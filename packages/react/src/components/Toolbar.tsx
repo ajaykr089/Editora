@@ -1,6 +1,6 @@
 import React from 'react';
 import { useEditorContext } from '../context/EditorContext';
-import { ToolbarItem } from '@rte-editor/core';
+import { ToolbarItem, TextSelection, ResolvedPos } from '@rte-editor/core';
 
 /**
  * Props for the Toolbar component.
@@ -60,8 +60,78 @@ export const Toolbar: React.FC<ToolbarProps> = ({ className, items }) => {
     );
   }
 
-  const handleCommand = (commandName: string) => {
-    editor.executeCommand(commandName);
+  const handleCommand = (commandName: string, commandArgs?: any[]) => {
+    const domSelection = window.getSelection();
+    const editorDom = document.querySelector('.rte-content');
+    
+    if (domSelection && domSelection.rangeCount > 0 && editorDom) {
+      const range = domSelection.getRangeAt(0);
+      const from = getDocPosition(editorDom, range.startContainer, range.startOffset);
+      const to = getDocPosition(editorDom, range.endContainer, range.endOffset);
+      
+      const $from = ResolvedPos.resolve(editor.state.doc, from);
+      const $to = ResolvedPos.resolve(editor.state.doc, to);
+      editor['_state'] = editor.state.update({
+        selection: new TextSelection($from, $to)
+      });
+      
+      editor.executeCommand(commandName, ...(commandArgs || []));
+      
+      requestAnimationFrame(() => {
+        const newRange = document.createRange();
+        const walker = document.createTreeWalker(editorDom, NodeFilter.SHOW_TEXT);
+        let currentPos = 0;
+        let startNode: Node | null = null;
+        let startOffset = 0;
+        let endNode: Node | null = null;
+        let endOffset = 0;
+        let node: Node | null;
+        
+        while ((node = walker.nextNode())) {
+          const nodeLength = (node.textContent || '').length;
+          if (!startNode && currentPos + nodeLength >= from - 1) {
+            startNode = node;
+            startOffset = from - 1 - currentPos;
+          }
+          if (!endNode && currentPos + nodeLength >= to - 1) {
+            endNode = node;
+            endOffset = to - 1 - currentPos;
+            break;
+          }
+          currentPos += nodeLength;
+        }
+        
+        if (startNode && endNode) {
+          try {
+            newRange.setStart(startNode, Math.max(0, startOffset));
+            newRange.setEnd(endNode, Math.max(0, endOffset));
+            domSelection.removeAllRanges();
+            domSelection.addRange(newRange);
+          } catch (e) {
+            // Ignore
+          }
+        }
+        
+        (editorDom as HTMLElement).focus();
+      });
+    } else {
+      editor.executeCommand(commandName, ...(commandArgs || []));
+    }
+  };
+  
+  const getDocPosition = (root: Node, node: Node, offset: number): number => {
+    let pos = 0;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let currentNode: Node | null;
+    
+    while ((currentNode = walker.nextNode())) {
+      if (currentNode === node) {
+        return pos + offset + 1;
+      }
+      pos += (currentNode.textContent || '').length;
+    }
+    
+    return pos + 1;
   };
 
   return (
@@ -84,7 +154,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ className, items }) => {
 interface ToolbarButtonProps {
   item: ToolbarItem;
   state: any;
-  onCommand: (command: string) => void;
+  onCommand: (command: string, commandArgs?: any[]) => void;
 }
 
 /**
@@ -95,11 +165,10 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({ item, state, onCommand })
   const isEnabled = item.enabled ? item.enabled(state) : true;
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    // Prevent button from stealing focus
     e.preventDefault();
     
-    if (isEnabled) {
-      onCommand(item.command);
+    if (isEnabled !== false) {
+      onCommand(item.command, item.commandArgs);
     }
   };
 
@@ -109,10 +178,10 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({ item, state, onCommand })
       className={`rte-toolbar-button ${
         isActive ? 'rte-toolbar-button--active' : ''
       } ${
-        !isEnabled ? 'rte-toolbar-button--disabled' : ''
+        isEnabled === false ? 'rte-toolbar-button--disabled' : ''
       }`}
       onMouseDown={handleMouseDown}
-      disabled={!isEnabled}
+      disabled={isEnabled === false}
       title={item.label}
       aria-label={item.label}
     >

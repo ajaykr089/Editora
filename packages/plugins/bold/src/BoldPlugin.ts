@@ -39,9 +39,6 @@ export class BoldPlugin extends Plugin {
           active: (state: EditorState) => {
             const markType = state.schema.marks.bold;
             return markType ? markType.isInSet(state.storedMarks || []) : false;
-          },
-          enabled: (state: EditorState) => {
-            return !state.selection.empty || !!state.storedMarks;
           }
         }]
       },
@@ -61,6 +58,7 @@ function toggleBoldCommand(state: EditorState, dispatch?: (tr: any) => void): bo
   if (!markType) return false;
 
   const { from, to, empty } = state.selection;
+  console.log('[toggleBold] Selection:', { from, to, empty }, 'dispatch:', !!dispatch);
 
   if (empty) {
     if (dispatch) {
@@ -79,10 +77,13 @@ function toggleBoldCommand(state: EditorState, dispatch?: (tr: any) => void): bo
     if (dispatch) {
       const tr = state.tr;
       const hasMark = state.doc.rangeHasMark(from, to, markType);
+      console.log('[toggleBold] Has mark:', hasMark, 'doc children:', state.doc.content.children.length);
 
       if (hasMark) {
+        console.log('[toggleBold] Removing mark');
         tr.removeMark(from, to, markType);
       } else {
+        console.log('[toggleBold] Adding mark');
         tr.addMark(from, to, markType.create());
       }
 

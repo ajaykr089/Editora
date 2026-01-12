@@ -1,0 +1,2 @@
+import{Plugin as r}from"@rte-editor/core";class a extends r{constructor(){super({name:"paragraph",schema:{nodes:{paragraph:{content:"inline*",group:"block",parseDOM:[{tag:"p"}],toDOM:()=>["p",0]}}},commands:{setParagraph:(r,a)=>{if(a){a(r.tr.setBlockType(r.selection.from,r.selection.to,r.schema.nodes.paragraph))}return!0}},toolbar:{items:[{id:"paragraph",icon:"P",label:"Paragraph",command:"setParagraph"}]}})}}function e(){return new a}export{a as ParagraphPlugin,e as createParagraphPlugin};
+//# sourceMappingURL=index.esm.js.map

@@ -1,0 +1,58 @@
+:root {
+  --rte-color-primary: #007bff;
+  --rte-color-text-primary: #212529;
+  --rte-color-text-secondary: #6c757d;
+  --rte-color-border: #dee2e6;
+  --rte-color-background: #ffffff;
+  --rte-font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --rte-font-size-base: 16px;
+  --rte-line-height-base: 1.5;
+  --rte-border-radius: 4px;
+  --rte-spacing-sm: 8px;
+  --rte-spacing-md: 16px;
+  --rte-spacing-lg: 24px;
+}
+
+.rte-editor {
+  font-family: var(--rte-font-family-base);
+  font-size: var(--rte-font-size-base);
+  line-height: var(--rte-line-height-base);
+  color: var(--rte-color-text-primary);
+  background: var(--rte-color-background);
+  border: 1px solid var(--rte-color-border);
+  border-radius: var(--rte-border-radius);
+  padding: var(--rte-spacing-md);
+  min-height: 200px;
+}
+
+.rte-editor:focus {
+  outline: none;
+  border-color: var(--rte-color-primary);
+}
+
+.rte-toolbar {
+  display: flex;
+  gap: var(--rte-spacing-sm);
+  padding: var(--rte-spacing-sm);
+  border-bottom: 1px solid var(--rte-color-border);
+  background: var(--rte-color-background);
+}
+
+.rte-toolbar-button {
+  padding: var(--rte-spacing-sm);
+  border: 1px solid var(--rte-color-border);
+  border-radius: var(--rte-border-radius);
+  background: var(--rte-color-background);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rte-toolbar-button:hover {
+  background: #f8f9fa;
+}
+
+.rte-toolbar-button.active {
+  background: var(--rte-color-primary);
+  color: white;
+  border-color: var(--rte-color-primary);
+}

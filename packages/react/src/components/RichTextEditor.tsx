@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { EditorState, Editor, Plugin } from '@rte-editor/core';
 import { EditorProvider } from '../context/EditorContext';
 import { Toolbar } from './Toolbar';
@@ -53,30 +54,28 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 }) => {
   // Editor instance
   const [editor, setEditor] = useState<Editor | null>(null);
+  const [editorState, setEditorState] = useState<EditorState | null>(null);
 
   // Initialize editor
   useEffect(() => {
     const editorInstance = new Editor({
       content: value || '',
       plugins,
-      onUpdate: ({ editor }) => {
+      onUpdate: ({ editor, transaction }) => {
+        setEditorState(editor.state);
         onChange?.(editor.getHTML());
       }
     });
 
     setEditor(editorInstance);
+    setEditorState(editorInstance.state);
 
     return () => {
       editorInstance.destroy();
     };
   }, []);
 
-  // Update content when value changes
-  useEffect(() => {
-    if (editor && value !== undefined && value !== editor.getHTML()) {
-      editor.setContent(value);
-    }
-  }, [value, editor]);
+
 
   // Container ref for DOM access
   const containerRef = useRef<HTMLDivElement>(null);
@@ -89,13 +88,13 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     className
   ].filter(Boolean).join(' ');
 
-  if (!editor) {
+  if (!editor || !editorState) {
     return <div className="rte-loading">Loading editor...</div>;
   }
 
   return (
     <EditorProvider
-      state={editor.state}
+      state={editorState}
       dispatch={(tr) => editor.dispatch(tr)}
       plugins={plugins}
       editor={editor}

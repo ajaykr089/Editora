@@ -10,14 +10,9 @@ export { MemoryManager, createMemoryManager } from './MemoryManager';
 // Performance monitoring
 export { PerformanceMonitor, createPerformanceMonitor } from './PerformanceMonitor';
 
-// Virtual scrolling framework
-export { VirtualScroller, createVirtualScroller } from './VirtualScroller';
-
-// Lazy loading utilities
-export { LazyLoader, createLazyLoader } from './LazyLoader';
-
+// Placeholder exports for future features
+// export { VirtualScroller, createVirtualScroller } from './VirtualScroller';
+// export { LazyLoader, createLazyLoader } from './LazyLoader';
+// export { optimizeEditorState, optimizeDocument } from './optimization';
+// export { useDebouncedCallback, useThrottledCallback } from './hooks';
 // Optimization helpers
-export { optimizeEditorState, optimizeDocument } from './optimization';
-
-// Performance hooks for React
-export { useDebouncedCallback, useThrottledCallback } from './hooks';

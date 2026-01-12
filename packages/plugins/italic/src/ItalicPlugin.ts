@@ -24,9 +24,6 @@ export class ItalicPlugin extends Plugin {
           command: 'toggleItalic',
           active: (state: EditorState) => {
             return state.schema.marks.italic.isInSet(state.storedMarks || []);
-          },
-          enabled: (state: EditorState) => {
-            return !state.selection.empty || !!state.storedMarks;
           }
         }]
       },

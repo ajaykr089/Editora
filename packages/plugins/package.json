@@ -1,0 +1,23 @@
+{
+  "name": "@rte-editor/plugins",
+  "version": "1.0.0",
+  "description": "Plugin collection for Rich Text Editor",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "rollup -c ../../rollup.config.js",
+    "dev": "rollup -c ../../rollup.config.js -w",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "@rte-editor/core": "^1.0.0"
+  },
+  "dependencies": {
+    "@rte-editor/core": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

@@ -36,11 +36,9 @@ export const EditorContent: React.FC<EditorContentProps> = ({
         dom: contentRef.current,
         focus: () => {
           contentRef.current?.focus();
-          editor.focus();
         },
         blur: () => {
           contentRef.current?.blur();
-          editor.blur();
         },
         updateState: (newState: any) => {
           // Handle state updates from editor
@@ -55,19 +53,8 @@ export const EditorContent: React.FC<EditorContentProps> = ({
 
   // Handle input events
   const handleInput = useCallback(() => {
-    if (readOnly || isInternalUpdate.current || !contentRef.current) return;
-    
-    const content = contentRef.current.innerHTML;
-    if (content !== lastContent.current) {
-      lastContent.current = content;
-      // Debounce content updates to prevent excessive re-renders
-      setTimeout(() => {
-        if (!isInternalUpdate.current) {
-          editor.setContent(content);
-        }
-      }, 10);
-    }
-  }, [readOnly, editor]);
+    // Don't sync back to editor on input - editor updates DOM
+  }, []);
 
   // Handle composition events for IME support
   const handleCompositionStart = useCallback(() => {
@@ -157,11 +144,8 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       
       if (commandName) {
         event.preventDefault();
-        selectionManager.current.saveSelection();
+        syncSelectionToEditor();
         editor.executeCommand(commandName);
-        setTimeout(() => {
-          selectionManager.current.restoreSelection();
-        }, 0);
       }
     }
 
@@ -183,51 +167,65 @@ export const EditorContent: React.FC<EditorContentProps> = ({
         break;
       case 'Backspace':
       case 'Delete':
-        // Let browser handle, but save selection
-        selectionManager.current.saveSelection();
-        setTimeout(() => {
-          handleInput();
-        }, 0);
+        // Let browser handle
         break;
     }
   }, [readOnly, editor]);
 
-  // Handle focus and blur
-  const handleFocus = useCallback(() => {
-    if (!readOnly) {
-      editor.focus();
+  // Sync DOM selection to editor
+  const syncSelectionToEditor = useCallback(() => {
+    if (!contentRef.current || !editor) return;
+    
+    const domSelection = window.getSelection();
+    if (!domSelection || domSelection.rangeCount === 0) return;
+    
+    const range = domSelection.getRangeAt(0);
+    if (!contentRef.current.contains(range.commonAncestorContainer)) return;
+    
+    const from = getDocPosition(contentRef.current, range.startContainer, range.startOffset);
+    const to = getDocPosition(contentRef.current, range.endContainer, range.endOffset);
+    
+    const tr = editor.state.tr.setSelection(editor.state.selection.constructor.create(editor.state.doc, from, to));
+    editor.dispatch(tr);
+  }, [editor]);
+  
+  // Helper to calculate document position from DOM node
+  const getDocPosition = (root: Node, node: Node, offset: number): number => {
+    let pos = 0;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let currentNode: Node | null;
+    
+    while ((currentNode = walker.nextNode())) {
+      if (currentNode === node) {
+        return pos + offset + 1; // +1 for opening tag
+      }
+      pos += (currentNode.textContent || '').length;
     }
-  }, [readOnly, editor]);
+    
+    return pos + 1;
+  };
+  
+
+
+  const handleFocus = useCallback(() => {
+    // Focus is already handled by the DOM element
+  }, []);
 
   const handleBlur = useCallback(() => {
-    if (!readOnly && contentRef.current) {
-      const content = contentRef.current.innerHTML;
-      if (content !== lastContent.current) {
-        editor.setContent(content);
-      }
-      editor.blur();
-    }
-  }, [readOnly, editor]);
+    // Don't sync on blur - causes issues
+  }, []);
 
-  // Update content when editor state changes
+  // Update content when editor state changes (only from external sources)
   useEffect(() => {
     if (contentRef.current && editor && !isInternalUpdate.current) {
       const html = editor.getHTML();
       
-      if (contentRef.current.innerHTML !== html && html !== lastContent.current) {
-        isInternalUpdate.current = true;
-        selectionManager.current.saveSelection();
-        
+      if (html !== lastContent.current) {
         contentRef.current.innerHTML = html;
         lastContent.current = html;
-        
-        setTimeout(() => {
-          selectionManager.current.restoreSelection();
-          isInternalUpdate.current = false;
-        }, 0);
       }
     }
-  }, [state.version, editor]);
+  }, [state, editor]);
 
   return (
     <div

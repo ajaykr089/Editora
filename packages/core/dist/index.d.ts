@@ -299,6 +299,10 @@ declare class Node {
      */
     nodeAt(pos: number): Node | null;
     /**
+     * Iterate over nodes between two positions.
+     */
+    nodesBetween(from: number, to: number, callback: (node: Node, pos: number, parent: Node | null) => void | boolean, startPos?: number): void;
+    /**
      * Check if this node has a mark in the given range.
      */
     rangeHasMark(from: number, to: number, markType: MarkType): boolean;
@@ -565,6 +569,7 @@ interface ToolbarItem {
     icon?: string | any | (() => any);
     label?: string;
     command: string;
+    commandArgs?: any[];
     shortcut?: string;
     active?: (state: EditorState) => boolean;
     enabled?: (state: EditorState) => boolean;
@@ -853,6 +858,14 @@ declare class Transaction {
      * Replace content in a range.
      */
     replace(from: number, to: number, slice: Fragment): Transaction;
+    /**
+     * Set the block type for nodes in a range.
+     */
+    setBlockType(from: number, to: number, nodeType: any, attrs?: any): Transaction;
+    /**
+     * Wrap a range in a node.
+     */
+    wrapIn(nodeType: any, attrs?: any): Transaction;
     /**
      * Get the state before this transaction.
      */

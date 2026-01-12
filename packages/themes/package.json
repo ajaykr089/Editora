@@ -6,7 +6,7 @@
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "style": "src/index.css",
-  "files": ["dist", "src/*.css"],
+  "files": ["dist", "src/*.css", "src/themes/*.css"],
   "scripts": {
     "build": "rollup -c ../../rollup.config.js",
     "dev": "rollup -c ../../rollup.config.js -w",

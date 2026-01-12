@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import * as _rte_editor_core from '@rte-editor/core';
 import { Plugin, ToolbarItem, EditorState, Editor } from '@rte-editor/core';
 
@@ -48,7 +48,7 @@ declare const Toolbar: React.FC<ToolbarProps>;
 interface ToolbarButtonProps {
     item: ToolbarItem;
     state: any;
-    onCommand: (command: string) => void;
+    onCommand: (command: string, commandArgs?: any[]) => void;
 }
 /**
  * Individual toolbar button component.
@@ -94,7 +94,7 @@ interface EditorProviderProps {
     plugins?: readonly Plugin[];
     editor: Editor;
     view?: any;
-    children: React.ReactNode;
+    children: ReactNode;
 }
 /**
  * Provider component that makes editor state available to child components.

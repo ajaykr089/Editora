@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { EditorState, Plugin, Editor } from '@rte-editor/core';
 
 /**
@@ -38,7 +38,7 @@ export interface EditorProviderProps {
   plugins?: readonly Plugin[];
   editor: Editor;
   view?: any;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 /**

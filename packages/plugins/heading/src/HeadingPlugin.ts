@@ -95,7 +95,7 @@ function setHeadingCommand(level: number): Command {
 
     // Check if we can apply this transformation
     state.doc.nodesBetween($from.pos, $to.pos, (node, pos) => {
-      if (node.isTextblock) {
+      if (node.type.name === 'paragraph' || node.type.name === 'heading') {
         applicable = true;
         return false;
       }
@@ -110,10 +110,8 @@ function setHeadingCommand(level: number): Command {
       const tr = state.tr;
 
       if (level === 0) {
-        // Convert to paragraph
         tr.setBlockType($from.pos, $to.pos, paragraphType);
       } else {
-        // Convert to heading
         tr.setBlockType($from.pos, $to.pos, headingType, { level });
       }
 

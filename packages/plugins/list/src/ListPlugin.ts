@@ -2,7 +2,8 @@ import {
   Plugin,
   Command,
   EditorState,
-  NodeType
+  NodeType,
+  Fragment
 } from '@rte-editor/core';
 
 /**
@@ -114,19 +115,54 @@ function toggleBulletListCommand(state: EditorState, dispatch?: (tr: any) => voi
     return false;
   }
 
-  const { from, to } = state.selection;
-
   if (isBulletListActive(state)) {
     if (dispatch) {
-      const tr = state.tr.setBlockType(from, to, paragraphType);
+      const doc = state.doc;
+      const newChildren: any[] = [];
+      
+      doc.content.children.forEach((child) => {
+        if (child.type.name === 'bullet_list') {
+          child.content.children.forEach((listItem: any) => {
+            if (listItem.content.children.length > 0) {
+              newChildren.push(listItem.content.children[0]);
+            }
+          });
+        } else {
+          newChildren.push(child);
+        }
+      });
+      
+      const newDoc = doc.type.create(doc.attrs, Fragment.from(newChildren));
+      const tr = state.tr.setDoc(newDoc);
       dispatch(tr);
     }
     return true;
   } else {
     if (dispatch) {
-      const tr = state.tr;
-      tr.wrapIn(bulletListType);
-      tr.setBlockType(from, to, listItemType);
+      const doc = state.doc;
+      const { from, to } = state.selection;
+      const newChildren: any[] = [];
+      const listItems: any[] = [];
+      
+      doc.content.children.forEach((child) => {
+        if (child.type.name === 'paragraph') {
+          const para = paragraphType.create({}, child.content);
+          listItems.push(listItemType.create({}, Fragment.from([para])));
+        } else {
+          if (listItems.length > 0) {
+            newChildren.push(bulletListType.create({}, Fragment.from(listItems)));
+            listItems.length = 0;
+          }
+          newChildren.push(child);
+        }
+      });
+      
+      if (listItems.length > 0) {
+        newChildren.push(bulletListType.create({}, Fragment.from(listItems)));
+      }
+      
+      const newDoc = doc.type.create(doc.attrs, Fragment.from(newChildren));
+      const tr = state.tr.setDoc(newDoc);
       dispatch(tr);
     }
     return true;
@@ -142,19 +178,53 @@ function toggleOrderedListCommand(state: EditorState, dispatch?: (tr: any) => vo
     return false;
   }
 
-  const { from, to } = state.selection;
-
   if (isOrderedListActive(state)) {
     if (dispatch) {
-      const tr = state.tr.setBlockType(from, to, paragraphType);
+      const doc = state.doc;
+      const newChildren: any[] = [];
+      
+      doc.content.children.forEach((child) => {
+        if (child.type.name === 'ordered_list') {
+          child.content.children.forEach((listItem: any) => {
+            if (listItem.content.children.length > 0) {
+              newChildren.push(listItem.content.children[0]);
+            }
+          });
+        } else {
+          newChildren.push(child);
+        }
+      });
+      
+      const newDoc = doc.type.create(doc.attrs, Fragment.from(newChildren));
+      const tr = state.tr.setDoc(newDoc);
       dispatch(tr);
     }
     return true;
   } else {
     if (dispatch) {
-      const tr = state.tr;
-      tr.wrapIn(orderedListType);
-      tr.setBlockType(from, to, listItemType);
+      const doc = state.doc;
+      const newChildren: any[] = [];
+      const listItems: any[] = [];
+      
+      doc.content.children.forEach((child) => {
+        if (child.type.name === 'paragraph') {
+          const para = paragraphType.create({}, child.content);
+          listItems.push(listItemType.create({}, Fragment.from([para])));
+        } else {
+          if (listItems.length > 0) {
+            newChildren.push(orderedListType.create({}, Fragment.from(listItems)));
+            listItems.length = 0;
+          }
+          newChildren.push(child);
+        }
+      });
+      
+      if (listItems.length > 0) {
+        newChildren.push(orderedListType.create({}, Fragment.from(listItems)));
+      }
+      
+      const newDoc = doc.type.create(doc.attrs, Fragment.from(newChildren));
+      const tr = state.tr.setDoc(newDoc);
       dispatch(tr);
     }
     return true;

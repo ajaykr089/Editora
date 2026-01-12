@@ -104,8 +104,8 @@ export class Editor {
     return this.parseDOMNode(doc.body.firstChild || doc.createElement('div'));
   }
 
-  private parseDOMNode(domNode: Node): Node {
-    if (domNode.nodeType === Node.TEXT_NODE) {
+  private parseDOMNode(domNode: globalThis.Node): Node {
+    if (domNode.nodeType === 3) { // TEXT_NODE
       return Node.text(domNode.textContent || '');
     }
 
@@ -133,7 +133,7 @@ export class Editor {
       const child = this.parseDOMNode(element.childNodes[i]);
       if (child) children.push(child);
     }
-
+    
     return nodeType.create(attrs, Fragment.from(children));
   }
 
@@ -153,12 +153,17 @@ export class Editor {
   dispatch = (tr: Transaction): void => {
     if (this.destroyed) return;
     
-    const newState = this._state.apply(tr);
-    const oldState = this._state;
-    this.updateState(newState, tr);
+    try {
+      const newState = this._state.apply(tr);
+      const oldState = this._state;
+      this.updateState(newState, tr);
 
-    if (!oldState.selection.equals(newState.selection)) {
-      this.onSelectionUpdate?.({ editor: this, selection: newState.selection });
+      if (!oldState.selection.equals(newState.selection)) {
+        this.onSelectionUpdate?.({ editor: this, selection: newState.selection });
+      }
+    } catch (error) {
+      console.error('[Editor] Dispatch error:', error);
+      throw error;
     }
   }
 
@@ -172,7 +177,9 @@ export class Editor {
       view: this.view
     };
 
-    this.pluginManager.onTransaction(tr, ctx);
+    this.plugins.forEach(plugin => {
+      plugin.spec.onTransaction?.(tr, ctx);
+    });
     this.onUpdate?.({ editor: this, transaction: tr });
   }
 
@@ -286,46 +293,67 @@ export class Editor {
   executeCommand(commandName: string, ...args: any[]): boolean {
     if (this.destroyed) return false;
     
-    // Use plugin manager to get commands
-    const commands = this.pluginManager.getCommands();
-    const command = commands[commandName];
+    console.log('[executeCommand]', commandName, 'args:', args);
     
-    if (command) {
-      return command(this._state, this.dispatch, this.view, ...args);
+    for (const plugin of this.plugins) {
+      const commands = plugin.getCommands();
+      if (commands[commandName]) {
+        const command = commands[commandName];
+        console.log('[executeCommand] Found command in plugin:', plugin.name, 'type:', typeof command);
+        if (typeof command === 'function') {
+          if (args.length > 0) {
+            const commandWithArgs = command(...args);
+            console.log('[executeCommand] Command with args returned:', typeof commandWithArgs);
+            if (typeof commandWithArgs === 'function') {
+              const result = commandWithArgs(this._state, this.dispatch, this.view);
+              console.log('[executeCommand] Result:', result);
+              return result;
+            }
+          }
+          const result = command(this._state, this.dispatch, this.view);
+          console.log('[executeCommand] Direct result:', result);
+          return result;
+        }
+      }
     }
     
+    console.log('[executeCommand] Command not found:', commandName);
     return false;
   }
 
   can(commandName: string, ...args: any[]): boolean {
     if (this.destroyed) return false;
     
-    const commands = this.pluginManager.getCommands();
-    const command = commands[commandName];
-    
-    if (command) {
-      return command(this._state, undefined, this.view, ...args);
+    for (const plugin of this.plugins) {
+      const commands = plugin.getCommands();
+      if (commands[commandName]) {
+        return commands[commandName](this._state, undefined, this.view, ...args);
+      }
     }
     
     return false;
   }
 
   getCommands(): Record<string, any> {
-    return this.pluginManager.getCommands();
+    const allCommands: Record<string, any> = {};
+    this.plugins.forEach(plugin => {
+      Object.assign(allCommands, plugin.getCommands());
+    });
+    return allCommands;
   }
 
   registerPlugin(plugin: Plugin): Editor {
     if (this.destroyed) return this;
     
-    this.pluginManager.register(plugin);
+    this.plugins.push(plugin);
     
     // Recreate schema with new plugin
-    this.schema = this.pluginManager.mergeSchemas(defaultSchema);
+    this.schema = this.createMergedSchema(defaultSchema);
     
     // Update state with new schema and plugins
     this._state = this._state.update({
       schema: this.schema,
-      plugins: this.pluginManager.getAll()
+      plugins: this.plugins
     });
     
     return this;
@@ -334,16 +362,18 @@ export class Editor {
   unregisterPlugin(pluginName: string): Editor {
     if (this.destroyed) return this;
     
-    const removed = this.pluginManager.unregister(pluginName);
+    const index = this.plugins.findIndex(p => p.name === pluginName);
     
-    if (removed) {
+    if (index !== -1) {
+      this.plugins.splice(index, 1);
+      
       // Recreate schema without the plugin
-      this.schema = this.pluginManager.mergeSchemas(defaultSchema);
+      this.schema = this.createMergedSchema(defaultSchema);
       
       // Update state
       this._state = this._state.update({
         schema: this.schema,
-        plugins: this.pluginManager.getAll()
+        plugins: this.plugins
       });
     }
     
@@ -402,7 +432,9 @@ export class Editor {
       view: this.view
     };
 
-    this.pluginManager.destroy(ctx);
+    this.plugins.forEach(plugin => {
+      plugin.spec.onDestroy?.(ctx);
+    });
     this.destroyed = true;
   }
 

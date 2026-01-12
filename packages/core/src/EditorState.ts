@@ -219,6 +219,62 @@ export class Transaction {
   }
 
   /**
+   * Set the block type for nodes in a range.
+   */
+  setBlockType(from: number, to: number, nodeType: any, attrs?: any): Transaction {
+    const doc = this.updated.doc || this.before.doc;
+    const newChildren: Node[] = [];
+    
+    doc.content.children.forEach((child, idx) => {
+      const childStart = idx === 0 ? 1 : newChildren.reduce((sum, n) => sum + n.nodeSize, 1);
+      const childEnd = childStart + child.nodeSize;
+      
+      if (childEnd > from && childStart < to && !child.isText) {
+        newChildren.push(nodeType.create(attrs || {}, child.content, child.marks));
+      } else {
+        newChildren.push(child);
+      }
+    });
+    
+    const newDoc = doc.type.create(doc.attrs, Fragment.from(newChildren));
+    this.updated.doc = newDoc;
+    return this;
+  }
+
+  /**
+   * Wrap a range in a node.
+   */
+  wrapIn(nodeType: any, attrs?: any): Transaction {
+    const doc = this.updated.doc || this.before.doc;
+    const { from, to } = this.before.selection;
+    const newChildren: Node[] = [];
+    const wrappedChildren: Node[] = [];
+    
+    doc.content.children.forEach((child, idx) => {
+      const childStart = idx === 0 ? 1 : newChildren.reduce((sum, n) => sum + n.nodeSize, 1) + wrappedChildren.reduce((sum, n) => sum + n.nodeSize, 0);
+      const childEnd = childStart + child.nodeSize;
+      
+      if (childEnd > from && childStart < to && !child.isText) {
+        wrappedChildren.push(child);
+      } else {
+        if (wrappedChildren.length > 0) {
+          newChildren.push(nodeType.create(attrs || {}, Fragment.from(wrappedChildren)));
+          wrappedChildren.length = 0;
+        }
+        newChildren.push(child);
+      }
+    });
+    
+    if (wrappedChildren.length > 0) {
+      newChildren.push(nodeType.create(attrs || {}, Fragment.from(wrappedChildren)));
+    }
+    
+    const newDoc = doc.type.create(doc.attrs, Fragment.from(newChildren));
+    this.updated.doc = newDoc;
+    return this;
+  }
+
+  /**
    * Get the state before this transaction.
    */
   get beforeState(): EditorState {

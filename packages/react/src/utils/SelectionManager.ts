@@ -5,8 +5,29 @@ export class SelectionManager {
   private savedRange: Range | null = null;
   private element: HTMLElement | null = null;
 
-  constructor(element: HTMLElement) {
+  constructor(element?: HTMLElement) {
+    this.element = element || null;
+  }
+
+  /**
+   * Set the element for this selection manager.
+   */
+  setElement(element: HTMLElement): void {
     this.element = element;
+  }
+
+  /**
+   * Save the current selection range.
+   */
+  saveSelection(): void {
+    this.save();
+  }
+
+  /**
+   * Restore the saved selection range.
+   */
+  restoreSelection(): void {
+    this.restore();
   }
 
   /**

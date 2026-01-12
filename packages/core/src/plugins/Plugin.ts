@@ -11,6 +11,7 @@ export interface ToolbarItem {
   icon?: string | any | (() => any); // Icon can be string, component, or function
   label?: string;
   command: string;
+  commandArgs?: any[];
   shortcut?: string;
   active?: (state: EditorState) => boolean;
   enabled?: (state: EditorState) => boolean;

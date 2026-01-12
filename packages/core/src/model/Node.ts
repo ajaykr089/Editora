@@ -237,22 +237,76 @@ export class Node {
   }
 
   /**
+   * Iterate over nodes between two positions.
+   */
+  nodesBetween(from: number, to: number, callback: (node: Node, pos: number, parent: Node | null) => void | boolean, startPos = 0): void {
+    if (this.isText) {
+      callback(this, startPos, null);
+      return;
+    }
+
+    let pos = startPos;
+    this.content.children.forEach((child, index) => {
+      const childStart = pos + 1;
+      const childEnd = childStart + child.nodeSize;
+
+      if (childEnd > from && childStart < to) {
+        const result = callback(child, childStart, this);
+        if (result !== false && !child.isText) {
+          child.nodesBetween(
+            Math.max(0, from - childStart),
+            Math.min(child.nodeSize, to - childStart),
+            callback,
+            childStart
+          );
+        }
+      }
+
+      pos = childEnd;
+    });
+  }
+
+  /**
    * Check if this node has a mark in the given range.
    */
   rangeHasMark(from: number, to: number, markType: MarkType): boolean {
-    // Simplified implementation - would need more sophisticated traversal
     if (this.isText) {
       return this.marks.some(mark => mark.type === markType);
     }
 
-    // Check children recursively
+    // Check if ALL text nodes in the range have the mark
+    let hasAnyText = false;
+    let allHaveMark = true;
+    let pos = 1;
+    
     for (const child of this.content.children) {
-      if (child.rangeHasMark(from, to, markType)) {
-        return true;
+      const childStart = pos;
+      const childEnd = pos + child.nodeSize;
+      
+      if (child.isText && childEnd > from && childStart < to) {
+        hasAnyText = true;
+        if (!child.marks.some(mark => mark.type === markType)) {
+          allHaveMark = false;
+          break;
+        }
+      } else if (!child.isText && childEnd > from && childStart < to) {
+        const childHasMark = child.rangeHasMark(
+          Math.max(0, from - childStart),
+          Math.min(child.nodeSize, to - childStart),
+          markType
+        );
+        if (childHasMark) {
+          hasAnyText = true;
+        } else {
+          allHaveMark = false;
+          break;
+        }
       }
+      
+      pos = childEnd;
     }
 
-    return false;
+    return hasAnyText && allHaveMark;
   }
 
   /**
@@ -264,8 +318,47 @@ export class Node {
       return this.withMarks(newMarks);
     }
 
-    // For complex nodes, this would need recursive implementation
-    return this;
+    const newChildren: Node[] = [];
+    let pos = 1;
+    
+    this.content.children.forEach(child => {
+      const childStart = pos;
+      const childEnd = pos + child.nodeSize;
+      
+      if (child.isText && childEnd > from && childStart < to) {
+        const text = child.attrs.text || '';
+        const textStart = Math.max(0, from - childStart);
+        const textEnd = Math.min(text.length, to - childStart + 1);
+        
+        if (textStart > 0) {
+          newChildren.push(child.withText(text.slice(0, textStart)));
+        }
+        
+        const selectedText = text.slice(textStart, textEnd);
+        if (selectedText) {
+          const unmarkedNode = child.withText(selectedText).withMarks(
+            child.marks.filter(mark => mark.type !== markType)
+          );
+          newChildren.push(unmarkedNode);
+        }
+        
+        if (textEnd < text.length) {
+          newChildren.push(child.withText(text.slice(textEnd)));
+        }
+      } else if (!child.isText && childEnd > from && childStart < to) {
+        newChildren.push(child.removeMark(
+          Math.max(0, from - childStart),
+          Math.min(child.nodeSize, to - childStart),
+          markType
+        ));
+      } else {
+        newChildren.push(child);
+      }
+      
+      pos = childEnd;
+    });
+    
+    return this.withContent(Fragment.from(newChildren));
   }
 
   /**
@@ -277,8 +370,45 @@ export class Node {
       return this.withMarks(newMarks);
     }
 
-    // For complex nodes, this would need recursive implementation
-    return this;
+    const newChildren: Node[] = [];
+    let pos = 1;
+    
+    this.content.children.forEach((child, idx) => {
+      const childStart = pos;
+      const childEnd = pos + child.nodeSize;
+      
+      if (child.isText && childEnd > from && childStart < to) {
+        const text = child.attrs.text || '';
+        const textStart = Math.max(0, from - childStart);
+        const textEnd = Math.min(text.length, to - childStart + 1);
+        
+        if (textStart > 0) {
+          newChildren.push(child.withText(text.slice(0, textStart)));
+        }
+        
+        const selectedText = text.slice(textStart, textEnd);
+        if (selectedText) {
+          const markedNode = child.withText(selectedText).withMarks(mark.addToSet(child.marks));
+          newChildren.push(markedNode);
+        }
+        
+        if (textEnd < text.length) {
+          newChildren.push(child.withText(text.slice(textEnd)));
+        }
+      } else if (!child.isText && childEnd > from && childStart < to) {
+        newChildren.push(child.addMark(
+          Math.max(0, from - childStart),
+          Math.min(child.nodeSize, to - childStart),
+          mark
+        ));
+      } else {
+        newChildren.push(child);
+      }
+      
+      pos = childEnd;
+    });
+    
+    return this.withContent(Fragment.from(newChildren));
   }
 
   /**
