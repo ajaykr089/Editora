@@ -98,6 +98,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       state={editor.state}
       dispatch={(tr) => editor.dispatch(tr)}
       plugins={plugins}
+      editor={editor}
     >
       <div
         ref={containerRef}

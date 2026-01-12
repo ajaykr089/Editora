@@ -1,43 +1,22 @@
 {
   "name": "@rte-editor/plugin-codeblock",
   "version": "1.0.0",
-  "description": "Code block plugin for Rich Text Editor with syntax highlighting support",
+  "description": "Codeblock plugin for Rich Text Editor",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "scripts": {
-    "build": "rollup -c ../../../rollup.config.js --pkg plugins/codeblock",
-    "clean": "rm -rf dist",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts,.tsx",
-    "dev": "tsc --watch"
+    "build": "rollup -c ../../../rollup.config.js",
+    "dev": "rollup -c ../../../rollup.config.js -w",
+    "clean": "rm -rf dist"
   },
-  "dependencies": {
-    "@rte-editor/core": "^1.0.0",
-    "@rte-editor/react": "^1.0.0"
+  "peerDependencies": {
+    "@rte-editor/core": "^1.0.0"
   },
-  "keywords": [
-    "rich-text-editor",
-    "plugin",
-    "code-block",
-    "syntax-highlighting",
-    "preformatted",
-    "wysiwyg"
-  ],
-  "author": "Rich Text Editor Team",
-  "license": "MIT",
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ajaykr089/Rich-Text-Editor.git",
-    "directory": "packages/plugins/codeblock"
+  "devDependencies": {
+    "typescript": "^5.0.0"
   }
 }

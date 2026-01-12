@@ -99,7 +99,7 @@ export interface SchemaSpec {
 }
 
 /**
- * Default schema with basic node and mark types.
+ * Enhanced default schema with comprehensive node and mark types.
  */
 export const defaultSchema = new Schema({
   nodes: {
@@ -128,6 +128,110 @@ export const defaultSchema = new Schema({
         { tag: 'h6', attrs: { level: 6 } }
       ],
       toDOM: (node) => [`h${node.attrs.level}`, 0]
+    },
+    blockquote: {
+      content: 'block+',
+      group: 'block',
+      defining: true,
+      parseDOM: [{ tag: 'blockquote' }],
+      toDOM: () => ['blockquote', 0]
+    },
+    code_block: {
+      content: 'text*',
+      marks: '',
+      group: 'block',
+      code: true,
+      defining: true,
+      attrs: {
+        language: { default: null }
+      },
+      parseDOM: [{ tag: 'pre', preserveWhitespace: 'full' }],
+      toDOM: () => ['pre', ['code', 0]]
+    },
+    horizontal_rule: {
+      group: 'block',
+      parseDOM: [{ tag: 'hr' }],
+      toDOM: () => ['hr']
+    },
+    bullet_list: {
+      content: 'list_item+',
+      group: 'block',
+      parseDOM: [{ tag: 'ul' }],
+      toDOM: () => ['ul', 0]
+    },
+    ordered_list: {
+      content: 'list_item+',
+      group: 'block',
+      attrs: {
+        order: { default: 1 }
+      },
+      parseDOM: [{ tag: 'ol', getAttrs: (dom: any) => ({ order: dom.hasAttribute('start') ? +dom.getAttribute('start') : 1 }) }],
+      toDOM: (node) => node.attrs.order === 1 ? ['ol', 0] : ['ol', { start: node.attrs.order }, 0]
+    },
+    list_item: {
+      content: 'paragraph block*',
+      parseDOM: [{ tag: 'li' }],
+      toDOM: () => ['li', 0],
+      defining: true
+    },
+    table: {
+      content: 'table_row+',
+      group: 'block',
+      isolating: true,
+      parseDOM: [{ tag: 'table' }],
+      toDOM: () => ['table', ['tbody', 0]]
+    },
+    table_row: {
+      content: 'table_cell+',
+      parseDOM: [{ tag: 'tr' }],
+      toDOM: () => ['tr', 0]
+    },
+    table_cell: {
+      content: 'block+',
+      attrs: {
+        colspan: { default: 1 },
+        rowspan: { default: 1 },
+        colwidth: { default: null }
+      },
+      isolating: true,
+      parseDOM: [{ tag: 'td' }, { tag: 'th' }],
+      toDOM: (node) => {
+        const attrs: any = {};
+        if (node.attrs.colspan !== 1) attrs.colspan = node.attrs.colspan;
+        if (node.attrs.rowspan !== 1) attrs.rowspan = node.attrs.rowspan;
+        if (node.attrs.colwidth) attrs.style = `width: ${node.attrs.colwidth.join(', ')}px`;
+        return ['td', attrs, 0];
+      }
+    },
+    hard_break: {
+      inline: true,
+      group: 'inline',
+      selectable: false,
+      parseDOM: [{ tag: 'br' }],
+      toDOM: () => ['br']
+    },
+    image: {
+      inline: true,
+      attrs: {
+        src: {},
+        alt: { default: null },
+        title: { default: null },
+        width: { default: null },
+        height: { default: null }
+      },
+      group: 'inline',
+      draggable: true,
+      parseDOM: [{
+        tag: 'img[src]',
+        getAttrs: (dom: any) => ({
+          src: dom.getAttribute('src'),
+          title: dom.getAttribute('title'),
+          alt: dom.getAttribute('alt'),
+          width: dom.getAttribute('width'),
+          height: dom.getAttribute('height')
+        })
+      }],
+      toDOM: (node) => ['img', node.attrs]
     },
     text: {
       group: 'inline',
@@ -158,6 +262,55 @@ export const defaultSchema = new Schema({
         { style: 'text-decoration=underline' }
       ],
       toDOM: () => ['u', 0]
+    },
+    strikethrough: {
+      parseDOM: [
+        { tag: 's' },
+        { tag: 'strike' },
+        { style: 'text-decoration=line-through' }
+      ],
+      toDOM: () => ['s', 0]
+    },
+    code: {
+      parseDOM: [{ tag: 'code' }],
+      toDOM: () => ['code', 0]
+    },
+    link: {
+      attrs: {
+        href: {},
+        title: { default: null },
+        target: { default: null }
+      },
+      inclusive: false,
+      parseDOM: [{
+        tag: 'a[href]',
+        getAttrs: (dom: any) => ({
+          href: dom.getAttribute('href'),
+          title: dom.getAttribute('title'),
+          target: dom.getAttribute('target')
+        })
+      }],
+      toDOM: (node) => ['a', node.attrs, 0]
+    },
+    subscript: {
+      parseDOM: [{ tag: 'sub' }],
+      toDOM: () => ['sub', 0],
+      excludes: 'superscript'
+    },
+    superscript: {
+      parseDOM: [{ tag: 'sup' }],
+      toDOM: () => ['sup', 0],
+      excludes: 'subscript'
+    },
+    highlight: {
+      attrs: {
+        color: { default: 'yellow' }
+      },
+      parseDOM: [{
+        tag: 'mark',
+        getAttrs: (dom: any) => ({ color: dom.style.backgroundColor || 'yellow' })
+      }],
+      toDOM: (node) => ['mark', { style: `background-color: ${node.attrs.color}` }, 0]
     }
   }
 });

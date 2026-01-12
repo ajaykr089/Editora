@@ -4,57 +4,53 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const packages = ['core', 'react', 'themes'];
+const packages = [
+  'core',
+  'react', 
+  'themes',
+  'performance',
+  'plugins/bold',
+  'plugins/italic',
+  'plugins/heading',
+  'plugins/paragraph',
+  'plugins/history',
+  'plugins/list',
+  'plugins/blockquote',
+  'plugins/table',
+  'plugins/image',
+  'plugins/link',
+  'plugins/codeblock'
+];
 
-function buildPackage(pkg) {
-  const pkgPath = path.join(__dirname, 'packages', pkg);
-  const srcPath = path.join(pkgPath, 'src');
-  const distPath = path.join(pkgPath, 'dist');
+console.log('🚀 Building Rich Text Editor packages...\n');
 
-  // Create dist directory
-  if (!fs.existsSync(distPath)) {
-    fs.mkdirSync(distPath, { recursive: true });
+// Clean all packages
+console.log('🧹 Cleaning previous builds...');
+packages.forEach(pkg => {
+  const distPath = path.join(__dirname, 'packages', pkg, 'dist');
+  if (fs.existsSync(distPath)) {
+    fs.rmSync(distPath, { recursive: true, force: true });
   }
+  fs.mkdirSync(distPath, { recursive: true });
+});
 
-  // Copy src files to dist
-  copyDir(srcPath, distPath);
-
-  // Compile TypeScript
-  console.log(`Compiling ${pkg}...`);
-  try {
-    execSync(`cd ${pkgPath} && npx tsc --project tsconfig.json --outDir dist --declaration --declarationMap --module commonjs --esModuleInterop --target ES2020 --skipLibCheck`, {
-      stdio: 'inherit'
-    });
-    console.log(`✅ ${pkg} built successfully`);
-  } catch (e) {
-    console.log(`⚠️ ${pkg} had compilation issues, but files are in dist`);
-  }
-}
-
-function copyDir(src, dest) {
-  if (!fs.existsSync(dest)) {
-    fs.mkdirSync(dest, { recursive: true });
-  }
-
-  const entries = fs.readdirSync(src, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const srcPath = path.join(src, entry.name);
-    const destPath = path.join(dest, entry.name);
-
-    if (entry.isDirectory()) {
-      copyDir(srcPath, destPath);
-    } else {
-      fs.copyFileSync(srcPath, destPath);
+// Build all packages
+console.log('📦 Building packages...');
+try {
+  execSync('rollup -c', { stdio: 'inherit' });
+  console.log('\n✅ Build completed successfully!');
+  
+  // Show build summary
+  console.log('\n📊 Build Summary:');
+  packages.forEach(pkg => {
+    const distPath = path.join(__dirname, 'packages', pkg, 'dist');
+    if (fs.existsSync(distPath)) {
+      const files = fs.readdirSync(distPath);
+      console.log(`  ✅ ${pkg}: ${files.length} files`);
     }
-  }
+  });
+  
+} catch (error) {
+  console.error('\n❌ Build failed:', error.message);
+  process.exit(1);
 }
-
-console.log('Building Rich Text Editor packages...\n');
-
-for (const pkg of packages) {
-  buildPackage(pkg);
-}
-
-console.log('\n✅ All packages built successfully!');
-console.log('Distribution files are in packages/*/dist/');

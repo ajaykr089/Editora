@@ -1,197 +1,190 @@
 import {
   Plugin,
+  Command,
   EditorState,
   Transaction
 } from '@rte-editor/core';
 
-/**
- * History state for tracking undo/redo operations.
- */
 interface HistoryState {
   done: Transaction[];
   undone: Transaction[];
-  prevRanges: any[]; // For complex undo scenarios
+  depth: number;
+  newGroupDelay: number;
 }
 
 /**
- * History plugin for undo/redo functionality.
- * Tracks state changes and provides commands to navigate through history.
+ * History plugin for rich text editor.
+ * Provides undo/redo functionality with configurable depth.
  */
 export class HistoryPlugin extends Plugin {
-  private history: HistoryState;
-  private config: HistoryConfig;
+  private historyState: HistoryState;
 
-  constructor(config: HistoryConfig = {}) {
+  constructor(options: { depth?: number; newGroupDelay?: number } = {}) {
     super({
       name: 'history',
       commands: {
         undo: undoCommand,
-        redo: redoCommand
+        redo: redoCommand,
+        clearHistory: clearHistoryCommand
       },
       toolbar: {
         items: [
           {
             id: 'undo',
-            icon: '↶', // Simple undo symbol
+            icon: '↶',
             label: 'Undo',
             command: 'undo',
-            enabled: (state: EditorState) => this.canUndo()
+            enabled: (state: EditorState) => {
+              const history = getHistoryState(state);
+              return history.done.length > 0;
+            }
           },
           {
             id: 'redo',
-            icon: '↷', // Simple redo symbol
+            icon: '↷',
             label: 'Redo',
             command: 'redo',
-            enabled: (state: EditorState) => this.canRedo()
+            enabled: (state: EditorState) => {
+              const history = getHistoryState(state);
+              return history.undone.length > 0;
+            }
           }
         ]
       },
       keybindings: {
         'Mod-z': 'undo',
         'Mod-y': 'redo',
-        'Mod-Shift-z': 'redo' // Alternative redo shortcut
+        'Mod-Shift-z': 'redo'
+      },
+      onTransaction: (tr: Transaction, ctx) => {
+        this.handleTransaction(tr, ctx.state);
       }
     });
 
-    this.config = {
-      depth: 100,
-      newGroupDelay: 500,
-      ...config
-    };
-
-    this.history = {
+    this.historyState = {
       done: [],
       undone: [],
-      prevRanges: []
+      depth: options.depth || 100,
+      newGroupDelay: options.newGroupDelay || 500
     };
   }
 
-  /**
-   * Initialize the history plugin.
-   */
-  init(ctx: any): void {
-    // Set up transaction listener to track changes
-    this.setupTransactionListener(ctx);
-  }
+  private handleTransaction(tr: Transaction, state: EditorState): void {
+    const historyMeta = tr.getMeta('history');
+    
+    if (historyMeta === 'ignore') {
+      return;
+    }
 
-  /**
-   * Check if undo is available.
-   */
-  canUndo(): boolean {
-    return this.history.done.length > 0;
-  }
+    if (historyMeta === 'undo') {
+      this.historyState.undone.push(tr);
+      return;
+    }
 
-  /**
-   * Check if redo is available.
-   */
-  canRedo(): boolean {
-    return this.history.undone.length > 0;
-  }
+    if (historyMeta === 'redo') {
+      this.historyState.done.push(tr);
+      return;
+    }
 
-  /**
-   * Get the current history state.
-   */
-  getHistoryState(): HistoryState {
-    return { ...this.history };
-  }
-
-  /**
-   * Set up transaction listener to track state changes.
-   */
-  private setupTransactionListener(ctx: any): void {
-    // This would be implemented to listen to transactions
-    // and automatically add them to history
-  }
-
-  /**
-   * Add a transaction to the history.
-   */
-  addTransaction(tr: Transaction): void {
-    // Clear redo stack when new changes are made
-    this.history.undone = [];
-
-    // Add to done stack
-    this.history.done.push(tr);
+    // Add transaction to history
+    this.historyState.done.push(tr);
+    this.historyState.undone = [];
 
     // Limit history depth
-    if (this.history.done.length > this.config.depth) {
-      this.history.done.shift();
+    if (this.historyState.done.length > this.historyState.depth) {
+      this.historyState.done.shift();
     }
-  }
-
-  /**
-   * Perform undo operation.
-   */
-  undo(): Transaction | null {
-    if (!this.canUndo()) {
-      return null;
-    }
-
-    const tr = this.history.done.pop()!;
-    this.history.undone.push(tr);
-
-    // Create inverse transaction
-    return this.createInverseTransaction(tr);
-  }
-
-  /**
-   * Perform redo operation.
-   */
-  redo(): Transaction | null {
-    if (!this.canRedo()) {
-      return null;
-    }
-
-    const tr = this.history.undone.pop()!;
-    this.history.done.push(tr);
-
-    // Return the original transaction
-    return tr;
-  }
-
-  /**
-   * Create an inverse transaction for undo.
-   * This is a simplified implementation.
-   */
-  private createInverseTransaction(tr: Transaction): Transaction {
-    // For now, return a placeholder inverse transaction
-    // A full implementation would analyze the transaction and create proper inverse
-    return tr.beforeState.tr;
   }
 }
 
 /**
- * Configuration options for the history plugin.
+ * Get history state from editor state.
  */
-export interface HistoryConfig {
-  /** Maximum number of history states to keep */
-  depth?: number;
-
-  /** Delay in milliseconds before starting a new history group */
-  newGroupDelay?: number;
+function getHistoryState(state: EditorState): HistoryState {
+  // In a real implementation, this would be stored in the editor state
+  // For now, we'll use a simple approach
+  return {
+    done: [],
+    undone: [],
+    depth: 100,
+    newGroupDelay: 500
+  };
 }
 
 /**
- * Undo command implementation.
+ * Undo command.
  */
-function undoCommand(state: EditorState, dispatch?: (tr: Transaction) => void): boolean {
-  // This would be implemented by accessing the history plugin instance
-  // For now, return false as placeholder
-  return false;
+function undoCommand(state: EditorState, dispatch?: (tr: any) => void): boolean {
+  const history = getHistoryState(state);
+  
+  if (history.done.length === 0) {
+    return false;
+  }
+
+  if (dispatch) {
+    const lastTransaction = history.done[history.done.length - 1];
+    const tr = state.tr.setMeta('history', 'undo');
+    
+    // Invert the last transaction
+    if (lastTransaction.steps) {
+      for (let i = lastTransaction.steps.length - 1; i >= 0; i--) {
+        const step = lastTransaction.steps[i];
+        if (step.invert) {
+          const inverted = step.invert(state);
+          if (inverted) {
+            tr.step(inverted);
+          }
+        }
+      }
+    }
+    
+    dispatch(tr);
+  }
+
+  return true;
 }
 
 /**
- * Redo command implementation.
+ * Redo command.
  */
-function redoCommand(state: EditorState, dispatch?: (tr: Transaction) => void): boolean {
-  // This would be implemented by accessing the history plugin instance
-  // For now, return false as placeholder
-  return false;
+function redoCommand(state: EditorState, dispatch?: (tr: any) => void): boolean {
+  const history = getHistoryState(state);
+  
+  if (history.undone.length === 0) {
+    return false;
+  }
+
+  if (dispatch) {
+    const lastUndone = history.undone[history.undone.length - 1];
+    const tr = state.tr.setMeta('history', 'redo');
+    
+    // Reapply the undone transaction
+    if (lastUndone.steps) {
+      for (const step of lastUndone.steps) {
+        tr.step(step);
+      }
+    }
+    
+    dispatch(tr);
+  }
+
+  return true;
+}
+
+/**
+ * Clear history command.
+ */
+function clearHistoryCommand(state: EditorState, dispatch?: (tr: any) => void): boolean {
+  if (dispatch) {
+    const tr = state.tr.setMeta('history', 'clear');
+    dispatch(tr);
+  }
+  return true;
 }
 
 /**
  * Create a history plugin instance.
  */
-export function createHistoryPlugin(config?: HistoryConfig): HistoryPlugin {
-  return new HistoryPlugin(config);
+export function createHistoryPlugin(options?: { depth?: number; newGroupDelay?: number }): HistoryPlugin {
+  return new HistoryPlugin(options);
 }

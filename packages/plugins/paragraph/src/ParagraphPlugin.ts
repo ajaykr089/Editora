@@ -1,9 +1,5 @@
 import { Plugin, EditorState } from '@rte-editor/core';
 
-/**
- * Paragraph plugin for rich text editor.
- * Provides basic paragraph functionality and Enter key handling.
- */
 export class ParagraphPlugin extends Plugin {
   constructor() {
     super({
@@ -19,26 +15,26 @@ export class ParagraphPlugin extends Plugin {
         }
       },
       commands: {
-        insertParagraph: (state: EditorState, dispatch?: (tr: any) => void) => {
+        setParagraph: (state: EditorState, dispatch?: any) => {
           if (dispatch) {
-            const { from } = state.selection;
-            const paragraph = state.schema.nodes.paragraph.create();
-            const tr = state.tr.insert(from, paragraph);
+            const tr = state.tr.setBlockType(state.selection.from, state.selection.to, state.schema.nodes.paragraph);
             dispatch(tr);
           }
           return true;
         }
       },
-      keybindings: {
-        'Enter': 'insertParagraph'
+      toolbar: {
+        items: [{
+          id: 'paragraph',
+          icon: 'P',
+          label: 'Paragraph',
+          command: 'setParagraph'
+        }]
       }
     });
   }
 }
 
-/**
- * Create a paragraph plugin instance.
- */
 export function createParagraphPlugin(): ParagraphPlugin {
   return new ParagraphPlugin();
 }

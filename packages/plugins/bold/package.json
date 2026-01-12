@@ -1,1 +1,22 @@
-{\n  \"name\": \"@rte-editor/plugin-bold\",\n  \"version\": \"1.0.0\",\n  \"description\": \"Bold formatting plugin\",\n  \"main\": \"dist/index.js\",\n  \"files\": [\"dist\"],\n  \"dependencies\": {\n    \"@rte-editor/core\": \"^1.0.0\"\n  }\n}
+{
+  "name": "@rte-editor/plugin-bold",
+  "version": "1.0.0",
+  "description": "Bold plugin for Rich Text Editor",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup -c ../../../rollup.config.js",
+    "dev": "rollup -c ../../../rollup.config.js -w",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "@rte-editor/core": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

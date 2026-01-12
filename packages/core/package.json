@@ -2,10 +2,17 @@
   "name": "@rte-editor/core",
   "version": "1.0.0",
   "description": "Framework-agnostic core editor engine",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "files": ["dist"],
   "scripts": {
-    "build": "cp -r src/* dist/"
+    "build": "rollup -c ../../rollup.config.js",
+    "dev": "rollup -c ../../rollup.config.js -w",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0"
   }
 }

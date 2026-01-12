@@ -2,17 +2,23 @@
   "name": "@rte-editor/react",
   "version": "1.0.0",
   "description": "React components for Rich Text Editor",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "files": ["dist"],
   "scripts": {
-    "build": "cp -r src/* dist/"
+    "build": "rollup -c ../../rollup.config.js",
+    "dev": "rollup -c ../../rollup.config.js -w",
+    "clean": "rm -rf dist"
   },
   "peerDependencies": {
     "react": ">=16.8.0",
-    "react-dom": ">=16.8.0"
-  },
-  "dependencies": {
+    "react-dom": ">=16.8.0",
     "@rte-editor/core": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.0.0"
   }
 }

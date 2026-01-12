@@ -72,10 +72,16 @@ export class Fragment {
 
     for (const child of this.content) {
       const childSize = child.nodeSize;
-      if (pos >= offset && pos <= offset + childSize) {
+      if (pos >= offset && pos < offset + childSize) {
         return { node: child, offset };
       }
       offset += childSize;
+    }
+
+    // Return last child if position is at the end
+    if (pos === offset && this.content.length > 0) {
+      const lastChild = this.content[this.content.length - 1];
+      return { node: lastChild, offset: offset - lastChild.nodeSize };
     }
 
     return null;

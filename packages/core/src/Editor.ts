@@ -1,240 +1,422 @@
 import { EditorState, Transaction } from './EditorState';
 import { Schema, defaultSchema } from './schema/Schema';
-import { Plugin } from './plugins/Plugin';
-import { CommandManager } from './commands/CommandManager';
 import { Node } from './model/Node';
+import { Plugin } from './plugins/Plugin';
+import { Selection, TextSelection } from './Selection';
+import { Fragment } from './model/Fragment';
+import { Mark } from './model/Mark';
 
-/**
- * Configuration for creating an editor instance.
- */
 export interface EditorConfig {
-  /** Initial document content */
-  doc?: Node;
-  /** Document schema */
-  schema?: Schema;
-  /** List of plugins */
+  content?: string | Node;
   plugins?: Plugin[];
-  /** Initial content as HTML string */
-  content?: string;
-  /** Event handlers */
+  schema?: Schema;
   onUpdate?: (props: { editor: Editor; transaction: Transaction }) => void;
-  onSelectionUpdate?: (props: { editor: Editor }) => void;
+  onSelectionUpdate?: (props: { editor: Editor; selection: Selection }) => void;
   onFocus?: (props: { editor: Editor }) => void;
   onBlur?: (props: { editor: Editor }) => void;
+  editable?: boolean;
 }
 
-/**
- * Main editor class that coordinates state, plugins, and commands.
- */
 export class Editor {
   private _state: EditorState;
-  private commandManager: CommandManager;
-  private config: EditorConfig;
-  private eventListeners: Map<string, Function[]> = new Map();
+  private plugins: Plugin[];
+  private schema: Schema;
+  private onUpdate?: (props: { editor: Editor; transaction: Transaction }) => void;
+  private onSelectionUpdate?: (props: { editor: Editor; selection: Selection }) => void;
+  private onFocus?: (props: { editor: Editor }) => void;
+  private onBlur?: (props: { editor: Editor }) => void;
+  private view?: any;
+  private editable: boolean;
+  private destroyed = false;
 
   constructor(config: EditorConfig = {}) {
-    this.config = config;
-    this.commandManager = new CommandManager();
+    this.plugins = config.plugins || [];
+    this.onUpdate = config.onUpdate;
+    this.onSelectionUpdate = config.onSelectionUpdate;
+    this.onFocus = config.onFocus;
+    this.onBlur = config.onBlur;
+    this.editable = config.editable !== false;
 
-    // Initialize schema
-    const schema = config.schema || defaultSchema;
-
-    // Create initial document
-    let doc = config.doc;
-    if (!doc) {
-      if (config.content) {
-        // Parse HTML content (simplified)
-        doc = this.parseHTML(config.content, schema);
-      } else {
-        // Create empty document
-        doc = schema.nodes.doc.create({}, schema.nodes.paragraph.create());
-      }
-    }
-
-    // Create initial state
+    // Merge schemas from plugins
+    this.schema = this.createMergedSchema(config.schema);
+    
+    const doc = this.createDocument(config.content);
+    
     this._state = EditorState.create({
       doc,
-      schema,
-      plugins: config.plugins || []
+      schema: this.schema,
+      plugins: this.plugins,
+      selection: Selection.atStart(doc)
     });
 
-    // Register plugin commands
-    this.registerPluginCommands();
-
-    // Initialize plugins
     this.initializePlugins();
   }
 
-  /**
-   * Get the current editor state.
-   */
+  private createMergedSchema(baseSchema?: Schema): Schema {
+    const base = baseSchema || defaultSchema;
+    
+    // Collect schema extensions from plugins
+    const nodeSpecs = { ...base.spec.nodes };
+    const markSpecs = { ...base.spec.marks };
+    
+    this.plugins.forEach(plugin => {
+      const schemaExt = plugin.getSchemaExtensions();
+      if (schemaExt) {
+        if (schemaExt.nodes) {
+          Object.assign(nodeSpecs, schemaExt.nodes);
+        }
+        if (schemaExt.marks) {
+          Object.assign(markSpecs, schemaExt.marks);
+        }
+      }
+    });
+    
+    return new Schema({
+      nodes: nodeSpecs,
+      marks: markSpecs,
+      topNode: base.spec.topNode
+    });
+  }
+
   get state(): EditorState {
     return this._state;
   }
 
-  /**
-   * Dispatch a transaction to update the editor state.
-   */
-  dispatch(tr: Transaction): void {
-    const newState = this._state.apply(tr);
-    const oldState = this._state;
-    this._state = newState;
+  get isEditable(): boolean {
+    return this.editable && !this.destroyed;
+  }
 
-    // Notify plugins
-    this.notifyPlugins('onTransaction', tr);
+  private createDocument(content?: string | Node): Node {
+    if (content instanceof Node) return content;
 
-    // Call update handler
-    if (this.config.onUpdate) {
-      this.config.onUpdate({ editor: this, transaction: tr });
+    if (typeof content === 'string') {
+      return this.parseHTML(content);
     }
 
-    // Emit update event
-    this.emit('update', { editor: this, transaction: tr });
+    return this.schema.nodes.doc.create({}, Fragment.from([
+      this.schema.nodes.paragraph.create()
+    ]));
   }
 
-  /**
-   * Execute a command by name.
-   */
-  executeCommand(name: string): boolean {
-    return this.commandManager.execute(name, this._state, (tr) => this.dispatch(tr));
+  private parseHTML(html: string): Node {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(`<div>${html}</div>`, 'text/html');
+    return this.parseDOMNode(doc.body.firstChild || doc.createElement('div'));
   }
 
-  /**
-   * Get the document as HTML.
-   */
+  private parseDOMNode(domNode: Node): Node {
+    if (domNode.nodeType === Node.TEXT_NODE) {
+      return Node.text(domNode.textContent || '');
+    }
+
+    const element = domNode as Element;
+    const tagName = element.tagName?.toLowerCase();
+    
+    let nodeType = this.schema.nodes.paragraph;
+    let attrs: any = {};
+
+    switch (tagName) {
+      case 'h1': case 'h2': case 'h3': case 'h4': case 'h5': case 'h6':
+        nodeType = this.schema.nodes.heading;
+        attrs.level = parseInt(tagName[1]);
+        break;
+      case 'p':
+        nodeType = this.schema.nodes.paragraph;
+        break;
+      case 'div':
+        nodeType = this.schema.nodes.doc;
+        break;
+    }
+
+    const children: Node[] = [];
+    for (let i = 0; i < element.childNodes.length; i++) {
+      const child = this.parseDOMNode(element.childNodes[i]);
+      if (child) children.push(child);
+    }
+
+    return nodeType.create(attrs, Fragment.from(children));
+  }
+
+  private initializePlugins(): void {
+    const ctx = {
+      schema: this.schema,
+      state: this._state,
+      dispatch: this.dispatch.bind(this),
+      view: this.view
+    };
+
+    this.plugins.forEach(plugin => {
+      plugin.init(ctx);
+    });
+  }
+
+  dispatch = (tr: Transaction): void => {
+    if (this.destroyed) return;
+    
+    const newState = this._state.apply(tr);
+    const oldState = this._state;
+    this.updateState(newState, tr);
+
+    if (!oldState.selection.equals(newState.selection)) {
+      this.onSelectionUpdate?.({ editor: this, selection: newState.selection });
+    }
+  }
+
+  private updateState(newState: EditorState, tr: Transaction): void {
+    this._state = newState;
+    
+    const ctx = {
+      schema: this.schema,
+      state: this._state,
+      dispatch: this.dispatch,
+      view: this.view
+    };
+
+    this.pluginManager.onTransaction(tr, ctx);
+    this.onUpdate?.({ editor: this, transaction: tr });
+  }
+
   getHTML(): string {
     return this.serializeToHTML(this._state.doc);
   }
 
-  /**
-   * Get the document as JSON.
-   */
   getJSON(): any {
     return this._state.doc.toJSON();
   }
 
-  /**
-   * Set the content from HTML.
-   */
-  setContent(html: string): void {
-    const doc = this.parseHTML(html, this._state.schema);
-    const tr = this._state.tr.setDoc(doc);
-    this.dispatch(tr);
+  getText(): string {
+    return this._state.doc.textContent;
   }
 
-  /**
-   * Destroy the editor and clean up resources.
-   */
-  destroy(): void {
-    // Notify plugins
-    this.notifyPlugins('onDestroy');
-
-    // Clear event listeners
-    this.eventListeners.clear();
-
-    // Clear commands
-    this.commandManager.clear();
-  }
-
-  /**
-   * Add an event listener.
-   */
-  on(event: string, handler: Function): void {
-    if (!this.eventListeners.has(event)) {
-      this.eventListeners.set(event, []);
-    }
-    this.eventListeners.get(event)!.push(handler);
-  }
-
-  /**
-   * Remove an event listener.
-   */
-  off(event: string, handler: Function): void {
-    const handlers = this.eventListeners.get(event);
-    if (handlers) {
-      const index = handlers.indexOf(handler);
-      if (index > -1) {
-        handlers.splice(index, 1);
-      }
-    }
-  }
-
-  /**
-   * Emit an event.
-   */
-  private emit(event: string, data: any): void {
-    const handlers = this.eventListeners.get(event);
-    if (handlers) {
-      handlers.forEach(handler => handler(data));
-    }
-  }
-
-  /**
-   * Register commands from all plugins.
-   */
-  private registerPluginCommands(): void {
-    for (const plugin of this._state.plugins) {
-      const commands = plugin.getCommands();
-      for (const [name, command] of Object.entries(commands)) {
-        this.commandManager.register(name, command);
-      }
-    }
-  }
-
-  /**
-   * Initialize all plugins.
-   */
-  private initializePlugins(): void {
-    const context = {
-      schema: this._state.schema,
-      state: this._state,
-      dispatch: (tr: Transaction) => this.dispatch(tr)
-    };
-
-    for (const plugin of this._state.plugins) {
-      plugin.init(context);
-    }
-  }
-
-  /**
-   * Notify plugins of events.
-   */
-  private notifyPlugins(method: string, ...args: any[]): void {
-    const context = {
-      schema: this._state.schema,
-      state: this._state,
-      dispatch: (tr: Transaction) => this.dispatch(tr)
-    };
-
-    for (const plugin of this._state.plugins) {
-      if (typeof (plugin as any)[method] === 'function') {
-        (plugin as any)[method](...args, context);
-      }
-    }
-  }
-
-  /**
-   * Parse HTML content to document nodes (simplified implementation).
-   */
-  private parseHTML(html: string, schema: Schema): Node {
-    // This is a simplified parser - a real implementation would be more robust
-    if (!html.trim()) {
-      return schema.nodes.doc.create({}, schema.nodes.paragraph.create());
+  private serializeToHTML(node: Node): string {
+    if (node.isText) {
+      let text = node.attrs.text || '';
+      
+      node.marks.forEach(mark => {
+        switch (mark.type.name) {
+          case 'bold': text = `<strong>${text}</strong>`; break;
+          case 'italic': text = `<em>${text}</em>`; break;
+          case 'underline': text = `<u>${text}</u>`; break;
+          case 'code': text = `<code>${text}</code>`; break;
+        }
+      });
+      
+      return text;
     }
 
-    // For now, create a simple paragraph with the text content
-    const textContent = html.replace(/<[^>]*>/g, '');
-    const textNode = schema.nodes.text.create({ text: textContent });
-    const paragraph = schema.nodes.paragraph.create({}, [textNode]);
+    const tag = this.getHTMLTag(node);
+    if (!tag) {
+      return node.content.children.map(child => this.serializeToHTML(child)).join('');
+    }
+
+    const attrs = this.getHTMLAttrs(node);
+    const attrStr = attrs ? ` ${attrs}` : '';
+    const content = node.content.children.map(child => this.serializeToHTML(child)).join('');
     
-    return schema.nodes.doc.create({}, [paragraph]);
+    return `<${tag}${attrStr}>${content}</${tag}>`;
   }
 
-  /**
-   * Serialize document to HTML (simplified implementation).
-   */
-  private serializeToHTML(doc: Node): string {
-    // This is a simplified serializer - a real implementation would be more robust
-    return doc.textContent;
+  private getHTMLTag(node: Node): string | null {
+    switch (node.type.name) {
+      case 'doc': return null;
+      case 'paragraph': return 'p';
+      case 'heading': return `h${node.attrs.level || 1}`;
+      case 'blockquote': return 'blockquote';
+      case 'code_block': return 'pre';
+      case 'bullet_list': return 'ul';
+      case 'ordered_list': return 'ol';
+      case 'list_item': return 'li';
+      case 'table': return 'table';
+      case 'table_row': return 'tr';
+      case 'table_cell': return 'td';
+      case 'horizontal_rule': return 'hr';
+      default: return 'div';
+    }
+  }
+
+  private getHTMLAttrs(node: Node): string {
+    const attrs: string[] = [];
+    
+    if (node.type.name === 'table_cell') {
+      if (node.attrs.colspan > 1) attrs.push(`colspan="${node.attrs.colspan}"`);
+      if (node.attrs.rowspan > 1) attrs.push(`rowspan="${node.attrs.rowspan}"`);
+    }
+    
+    return attrs.join(' ');
+  }
+
+  setContent(content: string | Node): Editor {
+    if (this.destroyed) return this;
+    
+    const doc = this.createDocument(content);
+    const tr = this._state.tr.setDoc(doc).setSelection(Selection.atStart(doc));
+    this.dispatch(tr);
+    return this;
+  }
+
+  insertContent(content: string | Node, position?: number): Editor {
+    if (this.destroyed) return this;
+    
+    const pos = position ?? this._state.selection.from;
+    const fragment = typeof content === 'string' 
+      ? Fragment.from([Node.text(content)])
+      : Fragment.from([content]);
+    
+    const tr = this._state.tr.replace(pos, pos, fragment);
+    this.dispatch(tr);
+    return this;
+  }
+
+  deleteRange(from: number, to: number): Editor {
+    if (this.destroyed) return this;
+    
+    const tr = this._state.tr.replace(from, to, Fragment.from([]));
+    this.dispatch(tr);
+    return this;
+  }
+
+  setSelection(selection: Selection): Editor {
+    if (this.destroyed) return this;
+    
+    const tr = this._state.tr.setSelection(selection);
+    this.dispatch(tr);
+    return this;
+  }
+
+  executeCommand(commandName: string, ...args: any[]): boolean {
+    if (this.destroyed) return false;
+    
+    // Use plugin manager to get commands
+    const commands = this.pluginManager.getCommands();
+    const command = commands[commandName];
+    
+    if (command) {
+      return command(this._state, this.dispatch, this.view, ...args);
+    }
+    
+    return false;
+  }
+
+  can(commandName: string, ...args: any[]): boolean {
+    if (this.destroyed) return false;
+    
+    const commands = this.pluginManager.getCommands();
+    const command = commands[commandName];
+    
+    if (command) {
+      return command(this._state, undefined, this.view, ...args);
+    }
+    
+    return false;
+  }
+
+  getCommands(): Record<string, any> {
+    return this.pluginManager.getCommands();
+  }
+
+  registerPlugin(plugin: Plugin): Editor {
+    if (this.destroyed) return this;
+    
+    this.pluginManager.register(plugin);
+    
+    // Recreate schema with new plugin
+    this.schema = this.pluginManager.mergeSchemas(defaultSchema);
+    
+    // Update state with new schema and plugins
+    this._state = this._state.update({
+      schema: this.schema,
+      plugins: this.pluginManager.getAll()
+    });
+    
+    return this;
+  }
+
+  unregisterPlugin(pluginName: string): Editor {
+    if (this.destroyed) return this;
+    
+    const removed = this.pluginManager.unregister(pluginName);
+    
+    if (removed) {
+      // Recreate schema without the plugin
+      this.schema = this.pluginManager.mergeSchemas(defaultSchema);
+      
+      // Update state
+      this._state = this._state.update({
+        schema: this.schema,
+        plugins: this.pluginManager.getAll()
+      });
+    }
+    
+    return this;
+  }
+
+  setView(view: any): void {
+    this.view = view;
+    
+    const ctx = {
+      schema: this.schema,
+      state: this._state,
+      dispatch: this.dispatch,
+      view: this.view
+    };
+    
+    this.plugins.forEach(plugin => {
+      if (plugin.spec.onFocus) {
+        view.dom?.addEventListener('focus', () => {
+          plugin.spec.onFocus?.(ctx);
+          this.onFocus?.({ editor: this });
+        });
+      }
+      
+      if (plugin.spec.onBlur) {
+        view.dom?.addEventListener('blur', () => {
+          plugin.spec.onBlur?.(ctx);
+          this.onBlur?.({ editor: this });
+        });
+      }
+    });
+  }
+
+  focus(): Editor {
+    this.view?.focus();
+    return this;
+  }
+
+  blur(): Editor {
+    this.view?.blur();
+    return this;
+  }
+
+  setEditable(editable: boolean): Editor {
+    this.editable = editable;
+    return this;
+  }
+
+  destroy(): void {
+    if (this.destroyed) return;
+    
+    const ctx = {
+      schema: this.schema,
+      state: this._state,
+      dispatch: this.dispatch,
+      view: this.view
+    };
+
+    this.pluginManager.destroy(ctx);
+    this.destroyed = true;
+  }
+
+  isEmpty(): boolean {
+    return this._state.doc.content.childCount === 0 || 
+           (this._state.doc.content.childCount === 1 && 
+            this._state.doc.content.firstChild?.textContent === '');
+  }
+
+  getCharacterCount(): number {
+    return this._state.doc.textContent.length;
+  }
+
+  getWordCount(): number {
+    return this._state.doc.textContent.trim().split(/\s+/).filter(word => word.length > 0).length;
   }
 }

@@ -26,6 +26,19 @@ export abstract class Selection {
   }
 
   /**
+   * Create a selection from positions.
+   */
+  static create(doc: Node, from: number, to?: number): Selection {
+    if (to === undefined || from === to) {
+      return TextSelection.create(doc, from);
+    }
+    return new TextSelection(
+      ResolvedPos.resolve(doc, from),
+      ResolvedPos.resolve(doc, to)
+    );
+  }
+
+  /**
    * Check if this selection equals another selection.
    */
   abstract equals(other: Selection): boolean;
@@ -169,24 +182,24 @@ export class ResolvedPos {
    * Resolve a position in the document to a ResolvedPos.
    */
   static resolve(doc: Node, pos: number): ResolvedPos {
-    if (pos < 0 || pos > doc.content.size) {
-      throw new Error(`Position ${pos} out of range`);
-    }
+    if (pos < 0) pos = 0;
+    if (pos > doc.content.size) pos = doc.content.size;
 
     let depth = 0;
     let parentOffset = pos;
     let node = doc;
 
-    // Traverse down to find the exact position
-    while (depth < 100) { // Prevent infinite loops
-      if (parentOffset === 0) break;
-
-      const child = node.content.findChildAt(parentOffset);
+    while (depth < 100 && parentOffset > 0) {
+      const child = node.content.findChildAt(parentOffset - 1);
       if (!child) break;
 
-      depth++;
-      parentOffset -= child.offset;
-      node = child.node;
+      if (parentOffset <= child.offset + child.node.nodeSize) {
+        depth++;
+        parentOffset -= child.offset;
+        node = child.node;
+      } else {
+        break;
+      }
     }
 
     return new ResolvedPos(pos, doc, depth, parentOffset);

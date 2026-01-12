@@ -1,68 +1,83 @@
 import typescript from '@rollup/plugin-typescript';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import dts from 'rollup-plugin-dts';
-import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { dts } from 'rollup-plugin-dts';
+import terser from '@rollup/plugin-terser';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const rootDir = join(__dirname, 'packages/core') === process.cwd() 
-  ? join(__dirname, '..', '..') 
-  : __dirname;
-
-const pkg = JSON.parse(readFileSync(join(rootDir, 'package.json'), 'utf-8'));
-
-const external = [
-  ...Object.keys(pkg.dependencies || {}),
-  ...Object.keys(pkg.peerDependencies || {}),
-  'react',
-  'react-dom',
-  'react/jsx-runtime'
+const packages = [
+  'core',
+  'react', 
+  'themes',
+  'performance',
+  'plugins/bold',
+  'plugins/italic',
+  'plugins/heading',
+  'plugins/paragraph',
+  'plugins/history',
+  'plugins/list',
+  'plugins/blockquote',
+  'plugins/table',
+  'plugins/image',
+  'plugins/link',
+  'plugins/codeblock'
 ];
 
-const createConfig = (input, output) => [
-  {
+const configs = [];
+
+packages.forEach(pkg => {
+  const input = `packages/${pkg}/src/index.ts`;
+  const outputDir = `packages/${pkg}/dist`;
+  
+  // ESM build
+  configs.push({
     input,
-    external,
+    output: {
+      file: `${outputDir}/index.esm.js`,
+      format: 'esm',
+      sourcemap: true
+    },
     plugins: [
-      resolve({
-        preferBuiltins: false,
-        browser: true
-      }),
+      resolve(),
       commonjs(),
       typescript({
-        tsconfig: join(rootDir, 'tsconfig.json'),
-        declaration: false,
-        declarationMap: false
-      })
+        tsconfig: `packages/${pkg}/tsconfig.json`,
+        declaration: false
+      }),
+      terser()
     ],
-    output: [
-      {
-        file: output.replace('.js', '.cjs.js'),
-        format: 'cjs',
-        sourcemap: true
-      },
-      {
-        file: output.replace('.js', '.esm.js'),
-        format: 'esm',
-        sourcemap: true
-      }
-    ]
-  },
-  {
-    input: output.replace('.js', '.d.ts'),
-    plugins: [dts()],
+    external: ['react', 'react-dom', '@rte-editor/core']
+  });
+
+  // CJS build
+  configs.push({
+    input,
     output: {
-      file: output.replace('.js', '.d.ts'),
+      file: `${outputDir}/index.cjs.js`,
+      format: 'cjs',
+      sourcemap: true
+    },
+    plugins: [
+      resolve(),
+      commonjs(),
+      typescript({
+        tsconfig: `packages/${pkg}/tsconfig.json`,
+        declaration: false
+      }),
+      terser()
+    ],
+    external: ['react', 'react-dom', '@rte-editor/core']
+  });
+
+  // Types build
+  configs.push({
+    input,
+    output: {
+      file: `${outputDir}/index.d.ts`,
       format: 'esm'
-    }
-  }
-];
+    },
+    plugins: [dts()],
+    external: ['react', 'react-dom', '@rte-editor/core']
+  });
+});
 
-export default (input) => {
-  const pkgName = process.env.PACKAGE || 'core';
-  const output = `packages/${pkgName}/dist/index.js`;
-
-  return createConfig(join(rootDir, output), output);
-};
+export default configs;

@@ -1,24 +1,25 @@
 {
   "name": "rte-editor",
   "version": "1.0.0",
-  "description": "Production-grade Rich Text Editor - A framework-agnostic, plugin-based editor built for enterprise applications",
+  "description": "Production-grade Rich Text Editor",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/plugins/*"
   ],
   "scripts": {
-    "build": "lerna run build",
-    "clean": "lerna run clean && lerna clean",
-    "test": "lerna run test",
-    "test:watch": "lerna run test:watch",
-    "lint": "lerna run lint",
-    "typecheck": "lerna run typecheck",
-    "publish": "lerna publish",
-    "bootstrap": "lerna bootstrap",
-    "dev": "lerna run dev --parallel"
+    "build": "rollup -c",
+    "build:watch": "rollup -c -w",
+    "clean": "lerna run clean",
+    "test": "jest",
+    "lint": "eslint packages/*/src/**/*.{ts,tsx}",
+    "typecheck": "tsc --noEmit",
+    "dev": "rollup -c -w"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
     "lerna": "^8.0.0",
     "typescript": "^5.0.0",
     "rollup": "^4.0.0",
@@ -26,33 +27,15 @@
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-commonjs": "^25.0.0",
     "rollup-plugin-dts": "^6.0.0",
+    "@rollup/plugin-terser": "^0.4.0",
     "jest": "^29.0.0",
     "@types/jest": "^29.0.0",
     "ts-jest": "^29.0.0",
     "eslint": "^8.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "prettier": "^3.0.0",
-    "husky": "^9.0.0",
-    "lint-staged": "^15.0.0"
+    "prettier": "^3.0.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ajaykr089/Rich-Text-Editor.git"
-  },
-  "keywords": [
-    "rich-text-editor",
-    "wysiwyg",
-    "react",
-    "nextjs",
-    "typescript",
-    "plugin",
-    "enterprise",
-    "prosemirror",
-    "slate"
-  ],
-  "author": "Rich Text Editor Team",
-  "license": "MIT",
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"

@@ -14,23 +14,54 @@ export interface ToolbarProps {
  * Toolbar component that renders editor controls.
  */
 export const Toolbar: React.FC<ToolbarProps> = ({ className, items }) => {
-  const { state, dispatch, plugins } = useEditorContext();
+  const { state, editor } = useEditorContext();
 
   // Collect toolbar items from plugins if not provided
-  const toolbarItems = items || plugins.flatMap(plugin => {
+  const toolbarItems = items || editor.state.plugins.flatMap(plugin => {
     const config = plugin.getToolbarConfig();
     return config?.items || [];
   });
 
+  // Fallback toolbar if no plugin items
+  if (toolbarItems.length === 0) {
+    return (
+      <div className={`rte-toolbar ${className || ''}`}>
+        <button
+          className="rte-toolbar-button"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor.executeCommand('toggleBold');
+          }}
+          title="Bold"
+        >
+          <strong>B</strong>
+        </button>
+        <button
+          className="rte-toolbar-button"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor.executeCommand('toggleItalic');
+          }}
+          title="Italic"
+        >
+          <em>I</em>
+        </button>
+        <button
+          className="rte-toolbar-button"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor.executeCommand('undo');
+          }}
+          title="Undo"
+        >
+          ↶
+        </button>
+      </div>
+    );
+  }
+
   const handleCommand = (commandName: string) => {
-    // Find and execute the command
-    for (const plugin of plugins) {
-      const commands = plugin.getCommands();
-      if (commands[commandName]) {
-        commands[commandName](state, dispatch);
-        break;
-      }
-    }
+    editor.executeCommand(commandName);
   };
 
   return (

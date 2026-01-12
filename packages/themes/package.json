@@ -1,1 +1,18 @@
-{\n  \"name\": \"@rte-editor/themes\",\n  \"version\": \"1.0.0\",\n  \"description\": \"CSS themes for Rich Text Editor\",\n  \"main\": \"dist/index.css\",\n  \"files\": [\"dist\"]\n}
+{
+  "name": "@rte-editor/themes",
+  "version": "1.0.0",
+  "description": "Themes and styling for Rich Text Editor",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "style": "src/index.css",
+  "files": ["dist", "src/*.css"],
+  "scripts": {
+    "build": "rollup -c ../../rollup.config.js",
+    "dev": "rollup -c ../../rollup.config.js -w",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

@@ -37,25 +37,20 @@ export class Mark {
    * Check if this mark is in a set of marks.
    */
   isInSet(marks: readonly Mark[]): boolean {
-    for (const mark of marks) {
-      if (mark.type === this.type && this.attrsEqual(mark.attrs)) {
-        return true;
-      }
-    }
-    return false;
+    return marks.some(mark => mark.type === this.type && this.attrsEqual(mark.attrs));
   }
 
   /**
    * Add this mark to a set of marks.
    */
   addToSet(marks: readonly Mark[]): readonly Mark[] {
-    if (this.isInSet(marks)) {
-      return marks;
-    }
-
+    // Remove any existing marks of the same type first
+    const filtered = marks.filter(mark => mark.type !== this.type);
+    
     // Check if this mark excludes any existing marks
-    const filtered = marks.filter(mark => !this.type.excludes(mark.type));
-    return [...filtered, this];
+    const compatible = filtered.filter(mark => !this.type.excludes(mark.type));
+    
+    return [...compatible, this];
   }
 
   /**
@@ -63,6 +58,13 @@ export class Mark {
    */
   removeFromSet(marks: readonly Mark[]): readonly Mark[] {
     return marks.filter(mark => !(mark.type === this.type && this.attrsEqual(mark.attrs)));
+  }
+
+  /**
+   * Remove marks of a specific type from a set.
+   */
+  static removeFromSet(marks: readonly Mark[], markType: MarkType): readonly Mark[] {
+    return marks.filter(mark => mark.type !== markType);
   }
 
   /**

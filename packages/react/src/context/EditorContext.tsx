@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { EditorState, Plugin } from '@rte-editor/core';
+import { EditorState, Plugin, Editor } from '@rte-editor/core';
 
 /**
  * Editor context value interface.
@@ -8,6 +8,7 @@ export interface EditorContextValue {
   state: EditorState;
   dispatch: (tr: any) => void;
   plugins: readonly Plugin[];
+  editor: Editor;
   view?: any; // Editor view instance
 }
 
@@ -35,6 +36,7 @@ export interface EditorProviderProps {
   state: EditorState;
   dispatch: (tr: any) => void;
   plugins?: readonly Plugin[];
+  editor: Editor;
   view?: any;
   children: React.ReactNode;
 }
@@ -46,6 +48,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   state,
   dispatch,
   plugins = [],
+  editor,
   view,
   children
 }) => {
@@ -53,6 +56,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
     state,
     dispatch,
     plugins,
+    editor,
     view
   };
 

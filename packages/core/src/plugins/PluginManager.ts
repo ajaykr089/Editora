@@ -1,209 +1,144 @@
-import { EditorState, Transaction } from '../EditorState';
-import { Plugin, CommandMap, PluginSpec } from './Plugin';
+import { Plugin, PluginSpec, PluginContext } from './Plugin';
+import { EditorState } from '../EditorState';
+import { Schema } from '../schema/Schema';
 
 /**
- * Manages the lifecycle and coordination of editor plugins.
- * Handles plugin registration, command resolution, and event dispatching.
+ * Plugin manager handles plugin lifecycle and coordination.
  */
 export class PluginManager {
   private plugins: Map<string, Plugin> = new Map();
-  private commands: Map<string, { plugin: Plugin; command: Function }> = new Map();
-  private keyBindings: Map<string, { plugin: Plugin; commandName: string }> = new Map();
+  private initialized = false;
 
   /**
-   * Register a plugin with the manager.
+   * Register a plugin.
    */
   register(plugin: Plugin): void {
     if (this.plugins.has(plugin.name)) {
-      throw new Error(`Plugin '${plugin.name}' is already registered`);
-    }
-
-    this.plugins.set(plugin.name, plugin);
-
-    // Register commands
-    const commands = plugin.getCommands();
-    for (const [commandName, command] of Object.entries(commands)) {
-      this.commands.set(commandName, { plugin, command });
-    }
-
-    // Register key bindings
-    const keyBindings = plugin.getKeyBindings();
-    for (const [key, commandName] of Object.entries(keyBindings)) {
-      this.keyBindings.set(key, { plugin, commandName });
-    }
-
-    // Initialize the plugin
-    plugin.init({
-      schema: null, // Will be set when editor is created
-      state: {} as EditorState,
-      dispatch: () => {},
-      view: null
-    });
-  }
-
-  /**
-   * Unregister a plugin from the manager.
-   */
-  unregister(pluginName: string): void {
-    const plugin = this.plugins.get(pluginName);
-    if (!plugin) {
+      console.warn(`Plugin "${plugin.name}" is already registered`);
       return;
     }
-
-    // Remove commands
-    for (const [commandName, { plugin: cmdPlugin }] of this.commands.entries()) {
-      if (cmdPlugin === plugin) {
-        this.commands.delete(commandName);
-      }
+    
+    this.plugins.set(plugin.name, plugin);
+    
+    if (this.initialized) {
+      // Initialize immediately if manager is already initialized
+      this.initializePlugin(plugin);
     }
-
-    // Remove key bindings
-    for (const [key, { plugin: keyPlugin }] of this.keyBindings.entries()) {
-      if (keyPlugin === plugin) {
-        this.keyBindings.delete(key);
-      }
-    }
-
-    // Destroy the plugin
-    plugin.destroy({
-      schema: null,
-      state: {} as EditorState,
-      dispatch: () => {},
-      view: null
-    });
-
-    this.plugins.delete(pluginName);
   }
 
   /**
-   * Get all registered plugins.
+   * Unregister a plugin.
    */
-  getPlugins(): Plugin[] {
-    return Array.from(this.plugins.values());
+  unregister(name: string): boolean {
+    const plugin = this.plugins.get(name);
+    if (!plugin) return false;
+    
+    if (this.initialized) {
+      this.destroyPlugin(plugin);
+    }
+    
+    return this.plugins.delete(name);
   }
 
   /**
    * Get a plugin by name.
    */
-  getPlugin(name: string): Plugin | undefined {
+  get(name: string): Plugin | undefined {
     return this.plugins.get(name);
   }
 
   /**
-   * Execute a command by name.
+   * Get all registered plugins.
    */
-  executeCommand(commandName: string, state: EditorState, dispatch?: (tr: Transaction) => void): boolean {
-    const commandEntry = this.commands.get(commandName);
-    if (!commandEntry) {
-      return false;
-    }
-
-    const { command } = commandEntry;
-    return command(state, dispatch) !== false;
+  getAll(): Plugin[] {
+    return Array.from(this.plugins.values());
   }
 
   /**
-   * Check if a command is available.
+   * Check if a plugin is registered.
    */
-  hasCommand(commandName: string): boolean {
-    return this.commands.has(commandName);
+  has(name: string): boolean {
+    return this.plugins.has(name);
   }
 
   /**
-   * Get the command function by name.
+   * Initialize all plugins.
    */
-  getCommand(commandName: string): Function | undefined {
-    const entry = this.commands.get(commandName);
-    return entry?.command;
-  }
-
-  /**
-   * Handle a key event and execute the corresponding command if found.
-   */
-  handleKey(key: string, state: EditorState, dispatch?: (tr: Transaction) => void): boolean {
-    const binding = this.keyBindings.get(key);
-    if (!binding) {
-      return false;
-    }
-
-    return this.executeCommand(binding.commandName, state, dispatch);
-  }
-
-  /**
-   * Get all key bindings.
-   */
-  getKeyBindings(): Map<string, { plugin: Plugin; commandName: string }> {
-    return new Map(this.keyBindings);
-  }
-
-  /**
-   * Notify all plugins of a transaction.
-   */
-  onTransaction(tr: Transaction, state: EditorState): void {
+  initialize(context: PluginContext): void {
+    this.initialized = true;
+    
     for (const plugin of this.plugins.values()) {
-      plugin.onTransaction(tr, {
-        schema: state.schema,
-        state,
-        dispatch: () => {},
-        view: null
-      });
+      this.initializePlugin(plugin, context);
     }
   }
 
   /**
-   * Notify all plugins of a selection change.
+   * Destroy all plugins.
    */
-  onSelectionChange(selection: any, state: EditorState): void {
+  destroy(context: PluginContext): void {
     for (const plugin of this.plugins.values()) {
-      plugin.onSelectionChange(selection, {
-        schema: state.schema,
-        state,
-        dispatch: () => {},
-        view: null
-      });
+      this.destroyPlugin(plugin, context);
+    }
+    
+    this.initialized = false;
+  }
+
+  /**
+   * Handle transaction for all plugins.
+   */
+  onTransaction(tr: any, context: PluginContext): void {
+    for (const plugin of this.plugins.values()) {
+      plugin.onTransaction(tr, context);
     }
   }
 
   /**
-   * Notify all plugins of focus event.
+   * Handle selection change for all plugins.
    */
-  onFocus(state: EditorState): void {
+  onSelectionChange(selection: any, context: PluginContext): void {
     for (const plugin of this.plugins.values()) {
-      plugin.onFocus({
-        schema: state.schema,
-        state,
-        dispatch: () => {},
-        view: null
-      });
+      plugin.onSelectionChange(selection, context);
     }
   }
 
   /**
-   * Notify all plugins of blur event.
+   * Merge schemas from all plugins.
    */
-  onBlur(state: EditorState): void {
+  mergeSchemas(baseSchema: Schema): Schema {
+    const nodeSpecs = { ...baseSchema.spec.nodes };
+    const markSpecs = { ...baseSchema.spec.marks };
+    
     for (const plugin of this.plugins.values()) {
-      plugin.onBlur({
-        schema: state.schema,
-        state,
-        dispatch: () => {},
-        view: null
-      });
-    }
-  }
-
-  /**
-   * Get all schema extensions from plugins.
-   */
-  getSchemaExtensions(): any[] {
-    const extensions: any[] = [];
-    for (const plugin of this.plugins.values()) {
-      const extension = plugin.getSchemaExtensions();
-      if (extension) {
-        extensions.push(extension);
+      const schemaExt = plugin.getSchemaExtensions();
+      if (schemaExt) {
+        if (schemaExt.nodes) {
+          Object.assign(nodeSpecs, schemaExt.nodes);
+        }
+        if (schemaExt.marks) {
+          Object.assign(markSpecs, schemaExt.marks);
+        }
       }
     }
-    return extensions;
+    
+    return new Schema({
+      nodes: nodeSpecs,
+      marks: markSpecs,
+      topNode: baseSchema.spec.topNode
+    });
+  }
+
+  /**
+   * Get all commands from plugins.
+   */
+  getCommands(): Record<string, any> {
+    const commands: Record<string, any> = {};
+    
+    for (const plugin of this.plugins.values()) {
+      const pluginCommands = plugin.getCommands();
+      Object.assign(commands, pluginCommands);
+    }
+    
+    return commands;
   }
 
   /**
@@ -211,24 +146,64 @@ export class PluginManager {
    */
   getToolbarItems(): any[] {
     const items: any[] = [];
+    
     for (const plugin of this.plugins.values()) {
-      const toolbar = plugin.getToolbarConfig();
-      if (toolbar?.items) {
-        items.push(...toolbar.items);
+      const toolbarConfig = plugin.getToolbarConfig();
+      if (toolbarConfig?.items) {
+        items.push(...toolbarConfig.items);
       }
     }
+    
     return items;
   }
 
   /**
-   * Get all menu items from plugins.
+   * Get all key bindings from plugins.
    */
-  getMenuItems(): any[] {
-    const items: any[] = [];
+  getKeyBindings(): Record<string, string> {
+    const bindings: Record<string, string> = {};
+    
     for (const plugin of this.plugins.values()) {
-      items.push(...plugin.getMenuItems());
+      const pluginBindings = plugin.getKeyBindings();
+      Object.assign(bindings, pluginBindings);
     }
-    return items;
+    
+    return bindings;
+  }
+
+  private initializePlugin(plugin: Plugin, context?: PluginContext): void {
+    try {
+      if (context) {
+        plugin.init(context);
+      }
+    } catch (error) {
+      console.error(`Failed to initialize plugin "${plugin.name}":`, error);
+    }
+  }
+
+  private destroyPlugin(plugin: Plugin, context?: PluginContext): void {
+    try {
+      if (context) {
+        plugin.destroy(context);
+      }
+    } catch (error) {
+      console.error(`Failed to destroy plugin "${plugin.name}":`, error);
+    }
+  }
+
+  /**
+   * Clear all plugins.
+   */
+  clear(): void {
+    this.plugins.clear();
+    this.initialized = false;
+  }
+
+  /**
+   * Get plugin count.
+   */
+  get size(): number {
+    return this.plugins.size;
   }
 }
 
