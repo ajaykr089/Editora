@@ -49,6 +49,12 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         const url = prompt('Enter URL:');
         if (url) document.execCommand('createLink', false, url);
       },
+      clearFormatting: () => {
+        // Remove all formatting from selected text
+        document.execCommand('removeFormat', false);
+        // Also remove links if present
+        document.execCommand('unlink', false);
+      },
       insertImage: () => mediaContext.openImageDialog(),
       insertVideo: () => mediaContext.openVideoDialog(),
       undo: () => document.execCommand('undo', false),

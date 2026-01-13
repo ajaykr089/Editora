@@ -1,0 +1,1 @@
+export { ClearFormattingPlugin } from './ClearFormattingPlugin';

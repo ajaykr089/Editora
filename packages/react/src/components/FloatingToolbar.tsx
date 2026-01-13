@@ -115,6 +115,12 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
           onOpenLinkDialog('openLinkDialog');
         }
       },
+      clearFormatting: () => {
+        // Remove all formatting from selected text
+        document.execCommand('removeFormat', false);
+        // Also remove links if present
+        document.execCommand('unlink', false);
+      },
       toggleCode: () => {
         const selection = window.getSelection();
         if (selection && selection.rangeCount > 0) {
@@ -191,6 +197,14 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
       </button>
 
       <div className="floating-toolbar-separator" />
+
+      <button
+        className="floating-toolbar-btn"
+        onClick={() => handleCommand("clearFormatting")}
+        title="Clear Formatting"
+      >
+        ⌫
+      </button>
 
       <button
         className="floating-toolbar-btn"
