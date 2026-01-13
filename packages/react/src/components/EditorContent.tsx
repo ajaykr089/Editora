@@ -23,9 +23,19 @@ export const EditorContent: React.FC<EditorContentProps> = ({ editor }) => {
       }
     };
 
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'IMG' || target.tagName === 'VIDEO') {
+        target.style.resize = 'both';
+        target.style.overflow = 'auto';
+        target.style.display = 'inline-block';
+      }
+    };
+
     const el = contentRef.current;
     el.addEventListener('input', handleInput);
     el.addEventListener('paste', handlePaste);
+    el.addEventListener('click', handleClick);
 
     // Set focus to editor
     el.focus();
@@ -33,6 +43,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({ editor }) => {
     return () => {
       el.removeEventListener('input', handleInput);
       el.removeEventListener('paste', handlePaste);
+      el.removeEventListener('click', handleClick);
     };
   }, [editor]);
 

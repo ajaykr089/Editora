@@ -223,9 +223,25 @@
 .rte-content img {
   max-width: 100%;
   height: auto;
+  display: inline-block;
+  position: relative;
+}
+
+.rte-content img.resizable {
+  border: 2px dashed #0066cc;
+  padding: 4px;
+  cursor: nwse-resize;
 }
 
 .rte-content video {
   max-width: 100%;
   height: auto;
+  display: inline-block;
+  position: relative;
+}
+
+.rte-content video.resizable {
+  border: 2px dashed #0066cc;
+  padding: 4px;
+  cursor: nwse-resize;
 }

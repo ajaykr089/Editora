@@ -9,6 +9,46 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
+.media-dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background: white;
+  min-height: 60px;
+  flex-shrink: 0;
+}
+
+.media-dialog-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.media-dialog-header button {
+  background: none;
+  border: none;
+  font-size: 32px;
+  cursor: pointer;
+  color: #666;
+  line-height: 1;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.media-dialog-header button:hover {
+  color: #000;
+}
+
 .media-dialog-body {
   display: flex;
   flex: 1;
