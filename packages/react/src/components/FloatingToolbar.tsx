@@ -130,7 +130,27 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
         }
       },
       setBlockType: () => {
-        if (value) document.execCommand('formatBlock', false, value);
+        if (value === 'blockquote') {
+          // Toggle blockquote - check if current selection is already in a blockquote
+          const selection = window.getSelection();
+          if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            const currentBlock = range.commonAncestorContainer.nodeType === Node.TEXT_NODE
+              ? range.commonAncestorContainer.parentElement
+              : range.commonAncestorContainer;
+
+            const blockquote = (currentBlock as Element)?.closest?.('blockquote');
+            if (blockquote) {
+              // Already in blockquote, convert to paragraph
+              document.execCommand('formatBlock', false, 'p');
+            } else {
+              // Not in blockquote, convert to blockquote
+              document.execCommand('formatBlock', false, 'blockquote');
+            }
+          }
+        } else if (value) {
+          document.execCommand('formatBlock', false, value);
+        }
       }
     };
 
