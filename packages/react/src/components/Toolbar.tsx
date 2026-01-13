@@ -5,9 +5,10 @@ import { useMediaManagerContext } from '../../../plugins/media-manager/src/compo
 
 interface ToolbarProps {
   editor: Editor;
+  onCustomCommand?: (command: string) => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ editor, onCustomCommand }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const items = editor.pluginManager.getToolbarItems();
   const mediaContext = useMediaManagerContext();
@@ -16,6 +17,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
     const contentEl = document.querySelector('.rte-content') as HTMLElement;
     if (contentEl) {
       contentEl.focus();
+    }
+
+    // Handle custom commands first
+    if (command === 'openLinkDialog') {
+      onCustomCommand?.(command);
+      setOpenDropdown(null);
+      return;
     }
 
     const commandMap: Record<string, () => void> = {
@@ -49,7 +57,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
 
     commandMap[command]?.();
     setOpenDropdown(null);
-    
+
     if (contentEl) {
       contentEl.focus();
     }
