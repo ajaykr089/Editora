@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Editor } from '@rte-editor/core';
 import { ToolbarItem } from '@rte-editor/core';
+import { useMediaManagerContext } from '../../../plugins/media-manager/src/components/MediaManagerProvider';
 
 interface ToolbarProps {
   editor: Editor;
@@ -9,6 +10,7 @@ interface ToolbarProps {
 export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const items = editor.pluginManager.getToolbarItems();
+  const mediaContext = useMediaManagerContext();
 
   const handleCommand = (command: string, value?: string) => {
     const contentEl = document.querySelector('.rte-content') as HTMLElement;
@@ -20,8 +22,26 @@ export const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
       toggleBold: () => document.execCommand('bold', false),
       toggleItalic: () => document.execCommand('italic', false),
       toggleUnderline: () => document.execCommand('underline', false),
+      toggleStrikethrough: () => document.execCommand('strikeThrough', false),
+      toggleCode: () => {
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          const code = document.createElement('code');
+          range.surroundContents(code);
+        }
+      },
       toggleBulletList: () => document.execCommand('insertUnorderedList', false),
       toggleOrderedList: () => document.execCommand('insertOrderedList', false),
+      toggleBlockquote: () => document.execCommand('formatBlock', false, 'blockquote'),
+      createLink: () => {
+        const url = prompt('Enter URL:');
+        if (url) document.execCommand('createLink', false, url);
+      },
+      insertImage: () => mediaContext.openImageDialog(),
+      insertVideo: () => mediaContext.openVideoDialog(),
+      undo: () => document.execCommand('undo', false),
+      redo: () => document.execCommand('redo', false),
       setBlockType: () => {
         if (value) document.execCommand('formatBlock', false, value);
       }

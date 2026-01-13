@@ -22,6 +22,18 @@ const config: StorybookConfig = {
           '@rte-editor/themes': path.resolve(__dirname, '../packages/themes/src'),
         },
       },
+      server: {
+        proxy: {
+          '/api': {
+            target: 'http://localhost:3001',
+            changeOrigin: true
+          },
+          '/uploads': {
+            target: 'http://localhost:3001',
+            changeOrigin: true
+          }
+        }
+      }
     });
   },
 };

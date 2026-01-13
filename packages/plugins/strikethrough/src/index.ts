@@ -1,0 +1,1 @@
+export { StrikethroughPlugin } from './StrikethroughPlugin';

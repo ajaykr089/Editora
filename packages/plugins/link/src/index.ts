@@ -1,1 +1,1 @@
-export { LinkPlugin, createLinkPlugin } from './LinkPlugin';
+export { LinkPlugin } from './LinkPlugin';

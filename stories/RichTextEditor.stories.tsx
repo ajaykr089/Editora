@@ -6,7 +6,13 @@ import {
   BoldPlugin,
   ItalicPlugin,
   UnderlinePlugin,
-  ListPlugin
+  StrikethroughPlugin,
+  ListPlugin,
+  BlockquotePlugin,
+  CodePlugin,
+  LinkPlugin,
+  HistoryPlugin,
+  MediaManagerPlugin
 } from '../packages/plugins/src';
 import '../packages/themes/src/themes/default.css';
 
@@ -29,8 +35,20 @@ export const Default: Story = {
       BoldPlugin(),
       ItalicPlugin(),
       UnderlinePlugin(),
-      ListPlugin()
-    ]
+      StrikethroughPlugin(),
+      CodePlugin(),
+      ListPlugin(),
+      BlockquotePlugin(),
+      LinkPlugin(),
+      HistoryPlugin(),
+      MediaManagerPlugin()
+    ],
+    mediaConfig: {
+      uploadUrl: '/api/media/upload',
+      libraryUrl: '/api/media/library',
+      maxFileSize: 5 * 1024 * 1024,
+      allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/webm']
+    }
   }
 };
 

@@ -1,1 +1,1 @@
-export { BlockquotePlugin, createBlockquotePlugin } from './BlockquotePlugin';
+export { BlockquotePlugin } from './BlockquotePlugin';

@@ -1,2 +1,1 @@
-export { HistoryPlugin, createHistoryPlugin } from './HistoryPlugin';
-export type { HistoryPlugin as HistoryPluginType } from './HistoryPlugin';
+export { HistoryPlugin } from './HistoryPlugin';

@@ -78,6 +78,26 @@
   padding-left: 2em;
 }
 
-.rte-content li {
-  margin: 0.5em 0;
+.rte-content code {
+  background: #f4f4f4;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.rte-content blockquote {
+  border-left: 4px solid #ddd;
+  margin: 1em 0;
+  padding-left: 1em;
+  color: #666;
+}
+
+.rte-content a {
+  color: #0066cc;
+  text-decoration: underline;
+}
+
+.rte-content a:hover {
+  color: #0052a3;
 }
