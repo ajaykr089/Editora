@@ -7,7 +7,10 @@ interface LinkDialogProps {
   onInsert: (linkData: LinkData) => void;
   initialText?: string;
   initialUrl?: string;
+  initialTarget?: '_blank' | '_self';
+  initialTitle?: string;
   mediaManager?: MediaManager;
+  isEditing?: boolean;
 }
 
 interface LinkData {
@@ -23,29 +26,31 @@ export const LinkDialog: React.FC<LinkDialogProps> = ({
   onInsert,
   initialText = '',
   initialUrl = '',
-  mediaManager
+  initialTarget = '_self',
+  initialTitle = '',
+  mediaManager,
+  isEditing = false
 }) => {
   const [text, setText] = useState(initialText);
   const [url, setUrl] = useState(initialUrl);
-  const [target, setTarget] = useState<'_blank' | '_self'>('_self');
-  const [title, setTitle] = useState('');
+  const [target, setTarget] = useState<'_blank' | '_self'>(initialTarget);
+  const [title, setTitle] = useState(initialTitle);
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [isLoadingFiles, setIsLoadingFiles] = useState(false);
 
-  console.log('LinkDialog render:', { isOpen, initialText, initialUrl, mediaManager: !!mediaManager });
+  console.log('LinkDialog render:', { isOpen, initialText, initialUrl, initialTarget, initialTitle, mediaManager: !!mediaManager });
 
   useEffect(() => {
     if (isOpen) {
-      console.log('LinkDialog opening with:', { initialText, initialUrl });
+      console.log('LinkDialog opening with:', { initialText, initialUrl, initialTarget, initialTitle, isEditing });
       setText(initialText);
       setUrl(initialUrl);
-      // Reset other fields when dialog opens
-      setTarget('_self');
-      setTitle('');
+      setTarget(initialTarget);
+      setTitle(initialTitle);
       setShowFileUpload(false);
     }
-  }, [isOpen, initialText, initialUrl]);
+  }, [isOpen, initialText, initialUrl, initialTarget, initialTitle, isEditing]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,7 +101,7 @@ export const LinkDialog: React.FC<LinkDialogProps> = ({
     <div className="link-dialog-overlay" onClick={onClose}>
       <div className="link-dialog" onClick={(e) => e.stopPropagation()}>
         <div className="link-dialog-header">
-          <h3>Insert Link</h3>
+          <h3>{isEditing ? 'Edit Link' : 'Insert Link'}</h3>
           <button className="link-dialog-close" onClick={onClose}>×</button>
         </div>
 
@@ -194,7 +199,7 @@ export const LinkDialog: React.FC<LinkDialogProps> = ({
           <div className="link-dialog-footer">
             <button type="button" onClick={onClose}>Cancel</button>
             <button type="submit" disabled={!url.trim()}>
-              Insert Link
+              {isEditing ? 'Update Link' : 'Insert Link'}
             </button>
           </div>
         </form>
