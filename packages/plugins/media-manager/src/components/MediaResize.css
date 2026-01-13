@@ -1,0 +1,66 @@
+/* Media Resize Styles */
+.image-selected {
+  outline: 2px solid #007bff !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.3);
+  position: relative;
+}
+
+.image-resize-handle {
+  box-sizing: border-box;
+  transition: all 0.1s ease;
+}
+
+.image-resize-handle:hover {
+  background: #0056b3;
+  transform: scale(1.2);
+}
+
+.image-resize-handle:active {
+  background: #004085;
+  transform: scale(1.1);
+}
+
+/* Handle-specific cursors */
+.image-resize-handle-nw {
+  cursor: nw-resize;
+}
+
+.image-resize-handle-ne {
+  cursor: ne-resize;
+}
+
+.image-resize-handle-sw {
+  cursor: sw-resize;
+}
+
+.image-resize-handle-se {
+  cursor: se-resize;
+}
+
+/* Prevent text selection during resize */
+.image-resizing * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}
+
+/* Visual feedback during resize */
+.image-selected.image-resizing {
+  opacity: 0.8;
+  transition: opacity 0.1s ease;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .image-resize-handle {
+    width: 12px;
+    height: 12px;
+  }
+
+  .image-selected {
+    outline-width: 1px;
+    outline-offset: 1px;
+  }
+}
