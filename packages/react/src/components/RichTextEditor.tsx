@@ -3,10 +3,10 @@ import { Editor, PluginManager, Plugin } from '@rte-editor/core';
 import { Toolbar } from './Toolbar';
 import { EditorContent } from './EditorContent';
 import { MediaManagerProvider, useMediaManagerContext } from '../../../plugins/media-manager/src/components/MediaManagerProvider';
-import { MediaDialog } from '../../../plugins/media-manager/src/components/MediaDialog';
+import { MediaDialog } from '../../../plugins/media-manager/src/components/MediaDialogAdvanced';
 import { RichTextEditorAdapter } from '../../../plugins/media-manager/src/adapters/EditorAdapter';
 import { MediaManager } from '../../../plugins/media-manager/src/MediaManager';
-import '../../../plugins/media-manager/src/components/MediaDialog.css';
+import '../../../plugins/media-manager/src/components/MediaDialogAdvanced.css';
 
 interface RichTextEditorProps {
   plugins: Plugin[];

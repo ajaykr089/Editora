@@ -45,6 +45,7 @@ export interface MediaLibraryItem {
   width: number;
   height: number;
   createdAt: string;
+  folder_id?: string | null;
 }
 
 export interface MediaManagerConfig {

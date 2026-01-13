@@ -85,7 +85,7 @@ app.get('/api/media/library', async (req, res) => {
 
   try {
     const [rows] = await pool.execute<RowDataPacket[]>(
-      `SELECT id, filename, original_filename AS name, url, thumbnail_url AS thumbnailUrl, type, file_size AS size, width, height, created_at AS createdAt 
+      `SELECT id, filename, original_filename AS name, url, thumbnail_url AS thumbnailUrl, type, file_size AS size, width, height, folder_id, created_at AS createdAt 
        FROM media 
        WHERE deleted_at IS NULL AND status = 'ready' 
        ORDER BY created_at DESC 
@@ -107,14 +107,68 @@ app.get('/api/media/library', async (req, res) => {
   }
 });
 
-app.patch('/api/media/library/:id', async (req, res) => {
-  const { id } = req.params;
-  const { alt_text, title, description } = req.body;
+app.get('/api/media/folders', async (req, res) => {
+  try {
+    const [rows] = await pool.execute<RowDataPacket[]>(
+      'SELECT id, name, parent_id FROM media_folders WHERE user_id IS NULL OR user_id = ?',
+      ['default-user']
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ error: 'Failed to fetch folders' });
+  }
+});
+
+app.post('/api/media/folders', async (req, res) => {
+  const { name, parent_id } = req.body;
+  const id = uuidv4();
 
   try {
     await pool.execute(
-      'UPDATE media SET alt_text = ?, title = ?, description = ? WHERE id = ?',
-      [alt_text, title, description, id]
+      'INSERT INTO media_folders (id, name, parent_id, user_id) VALUES (?, ?, ?, ?)',
+      [id, name, parent_id || null, 'default-user']
+    );
+    res.json({ id, name, parent_id });
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ error: 'Failed to create folder' });
+  }
+});
+
+app.patch('/api/media/library/:id', async (req, res) => {
+  const { id } = req.params;
+  const { alt_text, title, description, folder_id } = req.body;
+
+  try {
+    const updates: string[] = [];
+    const values: any[] = [];
+
+    if (alt_text !== undefined) {
+      updates.push('alt_text = ?');
+      values.push(alt_text);
+    }
+    if (title !== undefined) {
+      updates.push('title = ?');
+      values.push(title);
+    }
+    if (description !== undefined) {
+      updates.push('description = ?');
+      values.push(description);
+    }
+    if (folder_id !== undefined) {
+      updates.push('folder_id = ?');
+      values.push(folder_id || null);
+    }
+
+    if (updates.length === 0) {
+      return res.json({ success: true });
+    }
+
+    values.push(id);
+    await pool.execute(
+      `UPDATE media SET ${updates.join(', ')} WHERE id = ?`,
+      values
     );
 
     res.json({ success: true });
