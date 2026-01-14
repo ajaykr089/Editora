@@ -78,50 +78,72 @@ export const TablePlugin = (): Plugin => ({
  * Implements the requirements from Table-manager.md
  */
 
-// Insert table command - creates a 3x3 table
+// Insert table command - creates a 3x3 table with thead/tbody
 export const insertTableCommand = () => {
   const contentEl = document.querySelector('.rte-content') as HTMLElement;
   if (!contentEl) return;
 
-  // Get current selection
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return;
 
   const range = selection.getRangeAt(0);
 
-  // Create table structure
+  // Create table
   const table = document.createElement('table');
   table.className = 'rte-table';
 
+  // ===== THEAD =====
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+
   for (let i = 0; i < 3; i++) {
-    const row = document.createElement('tr');
-    for (let j = 0; j < 3; j++) {
-      const cell = document.createElement('td');
-      const paragraph = document.createElement('p');
-      paragraph.innerHTML = '<br>'; // Empty paragraph
-      cell.appendChild(paragraph);
-      row.appendChild(cell);
-    }
-    table.appendChild(row);
+    const th = document.createElement('th');
+    const p = document.createElement('p');
+    p.appendChild(document.createElement('br'));
+    th.appendChild(p);
+    headerRow.appendChild(th);
   }
 
-  // Insert the table
+  thead.appendChild(headerRow);
+
+  // ===== TBODY =====
+  const tbody = document.createElement('tbody');
+
+  for (let rowIndex = 0; rowIndex < 2; rowIndex++) {
+    const row = document.createElement('tr');
+
+    for (let colIndex = 0; colIndex < 3; colIndex++) {
+      const td = document.createElement('td');
+      const p = document.createElement('p');
+      p.appendChild(document.createElement('br'));
+      td.appendChild(p);
+      row.appendChild(td);
+    }
+
+    tbody.appendChild(row);
+  }
+
+  table.appendChild(thead);
+  table.appendChild(tbody);
+
+  // Insert table
   range.deleteContents();
   range.insertNode(table);
 
-  // Move cursor to first cell
-  const firstCell = table.querySelector('td');
-  if (firstCell) {
-    const range = document.createRange();
-    range.selectNodeContents(firstCell);
-    range.collapse(true);
+  // Move cursor to first header cell paragraph
+  const firstParagraph = table.querySelector('th p');
+  if (firstParagraph) {
+    const newRange = document.createRange();
+    newRange.setStart(firstParagraph, 0);
+    newRange.collapse(true);
+
     selection.removeAllRanges();
-    selection.addRange(range);
+    selection.addRange(newRange);
   }
 
-  // Focus back to editor
   contentEl.focus();
 };
+
 
 // Add row above current position
 export const addRowAboveCommand = () => {
