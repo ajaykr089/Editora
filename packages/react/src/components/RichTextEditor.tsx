@@ -19,6 +19,9 @@ import { HeadingPluginProvider } from './PluginManager';
 import { TableProvider } from '../../../plugins/table/src/TableProvider';
 import { LinkProvider } from '../../../plugins/link/src/LinkProvider';
 import { MediaProvider } from '../../../plugins/media-manager/src/MediaProvider';
+import { FontSizeProvider } from '../../../plugins/font-size/src/FontSizeProvider';
+import { TextAlignmentProvider } from '../../../plugins/text-alignment/src/TextAlignmentProvider';
+import { FontFamilyProvider } from '../../../plugins/font-family/src/FontFamilyProvider';
 
 interface RichTextEditorProps {
   plugins: Plugin[];
@@ -58,16 +61,22 @@ const EditorCore: React.FC<RichTextEditorProps> = ({ plugins, className, mediaCo
                           <TableProvider>
                             <LinkProvider>
                               <MediaProvider mediaConfig={mediaConfig}>
-                                <div className={`rte-editor ${className || ''}`}>
-                                  <Toolbar
-                                    editor={editor}
-                                  />
-                                  <EditorContent editor={editor} />
-                                  <FloatingToolbar
-                                    editor={editor}
-                                    isEnabled={floatingToolbarEnabled}
-                                  />
-                                </div>
+                                <FontSizeProvider>
+                                  <TextAlignmentProvider>
+                                    <FontFamilyProvider>
+                                      <div className={`rte-editor ${className || ''}`}>
+                                        <Toolbar
+                                          editor={editor}
+                                        />
+                                        <EditorContent editor={editor} />
+                                        <FloatingToolbar
+                                          editor={editor}
+                                          isEnabled={floatingToolbarEnabled}
+                                        />
+                                      </div>
+                                    </FontFamilyProvider>
+                                  </TextAlignmentProvider>
+                                </FontSizeProvider>
                               </MediaProvider>
                             </LinkProvider>
                           </TableProvider>

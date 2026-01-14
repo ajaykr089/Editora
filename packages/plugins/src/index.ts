@@ -12,3 +12,6 @@ export { CodePlugin } from '../code/src/CodePlugin';
 export { ClearFormattingPlugin } from '../clear-formatting/src/ClearFormattingPlugin';
 export { TablePlugin } from '../table/src/TablePlugin';
 export { MediaManagerPlugin } from '../media-manager/src/MediaManagerPlugin';
+export { FontSizePlugin, FontSizeProvider } from '../font-size/src/index';
+export { TextAlignmentPlugin, TextAlignmentProvider } from '../text-alignment/src/index';
+export { FontFamilyPlugin, FontFamilyProvider } from '../font-family/src/index';

@@ -5,8 +5,9 @@ export interface ToolbarItem {
   label: string;
   command: string;
   icon?: string;
-  type?: 'button' | 'dropdown';
+  type?: 'button' | 'dropdown' | 'input';
   options?: Array<{ label: string; value: string }>;
+  placeholder?: string;
 }
 
 export interface Plugin {

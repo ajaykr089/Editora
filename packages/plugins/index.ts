@@ -28,3 +28,6 @@ export { StrikethroughPlugin } from './strikethrough/src/StrikethroughPlugin';
 export { ClearFormattingPlugin } from './clear-formatting/src/ClearFormattingPlugin';
 export { MediaManagerPlugin } from './media-manager/src/MediaManagerPlugin';
 export { CodePlugin } from './code/src/CodePlugin';
+export  { FontSizePlugin, FontSizeProvider } from './font-size/src/index';
+export { TextAlignmentPlugin, TextAlignmentProvider } from './text-alignment/src/index';
+export { FontFamilyPlugin, FontFamilyProvider } from './font-family/src/index';

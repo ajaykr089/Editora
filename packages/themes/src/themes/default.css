@@ -30,6 +30,14 @@
   background: #e9e9e9;
 }
 
+.rte-toolbar-input {
+  width: 26px;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 14px;
+  text-align: center;
+}
 .rte-toolbar-dropdown {
   position: relative;
 }

@@ -58,7 +58,9 @@ export const EditorContent: React.FC<EditorContentProps> = ({ editor }) => {
         padding: '16px',
         outline: 'none',
         border: '1px solid #ddd',
-        borderRadius: '4px'
+        borderRadius: '4px',
+        fontSize: '14px', // Default font size
+        lineHeight: '1.5'
       }}
     >
       <p><br /></p>

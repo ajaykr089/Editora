@@ -11,6 +11,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   editor
 }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [storedSelection, setStoredSelection] = useState<Range | null>(null);
   const items = editor.pluginManager.getToolbarItems();
   const { executeCommand } = usePluginContext();
 
@@ -19,6 +20,16 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     const contentEl = document.querySelector('.rte-content') as HTMLElement;
     if (contentEl) {
       contentEl.focus();
+    }
+
+    // Restore stored selection if available (for dropdown commands)
+    if (storedSelection && (command === 'setTextAlignment' || command === 'setFontFamily')) {
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(storedSelection);
+      }
+      setStoredSelection(null);
     }
 
     // Use plugin context to execute all commands
@@ -30,6 +41,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     }
   };
 
+  const handleDropdownOpen = (command: string) => {
+    // Store current selection when opening dropdown
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      setStoredSelection(selection.getRangeAt(0).cloneRange());
+    }
+    setOpenDropdown(openDropdown === command ? null : command);
+  };
+
   return (
     <div className="rte-toolbar">
       {items.map((item, idx) => (
@@ -38,7 +58,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <div className="rte-toolbar-dropdown">
               <button
                 className="rte-toolbar-button"
-                onClick={() => setOpenDropdown(openDropdown === item.command ? null : item.command)}
+                onClick={() => handleDropdownOpen(item.command)}
               >
                 {item.label} ▼
               </button>
@@ -56,6 +76,19 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 </div>
               )}
             </div>
+          ) : item.type === 'input' ? (
+            <input
+              type="text"
+              className="rte-toolbar-input"
+              placeholder={item.placeholder}
+              onChange={(e) => handleCommand(item.command, e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleCommand(item.command, (e.target as HTMLInputElement).value);
+                }
+              }}
+              title={item.label}
+            />
           ) : (
             <button
               className="rte-toolbar-button"

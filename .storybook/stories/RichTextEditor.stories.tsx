@@ -15,6 +15,9 @@ import {
   HistoryPlugin,
   TablePlugin,
   MediaManagerPlugin,
+  FontSizePlugin,
+  FontFamilyPlugin,
+  TextAlignmentPlugin,
 } from "@rte-editor/plugins";
 import "@rte-editor/themes/themes/default.css";
 
@@ -46,6 +49,9 @@ export const Default: Story = {
       TablePlugin(),
       HistoryPlugin(),
       MediaManagerPlugin(),
+      FontSizePlugin(),
+      FontFamilyPlugin(),
+      TextAlignmentPlugin(),  
     ],
     mediaConfig: {
       uploadUrl: "/api/media/upload",
