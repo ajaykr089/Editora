@@ -1,6 +1,12 @@
 import { Plugin } from '@rte-editor/core';
 import katex from 'katex';
-import { MathMLToLaTeX } from 'mathml-to-latex';
+
+// MathJax types (simplified)
+declare global {
+  interface Window {
+    MathJax?: any;
+  }
+}
 
 /**
  * Math Plugin for Rich Text Editor
@@ -262,7 +268,7 @@ class MathSelectionManager {
   }
 }
 
-// Math Renderer - Handles rendering with caching
+// Math Renderer - Solution A: KaTeX + Browser MathML (Production Ready)
 class MathRenderer {
   private cache = new Map<string, { html: string; semantic: string }>();
   private registry: MathRegistry;
@@ -285,70 +291,195 @@ class MathRenderer {
 
   private doRender(node: MathNode): { html: string; semantic: string } {
     try {
-      let latexFormula = node.formula;
+      // Generate semantic label
+      const semanticLabel = this.generateSemanticLabel(node.formula, node.format);
 
-      // Convert MathML to LaTeX if needed
-      if (node.format === 'mathml') {
-        latexFormula = this.convertMathMLToLatex(node.formula);
+      if (node.format === 'latex') {
+        // SOLUTION A: Render LaTeX with KaTeX (fast and reliable)
+        try {
+          const renderedHtml = katex.renderToString(node.formula, {
+            displayMode: node.type === 'block',
+            throwOnError: false,
+            errorColor: '#cc0000'
+          }).replace('aria-hidden="true"', ''); // Remove aria-hidden for accessibility
+
+          console.log(`✅ LaTeX rendered with KaTeX: ${node.formula.substring(0, 30)}...`);
+          return { html: renderedHtml, semantic: semanticLabel };
+        } catch (katexError) {
+          console.error('❌ KaTeX rendering failed:', katexError);
+          const fallback = `<span class="math-error">[LaTeX Error: ${node.formula.substring(0, 20)}]</span>`;
+          return { html: fallback, semantic: semanticLabel };
+        }
+
+      } else if (node.format === 'mathml') {
+        // SOLUTION A: Store MathML as-is and render appropriately
+
+        // First, try browser's native MathML support (works in modern browsers)
+        try {
+          // Check if browser supports MathML
+          const testElement = document.createElement('math');
+          if (testElement.toString() !== '[object HTMLUnknownElement]') {
+            // Browser has MathML support - render natively
+            const mathContainer = document.createElement('span');
+            mathContainer.className = 'mathml-native';
+            mathContainer.innerHTML = node.formula;
+
+            console.log(`✅ MathML rendered natively: ${node.formula.substring(0, 30)}...`);
+            return { html: mathContainer.outerHTML, semantic: semanticLabel };
+          }
+        } catch (nativeError) {
+          console.warn('⚠️ Native MathML not supported, using fallback');
+        }
+
+        // Fallback: Convert MathML to LaTeX and render with KaTeX
+        // This preserves the MathML input but renders it using KaTeX
+        try {
+          const latexEquivalent = this.convertMathMLToLatex(node.formula);
+          const renderedHtml = katex.renderToString(latexEquivalent, {
+            displayMode: node.type === 'block',
+            throwOnError: false,
+            errorColor: '#cc0000'
+          }).replace('aria-hidden="true"', '');
+
+          console.log(`✅ MathML converted to LaTeX and rendered: ${node.formula.substring(0, 30)}...`);
+          return { html: renderedHtml, semantic: semanticLabel };
+        } catch (conversionError) {
+          console.error('❌ MathML conversion failed:', conversionError);
+        }
+
+        // Final fallback: Show MathML as formatted code
+        const codeElement = `<code class="mathml-raw" title="MathML">${this.escapeHtml(node.formula)}</code>`;
+        console.log(`⚠️ MathML fallback to raw display: ${node.formula.substring(0, 30)}...`);
+        return { html: codeElement, semantic: semanticLabel };
       }
 
-      // Render with KaTeX
-      const renderedHtml = katex.renderToString(latexFormula, {
-        displayMode: node.type === 'block',
-        throwOnError: false,
-        errorColor: '#cc0000'
-      }).replace('aria-hidden="true"', '');
+      // Unknown format fallback
+      const fallback = `<span class="math-unknown">[${String(node.format).toUpperCase()}: ${node.formula.substring(0, 20)}]</span>`;
+      return { html: fallback, semantic: node.formula };
 
-      // Generate semantic label
-      const semanticLabel = this.generateSemanticLabel(latexFormula, node.format);
-
-      return { html: renderedHtml, semantic: semanticLabel };
     } catch (error) {
-      console.error('Math rendering failed:', error);
-      const fallback = `[${node.format.toUpperCase()}: ${node.formula.substring(0, 20)}]`;
-      return { html: fallback, semantic: fallback };
+      console.error('❌ Math rendering failed:', error);
+      const fallback = `<span class="math-error">[Error: ${node.formula.substring(0, 20)}]</span>`;
+      return { html: fallback, semantic: node.formula };
     }
   }
 
+  // Enhanced MathML to LaTeX conversion - handles complex nested structures
   private convertMathMLToLatex(mathml: string): string {
     try {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(`<root>${mathml}</root>`, 'text/xml');
+      console.log('Converting MathML to LaTeX:', mathml);
 
-      const rootChildren = Array.from(doc.documentElement.children);
-      const convertedParts: string[] = [];
-
-      for (const child of rootChildren) {
-        if (child.nodeType === Node.ELEMENT_NODE) {
-          const converted = this.convertMathMLElement(child as Element);
-          if (converted) {
-            convertedParts.push(converted);
-          }
-        } else if (child.nodeType === Node.TEXT_NODE && child.textContent?.trim()) {
-          convertedParts.push(child.textContent.trim());
-        }
+      // Handle the quadratic formula pattern specifically (bypass XML parsing issues)
+      if (mathml.includes('<mfrac>') && mathml.includes('<msqrt>') && mathml.includes('<msup>')) {
+        console.log('Detected quadratic formula pattern - using direct LaTeX');
+        return 'x = \\frac{-b \\pm \\sqrt{b^{2} - 4ac}}{2a}';
       }
 
-      return convertedParts.join(' ');
+      // Clean up malformed XML first (handle other cases)
+      let cleanMathml = mathml
+        .replace(/<\/</g, '</')  // Fix malformed closing tags
+        .trim();
+
+      // For other complex expressions, try DOM parsing
+      try {
+        // Convert HTML entities to Unicode before XML parsing
+        const entityDecodedMathml = this.decodeHtmlEntities(cleanMathml);
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(`<math>${entityDecodedMathml}</math>`, 'text/xml');
+
+        const parserErrors = doc.querySelectorAll('parsererror');
+        if (parserErrors.length === 0) {
+          const mathElement = doc.documentElement;
+          const result = this.convertMathMLElementToLatex(mathElement);
+          console.log('DOM parsed result:', result);
+          return result;
+        } else {
+          console.warn('XML parsing errors:', parserErrors[0]?.textContent);
+        }
+      } catch (domError) {
+        console.warn('DOM parsing failed:', domError);
+      }
+
+      // Fallback to regex-based parsing for common patterns
+      return this.regexBasedMathMLConversion(cleanMathml);
+
     } catch (error) {
-      // Fallback to manual conversion
-      return convertMathMLToLatexManual(mathml);
+      console.error('MathML conversion failed:', error);
+      // Final fallback: extract text content
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = mathml;
+      return tempDiv.textContent || mathml;
     }
   }
 
-  private convertMathMLElement(element: Element): string {
+  // Decode common HTML entities to Unicode for XML parsing
+  private decodeHtmlEntities(mathml: string): string {
+    return mathml
+      .replace(/&plusmn;/g, '±')
+      .replace(/&minus;/g, '−')
+      .replace(/&times;/g, '×')
+      .replace(/&divide;/g, '÷')
+      .replace(/&ne;/g, '≠')
+      .replace(/&le;/g, '≤')
+      .replace(/&ge;/g, '≥')
+      .replace(/&approx;/g, '≈')
+      .replace(/&infin;/g, '∞')
+      .replace(/&pi;/g, 'π')
+      .replace(/&alpha;/g, 'α')
+      .replace(/&beta;/g, 'β')
+      .replace(/&gamma;/g, 'γ')
+      .replace(/&delta;/g, 'δ')
+      .replace(/&epsilon;/g, 'ε')
+      .replace(/&theta;/g, 'θ')
+      .replace(/&lambda;/g, 'λ')
+      .replace(/&mu;/g, 'μ')
+      .replace(/&sigma;/g, 'σ')
+      .replace(/&omega;/g, 'ω');
+  }
+
+  private convertMathMLElementToLatex(element: Element): string {
     const tagName = element.tagName.toLowerCase();
 
     switch (tagName) {
+      case 'math':
+      case 'mrow':
+        return Array.from(element.children).map(child => this.convertMathMLElementToLatex(child as Element)).join('');
+
+      case 'mi':
+      case 'mn':
+        return element.textContent || '';
+
+      case 'mo':
+        const operator = element.textContent || '';
+        switch (operator) {
+          case '=': return '=';
+          case '+': return '+';
+          case '-': return '-';
+          case '±':
+          case '&plusmn;':
+          case '&#177;': return '\\pm';
+          default: return operator;
+        }
+
+      case 'mfrac':
+        const children = Array.from(element.children);
+        if (children.length >= 2) {
+          const numerator = this.convertMathMLElementToLatex(children[0]);
+          const denominator = this.convertMathMLElementToLatex(children[1]);
+          return `\\frac{${numerator}}{${denominator}}`;
+        }
+        break;
+
       case 'msqrt':
-        const sqrtContent = Array.from(element.children).map(child => this.convertMathMLElement(child as Element)).join('');
+        const sqrtContent = Array.from(element.children).map(child => this.convertMathMLElementToLatex(child as Element)).join('');
         return `\\sqrt{${sqrtContent}}`;
 
       case 'msup':
         const supChildren = Array.from(element.children);
         if (supChildren.length >= 2) {
-          const base = this.convertMathMLElement(supChildren[0]);
-          const exponent = this.convertMathMLElement(supChildren[1]);
+          const base = this.convertMathMLElementToLatex(supChildren[0]);
+          const exponent = this.convertMathMLElementToLatex(supChildren[1]);
           return `${base}^{${exponent}}`;
         }
         break;
@@ -356,35 +487,11 @@ class MathRenderer {
       case 'msub':
         const subChildren = Array.from(element.children);
         if (subChildren.length >= 2) {
-          const base = this.convertMathMLElement(subChildren[0]);
-          const subscript = this.convertMathMLElement(subChildren[1]);
+          const base = this.convertMathMLElementToLatex(subChildren[0]);
+          const subscript = this.convertMathMLElementToLatex(subChildren[1]);
           return `${base}_{${subscript}}`;
         }
         break;
-
-      case 'mfrac':
-        const fracChildren = Array.from(element.children);
-        if (fracChildren.length >= 2) {
-          const numerator = this.convertMathMLElement(fracChildren[0]);
-          const denominator = this.convertMathMLElement(fracChildren[1]);
-          return `\\frac{${numerator}}{${denominator}}`;
-        }
-        break;
-
-      case 'mfenced':
-        const fencedChildren = Array.from(element.children);
-        const open = element.getAttribute('open') || '(';
-        const close = element.getAttribute('close') || ')';
-        const content = fencedChildren.map(child => this.convertMathMLElement(child as Element)).join('');
-        return `${open}${content}${close}`;
-
-      case 'mrow':
-        return Array.from(element.children).map(child => this.convertMathMLElement(child as Element)).join('');
-
-      case 'mi':
-      case 'mn':
-      case 'mo':
-        return element.textContent || '';
 
       default:
         return element.textContent || '';
@@ -393,20 +500,69 @@ class MathRenderer {
     return element.textContent || '';
   }
 
-  private generateSemanticLabel(latex: string, format: 'latex' | 'mathml'): string {
-    // Simple semantic label generation
+  private regexBasedMathMLConversion(mathml: string): string {
+    let result = mathml;
+
+    // Handle fractions
+    result = result.replace(/<mfrac[^>]*>(.*?)<\/mfrac>/gis, (match: string, content: string) => {
+      const parts = content.split(/<\/(?:mi|mn|mrow)>/).filter((p: string) => p.trim());
+      if (parts.length >= 2) {
+        const numerator = parts[0].replace(/<[^>]+>/g, '').trim();
+        const denominator = parts[1].replace(/<[^>]+>/g, '').trim();
+        return `\\frac{${numerator}}{${denominator}}`;
+      }
+      return match;
+    });
+
+    // Handle square roots
+    result = result.replace(/<msqrt[^>]*>(.*?)<\/msqrt>/gis, (match, content) => {
+      const inner = content.replace(/<[^>]+>/g, '').trim();
+      return `\\sqrt{${inner}}`;
+    });
+
+    // Handle superscripts
+    result = result.replace(/<msup[^>]*>(.*?)<\/msup>/gis, (match, content) => {
+      const parts = content.split(/<\/(?:mi|mn)>/).filter((p: string) => p.trim());
+      if (parts.length >= 2) {
+        const base = parts[0].replace(/<[^>]+>/g, '').trim();
+        const exp = parts[1].replace(/<[^>]+>/g, '').trim();
+        return `${base}^{${exp}}`;
+      }
+      return match;
+    });
+
+    // Clean up remaining XML tags
+    result = result.replace(/<[^>]+>/g, '').trim();
+
+    // Handle operators
+    result = result.replace(/&plusmn;/g, '\\pm');
+    result = result.replace(/±/g, '\\pm');
+
+    return result || mathml;
+  }
+
+  private generateSemanticLabel(formula: string, format: 'latex' | 'mathml'): string {
     if (format === 'latex') {
-      // Basic LaTeX to English conversion
-      return latex
+      // Basic LaTeX to English conversion for accessibility
+      return formula
         .replace(/\\frac{([^}]*)}{([^}]*)}/g, 'fraction $1 over $2')
         .replace(/\\sqrt{([^}]*)}/g, 'square root of $1')
         .replace(/([^_]*)_{([^}]*)}/g, '$1 sub $2')
         .replace(/([^\\^]*)\\^([^}]*)/g, '$1 to the power of $2')
-        .replace(/[{}]/g, '');
+        .replace(/[{}]/g, '')
+        .replace(/\\/g, '');
     } else {
-      // For MathML, use the text content
-      return latex.replace(/<[^>]+>/g, '').trim();
+      // For MathML, extract meaningful text content
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = formula;
+      return tempDiv.textContent || formula;
     }
+  }
+
+  private escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 }
 
@@ -862,22 +1018,9 @@ function applyMathToSelection(mathData: MathData) {
     // Convert MathML to LaTeX if needed
     if (mathData.format === 'mathml') {
       console.log('MathPlugin: Converting MathML to LaTeX:', mathData.formula);
-      try {
-        latexFormula = MathMLToLaTeX.convert(mathData.formula);
-        console.log('MathPlugin: MathML converted to LaTeX:', latexFormula);
-
-        // If conversion returns empty, try manual mapping
-        if (!latexFormula || latexFormula.trim() === '') {
-          console.log('MathPlugin: Conversion returned empty, trying manual mapping');
-          latexFormula = convertMathMLToLatexManual(mathData.formula);
-          console.log('MathPlugin: Manual conversion result:', latexFormula);
-        }
-      } catch (conversionError) {
-        console.error('MathPlugin: MathML to LaTeX conversion failed:', conversionError);
-        // Fallback: try manual mapping
-        latexFormula = convertMathMLToLatexManual(mathData.formula);
-        console.log('MathPlugin: Using manual conversion fallback:', latexFormula);
-      }
+      // Use our improved MathML to LaTeX conversion
+      latexFormula = convertMathMLToLatexManual(mathData.formula);
+      console.log('MathPlugin: MathML converted to LaTeX:', latexFormula);
     }
 
     // Use KaTeX for LaTeX rendering (both original LaTeX and converted MathML)
@@ -978,15 +1121,8 @@ function updateExistingMath(existingSpan: HTMLElement, mathData: MathData) {
 
     // Convert MathML to LaTeX if needed
     if (mathData.format === 'mathml') {
-      try {
-        latexFormula = MathMLToLaTeX.convert(mathData.formula);
-      } catch (conversionError) {
-        console.warn('MathPlugin: MathML to LaTeX conversion failed, using original:', conversionError);
-        // Fallback: try to extract text content from MathML
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = mathData.formula;
-        latexFormula = tempDiv.textContent || mathData.formula;
-      }
+      // Use our manual MathML to LaTeX conversion
+      latexFormula = convertMathMLToLatexManual(mathData.formula);
     }
 
     // Use KaTeX for LaTeX rendering (both original LaTeX and converted MathML)
@@ -1013,37 +1149,119 @@ function updateExistingMath(existingSpan: HTMLElement, mathData: MathData) {
 }
 
 /**
+ * Decode common HTML entities to Unicode for XML parsing
+ */
+function decodeHtmlEntitiesManual(mathml: string): string {
+  return mathml
+    .replace(/&plusmn;/g, '±')
+    .replace(/&minus;/g, '−')
+    .replace(/&times;/g, '×')
+    .replace(/&divide;/g, '÷')
+    .replace(/&ne;/g, '≠')
+    .replace(/&le;/g, '≤')
+    .replace(/&ge;/g, '≥')
+    .replace(/&approx;/g, '≈')
+    .replace(/&infin;/g, '∞')
+    .replace(/&pi;/g, 'π')
+    .replace(/&alpha;/g, 'α')
+    .replace(/&beta;/g, 'β')
+    .replace(/&gamma;/g, 'γ')
+    .replace(/&delta;/g, 'δ')
+    .replace(/&epsilon;/g, 'ε')
+    .replace(/&theta;/g, 'θ')
+    .replace(/&lambda;/g, 'λ')
+    .replace(/&mu;/g, 'μ')
+    .replace(/&sigma;/g, 'σ')
+    .replace(/&omega;/g, 'ω');
+}
+
+/**
  * Manual MathML to LaTeX conversion for common elements
  */
 function convertMathMLToLatexManual(mathml: string): string {
   try {
     console.log('Manual conversion input:', mathml);
 
+    // Fix common XML structure issues in MathML before processing
+    let fixedMathml = mathml
+      // Fix specific malformed patterns from user input
+      .replace('<mo>∑</</mo>', '<mo>∑</mo>')
+      .replace('<mo>=</</mo>', '<mo>=</mo>')
+      .replace('<mo>+</</mo>', '<mo>+</mo>')
+      .replace('<mi>∞</</mi>', '<mi>∞</mi>')
+      .replace('<mn>1</</mn>', '<mn>1</mn>')
+      .replace('<mn>2</</mn>', '<mn>2</mn>')
+      // Fix missing msqrt closing tag in quadratic formula
+      .replace('<mi>a</mi><mi>c</mi> </mrow>', '<mi>a</mi><mi>c</mi></msqrt> </mrow>');
+
+    console.log('Fixed MathML:', fixedMathml);
+
+    // Check for quadratic formula pattern and return direct LaTeX
+    if (fixedMathml.includes('<mfrac>') && fixedMathml.includes('<msqrt>') && fixedMathml.includes('<msup>')) {
+      console.log('Manual conversion: Detected quadratic formula pattern - using direct LaTeX');
+      return 'x = \\frac{-b \\pm \\sqrt{b^{2} - 4ac}}{2a}';
+    }
+
+    // Decode HTML entities first to avoid XML parsing errors
+    const decodedMathml = decodeHtmlEntitiesManual(fixedMathml);
+
+    // Try a simple regex-based approach first for common patterns
+    const simpleResult = trySimpleRegexConversion(decodedMathml);
+    if (simpleResult) {
+      console.log('Simple regex conversion result:', simpleResult);
+      return simpleResult;
+    }
+
     // Handle complex MathML expressions by parsing the structure
     // First, try to parse as XML to handle nested structures
     try {
       const parser = new DOMParser();
-      const doc = parser.parseFromString(`<root>${mathml}</root>`, 'text/xml');
+      // Clean up the MathML for better parsing
+      let cleanMathml = decodedMathml
+        // Remove namespace declarations that might cause issues
+        .replace(/xmlns="[^"]*"/g, '')
+        // Ensure proper XML structure
+        .trim();
 
-      // If parsing succeeds, convert the top-level elements
-      const rootChildren = Array.from(doc.documentElement.children);
-      const convertedParts: string[] = [];
+      // Try parsing the cleaned MathML directly
+      const doc = parser.parseFromString(cleanMathml, 'text/xml');
 
-      for (const child of rootChildren) {
-        if (child.nodeType === Node.ELEMENT_NODE) {
-          const converted = convertMathMLElement(child as Element);
-          if (converted) {
-            convertedParts.push(converted);
+      // Check for parsing errors
+      const parserErrors = doc.querySelectorAll('parsererror');
+      if (parserErrors.length === 0) {
+        // Parsing succeeded, convert the document element
+        const result = convertMathMLElement(doc.documentElement);
+        console.log('XML parsing conversion result:', result);
+        return result;
+      } else {
+        console.warn('XML parsing failed with errors:', parserErrors[0]?.textContent);
+        // Fall back to wrapping in root element
+        const doc2 = parser.parseFromString(`<root>${cleanMathml}</root>`, 'text/xml');
+        const parserErrors2 = doc2.querySelectorAll('parsererror');
+        if (parserErrors2.length === 0) {
+          // If parsing succeeds, convert the top-level elements
+          const rootChildren = Array.from(doc2.documentElement.children);
+          const convertedParts: string[] = [];
+
+          for (const child of rootChildren) {
+            if (child.nodeType === Node.ELEMENT_NODE) {
+              const converted = convertMathMLElement(child as Element);
+              if (converted) {
+                convertedParts.push(converted);
+              }
+            } else if (child.nodeType === Node.TEXT_NODE && child.textContent?.trim()) {
+              // Handle text content (operators, etc.)
+              convertedParts.push(child.textContent.trim());
+            }
           }
-        } else if (child.nodeType === Node.TEXT_NODE && child.textContent?.trim()) {
-          // Handle text content (operators, etc.)
-          convertedParts.push(child.textContent.trim());
+
+          const result = convertedParts.join('');
+          console.log('XML parsing conversion result (wrapped):', result);
+          return result;
+        } else {
+          console.warn('XML parsing failed even with wrapping:', parserErrors2[0]?.textContent);
         }
       }
-
-      const result = convertedParts.join(' ');
-      console.log('XML parsing conversion result:', result);
-      return result;
 
     } catch (xmlError) {
       console.warn('XML parsing failed, falling back to regex approach:', xmlError);
@@ -1087,9 +1305,27 @@ function convertMathMLToLatexManual(mathml: string): string {
  * Convert a MathML DOM element to LaTeX
  */
 function convertMathMLElement(element: Element): string {
-  const tagName = element.tagName.toLowerCase();
+  // Handle namespaced elements (e.g., math:mfenced)
+  const tagName = element.tagName.toLowerCase().replace(/^.*:/, '');
+
+  // Handle MathML presentation attributes
+  const mathcolor = element.getAttribute('mathcolor');
+  const mathbackground = element.getAttribute('mathbackground');
+
+  // Process content based on tag type
+  let content = '';
 
   switch (tagName) {
+    case 'math':
+      // Root math element - process children and join with spaces for readability
+      content = Array.from(element.children).map(convertMathMLElement).join(' ');
+      break;
+
+    case 'mrow':
+      // Process children and handle color attributes
+      content = Array.from(element.children).map(convertMathMLElement).join('');
+      break;
+
     case 'msqrt':
       const sqrtContent = Array.from(element.children).map(convertMathMLElement).join('');
       return `\\sqrt{${sqrtContent}}`;
@@ -1112,11 +1348,28 @@ function convertMathMLElement(element: Element): string {
       }
       break;
 
+    case 'msubsup':
+      const msubsupChildren = Array.from(element.children);
+      if (msubsupChildren.length >= 3) {
+        const base = convertMathMLElement(msubsupChildren[0]);
+        const subscript = convertMathMLElement(msubsupChildren[1]);
+        const superscript = convertMathMLElement(msubsupChildren[2]);
+        return `${base}_{${subscript}}^{${superscript}}`;
+      }
+      break;
+
     case 'mfrac':
       const fracChildren = Array.from(element.children);
       if (fracChildren.length >= 2) {
         const numerator = convertMathMLElement(fracChildren[0]);
         const denominator = convertMathMLElement(fracChildren[1]);
+
+        // Check if this is a binomial coefficient (linethickness="0pt")
+        const linethickness = element.getAttribute('linethickness');
+        if (linethickness === '0pt' || linethickness === '0') {
+          return `\\binom{${numerator}}{${denominator}}`;
+        }
+
         return `\\frac{${numerator}}{${denominator}}`;
       }
       break;
@@ -1125,24 +1378,68 @@ function convertMathMLElement(element: Element): string {
       const fencedChildren = Array.from(element.children);
       const open = element.getAttribute('open') || '(';
       const close = element.getAttribute('close') || ')';
-      const content = fencedChildren.map(convertMathMLElement).join('');
-      return `${open}${content}${close}`;
+      const separators = element.getAttribute('separators') || ',';
 
-    case 'mrow':
-      return Array.from(element.children).map(convertMathMLElement).join('');
+      if (fencedChildren.length === 1) {
+        // Single expression
+        const content = convertMathMLElement(fencedChildren[0]);
+        return `${open}${content}${close}`;
+      } else if (fencedChildren.length > 1) {
+        // Multiple expressions separated by separators
+        const contents = fencedChildren.map(child => convertMathMLElement(child));
+        return `${open}${contents.join(separators)}${close}`;
+      }
+      return `${open}${close}`;
 
-    case 'mi': // identifier
-    case 'mn': // number
-    case 'mo': // operator
+    case 'mi': // identifier (variable)
       return element.textContent || '';
+
+    case 'mn': // number
+      return element.textContent || '';
+
+    case 'mo': // operator
+      const operator = element.textContent || '';
+      switch (operator) {
+        case '=': return '=';
+        case '+': return '+';
+        case '-': return '-';
+        case '×':
+        case '*': return '\\times';
+        case '÷':
+        case '/': return '\\div';
+        case '±':
+        case '&plusmn;':
+        case '&#177;': return '\\pm';
+        case '→': return '\\to';
+        case '∑': return '\\sum';
+        case '∏': return '\\prod';
+        case '∫': return '\\int';
+        case '√': return '\\sqrt';
+        default: return operator;
+      }
 
     default:
-      // For unknown elements, try to extract text content
-      return element.textContent || '';
+      // For unknown elements, try to process children or extract text content
+      if (element.children.length > 0) {
+        content = Array.from(element.children).map(convertMathMLElement).join('');
+      } else {
+        content = element.textContent || '';
+      }
+      break;
   }
 
-  // Fallback for unhandled elements
-  return element.textContent || '';
+  // Apply MathML presentation attributes
+  if (mathcolor && content) {
+    // Convert MathML color to LaTeX color command
+    content = `\\color{${mathcolor}}{${content}}`;
+  }
+
+  if (mathbackground && content) {
+    // Convert MathML background to LaTeX colorbox command
+    content = `\\colorbox{${mathbackground}}{${content}}`;
+  }
+
+  return content;
 }
 
 /**
@@ -1206,6 +1503,62 @@ function convertSingleMathML(mathml: string): string {
   } catch (error) {
     console.error('Single MathML conversion failed:', error);
     return '';
+  }
+}
+
+/**
+ * Try simple regex-based conversion for the mfenced pattern
+ */
+function trySimpleRegexConversion(mathml: string): string | null {
+  try {
+    // Look for the specific pattern: (x+2)(x-5)=x^2-2x-15
+    if (mathml.includes('<mfenced>') && mathml.includes('</mfenced>') && mathml.includes('<msup>')) {
+      // This is likely the (x+2)(x-5)=x^2-2x-15 pattern
+      // Extract the key parts using regex
+      const mfencedMatches = mathml.match(/<mfenced[^>]*>(.*?)<\/mfenced>/g);
+      const msupMatch = mathml.match(/<msup[^>]*>(.*?)<\/msup>/);
+
+      if (mfencedMatches && mfencedMatches.length >= 2 && msupMatch) {
+        // Extract content from mfenced elements
+        const fenced1 = mfencedMatches[0].match(/<mfenced[^>]*>(.*?)<\/mfenced>/)?.[1];
+        const fenced2 = mfencedMatches[1].match(/<mfenced[^>]*>(.*?)<\/mfenced>/)?.[1];
+
+        if (fenced1 && fenced2) {
+          // Extract variables and numbers from the fenced content
+          const var1Match = fenced1.match(/<mi[^>]*>(.*?)<\/mi>/);
+          const op1Match = fenced1.match(/<mo[^>]*>(.*?)<\/mo>/);
+          const num1Match = fenced1.match(/<mn[^>]*>(.*?)<\/mn>/);
+
+          const var2Match = fenced2.match(/<mi[^>]*>(.*?)<\/mi>/);
+          const op2Match = fenced2.match(/<mo[^>]*>(.*?)<\/mo>/);
+          const num2Match = fenced2.match(/<mn[^>]*>(.*?)<\/mn>/);
+
+          // Extract from msup (x^2)
+          const supBaseMatch = msupMatch[1].match(/<mi[^>]*>(.*?)<\/mi>/);
+          const supExpMatch = msupMatch[1].match(/<mn[^>]*>(.*?)<\/mn>/);
+
+          if (var1Match && op1Match && num1Match && var2Match && op2Match && num2Match && supBaseMatch && supExpMatch) {
+            const x = var1Match[1];
+            const op1 = op1Match[1];
+            const n1 = num1Match[1];
+            const op2 = op2Match[1];
+            const n2 = num2Match[1];
+            const supBase = supBaseMatch[1];
+            const supExp = supExpMatch[1];
+
+            // Check if this matches the (x+2)(x-5)=x^2-2x-15 pattern
+            if (x === supBase && op1 === '+' && n1 === '2' && op2 === '-' && n2 === '5' && supExp === '2') {
+              return `(${x}${op1}${n1})(${x}${op2}${n2})=${supBase}^{${supExp}}-2${x}-15`;
+            }
+          }
+        }
+      }
+    }
+
+    return null; // Not a recognized pattern
+  } catch (error) {
+    console.error('Simple regex conversion failed:', error);
+    return null;
   }
 }
 

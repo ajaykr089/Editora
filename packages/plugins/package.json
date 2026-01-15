@@ -19,7 +19,7 @@
   "dependencies": {
     "@rte-editor/core": "^1.0.0",
     "katex": "^0.16.27",
-    "mathml-to-latex": "^1.5.0"
+    "mathjax": "^3.2.2"
   },
   "devDependencies": {
     "@types/katex": "^0.16.8",
