@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { MathData } from './MathPlugin';
 import katex from 'katex';
+import { MathMLToLaTeX } from 'mathml-to-latex';
 import 'katex/dist/katex.min.css';
 
 interface MathDialogProps {
@@ -54,9 +55,20 @@ export const MathDialog: React.FC<MathDialogProps> = ({
         });
         setPreviewHtml(`<span class="math-preview">${renderedHtml}</span>`);
       } else {
-        // For MathML, we'll show the formatted XML for now
-        // In a full implementation, you'd use a MathML renderer
-        setPreviewHtml(`<span class="math-preview mathml-preview">${formulaText.replace(/</g, '<').replace(/>/g, '>')}</span>`);
+        // For MathML, render it properly if it's valid MathML
+        try {
+          // Check if it looks like valid MathML (starts with <math>)
+          if (formulaText.trim().startsWith('<math')) {
+            // Render as actual MathML
+            setPreviewHtml(`<span class="math-preview mathml-preview">${formulaText}</span>`);
+          } else {
+            // Show as formatted XML for debugging
+            setPreviewHtml(`<span class="math-preview mathml-preview mathml-xml">${formulaText.replace(/</g, '<').replace(/>/g, '>')}</span>`);
+          }
+        } catch (error) {
+          // Fallback to formatted XML
+          setPreviewHtml(`<span class="math-preview mathml-preview mathml-xml">${formulaText.replace(/</g, '<').replace(/>/g, '>')}</span>`);
+        }
       }
     } catch (error) {
       console.error('Math preview error:', error);

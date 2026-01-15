@@ -1,5 +1,6 @@
 import { Plugin } from '@rte-editor/core';
 import katex from 'katex';
+import { MathMLToLaTeX } from 'mathml-to-latex';
 
 /**
  * Math Plugin for Rich Text Editor
@@ -86,9 +87,33 @@ function applyMathToSelection(mathData: MathData) {
   mathSpan.setAttribute('data-math-inline', mathData.inline.toString());
   mathSpan.setAttribute('contenteditable', 'false'); // Make it non-editable
 
-  // Render the math formula using KaTeX
+  // Render the math formula
   try {
-    const renderedHtml = katex.renderToString(mathData.formula, {
+    let latexFormula = mathData.formula;
+
+    // Convert MathML to LaTeX if needed
+    if (mathData.format === 'mathml') {
+      console.log('MathPlugin: Converting MathML to LaTeX:', mathData.formula);
+      try {
+        latexFormula = MathMLToLaTeX.convert(mathData.formula);
+        console.log('MathPlugin: MathML converted to LaTeX:', latexFormula);
+
+        // If conversion returns empty, try manual mapping
+        if (!latexFormula || latexFormula.trim() === '') {
+          console.log('MathPlugin: Conversion returned empty, trying manual mapping');
+          latexFormula = convertMathMLToLatexManual(mathData.formula);
+          console.log('MathPlugin: Manual conversion result:', latexFormula);
+        }
+      } catch (conversionError) {
+        console.error('MathPlugin: MathML to LaTeX conversion failed:', conversionError);
+        // Fallback: try manual mapping
+        latexFormula = convertMathMLToLatexManual(mathData.formula);
+        console.log('MathPlugin: Using manual conversion fallback:', latexFormula);
+      }
+    }
+
+    // Use KaTeX for LaTeX rendering (both original LaTeX and converted MathML)
+    const renderedHtml = katex.renderToString(latexFormula, {
       displayMode: false, // inline mode
       throwOnError: false,
       errorColor: '#cc0000'
@@ -103,9 +128,9 @@ function applyMathToSelection(mathData: MathData) {
       mathSpan.appendChild(tempDiv.firstChild);
     }
   } catch (error) {
-    console.error('MathPlugin: KaTeX rendering failed:', error);
-    // Fallback to placeholder text if KaTeX fails
-    const fallbackText = `[Math: ${mathData.formula.substring(0, 20)}${mathData.formula.length > 20 ? '...' : ''}]`;
+    console.error('MathPlugin: Rendering failed:', error);
+    // Fallback to placeholder text
+    const fallbackText = `[${mathData.format.toUpperCase()}: ${mathData.formula.substring(0, 20)}${mathData.formula.length > 20 ? '...' : ''}]`;
     mathSpan.textContent = fallbackText;
   }
 
@@ -179,9 +204,25 @@ function updateExistingMath(existingSpan: HTMLElement, mathData: MathData) {
   existingSpan.setAttribute('data-math-format', mathData.format);
   existingSpan.setAttribute('data-math-inline', mathData.inline.toString());
 
-  // Render the new math formula using KaTeX
+  // Render the new math formula
   try {
-    const renderedHtml = katex.renderToString(mathData.formula, {
+    let latexFormula = mathData.formula;
+
+    // Convert MathML to LaTeX if needed
+    if (mathData.format === 'mathml') {
+      try {
+        latexFormula = MathMLToLaTeX.convert(mathData.formula);
+      } catch (conversionError) {
+        console.warn('MathPlugin: MathML to LaTeX conversion failed, using original:', conversionError);
+        // Fallback: try to extract text content from MathML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = mathData.formula;
+        latexFormula = tempDiv.textContent || mathData.formula;
+      }
+    }
+
+    // Use KaTeX for LaTeX rendering (both original LaTeX and converted MathML)
+    const renderedHtml = katex.renderToString(latexFormula, {
       displayMode: false, // inline mode
       throwOnError: false,
       errorColor: '#cc0000'
@@ -196,11 +237,217 @@ function updateExistingMath(existingSpan: HTMLElement, mathData: MathData) {
       existingSpan.appendChild(tempDiv.firstChild);
     }
   } catch (error) {
-    console.error('MathPlugin: KaTeX rendering failed:', error);
-    // Fallback to placeholder text if KaTeX fails
-    const fallbackText = `[Math: ${mathData.formula.substring(0, 20)}${mathData.formula.length > 20 ? '...' : ''}]`;
+    console.error('MathPlugin: Rendering failed:', error);
+    // Fallback to placeholder text
+    const fallbackText = `[${mathData.format.toUpperCase()}: ${mathData.formula.substring(0, 20)}${mathData.formula.length > 20 ? '...' : ''}]`;
     existingSpan.textContent = fallbackText;
   }
+}
+
+/**
+ * Manual MathML to LaTeX conversion for common elements
+ */
+function convertMathMLToLatexManual(mathml: string): string {
+  try {
+    console.log('Manual conversion input:', mathml);
+
+    // Handle complex MathML expressions by parsing the structure
+    // First, try to parse as XML to handle nested structures
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(`<root>${mathml}</root>`, 'text/xml');
+
+      // If parsing succeeds, convert the top-level elements
+      const rootChildren = Array.from(doc.documentElement.children);
+      const convertedParts: string[] = [];
+
+      for (const child of rootChildren) {
+        if (child.nodeType === Node.ELEMENT_NODE) {
+          const converted = convertMathMLElement(child as Element);
+          if (converted) {
+            convertedParts.push(converted);
+          }
+        } else if (child.nodeType === Node.TEXT_NODE && child.textContent?.trim()) {
+          // Handle text content (operators, etc.)
+          convertedParts.push(child.textContent.trim());
+        }
+      }
+
+      const result = convertedParts.join(' ');
+      console.log('XML parsing conversion result:', result);
+      return result;
+
+    } catch (xmlError) {
+      console.warn('XML parsing failed, falling back to regex approach:', xmlError);
+    }
+
+    // Fallback: Simple regex-based approach for basic cases
+    const parts = mathml.trim().split(/\s+/);
+    console.log('Fallback parsed parts:', parts);
+
+    const convertedParts: string[] = [];
+
+    for (const part of parts) {
+      if (part.startsWith('<') && part.includes('</')) {
+        // This looks like complete MathML, try to convert it
+        const converted = convertSingleMathML(part);
+        if (converted) {
+          convertedParts.push(converted);
+        } else {
+          convertedParts.push(extractTextContent(part));
+        }
+      } else {
+        // This is plain text (like operators +, -, etc.)
+        convertedParts.push(part);
+      }
+    }
+
+    const result = convertedParts.join(' ');
+    console.log('Manual conversion result:', result);
+    return result;
+
+  } catch (error) {
+    console.error('Manual MathML conversion failed:', error);
+    // Extract text content as final fallback
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = mathml;
+    return tempDiv.textContent || mathml;
+  }
+}
+
+/**
+ * Convert a MathML DOM element to LaTeX
+ */
+function convertMathMLElement(element: Element): string {
+  const tagName = element.tagName.toLowerCase();
+
+  switch (tagName) {
+    case 'msqrt':
+      const sqrtContent = Array.from(element.children).map(convertMathMLElement).join('');
+      return `\\sqrt{${sqrtContent}}`;
+
+    case 'msup':
+      const supChildren = Array.from(element.children);
+      if (supChildren.length >= 2) {
+        const base = convertMathMLElement(supChildren[0]);
+        const exponent = convertMathMLElement(supChildren[1]);
+        return `${base}^{${exponent}}`;
+      }
+      break;
+
+    case 'msub':
+      const subChildren = Array.from(element.children);
+      if (subChildren.length >= 2) {
+        const base = convertMathMLElement(subChildren[0]);
+        const subscript = convertMathMLElement(subChildren[1]);
+        return `${base}_{${subscript}}`;
+      }
+      break;
+
+    case 'mfrac':
+      const fracChildren = Array.from(element.children);
+      if (fracChildren.length >= 2) {
+        const numerator = convertMathMLElement(fracChildren[0]);
+        const denominator = convertMathMLElement(fracChildren[1]);
+        return `\\frac{${numerator}}{${denominator}}`;
+      }
+      break;
+
+    case 'mfenced':
+      const fencedChildren = Array.from(element.children);
+      const open = element.getAttribute('open') || '(';
+      const close = element.getAttribute('close') || ')';
+      const content = fencedChildren.map(convertMathMLElement).join('');
+      return `${open}${content}${close}`;
+
+    case 'mrow':
+      return Array.from(element.children).map(convertMathMLElement).join('');
+
+    case 'mi': // identifier
+    case 'mn': // number
+    case 'mo': // operator
+      return element.textContent || '';
+
+    default:
+      // For unknown elements, try to extract text content
+      return element.textContent || '';
+  }
+
+  // Fallback for unhandled elements
+  return element.textContent || '';
+}
+
+/**
+ * Convert a single MathML expression
+ */
+function convertSingleMathML(mathml: string): string {
+  try {
+    // Simple regex-based conversion for common patterns
+    let result = mathml;
+
+    // Handle fractions: <mfrac><mi>a</mi><mi>b</mi></mfrac> -> \frac{a}{b}
+    result = result.replace(/<mfrac[^>]*>(.*?)<\/mfrac>/gi, (match, content) => {
+      // Extract numerator and denominator
+      const numMatch = content.match(/<m[i|n][^>]*>(.*?)<\/m[i|n]>/i);
+      const denomMatch = content.match(/<m[i|n][^>]*>(.*?)<\/m[i|n]>(.*)/i);
+
+      if (numMatch && denomMatch) {
+        const numerator = numMatch[1];
+        // Get the second match which should be the denominator
+        const remaining = content.replace(numMatch[0], '');
+        const denomMatch2 = remaining.match(/<m[i|n][^>]*>(.*?)<\/m[i|n]>/i);
+        if (denomMatch2) {
+          const denominator = denomMatch2[1];
+          return `\\frac{${numerator}}{${denominator}}`;
+        }
+      }
+      return match;
+    });
+
+    // Handle square roots: <msqrt><mi>x</mi></msqrt> -> \sqrt{x}
+    result = result.replace(/<msqrt[^>]*>(.*?)<\/msqrt>/gi, (match, content) => {
+      // Extract the content inside msqrt
+      const innerMatch = content.match(/<m[i|n][^>]*>(.*?)<\/m[i|n]>/i);
+      if (innerMatch) {
+        return `\\sqrt{${innerMatch[1]}}`;
+      }
+      return match;
+    });
+
+    // Handle superscripts: <msup><mi>x</mi><mn>2</mn></msup> -> x^{2}
+    result = result.replace(/<msup[^>]*>(.*?)<\/msup>/gi, (match, content) => {
+      const baseMatch = content.match(/<m[i|n][^>]*>(.*?)<\/m[i|n]>/i);
+      if (baseMatch) {
+        const remaining = content.replace(baseMatch[0], '');
+        const expMatch = remaining.match(/<m[i|n][^>]*>(.*?)<\/m[i|n]>/i);
+        if (expMatch) {
+          return `${baseMatch[1]}^{${expMatch[1]}}`;
+        }
+      }
+      return match;
+    });
+
+    // If we successfully converted something, clean up remaining tags
+    if (result !== mathml) {
+      result = result.replace(/<[^>]+>/g, '');
+      return result;
+    }
+
+    return ''; // Return empty if no conversion happened
+
+  } catch (error) {
+    console.error('Single MathML conversion failed:', error);
+    return '';
+  }
+}
+
+/**
+ * Extract text content from MathML as fallback
+ */
+function extractTextContent(mathml: string): string {
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = mathml;
+  return tempDiv.textContent || mathml;
 }
 
 /**
