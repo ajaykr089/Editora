@@ -856,7 +856,7 @@ function applyMathToSelection(mathData: MathData) {
 
     // Use KaTeX for LaTeX rendering (both original LaTeX and converted MathML)
     const renderedHtml = katex.renderToString(latexFormula, {
-      displayMode: false, // inline mode
+      displayMode: !mathData.inline, // block mode for !inline, inline mode for inline
       throwOnError: false,
       errorColor: '#cc0000'
     }).replace('aria-hidden="true"', ''); // Remove aria-hidden to ensure visibility
@@ -878,6 +878,8 @@ function applyMathToSelection(mathData: MathData) {
 
   // For inline math, use a span wrapper
   // For block math, replace the entire paragraph
+  let insertedElement: HTMLElement | null = null;
+
   if (mathData.inline) {
     // Use insertHTML command for safe insertion of complex HTML
     const selection = window.getSelection();
@@ -886,6 +888,7 @@ function applyMathToSelection(mathData: MathData) {
 
       // Insert the math span at the cursor position
       range.insertNode(mathSpan);
+      insertedElement = mathSpan;
 
       // Move cursor after the inserted math
       range.setStartAfter(mathSpan);
@@ -904,9 +907,18 @@ function applyMathToSelection(mathData: MathData) {
       mathBlock.setAttribute('data-math-format', mathData.format);
       mathBlock.setAttribute('data-math-inline', 'false');
 
-      // Render the block math formula using KaTeX
+      // Convert MathML to LaTeX if needed, then render using KaTeX
       try {
-        const renderedHtml = katex.renderToString(mathData.formula, {
+        let latexFormula = mathData.formula;
+
+        // Convert MathML to LaTeX if needed
+        if (mathData.format === 'mathml') {
+          console.log('MathPlugin: Converting MathML to LaTeX for block mode:', mathData.formula);
+          latexFormula = convertMathMLToLatexManual(mathData.formula);
+          console.log('MathPlugin: MathML converted to LaTeX for block mode:', latexFormula);
+        }
+
+        const renderedHtml = katex.renderToString(latexFormula, {
           displayMode: true, // block/display mode
           throwOnError: false,
           errorColor: '#cc0000'
@@ -919,18 +931,24 @@ function applyMathToSelection(mathData: MathData) {
       }
 
       blockElement.parentNode?.replaceChild(mathBlock, blockElement);
+      insertedElement = mathBlock;
     }
   }
 
-  // Restore selection to after the inserted math
-  try {
-    const newRange = document.createRange();
-    newRange.setStartAfter(mathSpan);
-    newRange.setEndAfter(mathSpan);
-    selection.removeAllRanges();
-    selection.addRange(newRange);
-  } catch (error) {
-    console.error('MathPlugin: Error restoring selection:', error);
+  // Restore selection to after the inserted math (only for inline mode)
+  if (mathData.inline && insertedElement) {
+    try {
+      const newRange = document.createRange();
+      newRange.setStartAfter(insertedElement);
+      newRange.setEndAfter(insertedElement);
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+      }
+    } catch (error) {
+      console.error('MathPlugin: Error restoring selection:', error);
+    }
   }
 }
 
