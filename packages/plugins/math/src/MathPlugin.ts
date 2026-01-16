@@ -900,12 +900,14 @@ function applyMathToSelection(mathData: MathData) {
     // For block math, replace the entire block element
     const blockElement = findBlockAncestor(range.commonAncestorContainer);
     if (blockElement) {
-      // Create a block math div
+      // Create a block math div using the same logic as createMathElement
       const mathBlock = document.createElement('div');
-      mathBlock.className = 'math-block';
+      mathBlock.className = 'math-node math-block'; // Use math-node class for selection manager
       mathBlock.setAttribute('data-math-formula', mathData.formula);
       mathBlock.setAttribute('data-math-format', mathData.format);
       mathBlock.setAttribute('data-math-inline', 'false');
+      mathBlock.setAttribute('contenteditable', 'false'); // Make it non-editable
+      mathBlock.setAttribute('role', 'math');
 
       // Convert MathML to LaTeX if needed, then render using KaTeX
       try {
@@ -922,7 +924,7 @@ function applyMathToSelection(mathData: MathData) {
           displayMode: true, // block/display mode
           throwOnError: false,
           errorColor: '#cc0000'
-        });
+        }).replace('aria-hidden="true"', ''); // Remove aria-hidden for accessibility
         mathBlock.innerHTML = renderedHtml;
       } catch (error) {
         console.error('MathPlugin: KaTeX block rendering failed:', error);
