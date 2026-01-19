@@ -108,17 +108,53 @@ class MathSelectionManager {
     }
   }
 
+
   private handleClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-    const mathElement = target.closest('.math-node') as HTMLElement;
+    
+    const mathElement = target.closest(".math-formula") as HTMLElement;
 
-    if (mathElement) {
-      // Select the entire math element
-      const selection = window.getSelection();
-      const range = document.createRange();
-      range.selectNodeContents(mathElement);
-      selection?.removeAllRanges();
-      selection?.addRange(range);
+    if (mathElement && mathElement.parentElement) {
+      console.log("MathSelectionManager: Click event on", target);
+
+      //  const forceCaret = (element: any) => {
+      //    if (!element.textContent) {
+      //      element.textContent = "\u200b"; // Add zero-width space
+      //      // Use JavaScript Range API to set the cursor position after adding the space
+      //      const range = document.createRange();
+      //      const selection = window.getSelection();
+      //      range.setStart(element.childNodes[0], 1); // Position after the space
+      //      range.collapse(true);
+      //      selection?.removeAllRanges();
+      //      selection?.addRange(range);
+      //    }
+      //  };
+
+      // const currentlyFocusedElement = document.activeElement;
+      // console.log(currentlyFocusedElement);
+
+      //setTimeout(() => {
+        mathElement.parentElement.textContent = "\u200b"; // Add zero-width space
+        // Use JavaScript Range API to set the cursor position after adding the space
+        const range = document.createRange();
+        const selection = window.getSelection();
+        range.setStart(mathElement.parentElement.childNodes[0], 1); // Position after the space
+        range.collapse(true);
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+
+        mathElement.parentElement?.focus(); // Call focus again after 100ms
+      //}, 100);
+
+      // mathElement?.parentElement?.addEventListener("focusin", () =>
+      //   forceCaret(mathElement.parentElement)
+      // );
+      // // Select the entire math element
+      // const selection = window.getSelection();
+      // const range = document.createRange();
+      // range.selectNodeContents(mathElement);
+      // selection?.removeAllRanges();
+      // selection?.addRange(range);
     }
   }
 
@@ -600,7 +636,7 @@ function generateMathId(): string {
 }
 
 function createMathElement(node: MathNode): HTMLElement {
-  const element = document.createElement(node.type === 'inline' ? 'span' : 'div');
+  const element = document.createElement('span');
   element.className = `math-node math-${node.type}`;
   element.setAttribute('data-math-id', node.id);
   element.setAttribute('data-math-format', node.format);
@@ -859,10 +895,10 @@ function applyMathToSelection(mathData: MathData) {
       displayMode: !mathData.inline, // block mode for !inline, inline mode for inline
       throwOnError: false,
       errorColor: '#cc0000'
-    }).replace('aria-hidden="true"', ''); // Remove aria-hidden to ensure visibility
+    }); // Remove aria-hidden to ensure visibility
 
     // Instead of innerHTML, create a temporary element and append its children
-    const tempDiv = document.createElement('div');
+    const tempDiv = document.createElement('span');
     tempDiv.innerHTML = renderedHtml;
 
     // Append the KaTeX elements to our math span
@@ -897,48 +933,29 @@ function applyMathToSelection(mathData: MathData) {
       selection.addRange(range);
     }
   } else {
-    // For block math, replace the entire block element
-    const blockElement = findBlockAncestor(range.commonAncestorContainer);
-    if (blockElement) {
-      // Create a block math div using the same logic as createMathElement
-      const mathBlock = document.createElement('div');
-      mathBlock.className = 'math-node math-block'; // Use math-node class for selection manager
-      mathBlock.setAttribute('data-math-formula', mathData.formula);
-      mathBlock.setAttribute('data-math-format', mathData.format);
-      mathBlock.setAttribute('data-math-inline', 'false');
-      mathBlock.setAttribute('contenteditable', 'false'); // Make it non-editable
-      mathBlock.setAttribute('role', 'math');
+    mathSpan.style.display = 'block';
+    const pElement = document.createElement("p");
+    pElement.innerHTML = mathSpan.outerHTML;
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
 
-      // Convert MathML to LaTeX if needed, then render using KaTeX
-      try {
-        let latexFormula = mathData.formula;
+      // Insert the math span at the cursor position
+      range.insertNode(pElement);
+      insertedElement = pElement;
 
-        // Convert MathML to LaTeX if needed
-        if (mathData.format === 'mathml') {
-          console.log('MathPlugin: Converting MathML to LaTeX for block mode:', mathData.formula);
-          latexFormula = convertMathMLToLatexManual(mathData.formula);
-          console.log('MathPlugin: MathML converted to LaTeX for block mode:', latexFormula);
-        }
-
-        const renderedHtml = katex.renderToString(latexFormula, {
-          displayMode: true, // block/display mode
-          throwOnError: false,
-          errorColor: '#cc0000'
-        }).replace('aria-hidden="true"', ''); // Remove aria-hidden for accessibility
-        mathBlock.innerHTML = renderedHtml;
-      } catch (error) {
-        console.error('MathPlugin: KaTeX block rendering failed:', error);
-        // Fallback to placeholder text if KaTeX fails
-        mathBlock.textContent = `[Math Block: ${mathData.formula.substring(0, 30)}${mathData.formula.length > 30 ? '...' : ''}]`;
-      }
-
-      blockElement.parentNode?.replaceChild(mathBlock, blockElement);
-      insertedElement = mathBlock;
+      // Move cursor after the inserted math
+      range.setStartAfter(pElement);
+      range.setEndAfter(pElement);
+      selection.removeAllRanges();
+      selection.addRange(range);
     }
+
+    console.log("MathPlugin: block math inserted.");
   }
 
   // Restore selection to after the inserted math (only for inline mode)
-  if (mathData.inline && insertedElement) {
+  if (insertedElement) {
     try {
       const newRange = document.createRange();
       newRange.setStartAfter(insertedElement);
@@ -960,11 +977,11 @@ function applyMathToSelection(mathData: MathData) {
 function updateExistingMath(existingSpan: HTMLElement, mathData: MathData) {
   // Clear existing content
   existingSpan.innerHTML = '';
-
   // Update data attributes
   existingSpan.setAttribute('data-math-formula', mathData.formula);
   existingSpan.setAttribute('data-math-format', mathData.format);
   existingSpan.setAttribute('data-math-inline', mathData.inline.toString());
+  existingSpan.style.display = mathData.inline ? 'inline-block' : 'block';
 
   // Render the new math formula
   try {
@@ -981,10 +998,10 @@ function updateExistingMath(existingSpan: HTMLElement, mathData: MathData) {
       displayMode: false, // inline mode
       throwOnError: false,
       errorColor: '#cc0000'
-    }).replace('aria-hidden="true"', ''); // Remove aria-hidden to ensure visibility
+    }); // Remove aria-hidden to ensure visibility
 
     // Instead of innerHTML, create a temporary element and append its children
-    const tempDiv = document.createElement('div');
+    const tempDiv = document.createElement('span');
     tempDiv.innerHTML = renderedHtml;
 
     // Append the KaTeX elements to the existing span
