@@ -39,15 +39,39 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
       const range = selection.getRangeAt(0);
       const selectedText = selection.toString().trim();
 
+      // Check if the selection is within the editor content
+      const editorElement = document.querySelector('.rte-content');
+      if (!editorElement || !editorElement.contains(range.commonAncestorContainer)) {
+        setIsVisible(false);
+        selectionRef.current = null;
+        return;
+      }
+
       // Only show toolbar if there's actual text selected (not just whitespace)
       if (selectedText.length > 0) {
         const rect = range.getBoundingClientRect();
-        const editorRect = document.querySelector('.rte-content')?.getBoundingClientRect();
+        const editorRect = editorElement.getBoundingClientRect();
+        const toolbarWidth = 300; // Approximate width of floating toolbar
 
         if (rect && editorRect) {
           // Position above the selection, centered horizontally
           const top = rect.top - 50; // 50px above selection
-          const left = rect.left + (rect.width / 2);
+          let left = rect.left + (rect.width / 2);
+
+          // Ensure toolbar stays within editor bounds
+          const toolbarHalfWidth = toolbarWidth / 2;
+          const editorLeft = editorRect.left;
+          const editorRight = editorRect.right;
+
+          // If toolbar would overflow left edge, position it at the left edge + padding
+          if (left - toolbarHalfWidth < editorLeft) {
+            left = editorLeft + toolbarHalfWidth + 10; // 10px padding from edge
+          }
+
+          // If toolbar would overflow right edge, position it at the right edge - padding
+          if (left + toolbarHalfWidth > editorRight) {
+            left = editorRight - toolbarHalfWidth - 10; // 10px padding from edge
+          }
 
           setPosition({ top, left });
 
