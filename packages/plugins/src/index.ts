@@ -26,8 +26,7 @@ export { BackgroundColorPlugin } from '../background-color/src/index';
 export { SpecialCharactersPlugin } from '../special-characters/src/index';
 export { EmojisPlugin } from '../emojis/src/index';
 export { LineHeightPlugin } from '../line-height/src/index';
-export { DecreaseIndentPlugin } from '../decrease-indent/src/index';
-export { IncreaseIndentPlugin } from '../increase-indent/src/index';
+export { IndentPlugin } from '../indent/src/index';
 export { EmbedIframePlugin } from '../embed-iframe/src/index';
 
 // Shared API configuration for all plugins

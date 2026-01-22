@@ -3,7 +3,7 @@ import { Plugin } from '@rte-editor/core';
 export const LineHeightPlugin = (): Plugin => ({
   name: 'lineHeight',
   toolbar: [{
-    type: 'dropdown',
+    type: 'inline-menu',
     label: 'Line Height',
     command: 'setLineHeight',
     options: [

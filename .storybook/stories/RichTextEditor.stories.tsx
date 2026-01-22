@@ -25,8 +25,7 @@ import {
   SpecialCharactersPlugin,
   EmojisPlugin,
   LineHeightPlugin,
-  DecreaseIndentPlugin,
-  IncreaseIndentPlugin,
+  IndentPlugin,
   EmbedIframePlugin,
 } from "@rte-editor/plugins";
 import "@rte-editor/themes/themes/default.css";
@@ -69,8 +68,7 @@ export const Default: Story = {
       SpecialCharactersPlugin(),
       EmojisPlugin(),
       LineHeightPlugin(),
-      DecreaseIndentPlugin(),
-      IncreaseIndentPlugin(),
+      IndentPlugin(),
       EmbedIframePlugin(),
     ],
     mediaConfig: {

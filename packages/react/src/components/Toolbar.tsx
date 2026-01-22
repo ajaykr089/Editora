@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Editor } from '@rte-editor/core';
 import { ToolbarItem } from '@rte-editor/core';
 import { EditorIcons, EditorIconName } from './EditorIcons';
+import { InlineMenu, InlineMenuOption } from './InlineMenu';
 
 interface ToolbarProps {
   editor: Editor;
@@ -11,8 +12,17 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   editor
 }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [openInlineMenu, setOpenInlineMenu] = useState<string | null>(null);
   const [storedSelection, setStoredSelection] = useState<Range | null>(null);
+  const buttonRefs = useRef<Record<string, React.RefObject<HTMLButtonElement>>>({});
   const items = editor.pluginManager.getToolbarItems();
+
+  const getButtonRef = (command: string) => {
+    if (!buttonRefs.current[command]) {
+      buttonRefs.current[command] = React.createRef<HTMLButtonElement>();
+    }
+    return buttonRefs.current[command];
+  };
 
   const handleCommand = (command: string, value?: string) => {
     console.log(`Executing command: ${command} with value: ${value}`);
@@ -21,7 +31,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       contentEl.focus();
     }
 
-    // Restore stored selection if available (for dropdown commands)
+    // Restore stored selection if available (for dropdown and inline-menu commands that need selection)
     if (storedSelection && (command === 'setTextAlignment' || command === 'setFontFamily')) {
       const selection = window.getSelection();
       if (selection) {
@@ -49,6 +59,31 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       setStoredSelection(selection.getRangeAt(0).cloneRange());
     }
     setOpenDropdown(openDropdown === command ? null : command);
+  };
+
+  const handleInlineMenuOpen = (command: string) => {
+    // Store current selection when opening inline menu
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      setStoredSelection(selection.getRangeAt(0).cloneRange());
+    }
+    setOpenInlineMenu(openInlineMenu === command ? null : command);
+    setOpenDropdown(null); // Close any open dropdowns
+  };
+
+  const handleInlineMenuSelect = (command: string, value: string) => {
+    // Restore stored selection if available
+    if (storedSelection) {
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(storedSelection);
+      }
+      setStoredSelection(null);
+    }
+
+    handleCommand(command, value);
+    setOpenInlineMenu(null);
   };
 
   const renderIcon = (iconName?: string, command?: string) => {
@@ -98,55 +133,75 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   };
 
   return (
-    <div className="rte-toolbar">
-      {items.map((item, idx) => (
-        <div key={idx} className="rte-toolbar-item">
-          {item.type === 'dropdown' ? (
-            <div className="rte-toolbar-dropdown">
+    <>
+      <div className="rte-toolbar">
+        {items.map((item, idx) => (
+          <div key={idx} className="rte-toolbar-item">
+            {item.type === 'dropdown' ? (
+              <div className="rte-toolbar-dropdown">
+                <button
+                  className="rte-toolbar-button"
+                  onClick={() => handleDropdownOpen(item.command)}
+                >
+                  {item.label} ▼
+                </button>
+                {openDropdown === item.command && (
+                  <div className="rte-toolbar-dropdown-menu">
+                    {item.options?.map((opt) => (
+                      <div
+                        key={opt.value}
+                        className="rte-toolbar-dropdown-item"
+                        onClick={() => handleCommand(item.command, opt.value)}
+                      >
+                        {opt.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : item.type === 'inline-menu' ? (
+              <div className="rte-toolbar-inline-menu">
+                <button
+                  ref={getButtonRef(item.command)}
+                  className="rte-toolbar-button"
+                  onClick={() => handleInlineMenuOpen(item.command)}
+                  title={item.label}
+                >
+                  {renderIcon(item.icon, item.command)}
+                </button>
+                <InlineMenu
+                  isOpen={openInlineMenu === item.command}
+                  options={item.options || []}
+                  onSelect={(value) => handleInlineMenuSelect(item.command, value)}
+                  onClose={() => setOpenInlineMenu(null)}
+                  anchorRef={getButtonRef(item.command)}
+                />
+              </div>
+            ) : item.type === 'input' ? (
+              <input
+                type="text"
+                className="rte-toolbar-input"
+                placeholder={item.placeholder}
+                onChange={(e) => handleCommand(item.command, e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleCommand(item.command, (e.target as HTMLInputElement).value);
+                  }
+                }}
+                title={item.label}
+              />
+            ) : (
               <button
                 className="rte-toolbar-button"
-                onClick={() => handleDropdownOpen(item.command)}
+                onClick={() => handleCommand(item.command)}
+                title={item.label}
               >
-                {item.label} ▼
+                {renderIcon(item.icon, item.command)}
               </button>
-              {openDropdown === item.command && (
-                <div className="rte-toolbar-dropdown-menu">
-                  {item.options?.map((opt) => (
-                    <div
-                      key={opt.value}
-                      className="rte-toolbar-dropdown-item"
-                      onClick={() => handleCommand(item.command, opt.value)}
-                    >
-                      {opt.label}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : item.type === 'input' ? (
-            <input
-              type="text"
-              className="rte-toolbar-input"
-              placeholder={item.placeholder}
-              onChange={(e) => handleCommand(item.command, e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleCommand(item.command, (e.target as HTMLInputElement).value);
-                }
-              }}
-              title={item.label}
-            />
-          ) : (
-            <button
-              className="rte-toolbar-button"
-              onClick={() => handleCommand(item.command)}
-              title={item.label}
-            >
-              {renderIcon(item.icon, item.command)}
-            </button>
-          )}
-        </div>
-      ))}
-    </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </>
   );
 };

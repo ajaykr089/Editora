@@ -1,1 +1,0 @@
-export { DecreaseIndentPlugin } from './DecreaseIndentPlugin';

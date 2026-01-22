@@ -14,8 +14,8 @@ import { ListPluginProvider } from '../../../plugins/list/src/ListPluginProvider
 import { BlockquotePluginProvider } from '../../../plugins/blockquote/src/BlockquotePluginProvider';
 import { ClearFormattingPluginProvider } from '../../../plugins/clear-formatting/src/ClearFormattingPluginProvider';
 import { HistoryPluginProvider } from '../../../plugins/history/src/HistoryPluginProvider';
-import { DecreaseIndentPluginProvider } from '../../../plugins/decrease-indent/src/DecreaseIndentPluginProvider';
-import { IncreaseIndentPluginProvider } from '../../../plugins/increase-indent/src/IncreaseIndentPluginProvider';
+
+import { IndentPluginProvider } from '../../../plugins/indent/src/IndentPluginProvider';
 import { TableProvider } from '../../../plugins/table/src/TableProvider';
 import { LinkProvider } from '../../../plugins/link/src/LinkProvider';
 import { MediaProvider } from '../../../plugins/media-manager/src/MediaProvider';
@@ -83,8 +83,7 @@ const EditorCore: React.FC<RichTextEditorProps> = ({ plugins, className, mediaCo
                 <BlockquotePluginProvider>
                   <ClearFormattingPluginProvider>
                     <HistoryPluginProvider>
-                      <DecreaseIndentPluginProvider>
-                        <IncreaseIndentPluginProvider>
+                        <IndentPluginProvider>
                           <TableProvider>
                             <LinkProvider>
                               <MediaProvider>
@@ -123,8 +122,7 @@ const EditorCore: React.FC<RichTextEditorProps> = ({ plugins, className, mediaCo
                               </MediaProvider>
                             </LinkProvider>
                           </TableProvider>
-                        </IncreaseIndentPluginProvider>
-                      </DecreaseIndentPluginProvider>
+                        </IndentPluginProvider>
                     </HistoryPluginProvider>
                   </ClearFormattingPluginProvider>
                 </BlockquotePluginProvider>

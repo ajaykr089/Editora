@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import { setTextAlignmentCommand } from './TextAlignmentPlugin';
 
 interface TextAlignmentProviderProps {
   children: ReactNode;
@@ -8,9 +9,7 @@ export const TextAlignmentProvider: React.FC<TextAlignmentProviderProps> = ({ ch
   React.useEffect(() => {
     // Register commands with global system
     if (typeof window !== 'undefined') {
-      (window as any).registerEditorCommand?.('setTextAlignment', (alignment: string) => {
-        console.log('Set text alignment command triggered', alignment);
-      });
+      (window as any).registerEditorCommand?.('setTextAlignment', setTextAlignmentCommand);
     }
   }, []);
 

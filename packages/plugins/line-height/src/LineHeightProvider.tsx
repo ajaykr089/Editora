@@ -23,72 +23,97 @@ export const LineHeightProvider: React.FC<LineHeightProviderProps> = ({ children
 };
 
 /**
- * Line Height Commands - Uses DOM manipulation for line height application
+ * Line Height Commands - Applies line height to the currently selected paragraph
  */
 
 // Set line height command
 const setLineHeightCommand = (lineHeight?: string) => {
   if (!lineHeight) return;
 
-  applyLineHeightToSelection(lineHeight);
-};
-
-// Helper function to apply line height to current selection
-function applyLineHeightToSelection(lineHeight: string) {
+  // Store the current selection before any operations
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return;
 
-  const range = selection.getRangeAt(0);
+  const savedRange = selection.getRangeAt(0).cloneRange();
 
-  // If there's no actual selection (just cursor), apply to future text
-  if (range.collapsed) {
-    return; // Can't apply line height to collapsed selection
-  }
+  // Apply line height
+  applyLineHeightToCurrentParagraph(lineHeight, savedRange);
+};
 
-  // Check if the entire selection is within a single line-height span
-  const commonAncestor = range.commonAncestorContainer;
-  const lineHeightSpan = findLineHeightSpanAncestor(commonAncestor);
+// Helper function to apply line height to the currently selected paragraph(s)
+function applyLineHeightToCurrentParagraph(lineHeight: string, savedRange: Range) {
+  const paragraphs = getParagraphsInRange(savedRange);
 
-  if (lineHeightSpan && isSelectionEntirelyWithinSpan(range, lineHeightSpan)) {
-    // Update existing span's line-height
-    lineHeightSpan.style.lineHeight = lineHeight;
-
-    // Restore selection
-    const newRange = document.createRange();
-    newRange.selectNodeContents(lineHeightSpan);
-    selection.removeAllRanges();
-    selection.addRange(newRange);
-  } else {
-    // Create new span wrapper
-    const span = document.createElement('span');
-    span.style.lineHeight = lineHeight;
-
-    // Wrap the selected content
-    try {
-      range.surroundContents(span);
-    } catch (e) {
-      // surroundContents fails if the range spans multiple elements
-      const contents = range.extractContents();
-      span.appendChild(contents);
-      range.insertNode(span);
+  paragraphs.forEach(paragraph => {
+    if (paragraph) {
+      paragraph.style.lineHeight = lineHeight;
     }
+  });
 
-    // Restore selection to the inserted span
-    const newRange = document.createRange();
-    newRange.selectNodeContents(span);
+  // Restore the selection using the saved range
+  const selection = window.getSelection();
+  if (selection) {
     selection.removeAllRanges();
-    selection.addRange(newRange);
+    selection.addRange(savedRange);
   }
 }
 
-// Helper function to find if there's a line-height span ancestor
-function findLineHeightSpanAncestor(node: Node): HTMLElement | null {
+// Helper function to find all paragraphs that intersect with the range
+function getParagraphsInRange(range: Range): HTMLElement[] {
+  const paragraphs: HTMLElement[] = [];
+  const startParagraph = findContainingParagraph(range.startContainer);
+  const endParagraph = findContainingParagraph(range.endContainer);
+
+  if (!startParagraph && !endParagraph) return paragraphs;
+
+  // If range is collapsed (just cursor), return the paragraph containing the cursor
+  if (range.collapsed) {
+    if (startParagraph) paragraphs.push(startParagraph);
+    return paragraphs;
+  }
+
+  // For actual selections, find all paragraphs between start and end
+  if (startParagraph === endParagraph) {
+    // Selection is within a single paragraph
+    paragraphs.push(startParagraph);
+  } else {
+    // Selection spans multiple paragraphs - find all paragraphs in between
+    let current: HTMLElement | null = startParagraph;
+    while (current && current !== endParagraph) {
+      paragraphs.push(current);
+      let nextSibling = current.nextElementSibling as HTMLElement | null;
+      // If we hit a non-paragraph element, continue until we find the next paragraph
+      while (nextSibling && nextSibling.tagName !== 'P') {
+        nextSibling = nextSibling.nextElementSibling as HTMLElement | null;
+      }
+      current = nextSibling;
+    }
+    // Add the end paragraph if it's different
+    if (endParagraph && endParagraph !== startParagraph) {
+      paragraphs.push(endParagraph);
+    }
+  }
+
+  return paragraphs;
+}
+
+// Helper function to find the containing paragraph element
+function findContainingParagraph(node: Node): HTMLElement | null {
   let current: Node | null = node;
 
+  // If the node itself is a paragraph, return it
+  if (current.nodeType === Node.ELEMENT_NODE) {
+    const element = current as HTMLElement;
+    if (element.tagName === 'P') {
+      return element;
+    }
+  }
+
+  // Traverse up the DOM tree to find the nearest paragraph
   while (current) {
     if (current.nodeType === Node.ELEMENT_NODE) {
       const element = current as HTMLElement;
-      if (element.tagName === 'SPAN' && element.style.lineHeight) {
+      if (element.tagName === 'P') {
         return element;
       }
     }
@@ -96,21 +121,4 @@ function findLineHeightSpanAncestor(node: Node): HTMLElement | null {
   }
 
   return null;
-}
-
-// Helper function to check if selection is entirely within a span
-function isSelectionEntirelyWithinSpan(range: Range, span: HTMLElement): boolean {
-  const startContainer = range.startContainer;
-  const endContainer = range.endContainer;
-
-  // Check if both start and end are within the span
-  const startInSpan = span.contains(startContainer) ||
-    (startContainer.nodeType === Node.TEXT_NODE &&
-     startContainer.parentElement === span);
-
-  const endInSpan = span.contains(endContainer) ||
-    (endContainer.nodeType === Node.TEXT_NODE &&
-     endContainer.parentElement === span);
-
-  return startInSpan && endInSpan;
 }

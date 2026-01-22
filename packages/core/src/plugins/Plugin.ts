@@ -5,7 +5,7 @@ export interface ToolbarItem {
   label: string;
   command: string;
   icon?: string;
-  type?: 'button' | 'dropdown' | 'input';
+  type?: 'button' | 'dropdown' | 'input' | 'inline-menu';
   options?: Array<{ label: string; value: string }>;
   placeholder?: string;
 }
