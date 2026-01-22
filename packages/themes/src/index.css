@@ -110,7 +110,7 @@
   background-color: var(--rte-color-bg-secondary);
   border-radius: var(--rte-radius) var(--rte-radius) 0 0;
   flex-wrap: wrap;
-  gap: var(--rte-space-xs);
+  gap: 2px;
 }
 
 .rte-toolbar-group {
@@ -127,12 +127,32 @@
   justify-content: center;
   width: 2rem;
   height: 2rem;
+  padding: 0;
   border: none;
   background: transparent;
   color: var(--rte-color-text-secondary);
   cursor: pointer;
-  border-radius: 0;
+  border-radius: var(--rte-radius-sm);
   transition: background-color var(--rte-transition-fast), color var(--rte-transition-fast);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.rte-toolbar-button svg {
+  flex-shrink: 0;
+  fill: currentColor;
+  stroke: currentColor;
+  width: 14px;
+  height: 14px;
+}
+
+.rte-toolbar-button:hover svg {
+  opacity: 0.8;
+}
+
+.rte-toolbar-button[data-active="true"] svg {
+  fill: var(--rte-color-text-inverse);
+  stroke: var(--rte-color-text-inverse);
 }
 
 .rte-toolbar-button:hover {

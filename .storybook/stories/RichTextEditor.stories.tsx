@@ -20,6 +20,14 @@ import {
   TextAlignmentPlugin,
   MathPlugin,
   DocumentManagerPlugin,
+  TextColorPlugin,
+  BackgroundColorPlugin,
+  SpecialCharactersPlugin,
+  EmojisPlugin,
+  LineHeightPlugin,
+  DecreaseIndentPlugin,
+  IncreaseIndentPlugin,
+  EmbedIframePlugin,
 } from "@rte-editor/plugins";
 import "@rte-editor/themes/themes/default.css";
 
@@ -56,6 +64,14 @@ export const Default: Story = {
       TextAlignmentPlugin(),
       MathPlugin(),
       DocumentManagerPlugin(),
+      TextColorPlugin(),
+      BackgroundColorPlugin(),
+      SpecialCharactersPlugin(),
+      EmojisPlugin(),
+      LineHeightPlugin(),
+      DecreaseIndentPlugin(),
+      IncreaseIndentPlugin(),
+      EmbedIframePlugin(),
     ],
     mediaConfig: {
       uploadUrl: "/api/media/upload",

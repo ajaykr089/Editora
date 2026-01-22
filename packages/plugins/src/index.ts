@@ -20,6 +20,16 @@ export { MathPlugin, MathProvider } from '../math/src/index';
 export { DocumentManagerPlugin, DocumentManagerProvider, setDocumentManagerConfig, getDocumentManagerConfig } from '../document-manager/src/index';
 export type { DocumentManagerConfig } from '../document-manager/src/index';
 
+// New plugins
+export { TextColorPlugin } from '../text-color/src/index';
+export { BackgroundColorPlugin } from '../background-color/src/index';
+export { SpecialCharactersPlugin } from '../special-characters/src/index';
+export { EmojisPlugin } from '../emojis/src/index';
+export { LineHeightPlugin } from '../line-height/src/index';
+export { DecreaseIndentPlugin } from '../decrease-indent/src/index';
+export { IncreaseIndentPlugin } from '../increase-indent/src/index';
+export { EmbedIframePlugin } from '../embed-iframe/src/index';
+
 // Shared API configuration for all plugins
 export { setGlobalApiConfig, getGlobalApiConfig, getGlobalApiHeaders, buildApiUrl } from './shared-config';
 export type { ApiConfig } from './shared-config';

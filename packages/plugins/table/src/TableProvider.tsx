@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { TableToolbar } from './TableToolbar';
-import { usePluginContext } from '../../../react/src/components/PluginManager';
 import {
   insertTableCommand,
   addRowAboveCommand,
@@ -34,7 +33,6 @@ interface TableProviderProps {
 }
 
 export const TableProvider: React.FC<TableProviderProps> = ({ children }) => {
-  const { registerCommand } = usePluginContext();
   const [toolbarVisible, setToolbarVisible] = useState(false);
   const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
   const [tableInfo, setTableInfo] = useState({ canDeleteRow: true, canDeleteColumn: true });
@@ -192,8 +190,11 @@ export const TableProvider: React.FC<TableProviderProps> = ({ children }) => {
   }, []);
 
   React.useEffect(() => {
-    registerCommand('insertTable', insertTableCommand);
-  }, [registerCommand]);
+    // Register command with global system
+    if (typeof window !== 'undefined') {
+      (window as any).registerEditorCommand?.('insertTable', insertTableCommand);
+    }
+  }, []);
 
   const contextValue: TableContextType = {
     showToolbar,

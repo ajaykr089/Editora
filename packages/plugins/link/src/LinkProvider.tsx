@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { LinkDialog } from './components/LinkDialog';
-import { usePluginContext } from '../../../react/src/components/PluginManager';
 import './components/LinkDialog.css';
 
 interface LinkContextType {
@@ -23,7 +22,6 @@ interface LinkProviderProps {
 }
 
 export const LinkProvider: React.FC<LinkProviderProps> = ({ children }) => {
-  const { registerCommand, executeCommand } = usePluginContext();
 
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [selectedText, setSelectedText] = useState('');
@@ -195,11 +193,14 @@ export const LinkProvider: React.FC<LinkProviderProps> = ({ children }) => {
   };
 
   React.useEffect(() => {
-    registerCommand('openLinkDialog', openLinkDialog);
-    registerCommand('createLink', (url?: string) => {
-      if (url) document.execCommand('createLink', false, url);
-    });
-  }, [registerCommand]);
+    // Register commands with global system
+    if (typeof window !== 'undefined') {
+      (window as any).registerEditorCommand?.('openLinkDialog', openLinkDialog);
+      (window as any).registerEditorCommand?.('createLink', (url?: string) => {
+        if (url) document.execCommand('createLink', false, url);
+      });
+    }
+  }, []);
 
   const contextValue: LinkContextType = {
     openLinkDialog,

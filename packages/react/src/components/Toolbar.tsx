@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Editor } from '@rte-editor/core';
 import { ToolbarItem } from '@rte-editor/core';
-import { usePluginContext } from './PluginManager';
+import { EditorIcons, EditorIconName } from './EditorIcons';
 
 interface ToolbarProps {
   editor: Editor;
@@ -13,7 +13,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [storedSelection, setStoredSelection] = useState<Range | null>(null);
   const items = editor.pluginManager.getToolbarItems();
-  const { executeCommand } = usePluginContext();
 
   const handleCommand = (command: string, value?: string) => {
     console.log(`Executing command: ${command} with value: ${value}`);
@@ -32,8 +31,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       setStoredSelection(null);
     }
 
-    // Use plugin context to execute all commands
-    executeCommand(command, value);
+    // Use global command execution
+    if (typeof window !== 'undefined' && (window as any).executeEditorCommand) {
+      (window as any).executeEditorCommand(command, value);
+    }
     setOpenDropdown(null);
 
     if (contentEl) {
@@ -48,6 +49,52 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       setStoredSelection(selection.getRangeAt(0).cloneRange());
     }
     setOpenDropdown(openDropdown === command ? null : command);
+  };
+
+  const renderIcon = (iconName?: string, command?: string) => {
+    // Handle inline SVG strings from plugins
+    if (iconName && iconName.startsWith('<svg') && iconName.endsWith('</svg>')) {
+      return <span dangerouslySetInnerHTML={{ __html: iconName }} style={{ display: 'inline-block', width: '24px', height: '24px' }} />;
+    }
+
+    // Handle single character icons (B, I, U, S, H)
+    if (iconName && iconName.length === 1 && /^[BIUSH]$/.test(iconName)) {
+      return <span style={{ fontWeight: 'bold', fontSize: '14px', lineHeight: '1' }}>{iconName}</span>;
+    }
+
+    // Handle legacy SVG icons from EditorIcons for existing plugins
+    if (command) {
+      const commandIconMap: Record<string, EditorIconName> = {
+        'toggleBold': 'bold',
+        'toggleItalic': 'italic',
+        'toggleUnderline': 'underline',
+        'toggleStrikethrough': 'strikethrough',
+        'importFromWord': 'importWord',
+        'exportToWord': 'exportWord',
+        'exportToPdf': 'exportPdf',
+        'insertLink': 'link',
+        'insertImage': 'media',
+        'insertVideo': 'video',
+        'insertTable': 'table',
+        'insertMath': 'math',
+        'toggleOrderedList': 'numberedList',
+        'toggleBulletList': 'bulletList',
+        'setTextAlignment': 'alignLeft',
+        'setFontFamily': 'heading',
+        'toggleCodeBlock': 'codeBlock',
+        'toggleBlockquote': 'blockquote',
+        'clearFormatting': 'clearFormatting',
+      };
+
+      const commandIconKey = commandIconMap[command];
+      if (commandIconKey && EditorIcons[commandIconKey]) {
+        const IconComponent = EditorIcons[commandIconKey];
+        return <IconComponent />;
+      }
+    }
+
+    // Final fallback
+    return iconName || '⚪';
   };
 
   return (
@@ -95,7 +142,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onClick={() => handleCommand(item.command)}
               title={item.label}
             >
-              {item.icon || item.label}
+              {renderIcon(item.icon, item.command)}
             </button>
           )}
         </div>

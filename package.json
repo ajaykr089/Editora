@@ -1,8 +1,11 @@
 {
   "name": "rte-editor",
   "version": "1.0.0",
-  "description": "Production-grade Rich Text Editor",
+  "description": "Editora Production-grade Rich Text Editor",
   "private": true,
+  "authors": [
+    "Ajay kumar <ajaykr089@gmail.com>"
+  ],
   "workspaces": [
     "packages/*",
     "packages/plugins/*"

@@ -31,5 +31,8 @@ export { CodePlugin } from './code/src/CodePlugin';
 export  { FontSizePlugin, FontSizeProvider } from './font-size/src/index';
 export { TextAlignmentPlugin, TextAlignmentProvider } from './text-alignment/src/index';
 export { FontFamilyPlugin, FontFamilyProvider } from './font-family/src/index';
+export { LineHeightPlugin, LineHeightProvider } from './line-height/src/index';
+export { SpecialCharactersPlugin, SpecialCharactersProvider } from './special-characters/src/index';
 export { MathPlugin } from './math/src/MathPlugin';
 export { DocumentManagerPlugin, DocumentManagerProvider } from './document-manager/src/index';
+export { TextColorPlugin } from './text-color/src/TextColorPlugin';

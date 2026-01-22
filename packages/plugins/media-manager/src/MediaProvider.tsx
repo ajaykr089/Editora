@@ -3,7 +3,7 @@ import { MediaDialog } from './components/MediaDialogAdvanced';
 import { RichTextEditorAdapter } from './adapters/EditorAdapter';
 import { MediaManager } from './MediaManager';
 import { ImageResizer } from './utils/resizable';
-import { usePluginContext } from '../../../react/src/components/PluginManager';
+
 import { getMediaManagerConfig } from './constants';
 import './components/MediaDialogAdvanced.css';
 import './components/MediaResize.css';
@@ -30,8 +30,6 @@ interface MediaProviderProps {
 }
 
 export const MediaProvider: React.FC<MediaProviderProps> = ({ children }) => {
-  const { registerCommand } = usePluginContext();
-
   const [manager, setManager] = useState<MediaManager | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<'image' | 'video'>('image');
@@ -58,7 +56,11 @@ export const MediaProvider: React.FC<MediaProviderProps> = ({ children }) => {
       if (contentEl) {
         const adapter = new RichTextEditorAdapter(contentEl);
         const config = getMediaManagerConfig();
-        const mediaManager = new MediaManager(adapter, config);
+        // Ensure config has apiUrl, MediaAPI will handle global fallback
+        const mediaManager = new MediaManager(adapter, {
+          ...config,
+          apiUrl: config.apiUrl || 'http://localhost:3001/api/' // Will be overridden by MediaAPI if needed
+        });
         setManager(mediaManager);
 
         // Initialize image resizer
@@ -66,7 +68,7 @@ export const MediaProvider: React.FC<MediaProviderProps> = ({ children }) => {
           resizerRef.current = new ImageResizer(contentEl);
         }
       }
-    }, 100);
+    }, 100); // Small delay to ensure DOM is ready
 
     // Cleanup on unmount
     return () => {
@@ -78,9 +80,12 @@ export const MediaProvider: React.FC<MediaProviderProps> = ({ children }) => {
   }, []);
 
   React.useEffect(() => {
-    registerCommand('insertImage', openImageDialog);
-    registerCommand('insertVideo', openVideoDialog);
-  }, [registerCommand]);
+    // Register commands with global system
+    if (typeof window !== 'undefined') {
+      (window as any).registerEditorCommand?.('insertImage', openImageDialog);
+      (window as any).registerEditorCommand?.('insertVideo', openVideoDialog);
+    }
+  }, []);
 
   const contextValue: MediaContextType = {
     openImageDialog,

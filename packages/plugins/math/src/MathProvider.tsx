@@ -1,5 +1,4 @@
 import React, { ReactNode, useState, useCallback } from 'react';
-import { usePluginContext } from '../../../react/src/components/PluginManager';
 import { insertMathCommand, updateMathCommand, MathData } from './MathPlugin';
 import { MathDialog } from './MathDialog';
 import './MathDialog.css';
@@ -9,13 +8,15 @@ interface MathProviderProps {
 }
 
 export const MathProvider: React.FC<MathProviderProps> = ({ children }) => {
-  const { registerCommand } = usePluginContext();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingMath, setEditingMath] = useState<MathData | null>(null);
 
   React.useEffect(() => {
-    registerCommand('insertMath', handleInsertMath);
-    registerCommand('updateMath', handleUpdateMath);
+    // Register commands with global system
+    if (typeof window !== 'undefined') {
+      (window as any).registerEditorCommand?.('insertMath', handleInsertMath);
+      (window as any).registerEditorCommand?.('updateMath', handleUpdateMath);
+    }
 
     // Add double-click listener for math spans
     const handleDoubleClick = (event: MouseEvent) => {
@@ -123,7 +124,7 @@ export const MathProvider: React.FC<MathProviderProps> = ({ children }) => {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('click', handleClick);
     };
-  }, [registerCommand]);
+  }, []);
 
   const handleInsertMath = useCallback(() => {
     // Store current selection before dialog opens
