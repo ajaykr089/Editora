@@ -3,6 +3,9 @@
  * Author: Ajay Kumar <ajaykr089@gmail.com>
  */
 
+// Import CSS styles for self-contained library
+import './styles/editor.css';
+
 import { EditorCore } from './EditorCore';
 import { KeymapExtension } from './extensions/KeymapExtension';
 
