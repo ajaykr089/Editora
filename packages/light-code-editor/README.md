@@ -19,7 +19,7 @@ A lightweight, modular code editor library inspired by CodeMirror, optimized for
 ## Installation
 
 ```bash
-npm install @rte-editor/light-code-editor
+npm install @editora/light-code-editor
 ```
 
 ## Quick Start
@@ -28,13 +28,13 @@ npm install @rte-editor/light-code-editor
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="stylesheet" href="node_modules/@rte-editor/light-code-editor/dist/light-code-editor.css">
+  <link rel="stylesheet" href="node_modules/@editora/light-code-editor/dist/light-code-editor.css">
 </head>
 <body>
   <div id="editor"></div>
 
   <script type="module">
-    import { createEditor, LineNumbersExtension, SyntaxHighlightingExtension } from '@rte-editor/light-code-editor';
+    import { createEditor, LineNumbersExtension, SyntaxHighlightingExtension } from '@editora/light-code-editor';
 
     const editor = createEditor(document.getElementById('editor'), {
       value: '<div class="hello">Hello World</div>',
@@ -115,7 +115,7 @@ interface EditorAPI {
 Adds line numbers to the left gutter.
 
 ```typescript
-import { LineNumbersExtension } from '@rte-editor/light-code-editor';
+import { LineNumbersExtension } from '@editora/light-code-editor';
 
 const editor = createEditor(container, {
   extensions: [new LineNumbersExtension()]
@@ -126,7 +126,7 @@ const editor = createEditor(container, {
 Provides HTML syntax highlighting.
 
 ```typescript
-import { SyntaxHighlightingExtension } from '@rte-editor/light-code-editor';
+import { SyntaxHighlightingExtension } from '@editora/light-code-editor';
 
 const editor = createEditor(container, {
   extensions: [new SyntaxHighlightingExtension()]
@@ -137,7 +137,7 @@ const editor = createEditor(container, {
 Enables theme switching.
 
 ```typescript
-import { ThemeExtension } from '@rte-editor/light-code-editor';
+import { ThemeExtension } from '@editora/light-code-editor';
 
 const editor = createEditor(container, {
   extensions: [new ThemeExtension()]
@@ -148,7 +148,7 @@ const editor = createEditor(container, {
 Adds read-only mode functionality.
 
 ```typescript
-import { ReadOnlyExtension } from '@rte-editor/light-code-editor';
+import { ReadOnlyExtension } from '@editora/light-code-editor';
 
 const editor = createEditor(container, {
   extensions: [new ReadOnlyExtension()]
@@ -159,7 +159,7 @@ const editor = createEditor(container, {
 Provides search and replace functionality.
 
 ```typescript
-import { SearchExtension } from '@rte-editor/light-code-editor';
+import { SearchExtension } from '@editora/light-code-editor';
 
 const editor = createEditor(container, {
   extensions: [new SearchExtension()]
@@ -170,7 +170,7 @@ const editor = createEditor(container, {
 Highlights matching brackets.
 
 ```typescript
-import { BracketMatchingExtension } from '@rte-editor/light-code-editor';
+import { BracketMatchingExtension } from '@editora/light-code-editor';
 
 const editor = createEditor(container, {
   extensions: [new BracketMatchingExtension()]
@@ -181,7 +181,7 @@ const editor = createEditor(container, {
 Enables code folding functionality.
 
 ```typescript
-import { CodeFoldingExtension } from '@rte-editor/light-code-editor';
+import { CodeFoldingExtension } from '@editora/light-code-editor';
 
 const editor = createEditor(container, {
   extensions: [new CodeFoldingExtension()]
@@ -193,7 +193,7 @@ const editor = createEditor(container, {
 Create your own extensions by implementing the `EditorExtension` interface:
 
 ```typescript
-import { EditorExtension, EditorAPI } from '@rte-editor/light-code-editor';
+import { EditorExtension, EditorAPI } from '@editora/light-code-editor';
 
 class MyExtension implements EditorExtension {
   public readonly name = 'my-extension';

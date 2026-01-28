@@ -33,7 +33,7 @@ A comprehensive, enterprise-grade rich text editor built with React, TypeScript,
 ## 📦 Installation
 
 ```bash
-npm install @rte-editor/react @rte-editor/plugins @rte-editor/themes
+npm install @editora/react @editora/plugins @editora/themes
 ```
 
 ## 🏗️ Architecture
@@ -85,13 +85,13 @@ Everything is a plugin - from basic formatting to advanced features. This ensure
 ### Basic Setup
 
 ```typescript
-import { RichTextEditor } from '@rte-editor/react';
+import { RichTextEditor } from '@editora/react';
 import {
   createBoldPlugin,
   createItalicPlugin,
   createHeadingPlugin,
   createHistoryPlugin
-} from '@rte-editor/plugins';
+} from '@editora/plugins';
 
 function MyEditor() {
   const [content, setContent] = useState('<p>Start writing...</p>');
@@ -114,9 +114,9 @@ function MyEditor() {
 ### Advanced Configuration
 
 ```typescript
-import { RichTextEditor } from '@rte-editor/react';
-import { createImagePlugin, createTablePlugin } from '@rte-editor/plugins';
-import { createPerformanceMonitor } from '@rte-editor/performance';
+import { RichTextEditor } from '@editora/react';
+import { createImagePlugin, createTablePlugin } from '@editora/plugins';
+import { createPerformanceMonitor } from '@editora/performance';
 
 const imagePlugin = createImagePlugin({
   uploadUrl: '/api/upload',
@@ -144,9 +144,9 @@ function AdvancedEditor() {
 ### Theming
 
 ```typescript
-import '@rte-editor/themes'; // Base theme
-import '@rte-editor/themes/dark.css'; // Dark theme
-import { setGlobalTheme } from '@rte-editor/themes';
+import '@editora/themes'; // Base theme
+import '@editora/themes/dark.css'; // Dark theme
+import { setGlobalTheme } from '@editora/themes';
 
 // Apply dark theme
 setGlobalTheme('dark');
@@ -155,7 +155,7 @@ setGlobalTheme('dark');
 ### Security Integration
 
 ```typescript
-import { defaultSanitizer, ContentValidator } from '@rte-editor/core';
+import { defaultSanitizer, ContentValidator } from '@editora/core';
 
 // Sanitize user input
 const cleanContent = defaultSanitizer.sanitize(userInput);
@@ -172,7 +172,7 @@ if (!validation.valid) {
 ### Creating Custom Plugins
 
 ```typescript
-import { Plugin } from '@rte-editor/core';
+import { Plugin } from '@editora/core';
 
 class MyCustomPlugin extends Plugin {
   constructor() {
@@ -250,7 +250,7 @@ const imagePlugin = createImagePlugin({
 ### Monitoring
 
 ```typescript
-import { createPerformanceMonitor } from '@rte-editor/performance';
+import { createPerformanceMonitor } from '@editora/performance';
 
 const monitor = createPerformanceMonitor();
 
@@ -275,7 +275,7 @@ console.log('Memory usage:', metrics.memoryUsage, 'MB');
 ### Content Validation
 
 ```typescript
-import { ContentValidator } from '@rte-editor/core';
+import { ContentValidator } from '@editora/core';
 
 // Validate text content
 const result = ContentValidator.validateText('<script>alert(1)</script>');

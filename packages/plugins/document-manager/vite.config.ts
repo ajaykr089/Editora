@@ -13,7 +13,7 @@ export default defineConfig({
       external: [
         'react',
         'react-dom',
-        '@rte-editor/core',
+        '@editora/core',
         'mammoth',
         'docx',
         'jspdf',

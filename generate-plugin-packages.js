@@ -7,7 +7,7 @@ plugins.forEach(plugin => {
   const packagePath = path.join(__dirname, 'packages', 'plugins', plugin, 'package.json');
   
   const packageJson = {
-    name: `@rte-editor/plugin-${plugin}`,
+    name: `@editora/plugin-${plugin}`,
     version: '1.0.0',
     description: `${plugin.charAt(0).toUpperCase() + plugin.slice(1)} plugin for Rich Text Editor`,
     main: 'dist/index.cjs.js',
@@ -20,7 +20,7 @@ plugins.forEach(plugin => {
       clean: 'rm -rf dist'
     },
     peerDependencies: {
-      '@rte-editor/core': '^1.0.0'
+      '@editora/core': '^1.0.0'
     },
     devDependencies: {
       typescript: '^5.0.0'

@@ -11,7 +11,7 @@ A Rich Text Editor plugin that provides comprehensive document import and export
 ## Installation
 
 ```bash
-npm install @rte-editor/document-manager
+npm install @editora/document-manager
 ```
 
 ## API Configuration
@@ -22,12 +22,12 @@ This plugin communicates with external document processing APIs. You must config
 
 ```tsx
 import React from 'react';
-import { RichTextEditor } from '@rte-editor/react';
+import { RichTextEditor } from '@editora/react';
 import {
   DocumentManagerPlugin,
   setDocumentManagerConfig,
   // ... other plugins
-} from '@rte-editor/plugins';
+} from '@editora/plugins';
 
 // Configure your API endpoints (do this once, before using the plugin)
 setDocumentManagerConfig({
@@ -94,13 +94,13 @@ setDocumentManagerConfig({
 
 ```tsx
 import React from 'react';
-import { RichTextEditor } from '@rte-editor/react';
+import { RichTextEditor } from '@editora/react';
 import {
   DocumentManagerPlugin,
   DocumentManagerProvider,
   setDocumentManagerConfig,
   // ... other plugins
-} from '@rte-editor/plugins';
+} from '@editora/plugins';
 
 // Configure API (required!)
 setDocumentManagerConfig({
@@ -123,7 +123,7 @@ function App() {
 ### Using the Document Manager Hook
 
 ```tsx
-import { useDocumentManager } from '@rte-editor/document-manager';
+import { useDocumentManager } from '@editora/document-manager';
 
 function MyComponent() {
   const { importFromWord, exportToWord, exportToPdf } = useDocumentManager();

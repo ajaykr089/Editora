@@ -1,7 +1,10 @@
 {
-  "name": "@rte-editor/themes",
+  "name": "@editora/themes",
   "version": "1.0.0",
-  "description": "Themes and styling for Rich Text Editor",
+  "description": "Themes and styling for Editora Rich Text Editor",
+  "authors": [
+    "Ajay Kumar <ajaykr089@gmail.com>"
+  ],
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",

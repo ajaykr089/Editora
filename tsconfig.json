@@ -19,11 +19,12 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@rte-editor/core": ["packages/core/src"],
-      "@rte-editor/react": ["packages/react/src"],
-      "@rte-editor/themes": ["packages/themes/src"],
-      "@rte-editor/plugins": ["packages/plugins"],
-      "@rte-editor/plugins/*": ["packages/plugins/*/src"]
+      "@editora/core": ["packages/core/src"],
+      "@editora/react": ["packages/react/src"],
+      "@editora/themes": ["packages/themes/src"],
+      "@editora/plugins": ["packages/plugins"],
+      "@editora/plugins/*": ["packages/plugins/*/src"],
+      "@editora/light-code-editor": ["packages/light-code-editor/src"]
     }
   },
   "include": [

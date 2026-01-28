@@ -1,7 +1,10 @@
 {
-  "name": "@rte-editor/plugins",
+  "name": "@editora/plugins",
   "version": "1.0.0",
-  "description": "Plugin collection for Rich Text Editor",
+  "description": "Plugin collection for Editora Rich Text Editor",
+  "authors": [
+    "Ajay Kumar <ajaykr089@gmail.com>"
+  ],
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -14,10 +17,10 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "@rte-editor/core": "^1.0.0"
+    "@editora/core": "^1.0.0"
   },
   "dependencies": {
-    "@rte-editor/core": "^1.0.0",
+    "@editora/core": "^1.0.0",
     "katex": "^0.16.27",
     "mathjax": "^3.2.2"
   },

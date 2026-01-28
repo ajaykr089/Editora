@@ -4,7 +4,7 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "paths": {
-      "@rte-editor/core": ["../../core/src"]
+      "@editora/core": ["../../core/src"]
     }
   },
   "include": [

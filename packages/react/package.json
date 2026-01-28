@@ -1,7 +1,10 @@
 {
-  "name": "@rte-editor/react",
+  "name": "@editora/react",
   "version": "1.0.0",
-  "description": "React components for Rich Text Editor",
+  "description": "React components for Editora Rich Text Editor",
+  "authors": [
+    "Ajay Kumar <ajaykr089@gmail.com>"
+  ],
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -14,13 +17,13 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "@rte-editor/core": "^1.0.0",
+    "@editora/core": "^1.0.0",
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0"
   },
   "dependencies": {
-    "@rte-editor/core": "^1.0.0",
-    "@rte-editor/light-code-editor": "file:../light-code-editor"
+    "@editora/core": "^1.0.0",
+    "@editora/light-code-editor": "file:../light-code-editor"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",

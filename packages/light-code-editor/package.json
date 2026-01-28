@@ -1,7 +1,10 @@
 {
-  "name": "@rte-editor/light-code-editor",
+  "name": "@editora/light-code-editor",
   "version": "1.0.0",
   "description": "Lightweight, extensible code editor library inspired by CodeMirror",
+  "authors": [
+    "Ajay Kumar <ajaykr089@gmail.com>"
+  ],
   "main": "dist/index.umd.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",

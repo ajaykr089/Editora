@@ -12,7 +12,7 @@ import {
   BracketMatchingExtension,
   CodeFoldingExtension,
   SyntaxHighlightingExtension
-} from '@rte-editor/light-code-editor';
+} from '@editora/light-code-editor';
 
 interface SourceEditorDialogProps {
   isOpen: boolean;

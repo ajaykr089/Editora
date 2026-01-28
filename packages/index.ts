@@ -1,15 +1,15 @@
 // Core framework-agnostic editor engine
-export * from '@rte-editor/core';
+export * from '@editora/core';
 
 // React integration layer
-export * from '@rte-editor/react';
+export * from '@editora/react';
 
 // Re-export commonly used types
 export type {
   EditorState,
   Plugin,
   RichTextEditorProps
-} from '@rte-editor/core';
+} from '@editora/core';
 
 // Default export - main React component
-export { default } from '@rte-editor/react';
+export { default } from '@editora/react';

@@ -1,10 +1,10 @@
 {
-  "name": "rte-editor",
+  "name": "editora",
   "version": "1.0.0",
-  "description": "Editora Production-grade Rich Text Editor",
+  "description": "Editora - A Production-grade Rich Text Editor",
   "private": true,
   "authors": [
-    "Ajay kumar <ajaykr089@gmail.com>"
+    "Ajay Kumar <ajaykr089@gmail.com>"
   ],
   "workspaces": [
     "packages/*",

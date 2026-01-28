@@ -1,6 +1,9 @@
 {
-  "name": "@rte-editor/core",
+  "name": "@editora/core",
   "version": "1.0.0",
+  "authors": [
+    "Ajay Kumar <ajaykr089@gmail.com>"
+  ],
   "description": "Framework-agnostic core editor engine",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",

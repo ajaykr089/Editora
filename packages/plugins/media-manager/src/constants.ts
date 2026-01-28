@@ -62,7 +62,7 @@ let globalConfig: MediaManagerConfig = { ...DEFAULT_CONFIG };
  *
  * @example
  * ```typescript
- * import { setMediaManagerConfig } from '@rte-editor/media-manager';
+ * import { setMediaManagerConfig } from '@editora/media-manager';
  *
  * setMediaManagerConfig({
  *   apiUrl: 'https://your-api.com',

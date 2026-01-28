@@ -41,7 +41,7 @@ let globalApiConfig: ApiConfig = { ...DEFAULT_API_CONFIG };
  *
  * @example
  * ```typescript
- * import { setGlobalApiConfig } from '@rte-editor/plugins';
+ * import { setGlobalApiConfig } from '@editora/plugins';
  *
  * setGlobalApiConfig({
  *   apiUrl: 'https://your-api.com',

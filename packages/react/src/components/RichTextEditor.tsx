@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Editor, PluginManager, Plugin } from '@rte-editor/core';
+import { Editor, PluginManager, Plugin } from '@editora/core';
 import { Toolbar } from './Toolbar';
 import { EditorContent } from './EditorContent';
 import { FloatingToolbar } from './FloatingToolbar';

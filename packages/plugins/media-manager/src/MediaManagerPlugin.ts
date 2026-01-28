@@ -1,4 +1,4 @@
-import { Plugin } from '@rte-editor/core';
+import { Plugin } from '@editora/core';
 
 export const MediaManagerPlugin = (): Plugin => ({
   name: "mediaManager",

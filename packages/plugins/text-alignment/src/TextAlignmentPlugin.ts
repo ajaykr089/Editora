@@ -1,4 +1,4 @@
-import { Plugin } from '@rte-editor/core';
+import { Plugin } from '@editora/core';
 
 /**
  * Text Alignment Plugin for Rich Text Editor

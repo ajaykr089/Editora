@@ -41,7 +41,7 @@ let globalConfig: DocumentManagerConfig = { ...DEFAULT_CONFIG };
  *
  * @example
  * ```typescript
- * import { setDocumentManagerConfig } from '@rte-editor/document-manager';
+ * import { setDocumentManagerConfig } from '@editora/document-manager';
  *
  * setDocumentManagerConfig({
  *   apiUrl: 'https://your-api.com',

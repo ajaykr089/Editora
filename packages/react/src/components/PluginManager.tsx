@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import { Plugin } from '@rte-editor/core';
+import { Plugin } from '@editora/core';
 
 // Plugin Context Types
 interface PluginContextType {

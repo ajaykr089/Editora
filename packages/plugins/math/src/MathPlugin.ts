@@ -1,4 +1,4 @@
-import { Plugin } from '@rte-editor/core';
+import { Plugin } from '@editora/core';
 import katex from 'katex';
 import {
   convertMathMLToLatexManual

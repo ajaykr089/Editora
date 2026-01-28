@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Editor } from '@rte-editor/core';
-import { ToolbarItem } from '@rte-editor/core';
+import { Editor } from '@editora/core';
+import { ToolbarItem } from '@editora/core';
 import { EditorIcons, EditorIconName } from './EditorIcons';
 import { InlineMenu, InlineMenuOption } from './InlineMenu';
 

@@ -1,4 +1,4 @@
-import { Plugin } from '@rte-editor/core';
+import { Plugin } from '@editora/core';
 
 export const CapitalizationPlugin = (): Plugin => ({
   name: "capitalization",

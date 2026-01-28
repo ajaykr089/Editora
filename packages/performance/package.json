@@ -1,7 +1,10 @@
 {
-  "name": "@rte-editor/performance",
+  "name": "@editora/performance",
   "version": "1.0.0",
-  "description": "Performance optimization utilities for Rich Text Editor",
+  "description": "Performance optimization utilities for Editora Rich Text Editor",
+  "authors": [
+    "Ajay Kumar <ajaykr089@gmail.com>"
+  ],
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -19,7 +22,7 @@
     "lint": "eslint src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@rte-editor/core": "^1.0.0"
+    "@editora/core": "^1.0.0"
   },
   "keywords": [
     "rich-text-editor",

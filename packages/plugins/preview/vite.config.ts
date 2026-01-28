@@ -9,10 +9,10 @@ export default defineConfig({
       fileName: (format) => `index.${format}.js`
     },
     rollupOptions: {
-      external: ['@rte-editor/core', 'react'],
+      external: ['@editora/core', 'react'],
       output: {
         globals: {
-          '@rte-editor/core': 'RTECore',
+          '@editora/core': 'RTECore',
           'react': 'React'
         }
       }

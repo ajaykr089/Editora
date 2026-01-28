@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Editor } from '@rte-editor/core';
+import { Editor } from '@editora/core';
 
 interface EditorContentProps {
   editor: Editor;

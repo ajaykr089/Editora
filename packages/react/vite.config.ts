@@ -8,7 +8,7 @@ export default defineConfig({
       fileName: (format) => `index.${format === 'es' ? 'esm' : 'cjs'}.js`
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime', '@rte-editor/core', '@rte-editor/plugins']
+      external: ['react', 'react-dom', 'react/jsx-runtime', '@editora/core', '@editora/plugins', '@editora/light-code-editor']
     }
   }
 });

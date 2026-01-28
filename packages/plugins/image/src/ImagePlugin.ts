@@ -1,4 +1,4 @@
-import { Plugin, EditorState, Fragment, Node } from '@rte-editor/core';
+import { Plugin, EditorState, Fragment, Node } from '@editora/core';
 
 export class ImagePlugin extends Plugin {
   constructor(options: { uploadUrl?: string; maxSize?: number } = {}) {

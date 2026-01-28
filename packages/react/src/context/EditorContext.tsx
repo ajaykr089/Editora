@@ -1,5 +1,5 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import { EditorState, Plugin, Editor } from '@rte-editor/core';
+import { EditorState, Plugin, Editor } from '@editora/core';
 
 /**
  * Editor context value interface.

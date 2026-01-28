@@ -1,7 +1,10 @@
 {
-  "name": "@rte-editor/checklist",
+  "name": "@editora/checklist",
   "version": "1.0.0",
   "description": "Checklist plugin for Rich Text Editor",
+  "authors": [
+    "Ajay Kumar <ajaykr089@gmail.com>"
+  ],
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -17,7 +20,7 @@
     "dev": "vite build --watch"
   },
   "dependencies": {
-    "@rte-editor/core": "^1.0.0"
+    "@editora/core": "^1.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",

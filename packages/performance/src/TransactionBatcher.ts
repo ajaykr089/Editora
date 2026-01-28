@@ -1,4 +1,4 @@
-import { Transaction, EditorState } from '@rte-editor/core';
+import { Transaction, EditorState } from '@editora/core';
 
 /**
  * Configuration for transaction batching.

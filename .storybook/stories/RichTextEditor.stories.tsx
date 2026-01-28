@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { RichTextEditor } from "@rte-editor/react";
+import { RichTextEditor } from "@editora/react";
 import {
   ParagraphPlugin,
   HeadingPlugin,
@@ -31,8 +31,8 @@ import {
   DirectionPlugin,
   ChecklistPlugin,
   PreviewPlugin,
-} from "@rte-editor/plugins";
-import "@rte-editor/themes/themes/default.css";
+} from "@editora/plugins";
+import "@editora/themes/themes/default.css";
 
 const meta: Meta<typeof RichTextEditor> = {
   title: "Editor/RichTextEditor",
