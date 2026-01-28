@@ -30,9 +30,11 @@ import { EmbedIframePluginProvider } from '../../../plugins/embed-iframe/src/Emb
 import { CapitalizationPluginProvider } from '../../../plugins/capitalization/src/CapitalizationPluginProvider';
 import { DirectionPluginProvider } from '../../../plugins/direction/src/DirectionPluginProvider';
 import { CodePluginProvider } from '../../../plugins/code/src/CodePluginProvider';
+import { ChecklistPluginProvider } from '../../../plugins/checklist/src/ChecklistPluginProvider';
 import { MathProvider } from '../../../plugins/math/src/MathProvider';
 import { DocumentManagerProvider } from '../../../plugins/document-manager/src/DocumentManagerProvider';
 import { DocumentManagerPluginProvider } from '../../../plugins/document-manager/src/DocumentManagerPluginProvider';
+import { PreviewPluginProvider } from "../../../plugins/preview/src/PreviewPluginProvider";
 
 // Global command registry
 const commandRegistry = new Map<string, (params?: any) => void>();
@@ -82,10 +84,11 @@ const EditorCore: React.FC<RichTextEditorProps> = ({ plugins, className, mediaCo
           <UnderlinePluginProvider>
             <StrikethroughPluginProvider>
               <CodePluginProvider>
-                <ListPluginProvider>
-                  <BlockquotePluginProvider>
-                    <ClearFormattingPluginProvider>
-                      <HistoryPluginProvider>
+                <ChecklistPluginProvider>
+                  <ListPluginProvider>
+                    <BlockquotePluginProvider>
+                      <ClearFormattingPluginProvider>
+                        <HistoryPluginProvider>
                           <IndentPluginProvider>
                             <TableProvider>
                               <LinkProvider>
@@ -97,27 +100,43 @@ const EditorCore: React.FC<RichTextEditorProps> = ({ plugins, className, mediaCo
                                           <SpecialCharactersProvider>
                                             <EmojisProvider>
                                               <TextColorPluginProvider>
-                                            <BackgroundColorPluginProvider>
-                                                <CapitalizationPluginProvider>
-                                                <DirectionPluginProvider>
-                                                <MathProvider>
-                                                  <DocumentManagerProvider>
-                                                    <DocumentManagerPluginProvider>
-                                                      <div className={`rte-editor ${className || ''}`}>
-                                                        <Toolbar editor={editor} />
-                                                        <EditorContent editor={editor} />
-                                                        <FloatingToolbar
-                                                          editor={editor}
-                                                          isEnabled={floatingToolbarEnabled}
-                                                        />
-                                                      </div>
-                                                    </DocumentManagerPluginProvider>
-                                                  </DocumentManagerProvider>
-                                                </MathProvider>
-                                                </DirectionPluginProvider>
-                                                </CapitalizationPluginProvider>
-                                            </BackgroundColorPluginProvider>
-                                          </TextColorPluginProvider>
+                                                <BackgroundColorPluginProvider>
+                                                  <CapitalizationPluginProvider>
+                                                    <DirectionPluginProvider>
+                                                      <MathProvider>
+                                                        <DocumentManagerProvider>
+                                                          <DocumentManagerPluginProvider>
+                                                            <PreviewPluginProvider>
+                                                              <div
+                                                                className={`rte-editor ${className || ""}`}
+                                                              >
+                                                                <Toolbar
+                                                                  editor={
+                                                                    editor
+                                                                  }
+                                                                />
+                                                                <EditorContent
+                                                                  editor={
+                                                                    editor
+                                                                  }
+                                                                />
+                                                                <FloatingToolbar
+                                                                  editor={
+                                                                    editor
+                                                                  }
+                                                                  isEnabled={
+                                                                    floatingToolbarEnabled
+                                                                  }
+                                                                />
+                                                              </div>
+                                                            </PreviewPluginProvider>
+                                                          </DocumentManagerPluginProvider>
+                                                        </DocumentManagerProvider>
+                                                      </MathProvider>
+                                                    </DirectionPluginProvider>
+                                                  </CapitalizationPluginProvider>
+                                                </BackgroundColorPluginProvider>
+                                              </TextColorPluginProvider>
                                             </EmojisProvider>
                                           </SpecialCharactersProvider>
                                         </LineHeightProvider>
@@ -128,10 +147,11 @@ const EditorCore: React.FC<RichTextEditorProps> = ({ plugins, className, mediaCo
                               </LinkProvider>
                             </TableProvider>
                           </IndentPluginProvider>
-                      </HistoryPluginProvider>
-                    </ClearFormattingPluginProvider>
-                  </BlockquotePluginProvider>
-                </ListPluginProvider>
+                        </HistoryPluginProvider>
+                      </ClearFormattingPluginProvider>
+                    </BlockquotePluginProvider>
+                  </ListPluginProvider>
+                </ChecklistPluginProvider>
               </CodePluginProvider>
             </StrikethroughPluginProvider>
           </UnderlinePluginProvider>

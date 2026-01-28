@@ -1,6 +1,7 @@
 /* Table Styles for Rich Text Editor */
 
-.rte-table {
+.rte-table,
+table {
   border-collapse: collapse;
   width: 100%;
   margin: 1rem 0;
@@ -10,7 +11,9 @@
 }
 
 .rte-table td,
-.rte-table th {
+.rte-table th,
+table td,
+table th {
   border: 1px solid #ddd;
   padding: 8px 12px;
   min-width: 80px;
@@ -19,29 +22,35 @@
 }
 
 .rte-table td:focus,
-.rte-table th:focus {
+.rte-table th:focus,
+table td:focus,
+table th:focus {
   outline: 2px solid #007acc;
   outline-offset: -2px;
 }
 
-.rte-table th {
+.rte-table th,
+table th {
   background-color: #f8f9fa;
   font-weight: 600;
   text-align: left;
 }
 
-.rte-table td p {
+.rte-table td p,
+table td p {
   margin: 0;
   padding: 0;
 }
 
-.rte-table td p:empty::before {
+.rte-table td p:empty::before,
+table td p:empty::before {
   content: '\200B'; /* Zero-width space to maintain height */
   display: inline-block;
 }
 
 /* Table cell content editing */
-.rte-table td[contenteditable]:empty::before {
+.rte-table td[contenteditable]:empty::before,
+table td[contenteditable]:empty::before {
   content: 'Type here...';
   color: #999;
   font-style: italic;
@@ -49,18 +58,21 @@
 }
 
 /* Table hover effects */
-.rte-table tr:hover {
+.rte-table tr:hover,
+table tr:hover {
   background-color: #f8f9fa;
 }
 
 /* Table selection styles */
-.rte-table td.selected {
+.rte-table td.selected,
+table td.selected {
   background-color: #e3f2fd;
   border-color: #2196f3;
 }
 
 /* Table resize handles (for future enhancement) */
-.rte-table td::after {
+.rte-table td::after,
+table td::after {
   content: '';
   position: absolute;
   right: -1px;
@@ -71,18 +83,21 @@
   cursor: col-resize;
 }
 
-.rte-table td:hover::after {
+.rte-table td:hover::after,
+table td:hover::after {
   background-color: #007acc;
 }
 
 /* Responsive table */
 @media (max-width: 768px) {
-  .rte-table {
+  .rte-table, table {
     font-size: 12px;
   }
 
   .rte-table td,
-  .rte-table th {
+  .rte-table th,
+  table td,
+  table th {
     padding: 4px 6px;
     min-width: 60px;
   }
@@ -90,12 +105,14 @@
 
 /* Print styles */
 @media print {
-  .rte-table {
+  .rte-table, table {
     border: 1px solid #000;
   }
 
   .rte-table td,
-  .rte-table th {
+  .rte-table th,
+  table td,
+  table th {
     border: 1px solid #000;
     padding: 4px;
   }

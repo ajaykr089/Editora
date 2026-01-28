@@ -116,7 +116,7 @@ export const MathProvider: React.FC<MathProviderProps> = ({ children }) => {
     // Add event listeners
     document.addEventListener('dblclick', handleDoubleClick);
     document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('click', handleClick);
+    //document.addEventListener('click', handleClick);
 
     // Cleanup
     return () => {

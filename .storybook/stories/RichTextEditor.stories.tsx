@@ -29,6 +29,8 @@ import {
   EmbedIframePlugin,
   CapitalizationPlugin,
   DirectionPlugin,
+  ChecklistPlugin,
+  PreviewPlugin,
 } from "@rte-editor/plugins";
 import "@rte-editor/themes/themes/default.css";
 
@@ -74,6 +76,8 @@ export const Default: Story = {
       EmbedIframePlugin(),
       CapitalizationPlugin(),
       DirectionPlugin(),
+      ChecklistPlugin(),
+      PreviewPlugin(),
     ],
     mediaConfig: {
       uploadUrl: "/api/media/upload",

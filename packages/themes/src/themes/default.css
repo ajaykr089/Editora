@@ -384,3 +384,56 @@
   flex: 1;
   line-height: 1.4;
 }
+
+/* Checklist Styles */
+.rte-content ul[data-type="checklist"] {
+  list-style: none;
+  padding-left: 0;
+  margin: 1em 0;
+}
+
+.rte-content li[data-type="checklist-item"] {
+  position: relative;
+  padding-left: 2em;
+  margin-bottom: 0.5em;
+  line-height: 1.6;
+}
+
+.rte-content li[data-type="checklist-item"]:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.1em;
+  width: 1.2em;
+  height: 1.2em;
+  border: 2px solid #ccc;
+  border-radius: 3px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rte-content li[data-type="checklist-item"]:hover:before {
+  border-color: #999;
+}
+
+.rte-content li[data-type="checklist-item"][data-checked="true"]:before {
+  background: #0066cc;
+  border-color: #0066cc;
+}
+
+.rte-content li[data-type="checklist-item"][data-checked="true"]:after {
+  content: '✓';
+  position: absolute;
+  left: 0.36em;
+  top: 0.12em;
+  color: white;
+  font-size: 0.9em;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+.rte-content li[data-type="checklist-item"][data-checked="true"] p {
+  text-decoration: line-through;
+  color: #666;
+}

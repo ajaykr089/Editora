@@ -1,0 +1,33 @@
+{
+  "name": "@rte-editor/preview",
+  "version": "1.0.0",
+  "description": "Preview plugin for Rich Text Editor",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "@rte-editor/core": "^1.0.0",
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^7.3.1"
+  },
+  "keywords": [
+    "rich-text-editor",
+    "plugin",
+    "preview-code",
+    "html-editor"
+  ],
+  "author": "",
+  "license": "MIT"
+}

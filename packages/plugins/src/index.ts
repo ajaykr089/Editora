@@ -30,6 +30,8 @@ export { EmbedIframePlugin } from '../embed-iframe/src/index';
 export { CapitalizationPlugin } from '../capitalization/src/index';
 export { DirectionPlugin } from '../direction/src/index';
 export { CodePlugin } from '../code/src/index';
+export { ChecklistPlugin } from '../checklist/src/index';
+export { PreviewPlugin, PreviewPluginProvider } from "../preview/src/index";
 
 // Shared API configuration for all plugins
 export { setGlobalApiConfig, getGlobalApiConfig, getGlobalApiHeaders, buildApiUrl } from './shared-config';
