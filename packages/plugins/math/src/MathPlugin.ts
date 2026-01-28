@@ -108,55 +108,23 @@ class MathSelectionManager {
     }
   }
 
-
   private handleClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-    
-    const mathElement = target.closest(".math-formula") as HTMLElement;
+    const mathElement = target.closest('.math-formula') as HTMLElement;
 
-    if (mathElement && mathElement.parentElement) {
-      console.log("MathSelectionManager: Click event on", target);
+    if (mathElement) {
+      event.preventDefault();
+      event.stopPropagation();
 
-      //  const forceCaret = (element: any) => {
-      //    if (!element.textContent) {
-      //      element.textContent = "\u200b"; // Add zero-width space
-      //      // Use JavaScript Range API to set the cursor position after adding the space
-      //      const range = document.createRange();
-      //      const selection = window.getSelection();
-      //      range.setStart(element.childNodes[0], 1); // Position after the space
-      //      range.collapse(true);
-      //      selection?.removeAllRanges();
-      //      selection?.addRange(range);
-      //    }
-      //  };
-
-      // const currentlyFocusedElement = document.activeElement;
-      // console.log(currentlyFocusedElement);
-
-      //setTimeout(() => {
-        mathElement.parentElement.textContent = "\u200b"; // Add zero-width space
-        // Use JavaScript Range API to set the cursor position after adding the space
-        const range = document.createRange();
-        const selection = window.getSelection();
-        range.setStart(mathElement.parentElement.childNodes[0], 1); // Position after the space
-        range.collapse(true);
-        selection?.removeAllRanges();
-        selection?.addRange(range);
-
-        mathElement.parentElement?.focus(); // Call focus again after 100ms
-      //}, 100);
-
-      // mathElement?.parentElement?.addEventListener("focusin", () =>
-      //   forceCaret(mathElement.parentElement)
-      // );
-      // // Select the entire math element
-      // const selection = window.getSelection();
-      // const range = document.createRange();
-      // range.selectNodeContents(mathElement);
-      // selection?.removeAllRanges();
-      // selection?.addRange(range);
+      // Select the entire math span
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(mathElement);
+      selection?.removeAllRanges();
+      selection?.addRange(range);
     }
   }
+  
 
   private handleSelectionInMath(event: KeyboardEvent, range: Range, mathElement: HTMLElement): void {
     // Prevent normal text editing inside math elements
@@ -177,7 +145,7 @@ class MathSelectionManager {
     // Handle deletion near math elements
     if (event.key === 'Backspace') {
       const previousElement = this.findPreviousElement(range.startContainer, range.startOffset);
-      if (previousElement && previousElement.classList.contains('math-node')) {
+      if (previousElement && previousElement.classList.contains('math-formula')) {
         event.preventDefault();
         this.deleteMathElement(previousElement);
       }
@@ -185,7 +153,7 @@ class MathSelectionManager {
 
     if (event.key === 'Delete') {
       const nextElement = this.findNextElement(range.endContainer, range.endOffset);
-      if (nextElement && nextElement.classList.contains('math-node')) {
+      if (nextElement && nextElement.classList.contains('math-formula')) {
         event.preventDefault();
         this.deleteMathElement(nextElement);
       }
@@ -195,7 +163,7 @@ class MathSelectionManager {
   private findMathElement(node: Node): HTMLElement | null {
     if (node.nodeType === Node.ELEMENT_NODE) {
       const element = node as HTMLElement;
-      if (element.classList.contains('math-node')) {
+      if (element.classList.contains('math-formula')) {
         return element;
       }
     }
@@ -204,7 +172,7 @@ class MathSelectionManager {
     while (current) {
       if (current.nodeType === Node.ELEMENT_NODE) {
         const element = current as HTMLElement;
-        if (element.classList.contains('math-node')) {
+        if (element.classList.contains('math-formula')) {
           return element;
         }
       }
@@ -252,7 +220,7 @@ class MathSelectionManager {
       const index = siblings.indexOf(parent);
       for (let i = index - 1; i >= 0; i--) {
         const sibling = siblings[i] as HTMLElement;
-        if (sibling.classList.contains('math-node')) {
+        if (sibling.classList.contains('math-formula')) {
           return sibling;
         }
       }
@@ -269,7 +237,7 @@ class MathSelectionManager {
       const index = siblings.indexOf(parent);
       for (let i = index + 1; i < siblings.length; i++) {
         const sibling = siblings[i] as HTMLElement;
-        if (sibling.classList.contains('math-node')) {
+        if (sibling.classList.contains('math-formula')) {
           return sibling;
         }
       }
@@ -283,7 +251,7 @@ class MathSelectionManager {
       if (current.nodeType === Node.TEXT_NODE && current.textContent?.trim()) {
         return current as Text;
       }
-      if (current.nodeType === Node.ELEMENT_NODE && !(current as HTMLElement).classList.contains('math-node')) {
+      if (current.nodeType === Node.ELEMENT_NODE && !(current as HTMLElement).classList.contains('math-formula')) {
         // Look inside non-math elements for text nodes
         const textNode = this.findTextNodeInElement(current as HTMLElement);
         if (textNode) return textNode;
@@ -582,7 +550,7 @@ class MathSerializationManager {
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = htmlString;
 
-      const mathElements = tempDiv.querySelectorAll('.math-node');
+      const mathElements = tempDiv.querySelectorAll('.math-formula');
       for (const element of mathElements) {
         try {
           const node: MathNode = {
@@ -637,7 +605,7 @@ function generateMathId(): string {
 
 function createMathElement(node: MathNode): HTMLElement {
   const element = document.createElement('span');
-  element.className = `math-node math-${node.type}`;
+  element.className = `math-formula math-${node.type}`;
   element.setAttribute('data-math-id', node.id);
   element.setAttribute('data-math-format', node.format);
   element.setAttribute('data-math-formula', node.formula);
@@ -726,7 +694,7 @@ class MathClipboardManager {
   private findMathElement(node: Node): HTMLElement | null {
     if (node.nodeType === Node.ELEMENT_NODE) {
       const element = node as HTMLElement;
-      if (element.classList.contains('math-node')) {
+      if (element.classList.contains('math-formula')) {
         return element;
       }
     }
@@ -735,7 +703,7 @@ class MathClipboardManager {
     while (current) {
       if (current.nodeType === Node.ELEMENT_NODE) {
         const element = current as HTMLElement;
-        if (element.classList.contains('math-node')) {
+        if (element.classList.contains('math-formula')) {
           return element;
         }
       }
@@ -842,6 +810,31 @@ export const updateMathCommand = (mathData: MathData, existingSpan?: HTMLElement
   storedMathSelection = null;
 };
 
+// Utility command for undo support (can be called from editor toolbar)
+export const undoMathOperation = () => {
+  if (mathUndoManager.canUndo()) {
+    mathUndoManager.undo();
+  }
+};
+
+// Utility command to export all math content
+export const exportMathContent = (format: 'json' | 'html' = 'json'): string => {
+  if (format === 'json') {
+    return mathSerializationManager.exportToJSON();
+  } else {
+    return mathSerializationManager.exportToHTML();
+  }
+};
+
+// Utility command to import math content
+export const importMathContent = (data: string, format: 'json' | 'html' = 'json') => {
+  if (format === 'json') {
+    return mathSerializationManager.importFromJSON(data);
+  } else {
+    return mathSerializationManager.importFromHTML(data);
+  }
+};
+
 export interface MathData {
   formula: string;
   format: 'latex' | 'mathml';
@@ -867,53 +860,29 @@ function applyMathToSelection(mathData: MathData) {
   selection.removeAllRanges();
   selection.addRange(range);
 
+  // Create MathNode and render through MathRenderer for consistency
+  const mathNode: MathNode = {
+    id: generateMathId(),
+    type: mathData.inline ? 'inline' : 'block',
+    format: mathData.format,
+    formula: mathData.formula,
+    renderedHtml: '',
+    semanticLabel: '',
+    created: new Date(),
+    modified: new Date()
+  };
+
+  // Render using the centralized MathRenderer
+  const renderResult = mathRenderer.render(mathNode);
+  mathNode.renderedHtml = renderResult.html;
+  mathNode.semanticLabel = renderResult.semantic;
+
+  // Create DOM element
+  const mathSpan = createMathElement(mathNode);
+
   // For collapsed selections (just cursor), we'll still insert the math
   // For non-collapsed selections, we'll wrap the selected content
 
-  // Create a math span with data attributes
-  const mathSpan = document.createElement('span');
-  mathSpan.className = 'math-formula';
-  mathSpan.setAttribute('data-math-formula', mathData.formula);
-  mathSpan.setAttribute('data-math-format', mathData.format);
-  mathSpan.setAttribute('data-math-inline', mathData.inline.toString());
-  mathSpan.setAttribute('contenteditable', 'false'); // Make it non-editable
-
-  // Render the math formula
-  try {
-    let latexFormula = mathData.formula;
-
-    // Convert MathML to LaTeX if needed
-    if (mathData.format === 'mathml') {
-      console.log('MathPlugin: Converting MathML to LaTeX:', mathData.formula);
-      // Use our improved MathML to LaTeX conversion
-      latexFormula = convertMathMLToLatexManual(mathData.formula);
-      console.log('MathPlugin: MathML converted to LaTeX:', latexFormula);
-    }
-
-    // Use KaTeX for LaTeX rendering (both original LaTeX and converted MathML)
-    const renderedHtml = katex.renderToString(latexFormula, {
-      displayMode: !mathData.inline, // block mode for !inline, inline mode for inline
-      throwOnError: false,
-      errorColor: '#cc0000'
-    }); // Remove aria-hidden to ensure visibility
-
-    // Instead of innerHTML, create a temporary element and append its children
-    const tempDiv = document.createElement('span');
-    tempDiv.innerHTML = renderedHtml;
-
-    // Append the KaTeX elements to our math span
-    while (tempDiv.firstChild) {
-      mathSpan.appendChild(tempDiv.firstChild);
-    }
-  } catch (error) {
-    console.error('MathPlugin: Rendering failed:', error);
-    // Fallback to placeholder text
-    const fallbackText = `[${mathData.format.toUpperCase()}: ${mathData.formula.substring(0, 20)}${mathData.formula.length > 20 ? '...' : ''}]`;
-    mathSpan.textContent = fallbackText;
-  }
-
-  // For inline math, use a span wrapper
-  // For block math, replace the entire paragraph
   let insertedElement: HTMLElement | null = null;
 
   if (mathData.inline) {
@@ -954,6 +923,31 @@ function applyMathToSelection(mathData: MathData) {
     console.log("MathPlugin: block math inserted.");
   }
 
+  // Register the node in the central registry
+  mathRegistry.add(mathNode);
+
+  // Record operation for undo/redo
+  const mathOperation: MathOperation = {
+    type: 'insert',
+    nodeId: mathNode.id,
+    before: null,
+    after: mathNode,
+    timestamp: new Date(),
+    undo: () => {
+      mathRegistry.delete(mathNode.id);
+      if (insertedElement) {
+        insertedElement.remove();
+      }
+    },
+    redo: () => {
+      mathRegistry.add(mathNode);
+      if (insertedElement && insertedElement.parentNode) {
+        insertedElement.parentNode.appendChild(insertedElement);
+      }
+    }
+  };
+  mathUndoManager.record(mathOperation);
+
   // Restore selection to after the inserted math (only for inline mode)
   if (insertedElement) {
     try {
@@ -975,45 +969,55 @@ function applyMathToSelection(mathData: MathData) {
  * Helper function to update existing math span in place
  */
 function updateExistingMath(existingSpan: HTMLElement, mathData: MathData) {
-  // Clear existing content
-  existingSpan.innerHTML = '';
-  // Update data attributes
+  // Create MathNode from existing span data
+  const mathId = existingSpan.getAttribute('data-math-id') || generateMathId();
+  
+  const mathNode: MathNode = {
+    id: mathId,
+    type: mathData.inline ? 'inline' : 'block',
+    format: mathData.format,
+    formula: mathData.formula,
+    renderedHtml: '',
+    semanticLabel: '',
+    created: new Date(),
+    modified: new Date()
+  };
+
+  // Render using the centralized MathRenderer
+  const renderResult = mathRenderer.render(mathNode);
+  mathNode.renderedHtml = renderResult.html;
+  mathNode.semanticLabel = renderResult.semantic;
+
+  // Clear existing content and update
+  existingSpan.innerHTML = mathNode.renderedHtml;
   existingSpan.setAttribute('data-math-formula', mathData.formula);
   existingSpan.setAttribute('data-math-format', mathData.format);
   existingSpan.setAttribute('data-math-inline', mathData.inline.toString());
+  existingSpan.setAttribute('aria-label', mathNode.semanticLabel);
   existingSpan.style.display = mathData.inline ? 'inline-block' : 'block';
 
-  // Render the new math formula
-  try {
-    let latexFormula = mathData.formula;
+  // Update in registry
+  mathRegistry.update(mathId, mathNode);
 
-    // Convert MathML to LaTeX if needed
-    if (mathData.format === 'mathml') {
-      // Use our manual MathML to LaTeX conversion
-      latexFormula = convertMathMLToLatexManual(mathData.formula);
+  // Record operation for undo/redo
+  const mathOperation: MathOperation = {
+    type: 'update',
+    nodeId: mathId,
+    before: mathRegistry.get(mathId) || null,
+    after: mathNode,
+    timestamp: new Date(),
+    undo: () => {
+      // Undo would restore previous state
+      const prevNode = mathRegistry.get(mathId);
+      if (prevNode) {
+        existingSpan.innerHTML = prevNode.renderedHtml;
+      }
+    },
+    redo: () => {
+      existingSpan.innerHTML = mathNode.renderedHtml;
     }
-
-    // Use KaTeX for LaTeX rendering (both original LaTeX and converted MathML)
-    const renderedHtml = katex.renderToString(latexFormula, {
-      displayMode: false, // inline mode
-      throwOnError: false,
-      errorColor: '#cc0000'
-    }); // Remove aria-hidden to ensure visibility
-
-    // Instead of innerHTML, create a temporary element and append its children
-    const tempDiv = document.createElement('span');
-    tempDiv.innerHTML = renderedHtml;
-
-    // Append the KaTeX elements to the existing span
-    while (tempDiv.firstChild) {
-      existingSpan.appendChild(tempDiv.firstChild);
-    }
-  } catch (error) {
-    console.error('MathPlugin: Rendering failed:', error);
-    // Fallback to placeholder text
-    const fallbackText = `[${mathData.format.toUpperCase()}: ${mathData.formula.substring(0, 20)}${mathData.formula.length > 20 ? '...' : ''}]`;
-    existingSpan.textContent = fallbackText;
-  }
+  };
+  mathUndoManager.record(mathOperation);
 }
 
 
@@ -1037,3 +1041,55 @@ function findBlockAncestor(node: Node): HTMLElement | null {
 
   return null;
 }
+
+// ============================================
+// EXPORT PUBLIC API
+// ============================================
+
+// Export main managers for external use and for internal access
+export {
+  mathRegistry,
+  mathRenderer,
+  mathSelectionManager,
+  mathUndoManager,
+  mathSerializationManager,
+  mathClipboardManager
+};
+
+/**
+ * Public API for Math Plugin Management
+ * 
+ * Usage Examples:
+ * 
+ * 1. Export all math content:
+ *    const json = mathSerializationManager.exportToJSON();
+ * 
+ * 2. Import math content:
+ *    const result = mathSerializationManager.importFromJSON(jsonString);
+ * 
+ * 3. Get all registered math nodes:
+ *    const nodes = mathRegistry.getAll();
+ * 
+ * 4. Subscribe to math node changes:
+ *    const unsubscribe = mathRegistry.subscribe((node, action) => {
+ *      console.log(`Math node ${action}:`, node);
+ *    });
+ * 
+ * 5. Undo last operation:
+ *    if (mathUndoManager.canUndo()) {
+ *      mathUndoManager.undo();
+ *    }
+ * 
+ * 6. Render a math formula:
+ *    const mathNode: MathNode = {
+ *      id: 'custom-id',
+ *      type: 'inline',
+ *      format: 'latex',
+ *      formula: 'x^2 + y^2 = z^2',
+ *      renderedHtml: '',
+ *      semanticLabel: '',
+ *      created: new Date(),
+ *      modified: new Date()
+ *    };
+ *    const result = mathRenderer.render(mathNode);
+ */

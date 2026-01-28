@@ -1,5 +1,5 @@
 import React, { ReactNode, useState, useCallback } from 'react';
-import { insertMathCommand, updateMathCommand, MathData } from './MathPlugin';
+import { insertMathCommand, updateMathCommand, MathData, undoMathOperation } from './MathPlugin';
 import { MathDialog } from './MathDialog';
 import './MathDialog.css';
 
@@ -16,9 +16,10 @@ export const MathProvider: React.FC<MathProviderProps> = ({ children }) => {
     if (typeof window !== 'undefined') {
       (window as any).registerEditorCommand?.('insertMath', handleInsertMath);
       (window as any).registerEditorCommand?.('updateMath', handleUpdateMath);
+      (window as any).registerEditorCommand?.('undoMath', undoMathOperation);
     }
 
-    // Add double-click listener for math spans
+    // Add double-click listener for math spans (for editing)
     const handleDoubleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       const mathSpan = target.closest('.math-formula') as HTMLElement;
@@ -44,85 +45,26 @@ export const MathProvider: React.FC<MathProviderProps> = ({ children }) => {
       }
     };
 
-    // Handle keyboard events for math span deletion and navigation
+    // Add keyboard shortcut for undo (Ctrl+Z or Cmd+Z)
     const handleKeyDown = (event: KeyboardEvent) => {
-      const selection = window.getSelection();
-      if (!selection || selection.rangeCount === 0) return;
-
-      const range = selection.getRangeAt(0);
-
-      // Check if selection is inside any math formula
-      const startContainer = range.startContainer;
-      const endContainer = range.endContainer;
-
-      const startMathSpan = startContainer.nodeType === Node.TEXT_NODE
-        ? startContainer.parentElement?.closest('.math-formula') as HTMLElement
-        : startContainer.nodeType === Node.ELEMENT_NODE
-        ? (startContainer as Element).closest('.math-formula') as HTMLElement
-        : null;
-
-      const endMathSpan = endContainer.nodeType === Node.TEXT_NODE
-        ? endContainer.parentElement?.closest('.math-formula') as HTMLElement
-        : endContainer.nodeType === Node.ELEMENT_NODE
-        ? (endContainer as Element).closest('.math-formula') as HTMLElement
-        : null;
-
-      // If any part of the selection is inside a math span
-      const selectedMathSpan = startMathSpan || endMathSpan;
-
-      if (selectedMathSpan) {
-        // If a math span is selected and user presses delete/backspace
-        if (event.key === 'Delete' || event.key === 'Backspace') {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
+        // Check if active element is a math formula
+        const target = event.target as HTMLElement;
+        if (target.closest('.math-formula')) {
           event.preventDefault();
-          selectedMathSpan.remove();
-          return;
+          undoMathOperation();
         }
-
-        // Prevent cursor from entering math spans
-        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight' ||
-            event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-          // Allow navigation but ensure cursor doesn't get stuck
-          return;
-        }
-
-        // Prevent typing inside math spans
-        if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
-          event.preventDefault();
-          // Move cursor after the math span
-          const newRange = document.createRange();
-          newRange.setStartAfter(selectedMathSpan);
-          newRange.setEndAfter(selectedMathSpan);
-          selection.removeAllRanges();
-          selection.addRange(newRange);
-        }
-      }
-    };
-
-    // Handle click events on math spans to select them entirely
-    const handleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      const mathSpan = target.closest('.math-formula') as HTMLElement;
-
-      if (mathSpan) {
-        // Select the entire math span
-        const selection = window.getSelection();
-        const range = document.createRange();
-        range.selectNodeContents(mathSpan);
-        selection?.removeAllRanges();
-        selection?.addRange(range);
       }
     };
 
     // Add event listeners
     document.addEventListener('dblclick', handleDoubleClick);
     document.addEventListener('keydown', handleKeyDown);
-    //document.addEventListener('click', handleClick);
 
     // Cleanup
     return () => {
       document.removeEventListener('dblclick', handleDoubleClick);
       document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('click', handleClick);
     };
   }, []);
 
