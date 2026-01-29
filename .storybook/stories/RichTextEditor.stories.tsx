@@ -32,6 +32,11 @@ import {
   ChecklistPlugin,
   PreviewPlugin,
   FullscreenPlugin,
+  AnchorPlugin,
+  PrintPlugin,
+  PageBreakPlugin,
+  FootnotePlugin,
+  CodeSamplePlugin
 } from "@editora/plugins";
 import "@editora/themes/themes/default.css";
 
@@ -80,6 +85,11 @@ export const Default: Story = {
       ChecklistPlugin(),
       PreviewPlugin(),
       FullscreenPlugin(),
+      AnchorPlugin(),
+      PrintPlugin(),
+      PageBreakPlugin(),
+      FootnotePlugin(),
+      CodeSamplePlugin()
     ],
     mediaConfig: {
       uploadUrl: "/api/media/upload",

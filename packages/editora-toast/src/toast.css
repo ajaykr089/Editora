@@ -1,0 +1,42 @@
+/* Simple toast styles for editora-toast */
+.editora-toast-container {
+  position: fixed;
+  z-index: 2147483647;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.editora-toast {
+  min-width: 200px;
+  max-width: 360px;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  font-size: 13px;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transition: opacity 160ms ease, transform 180ms cubic-bezier(.2,.9,.25,1);
+}
+
+.editora-toast.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.editora-toast.success { background: #1b8c4a; }
+.editora-toast.error { background: #b02a37; }
+.editora-toast.info { background: #205081; }
+
+.editora-toast .close {
+  margin-left: 8px;
+  opacity: 0.85;
+  cursor: pointer;
+}

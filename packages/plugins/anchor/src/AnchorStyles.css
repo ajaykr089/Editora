@@ -1,0 +1,109 @@
+/**
+ * Anchor Plugin Styles
+ *
+ * Visual styling for anchor navigation targets.
+ * Anchors are invisible by default but visible on hover in edit mode.
+ */
+
+.rte-anchor {
+  display: inline;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rte-anchor[data-anchor-id] {
+  /* Anchors are inline and non-intrusive by default */
+}
+
+/* Show anchor marker on hover (editor only) */
+.rte-anchor:hover::before {
+  content: '⚓';
+  position: absolute;
+  top: -1.2em;
+  left: 0;
+  background: #333;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.8em;
+  white-space: nowrap;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.rte-anchor:hover::after {
+  content: attr(data-anchor-id);
+  position: absolute;
+  top: -1.2em;
+  left: 1.4em;
+  background: #333;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.75em;
+  font-family: 'Courier New', monospace;
+  white-space: nowrap;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Optional: Visual indicator for anchors in editor */
+[contenteditable='true'] .rte-anchor::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #0066cc;
+  border-radius: 50%;
+  top: -3px;
+  left: 0;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+[contenteditable='true'] .rte-anchor:hover::before {
+  opacity: 1;
+  width: auto;
+  height: auto;
+  background: #333;
+  border-radius: 3px;
+  top: -1.2em;
+  padding: 2px 6px;
+  font-size: 0.8em;
+  content: '⚓';
+}
+
+/* Print: Preserve IDs but make inert */
+@media print {
+  .rte-anchor::before,
+  .rte-anchor::after {
+    display: none;
+  }
+
+  .rte-anchor {
+    cursor: auto;
+  }
+}
+
+/* Selection styling */
+.rte-anchor::selection {
+  background: transparent;
+}
+
+/* Focus state for accessibility */
+.rte-anchor:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}
+
+/* Draggable anchor (future feature) */
+.rte-anchor[draggable='true'] {
+  cursor: move;
+  opacity: 0.8;
+}
+
+.rte-anchor[draggable='true']:hover {
+  opacity: 1;
+  background: rgba(0, 102, 204, 0.1);
+}

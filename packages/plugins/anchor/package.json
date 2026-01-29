@@ -1,0 +1,44 @@
+{
+  "name": "@editora/anchor",
+  "version": "1.0.0",
+  "description": "Anchor plugin for Rich Text Editor - Create named navigation targets",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "vite build"
+  },
+  "keywords": [
+    "editor",
+    "anchor",
+    "link",
+    "navigation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Rich-Text-Editor.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "peerDependenciesMeta": {
+    "editora-toast": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@editora/core": "workspace:*",
+    "@editora/toast": "workspace:*"
+  },
+  "devDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "@editora/print",
+  "version": "1.0.0",
+  "description": "Print plugin for Rich Text Editor - Clone content to print-safe DOM",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "vite build"
+  },
+  "keywords": [
+    "editor",
+    "print",
+    "page-break",
+    "document"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Rich-Text-Editor.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@editora/core": "workspace:*"
+  },
+  "devDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  }
+}

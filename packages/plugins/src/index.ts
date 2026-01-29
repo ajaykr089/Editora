@@ -33,6 +33,11 @@ export { CodePlugin } from '../code/src/index';
 export { ChecklistPlugin } from '../checklist/src/index';
 export { PreviewPlugin, PreviewPluginProvider } from "../preview/src/index";
 export { FullscreenPlugin, FullscreenPluginProvider, useFullscreen } from '../fullscreen/src/index';
+export { PrintPlugin } from '../print/src/index';
+export { PageBreakPlugin, PageBreakPluginProvider } from '../page-break/src/index';
+export { FootnotePlugin, FootnotePluginProvider } from '../footnote/src/index';
+export { CodeSamplePlugin, CodeSamplePluginProvider } from '../code-sample/src/index';
+export { AnchorPlugin, AnchorPluginProvider } from '../anchor/src/index';
 
 // Shared API configuration for all plugins
 export { setGlobalApiConfig, getGlobalApiConfig, getGlobalApiHeaders, buildApiUrl } from './shared-config';

@@ -20,6 +20,7 @@
     "baseUrl": ".",
     "paths": {
       "@editora/core": ["packages/core/src"],
+      "@editora/toast": ["packages/editora-toast/src"],
       "@editora/react": ["packages/react/src"],
       "@editora/themes": ["packages/themes/src"],
       "@editora/plugins": ["packages/plugins"],

@@ -1,5 +1,4 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'path';
 
 export default defineConfig({
   build: {
@@ -9,7 +8,7 @@ export default defineConfig({
       fileName: (format) => `index.${format === 'es' ? 'esm' : 'cjs'}.js`
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime', '@editora/core', '@editora/toast']
+      external: ['react', 'react-dom', 'react/jsx-runtime', '@editora/core']
     }
   }
 });
