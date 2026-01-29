@@ -1,5 +1,6 @@
 import { Plugin } from '@editora/core';
 import { CodeSamplePluginProvider } from './CodeSamplePluginProvider';
+// Prism theme CSS will be loaded dynamically when Prism is initialized
 
 /**
  * Code Sample Plugin for Rich Text Editor
@@ -255,24 +256,74 @@ export const validateCodeBlocks = (): boolean => {
 
 /**
  * Apply syntax highlighting to code element
- * Uses language class for CSS-based highlighting or external library
+ * Uses language class for CSS-based highlighting or external Prism library
+ * 
+ * Note: Prism.js is optional. If available (via CDN, npm, or other means),
+ * it will be used for syntax highlighting. Otherwise, basic CSS-based
+ * highlighting with the language class is applied.
  */
 function applySyntaxHighlighting(codeEl: HTMLCodeElement, language: string) {
-  // Add language class for CSS highlighting
+  // Add language class for CSS-based highlighting (always applied)
   codeEl.className = `language-${language}`;
-  
-  // If Highlight.js or Prism is available, use it
-  if (typeof (window as any).hljs !== 'undefined') {
-    try {
-      (window as any).hljs.highlightElement(codeEl);
-    } catch (e) {
-      console.warn('Failed to apply Highlight.js highlighting:', e);
-    }
-  } else if (typeof (window as any).Prism !== 'undefined') {
+
+  // Check for global Prism first (from host app, CDN, or previous import)
+  if (typeof (window as any).Prism !== 'undefined') {
     try {
       (window as any).Prism.highlightElement(codeEl);
+      return;
     } catch (e) {
-      console.warn('Failed to apply Prism highlighting:', e);
+      console.warn(`[CodeSample] Prism highlighting for ${language} failed:`, e);
+      return;
     }
+  }
+
+  // Try dynamic import as fallback (not bundled with plugins, handled by host app)
+  ensurePrism().then((Prism) => {
+    if (!Prism) return;
+    try {
+      Prism.highlightElement(codeEl);
+    } catch (e) {
+      console.warn(`[CodeSample] Prism highlighting for ${language} failed:`, e);
+    }
+  }).catch(() => {
+    // Silently fail; code block will display with language class applied
+    // Host app can provide CSS-based highlighting as fallback
+  });
+}
+
+let _prismLoadAttempted = false;
+let _Prism: any = null;
+
+/**
+ * Attempt to dynamically import Prism at runtime
+ * This is a fallback if Prism is not provided by the host application
+ */
+async function ensurePrism(): Promise<any | null> {
+  if (_prismLoadAttempted) return _Prism;
+  
+  try {
+    // Dynamic import requires Prism to be installed as a dependency
+    // and available in node_modules (not bundled in plugins package)
+    const prism = await import('prismjs');
+    _Prism = prism.default || prism;
+    _prismLoadAttempted = true;
+    return _Prism;
+  } catch (e) {
+    _prismLoadAttempted = true;
+    // Prism not available; code blocks will use CSS-based highlighting
+    // Host app should provide Prism via CDN or npm for syntax highlighting
+    return null;
+  }
+}
+
+/**
+ * Attempt to load a Prism language component dynamically
+ */
+export async function loadPrismLanguage(language: string) {
+  try {
+    // Prism component names sometimes differ (e.g., 'csharp' => 'csharp')
+    await import(`prismjs/components/prism-${language}.js`);
+  } catch (e) {
+    // ignore missing language
   }
 }
