@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { MathProvider } from './MathProvider';
 import katex from 'katex';
 import {
   convertMathMLToLatexManual
@@ -627,7 +628,10 @@ export const MathPlugin = (): Plugin => ({
       command: 'insertMath',
       icon: '∑'
     }
-  ]
+  ],
+  context: {
+    provider: MathProvider
+  }
 });
 
 // Clipboard Support - Phase 1 Implementation

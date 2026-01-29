@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { ListPluginProvider } from './ListPluginProvider';
 
 export const ListPlugin = (): Plugin => ({
   name: 'list',
@@ -32,5 +33,8 @@ export const ListPlugin = (): Plugin => ({
       command: 'toggleOrderedList',
       icon: '1.'
     }
-  ]
+  ],
+  context: {
+    provider: ListPluginProvider
+  }
 });

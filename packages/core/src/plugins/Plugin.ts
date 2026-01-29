@@ -1,5 +1,6 @@
 import { Schema, NodeSpec } from '../schema/Node';
 import { EditorState } from '../EditorState';
+import React from 'react';
 
 export interface ToolbarItem {
   label: string;
@@ -10,12 +11,20 @@ export interface ToolbarItem {
   placeholder?: string;
 }
 
+export interface PluginContext {
+  provider?: React.FC<{ children: React.ReactNode }>;
+  initialize?: () => void;
+  destroy?: () => void;
+  onEditorReady?: (editor: any) => void;
+}
+
 export interface Plugin {
   name: string;
   nodes?: Record<string, NodeSpec>;
   marks?: Record<string, NodeSpec>;
   commands?: Record<string, (state: EditorState) => EditorState | null>;
   toolbar?: ToolbarItem[];
+  context?: PluginContext;
 }
 
 export class PluginManager {

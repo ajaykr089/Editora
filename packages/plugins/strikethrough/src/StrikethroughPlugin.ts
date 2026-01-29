@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { StrikethroughPluginProvider } from './StrikethroughPluginProvider';
 
 export const StrikethroughPlugin = (): Plugin => ({
   name: 'strikethrough',
@@ -18,5 +19,8 @@ export const StrikethroughPlugin = (): Plugin => ({
       command: 'toggleStrikethrough',
       icon: 'S̶'
     }
-  ]
+  ],
+  context: {
+    provider: StrikethroughPluginProvider
+  }
 });

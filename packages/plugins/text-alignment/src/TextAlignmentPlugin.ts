@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { TextAlignmentProvider } from './TextAlignmentProvider';
 
 /**
  * Text Alignment Plugin for Rich Text Editor
@@ -20,7 +21,10 @@ export const TextAlignmentPlugin = (): Plugin => ({
         { label: 'Justify', value: 'justify' }
       ]
     }
-  ]
+  ],
+  context: {
+    provider: TextAlignmentProvider
+  }
 });
 
 /**

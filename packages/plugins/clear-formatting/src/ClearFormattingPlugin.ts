@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { ClearFormattingPluginProvider } from './ClearFormattingPluginProvider';
 
 export const ClearFormattingPlugin = (): Plugin => ({
   name: 'clearFormatting',
@@ -6,7 +7,10 @@ export const ClearFormattingPlugin = (): Plugin => ({
     {
       label: 'Clear Formatting',
       command: 'clearFormatting',
-      icon: '⌫'
+      icon: '␃'
     }
-  ]
+  ],
+  context: {
+    provider: ClearFormattingPluginProvider
+  }
 });

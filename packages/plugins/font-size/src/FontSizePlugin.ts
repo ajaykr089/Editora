@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { FontSizeProvider } from './FontSizeProvider';
 
 /**
  * Font Size Plugin for Rich Text Editor
@@ -25,7 +26,10 @@ export const FontSizePlugin = (): Plugin => ({
       command: 'increaseFontSize',
       icon: '+'
     }
-  ]
+  ],
+  context: {
+    provider: FontSizeProvider
+  }
 });
 
 /**

@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { BlockquotePluginProvider } from './BlockquotePluginProvider';
 
 export const BlockquotePlugin = (): Plugin => ({
   name: 'blockquote',
@@ -16,5 +17,8 @@ export const BlockquotePlugin = (): Plugin => ({
       command: 'toggleBlockquote',
       icon: '❝'
     }
-  ]
+  ],
+  context: {
+    provider: BlockquotePluginProvider
+  }
 });
