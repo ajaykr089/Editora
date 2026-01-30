@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from 'react';
+// TypeScript module declaration for import resolution
+// This is a workaround for missing type declaration errors in sibling imports
+// Remove if/when a .d.ts file is generated for this file
+declare module './SpellCheckPluginProvider';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   scanDocumentForMisspellings,
   getSpellCheckStats,
@@ -7,7 +11,8 @@ import {
   getSuggestions,
   replaceWord,
   ignoreWord,
-  addToDictionary
+  addToDictionary,
+  attachSpellCheckContextMenu
 } from './SpellCheckPlugin';
 
 /**
@@ -97,8 +102,8 @@ const MisspellingsList: React.FC<{
     setExpandedWords(newExpanded);
   };
 
-  const handleReplace = (oldWord: string, newWord: string) => {
-    replaceWord(oldWord, newWord);
+  const handleReplace = (issue: any, newWord: string) => {
+    replaceWord(issue, newWord);
     setMisspellings(scanDocumentForMisspellings());
   };
 
@@ -138,7 +143,7 @@ const MisspellingsList: React.FC<{
                       <button
                         key={i}
                         className="suggestion-btn"
-                        onClick={() => handleReplace(result.word, suggestion)}
+                        onClick={() => handleReplace(result, suggestion)}
                       >
                         {suggestion}
                       </button>
@@ -180,26 +185,55 @@ interface SpellCheckPluginProviderProps {
 
 export const SpellCheckPluginProvider: React.FC<SpellCheckPluginProviderProps> = ({ children }) => {
   const [isSpellCheckEnabled, setIsSpellCheckEnabled] = useState(false);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const observerRef = useRef<MutationObserver | null>(null);
 
+  // Attach context menu once
   useEffect(() => {
-    // Register toggle command
-    (window as any).registerEditorCommand?.('toggleSpellCheck', () => {
-      setIsSpellCheckEnabled(!isSpellCheckEnabled);
-      if (!isSpellCheckEnabled) {
-        highlightMisspelledWords();
-      } else {
-        clearSpellCheckHighlights();
+    attachSpellCheckContextMenu();
+  }, []);
+
+  // Debounced highlight function
+  const debouncedHighlight = () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      if (isSpellCheckEnabled) highlightMisspelledWords();
+    }, 350);
+  };
+
+  // MutationObserver for incremental spell check
+  useEffect(() => {
+    const editor = document.querySelector('[contenteditable="true"]');
+    if (!editor) return;
+    if (observerRef.current) observerRef.current.disconnect();
+    if (!isSpellCheckEnabled) return;
+    observerRef.current = new MutationObserver((mutations) => {
+      // Only trigger on text/content changes
+      if (mutations.some(m => m.type === 'characterData' || m.type === 'childList')) {
+        debouncedHighlight();
       }
     });
+    observerRef.current.observe(editor, {
+      characterData: true,
+      childList: true,
+      subtree: true
+    });
+    return () => observerRef.current?.disconnect();
+  }, [isSpellCheckEnabled]);
 
-    // Listen for close button event from panel
-    const closeListener = () => setIsSpellCheckEnabled(false);
-    window.addEventListener('rte-close-spellcheck-panel', closeListener);
-    // Initial highlighting
-    highlightMisspelledWords();
-    return () => {
-      window.removeEventListener('rte-close-spellcheck-panel', closeListener);
-    };
+  // Register toggle command and initial highlight
+  useEffect(() => {
+    (window as any).registerEditorCommand?.('toggleSpellCheck', () => {
+      setIsSpellCheckEnabled(prev => {
+        const next = !prev;
+        if (next) highlightMisspelledWords();
+        else clearSpellCheckHighlights();
+        return next;
+      });
+    });
+    // Initial highlight if enabled
+    if (isSpellCheckEnabled) highlightMisspelledWords();
+    else clearSpellCheckHighlights();
   }, [isSpellCheckEnabled]);
 
   // Handler for close button

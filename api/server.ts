@@ -4,7 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { Document, Packer, Paragraph, TextRun, Table, TableCell, TableRow, HeadingLevel } from 'docx';
-import pool from './media/db';
+import pool from './db/db';
 import { RowDataPacket } from 'mysql2';
 
 const app = express();
@@ -81,21 +81,21 @@ app.post('/api/media/upload', upload.single('file'), async (req, res) => {
 
 app.get('/api/media/library', async (req, res) => {
   const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 20;
+  const limit = Math.max(1, Math.min(100, parseInt(req.query.limit as string) || 20)); // clamp for safety
   const offset = (page - 1) * limit;
 
   try {
-    const [rows] = await pool.execute<RowDataPacket[]>(
-      `SELECT id, filename, original_filename AS name, url, thumbnail_url AS thumbnailUrl, type, file_size AS size, width, height, folder_id, created_at AS createdAt 
-       FROM media 
-       WHERE deleted_at IS NULL AND status = 'ready' 
-       ORDER BY created_at DESC 
-       LIMIT ? OFFSET ?`,
-      [limit, offset]
-    );
+    const sql = `
+      SELECT id, filename, original_filename AS name, url, thumbnail_url AS thumbnailUrl, type, file_size AS size, width, height, folder_id, created_at AS createdAt 
+      FROM media 
+      WHERE deleted_at IS NULL AND status = 'ready' 
+      ORDER BY created_at DESC 
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+    const [rows] = await pool.execute<RowDataPacket[]>(sql);
 
     const [countResult] = await pool.execute<RowDataPacket[]>(
-      'SELECT COUNT(*) as total FROM media WHERE deleted_at IS NULL AND status = \'ready\''
+      "SELECT COUNT(*) as total FROM media WHERE deleted_at IS NULL AND status = 'ready'"
     );
 
     res.json({

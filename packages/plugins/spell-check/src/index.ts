@@ -1,7 +1,6 @@
 export { SpellCheckPlugin } from './SpellCheckPlugin';
-export type { SpellCheckResult, DictionaryEntry } from './SpellCheckPlugin';
+export type { SpellCheckIssue, DictionaryProvider } from './SpellCheckPlugin';
 export {
-  isWordMisspelled,
   getSuggestions,
   scanDocumentForMisspellings,
   addToDictionary,
