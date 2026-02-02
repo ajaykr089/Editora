@@ -69,6 +69,33 @@
   color: var(--rte-color-text-inverse);
 }
 
+/* Dark theme - More Button */
+[data-theme="dark"] .rte-toolbar-more-button,
+.dark .rte-toolbar-more-button {
+  background-color: var(--rte-color-bg-secondary);
+  border-color: var(--rte-color-border);
+  color: var(--rte-color-text-secondary);
+}
+
+[data-theme="dark"] .rte-toolbar-more-button:hover,
+.dark .rte-toolbar-more-button:hover {
+  background-color: var(--rte-color-bg-hover);
+  color: var(--rte-color-text-primary);
+}
+
+[data-theme="dark"] .rte-toolbar-more-button.active,
+.dark .rte-toolbar-more-button.active {
+  background-color: var(--rte-color-bg-tertiary);
+  border-color: var(--rte-color-border);
+}
+
+/* Dark theme - Expanded row */
+[data-theme="dark"] .rte-toolbar-expanded-row,
+.dark .rte-toolbar-expanded-row {
+  background-color: var(--rte-color-bg-secondary);
+  border-color: var(--rte-color-border);
+}
+
 [data-theme="dark"] .rte-content,
 .dark .rte-content {
   color: var(--rte-color-text-primary);

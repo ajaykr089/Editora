@@ -37,10 +37,6 @@ export const HeadingPluginProvider: React.FC<{ children: React.ReactNode }> = ({
             range: range,
             container: contentEl
           };
-          console.log('Selection saved:', {
-            startOffset: savedSelection.range.startOffset,
-            endOffset: savedSelection.range.endOffset
-          });
         } catch (e) {
           console.error('Error saving selection:', e);
         }

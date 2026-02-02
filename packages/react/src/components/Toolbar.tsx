@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Editor } from '@editora/core';
 import { ToolbarItem } from '@editora/core';
 import { EditorIcons, EditorIconName } from './EditorIcons';
@@ -20,8 +20,77 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [openInlineMenu, setOpenInlineMenu] = useState<string | null>(null);
   const [storedSelection, setStoredSelection] = useState<Range | null>(null);
+  const [visibleCount, setVisibleCount] = useState<number | null>(null);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const buttonRefs = useRef<Record<string, React.RefObject<HTMLButtonElement>>>({});
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const itemsContainerRef = useRef<HTMLDivElement>(null);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
   const items = editor.pluginManager.getToolbarItems();
+
+  // Calculate visible items based on available space
+  useEffect(() => {
+    const calculateVisibleItems = () => {
+      if (!toolbarRef.current || !itemsContainerRef.current) return;
+
+      const toolbarWidth = toolbarRef.current.clientWidth;
+      const padding = 16; // 8px on each side
+      const moreButtonWidth = 40; // Width of more button
+      const gap = 4; // Gap between items
+      const availableWidth = toolbarWidth - padding - moreButtonWidth - gap;
+
+      let accumulatedWidth = 0;
+      let count = 0;
+
+      const itemElements = itemsContainerRef.current.children;
+      for (let i = 0; i < itemElements.length; i++) {
+        const element = itemElements[i] as HTMLElement;
+        const itemWidth = element.offsetWidth + gap;
+
+        if (accumulatedWidth + itemWidth <= availableWidth) {
+          accumulatedWidth += itemWidth;
+          count++;
+        } else {
+          break;
+        }
+      }
+
+      // Ensure at least one item is visible
+      setVisibleCount(Math.max(1, count));
+    };
+
+    // Use requestAnimationFrame to ensure DOM is ready
+    const rafId = requestAnimationFrame(() => {
+      calculateVisibleItems();
+    });
+
+    // Recalculate on window/container resize
+    const resizeObserver = new ResizeObserver(() => {
+      calculateVisibleItems();
+    });
+    
+    if (toolbarRef.current) {
+      resizeObserver.observe(toolbarRef.current);
+    }
+
+    // Watch for DOM changes (new items added)
+    const mutationObserver = new MutationObserver(() => {
+      calculateVisibleItems();
+    });
+
+    if (itemsContainerRef.current) {
+      mutationObserver.observe(itemsContainerRef.current, {
+        childList: true,
+        subtree: true
+      });
+    }
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+    };
+  }, [items.length]);
 
   const getButtonRef = (command: string) => {
     if (!buttonRefs.current[command]) {
@@ -157,79 +226,183 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
   return (
     <>
-      <div className="rte-toolbar" style={toolbarStyle}>
-        {items.map((item, idx) => (
-          <div key={idx} className="rte-toolbar-item">
-            {item.type === 'dropdown' ? (
-              <div className="rte-toolbar-dropdown">
-                <button
-                  className="rte-toolbar-button"
-                  data-command={item.command}
-                  data-active="false"
-                  onClick={() => handleDropdownOpen(item.command)}
-                >
-                  {item.label} ▼
-                </button>
-                {openDropdown === item.command && (
-                  <div className="rte-toolbar-dropdown-menu">
-                    {item.options?.map((opt) => (
-                      <div
-                        key={opt.value}
-                        className="rte-toolbar-dropdown-item"
-                        onClick={() => handleCommand(item.command, opt.value)}
-                      >
-                        {opt.label}
+      <div className="rte-toolbar-wrapper" style={toolbarStyle}>
+        {/* Main toolbar row */}
+        <div className="rte-toolbar" ref={toolbarRef}>
+          <div className="rte-toolbar-items-container" ref={itemsContainerRef}>
+            {items.map((item, idx) => (
+              <div 
+                key={idx} 
+                className="rte-toolbar-item"
+                style={{
+                  display: visibleCount !== null && idx >= visibleCount ? 'none' : 'flex'
+                }}
+              >
+                {item.type === 'dropdown' ? (
+                  <div className="rte-toolbar-dropdown">
+                    <button
+                      className="rte-toolbar-button"
+                      data-command={item.command}
+                      data-active="false"
+                      onClick={() => handleDropdownOpen(item.command)}
+                    >
+                      {item.label} ▼
+                    </button>
+                    {openDropdown === item.command && (
+                      <div className="rte-toolbar-dropdown-menu">
+                        {item.options?.map((opt) => (
+                          <div
+                            key={opt.value}
+                            className="rte-toolbar-dropdown-item"
+                            onClick={() => handleCommand(item.command, opt.value)}
+                          >
+                            {opt.label}
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
                   </div>
+                ) : item.type === 'inline-menu' ? (
+                  <div className="rte-toolbar-inline-menu">
+                    <button
+                      ref={getButtonRef(item.command)}
+                      className="rte-toolbar-button"
+                      data-command={item.command}
+                      data-active="false"
+                      onClick={() => handleInlineMenuOpen(item.command)}
+                      title={item.label}
+                    >
+                      {renderIcon(item.icon, item.command)}
+                    </button>
+                    <InlineMenu
+                      isOpen={openInlineMenu === item.command}
+                      options={item.options || []}
+                      onSelect={(value) => handleInlineMenuSelect(item.command, value)}
+                      onClose={() => setOpenInlineMenu(null)}
+                      anchorRef={getButtonRef(item.command)}
+                    />
+                  </div>
+                ) : item.type === 'input' ? (
+                  <input
+                    type="text"
+                    className="rte-toolbar-input"
+                    placeholder={item.placeholder}
+                    onChange={(e) => handleCommand(item.command, e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleCommand(item.command, (e.target as HTMLInputElement).value);
+                      }
+                    }}
+                    title={item.label}
+                  />
+                ) : (
+                  <button
+                    className="rte-toolbar-button"
+                    data-command={item.command}
+                    data-active="false"
+                    onClick={() => handleCommand(item.command)}
+                    title={item.label}
+                  >
+                    {renderIcon(item.icon, item.command)}
+                  </button>
                 )}
               </div>
-            ) : item.type === 'inline-menu' ? (
-              <div className="rte-toolbar-inline-menu">
-                <button
-                  ref={getButtonRef(item.command)}
-                  className="rte-toolbar-button"
-                  data-command={item.command}
-                  data-active="false"
-                  onClick={() => handleInlineMenuOpen(item.command)}
-                  title={item.label}
-                >
-                  {renderIcon(item.icon, item.command)}
-                </button>
-                <InlineMenu
-                  isOpen={openInlineMenu === item.command}
-                  options={item.options || []}
-                  onSelect={(value) => handleInlineMenuSelect(item.command, value)}
-                  onClose={() => setOpenInlineMenu(null)}
-                  anchorRef={getButtonRef(item.command)}
-                />
-              </div>
-            ) : item.type === 'input' ? (
-              <input
-                type="text"
-                className="rte-toolbar-input"
-                placeholder={item.placeholder}
-                onChange={(e) => handleCommand(item.command, e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleCommand(item.command, (e.target as HTMLInputElement).value);
-                  }
-                }}
-                title={item.label}
-              />
-            ) : (
-              <button
-                className="rte-toolbar-button"
-                data-command={item.command}
-                data-active="false"
-                onClick={() => handleCommand(item.command)}
-                title={item.label}
-              >
-                {renderIcon(item.icon, item.command)}
-              </button>
-            )}
+            ))}
           </div>
-        ))}
+
+          {/* More button - only show if there are hidden items */}
+          {visibleCount !== null && visibleCount < items.length && (
+            <button
+              ref={moreButtonRef}
+              className={`rte-toolbar-more-button ${showMoreMenu ? 'active' : ''}`}
+              onClick={() => setShowMoreMenu(!showMoreMenu)}
+              title="Show more options"
+              aria-label="More toolbar options"
+            >
+              ☰
+            </button>
+          )}
+        </div>
+
+        {/* Hidden items expansion row - slides down inline */}
+        {visibleCount !== null && visibleCount < items.length && (
+          <div className={`rte-toolbar-expanded-row ${showMoreMenu ? 'show' : ''}`}>
+            {items.map((item, idx) => (
+              idx >= (visibleCount || 0) && (
+                <div key={idx} className="rte-toolbar-item">
+                  {item.type === 'dropdown' ? (
+                    <div className="rte-toolbar-dropdown">
+                      <button
+                        className="rte-toolbar-button"
+                        data-command={item.command}
+                        data-active="false"
+                        onClick={() => handleDropdownOpen(item.command)}
+                      >
+                        {item.label} ▼
+                      </button>
+                      {openDropdown === item.command && (
+                        <div className="rte-toolbar-dropdown-menu">
+                          {item.options?.map((opt) => (
+                            <div
+                              key={opt.value}
+                              className="rte-toolbar-dropdown-item"
+                              onClick={() => handleCommand(item.command, opt.value)}
+                            >
+                              {opt.label}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : item.type === 'inline-menu' ? (
+                    <div className="rte-toolbar-inline-menu">
+                      <button
+                        ref={getButtonRef(item.command)}
+                        className="rte-toolbar-button"
+                        data-command={item.command}
+                        data-active="false"
+                        onClick={() => handleInlineMenuOpen(item.command)}
+                        title={item.label}
+                      >
+                        {renderIcon(item.icon, item.command)}
+                      </button>
+                      <InlineMenu
+                        isOpen={openInlineMenu === item.command}
+                        options={item.options || []}
+                        onSelect={(value) => handleInlineMenuSelect(item.command, value)}
+                        onClose={() => setOpenInlineMenu(null)}
+                        anchorRef={getButtonRef(item.command)}
+                      />
+                    </div>
+                  ) : item.type === 'input' ? (
+                    <input
+                      type="text"
+                      className="rte-toolbar-input"
+                      placeholder={item.placeholder}
+                      onChange={(e) => handleCommand(item.command, e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleCommand(item.command, (e.target as HTMLInputElement).value);
+                        }
+                      }}
+                      title={item.label}
+                    />
+                  ) : (
+                    <button
+                      className="rte-toolbar-button"
+                      data-command={item.command}
+                      data-active="false"
+                      onClick={() => handleCommand(item.command)}
+                      title={item.label}
+                    >
+                      {renderIcon(item.icon, item.command)}
+                    </button>
+                  )}
+                </div>
+              )
+            ))}
+          </div>
+        )}
       </div>
     </>
   );
