@@ -1,20 +1,50 @@
 {
   "name": "@editora/plugins",
   "version": "1.0.0",
-  "description": "Plugin collection for Editora Rich Text Editor",
-  "authors": [
-    "Ajay Kumar <ajaykr089@gmail.com>"
+  "description": "Comprehensive plugin collection for Editora Rich Text Editor with 40+ plugins",
+  "author": "Ajay Kumar <ajaykr089@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Rich-Text-Editor.git",
+    "directory": "packages/plugins"
+  },
+  "homepage": "https://github.com/ajaykr089/Rich-Text-Editor#readme",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Rich-Text-Editor/issues"
+  },
+  "keywords": [
+    "editor-plugins",
+    "rich-text",
+    "formatting",
+    "toolbar",
+    "wysiwyg",
+    "text-formatting",
+    "markdown",
+    "accessibility",
+    "math-editor",
+    "code-editor"
   ],
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    }
+  },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
     "@editora/core": "^1.0.0"
@@ -29,7 +59,7 @@
     "typescript": "^5.0.0",
     "vite": "^7.3.1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "publishConfig": {
+    "access": "public"
+  }
 }

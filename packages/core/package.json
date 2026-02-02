@@ -1,23 +1,53 @@
 {
   "name": "@editora/core",
   "version": "1.0.0",
-  "authors": [
-    "Ajay Kumar <ajaykr089@gmail.com>"
+  "description": "Framework-agnostic core editor engine for Editora Rich Text Editor",
+  "author": "Ajay Kumar <ajaykr089@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Rich-Text-Editor.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/ajaykr089/Rich-Text-Editor#readme",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Rich-Text-Editor/issues"
+  },
+  "keywords": [
+    "editor",
+    "rich-text",
+    "wysiwyg",
+    "contenteditable",
+    "prosemirror",
+    "framework-agnostic",
+    "typescript"
   ],
-  "description": "Framework-agnostic core editor engine",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    }
+  },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
     "vite": "^7.3.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

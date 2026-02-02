@@ -1,26 +1,57 @@
 {
   "name": "@editora/themes",
   "version": "1.0.0",
-  "description": "Themes and styling for Editora Rich Text Editor",
-  "authors": [
-    "Ajay Kumar <ajaykr089@gmail.com>"
+  "description": "Themes and styling system for Editora Rich Text Editor with light/dark mode support",
+  "author": "Ajay Kumar <ajaykr089@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Rich-Text-Editor.git",
+    "directory": "packages/themes"
+  },
+  "homepage": "https://github.com/ajaykr089/Rich-Text-Editor#readme",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Rich-Text-Editor/issues"
+  },
+  "keywords": [
+    "themes",
+    "styling",
+    "css",
+    "dark-mode",
+    "light-mode",
+    "design-system",
+    "css-variables"
   ],
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "style": "src/index.css",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./styles": "./src/index.css"
+  },
   "files": [
     "dist",
     "src/*.css",
-    "src/themes/*.css"
+    "src/themes/*.css",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
     "vite": "^7.3.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

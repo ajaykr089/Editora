@@ -1,0 +1,43 @@
+# Development files
+src/
+**/__tests__/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+*.stories.tsx
+*.stories.ts
+
+# Build tools
+tsconfig.json
+vite.config.ts
+.eslintrc
+.prettierrc
+
+# Documentation (except README)
+docs/
+stories/
+examples/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules/
+
+# Misc
+.DS_Store
+*.tgz

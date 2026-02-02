@@ -8,11 +8,20 @@
   "command": {
     "publish": {
       "conventionalCommits": true,
-      "message": "chore(release): publish %s"
+      "message": "chore(release): publish %s",
+      "registry": "https://registry.npmjs.org/",
+      "ignoreChanges": [
+        "**/*.md",
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/stories/**"
+      ]
     },
     "version": {
       "conventionalCommits": true,
-      "message": "chore(release): bump version to %s"
+      "message": "chore(release): bump version to %s",
+      "allowBranch": ["main", "develop"],
+      "createRelease": "github"
     }
   }
 }

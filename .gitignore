@@ -46,3 +46,5 @@ node_modules/
 dist/
 build/
 .cache/
+api/media/uploads/
+docs/

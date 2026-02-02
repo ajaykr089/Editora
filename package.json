@@ -19,7 +19,15 @@
     "typecheck": "tsc --noEmit",
     "dev": "lerna run dev",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "publish:all": "lerna publish",
+    "publish:canary": "lerna publish --canary",
+    "version": "lerna version",
+    "prerelease": "npm run clean && npm run build && npm run test",
+    "release": "lerna publish --conventional-commits",
+    "release:patch": "lerna version patch --conventional-commits",
+    "release:minor": "lerna version minor --conventional-commits",
+    "release:major": "lerna version major --conventional-commits"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.6.0",
