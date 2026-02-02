@@ -118,7 +118,8 @@ export const InlineMenu: React.FC<InlineMenuProps> = ({
         borderRadius: '4px',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
         minWidth: '120px',
-        maxWidth: '200px'
+        maxWidth: '200px',
+        pointerEvents: 'auto'
       }}
     >
       {options.map((option) => (

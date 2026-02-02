@@ -267,25 +267,16 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     )}
                   </div>
                 ) : item.type === 'inline-menu' ? (
-                  <div className="rte-toolbar-inline-menu">
-                    <button
-                      ref={getButtonRef(item.command)}
-                      className="rte-toolbar-button"
-                      data-command={item.command}
-                      data-active="false"
-                      onClick={() => handleInlineMenuOpen(item.command)}
-                      title={item.label}
-                    >
-                      {renderIcon(item.icon, item.command)}
-                    </button>
-                    <InlineMenu
-                      isOpen={openInlineMenu === item.command}
-                      options={item.options || []}
-                      onSelect={(value) => handleInlineMenuSelect(item.command, value)}
-                      onClose={() => setOpenInlineMenu(null)}
-                      anchorRef={getButtonRef(item.command)}
-                    />
-                  </div>
+                  <button
+                    ref={getButtonRef(item.command)}
+                    className="rte-toolbar-button"
+                    data-command={item.command}
+                    data-active="false"
+                    onClick={() => handleInlineMenuOpen(item.command)}
+                    title={item.label}
+                  >
+                    {renderIcon(item.icon, item.command)}
+                  </button>
                 ) : item.type === 'input' ? (
                   <input
                     type="text"
@@ -359,25 +350,16 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       )}
                     </div>
                   ) : item.type === 'inline-menu' ? (
-                    <div className="rte-toolbar-inline-menu">
-                      <button
-                        ref={getButtonRef(item.command)}
-                        className="rte-toolbar-button"
-                        data-command={item.command}
-                        data-active="false"
-                        onClick={() => handleInlineMenuOpen(item.command)}
-                        title={item.label}
-                      >
-                        {renderIcon(item.icon, item.command)}
-                      </button>
-                      <InlineMenu
-                        isOpen={openInlineMenu === item.command}
-                        options={item.options || []}
-                        onSelect={(value) => handleInlineMenuSelect(item.command, value)}
-                        onClose={() => setOpenInlineMenu(null)}
-                        anchorRef={getButtonRef(item.command)}
-                      />
-                    </div>
+                    <button
+                      ref={getButtonRef(item.command)}
+                      className="rte-toolbar-button"
+                      data-command={item.command}
+                      data-active="false"
+                      onClick={() => handleInlineMenuOpen(item.command)}
+                      title={item.label}
+                    >
+                      {renderIcon(item.icon, item.command)}
+                    </button>
                   ) : item.type === 'input' ? (
                     <input
                       type="text"
@@ -408,6 +390,23 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           </div>
         )}
       </div>
+
+      {/* Render all inline menus outside toolbar items to prevent width issues */}
+      {items.map((item) => {
+        if (item.type === 'inline-menu') {
+          return (
+            <InlineMenu
+              key={`menu-${item.command}`}
+              isOpen={openInlineMenu === item.command}
+              options={item.options || []}
+              onSelect={(value) => handleInlineMenuSelect(item.command, value)}
+              onClose={() => setOpenInlineMenu(null)}
+              anchorRef={getButtonRef(item.command)}
+            />
+          );
+        }
+        return null;
+      })}
     </>
   );
 };
