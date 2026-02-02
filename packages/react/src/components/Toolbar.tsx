@@ -6,10 +6,16 @@ import { InlineMenu, InlineMenuOption } from './InlineMenu';
 
 interface ToolbarProps {
   editor: Editor;
+  position?: 'top' | 'bottom';
+  sticky?: boolean;
+  floating?: boolean;
 }
 
 export const Toolbar: React.FC<ToolbarProps> = ({
-  editor
+  editor,
+  position = 'top',
+  sticky = false,
+  floating = false
 }) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [openInlineMenu, setOpenInlineMenu] = useState<string | null>(null);
@@ -131,9 +137,27 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     return iconName || '⚪';
   };
 
+  // Don't render toolbar if floating mode is enabled (FloatingToolbar will handle it)
+  if (floating) {
+    return null;
+  }
+
+  const toolbarStyle: React.CSSProperties = {
+    ...(sticky && {
+      position: 'sticky',
+      top: 0,
+      zIndex: 100,
+      backgroundColor: '#fff',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+    }),
+    ...(position === 'bottom' && {
+      order: 2, // Move to bottom in flex container
+    })
+  };
+
   return (
     <>
-      <div className="rte-toolbar">
+      <div className="rte-toolbar" style={toolbarStyle}>
         {items.map((item, idx) => (
           <div key={idx} className="rte-toolbar-item">
             {item.type === 'dropdown' ? (

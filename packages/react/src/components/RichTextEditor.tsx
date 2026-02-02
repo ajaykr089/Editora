@@ -1,9 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import { Editor, PluginManager, Plugin } from '@editora/core';
 import { Toolbar } from './Toolbar';
 import { EditorContent } from './EditorContent';
 import { FloatingToolbar } from './FloatingToolbar';
 import { DynamicProviderWrapper } from './DynamicProviderWrapper';
+import { RichTextEditorProps, EditorAPI } from '../types';
+import { mergeConfig } from '../utils/mergeConfig';
 
 // Plugin Providers - These are now handled by DynamicProviderWrapper
 // Each plugin can define its own provider through the context property
@@ -27,43 +29,152 @@ if (typeof window !== 'undefined') {
   };
 }
 
-interface RichTextEditorProps {
-  plugins: Plugin[];
-  className?: string;
-  mediaConfig?: {
-    uploadUrl: string;
-    libraryUrl: string;
-    maxFileSize: number;
-    allowedTypes: string[];
-  };
-  floatingToolbar?: {
-    enabled?: boolean;
-  };
-}
+const EditorCore: React.FC<RichTextEditorProps> = (props) => {
+  const config = useMemo(() => mergeConfig(props), [
+    props.id,
+    props.className,
+    props.value,
+    props.defaultValue,
+    props.plugins,
+    props.toolbar,
+    props.menubar,
+    props.contextMenu,
+    props.media,
+    props.paste,
+    props.history,
+    props.language,
+    props.spellcheck,
+    props.autosave,
+    props.accessibility,
+    props.performance,
+    props.content,
+    props.security,
+    props.floatingToolbar,
+    props.mediaConfig,
+  ]);
+  
+  const editorRef = useRef<Editor | null>(null);
+  const apiRef = useRef<EditorAPI | null>(null);
+  const onInitRef = useRef(props.onInit);
+  const onDestroyRef = useRef(props.onDestroy);
+  
+  // Keep callback refs up to date
+  useEffect(() => {
+    onInitRef.current = props.onInit;
+    onDestroyRef.current = props.onDestroy;
+  });
 
-const EditorCore: React.FC<RichTextEditorProps> = ({ plugins, className, mediaConfig, floatingToolbar }) => {
   const editor = useMemo(() => {
     const pluginManager = new PluginManager();
-    plugins.forEach(p => pluginManager.register(p));
-    return new Editor(pluginManager);
-  }, [plugins]);
+    config.plugins.forEach(p => pluginManager.register(p));
+    const editorInstance = new Editor(pluginManager);
+    editorRef.current = editorInstance;
+    return editorInstance;
+  }, [config.plugins]);
 
-  const floatingToolbarEnabled = floatingToolbar?.enabled !== false;
+  // Build EditorAPI - only run once on mount
+  useEffect(() => {
+    const api: EditorAPI = {
+      getHTML: () => {
+        const contentEl = document.querySelector('.rte-content') as HTMLElement;
+        return contentEl?.innerHTML || '';
+      },
+      setHTML: (html: string) => {
+        const contentEl = document.querySelector('.rte-content') as HTMLElement;
+        if (contentEl) {
+          contentEl.innerHTML = html;
+        }
+      },
+      execCommand: (name: string, value?: any) => {
+        if (typeof window !== 'undefined' && (window as any).executeEditorCommand) {
+          (window as any).executeEditorCommand(name, value);
+        }
+      },
+      registerCommand: (name: string, fn: (params?: any) => void) => {
+        if (typeof window !== 'undefined' && (window as any).registerEditorCommand) {
+          (window as any).registerEditorCommand(name, fn);
+        }
+      },
+      focus: () => {
+        const contentEl = document.querySelector('.rte-content') as HTMLElement;
+        contentEl?.focus();
+      },
+      blur: () => {
+        const contentEl = document.querySelector('.rte-content') as HTMLElement;
+        contentEl?.blur();
+      },
+      destroy: () => {
+        // Cleanup logic
+        if (onDestroyRef.current) {
+          onDestroyRef.current();
+        }
+      },
+      onChange: (fn: (html: string) => void) => {
+        // Subscribe to changes and return unsubscribe function
+        return () => {};
+      },
+      getState: () => ({
+        plugins: config.plugins,
+        config,
+      }),
+      toolbar: { 
+        items: (editor as any).toolbar?.items || [],
+      },
+    };
+    
+    apiRef.current = api;
+    
+    // Call onInit if provided
+    if (onInitRef.current) {
+      onInitRef.current(api);
+    }
+    
+    return () => {
+      if (onDestroyRef.current) {
+        onDestroyRef.current();
+      }
+    };
+  }, []); // Empty deps - only run once on mount
+
+  const floatingToolbarEnabled = config.toolbar.floating ?? false;
+  const toolbarPosition = (config.toolbar as any).position || 'top';
+  const stickyToolbar = config.toolbar.sticky ?? false;
 
   return (
-    <DynamicProviderWrapper plugins={plugins}>
-        <div
-          data-editora-editor
-          className={`rte-editor ${className || ""}`}
-        >
-          <Toolbar editor={editor} />
-          <EditorContent editor={editor} />
-          <FloatingToolbar
-            editor={editor}
-            isEnabled={floatingToolbarEnabled}
-          />
-        </div>
-
+    <DynamicProviderWrapper plugins={config.plugins}>
+      <div
+        id={config.id}
+        data-editora-editor
+        className={`rte-editor ${config.className || ""}`}
+        dir={config.language.direction}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%'
+        }}
+      >
+        <Toolbar 
+          editor={editor}
+          position={toolbarPosition}
+          sticky={stickyToolbar}
+          floating={floatingToolbarEnabled}
+        />
+        <EditorContent 
+          editor={editor}
+          defaultValue={config.defaultValue}
+          value={config.value}
+          onChange={config.onChange}
+          pasteConfig={config.paste}
+          contentConfig={config.content}
+          securityConfig={config.security}
+          performanceConfig={config.performance}
+          autosaveConfig={config.autosave}
+        />
+        <FloatingToolbar
+          editor={editor}
+          isEnabled={floatingToolbarEnabled}
+        />
+      </div>
     </DynamicProviderWrapper>
   );
 };
