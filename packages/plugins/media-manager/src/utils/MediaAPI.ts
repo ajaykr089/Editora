@@ -8,6 +8,38 @@ export class MediaAPI {
     this.config = config;
   }
 
+  /**
+   * Convert file to base64 data URL
+   */
+  private async fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /**
+   * Get image dimensions from file
+   */
+  private async getImageDimensions(file: File): Promise<{ width: number; height: number }> {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          resolve({ width: img.naturalWidth, height: img.naturalHeight });
+        };
+        img.onerror = () => {
+          resolve({ width: 0, height: 0 });
+        };
+        img.src = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   private getHeaders(): Record<string, string> {
     return this.config.headers || {};
   }
@@ -25,21 +57,99 @@ export class MediaAPI {
       throw new Error(`File type ${file.type} not allowed`);
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const uploadUrl = buildApiUrl(this.getApiUrl(), this.config.apiEndpoints.upload);
-    const response = await fetch(uploadUrl, {
-      method: 'POST',
-      headers: this.getHeaders(),
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error(`Upload failed: ${response.statusText}`);
+    // If forced to use base64, skip server upload
+    if (this.config.offline?.useBase64Permanently) {
+      const dataUrl = await this.fileToBase64(file);
+      const dimensions = await this.getImageDimensions(file);
+      return {
+        url: dataUrl,
+        width: dimensions.width,
+        height: dimensions.height,
+        size: file.size,
+        mimeType: file.type,
+        thumbnailUrl: dataUrl
+      };
     }
 
-    return response.json();
+    // DEFAULT: Try base64/offline first (offline-first strategy)
+    // Try custom upload URL if provided
+    if (this.config.offline?.customUploadUrl) {
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('filename', file.name);
+
+        const response = await fetch(this.config.offline.customUploadUrl, {
+          method: 'POST',
+          headers: this.config.offline.customUploadHeaders || {},
+          body: formData
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Expected response: { url: string, width?: number, height?: number }
+          const dimensions = data.width && data.height
+            ? { width: data.width, height: data.height }
+            : await this.getImageDimensions(file);
+          
+          return {
+            url: data.url,
+            width: dimensions.width,
+            height: dimensions.height,
+            size: file.size,
+            mimeType: file.type,
+            thumbnailUrl: data.thumbnailUrl || data.url
+          };
+        }
+      } catch (error) {
+        console.warn('Custom upload failed, trying base64:', error);
+        const dataUrl = await this.fileToBase64(file);
+        const dimensions = await this.getImageDimensions(file);
+        return {
+          url: dataUrl,
+          width: dimensions.width,
+          height: dimensions.height,
+          size: file.size,
+          mimeType: file.type,
+          thumbnailUrl: dataUrl
+        };
+      }
+    }
+
+    // If no custom server, use base64 directly (offline-first default)
+    const dataUrl = await this.fileToBase64(file);
+    const dimensions = await this.getImageDimensions(file);
+    
+    // Optionally try API upload if configured and offline not disabled
+    if (this.config.apiEndpoints?.upload && this.config.offline?.enabled !== false) {
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const uploadUrl = buildApiUrl(this.getApiUrl(), this.config.apiEndpoints.upload);
+        const response = await fetch(uploadUrl, {
+          method: 'POST',
+          headers: this.getHeaders(),
+          body: formData
+        });
+
+        if (response.ok) {
+          return response.json();
+        }
+      } catch (error) {
+        console.warn('API upload optional, returning base64:', error);
+      }
+    }
+
+    // Return base64 as default fallback
+    return {
+      url: dataUrl,
+      width: dimensions.width,
+      height: dimensions.height,
+      size: file.size,
+      mimeType: file.type,
+      thumbnailUrl: dataUrl
+    };
   }
 
   async fetchLibrary(page = 1, limit = 20): Promise<{ items: MediaLibraryItem[]; total: number }> {

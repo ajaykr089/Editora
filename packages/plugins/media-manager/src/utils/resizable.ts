@@ -20,6 +20,14 @@ export class ImageResizer {
     this.init();
   }
 
+  public selectMediaElement(media: HTMLImageElement | HTMLVideoElement) {
+    this.selectMedia(media);
+  }
+
+  public clearSelection() {
+    this.deselectMedia();
+  }
+
   private init() {
     // Create resize handles
     const positions: Array<'nw' | 'ne' | 'sw' | 'se'> = ['nw', 'ne', 'sw', 'se'];

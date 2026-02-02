@@ -19,8 +19,45 @@
 .image-resize-handle:active {
   background: #004085;
   transform: scale(1.1);
+  box-shadow: 0 0 8px rgba(0, 64, 133, 0.5);
 }
 
+/* Enhanced handle visibility */
+.image-resize-handle {
+  width: 12px !important;
+  height: 12px !important;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+  border: 2px solid white !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  z-index: 9999 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  opacity: 0.8;
+}
+
+.image-resize-handle:hover {
+  opacity: 1;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.6);
+  transform: scale(1.3);
+}
+
+/* Tooltip for resize hint */
+.image-selected::after {
+  content: 'Drag corners to resize • Shift+Drag to maintain aspect ratio';
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 9998;
+  pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 /* Handle-specific cursors */
 .image-resize-handle-nw {
   cursor: nw-resize;

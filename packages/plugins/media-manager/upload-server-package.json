@@ -1,0 +1,40 @@
+{
+  "name": "@editora/media-upload-server",
+  "version": "1.0.0",
+  "description": "Standalone media upload server for Rich Text Editor",
+  "type": "module",
+  "main": "upload-server.js",
+  "bin": {
+    "media-upload-server": "upload-server.js"
+  },
+  "scripts": {
+    "start": "node upload-server.js",
+    "dev": "NODE_ENV=development node upload-server.js",
+    "start:token": "API_TOKEN=your-secret-token node upload-server.js",
+    "start:custom": "PORT=4000 UPLOAD_DIR=./my-uploads node upload-server.js"
+  },
+  "keywords": [
+    "media",
+    "upload",
+    "server",
+    "editor",
+    "image"
+  ],
+  "author": "Editora Contributors",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.33.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "optionalDependencies": {
+    "jimp": "^0.22.10"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
