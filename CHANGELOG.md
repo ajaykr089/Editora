@@ -150,6 +150,6 @@ function App() {
 
 ## Links
 
-- [GitHub Repository](https://github.com/ajaykr089/Rich-Text-Editor)
-- [Issue Tracker](https://github.com/ajaykr089/Rich-Text-Editor/issues)
+- [GitHub Repository](https://github.com/ajaykr089/Editora)
+- [Issue Tracker](https://github.com/ajaykr089/Editora/issues)
 - [npm Packages](https://www.npmjs.com/search?q=%40editora)

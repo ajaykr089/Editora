@@ -80,7 +80,7 @@ export interface StorageProvider {
 }
 
 /**
- * Complete MediaManagerConfig matching TinyMCE spec
+ * Complete MediaManagerConfig with professional features
  */
 export interface MediaManagerConfig {
   mode?: 'local' | 'api' | 'hybrid';

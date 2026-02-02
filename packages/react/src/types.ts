@@ -1,6 +1,6 @@
 /**
  * Production-grade Rich Text Editor Types
- * Designed for TinyMCE-level configurability
+ * Designed for enterprise-level configurability
  */
 
 import { Plugin } from '@editora/core';

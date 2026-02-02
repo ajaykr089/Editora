@@ -1,6 +1,6 @@
 ## 🎯 Objective
 
-You are a **senior staff-level frontend + platform engineer** tasked with building a **production-grade Rich Text Editor (RTE)** comparable to **TinyMCE**, but **modular, extensible, and modern**.
+You are a **senior staff-level frontend + platform engineer** tasked with building a **production-grade Rich Text Editor (RTE)** that is **modular, extensible, and modern**.
 
 The editor must:
 
@@ -136,7 +136,7 @@ export interface RichTextEditorProps {
 
 ## 🧠 EditorAPI (MANDATORY)
 
-Design and expose an `EditorAPI` similar to TinyMCE:
+Design and expose an `EditorAPI` with standard editor functionality:
 
 ```ts
 interface EditorAPI {
@@ -271,9 +271,8 @@ You MUST produce:
 
 Think like:
 
-* TinyMCE
-* ProseMirror
-* Slate
+* Modern text editors
+* Collaborative editing systems
 * VS Code extension system
 
 But build **cleaner**, **lighter**, and **modern**.

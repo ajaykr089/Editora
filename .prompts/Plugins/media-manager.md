@@ -1,6 +1,6 @@
 # 🧠 MASTER AI PROMPT
 
-## Build a TinyMCE-Level Media Manager (Local + API Hybrid, Free)
+## Build a Professional-Grade Media Manager (Local + API Hybrid, Free)
 
 ---
 
@@ -10,7 +10,7 @@ You are a **principal-level frontend + platform engineer** tasked with building 
 
 This Media Manager must:
 
-* Match or exceed **TinyMCE Premium Media Manager**
+* Match or exceed **professional-grade media management features**
 * Work **with or without backend APIs**
 * Be **fully optional**, configurable, and extensible
 * Support **advanced media manipulation**
@@ -336,10 +336,10 @@ You MUST produce:
 
 Think:
 
-* TinyMCE Media Manager
-* Google Docs image handling
-* Notion embeds
-* Figma asset pipeline
+* Professional media asset management
+* Cloud-based document image handling
+* Collaborative workspace asset systems
+* Modern asset pipeline architectures
 
 But:
 

@@ -4,7 +4,7 @@ import React from 'react';
  * Editor Toolbar Icons
  * 
  * A collection of SVG icons used in the Rich Text Editor toolbar.
- * All icons are based on TinyMCE editor icons for consistency.
+ * All icons are designed for consistency and usability.
  */
 
 // Common icon props

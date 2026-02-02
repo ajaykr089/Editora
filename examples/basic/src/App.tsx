@@ -57,7 +57,7 @@ function App() {
       <footer className="app-footer">
         <p>
           Learn more at{' '}
-          <a href="https://github.com/ajaykr089/Rich-Text-Editor" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener noreferrer">
             GitHub
           </a>
         </p>

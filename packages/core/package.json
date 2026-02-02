@@ -6,19 +6,19 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ajaykr089/Rich-Text-Editor.git",
+    "url": "https://github.com/ajaykr089/Editora.git",
     "directory": "packages/core"
   },
-  "homepage": "https://github.com/ajaykr089/Rich-Text-Editor#readme",
+  "homepage": "https://github.com/ajaykr089/Editora#readme",
   "bugs": {
-    "url": "https://github.com/ajaykr089/Rich-Text-Editor/issues"
+    "url": "https://github.com/ajaykr089/Editora/issues"
   },
   "keywords": [
     "editor",
     "rich-text",
     "wysiwyg",
     "contenteditable",
-    "prosemirror",
+    "modular",
     "framework-agnostic",
     "typescript"
   ],
@@ -27,6 +27,11 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    },
+    "./KeyboardShortcuts": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js"

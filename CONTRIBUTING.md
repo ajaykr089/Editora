@@ -44,7 +44,7 @@ cd Rich-Text-Editor
 3. Add upstream remote:
 
 ```bash
-git remote add upstream https://github.com/ajaykr089/Rich-Text-Editor.git
+git remote add upstream https://github.com/ajaykr089/Editora.git
 ```
 
 ## Development Setup
@@ -387,7 +387,7 @@ Before submitting:
 
 ## Questions?
 
-- Open an [issue](https://github.com/ajaykr089/Rich-Text-Editor/issues)
+- Open an [issue](https://github.com/ajaykr089/Editora/issues)
 - Check [documentation](README.md)
 - Ask in discussions
 

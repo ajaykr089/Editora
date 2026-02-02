@@ -262,7 +262,7 @@ npm run build
 ## 📞 Support
 
 - [npm Support](https://npmjs.com/support)
-- [GitHub Issues](https://github.com/ajaykr089/Rich-Text-Editor/issues)
+- [GitHub Issues](https://github.com/ajaykr089/Editora/issues)
 - Documentation: See main [README.md](README.md)
 
 ## 🔗 Resources

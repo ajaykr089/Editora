@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Editor } from '@editora/core';
+import { Editor, KeyboardShortcutManager } from '@editora/core';
 import { useAutosave } from '../hooks/useAutosave';
 import { sanitizePastedHTML, sanitizeInputHTML } from '../utils/sanitizeHTML';
 
@@ -200,6 +200,27 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       el.removeEventListener('click', handleClick);
     };
   }, [editor, onChange, pasteConfig, contentConfig, securityConfig, performanceConfig]);
+
+  useEffect(() => {
+    if (!contentRef.current || typeof window === 'undefined') return;
+
+    const manager = new KeyboardShortcutManager();
+    const el = contentRef.current;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      manager.handleKeyDown(event, (command, params) => {
+        if (typeof window !== 'undefined' && (window as any).executeEditorCommand) {
+          (window as any).executeEditorCommand(command, params);
+        }
+      });
+    };
+
+    el.addEventListener('keydown', handleKeyDown as any);
+
+    return () => {
+      el.removeEventListener('keydown', handleKeyDown as any);
+    };
+  }, []);
 
   return (
     <div

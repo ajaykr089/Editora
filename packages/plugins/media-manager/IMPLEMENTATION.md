@@ -2,7 +2,7 @@
 
 ## 🎉 Overview
 
-The enhanced Media Manager is a **TinyMCE-level professional media management system** for the Rich Text Editor, supporting:
+The enhanced Media Manager is a **professional media management system** for the Rich Text Editor, supporting:
 
 - ✅ Local-only mode (no backend required)
 - ✅ API-backed mode with automatic sync

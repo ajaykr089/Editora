@@ -143,5 +143,5 @@ Check out complete examples in the `/examples` directory:
 
 ## Support
 
-- [GitHub Issues](https://github.com/ajaykr089/Rich-Text-Editor/issues)
+- [GitHub Issues](https://github.com/ajaykr089/Editora/issues)
 - [Contributing Guide](./CONTRIBUTING.md)

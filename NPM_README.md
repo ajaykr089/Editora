@@ -457,10 +457,7 @@ MIT © 2024 [Ajay Kumar](https://github.com/ajaykr089)
 
 ## 🙏 Acknowledgments
 
-Editora is built with inspiration from:
-- [ProseMirror](https://prosemirror.net/) - Collaborative editing foundation
-- [Slate](https://www.slatejs.org/) - Modern editor architecture
-- [Draft.js](https://draftjs.org/) - Content model concepts
+Editora is built with inspiration from modern text editing technologies and collaborative editing systems.
 
 ## 📞 Support
 

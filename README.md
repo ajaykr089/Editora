@@ -1,6 +1,6 @@
 # Rich Text Editor
 
-A comprehensive, enterprise-grade rich text editor built with React, TypeScript, and modern web technologies. This editor rivals commercial solutions like CKEditor, TinyMCE, and Froala while maintaining open source accessibility.
+A comprehensive, enterprise-grade rich text editor built with React, TypeScript, and modern web technologies. A powerful, modular, and extensible text editing solution while maintaining open source accessibility.
 
 ## 🚀 Features
 
@@ -361,7 +361,7 @@ Built with modern web technologies:
 - **Jest** - Testing framework
 - **Lerna** - Monorepo management
 
-Inspired by CKEditor, ProseMirror, and Quill.js.
+Inspired by modern editor architecture and best practices.
 
 ---
 

@@ -7,6 +7,10 @@ export { PluginManager } from './plugins/Plugin';
 export type { Plugin, ToolbarItem } from './plugins/Plugin';
 export { PluginRuntime, createPluginRuntime } from './plugins/PluginRuntime';
 export type { PluginRuntimeContext } from './plugins/PluginRuntime';
+// Keyboard Shortcuts
+export { KeyboardShortcutManager } from './KeyboardShortcuts';
+export type { KeyboardShortcut, KeyboardShortcutConfig } from './KeyboardShortcuts';
+
 
 // Enterprise plugins
 export { createSpellcheckPlugin, createMediaPlugin } from './plugins/enterprise';
