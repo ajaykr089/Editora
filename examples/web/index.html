@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora - A powerful, modular, and framework-agnostic rich text editor. Features 33+ keyboard shortcuts, 30+ plugins, and works with React, Vue, Angular, Svelte, or vanilla JavaScript.">
+    <meta name="keywords" content="rich text editor, WYSIWYG editor, text editor, React editor, Vue editor, Angular editor, Svelte editor, contenteditable, modular editor, plugins">
+    <meta name="author" content="Editora Contributors">
+    <meta property="og:title" content="Editora - Modern Rich Text Editor">
+    <meta property="og:description" content="A powerful, modular, and framework-agnostic rich text editor with 30+ plugins and 33+ keyboard shortcuts.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora.example.com">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#007bff">
+    
+    <title>Editora - Modern Rich Text Editor</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">
+                    ✏️ <span>Editora</span>
+                </a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="active">Home</a></li>
+                    <li><a href="docs/installation.html">Docs</a></li>
+                    <li><a href="docs/features.html">Features</a></li>
+                    <li><a href="plugins/index.html">Plugins</a></li>
+                    <li><a href="docs/api.html">API</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>✨ Powerful Rich Text Editor</h1>
+            <p>A modern, modular, and framework-agnostic rich text editor with 33+ keyboard shortcuts, 30+ plugins, and enterprise-level features.</p>
+            <div class="hero-buttons">
+                <a href="docs/installation.html" class="btn btn-secondary btn-large">Get Started</a>
+                <a href="docs/features.html" class="btn btn-outline btn-large">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="alternate">
+        <div class="container">
+            <h2>🚀 Why Choose Editora?</h2>
+            <div class="features-grid">
+                <div class="feature-box">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Lightning Fast</h3>
+                    <p>Optimized performance with minimal footprint. Only 12KB gzipped with all features included.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">🔧</div>
+                    <h3>Highly Modular</h3>
+                    <p>Pick and choose the plugins you need. Build a custom editor that fits your requirements.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Framework Agnostic</h3>
+                    <p>Works with React, Vue, Angular, Svelte, or vanilla JavaScript. One editor for all platforms.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">⌨️</div>
+                    <h3>33+ Shortcuts</h3>
+                    <p>Comprehensive keyboard shortcuts matching industry standards. Boost productivity.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Fully Customizable</h3>
+                    <p>Customize colors, toolbar, plugins, and behavior to match your brand perfectly.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">📦</div>
+                    <h3>30+ Plugins</h3>
+                    <p>Extended functionality with media manager, tables, code samples, templates, and more.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Start Section -->
+    <section>
+        <div class="container">
+            <h2>⚡ Quick Start in 3 Minutes</h2>
+            <div class="row">
+                <div class="col">
+                    <h3>1. Install</h3>
+                    <pre><code class="language-bash">npm install @editora/core @editora/react</code></pre>
+                    <p>Or use via CDN for HTML websites without build tools.</p>
+                </div>
+                <div class="col">
+                    <h3>2. Import</h3>
+                    <pre><code class="language-javascript">import { Editor } from '@editora/core';
+// Or React
+import RichTextEditor from '@editora/react';</code></pre>
+                </div>
+                <div class="col">
+                    <h3>3. Use</h3>
+                    <pre><code class="language">const editor = new Editor({
+  element: '#editor',
+  content: '&lt;p&gt;Hello!&lt;/p&gt;'
+});</code></pre>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <a href="docs/installation.html" class="btn btn-primary btn-large">View Full Installation Guide</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Features Spotlight -->
+    <section class="alternate">
+        <div class="container">
+            <h2>✨ Key Features</h2>
+            <div class="row">
+                <div class="col">
+                    <h3>📝 Rich Formatting</h3>
+                    <ul>
+                        <li>Bold, Italic, Underline, Strikethrough</li>
+                        <li>Headings (H1-H6) and Paragraphs</li>
+                        <li>Lists (Bullet & Numbered)</li>
+                        <li>Text & Background Colors</li>
+                        <li>Font Family & Size</li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <h3>🎯 Advanced Tools</h3>
+                    <ul>
+                        <li>Link Management</li>
+                        <li>Image & Media Insertion</li>
+                        <li>Table Editor</li>
+                        <li>Code Samples with Syntax Highlighting</li>
+                        <li>Undo/Redo History</li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <h3>🚀 Pro Features</h3>
+                    <ul>
+                        <li>AI-Powered Spell Check</li>
+                        <li>Template System</li>
+                        <li>Comment System</li>
+                        <li>Page Breaks</li>
+                        <li>Merge Tags</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Plugins Preview -->
+    <section>
+        <div class="container">
+            <h2>🔌 30+ Plugins</h2>
+            <p class="text-center mb-4">Extend functionality with our comprehensive plugin ecosystem.</p>
+            <div class="plugin-grid">
+                <div class="plugin-card">
+                    <div class="plugin-icon">🖼️</div>
+                    <h4>Media Manager</h4>
+                    <p>Upload, organize, and manage images and media files.</p>
+                    <a href="plugins/media-manager.html" class="plugin-link">Learn More →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">📋</div>
+                    <h4>Tables</h4>
+                    <p>Create and edit powerful data tables.</p>
+                    <a href="plugins/table.html" class="plugin-link">Learn More →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">💻</div>
+                    <h4>Code Sample</h4>
+                    <p>Syntax highlighted code blocks with Prism.js integration.</p>
+                    <a href="plugins/code-sample.html" class="plugin-link">Learn More →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">✓</div>
+                    <h4>Checklist</h4>
+                    <p>Interactive task lists and checklist management.</p>
+                    <a href="plugins/checklist.html" class="plugin-link">Learn More →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">🎨</div>
+                    <h4>Template System</h4>
+                    <p>Save and reuse document templates.</p>
+                    <a href="plugins/template.html" class="plugin-link">Learn More →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">💬</div>
+                    <h4>Comments</h4>
+                    <p>Collaborative commenting and feedback.</p>
+                    <a href="plugins/comments.html" class="plugin-link">Learn More →</a>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <a href="plugins/index.html" class="btn btn-primary">View All Plugins</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison -->
+    <section class="alternate">
+        <div class="container">
+            <h2>📊 Comparison</h2>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; margin: 2rem 0;">
+                    <thead>
+                        <tr style="background: var(--gray-200);">
+                            <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Feature</th>
+                            <th style="padding: 1rem; text-align: center; border: 1px solid var(--gray-300);">Editora</th>
+                            <th style="padding: 1rem; text-align: center; border: 1px solid var(--gray-300);">Industry Standard</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 1rem; border: 1px solid var(--gray-300);">Package Size</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid var(--gray-300);">✅ 12KB</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid var(--gray-300);">❌ 50-100KB</td>
+                        </tr>
+                        <tr style="background: var(--white);">
+                            <td style="padding: 1rem; border: 1px solid var(--gray-300);">Framework Support</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid var(--gray-300);">✅ All</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid var(--gray-300);">❌ Limited</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 1rem; border: 1px solid var(--gray-300);">Keyboard Shortcuts</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid var(--gray-300);">✅ 33+</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid var(--gray-300);">⚠️ 20+</td>
+                        </tr>
+                        <tr style="background: var(--white);">
+                            <td style="padding: 1rem; border: 1px solid var(--gray-300);">Plugin System</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid var(--gray-300);">✅ Yes</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid var(--gray-300);">⚠️ Limited</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 1rem; border: 1px solid var(--gray-300);">TypeScript Support</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid var(--gray-300);">✅ Full</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid var(--gray-300);">⚠️ Partial</td>
+                        </tr>
+                        <tr style="background: var(--white);">
+                            <td style="padding: 1rem; border: 1px solid var(--gray-300);">Open Source</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid var(--gray-300);">✅ MIT License</td>
+                            <td style="padding: 1rem; text-align: center; border: 1px solid var(--gray-300);">⚠️ Commercial</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; text-align: center; padding: 4rem 0;">
+        <div class="container">
+            <h2 style="color: white; margin-bottom: 1rem;">Ready to Build Amazing Text Editors?</h2>
+            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem; margin-bottom: 2rem;">Get started with Editora in minutes. Choose from React, Vue, Angular, or use vanilla JavaScript.</p>
+            <div class="d-flex flex-center gap-2" style="flex-wrap: wrap;">
+                <a href="docs/installation.html" class="btn btn-secondary btn-large">Start Building</a>
+                <a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener" class="btn btn-outline btn-large">Star on GitHub</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>📚 Documentation</h5>
+                    <ul>
+                        <li><a href="docs/installation.html">Installation</a></li>
+                        <li><a href="docs/features.html">Features</a></li>
+                        <li><a href="docs/api.html">API Reference</a></li>
+                        <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔌 Plugins</h5>
+                    <ul>
+                        <li><a href="plugins/index.html">All Plugins</a></li>
+                        <li><a href="plugins/media-manager.html">Media Manager</a></li>
+                        <li><a href="plugins/table.html">Tables</a></li>
+                        <li><a href="plugins/code-sample.html">Code Samples</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔗 Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>ℹ️ About</h5>
+                    <ul>
+                        <li><a href="docs/about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024-2026 Editora. Built with ❤️ by Ajay Kumar. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>

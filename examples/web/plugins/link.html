@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Link plugin documentation for Editora rich text editor">
+    <title>Link Plugin - Editora</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="../index.html" class="logo">✏️ <span>Editora</span></a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../docs/installation.html">Docs</a></li>
+                    <li><a href="../docs/features.html">Features</a></li>
+                    <li><a href="index.html" class="active">Plugins</a></li>
+                    <li><a href="../docs/api.html">API</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+        <div class="container">
+            <h1 style="color: white;">🔗 Link Plugin</h1>
+            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Enhanced link management and SEO optimization</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Overview</h2>
+            <p>The Link plugin provides comprehensive link management capabilities, including inserting, editing, and optimizing hyperlinks. Features include URL validation, preview, SEO metadata, tracking parameters, and accessibility enhancements.</p>
+
+            <h2>Features</h2>
+            <ul style="columns: 2; gap: 2rem;">
+                <li>✓ Easy link insertion</li>
+                <li>✓ URL validation</li>
+                <li>✓ Link preview</li>
+                <li>✓ SEO meta tags</li>
+                <li>✓ Tracking parameters</li>
+                <li>✓ Link anchors</li>
+                <li>✓ Accessibility attributes</li>
+                <li>✓ Link analytics</li>
+            </ul>
+
+            <h2>Installation</h2>
+            <pre><code>npm install @editora/plugin-link</code></pre>
+
+            <h2>Basic Usage</h2>
+            <pre><code>import Editora from '@editora/core';
+import LinkPlugin from '@editora/plugin-link';
+
+const editor = new Editora('#editor');
+editor.use(LinkPlugin);
+
+// Select text and create link
+editor.execCommand('createLink', 'https://example.com');</code></pre>
+
+            <h2>Link Management</h2>
+            <p>Work with links efficiently:</p>
+            <ol>
+                <li><strong>Create:</strong> Select text and add link via dialog or toolbar</li>
+                <li><strong>Edit:</strong> Double-click link to edit URL or properties</li>
+                <li><strong>Remove:</strong> Remove links while keeping text</li>
+                <li><strong>Properties:</strong> Add title, target, rel attributes</li>
+            </ol>
+
+            <h2>Configuration Options</h2>
+            <table style="width: 100%; border-collapse: collapse; margin: 2rem 0;">
+                <tr style="background: var(--gray-100);">
+                    <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-200);">Option</th>
+                    <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-200);">Type</th>
+                    <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-200);">Description</th>
+                </tr>
+                <tr>
+                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">validateUrl</td>
+                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">boolean</td>
+                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">Validate URLs before insertion (default: true)</td>
+                </tr>
+                <tr style="background: var(--gray-50);">
+                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">openInNewTab</td>
+                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">boolean</td>
+                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">Default link target (default: false)</td>
+                </tr>
+            </table>
+
+            <h2>API Methods</h2>
+            <ul>
+                <li><strong>createLink(url):</strong> Create link from selection</li>
+                <li><strong>removeLink():</strong> Remove link from selection</li>
+                <li><strong>editLink(url):</strong> Edit selected link</li>
+                <li><strong>getLink():</strong> Get current link properties</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>📚 Documentation</h5>
+                    <ul>
+                        <li><a href="../docs/installation.html">Installation</a></li>
+                        <li><a href="../docs/features.html">Features</a></li>
+                        <li><a href="../docs/api.html">API Reference</a></li>
+                        <li><a href="../docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔌 Plugins</h5>
+                    <ul>
+                        <li><a href="index.html">All Plugins</a></li>
+                        <li><a href="media-manager.html">Media Manager</a></li>
+                        <li><a href="table.html">Tables</a></li>
+                        <li><a href="code-sample.html">Code Samples</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔗 Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>ℹ️ About</h5>
+                    <ul>
+                        <li><a href="../docs/about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024-2026 Editora. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>

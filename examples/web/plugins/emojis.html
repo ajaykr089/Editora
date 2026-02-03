@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Emojis plugin documentation for Editora rich text editor">
+    <title>Emojis Plugin - Editora</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="../index.html" class="logo">✏️ <span>Editora</span></a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../docs/installation.html">Docs</a></li>
+                    <li><a href="../docs/features.html">Features</a></li>
+                    <li><a href="index.html" class="active">Plugins</a></li>
+                    <li><a href="../docs/api.html">API</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+        <div class="container">
+            <h1 style="color: white;">😀 Emojis Plugin</h1>
+            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Insert emojis and special characters easily</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Overview</h2>
+            <p>The Emojis plugin provides an easy way to insert emojis and special characters into your documents. Browse through organized emoji categories or search by keyword for quick insertion of any emoji you need.</p>
+
+            <h2>Features</h2>
+            <ul style="columns: 2; gap: 2rem;">
+                <li>✓ Emoji picker</li>
+                <li>✓ Category navigation</li>
+                <li>✓ Search functionality</li>
+                <li>✓ Recently used tracking</li>
+                <li>✓ Skin tone variations</li>
+                <li>✓ Frequently used shortcuts</li>
+                <li>✓ Emoji preview</li>
+                <li>✓ Custom emojis support</li>
+            </ul>
+
+            <h2>Installation</h2>
+            <pre><code>npm install @editora/plugin-emojis</code></pre>
+
+            <h2>Basic Usage</h2>
+            <pre><code>import Editora from '@editora/core';
+import EmojisPlugin from '@editora/plugin-emojis';
+
+const editor = new Editora('#editor');
+editor.use(EmojisPlugin);
+
+// Open emoji picker
+editor.execCommand('openEmojiPicker');</code></pre>
+
+            <h2>Using Emojis</h2>
+            <p>Insert emojis easily:</p>
+            <ol>
+                <li><strong>Picker:</strong> Click emoji icon to open picker</li>
+                <li><strong>Browse:</strong> Navigate through categories</li>
+                <li><strong>Search:</strong> Search by keyword or emoji name</li>
+                <li><strong>Insert:</strong> Click emoji to insert at cursor</li>
+            </ol>
+
+            <h2>Emoji Categories</h2>
+            <ul>
+                <li><strong>Smileys:</strong> Faces and emotions</li>
+                <li><strong>People:</strong> People and body parts</li>
+                <li><strong>Nature:</strong> Animals and plants</li>
+                <li><strong>Food:</strong> Food and drink</li>
+                <li><strong>Travel:</strong> Places and transportation</li>
+                <li><strong>Activities:</strong> Sports and games</li>
+                <li><strong>Objects:</strong> Everyday objects</li>
+                <li><strong>Symbols:</strong> Symbols and signs</li>
+            </ul>
+
+            <h2>API Methods</h2>
+            <ul>
+                <li><strong>openEmojiPicker():</strong> Open emoji picker dialog</li>
+                <li><strong>insertEmoji(emoji):</strong> Insert specific emoji</li>
+                <li><strong>getRecentEmojis():</strong> Get recently used emojis</li>
+                <li><strong>addCustomEmoji(emoji, code):</strong> Add custom emoji</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>📚 Documentation</h5>
+                    <ul>
+                        <li><a href="../docs/installation.html">Installation</a></li>
+                        <li><a href="../docs/features.html">Features</a></li>
+                        <li><a href="../docs/api.html">API Reference</a></li>
+                        <li><a href="../docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔌 Plugins</h5>
+                    <ul>
+                        <li><a href="index.html">All Plugins</a></li>
+                        <li><a href="media-manager.html">Media Manager</a></li>
+                        <li><a href="table.html">Tables</a></li>
+                        <li><a href="code-sample.html">Code Samples</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔗 Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>ℹ️ About</h5>
+                    <ul>
+                        <li><a href="../docs/about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024-2026 Editora. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>

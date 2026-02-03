@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tables Plugin for Editora - Create and edit powerful data tables with cell formatting and styling.">
+    <meta name="keywords" content="tables, data tables, formatting, cells">
+    <title>Tables Plugin - Editora</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="../index.html" class="logo">✏️ <span>Editora</span></a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../docs/installation.html">Docs</a></li>
+                    <li><a href="../docs/features.html">Features</a></li>
+                    <li><a href="index.html" class="active">Plugins</a></li>
+                    <li><a href="../docs/api.html">API</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+        <div class="container">
+            <h1 style="color: white;">📋 Tables Plugin</h1>
+            <p style="color: rgba(255, 255, 255, 0.95);">Create and edit powerful data tables</p>
+        </div>
+    </section>
+
+    <!-- Content -->
+    <section>
+        <div class="container">
+            <div class="docs-wrapper">
+                <aside class="docs-sidebar">
+                    <h3>Plugins</h3>
+                    <ul>
+                        <li><a href="index.html">All Plugins</a></li>
+                        <li><a href="media-manager.html">Media Manager</a></li>
+                        <li><a href="table.html" class="active">Tables</a></li>
+                        <li><a href="code-sample.html">Code Sample</a></li>
+                    </ul>
+                </aside>
+
+                <main class="docs-content">
+                    <h2>Overview</h2>
+                    <p>The Tables plugin provides powerful table creation and editing capabilities with cell formatting, styling, and data management.</p>
+
+                    <h2>Features</h2>
+                    <ul>
+                        <li>✅ Create tables with custom rows and columns</li>
+                        <li>✅ Add/remove rows and columns</li>
+                        <li>✅ Merge cells</li>
+                        <li>✅ Cell formatting (bold, italic, colors)</li>
+                        <li>✅ Table styling (borders, background)</li>
+                        <li>✅ Header rows</li>
+                        <li>✅ Copy/paste table data</li>
+                    </ul>
+
+                    <h2>Installation</h2>
+                    <pre><code>npm install @editora/plugins/table</code></pre>
+
+                    <h2>Basic Usage</h2>
+                    <pre><code class="language-javascript">import { Editor } from '@editora/core';
+import { TablePlugin } from '@editora/plugins/table';
+
+const editor = new Editor({
+  element: '#editor',
+  plugins: [new TablePlugin()]
+});</code></pre>
+
+                    <h2>Creating a Table</h2>
+                    <ol>
+                        <li>Click the "Insert Table" button in the toolbar</li>
+                        <li>Enter desired rows and columns</li>
+                        <li>Click "Create"</li>
+                    </ol>
+
+                    <h2>Table Commands</h2>
+                    <pre><code class="language-javascript">// Insert table
+editor.execCommand('insertTable', { rows: 3, cols: 3 });
+
+// Add row
+editor.execCommand('addTableRow', { position: 'after' });
+
+// Delete row
+editor.execCommand('deleteTableRow');
+
+// Add column
+editor.execCommand('addTableColumn', { position: 'after' });
+
+// Merge cells
+editor.execCommand('mergeCells');</code></pre>
+
+                    <div style="margin-top: 2rem; padding: 2rem; background: var(--gray-50); border-radius: var(--border-radius);">
+                        <p><a href="index.html">← Back to Plugins</a></p>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>📚 Documentation</h5>
+                    <ul>
+                        <li><a href="../docs/installation.html">Installation</a></li>
+                        <li><a href="../docs/features.html">Features</a></li>
+                        <li><a href="../docs/api.html">API Reference</a></li>
+                        <li><a href="../docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔌 Plugins</h5>
+                    <ul>
+                        <li><a href="index.html">All Plugins</a></li>
+                        <li><a href="media-manager.html">Media Manager</a></li>
+                        <li><a href="table.html">Tables</a></li>
+                        <li><a href="code-sample.html">Code Samples</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔗 Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>ℹ️ About</h5>
+                    <ul>
+                        <li><a href="../docs/about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024-2026 Editora. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>

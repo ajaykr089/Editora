@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Media Manager Plugin for Editora - Upload, organize, and manage images and media files with drag & drop support.">
+    <meta name="keywords" content="media manager, images, upload, media, gallery, drag and drop">
+    <title>Media Manager Plugin - Editora</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="../index.html" class="logo">
+                    ✏️ <span>Editora</span>
+                </a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../docs/installation.html">Docs</a></li>
+                    <li><a href="../docs/features.html">Features</a></li>
+                    <li><a href="index.html" class="active">Plugins</a></li>
+                    <li><a href="../docs/api.html">API</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+        <div class="container">
+            <h1 style="color: white; margin-bottom: 0.5rem;">🖼️ Media Manager Plugin</h1>
+            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Upload, organize, and manage images and media files</p>
+        </div>
+    </section>
+
+    <!-- Content -->
+    <section>
+        <div class="container">
+            <div class="docs-wrapper">
+                <aside class="docs-sidebar">
+                    <h3>Plugins</h3>
+                    <ul>
+                        <li><a href="index.html">All Plugins</a></li>
+                        <li><a href="media-manager.html" class="active">Media Manager</a></li>
+                        <li><a href="table.html">Tables</a></li>
+                        <li><a href="code-sample.html">Code Sample</a></li>
+                        <li><a href="checklist.html">Checklist</a></li>
+                        <li><a href="template.html">Templates</a></li>
+                        <li><a href="comments.html">Comments</a></li>
+                    </ul>
+                </aside>
+
+                <main class="docs-content">
+                    <h2>Overview</h2>
+                    <p>The Media Manager plugin provides comprehensive media handling capabilities including upload, gallery organization, and asset management.</p>
+
+                    <h2>Features</h2>
+                    <ul>
+                        <li>✅ Drag & drop file upload</li>
+                        <li>✅ Multi-file upload support</li>
+                        <li>✅ Image gallery organization</li>
+                        <li>✅ File browser interface</li>
+                        <li>✅ Image optimization & compression</li>
+                        <li>✅ CDN support for media delivery</li>
+                        <li>✅ Custom upload endpoints</li>
+                        <li>✅ Thumbnail generation</li>
+                    </ul>
+
+                    <h2>Installation</h2>
+                    <pre><code>npm install @editora/plugins/media-manager</code></pre>
+
+                    <h2>Basic Usage</h2>
+                    <pre><code class="language-javascript">import { Editor } from '@editora/core';
+import { MediaManagerPlugin } from '@editora/plugins/media-manager';
+
+const editor = new Editor({
+  element: '#editor',
+  plugins: [
+    new MediaManagerPlugin({
+      uploadUrl: '/api/upload',
+      galleryUrl: '/api/gallery'
+    })
+  ]
+});</code></pre>
+
+                    <h2>Configuration Options</h2>
+                    <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                        <thead>
+                            <tr style="background: var(--gray-200);">
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Option</th>
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Type</th>
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Default</th>
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>uploadUrl</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">string</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">required</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">API endpoint for file uploads</td>
+                            </tr>
+                            <tr style="background: var(--gray-50);">
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>galleryUrl</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">string</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">null</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">API endpoint for gallery retrieval</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>maxFileSize</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">number</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">10485760</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Max file size in bytes (10MB default)</td>
+                            </tr>
+                            <tr style="background: var(--gray-50);">
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>allowedTypes</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">string[]</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">['image/*', 'video/*']</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Allowed MIME types</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Advanced Configuration</h2>
+                    <pre><code class="language-javascript">const plugin = new MediaManagerPlugin({
+  uploadUrl: '/api/media/upload',
+  galleryUrl: '/api/media/gallery',
+  maxFileSize: 52428800, // 50MB
+  allowedTypes: [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'video/mp4',
+    'audio/mpeg'
+  ],
+  onUpload: (file) => console.log('Uploading:', file),
+  onError: (error) => console.error('Upload error:', error),
+  compressionOptions: {
+    maxWidth: 1920,
+    maxHeight: 1080,
+    quality: 0.8
+  }
+});</code></pre>
+
+                    <h2>Server-Side Integration</h2>
+                    <p>Your upload endpoint should accept multipart/form-data:</p>
+                    <pre><code class="language-javascript">// Express.js example
+app.post('/api/upload', upload.single('file'), (req, res) => {
+  // req.file contains the uploaded file
+  const filename = req.file.filename;
+  const url = `/uploads/${filename}`;
+  
+  res.json({ 
+    success: true,
+    url: url,
+    name: req.file.originalname
+  });
+});</code></pre>
+
+                    <h2>Events</h2>
+                    <pre><code class="language-javascript">plugin.on('upload', (data) => {
+  console.log('File uploaded:', data);
+});
+
+plugin.on('error', (error) => {
+  console.error('Upload error:', error);
+});
+
+plugin.on('gallery-load', (items) => {
+  console.log('Gallery loaded:', items);
+});</code></pre>
+
+                    <h2>API Methods</h2>
+                    <h3>uploadFile(file)</h3>
+                    <p>Upload a single file</p>
+                    <pre><code class="language-javascript">plugin.uploadFile(fileInput.files[0]);</code></pre>
+
+                    <h3>openGallery()</h3>
+                    <p>Open media gallery dialog</p>
+                    <pre><code class="language-javascript">plugin.openGallery();</code></pre>
+
+                    <h3>insertMedia(url, options)</h3>
+                    <p>Insert media from URL</p>
+                    <pre><code class="language-javascript">plugin.insertMedia('https://example.com/image.jpg', {
+  alt: 'Image description',
+  width: '100%'
+});</code></pre>
+
+                    <h2>Styling</h2>
+                    <p>Customize the media manager appearance with CSS:</p>
+                    <pre><code class="language-css">.media-manager {
+  --primary: #007bff;
+  --border: #ddd;
+  --background: #fff;
+}
+
+.media-manager-dialog {
+  max-width: 800px;
+}
+
+.media-item {
+  border-radius: 8px;
+  transition: transform 0.2s;
+}
+
+.media-item:hover {
+  transform: scale(1.05);
+}</code></pre>
+
+                    <h2>Complete Example</h2>
+                    <pre><code class="language-javascript">import { Editor } from '@editora/core';
+import { MediaManagerPlugin } from '@editora/plugins/media-manager';
+
+// Initialize plugin
+const mediaPlugin = new MediaManagerPlugin({
+  uploadUrl: '/api/upload',
+  galleryUrl: '/api/gallery',
+  maxFileSize: 20 * 1024 * 1024 // 20MB
+});
+
+// Listen to upload events
+mediaPlugin.on('upload', (data) => {
+  console.log('File uploaded successfully:', data.url);
+});
+
+// Create editor with plugin
+const editor = new Editor({
+  element: '#editor',
+  plugins: [mediaPlugin]
+});
+
+// Upload files programmatically
+document.getElementById('upload-btn').addEventListener('click', () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*,video/*';
+  input.addEventListener('change', (e) => {
+    mediaPlugin.uploadFile(e.target.files[0]);
+  });
+  input.click();
+});</code></pre>
+
+                    <div class="alert alert-info" style="margin-top: 2rem;">
+                        <strong>💡 Tip:</strong> Enable image optimization on the server to reduce file sizes and improve performance.
+                    </div>
+
+                    <div style="margin-top: 2rem; padding: 2rem; background: var(--gray-50); border-radius: var(--border-radius);">
+                        <p><a href="index.html">← Back to Plugins</a></p>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>📚 Documentation</h5>
+                    <ul>
+                        <li><a href="../docs/installation.html">Installation</a></li>
+                        <li><a href="../docs/features.html">Features</a></li>
+                        <li><a href="../docs/api.html">API Reference</a></li>
+                        <li><a href="../docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔌 Plugins</h5>
+                    <ul>
+                        <li><a href="index.html">All Plugins</a></li>
+                        <li><a href="media-manager.html">Media Manager</a></li>
+                        <li><a href="table.html">Tables</a></li>
+                        <li><a href="code-sample.html">Code Samples</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔗 Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>ℹ️ About</h5>
+                    <ul>
+                        <li><a href="../docs/about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024-2026 Editora. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>

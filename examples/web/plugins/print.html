@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Print plugin documentation for Editora rich text editor">
+    <title>Print Plugin - Editora</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="../index.html" class="logo">✏️ <span>Editora</span></a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../docs/installation.html">Docs</a></li>
+                    <li><a href="../docs/features.html">Features</a></li>
+                    <li><a href="index.html" class="active">Plugins</a></li>
+                    <li><a href="../docs/api.html">API</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+        <div class="container">
+            <h1 style="color: white;">🖨️ Print Plugin</h1>
+            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Export and print content with beautiful formatting</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h2>Overview</h2>
+            <p>The Print plugin enables users to print or export documents with custom formatting, page layouts, and styling options. Optimize documents for print output with headers, footers, pagination, and watermarks.</p>
+
+            <h2>Features</h2>
+            <ul style="columns: 2; gap: 2rem;">
+                <li>✓ Print preview</li>
+                <li>✓ Custom page layout</li>
+                <li>✓ Headers and footers</li>
+                <li>✓ Page numbering</li>
+                <li>✓ Watermarks</li>
+                <li>✓ Export to PDF</li>
+                <li>✓ Print scaling</li>
+                <li>✓ Color management</li>
+            </ul>
+
+            <h2>Installation</h2>
+            <pre><code>npm install @editora/plugin-print</code></pre>
+
+            <h2>Basic Usage</h2>
+            <pre><code>import Editora from '@editora/core';
+import PrintPlugin from '@editora/plugin-print';
+
+const editor = new Editora('#editor');
+editor.use(PrintPlugin);
+
+// Open print dialog
+editor.execCommand('openPrintDialog');</code></pre>
+
+            <h2>Print Configuration</h2>
+            <p>Customize your print output:</p>
+            <ol>
+                <li><strong>Preview:</strong> Review document before printing</li>
+                <li><strong>Layout:</strong> Choose page size and orientation</li>
+                <li><strong>Headers:</strong> Add document title and date</li>
+                <li><strong>Footers:</strong> Add page numbers and branding</li>
+            </ol>
+
+            <h2>Configuration Options</h2>
+            <table style="width: 100%; border-collapse: collapse; margin: 2rem 0;">
+                <tr style="background: var(--gray-100);">
+                    <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-200);">Option</th>
+                    <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-200);">Type</th>
+                    <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-200);">Description</th>
+                </tr>
+                <tr>
+                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">pageSize</td>
+                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">string</td>
+                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">Page size: A4, Letter, etc. (default: A4)</td>
+                </tr>
+                <tr style="background: var(--gray-50);">
+                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">margins</td>
+                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">object</td>
+                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">Page margins in mm</td>
+                </tr>
+            </table>
+
+            <h2>API Methods</h2>
+            <ul>
+                <li><strong>openPrintDialog():</strong> Open print preview</li>
+                <li><strong>exportPDF():</strong> Export document as PDF</li>
+                <li><strong>print():</strong> Send to printer</li>
+                <li><strong>setPrintOptions(options):</strong> Configure print settings</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>📚 Documentation</h5>
+                    <ul>
+                        <li><a href="../docs/installation.html">Installation</a></li>
+                        <li><a href="../docs/features.html">Features</a></li>
+                        <li><a href="../docs/api.html">API Reference</a></li>
+                        <li><a href="../docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔌 Plugins</h5>
+                    <ul>
+                        <li><a href="index.html">All Plugins</a></li>
+                        <li><a href="media-manager.html">Media Manager</a></li>
+                        <li><a href="table.html">Tables</a></li>
+                        <li><a href="code-sample.html">Code Samples</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔗 Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>ℹ️ About</h5>
+                    <ul>
+                        <li><a href="../docs/about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024-2026 Editora. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>
