@@ -10,6 +10,7 @@
       "conventionalCommits": true,
       "message": "chore(release): publish %s",
       "registry": "https://registry.npmjs.org/",
+      "access": "public",
       "ignoreChanges": [
         "**/*.md",
         "**/*.test.ts",

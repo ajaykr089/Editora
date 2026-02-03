@@ -36,5 +36,6 @@
     "@types/react": "^18.0.0",
     "typescript": "^5.0.0",
     "vite": "^7.3.1"
-  }
+  },
+  "gitHead": "c85eb2f779a591740e261076a8777c9d11fdb8d8"
 }

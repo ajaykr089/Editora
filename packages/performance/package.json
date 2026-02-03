@@ -44,5 +44,6 @@
   },
   "devDependencies": {
     "vite": "^7.3.1"
-  }
+  },
+  "gitHead": "c85eb2f779a591740e261076a8777c9d11fdb8d8"
 }
