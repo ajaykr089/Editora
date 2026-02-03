@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Code examples and tutorials for Editora Rich Text Editor. Learn through practical examples.">
+    <meta name="keywords" content="examples, tutorials, code samples, getting started">
+    <title>Examples - Editora Documentation</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="../index.html" class="logo">✏️ <span>Editora</span></a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="installation.html">Docs</a></li>
+                    <li><a href="features.html">Features</a></li>
+                    <li><a href="../plugins/index.html">Plugins</a></li>
+                    <li><a href="api.html">API</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+        <div class="container">
+            <h1 style="color: white;">📚 Examples & Tutorials</h1>
+            <p style="color: rgba(255, 255, 255, 0.95);">Learn through practical code examples</p>
+        </div>
+    </section>
+
+    <!-- Content -->
+    <section>
+        <div class="container">
+            <div class="docs-wrapper">
+                <aside class="docs-sidebar">
+                    <h3>Documentation</h3>
+                    <ul>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="api.html">API Reference</a></li>
+                        <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                        <li><a href="examples.html" class="active">Examples</a></li>
+                        <li><a href="about.html">About</a></li>
+                    </ul>
+                </aside>
+
+                <main class="docs-content">
+                    <h2>Basic HTML Example</h2>
+                    <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;style&gt;
+    #editor { border: 1px solid #ccc; padding: 20px; min-height: 300px; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id="editor"&gt;&lt;/div&gt;
+  &lt;script src="https://unpkg.com/@editora/core@latest/dist/editora.min.js"&gt;&lt;/script&gt;
+  &lt;script&gt;
+    const editor = new Editora.Editor({
+      element: document.getElementById('editor'),
+      content: '&lt;p&gt;Hello World!&lt;/p&gt;'
+    });
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+                    <h2>React Example</h2>
+                    <pre><code class="language-jsx">import React, { useState } from 'react';
+import RichTextEditor from '@editora/react';
+
+export default function Editor() {
+  const [content, setContent] = useState('&lt;p&gt;Start typing...&lt;/p&gt;');
+
+  const handleChange = (newContent) => {
+    setContent(newContent);
+    console.log('Content:', newContent);
+  };
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;My Editor&lt;/h1&gt;
+      &lt;RichTextEditor
+        defaultContent={content}
+        onChange={handleChange}
+      /&gt;
+      &lt;button onClick={() =&gt; console.log('Saved:', content)}&gt;
+        Save
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+                    <h2>With Plugins Example</h2>
+                    <pre><code class="language-javascript">import { Editor } from '@editora/core';
+import { MediaManagerPlugin } from '@editora/plugins/media-manager';
+import { TablePlugin } from '@editora/plugins/table';
+import { CodeSamplePlugin } from '@editora/plugins/code-sample';
+
+const editor = new Editor({
+  element: '#editor',
+  content: '&lt;p&gt;Start editing...&lt;/p&gt;',
+  plugins: [
+    new MediaManagerPlugin({
+      uploadUrl: '/api/upload'
+    }),
+    new TablePlugin(),
+    new CodeSamplePlugin()
+  ]
+});
+
+// Save content
+document.getElementById('save').addEventListener('click', () => {
+  const html = editor.getContent();
+  // Send to server
+  fetch('/api/save', {
+    method: 'POST',
+    body: JSON.stringify({ content: html })
+  });
+});</code></pre>
+
+                    <h2>Auto-Save Example</h2>
+                    <pre><code class="language-javascript">import { Editor } from '@editora/core';
+
+const editor = new Editor({
+  element: '#editor'
+});
+
+// Auto-save every 30 seconds
+setInterval(() => {
+  const content = editor.getContent();
+  localStorage.setItem('draft', content);
+  console.log('Auto-saved');
+}, 30000);
+
+// Load draft on page load
+window.addEventListener('DOMContentLoaded', () => {
+  const draft = localStorage.getItem('draft');
+  if (draft) {
+    editor.setContent(draft);
+  }
+});</code></pre>
+
+                    <h2>Custom Toolbar Example</h2>
+                    <pre><code class="language-javascript">const editor = new Editor({
+  element: '#editor',
+  toolbar: [
+    'bold', 'italic', 'underline',
+    '|',
+    'heading1', 'heading2',
+    '|',
+    'bulletList', 'orderedList',
+    '|',
+    'insertLink', 'insertImage'
+  ]
+});</code></pre>
+
+                    <h2>Event Handling Example</h2>
+                    <pre><code class="language-javascript">const editor = new Editor({
+  element: '#editor'
+});
+
+editor.on('change', (content) => {
+  console.log('Content changed:', content);
+  // Update preview
+  document.getElementById('preview').innerHTML = content;
+});
+
+editor.on('focus', () => {
+  console.log('Editor focused');
+  document.getElementById('status').textContent = 'Editing...';
+});
+
+editor.on('blur', () => {
+  console.log('Editor blurred');
+  document.getElementById('status').textContent = 'Ready';
+});
+
+editor.on('selectionChange', (selection) => {
+  if (selection.isBold) {
+    document.getElementById('bold-btn').classList.add('active');
+  }
+});</code></pre>
+
+                    <h2>Data Binding Example</h2>
+                    <pre><code class="language-javascript">// Bind to form
+const form = document.getElementById('form');
+const contentInput = document.getElementById('content');
+
+const editor = new Editor({
+  element: '#editor'
+});
+
+// Set initial content
+editor.setContent(contentInput.value);
+
+// Update input on change
+editor.on('change', (content) => {
+  contentInput.value = content;
+});
+
+// Submit form
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  // Form is ready with content in contentInput
+  form.submit();
+});</code></pre>
+
+                    <h2>Formatting Example</h2>
+                    <pre><code class="language-javascript">const editor = new Editor({
+  element: '#editor'
+});
+
+// Make selected text bold
+function makeBold() {
+  editor.execCommand('bold');
+}
+
+// Insert heading
+function insertHeading(level = 1) {
+  editor.execCommand('heading', { level });
+}
+
+// Insert link
+function insertLink() {
+  const url = prompt('Enter URL:');
+  if (url) {
+    editor.execCommand('insertLink', { url });
+  }
+}
+
+// Clear formatting
+function clearFormatting() {
+  editor.execCommand('clearFormatting');
+}</code></pre>
+
+                    <h2>Validation Example</h2>
+                    <pre><code class="language-javascript">const editor = new Editor({
+  element: '#editor'
+});
+
+function validateContent() {
+  const content = editor.getContent();
+  
+  // Check if empty
+  if (content === '&lt;p&gt;&lt;/p&gt;' || content.trim() === '') {
+    alert('Content cannot be empty');
+    return false;
+  }
+  
+  // Check minimum length
+  const text = new DOMParser().parseFromString(content, 'text/html').body.textContent;
+  if (text.length &lt; 10) {
+    alert('Content must be at least 10 characters');
+    return false;
+  }
+  
+  return true;
+}
+
+document.getElementById('submit').addEventListener('click', () => {
+  if (validateContent()) {
+    // Save content
+    saveContent(editor.getContent());
+  }
+});</code></pre>
+
+                    <div style="margin-top: 3rem; padding: 2rem; background: var(--gray-50); border-radius: var(--border-radius);">
+                        <h3>💡 More Examples</h3>
+                        <p>Check the <a href="https://github.com/ajaykr089/Editora/tree/main/examples" target="_blank" rel="noopener">GitHub examples directory</a> for more complete examples.</p>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>📚 Documentation</h5>
+                    <ul>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="api.html">API Reference</a></li>
+                        <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔌 Plugins</h5>
+                    <ul>
+                        <li><a href="../plugins/index.html">All Plugins</a></li>
+                        <li><a href="../plugins/media-manager.html">Media Manager</a></li>
+                        <li><a href="../plugins/table.html">Tables</a></li>
+                        <li><a href="../plugins/code-sample.html">Code Samples</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔗 Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>ℹ️ About</h5>
+                    <ul>
+                        <li><a href="about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024-2026 Editora. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>

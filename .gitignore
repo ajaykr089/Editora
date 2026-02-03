@@ -47,4 +47,4 @@ dist/
 build/
 .cache/
 api/media/uploads/
-docs/
+ai-docs/

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Complete API reference for Editora Rich Text Editor. Learn about editor configuration, methods, events, and commands.">
+    <meta name="keywords" content="API, reference, methods, events, commands, configuration">
+    <title>API Reference - Editora Documentation</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="../index.html" class="logo">
+                    ✏️ <span>Editora</span>
+                </a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="installation.html">Docs</a></li>
+                    <li><a href="features.html">Features</a></li>
+                    <li><a href="../plugins/index.html">Plugins</a></li>
+                    <li><a href="api.html" class="active">API</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+        <div class="container">
+            <h1 style="color: white; margin-bottom: 0.5rem;">📚 API Reference</h1>
+            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Complete API documentation for Editora</p>
+        </div>
+    </section>
+
+    <!-- Content -->
+    <section>
+        <div class="container">
+            <div class="docs-wrapper">
+                <!-- Sidebar -->
+                <aside class="docs-sidebar">
+                    <h3>Documentation</h3>
+                    <ul>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="api.html" class="active">API Reference</a></li>
+                        <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                        <li><a href="examples.html">Examples</a></li>
+                        <li><a href="about.html">About</a></li>
+                    </ul>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="docs-content">
+                    <h2>Editor Constructor</h2>
+                    <pre><code class="language-javascript">const editor = new Editor(options)</code></pre>
+
+                    <h3>Constructor Options</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                        <thead>
+                            <tr style="background: var(--gray-200);">
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Option</th>
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Type</th>
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>element</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">HTMLElement | string</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Target DOM element or CSS selector</td>
+                            </tr>
+                            <tr style="background: var(--gray-50);">
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>content</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">string</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Initial HTML content</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>shortcuts</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">boolean</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Enable keyboard shortcuts (default: true)</td>
+                            </tr>
+                            <tr style="background: var(--gray-50);">
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>plugins</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Plugin[]</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Array of plugins to load</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>toolbar</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">boolean | string[]</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Show toolbar or custom buttons</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2 style="margin-top: 2rem;">Methods</h2>
+
+                    <h3>getContent()</h3>
+                    <p>Get the current editor content as HTML</p>
+                    <pre><code class="language-javascript">const html = editor.getContent();
+console.log(html); // &lt;p&gt;Your content&lt;/p&gt;</code></pre>
+
+                    <h3>setContent(html)</h3>
+                    <p>Set editor content</p>
+                    <pre><code class="language-javascript">editor.setContent('&lt;h1&gt;New Title&lt;/h1&gt;&lt;p&gt;Content&lt;/p&gt;');</code></pre>
+
+                    <h3>execCommand(command, args)</h3>
+                    <p>Execute an editor command</p>
+                    <pre><code class="language-javascript">editor.execCommand('bold');
+editor.execCommand('heading', { level: 1 });
+editor.execCommand('insertLink', { url: 'https://example.com', text: 'Link' });</code></pre>
+
+                    <h3>undo()</h3>
+                    <p>Undo the last action</p>
+                    <pre><code class="language-javascript">editor.undo();</code></pre>
+
+                    <h3>redo()</h3>
+                    <p>Redo the last undone action</p>
+                    <pre><code class="language-javascript">editor.redo();</code></pre>
+
+                    <h3>focus()</h3>
+                    <p>Focus the editor</p>
+                    <pre><code class="language-javascript">editor.focus();</code></pre>
+
+                    <h3>blur()</h3>
+                    <p>Blur the editor</p>
+                    <pre><code class="language-javascript">editor.blur();</code></pre>
+
+                    <h3>destroy()</h3>
+                    <p>Destroy the editor and clean up</p>
+                    <pre><code class="language-javascript">editor.destroy();</code></pre>
+
+                    <h2 style="margin-top: 2rem;">Events</h2>
+
+                    <h3>change</h3>
+                    <p>Fired when content changes</p>
+                    <pre><code class="language-javascript">editor.on('change', (content) => {
+  console.log('Content changed:', content);
+});</code></pre>
+
+                    <h3>selectionChange</h3>
+                    <p>Fired when selection changes</p>
+                    <pre><code class="language-javascript">editor.on('selectionChange', (selection) => {
+  console.log('Selection:', selection);
+});</code></pre>
+
+                    <h3>focus</h3>
+                    <p>Fired when editor is focused</p>
+                    <pre><code class="language-javascript">editor.on('focus', () => {
+  console.log('Editor focused');
+});</code></pre>
+
+                    <h3>blur</h3>
+                    <p>Fired when editor loses focus</p>
+                    <pre><code class="language-javascript">editor.on('blur', () => {
+  console.log('Editor blurred');
+});</code></pre>
+
+                    <h2 style="margin-top: 2rem;">Commands Reference</h2>
+
+                    <h3>Text Formatting Commands</h3>
+                    <ul>
+                        <li><code>bold</code> - Make text bold</li>
+                        <li><code>italic</code> - Make text italic</li>
+                        <li><code>underline</code> - Underline text</li>
+                        <li><code>strikethrough</code> - Strike through text</li>
+                        <li><code>superscript</code> - Superscript text</li>
+                        <li><code>subscript</code> - Subscript text</li>
+                    </ul>
+
+                    <h3>Heading Commands</h3>
+                    <pre><code class="language-javascript">editor.execCommand('heading', { level: 1 }); // H1
+editor.execCommand('heading', { level: 2 }); // H2
+// ... up to level 6
+editor.execCommand('paragraph'); // Back to paragraph</code></pre>
+
+                    <h3>List Commands</h3>
+                    <pre><code class="language-javascript">editor.execCommand('bulletList');
+editor.execCommand('orderedList');
+editor.execCommand('indent');
+editor.execCommand('outdent');</code></pre>
+
+                    <h3>Alignment Commands</h3>
+                    <pre><code class="language-javascript">editor.execCommand('alignLeft');
+editor.execCommand('alignCenter');
+editor.execCommand('alignRight');
+editor.execCommand('justify');</code></pre>
+
+                    <h3>Link Commands</h3>
+                    <pre><code class="language-javascript">editor.execCommand('insertLink', {
+  url: 'https://example.com',
+  text: 'Example',
+  target: '_blank'
+});
+editor.execCommand('removeLink');</code></pre>
+
+                    <h3>Color Commands</h3>
+                    <pre><code class="language-javascript">editor.execCommand('textColor', { color: '#ff0000' });
+editor.execCommand('backgroundColor', { color: '#ffff00' });</code></pre>
+
+                    <h3>History Commands</h3>
+                    <pre><code class="language-javascript">editor.execCommand('undo');
+editor.execCommand('redo');
+editor.execCommand('clearHistory');</code></pre>
+
+                    <h2 style="margin-top: 2rem;">React Component Props</h2>
+                    <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                        <thead>
+                            <tr style="background: var(--gray-200);">
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Prop</th>
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Type</th>
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>defaultContent</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">string</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Initial content</td>
+                            </tr>
+                            <tr style="background: var(--gray-50);">
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>onChange</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">function</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Content change callback</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>onFocus</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">function</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Focus event handler</td>
+                            </tr>
+                            <tr style="background: var(--gray-50);">
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>onBlur</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">function</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Blur event handler</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>plugins</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Plugin[]</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Array of plugins</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2 style="margin-top: 2rem;">Examples</h2>
+
+                    <h3>Basic Usage</h3>
+                    <pre><code class="language-javascript">import { Editor } from '@editora/core';
+
+const editor = new Editor({
+  element: '#editor',
+  content: '&lt;p&gt;Hello World&lt;/p&gt;'
+});
+
+editor.on('change', (content) => {
+  console.log('New content:', content);
+});</code></pre>
+
+                    <h3>React Usage</h3>
+                    <pre><code class="language-jsx">import RichTextEditor from '@editora/react';
+
+export default function Document() {
+  const handleChange = (content) => {
+    console.log('Content:', content);
+  };
+
+  return (
+    &lt;RichTextEditor
+      defaultContent="&lt;p&gt;Start typing...&lt;/p&gt;"
+      onChange={handleChange}
+    /&gt;
+  );
+}</code></pre>
+
+                    <h3>With Plugins</h3>
+                    <pre><code class="language-javascript">import { Editor } from '@editora/core';
+import { MediaManagerPlugin } from '@editora/plugins';
+
+const editor = new Editor({
+  element: '#editor',
+  plugins: [
+    new MediaManagerPlugin({
+      uploadUrl: '/api/upload'
+    })
+  ]
+});</code></pre>
+
+                    <div style="margin-top: 3rem; padding: 2rem; background: var(--gray-50); border-radius: var(--border-radius);">
+                        <p>For more examples and advanced usage, visit the <a href="examples.html">Examples page</a>.</p>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>📚 Documentation</h5>
+                    <ul>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="api.html">API Reference</a></li>
+                        <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔌 Plugins</h5>
+                    <ul>
+                        <li><a href="../plugins/index.html">All Plugins</a></li>
+                        <li><a href="../plugins/media-manager.html">Media Manager</a></li>
+                        <li><a href="../plugins/table.html">Tables</a></li>
+                        <li><a href="../plugins/code-sample.html">Code Samples</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔗 Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>ℹ️ About</h5>
+                    <ul>
+                        <li><a href="about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024-2026 Editora. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>
