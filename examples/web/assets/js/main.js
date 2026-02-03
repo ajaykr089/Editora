@@ -35,18 +35,21 @@ function initTabs() {
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const tabGroup = btn.parentElement;
-            const tabContent = btn.parentElement.parentElement;
+            const tabsContainer = btn.closest('.tabs-container') || document;
             const tabId = btn.getAttribute('data-tab');
 
             // Remove active class from all buttons and contents
             tabGroup.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            tabContent.querySelectorAll('.tab-content').forEach(content => {
+            tabsContainer.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
 
             // Add active class to clicked button and corresponding content
             btn.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
+            const targetTab = tabsContainer.querySelector(`#${tabId}`);
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
         });
     });
 }

@@ -37,8 +37,8 @@ By participating in this project, you agree to maintain a respectful and inclusi
 2. Clone your fork:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/Rich-Text-Editor.git
-cd Rich-Text-Editor
+git clone https://github.com/YOUR_USERNAME/Editora.git
+cd Editora
 ```
 
 3. Add upstream remote:
@@ -82,7 +82,7 @@ Opens Storybook at [http://localhost:6006](http://localhost:6006)
 ## Project Structure
 
 ```
-Rich-Text-Editor/
+Editora/
 ├── packages/
 │   ├── core/              # Framework-agnostic core
 │   ├── react/             # React components

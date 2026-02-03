@@ -203,7 +203,7 @@
 
             <div style="background: var(--gray-50); border-left: 4px solid var(--primary); padding: 2rem; border-radius: 4px; margin: 2rem 0;">
                 <h3>Basic Plugin Structure</h3>
-                <pre style="background: var(--gray-100); padding: 1.5rem; border-radius: 4px; overflow-x: auto; margin: 1rem 0;"><code>import { Plugin } from '@editora/core';
+                <pre><code>import { Plugin } from '@editora/core';
 
 export const MyPlugin: Plugin = {
     name: 'my-plugin',
@@ -229,13 +229,13 @@ editor.use(MyPlugin);</code></pre>
 
             <div style="background: var(--gray-50); border-left: 4px solid var(--primary); padding: 2rem; border-radius: 4px; margin: 2rem 0;">
                 <h3>Using npm</h3>
-                <pre style="background: var(--gray-100); padding: 1.5rem; border-radius: 4px; overflow-x: auto;"><code>npm install @editora/plugin-[name]</code></pre>
+                <pre><code>npm install @editora/plugin-[name]</code></pre>
 
                 <h3 style="margin-top: 2rem;">Using Yarn</h3>
-                <pre style="background: var(--gray-100); padding: 1.5rem; border-radius: 4px; overflow-x: auto;"><code>yarn add @editora/plugin-[name]</code></pre>
+                <pre><code>yarn add @editora/plugin-[name]</code></pre>
 
                 <h3 style="margin-top: 2rem;">Browser (CDN)</h3>
-                <pre style="background: var(--gray-100); padding: 1.5rem; border-radius: 4px; overflow-x: auto;"><code>&lt;script src="https://cdn.jsdelivr.net/npm/@editora/plugin-[name]">&lt;/script></code></pre>
+                <pre><code>&lt;script src="https://cdn.jsdelivr.net/npm/@editora/plugin-[name]">&lt;/script></code></pre>
             </div>
 
         </div>
