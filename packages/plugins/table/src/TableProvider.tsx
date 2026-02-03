@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { TableToolbar } from './TableToolbar';
+import { TableToolbar, TableResizer } from './TableToolbar';
 import {
   insertTableCommand,
   addRowAboveCommand,
@@ -10,7 +10,8 @@ import {
   deleteColumnCommand,
   toggleHeaderRowCommand,
   toggleHeaderColumnCommand,
-  deleteTableCommand
+  deleteTableCommand,
+  mergeCellsCommand
 } from './TablePlugin';
 
 interface TableContextType {
@@ -36,13 +37,44 @@ export const TableProvider: React.FC<TableProviderProps> = ({ children }) => {
   const [toolbarVisible, setToolbarVisible] = useState(false);
   const [toolbarPosition, setToolbarPosition] = useState({ top: 0, left: 0 });
   const [tableInfo, setTableInfo] = useState({ canDeleteRow: true, canDeleteColumn: true });
+  const [currentTable, setCurrentTable] = useState<HTMLElement | null>(null);
 
   const showToolbar = (table: HTMLElement) => {
     const rect = table.getBoundingClientRect();
-    setToolbarPosition({
-      top: rect.top - 50,
-      left: rect.left + rect.width / 2 - 100
-    });
+    const toolbarHeight = 140;
+    const toolbarWidth = 280;
+    const padding = 10;
+    
+    // Store current table for resizing
+    setCurrentTable(table);
+    
+    // Calculate position with smart viewport collision detection
+    let top = rect.top - toolbarHeight - padding;
+    let left = rect.left + (rect.width / 2) - (toolbarWidth / 2);
+    
+    // Adjust if off-screen (top) - show below if no room above
+    if (top < padding) {
+      top = rect.bottom + padding;
+    }
+    
+    // Adjust if off-screen (left)
+    if (left < padding) {
+      left = padding;
+    }
+    
+    // Adjust if off-screen (right)
+    const viewportWidth = window.innerWidth;
+    if (left + toolbarWidth > viewportWidth - padding) {
+      left = viewportWidth - toolbarWidth - padding;
+    }
+    
+    // Adjust if off-screen (bottom) - shift up if needed
+    const viewportHeight = window.innerHeight;
+    if (top + toolbarHeight > viewportHeight - padding) {
+      top = viewportHeight - toolbarHeight - padding;
+    }
+    
+    setToolbarPosition({ top, left });
     setToolbarVisible(true);
 
     // Calculate permissions
@@ -57,6 +89,22 @@ export const TableProvider: React.FC<TableProviderProps> = ({ children }) => {
 
   const hideToolbar = () => {
     setToolbarVisible(false);
+    setCurrentTable(null);
+  };
+
+  const handleColumnResize = (columnIndex: number, width: number) => {
+    if (!currentTable) return;
+    
+    const headerRow = currentTable.querySelector('thead tr, tbody tr:first-child') as HTMLTableRowElement;
+    if (!headerRow) return;
+    
+    // Set width for all cells in this column
+    const allRows = currentTable.querySelectorAll('tr') as NodeListOf<HTMLTableRowElement>;
+    allRows.forEach(row => {
+      if (row.cells[columnIndex]) {
+        (row.cells[columnIndex] as HTMLElement).style.width = width + 'px';
+      }
+    });
   };
 
   const handleToolbarCommand = (action: string) => {
@@ -87,6 +135,9 @@ export const TableProvider: React.FC<TableProviderProps> = ({ children }) => {
         break;
       case 'deleteTable':
         deleteTableCommand();
+        break;
+      case 'mergeCells':
+        mergeCellsCommand();
         break;
     }
     // Update table info after operations
@@ -195,12 +246,18 @@ export const TableProvider: React.FC<TableProviderProps> = ({ children }) => {
       }
     };
 
+    const handleTableDeleted = () => {
+      hideToolbar();
+    };
+
     document.addEventListener('selectionchange', handleSelectionChange);
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('tableDeleted', handleTableDeleted);
 
     return () => {
       document.removeEventListener('selectionchange', handleSelectionChange);
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('tableDeleted', handleTableDeleted);
     };
   }, []);
 
@@ -231,9 +288,11 @@ export const TableProvider: React.FC<TableProviderProps> = ({ children }) => {
         onToggleHeaderRow={() => handleToolbarCommand('toggleHeaderRow')}
         onToggleHeaderColumn={() => handleToolbarCommand('toggleHeaderColumn')}
         onDeleteTable={() => handleToolbarCommand('deleteTable')}
+        onMergeCells={() => handleToolbarCommand('mergeCells')}
         canDeleteRow={tableInfo.canDeleteRow}
         canDeleteColumn={tableInfo.canDeleteColumn}
       />
+      {currentTable && <TableResizer table={currentTable} onResize={handleColumnResize} />}
     </TableContext.Provider>
   );
 };

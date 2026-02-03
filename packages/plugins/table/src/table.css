@@ -8,6 +8,7 @@ table {
   border: 1px solid #ddd;
   font-size: 14px;
   line-height: 1.4;
+  position: relative;
 }
 
 .rte-table td,
@@ -19,6 +20,7 @@ table th {
   min-width: 80px;
   vertical-align: top;
   position: relative;
+  user-select: none;
 }
 
 .rte-table td:focus,
@@ -70,22 +72,159 @@ table td.selected {
   border-color: #2196f3;
 }
 
-/* Table resize handles (for future enhancement) */
-.rte-table td::after,
-table td::after {
-  content: '';
-  position: absolute;
-  right: -1px;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background-color: transparent;
-  cursor: col-resize;
+/* ============================================
+   TABLE TOOLBAR STYLES - INLINE DESIGN
+   ============================================ */
+
+.table-toolbar {
+  background: white;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  min-width: max-content;
 }
 
-.rte-table td:hover::after,
-table td:hover::after {
-  background-color: #007acc;
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 20px;
+  background: #e0e0e0;
+  margin: 0 4px;
+}
+
+/* Icon Button Styling */
+.toolbar-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  color: #333;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.toolbar-icon-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.toolbar-icon-btn:hover:not(:disabled) {
+  background: #f0f0f0;
+  border-color: #d0d0d0;
+  color: #0066cc;
+}
+
+.toolbar-icon-btn:active:not(:disabled) {
+  background: #e8f0ff;
+  border-color: #0066cc;
+  transform: scale(0.95);
+}
+
+.toolbar-icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  color: #ccc;
+}
+
+/* Danger buttons */
+.toolbar-icon-btn-danger {
+  color: #d32f2f;
+}
+
+.toolbar-icon-btn-danger:hover:not(:disabled) {
+  background: #fff3f3;
+  border-color: #ffcccc;
+  color: #d32f2f;
+}
+
+.toolbar-icon-btn-danger:active:not(:disabled) {
+  background: #ffebee;
+}
+
+/* Delete button styling */
+.toolbar-icon-btn-delete {
+  color: #d32f2f;
+}
+
+.toolbar-icon-btn-delete:hover:not(:disabled) {
+  background: #fff3f3;
+  border-color: #ffcccc;
+  color: #d32f2f;
+}
+
+.toolbar-icon-btn-delete:active:not(:disabled) {
+  background: #ffebee;
+}
+
+/* Resize Handle Styling */
+.resize-handle {
+  opacity: 0;
+  transition: all 0.15s ease;
+}
+
+.resize-handle:hover {
+  opacity: 1;
+}
+
+/* Show resize handle on table cell hover */
+td:hover > .resize-handle,
+th:hover > .resize-handle {
+  opacity: 1;
+}
+
+/* Table resize handle (for table-level resizing) */
+.table-resize-handle {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 12px;
+  height: 12px;
+  background: transparent;
+  cursor: nwse-resize;
+  z-index: 10;
+  transition: background 0.15s ease;
+}
+
+.table-resize-handle::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background: rgba(0, 102, 204, 0.3);
+  border-bottom: 2px solid #0066cc;
+  border-right: 2px solid #0066cc;
+  border-radius: 0 0 2px 0;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.table-resize-handle:hover::after {
+  opacity: 1;
+}
+
+.rte-table:hover .table-resize-handle::after,
+table:hover .table-resize-handle::after {
+  opacity: 1;
 }
 
 /* Responsive table */
@@ -101,6 +240,22 @@ table td:hover::after {
     padding: 4px 6px;
     min-width: 60px;
   }
+
+  .table-toolbar {
+    padding: 3px;
+    gap: 0;
+    max-width: 90vw;
+    overflow-x: auto;
+  }
+
+  .toolbar-icon-btn {
+    width: 26px;
+    height: 26px;
+  }
+
+  .toolbar-divider {
+    height: 18px;
+  }
 }
 
 /* Print styles */
@@ -115,5 +270,9 @@ table td:hover::after {
   table th {
     border: 1px solid #000;
     padding: 4px;
+  }
+
+  .table-toolbar {
+    display: none;
   }
 }

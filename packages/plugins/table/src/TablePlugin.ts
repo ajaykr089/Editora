@@ -170,11 +170,13 @@ export const addRowAboveCommand = () => {
     newRow.appendChild(cell);
   }
 
-  // Insert row at specified position
-  if (rowIndex === 0) {
-    table.insertBefore(newRow, table.rows[0]);
+  // Find the correct tbody/thead element and insert row
+  const currentRow = table.rows[rowIndex];
+  if (currentRow && currentRow.parentElement) {
+    currentRow.parentElement.insertBefore(newRow, currentRow);
   } else {
-    table.insertBefore(newRow, table.rows[rowIndex]);
+    // Fallback: append to table
+    table.appendChild(newRow);
   }
 };
 
@@ -339,7 +341,72 @@ export const deleteTableCommand = () => {
   const tableInfo = getTableInfoFromDOM();
   if (!tableInfo) return;
 
-  tableInfo.table.remove();
+  const table = tableInfo.table;
+  table.remove();
+  
+  // Trigger toolbar hide event
+  document.dispatchEvent(new CustomEvent('tableDeleted'));
+};
+
+// Merge cells
+export const mergeCellsCommand = () => {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
+
+  // Get all selected cells
+  const range = selection.getRangeAt(0);
+  const startContainer = range.startContainer;
+  
+  let tableElement = startContainer.nodeType === Node.TEXT_NODE
+    ? startContainer.parentElement?.closest('table')
+    : (startContainer as Element).closest('table');
+
+  if (!tableElement) return;
+
+  const table = tableElement as HTMLTableElement;
+  const allCells: HTMLTableCellElement[] = [];
+
+  // Find first selected cell
+  let firstCell: HTMLTableCellElement | null = null;
+  if (startContainer.nodeType === Node.TEXT_NODE) {
+    firstCell = startContainer.parentElement?.closest('td, th') as HTMLTableCellElement;
+  } else if (startContainer.nodeType === Node.ELEMENT_NODE) {
+    firstCell = (startContainer as Element).closest('td, th') as HTMLTableCellElement;
+  }
+
+  if (!firstCell) return;
+
+  // Collect all cells in selection based on current cell position
+  // For simplicity, we'll merge the current cell with the one to the right
+  const firstRow = firstCell.parentElement as HTMLTableRowElement;
+  if (!firstRow) return;
+
+  let cellIndex = -1;
+  for (let i = 0; i < firstRow.cells.length; i++) {
+    if (firstRow.cells[i] === firstCell) {
+      cellIndex = i;
+      break;
+    }
+  }
+
+  if (cellIndex === -1 || cellIndex === firstRow.cells.length - 1) return;
+
+  const secondCell = firstRow.cells[cellIndex + 1];
+  if (!secondCell) return;
+
+  // Merge colspan
+  const colspan1 = parseInt(firstCell.getAttribute('colspan') || '1');
+  const colspan2 = parseInt(secondCell.getAttribute('colspan') || '1');
+  firstCell.setAttribute('colspan', String(colspan1 + colspan2));
+
+  // Move content from second cell to first cell
+  const secondCellContent = Array.from(secondCell.childNodes);
+  secondCellContent.forEach(node => {
+    firstCell.appendChild(node);
+  });
+
+  // Remove second cell
+  secondCell.remove();
 };
 
 /**
