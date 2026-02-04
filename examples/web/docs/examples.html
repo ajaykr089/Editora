@@ -47,11 +47,17 @@
                         <li><a href="api.html">API Reference</a></li>
                         <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
                         <li><a href="examples.html" class="active">Examples</a></li>
+                    <li><a href="custom-plugins.html">Custom Plugins</a></li>
                         <li><a href="about.html">About</a></li>
                     </ul>
                 </aside>
 
                 <main class="docs-content">
+                  <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+                    <strong>Live Playground:</strong> Try Editora in your browser with a working sample.
+                    <a href="../playground.html" style="margin-left: 8px;">Open Playground →</a>
+                  </div>
+
                     <h2>Basic HTML Example</h2>
                     <pre><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
@@ -97,6 +103,104 @@ export default function Editor() {
     &lt;/div&gt;
   );
 }</code></pre>
+
+                    <h2>Vue 3 Example</h2>
+                    <pre><code class="language-html">&lt;template&gt;
+  &lt;div class="editor-wrapper"&gt;
+    &lt;div id="editor"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+import { onMounted, onBeforeUnmount } from 'vue';
+import { Editor } from '@editora/core';
+
+let editor;
+
+onMounted(() =&gt; {
+  editor = new Editor({
+    element: document.getElementById('editor'),
+    content: '&lt;p&gt;Hello from Vue 3!&lt;/p&gt;'
+  });
+});
+
+onBeforeUnmount(() =&gt; {
+  editor?.destroy?.();
+});
+&lt;/script&gt;</code></pre>
+
+                    <h2>Vue 3 + Plugins Example</h2>
+                    <pre><code class="language-html">&lt;template&gt;
+  &lt;div class="editor-wrapper"&gt;
+    &lt;div id="editor"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script setup&gt;
+import { onMounted, onBeforeUnmount } from 'vue';
+import { Editor } from '@editora/core';
+import { TablePlugin } from '@editora/plugins/table';
+import { CodeSamplePlugin } from '@editora/plugins/code-sample';
+
+let editor;
+
+onMounted(() =&gt; {
+  editor = new Editor({
+    element: document.getElementById('editor'),
+    content: '&lt;p&gt;Hello from Vue with plugins!&lt;/p&gt;',
+    plugins: [new TablePlugin(), new CodeSamplePlugin()]
+  });
+});
+
+onBeforeUnmount(() =&gt; {
+  editor?.destroy?.();
+});
+&lt;/script&gt;</code></pre>
+
+                    <h2>Angular Example</h2>
+                    <pre><code class="language-typescript">// app.component.ts
+import { Component, AfterViewInit, OnDestroy } from '@angular/core';
+import { Editor } from '@editora/core';
+
+@Component({
+  selector: 'app-root',
+  template: '&lt;div id="editor"&gt;&lt;/div&gt;'
+})
+export class AppComponent implements AfterViewInit, OnDestroy {
+  private editor?: Editor;
+
+  ngAfterViewInit() {
+    this.editor = new Editor({
+      element: document.getElementById('editor') as HTMLElement,
+      content: '&lt;p&gt;Hello from Angular!&lt;/p&gt;'
+    });
+  }
+
+  ngOnDestroy() {
+    this.editor?.destroy?.();
+  }
+}</code></pre>
+
+                    <h2>Svelte Example</h2>
+                    <pre><code class="language-html">&lt;script&gt;
+  import { onMount, onDestroy } from 'svelte';
+  import { Editor } from '@editora/core';
+
+  let editor;
+
+  onMount(() =&gt; {
+    editor = new Editor({
+      element: document.getElementById('editor'),
+      content: '&lt;p&gt;Hello from Svelte!&lt;/p&gt;'
+    });
+  });
+
+  onDestroy(() =&gt; {
+    editor?.destroy?.();
+  });
+&lt;/script&gt;
+
+&lt;div id="editor"&gt;&lt;/div&gt;</code></pre>
 
                     <h2>With Plugins Example</h2>
                     <pre><code class="language-javascript">import { Editor } from '@editora/core';

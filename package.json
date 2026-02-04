@@ -2,6 +2,7 @@
   "name": "editora",
   "version": "1.0.0",
   "description": "Editora - A Production-grade Rich Text Editor",
+  "homepage": "https://editora-free.netlify.app/",
   "private": true,
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"

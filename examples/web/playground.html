@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Playground - Try the editor live with a working sample.">
+    <meta name="keywords" content="playground, live demo, editor, editora">
+    <title>Editora Playground</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .playground-wrapper {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        .playground-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .playground-controls .btn {
+            padding: 10px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--primary);
+            background: var(--primary);
+            color: #fff;
+            cursor: pointer;
+        }
+        .playground-controls .btn.secondary {
+            background: #fff;
+            color: var(--primary);
+        }
+        #editor {
+            min-height: 320px;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            background: #fff;
+        }
+        .output-panel {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--border-radius);
+            padding: 16px;
+        }
+        .output-panel textarea {
+            width: 100%;
+            min-height: 180px;
+            resize: vertical;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        .editora-content {
+            line-height: 1.6;
+        }
+        .editora-content:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: -1px;
+            border-radius: 4px;
+        }
+        .editora-content h1, 
+        .editora-content h2, 
+        .editora-content h3 {
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+        }
+        .editora-content p, 
+        .editora-content ul, 
+        .editora-content ol {
+            margin-bottom: 1em;
+        }
+        .editora-content ul, 
+        .editora-content ol {
+            margin-left: 2em;
+        }
+        .editora-content a {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+        .editora-content strong {
+            font-weight: 600;
+        }
+        .editora-content em {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">✏️ <span>Editora</span></a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="docs/installation.html">Docs</a></li>
+                    <li><a href="docs/features.html">Features</a></li>
+                    <li><a href="plugins/index.html">Plugins</a></li>
+                    <li><a href="docs/api.html">API</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+        <div class="container">
+            <h1 style="color: white; margin-bottom: 0.5rem;">🎮 Playground</h1>
+            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Try Editora with a live, working editor sample</p>
+        </div>
+    </section>
+
+    <!-- Content -->
+    <section>
+        <div class="container">
+            <div class="playground-wrapper">
+                <div class="playground-controls">
+                    <button class="btn" id="btn-sample">Insert Sample Content</button>
+                    <button class="btn secondary" id="btn-clear">Clear Content</button>
+                    <button class="btn" id="btn-get">Get HTML</button>
+                </div>
+
+                <div id="editor"></div>
+
+                <div class="output-panel">
+                    <h3 style="margin-top: 0;">HTML Output</h3>
+                    <textarea id="output" placeholder="Click 'Get HTML' to see the editor content..."></textarea>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>📚 Documentation</h5>
+                    <ul>
+                        <li><a href="docs/installation.html">Installation</a></li>
+                        <li><a href="docs/features.html">Features</a></li>
+                        <li><a href="docs/api.html">API Reference</a></li>
+                        <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔌 Plugins</h5>
+                    <ul>
+                        <li><a href="plugins/index.html">All Plugins</a></li>
+                        <li><a href="plugins/media-manager.html">Media Manager</a></li>
+                        <li><a href="plugins/table.html">Tables</a></li>
+                        <li><a href="plugins/code-sample.html">Code Samples</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔗 Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>ℹ️ About</h5>
+                    <ul>
+                        <li><a href="docs/about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024-2026 Editora. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- <script src="https://unpkg.com/@editora/core@latest/dist/editora.min.js"></script> -->
+    <script src="../../packages/core/dist/editora.min.js"></script>
+    <script src="assets/js/main.js"></script>
+    <script>
+        const editorElement = document.getElementById('editor');
+        const output = document.getElementById('output');
+        const btnSample = document.getElementById('btn-sample');
+        const btnClear = document.getElementById('btn-clear');
+        const btnGet = document.getElementById('btn-get');
+
+        let editor;
+
+        // Initialize editor
+        if (window.Editora && editorElement) {
+            try {
+                editor = new Editora.Editor({
+                    element: editorElement,
+                    content: '<h2>Welcome to Editora Playground</h2><p>Try typing, formatting, and exploring the editor.</p><ul><li>Bold, italic, underline</li><li>Lists and headings</li><li>Links and more</li></ul>'
+                });
+                console.log('✓ Editor initialized successfully');
+            } catch (error) {
+                console.error('✗ Editor initialization failed:', error);
+            }
+        } else {
+            console.error('✗ Editora not loaded or editor element not found');
+        }
+
+        // Button: Insert Sample Content
+        btnSample?.addEventListener('click', () => {
+            const sample = '<h3>Sample Content</h3><p>This is a <strong>live</strong> playground with <em>formatted</em> content.</p><p><a href="https://editora-free.netlify.app/" target="_blank" rel="noopener">Visit the website</a></p>';
+            if (editor?.setContent) {
+                editor.setContent(sample);
+                console.log('✓ Sample content inserted');
+            } else {
+                console.warn('⚠ Editor not ready or setContent not available');
+            }
+        });
+
+        // Button: Clear Content
+        btnClear?.addEventListener('click', () => {
+            if (editor?.setContent) {
+                editor.setContent('<p></p>');
+                if (output) output.value = '';
+                console.log('✓ Content cleared');
+            } else {
+                console.warn('⚠ Editor not ready or setContent not available');
+            }
+        });
+
+        // Button: Get HTML
+        btnGet?.addEventListener('click', () => {
+            if (editor?.getContent) {
+                const content = editor.getContent();
+                if (output) {
+                    output.value = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+                }
+                console.log('✓ HTML extracted:', content);
+            } else {
+                console.warn('⚠ Editor not ready or getContent not available');
+            }
+        });
+    </script>
+</body>
+</html>

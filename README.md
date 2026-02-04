@@ -1,8 +1,19 @@
-# Rich Text Editor
+# Editora - Best Free Premium Rich Text Editor
 
-A comprehensive, enterprise-grade rich text editor built with React, TypeScript, and modern web technologies. A powerful, modular, and extensible text editing solution while maintaining open source accessibility.
+The **best free rich text editor** with enterprise-grade features. A comprehensive, production-ready WYSIWYG editor built with React, TypeScript, and modern web technologies. Get premium features completely free—no subscriptions, no limitations.
 
-## 🚀 Features
+**🌐 [Try it Live](https://editora-free.netlify.app/)** | **🔗 [GitHub](https://github.com/ajaykr089/Editora)** | **📦 [NPM](https://www.npmjs.com/org/editora)**
+
+**Free alternative to TinyMCE, Quill, Draft.js, and Slate.**
+
+## 🚀 Why Editora? (Free Premium Features)
+
+### ✨ Best Free Features
+- **30+ Free Plugins**: Table editor, code highlighting, accessibility checker, media manager, and more
+- **33+ Keyboard Shortcuts**: Professional editing speed
+- **Enterprise-Grade**: Security, performance, accessibility (WCAG compliant)
+- **Open Source**: MIT licensed, completely free forever
+- **No Subscriptions**: No paywalls, no limitations, no hidden costs
 
 ### Core Editing
 - ✅ **Rich Text Formatting**: Bold, italic, underline, strikethrough
@@ -11,15 +22,15 @@ A comprehensive, enterprise-grade rich text editor built with React, TypeScript,
 - ✅ **Blockquotes**: Quoted content blocks
 - ✅ **Links**: URL management with validation
 - ✅ **Images**: Upload with validation and controls
-- ✅ **Tables**: Full table editing with custom node views
+- ✅ **Tables**: Full table editing with resize and merge
 - ✅ **Code Blocks**: Syntax highlighting for 30+ languages
 - ✅ **History**: Undo/redo with configurable depth
 
-### Enterprise Features
+### Enterprise Features (All Free)
 - ✅ **Security**: XSS protection, HTML sanitization, content validation
 - ✅ **Performance**: Transaction batching, memory management, monitoring
 - ✅ **Theming**: CSS variables, light/dark themes, runtime switching
-- ✅ **Accessibility**: WCAG compliance, keyboard navigation
+- ✅ **Accessibility**: WCAG compliance, keyboard navigation, a11y checker
 - ✅ **TypeScript**: Full type safety and IntelliSense
 - ✅ **Framework Agnostic**: Core works with any framework
 
