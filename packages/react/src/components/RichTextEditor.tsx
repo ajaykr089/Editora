@@ -155,12 +155,14 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
           height: '100%'
         }}
       >
-        <Toolbar 
-          editor={editor}
-          position={toolbarPosition}
-          sticky={stickyToolbar}
-          floating={floatingToolbarEnabled}
-        />
+        {toolbarPosition !== 'bottom' && (
+          <Toolbar 
+            editor={editor}
+            position={toolbarPosition}
+            sticky={stickyToolbar}
+            floating={floatingToolbarEnabled}
+          />
+        )}
         <EditorContent 
           editor={editor}
           defaultValue={config.defaultValue}
@@ -172,6 +174,14 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
           performanceConfig={config.performance}
           autosaveConfig={config.autosave}
         />
+        {toolbarPosition === 'bottom' && (
+          <Toolbar 
+            editor={editor}
+            position={toolbarPosition}
+            sticky={stickyToolbar}
+            floating={floatingToolbarEnabled}
+          />
+        )}
         <FloatingToolbar
           editor={editor}
           isEnabled={floatingToolbarEnabled}
