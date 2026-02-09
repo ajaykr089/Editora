@@ -250,10 +250,43 @@ const injectStyles = (): void => {
 };
 
 /**
+ * Find the active editor based on current selection or focus
+ */
+const findActiveEditor = (): HTMLElement | null => {
+  // Try to find editor from current selection
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    let node: Node | null = selection.getRangeAt(0).startContainer;
+    while (node && node !== document.body) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as HTMLElement;
+        if (element.getAttribute('contenteditable') === 'true') {
+          return element;
+        }
+      }
+      node = node.parentNode;
+    }
+  }
+  
+  // Try to find focused editor
+  const activeElement = document.activeElement;
+  if (activeElement) {
+    if (activeElement.getAttribute('contenteditable') === 'true') {
+      return activeElement as HTMLElement;
+    }
+    const editor = activeElement.closest('[contenteditable="true"]');
+    if (editor) return editor as HTMLElement;
+  }
+  
+  // Fallback to first editor
+  return document.querySelector('[contenteditable="true"]');
+};
+
+/**
  * Serialize editor content to clean HTML
  */
 const serializeEditorContent = (): string => {
-  const editorElement = document.querySelector('[contenteditable="true"]');
+  const editorElement = findActiveEditor();
   if (!editorElement) return '';
 
   // Clone the content to avoid modifying the original

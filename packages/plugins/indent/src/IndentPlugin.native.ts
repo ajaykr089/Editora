@@ -15,25 +15,70 @@ import { Plugin } from '@editora/core';
 const INDENT_AMOUNT = 40; // pixels
 
 /**
- * Find the containing paragraph element
+ * Check if an element is a block-level element that can be indented
+ */
+const isBlockElement = (element: HTMLElement): boolean => {
+  const blockTags = ['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE', 'PRE'];
+  return blockTags.includes(element.tagName);
+};
+
+/**
+ * Find the active editor element
+ */
+const findActiveEditor = (): HTMLElement | null => {
+  // Try to find editor from current selection
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    let node: Node | null = selection.getRangeAt(0).startContainer;
+    while (node && node !== document.body) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as HTMLElement;
+        if (element.getAttribute('contenteditable') === 'true') {
+          return element;
+        }
+      }
+      node = node.parentNode;
+    }
+  }
+  
+  // Try active element
+  const activeElement = document.activeElement;
+  if (activeElement) {
+    if (activeElement.getAttribute('contenteditable') === 'true') {
+      return activeElement as HTMLElement;
+    }
+    const editor = activeElement.closest('[contenteditable="true"]');
+    if (editor) return editor as HTMLElement;
+  }
+  
+  // Fallback to first editor
+  return document.querySelector('[contenteditable="true"]');
+};
+
+/**
+ * Find the containing block element (paragraph, div, heading, etc.)
  */
 const findContainingParagraph = (node: Node): HTMLElement | null => {
   let current: Node | null = node;
 
-  // If the node itself is a paragraph, return it
+  // If the node itself is a block element, return it
   if (current.nodeType === Node.ELEMENT_NODE) {
     const element = current as HTMLElement;
-    if (element.tagName === 'P') {
+    if (isBlockElement(element)) {
       return element;
     }
   }
 
-  // Traverse up the DOM tree to find the nearest paragraph
+  // Traverse up the DOM tree to find the nearest block element
   while (current) {
     if (current.nodeType === Node.ELEMENT_NODE) {
       const element = current as HTMLElement;
-      if (element.tagName === 'P') {
+      if (isBlockElement(element)) {
         return element;
+      }
+      // Stop if we hit the contenteditable boundary
+      if (element.getAttribute('contenteditable') === 'true') {
+        break;
       }
     }
     current = current.parentNode;
@@ -63,13 +108,13 @@ const getParagraphsInRange = (range: Range): HTMLElement[] => {
     // Selection is within a single paragraph
     if (startParagraph) paragraphs.push(startParagraph);
   } else {
-    // Selection spans multiple paragraphs - find all paragraphs in between
+    // Selection spans multiple block elements - find all blocks in between
     let current: HTMLElement | null = startParagraph;
     while (current && current !== endParagraph) {
       paragraphs.push(current);
       let nextSibling = current.nextElementSibling as HTMLElement | null;
-      // If we hit a non-paragraph element, continue until we find the next paragraph
-      while (nextSibling && nextSibling.tagName !== 'P') {
+      // If we hit a non-block element, continue until we find the next block element
+      while (nextSibling && !isBlockElement(nextSibling)) {
         nextSibling = nextSibling.nextElementSibling as HTMLElement | null;
       }
       current = nextSibling;
@@ -105,10 +150,17 @@ const getCurrentPadding = (element: HTMLElement): number => {
  * Increase indentation level
  */
 export const increaseIndent = (): boolean => {
+  const editor = findActiveEditor();
+  if (!editor) return false;
+
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return false;
 
   const range = selection.getRangeAt(0);
+  
+  // Verify selection is within the active editor
+  if (!editor.contains(range.commonAncestorContainer)) return false;
+
   const paragraphs = getParagraphsInRange(range);
 
   if (paragraphs.length === 0) return false;
@@ -127,10 +179,17 @@ export const increaseIndent = (): boolean => {
  * Decrease indentation level
  */
 export const decreaseIndent = (): boolean => {
+  const editor = findActiveEditor();
+  if (!editor) return false;
+
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return false;
 
   const range = selection.getRangeAt(0);
+  
+  // Verify selection is within the active editor
+  if (!editor.contains(range.commonAncestorContainer)) return false;
+
   const paragraphs = getParagraphsInRange(range);
 
   if (paragraphs.length === 0) return false;
@@ -179,14 +238,14 @@ export const IndentPlugin = (): Plugin => ({
       label: 'Increase Indent',
       command: 'increaseIndent',
       type: 'button',
-      icon: '<svg width="24" height="24" focusable="false"><path d="M7 5h12c.6 0 1 .4 1 1s-.4 1-1 1H7a1 1 0 1 1 0-2Zm5 4h7c.6 0 1 .4 1 1s-.4 1-1 1h-7a1 1 0 0 1 0-2Zm0 4h7c.6 0 1 .4 1 1s-.4 1-1 1h-7a1 1 0 0 1 0-2Zm-5 4h12c.6 0 1 .4 1 1s-.4 1-1 1H7a1 1 0 0 1 0-2Zm-2.6-3.8L6.2 12l-1.8-1.2a1 1 0 0 1 1.2-1.6l3 2a1 1 0 0 1 0 1.6l-3 2a1 1 0 1 1-1.2-1.6Z" fill-rule="evenodd"></path></svg>',
+      icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h18v2H3V4zm0 14h18v2H3v-2zm8-7h10v2H11v-2zm0 4h10v2H11v-2zM3 8l4 4-4 4V8z"/></svg>',
       shortcut: 'Mod-]'
     },
     {
       label: 'Decrease Indent',
       command: 'decreaseIndent',
       type: 'button',
-      icon: '<svg width="24" height="24" focusable="false"><path d="M7 5h12c.6 0 1 .4 1 1s-.4 1-1 1H7a1 1 0 1 1 0-2Zm5 4h7c.6 0 1 .4 1 1s-.4 1-1 1h-7a1 1 0 0 1 0-2Zm0 4h7c.6 0 1 .4 1 1s-.4 1-1 1h-7a1 1 0 0 1 0-2Zm-5 4h12c.6 0 1 .4 1 1s-.4 1-1 1H7a1 1 0 0 1 0-2ZM3.6 10.2 5.4 12l-1.8 1.2a1 1 0 0 0 1.2 1.6l3-2a1 1 0 0 0 0-1.6l-3-2a1 1 0 1 0-1.2 1.6Z" fill-rule="evenodd"></path></svg>',
+      icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h18v2H3V4zm0 14h18v2H3v-2zm8-7h10v2H11v-2zm0 4h10v2H11v-2zM7 8v8l-4-4 4-4z"/></svg>',
       shortcut: 'Mod-['
     }
   ],

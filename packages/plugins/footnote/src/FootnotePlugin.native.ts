@@ -50,11 +50,44 @@ interface FootnoteData {
 const footnoteRegistry = new Map<string, FootnoteData>();
 
 /**
+ * Find the active editor based on current selection or focus
+ */
+function findActiveEditor(): HTMLElement | null {
+  // Try to find editor from current selection
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    let node: Node | null = selection.getRangeAt(0).startContainer;
+    while (node && node !== document.body) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as HTMLElement;
+        if (element.getAttribute('contenteditable') === 'true') {
+          return element;
+        }
+      }
+      node = node.parentNode;
+    }
+  }
+  
+  // Try to find focused editor
+  const activeElement = document.activeElement;
+  if (activeElement) {
+    if (activeElement.getAttribute('contenteditable') === 'true') {
+      return activeElement as HTMLElement;
+    }
+    const editor = activeElement.closest('[contenteditable="true"]');
+    if (editor) return editor as HTMLElement;
+  }
+  
+  // Fallback to first editor
+  return document.querySelector('[contenteditable="true"]');
+}
+
+/**
  * Get or create footnote container
  * Always at the end of the content area
  */
 function getFootnoteContainer(): HTMLElement {
-  const contentElement = document.querySelector('[contenteditable="true"]');
+  const contentElement = findActiveEditor();
   if (!contentElement) {
     throw new Error('Contenteditable element not found');
   }
@@ -155,7 +188,7 @@ export const insertFootnoteCommand = (content: string = '') => {
  * Get next footnote number
  */
 function getNextFootnoteNumber(): number {
-  const contentElement = document.querySelector('[contenteditable="true"]');
+  const contentElement = findActiveEditor();
   const container = contentElement?.querySelector('.rte-footnotes');
   if (!container) return 1;
 
@@ -168,7 +201,7 @@ function getNextFootnoteNumber(): number {
  * Called when a footnote is deleted or reordered
  */
 export const renumberAllFootnotes = () => {
-  const contentElement = document.querySelector('[contenteditable="true"]');
+  const contentElement = findActiveEditor();
   const container = contentElement?.querySelector('.rte-footnotes');
   if (!container) return;
 
@@ -202,7 +235,7 @@ export const renumberAllFootnotes = () => {
  * Delete footnote and its reference
  */
 export const deleteFootnote = (footnoteId: string) => {
-  const contentElement = document.querySelector('[contenteditable="true"]');
+  const contentElement = findActiveEditor();
   const reference = contentElement?.querySelector(`.rte-footnote-ref[data-footnote-id="${footnoteId}"]`);
   const footnoteItem = document.getElementById(footnoteId);
 
@@ -217,7 +250,7 @@ export const deleteFootnote = (footnoteId: string) => {
  * Setup interactions (scrolling between references and footnotes)
  */
 function setupFootnoteInteractions() {
-  const contentElement = document.querySelector('[contenteditable="true"]');
+  const contentElement = findActiveEditor();
   if (!contentElement) return;
 
   // Click on reference -> scroll to footnote

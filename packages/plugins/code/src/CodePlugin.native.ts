@@ -11,6 +11,366 @@ import {
   SyntaxHighlightingExtension
 } from '@editora/light-code-editor';
 
+const SOURCE_EDITOR_CSS = `/* Source Editor Dialog Styles */
+.rte-source-editor-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 10000 !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+.rte-source-editor-overlay.fullscreen {
+  padding: 0 !important;
+}
+
+.rte-source-editor-modal {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 1200px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.rte-source-editor-overlay.fullscreen .rte-source-editor-modal {
+  border-radius: 0;
+  max-width: 100%;
+  max-height: 100vh;
+  width: 100%;
+  height: 100vh;
+}
+
+.rte-source-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e1e5e9;
+  background: #f8f9fa;
+  border-radius: 8px 8px 0 0;
+}
+
+.rte-source-editor-overlay.fullscreen .rte-source-editor-header {
+  border-radius: 0;
+}
+
+.rte-source-editor-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.rte-source-editor-header-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+  margin-right: 16px;
+}
+
+.rte-source-editor-toolbar-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  font-size: 16px;
+  line-height: 1;
+  transition: all 0.2s ease;
+  color: #666;
+}
+
+.rte-source-editor-toolbar-btn:hover:not(:disabled) {
+  background: #e1e5e9;
+  color: #1a1a1a;
+}
+
+.rte-source-editor-toolbar-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rte-source-editor-toolbar-btn.active {
+  background: #007acc;
+  color: white;
+}
+
+.rte-source-editor-toolbar-btn.active:hover {
+  background: #0056b3;
+}
+
+.rte-source-editor-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.rte-source-editor-fullscreen-btn,
+.rte-source-editor-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #666;
+  font-size: 16px;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.rte-source-editor-fullscreen-btn:hover,
+.rte-source-editor-close-btn:hover {
+  background: #e1e5e9;
+  color: #1a1a1a;
+}
+
+.rte-source-editor-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.rte-source-editor-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: #666;
+  position: absolute;
+  z-index: 9;
+  margin: 0 auto;
+  width: 100%;
+  top: 44%;
+}
+
+.rte-source-editor-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e1e5e9;
+  border-top: 3px solid #007acc;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.rte-source-editor-error {
+  background: #fee;
+  color: #c53030;
+  padding: 12px 16px;
+  border-left: 4px solid #c53030;
+  margin: 16px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.rte-source-editor-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.rte-source-editor-warning {
+  background: #fefcbf;
+  color: #744210;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  border-bottom: 1px solid #f6e05e;
+}
+
+.rte-source-editor-codemirror {
+  flex: 1;
+  overflow: auto;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.rte-source-editor-codemirror .cm-editor {
+  height: 100%;
+}
+
+.rte-source-editor-codemirror .cm-focused {
+  outline: none;
+}
+
+.rte-source-editor-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-top: 1px solid #e1e5e9;
+  background: #f8f9fa;
+  border-radius: 0 0 8px 8px;
+}
+
+.rte-source-editor-overlay.fullscreen .rte-source-editor-footer {
+  border-radius: 0;
+}
+
+.rte-source-editor-footer-info {
+  font-size: 12px;
+  color: #666;
+}
+
+.unsaved-changes {
+  color: #d69e2e;
+  font-weight: 500;
+}
+
+.rte-source-editor-footer-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.rte-source-editor-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.rte-source-editor-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rte-source-editor-btn-cancel {
+  background: white;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.rte-source-editor-btn-cancel:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.rte-source-editor-btn-save {
+  background: #007acc;
+  color: white;
+}
+
+.rte-source-editor-btn-save:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .rte-source-editor-modal {
+    background: #1e1e1e;
+    color: #f8f9fa;
+  }
+
+  .rte-source-editor-header {
+    background: #2d2d2d;
+    border-color: #404040;
+  }
+
+  .rte-source-editor-header h2 {
+    color: #f8f9fa;
+  }
+
+  .rte-source-editor-fullscreen-btn,
+  .rte-source-editor-close-btn {
+    color: #ccc;
+  }
+
+  .rte-source-editor-fullscreen-btn:hover,
+  .rte-source-editor-close-btn:hover {
+    background: #404040;
+    color: #f8f9fa;
+  }
+
+  .rte-source-editor-error {
+    background: #2d1b1b;
+    color: #fca5a5;
+    border-color: #dc2626;
+  }
+
+  .rte-source-editor-warning {
+    background: #2d2a1b;
+    color: #fcd34d;
+    border-color: #d97706;
+  }
+
+  .rte-source-editor-footer {
+    background: #2d2d2d;
+    border-color: #404040;
+  }
+
+  .rte-source-editor-footer-info {
+    color: #ccc;
+  }
+
+  .rte-source-editor-btn-cancel {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+
+  .rte-source-editor-btn-cancel:hover:not(:disabled) {
+    background: #4b5563;
+    border-color: #6b7280;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .rte-source-editor-overlay {
+    padding: 10px;
+  }
+
+  .rte-source-editor-modal {
+    max-height: 95vh;
+  }
+
+  .rte-source-editor-header {
+    padding: 12px 16px;
+  }
+
+  .rte-source-editor-footer {
+    padding: 12px 16px;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .rte-source-editor-footer-actions {
+    justify-content: stretch;
+  }
+
+  .rte-source-editor-btn {
+    flex: 1;
+    text-align: center;
+  }
+}`;
+
 /**
  * Code Plugin - Framework Agnostic
  * 
@@ -41,20 +401,15 @@ export const CodePlugin = (): Plugin => ({
     toggleSourceView: () => {
       // Find the editor container and content area
       const findEditorContent = (): HTMLElement | null => {
-        // Try to find the editor container first
-        const editorContainer = document.querySelector('[data-editora-editor]');
-        if (editorContainer) {
-          const contentEl = editorContainer.querySelector('.rte-content') as HTMLElement;
-          if (contentEl) return contentEl;
-        }
-        
-        // Fallback: search from current selection
+        // PRIORITY 1: Try to find from current selection or focus
+        // This ensures we get the correct editor in multi-instance scenarios
         const selection = window.getSelection();
         if (selection && selection.anchorNode) {
           let current = selection.anchorNode instanceof HTMLElement 
             ? selection.anchorNode 
             : selection.anchorNode.parentElement;
           
+          // Traverse up to find .rte-content (the contenteditable element)
           while (current) {
             if (current.classList?.contains('rte-content')) {
               return current;
@@ -63,7 +418,37 @@ export const CodePlugin = (): Plugin => ({
           }
         }
         
-        // Last resort: find any .rte-content
+        // PRIORITY 2: Try to find from document.activeElement
+        // If the editor was just focused by the toolbar
+        if (document.activeElement) {
+          let current = document.activeElement;
+          
+          // Check if activeElement itself is the content
+          if (current.classList?.contains('rte-content')) {
+            return current as HTMLElement;
+          }
+          
+          // Or traverse up from activeElement
+          while (current && current !== document.body) {
+            if (current.classList?.contains('rte-content')) {
+              return current as HTMLElement;
+            }
+            // Also check children
+            const contentEl = current.querySelector('.rte-content') as HTMLElement;
+            if (contentEl) return contentEl;
+            
+            current = current.parentElement!;
+          }
+        }
+        
+        // PRIORITY 3: Find from data-editora-editor (single instance fallback)
+        const editorContainer = document.querySelector('[data-editora-editor]');
+        if (editorContainer) {
+          const contentEl = editorContainer.querySelector('.rte-content') as HTMLElement;
+          if (contentEl) return contentEl;
+        }
+        
+        // PRIORITY 4: Last resort - find any .rte-content
         return document.querySelector('.rte-content') as HTMLElement;
       };
       
@@ -196,12 +581,12 @@ export const CodePlugin = (): Plugin => ({
         dialog.appendChild(footer);
         overlay.appendChild(dialog);
         
-        // Add CSS link if not already present
-        if (!document.querySelector('link[href*="SourceEditorDialog.css"]')) {
-          const cssLink = document.createElement('link');
-          cssLink.rel = 'stylesheet';
-          cssLink.href = '/packages/plugins/code/src/SourceEditorDialog.css';
-          document.head.appendChild(cssLink);
+        // Inject Source Editor CSS if not already present
+        if (!document.getElementById('rte-source-editor-styles')) {
+          const style = document.createElement('style');
+          style.id = 'rte-source-editor-styles';
+          style.textContent = SOURCE_EDITOR_CSS;
+          document.head.appendChild(style);
         }
         
         document.body.appendChild(overlay);

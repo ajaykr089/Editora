@@ -12,6 +12,40 @@ import type { Plugin } from '@editora/core';
  * Commands:
  * - toggleChecklist: Convert to/from checklist
  */
+
+/**
+ * Find the active editor element
+ */
+const findActiveEditor = (): HTMLElement | null => {
+  // Try to find editor from current selection
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    let node: Node | null = selection.getRangeAt(0).startContainer;
+    while (node && node !== document.body) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as HTMLElement;
+        if (element.getAttribute('contenteditable') === 'true') {
+          return element;
+        }
+      }
+      node = node.parentNode;
+    }
+  }
+  
+  // Try active element
+  const activeElement = document.activeElement;
+  if (activeElement) {
+    if (activeElement.getAttribute('contenteditable') === 'true') {
+      return activeElement as HTMLElement;
+    }
+    const editor = activeElement.closest('[contenteditable="true"]');
+    if (editor) return editor as HTMLElement;
+  }
+  
+  // Fallback to first editor
+  return document.querySelector('[contenteditable="true"]');
+};
+
 export const ChecklistPlugin = (): Plugin => {
   return {
     name: 'checklist',
@@ -25,16 +59,22 @@ export const ChecklistPlugin = (): Plugin => {
           // Find the closest checklist item
           const checklistItem = target.closest('li[data-type="checklist-item"]') as HTMLElement;
           
-          // Only toggle if we found a checklist item AND we're not clicking inside the paragraph text
-          if (checklistItem && !target.closest('p')) {
-            event.preventDefault();
-            event.stopPropagation();
+          if (checklistItem) {
+            // Calculate if click is in the checkbox area (left 2em where checkbox is positioned)
+            const rect = checklistItem.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
             
-            // Toggle the checked state
-            const isChecked = checklistItem.getAttribute("data-checked") === "true";
-            checklistItem.setAttribute("data-checked", (!isChecked).toString());
+            // Checkbox is in the first 2em (approximately 32px at default font size)
+            const isCheckboxArea = clickX < 32;
             
-            console.log('[ChecklistPlugin] Toggled checkbox:', !isChecked);
+            if (isCheckboxArea) {
+              event.preventDefault();
+              event.stopPropagation();
+              
+              // Toggle the checked state
+              const isChecked = checklistItem.getAttribute("data-checked") === "true";
+              checklistItem.setAttribute("data-checked", (!isChecked).toString());
+            }
           }
         };
         
@@ -89,16 +129,20 @@ export const ChecklistPlugin = (): Plugin => {
     commands: {
       toggleChecklist: () => {
         try {
+          const editorElement = findActiveEditor();
+          if (!editorElement) return false;
+
           const selection = window.getSelection();
           if (!selection || selection.rangeCount === 0) return false;
 
           const range = selection.getRangeAt(0);
+          
+          // Verify selection is within the active editor
+          if (!editorElement.contains(range.commonAncestorContainer)) return false;
+
           const container = range.commonAncestorContainer.nodeType === Node.TEXT_NODE
             ? (range.commonAncestorContainer.parentElement as HTMLElement)
             : (range.commonAncestorContainer as HTMLElement);
-          
-          const editorElement = container?.closest('[contenteditable="true"]');
-          if (!editorElement) return false;
 
           // Check if we're in a list
           const listElement = container?.closest("li")?.closest("ul, ol");
@@ -157,83 +201,48 @@ export const ChecklistPlugin = (): Plugin => {
           // Convert paragraph to checklist or create new checklist
           const selectedText = range.toString().trim();
           
-          if (selectedText === "") {
-            const blockElement = container?.closest("p, div, h1, h2, h3, h4, h5, h6");
-            if (blockElement && blockElement.textContent?.trim()) {
-              const checklistHTML = `
-                <ul data-type="checklist">
-                  <li data-type="checklist-item" data-checked="false">
-                    <p>${blockElement.innerHTML}</p>
-                  </li>
-                </ul>
-              `;
-              blockElement.outerHTML = checklistHTML;
-              
-              // Restore selection
-              setTimeout(() => {
-                const sel = window.getSelection();
-                if (sel && editorElement) {
-                  try {
-                    const checklistItem = editorElement.querySelector('li[data-type="checklist-item"]');
-                    if (checklistItem) {
-                      const p = checklistItem.querySelector("p");
-                      if (p) {
-                        const newRange = document.createRange();
-                        newRange.setStart(p, p.childNodes.length);
-                        newRange.setEnd(p, p.childNodes.length);
-                        sel.removeAllRanges();
-                        sel.addRange(newRange);
-                      }
-                    }
-                  } catch {
-                    console.warn("Could not restore selection after checklist insertion");
-                  }
-                }
-              }, 10);
-              return true;
-            }
-          }
-
-          // Create new checklist with selected text or empty
-          const checklistHTML = selectedText
-            ? `
-                <ul data-type="checklist">
-                  <li data-type="checklist-item" data-checked="false">
-                    <p>${selectedText}</p>
-                  </li>
-                </ul>
-              `
-            : `
-                <ul data-type="checklist">
-                  <li data-type="checklist-item" data-checked="false">
-                    <p><br></p>
-                  </li>
-                </ul>
-              `;
-
-          document.execCommand("insertHTML", false, checklistHTML.trim());
+          // Find the block element containing the selection
+          const blockElement = container?.closest("p, div, h1, h2, h3, h4, h5, h6");
           
-          // Restore selection
-          setTimeout(() => {
-            const sel = window.getSelection();
-            if (sel && editorElement) {
-              try {
-                const checklistItem = editorElement.querySelector('li[data-type="checklist-item"]');
-                if (checklistItem) {
-                  const p = checklistItem.querySelector("p");
-                  if (p) {
-                    const newRange = document.createRange();
-                    newRange.setStart(p, p.childNodes.length);
-                    newRange.setEnd(p, p.childNodes.length);
-                    sel.removeAllRanges();
-                    sel.addRange(newRange);
+          if (blockElement) {
+            // Use selected text if any, otherwise use block content
+            const contentHTML = selectedText || blockElement.innerHTML;
+            const checklistHTML = `<ul data-type="checklist"><li data-type="checklist-item" data-checked="false"><p>${contentHTML}</p></li></ul>`;
+            
+            // Create the checklist element
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = checklistHTML;
+            const checklistElement = tempDiv.firstElementChild as HTMLElement;
+            
+            // Replace the block element
+            blockElement.parentNode?.replaceChild(checklistElement, blockElement);
+            
+            // Restore selection
+            setTimeout(() => {
+              const sel = window.getSelection();
+              if (sel) {
+                try {
+                  const checklistItem = checklistElement.querySelector('li[data-type="checklist-item"]');
+                  if (checklistItem) {
+                    const p = checklistItem.querySelector("p");
+                    if (p && p.firstChild) {
+                      const newRange = document.createRange();
+                      newRange.setStart(p.firstChild, p.textContent?.length || 0);
+                      newRange.collapse(true);
+                      sel.removeAllRanges();
+                      sel.addRange(newRange);
+                    }
                   }
+                } catch (e) {
+                  console.warn("Could not restore selection after checklist insertion:", e);
                 }
-              } catch {
-                console.warn("Could not restore selection after checklist insertion");
               }
-            }
-          }, 10);
+            }, 10);
+            return true;
+          } else {
+            console.warn('[ChecklistPlugin] No block element found');
+            return false;
+          }
 
           return true;
         } catch (error) {

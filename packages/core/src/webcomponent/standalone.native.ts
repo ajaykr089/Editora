@@ -71,48 +71,60 @@ export function initWebComponent() {
   console.log('[Editora] Initializing web component with native plugins...');
 
   // Register native plugins (framework-agnostic, no React) ✅
-  const nativePlugins = [
-    BoldPlugin(),
-    ItalicPlugin(),
-    UnderlinePlugin(),
-    StrikethroughPlugin(),
-    ClearFormattingPlugin(),
+  const pluginFactories = [
+    { name: 'BoldPlugin', factory: BoldPlugin },
+    { name: 'ItalicPlugin', factory: ItalicPlugin },
+    { name: 'UnderlinePlugin', factory: UnderlinePlugin },
+    { name: 'StrikethroughPlugin', factory: StrikethroughPlugin },
+    { name: 'ClearFormattingPlugin', factory: ClearFormattingPlugin },
     // ParagraphPlugin removed - paragraph option is in HeadingPlugin dropdown
-    HeadingPlugin(),
-    BlockquotePlugin(),
-    CodePlugin(),
-    ListPlugin(),
-    ChecklistPlugin(),
-    TextAlignmentPlugin(),
-    IndentPlugin(),
-    DirectionPlugin(),
-    TextColorPlugin(),
-    BackgroundColorPlugin(),
-    FontSizePlugin(),
-    FontFamilyPlugin(),
-    LineHeightPlugin(),
-    CapitalizationPlugin(),
-    LinkPlugin(),
-    TablePlugin(),
-    AnchorPlugin(),
-    EmbedIframePlugin(),
-    MathPlugin(),
-    MediaManagerPlugin(),
-    MergeTagPlugin(),
-    PageBreakPlugin(),
-    PrintPlugin(),
-    PreviewPlugin(),
-    SpecialCharactersPlugin(),
-    SpellCheckPlugin(),
-    EmojisPlugin(),
-    A11yCheckerPlugin(),
-    CommentsPlugin(),
-    DocumentManagerPlugin(),
-    FullscreenPlugin(),
-    TemplatePlugin(),
-    HistoryPlugin(),
-    FootnotePlugin(),
+    { name: 'HeadingPlugin', factory: HeadingPlugin },
+    { name: 'BlockquotePlugin', factory: BlockquotePlugin },
+    { name: 'CodePlugin', factory: CodePlugin },
+    { name: 'ListPlugin', factory: ListPlugin },
+    { name: 'ChecklistPlugin', factory: ChecklistPlugin },
+    { name: 'TextAlignmentPlugin', factory: TextAlignmentPlugin },
+    { name: 'IndentPlugin', factory: IndentPlugin },
+    { name: 'DirectionPlugin', factory: DirectionPlugin },
+    { name: 'TextColorPlugin', factory: TextColorPlugin },
+    { name: 'BackgroundColorPlugin', factory: BackgroundColorPlugin },
+    { name: 'FontSizePlugin', factory: FontSizePlugin },
+    { name: 'FontFamilyPlugin', factory: FontFamilyPlugin },
+    { name: 'LineHeightPlugin', factory: LineHeightPlugin },
+    { name: 'CapitalizationPlugin', factory: CapitalizationPlugin },
+    { name: 'LinkPlugin', factory: LinkPlugin },
+    { name: 'TablePlugin', factory: TablePlugin },
+    { name: 'AnchorPlugin', factory: AnchorPlugin },
+    { name: 'EmbedIframePlugin', factory: EmbedIframePlugin },
+    { name: 'MathPlugin', factory: MathPlugin },
+    { name: 'MediaManagerPlugin', factory: MediaManagerPlugin },
+    { name: 'MergeTagPlugin', factory: MergeTagPlugin },
+    { name: 'PageBreakPlugin', factory: PageBreakPlugin },
+    { name: 'PrintPlugin', factory: PrintPlugin },
+    { name: 'PreviewPlugin', factory: PreviewPlugin },
+    { name: 'SpecialCharactersPlugin', factory: SpecialCharactersPlugin },
+    { name: 'SpellCheckPlugin', factory: SpellCheckPlugin },
+    { name: 'EmojisPlugin', factory: EmojisPlugin },
+    { name: 'A11yCheckerPlugin', factory: A11yCheckerPlugin },
+    { name: 'CommentsPlugin', factory: CommentsPlugin },
+    { name: 'DocumentManagerPlugin', factory: DocumentManagerPlugin },
+    { name: 'FullscreenPlugin', factory: FullscreenPlugin },
+    { name: 'TemplatePlugin', factory: TemplatePlugin },
+    { name: 'HistoryPlugin', factory: HistoryPlugin },
+    { name: 'FootnotePlugin', factory: FootnotePlugin },
   ];
+
+  const nativePlugins: any[] = [];
+
+  // Initialize each plugin with error handling
+  pluginFactories.forEach(({ name, factory }) => {
+    try {
+      const plugin = factory();
+      nativePlugins.push(plugin);
+    } catch (error) {
+      console.error(`[Editora] Failed to load ${name}:`, error);
+    }
+  });
 
   // All plugins are now native! ✅✅✅
   const allPlugins = nativePlugins;
@@ -120,11 +132,7 @@ export function initWebComponent() {
   // Register plugins globally
   allPlugins.forEach(plugin => {
     globalPluginLoader.register(plugin.name, () => plugin);
-    console.log(`[Editora] ✓ Registered plugin: ${plugin.name}`, {
-      hasCommands: !!plugin.commands,
-      hasToolbar: !!plugin.toolbar?.length,
-      type: plugin.commands ? 'native' : 'legacy'
-    });
+
   });
 
   console.log(`[Editora] ✅ ALL ${allPlugins.length} PLUGINS ARE NATIVE! Phase 2 Complete!`);

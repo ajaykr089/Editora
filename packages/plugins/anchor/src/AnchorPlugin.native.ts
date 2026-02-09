@@ -1,4 +1,5 @@
 import type { Plugin } from '@editora/core';
+import { findEditorContainerFromSelection, getContentElement } from '../../shared/editorContainerHelpers';
 
 /**
  * AnchorPlugin - Native implementation with complete UI/UX dialog
@@ -116,10 +117,13 @@ function validateId(id: string): { valid: boolean; error: string } {
 }
 
 /**
- * Sync anchor registry with DOM
+ * Sync anchor registry with DOM (multi-instance safe)
  */
 function syncAnchorRegistry() {
-  const editor = document.querySelector('[contenteditable="true"]') as HTMLElement;
+  const editorContainer = findEditorContainerFromSelection();
+  if (!editorContainer) return;
+  
+  const editor = getContentElement(editorContainer);
   if (!editor) return;
   
   const anchors = editor.querySelectorAll('.rte-anchor');
@@ -137,7 +141,7 @@ function syncAnchorRegistry() {
 /**
  * Create Anchor Dialog
  */
-function createAnchorDialog(mode: 'add' | 'edit', currentId?: string, onSave?: (id: string) => void) {
+function createAnchorDialog(mode: 'add' | 'edit', currentId?: string, onSave?: (id: string) => void, savedRange?: Range) {
   // Sync registry before showing dialog
   syncAnchorRegistry();
   
@@ -451,11 +455,16 @@ function createAnchorDialog(mode: 'add' | 'edit', currentId?: string, onSave?: (
 /**
  * Insert anchor at cursor
  */
-function insertAnchor(anchorId: string) {
-  const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) return;
-
-  const range = selection.getRangeAt(0);
+function insertAnchor(anchorId: string, savedRange?: Range) {
+  let range: Range;
+  
+  if (savedRange) {
+    range = savedRange;
+  } else {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+    range = selection.getRangeAt(0);
+  }
 
   // Create anchor element
   const anchor = document.createElement('span');
@@ -478,8 +487,20 @@ function insertAnchor(anchorId: string) {
   // Move cursor after anchor
   range.setStart(anchor.nextSibling || anchor.parentNode!, 0);
   range.collapse(true);
-  selection.removeAllRanges();
-  selection.addRange(range);
+  const sel = window.getSelection();
+  if (sel) {
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+  
+  // Trigger input event to update editor state
+  const editorContainer = findEditorContainerFromSelection();
+  if (editorContainer) {
+    const contentElement = getContentElement(editorContainer);
+    if (contentElement) {
+      contentElement.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
   
   // Add hover CSS if not already present
   addAnchorStyles();
@@ -597,9 +618,17 @@ export const AnchorPlugin = (): Plugin => {
     commands: {
       insertAnchor: () => {
         try {
+          const selection = window.getSelection();
+          if (!selection || selection.rangeCount === 0) {
+            alert('Please place your cursor where you want to insert the anchor.');
+            return false;
+          }
+          
+          const savedRange = selection.getRangeAt(0).cloneRange();
+          
           createAnchorDialog('add', '', (anchorId) => {
-            insertAnchor(anchorId);
-          });
+            insertAnchor(anchorId, savedRange);
+          }, savedRange);
           return true;
         } catch (error) {
           console.error('Failed to insert anchor:', error);

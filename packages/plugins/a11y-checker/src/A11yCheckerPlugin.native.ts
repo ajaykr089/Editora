@@ -341,9 +341,42 @@ registerA11yRule({
   }
 });
 
+/**
+ * Find the active editor element
+ */
+const findActiveEditor = (): HTMLElement | null => {
+  // Try to find editor from current selection
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    let node: Node | null = selection.getRangeAt(0).startContainer;
+    while (node && node !== document.body) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as HTMLElement;
+        if (element.getAttribute('contenteditable') === 'true') {
+          return element;
+        }
+      }
+      node = node.parentNode;
+    }
+  }
+  
+  // Try active element
+  const activeElement = document.activeElement;
+  if (activeElement) {
+    if (activeElement.getAttribute('contenteditable') === 'true') {
+      return activeElement as HTMLElement;
+    }
+    const editor = activeElement.closest('[contenteditable="true"]');
+    if (editor) return editor as HTMLElement;
+  }
+  
+  // Fallback to first editor
+  return document.querySelector('[contenteditable="true"]');
+};
+
 // --- Audit Engine ---
 export const runA11yAudit = (): A11yIssue[] => {
-  const editor = document.querySelector('[contenteditable="true"]') as HTMLElement;
+  const editor = findActiveEditor();
   if (!editor) return [];
   
   const issues: A11yIssue[] = [];
@@ -425,8 +458,11 @@ export const highlightIssue = (issue: A11yIssue, highlight: boolean = true) => {
   }
 };
 
-export const getA11yScore = (): number => {
-  const issues = runA11yAudit();
+export const getA11yScore = (issues?: A11yIssue[]): number => {
+  // Use provided issues or run fresh audit if not provided
+  if (!issues) {
+    issues = runA11yAudit();
+  }
   const errors = issues.filter(i => i.severity === 'error').length;
   const warnings = issues.filter(i => i.severity === 'warning').length;
   let score = 100 - (errors * 20) - (warnings * 5);
@@ -444,7 +480,7 @@ export const unsuppressRule = (ruleId: string) => { suppressedRules.delete(ruleI
 // --- UI Dialog Implementation ---
 const createA11yDialog = () => {
   const issues = runA11yAudit();
-  const score = getA11yScore();
+  const score = getA11yScore(issues); // Pass issues to avoid duplicate audit
   
   // Create dialog overlay
   const overlay = document.createElement('div');

@@ -156,6 +156,18 @@ export class RichTextEditorElement extends HTMLElement {
     // Load plugins
     const plugins = this.loadPlugins();
     
+    // Initialize plugins (call init hooks)
+    plugins.forEach(plugin => {
+      if (plugin.init && typeof plugin.init === 'function') {
+        try {
+          console.log('[RichTextEditor] Calling init for plugin:', plugin.name);
+          plugin.init();
+        } catch (error) {
+          console.error(`[RichTextEditor] Error initializing plugin ${plugin.name}:`, error);
+        }
+      }
+    });
+    
     // Create editor engine
     this.engine = new EditorEngine({
       content: this.getInitialContent(),
@@ -307,6 +319,9 @@ export class RichTextEditorElement extends HTMLElement {
         }
         
         // Try to find the command in loaded plugins first (for native commands)
+        console.log(`[RichTextEditor] Looking for command "${command}" in ${plugins.length} plugins`);
+        console.log(`[RichTextEditor] Plugins:`, plugins.map(p => `${p.name}(hasCommands:${!!p.commands})`).join(', '));
+        
         const plugin = plugins.find(p => p.commands && p.commands[command]);
         if (plugin && plugin.commands) {
           const commandFn = plugin.commands[command];
@@ -314,7 +329,7 @@ export class RichTextEditorElement extends HTMLElement {
             // Call native command directly
             try {
               const result = commandFn(value);
-              console.log(`[RichTextEditor] Executed native command: ${command}, result:`, result);
+              console.log(`[RichTextEditor] Executed native command: ${command} from plugin ${plugin.name}, result:`, result);
               return result;
             } catch (error) {
               console.error(`[RichTextEditor] Error executing native command ${command}:`, error);
@@ -323,6 +338,7 @@ export class RichTextEditorElement extends HTMLElement {
           }
         }
         
+        console.warn(`[RichTextEditor] Command "${command}" not found in plugins, falling back to engine`);
         // Fallback to engine command (ProseMirror-style)
         return this.engine?.execCommand(command, value) || false;
       });
@@ -345,9 +361,37 @@ export class RichTextEditorElement extends HTMLElement {
       this.contentElement.setAttribute('data-placeholder', this.config.placeholder);
     }
     
-    // Set initial content (already captured before clearing)
+    // Set default paragraph separator to <p> for consistency with React
+    try {
+      document.execCommand('defaultParagraphSeparator', false, 'p');
+    } catch (e) {
+      // Fallback: some browsers may not support this
+      console.warn('defaultParagraphSeparator not supported:', e);
+    }
+    
+    // Set initial content and ensure it's wrapped in <p> tags
     if (initialContent) {
-      this.contentElement.innerHTML = initialContent;
+      // Check if content is already wrapped in block elements
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = initialContent.trim();
+      
+      // If content has no block-level elements, wrap it in a <p> tag
+      const hasBlockElements = Array.from(tempDiv.childNodes).some(node => {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const tagName = (node as Element).tagName;
+          return ['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'BLOCKQUOTE', 'PRE'].includes(tagName);
+        }
+        return false;
+      });
+      
+      if (!hasBlockElements && initialContent.trim()) {
+        this.contentElement.innerHTML = `<p>${initialContent.trim()}</p>`;
+      } else {
+        this.contentElement.innerHTML = initialContent;
+      }
+    } else {
+      // Initialize with an empty paragraph for proper structure
+      this.contentElement.innerHTML = '<p><br></p>';
     }
     
     this.appendChild(this.contentElement);

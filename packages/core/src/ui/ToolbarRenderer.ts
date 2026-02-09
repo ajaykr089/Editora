@@ -61,7 +61,7 @@ export class ToolbarRenderer {
       'strikethrough': 'toggleStrikethrough',
       'bullist': 'toggleBulletList',
       'numlist': 'toggleOrderedList',
-      'checklist': 'toggleCheckList',
+      'checklist': 'toggleChecklist',
       'link': 'openLinkDialog',
       'image': 'openImageDialog',
       'table': 'insertTable',
@@ -78,24 +78,26 @@ export class ToolbarRenderer {
       'heading': 'setBlockType',
       'paragraph': 'setParagraph',
       'textAlignment': 'setTextAlignment',
-      'direction': 'setDirection',
-      'indent': 'indent',
-      'outdent': 'outdent',
+      'direction': 'setDirectionLTR',
+      'indent': 'increaseIndent',
+      'outdent': 'decreaseIndent',
       'capitalization': 'setCapitalization',
       'math': 'insertMath',
       'specialCharacters': 'insertSpecialCharacter',
-      'emojis': 'insertEmoji',
+      'emojis': 'openEmojiDialog',
       'embedIframe': 'openEmbedIframeDialog',
       'fullscreen': 'toggleFullscreen',
       'preview': 'togglePreview',
       'print': 'print',
-      'a11yChecker': 'checkAccessibility',
+      'a11yChecker': 'toggleA11yChecker',
       'spellCheck': 'toggleSpellCheck',
       'comments': 'addComment',
+      'showHideComments': 'toggleComments',
+      'toggleComments': 'toggleComments',
       'footnote': 'insertFootnote',
       'mergeTags': 'insertMergeTag',
       'pageBreak': 'insertPageBreak',
-      'template': 'applyTemplate',
+      'template': 'insertTemplate',
       'importWord': 'importWord',
       'exportWord': 'exportWord',
       'exportPdf': 'exportPdf',
@@ -108,6 +110,61 @@ export class ToolbarRenderer {
       const commands = section.split(/\s+/).filter(Boolean);
       
       commands.forEach(cmd => {
+        // Special handling for multi-button shortcuts
+        if (cmd === 'direction') {
+          // Direction has two buttons: LTR and RTL
+          const ltrItem = itemMap.get('setDirectionLTR');
+          const rtlItem = itemMap.get('setDirectionRTL');
+          if (ltrItem) {
+            buttons.push({
+              id: 'directionLTR',
+              label: ltrItem.label,
+              command: ltrItem.command,
+              icon: ltrItem.icon,
+              type: ltrItem.type || 'button',
+              options: ltrItem.options,
+            });
+          }
+          if (rtlItem) {
+            buttons.push({
+              id: 'directionRTL',
+              label: rtlItem.label,
+              command: rtlItem.command,
+              icon: rtlItem.icon,
+              type: rtlItem.type || 'button',
+              options: rtlItem.options,
+            });
+          }
+          return;
+        }
+        
+        if (cmd === 'comments') {
+          // Comments has two buttons: Add Comment and Toggle Comments
+          const addCommentItem = itemMap.get('addComment');
+          const toggleCommentsItem = itemMap.get('toggleComments');
+          if (addCommentItem) {
+            buttons.push({
+              id: 'addComment',
+              label: addCommentItem.label,
+              command: addCommentItem.command,
+              icon: addCommentItem.icon,
+              type: addCommentItem.type || 'button',
+              options: addCommentItem.options,
+            });
+          }
+          if (toggleCommentsItem) {
+            buttons.push({
+              id: 'toggleComments',
+              label: toggleCommentsItem.label,
+              command: toggleCommentsItem.command,
+              icon: toggleCommentsItem.icon,
+              type: toggleCommentsItem.type || 'button',
+              options: toggleCommentsItem.options,
+            });
+          }
+          return;
+        }
+        
         // Try direct command first, then alias
         const actualCommand = aliases[cmd] || cmd;
         const item = itemMap.get(actualCommand);

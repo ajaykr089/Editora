@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anchor Plugin Multi-Instance Test</title>
+  <link rel="stylesheet" href="packages/core/src/webcomponent/styles.css">
+  <link rel="stylesheet" href="packages/plugins/dist/plugins.css">
+  <link rel="stylesheet" href="packages/core/dist/core.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .editor-wrapper {
+      margin-bottom: 20px;
+    }
+    .editor-label {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .instructions {
+      background: #f0f7ff;
+      border-left: 4px solid #0066cc;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+    .instructions h3 {
+      margin-top: 0;
+      color: #0066cc;
+    }
+    .instructions ul {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+    .instructions li {
+      margin: 5px 0;
+    }
+    code {
+      background: #e8e8e8;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔗 Anchor Plugin Test - Multi-Instance Support</h1>
+    <p class="subtitle">Testing anchor plugin with multiple editor instances</p>
+    
+    <div class="instructions">
+      <h3>Test Instructions:</h3>
+      <ul>
+        <li><strong>Add Anchor:</strong> Place cursor in editor, click anchor button (⚓) in toolbar</li>
+        <li><strong>ID Validation:</strong> Try entering special characters - should auto-sanitize to URL-safe format</li>
+        <li><strong>Uniqueness:</strong> Try creating duplicate anchor IDs - should show error</li>
+        <li><strong>Visual Indicator:</strong> Hover over created anchors to see ⚓ icon and ID tooltip</li>
+        <li><strong>Multi-Instance:</strong> Create anchors in both editors - IDs should be independent per editor</li>
+        <li><strong>Keyboard:</strong> Press <code>ESC</code> to cancel, <code>Enter</code> to save in dialog</li>
+      </ul>
+    </div>
+
+    <div class="editor-wrapper">
+      <div class="editor-label">Editor Instance 1</div>
+      <rich-text-editor 
+        placeholder="Click anchor button to add navigation targets..."
+        toolbar="undo redo | anchor | bold italic | preview"
+        height="200px"
+      >
+        <h2>Editor 1: Navigation Targets</h2>
+        <p>Try adding anchors with IDs like: <strong>section-1</strong>, <strong>intro</strong>, <strong>conclusion</strong></p>
+        <p>Hover over created anchors to see the visual indicator!</p>
+      </rich-text-editor>
+    </div>
+
+    <div class="editor-wrapper">
+      <div class="editor-label">Editor Instance 2 (Independent)</div>
+      <rich-text-editor 
+        placeholder="This editor should have independent anchor IDs..."
+        toolbar="undo redo | anchor | bold italic underline | preview"
+        height="200px"
+      >
+        <h2>Editor 2: Independent Anchors</h2>
+        <p>You can create anchors with the same IDs as Editor 1 - they are independent!</p>
+        <p>Each editor maintains its own anchor registry.</p>
+      </rich-text-editor>
+    </div>
+  </div>
+
+  <div class="container">
+    <h3>✅ Features to Verify:</h3>
+    <ul style="color: #333;">
+      <li>✓ Anchor button appears in toolbar with ⚓ icon</li>
+      <li>✓ Dialog opens when clicking anchor button</li>
+      <li>✓ ID validation (URL-safe characters only)</li>
+      <li>✓ Auto-sanitization (e.g., "My Section!" → "my-section")</li>
+      <li>✓ Duplicate ID detection with error message</li>
+      <li>✓ Visual hover indicator showing ⚓ + ID</li>
+      <li>✓ ESC key closes dialog without saving</li>
+      <li>✓ Enter key saves anchor</li>
+      <li>✓ Multi-instance support (independent registries)</li>
+      <li>✓ Clean cursor positioning after insertion</li>
+    </ul>
+  </div>
+
+  <script src="packages/core/dist/webcomponent.min.js"></script>
+</body>
+</html>

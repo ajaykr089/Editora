@@ -258,15 +258,35 @@ const getPrintStyles = (): string => {
 const printDocument = () => {
   if (typeof window === 'undefined') return false;
 
-  // Find the editor element
-  const editorElement = document.querySelector('[data-editora-editor]');
-  if (!editorElement) {
-    console.warn('Editor element not found');
-    return false;
-  }
+  // Find the active editor based on current selection or focus
+  const findActiveEditor = (): HTMLElement | null => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      let node: Node | null = selection.getRangeAt(0).startContainer;
+      while (node && node !== document.body) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const element = node as HTMLElement;
+          if (element.getAttribute('contenteditable') === 'true') {
+            return element;
+          }
+        }
+        node = node.parentNode;
+      }
+    }
+    
+    const activeElement = document.activeElement;
+    if (activeElement) {
+      if (activeElement.getAttribute('contenteditable') === 'true') {
+        return activeElement as HTMLElement;
+      }
+      const editor = activeElement.closest('[contenteditable="true"]');
+      if (editor) return editor as HTMLElement;
+    }
+    
+    return document.querySelector('[contenteditable="true"]');
+  };
 
-  // Find the actual content div
-  const contentElement = editorElement.querySelector('[contenteditable="true"]');
+  const contentElement = findActiveEditor();
   if (!contentElement) {
     console.warn('Editor content not found');
     return false;

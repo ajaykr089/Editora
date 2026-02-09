@@ -54,6 +54,30 @@ export const DocumentManagerPlugin = (): Plugin => {
     
     commands: {
       importWord: () => {
+        // Helper to find active editor
+        const findActiveEditor = (): HTMLElement | null => {
+          const selection = window.getSelection();
+          if (selection && selection.rangeCount > 0) {
+            let node: Node | null = selection.getRangeAt(0).startContainer;
+            while (node && node !== document.body) {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                const element = node as HTMLElement;
+                if (element.getAttribute('contenteditable') === 'true') {
+                  return element;
+                }
+              }
+              node = node.parentNode;
+            }
+          }
+          const activeElement = document.activeElement;
+          if (activeElement?.getAttribute('contenteditable') === 'true') {
+            return activeElement as HTMLElement;
+          }
+          const editor = activeElement?.closest('[contenteditable="true"]');
+          if (editor) return editor as HTMLElement;
+          return document.querySelector('[contenteditable="true"]');
+        };
+        
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.docx';
@@ -62,7 +86,7 @@ export const DocumentManagerPlugin = (): Plugin => {
           const file = (event.target as HTMLInputElement).files?.[0];
           if (file) {
             try {
-              const editorElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+              const editorElement = findActiveEditor();
               if (editorElement) {
                 const { importFromWord } = await import('./documentManager');
                 const htmlContent = await importFromWord(file);
@@ -81,8 +105,25 @@ export const DocumentManagerPlugin = (): Plugin => {
       },
       
       exportWord: async () => {
+        const findActiveEditor = (): HTMLElement | null => {
+          const selection = window.getSelection();
+          if (selection && selection.rangeCount > 0) {
+            let node: Node | null = selection.getRangeAt(0).startContainer;
+            while (node && node !== document.body) {
+              if (node.nodeType === Node.ELEMENT_NODE && (node as HTMLElement).getAttribute('contenteditable') === 'true') {
+                return node as HTMLElement;
+              }
+              node = node.parentNode;
+            }
+          }
+          const activeElement = document.activeElement;
+          if (activeElement?.getAttribute('contenteditable') === 'true') return activeElement as HTMLElement;
+          const editor = activeElement?.closest('[contenteditable="true"]');
+          return (editor as HTMLElement) || document.querySelector('[contenteditable="true"]');
+        };
+        
         try {
-          const editorElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+          const editorElement = findActiveEditor();
           if (editorElement) {
             const htmlContent = editorElement.innerHTML;
             const { exportToWord } = await import('./documentManager');
@@ -97,8 +138,25 @@ export const DocumentManagerPlugin = (): Plugin => {
       },
       
       exportPdf: async () => {
+        const findActiveEditor = (): HTMLElement | null => {
+          const selection = window.getSelection();
+          if (selection && selection.rangeCount > 0) {
+            let node: Node | null = selection.getRangeAt(0).startContainer;
+            while (node && node !== document.body) {
+              if (node.nodeType === Node.ELEMENT_NODE && (node as HTMLElement).getAttribute('contenteditable') === 'true') {
+                return node as HTMLElement;
+              }
+              node = node.parentNode;
+            }
+          }
+          const activeElement = document.activeElement;
+          if (activeElement?.getAttribute('contenteditable') === 'true') return activeElement as HTMLElement;
+          const editor = activeElement?.closest('[contenteditable="true"]');
+          return (editor as HTMLElement) || document.querySelector('[contenteditable="true"]');
+        };
+        
         try {
-          const editorElement = document.querySelector('[contenteditable="true"]') as HTMLElement;
+          const editorElement = findActiveEditor();
           if (editorElement) {
             const htmlContent = editorElement.innerHTML;
             const { exportToPdf } = await import('./documentManager');

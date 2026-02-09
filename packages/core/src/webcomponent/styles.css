@@ -60,20 +60,17 @@
 }
 
 .editora-toolbar-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 10px;
-  border: 1px solid transparent;
-  border-radius: 3px;
-  background: transparent;
-  color: #333;
-  cursor: pointer;
-  font-size: 13px;
-  line-height: 1;
-  transition: all 0.15s ease;
-  min-width: 32px;
-  min-height: 32px;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    background: white;
+    cursor: pointer;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 14px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
 }
 
 .editora-theme-dark .editora-toolbar-button {
@@ -112,16 +109,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   line-height: 1;
 }
 
 /* Toolbar icon SVG styling */
 .editora-toolbar-button svg,
 .editora-toolbar-icon svg {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   display: block;
   fill: currentColor;
 }

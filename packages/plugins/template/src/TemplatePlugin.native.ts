@@ -459,7 +459,28 @@ function handleInsert(): void {
   if (!selectedTemplate) return;
 
   if (insertMode === 'replace') {
-    const editor = document.querySelector('[contenteditable="true"]');
+    // Find the correct editor based on saved range
+    let editor: Element | null = null;
+    
+    if (savedRange) {
+      let node: Node | null = savedRange.startContainer;
+      while (node && node !== document.body) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const element = node as Element;
+          if (element.getAttribute('contenteditable') === 'true') {
+            editor = element;
+            break;
+          }
+        }
+        node = node.parentNode;
+      }
+    }
+    
+    // Fallback to first editor
+    if (!editor) {
+      editor = document.querySelector('[contenteditable="true"]');
+    }
+    
     if (editor?.innerHTML?.trim()) {
       // Show warning dialog
       renderWarningDialog();
@@ -519,9 +540,34 @@ function insertTemplateAtCursor(template: Template): void {
  * Replace entire document with template
  */
 function replaceDocumentWithTemplate(template: Template): void {
-  const editor = document.querySelector('[contenteditable="true"]');
+  // Find the correct editor based on saved range
+  let editor: Element | null = null;
+  
+  if (savedRange) {
+    // Find editor containing the saved range
+    let node: Node | null = savedRange.startContainer;
+    while (node && node !== document.body) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as Element;
+        if (element.getAttribute('contenteditable') === 'true') {
+          editor = element;
+          break;
+        }
+      }
+      node = node.parentNode;
+    }
+  }
+  
+  // Fallback to first editor if we couldn't find the specific one
+  if (!editor) {
+    editor = document.querySelector('[contenteditable="true"]');
+  }
+  
   if (editor) {
     editor.innerHTML = sanitizeTemplate(template.html);
+    
+    // Trigger input event to notify editor of change
+    editor.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
   console.log(`Document replaced with template: ${template.name}`);

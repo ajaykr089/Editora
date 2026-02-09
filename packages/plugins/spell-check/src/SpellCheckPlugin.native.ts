@@ -52,6 +52,29 @@ let mutationObserver: MutationObserver | null = null;
 let debounceTimeout: number | null = null;
 let sidePanelElement: HTMLElement | null = null;
 
+// Load custom dictionary from localStorage
+const loadCustomDictionary = () => {
+  try {
+    const saved = localStorage.getItem('rte-custom-dictionary');
+    if (saved) {
+      const words = JSON.parse(saved) as string[];
+      words.forEach(word => customDictionary.add(word.toLowerCase()));
+    }
+  } catch (e) {
+    console.warn('Failed to load custom dictionary:', e);
+  }
+};
+
+// Save custom dictionary to localStorage
+const saveCustomDictionary = () => {
+  try {
+    const words = Array.from(customDictionary);
+    localStorage.setItem('rte-custom-dictionary', JSON.stringify(words));
+  } catch (e) {
+    console.warn('Failed to save custom dictionary:', e);
+  }
+};
+
 // ===== Spell Check Engine =====
 
 /**
@@ -148,10 +171,43 @@ function tokenizeTextNode(node: Text): SpellCheckIssue[] {
 }
 
 /**
+ * Find the active editor element
+ */
+const findActiveEditor = (): HTMLElement | null => {
+  // Try to find editor from current selection
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    let node: Node | null = selection.getRangeAt(0).startContainer;
+    while (node && node !== document.body) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as HTMLElement;
+        if (element.getAttribute('contenteditable') === 'true') {
+          return element;
+        }
+      }
+      node = node.parentNode;
+    }
+  }
+  
+  // Try active element
+  const activeElement = document.activeElement;
+  if (activeElement) {
+    if (activeElement.getAttribute('contenteditable') === 'true') {
+      return activeElement as HTMLElement;
+    }
+    const editor = activeElement.closest('[contenteditable="true"]');
+    if (editor) return editor as HTMLElement;
+  }
+  
+  // Fallback to first editor
+  return document.querySelector('[contenteditable="true"]');
+};
+
+/**
  * Scan entire document for misspellings
  */
 function scanDocumentForMisspellings(): SpellCheckIssue[] {
-  const editor = document.querySelector('[contenteditable="true"]');
+  const editor = findActiveEditor();
   if (!editor) return [];
   
   const issues: SpellCheckIssue[] = [];
@@ -180,7 +236,7 @@ function scanDocumentForMisspellings(): SpellCheckIssue[] {
  * Highlight misspelled words with red wavy underline
  */
 function highlightMisspelledWords(issues?: SpellCheckIssue[]): void {
-  const editor = document.querySelector('[contenteditable="true"]');
+  const editor = findActiveEditor();
   if (!editor) return;
   
   if (!issues) issues = scanDocumentForMisspellings();
@@ -263,9 +319,7 @@ function replaceWord(issue: SpellCheckIssue, replacement: string): void {
   range.deleteContents();
   range.insertNode(textNode);
   
-  // Refresh highlights
-  clearSpellCheckHighlights();
-  highlightMisspelledWords();
+  // MutationObserver will trigger highlight and panel update
 }
 
 /**
@@ -275,6 +329,7 @@ function ignoreWord(word: string): void {
   ignoredWords.add(word.toLowerCase());
   clearSpellCheckHighlights();
   highlightMisspelledWords();
+  updateSidePanel(); // Immediate update needed since no DOM change
 }
 
 /**
@@ -282,18 +337,23 @@ function ignoreWord(word: string): void {
  */
 function addToDictionary(word: string): void {
   customDictionary.add(word.toLowerCase());
+  saveCustomDictionary(); // Save to localStorage
   clearSpellCheckHighlights();
   highlightMisspelledWords();
+  updateSidePanel(); // Immediate update needed since no DOM change
 }
 
 /**
  * Get spell check statistics
  */
-function getSpellCheckStats(): { total: number; misspelled: number; accuracy: number } {
-  const editor = document.querySelector('[contenteditable="true"]');
+function getSpellCheckStats(issues?: SpellingIssue[]): { total: number; misspelled: number; accuracy: number } {
+  const editor = findActiveEditor();
   if (!editor) return { total: 0, misspelled: 0, accuracy: 100 };
   
-  const issues = scanDocumentForMisspellings();
+  // Use provided issues or scan if not provided
+  if (!issues) {
+    issues = scanDocumentForMisspellings();
+  }
   const misspelled = issues.filter(i => !ignoredWords.has(i.word.toLowerCase())).length;
   
   // Count total words
@@ -474,8 +534,8 @@ function createSidePanel(): HTMLElement {
 function updateSidePanel(): void {
   if (!sidePanelElement) return;
   
-  const stats = getSpellCheckStats();
   const issues = scanDocumentForMisspellings();
+  const stats = getSpellCheckStats(issues); // Pass issues to avoid duplicate scan
   
   sidePanelElement.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -584,7 +644,7 @@ function updateSidePanel(): void {
 // ===== MutationObserver for incremental spell check =====
 
 function startMutationObserver(): void {
-  const editor = document.querySelector('[contenteditable="true"]');
+  const editor = findActiveEditor();
   if (!editor) return;
   
   if (mutationObserver) mutationObserver.disconnect();
@@ -595,7 +655,10 @@ function startMutationObserver(): void {
       // Debounce the highlight function
       if (debounceTimeout) clearTimeout(debounceTimeout);
       debounceTimeout = window.setTimeout(() => {
-        if (isSpellCheckEnabled) highlightMisspelledWords();
+        if (isSpellCheckEnabled) {
+          highlightMisspelledWords();
+          updateSidePanel(); // Update side panel when content changes
+        }
       }, 350);
     }
   });
@@ -653,6 +716,11 @@ function toggleSpellCheck(): void {
 
 export const SpellCheckPlugin = (): Plugin => ({
   name: 'spellCheck',
+  
+  init: () => {
+    // Load custom dictionary from localStorage on plugin initialization
+    loadCustomDictionary();
+  },
   
   toolbar: [
     {

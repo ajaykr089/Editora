@@ -117,26 +117,47 @@ function applyFontFamilyToSelection(fontFamily: string) {
     newRange.selectNodeContents(fontFamilySpan);
     selection.removeAllRanges();
     selection.addRange(newRange);
+    
+    // Trigger input event to update editor state
+    const contentElement = fontFamilySpan.closest('[contenteditable="true"]');
+    if (contentElement) {
+      contentElement.dispatchEvent(new Event('input', { bubbles: true }));
+    }
   } else {
     // Create new span wrapper
     const span = document.createElement('span');
     span.style.fontFamily = fontFamily;
+    span.className = 'rte-font-family';
 
     // Wrap the selected content
     try {
-      range.surroundContents(span);
+      // Clone range to avoid modifying original
+      const clonedRange = range.cloneRange();
+      clonedRange.surroundContents(span);
+      
+      // Update original range to select the span content
+      range.selectNodeContents(span);
+      selection.removeAllRanges();
+      selection.addRange(range);
     } catch (e) {
       // surroundContents fails if the range spans multiple elements
+      // Use extractContents and insertNode instead
       const contents = range.extractContents();
       span.appendChild(contents);
       range.insertNode(span);
+      
+      // Select the span content
+      const newRange = document.createRange();
+      newRange.selectNodeContents(span);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
     }
-
-    // Restore selection to the inserted span
-    const newRange = document.createRange();
-    newRange.selectNodeContents(span);
-    selection.removeAllRanges();
-    selection.addRange(newRange);
+    
+    // Trigger input event to update editor state
+    const contentElement = span.closest('[contenteditable="true"]');
+    if (contentElement) {
+      contentElement.dispatchEvent(new Event('input', { bubbles: true }));
+    }
   }
 }
 
