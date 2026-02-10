@@ -27,6 +27,8 @@ import { emojisSets, descriptions, type EmojiCategory } from './Constants';
 let dialogElement: HTMLElement | null = null;
 let activeTab: EmojiCategory = 'all';
 let searchQuery = '';
+// Store the selection range before opening the dialog
+let savedSelectionRange: Range | null = null;
 
 export const EmojisPlugin = (): Plugin => {
   return {
@@ -43,19 +45,25 @@ export const EmojisPlugin = (): Plugin => {
     ],
 
     commands: {
-      openEmojiDialog: () => {
-        createEmojiDialog();
-        return true;
+      openEmojiDialog: (_args, context) => {
+        // Try to get the correct editor content element from context
+        const editorContent = context?.contentElement || getActiveEditorContent();
+        if (editorContent) {
+          createEmojiDialog(editorContent);
+          return true;
+        }
+        return false;
       },
 
-      insertEmoji: (emoji?: string) => {
+      insertEmoji: (emoji?: string, context?) => {
         if (!emoji) return false;
-
+        const editorContent = context?.contentElement || getActiveEditorContent();
+        if (!editorContent) return false;
         try {
-          insertEmoji(emoji);
+          insertEmoji(emoji, editorContent);
           return true;
         } catch (error) {
-          console.error("Failed to insert emoji:", error);
+          // No console log in production
           return false;
         }
       },
@@ -67,17 +75,21 @@ export const EmojisPlugin = (): Plugin => {
   };
 };
 
-function createEmojiDialog(): void {
-  // Reset state
+function createEmojiDialog(editorContent: HTMLElement): void {
   activeTab = 'all';
   searchQuery = '';
 
-  // Create dialog overlay
+  // Save the current selection range before opening the dialog
+  const selection = window.getSelection();
+  savedSelectionRange = null;
+  if (selection && selection.rangeCount > 0 && editorContent.contains(selection.anchorNode)) {
+    savedSelectionRange = selection.getRangeAt(0).cloneRange();
+  }
+
   const overlay = document.createElement('div');
   overlay.className = 'emojis-overlay';
   overlay.onclick = closeDialog;
 
-  // Create dialog content
   const dialog = document.createElement('div');
   dialog.className = 'emojis-dialog';
   dialog.onclick = (e) => e.stopPropagation();
@@ -122,67 +134,52 @@ function createEmojiDialog(): void {
   dialogElement = overlay;
 
   // Add event listeners
-  setupEmojiDialogEventListeners(dialog);
+  setupEmojiDialogEventListeners(dialog, editorContent);
 
-  // Inject styles
   injectEmojiDialogStyles();
 
-  // Focus search input
   setTimeout(() => {
     (dialog.querySelector('#emoji-search-input') as HTMLInputElement)?.focus();
   }, 100);
 }
 
-function setupEmojiDialogEventListeners(dialog: HTMLElement): void {
-  // Close button
+function setupEmojiDialogEventListeners(dialog: HTMLElement, editorContent: HTMLElement): void {
   dialog.querySelector('.emojis-close')?.addEventListener('click', closeDialog);
 
-  // Tab switching
   dialog.querySelectorAll('.emojis-tab').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       const category = (e.target as HTMLElement).getAttribute('data-category') as EmojiCategory;
-      if (category) switchEmojiTab(dialog, category);
+      if (category) switchEmojiTab(dialog, category, editorContent);
     });
   });
 
-  // Search input
   const searchInput = dialog.querySelector('#emoji-search-input') as HTMLInputElement;
   searchInput?.addEventListener('input', (e) => {
     searchQuery = (e.target as HTMLInputElement).value;
-    updateEmojiGrid(dialog);
+    updateEmojiGrid(dialog, editorContent);
   });
 
-  // Emoji clicks will be handled by the grid rendering
+  // Initial emoji click handlers
+  updateEmojiGrid(dialog, editorContent);
 }
 
-function switchEmojiTab(dialog: HTMLElement, category: EmojiCategory): void {
+function switchEmojiTab(dialog: HTMLElement, category: EmojiCategory, editorContent: HTMLElement): void {
   activeTab = category;
-
-  // Update button states
   dialog.querySelectorAll('.emojis-tab').forEach((btn) => {
     btn.classList.toggle('active', btn.getAttribute('data-category') === category);
   });
-
-  // Update grid
-  updateEmojiGrid(dialog);
+  updateEmojiGrid(dialog, editorContent);
 }
 
-function updateEmojiGrid(dialog: HTMLElement): void {
+function updateEmojiGrid(dialog: HTMLElement, editorContent: HTMLElement): void {
   const grid = dialog.querySelector('#emojis-grid');
-  console.log(
-    `Updating emoji grid for category: ${activeTab}, search: "${searchQuery}"`,
-    grid,
-  ); // Debug log
   if (grid) {
     grid.innerHTML = renderEmojiGrid(activeTab, searchQuery);
-    
-    // Re-attach click handlers for emoji items
     grid.querySelectorAll('.emojis-item').forEach((item) => {
-        console.log('Attaching click handler for emoji:', item.getAttribute('data-emoji')); // Debug log
       item.addEventListener('click', () => {
         const emoji = item.textContent?.trim() || '';
         if (emoji) {
-          insertEmoji(emoji);
+          insertEmoji(emoji, editorContent);
           closeDialog();
         }
       });
@@ -230,22 +227,36 @@ function closeDialog(): void {
 }
 
 // Helper function to insert emoji at cursor
-function insertEmoji(emoji: string): void {
-  const selection = window.getSelection();
-  
+function insertEmoji(emoji: string, editorContent: HTMLElement): void {
+  editorContent.focus();
+  let selection = window.getSelection();
+  // Restore the saved selection range if available
+  if (savedSelectionRange) {
+    selection?.removeAllRanges();
+    selection?.addRange(savedSelectionRange);
+    savedSelectionRange = null;
+  }
+  selection = window.getSelection();
   if (selection && selection.rangeCount > 0) {
     const range = selection.getRangeAt(0);
     range.deleteContents();
-    
     const textNode = document.createTextNode(emoji);
     range.insertNode(textNode);
-    
-    // Move cursor after the inserted emoji
     range.setStartAfter(textNode);
     range.setEndAfter(textNode);
     selection.removeAllRanges();
     selection.addRange(range);
   }
+}
+// Helper to get the currently focused editor content element (fallback)
+function getActiveEditorContent(): HTMLElement | null {
+  // Try to find the focused .editora-content or .rte-content
+  const active = document.activeElement as HTMLElement | null;
+  if (active && (active.classList.contains('editora-content') || active.classList.contains('rte-content'))) {
+    return active;
+  }
+  // Fallback: first editor content in DOM
+  return document.querySelector('.editora-content, .rte-content') as HTMLElement | null;
 }
 
 function injectEmojiDialogStyles(): void {
