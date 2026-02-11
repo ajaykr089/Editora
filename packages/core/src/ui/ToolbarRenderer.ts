@@ -424,8 +424,24 @@ export class ToolbarRenderer {
 
     trigger.addEventListener("click", (e) => {
       e.preventDefault();
-      menu.style.display = menu.style.display === "none" ? "block" : "none";
+      e.stopPropagation();
+      const isOpen = menu.style.display === "block";
+      menu.style.display = isOpen ? "none" : "block";
     });
+
+    // Close dropdown when clicking outside
+    const closeDropdown = (e: Event) => {
+      if (!container.contains(e.target as Node)) {
+        menu.style.display = "none";
+      }
+    };
+
+    document.addEventListener("click", closeDropdown);
+
+    // Store the cleanup function for later removal
+    (container as any)._cleanupDropdown = () => {
+      document.removeEventListener("click", closeDropdown);
+    };
 
     container.appendChild(trigger);
     container.appendChild(menu);
@@ -551,6 +567,14 @@ export class ToolbarRenderer {
    */
   destroy(): void {
     if (this.container) {
+      // Clean up dropdown event listeners
+      const dropdowns = this.container.querySelectorAll('.editora-toolbar-dropdown');
+      dropdowns.forEach(dropdown => {
+        const cleanup = (dropdown as any)._cleanupDropdown;
+        if (cleanup) {
+          cleanup();
+        }
+      });
       this.container.innerHTML = "";
     }
     this.commandHandler = undefined;
