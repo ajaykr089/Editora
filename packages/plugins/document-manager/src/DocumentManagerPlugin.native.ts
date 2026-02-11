@@ -161,10 +161,13 @@ export const DocumentManagerPlugin = (): Plugin => {
             const htmlContent = editorElement.innerHTML;
             const { exportToPdf } = await import('./documentManager');
             await exportToPdf(htmlContent, 'document.pdf', editorElement);
+          } else {
+            console.error('PDF Export: No editor element found');
+            alert('No active editor found. Please click in the editor area first.');
           }
           return true;
         } catch (error) {
-          console.error('Export failed:', error);
+          console.error('PDF Export: Export failed:', error);
           alert('Failed to export to PDF. Please check the console for details.');
           return false;
         }
