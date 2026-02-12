@@ -22,9 +22,10 @@ if (typeof window !== 'undefined') {
   (window as any).executeEditorCommand = (command: string, params?: any) => {
     const handler = commandRegistry.get(command);
     if (handler) {
-      handler(params);
+      return handler(params);
     } else {
       console.warn(`No handler registered for command: ${command}`);
+      return false;
     }
   };
 }

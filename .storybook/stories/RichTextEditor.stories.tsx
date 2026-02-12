@@ -4,7 +4,7 @@ import { RichTextEditor } from "@editora/react";
 import "@editora/themes/themes/default.css";
 
 // Import the Web Component build
-import "../../packages/core/dist/webcomponent.min.js";
+import "../../packages/core/dist/webcomponent.esm.js";
 
 // Import native plugins
 import {

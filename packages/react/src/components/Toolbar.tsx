@@ -108,7 +108,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     }
 
     // Restore stored selection if available (for dropdown and inline-menu commands that need selection)
-    if (storedSelection && (command === 'setTextAlignment' || command === 'setFontFamily')) {
+    if (storedSelection && (command === 'setTextAlignment' || command === 'setFontFamily' || command === 'setBlockType')) {
       const selection = window.getSelection();
       if (selection) {
         selection.removeAllRanges();
