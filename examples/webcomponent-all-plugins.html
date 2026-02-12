@@ -31,7 +31,7 @@
             margin-top: 0;
             color: #0066cc;
         }
-        rich-text-editor {
+        editora-editor {
             display: block;
             margin: 15px 0;
             border: 1px solid #ccc;
@@ -65,7 +65,7 @@
     <div class="test-section">
         <h2>1. Full Toolbar (All Plugins)</h2>
         <p>All 30+ plugins loaded from @editora/plugins package:</p>
-        <rich-text-editor 
+        <editora-editor 
             id="editor-full"
             placeholder="Try all formatting options including dropdowns, dialogs, and menus...">
             <h2>Welcome to Editora!</h2>
@@ -79,54 +79,54 @@
                 <li>Links with dialogs</li>
                 <li>And 20+ more plugins!</li>
             </ul>
-        </rich-text-editor>
+        </editora-editor>
     </div>
 
     <div class="test-section">
         <h2>2. Basic Formatting</h2>
         <p>Configure: <code>toolbar="history | bold italic underline strikethrough"</code></p>
-        <rich-text-editor 
+        <editora-editor 
             id="editor-basic"
             toolbar="history | bold italic underline strikethrough"
             placeholder="Basic formatting...">
             <p>This editor shows only basic text formatting.</p>
-        </rich-text-editor>
+        </editora-editor>
     </div>
 
     <div class="test-section">
         <h2>3. Document Editor</h2>
         <p>Configure: <code>toolbar="history | heading | list | textAlignment | link blockquote"</code></p>
-        <rich-text-editor 
+        <editora-editor 
             id="editor-document"
             toolbar="history | heading | list | textAlignment | link blockquote"
             placeholder="Document formatting...">
             <h1>Document Title</h1>
             <p>This editor includes heading dropdown, lists with full functionality, and text alignment.</p>
-        </rich-text-editor>
+        </editora-editor>
     </div>
 
     <div class="test-section">
         <h2>4. Rich Content Editor</h2>
         <p>Full featured: <code>toolbar="history | heading | bold italic underline | fontSize fontFamily | textColor backgroundColor | list table | link"</code></p>
-        <rich-text-editor 
+        <editora-editor 
             id="editor-rich"
             toolbar="history | heading | bold italic underline | fontSize fontFamily | textColor backgroundColor | list table | link"
             placeholder="Rich content with all features...">
             <h3>Rich Content Example</h3>
             <p><strong>Bold</strong>, <em>italic</em>, and <u>underlined</u> text with font controls.</p>
             <p>Try the font family dropdown, font size selector, and color pickers!</p>
-        </rich-text-editor>
+        </editora-editor>
     </div>
 
     <div class="test-section">
         <h2>5. Minimal Editor</h2>
         <p>Just the essentials: <code>toolbar="bold italic | link"</code></p>
-        <rich-text-editor 
+        <editora-editor 
             id="editor-minimal"
             toolbar="bold italic | link"
             placeholder="Minimal toolbar...">
             <p>A simple editor with only bold, italic, and link options.</p>
-        </rich-text-editor>
+        </editora-editor>
     </div>
 
     <script type="module">
@@ -136,11 +136,11 @@
         console.log('=== Web Component Loaded ===');
         
         // Wait for custom element to be defined
-        customElements.whenDefined('rich-text-editor').then(() => {
-            console.log('✅ rich-text-editor element is ready!');
+        customElements.whenDefined('editora-editor').then(() => {
+            console.log('✅ editora-editor element is ready!');
             
             // Show plugin count
-            const editors = document.querySelectorAll('rich-text-editor');
+            const editors = document.querySelectorAll('editora-editor');
             console.log(`📝 ${editors.length} editors initialized on this page`);
             
             // Display plugin count in UI
@@ -152,7 +152,7 @@
 
         // Log editor instances
         window.addEventListener('load', () => {
-            const editors = document.querySelectorAll('rich-text-editor');
+            const editors = document.querySelectorAll('editora-editor');
             editors.forEach((editor, index) => {
                 console.log(`Editor ${index + 1}:`, {
                     id: editor.id,

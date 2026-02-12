@@ -176,13 +176,15 @@
       font-size: 20px;
     }
 
-    rich-text-editor {
+    editora-editor {
       display: block;
       border: 2px solid #e0e0e0;
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+
+    editora-editor {
 
     .code-block {
       background: #1e1e1e;
@@ -276,7 +278,7 @@
       <p style="margin-bottom: 20px; color: #666;">
         Try editing below - all plugins are native TypeScript/JavaScript with zero React dependency!
       </p>
-      <rich-text-editor
+      <editora-editor
         height="400"
         plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight image direction capitalization checklist anchor embedIframe math specialCharacters emojis"
         toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily | heading | textAlignment | bullist numlist | link image table | code blockquote | clearFormatting"
@@ -296,7 +298,7 @@
         <blockquote>
           <p>This is a pure web component that works in HTML, React, Vue, Angular, Svelte, or any JavaScript environment.</p>
         </blockquote>
-      </rich-text-editor>
+      </editora-editor>
     </div>
 
     <!-- Usage Examples -->
@@ -309,13 +311,13 @@
 <span class="highlight">&lt;script</span> src="packages/core/dist/webcomponent.min.js"<span class="highlight">&gt;&lt;/script&gt;</span>
 
 <span class="comment">&lt;!-- Use the custom element --&gt;</span>
-<span class="highlight">&lt;rich-text-editor</span>
+<span class="highlight">&lt;editora-editor</span>
   height="400"
   plugins="bold italic underline link table"
   toolbar-items="bold italic underline | link table"
 <span class="highlight">&gt;</span>
   &lt;p&gt;Your content here&lt;/p&gt;
-<span class="highlight">&lt;/rich-text-editor&gt;</span>
+<span class="highlight">&lt;/editora-editor&gt;</span>
       </div>
 
       <h3 style="margin: 20px 0 10px; color: #667eea;">2. React (No React Import Needed!)</h3>
@@ -323,7 +325,7 @@
 <span class="comment">// React treats it as a native HTML element</span>
 <span class="highlight">function</span> App() {
   <span class="highlight">return</span> (
-    &lt;rich-text-editor
+    &lt;editora-editor
       height={<span class="highlight">"400"</span>}
       plugins={<span class="highlight">"bold italic underline"</span>}
       toolbar-items={<span class="highlight">"bold italic underline"</span>}
@@ -337,20 +339,20 @@
       <h3 style="margin: 20px 0 10px; color: #667eea;">3. Vue</h3>
       <div class="code-block">
 <span class="highlight">&lt;template&gt;</span>
-  &lt;rich-text-editor
+  &lt;editora-editor
     height=<span class="highlight">"400"</span>
     plugins=<span class="highlight">"bold italic underline"</span>
     toolbar-items=<span class="highlight">"bold italic underline"</span>
   &gt;
     &lt;p&gt;Content&lt;/p&gt;
-  &lt;/rich-text-editor&gt;
+  &lt;/editora-editor&gt;
 <span class="highlight">&lt;/template&gt;</span>
       </div>
 
       <h3 style="margin: 20px 0 10px; color: #667eea;">4. CDN Usage</h3>
       <div class="code-block">
 <span class="highlight">&lt;script</span> src="https://unpkg.com/@editora/core@latest/dist/webcomponent.min.js"<span class="highlight">&gt;&lt;/script&gt;</span>
-<span class="highlight">&lt;rich-text-editor</span> height="400"<span class="highlight">&gt;&lt;/rich-text-editor&gt;</span>
+<span class="highlight">&lt;editora-editor</span> height="400"<span class="highlight">&gt;&lt;/editora-editor&gt;</span>
       </div>
     </div>
 
@@ -366,7 +368,7 @@
 
   <script>
     // Wait for custom element to be defined
-    customElements.whenDefined('rich-text-editor').then(() => {
+    customElements.whenDefined('editora-editor').then(() => {
       console.log('✅ Custom element registered!');
       runTests();
       displayPlugins();
@@ -377,7 +379,7 @@
       const tests = [
         {
           name: 'Custom Element Registered',
-          test: () => !!customElements.get('rich-text-editor'),
+          test: () => !!customElements.get('editora-editor'),
           description: 'Web component is properly defined'
         },
         {
@@ -392,7 +394,7 @@
           name: 'Native Plugins Loaded',
           test: () => {
             // Check if plugins are registered
-            const editor = document.querySelector('rich-text-editor');
+            const editor = document.querySelector('editora-editor');
             return editor !== null;
           },
           description: 'All plugins are native implementations'
@@ -431,7 +433,7 @@
 
       console.log('🧪 All tests completed!');
       console.log('React in window?', typeof window.React !== 'undefined' ? 'YES (BAD)' : 'NO (GOOD)');
-      console.log('Custom element?', customElements.get('rich-text-editor') ? 'YES' : 'NO');
+      console.log('Custom element?', customElements.get('editora-editor') ? 'YES' : 'NO');
     }
 
     function displayPlugins() {

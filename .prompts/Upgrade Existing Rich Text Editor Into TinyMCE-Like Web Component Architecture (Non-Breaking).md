@@ -33,7 +33,7 @@ Target state:
 
   ```html
   <script src="editor.min.js"></script>
-  <rich-text-editor></rich-text-editor>
+  <editora-editor></editora-editor>
   ```
 * Framework-agnostic (React, Vue, Angular, plain HTML)
 * Toolbar + plugins fully configurable via attributes
@@ -137,7 +137,7 @@ Internally:
 Expose editor as:
 
 ```html
-<rich-text-editor
+<editora-editor
   height="500"
   menubar="false"
   plugins="lists link image media table spellcheck"
@@ -146,7 +146,7 @@ Expose editor as:
   theme="light"
 >
   <p>Initial content</p>
-</rich-text-editor>
+</editora-editor>
 ```
 
 #### Required behaviors:
@@ -229,10 +229,10 @@ Edge cases:
 Support:
 
 ```html
-<rich-text-editor>
+<editora-editor>
   <toolbar slot="toolbar"></toolbar>
   <statusbar slot="statusbar"></statusbar>
-</rich-text-editor>
+</editora-editor>
 ```
 
 Allow:

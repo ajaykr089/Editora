@@ -88,7 +88,7 @@
       color: #333;
     }
     
-    rich-text-editor {
+    editora-editor {
       display: block;
       margin: 20px 0;
     }
@@ -103,7 +103,7 @@
     <h2>1. Basic Usage</h2>
     <p>Simple editor with default configuration:</p>
     
-    <rich-text-editor id="editor1" height="300">
+    <editora-editor id="editor1" height="300">
       <p>Welcome to <strong>Editora</strong>! Start editing this text...</p>
       <p>Features include:</p>
       <ul>
@@ -111,7 +111,7 @@
         <li>Keyboard shortcuts</li>
         <li>Real-time updates</li>
       </ul>
-    </rich-text-editor>
+    </editora-editor>
 
     <div class="button-group">
       <button onclick="getContent('editor1')">Get Content</button>
@@ -130,14 +130,14 @@
     <h2>2. Custom Toolbar Configuration</h2>
     <p>Editor with declarative toolbar string:</p>
     
-    <rich-text-editor 
+    <editora-editor 
       id="editor2"
       height="300"
       toolbar="undo redo | bold italic underline"
       theme="light"
     >
       <p>This editor has a custom toolbar with only basic formatting options.</p>
-    </rich-text-editor>
+    </editora-editor>
 
     <div class="button-group">
       <button onclick="getContent('editor2')">Get Content</button>
@@ -149,14 +149,14 @@
     <h2>3. Read-only Mode</h2>
     <p>Editor in read-only mode (try to edit it):</p>
     
-    <rich-text-editor 
+    <editora-editor 
       id="editor3"
       height="200"
       readonly="true"
     >
       <p>This editor is <strong>read-only</strong>. You cannot edit this content.</p>
       <p>Perfect for displaying formatted content without editing.</p>
-    </rich-text-editor>
+    </editora-editor>
 
     <div class="button-group">
       <button onclick="toggleReadonly('editor3')">Toggle Read-only</button>
@@ -168,13 +168,13 @@
     <h2>4. Dark Theme</h2>
     <p>Editor with dark theme:</p>
     
-    <rich-text-editor 
+    <editora-editor 
       id="editor4"
       height="300"
       theme="dark"
       placeholder="Start typing in dark mode..."
     >
-    </rich-text-editor>
+    </editora-editor>
 
     <div class="button-group">
       <button onclick="toggleTheme('editor4')">Toggle Theme</button>
@@ -186,12 +186,12 @@
     <h2>5. Event Handling</h2>
     <p>Editor with event listeners:</p>
     
-    <rich-text-editor 
+    <editora-editor 
       id="editor5"
       height="250"
     >
       <p>Type something to see events in action...</p>
-    </rich-text-editor>
+    </editora-editor>
 
     <div class="output" id="output5">
       <div class="output-label">Events Log:</div>
@@ -204,7 +204,7 @@
     <h2>6. JavaScript Configuration (Highest Priority)</h2>
     <p>Editor configured via JavaScript API:</p>
     
-    <rich-text-editor id="editor6"></rich-text-editor>
+    <editora-editor id="editor6"></editora-editor>
 
     <div class="button-group">
       <button onclick="initEditor6()">Initialize with JS Config</button>
@@ -220,25 +220,25 @@
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
       <div>
         <h3>Editor A</h3>
-        <rich-text-editor 
+        <editora-editor 
           id="editorA"
           height="200"
           toolbar="bold italic"
         >
           <p>Editor A content</p>
-        </rich-text-editor>
+        </editora-editor>
       </div>
       
       <div>
         <h3>Editor B</h3>
-        <rich-text-editor 
+        <editora-editor 
           id="editorB"
           height="200"
           toolbar="bold italic underline"
           theme="dark"
         >
           <p>Editor B content</p>
-        </rich-text-editor>
+        </editora-editor>
       </div>
     </div>
   </div>
@@ -345,7 +345,7 @@
     // Log initial ready state
     document.addEventListener('DOMContentLoaded', () => {
       console.log('✅ All editors initialized');
-      console.log('Total editors:', document.querySelectorAll('rich-text-editor').length);
+      console.log('Total editors:', document.querySelectorAll('editora-editor').length);
     });
   </script>
 </body>

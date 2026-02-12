@@ -4,7 +4,7 @@
 
 ```html
 <script src="https://unpkg.com/@editora/core@latest/dist/editora.min.js"></script>
-<rich-text-editor height="400" plugins="bold italic link"></rich-text-editor>
+<editora-editor height="400" plugins="bold italic link"></editora-editor>
 ```
 
 ## Attributes
@@ -35,7 +35,7 @@
 ## JavaScript API
 
 ```javascript
-const editor = document.querySelector('rich-text-editor');
+const editor = document.querySelector('editora-editor');
 
 // Content
 editor.getContent();
@@ -86,10 +86,10 @@ editor.addEventListener('editor-destroy', () => {});
 ## Custom Slots
 
 ```html
-<rich-text-editor>
+<editora-editor>
   <!-- Custom toolbar -->
   <div slot="toolbar">
-    <button onclick="this.closest('rich-text-editor').execCommand('bold')">
+    <button onclick="this.closest('editora-editor').execCommand('bold')">
       Bold
     </button>
   </div>
@@ -101,7 +101,7 @@ editor.addEventListener('editor-destroy', () => {});
   <div slot="statusbar">
     <span>Custom status</span>
   </div>
-</rich-text-editor>
+</editora-editor>
 ```
 
 ## Plugin Configuration
@@ -129,12 +129,12 @@ editor.setConfig({
 
 ### Light Theme (Default)
 ```html
-<rich-text-editor theme="light"></rich-text-editor>
+<editora-editor theme="light"></editora-editor>
 ```
 
 ### Dark Theme
 ```html
-<rich-text-editor theme="dark"></rich-text-editor>
+<editora-editor theme="dark"></editora-editor>
 ```
 
 ### Switch Theme Dynamically
@@ -151,7 +151,7 @@ editor.setAttribute('theme', 'dark');
 
 2. **HTML Attributes**
    ```html
-   <rich-text-editor height="400"></rich-text-editor>
+   <editora-editor height="400"></editora-editor>
    ```
 
 3. **Plugin Defaults**
@@ -206,7 +206,7 @@ function Editor() {
     };
   }, []);
   
-  return <rich-text-editor ref={editorRef} />;
+  return <editora-editor ref={editorRef} />;
 }
 ```
 
@@ -254,7 +254,7 @@ editor.addEventListener('content-change', (e) => {
 ### Read-only Toggle
 ```html
 <button onclick="toggleReadonly()">Toggle Edit Mode</button>
-<rich-text-editor id="editor"></rich-text-editor>
+<editora-editor id="editor"></editora-editor>
 
 <script>
   function toggleReadonly() {
@@ -267,8 +267,8 @@ editor.addEventListener('content-change', (e) => {
 
 ### Multiple Editors
 ```html
-<rich-text-editor id="editor1" height="200"></rich-text-editor>
-<rich-text-editor id="editor2" height="200" theme="dark"></rich-text-editor>
+<editora-editor id="editor1" height="200"></editora-editor>
+<editora-editor id="editor2" height="200" theme="dark"></editora-editor>
 
 <button onclick="syncEditors()">Sync Editors</button>
 
@@ -320,7 +320,7 @@ import type {
   ToolbarConfig 
 } from '@editora/core';
 
-const editor = document.querySelector('rich-text-editor')!;
+const editor = document.querySelector('editora-editor')!;
 const config: EditorConfigDefaults = editor.getConfig();
 ```
 

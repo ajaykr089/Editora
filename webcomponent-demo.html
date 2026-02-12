@@ -182,7 +182,7 @@
 &lt;/rich-text-editor&gt;</code>
     </div>
     
-    <rich-text-editor id="editor1" height="400">
+    <editora-editor id="editor1" height="400">
       <p><strong>Welcome to Editora!</strong></p>
       <p>This is a <em>framework-agnostic</em> rich text editor with <mark style="background: yellow;">29 native plugins</mark>.</p>
       <p>Try these features:</p>
@@ -193,7 +193,7 @@
         <li>Text colors and highlighting</li>
         <li>Links, images, and tables</li>
       </ul>
-    </rich-text-editor>
+    </editora-editor>
     
     <div class="buttons">
       <button onclick="getContent1()">Get Content</button>
@@ -219,13 +219,13 @@
 &gt;&lt;/rich-text-editor&gt;</code>
     </div>
     
-    <rich-text-editor 
+    <editora-editor 
       id="editor2"
       height="300"
       placeholder="Type something here..."
       toolbar="undo redo | bold italic underline strikethrough | link image | alignleft aligncenter alignright"
     >
-    </rich-text-editor>
+    </editora-editor>
     
     <div class="buttons">
       <button onclick="toggleReadonly()">Toggle Readonly</button>
@@ -250,9 +250,9 @@ const editor = Editora.init('#editor3', {
 });</code>
     </div>
     
-    <rich-text-editor id="editor3" height="250">
+    <editora-editor id="editor3" height="250">
       <p>Content controlled via JavaScript API</p>
-    </rich-text-editor>
+    </editora-editor>
     
     <div class="buttons">
       <button onclick="apiDemo()">Run API Demo</button>
@@ -271,15 +271,15 @@ const editor = Editora.init('#editor3', {
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
       <div>
         <h4>Editor A</h4>
-        <rich-text-editor id="editorA" height="200">
+        <editora-editor id="editorA" height="200">
           <p>Editor A content</p>
-        </rich-text-editor>
+        </editora-editor>
       </div>
       <div>
         <h4>Editor B</h4>
-        <rich-text-editor id="editorB" height="200">
+        <editora-editor id="editorB" height="200">
           <p>Editor B content</p>
-        </rich-text-editor>
+        </editora-editor>
       </div>
     </div>
     

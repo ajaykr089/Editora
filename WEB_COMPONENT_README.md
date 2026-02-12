@@ -9,14 +9,14 @@ Successfully transformed Editora Rich Text Editor from a React-bound library int
 ### ✅ Web Component Ready
 ```html
 <script src="https://unpkg.com/@editora/core@latest/dist/editora.min.js"></script>
-<rich-text-editor 
+<editora-editor 
   height="500"
   plugins="bold italic link image"
   toolbar="undo redo | bold italic | link image"
   theme="light"
 >
   <p>Start editing...</p>
-</rich-text-editor>
+</editora-editor>
 ```
 
 ### ✅ Framework-Agnostic
@@ -81,10 +81,10 @@ packages/core/src/
   <script src="https://unpkg.com/@editora/core@latest/dist/editora.min.js"></script>
 </head>
 <body>
-  <rich-text-editor height="400" plugins="bold italic"></rich-text-editor>
+  <editora-editor height="400" plugins="bold italic"></editora-editor>
   
   <script>
-    const editor = document.querySelector('rich-text-editor');
+    const editor = document.querySelector('editora-editor');
     editor.addEventListener('content-change', (e) => {
       console.log('Content:', e.detail.html);
     });
@@ -146,14 +146,14 @@ function Editor() {
     };
   }, []);
   
-  return <rich-text-editor ref={editorRef} />;
+  return <editora-editor ref={editorRef} />;
 }
 ```
 
 ### Pattern 5: Vue 3
 ```vue
 <template>
-  <rich-text-editor 
+  <editora-editor 
     ref="editor"
     height="500"
     :plugins="plugins"
@@ -181,7 +181,7 @@ onMounted(() => {
 
 ### Declarative (HTML Attributes)
 ```html
-<rich-text-editor
+<editora-editor
   height="500"
   width="100%"
   theme="dark"
@@ -191,12 +191,12 @@ onMounted(() => {
   placeholder="Start typing..."
   autofocus="true"
   language="en"
-></rich-text-editor>
+></editora-editor>
 ```
 
 ### Programmatic (JavaScript)
 ```javascript
-const editor = document.querySelector('rich-text-editor');
+const editor = document.querySelector('editora-editor');
 
 editor.setConfig({
   height: 600,
@@ -223,12 +223,12 @@ editor.setConfig({
 
 ### Custom Toolbar (Slots)
 ```html
-<rich-text-editor>
+<editora-editor>
   <div slot="toolbar" class="my-toolbar">
-    <button onclick="this.closest('rich-text-editor').execCommand('bold')">
+    <button onclick="this.closest('editora-editor').execCommand('bold')">
       <strong>B</strong>
     </button>
-    <button onclick="this.closest('rich-text-editor').execCommand('italic')">
+    <button onclick="this.closest('editora-editor').execCommand('italic')">
       <em>I</em>
     </button>
   </div>
@@ -238,7 +238,7 @@ editor.setConfig({
   <div slot="statusbar" class="my-statusbar">
     <span id="word-count">Words: 0</span>
   </div>
-</rich-text-editor>
+</editora-editor>
 ```
 
 ### Toolbar String Format
@@ -254,7 +254,7 @@ editor.setConfig({
 
 ### DOM Events
 ```javascript
-const editor = document.querySelector('rich-text-editor');
+const editor = document.querySelector('editora-editor');
 
 // Editor ready
 editor.addEventListener('editor-ready', (e) => {
@@ -445,7 +445,7 @@ Comprehensive guides and examples.
   <script src="https://unpkg.com/@editora/core@latest/dist/editora.min.js"></script>
 </head>
 <body>
-  <rich-text-editor height="400"></rich-text-editor>
+  <editora-editor height="400"></editora-editor>
 </body>
 </html>
 ```

@@ -14,7 +14,7 @@ Your Editora Web Component is **100% framework-agnostic** with **ZERO React depe
 | **React Dependency** | 0 occurrences | ✅ |
 | **Native Plugins** | 39 plugins | ✅ |
 | **Framework** | Agnostic | ✅ |
-| **Custom Element** | `<rich-text-editor>` | ✅ |
+| **Custom Element** | `<editora-editor>` | ✅ |
 
 ---
 
@@ -83,13 +83,13 @@ All plugins are implemented in pure TypeScript/JavaScript using native DOM APIs:
   <script src="https://unpkg.com/@editora/core@latest/dist/webcomponent.min.js"></script>
   
   <!-- Use the custom element -->
-  <rich-text-editor
+  <editora-editor
     height="400"
     plugins="bold italic underline link table image"
     toolbar-items="bold italic underline | link table image"
   >
     <p>Your content here</p>
-  </rich-text-editor>
+  </editora-editor>
 </body>
 </html>
 ```
@@ -102,32 +102,32 @@ import React from 'react';
 function App() {
   return (
     <div>
-      <rich-text-editor
+      <editora-editor
         height="400"
         plugins="bold italic underline link table"
         toolbar-items="bold italic underline | link table"
       >
         <p>Content here</p>
-      </rich-text-editor>
+      </editora-editor>
     </div>
   );
 }
 ```
 
-**Note:** React treats `<rich-text-editor>` as a native HTML element. No wrapper needed!
+**Note:** React treats `<editora-editor>` as a native HTML element. No wrapper needed!
 
 ### 3. Vue
 
 ```vue
 <template>
   <div>
-    <rich-text-editor
+    <editora-editor
       height="400"
       plugins="bold italic underline link table"
       toolbar-items="bold italic underline | link table"
     >
       <p>Content here</p>
-    </rich-text-editor>
+    </editora-editor>
   </div>
 </template>
 
@@ -146,13 +146,13 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-editor',
   template: `
-    <rich-text-editor
+    <editora-editor
       height="400"
       plugins="bold italic underline link table"
       toolbar-items="bold italic underline | link table"
     >
       <p>Content here</p>
-    </rich-text-editor>
+    </editora-editor>
   `
 })
 export class EditorComponent {}
@@ -165,13 +165,13 @@ export class EditorComponent {}
   // Web component works automatically
 </script>
 
-<rich-text-editor
+<editora-editor
   height="400"
   plugins="bold italic underline link table"
   toolbar-items="bold italic underline | link table"
 >
   <p>Content here</p>
-</rich-text-editor>
+</editora-editor>
 ```
 
 ---
@@ -347,16 +347,16 @@ console.log(window.Editora.plugins.length);
 document.querySelector('rich-text-editor');
 
 // Works in React
-<rich-text-editor />
+<editora-editor />
 
 // Works in Vue
-<rich-text-editor />
+<editora-editor />
 
 // Works in Angular
-<rich-text-editor></rich-text-editor>
+<editora-editor></editora-editor>
 
 // Works in Svelte
-<rich-text-editor />
+<editora-editor />
 ```
 ✅ **PASS** - True web component
 
@@ -408,7 +408,7 @@ api.setHTML('<p>New content</p>');
 Your web component supports all required props via attributes:
 
 ```html
-<rich-text-editor
+<editora-editor
   id="editor"
   class="my-editor"
   height="500"
@@ -418,7 +418,7 @@ Your web component supports all required props via attributes:
   content-style="body { font-family: Arial; }"
 >
   <p>Initial content</p>
-</rich-text-editor>
+</editora-editor>
 ```
 
 Maps to:

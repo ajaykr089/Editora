@@ -52,14 +52,14 @@ export function createEditor(options: any) {
 
 /**
  * Initialize Web Component globally
- * Allows usage via <rich-text-editor> HTML tag
+ * Allows usage via <editora-editor> HTML tag
  * 
  * NOTE: Auto-initialization is disabled here to avoid conflicts.
  * The standalone.native.ts bundle handles web component registration.
  */
 export function initWebComponent() {
-  if (typeof window !== 'undefined' && !customElements.get('rich-text-editor')) {
-    customElements.define('rich-text-editor', RichTextEditorElement);
+  if (typeof window !== 'undefined' && !customElements.get('editora-editor')) {
+    customElements.define('editora-editor', RichTextEditorElement);
   }
 }
 

@@ -149,7 +149,7 @@ if (typeof window !== 'undefined') {
   (RichTextEditorElement as any).__globalPlugins = plugins;
   
   // Capture initial content for existing elements before upgrading
-  const existingElements = document.querySelectorAll('rich-text-editor:not([data-initial-content])');
+  const existingElements = document.querySelectorAll('editora-editor:not([data-initial-content])');
   const contents: string[] = [];
   existingElements.forEach((el) => {
     const content = el.innerHTML.trim();
@@ -160,12 +160,12 @@ if (typeof window !== 'undefined') {
   });
   
   // Register custom element
-  if (!customElements.get('rich-text-editor')) {
-    customElements.define('rich-text-editor', RichTextEditorElement);
+  if (!customElements.get('editora-editor')) {
+    customElements.define('editora-editor', RichTextEditorElement);
   }
   
   // After define, set content on new elements if they were replaced
-  const allElements = document.querySelectorAll('rich-text-editor');
+  const allElements = document.querySelectorAll('editora-editor');
   const newElements = Array.from(allElements).filter(el => !el.hasAttribute('data-initial-content'));
   newElements.forEach(el => {
     const index = Array.from(allElements).indexOf(el);

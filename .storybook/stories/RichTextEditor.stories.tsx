@@ -696,15 +696,15 @@ export const FrameworkIndependence: Story = {
           </div>
           <div style={{ padding: "10px", background: "white", borderRadius: "4px" }}>
             <strong>Vanilla JS:</strong><br/>
-            <code style={{ fontSize: "11px" }}>&lt;rich-text-editor&gt;</code>
+            <code style={{ fontSize: "11px" }}>&lt;editora-editor&gt;</code>
           </div>
           <div style={{ padding: "10px", background: "white", borderRadius: "4px" }}>
             <strong>Vue:</strong><br/>
-            <code style={{ fontSize: "11px" }}>&lt;rich-text-editor&gt;</code>
+            <code style={{ fontSize: "11px" }}>&lt;editora-editor&gt;</code>
           </div>
           <div style={{ padding: "10px", background: "white", borderRadius: "4px" }}>
             <strong>Angular:</strong><br/>
-            <code style={{ fontSize: "11px" }}>&lt;rich-text-editor&gt;</code>
+            <code style={{ fontSize: "11px" }}>&lt;editora-editor&gt;</code>
           </div>
         </div>
       </div>

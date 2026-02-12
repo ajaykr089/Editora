@@ -37,7 +37,7 @@ packages/core/src/
 **File**: `packages/core/src/webcomponent/RichTextEditor.ts`
 
 Features:
-- Custom element `<rich-text-editor>`
+- Custom element `<editora-editor>`
 - Observed attributes for reactivity
 - Slot support (toolbar, statusbar)
 - Complete lifecycle management
@@ -47,13 +47,13 @@ Features:
 
 Usage:
 ```html
-<rich-text-editor 
+<editora-editor 
   height="500"
   plugins="bold italic link"
   toolbar="undo redo | bold italic | link"
 >
   <p>Content</p>
-</rich-text-editor>
+</editora-editor>
 ```
 
 ### 3. Configuration Priority System ✅
@@ -199,20 +199,20 @@ Package.json exports:
 
 Custom toolbar:
 ```html
-<rich-text-editor>
+<editora-editor>
   <div slot="toolbar">
     <button>Custom Button</button>
   </div>
-</rich-text-editor>
+</editora-editor>
 ```
 
 Custom status bar:
 ```html
-<rich-text-editor>
+<editora-editor>
   <div slot="statusbar">
     <span>Custom Status</span>
   </div>
-</rich-text-editor>
+</editora-editor>
 ```
 
 ### 11. Documentation ✅
@@ -267,7 +267,7 @@ Created comprehensive documentation:
 
 ```html
 <script src="https://unpkg.com/@editora/core@latest/dist/editora.min.js"></script>
-<rich-text-editor
+<editora-editor
   height="500"
   menubar="false"
   plugins="lists link image media table spellcheck"
@@ -276,7 +276,7 @@ Created comprehensive documentation:
   theme="light"
 >
   <p>Initial content</p>
-</rich-text-editor>
+</editora-editor>
 ```
 
 ### ✅ Configuration Priority
@@ -394,7 +394,7 @@ npm run build
 
 ```html
 <script src="dist/editora.min.js"></script>
-<rich-text-editor></rich-text-editor>
+<editora-editor></editora-editor>
 ```
 
 ### 3. Use via NPM
@@ -418,7 +418,7 @@ import '@editora/core/webcomponent';
 ```
 
 ```html
-<rich-text-editor plugins="bold italic"></rich-text-editor>
+<editora-editor plugins="bold italic"></editora-editor>
 ```
 
 ## 🎨 No Breaking Changes

@@ -59,7 +59,7 @@
       font-size: 13px;
     }
 
-    rich-text-editor {
+    editora-editor {
       display: block;
       margin: 20px 0;
     }
@@ -96,13 +96,13 @@
     <div class="test-info">
       Using <code>toolbar-items="undo redo | bold italic underline"</code>
     </div>
-    <rich-text-editor
+    <editora-editor
       height="300"
       plugins="bold italic underline history"
       toolbar-items="undo redo | bold italic underline"
     >
       <p><strong>Expected:</strong> Toolbar should show: Undo, Redo | Bold, Italic, Underline</p>
-    </rich-text-editor>
+    </editora-editor>
     <div id="test1-status" class="status"></div>
   </div>
 
@@ -112,7 +112,7 @@
     <div class="test-info">
       Using <code>toolbar-items</code> with multiple groups and all 39 native plugins
     </div>
-    <rich-text-editor
+    <editora-editor
       height="400"
       plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis a11yChecker comments document-manager footnote fullscreen mediaManager mergeTag pageBreak preview print spellCheck template"
       toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | importWord exportWord exportPdf | fullscreen preview print | a11yChecker spellCheck | comments footnote insertMergeTag pageBreak template | clearFormatting"
@@ -131,7 +131,7 @@
         <li>Code and Blockquote</li>
         <li>Clear Formatting</li>
       </ul>
-    </rich-text-editor>
+    </editora-editor>
     <div id="test2-status" class="status"></div>
   </div>
 
@@ -141,12 +141,12 @@
     <div class="test-info">
       No <code>toolbar-items</code> attribute - should automatically create toolbar from registered plugins
     </div>
-    <rich-text-editor
+    <editora-editor
       height="300"
       plugins="bold italic underline link"
     >
       <p><strong>Expected:</strong> Toolbar should auto-generate from the 4 specified plugins</p>
-    </rich-text-editor>
+    </editora-editor>
     <div id="test3-status" class="status"></div>
   </div>
 
@@ -157,14 +157,14 @@
     <div class="test-info">
       Toggle the editor between editable and readonly states using the button below.
     </div>
-    <rich-text-editor
+    <editora-editor
       id="readonly-editor"
       height="150"
       plugins="bold italic"
       toolbar-items="bold italic"
     >
       <p>This editor can be toggled readonly.</p>
-    </rich-text-editor>
+    </editora-editor>
     <button id="toggle-readonly-btn">Toggle Readonly</button>
     <div id="readonly-status" class="status"></div>
   </div>
@@ -175,13 +175,13 @@
     <div class="test-info">
       Shows a placeholder when the editor is empty.
     </div>
-    <rich-text-editor
+    <editora-editor
       id="placeholder-editor"
       height="120"
       plugins="bold italic"
       toolbar-items="bold italic"
       placeholder="Type something here..."
-    ></rich-text-editor>
+    ></editora-editor>
   </div>
 
   <!-- Test 7: Theme Switcher -->
@@ -190,7 +190,7 @@
     <div class="test-info">
       Switch between default and dark themes dynamically.
     </div>
-    <rich-text-editor
+    <editora-editor
       id="theme-editor"
       height="150"
       plugins="bold italic"
@@ -198,7 +198,7 @@
       theme="default"
     >
       <p>Click the button to toggle theme.</p>
-    </rich-text-editor>
+    </editora-editor>
     <button id="toggle-theme-btn">Toggle Theme</button>
   </div>
 
@@ -208,14 +208,14 @@
     <div class="test-info">
       Listen for <code>editor-focus</code> and <code>editor-blur</code> events and display status.
     </div>
-    <rich-text-editor
+    <editora-editor
       id="event-editor"
       height="120"
       plugins="bold italic"
       toolbar-items="bold italic"
     >
       <p>Focus and blur this editor to see events.</p>
-    </rich-text-editor>
+    </editora-editor>
     <div id="event-status" class="status"></div>
   </div>
   <div class="test-section">
@@ -224,14 +224,14 @@
       Demonstrates <code>onchange</code> event, <code>getContent()</code>, <code>setContent()</code>, and dynamic behaviors.<br>
       <strong>Try editing, clicking the buttons, and observe the output below.</strong>
     </div>
-    <rich-text-editor
+    <editora-editor
       id="dynamic-editor"
       height="200"
       plugins="bold italic underline"
       toolbar-items="bold italic underline"
     >
       <p>Edit this text. Changes will be shown below.</p>
-    </rich-text-editor>
+    </editora-editor>
     <div style="margin: 10px 0;">
       <button id="get-content-btn">Get Content</button>
       <button id="set-content-btn">Set Content</button>
@@ -246,7 +246,7 @@
 
   <script>
     // Wait for custom element to be defined
-    customElements.whenDefined('rich-text-editor').then(() => {
+    customElements.whenDefined('editora-editor').then(() => {
       console.log('✅ Custom element registered');
       runTests();
     });
@@ -326,7 +326,7 @@
       };
       // Test 1: Check toolbar buttons
       setTimeout(() => {
-        const test1 = document.querySelectorAll('rich-text-editor')[0];
+        const test1 = document.querySelectorAll('editora-editor')[0];
         const toolbar1 = test1.querySelector('.editora-toolbar');
         const buttons1 = toolbar1?.querySelectorAll('.editora-toolbar-button');
         
@@ -341,7 +341,7 @@
         }
 
         // Test 2: Check full toolbar
-        const test2 = document.querySelectorAll('rich-text-editor')[1];
+        const test2 = document.querySelectorAll('editora-editor')[1];
         const toolbar2 = test2.querySelector('.editora-toolbar');
         const buttons2 = toolbar2?.querySelectorAll('.editora-toolbar-button');
         
@@ -356,7 +356,7 @@
         }
 
         // Test 3: Check auto toolbar
-        const test3 = document.querySelectorAll('rich-text-editor')[2];
+        const test3 = document.querySelectorAll('editora-editor')[2];
         const toolbar3 = test3.querySelector('.editora-toolbar');
         const buttons3 = toolbar3?.querySelectorAll('.editora-toolbar-button');
         
@@ -389,7 +389,7 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const editor = document.querySelector('rich-text-editor');
+      const editor = document.querySelector('editora-editor');
       if (editor) {
         const api = editor.getAPI();
         if (api && typeof api.getContent === 'function') {

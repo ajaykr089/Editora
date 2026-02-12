@@ -141,13 +141,13 @@ Custom element implementation for HTML usage.
 - Complete lifecycle management
 
 ```html
-<rich-text-editor
+<editora-editor
   height="500"
   plugins="bold italic link"
   toolbar="undo redo | bold italic | link"
 >
   <p>Content</p>
-</rich-text-editor>
+</editora-editor>
 ```
 
 ## Configuration Priority System
@@ -159,7 +159,7 @@ Priority (Highest → Lowest):
    editor.setConfig({ height: 600 })
 
 2. HTML Attributes
-   <rich-text-editor height="400">
+   <editora-editor height="400">
 
 3. Plugin Defaults
    Plugin specifies default height
@@ -276,22 +276,22 @@ engine.on('destroy', () => {});
 ### Toolbar Slot
 
 ```html
-<rich-text-editor>
+<editora-editor>
   <div slot="toolbar">
     <button onclick="editor.execCommand('bold')">Bold</button>
     <button onclick="editor.execCommand('italic')">Italic</button>
   </div>
-</rich-text-editor>
+</editora-editor>
 ```
 
 ### Status Bar Slot
 
 ```html
-<rich-text-editor>
+<editora-editor>
   <div slot="statusbar">
     <span>Custom status</span>
   </div>
-</rich-text-editor>
+</editora-editor>
 ```
 
 ## API Surface
@@ -358,7 +358,7 @@ dist/
 
 ```html
 <script src="https://unpkg.com/@editora/core@latest/dist/editora.min.js"></script>
-<rich-text-editor plugins="bold italic"></rich-text-editor>
+<editora-editor plugins="bold italic"></editora-editor>
 ```
 
 ### Pattern 2: Vanilla JavaScript
@@ -385,7 +385,7 @@ import { RichTextEditor } from '@editora/react';
 ```tsx
 import { RichTextEditorElement } from '@editora/core/webcomponent';
 
-<rich-text-editor ref={editorRef} />
+<editora-editor ref={editorRef} />
 ```
 
 ### Pattern 5: Framework-Agnostic Library

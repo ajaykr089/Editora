@@ -85,7 +85,7 @@
 
     <div class="editor-wrapper">
       <div class="editor-label">Editor Instance 1</div>
-      <rich-text-editor 
+      <editora-editor 
         placeholder="Click anchor button to add navigation targets..."
         toolbar="undo redo | anchor | bold italic | preview"
         height="200px"
@@ -93,12 +93,12 @@
         <h2>Editor 1: Navigation Targets</h2>
         <p>Try adding anchors with IDs like: <strong>section-1</strong>, <strong>intro</strong>, <strong>conclusion</strong></p>
         <p>Hover over created anchors to see the visual indicator!</p>
-      </rich-text-editor>
+      </editora-editor>
     </div>
 
     <div class="editor-wrapper">
       <div class="editor-label">Editor Instance 2 (Independent)</div>
-      <rich-text-editor 
+      <editora-editor 
         placeholder="This editor should have independent anchor IDs..."
         toolbar="undo redo | anchor | bold italic underline | preview"
         height="200px"
@@ -106,7 +106,7 @@
         <h2>Editor 2: Independent Anchors</h2>
         <p>You can create anchors with the same IDs as Editor 1 - they are independent!</p>
         <p>Each editor maintains its own anchor registry.</p>
-      </rich-text-editor>
+      </editora-editor>
     </div>
   </div>
 

@@ -91,7 +91,7 @@
     }
 
     /* Rich Text Editor Styles */
-    rich-text-editor {
+    editora-editor {
       display: block;
       border: 1px solid #ddd;
       border-radius: 4px;
@@ -99,19 +99,19 @@
       background: white;
     }
 
-    rich-text-editor .editora-content {
+    editora-editor .editora-content {
       min-height: 150px;
       padding: 12px;
       outline: none;
       line-height: 1.6;
     }
 
-    rich-text-editor .editora-content:focus {
+    editora-editor .editora-content:focus {
       outline: 2px solid #0066cc;
       outline-offset: -2px;
     }
 
-    rich-text-editor .editora-toolbar-container {
+    editora-editor .editora-toolbar-container {
       background: #f8f9fa;
       border-bottom: 1px solid #ddd;
       padding: 8px;
@@ -131,23 +131,23 @@
       <div>
         <h3>Local Mode</h3>
         <p>All operations happen client-side</p>
-        <rich-text-editor 
+        <editora-editor 
           id="editor-local"
           height="200"
         >
           <p>This editor uses local spellchecking (browser native).</p>
-        </rich-text-editor>
+        </editora-editor>
       </div>
       
       <div>
         <h3>Hybrid Mode</h3>
         <p>API first, fallback to local</p>
-        <rich-text-editor 
+        <editora-editor 
           id="editor-hybrid"
           height="200"
         >
           <p>This editor tries API first, then falls back to local mode.</p>
-        </rich-text-editor>
+        </editora-editor>
       </div>
     </div>
 
@@ -162,7 +162,7 @@
     <h2>2. Custom Toolbar and Status Bar (Slots)</h2>
     <p>Replace default UI with custom components using slots</p>
     
-    <rich-text-editor id="editor-slots" height="300">
+    <editora-editor id="editor-slots" height="300">
       <!-- Custom Toolbar Slot -->
       <div slot="toolbar" class="custom-toolbar">
         <button onclick="execSlotCommand('bold')">🅱️ Bold</button>
@@ -181,7 +181,7 @@
         <span id="status-words">Words: 0</span>
         <span id="status-time">Last edit: Never</span>
       </div>
-    </rich-text-editor>
+    </editora-editor>
   </div>
 
   <!-- Example 3: Configuration Priority -->
@@ -189,7 +189,7 @@
     <h2>3. Configuration Priority System</h2>
     <p>Priority: JS Config > HTML Attributes > Plugin Defaults > Editor Defaults</p>
     
-    <rich-text-editor 
+    <editora-editor 
       id="editor-priority"
       height="200"
       theme="light"
@@ -197,7 +197,7 @@
       toolbar="undo redo | bold italic"
     >
       <p>Attribute: theme="light", toolbar="undo redo | bold italic"</p>
-    </rich-text-editor>
+    </editora-editor>
 
     <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
       <button onclick="jsOverride()">Override with JS (theme=dark, height=400)</button>
@@ -215,14 +215,14 @@
     <h2>4. Reactive Attribute Updates</h2>
     <p>Changes to attributes update the editor in real-time</p>
     
-    <rich-text-editor 
+    <editora-editor 
       id="editor-reactive"
       height="250"
       theme="light"
       readonly="false"
     >
       <p>Try the buttons below to change attributes dynamically.</p>
-    </rich-text-editor>
+    </editora-editor>
 
     <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
       <button onclick="setAttr('editor-reactive', 'theme', 'dark')">Set theme="dark"</button>
@@ -238,12 +238,12 @@
     <h2>5. JavaScript API Methods</h2>
     <p>Access the editor programmatically</p>
     
-    <rich-text-editor 
+    <editora-editor 
       id="editor-api"
       height="200"
     >
       <p>Use the buttons to interact with this editor via JavaScript.</p>
-    </rich-text-editor>
+    </editora-editor>
 
     <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
       <button onclick="apiGetContent()">getContent()</button>
@@ -265,12 +265,12 @@
     <h2>6. Complete Event Lifecycle</h2>
     <p>Track all editor events</p>
     
-    <rich-text-editor 
+    <editora-editor 
       id="editor-events"
       height="200"
     >
       <p>Interact with this editor to see events.</p>
-    </rich-text-editor>
+    </editora-editor>
 
     <button onclick="destroyEditor()">Destroy Editor</button>
     <button onclick="recreateEditor()">Recreate Editor</button>

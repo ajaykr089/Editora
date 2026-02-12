@@ -49,17 +49,17 @@ function MyEditor() {
   <script src="https://unpkg.com/@editora/core@latest/dist/editora.min.js"></script>
 </head>
 <body>
-  <rich-text-editor
+  <editora-editor
     height="500"
     plugins="bold italic link image"
     toolbar="undo redo | bold italic | link image"
     theme="light"
   >
     <p>Initial content</p>
-  </rich-text-editor>
+  </editora-editor>
 
   <script>
-    const editor = document.querySelector('rich-text-editor');
+    const editor = document.querySelector('editora-editor');
     
     editor.addEventListener('content-change', (e) => {
       console.log('Content:', e.detail.html);
@@ -81,7 +81,7 @@ function MyEditor() {
 #### With JavaScript Configuration
 
 ```html
-<rich-text-editor id="editor"></rich-text-editor>
+<editora-editor id="editor"></editora-editor>
 
 <script>
   const editor = document.getElementById('editor');
@@ -157,7 +157,7 @@ function EditorComponent() {
     };
   }, []);
 
-  return <rich-text-editor ref={editorRef} />;
+  return <editora-editor ref={editorRef} />;
 }
 ```
 
@@ -166,7 +166,7 @@ function EditorComponent() {
 The new system resolves configuration in this order (highest to lowest):
 
 1. **JavaScript Config** (via `setConfig()`)
-2. **HTML Attributes** (`<rich-text-editor height="500">`)
+2. **HTML Attributes** (`<editora-editor height="500">`)
 3. **Plugin Defaults**
 4. **Editor Defaults**
 
@@ -174,7 +174,7 @@ Example:
 
 ```html
 <!-- Attribute: height="400" -->
-<rich-text-editor id="editor" height="400"></rich-text-editor>
+<editora-editor id="editor" height="400"></editora-editor>
 
 <script>
   const editor = document.getElementById('editor');
@@ -246,7 +246,7 @@ Tries API first, falls back to local:
 ### Using Slots
 
 ```html
-<rich-text-editor>
+<editora-editor>
   <div slot="toolbar">
     <button onclick="editor.execCommand('bold')">Bold</button>
     <button onclick="editor.execCommand('italic')">Italic</button>
@@ -255,15 +255,15 @@ Tries API first, falls back to local:
   <div slot="statusbar">
     <span>Custom status</span>
   </div>
-</rich-text-editor>
+</editora-editor>
 ```
 
 ### Declarative Toolbar String
 
 ```html
-<rich-text-editor
+<editora-editor
   toolbar="undo redo | bold italic underline | alignleft aligncenter alignright | link image | table"
-></rich-text-editor>
+></editora-editor>
 ```
 
 ## Events
@@ -271,7 +271,7 @@ Tries API first, falls back to local:
 ### DOM Events
 
 ```javascript
-const editor = document.querySelector('rich-text-editor');
+const editor = document.querySelector('editora-editor');
 
 editor.addEventListener('editor-ready', (e) => {
   console.log('Editor ready', e.detail.api);
