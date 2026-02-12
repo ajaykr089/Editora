@@ -1,1 +1,1 @@
-export { FootnotePlugin } from './FootnotePlugin';
+export { FootnotePlugin } from './FootnotePlugin.native';

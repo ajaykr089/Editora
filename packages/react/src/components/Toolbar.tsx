@@ -175,37 +175,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       return <span style={{ fontWeight: 'bold', fontSize: '14px', lineHeight: '1' }}>{iconName}</span>;
     }
 
-    // Handle legacy SVG icons from EditorIcons for existing plugins
-    if (command) {
-      const commandIconMap: Record<string, EditorIconName> = {
-        'toggleBold': 'bold',
-        'toggleItalic': 'italic',
-        'toggleUnderline': 'underline',
-        'toggleStrikethrough': 'strikethrough',
-        'importFromWord': 'importWord',
-        'exportToWord': 'exportWord',
-        'exportToPdf': 'exportPdf',
-        'insertLink': 'link',
-        'insertImage': 'media',
-        'insertVideo': 'video',
-        'insertTable': 'table',
-        'insertMath': 'math',
-        'toggleOrderedList': 'numberedList',
-        'toggleBulletList': 'bulletList',
-        'setTextAlignment': 'alignLeft',
-        'setFontFamily': 'heading',
-        'toggleCodeBlock': 'codeBlock',
-        'toggleBlockquote': 'blockquote',
-        'clearFormatting': 'clearFormatting',
-      };
-
-      const commandIconKey = commandIconMap[command];
-      if (commandIconKey && EditorIcons[commandIconKey]) {
-        const IconComponent = EditorIcons[commandIconKey];
-        return <IconComponent />;
-      }
-    }
-
     // Final fallback
     return iconName || '⚪';
   };

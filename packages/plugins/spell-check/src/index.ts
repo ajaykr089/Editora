@@ -1,1 +1,1 @@
-export { SpellCheckPlugin } from './SpellCheckPlugin';
+export { SpellCheckPlugin } from './SpellCheckPlugin.native';

@@ -1,5 +1,5 @@
 import { Plugin } from '@editora/core';
-import { TextAlignmentProvider } from './TextAlignmentProvider';
+// import { TextAlignmentProvider } from './TextAlignmentProvider';
 
 /**
  * Text Alignment Plugin for Rich Text Editor
@@ -22,9 +22,9 @@ export const TextAlignmentPlugin = (): Plugin => ({
       ]
     }
   ],
-  context: {
-    provider: TextAlignmentProvider
-  }
+  // context: {
+  //   provider: TextAlignmentProvider
+  // }
 });
 
 /**

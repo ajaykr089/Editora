@@ -1,1 +1,1 @@
-export { PreviewPlugin } from './PreviewPlugin';
+export { PreviewPlugin } from './PreviewPlugin.native';

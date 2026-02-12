@@ -1,5 +1,5 @@
 import { Plugin } from '@editora/core';
-import { AnchorPluginProvider } from './AnchorPluginProvider';
+// import { AnchorPluginProvider } from './AnchorPluginProvider';
 import { getScopedElementById, queryScopedElements, findEditorContainer, findEditorContainerFromSelection } from '../../shared/editorContainerHelpers';
 import { toast } from '@editora/toast';
 
@@ -48,7 +48,7 @@ export const AnchorPlugin = (): Plugin => {
       },
     ],
     context: {
-      provider: AnchorPluginProvider,
+      // provider: AnchorPluginProvider,
     },
   };
 };

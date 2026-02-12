@@ -1,11 +1,11 @@
 import { Plugin } from '@editora/core';
-import { HeadingPluginProvider } from './HeadingPluginProvider';
+// import { HeadingPluginProvider } from './HeadingPluginProvider';
 
 export const HeadingPlugin = (): Plugin => ({
   name: "heading",
-  context: {
-    provider:  HeadingPluginProvider ,
-  },
+  // context: {
+  //   provider:  HeadingPluginProvider ,
+  // },
   nodes: {
     heading: {
       content: "inline*",

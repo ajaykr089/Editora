@@ -70,7 +70,7 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
     config.plugins.forEach(p => {
       pluginManager.register(p);
       
-      // Register commands from native plugins
+      // Register commands from native plugins in global registry for backward compatibility
       if (p.commands && typeof window !== 'undefined') {
         Object.entries(p.commands).forEach(([commandName, commandFn]) => {
           commandRegistry.set(commandName, commandFn);

@@ -1,1 +1,1 @@
-export { CodeSamplePlugin } from './CodeSamplePlugin';
+export { CodeSamplePlugin } from './CodeSamplePlugin.native';

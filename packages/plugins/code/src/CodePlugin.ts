@@ -1,5 +1,5 @@
 import { Plugin } from '@editora/core';
-import { CodePluginProvider } from './CodePluginProvider';
+// import { CodePluginProvider } from './CodePluginProvider';
 
 export const CodePlugin = (): Plugin => ({
   name: 'code',
@@ -11,7 +11,7 @@ export const CodePlugin = (): Plugin => ({
       icon: '<>'
     }
   ],
-  context: {
-    provider: CodePluginProvider
-  }
+  // context: {
+  //   provider: CodePluginProvider
+  // }
 });

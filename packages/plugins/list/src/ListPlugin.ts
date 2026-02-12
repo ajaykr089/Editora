@@ -1,5 +1,5 @@
 import { Plugin } from '@editora/core';
-import { ListPluginProvider } from './ListPluginProvider';
+// import { ListPluginProvider } from './ListPluginProvider';
 
 export const ListPlugin = (): Plugin => ({
   name: 'list',
@@ -36,7 +36,7 @@ export const ListPlugin = (): Plugin => ({
       shortcut: 'Mod-Shift-7'
     }
   ],
-  context: {
-    provider: ListPluginProvider
-  }
+  // context: {
+  //   provider: ListPluginProvider
+  // }
 });

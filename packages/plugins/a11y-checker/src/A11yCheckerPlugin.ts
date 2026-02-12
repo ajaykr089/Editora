@@ -654,7 +654,7 @@ export const A11yCheckerPlugin = (): Plugin => ({
     },
   ],
   context: {
-    provider: A11yCheckerPluginProvider,
+    // provider: A11yCheckerPluginProvider,
   },
 });
 

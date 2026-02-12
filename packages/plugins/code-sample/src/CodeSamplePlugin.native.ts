@@ -530,9 +530,9 @@ export const CodeSamplePlugin = (): Plugin => ({
   ],
   
   commands: {
-    insertCodeBlock: function (state: any, ...args: any[]): null {
+    insertCodeBlock: (...args: any[]) => {
       insertCodeBlock();
-      return null;
+      return true;
     }
   },
   

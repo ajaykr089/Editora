@@ -1,1 +1,1 @@
-export { TemplatePlugin } from './TemplatePlugin';
+export { TemplatePlugin } from './TemplatePlugin.native';

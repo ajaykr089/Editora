@@ -1,1 +1,1 @@
-export { CommentsPlugin } from './CommentsPlugin';
+export { CommentsPlugin } from './CommentsPlugin.native';

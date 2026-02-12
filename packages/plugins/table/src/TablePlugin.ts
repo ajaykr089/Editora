@@ -1,5 +1,5 @@
 import { Plugin } from '@editora/core';
-import { TableProvider } from './TableProvider';
+// import { TableProvider } from './TableProvider';
 
 /**
  * Advanced Table Plugin for Rich Text Editor
@@ -72,9 +72,9 @@ export const TablePlugin = (): Plugin => ({
       icon: '⊞'
     }
   ],
-  context: {
-    provider: TableProvider
-  }
+  // context: {
+  //   provider: TableProvider
+  // }
 });
 
 /**

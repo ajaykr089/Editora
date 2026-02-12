@@ -7,47 +7,48 @@ import "@editora/themes/themes/default.css";
 import "../../packages/core/dist/webcomponent.min.js";
 
 // Import native plugins
-import { BoldPlugin } from "../../packages/plugins/bold/src/BoldPlugin.native";
-import { ItalicPlugin } from "../../packages/plugins/italic/src/ItalicPlugin.native";
-import { UnderlinePlugin } from "../../packages/plugins/underline/src/UnderlinePlugin.native";
-import { StrikethroughPlugin } from "../../packages/plugins/strikethrough/src/StrikethroughPlugin.native";
-import { LinkPlugin } from "../../packages/plugins/link/src/LinkPlugin.native";
-import { TablePlugin } from "../../packages/plugins/table/src/TablePlugin.native";
-import { ListPlugin } from "../../packages/plugins/list/src/ListPlugin.native";
-import { HistoryPlugin } from "../../packages/plugins/history/src/HistoryPlugin.native";
-import { ClearFormattingPlugin } from "../../packages/plugins/clear-formatting/src/ClearFormattingPlugin.native";
-import { HeadingPlugin } from "../../packages/plugins/heading/src/HeadingPlugin.native";
-import { BlockquotePlugin } from "../../packages/plugins/blockquote/src/BlockquotePlugin.native";
-import { CodePlugin } from "../../packages/plugins/code/src/CodePlugin.native";
-import { CodeSamplePlugin } from "../../packages/plugins/code-sample/src/CodeSamplePlugin.native";
-import { IndentPlugin } from "../../packages/plugins/indent/src/IndentPlugin.native";
-import { TextAlignmentPlugin } from "../../packages/plugins/text-alignment/src/TextAlignmentPlugin.native";
-import { TextColorPlugin } from "../../packages/plugins/text-color/src/TextColorPlugin.native";
-import { BackgroundColorPlugin } from "../../packages/plugins/background-color/src/BackgroundColorPlugin.native";
-import { FontSizePlugin } from "../../packages/plugins/font-size/src/FontSizePlugin.native";
-import { FontFamilyPlugin } from "../../packages/plugins/font-family/src/FontFamilyPlugin.native";
-import { LineHeightPlugin } from "../../packages/plugins/line-height/src/LineHeightPlugin.native";
-import { FootnotePlugin } from "../../packages/plugins/footnote/src/FootnotePlugin.native";
-// ParagraphPlugin removed - paragraph option is in HeadingPlugin dropdown
-import { DirectionPlugin } from "../../packages/plugins/direction/src/DirectionPlugin.native";
-import { CapitalizationPlugin } from "../../packages/plugins/capitalization/src/CapitalizationPlugin.native";
-import { ChecklistPlugin } from "../../packages/plugins/checklist/src/ChecklistPlugin.native";
-import { AnchorPlugin } from "../../packages/plugins/anchor/src/AnchorPlugin.native";
-import { EmbedIframePlugin } from "../../packages/plugins/embed-iframe/src/EmbedIframePlugin.native";
-import { MathPlugin } from "../../packages/plugins/math/src/MathPlugin.native";
-import { MediaManagerPlugin } from "../../packages/plugins/media-manager/src/MediaManagerPlugin.native";
-import { MergeTagPlugin } from "../../packages/plugins/merge-tag/src/MergeTagPlugin.native";
-import { PageBreakPlugin } from "../../packages/plugins/page-break/src/PageBreakPlugin.native";
-import { PrintPlugin } from "../../packages/plugins/print/src/PrintPlugin.native";
-import { PreviewPlugin } from "../../packages/plugins/preview/src/PreviewPlugin.native";
-import { SpecialCharactersPlugin } from "../../packages/plugins/special-characters/src/SpecialCharactersPlugin.native";
-import { SpellCheckPlugin } from "../../packages/plugins/spell-check/src/SpellCheckPlugin.native";
-import { EmojisPlugin } from "../../packages/plugins/emojis/src/EmojisPlugin.native";
-import { A11yCheckerPlugin } from "../../packages/plugins/a11y-checker/src/A11yCheckerPlugin.native";
-import { CommentsPlugin } from "../../packages/plugins/comments/src/CommentsPlugin.native";
-import { DocumentManagerPlugin } from "../../packages/plugins/document-manager/src/DocumentManagerPlugin.native";
-import { FullscreenPlugin } from "../../packages/plugins/fullscreen/src/FullscreenPlugin.native";
-import { TemplatePlugin } from "../../packages/plugins/template/src/TemplatePlugin.native";
+import {
+  BoldPlugin,
+  ItalicPlugin,
+  UnderlinePlugin,
+  StrikethroughPlugin,
+  LinkPlugin,
+  TablePlugin,
+  ListPlugin,
+  HistoryPlugin,
+  ClearFormattingPlugin,
+  HeadingPlugin,
+  BlockquotePlugin,
+  CodePlugin,
+  CodeSamplePlugin,
+  IndentPlugin,
+  TextAlignmentPlugin,
+  TextColorPlugin,
+  BackgroundColorPlugin,
+  FontSizePlugin,
+  FontFamilyPlugin,
+  LineHeightPlugin,
+  FootnotePlugin,
+  DirectionPlugin,
+  CapitalizationPlugin,
+  ChecklistPlugin,
+  AnchorPlugin,
+  EmbedIframePlugin,
+  MathPlugin,
+  MediaManagerPlugin,
+  MergeTagPlugin,
+  PageBreakPlugin,
+  PrintPlugin,
+  PreviewPlugin,
+  SpecialCharactersPlugin,
+  SpellCheckPlugin,
+  EmojisPlugin,
+  A11yCheckerPlugin,
+  CommentsPlugin,
+  DocumentManagerPlugin,
+  FullscreenPlugin,
+  TemplatePlugin
+} from "@editora/plugins";
 
 const meta: Meta = {
   title: "Editor/Rich Text Editor - Web Component",

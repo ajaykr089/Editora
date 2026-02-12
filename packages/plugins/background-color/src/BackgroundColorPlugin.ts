@@ -1,5 +1,5 @@
 import { Plugin } from '@editora/core';
-import { BackgroundColorPluginProvider } from './BackgroundColorPluginProvider';
+// import { BackgroundColorPluginProvider } from './BackgroundColorPluginProvider';
 
 export const BackgroundColorPlugin = (): Plugin => ({
   name: 'backgroundColor',
@@ -39,6 +39,6 @@ export const BackgroundColorPlugin = (): Plugin => ({
     }
   ],
   context: {
-    provider: BackgroundColorPluginProvider
+    // provider: BackgroundColorPluginProvider
   }
 });

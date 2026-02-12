@@ -1,1 +1,1 @@
-export { PageBreakPlugin } from './PageBreakPlugin';
+export { PageBreakPlugin } from './PageBreakPlugin.native';

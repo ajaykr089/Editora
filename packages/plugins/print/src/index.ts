@@ -1,1 +1,1 @@
-export { PrintPlugin } from './PrintPlugin';
+export { PrintPlugin } from './PrintPlugin.native';

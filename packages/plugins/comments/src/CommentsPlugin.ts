@@ -42,9 +42,9 @@ export const CommentsPlugin = (): Plugin => ({
       icon: '<svg width="24px" height="24px" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M16 1H4V11H8L10 13L12 11H16V1Z" fill="#000000"></path> <path d="M2 5V13H7.17157L8.70711 14.5355L7.29289 15.9497L6.34315 15H0V5H2Z" fill="#000000"></path> </g></svg>',
     },
   ],
-  context: {
-    provider: CommentsPluginProvider,
-  },
+  // context: {
+  //   provider: CommentsPluginProvider,
+  // },
 });
 
 /**

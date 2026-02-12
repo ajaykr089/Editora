@@ -1,1 +1,1 @@
-export { FullscreenPlugin } from './FullscreenPlugin';
+export { FullscreenPlugin } from './FullscreenPlugin.native';

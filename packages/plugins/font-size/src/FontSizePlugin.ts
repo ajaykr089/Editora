@@ -1,5 +1,5 @@
 import { Plugin } from '@editora/core';
-import { FontSizeProvider } from './FontSizeProvider';
+// import { FontSizeProvider } from './FontSizeProvider';
 import { findEditorContainer, queryScopedElement, findEditorContainerFromSelection } from '../../shared/editorContainerHelpers';
 
 /**
@@ -28,9 +28,9 @@ export const FontSizePlugin = (): Plugin => ({
       icon: '+'
     }
   ],
-  context: {
-    provider: FontSizeProvider
-  }
+  // context: {
+  //   provider: FontSizeProvider
+  // }
 });
 
 /**

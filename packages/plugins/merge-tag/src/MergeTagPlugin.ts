@@ -1,5 +1,5 @@
 import { Plugin } from '@editora/core';
-import { MergeTagPluginProvider } from './MergeTagPluginProvider';
+// import { MergeTagPluginProvider } from './MergeTagPluginProvider';
 import { getScopedElementById, queryScopedElements, findEditorContainer, findEditorContainerFromSelection } from '../../shared/editorContainerHelpers';
 
 /**
@@ -34,9 +34,9 @@ export const MergeTagPlugin = (): Plugin => ({
       icon: '{{ }}'
     }
   ],
-  context: {
-    provider: MergeTagPluginProvider
-  }
+  // context: {
+  //   provider: MergeTagPluginProvider
+  // }
 });
 
 /**

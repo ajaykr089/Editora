@@ -1,5 +1,5 @@
 import { Plugin } from '@editora/core';
-import { ClearFormattingPluginProvider } from './ClearFormattingPluginProvider';
+// import { ClearFormattingPluginProvider } from './ClearFormattingPluginProvider';
 
 export const ClearFormattingPlugin = (): Plugin => ({
   name: 'clearFormatting',
@@ -11,7 +11,7 @@ export const ClearFormattingPlugin = (): Plugin => ({
       shortcut: 'Mod-\\'
     }
   ],
-  context: {
-    provider: ClearFormattingPluginProvider
-  }
+  // context: {
+  //   provider: ClearFormattingPluginProvider
+  // }
 });

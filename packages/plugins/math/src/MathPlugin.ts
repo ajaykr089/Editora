@@ -1,5 +1,5 @@
 import { Plugin } from '@editora/core';
-import { MathProvider } from './MathProvider';
+// import { MathProvider } from './MathProvider';
 import katex from 'katex';
 import {
   convertMathMLToLatexManual
@@ -629,9 +629,9 @@ export const MathPlugin = (): Plugin => ({
       icon: '<svg width="24" height="24" focusable="false"><path fill-rule="evenodd" clip-rule="evenodd" d="M9 4.8c.1-.5.5-.8 1-.8h10a1 1 0 1 1 0 2h-9.2L8.3 19.2a1 1 0 0 1-1.7.4l-3.4-4.2a1 1 0 0 1 1.6-1.2l2 2.5L9 4.8Zm9.7 5.5c.4.4.4 1 0 1.4L17 13.5l1.8 1.8a1 1 0 0 1-1.4 1.4L15.5 15l-1.8 1.8a1 1 0 0 1-1.4-1.4l1.8-1.8-1.8-1.8a1 1 0 0 1 1.4-1.4l1.8 1.8 1.8-1.8a1 1 0 0 1 1.4 0Z"></path></svg>'
     }
   ],
-  context: {
-    provider: MathProvider
-  }
+  // context: {
+  //   provider: MathProvider
+  // }
 });
 
 // Clipboard Support - Phase 1 Implementation

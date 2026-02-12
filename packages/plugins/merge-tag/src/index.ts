@@ -1,1 +1,1 @@
-export { MergeTagPlugin } from './MergeTagPlugin';
+export { MergeTagPlugin } from './MergeTagPlugin.native';
