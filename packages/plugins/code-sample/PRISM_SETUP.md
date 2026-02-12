@@ -27,7 +27,7 @@ Add these lines to your HTML `<head>`:
 ```typescript
 import { CodeSamplePlugin } from '@editora/code-sample';
 
-const editor = new RichTextEditor({
+const editor = new EditoraEditor({
   plugins: [CodeSamplePlugin()]
 });
 ```
@@ -75,7 +75,7 @@ import Prism from 'prismjs';
 // Import and initialize your editor
 import { CodeSamplePlugin } from '@editora/code-sample';
 
-const editor = new RichTextEditor({
+const editor = new EditoraEditor({
   plugins: [CodeSamplePlugin()]
 });
 ```

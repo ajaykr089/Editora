@@ -104,6 +104,14 @@
             border-radius: 4px;
         }
 
+        .warning-box code {
+            color: white;
+        }
+
+        .warning-code {
+            color: white;
+        }
+
         .success-box {
             background: #e8f5e9;
             border-left: 4px solid #4caf50;
@@ -467,148 +475,123 @@
 
             <p>Let's build a practical plugin that adds a <span class="highlight">Callout Box</span> (alert/note box) to the editor. This plugin will help users create highlighted information boxes.</p>
 
-            <h3><span class="step-number">1</span>Define the Node (MyCustomPlugin.ts)</h3>
-            <p>Start by defining the node structure and commands:</p>
+            <h3><span class="step-number">1</span>Create Plugin Function (CalloutPlugin.ts)</h3>
+            <p>Start by creating a plugin function that returns a Plugin object:</p>
 
             <div class="code-section">
                 <div class="example-title">src/CalloutPlugin.ts</div>
-                <div class="code-block"><code><span class="keyword">import</span> { Node } <span class="keyword">from</span> <span class="string">'prosemirror-model'</span>;
-<span class="keyword">import</span> { Command } <span class="keyword">from</span> <span class="string">'prosemirror-state'</span>;
-<span class="keyword">import</span> { EditorView } <span class="keyword">from</span> <span class="string">'prosemirror-view'</span>;
+                <div class="code-block"><code><span class="keyword">import</span> { Plugin } <span class="keyword">from</span> <span class="string">'@editora/core'</span>;
 
-<span class="comment">// Define the Callout node</span>
-<span class="keyword">export</span> <span class="keyword">const</span> <span class="function">CalloutNode</span> = {
+<span class="comment">/**
+ * Callout Plugin - Native Implementation
+ * 
+ * Adds callout boxes (alert/note boxes) to the editor.
+ * Supports info, warning, success, and error types.
+ */</span>
+<span class="keyword">export</span> <span class="keyword">const</span> <span class="function">CalloutPlugin</span> = (): Plugin =&gt; ({
   name: <span class="string">'callout'</span>,
-  <span class="keyword">group</span>: <span class="string">'block'</span>,
-  <span class="keyword">atom</span>: <span class="keyword">true</span>,
-  
-  <span class="comment">// Define what data this node can store</span>
-  attrs: {
-    type: { <span class="keyword">default</span>: <span class="string">'info'</span> }, <span class="comment">// info, warning, success, error</span>
-    message: { <span class="keyword">default</span>: <span class="string">''</span> }
-  },
 
-  <span class="comment">// HTML representation</span>
-  toDOM(node: Node) {
-    <span class="keyword">return</span> [
-      <span class="string">'div'</span>,
-      {
-        <span class="keyword">class</span>: `callout callout-${node.attrs.type}`,
-        <span class="keyword">data-type</span>: node.attrs.type
+  <span class="comment">// Define the callout node in the schema</span>
+  nodes: {
+    callout: {
+      <span class="keyword">group</span>: <span class="string">'block'</span>,
+      <span class="keyword">atom</span>: <span class="keyword">true</span>,
+      <span class="keyword">attrs</span>: {
+        type: { <span class="keyword">default</span>: <span class="string">'info'</span> },
+        message: { <span class="keyword">default</span>: <span class="string">''</span> }
       },
-      [<span class="string">'p'</span>, node.attrs.message]
-    ];
-  },
-
-  <span class="comment">// Parse HTML back to node</span>
-  parseDOM: [
-    {
-      tag: <span class="string">'div.callout'</span>,
-      <span class="keyword">getAttrs</span>(dom: HTMLElement) {
-        <span class="keyword">return</span> {
-          type: dom.getAttribute(<span class="string">'data-type'</span>) || <span class="string">'info'</span>,
-          message: dom.textContent || <span class="string">''</span>
-        };
+      <span class="keyword">parseDOM</span>: [
+        {
+          tag: <span class="string">'div.callout'</span>,
+          <span class="keyword">getAttrs</span>(dom: HTMLElement) {
+            <span class="keyword">return</span> {
+              type: dom.getAttribute(<span class="string">'data-type'</span>) || <span class="string">'info'</span>,
+              message: dom.textContent || <span class="string">''</span>
+            };
+          }
+        }
+      ],
+      <span class="keyword">toDOM</span>(node) {
+        <span class="keyword">return</span> [
+          <span class="string">'div'</span>,
+          {
+            <span class="keyword">class</span>: `callout callout-${node.attrs.type}`,
+            <span class="keyword">data-type</span>: node.attrs.type
+          },
+          [<span class="string">'p'</span>, node.attrs.message]
+        ];
       }
     }
-  ]
-};
+  },
 
-<span class="comment">// Command to insert a callout</span>
-<span class="keyword">export</span> <span class="keyword">const</span> <span class="function">insertCalloutCommand</span> = (
-  type: <span class="string">'info'</span> | <span class="string">'warning'</span> | <span class="string">'success'</span> | <span class="string">'error'</span>,
-  message: <span class="keyword">string</span>
-): <span class="keyword">Command</span> => {
-  <span class="keyword">return</span> ({ tr, dispatch }) => {
-    <span class="keyword">const</span> { $from } = tr.selection;
-    <span class="keyword">const</span> node = tr.doc.type.schema.nodes.callout.create({
-      type,
-      message
-    });
-
-    <span class="keyword">if</span> (dispatch) {
-      dispatch(tr.replaceRangeWith($from.pos, $from.pos, node));
+  <span class="comment">// Toolbar button configuration</span>
+  toolbar: [
+    {
+      label: <span class="string">'Callout Box'</span>,
+      command: <span class="string">'insertCallout'</span>,
+      icon: <span class="string">'💬'</span>
     }
-    <span class="keyword">return</span> <span class="keyword">true</span>;
-  };
-};</code></div>
+  ],
+
+  <span class="comment">// Commands for inserting callouts</span>
+  commands: {
+    insertCallout: (type: <span class="string">'info'</span> | <span class="string">'warning'</span> | <span class="string">'success'</span> | <span class="string">'error'</span> = <span class="string">'info'</span>) =&gt; {
+      <span class="keyword">const</span> message = prompt(<span class="string">'Enter callout message:'</span>);
+      <span class="keyword">if</span> (!message) <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      <span class="comment">// Use document.execCommand for simplicity</span>
+      <span class="comment">// In production, manipulate EditorState directly</span>
+      <span class="keyword">const</span> calloutHtml = `&lt;div class="callout callout-${type}" data-type="${type}"&gt;&lt;p&gt;${message}&lt;/p&gt;&lt;/div&gt;`;
+      document.execCommand(<span class="string">'insertHTML'</span>, <span class="keyword">false</span>, calloutHtml);
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+    }
+  },
+
+  <span class="comment">// Keyboard shortcuts</span>
+  keymap: {
+    <span class="string">'Mod-Shift-C'</span>: () =&gt; <span class="string">'insertCallout'</span>
+  }
+});</code></div>
             </div>
 
-            <h3><span class="step-number">2</span>Create React Provider (CalloutProvider.tsx)</h3>
-            <p>Now create the UI component that manages the callout interface:</p>
+            <h3><span class="step-number">2</span>Export Plugin Function</h3>
+            <p>Export your plugin function so it can be imported and used:</p>
 
             <div class="code-section">
-                <div class="example-title">src/CalloutProvider.tsx</div>
-                <div class="code-block"><code><span class="keyword">import</span> React, { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
-<span class="keyword">import</span> { useEditorContext } <span class="keyword">from</span> <span class="string">'@editora/core'</span>;
-<span class="keyword">import</span> { insertCalloutCommand } <span class="keyword">from</span> <span class="string">'./CalloutPlugin'</span>;
-<span class="keyword">import</span> <span class="string">'./Callout.css'</span>;
-
-<span class="keyword">export</span> <span class="keyword">const</span> <span class="function">CalloutProvider</span> = () => {
-  <span class="keyword">const</span> { view } = useEditorContext();
-  <span class="keyword">const</span> [message, setMessage] = useState(<span class="string">''</span>);
-  <span class="keyword">const</span> [calloutType, setCalloutType] = useState<span class="string">'info'</span>);
-
-  <span class="keyword">const</span> <span class="function">handleInsertCallout</span> = () => {
-    <span class="keyword">if</span> (!message.trim()) {
-      alert(<span class="string">'Please enter a message'</span>);
-      <span class="keyword">return</span>;
-    }
-
-    <span class="keyword">const</span> command = insertCalloutCommand(calloutType, message);
-    <span class="keyword">if</span> (view && command(view.state, view.dispatch)) {
-      <span class="comment">// Reset form</span>
-      setMessage(<span class="string">''</span>);
-      setCalloutType(<span class="string">'info'</span>);
-      view.focus();
-    }
-  };
-
-  <span class="keyword">return</span> (
-    &lt;&gt;
-      {/* Toolbar Button - Add to editor toolbar */}
-      &lt;<span class="tag">button</span>
-        onClick={() =&gt; {/* Open modal/form */}}
-        title=<span class="string">"Insert Callout Box"</span>
-        className=<span class="string">"callout-button"</span>
-      &gt;
-        💬 Callout
-      &lt;/<span class="tag">button</span>&gt;
-
-      {/* Modal/Form */}
-      &lt;<span class="tag">div</span> className=<span class="string">"callout-form"</span>&gt;
-        &lt;<span class="tag">div</span>&gt;
-          &lt;<span class="tag">label</span>&gt;Callout Type:&lt;/<span class="tag">label</span>&gt;
-          &lt;<span class="tag">select</span>
-            value={calloutType}
-            onChange={(e) =&gt; setCalloutType(e.target.value)}
-          &gt;
-            &lt;<span class="tag">option</span> value=<span class="string">"info"</span>&gt;ℹ️ Info&lt;/<span class="tag">option</span>&gt;
-            &lt;<span class="tag">option</span> value=<span class="string">"warning"</span>&gt;⚠️ Warning&lt;/<span class="tag">option</span>&gt;
-            &lt;<span class="tag">option</span> value=<span class="string">"success"</span>&gt;✓ Success&lt;/<span class="tag">option</span>&gt;
-            &lt;<span class="tag">option</span> value=<span class="string">"error"</span>&gt;✕ Error&lt;/<span class="tag">option</span>&gt;
-          &lt;/<span class="tag">select</span>&gt;
-        &lt;/<span class="tag">div</span>&gt;
-
-        &lt;<span class="tag">div</span>&gt;
-          &lt;<span class="tag">textarea</span>
-            value={message}
-            onChange={(e) =&gt; setMessage(e.target.value)}
-            placeholder=<span class="string">"Enter your message..."</span>
-            rows={3}
-          /&gt;
-        &lt;/<span class="tag">div</span>&gt;
-
-        &lt;<span class="tag">button</span> onClick={handleInsertCallout}&gt;
-          Insert Callout
-        &lt;/<span class="tag">button</span>&gt;
-      &lt;/<span class="tag">div</span>&gt;
-    &lt;/&gt;
-  );
-};</code></div>
+                <div class="example-title">src/index.ts</div>
+                <div class="code-block"><code><span class="keyword">export</span> { CalloutPlugin } <span class="keyword">from</span> <span class="string">'./CalloutPlugin'</span>;</code></div>
             </div>
 
-            <h3><span class="step-number">3</span>Add Styles (Callout.css)</h3>
+            <h3><span class="step-number">3</span>Use the Plugin</h3>
+            <p>Import and use your plugin in your editor setup:</p>
+
+            <div class="code-section">
+                <div class="example-title">Web Component Usage</div>
+                <div class="code-block"><code><span class="keyword">import</span> { CalloutPlugin } <span class="keyword">from</span> <span class="string">'./src/index'</span>;
+
+<span class="comment">// In your HTML</span>
+&lt;editora-editor
+  plugins="<span class="string">[CalloutPlugin()]</span>"
+  toolbar-items="<span class="string">['bold', 'italic', 'callout']</span>"
+&gt;&lt;/editora-editor&gt;</code></div>
+            </div>
+
+            <div class="code-section">
+                <div class="example-title">React Usage</div>
+                <div class="code-block"><code><span class="keyword">import</span> { EditoraEditor } <span class="keyword">from</span> <span class="string">'@editora/react'</span>;
+<span class="keyword">import</span> { CalloutPlugin } <span class="keyword">from</span> <span class="string">'./src/index'</span>;
+
+<span class="keyword">function</span> <span class="function">MyEditor</span>() {
+  <span class="keyword">return</span> (
+    &lt;EditoraEditor
+      plugins={[CalloutPlugin()]}
+      toolbarItems={[<span class="string">'bold'</span>, <span class="string">'italic'</span>, <span class="string">'callout'</span>]}
+    /&gt;
+  );
+}</code></div>
+            </div>
+
+            <h3><span class="step-number">4</span>Add Styles (Callout.css)</h3>
 
             <div class="code-section">
                 <div class="example-title">src/Callout.css</div>
@@ -650,15 +633,6 @@
 .<span class="keyword">callout</span> <span class="keyword">p</span> {
   margin: 0;
 }</code></div>
-            </div>
-
-            <h3><span class="step-number">4</span>Export Plugin (index.ts)</h3>
-
-            <div class="code-section">
-                <div class="example-title">src/index.ts</div>
-                <div class="code-block"><code><span class="keyword">export</span> { CalloutNode, insertCalloutCommand } <span class="keyword">from</span> <span class="string">'./CalloutPlugin'</span>;
-<span class="keyword">export</span> { CalloutProvider } <span class="keyword">from</span> <span class="string">'./CalloutProvider'</span>;
-<span class="keyword">export</span> <span class="string">'./Callout.css'</span>;</code></div>
             </div>
         </div>
 
@@ -724,61 +698,44 @@
         <div class="tutorial-section" id="integrating-plugin">
             <h2>🔗 Integrating Your Plugin</h2>
 
-            <h3>Method 1: Using in React Component</h3>
+            <h3>Method 1: Web Component</h3>
+
+            <div class="code-section">
+                <div class="example-title">index.html - Web Component</div>
+                <div class="code-block"><code>&lt;<span class="tag">script</span> src=<span class="string">"https://unpkg.com/@editora/core@1.0.1"</span>&gt;&lt;/<span class="tag">script</span>&gt;
+&lt;<span class="tag">script</span> src=<span class="string">"https://unpkg.com/my-callout-plugin@1.0.0"</span>&gt;&lt;/<span class="tag">script</span>&gt;
+
+&lt;editora-editor
+  plugins="<span class="string">[window.MyCalloutPlugin.CalloutPlugin()]"</span>
+  toolbar-items="<span class="string">['bold', 'italic', 'callout']"</span>
+&gt;&lt;/editora-editor&gt;</code></div>
+            </div>
+
+            <h3>Method 2: React Component</h3>
 
             <div class="code-section">
                 <div class="example-title">App.tsx - React Component</div>
                 <div class="code-block"><code><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;
 <span class="keyword">import</span> { EditoraEditor } <span class="keyword">from</span> <span class="string">'@editora/react'</span>;
-<span class="keyword">import</span> { CalloutNode, CalloutProvider } <span class="keyword">from</span> <span class="string">'./CalloutPlugin'</span>;
+<span class="keyword">import</span> { CalloutPlugin } <span class="keyword">from</span> <span class="string">'my-callout-plugin'</span>;
 
 <span class="keyword">export</span> <span class="keyword">const</span> <span class="function">App</span> = () => {
   <span class="keyword">return</span> (
-    &lt;<span class="tag">EditoraEditor</span>
-      schema={{
-        nodes: {
-          <span class="string">'callout'</span>: CalloutNode
-          <span class="comment">// ... other nodes</span>
-        }
-      }}
-      plugins={[
-        <span class="comment">// ... other plugins</span>
-      ]}
-    &gt;
-      &lt;<span class="tag">CalloutProvider</span> /&gt;
-    &lt;/<span class="tag">EditoraEditor</span>&gt;
+    &lt;EditoraEditor
+      plugins={[CalloutPlugin()]}
+      toolbarItems={[<span class="string">'bold'</span>, <span class="string">'italic'</span>, <span class="string">'callout'</span>]}
+    /&gt;
   );
 };</code></div>
             </div>
 
-            <h3>Method 2: Standalone HTML</h3>
-
-            <div class="code-section">
-                <div class="example-title">index.html - Standalone</div>
-                <div class="code-block"><code>&lt;<span class="tag">script</span> src=<span class="string">"https://unpkg.com/@editora/react@1.0.0"</span>&gt;&lt;/<span class="tag">script</span>&gt;
-&lt;<span class="tag">script</span> src=<span class="string">"https://unpkg.com/my-callout-plugin@1.0.0"</span>&gt;&lt;/<span class="tag">script</span>&gt;
-
-&lt;<span class="tag">div</span> id=<span class="string">"editor"</span>&gt;&lt;/<span class="tag">div</span>&gt;
-
-&lt;<span class="tag">script</span>&gt;
-  <span class="keyword">const</span> editor = <span class="keyword">new</span> <span class="function">Editora</span>({
-    element: document.getElementById(<span class="string">'editor'</span>),
-    schema: {
-      nodes: {
-        <span class="string">'callout'</span>: window.CalloutPlugin.CalloutNode
-      }
-    }
-  });
-&lt;/<span class="tag">script</span>&gt;</code></div>
-            </div>
-
             <h3>Step-by-Step Integration</h3>
             <ol>
-                <li><strong>Install plugin:</strong> <code>npm install my-callout-plugin</code></li>
-                <li><strong>Import components:</strong> Import the Node and Provider from your plugin</li>
-                <li><strong>Add to schema:</strong> Register the node in the editor schema</li>
-                <li><strong>Add provider:</strong> Include the Provider component in your editor</li>
-                <li><strong>Import styles:</strong> Make sure CSS is imported</li>
+                <li><strong>Install plugin:</strong> <code class="warning-code">npm install my-callout-plugin</code></li>
+                <li><strong>Import plugin function:</strong> Import the plugin function from your package</li>
+                <li><strong>Call the function:</strong> Execute the plugin function to get the Plugin object</li>
+                <li><strong>Add to plugins array:</strong> Include the plugin in your editor's plugins array</li>
+                <li><strong>Add toolbar items:</strong> Include plugin toolbar items in toolbar-items</li>
                 <li><strong>Test:</strong> Verify the plugin works in your editor</li>
             </ol>
         </div>
@@ -799,33 +756,8 @@
 };</code></div>
             </div>
 
-            <h3>Custom Event Handling</h3>
-            <p>Listen to editor events and react accordingly:</p>
-
-            <div class="code-section">
-                <div class="example-title">Event Listeners</div>
-                <div class="code-block"><code><span class="keyword">export</span> <span class="keyword">const</span> <span class="function">CalloutProvider</span> = () => {
-  <span class="keyword">const</span> { view } = useEditorContext();
-
-  React.useEffect(() => {
-    <span class="keyword">const</span> <span class="function">handleUpdate</span> = (update) => {
-      <span class="comment">// React to editor changes</span>
-      console.log(<span class="string">'Editor updated'</span>, update);
-    };
-
-    view?.addEventListener(<span class="string">'update'</span>, handleUpdate);
-
-    <span class="keyword">return</span> () => {
-      view?.removeEventListener(<span class="string">'update'</span>, handleUpdate);
-    };
-  }, [view]);
-
-  <span class="comment">// ... rest of component</span>
-};</code></div>
-            </div>
-
             <h3>Plugin Configuration</h3>
-            <p>Allow your plugin to be customized:</p>
+            <p>Make your plugin configurable by accepting options:</p>
 
             <div class="code-section">
                 <div class="example-title">Configurable Plugin</div>
@@ -836,46 +768,111 @@
   customStyles?: Record&lt;<span class="keyword">string</span>, <span class="keyword">string</span>&gt;;
 }
 
-<span class="keyword">export</span> <span class="keyword">const</span> <span class="function">createCalloutPlugin</span> = (config: CalloutConfig = {}) => {
-  <span class="keyword">return</span> {
-    ...CalloutNode,
-    attrs: {
-      type: { <span class="keyword">default</span>: config.defaultType || <span class="string">'info'</span> },
-      message: { <span class="keyword">default</span>: <span class="string">''</span> }
+<span class="keyword">export</span> <span class="keyword">const</span> <span class="function">CalloutPlugin</span> = (config: CalloutConfig = {}): Plugin =&gt; ({
+  name: <span class="string">'callout'</span>,
+
+  <span class="comment">// Configurable node definition</span>
+  nodes: {
+    callout: {
+      <span class="keyword">group</span>: <span class="string">'block'</span>,
+      <span class="keyword">atom</span>: <span class="keyword">true</span>,
+      <span class="keyword">attrs</span>: {
+        type: { <span class="keyword">default</span>: config.defaultType || <span class="string">'info'</span> },
+        message: { <span class="keyword">default</span>: <span class="string">''</span> }
+      },
+      <span class="keyword">parseDOM</span>: [
+        {
+          tag: <span class="string">'div.callout'</span>,
+          <span class="keyword">getAttrs</span>(dom: HTMLElement) {
+            <span class="keyword">return</span> {
+              type: dom.getAttribute(<span class="string">'data-type'</span>) || config.defaultType || <span class="string">'info'</span>,
+              message: dom.textContent || <span class="string">''</span>
+            };
+          }
+        }
+      ],
+      <span class="keyword">toDOM</span>(node) {
+        <span class="keyword">return</span> [
+          <span class="string">'div'</span>,
+          {
+            <span class="keyword">class</span>: `callout callout-${node.attrs.type}`,
+            <span class="keyword">data-type</span>: node.attrs.type
+          },
+          [<span class="string">'p'</span>, node.attrs.message]
+        ];
+      }
     }
-  };
-};</code></div>
+  },
+
+  <span class="comment">// Configurable toolbar</span>
+  toolbar: config.showIcon !== <span class="keyword">false</span> ? [
+    {
+      label: <span class="string">'Callout Box'</span>,
+      command: <span class="string">'insertCallout'</span>,
+      icon: <span class="string">'💬'</span>
+    }
+  ] : [],
+
+  <span class="comment">// Commands with config</span>
+  commands: {
+    insertCallout: (type?: <span class="string">'info'</span> | <span class="string">'warning'</span> | <span class="string">'success'</span> | <span class="string">'error'</span>) =&gt; {
+      <span class="keyword">const</span> calloutType = type || config.defaultType || <span class="string">'info'</span>;
+      <span class="keyword">const</span> message = prompt(<span class="string">'Enter callout message:'</span>);
+      <span class="keyword">if</span> (!message) <span class="keyword">return</span> <span class="keyword">false</span>;
+
+      <span class="keyword">const</span> calloutHtml = `&lt;div class="callout callout-${calloutType}" data-type="${calloutType}"&gt;&lt;p&gt;${message}&lt;/p&gt;&lt;/div&gt;`;
+      document.execCommand(<span class="string">'insertHTML'</span>, <span class="keyword">false</span>, calloutHtml);
+      <span class="keyword">return</span> <span class="keyword">true</span>;
+    }
+  },
+
+  <span class="comment">// Keyboard shortcuts</span>
+  keymap: {
+    <span class="string">'Mod-Shift-C'</span>: () =&gt; <span class="string">'insertCallout'</span>
+  }
+});</code></div>
             </div>
 
-            <h3>Plugin Hooks & Lifecycle</h3>
-            <p>Use React hooks to manage plugin state:</p>
+            <h3>Plugin State Management</h3>
+            <p>Plugins can manage their own state and lifecycle:</p>
 
             <div class="code-section">
-                <div class="example-title">Plugin Lifecycle</div>
-                <div class="code-block"><code><span class="keyword">const</span> <span class="function">CalloutProvider</span> = () => {
-  <span class="keyword">const</span> [isOpen, setIsOpen] = useState(<span class="keyword">false</span>);
-  <span class="keyword">const</span> { view } = useEditorContext();
+                <div class="example-title">Plugin with State</div>
+                <div class="code-block"><code><span class="keyword">export</span> <span class="keyword">const</span> <span class="function">CounterPlugin</span> = (): Plugin =&gt; {
+  <span class="keyword">let</span> count = 0;
 
-  <span class="comment">// Initialize plugin</span>
-  React.useEffect(() => {
-    console.log(<span class="string">'Callout plugin initialized'</span>);
-    <span class="keyword">return</span> () => console.log(<span class="string">'Callout plugin unmounted'</span>);
-  }, []);
+  <span class="keyword">return</span> {
+    name: <span class="string">'counter'</span>,
 
-  <span class="comment">// React to editor state changes</span>
-  React.useEffect(() => {
-    <span class="keyword">const</span> <span class="keyword">updateHandler</span> = (tr) => {
-      <span class="comment">// Handle transaction</span>
-    };
-    
-    <span class="keyword">return</span> () => {
-      <span class="comment">// Cleanup</span>
-    };
-  }, [view?.state]);
+    <span class="comment">// Mark for text highlighting</span>
+    marks: {
+      highlight: {
+        <span class="keyword">parseDOM</span>: [{ tag: <span class="string">'mark'</span> }],
+        <span class="keyword">toDOM</span>() { <span class="keyword">return</span> [<span class="string">'mark'</span>, { <span class="keyword">class</span>: <span class="string">'highlight'</span> }, 0]; }
+      }
+    },
 
-  <span class="keyword">return</span> (
-    <span class="comment">// ... JSX</span>
-  );
+    <span class="comment">// Commands that use state</span>
+    commands: {
+      highlightText: () =&gt; {
+        count++;
+        document.execCommand(<span class="string">'insertHTML'</span>, <span class="keyword">false</span>, `&lt;mark class="highlight"&gt;Highlighted ${count}&lt;/mark&gt;`);
+        <span class="keyword">return</span> <span class="keyword">true</span>;
+      }
+    },
+
+    toolbar: [
+      {
+        label: <span class="string">'Highlight'</span>,
+        command: <span class="string">'highlightText'</span>,
+        icon: <span class="string">'🖍️'</span>
+      }
+    ],
+
+    keymap: {
+      <span class="string">'Mod-Shift-H'</span>: () =&gt; <span class="string">'highlightText'</span>
+    }
+  };
 };</code></div>
             </div>
         </div>
@@ -887,11 +884,22 @@
             <h3>Step 1: Prepare Your Package</h3>
             <div class="file-structure">
                 <code>package.json - must include:</code><br>
-                <code>"name": "@your-org/my-callout-plugin"</code><br>
+                <code>"name": "my-callout-plugin"</code><br>
                 <code>"version": "1.0.0"</code><br>
                 <code>"main": "dist/index.js"</code><br>
+                <code>"module": "dist/index.mjs"</code><br>
                 <code>"types": "dist/index.d.ts"</code><br>
-                <code>"files": ["dist"]</code><br>
+                <code>"files": ["dist", "README.md"]</code><br>
+                <code>"peerDependencies": {</code><br>
+                <code>&nbsp;&nbsp;"@editora/core": "^1.0.0"</code><br>
+                <code>}</code><br>
+            </div>
+
+            <h3>Step 2: Export Structure</h3>
+            <div class="code-section">
+                <div class="example-title">src/index.ts</div>
+                <div class="code-block"><code><span class="keyword">export</span> { CalloutPlugin } <span class="keyword">from</span> <span class="string">'./CalloutPlugin'</span>;
+<span class="keyword">export</span> <span class="keyword">type</span> { CalloutConfig } <span class="keyword">from</span> <span class="string">'./CalloutPlugin'</span>;</code></div>
             </div>
 
             <h3>Step 2: Build the Plugin</h3>
@@ -952,29 +960,39 @@ npm publish --access public</code></div>
             <div class="warning-box">
                 <strong>⚠️ Common Issues & Solutions:</strong>
                 <ul style="margin: 10px 0;">
-                    <li><strong>Node not appearing:</strong> Check that node is registered in schema</li>
-                    <li><strong>Command not working:</strong> Verify dispatch is being called correctly</li>
-                    <li><strong>Styles not applied:</strong> Ensure CSS is imported and class names match</li>
-                    <li><strong>Memory leaks:</strong> Clean up event listeners in useEffect cleanup</li>
+                    <li><strong>Plugin not loading:</strong> Check that you're calling the plugin function: <code>CalloutPlugin()</code> not <code>CalloutPlugin</code></li>
+                    <li><strong>Node not appearing:</strong> Verify node is defined in the plugin's nodes property</li>
+                    <li><strong>Command not working:</strong> Ensure command is defined in plugin's commands object</li>
+                    <li><strong>Toolbar button missing:</strong> Check toolbar configuration and toolbar-items attribute</li>
+                    <li><strong>Styles not applied:</strong> Import CSS and ensure class names match toDOM output</li>
                 </ul>
             </div>
 
             <h3>Testing Your Plugin</h3>
 
             <div class="code-section">
-                <div class="example-title">Basic Plugin Test</div>
+                <div class="example-title">Plugin Function Test</div>
                 <div class="code-block"><code><span class="keyword">import</span> { describe, it, expect } <span class="keyword">from</span> <span class="string">'vitest'</span>;
-<span class="keyword">import</span> { CalloutNode, insertCalloutCommand } <span class="keyword">from</span> <span class="string">'./CalloutPlugin'</span>;
+<span class="keyword">import</span> { CalloutPlugin } <span class="keyword">from</span> <span class="string">'./CalloutPlugin'</span>;
 
 <span class="function">describe</span>(<span class="string">'Callout Plugin'</span>, () => {
-  <span class="function">it</span>(<span class="string">'should insert callout node'</span>, () => {
-    <span class="keyword">const</span> command = insertCalloutCommand(<span class="string">'info'</span>, <span class="string">'Test message'</span>);
-    expect(command).toBeDefined();
+  <span class="function">it</span>(<span class="string">'should create plugin object'</span>, () => {
+    <span class="keyword">const</span> plugin = CalloutPlugin();
+    expect(plugin).toBeDefined();
+    expect(plugin.name).toBe(<span class="string">'callout'</span>);
+    expect(plugin.nodes).toHaveProperty(<span class="string">'callout'</span>);
+    expect(plugin.commands).toHaveProperty(<span class="string">'insertCallout'</span>);
   });
 
-  <span class="function">it</span>(<span class="string">'should have correct schema'</span>, () => {
-    expect(CalloutNode.name).toBe(<span class="string">'callout'</span>);
-    expect(CalloutNode.group).toBe(<span class="string">'block'</span>);
+  <span class="function">it</span>(<span class="string">'should accept configuration'</span>, () => {
+    <span class="keyword">const</span> plugin = CalloutPlugin({ defaultType: <span class="string">'warning'</span> });
+    expect(plugin.nodes.callout.attrs.type.default).toBe(<span class="string">'warning'</span>);
+  });
+
+  <span class="function">it</span>(<span class="string">'should have toolbar configuration'</span>, () => {
+    <span class="keyword">const</span> plugin = CalloutPlugin();
+    expect(plugin.toolbar).toHaveLength(1);
+    expect(plugin.toolbar[0].command).toBe(<span class="string">'insertCallout'</span>);
   });
 });</code></div>
             </div>
@@ -983,11 +1001,12 @@ npm publish --access public</code></div>
             <div class="warning-box">
                 <strong>❌ Don't:</strong>
                 <ul style="margin: 10px 0;">
-                    <li>Hardcode styles - make them customizable</li>
-                    <li>Forget to export components properly</li>
-                    <li>Create side effects in render methods</li>
-                    <li>Ignore TypeScript warnings</li>
-                    <li>Skip testing before publishing</li>
+                    <li>Forget to call the plugin function: use <code>plugins={[CalloutPlugin()]}</code> not <code>plugins={[CalloutPlugin]}</code></li>
+                    <li>Hardcode styles - make them customizable through configuration</li>
+                    <li>Skip the Plugin interface - always return a properly typed Plugin object</li>
+                    <li>Ignore TypeScript warnings about the Plugin interface</li>
+                    <li>Skip testing plugin function instantiation before publishing</li>
+                    <li>Mix old ProseMirror patterns with the new Plugin interface</li>
                 </ul>
             </div>
 

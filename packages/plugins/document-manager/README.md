@@ -1,12 +1,12 @@
 # Document Manager Plugin
 
-A Rich Text Editor plugin that provides comprehensive document import and export functionality.
+A Rich Text Editor plugin that provides comprehensive document import and export functionality with **automatic fallback support**.
 
 ## Features
 
-- **📥 Word Import**: Import content from Microsoft Word (.docx) files
-- **📄 Word Export**: Export editor content to Microsoft Word (.docx) format
-- **📋 PDF Export**: Export editor content to PDF format
+- **📥 Word Import**: Import content from Microsoft Word (.docx) files using mammoth
+- **📄 Word Export**: Export editor content to Microsoft Word (.docx) format with API + client-side fallback
+- **📋 PDF Export**: Export editor content to PDF format using jsPDF and html2canvas
 
 ## Installation
 
@@ -14,22 +14,26 @@ A Rich Text Editor plugin that provides comprehensive document import and export
 npm install @editora/document-manager
 ```
 
-## API Configuration
+## Word Export: Smart Fallback System
 
-This plugin communicates with external document processing APIs. You must configure your API endpoints before using the plugin.
+The Word export feature includes a **smart fallback mechanism** that ensures documents can be exported even when your backend API is unavailable:
 
-### Configuration Setup
+### How It Works
+
+1. **Primary Mode (API)**: Attempts to export via your configured backend API for best quality
+2. **Fallback Mode (Client-Side)**: If the API fails or is unavailable, automatically falls back to client-side generation using the `docx` library
+
+### Configuration Options
 
 ```tsx
 import React from 'react';
-import { RichTextEditor } from '@editora/react';
+import { EditoraEditor } from '@editora/react';
 import {
   DocumentManagerPlugin,
   setDocumentManagerConfig,
-  // ... other plugins
 } from '@editora/plugins';
 
-// Configure your API endpoints (do this once, before using the plugin)
+// Option 1: With API backend + fallback (Recommended for Production)
 setDocumentManagerConfig({
   apiUrl: 'https://your-api.com',
   apiEndpoints: {
@@ -38,7 +42,23 @@ setDocumentManagerConfig({
   headers: {
     'Authorization': 'Bearer YOUR_TOKEN',
     'X-API-Key': 'YOUR_API_KEY'
-  }
+  },
+  useClientSideFallback: true // Enable fallback (default: true)
+});
+
+// Option 2: Client-side only (No backend required)
+setDocumentManagerConfig({
+  useClientSideFallback: true,
+  apiUrl: '' // Empty URL triggers immediate fallback
+});
+
+// Option 3: API only (No fallback, strict mode)
+setDocumentManagerConfig({
+  apiUrl: 'https://your-api.com',
+  apiEndpoints: {
+    exportWord: '/api/v1/documents/export-word'
+  },
+  useClientSideFallback: false // Disable fallback
 });
 
 const plugins = [
@@ -48,10 +68,42 @@ const plugins = [
 
 function App() {
   return (
-    <RichTextEditor plugins={plugins} />
+    <EditoraEditor plugins={plugins} />
   );
 }
 ```
+
+### Benefits of Fallback Mode
+
+✅ **Works Offline**: Export documents even when your backend is down or unavailable  
+✅ **No Server Required**: Can work entirely client-side if needed  
+✅ **Graceful Degradation**: Users can still export even if API fails  
+✅ **Automatic**: No user intervention needed when API fails  
+✅ **Zero Downtime**: Continues working during server maintenance  
+
+### Fallback Behavior
+
+When the API export fails (network error, server down, CORS issues, etc.), the plugin will:
+
+1. Log a warning to console: `"API export failed, falling back to client-side generation"`
+2. Automatically generate the .docx file using the `docx` library
+3. Log success message: `"✅ Document exported successfully using client-side generation"`
+4. Download the file normally to the user's computer
+
+### API vs Client-Side Export Comparison
+
+| Feature | API Export (Backend) | Client-Side Export (Fallback) |
+|---------|---------------------|-------------------------------|
+| File Quality | ⭐⭐⭐⭐⭐ Excellent | ⭐⭐⭐ Good |
+| Complex Formatting | ✅ Full CSS support | ⚠️ Basic formatting |
+| Tables | ✅ Advanced tables | ✅ Basic tables |
+| Images | ✅ Full support | ⚠️ Limited support |
+| Lists | ✅ Nested lists | ✅ Basic lists |
+| Custom Styles | ✅ All styles | ⚠️ Common styles only |
+| Headings | ✅ Full support | ✅ Full support |
+| Offline Support | ❌ Requires network | ✅ Works offline |
+| Server Required | ✅ Yes | ❌ No |
+| Processing Speed | Fast (server) | Instant (browser) |
 
 ### Configuration Options
 
@@ -65,6 +117,11 @@ interface DocumentManagerConfig {
   };
   /** Optional headers for API requests (e.g., authentication) */
   headers?: Record<string, string>;
+  /** 
+   * Enable client-side fallback for Word export when API is unavailable
+   * @default true
+   */
+  useClientSideFallback?: boolean;
 }
 ```
 
@@ -74,7 +131,8 @@ interface DocumentManagerConfig {
 // Development
 setDocumentManagerConfig({
   apiUrl: 'http://localhost:3001',
-  apiEndpoints: { exportWord: '/api/documents/export-word' }
+  apiEndpoints: { exportWord: '/api/documents/export-word' },
+  useClientSideFallback: true
 });
 
 // Production
@@ -84,7 +142,8 @@ setDocumentManagerConfig({
   headers: {
     'Authorization': `Bearer ${process.env.API_TOKEN}`,
     'X-Tenant-ID': process.env.TENANT_ID
-  }
+  },
+  useClientSideFallback: true // Ensure fallback is enabled
 });
 ```
 
@@ -94,7 +153,7 @@ setDocumentManagerConfig({
 
 ```tsx
 import React from 'react';
-import { RichTextEditor } from '@editora/react';
+import { EditoraEditor } from '@editora/react';
 import {
   DocumentManagerPlugin,
   DocumentManagerProvider,
@@ -102,10 +161,11 @@ import {
   // ... other plugins
 } from '@editora/plugins';
 
-// Configure API (required!)
+// Configure API (optional with fallback enabled!)
 setDocumentManagerConfig({
   apiUrl: 'https://your-api.com',
-  apiEndpoints: { exportWord: '/api/documents/export-word' }
+  apiEndpoints: { exportWord: '/api/documents/export-word' },
+  useClientSideFallback: true // Works even if API is down
 });
 
 const plugins = [
@@ -115,7 +175,7 @@ const plugins = [
 
 function App() {
   return (
-    <RichTextEditor plugins={plugins} />
+    <EditoraEditor plugins={plugins} />
   );
 }
 ```

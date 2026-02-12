@@ -1,1 +1,1 @@
-export { HistoryPlugin } from './HistoryPlugin';
+export { HistoryPlugin } from './HistoryPlugin.native';

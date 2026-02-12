@@ -33,7 +33,36 @@
   align-items: center;
   white-space: nowrap;
 }
-
+.rte-toolbar-group-items.font-size{
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    .rte-toolbar-input.font-size{
+      width: 40px;
+      padding: 0.25rem;
+      text-align: center;
+      font-size: 14px;
+      background: #fff;
+      border: 1px solid var(--rte-color-border-light);
+      border-radius: var(--rte-radius-sm);
+    }
+    .rte-toolbar-button {
+      border: none;
+      border-radius: 0;
+    }
+    .rte-toolbar-item{
+        &:first-child {
+            border-right: 1px solid #ccc;
+            border-top-left-radius: 3px;
+            border-bottom-left-radius: 3px;
+        }
+        &:last-child {
+            border-left: 1px solid #ccc;
+            border-top-right-radius: 3px;
+            border-bottom-right-radius: 3px;
+        }
+      }   
+}
 .rte-toolbar-button {
   padding: 6px 12px;
   border: 1px solid #ccc;
@@ -369,8 +398,8 @@
 }
 
 .rte-color-swatch {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border: 2px solid #ddd;
   border-radius: 4px;
   cursor: pointer;

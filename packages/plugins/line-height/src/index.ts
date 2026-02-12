@@ -1,2 +1,1 @@
-export { LineHeightPlugin } from './LineHeightPlugin';
-export { LineHeightProvider } from './LineHeightProvider';
+export { LineHeightPlugin } from './LineHeightPlugin.native';

@@ -261,7 +261,7 @@ editor.on('change', (content) => {
 });</code></pre>
 
                     <h3>React Usage</h3>
-                    <pre><code class="language-jsx">import RichTextEditor from '@editora/react';
+                    <pre><code class="language-jsx">import EditoraEditor from '@editora/react';
 
 export default function Document() {
   const handleChange = (content) => {
@@ -269,7 +269,7 @@ export default function Document() {
   };
 
   return (
-    &lt;RichTextEditor
+    &lt;EditoraEditor
       defaultContent="&lt;p&gt;Start typing...&lt;/p&gt;"
       onChange={handleChange}
     /&gt;

@@ -1,15 +1,14 @@
 import { useState } from 'react';
-import { RichTextEditor } from '@editora/react';
+import { EditoraEditor } from '@editora/react';
 import {
-  createBoldPlugin,
-  createItalicPlugin,
-  createUnderlinePlugin,
-  createStrikethroughPlugin,
-  createHeadingPlugin,
-  createParagraphPlugin,
-  createListPlugin,
-  createLinkPlugin,
-  createHistoryPlugin
+  BoldPlugin,
+  ItalicPlugin,
+  UnderlinePlugin,
+  StrikethroughPlugin,
+  HeadingPlugin,
+  ListPlugin,
+  LinkPlugin,
+  HistoryPlugin
 } from '@editora/plugins';
 import '@editora/themes/styles';
 import './App.css';
@@ -19,15 +18,14 @@ function App() {
 
   // Initialize plugins
   const plugins = [
-    createBoldPlugin(),
-    createItalicPlugin(),
-    createUnderlinePlugin(),
-    createStrikethroughPlugin(),
-    createHeadingPlugin(),
-    createParagraphPlugin(),
-    createListPlugin(),
-    createLinkPlugin(),
-    createHistoryPlugin()
+    BoldPlugin(),
+    ItalicPlugin(),
+    UnderlinePlugin(),
+    StrikethroughPlugin(),
+    HeadingPlugin(),
+    ListPlugin(),
+    LinkPlugin(),
+    HistoryPlugin()
   ];
 
   return (
@@ -39,7 +37,7 @@ function App() {
 
       <main className="app-main">
         <div className="editor-container">
-          <RichTextEditor
+          <EditoraEditor
             value={content}
             onChange={setContent}
             plugins={plugins}

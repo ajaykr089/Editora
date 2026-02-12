@@ -413,7 +413,7 @@ handle_upload();
 ## Configuration in React Component
 
 ```tsx
-import { RichTextEditor } from '@editora/react';
+import { EditoraEditor } from '@editora/react';
 
 export function MyEditor() {
   const config = {
@@ -433,7 +433,7 @@ export function MyEditor() {
     }
   };
 
-  return <RichTextEditor config={config} />;
+  return <EditoraEditor config={config} />;
 }
 ```
 

@@ -1,1 +1,1 @@
-export { BoldPlugin } from './BoldPlugin';
+export { BoldPlugin } from './BoldPlugin.native';

@@ -292,10 +292,10 @@ describe('BoldPlugin', () => {
 Test component integration:
 
 ```typescript
-describe('RichTextEditor', () => {
+describe('EditoraEditor', () => {
   it('should render with plugins', () => {
     render(
-      <RichTextEditor
+      <EditoraEditor
         plugins={[createBoldPlugin()]}
       />
     );

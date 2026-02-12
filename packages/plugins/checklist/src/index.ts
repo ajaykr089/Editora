@@ -1,2 +1,1 @@
-export { ChecklistPlugin } from './ChecklistPlugin';
-export { ChecklistPluginProvider } from './ChecklistPluginProvider';
+export { ChecklistPlugin } from './ChecklistPlugin.native';

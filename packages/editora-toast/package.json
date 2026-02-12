@@ -1,6 +1,6 @@
 {
   "name": "@editora/toast",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,5 +23,5 @@
   "devDependencies": {
     "typescript": "^5.0.0"
   },
-  "gitHead": "e26546f8b2455c9a27eceb61818db31fd81fb518"
+  "gitHead": "694494db58b809f0dcf24501696284faa1ab68a5"
 }

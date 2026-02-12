@@ -9,7 +9,7 @@
 
 import React, { ReactNode } from 'react';
 import { Plugin } from '@editora/core';
-import { RichTextEditor } from '@editora/react';
+import { EditoraEditor } from '@editora/react';
 
 // ============================================================================
 // STEP 1: Create a React Provider Component
@@ -125,7 +125,7 @@ export const EditorWithCustomPlugin = () => {
   } = require('@editora/plugins');
 
   return (
-    <RichTextEditor
+    <EditoraEditor
       plugins={[
         BoldPlugin(),
         ItalicPlugin(),
@@ -276,7 +276,7 @@ AFTER (Dynamic Providers - Fully Extensible):
 
 /*
 COMPONENT TREE:
-├── RichTextEditor (Main wrapper)
+├── EditoraEditor (Main wrapper)
 │   ├── DynamicProviderWrapper (Renders all plugin providers)
 │   │   ├── BoldPluginProvider
 │   │   ├── ItalicPluginProvider
@@ -295,7 +295,7 @@ COMMAND FLOW:
 5. Handler updates state, executes DOM manipulation, etc.
 
 PLUGIN REGISTRATION:
-1. Plugin is passed to RichTextEditor in plugins array
+1. Plugin is passed to EditoraEditor in plugins array
 2. DynamicProviderWrapper filters plugins with context.provider
 3. Each provider is rendered in order
 4. Plugin can execute initialization code in useEffect

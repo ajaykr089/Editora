@@ -1,2 +1,1 @@
-export { CapitalizationPlugin } from './CapitalizationPlugin';
-export { CapitalizationPluginProvider } from './CapitalizationPluginProvider';
+export { CapitalizationPlugin } from './CapitalizationPlugin.native';

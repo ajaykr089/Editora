@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editora - Native Plugins Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+      margin-top: 0;
+      color: #333;
+    }
+    
+    .info {
+      background: #e3f2fd;
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    
+    .info strong {
+      color: #0066cc;
+    }
+    
+    #editor {
+      border: 2px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 16px;
+      min-height: 400px;
+      background: white;
+    }
+    
+    #editor:focus {
+      outline: none;
+      border-color: #0066cc;
+    }
+    
+    .toolbar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      padding: 8px;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+    
+    .toolbar button {
+      padding: 8px 12px;
+      border: 1px solid #d0d0d0;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    
+    .toolbar button:hover {
+      background: #e0e0e0;
+    }
+    
+    .separator {
+      width: 1px;
+      background: #d0d0d0;
+      margin: 0 4px;
+    }
+    
+    .plugin-status {
+      margin-top: 20px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: monospace;
+    }
+    
+    .plugin-status h3 {
+      margin-top: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+    
+    .native-badge {
+      background: #4caf50;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 11px;
+      margin-left: 8px;
+    }
+    
+    .legacy-badge {
+      background: #ff9800;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 11px;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎯 Editora - Native Plugins Test</h1>
+    
+    <div class="info">
+      <strong>Framework-Agnostic Architecture</strong><br>
+      This editor uses <strong>native plugins</strong> with no React dependency. 
+      Bold, Italic, Link, and Table plugins are fully framework-agnostic.
+      Other plugins are temporarily bridged using document.execCommand.
+    </div>
+    
+    <div class="toolbar">
+      <button onclick="execCommand('toggleBold')" title="Bold (Ctrl+B)">
+        <strong>B</strong>
+      </button>
+      <button onclick="execCommand('toggleItalic')" title="Italic (Ctrl+I)">
+        <em>I</em>
+      </button>
+      <button onclick="execCommand('toggleUnderline')" title="Underline (Ctrl+U)">
+        <u>U</u>
+      </button>
+      <button onclick="execCommand('toggleStrikethrough')" title="Strikethrough">
+        <s>S</s>
+      </button>
+      
+      <div class="separator"></div>
+      
+      <button onclick="execCommand('openLinkDialog')" title="Insert Link (Ctrl+K)">
+        🔗 Link
+      </button>
+      <button onclick="execCommand('openTableDialog')" title="Insert Table">
+        ⊞ Table
+      </button>
+      
+      <div class="separator"></div>
+      
+      <button onclick="execCommand('toggleBulletList')" title="Bullet List">
+        • List
+      </button>
+      <button onclick="execCommand('toggleOrderedList')" title="Numbered List">
+        1. List
+      </button>
+      
+      <div class="separator"></div>
+      
+      <button onclick="execCommand('undo')" title="Undo (Ctrl+Z)">
+        ↶ Undo
+      </button>
+      <button onclick="execCommand('redo')" title="Redo (Ctrl+Y)">
+        ↷ Redo
+      </button>
+      
+      <div class="separator"></div>
+      
+      <button onclick="execCommand('clearFormatting')" title="Clear Formatting">
+        ✖ Clear
+      </button>
+    </div>
+    
+    <div id="editor" contenteditable="true">
+      <h2>Welcome to Editora!</h2>
+      <p>This is a <strong>framework-agnostic</strong> rich text editor built with native plugins.</p>
+      <p>Try the following features:</p>
+      <ul>
+        <li><strong>Bold</strong>, <em>italic</em>, <u>underline</u>, and <s>strikethrough</s> formatting</li>
+        <li>Insert <a href="https://example.com">links</a> with the native dialog</li>
+        <li>Create tables using the table dialog</li>
+        <li>Use keyboard shortcuts (Ctrl+B, Ctrl+I, Ctrl+K, etc.)</li>
+      </ul>
+      <p>Select any text and use the toolbar buttons above!</p>
+    </div>
+    
+    <div class="plugin-status">
+      <h3>Plugin Status</h3>
+      <div id="plugin-list">Loading plugin information...</div>
+    </div>
+  </div>
+  
+  <!-- Import native UI styles -->
+  <link rel="stylesheet" href="../packages/core/src/ui/native-ui.css">
+  
+  <!-- Import webcomponent bundle -->
+  <script src="../packages/core/dist/webcomponent.min.js"></script>
+  
+  <script>
+    // Global command execution function
+    function execCommand(commandName, value) {
+      const editor = document.getElementById('editor');
+      editor.focus();
+      
+      // Get the command from plugins
+      const plugins = window.PluginLoader ? window.PluginLoader.getAll() : [];
+      
+      for (const plugin of plugins) {
+        if (plugin.commands && plugin.commands[commandName]) {
+          console.log(`Executing command: ${commandName} from plugin: ${plugin.name}`);
+          plugin.commands[commandName](value);
+          return;
+        }
+      }
+      
+      console.warn(`Command not found: ${commandName}`);
+    }
+    
+    // Display plugin information
+    function displayPluginInfo() {
+      const pluginList = document.getElementById('plugin-list');
+      
+      if (!window.PluginLoader) {
+        pluginList.innerHTML = '<span style="color: red;">PluginLoader not available</span>';
+        return;
+      }
+      
+      const plugins = window.PluginLoader.getAll();
+      
+      if (plugins.length === 0) {
+        pluginList.innerHTML = '<span style="color: orange;">No plugins loaded</span>';
+        return;
+      }
+      
+      const nativePlugins = plugins.filter(p => p.commands && p.name);
+      const legacyPlugins = plugins.filter(p => !p.commands || !p.name);
+      
+      let html = `
+        <div>
+          <strong>Total Plugins:</strong> ${plugins.length}<br>
+          <strong>Native Plugins:</strong> ${nativePlugins.length} 
+          <span class="native-badge">NO REACT</span><br>
+          <strong>Legacy Plugins:</strong> ${legacyPlugins.length}
+          <span class="legacy-badge">BRIDGED</span>
+        </div>
+        <br>
+        <div style="max-height: 200px; overflow-y: auto;">
+      `;
+      
+      plugins.forEach(plugin => {
+        const isNative = plugin.commands;
+        const badge = isNative ? '<span class="native-badge">NATIVE</span>' : '<span class="legacy-badge">LEGACY</span>';
+        const commandCount = plugin.commands ? Object.keys(plugin.commands).length : 0;
+        
+        html += `
+          <div style="margin-bottom: 4px;">
+            ${plugin.name} ${badge} 
+            ${commandCount > 0 ? `(${commandCount} commands)` : ''}
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+      pluginList.innerHTML = html;
+    }
+    
+    // Wait for plugins to load
+    setTimeout(displayPluginInfo, 500);
+    
+    // Keyboard shortcuts
+    document.getElementById('editor').addEventListener('keydown', (e) => {
+      const isMod = e.ctrlKey || e.metaKey;
+      
+      if (isMod && e.key === 'b') {
+        e.preventDefault();
+        execCommand('toggleBold');
+      } else if (isMod && e.key === 'i') {
+        e.preventDefault();
+        execCommand('toggleItalic');
+      } else if (isMod && e.key === 'u') {
+        e.preventDefault();
+        execCommand('toggleUnderline');
+      } else if (isMod && e.key === 'k') {
+        e.preventDefault();
+        execCommand('openLinkDialog');
+      } else if (isMod && e.key === 'z') {
+        e.preventDefault();
+        execCommand('undo');
+      } else if (isMod && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) {
+        e.preventDefault();
+        execCommand('redo');
+      }
+    });
+    
+    console.log('✓ Editora Native Plugins Test loaded');
+  </script>
+</body>
+</html>

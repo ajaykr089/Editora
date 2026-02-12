@@ -1,1 +1,1 @@
-export { ListPlugin } from './ListPlugin';
+export { ListPlugin } from './ListPlugin.native';

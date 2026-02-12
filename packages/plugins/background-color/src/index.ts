@@ -1,1 +1,1 @@
-export { BackgroundColorPlugin } from './BackgroundColorPlugin';
+export { BackgroundColorPlugin } from './BackgroundColorPlugin.native';

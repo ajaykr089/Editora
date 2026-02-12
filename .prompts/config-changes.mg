@@ -14,6 +14,30 @@ You are NOT allowed to implement toy solutions.
 
 ---
 
+# Web Usage
+
+<editora
+      api-key="no-api-key"
+      height="500"
+      menubar="false"
+      plugins="advlist autolink lists link image charmap preview anchor
+        searchreplace visualblocks code fullscreen
+        insertdatetime media table code help wordcount"
+      toolbar="undo redo | blocks | bold italic backcolor |
+        alignleft aligncenter alignright alignjustify |
+        bullist numlist outdent indent | removeformat | help"
+      content_style="body
+      {
+        font-family:Helvetica,Arial,sans-serif;
+        font-size:14px
+      }"
+      >
+
+      <!-- Adding some initial editor content -->
+      &lt;p&gt;Welcome to the TinyMCE Web Component example!&lt;/p&gt;
+
+    </editora>
+
 ## 🧩 Core Input Interface (MANDATORY)
 
 You MUST fully support and design around the following props interface:

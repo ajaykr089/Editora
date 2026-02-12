@@ -1,2 +1,1 @@
-export { IndentPlugin } from './IndentPlugin';
-export { IndentPluginProvider } from './IndentPluginProvider';
+export { IndentPlugin } from './IndentPlugin.native';

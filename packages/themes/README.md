@@ -27,10 +27,10 @@ The themes package provides a comprehensive styling system using CSS variables, 
 
 ```tsx
 import '@editora/themes/styles';
-import { RichTextEditor } from '@editora/react';
+import { EditoraEditor } from '@editora/react';
 
 function App() {
-  return <RichTextEditor theme="light" />;
+  return <EditoraEditor theme="light" />;
 }
 ```
 
@@ -38,7 +38,7 @@ function App() {
 
 ```tsx
 import '@editora/themes/styles';
-import { RichTextEditor } from '@editora/react';
+import { EditoraEditor } from '@editora/react';
 import { useState } from 'react';
 
 function App() {
@@ -50,7 +50,7 @@ function App() {
         Toggle Theme
       </button>
       
-      <RichTextEditor theme={theme} />
+      <EditoraEditor theme={theme} />
     </div>
   );
 }
@@ -60,10 +60,10 @@ function App() {
 
 ```tsx
 import '@editora/themes/styles';
-import { RichTextEditor } from '@editora/react';
+import { EditoraEditor } from '@editora/react';
 
 function App() {
-  return <RichTextEditor theme="auto" />;
+  return <EditoraEditor theme="auto" />;
 }
 ```
 
@@ -74,7 +74,7 @@ function App() {
 Clean, professional light theme suitable for most applications.
 
 ```tsx
-<RichTextEditor theme="light" />
+<EditoraEditor theme="light" />
 ```
 
 ### Dark Theme
@@ -82,7 +82,7 @@ Clean, professional light theme suitable for most applications.
 Modern dark theme with comfortable colors for low-light environments.
 
 ```tsx
-<RichTextEditor theme="dark" />
+<EditoraEditor theme="dark" />
 ```
 
 ### Auto Theme
@@ -90,7 +90,7 @@ Modern dark theme with comfortable colors for low-light environments.
 Automatically matches system preferences.
 
 ```tsx
-<RichTextEditor theme="auto" />
+<EditoraEditor theme="auto" />
 ```
 
 ## 🔧 Customization
@@ -346,7 +346,7 @@ function App() {
   
   return (
     <div data-theme={theme}>
-      <RichTextEditor />
+      <EditoraEditor />
     </div>
   );
 }
@@ -371,7 +371,7 @@ function App() {
       <button onClick={toggleTheme}>
         {theme === 'light' ? '🌙' : '☀️'}
       </button>
-      <RichTextEditor />
+      <EditoraEditor />
     </div>
   );
 }

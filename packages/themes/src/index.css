@@ -1,3 +1,52 @@
+/* Toolbar group button and group items for native plugin grouping (e.g., font size) */
+.editora-toolbar-group-button {
+  display: flex;
+  align-items: center;
+  border-radius: var(--rte-radius);
+  overflow: hidden;
+  border: 1px solid var(--rte-color-border-light);
+  background: var(--rte-color-bg-secondary, #f9fafb);
+  margin-right: 0.5rem;
+  padding: 0;
+}
+
+.editora-toolbar-group-items {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.editora-toolbar-group-button .editora-toolbar-button,
+.editora-toolbar-group-button .editora-toolbar-input {
+  border-radius: 0;
+  border: none;
+  margin: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.editora-toolbar-group-button .editora-toolbar-button:first-child {
+  border-radius: var(--rte-radius) 0 0 var(--rte-radius);
+}
+.editora-toolbar-group-button .editora-toolbar-button:last-child {
+  border-radius: 0 var(--rte-radius) var(--rte-radius) 0;
+}
+.editora-toolbar-group-button .editora-toolbar-input {
+  min-width: 44px;
+  width: 44px;
+  text-align: center;
+  font-size: 15px;
+  background: #fff;
+  border-left: 1px solid var(--rte-color-border-light);
+  border-right: 1px solid var(--rte-color-border-light);
+}
+.editora-toolbar-group-button .editora-toolbar-button:active,
+.editora-toolbar-group-button .editora-toolbar-button:focus {
+  background: #e5e7eb;
+}
+.editora-toolbar-group-button .editora-toolbar-input:focus {
+  outline: 1.5px solid var(--rte-color-primary, #2563eb);
+}
 /* Rich Text Editor - Base Theme Variables and Styles */
 
 /* CSS Custom Properties for Theming */
@@ -142,12 +191,16 @@
   flex-shrink: 0;
   fill: currentColor;
   stroke: currentColor;
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
+}
+
+.rte-toolbar-button svg path {
+  fill: currentColor;
 }
 
 .rte-toolbar-button:hover svg {
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 .rte-toolbar-button[data-active="true"] svg {

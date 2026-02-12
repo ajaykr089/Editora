@@ -26,20 +26,20 @@ The React package provides ready-to-use React components for building rich text 
 ### Basic Editor
 
 ```tsx
-import { RichTextEditor } from '@editora/react';
-import { createBoldPlugin, createItalicPlugin } from '@editora/plugins';
+import { EditoraEditor } from '@editora/react';
+import { BoldPlugin, ItalicPlugin } from '@editora/plugins';
 import '@editora/themes/styles';
 
 function App() {
   const [content, setContent] = useState('<p>Start writing...</p>');
 
   return (
-    <RichTextEditor
+    <EditoraEditor
       value={content}
       onChange={setContent}
       plugins={[
-        createBoldPlugin(),
-        createItalicPlugin()
+        BoldPlugin(),
+        ItalicPlugin()
       ]}
       placeholder="Type something..."
     />
@@ -50,19 +50,19 @@ function App() {
 ### Full-Featured Editor
 
 ```tsx
-import { RichTextEditor } from '@editora/react';
+import { EditoraEditor } from '@editora/react';
 import {
-  createBoldPlugin,
-  createItalicPlugin,
-  createUnderlinePlugin,
-  createHeadingPlugin,
-  createParagraphPlugin,
-  createListPlugin,
-  createLinkPlugin,
-  createImagePlugin,
-  createTablePlugin,
-  createCodeSamplePlugin,
-  createHistoryPlugin
+  BoldPlugin,
+  ItalicPlugin,
+  UnderlinePlugin,
+  HeadingPlugin,
+  ParagraphPlugin,
+  ListPlugin,
+  LinkPlugin,
+  ImagePlugin,
+  TablePlugin,
+  CodeSamplePlugin,
+  HistoryPlugin
 } from '@editora/plugins';
 import '@editora/themes/styles';
 
@@ -70,13 +70,12 @@ function FullEditor() {
   const [content, setContent] = useState('');
 
   const plugins = [
-    createBoldPlugin(),
-    createItalicPlugin(),
-    createUnderlinePlugin(),
-    createHeadingPlugin(),
-    createParagraphPlugin(),
-    createListPlugin(),
-    createLinkPlugin({
+    BoldPlugin(),
+    ItalicPlugin(),
+    UnderlinePlugin(),
+    HeadingPlugin(),
+    ListPlugin(),
+    LinkPlugin({
       onLinkClick: (url) => window.open(url, '_blank')
     }),
     createImagePlugin({
@@ -98,7 +97,7 @@ function FullEditor() {
 
   return (
     <div className="editor-container">
-      <RichTextEditor
+      <EditoraEditor
         value={content}
         onChange={setContent}
         plugins={plugins}
@@ -113,7 +112,7 @@ function FullEditor() {
 ### With Custom Toolbar
 
 ```tsx
-import { RichTextEditor, Toolbar, ToolbarButton } from '@editora/react';
+import { EditoraEditor, Toolbar, ToolbarButton } from '@editora/react';
 import { useEditor } from '@editora/react/hooks';
 
 function EditorWithCustomToolbar() {
@@ -146,14 +145,14 @@ function EditorWithCustomToolbar() {
 
 ### Components
 
-#### `<RichTextEditor />`
+#### `<EditoraEditor />`
 
 Main editor component with built-in toolbar.
 
 **Props:**
 
 ```typescript
-interface RichTextEditorProps {
+interface EditoraEditorProps {
   // Content
   value?: string;
   defaultValue?: string;
@@ -273,7 +272,7 @@ const {
 ```tsx
 import '@editora/themes/styles';
 
-<RichTextEditor theme="dark" />
+<EditoraEditor theme="dark" />
 ```
 
 ### Custom Theme
@@ -301,9 +300,9 @@ import '@editora/themes/styles';
 ### Bold Plugin
 
 ```tsx
-import { createBoldPlugin } from '@editora/plugins';
+import { BoldPlugin } from '@editora/plugins';
 
-const boldPlugin = createBoldPlugin({
+const boldPlugin = BoldPlugin({
   keyboard: 'Mod-b',
   icon: <BoldIcon />
 });
@@ -371,7 +370,7 @@ function BlogPostForm() {
         placeholder="Post title"
       />
       
-      <RichTextEditor
+      <EditoraEditor
         value={formData.content}
         onChange={(content) => setFormData({ ...formData, content })}
         plugins={[/* ... */]}
@@ -413,7 +412,7 @@ function DocumentEditor() {
         </button>
       </div>
       
-      <RichTextEditor
+      <EditoraEditor
         value={content}
         onChange={setContent}
         plugins={[/* ... */]}
@@ -428,7 +427,7 @@ function DocumentEditor() {
 ```tsx
 function ArticlePreview({ html }) {
   return (
-    <RichTextEditor
+    <EditoraEditor
       value={html}
       readonly
       showToolbar={false}
@@ -463,7 +462,7 @@ const config: EditorConfig = {
 The editor automatically adapts to different screen sizes:
 
 ```tsx
-<RichTextEditor
+<EditoraEditor
   // Toolbar collapses to hamburger menu on mobile
   toolbarBreakpoint={768}
   

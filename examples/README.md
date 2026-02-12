@@ -1,11 +1,11 @@
 # Editora Examples
 
-This directory contains example projects demonstrating different use cases of the Editora Rich Text Editor.
+This directory contains example projects demonstrating different use cases of the Editora Rich Text Editor (v1.0.1).
 
 ## 📁 Examples
 
-### 1. Basic Example (`basic/`)
-Simple editor setup with minimal configuration. Great for getting started.
+### 1. Basic React Example (`basic/`)
+Simple React editor setup with essential plugins. Great for getting started with Editora in React applications.
 
 ```bash
 cd examples/basic
@@ -13,41 +13,72 @@ npm install
 npm run dev
 ```
 
-### 2. Advanced Example (`advanced/`)
-Full-featured editor with all plugins, custom toolbar, and advanced features.
+Features:
+- Bold, italic, underline, strikethrough formatting
+- Headings (H1-H6)
+- Lists (bullet and numbered)
+- Links and basic text formatting
+- Undo/redo functionality
+
+### 2. Vanilla HTML Example (`vanilla-html/`)
+Pure HTML/CSS/JavaScript implementation without any framework dependencies.
 
 ```bash
-cd examples/advanced
-npm install
-npm run dev
+# Simply open the file in your browser
+open examples/vanilla-html/index.html
 ```
 
-### 3. Next.js Example (`nextjs/`)
-Integration with Next.js, including SSR support and API routes for file uploads.
+Features:
+- Framework-agnostic implementation
+- Custom toolbar with JavaScript event handlers
+- Real-time content updates
+
+### 3. Web Component Examples
+Standalone HTML files demonstrating web component usage:
+
+#### Basic Web Component (`webcomponent-basic.html`)
+```bash
+open examples/webcomponent-basic.html
+```
+
+#### Advanced Web Component (`webcomponent-advanced.html`)
+```bash
+open examples/webcomponent-advanced.html
+```
+
+#### All Plugins Web Component (`webcomponent-all-plugins.html`)
+```bash
+open examples/webcomponent-all-plugins.html
+```
+
+#### Toolbar Test (`webcomponent-toolbar-test.html`)
+```bash
+open examples/webcomponent-toolbar-test.html
+```
+
+Features:
+- Zero framework dependencies
+- Declarative plugin configuration
+- Customizable toolbar layouts
+- All 37+ native plugins available
+
+### 4. Documentation Website (`web/`)
+Complete documentation website with examples, API reference, and guides.
 
 ```bash
-cd examples/nextjs
-npm install
-npm run dev
+cd examples/web
+# Open index.html in browser or serve with a local server
+python3 -m http.server 8000
+# Visit http://localhost:8000
 ```
 
-### 4. Blog Editor Example (`blog/`)
-Blog post editor with image upload, formatting, and preview mode.
-
-```bash
-cd examples/blog
-npm install
-npm run dev
-```
-
-### 5. Documentation Editor (`docs/`)
-Technical documentation editor with code blocks, tables, and anchor links.
-
-```bash
-cd examples/docs
-npm install
-npm run dev
-```
+Includes:
+- Installation guides (NPM, CDN, Source)
+- Feature documentation
+- API reference
+- Code examples
+- Plugin documentation
+- Keyboard shortcuts guide
 
 ### 6. Collaborative Editor (`collaborative/`)
 Editor with comments, mentions, and real-time collaboration features.

@@ -1,1 +1,1 @@
-export { ItalicPlugin } from './ItalicPlugin';
+export { ItalicPlugin } from './ItalicPlugin.native';

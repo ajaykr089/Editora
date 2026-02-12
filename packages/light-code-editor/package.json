@@ -1,6 +1,6 @@
 {
   "name": "@editora/light-code-editor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Lightweight, extensible code editor library inspired by CodeMirror",
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
@@ -37,5 +37,5 @@
     "typescript": "^5.0.0",
     "vite": "^7.3.1"
   },
-  "gitHead": "e26546f8b2455c9a27eceb61818db31fd81fb518"
+  "gitHead": "694494db58b809f0dcf24501696284faa1ab68a5"
 }

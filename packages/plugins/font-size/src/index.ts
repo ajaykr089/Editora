@@ -1,2 +1,1 @@
-export { FontSizePlugin } from './FontSizePlugin';
-export { FontSizeProvider } from './FontSizeProvider';
+export { FontSizePlugin } from './FontSizePlugin.native';

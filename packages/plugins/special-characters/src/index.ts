@@ -1,2 +1,1 @@
-export { SpecialCharactersPlugin } from './SpecialCharactersPlugin';
-export { SpecialCharactersProvider } from './SpecialCharactersProvider';
+export { SpecialCharactersPlugin } from './SpecialCharactersPlugin.native';

@@ -1,3 +1,16 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## 1.0.1 (2026-02-12)
+
+**Note:** Version bump only for package editora
+
+
+
+
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -16,6 +29,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example projects
 - CI/CD workflows
 
+## [1.0.1] - 2026-02-12
+
+### Fixed
+- Corrected plugin import examples in README.md (changed `createBoldPlugin` to `BoldPlugin`)
+- Updated web component usage documentation with proper examples
+- Fixed package versions in example projects to match 1.0.1
+
+### Documentation
+- Added comprehensive web component usage section to main README
+- Updated examples README to reflect actual project structure
+- Updated version references in documentation website from 1.0.0 to 1.0.1
+
 ## [1.0.0] - 2026-02-02
 
 ### Added
@@ -29,7 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multi-instance editor support
 
 #### React Package
-- `<RichTextEditor />` component
+- `<EditoraEditor />` component
 - `useEditor` hook for editor management
 - `useEditorState` hook for state tracking
 - `useEditorCommands` hook for commands
@@ -128,13 +153,13 @@ npm install @editora/react @editora/core @editora/plugins @editora/themes
 
 **Quick Start:**
 ```tsx
-import { RichTextEditor } from '@editora/react';
+import { EditoraEditor } from '@editora/react';
 import { createBoldPlugin, createItalicPlugin } from '@editora/plugins';
 import '@editora/themes/styles';
 
 function App() {
   return (
-    <RichTextEditor
+    <EditoraEditor
       plugins={[createBoldPlugin(), createItalicPlugin()]}
     />
   );

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toolbar Fix Test</title>
+  
+  <!-- Editor Styles -->
+  <link rel="stylesheet" href="packages/core/src/webcomponent/styles.css">
+  <!-- All Plugin Styles (table, anchor, footnote, media, etc.) -->
+  <link rel="stylesheet" href="packages/plugins/dist/plugins.css">
+  <!-- Core Styles -->
+  <link rel="stylesheet" href="packages/core/dist/core.css">
+  <!-- Theme Styles (includes checklist, tables, etc.) -->
+  <link rel="stylesheet" href="packages/themes/src/themes/default.css">
+  
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .test-section {
+      background: white;
+      padding: 30px;
+      margin: 20px 0;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .test-section h2 {
+      color: #667eea;
+      margin: 0 0 20px 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #667eea;
+    }
+
+    .test-info {
+      background: #f0f4ff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #667eea;
+    }
+
+    .test-info code {
+      background: #e0e7ff;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Monaco', monospace;
+      font-size: 13px;
+    }
+
+    editora-editor {
+      display: block;
+      margin: 20px 0;
+    }
+
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      font-family: 'Monaco', monospace;
+      font-size: 13px;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔧 Toolbar Fix Test</h1>
+  <p style="color: #666; margin-bottom: 30px;">Testing toolbar-items attribute parsing</p>
+
+  <!-- Test 1: Using toolbar-items attribute -->
+  <div class="test-section">
+    <h2>Test 1: toolbar-items Attribute</h2>
+    <div class="test-info">
+      Using <code>toolbar-items="undo redo | bold italic underline"</code>
+    </div>
+    <editora-editor
+      height="300"
+      plugins="bold italic underline history"
+      toolbar-items="undo redo | bold italic underline"
+    >
+      <p><strong>Expected:</strong> Toolbar should show: Undo, Redo | Bold, Italic, Underline</p>
+    </editora-editor>
+    <div id="test1-status" class="status"></div>
+  </div>
+
+  <!-- Test 2: Using all native plugins -->
+  <div class="test-section">
+    <h2>Test 2: Full Toolbar (All Native Plugins)</h2>
+    <div class="test-info">
+      Using <code>toolbar-items</code> with multiple groups and all 39 native plugins
+    </div>
+    <editora-editor
+      height="400"
+      plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis a11yChecker comments document-manager footnote fullscreen mediaManager mergeTag pageBreak preview print spellCheck template"
+      toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | importWord exportWord exportPdf | fullscreen preview print | a11yChecker spellCheck | comments footnote insertMergeTag pageBreak template | clearFormatting"
+    >
+      <h2>Full Feature Test</h2>
+      <p>This editor should have a complete toolbar with all groups visible.</p>
+      <ul>
+        <li>Undo/Redo buttons</li>
+        <li>Text formatting (Bold, Italic, Underline, Strikethrough)</li>
+        <li>Colors (Text Color, Background Color)</li>
+        <li>Typography (Font Size, Font Family)</li>
+        <li>Block types (Heading)</li>
+        <li>Alignment</li>
+        <li>Lists</li>
+        <li>Insert (Link, Image, Table)</li>
+        <li>Code and Blockquote</li>
+        <li>Clear Formatting</li>
+      </ul>
+    </editora-editor>
+    <div id="test2-status" class="status"></div>
+  </div>
+
+  <!-- Test 3: No toolbar-items (should use all registered plugins) -->
+  <div class="test-section">
+    <h2>Test 3: Auto Toolbar (No toolbar-items specified)</h2>
+    <div class="test-info">
+      No <code>toolbar-items</code> attribute - should automatically create toolbar from registered plugins
+    </div>
+    <editora-editor
+      height="300"
+      plugins="bold italic underline link"
+    >
+      <p><strong>Expected:</strong> Toolbar should auto-generate from the 4 specified plugins</p>
+    </editora-editor>
+    <div id="test3-status" class="status"></div>
+  </div>
+
+
+  <!-- Test 5: Readonly Toggle -->
+  <div class="test-section">
+    <h2>Test 5: Readonly Toggle</h2>
+    <div class="test-info">
+      Toggle the editor between editable and readonly states using the button below.
+    </div>
+    <editora-editor
+      id="readonly-editor"
+      height="150"
+      plugins="bold italic"
+      toolbar-items="bold italic"
+    >
+      <p>This editor can be toggled readonly.</p>
+    </editora-editor>
+    <button id="toggle-readonly-btn">Toggle Readonly</button>
+    <div id="readonly-status" class="status"></div>
+  </div>
+
+  <!-- Test 6: Placeholder Example -->
+  <div class="test-section">
+    <h2>Test 6: Placeholder</h2>
+    <div class="test-info">
+      Shows a placeholder when the editor is empty.
+    </div>
+    <editora-editor
+      id="placeholder-editor"
+      height="120"
+      plugins="bold italic"
+      toolbar-items="bold italic"
+      placeholder="Type something here..."
+    ></editora-editor>
+  </div>
+
+  <!-- Test 7: Theme Switcher -->
+  <div class="test-section">
+    <h2>Test 7: Theme Switcher</h2>
+    <div class="test-info">
+      Switch between default and dark themes dynamically.
+    </div>
+    <editora-editor
+      id="theme-editor"
+      height="150"
+      plugins="bold italic"
+      toolbar-items="bold italic"
+      theme="default"
+    >
+      <p>Click the button to toggle theme.</p>
+    </editora-editor>
+    <button id="toggle-theme-btn">Toggle Theme</button>
+  </div>
+
+  <!-- Test 8: Custom Event Handling -->
+  <div class="test-section">
+    <h2>Test 8: Custom Event Handling</h2>
+    <div class="test-info">
+      Listen for <code>editor-focus</code> and <code>editor-blur</code> events and display status.
+    </div>
+    <editora-editor
+      id="event-editor"
+      height="120"
+      plugins="bold italic"
+      toolbar-items="bold italic"
+    >
+      <p>Focus and blur this editor to see events.</p>
+    </editora-editor>
+    <div id="event-status" class="status"></div>
+  </div>
+  <div class="test-section">
+    <h2>Test 4: Dynamic API & Events</h2>
+    <div class="test-info">
+      Demonstrates <code>onchange</code> event, <code>getContent()</code>, <code>setContent()</code>, and dynamic behaviors.<br>
+      <strong>Try editing, clicking the buttons, and observe the output below.</strong>
+    </div>
+    <editora-editor
+      id="dynamic-editor"
+      height="200"
+      plugins="bold italic underline"
+      toolbar-items="bold italic underline"
+    >
+      <p>Edit this text. Changes will be shown below.</p>
+    </editora-editor>
+    <div style="margin: 10px 0;">
+      <button id="get-content-btn">Get Content</button>
+      <button id="set-content-btn">Set Content</button>
+      <button id="focus-btn">Focus</button>
+      <button id="blur-btn">Blur</button>
+    </div>
+    <div id="dynamic-status" class="status"></div>
+  </div>
+
+  <!-- Import Web Component -->
+  <script src="packages/core/dist/webcomponent.min.js"></script>
+
+  <script>
+    // Wait for custom element to be defined
+    customElements.whenDefined('editora-editor').then(() => {
+      console.log('✅ Custom element registered');
+      runTests();
+    });
+
+    function runTests() {
+      // Test 5: Readonly Toggle
+      const readonlyEditor = document.getElementById('readonly-editor');
+      const readonlyBtn = document.getElementById('toggle-readonly-btn');
+      const readonlyStatus = document.getElementById('readonly-status');
+      let isReadonly = false;
+      readonlyBtn.onclick = () => {
+        isReadonly = !isReadonly;
+        readonlyEditor.setAttribute('readonly', isReadonly ? 'true' : 'false');
+        readonlyStatus.textContent = isReadonly ? 'Editor is now readonly.' : 'Editor is editable.';
+        readonlyStatus.className = 'status success';
+      };
+
+      // Test 7: Theme Switcher
+      const themeEditor = document.getElementById('theme-editor');
+      const themeBtn = document.getElementById('toggle-theme-btn');
+      let isDark = false;
+      themeBtn.onclick = () => {
+        isDark = !isDark;
+        themeEditor.setAttribute('theme', isDark ? 'dark' : 'default');
+      };
+
+      // Test 8: Custom Event Handling
+      const eventEditor = document.getElementById('event-editor');
+      const eventStatus = document.getElementById('event-status');
+      eventEditor.addEventListener('editor-focus', () => {
+        eventStatus.textContent = 'Editor focused!';
+        eventStatus.className = 'status success';
+      });
+      eventEditor.addEventListener('editor-blur', () => {
+        eventStatus.textContent = 'Editor blurred!';
+        eventStatus.className = 'status error';
+      });
+      const dynamicEditor = document.getElementById('dynamic-editor');
+      const status = document.getElementById('dynamic-status');
+      const getBtn = document.getElementById('get-content-btn');
+      const setBtn = document.getElementById('set-content-btn');
+      const focusBtn = document.getElementById('focus-btn');
+      const blurBtn = document.getElementById('blur-btn');
+
+      // Listen for content-change event
+      dynamicEditor.addEventListener('content-change', (e) => {
+        status.textContent = 'Content changed! Current HTML: ' + dynamicEditor.getContent();
+        status.className = 'status success';
+      });
+
+      // Get content button
+      getBtn.onclick = () => {
+        status.textContent = 'Current HTML: ' + dynamicEditor.getContent();
+        status.className = 'status success';
+      };
+
+      // Set content button
+      setBtn.onclick = () => {
+        const html = '<p><b>Set by API:</b> <i>This content was set dynamically!</i></p>';
+        dynamicEditor.setContent(html);
+        status.textContent = 'Content set via setContent().';
+        status.className = 'status success';
+      };
+
+      // Focus button
+      focusBtn.onclick = () => {
+        dynamicEditor.focus();
+        status.textContent = 'Editor focused.';
+        status.className = 'status success';
+      };
+
+      // Blur button
+      blurBtn.onclick = () => {
+        dynamicEditor.blur();
+        status.textContent = 'Editor blurred.';
+        status.className = 'status success';
+      };
+      // Test 1: Check toolbar buttons
+      setTimeout(() => {
+        const test1 = document.querySelectorAll('editora-editor')[0];
+        const toolbar1 = test1.querySelector('.editora-toolbar');
+        const buttons1 = toolbar1?.querySelectorAll('.editora-toolbar-button');
+        
+        const status1 = document.getElementById('test1-status');
+        if (buttons1 && buttons1.length > 0) {
+          status1.textContent = `✅ PASS: Found ${buttons1.length} toolbar buttons`;
+          status1.className = 'status success';
+         
+        } else {
+          status1.textContent = `❌ FAIL: No toolbar buttons found`;
+          status1.className = 'status error';
+        }
+
+        // Test 2: Check full toolbar
+        const test2 = document.querySelectorAll('editora-editor')[1];
+        const toolbar2 = test2.querySelector('.editora-toolbar');
+        const buttons2 = toolbar2?.querySelectorAll('.editora-toolbar-button');
+        
+        const status2 = document.getElementById('test2-status');
+        if (buttons2 && buttons2.length >= 10) {
+          status2.textContent = `✅ PASS: Found ${buttons2.length} toolbar buttons (expected 10+)`;
+          status2.className = 'status success';
+          
+        } else {
+          status2.textContent = `❌ FAIL: Expected 10+ buttons, found ${buttons2?.length || 0}`;
+          status2.className = 'status error';
+        }
+
+        // Test 3: Check auto toolbar
+        const test3 = document.querySelectorAll('editora-editor')[2];
+        const toolbar3 = test3.querySelector('.editora-toolbar');
+        const buttons3 = toolbar3?.querySelectorAll('.editora-toolbar-button');
+        
+        const status3 = document.getElementById('test3-status');
+        if (buttons3 && buttons3.length > 0) {
+          status3.textContent = `✅ PASS: Auto-generated ${buttons3.length} toolbar buttons`;
+          status3.className = 'status success';
+         
+        } else {
+          status3.textContent = `❌ FAIL: No auto-generated buttons`;
+          status3.className = 'status error';
+        }
+
+        // Overall summary
+      }, 500);
+    }
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const dynamicEditor = document.getElementById('dynamic-editor');
+
+      if (dynamicEditor) {
+        console.log('Dynamic Editor Content:', dynamicEditor.innerHTML);
+      } else {
+        console.error('Dynamic Editor not found');
+      }
+    });
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const editor = document.querySelector('editora-editor');
+      if (editor) {
+        const api = editor.getAPI();
+        if (api && typeof api.getContent === 'function') {
+          console.log('Editor Content:', api.getContent());
+        } else {
+          console.error('getContent method not found on editor API');
+        }
+      } else {
+        console.error('EditoraEditor component not found');
+      }
+    });
+  </script>
+</body>
+</html>

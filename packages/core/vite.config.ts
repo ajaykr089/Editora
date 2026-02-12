@@ -1,27 +1,44 @@
 import { defineConfig } from 'vite';
+import path from 'path';
 
 export default defineConfig({
   build: {
     lib: {
-      entry: 'src/index.ts',
+      entry: {
+        index: 'src/index.ts',
+        webcomponent: 'src/webcomponent/index.ts',
+      },
       name: 'Editora',
-      formats: ['es', 'cjs', 'umd', 'iife'],
-      fileName: (format) => {
+      formats: ['es', 'cjs'],
+      fileName: (format, entryName) => {
+        if (entryName === 'webcomponent') {
+          if (format === 'es') return 'webcomponent.esm.js';
+          if (format === 'cjs') return 'webcomponent.cjs.js';
+        }
+        
         if (format === 'es') return 'index.esm.js';
         if (format === 'cjs') return 'index.cjs.js';
-        if (format === 'umd') return 'editora.umd.js';
-        if (format === 'iife') return 'editora.min.js';
-        return `index.${format}.js`;
+        return `${entryName}.${format}.js`;
       }
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime'],
+      external: [],
       output: {
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM'
-        }
+        globals: {},
+        // Preserve module structure for tree-shaking
+        preserveModules: false,
       }
-    }
-  }
+    },
+    // Generate sourcemaps for debugging
+    sourcemap: true,
+    // Minify for production
+    minify: 'esbuild',
+    // Target modern browsers
+    target: 'es2018',
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
 });

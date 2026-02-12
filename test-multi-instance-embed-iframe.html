@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editora - Multi-Instance Embed Iframe Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    .editor-section {
+      margin-bottom: 40px;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 16px;
+    }
+
+    .editor-section h2 {
+      margin-top: 0;
+      color: #666;
+      font-size: 18px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      padding: 8px;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+
+    .toolbar button {
+      padding: 8px 12px;
+      border: 1px solid #d0d0d0;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .toolbar button:hover {
+      background: #e0e0e0;
+    }
+
+    .editor {
+      border: 2px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 16px;
+      min-height: 200px;
+      background: white;
+    }
+
+    .editor:focus {
+      outline: none;
+      border-color: #0066cc;
+    }
+
+    .test-info {
+      background: #e3f2fd;
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .test-info strong {
+      color: #0066cc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎯 Editora - Multi-Instance Embed Iframe Test</h1>
+
+    <div class="test-info">
+      <strong>Multi-Instance Plugin Test</strong><br>
+      This page tests that the embed-iframe plugin works correctly with multiple editors on the same page.
+      Each editor should maintain its own dialog state independently.
+    </div>
+
+    <div class="editor-section">
+      <h2>Editor 1</h2>
+      <div class="toolbar">
+        <button onclick="execCommand('editor1', 'openEmbedIframeDialog')" title="Embed Iframe">
+          📺 Embed Iframe
+        </button>
+      </div>
+      <div id="editor1" class="editor" contenteditable="true">
+        <h3>Editor One</h3>
+        <p>This is the first editor. Click the "Embed Iframe" button to open the dialog.</p>
+        <p>The dialog should be associated with this editor only.</p>
+      </div>
+    </div>
+
+    <div class="editor-section">
+      <h2>Editor 2</h2>
+      <div class="toolbar">
+        <button onclick="execCommand('editor2', 'openEmbedIframeDialog')" title="Embed Iframe">
+          📺 Embed Iframe
+        </button>
+      </div>
+      <div id="editor2" class="editor" contenteditable="true">
+        <h3>Editor Two</h3>
+        <p>This is the second editor. Click the "Embed Iframe" button to open a separate dialog.</p>
+        <p>Both editors should work independently without interfering with each other.</p>
+      </div>
+    </div>
+
+    <div class="editor-section">
+      <h2>Editor 3</h2>
+      <div class="toolbar">
+        <button onclick="execCommand('editor3', 'openEmbedIframeDialog')" title="Embed Iframe">
+          📺 Embed Iframe
+        </button>
+      </div>
+      <div id="editor3" class="editor" contenteditable="true">
+        <h3>Editor Three</h3>
+        <p>This is the third editor. Test that all three editors can open dialogs simultaneously.</p>
+        <p>Each dialog should maintain its own form state and settings.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import native UI styles -->
+  <link rel="stylesheet" href="../packages/core/src/ui/native-ui.css">
+
+  <!-- Import webcomponent bundle -->
+  <script src="../packages/core/dist/webcomponent.min.js"></script>
+
+  <script>
+    // Global command execution function for specific editors
+    function execCommand(editorId, commandName, value) {
+      const editor = document.getElementById(editorId);
+      editor.focus();
+
+      // Get the command from plugins
+      const plugins = window.PluginLoader ? window.PluginLoader.getAll() : [];
+
+      for (const plugin of plugins) {
+        if (plugin.commands && plugin.commands[commandName]) {
+          console.log(`Executing command: ${commandName} from plugin: ${plugin.name} on editor: ${editorId}`);
+          // Pass the editor element to the command
+          plugin.commands[commandName](editor, value);
+          return;
+        }
+      }
+
+      console.warn(`Command not found: ${commandName}`);
+    }
+
+    console.log('✓ Editora Multi-Instance Embed Iframe Test loaded');
+  </script>
+</body>
+</html></content>
+<parameter name="filePath">/Users/etelligens/Documents/Rich-Text-Editor/test-multi-instance-embed-iframe.html

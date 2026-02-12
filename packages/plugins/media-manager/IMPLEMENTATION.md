@@ -110,7 +110,7 @@ const config: MediaManagerConfig = {
   }
 };
 
-const editor = new RichTextEditor({
+const editor = new EditoraEditor({
   plugins: [MediaManagerPlugin],
   config
 });
@@ -534,6 +534,6 @@ The media manager is extensible - you can:
 
 ## 📚 Related Documentation
 
-- [RichTextEditor Config](../../README.md)
+- [EditoraEditor Config](../../README.md)
 - [Plugin Architecture](../PLUGINS_QUICK_REFERENCE.md)
 - [Security Guidelines](../../CSS_ISOLATION_GUIDE.md)

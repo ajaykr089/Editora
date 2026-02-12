@@ -1,1 +1,1 @@
-export { TextColorPlugin } from './TextColorPlugin';
+export { TextColorPlugin } from './TextColorPlugin.native';

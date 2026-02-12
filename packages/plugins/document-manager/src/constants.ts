@@ -12,6 +12,11 @@ export interface DocumentManagerConfig extends PartialApiConfig {
   apiEndpoints: {
     exportWord: string;
   };
+  /** 
+   * Enable client-side fallback for Word export when API is unavailable
+   * @default true
+   */
+  useClientSideFallback?: boolean;
 }
 
 /**
@@ -27,7 +32,8 @@ export const DEFAULT_CONFIG: DocumentManagerConfig = {
     // Add default headers if needed (e.g., API key)
     // 'Authorization': 'Bearer YOUR_API_KEY',
     // 'X-API-Key': 'YOUR_API_KEY'
-  }
+  },
+  useClientSideFallback: true // Enable fallback by default
 };
 
 /**
@@ -43,6 +49,7 @@ let globalConfig: DocumentManagerConfig = { ...DEFAULT_CONFIG };
  * ```typescript
  * import { setDocumentManagerConfig } from '@editora/document-manager';
  *
+ * // With API backend (recommended for production)
  * setDocumentManagerConfig({
  *   apiUrl: 'https://your-api.com',
  *   apiEndpoints: {
@@ -51,7 +58,14 @@ let globalConfig: DocumentManagerConfig = { ...DEFAULT_CONFIG };
  *   headers: {
  *     'Authorization': 'Bearer YOUR_TOKEN',
  *     'X-API-Key': 'YOUR_API_KEY'
- *   }
+ *   },
+ *   useClientSideFallback: true // Falls back to client-side if API fails
+ * });
+ *
+ * // Client-side only (no backend required)
+ * setDocumentManagerConfig({
+ *   useClientSideFallback: true,
+ *   apiUrl: '' // Empty to trigger immediate fallback
  * });
  * ```
  *

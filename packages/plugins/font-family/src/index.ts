@@ -1,2 +1,1 @@
-export { FontFamilyPlugin } from './FontFamilyPlugin';
-export { FontFamilyProvider } from './FontFamilyProvider';
+export { FontFamilyPlugin } from './FontFamilyPlugin.native';

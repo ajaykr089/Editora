@@ -127,7 +127,15 @@
                     <button class="btn" id="btn-get">Get HTML</button>
                 </div>
 
-                <div id="editor"></div>
+                <editora-editor id="editor" plugins="bold italic underline strikethrough link table list history heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight capitalizaton checklist anchor embedIframe math specialCharacters emojis a11yChecker comments document-manager fullscreen mediaManager mergeTag pageBreak preview print spellCheck template" toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | importWord exportWord exportPdf | fullscreen preview print | a11yChecker spellCheck | comments footnote insertMergeTag pageBreak template | clearFormatting" height="400">
+                    <h2>Welcome to Editora Playground</h2>
+                    <p>Try typing, formatting, and exploring the editor.</p>
+                    <ul>
+                        <li>Bold, italic, underline</li>
+                        <li>Lists and headings</li>
+                        <li>Links and more</li>
+                    </ul>
+                </editora-editor>
 
                 <div class="output-panel">
                     <h3 style="margin-top: 0;">HTML Output</h3>
@@ -185,7 +193,7 @@
     </footer>
 
     <!-- <script src="https://unpkg.com/@editora/core@latest/dist/editora.min.js"></script> -->
-    <script src="../../packages/core/dist/editora.min.js"></script>
+    <script src="../../packages/core/dist/webcomponent.min.js"></script>
     <script src="assets/js/main.js"></script>
     <script>
         const editorElement = document.getElementById('editor');
@@ -194,55 +202,38 @@
         const btnClear = document.getElementById('btn-clear');
         const btnGet = document.getElementById('btn-get');
 
-        let editor;
-
-        // Initialize editor
-        if (window.Editora && editorElement) {
-            try {
-                editor = new Editora.Editor({
-                    element: editorElement,
-                    content: '<h2>Welcome to Editora Playground</h2><p>Try typing, formatting, and exploring the editor.</p><ul><li>Bold, italic, underline</li><li>Lists and headings</li><li>Links and more</li></ul>'
-                });
-                console.log('✓ Editor initialized successfully');
-            } catch (error) {
-                console.error('✗ Editor initialization failed:', error);
-            }
-        } else {
-            console.error('✗ Editora not loaded or editor element not found');
-        }
-
         // Button: Insert Sample Content
         btnSample?.addEventListener('click', () => {
             const sample = '<h3>Sample Content</h3><p>This is a <strong>live</strong> playground with <em>formatted</em> content.</p><p><a href="https://editora-free.netlify.app/" target="_blank" rel="noopener">Visit the website</a></p>';
-            if (editor?.setContent) {
-                editor.setContent(sample);
+            if (editorElement) {
+                editorElement.innerHTML = sample;
                 console.log('✓ Sample content inserted');
             } else {
-                console.warn('⚠ Editor not ready or setContent not available');
+                console.warn('⚠ Editor element not found');
             }
         });
 
         // Button: Clear Content
         btnClear?.addEventListener('click', () => {
-            if (editor?.setContent) {
-                editor.setContent('<p></p>');
+            if (editorElement) {
+                editorElement.innerHTML = '<p></p>';
                 if (output) output.value = '';
                 console.log('✓ Content cleared');
             } else {
-                console.warn('⚠ Editor not ready or setContent not available');
+                console.warn('⚠ Editor element not found');
             }
         });
 
         // Button: Get HTML
         btnGet?.addEventListener('click', () => {
-            if (editor?.getContent) {
-                const content = editor.getContent();
+            if (editorElement) {
+                const content = editorElement.innerHTML;
                 if (output) {
-                    output.value = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+                    output.value = content;
                 }
                 console.log('✓ HTML extracted:', content);
             } else {
-                console.warn('⚠ Editor not ready or getContent not available');
+                console.warn('⚠ Editor element not found');
             }
         });
     </script>

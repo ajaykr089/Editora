@@ -89,13 +89,27 @@ const editor = new Editor({
 });</code></pre>
 
                             <h4>With React</h4>
-                            <pre><code class="language-jsx">import RichTextEditor from '@editora/react';
+                            <pre><code class="language-jsx">import { EditoraEditor } from '@editora/react';
+import {
+  BoldPlugin,
+  ItalicPlugin,
+  HeadingPlugin,
+  HistoryPlugin
+} from '@editora/plugins';
 
-export default function App() {
+function App() {
+  const [content, setContent] = useState('&lt;p&gt;Hello from React!&lt;/p&gt;');
+
   return (
-    &lt;RichTextEditor 
-      defaultContent="&lt;p&gt;Hello from React!&lt;/p&gt;"
-      onChange={(content) =&gt; console.log(content)}
+    &lt;EditoraEditor
+      value={content}
+      onChange={setContent}
+      plugins={[
+        BoldPlugin(),
+        ItalicPlugin(),
+        HeadingPlugin(),
+        HistoryPlugin()
+      ]}
     /&gt;
   );
 }</code></pre>
@@ -130,20 +144,18 @@ export default function App() {
                             <pre><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
-  &lt;style&gt;
-    #editor { border: 1px solid #ccc; min-height: 300px; padding: 20px; }
-  &lt;/style&gt;
+  &lt;title&gt;Editora Web Component&lt;/title&gt;
+  &lt;script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.js"&gt;&lt;/script&gt;
+  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/themes/dist/default.css"&gt;
 &lt;/head&gt;
 &lt;body&gt;
-  &lt;div id="editor"&gt;&lt;/div&gt;
-
-  &lt;script src="https://unpkg.com/@editora/core@latest/dist/editora.min.js"&gt;&lt;/script&gt;
-  &lt;script&gt;
-    const editor = new Editora.Editor({
-      element: document.getElementById('editor'),
-      content: '&lt;p&gt;Start typing...&lt;/p&gt;'
-    });
-  &lt;/script&gt;
+  &lt;editora-editor
+    plugins="bold italic underline history"
+    toolbar-items="bold italic underline | undo redo"
+    height="300"
+  &gt;
+    &lt;p&gt;Start typing...&lt;/p&gt;
+  &lt;/editora-editor&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
 

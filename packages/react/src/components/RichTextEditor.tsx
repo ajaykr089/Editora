@@ -22,9 +22,10 @@ if (typeof window !== 'undefined') {
   (window as any).executeEditorCommand = (command: string, params?: any) => {
     const handler = commandRegistry.get(command);
     if (handler) {
-      handler(params);
+      return handler(params);
     } else {
       console.warn(`No handler registered for command: ${command}`);
+      return false;
     }
   };
 }
@@ -67,7 +68,16 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
 
   const editor = useMemo(() => {
     const pluginManager = new PluginManager();
-    config.plugins.forEach(p => pluginManager.register(p));
+    config.plugins.forEach(p => {
+      pluginManager.register(p);
+      
+      // Register commands from native plugins in global registry for backward compatibility
+      if (p.commands && typeof window !== 'undefined') {
+        Object.entries(p.commands).forEach(([commandName, commandFn]) => {
+          commandRegistry.set(commandName, commandFn);
+        });
+      }
+    });
     const editorInstance = new Editor(pluginManager);
     editorRef.current = editorInstance;
     return editorInstance;
@@ -155,12 +165,14 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
           height: '100%'
         }}
       >
-        <Toolbar 
-          editor={editor}
-          position={toolbarPosition}
-          sticky={stickyToolbar}
-          floating={floatingToolbarEnabled}
-        />
+        {toolbarPosition !== 'bottom' && (
+          <Toolbar 
+            editor={editor}
+            position={toolbarPosition}
+            sticky={stickyToolbar}
+            floating={floatingToolbarEnabled}
+          />
+        )}
         <EditorContent 
           editor={editor}
           defaultValue={config.defaultValue}
@@ -172,6 +184,14 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
           performanceConfig={config.performance}
           autosaveConfig={config.autosave}
         />
+        {toolbarPosition === 'bottom' && (
+          <Toolbar 
+            editor={editor}
+            position={toolbarPosition}
+            sticky={stickyToolbar}
+            floating={floatingToolbarEnabled}
+          />
+        )}
         <FloatingToolbar
           editor={editor}
           isEnabled={floatingToolbarEnabled}

@@ -1,2 +1,1 @@
-export { HeadingPlugin } from './HeadingPlugin';
-export { HeadingPluginProvider } from './HeadingPluginProvider';
+export { HeadingPlugin } from './HeadingPlugin.native';

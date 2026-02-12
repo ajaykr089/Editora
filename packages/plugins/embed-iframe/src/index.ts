@@ -1,1 +1,1 @@
-export { EmbedIframePlugin } from './EmbedIframePlugin';
+export { EmbedIframePlugin } from './EmbedIframePlugin.native';

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Toolbar Test - Editora Web Component</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    
+    h1 { color: #333; }
+    
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .test-section h2 {
+      margin-top: 0;
+      color: #0066cc;
+    }
+    
+    rich-text-editor {
+      display: block;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+
+    .console-output {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 15px;
+    }
+
+    .console-output pre {
+      margin: 0;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔧 Toolbar Plugin Test</h1>
+  <p>Testing if toolbar renders with inline plugins from standalone.ts</p>
+
+  <div class="test-section">
+    <h2>Test 1: Default Toolbar (All Plugins)</h2>
+    <p>Should show: undo, redo, bold, italic, underline, strikethrough</p>
+    <editora-editor id="editor1" height="200">
+      <p>This editor should have a toolbar with 6 buttons.</p>
+    </editora-editor>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 2: Custom Toolbar (Subset)</h2>
+    <p>Custom configuration: toolbar="undo redo | bold italic"</p>
+    <editora-editor id="editor2" height="200" toolbar="undo redo | bold italic">
+      <p>This editor should only have undo, redo, bold, and italic buttons.</p>
+    </editora-editor>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 3: Minimal Toolbar</h2>
+    <p>Custom configuration: toolbar="bold italic"</p>
+    <editora-editor id="editor3" height="200" toolbar="bold italic">
+      <p>This editor should only have bold and italic buttons.</p>
+    </editora-editor>
+  </div>
+
+  <div class="test-section">
+    <h2>Debug Info</h2>
+    <button onclick="showDebugInfo()">🔍 Show Debug Info</button>
+    <div class="console-output" id="debug-output">
+      <pre>Click "Show Debug Info" to see plugin registration details</pre>
+    </div>
+  </div>
+
+  <!-- Load Editora Web Component -->
+  <script src="../packages/core/dist/webcomponent.min.js"></script>
+  
+  <script>
+    // Log loaded components
+    console.log('=== Editora Web Component Loaded ===');
+    console.log('window.Editora:', window.Editora);
+    console.log('Custom element defined:', customElements.get('rich-text-editor'));
+
+    function showDebugInfo() {
+      const editor1 = document.getElementById('editor1');
+      const editor2 = document.getElementById('editor2');
+      const editor3 = document.getElementById('editor3');
+
+      const info = {
+        'window.Editora': !!window.Editora,
+        'Custom Element': customElements.get('rich-text-editor')?.name,
+        'Editor 1 Element': editor1?.tagName,
+        'Editor 1 Shadow Root': !!editor1?.shadowRoot,
+        'Editor 1 Toolbar': editor1?.shadowRoot?.querySelector('.editora-toolbar-container')?.innerHTML?.substring(0, 200),
+        'Editor 2 Toolbar Attr': editor2?.getAttribute('toolbar'),
+        'Editor 3 Toolbar Attr': editor3?.getAttribute('toolbar'),
+      };
+
+      // Try to access internal state if available
+      if (editor1 && 'pluginLoader' in editor1) {
+        const loader = editor1.pluginLoader;
+        if (loader && 'plugins' in loader) {
+          info['Registered Plugins'] = loader.plugins.map(p => p.name);
+          info['Plugin Count'] = loader.plugins.length;
+        }
+      }
+
+      const output = document.getElementById('debug-output');
+      output.innerHTML = '<pre>' + JSON.stringify(info, null, 2) + '</pre>';
+      
+      console.log('=== Debug Info ===', info);
+    }
+
+    // Auto-run debug after elements are connected
+    setTimeout(() => {
+      console.log('=== Auto Debug Check ===');
+      const editor1 = document.getElementById('editor1');
+      if (editor1?.shadowRoot) {
+        const toolbar = editor1.shadowRoot.querySelector('.editora-toolbar-container');
+        console.log('Toolbar found:', !!toolbar);
+        console.log('Toolbar HTML:', toolbar?.innerHTML);
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

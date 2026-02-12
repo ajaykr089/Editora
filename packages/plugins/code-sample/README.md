@@ -34,7 +34,7 @@ npm install @editora/code-sample
 ```typescript
 import { CodeSamplePlugin } from '@editora/code-sample';
 
-const editor = new RichTextEditor({
+const editor = new EditoraEditor({
   plugins: [CodeSamplePlugin()]
 });
 ```
@@ -122,7 +122,7 @@ function EditorApp() {
     });
   }, []);
 
-  return <RichTextEditor plugins={[CodeSamplePlugin()]} />;
+  return <EditoraEditor plugins={[CodeSamplePlugin()]} />;
 }
 ```
 

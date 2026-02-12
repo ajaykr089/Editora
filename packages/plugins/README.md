@@ -453,7 +453,6 @@ const blogPlugins = [
   createBoldPlugin(),
   createItalicPlugin(),
   createHeadingPlugin({ levels: [1, 2, 3] }),
-  createParagraphPlugin(),
   createLinkPlugin({ targetBlank: true }),
   createImagePlugin({ 
     upload: uploadImage,

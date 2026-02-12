@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Test - Editora Web Component</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    h1 { color: #4CAF50; }
+    .status { 
+      padding: 15px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      margin: 20px 0;
+      font-family: monospace;
+    }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Editora Web Component Test</h1>
+  
+  <div id="status" class="status">Loading...</div>
+  
+  <h2>Editor Instance:</h2>
+  <editora-editor id="test-editor" height="300">
+    <h2>Test Editor</h2>
+    <p>If you can see this and the toolbar above, <strong>everything works!</strong></p>
+    <p>Try editing this text.</p>
+  </editora-editor>
+  
+  <h2>API Test:</h2>
+  <div id="api-result" class="status">Click button to test API...</div>
+  <button onclick="testAPI()" style="padding: 10px 20px; margin: 10px 0;">Test API</button>
+  
+  <script src="packages/core/dist/webcomponent.min.js"></script>
+  <script>
+    window.addEventListener('load', () => {
+      const status = document.getElementById('status');
+      let results = [];
+      
+      // Test 1: Check if Editora global exists
+      if (typeof window.Editora !== 'undefined') {
+        results.push('✅ Global Editora object exists');
+      } else {
+        results.push('❌ Global Editora object missing');
+      }
+      
+      // Test 2: Check version
+      if (window.Editora && window.Editora.version) {
+        results.push(`✅ Version: ${window.Editora.version}`);
+      } else {
+        results.push('❌ Version missing');
+      }
+      
+      // Test 3: Check plugins
+      if (window.Editora && window.Editora.plugins) {
+        results.push(`✅ Plugins loaded: ${window.Editora.plugins.length}`);
+      } else {
+        results.push('❌ Plugins missing');
+      }
+      
+      // Test 4: Check custom element
+      if (customElements.get('rich-text-editor')) {
+        results.push('✅ Custom element registered');
+      } else {
+        results.push('❌ Custom element not registered');
+      }
+      
+      // Test 5: Check editor instance
+      const editor = document.getElementById('test-editor');
+      if (editor && typeof editor.getContent === 'function') {
+        results.push('✅ Editor instance functional');
+      } else {
+        results.push('❌ Editor instance broken');
+      }
+      
+      // Display results
+      const allPassed = results.every(r => r.startsWith('✅'));
+      status.innerHTML = results.join('<br>');
+      status.className = allPassed ? 'status success' : 'status error';
+      
+      // Wait for editor to be ready
+      editor.addEventListener('editor-ready', () => {
+        console.log('✅ Editor ready event fired');
+      });
+    });
+    
+    function testAPI() {
+      const editor = document.getElementById('test-editor');
+      const result = document.getElementById('api-result');
+      const api = editor.getAPI();
+      
+      let tests = [];
+      
+      // Test getContent
+      try {
+        const content = api.getContent();
+        tests.push(`✅ getContent(): ${content.length} chars`);
+      } catch (e) {
+        tests.push(`❌ getContent() failed: ${e.message}`);
+      }
+      
+      // Test setContent
+      try {
+        const timestamp = new Date().toLocaleTimeString();
+        api.setContent(`<p>API test at ${timestamp}</p>`);
+        tests.push(`✅ setContent(): Success`);
+      } catch (e) {
+        tests.push(`❌ setContent() failed: ${e.message}`);
+      }
+      
+      // Test execCommand
+      try {
+        api.execCommand('toggleBold');
+        tests.push(`✅ execCommand(): Success`);
+      } catch (e) {
+        tests.push(`❌ execCommand() failed: ${e.message}`);
+      }
+      
+      // Test focus
+      try {
+        api.focus();
+        tests.push(`✅ focus(): Success`);
+      } catch (e) {
+        tests.push(`❌ focus() failed: ${e.message}`);
+      }
+      
+      // Test getConfig
+      try {
+        const config = api.getConfig();
+        tests.push(`✅ getConfig(): ${Object.keys(config).length} keys`);
+      } catch (e) {
+        tests.push(`❌ getConfig() failed: ${e.message}`);
+      }
+      
+      // Display results
+      const allPassed = tests.every(t => t.startsWith('✅'));
+      result.innerHTML = tests.join('<br>');
+      result.className = allPassed ? 'status success' : 'status error';
+    }
+  </script>
+</body>
+</html>

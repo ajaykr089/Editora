@@ -1,1 +1,1 @@
-export { EmojisPlugin } from './EmojisPlugin';
+export { EmojisPlugin } from './EmojisPlugin.native';

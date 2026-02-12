@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editora - PDF Export Test</title>
+
+  <!-- Editor Styles -->
+  <link rel="stylesheet" href="packages/core/src/webcomponent/styles.css">
+  <!-- All Plugin Styles -->
+  <link rel="stylesheet" href="packages/plugins/dist/plugins.css">
+  <!-- Core Styles -->
+  <link rel="stylesheet" href="packages/core/dist/core.css">
+  <!-- Theme Styles -->
+  <link rel="stylesheet" href="packages/themes/src/themes/default.css">
+
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    .test-section {
+      background: white;
+      padding: 30px;
+      margin: 20px 0;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .test-section h1 {
+      color: #667eea;
+      margin: 0 0 20px 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #667eea;
+    }
+
+    .test-info {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .test-info strong {
+      color: #0066cc;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar button {
+      padding: 8px 16px;
+      border: 1px solid #d0d0d0;
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .toolbar button:hover {
+      background: #e0e0e0;
+    }
+
+    .editor {
+      border: 2px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 16px;
+      min-height: 600px;
+      background: white;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .editor:focus {
+      outline: none;
+      border-color: #0066cc;
+    }
+
+    .export-section {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f0f8ff;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .export-section button {
+      padding: 12px 24px;
+      background: #0066cc;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .export-section button:hover {
+      background: #0052a3;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-section">
+    <h1>🎯 Editora - PDF Export Test</h1>
+
+    <div class="test-info">
+      <strong>PDF Export Multi-Page Test</strong><br>
+      This test verifies that PDF export now properly handles long content that spans multiple pages.
+      The content below should be exported to a multi-page PDF with proper pagination.
+    </div>
+
+    <div class="toolbar">
+      <button onclick="exportToPDF()">📄 Export to PDF</button>
+      <button onclick="debugPDF()">🔍 Debug PDF</button>
+    </div>
+
+    <editora-editor
+      id="editor"
+      height="600"
+      plugins="document-manager"
+      toolbar-items="exportPdf"
+    >
+      <h1>Multi-Page PDF Export Test</h1>
+
+      <h2>Introduction</h2>
+      <p>This document is designed to test the PDF export functionality with content that exceeds a single page. The previous implementation would cut off content or make it unreadable by trying to fit everything on one page.</p>
+
+      <h2>Section 1: Basic Content</h2>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+
+      <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+      <h3>Subsection 1.1</h3>
+      <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+
+      <ul>
+        <li>List item one</li>
+        <li>List item two</li>
+        <li>List item three</li>
+        <li>List item four</li>
+        <li>List item five</li>
+      </ul>
+
+      <h2>Section 2: More Content</h2>
+      <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+
+      <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+
+      <h3>Subsection 2.1</h3>
+      <p>Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur.</p>
+
+      <blockquote>
+        <p>This is a blockquote to test how block elements are rendered in the PDF export.</p>
+      </blockquote>
+
+      <h2>Section 3: Even More Content</h2>
+      <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.</p>
+
+      <p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.</p>
+
+      <h3>Subsection 3.1</h3>
+      <p>Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus.</p>
+
+      <p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.</p>
+
+      <h2>Section 4: Testing Pagination</h2>
+      <p>Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.</p>
+
+      <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+
+      <h3>Subsection 4.1</h3>
+      <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+
+      <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+
+      <h2>Section 5: Final Content</h2>
+      <p>Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur.</p>
+
+      <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident.</p>
+
+      <h3>Subsection 5.1</h3>
+      <p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio.</p>
+
+      <p>Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus, omnis voluptas assumenda est, omnis dolor repellendus.</p>
+
+      <h2>Conclusion</h2>
+      <p>This concludes our test document. If the PDF export is working correctly, all this content should appear across multiple pages in the exported PDF, with proper pagination and readable text.</p>
+
+      <p>The end of the document.</p>
+    </editora-editor>
+
+    <div class="export-section">
+      <button onclick="exportToPDF()">📄 Export Full Content to PDF</button>
+      <p><small>This should create a multi-page PDF with all the content above</small></p>
+    </div>
+  </div>
+
+  <!-- Import webcomponent bundle -->
+  <script src="packages/core/dist/webcomponent.min.js"></script>
+
+  <script>
+    async function exportToPDF() {
+      try {
+        const editor = document.getElementById('editor');
+
+        // Get the command from plugins
+        const plugins = window.PluginLoader ? window.PluginLoader.getAll() : [];
+
+        for (const plugin of plugins) {
+          if (plugin.commands && plugin.commands.exportPdf) {
+            console.log('Executing PDF export command');
+            await plugin.commands.exportPdf();
+            return;
+          }
+        }
+
+        console.warn('PDF export command not found');
+        alert('PDF export plugin not loaded');
+      } catch (error) {
+        console.error('PDF export failed:', error);
+        alert('PDF export failed: ' + error.message);
+      }
+    }
+
+    async function debugPDF() {
+      try {
+        const editor = document.getElementById('editor');
+        console.log('Editor element:', editor);
+
+        // For web component, we need to get the shadow root or content
+        const shadowRoot = editor.shadowRoot;
+        const contentEditable = shadowRoot ? shadowRoot.querySelector('[contenteditable="true"]') : null;
+
+        console.log('Shadow root:', shadowRoot);
+        console.log('Content editable element:', contentEditable);
+
+        if (contentEditable) {
+          console.log('Content editable dimensions:', {
+            scrollWidth: contentEditable.scrollWidth,
+            scrollHeight: contentEditable.scrollHeight,
+            clientWidth: contentEditable.clientWidth,
+            clientHeight: contentEditable.clientHeight,
+            offsetWidth: contentEditable.offsetWidth,
+            offsetHeight: contentEditable.offsetHeight
+          });
+          console.log('Content length:', contentEditable.innerHTML.length);
+          console.log('Content preview:', contentEditable.innerHTML.substring(0, 200) + '...');
+        }
+
+        // Test html2canvas directly
+        if (window.html2canvas && contentEditable) {
+          console.log('html2canvas is available, testing...');
+          const canvas = await window.html2canvas(contentEditable, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff'
+          });
+          console.log('Canvas created:', {
+            width: canvas.width,
+            height: canvas.height
+          });
+        } else {
+          console.log('html2canvas not available or no contentEditable found');
+        }
+
+        alert('Debug info logged to console');
+      } catch (error) {
+        console.error('Debug failed:', error);
+        alert('Debug failed: ' + error.message);
+      }
+    }
+
+    console.log('✓ PDF Export Test loaded');
+  </script>
+</body>
+</html></content>
+<parameter name="filePath">/Users/etelligens/Documents/Rich-Text-Editor/test-pdf-export.html

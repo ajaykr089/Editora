@@ -21,15 +21,15 @@ import { FullscreenPlugin, FullscreenPluginProvider } from '@editora/plugins';
 
 ### Basic Setup
 
-The fullscreen plugin is automatically integrated into the RichTextEditor when using `FullscreenPluginProvider`:
+The fullscreen plugin is automatically integrated into the EditoraEditor when using `FullscreenPluginProvider`:
 
 ```tsx
-import { RichTextEditor } from '@editora/react';
+import { EditoraEditor } from '@editora/react';
 import { FullscreenPlugin } from '@editora/plugins';
 
 export default function Editor() {
   return (
-    <RichTextEditor
+    <EditoraEditor
       plugins={[
         // ... other plugins
         FullscreenPlugin(),
@@ -125,7 +125,7 @@ The fullscreen plugin works in all modern browsers that support:
 
 ```tsx
 import React from 'react';
-import { RichTextEditor } from '@editora/react';
+import { EditoraEditor } from '@editora/react';
 import {
   BoldPlugin,
   ItalicPlugin,
@@ -134,7 +134,7 @@ import {
 
 export default function Editor() {
   return (
-    <RichTextEditor
+    <EditoraEditor
       plugins={[
         BoldPlugin(),
         ItalicPlugin(),

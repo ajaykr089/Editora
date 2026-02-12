@@ -1,1 +1,1 @@
-export { ClearFormattingPlugin } from './ClearFormattingPlugin';
+export { ClearFormattingPlugin } from './ClearFormattingPlugin.native';

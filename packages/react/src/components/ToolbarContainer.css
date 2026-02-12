@@ -1,0 +1,280 @@
+/* ToolbarContainer - Feature-Complete React Wrapper for Toolbar */
+
+.toolbar-container-wrapper {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  position: relative;
+}
+
+.toolbar-container-wrapper[data-toolbar-sticky='true'] {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-container-wrapper[data-toolbar-floating='true'] {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.toolbar-container-wrapper[data-toolbar-position='bottom'] {
+  border-bottom: none;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Toolbar wrapper and container */
+.toolbar-container-wrapper .toolbar-wrapper {
+  display: flex;
+  width: 100%;
+  padding: 8px;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.toolbar-container-wrapper .toolbar {
+  display: flex;
+  width: 100%;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.toolbar-container-wrapper .toolbar-container {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+/* Toolbar items */
+.toolbar-container-wrapper .toolbar-item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Toolbar buttons */
+.toolbar-container-wrapper .toolbar-button {
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+  min-height: 32px;
+  white-space: nowrap;
+}
+
+.toolbar-container-wrapper .toolbar-button:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.toolbar-container-wrapper .toolbar-button:active,
+.toolbar-container-wrapper .toolbar-button[data-active='true'] {
+  background-color: #0066cc;
+  color: #ffffff;
+  border-color: #0052a3;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-container-wrapper .toolbar-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f9fafb;
+}
+
+/* More button (overflow) */
+.toolbar-container-wrapper .toolbar-more-button {
+  padding: 6px 8px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* Toolbar separators */
+.toolbar-container-wrapper .toolbar-separator {
+  width: 1px;
+  height: 24px;
+  background-color: #d1d5db;
+  margin: 0 4px;
+}
+
+/* Toolbar icons */
+.toolbar-container-wrapper .toolbar-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.toolbar-container-wrapper .toolbar-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Dropdown menus */
+.toolbar-container-wrapper .toolbar-dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-container-wrapper .toolbar-dropdown-arrow {
+  font-size: 10px;
+  margin-left: 2px;
+  line-height: 1;
+}
+
+.toolbar-container-wrapper .toolbar-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 160px;
+  padding: 4px 0;
+  margin-top: 4px;
+  display: none;
+}
+
+.toolbar-container-wrapper .toolbar-dropdown-menu.show {
+  display: block;
+}
+
+.toolbar-container-wrapper .toolbar-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-size: 13px;
+  color: #1f2937;
+  transition: background-color 0.15s ease;
+  font-family: inherit;
+}
+
+.toolbar-container-wrapper .toolbar-dropdown-item:hover {
+  background-color: #f3f4f6;
+}
+
+.toolbar-container-wrapper .toolbar-dropdown-item:active {
+  background-color: #e5e7eb;
+}
+
+/* Input fields in toolbar */
+.toolbar-container-wrapper .toolbar-input {
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  background-color: #ffffff;
+  color: #1f2937;
+  transition: all 0.15s ease;
+}
+
+.toolbar-container-wrapper .toolbar-input:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+  background-color: #ffffff;
+}
+
+.toolbar-container-wrapper .toolbar-input::placeholder {
+  color: #9ca3af;
+}
+
+/* Overflow menu */
+.toolbar-overflow-menu {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toolbar-overflow-item {
+  transition: background-color 0.15s ease;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+  .toolbar-container-wrapper .toolbar-button {
+    padding: 5px 8px;
+    font-size: 12px;
+    min-height: 28px;
+  }
+
+  .toolbar-container-wrapper .toolbar-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .toolbar-container-wrapper .toolbar-dropdown-menu {
+    min-width: 140px;
+  }
+
+  .toolbar-container-wrapper .toolbar-dropdown-item {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .toolbar-container-wrapper {
+    padding: 4px;
+  }
+
+  .toolbar-container-wrapper .toolbar-wrapper {
+    padding: 4px;
+    gap: 2px;
+  }
+
+  .toolbar-container-wrapper .toolbar-button {
+    padding: 4px 6px;
+    font-size: 11px;
+    min-height: 24px;
+  }
+
+  .toolbar-container-wrapper .toolbar-icon {
+    width: 14px;
+    height: 14px;
+  }
+}

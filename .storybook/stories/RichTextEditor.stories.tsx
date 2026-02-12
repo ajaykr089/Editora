@@ -1,764 +1,743 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { useState } from "react";
-import { RichTextEditor } from "@editora/react";
+import { useEffect, useRef, useState } from "react";
+import { EditoraEditor } from "@editora/react";
+import "@editora/themes/themes/default.css";
+
+// Import the Web Component build
+import "../../packages/core/dist/webcomponent.esm.js";
+
+// Import native plugins
 import {
-  ParagraphPlugin,
-  HeadingPlugin,
   BoldPlugin,
   ItalicPlugin,
   UnderlinePlugin,
   StrikethroughPlugin,
+  LinkPlugin,
+  TablePlugin,
   ListPlugin,
+  HistoryPlugin,
+  ClearFormattingPlugin,
+  HeadingPlugin,
   BlockquotePlugin,
   CodePlugin,
-  LinkPlugin,
-  ClearFormattingPlugin,
-  HistoryPlugin,
-  TablePlugin,
-  MediaManagerPlugin,
-  FontSizePlugin,
-  FontFamilyPlugin,
+  CodeSamplePlugin,
+  IndentPlugin,
   TextAlignmentPlugin,
-  MathPlugin,
-  DocumentManagerPlugin,
   TextColorPlugin,
   BackgroundColorPlugin,
-  SpecialCharactersPlugin,
-  EmojisPlugin,
+  FontSizePlugin,
+  FontFamilyPlugin,
   LineHeightPlugin,
-  IndentPlugin,
-  EmbedIframePlugin,
-  CapitalizationPlugin,
-  DirectionPlugin,
-  ChecklistPlugin,
-  PreviewPlugin,
-  FullscreenPlugin,
-  AnchorPlugin,
-  PrintPlugin,
-  PageBreakPlugin,
   FootnotePlugin,
-  CodeSamplePlugin,
+  DirectionPlugin,
+  CapitalizationPlugin,
+  ChecklistPlugin,
+  AnchorPlugin,
+  EmbedIframePlugin,
+  MathPlugin,
+  MediaManagerPlugin,
   MergeTagPlugin,
-  TemplatePlugin,
-  CommentsPlugin,
+  PageBreakPlugin,
+  PrintPlugin,
+  PreviewPlugin,
+  SpecialCharactersPlugin,
   SpellCheckPlugin,
-  A11yCheckerPlugin
+  EmojisPlugin,
+  A11yCheckerPlugin,
+  CommentsPlugin,
+  DocumentManagerPlugin,
+  FullscreenPlugin,
+  TemplatePlugin
 } from "@editora/plugins";
-import "@editora/themes/themes/default.css";
 
-const meta: Meta<typeof RichTextEditor> = {
-  title: "Editor/RichTextEditor",
-  component: RichTextEditor,
+const meta: Meta = {
+  title: "Editor/Rich Text Editor - Web Component",
   parameters: {
     layout: "padded",
+    docs: {
+      description: {
+        component: `
+# Editora Web Component - Framework Agnostic Rich Text Editor
+
+**Bundle Size**: 115 KB minified (28.65 KB gzipped)  
+**Native Plugins**: 40  
+**Framework Dependencies**: 0  
+**Supports**: React, Vue, Angular, Svelte, Vanilla JS
+
+## Features
+- ✅ Zero framework dependencies
+- ✅ 91% bundle size reduction
+- ✅ TinyMCE-style declarative API
+- ✅ Works everywhere
+- ✅ 37 native plugins including Code Sample, Media Manager, Math, Merge Tags, Page Break, Template, A11y Checker, Comments, and more
+        `,
+      },
+    },
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof RichTextEditor>;
+type Story = StoryObj;
 
-// Common plugins for all stories
-const commonPlugins = [
-  ParagraphPlugin(),
-  HeadingPlugin(),
+// All native plugins
+const allNativePlugins = [
   BoldPlugin(),
   ItalicPlugin(),
   UnderlinePlugin(),
   StrikethroughPlugin(),
-  CodePlugin(),
-  ListPlugin(),
-  BlockquotePlugin(),
-  LinkPlugin(),
   ClearFormattingPlugin(),
-  TablePlugin(),
-  HistoryPlugin(),
-  MediaManagerPlugin(),
-  FontSizePlugin(),
-  FontFamilyPlugin(),
+  // ParagraphPlugin removed - paragraph option is in HeadingPlugin dropdown
+  HeadingPlugin(),
+  BlockquotePlugin(),
+  CodePlugin(),
+  CodeSamplePlugin(),
+  ListPlugin(),
+  ChecklistPlugin(),
   TextAlignmentPlugin(),
-  MathPlugin(),
-  DocumentManagerPlugin(),
+  IndentPlugin(),
+  DirectionPlugin(),
   TextColorPlugin(),
   BackgroundColorPlugin(),
-  SpecialCharactersPlugin(),
-  EmojisPlugin(),
+  FontSizePlugin(),
+  FontFamilyPlugin(),
   LineHeightPlugin(),
-  IndentPlugin(),
-  EmbedIframePlugin(),
   CapitalizationPlugin(),
-  DirectionPlugin(),
-  ChecklistPlugin(),
-  PreviewPlugin(),
-  FullscreenPlugin(),
+  LinkPlugin(),
+  TablePlugin(),
   AnchorPlugin(),
-  PrintPlugin(),
-  PageBreakPlugin(),
-  FootnotePlugin(),
-  CodeSamplePlugin(),
+  EmbedIframePlugin(),
+  MathPlugin(),
+  MediaManagerPlugin(),
   MergeTagPlugin(),
-  TemplatePlugin(),
-  CommentsPlugin(),
+  PageBreakPlugin(),
+  PrintPlugin(),
+  PreviewPlugin(),
+  SpecialCharactersPlugin(),
   SpellCheckPlugin(),
+  EmojisPlugin(),
   A11yCheckerPlugin(),
+  CommentsPlugin(),
+  DocumentManagerPlugin(),
+  FullscreenPlugin(),
+  TemplatePlugin(),
+  HistoryPlugin(),
+  FootnotePlugin()
 ];
 
-export const Default: Story = {
-  args: {
-    plugins: commonPlugins,
-    mediaConfig: {
-      uploadUrl: "/api/media/upload",
-      libraryUrl: "/api/media/library",
-      maxFileSize: 5 * 1024 * 1024,
-      allowedTypes: [
-        "image/jpeg",
-        "image/png",
-        "image/gif",
-        "video/mp4",
-        "video/webm",
-      ],
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <RichTextEditor {...args} />
-    </div>
-  ),
-};
-
-export const MinimalPlugins: Story = {
-  args: {
-    plugins: [ParagraphPlugin(), BoldPlugin(), ItalicPlugin()],
-  },
-};
-
-export const OnlyFormatting: Story = {
-  args: {
-    plugins: [ParagraphPlugin(), HeadingPlugin()],
-  },
-};
-
-// ==================== NEW CONFIGURATION FEATURES ====================
-
 /**
- * Toolbar Configuration Demo
- * Shows floating, sticky, and positioned toolbar options
+ * Basic usage with default configuration
+ * All 37 native plugins loaded automatically
  */
-export const FloatingToolbar: Story = {
-  args: {
-    plugins: commonPlugins,
-    toolbar: {
-      floating: true,
-      sticky: false,
-      position: 'top',
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>Floating Toolbar Demo:</strong> Select text to see the floating toolbar appear
-      </div>
-      <RichTextEditor {...args} defaultValue="<p>Select this text to see the floating toolbar in action!</p>" />
-    </div>
-  ),
-};
-
-export const StickyToolbar: Story = {
-  args: {
-    plugins: commonPlugins,
-    toolbar: {
-      floating: false,
-      sticky: true,
-      position: 'top',
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd', overflow: 'auto' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>Sticky Toolbar Demo:</strong> Scroll down and the toolbar stays at the top
-      </div>
-      <RichTextEditor {...args} defaultValue={"<p>Scroll down to see the sticky toolbar...</p><br>".repeat(50)} />
-    </div>
-  ),
-};
-
-export const BottomToolbar: Story = {
-  args: {
-    plugins: commonPlugins,
-    toolbar: {
-      floating: false,
-      sticky: false,
-      position: 'bottom',
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>Bottom Toolbar Demo:</strong> Toolbar appears at the bottom of the editor
-      </div>
-      <RichTextEditor {...args} />
-    </div>
+export const Basic: Story = {
+  render: () => (
+    <EditoraEditor
+      plugins={allNativePlugins}
+      defaultValue={`
+        <h2>Welcome to Editora!</h2>
+        <p>This is a <strong>framework-agnostic</strong> rich text editor with <mark style="background: #ffeb3b;">37 native plugins</mark>.</p>
+        <p>✨ <strong>Key Features:</strong></p>
+        <ul>
+          <li>Zero framework dependencies</li>
+          <li>115 KB minified (28.65 KB gzipped)</li>
+          <li>91% smaller than before!</li>
+          <li>Works with React, Vue, Angular, Svelte</li>
+        </ul>
+        <p>Try editing this content!</p>
+      `}
+    />
   ),
 };
 
 /**
- * MenuBar & StatusBar Configuration
+ * Web Component API - TinyMCE Style Usage
+ * Demonstrates using the global Editora API
  */
-export const WithMenuBar: Story = {
-  args: {
-    plugins: commonPlugins,
-    menubar: {
-      enabled: true,
-    },
-    statusbar: {
-      enabled: true,
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>MenuBar & StatusBar:</strong> Full editor UI with menu and status bar
-      </div>
-      <RichTextEditor {...args} defaultValue="<p>Type to see word count in status bar</p>" />
-    </div>
-  ),
-};
-
-export const NoMenuBar: Story = {
-  args: {
-    plugins: commonPlugins,
-    menubar: {
-      enabled: false,
-    },
-    statusbar: {
-      enabled: false,
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>Minimal UI:</strong> No menu bar or status bar for clean interface
-      </div>
-      <RichTextEditor {...args} />
-    </div>
-  ),
-};
-
-/**
- * Media Configuration Demo
- * Shows file size limits, allowed types, and upload handling
- */
-export const MediaConfiguration: Story = {
-  args: {
-    plugins: commonPlugins,
-    media: {
-      maxFileSize: 2 * 1024 * 1024, // 2MB
-      allowedTypes: ['image/png', 'image/jpeg'],
-      uploadHandler: async (file: File): Promise<{ url: string; name: string }> => {
-        console.log('Uploading file:', file.name, file.size);
-        // Simulate upload
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            resolve({
-              url: URL.createObjectURL(file),
-              name: file.name,
-            });
-          }, 1000);
-        });
-      },
-      chunkedUpload: {
-        enabled: true,
-        chunkSize: 512 * 1024, // 512KB chunks
-      },
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>Media Upload:</strong> Max 2MB, PNG/JPEG only, with chunked upload
-        <br />
-        <small>Try uploading an image to test validation and progress tracking</small>
-      </div>
-      <RichTextEditor {...args} />
-    </div>
-  ),
-};
-
-/**
- * Paste Configuration Demo
- */
-export const PasteConfiguration: Story = {
-  args: {
-    plugins: commonPlugins,
-    paste: {
-      pasteAsPlainText: false,
-      cleanupPaste: true,
-      pasteFilters: ['removeStyles', 'removeClasses'],
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>Smart Paste:</strong> Paste cleanup enabled
-        <br />
-        <small>Try pasting formatted content from Word or web pages</small>
-      </div>
-      <RichTextEditor {...args} />
-    </div>
-  ),
-};
-
-export const PastePlainText: Story = {
-  args: {
-    plugins: commonPlugins,
-    paste: {
-      pasteAsPlainText: true,
-      cleanupPaste: true,
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>Paste as Plain Text:</strong> All formatting stripped on paste
-        <br />
-        <small>Try pasting formatted text - only plain text will be inserted</small>
-      </div>
-      <RichTextEditor {...args} />
-    </div>
-  ),
-};
-
-/**
- * Spellcheck Configuration Demo
- */
-export const SpellcheckBrowser: Story = {
-  args: {
-    plugins: commonPlugins,
-    spellcheck: {
-      provider: 'browser',
-      language: 'en-US',
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>Browser Spellcheck:</strong> Native browser spell checking enabled
-        <br />
-        <small>Type "teh" or "wrng" to see spell check in action</small>
-      </div>
-      <RichTextEditor {...args} defaultValue="<p>Teh quik brwn fox...</p>" />
-    </div>
-  ),
-};
-
-export const SpellcheckCustomDictionary: Story = {
-  args: {
-    plugins: commonPlugins,
-    spellcheck: {
-      provider: 'browser',
-      language: 'en-US',
-      customDictionary: ['editora', 'webpack', 'JavaScript'],
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>Custom Dictionary:</strong> "editora", "webpack", "JavaScript" whitelisted
-        <br />
-        <small>These technical terms won't be flagged as misspelled</small>
-      </div>
-      <RichTextEditor {...args} defaultValue="<p>Using editora with webpack and JavaScript</p>" />
-    </div>
-  ),
-};
-
-/**
- * Autosave Configuration Demo
- */
-export const AutosaveEnabled: Story = {
-  args: {
-    plugins: commonPlugins,
-    autosave: {
-      enabled: true,
-      interval: 5000, // 5 seconds
-      retention: 7 * 24 * 60 * 60 * 1000, // 7 days
-      prefix: 'editora-autosave',
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>Autosave Enabled:</strong> Auto-saves every 5 seconds
-        <br />
-        <small>Type some content and refresh the page - your work will be restored</small>
-      </div>
-      <RichTextEditor {...args} />
-    </div>
-  ),
-};
-
-/**
- * History Configuration Demo
- */
-export const HistoryConfiguration: Story = {
-  args: {
-    plugins: commonPlugins,
-    history: {
-      undoLevels: 50,
-      undoTimeout: 300,
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>History Config:</strong> 50 undo levels, 300ms timeout
-        <br />
-        <small>Use Cmd/Ctrl+Z to undo, Cmd/Ctrl+Shift+Z to redo</small>
-      </div>
-      <RichTextEditor {...args} defaultValue="<p>Make changes and test undo/redo</p>" />
-    </div>
-  ),
-};
-
-/**
- * Accessibility Configuration Demo
- */
-export const AccessibilityFull: Story = {
-  args: {
-    plugins: commonPlugins,
-    accessibility: {
-      keyboardNavigation: true,
-      ariaLabels: true,
-      highContrast: true,
-      skipToContent: true,
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>Full Accessibility:</strong> Keyboard nav, ARIA labels, high contrast
-        <br />
-        <small>Try navigating with Tab, use screen reader for ARIA announcements</small>
-      </div>
-      <RichTextEditor {...args} />
-    </div>
-  ),
-};
-
-/**
- * Performance Configuration Demo
- */
-export const PerformanceOptimized: Story = {
-  args: {
-    plugins: commonPlugins,
-    performance: {
-      debounceDelay: 150,
-      lazyLoading: true,
-      virtualScrolling: true,
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>Performance Mode:</strong> Debounced updates, lazy loading, virtual scrolling
-        <br />
-        <small>Optimized for large documents and fast typing</small>
-      </div>
-      <RichTextEditor {...args} />
-    </div>
-  ),
-};
-
-/**
- * Language & Direction Demo
- */
-export const RTLLanguage: Story = {
-  args: {
-    plugins: commonPlugins,
-    language: {
-      ui: 'ar',
-      direction: 'rtl',
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>RTL Support:</strong> Right-to-left text direction for Arabic/Hebrew
-        <br />
-        <small>مرحبا بك في المحرر (Arabic text flows right to left)</small>
-      </div>
-      <RichTextEditor {...args} defaultValue="<p>مرحبا بك في editora</p>" />
-    </div>
-  ),
-};
-
-/**
- * Security Configuration Demo
- */
-export const SecurityStrict: Story = {
-  args: {
-    plugins: commonPlugins,
-    security: {
-      allowedTags: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3'],
-      allowedAttributes: ['class', 'style'],
-      sanitizeHtml: true,
-      cspNonce: 'random-nonce-123',
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>Strict Security:</strong> Limited tags, sanitization enabled, CSP nonce
-        <br />
-        <small>Try pasting dangerous HTML - it will be sanitized</small>
-      </div>
-      <RichTextEditor {...args} />
-    </div>
-  ),
-};
-
-/**
- * Print Configuration Demo
- */
-export const PrintConfiguration: Story = {
-  args: {
-    plugins: commonPlugins,
-    print: {
-      pageSize: 'A4',
-      margins: { top: 20, right: 20, bottom: 20, left: 20 },
-      customStyles: `
-        @media print {
-          body { font-family: 'Times New Roman', serif; }
-          h1 { page-break-before: always; }
-        }
-      `,
-    },
-  },
-  render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-        <strong>Print Settings:</strong> A4 page, custom margins, print-specific styles
-        <br />
-        <small>Use Print button in toolbar or Cmd/Ctrl+P</small>
-      </div>
-      <RichTextEditor {...args} defaultValue="<h1>Chapter 1</h1><p>Content here...</p>" />
-    </div>
-  ),
-};
-
-/**
- * EditorAPI Demo - Programmatic Control
- */
-export const EditorAPIDemo: Story = {
+export const WebComponentAPI: Story = {
   render: () => {
-    const EditorAPIExample = () => {
-      const [api, setApi] = useState<any>(null);
-      const [content, setContent] = useState('<p>Initial content</p>');
-      const [logs, setLogs] = useState<string[]>([]);
+    const editorRef = useRef<any>(null);
+    const [output, setOutput] = useState("");
+    const [pluginCount, setPluginCount] = useState(0);
+    const [version, setVersion] = useState("");
 
-      const addLog = (message: string) => {
-        setLogs(prev => [...prev.slice(-4), `${new Date().toLocaleTimeString()}: ${message}`]);
-      };
+    useEffect(() => {
+      // Access the global Editora object
+      if (typeof window !== 'undefined' && (window as any).Editora) {
+        const Editora = (window as any).Editora;
+        setVersion(Editora.version || "N/A");
+        setPluginCount(Editora.plugins?.length || 0);
+      }
+    }, []);
 
-      return (
-        <div style={{ display: 'flex', gap: '20px', height: '600px' }}>
-          <div style={{ flex: 1, border: '1px solid #ddd' }}>
-            <RichTextEditor
-              plugins={commonPlugins}
-              value={content}
-              onChange={(html: string) => {
-                console.log('[Story] onChange called with:', html);
-                setContent(html);
-                addLog('Content changed');
-              }}
-              onInit={(editorApi: any) => {
-                setApi(editorApi);
-                addLog('Editor initialized');
-              }}
-            />
-          </div>
-          <div style={{ width: '300px', padding: '20px', background: '#f5f5f5', borderRadius: '8px' }}>
-            <h3 style={{ marginTop: 0 }}>EditorAPI Controls</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <button
-                onClick={() => {
-                  const html = api?.getHTML() || '';
-                  addLog(`Get HTML (${html.length} chars)`);
-                  alert(html);
-                }}
-                style={{ padding: '8px', cursor: 'pointer' }}
-              >
-                Get HTML
-              </button>
-              <button
-                onClick={() => {
-                  api?.setHTML('<p>Programmatically set content!</p>');
-                  addLog('Set HTML via API');
-                }}
-                style={{ padding: '8px', cursor: 'pointer' }}
-              >
-                Set HTML
-              </button>
-              <button
-                onClick={() => {
-                  api?.execCommand('bold');
-                  addLog('Executed bold command');
-                }}
-                style={{ padding: '8px', cursor: 'pointer' }}
-              >
-                Toggle Bold
-              </button>
-              <button
-                onClick={() => {
-                  api?.focus();
-                  addLog('Editor focused');
-                }}
-                style={{ padding: '8px', cursor: 'pointer' }}
-              >
-                Focus Editor
-              </button>
-              <button
-                onClick={() => {
-                  const state = api?.getState();
-                  addLog(`Get state: ${state?.plugins.length || 0} plugins`);
-                  console.log('Editor state:', state);
-                }}
-                style={{ padding: '8px', cursor: 'pointer' }}
-              >
-                Get State
-              </button>
-            </div>
-            <div style={{ marginTop: '20px', padding: '10px', background: 'white', borderRadius: '4px', fontSize: '12px' }}>
-              <strong>Activity Log:</strong>
-              {logs.length === 0 && <div style={{ color: '#999', marginTop: '10px' }}>No activity yet</div>}
-              {logs.map((log, i) => (
-                <div key={i} style={{ marginTop: '5px', padding: '5px', background: '#f0f0f0', borderRadius: '3px' }}>
-                  {log}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      );
+    const getContent = () => {
+      if (editorRef.current) {
+        const content = editorRef.current.innerHTML;
+        setOutput(content);
+      }
     };
 
-    return <EditorAPIExample />;
-  },
-};
+    const setContent = () => {
+      if (editorRef.current) {
+        editorRef.current.innerHTML = `
+          <h3>Content Set via API!</h3>
+          <p>Updated at: ${new Date().toLocaleTimeString()}</p>
+          <p>This was set using the Web Component API.</p>
+        `;
+      }
+    };
 
-/**
- * Complete Production Configuration
- * Shows all features working together
- */
-export const ProductionReady: Story = {
-  render: () => {
-    const ProductionEditor = () => {
-      const [api, setApi] = useState<any>(null);
-
-      return (
-        <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-          <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
-            <strong>Production Configuration:</strong> All enterprise features enabled
-            <br />
-            <small>Autosave, accessibility, performance, security, RTL support, and more</small>
+    return (
+      <div>
+        <div style={{ marginBottom: "20px", padding: "15px", background: "#f5f5f5", borderRadius: "4px" }}>
+          <h4 style={{ margin: "0 0 10px 0" }}>🌐 Global Editora API</h4>
+          <p style={{ margin: "5px 0" }}>Version: <strong>{version}</strong></p>
+          <p style={{ margin: "5px 0" }}>Plugins Available: <strong>{pluginCount}</strong></p>
+          <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
+            <button onClick={getContent} style={{ padding: "8px 16px" }}>Get Content</button>
+            <button onClick={setContent} style={{ padding: "8px 16px" }}>Set Content</button>
           </div>
-          <RichTextEditor
-            plugins={commonPlugins}
-            
-            // Toolbar
-            toolbar={{
-              floating: false,
-              sticky: true,
-              position: 'top',
-            }}
-            
-            // UI
-            menubar={{ enabled: true }}
-            statusbar={{ enabled: true }}
-            
-            // Media
-            media={{
-              maxFileSize: 10 * 1024 * 1024,
-              allowedTypes: ['image/png', 'image/jpeg', 'image/gif', 'video/mp4'],
-              uploadHandler: async (file: File) => {
-                console.log('Uploading:', file.name);
-                return { url: URL.createObjectURL(file), name: file.name };
-              },
-              chunkedUpload: { enabled: true, chunkSize: 1024 * 1024 },
-            }}
-            
-            // Content handling
-            paste={{
-              pasteAsPlainText: false,
-              cleanupPaste: true,
-              pasteFilters: ['removeStyles'],
-            }}
-            
-            // Spellcheck
-            spellcheck={{
-              provider: 'browser',
-              language: 'en-US',
-              customDictionary: ['editora'],
-            }}
-            
-            // Autosave
-            autosave={{
-              enabled: true,
-              interval: 30000,
-              retention: 7 * 24 * 60 * 60 * 1000,
-            }}
-            
-            // History
-            history={{
-              undoLevels: 100,
-              undoTimeout: 500,
-            }}
-            
-            // Accessibility
-            accessibility={{
-              keyboardNavigation: true,
-              ariaLabels: true,
-              highContrast: false,
-              skipToContent: true,
-            }}
-            
-            // Performance
-            performance={{
-              debounceDelay: 300,
-              lazyLoading: true,
-              virtualScrolling: false,
-            }}
-            
-            // Security
-            security={{
-              sanitizeHtml: true,
-              allowedTags: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'h3', 'ul', 'ol', 'li', 'a', 'img', 'table', 'tr', 'td', 'th'],
-              allowedAttributes: ['href', 'src', 'alt', 'class', 'style'],
-            }}
-            
-            // Language
-            language={{
-              ui: 'en',
-              direction: 'ltr',
-            }}
-            
-            // Print
-            print={{
-              pageSize: 'A4',
-              margins: { top: 20, right: 20, bottom: 20, left: 20 },
-            }}
-            
-            // API
-            onInit={(editorApi: any) => {
-              setApi(editorApi);
-              console.log('Editor ready with API:', editorApi);
-            }}
-            
-            defaultValue="<h1>Production-Ready Editor</h1><p>This editor has all enterprise features configured for real-world use.</p>"
+        </div>
+
+        <div ref={editorRef}>
+          <EditoraEditor
+            plugins={allNativePlugins}
+            defaultValue={`
+              <h3>Web Component API Demo</h3>
+              <p>This editor can be controlled via the global <code>window.Editora</code> object.</p>
+              <p>Try the buttons above to interact with the editor programmatically!</p>
+            `}
           />
         </div>
-      );
+
+        {output && (
+          <div style={{ marginTop: "20px", padding: "15px", background: "#e8f5e9", borderRadius: "4px" }}>
+            <h4 style={{ margin: "0 0 10px 0" }}>📄 Output:</h4>
+            <pre style={{ overflow: "auto", fontSize: "12px" }}>{output}</pre>
+          </div>
+        )}
+      </div>
+    );
+  },
+};
+
+/**
+ * All 32 Native Plugins Showcase
+ * Demonstrates every available plugin
+ */
+export const AllPluginsShowcase: Story = {
+  render: () => (
+    <div>
+      <div style={{ marginBottom: "20px", padding: "15px", background: "#e3f2fd", borderRadius: "4px" }}>
+        <h3 style={{ margin: "0 0 10px 0" }}>🔌 All 32 Native Plugins Loaded</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", fontSize: "13px" }}>
+          <div><strong>Basic Formatting (5):</strong><br/>Bold, Italic, Underline, Strikethrough, ClearFormatting</div>
+          <div><strong>Block Types (4):</strong><br/>Paragraph, Heading, Blockquote, Code</div>
+          <div><strong>Lists (2):</strong><br/>List, Checklist</div>
+          <div><strong>Layout (3):</strong><br/>TextAlignment, Indent, Direction</div>
+          <div><strong>Typography (6):</strong><br/>TextColor, BackgroundColor, FontSize, FontFamily, LineHeight, Capitalization</div>
+          <div><strong>Content (6):</strong><br/>Link, Image, Table, Anchor, EmbedIframe, Footnote</div>
+          <div><strong>Special (3):</strong><br/>Math, SpecialCharacters, Emojis</div>
+          <div><strong>Tools (4):</strong><br/>A11yChecker, Comments, DocumentManager, Fullscreen</div>
+          <div><strong>History (1):</strong><br/>History</div>
+        </div>
+      </div>
+
+      <EditoraEditor
+        plugins={allNativePlugins}
+        defaultValue={`
+          <h1>🎨 All Plugin Features</h1>
+          
+          <h2>Basic Formatting</h2>
+          <p><strong>Bold</strong>, <em>Italic</em>, <u>Underline</u>, <s>Strikethrough</s></p>
+          
+          <h2>Typography</h2>
+          <p style="color: #e91e63;">Text Color</p>
+          <p style="background-color: #ffeb3b;">Background Color</p>
+          <p style="font-size: 18px;">Font Size: 18px</p>
+          <p style="font-family: 'Courier New';">Font Family: Courier New</p>
+          <p style="line-height: 2;">Line Height: 2.0</p>
+          
+          <h2>Text Alignment</h2>
+          <p style="text-align: left;">Left aligned</p>
+          <p style="text-align: center;">Center aligned</p>
+          <p style="text-align: right;">Right aligned</p>
+          <p style="text-align: justify;">Justified text with enough content to wrap and demonstrate the justification effect across multiple lines.</p>
+          
+          <h2>Lists</h2>
+          <ul>
+            <li>Bullet list item 1</li>
+            <li>Bullet list item 2</li>
+          </ul>
+          <ol>
+            <li>Numbered list item 1</li>
+            <li>Numbered list item 2</li>
+          </ol>
+          
+          <h2>Block Quotes</h2>
+          <blockquote>
+            "This is a blockquote. It can contain multiple paragraphs and formatting."
+          </blockquote>
+          
+          <h2>Code</h2>
+          <pre><code>function hello() {
+  console.log("Hello, World!");
+}</code></pre>
+          
+          <h2>Links & Media</h2>
+          <p><a href="https://example.com">Click here for a link</a></p>
+          
+          <h2>Tables</h2>
+          <table border="1">
+            <tr><th>Header 1</th><th>Header 2</th></tr>
+            <tr><td>Cell 1</td><td>Cell 2</td></tr>
+            <tr><td>Cell 3</td><td>Cell 4</td></tr>
+          </table>
+          
+          <p>Try using the toolbar to test all features! 🚀</p>
+        `}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Custom Toolbar Configuration
+ * Demonstrates toolbar customization
+ */
+export const CustomToolbar: Story = {
+  render: () => (
+    <div>
+      <div style={{ marginBottom: "20px", padding: "15px", background: "#fff3e0", borderRadius: "4px" }}>
+        <h4 style={{ margin: "0 0 10px 0" }}>🎨 Custom Toolbar</h4>
+        <p style={{ margin: 0, fontSize: "14px" }}>Only essential formatting tools are shown in the toolbar.</p>
+      </div>
+
+      <EditoraEditor
+        plugins={[
+          BoldPlugin(),
+          ItalicPlugin(),
+          UnderlinePlugin(),
+          StrikethroughPlugin(),
+          LinkPlugin(),
+          HistoryPlugin(),
+        ]}
+        toolbar={{
+          items: "undo redo | bold italic underline strikethrough | link",
+          sticky: true,
+        }}
+        defaultValue={`
+          <h2>Minimal Editor</h2>
+          <p>This editor has a <strong>simplified toolbar</strong> with only essential formatting options.</p>
+          <p>Perfect for comment sections, chat applications, or simple text input.</p>
+        `}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Readonly Mode
+ * Demonstrates readonly editor for viewing content
+ */
+export const ReadonlyMode: Story = {
+  render: () => {
+    const [readonly, setReadonly] = useState(true);
+
+    return (
+      <div>
+        <div style={{ marginBottom: "20px", padding: "15px", background: "#f3e5f5", borderRadius: "4px" }}>
+          <h4 style={{ margin: "0 0 10px 0" }}>🔒 Readonly Mode</h4>
+          <button onClick={() => setReadonly(!readonly)} style={{ padding: "8px 16px" }}>
+            {readonly ? "Enable Editing" : "Disable Editing"}
+          </button>
+        </div>
+
+        <EditoraEditor
+          plugins={allNativePlugins}
+          readonly={readonly}
+          defaultValue={`
+            <h2>Readonly Content</h2>
+            <p>This content is <strong>${readonly ? "readonly" : "editable"}</strong>.</p>
+            <p>Click the button above to toggle editing mode.</p>
+            <ul>
+              <li>Perfect for previewing documents</li>
+              <li>Displaying formatted content</li>
+              <li>Review mode in collaborative editing</li>
+            </ul>
+          `}
+        />
+      </div>
+    );
+  },
+};
+
+/**
+ * Event Handling
+ * Demonstrates onChange events and content tracking
+ */
+export const EventHandling: Story = {
+  render: () => {
+    const [content, setContent] = useState("");
+    const [wordCount, setWordCount] = useState(0);
+    const [charCount, setCharCount] = useState(0);
+
+    const handleChange = (html: string) => {
+      setContent(html);
+      const text = html.replace(/<[^>]*>/g, "").trim();
+      setWordCount(text.split(/\s+/).filter(Boolean).length);
+      setCharCount(text.length);
     };
 
-    return <ProductionEditor />;
+    return (
+      <div>
+        <EditoraEditor
+          plugins={allNativePlugins}
+          onChange={handleChange}
+          defaultValue={`
+            <h2>Try typing here!</h2>
+            <p>Watch the statistics update in real-time as you type.</p>
+          `}
+        />
+
+        <div style={{ marginTop: "20px", padding: "15px", background: "#e8f5e9", borderRadius: "4px" }}>
+          <h4 style={{ margin: "0 0 10px 0" }}>📊 Statistics</h4>
+          <p style={{ margin: "5px 0" }}>Words: <strong>{wordCount}</strong></p>
+          <p style={{ margin: "5px 0" }}>Characters: <strong>{charCount}</strong></p>
+          <details style={{ marginTop: "10px" }}>
+            <summary style={{ cursor: "pointer" }}>Show HTML</summary>
+            <pre style={{ fontSize: "12px", overflow: "auto", marginTop: "10px" }}>{content}</pre>
+          </details>
+        </div>
+      </div>
+    );
   },
+};
+
+/**
+ * Math Equations
+ * Demonstrates the Math plugin with LaTeX support
+ */
+export const MathEquations: Story = {
+  render: () => (
+    <div>
+      <div style={{ marginBottom: "20px", padding: "15px", background: "#e1f5fe", borderRadius: "4px" }}>
+        <h4 style={{ margin: "0 0 10px 0" }}>🔢 Math Plugin</h4>
+        <p style={{ margin: 0, fontSize: "14px" }}>
+          Insert mathematical equations using LaTeX notation. Click the Math button in the toolbar (fx).
+        </p>
+      </div>
+
+      <EditoraEditor
+        plugins={allNativePlugins}
+        defaultValue={`
+          <h2>Mathematical Equations</h2>
+          <p>Inline equation: <span data-math-inline="true" data-latex="E = mc^2" class="math-inline">$E = mc^2$</span></p>
+          
+          <p>Block equation:</p>
+          <div data-math-block="true" data-latex="\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}" class="math-block">
+            $$\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}$$
+          </div>
+          
+          <p>Pythagorean theorem: <span data-math-inline="true" data-latex="a^2 + b^2 = c^2" class="math-inline">$a^2 + b^2 = c^2$</span></p>
+          
+          <p><strong>Try it:</strong> Use Cmd/Ctrl-Shift-M to open the math dialog!</p>
+        `}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Special Characters & Emojis
+ * Demonstrates special character and emoji insertion
+ */
+export const SpecialContent: Story = {
+  render: () => (
+    <div>
+      <div style={{ marginBottom: "20px", padding: "15px", background: "#fce4ec", borderRadius: "4px" }}>
+        <h4 style={{ margin: "0 0 10px 0" }}>✨ Special Characters & Emojis</h4>
+        <p style={{ margin: 0, fontSize: "14px" }}>
+          Insert special characters (Cmd/Ctrl-Shift-S) and emojis (Cmd/Ctrl-Shift-J).
+        </p>
+      </div>
+
+      <EditoraEditor
+        plugins={allNativePlugins}
+        defaultValue={`
+          <h2>Special Characters & Emojis</h2>
+          
+          <h3>Special Characters</h3>
+          <p>Common: © ® ™ § ¶ † ‡ • ★</p>
+          <p>Arrows: → ← ↑ ↓ ↔ ⇒ ⇐</p>
+          <p>Currency: $ € £ ¥ ₹ ₽</p>
+          <p>Math: ± × ÷ ≠ ≤ ≥ ∞ ∑ ∫ √</p>
+          <p>Greek: α β γ δ π σ θ Ω</p>
+          
+          <h3>Emojis</h3>
+          <p>Smileys: 😀 😃 😄 😊 😍 🤩</p>
+          <p>Gestures: 👍 👏 🙌 💪 ✌️ 🤝</p>
+          <p>Objects: 💻 📱 📷 ⌚ 💡 🔋</p>
+          <p>Nature: 🌵 🌲 🌹 🌸 ⭐ 🌞</p>
+          
+          <p><strong>Try it:</strong> Use the toolbar buttons to insert more!</p>
+        `}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Tables
+ * Demonstrates table creation and editing
+ */
+export const Tables: Story = {
+  render: () => (
+    <div>
+      <div style={{ marginBottom: "20px", padding: "15px", background: "#f1f8e9", borderRadius: "4px" }}>
+        <h4 style={{ margin: "0 0 10px 0" }}>📊 Table Plugin</h4>
+        <p style={{ margin: 0, fontSize: "14px" }}>
+          Create and edit tables with the table button in the toolbar.
+        </p>
+      </div>
+
+      <EditoraEditor
+        plugins={allNativePlugins}
+        defaultValue={`
+          <h2>Tables</h2>
+          <p>Below is an example table:</p>
+          
+          <table border="1" style="border-collapse: collapse; width: 100%;">
+            <thead>
+              <tr>
+                <th style="padding: 8px; background: #f5f5f5;">Feature</th>
+                <th style="padding: 8px; background: #f5f5f5;">Status</th>
+                <th style="padding: 8px; background: #f5f5f5;">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 8px;">Web Component</td>
+                <td style="padding: 8px;">✅ Complete</td>
+                <td style="padding: 8px;">100% framework-agnostic</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px;">Native Plugins</td>
+                <td style="padding: 8px;">✅ Complete</td>
+                <td style="padding: 8px;">29 plugins available</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px;">Bundle Size</td>
+                <td style="padding: 8px;">✅ Optimized</td>
+                <td style="padding: 8px;">115 KB (91% reduction)</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <p><strong>Try it:</strong> Click the table button to create a new table!</p>
+        `}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Multiple Editors
+ * Demonstrates multiple editor instances on one page
+ */
+export const MultipleEditors: Story = {
+  render: () => {
+    const [contentA, setContentA] = useState("");
+    const [contentB, setContentB] = useState("");
+
+    const syncAtoB = () => {
+      setContentB(contentA);
+    };
+
+    const syncBtoA = () => {
+      setContentA(contentB);
+    };
+
+    return (
+      <div>
+        <div style={{ marginBottom: "20px", padding: "15px", background: "#fff9c4", borderRadius: "4px" }}>
+          <h4 style={{ margin: "0 0 10px 0" }}>👥 Multiple Editors</h4>
+          <p style={{ margin: "0 0 10px 0", fontSize: "14px" }}>
+            Two independent editor instances with content synchronization.
+          </p>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button onClick={syncAtoB} style={{ padding: "8px 16px" }}>Sync A → B</button>
+            <button onClick={syncBtoA} style={{ padding: "8px 16px" }}>Sync B → A</button>
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+          <div>
+            <h4>Editor A</h4>
+            <EditoraEditor
+              plugins={allNativePlugins}
+              onChange={setContentA}
+              defaultValue="<h3>Editor A</h3><p>Type here...</p>"
+            />
+          </div>
+          <div>
+            <h4>Editor B</h4>
+            <EditoraEditor
+              plugins={allNativePlugins}
+              value={contentB}
+              onChange={setContentB}
+              defaultValue="<h3>Editor B</h3><p>Type here...</p>"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  },
+};
+
+/**
+ * Controlled Editor
+ * Demonstrates controlled component pattern
+ */
+export const ControlledEditor: Story = {
+  render: () => {
+    const [value, setValue] = useState(`
+      <h2>Controlled Editor</h2>
+      <p>This editor's content is controlled by React state.</p>
+    `);
+
+    const resetContent = () => {
+      setValue(`
+        <h2>Reset!</h2>
+        <p>Content was reset at ${new Date().toLocaleTimeString()}</p>
+      `);
+    };
+
+    const appendContent = () => {
+      setValue(prev => prev + `<p>Appended at ${new Date().toLocaleTimeString()}</p>`);
+    };
+
+    return (
+      <div>
+        <div style={{ marginBottom: "20px", padding: "15px", background: "#e0f2f1", borderRadius: "4px" }}>
+          <h4 style={{ margin: "0 0 10px 0" }}>🎛️ Controlled Component</h4>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button onClick={resetContent} style={{ padding: "8px 16px" }}>Reset Content</button>
+            <button onClick={appendContent} style={{ padding: "8px 16px" }}>Append Content</button>
+          </div>
+        </div>
+
+        <EditoraEditor
+          plugins={allNativePlugins}
+          value={value}
+          onChange={setValue}
+        />
+      </div>
+    );
+  },
+};
+
+/**
+ * Performance - Large Document
+ * Tests editor with large content
+ */
+export const PerformanceLargeDocument: Story = {
+  render: () => {
+    const generateLargeContent = () => {
+      let content = "<h1>Large Document Performance Test</h1>";
+      content += "<p><strong>This document contains 100 paragraphs to test performance.</strong></p>";
+      
+      for (let i = 1; i <= 100; i++) {
+        content += `<h3>Section ${i}</h3>`;
+        content += `<p>This is paragraph ${i}. Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+          Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
+          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>`;
+        if (i % 10 === 0) {
+          content += `<blockquote>Milestone: Completed ${i} sections!</blockquote>`;
+        }
+      }
+      
+      return content;
+    };
+
+    return (
+      <div>
+        <div style={{ marginBottom: "20px", padding: "15px", background: "#ffebee", borderRadius: "4px" }}>
+          <h4 style={{ margin: "0 0 10px 0" }}>⚡ Performance Test</h4>
+          <p style={{ margin: 0, fontSize: "14px" }}>
+            This editor contains 100 sections (300+ paragraphs) to test performance with large documents.
+          </p>
+        </div>
+
+        <EditoraEditor
+          plugins={allNativePlugins}
+          defaultValue={generateLargeContent()}
+        />
+      </div>
+    );
+  },
+};
+
+/**
+ * Framework Independence Demo
+ * Shows that the same editor works in different contexts
+ */
+export const FrameworkIndependence: Story = {
+  render: () => (
+    <div>
+      <div style={{ marginBottom: "20px", padding: "15px", background: "#f3e5f5", borderRadius: "4px" }}>
+        <h3 style={{ margin: "0 0 10px 0" }}>🌐 Framework Independence</h3>
+        <p style={{ margin: 0, fontSize: "14px" }}>
+          This same editor can be used in React (shown here), Vue, Angular, Svelte, or vanilla JavaScript!
+        </p>
+        
+        <div style={{ marginTop: "15px", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px", fontSize: "13px" }}>
+          <div style={{ padding: "10px", background: "white", borderRadius: "4px" }}>
+            <strong>React:</strong><br/>
+            <code style={{ fontSize: "11px" }}>&lt;EditoraEditor /&gt;</code>
+          </div>
+          <div style={{ padding: "10px", background: "white", borderRadius: "4px" }}>
+            <strong>Vanilla JS:</strong><br/>
+            <code style={{ fontSize: "11px" }}>&lt;editora-editor&gt;</code>
+          </div>
+          <div style={{ padding: "10px", background: "white", borderRadius: "4px" }}>
+            <strong>Vue:</strong><br/>
+            <code style={{ fontSize: "11px" }}>&lt;editora-editor&gt;</code>
+          </div>
+          <div style={{ padding: "10px", background: "white", borderRadius: "4px" }}>
+            <strong>Angular:</strong><br/>
+            <code style={{ fontSize: "11px" }}>&lt;editora-editor&gt;</code>
+          </div>
+        </div>
+      </div>
+
+      <EditoraEditor
+        plugins={allNativePlugins}
+        defaultValue={`
+          <h2>🚀 Universal Editor</h2>
+          <p><strong>Zero framework dependencies!</strong></p>
+          
+          <h3>✅ Works With:</h3>
+          <ul>
+            <li>React (this example)</li>
+            <li>Vue.js</li>
+            <li>Angular</li>
+            <li>Svelte</li>
+            <li>Vanilla JavaScript</li>
+            <li>Any web framework</li>
+          </ul>
+          
+          <h3>📦 Bundle Benefits:</h3>
+          <ul>
+            <li><strong>115 KB</strong> minified</li>
+            <li><strong>28.65 KB</strong> gzipped</li>
+            <li><strong>91% smaller</strong> than before</li>
+            <li>No React in production bundle</li>
+          </ul>
+          
+          <blockquote>
+            "Build once, use everywhere!"
+          </blockquote>
+        `}
+      />
+    </div>
+  ),
 };

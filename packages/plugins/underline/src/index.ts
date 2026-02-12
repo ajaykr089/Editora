@@ -1,1 +1,1 @@
-export { UnderlinePlugin } from './UnderlinePlugin';
+export { UnderlinePlugin } from './UnderlinePlugin.native';

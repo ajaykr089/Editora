@@ -1,8 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import React from "react";
-import { RichTextEditor } from "@editora/react";
+import { EditoraEditor } from "@editora/react";
 import {
-  ParagraphPlugin,
   HeadingPlugin,
   BoldPlugin,
   ItalicPlugin,
@@ -32,20 +31,19 @@ import "@editora/themes/themes/default.css";
  * - Works without any backend API required
  */
 
-const meta: Meta<typeof RichTextEditor> = {
+const meta: Meta<typeof EditoraEditor> = {
   title: "Editor/MediaManager - Offline-First Upload",
-  component: RichTextEditor,
+  component: EditoraEditor,
   parameters: {
     layout: "padded",
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof RichTextEditor>;
+type Story = StoryObj<typeof EditoraEditor>;
 
 // Common plugins for all media manager stories
 const commonPlugins = [
-  ParagraphPlugin(),
   HeadingPlugin(),
   BoldPlugin(),
   ItalicPlugin(),
@@ -88,7 +86,7 @@ export const PureOfflineMode: Story = {
       <div style={{ padding: '10px', background: '#f0f8ff', marginBottom: '10px' }}>
         <strong>📱 Pure Offline Mode:</strong> All images stored as base64. No server required!
       </div>
-      <RichTextEditor {...args} />
+      <EditoraEditor {...args} />
     </div>
   ),
 };
@@ -120,7 +118,7 @@ export const OfflineFirstWithCustomServer: Story = {
       <div style={{ padding: '10px', background: '#fff8f0', marginBottom: '10px' }}>
         <strong>🌐 Offline-First with Custom Server:</strong> Tries server first, falls back to base64 if unavailable
       </div>
-      <RichTextEditor {...args} />
+      <EditoraEditor {...args} />
     </div>
   ),
 };
@@ -150,7 +148,7 @@ export const HybridModeApiOptional: Story = {
       <div style={{ padding: '10px', background: '#f0fff0', marginBottom: '10px' }}>
         <strong>⚡ Hybrid Mode:</strong> Base64 default + optional API upload in background
       </div>
-      <RichTextEditor {...args} />
+      <EditoraEditor {...args} />
     </div>
   ),
 };
@@ -195,7 +193,7 @@ export const ProductionSetup: Story = {
       <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
         <strong>🚀 Production Setup:</strong> Full-featured configuration with authentication and fallback
       </div>
-      <RichTextEditor {...args} />
+      <EditoraEditor {...args} />
     </div>
   ),
 };
@@ -261,7 +259,7 @@ export const MigrationGuide: Story = {
       
       <div style={{ borderTop: '1px solid #ddd', paddingTop: '10px', marginTop: '10px' }}>
         <strong>Try it below:</strong>
-        <RichTextEditor {...args} />
+        <EditoraEditor {...args} />
       </div>
     </div>
   ),
@@ -335,7 +333,7 @@ export const ToastNotificationsDemo: Story = {
         </div>
 
         <div style={{ position: 'relative', height: '500px', borderTop: '1px solid #ddd' }}>
-          <RichTextEditor 
+          <EditoraEditor 
             {...args}
             defaultValue="<p>Try uploading an image above to see the toast notifications! 📸</p>"
           />
@@ -387,7 +385,7 @@ export const SetupCodeExamples: Story = {
             lineHeight: '1.4',
             border: '1px solid #ddd'
           }}>
-{`import { RichTextEditor } from '@editora/react';
+{`import { EditoraEditor } from '@editora/react';
 import {
   ParagraphPlugin,
   BoldPlugin,
@@ -398,14 +396,13 @@ import '@editora/themes/themes/default.css';
 
 export function MyEditor() {
   const plugins = [
-    ParagraphPlugin(),
     BoldPlugin(),
     ItalicPlugin(),
     MediaManagerPlugin(),
   ];
 
   return (
-    <RichTextEditor
+    <EditoraEditor
       plugins={plugins}
       mediaConfig={{
         maxFileSize: 52428800,
@@ -439,12 +436,12 @@ export function MyEditor() {
             lineHeight: '1.4',
             border: '1px solid #ddd'
           }}>
-{`import { RichTextEditor } from '@editora/react';
+{`import { EditoraEditor } from '@editora/react';
 import { MediaManagerPlugin } from '@editora/plugins';
 
 export function MyEditor() {
   return (
-    <RichTextEditor
+    <EditoraEditor
       plugins={[
         // ... other plugins
         MediaManagerPlugin(),
@@ -491,12 +488,12 @@ export function MyEditor() {
             lineHeight: '1.4',
             border: '1px solid #ddd'
           }}>
-{`import { RichTextEditor } from '@editora/react';
+{`import { EditoraEditor } from '@editora/react';
 import { MediaManagerPlugin } from '@editora/plugins';
 
 export function MyEditor() {
   return (
-    <RichTextEditor
+    <EditoraEditor
       plugins={[MediaManagerPlugin()]}
       mediaConfig={{
         maxFileSize: 52428800,
@@ -562,12 +559,12 @@ export const mediaConfig = {
 };
 
 // MyEditor.tsx
-import { RichTextEditor } from '@editora/react';
+import { EditoraEditor } from '@editora/react';
 import { mediaConfig } from './config/mediaConfig';
 
 export function MyEditor() {
   return (
-    <RichTextEditor
+    <EditoraEditor
       plugins={[MediaManagerPlugin()]}
       mediaConfig={mediaConfig}
     />
@@ -669,7 +666,7 @@ export function MyEditor() {
       <div style={{ padding: '30px', borderTop: '2px solid #ddd' }}>
         <h3 style={{ marginTop: '0' }}>👇 Try it below (Live Editor)</h3>
         <div style={{ position: 'relative', height: '400px', marginTop: '20px' }}>
-          <RichTextEditor
+          <EditoraEditor
             {...args}
             defaultValue="<p>This editor uses the hybrid mode configuration from Example 3 above. Try uploading an image! 📸</p>"
           />

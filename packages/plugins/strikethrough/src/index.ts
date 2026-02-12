@@ -1,1 +1,1 @@
-export { StrikethroughPlugin } from './StrikethroughPlugin';
+export { StrikethroughPlugin } from './StrikethroughPlugin.native';

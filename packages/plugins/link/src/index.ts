@@ -1,2 +1,1 @@
-export { LinkPlugin } from './LinkPlugin';
-export { LinkProvider } from './LinkProvider';
+export { LinkPlugin } from './LinkPlugin.native';
