@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags for SEO -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Side-by-Side Theme Comparison - Compare light and dark themes with full webcomponent functionality and premium features.">
+    <meta name="keywords" content="theme comparison, light theme, dark theme, side-by-side, Editora editor, webcomponent">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Editora - Side-by-Side Theme Comparison">
+    <meta property="og:description" content="Compare light and dark themes with full webcomponent functionality and premium features.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora-free.netlify.app/">
+    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Editora - Side-by-Side Theme Comparison">
+    <meta property="twitter:description" content="Compare light and dark themes with full Editora functionality">
+    <meta name="theme-color" content="#007bff">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <title>Editora - Side-by-Side Theme Comparison</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">
+                    <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto;">
+                </a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="docs/installation.html">Docs</a></li>
+                    <li><a href="docs/features.html">Features</a></li>
+                    <li><a href="plugins/index.html">Plugins</a></li>
+                    <li><a href="docs/api.html">API</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Editor Styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css">
+
+    <div class="container">
+        <h1>🎨 Editora - Side-by-Side Theme Comparison</h1>
+    <p class="subtitle">Compare Light and Dark themes with full webcomponent functionality</p>
+
+    <div class="info">
+      <strong>WebComponent Integration</strong><br>
+      Both editors use the real <code>&lt;editora-editor&gt;</code> webcomponent with all native plugins.
+      Test all features including formatting, links, tables, lists, and keyboard shortcuts.
+      Switch between themes to see how the editor adapts to different color schemes.
+    </div>
+
+    <div class="editors-container">
+      <!-- Light Theme Editor -->
+      <div class="editor-section">
+        <h2>☀️ Light Theme</h2>
+        <span class="theme-badge light-badge">LIGHT THEME</span>
+
+        <editora-editor
+          id="light-editor"
+          height="400"
+          theme="light"
+          statusbar="true"
+          plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template"
+          toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | importWord exportWord exportPdf | fullscreen preview print | a11yChecker spellCheck | comments footnote insertMergeTag pageBreak template | clearFormatting"
+        >
+          <h2>Welcome to Editora - Light Theme!</h2>
+          <p>This editor demonstrates the <strong>light theme</strong> with full webcomponent functionality.</p>
+          <p>Try these features:</p>
+          <ul>
+            <li><strong>Bold</strong>, <em>italic</em>, <u>underline</u>, and <s>strikethrough</s> formatting</li>
+            <li>Insert <a href="https://example.com">links</a> using the native dialog</li>
+            <li>Create tables with the table insertion dialog</li>
+            <li>Use keyboard shortcuts (Ctrl+B, Ctrl+I, Ctrl+K, etc.)</li>
+            <li>Test undo/redo functionality</li>
+            <li>Change text and background colors</li>
+            <li>Insert images, videos, and other media</li>
+          </ul>
+          <p>Select any text above and use the toolbar buttons!</p>
+        </editora-editor>
+
+        <div class="features-list">
+          <h3>✨ Theme Features</h3>
+          <ul>
+            <li>Clean, bright interface</li>
+            <li>High contrast text on white background</li>
+            <li>Subtle shadows and borders</li>
+            <li>Perfect for daytime use</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Dark Theme Editor -->
+      <div class="editor-section dark-theme">
+        <h2>🌙 Dark Theme</h2>
+        <span class="theme-badge dark-badge">DARK THEME</span>
+
+        <editora-editor
+          id="dark-editor"
+          height="400"
+          theme="dark"
+          statusbar="true"
+          plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template"
+          toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | importWord exportWord exportPdf | fullscreen preview print | a11yChecker spellCheck | comments footnote insertMergeTag pageBreak template | clearFormatting"
+        >
+          <h2>Welcome to Editora - Dark Theme!</h2>
+          <p>This editor demonstrates the <strong>dark theme</strong> with full webcomponent functionality.</p>
+          <p>Try these features:</p>
+          <ul>
+            <li><strong>Bold</strong>, <em>italic</em>, <u>underline</u>, and <s>strikethrough</s> formatting</li>
+            <li>Insert <a href="https://example.com">links</a> using the native dialog</li>
+            <li>Create tables with the table insertion dialog</li>
+            <li>Use keyboard shortcuts (Ctrl+B, Ctrl+I, Ctrl+K, etc.)</li>
+            <li>Test undo/redo functionality</li>
+            <li>Change text and background colors</li>
+            <li>Insert images, videos, and other media</li>
+          </ul>
+          <p>Select any text above and use the toolbar buttons!</p>
+        </editora-editor>
+
+        <div class="features-list">
+          <h3>🌙 Theme Features</h3>
+          <ul>
+            <li>Easy on the eyes in low light</li>
+            <li>Dark background with light text</li>
+            <li>Reduced eye strain</li>
+            <li>Perfect for nighttime use</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="plugin-status">
+      <h3>🔌 WebComponent Status</h3>
+      <div id="component-status">Loading webcomponent...</div>
+    </div>
+  </div>
+
+  <!-- Import Web Component -->
+  <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.js"></script>
+
+  <script>
+    // Wait for custom element to be defined
+    customElements.whenDefined('editora-editor').then(() => {
+      console.log('✅ Editora webcomponent loaded successfully');
+
+      const statusDiv = document.getElementById('component-status');
+      statusDiv.innerHTML = `
+        <div style="color: green;">✅ WebComponent loaded successfully</div>
+        <div style="margin-top: 10px;">
+          <strong>Available editors:</strong><br>
+          • Light theme editor: Ready with ${document.getElementById('light-editor').getAttribute('plugins').split(' ').length} plugins<br>
+          • Dark theme editor: Ready with ${document.getElementById('dark-editor').getAttribute('plugins').split(' ').length} plugins
+        </div>
+        <div style="margin-top: 10px;">
+          <strong>Test the editors:</strong><br>
+          • Try formatting text with the toolbar<br>
+          • Insert links and tables<br>
+          • Use keyboard shortcuts (Ctrl+B, Ctrl+I, etc.)<br>
+          • Switch between light and dark themes
+        </div>
+      `;
+
+      // Add event listeners for demonstration
+      const lightEditor = document.getElementById('light-editor');
+      const darkEditor = document.getElementById('dark-editor');
+
+      lightEditor.addEventListener('content-change', () => {
+        console.log('Light editor content changed');
+      });
+
+      darkEditor.addEventListener('content-change', () => {
+        console.log('Dark editor content changed');
+      });
+
+      lightEditor.addEventListener('editor-focus', () => {
+        console.log('Light editor focused');
+      });
+
+      darkEditor.addEventListener('editor-focus', () => {
+        console.log('Dark editor focused');
+      });
+
+    }).catch((error) => {
+      console.error('❌ Failed to load webcomponent:', error);
+      document.getElementById('component-status').innerHTML = `
+        <div style="color: red;">❌ Failed to load webcomponent: ${error.message}</div>
+      `;
+    });
+
+    console.log('✓ Editora Side-by-Side Theme Comparison loaded');
+  </script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

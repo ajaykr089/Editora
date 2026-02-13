@@ -4,7 +4,7 @@
 
 Your complete Editora documentation website has been created at:
 ```
-/Users/etelligens/Documents/Rich-Text-Editor/examples/web/
+./examples/web/
 ```
 
 ### Directory Structure
@@ -222,7 +222,7 @@ All pages properly linked with:
 ## 🚀 How to Use
 
 ### Opening the Website
-1. Open `/Users/etelligens/Documents/Rich-Text-Editor/examples/web/index.html` in your web browser
+1. Open `./examples/web/index.html` in your web browser
 2. Or navigate to the folder and double-click index.html
 3. All links are relative paths, so navigation works locally
 
@@ -301,5 +301,5 @@ To further enhance the website, you can:
 **Total Files**: 23 HTML pages + 1 CSS file + 1 JS file
 **Total Size**: ~4,500 lines of code
 **Format**: All .html files as requested
-**Location**: /Users/etelligens/Documents/Rich-Text-Editor/examples/web/
+**Location**: ./examples/web/
 **Status**: ✅ Ready to use and deploy

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags for SEO -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Code Sample Test - Testing syntax highlighting and code sample features.">
+    <meta name="keywords" content="code sample, syntax highlighting, testing, Editora editor">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Editora - Test Code Sample">
+    <meta property="og:description" content="Editora Code Sample Test - Testing syntax highlighting and code sample features.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora-free.netlify.app/">
+    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Editora - Test Code Sample">
+    <meta property="twitter:description" content="Editora Code Sample Test - Testing syntax highlighting and code sample features">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <title>Editora - Test Code Sample</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">
+                    <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto;">
+                </a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="docs/installation.html">Docs</a></li>
+                    <li><a href="docs/features.html">Features</a></li>
+                    <li><a href="plugins/index.html">Plugins</a></li>
+                    <li><a href="docs/api.html">API</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>💻 Editora - Code Sample Test</h1>
+    <p class="subtitle">Testing syntax highlighting and code sample features</p>
+
+    <div class="info">
+      <strong>Code Sample Integration</strong><br>
+      This editor demonstrates advanced code sample functionality including syntax highlighting,
+      multiple programming languages, and code formatting using the full webcomponent interface.
+    </div>
+
+    <div class="features-list">
+      <h3>📝 Code Features</h3>
+      <ul>
+        <li><strong>Syntax Highlighting:</strong> Support for 100+ programming languages</li>
+        <li><strong>Code Blocks:</strong> Insert and edit code samples with proper formatting</li>
+        <li><strong>Language Selection:</strong> Choose from popular languages (JavaScript, Python, HTML, CSS, etc.)</li>
+        <li><strong>Line Numbers:</strong> Optional line numbering for code blocks</li>
+        <li><strong>Copy Code:</strong> Easy copying of code samples</li>
+        <li><strong>Inline Code:</strong> Highlight inline code snippets</li>
+        <li><strong>Code Formatting:</strong> Auto-indentation and formatting</li>
+      </ul>
+    </div>
+
+    <div class="code-guide">
+      <h3>💡 How to Test Code Features</h3>
+      <ul>
+        <li>Click the <strong>Code Sample</strong> button to insert code blocks</li>
+        <li>Select programming language from the dropdown</li>
+        <li>Use the <strong>Code</strong> button for inline code highlighting</li>
+        <li>Try different languages and syntax highlighting</li>
+        <li>Test copying code from the editor</li>
+      </ul>
+    </div>
+
+    <div class="language-examples">
+      <h3>🌐 Sample Code Snippets</h3>
+      <p>Here are some example code snippets you can copy and paste into the editor:</p>
+
+      <h4>JavaScript Function</h4>
+      <pre><code>function calculateTotal(items) {
+  return items.reduce((total, item) => {
+    return total + (item.price * item.quantity);
+  }, 0);
+}
+
+// Usage example
+const cart = [
+  { name: 'Laptop', price: 1299.99, quantity: 1 },
+  { name: 'Mouse', price: 29.99, quantity: 2 }
+];
+
+console.log('Total:', calculateTotal(cart));</code></pre>
+
+      <h4>Python Class</h4>
+      <pre><code>class UserManager:
+    def __init__(self):
+        self.users = {}
+
+    def add_user(self, user_id, name, email):
+        self.users[user_id] = {
+            'name': name,
+            'email': email,
+            'created_at': datetime.now()
+        }
+
+    def get_user(self, user_id):
+        return self.users.get(user_id)
+
+# Usage
+manager = UserManager()
+manager.add_user(1, 'John Doe', 'john@example.com')</code></pre>
+
+      <h4>HTML Component</h4>
+      <pre><code>&lt;div class="card"&gt;
+  &lt;h3&gt;Card Title&lt;/h3&gt;
+  &lt;p&gt;This is a sample card component.&lt;/p&gt;
+  &lt;button onclick="alert('Clicked!')"&gt;Click me&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+
+      <h4>CSS Styles</h4>
+      <pre><code>.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 20px;
+  margin: 10px;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}</code></pre>
+    </div>
+
+    <editora-editor
+      id="code-editor"
+      height="600"
+      statusbar="true"
+      plugins="bold italic underline link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template"
+      toolbar-items="undo redo | bold italic underline | code codeSample | bullist numlist | link insertImage | clearFormatting"
+    >
+      <h2>Code Sample Test Document</h2>
+      <p>This editor is optimized for testing <strong>code sample functionality</strong> and syntax highlighting.</p>
+
+      <h3>🧪 Testing Code Features</h3>
+
+      <p>Use this space to test various code-related features:</p>
+      <ul>
+        <li>Insert code blocks with syntax highlighting</li>
+        <li>Test different programming languages</li>
+        <li>Use inline code formatting</li>
+        <li>Copy and paste code samples</li>
+      </ul>
+
+      <h3>📋 Sample Code Blocks</h3>
+
+      <h4>JavaScript Example</h4>
+      <p>Here's a JavaScript function for handling form validation:</p>
+      <pre><code class="language-javascript">function validateEmail(email) {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+}
+
+function validateForm(formData) {
+  const errors = [];
+
+  if (!formData.name.trim()) {
+    errors.push('Name is required');
+  }
+
+  if (!validateEmail(formData.email)) {
+    errors.push('Valid email is required');
+  }
+
+  return errors;
+}</code></pre>
+
+      <h4>Python Data Processing</h4>
+      <p>A Python script for processing CSV data:</p>
+      <pre><code class="language-python">import csv
+from collections import defaultdict
+
+def process_sales_data(filename):
+    sales_by_product = defaultdict(float)
+
+    with open(filename, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            product = row['product']
+            sales = float(row['sales'])
+            sales_by_product[product] += sales
+
+    return dict(sales_by_product)
+
+# Usage
+sales_data = process_sales_data('sales.csv')
+for product, total in sales_data.items():
+    print(f"{product}: ${total:.2f}")</code></pre>
+
+      <h4>HTML Template</h4>
+      <p>A responsive HTML card component:</p>
+      <pre><code class="language-html">&lt;div class="product-card"&gt;
+  &lt;img src="product.jpg" alt="Product Image" class="product-image"&gt;
+  &lt;div class="product-info"&gt;
+    &lt;h3 class="product-title"&gt;Premium Widget&lt;/h3&gt;
+    &lt;p class="product-description"&gt;
+      High-quality widget with advanced features.
+    &lt;/p&gt;
+    &lt;div class="product-price"&gt;$99.99&lt;/div&gt;
+    &lt;button class="add-to-cart-btn"&gt;Add to Cart&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+      <h4>CSS Styling</h4>
+      <p>Modern CSS with flexbox and grid:</p>
+      <pre><code class="language-css">.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.product-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+}
+
+.product-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}</code></pre>
+
+      <h3>🎯 Test Area</h3>
+      <p>Create your own code samples below. Try inserting code blocks and testing syntax highlighting for different languages:</p>
+      <p>&nbsp;</p>
+      <p>&nbsp;</p>
+      <p>&nbsp;</p>
+      <p>&nbsp;</p>
+      <p>&nbsp;</p>
+    </editora-editor>
+
+    <div class="plugin-status">
+      <h3>🔌 WebComponent Status</h3>
+      <div id="component-status">Loading webcomponent...</div>
+    </div>
+  </div>
+
+  <!-- Import Web Component -->
+  <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.js"></script>
+
+  <script>
+    // Wait for custom element to be defined
+    customElements.whenDefined('editora-editor').then(() => {
+      console.log('✅ Editora webcomponent loaded successfully');
+
+      const statusDiv = document.getElementById('component-status');
+      const editor = document.getElementById('code-editor');
+
+      statusDiv.innerHTML = `
+        <div style="color: green;">✅ WebComponent loaded successfully</div>
+        <div style="margin-top: 10px;">
+          <strong>Code Plugins Loaded:</strong><br>
+          • Syntax highlighting for 100+ languages<br>
+          • Code block insertion and editing<br>
+          • Inline code formatting<br>
+          • Language selection dropdown<br>
+          • Copy code functionality<br>
+          • Line numbering options
+        </div>
+        <div style="margin-top: 10px;">
+          <strong>Test Instructions:</strong><br>
+          • Click the code sample button to insert code blocks<br>
+          • Select different programming languages<br>
+          • Use the code button for inline formatting<br>
+          • Test syntax highlighting accuracy
+        </div>
+      `;
+
+      // Add event listeners for demonstration
+      editor.addEventListener('content-change', () => {
+        console.log('Code editor content changed');
+      });
+
+      editor.addEventListener('editor-focus', () => {
+        console.log('Code editor focused');
+      });
+
+    }).catch((error) => {
+      console.error('❌ Failed to load webcomponent:', error);
+      document.getElementById('component-status').innerHTML = `
+        <div style="color: red;">❌ Failed to load webcomponent: ${error.message}</div>
+      `;
+    });
+
+    console.log('✓ Editora Code Sample Test loaded');
+  </script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

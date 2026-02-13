@@ -169,9 +169,9 @@ API responsibilities:
 * Transform (optional)
 
 Shared Api config URL:
-    /Users/etelligens/Documents/Rich-Text-Editor/packages/plugins/src/shared-config.ts
+    packages/plugins/src/shared-config.ts
 Api server path
-    /Users/etelligens/Documents/Rich-Text-Editor/api
+    api
 
 Example endpoints:
 

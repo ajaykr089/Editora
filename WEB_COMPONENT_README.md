@@ -317,7 +317,7 @@ editor.addEventListener('editor-destroy', () => console.log('Destroyed'));
 }
 ```
 
-## 📦 Build Outputs
+## 📦 Build Outputs & Bundle Optimization
 
 ```
 dist/
@@ -325,11 +325,58 @@ dist/
 ├── index.cjs.js           # CommonJS (require('@editora/core'))
 ├── editora.umd.js         # UMD (works with AMD, CommonJS, global)
 ├── editora.min.js         # Minified IIFE (CDN usage)
-├── webcomponent.esm.js    # Web component ESM
-├── webcomponent.cjs.js    # Web component CommonJS
-├── webcomponent.min.js    # Web component standalone
+├── webcomponent.esm.js    # Web component ESM (all plugins)
+├── webcomponent.cjs.js    # Web component CommonJS (all plugins)
+├── webcomponent.js        # Web component with lazy-loaded plugins (~60KB + chunks)
+├── webcomponent-core.esm.js    # Web component ESM (core plugins only)
+├── webcomponent-core.cjs.js    # Web component CommonJS (core plugins only)
+├── webcomponent-core.js   # Web component core bundle (~56KB)
+├── plugin-loader.esm.js   # Plugin loader utility ESM
+├── plugin-loader.cjs.js   # Plugin loader utility CommonJS
+├── plugin-loader.js       # Plugin loader utility (~4KB)
+├── *.mjs                  # Lazy-loaded plugin chunks (loaded on demand)
 ├── index.d.ts             # TypeScript definitions
 └── *.map                  # Source maps for debugging
+```
+
+### Bundle Size Optimization
+
+Choose the right bundle for your needs:
+
+#### 🚀 **Core Bundle** (~56KB) - Recommended for most users
+Includes essential editing plugins only. Perfect balance of features and size.
+
+```html
+<script src="https://unpkg.com/@editora/core@latest/dist/webcomponent-core.js"></script>
+<editora-editor plugins="bold italic underline" toolbar="bold italic underline"></editora-editor>
+```
+
+#### 🏗️ **Full Bundle** (~60KB) - For advanced users
+Includes all plugins with lazy loading. Plugins load as separate chunks on demand.
+
+```html
+<script src="https://unpkg.com/@editora/core@latest/dist/webcomponent.js"></script>
+<editora-editor plugins="bold italic table image media-manager" toolbar="bold italic | table | image"></editora-editor>
+```
+
+#### 🔌 **Dynamic Loading** - Minimal initial load
+Load core bundle, then add plugins as needed.
+
+```html
+<!-- Load core first -->
+<script src="https://unpkg.com/@editora/core@latest/dist/webcomponent-core.js"></script>
+<!-- Load plugin loader utility -->
+<script src="https://unpkg.com/@editora/core@latest/dist/plugin-loader.js"></script>
+
+<script>
+  // Load additional plugins dynamically
+  EditoraPlugins.loadPlugins(['table', 'image', 'media-manager']).then(() => {
+    // Plugins are now available
+    const editor = document.createElement('editora-editor');
+    editor.setAttribute('plugins', 'bold italic table image');
+    document.body.appendChild(editor);
+  });
+</script>
 ```
 
 ### Package Exports
@@ -338,6 +385,8 @@ dist/
   "exports": {
     ".": "./dist/index.esm.js",
     "./webcomponent": "./dist/webcomponent.esm.js",
+    "./webcomponent-core": "./dist/webcomponent-core.esm.js",
+    "./plugin-loader": "./dist/plugin-loader.esm.js",
     "./core": "./dist/index.esm.js",
     "./ui": "./dist/index.esm.js",
     "./adapters": "./dist/index.esm.js",

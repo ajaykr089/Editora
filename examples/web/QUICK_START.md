@@ -13,18 +13,18 @@ Your professional Editora documentation website has been successfully created wi
 
 ### Option 1: Open Directly (Recommended for Local Testing)
 1. Open Finder
-2. Navigate to: `/Users/etelligens/Documents/Rich-Text-Editor/examples/web/`
+2. Navigate to: `./examples/web/`
 3. Double-click `index.html`
 4. Your browser will open the homepage
 
 ### Option 2: Using Terminal
 ```bash
-open /Users/etelligens/Documents/Rich-Text-Editor/examples/web/index.html
+open ./examples/web/index.html
 ```
 
 ### Option 3: Using Python Server (for local testing)
 ```bash
-cd /Users/etelligens/Documents/Rich-Text-Editor/examples/web/
+cd ./examples/web/
 python3 -m http.server 8000
 # Then visit http://localhost:8000 in your browser
 ```
@@ -240,6 +240,6 @@ Your professional Editora documentation website is ready to use:
 - ✅ Fully responsive
 - ✅ Ready to deploy
 
-**Start by opening:** `/Users/etelligens/Documents/Rich-Text-Editor/examples/web/index.html`
+**Start by opening:** `./examples/web/index.html`
 
 Enjoy your new website! 🚀

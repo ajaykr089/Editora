@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags for SEO -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Native Plugins Test - Testing built-in native plugins functionality.">
+    <meta name="keywords" content="native plugins, built-in features, testing, Editora editor">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Editora - Test Native Plugins">
+    <meta property="og:description" content="Editora Native Plugins Test - Testing built-in native plugins functionality.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora-free.netlify.app/">
+    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Editora - Test Native Plugins">
+    <meta property="twitter:description" content="Editora Native Plugins Test - Testing built-in native plugins functionality">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <title>Editora - Test Native Plugins</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">
+                    <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto;">
+                </a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="docs/installation.html">Docs</a></li>
+                    <li><a href="docs/features.html">Features</a></li>
+                    <li><a href="plugins/index.html">Plugins</a></li>
+                    <li><a href="docs/api.html">API</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+    <h1>🔧 Editora - Native Plugins Test</h1>
+    <p class="subtitle">Testing all native plugins with full webcomponent functionality</p>
+
+    <div class="info">
+      <strong>WebComponent Integration</strong><br>
+      This editor uses the real <code>&lt;editora-editor&gt;</code> webcomponent with all native plugins.
+      Test formatting, links, tables, lists, keyboard shortcuts, and advanced features.
+    </div>
+
+    <div class="features-list">
+      <h3>✨ Available Features</h3>
+      <ul>
+        <li><strong>Text Formatting:</strong> Bold, Italic, Underline, Strikethrough</li>
+        <li><strong>Links & Tables:</strong> Insert links and create tables with dialogs</li>
+        <li><strong>Lists:</strong> Bullet lists and numbered lists</li>
+        <li><strong>History:</strong> Undo and redo functionality</li>
+        <li><strong>Colors:</strong> Text color and background color</li>
+        <li><strong>Typography:</strong> Font size, family, and line height</li>
+        <li><strong>Alignment:</strong> Text alignment and direction</li>
+        <li><strong>Code:</strong> Code blocks and inline code</li>
+        <li><strong>Media:</strong> Images, videos, and embeds</li>
+        <li><strong>Export:</strong> PDF and Word export</li>
+      </ul>
+    </div>
+
+    <div class="keyboard-shortcuts">
+      <h3>⌨️ Keyboard Shortcuts</h3>
+      <ul>
+        <li><kbd>Ctrl</kbd> + <kbd>B</kbd> - Bold</li>
+        <li><kbd>Ctrl</kbd> + <kbd>I</kbd> - Italic</li>
+        <li><kbd>Ctrl</kbd> + <kbd>U</kbd> - Underline</li>
+        <li><kbd>Ctrl</kbd> + <kbd>K</kbd> - Insert Link</li>
+        <li><kbd>Ctrl</kbd> + <kbd>Z</kbd> - Undo</li>
+        <li><kbd>Ctrl</kbd> + <kbd>Y</kbd> - Redo</li>
+        <li><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd> - Redo (alternative)</li>
+      </ul>
+    </div>
+
+    <editora-editor
+      id="native-plugins-editor"
+      height="500"
+      statusbar="true"
+      plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template"
+      toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | importWord exportWord exportPdf | fullscreen preview print | a11yChecker spellCheck | comments footnote insertMergeTag pageBreak template | clearFormatting"
+    >
+      <h2>Welcome to Editora Native Plugins Test!</h2>
+      <p>This editor demonstrates <strong>all native plugins</strong> working together in the webcomponent.</p>
+      <p>Try these features:</p>
+      <ul>
+        <li><strong>Bold</strong>, <em>italic</em>, <u>underline</u>, and <s>strikethrough</s> formatting</li>
+        <li>Insert <a href="https://example.com">links</a> using the link dialog</li>
+        <li>Create tables with the table insertion dialog</li>
+        <li>Use keyboard shortcuts (Ctrl+B, Ctrl+I, Ctrl+K, etc.)</li>
+        <li>Test undo/redo functionality</li>
+        <li>Change text and background colors</li>
+        <li>Insert images, videos, and other media</li>
+        <li>Export to PDF or Word</li>
+      </ul>
+      <p>Select any text above and use the toolbar buttons!</p>
+      <p>You can also try:</p>
+      <ul>
+        <li>Creating <strong>headings</strong> and different text styles</li>
+        <li>Adding <em>blockquotes</em> and code blocks</li>
+        <li>Using the <u>color picker</u> for text and background</li>
+        <li>Inserting mathematical equations and special characters</li>
+        <li>Adding checklists and task lists</li>
+      </ul>
+    </editora-editor>
+
+    <div class="plugin-status">
+      <h3>🔌 WebComponent Status</h3>
+      <div id="component-status">Loading webcomponent...</div>
+    </div>
+  </div>
+
+  <!-- Import Web Component -->
+  <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.js"></script>
+
+  <script>
+    // Wait for custom element to be defined
+    customElements.whenDefined('editora-editor').then(() => {
+      console.log('✅ Editora webcomponent loaded successfully');
+
+      const statusDiv = document.getElementById('component-status');
+      const editor = document.getElementById('native-plugins-editor');
+
+      statusDiv.innerHTML = `
+        <div style="color: green;">✅ WebComponent loaded successfully</div>
+        <div style="margin-top: 10px;">
+          <strong>Editor Status:</strong><br>
+          • Plugins loaded: ${editor.getAttribute('plugins').split(' ').length}<br>
+          • Toolbar items: ${editor.getAttribute('toolbar-items').split(' | ').length} groups<br>
+          • Status bar: ${editor.getAttribute('statusbar')}<br>
+          • Height: ${editor.getAttribute('height')}px
+        </div>
+        <div style="margin-top: 10px;">
+          <strong>Test Instructions:</strong><br>
+          • Try all toolbar buttons and features<br>
+          • Use keyboard shortcuts (Ctrl+B, Ctrl+I, etc.)<br>
+          • Test export functionality (PDF/Word)<br>
+          • Verify all plugins work correctly
+        </div>
+      `;
+
+      // Add event listeners for demonstration
+      editor.addEventListener('content-change', () => {
+        console.log('Editor content changed');
+      });
+
+      editor.addEventListener('editor-focus', () => {
+        console.log('Editor focused');
+      });
+
+      editor.addEventListener('editor-blur', () => {
+        console.log('Editor blurred');
+      });
+
+    }).catch((error) => {
+      console.error('❌ Failed to load webcomponent:', error);
+      document.getElementById('component-status').innerHTML = `
+        <div style="color: red;">❌ Failed to load webcomponent: ${error.message}</div>
+      `;
+    });
+
+    console.log('✓ Editora Native Plugins Test loaded');
+  </script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

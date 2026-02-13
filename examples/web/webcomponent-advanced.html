@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags for SEO -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Web Component Advanced Example - Full-featured web component with advanced configuration.">
+    <meta name="keywords" content="web component, advanced features, configuration, Editora editor">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Editora - Webcomponent Advanced">
+    <meta property="og:description" content="Editora Web Component Advanced Example - Full-featured web component with advanced configuration.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora-free.netlify.app/">
+    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Editora - Webcomponent Advanced">
+    <meta property="twitter:description" content="Editora Web Component Advanced Example - Full-featured web component with advanced configuration">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <title>Editora - Webcomponent Advanced</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+<body>
+  <header style="text-align: center; padding: 15px; background: #2c3e50; color: white; margin-bottom: 20px;">
+    <a href="index.html" style="text-decoration: none; color: inherit;">
+      <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; filter: brightness(0) invert(1);">
+    </a>
+  </header>
+  
+  <h1>🚀 Editora Web Component - Advanced Features</h1>
+  <p class="subtitle">Plugin modes, custom slots, and advanced configurations</p>
+
+  <!-- Example 1: Plugin Modes -->
+  <div class="example-section">
+    <h2>1. Plugin Operation Modes</h2>
+    <p>Plugins can operate in three modes: <strong>local</strong>, <strong>api</strong>, or <strong>hybrid</strong></p>
+    
+    <div class="grid">
+      <div>
+        <h3>Local Mode</h3>
+        <p>All operations happen client-side</p>
+        <editora-editor 
+          id="editor-local"
+          height="200"
+        >
+          <p>This editor uses local spellchecking (browser native).</p>
+        </editora-editor>
+      </div>
+      
+      <div>
+        <h3>Hybrid Mode</h3>
+        <p>API first, fallback to local</p>
+        <editora-editor 
+          id="editor-hybrid"
+          height="200"
+        >
+          <p>This editor tries API first, then falls back to local mode.</p>
+        </editora-editor>
+      </div>
+    </div>
+
+    <button onclick="configurePluginMode()">Configure Hybrid Mode</button>
+    <div class="output" id="plugin-output" style="display: none;">
+      <pre id="plugin-output-content"></pre>
+    </div>
+  </div>
+
+  <!-- Example 2: Custom Slots -->
+  <div class="example-section">
+    <h2>2. Custom Toolbar and Status Bar (Slots)</h2>
+    <p>Replace default UI with custom components using slots</p>
+    
+    <editora-editor id="editor-slots" height="300">
+      <!-- Custom Toolbar Slot -->
+      <div slot="toolbar" class="custom-toolbar">
+        <button onclick="execSlotCommand('bold')">🅱️ Bold</button>
+        <button onclick="execSlotCommand('italic')">🇮 Italic</button>
+        <button onclick="execSlotCommand('underline')">🇺 Underline</button>
+        <button onclick="clearContent()">🗑️ Clear</button>
+      </div>
+      
+      <!-- Initial Content -->
+      <h2>Custom UI Example</h2>
+      <p>This editor has a custom <strong>gradient toolbar</strong> and <strong>dark status bar</strong>.</p>
+      
+      <!-- Custom Status Bar Slot -->
+      <div slot="statusbar" class="custom-statusbar">
+        <span id="status-chars">Characters: 0</span>
+        <span id="status-words">Words: 0</span>
+        <span id="status-time">Last edit: Never</span>
+      </div>
+    </editora-editor>
+  </div>
+
+  <!-- Example 3: Configuration Priority -->
+  <div class="example-section">
+    <h2>3. Configuration Priority System</h2>
+    <p>Priority: JS Config > HTML Attributes > Plugin Defaults > Editor Defaults</p>
+    
+    <editora-editor 
+      id="editor-priority"
+      height="200"
+      theme="light"
+      plugins="undo redo bold italic"
+      toolbar="undo redo | bold italic"
+    >
+      <p>Attribute: theme="light", toolbar="undo redo | bold italic"</p>
+    </editora-editor>
+
+    <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+      <button onclick="jsOverride()">Override with JS (theme=dark, height=400)</button>
+      <button onclick="resetConfig()">Reset to Attributes</button>
+      <button onclick="showConfig()">Show Current Config</button>
+    </div>
+
+    <div class="output" id="config-output" style="display: none;">
+      <pre id="config-output-content"></pre>
+    </div>
+  </div>
+
+  <!-- Example 4: Live Attribute Updates -->
+  <div class="example-section">
+    <h2>4. Reactive Attribute Updates</h2>
+    <p>Changes to attributes update the editor in real-time</p>
+    
+    <editora-editor 
+      id="editor-reactive"
+      height="250"
+      theme="light"
+      readonly="false"
+    >
+      <p>Try the buttons below to change attributes dynamically.</p>
+    </editora-editor>
+
+    <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+      <button onclick="setAttr('editor-reactive', 'theme', 'dark')">Set theme="dark"</button>
+      <button onclick="setAttr('editor-reactive', 'theme', 'light')">Set theme="light"</button>
+      <button onclick="setAttr('editor-reactive', 'readonly', 'true')">Set readonly="true"</button>
+      <button onclick="setAttr('editor-reactive', 'readonly', 'false')">Set readonly="false"</button>
+      <button onclick="setAttr('editor-reactive', 'height', '500')">Set height="500"</button>
+    </div>
+  </div>
+
+  <!-- Example 5: API Methods -->
+  <div class="example-section">
+    <h2>5. JavaScript API Methods</h2>
+    <p>Access the editor programmatically</p>
+    
+    <editora-editor 
+      id="editor-api"
+      height="200"
+    >
+      <p>Use the buttons to interact with this editor via JavaScript.</p>
+    </editora-editor>
+
+    <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+      <button onclick="apiGetContent()">getContent()</button>
+      <button onclick="apiSetContent()">setContent()</button>
+      <button onclick="apiExecCommand()">execCommand('bold')</button>
+      <button onclick="apiFocus()">focus()</button>
+      <button onclick="apiBlur()">blur()</button>
+      <button onclick="apiGetConfig()">getConfig()</button>
+    </div>
+
+    <div class="output" id="api-output">
+      <div style="font-weight: bold; margin-bottom: 10px;">API Result:</div>
+      <pre id="api-output-content">// Execute an API method to see results</pre>
+    </div>
+  </div>
+
+  <!-- Example 6: Event Lifecycle -->
+  <div class="example-section">
+    <h2>6. Complete Event Lifecycle</h2>
+    <p>Track all editor events</p>
+    
+    <editora-editor 
+      id="editor-events"
+      height="200"
+    >
+      <p>Interact with this editor to see events.</p>
+    </editora-editor>
+
+    <button onclick="destroyEditor()">Destroy Editor</button>
+    <button onclick="recreateEditor()">Recreate Editor</button>
+
+    <div class="output" style="max-height: 250px; overflow-y: auto;">
+      <div style="font-weight: bold; margin-bottom: 10px;">Event Log:</div>
+      <pre id="event-log"></pre>
+    </div>
+  </div>
+
+  <!-- Load Editora Web Component (Full Bundle with Lazy Loading) -->
+  <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.js"></script>
+  
+  <script>
+    // Plugins are auto-registered in the webcomponent bundle
+    console.log('Editora loaded:', window.Editora);
+    console.log('Custom element:', customElements.get('rich-text-editor'));
+  </script>
+
+  <script>
+    // Example 1: Plugin Modes
+    function configurePluginMode() {
+      const editor = document.getElementById('editor-hybrid');
+      editor.setConfig({
+        spellcheck: {
+          mode: 'hybrid',
+          apiUrl: '/api/spellcheck',
+          fallbackToLocal: true,
+          timeout: 3000
+        },
+        image: {
+          mode: 'hybrid',
+          apiUrl: '/api/upload',
+          offline: {
+            enabled: true,
+            cacheStrategy: 'indexeddb'
+          }
+        }
+      });
+
+      const output = document.getElementById('plugin-output');
+      const content = document.getElementById('plugin-output-content');
+      output.style.display = 'block';
+      content.textContent = JSON.stringify(editor.getConfig(), null, 2);
+    }
+
+    // Example 2: Custom Slots
+    function execSlotCommand(command) {
+      const editor = document.getElementById('editor-slots');
+      editor.execCommand(command);
+      editor.focus();
+      updateCustomStatus();
+    }
+
+    function clearContent() {
+      const editor = document.getElementById('editor-slots');
+      editor.setContent('');
+      editor.focus();
+      updateCustomStatus();
+    }
+
+    function updateCustomStatus() {
+      const editor = document.getElementById('editor-slots');
+      if (!editor) return;
+      
+      const statusChars = document.getElementById('status-chars');
+      const statusWords = document.getElementById('status-words');
+      const statusTime = document.getElementById('status-time');
+      
+      if (!statusChars || !statusWords || !statusTime) return;
+      
+      const content = editor.getContent();
+      const text = content.replace(/<[^>]*>/g, '');
+      const charCount = text.length;
+      const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+      
+      statusChars.textContent = `Characters: ${charCount}`;
+      statusWords.textContent = `Words: ${wordCount}`;
+      statusTime.textContent = `Last edit: ${new Date().toLocaleTimeString()}`;
+    }
+
+    // Initialize when editor is ready
+    window.addEventListener('DOMContentLoaded', () => {
+      const editor = document.getElementById('editor-slots');
+      if (editor) {
+        editor.addEventListener('content-change', updateCustomStatus);
+        // Wait for editor to be fully initialized
+        if (editor.isConnected) {
+          updateCustomStatus();
+        } else {
+          editor.addEventListener('editor-ready', updateCustomStatus, { once: true });
+        }
+      }
+    });
+
+    // Example 3: Configuration Priority
+    function jsOverride() {
+      const editor = document.getElementById('editor-priority');
+      editor.setConfig({
+        theme: 'dark',
+        height: 400,
+        toolbar: 'undo redo | bold italic underline strikethrough'
+      });
+    }
+
+    function resetConfig() {
+      const editor = document.getElementById('editor-priority');
+      // Remove JS config by recreating
+      editor.parentNode.innerHTML = editor.parentNode.innerHTML;
+    }
+
+    function showConfig() {
+      const editor = document.getElementById('editor-priority');
+      const config = editor.getConfig();
+      const output = document.getElementById('config-output');
+      const content = document.getElementById('config-output-content');
+      output.style.display = 'block';
+      content.textContent = JSON.stringify(config, null, 2);
+    }
+
+    // Example 4: Reactive Attributes
+    function setAttr(id, attr, value) {
+      const editor = document.getElementById(id);
+      editor.setAttribute(attr, value);
+    }
+
+    // Example 5: API Methods
+    function apiGetContent() {
+      const editor = document.getElementById('editor-api');
+      const content = editor.getContent();
+      document.getElementById('api-output-content').textContent = 
+        `getContent() returned:\n\n${content}`;
+    }
+
+    function apiSetContent() {
+      const editor = document.getElementById('editor-api');
+      editor.setContent('<h3>New Content</h3><p>Content set via <code>setContent()</code></p>');
+      document.getElementById('api-output-content').textContent = 
+        'setContent() executed successfully';
+    }
+
+    function apiExecCommand() {
+      const editor = document.getElementById('editor-api');
+      const success = editor.execCommand('bold');
+      document.getElementById('api-output-content').textContent = 
+        `execCommand('bold') returned: ${success}`;
+      editor.focus();
+    }
+
+    function apiFocus() {
+      const editor = document.getElementById('editor-api');
+      editor.focus();
+      document.getElementById('api-output-content').textContent = 'focus() executed';
+    }
+
+    function apiBlur() {
+      const editor = document.getElementById('editor-api');
+      editor.blur();
+      document.getElementById('api-output-content').textContent = 'blur() executed';
+    }
+
+    function apiGetConfig() {
+      const editor = document.getElementById('editor-api');
+      const config = editor.getConfig();
+      document.getElementById('api-output-content').textContent = 
+        `getConfig() returned:\n\n${JSON.stringify(config, null, 2)}`;
+    }
+
+    // Example 6: Event Lifecycle
+    let eventLog;
+    let events = [];
+    let editorEvents;
+
+    function logEvent(event) {
+      if (!eventLog) eventLog = document.getElementById('event-log');
+      if (!eventLog) return;
+      
+      const timestamp = new Date().toLocaleTimeString();
+      events.unshift(`[${timestamp}] ${event}`);
+      if (events.length > 20) events.pop();
+      eventLog.textContent = events.join('\n');
+    }
+
+    function setupEventListeners(editor) {
+      if (!editor) return;
+      editor.addEventListener('editor-ready', () => logEvent('✅ editor-ready'));
+      editor.addEventListener('content-change', () => logEvent('📝 content-change'));
+      editor.addEventListener('editor-focus', () => logEvent('🎯 editor-focus'));
+      editor.addEventListener('editor-blur', () => logEvent('😴 editor-blur'));
+      editor.addEventListener('editor-destroy', () => logEvent('💀 editor-destroy'));
+    }
+
+    // Initialize event tracking when DOM is ready
+    window.addEventListener('DOMContentLoaded', () => {
+      eventLog = document.getElementById('event-log');
+      editorEvents = document.getElementById('editor-events');
+      if (editorEvents) {
+        setupEventListeners(editorEvents);
+      }
+      // Initial log
+      logEvent('📄 Page loaded');
+    });
+
+    function destroyEditor() {
+      const container = document.getElementById('editor-events').parentElement;
+      const editor = document.getElementById('editor-events');
+      container.removeChild(editor);
+      logEvent('🗑️ Editor removed from DOM');
+    }
+
+    function recreateEditor() {
+      const container = document.querySelector('.example-section:last-of-type');
+      const buttons = container.querySelector('button').parentElement;
+      
+      const newEditor = document.createElement('rich-text-editor');
+      newEditor.id = 'editor-events';
+      newEditor.setAttribute('height', '200');
+      newEditor.innerHTML = '<p>Recreated editor. Interact to see events.</p>';
+      
+      container.insertBefore(newEditor, buttons);
+      editorEvents = newEditor;
+      setupEventListeners(newEditor);
+      logEvent('🎉 Editor recreated');
+    }
+  </script>
+</body>
+</html>

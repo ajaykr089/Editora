@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags for SEO -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Statusbar Demo - Example and demonstration of Editora rich text editor features.">
+    <meta name="keywords" content="statusbar demo, Editora editor, example, demonstration">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Editora - Statusbar Demo">
+    <meta property="og:description" content="Editora Statusbar Demo - Example and demonstration of Editora rich text editor features.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora-free.netlify.app/">
+    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Editora - Statusbar Demo">
+    <meta property="twitter:description" content="Editora Statusbar Demo - Example and demonstration of Editora rich text editor features">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <title>Editora - Statusbar Demo</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+<body>
+  <h1>Editora Status Bar Demo</h1>
+
+  <div class="demo-section">
+    <h2>Enhanced Status Bar</h2>
+
+    <div class="instructions">
+      <h3>Status Bar Features:</h3>
+      <ul>
+        <li><strong>Left Section:</strong> Cursor position (Ln X, Col Y) or selection info</li>
+        <li><strong>Right Section:</strong> Word count, character count, and line count</li>
+        <li><strong>Real-time Updates:</strong> Information updates as you type and move cursor</li>
+      </ul>
+    </div>
+
+    <!-- Editora Web Component with Status Bar -->
+    <editora-editor
+      statusbar="true"
+      placeholder="Start typing to see the status bar in action..."
+      style="height: 300px; border: 1px solid #ddd; border-radius: 4px;"
+    >
+    </editora-editor>
+  </div>
+
+  <!-- Load Editora -->
+  <script type="module">
+    import { EditoraEditor } from 'https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.esm.js';
+
+    // Register the web component
+    if (!customElements.get('editora-editor')) {
+      customElements.define('editora-editor', EditoraEditor);
+    }
+
+    console.log('Editora Status Bar Demo loaded');
+  </script>
+</body>
+</html>

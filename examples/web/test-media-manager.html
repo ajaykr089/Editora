@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags for SEO -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Media Manager Test - Testing media upload, management, and insertion features.">
+    <meta name="keywords" content="media manager, upload, testing, Editora editor">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Editora - Test Media Manager">
+    <meta property="og:description" content="Editora Media Manager Test - Testing media upload, management, and insertion features.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora-free.netlify.app/">
+    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Editora - Test Media Manager">
+    <meta property="twitter:description" content="Editora Media Manager Test - Testing media upload, management, and insertion features">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <title>Editora - Test Media Manager</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">
+                    <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto;">
+                </a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="docs/installation.html">Docs</a></li>
+                    <li><a href="docs/features.html">Features</a></li>
+                    <li><a href="plugins/index.html">Plugins</a></li>
+                    <li><a href="docs/api.html">API</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+    <h1>🖼️ Editora - Media Manager Test</h1>
+    <p class="subtitle">Testing media insertion and management features</p>
+
+    <div class="info">
+      <strong>Media Manager Integration</strong><br>
+      This editor focuses on media-related plugins including image insertion, video embedding,
+      link management, and document handling with the full webcomponent interface.
+    </div>
+
+    <div class="features-list">
+      <h3>🎬 Media Features</h3>
+      <ul>
+        <li><strong>Image Insertion:</strong> Upload and insert images with resizing</li>
+        <li><strong>Video Embedding:</strong> Embed videos from various platforms</li>
+        <li><strong>Link Management:</strong> Create and edit hyperlinks</li>
+        <li><strong>Document Manager:</strong> Handle file attachments</li>
+        <li><strong>Anchor Links:</strong> Create internal page anchors</li>
+        <li><strong>Embed Iframes:</strong> Embed external content</li>
+        <li><strong>Media Library:</strong> Organize and reuse media assets</li>
+      </ul>
+    </div>
+
+    <div class="media-guide">
+      <h3>📋 How to Test Media Features</h3>
+      <ul>
+        <li>Click the <strong>Insert Image</strong> button to add images</li>
+        <li>Use <strong>Insert Video</strong> to embed videos</li>
+        <li>Try the <strong>Link</strong> button to create hyperlinks</li>
+        <li>Test <strong>Anchor</strong> insertion for internal links</li>
+        <li>Use <strong>Embed Iframe</strong> for external content</li>
+        <li>Explore the <strong>Document Manager</strong> features</li>
+      </ul>
+    </div>
+
+    <editora-editor
+      id="media-editor"
+      height="500"
+      statusbar="true"
+      plugins="bold italic underline link image table list history clearFormatting anchor embedIframe document-manager media-manager"
+      toolbar-items="undo redo | bold italic underline | link insertImage insertVideo table anchor embedIframe | document-manager | clearFormatting"
+    >
+      <h2>Media Manager Test Editor</h2>
+      <p>This editor is configured specifically for testing <strong>media management features</strong>.</p>
+
+      <h3>🖼️ Image Features</h3>
+      <p>You can insert images using the toolbar button. Try uploading different image formats and sizes.</p>
+
+      <h3>🎬 Video Embedding</h3>
+      <p>Use the video insertion tool to embed videos from YouTube, Vimeo, or other platforms.</p>
+
+      <h3>🔗 Link Management</h3>
+      <p>Create <a href="https://example.com">hyperlinks</a> to external websites or use anchors for internal navigation.</p>
+
+      <h3>📄 Document Handling</h3>
+      <p>The document manager allows you to attach and organize files within your content.</p>
+
+      <h3>🎯 Test Area</h3>
+      <p>This is a good place to test media insertion. Try adding images, videos, and links above!</p>
+    </editora-editor>
+
+    <div class="plugin-status">
+      <h3>🔌 WebComponent Status</h3>
+      <div id="component-status">Loading webcomponent...</div>
+    </div>
+  </div>
+
+  <!-- Import Web Component -->
+  <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.js"></script>
+
+  <script>
+    // Wait for custom element to be defined
+    customElements.whenDefined('editora-editor').then(() => {
+      console.log('✅ Editora webcomponent loaded successfully');
+
+      const statusDiv = document.getElementById('component-status');
+      const editor = document.getElementById('media-editor');
+
+      statusDiv.innerHTML = `
+        <div style="color: green;">✅ WebComponent loaded successfully</div>
+        <div style="margin-top: 10px;">
+          <strong>Media Plugins Loaded:</strong><br>
+          • Image insertion and management<br>
+          • Video embedding tools<br>
+          • Link and anchor creation<br>
+          • Document manager<br>
+          • Media library integration<br>
+          • Iframe embedding
+        </div>
+        <div style="margin-top: 10px;">
+          <strong>Test Instructions:</strong><br>
+          • Click toolbar buttons to test media insertion<br>
+          • Try uploading images and inserting videos<br>
+          • Create links and anchors<br>
+          • Test document management features
+        </div>
+      `;
+
+      // Add event listeners for demonstration
+      editor.addEventListener('content-change', () => {
+        console.log('Media editor content changed');
+      });
+
+      editor.addEventListener('editor-focus', () => {
+        console.log('Media editor focused');
+      });
+
+    }).catch((error) => {
+      console.error('❌ Failed to load webcomponent:', error);
+      document.getElementById('component-status').innerHTML = `
+        <div style="color: red;">❌ Failed to load webcomponent: ${error.message}</div>
+      `;
+    });
+
+    console.log('✓ Editora Media Manager Test loaded');
+  </script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

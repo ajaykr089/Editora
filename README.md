@@ -1,5 +1,9 @@
 # Editora - Best Free Premium Rich Text Editor
 
+<div align="center">
+  <img src="images/editora-logo.png" alt="Editora Logo" width="200" height="auto">
+</div>
+
 The **best free rich text editor** with enterprise-grade features. A comprehensive, production-ready WYSIWYG editor built with React, TypeScript, and modern web technologies. Get premium features completely free—no subscriptions, no limitations.
 
 **🌐 [Try it Live](https://editora-free.netlify.app/)** | **🔗 [GitHub](https://github.com/ajaykr089/Editora)** | **📦 [NPM](https://www.npmjs.com/org/editora)**
@@ -41,6 +45,22 @@ The **best free rich text editor** with enterprise-grade features. A comprehensi
 - ✅ **Modern Stack**: React 18, TypeScript 5, modern build tools
 - ✅ **Tree Shaking**: Optimized bundle sizes
 - ✅ **SSR Compatible**: Next.js and server-side rendering support
+
+## 📸 Features Overview
+
+<div align="center">
+  <img src="images/features-overview-1.png" alt="Rich Text Formatting" width="400" style="margin: 10px;">
+  <img src="images/features-overview-2.png" alt="Advanced Tables" width="400" style="margin: 10px;">
+  <br>
+  <img src="images/features-overview-3.png" alt="Code Syntax Highlighting" width="400" style="margin: 10px;">
+  <img src="images/features-overview-4.png" alt="Media Management" width="400" style="margin: 10px;">
+  <br>
+  <img src="images/features-overview-5.png" alt="Accessibility Checker" width="400" style="margin: 10px;">
+  <img src="images/features-overview-6.png" alt="Theme Support" width="400" style="margin: 10px;">
+  <br>
+  <img src="images/features-overview-7.png" alt="Plugin Architecture" width="400" style="margin: 10px;">
+  <img src="images/features-overview-8.png" alt="Performance Monitoring" width="400" style="margin: 10px;">
+</div>
 
 ## 📦 Installation
 
@@ -244,7 +264,12 @@ Editora provides a framework-agnostic web component that works with any JavaScri
 
 All 37+ native plugins are available: `bold`, `italic`, `underline`, `strikethrough`, `link`, `table`, `list`, `history`, `heading`, `blockquote`, `code`, `textColor`, `backgroundColor`, `fontSize`, `fontFamily`, `textAlignment`, `indent`, `image`, `anchor`, `embedIframe`, `math`, `specialCharacters`, `emojis`, `a11yChecker`, `comments`, `fullscreen`, and more.
 
-### Theming
+## 🌐 Web Component Demo
+
+<div align="center">
+  <img src="images/features-overview-1.png" alt="Web Component Interface" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <p><em>Editora Web Component - Framework Agnostic Rich Text Editing</em></p>
+</div>
 
 ```typescript
 import '@editora/themes'; // Base theme
@@ -254,6 +279,13 @@ import { setGlobalTheme } from '@editora/themes';
 // Apply dark theme
 setGlobalTheme('dark');
 ```
+
+## 🎨 Theme Comparison
+
+<div align="center">
+  <img src="images/theme-comparison.png" alt="Light vs Dark Theme Comparison" width="800" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <p><em>Editora supports both light and dark themes with seamless switching</em></p>
+</div>
 
 ### Security Integration
 
@@ -302,6 +334,14 @@ const myCustomPlugin: Plugin = {
     'Mod-Shift-H': 'toggleHighlight'
   }
 };
+```
+
+## 🔌 Plugin Architecture
+
+<div align="center">
+  <img src="images/features-overview-7.png" alt="Plugin Architecture" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <p><em>Modular Plugin System - Everything is a Plugin</em></p>
+</div>
 ```
 
 ## 🎨 Customization
@@ -355,6 +395,13 @@ const metrics = monitor.endOperation();
 console.log('Render time:', metrics.renderTime, 'ms');
 console.log('Memory usage:', metrics.memoryUsage, 'MB');
 ```
+
+## ⚡ Performance Monitoring
+
+<div align="center">
+  <img src="images/features-overview-8.png" alt="Performance Monitoring" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <p><em>Built-in Performance Monitoring and Optimization</em></p>
+</div>
 
 ## 🔒 Security
 
@@ -418,8 +465,8 @@ npm run test:coverage
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/rich-text-editor.git
-cd rich-text-editor
+git clone https://github.com/your-org/Editora.git
+cd Editora
 
 # Install dependencies
 npm install
@@ -461,8 +508,8 @@ Inspired by modern editor architecture and best practices.
 ## 📞 Support
 
 - **Documentation**: [docs.rte-editor.com](https://editora-free.netlify.app/)
-- **Issues**: [GitHub Issues](https://github.com/your-org/rich-text-editor/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/rich-text-editor/discussions)
+- **Issues**: [GitHub Issues](https://github.com/your-org/Editora/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-org/Editora/discussions)
 
 ---
 

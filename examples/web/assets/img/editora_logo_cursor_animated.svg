@@ -1,0 +1,8 @@
+<svg width="200" height="80" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="80" fill="white"/>
+  <text x="20" y="55" font-size="42" font-family="Arial, sans-serif" font-weight="bold" fill="#2563eb">E</text>
+  <rect x="51" y="20" width="4" height="40" fill="#2563eb">
+    <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+  <text x="58" y="55" font-size="32" font-family="Arial, sans-serif" fill="#111">ditora</text>
+</svg>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags for SEO -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Test Media Manager Webcomponent - Example and demonstration of Editora rich text editor features.">
+    <meta name="keywords" content="test media manager webcomponent, Editora editor, example, demonstration">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Editora - Test Media Manager Webcomponent">
+    <meta property="og:description" content="Editora Test Media Manager Webcomponent - Example and demonstration of Editora rich text editor features.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora-free.netlify.app/">
+    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Editora - Test Media Manager Webcomponent">
+    <meta property="twitter:description" content="Editora Test Media Manager Webcomponent - Example and demonstration of Editora rich text editor features">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <title>Editora - Test Media Manager Webcomponent</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+<body>
+  <h1>Media Manager Web Component Test</h1>
+  <p>Insert an image and click on it to see if the floating toolbar appears.</p>
+
+  <editora-editor
+    height="400"
+    plugins="image"
+    toolbar="bold italic underline | bullist numlist | image"
+    content="<p>Click the image button to insert an image, then click on the inserted image to test the floating toolbar.</p>"
+  ></editora-editor>
+
+  <script type="module">
+    import { RichTextEditorElement } from 'https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js';
+
+    // Register the web component
+    if (!customElements.get('editora-editor')) {
+      customElements.define('editora-editor', RichTextEditorElement);
+    }
+  </script>
+</body>
+</html></body>
+</html>

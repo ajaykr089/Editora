@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags for SEO -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Vanilla HTML with CDN - Quick start example using CDN links for fast integration.">
+    <meta name="keywords" content="vanilla HTML, CDN, quick start, fast integration, Editora editor">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Editora - Vanilla Html Cdn">
+    <meta property="og:description" content="Editora Vanilla HTML with CDN - Quick start example using CDN links for fast integration.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora-free.netlify.app/">
+    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Editora - Vanilla Html Cdn">
+    <meta property="twitter:description" content="Editora Vanilla HTML with CDN - Quick start example using CDN links for fast integration">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <title>Editora - Vanilla Html Cdn</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+<body>
+  <header style="text-align: center; padding: 15px; background: #2c3e50; color: white; margin-bottom: 20px;">
+    <a href="index.html" style="text-decoration: none; color: inherit;">
+      <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; filter: brightness(0) invert(1);">
+    </a>
+  </header>
+  
+    <h1>Editora Rich Text Editor</h1>
+    <p class="subtitle">Vanilla HTML with CDN - Production Ready</p>
+
+    <div class="editor-container">
+        <div class="toolbar">
+            <button onclick="editor.execCommand('bold')" title="Bold (Ctrl+B)">
+                <strong>B</strong>
+            </button>
+            <button onclick="editor.execCommand('italic')" title="Italic (Ctrl+I)">
+                <em>I</em>
+            </button>
+            <button onclick="editor.execCommand('underline')" title="Underline (Ctrl+U)">
+                <u>U</u>
+            </button>
+            <button onclick="editor.execCommand('strikethrough')" title="Strikethrough">
+                <s>S</s>
+            </button>
+            <button onclick="editor.execCommand('heading', { level: 1 })" title="Heading 1">
+                H1
+            </button>
+            <button onclick="editor.execCommand('heading', { level: 2 })" title="Heading 2">
+                H2
+            </button>
+            <button onclick="editor.execCommand('heading', { level: 3 })" title="Heading 3">
+                H3
+            </button>
+            <button onclick="editor.execCommand('bulletList')" title="Bullet List">
+                • List
+            </button>
+            <button onclick="editor.execCommand('orderedList')" title="Numbered List">
+                1. List
+            </button>
+            <button onclick="editor.execCommand('undo')" title="Undo (Ctrl+Z)">
+                ↶ Undo
+            </button>
+            <button onclick="editor.execCommand('redo')" title="Redo (Ctrl+Y)">
+                ↷ Redo
+            </button>
+        </div>
+        <div id="editor" class="editor-content" contenteditable="true"></div>
+    </div>
+
+    <div class="info">
+        <h3>📦 CDN Configuration</h3>
+        <p>This example uses JSDelivr CDN for production deployment:</p>
+        <ul>
+            <li><strong>Script:</strong> <code>https://cdn.jsdelivr.net/npm/@editora/core/dist/editora.min.js</code></li>
+            <li><strong>Version:</strong> Latest stable version from npm</li>
+            <li><strong>Benefits:</strong> Fast, reliable, globally distributed</li>
+        </ul>
+    </div>
+
+    <!-- CDN Script - Production Ready -->
+    <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/editora.min.js"></script>
+
+    <script>
+        // Initialize the editor
+        const editor = new Editora.Editor({
+            element: document.getElementById('editor'),
+            content: '<p>Welcome to Editora! This example uses CDN for production deployment.</p>',
+            shortcuts: true,
+            plugins: []
+        });
+
+        // Listen to content changes
+        editor.on('change', (content) => {
+            console.log('Content updated:', content);
+        });
+
+        // Programmatic API examples
+        window.getContent = () => {
+            console.log('Current content:', editor.getContent());
+            alert('Check console for content');
+        };
+
+        window.setContent = (html) => {
+            editor.setContent(html);
+        };
+    </script>
+</body>
+</html>

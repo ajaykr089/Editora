@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags for SEO -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Test Single Css - Example and demonstration of Editora rich text editor features.">
+    <meta name="keywords" content="test single css, Editora editor, example, demonstration">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Editora - Test Single Css">
+    <meta property="og:description" content="Editora Test Single Css - Example and demonstration of Editora rich text editor features.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora-free.netlify.app/">
+    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Editora - Test Single Css">
+    <meta property="twitter:description" content="Editora Test Single Css - Example and demonstration of Editora rich text editor features">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <title>Editora - Test Single Css</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+<body>
+    <h1>Editora Web Component - Single CSS Bundle Test</h1>
+    <p><strong>✅ Includes:</strong> Web component styles, themes, plugin styles (table floating toolbar, dialog overlays)</p>
+
+    <div id="editor-container">
+        <editora-editor
+            id="editor"
+            placeholder="Start typing... Test table insertion and dialogs!"
+            theme="light"
+        >
+            <p>This is a test of the single CSS bundle for web components.</p>
+            <p>The editor should load with all styles properly applied including table floating toolbars and dialog overlays.</p>
+        </editora-editor>
+    </div>
+
+    <!-- Import the web component JavaScript (Core Bundle - Optimized) -->
+    <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.js"></script>
+
+    <script>
+        // Initialize the editor when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const editor = document.getElementById('editor');
+
+            // Log when the editor is ready
+            editor.addEventListener('editora-ready', function() {
+                console.log('Editora web component is ready!');
+            });
+
+            // Log content changes
+            editor.addEventListener('input', function() {
+                console.log('Content changed');
+            });
+        });
+    </script>
+</body>
+</html>

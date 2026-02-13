@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags for SEO -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Webcomponent Demo - Example and demonstration of Editora rich text editor features.">
+    <meta name="keywords" content="webcomponent demo, Editora editor, example, demonstration">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Editora - Webcomponent Demo">
+    <meta property="og:description" content="Editora Webcomponent Demo - Example and demonstration of Editora rich text editor features.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora-free.netlify.app/">
+    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Editora - Webcomponent Demo">
+    <meta property="twitter:description" content="Editora Webcomponent Demo - Example and demonstration of Editora rich text editor features">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <title>Editora - Webcomponent Demo</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+<body>
+  <header style="text-align: center; padding: 20px; background: white; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <a href="index.html" style="text-decoration: none; color: inherit;">
+      <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 12px;">
+      <span style="font-size: 24px; font-weight: bold; color: #333;">Editora</span>
+    </a>
+  </header>
+  
+  <h1>🎉 Editora Web Component - Production Ready!</h1>
+  
+  <div class="stats">
+    <div class="stat-item">
+      <div class="label">Bundle Size</div>
+      <div class="value">97 KB</div>
+    </div>
+    <div class="stat-item">
+      <div class="label">Gzipped</div>
+      <div class="value">24 KB</div>
+    </div>
+    <div class="stat-item">
+      <div class="label">Native Plugins</div>
+      <div class="value">29</div>
+    </div>
+    <div class="stat-item">
+      <div class="label">Framework Deps</div>
+      <div class="value">0</div>
+    </div>
+  </div>
+
+  <!-- Example 1: Basic Usage -->
+  <div class="demo-section">
+    <h2>1️⃣ Basic Usage (TinyMCE-Style)</h2>
+    <p>Simple drop-in replacement with zero configuration:</p>
+    
+    <div class="code-block">
+      <code>&lt;!-- Core Bundle (~56KB) - Recommended --&gt;
+&lt;script src="dist/webcomponent-core.min.js"&gt;&lt;/script&gt;
+
+&lt;!-- Full Bundle (~60KB + lazy chunks) - All plugins --&gt;
+&lt;!-- &lt;script src="dist/webcomponent.min.js"&gt;&lt;/script&gt; --&gt;
+
+&lt;editora-editor height="400"&gt;
+  &lt;p&gt;Start typing...&lt;/p&gt;
+&lt;/editora-editor&gt;</code>
+    </div>
+    
+    <editora-editor id="editor1" height="400" statusbar="true">
+      <p><strong>Welcome to Editora!</strong></p>
+      <p>This is a <em>framework-agnostic</em> rich text editor with <mark style="background: yellow;">29 native plugins</mark>.</p>
+      <p>Try these features:</p>
+      <ul>
+        <li>Bold, italic, underline formatting</li>
+        <li>Headings and block quotes</li>
+        <li>Lists (ordered and unordered)</li>
+        <li>Text colors and highlighting</li>
+        <li>Links, images, and tables</li>
+      </ul>
+    </editora-editor>
+    
+    <div class="buttons">
+      <button onclick="getContent1()">Get Content</button>
+      <button onclick="setContent1()" class="secondary">Set New Content</button>
+      <button onclick="execCommand1()" class="secondary">Make Bold</button>
+    </div>
+    
+    <div id="output1" class="output">Click "Get Content" to see HTML...</div>
+  </div>
+
+  <!-- Example 2: Custom Configuration -->
+  <div class="demo-section">
+    <h2>2️⃣ Custom Configuration</h2>
+    <p>Configure via attributes or JavaScript API:</p>
+    
+    <div class="code-block">
+      <code>&lt;rich-text-editor
+  height="300"
+  theme="dark"
+  placeholder="Start writing..."
+  toolbar="undo redo | bold italic | link image"
+  plugins="bold italic underline link image"
+&gt;&lt;/rich-text-editor&gt;</code>
+    </div>
+    
+    <editora-editor 
+      id="editor2"
+      height="300"
+      placeholder="Type something here..."
+      toolbar="undo redo | bold italic underline strikethrough | link image | alignleft aligncenter alignright"
+      statusbar="true"
+    >
+    </editora-editor>
+    
+    <div class="buttons">
+      <button onclick="toggleReadonly()">Toggle Readonly</button>
+      <button onclick="changeTheme()" class="secondary">Change Theme</button>
+      <button onclick="focusEditor2()" class="secondary">Focus Editor</button>
+    </div>
+  </div>
+
+  <!-- Example 3: JavaScript API -->
+  <div class="demo-section">
+    <h2>3️⃣ JavaScript API (TinyMCE-Style)</h2>
+    <p>Programmatic control via the Editora global object:</p>
+    
+    <div class="code-block">
+      <code>// Get editor API
+const editor = document.querySelector('#editor3').getAPI();
+
+// Or use TinyMCE-style init
+const editor = Editora.init('#editor3', {
+  height: 400,
+  plugins: 'bold italic link'
+});</code>
+    </div>
+    
+    <editora-editor id="editor3" height="250" statusbar="true">
+      <p>Content controlled via JavaScript API</p>
+    </editora-editor>
+    
+    <div class="buttons">
+      <button onclick="apiDemo()">Run API Demo</button>
+      <button onclick="addEventListener3()" class="secondary">Add Event Listener</button>
+      <button onclick="removeContent3()" class="secondary">Clear Content</button>
+    </div>
+    
+    <div id="output3" class="output">API logs will appear here...</div>
+  </div>
+
+  <!-- Example 4: Multiple Editors -->
+  <div class="demo-section">
+    <h2>4️⃣ Multiple Editors on One Page</h2>
+    <p>Run multiple independent editor instances:</p>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div>
+        <h4>Editor A</h4>
+        <editora-editor id="editorA" height="200" statusbar="true">
+          <p>Editor A content</p>
+        </editora-editor>
+      </div>
+      <div>
+        <h4>Editor B</h4>
+        <editora-editor id="editorB" height="200" statusbar="true">
+          <p>Editor B content</p>
+        </editora-editor>
+      </div>
+    </div>
+    
+    <div class="buttons">
+      <button onclick="syncEditors()">Sync A → B</button>
+      <button onclick="compareEditors()" class="secondary">Compare Content</button>
+    </div>
+    
+    <div id="output4" class="output">Comparison results will appear here...</div>
+  </div>
+
+  <!-- Features Overview -->
+  <div class="demo-section">
+    <h2>✨ Features</h2>
+    
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h4>🚀 Framework Agnostic</h4>
+        <p>Works with React, Vue, Angular, Svelte, or vanilla JS</p>
+      </div>
+      
+      <div class="feature-card">
+        <h4>📦 Lightweight</h4>
+        <p>97 KB minified, 24 KB gzipped - 91% smaller than before!</p>
+      </div>
+      
+      <div class="feature-card">
+        <h4>🔌 29 Native Plugins</h4>
+        <p>All plugins are native TypeScript with zero React deps</p>
+      </div>
+      
+      <div class="feature-card">
+        <h4>🎨 Customizable</h4>
+        <p>Custom themes, toolbars, and plugin configurations</p>
+      </div>
+      
+      <div class="feature-card">
+        <h4>♿ Accessible</h4>
+        <p>ARIA-compliant with keyboard navigation support</p>
+      </div>
+      
+      <div class="feature-card">
+        <h4>🌐 Web Component</h4>
+        <p>Standard custom element with declarative API</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Available Plugins -->
+  <div class="demo-section">
+    <h2>🔌 Available Plugins (29 Total)</h2>
+    
+    <div class="code-block">
+      <code id="plugin-list">Loading plugins...</code>
+    </div>
+  </div>
+
+  <!-- Load the editor script (Core Bundle - Optimized) -->
+  <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.js"></script>
+  
+  <script>
+    // Wait for DOM and editor to load
+    window.addEventListener('DOMContentLoaded', () => {
+      console.log('Editora loaded:', window.Editora);
+      
+      // Display available plugins
+      if (window.Editora && window.Editora.plugins) {
+        document.getElementById('plugin-list').textContent = 
+          window.Editora.plugins.join(', ');
+      }
+    });
+
+    // Example 1 functions
+    function getContent1() {
+      const editor = document.getElementById('editor1');
+      const content = editor.getContent();
+      document.getElementById('output1').textContent = content;
+    }
+
+    function setContent1() {
+      const editor = document.getElementById('editor1');
+      editor.setContent(`
+        <h2>New Content Set!</h2>
+        <p>This content was set programmatically at ${new Date().toLocaleTimeString()}</p>
+        <p><strong>Pretty cool, right?</strong></p>
+      `);
+      document.getElementById('output1').textContent = 'Content updated!';
+    }
+
+    function execCommand1() {
+      const editor = document.getElementById('editor1');
+      editor.focus();
+      const success = editor.execCommand('toggleBold');
+      document.getElementById('output1').textContent = 
+        `Command executed: ${success ? 'Success' : 'Failed'}`;
+    }
+
+    // Example 2 functions
+    let isReadonly = false;
+    function toggleReadonly() {
+      const editor = document.getElementById('editor2');
+      isReadonly = !isReadonly;
+      editor.setAttribute('readonly', isReadonly.toString());
+    }
+
+    let currentTheme = 'light';
+    function changeTheme() {
+      const editor = document.getElementById('editor2');
+      currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+      editor.setAttribute('theme', currentTheme);
+    }
+
+    function focusEditor2() {
+      const editor = document.getElementById('editor2');
+      editor.focus();
+    }
+
+    // Example 3 functions
+    function apiDemo() {
+      const editor = document.getElementById('editor3');
+      const api = editor.getAPI();
+      
+      let log = '=== API Demo ===\n';
+      log += `getContent(): ${api.getContent().substring(0, 50)}...\n`;
+      log += `Config: ${JSON.stringify(api.getConfig(), null, 2)}\n`;
+      
+      // Test setContent
+      api.setContent('<p><strong>API Test:</strong> Content set at ' + new Date().toLocaleTimeString() + '</p>');
+      log += 'setContent(): Success\n';
+      
+      // Test focus
+      api.focus();
+      log += 'focus(): Success\n';
+      
+      document.getElementById('output3').textContent = log;
+    }
+
+    function addEventListener3() {
+      const editor = document.getElementById('editor3');
+      const api = editor.getAPI();
+      
+      const unsubscribe = api.on('content-change', (event) => {
+        document.getElementById('output3').textContent = 
+          '✅ Event listener active! Content changed.\nHTML: ' + 
+          event.detail.html.substring(0, 100) + '...';
+      });
+      
+      document.getElementById('output3').textContent = 
+        '✅ Event listener added! Type in the editor to trigger it.\n(Listener will fire on next change)';
+    }
+
+    function removeContent3() {
+      const editor = document.getElementById('editor3');
+      editor.setContent('');
+      document.getElementById('output3').textContent = 'Content cleared!';
+    }
+
+    // Example 4 functions
+    function syncEditors() {
+      const editorA = document.getElementById('editorA');
+      const editorB = document.getElementById('editorB');
+      
+      const content = editorA.getContent();
+      editorB.setContent(content);
+      
+      document.getElementById('output4').textContent = 
+        `✅ Synced! Editor B now has Editor A's content.\nLength: ${content.length} characters`;
+    }
+
+    function compareEditors() {
+      const editorA = document.getElementById('editorA');
+      const editorB = document.getElementById('editorB');
+      
+      const contentA = editorA.getContent();
+      const contentB = editorB.getContent();
+      
+      let comparison = '=== Editor Comparison ===\n';
+      comparison += `Editor A: ${contentA.length} characters\n`;
+      comparison += `Editor B: ${contentB.length} characters\n`;
+      comparison += `Same content: ${contentA === contentB ? 'Yes ✅' : 'No ❌'}\n`;
+      
+      document.getElementById('output4').textContent = comparison;
+    }
+
+    // Global error handler
+    window.addEventListener('error', (event) => {
+      console.error('Error:', event.error);
+    });
+  </script>
+</body>
+</html>

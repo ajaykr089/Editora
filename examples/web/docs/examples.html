@@ -1,19 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Meta Tags for SEO -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Code examples and tutorials for Editora Rich Text Editor. Learn through practical examples.">
-    <meta name="keywords" content="examples, tutorials, code samples, getting started">
-    <title>Examples - Editora Documentation</title>
+    <meta name="description" content="Editora Examples - Example and demonstration of Editora rich text editor features.">
+    <meta name="keywords" content="examples, Editora editor, example, demonstration">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Editora - Examples">
+    <meta property="og:description" content="Editora Examples - Example and demonstration of Editora rich text editor features.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora-free.netlify.app/">
+    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Editora - Examples">
+    <meta property="twitter:description" content="Editora Examples - Example and demonstration of Editora rich text editor features">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <title>Editora - Examples</title>
     <link rel="stylesheet" href="../assets/css/style.css">
-</head>
 <body>
     <!-- Header -->
     <header>
         <div class="container">
             <nav>
-                <a href="../index.html" class="logo">✏️ <span>Editora</span></a>
+                <a href="../index.html" class="logo">
+                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto;">
+                </a>
                 <button class="menu-toggle">☰</button>
                 <ul class="nav-links">
                     <li><a href="../index.html">Home</a></li>
@@ -58,13 +76,58 @@
                     <a href="../playground.html" style="margin-left: 8px;">Open Playground →</a>
                   </div>
 
+                  <h2>Bundle Options</h2>
+                  <p>Editora offers two bundle sizes to fit your needs:</p>
+                  <ul>
+                    <li><strong>Core Bundle:</strong> Essential plugins only (bold, italic, underline, history)</li>
+                    <li><strong>Full Bundle:</strong> All plugins including advanced ones (embedIframe, math, specialCharacters, table, image, link, heading, list, blockquote, code, fontSize, textAlignment, fontFamily, lineHeight, textColor, backgroundColor, capitalization, indent, direction, checklist, emojis, preview, fullscreen, print, pageBreak, footnote, codeSample, anchor, mergeTag, template, comments, spellCheck, a11yChecker, strikethrough, clearFormatting, mediaManager, documentManager)</li>
+                  </ul>
+
+                  <h3>Core Bundle Usage</h3>
+                  <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Editora Core Bundle&lt;/title&gt;
+  &lt;script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.js"&gt;&lt;/script&gt;
+  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;editora-editor
+    plugins="bold italic underline history"
+    toolbar-items="bold italic underline | undo redo"
+    height="300"
+  &gt;
+    &lt;p&gt;Start editing with core plugins...&lt;/p&gt;
+  &lt;/editora-editor&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+                  <h3>Full Bundle Usage</h3>
+                  <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Editora Full Bundle&lt;/title&gt;
+  &lt;script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.js"&gt;&lt;/script&gt;
+  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;editora-editor
+    plugins="bold italic underline table codeSample embedIframe math specialCharacters history"
+    toolbar-items="bold italic underline | table | codeSample | embedIframe | math | specialCharacters | undo redo"
+    height="400"
+  &gt;
+    &lt;p&gt;Start editing with all plugins...&lt;/p&gt;
+  &lt;/editora-editor&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
                     <h2>Basic HTML Example</h2>
                     <pre><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
   &lt;title&gt;Editora Web Component&lt;/title&gt;
-  &lt;script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.js"&gt;&lt;/script&gt;
-  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
+  &lt;script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.js"&gt;&lt;/script&gt;
+  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.css"&gt;
 &lt;/head&gt;
 &lt;body&gt;
   &lt;editora-editor
@@ -256,8 +319,8 @@ export class AppComponent implements AfterViewInit {
                     <pre><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
-  &lt;script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.js"&gt;&lt;/script&gt;
-  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
+  &lt;script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.js"&gt;&lt;/script&gt;
+  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.css"&gt;
 &lt;/head&gt;
 &lt;body&gt;
   &lt;editora-editor
@@ -450,8 +513,65 @@ export class AppComponent implements AfterViewInit {
 &lt;/script&gt;</code></pre>
 
                     <div style="margin-top: 3rem; padding: 2rem; background: var(--gray-50); border-radius: var(--border-radius);">
-                        <h3>💡 More Examples</h3>
-                        <p>Check the <a href="https://github.com/ajaykr089/Editora/tree/main/examples" target="_blank" rel="noopener">GitHub examples directory</a> for more complete examples.</p>
+                        <h3>💡 Additional Example Files</h3>
+                        <p>Explore these additional working example files:</p>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                            <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--gray-200);">
+                                <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">🔗 Core Examples</h4>
+                                <ul style="margin: 0; padding-left: 1rem;">
+                                    <li><a href="../test.html">Basic Test</a> - Simple editor setup</li>
+                                    <li><a href="../quick-test.html">Quick Test</a> - Fast testing example</li>
+                                    <li><a href="../webcomponent-demo.html">Web Component Demo</a> - Component showcase</li>
+                                    <li><a href="../complete-test.html">Complete Test</a> - Full feature test</li>
+                                </ul>
+                            </div>
+                            <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--gray-200);">
+                                <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">🎨 UI & Toolbar</h4>
+                                <ul style="margin: 0; padding-left: 1rem;">
+                                    <li><a href="../test-toolbar-fix.html">Toolbar Fix Test</a> - Toolbar debugging</li>
+                                    <li><a href="../debug-toolbar.html">Debug Toolbar</a> - Toolbar inspection</li>
+                                    <li><a href="../test-single-css.html">Single CSS Test</a> - Minimal styling</li>
+                                </ul>
+                            </div>
+                            <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--gray-200);">
+                                <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">📷 Media & Plugins</h4>
+                                <ul style="margin: 0; padding-left: 1rem;">
+                                    <li><a href="../test-media-manager.html">Media Manager</a> - File upload handling</li>
+                                    <li><a href="../test-media-manager-webcomponent.html">Media Manager WC</a> - Web component version</li>
+                                    <li><a href="../test-anchor-plugin.html">Anchor Plugin</a> - Link anchors</li>
+                                </ul>
+                            </div>
+                            <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--gray-200);">
+                                <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">🔧 Advanced Features</h4>
+                                <ul style="margin: 0; padding-left: 1rem;">
+                                    <li><a href="../test-multi-instance-embed-iframe.html">Multi Instance</a> - Multiple editors</li>
+                                    <li><a href="../test-pdf-export.html">PDF Export</a> - Document export</li>
+                                    <li><a href="../test-native-plugins.html">Native Plugins</a> - Plugin verification</li>
+                                    <li><a href="../verify-native-plugins.html">Plugin Verification</a> - Plugin testing</li>
+                                    <li><a href="../100-percent-connected.html">100% Connected</a> - Full integration</li>
+                                </ul>
+                            </div>
+                            <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--gray-200);">
+                                <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">⚛️ Framework Examples</h4>
+                                <ul style="margin: 0; padding-left: 1rem;">
+                                    <li><a href="../basic-example.html">React Basic</a> - React/Vite setup</li>
+                                    <li><a href="../vanilla-html-example.html">Vanilla HTML Basic</a> - Pure HTML/JS (no build)</li>
+                                    <li><a href="../vanilla-html-cdn.html">Vanilla HTML CDN</a> - Production CDN setup</li>
+                                    <li><a href="../vanilla-html-local.html">Vanilla HTML Local</a> - Development local files</li>
+                                    <li><a href="../vanilla-html-bundles.html">Bundle Comparison</a> - Core vs Full bundle demo</li>
+                                    <li><a href="../vanilla-html-plugins.html">Separate Plugins</a> - Individual plugin loading</li>
+                                    <li><a href="../webcomponent-basic.html">Web Component Basic</a> - Simple web component</li>
+                                    <li><a href="../webcomponent-advanced.html">Web Component Advanced</a> - Advanced features</li>
+                                    <li><a href="../webcomponent-all-plugins.html">All Plugins</a> - Complete plugin showcase</li>
+                                    <li><a href="../webcomponent-toolbar-test.html">Toolbar Test</a> - Toolbar configurations</li>
+                                    <li><a href="../statusbar-demo.html">Status Bar Demo</a> - Status bar features</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--gray-600);">
+                            All example files use CDN URLs and can be opened directly in your browser.
+                            Check the <a href="https://github.com/ajaykr089/Editora/tree/main/examples" target="_blank" rel="noopener">GitHub examples directory</a> for the complete collection.
+                        </p>
                     </div>
                 </main>
             </div>

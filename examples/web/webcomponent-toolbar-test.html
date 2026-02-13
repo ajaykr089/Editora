@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags for SEO -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Webcomponent Toolbar Test - Example and demonstration of Editora rich text editor features.">
+    <meta name="keywords" content="webcomponent toolbar test, Editora editor, example, demonstration">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Editora - Webcomponent Toolbar Test">
+    <meta property="og:description" content="Editora Webcomponent Toolbar Test - Example and demonstration of Editora rich text editor features.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora-free.netlify.app/">
+    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Editora - Webcomponent Toolbar Test">
+    <meta property="twitter:description" content="Editora Webcomponent Toolbar Test - Example and demonstration of Editora rich text editor features">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <title>Editora - Webcomponent Toolbar Test</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+<body>
+  <header style="text-align: center; padding: 15px; background: #2c3e50; color: white; margin-bottom: 20px;">
+    <a href="index.html" style="text-decoration: none; color: inherit;">
+      <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; filter: brightness(0) invert(1);">
+    </a>
+  </header>
+  
+  <h1>🔧 Toolbar Plugin Test</h1>
+  <p>Testing if toolbar renders with inline plugins from standalone.ts</p>
+
+  <div class="test-section">
+    <h2>Test 1: Default Toolbar (All Plugins)</h2>
+    <p>Should show: undo, redo, bold, italic, underline, strikethrough</p>
+    <editora-editor id="editor1" height="200">
+      <p>This editor should have a toolbar with 6 buttons.</p>
+    </editora-editor>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 2: Custom Toolbar (Subset)</h2>
+    <p>Custom configuration: toolbar="undo redo | bold italic"</p>
+    <editora-editor id="editor2" height="200" toolbar="undo redo | bold italic">
+      <p>This editor should only have undo, redo, bold, and italic buttons.</p>
+    </editora-editor>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 3: Minimal Toolbar</h2>
+    <p>Custom configuration: toolbar="bold italic"</p>
+    <editora-editor id="editor3" height="200" toolbar="bold italic">
+      <p>This editor should only have bold and italic buttons.</p>
+    </editora-editor>
+  </div>
+
+  <div class="test-section">
+    <h2>Debug Info</h2>
+    <button onclick="showDebugInfo()">🔍 Show Debug Info</button>
+    <div class="console-output" id="debug-output">
+      <pre>Click "Show Debug Info" to see plugin registration details</pre>
+    </div>
+  </div>
+
+  <!-- Load Editora Web Component (Core Bundle - Optimized) -->
+  <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.js"></script>
+  
+  <script>
+    // Log loaded components
+    console.log('=== Editora Web Component Loaded ===');
+    console.log('window.Editora:', window.Editora);
+    console.log('Custom element defined:', customElements.get('rich-text-editor'));
+
+    function showDebugInfo() {
+      const editor1 = document.getElementById('editor1');
+      const editor2 = document.getElementById('editor2');
+      const editor3 = document.getElementById('editor3');
+
+      const info = {
+        'window.Editora': !!window.Editora,
+        'Custom Element': customElements.get('rich-text-editor')?.name,
+        'Editor 1 Element': editor1?.tagName,
+        'Editor 1 Shadow Root': !!editor1?.shadowRoot,
+        'Editor 1 Toolbar': editor1?.shadowRoot?.querySelector('.editora-toolbar-container')?.innerHTML?.substring(0, 200),
+        'Editor 2 Toolbar Attr': editor2?.getAttribute('toolbar'),
+        'Editor 3 Toolbar Attr': editor3?.getAttribute('toolbar'),
+      };
+
+      // Try to access internal state if available
+      if (editor1 && 'pluginLoader' in editor1) {
+        const loader = editor1.pluginLoader;
+        if (loader && 'plugins' in loader) {
+          info['Registered Plugins'] = loader.plugins.map(p => p.name);
+          info['Plugin Count'] = loader.plugins.length;
+        }
+      }
+
+      const output = document.getElementById('debug-output');
+      output.innerHTML = '<pre>' + JSON.stringify(info, null, 2) + '</pre>';
+      
+      console.log('=== Debug Info ===', info);
+    }
+
+    // Auto-run debug after elements are connected
+    setTimeout(() => {
+      console.log('=== Auto Debug Check ===');
+      const editor1 = document.getElementById('editor1');
+      if (editor1?.shadowRoot) {
+        const toolbar = editor1.shadowRoot.querySelector('.editora-toolbar-container');
+        console.log('Toolbar found:', !!toolbar);
+        console.log('Toolbar HTML:', toolbar?.innerHTML);
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

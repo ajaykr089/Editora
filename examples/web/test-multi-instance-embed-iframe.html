@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags for SEO -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Test Multi Instance Embed Iframe - Example and demonstration of Editora rich text editor features.">
+    <meta name="keywords" content="test multi instance embed iframe, Editora editor, example, demonstration">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Editora - Test Multi Instance Embed Iframe">
+    <meta property="og:description" content="Editora Test Multi Instance Embed Iframe - Example and demonstration of Editora rich text editor features.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora-free.netlify.app/">
+    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Editora - Test Multi Instance Embed Iframe">
+    <meta property="twitter:description" content="Editora Test Multi Instance Embed Iframe - Example and demonstration of Editora rich text editor features">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <title>Editora - Test Multi Instance Embed Iframe</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+<body>
+  <div class="container">
+    <h1>🎯 Editora - Multi-Instance Embed Iframe Test</h1>
+
+    <div class="test-info">
+      <strong>Multi-Instance Plugin Test</strong><br>
+      This page tests that the embed-iframe plugin works correctly with multiple editors on the same page.
+      Each editor should maintain its own dialog state independently.
+    </div>
+
+    <div class="editor-section">
+      <h2>Editor 1</h2>
+      <div class="toolbar">
+        <button onclick="execCommand('editor1', 'openEmbedIframeDialog')" title="Embed Iframe">
+          📺 Embed Iframe
+        </button>
+      </div>
+      <div id="editor1" class="editor" contenteditable="true">
+        <h3>Editor One</h3>
+        <p>This is the first editor. Click the "Embed Iframe" button to open the dialog.</p>
+        <p>The dialog should be associated with this editor only.</p>
+      </div>
+    </div>
+
+    <div class="editor-section">
+      <h2>Editor 2</h2>
+      <div class="toolbar">
+        <button onclick="execCommand('editor2', 'openEmbedIframeDialog')" title="Embed Iframe">
+          📺 Embed Iframe
+        </button>
+      </div>
+      <div id="editor2" class="editor" contenteditable="true">
+        <h3>Editor Two</h3>
+        <p>This is the second editor. Click the "Embed Iframe" button to open a separate dialog.</p>
+        <p>Both editors should work independently without interfering with each other.</p>
+      </div>
+    </div>
+
+    <div class="editor-section">
+      <h2>Editor 3</h2>
+      <div class="toolbar">
+        <button onclick="execCommand('editor3', 'openEmbedIframeDialog')" title="Embed Iframe">
+          📺 Embed Iframe
+        </button>
+      </div>
+      <div id="editor3" class="editor" contenteditable="true">
+        <h3>Editor Three</h3>
+        <p>This is the third editor. Test that all three editors can open dialogs simultaneously.</p>
+        <p>Each dialog should maintain its own form state and settings.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import native UI styles -->
+  <link rel="stylesheet" href="../packages/core/src/ui/native-ui.css">
+
+  <!-- Import webcomponent bundle (Full Bundle with Lazy Loading) -->
+  <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.js"></script>
+
+  <script>
+    // Global command execution function for specific editors
+    function execCommand(editorId, commandName, value) {
+      const editor = document.getElementById(editorId);
+      editor.focus();
+
+      // Get the command from plugins
+      const plugins = window.PluginLoader ? window.PluginLoader.getAll() : [];
+
+      for (const plugin of plugins) {
+        if (plugin.commands && plugin.commands[commandName]) {
+          console.log(`Executing command: ${commandName} from plugin: ${plugin.name} on editor: ${editorId}`);
+          // Pass the editor element to the command
+          plugin.commands[commandName](editor, value);
+          return;
+        }
+      }
+
+      console.warn(`Command not found: ${commandName}`);
+    }
+
+    console.log('✓ Editora Multi-Instance Embed Iframe Test loaded');
+  </script>
+</body>
+</html>

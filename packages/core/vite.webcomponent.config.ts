@@ -36,7 +36,7 @@ export default defineConfig({
         {
           format: 'umd',
           name: 'Editora',
-          inlineDynamicImports: true,
+          inlineDynamicImports: true,  // Inline for UMD to work as regular script
           globals: {},
           assetFileNames: (assetInfo) => {
             if (assetInfo.name?.endsWith('.css')) {

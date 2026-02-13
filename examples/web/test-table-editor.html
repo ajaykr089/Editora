@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags for SEO -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Table Editor Test - Testing advanced table editing and formatting features.">
+    <meta name="keywords" content="table editor, formatting, testing, Editora editor">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Editora - Test Table Editor">
+    <meta property="og:description" content="Editora Table Editor Test - Testing advanced table editing and formatting features.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora-free.netlify.app/">
+    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Editora - Test Table Editor">
+    <meta property="twitter:description" content="Editora Table Editor Test - Testing advanced table editing and formatting features">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <title>Editora - Test Table Editor</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">
+                    <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto;">
+                </a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="docs/installation.html">Docs</a></li>
+                    <li><a href="docs/features.html">Features</a></li>
+                    <li><a href="plugins/index.html">Plugins</a></li>
+                    <li><a href="docs/api.html">API</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>📊 Editora - Table Editor Test</h1>
+    <p class="subtitle">Testing advanced table creation and editing features</p>
+
+    <div class="info">
+      <strong>Table Editor Integration</strong><br>
+      This editor focuses on comprehensive table functionality including creation, editing,
+      formatting, and advanced table operations using the full webcomponent interface.
+    </div>
+
+    <div class="features-list">
+      <h3>📋 Table Features</h3>
+      <ul>
+        <li><strong>Table Creation:</strong> Insert tables with custom rows and columns</li>
+        <li><strong>Cell Editing:</strong> Edit individual table cells</li>
+        <li><strong>Row/Column Operations:</strong> Add, delete, and modify rows/columns</li>
+        <li><strong>Table Formatting:</strong> Style tables with borders, colors, and alignment</li>
+        <li><strong>Cell Merging:</strong> Merge and split table cells</li>
+        <li><strong>Table Properties:</strong> Set table width, alignment, and styling</li>
+        <li><strong>Import/Export:</strong> Import tables from Word/Excel</li>
+      </ul>
+    </div>
+
+    <div class="table-guide">
+      <h3>📋 How to Test Table Features</h3>
+      <ul>
+        <li>Click the <strong>Table</strong> button to insert a new table</li>
+        <li>Right-click table cells for context menu options</li>
+        <li>Use toolbar buttons to add/remove rows and columns</li>
+        <li>Try cell merging and splitting operations</li>
+        <li>Test table styling and formatting options</li>
+        <li>Import tables from external sources</li>
+      </ul>
+    </div>
+
+    <editora-editor
+      id="table-editor"
+      height="600"
+      statusbar="true"
+      plugins="bold italic underline link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template"
+      toolbar-items="undo redo | bold italic underline | table | bullist numlist | link insertImage | clearFormatting"
+    >
+      <h2>Table Editor Test Document</h2>
+      <p>This editor is optimized for testing <strong>advanced table functionality</strong>.</p>
+
+      <h3>🗂️ Sample Data Tables</h3>
+
+      <h4>Product Inventory Table</h4>
+      <table border="1" style="border-collapse: collapse; width: 100%; margin-bottom: 20px;">
+        <thead>
+          <tr style="background-color: #f8f9fa;">
+            <th style="padding: 8px; text-align: left;">Product</th>
+            <th style="padding: 8px; text-align: center;">Quantity</th>
+            <th style="padding: 8px; text-align: right;">Price</th>
+            <th style="padding: 8px; text-align: center;">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 8px;">Laptop</td>
+            <td style="padding: 8px; text-align: center;">15</td>
+            <td style="padding: 8px; text-align: right;">$1,299.99</td>
+            <td style="padding: 8px; text-align: center;">In Stock</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px;">Mouse</td>
+            <td style="padding: 8px; text-align: center;">45</td>
+            <td style="padding: 8px; text-align: right;">$29.99</td>
+            <td style="padding: 8px; text-align: center;">In Stock</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px;">Keyboard</td>
+            <td style="padding: 8px; text-align: center;">8</td>
+            <td style="padding: 8px; text-align: right;">$89.99</td>
+            <td style="padding: 8px; text-align: center;">Low Stock</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Employee Schedule Table</h4>
+      <table border="1" style="border-collapse: collapse; width: 100%; margin-bottom: 20px;">
+        <thead>
+          <tr style="background-color: #e3f2fd;">
+            <th style="padding: 8px;">Employee</th>
+            <th style="padding: 8px;">Monday</th>
+            <th style="padding: 8px;">Tuesday</th>
+            <th style="padding: 8px;">Wednesday</th>
+            <th style="padding: 8px;">Thursday</th>
+            <th style="padding: 8px;">Friday</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 8px; font-weight: bold;">John Doe</td>
+            <td style="padding: 8px; text-align: center;">9-5</td>
+            <td style="padding: 8px; text-align: center;">9-5</td>
+            <td style="padding: 8px; text-align: center;">Off</td>
+            <td style="padding: 8px; text-align: center;">9-5</td>
+            <td style="padding: 8px; text-align: center;">9-5</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px; font-weight: bold;">Jane Smith</td>
+            <td style="padding: 8px; text-align: center;">10-6</td>
+            <td style="padding: 8px; text-align: center;">10-6</td>
+            <td style="padding: 8px; text-align: center;">10-6</td>
+            <td style="padding: 8px; text-align: center;">Off</td>
+            <td style="padding: 8px; text-align: center;">10-6</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>🎯 Test Area</h3>
+      <p>Use this space to test table creation and editing. Try:</p>
+      <ul>
+        <li>Inserting new tables with the table button</li>
+        <li>Adding and removing rows and columns</li>
+        <li>Merging and splitting cells</li>
+        <li>Applying different styles and formatting</li>
+        <li>Copying and pasting table data</li>
+      </ul>
+
+      <p>Create your own tables below:</p>
+      <p>&nbsp;</p>
+      <p>&nbsp;</p>
+      <p>&nbsp;</p>
+    </editora-editor>
+
+    <div class="plugin-status">
+      <h3>🔌 WebComponent Status</h3>
+      <div id="component-status">Loading webcomponent...</div>
+    </div>
+  </div>
+
+  <!-- Import Web Component -->
+  <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.js"></script>
+
+  <script>
+    // Wait for custom element to be defined
+    customElements.whenDefined('editora-editor').then(() => {
+      console.log('✅ Editora webcomponent loaded successfully');
+
+      const statusDiv = document.getElementById('component-status');
+      const editor = document.getElementById('table-editor');
+
+      statusDiv.innerHTML = `
+        <div style="color: green;">✅ WebComponent loaded successfully</div>
+        <div style="margin-top: 10px;">
+          <strong>Table Plugins Loaded:</strong><br>
+          • Advanced table creation and editing<br>
+          • Row and column manipulation<br>
+          • Cell merging and splitting<br>
+          • Table styling and formatting<br>
+          • Import/export functionality<br>
+          • Context menu operations
+        </div>
+        <div style="margin-top: 10px;">
+          <strong>Test Instructions:</strong><br>
+          • Click the table button to insert new tables<br>
+          • Right-click cells for advanced options<br>
+          • Try adding/removing rows and columns<br>
+          • Test cell merging and table styling
+        </div>
+      `;
+
+      // Add event listeners for demonstration
+      editor.addEventListener('content-change', () => {
+        console.log('Table editor content changed');
+      });
+
+      editor.addEventListener('editor-focus', () => {
+        console.log('Table editor focused');
+      });
+
+    }).catch((error) => {
+      console.error('❌ Failed to load webcomponent:', error);
+      document.getElementById('component-status').innerHTML = `
+        <div style="color: red;">❌ Failed to load webcomponent: ${error.message}</div>
+      `;
+    });
+
+    console.log('✓ Editora Table Editor Test loaded');
+  </script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

@@ -8,7 +8,7 @@ A complete, modern documentation website for Editora has been successfully creat
 
 ## 📍 Location
 ```
-/Users/etelligens/Documents/Rich-Text-Editor/examples/web/
+./examples/web/
 ```
 
 ## 📊 What Was Created
@@ -127,17 +127,17 @@ examples/web/
 
 ### Option 1: Direct (Recommended)
 1. Open Finder
-2. Navigate to `/Users/etelligens/Documents/Rich-Text-Editor/examples/web/`
+2. Navigate to `./examples/web/`
 3. Double-click `index.html`
 
 ### Option 2: Terminal
 ```bash
-open /Users/etelligens/Documents/Rich-Text-Editor/examples/web/index.html
+open ./examples/web/index.html
 ```
 
 ### Option 3: Local Server
 ```bash
-cd /Users/etelligens/Documents/Rich-Text-Editor/examples/web/
+cd ./examples/web/
 python3 -m http.server 8000
 # Visit http://localhost:8000 in browser
 ```
@@ -359,7 +359,7 @@ Inside the `/examples/web/` folder:
 
 ## 🚀 You're All Set!
 
-Your professional Editora documentation website is complete and ready to use. Navigate to `/Users/etelligens/Documents/Rich-Text-Editor/examples/web/` and open `index.html` to view your new website!
+Your professional Editora documentation website is complete and ready to use. Navigate to `./examples/web/` and open `index.html` to view your new website!
 
 **Total creation time:** One session
 **Total files created:** 28

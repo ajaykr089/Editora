@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta Tags for SEO -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Vanilla HTML with Plugins - Example showing how to add and configure plugins in vanilla HTML.">
+    <meta name="keywords" content="vanilla HTML, plugins, configuration, Editora editor, integration">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Editora - Vanilla Html Plugins">
+    <meta property="og:description" content="Editora Vanilla HTML with Plugins - Example showing how to add and configure plugins in vanilla HTML.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora-free.netlify.app/">
+    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Editora - Vanilla Html Plugins">
+    <meta property="twitter:description" content="Editora Vanilla HTML with Plugins - Example showing how to add and configure plugins in vanilla HTML">
+    <meta name="theme-color" content="#007bff">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <title>Editora - Vanilla Html Plugins</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+<body>
+  <header style="text-align: center; padding: 15px; background: #2c3e50; color: white; margin-bottom: 20px;">
+    <a href="index.html" style="text-decoration: none; color: inherit;">
+      <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; filter: brightness(0) invert(1);">
+    </a>
+  </header>
+  
+    <h1>Editora Rich Text Editor</h1>
+    <p class="subtitle">Vanilla HTML with Separate Plugin Loading</p>
+
+    <div class="editor-container">
+        <div class="toolbar">
+            <button onclick="editor.execCommand('bold')" title="Bold (Ctrl+B)">
+                <strong>B</strong>
+            </button>
+            <button onclick="editor.execCommand('italic')" title="Italic (Ctrl+I)">
+                <em>I</em>
+            </button>
+            <button onclick="editor.execCommand('underline')" title="Underline (Ctrl+U)">
+                <u>U</u>
+            </button>
+            <button onclick="editor.execCommand('insertLink')" title="Insert Link (Ctrl+K)">
+                🔗 Link
+            </button>
+            <button onclick="editor.execCommand('insertImage')" title="Insert Image">
+                🖼️ Image
+            </button>
+            <button onclick="editor.execCommand('heading', { level: 1 })" title="Heading 1">
+                H1
+            </button>
+            <button onclick="editor.execCommand('heading', { level: 2 })" title="Heading 2">
+                H2
+            </button>
+            <button onclick="editor.execCommand('bulletList')" title="Bullet List">
+                • List
+            </button>
+            <button onclick="editor.execCommand('orderedList')" title="Numbered List">
+                1. List
+            </button>
+            <button onclick="editor.execCommand('undo')" title="Undo (Ctrl+Z)">
+                ↶ Undo
+            </button>
+            <button onclick="editor.execCommand('redo')" title="Redo (Ctrl+Y)">
+                ↷ Redo
+            </button>
+        </div>
+        <div id="editor" class="editor-content" contenteditable="true"></div>
+    </div>
+
+    <div class="info">
+        <h3>🔌 Separate Plugin Loading</h3>
+        <p>This example loads plugins individually for better control:</p>
+        <ul>
+            <li><strong>Core:</strong> <code>https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.js</code></li>
+            <li><strong>Plugins:</strong> <code>https://cdn.jsdelivr.net/npm/@editora/plugins/dist/plugins.min.js</code></li>
+            <li><strong>Benefits:</strong> Smaller initial bundle, load plugins as needed</li>
+        </ul>
+
+        <h4>Loaded Plugins:</h4>
+        <div class="plugin-list">
+            <div class="plugin-item">✓ BoldPlugin</div>
+            <div class="plugin-item">✓ ItalicPlugin</div>
+            <div class="plugin-item">✓ UnderlinePlugin</div>
+            <div class="plugin-item">✓ LinkPlugin</div>
+            <div class="plugin-item">✓ ImagePlugin</div>
+            <div class="plugin-item">✓ HeadingPlugin</div>
+            <div class="plugin-item">✓ ListPlugin</div>
+            <div class="plugin-item">✓ HistoryPlugin</div>
+        </div>
+    </div>
+
+    <!-- Core Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.css">
+
+    <!-- Individual Plugins (when available) -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@editora/plugins/dist/plugins.min.js"></script> -->
+
+    <script>
+        // Initialize the editor with core plugins
+        const editor = new Editora.Editor({
+            element: document.getElementById('editor'),
+            content: '<p>Welcome to Editora! This example loads plugins separately for better performance.</p>',
+            shortcuts: true,
+            plugins: [
+                // Core plugins are included in the core bundle
+                // Additional plugins would be loaded here when available
+            ]
+        });
+
+        // Listen to content changes
+        editor.on('change', (content) => {
+            console.log('Content updated:', content);
+        });
+
+        // Programmatic API examples
+        window.getContent = () => {
+            console.log('Current content:', editor.getContent());
+            alert('Check console for content');
+        };
+
+        window.setContent = (html) => {
+            editor.setContent(html);
+        };
+
+        // Example: Dynamic plugin loading (when plugins are available)
+        window.loadAdditionalPlugins = async () => {
+            try {
+                // This would load additional plugins dynamically
+                // const { TablePlugin, CodePlugin } = await import('https://cdn.jsdelivr.net/npm/@editora/plugins/dist/plugins.min.js');
+                // editor.addPlugin(new TablePlugin());
+                // editor.addPlugin(new CodePlugin());
+                console.log('Additional plugins would be loaded here');
+                alert('Dynamic plugin loading example - check console');
+            } catch (error) {
+                console.error('Failed to load plugins:', error);
+            }
+        };
+    </script>
+</body>
+</html>
