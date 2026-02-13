@@ -23,7 +23,8 @@
       "message": "chore(release): bump version to %s",
       "allowBranch": [
         "main",
-        "develop"
+        "develop",
+        "v1.0.2"
       ]
     }
   }
