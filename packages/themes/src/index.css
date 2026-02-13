@@ -1,3 +1,6 @@
+/* Import default theme styles including dialog overlays */
+@import './themes/default.css';
+
 /* Toolbar group button and group items for native plugin grouping (e.g., font size) */
 .editora-toolbar-group-button {
   display: flex;

@@ -6,6 +6,9 @@
  * Lightweight, fast, and works in any JavaScript environment
  */
 
+// Import all styles for web components
+import './index.css';
+
 import { PluginLoader } from '../config/PluginLoader';
 
 // Import native plugins (framework-agnostic - NO REACT)

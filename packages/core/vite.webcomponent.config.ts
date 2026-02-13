@@ -24,6 +24,12 @@ export default defineConfig({
       output: {
         globals: {},
         inlineDynamicImports: true,
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name?.endsWith('.css')) {
+            return 'webcomponent.min.css';
+          }
+          return assetInfo.name || '[name].[ext]';
+        },
       }
     },
     sourcemap: true,
@@ -32,7 +38,10 @@ export default defineConfig({
     commonjsOptions: {
       include: [/node_modules/, /packages/],
       transformMixedEsModules: true,
-    }
+    },
+    // Enable CSS extraction
+    cssCodeSplit: false,
+    cssMinify: true,
   },
   resolve: {
     alias: {

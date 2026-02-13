@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editora Web Component - Single CSS Bundle Test</title>
+    <!-- Import the single bundled CSS file -->
+    <link rel="stylesheet" href="../packages/core/dist/webcomponent.min.css">
+</head>
+<body>
+    <h1>Editora Web Component - Single CSS Bundle Test</h1>
+    <p><strong>✅ Includes:</strong> Web component styles, themes, plugin styles (table floating toolbar, dialog overlays)</p>
+
+    <div id="editor-container">
+        <editora-editor
+            id="editor"
+            placeholder="Start typing... Test table insertion and dialogs!"
+            theme="light"
+        >
+            <p>This is a test of the single CSS bundle for web components.</p>
+            <p>The editor should load with all styles properly applied including table floating toolbars and dialog overlays.</p>
+        </editora-editor>
+    </div>
+
+    <!-- Import the web component JavaScript -->
+    <script src="../packages/core/dist/webcomponent.min.js"></script>
+
+    <script>
+        // Initialize the editor when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const editor = document.getElementById('editor');
+
+            // Log when the editor is ready
+            editor.addEventListener('editora-ready', function() {
+                console.log('Editora web component is ready!');
+            });
+
+            // Log content changes
+            editor.addEventListener('input', function() {
+                console.log('Content changed');
+            });
+        });
+    </script>
+</body>
+</html>

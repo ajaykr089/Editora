@@ -62,6 +62,7 @@
       "require": "./dist/webcomponent.cjs.js",
       "browser": "./dist/webcomponent.min.js"
     },
+    "./webcomponent.css": "./dist/webcomponent.min.css",
     "./KeyboardShortcuts": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.js",

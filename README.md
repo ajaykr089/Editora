@@ -202,7 +202,7 @@ Editora provides a framework-agnostic web component that works with any JavaScri
   <meta charset="UTF-8">
   <title>Editora Web Component</title>
   <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/themes/dist/default.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css">
 </head>
 <body>
   <editora-editor

@@ -1,0 +1,13 @@
+/**
+ * Editora Web Component Styles Bundle
+ * Single CSS file containing all styles for web components
+ */
+
+/* Import web component base styles */
+@import './styles.css';
+
+/* Import theme styles */
+@import '../themes/src/index.css';
+
+/* Import plugin styles */
+@import '../../../plugins/dist/plugins.css';

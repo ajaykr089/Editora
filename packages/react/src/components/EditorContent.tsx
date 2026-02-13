@@ -229,22 +229,24 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       suppressContentEditableWarning
       className="rte-content"
       style={{
-        minHeight: '200px',
-        maxHeight: '100%',
-        padding: '16px',
-        outline: 'none',
-        border: '1px solid #ddd',
-        borderRadius: '4px',
-        fontSize: '14px',
-        lineHeight: '1.5',
-        overflow: 'auto',
+        minHeight: "200px",
+        maxHeight: "100%",
+        padding: "16px",
+        outline: "none",
+        border: "1px solid #ddd",
+        borderRadius: "0px 0px 4px 4px",
+        fontSize: "14px",
+        lineHeight: "1.5",
+        overflow: "auto",
         flex: 1,
-        boxSizing: 'border-box',
-        wordWrap: 'break-word',
-        overflowWrap: 'break-word'
+        boxSizing: "border-box",
+        wordWrap: "break-word",
+        overflowWrap: "break-word",
       }}
     >
-      <p><br /></p>
+      <p>
+        <br />
+      </p>
     </div>
   );
 };
