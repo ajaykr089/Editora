@@ -1,5 +1,14 @@
 # @editora/core
 
+<div align="center">
+  <img src="../../images/editora_logo_blocks.svg" alt="Editora Logo" width="200" height="auto">
+</div>
+
+<div align="center">
+  <img src="../../images/features-overview-1.png" alt="Editora Core - Framework Agnostic Rich Text Editor" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <p><em>Framework-agnostic core editor engine that works with any JavaScript framework</em></p>
+</div>
+
 Framework-agnostic core editor engine for Editora Rich Text Editor.
 
 ## 📦 Installation

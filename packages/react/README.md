@@ -1,5 +1,14 @@
 # @editora/react
 
+<div align="center">
+  <img src="../../images/editora_logo_blocks.svg" alt="Editora Logo" width="200" height="auto">
+</div>
+
+<div align="center">
+  <img src="../../images/features-overview-2.png" alt="Editora React - Advanced Tables" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <p><em>React components for Editora Rich Text Editor with hooks-based API</em></p>
+</div>
+
 React components for Editora Rich Text Editor - A modern, extensible WYSIWYG editor.
 
 ## 📦 Installation

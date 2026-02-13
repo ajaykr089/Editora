@@ -1,5 +1,14 @@
 # @editora/plugins
 
+<div align="center">
+  <img src="../../images/editora_logo_blocks.svg" alt="Editora Logo" width="200" height="auto">
+</div>
+
+<div align="center">
+  <img src="../../images/features-overview-7.png" alt="Editora Plugins - Plugin Architecture" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <p><em>Comprehensive plugin collection with 40+ plugins for rich text editing</em></p>
+</div>
+
 Comprehensive plugin collection for Editora Rich Text Editor with 40+ plugins for text formatting, media management, accessibility, and more.
 
 ## 📦 Installation

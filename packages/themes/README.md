@@ -1,5 +1,14 @@
 # @editora/themes
 
+<div align="center">
+  <img src="../../images/editora_logo_blocks.svg" alt="Editora Logo" width="200" height="auto">
+</div>
+
+<div align="center">
+  <img src="../../images/theme-comparison.png" alt="Editora Themes - Light vs Dark Theme Comparison" width="800" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <p><em>Themes and styling system with built-in light/dark mode support</em></p>
+</div>
+
 Themes and styling system for Editora Rich Text Editor with built-in light/dark mode support and customizable design tokens.
 
 ## 📦 Installation
