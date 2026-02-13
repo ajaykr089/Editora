@@ -23,6 +23,7 @@ let startY = 0;
 let startWidth = 0;
 let startHeight = 0;
 let aspectRatio = 1;
+let editorElement: HTMLElement | null = null; // Editor instance context
 
 declare global {
   interface Window {
@@ -676,22 +677,65 @@ const showReplaceImageDialog = (img: HTMLImageElement) => {
   overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDialog(); });
 };
 
+const updatePosition = () => {
+  if (!floatingToolbar || !selectedMedia) return;
+
+  const toolbarHeight = floatingToolbar.offsetHeight || 40;
+  const mediaTop = selectedMedia.offsetTop;
+  const mediaLeft = selectedMedia.offsetLeft;
+  const mediaWidth = selectedMedia.offsetWidth;
+
+  // Position above the image, centered
+  const top = mediaTop - toolbarHeight - 8;
+  const left = mediaLeft + (mediaWidth / 2) - ((floatingToolbar.offsetWidth || 120) / 2);
+
+  floatingToolbar.style.top = `${top}px`;
+  floatingToolbar.style.left = `${left}px`;
+  setTimeout(() => {  
+    if (floatingToolbar) floatingToolbar.style.display = "flex";
+  },100);
+};
+
 // Show floating toolbar
 const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
-  if (floatingToolbar) floatingToolbar.remove();
+  // Clean up existing toolbar
+  if (floatingToolbar) {
+    if ((floatingToolbar as any)._cleanup) {
+      (floatingToolbar as any)._cleanup();
+    }
+    floatingToolbar.remove();
+  }
 
-  floatingToolbar = document.createElement('div');
-  floatingToolbar.style.cssText = `
-    position: fixed;
-    background: white;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-    display: flex;
-    gap: 2px;
-    padding: 4px;
-    z-index: 10000;
-  `;
+  // Ensure parent has relative positioning
+  const mediaParent = media.parentElement;
+  if (mediaParent) {
+    const originalPosition = mediaParent.style.position;
+    if (!originalPosition || originalPosition === 'static') {
+      mediaParent.style.position = 'relative';
+      (mediaParent as any)._originalPosition = originalPosition; // Store for cleanup
+    }
+
+    floatingToolbar = document.createElement('div');
+    floatingToolbar.className = 'media-floating-toolbar';
+    floatingToolbar.style.cssText = `
+      position: absolute;
+      background: white;
+      border: 1px solid #ced4da;
+      border-radius: 6px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      gap: 2px;
+      padding: 4px;
+      z-index: 10000;
+      pointer-events: auto;
+      display: none;
+    `;
+
+    // Insert toolbar as first child of parent
+    mediaParent.insertBefore(floatingToolbar, mediaParent.firstChild);
+
+    // Position the toolbar
+    updatePosition();
+  }
 
   const buttonStyle = 'padding: 6px 8px; border: none; background: white; cursor: pointer; border-radius: 4px; transition: background 0.2s; display: flex; align-items: center; justify-content: center;';
   
@@ -726,16 +770,36 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
     </button>
   `;
 
-  const updatePosition = () => {
-    if (!floatingToolbar || !selectedMedia) return;
-    const rect = selectedMedia.getBoundingClientRect();
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    floatingToolbar.style.top = `${rect.top + scrollTop - 50}px`;
-    floatingToolbar.style.left = `${rect.left + rect.width / 2 - floatingToolbar.offsetWidth / 2}px`;
-  };
 
-  updatePosition();
-  document.body.appendChild(floatingToolbar);
+
+  // Position the toolbar after it's rendered
+  setTimeout(() => {
+    updatePosition();
+  }, 0);
+
+  // Add event listeners for repositioning
+  const handleReposition = () => updatePosition();
+  
+  // Listen for scroll events on parent elements and window
+  let currentElement: Element | null = selectedMedia.parentElement;
+  while (currentElement) {
+    currentElement.addEventListener('scroll', handleReposition);
+    currentElement = currentElement.parentElement;
+  }
+  
+  window.addEventListener('scroll', handleReposition);
+  window.addEventListener('resize', handleReposition);
+  
+  // Store cleanup function
+  (floatingToolbar as any)._cleanup = () => {
+    let element: Element | null = selectedMedia?.parentElement;
+    while (element) {
+      element.removeEventListener('scroll', handleReposition);
+      element = element.parentElement;
+    }
+    window.removeEventListener('scroll', handleReposition);
+    window.removeEventListener('resize', handleReposition);
+  };
 
   floatingToolbar.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('mouseenter', () => {
@@ -804,6 +868,9 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
     if (confirm('Remove this media?')) {
       media.remove();
       if (floatingToolbar) {
+        if ((floatingToolbar as any)._cleanup) {
+          (floatingToolbar as any)._cleanup();
+        }
         floatingToolbar.remove();
         floatingToolbar = null;
       }
@@ -812,137 +879,168 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
     }
   });
 
-  window.addEventListener('scroll', updatePosition);
-  window.addEventListener('resize', updatePosition);
+  // Add scroll and resize event listeners (matching resize handles approach)
+  // Store cleanup function for later removal
+  (floatingToolbar as any)._cleanup = () => {
+    window.removeEventListener('scroll', updatePosition);
+    window.removeEventListener('resize', updatePosition);
+  };
+};
+
+// Initialize media manager function (moved outside conditional for plugin access)
+const initMediaManager = (editorEl?: HTMLElement) => {
+  // Store the editor element for scoping
+  editorElement = editorEl || null;
+
+  createResizeHandles();
+
+  // Add click listener - global but scoped to this editor instance
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+
+    if (target.tagName === 'IMG' || target.tagName === 'VIDEO') {
+      const media = target as HTMLImageElement | HTMLVideoElement;
+
+      // Check if media is within this editor's contenteditable area
+      let isInThisEditor = false;
+      if (editorElement) {
+        // For web component, check if media is within this editor element
+        isInThisEditor = editorElement.contains(media);
+      } else {
+        // Fallback to global behavior
+        isInThisEditor = !!media.closest('[contenteditable="true"]');
+      }
+
+      if (isInThisEditor) {
+        e.preventDefault();
+        e.stopPropagation();
+        selectedMedia = media;
+        selectedMedia.style.display = 'block'; // Ensure block display for alignment
+        showFloatingToolbar(media);
+        updateResizeHandles();
+        return;
+      }
+    }
+
+    if (!target.closest('.btn-link, .btn-resize, .btn-remove')) {
+      if (floatingToolbar && !target.closest('button')) {
+        if ((floatingToolbar as any)._cleanup) {
+          (floatingToolbar as any)._cleanup();
+        }
+        floatingToolbar.remove();
+        floatingToolbar = null;
+        
+        // Restore parent position
+        if (selectedMedia && selectedMedia.parentElement) {
+          const parent = selectedMedia.parentElement;
+          if ((parent as any)._originalPosition !== undefined) {
+            parent.style.position = (parent as any)._originalPosition;
+            delete (parent as any)._originalPosition;
+          }
+        }
+        
+        selectedMedia = null;
+        updateResizeHandles();
+      }
+    }
+  });
+
+  resizeHandles.forEach(handle => {
+    handle.addEventListener('mousedown', (e) => {
+      if (!selectedMedia) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      isResizing = true;
+      currentHandle = handle.getAttribute('data-position');
+      startX = e.clientX;
+      startY = e.clientY;
+
+      const rect = selectedMedia.getBoundingClientRect();
+      startWidth = rect.width;
+      startHeight = rect.height;
+      aspectRatio = startWidth / startHeight;
+
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = `${currentHandle}-resize`;
+    });
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isResizing || !selectedMedia || !currentHandle) return;
+
+    const deltaX = e.clientX - startX;
+    const deltaY = e.clientY - startY;
+
+    let newWidth = startWidth;
+    let newHeight = startHeight;
+
+    switch (currentHandle) {
+      case 'se':
+        newWidth = startWidth + deltaX;
+        newHeight = startHeight + deltaY;
+        break;
+      case 'sw':
+        newWidth = startWidth - deltaX;
+        newHeight = startHeight + deltaY;
+        break;
+      case 'ne':
+        newWidth = startWidth + deltaX;
+        newHeight = startHeight - deltaY;
+        break;
+      case 'nw':
+        newWidth = startWidth - deltaX;
+        newHeight = startHeight - deltaY;
+        break;
+    }
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      newHeight = newWidth / aspectRatio;
+    } else {
+      newWidth = newHeight * aspectRatio;
+    }
+
+    newWidth = Math.max(50, newWidth);
+    newHeight = Math.max(50, newHeight);
+
+    selectedMedia.style.width = `${newWidth}px`;
+    selectedMedia.style.height = `${newHeight}px`;
+    selectedMedia.setAttribute('width', String(Math.round(newWidth)));
+    selectedMedia.setAttribute('height', String(Math.round(newHeight)));
+
+    updateResizeHandles();
+    updatePosition();
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (isResizing) {
+      isResizing = false;
+      currentHandle = null;
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    }
+  });
+
+  window.addEventListener('scroll', updateResizeHandles);
+  window.addEventListener('resize', updateResizeHandles);
 };
 
 // Initialize media manager
 if (typeof window !== 'undefined' && !window.__mediaManagerInitialized) {
   window.__mediaManagerInitialized = true;
 
-  const initMediaManager = () => {
-    createResizeHandles();
-
-    document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      
-      if (target.tagName === 'IMG' || target.tagName === 'VIDEO') {
-        const media = target as HTMLImageElement | HTMLVideoElement;
-        
-        if (media.closest('[contenteditable="true"]')) {
-          e.preventDefault();
-          e.stopPropagation();
-          selectedMedia = media;
-          showFloatingToolbar(media);
-          updateResizeHandles();
-          return;
-        }
-      }
-
-      if (!target.closest('.btn-link, .btn-resize, .btn-remove')) {
-        if (floatingToolbar && !target.closest('button')) {
-          floatingToolbar.remove();
-          floatingToolbar = null;
-          selectedMedia = null;
-          updateResizeHandles();
-        }
-      }
-    });
-
-    resizeHandles.forEach(handle => {
-      handle.addEventListener('mousedown', (e) => {
-        if (!selectedMedia) return;
-        e.preventDefault();
-        e.stopPropagation();
-
-        isResizing = true;
-        currentHandle = handle.getAttribute('data-position');
-        startX = e.clientX;
-        startY = e.clientY;
-
-        const rect = selectedMedia.getBoundingClientRect();
-        startWidth = rect.width;
-        startHeight = rect.height;
-        aspectRatio = startWidth / startHeight;
-
-        document.body.style.userSelect = 'none';
-        document.body.style.cursor = `${currentHandle}-resize`;
-      });
-    });
-
-    document.addEventListener('mousemove', (e) => {
-      if (!isResizing || !selectedMedia || !currentHandle) return;
-
-      const deltaX = e.clientX - startX;
-      const deltaY = e.clientY - startY;
-
-      let newWidth = startWidth;
-      let newHeight = startHeight;
-
-      switch (currentHandle) {
-        case 'se':
-          newWidth = startWidth + deltaX;
-          newHeight = startHeight + deltaY;
-          break;
-        case 'sw':
-          newWidth = startWidth - deltaX;
-          newHeight = startHeight + deltaY;
-          break;
-        case 'ne':
-          newWidth = startWidth + deltaX;
-          newHeight = startHeight - deltaY;
-          break;
-        case 'nw':
-          newWidth = startWidth - deltaX;
-          newHeight = startHeight - deltaY;
-          break;
-      }
-
-      if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        newHeight = newWidth / aspectRatio;
-      } else {
-        newWidth = newHeight * aspectRatio;
-      }
-
-      newWidth = Math.max(50, newWidth);
-      newHeight = Math.max(50, newHeight);
-
-      selectedMedia.style.width = `${newWidth}px`;
-      selectedMedia.style.height = `${newHeight}px`;
-      selectedMedia.setAttribute('width', String(Math.round(newWidth)));
-      selectedMedia.setAttribute('height', String(Math.round(newHeight)));
-
-      updateResizeHandles();
-      if (floatingToolbar && selectedMedia) {
-        const rect = selectedMedia.getBoundingClientRect();
-        const scrollTop = window.scrollY || document.documentElement.scrollTop;
-        floatingToolbar.style.top = `${rect.top + scrollTop - 50}px`;
-        floatingToolbar.style.left = `${rect.left + rect.width / 2 - 120}px`;
-      }
-    });
-
-    document.addEventListener('mouseup', () => {
-      if (isResizing) {
-        isResizing = false;
-        currentHandle = null;
-        document.body.style.userSelect = '';
-        document.body.style.cursor = '';
-      }
-    });
-
-    window.addEventListener('scroll', updateResizeHandles);
-    window.addEventListener('resize', updateResizeHandles);
-  };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initMediaManager);
-  } else {
-    setTimeout(initMediaManager, 100);
-  }
+  // Call initMediaManager without parameters for global initialization
+  initMediaManager();
 }
 
 export const MediaManagerPlugin = (): Plugin => ({
-  name: 'mediaManager',
+  name: 'image',
+  
+  initialize: (config?: any) => {
+    // Get the editor element from config (passed by web component)
+    const editorEl = config?.editorElement;
+    initMediaManager(editorEl);
+  },
   
   toolbar: [
     {

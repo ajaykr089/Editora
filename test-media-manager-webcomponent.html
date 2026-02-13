@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media Manager Web Component Test</title>
+  <link rel="stylesheet" href="packages/core/dist/webcomponent.min.css">
+</head>
+<body>
+  <h1>Media Manager Web Component Test</h1>
+  <p>Insert an image and click on it to see if the floating toolbar appears.</p>
+
+  <editora-editor
+    height="400"
+    plugins="image"
+    toolbar="bold italic underline | bullist numlist | image"
+    content="<p>Click the image button to insert an image, then click on the inserted image to test the floating toolbar.</p>"
+  ></editora-editor>
+
+  <script type="module">
+    import { RichTextEditorElement } from './packages/core/dist/webcomponent.min.js';
+
+    // Register the web component
+    if (!customElements.get('editora-editor')) {
+      customElements.define('editora-editor', RichTextEditorElement);
+    }
+  </script>
+</body>
+</html></body>
+</html>

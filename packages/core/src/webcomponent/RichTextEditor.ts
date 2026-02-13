@@ -198,7 +198,8 @@ export class RichTextEditorElement extends HTMLElement {
     plugins.forEach(plugin => {
       if (plugin.init && typeof plugin.init === 'function') {
         try {
-          plugin.init();
+          // Pass the web component element as context for plugins that need it
+          plugin.init({ editorElement: this });
         } catch (error) {
           console.error(`[RichTextEditor] Error initializing plugin ${plugin.name}:`, error);
         }

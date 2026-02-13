@@ -51,6 +51,8 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  /* Ensure sticky works in web components */
+  position: -webkit-sticky;
 }
 
 .editora-toolbar-group {
@@ -462,6 +464,15 @@
   max-width: 100%;
   height: auto;
   border-radius: 4px;
+  display: block;
+}
+
+/* Videos */
+.editora-content video {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  display: block;
 }
 
 /* Loading state */

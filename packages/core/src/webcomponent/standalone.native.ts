@@ -101,7 +101,7 @@ export function initWebComponent() {
     { name: 'AnchorPlugin', factory: AnchorPlugin },
     { name: 'EmbedIframePlugin', factory: EmbedIframePlugin },
     { name: 'MathPlugin', factory: MathPlugin },
-    { name: 'MediaManagerPlugin', factory: MediaManagerPlugin },
+    { name: 'image', factory: MediaManagerPlugin },
     { name: 'MergeTagPlugin', factory: MergeTagPlugin },
     { name: 'PageBreakPlugin', factory: PageBreakPlugin },
     { name: 'PrintPlugin', factory: PrintPlugin },
