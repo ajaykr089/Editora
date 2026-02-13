@@ -1,6 +1,6 @@
 {
   "name": "@editora/plugins",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "40+ Free Premium Plugins for Editora Rich Text Editor. Table editor, code formatting, accessibility, math, media, and more. Free enterprise plugin collection.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
@@ -62,7 +62,7 @@
     "@editora/core": "^1.0.0"
   },
   "dependencies": {
-    "@editora/core": "^1.0.1",
+    "@editora/core": "^1.0.2",
     "katex": "^0.16.27",
     "mathjax": "^3.2.2"
   },

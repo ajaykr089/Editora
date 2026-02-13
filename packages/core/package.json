@@ -1,6 +1,6 @@
 {
   "name": "@editora/core",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Framework-agnostic core editor engine for Editora Rich Text Editor",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",

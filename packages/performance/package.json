@@ -1,6 +1,6 @@
 {
   "name": "@editora/performance",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Performance optimization utilities for Editora Rich Text Editor",
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
@@ -22,7 +22,7 @@
     "lint": "eslint src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@editora/core": "^1.0.1"
+    "@editora/core": "^1.0.2"
   },
   "keywords": [
     "editora",
