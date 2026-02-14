@@ -96,7 +96,7 @@ import { MediaManagerPlugin } from '@editora/plugins/media-manager';
 const editor = new Editor({
   element: '#editor',
   plugins: [
-    new MediaManagerPlugin({
+    MediaManagerPlugin({
       uploadUrl: '/api/upload',
       galleryUrl: '/api/gallery'
     })
@@ -142,7 +142,7 @@ const editor = new Editor({
                     </table>
 
                     <h2>Advanced Configuration</h2>
-                    <pre><code class="language-javascript">const plugin = new MediaManagerPlugin({
+                    <pre><code class="language-javascript">const plugin = MediaManagerPlugin({
   uploadUrl: '/api/media/upload',
   galleryUrl: '/api/media/gallery',
   maxFileSize: 52428800, // 50MB
@@ -232,7 +232,7 @@ plugin.on('gallery-load', (items) => {
 import { MediaManagerPlugin } from '@editora/plugins/media-manager';
 
 // Initialize plugin
-const mediaPlugin = new MediaManagerPlugin({
+const mediaPlugin = MediaManagerPlugin({
   uploadUrl: '/api/upload',
   galleryUrl: '/api/gallery',
   maxFileSize: 20 * 1024 * 1024 // 20MB

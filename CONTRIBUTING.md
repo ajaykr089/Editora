@@ -315,28 +315,22 @@ export interface MyPluginOptions {
   // Plugin options
 }
 
-export class MyPlugin extends Plugin {
-  name = 'my-plugin';
-  
-  constructor(private options: MyPluginOptions = {}) {
-    super();
-  }
-  
-  install(editor: Editor) {
-    // Initialize plugin
-  }
-  
-  execute(command: string, ...args: any[]) {
-    // Handle commands
-  }
-  
-  destroy() {
-    // Cleanup
-  }
-}
-
-export function createMyPlugin(options?: MyPluginOptions) {
-  return new MyPlugin(options);
+export function MyPlugin(options?: MyPluginOptions) {
+  return {
+    name: 'my-plugin',
+    
+    install(editor: Editor) {
+      // Initialize plugin
+    },
+    
+    execute(command: string, ...args: any[]) {
+      // Handle commands
+    },
+    
+    destroy() {
+      // Cleanup
+    }
+  };
 }
 ```
 

@@ -134,8 +134,8 @@
             try {
                 // This would load additional plugins dynamically
                 // const { TablePlugin, CodePlugin } = await import('https://cdn.jsdelivr.net/npm/@editora/plugins/dist/plugins.min.js');
-                // editor.addPlugin(new TablePlugin());
-                // editor.addPlugin(new CodePlugin());
+                // editor.addPlugin(TablePlugin());
+                // editor.addPlugin(CodePlugin());
                 console.log('Additional plugins would be loaded here');
                 alert('Dynamic plugin loading example - check console');
             } catch (error) {
@@ -143,5 +143,50 @@
             }
         };
     </script>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Documentation</h3>
+                <ul>
+                    <li><a href="https://editora-free.netlify.app/">Home</a></li>
+                    <li><a href="https://editora-free.netlify.app/docs/">Docs</a></li>
+                    <li><a href="https://editora-free.netlify.app/api/">API Reference</a></li>
+                    <li><a href="https://editora-free.netlify.app/examples/">Examples</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Plugins</h3>
+                <ul>
+                    <li><a href="https://editora-free.netlify.app/plugins/">Available Plugins</a></li>
+                    <li><a href="https://editora-free.netlify.app/plugins/custom/">Custom Plugins</a></li>
+                    <li><a href="https://editora-free.netlify.app/plugins/native/">Native Plugins</a></li>
+                    <li><a href="https://editora-free.netlify.app/plugins/themes/">Themes</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="https://github.com/editora-org/editora">GitHub</a></li>
+                    <li><a href="https://www.npmjs.com/package/@editora/core">NPM</a></li>
+                    <li><a href="https://editora-free.netlify.app/blog/">Blog</a></li>
+                    <li><a href="https://editora-free.netlify.app/community/">Community</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>About</h3>
+                <ul>
+                    <li><a href="https://editora-free.netlify.app/about/">About Editora</a></li>
+                    <li><a href="https://editora-free.netlify.app/license/">License</a></li>
+                    <li><a href="https://editora-free.netlify.app/contributing/">Contributing</a></li>
+                    <li><a href="https://editora-free.netlify.app/contact/">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Editora. Built with ❤️ by the Editora team.</p>
+        </div>
+    </footer>
 </body>
 </html>

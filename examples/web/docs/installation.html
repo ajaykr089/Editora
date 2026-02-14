@@ -24,6 +24,8 @@
     <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
     <title>Editora - Installation</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+    </head>
+    
 <body>
     <!-- Header -->
     <header>
@@ -153,10 +155,16 @@ function App() {
                             <p>For HTML websites without build tools, use the browser-ready build via CDN:</p>
 
                             <h4>unpkg CDN</h4>
-                            <pre><code class="language-html">&lt;script src="https://unpkg.com/@editora/core@latest/dist/editora.min.js"&gt;&lt;/script&gt;</code></pre>
+                            <pre><code class="language-html">
+&lt;script src="https://unpkg.com/@editora/core/dist/webcomponent.min.js"&gt;&lt;/script&gt;
+&lt;link rel="stylesheet" href="https://unpkg.com/@editora/core/dist/webcomponent.min.css"&gt;
+                            </code></pre>
 
                             <h4>jsDelivr CDN</h4>
-                            <pre><code class="language-html">&lt;script src="https://cdn.jsdelivr.net/npm/@editora/core@latest/dist/editora.min.js"&gt;&lt;/script&gt;</code></pre>
+                            <pre><code class="language-html">
+&lt;script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.js"&gt;&lt;/script&gt;
+&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
+                            </code></pre>
 
                             <h4>Basic HTML Setup</h4>
                             <pre><code class="language-html">&lt;!DOCTYPE html&gt;

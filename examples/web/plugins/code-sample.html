@@ -100,14 +100,14 @@ import { CodeSamplePlugin } from '@editora/plugins/code-sample';
 
 const editor = new Editor({
   element: '#editor',
-  plugins: [new CodeSamplePlugin()]
+  plugins: [CodeSamplePlugin()]
 });</code></pre>
 
                     <h2>Insert Code Block</h2>
                     <p>Use the "Code Block" button in toolbar or press <code>Ctrl+Shift+C</code></p>
 
                     <h2>Configuration</h2>
-                    <pre><code class="language-javascript">new CodeSamplePlugin({
+                    <pre><code class="language-javascript">CodeSamplePlugin({
   theme: 'prism',
   lineNumbers: true,
   highlightInline: true,

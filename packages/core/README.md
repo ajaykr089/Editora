@@ -62,9 +62,9 @@ import { BoldPlugin, ItalicPlugin, HeadingPlugin } from '@editora/plugins';
 
 const editor = createEditor({
   plugins: [
-    new BoldPlugin(),
-    new ItalicPlugin(),
-    new HeadingPlugin()
+    BoldPlugin(),
+    ItalicPlugin(),
+    HeadingPlugin()
   ],
   content: '<h1>Welcome</h1><p>Start writing...</p>'
 });

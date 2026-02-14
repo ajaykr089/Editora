@@ -24,6 +24,50 @@
     <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
     <title>Editora - Webcomponent All Plugins</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #0066cc;
+        }
+        editora-editor {
+            display: block;
+            margin: 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .info {
+            background: #e7f3ff;
+            padding: 10px;
+            border-left: 4px solid #0066cc;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .plugin-count {
+            background: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+    </style>
+</head>
 <body>
   <header style="text-align: center; padding: 15px; background: #2c3e50; color: white; margin-bottom: 20px;">
     <a href="index.html" style="text-decoration: none; color: inherit;">
@@ -138,5 +182,50 @@
             });
         });
     </script>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Documentation</h3>
+                <ul>
+                    <li><a href="https://editora-free.netlify.app/">Home</a></li>
+                    <li><a href="https://editora-free.netlify.app/docs/">Docs</a></li>
+                    <li><a href="https://editora-free.netlify.app/api/">API Reference</a></li>
+                    <li><a href="https://editora-free.netlify.app/examples/">Examples</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Plugins</h3>
+                <ul>
+                    <li><a href="https://editora-free.netlify.app/plugins/">Available Plugins</a></li>
+                    <li><a href="https://editora-free.netlify.app/plugins/custom/">Custom Plugins</a></li>
+                    <li><a href="https://editora-free.netlify.app/plugins/native/">Native Plugins</a></li>
+                    <li><a href="https://editora-free.netlify.app/plugins/themes/">Themes</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="https://github.com/editora-org/editora">GitHub</a></li>
+                    <li><a href="https://www.npmjs.com/package/@editora/core">NPM</a></li>
+                    <li><a href="https://editora-free.netlify.app/blog/">Blog</a></li>
+                    <li><a href="https://editora-free.netlify.app/community/">Community</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>About</h3>
+                <ul>
+                    <li><a href="https://editora-free.netlify.app/about/">About Editora</a></li>
+                    <li><a href="https://editora-free.netlify.app/license/">License</a></li>
+                    <li><a href="https://editora-free.netlify.app/contributing/">Contributing</a></li>
+                    <li><a href="https://editora-free.netlify.app/contact/">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Editora. Built with ❤️ by the Editora team.</p>
+        </div>
+    </footer>
 </body>
 </html>
