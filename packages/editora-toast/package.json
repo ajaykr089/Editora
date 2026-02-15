@@ -1,27 +1,61 @@
 {
   "name": "@editora/toast",
-  "version": "1.0.2",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
+  "version": "2.0.0",
+  "description": "Advanced toast notification system with enterprise features, backward compatibility, and rich customization options",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "browser": "dist/index.umd.js",
+  "unpkg": "dist/index.umd.js",
+  "jsdelivr": "dist/index.umd.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "browser": "./dist/index.umd.js"
+    },
+    "./css": "./dist/toast.css"
   },
   "files": [
     "dist",
     "src"
   ],
+  "keywords": [
+    "toast",
+    "notification",
+    "ui",
+    "ux",
+    "typescript",
+    "framework-agnostic",
+    "accessibility",
+    "promise",
+    "queue",
+    "plugin",
+    "editor",
+    "rich-text-editor"
+  ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/editora-toast"
+  },
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
+  },
+  "homepage": "https://github.com/ajaykr089/Editora/tree/main/packages/editora-toast#readme",
   "scripts": {
-    "build": "tsc --project tsconfig.json && cp src/toast.css dist/toast.css"
+    "build": "vite build && vite build --config vite.umd.config.ts",
+    "postbuild": "cp src/toast.css dist/",
+    "dev": "vite build --watch",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vite": "^7.3.1"
   },
   "gitHead": "694494db58b809f0dcf24501696284faa1ab68a5"
 }

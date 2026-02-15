@@ -29,7 +29,7 @@
         <div class="container">
             <nav>
                 <a href="../index.html" class="logo">
-                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto;">
+                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
                 </a>
                 <button class="menu-toggle">☰</button>
                 <ul class="nav-links">
@@ -38,6 +38,7 @@
                     <li><a href="../docs/features.html">Features</a></li>
                     <li><a href="index.html" class="active">Plugins</a></li>
                     <li><a href="../docs/api.html">API</a></li>
+                    <li><a href="../toast-demo.html">Toast Demo</a></li>
                     <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
                 </ul>
             </nav>
@@ -53,26 +54,59 @@
 
     <section>
         <div class="container">
-            <h2>Overview</h2>
-            <p>The Template plugin allows users to save and reuse content templates. Create templates for common document types, email structures, or any recurring content patterns, then quickly insert them into new documents.</p>
+            <div class="docs-wrapper">
+                <aside class="docs-sidebar">
+                    <h3>Plugins</h3>
+                    <ul>
+                        <li><a href="index.html">All Plugins</a></li>
+                        <li><a href="media-manager.html">Media Manager</a></li>
+                        <li><a href="table.html">Tables</a></li>
+                        <li><a href="code-sample.html">Code Sample</a></li>
+                        <li><a href="checklist.html">Checklist</a></li>
+                        <li><a href="template.html" class="active">Templates</a></li>
+                        <li><a href="comments.html">Comments</a></li>
+                        <li><a href="image.html">Image Plugin</a></li>
+                        <li><a href="link.html">Link Manager</a></li>
+                        <li><a href="print.html">Print Export</a></li>
+                        <li><a href="preview.html">Preview Mode</a></li>
+                        <li><a href="history.html">History</a></li>
+                        <li><a href="spell-check.html">Spell Check</a></li>
+                        <li><a href="emojis.html">Emojis</a></li>
+                        <li><a href="special-characters.html">Special Characters</a></li>
+                        <li><a href="math.html">Math Equations</a></li>
+                        <li><a href="document-manager.html">Document Manager</a></li>
+                    </ul>
 
-            <h2>Features</h2>
-            <ul style="columns: 2; gap: 2rem;">
-                <li>✓ Save content as templates</li>
-                <li>✓ Template library management</li>
-                <li>✓ Quick insert from library</li>
-                <li>✓ Template categorization</li>
-                <li>✓ Search templates</li>
-                <li>✓ Template sharing</li>
-                <li>✓ Variable placeholders</li>
-                <li>✓ Cloud sync support</li>
-            </ul>
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="../playground.html">Live Playground</a></li>
+                        <li><a href="../toast-demo.html">Toast Demo</a></li>
+                        <li><a href="../docs/examples.html">Examples</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank">GitHub</a></li>
+                    </ul>
+                </aside>
 
-            <h2>Installation</h2>
-            <pre><code>npm install @editora/plugin-template</code></pre>
+                <main class="docs-content">
+                    <h2>Overview</h2>
+                    <p>The Template plugin allows users to save and reuse content templates. Create templates for common document types, email structures, or any recurring content patterns, then quickly insert them into new documents.</p>
 
-            <h2>Basic Usage</h2>
-            <pre><code>import Editora from '@editora/core';
+                    <h2>Features</h2>
+                    <ul style="columns: 2; gap: 2rem;">
+                        <li>✓ Save content as templates</li>
+                        <li>✓ Template library management</li>
+                        <li>✓ Quick insert from library</li>
+                        <li>✓ Template categorization</li>
+                        <li>✓ Search templates</li>
+                        <li>✓ Template sharing</li>
+                        <li>✓ Variable placeholders</li>
+                        <li>✓ Cloud sync support</li>
+                    </ul>
+
+                    <h2>Installation</h2>
+                    <pre><code>npm install @editora/plugin-template</code></pre>
+
+                    <h2>Basic Usage</h2>
+                    <pre><code>import Editora from '@editora/core';
 import TemplatePlugin from '@editora/plugin-template';
 
 const editor = new Editora('#editor');
@@ -84,30 +118,32 @@ editor.execCommand('saveAsTemplate', {
     category: 'business'
 });</code></pre>
 
-            <h2>Template Management</h2>
-            <p>Create templates for different scenarios:</p>
-            <ol>
-                <li><strong>Save Template:</strong> Select content and save it as a reusable template</li>
-                <li><strong>Browse Library:</strong> Access all saved templates from the library</li>
-                <li><strong>Organize:</strong> Group templates by category for easy access</li>
-                <li><strong>Insert:</strong> Quickly insert any template into your document</li>
-            </ol>
+                    <h2>Template Management</h2>
+                    <p>Create templates for different scenarios:</p>
+                    <ol>
+                        <li><strong>Save Template:</strong> Select content and save it as a reusable template</li>
+                        <li><strong>Browse Library:</strong> Access all saved templates from the library</li>
+                        <li><strong>Organize:</strong> Group templates by category for easy access</li>
+                        <li><strong>Insert:</strong> Quickly insert any template into your document</li>
+                    </ol>
 
-            <h2>Common Templates</h2>
-            <ul>
-                <li><strong>Email:</strong> Standard email layout with greeting, body, and signature</li>
-                <li><strong>Report:</strong> Report structure with title, summary, and sections</li>
-                <li><strong>Invoice:</strong> Invoice format with headers, items, and totals</li>
-                <li><strong>Meeting Notes:</strong> Notes template with date, attendees, and action items</li>
-            </ul>
+                    <h2>Common Templates</h2>
+                    <ul>
+                        <li><strong>Email:</strong> Standard email layout with greeting, body, and signature</li>
+                        <li><strong>Report:</strong> Report structure with title, summary, and sections</li>
+                        <li><strong>Invoice:</strong> Invoice format with headers, items, and totals</li>
+                        <li><strong>Meeting Notes:</strong> Notes template with date, attendees, and action items</li>
+                    </ul>
 
-            <h2>API Methods</h2>
-            <ul>
-                <li><strong>saveAsTemplate():</strong> Save selected content as template</li>
-                <li><strong>insertTemplate(id):</strong> Insert template by ID</li>
-                <li><strong>listTemplates():</strong> Get all available templates</li>
-                <li><strong>deleteTemplate(id):</strong> Delete a template</li>
-            </ul>
+                    <h2>API Methods</h2>
+                    <ul>
+                        <li><strong>saveAsTemplate():</strong> Save selected content as template</li>
+                        <li><strong>insertTemplate(id):</strong> Insert template by ID</li>
+                        <li><strong>listTemplates():</strong> Get all available templates</li>
+                        <li><strong>deleteTemplate(id):</strong> Delete a template</li>
+                    </ul>
+                </main>
+            </div>
         </div>
     </section>
 

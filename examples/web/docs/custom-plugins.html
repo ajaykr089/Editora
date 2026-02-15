@@ -24,146 +24,169 @@
     <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
     <title>Editora - Custom Plugins</title>
     <link rel="stylesheet" href="../assets/css/style.css">
+</head>
 <body>
-    <!-- Header Navigation -->
     <header>
         <div class="container">
             <nav>
                 <a href="../index.html" class="logo">
-                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto;">
+                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
                 </a>
                 <button class="menu-toggle">☰</button>
                 <ul class="nav-links">
                     <li><a href="../index.html">Home</a></li>
-                    <li><a href="installation.html">Docs</a></li>
+                    <li><a href="installation.html" class="active">Docs</a></li>
                     <li><a href="features.html">Features</a></li>
                     <li><a href="../plugins/index.html">Plugins</a></li>
                     <li><a href="api.html">API</a></li>
+                    <li><a href="../toast-demo.html">Toast Demo</a></li>
                     <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <main class="tutorial-container">
-        <div class="breadcrumb">
-            <a href="../index.html">Home</a> > <a href="installation.html">Docs</a> > <span>Custom Plugins Tutorial</span>
-        </div>
+    <section>
+        <div class="container">
+            <div class="docs-wrapper">
+                <aside class="docs-sidebar">
+                    <h3>Documentation</h3>
+                    <ul>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="api.html">API Reference</a></li>
+                        <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                        <li><a href="examples.html">Examples</a></li>
+                        <li><a href="custom-plugins.html" class="active">Custom Plugins</a></li>
+                        <li><a href="about.html">About</a></li>
+                    </ul>
 
-        <div class="tutorial-section">
-            <h1>Create Custom Plugins for Editora</h1>
-            <p><strong>Learn how to build and integrate custom plugins with Editora Rich Text Editor</strong></p>
-            <p>This comprehensive guide will walk you through creating your own plugins to extend Editora's functionality. You'll learn the plugin architecture, build your first plugin, and integrate it into your editor.</p>
-        </div>
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="../playground.html">Live Playground</a></li>
+                        <li><a href="../toast-demo.html">Toast Demo</a></li>
+                        <li><a href="../plugins/index.html">All Plugins</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank">GitHub</a></li>
+                    </ul>
+                </aside>
 
-        <!-- Table of Contents -->
-        <div class="toc">
-            <h3>📋 Table of Contents</h3>
-            <ol>
-                <li><a href="#understanding-plugins">Understanding Plugin Architecture</a></li>
-                <li><a href="#plugin-structure">Plugin Project Structure</a></li>
-                <li><a href="#creating-first-plugin">Creating Your First Plugin</a></li>
-                <li><a href="#plugin-types">Plugin Types & Examples</a></li>
-                <li><a href="#integrating-plugin">Integrating Your Plugin</a></li>
-                <li><a href="#advanced-features">Advanced Features</a></li>
-                <li><a href="#publishing-plugin">Publishing Your Plugin</a></li>
-                <li><a href="#best-practices">Best Practices & Tips</a></li>
-            </ol>
-        </div>
+                <main class="docs-content">
+                    <div class="breadcrumb">
+                        <a href="../index.html">Home</a> > <a href="installation.html">Docs</a> > <span>Custom Plugins Tutorial</span>
+                    </div>
 
-        <!-- Section 1: Understanding Plugin Architecture -->
-        <div class="tutorial-section" id="understanding-plugins">
-            <h2>📚 Understanding Plugin Architecture</h2>
-            
-            <h3>What is a Plugin?</h3>
-            <p>A plugin in Editora is a modular component that extends the editor's functionality. Plugins can:</p>
-            <ul class="feature-list">
-                <li>Add new toolbar buttons and commands</li>
-                <li>Create custom node types in the document</li>
-                <li>Handle keyboard shortcuts</li>
-                <li>Provide UI components and interactions</li>
-                <li>Integrate with external APIs</li>
-                <li>Transform and validate content</li>
-            </ul>
+                    <h1>Create Custom Plugins for Editora</h1>
+                    <p><strong>Learn how to build and integrate custom plugins with Editora Rich Text Editor</strong></p>
+                    <p>This comprehensive guide will walk you through creating your own plugins to extend Editora's functionality. You'll learn the plugin architecture, build your first plugin, and integrate it into your editor.</p>
 
-            <h3>Core Plugin Concepts</h3>
-            <div class="info-box">
-                <strong>🔑 Key Concepts:</strong>
-                <ul style="margin: 10px 0;">
-                    <li><strong>ProseMirror:</strong> Editora is built on ProseMirror, a powerful editor framework</li>
-                    <li><strong>Schema:</strong> Defines the structure of editable content (nodes and marks)</li>
-                    <li><strong>Commands:</strong> Functions that modify editor state</li>
-                    <li><strong>Plugins:</strong> Extend editor behavior with new features</li>
-                    <li><strong>Providers:</strong> React components that manage plugin state and UI</li>
-                </ul>
-            </div>
+                    <!-- Table of Contents -->
+                    <div class="toc">
+                        <h3>📋 Table of Contents</h3>
+                        <ol>
+                            <li><a href="#understanding-plugins">Understanding Plugin Architecture</a></li>
+                            <li><a href="#plugin-structure">Plugin Project Structure</a></li>
+                            <li><a href="#creating-first-plugin">Creating Your First Plugin</a></li>
+                            <li><a href="#plugin-types">Plugin Types & Examples</a></li>
+                            <li><a href="#integrating-plugin">Integrating Your Plugin</a></li>
+                            <li><a href="#advanced-features">Advanced Features</a></li>
+                            <li><a href="#publishing-plugin">Publishing Your Plugin</a></li>
+                            <li><a href="#best-practices">Best Practices & Tips</a></li>
+                        </ol>
+                    </div>
 
-            <h3>Plugin Anatomy</h3>
-            <p>Every Editora plugin consists of three main parts:</p>
-            <table class="plugin-anatomy">
-                <tr>
-                    <th>Component</th>
-                    <th>Purpose</th>
-                    <th>Example</th>
-                </tr>
-                <tr>
-                    <td><strong>Node/Mark Definition</strong></td>
-                    <td>Defines how content is stored in the document</td>
-                    <td><code>MyCustomNode.ts</code></td>
-                </tr>
-                <tr>
-                    <td><strong>Commands</strong></td>
-                    <td>Functions that insert/modify the custom element</td>
-                    <td><code>insertMyNodeCommand</code></td>
-                </tr>
-                <tr>
-                    <td><strong>UI Provider</strong></td>
-                    <td>React component for UI and state management</td>
-                    <td><code>MyNodeProvider.tsx</code></td>
-                </tr>
-            </table>
-        </div>
+                    <!-- Section 1: Understanding Plugin Architecture -->
+                    <div class="tutorial-section" id="understanding-plugins">
+                        <h2>📚 Understanding Plugin Architecture</h2>
+                        
+                        <h3>What is a Plugin?</h3>
+                        <p>A plugin in Editora is a modular component that extends the editor's functionality. Plugins can:</p>
+                        <ul class="feature-list">
+                            <li>Add new toolbar buttons and commands</li>
+                            <li>Create custom node types in the document</li>
+                            <li>Handle keyboard shortcuts</li>
+                            <li>Provide UI components and interactions</li>
+                            <li>Integrate with external APIs</li>
+                            <li>Transform and validate content</li>
+                        </ul>
 
-        <!-- Section 2: Plugin Project Structure -->
-        <div class="tutorial-section" id="plugin-structure">
-            <h2>🗂️ Plugin Project Structure</h2>
+                        <h3>Core Plugin Concepts</h3>
+                        <div class="info-box">
+                            <strong>🔑 Key Concepts:</strong>
+                            <ul style="margin: 10px 0;">
+                                <li><strong>ProseMirror:</strong> Editora is built on ProseMirror, a powerful editor framework</li>
+                                <li><strong>Schema:</strong> Defines the structure of editable content (nodes and marks)</li>
+                                <li><strong>Commands:</strong> Functions that modify editor state</li>
+                                <li><strong>Plugins:</strong> Extend editor behavior with new features</li>
+                                <li><strong>Providers:</strong> React components that manage plugin state and UI</li>
+                            </ul>
+                        </div>
 
-            <h3>Creating a New Plugin Package</h3>
-            <p>If you're building a plugin as part of the monorepo:</p>
+                        <h3>Plugin Anatomy</h3>
+                        <p>Every Editora plugin consists of three main parts:</p>
+                        <table class="plugin-anatomy">
+                            <tr>
+                                <th>Component</th>
+                                <th>Purpose</th>
+                                <th>Example</th>
+                            </tr>
+                            <tr>
+                                <td><strong>Node/Mark Definition</strong></td>
+                                <td>Defines how content is stored in the document</td>
+                                <td><code>MyCustomNode.ts</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Commands</strong></td>
+                                <td>Functions that insert/modify the custom element</td>
+                                <td><code>insertMyNodeCommand</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>UI Provider</strong></td>
+                                <td>React component for UI and state management</td>
+                                <td><code>MyNodeProvider.tsx</code></td>
+                            </tr>
+                        </table>
+                    </div>
 
-            <div class="file-structure">
-                <code>packages/plugins/my-custom-plugin/</code><br>
-                <code>&nbsp;&nbsp;├── src/</code><br>
-                <code>&nbsp;&nbsp;│&nbsp;&nbsp;├── MyCustomPlugin.ts&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node definition)</code><br>
-                <code>&nbsp;&nbsp;│&nbsp;&nbsp;├── MyCustomProvider.tsx&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(React component)</code><br>
-                <code>&nbsp;&nbsp;│&nbsp;&nbsp;├── MyCustom.css&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(styles)</code><br>
-                <code>&nbsp;&nbsp;│&nbsp;&nbsp;└── index.ts&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exports)</code><br>
-                <code>&nbsp;&nbsp;├── package.json</code><br>
-                <code>&nbsp;&nbsp;├── tsconfig.json</code><br>
-                <code>&nbsp;&nbsp;└── README.md</code>
-            </div>
+                    <!-- Section 2: Plugin Project Structure -->
+                    <div class="tutorial-section" id="plugin-structure">
+                        <h2>🗂️ Plugin Project Structure</h2>
 
-            <h3>File Descriptions</h3>
-            <ul>
-                <li><strong>MyCustomPlugin.ts:</strong> Core plugin logic, node/mark schema, and commands</li>
-                <li><strong>MyCustomProvider.tsx:</strong> React component managing plugin UI and state</li>
-                <li><strong>MyCustom.css:</strong> Styling for rendered nodes and UI components</li>
-                <li><strong>index.ts:</strong> Exports the plugin components for external use</li>
-            </ul>
-        </div>
+                        <h3>Creating a New Plugin Package</h3>
+                        <p>If you're building a plugin as part of the monorepo:</p>
 
-        <!-- Section 3: Creating Your First Plugin -->
-        <div class="tutorial-section" id="creating-first-plugin">
-            <h2>🚀 Creating Your First Plugin - Callout Box</h2>
+                        <div class="file-structure">
+                            <code>packages/plugins/my-custom-plugin/</code><br>
+                            <code>&nbsp;&nbsp;├── src/</code><br>
+                            <code>&nbsp;&nbsp;│&nbsp;&nbsp;├── MyCustomPlugin.ts&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(node definition)</code><br>
+                            <code>&nbsp;&nbsp;│&nbsp;&nbsp;├── MyCustomProvider.tsx&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(React component)</code><br>
+                            <code>&nbsp;&nbsp;│&nbsp;&nbsp;├── MyCustom.css&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(styles)</code><br>
+                            <code>&nbsp;&nbsp;│&nbsp;&nbsp;└── index.ts&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(exports)</code><br>
+                            <code>&nbsp;&nbsp;├── package.json</code><br>
+                            <code>&nbsp;&nbsp;├── tsconfig.json</code><br>
+                            <code>&nbsp;&nbsp;└── README.md</code>
+                        </div>
 
-            <p>Let's build a practical plugin that adds a <span class="highlight">Callout Box</span> (alert/note box) to the editor. This plugin will help users create highlighted information boxes.</p>
+                        <h3>File Descriptions</h3>
+                        <ul>
+                            <li><strong>MyCustomPlugin.ts:</strong> Core plugin logic, node/mark schema, and commands</li>
+                            <li><strong>MyCustomProvider.tsx:</strong> React component managing plugin UI and state</li>
+                            <li><strong>MyCustom.css:</strong> Styling for rendered nodes and UI components</li>
+                            <li><strong>index.ts:</strong> Exports the plugin components for external use</li>
+                        </ul>
+                    </div>
 
-            <h3><span class="step-number">1</span>Create Plugin Function (CalloutPlugin.ts)</h3>
-            <p>Start by creating a plugin function that returns a Plugin object:</p>
+                    <!-- Section 3: Creating Your First Plugin -->
+                    <div class="tutorial-section" id="creating-first-plugin">
+                        <h2>🚀 Creating Your First Plugin - Callout Box</h2>
 
-            <div class="code-section">
-                <div class="example-title">src/CalloutPlugin.ts</div>
-                <div class="code-block"><code><span class="keyword">import</span> { Plugin } <span class="keyword">from</span> <span class="string">'@editora/core'</span>;
+                        <p>Let's build a practical plugin that adds a <span class="highlight">Callout Box</span> (alert/note box) to the editor. This plugin will help users create highlighted information boxes.</p>
+
+                        <h3><span class="step-number">1</span>Create Plugin Function (CalloutPlugin.ts)</h3>
+                        <p>Start by creating a plugin function that returns a Plugin object:</p>
+
+                        <div class="code-section">
+                            <div class="example-title">src/CalloutPlugin.ts</div>
+                            <pre><code><span class="keyword">import</span> { Plugin } <span class="keyword">from</span> <span class="string">'@editora/core'</span>;
 
 <span class="comment">/**
  * Callout Plugin - Native Implementation
@@ -234,34 +257,34 @@
   keymap: {
     <span class="string">'Mod-Shift-C'</span>: () =&gt; <span class="string">'insertCallout'</span>
   }
-});</code></div>
-            </div>
+});</code></pre>
+                        </div>
 
-            <h3><span class="step-number">2</span>Export Plugin Function</h3>
-            <p>Export your plugin function so it can be imported and used:</p>
+                        <h3><span class="step-number">2</span>Export Plugin Function</h3>
+                        <p>Export your plugin function so it can be imported and used:</p>
 
-            <div class="code-section">
-                <div class="example-title">src/index.ts</div>
-                <div class="code-block"><code><span class="keyword">export</span> { CalloutPlugin } <span class="keyword">from</span> <span class="string">'./CalloutPlugin'</span>;</code></div>
-            </div>
+                        <div class="code-section">
+                            <div class="example-title">src/index.ts</div>
+                            <pre><code><span class="keyword">export</span> { CalloutPlugin } <span class="keyword">from</span> <span class="string">'./CalloutPlugin'</span>;</code></pre>
+                        </div>
 
-            <h3><span class="step-number">3</span>Use the Plugin</h3>
-            <p>Import and use your plugin in your editor setup:</p>
+                        <h3><span class="step-number">3</span>Use the Plugin</h3>
+                        <p>Import and use your plugin in your editor setup:</p>
 
-            <div class="code-section">
-                <div class="example-title">Web Component Usage</div>
-                <div class="code-block"><code><span class="keyword">import</span> { CalloutPlugin } <span class="keyword">from</span> <span class="string">'./src/index'</span>;
+                        <div class="code-section">
+                            <div class="example-title">Web Component Usage</div>
+                            <pre><code><span class="keyword">import</span> { CalloutPlugin } <span class="keyword">from</span> <span class="string">'./src/index'</span>;
 
 <span class="comment">// In your HTML</span>
 &lt;editora-editor
   plugins="<span class="string">[CalloutPlugin()]</span>"
   toolbar-items="<span class="string">['bold', 'italic', 'callout']</span>"
-&gt;&lt;/editora-editor&gt;</code></div>
-            </div>
+&gt;&lt;/editora-editor&gt;</code></pre>
+                        </div>
 
-            <div class="code-section">
-                <div class="example-title">React Usage</div>
-                <div class="code-block"><code><span class="keyword">import</span> { EditoraEditor } <span class="keyword">from</span> <span class="string">'@editora/react'</span>;
+                        <div class="code-section">
+                            <div class="example-title">React Usage</div>
+                            <pre><code><span class="keyword">import</span> { EditoraEditor } <span class="keyword">from</span> <span class="string">'@editora/react'</span>;
 <span class="keyword">import</span> { CalloutPlugin } <span class="keyword">from</span> <span class="string">'./src/index'</span>;
 
 <span class="keyword">function</span> <span class="function">MyEditor</span>() {
@@ -271,14 +294,14 @@
       toolbarItems={[<span class="string">'bold'</span>, <span class="string">'italic'</span>, <span class="string">'callout'</span>]}
     /&gt;
   );
-}</code></div>
-            </div>
+}</code></pre>
+                        </div>
 
-            <h3><span class="step-number">4</span>Add Styles (Callout.css)</h3>
+                                    <h3><span class="step-number">4</span>Add Styles (Callout.css)</h3>
 
             <div class="code-section">
                 <div class="example-title">src/Callout.css</div>
-                <div class="code-block"><code><span class="comment">/* Callout Box Styles */</span>
+                <pre><code><span class="comment">/* Callout Box Styles */</span>
 .<span class="keyword">callout</span> {
   padding: 16px;
   margin: 12px 0;
@@ -315,90 +338,90 @@
 
 .<span class="keyword">callout</span> <span class="keyword">p</span> {
   margin: 0;
-}</code></div>
+}</code></pre>
             </div>
         </div>
 
-        <!-- Section 4: Plugin Types -->
-        <div class="tutorial-section" id="plugin-types">
-            <h2>🎯 Plugin Types & Examples</h2>
+                    <!-- Section 4: Plugin Types -->
+                    <div class="tutorial-section" id="plugin-types">
+                        <h2>🎯 Plugin Types & Examples</h2>
 
-            <h3>Block Plugins</h3>
-            <p>Block-level elements that take up full width (examples: callout, quote, code block)</p>
-            <div class="info-box">
-                <strong>Use when:</strong> Creating elements that should be standalone blocks in the document
-            </div>
+                        <h3>Block Plugins</h3>
+                        <p>Block-level elements that take up full width (examples: callout, quote, code block)</p>
+                        <div class="info-box">
+                            <strong>Use when:</strong> Creating elements that should be standalone blocks in the document
+                        </div>
 
-            <h3>Inline Plugins</h3>
-            <p>Elements that flow within text (examples: link, mention, emoji)</p>
-            <div class="info-box">
-                <strong>Use when:</strong> Creating elements that should appear within paragraphs or text
-            </div>
+                        <h3>Inline Plugins</h3>
+                        <p>Elements that flow within text (examples: link, mention, emoji)</p>
+                        <div class="info-box">
+                            <strong>Use when:</strong> Creating elements that should appear within paragraphs or text
+                        </div>
 
-            <h3>Mark Plugins</h3>
-            <p>Text formatting marks (examples: bold, italic, highlight)</p>
-            <div class="info-box">
-                <strong>Use when:</strong> Creating text styling or formatting options
-            </div>
+                        <h3>Mark Plugins</h3>
+                        <p>Text formatting marks (examples: bold, italic, highlight)</p>
+                        <div class="info-box">
+                            <strong>Use when:</strong> Creating text styling or formatting options
+                        </div>
 
-            <h3>Command-Only Plugins</h3>
-            <p>Plugins that provide functionality without creating new content types (examples: find/replace, undo/redo)</p>
-            <div class="info-box">
-                <strong>Use when:</strong> Creating utility features without new content types
-            </div>
+                        <h3>Command-Only Plugins</h3>
+                        <p>Plugins that provide functionality without creating new content types (examples: find/replace, undo/redo)</p>
+                        <div class="info-box">
+                            <strong>Use when:</strong> Creating utility features without new content types
+                        </div>
 
-            <h3>Popular Plugin Examples</h3>
-            <table>
-                <tr>
-                    <th>Plugin Type</th>
-                    <th>Built-in Examples</th>
-                    <th>Idea for Custom Plugin</th>
-                </tr>
-                <tr>
-                    <td><strong>Block</strong></td>
-                    <td>Table, Code Sample, Quote</td>
-                    <td>Timeline, Timeline Event, Accordion</td>
-                </tr>
-                <tr>
-                    <td><strong>Inline</strong></td>
-                    <td>Link, Mention</td>
-                    <td>Price Tag, Badge, Tooltip</td>
-                </tr>
-                <tr>
-                    <td><strong>Mark</strong></td>
-                    <td>Bold, Italic, Underline</td>
-                    <td>Highlight Color, Font Style</td>
-                </tr>
-                <tr>
-                    <td><strong>Command</strong></td>
-                    <td>Find/Replace, Export</td>
-                    <td>Word Count, Reading Time, Analytics</td>
-                </tr>
-            </table>
-        </div>
+                        <h3>Popular Plugin Examples</h3>
+                        <table>
+                            <tr>
+                                <th>Plugin Type</th>
+                                <th>Built-in Examples</th>
+                                <th>Idea for Custom Plugin</th>
+                            </tr>
+                            <tr>
+                                <td><strong>Block</strong></td>
+                                <td>Table, Code Sample, Quote</td>
+                                <td>Timeline, Timeline Event, Accordion</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Inline</strong></td>
+                                <td>Link, Mention</td>
+                                <td>Price Tag, Badge, Tooltip</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Mark</strong></td>
+                                <td>Bold, Italic, Underline</td>
+                                <td>Highlight Color, Font Style</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Command</strong></td>
+                                <td>Find/Replace, Export</td>
+                                <td>Word Count, Reading Time, Analytics</td>
+                            </tr>
+                        </table>
+                    </div>
 
-        <!-- Section 5: Integrating Your Plugin -->
-        <div class="tutorial-section" id="integrating-plugin">
-            <h2>🔗 Integrating Your Plugin</h2>
+                    <!-- Section 5: Integrating Your Plugin -->
+                    <div class="tutorial-section" id="integrating-plugin">
+                        <h2>🔗 Integrating Your Plugin</h2>
 
-            <h3>Method 1: Web Component</h3>
+                        <h3>Method 1: Web Component</h3>
 
-            <div class="code-section">
-                <div class="example-title">index.html - Web Component</div>
-                <div class="code-block"><code>&lt;<span class="tag">script</span> src=<span class="string">"https://unpkg.com/@editora/core@1.0.1"</span>&gt;&lt;/<span class="tag">script</span>&gt;
+                        <div class="code-section">
+                            <div class="example-title">index.html - Web Component</div>
+                            <pre><code>&lt;<span class="tag">script</span> src=<span class="string">"https://unpkg.com/@editora/core@1.0.1"</span>&gt;&lt;/<span class="tag">script</span>&gt;
 &lt;<span class="tag">script</span> src=<span class="string">"https://unpkg.com/my-callout-plugin@1.0.0"</span>&gt;&lt;/<span class="tag">script</span>&gt;
 
 &lt;editora-editor
   plugins="<span class="string">[window.MyCalloutPlugin.CalloutPlugin()]"</span>
   toolbar-items="<span class="string">['bold', 'italic', 'callout']"</span>
-&gt;&lt;/editora-editor&gt;</code></div>
-            </div>
+&gt;&lt;/editora-editor&gt;</code></pre>
+                        </div>
 
-            <h3>Method 2: React Component</h3>
+                        <h3>Method 2: React Component</h3>
 
-            <div class="code-section">
-                <div class="example-title">App.tsx - React Component</div>
-                <div class="code-block"><code><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;
+                        <div class="code-section">
+                            <div class="example-title">App.tsx - React Component</div>
+                            <pre><code><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;
 <span class="keyword">import</span> { EditoraEditor } <span class="keyword">from</span> <span class="string">'@editora/react'</span>;
 <span class="keyword">import</span> { CalloutPlugin } <span class="keyword">from</span> <span class="string">'my-callout-plugin'</span>;
 
@@ -409,42 +432,42 @@
       toolbarItems={[<span class="string">'bold'</span>, <span class="string">'italic'</span>, <span class="string">'callout'</span>]}
     /&gt;
   );
-};</code></div>
-            </div>
+};</code></pre>
+                        </div>
 
-            <h3>Step-by-Step Integration</h3>
-            <ol>
-                <li><strong>Install plugin:</strong> <code class="warning-code">npm install my-callout-plugin</code></li>
-                <li><strong>Import plugin function:</strong> Import the plugin function from your package</li>
-                <li><strong>Call the function:</strong> Execute the plugin function to get the Plugin object</li>
-                <li><strong>Add to plugins array:</strong> Include the plugin in your editor's plugins array</li>
-                <li><strong>Add toolbar items:</strong> Include plugin toolbar items in toolbar-items</li>
-                <li><strong>Test:</strong> Verify the plugin works in your editor</li>
-            </ol>
-        </div>
+                        <h3>Step-by-Step Integration</h3>
+                        <ol>
+                            <li><strong>Install plugin:</strong> <code class="warning-code">npm install my-callout-plugin</code></li>
+                            <li><strong>Import plugin function:</strong> Import the plugin function from your package</li>
+                            <li><strong>Call the function:</strong> Execute the plugin function to get the Plugin object</li>
+                            <li><strong>Add to plugins array:</strong> Include the plugin in your editor's plugins array</li>
+                            <li><strong>Add toolbar items:</strong> Include plugin toolbar items in toolbar-items</li>
+                            <li><strong>Test:</strong> Verify the plugin works in your editor</li>
+                        </ol>
+                    </div>
 
-        <!-- Section 6: Advanced Features -->
-        <div class="tutorial-section" id="advanced-features">
-            <h2>⚡ Advanced Features</h2>
+                    <!-- Section 6: Advanced Features -->
+                    <div class="tutorial-section" id="advanced-features">
+                        <h2>⚡ Advanced Features</h2>
 
-            <h3>Keyboard Shortcuts</h3>
-            <p>Add keyboard shortcuts to your plugin commands:</p>
+                        <h3>Keyboard Shortcuts</h3>
+                        <p>Add keyboard shortcuts to your plugin commands:</p>
 
-            <div class="code-section">
-                <div class="example-title">Adding Keyboard Shortcuts</div>
-                <div class="code-block"><code><span class="keyword">export</span> <span class="keyword">const</span> <span class="function">keyboardShortcuts</span> = {
+                        <div class="code-section">
+                            <div class="example-title">Adding Keyboard Shortcuts</div>
+                            <pre><code><span class="keyword">export</span> <span class="keyword">const</span> <span class="function">keyboardShortcuts</span> = {
   <span class="string">'Ctrl-Shift-K'</span>: insertCalloutCommand(<span class="string">'info'</span>, <span class="string">''</span>),
   <span class="string">'Ctrl-Shift-W'</span>: insertCalloutCommand(<span class="string">'warning'</span>, <span class="string">''</span>),
   <span class="string">'Ctrl-Shift-S'</span>: insertCalloutCommand(<span class="string">'success'</span>, <span class="string">''</span>)
-};</code></div>
-            </div>
+};</code></pre>
+                        </div>
 
-            <h3>Plugin Configuration</h3>
-            <p>Make your plugin configurable by accepting options:</p>
+                        <h3>Plugin Configuration</h3>
+                        <p>Make your plugin configurable by accepting options:</p>
 
-            <div class="code-section">
-                <div class="example-title">Configurable Plugin</div>
-                <div class="code-block"><code><span class="keyword">export</span> <span class="keyword">interface</span> <span class="function">CalloutConfig</span> {
+                        <div class="code-section">
+                            <div class="example-title">Configurable Plugin</div>
+                            <pre><code><span class="keyword">export</span> <span class="keyword">interface</span> <span class="function">CalloutConfig</span> {
   types?: <span class="keyword">string</span>[];
   defaultType?: <span class="string">'info'</span> | <span class="string">'warning'</span> | <span class="string">'success'</span> | <span class="string">'error'</span>;
   showIcon?: <span class="keyword">boolean</span>;
@@ -513,15 +536,15 @@
   keymap: {
     <span class="string">'Mod-Shift-C'</span>: () =&gt; <span class="string">'insertCallout'</span>
   }
-});</code></div>
-            </div>
+});</code></pre>
+                        </div>
 
-            <h3>Plugin State Management</h3>
-            <p>Plugins can manage their own state and lifecycle:</p>
+                        <h3>Plugin State Management</h3>
+                        <p>Plugins can manage their own state and lifecycle:</p>
 
-            <div class="code-section">
-                <div class="example-title">Plugin with State</div>
-                <div class="code-block"><code><span class="keyword">export</span> <span class="keyword">const</span> <span class="function">CounterPlugin</span> = (): Plugin =&gt; {
+                        <div class="code-section">
+                            <div class="example-title">Plugin with State</div>
+                            <pre><code><span class="keyword">export</span> <span class="keyword">const</span> <span class="function">CounterPlugin</span> = (): Plugin =&gt; {
   <span class="keyword">let</span> count = 0;
 
   <span class="keyword">return</span> {
@@ -556,106 +579,106 @@
       <span class="string">'Mod-Shift-H'</span>: () =&gt; <span class="string">'highlightText'</span>
     }
   };
-};</code></div>
-            </div>
-        </div>
+};</code></pre>
+                        </div>
+                    </div>
 
-        <!-- Section 7: Publishing -->
-        <div class="tutorial-section" id="publishing-plugin">
-            <h2>📦 Publishing Your Plugin</h2>
+                    <!-- Section 7: Publishing -->
+                    <div class="tutorial-section" id="publishing-plugin">
+                        <h2>📦 Publishing Your Plugin</h2>
 
-            <h3>Step 1: Prepare Your Package</h3>
-            <div class="file-structure">
-                <code>package.json - must include:</code><br>
-                <code>"name": "my-callout-plugin"</code><br>
-                <code>"version": "1.0.0"</code><br>
-                <code>"main": "dist/index.js"</code><br>
-                <code>"module": "dist/index.mjs"</code><br>
-                <code>"types": "dist/index.d.ts"</code><br>
-                <code>"files": ["dist", "README.md"]</code><br>
-                <code>"peerDependencies": {</code><br>
-                <code>&nbsp;&nbsp;"@editora/core": "^1.0.0"</code><br>
-                <code>}</code><br>
-            </div>
+                        <h3>Step 1: Prepare Your Package</h3>
+                        <div class="file-structure">
+                            <code>package.json - must include:</code><br>
+                            <code>"name": "my-callout-plugin"</code><br>
+                            <code>"version": "1.0.0"</code><br>
+                            <code>"main": "dist/index.js"</code><br>
+                            <code>"module": "dist/index.mjs"</code><br>
+                            <code>"types": "dist/index.d.ts"</code><br>
+                            <code>"files": ["dist", "README.md"]</code><br>
+                            <code>"peerDependencies": {</code><br>
+                            <code>&nbsp;&nbsp;"@editora/core": "^1.0.0"</code><br>
+                            <code>}</code><br>
+                        </div>
 
-            <h3>Step 2: Export Structure</h3>
-            <div class="code-section">
-                <div class="example-title">src/index.ts</div>
-                <div class="code-block"><code><span class="keyword">export</span> { CalloutPlugin } <span class="keyword">from</span> <span class="string">'./CalloutPlugin'</span>;
-<span class="keyword">export</span> <span class="keyword">type</span> { CalloutConfig } <span class="keyword">from</span> <span class="string">'./CalloutPlugin'</span>;</code></div>
-            </div>
+                        <h3>Step 2: Export Structure</h3>
+                        <div class="code-section">
+                            <div class="example-title">src/index.ts</div>
+                            <pre><code><span class="keyword">export</span> { CalloutPlugin } <span class="keyword">from</span> <span class="string">'./CalloutPlugin'</span>;
+<span class="keyword">export</span> <span class="keyword">type</span> { CalloutConfig } <span class="keyword">from</span> <span class="string">'./CalloutPlugin'</span>;</code></pre>
+                        </div>
 
-            <h3>Step 2: Build the Plugin</h3>
-            <div class="code-block"><code>npm run build</code></div>
+                        <h3>Step 2: Build the Plugin</h3>
+                        <pre><code>npm run build</code></pre>
 
-            <h3>Step 3: Publish to npm</h3>
-            <div class="code-block"><code><span class="comment"># Login to npm</span>
+                        <h3>Step 3: Publish to npm</h3>
+                        <pre><code><span class="comment"># Login to npm</span>
 npm login
 
 <span class="comment"># Publish</span>
-npm publish --access public</code></div>
+npm publish --access public</code></pre>
 
-            <h3>Step 4: Create Documentation</h3>
-            <div class="info-box">
-                <strong>Include in your README.md:</strong>
-                <ul style="margin: 10px 0;">
-                    <li>Installation instructions</li>
-                    <li>Basic usage example</li>
-                    <li>Configuration options</li>
-                    <li>Keyboard shortcuts</li>
-                    <li>License information</li>
-                </ul>
-            </div>
-        </div>
+                        <h3>Step 4: Create Documentation</h3>
+                        <div class="info-box">
+                            <strong>Include in your README.md:</strong>
+                            <ul style="margin: 10px 0;">
+                                <li>Installation instructions</li>
+                                <li>Basic usage example</li>
+                                <li>Configuration options</li>
+                                <li>Keyboard shortcuts</li>
+                                <li>License information</li>
+                            </ul>
+                        </div>
+                    </div>
 
-        <!-- Section 8: Best Practices -->
-        <div class="tutorial-section" id="best-practices">
-            <h2>✨ Best Practices & Tips</h2>
+                    <!-- Section 8: Best Practices -->
+                    <div class="tutorial-section" id="best-practices">
+                        <h2>✨ Best Practices & Tips</h2>
 
-            <h3>Code Quality</h3>
-            <ul class="feature-list">
-                <li>Use TypeScript for type safety</li>
-                <li>Write unit tests for your plugin</li>
-                <li>Follow the existing code style</li>
-                <li>Document your code with JSDoc comments</li>
-                <li>Handle edge cases and errors gracefully</li>
-            </ul>
+                        <h3>Code Quality</h3>
+                        <ul class="feature-list">
+                            <li>Use TypeScript for type safety</li>
+                            <li>Write unit tests for your plugin</li>
+                            <li>Follow the existing code style</li>
+                            <li>Document your code with JSDoc comments</li>
+                            <li>Handle edge cases and errors gracefully</li>
+                        </ul>
 
-            <h3>Performance</h3>
-            <ul class="feature-list">
-                <li>Memoize React components with React.memo</li>
-                <li>Use useCallback for event handlers</li>
-                <li>Avoid unnecessary re-renders</li>
-                <li>Lazy load heavy dependencies</li>
-                <li>Minimize CSS selectors complexity</li>
-            </ul>
+                        <h3>Performance</h3>
+                        <ul class="feature-list">
+                            <li>Memoize React components with React.memo</li>
+                            <li>Use useCallback for event handlers</li>
+                            <li>Avoid unnecessary re-renders</li>
+                            <li>Lazy load heavy dependencies</li>
+                            <li>Minimize CSS selectors complexity</li>
+                        </ul>
 
-            <h3>User Experience</h3>
-            <ul class="feature-list">
-                <li>Provide clear visual feedback</li>
-                <li>Add keyboard shortcuts</li>
-                <li>Include helpful tooltips</li>
-                <li>Support undo/redo properly</li>
-                <li>Mobile-friendly design</li>
-            </ul>
+                        <h3>User Experience</h3>
+                        <ul class="feature-list">
+                            <li>Provide clear visual feedback</li>
+                            <li>Add keyboard shortcuts</li>
+                            <li>Include helpful tooltips</li>
+                            <li>Support undo/redo properly</li>
+                            <li>Mobile-friendly design</li>
+                        </ul>
 
-            <h3>Debugging Tips</h3>
-            <div class="warning-box">
-                <strong>⚠️ Common Issues & Solutions:</strong>
-                <ul style="margin: 10px 0;">
-                    <li><strong>Plugin not loading:</strong> Check that you're calling the plugin function: <code>CalloutPlugin()</code> not <code>CalloutPlugin</code></li>
-                    <li><strong>Node not appearing:</strong> Verify node is defined in the plugin's nodes property</li>
-                    <li><strong>Command not working:</strong> Ensure command is defined in plugin's commands object</li>
-                    <li><strong>Toolbar button missing:</strong> Check toolbar configuration and toolbar-items attribute</li>
-                    <li><strong>Styles not applied:</strong> Import CSS and ensure class names match toDOM output</li>
-                </ul>
-            </div>
+                        <h3>Debugging Tips</h3>
+                        <div class="warning-box">
+                            <strong>⚠️ Common Issues & Solutions:</strong>
+                            <ul style="margin: 10px 0;">
+                                <li><strong>Plugin not loading:</strong> Check that you're calling the plugin function: <code>CalloutPlugin()</code> not <code>CalloutPlugin</code></li>
+                                <li><strong>Node not appearing:</strong> Verify node is defined in the plugin's nodes property</li>
+                                <li><strong>Command not working:</strong> Ensure command is defined in plugin's commands object</li>
+                                <li><strong>Toolbar button missing:</strong> Check toolbar configuration and toolbar-items attribute</li>
+                                <li><strong>Styles not applied:</strong> Import CSS and ensure class names match toDOM output</li>
+                            </ul>
+                        </div>
 
-            <h3>Testing Your Plugin</h3>
+                        <h3>Testing Your Plugin</h3>
 
-            <div class="code-section">
-                <div class="example-title">Plugin Function Test</div>
-                <div class="code-block"><code><span class="keyword">import</span> { describe, it, expect } <span class="keyword">from</span> <span class="string">'vitest'</span>;
+                        <div class="code-section">
+                            <div class="example-title">Plugin Function Test</div>
+                            <pre><code><span class="keyword">import</span> { describe, it, expect } <span class="keyword">from</span> <span class="string">'vitest'</span>;
 <span class="keyword">import</span> { CalloutPlugin } <span class="keyword">from</span> <span class="string">'./CalloutPlugin'</span>;
 
 <span class="function">describe</span>(<span class="string">'Callout Plugin'</span>, () => {
@@ -677,39 +700,39 @@ npm publish --access public</code></div>
     expect(plugin.toolbar).toHaveLength(1);
     expect(plugin.toolbar[0].command).toBe(<span class="string">'insertCallout'</span>);
   });
-});</code></div>
-            </div>
+});</code></pre>
+                        </div>
 
-            <h3>Common Mistakes to Avoid</h3>
-            <div class="warning-box">
-                <strong>❌ Don't:</strong>
-                <ul style="margin: 10px 0;">
-                    <li>Forget to call the plugin function: use <code>plugins={[CalloutPlugin()]}</code> not <code>plugins={[CalloutPlugin]}</code></li>
-                    <li>Hardcode styles - make them customizable through configuration</li>
-                    <li>Skip the Plugin interface - always return a properly typed Plugin object</li>
-                    <li>Ignore TypeScript warnings about the Plugin interface</li>
-                    <li>Skip testing plugin function instantiation before publishing</li>
-                    <li>Mix old ProseMirror patterns with the new Plugin interface</li>
-                </ul>
-            </div>
+                        <h3>Common Mistakes to Avoid</h3>
+                        <div class="warning-box">
+                            <strong>❌ Don't:</strong>
+                            <ul style="margin: 10px 0;">
+                                <li>Forget to call the plugin function: use <code>plugins={[CalloutPlugin()]}</code> not <code>plugins={[CalloutPlugin]}</code></li>
+                                <li>Hardcode styles - make them customizable through configuration</li>
+                                <li>Skip the Plugin interface - always return a properly typed Plugin object</li>
+                                <li>Ignore TypeScript warnings about the Plugin interface</li>
+                                <li>Skip testing plugin function instantiation before publishing</li>
+                                <li>Mix old ProseMirror patterns with the new Plugin interface</li>
+                            </ul>
+                        </div>
 
-            <h3>Plugin Development Resources</h3>
-            <ul class="feature-list">
-                <li><a href="https://prosemirror.net/" target="_blank">ProseMirror Documentation</a></li>
-                <li><a href="https://github.com/ajaykr089/Editora" target="_blank">Editora GitHub Repository</a></li>
-                <li><a href="../plugins/index.html">Built-in Plugins Reference</a></li>
-                <li><a href="api.html">Editora API Documentation</a></li>
-            </ul>
-        </div>
+                        <h3>Plugin Development Resources</h3>
+                        <ul class="feature-list">
+                            <li><a href="https://prosemirror.net/" target="_blank">ProseMirror Documentation</a></li>
+                            <li><a href="https://github.com/ajaykr089/Editora" target="_blank">Editora GitHub Repository</a></li>
+                            <li><a href="../plugins/index.html">Built-in Plugins Reference</a></li>
+                            <li><a href="api.html">Editora API Documentation</a></li>
+                        </ul>
+                    </div>
 
-        <!-- Quick Reference -->
-        <div class="tutorial-section">
-            <h2>🔍 Quick Reference</h2>
+                    <!-- Quick Reference -->
+                    <div class="tutorial-section">
+                        <h2>🔍 Quick Reference</h2>
 
-            <h3>Plugin File Template</h3>
-            <div class="code-section">
-                <div class="example-title">Complete Plugin Template</div>
-                <div class="code-block"><code><span class="comment">// MyPlugin.ts</span>
+                        <h3>Plugin File Template</h3>
+                        <div class="code-section">
+                            <div class="example-title">Complete Plugin Template</div>
+                            <pre><code><span class="comment">// MyPlugin.ts</span>
 <span class="keyword">import</span> { Node } <span class="keyword">from</span> <span class="string">'prosemirror-model'</span>;
 
 <span class="keyword">export</span> <span class="keyword">const</span> MyPluginNode = {
@@ -734,68 +757,99 @@ npm publish --access public</code></div>
   <span class="keyword">const</span> node = tr.doc.type.schema.nodes[<span class="string">'my-plugin'</span>].create();
   <span class="keyword">if</span> (dispatch) dispatch(tr.replaceRangeWith(tr.selection.$from.pos, tr.selection.$from.pos, node));
   <span class="keyword">return</span> <span class="keyword">true</span>;
-};</code></div>
+};</code></pre>
+                        </div>
+
+                        <h3>Common Command Patterns</h3>
+                        <table class="command-patterns">
+                            <tr>
+                                <th>Task</th>
+                                <th>Code Example</th>
+                            </tr>
+                            <tr>
+                                <td>Insert Node</td>
+                                <td><code>tr.replaceRangeWith(pos, pos, node)</code></td>
+                            </tr>
+                            <tr>
+                                <td>Replace Selection</td>
+                                <td><code>tr.replaceSelectionWith(node)</code></td>
+                            </tr>
+                            <tr>
+                                <td>Wrap Selection</td>
+                                <td><code>tr.wrap(range, schema.nodes.wrapper)</code></td>
+                            </tr>
+                            <tr>
+                                <td>Get Current Node</td>
+                                <td><code>state.doc.nodeAt(pos)</code></td>
+                            </tr>
+                            <tr>
+                                <td>Get Selection</td>
+                                <td><code>state.selection.$from / $to</code></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="tutorial-section success-box">
+                        <h2>🎉 You're Ready to Build!</h2>
+                        <p>You now have everything you need to create custom plugins for Editora. Start by building your first plugin, test it thoroughly, and share it with the community.</p>
+                        <p><strong>Next steps:</strong></p>
+                        <ul>
+                            <li>Choose a plugin idea that excites you</li>
+                            <li>Create the plugin package structure</li>
+                            <li>Build and test your plugin</li>
+                            <li>Publish to npm</li>
+                            <li>Share with the Editora community</li>
+                        </ul>
+                    </div>
+                </main>
             </div>
-
-            <h3>Common Command Patterns</h3>
-            <table class="command-patterns">
-                <tr>
-                    <th>Task</th>
-                    <th>Code Example</th>
-                </tr>
-                <tr>
-                    <td>Insert Node</td>
-                    <td><code>tr.replaceRangeWith(pos, pos, node)</code></td>
-                </tr>
-                <tr>
-                    <td>Replace Selection</td>
-                    <td><code>tr.replaceSelectionWith(node)</code></td>
-                </tr>
-                <tr>
-                    <td>Wrap Selection</td>
-                    <td><code>tr.wrap(range, schema.nodes.wrapper)</code></td>
-                </tr>
-                <tr>
-                    <td>Get Current Node</td>
-                    <td><code>state.doc.nodeAt(pos)</code></td>
-                </tr>
-                <tr>
-                    <td>Get Selection</td>
-                    <td><code>state.selection.$from / $to</code></td>
-                </tr>
-            </table>
         </div>
-
-        <!-- Summary -->
-        <div class="tutorial-section success-box">
-            <h2>🎉 You're Ready to Build!</h2>
-            <p>You now have everything you need to create custom plugins for Editora. Start by building your first plugin, test it thoroughly, and share it with the community.</p>
-            <p><strong>Next steps:</strong></p>
-            <ul>
-                <li>Choose a plugin idea that excites you</li>
-                <li>Create the plugin package structure</li>
-                <li>Build and test your plugin</li>
-                <li>Publish to npm</li>
-                <li>Share with the Editora community</li>
-            </ul>
-        </div>
-
-        <!-- Navigation -->
-        <div class="nav-buttons">
-            <a href="api.html" class="nav-button prev">← Previous: API Reference</a>
-            <a href="../plugins/index.html" class="nav-button next">Next: Plugin Directory →</a>
-        </div>
-    </main>
-
+    </section>
     <!-- Footer -->
     <footer>
         <div class="container">
-            <p>&copy; 2026 Editora - Best Free Premium Rich Text Editor. All rights reserved.</p>
-            <p>
-                <a href="https://github.com/ajaykr089/Editora" target="_blank">GitHub</a> •
-                <a href="https://www.npmjs.com/org/editora" target="_blank">npm</a> •
-                <a href="https://editora-free.netlify.app/" target="_blank">Website</a>
-            </p>
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>📚 Documentation</h5>
+                    <ul>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="api.html">API Reference</a></li>
+                        <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔌 Plugins</h5>
+                    <ul>
+                        <li><a href="../plugins/index.html">All Plugins</a></li>
+                        <li><a href="../plugins/media-manager.html">Media Manager</a></li>
+                        <li><a href="../plugins/table.html">Tables</a></li>
+                        <li><a href="../plugins/code-sample.html">Code Samples</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔗 Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>ℹ️ About</h5>
+                    <ul>
+                        <li><a href="about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024-2026 Editora. All rights reserved.</p>
+            </div>
         </div>
     </footer>
 
