@@ -398,14 +398,14 @@ editor.on('change', (changes) => {
       <li>Third item</li>
     </ul>
 
-    <button onclick="alert('Hello!')">Click me</button>
+    <button>Click me</button>
 
     <!-- This is a comment -->
     <p>End of document.</p>
   </div>
 
   <script>
-    console.log("Page loaded successfully!");
+    /* Page script removed demo console.log */
   </script>
 </body>
 </html>`,
@@ -501,7 +501,7 @@ editor.on('change', (changes) => {
         extensions
       });
 
-      console.log('Light Code Editor initialized with extensions:', extensions.map(ext => ext.name));
+      // Editor initialized (extensions available in `extensions`)
     }
 
     // Initialize
@@ -561,7 +561,7 @@ editor.on('change', (changes) => {
     setTimeout(() => {
       if (editor) {
         editor.on('change', (changes) => {
-          console.log('Editor content changed:', changes);
+          // Editor content changed - handled by consumers
         });
       }
     }, 100);

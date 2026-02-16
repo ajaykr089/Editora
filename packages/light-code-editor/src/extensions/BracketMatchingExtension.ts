@@ -153,7 +153,6 @@ export class BracketMatchingExtension implements EditorExtension {
   private highlightBrackets(match: BracketMatch): void {
     // This would apply CSS classes or styling to highlight the brackets
     // For now, we'll just log the match for demonstration
-    console.log('Bracket match found:', match);
   }
 
   private clearBracketHighlighting(): void {

@@ -16,22 +16,18 @@ export class CodeFoldingExtension implements EditorExtension {
 
     // Register folding commands (basic implementation - just log for now)
     editor.registerCommand('fold', () => {
-      console.log('Fold command executed - folding not yet implemented');
       this.foldAtCursor();
     });
 
     editor.registerCommand('unfold', () => {
-      console.log('Unfold command executed - unfolding not yet implemented');
       this.unfoldAtCursor();
     });
 
     editor.registerCommand('foldAll', () => {
-      console.log('Fold all command executed - folding not yet implemented');
       this.foldAll();
     });
 
     editor.registerCommand('unfoldAll', () => {
-      console.log('Unfold all command executed - unfolding not yet implemented');
       this.unfoldAll();
     });
 
@@ -129,7 +125,6 @@ export class CodeFoldingExtension implements EditorExtension {
     indicator.title = 'Code folding not yet implemented - click shows fold indicators';
 
     indicator.addEventListener('click', () => {
-      console.log(`Fold toggle clicked at line ${lineIndex} - implementation pending`);
     });
 
     this.foldingUI.appendChild(indicator);
@@ -138,22 +133,18 @@ export class CodeFoldingExtension implements EditorExtension {
 
   private foldAtCursor(): void {
     // Placeholder - folding not yet implemented in core
-    console.log('foldAtCursor called - implementation pending');
   }
 
   private unfoldAtCursor(): void {
     // Placeholder - folding not yet implemented in core
-    console.log('unfoldAtCursor called - implementation pending');
   }
 
   private foldAll(): void {
     // Placeholder - folding not yet implemented in core
-    console.log('foldAll called - implementation pending');
   }
 
   private unfoldAll(): void {
     // Placeholder - folding not yet implemented in core
-    console.log('unfoldAll called - implementation pending');
   }
 
   destroy(): void {

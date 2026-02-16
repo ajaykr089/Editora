@@ -7,10 +7,12 @@ import { Position, Range } from './types';
 
 export class View {
   private container: HTMLElement;
+  private editorContainer!: HTMLElement;
   private contentElement!: HTMLElement;
   private lineNumbersElement!: HTMLElement;
   private gutterWidth = 50;
   private lineHeight = 21;
+  private _rafId?: number;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -23,6 +25,7 @@ export class View {
 
     // Create main editor container
     const editorContainer = document.createElement('div');
+    this.editorContainer = editorContainer;
     editorContainer.style.cssText = `
       position: relative;
       display: flex;
@@ -33,37 +36,38 @@ export class View {
       font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
       font-size: 14px;
       line-height: ${this.lineHeight}px;
-      overflow: hidden;
+      /* make the outer container the single scrollable element so gutter and content scroll together */
+      overflow: auto;
     `;
 
     // Create gutter (line numbers)
     this.lineNumbersElement = document.createElement('div');
+    this.lineNumbersElement.setAttribute('data-editor-gutter', 'true');
     this.lineNumbersElement.style.cssText = `
-      position: sticky;
-      left: 0;
-      top: 0;
+      display: table-cell;
+      vertical-align: top;
       width: ${this.gutterWidth}px;
       background: var(--editor-gutter-background, #252526);
       color: var(--editor-gutter-foreground, #858585);
-      padding: 0;
+      padding: 0 8px 0 0;
       text-align: right;
       border-right: 1px solid var(--editor-gutter-border, #3e3e42);
       user-select: none;
-      overflow: hidden;
       z-index: 1;
     `;
 
     // Create content area
     this.contentElement = document.createElement('div');
     this.contentElement.style.cssText = `
-      flex: 1;
-      padding: 0;
+      display: table-cell;
+      vertical-align: top;
+      padding: 0 12px;
       background: transparent;
       border: none;
       outline: none;
       white-space: pre;
       overflow-x: auto;
-      overflow-y: auto;
+      overflow-y: visible;
       min-height: 400px;
       font-family: inherit;
       font-size: inherit;
@@ -75,12 +79,24 @@ export class View {
     this.contentElement.contentEditable = 'true';
     this.contentElement.spellcheck = false;
 
-    // Assemble
-    editorContainer.appendChild(this.lineNumbersElement);
-    editorContainer.appendChild(this.contentElement);
+    // Assemble: create a single scroll wrapper so gutter and content
+    // share the same scroller and remain aligned when scrolling.
+    const scrollWrapper = document.createElement('div');
+    scrollWrapper.setAttribute('data-editora-editor', 'true');
+    // Use a table-like layout so gutter and content are table-cells
+    // inside the same scrollable container (`editorContainer`) and
+    // therefore always scroll together naturally.
+    scrollWrapper.style.cssText = `display: table; table-layout: fixed; width: 100%; height: 100%;`;
+
+    // Put both into the same scroll surface by appending to the editor container
+    scrollWrapper.appendChild(this.lineNumbersElement);
+    scrollWrapper.appendChild(this.contentElement);
+    editorContainer.appendChild(scrollWrapper);
     this.container.appendChild(editorContainer);
 
-    // Initial line numbers
+    // Make the outer editor container the single scrollable element so
+    // the gutter and content scroll together naturally. No transform
+    // syncing or RAF loop is necessary.
     this.updateLineNumbers(1);
   }
 
@@ -117,7 +133,29 @@ export class View {
 
   // Set inner HTML (used for syntax highlighted content)
   setHTML(html: string): void {
-    this.contentElement.innerHTML = html;
+    // Decide how to render the provided HTML-like string safely:
+    // - Highlighting output contains escaped tag entities (e.g. &lt;div&gt;)
+    //   and also uses <span> wrappers for colored tokens. For this case we
+    //   should set `innerHTML` so the spans render while entities remain
+    //   escaped text (showing the source tags visibly).
+    // - If the string contains raw tags (e.g. `<mark ...>`) and does NOT
+    //   contain escaped entities, treat it as literal text to avoid
+    //   inserting arbitrary DOM elements.
+    const hasEntities = /&lt;|&gt;/.test(html);
+    const hasSpanWrapper = /<span\b/i.test(html);
+    const hasRawTags = /<[^>]+>/.test(html);
+
+    if (hasEntities && hasSpanWrapper) {
+      // This is likely highlighted source produced by the extension.
+      this.contentElement.innerHTML = html;
+    } else if (hasRawTags && !hasEntities) {
+      // Raw user-supplied HTML — render as text to avoid DOM injection.
+      this.contentElement.textContent = html;
+    } else {
+      // Default: allow innerHTML so simple markup or escaped entities render.
+      this.contentElement.innerHTML = html;
+    }
+
     const text = this.contentElement.textContent || '';
     const lines = text.split('\n').length;
     this.updateLineNumbers(lines);
@@ -272,19 +310,23 @@ export class View {
 
   // Get scroll position
   getScrollTop(): number {
-    return this.contentElement.scrollTop;
+    // The editor container is the scroll container for vertical scroll
+    return this.editorContainer.scrollTop;
   }
 
   // Set scroll position
   setScrollTop(scrollTop: number): void {
-    this.contentElement.scrollTop = scrollTop;
-    this.lineNumbersElement.scrollTop = scrollTop;
+    this.editorContainer.scrollTop = scrollTop;
   }
 
   // Destroy the view
   destroy(): void {
     if (this.container && this.container.parentNode) {
       this.container.parentNode.removeChild(this.container);
+    }
+    if (this._rafId) {
+      cancelAnimationFrame(this._rafId);
+      this._rafId = undefined;
     }
   }
 }

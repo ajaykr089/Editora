@@ -130,6 +130,7 @@ export interface EditorEvents {
   blur: () => void;
   keydown: (event: KeyboardEvent) => void;
   mousedown: (event: MouseEvent) => void;
+  save: () => void;
 }
 
 // Forward declarations

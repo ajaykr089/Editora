@@ -15,13 +15,11 @@ export class SyntaxHighlightingExtension implements EditorExtension {
 
   setup(editor: EditorAPI): void {
     this.editor = editor;
-    console.log('SyntaxHighlightingExtension: Isolated extension loaded - ready for use');
   }
 
   // Extension provides methods that can be called by the editor
   setTheme(theme: string): void {
     this.currentTheme = theme;
-    console.log(`SyntaxHighlightingExtension: Theme changed to ${theme}`);
   }
 
   // Method to get syntax highlighting colors for a given theme
@@ -157,6 +155,5 @@ export class SyntaxHighlightingExtension implements EditorExtension {
 
   destroy(): void {
     this.editor = null;
-    console.log('SyntaxHighlightingExtension: Extension destroyed');
   }
 }

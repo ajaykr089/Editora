@@ -20,11 +20,6 @@ export class KeymapExtension implements EditorExtension {
 
   setup(editor: EditorCore): void {
     this.editor = editor;
-
-    // Listen for keyboard events
-    editor.on('keydown', (event) => {
-      return this.handleKeyDown(event);
-    });
   }
 
   private handleKeyDown(event: KeyboardEvent): boolean | void {
@@ -45,25 +40,30 @@ export class KeymapExtension implements EditorExtension {
     const { key, ctrlKey, altKey, shiftKey, metaKey } = event;
 
     // Normalize key for cross-platform compatibility
-    const normalizedKey = key.toLowerCase();
+    const normalizedKey = String(key).toLowerCase();
 
     // Check if we have bindings for this key
     const bindings = this.keymap[normalizedKey];
     if (!bindings) return null;
 
-    // Find exact match
+    // Find match where a modifier in the binding is either unspecified (don't care) or equals the event
     for (const binding of bindings) {
-      if (
-        (binding.ctrlKey === ctrlKey || (!binding.ctrlKey && !ctrlKey)) &&
-        (binding.altKey === altKey || (!binding.altKey && !altKey)) &&
-        (binding.shiftKey === shiftKey || (!binding.shiftKey && !shiftKey)) &&
-        (binding.metaKey === metaKey || (!binding.metaKey && !metaKey))
-      ) {
+      const ctrlMatch = binding.ctrlKey === undefined || binding.ctrlKey === ctrlKey;
+      const altMatch = binding.altKey === undefined || binding.altKey === altKey;
+      const shiftMatch = binding.shiftKey === undefined || binding.shiftKey === shiftKey;
+      const metaMatch = binding.metaKey === undefined || binding.metaKey === metaKey;
+
+      if (ctrlMatch && altMatch && shiftMatch && metaMatch) {
         return binding;
       }
     }
 
     return null;
+  }
+
+  // Allow EditorCore to call this directly when checking extension.onKeyDown
+  onKeyDown(event: KeyboardEvent): boolean | void {
+    return this.handleKeyDown(event);
   }
 
   private getDefaultKeymap(): Keymap {
@@ -82,11 +82,19 @@ export class KeymapExtension implements EditorExtension {
     this.addBinding(keymap, '[', { ctrlKey: !this.isMac, metaKey: this.isMac, shiftKey: true }, 'fold');
     this.addBinding(keymap, ']', { ctrlKey: !this.isMac, metaKey: this.isMac, shiftKey: true }, 'unfold');
 
-    // Editor commands
-    this.addBinding(keymap, 's', { ctrlKey: !this.isMac, metaKey: this.isMac }, 'save');
-    this.addBinding(keymap, 'z', { ctrlKey: !this.isMac, metaKey: this.isMac }, 'undo');
-    this.addBinding(keymap, 'y', { ctrlKey: !this.isMac, metaKey: this.isMac }, 'redo');
-    this.addBinding(keymap, 'z', { ctrlKey: !this.isMac, metaKey: this.isMac, shiftKey: true }, 'redo');
+    // Editor commands - add both ctrl and meta variants so shortcuts work across platforms and with either modifier
+    this.addBinding(keymap, 's', { ctrlKey: true }, 'save');
+    this.addBinding(keymap, 's', { metaKey: true }, 'save');
+
+    this.addBinding(keymap, 'z', { ctrlKey: true }, 'undo');
+    this.addBinding(keymap, 'z', { metaKey: true }, 'undo');
+
+    this.addBinding(keymap, 'y', { ctrlKey: true }, 'redo');
+    this.addBinding(keymap, 'y', { metaKey: true }, 'redo');
+    this.addBinding(keymap, 'z', { ctrlKey: true, shiftKey: true }, 'redo');
+    this.addBinding(keymap, 'z', { metaKey: true, shiftKey: true }, 'redo');
+    // Tab insertion
+    this.addBinding(keymap, 'tab', {}, 'insertTab');
 
     // Theme switching
     this.addBinding(keymap, 't', { ctrlKey: !this.isMac, metaKey: this.isMac, shiftKey: true }, 'toggleTheme');
