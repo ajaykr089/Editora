@@ -62,8 +62,6 @@ export class EditorCore implements EditorAPI {
 
     // Initialize view
     this.view = new View(container);
-    this.view.setText(this.textModel.getText());
-    this.view.setReadOnly(this.config.readOnly || false);
 
     // Setup event handlers
     this.setupEventHandlers();
@@ -75,6 +73,12 @@ export class EditorCore implements EditorAPI {
 
     // Apply initial theme
     this.setTheme(this.config.theme!);
+
+    // Apply read-only state
+    this.view.setReadOnly(this.config.readOnly || false);
+
+    // Render initial text (use highlighting if available)
+    this.renderTextWithHighlight(this.textModel.getText());
   }
 
   // Get keymap extension if available
@@ -93,8 +97,10 @@ export class EditorCore implements EditorAPI {
 
       if (newText !== oldText) {
         this.textModel.setText(newText);
-        this.emit('change', [{ range: this.getFullRange(), text: newText, oldText }]);
+        // Re-render with syntax highlighting if available
+        this.renderTextWithHighlight(newText);
         this.updateLineNumbers();
+        this.emit('change', [{ range: this.getFullRange(), text: newText, oldText }]);
       }
     });
 
@@ -178,10 +184,11 @@ export class EditorCore implements EditorAPI {
   }
 
   setValue(value: string): void {
+    const old = this.textModel.getText();
     this.textModel.setText(value);
-    this.view.setText(value);
+    this.renderTextWithHighlight(value);
     this.updateLineNumbers();
-    this.emit('change', [{ range: this.getFullRange(), text: value, oldText: this.getValue() }]);
+    this.emit('change', [{ range: this.getFullRange(), text: value, oldText: old }]);
   }
 
   getState(): EditorState {
@@ -229,6 +236,18 @@ export class EditorCore implements EditorAPI {
       'editor-gutter-border': theme === 'dark' ? '#3e3e42' : '#e1e5e9'
     };
     this.view.applyTheme(themeVars);
+    // Notify syntax highlighting extension (if present)
+    const sh = this.extensions.get('syntax-highlighting') as any;
+    if (sh && typeof sh.setTheme === 'function') {
+      try {
+        sh.setTheme(theme === 'dark' ? 'dark' : 'light');
+        // Re-render current text with new theme colors
+        this.renderTextWithHighlight(this.textModel.getText());
+      } catch (e) {
+        // silently ignore extension errors
+        console.warn('Error applying theme to syntax-highlighting extension', e);
+      }
+    }
   }
 
   setReadOnly(readOnly: boolean): void {
@@ -244,6 +263,13 @@ export class EditorCore implements EditorAPI {
 
     this.extensions.set(extension.name, extension);
     extension.setup(this);
+    // If syntax-highlighting added, re-render current content using it
+    if (extension.name === 'syntax-highlighting') {
+      const ext: any = extension as any;
+      if (typeof ext.highlightHTML === 'function') {
+        this.renderTextWithHighlight(this.textModel.getText());
+      }
+    }
   }
 
   removeExtension(name: string): void {
@@ -320,7 +346,7 @@ export class EditorCore implements EditorAPI {
 
   replace(range: Range, text: string): void {
     const change = this.textModel.replaceRange(range, text);
-    this.view.setText(this.getValue());
+    this.renderTextWithHighlight(this.getValue());
     this.emit('change', [change]);
   }
 
@@ -367,6 +393,23 @@ export class EditorCore implements EditorAPI {
 
   blur(): void {
     this.view.blur();
+  }
+
+  // Render text using syntax highlighting extension if available
+  private renderTextWithHighlight(text: string): void {
+    const sh = this.extensions.get('syntax-highlighting') as any;
+    if (sh && typeof sh.highlightHTML === 'function') {
+      try {
+        const html = sh.highlightHTML(text);
+        this.view.setHTML(html);
+        return;
+      } catch (e) {
+        console.warn('Syntax highlighting failed, falling back to plain text', e);
+      }
+    }
+
+    // Fallback to plain text
+    this.view.setText(text);
   }
 
   destroy(): void {

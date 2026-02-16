@@ -255,3 +255,26 @@
 .dark .fold-indicator.collapsed::before {
   color: #999;
 }
+
+/* Editor Core Styles */
+.editor-container {
+  font-family: monospace;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  padding: 10px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  overflow: auto;
+}
+
+.editor-line {
+  white-space: pre;
+}
+
+.editor-line-number {
+  display: inline-block;
+  width: 30px;
+  text-align: right;
+  margin-right: 10px;
+  color: #858585;
+}

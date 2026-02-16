@@ -8,6 +8,7 @@ import './styles/editor.css';
 
 import { EditorCore } from './EditorCore';
 import { KeymapExtension } from './extensions/KeymapExtension';
+import { TransactionExtension } from './extensions/TransactionExtension';
 
 // Main exports
 export { EditorCore } from './EditorCore';
@@ -47,6 +48,12 @@ export function createEditor(container: HTMLElement, config?: import('./types').
   const hasKeymap = finalConfig.extensions.some(ext => ext.name === 'keymap');
   if (!hasKeymap) {
     finalConfig.extensions.unshift(new KeymapExtension(finalConfig.keymap));
+  }
+
+  // Add TransactionExtension by default
+  const hasTransaction = finalConfig.extensions.some(ext => ext.name === 'transaction');
+  if (!hasTransaction) {
+    finalConfig.extensions.unshift(new TransactionExtension());
   }
 
   return new EditorCore(container, finalConfig);

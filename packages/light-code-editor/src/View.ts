@@ -115,6 +115,14 @@ export class View {
     this.updateLineNumbers(lines);
   }
 
+  // Set inner HTML (used for syntax highlighted content)
+  setHTML(html: string): void {
+    this.contentElement.innerHTML = html;
+    const text = this.contentElement.textContent || '';
+    const lines = text.split('\n').length;
+    this.updateLineNumbers(lines);
+  }
+
   // Get cursor position from DOM selection
   getCursorPosition(): Position {
     const selection = window.getSelection();
