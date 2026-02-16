@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editora Toast - Advanced Features Demo</title>
+    <link rel="stylesheet" href="dist/toast.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .demo-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+        }
+
+        .demo-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+        button.primary {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        button.primary:hover {
+            background: #2563eb;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+        }
+
+        pre {
+            background: #f6f8fa;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+
+        code {
+            background: #f6f8fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎉 Editora Toast - Advanced Features Demo</h1>
+    <p>This demo showcases the advanced features of the upgraded toast notification system.</p>
+
+    <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+
+    <!-- Basic Toasts -->
+    <div class="demo-section">
+        <h2>📝 Basic Toasts (Backward Compatible)</h2>
+        <p>These work exactly like the original v1.x API:</p>
+        <div class="demo-buttons">
+            <button onclick="showBasic('info')">Info Toast</button>
+            <button onclick="showBasic('success')">Success Toast</button>
+            <button onclick="showBasic('error')">Error Toast</button>
+        </div>
+        <pre><code>// Original API (still works)
+import { toast } from '@editora/toast';
+
+toast.info('Info message');
+toast.success('Success!');
+toast.error('Error occurred');</code></pre>
+    </div>
+
+    <!-- Advanced Toasts -->
+    <div class="demo-section">
+        <h2>🚀 Advanced Toasts</h2>
+        <p>New features with rich content and interactions:</p>
+        <div class="demo-buttons">
+            <button onclick="showRichToast()">Rich Toast with Actions</button>
+            <button onclick="showProgressToast()">Progress Toast</button>
+            <button onclick="showCustomToast()">Custom Render Function</button>
+            <button onclick="showGroupedToast()">Grouped Toast</button>
+        </div>
+        <pre><code>// Advanced API
+import { toastAdvanced as toast } from '@editora/toast';
+
+toast.show({
+  message: 'File uploaded successfully',
+  level: 'success',
+  icon: '✓',
+  actions: [
+    { label: 'View', onClick: () => console.log('View clicked') },
+    { label: 'Dismiss', onClick: () => {} }
+  ]
+});</code></pre>
+    </div>
+
+    <!-- Promise Toasts -->
+    <div class="demo-section">
+        <h2>⏳ Promise Lifecycle Toasts</h2>
+        <p>Automatic state transitions for async operations:</p>
+        <div class="demo-buttons">
+            <button onclick="showPromiseToast('success')">Successful Promise</button>
+            <button onclick="showPromiseToast('error')">Failed Promise</button>
+            <button onclick="showFileUpload()">File Upload Simulation</button>
+        </div>
+        <pre><code>// Promise API
+toast.promise(
+  uploadFile(file),
+  {
+    loading: 'Uploading file...',
+    success: 'File uploaded successfully!',
+    error: 'Upload failed'
+  }
+);</code></pre>
+    </div>
+
+    <!-- Toast Updates -->
+    <div class="demo-section">
+        <h2>🔄 Toast Updates</h2>
+        <p>Update existing toasts dynamically:</p>
+        <div class="demo-buttons">
+            <button onclick="showUpdateToast()">Loading → Success</button>
+            <button onclick="showProgressUpdate()">Progress Updates</button>
+        </div>
+        <pre><code>// Update API
+const loadingToast = toast.loading('Saving...');
+setTimeout(() => {
+  toast.update(loadingToast.id, {
+    message: 'Saved!',
+    level: 'success'
+  });
+}, 2000);</code></pre>
+    </div>
+
+    <!-- Positions -->
+    <div class="demo-section">
+        <h2>📍 Positions</h2>
+        <p>Toasts can appear in different positions:</p>
+        <div class="demo-buttons">
+            <button onclick="showPositionedToast('top-left')">Top Left</button>
+            <button onclick="showPositionedToast('top-right')">Top Right</button>
+            <button onclick="showPositionedToast('bottom-left')">Bottom Left</button>
+            <button onclick="showPositionedToast('bottom-right')">Bottom Right</button>
+            <button onclick="showPositionedToast('center')">Center</button>
+        </div>
+        <pre><code>// Position configuration
+toast.configure({
+  position: 'top-right'
+});
+
+toast.show({
+  message: 'Hello World',
+  position: 'center'
+});</code></pre>
+    </div>
+
+    <!-- Configuration -->
+    <div class="demo-section">
+        <h2>⚙️ Configuration</h2>
+        <p>Global configuration options:</p>
+        <div class="demo-buttons">
+            <button onclick="configureToast('fast')">Fast Duration (2s)</button>
+            <button onclick="configureToast('slow')">Slow Duration (10s)</button>
+            <button onclick="configureToast('max')">Max Visible (2)</button>
+            <button onclick="configureToast('reset')">Reset Config</button>
+        </div>
+        <pre><code>// Global configuration
+toast.configure({
+  position: 'top-right',
+  duration: 5000,
+  maxVisible: 5,
+  theme: 'dark',
+  pauseOnHover: true,
+  swipeDismiss: true,
+  swipeDirection: 'any'
+});</code></pre>
+    </div>
+
+    <!-- Plugins -->
+    <div class="demo-section">
+        <h2>🔌 Plugins</h2>
+        <p>Extensible with custom plugins:</p>
+        <div class="demo-buttons">
+            <button onclick="installAnalyticsPlugin()">Install Analytics Plugin</button>
+            <button onclick="showToastWithPlugin()">Show Toast (with plugin)</button>
+        </div>
+        <pre><code>// Plugin system
+const analyticsPlugin = {
+  name: 'analytics',
+  install(manager) {
+    manager.on('afterShow', (toast) => {
+      console.log('Toast shown:', toast.level);
+    });
+  }
+};
+
+toast.use(analyticsPlugin);</code></pre>
+    </div>
+
+    <!-- Themes -->
+    <div class="demo-section">
+        <h2>🎨 Themes</h2>
+        <p>Choose from 13 beautiful themes:</p>
+        <div class="demo-buttons">
+            <button onclick="setTheme('light')">Light</button>
+            <button onclick="setTheme('dark')">Dark</button>
+            <button onclick="setTheme('colored')">Colored</button>
+            <button onclick="setTheme('minimal')">Minimal</button>
+            <button onclick="setTheme('glass')">Glass</button>
+            <button onclick="setTheme('neon')">Neon</button>
+            <button onclick="setTheme('retro')">Retro</button>
+            <button onclick="setTheme('ocean')">Ocean</button>
+            <button onclick="setTheme('forest')">Forest</button>
+            <button onclick="setTheme('sunset')">Sunset</button>
+            <button onclick="setTheme('midnight')">Midnight</button>
+            <button onclick="setTheme('spring')">Spring</button>
+            <button onclick="setTheme('autumn')">Autumn</button>
+        </div>
+        <div style="margin-top: 15px;">
+            <strong>Current Theme:</strong> <span id="currentThemeDisplay">light</span>
+        </div>
+        <pre><code>// Theme configuration
+window.toastPro.configure({
+  theme: 'dark', // Options: light, dark, colored, minimal, glass, neon, retro, ocean, forest, sunset, midnight, spring, autumn
+  position: 'bottom-right'
+});
+
+// Or per toast:
+window.toastPro.success('Success!', { theme: 'neon' });</code></pre>
+    </div>
+
+    <!-- New Features -->
+    <div class="demo-section">
+        <h2>✨ New Features</h2>
+        <p>Latest additions to the toast library:</p>
+
+        <!-- RTL Support -->
+        <h3>🌍 RTL Support</h3>
+        <p>Right-to-left language support for international applications:</p>
+        <div class="demo-buttons">
+            <button onclick="showRTLToast()">RTL Toast (Arabic)</button>
+            <button onclick="showLTRToast()">LTR Toast (English)</button>
+        </div>
+        <pre><code>// RTL Support
+toast.show({
+  message: 'نص عربي من اليمين إلى اليسار',
+  level: 'info',
+  rtl: true
+});</code></pre>
+
+        <!-- Swipe Direction Control -->
+        <h3>👆 Swipe Direction Control</h3>
+        <p>Control which swipe directions can dismiss toasts. Click a button below, then swipe the toast in the specified direction to dismiss it:</p>
+        <div class="demo-buttons">
+            <button onclick="showSwipeToast('left')">Swipe Left Only</button>
+            <button onclick="showSwipeToast('right')">Swipe Right Only</button>
+            <button onclick="showSwipeToast('up')">Swipe Up Only</button>
+            <button onclick="showSwipeToast('down')">Swipe Down Only</button>
+            <button onclick="showSwipeToast('horizontal')">Horizontal Only</button>
+            <button onclick="showSwipeToast('vertical')">Vertical Only</button>
+        </div>
+        <p><small><em>💡 Tip: The toast will move slightly as you drag to show it's responding to your swipe</em></small></p>
+        <pre><code>// Swipe Direction Control
+toast.show({
+  message: 'Swipe left to dismiss',
+  level: 'warning',
+  swipeDismiss: true,
+  swipeDirection: 'left',
+  duration: 10000
+});</code></pre>
+
+        <!-- Window Focus Pausing -->
+        <h3>👁️ Window Focus Pausing</h3>
+        <p>Automatically pause toasts when window loses focus:</p>
+        <div class="demo-buttons">
+            <button onclick="enableWindowFocusPause()">Enable Auto-Pause</button>
+            <button onclick="disableWindowFocusPause()">Disable Auto-Pause</button>
+            <button onclick="testWindowFocusPause()">Test Auto-Pause</button>
+        </div>
+        <pre><code>// Window Focus Pausing
+toast.configure({
+  pauseOnWindowBlur: true
+});
+
+// Toasts will pause when you switch tabs
+toast.show({
+  message: 'This toast pauses when window loses focus!',
+  level: 'info',
+  duration: 10000
+});</code></pre>
+    </div>
+
+    <script type="module" src="dist/index.esm.js"></script>
+    <script>
+        // Wait for toast library to be ready
+        window.addEventListener('toastReady', (event) => {
+            console.log('Toast library ready:', event.detail);
+
+            // Debug: Check if globals are available
+            console.log('Toast globals:', { toast: window.toast, toastPro: window.toastPro, toastAdvanced: window.toastAdvanced });
+
+        // Theme toggle
+        window.toggleTheme = () => {
+            const isDark = document.body.dataset.theme === 'dark';
+            document.body.dataset.theme = isDark ? 'light' : 'dark';
+            window.toastPro.configure({ theme: isDark ? 'light' : 'dark' });
+        };
+
+        // Basic toasts (backward compatible)
+        window.showBasic = (level) => {
+            window.toast[level](`${level.charAt(0).toUpperCase() + level.slice(1)} message`);
+        };
+
+        // Rich toast
+        window.showRichToast = () => {
+            window.toastPro.show({
+                message: 'Document saved successfully!',
+                level: 'success',
+                icon: '💾',
+                actions: [
+                    { label: 'View Document', onClick: () => alert('Viewing document...') },
+                    { label: 'Share', onClick: () => alert('Sharing...') }
+                ]
+            });
+        };
+
+        // Progress toast
+        window.showProgressToast = () => {
+            const toast = window.toastPro.show({
+                message: 'Processing...',
+                level: 'loading',
+                progress: { value: 0, showPercentage: true }
+            });
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                window.toastPro.update(toast.id, {
+                    progress: { value: progress, showPercentage: true },
+                    message: `Processing... ${progress}%`
+                });
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        window.toastPro.update(toast.id, {
+                            message: 'Complete!',
+                            level: 'success',
+                            progress: undefined
+                        });
+                    }, 500);
+                }
+            }, 200);
+        };
+
+        // Custom render
+        window.showCustomToast = () => {
+            window.toastPro.show({
+                render: () => {
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 20px;">🎨</span>
+                            <div>
+                                <strong>Custom Toast</strong>
+                                <br>
+                                <small>Rendered with custom function</small>
+                            </div>
+                        </div>
+                    `;
+                    return div;
+                },
+                level: 'custom'
+            });
+        };
+
+        // Grouped toasts
+        window.showGroupedToast = () => {
+            window.toastPro.group('upload-group', {
+                message: 'Upload 1 of 3 complete',
+                level: 'success'
+            });
+
+            setTimeout(() => {
+                window.toastPro.group('upload-group', {
+                    message: 'Upload 2 of 3 complete',
+                    level: 'success'
+                });
+            }, 1000);
+
+            setTimeout(() => {
+                window.toastPro.group('upload-group', {
+                    message: 'All uploads complete!',
+                    level: 'success'
+                });
+            }, 2000);
+        };
+
+        // Promise toasts
+        window.showPromiseToast = (type) => {
+            const promise = new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    if (type === 'success') {
+                        resolve('Data loaded');
+                    } else {
+                        reject(new Error('Network error'));
+                    }
+                }, 2000);
+            });
+
+            // Handle the promise but don't let rejections bubble up to console
+            window.toastPro.promise(promise, {
+                loading: 'Loading data...',
+                success: (data) => `Success: ${data}`,
+                error: (error) => `Error: ${error.message}`
+            }).catch(() => {
+                // Error already handled by toast, just prevent console error
+            });
+        };
+
+        // File upload simulation
+        window.showFileUpload = () => {
+            const uploadPromise = new Promise((resolve, reject) => {
+                // Simulate upload with progress
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 20;
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        resolve('File uploaded');
+                    }
+                }, 300);
+
+                // Random failure
+                setTimeout(() => {
+                    if (Math.random() > 0.7) {
+                        clearInterval(interval);
+                        reject(new Error('Upload failed'));
+                    }
+                }, 1000);
+            });
+
+            window.toastPro.promise(uploadPromise, {
+                loading: 'Uploading file...',
+                success: 'File uploaded successfully!',
+                error: 'Upload failed. Please try again.'
+            }).catch(() => {
+                // Error already handled by toast, just prevent console error
+            });
+        };
+
+        // Update toast
+        window.showUpdateToast = () => {
+            const loadingToast = window.toastPro.loading('Saving document...');
+            setTimeout(() => {
+                window.toastPro.update(loadingToast.id, {
+                    message: 'Document saved successfully!',
+                    level: 'success'
+                });
+            }, 2000);
+        };
+
+        // Progress updates
+        window.showProgressUpdate = () => {
+            const toast = window.toastPro.show({
+                message: 'Downloading...',
+                level: 'loading',
+                progress: { value: 0 }
+            });
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                window.toastPro.update(toast.id, {
+                    progress: { value: progress }
+                });
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    window.toastPro.update(toast.id, {
+                        message: 'Download complete!',
+                        level: 'success',
+                        progress: undefined
+                    });
+                }
+            }, 100);
+        };
+
+        // Positioned toasts
+        window.showPositionedToast = (position) => {
+            window.toastPro.show({
+                message: `Toast at ${position}`,
+                level: 'info',
+                position: position
+            });
+        };
+
+        // Configuration
+        window.configureToast = (type) => {
+            switch (type) {
+                case 'fast':
+                    window.toastPro.configure({ duration: 2000 });
+                    window.toast.info('Fast duration set (2s)');
+                    break;
+                case 'slow':
+                    window.toastPro.configure({ duration: 10000 });
+                    window.toast.info('Slow duration set (10s)');
+                    break;
+                case 'max':
+                    window.toastPro.configure({ maxVisible: 2 });
+                    window.toast.info('Max visible set to 2');
+                    break;
+                case 'reset':
+                    window.toastPro.configure({
+                        duration: 4000,
+                        maxVisible: 5,
+                        position: 'bottom-right'
+                    });
+                    window.toast.info('Configuration reset');
+                    break;
+            }
+        };
+
+        // Plugin demo
+        let analyticsInstalled = false;
+        window.installAnalyticsPlugin = () => {
+            if (analyticsInstalled) {
+                window.toast.info('Analytics plugin already installed');
+                return;
+            }
+
+            const analyticsPlugin = {
+                name: 'analytics',
+                install(manager) {
+                    manager.on('afterShow', (toast) => {
+                        console.log('📊 Toast shown:', {
+                            level: toast.level,
+                            message: toast.message,
+                            timestamp: new Date().toISOString()
+                        });
+                    });
+                }
+            };
+
+            window.toastPro.use(analyticsPlugin);
+            analyticsInstalled = true;
+            window.toast.success('Analytics plugin installed! Check console.');
+        };
+
+        window.showToastWithPlugin = () => {
+            window.toastPro.info('This toast will be tracked by analytics plugin');
+        };
+
+        // Theme switching
+        window.setTheme = (themeName) => {
+            // Configure the global theme
+            window.toastPro.configure({ theme: themeName });
+
+            // Update display
+            document.getElementById('currentThemeDisplay').textContent = themeName;
+
+            // Clear existing toasts and show demo toasts
+            window.toastPro.clear();
+
+            // Show test toasts with the new theme
+            setTimeout(() => {
+                window.toastPro.success(`🎨 ${themeName} theme - Success!`, { theme: themeName });
+            }, 100);
+
+            setTimeout(() => {
+                window.toastPro.info(`🎨 ${themeName} theme - Info message`, { theme: themeName });
+            }, 600);
+
+            setTimeout(() => {
+                window.toastPro.warning(`🎨 ${themeName} theme - Warning!`, { theme: themeName });
+            }, 1100);
+
+            setTimeout(() => {
+                window.toastPro.error(`🎨 ${themeName} theme - Error occurred`, { theme: themeName });
+            }, 1600);
+        };
+
+        // New Features Functions
+
+        // RTL Support
+        window.showRTLToast = () => {
+            window.toastPro.show({
+                message: 'هذا اختبار للنص من اليمين إلى اليسار - RTL Support',
+                level: 'info',
+                rtl: true,
+                duration: 5000
+            });
+        };
+
+        window.showLTRToast = () => {
+            window.toastPro.show({
+                message: 'This is a left-to-right text test - LTR Support',
+                level: 'success',
+                rtl: false,
+                duration: 5000
+            });
+        };
+
+        // Swipe Direction Control
+        window.showSwipeToast = (direction) => {
+            const directionText = {
+                'left': 'left',
+                'right': 'right',
+                'up': 'up',
+                'down': 'down',
+                'horizontal': 'horizontally (left/right)',
+                'vertical': 'vertically (up/down)'
+            };
+
+            window.toastPro.show({
+                message: `Swipe ${directionText[direction]} to dismiss this toast`,
+                level: 'warning',
+                swipeDismiss: true,
+                swipeDirection: direction,
+                duration: 10000
+            });
+        };
+
+        // Window Focus Pausing
+        window.enableWindowFocusPause = () => {
+            window.toastPro.configure({ pauseOnWindowBlur: true });
+            window.toastPro.show({
+                message: 'Window focus pausing enabled! Switch tabs to test.',
+                level: 'success',
+                duration: 3000
+            });
+        };
+
+        window.disableWindowFocusPause = () => {
+            window.toastPro.configure({ pauseOnWindowBlur: false });
+            window.toastPro.show({
+                message: 'Window focus pausing disabled.',
+                level: 'info',
+                duration: 3000
+            });
+        };
+
+        window.testWindowFocusPause = () => {
+            window.toastPro.configure({ pauseOnWindowBlur: true });
+            window.toastPro.show({
+                message: 'This toast will pause when you switch tabs/windows. Try it now!',
+                level: 'info',
+                duration: 15000
+            });
+        };
+
+        // Initialize with some defaults
+        window.toastPro.configure({
+            position: 'bottom-right',
+            theme: 'light',
+            enableAccessibility: true,
+            swipeDismiss: true
+        });
+        });
+    </script>
+</body>
+</html>

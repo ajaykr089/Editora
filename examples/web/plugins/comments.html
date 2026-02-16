@@ -29,7 +29,7 @@
         <div class="container">
             <nav>
                 <a href="../index.html" class="logo">
-                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto;">
+                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
                 </a>
                 <button class="menu-toggle">☰</button>
                 <ul class="nav-links">
@@ -38,6 +38,7 @@
                     <li><a href="../docs/features.html">Features</a></li>
                     <li><a href="index.html" class="active">Plugins</a></li>
                     <li><a href="../docs/api.html">API</a></li>
+                    <li><a href="../toast-demo.html">Toast Demo</a></li>
                     <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
                 </ul>
             </nav>
@@ -53,26 +54,59 @@
 
     <section>
         <div class="container">
-            <h2>Overview</h2>
-            <p>The Comments plugin enables real-time collaborative commenting on document content. Users can add comments to specific sections, reply to comments, resolve discussions, and track all changes with contributor information.</p>
+            <div class="docs-wrapper">
+                <aside class="docs-sidebar">
+                    <h3>Plugins</h3>
+                    <ul>
+                        <li><a href="index.html">All Plugins</a></li>
+                        <li><a href="media-manager.html">Media Manager</a></li>
+                        <li><a href="table.html">Tables</a></li>
+                        <li><a href="code-sample.html">Code Sample</a></li>
+                        <li><a href="checklist.html">Checklist</a></li>
+                        <li><a href="template.html">Templates</a></li>
+                        <li><a href="comments.html" class="active">Comments</a></li>
+                        <li><a href="image.html">Image Plugin</a></li>
+                        <li><a href="link.html">Link Manager</a></li>
+                        <li><a href="print.html">Print Export</a></li>
+                        <li><a href="preview.html">Preview Mode</a></li>
+                        <li><a href="history.html">History</a></li>
+                        <li><a href="spell-check.html">Spell Check</a></li>
+                        <li><a href="emojis.html">Emojis</a></li>
+                        <li><a href="special-characters.html">Special Characters</a></li>
+                        <li><a href="math.html">Math Equations</a></li>
+                        <li><a href="document-manager.html">Document Manager</a></li>
+                    </ul>
 
-            <h2>Features</h2>
-            <ul style="columns: 2; gap: 2rem;">
-                <li>✓ Real-time comments</li>
-                <li>✓ Threaded discussions</li>
-                <li>✓ Comment replies</li>
-                <li>✓ Resolve/mark as done</li>
-                <li>✓ User attribution</li>
-                <li>✓ Comment threading</li>
-                <li>✓ Mention notifications</li>
-                <li>✓ Comment export</li>
-            </ul>
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="../playground.html">Live Playground</a></li>
+                        <li><a href="../toast-demo.html">Toast Demo</a></li>
+                        <li><a href="../docs/examples.html">Examples</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank">GitHub</a></li>
+                    </ul>
+                </aside>
 
-            <h2>Installation</h2>
-            <pre><code>npm install @editora/plugin-comments</code></pre>
+                <main class="docs-content">
+                    <h2>Overview</h2>
+                    <p>The Comments plugin enables real-time collaborative commenting on document content. Users can add comments to specific sections, reply to comments, resolve discussions, and track all changes with contributor information.</p>
 
-            <h2>Basic Usage</h2>
-            <pre><code>import Editora from '@editora/core';
+                    <h2>Features</h2>
+                    <ul style="columns: 2; gap: 2rem;">
+                        <li>✓ Real-time comments</li>
+                        <li>✓ Threaded discussions</li>
+                        <li>✓ Comment replies</li>
+                        <li>✓ Resolve/mark as done</li>
+                        <li>✓ User attribution</li>
+                        <li>✓ Comment threading</li>
+                        <li>✓ Mention notifications</li>
+                        <li>✓ Comment export</li>
+                    </ul>
+
+                    <h2>Installation</h2>
+                    <pre><code>npm install @editora/plugin-comments</code></pre>
+
+                    <h2>Basic Usage</h2>
+                    <pre><code>import Editora from '@editora/core';
 import CommentsPlugin from '@editora/plugin-comments';
 
 const editor = new Editora('#editor');
@@ -82,30 +116,32 @@ editor.use(CommentsPlugin, {
     serverUrl: 'https://your-server.com/comments'
 });</code></pre>
 
-            <h2>Comment Management</h2>
-            <p>Work with comments effectively:</p>
-            <ol>
-                <li><strong>Add Comment:</strong> Select text and add a comment</li>
-                <li><strong>Reply:</strong> Add replies to existing comments</li>
-                <li><strong>Resolve:</strong> Mark comments as resolved</li>
-                <li><strong>Filter:</strong> View all, open, or resolved comments</li>
-            </ol>
+                    <h2>Comment Management</h2>
+                    <p>Work with comments effectively:</p>
+                    <ol>
+                        <li><strong>Add Comment:</strong> Select text and add a comment</li>
+                        <li><strong>Reply:</strong> Add replies to existing comments</li>
+                        <li><strong>Resolve:</strong> Mark comments as resolved</li>
+                        <li><strong>Filter:</strong> View all, open, or resolved comments</li>
+                    </ol>
 
-            <h2>API Methods</h2>
-            <ul>
-                <li><strong>addComment(text):</strong> Add comment to selection</li>
-                <li><strong>replyToComment(id, text):</strong> Reply to existing comment</li>
-                <li><strong>resolveComment(id):</strong> Mark comment as resolved</li>
-                <li><strong>getComments():</strong> Get all comments for document</li>
-            </ul>
+                    <h2>API Methods</h2>
+                    <ul>
+                        <li><strong>addComment(text):</strong> Add comment to selection</li>
+                        <li><strong>replyToComment(id, text):</strong> Reply to existing comment</li>
+                        <li><strong>resolveComment(id):</strong> Mark comment as resolved</li>
+                        <li><strong>getComments():</strong> Get all comments for document</li>
+                    </ul>
 
-            <h2>Best Practices</h2>
-            <ul>
-                <li><strong>Be Specific:</strong> Highlight exact text when commenting</li>
-                <li><strong>Use Mentions:</strong> Tag team members using @username</li>
-                <li><strong>Resolve:</strong> Mark comments as resolved when addressed</li>
-                <li><strong>Threads:</strong> Keep related discussion in comment threads</li>
-            </ul>
+                    <h2>Best Practices</h2>
+                    <ul>
+                        <li><strong>Be Specific:</strong> Highlight exact text when commenting</li>
+                        <li><strong>Use Mentions:</strong> Tag team members using @username</li>
+                        <li><strong>Resolve:</strong> Mark comments as resolved when addressed</li>
+                        <li><strong>Threads:</strong> Keep related discussion in comment threads</li>
+                    </ul>
+                </main>
+            </div>
         </div>
     </section>
 

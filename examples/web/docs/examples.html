@@ -31,15 +31,16 @@
         <div class="container">
             <nav>
                 <a href="../index.html" class="logo">
-                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto;">
+                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
                 </a>
                 <button class="menu-toggle">☰</button>
                 <ul class="nav-links">
                     <li><a href="../index.html">Home</a></li>
-                    <li><a href="installation.html">Docs</a></li>
+                    <li><a href="installation.html" class="active">Docs</a></li>
                     <li><a href="features.html">Features</a></li>
                     <li><a href="../plugins/index.html">Plugins</a></li>
                     <li><a href="api.html">API</a></li>
+                    <li><a href="../toast-demo.html">Toast Demo</a></li>
                     <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
                 </ul>
             </nav>
@@ -66,8 +67,16 @@
                         <li><a href="api.html">API Reference</a></li>
                         <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
                         <li><a href="examples.html" class="active">Examples</a></li>
-                    <li><a href="custom-plugins.html">Custom Plugins</a></li>
+                        <li><a href="custom-plugins.html">Custom Plugins</a></li>
                         <li><a href="about.html">About</a></li>
+                    </ul>
+
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="../playground.html">Live Playground</a></li>
+                        <li><a href="../toast-demo.html">Toast Demo</a></li>
+                        <li><a href="../plugins/index.html">All Plugins</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank">GitHub</a></li>
                     </ul>
                 </aside>
 
@@ -529,7 +538,7 @@ export class AppComponent implements AfterViewInit {
                             <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--gray-200);">
                                 <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">🎨 UI & Toolbar</h4>
                                 <ul style="margin: 0; padding-left: 1rem;">
-                                    <li><a href="../test-toolbar-fix.html">Toolbar Fix Test</a> - Toolbar debugging</li>
+                                    <li><a href="../test-toolbar-fix.html">Toolbar Test</a> - Toolbar debugging</li>
                                     <li><a href="../debug-toolbar.html">Debug Toolbar</a> - Toolbar inspection</li>
                                     <li><a href="../test-single-css.html">Single CSS Test</a> - Minimal styling</li>
                                 </ul>
@@ -553,12 +562,14 @@ export class AppComponent implements AfterViewInit {
                                 </ul>
                             </div>
                             <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--gray-200);">
+                                <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">🍞 Toast Notifications</h4>
+                                <ul style="margin: 0; padding-left: 1rem;">
+                                    <li><a href="../toast-demo.html">Toast Demo</a> - Advanced toast notification system</li>
+                                </ul>
+                            </div>
+                            <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--gray-200);">
                                 <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">⚛️ Framework Examples</h4>
                                 <ul style="margin: 0; padding-left: 1rem;">
-                                    <li><a href="../basic-example.html">React Basic</a> - React/Vite setup</li>
-                                    <li><a href="../vanilla-html-example.html">Vanilla HTML Basic</a> - Pure HTML/JS (no build)</li>
-                                    <li><a href="../vanilla-html-cdn.html">Vanilla HTML CDN</a> - Production CDN setup</li>
-                                    <li><a href="../vanilla-html-local.html">Vanilla HTML Local</a> - Development local files</li>
                                     <li><a href="../vanilla-html-bundles.html">Bundle Comparison</a> - Core vs Full bundle demo</li>
                                     <li><a href="../vanilla-html-plugins.html">Separate Plugins</a> - Individual plugin loading</li>
                                     <li><a href="../webcomponent-basic.html">Web Component Basic</a> - Simple web component</li>

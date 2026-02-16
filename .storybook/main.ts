@@ -20,6 +20,7 @@ const config: StorybookConfig = {
           '@editora/react': path.resolve(__dirname, '../packages/react/src'),
           '@editora/plugins': path.resolve(__dirname, '../packages/plugins/src'),
           '@editora/themes': path.resolve(__dirname, '../packages/themes/src'),
+          '@editora/toast': path.resolve(__dirname, '../packages/editora-toast/src'),
         },
       }
     });

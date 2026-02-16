@@ -53,26 +53,59 @@
 
     <section>
         <div class="container">
-            <h2>Overview</h2>
-            <p>The Image plugin enables advanced image manipulation and management within the editor. Users can insert, resize, crop, adjust colors, add captions, and embed images from various sources with full control over placement and styling.</p>
+            <div class="docs-wrapper">
+                <aside class="docs-sidebar">
+                    <h3>Plugins</h3>
+                    <ul>
+                        <li><a href="index.html">All Plugins</a></li>
+                        <li><a href="media-manager.html">Media Manager</a></li>
+                        <li><a href="table.html">Tables</a></li>
+                        <li><a href="code-sample.html">Code Sample</a></li>
+                        <li><a href="checklist.html">Checklist</a></li>
+                        <li><a href="template.html">Templates</a></li>
+                        <li><a href="comments.html">Comments</a></li>
+                        <li><a href="image.html" class="active">Image Plugin</a></li>
+                        <li><a href="link.html">Link Manager</a></li>
+                        <li><a href="print.html">Print Export</a></li>
+                        <li><a href="preview.html">Preview Mode</a></li>
+                        <li><a href="history.html">History</a></li>
+                        <li><a href="spell-check.html">Spell Check</a></li>
+                        <li><a href="emojis.html">Emojis</a></li>
+                        <li><a href="special-characters.html">Special Characters</a></li>
+                        <li><a href="math.html">Math Equations</a></li>
+                        <li><a href="document-manager.html">Document Manager</a></li>
+                    </ul>
 
-            <h2>Features</h2>
-            <ul style="columns: 2; gap: 2rem;">
-                <li>✓ Image upload and insertion</li>
-                <li>✓ Drag-and-drop reordering</li>
-                <li>✓ Image resizing and cropping</li>
-                <li>✓ Color adjustment</li>
-                <li>✓ Image captions</li>
-                <li>✓ URL embedding</li>
-                <li>✓ Alt text and accessibility</li>
-                <li>✓ Gallery layouts</li>
-            </ul>
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="../playground.html">Live Playground</a></li>
+                        <li><a href="../toast-demo.html">Toast Demo</a></li>
+                        <li><a href="../docs/examples.html">Examples</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank">GitHub</a></li>
+                    </ul>
+                </aside>
 
-            <h2>Installation</h2>
-            <pre><code>npm install @editora/plugin-image</code></pre>
+                <main class="docs-content">
+                    <h2>Overview</h2>
+                    <p>The Image plugin enables advanced image manipulation and management within the editor. Users can insert, resize, crop, adjust colors, add captions, and embed images from various sources with full control over placement and styling.</p>
 
-            <h2>Basic Usage</h2>
-            <pre><code>import Editora from '@editora/core';
+                    <h2>Features</h2>
+                    <ul style="columns: 2; gap: 2rem;">
+                        <li>✓ Image upload and insertion</li>
+                        <li>✓ Drag-and-drop reordering</li>
+                        <li>✓ Image resizing and cropping</li>
+                        <li>✓ Color adjustment</li>
+                        <li>✓ Image captions</li>
+                        <li>✓ URL embedding</li>
+                        <li>✓ Alt text and accessibility</li>
+                        <li>✓ Gallery layouts</li>
+                    </ul>
+
+                    <h2>Installation</h2>
+                    <pre><code>npm install @editora/plugin-image</code></pre>
+
+                    <h2>Basic Usage</h2>
+                    <pre><code>import Editora from '@editora/core';
 import ImagePlugin from '@editora/plugin-image';
 
 const editor = new Editora('#editor');
@@ -81,46 +114,48 @@ editor.use(ImagePlugin, {
     maxSize: 5000000 // 5MB
 });</code></pre>
 
-            <h2>Image Management</h2>
-            <p>Work with images efficiently:</p>
-            <ol>
-                <li><strong>Upload:</strong> Click image icon or drag-drop images</li>
-                <li><strong>Resize:</strong> Drag handles or enter dimensions</li>
-                <li><strong>Crop:</strong> Use crop tool for precise framing</li>
-                <li><strong>Style:</strong> Add captions, borders, and alignment</li>
-            </ol>
+                    <h2>Image Management</h2>
+                    <p>Work with images efficiently:</p>
+                    <ol>
+                        <li><strong>Upload:</strong> Click image icon or drag-drop images</li>
+                        <li><strong>Resize:</strong> Drag handles or enter dimensions</li>
+                        <li><strong>Crop:</strong> Use crop tool for precise framing</li>
+                        <li><strong>Style:</strong> Add captions, borders, and alignment</li>
+                    </ol>
 
-            <h2>Configuration Options</h2>
-            <table style="width: 100%; border-collapse: collapse; margin: 2rem 0;">
-                <tr style="background: var(--gray-100);">
-                    <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-200);">Option</th>
-                    <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-200);">Type</th>
-                    <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-200);">Description</th>
-                </tr>
-                <tr>
-                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">uploadUrl</td>
-                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">string</td>
-                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">Server endpoint for image uploads</td>
-                </tr>
-                <tr style="background: var(--gray-50);">
-                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">maxSize</td>
-                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">number</td>
-                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">Maximum file size in bytes (default: 5MB)</td>
-                </tr>
-                <tr>
-                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">allowedTypes</td>
-                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">string[]</td>
-                    <td style="padding: 1rem; border: 1px solid var(--gray-200);">Allowed MIME types</td>
-                </tr>
-            </table>
+                    <h2>Configuration Options</h2>
+                    <table style="width: 100%; border-collapse: collapse; margin: 2rem 0;">
+                        <tr style="background: var(--gray-100);">
+                            <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-200);">Option</th>
+                            <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-200);">Type</th>
+                            <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-200);">Description</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 1rem; border: 1px solid var(--gray-200);">uploadUrl</td>
+                            <td style="padding: 1rem; border: 1px solid var(--gray-200);">string</td>
+                            <td style="padding: 1rem; border: 1px solid var(--gray-200);">Server endpoint for image uploads</td>
+                        </tr>
+                        <tr style="background: var(--gray-50);">
+                            <td style="padding: 1rem; border: 1px solid var(--gray-200);">maxSize</td>
+                            <td style="padding: 1rem; border: 1px solid var(--gray-200);">number</td>
+                            <td style="padding: 1rem; border: 1px solid var(--gray-200);">Maximum file size in bytes (default: 5MB)</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 1rem; border: 1px solid var(--gray-200);">allowedTypes</td>
+                            <td style="padding: 1rem; border: 1px solid var(--gray-200);">string[]</td>
+                            <td style="padding: 1rem; border: 1px solid var(--gray-200);">Allowed MIME types</td>
+                        </tr>
+                    </table>
 
-            <h2>API Methods</h2>
-            <ul>
-                <li><strong>insertImage(url):</strong> Insert image from URL</li>
-                <li><strong>resizeImage(width, height):</strong> Resize selected image</li>
-                <li><strong>cropImage(coords):</strong> Crop image to coordinates</li>
-                <li><strong>getImageUrl():</strong> Get URL of selected image</li>
-            </ul>
+                    <h2>API Methods</h2>
+                    <ul>
+                        <li><strong>insertImage(url):</strong> Insert image from URL</li>
+                        <li><strong>resizeImage(width, height):</strong> Resize selected image</li>
+                        <li><strong>cropImage(coords):</strong> Crop image to coordinates</li>
+                        <li><strong>getImageUrl():</strong> Get URL of selected image</li>
+                    </ul>
+                </main>
+            </div>
         </div>
     </section>
 

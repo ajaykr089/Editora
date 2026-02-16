@@ -111,11 +111,14 @@ pre {
     overflow-x: auto;
     margin: 1rem 0;
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.9em;
+    line-height: 1.4;
 }
 
 pre code {
     background: none;
     padding: 0;
+    color: inherit;
 }
 
 /* ============================================
