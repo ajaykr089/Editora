@@ -18,8 +18,7 @@
     "./css": "./dist/toast.css"
   },
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "keywords": [
     "toast",
@@ -39,7 +38,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ajaykr089/Editora.git",
+    "url": "git+https://github.com/ajaykr089/Editora.git",
     "directory": "packages/editora-toast"
   },
   "bugs": {
@@ -47,7 +46,7 @@
   },
   "homepage": "https://github.com/ajaykr089/Editora/tree/main/packages/editora-toast#readme",
   "scripts": {
-    "build": "vite build && vite build --config vite.umd.config.ts",
+    "build": "vite build && vite build --config vite.umd.config.ts && tsc --emitDeclarationOnly --outDir dist",
     "postbuild": "cp src/toast.css dist/",
     "dev": "vite build --watch",
     "clean": "rm -rf dist",
