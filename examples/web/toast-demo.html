@@ -1117,6 +1117,16 @@ toast.configure({
 
     <!-- Demo Scripts -->
     <script>
+        toast.success('Hello from CDN!');
+        const notification = toastPro.show({
+            message: 'File uploaded successfully!',
+            level: 'success',
+            icon: '✓',
+            actions: [
+                { label: 'View', onClick: () => console.log('View clicked') },
+                { label: 'Dismiss', onClick: () => notification.dismiss() }
+            ]
+        });
         // Initialize toast instance
         window.toastPro = new ToastManager({
             position: 'bottom-right',

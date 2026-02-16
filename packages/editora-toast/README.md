@@ -111,12 +111,23 @@ You can also use Editora Toast directly from a CDN without installing it via npm
   <script>
     // Now you can use the toast functions
     toast.success('Hello from CDN!');
-    toast.error('Something went wrong!');
+    toast.error('Something went wrong!', 1000);
     toast.info('This is an info message');
     toast.warning('This is a warning');
     
-    // Advanced usage
-    const notification = toast.show({
+    // Advanced usage (toastAdvanced, toastPro)
+    // global window.toastPro.show()
+    // global window.toastAdvanced.show()
+    const notification = toastAdvanced.show({
+      message: 'File uploaded successfully!',
+      level: 'success',
+      icon: '✓',
+      actions: [
+        { label: 'View', onClick: () => console.log('View clicked') },
+        { label: 'Dismiss', onClick: () => notification.dismiss() }
+      ]
+    });
+    const notification = toastPro.show({
       message: 'File uploaded successfully!',
       level: 'success',
       icon: '✓',
