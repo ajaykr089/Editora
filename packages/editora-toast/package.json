@@ -1,6 +1,6 @@
 {
   "name": "@editora/toast",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Advanced toast notification system with enterprise features, backward compatibility, and rich customization options",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -45,6 +45,10 @@
     "url": "https://github.com/ajaykr089/Editora/issues"
   },
   "homepage": "https://github.com/ajaykr089/Editora/tree/main/packages/editora-toast#readme",
+  "style": "dist/toast.css",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "vite build && vite build --config vite.umd.config.ts && tsc --emitDeclarationOnly --outDir dist",
     "postbuild": "cp src/toast.css dist/",
