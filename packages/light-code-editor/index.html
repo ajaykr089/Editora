@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Light Code Editor Demo</title>
-  <link rel="stylesheet" href="../packages/light-code-editor/dist/light-code-editor.css">
+  <link rel="stylesheet" href="dist/light-code-editor.css">
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -60,9 +60,17 @@
     .editor-container {
       border: 2px solid #e2e8f0;
       border-radius: 8px;
-      overflow: hidden;
+      overflow: auto;
       height: 400px;
       background: #f8fafc;
+    }
+
+    /* Ensure the editor element fills the container and is itself scrollable */
+    #editor {
+      height: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      overflow: auto;
     }
 
     .controls {
@@ -319,32 +327,32 @@
       <!-- Usage Example -->
       <div class="editor-section">
         <h2>Usage Example</h2>
-        <div class="code-snippet">
-import { createEditor, LineNumbersExtension, SyntaxHighlightingExtension } from '@editora/light-code-editor';
+        <pre class="code-snippet"><code>
+  import { createEditor, LineNumbersExtension, SyntaxHighlightingExtension } from '@editora/light-code-editor';
 
-const editor = createEditor(document.getElementById('editor'), {
-  value: '&lt;div class="hello"&gt;Hello World&lt;/div&gt;',
-  theme: 'dark',
-  extensions: [
-    new LineNumbersExtension(),
-    new SyntaxHighlightingExtension()
-  ]
-});
+  const editor = createEditor(document.getElementById('editor'), {
+    value: '&lt;div class="hello"&gt;Hello World&lt;/div&gt;',
+    theme: 'dark',
+    extensions: [
+      new LineNumbersExtension(),
+      new SyntaxHighlightingExtension()
+    ]
+  });
 
-// Get current content
-console.log(editor.getValue());
+  // Get current content
+  console.log(editor.getValue());
 
-// Listen for changes
-editor.on('change', (changes) => {
-  console.log('Content changed:', changes);
-});
-        </div>
+  // Listen for changes
+  editor.on('change', (changes) => {
+    console.log('Content changed:', changes);
+  });
+          </code></pre>
       </div>
     </div>
   </div>
 
   <script type="module">
-    import { createEditor, LineNumbersExtension, SyntaxHighlightingExtension, ThemeExtension, ReadOnlyExtension, SearchExtension, BracketMatchingExtension, CodeFoldingExtension } from '../packages/light-code-editor/dist/index.es.js';
+    import { createEditor, LineNumbersExtension, SyntaxHighlightingExtension, ThemeExtension, ReadOnlyExtension, SearchExtension, BracketMatchingExtension, CodeFoldingExtension } from './dist/index.es.js';
 
     // Sample content
     const sampleContent = {
@@ -406,7 +414,7 @@ editor.on('change', (changes) => {
 
   <script>
     /* Page script removed demo console.log */
-  </script>
+  <\/script>
 </body>
 </html>`,
       minimal: `<!DOCTYPE html>
@@ -522,31 +530,31 @@ editor.on('change', (changes) => {
 
     document.getElementById('toggle-line-numbers').addEventListener('click', () => {
       currentExtensions.lineNumbers = !currentExtensions.lineNumbers;
-      document.getElementById('toggle-line-numbers').textContent = \`Line Numbers \${currentExtensions.lineNumbers ? '✓' : '✗'}\`;
+      document.getElementById('toggle-line-numbers').textContent = `Line Numbers ${currentExtensions.lineNumbers ? '✓' : '✗'}`;
       createEditorInstance();
     });
 
     document.getElementById('toggle-syntax').addEventListener('click', () => {
       currentExtensions.syntax = !currentExtensions.syntax;
-      document.getElementById('toggle-syntax').textContent = \`Syntax \${currentExtensions.syntax ? '✓' : '✗'}\`;
+      document.getElementById('toggle-syntax').textContent = `Syntax ${currentExtensions.syntax ? '✓' : '✗'}`;
       createEditorInstance();
     });
 
     document.getElementById('toggle-search').addEventListener('click', () => {
       currentExtensions.search = !currentExtensions.search;
-      document.getElementById('toggle-search').textContent = \`Search \${currentExtensions.search ? '✓' : '✗'}\`;
+      document.getElementById('toggle-search').textContent = `Search ${currentExtensions.search ? '✓' : '✗'}`;
       createEditorInstance();
     });
 
     document.getElementById('toggle-brackets').addEventListener('click', () => {
       currentExtensions.brackets = !currentExtensions.brackets;
-      document.getElementById('toggle-brackets').textContent = \`Brackets \${currentExtensions.brackets ? '✓' : '✗'}\`;
+      document.getElementById('toggle-brackets').textContent = `Brackets ${currentExtensions.brackets ? '✓' : '✗'}`;
       createEditorInstance();
     });
 
     document.getElementById('toggle-folding').addEventListener('click', () => {
       currentExtensions.folding = !currentExtensions.folding;
-      document.getElementById('toggle-folding').textContent = \`Folding \${currentExtensions.folding ? '✓' : '✗'}\`;
+      document.getElementById('toggle-folding').textContent = `Folding ${currentExtensions.folding ? '✓' : '✗'}`;
       createEditorInstance();
     });
 
