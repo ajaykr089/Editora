@@ -14,7 +14,7 @@ Framework-agnostic core editor engine for Editora Rich Text Editor.
 ## 📦 Installation
 
 ```bash
-npm install @editora/core
+npm install @editora/core @editora/plugins @editora/themes @editora/react
 ```
 
 ## 🎯 Overview
@@ -36,7 +36,9 @@ The core package provides the fundamental editor engine that can be integrated w
 
 ```typescript
 import { createEditor, EditorConfig } from '@editora/core';
-
+import "@editora/themes/theme.css";
+OR
+import "@editora/themes/themes/default.css";
 // Create editor configuration
 const config: EditorConfig = {
   content: '<p>Hello World!</p>',
@@ -59,6 +61,9 @@ editor.mount(container);
 ```typescript
 import { createEditor } from '@editora/core';
 import { BoldPlugin, ItalicPlugin, HeadingPlugin } from '@editora/plugins';
+import "@editora/themes/theme.css";
+OR
+import "@editora/themes/themes/default.css";
 
 const editor = createEditor({
   plugins: [
@@ -209,7 +214,9 @@ Create custom plugins by extending the base Plugin class:
 
 ```typescript
 import { Plugin, Editor } from '@editora/core';
-
+import "@editora/themes/theme.css";
+OR
+import "@editora/themes/themes/default.css";
 class CustomPlugin extends Plugin {
   name = 'custom';
   

@@ -109,11 +109,11 @@ You can also use Editora Toast directly from a CDN without installing it via npm
   <script src="https://cdn.jsdelivr.net/npm/@editora/toast@latest/dist/index.umd.js"></script>
   
   <script>
-    // Now you can use the toast functions
-    toast.success('Hello from CDN!');
-    toast.error('Something went wrong!', 1000);
-    toast.info('This is an info message');
-    toast.warning('This is a warning');
+    // Now you can use the toast functions (legacy API supports an optional options object)
+    toast.success('Hello from CDN!', { theme: 'light', position: 'top-right' });
+    toast.error('Something went wrong!', { duration: 1000 });
+    toast.info('This is an info message', { theme: 'light', position: 'top-right' });
+    toast.warning('This is a warning', { theme: 'light', position: 'top-right' });
     
     // Advanced usage (toastAdvanced, toastPro)
     // global window.toastPro.show()
@@ -154,19 +154,20 @@ You can also use Editora Toast directly from a CDN without installing it via npm
 
 ```typescript
 import { toast } from '@editora/toast';
+import "@editora/toast/toast.css";
 
-// Simple notifications
-toast.success('File saved successfully!');
-toast.error('Failed to save file');
-toast.info('Info message');
-toast.warning('Warning message');
+// Simple notifications (migrated to optional advanced options)
+toast.success('File saved successfully!', { theme: 'light', position: 'top-right' });
+toast.error('Failed to save file', { theme: 'light', position: 'top-right' });
+toast.info('Info message', { theme: 'light', position: 'top-right' });
+toast.warning('Warning message', { theme: 'light', position: 'top-right' });
 ```
 
 ### Advanced Usage (v2.0.0 Features)
 
 ```typescript
 import { toastAdvanced as toast } from '@editora/toast';
-
+import "@editora/toast/toast.css";
 // Rich notifications with actions and progress
 const notification = toast.show({
   message: 'Document uploaded successfully!',
@@ -218,7 +219,7 @@ toast.group('file-operations', {
 
 ```typescript
 import { toastAdvanced as toast } from '@editora/toast';
-
+import "@editora/toast/toast.css";
 // Global configuration with all available options
 toast.configure({
   // Positioning
@@ -290,7 +291,7 @@ Editora Toast comes with 13 beautiful themes:
 
 ```typescript
 import { toastAdvanced as toast } from '@editora/toast';
-
+import "@editora/toast/toast.css";
 // Set global theme
 toast.configure({
   theme: 'glass'  // or 'neon', 'retro', 'ocean', etc.
@@ -374,7 +375,7 @@ Add interactive buttons to your toasts:
 
 ```typescript
 import { toastAdvanced as toast } from '@editora/toast';
-
+import "@editora/toast/toast.css";
 const notification = toast.show({
   message: 'Document saved successfully!',
   level: 'success',
@@ -407,7 +408,7 @@ Built-in progress bars with customizable display:
 
 ```typescript
 import { toastAdvanced as toast } from '@editora/toast';
-
+import "@editora/toast/toast.css";
 // Determinate progress
 const progressToast = toast.show({
   message: 'Processing files...',
@@ -446,7 +447,7 @@ Modify existing toasts dynamically:
 
 ```typescript
 import { toastAdvanced as toast } from '@editora/toast';
-
+import "@editora/toast/toast.css";
 // Create a loading toast
 const loadingToast = toast.loading('Connecting to server...');
 
@@ -477,7 +478,7 @@ Group related notifications together:
 
 ```typescript
 import { toastAdvanced as toast } from '@editora/toast';
-
+import "@editora/toast/toast.css";
 // Group file operations
 const files = ['document.pdf', 'image.jpg', 'data.json'];
 
@@ -513,7 +514,7 @@ Create interactive forms within toasts:
 
 ```typescript
 import { toastAdvanced as toast } from '@editora/toast';
-
+import "@editora/toast/toast.css";
 toast.show({
   message: 'How was your experience?',
   level: 'info',
@@ -548,7 +549,7 @@ toast.show({
 
 ```typescript
 import { toastAdvanced as toast } from '@editora/toast';
-
+import "@editora/toast/toast.css";
 const myPlugin = {
   name: 'my-plugin',
   install(manager) {
@@ -577,7 +578,7 @@ toast.show({
 
 ```typescript
 import { toastAdvanced as toast } from '@editora/toast';
-
+import "@editora/toast/toast.css";
 // Spring animation with custom physics
 toast.show({
   message: 'Spring animated toast!',
@@ -598,7 +599,7 @@ toast.show({
 
 ```typescript
 import { toastAdvanced as toast } from '@editora/toast';
-
+import "@editora/toast/toast.css";
 // Custom animation functions
 toast.show({
   message: 'Custom animated toast!',
@@ -642,7 +643,7 @@ toast.show({
 
 ```typescript
 import { toastAdvanced as toast } from '@editora/toast';
-
+import "@editora/toast/toast.css";
 // Set default animation for all toasts
 toast.configure({
   animation: {
@@ -683,10 +684,10 @@ toast.show({
 
 ```typescript
 import { toastAdvanced as toast } from '@editora/toast';
-
+import "@editora/toast/toast.css";
 // Listen for editor events
 toast.onEditorEvent('spellcheck-error', (error) => {
-  toast.error(`Spelling error: ${error.word}`);
+  toast.error(`Spelling error: ${error.word}`, { theme: 'light', position: 'top-right' });
 });
 
 // Trigger editor events
@@ -855,11 +856,12 @@ The v2.0.0 release introduces powerful new features while maintaining **full bac
 ```typescript
 // v1.x (still works)
 import { toast } from '@editora/toast';
-toast.success('Hello World');
+import "@editora/toast/toast.css";
+toast.success('Hello World', { theme: 'light', position: 'top-right' });
 
 // v2.0.0 advanced features
 import { toastAdvanced as toast } from '@editora/toast';
-
+import "@editora/toast/toast.css";
 // Promise lifecycle toasts
 toast.promise(fetchData(), {
   loading: 'Loading...',

@@ -45,9 +45,10 @@ For advanced features, use the new import:
 ```typescript
 // Old way (still works)
 import { toast } from '@editora/toast';
-
+import "@editora/toast/toast.css";
 // New way for advanced features
 import { toastAdvanced as toast } from '@editora/toast';
+import "@editora/toast/toast.css";
 ```
 
 ### Step 3: Enable Advanced Features
@@ -214,7 +215,7 @@ The library now safely handles server-side rendering environments.
 ### Common Issues
 
 **Toasts not showing?**
-- Check that CSS is loaded: `import '@editora/toast/css'`
+- Check that CSS is loaded: `import "@editora/toast/toast.css"`
 - Verify DOM is available (not SSR)
 
 **Styling issues?**

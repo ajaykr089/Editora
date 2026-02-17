@@ -118,6 +118,9 @@ Everything is a plugin - from basic formatting to advanced features. This ensure
 
 ```typescript
 import { EditoraEditor } from '@editora/react';
+import "@editora/themes/theme.css";
+OR
+import "@editora/themes/themes/default.css";
 import {
   BoldPlugin,
   ItalicPlugin,

@@ -32,7 +32,9 @@
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js"
     },
-    "./styles": "./src/index.css"
+    "./theme.css": "./src/index.css",
+    "./themes/*": "./src/themes/*.css",
+    "./themes/default.css": "./src/themes/default.css"
   },
   "files": [
     "dist",

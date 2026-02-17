@@ -24,7 +24,30 @@
     <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
     <title>Editora - Verify Native Plugins</title>
     <link rel="stylesheet" href="assets/css/style.css">
-<body>
+  </head>
+  <body>
+    <!-- Header Navigation -->
+    <header>
+      <div class="container">
+        <nav>
+          <a href="index.html" class="logo">
+            <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
+          </a>
+          <button class="menu-toggle">☰</button>
+          <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="docs/installation.html">Docs</a></li>
+            <li><a href="docs/features.html">Features</a></li>
+            <li><a href="plugins/index.html">Plugins</a></li>
+            <li><a href="docs/api.html">API</a></li>
+            <li><a href="toast-demo.html">Toast Demo</a></li>
+            <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
   <div class="container">
     <!-- Header -->
     <div class="header">
@@ -117,8 +140,7 @@
       <h2>📚 Usage Examples</h2>
       
       <h3 style="margin: 20px 0 10px; color: #667eea;">1. Vanilla HTML</h3>
-      <div class="code-block">
-<span class="comment">&lt;!-- Just include the script (Full bundle for all plugins) --&gt;</span>
+      <pre class="code-block"><code><span class="comment">&lt;!-- Just include the script (Full bundle for all plugins) --&gt;</span>
 <span class="highlight">&lt;script</span> src="packages/core/dist/webcomponent.min.js"<span class="highlight">&gt;&lt;/script&gt;</span>
 
 <span class="comment">&lt;!-- Use the custom element --&gt;</span>
@@ -128,12 +150,10 @@
   toolbar-items="bold italic underline | link table"
 <span class="highlight">&gt;</span>
   &lt;p&gt;Your content here&lt;/p&gt;
-<span class="highlight">&lt;/editora-editor&gt;</span>
-      </div>
+<span class="highlight">&lt;/editora-editor&gt;</span></code></pre>
 
       <h3 style="margin: 20px 0 10px; color: #667eea;">2. React (No React Import Needed!)</h3>
-      <div class="code-block">
-<span class="comment">// React treats it as a native HTML element</span>
+      <pre class="code-block"><code><span class="comment">// React treats it as a native HTML element</span>
 <span class="highlight">function</span> App() {
   <span class="highlight">return</span> (
     &lt;editora-editor
@@ -144,12 +164,10 @@
       &lt;p&gt;Content&lt;/p&gt;
     &lt;/rich-text-editor&gt;
   );
-}
-      </div>
+}</code></pre>
 
       <h3 style="margin: 20px 0 10px; color: #667eea;">3. Vue</h3>
-      <div class="code-block">
-<span class="highlight">&lt;template&gt;</span>
+      <pre class="code-block"><code><span class="highlight">&lt;template&gt;</span>
   &lt;editora-editor
     height=<span class="highlight">"400"</span>
     plugins=<span class="highlight">"bold italic underline"</span>
@@ -157,14 +175,11 @@
   &gt;
     &lt;p&gt;Content&lt;/p&gt;
   &lt;/editora-editor&gt;
-<span class="highlight">&lt;/template&gt;</span>
-      </div>
+<span class="highlight">&lt;/template&gt;</span></code></pre>
 
       <h3 style="margin: 20px 0 10px; color: #667eea;">4. CDN Usage</h3>
-      <div class="code-block">
-<span class="highlight">&lt;script</span> src="https://unpkg.com/@editora/core@latest/dist/webcomponent.min.js"<span class="highlight">&gt;&lt;/script&gt;</span>
-<span class="highlight">&lt;editora-editor</span> height="400"<span class="highlight">&gt;&lt;/editora-editor&gt;</span>
-      </div>
+      <pre class="code-block"><code><span class="highlight">&lt;script</span> src="https://unpkg.com/@editora/core@latest/dist/webcomponent.min.js"<span class="highlight">&gt;&lt;/script&gt;</span>
+    <span class="highlight">&lt;editora-editor</span> height="400"<span class="highlight">&gt;&lt;/editora-editor&gt;</span></code></pre>
     </div>
 
     <!-- Footer -->
@@ -301,5 +316,54 @@
     console.log('%c🔌 39 Native Plugins Loaded', 'font-size: 14px; color: #8b5cf6;');
     console.log('%c🌐 Framework Agnostic - Works Everywhere!', 'font-size: 14px; color: #f59e0b;');
   </script>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <div class="footer-section">
+          <h5>📚 Documentation</h5>
+          <ul>
+            <li><a href="docs/installation.html">Installation</a></li>
+            <li><a href="docs/features.html">Features</a></li>
+            <li><a href="docs/api.html">API Reference</a></li>
+            <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+            <li><a href="docs/custom-plugins.html">Custom Plugins</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h5>🔌 Plugins</h5>
+          <ul>
+            <li><a href="plugins/index.html">All Plugins</a></li>
+            <li><a href="plugins/media-manager.html">Media Manager</a></li>
+            <li><a href="plugins/table.html">Tables</a></li>
+            <li><a href="plugins/code-sample.html">Code Samples</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h5>🔗 Links</h5>
+          <ul>
+            <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+            <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+            <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+            <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h5>ℹ️ About</h5>
+          <ul>
+            <li><a href="docs/about.html">About Editora</a></li>
+            <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+            <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+            <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024-2026 Editora. Built with ❤️ by Ajay Kumar. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+      </div>
+    </div>
+  </footer>
 </body>
 </html>

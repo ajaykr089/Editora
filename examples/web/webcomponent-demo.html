@@ -24,15 +24,31 @@
     <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
     <title>Editora - Webcomponent Demo</title>
     <link rel="stylesheet" href="assets/css/style.css">
+</head>
 <body>
-  <header style="text-align: center; padding: 20px; background: white; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <a href="index.html" style="text-decoration: none; color: inherit;">
-      <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
-      <span style="font-size: 24px; font-weight: bold; color: #333;">Editora</span>
-    </a>
-  </header>
-  
-  <h1>🎉 Editora Web Component - Production Ready!</h1>
+    <!-- Header Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">
+                    <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
+                </a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="docs/installation.html">Docs</a></li>
+                    <li><a href="docs/features.html">Features</a></li>
+                    <li><a href="plugins/index.html">Plugins</a></li>
+                    <li><a href="docs/api.html">API</a></li>
+                    <li><a href="toast-demo.html">Toast Demo</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+      <h1>🎉 Editora Web Component - Production Ready!</h1>
   
   <div class="stats">
     <div class="stat-item">
@@ -45,7 +61,7 @@
     </div>
     <div class="stat-item">
       <div class="label">Native Plugins</div>
-      <div class="value">29</div>
+      <div class="value">39</div>
     </div>
     <div class="stat-item">
       <div class="label">Framework Deps</div>
@@ -58,8 +74,7 @@
     <h2>1️⃣ Basic Usage (TinyMCE-Style)</h2>
     <p>Simple drop-in replacement with zero configuration:</p>
     
-    <div class="code-block">
-      <code>&lt;!-- Core Bundle (~56KB) - Recommended --&gt;
+    <pre class="code-block"><code>&lt;!-- Core Bundle (~56KB) - Recommended --&gt;
 &lt;script src="dist/webcomponent-core.min.js"&gt;&lt;/script&gt;
 
 &lt;!-- Full Bundle (~60KB + lazy chunks) - All plugins --&gt;
@@ -67,12 +82,11 @@
 
 &lt;editora-editor height="400"&gt;
   &lt;p&gt;Start typing...&lt;/p&gt;
-&lt;/editora-editor&gt;</code>
-    </div>
+&lt;/editora-editor&gt;</code></pre>
     
     <editora-editor id="editor1" height="400" statusbar="true">
       <p><strong>Welcome to Editora!</strong></p>
-      <p>This is a <em>framework-agnostic</em> rich text editor with <mark style="background: yellow;">29 native plugins</mark>.</p>
+      <p>This is a <em>framework-agnostic</em> rich text editor with <mark style="background: yellow;">39 native plugins</mark>.</p>
       <p>Try these features:</p>
       <ul>
         <li>Bold, italic, underline formatting</li>
@@ -97,15 +111,13 @@
     <h2>2️⃣ Custom Configuration</h2>
     <p>Configure via attributes or JavaScript API:</p>
     
-    <div class="code-block">
-      <code>&lt;rich-text-editor
+    <pre class="code-block"><code>&lt;rich-text-editor
   height="300"
   theme="dark"
   placeholder="Start writing..."
   toolbar="undo redo | bold italic | link image"
   plugins="bold italic underline link image"
-&gt;&lt;/rich-text-editor&gt;</code>
-    </div>
+&gt;&lt;/rich-text-editor&gt;</code></pre>
     
     <editora-editor 
       id="editor2"
@@ -128,16 +140,14 @@
     <h2>3️⃣ JavaScript API (TinyMCE-Style)</h2>
     <p>Programmatic control via the Editora global object:</p>
     
-    <div class="code-block">
-      <code>// Get editor API
+    <pre class="code-block"><code>// Get editor API
 const editor = document.querySelector('#editor3').getAPI();
 
 // Or use TinyMCE-style init
 const editor = Editora.init('#editor3', {
   height: 400,
   plugins: 'bold italic link'
-});</code>
-    </div>
+});</code></pre>
     
     <editora-editor id="editor3" height="250" statusbar="true">
       <p>Content controlled via JavaScript API</p>
@@ -196,7 +206,7 @@ const editor = Editora.init('#editor3', {
       </div>
       
       <div class="feature-card">
-        <h4>🔌 29 Native Plugins</h4>
+        <h4>🔌 39 Native Plugins</h4>
         <p>All plugins are native TypeScript with zero React deps</p>
       </div>
       
@@ -219,17 +229,65 @@ const editor = Editora.init('#editor3', {
 
   <!-- Available Plugins -->
   <div class="demo-section">
-    <h2>🔌 Available Plugins (29 Total)</h2>
+    <h2>🔌 Available Plugins (39 Total)</h2>
     
-    <div class="code-block">
-      <code id="plugin-list">Loading plugins...</code>
-    </div>
+    <pre class="code-block"><code id="plugin-list">Loading plugins...</code></pre>
   </div>
 
-  <!-- Load the editor script (Core Bundle - Optimized) -->
-  <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.js"></script>
+    <!-- Load the editor script (Core Bundle - Optimized) -->
+    <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.js"></script>
   
-  <script>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div class="footer-links">
+          <div class="footer-section">
+            <h5>📚 Documentation</h5>
+            <ul>
+              <li><a href="docs/installation.html">Installation</a></li>
+              <li><a href="docs/features.html">Features</a></li>
+              <li><a href="docs/api.html">API Reference</a></li>
+              <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+              <li><a href="docs/custom-plugins.html">Custom Plugins</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h5>🔌 Plugins</h5>
+            <ul>
+              <li><a href="plugins/index.html">All Plugins</a></li>
+              <li><a href="plugins/media-manager.html">Media Manager</a></li>
+              <li><a href="plugins/table.html">Tables</a></li>
+              <li><a href="plugins/code-sample.html">Code Samples</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h5>🔗 Links</h5>
+            <ul>
+              <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+              <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+              <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+              <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h5>ℹ️ About</h5>
+            <ul>
+              <li><a href="docs/about.html">About Editora</a></li>
+              <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+              <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+              <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2024-2026 Editora. Built with ❤️ by Ajay Kumar. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
     // Wait for DOM and editor to load
     window.addEventListener('DOMContentLoaded', () => {
       console.log('Editora loaded:', window.Editora);

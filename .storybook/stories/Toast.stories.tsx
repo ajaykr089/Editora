@@ -115,21 +115,21 @@ const ToastDemo = ({
           <div
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
-            <button onClick={() => toast.info("This is an info message")}>
+            <button onClick={() => toast.info("This is an info message", { theme: theme as any, position: position as any, rtl, swipeDirection: swipeDirection as any })}>
               Info Toast
             </button>
             <button
-              onClick={() => toast.success("Operation completed successfully!")}
+              onClick={() => toast.success("Operation completed successfully!", { theme: theme as any, position: position as any, rtl, swipeDirection: swipeDirection as any })}
             >
               Success Toast
             </button>
-            <button onClick={() => toast.error("Something went wrong!")}>
+            <button onClick={() => toast.error("Something went wrong!", { theme: theme as any, position: position as any, rtl, swipeDirection: swipeDirection as any })}>
               Error Toast
             </button>
-            <button onClick={() => toastAdvanced.warning("This is a warning")}>
+            <button onClick={() => toastAdvanced.warning("This is a warning", { theme: theme as any, position: position as any, rtl, swipeDirection: swipeDirection as any })}>
               Warning Toast
             </button>
-            <button onClick={() => toastAdvanced.loading("Loading content...")}>
+            <button onClick={() => toastAdvanced.loading("Loading content...", { theme: theme as any, position: position as any, rtl, swipeDirection: swipeDirection as any })}>
               Loading Toast
             </button>
           </div>
@@ -647,7 +647,7 @@ const ToastDemo = ({
             <button
               onClick={() => {
                 toastAdvanced.configure({ duration: 2000 });
-                toast.info("Fast duration set (2s)");
+                toast.info("Fast duration set (2s)", { theme: theme as any, position: position as any, rtl, swipeDirection: swipeDirection as any });
               }}
             >
               Fast Duration (2s)
@@ -656,7 +656,7 @@ const ToastDemo = ({
             <button
               onClick={() => {
                 toastAdvanced.configure({ duration: 10000 });
-                toast.info("Slow duration set (10s)");
+                toast.info("Slow duration set (10s)", { theme: theme as any, position: position as any, rtl, swipeDirection: swipeDirection as any });
               }}
             >
               Slow Duration (10s)
@@ -665,7 +665,7 @@ const ToastDemo = ({
             <button
               onClick={() => {
                 toastAdvanced.configure({ maxVisible: 2 });
-                toast.info("Max visible set to 2");
+                toast.info("Max visible set to 2", { theme: theme as any, position: position as any, rtl, swipeDirection: swipeDirection as any });
               }}
             >
               Max Visible: 2
@@ -678,7 +678,7 @@ const ToastDemo = ({
                   maxVisible: 5,
                   position: "bottom-right",
                 });
-                toast.info("Configuration reset");
+                toast.info("Configuration reset", { theme: theme as any, position: position as any, rtl, swipeDirection: swipeDirection as any });
               }}
             >
               Reset Config
@@ -731,7 +731,7 @@ const ToastDemo = ({
                 };
 
                 toastAdvanced.use(analyticsPlugin);
-                toast.success("Analytics plugin installed! Check console.");
+                toast.success("Analytics plugin installed! Check console.", { theme: theme as any, position: position as any, rtl, swipeDirection: swipeDirection as any });
               }}
             >
               Install Analytics Plugin
@@ -794,11 +794,11 @@ export const BasicToasts: Story = {
     <div style={{ padding: "20px" }}>
       <h2>Basic Toast Types</h2>
       <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-        <button onClick={() => toast.info("Info message")}>Info</button>
-        <button onClick={() => toast.success("Success message")}>Success</button>
-        <button onClick={() => toast.error("Error message")}>Error</button>
-        <button onClick={() => toastAdvanced.warning("Warning message")}>Warning</button>
-        <button onClick={() => toastAdvanced.loading("Loading message")}>Loading</button>
+        <button onClick={() => toast.info("Info message", { theme: 'light', position: 'bottom-right' })}>Info</button>
+        <button onClick={() => toast.success("Success message", { theme: 'light', position: 'bottom-right' })}>Success</button>
+        <button onClick={() => toast.error("Error message", { theme: 'light', position: 'bottom-right' })}>Error</button>
+        <button onClick={() => toastAdvanced.warning("Warning message", { theme: 'light', position: 'bottom-right' })}>Warning</button>
+        <button onClick={() => toastAdvanced.loading("Loading message", { theme: 'light', position: 'bottom-right' })}>Loading</button>
       </div>
     </div>
   ),

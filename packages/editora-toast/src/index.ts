@@ -2,31 +2,67 @@
 // Backward compatible with the original API
 
 import { ToastManager } from './core/ToastManager';
-import { ToastOptions, ToastInstance, ToastConfig, ToastPlugin, ToastPromiseOptions } from './core/types';
+import { ToastOptions, ToastInstance, ToastConfig, ToastPlugin, ToastPromiseOptions, ToastTheme, ToastPosition } from './core/types';
 
 // Legacy types for backward compatibility
-export type ToastLevel = 'info' | 'success' | 'error';
+export type ToastLevel = 'info' | 'success' | 'error' | 'warning' | 'loading';
 
 // Create the global toast manager instance
 const manager = new ToastManager();
 
 // Legacy API - maintains exact same interface
-export interface ToastOptionsLegacy {
+// Legacy options should be compatible with the advanced ToastOptions shape
+export interface ToastOptionsLegacy extends ToastOptions {
   message: string;
-  duration?: number;
-  level?: ToastLevel;
 }
 
-function showLegacy(options: ToastOptionsLegacy) {
+function showLegacy(options: ToastOptions) {
   if (typeof document === 'undefined') return { dismiss: () => {} };
   return manager.show(options);
+}
+// Normalize legacy arguments to the new ToastOptions shape.
+function normalizeLegacyArgs(
+  message: string,
+  optionsOrDuration?: Partial<ToastOptions> | number | null,
+  theme?: ToastTheme,
+  position?: ToastPosition
+): 
+ToastOptions {
+  const defaults = { position: 'top-right' as ToastPosition, theme: 'light' as ToastTheme };
+
+  let opts: Partial<ToastOptions> = {};
+
+  if (optionsOrDuration && typeof optionsOrDuration === 'object') {
+    opts = { ...(optionsOrDuration as Partial<ToastOptions>) };
+  } else if (typeof optionsOrDuration === 'number') {
+    opts.duration = optionsOrDuration;
+  }
+
+  if (theme) opts.theme = theme;
+  if (position) opts.position = position;
+
+  return {
+    message,
+    ...opts,
+    duration: opts.duration,
+    level: (opts.level || undefined) as any,
+    position: (opts.position as ToastPosition) || defaults.position,
+    theme: (opts.theme as ToastTheme) || defaults.theme
+  } as ToastOptions;
 }
 
 // Legacy exports
 export const toast = {
-  info: (msg: string, duration?: number) => showLegacy({ message: msg, level: 'info', duration }),
-  success: (msg: string, duration?: number) => showLegacy({ message: msg, level: 'success', duration }),
-  error: (msg: string, duration?: number) => showLegacy({ message: msg, level: 'error', duration })
+  info: (msg: string, optionsOrDuration?: Partial<ToastOptions> | number, theme?: ToastTheme, position?: ToastPosition) =>
+    showLegacy({ ...normalizeLegacyArgs(msg, optionsOrDuration, theme, position), level: 'info' }),
+  success: (msg: string, optionsOrDuration?: Partial<ToastOptions> | number, theme?: ToastTheme, position?: ToastPosition) =>
+    showLegacy({ ...normalizeLegacyArgs(msg, optionsOrDuration, theme, position), level: 'success' }),
+  error: (msg: string, optionsOrDuration?: Partial<ToastOptions> | number, theme?: ToastTheme, position?: ToastPosition) =>
+    showLegacy({ ...normalizeLegacyArgs(msg, optionsOrDuration, theme, position), level: 'error' }),
+  warning: (msg: string, optionsOrDuration?: Partial<ToastOptions> | number, theme?: ToastTheme, position?: ToastPosition) =>
+    showLegacy({ ...normalizeLegacyArgs(msg, optionsOrDuration, theme, position), level: 'warning' }),
+  loading: (msg: string, optionsOrDuration?: Partial<ToastOptions> | number, theme?: ToastTheme, position?: ToastPosition) =>
+    showLegacy({ ...normalizeLegacyArgs(msg, optionsOrDuration, theme, position), level: 'loading' })
 };
 
 export default toast;

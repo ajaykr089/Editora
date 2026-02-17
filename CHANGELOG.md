@@ -163,7 +163,9 @@ npm install @editora/react @editora/core @editora/plugins @editora/themes
 ```tsx
 import { EditoraEditor } from '@editora/react';
 import { createBoldPlugin, createItalicPlugin } from '@editora/plugins';
-import '@editora/themes/styles';
+import "@editora/themes/theme.css";
+OR
+import "@editora/themes/themes/default.css";
 
 function App() {
   return (

@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useEffect, useRef, useState } from "react";
 import { EditoraEditor } from "@editora/react";
-import "@editora/themes/themes/default.css";
+// import "@editora/themes/themes/default.css";
 
 // Import the Web Component build
-import "../../packages/core/dist/webcomponent.esm.js";
+// import "../../packages/core/dist/webcomponent.esm.js";
 
 // Import native plugins
 import {

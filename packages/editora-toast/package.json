@@ -15,7 +15,7 @@
       "require": "./dist/index.cjs.js",
       "browser": "./dist/index.umd.js"
     },
-    "./css": "./dist/toast.css"
+    "./toast.css": "./dist/toast.css"
   },
   "files": [
     "dist"

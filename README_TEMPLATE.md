@@ -59,7 +59,9 @@ npm install @editora/core @editora/plugins
 
 ```jsx
 import { EditoraEditor } from '@editora/react';
-import '@editora/themes/default.css';
+import "@editora/themes/theme.css";
+OR
+import "@editora/themes/themes/default.css";
 
 function MyEditor() {
   return (

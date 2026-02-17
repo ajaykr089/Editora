@@ -35,7 +35,9 @@ The themes package provides a comprehensive styling system using CSS variables, 
 ### Basic Usage
 
 ```tsx
-import '@editora/themes/styles';
+import "@editora/themes/theme.css";
+OR
+import "@editora/themes/themes/default.css";
 import { EditoraEditor } from '@editora/react';
 
 function App() {
@@ -46,7 +48,9 @@ function App() {
 ### With Theme Toggle
 
 ```tsx
-import '@editora/themes/styles';
+import "@editora/themes/theme.css";
+OR
+import "@editora/themes/themes/default.css";
 import { EditoraEditor } from '@editora/react';
 import { useState } from 'react';
 
@@ -68,7 +72,9 @@ function App() {
 ### Auto Theme Detection
 
 ```tsx
-import '@editora/themes/styles';
+import "@editora/themes/theme.css";
+OR
+import "@editora/themes/themes/default.css";
 import { EditoraEditor } from '@editora/react';
 
 function App() {
@@ -219,7 +225,9 @@ All theme colors and sizes use CSS variables for easy customization.
 
 ```css
 /* custom-theme.css */
-@import '@editora/themes/styles';
+import "@editora/themes/theme.css";
+OR
+import "@editora/themes/themes/default.css";
 
 :root {
   /* Brand colors */

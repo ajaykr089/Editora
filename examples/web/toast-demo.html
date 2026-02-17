@@ -641,10 +641,10 @@ npm install @editora/toast
 
 // Basic usage
 import { toast } from '@editora/toast';
-
-toast.success('Welcome to Editora Toast!');
-toast.error('Something went wrong!');
-toast.info('Here is some information');</code></pre>
+import "@editora/toast/toast.css";
+toast.success('Welcome to Editora Toast!', { theme: 'light', position: 'top-right' });
+toast.error('Something went wrong!', { theme: 'light', position: 'top-right' });
+toast.info('Here is some information', { theme: 'light', position: 'top-right' });</code></pre>
                     </div>
                 </div>
             </div>
@@ -672,13 +672,14 @@ toast.info('Here is some information');</code></pre>
                     <h2>💻 Developer Friendly</h2>
                     <div class="code-example light">
                         <pre><code>// Simple API - Just call the method
-toast.info('This is an info message');
-toast.success('Operation completed!');
-toast.warning('Please check your input');
-toast.error('Failed to save data');
+toast.info('This is an info message', { theme: 'light', position: 'top-right' });
+toast.success('Operation completed!', { theme: 'light', position: 'top-right' });
+toast.warning('Please check your input', { theme: 'light', position: 'top-right' });
+toast.error('Failed to save data', { theme: 'light', position: 'top-right' });
 
 // Backward compatible with v1.x
-import { toast } from '@editora/toast';</code></pre>
+import { toast } from '@editora/toast';
+import "@editora/toast/toast.css";</code></pre>
                     </div>
 
                     <div class="feature-highlight">
@@ -1118,6 +1119,7 @@ toast.configure({
     <!-- Demo Scripts -->
     <script>
         toast.success('Hello from CDN!');
+        toast.success('Hello from CDN!', { theme: 'light', position: 'top-right' });
         const notification = toastPro.show({
             message: 'File uploaded successfully!',
             level: 'success',
@@ -2007,5 +2009,6 @@ toast.configure({
             window.toastPro.success(themeMessages[themeName] || `🎭 Switched to ${themeName} theme`);
         };
     </script>
+    <script src="assets/js/main.js"></script>
 </body>
 </html>

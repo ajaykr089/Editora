@@ -103,7 +103,7 @@
 
                             <h4>For React Projects</h4>
                             <p>Install the React integration package:</p>
-                            <pre><code>npm install @editora/react react react-dom</code></pre>
+                            <pre><code>npm install @editora/react, @editora/plugins react react-dom</code></pre>
 
                             <h4>Quick Start</h4>
                             <pre><code class="language-javascript">import { Editor } from '@editora/core';
@@ -115,8 +115,10 @@ const editor = new Editor({
 
                             <h4>With React</h4>
                             <pre><code class="language-jsx">
-                                import { EditoraEditor } from '@editora/react';
-                                import "@editora/themes/themes/default.css";
+import { EditoraEditor } from '@editora/react';
+import "@editora/themes/theme.css";
+OR
+import "@editora/themes/themes/default.css";
 import {
   BoldPlugin,
   ItalicPlugin,

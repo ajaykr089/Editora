@@ -14,7 +14,7 @@ Comprehensive plugin collection for Editora Rich Text Editor with 40+ plugins fo
 ## 📦 Installation
 
 ```bash
-npm install @editora/plugins @editora/core
+npm install @editora/plugins @editora/core @editora/themes
 ```
 
 ## 🎯 Overview
@@ -84,7 +84,9 @@ import {
   UnderlinePlugin,
   StrikethroughPlugin
 } from '@editora/plugins';
-
+import "@editora/themes/theme.css";
+OR
+import "@editora/themes/themes/default.css";
 const plugins = [
   BoldPlugin(),
   ItalicPlugin(),

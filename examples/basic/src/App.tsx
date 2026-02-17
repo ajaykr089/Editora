@@ -10,7 +10,7 @@ import {
   LinkPlugin,
   HistoryPlugin
 } from '@editora/plugins';
-import '@editora/themes/styles';
+import "@editora/themes/theme.css";
 import './App.css';
 
 function App() {

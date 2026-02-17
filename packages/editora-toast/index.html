@@ -90,12 +90,13 @@
             <button onclick="showBasic('success')">Success Toast</button>
             <button onclick="showBasic('error')">Error Toast</button>
         </div>
-        <pre><code>// Original API (still works)
-import { toast } from '@editora/toast';
+        <pre><code>// Original API (still works) — now accepts an optional advanced `options` object
+    import { toast } from '@editora/toast';
+    import "@editora/toast/toast.css";
 
-toast.info('Info message');
-toast.success('Success!');
-toast.error('Error occurred');</code></pre>
+    toast.info('Info message', { theme: 'light', position: 'top-right' });
+    toast.success('Success!', { theme: 'light', position: 'top-right' });
+    toast.error('Error occurred', { theme: 'light', position: 'top-right' });</code></pre>
     </div>
 
     <!-- Advanced Toasts -->
@@ -318,373 +319,257 @@ toast.show({
 });</code></pre>
     </div>
 
-    <script type="module" src="dist/index.esm.js"></script>
+    <script src="dist/index.umd.js"></script>
     <script>
-        // Wait for toast library to be ready
-        window.addEventListener('toastReady', (event) => {
-            console.log('Toast library ready:', event.detail);
-
-            // Debug: Check if globals are available
+        // Initialize demo helpers once the toast library is available.
+        const initToastDemo = (event) => {
+            console.log('Toast library ready:', event && event.detail ? event.detail : { toast: window.toast });
             console.log('Toast globals:', { toast: window.toast, toastPro: window.toastPro, toastAdvanced: window.toastAdvanced });
 
-        // Theme toggle
-        window.toggleTheme = () => {
-            const isDark = document.body.dataset.theme === 'dark';
-            document.body.dataset.theme = isDark ? 'light' : 'dark';
-            window.toastPro.configure({ theme: isDark ? 'light' : 'dark' });
-        };
+            // Provide a couple of initial toasts
+            if (window.toast && window.toast.success) {
+                window.toast.success('Hello from local UMD demo!');
+                window.toast.success('Hello from local UMD demo!', { theme: 'light', position: 'top-right' });
+            }
 
-        // Basic toasts (backward compatible)
-        window.showBasic = (level) => {
-            window.toast[level](`${level.charAt(0).toUpperCase() + level.slice(1)} message`);
-        };
+            // Theme toggle
+            window.toggleTheme = () => {
+                const isDark = document.body.dataset.theme === 'dark';
+                document.body.dataset.theme = isDark ? 'light' : 'dark';
+                window.toastPro && window.toastPro.configure({ theme: isDark ? 'light' : 'dark' });
+            };
 
-        // Rich toast
-        window.showRichToast = () => {
-            window.toastPro.show({
-                message: 'Document saved successfully!',
-                level: 'success',
-                icon: '💾',
-                actions: [
-                    { label: 'View Document', onClick: () => alert('Viewing document...') },
-                    { label: 'Share', onClick: () => alert('Sharing...') }
-                ]
-            });
-        };
-
-        // Progress toast
-        window.showProgressToast = () => {
-            const toast = window.toastPro.show({
-                message: 'Processing...',
-                level: 'loading',
-                progress: { value: 0, showPercentage: true }
-            });
-
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 10;
-                window.toastPro.update(toast.id, {
-                    progress: { value: progress, showPercentage: true },
-                    message: `Processing... ${progress}%`
-                });
-
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        window.toastPro.update(toast.id, {
-                            message: 'Complete!',
-                            level: 'success',
-                            progress: undefined
-                        });
-                    }, 500);
+            // Basic toasts (backward compatible)
+            window.showBasic = (level) => {
+                if (window.toast && window.toast[level]) {
+                    window.toast[level](`${level.charAt(0).toUpperCase() + level.slice(1)} message`, { theme: 'light', position: 'top-right' });
                 }
-            }, 200);
-        };
+            };
 
-        // Custom render
-        window.showCustomToast = () => {
-            window.toastPro.show({
-                render: () => {
-                    const div = document.createElement('div');
-                    div.innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 20px;">🎨</span>
-                            <div>
-                                <strong>Custom Toast</strong>
-                                <br>
-                                <small>Rendered with custom function</small>
-                            </div>
-                        </div>
-                    `;
-                    return div;
-                },
-                level: 'custom'
-            });
-        };
-
-        // Grouped toasts
-        window.showGroupedToast = () => {
-            window.toastPro.group('upload-group', {
-                message: 'Upload 1 of 3 complete',
-                level: 'success'
-            });
-
-            setTimeout(() => {
-                window.toastPro.group('upload-group', {
-                    message: 'Upload 2 of 3 complete',
-                    level: 'success'
+            // Rich toast
+            window.showRichToast = () => {
+                window.toastPro && window.toastPro.show({
+                    message: 'Document saved successfully!',
+                    level: 'success',
+                    icon: '💾',
+                    actions: [
+                        { label: 'View Document', onClick: () => alert('Viewing document...') },
+                        { label: 'Share', onClick: () => alert('Sharing...') }
+                    ]
                 });
-            }, 1000);
+            };
 
-            setTimeout(() => {
-                window.toastPro.group('upload-group', {
-                    message: 'All uploads complete!',
-                    level: 'success'
+            // Progress toast
+            window.showProgressToast = () => {
+                if (!window.toastPro) return;
+                const toast = window.toastPro.show({
+                    message: 'Processing...',
+                    level: 'loading',
+                    progress: { value: 0, showPercentage: true }
                 });
-            }, 2000);
-        };
 
-        // Promise toasts
-        window.showPromiseToast = (type) => {
-            const promise = new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    if (type === 'success') {
-                        resolve('Data loaded');
-                    } else {
-                        reject(new Error('Network error'));
-                    }
-                }, 2000);
-            });
-
-            // Handle the promise but don't let rejections bubble up to console
-            window.toastPro.promise(promise, {
-                loading: 'Loading data...',
-                success: (data) => `Success: ${data}`,
-                error: (error) => `Error: ${error.message}`
-            }).catch(() => {
-                // Error already handled by toast, just prevent console error
-            });
-        };
-
-        // File upload simulation
-        window.showFileUpload = () => {
-            const uploadPromise = new Promise((resolve, reject) => {
-                // Simulate upload with progress
                 let progress = 0;
                 const interval = setInterval(() => {
-                    progress += 20;
+                    progress += 10;
+                    window.toastPro.update(toast.id, {
+                        progress: { value: progress, showPercentage: true },
+                        message: `Processing... ${progress}%`
+                    });
+
                     if (progress >= 100) {
                         clearInterval(interval);
-                        resolve('File uploaded');
+                        setTimeout(() => {
+                            window.toastPro.update(toast.id, {
+                                message: 'Complete!',
+                                level: 'success',
+                                progress: undefined
+                            });
+                        }, 500);
                     }
-                }, 300);
+                }, 200);
+            };
 
-                // Random failure
+            // Custom render
+            window.showCustomToast = () => {
+                window.toastPro && window.toastPro.show({
+                    render: () => {
+                        const div = document.createElement('div');
+                        div.innerHTML = `
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 20px;">🎨</span>
+                                <div>
+                                    <strong>Custom Toast</strong>
+                                    <br>
+                                    <small>Rendered with custom function</small>
+                                </div>
+                            </div>
+                        `;
+                        return div;
+                    },
+                    level: 'custom'
+                });
+            };
+
+            // Grouped toasts
+            window.showGroupedToast = () => {
+                if (!window.toastPro) return;
+                window.toastPro.group('upload-group', { message: 'Upload 1 of 3 complete', level: 'success' });
+
                 setTimeout(() => {
-                    if (Math.random() > 0.7) {
-                        clearInterval(interval);
-                        reject(new Error('Upload failed'));
-                    }
+                    window.toastPro.group('upload-group', { message: 'Upload 2 of 3 complete', level: 'success' });
                 }, 1000);
-            });
 
-            window.toastPro.promise(uploadPromise, {
-                loading: 'Uploading file...',
-                success: 'File uploaded successfully!',
-                error: 'Upload failed. Please try again.'
-            }).catch(() => {
-                // Error already handled by toast, just prevent console error
-            });
-        };
+                setTimeout(() => {
+                    window.toastPro.group('upload-group', { message: 'All uploads complete!', level: 'success' });
+                }, 2000);
+            };
 
-        // Update toast
-        window.showUpdateToast = () => {
-            const loadingToast = window.toastPro.loading('Saving document...');
-            setTimeout(() => {
-                window.toastPro.update(loadingToast.id, {
-                    message: 'Document saved successfully!',
-                    level: 'success'
-                });
-            }, 2000);
-        };
-
-        // Progress updates
-        window.showProgressUpdate = () => {
-            const toast = window.toastPro.show({
-                message: 'Downloading...',
-                level: 'loading',
-                progress: { value: 0 }
-            });
-
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 5;
-                window.toastPro.update(toast.id, {
-                    progress: { value: progress }
+            // Promise toasts
+            window.showPromiseToast = (type) => {
+                if (!window.toastPro) return;
+                const promise = new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        if (type === 'success') {
+                            resolve('Data loaded');
+                        } else {
+                            reject(new Error('Network error'));
+                        }
+                    }, 2000);
                 });
 
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    window.toastPro.update(toast.id, {
-                        message: 'Download complete!',
-                        level: 'success',
-                        progress: undefined
-                    });
-                }
-            }, 100);
-        };
+                window.toastPro.promise(promise, {
+                    loading: 'Loading data...',
+                    success: (data) => `Success: ${data}`,
+                    error: (error) => `Error: ${error.message}`
+                }).catch(() => {});
+            };
 
-        // Positioned toasts
-        window.showPositionedToast = (position) => {
-            window.toastPro.show({
-                message: `Toast at ${position}`,
-                level: 'info',
-                position: position
-            });
-        };
+            // File upload simulation
+            window.showFileUpload = () => {
+                if (!window.toastPro) return;
+                const uploadPromise = new Promise((resolve, reject) => {
+                    let progress = 0;
+                    const interval = setInterval(() => {
+                        progress += 20;
+                        if (progress >= 100) {
+                            clearInterval(interval);
+                            resolve('File uploaded');
+                        }
+                    }, 300);
 
-        // Configuration
-        window.configureToast = (type) => {
-            switch (type) {
-                case 'fast':
-                    window.toastPro.configure({ duration: 2000 });
-                    window.toast.info('Fast duration set (2s)');
-                    break;
-                case 'slow':
-                    window.toastPro.configure({ duration: 10000 });
-                    window.toast.info('Slow duration set (10s)');
-                    break;
-                case 'max':
-                    window.toastPro.configure({ maxVisible: 2 });
-                    window.toast.info('Max visible set to 2');
-                    break;
-                case 'reset':
-                    window.toastPro.configure({
-                        duration: 4000,
-                        maxVisible: 5,
-                        position: 'bottom-right'
-                    });
-                    window.toast.info('Configuration reset');
-                    break;
-            }
-        };
+                    setTimeout(() => {
+                        if (Math.random() > 0.7) {
+                            clearInterval(interval);
+                            reject(new Error('Upload failed'));
+                        }
+                    }, 1000);
+                });
 
-        // Plugin demo
-        let analyticsInstalled = false;
-        window.installAnalyticsPlugin = () => {
-            if (analyticsInstalled) {
-                window.toast.info('Analytics plugin already installed');
-                return;
-            }
+                window.toastPro.promise(uploadPromise, { loading: 'Uploading file...', success: 'File uploaded successfully!', error: 'Upload failed. Please try again.' }).catch(() => {});
+            };
 
-            const analyticsPlugin = {
-                name: 'analytics',
-                install(manager) {
-                    manager.on('afterShow', (toast) => {
-                        console.log('📊 Toast shown:', {
-                            level: toast.level,
-                            message: toast.message,
-                            timestamp: new Date().toISOString()
-                        });
-                    });
+            // Update toast
+            window.showUpdateToast = () => {
+                if (!window.toastPro) return;
+                const loadingToast = window.toastPro.loading('Saving document...');
+                setTimeout(() => {
+                    window.toastPro.update(loadingToast.id, { message: 'Document saved successfully!', level: 'success' });
+                }, 2000);
+            };
+
+            // Progress updates
+            window.showProgressUpdate = () => {
+                if (!window.toastPro) return;
+                const toast = window.toastPro.show({ message: 'Downloading...', level: 'loading', progress: { value: 0 } });
+
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    window.toastPro.update(toast.id, { progress: { value: progress } });
+
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        window.toastPro.update(toast.id, { message: 'Download complete!', level: 'success', progress: undefined });
+                    }
+                }, 100);
+            };
+
+            // Positioned toasts
+            window.showPositionedToast = (position) => { window.toastPro && window.toastPro.show({ message: `Toast at ${position}`, level: 'info', position: position }); };
+
+            // Configuration
+            window.configureToast = (type) => {
+                if (!window.toastPro) return;
+                switch (type) {
+                    case 'fast':
+                        window.toastPro.configure({ duration: 2000 });
+                        window.toast.info('Fast duration set (2s)', { theme: 'light', position: 'top-right' });
+                        break;
+                    case 'slow':
+                        window.toastPro.configure({ duration: 10000 });
+                        window.toast.info('Slow duration set (10s)', { theme: 'light', position: 'top-right' });
+                        break;
+                    case 'max':
+                        window.toastPro.configure({ maxVisible: 2 });
+                        window.toast.info('Max visible set to 2', { theme: 'light', position: 'top-right' });
+                        break;
+                    case 'reset':
+                        window.toastPro.configure({ duration: 4000, maxVisible: 5, position: 'bottom-right' });
+                        window.toast.info('Configuration reset', { theme: 'light', position: 'top-right' });
+                        break;
                 }
             };
 
-            window.toastPro.use(analyticsPlugin);
-            analyticsInstalled = true;
-            window.toast.success('Analytics plugin installed! Check console.');
-        };
+            // Plugin demo
+            let analyticsInstalled = false;
+            window.installAnalyticsPlugin = () => {
+                if (analyticsInstalled) {
+                    window.toast.info('Analytics plugin already installed', { theme: 'light', position: 'top-right' });
+                    return;
+                }
 
-        window.showToastWithPlugin = () => {
-            window.toastPro.info('This toast will be tracked by analytics plugin');
-        };
+                const analyticsPlugin = { name: 'analytics', install(manager) { manager.on('afterShow', (toast) => { console.log('📊 Toast shown:', { level: toast.level, message: toast.message, timestamp: new Date().toISOString() }); }); } };
 
-        // Theme switching
-        window.setTheme = (themeName) => {
-            // Configure the global theme
-            window.toastPro.configure({ theme: themeName });
-
-            // Update display
-            document.getElementById('currentThemeDisplay').textContent = themeName;
-
-            // Clear existing toasts and show demo toasts
-            window.toastPro.clear();
-
-            // Show test toasts with the new theme
-            setTimeout(() => {
-                window.toastPro.success(`🎨 ${themeName} theme - Success!`, { theme: themeName });
-            }, 100);
-
-            setTimeout(() => {
-                window.toastPro.info(`🎨 ${themeName} theme - Info message`, { theme: themeName });
-            }, 600);
-
-            setTimeout(() => {
-                window.toastPro.warning(`🎨 ${themeName} theme - Warning!`, { theme: themeName });
-            }, 1100);
-
-            setTimeout(() => {
-                window.toastPro.error(`🎨 ${themeName} theme - Error occurred`, { theme: themeName });
-            }, 1600);
-        };
-
-        // New Features Functions
-
-        // RTL Support
-        window.showRTLToast = () => {
-            window.toastPro.show({
-                message: 'هذا اختبار للنص من اليمين إلى اليسار - RTL Support',
-                level: 'info',
-                rtl: true,
-                duration: 5000
-            });
-        };
-
-        window.showLTRToast = () => {
-            window.toastPro.show({
-                message: 'This is a left-to-right text test - LTR Support',
-                level: 'success',
-                rtl: false,
-                duration: 5000
-            });
-        };
-
-        // Swipe Direction Control
-        window.showSwipeToast = (direction) => {
-            const directionText = {
-                'left': 'left',
-                'right': 'right',
-                'up': 'up',
-                'down': 'down',
-                'horizontal': 'horizontally (left/right)',
-                'vertical': 'vertically (up/down)'
+                window.toastPro.use(analyticsPlugin);
+                analyticsInstalled = true;
+                window.toast.success('Analytics plugin installed! Check console.');
             };
 
-            window.toastPro.show({
-                message: `Swipe ${directionText[direction]} to dismiss this toast`,
-                level: 'warning',
-                swipeDismiss: true,
-                swipeDirection: direction,
-                duration: 10000
-            });
+            window.showToastWithPlugin = () => { window.toastPro && window.toastPro.info('This toast will be tracked by analytics plugin'); };
+
+            // Theme switching
+            window.setTheme = (themeName) => {
+                if (!window.toastPro) return;
+                window.toastPro.configure({ theme: themeName });
+                const el = document.getElementById('currentThemeDisplay'); if (el) el.textContent = themeName; window.toastPro.clear();
+                setTimeout(() => { window.toastPro.success(`🎨 ${themeName} theme - Success!`, { theme: themeName }); }, 100);
+                setTimeout(() => { window.toastPro.info(`🎨 ${themeName} theme - Info message`, { theme: themeName }); }, 600);
+                setTimeout(() => { window.toastPro.warning(`🎨 ${themeName} theme - Warning!`, { theme: themeName }); }, 1100);
+                setTimeout(() => { window.toastPro.error(`🎨 ${themeName} theme - Error occurred`, { theme: themeName }); }, 1600);
+            };
+
+            // RTL Support
+            window.showRTLToast = () => { window.toastPro && window.toastPro.show({ message: 'هذا اختبار للنص من اليمين إلى اليسار - RTL Support', level: 'info', rtl: true, duration: 5000 }); };
+            window.showLTRToast = () => { window.toastPro && window.toastPro.show({ message: 'This is a left-to-right text test - LTR Support', level: 'success', rtl: false, duration: 5000 }); };
+
+            // Swipe Direction Control
+            window.showSwipeToast = (direction) => { if (!window.toastPro) return; const directionText = { left: 'left', right: 'right', up: 'up', down: 'down', horizontal: 'horizontally (left/right)', vertical: 'vertically (up/down)' }; window.toastPro.show({ message: `Swipe ${directionText[direction]} to dismiss this toast`, level: 'warning', swipeDismiss: true, swipeDirection: direction, duration: 10000 }); };
+
+            // Window Focus Pausing
+            window.enableWindowFocusPause = () => { window.toastPro && window.toastPro.configure({ pauseOnWindowBlur: true }); window.toastPro && window.toastPro.show({ message: 'Window focus pausing enabled! Switch tabs to test.', level: 'success', duration: 3000 }); };
+            window.disableWindowFocusPause = () => { window.toastPro && window.toastPro.configure({ pauseOnWindowBlur: false }); window.toastPro && window.toastPro.show({ message: 'Window focus pausing disabled.', level: 'info', duration: 3000 }); };
+            window.testWindowFocusPause = () => { window.toastPro && window.toastPro.configure({ pauseOnWindowBlur: true }); window.toastPro && window.toastPro.show({ message: 'This toast will pause when you switch tabs/windows. Try it now!', level: 'info', duration: 15000 }); };
+
+            // Initialize with some defaults
+            window.toastPro && window.toastPro.configure({ position: 'bottom-right', theme: 'light', enableAccessibility: true, swipeDismiss: true });
         };
 
-        // Window Focus Pausing
-        window.enableWindowFocusPause = () => {
-            window.toastPro.configure({ pauseOnWindowBlur: true });
-            window.toastPro.show({
-                message: 'Window focus pausing enabled! Switch tabs to test.',
-                level: 'success',
-                duration: 3000
-            });
-        };
-
-        window.disableWindowFocusPause = () => {
-            window.toastPro.configure({ pauseOnWindowBlur: false });
-            window.toastPro.show({
-                message: 'Window focus pausing disabled.',
-                level: 'info',
-                duration: 3000
-            });
-        };
-
-        window.testWindowFocusPause = () => {
-            window.toastPro.configure({ pauseOnWindowBlur: true });
-            window.toastPro.show({
-                message: 'This toast will pause when you switch tabs/windows. Try it now!',
-                level: 'info',
-                duration: 15000
-            });
-        };
-
-        // Initialize with some defaults
-        window.toastPro.configure({
-            position: 'bottom-right',
-            theme: 'light',
-            enableAccessibility: true,
-            swipeDismiss: true
-        });
-        });
+        // If the UMD already initialized, run immediately; otherwise wait for event
+        if (window.toast && window.toastPro) {
+            initToastDemo();
+        } else {
+            window.addEventListener('toastReady', initToastDemo);
+        }
     </script>
 </body>
 </html>

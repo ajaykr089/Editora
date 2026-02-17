@@ -21,7 +21,9 @@ import {
   ListPlugin,
   HistoryPlugin
 } from '@editora/plugins';
-import '@editora/themes/styles';
+import "@editora/themes/theme.css";
+OR
+import "@editora/themes/themes/default.css";
 ```
 
 ### 2. Create Component
