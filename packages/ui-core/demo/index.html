@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Editora UI Core Demo</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+  </head>
+  <body>
+    <h1>Editora UI Core - Demo</h1>
+    <ui-button id="btn">Click me</ui-button>
+
+    <script type="module">
+      import '../dist/index.esm.js';
+      import { applyTheme, defaultTokens } from '../dist/index.esm.js';
+      applyTheme(defaultTokens);
+      document.getElementById('btn').addEventListener('click', () => alert('Button clicked'));
+    </script>
+  </body>
+</html>

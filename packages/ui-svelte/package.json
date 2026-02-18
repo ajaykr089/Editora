@@ -1,0 +1,20 @@
+{
+  "name": "@editora/ui-svelte",
+  "version": "0.1.0",
+  "description": "Svelte adapters for @editora UI web components",
+  "files": ["src"],
+  "peerDependencies": {
+    "svelte": "^3.0.0"
+  },
+  "scripts": {
+    "build": "node -e \"try{require.resolve('@sveltejs/vite-plugin-svelte'); require('child_process').execSync('vite build', {stdio:'inherit'});}catch(e){console.log('Skipping @editora/ui-svelte build: @sveltejs/vite-plugin-svelte not installed');}\"",
+    "dev": "echo 'dev server requires @sveltejs/vite-plugin-svelte'",
+    "prepare": "echo 'no prepare step for ui-svelte'"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1",
+    "typescript": "^5.0.0",
+    "@sveltejs/vite-plugin-svelte": "^2.0.0"
+  },
+  "license": "MIT"
+}
