@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Pagination, Button } from '@editora/ui-react';
+import { Box, Button, Flex, Grid, Pagination } from '@editora/ui-react';
 
 export default {
   title: 'UI/Pagination',
@@ -27,18 +27,18 @@ export const Interactive = (args: any) => {
   }, []);
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
-      <div style={{ display: 'flex', gap: 8 }}>
+    <Grid style={{ display: 'grid', gap: 12 }}>
+      <Flex style={{ display: 'flex', gap: 8 }}>
         <Button size="sm" variant="secondary" onClick={() => setCount((v) => Math.max(1, v - 1))}>- count</Button>
         <Button size="sm" variant="secondary" onClick={() => setCount((v) => v + 1)}>+ count</Button>
-      </div>
+      </Flex>
 
       <Pagination ref={ref as any} page={String(page)} count={String(count)} />
 
-      <div style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: '#475569' }}>
         Page {page} of {count}
-      </div>
-    </div>
+      </Box>
+    </Grid>
   );
 };
 Interactive.args = { page: 3, count: 12 };

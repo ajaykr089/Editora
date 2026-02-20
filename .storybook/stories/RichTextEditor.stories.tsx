@@ -49,6 +49,8 @@ import {
   FullscreenPlugin,
   TemplatePlugin
 } from "@editora/plugins";
+import { Box, Flex, Grid} from '@editora/ui-react';
+
 
 const meta: Meta = {
   title: "Editor/Rich Text Editor - Web Component",
@@ -188,15 +190,15 @@ export const WebComponentAPI: Story = {
 
     return (
       <div>
-        <div style={{ marginBottom: "20px", padding: "15px", background: "#f5f5f5", borderRadius: "4px" }}>
+        <Box style={{ marginBottom: "20px", padding: "15px", background: "#f5f5f5", borderRadius: "4px" }}>
           <h4 style={{ margin: "0 0 10px 0" }}>🌐 Global Editora API</h4>
           <p style={{ margin: "5px 0" }}>Version: <strong>{version}</strong></p>
           <p style={{ margin: "5px 0" }}>Plugins Available: <strong>{pluginCount}</strong></p>
-          <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
+          <Flex style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
             <button onClick={getContent} style={{ padding: "8px 16px" }}>Get Content</button>
             <button onClick={setContent} style={{ padding: "8px 16px" }}>Set Content</button>
-          </div>
-        </div>
+          </Flex>
+        </Box>
 
         <div ref={editorRef}>
           <EditoraEditor
@@ -211,10 +213,10 @@ export const WebComponentAPI: Story = {
         </div>
 
         {output && (
-          <div style={{ marginTop: "20px", padding: "15px", background: "#e8f5e9", borderRadius: "4px" }}>
+          <Box style={{ marginTop: "20px", padding: "15px", background: "#e8f5e9", borderRadius: "4px" }}>
             <h4 style={{ margin: "0 0 10px 0" }}>📄 Output:</h4>
             <pre style={{ overflow: "auto", fontSize: "12px" }}>{output}</pre>
-          </div>
+          </Box>
         )}
       </div>
     );
@@ -228,9 +230,9 @@ export const WebComponentAPI: Story = {
 export const AllPluginsShowcase: Story = {
   render: () => (
     <div>
-      <div style={{ marginBottom: "20px", padding: "15px", background: "#e3f2fd", borderRadius: "4px" }}>
+      <Box style={{ marginBottom: "20px", padding: "15px", background: "#e3f2fd", borderRadius: "4px" }}>
         <h3 style={{ margin: "0 0 10px 0" }}>🔌 All 32 Native Plugins Loaded</h3>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", fontSize: "13px" }}>
+        <Grid style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px", fontSize: "13px" }}>
           <div><strong>Basic Formatting (5):</strong><br/>Bold, Italic, Underline, Strikethrough, ClearFormatting</div>
           <div><strong>Block Types (4):</strong><br/>Paragraph, Heading, Blockquote, Code</div>
           <div><strong>Lists (2):</strong><br/>List, Checklist</div>
@@ -240,8 +242,8 @@ export const AllPluginsShowcase: Story = {
           <div><strong>Special (3):</strong><br/>Math, SpecialCharacters, Emojis</div>
           <div><strong>Tools (4):</strong><br/>A11yChecker, Comments, DocumentManager, Fullscreen</div>
           <div><strong>History (1):</strong><br/>History</div>
-        </div>
-      </div>
+        </Grid>
+      </Box>
 
       <EditoraEditor
         plugins={allNativePlugins}
@@ -309,10 +311,10 @@ export const AllPluginsShowcase: Story = {
 export const CustomToolbar: Story = {
   render: () => (
     <div>
-      <div style={{ marginBottom: "20px", padding: "15px", background: "#fff3e0", borderRadius: "4px" }}>
+      <Box style={{ marginBottom: "20px", padding: "15px", background: "#fff3e0", borderRadius: "4px" }}>
         <h4 style={{ margin: "0 0 10px 0" }}>🎨 Custom Toolbar</h4>
         <p style={{ margin: 0, fontSize: "14px" }}>Only essential formatting tools are shown in the toolbar.</p>
-      </div>
+      </Box>
 
       <EditoraEditor
         plugins={[
@@ -348,12 +350,12 @@ export const ReadonlyMode: Story = {
 
     return (
       <div>
-        <div style={{ marginBottom: "20px", padding: "15px", background: "#f3e5f5", borderRadius: "4px" }}>
+        <Box style={{ marginBottom: "20px", padding: "15px", background: "#f3e5f5", borderRadius: "4px" }}>
           <h4 style={{ margin: "0 0 10px 0" }}>🔒 Readonly Mode</h4>
           <button onClick={() => setReadonly(!readonly)} style={{ padding: "8px 16px" }}>
             {readonly ? "Enable Editing" : "Disable Editing"}
           </button>
-        </div>
+        </Box>
 
         <EditoraEditor
           plugins={allNativePlugins}
@@ -404,7 +406,7 @@ export const EventHandling: Story = {
           `}
         />
 
-        <div style={{ marginTop: "20px", padding: "15px", background: "#e8f5e9", borderRadius: "4px" }}>
+        <Box style={{ marginTop: "20px", padding: "15px", background: "#e8f5e9", borderRadius: "4px" }}>
           <h4 style={{ margin: "0 0 10px 0" }}>📊 Statistics</h4>
           <p style={{ margin: "5px 0" }}>Words: <strong>{wordCount}</strong></p>
           <p style={{ margin: "5px 0" }}>Characters: <strong>{charCount}</strong></p>
@@ -412,7 +414,7 @@ export const EventHandling: Story = {
             <summary style={{ cursor: "pointer" }}>Show HTML</summary>
             <pre style={{ fontSize: "12px", overflow: "auto", marginTop: "10px" }}>{content}</pre>
           </details>
-        </div>
+        </Box>
       </div>
     );
   },
@@ -425,12 +427,12 @@ export const EventHandling: Story = {
 export const MathEquations: Story = {
   render: () => (
     <div>
-      <div style={{ marginBottom: "20px", padding: "15px", background: "#e1f5fe", borderRadius: "4px" }}>
+      <Box style={{ marginBottom: "20px", padding: "15px", background: "#e1f5fe", borderRadius: "4px" }}>
         <h4 style={{ margin: "0 0 10px 0" }}>🔢 Math Plugin</h4>
         <p style={{ margin: 0, fontSize: "14px" }}>
           Insert mathematical equations using LaTeX notation. Click the Math button in the toolbar (fx).
         </p>
-      </div>
+      </Box>
 
       <EditoraEditor
         plugins={allNativePlugins}
@@ -460,12 +462,12 @@ export const MathEquations: Story = {
 export const SpecialContent: Story = {
   render: () => (
     <div>
-      <div style={{ marginBottom: "20px", padding: "15px", background: "#fce4ec", borderRadius: "4px" }}>
+      <Box style={{ marginBottom: "20px", padding: "15px", background: "#fce4ec", borderRadius: "4px" }}>
         <h4 style={{ margin: "0 0 10px 0" }}>✨ Special Characters & Emojis</h4>
         <p style={{ margin: 0, fontSize: "14px" }}>
           Insert special characters (Cmd/Ctrl-Shift-S) and emojis (Cmd/Ctrl-Shift-J).
         </p>
-      </div>
+      </Box>
 
       <EditoraEditor
         plugins={allNativePlugins}
@@ -500,12 +502,12 @@ export const SpecialContent: Story = {
 export const Tables: Story = {
   render: () => (
     <div>
-      <div style={{ marginBottom: "20px", padding: "15px", background: "#f1f8e9", borderRadius: "4px" }}>
+      <Box style={{ marginBottom: "20px", padding: "15px", background: "#f1f8e9", borderRadius: "4px" }}>
         <h4 style={{ margin: "0 0 10px 0" }}>📊 Table Plugin</h4>
         <p style={{ margin: 0, fontSize: "14px" }}>
           Create and edit tables with the table button in the toolbar.
         </p>
-      </div>
+      </Box>
 
       <EditoraEditor
         plugins={allNativePlugins}
@@ -567,18 +569,18 @@ export const MultipleEditors: Story = {
 
     return (
       <div>
-        <div style={{ marginBottom: "20px", padding: "15px", background: "#fff9c4", borderRadius: "4px" }}>
+        <Box style={{ marginBottom: "20px", padding: "15px", background: "#fff9c4", borderRadius: "4px" }}>
           <h4 style={{ margin: "0 0 10px 0" }}>👥 Multiple Editors</h4>
           <p style={{ margin: "0 0 10px 0", fontSize: "14px" }}>
             Two independent editor instances with content synchronization.
           </p>
-          <div style={{ display: "flex", gap: "10px" }}>
+          <Flex style={{ display: "flex", gap: "10px" }}>
             <button onClick={syncAtoB} style={{ padding: "8px 16px" }}>Sync A → B</button>
             <button onClick={syncBtoA} style={{ padding: "8px 16px" }}>Sync B → A</button>
-          </div>
-        </div>
+          </Flex>
+        </Box>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+        <Grid style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
           <div>
             <h4>Editor A</h4>
             <EditoraEditor
@@ -598,7 +600,7 @@ export const MultipleEditors: Story = {
               defaultValue="<h3>Editor B</h3><p>Type here...</p>"
             />
           </div>
-        </div>
+        </Grid>
       </div>
     );
   },
@@ -628,13 +630,13 @@ export const ControlledEditor: Story = {
 
     return (
       <div>
-        <div style={{ marginBottom: "20px", padding: "15px", background: "#e0f2f1", borderRadius: "4px" }}>
+        <Box style={{ marginBottom: "20px", padding: "15px", background: "#e0f2f1", borderRadius: "4px" }}>
           <h4 style={{ margin: "0 0 10px 0" }}>🎛️ Controlled Component</h4>
-          <div style={{ display: "flex", gap: "10px" }}>
+          <Flex style={{ display: "flex", gap: "10px" }}>
             <button onClick={resetContent} style={{ padding: "8px 16px" }}>Reset Content</button>
             <button onClick={appendContent} style={{ padding: "8px 16px" }}>Append Content</button>
-          </div>
-        </div>
+          </Flex>
+        </Box>
 
         <EditoraEditor
           plugins={allNativePlugins}
@@ -672,12 +674,12 @@ export const PerformanceLargeDocument: Story = {
 
     return (
       <div>
-        <div style={{ marginBottom: "20px", padding: "15px", background: "#ffebee", borderRadius: "4px" }}>
+        <Box style={{ marginBottom: "20px", padding: "15px", background: "#ffebee", borderRadius: "4px" }}>
           <h4 style={{ margin: "0 0 10px 0" }}>⚡ Performance Test</h4>
           <p style={{ margin: 0, fontSize: "14px" }}>
             This editor contains 100 sections (300+ paragraphs) to test performance with large documents.
           </p>
-        </div>
+        </Box>
 
         <EditoraEditor
           plugins={allNativePlugins}
@@ -696,31 +698,31 @@ export const PerformanceLargeDocument: Story = {
 export const FrameworkIndependence: Story = {
   render: () => (
     <div>
-      <div style={{ marginBottom: "20px", padding: "15px", background: "#f3e5f5", borderRadius: "4px" }}>
+      <Box style={{ marginBottom: "20px", padding: "15px", background: "#f3e5f5", borderRadius: "4px" }}>
         <h3 style={{ margin: "0 0 10px 0" }}>🌐 Framework Independence</h3>
         <p style={{ margin: 0, fontSize: "14px" }}>
           This same editor can be used in React (shown here), Vue, Angular, Svelte, or vanilla JavaScript!
         </p>
         
-        <div style={{ marginTop: "15px", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px", fontSize: "13px" }}>
-          <div style={{ padding: "10px", background: "white", borderRadius: "4px" }}>
+        <Grid style={{ marginTop: "15px", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "10px", fontSize: "13px" }}>
+          <Box style={{ padding: "10px", background: "white", borderRadius: "4px" }}>
             <strong>React:</strong><br/>
             <code style={{ fontSize: "11px" }}>&lt;EditoraEditor /&gt;</code>
-          </div>
-          <div style={{ padding: "10px", background: "white", borderRadius: "4px" }}>
+          </Box>
+          <Box style={{ padding: "10px", background: "white", borderRadius: "4px" }}>
             <strong>Vanilla JS:</strong><br/>
             <code style={{ fontSize: "11px" }}>&lt;editora-editor&gt;</code>
-          </div>
-          <div style={{ padding: "10px", background: "white", borderRadius: "4px" }}>
+          </Box>
+          <Box style={{ padding: "10px", background: "white", borderRadius: "4px" }}>
             <strong>Vue:</strong><br/>
             <code style={{ fontSize: "11px" }}>&lt;editora-editor&gt;</code>
-          </div>
-          <div style={{ padding: "10px", background: "white", borderRadius: "4px" }}>
+          </Box>
+          <Box style={{ padding: "10px", background: "white", borderRadius: "4px" }}>
             <strong>Angular:</strong><br/>
             <code style={{ fontSize: "11px" }}>&lt;editora-editor&gt;</code>
-          </div>
-        </div>
-      </div>
+          </Box>
+        </Grid>
+      </Box>
 
       <EditoraEditor
         plugins={allNativePlugins}

@@ -11,13 +11,14 @@ const style = `
     --ui-badge-padding-y: 5px;
     --ui-badge-padding-x: 10px;
     --ui-badge-border: 1px solid transparent;
-    --ui-badge-bg: #eef2ff;
-    --ui-badge-color: #1e293b;
-    --ui-badge-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    --ui-badge-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 11%, var(--ui-color-surface, #ffffff));
+    --ui-badge-color: var(--ui-color-text, #1e293b);
+    --ui-badge-shadow: var(--ui-shadow-sm, 0 4px 12px rgba(15, 23, 42, 0.08));
     --ui-badge-dot-size: 7px;
     --ui-badge-dot-color: currentColor;
-    --ui-badge-remove-bg: rgba(15, 23, 42, 0.08);
-    --ui-badge-remove-bg-hover: rgba(15, 23, 42, 0.16);
+    --ui-badge-remove-bg: color-mix(in srgb, var(--ui-color-text, #0f172a) 10%, transparent);
+    --ui-badge-remove-bg-hover: color-mix(in srgb, var(--ui-color-text, #0f172a) 18%, transparent);
+    color-scheme: light dark;
   }
 
   .badge {
@@ -81,6 +82,11 @@ const style = `
     background: var(--ui-badge-remove-bg-hover);
   }
 
+  .remove-btn:focus-visible {
+    outline: 2px solid var(--ui-color-focus-ring, #2563eb);
+    outline-offset: 2px;
+  }
+
   :host([size="sm"]),
   :host([size="1"]) {
     --ui-badge-font-size: 11px;
@@ -120,10 +126,10 @@ const style = `
   }
 
   :host([tone="neutral"]) .badge { --ui-badge-color: #334155; }
-  :host([tone="info"]) .badge { --ui-badge-color: #1d4ed8; }
-  :host([tone="success"]) .badge { --ui-badge-color: #15803d; }
-  :host([tone="warning"]) .badge { --ui-badge-color: #b45309; }
-  :host([tone="danger"]) .badge { --ui-badge-color: #b91c1c; }
+  :host([tone="info"]) .badge { --ui-badge-color: var(--ui-color-primary, #1d4ed8); }
+  :host([tone="success"]) .badge { --ui-badge-color: var(--ui-color-success, #15803d); }
+  :host([tone="warning"]) .badge { --ui-badge-color: var(--ui-color-warning, #b45309); }
+  :host([tone="danger"]) .badge { --ui-badge-color: var(--ui-color-danger, #b91c1c); }
   :host([tone="purple"]) .badge { --ui-badge-color: #7c3aed; }
 
   :host([pill]) { --ui-badge-radius: 9999px; }
@@ -146,6 +152,34 @@ const style = `
     .badge,
     .remove-btn {
       transition: none !important;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .badge {
+      border-width: 2px;
+      box-shadow: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .badge,
+    .remove-btn {
+      forced-color-adjust: none;
+      background: Canvas;
+      color: CanvasText;
+      border: 1px solid CanvasText;
+      box-shadow: none;
+    }
+    .dot {
+      background: CanvasText;
+    }
+    :host(:hover) .badge,
+    .remove-btn:hover {
+      background: Highlight;
+      color: HighlightText;
+      border-color: Highlight;
+      transform: none;
     }
   }
 `;

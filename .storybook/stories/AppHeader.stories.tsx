@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AppHeader, Button, Drawer, Sidebar } from '@editora/ui-react';
+import { AppHeader, Box, Button, Drawer, Flex, Sidebar } from '@editora/ui-react';
 
 export default {
   title: 'UI/AppHeader',
@@ -16,7 +16,7 @@ export const Default = (args: any) => {
   const [menuCount, setMenuCount] = useState(0);
 
   return (
-    <div style={{ minHeight: 220 }}>
+    <Box style={{ minHeight: 220 }}>
       <AppHeader
         sticky={args.sticky}
         bordered={args.bordered}
@@ -24,18 +24,18 @@ export const Default = (args: any) => {
         showMenuButton={args.showMenuButton}
         onMenuTrigger={() => setMenuCount((v) => v + 1)}
       >
-        <div slot="start" style={{ fontWeight: 700 }}>Editora Admin</div>
-        <div slot="title">Workspace</div>
-        <div slot="end" style={{ display: 'flex', gap: 8 }}>
+        <Box slot="start" style={{ fontWeight: 700 }}>Editora Admin</Box>
+        <Box slot="title">Workspace</Box>
+        <Flex slot="end" style={{ display: 'flex', gap: 8 }}>
           <Button size="sm" variant="secondary">Search</Button>
           <Button size="sm">Create</Button>
-        </div>
+        </Flex>
       </AppHeader>
 
-      <div style={{ padding: 16, color: '#475569', fontSize: 13 }}>
+      <Box style={{ padding: 16, color: '#475569', fontSize: 13 }}>
         Menu trigger count: {menuCount}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 Default.args = { sticky: false, bordered: true, dense: false, showMenuButton: true };
@@ -45,12 +45,12 @@ export const MobileShell = () => {
   const [active, setActive] = useState('dashboard');
 
   return (
-    <div style={{ minHeight: 360, border: '1px solid #e2e8f0', borderRadius: 12, overflow: 'hidden' }}>
+    <Box style={{ minHeight: 360, border: '1px solid #e2e8f0', borderRadius: 12, overflow: 'hidden' }}>
       <AppHeader bordered showMenuButton onMenuTrigger={() => setOpen(true)}>
-        <div slot="title">Admin Shell</div>
-        <div slot="end">
+        <Box slot="title">Admin Shell</Box>
+        <Box slot="end">
           <Button size="sm" variant="secondary">Profile</Button>
-        </div>
+        </Box>
       </AppHeader>
 
       <main style={{ padding: 16, background: '#f8fafc', minHeight: 280 }}>
@@ -59,14 +59,14 @@ export const MobileShell = () => {
       </main>
 
       <Drawer open={open} side="left" dismissible onChange={setOpen}>
-        <div slot="header" style={{ fontWeight: 700 }}>Navigation</div>
+        <Box slot="header" style={{ fontWeight: 700 }}>Navigation</Box>
         <Sidebar value={active} onSelect={(detail) => { setActive(detail.value); setOpen(false); }}>
-          <div slot="item" data-value="dashboard" data-icon="🏠" data-active>Dashboard</div>
-          <div slot="item" data-value="users" data-icon="👥">Users</div>
-          <div slot="item" data-value="reports" data-icon="📊">Reports</div>
-          <div slot="item" data-value="settings" data-icon="⚙️">Settings</div>
+          <Box slot="item" data-value="dashboard" data-icon="🏠" data-active>Dashboard</Box>
+          <Box slot="item" data-value="users" data-icon="👥">Users</Box>
+          <Box slot="item" data-value="reports" data-icon="📊">Reports</Box>
+          <Box slot="item" data-value="settings" data-icon="⚙️">Settings</Box>
         </Sidebar>
       </Drawer>
-    </div>
+    </Box>
   );
 };

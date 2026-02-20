@@ -9,8 +9,12 @@ describe('theme.applyTheme', () => {
   it('applies CSS variables to documentElement', () => {
     applyTheme(defaultTokens);
     expect(getComputedStyle(document.documentElement).getPropertyValue('--ui-color-primary').trim()).toBe(defaultTokens.colors.primary);
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--ui-color-border').trim()).toBe(defaultTokens.colors.border);
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--ui-color-focus-ring').trim()).toBe(defaultTokens.colors.focusRing);
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--ui-color-surface-alt').trim()).toBe(defaultTokens.colors.surfaceAlt);
     // legacy variable (backwards compatibility)
     expect(getComputedStyle(document.documentElement).getPropertyValue('--ui-primary').trim()).toBe(defaultTokens.colors.primary);
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--ui-border').trim()).toBe(defaultTokens.colors.border);
     expect(getComputedStyle(document.documentElement).getPropertyValue('--ui-radius').trim()).toBe(defaultTokens.radius);
     expect(getComputedStyle(document.documentElement).getPropertyValue('--ui-font-family')).toContain('Inter');
     expect(getComputedStyle(document.documentElement).getPropertyValue('--ui-motion-easing')).toBe(defaultTokens.motion?.easing);

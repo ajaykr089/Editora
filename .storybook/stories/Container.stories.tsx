@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container } from '@editora/ui-react';
+import { Container , Box, Grid} from '@editora/ui-react';
 
 export default {
   title: 'UI/Container',
@@ -17,10 +17,10 @@ export const Default = (args: any) => (
 Default.args = { size: 'md' };
 
 export const SizeComparison = () => (
-  <div style={{ display: 'grid', gap: 10 }}>
+  <Grid style={{ display: 'grid', gap: 10 }}>
     <Container size="sm" style={{ background: '#f1f5f9', padding: 12 }}>Small</Container>
     <Container size="md" style={{ background: '#f1f5f9', padding: 12 }}>Medium</Container>
     <Container size="lg" style={{ background: '#f1f5f9', padding: 12 }}>Large</Container>
     <Container size="xl" style={{ background: '#f1f5f9', padding: 12 }}>Extra Large</Container>
-  </div>
+  </Grid>
 );

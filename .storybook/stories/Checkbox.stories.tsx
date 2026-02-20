@@ -1,5 +1,5 @@
 import React from 'react';
-import { Checkbox } from '@editora/ui-react';
+import { Checkbox , Box, Flex} from '@editora/ui-react';
 
 export default {
   title: 'UI/Checkbox',
@@ -49,7 +49,7 @@ export const Headless = () => (
 export const CheckboxGroup = () => {
   const [values, setValues] = React.useState([false, true, false]);
   return (
-    <div style={{ display: 'flex', gap: 16 }}>
+    <Flex style={{ display: 'flex', gap: 16 }}>
       {['One', 'Two', 'Three'].map((label, i) => (
         <Checkbox
           key={label}
@@ -59,6 +59,6 @@ export const CheckboxGroup = () => {
           {label}
         </Checkbox>
       ))}
-    </div>
+    </Flex>
   );
 };

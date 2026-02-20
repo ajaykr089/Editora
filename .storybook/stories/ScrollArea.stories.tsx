@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ScrollArea } from '@editora/ui-react';
+import { ScrollArea , Box, Grid} from '@editora/ui-react';
 
 export default {
   title: 'UI/ScrollArea',
@@ -33,18 +33,18 @@ export const Default = () => {
   }, []);
 
   return (
-    <div style={{ display: 'grid', gap: 12, maxWidth: 460 }}>
+    <Grid style={{ display: 'grid', gap: 12, maxWidth: 460 }}>
       <ScrollArea ref={ref as any} style={{ maxHeight: 180, border: '1px solid #e2e8f0', borderRadius: 10, padding: 8 }}>
         {Array.from({ length: 30 }).map((_, idx) => (
-          <div key={idx} style={{ padding: '8px 4px', borderBottom: '1px solid #f1f5f9' }}>
+          <Box key={idx} style={{ padding: '8px 4px', borderBottom: '1px solid #f1f5f9' }}>
             Row {idx + 1}
-          </div>
+          </Box>
         ))}
       </ScrollArea>
 
-      <div style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: '#475569' }}>
         scrollTop: {scrollTop}px {atEnd ? '• reached end' : ''}
-      </div>
-    </div>
+      </Box>
+    </Grid>
   );
 };

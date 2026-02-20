@@ -13,6 +13,8 @@ import {
   CodeFoldingExtension
 } from "@editora/light-code-editor";
 import "../../packages/light-code-editor/dist/light-code-editor.css";
+import { Box, Flex} from '@editora/ui-react';
+
 
 const meta: Meta = {
   title: "UI Components/Light Code Editor",
@@ -321,7 +323,7 @@ const LightCodeEditorDemo = ({
   };
 
   return (
-    <div style={{
+    <Flex style={{
       padding: "20px",
       height: "100vh",
       display: "flex",
@@ -330,7 +332,7 @@ const LightCodeEditorDemo = ({
       color: theme === "dark" ? "#f8f9fa" : "#333"
     }}>
       {/* Header */}
-      <div style={{
+      <Flex style={{
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
@@ -357,10 +359,10 @@ const LightCodeEditorDemo = ({
         >
           {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
         </button>
-      </div>
+      </Flex>
 
       {/* Controls */}
-      <div style={{
+      <Flex style={{
         display: "flex",
         gap: "20px",
         marginBottom: "20px",
@@ -389,7 +391,7 @@ const LightCodeEditorDemo = ({
 
         {/* Search Controls */}
         {enableSearch && (
-          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center" }}>
             <input
               type="text"
               placeholder="Search..."
@@ -430,17 +432,17 @@ const LightCodeEditorDemo = ({
             >
               Replace All
             </button>
-          </div>
+          </Flex>
         )}
 
         {/* Content Info */}
-        <div style={{ marginLeft: "auto", fontSize: "14px", opacity: 0.7 }}>
+        <Box style={{ marginLeft: "auto", fontSize: "14px", opacity: 0.7 }}>
           {currentContent.split('\n').length} lines, {currentContent.length} characters
-        </div>
-      </div>
+        </Box>
+      </Flex>
 
       {/* Editor Container */}
-      <div
+      <Box
         ref={editorRef}
         style={{
           flex: 1,
@@ -453,14 +455,14 @@ const LightCodeEditorDemo = ({
       />
 
       {/* Footer */}
-      <div style={{
+      <Box style={{
         marginTop: "20px",
         padding: "10px 0",
         borderTop: `1px solid ${theme === "dark" ? "#404040" : "#ddd"}`,
         fontSize: "14px",
         opacity: 0.7
       }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Flex style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             Active Extensions: {[
               showLineNumbers && "Line Numbers",
@@ -474,9 +476,9 @@ const LightCodeEditorDemo = ({
           <div>
             Theme: {theme} | Mode: {readOnly ? "Read-Only" : "Editable"}
           </div>
-        </div>
-      </div>
-    </div>
+        </Flex>
+      </Box>
+    </Flex>
   );
 };
 
@@ -570,9 +572,9 @@ export const FeatureShowcase: Story = {
     };
 
     return (
-      <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+      <Flex style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
         {/* Tab Navigation */}
-        <div style={{
+        <Flex style={{
           display: "flex",
           borderBottom: "1px solid #ddd",
           backgroundColor: "#f8f9fa",
@@ -595,10 +597,10 @@ export const FeatureShowcase: Story = {
               {tab.label}
             </button>
           ))}
-        </div>
+        </Flex>
 
         {/* Tab Description */}
-        <div style={{
+        <Box style={{
           padding: "10px 20px",
           backgroundColor: "#f8f9fa",
           borderBottom: "1px solid #ddd",
@@ -606,13 +608,13 @@ export const FeatureShowcase: Story = {
           color: "#666"
         }}>
           {tabs.find(tab => tab.id === activeTab)?.description}
-        </div>
+        </Box>
 
         {/* Tab Content */}
-        <div style={{ flex: 1, overflow: "hidden" }}>
+        <Box style={{ flex: 1, overflow: "hidden" }}>
           {getTabContent()}
-        </div>
-      </div>
+        </Box>
+      </Flex>
     );
   },
 };

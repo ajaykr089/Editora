@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Field, Input, Textarea, Checkbox } from '@editora/ui-react';
+import { Box, Checkbox, Field, Flex, Grid, Input, Textarea } from '@editora/ui-react';
 
 export default {
   title: 'UI/Field',
@@ -15,7 +15,7 @@ export default {
 };
 
 export const Default = (args: any) => (
-  <div style={{ maxWidth: 520 }}>
+  <Box style={{ maxWidth: 520 }}>
     <Field
       label={args.label}
       description={args.description}
@@ -27,7 +27,7 @@ export const Default = (args: any) => (
     >
       <Input id="field-name" placeholder="Jane Doe" />
     </Field>
-  </div>
+  </Box>
 );
 Default.args = {
   label: 'Full name',
@@ -42,7 +42,7 @@ export const WithCustomSlots = () => {
   const [checked, setChecked] = useState(false);
 
   return (
-    <div style={{ display: 'grid', gap: 14, maxWidth: 560 }}>
+    <Grid style={{ display: 'grid', gap: 14, maxWidth: 560 }}>
       <Field required invalid error="Please provide implementation notes." htmlFor="field-notes">
         <span slot="label">Implementation Notes</span>
         <span slot="actions" style={{ fontSize: 12, color: '#64748b' }}>Markdown supported</span>
@@ -51,17 +51,17 @@ export const WithCustomSlots = () => {
       </Field>
 
       <Field label="Confirmation" description="Required before submitting.">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Flex style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Checkbox checked={checked} onClick={() => setChecked((v) => !v)} />
           <span>I verified these details.</span>
-        </div>
+        </Flex>
       </Field>
-    </div>
+    </Grid>
   );
 };
 
 export const HorizontalLayout = () => (
-  <div style={{ maxWidth: 760 }}>
+  <Box style={{ maxWidth: 760 }}>
     <Field
       orientation="horizontal"
       label="API Key"
@@ -70,5 +70,5 @@ export const HorizontalLayout = () => (
     >
       <Input id="field-key" value="sk_live_****************" readOnly />
     </Field>
-  </div>
+  </Box>
 );

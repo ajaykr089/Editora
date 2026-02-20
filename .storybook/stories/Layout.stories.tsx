@@ -24,27 +24,27 @@ export const FlexAndGrid = () => {
   }, []);
 
   return (
-    <div ref={ref} style={{ padding: 12 }}>
-      <div style={{ marginBottom: 8 }}>Flex and Grid primitives (native web components):</div>
-    </div>
+    <Box ref={ref} style={{ padding: 12 }}>
+      <Box style={{ marginBottom: 8 }}>Flex and Grid primitives (native web components):</Box>
+    </Box>
   );
 };
 
 export const BoxDemo = () => (
-  <div style={{ padding: 20 }}>
-    <div style={{ display: "flex", gap: 12 }}>
+  <Box style={{ padding: 20 }}>
+    <Flex style={{ display: "flex", gap: 12 }}>
       <Box p="md" w="100%" bg="red" color="white" display="flex">Box MD</Box>
       <Box p="sm" w="100%" bg="#fff" color="#000" border="1px solid #eee">Box SM</Box>
-    </div>
+    </Flex>
 
-    <div style={{ marginTop: 16 }}>
-      <div style={{ marginBottom: 8 }}>Box align (explicit prop):</div>
+    <Box style={{ marginTop: 16 }}>
+      <Box style={{ marginBottom: 8 }}>Box align (explicit prop):</Box>
       <Box display="flex" align="flex-start" p="sm" bg="#f3f4f6" style={{ height: 72 }}>
-        <div style={{ background: '#fff', padding: 8 }}>start</div>
-        <div style={{ background: '#fff', padding: 8 }}>start</div>
+        <Box style={{ background: '#fff', padding: 8 }}>start</Box>
+        <Box style={{ background: '#fff', padding: 8 }}>start</Box>
       </Box>
-    </div>
-  </div>
+    </Box>
+  </Box>
 );
 
 export const SectionContainerDemo = () => (

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ToggleGroup, Toggle } from '@editora/ui-react';
+import { ToggleGroup, Toggle , Box, Grid} from '@editora/ui-react';
 
 export default {
   title: 'UI/ToggleGroup',
@@ -22,14 +22,14 @@ export const SingleSelect = () => {
   }, []);
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
+    <Grid style={{ display: 'grid', gap: 12 }}>
       <ToggleGroup ref={ref as any} value={value}>
         <Toggle value="left">Left</Toggle>
         <Toggle value="center">Center</Toggle>
         <Toggle value="right">Right</Toggle>
       </ToggleGroup>
-      <div style={{ fontSize: 13, color: '#475569' }}>Alignment: {value}</div>
-    </div>
+      <Box style={{ fontSize: 13, color: '#475569' }}>Alignment: {value}</Box>
+    </Grid>
   );
 };
 
@@ -49,13 +49,13 @@ export const MultipleSelect = () => {
   }, []);
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
+    <Grid style={{ display: 'grid', gap: 12 }}>
       <ToggleGroup ref={ref as any} multiple value={JSON.stringify(value)}>
         <Toggle value="bold">Bold</Toggle>
         <Toggle value="italic">Italic</Toggle>
         <Toggle value="underline">Underline</Toggle>
       </ToggleGroup>
-      <div style={{ fontSize: 13, color: '#475569' }}>Active styles: {value.join(', ') || 'none'}</div>
-    </div>
+      <Box style={{ fontSize: 13, color: '#475569' }}>Active styles: {value.join(', ') || 'none'}</Box>
+    </Grid>
   );
 };

@@ -18,19 +18,21 @@ const style = `
     --ui-combobox-height: 40px;
     --ui-combobox-padding-x: 12px;
     --ui-combobox-radius: var(--ui-radius, 12px);
-    --ui-combobox-border: 1px solid rgba(15, 23, 42, 0.14);
-    --ui-combobox-bg: rgba(255, 255, 255, 0.94);
-    --ui-combobox-color: #0f172a;
-    --ui-combobox-shadow: 0 10px 32px rgba(2, 6, 23, 0.08);
-    --ui-combobox-focus: #2563eb;
-    --ui-combobox-panel-bg: rgba(255, 255, 255, 0.98);
-    --ui-combobox-panel-border: 1px solid rgba(15, 23, 42, 0.08);
-    --ui-combobox-panel-shadow: 0 22px 48px rgba(2, 6, 23, 0.16);
-    --ui-combobox-muted: #64748b;
-    --ui-combobox-option-hover: rgba(37, 99, 235, 0.1);
-    --ui-combobox-option-active: rgba(37, 99, 235, 0.16);
-    --ui-combobox-error: #dc2626;
-    --ui-combobox-success: #16a34a;
+    --ui-combobox-border-color: var(--ui-color-border, var(--ui-border, rgba(15, 23, 42, 0.14)));
+    --ui-combobox-border: 1px solid var(--ui-combobox-border-color);
+    --ui-combobox-bg: color-mix(in srgb, var(--ui-color-surface, var(--ui-surface, #ffffff)) 94%, transparent);
+    --ui-combobox-color: var(--ui-color-text, var(--ui-text, #0f172a));
+    --ui-combobox-shadow: var(--ui-shadow-sm, 0 10px 32px rgba(2, 6, 23, 0.08));
+    --ui-combobox-focus: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
+    --ui-combobox-panel-bg: color-mix(in srgb, var(--ui-color-surface, var(--ui-surface, #ffffff)) 98%, transparent);
+    --ui-combobox-panel-border: 1px solid color-mix(in srgb, var(--ui-combobox-border-color) 72%, transparent);
+    --ui-combobox-panel-shadow: var(--ui-shadow-md, 0 22px 48px rgba(2, 6, 23, 0.16));
+    --ui-combobox-muted: var(--ui-color-muted, var(--ui-muted, #64748b));
+    --ui-combobox-option-hover: color-mix(in srgb, var(--ui-color-primary, var(--ui-primary, #2563eb)) 10%, transparent);
+    --ui-combobox-option-active: color-mix(in srgb, var(--ui-color-primary, var(--ui-primary, #2563eb)) 16%, transparent);
+    --ui-combobox-error: var(--ui-color-danger, var(--ui-error, #dc2626));
+    --ui-combobox-success: var(--ui-color-success, var(--ui-success, #16a34a));
+    color-scheme: light dark;
   }
 
   .label-row {
@@ -88,7 +90,7 @@ const style = `
   }
 
   .control[data-focused="true"] {
-    border-color: color-mix(in srgb, var(--ui-combobox-focus) 58%, white);
+    border-color: color-mix(in srgb, var(--ui-combobox-focus) 68%, var(--ui-combobox-border-color));
     box-shadow: 0 0 0 4px color-mix(in srgb, var(--ui-combobox-focus) 15%, transparent), var(--ui-combobox-shadow);
   }
 
@@ -109,7 +111,7 @@ const style = `
     transition: background-color 120ms ease, color 120ms ease;
   }
   .icon-btn:hover {
-    background: rgba(15, 23, 42, 0.08);
+    background: color-mix(in srgb, var(--ui-combobox-color) 10%, transparent);
     color: var(--ui-combobox-color);
   }
   .icon-btn[hidden] {
@@ -203,7 +205,7 @@ const style = `
   :host([disabled]) .control {
     opacity: 0.62;
     pointer-events: none;
-    background: rgba(148, 163, 184, 0.12);
+    background: color-mix(in srgb, var(--ui-combobox-muted) 20%, transparent);
   }
 
   :host([size="sm"]),
@@ -219,11 +221,11 @@ const style = `
   }
 
   :host([variant="surface"]) .control {
-    background: #f8fafc;
+    background: var(--ui-color-surface-alt, var(--ui-surface-alt, #f8fafc));
   }
   :host([variant="soft"]) .control {
-    background: rgba(15, 23, 42, 0.03);
-    border-color: rgba(15, 23, 42, 0.08);
+    background: color-mix(in srgb, var(--ui-combobox-color) 5%, transparent);
+    border-color: color-mix(in srgb, var(--ui-combobox-border-color) 70%, transparent);
   }
 
   :host([radius="none"]) {
@@ -238,7 +240,7 @@ const style = `
 
   :host([validation="error"]) .control {
     border-color: var(--ui-combobox-error);
-    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.08), var(--ui-combobox-shadow);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ui-combobox-error) 20%, transparent), var(--ui-combobox-shadow);
   }
   :host([validation="success"]) .control {
     border-color: var(--ui-combobox-success);
@@ -256,6 +258,38 @@ const style = `
     .panel,
     .icon-btn {
       transition: none !important;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    :host {
+      --ui-combobox-border: 2px solid var(--ui-combobox-border-color);
+      --ui-combobox-panel-border: 2px solid var(--ui-combobox-border-color);
+      --ui-combobox-shadow: none;
+      --ui-combobox-panel-shadow: none;
+      --ui-combobox-option-hover: color-mix(in srgb, var(--ui-color-primary, var(--ui-primary, #2563eb)) 24%, transparent);
+      --ui-combobox-option-active: color-mix(in srgb, var(--ui-color-primary, var(--ui-primary, #2563eb)) 32%, transparent);
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-combobox-bg: Canvas;
+      --ui-combobox-color: CanvasText;
+      --ui-combobox-border-color: CanvasText;
+      --ui-combobox-panel-bg: Canvas;
+      --ui-combobox-panel-border: 1px solid CanvasText;
+      --ui-combobox-shadow: none;
+      --ui-combobox-panel-shadow: none;
+      --ui-combobox-muted: GrayText;
+      --ui-combobox-focus: Highlight;
+      --ui-combobox-option-hover: Highlight;
+      --ui-combobox-option-active: Highlight;
+    }
+
+    .option[data-highlighted="true"],
+    .option:hover {
+      color: HighlightText;
     }
   }
 `;

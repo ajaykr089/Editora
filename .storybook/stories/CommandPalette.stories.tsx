@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { CommandPalette, Button } from '@editora/ui-react';
+import { CommandPalette, Button , Box, Grid, Flex} from '@editora/ui-react';
 
 export default {
   title: 'UI/CommandPalette',
@@ -20,11 +20,11 @@ export const Default = (args: any) => {
   const [selected, setSelected] = useState<number | null>(null);
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
-      <div style={{ display: 'flex', gap: 8 }}>
+    <Grid style={{ display: 'grid', gap: 12 }}>
+      <Flex style={{ display: 'flex', gap: 8 }}>
         <Button onClick={() => setOpen(true)}>Open Palette</Button>
         <Button variant="secondary" onClick={() => setOpen(false)}>Close</Button>
-      </div>
+      </Flex>
 
       <CommandPalette
         open={open}
@@ -34,16 +34,16 @@ export const Default = (args: any) => {
         }}
       >
         {commands.map((command) => (
-          <div key={command} slot="command" style={{ padding: 8, borderRadius: 6 }}>
+          <Box key={command} slot="command" style={{ padding: 8, borderRadius: 6 }}>
             {command}
-          </div>
+          </Box>
         ))}
       </CommandPalette>
 
-      <div style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: '#475569' }}>
         Selected: {selected == null ? 'none' : commands[selected]}
-      </div>
-    </div>
+      </Box>
+    </Grid>
   );
 };
 Default.args = { open: false };
@@ -58,7 +58,7 @@ export const FilteredList = () => {
   );
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
+    <Grid style={{ display: 'grid', gap: 12 }}>
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
@@ -73,6 +73,6 @@ export const FilteredList = () => {
       <Button size="sm" variant="secondary" onClick={() => setOpen((v) => !v)}>
         Toggle palette
       </Button>
-    </div>
+    </Grid>
   );
 };

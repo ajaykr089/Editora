@@ -3,38 +3,70 @@ import { ElementBase } from '../ElementBase';
 const style = `
   :host {
     display: inline-block;
-    --ui-select-radius: 6px;
-    --ui-select-bg: #fff;
-    --ui-select-border: 1px solid #e5e7eb;
-    --ui-select-color: #111;
-    --ui-select-focus: #2563eb;
+    --ui-select-radius: var(--ui-radius, 10px);
+    --ui-select-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
+    --ui-select-border-color: var(--ui-color-border, var(--ui-border, rgba(15, 23, 42, 0.16)));
+    --ui-select-border: 1px solid var(--ui-select-border-color);
+    --ui-select-color: var(--ui-color-text, var(--ui-text, #111827));
+    --ui-select-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     --ui-select-padding: 8px 12px;
     --ui-select-font: 14px;
-    --ui-select-disabled-bg: #f3f4f6;
-    --ui-select-disabled-color: #bdbdbd;
+    --ui-select-disabled-bg: var(--ui-color-surface-alt, var(--ui-surface-alt, #f3f4f6));
+    --ui-select-disabled-color: color-mix(in srgb, var(--ui-select-color) 48%, transparent);
+    color-scheme: light dark;
   }
   select {
     padding: var(--ui-select-padding);
+    padding-right: calc(12px + 1.4em);
     border-radius: var(--ui-select-radius);
     border: var(--ui-select-border);
     background: var(--ui-select-bg);
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: calc(100% - 15px) calc(50% - 2px), calc(100% - 10px) calc(50% - 2px);
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
     color: var(--ui-select-color);
     font-size: var(--ui-select-font);
     outline: none;
     min-width: 120px;
-    transition: border-color 0.2s;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
     appearance: none;
     width: 100%;
     box-sizing: border-box;
   }
   select:focus-visible {
-    border-color: var(--ui-select-focus);
+    border-color: var(--ui-select-focus-ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-select-focus-ring) 24%, transparent);
   }
   select:disabled {
     background: var(--ui-select-disabled-bg);
+    background-image: none;
     color: var(--ui-select-disabled-color);
     cursor: not-allowed;
     opacity: 0.7;
+  }
+  @media (prefers-contrast: more) {
+    :host {
+      --ui-select-border: 2px solid var(--ui-select-border-color);
+    }
+    select:focus-visible {
+      box-shadow: none;
+      outline: 2px solid var(--ui-select-focus-ring);
+      outline-offset: 1px;
+    }
+  }
+  @media (forced-colors: active) {
+    :host {
+      --ui-select-bg: Canvas;
+      --ui-select-color: CanvasText;
+      --ui-select-border-color: CanvasText;
+      --ui-select-focus-ring: Highlight;
+      --ui-select-disabled-bg: Canvas;
+      --ui-select-disabled-color: GrayText;
+    }
+    select {
+      background-image: none;
+    }
   }
   :host([headless]) select { display: none; }
 `;

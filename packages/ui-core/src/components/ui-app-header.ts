@@ -5,13 +5,18 @@ const style = `
     display: block;
     --ui-app-header-height: 60px;
     --ui-app-header-height-dense: 48px;
-    --ui-app-header-bg: #ffffff;
-    --ui-app-header-color: #0f172a;
-    --ui-app-header-border: #e2e8f0;
+    --ui-app-header-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
+    --ui-app-header-color: var(--ui-color-text, var(--ui-text, #0f172a));
+    --ui-app-header-border-color: var(--ui-color-border, var(--ui-border, rgba(15, 23, 42, 0.14)));
+    --ui-app-header-border: 1px solid var(--ui-app-header-border-color);
+    --ui-app-header-control-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
+    --ui-app-header-control-bg-hover: var(--ui-color-surface-alt, var(--ui-surface-alt, #f8fafc));
+    --ui-app-header-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     --ui-app-header-gap: 10px;
     --ui-app-header-padding-x: 14px;
     --ui-app-header-z: 60;
-    --ui-app-header-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+    --ui-app-header-shadow: var(--ui-shadow-sm, 0 1px 0 rgba(15, 23, 42, 0.04));
+    color-scheme: light dark;
   }
   header {
     min-height: var(--ui-app-header-height);
@@ -29,7 +34,7 @@ const style = `
     min-height: var(--ui-app-header-height-dense);
   }
   :host([bordered]) header {
-    border-bottom-color: var(--ui-app-header-border);
+    border-bottom-color: var(--ui-app-header-border-color);
   }
   :host([sticky]) {
     position: sticky;
@@ -62,8 +67,8 @@ const style = `
     width: 34px;
     height: 34px;
     border-radius: 8px;
-    border: 1px solid var(--ui-app-header-border);
-    background: #ffffff;
+    border: var(--ui-app-header-border);
+    background: var(--ui-app-header-control-bg);
     color: var(--ui-app-header-color);
     display: inline-flex;
     align-items: center;
@@ -72,17 +77,37 @@ const style = `
     font-size: 15px;
   }
   .menu-btn:hover {
-    background: #f8fafc;
+    background: var(--ui-app-header-control-bg-hover);
   }
   .menu-btn:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.28);
+    outline: 2px solid var(--ui-app-header-focus-ring);
+    outline-offset: 1px;
   }
   .menu-btn[hidden] {
     display: none;
   }
   :host([headless]) header {
     display: none;
+  }
+
+  @media (prefers-contrast: more) {
+    :host {
+      --ui-app-header-border: 2px solid var(--ui-app-header-border-color);
+      --ui-app-header-shadow: none;
+      --ui-app-header-control-bg-hover: color-mix(in srgb, var(--ui-color-primary, var(--ui-primary, #2563eb)) 18%, transparent);
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-app-header-bg: Canvas;
+      --ui-app-header-color: CanvasText;
+      --ui-app-header-border-color: CanvasText;
+      --ui-app-header-shadow: none;
+      --ui-app-header-control-bg: Canvas;
+      --ui-app-header-control-bg-hover: Highlight;
+      --ui-app-header-focus-ring: Highlight;
+    }
   }
 `;
 

@@ -20,6 +20,8 @@ import {
   TextAlignmentPlugin,
 } from "@editora/plugins";
 import "@editora/themes/themes/default.css";
+import { Box, Grid} from '@editora/ui-react';
+
 
 /**
  * Media Manager Stories - Demonstrating Offline-First Upload
@@ -82,12 +84,12 @@ export const PureOfflineMode: Story = {
     },
   },
   render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f0f8ff', marginBottom: '10px' }}>
+    <Box style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
+      <Box style={{ padding: '10px', background: '#f0f8ff', marginBottom: '10px' }}>
         <strong>📱 Pure Offline Mode:</strong> All images stored as base64. No server required!
-      </div>
+      </Box>
       <EditoraEditor {...args} />
-    </div>
+    </Box>
   ),
 };
 
@@ -114,12 +116,12 @@ export const OfflineFirstWithCustomServer: Story = {
     },
   },
   render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#fff8f0', marginBottom: '10px' }}>
+    <Box style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
+      <Box style={{ padding: '10px', background: '#fff8f0', marginBottom: '10px' }}>
         <strong>🌐 Offline-First with Custom Server:</strong> Tries server first, falls back to base64 if unavailable
-      </div>
+      </Box>
       <EditoraEditor {...args} />
-    </div>
+    </Box>
   ),
 };
 
@@ -144,12 +146,12 @@ export const HybridModeApiOptional: Story = {
     },
   },
   render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f0fff0', marginBottom: '10px' }}>
+    <Box style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
+      <Box style={{ padding: '10px', background: '#f0fff0', marginBottom: '10px' }}>
         <strong>⚡ Hybrid Mode:</strong> Base64 default + optional API upload in background
-      </div>
+      </Box>
       <EditoraEditor {...args} />
-    </div>
+    </Box>
   ),
 };
 
@@ -189,12 +191,12 @@ export const ProductionSetup: Story = {
     },
   },
   render: (args) => (
-    <div style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
+    <Box style={{ position: 'relative', height: '600px', border: '1px solid #ddd' }}>
+      <Box style={{ padding: '10px', background: '#f5f5f5', marginBottom: '10px' }}>
         <strong>🚀 Production Setup:</strong> Full-featured configuration with authentication and fallback
-      </div>
+      </Box>
       <EditoraEditor {...args} />
-    </div>
+    </Box>
   ),
 };
 
@@ -218,11 +220,11 @@ export const MigrationGuide: Story = {
     },
   },
   render: (args) => (
-    <div style={{ position: 'relative', minHeight: '600px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '20px', maxHeight: '400px', overflow: 'auto' }}>
+    <Box style={{ position: 'relative', minHeight: '600px', border: '1px solid #ddd' }}>
+      <Box style={{ padding: '20px', maxHeight: '400px', overflow: 'auto' }}>
         <h3>📚 Migration Guide: API-First → Offline-First</h3>
         
-        <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#fff3cd', borderRadius: '4px' }}>
+        <Box style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#fff3cd', borderRadius: '4px' }}>
           <strong>❌ Old (Phase 16 - API-First):</strong>
           <pre style={{ marginTop: '10px', overflow: 'auto', fontSize: '11px' }}>
 {`offline: {
@@ -231,9 +233,9 @@ export const MigrationGuide: Story = {
 }
 // API tried first, base64 was fallback`}
           </pre>
-        </div>
+        </Box>
 
-        <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#d4edda', borderRadius: '4px' }}>
+        <Box style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#d4edda', borderRadius: '4px' }}>
           <strong>✅ New (Phase 17 - Offline-First):</strong>
           <pre style={{ marginTop: '10px', overflow: 'auto', fontSize: '11px' }}>
 {`offline: {
@@ -243,9 +245,9 @@ export const MigrationGuide: Story = {
 }
 // Base64 first, servers optional`}
           </pre>
-        </div>
+        </Box>
 
-        <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f0fff0', borderRadius: '4px' }}>
+        <Box style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f0fff0', borderRadius: '4px' }}>
           <strong>🎯 Key Improvements:</strong>
           <ul style={{ marginTop: '10px', marginBottom: '0', fontSize: '13px' }}>
             <li>✅ Instant uploads (base64 immediate)</li>
@@ -254,14 +256,14 @@ export const MigrationGuide: Story = {
             <li>✅ Toast notifications (better UX)</li>
             <li>✅ Backward compatible (old config still works)</li>
           </ul>
-        </div>
-      </div>
+        </Box>
+      </Box>
       
-      <div style={{ borderTop: '1px solid #ddd', paddingTop: '10px', marginTop: '10px' }}>
+      <Box style={{ borderTop: '1px solid #ddd', paddingTop: '10px', marginTop: '10px' }}>
         <strong>Try it below:</strong>
         <EditoraEditor {...args} />
-      </div>
-    </div>
+      </Box>
+    </Box>
   ),
 };
 
@@ -286,15 +288,15 @@ export const ToastNotificationsDemo: Story = {
     const [notificationInfo, setNotificationInfo] = React.useState('');
     
     return (
-      <div style={{ position: 'relative', minHeight: '600px', border: '1px solid #ddd' }}>
-        <div style={{ padding: '20px', background: '#f9f9f9', borderBottom: '1px solid #ddd' }}>
+      <Box style={{ position: 'relative', minHeight: '600px', border: '1px solid #ddd' }}>
+        <Box style={{ padding: '20px', background: '#f9f9f9', borderBottom: '1px solid #ddd' }}>
           <h3>🔔 Toast Notifications in Action</h3>
           <p style={{ color: '#666', fontSize: '13px', margin: '10px 0 0 0' }}>
             When you upload images, you'll see professional toast notifications showing the upload status.
           </p>
           
-          <div style={{ marginTop: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-            <div style={{
+          <Grid style={{ marginTop: '20px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+            <Box style={{
               padding: '15px',
               backgroundColor: '#f1f8f4',
               borderLeft: '4px solid #4CAF50',
@@ -304,9 +306,9 @@ export const ToastNotificationsDemo: Story = {
               <p style={{ fontSize: '11px', marginTop: '5px', color: '#666' }}>
                 Shows when image uploaded to server
               </p>
-            </div>
+            </Box>
 
-            <div style={{
+            <Box style={{
               padding: '15px',
               backgroundColor: '#f1f5f8',
               borderLeft: '4px solid #2196F3',
@@ -316,9 +318,9 @@ export const ToastNotificationsDemo: Story = {
               <p style={{ fontSize: '11px', marginTop: '5px', color: '#666' }}>
                 Shows when image stored as base64
               </p>
-            </div>
+            </Box>
 
-            <div style={{
+            <Box style={{
               padding: '15px',
               backgroundColor: '#fdf1f1',
               borderLeft: '4px solid #f44336',
@@ -328,17 +330,17 @@ export const ToastNotificationsDemo: Story = {
               <p style={{ fontSize: '11px', marginTop: '5px', color: '#666' }}>
                 Shows when upload fails
               </p>
-            </div>
-          </div>
-        </div>
+            </Box>
+          </Grid>
+        </Box>
 
-        <div style={{ position: 'relative', height: '500px', borderTop: '1px solid #ddd' }}>
+        <Box style={{ position: 'relative', height: '500px', borderTop: '1px solid #ddd' }}>
           <EditoraEditor 
             {...args}
             defaultValue="<p>Try uploading an image above to see the toast notifications! 📸</p>"
           />
-        </div>
-      </div>
+        </Box>
+      </Box>
     );
   },
 };
@@ -361,15 +363,15 @@ export const SetupCodeExamples: Story = {
     },
   },
   render: (args) => (
-    <div style={{ minHeight: '900px', border: '1px solid #ddd' }}>
-      <div style={{ padding: '30px', background: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
+    <Box style={{ minHeight: '900px', border: '1px solid #ddd' }}>
+      <Box style={{ padding: '30px', background: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
         <h2>💻 Setup Code Examples</h2>
         <p style={{ color: '#666', marginTop: '10px' }}>
           Complete code snippets showing how to initialize and configure the media manager with various options
         </p>
-      </div>
+      </Box>
 
-      <div style={{ padding: '30px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+      <Grid style={{ padding: '30px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
         
         {/* Example 1: Minimal Setup */}
         <div>
@@ -416,10 +418,10 @@ export function MyEditor() {
   );
 }`}
           </pre>
-          <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#e8f5e9', borderRadius: '4px' }}>
+          <Box style={{ marginTop: '10px', padding: '10px', backgroundColor: '#e8f5e9', borderRadius: '4px' }}>
             <strong style={{ fontSize: '12px' }}>💡 Use this when:</strong>
             <p style={{ fontSize: '11px', margin: '5px 0 0 0', color: '#555' }}>No server available, images stored in document</p>
-          </div>
+          </Box>
         </div>
 
         {/* Example 2: With Custom Server */}
@@ -468,10 +470,10 @@ export function MyEditor() {
   );
 }`}
           </pre>
-          <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#e3f2fd', borderRadius: '4px' }}>
+          <Box style={{ marginTop: '10px', padding: '10px', backgroundColor: '#e3f2fd', borderRadius: '4px' }}>
             <strong style={{ fontSize: '12px' }}>💡 Use this when:</strong>
             <p style={{ fontSize: '11px', margin: '5px 0 0 0', color: '#555' }}>You have a custom server endpoint</p>
-          </div>
+          </Box>
         </div>
 
         {/* Example 3: Hybrid with API Optional */}
@@ -515,10 +517,10 @@ export function MyEditor() {
   );
 }`}
           </pre>
-          <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#fff3e0', borderRadius: '4px' }}>
+          <Box style={{ marginTop: '10px', padding: '10px', backgroundColor: '#fff3e0', borderRadius: '4px' }}>
             <strong style={{ fontSize: '12px' }}>💡 Use this when:</strong>
             <p style={{ fontSize: '11px', margin: '5px 0 0 0', color: '#555' }}>You want instant response + server upload as bonus</p>
-          </div>
+          </Box>
         </div>
 
         {/* Example 4: Complete Production Setup */}
@@ -571,23 +573,23 @@ export function MyEditor() {
   );
 }`}
           </pre>
-          <div style={{ marginTop: '10px', padding: '10px', backgroundColor: '#f3e5f5', borderRadius: '4px' }}>
+          <Box style={{ marginTop: '10px', padding: '10px', backgroundColor: '#f3e5f5', borderRadius: '4px' }}>
             <strong style={{ fontSize: '12px' }}>💡 Use this when:</strong>
             <p style={{ fontSize: '11px', margin: '5px 0 0 0', color: '#555' }}>Multiple editors, environment variables, authentication</p>
-          </div>
+          </Box>
         </div>
-      </div>
+      </Grid>
 
       {/* Configuration Options Reference */}
-      <div style={{ padding: '30px', background: '#fafafa', borderTop: '2px solid #ddd' }}>
+      <Box style={{ padding: '30px', background: '#fafafa', borderTop: '2px solid #ddd' }}>
         <h3 style={{ marginTop: '0', fontSize: '16px', borderBottom: '2px solid #666', paddingBottom: '10px' }}>
           ⚙️ Configuration Options Reference
         </h3>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
+        <Grid style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
           
           {/* Offline Options */}
-          <div style={{ padding: '15px', backgroundColor: '#fff', borderRadius: '4px', border: '1px solid #e0e0e0' }}>
+          <Box style={{ padding: '15px', backgroundColor: '#fff', borderRadius: '4px', border: '1px solid #e0e0e0' }}>
             <h4 style={{ marginTop: '0', color: '#2196F3' }}>📱 offline Options</h4>
             <pre style={{
               background: '#f5f5f5',
@@ -615,10 +617,10 @@ export function MyEditor() {
   }
 }`}
             </pre>
-          </div>
+          </Box>
 
           {/* File Options */}
-          <div style={{ padding: '15px', backgroundColor: '#fff', borderRadius: '4px', border: '1px solid #e0e0e0' }}>
+          <Box style={{ padding: '15px', backgroundColor: '#fff', borderRadius: '4px', border: '1px solid #e0e0e0' }}>
             <h4 style={{ marginTop: '0', color: '#4CAF50' }}>📄 File Options</h4>
             <pre style={{
               background: '#f5f5f5',
@@ -646,11 +648,11 @@ export function MyEditor() {
   offline: { ... }
 }`}
             </pre>
-          </div>
-        </div>
+          </Box>
+        </Grid>
 
         {/* Common Patterns */}
-        <div style={{ marginTop: '30px', padding: '20px', backgroundColor: '#e8f5e9', borderRadius: '4px', border: '1px solid #4CAF50' }}>
+        <Box style={{ marginTop: '30px', padding: '20px', backgroundColor: '#e8f5e9', borderRadius: '4px', border: '1px solid #4CAF50' }}>
           <h4 style={{ marginTop: '0', color: '#2e7d32' }}>🎯 Common Patterns</h4>
           <ul style={{ fontSize: '12px', lineHeight: '1.8', color: '#555' }}>
             <li><strong>Development:</strong> Use base64 only (no server needed)</li>
@@ -659,19 +661,19 @@ export function MyEditor() {
             <li><strong>Self-Hosted:</strong> Use custom server with auth headers</li>
             <li><strong>SaaS:</strong> Use API endpoints + optional custom server</li>
           </ul>
-        </div>
-      </div>
+        </Box>
+      </Box>
 
       {/* Live Editor Example */}
-      <div style={{ padding: '30px', borderTop: '2px solid #ddd' }}>
+      <Box style={{ padding: '30px', borderTop: '2px solid #ddd' }}>
         <h3 style={{ marginTop: '0' }}>👇 Try it below (Live Editor)</h3>
-        <div style={{ position: 'relative', height: '400px', marginTop: '20px' }}>
+        <Box style={{ position: 'relative', height: '400px', marginTop: '20px' }}>
           <EditoraEditor
             {...args}
             defaultValue="<p>This editor uses the hybrid mode configuration from Example 3 above. Try uploading an image! 📸</p>"
           />
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   ),
 };

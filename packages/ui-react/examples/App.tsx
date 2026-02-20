@@ -1,15 +1,33 @@
 import React from 'react';
-import { Badge, Button, Combobox, ContextMenu, Dialog, Form, Input, Menubar, NavigationMenu, Table, ThemeProvider, useForm } from '@editora/ui-react';
+import {
+  Alert,
+  Badge,
+  Button,
+  Combobox,
+  ContextMenu,
+  DataTable,
+  Dialog,
+  EmptyState,
+  Form,
+  Input,
+  Menubar,
+  NavigationMenu,
+  Pagination,
+  Skeleton,
+  Table,
+  ThemeProvider,
+  useForm
+} from '@editora/ui-react';
 
 const shell: React.CSSProperties = {
   minHeight: '100vh',
-  background: 'linear-gradient(150deg, #f8fafc 0%, #f1f5f9 42%, #ffffff 100%)',
+  background: 'radial-gradient(1200px 420px at 10% -10%, rgba(14, 165, 233, 0.18), transparent 62%), linear-gradient(160deg, #f8fafc 0%, #eef2ff 46%, #ffffff 100%)',
   color: '#0f172a',
-  fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial'
+  fontFamily: '"Avenir Next", "Segoe UI", "Helvetica Neue", Arial, sans-serif'
 };
 
 const page: React.CSSProperties = {
-  maxWidth: 1000,
+  maxWidth: 1160,
   margin: '0 auto',
   padding: '40px 20px 64px'
 };
@@ -23,10 +41,35 @@ const grid: React.CSSProperties = {
 const card: React.CSSProperties = {
   borderRadius: 14,
   border: '1px solid rgba(15, 23, 42, 0.12)',
-  background: '#ffffff',
+  background: 'rgba(255, 255, 255, 0.88)',
+  backdropFilter: 'blur(6px)',
   boxShadow: '0 10px 30px rgba(15, 23, 42, 0.08)',
   padding: 16
 };
+
+const users = [
+  { name: 'Ava Johnson', email: 'ava@acme.com', role: 'Admin', status: 'Active', signups: 12 },
+  { name: 'Liam Carter', email: 'liam@acme.com', role: 'Manager', status: 'Invited', signups: 3 },
+  { name: 'Mia Chen', email: 'mia@acme.com', role: 'Editor', status: 'Active', signups: 8 },
+  { name: 'Noah Patel', email: 'noah@acme.com', role: 'Editor', status: 'Suspended', signups: 1 },
+  { name: 'Emma Garcia', email: 'emma@acme.com', role: 'Analyst', status: 'Active', signups: 9 },
+  { name: 'Lucas Brown', email: 'lucas@acme.com', role: 'Manager', status: 'Active', signups: 14 },
+  { name: 'Sophia Miller', email: 'sophia@acme.com', role: 'Admin', status: 'Invited', signups: 2 },
+  { name: 'Ethan Wilson', email: 'ethan@acme.com', role: 'Editor', status: 'Active', signups: 6 }
+];
+
+const revenueRows = [
+  { metric: 'Daily Active Users', value: '2,184', trend: '+8.4%' },
+  { metric: 'Conversion Rate', value: '4.9%', trend: '+0.7%' },
+  { metric: 'Avg. Response Time', value: '218ms', trend: '-12ms' }
+];
+
+function statusTone(status: string): 'success' | 'warning' | 'danger' | 'info' {
+  if (status === 'Active') return 'success';
+  if (status === 'Invited') return 'warning';
+  if (status === 'Suspended') return 'danger';
+  return 'info';
+}
 
 function QuickStartCard() {
   return (
@@ -265,15 +308,137 @@ function DialogCard() {
   );
 }
 
+function DataTableCard() {
+  const [page, setPage] = React.useState(1);
+  const [selected, setSelected] = React.useState<number[]>([]);
+
+  return (
+    <section style={{ ...card, gridColumn: '1 / -1' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: 10 }}>
+        <h2 style={{ margin: 0, fontSize: 16 }}>Admin Users Table</h2>
+        <div style={{ fontSize: 12, color: '#475569' }}>
+          Selected rows: {selected.length}
+        </div>
+      </div>
+
+      <DataTable
+        sortable
+        selectable
+        multiSelect
+        striped
+        hover
+        stickyHeader
+        page={page}
+        pageSize={4}
+        paginationId="examples-users-pagination"
+        onPageChange={(detail) => setPage(detail.page)}
+        onRowSelect={(detail) => setSelected(detail.indices)}
+      >
+        <table>
+          <thead>
+            <tr>
+              <th data-key="name">Name</th>
+              <th data-key="email">Email</th>
+              <th data-key="role">Role</th>
+              <th data-key="status">Status</th>
+              <th data-key="signups">Signups</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((row) => (
+              <tr key={row.email}>
+                <td>{row.name}</td>
+                <td>{row.email}</td>
+                <td>{row.role}</td>
+                <td>
+                  <Badge tone={statusTone(row.status)} variant="soft" size="sm">
+                    {row.status}
+                  </Badge>
+                </td>
+                <td>{row.signups}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </DataTable>
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+        <Pagination id="examples-users-pagination" page={String(page)} />
+      </div>
+    </section>
+  );
+}
+
+function ServerStatesCard() {
+  return (
+    <section style={{ ...card, gridColumn: '1 / -1' }}>
+      <h2 style={{ margin: '0 0 10px', fontSize: 16 }}>Server States Matrix</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+        <div style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 12 }}>
+          <h3 style={{ margin: '0 0 8px', fontSize: 13, color: '#334155' }}>Loading</h3>
+          <Skeleton variant="text" count={4} animated />
+        </div>
+        <div style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 12 }}>
+          <h3 style={{ margin: '0 0 8px', fontSize: 13, color: '#334155' }}>Error</h3>
+          <Alert
+            tone="danger"
+            title="Failed to fetch"
+            description="Upstream API returned 502. Retry in a moment."
+            dismissible
+          >
+            <Button slot="actions" size="sm">
+              Retry
+            </Button>
+          </Alert>
+        </div>
+        <div style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 12 }}>
+          <h3 style={{ margin: '0 0 8px', fontSize: 13, color: '#334155' }}>Empty</h3>
+          <EmptyState
+            compact
+            title="No records in range"
+            description="Try a different date range or clear filters."
+            actionLabel="Create record"
+          />
+        </div>
+      </div>
+      <div style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 12, marginTop: 12 }}>
+        <h3 style={{ margin: '0 0 8px', fontSize: 13, color: '#334155' }}>Success</h3>
+        <DataTable sortable striped hover page={1} pageSize={3}>
+          <table>
+            <thead>
+              <tr>
+                <th data-key="metric">Metric</th>
+                <th data-key="value">Value</th>
+                <th data-key="trend">Trend</th>
+              </tr>
+            </thead>
+            <tbody>
+              {revenueRows.map((row) => (
+                <tr key={row.metric}>
+                  <td>{row.metric}</td>
+                  <td>{row.value}</td>
+                  <td>{row.trend}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </DataTable>
+      </div>
+    </section>
+  );
+}
+
 export function App() {
   return (
     <main style={shell}>
       <div style={page}>
         <h1 style={{ margin: '0 0 8px', fontSize: 24 }}>@editora/ui-react examples</h1>
         <p style={{ margin: '0 0 20px', color: '#475569' }}>
-          Runnable local examples for wrappers and common integration patterns.
+          Runnable local examples for wrappers, admin data flows, and real-world integration patterns.
         </p>
         <div style={grid}>
+          <DataTableCard />
+          <ServerStatesCard />
           <QuickStartCard />
           <ContextMenuCard />
           <FormCard />

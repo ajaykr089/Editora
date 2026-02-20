@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, Button } from '@editora/ui-react';
+import { Menu, Button , Box, Grid} from '@editora/ui-react';
 
 export default {
   title: 'UI/Menu',
@@ -12,7 +12,7 @@ export const Default = () => {
   const [selected, setSelected] = useState<number | null>(null);
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
+    <Grid style={{ display: 'grid', gap: 12 }}>
       <Menu onSelect={(idx) => setSelected(idx)}>
         <Button slot="trigger">Open menu</Button>
         {items.map((item) => (
@@ -20,10 +20,10 @@ export const Default = () => {
         ))}
       </Menu>
 
-      <div style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: '#475569' }}>
         Selected action: {selected == null ? 'none' : items[selected]}
-      </div>
-    </div>
+      </Box>
+    </Grid>
   );
 };
 
@@ -32,6 +32,6 @@ export const MenuWithDangerZone = () => (
     <Button slot="trigger" variant="secondary">Document actions</Button>
     <div slot="item">Move</div>
     <div slot="item">Share</div>
-    <div slot="item" style={{ color: '#dc2626' }}>Delete permanently</div>
+    <Box slot="item" style={{ color: '#dc2626' }}>Delete permanently</Box>
   </Menu>
 );

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tooltip } from '@editora/ui-react';
+import { Tooltip , Box, Flex} from '@editora/ui-react';
 
 export default {
   title: 'UI/Tooltip',
@@ -19,26 +19,26 @@ export const Hover = Template.bind({});
 Hover.args = { text: 'Helpful tooltip text' };
 
 export const ReducedMotion = () => (
-  <div style={{ '--ui-motion-short': '0ms' } as React.CSSProperties}>
+  <Box style={{ '--ui-motion-short': '0ms' } as React.CSSProperties}>
     <Tooltip text="Reduced motion tooltip">
       <button>Hover me (reduced)</button>
     </Tooltip>
-  </div>
+  </Box>
 );
 
 export const Placement = () => (
-  <div style={{ display: 'flex', gap: 20, alignItems: 'center', justifyContent: 'center', padding: 40 }}>
+  <Flex style={{ display: 'flex', gap: 20, alignItems: 'center', justifyContent: 'center', padding: 40 }}>
     <Tooltip text="Top" placement="top"><button>Top</button></Tooltip>
     <Tooltip text="Right" placement="right"><button>Right</button></Tooltip>
     <Tooltip text="Bottom" placement="bottom"><button>Bottom</button></Tooltip>
     <Tooltip text="Left" placement="left"><button>Left</button></Tooltip>
-  </div>
+  </Flex>
 );
 
 export const Headless = () => (
-  <div style={{ padding: 40 }}>
+  <Box style={{ padding: 40 }}>
     <Tooltip text="I am headless" headless>
       <button>Headless (unstyled)</button>
     </Tooltip>
-  </div>
+  </Box>
 );

@@ -166,6 +166,37 @@ export function ThemedExample() {
 }
 ```
 
+## DataTable + Server States
+
+```tsx
+import React from 'react';
+import { Alert, DataTable, EmptyState, Pagination, Skeleton } from '@editora/ui-react';
+
+export function AdminDataStateExample() {
+  const [page, setPage] = React.useState(1);
+
+  return (
+    <div style={{ display: 'grid', gap: 12 }}>
+      <DataTable
+        sortable
+        selectable
+        page={page}
+        pageSize={5}
+        paginationId="users-pagination"
+        onPageChange={(detail) => setPage(detail.page)}
+      >
+        <table>{/* your thead/tbody rows */}</table>
+      </DataTable>
+      <Pagination id="users-pagination" page={String(page)} />
+
+      <Skeleton variant="text" count={4} animated />
+      <Alert tone="danger" title="Could not fetch users" description="Retry in a moment." dismissible />
+      <EmptyState title="No users found" description="Try changing filters." actionLabel="Create user" />
+    </div>
+  );
+}
+```
+
 ## Build
 
 ```bash

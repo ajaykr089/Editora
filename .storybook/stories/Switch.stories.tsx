@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Switch } from '@editora/ui-react';
+import { Switch , Box, Grid} from '@editora/ui-react';
 
 export default {
   title: 'UI/Switch',
@@ -23,10 +23,10 @@ export const Controlled = (args: any) => {
   }, []);
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
+    <Grid style={{ display: 'grid', gap: 12 }}>
       <Switch ref={ref as any} checked={checked}>Enable autosave</Switch>
-      <div style={{ fontSize: 13, color: '#475569' }}>State: {checked ? 'on' : 'off'}</div>
-    </div>
+      <Box style={{ fontSize: 13, color: '#475569' }}>State: {checked ? 'on' : 'off'}</Box>
+    </Grid>
   );
 };
 Controlled.args = { checked: true };

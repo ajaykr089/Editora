@@ -1,5 +1,5 @@
 import React from 'react';
-import { HoverCard } from '@editora/ui-react';
+import { HoverCard , Box, Grid} from '@editora/ui-react';
 
 export default {
   title: 'UI/HoverCard',
@@ -23,10 +23,10 @@ Default.args = { delay: 120 };
 export const RichCardContent = () => (
   <HoverCard>
     <span tabIndex={0} style={{ display: 'inline-block', padding: 8, borderBottom: '1px dashed #94a3b8' }}>Product details</span>
-    <div slot="card" style={{ display: 'grid', gap: 6 }}>
+    <Grid slot="card" style={{ display: 'grid', gap: 6 }}>
       <div>Release: <strong>2.0</strong></div>
       <div>Support: LTR / RTL</div>
       <div>Theme-ready tokens</div>
-    </div>
+    </Grid>
   </HoverCard>
 );

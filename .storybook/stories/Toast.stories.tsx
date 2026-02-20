@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 // Import the toast library
 import { toast, toastAdvanced } from "@editora/toast";
 import "../../packages/editora-toast/dist/toast.css";
+import { Box, Grid, Flex} from '@editora/ui-react';
+
 
 const meta: Meta = {
   title: "UI Components/Toast Notifications",
@@ -98,11 +100,11 @@ const ToastDemo = ({
   }
 
   return (
-    <div style={{ padding: "20px", maxWidth: "800px" }}>
+    <Box style={{ padding: "20px", maxWidth: "800px" }}>
       <h1>Toast Notifications Demo</h1>
       <p>Click the buttons below to see different toast types and features.</p>
 
-      <div
+      <Grid
         style={{
           display: "grid",
           gap: "20px",
@@ -112,7 +114,7 @@ const ToastDemo = ({
         {/* Basic Toasts */}
         <div>
           <h3>Basic Toasts</h3>
-          <div
+          <Flex
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
             <button onClick={() => toast.info("This is an info message", { theme: theme as any, position: position as any, rtl, swipeDirection: swipeDirection as any })}>
@@ -132,13 +134,13 @@ const ToastDemo = ({
             <button onClick={() => toastAdvanced.loading("Loading content...", { theme: theme as any, position: position as any, rtl, swipeDirection: swipeDirection as any })}>
               Loading Toast
             </button>
-          </div>
+          </Flex>
         </div>
 
         {/* Rich Toasts */}
         <div>
           <h3>Rich Toasts</h3>
-          <div
+          <Flex
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
             <button
@@ -183,13 +185,13 @@ const ToastDemo = ({
             >
               Custom Render Toast
             </button>
-          </div>
+          </Flex>
         </div>
 
         {/* Progress Toasts */}
         <div>
           <h3>Progress Toasts</h3>
-          <div
+          <Flex
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
             <button
@@ -252,12 +254,12 @@ const ToastDemo = ({
             >
               Download Progress
             </button>
-          </div>
+          </Flex>
         </div>
         {/* Theme Showcase */}
         <div>
           <h3>Theme Showcase</h3>
-          <div style={{ display: "grid", gap: "15px", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))" }}>
+          <Grid style={{ display: "grid", gap: "15px", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))" }}>
             {[
               { name: "Colored", theme: "colored" },
               { name: "Minimal", theme: "minimal" },
@@ -269,9 +271,9 @@ const ToastDemo = ({
               { name: "Sunset", theme: "sunset" },
               { name: "Midnight", theme: "midnight" }
             ].map(({ name, theme }) => (
-              <div key={theme} style={{ border: "1px solid #e1e5e9", borderRadius: "8px", padding: "15px" }}>
+              <Box key={theme} style={{ border: "1px solid #e1e5e9", borderRadius: "8px", padding: "15px" }}>
                 <h4 style={{ margin: "0 0 10px 0", fontSize: "14px" }}>{name} Theme</h4>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <Flex style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                   <button onClick={() => {
                     const toast = toastAdvanced.show({
                       message: `${name} theme - Success!`,
@@ -308,14 +310,14 @@ const ToastDemo = ({
                   }}>
                     Error
                   </button>
-                </div>
-              </div>
+                </Flex>
+              </Box>
             ))}
-          </div>
+          </Grid>
         </div>
         <div>
           <h3>Advanced Animations</h3>
-          <div
+          <Flex
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
             <button
@@ -476,13 +478,13 @@ const ToastDemo = ({
             >
               Custom Bounce Animation
             </button>
-          </div>
+          </Flex>
         </div>
 
         {/* Promise Toasts */}
         <div>
           <h3>Promise Lifecycle Toasts</h3>
-          <div
+          <Flex
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
             <button
@@ -520,13 +522,13 @@ const ToastDemo = ({
             >
               Failed Promise
             </button>
-          </div>
+          </Flex>
         </div>
 
         {/* Grouped Toasts */}
         <div>
           <h3>Grouped Toasts</h3>
-          <div
+          <Flex
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
             <button
@@ -553,13 +555,13 @@ const ToastDemo = ({
             >
               Grouped Uploads
             </button>
-          </div>
+          </Flex>
         </div>
 
         {/* File Upload Simulation */}
         <div>
           <h3>File Upload Simulation</h3>
-          <div
+          <Flex
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
             <button
@@ -593,13 +595,13 @@ const ToastDemo = ({
             >
               File Upload
             </button>
-          </div>
+          </Flex>
         </div>
 
         {/* Positioned Toasts */}
         <div>
           <h3>Positioned Toasts</h3>
-          <div
+          <Flex
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
             {[
@@ -623,13 +625,13 @@ const ToastDemo = ({
                 {pos}
               </button>
             ))}
-          </div>
+          </Flex>
         </div>
 
         {/* Configuration */}
         <div>
           <h3>Configuration</h3>
-          <div
+          <Flex
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
             <button
@@ -683,13 +685,13 @@ const ToastDemo = ({
             >
               Reset Config
             </button>
-          </div>
+          </Flex>
         </div>
 
         {/* Update Toast */}
         <div>
           <h3>Update Toast</h3>
-          <div
+          <Flex
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
             <button
@@ -706,13 +708,13 @@ const ToastDemo = ({
             >
               Loading → Success
             </button>
-          </div>
+          </Flex>
         </div>
 
         {/* Plugin Demo */}
         <div>
           <h3>Plugin Demo</h3>
-          <div
+          <Flex
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
             <button
@@ -746,11 +748,11 @@ const ToastDemo = ({
             >
               Toast with Plugin
             </button>
-          </div>
+          </Flex>
         </div>
-      </div>
+      </Grid>
 
-      <div
+      <Box
         style={{
           marginTop: "40px",
           padding: "20px",
@@ -759,7 +761,7 @@ const ToastDemo = ({
         }}
       >
         <h3>Toast State</h3>
-        <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+        <Flex style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
           <div>
             <strong>Toasts:</strong> {toastAdvanced.getToasts().length}
           </div>
@@ -773,9 +775,9 @@ const ToastDemo = ({
               {JSON.stringify(toastAdvanced.getConfig(), null, 2)}
             </pre>
           </div>
-        </div>
-      </div>
-    </div>
+        </Flex>
+      </Box>
+    </Box>
   );
 };
 
@@ -791,24 +793,24 @@ export const ToastShowcase: Story = {
 // Individual feature stories
 export const BasicToasts: Story = {
   render: () => (
-    <div style={{ padding: "20px" }}>
+    <Box style={{ padding: "20px" }}>
       <h2>Basic Toast Types</h2>
-      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+      <Flex style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
         <button onClick={() => toast.info("Info message", { theme: 'light', position: 'bottom-right' })}>Info</button>
         <button onClick={() => toast.success("Success message", { theme: 'light', position: 'bottom-right' })}>Success</button>
         <button onClick={() => toast.error("Error message", { theme: 'light', position: 'bottom-right' })}>Error</button>
         <button onClick={() => toastAdvanced.warning("Warning message", { theme: 'light', position: 'bottom-right' })}>Warning</button>
         <button onClick={() => toastAdvanced.loading("Loading message", { theme: 'light', position: 'bottom-right' })}>Loading</button>
-      </div>
-    </div>
+      </Flex>
+    </Box>
   ),
 };
 
 export const PromiseToasts: Story = {
   render: () => (
-    <div style={{ padding: "20px" }}>
+    <Box style={{ padding: "20px" }}>
       <h2>Promise Lifecycle Toasts</h2>
-      <div style={{ display: "flex", gap: "10px" }}>
+      <Flex style={{ display: "flex", gap: "10px" }}>
         <button onClick={() => {
           const promise = new Promise((resolve) => {
             setTimeout(() => resolve("Data loaded!"), 2000);
@@ -833,14 +835,14 @@ export const PromiseToasts: Story = {
         }}>
           Failed Promise
         </button>
-      </div>
-    </div>
+      </Flex>
+    </Box>
   ),
 };
 
 export const ProgressToasts: Story = {
   render: () => (
-    <div style={{ padding: "20px" }}>
+    <Box style={{ padding: "20px" }}>
       <h2>Progress Toasts</h2>
       <button onClick={() => {
         const toastInstance = toastAdvanced.show({
@@ -871,7 +873,7 @@ export const ProgressToasts: Story = {
       }}>
         Start Progress
       </button>
-    </div>
+    </Box>
   ),
 };
 
@@ -920,7 +922,7 @@ This story demonstrates the newly added features:
 // Complex Examples Stories
 export const InteractiveFeedbackForm: Story = {
   render: () => (
-    <div style={{ padding: "20px" }}>
+    <Box style={{ padding: "20px" }}>
       <h2>Interactive Feedback Form</h2>
       <p>Toast containing a textarea and submit/cancel buttons for user feedback.</p>
       <button onClick={() => {
@@ -1073,16 +1075,16 @@ export const InteractiveFeedbackForm: Story = {
       }}>
         Show Feedback Form
       </button>
-    </div>
+    </Box>
   ),
 };
 
 export const SystemNotifications: Story = {
   render: () => (
-    <div style={{ padding: "20px" }}>
+    <Box style={{ padding: "20px" }}>
       <h2>System Notifications</h2>
       <p>Different types of system notifications with appropriate actions.</p>
-      <div style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
+      <Grid style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
         <button onClick={() => {
           toastAdvanced.show({
             message: '🎉 System update v2.1.0 is now available! New features include enhanced accessibility and improved performance.',
@@ -1134,14 +1136,14 @@ export const SystemNotifications: Story = {
         }}>
           New Messages
         </button>
-      </div>
-    </div>
+      </Grid>
+    </Box>
   ),
 };
 
 export const BulkNotifications: Story = {
   render: () => (
-    <div style={{ padding: "20px" }}>
+    <Box style={{ padding: "20px" }}>
       <h2>Bulk Notifications</h2>
       <p>Multiple notifications appearing in sequence.</p>
       <button onClick={() => {
@@ -1163,13 +1165,13 @@ export const BulkNotifications: Story = {
       }}>
         Show Bulk Notifications
       </button>
-    </div>
+    </Box>
   ),
 };
 
 export const PriorityNotifications: Story = {
   render: () => (
-    <div style={{ padding: "20px" }}>
+    <Box style={{ padding: "20px" }}>
       <h2>Priority Notifications</h2>
       <p>High-priority notifications that require immediate attention.</p>
       <button onClick={() => {
@@ -1186,13 +1188,13 @@ export const PriorityNotifications: Story = {
       }}>
         Show Critical Alert
       </button>
-    </div>
+    </Box>
   ),
 };
 
 export const PersistentNotifications: Story = {
   render: () => (
-    <div style={{ padding: "20px" }}>
+    <Box style={{ padding: "20px" }}>
       <h2>Persistent Notifications</h2>
       <p>Notifications that stay until manually dismissed.</p>
       <button onClick={() => {
@@ -1208,16 +1210,16 @@ export const PersistentNotifications: Story = {
       }}>
         Show Persistent Notification
       </button>
-    </div>
+    </Box>
   ),
 };
 
 export const AdvancedProgressScenarios: Story = {
   render: () => (
-    <div style={{ padding: "20px" }}>
+    <Box style={{ padding: "20px" }}>
       <h2>Advanced Progress Scenarios</h2>
       <p>Complex progress tracking with multiple stages and real-time updates.</p>
-      <div style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
+      <Grid style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
         <button onClick={() => {
           const toast = toastAdvanced.show({
             message: '📁 Uploading document.pdf...',
@@ -1328,17 +1330,17 @@ export const AdvancedProgressScenarios: Story = {
         }}>
           Indeterminate Progress
         </button>
-      </div>
-    </div>
+      </Grid>
+    </Box>
   ),
 };
 
 export const InteractiveActions: Story = {
   render: () => (
-    <div style={{ padding: "20px" }}>
+    <Box style={{ padding: "20px" }}>
       <h2>Interactive Actions</h2>
       <p>Toasts with multiple action buttons for complex user interactions.</p>
-      <div style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
+      <Grid style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
         <button onClick={() => {
           toastAdvanced.show({
             message: '🔄 Are you sure you want to delete this file? This action cannot be undone.',
@@ -1416,17 +1418,17 @@ export const InteractiveActions: Story = {
         }}>
           Decision Required
         </button>
-      </div>
-    </div>
+      </Grid>
+    </Box>
   ),
 };
 
 export const ErrorHandlingScenarios: Story = {
   render: () => (
-    <div style={{ padding: "20px" }}>
+    <Box style={{ padding: "20px" }}>
       <h2>Error Handling Scenarios</h2>
       <p>Different error types with appropriate recovery options.</p>
-      <div style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
+      <Grid style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
         <button onClick={() => {
           toastAdvanced.show({
             message: '🌐 Unable to connect to the server. Please check your internet connection and try again.',
@@ -1504,17 +1506,17 @@ export const ErrorHandlingScenarios: Story = {
         }}>
           Rate Limited
         </button>
-      </div>
-    </div>
+      </Grid>
+    </Box>
   ),
 };
 
 export const AsyncOperations: Story = {
   render: () => (
-    <div style={{ padding: "20px" }}>
+    <Box style={{ padding: "20px" }}>
       <h2>Async Operations</h2>
       <p>Promise-based operations with loading states and success/error handling.</p>
-      <div style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
+      <Grid style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
         <button onClick={() => {
           const promise = new Promise((resolve, reject) => {
             setTimeout(() => {
@@ -1578,7 +1580,7 @@ export const AsyncOperations: Story = {
         }}>
           Data Synchronization
         </button>
-      </div>
-    </div>
+      </Grid>
+    </Box>
   ),
 };

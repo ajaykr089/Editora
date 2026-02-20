@@ -56,7 +56,7 @@ const style = `
     display: grid;
     gap: 4px;
     margin-bottom: 10px;
-    padding-right: 34px;
+    padding-inline-end: 34px;
   }
 
   .title {
@@ -77,7 +77,7 @@ const style = `
   .close {
     position: absolute;
     top: 10px;
-    right: 10px;
+    inset-inline-end: 10px;
     width: 28px;
     height: 28px;
     border: none;

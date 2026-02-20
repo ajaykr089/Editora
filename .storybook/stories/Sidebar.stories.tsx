@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sidebar, Button } from '@editora/ui-react';
+import { Box, Button, Sidebar , Grid} from '@editora/ui-react';
 
 export default {
   title: 'UI/Sidebar',
@@ -16,7 +16,7 @@ export const Interactive = (args: any) => {
   const [collapsed, setCollapsed] = useState(!!args.collapsed);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', minHeight: 360, border: '1px solid #e2e8f0', borderRadius: 12, overflow: 'hidden' }}>
+    <Grid style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', minHeight: 360, border: '1px solid #e2e8f0', borderRadius: 12, overflow: 'hidden' }}>
       <Sidebar
         value={value}
         collapsed={collapsed}
@@ -25,14 +25,14 @@ export const Interactive = (args: any) => {
         onSelect={(detail) => setValue(detail.value)}
         onToggle={setCollapsed}
       >
-        <div slot="header" style={{ fontWeight: 700, padding: '6px 4px' }}>Editora</div>
+        <Box slot="header" style={{ fontWeight: 700, padding: '6px 4px' }}>Editora</Box>
 
-        <div slot="item" data-value="dashboard" data-icon="🏠" data-active>Dashboard</div>
-        <div slot="item" data-value="users" data-icon="👥">Users</div>
-        <div slot="item" data-value="analytics" data-icon="📊">Analytics</div>
-        <div slot="item" data-value="settings" data-icon="⚙️">Settings</div>
+        <Box slot="item" data-value="dashboard" data-icon="🏠" data-active>Dashboard</Box>
+        <Box slot="item" data-value="users" data-icon="👥">Users</Box>
+        <Box slot="item" data-value="analytics" data-icon="📊">Analytics</Box>
+        <Box slot="item" data-value="settings" data-icon="⚙️">Settings</Box>
 
-        <div slot="footer" style={{ fontSize: 12, color: '#64748b', padding: '4px 6px' }}>v2.0</div>
+        <Box slot="footer" style={{ fontSize: 12, color: '#64748b', padding: '4px 6px' }}>v2.0</Box>
       </Sidebar>
 
       <main style={{ padding: 20, background: '#f8fafc' }}>
@@ -42,23 +42,23 @@ export const Interactive = (args: any) => {
           {collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         </Button>
       </main>
-    </div>
+    </Grid>
   );
 };
 Interactive.args = { collapsed: false, collapsible: true, position: 'left' };
 
 export const RightPosition = () => (
-  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', minHeight: 320, border: '1px solid #e2e8f0', borderRadius: 12, overflow: 'hidden' }}>
+  <Grid style={{ display: 'grid', gridTemplateColumns: '1fr auto', minHeight: 320, border: '1px solid #e2e8f0', borderRadius: 12, overflow: 'hidden' }}>
     <main style={{ padding: 20, background: '#f8fafc' }}>
       Content area with right-side inspector navigation.
     </main>
     <Sidebar position="right" value="inspector">
-      <div slot="header" style={{ fontWeight: 700, padding: '6px 4px' }}>Inspector</div>
-      <div slot="item" data-value="inspector" data-icon="🧩">Inspector</div>
-      <div slot="item" data-value="activity" data-icon="🕘">Activity</div>
-      <div slot="item" data-value="history" data-icon="🧾">History</div>
+      <Box slot="header" style={{ fontWeight: 700, padding: '6px 4px' }}>Inspector</Box>
+      <Box slot="item" data-value="inspector" data-icon="🧩">Inspector</Box>
+      <Box slot="item" data-value="activity" data-icon="🕘">Activity</Box>
+      <Box slot="item" data-value="history" data-icon="🧾">History</Box>
     </Sidebar>
-  </div>
+  </Grid>
 );
 
 export const CustomTokens = () => (
@@ -73,9 +73,9 @@ export const CustomTokens = () => (
       ['--ui-sidebar-accent-color' as any]: '#93c5fd'
     }}
   >
-    <div slot="header" style={{ fontWeight: 700, padding: '6px 4px' }}>Dark Nav</div>
-    <div slot="item" data-value="overview" data-icon="📌" data-active>Overview</div>
-    <div slot="item" data-value="reports" data-icon="🧮">Reports</div>
-    <div slot="item" data-value="billing" data-icon="💳">Billing</div>
+    <Box slot="header" style={{ fontWeight: 700, padding: '6px 4px' }}>Dark Nav</Box>
+    <Box slot="item" data-value="overview" data-icon="📌" data-active>Overview</Box>
+    <Box slot="item" data-value="reports" data-icon="🧮">Reports</Box>
+    <Box slot="item" data-value="billing" data-icon="💳">Billing</Box>
   </Sidebar>
 );

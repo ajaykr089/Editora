@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Combobox, Field, Form, useForm } from '@editora/ui-react';
+import { Box, Button, Combobox, Field, Flex, Form, Grid, useForm } from '@editora/ui-react';
 
 export default {
   title: 'UI/Combobox',
@@ -38,9 +38,9 @@ const renderOptions = () =>
   ));
 
 const Template = (args: any) => (
-  <div style={{ maxWidth: 360 }}>
+  <Box style={{ maxWidth: 360 }}>
     <Combobox {...args}>{renderOptions()}</Combobox>
-  </div>
+  </Box>
 );
 
 export const Default = Template.bind({});
@@ -54,7 +54,7 @@ export const Controlled = () => {
   const [value, setValue] = React.useState('engineering');
   const [query, setQuery] = React.useState('');
   return (
-    <div style={{ display: 'grid', gap: 10, maxWidth: 380 }}>
+    <Grid style={{ display: 'grid', gap: 10, maxWidth: 380 }}>
       <Combobox
         value={value}
         clearable
@@ -64,15 +64,15 @@ export const Controlled = () => {
       >
         {renderOptions()}
       </Combobox>
-      <div style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: '#475569' }}>
         value: <code>{value || '(empty)'}</code> | query: <code>{query || '(empty)'}</code>
-      </div>
-    </div>
+      </Box>
+    </Grid>
   );
 };
 
 export const AllowCustomValues = () => (
-  <div style={{ maxWidth: 380 }}>
+  <Box style={{ maxWidth: 380 }}>
     <Combobox
       allowCustom
       clearable
@@ -86,7 +86,7 @@ export const AllowCustomValues = () => (
       <option value="customer-report">Customer report</option>
       <option value="internal-note">Internal note</option>
     </Combobox>
-  </div>
+  </Box>
 );
 
 export const ValidationState = Template.bind({});
@@ -102,23 +102,23 @@ export const InForm = () => {
   const { ref, submit, getValues } = useForm();
 
   return (
-    <div style={{ maxWidth: 460 }}>
+    <Box style={{ maxWidth: 460 }}>
       <Form ref={ref} onSubmit={(values) => alert(JSON.stringify(values))}>
-        <div style={{ display: 'grid', gap: 12 }}>
+        <Grid style={{ display: 'grid', gap: 12 }}>
           <Field label="Team" htmlFor="team-combobox" required>
             <Combobox id="team-combobox" name="team" required placeholder="Select team..." clearable>
               {renderOptions()}
             </Combobox>
           </Field>
-        </div>
+        </Grid>
       </Form>
 
-      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+      <Flex style={{ display: 'flex', gap: 8, marginTop: 12 }}>
         <Button onClick={() => submit()}>Submit</Button>
         <Button variant="secondary" onClick={() => alert(JSON.stringify(getValues()))}>
           Get values
         </Button>
-      </div>
-    </div>
+      </Flex>
+    </Box>
   );
 };

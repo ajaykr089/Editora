@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input, ThemeProvider } from '@editora/ui-react';
+import { Input, ThemeProvider , Box} from '@editora/ui-react';
 
 export default {
   title: 'UI/Input',
@@ -64,9 +64,9 @@ StyledWithCSSVars.args = { value: '', placeholder: 'Custom CSS vars', style: { [
 
 export const ThemedByTokens = () => (
   <ThemeProvider tokens={{ colors: { primary: '#16a34a', background: '#0f172a', text: '#f8fafc' }, radius: '12px' }}>
-    <div style={{ padding: 12, background: 'var(--ui-color-background)' }}>
+    <Box style={{ padding: 12, background: 'var(--ui-color-background)' }}>
       <Input placeholder="Token-driven input" />
-    </div>
+    </Box>
   </ThemeProvider>
 );
 

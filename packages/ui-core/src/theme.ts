@@ -5,8 +5,11 @@ export interface ThemeTokens {
     foregroundOnPrimary?: string;
     background?: string;
     surface?: string;
+    surfaceAlt?: string;
     text?: string;
     muted?: string;
+    border?: string;
+    focusRing?: string;
     success?: string;
     danger?: string;
     warning?: string;
@@ -27,8 +30,11 @@ export const defaultTokens: ThemeTokens = {
     foregroundOnPrimary: '#ffffff',
     background: '#ffffff',
     surface: '#ffffff',
+    surfaceAlt: '#f8fafc',
     text: '#111827',
     muted: '#6b7280',
+    border: 'rgba(15, 23, 42, 0.16)',
+    focusRing: '#2563eb',
     success: '#16a34a',
     danger: '#dc2626',
     warning: '#f59e0b'
@@ -72,8 +78,11 @@ export function applyTheme(tokens: any, root: ShadowRoot | Document | null = typ
   setOn(styleRoot, '--ui-color-foreground-on-primary', tokens.colors.foregroundOnPrimary || '#fff');
   setOn(styleRoot, '--ui-color-background', tokens.colors.background || '#fff');
   setOn(styleRoot, '--ui-color-surface', tokens.colors.surface || tokens.colors.background || '#fff');
+  setOn(styleRoot, '--ui-color-surface-alt', tokens.colors.surfaceAlt || '#f8fafc');
   setOn(styleRoot, '--ui-color-text', tokens.colors.text || '#111827');
   setOn(styleRoot, '--ui-color-muted', tokens.colors.muted || '#6b7280');
+  setOn(styleRoot, '--ui-color-border', tokens.colors.border || 'rgba(15, 23, 42, 0.16)');
+  setOn(styleRoot, '--ui-color-focus-ring', tokens.colors.focusRing || tokens.colors.primary || '#2563eb');
   setOn(styleRoot, '--ui-color-success', tokens.colors.success || '#16a34a');
   setOn(styleRoot, '--ui-color-danger', tokens.colors.danger || '#dc2626');
   setOn(styleRoot, '--ui-color-warning', tokens.colors.warning || '#f59e0b');
@@ -84,8 +93,11 @@ export function applyTheme(tokens: any, root: ShadowRoot | Document | null = typ
   setOn(styleRoot, '--ui-foreground', tokens.colors.foregroundOnPrimary || '#fff');
   setOn(styleRoot, '--ui-background', tokens.colors.background || '#fff');
   setOn(styleRoot, '--ui-surface', tokens.colors.surface || tokens.colors.background || '#fff');
+  setOn(styleRoot, '--ui-surface-alt', tokens.colors.surfaceAlt || '#f8fafc');
   setOn(styleRoot, '--ui-text', tokens.colors.text || '#111827');
   setOn(styleRoot, '--ui-muted', tokens.colors.muted || '#6b7280');
+  setOn(styleRoot, '--ui-border', tokens.colors.border || 'rgba(15, 23, 42, 0.16)');
+  setOn(styleRoot, '--ui-focus-ring', tokens.colors.focusRing || tokens.colors.primary || '#2563eb');
   setOn(styleRoot, '--ui-success', tokens.colors.success || '#16a34a');
   setOn(styleRoot, '--ui-error', tokens.colors.danger || '#dc2626');
   setOn(styleRoot, '--ui-warning', tokens.colors.warning || '#f59e0b');
@@ -137,6 +149,7 @@ export function applyTheme(tokens: any, root: ShadowRoot | Document | null = typ
       host.style.setProperty('--ui-foreground', tokens.colors.foregroundOnPrimary || '#fff');
       host.style.setProperty('--ui-background', tokens.colors.background || '#fff');
       host.style.setProperty('--ui-text', tokens.colors.text || '#111827');
+      host.style.setProperty('--ui-border', tokens.colors.border || 'rgba(15, 23, 42, 0.16)');
       host.style.setProperty('--ui-motion-easing', tokens.motion?.easing || 'cubic-bezier(.2,.9,.2,1)');
     } catch (e) {}
   }

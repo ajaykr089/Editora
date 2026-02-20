@@ -53,6 +53,10 @@ import './components/ui-command-palette';
 import './components/ui-textarea';
 import './components/ui-field';
 import './components/ui-combobox';
+import './components/ui-alert';
+import './components/ui-skeleton';
+import './components/ui-empty-state';
+import './components/ui-data-table';
 
 
 // layout primitives
@@ -130,3 +134,7 @@ export { UICommandPalette } from './components/ui-command-palette';
 export { UITextarea } from './components/ui-textarea';
 export { UIField } from './components/ui-field';
 export { UICombobox } from './components/ui-combobox';
+export { UIAlert } from './components/ui-alert';
+export { UISkeleton } from './components/ui-skeleton';
+export { UIEmptyState } from './components/ui-empty-state';
+export { UIDataTable } from './components/ui-data-table';

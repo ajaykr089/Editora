@@ -1,5 +1,5 @@
 import React from 'react';
-import { Slider } from '@editora/ui-react';
+import { Slider , Box, Grid} from '@editora/ui-react';
 
 export default {
   title: 'UI/Slider',
@@ -23,7 +23,7 @@ export const Controlled = (args: any) => {
   }, [min, max]);
 
   return (
-    <div style={{ display: 'grid', gap: 12, maxWidth: 360 }}>
+    <Grid style={{ display: 'grid', gap: 12, maxWidth: 360 }}>
       <Slider
         {...args}
         value={value}
@@ -31,10 +31,10 @@ export const Controlled = (args: any) => {
         max={max}
         onInput={setValue}
       />
-      <div style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: '#475569' }}>
         Value: {value} ({min}-{max})
-      </div>
-    </div>
+      </Box>
+    </Grid>
   );
 };
 

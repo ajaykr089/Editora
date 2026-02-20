@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationMenu } from '@editora/ui-react';
+import { NavigationMenu , Box, Grid} from '@editora/ui-react';
 
 export default {
   title: 'UI/NavigationMenu',
@@ -21,13 +21,13 @@ function ProductMenu(props: any) {
       <button slot="item">Resources</button>
 
       <section slot="panel">
-        <div style={{ display: 'grid', gap: 4 }}>
+        <Grid style={{ display: 'grid', gap: 4 }}>
           <strong>Overview</strong>
           <span style={{ fontSize: 13, color: '#475569' }}>Roadmap, release notes, and workspace activity.</span>
-        </div>
+        </Grid>
       </section>
       <section slot="panel">
-        <div style={{ display: 'grid', gap: 6 }}>
+        <Grid style={{ display: 'grid', gap: 6 }}>
           <strong>Components</strong>
           <ul style={{ margin: 0, paddingLeft: 18, color: '#475569', fontSize: 13 }}>
             <li>Combobox</li>
@@ -35,13 +35,13 @@ function ProductMenu(props: any) {
             <li>Table</li>
             <li>Context Menu</li>
           </ul>
-        </div>
+        </Grid>
       </section>
       <section slot="panel">
-        <div style={{ display: 'grid', gap: 4 }}>
+        <Grid style={{ display: 'grid', gap: 4 }}>
           <strong>Resources</strong>
           <span style={{ fontSize: 13, color: '#475569' }}>Developer docs, tokens, and Storybook examples.</span>
-        </div>
+        </Grid>
       </section>
     </NavigationMenu>
   );
@@ -86,9 +86,9 @@ Vertical.args = {
 export const Controlled = () => {
   const [selected, setSelected] = React.useState(0);
   return (
-    <div style={{ display: 'grid', gap: 10 }}>
+    <Grid style={{ display: 'grid', gap: 10 }}>
       <ProductMenu selected={selected} onSelect={(next) => setSelected(next)} />
-      <div style={{ fontSize: 13, color: '#475569' }}>Selected index: {selected}</div>
-    </div>
+      <Box style={{ fontSize: 13, color: '#475569' }}>Selected index: {selected}</Box>
+    </Grid>
   );
 };

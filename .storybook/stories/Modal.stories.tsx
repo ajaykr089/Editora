@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Button, ThemeProvider } from '@editora/ui-react';
+import { Modal, Button, ThemeProvider , Box} from '@editora/ui-react';
 
 export default {
   title: 'UI/Modal',
@@ -13,11 +13,11 @@ export const Default = (args: any) => {
     <div>
       <Button onClick={() => setOpen(true)}>Open modal</Button>
       <Modal open={open}>
-        <div style={{ padding: 20 }}>
+        <Box style={{ padding: 20 }}>
           <h3>Dialog title</h3>
           <p>This is modal content.</p>
           <Button onClick={() => setOpen(false)}>Close</Button>
-        </div>
+        </Box>
       </Modal>
     </div>
   );
@@ -31,11 +31,11 @@ export const ThemedByTokens = () => {
       <div>
         <Button onClick={() => setOpen(true)}>Open themed modal</Button>
         <Modal open={open}>
-          <div style={{ padding: 20 }}>
+          <Box style={{ padding: 20 }}>
             <h3>Dialog title</h3>
             <p>Modal styled from theme tokens.</p>
             <Button onClick={() => setOpen(false)}>Close</Button>
-          </div>
+          </Box>
         </Modal>
       </div>
     </ThemeProvider>

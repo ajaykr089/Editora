@@ -7,7 +7,7 @@
   "types": "dist/index.d.ts",
   "files": ["dist"],
   "scripts": {
-    "build:tsc": "tsc -p . --emitDeclarationOnly --outDir dist",
+    "build:tsc": "tsc -p . --emitDeclarationOnly --noEmit false --outDir dist",
     "build": "vite build && npm run build:tsc",
     "test": "vitest",
     "dev": "vite build --watch",

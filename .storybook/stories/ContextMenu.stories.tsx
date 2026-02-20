@@ -1,5 +1,5 @@
 import React from 'react';
-import { ContextMenu, Button } from '@editora/ui-react';
+import { ContextMenu, Button , Box} from '@editora/ui-react';
 
 export default {
   title: 'UI/ContextMenu',
@@ -12,7 +12,7 @@ export default {
 
 export const Default = (args: any) => (
   <div>
-    <div id="ctx-anchor" style={{ margin: 40, padding: 20, border: '1px dashed #ccc', display: 'inline-block' }}>Right-click / anchor</div>
+    <Box id="ctx-anchor" style={{ margin: 40, padding: 20, border: '1px dashed #ccc', display: 'inline-block' }}>Right-click / anchor</Box>
     <ContextMenu anchorId={args.anchorId || 'ctx-anchor'} open={args.open}>
       <div slot="menu">
         <div className="menuitem" role="menuitem" tabIndex={0}><span className="icon">🍔</span><span className="label">Menu with icon</span></div>
@@ -33,8 +33,8 @@ Default.args = { open: true, anchorId: 'ctx-anchor' };
 export const RightClickDemo = () => {
   const [state, setState] = React.useState<{open: boolean; point?: {x:number;y:number}}>({ open: false });
   return (
-    <div style={{ padding: 40 }} onContextMenu={(e) => { e.preventDefault(); setState({ open: true, point: { x: e.clientX, y: e.clientY } }); }}>
-      <div style={{ padding: 20, border: '1px dashed #ccc', display: 'inline-block' }}>Right-click anywhere inside this box</div>
+    <Box style={{ padding: 40 }} onContextMenu={(e) => { e.preventDefault(); setState({ open: true, point: { x: e.clientX, y: e.clientY } }); }}>
+      <Box style={{ padding: 20, border: '1px dashed #ccc', display: 'inline-block' }}>Right-click anywhere inside this box</Box>
       <ContextMenu open={state.open} anchorPoint={state.point}>
         <div slot="menu">
           <div className="menuitem" role="menuitem" tabIndex={0}><span className="icon">📝</span><span className="label">Edit</span></div>
@@ -50,6 +50,6 @@ export const RightClickDemo = () => {
           </div>
         </div>
       </ContextMenu>
-    </div>
+    </Box>
   );
 };

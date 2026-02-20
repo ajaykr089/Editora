@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Toggle } from '@editora/ui-react';
+import { Toggle , Box, Grid} from '@editora/ui-react';
 
 export default {
   title: 'UI/Toggle',
@@ -23,10 +23,10 @@ export const Controlled = (args: any) => {
   }, []);
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
+    <Grid style={{ display: 'grid', gap: 12 }}>
       <Toggle ref={ref as any} pressed={pressed}>Bold</Toggle>
-      <div style={{ fontSize: 13, color: '#475569' }}>Pressed: {String(pressed)}</div>
-    </div>
+      <Box style={{ fontSize: 13, color: '#475569' }}>Pressed: {String(pressed)}</Box>
+    </Grid>
   );
 };
 Controlled.args = { pressed: false };

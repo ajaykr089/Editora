@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BlockControls, Button } from '@editora/ui-react';
+import { BlockControls, Button , Box, Grid} from '@editora/ui-react';
 
 export default {
   title: 'UI/BlockControls',
@@ -18,14 +18,14 @@ export const ActiveToolState = () => {
   const [tool, setTool] = useState('paragraph');
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
+    <Grid style={{ display: 'grid', gap: 12 }}>
       <BlockControls>
         <Button variant={tool === 'paragraph' ? 'primary' : 'secondary'} onClick={() => setTool('paragraph')}>Paragraph</Button>
         <Button variant={tool === 'heading' ? 'primary' : 'secondary'} onClick={() => setTool('heading')}>Heading</Button>
         <Button variant={tool === 'quote' ? 'primary' : 'secondary'} onClick={() => setTool('quote')}>Quote</Button>
       </BlockControls>
-      <div style={{ fontSize: 13, color: '#475569' }}>Active block: <strong>{tool}</strong></div>
-    </div>
+      <Box style={{ fontSize: 13, color: '#475569' }}>Active block: <strong>{tool}</strong></Box>
+    </Grid>
   );
 };
 

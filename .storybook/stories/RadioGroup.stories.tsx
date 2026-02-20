@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { RadioGroup } from '@editora/ui-react';
+import { RadioGroup , Box, Grid} from '@editora/ui-react';
 
 export default {
   title: 'UI/RadioGroup',
@@ -22,13 +22,13 @@ export const Default = () => {
   }, []);
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
+    <Grid style={{ display: 'grid', gap: 12 }}>
       <RadioGroup ref={ref as any} value={value}>
         <div data-radio data-value="draft">Draft</div>
         <div data-radio data-value="review">In review</div>
         <div data-radio data-value="published">Published</div>
       </RadioGroup>
-      <div style={{ fontSize: 13, color: '#475569' }}>Selected: {value}</div>
-    </div>
+      <Box style={{ fontSize: 13, color: '#475569' }}>Selected: {value}</Box>
+    </Grid>
   );
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider, useTheme, Button } from '@editora/ui-react';
+import { ThemeProvider, useTheme, Button , Box} from '@editora/ui-react';
 
 export default { title: 'UI/Theming', component: ThemeProvider, argTypes: {
   primary: { control: 'color' },
@@ -21,11 +21,11 @@ function Demo() {
     });
   };
   return (
-    <div style={{ padding: 20, background: 'var(--ui-color-background)', color: 'var(--ui-color-text)' }}>
+    <Box style={{ padding: 20, background: 'var(--ui-color-background)', color: 'var(--ui-color-text)' }}>
       <h3>Theme demo</h3>
       <p>Primary color token: <strong style={{ color: 'var(--ui-color-primary)' }}>{tokens.colors.primary}</strong></p>
       <Button onClick={toggle}>Toggle theme</Button>
-    </div>
+    </Box>
   );
 }
 

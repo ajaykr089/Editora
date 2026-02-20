@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table } from '@editora/ui-react';
+import { Table , Box, Grid} from '@editora/ui-react';
 
 export default {
   title: 'UI/Table',
@@ -53,11 +53,11 @@ function TeamMarkup() {
 }
 
 const Template = (args: any) => (
-  <div style={{ maxWidth: 900 }}>
+  <Box style={{ maxWidth: 900 }}>
     <Table {...args}>
       <TeamMarkup />
     </Table>
-  </div>
+  </Box>
 );
 
 export const Default = Template.bind({});
@@ -69,26 +69,26 @@ Default.args = {
 export const Sortable = () => {
   const [sort, setSort] = React.useState('none');
   return (
-    <div style={{ display: 'grid', gap: 10, maxWidth: 900 }}>
+    <Grid style={{ display: 'grid', gap: 10, maxWidth: 900 }}>
       <Table sortable striped onSortChange={(detail) => setSort(`${detail.key} (${detail.direction})`)}>
         <TeamMarkup />
       </Table>
-      <div style={{ fontSize: 13, color: '#475569' }}>Current sort: {sort}</div>
-    </div>
+      <Box style={{ fontSize: 13, color: '#475569' }}>Current sort: {sort}</Box>
+    </Grid>
   );
 };
 
 export const SelectableRows = () => {
   const [selection, setSelection] = React.useState<number[]>([]);
   return (
-    <div style={{ display: 'grid', gap: 10, maxWidth: 900 }}>
+    <Grid style={{ display: 'grid', gap: 10, maxWidth: 900 }}>
       <Table selectable multiSelect striped hover onRowSelect={(detail) => setSelection(detail.indices)}>
         <TeamMarkup />
       </Table>
-      <div style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: '#475569' }}>
         Selected row indices: {selection.length ? selection.join(', ') : 'none'}
-      </div>
-    </div>
+      </Box>
+    </Grid>
   );
 };
 

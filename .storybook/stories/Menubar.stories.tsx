@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menubar } from '@editora/ui-react';
+import { Menubar , Box, Grid} from '@editora/ui-react';
 
 export default {
   title: 'UI/Menubar',
@@ -18,25 +18,25 @@ function EditorMenubar(args: any) {
       <button slot="item">Edit</button>
       <button slot="item">View</button>
 
-      <div slot="content" style={{ minWidth: 200 }}>
-        <div style={{ padding: 8, borderRadius: 8 }}>New Document</div>
-        <div style={{ padding: 8, borderRadius: 8 }}>Open...</div>
-        <div style={{ padding: 8, borderRadius: 8 }}>Save</div>
-        <div style={{ padding: 8, borderRadius: 8 }}>Export PDF</div>
-      </div>
+      <Box slot="content" style={{ minWidth: 200 }}>
+        <Box style={{ padding: 8, borderRadius: 8 }}>New Document</Box>
+        <Box style={{ padding: 8, borderRadius: 8 }}>Open...</Box>
+        <Box style={{ padding: 8, borderRadius: 8 }}>Save</Box>
+        <Box style={{ padding: 8, borderRadius: 8 }}>Export PDF</Box>
+      </Box>
 
-      <div slot="content" style={{ minWidth: 200 }}>
-        <div style={{ padding: 8, borderRadius: 8 }}>Undo</div>
-        <div style={{ padding: 8, borderRadius: 8 }}>Redo</div>
-        <div style={{ padding: 8, borderRadius: 8 }}>Find</div>
-        <div style={{ padding: 8, borderRadius: 8 }}>Replace</div>
-      </div>
+      <Box slot="content" style={{ minWidth: 200 }}>
+        <Box style={{ padding: 8, borderRadius: 8 }}>Undo</Box>
+        <Box style={{ padding: 8, borderRadius: 8 }}>Redo</Box>
+        <Box style={{ padding: 8, borderRadius: 8 }}>Find</Box>
+        <Box style={{ padding: 8, borderRadius: 8 }}>Replace</Box>
+      </Box>
 
-      <div slot="content" style={{ minWidth: 220 }}>
-        <div style={{ padding: 8, borderRadius: 8 }}>Zoom In</div>
-        <div style={{ padding: 8, borderRadius: 8 }}>Zoom Out</div>
-        <div style={{ padding: 8, borderRadius: 8 }}>Zen Mode</div>
-      </div>
+      <Box slot="content" style={{ minWidth: 220 }}>
+        <Box style={{ padding: 8, borderRadius: 8 }}>Zoom In</Box>
+        <Box style={{ padding: 8, borderRadius: 8 }}>Zoom Out</Box>
+        <Box style={{ padding: 8, borderRadius: 8 }}>Zen Mode</Box>
+      </Box>
     </Menubar>
   );
 }
@@ -50,7 +50,7 @@ Default.args = {
 export const Interactive = () => {
   const [state, setState] = React.useState({ open: false, selected: 0 });
   return (
-    <div style={{ display: 'grid', gap: 10 }}>
+    <Grid style={{ display: 'grid', gap: 10 }}>
       <EditorMenubar
         selected={state.selected}
         open={state.open}
@@ -58,10 +58,10 @@ export const Interactive = () => {
         onClose={() => setState((prev) => ({ ...prev, open: false }))}
         onChange={(detail) => setState({ open: detail.open, selected: detail.selected })}
       />
-      <div style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: '#475569' }}>
         open: {String(state.open)} | selected: {state.selected}
-      </div>
-    </div>
+      </Box>
+    </Grid>
   );
 };
 

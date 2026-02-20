@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge } from '@editora/ui-react';
+import { Badge, Flex } from '@editora/ui-react';
 
 export default {
   title: 'UI/Badge',
@@ -27,27 +27,27 @@ Default.args = {
 };
 
 export const TonePalette = () => (
-  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+  <Flex style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
     <Badge tone="neutral" text="Neutral" />
     <Badge tone="info" text="Info" />
     <Badge tone="success" text="Success" />
     <Badge tone="warning" text="Warning" />
     <Badge tone="danger" text="Danger" />
     <Badge tone="purple" text="Purple" />
-  </div>
+  </Flex>
 );
 
 export const Variants = () => (
-  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+  <Flex style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
     <Badge variant="solid" tone="info" text="Solid" />
     <Badge variant="soft" tone="info" text="Soft" />
     <Badge variant="outline" tone="info" text="Outline" />
     <Badge variant="ghost" tone="info" text="Ghost" />
-  </div>
+  </Flex>
 );
 
 export const WithDotAndIcon = () => (
-  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+  <Flex style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
     <Badge dot tone="success" text="Live" />
     <Badge tone="warning">
       <span slot="icon">⚡</span>
@@ -57,26 +57,26 @@ export const WithDotAndIcon = () => (
       <span slot="icon">⛔</span>
       Blocked
     </Badge>
-  </div>
+  </Flex>
 );
 
 export const Removable = () => {
   const [items, setItems] = React.useState(['Marketing', 'Design', 'Engineering']);
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+    <Flex style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
       {items.map((item) => (
         <Badge key={item} tone="neutral" removable onRemove={() => setItems((prev) => prev.filter((x) => x !== item))}>
           {item}
         </Badge>
       ))}
-    </div>
+    </Flex>
   );
 };
 
 export const Sizes = () => (
-  <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+  <Flex style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
     <Badge size="sm" tone="info" text="Small" />
     <Badge size="md" tone="info" text="Default" />
     <Badge size="lg" tone="info" text="Large" />
-  </div>
+  </Flex>
 );

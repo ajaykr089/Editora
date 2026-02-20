@@ -5,12 +5,14 @@ const style = `
     display: block;
     --ui-breadcrumb-gap: 8px;
     --ui-breadcrumb-radius: 8px;
-    --ui-breadcrumb-color: #334155;
-    --ui-breadcrumb-muted: #94a3b8;
-    --ui-breadcrumb-current: #0f172a;
-    --ui-breadcrumb-hover-bg: #f1f5f9;
-    --ui-breadcrumb-focus: 0 0 0 2px rgba(37, 99, 235, 0.28);
+    --ui-breadcrumb-color: var(--ui-color-muted, var(--ui-muted, #334155));
+    --ui-breadcrumb-muted: color-mix(in srgb, var(--ui-color-muted, var(--ui-muted, #94a3b8)) 72%, transparent);
+    --ui-breadcrumb-current: var(--ui-color-text, var(--ui-text, #0f172a));
+    --ui-breadcrumb-hover-bg: var(--ui-color-surface-alt, var(--ui-surface-alt, #f1f5f9));
+    --ui-breadcrumb-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
+    --ui-breadcrumb-current-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-breadcrumb-font-size: 14px;
+    color-scheme: light dark;
   }
   nav {
     display: block;
@@ -52,13 +54,13 @@ const style = `
     color: var(--ui-breadcrumb-current);
   }
   .crumb-btn:focus-visible {
-    outline: none;
-    box-shadow: var(--ui-breadcrumb-focus);
+    outline: 2px solid var(--ui-breadcrumb-focus-ring);
+    outline-offset: 1px;
   }
   .crumb-current {
     color: var(--ui-breadcrumb-current);
     font-weight: 600;
-    background: #ffffff;
+    background: var(--ui-breadcrumb-current-bg);
   }
   .crumb-ellipsis,
   .separator {
@@ -66,6 +68,24 @@ const style = `
   }
   :host([headless]) nav {
     display: none;
+  }
+
+  @media (prefers-contrast: more) {
+    :host {
+      --ui-breadcrumb-hover-bg: color-mix(in srgb, var(--ui-color-primary, var(--ui-primary, #2563eb)) 18%, transparent);
+      --ui-breadcrumb-muted: var(--ui-breadcrumb-color);
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-breadcrumb-color: CanvasText;
+      --ui-breadcrumb-muted: CanvasText;
+      --ui-breadcrumb-current: CanvasText;
+      --ui-breadcrumb-hover-bg: Highlight;
+      --ui-breadcrumb-current-bg: Canvas;
+      --ui-breadcrumb-focus-ring: Highlight;
+    }
   }
 `;
 

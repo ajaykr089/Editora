@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Toast, type ToastElement } from '@editora/ui-react';
+import { Button, Toast, type ToastElement , Box, Grid, Flex} from '@editora/ui-react';
 
 export default {
   title: 'UI/Toast',
@@ -17,14 +17,14 @@ export const Playground = () => {
   };
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
+    <Grid style={{ display: 'grid', gap: 12 }}>
       <Toast
         ref={ref}
         onShow={(detail) => setLastEvent(`show #${detail.id}`)}
         onHide={(detail) => setLastEvent(`hide #${detail.id}`)}
       />
 
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <Flex style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <Button onClick={() => showToast('Saved successfully')}>Show toast</Button>
         <Button variant="secondary" onClick={() => showToast('Publishing in progress...', 4000)}>
           Show long toast
@@ -37,11 +37,11 @@ export const Playground = () => {
         >
           Hide last toast
         </Button>
-      </div>
+      </Flex>
 
-      <div style={{ fontSize: 13, color: '#475569' }}>
+      <Box style={{ fontSize: 13, color: '#475569' }}>
         Last event: {lastEvent} {lastToastId != null ? `(id: ${lastToastId})` : ''}
-      </div>
-    </div>
+      </Box>
+    </Grid>
   );
 };

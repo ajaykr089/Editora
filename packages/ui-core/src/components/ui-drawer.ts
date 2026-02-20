@@ -9,15 +9,20 @@ const style = `
     display: block;
     pointer-events: none;
     z-index: 1000;
-    --ui-drawer-overlay: rgba(15, 23, 42, 0.48);
-    --ui-drawer-bg: #ffffff;
-    --ui-drawer-color: #0f172a;
-    --ui-drawer-border: #e2e8f0;
-    --ui-drawer-shadow: 0 20px 45px rgba(2, 6, 23, 0.26);
+    --ui-drawer-overlay: color-mix(in srgb, var(--ui-color-text, var(--ui-text, #0f172a)) 48%, transparent);
+    --ui-drawer-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
+    --ui-drawer-color: var(--ui-color-text, var(--ui-text, #0f172a));
+    --ui-drawer-border-color: var(--ui-color-border, var(--ui-border, rgba(15, 23, 42, 0.14)));
+    --ui-drawer-border: 1px solid var(--ui-drawer-border-color);
+    --ui-drawer-shadow: var(--ui-shadow-md, 0 20px 45px rgba(2, 6, 23, 0.26));
+    --ui-drawer-control-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
+    --ui-drawer-control-bg-hover: var(--ui-color-surface-alt, var(--ui-surface-alt, #f8fafc));
+    --ui-drawer-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     --ui-drawer-width: min(360px, 88vw);
     --ui-drawer-height: min(420px, 70vh);
     --ui-drawer-radius: 14px;
     --ui-drawer-transition: 0.22s cubic-bezier(.4, 0, .2, 1);
+    color-scheme: light dark;
   }
   :host([open]) {
     pointer-events: auto;
@@ -49,7 +54,7 @@ const style = `
     left: 0;
     bottom: 0;
     width: var(--ui-drawer-width);
-    border-right: 1px solid var(--ui-drawer-border);
+    border-right: var(--ui-drawer-border);
     transform: translateX(-102%);
   }
   :host([open]) .panel.side-left {
@@ -61,7 +66,7 @@ const style = `
     right: 0;
     bottom: 0;
     width: var(--ui-drawer-width);
-    border-left: 1px solid var(--ui-drawer-border);
+    border-left: var(--ui-drawer-border);
     transform: translateX(102%);
   }
   :host([open]) .panel.side-right {
@@ -73,7 +78,7 @@ const style = `
     right: 0;
     top: 0;
     height: var(--ui-drawer-height);
-    border-bottom: 1px solid var(--ui-drawer-border);
+    border-bottom: var(--ui-drawer-border);
     border-radius: 0 0 var(--ui-drawer-radius) var(--ui-drawer-radius);
     transform: translateY(-102%);
   }
@@ -86,7 +91,7 @@ const style = `
     right: 0;
     bottom: 0;
     height: var(--ui-drawer-height);
-    border-top: 1px solid var(--ui-drawer-border);
+    border-top: var(--ui-drawer-border);
     border-radius: var(--ui-drawer-radius) var(--ui-drawer-radius) 0 0;
     transform: translateY(102%);
   }
@@ -103,10 +108,10 @@ const style = `
   }
   .header {
     justify-content: space-between;
-    border-bottom: 1px solid var(--ui-drawer-border);
+    border-bottom: var(--ui-drawer-border);
   }
   .footer {
-    border-top: 1px solid var(--ui-drawer-border);
+    border-top: var(--ui-drawer-border);
   }
   .body {
     min-height: 0;
@@ -118,8 +123,8 @@ const style = `
     width: 30px;
     height: 30px;
     border-radius: 8px;
-    border: 1px solid var(--ui-drawer-border);
-    background: #ffffff;
+    border: var(--ui-drawer-border);
+    background: var(--ui-drawer-control-bg);
     color: inherit;
     cursor: pointer;
     display: inline-flex;
@@ -128,11 +133,11 @@ const style = `
     font-size: 15px;
   }
   .close-btn:hover {
-    background: #f8fafc;
+    background: var(--ui-drawer-control-bg-hover);
   }
   .close-btn:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.28);
+    outline: 2px solid var(--ui-drawer-focus-ring);
+    outline-offset: 1px;
   }
   .close-btn[hidden] {
     display: none;
@@ -147,6 +152,27 @@ const style = `
     .overlay,
     .panel {
       transition: none !important;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    :host {
+      --ui-drawer-border: 2px solid var(--ui-drawer-border-color);
+      --ui-drawer-shadow: none;
+      --ui-drawer-control-bg-hover: color-mix(in srgb, var(--ui-color-primary, var(--ui-primary, #2563eb)) 16%, transparent);
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-drawer-overlay: color-mix(in srgb, CanvasText 46%, transparent);
+      --ui-drawer-bg: Canvas;
+      --ui-drawer-color: CanvasText;
+      --ui-drawer-border-color: CanvasText;
+      --ui-drawer-shadow: none;
+      --ui-drawer-control-bg: Canvas;
+      --ui-drawer-control-bg-hover: Highlight;
+      --ui-drawer-focus-ring: Highlight;
     }
   }
 `;

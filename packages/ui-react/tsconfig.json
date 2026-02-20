@@ -2,6 +2,11 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "jsx": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@editora/ui-core": ["../ui-core/dist/index"],
+      "@editora/ui-core/*": ["../ui-core/dist/*"]
+    },
     "outDir": "dist",
     "rootDir": "src",
     "declaration": true,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PluginPanel, Button } from '@editora/ui-react';
+import { PluginPanel, Button , Box, Grid, Flex} from '@editora/ui-react';
 
 export default {
   title: 'UI/PluginPanel',
@@ -15,21 +15,21 @@ export const Default = (args: any) => {
   const [position, setPosition] = useState(args.position || 'right');
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
-      <div style={{ display: 'flex', gap: 8 }}>
+    <Grid style={{ display: 'grid', gap: 12 }}>
+      <Flex style={{ display: 'flex', gap: 8 }}>
         <Button size="sm" onClick={() => setOpen((v) => !v)}>{open ? 'Close panel' : 'Open panel'}</Button>
         <Button size="sm" variant="secondary" onClick={() => setPosition('right')}>Right</Button>
         <Button size="sm" variant="secondary" onClick={() => setPosition('left')}>Left</Button>
         <Button size="sm" variant="secondary" onClick={() => setPosition('bottom')}>Bottom</Button>
-      </div>
+      </Flex>
 
       <PluginPanel open={open} position={position}>
-        <div style={{ padding: 12, minWidth: 220 }}>
+        <Box style={{ padding: 12, minWidth: 220 }}>
           <strong>Plugin Panel</strong>
           <p style={{ margin: '8px 0 0', color: '#475569' }}>Position: {position}</p>
-        </div>
+        </Box>
       </PluginPanel>
-    </div>
+    </Grid>
   );
 };
 Default.args = { open: true, position: 'right' };

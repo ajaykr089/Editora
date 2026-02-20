@@ -1,5 +1,5 @@
 import React from 'react';
-import { Collapsible } from '@editora/ui-react';
+import { Collapsible , Box} from '@editora/ui-react';
 
 export default {
   title: 'UI/Collapsible',
@@ -12,7 +12,7 @@ export default {
 
 export const Default = (args: any) => (
   <Collapsible header="Click to expand" open={args.open} headless={args.headless}>
-    <div style={{ paddingTop: 8 }}>Collapsible content with keyboard support (Enter/Space on header).</div>
+    <Box style={{ paddingTop: 8 }}>Collapsible content with keyboard support (Enter/Space on header).</Box>
   </Collapsible>
 );
 Default.args = { open: false, headless: false };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Select } from '@editora/ui-react';
+import { Box, Grid, Select } from '@editora/ui-react';
 
 export default {
   title: 'UI/Select',
@@ -14,7 +14,7 @@ export const Controlled = (args: any) => {
   const [value, setValue] = React.useState(args.value || 'draft');
 
   return (
-    <div style={{ display: 'grid', gap: 12, maxWidth: 320 }}>
+    <Grid style={{ display: 'grid', gap: 12, maxWidth: 320 }}>
       <Select
         {...args}
         value={value}
@@ -25,8 +25,8 @@ export const Controlled = (args: any) => {
         <option value="published">Published</option>
         <option value="archived">Archived</option>
       </Select>
-      <div style={{ fontSize: 13, color: '#475569' }}>Selected: {value}</div>
-    </div>
+      <Box style={{ fontSize: 13, color: '#475569' }}>Selected: {value}</Box>
+    </Grid>
   );
 };
 

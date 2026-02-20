@@ -6,8 +6,9 @@ const style = `
     width: 100%;
     --ui-field-gap: 6px;
     --ui-field-label-color: var(--ui-color-text, #0f172a);
-    --ui-field-description-color: var(--ui-muted, #64748b);
-    --ui-field-error-color: var(--ui-error, #dc2626);
+    --ui-field-description-color: var(--ui-color-muted, var(--ui-muted, #64748b));
+    --ui-field-error-color: var(--ui-color-danger, var(--ui-error, #dc2626));
+    color-scheme: light dark;
   }
   .field {
     width: 100%;
@@ -61,6 +62,23 @@ const style = `
   }
   :host([headless]) .field {
     display: none;
+  }
+
+  @media (prefers-contrast: more) {
+    .label,
+    .description,
+    .error {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-field-label-color: CanvasText;
+      --ui-field-description-color: CanvasText;
+      --ui-field-error-color: CanvasText;
+    }
   }
 `;
 

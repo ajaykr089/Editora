@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Breadcrumb } from '@editora/ui-react';
+import { Box, Breadcrumb, Grid } from '@editora/ui-react';
 
 export default {
   title: 'UI/Breadcrumb',
@@ -14,7 +14,7 @@ export const Default = (args: any) => {
   const [selected, setSelected] = useState('none');
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
+    <Grid style={{ display: 'grid', gap: 12 }}>
       <Breadcrumb
         separator={args.separator}
         maxItems={args.maxItems}
@@ -26,8 +26,8 @@ export const Default = (args: any) => {
         <span slot="item">Users</span>
       </Breadcrumb>
 
-      <div style={{ fontSize: 13, color: '#475569' }}>Clicked crumb: {selected}</div>
-    </div>
+      <Box style={{ fontSize: 13, color: '#475569' }}>Clicked crumb: {selected}</Box>
+    </Grid>
   );
 };
 Default.args = { separator: '/', maxItems: 6 };

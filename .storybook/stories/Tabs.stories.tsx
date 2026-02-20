@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tabs } from '@editora/ui-react';
+import { Tabs , Box, Grid} from '@editora/ui-react';
 
 export default {
   title: 'UI/Tabs',
@@ -13,7 +13,7 @@ export const Controlled = (args: any) => {
   const [selected, setSelected] = useState(Number(args.selected) || 0);
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
+    <Grid style={{ display: 'grid', gap: 12 }}>
       <Tabs selected={String(selected)} onChange={setSelected}>
         <div slot="tab">Overview</div>
         <div slot="panel">Overview content for the current document.</div>
@@ -25,8 +25,8 @@ export const Controlled = (args: any) => {
         <div slot="panel">Editor behavior and preference controls.</div>
       </Tabs>
 
-      <div style={{ fontSize: 13, color: '#475569' }}>Selected tab index: {selected}</div>
-    </div>
+      <Box style={{ fontSize: 13, color: '#475569' }}>Selected tab index: {selected}</Box>
+    </Grid>
   );
 };
 Controlled.args = { selected: 0 };

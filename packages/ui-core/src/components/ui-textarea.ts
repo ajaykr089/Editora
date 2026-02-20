@@ -7,14 +7,19 @@ const style = `
     font-family: inherit;
 
     --ui-textarea-padding: var(--ui-padding, 10px 12px);
-    --ui-textarea-border: var(--ui-border, 1px solid rgba(0, 0, 0, 0.12));
+    --ui-textarea-border-color: var(--ui-color-border, var(--ui-border, rgba(15, 23, 42, 0.14)));
+    --ui-textarea-border: 1px solid var(--ui-textarea-border-color);
     --ui-textarea-radius: var(--ui-radius, 8px);
     --ui-textarea-width: var(--ui-width, auto);
     --ui-textarea-min-height: var(--ui-min-height, 96px);
-    --ui-textarea-bg: #ffffff;
-    --ui-textarea-color: inherit;
-    --ui-textarea-label: var(--ui-muted, #64748b);
-    --ui-textarea-description: var(--ui-muted, #64748b);
+    --ui-textarea-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
+    --ui-textarea-color: var(--ui-color-text, var(--ui-text, inherit));
+    --ui-textarea-label: var(--ui-color-muted, var(--ui-muted, #64748b));
+    --ui-textarea-description: var(--ui-color-muted, var(--ui-muted, #64748b));
+    --ui-textarea-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
+    --ui-textarea-error: var(--ui-color-danger, var(--ui-error, #dc2626));
+    --ui-textarea-success: var(--ui-color-success, var(--ui-success, #16a34a));
+    color-scheme: light dark;
   }
 
   .label-row {
@@ -60,6 +65,10 @@ const style = `
     outline: none;
     transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
   }
+  textarea:focus-visible {
+    border-color: var(--ui-textarea-focus-ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-textarea-focus-ring) 22%, transparent);
+  }
 
   :host([size="sm"]) textarea,
   :host([size="1"]) textarea {
@@ -75,11 +84,11 @@ const style = `
   }
 
   :host([variant="surface"]) textarea {
-    background: var(--ui-surface, #f8fafc);
+    background: var(--ui-color-surface-alt, var(--ui-surface-alt, #f8fafc));
   }
   :host([variant="soft"]) textarea {
-    background: rgba(2, 6, 23, 0.03);
-    border: 1px solid rgba(2, 6, 23, 0.06);
+    background: color-mix(in srgb, var(--ui-textarea-color) 4%, transparent);
+    border: 1px solid color-mix(in srgb, var(--ui-textarea-border-color) 70%, transparent);
   }
 
   :host([radius="none"]) textarea { border-radius: 0; }
@@ -87,11 +96,11 @@ const style = `
   :host([radius="full"]) textarea { border-radius: 18px; }
 
   :host([validation="error"]) textarea {
-    border-color: var(--ui-error, #dc2626);
-    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.06);
+    border-color: var(--ui-textarea-error);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ui-textarea-error) 18%, transparent);
   }
   :host([validation="success"]) textarea {
-    border-color: var(--ui-success, #16a34a);
+    border-color: var(--ui-textarea-success);
   }
 
   textarea[disabled] {
@@ -112,7 +121,7 @@ const style = `
     border-radius: 6px;
   }
   .clear-btn:hover {
-    background: rgba(15, 23, 42, 0.06);
+    background: color-mix(in srgb, var(--ui-textarea-color) 9%, transparent);
   }
   .clear-btn[hidden] {
     display: none;
@@ -120,8 +129,32 @@ const style = `
 
   .error {
     margin-top: 6px;
-    color: var(--ui-error, #dc2626);
+    color: var(--ui-textarea-error);
     font-size: 12px;
+  }
+
+  @media (prefers-contrast: more) {
+    :host {
+      --ui-textarea-border: 2px solid var(--ui-textarea-border-color);
+    }
+    textarea:focus-visible {
+      box-shadow: none;
+      outline: 2px solid var(--ui-textarea-focus-ring);
+      outline-offset: 1px;
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-textarea-bg: Canvas;
+      --ui-textarea-color: CanvasText;
+      --ui-textarea-border-color: CanvasText;
+      --ui-textarea-label: CanvasText;
+      --ui-textarea-description: CanvasText;
+      --ui-textarea-focus-ring: Highlight;
+      --ui-textarea-error: CanvasText;
+      --ui-textarea-success: CanvasText;
+    }
   }
 `;
 
