@@ -61,6 +61,9 @@ import './components/ui-chart';
 import './components/ui-timeline';
 import './components/ui-calendar';
 import './components/ui-gantt';
+import './components/ui-stepper';
+import './components/ui-wizard';
+import './components/ui-quick-actions';
 
 
 // layout primitives
@@ -146,3 +149,6 @@ export { UIChart } from './components/ui-chart';
 export { UITimeline } from './components/ui-timeline';
 export { UICalendar } from './components/ui-calendar';
 export { UIGantt } from './components/ui-gantt';
+export { UIStepper } from './components/ui-stepper';
+export { UIWizard } from './components/ui-wizard';
+export { UIQuickActions } from './components/ui-quick-actions';

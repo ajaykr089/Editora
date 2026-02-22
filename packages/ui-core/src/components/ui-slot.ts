@@ -138,6 +138,12 @@ const style = `
     }
   }
 
+  @media (prefers-contrast: more) {
+    .shell {
+      border-width: 2px;
+    }
+  }
+
   @media (forced-colors: active) {
     :host {
       --ui-slot-bg: Canvas;

@@ -167,6 +167,14 @@ const style = `
     :host { transition: none !important; }
   }
 
+  @media (prefers-contrast: more) {
+    :host {
+      --ui-box-border: 2px solid var(--ui-box-border-color);
+      --ui-box-shadow: none;
+      --ui-box-backdrop: none;
+    }
+  }
+
   @media (forced-colors: active) {
     :host {
       --ui-box-bg: Canvas;

@@ -3,11 +3,15 @@ import { ElementBase } from '../ElementBase';
 const style = `
   :host {
     display: block;
+    color-scheme: light dark;
     --ui-table-radius: 14px;
-    --ui-table-border: 1px solid rgba(15, 23, 42, 0.12);
-    --ui-table-bg: rgba(255, 255, 255, 0.94);
+    --ui-table-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
+    --ui-table-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 95%, transparent);
+    --ui-table-text: var(--ui-color-text, #0f172a);
+    --ui-table-muted: var(--ui-color-muted, #64748b);
+    --ui-table-accent: var(--ui-color-primary, #2563eb);
     --ui-table-shadow: 0 14px 40px rgba(15, 23, 42, 0.09);
-    --ui-table-empty-color: #64748b;
+    --ui-table-empty-color: var(--ui-table-muted);
   }
 
   .frame {
@@ -34,122 +38,193 @@ const style = `
     font-size: 13px;
     color: var(--ui-table-empty-color);
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .frame {
+      scroll-behavior: auto;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .frame {
+      border-width: 2px;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-table-border: 1px solid CanvasText;
+      --ui-table-bg: Canvas;
+      --ui-table-text: CanvasText;
+      --ui-table-muted: CanvasText;
+      --ui-table-accent: Highlight;
+      --ui-table-shadow: none;
+    }
+
+    .frame {
+      forced-color-adjust: none;
+      background: Canvas;
+      color: CanvasText;
+      border-color: CanvasText;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+  }
 `;
 
 const lightDomStyle = `
-  ui-table:not([headless]) table[data-ui-table] {
+  ui-table:not([headless]) > table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
     font-size: 13px;
-    color: #0f172a;
+    color: var(--ui-table-text, var(--ui-color-text, #0f172a));
     min-width: 560px;
   }
 
-  ui-table:not([headless]) table[data-ui-table] thead th {
+  ui-table:not([headless]) > table thead th {
     text-align: left;
     padding: 12px 14px;
-    color: #334155;
+    color: var(--ui-table-muted, var(--ui-color-muted, #64748b));
     font-weight: 600;
     letter-spacing: 0.01em;
-    background: linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(241, 245, 249, 0.86));
-    border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 92%, transparent),
+      color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 82%, transparent)
+    );
+    border-bottom: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
     white-space: nowrap;
   }
 
-  ui-table:not([headless]) table[data-ui-table] tbody td {
+  ui-table:not([headless]) > table tbody td {
     padding: 11px 14px;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    border-bottom: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 62%, transparent);
     vertical-align: middle;
-    color: #0f172a;
+    color: var(--ui-table-text, var(--ui-color-text, #0f172a));
   }
 
-  ui-table:not([headless]) table[data-ui-table] tbody tr:last-child td {
+  ui-table:not([headless]) > table tbody tr:last-child td {
     border-bottom: none;
   }
 
-  ui-table[compact]:not([headless]) table[data-ui-table] thead th,
-  ui-table[compact]:not([headless]) table[data-ui-table] tbody td {
+  ui-table[compact]:not([headless]) > table thead th,
+  ui-table[compact]:not([headless]) > table tbody td {
     padding-top: 8px;
     padding-bottom: 8px;
   }
 
-  ui-table[striped]:not([headless]) table[data-ui-table] tbody tr:nth-child(even) td {
-    background: rgba(148, 163, 184, 0.08);
+  ui-table[striped]:not([headless]) > table tbody tr:nth-child(even) td {
+    background: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 24%, transparent);
   }
 
-  ui-table[hover]:not([headless]) table[data-ui-table] tbody tr:hover td {
-    background: rgba(37, 99, 235, 0.08);
+  ui-table[hover]:not([headless]) > table tbody tr:hover td {
+    background: color-mix(in srgb, var(--ui-table-accent, var(--ui-color-primary, #2563eb)) 12%, transparent);
   }
 
-  ui-table[bordered]:not([headless]) table[data-ui-table] thead th,
-  ui-table[bordered]:not([headless]) table[data-ui-table] tbody td {
-    border-right: 1px solid rgba(15, 23, 42, 0.08);
+  ui-table[bordered]:not([headless]) > table thead th,
+  ui-table[bordered]:not([headless]) > table tbody td {
+    border-right: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 62%, transparent);
   }
 
-  ui-table[bordered]:not([headless]) table[data-ui-table] thead th:last-child,
-  ui-table[bordered]:not([headless]) table[data-ui-table] tbody td:last-child {
+  ui-table[bordered]:not([headless]) > table thead th:last-child,
+  ui-table[bordered]:not([headless]) > table tbody td:last-child {
     border-right: none;
   }
 
-  ui-table[sticky-header]:not([headless]) table[data-ui-table] thead th {
+  ui-table[sticky-header]:not([headless]) > table thead th {
     position: sticky;
     top: 0;
     z-index: 1;
   }
 
-  ui-table[sortable]:not([headless]) table[data-ui-table] thead th[data-sortable="true"] {
+  ui-table[sortable]:not([headless]) > table thead th[data-sortable="true"] {
     cursor: pointer;
     user-select: none;
     position: relative;
     padding-right: 24px;
   }
 
-  ui-table[sortable]:not([headless]) table[data-ui-table] thead th[data-sortable="true"]::after {
+  ui-table[sortable]:not([headless]) > table thead th[data-sortable="true"]::after {
     content: "v^";
     position: absolute;
     right: 9px;
     top: 50%;
     margin-top: -6px;
     font-size: 10px;
-    color: #94a3b8;
+    color: color-mix(in srgb, var(--ui-table-muted, var(--ui-color-muted, #64748b)) 76%, transparent);
     letter-spacing: -1px;
   }
 
-  ui-table[sortable]:not([headless]) table[data-ui-table] thead th[aria-sort="ascending"]::after {
+  ui-table[sortable]:not([headless]) > table thead th[aria-sort="ascending"]::after {
     content: "^";
     letter-spacing: 0;
-    color: #2563eb;
+    color: var(--ui-table-accent, var(--ui-color-primary, #2563eb));
   }
 
-  ui-table[sortable]:not([headless]) table[data-ui-table] thead th[aria-sort="descending"]::after {
+  ui-table[sortable]:not([headless]) > table thead th[aria-sort="descending"]::after {
     content: "v";
     letter-spacing: 0;
-    color: #2563eb;
+    color: var(--ui-table-accent, var(--ui-color-primary, #2563eb));
   }
 
-  ui-table[selectable]:not([headless]) table[data-ui-table] tbody tr {
+  ui-table[selectable]:not([headless]) > table tbody tr {
     cursor: pointer;
   }
 
-  ui-table[selectable]:not([headless]) table[data-ui-table] tbody tr[data-selected="true"] td {
-    background: rgba(37, 99, 235, 0.12);
+  ui-table[selectable]:not([headless]) > table tbody tr[data-selected="true"] td {
+    background: color-mix(in srgb, var(--ui-table-accent, var(--ui-color-primary, #2563eb)) 16%, transparent);
   }
 
-  ui-table[loading]:not([headless]) table[data-ui-table] tbody {
+  ui-table[loading]:not([headless]) > table tbody {
     opacity: 0.55;
     pointer-events: none;
+  }
+
+  @media (prefers-contrast: more) {
+    ui-table:not([headless]) > table thead th,
+    ui-table:not([headless]) > table tbody td {
+      border-bottom-width: 2px;
+    }
+  }
+
+  @media (forced-colors: active) {
+    ui-table:not([headless]) > table,
+    ui-table:not([headless]) > table thead th,
+    ui-table:not([headless]) > table tbody td {
+      forced-color-adjust: none;
+      background: Canvas;
+      color: CanvasText;
+      border-color: CanvasText;
+    }
+
+    ui-table[hover]:not([headless]) > table tbody tr:hover td,
+    ui-table[selectable]:not([headless]) > table tbody tr[data-selected="true"] td {
+      border-color: Highlight;
+    }
   }
 `;
 
 function ensureTableLightDomStyle() {
   if (typeof document === 'undefined') return;
   const styleId = 'ui-table-light-dom-style';
-  if (document.getElementById(styleId)) return;
+  const existing = document.getElementById(styleId);
+  if (existing) {
+    if (existing.textContent !== lightDomStyle) {
+      existing.textContent = lightDomStyle;
+    }
+    return;
+  }
   const el = document.createElement('style');
   el.id = styleId;
   el.textContent = lightDomStyle;
   document.head.appendChild(el);
+}
+
+if (typeof document !== 'undefined') {
+  ensureTableLightDomStyle();
 }
 
 function getCellText(cell: HTMLTableCellElement | undefined): string {

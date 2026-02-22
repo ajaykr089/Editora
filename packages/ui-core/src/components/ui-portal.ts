@@ -10,6 +10,9 @@ type PortaledNode = {
 const style = `
   :host {
     display: contents;
+    color-scheme: light dark;
+    --ui-portal-color: var(--ui-color-text, inherit);
+    color: var(--ui-portal-color);
   }
 
   .source {
@@ -18,6 +21,24 @@ const style = `
 
   :host([headless]) .source {
     display: block;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .source {
+      scroll-behavior: auto;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    :host {
+      --ui-portal-color: var(--ui-color-text, inherit);
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-portal-color: CanvasText;
+    }
   }
 `;
 

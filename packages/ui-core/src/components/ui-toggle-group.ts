@@ -84,6 +84,12 @@ const style = `
     display: none;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .group {
+      transition: none !important;
+    }
+  }
+
   @media (prefers-contrast: more) {
     .group {
       border-width: 2px;

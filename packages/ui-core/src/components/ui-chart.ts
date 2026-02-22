@@ -111,9 +111,44 @@ const style = `
       box-shadow: none;
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .frame,
+    .legend-dot {
+      transition: none !important;
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-chart-bg: Canvas;
+      --ui-chart-border: CanvasText;
+      --ui-chart-text: CanvasText;
+      --ui-chart-muted: CanvasText;
+      --ui-chart-grid: CanvasText;
+      --ui-chart-accent: Highlight;
+      --ui-chart-shadow: none;
+    }
+
+    .frame,
+    .legend-dot {
+      forced-color-adjust: none;
+      background: Canvas;
+      color: CanvasText;
+      border-color: CanvasText;
+      box-shadow: none;
+    }
+  }
 `;
 
-const palette = ['#2563eb', '#16a34a', '#d97706', '#dc2626', '#0891b2', '#7c3aed'];
+const palette = [
+  'var(--ui-color-primary, #2563eb)',
+  'var(--ui-color-success, #16a34a)',
+  'var(--ui-color-warning, #d97706)',
+  'var(--ui-color-danger, #dc2626)',
+  'var(--ui-color-info, #0891b2)',
+  'var(--ui-color-accent, #7c3aed)'
+];
 
 function escapeHtml(value: string): string {
   return value

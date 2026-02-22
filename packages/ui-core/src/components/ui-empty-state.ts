@@ -119,6 +119,12 @@ const style = `
     display: none;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .default-action {
+      transition: none !important;
+    }
+  }
+
   @media (prefers-contrast: more) {
     .card {
       box-shadow: none;

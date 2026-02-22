@@ -116,61 +116,6 @@ export function ContextMenu(props: ContextMenuProps) {
     el.open = true;
   }, [open, anchorId, anchorPoint]);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (variant && variant !== 'default') el.setAttribute('variant', variant);
-    else el.removeAttribute('variant');
-  }, [variant]);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (density && density !== 'default') el.setAttribute('density', density);
-    else el.removeAttribute('density');
-  }, [density]);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (shape && shape !== 'default') el.setAttribute('shape', shape);
-    else el.removeAttribute('shape');
-  }, [shape]);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (elevation && elevation !== 'default') el.setAttribute('elevation', elevation);
-    else el.removeAttribute('elevation');
-  }, [elevation]);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (tone && tone !== 'default' && tone !== 'brand') el.setAttribute('tone', tone);
-    else el.removeAttribute('tone');
-  }, [tone]);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (closeOnSelect == null) {
-      el.removeAttribute('close-on-select');
-      return;
-    }
-    el.setAttribute('close-on-select', closeOnSelect ? 'true' : 'false');
-  }, [closeOnSelect]);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (typeahead == null) {
-      el.removeAttribute('typeahead');
-      return;
-    }
-    el.setAttribute('typeahead', typeahead ? 'true' : 'false');
-  }, [typeahead]);
-
   // Render menu items recursively
   const renderMenuItems = (menuItems?: MenuItem[]) => {
     if (!menuItems) return null;
@@ -210,9 +155,21 @@ export function ContextMenu(props: ContextMenuProps) {
   };
 
   const hasChildren = React.Children.count(children) > 0;
+  const shouldReflectOpenAttr = !!open && !anchorPoint && !anchorId;
 
   return (
-    <ui-context-menu ref={ref} {...rest} {...(open ? { open: '' } : {})}>
+    <ui-context-menu
+      ref={ref}
+      {...rest}
+      {...(shouldReflectOpenAttr ? { open: '' } : {})}
+      {...(variant && variant !== 'default' ? { variant } : {})}
+      {...(density && density !== 'default' ? { density } : {})}
+      {...(shape && shape !== 'default' ? { shape } : {})}
+      {...(elevation && elevation !== 'default' ? { elevation } : {})}
+      {...(tone && tone !== 'default' && tone !== 'brand' ? { tone } : {})}
+      {...(closeOnSelect == null ? {} : { 'close-on-select': closeOnSelect ? 'true' : 'false' })}
+      {...(typeahead == null ? {} : { typeahead: typeahead ? 'true' : 'false' })}
+    >
       {hasChildren ? children : <div slot="menu">{renderMenuItems(items)}</div>}
     </ui-context-menu>
   );

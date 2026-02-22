@@ -16,7 +16,10 @@ const style = `
     --ui-presence-filter-enter: none;
     --ui-presence-filter-exit: none;
     --ui-presence-perspective: 860px;
+    --ui-presence-color: var(--ui-color-text, inherit);
     display: contents;
+    color: var(--ui-presence-color);
+    color-scheme: light dark;
   }
 
   .presence {
@@ -135,6 +138,23 @@ const style = `
       transition: none !important;
       transform: none !important;
       filter: none !important;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .presence {
+      filter: none !important;
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-presence-color: CanvasText;
+    }
+
+    .presence {
+      forced-color-adjust: none;
+      color: CanvasText;
     }
   }
 `;

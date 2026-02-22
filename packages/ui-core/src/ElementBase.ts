@@ -2,13 +2,24 @@ export abstract class ElementBase extends HTMLElement {
   protected root: ShadowRoot;
   private _isRendering = false;
   private _renderRequested = false;
+  private _renderScheduled = false;
+  private _hasRendered = false;
+  private _visibilityGuardApplied = false;
+
   constructor() {
     super();
     this.root = this.attachShadow({ mode: 'open' });
   }
 
   connectedCallback() {
-    this._requestRender();
+    if (!this._hasRendered && !this._visibilityGuardApplied) {
+      const inlineVisibility = this.style.getPropertyValue('visibility').trim();
+      if (!inlineVisibility) {
+        this.style.setProperty('visibility', 'hidden');
+        this._visibilityGuardApplied = true;
+      }
+    }
+    this._scheduleRender();
   }
 
   disconnectedCallback() {
@@ -41,7 +52,8 @@ export abstract class ElementBase extends HTMLElement {
   attributeChangedCallback(name?: string, oldValue?: string | null, newValue?: string | null) {
     // default behavior: re-render on attribute changes
     if (oldValue === newValue) return;
-    this._requestRender();
+    if (!this.isConnected) return;
+    this._scheduleRender();
   }
 
   protected setContent(html: string) {
@@ -49,7 +61,16 @@ export abstract class ElementBase extends HTMLElement {
   }
 
   protected requestRender(): void {
-    this._requestRender();
+    this._scheduleRender();
+  }
+
+  private _scheduleRender(): void {
+    if (this._renderScheduled) return;
+    this._renderScheduled = true;
+    queueMicrotask(() => {
+      this._renderScheduled = false;
+      this._requestRender();
+    });
   }
 
   private _requestRender(): void {
@@ -62,10 +83,17 @@ export abstract class ElementBase extends HTMLElement {
       this.render();
     } finally {
       this._isRendering = false;
+      if (!this._hasRendered) {
+        this._hasRendered = true;
+        if (this._visibilityGuardApplied) {
+          this.style.removeProperty('visibility');
+          this._visibilityGuardApplied = false;
+        }
+      }
     }
     if (this._renderRequested) {
       this._renderRequested = false;
-      queueMicrotask(() => this._requestRender());
+      this._scheduleRender();
     }
   }
 

@@ -52,8 +52,10 @@ const style = `
     --ui-grid-align-content: normal;
     --ui-grid-justify-content: normal;
     --ui-grid-place-content: initial;
+    --ui-grid-color: var(--ui-color-text, inherit);
     color-scheme: light dark;
     display: var(--ui-grid-display);
+    color: var(--ui-grid-color);
     box-sizing: border-box;
     min-inline-size: 0;
     grid-template-columns: var(--ui-grid-columns);
@@ -78,6 +80,24 @@ const style = `
 
   :host([headless]) {
     display: none !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :host {
+      scroll-behavior: auto;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    :host {
+      --ui-grid-color: var(--ui-color-text, inherit);
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-grid-color: CanvasText;
+    }
   }
 `;
 

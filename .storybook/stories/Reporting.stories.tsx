@@ -23,10 +23,10 @@ export const HospitalOrSchoolModule = () => (
         title="Department Mix"
         subtitle="Current month"
         data={[
-          { label: 'Emergency', value: 40, tone: '#2563eb' },
-          { label: 'OPD', value: 25, tone: '#16a34a' },
-          { label: 'Lab', value: 20, tone: '#d97706' },
-          { label: 'Other', value: 15, tone: '#dc2626' }
+          { label: 'Emergency', value: 40, tone: 'var(--ui-color-primary, #2563eb)' },
+          { label: 'OPD', value: 25, tone: 'var(--ui-color-success, #16a34a)' },
+          { label: 'Lab', value: 20, tone: 'var(--ui-color-warning, #d97706)' },
+          { label: 'Other', value: 15, tone: 'var(--ui-color-danger, #dc2626)' }
         ]}
       />
     </Grid>
@@ -63,7 +63,7 @@ export const HospitalOrSchoolModule = () => (
       ]}
     />
 
-    <Flex style={{ fontSize: 12, color: '#64748b' }}>
+    <Flex style={{ fontSize: 'var(--ui-font-size-sm, 12px)', color: 'var(--ui-color-muted, #64748b)' }}>
       Reporting primitives now cover charts, timeline history, calendar planning, and Gantt-like execution tracking.
     </Flex>
   </Grid>

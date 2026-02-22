@@ -196,7 +196,7 @@ export class UICollapsible extends ElementBase {
       const applied = this._applyOpenState();
       if (applied) return;
     }
-    this.render();
+    this.requestRender();
   }
 
   get open() {

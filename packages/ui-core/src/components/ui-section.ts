@@ -143,6 +143,13 @@ const style = `
     }
   }
 
+  @media (prefers-contrast: more) {
+    .section {
+      border-width: 2px;
+      box-shadow: none;
+    }
+  }
+
   @media (forced-colors: active) {
     .section {
       forced-color-adjust: none;

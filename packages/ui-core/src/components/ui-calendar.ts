@@ -121,14 +121,62 @@ const style = `
   :host([headless]) .frame {
     display: none;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .day {
+      transition: none !important;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .frame {
+      box-shadow: none;
+    }
+
+    .day {
+      border-width: 2px;
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-calendar-bg: Canvas;
+      --ui-calendar-border: CanvasText;
+      --ui-calendar-text: CanvasText;
+      --ui-calendar-muted: CanvasText;
+      --ui-calendar-accent: Highlight;
+    }
+
+    .frame,
+    .day,
+    .event-dot {
+      forced-color-adjust: none;
+      box-shadow: none;
+    }
+
+    .frame,
+    .day {
+      background: Canvas;
+      color: CanvasText;
+      border-color: CanvasText;
+    }
+
+    .day[aria-selected="true"] {
+      border-color: Highlight;
+    }
+
+    .event-dot {
+      background: Highlight;
+    }
+  }
 `;
 
 const tones: Record<string, string> = {
   default: 'var(--ui-color-primary, #2563eb)',
-  info: '#0891b2',
-  success: '#16a34a',
-  warning: '#d97706',
-  danger: '#dc2626'
+  info: 'var(--ui-color-info, #0891b2)',
+  success: 'var(--ui-color-success, #16a34a)',
+  warning: 'var(--ui-color-warning, #d97706)',
+  danger: 'var(--ui-color-danger, #dc2626)'
 };
 
 function toIsoDate(year: number, month: number, day: number): string {

@@ -3,19 +3,21 @@ import { ElementBase } from '../ElementBase';
 const style = `
   :host {
     display: block;
+    color-scheme: light dark;
     --ui-nav-gap: 8px;
     --ui-nav-padding: 6px;
     --ui-nav-radius: 14px;
-    --ui-nav-bg: rgba(248, 250, 252, 0.82);
-    --ui-nav-border: 1px solid rgba(15, 23, 42, 0.1);
+    --ui-nav-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 86%, transparent);
+    --ui-nav-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
     --ui-nav-shadow: 0 12px 34px rgba(15, 23, 42, 0.09);
     --ui-nav-item-radius: 10px;
     --ui-nav-item-padding: 8px 10px;
-    --ui-nav-item-color: #334155;
-    --ui-nav-item-active-bg: rgba(37, 99, 235, 0.14);
-    --ui-nav-item-active-color: #1d4ed8;
-    --ui-nav-panel-bg: rgba(255, 255, 255, 0.92);
-    --ui-nav-panel-border: 1px solid rgba(15, 23, 42, 0.08);
+    --ui-nav-item-color: var(--ui-color-muted, #334155);
+    --ui-nav-item-hover-bg: color-mix(in srgb, var(--ui-color-text, #0f172a) 8%, transparent);
+    --ui-nav-item-active-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 14%, transparent);
+    --ui-nav-item-active-color: var(--ui-color-primary, #1d4ed8);
+    --ui-nav-panel-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 93%, transparent);
+    --ui-nav-panel-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 68%, transparent);
     --ui-nav-panel-radius: 12px;
     --ui-nav-panel-shadow: 0 18px 42px rgba(15, 23, 42, 0.1);
   }
@@ -60,7 +62,12 @@ const style = `
 
   ::slotted([slot="item"]:hover),
   ::slotted([slot="item"]:focus-visible) {
-    background: rgba(15, 23, 42, 0.08);
+    background: var(--ui-nav-item-hover-bg);
+  }
+
+  ::slotted([slot="item"]:focus-visible) {
+    outline: 2px solid var(--ui-color-focus-ring, #2563eb);
+    outline-offset: 1px;
   }
 
   ::slotted([slot="item"][data-active="true"]) {
@@ -91,6 +98,36 @@ const style = `
   :host([headless]) .list,
   :host([headless]) .viewport {
     display: none !important;
+  }
+
+  @media (prefers-contrast: more) {
+    .list,
+    .viewport {
+      border-width: 2px;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-nav-bg: Canvas;
+      --ui-nav-border: 1px solid CanvasText;
+      --ui-nav-shadow: none;
+      --ui-nav-item-color: CanvasText;
+      --ui-nav-item-hover-bg: Highlight;
+      --ui-nav-item-active-bg: Highlight;
+      --ui-nav-item-active-color: HighlightText;
+      --ui-nav-panel-bg: Canvas;
+      --ui-nav-panel-border: 1px solid CanvasText;
+      --ui-nav-panel-shadow: none;
+    }
+
+    .list,
+    .viewport {
+      forced-color-adjust: none;
+      backdrop-filter: none;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

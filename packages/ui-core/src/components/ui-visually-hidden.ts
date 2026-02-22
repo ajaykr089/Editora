@@ -1,7 +1,12 @@
 import { ElementBase } from '../ElementBase';
 
 const style = `
-  :host { display: contents; }
+  :host {
+    display: contents;
+    color-scheme: light dark;
+    --ui-visually-hidden-color: var(--ui-color-text, inherit);
+    color: var(--ui-visually-hidden-color);
+  }
   .vh {
     position: absolute !important;
     width: 1px !important;
@@ -14,6 +19,24 @@ const style = `
     border: 0 !important;
     background: transparent !important;
     color: inherit !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vh {
+      scroll-behavior: auto;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    :host {
+      --ui-visually-hidden-color: var(--ui-color-text, inherit);
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-visually-hidden-color: CanvasText;
+    }
   }
 `;
 
@@ -33,7 +56,7 @@ export class UIVisuallyHidden extends ElementBase {
     if (oldValue === newValue) return;
     if (name === 'headless') {
       this._headless = this.hasAttribute('headless');
-      this.render();
+      this.requestRender();
     }
   }
 

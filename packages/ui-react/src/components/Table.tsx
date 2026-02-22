@@ -75,45 +75,25 @@ export function Table(props: TableProps) {
     };
   }, [onSortChange, onRowSelect]);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    if (sortable) el.setAttribute('sortable', '');
-    else el.removeAttribute('sortable');
-
-    if (selectable) el.setAttribute('selectable', '');
-    else el.removeAttribute('selectable');
-
-    if (multiSelect) el.setAttribute('multi-select', '');
-    else el.removeAttribute('multi-select');
-
-    if (striped) el.setAttribute('striped', '');
-    else el.removeAttribute('striped');
-
-    if (hover) el.setAttribute('hover', '');
-    else el.removeAttribute('hover');
-
-    if (compact) el.setAttribute('compact', '');
-    else el.removeAttribute('compact');
-
-    if (bordered) el.setAttribute('bordered', '');
-    else el.removeAttribute('bordered');
-
-    if (stickyHeader) el.setAttribute('sticky-header', '');
-    else el.removeAttribute('sticky-header');
-
-    if (loading) el.setAttribute('loading', '');
-    else el.removeAttribute('loading');
-
-    if (headless) el.setAttribute('headless', '');
-    else el.removeAttribute('headless');
-
-    if (emptyText) el.setAttribute('empty-text', emptyText);
-    else el.removeAttribute('empty-text');
-  }, [sortable, selectable, multiSelect, striped, hover, compact, bordered, stickyHeader, loading, headless, emptyText]);
-
-  return React.createElement('ui-table', { ref, ...rest }, children);
+  return React.createElement(
+    'ui-table',
+    {
+      ref,
+      ...rest,
+      ...(sortable ? { sortable: '' } : {}),
+      ...(selectable ? { selectable: '' } : {}),
+      ...(multiSelect ? { 'multi-select': '' } : {}),
+      ...(striped ? { striped: '' } : {}),
+      ...(hover ? { hover: '' } : {}),
+      ...(compact ? { compact: '' } : {}),
+      ...(bordered ? { bordered: '' } : {}),
+      ...(stickyHeader ? { 'sticky-header': '' } : {}),
+      ...(loading ? { loading: '' } : {}),
+      ...(headless ? { headless: '' } : {}),
+      ...(emptyText ? { 'empty-text': emptyText } : {})
+    },
+    children
+  );
 }
 
 export default Table;

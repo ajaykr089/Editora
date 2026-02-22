@@ -29,8 +29,10 @@ const style = `
     --ui-flex-gap: 0px;
     --ui-flex-row-gap: var(--ui-flex-gap);
     --ui-flex-column-gap: var(--ui-flex-gap);
+    --ui-flex-color: var(--ui-color-text, inherit);
     color-scheme: light dark;
     display: var(--ui-flex-display);
+    color: var(--ui-flex-color);
     box-sizing: border-box;
     min-inline-size: 0;
     flex-direction: var(--ui-flex-direction);
@@ -49,6 +51,24 @@ const style = `
   :host([headless]) {
     display: block;
     gap: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :host {
+      scroll-behavior: auto;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    :host {
+      --ui-flex-color: var(--ui-color-text, inherit);
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-flex-color: CanvasText;
+    }
   }
 `;
 

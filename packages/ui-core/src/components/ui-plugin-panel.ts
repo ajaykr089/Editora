@@ -6,12 +6,14 @@ const style = `
     display: block;
     z-index: 1120;
     pointer-events: none;
+    color-scheme: light dark;
     --ui-plugin-panel-width: min(340px, 92vw);
     --ui-plugin-panel-height: min(280px, 44vh);
-    --ui-plugin-panel-bg: rgba(255, 255, 255, 0.96);
-    --ui-plugin-panel-border: 1px solid rgba(15, 23, 42, 0.12);
+    --ui-plugin-panel-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 94%, transparent);
+    --ui-plugin-panel-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-plugin-panel-radius: 14px;
     --ui-plugin-panel-shadow: 0 18px 48px rgba(15, 23, 42, 0.16);
+    --ui-plugin-panel-color: var(--ui-color-text, #0f172a);
   }
 
   .panel {
@@ -22,6 +24,7 @@ const style = `
     border: var(--ui-plugin-panel-border);
     border-radius: var(--ui-plugin-panel-radius);
     box-shadow: var(--ui-plugin-panel-shadow);
+    color: var(--ui-plugin-panel-color);
     backdrop-filter: saturate(1.1) blur(10px);
     opacity: 0;
     transform: translate3d(0, 6px, 0) scale(0.985);
@@ -68,6 +71,32 @@ const style = `
 
   :host([headless]) .panel {
     display: none !important;
+  }
+
+  @media (prefers-contrast: more) {
+    .panel {
+      border-width: 2px;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-plugin-panel-bg: Canvas;
+      --ui-plugin-panel-border: 1px solid CanvasText;
+      --ui-plugin-panel-shadow: none;
+      --ui-plugin-panel-color: CanvasText;
+    }
+
+    .panel {
+      forced-color-adjust: none;
+      background: Canvas;
+      color: CanvasText;
+      border-color: CanvasText;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -8,6 +8,14 @@ const style = `
     z-index: 1160;
     pointer-events: none;
     display: none;
+    color-scheme: light dark;
+    --ui-floating-toolbar-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 94%, transparent);
+    --ui-floating-toolbar-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
+    --ui-floating-toolbar-radius: 12px;
+    --ui-floating-toolbar-shadow:
+      0 2px 8px rgba(15, 23, 42, 0.11),
+      0 22px 50px rgba(15, 23, 42, 0.18);
+    --ui-floating-toolbar-text: var(--ui-color-text, #0f172a);
   }
 
   :host([open]) {
@@ -15,19 +23,57 @@ const style = `
   }
 
   .panel {
+    box-sizing: border-box;
     pointer-events: auto;
-    transform: translate3d(-50%, -100%, 0) scale(0.98);
+    transform: translate3d(-50%, calc(-100% - 8px), 0) scale(0.98);
     opacity: 0;
+    border-radius: var(--ui-floating-toolbar-radius);
+    border: var(--ui-floating-toolbar-border);
+    background: var(--ui-floating-toolbar-bg);
+    color: var(--ui-floating-toolbar-text);
+    box-shadow: var(--ui-floating-toolbar-shadow);
+    backdrop-filter: saturate(1.08) blur(10px);
+    padding: 6px;
     transition: opacity 130ms ease, transform 130ms ease;
   }
 
   :host([open]) .panel {
-    transform: translate3d(-50%, -100%, 0) scale(1);
+    transform: translate3d(-50%, calc(-100% - 8px), 0) scale(1);
     opacity: 1;
+  }
+
+  .panel[data-side="bottom"] {
+    transform: translate3d(-50%, 8px, 0) scale(0.98);
+  }
+
+  :host([open]) .panel[data-side="bottom"] {
+    transform: translate3d(-50%, 8px, 0) scale(1);
   }
 
   :host([headless]) .panel {
     display: none !important;
+  }
+
+  @media (prefers-contrast: more) {
+    .panel {
+      border-width: 2px;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-floating-toolbar-bg: Canvas;
+      --ui-floating-toolbar-border: 1px solid CanvasText;
+      --ui-floating-toolbar-shadow: none;
+      --ui-floating-toolbar-text: CanvasText;
+    }
+
+    .panel {
+      forced-color-adjust: none;
+      backdrop-filter: none;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -117,14 +163,13 @@ export class UIFloatingToolbar extends ElementBase {
     const panelRect = panel.getBoundingClientRect();
     const gap = 8;
     let x = anchorRect.left + anchorRect.width / 2;
-    let y = anchorRect.top - gap;
+    let y = anchorRect.top;
 
     if (y - panelRect.height < 8) {
-      y = anchorRect.bottom + gap + panelRect.height;
-      panel.style.transform = 'translate3d(-50%, 0, 0) scale(0.98)';
-      if (this.hasAttribute('open')) panel.style.transform = 'translate3d(-50%, 0, 0) scale(1)';
+      y = anchorRect.bottom + gap;
+      panel.setAttribute('data-side', 'bottom');
     } else {
-      panel.style.transform = '';
+      panel.setAttribute('data-side', 'top');
     }
 
     const minX = 12 + panelRect.width / 2;

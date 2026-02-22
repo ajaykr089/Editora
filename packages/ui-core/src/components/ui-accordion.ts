@@ -272,7 +272,7 @@ export class UIAccordion extends ElementBase {
     this.root.addEventListener('click', this._onClick as EventListener);
     this.root.addEventListener('keydown', this._onKeyDown as EventListener);
 
-    this._observer = new MutationObserver(() => this.render());
+    this._observer = new MutationObserver(() => this.requestRender());
     this._observer.observe(this, {
       childList: true,
       subtree: true,
@@ -297,7 +297,7 @@ export class UIAccordion extends ElementBase {
       const applied = this._applyOpenState();
       if (applied) return;
     }
-    this.render();
+    this.requestRender();
   }
 
   get multiple() {

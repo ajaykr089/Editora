@@ -1,8 +1,31 @@
 import { ElementBase } from '../ElementBase';
 
 const style = `
-  :host { display: contents; }
+  :host {
+    display: contents;
+    color-scheme: light dark;
+    --ui-direction-color: var(--ui-color-text, inherit);
+    color: var(--ui-direction-color);
+  }
   .dir-wrap { width: 100%; height: 100%; display: contents; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dir-wrap {
+      scroll-behavior: auto;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    :host {
+      --ui-direction-color: var(--ui-color-text, inherit);
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-direction-color: CanvasText;
+    }
+  }
 `;
 
 export class UIDirectionProvider extends ElementBase {
@@ -24,7 +47,7 @@ export class UIDirectionProvider extends ElementBase {
     if (oldValue === newValue) return;
     if (name === 'dir' || name === 'headless') {
       this._reflectDir();
-      this.render();
+      this.requestRender();
       return;
     }
     super.attributeChangedCallback(name, oldValue, newValue);

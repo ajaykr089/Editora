@@ -308,6 +308,17 @@ const style = `
       color: CanvasText;
     }
   }
+
+  @media (prefers-contrast: more) {
+    .track,
+    .radial-wrap {
+      box-shadow: none;
+    }
+
+    .track {
+      border-width: 2px;
+    }
+  }
 `;
 
 function clamp(value: number, min: number, max: number): number {
@@ -404,14 +415,14 @@ export class UIProgress extends ElementBase {
 
   override connectedCallback(): void {
     this._syncFromAttributes();
-    this.requestRender();
+    super.connectedCallback();
     this._emitState();
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
     this._syncFromAttributes();
-    this.requestRender();
+    super.attributeChangedCallback(name, oldValue, newValue);
     if (name === 'value' || name === 'buffer' || name === 'max' || name === 'min' || name === 'indeterminate') {
       this._emitState();
     }

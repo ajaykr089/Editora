@@ -117,7 +117,7 @@ export const UsersTable = (args: any) => {
       </DataTable>
 
       <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box style={{ fontSize: 13, color: '#475569' }}>
+        <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>
           Selected users: {selected.length ? selected.length : 'none'}
         </Box>
         <Pagination id="users-pagination" page={String(page)} />
@@ -193,42 +193,35 @@ export const FilterResizeReorder = () => {
   return (
     <Grid style={{ display: 'grid', gap: 10, maxWidth: 980 }}>
       <Flex style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-        <input
+        <Input
           value={query}
-          onChange={(event) => {
-            setQuery(event.target.value);
+          onChange={(next) => {
+            setQuery(next);
             setPage(1);
           }}
           placeholder="Filter users..."
-          style={{
-            minWidth: 220,
-            borderRadius: 10,
-            border: '1px solid #cbd5e1',
-            padding: '8px 10px',
-            fontSize: 13
-          }}
+          style={{ minWidth: 220 }}
         />
-        <select
+        <Select
           value={column}
-          onChange={(event) => {
-            setColumn(event.target.value);
+          onChange={(next) => {
+            setColumn(next);
             setPage(1);
           }}
-          style={{ borderRadius: 10, border: '1px solid #cbd5e1', padding: '8px 10px', fontSize: 13 }}
         >
           <option value="all">All columns</option>
           <option value="name">Name</option>
           <option value="email">Email</option>
           <option value="role">Role</option>
           <option value="status">Status</option>
-        </select>
+        </Select>
         <Button size="sm" variant="secondary" onClick={() => setOrder('name,email,role,status,signups')}>
           Default order
         </Button>
         <Button size="sm" variant="secondary" onClick={() => setOrder('status,name,role,email,signups')}>
           Status-first
         </Button>
-        <Box style={{ fontSize: 12, color: '#64748b' }}>
+        <Box style={{ fontSize: 'var(--ui-font-size-sm, 12px)', color: 'var(--ui-color-muted, #64748b)' }}>
           Drag table headers to reorder columns
         </Box>
       </Flex>
@@ -278,10 +271,10 @@ export const FilterResizeReorder = () => {
       </DataTable>
 
       <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box style={{ fontSize: 13, color: '#475569' }}>
+        <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>
           Matched {stats.filtered} of {stats.total} users
         </Box>
-        <Box style={{ fontSize: 12, color: '#64748b' }}>
+        <Box style={{ fontSize: 'var(--ui-font-size-sm, 12px)', color: 'var(--ui-color-muted, #64748b)' }}>
           Order: <code>{order}</code>
         </Box>
         <Pagination id="filter-pagination" page={String(page)} />
@@ -297,19 +290,13 @@ export const VirtualizedLargeDataset = () => {
   return (
     <Grid style={{ display: 'grid', gap: 10, maxWidth: 1020 }}>
       <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <input
+        <Input
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(next) => setQuery(next)}
           placeholder="Filter large dataset..."
-          style={{
-            minWidth: 240,
-            borderRadius: 10,
-            border: '1px solid #cbd5e1',
-            padding: '8px 10px',
-            fontSize: 13
-          }}
+          style={{ minWidth: 240 }}
         />
-        <Box style={{ fontSize: 13, color: '#475569' }}>
+        <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>
           Window: {range.start + 1}-{Math.max(range.start + 1, range.end + 1)} / {range.total} (visible {range.visible})
         </Box>
       </Flex>
@@ -362,12 +349,12 @@ export const AccessibilityKeyboardMap = () => (
   <Grid style={{ display: 'grid', gap: 10, maxWidth: 980 }}>
     <Box
       style={{
-        border: '1px solid #dbeafe',
-        borderRadius: 12,
-        background: '#f8fbff',
-        color: '#1e3a8a',
-        fontSize: 13,
-        padding: 12,
+        border: '1px solid color-mix(in srgb, var(--ui-color-primary, #2563eb) 22%, var(--ui-color-border, #cbd5e1))',
+        borderRadius: 'var(--ui-radius, 12px)',
+        background: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 6%, var(--ui-color-surface-alt, #f8fafc))',
+        color: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 74%, #0f172a 26%)',
+        fontSize: 'var(--ui-font-size-md, 14px)',
+        padding: 'var(--ui-space-md, 12px)',
         lineHeight: 1.5
       }}
     >
@@ -378,7 +365,7 @@ export const AccessibilityKeyboardMap = () => (
       In <strong>RTL</strong>, left/right shortcuts are mirrored.
     </Box>
 
-    <Box dir="rtl" style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 12 }}>
+    <Box dir="rtl" style={{ border: '1px solid var(--ui-color-border, #cbd5e1)', borderRadius: 'var(--ui-radius, 12px)', padding: 'var(--ui-space-md, 12px)' }}>
       <h4 style={{ margin: '0 0 10px' }}>RTL Preview</h4>
       <DataTable sortable draggableColumns striped hover>
         <table>
@@ -403,12 +390,12 @@ export const AccessibilityKeyboardMap = () => (
 export const LoadingErrorEmptyMatrix = () => (
   <Grid style={{ display: 'grid', gap: 14 }}>
     <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
-      <Box style={{ border: '1px solid #e2e8f0', borderRadius: 14, padding: 14 }}>
+      <Box style={{ border: '1px solid var(--ui-color-border, #cbd5e1)', borderRadius: 'calc(var(--ui-radius, 12px) + 2px)', padding: 'var(--ui-space-lg, 16px)' }}>
         <h4 style={{ margin: '0 0 10px' }}>Loading</h4>
         <Skeleton variant="text" count={5} animated />
       </Box>
 
-      <Box style={{ border: '1px solid #e2e8f0', borderRadius: 14, padding: 14 }}>
+      <Box style={{ border: '1px solid var(--ui-color-border, #cbd5e1)', borderRadius: 'calc(var(--ui-radius, 12px) + 2px)', padding: 'var(--ui-space-lg, 16px)' }}>
         <h4 style={{ margin: '0 0 10px' }}>Error</h4>
         <Alert
           tone="danger"
@@ -422,7 +409,7 @@ export const LoadingErrorEmptyMatrix = () => (
         </Alert>
       </Box>
 
-      <Box style={{ border: '1px solid #e2e8f0', borderRadius: 14, padding: 14 }}>
+      <Box style={{ border: '1px solid var(--ui-color-border, #cbd5e1)', borderRadius: 'calc(var(--ui-radius, 12px) + 2px)', padding: 'var(--ui-space-lg, 16px)' }}>
         <h4 style={{ margin: '0 0 10px' }}>Empty</h4>
         <EmptyState
           title="No orders in this range"
@@ -433,7 +420,7 @@ export const LoadingErrorEmptyMatrix = () => (
       </Box>
     </Grid>
 
-    <Box style={{ border: '1px solid #e2e8f0', borderRadius: 14, padding: 14 }}>
+    <Box style={{ border: '1px solid var(--ui-color-border, #cbd5e1)', borderRadius: 'calc(var(--ui-radius, 12px) + 2px)', padding: 'var(--ui-space-lg, 16px)' }}>
       <h4 style={{ margin: '0 0 10px' }}>Success</h4>
       <DataTable sortable striped hover page={1} pageSize={3}>
         <table>
@@ -586,7 +573,7 @@ export const PinnedFilterBuilderBulkActions = () => {
       </DataTable>
 
       <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <Box style={{ fontSize: 13, color: '#475569' }}>
+        <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>
           Selected rows: <strong>{selected.length}</strong> {message ? `• ${message}` : ''}
         </Box>
         <Pagination id="pinned-pagination" page={String(page)} />

@@ -20,7 +20,7 @@ export const InteractiveShell = (args: any) => {
   const [collapsed, setCollapsed] = useState(!!args.collapsed);
 
   return (
-    <Grid columns="auto 1fr" style={{ minHeight: 440, border: '1px solid #e2e8f0', borderRadius: 16, overflow: 'hidden' }}>
+    <Grid columns="auto 1fr" style={{ minHeight: 440, border: '1px solid var(--ui-color-border, #cbd5e1)', borderRadius: 'calc(var(--ui-radius, 12px) + 4px)', overflow: 'hidden' }}>
       <Sidebar
         value={value}
         collapsed={collapsed}
@@ -38,7 +38,7 @@ export const InteractiveShell = (args: any) => {
           <Badge tone="info" variant="soft" size="sm">v3</Badge>
         </Flex>
 
-        <Box slot="search" variant="outline" radius="lg" p="8px" style={{ fontSize: 12, color: '#64748b' }}>
+        <Box slot="search" variant="outline" radius="lg" p="8px" style={{ fontSize: 'var(--ui-font-size-sm, 12px)', color: 'var(--ui-color-muted, #64748b)' }}>
           Search apps, teams, reports...
         </Box>
 
@@ -64,9 +64,9 @@ export const InteractiveShell = (args: any) => {
         <Box slot="footer">Signed in as owner@editora.dev</Box>
       </Sidebar>
 
-      <Box variant="surface" p="20px" style={{ background: '#f8fafc' }}>
-        <Box style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Section: {value}</Box>
-        <Box style={{ color: '#475569', marginBottom: 12 }}>
+      <Box variant="surface" p="20px" style={{ background: 'var(--ui-color-surface-alt, #f8fafc)' }}>
+        <Box style={{ fontSize: 'var(--ui-font-size-lg, 18px)', fontWeight: 700, marginBottom: 8 }}>Section: {value}</Box>
+        <Box style={{ color: 'var(--ui-color-muted, #64748b)', marginBottom: 12 }}>
           Production shell pattern with grouped items, badge states, keyboard navigation, and collapsible rail mode.
         </Box>
         <Flex gap="10px" align="center">
@@ -103,7 +103,7 @@ export const DataDriven = () => {
   );
 
   return (
-    <Grid columns="auto 1fr" style={{ minHeight: 360, border: '1px solid #e2e8f0', borderRadius: 14, overflow: 'hidden' }}>
+    <Grid columns="auto 1fr" style={{ minHeight: 360, border: '1px solid var(--ui-color-border, #cbd5e1)', borderRadius: 'calc(var(--ui-radius, 12px) + 2px)', overflow: 'hidden' }}>
       <Sidebar
         items={items}
         value={value}
@@ -115,7 +115,7 @@ export const DataDriven = () => {
       >
         <Box slot="header" style={{ fontWeight: 700 }}>Data-driven Navigation</Box>
       </Sidebar>
-      <Box p="18px" style={{ background: '#f8fafc' }}>
+      <Box p="18px" style={{ background: 'var(--ui-color-surface-alt, #f8fafc)' }}>
         <strong>Active:</strong> {value}
       </Box>
     </Grid>
@@ -162,10 +162,10 @@ export const MegaNavigationAndQuickActions = () => {
   ];
 
   return (
-    <Grid columns="auto 1fr" style={{ minHeight: 520, border: '1px solid #e2e8f0', borderRadius: 16, overflow: 'hidden' }}>
+    <Grid columns="auto 1fr" style={{ minHeight: 520, border: '1px solid var(--ui-color-border, #cbd5e1)', borderRadius: 'calc(var(--ui-radius, 12px) + 4px)', overflow: 'hidden' }}>
       <Sidebar value={value} collapsible variant="floating" density="compact" onSelect={(detail) => setValue(detail.value)}>
         <Box slot="header" style={{ fontWeight: 700 }}>Operations Hub</Box>
-        <Box slot="search" variant="outline" radius="lg" p="8px" style={{ fontSize: 12, color: '#64748b' }}>
+        <Box slot="search" variant="outline" radius="lg" p="8px" style={{ fontSize: 'var(--ui-font-size-sm, 12px)', color: 'var(--ui-color-muted, #64748b)' }}>
           Cmd + K for command palette
         </Box>
 
@@ -179,7 +179,7 @@ export const MegaNavigationAndQuickActions = () => {
         <Box slot="item" data-section="Finance" data-value="reports" data-icon="📊">Reports</Box>
       </Sidebar>
 
-      <Box p="18px" style={{ background: '#f8fafc', display: 'grid', gap: 12, alignContent: 'start' }}>
+      <Box p="18px" style={{ background: 'var(--ui-color-surface-alt, #f8fafc)', display: 'grid', gap: 12, alignContent: 'start' }}>
         <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <Box style={{ fontSize: 20, fontWeight: 700 }}>Module: {value}</Box>
           <Flex style={{ display: 'flex', gap: 8 }}>
@@ -188,7 +188,7 @@ export const MegaNavigationAndQuickActions = () => {
             <Button size="sm" variant="ghost">Quick export</Button>
           </Flex>
         </Flex>
-        <Box style={{ color: '#475569', fontSize: 13 }}>
+        <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 'var(--ui-font-size-md, 14px)' }}>
           Dense navigation pattern with grouped modules, fast actions, and command-palette jump workflow for admin-heavy apps.
         </Box>
       </Box>

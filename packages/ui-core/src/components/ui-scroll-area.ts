@@ -248,6 +248,21 @@ const style = `
     }
   }
 
+  @media (prefers-contrast: more) {
+    .shell {
+      border-width: 2px;
+      box-shadow: none;
+    }
+
+    .scrollbar {
+      background: color-mix(in srgb, var(--ui-scroll-track-bg) 70%, transparent);
+    }
+
+    .thumb {
+      border: 1px solid color-mix(in srgb, var(--ui-scroll-thumb-hover) 72%, transparent);
+    }
+  }
+
   @media (forced-colors: active) {
     .shell {
       border-color: CanvasText;
@@ -335,7 +350,7 @@ export class UIScrollArea extends ElementBase {
 
   override connectedCallback(): void {
     this._syncFromAttributes();
-    this.requestRender();
+    super.connectedCallback();
     this._observe();
     this._scheduleMetrics();
   }
@@ -351,7 +366,7 @@ export class UIScrollArea extends ElementBase {
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
     this._syncFromAttributes();
-    this.requestRender();
+    super.attributeChangedCallback(name, oldValue, newValue);
     this._scheduleMetrics();
   }
 

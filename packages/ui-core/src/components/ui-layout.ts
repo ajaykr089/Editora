@@ -20,6 +20,7 @@ const style = `
     --ui-layout-max-width: none;
     display: block;
     color: var(--ui-layout-color);
+    color-scheme: light dark;
   }
 
   .layout {
@@ -37,6 +38,10 @@ const style = `
     box-shadow: var(--ui-layout-shadow);
     position: relative;
     isolation: isolate;
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      box-shadow 180ms ease;
   }
 
   :host([variant="flat"]) .layout {
@@ -184,6 +189,24 @@ const style = `
 
     .content {
       order: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .layout {
+      transition: none !important;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .layout,
+    .header,
+    .footer,
+    .sidebar,
+    .aside,
+    .content {
+      border-width: 2px;
+      box-shadow: none;
     }
   }
 

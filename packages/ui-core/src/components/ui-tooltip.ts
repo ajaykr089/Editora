@@ -5,6 +5,7 @@ type TooltipPlacement = 'top' | 'right' | 'bottom' | 'left';
 
 const style = `
   .tooltip {
+    color-scheme: light dark;
     --ui-tooltip-bg: color-mix(in srgb, #0f172a 92%, #111827 8%);
     --ui-tooltip-color: #f8fafc;
     --ui-tooltip-border: color-mix(in srgb, #334155 58%, transparent);

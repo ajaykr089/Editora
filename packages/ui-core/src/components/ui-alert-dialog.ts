@@ -3,14 +3,18 @@ import { ElementBase } from '../ElementBase';
 const style = `
   :host {
     display: block;
-    --ui-alert-radius: 8px;
-    --ui-alert-bg: #fff;
-    --ui-alert-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    color-scheme: light dark;
+    --ui-alert-radius: 12px;
+    --ui-alert-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    --ui-alert-text: var(--ui-color-text, #0f172a);
+    --ui-alert-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
+    --ui-alert-shadow: 0 22px 58px rgba(2, 6, 23, 0.24);
     --ui-alert-padding: 24px;
     --ui-alert-min-width: 320px;
     --ui-alert-max-width: 90vw;
     --ui-alert-z: 1001;
-    --ui-alert-backdrop: rgba(0,0,0,0.32);
+    --ui-alert-focus: var(--ui-color-focus-ring, #2563eb);
+    --ui-alert-backdrop: rgba(2, 6, 23, 0.48);
   }
   .backdrop {
     position: fixed;
@@ -23,6 +27,8 @@ const style = `
   }
   .dialog {
     background: var(--ui-alert-bg);
+    color: var(--ui-alert-text);
+    border: 1px solid var(--ui-alert-border);
     border-radius: var(--ui-alert-radius);
     box-shadow: var(--ui-alert-shadow);
     padding: var(--ui-alert-padding);
@@ -30,15 +36,64 @@ const style = `
     max-width: var(--ui-alert-max-width);
     z-index: var(--ui-alert-z);
     outline: none;
+    transition: border-color 140ms ease, box-shadow 140ms ease, transform 160ms ease, opacity 160ms ease;
+  }
+
+  .dialog:focus-visible {
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--ui-alert-focus) 24%, transparent),
+      var(--ui-alert-shadow);
+    border-color: color-mix(in srgb, var(--ui-alert-focus) 45%, var(--ui-alert-border));
   }
   :host([headless]) .backdrop, :host([headless]) .dialog { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dialog {
+      transition: none !important;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .dialog {
+      border-width: 2px;
+      box-shadow: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-alert-bg: Canvas;
+      --ui-alert-text: CanvasText;
+      --ui-alert-border: CanvasText;
+      --ui-alert-backdrop: rgba(0, 0, 0, 0.72);
+      --ui-alert-shadow: none;
+      --ui-alert-focus: Highlight;
+    }
+
+    .dialog {
+      forced-color-adjust: none;
+      background: Canvas;
+      color: CanvasText;
+      border-color: CanvasText;
+      box-shadow: none;
+    }
+  }
 `;
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 
 export class UIAlertDialog extends ElementBase {
   private _lastActive?: HTMLElement;
   static get observedAttributes() {
-    return ['open', 'headless'];
+    return ['open', 'headless', 'aria-label'];
   }
 
   constructor() {
@@ -164,7 +219,7 @@ export class UIAlertDialog extends ElementBase {
     this.setContent(open ? `
       <style>${style}</style>
       <div class="backdrop" role="presentation">
-        <div class="dialog" role="alertdialog" aria-modal="true" tabindex="0">
+        <div class="dialog" role="alertdialog" aria-modal="true" aria-label="${escapeHtml(this.getAttribute('aria-label') || 'Alert dialog')}" tabindex="0">
           <slot></slot>
         </div>
       </div>

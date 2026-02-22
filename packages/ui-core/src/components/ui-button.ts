@@ -370,11 +370,7 @@ export class UIButton extends ElementBase {
   }
 
   connectedCallback() {
-    // React custom-element props can land after connect; defer first paint to avoid default-style flash.
-    queueMicrotask(() => {
-      if (!this.isConnected) return;
-      this.render();
-    });
+    super.connectedCallback();
   }
 
   disconnectedCallback() {
@@ -382,9 +378,7 @@ export class UIButton extends ElementBase {
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
-    if (oldValue === newValue) return;
-    if (!this.isConnected) return;
-    this.render();
+    super.attributeChangedCallback(name, oldValue, newValue);
   }
 
   protected render() {

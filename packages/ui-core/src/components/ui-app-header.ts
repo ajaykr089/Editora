@@ -90,6 +90,12 @@ const style = `
     display: none;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .menu-btn {
+      transition: none !important;
+    }
+  }
+
   @media (prefers-contrast: more) {
     :host {
       --ui-app-header-border: 2px solid var(--ui-app-header-border-color);

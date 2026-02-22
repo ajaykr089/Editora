@@ -3,11 +3,18 @@ import { showPortalFor } from '../portal';
 
 const style = `
   .panel {
-    background: white;
-    border: 1px solid rgba(0,0,0,0.12);
-    border-radius: 6px;
+    color-scheme: light dark;
+    --ui-popover-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    --ui-popover-text: var(--ui-color-text, #0f172a);
+    --ui-popover-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
+    --ui-popover-shadow: 0 18px 42px rgba(2, 6, 23, 0.2);
+    --ui-popover-focus: var(--ui-color-focus-ring, #2563eb);
+    background: var(--ui-popover-bg);
+    color: var(--ui-popover-text);
+    border: 1px solid var(--ui-popover-border);
+    border-radius: 10px;
     padding: 8px;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+    box-shadow: var(--ui-popover-shadow);
     opacity: 0;
     transform: translateY(6px) scale(0.99);
     transition: opacity var(--ui-motion-base, 200ms) var(--ui-motion-easing, ease), transform var(--ui-motion-base, 200ms) var(--ui-motion-easing, ease);
@@ -20,9 +27,9 @@ const style = `
     position: absolute;
     width: 12px;
     height: 12px;
-    background: white;
+    background: var(--ui-popover-bg);
     transform: rotate(45deg);
-    box-shadow: -2px -2px 6px rgba(0,0,0,0.06);
+    box-shadow: -2px -2px 6px color-mix(in srgb, var(--ui-popover-text) 12%, transparent);
     left: 50%;
     top: -6px;
     margin-left: -6px;
@@ -32,6 +39,32 @@ const style = `
 
   @media (prefers-reduced-motion: reduce) {
     .panel { transition: none !important; transform: none !important; }
+  }
+
+  @media (prefers-contrast: more) {
+    .panel {
+      border-width: 2px;
+      box-shadow: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .panel {
+      --ui-popover-bg: Canvas;
+      --ui-popover-text: CanvasText;
+      --ui-popover-border: CanvasText;
+      --ui-popover-focus: Highlight;
+      --ui-popover-shadow: none;
+    }
+
+    .panel,
+    .arrow {
+      forced-color-adjust: none;
+      background: Canvas;
+      color: CanvasText;
+      border-color: CanvasText;
+      box-shadow: none;
+    }
   }
 `;
 

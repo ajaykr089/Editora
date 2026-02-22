@@ -99,14 +99,60 @@ const style = `
   :host([headless]) .frame {
     display: none;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bar,
+    .progress {
+      transition: none !important;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .frame {
+      box-shadow: none;
+    }
+
+    .track {
+      border-width: 2px;
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-gantt-bg: Canvas;
+      --ui-gantt-border: CanvasText;
+      --ui-gantt-text: CanvasText;
+      --ui-gantt-muted: CanvasText;
+      --ui-gantt-accent: Highlight;
+    }
+
+    .frame,
+    .track,
+    .bar,
+    .progress {
+      forced-color-adjust: none;
+      box-shadow: none;
+      border-color: CanvasText;
+    }
+
+    .frame,
+    .track {
+      background: Canvas;
+      color: CanvasText;
+    }
+
+    .bar {
+      background: Highlight;
+    }
+  }
 `;
 
 const tones: Record<string, string> = {
   default: 'var(--ui-color-primary, #2563eb)',
-  info: '#0891b2',
-  success: '#16a34a',
-  warning: '#d97706',
-  danger: '#dc2626'
+  info: 'var(--ui-color-info, #0891b2)',
+  success: 'var(--ui-color-success, #16a34a)',
+  warning: 'var(--ui-color-warning, #d97706)',
+  danger: 'var(--ui-color-danger, #dc2626)'
 };
 
 function parseDate(value: string): number | null {

@@ -211,6 +211,14 @@ const style = `
     }
   }
 
+  @media (prefers-contrast: more) {
+    .option,
+    .control {
+      border-width: 2px;
+      box-shadow: none;
+    }
+  }
+
   @media (forced-colors: active) {
     .option {
       forced-color-adjust: none;
@@ -298,7 +306,7 @@ export class UIRadioGroup extends ElementBase {
 
   override connectedCallback(): void {
     this._syncFromAttributes();
-    this.requestRender();
+    super.connectedCallback();
     this.root.addEventListener('click', this._onClickBound);
     this.root.addEventListener('keydown', this._onKeydownBound);
     if (typeof MutationObserver !== 'undefined') {
@@ -323,7 +331,7 @@ export class UIRadioGroup extends ElementBase {
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
     this._syncFromAttributes();
-    this.requestRender();
+    super.attributeChangedCallback(name, oldValue, newValue);
     if (name === 'value') {
       this.dispatchEvent(
         new CustomEvent('valuechange', {

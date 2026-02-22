@@ -70,6 +70,12 @@ const style = `
     display: none;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .crumb-btn {
+      transition: none !important;
+    }
+  }
+
   @media (prefers-contrast: more) {
     :host {
       --ui-breadcrumb-hover-bg: color-mix(in srgb, var(--ui-color-primary, var(--ui-primary, #2563eb)) 18%, transparent);

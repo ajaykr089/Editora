@@ -89,7 +89,7 @@ export const ValidationFlow = () => {
 
         <Box style={{ marginTop: 12 }}>
           <Button onClick={() => submit()}>Run validation</Button>
-          <Box style={{ marginTop: 8, fontSize: 13, color: '#475569' }}>State: {state}</Box>
+          <Box style={{ marginTop: 8, fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>State: {state}</Box>
         </Box>
       </Form>
     </Box>
@@ -99,7 +99,7 @@ export const ValidationFlow = () => {
 export const ContrastMode = () => {
   const { ref, submit } = useForm();
   return (
-    <Box style={{ maxWidth: 620, background: '#020617', padding: 12, borderRadius: 14 }}>
+    <Box style={{ maxWidth: 620, background: 'color-mix(in srgb, var(--ui-color-text, #0f172a) 94%, transparent)', padding: 'var(--ui-space-md, 12px)', borderRadius: 'calc(var(--ui-radius, 12px) + 2px)' }}>
       <Form ref={ref} variant="contrast" shape="soft" elevation="high" onSubmit={() => {}}>
         <Field label="Workspace" htmlFor="form-workspace" variant="contrast">
           <Input id="form-workspace" name="workspace" value="Editora" />
@@ -152,10 +152,10 @@ export const AdvancedAdminFlow = () => {
     <Box style={{ maxWidth: 760, display: 'grid', gap: 12 }}>
       <Progress value={progress} max={100} shape="round" />
       <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <Box style={{ fontSize: 13, color: '#475569' }}>
+        <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>
           Step {step} of 3 • Dirty: <strong>{String(dirty)}</strong> • Autosave: <strong>{autosaveAt}</strong>
         </Box>
-        <Box style={{ fontSize: 12, color: '#64748b' }}>Unsaved-change guard is enabled on this story.</Box>
+        <Box style={{ fontSize: 'var(--ui-font-size-sm, 12px)', color: 'var(--ui-color-muted, #64748b)' }}>Unsaved-change guard is enabled on this story.</Box>
       </Flex>
 
       <Form
@@ -221,7 +221,7 @@ export const AdvancedAdminFlow = () => {
         </Flex>
       </Form>
 
-      <Box style={{ fontSize: 13, color: '#334155' }}>Validation state: <strong>{status}</strong></Box>
+      <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-text, #0f172a)' }}>Validation state: <strong>{status}</strong></Box>
     </Box>
   );
 };

@@ -145,6 +145,12 @@ const style = `
     display: none;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .dismiss {
+      transition: none !important;
+    }
+  }
+
   @media (prefers-contrast: more) {
     .alert {
       box-shadow: none;

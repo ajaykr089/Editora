@@ -366,7 +366,7 @@ export class UICheckbox extends ElementBase {
       this._syncA11yState();
       return;
     }
-    this.render();
+    this.requestRender();
   }
 
   get checked() {

@@ -8,14 +8,17 @@ const style = `
     inset: 0;
     display: none;
     z-index: 1200;
+    color-scheme: light dark;
     --ui-dialog-backdrop: rgba(2, 6, 23, 0.56);
-    --ui-dialog-bg: rgba(255, 255, 255, 0.96);
-    --ui-dialog-color: #0f172a;
-    --ui-dialog-border: 1px solid rgba(15, 23, 42, 0.12);
+    --ui-dialog-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    --ui-dialog-color: var(--ui-color-text, #0f172a);
+    --ui-dialog-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 68%, transparent);
     --ui-dialog-shadow: 0 30px 80px rgba(2, 6, 23, 0.24);
     --ui-dialog-radius: 16px;
     --ui-dialog-padding: 18px;
     --ui-dialog-width: min(560px, calc(100vw - 24px));
+    --ui-dialog-focus: var(--ui-color-focus-ring, #2563eb);
+    --ui-dialog-muted: var(--ui-color-muted, #64748b);
   }
 
   :host([open]) {
@@ -69,7 +72,7 @@ const style = `
 
   .description {
     margin: 0;
-    color: #475569;
+    color: var(--ui-dialog-muted);
     font-size: 13px;
     line-height: 1.45;
   }
@@ -82,7 +85,7 @@ const style = `
     height: 28px;
     border: none;
     border-radius: 8px;
-    background: rgba(15, 23, 42, 0.08);
+    background: color-mix(in srgb, var(--ui-dialog-color) 10%, transparent);
     color: inherit;
     cursor: pointer;
     display: inline-flex;
@@ -93,7 +96,12 @@ const style = `
   }
 
   .close:hover {
-    background: rgba(15, 23, 42, 0.14);
+    background: color-mix(in srgb, var(--ui-dialog-color) 18%, transparent);
+  }
+
+  .close:focus-visible {
+    outline: 2px solid var(--ui-dialog-focus);
+    outline-offset: 1px;
   }
 
   .body {
@@ -119,6 +127,34 @@ const style = `
   @media (prefers-reduced-motion: reduce) {
     .panel {
       transition: none !important;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .panel {
+      border-width: 2px;
+      box-shadow: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-dialog-backdrop: rgba(0, 0, 0, 0.72);
+      --ui-dialog-bg: Canvas;
+      --ui-dialog-color: CanvasText;
+      --ui-dialog-border: 1px solid CanvasText;
+      --ui-dialog-shadow: none;
+      --ui-dialog-muted: CanvasText;
+      --ui-dialog-focus: Highlight;
+    }
+
+    .panel,
+    .close {
+      forced-color-adjust: none;
+      background: Canvas;
+      color: CanvasText;
+      border-color: CanvasText;
+      box-shadow: none;
     }
   }
 `;

@@ -219,14 +219,14 @@ export class UIAvatar extends ElementBase {
   private _onImageLoad() {
     this._imgLoaded = true;
     this._imgFailed = false;
-    this.render();
+    this.requestRender();
     this.dispatchEvent(new CustomEvent('load', { detail: { src: this.getAttribute('src') || '' }, bubbles: true }));
   }
 
   private _onImageError() {
     this._imgLoaded = false;
     this._imgFailed = true;
-    this.render();
+    this.requestRender();
     this.dispatchEvent(new CustomEvent('error', { detail: { src: this.getAttribute('src') || '' }, bubbles: true }));
   }
 

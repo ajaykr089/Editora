@@ -232,138 +232,68 @@ export function DataTable(props: DataTableProps) {
     onBulkClear
   ]);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const filtersAttr =
+    filterRules && filterRules.length
+      ? (() => {
+          try {
+            return JSON.stringify(filterRules);
+          } catch {
+            return undefined;
+          }
+        })()
+      : undefined;
 
-    if (sortable) el.setAttribute('sortable', '');
-    else el.removeAttribute('sortable');
+  const pinColumnsAttr =
+    typeof pinColumns === 'string'
+      ? pinColumns.trim() || undefined
+      : pinColumns && typeof pinColumns === 'object'
+        ? (() => {
+            try {
+              return JSON.stringify(pinColumns);
+            } catch {
+              return undefined;
+            }
+          })()
+        : undefined;
 
-    if (selectable) el.setAttribute('selectable', '');
-    else el.removeAttribute('selectable');
-
-    if (multiSelect) el.setAttribute('multi-select', '');
-    else el.removeAttribute('multi-select');
-
-    if (striped) el.setAttribute('striped', '');
-    else el.removeAttribute('striped');
-
-    if (hover) el.setAttribute('hover', '');
-    else el.removeAttribute('hover');
-
-    if (compact) el.setAttribute('compact', '');
-    else el.removeAttribute('compact');
-
-    if (bordered) el.setAttribute('bordered', '');
-    else el.removeAttribute('bordered');
-
-    if (stickyHeader) el.setAttribute('sticky-header', '');
-    else el.removeAttribute('sticky-header');
-
-    if (loading) el.setAttribute('loading', '');
-    else el.removeAttribute('loading');
-
-    if (headless) el.setAttribute('headless', '');
-    else el.removeAttribute('headless');
-
-    if (emptyText) el.setAttribute('empty-text', emptyText);
-    else el.removeAttribute('empty-text');
-
-    if (typeof page === 'number' && Number.isFinite(page)) el.setAttribute('page', String(page));
-    else el.removeAttribute('page');
-
-    if (typeof pageSize === 'number' && Number.isFinite(pageSize)) el.setAttribute('page-size', String(pageSize));
-    else el.removeAttribute('page-size');
-
-    if (paginationId) el.setAttribute('pagination-id', paginationId);
-    else el.removeAttribute('pagination-id');
-
-    if (typeof filterQuery === 'string') el.setAttribute('filter-query', filterQuery);
-    else el.removeAttribute('filter-query');
-
-    if (typeof filterColumn === 'number' && Number.isFinite(filterColumn)) {
-      el.setAttribute('filter-column', String(filterColumn));
-    } else if (typeof filterColumn === 'string' && filterColumn.trim()) {
-      el.setAttribute('filter-column', filterColumn);
-    } else {
-      el.removeAttribute('filter-column');
-    }
-
-    if (filterRules && filterRules.length) {
-      try {
-        el.setAttribute('filters', JSON.stringify(filterRules));
-      } catch {
-        el.removeAttribute('filters');
-      }
-    } else {
-      el.removeAttribute('filters');
-    }
-
-    if (columnOrder) el.setAttribute('column-order', columnOrder);
-    else el.removeAttribute('column-order');
-
-    if (typeof pinColumns === 'string' && pinColumns.trim()) {
-      el.setAttribute('pin-columns', pinColumns);
-    } else if (pinColumns && typeof pinColumns === 'object') {
-      try {
-        el.setAttribute('pin-columns', JSON.stringify(pinColumns));
-      } catch {
-        el.removeAttribute('pin-columns');
-      }
-    } else {
-      el.removeAttribute('pin-columns');
-    }
-
-    if (draggableColumns) el.setAttribute('draggable-columns', '');
-    else el.removeAttribute('draggable-columns');
-
-    if (resizableColumns) el.setAttribute('resizable-columns', '');
-    else el.removeAttribute('resizable-columns');
-
-    if (bulkActionsLabel) el.setAttribute('bulk-actions-label', bulkActionsLabel);
-    else el.removeAttribute('bulk-actions-label');
-
-    if (bulkClearLabel) el.setAttribute('bulk-clear-label', bulkClearLabel);
-    else el.removeAttribute('bulk-clear-label');
-
-    if (virtualize) el.setAttribute('virtualize', '');
-    else el.removeAttribute('virtualize');
-
-    if (typeof rowHeight === 'number' && Number.isFinite(rowHeight)) el.setAttribute('row-height', String(rowHeight));
-    else el.removeAttribute('row-height');
-
-    if (typeof overscan === 'number' && Number.isFinite(overscan)) el.setAttribute('overscan', String(overscan));
-    else el.removeAttribute('overscan');
-  }, [
-    sortable,
-    selectable,
-    multiSelect,
-    striped,
-    hover,
-    compact,
-    bordered,
-    stickyHeader,
-    loading,
-    headless,
-    emptyText,
-    page,
-    pageSize,
-    paginationId,
-    filterQuery,
-    filterColumn,
-    filterRules,
-    columnOrder,
-    pinColumns,
-    draggableColumns,
-    resizableColumns,
-    bulkActionsLabel,
-    bulkClearLabel,
-    virtualize,
-    rowHeight,
-    overscan
-  ]);
-
-  return React.createElement('ui-data-table', { ref, ...rest }, children);
+  return React.createElement(
+    'ui-data-table',
+    {
+      ref,
+      ...rest,
+      ...(sortable ? { sortable: '' } : {}),
+      ...(selectable ? { selectable: '' } : {}),
+      ...(multiSelect ? { 'multi-select': '' } : {}),
+      ...(striped ? { striped: '' } : {}),
+      ...(hover ? { hover: '' } : {}),
+      ...(compact ? { compact: '' } : {}),
+      ...(bordered ? { bordered: '' } : {}),
+      ...(stickyHeader ? { 'sticky-header': '' } : {}),
+      ...(loading ? { loading: '' } : {}),
+      ...(headless ? { headless: '' } : {}),
+      ...(emptyText ? { 'empty-text': emptyText } : {}),
+      ...(typeof page === 'number' && Number.isFinite(page) ? { page: String(page) } : {}),
+      ...(typeof pageSize === 'number' && Number.isFinite(pageSize) ? { 'page-size': String(pageSize) } : {}),
+      ...(paginationId ? { 'pagination-id': paginationId } : {}),
+      ...(typeof filterQuery === 'string' ? { 'filter-query': filterQuery } : {}),
+      ...(typeof filterColumn === 'number' && Number.isFinite(filterColumn)
+        ? { 'filter-column': String(filterColumn) }
+        : typeof filterColumn === 'string' && filterColumn.trim()
+          ? { 'filter-column': filterColumn }
+          : {}),
+      ...(filtersAttr ? { filters: filtersAttr } : {}),
+      ...(columnOrder ? { 'column-order': columnOrder } : {}),
+      ...(pinColumnsAttr ? { 'pin-columns': pinColumnsAttr } : {}),
+      ...(draggableColumns ? { 'draggable-columns': '' } : {}),
+      ...(resizableColumns ? { 'resizable-columns': '' } : {}),
+      ...(bulkActionsLabel ? { 'bulk-actions-label': bulkActionsLabel } : {}),
+      ...(bulkClearLabel ? { 'bulk-clear-label': bulkClearLabel } : {}),
+      ...(virtualize ? { virtualize: '' } : {}),
+      ...(typeof rowHeight === 'number' && Number.isFinite(rowHeight) ? { 'row-height': String(rowHeight) } : {}),
+      ...(typeof overscan === 'number' && Number.isFinite(overscan) ? { overscan: String(overscan) } : {})
+    },
+    children
+  );
 }
 
 export default DataTable;

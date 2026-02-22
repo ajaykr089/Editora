@@ -7,8 +7,13 @@ const style = `
     inset: 0;
     z-index: 1180;
     display: none;
-    --ui-command-bg: rgba(255, 255, 255, 0.97);
-    --ui-command-border: 1px solid rgba(15, 23, 42, 0.12);
+    color-scheme: light dark;
+    --ui-command-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    --ui-command-text: var(--ui-color-text, #0f172a);
+    --ui-command-muted: var(--ui-color-muted, #64748b);
+    --ui-command-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 68%, transparent);
+    --ui-command-accent: var(--ui-color-primary, #2563eb);
+    --ui-command-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-command-radius: 16px;
     --ui-command-shadow: 0 28px 70px rgba(2, 6, 23, 0.26);
     --ui-command-backdrop: rgba(2, 6, 23, 0.52);
@@ -36,6 +41,7 @@ const style = `
     border: var(--ui-command-border);
     border-radius: var(--ui-command-radius);
     background: var(--ui-command-bg);
+    color: var(--ui-command-text);
     box-shadow: var(--ui-command-shadow);
     display: grid;
     grid-template-rows: auto 1fr;
@@ -58,6 +64,12 @@ const style = `
     padding: 14px 16px;
     font-size: 15px;
     border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+    color: inherit;
+  }
+
+  .search:focus-visible {
+    outline: 2px solid var(--ui-command-focus);
+    outline-offset: -2px;
   }
 
   .list {
@@ -72,7 +84,7 @@ const style = `
     border-radius: 10px;
     padding: 10px 10px;
     font-size: 13px;
-    color: #0f172a;
+    color: var(--ui-command-text);
     line-height: 1.35;
     cursor: pointer;
     user-select: none;
@@ -83,7 +95,7 @@ const style = `
   ::slotted([slot="command"]:hover),
   ::slotted([slot="command"]:focus-visible),
   ::slotted([slot="command"][data-active="true"]) {
-    background: rgba(37, 99, 235, 0.12);
+    background: color-mix(in srgb, var(--ui-command-accent) 14%, transparent);
   }
 
   ::slotted([slot="command"][hidden]) {
@@ -92,7 +104,7 @@ const style = `
 
   .empty {
     padding: 12px 10px 14px;
-    color: #64748b;
+    color: var(--ui-command-muted);
     font-size: 12px;
     text-align: center;
   }
@@ -110,6 +122,42 @@ const style = `
     .panel,
     ::slotted([slot="command"]) {
       transition: none !important;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .panel {
+      border-width: 2px;
+      box-shadow: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-command-bg: Canvas;
+      --ui-command-text: CanvasText;
+      --ui-command-muted: CanvasText;
+      --ui-command-border: 1px solid CanvasText;
+      --ui-command-backdrop: rgba(0, 0, 0, 0.72);
+      --ui-command-accent: Highlight;
+      --ui-command-focus: Highlight;
+      --ui-command-shadow: none;
+    }
+
+    .panel,
+    .search,
+    ::slotted([slot="command"]) {
+      forced-color-adjust: none;
+      background: Canvas;
+      color: CanvasText;
+      border-color: CanvasText;
+      box-shadow: none;
+    }
+
+    ::slotted([slot="command"]:hover),
+    ::slotted([slot="command"]:focus-visible),
+    ::slotted([slot="command"][data-active="true"]) {
+      border-color: Highlight;
     }
   }
 `;
@@ -201,7 +249,7 @@ export class UICommandPalette extends ElementBase {
       <div class="overlay" part="overlay"></div>
       <section class="panel" part="panel" role="dialog" aria-modal="true" aria-label="Command palette">
         <input class="search" part="search" type="text" placeholder="${placeholder}" />
-        <div class="list" part="list">
+        <div class="list" part="list" role="listbox" aria-label="Command options">
           <slot name="command"></slot>
           <div class="empty" part="empty" hidden>${emptyText}</div>
         </div>

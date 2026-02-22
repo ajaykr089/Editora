@@ -126,6 +126,12 @@ const style = `
     display: none;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .bulk-clear {
+      transition: none !important;
+    }
+  }
+
   @media (prefers-contrast: more) {
     :host {
       --ui-data-table-border: 2px solid var(--ui-data-table-border-color);
@@ -154,7 +160,7 @@ const style = `
 `;
 
 const lightDomStyle = `
-  ui-data-table:not([headless]) table[data-ui-data-table] {
+  ui-data-table:not([headless]) > table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
@@ -163,7 +169,7 @@ const lightDomStyle = `
     min-width: 680px;
   }
 
-  ui-data-table:not([headless]) table[data-ui-data-table] thead th {
+  ui-data-table:not([headless]) > table thead th {
     text-align: left;
     padding: 12px 14px;
     color: var(--ui-data-table-header-text, #334155);
@@ -174,67 +180,67 @@ const lightDomStyle = `
     white-space: nowrap;
   }
 
-  ui-data-table:not([headless]) table[data-ui-data-table] tbody td {
+  ui-data-table:not([headless]) > table tbody td {
     padding: 11px 14px;
     border-bottom: 1px solid var(--ui-data-table-cell-border, rgba(15, 23, 42, 0.08));
     vertical-align: middle;
     color: var(--ui-data-table-text, #0f172a);
   }
 
-  ui-data-table:not([headless]) table[data-ui-data-table] tbody tr:last-child td {
+  ui-data-table:not([headless]) > table tbody tr:last-child td {
     border-bottom: none;
   }
 
-  ui-data-table[compact]:not([headless]) table[data-ui-data-table] thead th,
-  ui-data-table[compact]:not([headless]) table[data-ui-data-table] tbody td {
+  ui-data-table[compact]:not([headless]) > table thead th,
+  ui-data-table[compact]:not([headless]) > table tbody td {
     padding-top: 8px;
     padding-bottom: 8px;
   }
 
-  ui-data-table[striped]:not([headless]) table[data-ui-data-table] tbody tr:nth-child(even) td {
+  ui-data-table[striped]:not([headless]) > table tbody tr:nth-child(even) td {
     background: var(--ui-data-table-striped-bg, rgba(148, 163, 184, 0.08));
   }
 
-  ui-data-table[hover]:not([headless]) table[data-ui-data-table] tbody tr:hover td {
+  ui-data-table[hover]:not([headless]) > table tbody tr:hover td {
     background: var(--ui-data-table-hover-bg, rgba(37, 99, 235, 0.08));
   }
 
-  ui-data-table[bordered]:not([headless]) table[data-ui-data-table] thead th,
-  ui-data-table[bordered]:not([headless]) table[data-ui-data-table] tbody td {
+  ui-data-table[bordered]:not([headless]) > table thead th,
+  ui-data-table[bordered]:not([headless]) > table tbody td {
     border-right: 1px solid var(--ui-data-table-cell-border, rgba(15, 23, 42, 0.08));
   }
 
-  ui-data-table[bordered]:not([headless]) table[data-ui-data-table] thead th:last-child,
-  ui-data-table[bordered]:not([headless]) table[data-ui-data-table] tbody td:last-child {
+  ui-data-table[bordered]:not([headless]) > table thead th:last-child,
+  ui-data-table[bordered]:not([headless]) > table tbody td:last-child {
     border-right: none;
   }
 
-  ui-data-table[sticky-header]:not([headless]) table[data-ui-data-table] thead th {
+  ui-data-table[sticky-header]:not([headless]) > table thead th {
     position: sticky;
     top: 0;
     z-index: 2;
   }
 
-  ui-data-table[sortable]:not([headless]) table[data-ui-data-table] thead th[data-sortable="true"] {
+  ui-data-table[sortable]:not([headless]) > table thead th[data-sortable="true"] {
     cursor: pointer;
     user-select: none;
     position: relative;
     padding-right: 24px;
   }
 
-  ui-data-table[draggable-columns]:not([headless]) table[data-ui-data-table] thead th[data-draggable="true"] {
+  ui-data-table[draggable-columns]:not([headless]) > table thead th[data-draggable="true"] {
     cursor: grab;
   }
 
-  ui-data-table[draggable-columns]:not([headless]) table[data-ui-data-table] thead th[data-dragging="true"] {
+  ui-data-table[draggable-columns]:not([headless]) > table thead th[data-dragging="true"] {
     opacity: 0.62;
   }
 
-  ui-data-table[draggable-columns]:not([headless]) table[data-ui-data-table] thead th[data-drag-over="true"] {
+  ui-data-table[draggable-columns]:not([headless]) > table thead th[data-drag-over="true"] {
     box-shadow: inset 0 -2px 0 rgba(37, 99, 235, 0.82);
   }
 
-  ui-data-table[sortable]:not([headless]) table[data-ui-data-table] thead th[data-sortable="true"]::after {
+  ui-data-table[sortable]:not([headless]) > table thead th[data-sortable="true"]::after {
     content: "v^";
     position: absolute;
     right: 9px;
@@ -245,36 +251,36 @@ const lightDomStyle = `
     letter-spacing: -1px;
   }
 
-  ui-data-table[sortable]:not([headless]) table[data-ui-data-table] thead th[aria-sort="ascending"]::after {
+  ui-data-table[sortable]:not([headless]) > table thead th[aria-sort="ascending"]::after {
     content: "^";
     letter-spacing: 0;
     color: var(--ui-data-table-sort-active, #2563eb);
   }
 
-  ui-data-table[sortable]:not([headless]) table[data-ui-data-table] thead th[aria-sort="descending"]::after {
+  ui-data-table[sortable]:not([headless]) > table thead th[aria-sort="descending"]::after {
     content: "v";
     letter-spacing: 0;
     color: var(--ui-data-table-sort-active, #2563eb);
   }
 
-  ui-data-table[selectable]:not([headless]) table[data-ui-data-table] tbody tr {
+  ui-data-table[selectable]:not([headless]) > table tbody tr {
     cursor: pointer;
   }
 
-  ui-data-table[selectable]:not([headless]) table[data-ui-data-table] tbody tr[data-selected="true"] td {
+  ui-data-table[selectable]:not([headless]) > table tbody tr[data-selected="true"] td {
     background: var(--ui-data-table-selected-bg, rgba(37, 99, 235, 0.14));
   }
 
-  ui-data-table[loading]:not([headless]) table[data-ui-data-table] tbody {
+  ui-data-table[loading]:not([headless]) > table tbody {
     opacity: 0.55;
     pointer-events: none;
   }
 
-  ui-data-table[resizable-columns]:not([headless]) table[data-ui-data-table] thead th[data-resizable="true"] {
+  ui-data-table[resizable-columns]:not([headless]) > table thead th[data-resizable="true"] {
     position: relative;
   }
 
-  ui-data-table[resizable-columns]:not([headless]) table[data-ui-data-table] thead th .resize-handle {
+  ui-data-table[resizable-columns]:not([headless]) > table thead th .resize-handle {
     position: absolute;
     inset-inline-end: -4px;
     top: 0;
@@ -287,7 +293,7 @@ const lightDomStyle = `
     z-index: 3;
   }
 
-  ui-data-table[resizable-columns]:not([headless]) table[data-ui-data-table] thead th .resize-handle::before {
+  ui-data-table[resizable-columns]:not([headless]) > table thead th .resize-handle::before {
     content: "";
     position: absolute;
     inset-inline-start: 3px;
@@ -298,54 +304,54 @@ const lightDomStyle = `
     transition: background 120ms ease;
   }
 
-  ui-data-table[resizable-columns]:not([headless]) table[data-ui-data-table] thead th .resize-handle:hover::before {
+  ui-data-table[resizable-columns]:not([headless]) > table thead th .resize-handle:hover::before {
     background: var(--ui-data-table-resize-handle-active, rgba(37, 99, 235, 0.72));
   }
 
-  ui-data-table:not([headless]) table[data-ui-data-table] [data-pinned="left"],
-  ui-data-table:not([headless]) table[data-ui-data-table] [data-pinned="right"] {
+  ui-data-table:not([headless]) > table [data-pinned="left"],
+  ui-data-table:not([headless]) > table [data-pinned="right"] {
     position: sticky;
     z-index: 3;
     background: var(--ui-data-table-bg, #fff);
   }
 
-  ui-data-table:not([headless]) table[data-ui-data-table] thead [data-pinned="left"],
-  ui-data-table:not([headless]) table[data-ui-data-table] thead [data-pinned="right"] {
+  ui-data-table:not([headless]) > table thead [data-pinned="left"],
+  ui-data-table:not([headless]) > table thead [data-pinned="right"] {
     z-index: 4;
     background: var(--ui-data-table-header-bg, #f8fafc);
   }
 
-  ui-data-table:not([headless]) table[data-ui-data-table] [data-pinned="left"][data-pin-edge="true"] {
+  ui-data-table:not([headless]) > table [data-pinned="left"][data-pin-edge="true"] {
     box-shadow: 1px 0 0 var(--ui-data-table-cell-border, rgba(15, 23, 42, 0.08)), 8px 0 14px rgba(15, 23, 42, 0.08);
   }
 
-  ui-data-table:not([headless]) table[data-ui-data-table] [data-pinned="right"][data-pin-edge="true"] {
+  ui-data-table:not([headless]) > table [data-pinned="right"][data-pin-edge="true"] {
     box-shadow: -1px 0 0 var(--ui-data-table-cell-border, rgba(15, 23, 42, 0.08)), -8px 0 14px rgba(15, 23, 42, 0.08);
   }
 
-  ui-data-table:not([headless]) table[data-ui-data-table] thead th:focus-visible,
-  ui-data-table:not([headless]) table[data-ui-data-table] tbody tr[tabindex="0"]:focus-visible {
+  ui-data-table:not([headless]) > table thead th:focus-visible,
+  ui-data-table:not([headless]) > table tbody tr[tabindex="0"]:focus-visible {
     outline: 2px solid var(--ui-color-focus-ring, #2563eb);
     outline-offset: -2px;
   }
 
   @media (prefers-contrast: more) {
-    ui-data-table:not([headless]) table[data-ui-data-table] thead th,
-    ui-data-table:not([headless]) table[data-ui-data-table] tbody td {
+    ui-data-table:not([headless]) > table thead th,
+    ui-data-table:not([headless]) > table tbody td {
       border-color: var(--ui-data-table-cell-border, currentColor);
     }
   }
 
   @media (forced-colors: active) {
-    ui-data-table:not([headless]) table[data-ui-data-table] thead th,
-    ui-data-table:not([headless]) table[data-ui-data-table] tbody td {
+    ui-data-table:not([headless]) > table thead th,
+    ui-data-table:not([headless]) > table tbody td {
       forced-color-adjust: none;
       background: Canvas;
       color: CanvasText;
       border-color: CanvasText;
     }
-    ui-data-table[hover]:not([headless]) table[data-ui-data-table] tbody tr:hover td,
-    ui-data-table[selectable]:not([headless]) table[data-ui-data-table] tbody tr[data-selected="true"] td {
+    ui-data-table[hover]:not([headless]) > table tbody tr:hover td,
+    ui-data-table[selectable]:not([headless]) > table tbody tr[data-selected="true"] td {
       background: Highlight;
       color: HighlightText;
     }
@@ -355,11 +361,21 @@ const lightDomStyle = `
 function ensureDataTableLightDomStyle() {
   if (typeof document === 'undefined') return;
   const styleId = 'ui-data-table-light-dom-style';
-  if (document.getElementById(styleId)) return;
+  const existing = document.getElementById(styleId);
+  if (existing) {
+    if (existing.textContent !== lightDomStyle) {
+      existing.textContent = lightDomStyle;
+    }
+    return;
+  }
   const el = document.createElement('style');
   el.id = styleId;
   el.textContent = lightDomStyle;
   document.head.appendChild(el);
+}
+
+if (typeof document !== 'undefined') {
+  ensureDataTableLightDomStyle();
 }
 
 function getCellText(cell: HTMLTableCellElement | undefined): string {

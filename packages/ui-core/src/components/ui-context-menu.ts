@@ -528,6 +528,10 @@ function ensureLightDomStyle(): void {
   document.head.appendChild(el);
 }
 
+if (typeof document !== 'undefined') {
+  ensureLightDomStyle();
+}
+
 function isDisabled(node: MenuLikeItem): boolean {
   return node.hasAttribute('disabled') || node.getAttribute('aria-disabled') === 'true' || !!node.disabled;
 }

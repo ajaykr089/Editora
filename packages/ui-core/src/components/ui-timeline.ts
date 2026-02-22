@@ -101,14 +101,61 @@ const style = `
     --ui-timeline-muted: #93a4bd;
     --ui-timeline-accent: #93c5fd;
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dot {
+      transition: none !important;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .frame {
+      box-shadow: none;
+    }
+
+    .rail::before {
+      inline-size: 3px;
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-timeline-bg: Canvas;
+      --ui-timeline-border: CanvasText;
+      --ui-timeline-text: CanvasText;
+      --ui-timeline-muted: CanvasText;
+      --ui-timeline-accent: Highlight;
+    }
+
+    .frame,
+    .rail::before,
+    .dot {
+      forced-color-adjust: none;
+      box-shadow: none;
+    }
+
+    .frame {
+      background: Canvas;
+      color: CanvasText;
+      border-color: CanvasText;
+    }
+
+    .rail::before {
+      background: CanvasText;
+    }
+
+    .dot {
+      background: Highlight;
+    }
+  }
 `;
 
 const toneMap: Record<string, string> = {
   default: 'var(--ui-color-primary, #2563eb)',
-  info: '#0891b2',
-  success: '#16a34a',
-  warning: '#d97706',
-  danger: '#dc2626'
+  info: 'var(--ui-color-info, #0891b2)',
+  success: 'var(--ui-color-success, #16a34a)',
+  warning: 'var(--ui-color-warning, #d97706)',
+  danger: 'var(--ui-color-danger, #dc2626)'
 };
 
 function escapeHtml(value: string): string {

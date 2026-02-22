@@ -3,6 +3,7 @@ import { ElementBase } from '../ElementBase';
 const style = `
   :host {
     display: block;
+    color-scheme: light dark;
     position: fixed;
     z-index: 9999;
     top: 24px;
@@ -10,6 +11,11 @@ const style = `
     pointer-events: none;
     width: auto;
     max-width: 360px;
+    --ui-toast-bg: color-mix(in srgb, var(--ui-color-text, #0f172a) 88%, #ffffff 12%);
+    --ui-toast-text: #ffffff;
+    --ui-toast-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 34%, transparent);
+    --ui-toast-shadow: 0 16px 34px rgba(2, 6, 23, 0.32);
+    --ui-toast-focus: var(--ui-color-focus-ring, #93c5fd);
   }
   .toast-list {
     display: flex;
@@ -19,10 +25,11 @@ const style = `
   }
   .toast {
     position: relative;
-    background: #222;
-    color: #fff;
+    background: var(--ui-toast-bg);
+    color: var(--ui-toast-text);
+    border: 1px solid var(--ui-toast-border);
     border-radius: 8px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    box-shadow: var(--ui-toast-shadow);
     padding: 16px 20px;
     font-size: 15px;
     opacity: 0;
@@ -41,7 +48,7 @@ const style = `
   .toast button.close {
     background: none;
     border: none;
-    color: #fff;
+    color: var(--ui-toast-text);
     font-size: 18px;
     position: absolute;
     top: 8px;
@@ -51,7 +58,45 @@ const style = `
     transition: opacity 0.18s;
   }
   .toast button.close:hover { opacity: 1; }
+
+  .toast button.close:focus-visible {
+    outline: 2px solid var(--ui-toast-focus);
+    outline-offset: 1px;
+  }
   :host([headless]) { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toast,
+    .toast button.close {
+      transition: none !important;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .toast {
+      border-width: 2px;
+      box-shadow: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    :host {
+      --ui-toast-bg: Canvas;
+      --ui-toast-text: CanvasText;
+      --ui-toast-border: CanvasText;
+      --ui-toast-shadow: none;
+      --ui-toast-focus: Highlight;
+    }
+
+    .toast,
+    .toast button.close {
+      forced-color-adjust: none;
+      background: Canvas;
+      color: CanvasText;
+      border-color: CanvasText;
+      box-shadow: none;
+    }
+  }
 `;
 
 let toastId = 0;
@@ -118,7 +163,7 @@ export class UIToast extends ElementBase {
       ariaLive: opts.ariaLive || 'polite',
     };
     this._toasts.push(toast);
-    this.render();
+    this.requestRender();
     this.dispatchEvent(new CustomEvent('show', { detail: { id, message }, bubbles: true }));
     if (toast.duration > 0) {
       const timeout = setTimeout(() => this.hide(id), toast.duration);
@@ -129,7 +174,7 @@ export class UIToast extends ElementBase {
 
   hide(id: number) {
     this._toasts = this._toasts.filter(t => t.id !== id);
-    this.render();
+    this.requestRender();
     this.dispatchEvent(new CustomEvent('hide', { detail: { id }, bubbles: true }));
     if (this._timeoutMap.has(id)) {
       clearTimeout(this._timeoutMap.get(id));
