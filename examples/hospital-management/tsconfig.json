@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "lib": ["ES2021", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@editora/icons": ["../../packages/icons/src/index.ts"],
+      "@editora/react-icons": ["../../packages/react-icons/src/index.ts"],
+      "@editora/ui-core": ["../../packages/ui-core/src/index.ts"],
+      "@editora/ui-react": ["../../packages/ui-react/src/index.tsx"],
+      "@editora/toast": ["../../packages/editora-toast/src/index.ts"],
+      "@editora/editor": ["../../packages/react/src/index.ts"],
+      "@editora/core": ["../../packages/core/src/index.ts"],
+      "@editora/plugins": ["../../packages/plugins/src/index.ts"],
+      "@editora/themes/*": ["../../packages/themes/*"]
+    }
+  },
+  "include": ["src"]
+}

@@ -258,10 +258,16 @@ const style = `
   .icon {
     inline-size: 18px;
     block-size: 18px;
-    font-size: 14px;
-    line-height: 1;
     display: inline-grid;
     place-items: center;
+    flex: 0 0 auto;
+  }
+
+  .icon ui-icon {
+    --ui-icon-size: 16px;
+    inline-size: 18px;
+    block-size: 18px;
+    pointer-events: none;
   }
 
   .meta {
@@ -773,7 +779,7 @@ export class UISidebar extends ElementBase {
 
             const listHtml = group.items
               .map((item) => {
-                const icon = item.icon ? escapeHtml(item.icon) : '•';
+                const iconName = item.icon ? escapeHtml(item.icon) : 'dot';
                 return `
                   <li>
                     <button
@@ -789,7 +795,7 @@ export class UISidebar extends ElementBase {
                       tabindex="${item.active ? '0' : '-1'}"
                       ${item.disabled ? 'disabled' : ''}
                     >
-                      <span class="icon" part="item-icon">${icon}</span>
+                      <span class="icon" part="item-icon"><ui-icon name="${iconName}" size="sm" decorative></ui-icon></span>
                       <span class="meta" part="item-meta" ${collapsed ? 'hidden' : ''}>
                         <span class="label" part="item-label">${escapeHtml(item.label)}</span>
                         <span class="description" part="item-description" ${item.description ? '' : 'hidden'}>${escapeHtml(item.description)}</span>

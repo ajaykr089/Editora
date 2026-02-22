@@ -80,6 +80,22 @@ Includes:
 - Plugin documentation
 - Keyboard shortcuts guide
 
+### 5. Hospital Management Admin (`hospital-management/`)
+Frontend-first SaaS-grade hospital admin dashboard built with the Editora UI ecosystem.
+
+```bash
+cd examples/hospital-management
+npm install
+npm run dev
+```
+
+Includes:
+- App shell (sidebar/topbar/breadcrumb/command palette/quick actions)
+- Auth UX (login, forgot password, role-guarded routing, forbidden/not-found)
+- Dashboard, Patients, Appointments, Staff/RBAC, Wards, Pharmacy, Lab, Billing, Reports, Settings
+- In-memory API + TanStack Query + RHF/Zod forms
+- Toasts, confirmations, loading/empty/error states
+
 ### 6. Collaborative Editor (`collaborative/`)
 Editor with comments, mentions, and real-time collaboration features.
 

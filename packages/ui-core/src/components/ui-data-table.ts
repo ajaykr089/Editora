@@ -111,6 +111,14 @@ const style = `
     min-height: 1.2em;
   }
 
+  :host([hide-summary]) .meta {
+    margin-top: 0;
+  }
+
+  :host([hide-summary]) .summary {
+    display: none;
+  }
+
   :host([headless]) .frame {
     border: none;
     border-radius: 0;
@@ -421,7 +429,8 @@ export class UIDataTable extends ElementBase {
       'overscan',
       'page',
       'page-size',
-      'pagination-id'
+      'pagination-id',
+      'hide-summary'
     ];
   }
 

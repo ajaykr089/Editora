@@ -5,6 +5,9 @@ const style = `
     position: fixed;
     inset: 0;
     display: block;
+    z-index: var(--ui-dialog-backdrop-z);
+    pointer-events: none;
+    isolation: isolate;
     color-scheme: light dark;
     --ui-dialog-backdrop: rgba(2, 6, 23, 0.56);
     --ui-dialog-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
@@ -42,6 +45,7 @@ const style = `
     z-index: var(--ui-dialog-backdrop-z);
     display: grid;
     place-items: center;
+    pointer-events: auto;
     background: var(--ui-dialog-backdrop);
     backdrop-filter: saturate(1.06) blur(3px);
     opacity: 0;

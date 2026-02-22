@@ -91,6 +91,7 @@ export type DataTableProps = React.HTMLAttributes<HTMLElement> & {
   stickyHeader?: boolean;
   loading?: boolean;
   headless?: boolean;
+  hideSummary?: boolean;
   emptyText?: string;
   page?: number;
   pageSize?: number;
@@ -129,6 +130,7 @@ export function DataTable(props: DataTableProps) {
     stickyHeader,
     loading,
     headless,
+    hideSummary,
     emptyText,
     page,
     pageSize,
@@ -271,6 +273,7 @@ export function DataTable(props: DataTableProps) {
       ...(stickyHeader ? { 'sticky-header': '' } : {}),
       ...(loading ? { loading: '' } : {}),
       ...(headless ? { headless: '' } : {}),
+      ...(hideSummary ? { 'hide-summary': '' } : {}),
       ...(emptyText ? { 'empty-text': emptyText } : {}),
       ...(typeof page === 'number' && Number.isFinite(page) ? { page: String(page) } : {}),
       ...(typeof pageSize === 'number' && Number.isFinite(pageSize) ? { 'page-size': String(pageSize) } : {}),

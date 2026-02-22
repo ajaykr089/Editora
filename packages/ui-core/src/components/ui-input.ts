@@ -4,7 +4,9 @@ const style = `
   :host {
     --ui-input-padding: var(--ui-padding, 10px 12px);
     --ui-input-border-color: var(--ui-color-border, var(--ui-border-color, #cbd5e1));
-    --ui-input-border: var(--ui-border, 1px solid var(--ui-input-border-color));
+    --ui-input-border-width: 1px;
+    --ui-input-border-style: solid;
+    --ui-input-border: var(--ui-input-border-width) var(--ui-input-border-style) var(--ui-input-border-color);
     --ui-input-border-radius: var(--ui-radius, 10px);
     --ui-input-min-height: var(--ui-min-height, 40px);
     --ui-input-width: 100%;
