@@ -579,9 +579,21 @@ export class UIMenubar extends ElementBase {
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+    if (oldValue === newValue) return;
     if (name === 'selected' && this._ignoreSelected) return;
-    super.attributeChangedCallback(name, oldValue, newValue);
-    this._attachSlotListeners();
+    this._syncBarA11y();
+    if (
+      this._open &&
+      (name === 'placement' ||
+        name === 'variant' ||
+        name === 'density' ||
+        name === 'shape' ||
+        name === 'elevation' ||
+        name === 'tone')
+    ) {
+      this._rebuildPanel();
+      return;
+    }
     this._syncState();
   }
 
@@ -599,6 +611,7 @@ export class UIMenubar extends ElementBase {
     `);
     this._attachSlotListeners();
     this._syncStructure();
+    this._syncBarA11y();
   }
 
   open(): void {
@@ -657,6 +670,13 @@ export class UIMenubar extends ElementBase {
     if (this._contentSlot) this._contentSlot.removeEventListener('slotchange', this._onSlotChange as EventListener);
     this._itemSlot = null;
     this._contentSlot = null;
+  }
+
+  private _syncBarA11y(): void {
+    const bar = this.root.querySelector('.bar') as HTMLElement | null;
+    if (!bar) return;
+    const orientation = this.getAttribute('orientation') === 'vertical' ? 'vertical' : 'horizontal';
+    bar.setAttribute('aria-orientation', orientation);
   }
 
   private _onSlotChange(): void {
@@ -1217,6 +1237,14 @@ export class UIMenubar extends ElementBase {
       event.preventDefault();
       item.click();
     }
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return false;
   }
 }
 

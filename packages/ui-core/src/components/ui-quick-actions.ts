@@ -253,7 +253,7 @@ export class UIQuickActions extends ElementBase {
       return;
     }
 
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (this.isConnected) this.requestRender();
   }
 
   get open(): boolean {

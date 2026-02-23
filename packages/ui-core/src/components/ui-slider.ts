@@ -471,6 +471,26 @@ function formatValue(
   return `${singleValue}`;
 }
 
+const SLIDER_LIVE_ATTRS = new Set([
+  'value',
+  'value-start',
+  'value-end',
+  'min',
+  'max',
+  'step',
+  'disabled',
+  'headless',
+  'orientation',
+  'size',
+  'variant',
+  'tone',
+  'show-value',
+  'format',
+  'name',
+  'name-start',
+  'name-end'
+]);
+
 export class UISlider extends ElementBase {
   static get observedAttributes() {
     return [
@@ -527,15 +547,13 @@ export class UISlider extends ElementBase {
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
-
-    const liveAttrs = new Set(['value', 'value-start', 'value-end', 'min', 'max', 'step', 'disabled', 'show-value', 'format', 'name', 'name-start', 'name-end']);
-    if (liveAttrs.has(name) && this._trackWrap) {
+    if (SLIDER_LIVE_ATTRS.has(name) && this._trackWrap) {
       this._syncFromAttributes();
       this._syncDom();
       return;
     }
 
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (this.isConnected) this.requestRender();
   }
 
   get value(): number {
@@ -799,6 +817,14 @@ export class UISlider extends ElementBase {
     this._trackWrap = this.root.querySelector('.track-wrap') as HTMLElement | null;
 
     this._syncDom();
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return !SLIDER_LIVE_ATTRS.has(name);
   }
 }
 

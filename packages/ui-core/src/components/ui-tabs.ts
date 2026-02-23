@@ -327,7 +327,7 @@ export class UITabs extends ElementBase {
       return;
     }
 
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (this.isConnected) this.requestRender();
   }
 
   get selected(): string {

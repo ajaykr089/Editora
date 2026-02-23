@@ -73,57 +73,170 @@ export class UIPopover extends ElementBase {
   private _portalEl: HTMLElement | null = null;
   private _cleanup: (() => void) | undefined = undefined;
   private _onHostClick: (e: Event) => void;
+  private _onDocumentPointerDown: (e: PointerEvent) => void;
+  private _onDocumentKeyDown: (e: KeyboardEvent) => void;
+  private _isOpen = false;
+  private _globalListenersBound = false;
+  private _restoreFocusEl: HTMLElement | null = null;
 
   constructor() {
     super();
     this._onHostClick = this._handleHostClick.bind(this);
+    this._onDocumentPointerDown = this._handleDocumentPointerDown.bind(this);
+    this._onDocumentKeyDown = this._handleDocumentKeyDown.bind(this);
+  }
+
+  override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+    if (oldValue === newValue) return;
+    if (name === 'open') this._syncOpenState();
   }
 
   connectedCallback() {
     super.connectedCallback();
     this.addEventListener('click', this._onHostClick);
+    this._syncOpenState();
   }
 
   disconnectedCallback() {
     this.removeEventListener('click', this._onHostClick);
+    this._unbindGlobalListeners();
+    this._teardownPortal();
     super.disconnectedCallback();
   }
 
   private _handleHostClick(e: Event) {
     // support clicking any element inside a slotted trigger (use composedPath)
     const path = e.composedPath() as any[];
-    const triggerEl = path.find(p => p && p.getAttribute && p.getAttribute('slot') === 'trigger') as HTMLElement | undefined;
+    const triggerEl = path.find((p) => p && p.getAttribute && p.getAttribute('slot') === 'trigger') as HTMLElement | undefined;
     if (triggerEl) this.toggle();
   }
 
-  open() { this.setAttribute('open',''); this.dispatchEvent(new CustomEvent('open')); }
-  close() { this.removeAttribute('open'); this.dispatchEvent(new CustomEvent('close')); }
+  private _handleDocumentPointerDown(event: PointerEvent): void {
+    if (!this._isOpen) return;
+    const path = event.composedPath();
+    if (path.includes(this)) return;
+    if (this._portalEl && path.includes(this._portalEl)) return;
+    this.close();
+  }
+
+  private _handleDocumentKeyDown(event: KeyboardEvent): void {
+    if (!this._isOpen) return;
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    this.close();
+  }
+
+  open() { this.setAttribute('open', ''); }
+  close() { this.removeAttribute('open'); }
   toggle() { this.hasAttribute('open') ? this.close() : this.open(); }
+
+  private _getTrigger(): HTMLElement | null {
+    return this.querySelector('[slot="trigger"]') as HTMLElement | null;
+  }
+
+  private _bindGlobalListeners(): void {
+    if (this._globalListenersBound) return;
+    document.addEventListener('pointerdown', this._onDocumentPointerDown, true);
+    document.addEventListener('keydown', this._onDocumentKeyDown);
+    this._globalListenersBound = true;
+  }
+
+  private _unbindGlobalListeners(): void {
+    if (!this._globalListenersBound) return;
+    document.removeEventListener('pointerdown', this._onDocumentPointerDown, true);
+    document.removeEventListener('keydown', this._onDocumentKeyDown);
+    this._globalListenersBound = false;
+  }
+
+  private _buildPortalContent(): HTMLElement {
+    const wrapper = document.createElement('div');
+    const styleEl = document.createElement('style');
+    styleEl.textContent = style;
+    wrapper.appendChild(styleEl);
+
+    const panel = document.createElement('div');
+    panel.className = 'panel show';
+
+    const arrow = document.createElement('div');
+    arrow.className = 'arrow';
+    panel.appendChild(arrow);
+
+    const source = this.querySelector('[slot="content"]');
+    if (source) panel.appendChild(source.cloneNode(true));
+    wrapper.appendChild(panel);
+    return wrapper;
+  }
+
+  private _teardownPortal(): void {
+    if (this._cleanup) {
+      try {
+        this._cleanup();
+      } catch {
+        // no-op
+      }
+      this._cleanup = undefined;
+    }
+    this._portalEl = null;
+  }
+
+  private _mountPortal(): void {
+    const trigger = this._getTrigger();
+    if (!trigger) return;
+    this._teardownPortal();
+    this._portalEl = this._buildPortalContent();
+    const cleanup = showPortalFor(trigger, this._portalEl, { placement: 'bottom', shift: true });
+    this._cleanup = typeof cleanup === 'function' ? cleanup : undefined;
+  }
+
+  private _syncOpenState(): void {
+    const nowOpen = this.hasAttribute('open');
+    if (nowOpen === this._isOpen) {
+      if (nowOpen) {
+        this._bindGlobalListeners();
+        if (!this._portalEl || !this._portalEl.isConnected) {
+          this._mountPortal();
+        }
+      } else {
+        this._unbindGlobalListeners();
+      }
+      return;
+    }
+
+    this._isOpen = nowOpen;
+    if (nowOpen) {
+      this._bindGlobalListeners();
+      this._restoreFocusEl = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      this._mountPortal();
+      this.dispatchEvent(new CustomEvent('open', { bubbles: true, composed: true }));
+      return;
+    }
+    this._unbindGlobalListeners();
+    this._teardownPortal();
+    this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
+
+    const trigger = this._getTrigger();
+    const fallback = this._restoreFocusEl;
+    this._restoreFocusEl = null;
+    const focusTarget = (trigger && trigger.isConnected ? trigger : fallback) || null;
+    if (focusTarget && focusTarget.isConnected) {
+      try {
+        focusTarget.focus();
+      } catch {
+        // no-op
+      }
+    }
+  }
 
   protected render() {
     this.setContent(`<slot name="trigger"></slot>`);
-    if (this.hasAttribute('open')) {
-      const panel = document.createElement('div');
-      // add `show` so CSS animation/visibility is applied when portal is mounted
-      panel.className = 'panel show';
+  }
 
-      // arrow element: positioned by portal.showPortalFor if present
-      const arrow = document.createElement('div');
-      arrow.className = 'arrow';
-      panel.appendChild(arrow);
-
-      const sl = this.querySelector('[slot="content"]');
-      if (sl) panel.appendChild(sl.cloneNode(true));
-      if (!this._portalEl) this._portalEl = document.createElement('div');
-      this._portalEl.innerHTML = '';
-      const s = document.createElement('style'); s.textContent = style; this._portalEl.appendChild(s);
-      this._portalEl.appendChild(panel);
-      const trigger = this.querySelector('[slot="trigger"]') as HTMLElement | null;
-      if (trigger) this._cleanup = showPortalFor(trigger, this._portalEl, { placement: 'bottom', shift: true });
-    } else {
-      if (this._cleanup) { this._cleanup(); this._cleanup = undefined; }
-      this._portalEl = null;
-    }
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return false;
   }
 }
 

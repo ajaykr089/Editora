@@ -217,6 +217,7 @@ export class UIPresence extends ElementBase {
   private _headless = false;
   private _hasEntered = false;
   private _delayTimer: number | null = null;
+  private _presenceEl: HTMLElement | null = null;
 
   constructor() {
     super();
@@ -234,14 +235,18 @@ export class UIPresence extends ElementBase {
       window.clearTimeout(this._delayTimer);
       this._delayTimer = null;
     }
+    if (this._presenceEl) {
+      this._presenceEl.removeEventListener('transitionend', this._onTransitionEnd as EventListener);
+      this._presenceEl = null;
+    }
     super.disconnectedCallback();
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
-    super.attributeChangedCallback(name, oldValue, newValue);
     if (oldValue === newValue) return;
     this._syncFromAttributes();
     this._syncStateWithPresence();
+    this._syncNodePresentation();
   }
 
   show(): void {
@@ -260,12 +265,9 @@ export class UIPresence extends ElementBase {
   private _syncFromAttributes(): void {
     this._present = this.hasAttribute('present');
     this._headless = this.hasAttribute('headless');
-    const mode = normalizeMode(this.getAttribute('mode'));
-    const size = normalizeSize(this.getAttribute('size'));
-    const variant = normalizeVariant(this.getAttribute('variant'));
-    if (mode !== 'fade') this.setAttribute('mode', mode); else this.removeAttribute('mode');
-    if (size !== 'md') this.setAttribute('size', size); else this.removeAttribute('size');
-    if (variant !== 'default') this.setAttribute('variant', variant); else this.removeAttribute('variant');
+    normalizeMode(this.getAttribute('mode'));
+    normalizeSize(this.getAttribute('size'));
+    normalizeVariant(this.getAttribute('variant'));
   }
 
   private _syncStateWithPresence(): void {
@@ -325,13 +327,28 @@ export class UIPresence extends ElementBase {
   private _setState(next: PresenceState): void {
     if (this._state === next) return;
     this._state = next;
-    const node = this.root.querySelector('.presence') as HTMLElement | null;
+    const node = this._presenceEl || (this.root.querySelector('.presence') as HTMLElement | null);
+    this._presenceEl = node;
     if (node) {
       node.setAttribute('data-state', next);
-      const keepMounted = booleanAttr(this.getAttribute('keep-mounted'), false);
-      node.style.display = next === 'hidden' && !keepMounted ? 'none' : 'block';
     }
+    this._syncNodePresentation();
     this.setAttribute('data-state', next);
+  }
+
+  private _syncNodePresentation(): void {
+    const node = this._presenceEl || (this.root.querySelector('.presence') as HTMLElement | null);
+    if (!node) return;
+    this._presenceEl = node;
+
+    const keepMounted = booleanAttr(this.getAttribute('keep-mounted'), false);
+    const enterDuration = Math.max(0, numberAttr(this.getAttribute('enter-duration'), 180));
+    const exitDuration = Math.max(0, numberAttr(this.getAttribute('exit-duration'), 150));
+    const shouldDisplay = this._state !== 'hidden' || keepMounted;
+
+    node.style.setProperty('--ui-presence-duration-enter', `${enterDuration}ms`);
+    node.style.setProperty('--ui-presence-duration-exit', `${exitDuration}ms`);
+    node.style.display = shouldDisplay ? 'block' : 'none';
   }
 
   private _onTransitionEnd(event: TransitionEvent): void {
@@ -373,8 +390,18 @@ export class UIPresence extends ElementBase {
 
     const node = this.root.querySelector('.presence') as HTMLElement | null;
     if (!node) return;
+    this._presenceEl = node;
     node.removeEventListener('transitionend', this._onTransitionEnd as EventListener);
     node.addEventListener('transitionend', this._onTransitionEnd as EventListener);
+    this._syncNodePresentation();
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return false;
   }
 }
 

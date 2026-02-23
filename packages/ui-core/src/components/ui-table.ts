@@ -297,9 +297,13 @@ export class UITable extends ElementBase {
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
     if (oldValue === newValue) return;
-    // Only these attributes change the component frame/template.
-    if (name === 'headless' || name === 'empty-text') {
-      super.attributeChangedCallback(name, oldValue, newValue);
+    if (name === 'headless') {
+      this.requestRender();
+      return;
+    }
+    if (name === 'empty-text') {
+      this._syncEmptyText();
+      return;
     }
     if (!this.isConnected) return;
     this._queueSyncStructure();
@@ -342,6 +346,7 @@ export class UITable extends ElementBase {
     try {
       this._table = this._findTable();
       const emptyEl = this.root.querySelector('.empty') as HTMLElement | null;
+      this._syncEmptyText();
 
       if (!this._table) {
         if (emptyEl) emptyEl.removeAttribute('hidden');
@@ -363,6 +368,12 @@ export class UITable extends ElementBase {
     } finally {
       this._isSyncing = false;
     }
+  }
+
+  private _syncEmptyText() {
+    const emptyEl = this.root.querySelector('.empty') as HTMLElement | null;
+    if (!emptyEl) return;
+    emptyEl.textContent = this.getAttribute('empty-text') || 'No table data available.';
   }
 
   private _headerCells(): HTMLTableCellElement[] {
@@ -570,6 +581,14 @@ export class UITable extends ElementBase {
         this._toggleRowSelection(row);
       }
     }
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return false;
   }
 }
 

@@ -297,7 +297,7 @@ export class UIWizard extends ElementBase {
       return;
     }
 
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (this.isConnected) this.requestRender();
   }
 
   get value(): string {

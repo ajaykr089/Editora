@@ -124,7 +124,6 @@ export class UIFloatingToolbar extends ElementBase {
       this._schedulePosition();
       return;
     }
-    super.attributeChangedCallback(name, oldValue, newValue);
     this._schedulePosition();
   }
 

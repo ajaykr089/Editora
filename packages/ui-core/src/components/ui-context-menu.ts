@@ -604,9 +604,28 @@ export class UIContextMenu extends ElementBase {
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (oldValue === newValue) return;
     if (name === 'open') {
       this._syncOpenState();
+      return;
+    }
+
+    if (name === 'headless') {
+      if (this.headless && this._isOpen) {
+        this.close();
+      } else {
+        this._syncSurfaceA11y();
+      }
+      return;
+    }
+
+    if (name === 'close-on-select' || name === 'typeahead') {
+      return;
+    }
+
+    if (this._isOpen) {
+      this._schedulePosition();
+      this._scheduleSubmenuLayout();
     }
   }
 
@@ -708,6 +727,7 @@ export class UIContextMenu extends ElementBase {
   private _syncOpenState(): void {
     const nowOpen = this.hasAttribute('open');
     if (nowOpen === this._isOpen) {
+      this._syncSurfaceA11y();
       if (nowOpen) this._bindGlobalListeners();
       else this._unbindGlobalListeners();
       if (nowOpen) {
@@ -718,6 +738,7 @@ export class UIContextMenu extends ElementBase {
     }
 
     this._isOpen = nowOpen;
+    this._syncSurfaceA11y();
 
     if (nowOpen) {
       this._bindGlobalListeners();
@@ -748,6 +769,12 @@ export class UIContextMenu extends ElementBase {
       }
     }
     this._restoreFocusEl = null;
+  }
+
+  private _syncSurfaceA11y(): void {
+    const surface = this._getSurface();
+    if (!surface) return;
+    surface.setAttribute('aria-hidden', this._isOpen ? 'false' : 'true');
   }
 
   private _bindGlobalListeners(): void {
@@ -1229,6 +1256,14 @@ export class UIContextMenu extends ElementBase {
       this._schedulePosition();
       this._scheduleSubmenuLayout();
     }
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return false;
   }
 }
 

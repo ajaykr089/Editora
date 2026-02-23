@@ -225,7 +225,9 @@ export class UICommandPalette extends ElementBase {
       if (empty) empty.textContent = newValue || 'No commands found.';
       return;
     }
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (name === 'headless') {
+      if (this.isConnected) this.requestRender();
+    }
   }
 
   openPalette() {

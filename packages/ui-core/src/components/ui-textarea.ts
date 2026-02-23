@@ -389,6 +389,10 @@ export class UITextarea extends ElementBase {
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
 
+    if (name === 'name') {
+      this._tryRegisterWithForm();
+    }
+
     if (name === 'value' && this._textarea) {
       const next = newValue || '';
       if (this._textarea.value !== next) {
@@ -411,17 +415,33 @@ export class UITextarea extends ElementBase {
       'name',
       'validation',
       'show-count',
-      'data-error'
+      'clearable',
+      'autosize',
+      'max-rows',
+      'variant',
+      'size',
+      'density',
+      'tone',
+      'headless',
+      'color',
+      'radius',
+      'autofocus'
     ]);
 
-    if (this._textarea && liveAttrs.has(name)) {
+    if (liveAttrs.has(name)) {
       this._syncControlAttrs();
       this._syncDynamicUi();
       this._applyAutosize();
+
+      if (name === 'autofocus' && this.hasAttribute('autofocus')) {
+        queueMicrotask(() => {
+          this._textarea?.focus();
+        });
+      }
       return;
     }
 
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (this.isConnected) this.requestRender();
   }
 
   get value(): string {
@@ -719,6 +739,14 @@ export class UITextarea extends ElementBase {
         this._textarea?.focus();
       });
     }
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return name === 'label' || name === 'description' || name === 'data-error';
   }
 }
 

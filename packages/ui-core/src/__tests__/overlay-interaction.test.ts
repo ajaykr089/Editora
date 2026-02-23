@@ -32,6 +32,53 @@ describe('overlay interaction (popover / dropdown / menu)', () => {
     expect(rootAfter?.querySelector('.panel')).toBeNull();
   });
 
+  it('ui-popover: closes on outside pointerdown', () => {
+    const outside = document.createElement('button');
+    outside.textContent = 'outside';
+    document.body.appendChild(outside);
+
+    const el = document.createElement('ui-popover') as any;
+    el.innerHTML = `
+      <button slot="trigger">Open</button>
+      <div slot="content"><button>Action</button></div>
+    `;
+    document.body.appendChild(el);
+
+    const trigger = el.querySelector('[slot="trigger"]') as HTMLElement;
+    trigger.click();
+    expect(el.hasAttribute('open')).toBe(true);
+
+    outside.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+    expect(el.hasAttribute('open')).toBe(false);
+
+    el.remove();
+    outside.remove();
+  });
+
+  it('ui-popover: Escape closes and restores trigger focus', () => {
+    const el = document.createElement('ui-popover') as any;
+    el.innerHTML = `
+      <button slot="trigger">Open</button>
+      <div slot="content"><button>Popover action</button></div>
+    `;
+    document.body.appendChild(el);
+
+    const trigger = el.querySelector('[slot="trigger"]') as HTMLButtonElement;
+    trigger.focus();
+    trigger.click();
+    expect(el.hasAttribute('open')).toBe(true);
+
+    const root = document.getElementById('ui-portal-root')!;
+    const panelAction = root.querySelector('.panel button') as HTMLButtonElement | null;
+    panelAction?.focus();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+    expect(el.hasAttribute('open')).toBe(false);
+    expect(document.activeElement).toBe(trigger);
+
+    el.remove();
+  });
+
   it('ui-dropdown: clicking a slotted trigger opens the dropdown and portal contains menu', () => {
     const el = document.createElement('ui-dropdown') as any;
     el.innerHTML = `

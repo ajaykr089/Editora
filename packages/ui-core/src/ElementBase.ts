@@ -5,6 +5,7 @@ export abstract class ElementBase extends HTMLElement {
   private _renderScheduled = false;
   private _hasRendered = false;
   private _visibilityGuardApplied = false;
+  private _lastRenderedContent: string | null = null;
 
   constructor() {
     super();
@@ -66,8 +67,15 @@ export abstract class ElementBase extends HTMLElement {
     return true;
   }
 
-  protected setContent(html: string) {
+  protected setContent(html: string, options?: { force?: boolean }) {
+    const force = !!options?.force;
+    if (!force && this._lastRenderedContent === html) return;
     this.root.innerHTML = html;
+    this._lastRenderedContent = html;
+  }
+
+  protected invalidateContentCache(): void {
+    this._lastRenderedContent = null;
   }
 
   protected requestRender(): void {

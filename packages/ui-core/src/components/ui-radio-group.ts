@@ -331,7 +331,11 @@ export class UIRadioGroup extends ElementBase {
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
     this._syncFromAttributes();
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (name === 'options') {
+      this.requestRender();
+    } else {
+      this._syncInteractiveState();
+    }
     if (name === 'value') {
       this.dispatchEvent(
         new CustomEvent('valuechange', {
@@ -476,6 +480,44 @@ export class UIRadioGroup extends ElementBase {
     if (next) next.focus();
   }
 
+  private _syncInteractiveState(): void {
+    const root = this.root.querySelector('.root') as HTMLElement | null;
+    if (!root) return;
+
+    this.setAttribute('role', 'radiogroup');
+    this.setAttribute('aria-disabled', this._disabled ? 'true' : 'false');
+    this.setAttribute('aria-required', this._required ? 'true' : 'false');
+    this.setAttribute('aria-orientation', this._orientation);
+
+    const selectedIndex = this._findSelectedIndex();
+    const effectiveSelected = selectedIndex >= 0 ? selectedIndex : this._findFirstEnabledIndex();
+    if (
+      this._focusIndex < 0 ||
+      this._focusIndex >= this._options.length ||
+      this._options[this._focusIndex]?.disabled
+    ) {
+      this._focusIndex = effectiveSelected;
+    }
+
+    const options = this.root.querySelectorAll<HTMLElement>('.option[data-index]');
+    options.forEach((option) => {
+      const index = Number(option.getAttribute('data-index'));
+      if (Number.isNaN(index)) return;
+      const item = this._options[index];
+      if (!item) return;
+      const checked = index === effectiveSelected;
+      const disabled = this._disabled || Boolean(item.disabled);
+      const tabIndex = index === this._focusIndex ? 0 : -1;
+
+      option.setAttribute('data-value', item.value);
+      option.setAttribute('data-checked', checked ? 'true' : 'false');
+      option.setAttribute('data-disabled', disabled ? 'true' : 'false');
+      option.setAttribute('aria-checked', checked ? 'true' : 'false');
+      option.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+      option.setAttribute('tabindex', String(tabIndex));
+    });
+  }
+
   private _onClick(event: Event): void {
     const target = event.target as HTMLElement | null;
     if (!target) return;
@@ -580,6 +622,14 @@ export class UIRadioGroup extends ElementBase {
           .join('')}
       </div>
     `);
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return name === 'options';
   }
 }
 

@@ -289,7 +289,7 @@ export class UISelectionPopup extends ElementBase {
       );
     }
 
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (this.isConnected) this.requestRender();
     this._schedulePosition();
   }
 

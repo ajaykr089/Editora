@@ -221,6 +221,14 @@ export class UIBlockControls extends ElementBase {
       </div>
     `);
   }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return true;
+  }
 }
 
 if (typeof customElements !== 'undefined' && !customElements.get('ui-block-controls')) {

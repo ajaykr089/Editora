@@ -218,6 +218,8 @@ export class UITooltip extends ElementBase {
   private _openTimer: ReturnType<typeof setTimeout> | null = null;
   private _closeTimer: ReturnType<typeof setTimeout> | null = null;
   private _pointerInsidePortal = false;
+  private _onPortalMouseEnter: EventListener;
+  private _onPortalMouseLeave: EventListener;
 
   constructor() {
     super();
@@ -227,6 +229,8 @@ export class UITooltip extends ElementBase {
     this._onFocusOut = this._onFocusOut.bind(this);
     this._onClick = this._onClick.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
+    this._onPortalMouseEnter = this._handlePortalMouseEnter.bind(this);
+    this._onPortalMouseLeave = this._handlePortalMouseLeave.bind(this);
   }
 
   override connectedCallback(): void {
@@ -271,13 +275,13 @@ export class UITooltip extends ElementBase {
       return;
     }
 
-    if (this._isOpen && ['text', 'placement', 'variant', 'size', 'tone', 'headless', 'offset', 'arrow'].includes(name)) {
+    if (this._isOpen && ['text', 'placement', 'variant', 'size', 'tone', 'headless', 'offset', 'arrow', 'aria-label'].includes(name)) {
       this._renderPortalContent();
       this._reposition();
       return;
     }
 
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (this.isConnected) this.requestRender();
   }
 
   private _clearTimers(): void {
@@ -314,7 +318,10 @@ export class UITooltip extends ElementBase {
 
     const delay = typeof delayMs === 'number' ? delayMs : parseNumber(this.getAttribute('close-delay'), 120);
     this._closeTimer = setTimeout(() => {
-      if (this.hasAttribute('interactive') && this._pointerInsidePortal) return;
+      if (this.hasAttribute('interactive') && this._pointerInsidePortal) {
+        this._closeTimer = null;
+        return;
+      }
       this.hide();
       this._closeTimer = null;
     }, Math.max(0, delay));
@@ -338,23 +345,26 @@ export class UITooltip extends ElementBase {
     content.className = 'tooltip-content';
     portal.appendChild(content);
 
-    portal.addEventListener('mouseenter', () => {
-      this._pointerInsidePortal = true;
-      if (this._closeTimer) {
-        clearTimeout(this._closeTimer);
-        this._closeTimer = null;
-      }
-    });
-
-    portal.addEventListener('mouseleave', () => {
-      this._pointerInsidePortal = false;
-      if (this.hasAttribute('interactive')) {
-        this._scheduleHide();
-      }
-    });
+    portal.addEventListener('mouseenter', this._onPortalMouseEnter);
+    portal.addEventListener('mouseleave', this._onPortalMouseLeave);
 
     this._portalEl = portal;
     return portal;
+  }
+
+  private _handlePortalMouseEnter(): void {
+    this._pointerInsidePortal = true;
+    if (this._closeTimer) {
+      clearTimeout(this._closeTimer);
+      this._closeTimer = null;
+    }
+  }
+
+  private _handlePortalMouseLeave(): void {
+    this._pointerInsidePortal = false;
+    if (this.hasAttribute('interactive')) {
+      this._scheduleHide();
+    }
   }
 
   private _renderPortalContent(): void {
@@ -460,6 +470,14 @@ export class UITooltip extends ElementBase {
       this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
       this.dispatchEvent(new CustomEvent('change', { detail: { open: false }, bubbles: true, composed: true }));
     }
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return false;
   }
 
   private _onMouseEnter(): void {

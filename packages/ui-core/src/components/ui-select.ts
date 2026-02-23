@@ -447,7 +447,34 @@ export class UISelect extends ElementBase {
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
     if (name === 'name') this._attachFormRegistration();
-    super.attributeChangedCallback(name, oldValue, newValue);
+
+    const liveAttrs = new Set([
+      'value',
+      'disabled',
+      'required',
+      'placeholder',
+      'name',
+      'tabindex',
+      'headless',
+      'size',
+      'variant',
+      'tone',
+      'density',
+      'radius',
+      'aria-label',
+      'validation',
+      'invalid',
+      'data-invalid',
+      'data-valid'
+    ]);
+
+    if (this._select && liveAttrs.has(name)) {
+      if (name === 'placeholder') this._syncOptions(this._select);
+      this._syncControlState();
+      return;
+    }
+
+    if (this.isConnected) this.requestRender();
   }
 
   get value(): string {
@@ -599,6 +626,38 @@ export class UISelect extends ElementBase {
     }
   }
 
+  private _syncControlState(): void {
+    const select = this._select;
+    if (!select) return;
+
+    const labelAttr = this.getAttribute('label') || '';
+    const ariaLabel = this.getAttribute('aria-label') || labelAttr || 'Select';
+    const disabled = this.disabled;
+    const required = isTruthyAttr(this.getAttribute('required')) || this.hasAttribute('required');
+    const name = this.getAttribute('name') || '';
+    const tabindex = this.getAttribute('tabindex');
+    const isInvalid =
+      (this.hasAttribute('validation') && this.getAttribute('validation') === 'error') ||
+      this.hasAttribute('invalid') ||
+      this.getAttribute('data-invalid') === 'true';
+
+    select.disabled = disabled;
+    select.required = required;
+    select.name = name;
+    select.setAttribute('aria-label', ariaLabel);
+
+    if (tabindex != null) select.setAttribute('tabindex', tabindex);
+    else select.removeAttribute('tabindex');
+
+    if (isInvalid) select.setAttribute('aria-invalid', 'true');
+    else select.removeAttribute('aria-invalid');
+
+    if (this.hasAttribute('value')) {
+      const next = this.getAttribute('value') || '';
+      if (select.value !== next) select.value = next;
+    }
+  }
+
   protected override render(): void {
     const labelAttr = this.getAttribute('label') || '';
     const descriptionAttr = this.getAttribute('description') || '';
@@ -660,7 +719,18 @@ export class UISelect extends ElementBase {
 
     const select = this.root.querySelector('select') as HTMLSelectElement | null;
     this._select = select;
-    if (select) this._syncOptions(select);
+    if (select) {
+      this._syncOptions(select);
+      this._syncControlState();
+    }
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return name === 'label' || name === 'description' || name === 'error';
   }
 }
 

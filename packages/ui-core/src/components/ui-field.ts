@@ -411,12 +411,17 @@ export class UIField extends ElementBase {
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (oldValue === newValue) return;
 
     if (name === 'label-width') {
       const width = this.getAttribute('label-width');
       if (width) this.style.setProperty('--ui-field-label-width', width);
       else this.style.removeProperty('--ui-field-label-width');
+    }
+
+    if (name === 'label' || name === 'description' || name === 'error' || name === 'required' || name === 'for') {
+      if (this.isConnected) this.requestRender();
+      return;
     }
 
     this._syncDerivedState();
@@ -564,6 +569,14 @@ export class UIField extends ElementBase {
     `);
 
     this._syncDerivedState();
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return name === 'label' || name === 'description' || name === 'error' || name === 'required' || name === 'for';
   }
 }
 

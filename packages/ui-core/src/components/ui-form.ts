@@ -440,8 +440,33 @@ export class UIForm extends ElementBase {
     event.returnValue = '';
   }
 
+  private _syncGap(): void {
+    const gap = this.getAttribute('gap');
+    if (gap) this.style.setProperty('--ui-form-gap', gap);
+    else this.style.removeProperty('--ui-form-gap');
+  }
+
+  private _syncFormAttrs(): void {
+    const form = this.root.querySelector('.form') as HTMLFormElement | null;
+    if (!form) return;
+    form.setAttribute('aria-busy', this.hasAttribute('loading') ? 'true' : 'false');
+    if (this.hasAttribute('novalidate')) form.setAttribute('novalidate', '');
+    else form.removeAttribute('novalidate');
+  }
+
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (oldValue === newValue) return;
+
+    if (name === 'gap') {
+      this._syncGap();
+      return;
+    }
+
+    if (name === 'loading' || name === 'novalidate') {
+      this._syncFormAttrs();
+      return;
+    }
+
     if (name !== 'guard-unsaved' || oldValue === newValue) return;
     if (this.hasAttribute('guard-unsaved')) {
       window.addEventListener('beforeunload', this._onBeforeUnload as EventListener);
@@ -451,9 +476,7 @@ export class UIForm extends ElementBase {
   }
 
   protected override render(): void {
-    const gap = this.getAttribute('gap');
-    if (gap) this.style.setProperty('--ui-form-gap', gap);
-    else this.style.removeProperty('--ui-form-gap');
+    this._syncGap();
 
     this.setContent(`
       <style>${style}</style>
@@ -467,6 +490,15 @@ export class UIForm extends ElementBase {
         <slot></slot>
       </form>
     `);
+    this._syncFormAttrs();
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return false;
   }
 }
 

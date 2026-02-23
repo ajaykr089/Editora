@@ -181,7 +181,8 @@ export class UINavigationMenu extends ElementBase {
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
     if (name === 'selected' && this._ignoreSelectedAttribute) return;
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (oldValue === newValue) return;
+    if (name === 'orientation' && this.isConnected) this.requestRender();
     this._attachSlotHandlers();
     this._syncStructure();
   }

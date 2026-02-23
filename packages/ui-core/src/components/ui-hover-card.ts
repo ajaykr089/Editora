@@ -342,7 +342,7 @@ export class UIHoverCard extends ElementBase {
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (oldValue === newValue) return;
 
     if (name === 'open' || name === 'headless') {
       this._syncOpenState();
@@ -495,6 +495,7 @@ export class UIHoverCard extends ElementBase {
     const nowOpen = this.hasAttribute('open') && !this.hasAttribute('headless');
 
     if (nowOpen === this._isOpen) {
+      this._syncPanelA11y();
       if (nowOpen) {
         this._bindGlobalListeners();
         this._schedulePosition();
@@ -505,6 +506,7 @@ export class UIHoverCard extends ElementBase {
     }
 
     this._isOpen = nowOpen;
+    this._syncPanelA11y();
     const panel = this._getPanel();
 
     if (nowOpen) {
@@ -531,6 +533,13 @@ export class UIHoverCard extends ElementBase {
     this.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { open: false } }));
   }
 
+  private _syncPanelA11y(): void {
+    const panel = this._getPanel();
+    if (!panel) return;
+    panel.setAttribute('aria-hidden', this._isOpen ? 'false' : 'true');
+    if (!this._isOpen) panel.setAttribute('data-ready', 'false');
+  }
+
   private _bindGlobalListeners(): void {
     if (this._globalListenersBound) return;
     document.addEventListener('pointerdown', this._onDocumentPointerDown, true);
@@ -548,6 +557,7 @@ export class UIHoverCard extends ElementBase {
   }
 
   private _schedulePosition(): void {
+    if (!this._isOpen) return;
     if (this._positionRaf != null) cancelAnimationFrame(this._positionRaf);
     this._positionRaf = requestAnimationFrame(() => {
       this._positionRaf = null;
@@ -646,7 +656,16 @@ export class UIHoverCard extends ElementBase {
       </div>
     `);
 
+    this._syncPanelA11y();
     if (this._isOpen) this._schedulePosition();
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return false;
   }
 }
 

@@ -176,6 +176,14 @@ export class UIAppHeader extends ElementBase {
       </header>
     `);
   }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return true;
+  }
 }
 
 if (typeof customElements !== 'undefined' && !customElements.get('ui-app-header')) {

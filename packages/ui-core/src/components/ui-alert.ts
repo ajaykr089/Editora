@@ -258,6 +258,14 @@ export class UIAlert extends ElementBase {
       this._dismissBtn.addEventListener('click', this._onDismiss);
     }
   }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return true;
+  }
 }
 
 if (typeof customElements !== 'undefined' && !customElements.get('ui-alert')) {

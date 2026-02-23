@@ -204,11 +204,12 @@ export class UIAvatar extends ElementBase {
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
+    if (oldValue === newValue) return;
     if (name === 'src' && oldValue !== newValue) {
       this._imgLoaded = false;
       this._imgFailed = false;
     }
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (this.isConnected) this.requestRender();
   }
 
   disconnectedCallback() {

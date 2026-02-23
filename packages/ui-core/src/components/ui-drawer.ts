@@ -487,7 +487,8 @@ export class UIDrawer extends ElementBase {
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (oldValue === newValue) return;
+    if (this.isConnected) this.requestRender();
     if (name === 'open') {
       this._syncOpenState();
       return;

@@ -409,6 +409,7 @@ export class UICombobox extends ElementBase {
   }
 
   attributeChangedCallback(name: string, oldVal: string | null, newVal: string | null) {
+    if (oldVal === newVal) return;
     if (name === 'value') {
       if (!this._suppressValueSync) this._syncInputFromValue();
       this._updateClearButton();
@@ -424,7 +425,7 @@ export class UICombobox extends ElementBase {
       return;
     }
 
-    super.attributeChangedCallback(name, oldVal, newVal);
+    if (this.isConnected) this.requestRender();
   }
 
   get value() {

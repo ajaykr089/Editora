@@ -585,13 +585,83 @@ export class UIInput extends ElementBase {
     super.disconnectedCallback();
   }
 
+  private _syncHostTokens(): void {
+    const color = this.getAttribute('color');
+    if (color) this.style.setProperty('--ui-input-accent', color);
+    else this.style.removeProperty('--ui-input-accent');
+
+    const radius = this.getAttribute('radius') || '';
+    if (radius && !isKnownRadius(radius)) this.style.setProperty('--ui-input-border-radius', radius);
+    else this.style.removeProperty('--ui-input-border-radius');
+  }
+
+  private _syncControlAttrs(): void {
+    this._syncHostTokens();
+    if (!this._input) return;
+
+    const input = this._input;
+    const type = this.getAttribute('type') || 'text';
+    const placeholder = this.getAttribute('placeholder') || '';
+    const name = this.getAttribute('name') || '';
+    const pattern = this.getAttribute('pattern') || '';
+    const inputMode = this.getAttribute('inputmode') || '';
+    const autoComplete = this.getAttribute('autocomplete') || '';
+    const min = this.getAttribute('min') || '';
+    const max = this.getAttribute('max') || '';
+    const step = this.getAttribute('step') || '';
+    const spellcheck = this.getAttribute('spellcheck') || '';
+    const maxLength = this.getAttribute('maxlength') || '';
+    const minLength = this.getAttribute('minlength') || '';
+    const disabled = readBooleanHostAttribute(this, 'disabled');
+    const required = this.hasAttribute('required');
+    const readOnly = this.hasAttribute('readonly');
+
+    try {
+      input.type = type;
+    } catch {
+      input.type = 'text';
+    }
+    input.placeholder = placeholder;
+    input.disabled = disabled;
+    input.required = required;
+    input.readOnly = readOnly;
+    input.name = name;
+
+    if (pattern) input.setAttribute('pattern', pattern);
+    else input.removeAttribute('pattern');
+
+    if (inputMode) input.setAttribute('inputmode', inputMode);
+    else input.removeAttribute('inputmode');
+
+    if (autoComplete) input.setAttribute('autocomplete', autoComplete);
+    else input.removeAttribute('autocomplete');
+
+    if (min) input.setAttribute('min', min);
+    else input.removeAttribute('min');
+
+    if (max) input.setAttribute('max', max);
+    else input.removeAttribute('max');
+
+    if (step) input.setAttribute('step', step);
+    else input.removeAttribute('step');
+
+    if (spellcheck) input.setAttribute('spellcheck', spellcheck);
+    else input.removeAttribute('spellcheck');
+
+    if (maxLength && Number.isFinite(Number(maxLength))) input.setAttribute('maxlength', maxLength);
+    else input.removeAttribute('maxlength');
+
+    if (minLength && Number.isFinite(Number(minLength))) input.setAttribute('minlength', minLength);
+    else input.removeAttribute('minlength');
+  }
+
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+    if (oldValue === newValue) return;
+
     if (name === 'value') {
       this._syncInputValue(newValue || '');
       return;
     }
-
-    super.attributeChangedCallback(name, oldValue, newValue);
 
     if (name === 'name') {
       this._registerWithForm();
@@ -600,6 +670,58 @@ export class UIInput extends ElementBase {
     if (name === 'autofocus' && !this.hasAttribute('autofocus')) {
       this._autofocusApplied = false;
     }
+
+    const liveAttrs = new Set([
+      'placeholder',
+      'disabled',
+      'clearable',
+      'size',
+      'validation',
+      'debounce',
+      'maxlength',
+      'minlength',
+      'readonly',
+      'autofocus',
+      'counter',
+      'headless',
+      'type',
+      'name',
+      'required',
+      'pattern',
+      'inputmode',
+      'autocomplete',
+      'min',
+      'max',
+      'step',
+      'spellcheck',
+      'variant',
+      'tone',
+      'density',
+      'shape',
+      'color',
+      'radius'
+    ]);
+
+    if (liveAttrs.has(name)) {
+      this._syncControlAttrs();
+      this._syncInputValue(this.value);
+      this._syncDerivedState();
+
+      if (name === 'autofocus' && this.hasAttribute('autofocus') && !this._autofocusApplied) {
+        this._autofocusApplied = true;
+        queueMicrotask(() => {
+          if (!this.isConnected) return;
+          try {
+            this._input?.focus({ preventScroll: true });
+          } catch {
+            this._input?.focus();
+          }
+        });
+      }
+      return;
+    }
+
+    if (this.isConnected) this.requestRender();
   }
 
   get value() {
@@ -880,13 +1002,7 @@ export class UIInput extends ElementBase {
     const floatingLabel = this.hasAttribute('floating-label');
     const requiredMarker = required ? '<span class="required" aria-hidden="true">*</span>' : '';
 
-    const color = this.getAttribute('color');
-    if (color) this.style.setProperty('--ui-input-accent', color);
-    else this.style.removeProperty('--ui-input-accent');
-
-    const radius = this.getAttribute('radius') || '';
-    if (radius && !isKnownRadius(radius)) this.style.setProperty('--ui-input-border-radius', radius);
-    else this.style.removeProperty('--ui-input-border-radius');
+    this._syncHostTokens();
 
     this.setContent(`
       <style>${style}</style>
@@ -953,6 +1069,7 @@ export class UIInput extends ElementBase {
 
     this._clearBtn?.addEventListener('click', this._onClearClick);
 
+    this._syncControlAttrs();
     this._syncInputValue(value);
     this._syncDerivedState();
 
@@ -967,6 +1084,14 @@ export class UIInput extends ElementBase {
         }
       });
     }
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return name === 'label' || name === 'description' || name === 'data-error' || name === 'floating-label';
   }
 }
 

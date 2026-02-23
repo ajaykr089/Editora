@@ -112,7 +112,8 @@ export class UIPluginPanel extends ElementBase {
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (oldValue === newValue) return;
+    if (this.isConnected) this.requestRender();
     if (name === 'open' && oldValue !== newValue) {
       this.dispatchEvent(new CustomEvent(newValue != null ? 'open' : 'close', { bubbles: true }));
     }

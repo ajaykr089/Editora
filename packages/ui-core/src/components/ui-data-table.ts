@@ -401,6 +401,22 @@ function normalizeSortValue(value: string): string | number {
 
 type SortDirection = 'asc' | 'desc';
 
+const DATA_TABLE_VISUAL_ONLY_ATTRS = new Set([
+  'sticky-header',
+  'striped',
+  'hover',
+  'compact',
+  'bordered',
+  'loading',
+  'hide-summary'
+]);
+
+const DATA_TABLE_LIGHT_SYNC_ATTRS = new Set([
+  'pagination-id',
+  'bulk-actions-label',
+  'bulk-clear-label'
+]);
+
 export class UIDataTable extends ElementBase {
   static get observedAttributes() {
     return [
@@ -536,16 +552,34 @@ export class UIDataTable extends ElementBase {
     if (name === 'column-order' && this._isSettingColumnOrder) return;
     if (name === 'page' && this._isSettingPage) return;
 
-    // Only these attributes require rebuilding the component frame/template.
-    if (name === 'headless' || name === 'empty-text') {
-      super.attributeChangedCallback(name, oldValue, newValue);
+    if (name === 'headless') {
+      this.requestRender();
+      return;
+    }
+
+    if (name === 'empty-text') {
+      this._syncEmptyText();
+      return;
     }
 
     if (!this.isConnected) return;
 
-    if (name === 'pagination-id') {
-      this._syncPaginationBinding();
+    if (DATA_TABLE_LIGHT_SYNC_ATTRS.has(name)) {
+      if (name === 'pagination-id') {
+        this._syncPaginationBinding();
+      } else if (name === 'bulk-actions-label' || name === 'bulk-clear-label') {
+        this._updateBulkActions();
+      }
+      return;
     }
+
+    if (DATA_TABLE_VISUAL_ONLY_ATTRS.has(name)) {
+      if (name === 'hide-summary') {
+        this._updateSummary();
+      }
+      return;
+    }
+
     this._queueSyncStructure();
     if (name === 'filter-query' || name === 'filter-column' || name === 'filters') {
       this._dispatchFilterChange();
@@ -1025,6 +1059,7 @@ export class UIDataTable extends ElementBase {
       }
       const emptyEl = this.root.querySelector('.empty') as HTMLElement | null;
       const summaryEl = this.root.querySelector('.summary') as HTMLElement | null;
+      this._syncEmptyText();
 
       if (!this._table) {
         if (emptyEl) emptyEl.removeAttribute('hidden');
@@ -1057,8 +1092,7 @@ export class UIDataTable extends ElementBase {
         if (this._filteredRows > 0) {
           emptyEl.setAttribute('hidden', '');
         } else {
-          const hasFilter = !!this._parseFilterQuery();
-          emptyEl.textContent = hasFilter ? 'No matching records.' : (this.getAttribute('empty-text') || 'No data available.');
+          this._syncEmptyText();
           emptyEl.removeAttribute('hidden');
         }
       }
@@ -1333,6 +1367,19 @@ export class UIDataTable extends ElementBase {
       return;
     }
     summaryEl.textContent = `Showing ${start}-${end} of ${filtered} filtered records (${total} total)`;
+  }
+
+  private _syncEmptyText() {
+    const emptyEl = this.root.querySelector('.empty') as HTMLElement | null;
+    if (!emptyEl) return;
+
+    const hasFilter = !!this._parseFilterQuery();
+    if (this._table && this._filteredRows === 0 && hasFilter) {
+      emptyEl.textContent = 'No matching records.';
+      return;
+    }
+
+    emptyEl.textContent = this.getAttribute('empty-text') || 'No data available.';
   }
 
   private _dispatchFilterChange() {
@@ -1877,6 +1924,14 @@ export class UIDataTable extends ElementBase {
 
     const clearButton = bulk.querySelector('.bulk-clear') as HTMLButtonElement | null;
     if (clearButton) clearButton.textContent = clearLabel;
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return false;
   }
 }
 

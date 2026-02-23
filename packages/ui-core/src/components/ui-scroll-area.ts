@@ -366,7 +366,7 @@ export class UIScrollArea extends ElementBase {
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
     this._syncFromAttributes();
-    super.attributeChangedCallback(name, oldValue, newValue);
+    this._syncDomState();
     this._scheduleMetrics();
   }
 
@@ -408,6 +408,24 @@ export class UIScrollArea extends ElementBase {
     this._orientation = normalizeOrientation(this.getAttribute('orientation'));
     this._autoHide = booleanAttr(this.getAttribute('auto-hide'), true);
     this._showShadows = booleanAttr(this.getAttribute('shadows'), true);
+  }
+
+  private _syncDomState(): void {
+    const shell = this._shellEl;
+    const viewport = this._viewportEl;
+    if (!shell || !viewport) return;
+
+    const size = normalizeSize(this.getAttribute('size'));
+    const variant = normalizeVariant(this.getAttribute('variant'));
+    const tone = normalizeTone(this.getAttribute('tone'));
+
+    shell.dataset.size = size;
+    shell.dataset.variant = variant;
+    shell.dataset.tone = tone;
+    shell.dataset.orientation = this._orientation;
+
+    const label = this.getAttribute('aria-label') || 'Scrollable area';
+    viewport.setAttribute('aria-label', label);
   }
 
   private _ensureDom(): void {
@@ -681,31 +699,20 @@ export class UIScrollArea extends ElementBase {
   protected render(): void {
     this._ensureDom();
 
-    const shell = this._shellEl;
-    const viewport = this._viewportEl;
-
-    if (!shell || !viewport) return;
+    if (!this._shellEl || !this._viewportEl) return;
 
     this._attachDomListeners();
-
-    const size = normalizeSize(this.getAttribute('size'));
-    const variant = normalizeVariant(this.getAttribute('variant'));
-    const tone = normalizeTone(this.getAttribute('tone'));
-
-    shell.dataset.size = size;
-    shell.dataset.variant = variant;
-    shell.dataset.tone = tone;
-    shell.dataset.orientation = this._orientation;
-
-    if (!this.hasAttribute('aria-label')) {
-      viewport.setAttribute('aria-label', 'Scrollable area');
-    } else {
-      const label = this.getAttribute('aria-label') || 'Scrollable area';
-      viewport.setAttribute('aria-label', label);
-    }
-
+    this._syncDomState();
     this._observe();
     this._scheduleMetrics();
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return false;
   }
 }
 

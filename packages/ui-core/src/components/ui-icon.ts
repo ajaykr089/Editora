@@ -321,6 +321,14 @@ export class UIIcon extends ElementBase {
       this._lastName = name;
     }
   }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return true;
+  }
 }
 
 if (typeof customElements !== 'undefined' && !customElements.get('ui-icon')) {

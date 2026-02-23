@@ -354,7 +354,7 @@ export class UIStepper extends ElementBase {
       }
     }
 
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (this.isConnected) this.requestRender();
   }
 
   private _fromSlots(): StepItem[] {

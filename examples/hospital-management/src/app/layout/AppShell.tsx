@@ -146,7 +146,7 @@ export function AppShell() {
               placeholder="Search patients, appointments..."
               clearable
               size="sm"
-              style={{ minInlineSize: 220 }}
+              style={{ maxInlineSize: 150 }}
             />
             <Button
               size="sm"

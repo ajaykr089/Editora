@@ -99,7 +99,6 @@ export class UIPortal extends ElementBase {
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
-    super.attributeChangedCallback(name, oldValue, newValue);
     if (oldValue === newValue) return;
     this._syncConfig();
     if (this._headless) {
@@ -280,6 +279,15 @@ export class UIPortal extends ElementBase {
     if (!slot) return;
     this._slot = slot;
     this._slot.addEventListener('slotchange', this._onSlotChange as EventListener);
+    this._mountAllFromSlot();
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return false;
   }
 }
 

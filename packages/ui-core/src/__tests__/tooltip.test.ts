@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('ui-tooltip', () => {
   beforeEach(() => {
@@ -47,5 +47,29 @@ describe('ui-tooltip', () => {
     // remove the host -> portal should be removed by ElementBase.disconnectedCallback
     el.remove();
     expect(document.getElementById('ui-portal-root')?.querySelector('.tooltip')).toBeNull();
+  });
+
+  it('does not rerender shadow template for attribute-only updates', async () => {
+    const el = document.createElement('ui-tooltip') as any;
+    el.setAttribute('text', 'Perf tip');
+    el.innerHTML = `<button>Hover</button>`;
+    document.body.appendChild(el);
+    await Promise.resolve();
+
+    const slotBefore = el.shadowRoot?.querySelector('slot');
+    expect(slotBefore).toBeTruthy();
+
+    const renderSpy = vi.spyOn(el as any, 'render');
+    el.setAttribute('delay', '180');
+    el.setAttribute('placement', 'bottom');
+    el.setAttribute('variant', 'contrast');
+    await Promise.resolve();
+
+    const slotAfter = el.shadowRoot?.querySelector('slot');
+    expect(slotAfter).toBe(slotBefore);
+    expect(renderSpy).not.toHaveBeenCalled();
+
+    renderSpy.mockRestore();
+    el.remove();
   });
 });

@@ -504,7 +504,6 @@ export class UIAlertDialog extends ElementBase {
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
-    super.attributeChangedCallback(name, oldValue, newValue);
     if (oldValue === newValue) return;
     if (name === 'open') {
       this._syncOpenState();
@@ -514,6 +513,7 @@ export class UIAlertDialog extends ElementBase {
       this._runtimeError = '';
     }
     this._syncFromAttributes();
+    if (this.isConnected) this.requestRender();
   }
 
   get open() {

@@ -378,7 +378,8 @@ export class UIButton extends ElementBase {
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (oldValue === newValue) return;
+    if (this.isConnected) this.requestRender();
   }
 
   protected render() {

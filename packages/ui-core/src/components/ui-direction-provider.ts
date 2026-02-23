@@ -47,10 +47,9 @@ export class UIDirectionProvider extends ElementBase {
     if (oldValue === newValue) return;
     if (name === 'dir' || name === 'headless') {
       this._reflectDir();
-      this.requestRender();
+      if (this.isConnected) this.requestRender();
       return;
     }
-    super.attributeChangedCallback(name, oldValue, newValue);
   }
 
   get headless() {

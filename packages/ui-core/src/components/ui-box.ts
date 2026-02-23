@@ -363,6 +363,14 @@ export class UIBox extends ElementBase {
     const responsiveCss = this._buildResponsiveCss();
     this.setContent(`<style>${style}${responsiveCss ? `\n${responsiveCss}` : ''}</style><slot></slot>`);
   }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return true;
+  }
 }
 
 if (typeof customElements !== 'undefined' && !customElements.get('ui-box')) {

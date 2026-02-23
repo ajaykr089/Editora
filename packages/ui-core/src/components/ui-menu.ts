@@ -451,6 +451,21 @@ function readVariantValue(host: HTMLElement, name: string): string {
   return host.getAttribute(name) || '';
 }
 
+const MENU_VISUAL_ATTRS = new Set(['variant', 'density', 'shape', 'elevation', 'tone']);
+const MENU_TOKEN_NAMES = [
+  '--ui-menu-bg',
+  '--ui-menu-color',
+  '--ui-menu-border-color',
+  '--ui-menu-border',
+  '--ui-menu-shadow',
+  '--ui-menu-radius',
+  '--ui-menu-padding',
+  '--ui-menu-min-width',
+  '--ui-menu-ring',
+  '--ui-menu-backdrop',
+  '--ui-menu-z'
+];
+
 export class UIMenu extends ElementBase {
   static get observedAttributes() {
     return [
@@ -502,11 +517,13 @@ export class UIMenu extends ElementBase {
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
-    super.attributeChangedCallback(name, oldValue, newValue);
+    if (oldValue === newValue) return;
     if (name === 'open') {
       this._syncOpenState();
       return;
     }
+
+    if (name === 'close-on-select' || name === 'typeahead') return;
 
     if (name === 'disabled') {
       if (this.hasAttribute('disabled')) this.close();
@@ -514,16 +531,13 @@ export class UIMenu extends ElementBase {
       return;
     }
 
-    if (
-      this._isOpen &&
-      (name === 'placement' ||
-        name === 'variant' ||
-        name === 'density' ||
-        name === 'shape' ||
-        name === 'elevation' ||
-        name === 'tone')
-    ) {
+    if (name === 'placement' && this._isOpen) {
       this._rebuildPortal();
+      return;
+    }
+
+    if (MENU_VISUAL_ATTRS.has(name) && this._isOpen) {
+      this._syncPortalVisualState();
     }
   }
 
@@ -685,35 +699,8 @@ export class UIMenu extends ElementBase {
     menu.setAttribute('role', 'menu');
     menu.setAttribute('tabindex', '-1');
 
-    const variant = readVariantValue(this, 'variant');
-    const density = readVariantValue(this, 'density');
-    const shape = readVariantValue(this, 'shape');
-    const elevation = readVariantValue(this, 'elevation');
-    const tone = readVariantValue(this, 'tone');
-    if (variant && variant !== 'default') menu.setAttribute('data-variant', variant);
-    if (density && density !== 'default') menu.setAttribute('data-density', density);
-    if (shape && shape !== 'default') menu.setAttribute('data-shape', shape);
-    if (elevation && elevation !== 'default') menu.setAttribute('data-elevation', elevation);
-    if (tone && tone !== 'default' && tone !== 'brand') menu.setAttribute('data-tone', tone);
-
-    const computed = window.getComputedStyle(this);
-    const tokenNames = [
-      '--ui-menu-bg',
-      '--ui-menu-color',
-      '--ui-menu-border-color',
-      '--ui-menu-border',
-      '--ui-menu-shadow',
-      '--ui-menu-radius',
-      '--ui-menu-padding',
-      '--ui-menu-min-width',
-      '--ui-menu-ring',
-      '--ui-menu-backdrop',
-      '--ui-menu-z'
-    ];
-    tokenNames.forEach((token) => {
-      const value = computed.getPropertyValue(token).trim();
-      if (value) menu.style.setProperty(token, value);
-    });
+    this._applyPortalVariantData(menu);
+    this._applyPortalTokens(menu);
 
     const styleEl = document.createElement('style');
     styleEl.textContent = menuStyle;
@@ -768,6 +755,45 @@ export class UIMenu extends ElementBase {
     });
 
     return menu;
+  }
+
+  private _applyPortalVariantData(menu: HTMLElement): void {
+    const variant = readVariantValue(this, 'variant');
+    const density = readVariantValue(this, 'density');
+    const shape = readVariantValue(this, 'shape');
+    const elevation = readVariantValue(this, 'elevation');
+    const tone = readVariantValue(this, 'tone');
+
+    if (variant && variant !== 'default') menu.setAttribute('data-variant', variant);
+    else menu.removeAttribute('data-variant');
+
+    if (density && density !== 'default') menu.setAttribute('data-density', density);
+    else menu.removeAttribute('data-density');
+
+    if (shape && shape !== 'default') menu.setAttribute('data-shape', shape);
+    else menu.removeAttribute('data-shape');
+
+    if (elevation && elevation !== 'default') menu.setAttribute('data-elevation', elevation);
+    else menu.removeAttribute('data-elevation');
+
+    if (tone && tone !== 'default' && tone !== 'brand') menu.setAttribute('data-tone', tone);
+    else menu.removeAttribute('data-tone');
+  }
+
+  private _applyPortalTokens(menu: HTMLElement): void {
+    const computed = window.getComputedStyle(this);
+    MENU_TOKEN_NAMES.forEach((token) => {
+      const value = computed.getPropertyValue(token).trim();
+      if (value) menu.style.setProperty(token, value);
+      else menu.style.removeProperty(token);
+    });
+  }
+
+  private _syncPortalVisualState(): void {
+    const menu = this._portalEl;
+    if (!menu) return;
+    this._applyPortalVariantData(menu);
+    this._applyPortalTokens(menu);
   }
 
   private _rebuildPortal(): void {
@@ -1038,6 +1064,14 @@ export class UIMenu extends ElementBase {
 
     this._syncTriggerA11y();
     if (this._isOpen) this._rebuildPortal();
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return false;
   }
 }
 
