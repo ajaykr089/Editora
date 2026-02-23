@@ -1,7 +1,7 @@
 {
   "name": "@editora/icons",
   "version": "0.1.0",
-  "description": "Framework-agnostic SVG icon system for the Editora UI ecosystem with outline/solid/duotone variants",
+  "description": "Framework-agnostic SVG icon library for the Editora UI ecosystem with outline, solid, and duotone variants",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -33,9 +33,13 @@
     "editora ui ecosystem",
     "icons",
     "svg",
+    "ui-icons",
     "design-system",
     "theming",
     "icon-library",
+    "framework-agnostic",
+    "typescript",
+    "admin-ui",
     "outline-icons",
     "duotone-icons"
   ],
