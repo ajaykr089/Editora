@@ -7,20 +7,71 @@ export type CalendarEvent = {
 };
 
 export type CalendarSelectDetail = { value: string };
+export type CalendarChangeDetail =
+  | { mode: 'single'; value: string | null }
+  | { mode: 'range'; value: { start: string; end: string } | null; start: string | null; end: string | null }
+  | { mode: 'multiple'; value: string[]; values: string[] };
 
-export type CalendarProps = React.HTMLAttributes<HTMLElement> & {
+type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect'> & {
+  children?: React.ReactNode;
+};
+
+export type CalendarProps = BaseProps & {
   year?: number;
   month?: number;
   value?: string;
   events?: CalendarEvent[];
   variant?: 'default' | 'contrast';
+  selection?: 'single' | 'range' | 'multiple';
+  min?: string;
+  max?: string;
+  disabled?: boolean;
+  readOnly?: boolean;
+  locale?: string;
+  weekStart?: 0 | 1 | 6;
+  outsideClick?: 'none' | 'navigate' | 'select';
+  eventsMax?: number;
+  eventsDisplay?: 'dots' | 'badges' | 'count';
+  maxSelections?: number;
+  size?: 'sm' | 'md' | 'lg';
   headless?: boolean;
+  hideToday?: boolean;
+  showToday?: boolean;
   onSelect?: (detail: CalendarSelectDetail) => void;
   onChange?: (detail: CalendarSelectDetail) => void;
+  onCalendarChange?: (detail: CalendarChangeDetail) => void;
+  onValueChange?: (value: string) => void;
 };
 
 export const Calendar = React.forwardRef<HTMLElement, CalendarProps>(function Calendar(
-  { year, month, value, events, variant, headless, onSelect, onChange, children, ...rest },
+  {
+    year,
+    month,
+    value,
+    events,
+    variant,
+    selection,
+    min,
+    max,
+    disabled,
+    readOnly,
+    locale,
+    weekStart,
+    outsideClick,
+    eventsMax,
+    eventsDisplay,
+    maxSelections,
+    size,
+    headless,
+    hideToday,
+    showToday,
+    onSelect,
+    onChange,
+    onCalendarChange,
+    onValueChange,
+    children,
+    ...rest
+  },
   forwardedRef
 ) {
   const ref = useRef<HTMLElement | null>(null);
@@ -36,13 +87,22 @@ export const Calendar = React.forwardRef<HTMLElement, CalendarProps>(function Ca
       if (!detail) return;
       onSelect?.(detail);
       onChange?.(detail);
+      onValueChange?.(detail.value);
+    };
+
+    const handleCalendarChange = (event: Event) => {
+      const detail = (event as CustomEvent<CalendarChangeDetail>).detail;
+      if (!detail) return;
+      onCalendarChange?.(detail);
     };
 
     el.addEventListener('select', handleSelect as EventListener);
+    el.addEventListener('change', handleCalendarChange as EventListener);
     return () => {
       el.removeEventListener('select', handleSelect as EventListener);
+      el.removeEventListener('change', handleCalendarChange as EventListener);
     };
-  }, [onSelect, onChange]);
+  }, [onSelect, onChange, onCalendarChange, onValueChange]);
 
   useEffect(() => {
     const el = ref.current;
@@ -58,8 +118,11 @@ export const Calendar = React.forwardRef<HTMLElement, CalendarProps>(function Ca
     };
 
     const syncBool = (name: string, enabled: boolean | undefined) => {
-      if (enabled) syncAttr(name, '');
-      else syncAttr(name, null);
+      if (enabled) {
+        if (!el.hasAttribute(name)) el.setAttribute(name, '');
+      } else if (el.hasAttribute(name)) {
+        el.removeAttribute(name);
+      }
     };
 
     if (typeof year === 'number' && Number.isFinite(year)) syncAttr('year', String(year));
@@ -69,6 +132,25 @@ export const Calendar = React.forwardRef<HTMLElement, CalendarProps>(function Ca
     else syncAttr('month', null);
 
     syncAttr('value', value || null);
+    syncAttr('selection', selection && selection !== 'single' ? selection : null);
+    syncAttr('min', min || null);
+    syncAttr('max', max || null);
+    syncAttr('locale', locale || null);
+    syncAttr('week-start', typeof weekStart === 'number' ? String(weekStart) : null);
+    syncAttr('outside-click', outsideClick && outsideClick !== 'navigate' ? outsideClick : null);
+    syncAttr('events-max', typeof eventsMax === 'number' && Number.isFinite(eventsMax) ? String(eventsMax) : null);
+    syncAttr('events-display', eventsDisplay && eventsDisplay !== 'dots' ? eventsDisplay : null);
+    syncAttr(
+      'max-selections',
+      typeof maxSelections === 'number' && Number.isFinite(maxSelections) ? String(maxSelections) : null
+    );
+    syncAttr('size', size && size !== 'md' ? size : null);
+    syncAttr('show-today', typeof showToday === 'boolean' ? (showToday ? 'true' : 'false') : null);
+
+    syncBool('disabled', disabled);
+    syncBool('readonly', readOnly);
+    syncBool('hide-today', hideToday);
+    syncBool('headless', headless);
 
     if (events && events.length) {
       try {
@@ -81,8 +163,28 @@ export const Calendar = React.forwardRef<HTMLElement, CalendarProps>(function Ca
     }
 
     syncAttr('variant', variant && variant !== 'default' ? variant : null);
-    syncBool('headless', headless);
-  }, [year, month, value, events, variant, headless]);
+  }, [
+    year,
+    month,
+    value,
+    events,
+    variant,
+    selection,
+    min,
+    max,
+    disabled,
+    readOnly,
+    locale,
+    weekStart,
+    outsideClick,
+    eventsMax,
+    eventsDisplay,
+    maxSelections,
+    size,
+    headless,
+    hideToday,
+    showToday
+  ]);
 
   return React.createElement('ui-calendar', { ref, ...rest }, children);
 });
