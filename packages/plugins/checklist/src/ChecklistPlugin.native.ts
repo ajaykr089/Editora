@@ -13,6 +13,12 @@ import type { Plugin } from '@editora/core';
  * - toggleChecklist: Convert to/from checklist
  */
 
+declare global {
+  interface Window {
+    __checklistPluginClickInitialized?: boolean;
+  }
+}
+
 /**
  * Find the active editor element
  */
@@ -46,41 +52,174 @@ const findActiveEditor = (): HTMLElement | null => {
   return document.querySelector('[contenteditable="true"]');
 };
 
+const getElementFromNode = (node: Node | null): HTMLElement | null => {
+  if (!node) return null;
+  return node.nodeType === Node.ELEMENT_NODE
+    ? (node as HTMLElement)
+    : node.parentElement;
+};
+
+const getSelectionRangeInEditor = (editor: HTMLElement): Range | null => {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return null;
+  const range = selection.getRangeAt(0);
+  return editor.contains(range.commonAncestorContainer) ? range : null;
+};
+
+const dispatchEditorInput = (editor: HTMLElement): void => {
+  editor.dispatchEvent(new Event('input', { bubbles: true }));
+};
+
+const placeCaretAtEnd = (element: HTMLElement, editor: HTMLElement): void => {
+  if (!element.isConnected) {
+    editor.focus({ preventScroll: true });
+    return;
+  }
+
+  const selection = window.getSelection();
+  if (!selection) return;
+
+  const range = document.createRange();
+  range.selectNodeContents(element);
+  range.collapse(false);
+  selection.removeAllRanges();
+  try {
+    selection.addRange(range);
+  } catch {
+    editor.focus({ preventScroll: true });
+    return;
+  }
+  editor.focus({ preventScroll: true });
+};
+
+const ensureChecklistItemParagraph = (item: HTMLLIElement): HTMLParagraphElement => {
+  let paragraph = item.querySelector(':scope > p') as HTMLParagraphElement | null;
+
+  if (!paragraph) {
+    paragraph = document.createElement('p');
+
+    const nodesToMove: Node[] = [];
+    item.childNodes.forEach((node) => {
+      if (
+        node.nodeType === Node.ELEMENT_NODE &&
+        ['UL', 'OL'].includes((node as HTMLElement).tagName)
+      ) {
+        return;
+      }
+      nodesToMove.push(node);
+    });
+
+    nodesToMove.forEach((node) => paragraph!.appendChild(node));
+    item.insertBefore(paragraph, item.firstChild);
+  }
+
+  if (!paragraph.innerHTML.trim()) {
+    paragraph.innerHTML = '<br>';
+  }
+
+  return paragraph;
+};
+
+const createChecklistItemFromHTML = (html: string): HTMLLIElement => {
+  const item = document.createElement('li');
+  item.setAttribute('data-type', 'checklist-item');
+  item.setAttribute('data-checked', 'false');
+
+  const paragraph = document.createElement('p');
+  paragraph.innerHTML = html.trim() || '<br>';
+  item.appendChild(paragraph);
+
+  return item;
+};
+
+const getDirectListItems = (list: HTMLElement): HTMLLIElement[] =>
+  Array.from(list.children).filter(
+    (child): child is HTMLLIElement => child instanceof HTMLLIElement
+  );
+
+const extractChecklistItemParagraphs = (item: HTMLLIElement): HTMLParagraphElement[] => {
+  const paragraphs: HTMLParagraphElement[] = [];
+  const inlineBuffer = document.createElement('div');
+
+  const flushInlineBuffer = () => {
+    const html = inlineBuffer.innerHTML.trim();
+    if (!html) return;
+    const paragraph = document.createElement('p');
+    paragraph.innerHTML = html;
+    paragraphs.push(paragraph);
+    inlineBuffer.innerHTML = '';
+  };
+
+  item.childNodes.forEach((node) => {
+    if (
+      node.nodeType === Node.ELEMENT_NODE &&
+      ['UL', 'OL'].includes((node as HTMLElement).tagName)
+    ) {
+      flushInlineBuffer();
+      return;
+    }
+
+    if (node.nodeType === Node.ELEMENT_NODE && (node as HTMLElement).tagName === 'P') {
+      flushInlineBuffer();
+      const html = (node as HTMLElement).innerHTML.trim();
+      const paragraph = document.createElement('p');
+      paragraph.innerHTML = html || '<br>';
+      paragraphs.push(paragraph);
+      return;
+    }
+
+    if (node.nodeType === Node.TEXT_NODE && !(node.textContent || '').trim()) {
+      return;
+    }
+
+    inlineBuffer.appendChild(node.cloneNode(true));
+  });
+
+  flushInlineBuffer();
+
+  if (paragraphs.length === 0) {
+    const paragraph = document.createElement('p');
+    paragraph.innerHTML = '<br>';
+    paragraphs.push(paragraph);
+  }
+
+  return paragraphs;
+};
+
 export const ChecklistPlugin = (): Plugin => {
   return {
     name: 'checklist',
     
     // Initialize click handler when plugin is loaded
     init: () => {
-      if (typeof document !== 'undefined' && typeof window !== 'undefined') {
-        const handleChecklistClick = (event: MouseEvent) => {
-          const target = event.target as HTMLElement;
-          
-          // Find the closest checklist item
-          const checklistItem = target.closest('li[data-type="checklist-item"]') as HTMLElement;
-          
-          if (checklistItem) {
-            // Calculate if click is in the checkbox area (left 2em where checkbox is positioned)
-            const rect = checklistItem.getBoundingClientRect();
-            const clickX = event.clientX - rect.left;
-            
-            // Checkbox is in the first 2em (approximately 32px at default font size)
-            const isCheckboxArea = clickX < 32;
-            
-            if (isCheckboxArea) {
-              event.preventDefault();
-              event.stopPropagation();
-              
-              // Toggle the checked state
-              const isChecked = checklistItem.getAttribute("data-checked") === "true";
-              checklistItem.setAttribute("data-checked", (!isChecked).toString());
-            }
-          }
-        };
-        
-        // Set up the click handler
-        document.addEventListener("click", handleChecklistClick);
-      }
+      if (typeof document === 'undefined' || typeof window === 'undefined') return;
+      if (window.__checklistPluginClickInitialized) return;
+      window.__checklistPluginClickInitialized = true;
+
+      const handleChecklistClick = (event: MouseEvent) => {
+        const target = event.target as HTMLElement;
+        const checklistItem = target.closest('li[data-type="checklist-item"]') as HTMLLIElement | null;
+        if (!checklistItem) return;
+
+        const rect = checklistItem.getBoundingClientRect();
+        const clickX = event.clientX - rect.left;
+        const isCheckboxArea = clickX < 32;
+
+        if (!isCheckboxArea) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const isChecked = checklistItem.getAttribute('data-checked') === 'true';
+        checklistItem.setAttribute('data-checked', (!isChecked).toString());
+
+        const editor = checklistItem.closest('[contenteditable="true"], .rte-content, .editora-content') as HTMLElement | null;
+        if (editor) {
+          dispatchEditorInput(editor);
+        }
+      };
+
+      document.addEventListener('click', handleChecklistClick);
     },
     
     // Schema definition for checklist nodes
@@ -130,118 +269,118 @@ export const ChecklistPlugin = (): Plugin => {
           const editorElement = findActiveEditor();
           if (!editorElement) return false;
 
-          const selection = window.getSelection();
-          if (!selection || selection.rangeCount === 0) return false;
+          const range = getSelectionRangeInEditor(editorElement);
+          if (!range) return false;
 
-          const range = selection.getRangeAt(0);
-          
-          // Verify selection is within the active editor
-          if (!editorElement.contains(range.commonAncestorContainer)) return false;
+          const container = getElementFromNode(range.startContainer);
+          if (!container) return false;
 
-          const container = range.commonAncestorContainer.nodeType === Node.TEXT_NODE
-            ? (range.commonAncestorContainer.parentElement as HTMLElement)
-            : (range.commonAncestorContainer as HTMLElement);
+          const checklistList = container.closest('ul[data-type="checklist"]') as HTMLUListElement | null;
+          if (checklistList && editorElement.contains(checklistList)) {
+            const topItems = getDirectListItems(checklistList);
 
-          // Check if we're in a list
-          const listElement = container?.closest("li")?.closest("ul, ol");
-          
-          if (listElement) {
-            const isChecklist = listElement.hasAttribute("data-type") && 
-                               listElement.getAttribute("data-type") === "checklist";
-            const isOrderedList = listElement.tagName.toLowerCase() === "ol";
-            const isBulletList = listElement.tagName.toLowerCase() === "ul" && 
-                                !listElement.hasAttribute("data-type");
+            if (topItems.length === 0) return false;
 
-            // Convert checklist back to paragraphs
-            if (isChecklist) {
-              const checklistItems = listElement.querySelectorAll('li[data-type="checklist-item"]');
-              const paragraphs = Array.from(checklistItems)
-                .map((item) => `<p>${item.innerHTML}</p>`)
-                .join("");
-              
-              listElement.outerHTML = paragraphs;
-              
-              // Restore selection
-              setTimeout(() => {
-                const sel = window.getSelection();
-                if (sel && editorElement) {
-                  try {
-                    const allParagraphs = editorElement.querySelectorAll("p");
-                    const originalItem = container?.closest('li[data-type="checklist-item"]');
-                    const itemIndex = originalItem ? Array.from(checklistItems).indexOf(originalItem) : -1;
-                    
-                    if (allParagraphs[itemIndex] && itemIndex >= 0) {
-                      const targetP = allParagraphs[itemIndex];
-                      const newRange = document.createRange();
-                      newRange.setStart(targetP, targetP.childNodes.length);
-                      newRange.setEnd(targetP, targetP.childNodes.length);
-                      sel.removeAllRanges();
-                      sel.addRange(newRange);
-                    }
-                  } catch {
-                    console.warn("Could not restore selection after checklist removal");
-                  }
+            const fragment = document.createDocumentFragment();
+            let targetParagraph: HTMLParagraphElement | null = null;
+
+            topItems.forEach((item, index) => {
+              const extractedParagraphs = extractChecklistItemParagraphs(item);
+              extractedParagraphs.forEach((paragraph) => {
+                fragment.appendChild(paragraph);
+                if (
+                  !targetParagraph &&
+                  (item.contains(range.startContainer) || index === 0)
+                ) {
+                  targetParagraph = paragraph;
                 }
-              }, 10);
-              return true;
-            } 
-            // Convert ordered/bullet list to checklist
-            else if (isOrderedList || isBulletList) {
-              listElement.setAttribute("data-type", "checklist");
-              listElement.querySelectorAll("li").forEach((li) => {
-                li.setAttribute("data-type", "checklist-item");
-                li.setAttribute("data-checked", "false");
               });
-              return true;
-            }
-          }
 
-          // Convert paragraph to checklist or create new checklist
-          const selectedText = range.toString().trim();
-          
-          // Find the block element containing the selection
-          const blockElement = container?.closest("p, div, h1, h2, h3, h4, h5, h6");
-          
-          if (blockElement) {
-            // Use selected text if any, otherwise use block content
-            const contentHTML = selectedText || blockElement.innerHTML;
-            const checklistHTML = `<ul data-type="checklist"><li data-type="checklist-item" data-checked="false"><p>${contentHTML}</p></li></ul>`;
-            
-            // Create the checklist element
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = checklistHTML;
-            const checklistElement = tempDiv.firstElementChild as HTMLElement;
-            
-            // Replace the block element
-            blockElement.parentNode?.replaceChild(checklistElement, blockElement);
-            
-            // Restore selection
-            setTimeout(() => {
-              const sel = window.getSelection();
-              if (sel) {
-                try {
-                  const checklistItem = checklistElement.querySelector('li[data-type="checklist-item"]');
-                  if (checklistItem) {
-                    const p = checklistItem.querySelector("p");
-                    if (p && p.firstChild) {
-                      const newRange = document.createRange();
-                      newRange.setStart(p.firstChild, p.textContent?.length || 0);
-                      newRange.collapse(true);
-                      sel.removeAllRanges();
-                      sel.addRange(newRange);
-                    }
-                  }
-                } catch (e) {
-                  console.warn("Could not restore selection after checklist insertion:", e);
-                }
+              if (!targetParagraph && index === 0 && extractedParagraphs[0]) {
+                targetParagraph = extractedParagraphs[0];
               }
-            }, 10);
+            });
+
+            checklistList.replaceWith(fragment);
+            if (targetParagraph) {
+              placeCaretAtEnd(targetParagraph, editorElement);
+            }
+            dispatchEditorInput(editorElement);
             return true;
-          } else {
-            console.warn('[ChecklistPlugin] No block element found');
-            return false;
           }
 
+          const regularList = container.closest('ul, ol') as HTMLElement | null;
+          if (regularList && editorElement.contains(regularList)) {
+            let checklistContainer: HTMLUListElement;
+
+            if (regularList.tagName.toLowerCase() === 'ul') {
+              checklistContainer = regularList as HTMLUListElement;
+            } else {
+              checklistContainer = document.createElement('ul');
+              while (regularList.firstChild) {
+                checklistContainer.appendChild(regularList.firstChild);
+              }
+              regularList.replaceWith(checklistContainer);
+            }
+
+            checklistContainer.setAttribute('data-type', 'checklist');
+
+            let directItems = getDirectListItems(checklistContainer);
+            if (directItems.length === 0) {
+              checklistContainer.appendChild(createChecklistItemFromHTML(''));
+              directItems = getDirectListItems(checklistContainer);
+            }
+
+            let activeParagraph: HTMLParagraphElement | null = null;
+
+            directItems.forEach((checklistItem) => {
+              checklistItem.setAttribute('data-type', 'checklist-item');
+              if (!checklistItem.hasAttribute('data-checked')) {
+                checklistItem.setAttribute('data-checked', 'false');
+              }
+
+              const paragraph = ensureChecklistItemParagraph(checklistItem);
+              if (checklistItem.contains(range.startContainer)) {
+                activeParagraph = paragraph;
+              }
+            });
+
+            const fallbackParagraph = checklistContainer.querySelector(':scope > li[data-type="checklist-item"] > p') as HTMLParagraphElement | null;
+            placeCaretAtEnd(activeParagraph || fallbackParagraph || checklistContainer, editorElement);
+            dispatchEditorInput(editorElement);
+            return true;
+          }
+
+          const blockElement = container.closest('p, h1, h2, h3, h4, h5, h6, blockquote, pre') as HTMLElement | null;
+          if (blockElement && blockElement !== editorElement) {
+            const checklist = document.createElement('ul');
+            checklist.setAttribute('data-type', 'checklist');
+            const checklistItem = createChecklistItemFromHTML(blockElement.innerHTML);
+            checklist.appendChild(checklistItem);
+
+            blockElement.replaceWith(checklist);
+
+            const paragraph = checklistItem.querySelector(':scope > p') as HTMLParagraphElement | null;
+            if (paragraph) {
+              placeCaretAtEnd(paragraph, editorElement);
+            }
+            dispatchEditorInput(editorElement);
+            return true;
+          }
+
+          const checklist = document.createElement('ul');
+          checklist.setAttribute('data-type', 'checklist');
+          const checklistItem = createChecklistItemFromHTML('');
+          checklist.appendChild(checklistItem);
+
+          range.deleteContents();
+          range.insertNode(checklist);
+
+          const paragraph = checklistItem.querySelector(':scope > p') as HTMLParagraphElement | null;
+          if (paragraph) {
+            placeCaretAtEnd(paragraph, editorElement);
+          }
+          dispatchEditorInput(editorElement);
           return true;
         } catch (error) {
           console.error('Failed to toggle checklist:', error);

@@ -46,8 +46,24 @@ export const StrikethroughPlugin = (): Plugin => ({
      * Toggle strikethrough formatting on current selection
      */
     toggleStrikethrough: () => {
-      document.execCommand('strikeThrough', false);
-      return true;
+      const content = getActiveContentElement();
+      if (!content) return false;
+
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return false;
+
+      const range = selection.getRangeAt(0);
+      if (!content.contains(range.commonAncestorContainer)) return false;
+
+      content.focus({ preventScroll: true });
+      const executed = document.execCommand('strikeThrough', false);
+
+      // Normalize browser-specific markup (<strike>, <del>) to <s>
+      normalizeStrikethroughMarkup(content);
+
+      // Notify React/web component bindings about content change.
+      content.dispatchEvent(new Event('input', { bubbles: true }));
+      return executed !== false;
     }
   },
   
@@ -57,3 +73,39 @@ export const StrikethroughPlugin = (): Plugin => ({
     'Mod-Shift-X': 'toggleStrikethrough'
   }
 });
+
+function getActiveContentElement(): HTMLElement | null {
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    const node = selection.getRangeAt(0).startContainer;
+    const element = node.nodeType === Node.ELEMENT_NODE
+      ? (node as HTMLElement)
+      : node.parentElement;
+    const content = element?.closest('[contenteditable="true"], .rte-content, .editora-content') as HTMLElement | null;
+    if (content) return content;
+  }
+
+  const active = document.activeElement as HTMLElement | null;
+  if (!active) return null;
+  if (active.getAttribute('contenteditable') === 'true') return active;
+  return active.closest('[contenteditable="true"], .rte-content, .editora-content') as HTMLElement | null;
+}
+
+function normalizeStrikethroughMarkup(root: HTMLElement): void {
+  const legacyNodes = root.querySelectorAll('strike, del');
+  legacyNodes.forEach((legacy) => {
+    const replacement = document.createElement('s');
+
+    // Preserve classes/ids/data attributes for downstream plugins/styles.
+    for (const attr of Array.from(legacy.attributes)) {
+      if (attr.name === 'style') continue;
+      replacement.setAttribute(attr.name, attr.value);
+    }
+
+    while (legacy.firstChild) {
+      replacement.appendChild(legacy.firstChild);
+    }
+
+    legacy.parentNode?.replaceChild(replacement, legacy);
+  });
+}

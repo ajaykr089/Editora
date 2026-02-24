@@ -132,6 +132,16 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
       contentEl.focus();
     }
 
+    const selection = window.getSelection();
+    if (selection && selectionRef.current) {
+      try {
+        selection.removeAllRanges();
+        selection.addRange(selectionRef.current);
+      } catch {
+        // Ignore stale selection ranges and let command execution decide fallback behavior.
+      }
+    }
+
     const commandMap: Record<string, () => void> = {
       toggleBold: () => document.execCommand('bold', false),
       toggleItalic: () => document.execCommand('italic', false),
@@ -184,10 +194,6 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
     commandMap[command]?.();
     setIsVisible(false);
     selectionRef.current = null;
-
-    if (contentEl) {
-      contentEl.focus();
-    }
   };
 
   if (!isEnabled || !isVisible) return null;
@@ -196,6 +202,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
     <div
       ref={toolbarRef}
       className="floating-toolbar"
+      onMouseDown={(e) => e.preventDefault()}
       style={{
         position: "fixed",
         top: `${position.top}px`,

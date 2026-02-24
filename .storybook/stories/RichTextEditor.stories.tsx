@@ -136,6 +136,7 @@ export const Basic: Story = {
     <EditoraEditor
       plugins={allNativePlugins}
       statusbar={{ enabled: true , position: "bottom" }}
+      floatingToolbar={{ enabled: false }}
       defaultValue={`
         <h2>Welcome to Editora!!</h2>
         <p>This is a <strong>framework-agnostic</strong> rich text editor with <mark style="background: #ffeb3b;">37 native plugins</mark>.</p>

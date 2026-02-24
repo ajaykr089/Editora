@@ -18,7 +18,7 @@ interface SecurityConfig {
  * Default safe HTML tags (based on common rich text editor needs)
  */
 const DEFAULT_ALLOWED_TAGS = [
-  'p', 'br', 'strong', 'em', 'u', 's', 'b', 'i',
+  'p', 'br', 'strong', 'em', 'u', 's', 'strike', 'del', 'b', 'i',
   'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
   'ul', 'ol', 'li',
   'a', 'img', 'video', 'audio',
@@ -60,7 +60,15 @@ export function sanitizeHTML(
     ? contentConfig.allowedTags
     : DEFAULT_ALLOWED_TAGS;
 
-  const allowedAttributes = contentConfig?.allowedAttributes || DEFAULT_ALLOWED_ATTRIBUTES;
+  // Treat empty object as "not configured" so defaults still apply.
+  // This prevents style-based formatting (e.g. strikethrough/color/font-size)
+  // from being stripped when mergeConfig provides {}.
+  const hasCustomAllowedAttributes =
+    !!contentConfig?.allowedAttributes &&
+    Object.keys(contentConfig.allowedAttributes).length > 0;
+  const allowedAttributes = hasCustomAllowedAttributes
+    ? (contentConfig!.allowedAttributes as Record<string, string[]>)
+    : DEFAULT_ALLOWED_ATTRIBUTES;
 
   // Create a temporary DOM element to parse HTML
   const tempDiv = document.createElement('div');
