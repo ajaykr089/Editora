@@ -227,6 +227,69 @@ table:hover .table-resize-handle::after {
   opacity: 1;
 }
 
+/* ============================================
+   DARK THEME TABLE STYLES
+   ============================================ */
+
+:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table, table) {
+  border-color: #607088;
+  background: #24303c;
+  color: #e6eefb;
+}
+
+:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table td, .rte-table th, table td, table th) {
+  border-color: #607088;
+  color: #e6eefb;
+}
+
+:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table th, table th) {
+  background: linear-gradient(180deg, #3b4553 0%, #333d4a 100%);
+  color: #f3f8ff;
+}
+
+:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table tr:hover, table tr:hover) {
+  background-color: rgba(88, 166, 255, 0.12);
+}
+
+:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table td.selected, table td.selected) {
+  background-color: rgba(88, 166, 255, 0.28);
+  border-color: #79beff;
+}
+
+:is([data-theme="dark"], .dark, .editora-theme-dark) :is(.rte-table td[contenteditable]:empty::before, table td[contenteditable]:empty::before) {
+  color: #94a3b8;
+}
+
+:is([data-theme="dark"], .dark, .editora-theme-dark) .table-toolbar {
+  background: #2a323c;
+  border-color: #4d596b;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+:is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-divider {
+  background: #4d596b;
+}
+
+:is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn {
+  color: #d7deea;
+}
+
+:is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn:hover:not(:disabled) {
+  background: #3a4554;
+  border-color: #607088;
+  color: #f3f8ff;
+}
+
+:is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn:active:not(:disabled) {
+  background: #4a95de;
+  border-color: #67adf4;
+  color: #0f1b2a;
+}
+
+:is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn:disabled {
+  color: #7f8ca1;
+}
+
 /* Responsive table */
 @media (max-width: 768px) {
   .rte-table, table {

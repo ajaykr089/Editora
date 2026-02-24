@@ -190,15 +190,14 @@
   line-height: 1;
 }
 
-.rte-toolbar-button svg {
+.rte-toolbar-button svg,
+.editora-toolbar-button svg,
+.editora-toolbar-icon svg {
   flex-shrink: 0;
-  fill: currentColor;
-  stroke: currentColor;
   width: 20px;
   height: 20px;
-}
-
-.rte-toolbar-button svg path {
+  display: block;
+  color: currentColor;
   fill: currentColor;
 }
 
@@ -206,9 +205,8 @@
   opacity: 0.9;
 }
 
-.rte-toolbar-button[data-active="true"] svg {
-  fill: var(--rte-color-text-inverse);
-  stroke: var(--rte-color-text-inverse);
+:is(.rte-toolbar-button[data-active="true"], .editora-toolbar-button.active) svg {
+  color: var(--rte-color-text-inverse);
 }
 
 .rte-toolbar-button:hover {

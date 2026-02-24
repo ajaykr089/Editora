@@ -56,6 +56,16 @@ open examples/webcomponent-all-plugins.html
 open examples/webcomponent-toolbar-test.html
 ```
 
+#### Integration Lab (`web/webcomponent-integration-lab.html`)
+Multi-instance command-routing test harness for safe webcomponent verification before React parity work.
+
+```bash
+# from repo root
+python3 -m http.server 8000
+# open
+http://localhost:8000/examples/web/webcomponent-integration-lab.html
+```
+
 Features:
 - Zero framework dependencies
 - Declarative plugin configuration

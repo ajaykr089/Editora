@@ -29,6 +29,52 @@ const PRESET_COLORS = [
   '#ffff00', '#ff00ff', '#00ffff', '#ffa500', '#800080', '#ffc0cb'
 ];
 
+/**
+ * Find the editor container that currently owns selection/focus.
+ * Supports both web component and React editor roots.
+ */
+function getActiveEditorRoot(): HTMLElement | null {
+  const selection = window.getSelection();
+
+  if (selection && selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    const startNode = range.startContainer;
+    const startElement = startNode.nodeType === Node.ELEMENT_NODE
+      ? (startNode as HTMLElement)
+      : startNode.parentElement;
+
+    if (startElement) {
+      const selectionRoot = startElement.closest(
+        '[data-editora-editor="true"], .rte-editor, .editora-editor',
+      ) as HTMLElement | null;
+      if (selectionRoot) return selectionRoot;
+    }
+  }
+
+  const activeElement = document.activeElement as HTMLElement | null;
+  if (!activeElement) return null;
+
+  return activeElement.closest(
+    '[data-editora-editor="true"], .rte-editor, .editora-editor',
+  ) as HTMLElement | null;
+}
+
+/**
+ * Resolve toolbar button for command in current active editor first.
+ */
+function getToolbarButton(command: string): HTMLElement | null {
+  const root = getActiveEditorRoot();
+
+  if (root) {
+    const scopedButton = root.querySelector(
+      `[data-command="${command}"]`,
+    ) as HTMLElement | null;
+    if (scopedButton) return scopedButton;
+  }
+
+  return document.querySelector(`[data-command="${command}"]`) as HTMLElement | null;
+}
+
 // ============================================================================
 // Helper Functions
 // ============================================================================
@@ -55,12 +101,16 @@ function applyTextColor(color: string): boolean {
     const range = selection.getRangeAt(0);
 
     // Check if the selection is entirely within existing color spans
-    const startElement = range.startContainer.nodeType === Node.TEXT_NODE ? range.startContainer.parentElement : range.startContainer as Element;
-    const endElement = range.endContainer.nodeType === Node.TEXT_NODE ? range.endContainer.parentElement : range.endContainer as Element;
+    const startElement = range.startContainer.nodeType === Node.TEXT_NODE
+      ? range.startContainer.parentElement
+      : range.startContainer as HTMLElement;
+    const endElement = range.endContainer.nodeType === Node.TEXT_NODE
+      ? range.endContainer.parentElement
+      : range.endContainer as HTMLElement;
 
     // Find the outermost color span that contains the entire selection
-    let targetSpan: Element | null = null;
-    let currentElement: Element | null = startElement;
+    let targetSpan: HTMLElement | null = null;
+    let currentElement: HTMLElement | null = startElement as HTMLElement | null;
 
     while (currentElement && currentElement !== document.body) {
       if (currentElement.classList.contains('rte-text-color')) {
@@ -372,7 +422,7 @@ function openTextColorPicker(): boolean {
   }
 
   // Find the text color button
-  const button = document.querySelector('[data-command="openTextColorPicker"]') as HTMLElement;
+  const button = getToolbarButton('openTextColorPicker');
   if (!button) return false;
 
   createColorPicker(button);

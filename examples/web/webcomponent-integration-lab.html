@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editora Webcomponent Integration Lab</title>
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --text: #0f172a;
+      --muted: #475569;
+      --card: #ffffff;
+      --border: #d8e1ee;
+      --accent: #0ea5e9;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(180deg, #eef4ff 0%, #f7fbff 100%);
+      color: var(--text);
+    }
+
+    .shell {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .topbar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      margin: 0;
+    }
+
+    .sub {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .bundle-status {
+      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f8fbff;
+      color: #0c4a6e;
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .panel h2 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #334155;
+    }
+
+    .row {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    select, button {
+      width: 100%;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid #c9d6e7;
+      background: #fff;
+      color: #0f172a;
+      font-size: 13px;
+      padding: 0 10px;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button:hover { border-color: #8fb7e6; }
+    button.primary {
+      background: linear-gradient(180deg, #24b2ef 0%, #0ea5e9 100%);
+      color: #fff;
+      border-color: #0891d0;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #64748b;
+      margin: 0;
+    }
+
+    .editors {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .editor-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      min-height: 520px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 10px;
+    }
+
+    .editor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .editor-header h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .editor-meta {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .log {
+      white-space: pre-wrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      line-height: 1.45;
+      max-height: 220px;
+      overflow: auto;
+      border: 1px solid #d8e1ee;
+      background: #f8fbff;
+      border-radius: 8px;
+      padding: 10px;
+      color: #0f172a;
+    }
+
+    @media (max-width: 1200px) {
+      .layout { grid-template-columns: 1fr; }
+      .editors { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="topbar">
+      <div>
+        <h1 class="title">Webcomponent Integration Lab</h1>
+        <p class="sub">Safe sandbox for command routing and multi-instance behavior. No core runtime changes required.</p>
+      </div>
+      <div id="bundleStatus" class="bundle-status">Loading webcomponent bundle...</div>
+    </section>
+
+    <section class="layout">
+      <aside class="panel">
+        <h2>Controls</h2>
+
+        <div class="row">
+          <label for="targetEditor">Target Editor</label>
+          <select id="targetEditor">
+            <option value="editorA">Editor A</option>
+            <option value="editorB">Editor B</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <button id="toggleTheme" class="primary">Toggle Theme (Target)</button>
+          <p class="hint">Toggles `theme="dark"` / `theme="light"` per instance.</p>
+        </div>
+
+        <div class="row">
+          <label for="toolbarCommand">Run Toolbar Command (simulated click)</label>
+          <select id="toolbarCommand">
+            <option value="toggleBold">toggleBold</option>
+            <option value="toggleItalic">toggleItalic</option>
+            <option value="toggleUnderline">toggleUnderline</option>
+            <option value="toggleStrikethrough">toggleStrikethrough</option>
+            <option value="insertTable">insertTable</option>
+            <option value="print">print</option>
+            <option value="toggleSpellCheck">toggleSpellCheck</option>
+            <option value="toggleA11yChecker">toggleA11yChecker</option>
+            <option value="setDirectionLTR">setDirectionLTR</option>
+            <option value="setDirectionRTL">setDirectionRTL</option>
+          </select>
+          <button id="runToolbarCommand">Run Command via Toolbar</button>
+          <p class="hint">Uses toolbar button `data-command` click, same path as user interaction.</p>
+        </div>
+
+        <div class="row">
+          <button id="clearLogs">Clear Event Logs</button>
+        </div>
+      </aside>
+
+      <div class="editors">
+        <article class="editor-card">
+          <header class="editor-header">
+            <h3>Editor A</h3>
+            <div id="metaA" class="editor-meta">theme=light</div>
+          </header>
+          <editora-editor
+            id="editorA"
+            height="460"
+            statusbar="true"
+            theme="light"
+            plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template"
+      toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | importWord exportWord exportPdf | fullscreen preview print | a11yChecker spellCheck | comments footnote insertMergeTag pageBreak template | clearFormatting"
+    placeholder="Editor A: Select text and test commands..."
+          >
+            <h3>Editor A Sample</h3>
+            <p>Select this text and test <strong>formatting</strong>, table insertion, print, and direction commands.</p>
+          </editora-editor>
+        </article>
+
+        <article class="editor-card">
+          <header class="editor-header">
+            <h3>Editor B</h3>
+            <div id="metaB" class="editor-meta">theme=dark</div>
+          </header>
+          <editora-editor
+            id="editorB"
+            height="460"
+            statusbar="true"
+            theme="dark"
+            plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template"
+      toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | importWord exportWord exportPdf | fullscreen preview print | a11yChecker spellCheck | comments footnote insertMergeTag pageBreak template | clearFormatting"
+    placeholder="Editor B: independent instance test"
+          >
+            <h3>Editor B Sample</h3>
+            <p>This is a second editor instance. Verify commands do not leak across editors.</p>
+          </editora-editor>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Event Log</h2>
+      <div id="eventLog" class="log">Waiting for events...</div>
+    </section>
+  </div>
+
+  <script type="module">
+    const bundleStatus = document.getElementById('bundleStatus');
+    const logEl = document.getElementById('eventLog');
+    const targetEditorSelect = document.getElementById('targetEditor');
+    const toolbarCommandSelect = document.getElementById('toolbarCommand');
+
+    const appendLog = (line) => {
+      const now = new Date().toLocaleTimeString();
+      logEl.textContent += `\n[${now}] ${line}`;
+      logEl.scrollTop = logEl.scrollHeight;
+    };
+
+    const setBundleStatus = (text) => {
+      bundleStatus.textContent = text;
+    };
+
+    function injectCss(href) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      document.head.appendChild(link);
+    }
+
+    async function loadBundle() {
+      try {
+        injectCss('../../packages/core/dist/webcomponent.min.css');
+        await import('../../packages/core/dist/webcomponent.js');
+        setBundleStatus('Bundle: local dist (packages/core/dist/webcomponent.js)');
+        appendLog('Loaded local webcomponent bundle.');
+      } catch (err) {
+        appendLog(`Local bundle failed, falling back to CDN. Reason: ${String(err)}`);
+        injectCss('https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css');
+        await import('https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js');
+        setBundleStatus('Bundle: CDN fallback (@editora/core)');
+        appendLog('Loaded CDN webcomponent bundle.');
+      }
+    }
+
+    await loadBundle();
+    await customElements.whenDefined('editora-editor');
+
+    const editorA = document.getElementById('editorA');
+    const editorB = document.getElementById('editorB');
+    const metaA = document.getElementById('metaA');
+    const metaB = document.getElementById('metaB');
+
+    const syncMeta = () => {
+      metaA.textContent = `theme=${editorA.getAttribute('theme') || 'light'}`;
+      metaB.textContent = `theme=${editorB.getAttribute('theme') || 'light'}`;
+    };
+
+    const getTargetEditor = () => {
+      const id = targetEditorSelect.value;
+      return document.getElementById(id);
+    };
+
+    const editorName = (editor) => editor.id === 'editorA' ? 'Editor A' : 'Editor B';
+
+    const bindEditorEvents = (editor) => {
+      editor.addEventListener('editor-ready', () => appendLog(`${editorName(editor)} ready`));
+      editor.addEventListener('editor-focus', () => appendLog(`${editorName(editor)} focus`));
+      editor.addEventListener('editor-blur', () => appendLog(`${editorName(editor)} blur`));
+      editor.addEventListener('content-change', () => appendLog(`${editorName(editor)} content-change`));
+    };
+
+    bindEditorEvents(editorA);
+    bindEditorEvents(editorB);
+
+    document.getElementById('toggleTheme').addEventListener('click', () => {
+      const editor = getTargetEditor();
+      const current = (editor.getAttribute('theme') || 'light').toLowerCase();
+      const next = current === 'dark' ? 'light' : 'dark';
+      editor.setAttribute('theme', next);
+      appendLog(`${editorName(editor)} theme -> ${next}`);
+      syncMeta();
+    });
+
+    document.getElementById('runToolbarCommand').addEventListener('click', () => {
+      const editor = getTargetEditor();
+      const cmd = toolbarCommandSelect.value;
+      const btn = editor.querySelector(`.editora-toolbar-button[data-command="${cmd}"]`);
+      if (!btn) {
+        appendLog(`${editorName(editor)} command not found in toolbar: ${cmd}`);
+        return;
+      }
+      btn.click();
+      appendLog(`${editorName(editor)} toolbar click -> ${cmd}`);
+    });
+
+    document.getElementById('clearLogs').addEventListener('click', () => {
+      logEl.textContent = 'Event log cleared.';
+    });
+
+    syncMeta();
+    appendLog('Integration lab initialized.');
+  </script>
+</body>
+</html>
