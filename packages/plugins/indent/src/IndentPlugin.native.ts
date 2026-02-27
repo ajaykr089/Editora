@@ -12,6 +12,13 @@ import { Plugin } from '@editora/core';
  * - Keyboard shortcuts (Tab, Shift-Tab, Cmd-[, Cmd-])
  */
 
+declare global {
+  interface Window {
+    execEditorCommand?: (command: string, ...args: any[]) => any;
+    executeEditorCommand?: (command: string, ...args: any[]) => any;
+  }
+}
+
 const INDENT_AMOUNT = 40; // pixels
 
 /**
@@ -19,7 +26,10 @@ const INDENT_AMOUNT = 40; // pixels
  */
 const isBlockElement = (element: HTMLElement): boolean => {
   const blockTags = ['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE', 'PRE'];
-  return blockTags.includes(element.tagName);
+  return (
+    blockTags.includes(element.tagName) &&
+    element.getAttribute('contenteditable') !== 'true'
+  );
 };
 
 /**
@@ -88,44 +98,60 @@ const findContainingParagraph = (node: Node): HTMLElement | null => {
 };
 
 /**
- * Find all paragraphs that intersect with the range
+ * Find all block elements that intersect with the range
  */
-const getParagraphsInRange = (range: Range): HTMLElement[] => {
-  const paragraphs: HTMLElement[] = [];
-  const startParagraph = findContainingParagraph(range.startContainer);
-  const endParagraph = findContainingParagraph(range.endContainer);
+const getBlocksInRange = (range: Range, editor: HTMLElement): HTMLElement[] => {
+  const blocks: HTMLElement[] = [];
+  const seen = new Set<HTMLElement>();
 
-  if (!startParagraph && !endParagraph) return paragraphs;
+  const pushBlock = (element: HTMLElement | null) => {
+    if (!element || seen.has(element)) return;
+    if (!editor.contains(element)) return;
+    if (!isBlockElement(element)) return;
+    seen.add(element);
+    blocks.push(element);
+  };
 
-  // If range is collapsed (just cursor), return the paragraph containing the cursor
   if (range.collapsed) {
-    if (startParagraph) paragraphs.push(startParagraph);
-    return paragraphs;
+    pushBlock(findContainingParagraph(range.startContainer));
+    return blocks;
   }
 
-  // For actual selections, find all paragraphs between start and end
-  if (startParagraph === endParagraph) {
-    // Selection is within a single paragraph
-    if (startParagraph) paragraphs.push(startParagraph);
-  } else {
-    // Selection spans multiple block elements - find all blocks in between
-    let current: HTMLElement | null = startParagraph;
-    while (current && current !== endParagraph) {
-      paragraphs.push(current);
-      let nextSibling = current.nextElementSibling as HTMLElement | null;
-      // If we hit a non-block element, continue until we find the next block element
-      while (nextSibling && !isBlockElement(nextSibling)) {
-        nextSibling = nextSibling.nextElementSibling as HTMLElement | null;
-      }
-      current = nextSibling;
-    }
-    // Add the end paragraph if it's different
-    if (endParagraph && endParagraph !== startParagraph) {
-      paragraphs.push(endParagraph);
-    }
+  const walker = document.createTreeWalker(
+    editor,
+    NodeFilter.SHOW_ELEMENT,
+    {
+      acceptNode: (node: Node) => {
+        const element = node as HTMLElement;
+        if (!isBlockElement(element)) return NodeFilter.FILTER_SKIP;
+
+        if (typeof range.intersectsNode === 'function') {
+          return range.intersectsNode(element)
+            ? NodeFilter.FILTER_ACCEPT
+            : NodeFilter.FILTER_SKIP;
+        }
+
+        const nodeRange = document.createRange();
+        nodeRange.selectNodeContents(element);
+        const intersects =
+          range.compareBoundaryPoints(Range.END_TO_START, nodeRange) > 0 &&
+          range.compareBoundaryPoints(Range.START_TO_END, nodeRange) < 0;
+        return intersects ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+      },
+    },
+  );
+
+  let current = walker.nextNode();
+  while (current) {
+    pushBlock(current as HTMLElement);
+    current = walker.nextNode();
   }
 
-  return paragraphs;
+  if (blocks.length === 0) {
+    pushBlock(findContainingParagraph(range.commonAncestorContainer));
+  }
+
+  return blocks;
 };
 
 /**
@@ -146,6 +172,18 @@ const getCurrentPadding = (element: HTMLElement): number => {
   return 0;
 };
 
+const recordDomHistoryTransaction = (editor: HTMLElement, beforeHTML: string): void => {
+  if (beforeHTML === editor.innerHTML) return;
+  const executor = window.execEditorCommand || window.executeEditorCommand;
+  if (typeof executor !== 'function') return;
+
+  try {
+    executor('recordDomTransaction', editor, beforeHTML, editor.innerHTML);
+  } catch {
+    // History plugin may be unavailable.
+  }
+};
+
 /**
  * Increase indentation level
  */
@@ -161,9 +199,10 @@ export const increaseIndent = (): boolean => {
   // Verify selection is within the active editor
   if (!editor.contains(range.commonAncestorContainer)) return false;
 
-  const paragraphs = getParagraphsInRange(range);
+  const paragraphs = getBlocksInRange(range, editor);
 
   if (paragraphs.length === 0) return false;
+  const beforeHTML = editor.innerHTML;
 
   // Apply indentation to all selected paragraphs
   paragraphs.forEach(paragraph => {
@@ -172,6 +211,8 @@ export const increaseIndent = (): boolean => {
     paragraph.style.paddingLeft = `${newPadding}px`;
   });
 
+  recordDomHistoryTransaction(editor, beforeHTML);
+  editor.dispatchEvent(new Event('input', { bubbles: true }));
   return true;
 };
 
@@ -190,9 +231,10 @@ export const decreaseIndent = (): boolean => {
   // Verify selection is within the active editor
   if (!editor.contains(range.commonAncestorContainer)) return false;
 
-  const paragraphs = getParagraphsInRange(range);
+  const paragraphs = getBlocksInRange(range, editor);
 
   if (paragraphs.length === 0) return false;
+  const beforeHTML = editor.innerHTML;
 
   // Apply indentation to all selected paragraphs
   paragraphs.forEach(paragraph => {
@@ -201,6 +243,8 @@ export const decreaseIndent = (): boolean => {
     paragraph.style.paddingLeft = `${newPadding}px`;
   });
 
+  recordDomHistoryTransaction(editor, beforeHTML);
+  editor.dispatchEvent(new Event('input', { bubbles: true }));
   return true;
 };
 

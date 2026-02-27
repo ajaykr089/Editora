@@ -135,6 +135,174 @@ export const FontSizePlugin = (): Plugin => {
   };
 };
 
+const BLOCK_SELECTOR =
+  "p,div,li,ul,ol,table,thead,tbody,tfoot,tr,td,th,h1,h2,h3,h4,h5,h6,blockquote,pre";
+
+const FONT_SIZE_KEYWORD_TO_PX: Record<string, number> = {
+  "xx-small": 9,
+  "x-small": 10,
+  small: 13,
+  medium: 16,
+  large: 18,
+  "x-large": 24,
+  "xx-large": 32,
+  "xxx-large": 48,
+  smaller: 13,
+  larger: 18,
+};
+
+function parseFontSizeValue(raw: string): { value: number; unit: string } | null {
+  const size = raw.trim().toLowerCase();
+  const numericMatch = size.match(/^(\d+(?:\.\d+)?)(px|em|rem)$/i);
+  if (numericMatch) {
+    return {
+      value: parseFloat(numericMatch[1]),
+      unit: numericMatch[2].toLowerCase(),
+    };
+  }
+
+  const keywordValue = FONT_SIZE_KEYWORD_TO_PX[size];
+  if (keywordValue) {
+    return { value: keywordValue, unit: "px" };
+  }
+
+  return null;
+}
+
+function isKeywordFontSize(raw: string): boolean {
+  const size = raw.trim().toLowerCase();
+  return size in FONT_SIZE_KEYWORD_TO_PX;
+}
+
+function selectionContainsBlockNodes(range: Range): boolean {
+  const fragment = range.cloneContents();
+  return !!fragment.querySelector(BLOCK_SELECTOR);
+}
+
+function getEditableContentFromNode(node: Node): HTMLElement | null {
+  const element =
+    node.nodeType === Node.ELEMENT_NODE
+      ? (node as HTMLElement)
+      : node.parentElement;
+
+  return (
+    (element?.closest('[contenteditable="true"]') as HTMLElement | null) ||
+    (document.querySelector('[contenteditable="true"]') as HTMLElement | null)
+  );
+}
+
+function dispatchEditorInput(editorContent: HTMLElement | null): void {
+  if (editorContent) {
+    editorContent.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+}
+
+function replaceFontTagWithSpan(fontElement: HTMLElement, fontSizeValue: string): void {
+  const span = document.createElement("span");
+
+  for (const attr of Array.from(fontElement.attributes)) {
+    if (attr.name === "size" || attr.name === "style") continue;
+    span.setAttribute(attr.name, attr.value);
+  }
+
+  const existingStyle = fontElement.getAttribute("style");
+  if (existingStyle) {
+    span.setAttribute("style", existingStyle);
+  }
+
+  span.style.fontSize = fontSizeValue;
+  while (fontElement.firstChild) {
+    span.appendChild(fontElement.firstChild);
+  }
+  fontElement.parentNode?.replaceChild(span, fontElement);
+}
+
+function normalizeAppliedFontSize(
+  editorContent: HTMLElement,
+  previousNodes: Set<HTMLElement>,
+  fontSizeValue: string,
+  affectedRange: Range | null,
+): boolean {
+  const candidates = Array.from(
+    editorContent.querySelectorAll("font[size], [style*='font-size']"),
+  ) as HTMLElement[];
+
+  const intersectsRange = (element: HTMLElement): boolean => {
+    if (!affectedRange || !element.isConnected) return false;
+    try {
+      if (typeof affectedRange.intersectsNode === "function") {
+        return affectedRange.intersectsNode(element);
+      }
+    } catch {
+      // Fall back to manual range comparison below.
+    }
+
+    const elementRange = document.createRange();
+    elementRange.selectNodeContents(element);
+    return (
+      affectedRange.compareBoundaryPoints(Range.END_TO_START, elementRange) > 0 &&
+      affectedRange.compareBoundaryPoints(Range.START_TO_END, elementRange) < 0
+    );
+  };
+
+  let changed = false;
+  candidates.forEach((candidate) => {
+    const isNewNode = !previousNodes.has(candidate);
+    const isLegacyFontTag = candidate.tagName === "FONT";
+    const hasKeywordFontSize = isKeywordFontSize(candidate.style.fontSize || "");
+    const isInAffectedSelection = intersectsRange(candidate);
+
+    if (!isNewNode && !isInAffectedSelection) return;
+    if (!isNewNode && !isLegacyFontTag && !hasKeywordFontSize) return;
+
+    changed = true;
+    if (candidate.tagName === "FONT") {
+      replaceFontTagWithSpan(candidate, fontSizeValue);
+      return;
+    }
+
+    candidate.style.fontSize = fontSizeValue;
+  });
+
+  return changed;
+}
+
+function cleanupEmptyInlineStyleSpans(editorContent: HTMLElement): void {
+  const emptySpans = editorContent.querySelectorAll("span");
+  emptySpans.forEach((span) => {
+    if (span.childElementCount > 0) return;
+    if ((span.textContent || "").trim().length > 0) return;
+    span.remove();
+  });
+}
+
+function applyInlineFontSizeFallback(
+  range: Range,
+  selection: Selection,
+  fontSizeValue: string,
+): boolean {
+  if (selectionContainsBlockNodes(range)) {
+    return false;
+  }
+
+  const span = document.createElement("span");
+  span.style.fontSize = fontSizeValue;
+
+  try {
+    range.surroundContents(span);
+  } catch {
+    const contents = range.extractContents();
+    span.appendChild(contents);
+    range.insertNode(span);
+  }
+
+  const newRange = document.createRange();
+  newRange.selectNodeContents(span);
+  selection.removeAllRanges();
+  selection.addRange(newRange);
+  return true;
+}
+
 /**
  * Helper function to apply relative font size change
  */
@@ -187,24 +355,18 @@ function getCurrentFontSizeFromSelection(): { value: number; unit: string } {
     // First check if there's an inline style with font-size (preserves user's unit choice)
     const inlineStyle = (element as HTMLElement).style?.fontSize;
     if (inlineStyle) {
-      const match = inlineStyle.match(/^(\d+(?:\.\d+)?)(px|em|rem)$/i);
-      if (match) {
-        return {
-          value: parseFloat(match[1]),
-          unit: match[2].toLowerCase(),
-        };
+      const parsed = parseFontSizeValue(inlineStyle);
+      if (parsed) {
+        return parsed;
       }
     }
 
     // Fall back to computed style (usually returns px)
     const computedStyle = window.getComputedStyle(element);
     const fontSize = computedStyle.fontSize;
-    const match = fontSize.match(/^(\d+(?:\.\d+)?)(px|em|rem)$/i);
-    if (match) {
-      return {
-        value: parseFloat(match[1]),
-        unit: match[2].toLowerCase(),
-      };
+    const parsed = parseFontSizeValue(fontSize);
+    if (parsed) {
+      return parsed;
     }
   }
 
@@ -219,6 +381,8 @@ function applyFontSizeToSelection(size: number, unit: string = "px") {
   if (!selection || selection.rangeCount === 0) return;
 
   const range = selection.getRangeAt(0);
+  const originalRange = range.cloneRange();
+  const editorContent = getEditableContentFromNode(range.commonAncestorContainer);
 
   // If there's no actual selection (just cursor), return
   if (range.collapsed) {
@@ -234,32 +398,51 @@ function applyFontSizeToSelection(size: number, unit: string = "px") {
   if (fontSizeSpan && isSelectionEntirelyWithinSpan(range, fontSizeSpan)) {
     // Update existing span's font-size
     fontSizeSpan.style.fontSize = fontSizeValue;
+    dispatchEditorInput(editorContent);
 
     // Restore selection
     const newRange = document.createRange();
     newRange.selectNodeContents(fontSizeSpan);
     selection.removeAllRanges();
     selection.addRange(newRange);
-  } else {
-    // Create new span wrapper
-    const span = document.createElement("span");
-    span.style.fontSize = fontSizeValue;
+    return;
+  }
 
-    // Wrap the selected content
-    try {
-      range.surroundContents(span);
-    } catch (e) {
-      // surroundContents fails if the range spans multiple elements
-      const contents = range.extractContents();
-      span.appendChild(contents);
-      range.insertNode(span);
-    }
+  if (!editorContent) return;
 
-    // Restore selection to the inserted span
-    const newRange = document.createRange();
-    newRange.selectNodeContents(span);
-    selection.removeAllRanges();
-    selection.addRange(newRange);
+  const previousNodes = new Set(
+    Array.from(
+      editorContent.querySelectorAll("font[size], [style*='font-size']"),
+    ) as HTMLElement[],
+  );
+
+  editorContent.focus({ preventScroll: true });
+  try {
+    document.execCommand("styleWithCSS", false, "true");
+  } catch {
+    // Some browsers ignore this command.
+  }
+
+  let applied = document.execCommand("fontSize", false, "7");
+  const selectionRangeAfterExec =
+    selection.rangeCount > 0 ? selection.getRangeAt(0).cloneRange() : originalRange;
+  const normalized = normalizeAppliedFontSize(
+    editorContent,
+    previousNodes,
+    fontSizeValue,
+    selectionRangeAfterExec,
+  );
+
+  if (applied && normalized) {
+    cleanupEmptyInlineStyleSpans(editorContent);
+    dispatchEditorInput(editorContent);
+    return;
+  }
+
+  applied = applyInlineFontSizeFallback(originalRange, selection, fontSizeValue);
+  if (applied) {
+    cleanupEmptyInlineStyleSpans(editorContent);
+    dispatchEditorInput(editorContent);
   }
 }
 
@@ -304,36 +487,49 @@ function updateFontSizeInput() {
     const { value, unit } = getCurrentFontSizeFromSelection();
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return;
-    let editorRoot: HTMLElement | null = null;
+
+    let editorContainer: HTMLElement | null = null;
     const range = selection.getRangeAt(0);
     let node: Node | null = range.startContainer;
-    // Traverse up to find the editor container (assume .rte-editor or .editora-editor)
+
+    // Traverse up to find the editor container.
     while (node) {
-      if (node instanceof HTMLElement && (node.classList.contains('rte-editor') || node.classList.contains('editora-editor'))) {
-        editorRoot = node;
+      if (
+        node instanceof HTMLElement &&
+        (node.classList.contains("rte-editor") ||
+          node.classList.contains("editora-editor") ||
+          node.hasAttribute("data-editora-editor"))
+      ) {
+        editorContainer = node;
         break;
       }
       node = node.parentNode;
     }
-    if (!editorRoot) return;
-    // Find the nearest toolbar to this editor
-    let toolbar: HTMLElement | null = null;
-    if (editorRoot.previousElementSibling && editorRoot.previousElementSibling.classList.contains('rte-toolbar')) {
-      toolbar = editorRoot.previousElementSibling as HTMLElement;
-    } else if (editorRoot.nextElementSibling && editorRoot.nextElementSibling.classList.contains('rte-toolbar')) {
-      toolbar = editorRoot.nextElementSibling as HTMLElement;
-    } else {
-      toolbar = editorRoot.parentElement?.querySelector('.rte-toolbar') || null;
-    }
-    if (!toolbar) return;
-    // Find the font size input in this toolbar
-    const input = toolbar.querySelector('input[placeholder="14"], .rte-toolbar-input[type="text"], input[type="text"]') as HTMLInputElement | null;
-    if (!input) return;
+
+    if (!editorContainer) return;
+
+    const toolbarScope =
+      (editorContainer.querySelector(
+        ".rte-toolbar-wrapper, .editora-toolbar-container",
+      ) as HTMLElement | null) || editorContainer;
+
+    const inputs = Array.from(
+      toolbarScope.querySelectorAll(
+        'input[data-command="setFontSize"], input.editora-toolbar-input.font-size, input.rte-toolbar-input.font-size, input[title="Font Size"]',
+      ),
+    ) as HTMLInputElement[];
+
+    if (inputs.length === 0) return;
+
     // Format value: remove trailing zeros and show unit
     const formattedValue =
       value % 1 === 0
         ? value.toString()
         : value.toFixed(2).replace(/\.?0+$/, "");
-    input.value = `${formattedValue}${unit}`;
+    const text = `${formattedValue}${unit}`;
+
+    inputs.forEach((input) => {
+      input.value = text;
+    });
   }, 10);
 }

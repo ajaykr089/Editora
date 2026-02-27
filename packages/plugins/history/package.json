@@ -9,17 +9,19 @@
   "module": "dist/index.esm.js",
   "types": "src/index.ts",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "scripts": {
-    "build": "rollup -c ../../../rollup.config.js",
-    "dev": "rollup -c ../../../rollup.config.js -w",
+    "build": "vite build",
+    "dev": "vite build --watch",
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
     "@editora/core": "^1.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vite": "^7.3.1"
   }
 }

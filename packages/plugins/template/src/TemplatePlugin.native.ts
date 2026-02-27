@@ -206,20 +206,20 @@ export const validateTemplate = (template: Template): boolean => {
 // ============================================================================
 
 /**
- * Create the template dialog
+ * Create the template dialog (context-aware, matches emoji/special char plugins)
  */
-function createTemplateDialog(): void {
-  // Create overlay
+function createTemplateDialog(editorContent?: HTMLElement | null): void {
   overlayElement = document.createElement('div');
   overlayElement.className = 'rte-dialog-overlay';
+  if (isDarkThemeContext(editorContent)) {
+    overlayElement.classList.add('rte-ui-theme-dark');
+  }
   overlayElement.addEventListener('click', () => closeDialog());
 
-  // Create dialog
   dialogElement = document.createElement('div');
   dialogElement.className = 'rte-dialog rte-template-dialog';
   dialogElement.addEventListener('click', (e) => e.stopPropagation());
 
-  // Initialize with first category
   const categories = getTemplateCategories();
   if (categories.length > 0 && !selectedCategory) {
     selectedCategory = categories[0];
@@ -229,6 +229,28 @@ function createTemplateDialog(): void {
 
   overlayElement.appendChild(dialogElement);
   document.body.appendChild(overlayElement);
+  injectTemplateDialogStyles();
+}
+
+// Dark theme detection (scoped to the nearest editor root)
+// Include `.dark` when it's applied inside the editor root (e.g. React)
+const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
+const getEditorContentFromSelection = (): HTMLElement | null => {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return null;
+  const anchorNode = selection.anchorNode;
+  const anchorElement =
+    anchorNode instanceof HTMLElement ? anchorNode : anchorNode?.parentElement;
+  return (
+    (anchorElement?.closest(
+      ".rte-content, .editora-content",
+    ) as HTMLElement | null) || null
+  );
+};
+const isDarkThemeContext = (editorContent?: HTMLElement | null): boolean => {
+  const source = editorContent || getEditorContentFromSelection();
+  if (!source) return false;
+  return Boolean(source.closest(DARK_THEME_SELECTOR));
 }
 
 /**
@@ -533,7 +555,7 @@ function insertTemplateAtCursor(template: Template): void {
   selection.removeAllRanges();
   selection.addRange(newRange);
 
-  console.log(`Template inserted: ${template.name}`);
+  // (Optional: Remove debug log)
 }
 
 /**
@@ -570,7 +592,7 @@ function replaceDocumentWithTemplate(template: Template): void {
     editor.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
-  console.log(`Document replaced with template: ${template.name}`);
+  // (Optional: Remove debug log)
 }
 
 /**
@@ -589,7 +611,7 @@ function closeDialog(): void {
 /**
  * Open template dialog
  */
-function openTemplateDialog(): void {
+function openTemplateDialog(context?: any): void {
   // Save current selection
   const selection = window.getSelection();
   if (selection && selection.rangeCount > 0) {
@@ -604,274 +626,263 @@ function openTemplateDialog(): void {
     selectedTemplate = filteredTemplates[0];
   }
 
-  createTemplateDialog();
+ const editorContent =
+   context?.contentElement instanceof HTMLElement
+     ? context.contentElement
+     : getEditorContentFromSelection();
+  createTemplateDialog(editorContent);
 }
 
 // ============================================================================
 // Plugin Initialization
 // ============================================================================
 
-/**
- * Initialize plugin (called once when editor loads)
- */
-function initTemplatePlugin(): void {
-  if ((window as any).__templatePluginInitialized) {
-    return;
-  }
-
-  (window as any).__templatePluginInitialized = true;
-
-  // Add CSS styles
-  if (!document.getElementById('template-plugin-styles')) {
-    const styleElement = document.createElement('style');
-    styleElement.id = 'template-plugin-styles';
-    styleElement.textContent = `
-      .rte-dialog-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10000;
-      }
-
-      .rte-dialog {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        max-width: 90vw;
-        max-height: 90vh;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .rte-dialog-header {
-        padding: 16px;
-        border-bottom: 1px solid #eee;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .rte-dialog-header h2 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 600;
-      }
-
-      .rte-dialog-close {
-        background: none;
-        border: none;
-        font-size: 24px;
-        cursor: pointer;
-        color: #999;
-        padding: 0;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .rte-dialog-close:hover {
-        color: #333;
-      }
-
-      .rte-dialog-body {
-        padding: 16px;
-        overflow-y: auto;
-        flex: 1;
-      }
-
-      .rte-dialog-footer {
-        padding: 12px 16px;
-        border-top: 1px solid #eee;
-        display: flex;
-        gap: 8px;
-        justify-content: flex-end;
-      }
-
-      .rte-button-primary {
-        padding: 8px 16px;
-        border: none;
-        border-radius: 4px;
-        font-size: 14px;
-        cursor: pointer;
-        background-color: #1976d2;
-        color: white;
-        transition: all 0.2s;
-      }
-
-      .rte-button-primary:hover:not([disabled]) {
-        background-color: #1565c0;
-      }
-
-      .rte-button-primary[disabled] {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      .rte-button-secondary {
-        padding: 8px 16px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-        cursor: pointer;
-        background-color: #f5f5f5;
-        color: #333;
-        transition: all 0.2s;
-      }
-
-      .rte-button-secondary:hover {
-        background-color: #eeeeee;
-      }
-
-      .rte-template-dialog {
-        width: 600px;
-        max-height: 700px;
-      }
-
-      .rte-input {
-        width: 100%;
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-        box-sizing: border-box;
-      }
-
-      .rte-input:focus {
-        outline: none;
-        border-color: #1976d2;
-      }
-
-      .rte-tabs {
-        display: flex;
-        gap: 8px;
-        margin-top: 12px;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 8px;
-      }
-
-      .rte-tab {
-        padding: 6px 12px;
-        border: none;
-        background: none;
-        cursor: pointer;
-        font-size: 14px;
-        color: #666;
-        border-bottom: 2px solid transparent;
-        transition: all 0.2s;
-      }
-
-      .rte-tab:hover {
-        color: #333;
-      }
-
-      .rte-tab.active {
-        color: #1976d2;
-        border-bottom-color: #1976d2;
-        font-weight: 600;
-      }
-
-      .rte-template-list {
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        max-height: 250px;
-        overflow-y: auto;
-        margin: 12px 0;
-      }
-
-      .rte-template-item {
-        padding: 12px;
-        border-bottom: 1px solid #f0f0f0;
-        cursor: pointer;
-        transition: background-color 0.2s;
-      }
-
-      .rte-template-item:last-child {
-        border-bottom: none;
-      }
-
-      .rte-template-item:hover,
-      .rte-template-item.selected {
-        background-color: #f5f5f5;
-      }
-
-      .template-name {
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 4px;
-      }
-
-      .template-description {
-        font-size: 12px;
-        color: #999;
-      }
-
-      .rte-template-preview {
-        padding: 12px;
-        background-color: #fafafa;
-        border: 1px solid #eee;
-        border-radius: 4px;
-        margin-top: 12px;
-        max-height: 200px;
-        overflow-y: auto;
-      }
-
-      .template-preview-content {
-        font-size: 13px;
-        line-height: 1.5;
-        margin-top: 8px;
-      }
-
-      .template-preview-content * {
-        margin: 4px 0;
-      }
-
-      .rte-insert-mode {
-        margin-top: 12px;
-        padding: 12px;
-        background-color: #f5f5f5;
-        border-radius: 4px;
-        display: flex;
-        gap: 16px;
-      }
-
-      .rte-insert-mode label {
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        font-size: 14px;
-      }
-
-      .rte-insert-mode input {
-        margin-right: 6px;
-        cursor: pointer;
-      }
-
-      .rte-empty-state {
-        padding: 40px;
-        text-align: center;
-        color: #999;
-        font-size: 14px;
-      }
-    `;
-    document.head.appendChild(styleElement);
-  }
-}
-
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initTemplatePlugin);
-} else {
-  // DOM already loaded
-  setTimeout(initTemplatePlugin, 100);
+// Inject dialog styles (with dark theme support)
+function injectTemplateDialogStyles() {
+  if (typeof document === 'undefined') return;
+  const styleId = 'template-plugin-dialog-styles';
+  if (document.getElementById(styleId)) return;
+  const style = document.createElement('style');
+  style.id = styleId;
+  style.textContent = `
+    .rte-dialog-overlay {
+      --rte-tmpl-overlay-bg: rgba(15, 23, 36, 0.56);
+      --rte-tmpl-dialog-bg: #fff;
+      --rte-tmpl-dialog-text: #101828;
+      --rte-tmpl-border: #d6dbe4;
+      --rte-tmpl-subtle-bg: #f7f9fc;
+      --rte-tmpl-subtle-hover: #eef2f7;
+      --rte-tmpl-muted-text: #5f6b7d;
+      --rte-tmpl-accent: #1976d2;
+      --rte-tmpl-accent-strong: #1565c0;
+      --rte-tmpl-ring: rgba(31, 117, 254, 0.18);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--rte-tmpl-overlay-bg);
+      backdrop-filter: blur(2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .rte-dialog-overlay.rte-ui-theme-dark {
+      --rte-tmpl-overlay-bg: rgba(2, 8, 20, 0.72);
+      --rte-tmpl-dialog-bg: #202938;
+      --rte-tmpl-dialog-text: #e8effc;
+      --rte-tmpl-border: #49566c;
+      --rte-tmpl-subtle-bg: #2a3444;
+      --rte-tmpl-subtle-hover: #344256;
+      --rte-tmpl-muted-text: #a5b1c5;
+      --rte-tmpl-accent: #58a6ff;
+      --rte-tmpl-accent-strong: #4598f4;
+      --rte-tmpl-ring: rgba(88, 166, 255, 0.22);
+    }
+    .rte-template-dialog {
+      background: var(--rte-tmpl-dialog-bg);
+      color: var(--rte-tmpl-dialog-text);
+      border: 1px solid var(--rte-tmpl-border);
+      border-radius: 12px;
+      box-shadow: 0 24px 48px rgba(10, 15, 24, 0.28);
+      width: 600px;
+      max-height: 700px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .rte-dialog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--rte-tmpl-border);
+      background: linear-gradient(180deg, rgba(127, 154, 195, 0.08) 0%, rgba(127, 154, 195, 0) 100%);
+    }
+    .rte-dialog-header h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--rte-tmpl-dialog-text);
+    }
+    .rte-dialog-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--rte-tmpl-muted-text);
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      transition: background-color 0.16s ease, color 0.16s ease;
+    }
+    .rte-dialog-close:hover {
+      background-color: var(--rte-tmpl-subtle-hover);
+      color: var(--rte-tmpl-dialog-text);
+    }
+    .rte-dialog-body {
+      padding: 20px;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .rte-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--rte-tmpl-border);
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+      background: var(--rte-tmpl-subtle-bg);
+      color: var(--rte-tmpl-dialog-text);
+    }
+    .rte-input:focus {
+      outline: none;
+      border-color: var(--rte-tmpl-accent);
+    }
+    .rte-tabs {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      border-bottom: 1px solid var(--rte-tmpl-border);
+      padding-bottom: 8px;
+    }
+    .rte-tab {
+      padding: 6px 12px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--rte-tmpl-muted-text);
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .rte-tab:hover {
+      color: var(--rte-tmpl-dialog-text);
+    }
+    .rte-tab.active {
+      color: var(--rte-tmpl-accent);
+      border-bottom-color: var(--rte-tmpl-accent);
+      font-weight: 600;
+    }
+    .rte-template-list {
+      border: 1px solid var(--rte-tmpl-border);
+      border-radius: 4px;
+      max-height: 250px;
+      overflow-y: auto;
+      margin: 12px 0;
+      background: var(--rte-tmpl-subtle-bg);
+    }
+    .rte-template-item {
+      padding: 12px;
+      border-bottom: 1px solid var(--rte-tmpl-border);
+      cursor: pointer;
+      transition: background-color 0.2s;
+      background: none;
+    }
+    .rte-template-item:last-child {
+      border-bottom: none;
+    }
+    .rte-template-item:hover,
+    .rte-template-item.selected {
+      background-color: var(--rte-tmpl-subtle-hover);
+    }
+    .template-name {
+      font-weight: 600;
+      color: var(--rte-tmpl-dialog-text);
+      margin-bottom: 4px;
+    }
+    .template-description {
+      font-size: 12px;
+      color: var(--rte-tmpl-muted-text);
+    }
+    .rte-template-preview {
+      padding: 12px;
+      background-color: var(--rte-tmpl-subtle-bg);
+      border: 1px solid var(--rte-tmpl-border);
+      border-radius: 4px;
+      margin-top: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .template-preview-content {
+      font-size: 13px;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+    .template-preview-content * {
+      margin: 4px 0;
+    }
+    .rte-insert-mode {
+      margin-top: 12px;
+      padding: 12px;
+      background-color: var(--rte-tmpl-subtle-bg);
+      border-radius: 4px;
+      display: flex;
+      gap: 16px;
+    }
+    .rte-insert-mode label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .rte-insert-mode input {
+      margin-right: 6px;
+      cursor: pointer;
+    }
+    .rte-empty-state {
+      padding: 40px;
+      text-align: center;
+      color: var(--rte-tmpl-muted-text);
+      font-size: 14px;
+    }
+    .rte-dialog-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--rte-tmpl-border);
+      background: var(--rte-tmpl-subtle-bg);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+    .rte-button-primary {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      background-color: var(--rte-tmpl-accent);
+      color: white;
+      transition: all 0.2s;
+    }
+    .rte-button-primary:hover:not([disabled]) {
+      background-color: var(--rte-tmpl-accent-strong);
+    }
+    .rte-button-primary[disabled] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .rte-button-secondary {
+      padding: 8px 16px;
+      border: 1px solid var(--rte-tmpl-border);
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      background-color: var(--rte-tmpl-subtle-bg);
+      color: var(--rte-tmpl-dialog-text);
+      transition: all 0.2s;
+    }
+    .rte-button-secondary:hover {
+      background-color: var(--rte-tmpl-subtle-hover);
+    }
+  `;
+  document.head.appendChild(style);
 }
 
 // ============================================================================
@@ -880,7 +891,6 @@ if (document.readyState === 'loading') {
 
 export const TemplatePlugin = (): Plugin => ({
   name: 'template',
-
   toolbar: [
     {
       label: 'Template',
@@ -888,13 +898,11 @@ export const TemplatePlugin = (): Plugin => ({
       icon: '<svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M3 3V9H21V3H3ZM19 5H5V7H19V5Z" fill="#000000"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M3 11V21H11V11H3ZM9 13H5V19H9V13Z" fill="#000000"></path> <path d="M21 11H13V13H21V11Z" fill="#000000"></path> <path d="M13 15H21V17H13V15Z" fill="#000000"></path> <path d="M21 19H13V21H21V19Z" fill="#000000"></path> </g></svg>'
     }
   ],
-
   commands: {
-    insertTemplate: () => {
-      openTemplateDialog();
+    insertTemplate: (_args: unknown, context: any) => {
+      openTemplateDialog(context);
       return true;
     }
   },
-
   keymap: {}
 });

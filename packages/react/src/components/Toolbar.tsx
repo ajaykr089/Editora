@@ -276,11 +276,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     return iconName || '⚪';
   };
 
-  // Don't render toolbar if floating mode is enabled (FloatingToolbar will handle it)
-  if (floating) {
-    return null;
-  }
-
   const toolbarStyle: React.CSSProperties = {
     ...(sticky && {
       position: 'sticky',

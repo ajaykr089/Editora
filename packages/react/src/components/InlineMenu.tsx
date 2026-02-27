@@ -109,17 +109,8 @@ export const InlineMenu: React.FC<InlineMenuProps> = ({
       ref={menuRef}
       className={`rte-inline-menu ${className}`}
       style={{
-        position: 'fixed',
         top: position.top,
-        left: position.left,
-        zIndex: 1000,
-        background: 'white',
-        border: '1px solid #ccc',
-        borderRadius: '4px',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-        minWidth: '120px',
-        maxWidth: '200px',
-        pointerEvents: 'auto'
+        left: position.left
       }}
     >
       {options.map((option) => (
@@ -129,21 +120,6 @@ export const InlineMenu: React.FC<InlineMenuProps> = ({
           onClick={() => {
             onSelect(option.value);
             onClose();
-          }}
-          style={{
-            padding: '8px 12px',
-            cursor: 'pointer',
-            borderBottom: '1px solid #f0f0f0',
-            fontSize: '14px',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#f5f5f5';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
           }}
         >
           {option.label}

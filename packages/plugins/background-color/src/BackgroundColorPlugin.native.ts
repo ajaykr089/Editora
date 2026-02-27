@@ -1,4 +1,5 @@
 import type { Plugin } from '@editora/core';
+import { applyColorToSelection } from '../../src/utils/colorSelectionApply';
 
 /**
  * BackgroundColorPlugin - Native implementation with inline color picker
@@ -657,105 +658,21 @@ function rgbToHex(rgb: string): string {
  * Apply background color to the saved selection
  */
 function applyBackgroundColor(color: string): boolean {
-  try {
-    // Restore saved range
-    if (savedRange) {
-      const selection = window.getSelection();
-      if (selection) {
-        selection.removeAllRanges();
-        selection.addRange(savedRange.cloneRange()); // Clone to avoid mutating saved range
-      }
-    }
+  const applied = applyColorToSelection({
+    color,
+    className: 'rte-bg-color',
+    styleProperty: 'backgroundColor',
+    commands: ['hiliteColor', 'backColor'],
+    savedRange,
+    getActiveEditorRoot,
+    warnMessage: '[BackgroundColor] Could not apply highlight for current selection',
+  });
 
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
-      console.warn('[BackgroundColor] No valid selection');
-      return false;
-    }
-
-    const range = selection.getRangeAt(0);
-
-    // Check if range is valid and has content
-    if (range.collapsed) {
-      console.warn('[BackgroundColor] Range is collapsed');
-      return false;
-    }
-
-    // Check if the selection is entirely within existing background color spans
-    const startElement = range.startContainer.nodeType === Node.TEXT_NODE
-      ? range.startContainer.parentElement
-      : range.startContainer as HTMLElement;
-    const endElement = range.endContainer.nodeType === Node.TEXT_NODE
-      ? range.endContainer.parentElement
-      : range.endContainer as HTMLElement;
-
-    // Find the outermost background color span that contains the entire selection
-    let targetSpan: HTMLElement | null = null;
-    let currentElement: HTMLElement | null = startElement as HTMLElement | null;
-
-    while (currentElement && currentElement !== document.body) {
-      if (currentElement.classList.contains('rte-bg-color')) {
-        // Check if this span contains the entire selection
-        const spanRange = document.createRange();
-        spanRange.selectNodeContents(currentElement);
-        
-        // Check if the selection range is within this span's range
-        if (spanRange.compareBoundaryPoints(Range.START_TO_START, range) <= 0 &&
-            spanRange.compareBoundaryPoints(Range.END_TO_END, range) >= 0) {
-          targetSpan = currentElement;
-          break;
-        }
-      }
-      currentElement = currentElement.parentElement;
-    }
-
-    // If we found a target span that contains the entire selection, just update its background color
-    if (targetSpan) {
-      targetSpan.style.backgroundColor = color;
-
-      // Trigger input event to notify editor
-      const editorContent =
-        (targetSpan.closest('[contenteditable="true"]') as HTMLElement | null) ||
-        (getActiveEditorRoot()?.querySelector('[contenteditable="true"]') as HTMLElement | null) ||
-        (document.querySelector('[contenteditable="true"]') as HTMLElement | null);
-      if (editorContent) {
-        editorContent.dispatchEvent(new Event('input', { bubbles: true }));
-      }
-
-      console.log('[BackgroundColor] Updated existing span with color:', color);
-      return true;
-    }
-
-    // No existing span contains the entire selection, create a new one
-    const span = document.createElement('span');
-    span.style.backgroundColor = color;
-    span.className = 'rte-bg-color';
-
-    const contents = range.extractContents();
-    span.appendChild(contents);
-    range.insertNode(span);
-
-    // Move cursor to end of inserted span
-    range.setStartAfter(span);
-    range.setEndAfter(span);
-    selection.removeAllRanges();
-    selection.addRange(range);
-
-    // Trigger input event to notify editor
-    const editorContent =
-      (span.closest('[contenteditable="true"]') as HTMLElement | null) ||
-      (getActiveEditorRoot()?.querySelector('[contenteditable="true"]') as HTMLElement | null) ||
-      (document.querySelector('[contenteditable="true"]') as HTMLElement | null);
-    if (editorContent) {
-      editorContent.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-
+  if (applied) {
     console.log('[BackgroundColor] Applied color:', color);
-    return true;
-  } catch (error) {
-    console.error('[BackgroundColor] Failed to apply background color:', error);
-    return false;
   }
+
+  return applied;
 }
 
 

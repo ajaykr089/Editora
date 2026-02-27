@@ -619,3 +619,96 @@
 .editora-theme-dark .rte-content h6 {
   color: #fff;
 }
+
+.rte-inline-menu {
+  position: fixed;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  min-width: 120px;
+  max-width: 200px;
+  pointer-events: auto;
+}
+.rte-inline-menu-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background-color: transparent;
+  
+}
+.rte-inline-menu-item:hover {
+    background-color: #f5f5f5;
+}
+
+/* Floating toolbar (React wrapper) */
+.floating-toolbar {
+  --rte-floating-toolbar-bg: #ffffff;
+  --rte-floating-toolbar-border: #d7dee8;
+  --rte-floating-toolbar-text: #364152;
+  --rte-floating-toolbar-hover-bg: #f2f6fb;
+  --rte-floating-toolbar-hover-text: #101828;
+  --rte-floating-toolbar-active-bg: #e7eef7;
+  --rte-floating-toolbar-separator: #d8e1ec;
+  --rte-floating-toolbar-shadow: 0 10px 28px rgba(15, 23, 36, 0.16);
+  user-select: none;
+  -webkit-user-select: none;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid var(--rte-floating-toolbar-border);
+  background: var(--rte-floating-toolbar-bg);
+  color: var(--rte-floating-toolbar-text);
+  box-shadow: var(--rte-floating-toolbar-shadow);
+  pointer-events: auto;
+  animation: rteFloatingToolbarIn 0.15s ease-out;
+}
+
+.floating-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
+}
+
+.floating-toolbar-btn:hover {
+  background: var(--rte-floating-toolbar-hover-bg);
+  color: var(--rte-floating-toolbar-hover-text);
+}
+
+.floating-toolbar-btn:active {
+  background: var(--rte-floating-toolbar-active-bg);
+  transform: scale(0.96);
+}
+
+.floating-toolbar-separator {
+  width: 1px;
+  height: 20px;
+  margin: 0 2px;
+  background: var(--rte-floating-toolbar-separator);
+}
+
+@keyframes rteFloatingToolbarIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}

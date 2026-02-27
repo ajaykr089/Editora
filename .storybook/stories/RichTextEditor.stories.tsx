@@ -135,8 +135,8 @@ export const Basic: Story = {
   render: () => (
     <EditoraEditor
       plugins={allNativePlugins}
-      statusbar={{ enabled: true , position: "bottom" }}
-      floatingToolbar={{ enabled: false }}
+      statusbar={{ enabled: true, position: "bottom" }}
+      floatingToolbar={true}
       defaultValue={`
         <h2>Welcome to Editora!!</h2>
         <p>This is a <strong>framework-agnostic</strong> rich text editor with <mark style="background: #ffeb3b;">37 native plugins</mark>.</p>
@@ -504,6 +504,7 @@ export const Test7ThemeSwitcherEditorOnly: Story = {
               plugins={allNativePlugins}
               toolbar={{ showMoreOptions: false }}
               statusbar={{ enabled: true }}
+              floatingToolbar={true}
               defaultValue="<p>Editor A theme is controlled independently.</p>"
             />
           </div>
@@ -514,6 +515,7 @@ export const Test7ThemeSwitcherEditorOnly: Story = {
               plugins={allNativePlugins}
               toolbar={{ showMoreOptions: false }}
               statusbar={{ enabled: true }}
+              floatingToolbar={true}
               defaultValue="<p>Editor B can use a different theme from Editor A.</p>"
             />
           </div>

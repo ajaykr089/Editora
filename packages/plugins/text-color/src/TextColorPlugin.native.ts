@@ -1,4 +1,5 @@
 import type { Plugin } from '@editora/core';
+import { applyColorToSelection } from '../../src/utils/colorSelectionApply';
 
 /**
  * TextColorPlugin - Native Implementation
@@ -102,77 +103,15 @@ function isDarkThemeContext(anchor?: HTMLElement | null): boolean {
  * Apply text color to selection
  */
 function applyTextColor(color: string): boolean {
-  try {
-    // Restore saved selection if available
-    if (savedRange) {
-      const selection = window.getSelection();
-      if (selection) {
-        selection.removeAllRanges();
-        selection.addRange(savedRange);
-      }
-    }
-
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
-      return false;
-    }
-
-    const range = selection.getRangeAt(0);
-
-    // Check if the selection is entirely within existing color spans
-    const startElement = range.startContainer.nodeType === Node.TEXT_NODE
-      ? range.startContainer.parentElement
-      : range.startContainer as HTMLElement;
-    const endElement = range.endContainer.nodeType === Node.TEXT_NODE
-      ? range.endContainer.parentElement
-      : range.endContainer as HTMLElement;
-
-    // Find the outermost color span that contains the entire selection
-    let targetSpan: HTMLElement | null = null;
-    let currentElement: HTMLElement | null = startElement as HTMLElement | null;
-
-    while (currentElement && currentElement !== document.body) {
-      if (currentElement.classList.contains('rte-text-color')) {
-        // Check if this span contains the entire selection
-        const spanRange = document.createRange();
-        spanRange.selectNodeContents(currentElement);
-        
-        // Check if the selection range is within this span's range
-        if (spanRange.compareBoundaryPoints(Range.START_TO_START, range) <= 0 &&
-            spanRange.compareBoundaryPoints(Range.END_TO_END, range) >= 0) {
-          targetSpan = currentElement;
-          break;
-        }
-      }
-      currentElement = currentElement.parentElement;
-    }
-
-    // If we found a target span that contains the entire selection, just update its color
-    if (targetSpan) {
-      targetSpan.style.color = color;
-      return true;
-    }
-
-    // No existing span contains the entire selection, create a new one
-    const span = document.createElement('span');
-    span.style.color = color;
-    span.className = 'rte-text-color';
-
-    const contents = range.extractContents();
-    span.appendChild(contents);
-    range.insertNode(span);
-
-    // Move cursor after the colored text
-    range.setStartAfter(span);
-    range.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(range);
-
-    return true;
-  } catch (error) {
-    console.error('Failed to set text color:', error);
-    return false;
-  }
+  return applyColorToSelection({
+    color,
+    className: 'rte-text-color',
+    styleProperty: 'color',
+    commands: ['foreColor'],
+    savedRange,
+    getActiveEditorRoot,
+    warnMessage: '[TextColor] Could not apply color for current selection',
+  });
 }
 function getCurrentTextColor(): string {
   const selection = window.getSelection();

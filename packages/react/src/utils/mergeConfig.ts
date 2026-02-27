@@ -137,9 +137,14 @@ export function mergeConfig(props: RichTextEditorProps): EditorConfig {
 
   // Legacy compatibility: merge floatingToolbar into toolbar
   if (props.floatingToolbar !== undefined) {
+    const floatingFromLegacy =
+      typeof props.floatingToolbar === 'boolean'
+        ? props.floatingToolbar
+        : props.floatingToolbar.enabled;
+
     config.toolbar = {
       ...config.toolbar,
-      floating: props.floatingToolbar.enabled ?? config.toolbar.floating,
+      floating: floatingFromLegacy ?? config.toolbar.floating,
     };
   }
 

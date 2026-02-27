@@ -11,6 +11,13 @@ import type { Plugin } from '@editora/core';
  * - Current value detection and display
  */
 
+declare global {
+  interface Window {
+    execEditorCommand?: (command: string, ...args: any[]) => any;
+    executeEditorCommand?: (command: string, ...args: any[]) => any;
+  }
+}
+
 /**
  * Predefined line height options
  */
@@ -23,26 +30,142 @@ const lineHeights = [
   { label: '3.0', value: '3.0' }
 ];
 
+const BLOCK_ELEMENTS = new Set([
+  'P',
+  'DIV',
+  'H1',
+  'H2',
+  'H3',
+  'H4',
+  'H5',
+  'H6',
+  'LI',
+  'BLOCKQUOTE',
+  'PRE',
+]);
+
+const isBlockElement = (element: HTMLElement): boolean => {
+  return (
+    BLOCK_ELEMENTS.has(element.tagName) &&
+    element.getAttribute('contenteditable') !== 'true'
+  );
+};
+
+const findActiveEditor = (): HTMLElement | null => {
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    let node: Node | null = selection.getRangeAt(0).startContainer;
+    while (node && node !== document.body) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as HTMLElement;
+        if (element.getAttribute('contenteditable') === 'true') {
+          return element;
+        }
+      }
+      node = node.parentNode;
+    }
+  }
+
+  const activeElement = document.activeElement;
+  if (activeElement) {
+    if (activeElement.getAttribute('contenteditable') === 'true') {
+      return activeElement as HTMLElement;
+    }
+    const editor = activeElement.closest('[contenteditable="true"]');
+    if (editor) return editor as HTMLElement;
+  }
+
+  return document.querySelector('[contenteditable="true"]');
+};
+
 /**
  * Find the containing block element for line height
  */
 const findBlockElement = (node: Node): HTMLElement | null => {
   let current: Node | null = node;
 
-  // Block-level elements that can have line-height
-  const blockElements = ['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE', 'PRE'];
-
   while (current) {
     if (current.nodeType === Node.ELEMENT_NODE) {
       const element = current as HTMLElement;
-      if (blockElements.includes(element.tagName)) {
+      if (isBlockElement(element)) {
         return element;
       }
+      if (element.getAttribute('contenteditable') === 'true') break;
     }
     current = current.parentNode;
   }
 
   return null;
+};
+
+const getSelectedBlocks = (range: Range, editor: HTMLElement): HTMLElement[] => {
+  const blocks: HTMLElement[] = [];
+  const seen = new Set<HTMLElement>();
+
+  const pushBlock = (element: HTMLElement | null) => {
+    if (!element || seen.has(element)) return;
+    if (!editor.contains(element)) return;
+    if (!isBlockElement(element)) return;
+    seen.add(element);
+    blocks.push(element);
+  };
+
+  if (range.collapsed) {
+    pushBlock(findBlockElement(range.startContainer));
+    return blocks;
+  }
+
+  const walker = document.createTreeWalker(
+    editor,
+    NodeFilter.SHOW_ELEMENT,
+    {
+      acceptNode: (node: Node) => {
+        const element = node as HTMLElement;
+        if (!isBlockElement(element)) return NodeFilter.FILTER_SKIP;
+
+        if (typeof range.intersectsNode === 'function') {
+          return range.intersectsNode(element)
+            ? NodeFilter.FILTER_ACCEPT
+            : NodeFilter.FILTER_SKIP;
+        }
+
+        const nodeRange = document.createRange();
+        nodeRange.selectNodeContents(element);
+        const intersects =
+          range.compareBoundaryPoints(Range.END_TO_START, nodeRange) > 0 &&
+          range.compareBoundaryPoints(Range.START_TO_END, nodeRange) < 0;
+        return intersects ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+      },
+    },
+  );
+
+  let current = walker.nextNode();
+  while (current) {
+    pushBlock(current as HTMLElement);
+    current = walker.nextNode();
+  }
+
+  if (blocks.length === 0) {
+    pushBlock(findBlockElement(range.commonAncestorContainer));
+  }
+
+  return blocks;
+};
+
+const dispatchEditorInput = (editor: HTMLElement) => {
+  editor.dispatchEvent(new Event('input', { bubbles: true }));
+};
+
+const recordDomHistoryTransaction = (editor: HTMLElement, beforeHTML: string): void => {
+  if (beforeHTML === editor.innerHTML) return;
+  const executor = window.execEditorCommand || window.executeEditorCommand;
+  if (typeof executor !== 'function') return;
+
+  try {
+    executor('recordDomTransaction', editor, beforeHTML, editor.innerHTML);
+  } catch {
+    // History plugin may be unavailable.
+  }
 };
 
 /**
@@ -79,18 +202,26 @@ export const setLineHeight = (height?: string): boolean => {
   if (!height) return false;
 
   try {
+    const editor = findActiveEditor();
+    if (!editor) return false;
+
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return false;
 
     const range = selection.getRangeAt(0);
-    const element = findBlockElement(range.commonAncestorContainer);
+    if (!editor.contains(range.commonAncestorContainer)) return false;
 
-    if (element) {
-      element.style.lineHeight = height;
-      return true;
-    }
+    const blocks = getSelectedBlocks(range, editor);
+    if (blocks.length === 0) return false;
+    const beforeHTML = editor.innerHTML;
 
-    return false;
+    blocks.forEach((block) => {
+      block.style.lineHeight = height;
+    });
+
+    recordDomHistoryTransaction(editor, beforeHTML);
+    dispatchEditorInput(editor);
+    return true;
   } catch (error) {
     console.error('Failed to set line height:', error);
     return false;

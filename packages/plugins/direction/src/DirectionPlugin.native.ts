@@ -19,8 +19,167 @@ import type { Plugin } from '@editora/core';
  * - Clean attribute-only approach (no inline styles)
  */
 
+declare global {
+  interface Window {
+    execEditorCommand?: (command: string, ...args: any[]) => any;
+    executeEditorCommand?: (command: string, ...args: any[]) => any;
+  }
+}
+
 // List of block-level elements that can have direction attributes
-const BLOCK_LEVEL_TAGS = ['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE'];
+const BLOCK_LEVEL_TAGS = new Set([
+  'P',
+  'DIV',
+  'H1',
+  'H2',
+  'H3',
+  'H4',
+  'H5',
+  'H6',
+  'LI',
+  'BLOCKQUOTE',
+  'PRE',
+]);
+
+const isBlockElement = (element: HTMLElement): boolean => {
+  return (
+    BLOCK_LEVEL_TAGS.has(element.tagName) &&
+    element.getAttribute('contenteditable') !== 'true'
+  );
+};
+
+const findActiveEditor = (): HTMLElement | null => {
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    let node: Node | null = selection.getRangeAt(0).startContainer;
+    while (node && node !== document.body) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as HTMLElement;
+        if (element.getAttribute('contenteditable') === 'true') {
+          return element;
+        }
+      }
+      node = node.parentNode;
+    }
+  }
+
+  const activeElement = document.activeElement;
+  if (activeElement) {
+    if (activeElement.getAttribute('contenteditable') === 'true') {
+      return activeElement as HTMLElement;
+    }
+    const editor = activeElement.closest('[contenteditable="true"]');
+    if (editor) return editor as HTMLElement;
+  }
+
+  return document.querySelector('[contenteditable="true"]');
+};
+
+const findContainingBlock = (node: Node): HTMLElement | null => {
+  let current: Node | null = node;
+  while (current && current !== document.body) {
+    if (current.nodeType === Node.ELEMENT_NODE) {
+      const element = current as HTMLElement;
+      if (isBlockElement(element)) return element;
+      if (element.getAttribute('contenteditable') === 'true') break;
+    }
+    current = current.parentNode;
+  }
+  return null;
+};
+
+const getSelectedBlocks = (range: Range, editor: HTMLElement): HTMLElement[] => {
+  const blocks: HTMLElement[] = [];
+  const seen = new Set<HTMLElement>();
+
+  const pushBlock = (element: HTMLElement | null) => {
+    if (!element || seen.has(element)) return;
+    if (!editor.contains(element)) return;
+    if (!isBlockElement(element)) return;
+    seen.add(element);
+    blocks.push(element);
+  };
+
+  if (range.collapsed) {
+    pushBlock(findContainingBlock(range.startContainer));
+    return blocks;
+  }
+
+  const walker = document.createTreeWalker(
+    editor,
+    NodeFilter.SHOW_ELEMENT,
+    {
+      acceptNode: (node: Node) => {
+        const element = node as HTMLElement;
+        if (!isBlockElement(element)) return NodeFilter.FILTER_SKIP;
+
+        if (typeof range.intersectsNode === 'function') {
+          return range.intersectsNode(element)
+            ? NodeFilter.FILTER_ACCEPT
+            : NodeFilter.FILTER_SKIP;
+        }
+
+        const nodeRange = document.createRange();
+        nodeRange.selectNodeContents(element);
+        const intersects =
+          range.compareBoundaryPoints(Range.END_TO_START, nodeRange) > 0 &&
+          range.compareBoundaryPoints(Range.START_TO_END, nodeRange) < 0;
+        return intersects ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+      },
+    },
+  );
+
+  let current = walker.nextNode();
+  while (current) {
+    pushBlock(current as HTMLElement);
+    current = walker.nextNode();
+  }
+
+  if (blocks.length === 0) {
+    pushBlock(findContainingBlock(range.commonAncestorContainer));
+  }
+
+  return blocks;
+};
+
+const recordDomHistoryTransaction = (editor: HTMLElement, beforeHTML: string): void => {
+  if (beforeHTML === editor.innerHTML) return;
+  const executor = window.execEditorCommand || window.executeEditorCommand;
+  if (typeof executor !== 'function') return;
+
+  try {
+    executor('recordDomTransaction', editor, beforeHTML, editor.innerHTML);
+  } catch {
+    // History plugin may be unavailable.
+  }
+};
+
+const applyDirectionToSelection = (dir: 'rtl' | null): boolean => {
+  const editor = findActiveEditor();
+  if (!editor) return false;
+
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return false;
+
+  const range = selection.getRangeAt(0);
+  if (!editor.contains(range.commonAncestorContainer)) return false;
+
+  const blocks = getSelectedBlocks(range, editor);
+  if (blocks.length === 0) return false;
+  const beforeHTML = editor.innerHTML;
+
+  blocks.forEach((block) => {
+    if (dir === 'rtl') {
+      block.setAttribute('dir', 'rtl');
+    } else {
+      block.removeAttribute('dir');
+    }
+  });
+
+  recordDomHistoryTransaction(editor, beforeHTML);
+  editor.dispatchEvent(new Event('input', { bubbles: true }));
+  return true;
+};
 
 export const DirectionPlugin = (): Plugin => {
   return {
@@ -44,29 +203,7 @@ export const DirectionPlugin = (): Plugin => {
     commands: {
       setDirectionLTR: () => {
         try {
-          const selection = window.getSelection();
-          if (!selection || selection.rangeCount === 0) return false;
-
-          const range = selection.getRangeAt(0);
-          let element: Node | null = range.commonAncestorContainer;
-
-          // If it's a text node, get the parent element
-          if (element && element.nodeType === Node.TEXT_NODE) {
-            element = element.parentElement;
-          }
-
-          // Find the nearest block-level element
-          while (element && element !== document.body) {
-            const htmlElement = element as HTMLElement;
-            if (htmlElement.tagName && BLOCK_LEVEL_TAGS.includes(htmlElement.tagName)) {
-              // Remove the dir attribute - browser defaults to LTR
-              htmlElement.removeAttribute('dir');
-              return true;
-            }
-            element = htmlElement.parentElement;
-          }
-          
-          return false;
+          return applyDirectionToSelection(null);
         } catch (error) {
           console.error('Failed to set LTR direction:', error);
           return false;
@@ -75,29 +212,7 @@ export const DirectionPlugin = (): Plugin => {
 
       setDirectionRTL: () => {
         try {
-          const selection = window.getSelection();
-          if (!selection || selection.rangeCount === 0) return false;
-
-          const range = selection.getRangeAt(0);
-          let element: Node | null = range.commonAncestorContainer;
-
-          // If it's a text node, get the parent element
-          if (element && element.nodeType === Node.TEXT_NODE) {
-            element = element.parentElement;
-          }
-
-          // Find the nearest block-level element
-          while (element && element !== document.body) {
-            const htmlElement = element as HTMLElement;
-            if (htmlElement.tagName && BLOCK_LEVEL_TAGS.includes(htmlElement.tagName)) {
-              // Set the dir attribute to "rtl"
-              htmlElement.setAttribute('dir', 'rtl');
-              return true;
-            }
-            element = htmlElement.parentElement;
-          }
-          
-          return false;
+          return applyDirectionToSelection('rtl');
         } catch (error) {
           console.error('Failed to set RTL direction:', error);
           return false;

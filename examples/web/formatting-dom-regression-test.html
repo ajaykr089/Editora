@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editora Formatting DOM Regression Test</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6fb;
+      color: #111827;
+    }
+
+    .shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .card {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid #c7ced9;
+      background: #eef3ff;
+      color: #1f2937;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    button:hover {
+      background: #e4ebff;
+    }
+
+    .status {
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+    }
+
+    .status.pass {
+      background: #dcfce7;
+      border-color: #86efac;
+      color: #166534;
+    }
+
+    .status.fail {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      color: #991b1b;
+    }
+
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      overflow: auto;
+      font-size: 12px;
+      line-height: 1.5;
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="card">
+      <h1 style="margin: 0 0 8px;">Formatting DOM Regression Test</h1>
+      <p style="margin: 0 0 10px;">
+        Sequence A:
+        <code>Background Color -> Text Color -> Heading(H1) -> Font Family -> Increase Font Size</code>
+      </p>
+      <p style="margin: 0 0 10px;">
+        Sequence B:
+        <code>Line Height -> Direction(RTL/LTR) -> Indent/Outdent</code> on multi-paragraph selection
+      </p>
+      <p style="margin: 0 0 10px;">
+        Sequence C:
+        <code>Bullet List -> Numbered List -> Checklist -> Checklist(toggle back)</code> on multi-paragraph selection
+      </p>
+      <p style="margin: 0 0 10px;">
+        Sequence D:
+        <code>Mixed Formatting -> Clear Formatting</code> with multi-block + inline edge cases
+      </p>
+      <p style="margin: 0 0 10px;">
+        Sequence E:
+        <code>Merge Tag insert</code> with caret + stale selection fallback
+      </p>
+      <p style="margin: 0 0 10px;">
+        Sequence F:
+        <code>Page Break insert/select/delete/collapse</code> edge-case coverage
+      </p>
+      <p style="margin: 0 0 10px;">
+        Sequence G:
+        <code>Footnote insert/renumber/select/delete</code> edge-case coverage
+      </p>
+      <p style="margin: 0 0 10px;">
+        Sequence H:
+        <code>History setText/setAttribute + undoDom/redoDom + native undo/redo</code>
+      </p>
+      <p style="margin: 0 0 10px;">
+        Sequence I:
+        <code>Block plugins (textAlignment/lineHeight/direction/indent) undo/redo round-trip</code>
+      </p>
+      <div class="row">
+        <button id="runTest">Run Regression Test</button>
+        <span id="status" class="status">Pending</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top: 0;">Editor</h2>
+      <editora-editor
+        id="regressionEditor"
+        height="360"
+        statusbar="true"
+        theme="light"
+        plugins="bold italic underline strikethrough heading textColor backgroundColor fontFamily fontSize lineHeight textAlignment direction indent list checklist clearFormatting mergeTag pageBreak footnote history"
+        toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | heading | fontFamily fontSize lineHeight | textAlignment direction | indent outdent | bullist numlist checklist | insertMergeTag insertPageBreak footnote clearFormatting"
+      >
+        <p>line one for formatting checks</p>
+        <p>line two for formatting checks</p>
+        <p>line three for formatting checks</p>
+      </editora-editor>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top: 0;">Validation Output</h2>
+      <pre id="output">Waiting to run test...</pre>
+    </div>
+  </div>
+
+  <script type="module">
+    const statusEl = document.getElementById("status");
+    const outputEl = document.getElementById("output");
+    const runBtn = document.getElementById("runTest");
+
+    function setStatus(text, cls) {
+      statusEl.textContent = text;
+      statusEl.className = `status ${cls || ""}`.trim();
+    }
+
+    function log(msg) {
+      outputEl.textContent += `\n${msg}`;
+    }
+
+    function wait(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    function loadStylesheet(href) {
+      return new Promise((resolve, reject) => {
+        const css = document.createElement("link");
+        css.rel = "stylesheet";
+        css.href = href;
+        css.onload = () => resolve();
+        css.onerror = () => reject(new Error(`Failed to load stylesheet: ${href}`));
+        document.head.appendChild(css);
+      });
+    }
+
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+        document.head.appendChild(script);
+      });
+    }
+
+    async function loadBundle() {
+      const localCss = "../../packages/core/dist/webcomponent.min.css";
+      const localScript = "../../packages/core/dist/webcomponent.min.js";
+      const cdnCss = "https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css";
+      const cdnScript = "https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.js";
+
+      try {
+        await loadStylesheet(localCss);
+        await loadScript(localScript);
+        return window.location.protocol === "file:" ? "local-file" : "local";
+      } catch (localError) {
+        await loadStylesheet(cdnCss);
+        await loadScript(cdnScript);
+        return "cdn";
+      }
+    }
+
+    function getEditable(editorEl) {
+      return editorEl.querySelector(".editora-content, .rte-content");
+    }
+
+    function getTextNodes(node, out = []) {
+      if (!node) return out;
+      if (node.nodeType === Node.TEXT_NODE && (node.textContent || "").trim().length > 0) {
+        out.push(node);
+        return out;
+      }
+      node.childNodes.forEach((child) => getTextNodes(child, out));
+      return out;
+    }
+
+    function selectAllText(contentEl) {
+      const textNodes = getTextNodes(contentEl);
+      if (textNodes.length === 0) return false;
+
+      const start = textNodes[0];
+      const end = textNodes[textNodes.length - 1];
+      const range = document.createRange();
+      range.setStart(start, 0);
+      range.setEnd(end, end.textContent.length);
+
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      contentEl.focus();
+      return true;
+    }
+
+    function setCaretAtEnd(contentEl) {
+      const range = document.createRange();
+      range.selectNodeContents(contentEl);
+      range.collapse(false);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      contentEl.focus();
+    }
+
+    function setCaretBeforeNode(contentEl, node) {
+      const parent = node?.parentNode;
+      if (!parent) return false;
+      const index = Array.from(parent.childNodes).indexOf(node);
+      if (index < 0) return false;
+
+      const range = document.createRange();
+      range.setStart(parent, index);
+      range.collapse(true);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      contentEl.focus();
+      return true;
+    }
+
+    function dispatchEditorKey(contentEl, key) {
+      contentEl.focus();
+      const event = new KeyboardEvent("keydown", {
+        key,
+        bubbles: true,
+        cancelable: true,
+      });
+      document.dispatchEvent(event);
+    }
+
+    function setCaretInsideText(contentEl, textSnippet, offset = 1) {
+      const textNodes = getTextNodes(contentEl);
+      const targetNode = textNodes.find((node) =>
+        (node.textContent || "").toLowerCase().includes(textSnippet.toLowerCase()),
+      );
+      if (!targetNode) return false;
+
+      const text = targetNode.textContent || "";
+      const idx = text.toLowerCase().indexOf(textSnippet.toLowerCase());
+      const start = Math.max(0, idx >= 0 ? idx : 0);
+      const pos = Math.min(text.length, start + Math.max(0, offset));
+
+      const range = document.createRange();
+      range.setStart(targetNode, pos);
+      range.collapse(true);
+
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      contentEl.focus();
+      return true;
+    }
+
+    function findButton(editorEl, command) {
+      return editorEl.querySelector(`.editora-toolbar-button[data-command="${command}"]`);
+    }
+
+    async function clickButton(editorEl, command) {
+      const btn = findButton(editorEl, command);
+      if (!btn) throw new Error(`Button not found: ${command}`);
+      btn.click();
+      await wait(60);
+    }
+
+    async function applyBackgroundColor(editorEl, color) {
+      await clickButton(editorEl, "openBackgroundColorPicker");
+      const swatch = document.querySelector(`.rte-bg-color-picker .rte-bg-color-swatch[data-color="${color.toLowerCase()}"]`);
+      if (!swatch) throw new Error(`Background swatch not found: ${color}`);
+      swatch.click();
+      await wait(80);
+    }
+
+    async function applyTextColor(editorEl, color) {
+      await clickButton(editorEl, "openTextColorPicker");
+      const swatch = document.querySelector(`.rte-inline-color-picker .rte-color-swatch[data-color="${color.toLowerCase()}"]`);
+      if (!swatch) throw new Error(`Text swatch not found: ${color}`);
+      swatch.click();
+      await wait(80);
+    }
+
+    async function applyHeading(editorEl, value) {
+      const trigger = Array.from(editorEl.querySelectorAll(".editora-toolbar-dropdown-trigger"))
+        .find((el) => (el.textContent || "").toLowerCase().includes("heading"));
+      if (!trigger) throw new Error("Heading dropdown trigger not found");
+      trigger.click();
+      await wait(60);
+      const item = editorEl.querySelector(`.editora-toolbar-dropdown-item[data-value="${value}"]`);
+      if (!item) throw new Error(`Heading option not found: ${value}`);
+      item.click();
+      await wait(80);
+    }
+
+    async function applyFontFamily(editorEl, family) {
+      const trigger = editorEl.querySelector('.editora-toolbar-inline-menu > .editora-toolbar-button[title="Font Family"]');
+      if (!trigger) throw new Error("Font Family trigger not found");
+      trigger.click();
+      await wait(60);
+      const item = editorEl.querySelector(`.editora-toolbar-dropdown-item[data-value="${family}"]`);
+      if (!item) throw new Error(`Font Family option not found: ${family}`);
+      item.click();
+      await wait(80);
+    }
+
+    async function increaseFontSize(editorEl, times) {
+      for (let i = 0; i < times; i += 1) {
+        await clickButton(editorEl, "increaseFontSize");
+      }
+    }
+
+    async function applyLineHeight(editorEl, value) {
+      const trigger = editorEl.querySelector('.editora-toolbar-inline-menu > .editora-toolbar-button[title="Line Height"]');
+      if (!trigger) throw new Error("Line Height trigger not found");
+      trigger.click();
+      await wait(60);
+      const item = editorEl.querySelector(`.editora-toolbar-dropdown-item[data-value="${value}"]`);
+      if (!item) throw new Error(`Line Height option not found: ${value}`);
+      item.click();
+      await wait(80);
+    }
+
+    async function applyTextAlignment(editorEl, value) {
+      const trigger = editorEl.querySelector('.editora-toolbar-inline-menu > .editora-toolbar-button[title="Text Alignment"]');
+      if (!trigger) throw new Error("Text Alignment trigger not found");
+      trigger.click();
+      await wait(60);
+      const item = editorEl.querySelector(`.editora-toolbar-dropdown-item[data-value="${value}"]`);
+      if (!item) throw new Error(`Text Alignment option not found: ${value}`);
+      item.click();
+      await wait(80);
+    }
+
+    async function insertFirstMergeTag(editorEl, useKeyboard = false) {
+      await clickButton(editorEl, "insertMergeTag");
+      await wait(80);
+
+      const overlay = document.querySelector(".rte-merge-tag-overlay");
+      if (!overlay) throw new Error("Merge tag dialog did not open");
+
+      if (useKeyboard) {
+        const searchInput = overlay.querySelector(".rte-merge-tag-input");
+        if (!(searchInput instanceof HTMLInputElement)) {
+          throw new Error("Merge tag search input not found");
+        }
+        searchInput.focus();
+        searchInput.dispatchEvent(
+          new KeyboardEvent("keydown", {
+            key: "Enter",
+            bubbles: true,
+            cancelable: true,
+          }),
+        );
+      } else {
+        const firstItem = overlay.querySelector(".rte-merge-tag-item[data-index='0']");
+        if (!(firstItem instanceof HTMLElement)) {
+          throw new Error("Merge tag item not found");
+        }
+        firstItem.click();
+        await wait(20);
+        const insertBtn = overlay.querySelector(".rte-merge-tag-btn-primary");
+        if (!(insertBtn instanceof HTMLButtonElement)) {
+          throw new Error("Merge tag insert button not found");
+        }
+        insertBtn.click();
+      }
+
+      await wait(100);
+    }
+
+    function getTextBlocks(contentEl) {
+      const candidates = Array.from(
+        contentEl.querySelectorAll("p,h1,h2,h3,h4,h5,h6,li,blockquote,pre"),
+      );
+      return candidates.filter((el) => (el.textContent || "").trim().length > 0);
+    }
+
+    function validateBlockPlugins(contentEl) {
+      const blocks = getTextBlocks(contentEl);
+      if (blocks.length === 0) {
+        return {
+          blockCount: 0,
+          lineHeightFailures: 1,
+          alignmentFailures: 1,
+          rtlFailures: 1,
+          ltrFailures: 1,
+          indentFailures: 1,
+          outdentFailures: 1,
+        };
+      }
+
+      const lineHeightFailures = blocks.filter(
+        (el) => !(el.style.lineHeight === "2.0" || el.style.lineHeight === "2"),
+      ).length;
+
+      const alignmentFailures = blocks.filter(
+        (el) => (el.style.textAlign || "").trim().toLowerCase() !== "center",
+      ).length;
+
+      const rtlFailures = blocks.filter((el) => el.getAttribute("dir") !== "rtl").length;
+      const indentFailures = blocks.filter((el) => {
+        const value = parseFloat(el.style.paddingLeft || "0");
+        return Number.isNaN(value) || value < 40;
+      }).length;
+
+      return {
+        blockCount: blocks.length,
+        lineHeightFailures,
+        alignmentFailures,
+        rtlFailures,
+        indentFailures,
+      };
+    }
+
+    function validateBlockPluginsAfterLtrOutdent(contentEl) {
+      const blocks = getTextBlocks(contentEl);
+      if (blocks.length === 0) {
+        return {
+          blockCount: 0,
+          lineHeightResetFailures: 1,
+          alignmentResetFailures: 1,
+          ltrFailures: 1,
+          outdentFailures: 1,
+        };
+      }
+
+      const lineHeightResetFailures = blocks.filter((el) => {
+        const value = (el.style.lineHeight || "").trim();
+        return value === "2.0" || value === "2";
+      }).length;
+
+      const alignmentResetFailures = blocks.filter((el) => {
+        const value = (el.style.textAlign || "").trim().toLowerCase();
+        return value === "center" || value === "right" || value === "justify";
+      }).length;
+
+      const ltrFailures = blocks.filter((el) => el.hasAttribute("dir")).length;
+      const outdentFailures = blocks.filter((el) => {
+        const value = parseFloat(el.style.paddingLeft || "0");
+        return Number.isNaN(value) || value > 0;
+      }).length;
+
+      return {
+        blockCount: blocks.length,
+        lineHeightResetFailures,
+        alignmentResetFailures,
+        ltrFailures,
+        outdentFailures,
+      };
+    }
+
+    function collectDomIssues(contentEl) {
+      const blockInSpan = contentEl.querySelectorAll(
+        "span > p, span > ul, span > ol, span > li, span > h1, span > h2, span > h3, span > h4, span > h5, span > h6, span > blockquote, span > pre, span > table",
+      );
+
+      const spanInsideLists = contentEl.querySelectorAll("ul > span, ol > span");
+
+      const emptyStyledSpans = Array.from(
+        contentEl.querySelectorAll("span[style*='color'], span[style*='background-color'], span[style*='font-size'], span[style*='font-family']"),
+      ).filter((span) => {
+        const hasText = (span.textContent || "").trim().length > 0;
+        const hasElements = span.childElementCount > 0;
+        return !hasText && !hasElements;
+      });
+
+      return {
+        blockInSpan: blockInSpan.length,
+        spanInsideLists: spanInsideLists.length,
+        emptyStyledSpans: emptyStyledSpans.length,
+      };
+    }
+
+    function collectFontSizeKeywordIssues(contentEl) {
+      const keywordSet = new Set([
+        "xx-small",
+        "x-small",
+        "small",
+        "medium",
+        "large",
+        "x-large",
+        "xx-large",
+        "xxx-large",
+        "smaller",
+        "larger",
+      ]);
+
+      const candidates = Array.from(contentEl.querySelectorAll("[style*='font-size']"));
+      const keywordNodes = candidates.filter((el) => {
+        if (!(el instanceof HTMLElement)) return false;
+        const value = (el.style.fontSize || "").trim().toLowerCase();
+        return keywordSet.has(value);
+      });
+
+      return {
+        keywordFontSizeCount: keywordNodes.length,
+      };
+    }
+
+    function validateListState(contentEl) {
+      const lists = Array.from(contentEl.querySelectorAll("ul:not([data-type='checklist']), ol"));
+      const directLiViolations = lists.reduce((count, list) => {
+        const invalidChildren = Array.from(list.childNodes).filter((child) => {
+          if (child.nodeType === Node.TEXT_NODE) {
+            return (child.textContent || "").trim().length > 0;
+          }
+          return !(child instanceof HTMLElement && child.tagName === "LI");
+        });
+        return count + invalidChildren.length;
+      }, 0);
+
+      const emptyListItems = lists.reduce((count, list) => {
+        const items = Array.from(list.children).filter((el) => el instanceof HTMLLIElement);
+        return count + items.filter((item) => ((item.textContent || "").trim().length === 0)).length;
+      }, 0);
+
+      return {
+        listCount: lists.length,
+        directLiViolations,
+        emptyListItems,
+      };
+    }
+
+    function validateChecklistState(contentEl) {
+      const checklist = contentEl.querySelector("ul[data-type='checklist']");
+      if (!checklist) {
+        return {
+          exists: false,
+          itemCount: 0,
+          invalidItemCount: 1,
+          nestedChecklistCount: 0,
+        };
+      }
+
+      const directItems = Array.from(checklist.children).filter((el) => el instanceof HTMLLIElement);
+      const invalidItemCount = directItems.filter((item) => {
+        if (!(item instanceof HTMLLIElement)) return true;
+        if (item.getAttribute("data-type") !== "checklist-item") return true;
+        if (!item.hasAttribute("data-checked")) return true;
+        const firstElement = item.firstElementChild;
+        return !(firstElement instanceof HTMLParagraphElement);
+      }).length;
+
+      const nestedChecklistCount = checklist.querySelectorAll("ul[data-type='checklist']").length;
+
+      return {
+        exists: true,
+        itemCount: directItems.length,
+        invalidItemCount,
+        nestedChecklistCount,
+      };
+    }
+
+    function validateChecklistToggleBack(contentEl) {
+      const checklistCount = contentEl.querySelectorAll("ul[data-type='checklist']").length;
+      const remainingLists = contentEl.querySelectorAll("ul, ol").length;
+      const paragraphs = contentEl.querySelectorAll("p");
+
+      return {
+        checklistCount,
+        remainingLists,
+        paragraphCount: paragraphs.length,
+      };
+    }
+
+    function validateChecklistDivLines(contentEl) {
+      const checklist = contentEl.querySelector("ul[data-type='checklist']");
+      if (!checklist) {
+        return {
+          exists: false,
+          itemCount: 0,
+          invalidItemCount: 1,
+        };
+      }
+
+      const directItems = Array.from(checklist.children).filter((el) => el instanceof HTMLLIElement);
+      const invalidItemCount = directItems.filter((item) => {
+        if (!(item instanceof HTMLLIElement)) return true;
+        if (item.getAttribute("data-type") !== "checklist-item") return true;
+        if (!item.hasAttribute("data-checked")) return true;
+        const firstElement = item.firstElementChild;
+        return !(firstElement instanceof HTMLParagraphElement);
+      }).length;
+
+      return {
+        exists: true,
+        itemCount: directItems.length,
+        invalidItemCount,
+      };
+    }
+
+    function validateClearFormatting(contentEl) {
+      const formattingTags = contentEl.querySelectorAll(
+        "a,b,strong,i,em,u,s,strike,del,font,mark,code,sub,sup",
+      );
+      const blockFormattingTags = contentEl.querySelectorAll("h1,h2,h3,h4,h5,h6,blockquote,pre");
+      const formatClasses = contentEl.querySelectorAll(".rte-text-color, .rte-bg-color");
+
+      const styleNodes = Array.from(contentEl.querySelectorAll("[style]"));
+      const styleFormattingNodes = styleNodes.filter((node) => {
+        if (!(node instanceof HTMLElement)) return false;
+        const style = node.style;
+        return !!(
+          style.color ||
+          style.backgroundColor ||
+          style.fontSize ||
+          style.fontFamily ||
+          style.fontWeight ||
+          style.fontStyle ||
+          style.textDecoration ||
+          style.textTransform ||
+          style.lineHeight ||
+          style.textAlign ||
+          style.paddingLeft
+        );
+      });
+
+      const text = (contentEl.textContent || "").toLowerCase();
+      const preservedTextCount = [
+        "clear one",
+        "clear two",
+        "clear three",
+      ].filter((sample) => text.includes(sample)).length;
+
+      return {
+        formattingTagCount: formattingTags.length,
+        blockFormattingTagCount: blockFormattingTags.length,
+        formatClassCount: formatClasses.length,
+        styleFormattingNodeCount: styleFormattingNodes.length,
+        preservedTextCount,
+      };
+    }
+
+    function validateMergeTagState(contentEl) {
+      const mergeTags = Array.from(contentEl.querySelectorAll(".rte-merge-tag"));
+      const invalidTagCount = mergeTags.filter((tag) => {
+        if (!(tag instanceof HTMLElement)) return true;
+        if (tag.getAttribute("contenteditable") !== "false") return true;
+        if (!tag.getAttribute("data-key")) return true;
+        if (!tag.getAttribute("data-category")) return true;
+        if (!tag.getAttribute("data-label")) return true;
+        if (tag.hasAttribute("style")) return true;
+        if (tag.querySelector(".rte-merge-tag")) return true;
+        return false;
+      }).length;
+
+      const openDialogCount = document.querySelectorAll(".rte-merge-tag-overlay").length;
+
+      return {
+        tagCount: mergeTags.length,
+        invalidTagCount,
+        openDialogCount,
+      };
+    }
+
+    function validateMergeTagSelection(tag) {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) {
+        return { selected: false };
+      }
+
+      const range = selection.getRangeAt(0);
+      const parent = tag?.parentNode;
+      if (!parent) {
+        return { selected: false };
+      }
+
+      const index = Array.from(parent.childNodes).indexOf(tag);
+      if (index < 0) {
+        return { selected: false };
+      }
+
+      return {
+        selected:
+          range.startContainer === parent &&
+          range.endContainer === parent &&
+          range.startOffset === index &&
+          range.endOffset === index + 1 &&
+          range.collapsed === false,
+      };
+    }
+
+    function createPageBreakHtml() {
+      return '<div class="rte-page-break" data-page-break="true" data-type="page-break" contenteditable="false" tabindex="0" role="separator" aria-label="Page break"></div>';
+    }
+
+    function validatePageBreakState(contentEl) {
+      const pageBreaks = Array.from(contentEl.querySelectorAll(".rte-page-break[data-type='page-break']"));
+      const invalidCount = pageBreaks.filter((pb) => {
+        if (!(pb instanceof HTMLElement)) return true;
+        if (pb.getAttribute("data-page-break") !== "true") return true;
+        if (pb.getAttribute("contenteditable") !== "false") return true;
+        if (pb.getAttribute("role") !== "separator") return true;
+        if (pb.getAttribute("aria-label") !== "Page break") return true;
+        return false;
+      }).length;
+
+      const adjacentPairs = pageBreaks.filter((pb) => pb.nextElementSibling?.matches?.(".rte-page-break")).length;
+
+      return {
+        count: pageBreaks.length,
+        invalidCount,
+        adjacentPairs,
+      };
+    }
+
+    function validatePageBreakSelection(pb) {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return { selected: false };
+      const range = selection.getRangeAt(0);
+
+      const parent = pb?.parentNode;
+      if (!parent) return { selected: false };
+      const index = Array.from(parent.childNodes).indexOf(pb);
+      if (index < 0) return { selected: false };
+
+      return {
+        selected:
+          range.startContainer === parent &&
+          range.endContainer === parent &&
+          range.startOffset === index &&
+          range.endOffset === index + 1 &&
+          range.collapsed === false,
+      };
+    }
+
+    function validateFootnoteState(contentEl) {
+      const refs = Array.from(contentEl.querySelectorAll(".rte-footnote-ref[data-footnote-id]"))
+        .filter((ref) => !ref.closest(".rte-footnotes"));
+      const container = contentEl.querySelector(".rte-footnotes[data-type='footnotes']");
+      const items = container
+        ? Array.from(container.querySelectorAll("li.rte-footnote-item[data-type='footnote']"))
+        : [];
+
+      const refIds = refs.map((ref) => ref.getAttribute("data-footnote-id") || "");
+      const itemIds = items.map((item) => item.id || "");
+      const refIdSet = new Set(refIds);
+      const itemIdSet = new Set(itemIds);
+
+      const invalidRefCount = refs.filter((ref, index) => {
+        if (!(ref instanceof HTMLElement)) return true;
+        const id = ref.getAttribute("data-footnote-id");
+        if (!id) return true;
+        const number = Number.parseInt(ref.getAttribute("data-number") || "", 10);
+        if (!Number.isInteger(number)) return true;
+        if (ref.getAttribute("contenteditable") !== "false") return true;
+        if (ref.textContent !== String(number)) return true;
+        if (number !== index + 1) return true;
+        return false;
+      }).length;
+
+      const invalidItemCount = items.filter((item, index) => {
+        if (!(item instanceof HTMLElement)) return true;
+        const id = item.id;
+        if (!id) return true;
+        const number = Number.parseInt(item.getAttribute("data-number") || "", 10);
+        if (!Number.isInteger(number)) return true;
+        if (number !== index + 1) return true;
+        const content = item.querySelector(".rte-footnote-content");
+        if (!(content instanceof HTMLElement) || content.getAttribute("contenteditable") !== "true") {
+          return true;
+        }
+        const backRef = item.querySelector(".rte-footnote-backref");
+        if (!(backRef instanceof HTMLAnchorElement)) return true;
+        return backRef.getAttribute("href") !== `#ref-${id}`;
+      }).length;
+
+      const orphanRefs = refs.filter((ref) => {
+        const id = ref.getAttribute("data-footnote-id") || "";
+        return !itemIdSet.has(id);
+      }).length;
+
+      const orphanItems = items.filter((item) => !refIdSet.has(item.id || "")).length;
+
+      const sequential =
+        refs.every((ref, index) => Number.parseInt(ref.getAttribute("data-number") || "", 10) === index + 1) &&
+        items.every((item, index) => Number.parseInt(item.getAttribute("data-number") || "", 10) === index + 1);
+
+      return {
+        refCount: refs.length,
+        itemCount: items.length,
+        invalidRefCount,
+        invalidItemCount,
+        orphanRefs,
+        orphanItems,
+        sequential,
+        containerPresent: !!container,
+      };
+    }
+
+    function validateFootnoteSelection(ref) {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return { selected: false };
+      const range = selection.getRangeAt(0);
+
+      const parent = ref?.parentNode;
+      if (!parent) return { selected: false };
+      const index = Array.from(parent.childNodes).indexOf(ref);
+      if (index < 0) return { selected: false };
+
+      return {
+        selected:
+          range.startContainer === parent &&
+          range.endContainer === parent &&
+          range.startOffset === index &&
+          range.endOffset === index + 1 &&
+          range.collapsed === false,
+      };
+    }
+
+    function execHistoryCommand(command, ...args) {
+      const fn = window.execEditorCommand || window.executeEditorCommand;
+      if (typeof fn !== "function") {
+        throw new Error(`History command bridge not available for: ${command}`);
+      }
+      return fn(command, ...args);
+    }
+
+    function insertTextAtCaret(contentEl, text) {
+      contentEl.focus();
+      try {
+        const executed = document.execCommand("insertText", false, text);
+        if (executed) return true;
+      } catch {
+        // Fallback below.
+      }
+
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return false;
+      const range = selection.getRangeAt(0);
+      if (!contentEl.contains(range.commonAncestorContainer)) return false;
+
+      range.deleteContents();
+      const textNode = document.createTextNode(text);
+      range.insertNode(textNode);
+      range.setStartAfter(textNode);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      contentEl.dispatchEvent(new Event("input", { bubbles: true }));
+      return false;
+    }
+
+    async function runRegression() {
+      outputEl.textContent = "";
+      setStatus("Running...", "");
+
+      const editorEl = document.getElementById("regressionEditor");
+      const contentEl = getEditable(editorEl);
+      if (!contentEl) throw new Error("Editor content element not found");
+
+      const selected = selectAllText(contentEl);
+      if (!selected) throw new Error("Unable to select editor text");
+
+      await applyBackgroundColor(editorEl, "#00FF00");
+
+      selectAllText(contentEl);
+      await applyTextColor(editorEl, "#FF0000");
+
+      selectAllText(contentEl);
+      await applyHeading(editorEl, "h1");
+
+      selectAllText(contentEl);
+      await applyFontFamily(editorEl, "Georgia, serif");
+
+      selectAllText(contentEl);
+      await increaseFontSize(editorEl, 12); // 14px -> 38px
+
+      await wait(120);
+
+      const inlineIssues = collectDomIssues(contentEl);
+      const fontSizeKeywordIssues = collectFontSizeKeywordIssues(contentEl);
+
+      contentEl.innerHTML = `
+        <p>block one line</p>
+        <p>block two line</p>
+        <p>block three line</p>
+      `;
+      contentEl.dispatchEvent(new Event("input", { bubbles: true }));
+      await wait(60);
+
+      selectAllText(contentEl);
+      await applyLineHeight(editorEl, "2.0");
+
+      selectAllText(contentEl);
+      await applyTextAlignment(editorEl, "center");
+
+      selectAllText(contentEl);
+      await clickButton(editorEl, "setDirectionRTL");
+
+      selectAllText(contentEl);
+      await clickButton(editorEl, "increaseIndent");
+
+      await wait(100);
+      const blockPhaseA = validateBlockPlugins(contentEl);
+
+      selectAllText(contentEl);
+      await clickButton(editorEl, "setDirectionLTR");
+
+      selectAllText(contentEl);
+      await applyTextAlignment(editorEl, "left");
+
+      selectAllText(contentEl);
+      await clickButton(editorEl, "decreaseIndent");
+
+      await wait(100);
+      const blockPhaseB = validateBlockPluginsAfterLtrOutdent(contentEl);
+
+      const blockHistoryBaselineHTML = contentEl.innerHTML;
+
+      selectAllText(contentEl);
+      await applyTextAlignment(editorEl, "center");
+      selectAllText(contentEl);
+      await applyLineHeight(editorEl, "2.0");
+      selectAllText(contentEl);
+      await clickButton(editorEl, "setDirectionRTL");
+      selectAllText(contentEl);
+      await clickButton(editorEl, "increaseIndent");
+      await wait(100);
+
+      const blockHistoryPhaseA = validateBlockPlugins(contentEl);
+      const blockHistoryAfterApplyHTML = contentEl.innerHTML;
+
+      for (let i = 0; i < 4; i += 1) {
+        await clickButton(editorEl, "undo");
+      }
+      await wait(120);
+      const blockHistoryPhaseUndo = validateBlockPluginsAfterLtrOutdent(contentEl);
+      const blockHistoryAfterUndoHTML = contentEl.innerHTML;
+
+      for (let i = 0; i < 4; i += 1) {
+        await clickButton(editorEl, "redo");
+      }
+      await wait(120);
+      const blockHistoryPhaseRedo = validateBlockPlugins(contentEl);
+      const blockHistoryAfterRedoHTML = contentEl.innerHTML;
+
+      contentEl.innerHTML = `
+        <p>list one line</p>
+        <p>list two line</p>
+        <p>list three line</p>
+      `;
+      contentEl.dispatchEvent(new Event("input", { bubbles: true }));
+      await wait(60);
+
+      selectAllText(contentEl);
+      await clickButton(editorEl, "toggleBulletList");
+      await wait(80);
+      const listPhaseA = validateListState(contentEl);
+
+      selectAllText(contentEl);
+      await clickButton(editorEl, "toggleOrderedList");
+      await wait(80);
+      const listPhaseB = validateListState(contentEl);
+
+      selectAllText(contentEl);
+      await clickButton(editorEl, "toggleChecklist");
+      await wait(80);
+      const checklistPhaseA = validateChecklistState(contentEl);
+
+      selectAllText(contentEl);
+      await clickButton(editorEl, "toggleChecklist");
+      await wait(80);
+      const checklistPhaseB = validateChecklistToggleBack(contentEl);
+
+      contentEl.innerHTML = `
+        <div>check div line one</div>
+        <div>check div line two</div>
+        <div>check div line three</div>
+      `;
+      contentEl.dispatchEvent(new Event("input", { bubbles: true }));
+      await wait(60);
+
+      selectAllText(contentEl);
+      await clickButton(editorEl, "toggleChecklist");
+      await wait(80);
+      const checklistPhaseC = validateChecklistDivLines(contentEl);
+
+      contentEl.innerHTML = `
+        <h2><span style="color: rgb(255, 0, 0); background-color: rgb(0, 255, 0); font-size: 38px; font-family: Georgia, serif;"><strong><em><u><s>clear one</s></u></em></strong></span></h2>
+        <blockquote><span style="color: rgb(0, 0, 255); font-size: 28px;">clear two</span></blockquote>
+        <p><a href="https://example.com"><span style="background-color: rgb(255, 255, 0); font-size: 22px;">clear three</span></a></p>
+      `;
+      contentEl.dispatchEvent(new Event("input", { bubbles: true }));
+      await wait(60);
+
+      selectAllText(contentEl);
+      await clickButton(editorEl, "clearFormatting");
+      await wait(100);
+      const clearFormattingPhase = validateClearFormatting(contentEl);
+
+      contentEl.innerHTML = `
+        <p>merge line one</p>
+        <p>merge line two</p>
+      `;
+      contentEl.dispatchEvent(new Event("input", { bubbles: true }));
+      await wait(60);
+
+      setCaretAtEnd(contentEl);
+      await insertFirstMergeTag(editorEl);
+      const mergeTagPhaseA = validateMergeTagState(contentEl);
+
+      const mergeTagCountBeforeFallback = mergeTagPhaseA.tagCount;
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      contentEl.focus();
+
+      await insertFirstMergeTag(editorEl, true);
+      const mergeTagPhaseB = validateMergeTagState(contentEl);
+      const mergeTagFallbackInserted = mergeTagPhaseB.tagCount - mergeTagCountBeforeFallback;
+
+      const firstMergeTag = contentEl.querySelector(".rte-merge-tag");
+      if (!(firstMergeTag instanceof HTMLElement)) {
+        throw new Error("Expected merge tag for interaction test");
+      }
+      firstMergeTag.click();
+      await wait(40);
+      const mergeTagClickSelectionPhase = validateMergeTagSelection(firstMergeTag);
+
+      const mergeTagCountBeforeBackspace = contentEl.querySelectorAll(".rte-merge-tag").length;
+      dispatchEditorKey(contentEl, "Backspace");
+      await wait(60);
+      const mergeTagCountAfterBackspace = contentEl.querySelectorAll(".rte-merge-tag").length;
+
+      const deleteTarget = contentEl.querySelector(".rte-merge-tag");
+      if (!(deleteTarget instanceof HTMLElement)) {
+        throw new Error("Expected merge tag for delete interaction test");
+      }
+
+      const caretPlaced = setCaretBeforeNode(contentEl, deleteTarget);
+      if (!caretPlaced) {
+        throw new Error("Failed to place caret before merge tag");
+      }
+      await wait(30);
+
+      const mergeTagCountBeforeDelete = contentEl.querySelectorAll(".rte-merge-tag").length;
+      dispatchEditorKey(contentEl, "Delete");
+      await wait(60);
+      const mergeTagCountAfterDelete = contentEl.querySelectorAll(".rte-merge-tag").length;
+
+      contentEl.innerHTML = `
+        <p><strong>page break inline anchor</strong> and text</p>
+        <p>page break second block</p>
+      `;
+      contentEl.dispatchEvent(new Event("input", { bubbles: true }));
+      await wait(60);
+
+      const pageBreakCaretSet = setCaretInsideText(contentEl, "page break inline anchor", 3);
+      if (!pageBreakCaretSet) {
+        throw new Error("Failed to place caret for page break inline-context insertion");
+      }
+
+      await clickButton(editorEl, "insertPageBreak");
+      await wait(80);
+      const pageBreakPhaseA = validatePageBreakState(contentEl);
+
+      const insertedPageBreak = contentEl.querySelector(".rte-page-break");
+      if (!(insertedPageBreak instanceof HTMLElement)) {
+        throw new Error("Page break not inserted");
+      }
+      insertedPageBreak.click();
+      await wait(40);
+      const pageBreakSelectionPhase = validatePageBreakSelection(insertedPageBreak);
+
+      const pageBreakCountBeforeBackspace = contentEl.querySelectorAll(".rte-page-break").length;
+      dispatchEditorKey(contentEl, "Backspace");
+      await wait(60);
+      const pageBreakCountAfterBackspace = contentEl.querySelectorAll(".rte-page-break").length;
+
+      contentEl.innerHTML = `
+        <p>page collapse start</p>
+        ${createPageBreakHtml()}
+        ${createPageBreakHtml()}
+        <p>page collapse end</p>
+      `;
+      contentEl.dispatchEvent(new Event("input", { bubbles: true }));
+      await wait(60);
+
+      const pageBreakCollapseCaretSet = setCaretInsideText(contentEl, "page collapse start", 4);
+      if (!pageBreakCollapseCaretSet) {
+        throw new Error("Failed to place caret for page break collapse test");
+      }
+      await clickButton(editorEl, "insertPageBreak");
+      await wait(80);
+      const pageBreakPhaseB = validatePageBreakState(contentEl);
+
+      const pageBreakForDelete = contentEl.querySelector(".rte-page-break");
+      if (!(pageBreakForDelete instanceof HTMLElement)) {
+        throw new Error("Expected page break for delete edge-case test");
+      }
+
+      const pageBreakDeleteCaretSet = setCaretBeforeNode(contentEl, pageBreakForDelete);
+      if (!pageBreakDeleteCaretSet) {
+        throw new Error("Failed to place caret before page break for delete test");
+      }
+      await wait(30);
+
+      const pageBreakCountBeforeDelete = contentEl.querySelectorAll(".rte-page-break").length;
+      dispatchEditorKey(contentEl, "Delete");
+      await wait(60);
+      const pageBreakCountAfterDelete = contentEl.querySelectorAll(".rte-page-break").length;
+
+      contentEl.innerHTML = `
+        <p>footnote first line</p>
+        <p>footnote second line</p>
+      `;
+      contentEl.dispatchEvent(new Event("input", { bubbles: true }));
+      await wait(60);
+
+      const footnoteCaretA = setCaretInsideText(contentEl, "footnote first line", 3);
+      if (!footnoteCaretA) {
+        throw new Error("Failed to place caret for footnote insertion A");
+      }
+      await clickButton(editorEl, "insertFootnote");
+      await wait(80);
+
+      const footnoteCaretB = setCaretInsideText(contentEl, "footnote second line", 4);
+      if (!footnoteCaretB) {
+        throw new Error("Failed to place caret for footnote insertion B");
+      }
+      await clickButton(editorEl, "insertFootnote");
+      await wait(80);
+
+      const footnotePhaseA = validateFootnoteState(contentEl);
+
+      const firstFootnoteRef = contentEl.querySelector(".rte-footnote-ref[data-footnote-id]");
+      if (!(firstFootnoteRef instanceof HTMLElement)) {
+        throw new Error("Expected footnote reference for selection test");
+      }
+
+      firstFootnoteRef.click();
+      await wait(50);
+      const footnoteSelectionPhase = validateFootnoteSelection(firstFootnoteRef);
+
+      const footnoteCountBeforeBackspace = contentEl.querySelectorAll(".rte-footnote-ref[data-footnote-id]").length;
+      dispatchEditorKey(contentEl, "Backspace");
+      await wait(70);
+      const footnoteCountAfterBackspace = contentEl.querySelectorAll(".rte-footnote-ref[data-footnote-id]").length;
+      const footnotePhaseB = validateFootnoteState(contentEl);
+
+      const remainingFootnoteRef = contentEl.querySelector(".rte-footnote-ref[data-footnote-id]");
+      if (!(remainingFootnoteRef instanceof HTMLElement)) {
+        throw new Error("Expected remaining footnote reference for delete test");
+      }
+      const footnoteDeleteCaret = setCaretBeforeNode(contentEl, remainingFootnoteRef);
+      if (!footnoteDeleteCaret) {
+        throw new Error("Failed to place caret before remaining footnote reference");
+      }
+
+      const footnoteCountBeforeDelete = contentEl.querySelectorAll(".rte-footnote-ref[data-footnote-id]").length;
+      dispatchEditorKey(contentEl, "Delete");
+      await wait(70);
+      const footnoteCountAfterDelete = contentEl.querySelectorAll(".rte-footnote-ref[data-footnote-id]").length;
+      const footnotePhaseC = validateFootnoteState(contentEl);
+
+      contentEl.innerHTML = `
+        <p id="history-target">history baseline text</p>
+        <p>history native baseline</p>
+      `;
+      contentEl.dispatchEvent(new Event("input", { bubbles: true }));
+      await wait(60);
+
+      const historyTarget = contentEl.querySelector("#history-target");
+      if (!(historyTarget instanceof HTMLElement)) {
+        throw new Error("History target paragraph not found");
+      }
+
+      const historyTextBefore = historyTarget.textContent || "";
+      execHistoryCommand("setText", historyTarget, "history changed text");
+      await wait(40);
+      const historyTextAfterSet = historyTarget.textContent || "";
+
+      execHistoryCommand("undoDom");
+      await wait(40);
+      const historyTextAfterUndo = historyTarget.textContent || "";
+
+      execHistoryCommand("redoDom");
+      await wait(40);
+      const historyTextAfterRedo = historyTarget.textContent || "";
+
+      execHistoryCommand("setAttribute", historyTarget, "data-history-flag", "v1");
+      await wait(30);
+      const historyAttrAfterSet = historyTarget.getAttribute("data-history-flag");
+
+      execHistoryCommand("undoDom");
+      await wait(30);
+      const historyAttrAfterUndo = historyTarget.getAttribute("data-history-flag");
+
+      execHistoryCommand("redoDom");
+      await wait(30);
+      const historyAttrAfterRedo = historyTarget.getAttribute("data-history-flag");
+
+      setCaretAtEnd(contentEl);
+      const nativeInsertAppliedByExecCommand = insertTextAtCaret(contentEl, " [native-history]");
+      await wait(40);
+      const nativeTextAfterInsert = contentEl.textContent || "";
+
+      await clickButton(editorEl, "undo");
+      await wait(70);
+      const nativeTextAfterUndo = contentEl.textContent || "";
+
+      await clickButton(editorEl, "redo");
+      await wait(70);
+      const nativeTextAfterRedo = contentEl.textContent || "";
+
+      const html = contentEl.innerHTML;
+
+      const pass =
+        inlineIssues.blockInSpan === 0 &&
+        inlineIssues.spanInsideLists === 0 &&
+        inlineIssues.emptyStyledSpans === 0 &&
+        fontSizeKeywordIssues.keywordFontSizeCount === 0 &&
+        blockPhaseA.lineHeightFailures === 0 &&
+        blockPhaseA.alignmentFailures === 0 &&
+        blockPhaseA.rtlFailures === 0 &&
+        blockPhaseA.indentFailures === 0 &&
+        blockPhaseB.lineHeightResetFailures === 0 &&
+        blockPhaseB.alignmentResetFailures === 0 &&
+        blockPhaseB.ltrFailures === 0 &&
+        blockPhaseB.outdentFailures === 0 &&
+        blockHistoryPhaseA.lineHeightFailures === 0 &&
+        blockHistoryPhaseA.alignmentFailures === 0 &&
+        blockHistoryPhaseA.rtlFailures === 0 &&
+        blockHistoryPhaseA.indentFailures === 0 &&
+        blockHistoryPhaseUndo.lineHeightResetFailures === 0 &&
+        blockHistoryPhaseUndo.alignmentResetFailures === 0 &&
+        blockHistoryPhaseUndo.ltrFailures === 0 &&
+        blockHistoryPhaseUndo.outdentFailures === 0 &&
+        blockHistoryPhaseRedo.lineHeightFailures === 0 &&
+        blockHistoryPhaseRedo.alignmentFailures === 0 &&
+        blockHistoryPhaseRedo.rtlFailures === 0 &&
+        blockHistoryPhaseRedo.indentFailures === 0 &&
+        blockHistoryAfterUndoHTML === blockHistoryBaselineHTML &&
+        blockHistoryAfterRedoHTML === blockHistoryAfterApplyHTML &&
+        listPhaseA.listCount > 0 &&
+        listPhaseA.directLiViolations === 0 &&
+        listPhaseA.emptyListItems === 0 &&
+        listPhaseB.listCount > 0 &&
+        listPhaseB.directLiViolations === 0 &&
+        checklistPhaseA.exists === true &&
+        checklistPhaseA.itemCount >= 3 &&
+        checklistPhaseA.invalidItemCount === 0 &&
+        checklistPhaseA.nestedChecklistCount === 0 &&
+        checklistPhaseB.checklistCount === 0 &&
+        checklistPhaseB.remainingLists === 0 &&
+        checklistPhaseB.paragraphCount >= 3 &&
+        checklistPhaseC.exists === true &&
+        checklistPhaseC.itemCount >= 3 &&
+        checklistPhaseC.invalidItemCount === 0 &&
+        clearFormattingPhase.formattingTagCount === 0 &&
+        clearFormattingPhase.blockFormattingTagCount === 0 &&
+        clearFormattingPhase.formatClassCount === 0 &&
+        clearFormattingPhase.styleFormattingNodeCount === 0 &&
+        clearFormattingPhase.preservedTextCount === 3 &&
+        mergeTagPhaseA.tagCount >= 1 &&
+        mergeTagPhaseA.invalidTagCount === 0 &&
+        mergeTagPhaseA.openDialogCount === 0 &&
+        mergeTagPhaseB.tagCount >= 2 &&
+        mergeTagPhaseB.invalidTagCount === 0 &&
+        mergeTagPhaseB.openDialogCount === 0 &&
+        mergeTagFallbackInserted >= 1 &&
+        mergeTagClickSelectionPhase.selected === true &&
+        mergeTagCountAfterBackspace === mergeTagCountBeforeBackspace - 1 &&
+        mergeTagCountAfterDelete === mergeTagCountBeforeDelete - 1 &&
+        pageBreakPhaseA.count >= 1 &&
+        pageBreakPhaseA.invalidCount === 0 &&
+        pageBreakSelectionPhase.selected === true &&
+        pageBreakCountAfterBackspace === pageBreakCountBeforeBackspace - 1 &&
+        pageBreakPhaseB.count === 1 &&
+        pageBreakPhaseB.invalidCount === 0 &&
+        pageBreakPhaseB.adjacentPairs === 0 &&
+        pageBreakCountAfterDelete === pageBreakCountBeforeDelete - 1 &&
+        footnotePhaseA.refCount === 2 &&
+        footnotePhaseA.itemCount === 2 &&
+        footnotePhaseA.invalidRefCount === 0 &&
+        footnotePhaseA.invalidItemCount === 0 &&
+        footnotePhaseA.orphanRefs === 0 &&
+        footnotePhaseA.orphanItems === 0 &&
+        footnotePhaseA.sequential === true &&
+        footnoteSelectionPhase.selected === true &&
+        footnoteCountAfterBackspace === footnoteCountBeforeBackspace - 1 &&
+        footnotePhaseB.refCount === 1 &&
+        footnotePhaseB.itemCount === 1 &&
+        footnotePhaseB.sequential === true &&
+        footnoteCountAfterDelete === footnoteCountBeforeDelete - 1 &&
+        footnotePhaseC.refCount === 0 &&
+        footnotePhaseC.itemCount === 0 &&
+        footnotePhaseC.containerPresent === false &&
+        historyTextBefore === "history baseline text" &&
+        historyTextAfterSet === "history changed text" &&
+        historyTextAfterUndo === "history baseline text" &&
+        historyTextAfterRedo === "history changed text" &&
+        historyAttrAfterSet === "v1" &&
+        historyAttrAfterUndo === null &&
+        historyAttrAfterRedo === "v1" &&
+        (
+          nativeInsertAppliedByExecCommand === false ||
+          (
+            nativeTextAfterInsert.includes("[native-history]") &&
+            !nativeTextAfterUndo.includes("[native-history]") &&
+            nativeTextAfterRedo.includes("[native-history]")
+          )
+        );
+
+      log(`Inline Issues: ${JSON.stringify(inlineIssues, null, 2)}`);
+      log(`\nFont Size Keyword Issues: ${JSON.stringify(fontSizeKeywordIssues, null, 2)}`);
+      log(`\nBlock Phase A: ${JSON.stringify(blockPhaseA, null, 2)}`);
+      log(`\nBlock Phase B: ${JSON.stringify(blockPhaseB, null, 2)}`);
+      log(`\nBlock History Baseline HTML: ${blockHistoryBaselineHTML}`);
+      log(`\nBlock History Phase A: ${JSON.stringify(blockHistoryPhaseA, null, 2)}`);
+      log(`\nBlock History Undo Phase: ${JSON.stringify(blockHistoryPhaseUndo, null, 2)}`);
+      log(`\nBlock History Redo Phase: ${JSON.stringify(blockHistoryPhaseRedo, null, 2)}`);
+      log(`\nBlock History HTML Baseline===Undo: ${blockHistoryAfterUndoHTML === blockHistoryBaselineHTML}`);
+      log(`Block History HTML Apply===Redo: ${blockHistoryAfterRedoHTML === blockHistoryAfterApplyHTML}`);
+      log(`\nList Phase A: ${JSON.stringify(listPhaseA, null, 2)}`);
+      log(`\nList Phase B: ${JSON.stringify(listPhaseB, null, 2)}`);
+      log(`\nChecklist Phase A: ${JSON.stringify(checklistPhaseA, null, 2)}`);
+      log(`\nChecklist Phase B: ${JSON.stringify(checklistPhaseB, null, 2)}`);
+      log(`\nChecklist Phase C: ${JSON.stringify(checklistPhaseC, null, 2)}`);
+      log(`\nClear Formatting Phase: ${JSON.stringify(clearFormattingPhase, null, 2)}`);
+      log(`\nMerge Tag Phase A: ${JSON.stringify(mergeTagPhaseA, null, 2)}`);
+      log(`\nMerge Tag Phase B: ${JSON.stringify(mergeTagPhaseB, null, 2)}`);
+      log(`\nMerge Tag Fallback Inserted: ${mergeTagFallbackInserted}`);
+      log(`\nMerge Tag Click Selection Phase: ${JSON.stringify(mergeTagClickSelectionPhase, null, 2)}`);
+      log(`\nMerge Tag Backspace Delta: ${mergeTagCountBeforeBackspace} -> ${mergeTagCountAfterBackspace}`);
+      log(`\nMerge Tag Delete Delta: ${mergeTagCountBeforeDelete} -> ${mergeTagCountAfterDelete}`);
+      log(`\nPage Break Phase A: ${JSON.stringify(pageBreakPhaseA, null, 2)}`);
+      log(`\nPage Break Selection Phase: ${JSON.stringify(pageBreakSelectionPhase, null, 2)}`);
+      log(`\nPage Break Backspace Delta: ${pageBreakCountBeforeBackspace} -> ${pageBreakCountAfterBackspace}`);
+      log(`\nPage Break Phase B (Collapse): ${JSON.stringify(pageBreakPhaseB, null, 2)}`);
+      log(`\nPage Break Delete Delta: ${pageBreakCountBeforeDelete} -> ${pageBreakCountAfterDelete}`);
+      log(`\nFootnote Phase A: ${JSON.stringify(footnotePhaseA, null, 2)}`);
+      log(`\nFootnote Selection Phase: ${JSON.stringify(footnoteSelectionPhase, null, 2)}`);
+      log(`\nFootnote Backspace Delta: ${footnoteCountBeforeBackspace} -> ${footnoteCountAfterBackspace}`);
+      log(`\nFootnote Phase B: ${JSON.stringify(footnotePhaseB, null, 2)}`);
+      log(`\nFootnote Delete Delta: ${footnoteCountBeforeDelete} -> ${footnoteCountAfterDelete}`);
+      log(`\nFootnote Phase C: ${JSON.stringify(footnotePhaseC, null, 2)}`);
+      log(`\nHistory Text Before: ${historyTextBefore}`);
+      log(`History Text After Set: ${historyTextAfterSet}`);
+      log(`History Text After Undo: ${historyTextAfterUndo}`);
+      log(`History Text After Redo: ${historyTextAfterRedo}`);
+      log(`History Attr set/undo/redo: ${historyAttrAfterSet} / ${historyAttrAfterUndo} / ${historyAttrAfterRedo}`);
+      log(`History Native insert used execCommand: ${nativeInsertAppliedByExecCommand}`);
+      log(`History Native text after insert: ${nativeTextAfterInsert}`);
+      log(`History Native text after undo: ${nativeTextAfterUndo}`);
+      log(`History Native text after redo: ${nativeTextAfterRedo}`);
+      log("\nFinal HTML:\n");
+      log(html);
+
+      if (pass) {
+        setStatus("PASS", "pass");
+      } else {
+        setStatus("FAIL", "fail");
+      }
+    }
+
+    runBtn.addEventListener("click", async () => {
+      try {
+        await runRegression();
+      } catch (error) {
+        setStatus("FAIL", "fail");
+        outputEl.textContent = `Regression run failed:\n${String(error)}`;
+      }
+    });
+
+    (async () => {
+      setStatus("Loading...", "");
+      try {
+        const source = await loadBundle();
+        await customElements.whenDefined("editora-editor");
+        outputEl.textContent = `Bundle source: ${source}\n`;
+        if (window.location.protocol === "file:") {
+          outputEl.textContent += "Tip: For stable module behavior, prefer opening this page over http://localhost.\n";
+        }
+        setStatus("Ready", "");
+      } catch (error) {
+        setStatus("FAIL", "fail");
+        outputEl.textContent = `Failed to load editor bundle:\n${String(error)}`;
+      }
+    })();
+  </script>
+</body>
+</html>

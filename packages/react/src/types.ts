@@ -167,7 +167,7 @@ export interface RichTextEditorProps {
   };
 
   // Legacy/compatibility - keep current prop support
-  floatingToolbar?: {
+  floatingToolbar?: boolean | {
     enabled?: boolean;
   };
   mediaConfig?: {

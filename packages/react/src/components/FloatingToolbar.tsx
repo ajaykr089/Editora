@@ -12,9 +12,10 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
+  const hostRef = useRef<HTMLSpanElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const selectionRef = useRef<Range | null>(null);
-  const showTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const showTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const editorContainerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -23,8 +24,35 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
       return;
     }
 
-    // Find the parent editor container for this floating toolbar
-    editorContainerRef.current = toolbarRef.current?.closest('[data-editora-editor]') as HTMLElement;
+    // Resolve parent editor container from persistent host node.
+    editorContainerRef.current = hostRef.current?.closest('[data-editora-editor]') as HTMLElement;
+
+    const resolveEditorContainer = (range?: Range): HTMLElement | null => {
+      if (editorContainerRef.current) return editorContainerRef.current;
+
+      const fromHost = hostRef.current?.closest('[data-editora-editor]') as HTMLElement | null;
+      if (fromHost) {
+        editorContainerRef.current = fromHost;
+        return fromHost;
+      }
+
+      const anchor = range?.commonAncestorContainer;
+      const anchorElement = anchor
+        ? (anchor.nodeType === Node.ELEMENT_NODE ? (anchor as HTMLElement) : anchor.parentElement)
+        : null;
+      const fromSelection = anchorElement?.closest('[data-editora-editor]') as HTMLElement | null;
+      if (fromSelection) {
+        editorContainerRef.current = fromSelection;
+        return fromSelection;
+      }
+
+      return null;
+    };
+
+    const getEditorContentElement = (container: HTMLElement | null | undefined): HTMLElement | null => {
+      if (!container) return null;
+      return (container.querySelector('.rte-content, .editora-content') as HTMLElement | null) || null;
+    };
 
     const handleSelectionChange = () => {
       // Clear any existing timeout
@@ -40,10 +68,17 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
       }
 
       const range = selection.getRangeAt(0);
+      if (range.collapsed) {
+        setIsVisible(false);
+        selectionRef.current = null;
+        return;
+      }
+
       const selectedText = selection.toString().trim();
 
       // Check if the selection is within THIS editor's content (not another editor instance)
-      const editorElement = editorContainerRef.current?.querySelector('.rte-content');
+      const editorContainer = resolveEditorContainer(range);
+      const editorElement = getEditorContentElement(editorContainer);
       if (!editorElement || !editorElement.contains(range.commonAncestorContainer)) {
         setIsVisible(false);
         selectionRef.current = null;
@@ -58,7 +93,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
 
         if (rect && editorRect) {
           // Position above the selection, centered horizontally
-          const top = rect.top - 50; // 50px above selection
+          const top = Math.max(8, rect.top - 50); // keep visible near viewport top
           let left = rect.left + (rect.width / 2);
 
           // Ensure toolbar stays within editor bounds
@@ -77,12 +112,8 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
           }
 
           setPosition({ top, left });
-
-          // Delay showing the toolbar to avoid showing it while user is still selecting
-          showTimeoutRef.current = setTimeout(() => {
-            setIsVisible(true);
-            selectionRef.current = range.cloneRange();
-          }, 300); // 300ms delay
+          setIsVisible(true);
+          selectionRef.current = range.cloneRange();
         }
       } else {
         setIsVisible(false);
@@ -93,9 +124,10 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
     const handleClickOutside = (e: MouseEvent) => {
       // Hide toolbar if clicked outside
       if (toolbarRef.current && !toolbarRef.current.contains(e.target as Node)) {
+        const editorContainer = resolveEditorContainer();
         const selection = window.getSelection();
         // Check if clicking within THIS editor instance
-        const clickedInEditor = editorContainerRef.current?.querySelector('.rte-content')?.contains(e.target as Node);
+        const clickedInEditor = getEditorContentElement(editorContainer)?.contains(e.target as Node);
 
         // Don't hide if clicking within the editor (user might be adjusting selection)
         if (!clickedInEditor) {
@@ -105,19 +137,27 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
       }
     };
 
-    document.addEventListener('selectionchange', handleSelectionChange);
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       // Hide on Escape
       if (e.key === 'Escape') {
         setIsVisible(false);
         selectionRef.current = null;
       }
-    });
+    };
+
+    const editorContentEl = getEditorContentElement(resolveEditorContainer());
+    document.addEventListener('selectionchange', handleSelectionChange);
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    editorContentEl?.addEventListener('mouseup', handleSelectionChange);
+    editorContentEl?.addEventListener('keyup', handleSelectionChange);
 
     return () => {
       document.removeEventListener('selectionchange', handleSelectionChange);
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+      editorContentEl?.removeEventListener('mouseup', handleSelectionChange);
+      editorContentEl?.removeEventListener('keyup', handleSelectionChange);
       if (showTimeoutRef.current) {
         clearTimeout(showTimeoutRef.current);
       }
@@ -196,95 +236,95 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
     selectionRef.current = null;
   };
 
-  if (!isEnabled || !isVisible) return null;
+  if (!isEnabled) {
+    return <span ref={hostRef} style={{ display: 'none' }} aria-hidden="true" />;
+  }
 
   return (
-    <div
-      ref={toolbarRef}
-      className="floating-toolbar"
-      onMouseDown={(e) => e.preventDefault()}
-      style={{
-        position: "fixed",
-        top: `${position.top}px`,
-        left: `${position.left}px`,
-        transform: "translateX(-50%)",
-        zIndex: 1000,
-        background: "white",
-        border: "1px solid #e1e5e9",
-        borderRadius: "6px",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-        padding: "6px",
-        display: "flex",
-        gap: "4px",
-        alignItems: "center",
-      }}
-    >
-      <button
-        className="floating-toolbar-btn"
-        onClick={() => handleCommand("toggleBold")}
-        title="Bold (Ctrl+B)"
-      > 
-        <strong>B</strong>
-      </button>
-      <button
-        className="floating-toolbar-btn"
-        onClick={() => handleCommand("toggleItalic")}
-        title="Italic (Ctrl+I)"
-      >
-        <em>I</em>
-      </button>
+    <>
+      <span ref={hostRef} style={{ display: 'none' }} aria-hidden="true" />
+      {isVisible && (
+        <div
+          ref={toolbarRef}
+          className="floating-toolbar"
+          onMouseDown={(e) => e.preventDefault()}
+          style={{
+            position: "fixed",
+            top: `${position.top}px`,
+            left: `${position.left}px`,
+            transform: "translateX(-50%)",
+            zIndex: 10000,
+            display: "flex",
+          }}
+        >
+          <button
+            className="floating-toolbar-btn"
+            onClick={() => handleCommand("toggleBold")}
+            title="Bold (Ctrl+B)"
+          > 
+            <strong>B</strong>
+          </button>
+          <button
+            className="floating-toolbar-btn"
+            onClick={() => handleCommand("toggleItalic")}
+            title="Italic (Ctrl+I)"
+          >
+            <em>I</em>
+          </button>
 
-      <button
-        className="floating-toolbar-btn"
-        onClick={() => handleCommand("toggleUnderline")}
-        title="Underline (Ctrl+U)"
-      >
-        <u>U</u>
-      </button>
+          <button
+            className="floating-toolbar-btn"
+            onClick={() => handleCommand("toggleUnderline")}
+            title="Underline (Ctrl+U)"
+          >
+            <u>U</u>
+          </button>
 
-      <button
-        className="floating-toolbar-btn"
-        onClick={() => handleCommand("toggleStrikethrough")}
-        title="Strikethrough"
-      >
-        <s>S</s>
-      </button>
+          <button
+            className="floating-toolbar-btn"
+            onClick={() => handleCommand("toggleStrikethrough")}
+            title="Strikethrough"
+          >
+            <s>S</s>
+          </button>
 
-      <div className="floating-toolbar-separator" />
+          <div className="floating-toolbar-separator" />
 
-      <button
-        className="floating-toolbar-btn"
-        onClick={() => handleCommand("clearFormatting")}
-        title="Clear Formatting"
-      >
-        ⌫
-      </button>
+          <button
+            className="floating-toolbar-btn"
+            onClick={() => handleCommand("clearFormatting")}
+            title="Clear Formatting"
+          >
+            ⌫
+          </button>
 
-      <button
-        className="floating-toolbar-btn"
-        onClick={() => handleCommand("createLink")}
-        title="Insert Link"
-      >
-        🔗
-      </button>
+          <button
+            className="floating-toolbar-btn"
+            onClick={() => handleCommand("createLink")}
+            title="Insert Link"
+          >
+            🔗
+          </button>
 
-      <button
-        className="floating-toolbar-btn"
-        onClick={() => handleCommand("toggleCode")}
-        title="Code"
-      >
-        Code
-      </button>
+          <button
+            className="floating-toolbar-btn"
+            onClick={() => handleCommand("toggleCode")}
+            title="Code"
+          >
+            Code
+          </button>
 
-      <div className="floating-toolbar-separator" />
+          <div className="floating-toolbar-separator" />
 
-      <button
-        className="floating-toolbar-btn"
-        onClick={() => handleCommand("setBlockType", "blockquote")}
-        title="Quote"
-      >
-        ❝
-      </button>
-    </div>
+          <button
+            className="floating-toolbar-btn"
+            onClick={() => handleCommand("setBlockType", "blockquote")}
+            title="Quote"
+          >
+            ❝
+          </button>
+        </div>
+      )}
+    </>
   );
 };

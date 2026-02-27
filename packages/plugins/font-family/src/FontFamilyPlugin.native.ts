@@ -89,6 +89,92 @@ export const FontFamilyPlugin = (): Plugin => {
   };
 };
 
+const BLOCK_SELECTOR =
+  "p,div,li,ul,ol,table,thead,tbody,tfoot,tr,td,th,h1,h2,h3,h4,h5,h6,blockquote,pre";
+
+function selectionContainsBlockNodes(range: Range): boolean {
+  const fragment = range.cloneContents();
+  return !!fragment.querySelector(BLOCK_SELECTOR);
+}
+
+function getEditableContentFromNode(node: Node): HTMLElement | null {
+  const element =
+    node.nodeType === Node.ELEMENT_NODE
+      ? (node as HTMLElement)
+      : node.parentElement;
+
+  return (
+    (element?.closest('[contenteditable="true"]') as HTMLElement | null) ||
+    (document.querySelector('[contenteditable="true"]') as HTMLElement | null)
+  );
+}
+
+function dispatchEditorInput(editorContent: HTMLElement | null): void {
+  if (editorContent) {
+    editorContent.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+}
+
+function replaceFontTagWithSpan(fontElement: HTMLElement, fontFamily: string): void {
+  const span = document.createElement("span");
+
+  for (const attr of Array.from(fontElement.attributes)) {
+    if (attr.name === "face" || attr.name === "style") continue;
+    span.setAttribute(attr.name, attr.value);
+  }
+
+  const existingStyle = fontElement.getAttribute("style");
+  if (existingStyle) {
+    span.setAttribute("style", existingStyle);
+  }
+
+  span.style.fontFamily = fontFamily;
+  span.classList.add("rte-font-family");
+
+  while (fontElement.firstChild) {
+    span.appendChild(fontElement.firstChild);
+  }
+
+  fontElement.parentNode?.replaceChild(span, fontElement);
+}
+
+function cleanupEmptyInlineStyleSpans(editorContent: HTMLElement): void {
+  const emptySpans = editorContent.querySelectorAll("span");
+  emptySpans.forEach((span) => {
+    if (span.childElementCount > 0) return;
+    if ((span.textContent || "").trim().length > 0) return;
+    span.remove();
+  });
+}
+
+function applyInlineFontFamilyFallback(
+  range: Range,
+  selection: Selection,
+  fontFamily: string,
+): boolean {
+  if (selectionContainsBlockNodes(range)) {
+    return false;
+  }
+
+  const span = document.createElement("span");
+  span.style.fontFamily = fontFamily;
+  span.className = "rte-font-family";
+
+  try {
+    range.surroundContents(span);
+  } catch {
+    const contents = range.extractContents();
+    span.appendChild(contents);
+    range.insertNode(span);
+  }
+
+  const newRange = document.createRange();
+  newRange.selectNodeContents(span);
+  selection.removeAllRanges();
+  selection.addRange(newRange);
+  return true;
+}
+
 /**
  * Helper function to apply font family to current selection
  * Uses DOM manipulation for reliable font family application
@@ -98,6 +184,8 @@ function applyFontFamilyToSelection(fontFamily: string) {
   if (!selection || selection.rangeCount === 0) return;
 
   const range = selection.getRangeAt(0);
+  const originalRange = range.cloneRange();
+  const editorContent = getEditableContentFromNode(range.commonAncestorContainer);
 
   // If there's no actual selection (just cursor), return
   if (range.collapsed) {
@@ -111,53 +199,72 @@ function applyFontFamilyToSelection(fontFamily: string) {
   if (fontFamilySpan && isSelectionEntirelyWithinSpan(range, fontFamilySpan)) {
     // Update existing span's font-family
     fontFamilySpan.style.fontFamily = fontFamily;
+    fontFamilySpan.classList.add("rte-font-family");
 
     // Restore selection
     const newRange = document.createRange();
     newRange.selectNodeContents(fontFamilySpan);
     selection.removeAllRanges();
     selection.addRange(newRange);
-    
-    // Trigger input event to update editor state
-    const contentElement = fontFamilySpan.closest('[contenteditable="true"]');
-    if (contentElement) {
-      contentElement.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-  } else {
-    // Create new span wrapper
-    const span = document.createElement('span');
-    span.style.fontFamily = fontFamily;
-    span.className = 'rte-font-family';
+    dispatchEditorInput(editorContent);
+    return;
+  }
 
-    // Wrap the selected content
-    try {
-      // Clone range to avoid modifying original
-      const clonedRange = range.cloneRange();
-      clonedRange.surroundContents(span);
-      
-      // Update original range to select the span content
-      range.selectNodeContents(span);
-      selection.removeAllRanges();
-      selection.addRange(range);
-    } catch (e) {
-      // surroundContents fails if the range spans multiple elements
-      // Use extractContents and insertNode instead
-      const contents = range.extractContents();
-      span.appendChild(contents);
-      range.insertNode(span);
-      
-      // Select the span content
-      const newRange = document.createRange();
-      newRange.selectNodeContents(span);
-      selection.removeAllRanges();
-      selection.addRange(newRange);
+  if (!editorContent) return;
+
+  const previousFontTags = new Set(
+    Array.from(editorContent.querySelectorAll("font[face]")) as HTMLElement[],
+  );
+  const previousFamilySpans = new Set(
+    Array.from(
+      editorContent.querySelectorAll("span[style*='font-family']"),
+    ) as HTMLElement[],
+  );
+
+  editorContent.focus({ preventScroll: true });
+  try {
+    document.execCommand("styleWithCSS", false, "true");
+  } catch {
+    // Some browsers ignore this command.
+  }
+
+  const primaryFamily =
+    fontFamily
+      .split(",")
+      .map((part) => part.trim().replace(/^['"]|['"]$/g, ""))
+      .filter(Boolean)[0] || "Arial";
+
+  let applied = document.execCommand("fontName", false, primaryFamily);
+  let normalized = false;
+
+  const fontTagsAfter = Array.from(
+    editorContent.querySelectorAll("font[face]"),
+  ) as HTMLElement[];
+  fontTagsAfter.forEach((fontTag) => {
+    if (!previousFontTags.has(fontTag)) {
+      replaceFontTagWithSpan(fontTag, fontFamily);
+      normalized = true;
     }
-    
-    // Trigger input event to update editor state
-    const contentElement = span.closest('[contenteditable="true"]');
-    if (contentElement) {
-      contentElement.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
+  const spansAfter = Array.from(
+    editorContent.querySelectorAll("span[style*='font-family']"),
+  ) as HTMLElement[];
+  spansAfter.forEach((span) => {
+    if (!previousFamilySpans.has(span)) {
+      span.style.fontFamily = fontFamily;
+      span.classList.add("rte-font-family");
+      normalized = true;
     }
+  });
+
+  if (!applied) {
+    applied = applyInlineFontFamilyFallback(originalRange, selection, fontFamily);
+  }
+
+  if (applied || normalized) {
+    cleanupEmptyInlineStyleSpans(editorContent);
+    dispatchEditorInput(editorContent);
   }
 }
 

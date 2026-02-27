@@ -389,6 +389,81 @@ const injectMediaDialogStyles = (): void => {
     .rte-media-spacer {
       flex: 1;
     }
+
+    .media-floating-toolbar {
+      --rte-media-toolbar-bg: #ffffff;
+      --rte-media-toolbar-border: #d6dbe4;
+      --rte-media-toolbar-text: #344054;
+      --rte-media-toolbar-hover-bg: #f3f6fb;
+      --rte-media-toolbar-hover-text: #101828;
+      --rte-media-toolbar-active-bg: #e6edf7;
+      --rte-media-toolbar-separator: #d9e1eb;
+      --rte-media-toolbar-danger-hover-bg: #fee2e2;
+      --rte-media-toolbar-danger-hover-text: #b42318;
+      position: absolute;
+      display: none;
+      align-items: center;
+      gap: 2px;
+      padding: 4px;
+      border: 1px solid var(--rte-media-toolbar-border);
+      border-radius: 8px;
+      background: var(--rte-media-toolbar-bg);
+      color: var(--rte-media-toolbar-text);
+      box-shadow: 0 10px 24px rgba(15, 23, 36, 0.18);
+      z-index: 10000;
+      pointer-events: auto;
+      backdrop-filter: blur(6px);
+    }
+
+    .media-floating-toolbar.rte-ui-theme-dark,
+    ${DARK_THEME_SELECTOR} .media-floating-toolbar {
+      --rte-media-toolbar-bg: #24303f;
+      --rte-media-toolbar-border: #4a5a71;
+      --rte-media-toolbar-text: #d9e6fb;
+      --rte-media-toolbar-hover-bg: #33445a;
+      --rte-media-toolbar-hover-text: #f4f8ff;
+      --rte-media-toolbar-active-bg: #415875;
+      --rte-media-toolbar-separator: #566884;
+      --rte-media-toolbar-danger-hover-bg: #5f2a32;
+      --rte-media-toolbar-danger-hover-text: #ffd7d5;
+      box-shadow: 0 16px 30px rgba(2, 8, 20, 0.42);
+    }
+
+    .media-floating-toolbar-btn {
+      width: 30px;
+      height: 30px;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color 0.16s ease, color 0.16s ease, transform 0.12s ease;
+    }
+
+    .media-floating-toolbar-btn:hover {
+      background: var(--rte-media-toolbar-hover-bg);
+      color: var(--rte-media-toolbar-hover-text);
+    }
+
+    .media-floating-toolbar-btn:active {
+      background: var(--rte-media-toolbar-active-bg);
+      transform: scale(0.96);
+    }
+
+    .media-floating-toolbar-btn.btn-remove:hover {
+      background: var(--rte-media-toolbar-danger-hover-bg);
+      color: var(--rte-media-toolbar-danger-hover-text);
+    }
+
+    .media-floating-toolbar-separator {
+      width: 1px;
+      height: 20px;
+      margin: 0 2px;
+      background: var(--rte-media-toolbar-separator);
+    }
   `;
 
   document.head.appendChild(style);
@@ -1112,18 +1187,9 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
 
     floatingToolbar = document.createElement('div');
     floatingToolbar.className = 'media-floating-toolbar';
-    floatingToolbar.style.cssText = `
-      position: absolute;
-      background: white;
-      border: 1px solid #ced4da;
-      border-radius: 6px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-      gap: 2px;
-      padding: 4px;
-      z-index: 10000;
-      pointer-events: auto;
-      display: none;
-    `;
+    if (isDarkThemeContext(media)) {
+      floatingToolbar.classList.add('rte-ui-theme-dark');
+    }
 
     // Insert toolbar as first child of parent
     mediaParent.insertBefore(floatingToolbar, mediaParent.firstChild);
@@ -1132,35 +1198,33 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
     updatePosition();
   }
 
-  const buttonStyle = 'padding: 6px 8px; border: none; background: white; cursor: pointer; border-radius: 4px; transition: background 0.2s; display: flex; align-items: center; justify-content: center;';
-  
   const isImage = media.tagName === 'IMG';
   const existingLink = (media as HTMLElement).closest('a');
 
   floatingToolbar.innerHTML = `
-    <button class="btn-align-left" title="Align Left" style="${buttonStyle}">
+    <button class="media-floating-toolbar-btn btn-align-left" title="Align Left" type="button">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>
     </button>
-    <button class="btn-align-center" title="Align Center" style="${buttonStyle}">
+    <button class="media-floating-toolbar-btn btn-align-center" title="Align Center" type="button">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="10" x2="6" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="18" y1="18" x2="6" y2="18"></line></svg>
     </button>
-    <button class="btn-align-right" title="Align Right" style="${buttonStyle}">
+    <button class="media-floating-toolbar-btn btn-align-right" title="Align Right" type="button">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="7" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="21" y1="18" x2="7" y2="18"></line></svg>
     </button>
-    <div style="width: 1px; height: 20px; background: #dee2e6; margin: 0 2px;"></div>
+    <div class="media-floating-toolbar-separator" aria-hidden="true"></div>
     ${isImage ? `
-    <button class="btn-alt" title="Edit Alt Text" style="${buttonStyle}">
+    <button class="media-floating-toolbar-btn btn-alt" title="Edit Alt Text" type="button">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
     </button>` : ''}
-    <button class="btn-link" title="${existingLink ? 'Edit/Remove Link' : 'Add Link'}" style="${buttonStyle}">
+    <button class="media-floating-toolbar-btn btn-link" title="${existingLink ? 'Edit/Remove Link' : 'Add Link'}" type="button">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
     </button>
     ${isImage ? `
-    <button class="btn-replace" title="Replace Image" style="${buttonStyle}">
+    <button class="media-floating-toolbar-btn btn-replace" title="Replace Image" type="button">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
     </button>` : ''}
-    <div style="width: 1px; height: 20px; background: #dee2e6; margin: 0 2px;"></div>
-    <button class="btn-remove" title="Remove" style="${buttonStyle}">
+    <div class="media-floating-toolbar-separator" aria-hidden="true"></div>
+    <button class="media-floating-toolbar-btn btn-remove" title="Remove" type="button">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
     </button>
   `;
@@ -1195,15 +1259,6 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
     window.removeEventListener('scroll', handleReposition);
     window.removeEventListener('resize', handleReposition);
   };
-
-  floatingToolbar.querySelectorAll('button').forEach(btn => {
-    btn.addEventListener('mouseenter', () => {
-      (btn as HTMLElement).style.background = '#f8f9fa';
-    });
-    btn.addEventListener('mouseleave', () => {
-      (btn as HTMLElement).style.background = 'white';
-    });
-  });
 
   // Align Left
   floatingToolbar.querySelector('.btn-align-left')?.addEventListener('click', () => {

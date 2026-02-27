@@ -16,17 +16,87 @@ import { Plugin } from '@editora/core';
  * Toggle bullet (unordered) list
  */
 export const toggleBulletList = (): boolean => {
-  document.execCommand('insertUnorderedList', false);
-  return true;
+  return applyListCommand('insertUnorderedList');
 };
 
 /**
  * Toggle numbered (ordered) list
  */
 export const toggleOrderedList = (): boolean => {
-  document.execCommand('insertOrderedList', false);
-  return true;
+  return applyListCommand('insertOrderedList');
 };
+
+function getActiveContentElement(): HTMLElement | null {
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    const node = selection.getRangeAt(0).startContainer;
+    const element = node.nodeType === Node.ELEMENT_NODE
+      ? (node as HTMLElement)
+      : node.parentElement;
+    const content = element?.closest('[contenteditable="true"], .rte-content, .editora-content') as HTMLElement | null;
+    if (content) return content;
+  }
+
+  const active = document.activeElement as HTMLElement | null;
+  if (!active) return null;
+  if (active.getAttribute('contenteditable') === 'true') return active;
+  return active.closest('[contenteditable="true"], .rte-content, .editora-content') as HTMLElement | null;
+}
+
+function normalizeListMarkup(root: HTMLElement): void {
+  const listNodes = root.querySelectorAll('ul:not([data-type="checklist"]), ol');
+
+  listNodes.forEach((list) => {
+    const directChildren = Array.from(list.childNodes);
+    directChildren.forEach((child) => {
+      if (child.nodeType === Node.TEXT_NODE) {
+        const text = (child.textContent || '').trim();
+        if (!text) {
+          list.removeChild(child);
+          return;
+        }
+
+        const li = document.createElement('li');
+        li.textContent = text;
+        list.replaceChild(li, child);
+        return;
+      }
+
+      if (!(child instanceof HTMLElement)) {
+        list.removeChild(child);
+        return;
+      }
+
+      if (child.tagName === 'LI') {
+        return;
+      }
+
+      const li = document.createElement('li');
+      while (child.firstChild) {
+        li.appendChild(child.firstChild);
+      }
+      list.replaceChild(li, child);
+    });
+  });
+}
+
+function applyListCommand(command: 'insertUnorderedList' | 'insertOrderedList'): boolean {
+  const content = getActiveContentElement();
+  if (!content) return false;
+
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return false;
+
+  const range = selection.getRangeAt(0);
+  if (!content.contains(range.commonAncestorContainer)) return false;
+
+  content.focus({ preventScroll: true });
+  const executed = document.execCommand(command, false);
+
+  normalizeListMarkup(content);
+  content.dispatchEvent(new Event('input', { bubbles: true }));
+  return executed !== false;
+}
 
 /**
  * Register commands globally

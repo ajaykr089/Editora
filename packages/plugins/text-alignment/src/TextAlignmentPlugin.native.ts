@@ -13,6 +13,13 @@ import { Plugin } from '@editora/core';
  * - Consistent results
  */
 
+declare global {
+  interface Window {
+    execEditorCommand?: (command: string, ...args: any[]) => any;
+    executeEditorCommand?: (command: string, ...args: any[]) => any;
+  }
+}
+
 // Block-level elements that can have text-align applied
 const BLOCK_LEVEL_TAGS = ['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE', 'PRE', 'TD', 'TH'];
 
@@ -112,6 +119,31 @@ function getBlocksInRange(range: Range): HTMLElement[] {
   return blocks;
 }
 
+function resolveEditorFromRange(range: Range): HTMLElement | null {
+  const element = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+    ? (range.commonAncestorContainer as HTMLElement)
+    : range.commonAncestorContainer.parentElement;
+  if (!element) return null;
+  return (
+    (element.closest('.rte-content, .editora-content') as HTMLElement | null) ||
+    (element.closest('[contenteditable="true"]') as HTMLElement | null)
+  );
+}
+
+function recordDomHistoryTransaction(editor: HTMLElement | null, beforeHTML: string): void {
+  if (!editor) return;
+  if (beforeHTML === editor.innerHTML) return;
+
+  const executor = window.execEditorCommand || window.executeEditorCommand;
+  if (typeof executor !== 'function') return;
+
+  try {
+    executor('recordDomTransaction', editor, beforeHTML, editor.innerHTML);
+  } catch {
+    // History plugin may be unavailable.
+  }
+}
+
 /**
  * Set text alignment command
  * Applies CSS text-align styles to block-level elements
@@ -128,6 +160,8 @@ export const setTextAlignmentCommand = (alignment?: string) => {
   if (!selection || selection.rangeCount === 0) return false;
 
   const range = selection.getRangeAt(0).cloneRange();
+  const editorElement = resolveEditorFromRange(range);
+  const beforeHTML = editorElement?.innerHTML || '';
   const blocks = getBlocksInRange(range);
 
   // If we found block elements, apply alignment to them
@@ -143,9 +177,9 @@ export const setTextAlignmentCommand = (alignment?: string) => {
     selection.addRange(range);
     
     // Trigger input event to update editor state
-    const contentElement = range.commonAncestorContainer.parentElement?.closest('[contenteditable="true"]');
-    if (contentElement) {
-      contentElement.dispatchEvent(new Event('input', { bubbles: true }));
+    recordDomHistoryTransaction(editorElement, beforeHTML);
+    if (editorElement) {
+      editorElement.dispatchEvent(new Event('input', { bubbles: true }));
     }
   } else {
     // No block elements found - wrap selection in a div with alignment
@@ -167,9 +201,10 @@ export const setTextAlignmentCommand = (alignment?: string) => {
       selection.addRange(newRange);
       
       // Trigger input event
-      const contentElement = div.closest('[contenteditable="true"]');
-      if (contentElement) {
-        contentElement.dispatchEvent(new Event('input', { bubbles: true }));
+      const contentElement = (div.closest('.rte-content, .editora-content') || div.closest('[contenteditable="true"]')) as HTMLElement | null;
+      recordDomHistoryTransaction(contentElement || editorElement, beforeHTML);
+      if (contentElement || editorElement) {
+        (contentElement || editorElement)?.dispatchEvent(new Event('input', { bubbles: true }));
       }
     } catch (error) {
       console.error('Failed to wrap content for alignment:', error);

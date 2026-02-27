@@ -331,3 +331,41 @@
   border-left-color: #3f4a5b;
   border-right-color: #3f4a5b;
 }
+
+
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-inline-menu {
+  position: fixed;
+  z-index: 1000;
+  background: #1b2430;
+  border: 1px solid #4f5b70;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  min-width: 120px;
+  max-width: 200px;
+  pointer-events: auto;
+}
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-inline-menu-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  /* border-bottom: 1px solid #4f5b70; */
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background-color: transparent;
+  
+}
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-inline-menu-item:hover {
+    background-color: #2f3946;
+}
+
+:is([data-theme="dark"], .dark, .editora-theme-dark) .floating-toolbar {
+  --rte-floating-toolbar-bg: #273240;
+  --rte-floating-toolbar-border: #4f5f76;
+  --rte-floating-toolbar-text: #d8e4f6;
+  --rte-floating-toolbar-hover-bg: #354760;
+  --rte-floating-toolbar-hover-text: #f4f8ff;
+  --rte-floating-toolbar-active-bg: #425a79;
+  --rte-floating-toolbar-separator: #5f7493;
+  --rte-floating-toolbar-shadow: 0 16px 30px rgba(2, 8, 20, 0.42);
+}
