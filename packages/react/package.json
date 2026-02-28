@@ -1,6 +1,6 @@
 {
   "name": "@editora/react",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "React components for Editora - Best Free Premium Rich Text Editor. Free React WYSIWYG editor with enterprise features, 30+ free plugins, and accessibility support.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
@@ -57,9 +57,9 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.4",
-    "@editora/plugins": "^1.0.4",
-    "@editora/themes": "^1.0.4",
+    "@editora/core": "^1.0.5",
+    "@editora/plugins": "^1.0.5",
+    "@editora/themes": "^1.0.5",
     "react": ">=16.8.0 <20",
     "react-dom": ">=16.8.0 <20"
   },
@@ -72,10 +72,10 @@
     }
   },
   "dependencies": {
-    "@editora/light-code-editor": "^1.0.2"
+    "@editora/light-code-editor": "^1.0.4"
   },
   "devDependencies": {
-    "@editora/core": "^1.0.4",
+    "@editora/core": "^1.0.5",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "typescript": "^5.0.0",

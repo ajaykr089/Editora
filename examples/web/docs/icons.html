@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Icons documentation - framework-agnostic SVG icon library usage, API, and customization.">
+    <meta name="keywords" content="editora icons, svg icon library, icon api, custom icons, theming">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#007bff">
+
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="../assets/img/favicon_64.png">
+
+    <title>Editora - @editora/icons</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="../index.html" class="logo">
+                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
+                </a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="installation.html" class="active">Docs</a></li>
+                    <li><a href="features.html">Features</a></li>
+                    <li><a href="../plugins/index.html">Plugins</a></li>
+                    <li><a href="api.html">API</a></li>
+                    <li><a href="../toast-demo.html">Toast Demo</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+        <div class="container">
+            <h1 style="color: white; margin-bottom: 0.5rem;">@editora/icons</h1>
+            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Framework-agnostic SVG icon definitions, registry APIs, and runtime rendering helpers.</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <div class="docs-wrapper">
+                <aside class="docs-sidebar">
+                    <h3>Documentation</h3>
+                    <ul>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="api.html">API Reference</a></li>
+                        <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                        <li><a href="examples.html">Examples</a></li>
+                        <li><a href="custom-plugins.html">Custom Plugins</a></li>
+                        <li><a href="icons.html" class="active">@editora/icons</a></li>
+                        <li><a href="react-icons.html">@editora/react-icons</a></li>
+                        <li><a href="ui-core.html">@editora/ui-core</a></li>
+                        <li><a href="ui-react.html">@editora/ui-react</a></li>
+                        <li><a href="about.html">About</a></li>
+                    </ul>
+
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="../playground.html">Live Playground</a></li>
+                        <li><a href="../toast-demo.html">Toast Demo</a></li>
+                        <li><a href="../plugins/index.html">All Plugins</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/icons" target="_blank" rel="noopener">npm: @editora/icons</a></li>
+                    </ul>
+                </aside>
+
+                <main class="docs-content">
+                    <h2>Overview</h2>
+                    <p><code>@editora/icons</code> is the raw icon layer for the Editora UI ecosystem. It provides SVG definitions and utilities that work in any runtime (React, Web Components, vanilla JS, server-side rendering pipelines, and design tooling scripts).</p>
+
+                    <div class="alert alert-info" style="margin: 1rem 0;">
+                        <strong>Best fit:</strong> use this package when you need framework-neutral icon lookup/render APIs or runtime icon registry extension.
+                    </div>
+
+                    <h2>Installation</h2>
+                    <pre><code class="language-bash">npm install @editora/icons</code></pre>
+
+                    <h2>Quick Start</h2>
+                    <pre><code class="language-javascript">import { renderIconSvg, listIcons } from '@editora/icons';
+
+const svg = renderIconSvg('check', {
+  variant: 'outline',
+  size: 16,
+  color: 'currentColor',
+  strokeWidth: 1.5,
+  decorative: true
+});
+
+console.log(svg);
+console.log(listIcons().slice(0, 10));</code></pre>
+
+                    <h2>Core Exports</h2>
+                    <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                        <thead>
+                            <tr style="background: var(--gray-200);">
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Category</th>
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Exports</th>
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Registry</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>iconDefinitions</code>, <code>iconNameList</code>, <code>getIcon</code>, <code>hasIcon</code>, <code>listIcons</code>, <code>listIconAliases</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Discover and lookup icon definitions.</td>
+                            </tr>
+                            <tr style="background: var(--gray-50);">
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Mutation</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>registerIcon</code>, <code>registerIcons</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Add custom icon definitions at runtime.</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Rendering</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>resolveIcon</code>, <code>renderIconSvg</code>, <code>iconToDataUri</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Render variant-specific SVG markup or data URIs.</td>
+                            </tr>
+                            <tr style="background: var(--gray-50);">
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Integration</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>registerWithEditoraUI</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Bulk-register icons into <code>@editora/ui-core</code> icon stores.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Variants and Fallbacks</h2>
+                    <ul>
+                        <li>Supported variants: <code>outline</code>, <code>solid</code>, <code>duotone</code>.</li>
+                        <li>If a requested variant is missing, resolver falls back to <code>outline</code>.</li>
+                        <li>Name normalization is built in (e.g. <code>chart_line</code> and <code>chart-line</code> resolve consistently).</li>
+                    </ul>
+
+                    <h2>Render Options</h2>
+                    <p>The render helpers support styling and accessibility options such as:</p>
+                    <ul>
+                        <li><code>size</code>, <code>color</code>, <code>secondaryColor</code>, <code>strokeWidth</code>, <code>absoluteStrokeWidth</code></li>
+                        <li><code>strokeLinecap</code>, <code>strokeLinejoin</code></li>
+                        <li><code>title</code>, <code>ariaLabel</code>, <code>decorative</code></li>
+                        <li><code>rotate</code>, <code>flip</code>, <code>rtl</code></li>
+                        <li><code>className</code>, <code>style</code>, additional root <code>attrs</code></li>
+                    </ul>
+
+                    <h2>Custom Icon Registration</h2>
+                    <pre><code class="language-typescript">import { registerIcon, renderIconSvg } from '@editora/icons';
+
+registerIcon({
+  name: 'billing-custom',
+  aliases: ['billing-custom-outline'],
+  viewBox: '0 0 15 15',
+  variants: {
+    outline: {
+      nodes: [
+        { tag: 'rect', attrs: { x: 2, y: 1.5, width: 11, height: 12, rx: 2, fill: 'none', stroke: 'currentColor' } }
+      ]
+    }
+  }
+});
+
+console.log(renderIconSvg('billing-custom'));</code></pre>
+
+                    <h2>UI-Core Bridge</h2>
+                    <pre><code class="language-javascript">import { registerWithEditoraUI } from '@editora/icons';
+
+registerWithEditoraUI((name, svg) => {
+  // register icon in UI icon map/store
+  console.log('registered', name, svg.length);
+});</code></pre>
+
+                    <h2>Accessibility Guidance</h2>
+                    <ul>
+                        <li>Decorative icons should use <code>decorative: true</code> or omit semantic labels.</li>
+                        <li>Semantic icons should include <code>title</code> or <code>ariaLabel</code>.</li>
+                        <li>Keep contrast high when overriding <code>color</code>/<code>secondaryColor</code>.</li>
+                    </ul>
+
+                    <h2>Performance Notes</h2>
+                    <ul>
+                        <li>Package is <code>sideEffects: false</code> for tree-shaking.</li>
+                        <li>Cache repeated <code>renderIconSvg</code>/<code>iconToDataUri</code> outputs in high-frequency paths.</li>
+                        <li>Prefer normalized names in hot loops to reduce repeated normalization work.</li>
+                    </ul>
+
+                    <div style="margin-top: 3rem; padding: 2rem; background: var(--gray-50); border-radius: var(--border-radius);">
+                        <h3>Related Docs</h3>
+                        <ul>
+                            <li><a href="react-icons.html">@editora/react-icons</a> for React components and provider context</li>
+                            <li><a href="ui-core.html">@editora/ui-core</a> for framework-agnostic UI components</li>
+                            <li><a href="ui-react.html">@editora/ui-react</a> for React wrappers and hooks</li>
+                        </ul>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>📚 Documentation</h5>
+                    <ul>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="api.html">API Reference</a></li>
+                        <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔌 UI Packages</h5>
+                    <ul>
+                        <li><a href="icons.html">@editora/icons</a></li>
+                        <li><a href="react-icons.html">@editora/react-icons</a></li>
+                        <li><a href="ui-core.html">@editora/ui-core</a></li>
+                        <li><a href="ui-react.html">@editora/ui-react</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔗 Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/icons" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>ℹ️ About</h5>
+                    <ul>
+                        <li><a href="about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024-2026 Editora. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>

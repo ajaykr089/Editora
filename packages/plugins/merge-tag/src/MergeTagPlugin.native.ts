@@ -69,7 +69,7 @@ const INDEXED_TAGS_BY_CATEGORY: Record<CategoryKey, IndexedMergeTag[]> = CATEGOR
   (acc, categoryKey) => {
     acc[categoryKey] = MERGE_TAG_CATEGORIES[categoryKey].tags.map((tag) => ({
       ...tag,
-      searchIndex: `${tag.label} ${tag.key} ${tag.category} ${tag.description || ''}`.toLowerCase(),
+      searchIndex: `${tag.label} ${tag.key} ${tag.category} ${'description' in tag ? tag.description ?? '' : ''}`.toLowerCase(),
     }));
     return acc;
   },

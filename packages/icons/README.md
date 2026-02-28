@@ -8,6 +8,10 @@ Use this package when you need:
 - icon aliases and runtime extension,
 - bridge support to register icons into `@editora/ui-core`.
 
+<div align="center">
+  <img src="../../images/icon-catalog.png" alt="Icon Catalog" width="600" style="max-width: 100%;" height="auto">
+</div>
+
 ## Installation
 
 ```bash

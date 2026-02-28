@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora React Icons documentation - React SVG icon components, IconProvider, and typed icon APIs.">
+    <meta name="keywords" content="react icons, editora react-icons, icon provider, icon context, typescript icons">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#007bff">
+
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="../assets/img/favicon_64.png">
+
+    <title>Editora - @editora/react-icons</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="../index.html" class="logo">
+                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
+                </a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="installation.html" class="active">Docs</a></li>
+                    <li><a href="features.html">Features</a></li>
+                    <li><a href="../plugins/index.html">Plugins</a></li>
+                    <li><a href="api.html">API</a></li>
+                    <li><a href="../toast-demo.html">Toast Demo</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+        <div class="container">
+            <h1 style="color: white; margin-bottom: 0.5rem;">@editora/react-icons</h1>
+            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">React icon components, context provider, and typed dynamic icon rendering.</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <div class="docs-wrapper">
+                <aside class="docs-sidebar">
+                    <h3>Documentation</h3>
+                    <ul>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="api.html">API Reference</a></li>
+                        <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                        <li><a href="examples.html">Examples</a></li>
+                        <li><a href="custom-plugins.html">Custom Plugins</a></li>
+                        <li><a href="icons.html">@editora/icons</a></li>
+                        <li><a href="react-icons.html" class="active">@editora/react-icons</a></li>
+                        <li><a href="ui-core.html">@editora/ui-core</a></li>
+                        <li><a href="ui-react.html">@editora/ui-react</a></li>
+                        <li><a href="about.html">About</a></li>
+                    </ul>
+
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="../playground.html">Live Playground</a></li>
+                        <li><a href="../toast-demo.html">Toast Demo</a></li>
+                        <li><a href="../plugins/index.html">All Plugins</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/react-icons" target="_blank" rel="noopener">npm: @editora/react-icons</a></li>
+                    </ul>
+                </aside>
+
+                <main class="docs-content">
+                    <h2>Overview</h2>
+                    <p><code>@editora/react-icons</code> is the React-facing icon package built on top of <code>@editora/icons</code>. It provides a generic <code>&lt;Icon /&gt;</code> component, generated named icons, and shared defaults through <code>IconProvider</code>.</p>
+
+                    <h2>Installation</h2>
+                    <pre><code class="language-bash">npm install @editora/react-icons @editora/icons</code></pre>
+                    <p>Peer dependencies: <code>react</code> <code>^16.8 || ^17 || ^18 || ^19</code>.</p>
+
+                    <h2>Quick Start</h2>
+                    <pre><code class="language-tsx">import { IconProvider, Icon, CheckIcon, ChartLineIcon } from '@editora/react-icons';
+
+export function Example() {
+  return (
+    &lt;IconProvider
+      value={{
+        variant: 'outline',
+        size: 18,
+        color: 'var(--ui-fg)',
+        strokeWidth: 1.5
+      }}
+    &gt;
+      &lt;CheckIcon ariaLabel="Saved" /&gt;
+      &lt;ChartLineIcon variant="duotone" secondaryColor="var(--ui-muted)" /&gt;
+      &lt;Icon name="command" title="Command palette" /&gt;
+    &lt;/IconProvider&gt;
+  );
+}</code></pre>
+
+                    <h2>Package API</h2>
+                    <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                        <thead>
+                            <tr style="background: var(--gray-200);">
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Group</th>
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Exports</th>
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Core</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>Icon</code>, <code>IconProvider</code>, <code>IconContext</code>, <code>useIconContext</code>, <code>defaultIconContext</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Primary rendering and shared defaults.</td>
+                            </tr>
+                            <tr style="background: var(--gray-50);">
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Lookup</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>icons</code>, <code>iconNames</code>, <code>getIconComponent</code>, <code>createIcon</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Dynamic and generated icon workflows.</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Types</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>IconName</code>, <code>IconProps</code>, <code>IconContextValue</code>, <code>NamedIconProps</code>, <code>IconComponent</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Type-safe usage in app and design-system code.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2>Icon Props</h2>
+                    <p><code>Icon</code> accepts standard SVG props plus icon-specific fields:</p>
+                    <ul>
+                        <li><code>name</code>, <code>variant</code>, <code>size</code>, <code>color</code>, <code>secondaryColor</code>, <code>strokeWidth</code></li>
+                        <li><code>absoluteStrokeWidth</code>, <code>strokeLinecap</code>, <code>strokeLinejoin</code></li>
+                        <li><code>decorative</code>, <code>title</code>, <code>ariaLabel</code></li>
+                        <li><code>rotate</code>, <code>flip</code>, <code>rtl</code></li>
+                    </ul>
+
+                    <h2>Usage Patterns</h2>
+                    <h3>1. Named imports (best for static usage)</h3>
+                    <pre><code class="language-tsx">import { CheckIcon, AlertTriangleIcon } from '@editora/react-icons';
+
+export function Status({ ok }: { ok: boolean }) {
+  return ok
+    ? &lt;CheckIcon ariaLabel="Healthy" /&gt;
+    : &lt;AlertTriangleIcon ariaLabel="Warning" /&gt;;
+}</code></pre>
+
+                    <h3>2. Dynamic rendering from typed names</h3>
+                    <pre><code class="language-tsx">import { Icon, type IconName } from '@editora/react-icons';
+
+const items: Array&lt;{ label: string; icon: IconName }&gt; = [
+  { label: 'Dashboard', icon: 'dashboard' },
+  { label: 'Orders', icon: 'order' },
+  { label: 'Reports', icon: 'report' }
+];
+
+export function Sidebar() {
+  return (
+    &lt;ul&gt;
+      {items.map((item) =&gt; (
+        &lt;li key={item.label}&gt;
+          &lt;Icon name={item.icon} aria-hidden size={16} /&gt;
+          &lt;span&gt;{item.label}&lt;/span&gt;
+        &lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+
+                    <h3>3. Runtime lookup</h3>
+                    <pre><code class="language-tsx">import { getIconComponent, type IconName } from '@editora/react-icons';
+
+export function PluginIcon({ name }: { name: IconName }) {
+  const Comp = getIconComponent(name);
+  return &lt;Comp size={18} aria-hidden /&gt;;
+}</code></pre>
+
+                    <h2>Provider and Theming</h2>
+                    <pre><code class="language-tsx">import { IconProvider, SearchIcon, SettingsIcon } from '@editora/react-icons';
+
+export function HeaderActions() {
+  return (
+    &lt;IconProvider value={{ size: 16, color: 'var(--color-fg-muted)' }}&gt;
+      &lt;SearchIcon ariaLabel="Search" /&gt;
+      &lt;IconProvider value={{ color: 'var(--color-primary)' }}&gt;
+        &lt;SettingsIcon ariaLabel="Settings" /&gt;
+      &lt;/IconProvider&gt;
+    &lt;/IconProvider&gt;
+  );
+}</code></pre>
+                    <p>Nested providers merge with parent values, so local overrides are easy.</p>
+
+                    <h2>Accessibility</h2>
+                    <ul>
+                        <li>Use <code>aria-hidden</code> for purely decorative icons.</li>
+                        <li>Use <code>title</code> or <code>ariaLabel</code> for semantic icons.</li>
+                        <li>Keep icon meaning independent of color alone to support low-vision users.</li>
+                    </ul>
+
+                    <h2>Performance</h2>
+                    <ul>
+                        <li>Package has <code>sideEffects: false</code> for tree-shaking.</li>
+                        <li>Prefer named imports for static icons.</li>
+                        <li>Use dynamic <code>Icon name="..."</code> only when names are data-driven.</li>
+                    </ul>
+
+                    <div style="margin-top: 3rem; padding: 2rem; background: var(--gray-50); border-radius: var(--border-radius);">
+                        <h3>Related Docs</h3>
+                        <ul>
+                            <li><a href="icons.html">@editora/icons</a> for framework-agnostic definitions and render helpers</li>
+                            <li><a href="ui-react.html">@editora/ui-react</a> for React wrappers around UI core components</li>
+                        </ul>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>📚 Documentation</h5>
+                    <ul>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="api.html">API Reference</a></li>
+                        <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔌 UI Packages</h5>
+                    <ul>
+                        <li><a href="icons.html">@editora/icons</a></li>
+                        <li><a href="react-icons.html">@editora/react-icons</a></li>
+                        <li><a href="ui-core.html">@editora/ui-core</a></li>
+                        <li><a href="ui-react.html">@editora/ui-react</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔗 Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/react-icons" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>ℹ️ About</h5>
+                    <ul>
+                        <li><a href="about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024-2026 Editora. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>

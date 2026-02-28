@@ -67,6 +67,10 @@
                         <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
                         <li><a href="examples.html">Examples</a></li>
                         <li><a href="custom-plugins.html">Custom Plugins</a></li>
+                        <li><a href="icons.html">@editora/icons</a></li>
+                        <li><a href="react-icons.html">@editora/react-icons</a></li>
+                        <li><a href="ui-core.html">@editora/ui-core</a></li>
+                        <li><a href="ui-react.html">@editora/ui-react</a></li>
                         <li><a href="about.html">About</a></li>
                     </ul>
 
@@ -82,7 +86,7 @@
                 <!-- Main Content -->
                 <main class="docs-content">
                     <h2>Editor Constructor</h2>
-                    <pre><code class="language-javascript">const editor = new Editor(options)</code></pre>
+                    <pre><code class="language-javascript">const editor = createEditor(options)</code></pre>
 
                     <h3>Constructor Options</h3>
                     <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
@@ -128,6 +132,78 @@
                                 <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>performance</code></td>
                                 <td style="padding: 1rem; border: 1px solid var(--gray-300);">object</td>
                                 <td style="padding: 1rem; border: 1px solid var(--gray-300);">Debounced change events and viewport-only scan optimizations for multi-instance pages</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h2 style="margin-top: 2rem;">Web Component Dependencies</h2>
+                    <ul>
+                        <li><code>@editora/core</code> (required) - editor engine and web component bundle</li>
+                        <li><code>@editora/themes</code> (recommended) - dark/acme/custom theme CSS packs</li>
+                        <li><code>@editora/plugins</code> (framework wrappers) - explicit plugin factories for React/Vue integrations</li>
+                    </ul>
+
+                    <h2 style="margin-top: 2rem;">Web Component Runtime Config</h2>
+                    <p>Configure declaratively (attributes) or imperatively via <code>editor.setConfig(...)</code>.</p>
+                    <pre><code class="language-html">&lt;editora-editor
+  theme="dark"
+  toolbar-items="undo redo | bold italic underline"
+  toolbar-floating="true"
+  toolbar-sticky="true"
+  autosave='{"enabled":true,"intervalMs":3000,"storageKey":"doc-1"}'
+  security='{"sanitizeOnPaste":true,"sanitizeOnInput":true}'
+  accessibility='{"enableARIA":true,"keyboardNavigation":true,"checker":false}'
+  performance='{"debounceInputMs":120,"viewportOnlyScan":true}'
+&gt;&lt;/editora-editor&gt;</code></pre>
+
+                    <pre><code class="language-javascript">const editor = document.querySelector('editora-editor');
+await editor.setConfig({
+  theme: 'acme',
+  toolbar: { items: 'undo redo | bold italic', floating: true, sticky: true },
+  autosave: { enabled: true, intervalMs: 5000, storageKey: 'doc-2', provider: 'localStorage' },
+  security: { sanitizeOnPaste: true, sanitizeOnInput: true },
+  accessibility: { enableARIA: true, keyboardNavigation: true, checker: true },
+  performance: { debounceInputMs: 100, viewportOnlyScan: true }
+});</code></pre>
+
+                    <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                        <thead>
+                            <tr style="background: var(--gray-200);">
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Config Group</th>
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Key Options</th>
+                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Attribute Mapping</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>theme</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>light</code>, <code>dark</code>, <code>acme</code>, custom</td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>theme="dark"</code></td>
+                            </tr>
+                            <tr style="background: var(--gray-50);">
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>toolbar</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>items</code>, <code>floating</code>, <code>sticky</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>toolbar-items</code>, <code>toolbar-floating</code>, <code>toolbar-sticky</code></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>autosave</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>enabled</code>, <code>intervalMs</code>, <code>storageKey</code>, <code>provider</code>, <code>apiUrl</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>autosave-*</code> attributes or JSON in <code>autosave</code></td>
+                            </tr>
+                            <tr style="background: var(--gray-50);">
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>security</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>sanitizeOnPaste</code>, <code>sanitizeOnInput</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>security-sanitize-on-paste</code>, <code>security-sanitize-on-input</code></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>accessibility</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>enableARIA</code>, <code>keyboardNavigation</code>, <code>checker</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>accessibility-*</code> attributes or JSON in <code>accessibility</code></td>
+                            </tr>
+                            <tr style="background: var(--gray-50);">
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>performance</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>debounceInputMs</code>, <code>viewportOnlyScan</code></td>
+                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>performance-*</code> attributes or JSON in <code>performance</code></td>
                             </tr>
                         </tbody>
                     </table>
@@ -283,12 +359,12 @@ editor.execCommand('clearHistory');</code></pre>
                     <h2 style="margin-top: 2rem;">Examples</h2>
 
                     <h3>Basic Usage</h3>
-                    <pre><code class="language-javascript">import { Editor } from '@editora/core';
+                    <pre><code class="language-javascript">import { createEditor } from '@editora/core';
 
-const editor = new Editor({
-  element: '#editor',
+const editor = createEditor({
   content: '&lt;p&gt;Hello World&lt;/p&gt;'
 });
+editor.mount(document.getElementById('editor'));
 
 editor.on('change', (content) => {
   console.log('New content:', content);
@@ -311,17 +387,17 @@ export default function Document() {
 }</code></pre>
 
                     <h3>With Plugins</h3>
-                    <pre><code class="language-javascript">import { Editor } from '@editora/core';
+                    <pre><code class="language-javascript">import { createEditor } from '@editora/core';
 import { MediaManagerPlugin } from '@editora/plugins';
 
-const editor = new Editor({
-  element: '#editor',
+const editor = createEditor({
   plugins: [
     MediaManagerPlugin({
       uploadUrl: '/api/upload'
     })
   ]
-});</code></pre>
+});
+editor.mount(document.getElementById('editor'));</code></pre>
 
                     <div style="margin-top: 3rem; padding: 2rem; background: var(--gray-50); border-radius: var(--border-radius);">
                         <p>For more examples and advanced usage, visit the <a href="examples.html">Examples page</a>.</p>

@@ -8,6 +8,9 @@ React icon components and theming context for `@editora/icons`.
 - shared defaults via `IconProvider`,
 - type-safe icon names via `IconName`.
 
+<div align="center">
+  <img src="../../images/icon-catalog.png" alt="Icon Catalog" width="600" style="max-width: 100%;" height="auto">
+</div>
 ## Installation
 
 ```bash

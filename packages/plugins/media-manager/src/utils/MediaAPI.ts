@@ -41,11 +41,11 @@ export class MediaAPI {
   }
 
   private getHeaders(): Record<string, string> {
-    return this.config.headers || {};
+    return this.config.storage?.headers || {};
   }
 
   private getApiUrl(): string {
-    return this.config.apiUrl || getGlobalApiConfig().apiUrl;
+    return this.config.storage?.apiUrl || getGlobalApiConfig().apiUrl;
   }
 
   async upload(file: File): Promise<MediaUploadResponse> {

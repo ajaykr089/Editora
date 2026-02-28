@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@editora/core": ["../core/index.d.ts"],
+      "@editora/light-code-editor": ["../light-code-editor/dist/index.d.ts"],
+      "@editora/toast": ["../editora-toast/dist/index.d.ts"],
+      "@editora/themes": ["../themes/index.d.ts"]
+    },
+    "strict": false,
+    "noEmit": true
+  },
+  "include": ["src/**/*", "*/src/**/*"],
+  "exclude": ["dist", "**/*.test.ts"]
+}

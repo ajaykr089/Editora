@@ -189,6 +189,11 @@
   font-size: 14px;
   line-height: 1;
 }
+.rte-toolbar-button span{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 .rte-toolbar-button svg,
 .editora-toolbar-button svg,

@@ -313,14 +313,14 @@ export const undo = (): boolean => {
   const editor = resolveActiveEditor();
   const native = executeNativeHistoryCommand('undo', editor);
   if (native.changed) return true;
-  return undoDom(editor);
+  return undoDom(editor ?? undefined);
 };
 
 export const redo = (): boolean => {
   const editor = resolveActiveEditor();
   const native = executeNativeHistoryCommand('redo', editor);
   if (native.changed) return true;
-  return redoDom(editor);
+  return redoDom(editor ?? undefined);
 };
 
 export const setAttribute = (el: HTMLElement, attr: string, value: string): void => {

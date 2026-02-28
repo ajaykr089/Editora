@@ -1,6 +1,6 @@
 {
   "name": "@editora/core",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Framework-agnostic core editor engine for Editora Rich Text Editor",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
@@ -109,9 +109,10 @@
   ],
   "scripts": {
     "build": "vite build && vite build --config vite.umd.config.ts && vite build --config vite.webcomponent.config.ts && vite build --config vite.webcomponent-core.config.ts && vite build --config vite.plugin-loader.config.ts",
+    "typecheck:build": "tsc -p tsconfig.build.json --noEmit",
     "dev": "vite build --watch",
     "clean": "rm -rf dist",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run typecheck:build && npm run build"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

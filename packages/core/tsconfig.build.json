@@ -1,0 +1,27 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@editora/plugins": ["../plugins/index.d.ts"],
+      "@editora/plugins/*": ["../plugins/index.d.ts"],
+      "@editora/light-code-editor": ["../light-code-editor/dist/index.d.ts"],
+      "@editora/toast": ["../editora-toast/dist/index.d.ts"],
+      "@editora/themes": ["../themes/index.d.ts"]
+    },
+    "noEmit": true
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "dist",
+    "**/*.test.ts",
+    "src/commands/**",
+    "src/model/**",
+    "src/plugins/PluginManager.ts",
+    "src/schema/Schema.ts",
+    "src/webcomponent/plugin-loader.ts",
+    "src/webcomponent/standalone.core.ts",
+    "src/webcomponent/standalone.native.ts",
+    "src/webcomponent/standalone.ts"
+  ]
+}

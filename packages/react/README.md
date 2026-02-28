@@ -138,6 +138,23 @@ function FullEditor() {
 />
 ```
 
+### Content Sizing (Scrollable vs Auto Height)
+
+```tsx
+// Default: fixed layout + scrollable content area
+<EditoraEditor plugins={[BoldPlugin()]} />
+
+// Optional: grow editor content height with content
+<EditoraEditor
+  plugins={[BoldPlugin()]}
+  content={{
+    autoHeight: true,
+    minHeight: 220,
+    maxHeight: 700, // optional cap; keeps scrolling after cap
+  }}
+/>
+```
+
 ### With Custom Toolbar
 
 ```tsx

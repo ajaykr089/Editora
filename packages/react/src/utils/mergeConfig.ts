@@ -176,6 +176,9 @@ const DEFAULT_CONFIG: Omit<EditorConfig, 'id' | 'className' | 'value' | 'default
     allowedTags: [],
     allowedAttributes: {},
     sanitize: true,
+    autoHeight: false,
+    minHeight: 200,
+    maxHeight: 0,
   },
   security: {
     sanitizeOnPaste: true,

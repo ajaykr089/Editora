@@ -47,7 +47,7 @@ export const AllIcons = (args: any) => {
         }}
       />
 
-      <Grid columns="repeat(auto-fill, minmax(136px, 1fr))" gap="10px">
+      <Grid columns="repeat(auto-fill, minmax(48px, 1fr))" gap="10px">
         {filteredNames.map((name) => (
           <Box
             key={name}
@@ -74,7 +74,7 @@ export const AllIcons = (args: any) => {
               label={name}
               decorative={false}
             />
-            <Box style={{ fontSize: 11, color: '#334155', lineHeight: 1.25, wordBreak: 'break-word' }}>{name}</Box>
+            {/* <Box style={{ fontSize: 11, color: '#334155', lineHeight: 1.25, wordBreak: 'break-word' }}>{name}</Box> */}
           </Box>
         ))}
       </Grid>

@@ -28,6 +28,7 @@ export type {
   Position,
   Range,
   TextChange,
+  Transaction,
   Cursor,
   SearchResult,
   SearchOptions,

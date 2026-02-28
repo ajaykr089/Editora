@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora UI Core documentation - framework-agnostic web components, dialog managers, and theming utilities.">
+    <meta name="keywords" content="ui-core, web components, dialog manager, editora ui, design system">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#007bff">
+
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="../assets/img/favicon_64.png">
+
+    <title>Editora - @editora/ui-core</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="../index.html" class="logo">
+                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
+                </a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="installation.html" class="active">Docs</a></li>
+                    <li><a href="features.html">Features</a></li>
+                    <li><a href="../plugins/index.html">Plugins</a></li>
+                    <li><a href="api.html">API</a></li>
+                    <li><a href="../toast-demo.html">Toast Demo</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+        <div class="container">
+            <h1 style="color: white; margin-bottom: 0.5rem;">@editora/ui-core</h1>
+            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Framework-agnostic UI primitives and Web Components for production-grade applications.</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <div class="docs-wrapper">
+                <aside class="docs-sidebar">
+                    <h3>Documentation</h3>
+                    <ul>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="api.html">API Reference</a></li>
+                        <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                        <li><a href="examples.html">Examples</a></li>
+                        <li><a href="custom-plugins.html">Custom Plugins</a></li>
+                        <li><a href="icons.html">@editora/icons</a></li>
+                        <li><a href="react-icons.html">@editora/react-icons</a></li>
+                        <li><a href="ui-core.html" class="active">@editora/ui-core</a></li>
+                        <li><a href="ui-react.html">@editora/ui-react</a></li>
+                        <li><a href="about.html">About</a></li>
+                    </ul>
+
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="../playground.html">Live Playground</a></li>
+                        <li><a href="../toast-demo.html">Toast Demo</a></li>
+                        <li><a href="../plugins/index.html">All Plugins</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/ui-core" target="_blank" rel="noopener">npm: @editora/ui-core</a></li>
+                    </ul>
+                </aside>
+
+                <main class="docs-content">
+                    <h2>Overview</h2>
+                    <p><code>@editora/ui-core</code> is the framework-agnostic UI layer in the Editora ecosystem. It ships custom elements, dialog managers, token-based theming helpers, and overlay/focus utilities for complex UI flows.</p>
+
+                    <div class="alert alert-info" style="margin: 1rem 0;">
+                        <strong>Import rule:</strong> load <code>@editora/ui-core</code> once at app bootstrap to register all custom elements.
+                    </div>
+
+                    <h2>Installation</h2>
+                    <pre><code class="language-bash">npm install @editora/ui-core</code></pre>
+
+                    <h2>Bootstrap</h2>
+                    <pre><code class="language-javascript">import '@editora/ui-core';</code></pre>
+
+                    <h2>Quick Start (Vanilla / Any Framework)</h2>
+                    <pre><code class="language-html">&lt;ui-field label="Email" hint="Work email"&gt;
+  &lt;ui-input name="email" type="email" placeholder="you@company.com" required&gt;&lt;/ui-input&gt;
+&lt;/ui-field&gt;
+
+&lt;ui-button variant="primary"&gt;Save&lt;/ui-button&gt;</code></pre>
+
+                    <h2>Core Utilities</h2>
+                    <ul>
+                        <li><code>createSignal</code>, <code>computed</code>, <code>effect</code></li>
+                        <li><code>ElementBase</code></li>
+                        <li><code>applyTheme</code>, <code>defaultTokens</code></li>
+                        <li>Portal/overlay/focus helpers: <code>showPortalFor</code>, <code>autoUpdatePosition</code>, focus managers</li>
+                        <li><code>showToast</code></li>
+                    </ul>
+
+                    <h2>Dialog Managers (Promise API)</h2>
+                    <ul>
+                        <li><code>createDialogManager</code> / <code>DialogManager</code></li>
+                        <li><code>createAlertDialogManager</code> / <code>AlertDialogManager</code></li>
+                    </ul>
+
+                    <pre><code class="language-typescript">import '@editora/ui-core';
+import { createDialogManager } from '@editora/ui-core';
+
+const dialogs = createDialogManager();
+
+const result = await dialogs.confirm({
+  title: 'Delete record',
+  description: 'This action cannot be undone.',
+  submitText: 'Delete',
+  cancelText: 'Cancel',
+  mode: 'queue'
+});
+
+if (result.action === 'submit') {
+  // delete
+}</code></pre>
+
+                    <h2>Component Catalog</h2>
+                    <h3>Primitives and forms</h3>
+                    <p><code>ui-button</code>, <code>ui-input</code>, <code>ui-textarea</code>, <code>ui-field</code>, <code>ui-form</code>, <code>ui-checkbox</code>, <code>ui-select</code>, <code>ui-combobox</code>, <code>ui-date-picker</code>, <code>ui-color-picker</code> and related controls.</p>
+
+                    <h3>Layout and navigation</h3>
+                    <p><code>ui-layout</code>, <code>ui-sidebar</code>, <code>ui-app-header</code>, <code>ui-breadcrumb</code>, <code>ui-navigation-menu</code>, <code>ui-menubar</code>, <code>ui-tabs</code>, <code>ui-grid</code>, <code>ui-container</code>.</p>
+
+                    <h3>Data and display</h3>
+                    <p><code>ui-data-table</code>, <code>ui-pagination</code>, <code>ui-table</code>, <code>ui-chart</code>, <code>ui-calendar</code>, <code>ui-progress</code>, <code>ui-skeleton</code>, <code>ui-empty-state</code>.</p>
+
+                    <h3>Overlays and interaction</h3>
+                    <p><code>ui-dialog</code>, <code>ui-alert-dialog</code>, <code>ui-popover</code>, <code>ui-dropdown</code>, <code>ui-context-menu</code>, <code>ui-tooltip</code>, <code>ui-drawer</code>, <code>ui-floating-toolbar</code>, <code>ui-command-palette</code>.</p>
+
+                    <h2>Events and Integration Pattern</h2>
+                    <pre><code class="language-html">&lt;ui-date-picker id="start" name="startDate" clearable&gt;&lt;/ui-date-picker&gt;
+&lt;script type="module"&gt;
+  import '@editora/ui-core';
+
+  const picker = document.getElementById('start');
+  picker.addEventListener('change', (e) =&gt; {
+    console.log('new date', e.detail.value);
+  });
+&lt;/script&gt;</code></pre>
+                    <p>Most events are dispatched as <code>CustomEvent</code> with typed <code>detail</code>, and usually bubble across shadow boundaries.</p>
+
+                    <h2>Theming</h2>
+                    <pre><code class="language-typescript">import { applyTheme, defaultTokens } from '@editora/ui-core';
+
+applyTheme({
+  ...defaultTokens,
+  colors: {
+    ...defaultTokens.colors,
+    primary: '#0f766e',
+    text: '#0f172a',
+    background: '#ffffff'
+  },
+  radius: '10px'
+});</code></pre>
+
+                    <h2>Performance and Production Notes</h2>
+                    <ul>
+                        <li>Package is <code>sideEffects: true</code> because custom element registration happens at module import time.</li>
+                        <li>Use virtualized table mode for large datasets (<code>ui-data-table[virtualize]</code>).</li>
+                        <li>Avoid heavy synchronous work inside frequently fired event handlers.</li>
+                        <li>Initialize theme tokens early to avoid flash-of-unstyled-components.</li>
+                    </ul>
+
+                    <div style="margin-top: 3rem; padding: 2rem; background: var(--gray-50); border-radius: var(--border-radius);">
+                        <h3>Related Docs</h3>
+                        <ul>
+                            <li><a href="ui-react.html">@editora/ui-react</a> for React wrappers and hooks</li>
+                            <li><a href="icons.html">@editora/icons</a> and <a href="react-icons.html">@editora/react-icons</a> for icon infrastructure</li>
+                        </ul>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>📚 Documentation</h5>
+                    <ul>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="api.html">API Reference</a></li>
+                        <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔌 UI Packages</h5>
+                    <ul>
+                        <li><a href="icons.html">@editora/icons</a></li>
+                        <li><a href="react-icons.html">@editora/react-icons</a></li>
+                        <li><a href="ui-core.html">@editora/ui-core</a></li>
+                        <li><a href="ui-react.html">@editora/ui-react</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔗 Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/ui-core" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>ℹ️ About</h5>
+                    <ul>
+                        <li><a href="about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024-2026 Editora. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>

@@ -66,7 +66,7 @@ export type PluginCommandResult =
   | void
   | Promise<EditorState | null | boolean | void>;
 
-export type PluginCommand = (...args: unknown[]) => PluginCommandResult;
+export type PluginCommand = (...args: any[]) => PluginCommandResult;
 
 export interface Plugin {
   name: string;
@@ -77,12 +77,12 @@ export interface Plugin {
   keymap?: Record<string, string | ((...args: unknown[]) => unknown)>;
   context?: PluginContext;
   config?: PluginConfig;
-  init?: (...args: unknown[]) => void | Promise<void>;
+  init?: (...args: any[]) => void | Promise<void>;
   initialize?: (config?: PluginConfig) => void | Promise<void>;
-  destroy?: (...args: unknown[]) => void | Promise<void>;
-  executeLocal?: (command: string, ...args: unknown[]) => unknown;
-  executeAPI?: (command: string, ...args: unknown[]) => Promise<unknown>;
-  executeHybrid?: (command: string, ...args: unknown[]) => Promise<unknown>;
+  destroy?: (...args: any[]) => void | Promise<void>;
+  executeLocal?: (command: string, ...args: any[]) => unknown;
+  executeAPI?: (command: string, ...args: any[]) => Promise<unknown>;
+  executeHybrid?: (command: string, ...args: any[]) => Promise<unknown>;
 }
 
 export class PluginManager {

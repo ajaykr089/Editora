@@ -13,6 +13,7 @@ export class View {
   private gutterWidth = 50;
   private lineHeight = 21;
   private _rafId?: number;
+  private readonly trailingNewlineMarkerAttr = 'data-lce-trailing-newline-marker';
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -121,18 +122,26 @@ export class View {
 
   // Get text content
   getText(): string {
-    return this.contentElement.textContent || '';
+    const text = this.contentElement.textContent || '';
+    const hasMarker = !!this.contentElement.querySelector(`[${this.trailingNewlineMarkerAttr}]`);
+    if (hasMarker && text.endsWith('\u200B')) {
+      return text.slice(0, -1);
+    }
+    return text;
   }
 
   // Set text content
   setText(text: string): void {
     this.contentElement.textContent = text;
+    this.syncTrailingNewlineMarker(text.endsWith('\n'));
     const lines = text.split('\n').length;
     this.updateLineNumbers(lines);
   }
 
   // Set inner HTML (used for syntax highlighted content)
   setHTML(html: string): void {
+    const hasTrailingNewline = /\n$/.test(html);
+
     // Decide how to render the provided HTML-like string safely:
     // - Highlighting output contains escaped tag entities (e.g. &lt;div&gt;)
     //   and also uses <span> wrappers for colored tokens. For this case we
@@ -155,10 +164,17 @@ export class View {
       // Default: allow innerHTML so simple markup or escaped entities render.
       this.contentElement.innerHTML = html;
     }
+    this.syncTrailingNewlineMarker(hasTrailingNewline);
 
     const text = this.contentElement.textContent || '';
     const lines = text.split('\n').length;
     this.updateLineNumbers(lines);
+  }
+
+  // Keep trailing-newline caret marker in sync for live contenteditable edits
+  // (without forcing a full setText/setHTML render).
+  syncTrailingNewlineMarkerForText(text: string): void {
+    this.syncTrailingNewlineMarker(text.endsWith('\n'));
   }
 
   // Get cursor position from DOM selection
@@ -174,7 +190,7 @@ export class View {
     preCaretRange.setEnd(range.endContainer, range.endOffset);
 
     const text = preCaretRange.toString();
-    const lines = text.split('\n');
+    const lines = text.replace(/\u200B/g, '').split('\n');
 
     return {
       line: lines.length - 1,
@@ -230,9 +246,30 @@ export class View {
         range.setEnd(targetNode, targetOffset);
         selection?.removeAllRanges();
         selection?.addRange(range);
+        this.ensureCaretVisible();
       } catch (e) {
         // Fallback for edge cases
         console.warn('Could not set cursor position:', e);
+      }
+    } else {
+      // Fallback to end-of-content when the requested offset maps to trailing
+      // visual newline space (e.g., final empty line).
+      const marker = this.contentElement.querySelector(
+        `[${this.trailingNewlineMarkerAttr}]`
+      );
+      try {
+        if (marker && marker.parentNode === this.contentElement) {
+          range.setStartBefore(marker);
+        } else {
+          range.selectNodeContents(this.contentElement);
+          range.collapse(false);
+        }
+        range.collapse(true);
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+        this.ensureCaretVisible();
+      } catch (e) {
+        console.warn('Could not set fallback cursor position:', e);
       }
     }
   }
@@ -250,14 +287,14 @@ export class View {
     const startRange = range.cloneRange();
     startRange.selectNodeContents(this.contentElement);
     startRange.setEnd(range.startContainer, range.startOffset);
-    const startText = startRange.toString();
+    const startText = startRange.toString().replace(/\u200B/g, '');
     const startLines = startText.split('\n');
 
     // Get end position
     const endRange = range.cloneRange();
     endRange.selectNodeContents(this.contentElement);
     endRange.setEnd(range.endContainer, range.endOffset);
-    const endText = endRange.toString();
+    const endText = endRange.toString().replace(/\u200B/g, '');
     const endLines = endText.split('\n');
 
     return {
@@ -281,6 +318,7 @@ export class View {
   // Focus the editor
   focus(): void {
     this.contentElement.focus();
+    this.ensureCaretVisible();
   }
 
   // Blur the editor
@@ -317,6 +355,55 @@ export class View {
   // Set scroll position
   setScrollTop(scrollTop: number): void {
     this.editorContainer.scrollTop = scrollTop;
+  }
+
+  private syncTrailingNewlineMarker(shouldShow: boolean): void {
+    this.contentElement
+      .querySelectorAll(`[${this.trailingNewlineMarkerAttr}]`)
+      .forEach((node) => node.remove());
+
+    if (!shouldShow) return;
+
+    const marker = document.createElement('span');
+    marker.setAttribute(this.trailingNewlineMarkerAttr, 'true');
+    marker.setAttribute('aria-hidden', 'true');
+    marker.contentEditable = 'false';
+    marker.style.cssText = `
+      display: inline-block;
+      width: 0;
+      overflow: hidden;
+      pointer-events: none;
+      user-select: none;
+    `;
+    marker.appendChild(document.createTextNode('\u200B'));
+    this.contentElement.appendChild(marker);
+  }
+
+  // Ensure caret is visible inside the editor scroll container
+  ensureCaretVisible(): void {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0).cloneRange();
+    range.collapse(false);
+
+    let caretRect = range.getClientRects()[0] || range.getBoundingClientRect();
+    if ((!caretRect || (caretRect.width === 0 && caretRect.height === 0)) && selection.focusNode instanceof Element) {
+      caretRect = selection.focusNode.getBoundingClientRect();
+    } else if ((!caretRect || (caretRect.width === 0 && caretRect.height === 0)) && selection.focusNode?.parentElement) {
+      caretRect = selection.focusNode.parentElement.getBoundingClientRect();
+    }
+
+    if (!caretRect) return;
+
+    const containerRect = this.editorContainer.getBoundingClientRect();
+    const padding = 12;
+
+    if (caretRect.bottom > containerRect.bottom - padding) {
+      this.editorContainer.scrollTop += caretRect.bottom - (containerRect.bottom - padding);
+    } else if (caretRect.top < containerRect.top + padding) {
+      this.editorContainer.scrollTop -= (containerRect.top + padding) - caretRect.top;
+    }
   }
 
   // Destroy the view

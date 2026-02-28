@@ -1,6 +1,10 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@editora/core": ["../core/index.d.ts"]
+    },
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,

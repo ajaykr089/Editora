@@ -1,4 +1,9 @@
-import { Transaction, EditorState } from '@editora/core';
+import type { EditorState } from '@editora/core';
+
+export interface Transaction {
+  beforeState?: EditorState;
+  [key: string]: unknown;
+}
 
 /**
  * Configuration for transaction batching.

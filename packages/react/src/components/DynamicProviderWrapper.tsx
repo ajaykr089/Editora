@@ -27,7 +27,9 @@ export const DynamicProviderWrapper: React.FC<DynamicProviderWrapperProps> = ({
   // Start from the innermost (children) and wrap outward
   const wrappedChildren = pluginsWithProviders.reduce(
     (acc, plugin) => {
-      const Provider = plugin.context!.provider!;
+      const Provider = plugin.context!.provider as React.ComponentType<{
+        children?: React.ReactNode;
+      }>;
       return (
         <Provider key={plugin.name}>
           {acc}

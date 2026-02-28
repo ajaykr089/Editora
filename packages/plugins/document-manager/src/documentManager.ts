@@ -332,7 +332,7 @@ function createHeadingFromElement(element: Element): Paragraph {
       return textRun;
     }),
     heading: `Heading${level}` as any,
-    alignment: alignment,
+    alignment: alignment as any,
     spacing: { before: 240, after: 120 }
   });
 }
@@ -366,7 +366,7 @@ function createParagraphFromElement(element: Element): Paragraph {
       
       return new TextRun(textRunProps);
     }),
-    alignment: alignment,
+    alignment: alignment as any,
     indent: indent
   });
 }
@@ -391,7 +391,7 @@ function createBlockquoteFromElement(element: Element): Paragraph {
       left: {
         color: 'CCCCCC',
         space: 1,
-        style: 'single',
+        style: 'single' as any,
         size: 6
       }
     }
@@ -414,7 +414,7 @@ function createCodeBlockFromElement(element: Element): Paragraph {
     ],
     shading: {
       fill: 'F5F5F5', // Light gray background
-      type: 'solid'
+      type: 'solid' as any
     },
     indent: { left: 360 }, // 0.25 inch indent
     spacing: { before: 120, after: 120 }
@@ -431,7 +431,7 @@ function createHorizontalRule(): Paragraph {
       bottom: {
         color: 'CCCCCC',
         space: 1,
-        style: 'single',
+        style: 'single' as any,
         size: 6
       }
     },
@@ -683,7 +683,7 @@ function createTableFromElement(tableElement: Element): Table {
           ],
           shading: isHeader ? {
             fill: 'E0E0E0', // Light gray for headers
-            type: 'solid'
+            type: 'solid' as any
           } : undefined
         })
       );
@@ -696,7 +696,7 @@ function createTableFromElement(tableElement: Element): Table {
     rows,
     width: {
       size: 100,
-      type: 'pct' // 100% width
+      type: 'pct' as any // 100% width
     }
   });
 }

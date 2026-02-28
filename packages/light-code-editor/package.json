@@ -1,6 +1,6 @@
 {
   "name": "@editora/light-code-editor",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Lightweight, extensible code editor for the web — syntax highlighting, line numbers, code folding, and a plugin-friendly API. Ideal for embedding in docs, demos, and web apps.",
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
@@ -10,18 +10,25 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.es.js",
-      "require": "./dist/index.umd.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.umd.js"
     }
   },
   "files": [
-    "dist"
+    "dist/**/*.js",
+    "dist/**/*.css",
+    "dist/**/*.d.ts",
+    "README.md",
+    "CHANGELOG.md"
   ],
   "scripts": {
-    "build": "vite build",
+    "build": "npm run build:js && npm run build:types",
+    "build:js": "vite build",
+    "build:types": "tsc -p tsconfig.json --emitDeclarationOnly --noEmit false --outDir dist",
     "dev": "vite build --watch",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
     "code-editor",

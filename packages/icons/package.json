@@ -1,7 +1,16 @@
 {
   "name": "@editora/icons",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Framework-agnostic SVG icon library for the Editora UI ecosystem with outline, solid, and duotone variants",
+  "homepage": "https://editora-free.netlify.app/",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/icons"
+  },
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -12,7 +21,11 @@
       "require": "./dist/index.cjs.js"
     }
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "README.md"
+  ],
   "scripts": {
     "build": "node ../../node_modules/vite/bin/vite.js build && npm run build:tsc",
     "build:tsc": "node ../../node_modules/typescript/bin/tsc -p . --emitDeclarationOnly --noEmit false --outDir dist",

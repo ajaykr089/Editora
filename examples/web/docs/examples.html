@@ -68,6 +68,10 @@
                         <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
                         <li><a href="examples.html" class="active">Examples</a></li>
                         <li><a href="custom-plugins.html">Custom Plugins</a></li>
+                        <li><a href="icons.html">@editora/icons</a></li>
+                        <li><a href="react-icons.html">@editora/react-icons</a></li>
+                        <li><a href="ui-core.html">@editora/ui-core</a></li>
+                        <li><a href="ui-react.html">@editora/ui-react</a></li>
                         <li><a href="about.html">About</a></li>
                     </ul>
 
@@ -92,6 +96,11 @@
                   <div class="alert alert-success" style="margin-bottom: 1.5rem;">
                     <strong>Theme Verification:</strong> Compare default, dark, and the new acme theme.
                     <a href="../theme-acme.html" style="margin-left: 8px;">Open Acme Theme Demo →</a>
+                  </div>
+                  <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+                    <strong>Config Labs:</strong> Validate runtime config updates for autosave/security/performance/accessibility.
+                    <a href="../webcomponent-security-autosave-lab.html" style="margin-left: 8px;">Open Security + Autosave Lab →</a>
+                    <a href="../webcomponent-performance-accessibility-lab.html" style="margin-left: 8px;">Open Performance + A11y Lab →</a>
                   </div>
 
                   <h2>Bundle Options</h2>
@@ -144,14 +153,22 @@
 &lt;html&gt;
 &lt;head&gt;
   &lt;title&gt;Editora Web Component&lt;/title&gt;
-  &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.js"&gt;&lt;/script&gt;
-  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.css"&gt;
+  &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"&gt;&lt;/script&gt;
+  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
+  &lt;!-- Optional theme packs (npm: @editora/themes) --&gt;
+  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/themes/themes/dark.css"&gt;
+  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/themes/themes/acme.css"&gt;
 &lt;/head&gt;
 &lt;body&gt;
   &lt;editora-editor
     plugins="bold italic underline history"
     toolbar-items="bold italic underline | undo redo"
     height="300"
+    theme="dark"
+    autosave='{"enabled":true,"intervalMs":3000,"storageKey":"example-doc"}'
+    security='{"sanitizeOnPaste":true,"sanitizeOnInput":true}'
+    accessibility='{"enableARIA":true,"keyboardNavigation":true}'
+    performance='{"debounceInputMs":120,"viewportOnlyScan":true}'
   &gt;
     &lt;p&gt;Start editing your content here...&lt;/p&gt;
   &lt;/editora-editor&gt;
@@ -161,15 +178,16 @@
     const editor = document.querySelector('editora-editor');
     
     // Get content
-    const content = editor.innerHTML;
+    const content = editor.getContent();
     
     // Set content
-    editor.innerHTML = '&lt;p&gt;New content&lt;/p&gt;';
+    editor.setContent('&lt;p&gt;New content&lt;/p&gt;');
     
     // Get API for advanced operations
     const api = editor.getAPI();
     if (api) {
       console.log('Editor content:', api.getContent());
+      console.log('Runtime config:', api.getConfig());
     }
   &lt;/script&gt;
 &lt;/body&gt;
@@ -338,37 +356,59 @@ export class AppComponent implements AfterViewInit {
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
 
+                    <h2>Runtime Config Example (setConfig)</h2>
+                    <pre><code class="language-javascript">const editor = document.querySelector('editora-editor');
+
+await editor.setConfig({
+  theme: 'acme',
+  toolbar: {
+    items: 'undo redo | bold italic underline',
+    floating: true,
+    sticky: true
+  },
+  autosave: {
+    enabled: true,
+    intervalMs: 4000,
+    storageKey: 'runtime-doc',
+    provider: 'localStorage'
+  },
+  security: {
+    sanitizeOnPaste: true,
+    sanitizeOnInput: true
+  },
+  accessibility: {
+    enableARIA: true,
+    keyboardNavigation: true,
+    checker: true
+  },
+  performance: {
+    debounceInputMs: 120,
+    viewportOnlyScan: true
+  }
+});</code></pre>
+
                     <h2>Auto-Save Example</h2>
                     <pre><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
-  &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.js"&gt;&lt;/script&gt;
-  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.css"&gt;
+  &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"&gt;&lt;/script&gt;
+  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
 &lt;/head&gt;
 &lt;body&gt;
   &lt;editora-editor
     plugins="bold italic underline history"
     height="300"
+    autosave='{"enabled":true,"intervalMs":30000,"storageKey":"draft-doc","provider":"localStorage"}'
   &gt;
     &lt;p&gt;Start typing...&lt;/p&gt;
   &lt;/editora-editor&gt;
 
   &lt;script&gt;
-    // Auto-save every 30 seconds
-    setInterval(() => {
-      const editor = document.querySelector('editora-editor');
-      const content = editor.innerHTML;
-      localStorage.setItem('draft', content);
-      console.log('Auto-saved');
-    }, 30000);
-
-    // Load draft on page load
-    window.addEventListener('DOMContentLoaded', () => {
-      const draft = localStorage.getItem('draft');
-      if (draft) {
-        const editor = document.querySelector('editora-editor');
-        editor.innerHTML = draft;
-      }
+    // Built-in autosave stores content using the configured storageKey.
+    // You can still read latest content manually when needed:
+    const editor = document.querySelector('editora-editor');
+    editor.addEventListener('content-change', () => {
+      console.log('Current content:', editor.getContent());
     });
   &lt;/script&gt;
 &lt;/body&gt;
@@ -589,6 +629,8 @@ export class AppComponent implements AfterViewInit {
                                     <li><a href="../webcomponent-all-plugins.html">All Plugins</a> - Complete plugin showcase</li>
                                     <li><a href="../webcomponent-toolbar-test.html">Toolbar Test</a> - Toolbar configurations</li>
                                     <li><a href="../webcomponent-performance-accessibility-lab.html">Performance + A11y Lab</a> - Runtime config verification</li>
+                                    <li><a href="../webcomponent-security-autosave-lab.html">Security + Autosave Lab</a> - Sanitization and persistence config</li>
+                                    <li><a href="../theme-acme.html">Acme Theme Demo</a> - Theme scoping verification</li>
                                     <li><a href="../statusbar-demo.html">Status Bar Demo</a> - Status bar features</li>
                                 </ul>
                             </div>

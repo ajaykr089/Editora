@@ -17,6 +17,192 @@ const setPlaceholderVisualState = (el: HTMLElement, placeholder?: string): void 
   el.classList.toggle('rte-content-empty', shouldShowPlaceholder);
 };
 
+interface SelectionOffsets {
+  start: number;
+  end: number;
+}
+
+interface SelectionMarkersSnapshot {
+  collapsed: boolean;
+  caretId?: string;
+  startId?: string;
+  endId?: string;
+  fallbackOffsets: SelectionOffsets | null;
+}
+
+const CARET_MARKER_ATTR = 'data-rte-caret-marker';
+const RANGE_START_MARKER_ATTR = 'data-rte-range-start-marker';
+const RANGE_END_MARKER_ATTR = 'data-rte-range-end-marker';
+
+const createMarkerId = (): string => Math.random().toString(36).slice(2);
+
+const saveSelectionOffsets = (root: HTMLElement): SelectionOffsets | null => {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return null;
+
+  const range = selection.getRangeAt(0);
+  if (!root.contains(range.commonAncestorContainer)) return null;
+
+  try {
+    const startRange = range.cloneRange();
+    startRange.selectNodeContents(root);
+    startRange.setEnd(range.startContainer, range.startOffset);
+
+    const endRange = range.cloneRange();
+    endRange.selectNodeContents(root);
+    endRange.setEnd(range.endContainer, range.endOffset);
+
+    return {
+      start: startRange.toString().length,
+      end: endRange.toString().length,
+    };
+  } catch {
+    return null;
+  }
+};
+
+const getTextPositionFromOffset = (
+  root: HTMLElement,
+  offset: number,
+): { node: Node; offset: number } => {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let current = walker.nextNode();
+  let remaining = Math.max(0, offset);
+  let lastTextNode: Node | null = null;
+
+  while (current) {
+    lastTextNode = current;
+    const textLength = current.textContent?.length ?? 0;
+    if (remaining <= textLength) {
+      return { node: current, offset: remaining };
+    }
+    remaining -= textLength;
+    current = walker.nextNode();
+  }
+
+  if (lastTextNode) {
+    return {
+      node: lastTextNode,
+      offset: lastTextNode.textContent?.length ?? 0,
+    };
+  }
+
+  return { node: root, offset: root.childNodes.length };
+};
+
+const insertSelectionMarkers = (root: HTMLElement): SelectionMarkersSnapshot | null => {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return null;
+
+  const range = selection.getRangeAt(0);
+  if (!root.contains(range.commonAncestorContainer)) return null;
+
+  const fallbackOffsets = saveSelectionOffsets(root);
+
+  try {
+    if (range.collapsed) {
+      const caretId = createMarkerId();
+      const caretMarker = document.createElement('span');
+      caretMarker.setAttribute(CARET_MARKER_ATTR, caretId);
+      caretMarker.appendChild(document.createTextNode('\u200B'));
+
+      const collapsedRange = range.cloneRange();
+      collapsedRange.insertNode(caretMarker);
+
+      return { collapsed: true, caretId, fallbackOffsets };
+    }
+
+    const startId = createMarkerId();
+    const endId = createMarkerId();
+
+    const endMarker = document.createElement('span');
+    endMarker.setAttribute(RANGE_END_MARKER_ATTR, endId);
+    endMarker.appendChild(document.createTextNode('\u200B'));
+
+    const startMarker = document.createElement('span');
+    startMarker.setAttribute(RANGE_START_MARKER_ATTR, startId);
+    startMarker.appendChild(document.createTextNode('\u200B'));
+
+    const endRange = range.cloneRange();
+    endRange.collapse(false);
+    endRange.insertNode(endMarker);
+
+    const startRange = range.cloneRange();
+    startRange.collapse(true);
+    startRange.insertNode(startMarker);
+
+    return { collapsed: false, startId, endId, fallbackOffsets };
+  } catch {
+    return { collapsed: range.collapsed, fallbackOffsets };
+  }
+};
+
+const removeSelectionMarkers = (root: HTMLElement): void => {
+  root.querySelectorAll(
+    `[${CARET_MARKER_ATTR}], [${RANGE_START_MARKER_ATTR}], [${RANGE_END_MARKER_ATTR}]`,
+  ).forEach((node) => node.remove());
+};
+
+const restoreSelectionFromMarkers = (
+  root: HTMLElement,
+  snapshot: SelectionMarkersSnapshot | null,
+): boolean => {
+  if (!snapshot) return false;
+  const selection = window.getSelection();
+  if (!selection) return false;
+
+  try {
+    const range = document.createRange();
+
+    if (snapshot.collapsed && snapshot.caretId) {
+      const caretMarker = root.querySelector(`[${CARET_MARKER_ATTR}="${snapshot.caretId}"]`);
+      if (!caretMarker || !caretMarker.parentNode) return false;
+      range.setStartAfter(caretMarker);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return true;
+    }
+
+    if (!snapshot.collapsed && snapshot.startId && snapshot.endId) {
+      const startMarker = root.querySelector(`[${RANGE_START_MARKER_ATTR}="${snapshot.startId}"]`);
+      const endMarker = root.querySelector(`[${RANGE_END_MARKER_ATTR}="${snapshot.endId}"]`);
+      if (!startMarker || !endMarker || !startMarker.parentNode || !endMarker.parentNode) return false;
+
+      range.setStartAfter(startMarker);
+      range.setEndBefore(endMarker);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return true;
+    }
+  } catch {
+    return false;
+  }
+
+  return false;
+};
+
+const restoreSelectionOffsets = (root: HTMLElement, offsets: SelectionOffsets | null): void => {
+  if (!offsets) return;
+
+  const selection = window.getSelection();
+  if (!selection) return;
+
+  try {
+    const start = getTextPositionFromOffset(root, offsets.start);
+    const end = getTextPositionFromOffset(root, offsets.end);
+
+    const range = document.createRange();
+    range.setStart(start.node, start.offset);
+    range.setEnd(end.node, end.offset);
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+  } catch {
+    // If restoration fails, keep browser default caret behavior.
+  }
+};
+
 interface EditorContentProps {
   editor: Editor;
   defaultValue?: string;
@@ -33,6 +219,9 @@ interface EditorContentProps {
     allowedTags?: string[];
     allowedAttributes?: Record<string, string[]>;
     sanitize?: boolean;
+    autoHeight?: boolean;
+    minHeight?: number;
+    maxHeight?: number;
   };
   securityConfig?: {
     sanitizeOnPaste?: boolean;
@@ -82,6 +271,23 @@ export const EditorContent: React.FC<EditorContentProps> = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const isControlled = value !== undefined;
   const debounceTimerRef = useRef<NodeJS.Timeout>();
+  const autoHeightEnabled = contentConfig?.autoHeight === true;
+  const minEditorHeight = typeof contentConfig?.minHeight === 'number' ? contentConfig.minHeight : 200;
+  const maxEditorHeight = typeof contentConfig?.maxHeight === 'number' ? contentConfig.maxHeight : 0;
+
+  const syncAutoHeight = (el: HTMLElement | null): void => {
+    if (!el || !autoHeightEnabled) return;
+
+    el.style.height = 'auto';
+    const targetHeight = Math.max(minEditorHeight, el.scrollHeight);
+
+    if (maxEditorHeight > 0) {
+      el.style.height = `${Math.min(targetHeight, maxEditorHeight)}px`;
+      return;
+    }
+
+    el.style.height = `${targetHeight}px`;
+  };
 
   // Autosave setup
   const { restore } = useAutosave(
@@ -110,6 +316,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     }
     
     setPlaceholderVisualState(contentRef.current, placeholder);
+    syncAutoHeight(contentRef.current);
 
     if (restoredContent && onChange) {
       // Notify parent of restored content
@@ -125,6 +332,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       contentRef.current.innerHTML = value;
     }
     setPlaceholderVisualState(contentRef.current, placeholder);
+    syncAutoHeight(contentRef.current);
   }, [value, isControlled]);
 
   useEffect(() => {
@@ -139,11 +347,13 @@ export const EditorContent: React.FC<EditorContentProps> = ({
         el.innerHTML = '';
       }
       setPlaceholderVisualState(el, placeholder);
+      syncAutoHeight(el);
       return;
     }
 
     el.removeAttribute('data-placeholder');
     setPlaceholderVisualState(el, placeholder);
+    syncAutoHeight(el);
   }, [placeholder]);
 
   useEffect(() => {
@@ -171,6 +381,10 @@ export const EditorContent: React.FC<EditorContentProps> = ({
   }, [accessibilityConfig?.enableARIA, placeholder, readonly]);
 
   useEffect(() => {
+    syncAutoHeight(contentRef.current);
+  }, [autoHeightEnabled, minEditorHeight, maxEditorHeight, value]);
+
+  useEffect(() => {
     if (!contentRef.current) return;
 
     const handleInput = () => {
@@ -185,29 +399,31 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       
       // Sanitize input if enabled
       if (securityConfig?.sanitizeOnInput !== false && contentConfig?.sanitize !== false) {
-        html = sanitizeInputHTML(html, contentConfig, securityConfig);
+        const sanitizedHtml = sanitizeInputHTML(html, contentConfig, securityConfig);
         
         // Update content if sanitization changed it
-        if (html !== contentRef.current.innerHTML) {
-          // Save selection
-          const selection = window.getSelection();
-          const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-          
-          contentRef.current.innerHTML = html;
-          
-          // Restore selection
-          if (range && selection) {
-            try {
-              selection.removeAllRanges();
-              selection.addRange(range);
-            } catch (e) {
-              // Selection restoration failed, ignore
-            }
+        if (sanitizedHtml !== contentRef.current.innerHTML) {
+          // Keep caret/selection stable when sanitization rewrites DOM.
+          const snapshot = insertSelectionMarkers(contentRef.current);
+          const htmlWithMarkers = contentRef.current.innerHTML;
+          const sanitizedWithMarkers = sanitizeInputHTML(htmlWithMarkers, contentConfig, securityConfig);
+
+          contentRef.current.innerHTML = sanitizedWithMarkers;
+
+          const restoredFromMarkers = restoreSelectionFromMarkers(contentRef.current, snapshot);
+          if (!restoredFromMarkers) {
+            restoreSelectionOffsets(contentRef.current, snapshot?.fallbackOffsets || null);
           }
+
+          removeSelectionMarkers(contentRef.current);
+          html = contentRef.current.innerHTML;
+        } else {
+          html = sanitizedHtml;
         }
       }
 
       setPlaceholderVisualState(contentRef.current, placeholder);
+      syncAutoHeight(contentRef.current);
 
       if (!onChange) return;
       
@@ -304,6 +520,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
         contentRef.current.innerHTML = '';
       }
       setPlaceholderVisualState(contentRef.current, placeholder);
+      syncAutoHeight(contentRef.current);
     };
 
     const el = contentRef.current;
@@ -377,16 +594,18 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       data-readonly={readonly ? 'true' : 'false'}
       className={`rte-content ${readonly ? 'rte-content-readonly' : ''}`}
       style={{
-        minHeight: "200px",
-        maxHeight: "100%",
+        minHeight: `${minEditorHeight}px`,
+        maxHeight: autoHeightEnabled
+          ? (maxEditorHeight > 0 ? `${maxEditorHeight}px` : "none")
+          : "100%",
         padding: "16px",
         outline: "none",
         border: "1px solid #ddd",
         borderRadius: "0px 0px 4px 4px",
         fontSize: "14px",
         lineHeight: "1.5",
-        overflow: "auto",
-        flex: 1,
+        overflow: autoHeightEnabled ? (maxEditorHeight > 0 ? "auto" : "hidden") : "auto",
+        flex: autoHeightEnabled ? undefined : 1,
         boxSizing: "border-box",
         wordWrap: "break-word",
         overflowWrap: "break-word",

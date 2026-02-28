@@ -3,11 +3,6 @@
  * Author: Ajay Kumar <ajaykr089@gmail.com>
  */
 
-// Forward declarations
-export interface EditorCore {
-  // This will be defined in the main EditorCore class
-}
-
 // Position in the text
 export interface Position {
   line: number;
@@ -25,6 +20,14 @@ export interface TextChange {
   range: Range;
   text: string;
   oldText: string;
+}
+
+// Batched immutable change operation
+export interface Transaction {
+  changes: TextChange[];
+  selection?: Range;
+  effects: unknown[];
+  annotations: unknown[];
 }
 
 // Cursor position
@@ -135,7 +138,24 @@ export interface EditorEvents {
 
 // Forward declarations
 export interface View {
-  // This will be defined in the View class
+  getContentElement(): HTMLElement;
+  getLineNumbersElement(): HTMLElement;
+  getText(): string;
+  setText(text: string): void;
+  setHTML(html: string): void;
+  getCursorPosition(): Position;
+  setCursorPosition(position: Position): void;
+  getSelectionRange(): Range | undefined;
+  setSelectionRange(range: Range): void;
+  focus(): void;
+  blur(): void;
+  setReadOnly(readOnly: boolean): void;
+  applyTheme(theme: Record<string, string>): void;
+  scrollToPosition(position: Position): void;
+  getScrollTop(): number;
+  setScrollTop(scrollTop: number): void;
+  updateLineNumbers(lineCount: number): void;
+  destroy(): void;
 }
 
 // Public API interface
@@ -183,3 +203,6 @@ export interface EditorAPI {
   on<K extends keyof EditorEvents>(event: K, handler: EditorEvents[K]): void;
   off<K extends keyof EditorEvents>(event: K, handler?: EditorEvents[K]): void;
 }
+
+// Alias used by extensions for the concrete editor contract.
+export interface EditorCore extends EditorAPI {}

@@ -4,18 +4,18 @@
     <!-- Meta Tags for SEO -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Editora Installation - Example and demonstration of Editora rich text editor features.">
-    <meta name="keywords" content="installation, Editora editor, example, demonstration">
+    <meta name="description" content="Editora Installation - Set up the Editora content authoring ecosystem across core, plugins, themes, and framework adapters.">
+    <meta name="keywords" content="installation, Editora ecosystem, @editora/core, @editora/react, plugins, themes, framework adapters">
     <meta name="author" content="Editora Contributors">
     <meta name="robots" content="index, follow">
     <meta property="og:title" content="Editora - Installation">
-    <meta property="og:description" content="Editora Installation - Example and demonstration of Editora rich text editor features.">
+    <meta property="og:description" content="Set up the Editora ecosystem: core engine, plugins, themes, and framework integrations.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://editora-free.netlify.app/">
     <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:title" content="Editora - Installation">
-    <meta property="twitter:description" content="Editora Installation - Example and demonstration of Editora rich text editor features">
+    <meta property="twitter:description" content="Install and configure the Editora ecosystem for web components and framework apps.">
     <meta name="theme-color" content="#007bff">
 
     <!-- Favicon -->
@@ -52,7 +52,7 @@
     <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
         <div class="container">
             <h1 style="color: white; margin-bottom: 0.5rem;">📥 Installation Guide</h1>
-            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Get Editora up and running in your project</p>
+            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Set up the Editora content authoring ecosystem in your project</p>
         </div>
     </section>
 
@@ -70,6 +70,10 @@
                         <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
                         <li><a href="examples.html">Examples</a></li>
                         <li><a href="custom-plugins.html">Custom Plugins</a></li>
+                        <li><a href="icons.html">@editora/icons</a></li>
+                        <li><a href="react-icons.html">@editora/react-icons</a></li>
+                        <li><a href="ui-core.html">@editora/ui-core</a></li>
+                        <li><a href="ui-react.html">@editora/ui-react</a></li>
                         <li><a href="about.html">About</a></li>
                     </ul>
 
@@ -85,6 +89,8 @@
                 <!-- Main Content -->
                 <main class="docs-content">
                     <h2>Installation</h2>
+                    <p>Editora is a modular ecosystem, not just a single editor package. Start with <code>@editora/core</code>, then add <code>@editora/plugins</code>, <code>@editora/themes</code>, and framework-specific wrappers as needed.</p>
+                    <p>This guide shows minimal and full-featured setups for web components and React so you can scale from quick integration to production-ready authoring workflows.</p>
 
                     <!-- Tabs -->
                     <div class="tabs-container" style="margin: 2rem 0;">
@@ -100,20 +106,29 @@
                         <!-- npm Tab -->
                         <div id="tab-npm" class="tab-content active">
                             <h3>📦 Using npm</h3>
-                            <p>Install Editora core package from npm registry:</p>
-                            <pre><code>npm install @editora/core</code></pre>
+                            <p>Install packages based on your integration type:</p>
+                            <pre><code># Web component (minimal)
+npm install @editora/core
+
+# Web component with theme package (recommended for dark/acme/custom theme overrides)
+npm install @editora/core @editora/themes</code></pre>
 
                             <h4>For React Projects</h4>
-                            <p>Install the React integration package:</p>
-                            <pre><code>npm install @editora/react @editora/core @editora/plugins @editora/themes react react-dom</code></pre>
+                            <p>Install the React wrapper with peer dependencies:</p>
+                            <pre><code># Minimal runtime
+npm install @editora/react @editora/core react react-dom
+
+# Full-featured setup (recommended)
+npm install @editora/react @editora/core @editora/plugins @editora/themes react react-dom</code></pre>
 
                             <h4>Quick Start</h4>
-                            <pre><code class="language-javascript">import { Editor } from '@editora/core';
+                            <pre><code class="language-javascript">import { createEditor } from '@editora/core';
 
-const editor = new Editor({
-  element: document.getElementById('editor'),
+const editor = createEditor({
   content: '&lt;p&gt;Hello, World!&lt;/p&gt;'
-});</code></pre>
+});
+
+editor.mount(document.getElementById('editor'));</code></pre>
 
                             <h4>With React</h4>
                             <pre><code class="language-jsx">
@@ -158,10 +173,18 @@ function App() {
                         <div id="tab-yarn" class="tab-content">
                             <h3>🧶 Using Yarn</h3>
                             <p>Install Editora using Yarn package manager:</p>
-                            <pre><code>yarn add @editora/core</code></pre>
+                            <pre><code># Web component (minimal)
+yarn add @editora/core
+
+# Web component with themes
+yarn add @editora/core @editora/themes</code></pre>
 
                             <h4>For React Projects</h4>
-                            <pre><code>yarn add @editora/react @editora/core @editora/plugins @editora/themes react react-dom</code></pre>
+                            <pre><code># Minimal runtime
+yarn add @editora/react @editora/core react react-dom
+
+# Full-featured setup
+yarn add @editora/react @editora/core @editora/plugins @editora/themes react react-dom</code></pre>
 
                             <p class="alert alert-info">
                                 💡 Yarn usage is identical to npm. All other examples in this guide use npm but work the same with Yarn.
@@ -190,14 +213,22 @@ function App() {
 &lt;html&gt;
 &lt;head&gt;
   &lt;title&gt;Editora Web Component&lt;/title&gt;
-  &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.js"&gt;&lt;/script&gt;
-  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.css"&gt;
+  &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"&gt;&lt;/script&gt;
+  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
+  &lt;!-- Optional theme packs --&gt;
+  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/themes/themes/dark.css"&gt;
+  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/themes/themes/acme.css"&gt;
 &lt;/head&gt;
 &lt;body&gt;
   &lt;editora-editor
     plugins="bold italic underline history"
     toolbar-items="bold italic underline | undo redo"
     height="300"
+    theme="dark"
+    autosave='{"enabled":true,"intervalMs":3000,"storageKey":"doc-1"}'
+    security='{"sanitizeOnPaste":true,"sanitizeOnInput":true}'
+    accessibility='{"enableARIA":true,"keyboardNavigation":true}'
+    performance='{"debounceInputMs":120,"viewportOnlyScan":true}'
   &gt;
     &lt;p&gt;Start typing...&lt;/p&gt;
   &lt;/editora-editor&gt;
@@ -206,6 +237,10 @@ function App() {
 
                             <div class="alert alert-success">
                                 ✅ Ready to use! No build process needed. Works in all modern browsers.
+                            </div>
+
+                            <div class="alert alert-info">
+                                ℹ️ Web component dependencies: <code>@editora/core</code> is required. Use <code>@editora/themes</code> when you need dark/acme/custom theme CSS packs from npm/CDN.
                             </div>
                         </div>
 
@@ -280,8 +315,8 @@ npm run dev  # Watch mode build</code></pre>
 
                     <h2>✅ Verify Installation</h2>
                     <p>Test if the installation was successful:</p>
-                    <pre><code class="language-javascript">import { Editor } from '@editora/core';
-console.log(Editor); // Should print the Editor class</code></pre>
+                    <pre><code class="language-javascript">import { createEditor } from '@editora/core';
+console.log(typeof createEditor); // Should print "function"</code></pre>
 
                     <h2>❓ Troubleshooting</h2>
                     <div class="alert alert-warning">

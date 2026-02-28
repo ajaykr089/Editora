@@ -21,6 +21,7 @@ import {
 } from './types';
 
 export class EditorCore implements EditorAPI {
+  private static readonly CURSOR_SENTINEL = '\uE000';
   private textModel: TextModel;
   private view: View;
   private config: EditorConfig;
@@ -33,6 +34,7 @@ export class EditorCore implements EditorAPI {
   private undoStack: Array<string | { text: string; cursorOffset?: number; anchorOffset?: number; focusOffset?: number }> = [];
   private redoStack: Array<string | { text: string; cursorOffset?: number; anchorOffset?: number; focusOffset?: number }> = [];
   private suppressHistory = false;
+  private highlightTimeout: ReturnType<typeof setTimeout> | null = null;
   // When true, callers are about to set the cursor programmatically after a render
   // and we should not auto-restore the caret from a saved offset (avoids clobbering).
   private expectingProgrammaticCursor: boolean = false;
@@ -135,9 +137,16 @@ export class EditorCore implements EditorAPI {
         }
 
         this.textModel.setText(newText);
+        this.view.syncTrailingNewlineMarkerForText(newText);
         // Debounce re-render to avoid frequent DOM replacements during fast typing.
         if (this.highlightTimeout) clearTimeout(this.highlightTimeout);
         this.highlightTimeout = setTimeout(() => {
+          // Race guard: a key event can land near timeout boundary and mutate the DOM
+          // before input/model sync settles. Always reconcile with live DOM before render.
+          const latestText = this.view.getText();
+          if (latestText !== this.textModel.getText()) {
+            this.textModel.setText(latestText);
+          }
           // When typing, don't force selection restore; keep caret where the browser placed it.
           this.renderTextWithHighlight(this.textModel.getText(), false);
           this.highlightTimeout = null;
@@ -188,6 +197,10 @@ export class EditorCore implements EditorAPI {
               preAnchorOffset = this.textModel.positionToOffset(preSel.start);
               preFocusOffset = this.textModel.positionToOffset(preSel.end);
             }
+            const insertionStartOffset =
+              preSel && preAnchorOffset !== undefined && preFocusOffset !== undefined
+                ? Math.min(preAnchorOffset, preFocusOffset)
+                : preCursorOffset;
             if (!this.suppressHistory) {
               this.undoStack.push({ text: this.textModel.getText(), cursorOffset: preCursorOffset, anchorOffset: preAnchorOffset, focusOffset: preFocusOffset });
               if (this.undoStack.length > 100) this.undoStack.shift();
@@ -204,21 +217,30 @@ export class EditorCore implements EditorAPI {
             range.collapse(true);
             selection.removeAllRanges();
             selection.addRange(range);
+            this.view.ensureCaretVisible();
 
-            // Capture post-change cursor/selection to restore after rendering
-            const postCursorPos = this.getCursor().position;
-            const postCursorOffset = this.textModel.positionToOffset(postCursorPos);
-            const postSel = this.getSelection();
-            let postAnchorOffset: number | undefined;
-            let postFocusOffset: number | undefined;
-            if (postSel) {
-              postAnchorOffset = this.textModel.positionToOffset(postSel.start);
-              postFocusOffset = this.textModel.positionToOffset(postSel.end);
-            }
-
-            // Update model from DOM
+            // Update model from DOM before converting cursor/selection to offsets.
+            // Converting with the old model causes first-Enter caret restoration bugs.
             const newText = this.view.getText();
             this.textModel.setText(newText);
+            this.view.syncTrailingNewlineMarkerForText(newText);
+
+            // Enter always inserts a single newline and collapses caret right after it.
+            // Compute offset directly from pre-selection to avoid first-enter DOM/range drift.
+            const postCursorOffset = Math.min(
+              insertionStartOffset + 1,
+              this.textModel.getText().length
+            );
+
+            // Apply caret move immediately so Enter-at-end lands on the next line
+            // without waiting for the deferred syntax-highlight render.
+            try {
+              const immediatePos = this.textModel.offsetToPosition(postCursorOffset);
+              this.setCursor(immediatePos);
+              this.view.ensureCaretVisible();
+            } catch {
+              // ignore and allow delayed restore path below
+            }
 
             // Debounce highlight rendering and restore caret/selection after render
             if (this.highlightTimeout) clearTimeout(this.highlightTimeout);
@@ -227,18 +249,9 @@ export class EditorCore implements EditorAPI {
               // restore caret/selection on next frame after render
               requestAnimationFrame(() => {
                 try {
-                  if (postSel && (postAnchorOffset !== undefined || postFocusOffset !== undefined)) {
-                    const a = postAnchorOffset !== undefined ? postAnchorOffset : postCursorOffset;
-                    const f = postFocusOffset !== undefined ? postFocusOffset : postCursorOffset;
-                    const start = Math.min(a!, f!);
-                    const end = Math.max(a!, f!);
-                    const startPos = this.textModel.offsetToPosition(start);
-                    const endPos = this.textModel.offsetToPosition(end);
-                    this.setSelection({ start: startPos, end: endPos });
-                  } else {
-                    const pos = this.textModel.offsetToPosition(postCursorOffset);
-                    this.setCursor(pos);
-                  }
+                  const pos = this.textModel.offsetToPosition(postCursorOffset);
+                  this.setCursor(pos);
+                  this.view.ensureCaretVisible();
                 } catch (e) {
                   // ignore
                 }
@@ -572,15 +585,29 @@ export class EditorCore implements EditorAPI {
 
         if (restoreSelection || shouldAutoPreserve) {
           sel = this.getSelection();
-          const cursor = this.getCursor().position;
-          cursorOffset = this.textModel.positionToOffset(cursor);
+          const collapsedOffset = this.getCollapsedSelectionOffsetInEditor();
+          if (collapsedOffset !== undefined) {
+            cursorOffset = collapsedOffset;
+          } else {
+            const cursor = this.getCursor().position;
+            cursorOffset = this.textModel.positionToOffset(cursor);
+          }
           if (sel) {
             anchorOffset = this.textModel.positionToOffset(sel.start);
             focusOffset = this.textModel.positionToOffset(sel.end);
           }
         }
 
-        const html = sh.highlightHTML(text);
+        const shouldUseSentinel =
+          (restoreSelection || shouldAutoPreserve) &&
+          !sel &&
+          cursorOffset !== undefined &&
+          this.hasCollapsedSelectionInEditor();
+        const sourceForRender = shouldUseSentinel
+          ? this.insertSentinelAtOffset(text, cursorOffset!)
+          : text;
+
+        const html = sh.highlightHTML(sourceForRender);
         // Render highlights into the overlay to avoid replacing the editable DOM
         if (typeof (this.view as any).setHighlightHTML === 'function') {
           (this.view as any).setHighlightHTML(html);
@@ -588,11 +615,19 @@ export class EditorCore implements EditorAPI {
           // Fallback: set innerHTML on content area (legacy)
           this.view.setHTML(html);
         }
+        // Keep trailing-newline marker authoritative from source text, not rendered HTML.
+        // Some highlight outputs can normalize trailing newline markup and drop the marker state.
+        this.view.syncTrailingNewlineMarkerForText(text);
 
         // Restore selection/caret on next animation frame after DOM updates settle.
         if (restoreSelection || shouldAutoPreserve) {
           requestAnimationFrame(() => {
             try {
+              if (shouldUseSentinel && this.restoreCursorFromSentinel()) {
+                this.view.ensureCaretVisible();
+                return;
+              }
+
               if (sel && (anchorOffset !== undefined || focusOffset !== undefined)) {
                 const a = anchorOffset !== undefined ? anchorOffset : cursorOffset!;
                 const f = focusOffset !== undefined ? focusOffset : cursorOffset!;
@@ -619,6 +654,84 @@ export class EditorCore implements EditorAPI {
 
     // Fallback to plain text
     this.view.setText(text);
+  }
+
+  private hasCollapsedSelectionInEditor(): boolean {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || !selection.isCollapsed) {
+      return false;
+    }
+
+    const range = selection.getRangeAt(0);
+    const contentEl = this.view.getContentElement();
+    return contentEl.contains(range.commonAncestorContainer);
+  }
+
+  private getCollapsedSelectionOffsetInEditor(): number | undefined {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || !selection.isCollapsed) {
+      return undefined;
+    }
+
+    const range = selection.getRangeAt(0);
+    const contentEl = this.view.getContentElement();
+    if (!contentEl.contains(range.commonAncestorContainer)) {
+      return undefined;
+    }
+
+    const preCaretRange = range.cloneRange();
+    preCaretRange.selectNodeContents(contentEl);
+    preCaretRange.setEnd(range.endContainer, range.endOffset);
+    return this.stripVirtualMarkers(preCaretRange.toString()).length;
+  }
+
+  private stripVirtualMarkers(value: string): string {
+    return value.replace(/\u200B/g, '').split(EditorCore.CURSOR_SENTINEL).join('');
+  }
+
+  private insertSentinelAtOffset(text: string, offset: number): string {
+    const boundedOffset = Math.max(0, Math.min(offset, text.length));
+    return (
+      text.slice(0, boundedOffset) +
+      EditorCore.CURSOR_SENTINEL +
+      text.slice(boundedOffset)
+    );
+  }
+
+  private restoreCursorFromSentinel(): boolean {
+    const contentEl = this.view.getContentElement();
+    const selection = window.getSelection();
+
+    const walker = document.createTreeWalker(contentEl, NodeFilter.SHOW_TEXT);
+    let node = walker.nextNode();
+    let targetNode: Node | null = null;
+    let targetOffset = 0;
+
+    while (node) {
+      const text = node.textContent ?? '';
+      const index = text.indexOf(EditorCore.CURSOR_SENTINEL);
+      if (index !== -1) {
+        if (!targetNode) {
+          targetNode = node;
+          targetOffset = index;
+        }
+        (node as Text).textContent = text.split(EditorCore.CURSOR_SENTINEL).join('');
+      }
+      node = walker.nextNode();
+    }
+
+    if (!targetNode || !selection) return false;
+
+    try {
+      const range = document.createRange();
+      range.setStart(targetNode, targetOffset);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   destroy(): void {

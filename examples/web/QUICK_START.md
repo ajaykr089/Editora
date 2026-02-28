@@ -29,6 +29,19 @@ python3 -m http.server 8000
 # Then visit http://localhost:8000 in your browser
 ```
 
+## 📦 Current Dependency Notes
+
+- Web component runtime requires: `@editora/core`
+- Theme packs (dark/acme/custom CSS) come from: `@editora/themes`
+- React wrapper runtime uses: `@editora/react`, `@editora/core`, `react`, `react-dom`
+- Full React feature set usually adds: `@editora/plugins`, `@editora/themes`
+
+## ⚙️ Config Validation Labs
+
+- Security + Autosave: `webcomponent-security-autosave-lab.html`
+- Performance + Accessibility: `webcomponent-performance-accessibility-lab.html`
+- Theme comparison (default/dark/acme): `theme-acme.html`
+
 ## 📄 Website Pages Overview
 
 ### Main Pages

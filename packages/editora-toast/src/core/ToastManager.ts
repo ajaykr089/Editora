@@ -32,6 +32,7 @@ export class ToastManager implements IToastManager {
   private pausedToasts = new Set<string>();
   private windowFocusHandler?: () => void;
   private windowBlurHandler?: () => void;
+  private visibilityChangeHandler?: () => void;
 
   constructor(config: Partial<ToastConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -165,9 +166,14 @@ export class ToastManager implements IToastManager {
 
   // Configuration
   configure(config: Partial<ToastConfig>): void {
+    const hadPauseOnWindowBlur = this.config.pauseOnWindowBlur;
     this.config = { ...this.config, ...config };
     this.store.updateConfig(config);
     this.queue.updateConfig(config);
+    if (config.pauseOnWindowBlur !== undefined && config.pauseOnWindowBlur !== hadPauseOnWindowBlur) {
+      this.teardownWindowFocusHandling();
+      this.setupWindowFocusHandling();
+    }
     // Renderer will use updated config for new toasts
   }
 
@@ -224,22 +230,40 @@ export class ToastManager implements IToastManager {
 
   // Window focus/blur handling
   private setupWindowFocusHandling(): void {
-    if (typeof window === 'undefined' || !this.config.pauseOnWindowBlur) return;
+    if (typeof window === 'undefined' || typeof document === 'undefined' || !this.config.pauseOnWindowBlur) return;
+
+    // Avoid duplicate listeners when configuration changes.
+    this.teardownWindowFocusHandling();
 
     this.windowBlurHandler = () => this.pauseAllToasts();
     this.windowFocusHandler = () => this.resumeAllToasts();
-
-    window.addEventListener('blur', this.windowBlurHandler);
-    window.addEventListener('focus', this.windowFocusHandler);
-
-    // Also handle visibility change for better cross-browser support
-    document.addEventListener('visibilitychange', () => {
+    this.visibilityChangeHandler = () => {
       if (document.hidden) {
         this.pauseAllToasts();
       } else {
         this.resumeAllToasts();
       }
-    });
+    };
+
+    window.addEventListener('blur', this.windowBlurHandler);
+    window.addEventListener('focus', this.windowFocusHandler);
+    document.addEventListener('visibilitychange', this.visibilityChangeHandler);
+  }
+
+  private teardownWindowFocusHandling(): void {
+    if (typeof window === 'undefined') return;
+    if (this.windowBlurHandler) {
+      window.removeEventListener('blur', this.windowBlurHandler);
+      this.windowBlurHandler = undefined;
+    }
+    if (this.windowFocusHandler) {
+      window.removeEventListener('focus', this.windowFocusHandler);
+      this.windowFocusHandler = undefined;
+    }
+    if (typeof document !== 'undefined' && this.visibilityChangeHandler) {
+      document.removeEventListener('visibilitychange', this.visibilityChangeHandler);
+      this.visibilityChangeHandler = undefined;
+    }
   }
 
   private pauseAllToasts(): void {
@@ -268,13 +292,7 @@ export class ToastManager implements IToastManager {
 
   // Cleanup
   destroy(): void {
-    // Remove window event listeners
-    if (this.windowBlurHandler && typeof window !== 'undefined') {
-      window.removeEventListener('blur', this.windowBlurHandler);
-    }
-    if (this.windowFocusHandler && typeof window !== 'undefined') {
-      window.removeEventListener('focus', this.windowFocusHandler);
-    }
+    this.teardownWindowFocusHandling();
 
     this.clear();
     this.renderer.destroy();

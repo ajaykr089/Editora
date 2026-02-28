@@ -23,7 +23,7 @@ export class ReadOnlyExtension implements EditorExtension {
     });
 
     // Keyboard shortcut for toggling read-only mode
-    editor.on('keydown', (event) => {
+    editor.on('keydown', (event: KeyboardEvent) => {
       if (event.ctrlKey && event.key === 'r') {
         event.preventDefault();
         this.toggleReadOnly();

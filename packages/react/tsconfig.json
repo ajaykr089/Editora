@@ -1,6 +1,14 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@editora/core": ["../core/index.d.ts"],
+      "@editora/plugins": ["../plugins/index.d.ts"],
+      "@editora/plugins/*": ["../plugins/index.d.ts"],
+      "@editora/themes": ["../themes/index.d.ts"],
+      "@editora/light-code-editor": ["../light-code-editor/dist/index.d.ts"]
+    },
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,
@@ -9,5 +17,10 @@
     "jsx": "react-jsx"
   },
   "include": ["src/**/*"],
-  "exclude": ["dist", "**/*.test.ts"]
+  "exclude": [
+    "dist",
+    "**/*.test.ts",
+    "src/components/ToolbarContainer.tsx",
+    "src/hooks/useEditor.ts"
+  ]
 }

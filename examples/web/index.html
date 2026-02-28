@@ -113,21 +113,26 @@
             <div class="row">
                 <div class="col">
                     <h3>1. Install</h3>
-                    <pre><code class="language-bash">npm install @editora/core @editora/react @editora/plugins @editora/themes</code></pre>
-                    <p>Or use via CDN for HTML websites without build tools.</p>
+                    <pre><code class="language-bash"># Web component
+npm install @editora/core @editora/themes
+
+# React
+npm install @editora/react @editora/core @editora/plugins @editora/themes react react-dom</code></pre>
+                    <p>For no-build HTML usage, load <code>@editora/core/dist/webcomponent.js</code> via CDN.</p>
                 </div>
                 <div class="col">
                     <h3>2. Import</h3>
-                    <pre><code class="language-javascript">import { Editor } from '@editora/core';
+                    <pre><code class="language-javascript">import { createEditor } from '@editora/core';
 // Or React
 import EditoraEditor from '@editora/react';</code></pre>
                 </div>
                 <div class="col">
                     <h3>3. Use</h3>
-                    <pre><code class="language">const editor = new Editor({
-  element: '#editor',
+                    <pre><code class="language">const editor = createEditor({
   content: '&lt;p&gt;Hello!&lt;/p&gt;'
-});</code></pre>
+});
+editor.mount(document.getElementById('editor'));</code></pre>
+                    <p>Web component also supports <code>theme</code>, <code>autosave</code>, <code>security</code>, <code>accessibility</code>, and <code>performance</code> config groups.</p>
                 </div>
             </div>
             <div class="text-center mt-4">
@@ -224,6 +229,111 @@ import EditoraEditor from '@editora/react';</code></pre>
         </div>
     </section>
 
+    <!-- Ecosystem Section -->
+    <section>
+        <div class="container">
+            <h2>🧩 Editora Ecosystem</h2>
+            <p class="text-center" style="margin-bottom: 0.75rem;">
+                Editora is a modular content-authoring platform, not just a rich text editor. It combines a core editing engine with UI foundations, themes, icons, performance utilities, and framework adapters.
+            </p>
+            <p class="text-center mb-4">
+                Use these packages independently or together to build scalable authoring experiences across Web Components, React, Angular, Vue, and Svelte.
+            </p>
+            <div class="plugin-grid">
+                <div class="plugin-card">
+                    <div class="plugin-icon">⚙️</div>
+                    <h4>@editora/core</h4>
+                    <p>Framework-agnostic editor engine and web component runtime.</p>
+                    <a href="docs/installation.html" class="plugin-link">Open Docs →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">⚛️</div>
+                    <h4>@editora/react</h4>
+                    <p>React wrapper with controlled/uncontrolled editor support.</p>
+                    <a href="docs/examples.html" class="plugin-link">Open Docs →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">🔌</div>
+                    <h4>@editora/plugins</h4>
+                    <p>Native plugin suite for formatting, media, tables, and productivity.</p>
+                    <a href="plugins/index.html" class="plugin-link">View Plugins →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">🎨</div>
+                    <h4>@editora/themes</h4>
+                    <p>Default, dark, and custom theming primitives for the editor UI.</p>
+                    <a href="theme-comparison.html" class="plugin-link">Try Themes →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">🧱</div>
+                    <h4>@editora/icons</h4>
+                    <p>Core icon set used by toolbar, dialogs, and ecosystem packages.</p>
+                    <a href="docs/icons.html" class="plugin-link">Open Docs →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">🧩</div>
+                    <h4>@editora/react-icons</h4>
+                    <p>React icon components for tree-shakable icon usage in apps.</p>
+                    <a href="docs/react-icons.html" class="plugin-link">Open Docs →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">🧰</div>
+                    <h4>@editora/ui-core</h4>
+                    <p>Shared UI primitives for dialogs, panels, and design consistency.</p>
+                    <a href="docs/ui-core.html" class="plugin-link">Open Docs →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">🧪</div>
+                    <h4>@editora/ui-react</h4>
+                    <p>React-first UI building blocks aligned with Editora design tokens.</p>
+                    <a href="docs/ui-react.html" class="plugin-link">Open Docs →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">🍞</div>
+                    <h4>@editora/toast</h4>
+                    <p>Toast and notification primitives with theme-aware styling.</p>
+                    <a href="toast-demo.html" class="plugin-link">Open Demo →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">💡</div>
+                    <h4>@editora/light-code-editor</h4>
+                    <p>Lightweight code editor used by source/code editing workflows.</p>
+                    <a href="light-code-editor-demo.html" class="plugin-link">Open Demo →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">📈</div>
+                    <h4>@editora/performance</h4>
+                    <p>Performance utilities for debouncing, scans, and editor profiling.</p>
+                    <a href="webcomponent-performance-accessibility-lab.html" class="plugin-link">Open Lab →</a>
+                </div>
+                <!-- <div class="plugin-card">
+                    <div class="plugin-icon">🧭</div>
+                    <h4>@editora/ui-editor</h4>
+                    <p>Editor-specific UI wiring package for higher-level integrations.</p>
+                    <a href="docs/examples.html" class="plugin-link">View Integration Examples →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">🅰️</div>
+                    <h4>@editora/ui-angular</h4>
+                    <p>Angular adapter for Editora UI components and editor integration.</p>
+                    <a href="docs/examples.html" class="plugin-link">View Angular Integration →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">🟢</div>
+                    <h4>@editora/ui-vue</h4>
+                    <p>Vue adapter package for consistent Editora UI integration patterns.</p>
+                    <a href="docs/examples.html" class="plugin-link">View Vue Integration →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">🟠</div>
+                    <h4>@editora/ui-svelte</h4>
+                    <p>Svelte adapter package for lightweight Editora UI integrations.</p>
+                    <a href="docs/examples.html" class="plugin-link">View Svelte Integration →</a>
+                </div> -->
+            </div>
+        </div>
+    </section>
+
     <!-- Examples Section -->
     <section class="alternate">
         <div class="container">
@@ -271,6 +381,18 @@ import EditoraEditor from '@editora/react';</code></pre>
                     <h4>Toast Notifications</h4>
                     <p>Advanced toast notification system with themes, animations, and interactions.</p>
                     <a href="toast-demo.html" class="plugin-link">Try It →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">🛡️</div>
+                    <h4>Security + Autosave Lab</h4>
+                    <p>Validate sanitization and autosave behavior per editor instance.</p>
+                    <a href="webcomponent-security-autosave-lab.html" class="plugin-link">Try It →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">♿</div>
+                    <h4>Performance + A11y Lab</h4>
+                    <p>Test debounce, viewport-only scans, ARIA, and keyboard navigation.</p>
+                    <a href="webcomponent-performance-accessibility-lab.html" class="plugin-link">Try It →</a>
                 </div>
             </div>
             <div class="text-center mt-4">

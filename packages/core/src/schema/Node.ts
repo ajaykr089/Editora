@@ -6,7 +6,7 @@ export interface NodeSpec {
   attrs?: Record<string, any>;
   toDOM?: (node: Node) => [string, (Record<string, any> | number | undefined)?, ...any[]];
   parseDOM?: Array<{
-    tag: string;
+    tag?: string;
     style?: string;
     getAttrs?: (dom: HTMLElement) => Record<string, any> | null | false;
   }>;

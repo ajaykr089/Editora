@@ -159,6 +159,9 @@ export interface RichTextEditorProps {
     allowedTags?: string[];
     allowedAttributes?: Record<string, string[]>;
     sanitize?: boolean;
+    autoHeight?: boolean;
+    minHeight?: number;
+    maxHeight?: number;
   };
 
   // Security

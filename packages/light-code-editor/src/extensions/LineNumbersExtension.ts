@@ -53,6 +53,7 @@ export class LineNumbersExtension implements EditorExtension {
   }
 
   private toggle(): void {
+    if (!this.editor) return;
     this.isEnabled = !this.isEnabled;
 
     if (this.lineNumbersElement) {

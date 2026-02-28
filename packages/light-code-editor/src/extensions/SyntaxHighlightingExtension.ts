@@ -147,7 +147,9 @@ export class SyntaxHighlightingExtension implements EditorExtension {
     escaped = escaped.replace(/(&lt;\/?\s*)([^\s&>\/]+)([\s\S]*?)(\/?&gt;)/g, (whole, open, name, attrs, close) => {
       const taggedName = `<span style="color: ${colorsLocal.tag};">${name}</span>`;
       let processedAttrs = attrs;
-      processedAttrs = processedAttrs.replace(/([\w:-]+)(\s*=\s*)((&quot;[\s\S]*?&quot;|&#39;[\s\S]*?&#39;|[^\s&>]+))/g, (m, aname, aeq, aval) => {
+      processedAttrs = processedAttrs.replace(
+        /([\w:-]+)(\s*=\s*)((&quot;[\s\S]*?&quot;|&#39;[\s\S]*?&#39;|[^\s&>]+))/g,
+        (_m: string, aname: string, aeq: string, aval: string) => {
         const nameLower = String(aname).toLowerCase();
         const outName = `<span style="color: ${colorsLocal.attrName};">${aname}</span>`;
         let inner = aval;
@@ -156,7 +158,7 @@ export class SyntaxHighlightingExtension implements EditorExtension {
         else if (aval.startsWith('&#39;') && aval.endsWith('&#39;')) { inner = aval.slice(5, -5); quote = '&#39;'; }
         let outVal = aval;
         if (nameLower === 'style') {
-          const cssHighlighted = inner.replace(/([\w-]+)\s*:\s*([^;]+)(;?)/g, (cm, prop, v, semi) => {
+          const cssHighlighted = inner.replace(/([\w-]+)\s*:\s*([^;]+)(;?)/g, (_cm: string, prop: string, v: string, semi: string) => {
             return `<span style="color: ${colorsLocal.styleProp};">${prop}</span>:<span style="color: ${colorsLocal.styleVal};">${v.trim()}</span>${semi}`;
           });
           if (quote) outVal = `${quote}${cssHighlighted}${quote}`; else outVal = cssHighlighted;
@@ -165,8 +167,9 @@ export class SyntaxHighlightingExtension implements EditorExtension {
           if (quote) outVal = `${quote}${inner}${quote}`;
           outVal = `<span style=\"color: ${colorsLocal.attrValue};\">${outVal}</span>`;
         }
-        return `${outName}${aeq}${outVal}`;
-      });
+          return `${outName}${aeq}${outVal}`;
+        }
+      );
       return `${open}${taggedName}${processedAttrs}${close}`;
     });
 
