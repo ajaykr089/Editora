@@ -272,7 +272,7 @@ export const LineHeightPlugin = (): Plugin => ({
         }
       ],
       toDOM: (mark) => {
-        return ['span', { style: `line-height: ${mark.attrs.height}` }, 0];
+        return ['span', { style: `line-height: ${mark.attrs?.height}` }, 0];
       }
     }
   },

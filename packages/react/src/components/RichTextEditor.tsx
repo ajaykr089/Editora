@@ -39,6 +39,7 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
     props.className,
     props.value,
     props.defaultValue,
+    props.readonly,
     props.placeholder,
     props.plugins,
     props.toolbar,
@@ -292,6 +293,7 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
         ref={editorContainerRef}
         id={config.id}
         data-editora-editor
+        data-readonly={config.readonly ? 'true' : 'false'}
         className={`rte-editor ${config.className || ""}`}
         lang={config.language.locale}
         dir={config.language.direction}
@@ -307,6 +309,7 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
             position={toolbarPosition}
             sticky={stickyToolbar}
             floating={floatingToolbarEnabled}
+            readonly={config.readonly}
             showMoreOptions={showMoreOptions}
             itemsOverride={config.toolbar.items}
           />
@@ -315,6 +318,7 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
           editor={editor}
           defaultValue={config.defaultValue}
           value={config.value}
+          readonly={config.readonly}
           placeholder={config.placeholder}
           onChange={handleContentChange}
           pasteConfig={config.paste}
@@ -332,6 +336,7 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
             position={toolbarPosition}
             sticky={stickyToolbar}
             floating={floatingToolbarEnabled}
+            readonly={config.readonly}
             showMoreOptions={showMoreOptions}
             itemsOverride={config.toolbar.items}
           />
@@ -340,6 +345,7 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
           editor={editor}
           isEnabled={floatingToolbarEnabled}
           viewportOnlyScan={config.performance.viewportOnlyScan}
+          readonly={config.readonly}
         />
         {config.statusbar.enabled && (
           <div 

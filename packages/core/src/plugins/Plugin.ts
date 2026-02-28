@@ -56,20 +56,25 @@ export interface Plugin {
   name: string;
   nodes?: Record<string, NodeSpec>;
   marks?: Record<string, NodeSpec>;
-  commands?: Record<string, (state: EditorState, ...args: any[]) => EditorState | null>;
+  commands?: Record<string, PluginCommand>;
   toolbar?: ToolbarItem[];
+  keymap?: Record<string, string | ((...args: any[]) => any)>;
   context?: PluginContext;
   config?: PluginConfig;
+  init?: (...args: any[]) => void | Promise<void>;
   
   // Lifecycle hooks
   initialize?: (config?: PluginConfig) => void | Promise<void>;
-  destroy?: () => void | Promise<void>;
+  destroy?: (...args: any[]) => void | Promise<void>;
   
   // Mode-specific operations
   executeLocal?: (command: string, ...args: any[]) => any;
   executeAPI?: (command: string, ...args: any[]) => Promise<any>;
   executeHybrid?: (command: string, ...args: any[]) => Promise<any>;
 }
+
+export type PluginCommandResult = EditorState | null | boolean | void | Promise<EditorState | null | boolean | void>;
+export type PluginCommand = (...args: any[]) => PluginCommandResult;
 
 export class PluginManager {
   plugins: Plugin[] = [];
@@ -82,10 +87,22 @@ export class PluginManager {
       this.pluginConfigs.set(plugin.name, config);
     }
     
-    // Initialize plugin if it has an initialize method
+    const pluginConfig = this.pluginConfigs.get(plugin.name) || plugin.config;
+
     if (plugin.initialize) {
-      const pluginConfig = this.pluginConfigs.get(plugin.name) || plugin.config;
-      plugin.initialize(pluginConfig);
+      try {
+        plugin.initialize(pluginConfig);
+      } catch (error) {
+        console.error(`Failed to initialize plugin "${plugin.name}":`, error);
+      }
+    }
+
+    if (plugin.init && plugin.init !== plugin.initialize) {
+      try {
+        plugin.init(pluginConfig);
+      } catch (error) {
+        console.error(`Failed to run init hook for plugin "${plugin.name}":`, error);
+      }
     }
   }
 
@@ -124,8 +141,8 @@ export class PluginManager {
     return new Schema(nodes, marks);
   }
 
-  getCommands(): Record<string, (state: EditorState, ...args: any[]) => EditorState | null> {
-    const commands: Record<string, (state: EditorState, ...args: any[]) => EditorState | null> = {};
+  getCommands(): Record<string, PluginCommand> {
+    const commands: Record<string, PluginCommand> = {};
     this.plugins.forEach(plugin => {
       if (plugin.commands) Object.assign(commands, plugin.commands);
     });

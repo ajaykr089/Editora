@@ -21,10 +21,51 @@ declare global {
   }
 }
 
+const COMMAND_EDITOR_CONTEXT_KEY = '__editoraCommandEditorRoot';
+
+const getEditorContentFromHost = (host: Element | null): HTMLElement | null => {
+  if (!host) return null;
+  const content = host.querySelector('[contenteditable="true"]');
+  return content instanceof HTMLElement ? content : null;
+};
+
+const consumeCommandEditorContextEditor = (): HTMLElement | null => {
+  if (typeof window === 'undefined') return null;
+
+  const explicitContext = (window as any)[COMMAND_EDITOR_CONTEXT_KEY] as HTMLElement | null | undefined;
+  if (!(explicitContext instanceof HTMLElement)) return null;
+
+  (window as any)[COMMAND_EDITOR_CONTEXT_KEY] = null;
+
+  const root =
+    (explicitContext.closest('[data-editora-editor], .rte-editor, .editora-editor, editora-editor') as HTMLElement | null) ||
+    (explicitContext.matches('[data-editora-editor], .rte-editor, .editora-editor, editora-editor')
+      ? explicitContext
+      : null);
+
+  if (root) {
+    const content = getEditorContentFromHost(root);
+    if (content) return content;
+    if (root.getAttribute('contenteditable') === 'true') return root;
+  }
+
+  if (explicitContext.getAttribute('contenteditable') === 'true') {
+    return explicitContext;
+  }
+
+  const nearestEditable = explicitContext.closest('[contenteditable="true"]');
+  return nearestEditable instanceof HTMLElement ? nearestEditable : null;
+};
+
 /**
  * Find the active editor element
  */
 const findActiveEditor = (): HTMLElement | null => {
+  const explicitContextEditor = consumeCommandEditorContextEditor();
+  if (explicitContextEditor && document.contains(explicitContextEditor)) {
+    return explicitContextEditor;
+  }
+
   // Try to find editor from current selection
   const selection = window.getSelection();
   if (selection && selection.rangeCount > 0) {
@@ -326,7 +367,12 @@ export const ChecklistPlugin = (): Plugin => {
         event.preventDefault();
         event.stopPropagation();
 
-        const editor = checklistItem.closest('[contenteditable="true"], .rte-content, .editora-content') as HTMLElement | null;
+        const editor = checklistItem.closest('[contenteditable], .rte-content, .editora-content') as HTMLElement | null;
+        const isReadonlyEditor =
+          editor?.getAttribute('contenteditable') === 'false' ||
+          !!editor?.closest('[data-readonly="true"], .editora-editor[readonly], editora-editor[readonly]');
+        if (isReadonlyEditor) return;
+
         const beforeHTML = editor?.innerHTML || '';
 
         const isChecked = checklistItem.getAttribute('data-checked') === 'true';

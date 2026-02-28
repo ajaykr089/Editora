@@ -953,7 +953,7 @@ function ensurePanelStyles(): void {
       outline-offset: 2px;
     }
 
-    :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-comments-panel {
+    :is([theme="dark"], [data-theme="dark"], .dark, .editora-theme-dark) .rte-comments-panel {
       box-shadow: -14px 0 30px rgba(0, 0, 0, 0.45);
     }
 

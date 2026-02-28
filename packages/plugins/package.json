@@ -1,6 +1,6 @@
 {
   "name": "@editora/plugins",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "40+ Free Premium Plugins for Editora Rich Text Editor. Table editor, code formatting, accessibility, math, media, and more. Free enterprise plugin collection.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
@@ -45,10 +45,221 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js"
+    },
+    "./lite": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/lite.esm.js",
+      "require": "./dist/lite.cjs.js"
+    },
+    "./shared-config": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/shared-config.esm.js",
+      "require": "./dist/shared-config.cjs.js"
+    },
+    "./a11y-checker": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/a11y-checker.esm.js",
+      "require": "./dist/a11y-checker.cjs.js"
+    },
+    "./anchor": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/anchor.esm.js",
+      "require": "./dist/anchor.cjs.js"
+    },
+    "./background-color": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/background-color.esm.js",
+      "require": "./dist/background-color.cjs.js"
+    },
+    "./blockquote": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/blockquote.esm.js",
+      "require": "./dist/blockquote.cjs.js"
+    },
+    "./bold": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/bold.esm.js",
+      "require": "./dist/bold.cjs.js"
+    },
+    "./capitalization": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/capitalization.esm.js",
+      "require": "./dist/capitalization.cjs.js"
+    },
+    "./checklist": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/checklist.esm.js",
+      "require": "./dist/checklist.cjs.js"
+    },
+    "./clear-formatting": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/clear-formatting.esm.js",
+      "require": "./dist/clear-formatting.cjs.js"
+    },
+    "./code": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/code.esm.js",
+      "require": "./dist/code.cjs.js"
+    },
+    "./code-sample": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/code-sample.esm.js",
+      "require": "./dist/code-sample.cjs.js"
+    },
+    "./comments": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/comments.esm.js",
+      "require": "./dist/comments.cjs.js"
+    },
+    "./direction": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/direction.esm.js",
+      "require": "./dist/direction.cjs.js"
+    },
+    "./document-manager": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/document-manager.esm.js",
+      "require": "./dist/document-manager.cjs.js"
+    },
+    "./embed-iframe": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/embed-iframe.esm.js",
+      "require": "./dist/embed-iframe.cjs.js"
+    },
+    "./emojis": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/emojis.esm.js",
+      "require": "./dist/emojis.cjs.js"
+    },
+    "./font-family": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/font-family.esm.js",
+      "require": "./dist/font-family.cjs.js"
+    },
+    "./font-size": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/font-size.esm.js",
+      "require": "./dist/font-size.cjs.js"
+    },
+    "./footnote": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/footnote.esm.js",
+      "require": "./dist/footnote.cjs.js"
+    },
+    "./fullscreen": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/fullscreen.esm.js",
+      "require": "./dist/fullscreen.cjs.js"
+    },
+    "./heading": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/heading.esm.js",
+      "require": "./dist/heading.cjs.js"
+    },
+    "./history": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/history.esm.js",
+      "require": "./dist/history.cjs.js"
+    },
+    "./indent": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/indent.esm.js",
+      "require": "./dist/indent.cjs.js"
+    },
+    "./italic": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/italic.esm.js",
+      "require": "./dist/italic.cjs.js"
+    },
+    "./line-height": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/line-height.esm.js",
+      "require": "./dist/line-height.cjs.js"
+    },
+    "./link": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/link.esm.js",
+      "require": "./dist/link.cjs.js"
+    },
+    "./list": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/list.esm.js",
+      "require": "./dist/list.cjs.js"
+    },
+    "./math": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/math.esm.js",
+      "require": "./dist/math.cjs.js"
+    },
+    "./media-manager": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/media-manager.esm.js",
+      "require": "./dist/media-manager.cjs.js"
+    },
+    "./merge-tag": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/merge-tag.esm.js",
+      "require": "./dist/merge-tag.cjs.js"
+    },
+    "./page-break": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/page-break.esm.js",
+      "require": "./dist/page-break.cjs.js"
+    },
+    "./preview": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/preview.esm.js",
+      "require": "./dist/preview.cjs.js"
+    },
+    "./print": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/print.esm.js",
+      "require": "./dist/print.cjs.js"
+    },
+    "./special-characters": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/special-characters.esm.js",
+      "require": "./dist/special-characters.cjs.js"
+    },
+    "./spell-check": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/spell-check.esm.js",
+      "require": "./dist/spell-check.cjs.js"
+    },
+    "./strikethrough": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/strikethrough.esm.js",
+      "require": "./dist/strikethrough.cjs.js"
+    },
+    "./table": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/table.esm.js",
+      "require": "./dist/table.cjs.js"
+    },
+    "./template": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/template.esm.js",
+      "require": "./dist/template.cjs.js"
+    },
+    "./text-alignment": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/text-alignment.esm.js",
+      "require": "./dist/text-alignment.cjs.js"
+    },
+    "./text-color": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/text-color.esm.js",
+      "require": "./dist/text-color.cjs.js"
+    },
+    "./underline": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/underline.esm.js",
+      "require": "./dist/underline.cjs.js"
     }
   },
   "files": [
     "dist",
+    "!dist/**/*.map",
     "README.md",
     "LICENSE"
   ],
@@ -59,14 +270,14 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.0"
+    "@editora/core": "^1.0.3"
   },
   "dependencies": {
-    "@editora/core": "^1.0.2",
     "katex": "^0.16.27",
     "mathjax": "^3.2.2"
   },
   "devDependencies": {
+    "@editora/core": "^1.0.3",
     "@types/katex": "^0.16.8",
     "typescript": "^5.0.0",
     "vite": "^7.3.1"

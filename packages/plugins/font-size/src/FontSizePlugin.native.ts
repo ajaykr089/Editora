@@ -48,7 +48,7 @@ export const FontSizePlugin = (): Plugin => {
           },
         ],
         toDOM: (mark) => {
-          return ["span", { style: `font-size: ${mark.attrs.size}` }, 0];
+          return ["span", { style: `font-size: ${mark.attrs?.size}` }, 0];
         },
       },
     },

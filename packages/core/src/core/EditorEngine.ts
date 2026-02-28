@@ -63,20 +63,32 @@ export class EditorEngine {
       return false;
     }
     
-    let newState: EditorState | null;
+    let commandResult: EditorState | null | boolean | void | Promise<EditorState | null | boolean | void>;
     
     if (value !== undefined) {
-      newState = (command as any)(this.state, value);
+      commandResult = (command as any)(this.state, value);
     } else {
-      newState = command(this.state);
+      commandResult = command(this.state);
     }
     
-    if (newState) {
-      this.setState(newState);
+    if (commandResult instanceof Promise) {
+      void commandResult.then((resolved) => {
+        if (resolved && typeof resolved === 'object' && 'doc' in resolved && 'selection' in resolved) {
+          this.setState(resolved as EditorState);
+          this.emit('change', this.state);
+        }
+      }).catch((error) => {
+        console.error(`Async command failed: ${name}`, error);
+      });
+      return true;
+    }
+
+    if (commandResult && typeof commandResult === 'object' && 'doc' in commandResult && 'selection' in commandResult) {
+      this.setState(commandResult as EditorState);
       this.emit('change', this.state);
       return true;
     }
-    return false;
+    return commandResult !== false && commandResult != null;
   }
 
   /**

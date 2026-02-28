@@ -167,7 +167,7 @@ export class ConfigResolver {
 
     // Bridge flattened toolbar attributes into toolbar object config.
     if (normalized.toolbarFloating !== undefined || normalized.toolbarSticky !== undefined) {
-      const toolbarObject =
+      const toolbarObject: Record<string, any> =
         typeof normalized.toolbar === 'object' && normalized.toolbar
           ? { ...(normalized.toolbar as Record<string, any>) }
           : typeof normalized.toolbar === 'string'

@@ -77,7 +77,7 @@ if (typeof window !== 'undefined') {
       // Force upgrade
       if (el instanceof RichTextEditorElement) {
         // Element is already upgraded, just initialize if needed
-        if (!el.isInitialized && contents[index]) {
+        if (!(el as any).isInitialized && contents[index]) {
           el.setAttribute('content', contents[index]);
         }
       }

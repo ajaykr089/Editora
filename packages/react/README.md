@@ -21,6 +21,7 @@ npm install @editora/react @editora/core @editora/plugins @editora/themes
 
 - Required: `@editora/react`, `@editora/core`, `react`, `react-dom`
 - Optional but recommended: `@editora/plugins` (toolbar/plugin features), `@editora/themes` (default/dark/acme CSS)
+- For smaller bundles: prefer `@editora/plugins/lite` or per-plugin subpaths like `@editora/plugins/bold`, and lazy-load heavy plugins (`document-manager`, `media-manager`, `spell-check`) via dynamic imports.
 
 Minimal install:
 

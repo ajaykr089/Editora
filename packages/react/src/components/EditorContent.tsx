@@ -21,6 +21,7 @@ interface EditorContentProps {
   editor: Editor;
   defaultValue?: string;
   value?: string;
+  readonly?: boolean;
   placeholder?: string;
   onChange?: (html: string) => void;
   pasteConfig?: {
@@ -66,6 +67,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
   editor, 
   defaultValue,
   value,
+  readonly = false,
   placeholder,
   onChange,
   pasteConfig,
@@ -153,6 +155,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     if (ariaEnabled) {
       el.setAttribute('role', 'textbox');
       el.setAttribute('aria-multiline', 'true');
+      el.setAttribute('aria-disabled', readonly ? 'true' : 'false');
       const label = placeholder?.trim();
       if (label) {
         el.setAttribute('aria-label', label);
@@ -163,14 +166,16 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       el.removeAttribute('role');
       el.removeAttribute('aria-multiline');
       el.removeAttribute('aria-label');
+      el.removeAttribute('aria-disabled');
     }
-  }, [accessibilityConfig?.enableARIA, placeholder]);
+  }, [accessibilityConfig?.enableARIA, placeholder, readonly]);
 
   useEffect(() => {
     if (!contentRef.current) return;
 
     const handleInput = () => {
       if (!contentRef.current) return;
+      if (readonly) return;
 
       if (placeholder && isStructurallyEmpty(contentRef.current)) {
         contentRef.current.innerHTML = '';
@@ -220,6 +225,10 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     };
 
     const handlePaste = (e: ClipboardEvent) => {
+      if (readonly) {
+        e.preventDefault();
+        return;
+      }
       e.preventDefault();
       
       // Get pasted content
@@ -306,7 +315,9 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     el.addEventListener('blur', handleFocusOrBlur);
 
     // Set focus to editor
-    el.focus();
+    if (!readonly) {
+      el.focus();
+    }
 
     return () => {
       if (debounceTimerRef.current) {
@@ -319,7 +330,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       el.removeEventListener('focus', handleFocusOrBlur);
       el.removeEventListener('blur', handleFocusOrBlur);
     };
-  }, [editor, onChange, pasteConfig, contentConfig, securityConfig, performanceConfig, placeholder, contextMenuConfig]);
+  }, [editor, onChange, pasteConfig, contentConfig, securityConfig, performanceConfig, placeholder, contextMenuConfig, readonly]);
 
   const nativeSpellcheckEnabled =
     (spellcheckConfig?.enabled ?? false) &&
@@ -327,6 +338,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
 
   useEffect(() => {
     if (!contentRef.current || typeof window === 'undefined') return;
+    if (readonly) return;
 
     if (accessibilityConfig?.keyboardNavigation === false) {
       return;
@@ -350,19 +362,20 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     return () => {
       el.removeEventListener('keydown', handleKeyDown as any);
     };
-  }, [accessibilityConfig?.keyboardNavigation]);
+  }, [accessibilityConfig?.keyboardNavigation, readonly]);
 
   return (
     <div
       ref={contentRef}
-      contentEditable
+      contentEditable={!readonly}
       suppressContentEditableWarning
-      spellCheck={nativeSpellcheckEnabled}
+      spellCheck={readonly ? false : nativeSpellcheckEnabled}
       tabIndex={accessibilityConfig?.keyboardNavigation === false ? -1 : 0}
       aria-keyshortcuts={accessibilityConfig?.keyboardNavigation === false ? undefined : 'Ctrl+B Ctrl+I Ctrl+U Ctrl+Z Ctrl+Y'}
       data-viewport-only-scan={performanceConfig?.viewportOnlyScan ? 'true' : 'false'}
       data-a11y-checker={accessibilityConfig?.checker ? 'true' : 'false'}
-      className="rte-content"
+      data-readonly={readonly ? 'true' : 'false'}
+      className={`rte-content ${readonly ? 'rte-content-readonly' : ''}`}
       style={{
         minHeight: "200px",
         maxHeight: "100%",

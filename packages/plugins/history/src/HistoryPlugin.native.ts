@@ -21,12 +21,47 @@ interface ElementSnapshot {
 
 const ROOT_EDITOR_SELECTOR = '.rte-content, .editora-content';
 const MAX_DOM_HISTORY = 100;
+const COMMAND_EDITOR_CONTEXT_KEY = '__editoraCommandEditorRoot';
 
 const domHistoryByEditor = new Map<HTMLElement, EditorHistoryState>();
 const commandHandlers: Record<string, CommandHandler> = {};
 
 let commandSystemInitialized = false;
 let lastTouchedEditor: HTMLElement | null = null;
+
+function getEditorContentFromHost(host: Element | null): HTMLElement | null {
+  if (!host) return null;
+  const content = host.querySelector('[contenteditable="true"]');
+  return content instanceof HTMLElement ? content : null;
+}
+
+function consumeCommandEditorContextEditor(): HTMLElement | null {
+  if (typeof window === 'undefined') return null;
+
+  const explicitContext = (window as any)[COMMAND_EDITOR_CONTEXT_KEY] as HTMLElement | null | undefined;
+  if (!(explicitContext instanceof HTMLElement)) return null;
+
+  (window as any)[COMMAND_EDITOR_CONTEXT_KEY] = null;
+
+  const root =
+    (explicitContext.closest('[data-editora-editor], .rte-editor, .editora-editor, editora-editor') as HTMLElement | null) ||
+    (explicitContext.matches('[data-editora-editor], .rte-editor, .editora-editor, editora-editor')
+      ? explicitContext
+      : null);
+
+  if (root) {
+    const content = getEditorContentFromHost(root);
+    if (content) return content;
+    if (root.getAttribute('contenteditable') === 'true') return root;
+  }
+
+  if (explicitContext.getAttribute('contenteditable') === 'true') {
+    return explicitContext;
+  }
+
+  const nearestEditable = explicitContext.closest('[contenteditable="true"]');
+  return nearestEditable instanceof HTMLElement ? nearestEditable : null;
+}
 
 function getElementForNode(node: Node | null): HTMLElement | null {
   if (!node) return null;
@@ -57,6 +92,11 @@ function resolveEditorFromNode(node: Node | null): HTMLElement | null {
 }
 
 function resolveActiveEditor(): HTMLElement | null {
+  const explicitContextEditor = consumeCommandEditorContextEditor();
+  if (explicitContextEditor && document.contains(explicitContextEditor)) {
+    return explicitContextEditor;
+  }
+
   const selection = window.getSelection();
   if (selection && selection.rangeCount > 0) {
     const fromSelection = resolveEditorFromNode(selection.getRangeAt(0).startContainer);

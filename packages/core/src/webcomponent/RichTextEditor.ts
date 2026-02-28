@@ -67,7 +67,7 @@ export class RichTextEditorElement extends HTMLElement {
   private toolbar?: ToolbarRenderer;
   private floatingToolbar?: FloatingToolbar;
   private statusBar?: StatusBar;
-  private pluginLoader: PluginLoader;
+  private pluginLoader: PluginLoader = getGlobalRegistry();
   private config: EditorConfigDefaults = {};
   private contentElement?: HTMLElement;
   private toolbarElement?: HTMLElement;
@@ -1090,6 +1090,28 @@ export class RichTextEditorElement extends HTMLElement {
     return this.contentElement.contains(commonAncestor) ? range : null;
   }
 
+  private isSelectionBackward(selection: Selection): boolean {
+    if (!selection.anchorNode || !selection.focusNode) return false;
+
+    try {
+      const probe = document.createRange();
+      probe.setStart(selection.anchorNode, selection.anchorOffset);
+      probe.setEnd(selection.focusNode, selection.focusOffset);
+      return probe.collapsed;
+    } catch {
+      return false;
+    }
+  }
+
+  private getSelectionAnchorRect(selection: Selection, range: Range): DOMRect | null {
+    const rects = Array.from(range.getClientRects()).filter((rect) => rect.width > 0 || rect.height > 0);
+    if (rects.length === 0) return range.getBoundingClientRect();
+
+    // Keep toolbar near where user completed selection for long/multi-line ranges.
+    const backward = this.isSelectionBackward(selection);
+    return backward ? rects[0] : rects[rects.length - 1];
+  }
+
   /**
    * Update floating toolbar position
    */
@@ -1114,8 +1136,19 @@ export class RichTextEditorElement extends HTMLElement {
       this.floatingToolbar.hide();
       return;
     }
-    
-    const rect = range.getBoundingClientRect();
+
+    const selection = window.getSelection();
+    if (!selection) {
+      this.floatingToolbar.hide();
+      return;
+    }
+
+    const rect = this.getSelectionAnchorRect(selection, range);
+    if (!rect) {
+      this.floatingToolbar.hide();
+      return;
+    }
+
     this.floatingToolbar.show(rect.left, rect.top - 40);
   }
 

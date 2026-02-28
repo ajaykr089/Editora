@@ -52,21 +52,21 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "browser": "./dist/index.esm.js",
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js",
-      "browser": "./dist/index.esm.js"
+      "require": "./dist/index.cjs.js"
     },
     "./webcomponent": {
       "types": "./dist/webcomponent/index.d.ts",
+      "browser": "./dist/webcomponent.js",
       "import": "./dist/webcomponent.js",
-      "require": "./dist/webcomponent.cjs.js",
-      "browser": "./dist/webcomponent.js"
+      "require": "./dist/webcomponent.cjs.js"
     },
     "./webcomponent-core": {
       "types": "./dist/webcomponent/index.d.ts",
+      "browser": "./dist/webcomponent-core.js",
       "import": "./dist/webcomponent-core.js",
-      "require": "./dist/webcomponent-core.cjs.js",
-      "browser": "./dist/webcomponent-core.js"
+      "require": "./dist/webcomponent-core.cjs.js"
     },
     "./plugin-loader": {
       "types": "./dist/webcomponent/index.d.ts",
@@ -102,6 +102,7 @@
   },
   "files": [
     "dist",
+    "!dist/**/*.map",
     "README.md",
     "LICENSE"
   ],

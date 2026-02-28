@@ -4,6 +4,7 @@ const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
 const FOOTNOTE_CONTAINER_SELECTOR = '.rte-footnotes[data-type="footnotes"]';
 const FOOTNOTE_REF_SELECTOR = '.rte-footnote-ref[data-footnote-id]';
 const FOOTNOTE_ITEM_SELECTOR = 'li.rte-footnote-item[data-type="footnote"]';
+const COMMAND_EDITOR_CONTEXT_KEY = '__editoraCommandEditorRoot';
 
 let stylesInjected = false;
 let interactionsInitialized = false;
@@ -117,6 +118,40 @@ function getElementForNode(node: Node | null): HTMLElement | null {
   return node.parentElement;
 }
 
+function getEditorContentFromHost(host: Element | null): HTMLElement | null {
+  if (!host) return null;
+  const content = host.querySelector('[contenteditable="true"]');
+  return content instanceof HTMLElement ? content : null;
+}
+
+function consumeCommandEditorContextEditor(): HTMLElement | null {
+  if (typeof window === 'undefined') return null;
+
+  const explicitContext = (window as any)[COMMAND_EDITOR_CONTEXT_KEY] as HTMLElement | null | undefined;
+  if (!(explicitContext instanceof HTMLElement)) return null;
+
+  (window as any)[COMMAND_EDITOR_CONTEXT_KEY] = null;
+
+  const root =
+    (explicitContext.closest('[data-editora-editor], .rte-editor, .editora-editor, editora-editor') as HTMLElement | null) ||
+    (explicitContext.matches('[data-editora-editor], .rte-editor, .editora-editor, editora-editor')
+      ? explicitContext
+      : null);
+
+  if (root) {
+    const content = getEditorContentFromHost(root);
+    if (content) return content;
+    if (root.getAttribute('contenteditable') === 'true') return root;
+  }
+
+  if (explicitContext.getAttribute('contenteditable') === 'true') {
+    return explicitContext;
+  }
+
+  const nearestEditable = explicitContext.closest('[contenteditable="true"]');
+  return nearestEditable instanceof HTMLElement ? nearestEditable : null;
+}
+
 function getOutermostEditable(start: HTMLElement): HTMLElement | null {
   const nearestEditable = start.closest('[contenteditable="true"]') as HTMLElement | null;
   if (!nearestEditable) return null;
@@ -152,6 +187,11 @@ function resolveEditorFromSelection(): HTMLElement | null {
 }
 
 function resolveActiveEditor(): HTMLElement | null {
+  const explicitContextEditor = consumeCommandEditorContextEditor();
+  if (explicitContextEditor && document.contains(explicitContextEditor)) {
+    return explicitContextEditor;
+  }
+
   const fromSelection = resolveEditorFromSelection();
   if (fromSelection) return fromSelection;
 

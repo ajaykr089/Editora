@@ -45,7 +45,7 @@ export const FontFamilyPlugin = (): Plugin => {
           }
         ],
         toDOM: (mark) => {
-          return ['span', { style: `font-family: ${mark.attrs.family}` }, 0];
+          return ['span', { style: `font-family: ${mark.attrs?.family}` }, 0];
         }
       }
     },

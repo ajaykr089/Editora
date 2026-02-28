@@ -15,6 +15,7 @@ interface ToolbarProps {
   position?: 'top' | 'bottom';
   sticky?: boolean;
   floating?: boolean;
+  readonly?: boolean;
   showMoreOptions?: boolean;
   itemsOverride?: string[] | ToolbarItem[];
 }
@@ -113,6 +114,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   position = 'top',
   sticky = false,
   floating = false,
+  readonly = false,
   showMoreOptions = true,
   itemsOverride,
 }) => {
@@ -323,6 +325,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   };
 
   const handleCommand = (command: string, value?: string) => {
+    if (readonly) return;
     setActiveCommandEditorContext();
     const skipSelectionRestore =
       command === 'addComment' || command === 'toggleComments';
@@ -351,12 +354,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   };
 
   const handleDropdownOpen = (command: string) => {
+    if (readonly) return;
     // Store current selection when opening dropdown
     captureSelectionFromEditor();
     setOpenDropdown(openDropdown === command ? null : command);
   };
 
   const handleInlineMenuOpen = (command: string) => {
+    if (readonly) return;
     // Store current selection when opening inline menu
     captureSelectionFromEditor();
     setOpenInlineMenu(openInlineMenu === command ? null : command);
@@ -364,6 +369,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   };
 
   const handleInlineMenuSelect = (command: string, value: string) => {
+    if (readonly) return;
     restoreSelectionToEditor();
 
     handleCommand(command, value);
@@ -402,6 +408,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const hasOverflow = showMoreOptions && visibleCount !== null && visibleCount < items.length;
 
   const handleToolbarMouseDownCapture = (e: React.MouseEvent) => {
+    if (readonly) return;
     const target = e.target as HTMLElement;
     const isToolbarAction = target.closest('.rte-toolbar-button, .rte-toolbar-dropdown-item, .rte-toolbar-more-button');
     if (!isToolbarAction) return;
@@ -412,8 +419,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   };
 
   const renderToolbarItems = (items: ToolbarItemLike[]) => {
-    {
-      return items.map((item, idx) => (
+    return items.map((item, idx) => {
+      const itemCommand = item.command || '';
+      return (
         <div
           key={idx}
           className="rte-toolbar-item"
@@ -430,24 +438,25 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <div className="rte-toolbar-dropdown">
                 <button
                   className="rte-toolbar-button"
-                  data-command={item.command}
+                  data-command={itemCommand}
                   data-active="false"
                   onMouseDown={(e) => {
                     e.preventDefault();
                     captureSelectionFromEditor();
                   }}
-                  onClick={() => handleDropdownOpen(item.command)}
+                  onClick={() => handleDropdownOpen(itemCommand)}
+                  disabled={readonly}
                 >
                   {item.label} ▼
                 </button>
-              {openDropdown === item.command && (
+              {openDropdown === itemCommand && (
                 <div className="rte-toolbar-dropdown-menu">
                   {item.options?.map((opt) => (
                     <div
                       key={opt.value}
                       className="rte-toolbar-dropdown-item"
                       onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => handleCommand(item.command, opt.value)}
+                      onClick={() => handleCommand(itemCommand, opt.value)}
                     >
                       {opt.label}
                     </div>
@@ -457,29 +466,31 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             </div>
           ) : item.type === "inline-menu" ? (
             <button
-              ref={getButtonRef(item.command)}
+              ref={getButtonRef(itemCommand)}
               className="rte-toolbar-button"
-              data-command={item.command}
+              data-command={itemCommand}
               data-active="false"
               onMouseDown={(e) => {
                 e.preventDefault();
                 captureSelectionFromEditor();
               }}
-              onClick={() => handleInlineMenuOpen(item.command)}
+              onClick={() => handleInlineMenuOpen(itemCommand)}
+              disabled={readonly}
               title={item.label}
             >
-              {renderIcon(item.icon, item.command)}
+              {renderIcon(item.icon, itemCommand)}
             </button>
           ) : item.type === "input" ? (
             <input
               type="text"
               className={`rte-toolbar-input ${item.label.toLowerCase().replace(/\s+/g, "-")}`}
               placeholder={item.placeholder}
-              onChange={(e) => handleCommand(item.command, e.target.value)}
+              onChange={(e) => handleCommand(itemCommand, e.target.value)}
+              disabled={readonly}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   handleCommand(
-                    item.command,
+                    itemCommand,
                     (e.target as HTMLInputElement).value,
                   );
                 }
@@ -500,21 +511,22 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           ) : (
             <button
               className="rte-toolbar-button"
-              data-command={item.command}
+              data-command={itemCommand}
               data-active="false"
               onMouseDown={(e) => {
                 e.preventDefault();
                 captureSelectionFromEditor();
               }}
-              onClick={() => handleCommand(item.command)}
+              onClick={() => handleCommand(itemCommand)}
+              disabled={readonly}
               title={item.label}
             >
-              {renderIcon(item.icon, item.command)}
+              {renderIcon(item.icon, itemCommand)}
             </button>
           )}
         </div>
-      ));
-    }
+      );
+    });
   };
   return (
     <>
@@ -543,6 +555,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 captureSelectionFromEditor();
               }}
               onClick={() => setShowMoreMenu(!showMoreMenu)}
+              disabled={readonly}
               title="Show more options"
               aria-label="More toolbar options"
             >
@@ -557,8 +570,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             className={`rte-toolbar-expanded-row ${showMoreMenu ? "show" : ""}`}
           >
             {items.map(
-              (item, idx) =>
-                idx >= (visibleCount || 0) && (
+              (item, idx) => {
+                if (idx < (visibleCount || 0)) return null;
+                const itemCommand = item.command || '';
+                return (
                   <div key={idx} className="rte-toolbar-item">
                     {item.type === "separator" ? (
                       <div className="rte-toolbar-separator" aria-hidden="true" />
@@ -566,26 +581,25 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       <div className="rte-toolbar-dropdown">
                         <button
                           className="rte-toolbar-button"
-                          data-command={item.command}
+                          data-command={itemCommand}
                           data-active="false"
                           onMouseDown={(e) => {
                             e.preventDefault();
                             captureSelectionFromEditor();
                           }}
-                          onClick={() => handleDropdownOpen(item.command)}
+                          onClick={() => handleDropdownOpen(itemCommand)}
+                          disabled={readonly}
                         >
                           {item.label} ▼
                         </button>
-                        {openDropdown === item.command && (
+                        {openDropdown === itemCommand && (
                           <div className="rte-toolbar-dropdown-menu">
                             {item.options?.map((opt) => (
                               <div
                                 key={opt.value}
                                 className="rte-toolbar-dropdown-item"
                                 onMouseDown={(e) => e.preventDefault()}
-                                onClick={() =>
-                                  handleCommand(item.command, opt.value)
-                                }
+                                onClick={() => handleCommand(itemCommand, opt.value)}
                               >
                                 {opt.label}
                               </div>
@@ -595,31 +609,31 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                       </div>
                     ) : item.type === "inline-menu" ? (
                       <button
-                        ref={getButtonRef(item.command)}
+                        ref={getButtonRef(itemCommand)}
                         className="rte-toolbar-button"
-                        data-command={item.command}
+                        data-command={itemCommand}
                         data-active="false"
                         onMouseDown={(e) => {
                           e.preventDefault();
                           captureSelectionFromEditor();
                         }}
-                        onClick={() => handleInlineMenuOpen(item.command)}
+                        onClick={() => handleInlineMenuOpen(itemCommand)}
+                        disabled={readonly}
                         title={item.label}
                       >
-                        {renderIcon(item.icon, item.command)}
+                        {renderIcon(item.icon, itemCommand)}
                       </button>
                     ) : item.type === "input" ? (
                       <input
                         type="text"
                         className="rte-toolbar-input"
                         placeholder={item.placeholder}
-                        onChange={(e) =>
-                          handleCommand(item.command, e.target.value)
-                        }
+                        onChange={(e) => handleCommand(itemCommand, e.target.value)}
+                        disabled={readonly}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
                             handleCommand(
-                              item.command,
+                              itemCommand,
                               (e.target as HTMLInputElement).value,
                             );
                           }
@@ -629,20 +643,22 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     ) : (
                       <button
                         className="rte-toolbar-button"
-                        data-command={item.command}
+                        data-command={itemCommand}
                         data-active="false"
                         onMouseDown={(e) => {
                           e.preventDefault();
                           captureSelectionFromEditor();
                         }}
-                        onClick={() => handleCommand(item.command)}
+                        onClick={() => handleCommand(itemCommand)}
+                        disabled={readonly}
                         title={item.label}
                       >
-                        {renderIcon(item.icon, item.command)}
+                        {renderIcon(item.icon, itemCommand)}
                       </button>
                     )}
                   </div>
-                ),
+                );
+              },
             )}
           </div>
         )}
@@ -651,14 +667,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       {/* Render all inline menus outside toolbar items to prevent width issues */}
       {items.map((item) => {
         if (item.type === "inline-menu") {
+          const itemCommand = item.command || '';
           return (
             <InlineMenu
-              key={`menu-${item.command}`}
-              isOpen={openInlineMenu === item.command}
+              key={`menu-${itemCommand || 'unknown'}`}
+              isOpen={openInlineMenu === itemCommand}
               options={item.options || []}
-              onSelect={(value) => handleInlineMenuSelect(item.command, value)}
+              onSelect={(value) => handleInlineMenuSelect(itemCommand, value)}
               onClose={() => setOpenInlineMenu(null)}
-              anchorRef={getButtonRef(item.command)}
+              anchorRef={getButtonRef(itemCommand)}
             />
           );
         }

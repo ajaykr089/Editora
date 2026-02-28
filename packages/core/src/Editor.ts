@@ -1,5 +1,5 @@
 import { EditorState } from './EditorState';
-import { PluginManager } from './plugins/Plugin';
+import { PluginManager, PluginCommandResult } from './plugins/Plugin';
 import { Node } from './schema/Node';
 
 export interface EditorOptions {
@@ -15,7 +15,7 @@ export interface EditorOptions {
 export class Editor {
   state: EditorState;
   pluginManager: PluginManager;
-  commands: Record<string, (state: EditorState) => EditorState | null>;
+  commands: Record<string, (state?: EditorState, ...args: any[]) => PluginCommandResult>;
   listeners: Array<(state: EditorState) => void> = [];
   domElement?: HTMLElement;
   toolbarElement?: HTMLElement;
@@ -123,7 +123,7 @@ export class Editor {
     const toolbarItems = this.pluginManager.getToolbarItems();
     const item = toolbarItems.find(btn => (btn.id && btn.id === commandId) || btn.command === commandId);
     
-    if (item) {
+    if (item?.command) {
       if (value !== undefined) {
         // For commands with values (dropdowns, inputs)
         this.execCommand(item.command, value);
@@ -165,21 +165,33 @@ export class Editor {
       return false;
     }
     
-    let newState: EditorState | null;
+    let result: PluginCommandResult;
     
     // Pass value to command if provided
     if (value !== undefined) {
       // For commands that accept values
-      newState = (command as any)(this.state, value);
+      result = (command as any)(this.state, value);
     } else {
-      newState = command(this.state);
+      result = command(this.state);
     }
-    
-    if (newState) {
-      this.setState(newState);
+
+    if (result instanceof Promise) {
+      void result.then((resolved) => {
+        if (resolved && typeof resolved === 'object' && 'doc' in resolved && 'selection' in resolved) {
+          this.setState(resolved as EditorState);
+        }
+      }).catch((error) => {
+        console.error(`Async command failed: ${name}`, error);
+      });
       return true;
     }
-    return false;
+
+    if (result && typeof result === 'object' && 'doc' in result && 'selection' in result) {
+      this.setState(result as EditorState);
+      return true;
+    }
+
+    return result !== false && result != null;
   }
 
   setContent(doc: Node | string): void {

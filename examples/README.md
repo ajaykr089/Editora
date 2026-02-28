@@ -1,6 +1,6 @@
 # Editora Examples
 
-This directory contains example projects demonstrating different use cases of the Editora Rich Text Editor (v1.0.1).
+This directory contains example projects demonstrating different use cases of the Editora Rich Text Editor (v1.0.3).
 
 ## 📁 Examples
 

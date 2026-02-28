@@ -4,6 +4,12 @@
  */
 
 export interface DialogConfig {
+  buttons?: Array<{
+    label: string;
+    primary?: boolean;
+    type?: 'primary' | 'secondary' | 'danger';
+    onClick?: () => void;
+  }>;
   title: string;
   content: string | HTMLElement;
   width?: string;
@@ -40,6 +46,22 @@ export class Dialog {
       dialog.style.height = this.config.height;
     }
 
+    const footerButtons = (this.config.buttons && this.config.buttons.length > 0)
+      ? this.config.buttons.map((button, index) => {
+        const variantClass = button.type === 'danger'
+          ? 'editora-btn-danger'
+          : button.type === 'primary'
+            ? 'editora-btn-primary'
+            : button.primary
+              ? 'editora-btn-primary'
+            : 'editora-btn-cancel';
+        return `<button type="button" class="editora-btn ${variantClass}" data-dialog-button="${index}">${button.label}</button>`;
+      }).join('')
+      : `
+          <button type="button" class="editora-btn editora-btn-cancel" data-dialog-default="cancel">Cancel</button>
+          <button type="button" class="editora-btn editora-btn-primary" data-dialog-default="ok">OK</button>
+        `;
+
     dialog.innerHTML = `
       <div class="editora-dialog-container">
         <div class="editora-dialog-header">
@@ -50,8 +72,7 @@ export class Dialog {
           ${typeof this.config.content === 'string' ? this.config.content : ''}
         </div>
         <div class="editora-dialog-footer">
-          <button type="button" class="editora-btn editora-btn-cancel">Cancel</button>
-          <button type="button" class="editora-btn editora-btn-primary">OK</button>
+          ${footerButtons}
         </div>
       </div>
     `;
@@ -73,16 +94,27 @@ export class Dialog {
     const closeBtn = this.element.querySelector('.editora-dialog-close');
     closeBtn?.addEventListener('click', () => this.close());
 
-    // Cancel button
-    const cancelBtn = this.element.querySelector('.editora-btn-cancel');
-    cancelBtn?.addEventListener('click', () => {
-      this.config.onCancel?.();
-      this.close();
-    });
+    if (this.config.buttons && this.config.buttons.length > 0) {
+      const buttons = this.element.querySelectorAll<HTMLButtonElement>('[data-dialog-button]');
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const index = Number(btn.getAttribute('data-dialog-button'));
+          const configButton = this.config.buttons?.[index];
+          configButton?.onClick?.();
+        });
+      });
+    } else {
+      // Cancel button
+      const cancelBtn = this.element.querySelector('[data-dialog-default="cancel"]');
+      cancelBtn?.addEventListener('click', () => {
+        this.config.onCancel?.();
+        this.close();
+      });
 
-    // OK button
-    const okBtn = this.element.querySelector('.editora-btn-primary');
-    okBtn?.addEventListener('click', () => this.handleSubmit());
+      // OK button
+      const okBtn = this.element.querySelector('[data-dialog-default="ok"]');
+      okBtn?.addEventListener('click', () => this.handleSubmit());
+    }
 
     // ESC key
     if (this.config.closeOnEscape) {

@@ -5,12 +5,14 @@ interface FloatingToolbarProps {
   editor: Editor;
   isEnabled: boolean;
   viewportOnlyScan?: boolean;
+  readonly?: boolean;
 }
 
 export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
   editor,
   isEnabled,
   viewportOnlyScan = true,
+  readonly = false,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -21,7 +23,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
   const editorContainerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    if (!isEnabled) {
+    if (!isEnabled || readonly) {
       setIsVisible(false);
       return;
     }
@@ -54,6 +56,29 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
     const getEditorContentElement = (container: HTMLElement | null | undefined): HTMLElement | null => {
       if (!container) return null;
       return (container.querySelector('.rte-content, .editora-content') as HTMLElement | null) || null;
+    };
+
+    const isSelectionBackward = (selection: Selection): boolean => {
+      if (!selection.anchorNode || !selection.focusNode) return false;
+
+      try {
+        const probe = document.createRange();
+        probe.setStart(selection.anchorNode, selection.anchorOffset);
+        probe.setEnd(selection.focusNode, selection.focusOffset);
+        return probe.collapsed;
+      } catch {
+        return false;
+      }
+    };
+
+    const getAnchorRectForFloatingToolbar = (selection: Selection, range: Range): DOMRect | null => {
+      const rects = Array.from(range.getClientRects()).filter((rect) => rect.width > 0 || rect.height > 0);
+      if (rects.length === 0) return range.getBoundingClientRect();
+
+      // Keep toolbar close to where selection ends (focus side), which matches user intent
+      // for long multi-line selections.
+      const backward = isSelectionBackward(selection);
+      return backward ? rects[0] : rects[rects.length - 1];
     };
 
     const handleSelectionChange = () => {
@@ -100,7 +125,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
 
       // Only show toolbar if there's actual text selected (not just whitespace)
       if (selectedText.length > 0) {
-        const rect = range.getBoundingClientRect();
+        const rect = getAnchorRectForFloatingToolbar(selection, range);
         const editorRect = editorElement.getBoundingClientRect();
         const toolbarWidth = 300; // Approximate width of floating toolbar
 
@@ -175,9 +200,10 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
         clearTimeout(showTimeoutRef.current);
       }
     };
-  }, [isEnabled, viewportOnlyScan]);
+  }, [isEnabled, viewportOnlyScan, readonly]);
 
   const handleCommand = (command: string, value?: string) => {
+    if (readonly) return;
     if (!selectionRef.current) return;
 
     if (typeof window !== 'undefined') {
@@ -253,7 +279,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
     selectionRef.current = null;
   };
 
-  if (!isEnabled) {
+  if (!isEnabled || readonly) {
     return <span ref={hostRef} style={{ display: 'none' }} aria-hidden="true" />;
   }
 

@@ -12,7 +12,6 @@ export default defineConfig({
     lib: {
       entry: 'src/webcomponent/standalone.core.ts',
       name: 'EditoraCore',
-      formats: ['es', 'umd'],
       fileName: (format) => {
         if (format === 'es') return 'webcomponent-core.js';
         if (format === 'umd') return 'webcomponent-core.min.js';
@@ -26,24 +25,14 @@ export default defineConfig({
           format: 'es',
           inlineDynamicImports: false,
           globals: {},
-          assetFileNames: (assetInfo) => {
-            if (assetInfo.name?.endsWith('.css')) {
-              return 'webcomponent-core.min.css';
-            }
-            return assetInfo.name || '[name].[ext]';
-          },
+          assetFileNames: 'webcomponent-core.min.css',
         },
         {
           format: 'umd',
           name: 'EditoraCore',
           inlineDynamicImports: true,  // Inline for UMD to work as regular script
           globals: {},
-          assetFileNames: (assetInfo) => {
-            if (assetInfo.name?.endsWith('.css')) {
-              return 'webcomponent-core.min.css';
-            }
-            return assetInfo.name || '[name].[ext]';
-          },
+          assetFileNames: 'webcomponent-core.min.css',
         }
       ]
     },

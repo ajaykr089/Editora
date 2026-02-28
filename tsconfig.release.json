@@ -1,0 +1,32 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "paths": {
+      "@editora/core": ["packages/core/src"],
+      "@editora/react": ["packages/react/src"],
+      "@editora/themes": ["packages/themes/src"],
+      "@editora/plugins": ["packages/plugins"],
+      "@editora/plugins/*": ["packages/plugins/*/src"],
+      "@editora/light-code-editor": ["packages/plugins/code/src/types/light-code-editor.d.ts"]
+    }
+  },
+  "include": [
+    "packages/core/src/**/*",
+    "packages/react/src/**/*",
+    "packages/plugins/*/src/**/*",
+    "packages/themes/src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/dist/**",
+    "packages/core/src/commands/**",
+    "packages/core/src/model/**",
+    "packages/core/src/plugins/PluginManager.ts",
+    "packages/core/src/schema/Schema.ts",
+    "packages/plugins/document-manager/src/**",
+    "packages/plugins/media-manager/src/**",
+    "packages/react/src/components/ToolbarContainer.tsx",
+    "packages/react/src/hooks/useEditor.ts"
+  ]
+}

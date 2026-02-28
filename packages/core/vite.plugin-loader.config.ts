@@ -12,7 +12,6 @@ export default defineConfig({
     lib: {
       entry: 'src/webcomponent/plugin-loader.ts',
       name: 'EditoraPlugins',
-      formats: ['es'],
       fileName: (format) => {
         if (format === 'es') return 'plugin-loader.js';
         return `plugin-loader.${format}.js`;

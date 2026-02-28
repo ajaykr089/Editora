@@ -822,7 +822,7 @@ export const BackgroundColorPlugin = (): Plugin => {
           return [
             "span",
             { 
-              style: `background-color: ${mark.attrs.color || '#ffffff'}`,
+              style: `background-color: ${mark.attrs?.color || '#ffffff'}`,
               class: 'rte-bg-color'
             },
             0,

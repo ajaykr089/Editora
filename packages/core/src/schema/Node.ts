@@ -4,10 +4,11 @@ export interface NodeSpec {
   group?: string;
   inline?: boolean;
   attrs?: Record<string, any>;
-  toDOM?: (node: Node) => [string, Record<string, any>?, ...any[]];
+  toDOM?: (node: Node) => [string, (Record<string, any> | number | undefined)?, ...any[]];
   parseDOM?: Array<{
     tag: string;
-    getAttrs?: (dom: HTMLElement) => Record<string, any> | null;
+    style?: string;
+    getAttrs?: (dom: HTMLElement) => Record<string, any> | null | false;
   }>;
 }
 

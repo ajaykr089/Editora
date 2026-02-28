@@ -4,7 +4,7 @@
 
 import { EditorState } from '../EditorState';
 
-export type CommandHandler = (state: EditorState, value?: any) => EditorState | null;
+export type CommandHandler = (state?: EditorState, value?: any) => EditorState | null | boolean | void | Promise<EditorState | null | boolean | void>;
 
 export class CommandRegistry {
   private commands: Map<string, CommandHandler> = new Map();

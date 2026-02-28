@@ -915,8 +915,8 @@ function highlightMisspelledWords(issues?: SpellCheckIssue[]): void {
     });
   });
   
-  // Update side panel
-  updateSidePanel();
+  // Update side panel with precomputed issues to avoid an extra scan
+  updateSidePanel(issues);
 }
 
 /**
@@ -961,7 +961,6 @@ function ignoreWord(word: string): void {
   ignoredWords.add(word.toLowerCase());
   clearSpellCheckHighlights();
   highlightMisspelledWords();
-  updateSidePanel(); // Immediate update needed since no DOM change
 }
 
 /**
@@ -972,7 +971,6 @@ function addToDictionary(word: string): void {
   saveCustomDictionary(); // Save to localStorage
   clearSpellCheckHighlights();
   highlightMisspelledWords();
-  updateSidePanel(); // Immediate update needed since no DOM change
 }
 
 /**
@@ -1163,10 +1161,10 @@ function createSidePanel(): HTMLElement {
 /**
  * Update side panel content
  */
-function updateSidePanel(): void {
+function updateSidePanel(precomputedIssues?: SpellCheckIssue[]): void {
   if (!sidePanelElement) return;
   
-  const issues = scanDocumentForMisspellings();
+  const issues = precomputedIssues || scanDocumentForMisspellings();
   const stats = getSpellCheckStats(issues); // Pass issues to avoid duplicate scan
   
   sidePanelElement.innerHTML = `
@@ -1298,7 +1296,6 @@ function startMutationObserver(): void {
       debounceTimeout = window.setTimeout(() => {
         if (isSpellCheckEnabled) {
           highlightMisspelledWords();
-          updateSidePanel(); // Update side panel when content changes
         }
       }, 350);
     }

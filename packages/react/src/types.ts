@@ -60,6 +60,7 @@ export interface RichTextEditorProps {
   // Content control
   value?: string;
   defaultValue?: string;
+  readonly?: boolean;
   placeholder?: string;
   onChange?: (html: string) => void;
   onInit?: (editor: EditorAPI) => void;

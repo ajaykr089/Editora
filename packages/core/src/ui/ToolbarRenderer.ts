@@ -12,10 +12,11 @@ export interface ToolbarConfig {
 }
 
 export interface ToolbarButton {
-  id: string;
+  id?: string;
   label: string;
   command?: string;
   icon?: string;
+  placeholder?: string;
   type?: 'button' | 'dropdown' | 'input' | 'separator' | 'inline-menu' | 'group';
   options?: Array<{ label: string; value: string }>;
   active?: boolean;
@@ -185,7 +186,7 @@ export class ToolbarRenderer {
             type:
               item.type === "separator" ? "separator" : item.type || "button",
             options: item.options,
-            items: item.items,
+            items: item.items as unknown as ToolbarButton[] | undefined,
           });
         }
       });
@@ -309,7 +310,9 @@ export class ToolbarRenderer {
     el.type = "text";
     el.title = button.label;
     el.placeholder = button.placeholder || "";
-    el.setAttribute("data-command", button.command);
+    if (button.command) {
+      el.setAttribute("data-command", button.command);
+    }
 
     if (button.active) {
       el.classList.add("active");
@@ -321,7 +324,7 @@ export class ToolbarRenderer {
 
     el.addEventListener("click", (e) => {
       e.preventDefault();
-      if (this.commandHandler) {
+      if (this.commandHandler && button.command) {
         this.commandHandler(button.command);
       }
     });
@@ -337,7 +340,9 @@ export class ToolbarRenderer {
     el.className = "editora-toolbar-button";
     el.type = "button";
     el.title = button.label;
-    el.setAttribute("data-command", button.command);
+    if (button.command) {
+      el.setAttribute("data-command", button.command);
+    }
 
     if (button.icon) {
       // Check if it's an SVG icon
@@ -365,7 +370,7 @@ export class ToolbarRenderer {
 
     el.addEventListener("click", (e) => {
       e.preventDefault();
-      if (this.commandHandler) {
+      if (this.commandHandler && button.command) {
         this.commandHandler(button.command);
       }
     });
@@ -400,7 +405,7 @@ export class ToolbarRenderer {
 
         item.addEventListener("click", (e) => {
           e.preventDefault();
-          if (this.commandHandler) {
+          if (this.commandHandler && button.command) {
             this.commandHandler(button.command, option.value);
           }
           menu.style.display = "none";
@@ -479,7 +484,7 @@ export class ToolbarRenderer {
         item.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
-          if (this.commandHandler) {
+          if (this.commandHandler && button.command) {
             this.commandHandler(button.command, option.value);
           }
           menu.style.display = "none";

@@ -65,8 +65,17 @@ The **best free rich text editor** with enterprise-grade features. A comprehensi
 ## 📦 Installation
 
 ```bash
-npm install @editora/react @editora/plugins @editora/themes
+npm install @editora/react @editora/core @editora/plugins @editora/themes react react-dom
 ```
+
+Minimal React setup (no optional plugin/theme bundles):
+
+```bash
+npm install @editora/react @editora/core react react-dom
+```
+
+Bundle-size note:
+Prefer `@editora/plugins/lite` or per-plugin subpaths (for example `@editora/plugins/bold`, `@editora/plugins/spell-check`) and lazy-load heavy plugins with dynamic `import(...)`.
 
 ## 🏗️ Architecture
 

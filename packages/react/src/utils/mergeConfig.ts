@@ -110,6 +110,7 @@ const ensureAccessibilityChecker = (
  * Default configuration - production-ready defaults
  */
 const DEFAULT_CONFIG: Omit<EditorConfig, 'id' | 'className' | 'value' | 'defaultValue' | 'onChange' | 'onInit' | 'onDestroy' | 'plugins' | 'pluginConfig'> = {
+  readonly: false,
   placeholder: '',
   toolbar: {
     items: [],
@@ -218,6 +219,7 @@ function deepMerge<T>(target: T, source: Partial<T>): T {
 export function mergeConfig(props: RichTextEditorProps): EditorConfig {
   // Start with defaults
   const config = deepMerge(DEFAULT_CONFIG, {
+    readonly: props.readonly,
     placeholder: props.placeholder,
     toolbar: props.toolbar,
     statusbar: props.statusbar,
