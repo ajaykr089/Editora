@@ -1,10 +1,18 @@
 {
   "name": "@editora/ui-react",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "React wrappers and hooks for Web Components in the Editora UI ecosystem",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
+    }
+  },
   "files": [
     "dist"
   ],
@@ -26,7 +34,7 @@
     "react-dom": ">=16.8 <21"
   },
   "dependencies": {
-    "@editora/ui-core": "^0.1.0"
+    "@editora/ui-core": "^0.1.2"
   },
   "keywords": [
     "editora",

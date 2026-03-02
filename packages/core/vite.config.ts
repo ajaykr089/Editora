@@ -27,6 +27,9 @@ export default defineConfig({
         globals: {},
         // Preserve module structure for tree-shaking
         preserveModules: false,
+        exports: 'named',
+        interop: 'auto',
+        esModule: true,
       }
     },
     // Generate sourcemaps for debugging

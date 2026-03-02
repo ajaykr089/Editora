@@ -1,6 +1,6 @@
 {
   "name": "@editora/react-icons",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "React SVG icon components and theming context for the Editora UI ecosystem",
   "homepage": "https://editora-free.netlify.app/",
   "bugs": {
@@ -18,7 +18,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
     }
   },
   "files": [
@@ -37,7 +38,7 @@
     "react": ">=16.8 <21"
   },
   "dependencies": {
-    "@editora/icons": "^0.1.2"
+    "@editora/icons": "^0.1.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",

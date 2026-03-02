@@ -1,6 +1,6 @@
 {
   "name": "@editora/code-sample",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Code Sample plugin for Rich Text Editor - Insert immutable code blocks with optional Prism.js syntax highlighting",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -26,7 +26,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@editora/core": "^1.0.5"
+    "@editora/core": "^1.0.6"
   },
   "optionalDependencies": {
     "prismjs": "^1.29.0"
@@ -41,6 +41,14 @@
   "peerDependenciesMeta": {
     "prismjs": {
       "optional": true
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
     }
   }
 }

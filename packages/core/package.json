@@ -1,6 +1,6 @@
 {
   "name": "@editora/core",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Framework-agnostic core editor engine for Editora Rich Text Editor",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
@@ -54,50 +54,56 @@
       "types": "./index.d.ts",
       "browser": "./dist/index.esm.js",
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
     },
     "./webcomponent": {
       "types": "./index.d.ts",
       "browser": "./dist/webcomponent.js",
       "import": "./dist/webcomponent.js",
-      "require": "./dist/webcomponent.cjs.js"
+      "default": "./dist/webcomponent.js"
     },
     "./webcomponent-core": {
       "types": "./index.d.ts",
       "browser": "./dist/webcomponent-core.js",
       "import": "./dist/webcomponent-core.js",
-      "require": "./dist/webcomponent-core.cjs.js"
+      "default": "./dist/webcomponent-core.js"
     },
     "./plugin-loader": {
       "types": "./index.d.ts",
       "import": "./dist/plugin-loader.js",
-      "require": "./dist/plugin-loader.cjs.js"
+      "default": "./dist/plugin-loader.js"
     },
     "./webcomponent.css": "./dist/webcomponent.min.css",
     "./KeyboardShortcuts": {
       "types": "./index.d.ts",
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
     },
     "./core": {
       "types": "./index.d.ts",
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
     },
     "./ui": {
       "types": "./index.d.ts",
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
     },
     "./adapters": {
       "types": "./index.d.ts",
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
     },
     "./config": {
       "types": "./index.d.ts",
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
     }
   },
   "files": [

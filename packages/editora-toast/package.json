@@ -1,6 +1,6 @@
 {
   "name": "@editora/toast",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Advanced toast notification system for the Editora UI ecosystem with enterprise features and rich customization",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -13,7 +13,8 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js",
-      "browser": "./dist/index.umd.js"
+      "browser": "./dist/index.umd.js",
+      "default": "./dist/index.esm.js"
     },
     "./toast.css": "./dist/toast.css"
   },

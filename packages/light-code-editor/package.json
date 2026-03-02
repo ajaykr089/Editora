@@ -1,6 +1,6 @@
 {
   "name": "@editora/light-code-editor",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Lightweight, extensible code editor for the web — syntax highlighting, line numbers, code folding, and a plugin-friendly API. Ideal for embedding in docs, demos, and web apps.",
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
@@ -12,7 +12,8 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.es.js",
-      "require": "./dist/index.umd.js"
+      "require": "./dist/index.umd.js",
+      "default": "./dist/index.es.js"
     }
   },
   "files": [

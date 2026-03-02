@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-editor",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Editor-focused UI extensions for Editora (floating toolbar, command palette, context menus)",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -15,14 +15,22 @@
     "prepare": "npm run build"
   },
   "peerDependencies": {
-    "@editora/ui-core": "^0.1.0"
+    "@editora/ui-core": "^0.1.2"
   },
   "dependencies": {
-    "@editora/ui-core": "^0.1.0"
+    "@editora/ui-core": "^0.1.2"
   },
   "devDependencies": {
     "vite": "^7.3.1",
     "typescript": "^5.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
+    }
+  }
 }

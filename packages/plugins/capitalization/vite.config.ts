@@ -6,7 +6,8 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'line_heightPlugin',
-      fileName: (format) => `index.${format}.js`
+      formats: ['es', 'cjs'],
+      fileName: (format) => `index.${format === 'es' ? 'esm' : 'cjs'}.js`
     },
     rollupOptions: {
       external: ['@editora/core', 'react'],
@@ -14,7 +15,10 @@ export default defineConfig({
         globals: {
           '@editora/core': 'RTECore',
           'react': 'React'
-        }
+        },
+        exports: 'named',
+        interop: 'auto',
+        esModule: true
       }
     }
   }

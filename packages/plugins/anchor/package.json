@@ -1,6 +1,6 @@
 {
   "name": "@editora/anchor",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Anchor plugin for Rich Text Editor - Create named navigation targets",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -30,11 +30,19 @@
     }
   },
   "dependencies": {
-    "@editora/core": "^1.0.5",
-    "@editora/toast": "^2.0.2"
+    "@editora/core": "^1.0.6",
+    "@editora/toast": "^2.0.3"
   },
   "devDependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
+    }
   }
 }

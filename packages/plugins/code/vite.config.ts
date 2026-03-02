@@ -6,7 +6,8 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'line_heightPlugin',
-      fileName: (format) => `index.${format}.js`
+      formats: ['es', 'cjs'],
+      fileName: (format) => `index.${format === 'es' ? 'esm' : 'cjs'}.js`
     },
     rollupOptions: {
       external: ['@editora/core', '@editora/light-code-editor', 'react'],
@@ -15,7 +16,10 @@ export default defineConfig({
           '@editora/core': 'RTECore',
           '@editora/light-code-editor': 'LightCodeEditor',
           'react': 'React'
-        }
+        },
+        exports: 'named',
+        interop: 'auto',
+        esModule: true
       }
     }
   }

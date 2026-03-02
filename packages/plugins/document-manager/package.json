@@ -1,6 +1,6 @@
 {
   "name": "@editora/document-manager",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Document import/export plugin for Rich Text Editor",
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
@@ -28,6 +28,14 @@
     "typescript": "^5.0.0"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.5"
+    "@editora/core": "^1.0.6"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
+    }
   }
 }

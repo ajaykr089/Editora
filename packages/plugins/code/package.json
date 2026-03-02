@@ -1,6 +1,6 @@
 {
   "name": "@editora/code",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Source Code Editor plugin for Rich Text Editor",
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
@@ -21,7 +21,7 @@
     "highlight.js": "^11.9.0"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.5"
+    "@editora/core": "^1.0.6"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",
@@ -37,5 +37,13 @@
     "codejar"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
+    }
+  }
 }

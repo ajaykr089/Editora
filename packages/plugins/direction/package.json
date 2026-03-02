@@ -1,6 +1,6 @@
 {
   "name": "@editora/direction",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Direction plugin for Rich Text Editor",
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
@@ -17,7 +17,7 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.5"
+    "@editora/core": "^1.0.6"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",
@@ -33,5 +33,13 @@
     "ltr"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
+    }
+  }
 }

@@ -6,7 +6,8 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'anchorPlugin',
-      fileName: (format) => `index.${format}.js`
+      formats: ['es', 'cjs'],
+      fileName: (format) => `index.${format === 'es' ? 'esm' : 'cjs'}.js`
     },
     rollupOptions: {
       external: ['@editora/core', '@editora/toast', 'react'],
@@ -15,7 +16,10 @@ export default defineConfig({
           '@editora/core': 'RTECore',
           '@editora/toast': 'EditoraToast',
           'react': 'React'
-        }
+        },
+        exports: 'named',
+        interop: 'auto',
+        esModule: true
       }
     }
   }

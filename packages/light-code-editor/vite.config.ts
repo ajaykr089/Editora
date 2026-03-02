@@ -11,7 +11,10 @@ export default defineConfig({
     rollupOptions: {
       external: [],
       output: {
-        globals: {}
+        globals: {},
+        exports: 'named',
+        interop: 'auto',
+        esModule: true,
       }
     }
   }

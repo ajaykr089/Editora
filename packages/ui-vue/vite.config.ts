@@ -8,7 +8,12 @@ export default defineConfig({
       fileName: (format) => `index.${format === 'es' ? 'esm' : 'cjs'}.js`
     },
     rollupOptions: {
-      external: ['vue']
+      external: ['vue'],
+      output: {
+        exports: 'named',
+        interop: 'auto',
+        esModule: true
+      }
     }
   }
 });

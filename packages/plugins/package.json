@@ -1,6 +1,6 @@
 {
   "name": "@editora/plugins",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "40+ Free Premium Plugins for Editora Rich Text Editor. Table editor, code formatting, accessibility, math, media, and more. Free enterprise plugin collection.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
@@ -44,217 +44,260 @@
     ".": {
       "types": "./index.d.ts",
       "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
     },
     "./lite": {
       "types": "./index.d.ts",
       "import": "./dist/lite.esm.js",
-      "require": "./dist/lite.cjs.js"
+      "require": "./dist/lite.cjs.js",
+      "default": "./dist/lite.esm.js"
     },
     "./shared-config": {
       "types": "./index.d.ts",
       "import": "./dist/shared-config.esm.js",
-      "require": "./dist/shared-config.cjs.js"
+      "require": "./dist/shared-config.cjs.js",
+      "default": "./dist/shared-config.esm.js"
     },
     "./a11y-checker": {
       "types": "./index.d.ts",
       "import": "./dist/a11y-checker.esm.js",
-      "require": "./dist/a11y-checker.cjs.js"
+      "require": "./dist/a11y-checker.cjs.js",
+      "default": "./dist/a11y-checker.esm.js"
     },
     "./anchor": {
       "types": "./index.d.ts",
       "import": "./dist/anchor.esm.js",
-      "require": "./dist/anchor.cjs.js"
+      "require": "./dist/anchor.cjs.js",
+      "default": "./dist/anchor.esm.js"
     },
     "./background-color": {
       "types": "./index.d.ts",
       "import": "./dist/background-color.esm.js",
-      "require": "./dist/background-color.cjs.js"
+      "require": "./dist/background-color.cjs.js",
+      "default": "./dist/background-color.esm.js"
     },
     "./blockquote": {
       "types": "./index.d.ts",
       "import": "./dist/blockquote.esm.js",
-      "require": "./dist/blockquote.cjs.js"
+      "require": "./dist/blockquote.cjs.js",
+      "default": "./dist/blockquote.esm.js"
     },
     "./bold": {
       "types": "./index.d.ts",
       "import": "./dist/bold.esm.js",
-      "require": "./dist/bold.cjs.js"
+      "require": "./dist/bold.cjs.js",
+      "default": "./dist/bold.esm.js"
     },
     "./capitalization": {
       "types": "./index.d.ts",
       "import": "./dist/capitalization.esm.js",
-      "require": "./dist/capitalization.cjs.js"
+      "require": "./dist/capitalization.cjs.js",
+      "default": "./dist/capitalization.esm.js"
     },
     "./checklist": {
       "types": "./index.d.ts",
       "import": "./dist/checklist.esm.js",
-      "require": "./dist/checklist.cjs.js"
+      "require": "./dist/checklist.cjs.js",
+      "default": "./dist/checklist.esm.js"
     },
     "./clear-formatting": {
       "types": "./index.d.ts",
       "import": "./dist/clear-formatting.esm.js",
-      "require": "./dist/clear-formatting.cjs.js"
+      "require": "./dist/clear-formatting.cjs.js",
+      "default": "./dist/clear-formatting.esm.js"
     },
     "./code": {
       "types": "./index.d.ts",
       "import": "./dist/code.esm.js",
-      "require": "./dist/code.cjs.js"
+      "require": "./dist/code.cjs.js",
+      "default": "./dist/code.esm.js"
     },
     "./code-sample": {
       "types": "./index.d.ts",
       "import": "./dist/code-sample.esm.js",
-      "require": "./dist/code-sample.cjs.js"
+      "require": "./dist/code-sample.cjs.js",
+      "default": "./dist/code-sample.esm.js"
     },
     "./comments": {
       "types": "./index.d.ts",
       "import": "./dist/comments.esm.js",
-      "require": "./dist/comments.cjs.js"
+      "require": "./dist/comments.cjs.js",
+      "default": "./dist/comments.esm.js"
     },
     "./direction": {
       "types": "./index.d.ts",
       "import": "./dist/direction.esm.js",
-      "require": "./dist/direction.cjs.js"
+      "require": "./dist/direction.cjs.js",
+      "default": "./dist/direction.esm.js"
     },
     "./document-manager": {
       "types": "./index.d.ts",
       "import": "./dist/document-manager.esm.js",
-      "require": "./dist/document-manager.cjs.js"
+      "require": "./dist/document-manager.cjs.js",
+      "default": "./dist/document-manager.esm.js"
     },
     "./embed-iframe": {
       "types": "./index.d.ts",
       "import": "./dist/embed-iframe.esm.js",
-      "require": "./dist/embed-iframe.cjs.js"
+      "require": "./dist/embed-iframe.cjs.js",
+      "default": "./dist/embed-iframe.esm.js"
     },
     "./emojis": {
       "types": "./index.d.ts",
       "import": "./dist/emojis.esm.js",
-      "require": "./dist/emojis.cjs.js"
+      "require": "./dist/emojis.cjs.js",
+      "default": "./dist/emojis.esm.js"
     },
     "./font-family": {
       "types": "./index.d.ts",
       "import": "./dist/font-family.esm.js",
-      "require": "./dist/font-family.cjs.js"
+      "require": "./dist/font-family.cjs.js",
+      "default": "./dist/font-family.esm.js"
     },
     "./font-size": {
       "types": "./index.d.ts",
       "import": "./dist/font-size.esm.js",
-      "require": "./dist/font-size.cjs.js"
+      "require": "./dist/font-size.cjs.js",
+      "default": "./dist/font-size.esm.js"
     },
     "./footnote": {
       "types": "./index.d.ts",
       "import": "./dist/footnote.esm.js",
-      "require": "./dist/footnote.cjs.js"
+      "require": "./dist/footnote.cjs.js",
+      "default": "./dist/footnote.esm.js"
     },
     "./fullscreen": {
       "types": "./index.d.ts",
       "import": "./dist/fullscreen.esm.js",
-      "require": "./dist/fullscreen.cjs.js"
+      "require": "./dist/fullscreen.cjs.js",
+      "default": "./dist/fullscreen.esm.js"
     },
     "./heading": {
       "types": "./index.d.ts",
       "import": "./dist/heading.esm.js",
-      "require": "./dist/heading.cjs.js"
+      "require": "./dist/heading.cjs.js",
+      "default": "./dist/heading.esm.js"
     },
     "./history": {
       "types": "./index.d.ts",
       "import": "./dist/history.esm.js",
-      "require": "./dist/history.cjs.js"
+      "require": "./dist/history.cjs.js",
+      "default": "./dist/history.esm.js"
     },
     "./indent": {
       "types": "./index.d.ts",
       "import": "./dist/indent.esm.js",
-      "require": "./dist/indent.cjs.js"
+      "require": "./dist/indent.cjs.js",
+      "default": "./dist/indent.esm.js"
     },
     "./italic": {
       "types": "./index.d.ts",
       "import": "./dist/italic.esm.js",
-      "require": "./dist/italic.cjs.js"
+      "require": "./dist/italic.cjs.js",
+      "default": "./dist/italic.esm.js"
     },
     "./line-height": {
       "types": "./index.d.ts",
       "import": "./dist/line-height.esm.js",
-      "require": "./dist/line-height.cjs.js"
+      "require": "./dist/line-height.cjs.js",
+      "default": "./dist/line-height.esm.js"
     },
     "./link": {
       "types": "./index.d.ts",
       "import": "./dist/link.esm.js",
-      "require": "./dist/link.cjs.js"
+      "require": "./dist/link.cjs.js",
+      "default": "./dist/link.esm.js"
     },
     "./list": {
       "types": "./index.d.ts",
       "import": "./dist/list.esm.js",
-      "require": "./dist/list.cjs.js"
+      "require": "./dist/list.cjs.js",
+      "default": "./dist/list.esm.js"
     },
     "./math": {
       "types": "./index.d.ts",
       "import": "./dist/math.esm.js",
-      "require": "./dist/math.cjs.js"
+      "require": "./dist/math.cjs.js",
+      "default": "./dist/math.esm.js"
     },
     "./media-manager": {
       "types": "./index.d.ts",
       "import": "./dist/media-manager.esm.js",
-      "require": "./dist/media-manager.cjs.js"
+      "require": "./dist/media-manager.cjs.js",
+      "default": "./dist/media-manager.esm.js"
     },
     "./merge-tag": {
       "types": "./index.d.ts",
       "import": "./dist/merge-tag.esm.js",
-      "require": "./dist/merge-tag.cjs.js"
+      "require": "./dist/merge-tag.cjs.js",
+      "default": "./dist/merge-tag.esm.js"
     },
     "./page-break": {
       "types": "./index.d.ts",
       "import": "./dist/page-break.esm.js",
-      "require": "./dist/page-break.cjs.js"
+      "require": "./dist/page-break.cjs.js",
+      "default": "./dist/page-break.esm.js"
     },
     "./preview": {
       "types": "./index.d.ts",
       "import": "./dist/preview.esm.js",
-      "require": "./dist/preview.cjs.js"
+      "require": "./dist/preview.cjs.js",
+      "default": "./dist/preview.esm.js"
     },
     "./print": {
       "types": "./index.d.ts",
       "import": "./dist/print.esm.js",
-      "require": "./dist/print.cjs.js"
+      "require": "./dist/print.cjs.js",
+      "default": "./dist/print.esm.js"
     },
     "./special-characters": {
       "types": "./index.d.ts",
       "import": "./dist/special-characters.esm.js",
-      "require": "./dist/special-characters.cjs.js"
+      "require": "./dist/special-characters.cjs.js",
+      "default": "./dist/special-characters.esm.js"
     },
     "./spell-check": {
       "types": "./index.d.ts",
       "import": "./dist/spell-check.esm.js",
-      "require": "./dist/spell-check.cjs.js"
+      "require": "./dist/spell-check.cjs.js",
+      "default": "./dist/spell-check.esm.js"
     },
     "./strikethrough": {
       "types": "./index.d.ts",
       "import": "./dist/strikethrough.esm.js",
-      "require": "./dist/strikethrough.cjs.js"
+      "require": "./dist/strikethrough.cjs.js",
+      "default": "./dist/strikethrough.esm.js"
     },
     "./table": {
       "types": "./index.d.ts",
       "import": "./dist/table.esm.js",
-      "require": "./dist/table.cjs.js"
+      "require": "./dist/table.cjs.js",
+      "default": "./dist/table.esm.js"
     },
     "./template": {
       "types": "./index.d.ts",
       "import": "./dist/template.esm.js",
-      "require": "./dist/template.cjs.js"
+      "require": "./dist/template.cjs.js",
+      "default": "./dist/template.esm.js"
     },
     "./text-alignment": {
       "types": "./index.d.ts",
       "import": "./dist/text-alignment.esm.js",
-      "require": "./dist/text-alignment.cjs.js"
+      "require": "./dist/text-alignment.cjs.js",
+      "default": "./dist/text-alignment.esm.js"
     },
     "./text-color": {
       "types": "./index.d.ts",
       "import": "./dist/text-color.esm.js",
-      "require": "./dist/text-color.cjs.js"
+      "require": "./dist/text-color.cjs.js",
+      "default": "./dist/text-color.esm.js"
     },
     "./underline": {
       "types": "./index.d.ts",
       "import": "./dist/underline.esm.js",
-      "require": "./dist/underline.cjs.js"
+      "require": "./dist/underline.cjs.js",
+      "default": "./dist/underline.esm.js"
     }
   },
   "files": [
@@ -272,14 +315,14 @@
     "prepublishOnly": "npm run typecheck:build && npm run build"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.5"
+    "@editora/core": "^1.0.6"
   },
   "dependencies": {
     "katex": "^0.16.27",
     "mathjax": "^3.2.2"
   },
   "devDependencies": {
-    "@editora/core": "^1.0.5",
+    "@editora/core": "^1.0.6",
     "@types/katex": "^0.16.8",
     "typescript": "^5.0.0",
     "vite": "^7.3.1"

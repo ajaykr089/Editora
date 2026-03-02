@@ -14,6 +14,9 @@ export default defineConfig({
       external: [],
       output: {
         globals: {},
+        exports: 'named',
+        interop: 'auto',
+        esModule: true
       }
     },
     sourcemap: true,
