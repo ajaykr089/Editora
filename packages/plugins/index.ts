@@ -37,8 +37,25 @@ export { FootnotePlugin } from './footnote/src';
 export { CodeSamplePlugin } from './code-sample/src';
 export { AnchorPlugin } from './anchor/src';
 // 5 Enterprise Plugins (Second Batch)
-export { MergeTagPlugin } from './merge-tag/src';
-export { TemplatePlugin } from './template/src';
+export {
+  MergeTagPlugin,
+  type MergeTagItem,
+  type MergeTagCategory,
+  type MergeTagDialogOptions,
+  type MergeTagPluginOptions,
+} from './merge-tag/src';
+export {
+  TemplatePlugin,
+  PREDEFINED_TEMPLATES,
+  addCustomTemplate,
+  getAllTemplates,
+  getTemplatesByCategory,
+  getTemplateCategories,
+  searchTemplates,
+  sanitizeTemplate,
+  validateTemplate,
+  type Template,
+} from './template/src';
 export { CommentsPlugin } from './comments/src';
 export { SpellCheckPlugin } from './spell-check/src';
 export { A11yCheckerPlugin } from './a11y-checker/src';

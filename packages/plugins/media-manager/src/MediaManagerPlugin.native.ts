@@ -33,6 +33,23 @@ declare global {
 
 const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
 
+const attachEscapeCloseHandler = (
+  overlay: HTMLElement,
+  closeDialog: () => void,
+): (() => void) => {
+  const onEscape = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape' || !overlay.isConnected) return;
+    event.preventDefault();
+    event.stopPropagation();
+    closeDialog();
+  };
+
+  document.addEventListener('keydown', onEscape, true);
+  return () => {
+    document.removeEventListener('keydown', onEscape, true);
+  };
+};
+
 const injectMediaDialogStyles = (): void => {
   if (typeof document === 'undefined' || document.getElementById('rte-media-dialog-styles')) return;
 
@@ -600,9 +617,12 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
   overlay.appendChild(dialog);
   document.body.appendChild(overlay);
 
+  let cleanupEscape = () => {};
   const closeDialog = () => {
+    cleanupEscape();
     if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
   };
+  cleanupEscape = attachEscapeCloseHandler(overlay, closeDialog);
 
   const insertMedia = () => {
     if (!urlValue) return;
@@ -836,9 +856,12 @@ const showAltTextDialog = (img: HTMLImageElement) => {
   const cancelBtn = dialog.querySelector('.cancel-btn') as HTMLButtonElement;
   const saveBtn = dialog.querySelector('.save-btn') as HTMLButtonElement;
 
+  let cleanupEscape = () => {};
   const closeDialog = () => {
+    cleanupEscape();
     if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
   };
+  cleanupEscape = attachEscapeCloseHandler(overlay, closeDialog);
 
   closeBtn.addEventListener('click', closeDialog);
   cancelBtn.addEventListener('click', closeDialog);
@@ -904,9 +927,12 @@ const showLinkDialogForMedia = (media: HTMLImageElement | HTMLVideoElement) => {
   const saveBtn = dialog.querySelector('.save-btn') as HTMLButtonElement;
   const removeLinkBtn = dialog.querySelector('.remove-link-btn') as HTMLButtonElement;
 
+  let cleanupEscape = () => {};
   const closeDialog = () => {
+    cleanupEscape();
     if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
   };
+  cleanupEscape = attachEscapeCloseHandler(overlay, closeDialog);
 
   closeBtn.addEventListener('click', closeDialog);
   cancelBtn.addEventListener('click', closeDialog);
@@ -1033,9 +1059,12 @@ const showReplaceImageDialog = (img: HTMLImageElement) => {
   overlay.appendChild(dialog);
   document.body.appendChild(overlay);
 
+  let cleanupEscape = () => {};
   const closeDialog = () => {
+    cleanupEscape();
     if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
   };
+  cleanupEscape = attachEscapeCloseHandler(overlay, closeDialog);
 
   const replaceImage = () => {
     if (urlValue) {

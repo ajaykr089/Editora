@@ -35,6 +35,8 @@ python3 -m http.server 8000
 - Theme packs (dark/acme/custom CSS) come from: `@editora/themes`
 - React wrapper runtime uses: `@editora/react`, `@editora/core`, `react`, `react-dom`
 - Full React feature set usually adds: `@editora/plugins`, `@editora/themes`
+- If you use `@editora/plugins` in React/CRA, also import: `@editora/plugins/styles.css`
+- Theme layering rule: load `@editora/themes/themes/default.css` first, then optional `dark.css`/`acme.css`
 
 ## ⚙️ Config Validation Labs
 

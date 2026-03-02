@@ -74,6 +74,7 @@
                         <li><a href="react-icons.html">@editora/react-icons</a></li>
                         <li><a href="ui-core.html">@editora/ui-core</a></li>
                         <li><a href="ui-react.html">@editora/ui-react</a></li>
+                        <li><a href="../light-code-editor-demo.html">@editora/light-code-editor</a></li>
                         <li><a href="about.html">About</a></li>
                     </ul>
 
@@ -132,8 +133,10 @@ editor.mount(document.getElementById('editor'));</code></pre>
 
                             <h4>With React</h4>
                             <pre><code class="language-jsx">
+import { useState } from "react";
 import { EditoraEditor } from '@editora/react';
 
+import "@editora/plugins/styles.css";
 import "@editora/themes/themes/default.css";
 import "@editora/themes/themes/dark.css";
 import "@editora/themes/themes/acme.css";
@@ -162,6 +165,11 @@ function App() {
     &lt;/div&gt;
   );
 }</code></pre>
+
+                            <p class="alert alert-info">
+                                CRA compatibility note: when using <code>@editora/plugins</code>, import <code>@editora/plugins/styles.css</code>.
+                                Keep <code>default.css</code> as the base layer and load <code>dark.css</code>/<code>acme.css</code> as overrides.
+                            </p>
 
                             <h4>Theme Scoping</h4>
                             <pre><code class="language-jsx">&lt;div data-theme="light"&gt;...&lt;/div&gt;

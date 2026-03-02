@@ -30,6 +30,35 @@ let selectedTemplate: Template | null = null;
 let selectedCategory: string = '';
 let searchTerm: string = '';
 let insertMode: 'insert' | 'replace' = 'insert';
+let dialogKeydownListener: ((event: KeyboardEvent) => void) | null = null;
+let searchRaf: number | null = null;
+let activeEditorContent: HTMLElement | null = null;
+
+function recordDomHistoryTransaction(editor: HTMLElement, beforeHTML: string): void {
+  if (beforeHTML === editor.innerHTML) return;
+  const executor = (window as any).execEditorCommand || (window as any).executeEditorCommand;
+  if (typeof executor !== 'function') return;
+  try {
+    executor('recordDomTransaction', editor, beforeHTML, editor.innerHTML);
+  } catch {
+    // History plugin may be unavailable.
+  }
+}
+
+function findEditorFromRange(range: Range | null): HTMLElement | null {
+  if (!range) return null;
+  let node: Node | null = range.startContainer;
+  while (node && node !== document.body) {
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const element = node as HTMLElement;
+      if (element.getAttribute('contenteditable') === 'true') {
+        return element;
+      }
+    }
+    node = node.parentNode;
+  }
+  return null;
+}
 
 // ============================================================================
 // Template Data Model
@@ -229,7 +258,26 @@ function createTemplateDialog(editorContent?: HTMLElement | null): void {
 
   overlayElement.appendChild(dialogElement);
   document.body.appendChild(overlayElement);
+  attachDialogKeyboardListeners();
   injectTemplateDialogStyles();
+}
+
+function attachDialogKeyboardListeners(): void {
+  removeDialogKeyboardListeners();
+  dialogKeydownListener = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape') return;
+    if (!overlayElement || !dialogElement) return;
+    event.preventDefault();
+    event.stopPropagation();
+    closeDialog();
+  };
+  document.addEventListener('keydown', dialogKeydownListener, true);
+}
+
+function removeDialogKeyboardListeners(): void {
+  if (!dialogKeydownListener) return;
+  document.removeEventListener('keydown', dialogKeydownListener, true);
+  dialogKeydownListener = null;
 }
 
 // Dark theme detection (scoped to the nearest editor root)
@@ -251,6 +299,15 @@ const isDarkThemeContext = (editorContent?: HTMLElement | null): boolean => {
   const source = editorContent || getEditorContentFromSelection();
   if (!source) return false;
   return Boolean(source.closest(DARK_THEME_SELECTOR));
+}
+
+function resolveEditorForTemplate(): HTMLElement | null {
+  const fromRange = findEditorFromRange(savedRange);
+  if (fromRange) return fromRange;
+  if (activeEditorContent?.isConnected) return activeEditorContent;
+  const fromSelection = getEditorContentFromSelection();
+  if (fromSelection) return fromSelection;
+  return document.querySelector('.rte-content, .editora-content') as HTMLElement | null;
 }
 
 /**
@@ -392,11 +449,17 @@ function attachDialogListeners(): void {
   const insertBtn = dialogElement.querySelector('.rte-insert-btn');
   insertBtn?.addEventListener('click', () => handleInsert());
 
-  // Search input
+  // Search input (raf-throttled update)
   const searchInput = dialogElement.querySelector('.rte-template-search') as HTMLInputElement;
   searchInput?.addEventListener('input', (e) => {
+    if (searchRaf !== null) {
+      cancelAnimationFrame(searchRaf);
+    }
     searchTerm = (e.target as HTMLInputElement).value;
-    updateTemplateList();
+    searchRaf = requestAnimationFrame(() => {
+      searchRaf = null;
+      updateTemplateList();
+    });
   });
   searchInput?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && selectedTemplate) {
@@ -406,53 +469,57 @@ function attachDialogListeners(): void {
     }
   });
 
-  // Category tabs
-  const categoryTabs = dialogElement.querySelectorAll('.rte-tab');
-  categoryTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const category = tab.getAttribute('data-category');
-      if (category) {
-        selectedCategory = category;
-        searchTerm = ''; // Clear search when switching categories
-        updateTemplateList();
-      }
-    });
+  // Category tabs (delegated)
+  const tabsRoot = dialogElement.querySelector('.rte-tabs');
+  tabsRoot?.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement;
+    const tab = target.closest('.rte-tab') as HTMLElement | null;
+    if (!tab) return;
+
+    const category = tab.getAttribute('data-category');
+    if (!category) return;
+
+    selectedCategory = category;
+    searchTerm = '';
+    if (searchRaf !== null) {
+      cancelAnimationFrame(searchRaf);
+      searchRaf = null;
+    }
+    updateTemplateList();
   });
 
-  // Template items
-  const templateItems = dialogElement.querySelectorAll('.rte-template-item');
-  templateItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const templateId = item.getAttribute('data-template-id');
-      if (templateId) {
-        const template = getAllTemplates().find(t => t.id === templateId);
-        if (template) {
-          selectedTemplate = template;
-          renderDialogContent();
-        }
-      }
-    });
+  // Template items (delegated)
+  const listRoot = dialogElement.querySelector('.rte-template-list');
+  const resolveTemplateFromEvent = (event: Event): Template | null => {
+    const target = event.target as HTMLElement;
+    const item = target.closest('.rte-template-item') as HTMLElement | null;
+    if (!item) return null;
+    const templateId = item.getAttribute('data-template-id');
+    if (!templateId) return null;
+    return getAllTemplates().find((t) => t.id === templateId) || null;
+  };
 
-    // Double-click to insert
-    item.addEventListener('dblclick', () => {
-      const templateId = item.getAttribute('data-template-id');
-      if (templateId) {
-        const template = getAllTemplates().find(t => t.id === templateId);
-        if (template) {
-          selectedTemplate = template;
-          handleInsert();
-        }
-      }
-    });
+  listRoot?.addEventListener('click', (event) => {
+    const template = resolveTemplateFromEvent(event);
+    if (!template) return;
+    selectedTemplate = template;
+    renderDialogContent();
   });
 
-  // Insert mode radio buttons
-  const insertModeRadios = dialogElement.querySelectorAll('input[name="insertMode"]');
-  insertModeRadios.forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      insertMode = (e.target as HTMLInputElement).value as 'insert' | 'replace';
-      renderDialogContent();
-    });
+  listRoot?.addEventListener('dblclick', (event) => {
+    const template = resolveTemplateFromEvent(event);
+    if (!template) return;
+    selectedTemplate = template;
+    handleInsert();
+  });
+
+  // Insert mode radio buttons (delegated)
+  const modeRoot = dialogElement.querySelector('.rte-insert-mode');
+  modeRoot?.addEventListener('change', (event) => {
+    const target = event.target as HTMLInputElement | null;
+    if (!target || target.name !== 'insertMode') return;
+    insertMode = target.value as 'insert' | 'replace';
+    renderDialogContent();
   });
 }
 
@@ -481,27 +548,7 @@ function handleInsert(): void {
   if (!selectedTemplate) return;
 
   if (insertMode === 'replace') {
-    // Find the correct editor based on saved range
-    let editor: Element | null = null;
-    
-    if (savedRange) {
-      let node: Node | null = savedRange.startContainer;
-      while (node && node !== document.body) {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          const element = node as Element;
-          if (element.getAttribute('contenteditable') === 'true') {
-            editor = element;
-            break;
-          }
-        }
-        node = node.parentNode;
-      }
-    }
-    
-    // Fallback to first editor
-    if (!editor) {
-      editor = document.querySelector('[contenteditable="true"]');
-    }
+    const editor = resolveEditorForTemplate();
     
     if (editor?.innerHTML?.trim()) {
       // Show warning dialog
@@ -530,19 +577,28 @@ function handleConfirmReplace(): void {
  * Insert template at cursor position
  */
 function insertTemplateAtCursor(template: Template): void {
-  // Restore saved selection
+  const selection = window.getSelection();
+  if (!selection) return;
+
+  const editor = resolveEditorForTemplate();
+  if (!editor) return;
+
+  // Restore saved selection or fallback to end of the active editor.
   if (savedRange) {
-    const selection = window.getSelection();
-    if (selection) {
-      selection.removeAllRanges();
-      selection.addRange(savedRange);
-    }
+    selection.removeAllRanges();
+    selection.addRange(savedRange);
+  } else {
+    const fallbackRange = document.createRange();
+    fallbackRange.selectNodeContents(editor);
+    fallbackRange.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(fallbackRange);
   }
 
-  const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) return;
+  if (selection.rangeCount === 0) return;
 
   const range = selection.getRangeAt(0);
+  const beforeHTML = editor?.innerHTML ?? '';
   const fragment = document.createRange().createContextualFragment(sanitizeTemplate(template.html));
 
   range.deleteContents();
@@ -555,6 +611,11 @@ function insertTemplateAtCursor(template: Template): void {
   selection.removeAllRanges();
   selection.addRange(newRange);
 
+  if (editor) {
+    recordDomHistoryTransaction(editor, beforeHTML);
+    editor.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
   // (Optional: Remove debug log)
 }
 
@@ -562,31 +623,12 @@ function insertTemplateAtCursor(template: Template): void {
  * Replace entire document with template
  */
 function replaceDocumentWithTemplate(template: Template): void {
-  // Find the correct editor based on saved range
-  let editor: Element | null = null;
-  
-  if (savedRange) {
-    // Find editor containing the saved range
-    let node: Node | null = savedRange.startContainer;
-    while (node && node !== document.body) {
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        const element = node as Element;
-        if (element.getAttribute('contenteditable') === 'true') {
-          editor = element;
-          break;
-        }
-      }
-      node = node.parentNode;
-    }
-  }
-  
-  // Fallback to first editor if we couldn't find the specific one
-  if (!editor) {
-    editor = document.querySelector('[contenteditable="true"]');
-  }
+  const editor = resolveEditorForTemplate();
   
   if (editor) {
+    const beforeHTML = (editor as HTMLElement).innerHTML;
     editor.innerHTML = sanitizeTemplate(template.html);
+    recordDomHistoryTransaction(editor as HTMLElement, beforeHTML);
     
     // Trigger input event to notify editor of change
     editor.dispatchEvent(new Event('input', { bubbles: true }));
@@ -599,6 +641,11 @@ function replaceDocumentWithTemplate(template: Template): void {
  * Close dialog
  */
 function closeDialog(): void {
+  removeDialogKeyboardListeners();
+  if (searchRaf !== null) {
+    cancelAnimationFrame(searchRaf);
+    searchRaf = null;
+  }
   if (overlayElement) {
     overlayElement.remove();
     overlayElement = null;
@@ -606,6 +653,7 @@ function closeDialog(): void {
   dialogElement = null;
   savedRange = null;
   searchTerm = '';
+  activeEditorContent = null;
 }
 
 /**
@@ -630,6 +678,7 @@ function openTemplateDialog(context?: any): void {
    context?.contentElement instanceof HTMLElement
      ? context.contentElement
      : getEditorContentFromSelection();
+  activeEditorContent = editorContent || null;
   createTemplateDialog(editorContent);
 }
 

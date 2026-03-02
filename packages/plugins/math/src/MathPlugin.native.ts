@@ -35,6 +35,7 @@ const MATH_TEMPLATES = {
 let savedSelection: Range | null = null;
 let editingMathElement: HTMLElement | null = null;
 let katexLoaded = false;
+let activeMathEditorContent: HTMLElement | null = null;
 const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
 
 // Global flag to ensure listener is added only once across all instances
@@ -76,7 +77,20 @@ const loadKaTeX = (): Promise<any> => {
   });
 };
 
-const isDarkThemeContext = (): boolean => {
+const getEditorContentFromSelection = (): HTMLElement | null => {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return null;
+  const node = selection.getRangeAt(0).startContainer;
+  const element = node.nodeType === Node.ELEMENT_NODE
+    ? (node as HTMLElement)
+    : node.parentElement;
+  return (element?.closest('.rte-content, .editora-content') as HTMLElement | null) || null;
+};
+
+const isDarkThemeContext = (editorContent?: HTMLElement | null): boolean => {
+  const source = editorContent || getEditorContentFromSelection();
+  if (source?.closest(DARK_THEME_SELECTOR)) return true;
+
   const selection = window.getSelection();
   if (selection && selection.rangeCount > 0) {
     const node = selection.getRangeAt(0).startContainer;
@@ -92,14 +106,27 @@ const isDarkThemeContext = (): boolean => {
   return document.body.matches(DARK_THEME_SELECTOR) || document.documentElement.matches(DARK_THEME_SELECTOR);
 };
 
-const showMathDialog = async (initialData?: { formula: string; format: 'latex' | 'mathml'; inline: boolean }) => {
+const showMathDialog = async (
+  initialData?: { formula: string; format: 'latex' | 'mathml'; inline: boolean },
+  preferredEditorContent?: HTMLElement | null,
+) => {
+  const editorContent =
+    preferredEditorContent ||
+    (editingMathElement?.closest('.rte-content, .editora-content') as HTMLElement | null) ||
+    getEditorContentFromSelection() ||
+    activeMathEditorContent;
+  activeMathEditorContent = editorContent || null;
+
   const selection = window.getSelection();
   if (selection && selection.rangeCount > 0) {
-    savedSelection = selection.getRangeAt(0).cloneRange();
+    const range = selection.getRangeAt(0);
+    savedSelection = editorContent && editorContent.contains(range.commonAncestorContainer)
+      ? range.cloneRange()
+      : null;
   }
 
   await loadKaTeX();
-  const isDarkTheme = isDarkThemeContext();
+  const isDarkTheme = isDarkThemeContext(editorContent);
   const palette = isDarkTheme
     ? {
       overlay: 'rgba(0, 0, 0, 0.62)',
@@ -155,6 +182,8 @@ const showMathDialog = async (initialData?: { formula: string; format: 'latex' |
   let currentFormat: 'latex' | 'mathml' = initialData?.format || 'latex';
   let currentFormula = initialData?.formula || '';
   let currentInline = initialData?.inline !== false;
+  let previewRaf: number | null = null;
+  let lastPreviewSignature = '';
 
   dialog.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid ${palette.border}; background: ${palette.panelBg};">
@@ -182,7 +211,7 @@ const showMathDialog = async (initialData?: { formula: string; format: 'latex' |
 
       <div style="margin-bottom: 20px;">
         <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: ${palette.text};">Formula:</label>
-        <textarea id="formula-input" rows="4" style="width: 100%; padding: 10px; border: 1px solid ${palette.fieldBorder}; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 14px; background: ${palette.fieldBg}; color: ${palette.text};">${currentFormula}</textarea>
+        <textarea id="formula-input" rows="4" style="width: 100%; min-height: 112px; padding: 10px 12px; border: 1px solid ${palette.fieldBorder}; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.45; background: ${palette.fieldBg}; color: ${palette.text}; box-sizing: border-box; overflow-x: hidden; overflow-y: auto; resize: vertical;">${currentFormula}</textarea>
       </div>
 
       <div style="margin-bottom: 20px;">
@@ -209,33 +238,30 @@ const showMathDialog = async (initialData?: { formula: string; format: 'latex' |
   const closeBtn = dialog.querySelector('.close-btn') as HTMLButtonElement;
   const cancelBtn = dialog.querySelector('.cancel-btn') as HTMLButtonElement;
 
+  const encodeFormulaAttr = (formula: string): string => encodeURIComponent(formula);
+  const decodeFormulaAttr = (encoded: string): string => {
+    try {
+      return decodeURIComponent(encoded);
+    } catch {
+      return encoded;
+    }
+  };
+
   const updateTemplates = () => {
     const templates = MATH_TEMPLATES[currentFormat];
     templatesGrid.innerHTML = templates.map(t => `
-      <button type="button" data-formula="${t.formula.replace(/"/g, '&quot;')}" title="${t.description}" style="padding: 8px; border: 1px solid ${palette.fieldBorder}; border-radius: 4px; background: ${palette.templateBtnBg}; cursor: pointer; text-align: left;">
+      <button type="button" data-formula="${encodeFormulaAttr(t.formula)}" title="${t.description}" style="padding: 8px; border: 1px solid ${palette.fieldBorder}; border-radius: 4px; background: ${palette.templateBtnBg}; cursor: pointer; text-align: left; transition: background-color 0.16s ease;">
         <div style="font-weight: 600; font-size: 12px; color: ${palette.templateBtnText};">${t.name}</div>
         <div style="font-size: 10px; color: ${palette.templateSubText}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.formula.substring(0, 20)}...</div>
       </button>
     `).join('');
-
-    templatesGrid.querySelectorAll('button').forEach(btn => {
-      const buttonEl = btn as HTMLButtonElement;
-      buttonEl.onmouseover = () => {
-        buttonEl.style.background = palette.templateBtnHover;
-      };
-      buttonEl.onmouseout = () => {
-        buttonEl.style.background = palette.templateBtnBg;
-      };
-      btn.addEventListener('click', () => {
-        formulaInput.value = btn.getAttribute('data-formula') || '';
-        currentFormula = formulaInput.value;
-        updatePreview();
-      });
-    });
   };
 
   const updatePreview = () => {
     const formula = formulaInput.value.trim();
+    const signature = `${currentFormat}:${formula}`;
+    if (signature === lastPreviewSignature) return;
+    lastPreviewSignature = signature;
     
     if (!formula) {
       previewArea.innerHTML = `<span style="color: ${palette.previewText};">Enter a formula to see preview</span>`;
@@ -263,7 +289,33 @@ const showMathDialog = async (initialData?: { formula: string; format: 'latex' |
     }
   };
 
-  const closeDialog = () => document.body.removeChild(overlay);
+  const schedulePreview = () => {
+    if (previewRaf !== null) {
+      cancelAnimationFrame(previewRaf);
+    }
+    previewRaf = requestAnimationFrame(() => {
+      previewRaf = null;
+      updatePreview();
+    });
+  };
+
+  const handleEscape = (e: KeyboardEvent) => {
+    if (e.key !== 'Escape') return;
+    e.preventDefault();
+    e.stopPropagation();
+    closeDialog();
+  };
+
+  const closeDialog = () => {
+    document.removeEventListener('keydown', handleEscape, true);
+    if (previewRaf !== null) {
+      cancelAnimationFrame(previewRaf);
+      previewRaf = null;
+    }
+    if (overlay.parentNode) {
+      overlay.parentNode.removeChild(overlay);
+    }
+  };
   closeBtn.onmouseover = () => {
     closeBtn.style.color = '#f8fafc';
     closeBtn.style.background = isDarkTheme ? '#334155' : '#e5e7eb';
@@ -285,6 +337,29 @@ const showMathDialog = async (initialData?: { formula: string; format: 'latex' |
   insertBtn.onmouseout = () => {
     insertBtn.style.background = palette.insertBg;
   };
+
+  templatesGrid.addEventListener('mouseover', (event) => {
+    const target = event.target as HTMLElement;
+    const button = target.closest('button[data-formula]') as HTMLButtonElement | null;
+    if (!button) return;
+    button.style.background = palette.templateBtnHover;
+  });
+
+  templatesGrid.addEventListener('mouseout', (event) => {
+    const target = event.target as HTMLElement;
+    const button = target.closest('button[data-formula]') as HTMLButtonElement | null;
+    if (!button) return;
+    button.style.background = palette.templateBtnBg;
+  });
+
+  templatesGrid.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement;
+    const button = target.closest('button[data-formula]') as HTMLButtonElement | null;
+    if (!button) return;
+    formulaInput.value = decodeFormulaAttr(button.getAttribute('data-formula') || '');
+    currentFormula = formulaInput.value;
+    schedulePreview();
+  });
 
   const insertMath = () => {
     const formula = formulaInput.value.trim();
@@ -328,7 +403,15 @@ const showMathDialog = async (initialData?: { formula: string; format: 'latex' |
     } else if (savedSelection) {
       savedSelection.deleteContents();
       savedSelection.insertNode(mathEl);
+    } else if (activeMathEditorContent && activeMathEditorContent.isConnected) {
+      const fallbackRange = document.createRange();
+      fallbackRange.selectNodeContents(activeMathEditorContent);
+      fallbackRange.collapse(false);
+      fallbackRange.insertNode(mathEl);
     }
+
+    const targetEditor = (mathEl.closest('.rte-content, .editora-content') as HTMLElement | null) || activeMathEditorContent;
+    targetEditor?.dispatchEvent(new Event('input', { bubbles: true }));
 
     closeDialog();
   };
@@ -337,18 +420,20 @@ const showMathDialog = async (initialData?: { formula: string; format: 'latex' |
   cancelBtn.addEventListener('click', closeDialog);
   insertBtn.addEventListener('click', insertMath);
   overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDialog(); });
+  document.addEventListener('keydown', handleEscape, true);
 
   formatRadios.forEach(radio => {
     radio.addEventListener('change', (e) => {
       currentFormat = (e.target as HTMLInputElement).value as 'latex' | 'mathml';
+      lastPreviewSignature = '';
       updateTemplates();
-      updatePreview();
+      schedulePreview();
     });
   });
 
   formulaInput.addEventListener('input', () => {
     currentFormula = formulaInput.value;
-    updatePreview();
+    schedulePreview();
   });
 
   formulaInput.addEventListener('keydown', (e) => {
@@ -359,7 +444,7 @@ const showMathDialog = async (initialData?: { formula: string; format: 'latex' |
   });
 
   updateTemplates();
-  updatePreview();
+  schedulePreview();
   formulaInput.focus();
 };
 
@@ -407,8 +492,12 @@ export const MathPlugin = (): Plugin => ({
   ],
 
   commands: {
-    insertMath: () => {
-      showMathDialog();
+    insertMath: (_args: unknown, context: any) => {
+      const editorContent =
+        context?.contentElement instanceof HTMLElement
+          ? context.contentElement
+          : null;
+      showMathDialog(undefined, editorContent);
       return true;
     },
   },

@@ -43,6 +43,7 @@ Practical integration patterns for web components and framework wrappers.
 ```tsx
 import { EditoraEditor } from "@editora/react";
 import { BoldPlugin, ItalicPlugin, HeadingPlugin, HistoryPlugin } from "@editora/plugins";
+import "@editora/plugins/styles.css";
 import "@editora/themes/themes/default.css";
 
 function MyEditor() {

@@ -162,9 +162,23 @@ Provides search and replace functionality.
 import { SearchExtension } from '@editora/light-code-editor';
 
 const editor = createEditor(container, {
-  extensions: [new SearchExtension()]
+  extensions: [
+    new SearchExtension({
+      // Replace mode defaults to true and advances to the next match
+      // after each Enter press in the replace field.
+      replaceAndFindNext: true
+    })
+  ]
 });
 ```
+
+Advanced find/replace UI supports:
+
+- `Aa` for case-sensitive search
+- `Whole` for whole-word-only matching
+- `.*` for regular-expression search
+
+If regex input is invalid, the status shows `Invalid regular expression` and matching is skipped until the pattern is fixed.
 
 #### `BracketMatchingExtension`
 Highlights matching brackets.

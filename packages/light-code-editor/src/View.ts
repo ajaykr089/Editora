@@ -14,6 +14,7 @@ export class View {
   private lineHeight = 21;
   private _rafId?: number;
   private readonly trailingNewlineMarkerAttr = 'data-lce-trailing-newline-marker';
+  private readonly virtualMarkerRegex = /[\u200B\uE000]/;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -27,6 +28,7 @@ export class View {
     // Create main editor container
     const editorContainer = document.createElement('div');
     this.editorContainer = editorContainer;
+    editorContainer.setAttribute('data-lce-editor-container', 'true');
     editorContainer.style.cssText = `
       position: relative;
       display: flex;
@@ -214,36 +216,14 @@ export class View {
     }
     offset += column;
 
-    // Set selection
     const range = document.createRange();
     const selection = window.getSelection();
+    const point = this.resolveOffsetToDomPoint(offset);
 
-    // Find the text node and offset
-    let currentOffset = 0;
-    let targetNode: Node | null = null;
-    let targetOffset = 0;
-
-    const walker = document.createTreeWalker(
-      this.contentElement,
-      NodeFilter.SHOW_TEXT,
-      null
-    );
-
-    let node: Node | null;
-    while ((node = walker.nextNode())) {
-      const nodeLength = node.textContent?.length || 0;
-      if (currentOffset + nodeLength >= offset) {
-        targetNode = node;
-        targetOffset = offset - currentOffset;
-        break;
-      }
-      currentOffset += nodeLength;
-    }
-
-    if (targetNode) {
+    if (point) {
       try {
-        range.setStart(targetNode, targetOffset);
-        range.setEnd(targetNode, targetOffset);
+        range.setStart(point.node, point.offset);
+        range.setEnd(point.node, point.offset);
         selection?.removeAllRanges();
         selection?.addRange(range);
         this.ensureCaretVisible();
@@ -311,8 +291,43 @@ export class View {
 
   // Set selection range
   setSelectionRange(range: Range): void {
-    const startPos = this.setCursorPosition(range.start);
-    // Note: This is simplified - proper range selection would need more complex logic
+    const text = this.getText();
+    const lines = text.split('\n');
+    const toOffset = (pos: Position) => {
+      const line = Math.max(0, Math.min(pos.line, lines.length - 1));
+      const column = Math.max(
+        0,
+        Math.min(pos.column, lines[line] ? lines[line].length : 0),
+      );
+      let offset = 0;
+      for (let i = 0; i < line; i++) {
+        offset += lines[i].length + 1;
+      }
+      return offset + column;
+    };
+
+    const startOffset = toOffset(range.start);
+    const endOffset = toOffset(range.end);
+    const [fromOffset, toOffsetSorted] =
+      startOffset <= endOffset
+        ? [startOffset, endOffset]
+        : [endOffset, startOffset];
+
+    const fromPoint = this.resolveOffsetToDomPoint(fromOffset);
+    const toPoint = this.resolveOffsetToDomPoint(toOffsetSorted);
+    if (!fromPoint || !toPoint) return;
+
+    const domRange = document.createRange();
+    try {
+      domRange.setStart(fromPoint.node, fromPoint.offset);
+      domRange.setEnd(toPoint.node, toPoint.offset);
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(domRange);
+      this.ensureCaretVisible();
+    } catch (error) {
+      console.warn('Could not set selection range:', error);
+    }
   }
 
   // Focus the editor
@@ -350,6 +365,11 @@ export class View {
   getScrollTop(): number {
     // The editor container is the scroll container for vertical scroll
     return this.editorContainer.scrollTop;
+  }
+
+  // Get primary scroll element
+  getScrollElement(): HTMLElement {
+    return this.editorContainer;
   }
 
   // Set scroll position
@@ -415,5 +435,60 @@ export class View {
       cancelAnimationFrame(this._rafId);
       this._rafId = undefined;
     }
+  }
+
+  private resolveOffsetToDomPoint(offset: number): { node: Node; offset: number } | null {
+    const boundedOffset = Math.max(0, offset);
+    let currentOffset = 0;
+    const walker = document.createTreeWalker(
+      this.contentElement,
+      NodeFilter.SHOW_TEXT,
+      null,
+    );
+
+    let lastNode: Node | null = null;
+    let node: Node | null;
+    while ((node = walker.nextNode())) {
+      const parent = (node as Text).parentElement;
+      if (parent?.hasAttribute(this.trailingNewlineMarkerAttr)) {
+        continue;
+      }
+      lastNode = node;
+      const text = node.textContent || '';
+      const visibleToDom = this.buildVisibleToDomMap(text);
+      const visibleLen = Math.max(0, visibleToDom.length - 1);
+      if (currentOffset + visibleLen >= boundedOffset) {
+        const localVisibleOffset = Math.max(0, boundedOffset - currentOffset);
+        const domOffset =
+          visibleToDom[localVisibleOffset] ??
+          text.length;
+        return {
+          node,
+          offset: domOffset,
+        };
+      }
+      currentOffset += visibleLen;
+    }
+
+    if (lastNode) {
+      const nodeLength = lastNode.textContent?.length || 0;
+      return { node: lastNode, offset: nodeLength };
+    }
+
+    return null;
+  }
+
+  private buildVisibleToDomMap(text: string): number[] {
+    const map: number[] = [0];
+    let visibleCount = 0;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (this.virtualMarkerRegex.test(ch)) {
+        continue;
+      }
+      visibleCount += 1;
+      map[visibleCount] = i + 1;
+    }
+    return map;
   }
 }

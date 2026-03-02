@@ -72,6 +72,7 @@
                         <li><a href="react-icons.html">@editora/react-icons</a></li>
                         <li><a href="ui-core.html">@editora/ui-core</a></li>
                         <li><a href="ui-react.html">@editora/ui-react</a></li>
+                        <li><a href="../light-code-editor-demo.html">@editora/light-code-editor</a></li>
                         <li><a href="about.html">About</a></li>
                     </ul>
 
@@ -101,6 +102,10 @@
                     <strong>Config Labs:</strong> Validate runtime config updates for autosave/security/performance/accessibility.
                     <a href="../webcomponent-security-autosave-lab.html" style="margin-left: 8px;">Open Security + Autosave Lab →</a>
                     <a href="../webcomponent-performance-accessibility-lab.html" style="margin-left: 8px;">Open Performance + A11y Lab →</a>
+                  </div>
+                  <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+                    <strong>Advanced Find/Replace:</strong> Light Code Editor now supports case-sensitive, whole-word, and regex search with configurable replace navigation.
+                    <a href="../light-code-editor-demo.html" style="margin-left: 8px;">Open Light Code Editor Demo →</a>
                   </div>
 
                   <h2>Bundle Options</h2>
@@ -195,8 +200,10 @@
 
                     <h2>React Example</h2>
                     <pre><code class="language-jsx">
+import { useState } from "react";
 import { EditoraEditor } from '@editora/react';
 
+import "@editora/plugins/styles.css";
 import "@editora/themes/themes/default.css";
 import "@editora/themes/themes/acme.css";
 
@@ -225,6 +232,65 @@ function MyEditor() {
     &lt;/div&gt;
   );
 }</code></pre>
+
+                    <p class="alert alert-info">
+                        For CRA and other bundlers: plugin UI (table toolbar, color pickers, dialogs) requires
+                        <code>@editora/plugins/styles.css</code>. Import <code>default.css</code> first, then optional theme overrides.
+                    </p>
+
+                    <h2>Merge Tag Functional Customization</h2>
+                    <p>Use runtime options to define custom categories, labels, dialog text, and token output.</p>
+                    <pre><code class="language-ts">import { MergeTagPlugin } from "@editora/plugins";
+
+const mergeTag = MergeTagPlugin({
+  categories: [
+    {
+      id: "CUSTOMER",
+      name: "Customer",
+      tags: [
+        { key: "first_name", label: "First Name", value: "{{customer.first_name}}", preview: "John" },
+        { key: "email", label: "Email", value: "{{customer.email}}", preview: "john@acme.com" }
+      ]
+    },
+    {
+      id: "ORDER",
+      name: "Order",
+      tags: [
+        { key: "id", label: "Order ID", value: "{{order.id}}", preview: "#A-1024" }
+      ]
+    }
+  ],
+  defaultCategory: "CUSTOMER",
+  dialog: {
+    title: "Insert Variable",
+    searchPlaceholder: "Search variables...",
+    emptyStateText: "No variables found",
+    cancelText: "Close",
+    insertText: "Insert",
+    showPreview: true
+  },
+  tokenTemplate: "{value}" // supports {key} {label} {category} {value}
+});</code></pre>
+
+                    <h2>Template Plugin: Add Custom Templates</h2>
+                    <p>Register templates before initializing the editor plugin list.</p>
+                    <pre><code class="language-ts">import { TemplatePlugin, addCustomTemplate } from "@editora/plugins";
+
+addCustomTemplate({
+  id: "invoice-basic",
+  name: "Invoice (Basic)",
+  category: "Billing",
+  description: "Simple invoice template",
+  html: `
+    &lt;h1&gt;Invoice&lt;/h1&gt;
+    &lt;p&gt;&lt;strong&gt;Customer:&lt;/strong&gt; {{customer.name}}&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Date:&lt;/strong&gt; {{today}}&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Total:&lt;/strong&gt; {{invoice.total}}&lt;/p&gt;
+  `,
+  tags: ["invoice", "billing"]
+});
+
+const plugins = [TemplatePlugin()];</code></pre>
 
                     <h2>Vue 3 Example</h2>
                     <pre><code class="language-html">&lt;template&gt;

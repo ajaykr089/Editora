@@ -28,6 +28,17 @@ import { findEditorContainerFromSelection, getContentElement } from '../../share
 const anchorRegistry = new Set<string>();
 const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
 
+function recordDomHistoryTransaction(editor: HTMLElement, beforeHTML: string): void {
+  if (beforeHTML === editor.innerHTML) return;
+  const executor = (window as any).execEditorCommand || (window as any).executeEditorCommand;
+  if (typeof executor !== 'function') return;
+  try {
+    executor('recordDomTransaction', editor, beforeHTML, editor.innerHTML);
+  } catch {
+    // History plugin may be unavailable.
+  }
+}
+
 /**
  * Initialize mutation observer to track anchor deletions
  */
@@ -551,6 +562,20 @@ function insertAnchor(anchorId: string, savedRange?: Range) {
     range = selection.getRangeAt(0);
   }
 
+  let historyEditor: HTMLElement | null = null;
+  let ancestor: Node | null = range.startContainer;
+  while (ancestor && ancestor !== document.body) {
+    if (ancestor.nodeType === Node.ELEMENT_NODE) {
+      const el = ancestor as HTMLElement;
+      if (el.getAttribute('contenteditable') === 'true') {
+        historyEditor = el;
+        break;
+      }
+    }
+    ancestor = ancestor.parentNode;
+  }
+  const beforeHTML = historyEditor?.innerHTML ?? '';
+
   // Create anchor element
   const anchor = document.createElement('span');
   anchor.id = anchorId;
@@ -578,12 +603,17 @@ function insertAnchor(anchorId: string, savedRange?: Range) {
     sel.addRange(range);
   }
   
-  // Trigger input event to update editor state
-  const editorContainer = findEditorContainerFromSelection();
-  if (editorContainer) {
-    const contentElement = getContentElement(editorContainer);
-    if (contentElement) {
-      contentElement.dispatchEvent(new Event('input', { bubbles: true }));
+  // Trigger history + input event to update editor state
+  if (historyEditor) {
+    recordDomHistoryTransaction(historyEditor, beforeHTML);
+    historyEditor.dispatchEvent(new Event('input', { bubbles: true }));
+  } else {
+    const editorContainer = findEditorContainerFromSelection();
+    if (editorContainer) {
+      const contentElement = getContentElement(editorContainer);
+      if (contentElement) {
+        contentElement.dispatchEvent(new Event('input', { bubbles: true }));
+      }
     }
   }
   

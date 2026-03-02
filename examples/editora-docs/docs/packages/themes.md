@@ -35,7 +35,11 @@ npm i @editora/themes
 ```ts
 import "@editora/themes/themes/default.css";
 import "@editora/themes/themes/dark.css";
+import "@editora/themes/themes/acme.css";
 ```
+
+`dark.css` and `acme.css` are override layers and should be loaded after `default.css`.
+If you use `@editora/plugins`, also load `@editora/plugins/styles.css` for plugin UI surfaces.
 
 ## Best Practices
 

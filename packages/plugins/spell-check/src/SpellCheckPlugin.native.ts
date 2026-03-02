@@ -57,6 +57,7 @@ let isContextMenuAttached = false;
 let pendingToggleEditorElement: HTMLElement | null = null;
 let isToggleTriggerTrackingAttached = false;
 let observerSuspendDepth = 0;
+let spellCheckEscapeListener: ((event: KeyboardEvent) => void) | null = null;
 
 const MUTATION_OBSERVER_OPTIONS: MutationObserverInit = {
   characterData: true,
@@ -66,6 +67,37 @@ const MUTATION_OBSERVER_OPTIONS: MutationObserverInit = {
 
 const SPELLCHECK_STYLE_ID = 'rte-spellcheck-styles';
 const COMMAND_EDITOR_CONTEXT_KEY = '__editoraCommandEditorRoot';
+
+function setActiveEditorFromCommandContext(context: any): void {
+  const candidate =
+    (context?.contentElement as HTMLElement | undefined) ||
+    (context?.editorElement as HTMLElement | undefined) ||
+    null;
+  if (!(candidate instanceof HTMLElement)) return;
+
+  const explicitEditable =
+    candidate.getAttribute('contenteditable') === 'true'
+      ? candidate
+      : (candidate.querySelector?.('[contenteditable="true"]') as HTMLElement | null);
+
+  if (explicitEditable instanceof HTMLElement) {
+    activeEditorElement = explicitEditable;
+    pendingToggleEditorElement = explicitEditable;
+    return;
+  }
+
+  const hostRoot =
+    (candidate.closest('[data-editora-editor], .rte-editor, .editora-editor, editora-editor') as HTMLElement | null) ||
+    (candidate.matches('[data-editora-editor], .rte-editor, .editora-editor, editora-editor')
+      ? candidate
+      : null);
+
+  const fromHost = getEditorContentFromHost(hostRoot);
+  if (fromHost) {
+    activeEditorElement = fromHost;
+    pendingToggleEditorElement = fromHost;
+  }
+}
 
 function consumeCommandEditorContextEditor(): HTMLElement | null {
   if (typeof window === 'undefined') return null;
@@ -1321,6 +1353,23 @@ function removeSpellcheckMenus(): void {
   document.querySelectorAll('.rte-spellcheck-menu').forEach(el => el.remove());
 }
 
+function attachSpellCheckEscapeListener(): void {
+  if (spellCheckEscapeListener) return;
+  spellCheckEscapeListener = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape' || !isSpellCheckEnabled) return;
+    event.preventDefault();
+    event.stopPropagation();
+    disableSpellCheck();
+  };
+  document.addEventListener('keydown', spellCheckEscapeListener, true);
+}
+
+function detachSpellCheckEscapeListener(): void {
+  if (!spellCheckEscapeListener) return;
+  document.removeEventListener('keydown', spellCheckEscapeListener, true);
+  spellCheckEscapeListener = null;
+}
+
 function disableSpellCheck(): boolean {
   if (!isSpellCheckEnabled) return false;
 
@@ -1337,6 +1386,7 @@ function disableSpellCheck(): boolean {
   activeEditorElement = null;
   pendingToggleEditorElement = null;
   isSpellCheckEnabled = false;
+  detachSpellCheckEscapeListener();
   return false;
 }
 
@@ -1361,6 +1411,7 @@ function toggleSpellCheck(): boolean {
     activeEditorElement = targetEditor;
     ensureSpellCheckStyles();
     attachSpellCheckContextMenu();
+    attachSpellCheckEscapeListener();
     highlightMisspelledWords();
     startMutationObserver();
     sidePanelElement = createSidePanel();
@@ -1378,6 +1429,7 @@ function toggleSpellCheck(): boolean {
   isSpellCheckEnabled = true;
   ensureSpellCheckStyles();
   attachSpellCheckContextMenu();
+  attachSpellCheckEscapeListener();
   highlightMisspelledWords();
   startMutationObserver();
 
@@ -1411,7 +1463,8 @@ export const SpellCheckPlugin = (): Plugin => ({
   ],
   
   commands: {
-    toggleSpellCheck: () => {
+    toggleSpellCheck: (_args: unknown, context: any) => {
+      setActiveEditorFromCommandContext(context);
       toggleSpellCheck();
       return true;
     }

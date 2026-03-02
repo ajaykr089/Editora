@@ -111,6 +111,32 @@ import { SyntaxHighlightingExtension } from '@editora/light-code-editor';
 
 const ext = new SyntaxHighlightingExtension({ theme: 'dark' });
 editor.use(ext);</code></pre>
+
+            <h3 style="margin-top:18px">Advanced Find / Replace</h3>
+            <p>The search extension includes robust find/replace controls with case-sensitive, whole-word, and regex matching.</p>
+            <pre class="sample"><code>import { createEditor, SearchExtension } from '@editora/light-code-editor';
+
+const editor = createEditor(container, {
+  value: initialCode,
+  extensions: [
+    new SearchExtension({
+      // default: true
+      // when enabled, Enter in Replace mode moves to the next match.
+      replaceAndFindNext: true
+    })
+  ]
+});
+
+// Open find UI
+editor.executeCommand('find');
+// Open replace UI
+editor.executeCommand('replace');</code></pre>
+            <p>In the search panel:</p>
+            <ul>
+                <li><strong>Aa</strong>: case-sensitive matching</li>
+                <li><strong>Whole</strong>: whole-word-only matching</li>
+                <li><strong>.*</strong>: regex matching (invalid regex is validated and reported)</li>
+            </ul>
         </section>
     </main>
 

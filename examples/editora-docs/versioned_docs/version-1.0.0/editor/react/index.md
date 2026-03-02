@@ -16,11 +16,19 @@ npm i @editora/react @editora/core @editora/plugins @editora/themes
 
 ```tsx
 import { EditoraEditor } from "@editora/react";
+import { BoldPlugin, ItalicPlugin } from "@editora/plugins";
+import "@editora/plugins/styles.css";
+import "@editora/themes/themes/default.css";
 
 export function App() {
-  return <EditoraEditor placeholder="Compose..." />;
+  return <EditoraEditor plugins={[BoldPlugin(), ItalicPlugin()]} placeholder="Compose..." />;
 }
 ```
+
+## CRA and bundler compatibility
+
+- Import `@editora/plugins/styles.css` when using plugins from `@editora/plugins`.
+- Load theme CSS in order: `default.css` first, then optional overrides (`dark.css`, `acme.css`).
 
 ## Usage
 

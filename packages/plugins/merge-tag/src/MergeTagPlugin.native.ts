@@ -12,69 +12,216 @@ import type { Plugin } from '@editora/core';
  * - Graceful insertion fallback when selection is stale/missing
  */
 
-interface MergeTag {
-  key: string;
+export interface MergeTagItem {
+  key?: string;
   label: string;
-  category: string;
+  category?: string;
   preview?: string;
   description?: string;
+  value?: string;
 }
 
-interface IndexedMergeTag extends MergeTag {
+export interface MergeTagCategory {
+  id?: string;
+  name: string;
+  tags: MergeTagItem[];
+}
+
+interface IndexedMergeTag extends MergeTagItem {
+  key: string;
+  category: string;
+  categoryKey: string;
   searchIndex: string;
 }
 
-const MERGE_TAG_CATEGORIES = {
-  USER: {
-    name: 'User',
-    tags: [
-      { key: 'first_name', label: 'First Name', category: 'User', preview: 'John' },
-      { key: 'last_name', label: 'Last Name', category: 'User', preview: 'Doe' },
-      { key: 'email', label: 'Email', category: 'User', preview: 'john@example.com' },
-      { key: 'phone', label: 'Phone', category: 'User', preview: '+1-555-1234' },
-      { key: 'full_name', label: 'Full Name', category: 'User', preview: 'John Doe' },
-      { key: 'username', label: 'Username', category: 'User', preview: 'johndoe' },
-    ],
-  },
-  COMPANY: {
-    name: 'Company',
-    tags: [
-      { key: 'company_name', label: 'Company Name', category: 'Company', preview: 'Acme Corp' },
-      { key: 'company_address', label: 'Company Address', category: 'Company', preview: '123 Main St' },
-      { key: 'company_phone', label: 'Company Phone', category: 'Company', preview: '+1-555-0000' },
-      { key: 'company_email', label: 'Company Email', category: 'Company', preview: 'info@acme.com' },
-    ],
-  },
-  DATE: {
-    name: 'Date',
-    tags: [
-      { key: 'today', label: 'Today', category: 'Date', preview: new Date().toLocaleDateString() },
-      { key: 'tomorrow', label: 'Tomorrow', category: 'Date', preview: new Date(Date.now() + 86400000).toLocaleDateString() },
-      { key: 'next_week', label: 'Next Week', category: 'Date', preview: new Date(Date.now() + 604800000).toLocaleDateString() },
-    ],
-  },
-  CUSTOM: {
-    name: 'Custom',
-    tags: [],
-  },
-} as const;
+export interface MergeTagDialogOptions {
+  title?: string;
+  searchPlaceholder?: string;
+  emptyStateText?: string;
+  cancelText?: string;
+  insertText?: string;
+  showPreview?: boolean;
+}
 
-type CategoryKey = keyof typeof MERGE_TAG_CATEGORIES;
+export interface MergeTagPluginOptions {
+  tags?: MergeTagItem[];
+  categories?: MergeTagCategory[];
+  defaultCategory?: string;
+  dialog?: MergeTagDialogOptions;
+  tokenTemplate?: string | ((tag: IndexedMergeTag) => string);
+}
+
+interface MergeTagCatalog {
+  categoriesByKey: Record<string, { name: string; tags: IndexedMergeTag[] }>;
+  categoryKeys: string[];
+  defaultCategory: string;
+}
+
+interface MergeTagRuntimeConfig {
+  catalog: MergeTagCatalog;
+  dialog: Required<MergeTagDialogOptions>;
+  formatToken: (tag: IndexedMergeTag) => string;
+}
 
 const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
 const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
 
-const CATEGORY_KEYS = Object.keys(MERGE_TAG_CATEGORIES) as CategoryKey[];
-const INDEXED_TAGS_BY_CATEGORY: Record<CategoryKey, IndexedMergeTag[]> = CATEGORY_KEYS.reduce(
-  (acc, categoryKey) => {
-    acc[categoryKey] = MERGE_TAG_CATEGORIES[categoryKey].tags.map((tag) => ({
-      ...tag,
-      searchIndex: `${tag.label} ${tag.key} ${tag.category} ${'description' in tag ? tag.description ?? '' : ''}`.toLowerCase(),
-    }));
-    return acc;
-  },
-  {} as Record<CategoryKey, IndexedMergeTag[]>,
-);
+const DEFAULT_DIALOG_OPTIONS: Required<MergeTagDialogOptions> = {
+  title: 'Insert Merge Tag',
+  searchPlaceholder: 'Search merge tags...',
+  emptyStateText: 'No merge tags found',
+  cancelText: 'Cancel',
+  insertText: 'Insert',
+  showPreview: true,
+};
+
+function getDefaultCategories(): MergeTagCategory[] {
+  return [
+    {
+      id: 'USER',
+      name: 'User',
+      tags: [
+        { key: 'first_name', label: 'First Name', category: 'User', preview: 'John' },
+        { key: 'last_name', label: 'Last Name', category: 'User', preview: 'Doe' },
+        { key: 'email', label: 'Email', category: 'User', preview: 'john@example.com' },
+        { key: 'phone', label: 'Phone', category: 'User', preview: '+1-555-1234' },
+        { key: 'full_name', label: 'Full Name', category: 'User', preview: 'John Doe' },
+        { key: 'username', label: 'Username', category: 'User', preview: 'johndoe' },
+      ],
+    },
+    {
+      id: 'COMPANY',
+      name: 'Company',
+      tags: [
+        { key: 'company_name', label: 'Company Name', category: 'Company', preview: 'Acme Corp' },
+        { key: 'company_address', label: 'Company Address', category: 'Company', preview: '123 Main St' },
+        { key: 'company_phone', label: 'Company Phone', category: 'Company', preview: '+1-555-0000' },
+        { key: 'company_email', label: 'Company Email', category: 'Company', preview: 'info@acme.com' },
+      ],
+    },
+    {
+      id: 'DATE',
+      name: 'Date',
+      tags: [
+        { key: 'today', label: 'Today', category: 'Date', preview: new Date().toLocaleDateString() },
+        { key: 'tomorrow', label: 'Tomorrow', category: 'Date', preview: new Date(Date.now() + 86400000).toLocaleDateString() },
+        { key: 'next_week', label: 'Next Week', category: 'Date', preview: new Date(Date.now() + 604800000).toLocaleDateString() },
+      ],
+    },
+    {
+      id: 'CUSTOM',
+      name: 'Custom',
+      tags: [],
+    },
+  ];
+}
+
+function toCategoryKey(input: string, fallbackIndex: number): string {
+  const normalized = input.trim().toUpperCase().replace(/[^A-Z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  return normalized || `CATEGORY_${fallbackIndex + 1}`;
+}
+
+function toMergeTagKey(tag: MergeTagItem, fallbackIndex: number): string {
+  const source = (tag.key || tag.value || tag.label).trim();
+  const normalized = source.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  return normalized || `tag_${fallbackIndex + 1}`;
+}
+
+function buildCatalog(options?: MergeTagPluginOptions): MergeTagCatalog {
+  const categories: MergeTagCategory[] = (() => {
+    if (Array.isArray(options?.categories) && options.categories.length > 0) {
+      return options.categories;
+    }
+    if (Array.isArray(options?.tags) && options.tags.length > 0) {
+      const grouped = new Map<string, MergeTagItem[]>();
+      options.tags.forEach((tag) => {
+        const categoryName = (tag.category || 'Custom').trim() || 'Custom';
+        const existing = grouped.get(categoryName);
+        if (existing) {
+          existing.push(tag);
+        } else {
+          grouped.set(categoryName, [tag]);
+        }
+      });
+      return Array.from(grouped.entries()).map(([name, tags], index) => ({
+        id: toCategoryKey(name, index),
+        name,
+        tags,
+      }));
+    }
+    return getDefaultCategories();
+  })();
+
+  const categoriesByKey: Record<string, { name: string; tags: IndexedMergeTag[] }> = {};
+  const categoryKeys: string[] = [];
+
+  categories.forEach((category, categoryIndex) => {
+    const key = toCategoryKey(category.id || category.name, categoryIndex);
+    categoryKeys.push(key);
+    categoriesByKey[key] = {
+      name: category.name,
+      tags: (Array.isArray(category.tags) ? category.tags : []).map((tag, tagIndex) => {
+        const tagKey = toMergeTagKey(tag, tagIndex);
+        const resolvedCategory = (tag.category || category.name).trim() || category.name;
+        return {
+          ...tag,
+          key: tagKey,
+          category: resolvedCategory,
+          categoryKey: key,
+          searchIndex: `${tag.label} ${tagKey} ${resolvedCategory} ${tag.description ?? ''} ${tag.value ?? ''}`.toLowerCase(),
+        };
+      }),
+    };
+  });
+
+  if (categoryKeys.length === 0) {
+    const fallbackKey = 'CUSTOM';
+    categoryKeys.push(fallbackKey);
+    categoriesByKey[fallbackKey] = { name: 'Custom', tags: [] };
+  }
+
+  const requestedCategoryKey = options?.defaultCategory
+    ? toCategoryKey(options.defaultCategory, 0)
+    : null;
+  const defaultCategory = requestedCategoryKey && categoryKeys.includes(requestedCategoryKey)
+    ? requestedCategoryKey
+    : categoryKeys[0];
+
+  return {
+    categoriesByKey,
+    categoryKeys,
+    defaultCategory,
+  };
+}
+
+function createTokenFormatter(options?: MergeTagPluginOptions): (tag: IndexedMergeTag) => string {
+  const tokenTemplate = options?.tokenTemplate;
+  if (typeof tokenTemplate === 'function') {
+    return (tag) => {
+      const token = tokenTemplate(tag);
+      return typeof token === 'string' && token.trim() ? token : (tag.value?.trim() || `{{ ${tag.label} }}`);
+    };
+  }
+  if (typeof tokenTemplate === 'string' && tokenTemplate.trim()) {
+    return (tag) => tokenTemplate
+      .replace(/\{key\}/gi, tag.key)
+      .replace(/\{label\}/gi, tag.label)
+      .replace(/\{category\}/gi, tag.category)
+      .replace(/\{value\}/gi, tag.value ?? '');
+  }
+  return (tag) => tag.value?.trim() || `{{ ${tag.label} }}`;
+}
+
+function createRuntimeConfig(options?: MergeTagPluginOptions): MergeTagRuntimeConfig {
+  return {
+    catalog: buildCatalog(options),
+    dialog: {
+      ...DEFAULT_DIALOG_OPTIONS,
+      ...(options?.dialog || {}),
+    },
+    formatToken: createTokenFormatter(options),
+  };
+}
 
 let stylesInjected = false;
 let trackingInitialized = false;
@@ -82,6 +229,17 @@ let lastKnownEditorContent: HTMLElement | null = null;
 let activeOverlay: HTMLDivElement | null = null;
 let activeCleanup: (() => void) | null = null;
 let mergeTagInteractionsInitialized = false;
+
+function recordDomHistoryTransaction(editor: HTMLElement, beforeHTML: string): void {
+  if (beforeHTML === editor.innerHTML) return;
+  const executor = (window as any).execEditorCommand || (window as any).executeEditorCommand;
+  if (typeof executor !== 'function') return;
+  try {
+    executor('recordDomTransaction', editor, beforeHTML, editor.innerHTML);
+  } catch {
+    // History plugin may be unavailable.
+  }
+}
 
 function injectMergeTagStyles(): void {
   if (stylesInjected || typeof document === 'undefined') return;
@@ -139,19 +297,54 @@ function injectMergeTagStyles(): void {
     }
 
     .rte-merge-tag-header { padding: 16px; border-bottom: 1px solid var(--rte-mt-border); display:flex; justify-content:space-between; align-items:center; }
-    .rte-merge-tag-body { padding: 16px; overflow-y:auto; flex:1; }
-    .rte-merge-tag-input { width:100%; padding:10px; border:1px solid var(--rte-mt-border); border-radius:4px; background:var(--rte-mt-subtle-bg); color:var(--rte-mt-dialog-text); }
-    .rte-merge-tag-tabs { display:flex; gap:8px; margin: 12px 0; }
+    .rte-merge-tag-body {
+      padding: 16px;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .rte-merge-tag-input {
+      width:100%;
+      padding:11px 12px;
+      border:1px solid var(--rte-mt-border);
+      border-radius:6px;
+      background:var(--rte-mt-subtle-bg);
+      color:var(--rte-mt-dialog-text);
+      font-size:14px;
+      line-height:1.45;
+      box-sizing:border-box;
+    }
+    .rte-merge-tag-tabs { display:flex; flex-wrap: wrap; gap:8px; margin: 12px 0; }
     .rte-merge-tag-tab { padding:8px 12px; background:none; border:none; cursor:pointer; color:var(--rte-mt-muted-text); border-bottom:3px solid transparent; }
     .rte-merge-tag-tab.active { color:var(--rte-mt-accent); border-bottom-color:var(--rte-mt-accent); }
-    .rte-merge-tag-list { border:1px solid var(--rte-mt-border); border-radius:4px; max-height:300px; overflow-y:auto; margin-bottom:12px; background:var(--rte-mt-subtle-bg); }
-    .rte-merge-tag-item { padding:8px 12px; border-bottom:1px solid var(--rte-mt-border); cursor:pointer; transition:background-color 0.16s; color:var(--rte-mt-dialog-text); }
+    .rte-merge-tag-list {
+      border:1px solid var(--rte-mt-border);
+      border-radius:4px;
+      flex: 1;
+      min-height: 180px;
+      max-height: 300px;
+      overflow-y:auto;
+      overflow-x:hidden;
+      margin-bottom:12px;
+      background:var(--rte-mt-subtle-bg);
+    }
+    .rte-merge-tag-item {
+      padding:8px 12px;
+      border-bottom:1px solid var(--rte-mt-border);
+      cursor:pointer;
+      transition:background-color 0.16s;
+      color:var(--rte-mt-dialog-text);
+      overflow-wrap:anywhere;
+      word-break:break-word;
+    }
     .rte-merge-tag-item:last-child { border-bottom: none; }
     .rte-merge-tag-item.selected, .rte-merge-tag-item:hover { background-color:var(--rte-mt-subtle-hover); }
     .rte-merge-tag-item-label { font-weight: 600; }
-    .rte-merge-tag-item-preview { font-size: 12px; color: var(--rte-mt-muted-text); margin-top: 2px; }
+    .rte-merge-tag-item-preview { font-size: 12px; color: var(--rte-mt-muted-text); margin-top: 2px; overflow-wrap:anywhere; word-break:break-word; }
     .rte-merge-tag-empty { padding: 24px; text-align: center; color: var(--rte-mt-muted-text); }
-    .rte-merge-tag-preview { padding:8px; background:var(--rte-mt-subtle-bg); border-radius:4px; font-family:monospace; font-size:12px; color:var(--rte-mt-dialog-text); }
+    .rte-merge-tag-preview { padding:8px; background:var(--rte-mt-subtle-bg); border-radius:4px; font-family:monospace; font-size:12px; color:var(--rte-mt-dialog-text); overflow-wrap:anywhere; word-break:break-word; }
     .rte-merge-tag-footer { padding:12px 16px; border-top:1px solid var(--rte-mt-border); display:flex; gap:8px; justify-content:flex-end; background:var(--rte-mt-subtle-bg); }
     .rte-merge-tag-btn-primary { padding:8px 16px; border:none; border-radius:4px; background:var(--rte-mt-accent); color:#fff; cursor:pointer; }
     .rte-merge-tag-btn-primary:hover { background: var(--rte-mt-accent-strong); }
@@ -282,6 +475,8 @@ function placeCaretNearRemovedTag(
 }
 
 function removeMergeTagNode(tag: HTMLElement, key: 'Backspace' | 'Delete'): boolean {
+  const editorContent = tag.closest(EDITOR_CONTENT_SELECTOR) as HTMLElement | null;
+  const beforeHTML = editorContent?.innerHTML ?? '';
   const parent = tag.parentNode;
   if (!parent) return false;
 
@@ -302,11 +497,8 @@ function removeMergeTagNode(tag: HTMLElement, key: 'Backspace' | 'Delete'): bool
     placeCaretNearRemovedTag(parent, index);
   }
 
-  const editorContent = (parent instanceof HTMLElement
-    ? parent.closest(EDITOR_CONTENT_SELECTOR)
-    : (parent.parentElement?.closest(EDITOR_CONTENT_SELECTOR) || null)) as HTMLElement | null;
-
   if (editorContent) {
+    recordDomHistoryTransaction(editorContent, beforeHTML);
     editorContent.dispatchEvent(new Event('input', { bubbles: true }));
   }
   return true;
@@ -457,21 +649,32 @@ function safeRestoreSelection(editorContent: HTMLElement, savedRange: Range | nu
   return finalRange;
 }
 
-function createMergeTagNode(tag: MergeTag): HTMLSpanElement {
+function createMergeTagNode(tag: IndexedMergeTag, formatToken: (tag: IndexedMergeTag) => string): HTMLSpanElement {
   const span = document.createElement('span');
   span.className = 'rte-merge-tag';
   span.setAttribute('contenteditable', 'false');
   span.setAttribute('data-key', tag.key);
   span.setAttribute('data-category', tag.category);
   span.setAttribute('data-label', tag.label);
+  if (tag.value) {
+    span.setAttribute('data-value', tag.value);
+  }
+  const token = formatToken(tag);
+  span.setAttribute('data-token', token);
   span.setAttribute('aria-label', `Merge tag: ${tag.label}`);
-  span.textContent = `{{ ${tag.label} }}`;
+  span.textContent = token;
   return span;
 }
 
-function insertMergeTag(editorContent: HTMLElement, savedRange: Range | null, tag: MergeTag): boolean {
+function insertMergeTag(
+  editorContent: HTMLElement,
+  savedRange: Range | null,
+  tag: IndexedMergeTag,
+  formatToken: (tag: IndexedMergeTag) => string,
+): boolean {
   const selection = window.getSelection();
   if (!selection) return false;
+  const beforeHTML = editorContent.innerHTML;
 
   editorContent.focus({ preventScroll: true });
   const range = safeRestoreSelection(editorContent, savedRange);
@@ -489,7 +692,7 @@ function insertMergeTag(editorContent: HTMLElement, savedRange: Range | null, ta
   try {
     range.deleteContents();
 
-    const mergeTag = createMergeTagNode(tag);
+    const mergeTag = createMergeTagNode(tag, formatToken);
     const trailingSpace = document.createTextNode('\u00A0');
     const fragment = document.createDocumentFragment();
     fragment.appendChild(mergeTag);
@@ -504,6 +707,7 @@ function insertMergeTag(editorContent: HTMLElement, savedRange: Range | null, ta
     selection.removeAllRanges();
     selection.addRange(cursorRange);
 
+    recordDomHistoryTransaction(editorContent, beforeHTML);
     editorContent.dispatchEvent(new Event('input', { bubbles: true }));
     return true;
   } catch (error) {
@@ -512,29 +716,29 @@ function insertMergeTag(editorContent: HTMLElement, savedRange: Range | null, ta
   }
 }
 
-function filterTags(category: CategoryKey, searchTerm: string): IndexedMergeTag[] {
-  const allTags = INDEXED_TAGS_BY_CATEGORY[category];
+function filterTags(runtimeConfig: MergeTagRuntimeConfig, category: string, searchTerm: string): IndexedMergeTag[] {
+  const allTags = runtimeConfig.catalog.categoriesByKey[category]?.tags || [];
   const normalizedSearch = searchTerm.trim().toLowerCase();
   if (!normalizedSearch) return allTags;
 
   return allTags.filter((tag) => tag.searchIndex.includes(normalizedSearch));
 }
 
-function showMergeTagDialog(editorContent: HTMLElement): void {
+function showMergeTagDialog(editorContent: HTMLElement, runtimeConfig: MergeTagRuntimeConfig): void {
   closeActiveDialog();
   injectMergeTagStyles();
 
   const state: {
-    category: CategoryKey;
+    category: string;
     searchTerm: string;
     filteredTags: IndexedMergeTag[];
     selectedIndex: number;
     savedRange: Range | null;
     searchRaf: number | null;
   } = {
-    category: 'USER',
+    category: runtimeConfig.catalog.defaultCategory,
     searchTerm: '',
-    filteredTags: INDEXED_TAGS_BY_CATEGORY.USER,
+    filteredTags: runtimeConfig.catalog.categoriesByKey[runtimeConfig.catalog.defaultCategory]?.tags || [],
     selectedIndex: 0,
     savedRange: (() => {
       const selection = window.getSelection();
@@ -558,10 +762,22 @@ function showMergeTagDialog(editorContent: HTMLElement): void {
 
   const header = document.createElement('div');
   header.className = 'rte-merge-tag-header';
-  header.innerHTML = `
-    <h2 style="margin:0; font-size:18px; font-weight:700;">Insert Merge Tag</h2>
-    <button class="rte-merge-tag-close" aria-label="Close" style="background:none;border:none;color:inherit;cursor:pointer;font-size:20px;">✕</button>
-  `;
+  const title = document.createElement('h2');
+  title.style.margin = '0';
+  title.style.fontSize = '18px';
+  title.style.fontWeight = '700';
+  title.textContent = runtimeConfig.dialog.title;
+  const closeButton = document.createElement('button');
+  closeButton.className = 'rte-merge-tag-close';
+  closeButton.setAttribute('aria-label', 'Close');
+  closeButton.style.background = 'none';
+  closeButton.style.border = 'none';
+  closeButton.style.color = 'inherit';
+  closeButton.style.cursor = 'pointer';
+  closeButton.style.fontSize = '20px';
+  closeButton.textContent = '✕';
+  header.appendChild(title);
+  header.appendChild(closeButton);
 
   const body = document.createElement('div');
   body.className = 'rte-merge-tag-body';
@@ -569,18 +785,18 @@ function showMergeTagDialog(editorContent: HTMLElement): void {
   const searchInput = document.createElement('input');
   searchInput.type = 'text';
   searchInput.className = 'rte-merge-tag-input';
-  searchInput.placeholder = 'Search merge tags...';
+  searchInput.placeholder = runtimeConfig.dialog.searchPlaceholder;
   searchInput.setAttribute('aria-label', 'Search merge tags');
 
   const tabs = document.createElement('div');
   tabs.className = 'rte-merge-tag-tabs';
 
-  CATEGORY_KEYS.forEach((categoryKey) => {
+  runtimeConfig.catalog.categoryKeys.forEach((categoryKey) => {
     const tab = document.createElement('button');
     tab.type = 'button';
     tab.className = 'rte-merge-tag-tab';
     tab.setAttribute('data-category', categoryKey);
-    tab.textContent = MERGE_TAG_CATEGORIES[categoryKey].name;
+    tab.textContent = runtimeConfig.catalog.categoriesByKey[categoryKey]?.name || categoryKey;
     tabs.appendChild(tab);
   });
 
@@ -601,12 +817,12 @@ function showMergeTagDialog(editorContent: HTMLElement): void {
   const cancelBtn = document.createElement('button');
   cancelBtn.type = 'button';
   cancelBtn.className = 'rte-merge-tag-btn-secondary';
-  cancelBtn.textContent = 'Cancel';
+  cancelBtn.textContent = runtimeConfig.dialog.cancelText;
 
   const insertBtn = document.createElement('button');
   insertBtn.type = 'button';
   insertBtn.className = 'rte-merge-tag-btn-primary';
-  insertBtn.textContent = 'Insert';
+  insertBtn.textContent = runtimeConfig.dialog.insertText;
 
   footer.appendChild(cancelBtn);
   footer.appendChild(insertBtn);
@@ -639,6 +855,12 @@ function showMergeTagDialog(editorContent: HTMLElement): void {
   };
 
   const renderPreview = () => {
+    if (!runtimeConfig.dialog.showPreview) {
+      preview.style.display = 'none';
+      insertBtn.disabled = state.filteredTags.length === 0;
+      return;
+    }
+
     clampSelectedIndex();
     const selected = state.selectedIndex >= 0 ? state.filteredTags[state.selectedIndex] : null;
     if (!selected) {
@@ -648,7 +870,7 @@ function showMergeTagDialog(editorContent: HTMLElement): void {
     }
 
     preview.style.display = 'block';
-    preview.innerHTML = `<strong>Preview:</strong> {{ ${selected.label} }}`;
+    preview.textContent = `Preview: ${runtimeConfig.formatToken(selected)}`;
     insertBtn.disabled = false;
   };
 
@@ -658,8 +880,19 @@ function showMergeTagDialog(editorContent: HTMLElement): void {
     selectedItem?.scrollIntoView({ block: 'nearest' });
   };
 
+  const updateSelectionUI = () => {
+    const currentSelected = list.querySelector('.rte-merge-tag-item.selected') as HTMLElement | null;
+    currentSelected?.classList.remove('selected');
+    if (state.selectedIndex >= 0) {
+      const nextSelected = list.querySelector(`.rte-merge-tag-item[data-index="${state.selectedIndex}"]`) as HTMLElement | null;
+      nextSelected?.classList.add('selected');
+    }
+    renderPreview();
+    ensureSelectedVisible();
+  };
+
   const renderList = () => {
-    state.filteredTags = filterTags(state.category, state.searchTerm);
+    state.filteredTags = filterTags(runtimeConfig, state.category, state.searchTerm);
     if (state.filteredTags.length > 0 && state.selectedIndex < 0) {
       state.selectedIndex = 0;
     }
@@ -670,7 +903,7 @@ function showMergeTagDialog(editorContent: HTMLElement): void {
     if (state.filteredTags.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'rte-merge-tag-empty';
-      empty.textContent = 'No merge tags found';
+      empty.textContent = runtimeConfig.dialog.emptyStateText;
       list.appendChild(empty);
       renderPreview();
       return;
@@ -700,8 +933,7 @@ function showMergeTagDialog(editorContent: HTMLElement): void {
     });
 
     list.appendChild(fragment);
-    renderPreview();
-    ensureSelectedVisible();
+    updateSelectionUI();
   };
 
   const applySearchSoon = () => {
@@ -735,7 +967,7 @@ function showMergeTagDialog(editorContent: HTMLElement): void {
     if (state.selectedIndex < 0) return;
 
     const selectedTag = state.filteredTags[state.selectedIndex];
-    const inserted = insertMergeTag(editorContent, state.savedRange, selectedTag);
+    const inserted = insertMergeTag(editorContent, state.savedRange, selectedTag, runtimeConfig.formatToken);
     if (inserted) {
       closeDialog();
     }
@@ -746,8 +978,8 @@ function showMergeTagDialog(editorContent: HTMLElement): void {
     const tab = target.closest('.rte-merge-tag-tab') as HTMLElement | null;
     if (!tab) return;
 
-    const category = tab.dataset.category as CategoryKey | undefined;
-    if (!category || !CATEGORY_KEYS.includes(category)) return;
+    const category = tab.dataset.category;
+    if (!category || !runtimeConfig.catalog.categoriesByKey[category]) return;
 
     state.category = category;
     state.searchTerm = '';
@@ -766,7 +998,7 @@ function showMergeTagDialog(editorContent: HTMLElement): void {
     if (Number.isNaN(index) || index < 0 || index >= state.filteredTags.length) return;
 
     state.selectedIndex = index;
-    renderList();
+    updateSelectionUI();
   };
 
   const onListDoubleClick = (event: Event) => {
@@ -792,7 +1024,7 @@ function showMergeTagDialog(editorContent: HTMLElement): void {
       event.preventDefault();
       if (state.filteredTags.length === 0) return;
       state.selectedIndex = Math.min(state.filteredTags.length - 1, state.selectedIndex + 1);
-      renderList();
+      updateSelectionUI();
       return;
     }
 
@@ -800,7 +1032,7 @@ function showMergeTagDialog(editorContent: HTMLElement): void {
       event.preventDefault();
       if (state.filteredTags.length === 0) return;
       state.selectedIndex = Math.max(0, state.selectedIndex - 1);
-      renderList();
+      updateSelectionUI();
       return;
     }
 
@@ -815,8 +1047,6 @@ function showMergeTagDialog(editorContent: HTMLElement): void {
       closeDialog();
     }
   };
-
-  const closeButton = header.querySelector('.rte-merge-tag-close') as HTMLButtonElement | null;
 
   tabs.addEventListener('click', onTabClick);
   list.addEventListener('click', onListClick);
@@ -858,8 +1088,10 @@ function showMergeTagDialog(editorContent: HTMLElement): void {
   }, 0);
 }
 
-export const MergeTagPlugin = (): Plugin => ({
+export const MergeTagPlugin = (options?: MergeTagPluginOptions): Plugin => ({
   name: 'mergeTag',
+
+  config: options as Record<string, unknown> | undefined,
 
   init: () => {
     injectMergeTagStyles();
@@ -883,7 +1115,7 @@ export const MergeTagPlugin = (): Plugin => ({
       const editorContent = resolveEditorContent();
       if (!editorContent) return false;
 
-      showMergeTagDialog(editorContent);
+      showMergeTagDialog(editorContent, createRuntimeConfig(options));
       return true;
     },
   },

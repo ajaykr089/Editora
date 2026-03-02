@@ -27,8 +27,10 @@ import { emojisSets, descriptions, type EmojiCategory } from './Constants';
 let dialogElement: HTMLElement | null = null;
 let activeTab: EmojiCategory = 'all';
 let searchQuery = '';
+let searchDebounceTimer: number | null = null;
 // Store the selection range before opening the dialog
 let savedSelectionRange: Range | null = null;
+let escapeHandler: ((event: KeyboardEvent) => void) | null = null;
 const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
 
 export const EmojisPlugin = (): Plugin => {
@@ -77,6 +79,7 @@ export const EmojisPlugin = (): Plugin => {
 };
 
 function createEmojiDialog(editorContent: HTMLElement): void {
+  closeDialog();
   activeTab = 'all';
   searchQuery = '';
 
@@ -139,14 +142,23 @@ function createEmojiDialog(editorContent: HTMLElement): void {
   document.body.appendChild(overlay);
   dialogElement = overlay;
 
+  escapeHandler = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      closeDialog();
+    }
+  };
+  document.addEventListener('keydown', escapeHandler, true);
+
   // Add event listeners
   setupEmojiDialogEventListeners(dialog, editorContent);
 
   injectEmojiDialogStyles();
 
-  setTimeout(() => {
+  requestAnimationFrame(() => {
     (dialog.querySelector('#emoji-search-input') as HTMLInputElement)?.focus();
-  }, 100);
+  });
 }
 
 function setupEmojiDialogEventListeners(dialog: HTMLElement, editorContent: HTMLElement): void {
@@ -155,41 +167,48 @@ function setupEmojiDialogEventListeners(dialog: HTMLElement, editorContent: HTML
   dialog.querySelectorAll('.emojis-tab').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       const category = (e.target as HTMLElement).getAttribute('data-category') as EmojiCategory;
-      if (category) switchEmojiTab(dialog, category, editorContent);
+      if (category) switchEmojiTab(dialog, category);
     });
   });
 
   const searchInput = dialog.querySelector('#emoji-search-input') as HTMLInputElement;
   searchInput?.addEventListener('input', (e) => {
     searchQuery = (e.target as HTMLInputElement).value;
-    updateEmojiGrid(dialog, editorContent);
+    if (searchDebounceTimer !== null) {
+      window.clearTimeout(searchDebounceTimer);
+    }
+    searchDebounceTimer = window.setTimeout(() => {
+      searchDebounceTimer = null;
+      updateEmojiGrid(dialog);
+    }, 90);
   });
 
-  // Initial emoji click handlers
-  updateEmojiGrid(dialog, editorContent);
+  const grid = dialog.querySelector('#emojis-grid');
+  grid?.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement;
+    const item = target.closest('.emojis-item') as HTMLElement | null;
+    if (!item) return;
+
+    const emoji = item.getAttribute('data-emoji') || item.textContent?.trim() || '';
+    if (emoji) {
+      insertEmoji(emoji, editorContent);
+      closeDialog();
+    }
+  });
 }
 
-function switchEmojiTab(dialog: HTMLElement, category: EmojiCategory, editorContent: HTMLElement): void {
+function switchEmojiTab(dialog: HTMLElement, category: EmojiCategory): void {
   activeTab = category;
   dialog.querySelectorAll('.emojis-tab').forEach((btn) => {
     btn.classList.toggle('active', btn.getAttribute('data-category') === category);
   });
-  updateEmojiGrid(dialog, editorContent);
+  updateEmojiGrid(dialog);
 }
 
-function updateEmojiGrid(dialog: HTMLElement, editorContent: HTMLElement): void {
+function updateEmojiGrid(dialog: HTMLElement): void {
   const grid = dialog.querySelector('#emojis-grid');
   if (grid) {
     grid.innerHTML = renderEmojiGrid(activeTab, searchQuery);
-    grid.querySelectorAll('.emojis-item').forEach((item) => {
-      item.addEventListener('click', () => {
-        const emoji = item.textContent?.trim() || '';
-        if (emoji) {
-          insertEmoji(emoji, editorContent);
-          closeDialog();
-        }
-      });
-    });
   }
 }
 
@@ -226,8 +245,16 @@ function renderEmojiGrid(category: EmojiCategory, search: string): string {
 }
 
 function closeDialog(): void {
+  if (escapeHandler) {
+    document.removeEventListener('keydown', escapeHandler, true);
+    escapeHandler = null;
+  }
+  if (searchDebounceTimer !== null) {
+    window.clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = null;
+  }
   if (dialogElement) {
-    document.body.removeChild(dialogElement);
+    dialogElement.remove();
     dialogElement = null;
   }
 }
@@ -296,6 +323,26 @@ function injectEmojiDialogStyles(): void {
       --rte-emoji-accent: #1f75fe;
       --rte-emoji-accent-strong: #165fd6;
       --rte-emoji-ring: rgba(31, 117, 254, 0.18);
+      --rte-picker-dialog-width: min(640px, 96vw);
+      --rte-picker-dialog-max-height: min(560px, 86vh);
+      --rte-picker-dialog-radius: 12px;
+      --rte-picker-search-wrap-padding: 12px;
+      --rte-picker-search-height: 38px;
+      --rte-picker-search-font-size: 13px;
+      --rte-picker-search-radius: 8px;
+      --rte-picker-tabs-width: 156px;
+      --rte-picker-tab-padding-y: 10px;
+      --rte-picker-tab-padding-x: 12px;
+      --rte-picker-tab-font-size: 13px;
+      --rte-picker-grid-padding: 12px;
+      --rte-picker-grid-gap: 6px;
+      --rte-picker-cell-size: 34px;
+      --rte-picker-cell-font-size: 17px;
+      --rte-picker-cell-radius: 7px;
+      --rte-picker-mobile-tab-min-width: 82px;
+      --rte-picker-mobile-cell-size: 32px;
+      --rte-picker-mobile-grid-gap: 5px;
+      --rte-picker-mobile-dialog-max-height: 88vh;
       position: fixed;
       top: 0;
       left: 0;
@@ -306,7 +353,7 @@ function injectEmojiDialogStyles(): void {
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      z-index: 10000;
       padding: 16px;
       box-sizing: border-box;
     }
@@ -328,11 +375,10 @@ function injectEmojiDialogStyles(): void {
       background: var(--rte-emoji-dialog-bg);
       color: var(--rte-emoji-dialog-text);
       border: 1px solid var(--rte-emoji-border);
-      border-radius: 12px;
+      border-radius: var(--rte-picker-dialog-radius);
       box-shadow: 0 24px 48px rgba(10, 15, 24, 0.28);
-      max-width: 800px;
-      width: 90%;
-      max-height: 80vh;
+      width: var(--rte-picker-dialog-width);
+      max-height: var(--rte-picker-dialog-max-height);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -370,31 +416,34 @@ function injectEmojiDialogStyles(): void {
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      min-width: 0;
     }
 
     .emojis-search {
-      padding: 16px 16px 0 16px;
+      padding: var(--rte-picker-search-wrap-padding) var(--rte-picker-search-wrap-padding) 0 var(--rte-picker-search-wrap-padding);
       position: relative;
     }
 
     .emojis-search-icon {
       position: absolute;
-      left: 28px;
-      top: 27px;
+      left: 24px;
+      top: 22px;
       color: var(--rte-emoji-muted-text);
       pointer-events: none;
       z-index: 1;
     }
 
     .emojis-search-input {
-      width: calc(100% - 24px);
-      padding: 10px 12px 10px 40px;
+      width: 100%;
+      height: var(--rte-picker-search-height);
+      padding: 8px 12px 8px 36px;
       border: 1px solid var(--rte-emoji-border);
-      border-radius: 8px;
-      font-size: 14px;
+      border-radius: var(--rte-picker-search-radius);
+      font-size: var(--rte-picker-search-font-size);
       color: var(--rte-emoji-dialog-text);
       background-color: var(--rte-emoji-subtle-bg);
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      box-sizing: border-box;
     }
 
     .emojis-search-input:focus {
@@ -414,21 +463,23 @@ function injectEmojiDialogStyles(): void {
     .emojis-tabs {
       display: flex;
       flex-direction: column;
-      width: 180px;
+      width: var(--rte-picker-tabs-width);
       border-right: 1px solid var(--rte-emoji-border);
       background-color: var(--rte-emoji-subtle-bg);
+      overflow-y: auto;
     }
 
     .emojis-tab {
-      padding: 12px 16px;
+      padding: var(--rte-picker-tab-padding-y) var(--rte-picker-tab-padding-x);
       border: none;
       background: none;
       text-align: left;
       cursor: pointer;
-      font-size: 14px;
+      font-size: var(--rte-picker-tab-font-size);
       color: var(--rte-emoji-muted-text);
       border-bottom: 1px solid var(--rte-emoji-border);
       transition: all 0.2s ease;
+      line-height: 1.25;
     }
 
     .emojis-tab:hover {
@@ -447,24 +498,25 @@ function injectEmojiDialogStyles(): void {
     }
 
     .emojis-grid {
-      padding: 16px;
+      padding: var(--rte-picker-grid-padding);
       overflow-y: auto;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(var(--rte-picker-cell-size), 1fr));
+      gap: var(--rte-picker-grid-gap);
+      contain: content;
     }
 
     .emojis-item {
-      width: 40px;
-      height: 40px;
+      width: var(--rte-picker-cell-size);
+      height: var(--rte-picker-cell-size);
       display: flex;
       align-items: center;
       justify-content: center;
       border: 1px solid var(--rte-emoji-border);
       background: var(--rte-emoji-subtle-bg);
-      border-radius: 8px;
+      border-radius: var(--rte-picker-cell-radius);
       cursor: pointer;
-      font-size: 18px;
+      font-size: var(--rte-picker-cell-font-size);
       transition: all 0.2s ease;
       color: var(--rte-emoji-dialog-text);
     }
@@ -494,8 +546,8 @@ function injectEmojiDialogStyles(): void {
     /* Responsive design */
     @media (max-width: 768px) {
       .emojis-dialog {
-        width: 95%;
-        max-height: 90vh;
+        width: 96%;
+        max-height: var(--rte-picker-mobile-dialog-max-height);
       }
 
       .emojis-content {
@@ -514,17 +566,17 @@ function injectEmojiDialogStyles(): void {
         border-bottom: none;
         border-right: 1px solid var(--rte-emoji-border);
         white-space: nowrap;
-        min-width: 80px;
+        min-width: var(--rte-picker-mobile-tab-min-width);
       }
 
       .emojis-grid {
-        grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
-        gap: 6px;
+        grid-template-columns: repeat(auto-fill, minmax(var(--rte-picker-mobile-cell-size), 1fr));
+        gap: var(--rte-picker-mobile-grid-gap);
       }
 
       .emojis-item {
-        width: 36px;
-        height: 36px;
+        width: var(--rte-picker-mobile-cell-size);
+        height: var(--rte-picker-mobile-cell-size);
         font-size: 16px;
       }
     }

@@ -152,6 +152,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     (window as any).__editoraCommandEditorRoot = editorContainer || null;
   };
 
+  const setLastCommandTrigger = (element: HTMLElement | null) => {
+    if (typeof window === 'undefined' || !element) return;
+    const command = element.getAttribute('data-command');
+    if (!command) return;
+    (window as any).__editoraLastCommandButton = element;
+    (window as any).__editoraLastCommand = command;
+  };
+
   const getSelectionInEditor = (): Range | null => {
     const contentEl = getEditorContentElement();
     if (!contentEl) return null;
@@ -182,6 +190,34 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       document.removeEventListener('selectionchange', handleSelectionChange);
     };
   }, []);
+
+  useEffect(() => {
+    if (!openDropdown) return;
+
+    const handleOutsidePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (!(target instanceof Element)) return;
+
+      if (!target.closest('.rte-toolbar-dropdown')) {
+        setOpenDropdown(null);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener('pointerdown', handleOutsidePointerDown, true);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('pointerdown', handleOutsidePointerDown, true);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [openDropdown]);
 
   const shouldPreferExpandedSelection = (command: string): boolean => {
     return [
@@ -413,13 +449,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     const isToolbarAction = target.closest('.rte-toolbar-button, .rte-toolbar-dropdown-item, .rte-toolbar-more-button');
     if (!isToolbarAction) return;
 
+    setLastCommandTrigger(target.closest('[data-command]') as HTMLElement | null);
+
     setActiveCommandEditorContext();
     captureSelectionFromEditor();
     e.preventDefault();
   };
 
-  const renderToolbarItems = (items: ToolbarItemLike[]) => {
-    return items.map((item, idx) => {
+  const renderToolbarItems = (
+    itemsToRender: ToolbarItemLike[],
+    applyOverflowVisibility = true,
+  ) => {
+    return itemsToRender.map((item, idx) => {
       const itemCommand = item.command || '';
       return (
         <div
@@ -427,7 +468,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           className="rte-toolbar-item"
           style={{
             display:
-              showMoreOptions && visibleCount !== null && idx >= visibleCount
+              applyOverflowVisibility &&
+              showMoreOptions &&
+              visibleCount !== null &&
+              idx >= visibleCount
                 ? "none"
                 : "flex",
           }}
@@ -505,7 +549,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               <div
                 className={`rte-toolbar-group-items ${item.label.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                {renderToolbarItems(item.items || [])}
+                {renderToolbarItems(item.items || [], false)}
               </div>
             </div>
           ) : (
@@ -528,6 +572,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       );
     });
   };
+
+  const hiddenItems =
+    showMoreOptions && visibleCount !== null
+      ? items.filter((_, idx) => idx >= visibleCount)
+      : [];
   return (
     <>
       <div
@@ -566,100 +615,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
         {/* Hidden items expansion row - slides down inline */}
         {hasOverflow && (
-          <div
-            className={`rte-toolbar-expanded-row ${showMoreMenu ? "show" : ""}`}
-          >
-            {items.map(
-              (item, idx) => {
-                if (idx < (visibleCount || 0)) return null;
-                const itemCommand = item.command || '';
-                return (
-                  <div key={idx} className="rte-toolbar-item">
-                    {item.type === "separator" ? (
-                      <div className="rte-toolbar-separator" aria-hidden="true" />
-                    ) : item.type === "dropdown" ? (
-                      <div className="rte-toolbar-dropdown">
-                        <button
-                          className="rte-toolbar-button"
-                          data-command={itemCommand}
-                          data-active="false"
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            captureSelectionFromEditor();
-                          }}
-                          onClick={() => handleDropdownOpen(itemCommand)}
-                          disabled={readonly}
-                        >
-                          {item.label} ▼
-                        </button>
-                        {openDropdown === itemCommand && (
-                          <div className="rte-toolbar-dropdown-menu">
-                            {item.options?.map((opt) => (
-                              <div
-                                key={opt.value}
-                                className="rte-toolbar-dropdown-item"
-                                onMouseDown={(e) => e.preventDefault()}
-                                onClick={() => handleCommand(itemCommand, opt.value)}
-                              >
-                                {opt.label}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ) : item.type === "inline-menu" ? (
-                      <button
-                        ref={getButtonRef(itemCommand)}
-                        className="rte-toolbar-button"
-                        data-command={itemCommand}
-                        data-active="false"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          captureSelectionFromEditor();
-                        }}
-                        onClick={() => handleInlineMenuOpen(itemCommand)}
-                        disabled={readonly}
-                        title={item.label}
-                      >
-                        {renderIcon(item.icon, itemCommand)}
-                      </button>
-                    ) : item.type === "input" ? (
-                      <input
-                        type="text"
-                        className="rte-toolbar-input"
-                        placeholder={item.placeholder}
-                        onChange={(e) => handleCommand(itemCommand, e.target.value)}
-                        disabled={readonly}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            handleCommand(
-                              itemCommand,
-                              (e.target as HTMLInputElement).value,
-                            );
-                          }
-                        }}
-                        title={item.label}
-                      />
-                    ) : (
-                      <button
-                        className="rte-toolbar-button"
-                        data-command={itemCommand}
-                        data-active="false"
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          captureSelectionFromEditor();
-                        }}
-                        onClick={() => handleCommand(itemCommand)}
-                        disabled={readonly}
-                        title={item.label}
-                      >
-                        {renderIcon(item.icon, itemCommand)}
-                      </button>
-                    )}
-                  </div>
-                );
-              },
-            )}
+          <div className={`rte-toolbar-expanded-row ${showMoreMenu ? "show" : ""}`}>
+            {renderToolbarItems(hiddenItems, false)}
           </div>
         )}
       </div>

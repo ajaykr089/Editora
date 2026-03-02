@@ -448,6 +448,8 @@ export class EditorCore implements EditorAPI {
 
   // Search & Navigation
   search(query: string, options: Partial<SearchOptions> = {}): SearchResult[] {
+    if (!query) return [];
+
     const opts: SearchOptions = {
       query,
       caseSensitive: false,
@@ -457,43 +459,117 @@ export class EditorCore implements EditorAPI {
     };
 
     const results: SearchResult[] = [];
-    const text = this.getValue();
-    const lines = text.split('\n');
+    const rawText = this.textModel.getText();
+    const { normalizedText: text, normalizedToRawOffsets } =
+      this.buildSearchTextAndOffsetMap(rawText);
 
-    let searchText = opts.caseSensitive ? text : text.toLowerCase();
-    let searchQuery = opts.caseSensitive ? query : query.toLowerCase();
+    const searchText = opts.caseSensitive ? text : text.toLowerCase();
+    const searchQuery = opts.caseSensitive ? query : query.toLowerCase();
 
     if (opts.regex) {
-      const regex = new RegExp(searchQuery, opts.caseSensitive ? 'g' : 'gi');
+      let regex: RegExp;
+      try {
+        regex = new RegExp(query, opts.caseSensitive ? 'g' : 'gi');
+      } catch {
+        return [];
+      }
       let match;
-      while ((match = regex.exec(searchText)) !== null) {
-        const startPos = this.textModel.offsetToPosition(match.index);
-        const endPos = this.textModel.offsetToPosition(match.index + match[0].length);
-        results.push({
-          range: { start: startPos, end: endPos },
-          match: match[0]
-        });
+      while ((match = regex.exec(text)) !== null) {
+        const matched = match[0] ?? '';
+        if (matched.length === 0) {
+          regex.lastIndex = match.index + 1;
+          continue;
+        }
+        const startOffset = match.index;
+        const endOffset = match.index + matched.length;
+        if (opts.wholeWord && !this.isWholeWordBoundary(text, startOffset, endOffset)) {
+          continue;
+        }
+        this.pushSearchResultFromOffsets(
+          results,
+          startOffset,
+          endOffset,
+          text,
+          normalizedToRawOffsets,
+        );
       }
     } else {
       let index = 0;
       let startIndex = searchText.indexOf(searchQuery, index);
 
       while (startIndex !== -1) {
-        const endIndex = startIndex + query.length;
-        const startPos = this.textModel.offsetToPosition(startIndex);
-        const endPos = this.textModel.offsetToPosition(endIndex);
-
-        results.push({
-          range: { start: startPos, end: endPos },
-          match: text.substring(startIndex, endIndex)
-        });
-
-        index = endIndex;
+        const endIndex = startIndex + searchQuery.length;
+        if (!opts.wholeWord || this.isWholeWordBoundary(text, startIndex, endIndex)) {
+          this.pushSearchResultFromOffsets(
+            results,
+            startIndex,
+            endIndex,
+            text,
+            normalizedToRawOffsets,
+          );
+          index = endIndex;
+        } else {
+          index = startIndex + 1;
+        }
         startIndex = searchText.indexOf(searchQuery, index);
       }
     }
 
     return results;
+  }
+
+  private pushSearchResultFromOffsets(
+    results: SearchResult[],
+    startOffset: number,
+    endOffset: number,
+    text: string,
+    normalizedToRawOffsets: number[],
+  ): void {
+    const rawStartOffset =
+      normalizedToRawOffsets[startOffset] ?? startOffset;
+    const rawEndOffset =
+      normalizedToRawOffsets[endOffset] ?? rawStartOffset;
+    const startPos = this.textModel.offsetToPosition(rawStartOffset);
+    const endPos = this.textModel.offsetToPosition(rawEndOffset);
+    results.push({
+      range: { start: startPos, end: endPos },
+      match: text.substring(startOffset, endOffset),
+    });
+  }
+
+  private isWholeWordBoundary(text: string, start: number, end: number): boolean {
+    const prev = start > 0 ? text[start - 1] : '';
+    const next = end < text.length ? text[end] : '';
+    return !this.isWordChar(prev) && !this.isWordChar(next);
+  }
+
+  private isWordChar(ch: string): boolean {
+    return /^[A-Za-z0-9_]$/.test(ch);
+  }
+
+  private buildSearchTextAndOffsetMap(rawText: string): {
+    normalizedText: string;
+    normalizedToRawOffsets: number[];
+  } {
+    const normalizedChars: string[] = [];
+    const normalizedToRawOffsets: number[] = [0];
+
+    let normalizedOffset = 0;
+    for (let i = 0; i < rawText.length; i++) {
+      const ch = rawText[i];
+      if (ch === '\u200B' || ch === EditorCore.CURSOR_SENTINEL) {
+        continue;
+      }
+      normalizedChars.push(ch);
+      normalizedOffset += 1;
+      normalizedToRawOffsets[normalizedOffset] = i + 1;
+    }
+
+    normalizedToRawOffsets[normalizedOffset] = rawText.length;
+    return {
+      normalizedText: normalizedChars.join(''),
+      normalizedToRawOffsets,
+    };
   }
 
   replace(range: Range, text: string): void {
@@ -514,8 +590,11 @@ export class EditorCore implements EditorAPI {
     }
 
     const change = this.textModel.replaceRange(range, text);
-    // Programmatic replace should not let the renderer override caret
+    // Programmatic replace should not let render-time caret restoration
+    // (and related ensureCaretVisible) interfere with search replace scrolling.
+    this.expectingProgrammaticCursor = true;
     this.renderTextWithHighlight(this.getValue(), false);
+    this.expectingProgrammaticCursor = false;
     this.emit('change', [change]);
   }
 

@@ -8,6 +8,7 @@ This page focuses on production-oriented React integration patterns.
 import { useMemo, useState } from "react";
 import { EditoraEditor } from "@editora/react";
 import { BoldPlugin, ItalicPlugin, HistoryPlugin } from "@editora/plugins";
+import "@editora/plugins/styles.css";
 import "@editora/themes/themes/default.css";
 
 export default function EditorScreen() {

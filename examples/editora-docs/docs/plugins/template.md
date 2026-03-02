@@ -30,6 +30,28 @@ import {
 const plugins = [TemplatePlugin()];
 ```
 
+## Add Custom Templates
+
+```ts
+import { TemplatePlugin, addCustomTemplate } from "@editora/plugins";
+
+addCustomTemplate({
+  id: "invoice-basic",
+  name: "Invoice (Basic)",
+  category: "Billing",
+  description: "Simple invoice template",
+  html: `
+    <h1>Invoice</h1>
+    <p><strong>Customer:</strong> {{customer.name}}</p>
+    <p><strong>Date:</strong> {{today}}</p>
+    <p><strong>Total:</strong> {{invoice.total}}</p>
+  `,
+  tags: ["invoice", "billing"],
+});
+
+const plugins = [TemplatePlugin()];
+```
+
 ## Command Matrix
 
 | Action | Command | Shortcut | Toolbar |

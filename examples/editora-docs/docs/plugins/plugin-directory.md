@@ -59,3 +59,39 @@ import { CodeSamplePlugin, TablePlugin } from "@editora/plugins";
 import { CodeSamplePlugin } from "@editora/plugins/code-sample";
 import { TablePlugin } from "@editora/plugins/table";
 ```
+
+## Merge Tag Runtime Configuration
+
+```ts
+import { MergeTagPlugin } from "@editora/plugins";
+
+const mergeTag = MergeTagPlugin({
+  categories: [
+    {
+      id: "CUSTOMER",
+      name: "Customer",
+      tags: [
+        { key: "first_name", label: "First Name", value: "{{customer.first_name}}", preview: "John" },
+        { key: "email", label: "Email", value: "{{customer.email}}", preview: "john@acme.com" }
+      ]
+    },
+    {
+      id: "ORDER",
+      name: "Order",
+      tags: [
+        { key: "id", label: "Order ID", value: "{{order.id}}", preview: "#A-1024" }
+      ]
+    }
+  ],
+  defaultCategory: "CUSTOMER",
+  dialog: {
+    title: "Insert Variable",
+    searchPlaceholder: "Search variables...",
+    emptyStateText: "No variables found",
+    cancelText: "Close",
+    insertText: "Insert",
+    showPreview: true
+  },
+  tokenTemplate: "{value}" // supports {key} {label} {category} {value}
+});
+```

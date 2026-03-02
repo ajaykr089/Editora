@@ -8,6 +8,48 @@ export interface ApiConfig {
 export type MediaManagerConfig = Record<string, unknown>;
 export type DocumentManagerConfig = Record<string, unknown>;
 
+export interface MergeTagItem {
+  key?: string;
+  label: string;
+  category?: string;
+  preview?: string;
+  description?: string;
+  value?: string;
+}
+
+export interface MergeTagCategory {
+  id?: string;
+  name: string;
+  tags: MergeTagItem[];
+}
+
+export interface MergeTagDialogOptions {
+  title?: string;
+  searchPlaceholder?: string;
+  emptyStateText?: string;
+  cancelText?: string;
+  insertText?: string;
+  showPreview?: boolean;
+}
+
+export interface MergeTagPluginOptions {
+  tags?: MergeTagItem[];
+  categories?: MergeTagCategory[];
+  defaultCategory?: string;
+  dialog?: MergeTagDialogOptions;
+  tokenTemplate?: string | ((tag: MergeTagItem & { key: string; category: string }) => string);
+}
+
+export interface Template {
+  id: string;
+  name: string;
+  category: string;
+  html: string;
+  description?: string;
+  preview?: string;
+  tags?: string[];
+}
+
 export function HeadingPlugin(): Plugin;
 export function BoldPlugin(): Plugin;
 export function ItalicPlugin(): Plugin;
@@ -50,8 +92,16 @@ export function PrintPlugin(): Plugin;
 export function PageBreakPlugin(): Plugin;
 export function FootnotePlugin(): Plugin;
 export function CodeSamplePlugin(): Plugin;
-export function MergeTagPlugin(): Plugin;
+export function MergeTagPlugin(options?: MergeTagPluginOptions): Plugin;
 export function TemplatePlugin(): Plugin;
+export const PREDEFINED_TEMPLATES: Template[];
+export function addCustomTemplate(template: Template): boolean;
+export function getAllTemplates(): Template[];
+export function getTemplatesByCategory(category: string): Template[];
+export function getTemplateCategories(): string[];
+export function searchTemplates(query: string): Template[];
+export function sanitizeTemplate(html: string): string;
+export function validateTemplate(template: Template): boolean;
 export function CommentsPlugin(): Plugin;
 export function SpellCheckPlugin(): Plugin;
 export function A11yCheckerPlugin(): Plugin;

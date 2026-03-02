@@ -16,6 +16,7 @@ Understand how Editora packages fit together in a scalable monorepo ecosystem.
 - **Visual system**: `@editora/themes`
 - **Icons**: `@editora/icons`, `@editora/react-icons`
 - **UI layer**: `@editora/ui-core`, `@editora/ui-react`
+- **Code/source editing**: `@editora/light-code-editor`
 
 ## Recommended adoption order
 
@@ -36,3 +37,9 @@ Understand how Editora packages fit together in a scalable monorepo ecosystem.
 - Keep `@editora/*` dependency versions aligned.
 - Validate multi-instance and dark-mode behavior as release gates.
 - Maintain docs and examples in the same PR as runtime or API changes.
+
+## Direct package guides
+
+- [`@editora/light-code-editor` package docs](../packages/light-code-editor)
+- [`@editora/plugins` package docs](../packages/plugins)
+- [`@editora/core` package docs](../packages/core)

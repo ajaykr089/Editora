@@ -124,7 +124,10 @@ npm install @editora/react @editora/core @editora/plugins @editora/themes react 
                     <h3>2. Import</h3>
                     <pre><code class="language-javascript">import { createEditor } from '@editora/core';
 // Or React
-import EditoraEditor from '@editora/react';</code></pre>
+import { EditoraEditor } from '@editora/react';
+import "@editora/plugins/styles.css";
+import "@editora/themes/themes/default.css";</code></pre>
+                    <p>Use <code>@editora/themes/themes/default.css</code> as base, then optional overrides like <code>dark.css</code> or <code>acme.css</code>.</p>
                 </div>
                 <div class="col">
                     <h3>3. Use</h3>

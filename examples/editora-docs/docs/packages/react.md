@@ -20,6 +20,8 @@ npm i @editora/react @editora/core @editora/plugins @editora/themes react react-
 import { useState } from "react";
 import { EditoraEditor } from "@editora/react";
 import { BoldPlugin, ItalicPlugin } from "@editora/plugins";
+import "@editora/plugins/styles.css";
+import "@editora/themes/themes/default.css";
 
 export default function App() {
   const [value, setValue] = useState("<p>Start writing...</p>");
@@ -64,6 +66,8 @@ export default function App() {
 - Keep plugin array stable with memoization.
 - Scope theme classes per editor container in mixed-theme pages.
 - Debounce persistence in controlled mode for larger documents.
+- In CRA and similar bundlers, import `@editora/plugins/styles.css` when using plugin UI features.
+- Use `default.css` as base theme CSS, then optional override themes like `dark.css`/`acme.css`.
 
 ## Accessibility
 

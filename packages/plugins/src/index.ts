@@ -39,8 +39,25 @@ export { PrintPlugin } from '../print/src/index';
 export { PageBreakPlugin } from '../page-break/src/index';
 export { FootnotePlugin } from '../footnote/src/index';
 export { CodeSamplePlugin } from '../code-sample/src/index';
-export { MergeTagPlugin } from '../merge-tag/src/index';
-export { TemplatePlugin } from '../template/src/index';
+export {
+  MergeTagPlugin,
+  type MergeTagItem,
+  type MergeTagCategory,
+  type MergeTagDialogOptions,
+  type MergeTagPluginOptions,
+} from '../merge-tag/src/index';
+export {
+  TemplatePlugin,
+  PREDEFINED_TEMPLATES,
+  addCustomTemplate,
+  getAllTemplates,
+  getTemplatesByCategory,
+  getTemplateCategories,
+  searchTemplates,
+  sanitizeTemplate,
+  validateTemplate,
+  type Template,
+} from '../template/src/index';
 export { CommentsPlugin } from '../comments/src/index';
 export { SpellCheckPlugin } from '../spell-check/src/index';
 export { A11yCheckerPlugin } from '../a11y-checker/src/index';

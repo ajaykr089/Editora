@@ -154,6 +154,7 @@ export interface View {
   scrollToPosition(position: Position): void;
   getScrollTop(): number;
   setScrollTop(scrollTop: number): void;
+  getScrollElement(): HTMLElement;
   updateLineNumbers(lineCount: number): void;
   destroy(): void;
 }

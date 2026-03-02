@@ -37,6 +37,7 @@ import {
   SpellCheckPlugin,
   CommentsPlugin,
 } from "@editora/plugins";
+import "@editora/plugins/styles.css";
 import "@editora/themes/themes/default.css";
 import "@editora/themes/themes/dark.css";
 

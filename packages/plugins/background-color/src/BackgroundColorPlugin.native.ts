@@ -1,5 +1,9 @@
 import type { Plugin } from '@editora/core';
 import { applyColorToSelection } from '../../src/utils/colorSelectionApply';
+import {
+  attachAnchoredPopover,
+  type AnchoredPopoverHandle,
+} from '../../src/utils/anchoredPopover';
 
 /**
  * BackgroundColorPlugin - Native implementation with inline color picker
@@ -24,6 +28,7 @@ import { applyColorToSelection } from '../../src/utils/colorSelectionApply';
  */
 let colorPickerElement: HTMLDivElement | null = null;
 let currentButton: HTMLElement | null = null;
+let popoverHandle: AnchoredPopoverHandle | null = null;
 let savedRange: Range | null = null;
 let selectedColor: string = '#ffff00'; // Default yellow highlight
 const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
@@ -70,16 +75,54 @@ function getActiveEditorRoot(): HTMLElement | null {
  * Resolve toolbar button for command in current active editor first.
  */
 function getToolbarButton(command: string): HTMLElement | null {
+  const lastCommand = (window as any).__editoraLastCommand as string | undefined;
+  const lastButton = (window as any).__editoraLastCommandButton as HTMLElement | undefined;
+  if (lastCommand === command && lastButton && lastButton.isConnected) {
+    const styles = window.getComputedStyle(lastButton);
+    const rect = lastButton.getBoundingClientRect();
+    if (
+      styles.display !== 'none' &&
+      styles.visibility !== 'hidden' &&
+      styles.pointerEvents !== 'none' &&
+      !(rect.width === 0 && rect.height === 0)
+    ) {
+      return lastButton;
+    }
+  }
+
+  const pickVisibleButton = (buttons: HTMLElement[]): HTMLElement | null => {
+    for (const button of buttons) {
+      const styles = window.getComputedStyle(button);
+      const rect = button.getBoundingClientRect();
+      if (
+        styles.display === 'none' ||
+        styles.visibility === 'hidden' ||
+        styles.pointerEvents === 'none'
+      ) {
+        continue;
+      }
+      if (rect.width === 0 && rect.height === 0) {
+        continue;
+      }
+      return button;
+    }
+    return null;
+  };
+
   const root = getActiveEditorRoot();
 
   if (root) {
-    const scopedButton = root.querySelector(
-      `[data-command="${command}"]`,
-    ) as HTMLElement | null;
-    if (scopedButton) return scopedButton;
+    const scopedButtons = Array.from(
+      root.querySelectorAll(`[data-command="${command}"]`),
+    ) as HTMLElement[];
+    const scopedVisible = pickVisibleButton(scopedButtons);
+    if (scopedVisible) return scopedVisible;
   }
 
-  return document.querySelector(`[data-command="${command}"]`) as HTMLElement | null;
+  const globalButtons = Array.from(
+    document.querySelectorAll(`[data-command="${command}"]`),
+  ) as HTMLElement[];
+  return pickVisibleButton(globalButtons);
 }
 
 function isDarkThemeContext(anchor?: HTMLElement | null): boolean {
@@ -112,7 +155,7 @@ function injectStyles() {
   styleElement.id = 'rte-bg-color-picker-styles';
   styleElement.textContent = `
     .rte-bg-color-picker {
-      position: absolute;
+      position: fixed;
       background: white;
       border-radius: 8px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -369,10 +412,6 @@ function createColorPicker(): HTMLDivElement {
   const previewSection = document.createElement('div');
   previewSection.className = 'rte-bg-color-section';
 
-  const previewLabel = document.createElement('div');
-  previewLabel.className = 'rte-bg-color-section-label';
-  previewLabel.textContent = 'Current Color';
-
   const previewBox = document.createElement('div');
   previewBox.className = 'rte-bg-color-preview';
 
@@ -386,7 +425,6 @@ function createColorPicker(): HTMLDivElement {
 
   previewBox.appendChild(previewSwatch);
   previewBox.appendChild(previewHex);
-  previewSection.appendChild(previewLabel);
   previewSection.appendChild(previewBox);
 
   // Preset Colors Section
@@ -536,23 +574,6 @@ function attachColorPickerListeners() {
     });
   }
 
-  // Click outside to close
-  const handleClickOutside = (e: MouseEvent) => {
-    if (colorPickerElement && currentButton) {
-      const target = e.target as Node;
-      if (!colorPickerElement.contains(target) && !currentButton.contains(target)) {
-        closeColorPicker();
-      }
-    }
-  };
-
-  // Add slight delay to prevent immediate closure
-  setTimeout(() => {
-    document.addEventListener('click', handleClickOutside);
-  }, 100);
-
-  // Store handler for cleanup
-  (colorPickerElement as any)._clickOutsideHandler = handleClickOutside;
 }
 
 /**
@@ -681,50 +702,17 @@ function applyBackgroundColor(color: string): boolean {
  * Close and cleanup the color picker
  */
 function closeColorPicker() {
-  if (colorPickerElement) {
-    // Remove click outside handler
-    const handler = (colorPickerElement as any)._clickOutsideHandler;
-    if (handler) {
-      document.removeEventListener('click', handler);
-    }
+  if (popoverHandle) {
+    popoverHandle.destroy();
+    popoverHandle = null;
+  }
 
+  if (colorPickerElement) {
     colorPickerElement.remove();
     colorPickerElement = null;
   }
   currentButton = null;
   savedRange = null;
-}
-
-/**
- * Position the color picker below the button
- */
-function positionColorPicker(button: HTMLElement, picker: HTMLDivElement) {
-  const buttonRect = button.getBoundingClientRect();
-  const pickerRect = picker.getBoundingClientRect();
-  const pickerWidth = pickerRect.width || 220;
-  const pickerHeight = pickerRect.height || 320;
-  const gutter = 8;
-
-  // Horizontal placement in viewport space
-  let left = buttonRect.left;
-  if (left + pickerWidth > window.innerWidth - gutter) {
-    left = window.innerWidth - pickerWidth - gutter;
-  }
-  left = Math.max(gutter, left);
-
-  // Vertical placement in viewport space (prefer below)
-  let top = buttonRect.bottom + gutter;
-  if (top + pickerHeight > window.innerHeight - gutter) {
-    const aboveTop = buttonRect.top - pickerHeight - gutter;
-    if (aboveTop >= gutter) {
-      top = aboveTop;
-    } else {
-      top = Math.max(gutter, window.innerHeight - pickerHeight - gutter);
-    }
-  }
-
-  picker.style.top = `${Math.round(top + window.scrollY)}px`;
-  picker.style.left = `${Math.round(left + window.scrollX)}px`;
 }
 
 /**
@@ -768,7 +756,18 @@ function openBackgroundColorPicker(): boolean {
   document.body.appendChild(colorPickerElement);
 
   currentButton = button;
-  positionColorPicker(button, colorPickerElement);
+  if (popoverHandle) {
+    popoverHandle.destroy();
+    popoverHandle = null;
+  }
+  popoverHandle = attachAnchoredPopover({
+    popover: colorPickerElement,
+    anchor: button,
+    onClose: closeColorPicker,
+    gap: 8,
+    margin: 8,
+    zIndex: 10000,
+  });
 
   // Initialize preview
   updateColorPreview();

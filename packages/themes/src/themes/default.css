@@ -150,6 +150,8 @@
 /* Expanded row for hidden items - Slides down inline */
 .rte-toolbar-expanded-row {
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
   transform: scaleY(0);
   transform-origin: top;
   max-height: 0;
@@ -161,7 +163,7 @@
 
 .rte-toolbar-expanded-row.show {
   transform: scaleY(1);
-  max-height: 200px;
+  max-height: 320px;
   padding: 8px;
   padding-top:1px;
   opacity: 1;
@@ -169,6 +171,8 @@
   border: 1px solid #ddd;
   border-top: none;
   gap: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .rte-content {
@@ -198,6 +202,81 @@
 .rte-content ol {
   margin: 1em 0;
   padding-left: 2em;
+}
+
+/* Table styles (React wrapper uses .rte-content) */
+.rte-content .rte-table,
+.rte-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.rte-content .rte-table td,
+.rte-content .rte-table th,
+.rte-content table td,
+.rte-content table th {
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  min-width: 80px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.rte-content .rte-table th,
+.rte-content table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.rte-content .rte-table td p,
+.rte-content table td p {
+  margin: 0;
+}
+
+.table-toolbar {
+  background: #fff;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 20px;
+  background: #e0e0e0;
+  margin: 0 4px;
+}
+
+.toolbar-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #333;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.toolbar-icon-btn:hover:not(:disabled) {
+  background: #f0f0f0;
+  border-color: #d0d0d0;
 }
 
 .rte-content code {

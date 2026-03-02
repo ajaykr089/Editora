@@ -578,15 +578,20 @@ export class RichTextEditorElement extends HTMLElement {
     if (typeof window !== 'undefined') {
       (window as any).__editoraCommandEditorRoot = this;
     }
+    const commandContext = {
+      editorElement: this,
+      contentElement: this.contentElement,
+      toolbarElement: this.toolbarElement,
+    };
     const plugin = this.loadedPlugins.find((p) => p.commands && p.commands[command]);
     if (plugin && plugin.commands) {
       const commandFn = plugin.commands[command];
       if (typeof commandFn === 'function') {
         try {
           if (command === 'toggleFullscreen') {
-            commandFn(this as any);
+            commandFn(this as any, commandContext);
           } else {
-            commandFn(value);
+            commandFn(value, commandContext);
           }
           return true;
         } catch (error) {

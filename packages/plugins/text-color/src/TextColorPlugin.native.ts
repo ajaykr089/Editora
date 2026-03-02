@@ -1,5 +1,9 @@
 import type { Plugin } from '@editora/core';
 import { applyColorToSelection } from '../../src/utils/colorSelectionApply';
+import {
+  attachAnchoredPopover,
+  type AnchoredPopoverHandle,
+} from '../../src/utils/anchoredPopover';
 
 /**
  * TextColorPlugin - Native Implementation
@@ -19,6 +23,7 @@ import { applyColorToSelection } from '../../src/utils/colorSelectionApply';
 // ============================================================================
 let colorPickerElement: HTMLDivElement | null = null;
 let currentButton: HTMLElement | null = null;
+let popoverHandle: AnchoredPopoverHandle | null = null;
 let savedRange: Range | null = null;
 let selectedColor: string = '#000000';
 const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
@@ -65,16 +70,54 @@ function getActiveEditorRoot(): HTMLElement | null {
  * Resolve toolbar button for command in current active editor first.
  */
 function getToolbarButton(command: string): HTMLElement | null {
+  const lastCommand = (window as any).__editoraLastCommand as string | undefined;
+  const lastButton = (window as any).__editoraLastCommandButton as HTMLElement | undefined;
+  if (lastCommand === command && lastButton && lastButton.isConnected) {
+    const styles = window.getComputedStyle(lastButton);
+    const rect = lastButton.getBoundingClientRect();
+    if (
+      styles.display !== 'none' &&
+      styles.visibility !== 'hidden' &&
+      styles.pointerEvents !== 'none' &&
+      !(rect.width === 0 && rect.height === 0)
+    ) {
+      return lastButton;
+    }
+  }
+
+  const pickVisibleButton = (buttons: HTMLElement[]): HTMLElement | null => {
+    for (const button of buttons) {
+      const styles = window.getComputedStyle(button);
+      const rect = button.getBoundingClientRect();
+      if (
+        styles.display === 'none' ||
+        styles.visibility === 'hidden' ||
+        styles.pointerEvents === 'none'
+      ) {
+        continue;
+      }
+      if (rect.width === 0 && rect.height === 0) {
+        continue;
+      }
+      return button;
+    }
+    return null;
+  };
+
   const root = getActiveEditorRoot();
 
   if (root) {
-    const scopedButton = root.querySelector(
-      `[data-command="${command}"]`,
-    ) as HTMLElement | null;
-    if (scopedButton) return scopedButton;
+    const scopedButtons = Array.from(
+      root.querySelectorAll(`[data-command="${command}"]`),
+    ) as HTMLElement[];
+    const scopedVisible = pickVisibleButton(scopedButtons);
+    if (scopedVisible) return scopedVisible;
   }
 
-  return document.querySelector(`[data-command="${command}"]`) as HTMLElement | null;
+  const globalButtons = Array.from(
+    document.querySelectorAll(`[data-command="${command}"]`),
+  ) as HTMLElement[];
+  return pickVisibleButton(globalButtons);
 }
 
 function isDarkThemeContext(anchor?: HTMLElement | null): boolean {
@@ -229,15 +272,21 @@ function createColorPicker(button: HTMLElement): void {
     </div>
   `;
 
-  // Position picker below button
-  const buttonRect = button.getBoundingClientRect();
-  colorPickerElement.style.position = 'absolute';
-  colorPickerElement.style.top = `${buttonRect.bottom + window.scrollY + 4}px`;
-  colorPickerElement.style.left = `${buttonRect.left + window.scrollX}px`;
-  colorPickerElement.style.zIndex = '10000';
-
   document.body.appendChild(colorPickerElement);
   currentButton = button;
+
+  if (popoverHandle) {
+    popoverHandle.destroy();
+    popoverHandle = null;
+  }
+  popoverHandle = attachAnchoredPopover({
+    popover: colorPickerElement,
+    anchor: button,
+    onClose: closeColorPicker,
+    gap: 4,
+    margin: 8,
+    zIndex: 10000,
+  });
 
   // Attach event listeners
   attachColorPickerListeners();
@@ -364,6 +413,10 @@ function updateTextInput(color: string): void {
  * Close color picker
  */
 function closeColorPicker(): void {
+  if (popoverHandle) {
+    popoverHandle.destroy();
+    popoverHandle = null;
+  }
   if (colorPickerElement) {
     colorPickerElement.remove();
     colorPickerElement = null;
@@ -376,6 +429,8 @@ function closeColorPicker(): void {
  * Open color picker
  */
 function openTextColorPicker(): boolean {
+  initTextColorPlugin();
+
   // Close any existing picker
   if (colorPickerElement) {
     closeColorPicker();
@@ -399,16 +454,6 @@ function initTextColorPlugin(): void {
   }
 
   (window as any).__textColorPluginInitialized = true;
-
-  // Close picker when clicking outside
-  document.addEventListener('click', (e) => {
-    if (colorPickerElement && currentButton) {
-      const target = e.target as Node;
-      if (!colorPickerElement.contains(target) && !currentButton.contains(target)) {
-        closeColorPicker();
-      }
-    }
-  });
 
   // Add CSS styles
   if (!document.getElementById('text-color-plugin-styles')) {

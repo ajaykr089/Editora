@@ -52,3 +52,7 @@ Expected result: all packages resolve to the same compatible release line.
   enforce a single `@editora/core` version across app and plugin packages.
 - Missing theme CSS:
   import at least one theme stylesheet before rendering the editor.
+- Missing plugin UI CSS:
+  when using `@editora/plugins`, import `@editora/plugins/styles.css`.
+- Theme order:
+  import `@editora/themes/themes/default.css` first, then optional override themes (`dark.css`, `acme.css`).

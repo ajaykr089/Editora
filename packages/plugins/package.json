@@ -1,6 +1,6 @@
 {
   "name": "@editora/plugins",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "40+ Free Premium Plugins for Editora Rich Text Editor. Table editor, code formatting, accessibility, math, media, and more. Free enterprise plugin collection.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
@@ -40,6 +40,7 @@
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "index.d.ts",
+  "style": "dist/plugins.css",
   "exports": {
     ".": {
       "types": "./index.d.ts",
@@ -298,7 +299,8 @@
       "import": "./dist/underline.esm.js",
       "require": "./dist/underline.cjs.js",
       "default": "./dist/underline.esm.js"
-    }
+    },
+    "./styles.css": "./dist/plugins.css"
   },
   "files": [
     "dist",

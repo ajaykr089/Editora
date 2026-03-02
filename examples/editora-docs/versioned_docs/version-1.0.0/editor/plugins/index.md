@@ -12,6 +12,10 @@ keywords: [plugins, commands, formatting]
 npm i @editora/plugins @editora/core
 ```
 
+```ts
+import "@editora/plugins/styles.css";
+```
+
 ## Quick Start
 
 Import and register only required plugins.
@@ -29,6 +33,8 @@ Plugins expose commands, toolbar wiring, and optional dialogs/sidebars.
 ## API Reference
 
 Each plugin exposes a factory and command definitions with optional config options.
+
+Also available: `@editora/plugins/styles.css` for plugin UI styling (table toolbar, dialogs, color pickers).
 
 ## Best Practices
 

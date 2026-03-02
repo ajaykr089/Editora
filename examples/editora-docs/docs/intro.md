@@ -18,6 +18,7 @@ Official documentation for the Editora ecosystem covering editor runtime, React 
 - `@editora/react-icons`
 - `@editora/ui-core`
 - `@editora/ui-react`
+- `@editora/light-code-editor`
 
 ## Documentation principles
 
@@ -31,3 +32,7 @@ Official documentation for the Editora ecosystem covering editor runtime, React 
 1. Start with `Getting Started`.
 2. Pick your package path (`Editor`, `UI`, `Icons`).
 3. Use `Examples` for integration patterns and `Advanced/Live Playground` for interactive MDX demos.
+
+## Quick links
+
+- Source/code editor package: [`@editora/light-code-editor`](./packages/light-code-editor)

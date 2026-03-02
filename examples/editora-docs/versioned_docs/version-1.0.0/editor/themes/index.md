@@ -16,6 +16,8 @@ npm i @editora/themes
 
 ```ts
 import "@editora/themes/themes/default.css";
+import "@editora/themes/themes/dark.css"; // optional override
+import "@editora/themes/themes/acme.css"; // optional override
 ```
 
 ## Usage
@@ -34,6 +36,9 @@ Theme surfaces include toolbar, content area, dialogs, sidebars, and status comp
 
 ## Best Practices
 
+- Keep `default.css` as your base theme layer.
+- Load `dark.css`/`acme.css` as override layers, not standalone replacements.
+- If you use plugin UI, import `@editora/plugins/styles.css`.
 - Use semantic tokens instead of hardcoded values.
 - Keep contrast and hover/focus states consistent across modes.
 

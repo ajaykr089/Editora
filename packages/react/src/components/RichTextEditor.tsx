@@ -14,7 +14,20 @@ import { getCursorPosition, countLines, calculateTextStats, getSelectionInfo } f
 // Only essential providers are imported directly here
 
 // Global command registry
-const commandRegistry = new Map<string, (params?: any) => void>();
+const commandRegistry = new Map<string, (params?: any, context?: any) => any>();
+
+const resolveCommandContext = () => {
+  if (typeof window === 'undefined') {
+    return { editorElement: null, contentElement: null };
+  }
+
+  const root = ((window as any).__editoraCommandEditorRoot as HTMLElement | null) || null;
+  const content = root?.querySelector('[contenteditable="true"]') as HTMLElement | null;
+  return {
+    editorElement: root,
+    contentElement: content,
+  };
+};
 
 // Initialize global command functions
 if (typeof window !== 'undefined') {
@@ -25,7 +38,8 @@ if (typeof window !== 'undefined') {
   (window as any).executeEditorCommand = (command: string, params?: any) => {
     const handler = commandRegistry.get(command);
     if (handler) {
-      return handler(params);
+      const context = resolveCommandContext();
+      return (handler as any)(params, context);
     } else {
       console.warn(`No handler registered for command: ${command}`);
       return false;

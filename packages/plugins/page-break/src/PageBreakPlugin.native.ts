@@ -17,6 +17,17 @@ const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
 let pageBreakStyles: HTMLStyleElement | null = null;
 let interactionsInitialized = false;
 
+const recordDomHistoryTransaction = (editor: HTMLElement, beforeHTML: string): void => {
+  if (beforeHTML === editor.innerHTML) return;
+  const executor = (window as any).execEditorCommand || (window as any).executeEditorCommand;
+  if (typeof executor !== 'function') return;
+  try {
+    executor('recordDomTransaction', editor, beforeHTML, editor.innerHTML);
+  } catch {
+    // History plugin may be unavailable.
+  }
+};
+
 const BLOCK_TAGS = new Set([
   'DIV',
   'P',
@@ -339,6 +350,7 @@ const findPageBreakForCaretDeletion = (
 
 const removePageBreakNode = (pageBreak: HTMLElement, key: 'Backspace' | 'Delete'): boolean => {
   const editorContent = pageBreak.closest(EDITOR_CONTENT_SELECTOR) as HTMLElement | null;
+  const beforeHTML = editorContent?.innerHTML ?? '';
   const previous = pageBreak.previousSibling;
   const next = pageBreak.nextSibling;
 
@@ -372,6 +384,7 @@ const removePageBreakNode = (pageBreak: HTMLElement, key: 'Backspace' | 'Delete'
   }
 
   if (editorContent) {
+    recordDomHistoryTransaction(editorContent, beforeHTML);
     editorContent.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
@@ -381,6 +394,7 @@ const removePageBreakNode = (pageBreak: HTMLElement, key: 'Backspace' | 'Delete'
 const insertPageBreak = (): boolean => {
   const editorContent = resolveActiveEditorContent();
   if (!editorContent) return false;
+  const beforeHTML = editorContent.innerHTML;
 
   const selection = window.getSelection();
   if (!selection) return false;
@@ -412,6 +426,7 @@ const insertPageBreak = (): boolean => {
   const nextEditable = ensureParagraphAfter(pageBreak);
   setCaretAtStart(nextEditable);
 
+  recordDomHistoryTransaction(editorContent, beforeHTML);
   editorContent.dispatchEvent(new Event('input', { bubbles: true }));
   return true;
 };

@@ -55,6 +55,23 @@ function getEditorRootFromNode(node: Node | null): HTMLElement | null {
   );
 }
 
+function setActiveEditorRootFromCommandContext(context: any): void {
+  const candidate =
+    (context?.editorElement as HTMLElement | undefined) ||
+    (context?.contentElement as HTMLElement | undefined) ||
+    null;
+  if (!(candidate instanceof HTMLElement)) return;
+
+  const root =
+    (candidate.closest('[data-editora-editor], .rte-editor, .editora-editor, editora-editor') as HTMLElement | null) ||
+    (candidate.matches('[data-editora-editor], .rte-editor, .editora-editor, editora-editor')
+      ? candidate
+      : null);
+  if (root) {
+    activeEditorRoot = root;
+  }
+}
+
 function isRangeInsideEditor(range: Range, root: HTMLElement): boolean {
   return root.contains(range.commonAncestorContainer);
 }
@@ -172,21 +189,24 @@ function unwrapNode(node: HTMLElement): void {
 }
 
 function setPanelVisibility(state: CommentsEditorState, visible: boolean): void {
-  ensurePanelStyles();
-  ensurePanel(state);
-
   state.panelVisible = visible;
-  state.root.setAttribute('data-rte-comments-open', visible ? 'true' : 'false');
-
-  if (state.panelElement) {
-    state.panelElement.classList.toggle('is-open', visible);
-    state.panelElement.setAttribute('aria-hidden', visible ? 'false' : 'true');
+  if (visible) {
+    ensurePanelStyles();
+    ensurePanel(state);
+    state.root.setAttribute('data-rte-comments-open', 'true');
+    if (state.panelElement) {
+      state.panelElement.classList.add('is-open');
+      state.panelElement.setAttribute('aria-hidden', 'false');
+    }
+    startSelectionTracking(state);
+    return;
   }
 
-  if (visible) {
-    startSelectionTracking(state);
-  } else {
-    stopSelectionTracking(state);
+  state.root.removeAttribute('data-rte-comments-open');
+  stopSelectionTracking(state);
+  if (state.panelElement) {
+    state.panelElement.remove();
+    state.panelElement = null;
   }
 }
 
@@ -491,6 +511,19 @@ function ensureGlobalTracking(): void {
     if (!isRangeInsideEditor(range, root)) return;
     state.savedSelection = range.cloneRange();
   });
+
+  document.addEventListener(
+    'keydown',
+    (event) => {
+      if (event.key !== 'Escape') return;
+      const state = getActiveState();
+      if (!state || !state.panelVisible) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setPanelVisibility(state, false);
+    },
+    true,
+  );
 }
 
 /**
@@ -990,7 +1023,8 @@ export const CommentsPlugin = (): Plugin => ({
   ],
 
   commands: {
-    addComment: () => {
+    addComment: (_args: unknown, context: any) => {
+      setActiveEditorRootFromCommandContext(context);
       ensureGlobalTracking();
       const state = getActiveState();
       if (!state) return false;
@@ -1012,7 +1046,8 @@ export const CommentsPlugin = (): Plugin => ({
       return true;
     },
 
-    toggleComments: () => {
+    toggleComments: (_args: unknown, context: any) => {
+      setActiveEditorRootFromCommandContext(context);
       ensureGlobalTracking();
       const state = getActiveState();
       if (!state) return false;

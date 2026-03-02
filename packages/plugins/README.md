@@ -17,6 +17,12 @@ Comprehensive plugin collection for Editora Rich Text Editor with 40+ plugins fo
 npm install @editora/plugins @editora/core @editora/themes
 ```
 
+When using plugin UI features (table toolbar, pickers, dialogs), also import:
+
+```ts
+import "@editora/plugins/styles.css";
+```
+
 ## 🎯 Overview
 
 This package provides a complete set of plugins for building feature-rich text editors. Each plugin is modular, tree-shakeable, and can be used independently.
@@ -109,6 +115,7 @@ import {
   StrikethroughPlugin
 } from '@editora/plugins';
 
+import "@editora/plugins/styles.css";
 import "@editora/themes/themes/default.css";
 const plugins = [
   BoldPlugin(),
@@ -588,14 +595,60 @@ const collaborativePlugins = [
   }),
   MergeTagPlugin({
     tags: [
-      { label: 'First Name', value: '{{firstName}}' },
-      { label: 'Last Name', value: '{{lastName}}' },
-      { label: 'Email', value: '{{email}}' }
-    ]
+      { label: 'First Name', value: '{{firstName}}', category: 'User' },
+      { label: 'Last Name', value: '{{lastName}}', category: 'User' },
+      { label: 'Email', value: '{{email}}', category: 'User' }
+    ],
+    defaultCategory: 'User',
+    dialog: {
+      title: 'Insert Variable',
+      searchPlaceholder: 'Search variables...',
+      showPreview: true
+    },
+    tokenTemplate: '{value}'
   }),
   HistoryPlugin()
 ];
 ```
+
+`MergeTagPlugin` supports functional customization:
+
+- `tags`: flat list of tags (auto-grouped by `category`)
+- `categories`: explicit grouped categories with custom order
+- `defaultCategory`: initial tab
+- `dialog`: labels/placeholders/preview toggle
+- `tokenTemplate`: string template (`{key}`, `{label}`, `{category}`, `{value}`) or formatter function
+
+### Custom Templates
+
+You can register your own templates before initializing the editor:
+
+```typescript
+import { TemplatePlugin, addCustomTemplate } from '@editora/plugins';
+
+addCustomTemplate({
+  id: 'invoice-basic',
+  name: 'Invoice (Basic)',
+  category: 'Billing',
+  description: 'Simple invoice template',
+  html: `
+    <h1>Invoice</h1>
+    <p><strong>Customer:</strong> {{customer.name}}</p>
+    <p><strong>Date:</strong> {{today}}</p>
+    <p><strong>Total:</strong> {{invoice.total}}</p>
+  `,
+  tags: ['invoice', 'billing']
+});
+
+const plugins = [
+  TemplatePlugin()
+];
+```
+
+Notes:
+- `id` must be unique.
+- HTML is sanitized on insertion.
+- Use `validateTemplate(template)` if you want to pre-check templates before registering.
 
 ## 🔧 TypeScript Support
 

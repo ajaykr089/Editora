@@ -278,3 +278,124 @@
   margin-right: 10px;
   color: #858585;
 }
+
+/* Search / Replace overlay */
+.lce-search-ui {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1000;
+  min-width: 250px;
+  max-width: min(320px, calc(100% - 24px));
+  box-sizing: border-box;
+  border-radius: 6px;
+  border: 1px solid var(--editor-gutter-border, #3e3e42);
+  background: var(--editor-background, #1e1e1e);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+  padding: 8px;
+}
+
+.lce-search-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.lce-search-options {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0 6px;
+}
+
+.lce-search-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--editor-gutter-foreground, #858585);
+  font-size: 11px;
+  line-height: 1.2;
+  user-select: none;
+  cursor: pointer;
+}
+
+.lce-search-option-input {
+  margin: 0;
+  accent-color: var(--editor-cursor, #007acc);
+}
+
+.lce-search-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.lce-search-input {
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  padding: 6px 10px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid var(--editor-gutter-border, #3e3e42);
+  background: var(--editor-gutter-background, #252526);
+  color: var(--editor-foreground, #f8f9fa);
+  font-size: 12px;
+  line-height: 1.4;
+  outline: none;
+}
+
+.lce-search-input:focus {
+  border-color: var(--editor-cursor, #007acc);
+  box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+}
+
+.lce-search-replace {
+  display: none;
+  margin-top: 8px;
+}
+
+.lce-search-btn {
+  appearance: none;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 4px;
+  border: 1px solid var(--editor-gutter-border, #3e3e42);
+  background: var(--editor-gutter-background, #252526);
+  color: var(--editor-gutter-foreground, #858585);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lce-search-btn:hover {
+  color: var(--editor-foreground, #f8f9fa);
+}
+
+.lce-search-status {
+  min-height: 16px;
+  margin: 2px 2px 0;
+  color: var(--editor-gutter-foreground, #858585);
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: left;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lce-search-mode {
+  min-height: 16px;
+  margin: 2px 2px 0;
+  color: var(--editor-gutter-foreground, #858585);
+  font-size: 11px;
+  line-height: 1.35;
+  white-space: nowrap;
+  opacity: 0.9;
+}

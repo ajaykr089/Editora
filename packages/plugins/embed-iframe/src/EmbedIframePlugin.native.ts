@@ -37,6 +37,7 @@ const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
 // Per-editor instance state
 const editorStates = new WeakMap<HTMLElement, {
   dialogElement: HTMLElement | null;
+  escapeHandler: ((event: KeyboardEvent) => void) | null;
   activeTab: 'general' | 'advanced';
   formData: {
     src: string;
@@ -60,6 +61,7 @@ const getEditorState = (editorElement: HTMLElement) => {
   if (!editorStates.has(editorElement)) {
     editorStates.set(editorElement, {
       dialogElement: null,
+      escapeHandler: null,
       activeTab: 'general',
       formData: {
         src: '',
@@ -247,6 +249,13 @@ function createEmbedDialog(editorElement?: HTMLElement): void {
   overlay.appendChild(dialog);
   document.body.appendChild(overlay);
   state.dialogElement = overlay;
+  state.escapeHandler = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    event.stopPropagation();
+    closeDialog(editorElement!);
+  };
+  document.addEventListener('keydown', state.escapeHandler, true);
 
   // Add event listeners
   setupDialogEventListeners(dialog, editorElement);
@@ -488,8 +497,12 @@ function insertIframe(editorElement: HTMLElement, data: {
 
 function closeDialog(editorElement: HTMLElement): void {
   const state = getEditorState(editorElement);
+  if (state.escapeHandler) {
+    document.removeEventListener('keydown', state.escapeHandler, true);
+    state.escapeHandler = null;
+  }
   if (state.dialogElement) {
-    document.body.removeChild(state.dialogElement);
+    state.dialogElement.remove();
     state.dialogElement = null;
   }
 }

@@ -10,6 +10,9 @@ export class CodeFoldingExtension implements EditorExtension {
   private editor: EditorAPI | null = null;
   private foldIndicators: HTMLElement[] = [];
   private foldingUI: HTMLElement | null = null;
+  private pendingUpdateRaf: number | null = null;
+  private lastSnapshot = '';
+  private changeHandler: ((changes: unknown[]) => void) | null = null;
 
   setup(editor: EditorAPI): void {
     this.editor = editor;
@@ -34,21 +37,25 @@ export class CodeFoldingExtension implements EditorExtension {
     // Keyboard shortcuts are now handled by KeymapExtension
     // The commands are registered above and will be triggered by the keymap
 
-    // Listen for content changes to update fold indicators
-    editor.on('change', () => {
-      this.updateFoldIndicators();
-    });
+    // Listen for content changes and batch expensive indicator updates per frame.
+    this.changeHandler = () => {
+      this.scheduleFoldIndicatorUpdate();
+    };
+    editor.on('change', this.changeHandler);
 
     // Initial setup
     this.createFoldingUI();
-    this.updateFoldIndicators();
+    this.scheduleFoldIndicatorUpdate();
   }
 
   private createFoldingUI(): void {
     if (!this.editor) return;
 
-    // Find the editor container
-    const container = document.querySelector('.rte-source-editor-modal') as HTMLElement;
+    // Mount UI against the current editor modal to avoid cross-instance collisions.
+    const contentElement = this.editor.getView().getContentElement();
+    const container =
+      (contentElement.closest('.rte-source-editor-modal') as HTMLElement | null) ||
+      contentElement.parentElement;
     if (!container) return;
 
     this.foldingUI = document.createElement('div');
@@ -65,22 +72,36 @@ export class CodeFoldingExtension implements EditorExtension {
     container.appendChild(this.foldingUI);
   }
 
+  private scheduleFoldIndicatorUpdate(): void {
+    if (this.pendingUpdateRaf !== null) return;
+    this.pendingUpdateRaf = requestAnimationFrame(() => {
+      this.pendingUpdateRaf = null;
+      this.updateFoldIndicators();
+    });
+  }
+
   private updateFoldIndicators(): void {
     if (!this.editor || !this.foldingUI) return;
+    const text = this.editor.getValue();
+    if (text === this.lastSnapshot) return;
+    this.lastSnapshot = text;
 
     // Clear existing indicators
     this.foldingUI.innerHTML = '';
     this.foldIndicators = [];
 
-    const text = this.editor.getValue();
     const lines = text.split('\n');
 
     // Find foldable regions (simplified - could be extended for different languages)
     const foldableLines = this.findFoldableLines(lines);
+    const fragment = document.createDocumentFragment();
 
     foldableLines.forEach(lineIndex => {
-      this.createFoldIndicator(lineIndex);
+      const indicator = this.createFoldIndicator(lineIndex);
+      fragment.appendChild(indicator);
+      this.foldIndicators.push(indicator);
     });
+    this.foldingUI.appendChild(fragment);
   }
 
   private findFoldableLines(lines: string[]): number[] {
@@ -101,9 +122,7 @@ export class CodeFoldingExtension implements EditorExtension {
     return foldableLines;
   }
 
-  private createFoldIndicator(lineIndex: number): void {
-    if (!this.foldingUI) return;
-
+  private createFoldIndicator(lineIndex: number): HTMLElement {
     const indicator = document.createElement('div');
     indicator.style.cssText = `
       position: absolute;
@@ -127,8 +146,7 @@ export class CodeFoldingExtension implements EditorExtension {
     indicator.addEventListener('click', () => {
     });
 
-    this.foldingUI.appendChild(indicator);
-    this.foldIndicators.push(indicator);
+    return indicator;
   }
 
   private foldAtCursor(): void {
@@ -148,9 +166,18 @@ export class CodeFoldingExtension implements EditorExtension {
   }
 
   destroy(): void {
+    if (this.pendingUpdateRaf !== null) {
+      cancelAnimationFrame(this.pendingUpdateRaf);
+      this.pendingUpdateRaf = null;
+    }
+    if (this.editor && this.changeHandler) {
+      this.editor.off('change', this.changeHandler);
+    }
     if (this.foldingUI && this.foldingUI.parentNode) {
       this.foldingUI.parentNode.removeChild(this.foldingUI);
     }
+    this.changeHandler = null;
+    this.lastSnapshot = '';
     this.foldingUI = null;
     this.foldIndicators = [];
     this.editor = null;

@@ -11,10 +11,13 @@ Theme package for consistent editor and plugin UI styling.
 ## Usage
 
 ```ts
-import "@editora/themes/src/index.css";
+import "@editora/themes/themes/default.css";
+import "@editora/themes/themes/dark.css"; // optional override
+import "@editora/themes/themes/acme.css"; // optional override
 ```
 
-Or import specific theme files when needed.
+Load `default.css` first, then optional override themes.
+If using `@editora/plugins`, also import `@editora/plugins/styles.css` for plugin UI surfaces.
 
 ## Surfaces covered
 

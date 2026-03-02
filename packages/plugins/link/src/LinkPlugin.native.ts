@@ -263,7 +263,7 @@ const showLinkDialog = (
             type="text"
             value="${initialData.text || ''}"
             placeholder="Enter link text"
-            style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;"
+            style="width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; line-height: 1.45; box-sizing: border-box;"
           />
         </div>
         <div class="form-group" style="margin-bottom: 16px;">
@@ -274,7 +274,7 @@ const showLinkDialog = (
             value="${initialData.url || ''}"
             placeholder="https://example.com"
             required
-            style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;"
+            style="width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; line-height: 1.45; box-sizing: border-box;"
           />
         </div>
         <div class="form-group" style="margin-bottom: 16px;">
@@ -284,7 +284,7 @@ const showLinkDialog = (
             type="text"
             value="${initialData.title || ''}"
             placeholder="Link tooltip text"
-            style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;"
+            style="width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; line-height: 1.45; box-sizing: border-box;"
           />
         </div>
         <div class="form-group" style="margin-bottom: 0;">
@@ -321,8 +321,16 @@ const showLinkDialog = (
   const cancelBtn = dialog.querySelector('.btn-cancel') as HTMLButtonElement;
 
   // Close dialog function
+  const handleEscape = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    event.stopPropagation();
+    closeDialog();
+  };
+
   const closeDialog = () => {
-    document.body.removeChild(overlay);
+    document.removeEventListener('keydown', handleEscape, true);
+    overlay.remove();
   };
 
   // Event listeners
@@ -331,6 +339,7 @@ const showLinkDialog = (
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeDialog();
   });
+  document.addEventListener('keydown', handleEscape, true);
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();

@@ -28,6 +28,7 @@ npm i @editora/react @editora/core @editora/plugins @editora/themes react react-
 ```tsx
 import { EditoraEditor } from "@editora/react";
 import { BoldPlugin, ItalicPlugin, HistoryPlugin } from "@editora/plugins";
+import "@editora/plugins/styles.css";
 import "@editora/themes/themes/default.css";
 
 export function App() {
@@ -39,6 +40,14 @@ export function App() {
   );
 }
 ```
+
+## CRA and bundler compatibility
+
+- If you load plugins from `@editora/plugins`, import `@editora/plugins/styles.css`.
+- Keep theme imports layered as:
+  1. `@editora/themes/themes/default.css` (base)
+  2. `@editora/themes/themes/dark.css` or `@editora/themes/themes/acme.css` (overrides)
+- `acme.css` is an override theme and does not replace the default base styles.
 
 ## Capabilities matrix
 

@@ -18,6 +18,8 @@ npm i @editora/themes
 
 ```ts
 import "@editora/themes/themes/default.css";
+import "@editora/themes/themes/dark.css"; // optional override
+import "@editora/themes/themes/acme.css"; // optional override
 ```
 
 ## Usage
@@ -46,6 +48,9 @@ Activate theme scopes with `theme="..."`, `data-theme="..."`, or explicit theme 
 
 ## Best Practices
 
+- Always keep `default.css` as the base layer.
+- Load `dark.css` and `acme.css` as overrides on top of default.
+- If using plugin UI, also import `@editora/plugins/styles.css` for dialogs/pickers/table toolbar.
 - Override semantic tokens before writing component-specific selectors.
 - Keep dialog/panel/table/code surfaces verified in each theme.
 - Scope theme changes to the correct editor/app container.

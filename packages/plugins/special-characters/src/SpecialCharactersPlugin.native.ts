@@ -119,6 +119,26 @@ const injectStyles = (): void => {
       --rte-sc-accent: #1f75fe;
       --rte-sc-accent-strong: #165fd6;
       --rte-sc-ring: rgba(31, 117, 254, 0.18);
+      --rte-picker-dialog-width: min(640px, 96vw);
+      --rte-picker-dialog-max-height: min(560px, 86vh);
+      --rte-picker-dialog-radius: 12px;
+      --rte-picker-search-wrap-padding: 12px;
+      --rte-picker-search-height: 38px;
+      --rte-picker-search-font-size: 13px;
+      --rte-picker-search-radius: 8px;
+      --rte-picker-tabs-width: 156px;
+      --rte-picker-tab-padding-y: 10px;
+      --rte-picker-tab-padding-x: 12px;
+      --rte-picker-tab-font-size: 13px;
+      --rte-picker-grid-padding: 12px;
+      --rte-picker-grid-gap: 6px;
+      --rte-picker-cell-size: 34px;
+      --rte-picker-cell-font-size: 17px;
+      --rte-picker-cell-radius: 7px;
+      --rte-picker-mobile-tab-min-width: 82px;
+      --rte-picker-mobile-cell-size: 32px;
+      --rte-picker-mobile-grid-gap: 5px;
+      --rte-picker-mobile-dialog-max-height: 88vh;
       position: fixed;
       top: 0;
       left: 0;
@@ -151,11 +171,10 @@ const injectStyles = (): void => {
       background: var(--rte-sc-dialog-bg);
       color: var(--rte-sc-dialog-text);
       border: 1px solid var(--rte-sc-border);
-      border-radius: 12px;
+      border-radius: var(--rte-picker-dialog-radius);
       box-shadow: 0 24px 48px rgba(10, 15, 24, 0.28);
-      max-width: 800px;
-      width: 90%;
-      max-height: 80vh;
+      width: var(--rte-picker-dialog-width);
+      max-height: var(--rte-picker-dialog-max-height);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -209,18 +228,20 @@ const injectStyles = (): void => {
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      min-width: 0;
     }
 
     .special-characters-search {
-      padding: 16px 16px 0 16px;
+      padding: var(--rte-picker-search-wrap-padding) var(--rte-picker-search-wrap-padding) 0 var(--rte-picker-search-wrap-padding);
     }
 
     .special-characters-search-input {
       width: 100%;
-      padding: 10px 12px;
+      height: var(--rte-picker-search-height);
+      padding: 8px 12px;
       border: 1px solid var(--rte-sc-border);
-      border-radius: 8px;
-      font-size: 14px;
+      border-radius: var(--rte-picker-search-radius);
+      font-size: var(--rte-picker-search-font-size);
       color: var(--rte-sc-dialog-text);
       background-color: var(--rte-sc-subtle-bg);
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -240,21 +261,23 @@ const injectStyles = (): void => {
     .special-characters-tabs {
       display: flex;
       flex-direction: column;
-      width: 180px;
+      width: var(--rte-picker-tabs-width);
       border-right: 1px solid var(--rte-sc-border);
       background-color: var(--rte-sc-subtle-bg);
+      overflow-y: auto;
     }
 
     .special-characters-tab {
-      padding: 12px 16px;
+      padding: var(--rte-picker-tab-padding-y) var(--rte-picker-tab-padding-x);
       border: none;
       background: none;
       text-align: left;
       cursor: pointer;
-      font-size: 14px;
+      font-size: var(--rte-picker-tab-font-size);
       color: var(--rte-sc-muted-text);
       border-bottom: 1px solid var(--rte-sc-border);
       transition: all 0.2s ease;
+      line-height: 1.25;
     }
 
     .special-characters-tab:hover {
@@ -269,24 +292,25 @@ const injectStyles = (): void => {
     }
 
     .special-characters-grid {
-      padding: 16px;
+      padding: var(--rte-picker-grid-padding);
       overflow-y: auto;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(var(--rte-picker-cell-size), 1fr));
+      gap: var(--rte-picker-grid-gap);
+      contain: content;
     }
 
     .special-characters-item {
-      width: 40px;
-      height: 40px;
+      width: var(--rte-picker-cell-size);
+      height: var(--rte-picker-cell-size);
       display: flex;
       align-items: center;
       justify-content: center;
       border: 1px solid var(--rte-sc-border);
       background: var(--rte-sc-subtle-bg);
-      border-radius: 8px;
+      border-radius: var(--rte-picker-cell-radius);
       cursor: pointer;
-      font-size: 18px;
+      font-size: var(--rte-picker-cell-font-size);
       transition: all 0.2s ease;
       color: var(--rte-sc-dialog-text);
     }
@@ -315,8 +339,8 @@ const injectStyles = (): void => {
 
     @media (max-width: 768px) {
       .special-characters-dialog {
-        width: 95%;
-        max-height: 90vh;
+        width: 96%;
+        max-height: var(--rte-picker-mobile-dialog-max-height);
       }
 
       .special-characters-content {
@@ -335,6 +359,18 @@ const injectStyles = (): void => {
         border-bottom: none;
         border-right: 1px solid var(--rte-sc-border);
         white-space: nowrap;
+        min-width: var(--rte-picker-mobile-tab-min-width);
+      }
+
+      .special-characters-grid {
+        grid-template-columns: repeat(auto-fill, minmax(var(--rte-picker-mobile-cell-size), 1fr));
+        gap: var(--rte-picker-mobile-grid-gap);
+      }
+
+      .special-characters-item {
+        width: var(--rte-picker-mobile-cell-size);
+        height: var(--rte-picker-mobile-cell-size);
+        font-size: 16px;
       }
     }
   `;
@@ -370,6 +406,7 @@ const showSpecialCharactersDialog = (editorContent?: HTMLElement | null): void =
 
   let activeTab: CharacterCategory = 'all';
   let searchQuery = '';
+  let searchDebounceTimer: number | null = null;
 
   // Create overlay
   const overlay = document.createElement('div');
@@ -384,87 +421,77 @@ const showSpecialCharactersDialog = (editorContent?: HTMLElement | null): void =
   dialog.setAttribute('role', 'dialog');
   dialog.setAttribute('aria-modal', 'true');
 
-  // Render function
-  const render = () => {
-    // Filter characters
-    const currentCharacters = characterSets[activeTab].characters.filter(char => {
+  dialog.innerHTML = `
+    <div class="special-characters-header">
+      <h2>Insert Special Characters</h2>
+      <button class="special-characters-close">×</button>
+    </div>
+    <div class="special-characters-content">
+      <div class="special-characters-tabs">
+        ${(Object.keys(characterSets) as CharacterCategory[]).map(category => `
+          <button class="special-characters-tab ${activeTab === category ? 'active' : ''}" data-category="${category}">
+            ${characterSets[category].name}
+          </button>
+        `).join('')}
+      </div>
+      <div class="special-characters-main-content">
+        <div class="special-characters-search">
+          <input
+            type="text"
+            placeholder="Search characters..."
+            class="special-characters-search-input"
+          >
+        </div>
+        <div class="special-characters-grid"></div>
+      </div>
+    </div>
+  `;
+
+  const tabsContainer = dialog.querySelector('.special-characters-tabs') as HTMLElement | null;
+  const grid = dialog.querySelector('.special-characters-grid') as HTMLElement | null;
+  const searchInput = dialog.querySelector('.special-characters-search-input') as HTMLInputElement | null;
+  const closeBtn = dialog.querySelector('.special-characters-close') as HTMLElement | null;
+
+  const getFilteredCharacters = (): string[] => (
+    characterSets[activeTab].characters.filter((char) => {
       if (!searchQuery.trim()) return true;
       const query = searchQuery.toLowerCase();
-      return char.toLowerCase().includes(query) || 
-             (descriptions[char] || '').toLowerCase().includes(query);
-    });
+      return char.toLowerCase().includes(query)
+        || (descriptions[char] || '').toLowerCase().includes(query);
+    })
+  );
 
-    dialog.innerHTML = `
-      <div class="special-characters-header">
-        <h2>Insert Special Characters</h2>
-        <button class="special-characters-close">×</button>
-      </div>
-      <div class="special-characters-content">
-        <div class="special-characters-tabs">
-          ${(Object.keys(characterSets) as CharacterCategory[]).map(category => `
-            <button class="special-characters-tab ${activeTab === category ? 'active' : ''}" data-category="${category}">
-              ${characterSets[category].name}
-            </button>
-          `).join('')}
-        </div>
-        <div class="special-characters-main-content">
-          <div class="special-characters-search">
-            <input type="text" placeholder="Search characters..." value="${searchQuery}" class="special-characters-search-input">
-          </div>
-          <div class="special-characters-grid">
-            ${currentCharacters.length > 0 
-              ? currentCharacters.map(char => `
-                  <button class="special-characters-item" data-char="${char}" title="${descriptions[char] || char}">
-                    ${char}
-                  </button>
-                `).join('')
-              : `<div class="special-characters-no-results">No characters found for "${searchQuery}"</div>`
-            }
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Event listeners
-    const closeBtn = dialog.querySelector('.special-characters-close');
-    closeBtn?.addEventListener('click', closeDialog);
-
-    // Tab switching
-    dialog.querySelectorAll('.special-characters-tab').forEach(tab => {
-      tab.addEventListener('click', (e) => {
-        const category = (e.target as HTMLElement).getAttribute('data-category') as CharacterCategory;
-        if (category) {
-          activeTab = category;
-          render();
-        }
-      });
-    });
-
-    // Search
-    const searchInput = dialog.querySelector('.special-characters-search-input') as HTMLInputElement;
-    searchInput?.addEventListener('input', (e) => {
-      searchQuery = (e.target as HTMLInputElement).value;
-      render();
-    });
-
-    // Character insertion
-    dialog.querySelectorAll('.special-characters-item').forEach(item => {
-      item.addEventListener('click', (e) => {
-        const char = (e.target as HTMLElement).getAttribute('data-char');
-        if (char) {
-          insertCharacter(char);
-          closeDialog();
-        }
-      });
+  const renderTabs = (): void => {
+    tabsContainer?.querySelectorAll('.special-characters-tab').forEach((tab) => {
+      tab.classList.toggle('active', tab.getAttribute('data-category') === activeTab);
     });
   };
 
+  const renderGrid = (): void => {
+    if (!grid) return;
+    const currentCharacters = getFilteredCharacters();
+    if (currentCharacters.length === 0) {
+      grid.innerHTML = `<div class="special-characters-no-results">No characters found for "${searchQuery}"</div>`;
+      return;
+    }
+
+    grid.innerHTML = currentCharacters.map((char) => `
+      <button class="special-characters-item" data-char="${char}" title="${descriptions[char] || char}">
+        ${char}
+      </button>
+    `).join('');
+  };
+
   const closeDialog = () => {
+    if (searchDebounceTimer !== null) {
+      window.clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = null;
+    }
     if (overlay.parentNode) {
       overlay.parentNode.removeChild(overlay);
     }
     isDialogOpen = false;
-    document.removeEventListener('keydown', handleEscape);
+    document.removeEventListener('keydown', handleEscape, true);
   };
 
   const handleEscape = (e: KeyboardEvent) => {
@@ -475,19 +502,53 @@ const showSpecialCharactersDialog = (editorContent?: HTMLElement | null): void =
     }
   };
 
-  // Overlay click
+  closeBtn?.addEventListener('click', closeDialog);
+
+  tabsContainer?.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement;
+    const tab = target.closest('.special-characters-tab') as HTMLElement | null;
+    if (!tab) return;
+    const category = tab.getAttribute('data-category') as CharacterCategory | null;
+    if (!category || activeTab === category) return;
+    activeTab = category;
+    renderTabs();
+    renderGrid();
+  });
+
+  searchInput?.addEventListener('input', (event) => {
+    searchQuery = (event.target as HTMLInputElement).value;
+    if (searchDebounceTimer !== null) {
+      window.clearTimeout(searchDebounceTimer);
+    }
+    searchDebounceTimer = window.setTimeout(() => {
+      searchDebounceTimer = null;
+      renderGrid();
+    }, 90);
+  });
+
+  grid?.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement;
+    const item = target.closest('.special-characters-item') as HTMLElement | null;
+    if (!item) return;
+    const char = item.getAttribute('data-char');
+    if (!char) return;
+    insertCharacter(char);
+    closeDialog();
+  });
+
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) {
       closeDialog();
     }
   });
 
-  document.addEventListener('keydown', handleEscape);
+  document.addEventListener('keydown', handleEscape, true);
 
-  // Initial render
-  render();
+  renderTabs();
+  renderGrid();
   overlay.appendChild(dialog);
   document.body.appendChild(overlay);
+  requestAnimationFrame(() => searchInput?.focus());
 };
 
 export const SpecialCharactersPlugin = (): Plugin => ({

@@ -28,6 +28,7 @@ import {
   TablePlugin,
   SpellCheckPlugin,
 } from "@editora/plugins";
+import "@editora/plugins/styles.css";
 
 const plugins = [
   BoldPlugin(),
@@ -50,6 +51,7 @@ const plugins = [
 - Factory exports for native and advanced plugins
 - Plugin configuration helpers (for media/document managers)
 - Lite entry for smaller imports (`@editora/plugins/lite`)
+- CSS export for plugin UI surfaces (`@editora/plugins/styles.css`)
 
 ## Config Matrix
 

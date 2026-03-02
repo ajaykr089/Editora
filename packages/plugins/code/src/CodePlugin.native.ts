@@ -518,12 +518,14 @@ export const CodePlugin = (): Plugin => ({
 
       // Create source editor dialog
       const createSourceDialog = () => {
+        const originalHtml = currentHtml;
+        const formattedOriginalHtml = formatHTML(originalHtml);
         let editorInstance: EditorCore | null = null;
         let currentTheme = "dark";
         let isReadOnly = false;
         let isFullscreen = false;
         let hasUnsavedChanges = false;
-        const originalHtml = currentHtml;
+        let isDialogClosed = false;
         const isDarkTheme =
           !!contentElement.closest(DARK_THEME_SELECTOR) ||
           document.body.matches(DARK_THEME_SELECTOR) ||
@@ -611,13 +613,11 @@ export const CodePlugin = (): Plugin => ({
           </div>
         `;
 
-        // Assemble dialog
         dialog.appendChild(header);
         dialog.appendChild(body);
         dialog.appendChild(footer);
         overlay.appendChild(dialog);
 
-        // Inject Source Editor CSS if not already present
         if (!document.getElementById("rte-source-editor-styles")) {
           const style = document.createElement("style");
           style.id = "rte-source-editor-styles";
@@ -625,62 +625,87 @@ export const CodePlugin = (): Plugin => ({
           document.head.appendChild(style);
         }
 
-        document.body.appendChild(overlay);
+        const themeBtn = header.querySelector(
+          ".theme-toggle-btn",
+        ) as HTMLButtonElement | null;
+        const readonlyBtn = header.querySelector(
+          ".readonly-toggle-btn",
+        ) as HTMLButtonElement | null;
+        const fullscreenBtn = header.querySelector(
+          ".rte-source-editor-fullscreen-btn",
+        ) as HTMLButtonElement | null;
+        const closeBtn = header.querySelector(
+          ".rte-source-editor-close-btn",
+        ) as HTMLButtonElement | null;
+        const cancelBtn = footer.querySelector(
+          ".rte-source-editor-btn-cancel",
+        ) as HTMLButtonElement | null;
+        const saveBtn = footer.querySelector(
+          ".rte-source-editor-btn-save",
+        ) as HTMLButtonElement | null;
+        const unsavedLabel = footer.querySelector(
+          ".unsaved-changes",
+        ) as HTMLElement | null;
 
-        // Initialize code editor
-        try {
-          editorInstance = createEditor(editorContainer, {
-            value: formatHTML(currentHtml),
-            theme: "dark",
-            readOnly: false,
-            extensions: [
-              new LineNumbersExtension(),
-              new ThemeExtension(),
-              new ReadOnlyExtension(),
-              new BracketMatchingExtension(),
-              new SearchExtension(),
-              new CodeFoldingExtension(),
-              new SyntaxHighlightingExtension(),
-            ],
-          });
+        const teardownListeners: Array<() => void> = [];
+        const addListener = (
+          target: EventTarget,
+          type: string,
+          handler: EventListenerOrEventListenerObject,
+          options?: boolean | AddEventListenerOptions,
+        ) => {
+          target.addEventListener(type, handler, options);
+          teardownListeners.push(() =>
+            target.removeEventListener(type, handler, options),
+          );
+        };
 
-          // Track changes
-          editorInstance.on("change", () => {
-            const newContent = editorInstance?.getValue() || "";
-            hasUnsavedChanges = newContent !== formatHTML(originalHtml);
-            const unsavedLabel = footer.querySelector(
-              ".unsaved-changes",
-            ) as HTMLElement;
-            if (unsavedLabel) {
-              unsavedLabel.style.display = hasUnsavedChanges
-                ? "inline"
-                : "none";
-            }
-          });
-
-          setTimeout(() => editorInstance?.focus(), 100);
-        } catch (err) {
-          console.error("Failed to initialize code editor:", err);
-        }
-
-        // Event handlers
-        const updateUnsavedState = () => {
-          const unsavedLabel = footer.querySelector(
-            ".unsaved-changes",
-          ) as HTMLElement;
+        const setUnsavedState = (nextValue: boolean) => {
+          if (hasUnsavedChanges === nextValue) return;
+          hasUnsavedChanges = nextValue;
           if (unsavedLabel) {
             unsavedLabel.style.display = hasUnsavedChanges ? "inline" : "none";
+          }
+        };
+
+        const closeDialog = () => {
+          if (isDialogClosed) return;
+          isDialogClosed = true;
+          while (teardownListeners.length) {
+            const dispose = teardownListeners.pop();
+            dispose?.();
+          }
+          if (editorInstance) {
+            editorInstance.destroy();
+            editorInstance = null;
+          }
+          if (overlay.isConnected) {
+            overlay.remove();
           }
         };
 
         const toggleTheme = () => {
           currentTheme = currentTheme === "dark" ? "light" : "dark";
           editorInstance?.setTheme(currentTheme);
-          const themeBtn = header.querySelector(".theme-toggle-btn");
-          if (themeBtn && currentTheme === "light") {
-            themeBtn.innerHTML = `
+          if (themeBtn) {
+            themeBtn.innerHTML =
+              currentTheme === "light"
+                ? `
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            `
+                : `
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"/>
+                <line x1="12" y1="1" x2="12" y2="3"/>
+                <line x1="12" y1="21" x2="12" y2="23"/>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                <line x1="1" y1="12" x2="3" y2="12"/>
+                <line x1="21" y1="12" x2="23" y2="12"/>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
               </svg>
             `;
           }
@@ -689,41 +714,30 @@ export const CodePlugin = (): Plugin => ({
         const toggleReadOnly = () => {
           isReadOnly = !isReadOnly;
           editorInstance?.setReadOnly(isReadOnly);
-          const readonlyBtn = header.querySelector(".readonly-toggle-btn");
-          if (readonlyBtn) {
-            if (isReadOnly) {
-              readonlyBtn.classList.add("active");
-              readonlyBtn.innerHTML = `
+          if (!readonlyBtn) return;
+          readonlyBtn.classList.toggle("active", isReadOnly);
+          readonlyBtn.innerHTML = isReadOnly
+            ? `
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                   <circle cx="12" cy="16" r="1"/>
                   <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                 </svg>
-              `;
-            } else {
-              readonlyBtn.classList.remove("active");
-              readonlyBtn.innerHTML = `
+              `
+            : `
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                 </svg>
               `;
-            }
-          }
         };
 
         const toggleFullscreen = () => {
           isFullscreen = !isFullscreen;
-          if (isFullscreen) {
-            overlay.classList.add("fullscreen");
-            editorContainer.style.height = "calc(100vh - 200px)";
-          } else {
-            overlay.classList.remove("fullscreen");
-            editorContainer.style.height = "400px";
-          }
-          const fullscreenBtn = header.querySelector(
-            ".rte-source-editor-fullscreen-btn",
-          );
+          overlay.classList.toggle("fullscreen", isFullscreen);
+          editorContainer.style.height = isFullscreen
+            ? "calc(100vh - 200px)"
+            : "400px";
           if (fullscreenBtn) {
             fullscreenBtn.innerHTML = isFullscreen
               ? `
@@ -739,23 +753,12 @@ export const CodePlugin = (): Plugin => ({
           }
         };
 
-        const closeDialog = () => {
-          if (editorInstance) {
-            editorInstance.destroy();
-            editorInstance = null;
-          }
-          document.body.removeChild(overlay);
-        };
-
         const handleCancel = () => {
-          if (hasUnsavedChanges) {
-            if (
-              !confirm(
-                "You have unsaved changes. Are you sure you want to cancel?",
-              )
-            ) {
-              return;
-            }
+          if (
+            hasUnsavedChanges &&
+            !confirm("You have unsaved changes. Are you sure you want to cancel?")
+          ) {
+            return;
           }
           closeDialog();
         };
@@ -764,7 +767,6 @@ export const CodePlugin = (): Plugin => ({
           try {
             const htmlContent = editorInstance?.getValue() || "";
 
-            // Basic HTML sanitization
             const tempDiv = document.createElement("div");
             tempDiv.innerHTML = htmlContent;
             const dangerous = tempDiv.querySelectorAll(
@@ -773,7 +775,6 @@ export const CodePlugin = (): Plugin => ({
             dangerous.forEach((el) => el.remove());
 
             contentElement.innerHTML = tempDiv.innerHTML;
-            // Notify host wrappers (React/Web) that content changed via source dialog.
             try {
               contentElement.dispatchEvent(
                 new InputEvent("input", {
@@ -790,7 +791,7 @@ export const CodePlugin = (): Plugin => ({
             contentElement.dispatchEvent(
               new Event("change", { bubbles: true }),
             );
-            hasUnsavedChanges = false;
+            setUnsavedState(false);
             closeDialog();
           } catch (error) {
             alert("Failed to update HTML. Please check your syntax.");
@@ -798,38 +799,55 @@ export const CodePlugin = (): Plugin => ({
           }
         };
 
-        // Attach event listeners
-        header
-          .querySelector(".theme-toggle-btn")
-          ?.addEventListener("click", toggleTheme);
-        header
-          .querySelector(".readonly-toggle-btn")
-          ?.addEventListener("click", toggleReadOnly);
-        header
-          .querySelector(".rte-source-editor-fullscreen-btn")
-          ?.addEventListener("click", toggleFullscreen);
-        header
-          .querySelector(".rte-source-editor-close-btn")
-          ?.addEventListener("click", closeDialog);
-        footer
-          .querySelector(".rte-source-editor-btn-cancel")
-          ?.addEventListener("click", handleCancel);
-        footer
-          .querySelector(".rte-source-editor-btn-save")
-          ?.addEventListener("click", handleSave);
-
-        overlay.addEventListener("click", (e) => {
-          if (e.target === overlay) closeDialog();
+        if (themeBtn) addListener(themeBtn, "click", toggleTheme);
+        if (readonlyBtn) addListener(readonlyBtn, "click", toggleReadOnly);
+        if (fullscreenBtn) addListener(fullscreenBtn, "click", toggleFullscreen);
+        if (closeBtn) addListener(closeBtn, "click", closeDialog);
+        if (cancelBtn) addListener(cancelBtn, "click", handleCancel);
+        if (saveBtn) addListener(saveBtn, "click", handleSave);
+        addListener(overlay, "click", (e: Event) => {
+          if (e.target === overlay) {
+            closeDialog();
+          }
+        });
+        addListener(document, "keydown", (e: Event) => {
+          const keyEvent = e as KeyboardEvent;
+          if (keyEvent.key === "Escape") {
+            keyEvent.preventDefault();
+            closeDialog();
+          }
         });
 
-        // Keyboard shortcuts
-        const escHandler = (e: KeyboardEvent) => {
-          if (e.key === "Escape") {
-            closeDialog();
-            document.removeEventListener("keydown", escHandler);
+        document.body.appendChild(overlay);
+
+        requestAnimationFrame(() => {
+          if (isDialogClosed || !overlay.isConnected) return;
+          try {
+            editorInstance = createEditor(editorContainer, {
+              value: formattedOriginalHtml,
+              theme: "dark",
+              readOnly: false,
+              extensions: [
+                new LineNumbersExtension(),
+                new ThemeExtension(),
+                new ReadOnlyExtension(),
+                new BracketMatchingExtension(),
+                new SearchExtension(),
+                new CodeFoldingExtension(),
+                new SyntaxHighlightingExtension(),
+              ],
+            });
+
+            editorInstance.on("change", () => {
+              const newContent = editorInstance?.getValue() || "";
+              setUnsavedState(newContent !== formattedOriginalHtml);
+            });
+
+            requestAnimationFrame(() => editorInstance?.focus());
+          } catch (err) {
+            console.error("Failed to initialize code editor:", err);
           }
-        };
-        document.addEventListener("keydown", escHandler);
+        });
       };
 
       createSourceDialog();

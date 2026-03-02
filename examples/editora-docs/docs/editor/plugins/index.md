@@ -14,10 +14,15 @@ Plugin package for formatting, content insertion, workflow, and quality tooling.
 npm i @editora/plugins @editora/core
 ```
 
+```ts
+import "@editora/plugins/styles.css";
+```
+
 ## Quick Start
 
 ```ts
 import { BoldPlugin, ItalicPlugin, HistoryPlugin } from "@editora/plugins";
+import "@editora/plugins/styles.css";
 
 const plugins = [BoldPlugin(), ItalicPlugin(), HistoryPlugin()];
 ```
@@ -46,6 +51,7 @@ Use root exports for fast integration, subpath exports for bundle control, and `
 | Global API config | Functions/types | `setGlobalApiConfig`, `getGlobalApiConfig`, `getGlobalApiHeaders`, `buildApiUrl`, `ApiConfig` |
 | `@editora/plugins/lite` | Entry export | Lightweight subset focused on common commands |
 | Subpath exports | Package exports | Individual plugin paths (`@editora/plugins/<plugin-name>`) |
+| `@editora/plugins/styles.css` | CSS export | Plugin UI styles for table toolbar, dialogs, and color pickers |
 
 ## Best Practices
 

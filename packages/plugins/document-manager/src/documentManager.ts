@@ -1,17 +1,40 @@
-import mammoth from 'mammoth';
 import { Document, Packer, Paragraph, TextRun, Table, TableCell, TableRow } from 'docx';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { getApiUrl, getApiHeaders, getDocumentManagerConfig } from './constants';
 
 /**
  * Standalone Document Manager utilities for import/export operations
  */
 
+let mammothModulePromise: Promise<typeof import('mammoth')> | null = null;
+let jsPdfModulePromise: Promise<typeof import('jspdf')> | null = null;
+let html2CanvasModulePromise: Promise<typeof import('html2canvas')> | null = null;
+
+async function loadMammoth() {
+  if (!mammothModulePromise) {
+    mammothModulePromise = import('mammoth');
+  }
+  return mammothModulePromise;
+}
+
+async function loadJsPdf() {
+  if (!jsPdfModulePromise) {
+    jsPdfModulePromise = import('jspdf');
+  }
+  return jsPdfModulePromise;
+}
+
+async function loadHtml2Canvas() {
+  if (!html2CanvasModulePromise) {
+    html2CanvasModulePromise = import('html2canvas');
+  }
+  return html2CanvasModulePromise;
+}
+
 /**
  * Import content from Word document
  */
 export async function importFromWord(file: File): Promise<string> {
+  const mammoth = await loadMammoth();
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = async (event) => {
@@ -102,7 +125,9 @@ export async function exportToPdf(
   element?: HTMLElement
 ): Promise<void> {
   try {
-    const pdf = new jsPDF({
+    const jsPdfModule = await loadJsPdf();
+    const JsPDF = jsPdfModule.default;
+    const pdf = new JsPDF({
       orientation: 'portrait',
       unit: 'mm',
       format: 'a4'
@@ -132,6 +157,8 @@ export async function exportToPdf(
 
       try {
         // Render the entire content as one high-quality canvas
+        const html2canvasModule = await loadHtml2Canvas();
+        const html2canvas = html2canvasModule.default;
         const canvas = await html2canvas(element, {
           scale: 2, // High quality rendering
           useCORS: true,

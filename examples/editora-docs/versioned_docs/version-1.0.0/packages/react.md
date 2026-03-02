@@ -22,6 +22,8 @@ npm install @editora/react @editora/core @editora/plugins @editora/themes react 
 import { useState } from "react";
 import { EditoraEditor } from "@editora/react";
 import { BoldPlugin, ItalicPlugin } from "@editora/plugins";
+import "@editora/plugins/styles.css";
+import "@editora/themes/themes/default.css";
 
 export default function App() {
   const [value, setValue] = useState("<p>Start writing...</p>");
@@ -43,6 +45,8 @@ export default function App() {
 - Use stable plugin arrays to avoid unnecessary re-initialization
 - Validate multi-instance pages for sidebar/dialog scoping
 - Import theme CSS once at app-shell level
+- For CRA/bundlers, import `@editora/plugins/styles.css` when plugin UI features are enabled
+- Load `default.css` first, then optional theme overrides (`dark.css`, `acme.css`)
 
 ## Compatibility
 
