@@ -41,6 +41,7 @@ const pluginEntryNames = [
   'strikethrough',
   'table',
   'track-changes',
+  'version-diff',
   'template',
   'text-alignment',
   'text-color',

@@ -36,6 +36,13 @@ export {
 } from './mentions/src';
 export { TrackChangesPlugin, type TrackChangesPluginOptions } from './track-changes/src';
 export {
+  VersionDiffPlugin,
+  type VersionDiffMode,
+  type VersionDiffLabels,
+  type VersionDiffPluginOptions,
+  type VersionDiffOpenArgs,
+} from './version-diff/src';
+export {
   SlashCommandsPlugin,
   type SlashCommandsPluginOptions,
   type SlashCommandItem,

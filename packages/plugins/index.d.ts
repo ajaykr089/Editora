@@ -46,6 +46,40 @@ export interface TrackChangesPluginOptions {
   includeTimestamp?: boolean;
 }
 
+export type VersionDiffMode = "word" | "line";
+
+export interface VersionDiffLabels {
+  title?: string;
+  baseline?: string;
+  current?: string;
+  noChanges?: string;
+  loading?: string;
+  tabInline?: string;
+  tabSideBySide?: string;
+  refresh?: string;
+  setBaseline?: string;
+  close?: string;
+  mode?: string;
+  ignoreWhitespace?: string;
+  largeDocFallback?: string;
+}
+
+export interface VersionDiffOpenArgs {
+  baselineHtml?: string;
+  mode?: VersionDiffMode;
+  ignoreWhitespace?: boolean;
+}
+
+export interface VersionDiffPluginOptions {
+  baselineHtml?: string;
+  getBaselineHtml?: (context: { editor: HTMLElement; editorRoot: HTMLElement }) => string | Promise<string>;
+  mode?: VersionDiffMode;
+  ignoreWhitespace?: boolean;
+  maxTokens?: number;
+  maxMatrixSize?: number;
+  labels?: VersionDiffLabels;
+}
+
 export interface MentionItem {
   id: string;
   label: string;
@@ -169,6 +203,7 @@ export function EmbedIframePlugin(): Plugin;
 export function AnchorPlugin(): Plugin;
 export function MentionPlugin(options?: MentionPluginOptions): Plugin;
 export function TrackChangesPlugin(options?: TrackChangesPluginOptions): Plugin;
+export function VersionDiffPlugin(options?: VersionDiffPluginOptions): Plugin;
 export function SlashCommandsPlugin(options?: SlashCommandsPluginOptions): Plugin;
 
 export function MediaManagerPlugin(): Plugin;

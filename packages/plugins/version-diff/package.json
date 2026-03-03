@@ -1,0 +1,38 @@
+{
+  "name": "@editora/version-diff",
+  "version": "1.0.0",
+  "description": "Version diff plugin for Editora rich text editor with inline and side-by-side comparison",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "vite build"
+  },
+  "keywords": [
+    "editora",
+    "version-diff",
+    "compare",
+    "revision",
+    "editor"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@editora/core": "^1.0.7"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
+    }
+  }
+}

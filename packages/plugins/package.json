@@ -294,6 +294,12 @@
       "require": "./dist/track-changes.cjs.js",
       "default": "./dist/track-changes.esm.js"
     },
+    "./version-diff": {
+      "types": "./index.d.ts",
+      "import": "./dist/version-diff.esm.js",
+      "require": "./dist/version-diff.cjs.js",
+      "default": "./dist/version-diff.esm.js"
+    },
     "./template": {
       "types": "./index.d.ts",
       "import": "./dist/template.esm.js",
