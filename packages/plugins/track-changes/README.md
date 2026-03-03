@@ -25,6 +25,32 @@ const plugins = [
 ];
 ```
 
+## Web Component Configuration
+
+Use the same options through `pluginConfig`:
+
+```html
+<editora-editor id="wc-editor"></editora-editor>
+<script>
+  const el = document.getElementById('wc-editor');
+  el.setConfig({
+    plugins: 'bold history trackChanges',
+    toolbar: { items: 'bold | trackChanges | undo redo' },
+    pluginConfig: {
+      trackChanges: {
+        author: 'reviewer',
+        enabledByDefault: false,
+        includeTimestamp: true,
+      },
+    },
+  });
+</script>
+```
+
+Notes:
+- Use plugin name `trackChanges` (aliases `track-changes` / `trackchanges` are accepted for config lookup).
+- Toolbar group command is `trackChanges` (group) or `toggleTrackChanges` (single button command).
+
 ## Toolbar Behavior
 
 The plugin exposes one grouped toolbar control named **Track Changes** containing:

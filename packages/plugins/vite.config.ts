@@ -30,6 +30,7 @@ const pluginEntryNames = [
   'list',
   'math',
   'media-manager',
+  'mentions',
   'merge-tag',
   'page-break',
   'preview',

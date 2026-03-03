@@ -615,6 +615,9 @@ export class RichTextEditorElement extends HTMLElement {
 
     const aliasMap: Record<string, string[]> = {
       spellCheck: ['spellcheck', 'spellCheck'],
+      trackChanges: ['trackchanges', 'track-changes', 'trackChanges'],
+      mentions: ['mention', 'mentions'],
+      mention: ['mention', 'mentions'],
     };
 
     const candidateKeys = [

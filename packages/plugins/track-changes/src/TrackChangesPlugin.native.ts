@@ -1150,6 +1150,7 @@ function ensureStylesInjected(): void {
     .rte-toolbar-group-items.track-changes .rte-toolbar-button,
     .editora-toolbar-group-items.track-changes .editora-toolbar-button {
       border: none;
+      border-radius: 0px; 
     }
     .rte-toolbar-group-items.track-changes .rte-toolbar-button,
     .editora-toolbar-group-items.track-changes .editora-toolbar-button {

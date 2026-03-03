@@ -27,6 +27,13 @@ export { EmbedIframePlugin } from './embed-iframe/src';
 export { ChecklistPlugin } from './checklist/src';
 export { EmojisPlugin } from './emojis/src';
 export { BackgroundColorPlugin } from './background-color/src';
+export {
+  MentionPlugin,
+  type MentionItem,
+  type MentionPluginOptions,
+  type MentionApiConfig,
+  type MentionApiRequestContext,
+} from './mentions/src';
 export { TrackChangesPlugin, type TrackChangesPluginOptions } from './track-changes/src';
 export { PreviewPlugin } from './preview/src';
 export { FullscreenPlugin } from './fullscreen/src';

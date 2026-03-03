@@ -46,6 +46,57 @@ export interface TrackChangesPluginOptions {
   includeTimestamp?: boolean;
 }
 
+export interface MentionItem {
+  id: string;
+  label: string;
+  value?: string;
+  meta?: string;
+}
+
+export interface MentionApiRequestContext {
+  query: string;
+  trigger: string;
+  limit: number;
+  signal: AbortSignal;
+}
+
+export interface MentionApiConfig {
+  url: string;
+  method?: string;
+  headers?: Record<string, string> | ((ctx: MentionApiRequestContext) => Record<string, string>);
+  credentials?: RequestCredentials;
+  mode?: RequestMode;
+  cache?: RequestCache;
+  queryParam?: string;
+  triggerParam?: string;
+  limitParam?: string;
+  staticParams?: Record<string, string>;
+  body?: Record<string, unknown> | BodyInit | ((ctx: MentionApiRequestContext) => Record<string, unknown> | BodyInit | undefined);
+  buildRequest?: (ctx: MentionApiRequestContext) => { url: string; init?: RequestInit };
+  responseType?: "json" | "text";
+  responsePath?: string;
+  mapItem?: (raw: unknown, index: number) => MentionItem | null;
+  transformResponse?: (response: unknown, ctx: MentionApiRequestContext) => MentionItem[];
+  debounceMs?: number;
+  timeoutMs?: number;
+  onError?: (error: unknown, ctx: MentionApiRequestContext) => void;
+}
+
+export interface MentionPluginOptions {
+  triggerChars?: string[];
+  minChars?: number;
+  maxQueryLength?: number;
+  maxSuggestions?: number;
+  items?: MentionItem[];
+  api?: MentionApiConfig;
+  search?: (query: string, trigger: string) => MentionItem[] | Promise<MentionItem[]>;
+  itemRenderer?: (item: MentionItem, query: string) => string;
+  emptyStateText?: string;
+  noResultsText?: string;
+  loadingText?: string;
+  insertSpaceAfterMention?: boolean;
+}
+
 export interface Template {
   id: string;
   name: string;
@@ -83,6 +134,7 @@ export function SpecialCharactersPlugin(): Plugin;
 export function EmojisPlugin(): Plugin;
 export function EmbedIframePlugin(): Plugin;
 export function AnchorPlugin(): Plugin;
+export function MentionPlugin(options?: MentionPluginOptions): Plugin;
 export function TrackChangesPlugin(options?: TrackChangesPluginOptions): Plugin;
 
 export function MediaManagerPlugin(): Plugin;

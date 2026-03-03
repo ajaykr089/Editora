@@ -228,6 +228,12 @@
       "require": "./dist/media-manager.cjs.js",
       "default": "./dist/media-manager.esm.js"
     },
+    "./mentions": {
+      "types": "./index.d.ts",
+      "import": "./dist/mentions.esm.js",
+      "require": "./dist/mentions.cjs.js",
+      "default": "./dist/mentions.esm.js"
+    },
     "./merge-tag": {
       "types": "./index.d.ts",
       "import": "./dist/merge-tag.esm.js",

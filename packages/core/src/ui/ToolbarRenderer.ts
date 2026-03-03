@@ -113,6 +113,7 @@ export class ToolbarRenderer {
       toggleComments: "toggleComments",
       footnote: "insertFootnote",
       mergeTags: "insertMergeTag",
+      mention: "insertMention",
       pageBreak: "insertPageBreak",
       template: "insertTemplate",
       importWord: "importWord",
