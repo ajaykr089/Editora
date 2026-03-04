@@ -429,6 +429,63 @@ export interface PIIRedactionPluginOptions {
   skipInCodeBlocks?: boolean;
 }
 
+export type SmartPasteProfile = "fidelity" | "balanced" | "plain";
+export type SmartPasteSource = "word" | "google-docs" | "html" | "plain";
+
+export interface SmartPasteLabels {
+  panelTitle?: string;
+  panelAriaLabel?: string;
+  enabledText?: string;
+  disabledText?: string;
+  toggleOnText?: string;
+  toggleOffText?: string;
+  cycleProfileText?: string;
+  profileLabel?: string;
+  fidelityText?: string;
+  balancedText?: string;
+  plainText?: string;
+  lastPasteHeading?: string;
+  lastPasteEmptyText?: string;
+  lastPasteSourceLabel?: string;
+  lastPasteProfileLabel?: string;
+  lastPasteRemovedLabel?: string;
+  lastPasteCharsLabel?: string;
+  closeText?: string;
+  shortcutText?: string;
+  readonlyMessage?: string;
+}
+
+export interface SmartPasteProfileOptions {
+  keepStyles?: boolean;
+  keepClasses?: boolean;
+  keepDataAttributes?: boolean;
+  preserveTables?: boolean;
+}
+
+export interface SmartPastePluginOptions {
+  enabled?: boolean;
+  defaultProfile?: SmartPasteProfile;
+  maxHtmlLength?: number;
+  removeComments?: boolean;
+  normalizeWhitespace?: boolean;
+  profileOptions?: Partial<Record<SmartPasteProfile, SmartPasteProfileOptions>>;
+  labels?: SmartPasteLabels;
+  normalizeText?: (value: string) => string;
+}
+
+export interface SmartPasteReport {
+  source: SmartPasteSource;
+  profile: SmartPasteProfile;
+  inputHtmlLength: number;
+  outputHtmlLength: number;
+  outputTextLength: number;
+  removedElements: number;
+  removedAttributes: number;
+  removedComments: number;
+  normalizedStyles: number;
+  createdAt: string;
+}
+
 export interface MentionItem {
   id: string;
   label: string;
@@ -559,6 +616,7 @@ export function ContentRulesPlugin(options?: ContentRulesPluginOptions): Plugin;
 export function CitationsPlugin(options?: CitationsPluginOptions): Plugin;
 export function ApprovalWorkflowPlugin(options?: ApprovalWorkflowPluginOptions): Plugin;
 export function PIIRedactionPlugin(options?: PIIRedactionPluginOptions): Plugin;
+export function SmartPastePlugin(options?: SmartPastePluginOptions): Plugin;
 export function SlashCommandsPlugin(options?: SlashCommandsPluginOptions): Plugin;
 
 export function MediaManagerPlugin(): Plugin;

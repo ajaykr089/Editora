@@ -1005,6 +1005,9 @@ export class RichTextEditorElement extends HTMLElement {
     });
 
     this.contentElement.addEventListener('paste', (e: ClipboardEvent) => {
+      if ((e as any).__editoraSmartPasteHandled === true || e.defaultPrevented) {
+        return;
+      }
       e.preventDefault();
 
       const pasteConfig = this.config.paste || {};
@@ -1134,7 +1137,7 @@ export class RichTextEditorElement extends HTMLElement {
    * Update floating toolbar position
    */
   private updateFloatingToolbar(): void {
-    if (!this.floatingToolbar) return;
+    if (!this.floatingToolbar || !this.contentElement) return;
     const runtimeReadonly =
       this.config.readonly ||
       this.contentElement.contentEditable === 'false' ||

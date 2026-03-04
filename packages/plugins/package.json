@@ -84,6 +84,12 @@
       "require": "./dist/pii-redaction.cjs.js",
       "default": "./dist/pii-redaction.esm.js"
     },
+    "./smart-paste": {
+      "types": "./index.d.ts",
+      "import": "./dist/smart-paste.esm.js",
+      "require": "./dist/smart-paste.cjs.js",
+      "default": "./dist/smart-paste.esm.js"
+    },
     "./background-color": {
       "types": "./index.d.ts",
       "import": "./dist/background-color.esm.js",
@@ -379,7 +385,8 @@
     "test:citations": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./citations/src/CitationsPlugin.native.test.js",
     "test:approval-workflow": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./approval-workflow/src/ApprovalWorkflowPlugin.native.test.js",
     "test:pii-redaction": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./pii-redaction/src/PIIRedactionPlugin.native.test.js",
-    "verify:citations": "npm run typecheck:build && npm run test:citations && npm run test:content-rules && npm run test:approval-workflow && npm run test:pii-redaction && npm run build"
+    "test:smart-paste": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./smart-paste/src/SmartPastePlugin.native.test.js",
+    "verify:citations": "npm run typecheck:build && npm run test:citations && npm run test:content-rules && npm run test:approval-workflow && npm run test:pii-redaction && npm run test:smart-paste && npm run build"
   },
   "peerDependencies": {
     "@editora/core": "^1.0.7"

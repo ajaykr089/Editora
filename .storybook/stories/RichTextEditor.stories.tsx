@@ -60,6 +60,7 @@ import {
   CitationsPlugin,
   ApprovalWorkflowPlugin,
   PIIRedactionPlugin,
+  SmartPastePlugin,
 } from "@editora/plugins";
 import { Box, Flex, Grid} from '@editora/ui-react';
 
@@ -165,6 +166,10 @@ const allNativePlugins = [
     enableRealtime: true,
     redactionMode: "token",
     maxFindings: 120,
+  }),
+  SmartPastePlugin({
+    defaultProfile: "balanced",
+    maxHtmlLength: 220000,
   }),
   SlashCommandsPlugin(),
   MentionPlugin({

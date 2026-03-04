@@ -1,4 +1,4 @@
-// Native plugins (28 total - no React dependencies)
+// Native plugins (29 total - no React dependencies)
 // ParagraphPlugin removed - paragraph option now in HeadingPlugin dropdown
 export { HeadingPlugin } from '../heading/src/index';
 export { BoldPlugin } from '../bold/src/index';
@@ -95,6 +95,15 @@ export {
   type PIIRedactionDetectorConfig,
   type PIIRedactionPluginOptions,
 } from '../pii-redaction/src/index';
+export {
+  SmartPastePlugin,
+  type SmartPasteProfile,
+  type SmartPasteSource,
+  type SmartPasteLabels,
+  type SmartPasteProfileOptions,
+  type SmartPastePluginOptions,
+  type SmartPasteReport,
+} from '../smart-paste/src/index';
 export {
   SlashCommandsPlugin,
   type SlashCommandsPluginOptions,

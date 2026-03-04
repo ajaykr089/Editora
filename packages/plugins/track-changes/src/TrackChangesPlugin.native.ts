@@ -1033,6 +1033,7 @@ function handleKeydownFactory(editor: HTMLElement, state: EditorTrackState) {
 
 function handlePasteFactory(editor: HTMLElement, state: EditorTrackState) {
   return (event: ClipboardEvent): void => {
+    if ((event as any).__editoraSmartPasteHandled === true || event.defaultPrevented) return;
     if (!state.enabled || editor.getAttribute('data-track-changes') !== 'true') return;
     const text = event.clipboardData?.getData('text/plain') || '';
     if (!text) return;

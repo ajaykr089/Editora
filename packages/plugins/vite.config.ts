@@ -41,6 +41,7 @@ const pluginEntryNames = [
   'pii-redaction',
   'preview',
   'print',
+  'smart-paste',
   'slash-commands',
   'special-characters',
   'spell-check',

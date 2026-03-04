@@ -441,6 +441,9 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     };
 
     const handlePaste = (e: ClipboardEvent) => {
+      if ((e as any).__editoraSmartPasteHandled === true || e.defaultPrevented) {
+        return;
+      }
       if (readonly) {
         e.preventDefault();
         return;

@@ -91,6 +91,15 @@ export {
   type PIIRedactionPluginOptions,
 } from '../pii-redaction/src/index';
 export {
+  SmartPastePlugin,
+  type SmartPasteProfile,
+  type SmartPasteSource,
+  type SmartPasteLabels,
+  type SmartPasteProfileOptions,
+  type SmartPastePluginOptions,
+  type SmartPasteReport,
+} from '../smart-paste/src/index';
+export {
   SlashCommandsPlugin,
   type SlashCommandsPluginOptions,
   type SlashCommandItem,
