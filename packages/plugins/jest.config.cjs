@@ -6,6 +6,7 @@ module.exports = {
     '<rootDir>/approval-workflow/src/**/*.test.js',
     '<rootDir>/pii-redaction/src/**/*.test.js',
     '<rootDir>/smart-paste/src/**/*.test.js',
+    '<rootDir>/blocks-library/src/**/*.test.js',
   ],
   transform: {
     '^.+\\.tsx?$': [

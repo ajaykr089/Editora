@@ -486,6 +486,80 @@ export interface SmartPasteReport {
   createdAt: string;
 }
 
+export interface BlocksLibraryItem {
+  id: string;
+  label: string;
+  html: string;
+  description?: string;
+  category?: string;
+  tags?: string[];
+  keywords?: string[];
+}
+
+export interface BlocksLibraryItemInput {
+  id?: string;
+  label: string;
+  html: string;
+  description?: string;
+  category?: string;
+  tags?: string[];
+  keywords?: string[];
+}
+
+export interface BlocksLibraryLabels {
+  panelTitle?: string;
+  panelAriaLabel?: string;
+  searchLabel?: string;
+  searchPlaceholder?: string;
+  categoryLabel?: string;
+  allCategoriesText?: string;
+  recentHeading?: string;
+  insertText?: string;
+  closeText?: string;
+  noResultsText?: string;
+  summaryPrefix?: string;
+  loadingText?: string;
+  loadErrorText?: string;
+  readonlyMessage?: string;
+  shortcutText?: string;
+  helperText?: string;
+  lastInsertedPrefix?: string;
+  resultsListLabel?: string;
+}
+
+export interface BlocksLibraryRequestContext {
+  editor: HTMLElement;
+  editorRoot: HTMLElement;
+  signal: AbortSignal;
+}
+
+export interface BlocksLibraryPluginOptions {
+  blocks?: BlocksLibraryItemInput[];
+  defaultCategory?: string;
+  maxResults?: number;
+  maxRecentBlocks?: number;
+  debounceMs?: number;
+  cacheTtlMs?: number;
+  labels?: BlocksLibraryLabels;
+  normalizeText?: (value: string) => string;
+  sanitizeBlockHtml?: (html: string, block: BlocksLibraryItemInput) => string;
+  getBlocks?: (
+    context: BlocksLibraryRequestContext,
+  ) => BlocksLibraryItemInput[] | Promise<BlocksLibraryItemInput[]>;
+}
+
+export interface BlocksLibraryRuntimeState {
+  query: string;
+  category: string;
+  selectedBlockId: string | null;
+  totalMatches: number;
+  visibleMatches: number;
+  recentBlockIds: string[];
+  lastInsertedBlockId: string | null;
+  loading: boolean;
+  loadError: string | null;
+}
+
 export interface MentionItem {
   id: string;
   label: string;
@@ -617,6 +691,7 @@ export function CitationsPlugin(options?: CitationsPluginOptions): Plugin;
 export function ApprovalWorkflowPlugin(options?: ApprovalWorkflowPluginOptions): Plugin;
 export function PIIRedactionPlugin(options?: PIIRedactionPluginOptions): Plugin;
 export function SmartPastePlugin(options?: SmartPastePluginOptions): Plugin;
+export function BlocksLibraryPlugin(options?: BlocksLibraryPluginOptions): Plugin;
 export function SlashCommandsPlugin(options?: SlashCommandsPluginOptions): Plugin;
 
 export function MediaManagerPlugin(): Plugin;

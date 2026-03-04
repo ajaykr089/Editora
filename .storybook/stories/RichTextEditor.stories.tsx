@@ -61,6 +61,7 @@ import {
   ApprovalWorkflowPlugin,
   PIIRedactionPlugin,
   SmartPastePlugin,
+  BlocksLibraryPlugin,
 } from "@editora/plugins";
 import { Box, Flex, Grid} from '@editora/ui-react';
 
@@ -170,6 +171,35 @@ const allNativePlugins = [
   SmartPastePlugin({
     defaultProfile: "balanced",
     maxHtmlLength: 220000,
+  }),
+  BlocksLibraryPlugin({
+    maxResults: 120,
+    blocks: [
+      {
+        id: "incident-summary",
+        label: "Incident Summary Block",
+        category: "Operations",
+        tags: ["incident", "summary"],
+        keywords: ["postmortem", "rca"],
+        html: "<h3>Incident Summary</h3><p>Describe impact, timeline, and customer exposure.</p>",
+      },
+      {
+        id: "risk-register-entry",
+        label: "Risk Register Entry",
+        category: "Compliance",
+        tags: ["risk", "governance"],
+        keywords: ["mitigation", "owner"],
+        html: "<h3>Risk Register Entry</h3><p><strong>Risk:</strong> <em>Describe risk here.</em></p><p><strong>Mitigation:</strong> Define mitigation owner and due date.</p>",
+      },
+      {
+        id: "release-rollback",
+        label: "Release Rollback Plan",
+        category: "Engineering",
+        tags: ["release", "rollback"],
+        keywords: ["deployment", "runbook"],
+        html: "<h3>Rollback Plan</h3><ol><li>Pause rollout</li><li>Revert deployment</li><li>Validate service health</li></ol>",
+      },
+    ],
   }),
   SlashCommandsPlugin(),
   MentionPlugin({

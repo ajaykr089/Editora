@@ -7,6 +7,7 @@ const pluginEntryNames = [
   'approval-workflow',
   'background-color',
   'blockquote',
+  'blocks-library',
   'bold',
   'capitalization',
   'citations',

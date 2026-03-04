@@ -102,6 +102,12 @@
       "require": "./dist/blockquote.cjs.js",
       "default": "./dist/blockquote.esm.js"
     },
+    "./blocks-library": {
+      "types": "./index.d.ts",
+      "import": "./dist/blocks-library.esm.js",
+      "require": "./dist/blocks-library.cjs.js",
+      "default": "./dist/blocks-library.esm.js"
+    },
     "./bold": {
       "types": "./index.d.ts",
       "import": "./dist/bold.esm.js",
@@ -386,7 +392,8 @@
     "test:approval-workflow": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./approval-workflow/src/ApprovalWorkflowPlugin.native.test.js",
     "test:pii-redaction": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./pii-redaction/src/PIIRedactionPlugin.native.test.js",
     "test:smart-paste": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./smart-paste/src/SmartPastePlugin.native.test.js",
-    "verify:citations": "npm run typecheck:build && npm run test:citations && npm run test:content-rules && npm run test:approval-workflow && npm run test:pii-redaction && npm run test:smart-paste && npm run build"
+    "test:blocks-library": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./blocks-library/src/BlocksLibraryPlugin.native.test.js",
+    "verify:citations": "npm run typecheck:build && npm run test:citations && npm run test:content-rules && npm run test:approval-workflow && npm run test:pii-redaction && npm run test:smart-paste && npm run test:blocks-library && npm run build"
   },
   "peerDependencies": {
     "@editora/core": "^1.0.7"

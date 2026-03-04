@@ -105,6 +105,15 @@ export {
   type SmartPasteReport,
 } from '../smart-paste/src/index';
 export {
+  BlocksLibraryPlugin,
+  type BlocksLibraryItem,
+  type BlocksLibraryItemInput,
+  type BlocksLibraryLabels,
+  type BlocksLibraryRequestContext,
+  type BlocksLibraryPluginOptions,
+  type BlocksLibraryRuntimeState,
+} from '../blocks-library/src/index';
+export {
   SlashCommandsPlugin,
   type SlashCommandsPluginOptions,
   type SlashCommandItem,
