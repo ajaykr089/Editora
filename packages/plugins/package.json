@@ -108,6 +108,12 @@
       "require": "./dist/content-rules.cjs.js",
       "default": "./dist/content-rules.esm.js"
     },
+    "./citations": {
+      "types": "./index.d.ts",
+      "import": "./dist/citations.esm.js",
+      "require": "./dist/citations.cjs.js",
+      "default": "./dist/citations.esm.js"
+    },
     "./data-binding": {
       "types": "./index.d.ts",
       "import": "./dist/data-binding.esm.js",
@@ -357,7 +363,9 @@
     "dev": "vite build --watch",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run typecheck:build && npm run build",
-    "test:content-rules": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false"
+    "test:content-rules": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./content-rules/src/ContentRulesPlugin.native.test.js",
+    "test:citations": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./citations/src/CitationsPlugin.native.test.js",
+    "verify:citations": "npm run typecheck:build && npm run test:citations && npm run test:content-rules && npm run build"
   },
   "peerDependencies": {
     "@editora/core": "^1.0.7"

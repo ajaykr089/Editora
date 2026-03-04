@@ -63,6 +63,8 @@ const pluginRegistry: Record<string, () => Promise<any>> = {
   'contentRules': () => import("../../../plugins/content-rules/src/ContentRulesPlugin.native").then(m => m.ContentRulesPlugin()),
   'content-rules': () => import("../../../plugins/content-rules/src/ContentRulesPlugin.native").then(m => m.ContentRulesPlugin()),
   'contentrules': () => import("../../../plugins/content-rules/src/ContentRulesPlugin.native").then(m => m.ContentRulesPlugin()),
+  'citations': () => import("../../../plugins/citations/src/CitationsPlugin.native").then(m => m.CitationsPlugin()),
+  'citation': () => import("../../../plugins/citations/src/CitationsPlugin.native").then(m => m.CitationsPlugin()),
   'mentions': () => import("../../../plugins/mentions/src/MentionPlugin.native").then(m => m.MentionPlugin()),
   'mention': () => import("../../../plugins/mentions/src/MentionPlugin.native").then(m => m.MentionPlugin()),
   'anchor': () => import("../../../plugins/anchor/src/AnchorPlugin.native").then(m => m.AnchorPlugin()),

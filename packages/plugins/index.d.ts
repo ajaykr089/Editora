@@ -249,6 +249,61 @@ export interface ContentRulesPluginOptions {
   customRules?: ContentRuleDefinition[];
 }
 
+export type CitationStyle = "apa" | "mla" | "chicago";
+
+export interface CitationRecord {
+  id: string;
+  author: string;
+  year?: string;
+  title: string;
+  source?: string;
+  url?: string;
+  note?: string;
+}
+
+export interface CitationInput {
+  id?: string;
+  author: string;
+  year?: string;
+  title: string;
+  source?: string;
+  url?: string;
+  note?: string;
+}
+
+export interface CitationsLabels {
+  panelTitle?: string;
+  panelAriaLabel?: string;
+  styleLabel?: string;
+  authorLabel?: string;
+  yearLabel?: string;
+  titleLabel?: string;
+  sourceLabel?: string;
+  urlLabel?: string;
+  noteLabel?: string;
+  insertText?: string;
+  refreshText?: string;
+  closeText?: string;
+  bibliographyTitle?: string;
+  footnotesTitle?: string;
+  noCitationsText?: string;
+  styleButtonPrefix?: string;
+  recentHeading?: string;
+  deleteRecentText?: string;
+  summaryPrefix?: string;
+  invalidMessage?: string;
+}
+
+export interface CitationsPluginOptions {
+  defaultStyle?: CitationStyle;
+  enableFootnoteSync?: boolean;
+  debounceMs?: number;
+  maxRecentCitations?: number;
+  labels?: CitationsLabels;
+  normalizeText?: (value: string) => string;
+  generateCitationId?: (context: { editor: HTMLElement; index: number }) => string;
+}
+
 export interface MentionItem {
   id: string;
   label: string;
@@ -376,6 +431,7 @@ export function VersionDiffPlugin(options?: VersionDiffPluginOptions): Plugin;
 export function ConditionalContentPlugin(options?: ConditionalContentPluginOptions): Plugin;
 export function DataBindingPlugin(options?: DataBindingPluginOptions): Plugin;
 export function ContentRulesPlugin(options?: ContentRulesPluginOptions): Plugin;
+export function CitationsPlugin(options?: CitationsPluginOptions): Plugin;
 export function SlashCommandsPlugin(options?: SlashCommandsPluginOptions): Plugin;
 
 export function MediaManagerPlugin(): Plugin;

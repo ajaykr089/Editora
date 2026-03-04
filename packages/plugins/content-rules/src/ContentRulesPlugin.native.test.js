@@ -52,7 +52,16 @@ class MiniEventTarget {
 
   dispatchEvent(event) {
     if (!event || !event.type) return true;
-    event.target = event.target || this;
+    try {
+      if (!event.target) {
+        Object.defineProperty(event, 'target', {
+          configurable: true,
+          value: this,
+        });
+      }
+    } catch {
+      // Ignore readonly event target in newer Node/Event implementations.
+    }
     this.listeners.get(event.type)?.forEach((listener) => listener(event));
     return true;
   }

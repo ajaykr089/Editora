@@ -57,6 +57,7 @@ import {
   ConditionalContentPlugin,
   DataBindingPlugin,
   ContentRulesPlugin,
+  CitationsPlugin,
 } from "@editora/plugins";
 import { Box, Flex, Grid} from '@editora/ui-react';
 
@@ -148,6 +149,10 @@ const allNativePlugins = [
     maxSentenceWords: 28,
     minReadabilityScore: 55,
     enableRealtime: true,
+  }),
+  CitationsPlugin({
+    defaultStyle: "apa",
+    enableFootnoteSync: true,
   }),
   SlashCommandsPlugin(),
   MentionPlugin({

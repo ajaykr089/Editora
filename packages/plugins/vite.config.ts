@@ -8,6 +8,7 @@ const pluginEntryNames = [
   'blockquote',
   'bold',
   'capitalization',
+  'citations',
   'conditional-content',
   'checklist',
   'clear-formatting',

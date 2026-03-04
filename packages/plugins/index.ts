@@ -69,6 +69,14 @@ export {
   type ContentRuleDefinition,
 } from './content-rules/src';
 export {
+  CitationsPlugin,
+  type CitationStyle,
+  type CitationRecord,
+  type CitationInput,
+  type CitationsLabels,
+  type CitationsPluginOptions,
+} from './citations/src';
+export {
   SlashCommandsPlugin,
   type SlashCommandsPluginOptions,
   type SlashCommandItem,
