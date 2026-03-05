@@ -1621,7 +1621,7 @@ function ensureStylesInjected(): void {
 
     .rte-toolbar-button[data-command="toggleSmartPasteEnabled"].active,
     .editora-toolbar-button[data-command="toggleSmartPasteEnabled"].active {
-      background-color: rgba(14, 165, 233, 0.14);
+      background-color: #ccc;
     }
 
     ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.${TOOLBAR_GROUP_CLASS},

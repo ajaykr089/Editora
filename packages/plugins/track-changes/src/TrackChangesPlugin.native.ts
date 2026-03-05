@@ -1175,7 +1175,7 @@ function ensureStylesInjected(): void {
 
     .rte-toolbar-button[data-command="toggleTrackChanges"].active,
     .editora-toolbar-button[data-command="toggleTrackChanges"].active {
-      background-color: rgba(22, 163, 74, 0.1);
+      background-color: #ccc;
     }
   `;
 

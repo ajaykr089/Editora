@@ -1670,7 +1670,7 @@ function ensureStylesInjected(): void {
 
     .rte-toolbar-button[data-command="toggleCitationsPanel"].active,
     .editora-toolbar-button[data-command="toggleCitationsPanel"].active {
-      background: #16a34a1a;
+      background: #ccc;
     }
 
     ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.citations,

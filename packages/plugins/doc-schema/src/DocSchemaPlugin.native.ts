@@ -1704,7 +1704,7 @@ function ensureStylesInjected(): void {
     }
     .rte-toolbar-button[data-command="toggleDocSchemaRealtime"].active,
     .editora-toolbar-button[data-command="toggleDocSchemaRealtime"].active {
-      background-color: rgba(22, 163, 74, 0.12);
+      background-color: #ccc;
     }
     ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.${TOOLBAR_GROUP_CLASS} .rte-toolbar-button svg,
     ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.${TOOLBAR_GROUP_CLASS} .editora-toolbar-button svg,

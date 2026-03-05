@@ -1972,7 +1972,7 @@ function ensureStylesInjected(): void {
     .editora-toolbar-button[data-command="toggleTranslationSegmentLock"].active, 
     .rte-toolbar-button[data-command="toggleTranslationRealtime"].active,
     .editora-toolbar-button[data-command="toggleTranslationRealtime"].active {
-      background: rgba(15, 118, 110, 0.12);
+      background: #ccc;
     }
     ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.${TOOLBAR_GROUP_CLASS} .rte-toolbar-button svg,
     ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.${TOOLBAR_GROUP_CLASS} .editora-toolbar-button svg,

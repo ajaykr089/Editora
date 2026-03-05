@@ -125,8 +125,7 @@
     }
     &:last-child {
       border: 0px solid #ccc;
-      /* border-top-right-radius: 3px;
-      border-bottom-right-radius: 3px; */
+      border-radius: 0px !important;
     }
     &:hover {
       background: #e0e0e0;

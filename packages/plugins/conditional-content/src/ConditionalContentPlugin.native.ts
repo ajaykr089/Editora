@@ -482,7 +482,7 @@ function ensureStylesInjected(): void {
 
     .rte-toolbar-button[data-command="toggleConditionalPreview"].active,
     .editora-toolbar-button[data-command="toggleConditionalPreview"].active {
-      background: rgba(37, 99, 235, 0.14);
+      background: #ccc;
     }
 
     .rte-conditional-block.rte-conditional-preview {

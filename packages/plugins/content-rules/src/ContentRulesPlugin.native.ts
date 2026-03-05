@@ -999,7 +999,7 @@ function ensureStylesInjected(): void {
     }
     .rte-toolbar-button[data-command="toggleContentRulesRealtime"].active,
     .editora-toolbar-button[data-command="toggleContentRulesRealtime"].active {
-      background-color: rgba(22, 163, 74, 0.1);
+      background-color: #ccc;
     }
 
     ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.content-rules,

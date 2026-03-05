@@ -1055,7 +1055,7 @@ function ensureStylesInjected(): void {
     .editora-toolbar-button[data-command="toggleApprovalWorkflowPanel"].active,
     .rte-toolbar-button[data-command="reopenDraft"].active,
     .editora-toolbar-button[data-command="reopenDraft"].active {
-      background-color: #16a34a1f;
+      background-color: #ccc;
     }
 
     ${DARK_THEME_SELECTOR} .rte-toolbar-button[data-command="toggleApprovalWorkflowPanel"].active,
