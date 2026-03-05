@@ -195,6 +195,7 @@ export class RichTextEditorElement extends HTMLElement {
   private keyboardShortcutManager = new KeyboardShortcutManager();
   private lastAutosavedContent = '';
   private loadedPlugins: Plugin[] = [];
+  private lastBeforeInputType: string | null = null;
 
   // Observed attributes for reactive updates
   static get observedAttributes(): string[] {
@@ -1063,6 +1064,10 @@ export class RichTextEditorElement extends HTMLElement {
   private setupEventListeners(): void {
     if (!this.contentElement || !this.engine) return;
     const shortcutManager = this.keyboardShortcutManager;
+
+    this.contentElement.addEventListener('beforeinput', (event: InputEvent) => {
+      this.lastBeforeInputType = event.inputType || null;
+    });
     
     // Content change
     this.contentElement.addEventListener('input', () => {
@@ -1071,14 +1076,20 @@ export class RichTextEditorElement extends HTMLElement {
       const performanceConfig = this.getPerformanceConfig();
       const contentConfig = this.getContentSanitizeConfig();
       const securityConfig = this.getSecurityConfig();
+      const inputType = this.lastBeforeInputType;
+      this.lastBeforeInputType = null;
 
-      if (securityConfig.sanitizeOnInput !== false && contentConfig.sanitize !== false) {
+      const shouldSanitizeOnInput =
+        securityConfig.sanitizeOnInput !== false &&
+        contentConfig.sanitize !== false &&
+        !inputType;
+
+      if (shouldSanitizeOnInput) {
         const sanitized = sanitizeInputHTML(html, contentConfig, securityConfig);
         if (sanitized !== html) {
           const selection = window.getSelection();
           const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
           this.contentElement.innerHTML = sanitized;
-
           if (range && selection) {
             try {
               selection.removeAllRanges();

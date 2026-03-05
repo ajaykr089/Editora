@@ -408,6 +408,39 @@
   margin: 1em 0;
 }
 
+/* Prevent host-page typography rules (e.g. `p { color: ... }`) from overriding
+   webcomponent editor content colors in dark mode. */
+.editora-theme-dark .editora-content,
+.editora-theme-dark .editora-content :is(
+  p,
+  span,
+  div,
+  li,
+  ul,
+  ol,
+  td,
+  th,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  strong,
+  em,
+  u,
+  s,
+  small,
+  sub,
+  sup,
+  blockquote,
+  code,
+  pre,
+  a
+) {
+  color: #ecf3ff;
+}
+
 .editora-content ul,
 .editora-content ol {
   margin: 1em 0;
@@ -420,7 +453,7 @@
 }
 
 .editora-theme-dark .editora-content a {
-  color: #4db8ff;
+  color: #ecf3ff;
 }
 
 .editora-content code {
@@ -478,7 +511,7 @@
 
 .editora-theme-dark .editora-content blockquote {
   border-left-color: #3c3c3c;
-  color: #9a9a9a;
+  color: #ecf3ff;
 }
 
 /* Floating toolbar */

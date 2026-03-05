@@ -34,6 +34,25 @@ let lastActiveEditor: HTMLElement | null = null;
 let autoEnableHandlersBound = false;
 let defaultPluginOptions: TrackChangesPluginOptions = {};
 let selectionTrackingBound = false;
+const supportsBeforeInputEvent =
+  typeof InputEvent !== 'undefined' &&
+  typeof InputEvent.prototype === 'object' &&
+  'inputType' in InputEvent.prototype;
+const meaningfulListExitTags = new Set([
+  'IMG',
+  'TABLE',
+  'VIDEO',
+  'AUDIO',
+  'SVG',
+  'MATH',
+  'HR',
+  'IFRAME',
+  'INPUT',
+  'TEXTAREA',
+  'SELECT',
+  'BUTTON',
+  'CANVAS',
+]);
 
 function getEditorContentFromHost(host: Element | null): HTMLElement | null {
   if (!host) return null;
@@ -254,16 +273,8 @@ function appendTextToInsertMarker(editor: HTMLElement, marker: HTMLElement, text
   } else {
     marker.appendChild(document.createTextNode(text));
   }
-
-  const selection = window.getSelection();
-  if (!selection) return;
-
-  const range = document.createRange();
-  range.selectNodeContents(marker);
-  range.collapse(false);
-  selection.removeAllRanges();
-  selection.addRange(range);
-  editor.focus({ preventScroll: true });
+  // Keep caret outside the non-editable marker so continuous typing works.
+  setCaretAfterNode(editor, marker);
 }
 
 function createDeleteMarker(fragment: DocumentFragment, state: EditorTrackState): HTMLSpanElement {
@@ -399,6 +410,49 @@ function executeParagraphInsertion(editor: HTMLElement, inputType: string): bool
 
   finalizeTrackedMutation(editor, beforeHTML);
   return executed !== false;
+}
+
+function getCollapsedSelectionRangeForEditor(editor: HTMLElement): Range | null {
+  const liveRange = getSelectionRangeInEditor(editor);
+  if (liveRange && liveRange.collapsed) return liveRange;
+
+  const saved = lastSelectionRanges.get(editor);
+  if (saved && saved.collapsed && editor.contains(saved.commonAncestorContainer)) {
+    return saved.cloneRange();
+  }
+
+  return null;
+}
+
+function isMeaningfulElementInEmptyListItemCandidate(element: HTMLElement): boolean {
+  if (element.matches(TRACK_INSERT_SELECTOR) || element.matches(TRACK_DELETE_SELECTOR)) {
+    const markerText = (element.textContent || '').replace(/\u200B/g, '').trim();
+    return markerText.length > 0;
+  }
+
+  return meaningfulListExitTags.has(element.tagName);
+}
+
+function shouldAllowNativeListExit(editor: HTMLElement, inputType: string): boolean {
+  if (inputType !== 'insertParagraph') return false;
+
+  const range = getCollapsedSelectionRangeForEditor(editor);
+  if (!range) return false;
+
+  const element = getElementFromNode(range.startContainer);
+  if (!element) return false;
+
+  const listItem = element.closest('li');
+  if (!(listItem instanceof HTMLElement) || !editor.contains(listItem)) return false;
+
+  const text = (listItem.textContent || '').replace(/\u200B/g, '').trim();
+  if (text.length > 0) return false;
+
+  const hasMeaningfulElement = Array.from(listItem.querySelectorAll('*')).some((node) =>
+    isMeaningfulElementInEmptyListItemCandidate(node as HTMLElement),
+  );
+
+  return !hasMeaningfulElement;
 }
 
 function createCollapsedRangeAtSelectionEnd(editor: HTMLElement): Range {
@@ -998,6 +1052,9 @@ function handleBeforeInputFactory(editor: HTMLElement, state: EditorTrackState) 
 
     const inputType = event.inputType || '';
     if (inputType === 'insertParagraph' || inputType === 'insertLineBreak') {
+      if (shouldAllowNativeListExit(editor, inputType)) {
+        return;
+      }
       event.preventDefault();
       executeParagraphInsertion(editor, inputType);
       return;
@@ -1022,11 +1079,14 @@ function handleKeydownFactory(editor: HTMLElement, state: EditorTrackState) {
   return (event: KeyboardEvent): void => {
     if (!state.enabled || editor.getAttribute('data-track-changes') !== 'true') return;
     if (event.key !== 'Enter') return;
-
-    event.preventDefault();
-    event.stopPropagation();
+    if (supportsBeforeInputEvent) return;
 
     const inputType = event.shiftKey ? 'insertLineBreak' : 'insertParagraph';
+    if (shouldAllowNativeListExit(editor, inputType)) return;
+
+    lastActiveEditor = editor;
+    event.preventDefault();
+    event.stopPropagation();
     executeParagraphInsertion(editor, inputType);
   };
 }

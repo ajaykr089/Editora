@@ -1782,22 +1782,32 @@ function bindGlobalHandlers(options: ResolvedTranslationWorkflowOptions): void {
       const targetPanel = target?.closest(`.${PANEL_CLASS}`) as HTMLElement | null;
       if (targetPanel && event.key !== 'Escape' && !NAVIGATION_KEYS.has(event.key)) return;
 
+      const isEscape = event.key === 'Escape';
+      const toggleShortcut = isTogglePanelShortcut(event);
+      const runShortcut = isRunValidationShortcut(event);
+      const lockShortcut = isToggleLockShortcut(event);
+      const lockedSegment = getLockedSegmentFromTarget(target);
+
+      // Avoid touching editor DOM on unrelated keydown events (especially Enter),
+      // so native list behavior remains stable.
+      if (!isEscape && !toggleShortcut && !runShortcut && !lockShortcut && !lockedSegment) {
+        return;
+      }
+
       const editor = resolveEditorFromKeyboardEvent(event);
       if (!editor) return;
 
       const resolved = optionsByEditor.get(editor) || fallbackOptions || options;
-      const state = ensureState(editor, resolved);
-      state.segments = extractSegments(editor, resolved, state);
+      ensureState(editor, resolved);
       optionsByEditor.set(editor, resolved);
       lastActiveEditor = editor;
 
-      if (event.key === 'Escape' && isPanelVisible(editor)) {
+      if (isEscape && isPanelVisible(editor)) {
         event.preventDefault();
         hidePanel(editor, true);
         return;
       }
 
-      const lockedSegment = getLockedSegmentFromTarget(target);
       if (lockedSegment && editor.contains(lockedSegment) && isEditableKey(event)) {
         event.preventDefault();
         const panel = panelByEditor.get(editor);
@@ -1805,21 +1815,21 @@ function bindGlobalHandlers(options: ResolvedTranslationWorkflowOptions): void {
         return;
       }
 
-      if (isTogglePanelShortcut(event)) {
+      if (toggleShortcut) {
         event.preventDefault();
         event.stopPropagation();
         togglePanel(editor);
         return;
       }
 
-      if (isRunValidationShortcut(event)) {
+      if (runShortcut) {
         event.preventDefault();
         event.stopPropagation();
         runValidation(editor, 'shortcut', true);
         return;
       }
 
-      if (isToggleLockShortcut(event)) {
+      if (lockShortcut) {
         event.preventDefault();
         event.stopPropagation();
         setSegmentLock(editor);

@@ -1409,6 +1409,16 @@ function bindGlobalHandlers(options: ResolvedContentRulesOptions): void {
       const target = event.target as HTMLElement | null;
       if (target?.closest('input, textarea, select')) return;
 
+      const isEscape = event.key === 'Escape';
+      const openShortcut = isOpenPanelShortcut(event);
+      const runShortcut = isRunAuditShortcut(event);
+      const realtimeShortcut = isToggleRealtimeShortcut(event);
+
+      // Keep native typing/Enter flow untouched for non-plugin keys.
+      if (!isEscape && !openShortcut && !runShortcut && !realtimeShortcut) {
+        return;
+      }
+
       const editor = resolveEditorFromContext(undefined, false);
       if (!editor || isEditorReadonly(editor)) return;
 
@@ -1416,20 +1426,20 @@ function bindGlobalHandlers(options: ResolvedContentRulesOptions): void {
       optionsByEditor.set(editor, resolvedOptions);
       lastActiveEditor = editor;
 
-      if (event.key === 'Escape' && isPanelVisible(editor)) {
+      if (isEscape && isPanelVisible(editor)) {
         event.preventDefault();
         hidePanel(editor, true);
         return;
       }
 
-      if (isOpenPanelShortcut(event)) {
+      if (openShortcut) {
         event.preventDefault();
         event.stopPropagation();
         togglePanel(editor);
         return;
       }
 
-      if (isRunAuditShortcut(event)) {
+      if (runShortcut) {
         event.preventDefault();
         event.stopPropagation();
         void runAudit(editor, resolvedOptions, true);
@@ -1437,7 +1447,7 @@ function bindGlobalHandlers(options: ResolvedContentRulesOptions): void {
         return;
       }
 
-      if (isToggleRealtimeShortcut(event)) {
+      if (realtimeShortcut) {
         event.preventDefault();
         event.stopPropagation();
         const next = !getRealtimeEnabled(editor, resolvedOptions);
