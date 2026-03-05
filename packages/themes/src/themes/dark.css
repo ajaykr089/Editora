@@ -61,6 +61,62 @@
   fill: currentColor;
 }
 
+/* Direction plugin icons are stroke-driven; keep fills disabled in dark mode */
+:is([data-theme="dark"], .dark, .editora-theme-dark)
+  :is(
+    .rte-toolbar-button[data-command="setDirectionLTR"],
+    .rte-toolbar-button[data-command="setDirectionRTL"],
+    .editora-toolbar-button[data-command="setDirectionLTR"],
+    .editora-toolbar-button[data-command="setDirectionRTL"]
+  )
+  svg,
+:is([data-theme="dark"], .dark, .editora-theme-dark)
+  :is(
+    .rte-toolbar-button[data-command="setDirectionLTR"],
+    .rte-toolbar-button[data-command="setDirectionRTL"],
+    .editora-toolbar-button[data-command="setDirectionLTR"],
+    .editora-toolbar-button[data-command="setDirectionRTL"]
+  )
+  svg * {
+  fill: none !important;
+}
+
+/* Anchor and Spell Check icons are stroke-driven; keep fills disabled in dark mode */
+:is([data-theme="dark"], .dark, .editora-theme-dark)
+  :is(
+    .rte-toolbar-button[data-command="insertAnchor"],
+    .rte-toolbar-button[data-command="toggleSpellCheck"],
+    .editora-toolbar-button[data-command="insertAnchor"],
+    .editora-toolbar-button[data-command="toggleSpellCheck"]
+  )
+  svg,
+:is([data-theme="dark"], .dark, .editora-theme-dark)
+  :is(
+    .rte-toolbar-button[data-command="insertAnchor"],
+    .rte-toolbar-button[data-command="toggleSpellCheck"],
+    .editora-toolbar-button[data-command="insertAnchor"],
+    .editora-toolbar-button[data-command="toggleSpellCheck"]
+  )
+  svg * {
+  fill: none !important;
+}
+
+/* Fullscreen icon is stroke-driven; keep fills disabled in dark mode */
+:is([data-theme="dark"], .dark, .editora-theme-dark)
+  :is(
+    .rte-toolbar-button[data-command="toggleFullscreen"],
+    .editora-toolbar-button[data-command="toggleFullscreen"]
+  )
+  svg,
+:is([data-theme="dark"], .dark, .editora-theme-dark)
+  :is(
+    .rte-toolbar-button[data-command="toggleFullscreen"],
+    .editora-toolbar-button[data-command="toggleFullscreen"]
+  )
+  svg * {
+  fill: none !important;
+}
+
 /* Normalize plugin-provided inline SVGs with hardcoded black stroke values only */
 :is([data-theme="dark"], .dark, .editora-theme-dark)
   :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)

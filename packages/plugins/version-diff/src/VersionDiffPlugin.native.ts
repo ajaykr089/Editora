@@ -548,6 +548,32 @@ function ensureStylesInjected(): void {
       background: #1d4ed8;
     }
 
+    .rte-version-diff-close-btn {
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      min-height: 34px;
+      min-width: 34px;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      color: #0f172a;
+      font-size: 16px;
+      line-height: 1;
+      font-weight: 600;
+    }
+
+    .rte-version-diff-close-btn:hover,
+    .rte-version-diff-close-btn:focus-visible {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      background: #ffffff;
+      outline: none;
+    }
+
     .rte-version-diff-tabs {
       display: flex;
       gap: 6px;
@@ -676,6 +702,22 @@ function ensureStylesInjected(): void {
       background: #0f172a;
       color: #e5e7eb;
       border-color: #475569;
+    }
+
+    ${DARK_THEME_SELECTOR} .rte-version-diff-close-btn,
+    .${OVERLAY_CLASS}.rte-version-diff-theme-dark .rte-version-diff-close-btn {
+      background: #0f172a;
+      border-color: #475569;
+      color: #e2e8f0;
+    }
+
+    ${DARK_THEME_SELECTOR} .rte-version-diff-close-btn:hover,
+    ${DARK_THEME_SELECTOR} .rte-version-diff-close-btn:focus-visible,
+    .${OVERLAY_CLASS}.rte-version-diff-theme-dark .rte-version-diff-close-btn:hover,
+    .${OVERLAY_CLASS}.rte-version-diff-theme-dark .rte-version-diff-close-btn:focus-visible {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.24);
+      outline: none;
     }
 
     ${DARK_THEME_SELECTOR} .rte-version-diff-tab[aria-selected="true"],
@@ -840,7 +882,7 @@ function renderDialog(
         </label>
         <button type="button" class="rte-version-diff-btn rte-version-diff-set-baseline" aria-label="${escapeHtml(labels.setBaseline)}">${escapeHtml(labels.setBaseline)}</button>
         <button type="button" class="rte-version-diff-btn" data-action="refresh" aria-label="${escapeHtml(labels.refresh)}">${escapeHtml(labels.refresh)}</button>
-        <button type="button" class="rte-version-diff-btn" data-action="close" aria-label="${escapeHtml(labels.close)}">${escapeHtml(labels.close)}</button>
+        <button type="button" class="rte-version-diff-btn rte-version-diff-close-btn" data-action="close" aria-label="${escapeHtml(labels.close)}">✕</button>
       </div>
     </header>
 

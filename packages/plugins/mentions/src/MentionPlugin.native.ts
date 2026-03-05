@@ -1,8 +1,10 @@
 import type { Plugin } from '@editora/core';
 
 const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
+const EDITOR_HOST_SELECTOR = '[data-editora-editor], .rte-editor, .editora-editor, editora-editor';
 const MENTION_SELECTOR = '.rte-mention[data-mention="true"]';
-const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark, .rte-theme-dark';
+const DARK_THEME_SELECTOR =
+  ':is([data-theme="dark"], .dark, .editora-theme-dark, .rte-theme-dark)';
 
 export interface MentionItem {
   id: string;
@@ -141,6 +143,41 @@ function normalizeMentionNodes(editor: HTMLElement): void {
 function getElementFromNode(node: Node | null): HTMLElement | null {
   if (!node) return null;
   return node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement;
+}
+
+function resolveEditorRoot(editor: HTMLElement): HTMLElement {
+  const host = editor.closest(EDITOR_HOST_SELECTOR) as HTMLElement | null;
+  return host || editor;
+}
+
+function isThemeDarkFromElement(element: Element | null): boolean {
+  if (!element) return false;
+
+  const themeAttr = (element.getAttribute('data-theme') || element.getAttribute('theme') || '').toLowerCase();
+  if (themeAttr === 'dark') return true;
+
+  return (
+    element.classList.contains('dark') ||
+    element.classList.contains('editora-theme-dark') ||
+    element.classList.contains('rte-theme-dark')
+  );
+}
+
+function shouldUseDarkTheme(editor: HTMLElement): boolean {
+  const root = resolveEditorRoot(editor);
+  if (isThemeDarkFromElement(root)) return true;
+
+  const scoped = root.closest('[data-theme], [theme], .dark, .editora-theme-dark, .rte-theme-dark');
+  if (isThemeDarkFromElement(scoped)) return true;
+
+  return isThemeDarkFromElement(document.documentElement) || isThemeDarkFromElement(document.body);
+}
+
+function applyPanelThemeClass(panel: HTMLElement, editor: HTMLElement): void {
+  panel.classList.remove('rte-mention-theme-dark');
+  if (shouldUseDarkTheme(editor)) {
+    panel.classList.add('rte-mention-theme-dark');
+  }
 }
 
 function resolveEditorFromContext(context?: { editorElement?: unknown; contentElement?: unknown }): HTMLElement | null {
@@ -294,6 +331,7 @@ function ensurePanel(state: MentionState, options: Required<MentionPluginOptions
 
   panel.appendChild(list);
   document.body.appendChild(panel);
+  applyPanelThemeClass(panel, state.editor);
 
   state.panel = panel;
   state.list = list;
@@ -336,6 +374,7 @@ function closeMentionPanel(state: MentionState): void {
 
 function positionPanel(state: MentionState, range: Range): void {
   if (!state.panel) return;
+  applyPanelThemeClass(state.panel, state.editor);
   const caretRect = getCaretRect(state.editor, range);
 
   const panel = state.panel;
@@ -1087,7 +1126,7 @@ function ensureStylesInjected(): void {
       max-height: min(320px, calc(100vh - 32px));
       overflow: hidden;
       border: 1px solid #d9dfeb;
-      border-radius: 10px;
+      border-radius: 3px;
       background: #ffffff;
       box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
       z-index: 2147483646;
@@ -1096,7 +1135,7 @@ function ensureStylesInjected(): void {
     .rte-mention-list {
       max-height: min(300px, calc(100vh - 56px));
       overflow: auto;
-      padding: 6px;
+      padding: 0px;
     }
 
     .rte-mention-item {
@@ -1108,7 +1147,7 @@ function ensureStylesInjected(): void {
       border: none;
       background: transparent;
       padding: 10px 12px;
-      border-radius: 8px;
+      border-radius: 0px;
       color: #0f172a;
       text-align: left;
       cursor: pointer;
@@ -1146,24 +1185,30 @@ function ensureStylesInjected(): void {
       color: #bfdbfe;
     }
 
-    ${DARK_THEME_SELECTOR} .rte-mention-panel {
+    ${DARK_THEME_SELECTOR} .rte-mention-panel,
+    .rte-mention-panel.rte-mention-theme-dark {
       border-color: #364152;
       background: #1f2937;
       box-shadow: 0 22px 44px rgba(0, 0, 0, 0.48);
     }
 
-    ${DARK_THEME_SELECTOR} .rte-mention-item {
+    ${DARK_THEME_SELECTOR} .rte-mention-item,
+    .rte-mention-panel.rte-mention-theme-dark .rte-mention-item {
       color: #e5e7eb;
     }
 
     ${DARK_THEME_SELECTOR} .rte-mention-item:hover,
-    ${DARK_THEME_SELECTOR} .rte-mention-item.active {
+    ${DARK_THEME_SELECTOR} .rte-mention-item.active,
+    .rte-mention-panel.rte-mention-theme-dark .rte-mention-item:hover,
+    .rte-mention-panel.rte-mention-theme-dark .rte-mention-item.active {
       background: #334155;
       color: #bfdbfe;
     }
 
     ${DARK_THEME_SELECTOR} .rte-mention-item-meta,
-    ${DARK_THEME_SELECTOR} .rte-mention-empty {
+    ${DARK_THEME_SELECTOR} .rte-mention-empty,
+    .rte-mention-panel.rte-mention-theme-dark .rte-mention-item-meta,
+    .rte-mention-panel.rte-mention-theme-dark .rte-mention-empty {
       color: #9ca3af;
     }
   `;

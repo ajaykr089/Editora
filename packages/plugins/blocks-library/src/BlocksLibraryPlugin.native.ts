@@ -890,7 +890,7 @@ function refreshPanel(editor: HTMLElement): void {
   const close = panel.querySelector<HTMLButtonElement>('[data-action="close"]');
   if (close) {
     close.setAttribute('aria-label', options.labels.closeText);
-    close.textContent = options.labels.closeText;
+    close.textContent = '✕';
   }
 
   const searchLabel = panel.querySelector<HTMLElement>('.rte-blocks-library-search-label');
@@ -1276,7 +1276,7 @@ function ensurePanel(editor: HTMLElement): HTMLElement {
   panel.innerHTML = `
     <header class="rte-blocks-library-header">
       <h2 class="rte-blocks-library-title">${escapeHtml(options.labels.panelTitle)}</h2>
-      <button type="button" class="rte-blocks-library-icon-btn" data-action="close" aria-label="${escapeHtml(options.labels.closeText)}"></button>
+      <button type="button" class="rte-blocks-library-icon-btn" data-action="close" aria-label="${escapeHtml(options.labels.closeText)}">✕</button>
     </header>
     <div class="rte-blocks-library-body">
       <label class="rte-blocks-library-search-label" for="${escapeHtml(queryInputId)}"></label>
@@ -1741,34 +1741,40 @@ function ensureStylesInjected(): void {
 
     .rte-blocks-library-icon-btn {
       border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      min-height: 30px;
-      padding: 0 10px;
+      border-radius: 6px;
+      min-height: 34px;
+      min-width: 34px;
+      width: 34px;
+      height: 34px;
+      padding: 0;
       background: #ffffff;
-      color: inherit;
-      font-size: 12px;
+      color: #0f172a;
+      font-size: 16px;
       line-height: 1;
       font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
     }
 
     .rte-blocks-library-icon-btn:hover,
     .rte-blocks-library-icon-btn:focus-visible {
-      border-color: #94a3b8;
-      background: #f8fafc;
       outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
 
     .${PANEL_CLASS}.rte-blocks-library-theme-dark .rte-blocks-library-icon-btn {
-      border-color: #334155;
-      background: #111827;
+      border-color: #475569;
+      background: #0f172a;
       color: #e2e8f0;
     }
 
     .${PANEL_CLASS}.rte-blocks-library-theme-dark .rte-blocks-library-icon-btn:hover,
     .${PANEL_CLASS}.rte-blocks-library-theme-dark .rte-blocks-library-icon-btn:focus-visible {
-      border-color: #475569;
-      background: #1e293b;
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.24);
     }
 
     .rte-blocks-library-body {

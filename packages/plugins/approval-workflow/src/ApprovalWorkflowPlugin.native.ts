@@ -690,7 +690,7 @@ function ensurePanel(editor: HTMLElement): HTMLElement {
       <h2 class="rte-approval-title">${escapeHtml(options.labels.panelTitle)}</h2>
       <button type="button" class="rte-approval-icon-btn" data-action="close" aria-label="${escapeHtml(
         options.labels.closeText,
-      )}">X</button>
+      )}">✕</button>
     </header>
     <div class="rte-approval-body">
       <p class="rte-approval-summary" aria-live="polite"></p>
@@ -1151,22 +1151,41 @@ function ensureStylesInjected(): void {
     }
 
     .rte-approval-icon-btn {
-      border: 1px solid #d1d5db;
-      background: #fff;
-      color: inherit;
-      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 6px;
       cursor: pointer;
-      min-width: 30px;
-      min-height: 30px;
-      font-size: 12px;
-      font-weight: 700;
+      min-width: 34px;
+      min-height: 34px;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      line-height: 1;
+      font-weight: 600;
     }
 
     .rte-approval-icon-btn:hover,
     .rte-approval-icon-btn:focus-visible {
       outline: none;
-      border-color: #1d4ed8;
-      box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.2);
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .${PANEL_CLASS}.rte-approval-theme-dark .rte-approval-icon-btn {
+      background: #0f172a;
+      border-color: #475569;
+      color: #e2e8f0;
+    }
+
+    .${PANEL_CLASS}.rte-approval-theme-dark .rte-approval-icon-btn:hover,
+    .${PANEL_CLASS}.rte-approval-theme-dark .rte-approval-icon-btn:focus-visible {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.24);
     }
 
     .rte-approval-body {

@@ -1530,7 +1530,7 @@ function ensurePanel(editor: HTMLElement): HTMLElement {
       <h2 class="rte-translation-title">${escapeHtml(options.labels.panelTitle)}</h2>
       <button type="button" class="rte-translation-icon-btn" data-action="close" aria-label="${escapeHtml(
         options.labels.closeText,
-      )}"></button>
+      )}">✕</button>
     </header>
     <div class="rte-translation-body">
       <div class="rte-translation-locales">
@@ -1986,14 +1986,14 @@ function ensureStylesInjected(): void {
       border-color: #566275;
     }
 
-     ${DARK_THEME_SELECTOR} .rte-toolbar-button[data-command="toggleTranslationWorkflowPanel"].active,
-     ${DARK_THEME_SELECTOR} .editora-toolbar-button[data-command="toggleTranslationWorkflowPanel"].active,
-     ${DARK_THEME_SELECTOR} .rte-toolbar-button[data-command="toggleTranslationSegmentLock"].active,
-     ${DARK_THEME_SELECTOR} .editora-toolbar-button[data-command="toggleTranslationSegmentLock"].active, 
-     ${DARK_THEME_SELECTOR} .rte-toolbar-button[data-command="toggleTranslationRealtime"].active,
-     ${DARK_THEME_SELECTOR} .editora-toolbar-button[data-command="toggleTranslationRealtime"].active {
-        background: linear-gradient(180deg, #5eaaf6 0%, #4a95de 100%);
-     }
+    ${DARK_THEME_SELECTOR} .rte-toolbar-button[data-command="toggleTranslationWorkflowPanel"].active,
+    ${DARK_THEME_SELECTOR} .editora-toolbar-button[data-command="toggleTranslationWorkflowPanel"].active,
+    ${DARK_THEME_SELECTOR} .rte-toolbar-button[data-command="toggleTranslationSegmentLock"].active,
+    ${DARK_THEME_SELECTOR} .editora-toolbar-button[data-command="toggleTranslationSegmentLock"].active, 
+    ${DARK_THEME_SELECTOR} .rte-toolbar-button[data-command="toggleTranslationRealtime"].active,
+    ${DARK_THEME_SELECTOR} .editora-toolbar-button[data-command="toggleTranslationRealtime"].active {
+      background: linear-gradient(180deg, #5eaaf6 0%, #4a95de 100%);
+    }
 
     .${PANEL_CLASS} {
       position: fixed;
@@ -2045,37 +2045,38 @@ function ensureStylesInjected(): void {
 
     .rte-translation-icon-btn {
       border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      min-height: 30px;
-      width: 30px;
+      border-radius: 6px;
+      min-height: 34px;
+      width: 34px;
       background: #ffffff;
-      color: inherit;
-      font-size: 0;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .rte-translation-icon-btn::before {
-      content: '×';
-      font-size: 18px;
+      color: #0f172a;
+      font-size: 16px;
       line-height: 1;
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
+      font-weight: 600;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
     }
 
     .rte-translation-icon-btn:hover,
     .rte-translation-icon-btn:focus-visible {
-      border-color: #94a3b8;
-      background: #f8fafc;
       outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
 
     .${PANEL_CLASS}.rte-translation-workflow-theme-dark .rte-translation-icon-btn {
-      border-color: #334155;
-      background: #111827;
+      border-color: #475569;
+      background: #0f172a;
       color: #e2e8f0;
+    }
+
+    .${PANEL_CLASS}.rte-translation-workflow-theme-dark .rte-translation-icon-btn:hover,
+    .${PANEL_CLASS}.rte-translation-workflow-theme-dark .rte-translation-icon-btn:focus-visible {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.24);
     }
 
     .rte-translation-body {

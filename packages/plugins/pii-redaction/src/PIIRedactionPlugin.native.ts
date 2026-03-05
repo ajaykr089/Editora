@@ -933,7 +933,7 @@ function ensurePanel(editor: HTMLElement): HTMLElement {
       <h2 class="rte-pii-redaction-title">${escapeHtml(options.labels.panelTitle)}</h2>
       <button type="button" class="rte-pii-redaction-icon-btn" data-action="close" aria-label="${escapeHtml(
         options.labels.closeText,
-      )}">X</button>
+      )}">✕</button>
     </header>
     <div class="rte-pii-redaction-body">
       <div class="rte-pii-redaction-topline">
@@ -1528,21 +1528,39 @@ function ensureStylesInjected(): void {
     }
 
     .rte-pii-redaction-icon-btn {
-      width: 30px;
-      height: 30px;
-      border: 1px solid transparent;
-      border-radius: 8px;
-      background: transparent;
-      color: inherit;
+      width: 34px;
+      height: 34px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #ffffff;
+      color: #0f172a;
       font-size: 16px;
+      line-height: 1;
+      font-weight: 600;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
     }
 
     .rte-pii-redaction-icon-btn:hover,
     .rte-pii-redaction-icon-btn:focus-visible {
-      border-color: #cbd5e1;
-      background: rgba(148, 163, 184, 0.16);
       outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .${PANEL_CLASS}.rte-pii-redaction-theme-dark .rte-pii-redaction-icon-btn {
+      background: #0f172a;
+      border-color: #475569;
+      color: #e2e8f0;
+    }
+
+    .${PANEL_CLASS}.rte-pii-redaction-theme-dark .rte-pii-redaction-icon-btn:hover,
+    .${PANEL_CLASS}.rte-pii-redaction-theme-dark .rte-pii-redaction-icon-btn:focus-visible {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.24);
     }
 
     .rte-pii-redaction-body {
