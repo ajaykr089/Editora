@@ -1,6 +1,6 @@
 {
   "name": "@editora/light-code-editor",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Lightweight, extensible code editor for the web — syntax highlighting, line numbers, code folding, and a plugin-friendly API. Ideal for embedding in docs, demos, and web apps.",
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
