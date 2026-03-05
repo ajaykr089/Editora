@@ -404,6 +404,44 @@ section h2 {
     margin-bottom: 3rem;
 }
 
+section[class^="rte-"], section[class*=" rte-"]{
+    padding: 0;
+}
+.editora-toolbar-group-items .editora-toolbar-button[data-command="toggleContentRulesPanel"] svg,
+.editora-toolbar-group-items .editora-toolbar-button[data-command="runContentRulesAudit"] svg,
+.editora-toolbar-button[data-command="toggleContentRulesRealtime"] svg,
+.editora-toolbar-button[data-command="openVersionDiff"] svg,
+.editora-toolbar-button[data-command="toggleCitationsPanel"] svg,
+.editora-toolbar-button[data-command="refreshCitations"] svg,
+.editora-toolbar-button[data-command="cycleCitationStyle"] svg,
+.editora-toolbar-button[data-command="toggleApprovalWorkflowPanel"] svg,
+.editora-toolbar-button[data-command="requestApprovalReview"] svg,
+.editora-toolbar-button[data-command="approveDocument"] svg, 
+.editora-toolbar-button[data-command="reopenDraft"] svg,
+.editora-toolbar-button[data-command="togglePIIRedactionPanel"] svg,
+.editora-toolbar-button[data-command="runPIIScan"] svg,
+.editora-toolbar-button[data-command="redactAllPII"] svg,
+.editora-toolbar-button[data-command="togglePIIRealtime"] svg,
+.editora-toolbar-button[data-command="toggleSmartPastePanel"] svg,
+.editora-toolbar-button[data-command="cycleSmartPasteProfile"] svg,
+.editora-toolbar-button[data-command="toggleSmartPasteEnabled"] svg,
+.editora-toolbar-button[data-command="toggleBlocksLibraryPanel"] svg,
+.editora-toolbar-button[data-command="insertLastBlockSnippet"] svg,
+.editora-toolbar-button[data-command="toggleDocSchemaPanel"] svg, 
+.editora-toolbar-button[data-command="toggleDocSchemaRealtime"] svg,
+.editora-toolbar-button[data-command="runDocSchemaValidation"] svg,
+.editora-toolbar-button[data-command="toggleTranslationWorkflowPanel"] svg,
+.editora-toolbar-button[data-command="runTranslationLocaleValidation"] svg,
+.editora-toolbar-button[data-command="toggleTranslationSegmentLock"] svg,
+.editora-toolbar-button[data-command="toggleTranslationRealtime"] svg,
+.editora-toolbar-button[data-command="toggleFullscreen"] svg,
+.editora-toolbar-button[data-command="toggleSpellCheck"] svg,
+.editora-toolbar-button[data-command="setDirectionLTR"] svg,
+.editora-toolbar-button[data-command="setDirectionRTL"] svg
+{
+    fill: none;
+}
+
 /* ============================================
    FEATURES GRID
    ============================================ */

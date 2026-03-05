@@ -1653,6 +1653,7 @@ function ensureStylesInjected(): void {
       display: flex;
       border: 1px solid #ccc;
       border-radius: 3px;
+      background: #fff;
     }
 
     .rte-toolbar-group-items.citations .rte-toolbar-button,
@@ -1675,7 +1676,7 @@ function ensureStylesInjected(): void {
     ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.citations,
     ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.citations,
     .${PANEL_CLASS}.rte-citations-theme-dark {
-      border-color: rgba(148, 163, 184, 0.34);
+      border-color: #566275;
     }
 
     ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.citations .rte-toolbar-button[data-command="refreshCitations"] svg,

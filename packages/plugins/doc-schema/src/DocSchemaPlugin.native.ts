@@ -1671,6 +1671,7 @@ function ensureStylesInjected(): void {
       display: flex;
       border: 1px solid #cbd5e1;
       border-radius: 4px;
+      background: #ffffff;
     }
 
     .rte-toolbar-group-items.${TOOLBAR_GROUP_CLASS} .rte-toolbar-button,
@@ -1699,7 +1700,7 @@ function ensureStylesInjected(): void {
     ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.${LEGACY_TOOLBAR_GROUP_CLASS},
     ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.${LEGACY_TOOLBAR_GROUP_CLASS_CAMEL},
     ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.${LEGACY_TOOLBAR_GROUP_CLASS_CAMEL} {
-      border-color: rgba(100, 116, 139, 0.45);
+      border-color: #566275;
     }
     .rte-toolbar-button[data-command="toggleDocSchemaRealtime"].active,
     .editora-toolbar-button[data-command="toggleDocSchemaRealtime"].active {

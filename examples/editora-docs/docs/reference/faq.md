@@ -34,9 +34,11 @@ No. `<Icon />` works without a provider. `IconProvider` is optional for shared d
 
 ## How do I keep bundle size small?
 
-- Prefer targeted plugin imports or `@editora/plugins/lite`
+- Prefer targeted plugin imports, `@editora/plugins/lite`, or `@editora/plugins/enterprise`
 - Lazy-load heavy plugins
 - Avoid loading unused theme files
+
+All plugin entry paths (`@editora/plugins`, `@editora/plugins/lite`, `@editora/plugins/enterprise`) are free and fully customizable.
 
 ## What are common multi-instance pitfalls?
 

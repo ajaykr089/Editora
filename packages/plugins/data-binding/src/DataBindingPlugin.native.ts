@@ -490,10 +490,11 @@ function ensureStylesInjected(): void {
     }
 
     ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.data-binding,
-    .${DIALOG_OVERLAY_CLASS}.rte-data-binding-theme-dark .rte-toolbar-group-items.data-binding,
     ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.data-binding {
-      border-color: #566275;
-      background: #111827;
+      display: flex;
+      border: 1px solid #566275;
+      border-radius: 6px;
+      overflow: hidden;
     }
 
     ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.data-binding .rte-toolbar-button,

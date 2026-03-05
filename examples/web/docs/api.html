@@ -144,6 +144,16 @@
                         <li><code>@editora/plugins</code> (framework wrappers) - explicit plugin factories for React/Vue integrations</li>
                     </ul>
 
+                    <h2 style="margin-top: 2rem;">Plugin Import Surfaces (NPM)</h2>
+                    <ul>
+                        <li><code>@editora/plugins</code> - full plugin catalog</li>
+                        <li><code>@editora/plugins/lite</code> - common/core subset</li>
+                        <li><code>@editora/plugins/enterprise</code> - advanced/specialized subset</li>
+                        <li><code>@editora/plugins/&lt;plugin-name&gt;</code> - granular per-plugin imports</li>
+                    </ul>
+                    <p><strong>Enterprise preset includes:</strong> Mention, Track Changes, Version Diff, Conditional Content, Data Binding, Content Rules, Citations, Approval Workflow, PII Redaction, Smart Paste, Blocks Library, Document Schema, Translation Workflow, Slash Commands, Spell Check, A11y Checker, Comments, Merge Tag, Template, Media Manager, and Document Manager.</p>
+                    <p class="alert alert-success">All plugin entry paths (full/lite/enterprise) are completely free and customizable.</p>
+
                     <h2 style="margin-top: 2rem;">Web Component Runtime Config</h2>
                     <p>Configure declaratively (attributes) or imperatively via <code>editor.setConfig(...)</code>.</p>
                     <pre><code class="language-html">&lt;editora-editor

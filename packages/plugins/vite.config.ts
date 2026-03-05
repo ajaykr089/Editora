@@ -68,6 +68,7 @@ export default defineConfig({
       entry: {
         index: resolve(__dirname, 'src/index.ts'),
         lite: resolve(__dirname, 'src/lite.ts'),
+        enterprise: resolve(__dirname, 'src/enterprise.ts'),
         'shared-config': resolve(__dirname, 'src/shared-config.ts'),
         ...pluginEntries,
       },

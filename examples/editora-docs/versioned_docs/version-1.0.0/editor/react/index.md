@@ -28,7 +28,13 @@ export function App() {
 ## CRA and bundler compatibility
 
 - Import `@editora/plugins/styles.css` when using plugins from `@editora/plugins`.
+- Plugin entry options:
+  - `@editora/plugins` (full)
+  - `@editora/plugins/lite` (common/core)
+  - `@editora/plugins/enterprise` (advanced/specialized)
+  - `@editora/plugins/<plugin-name>` (per-plugin)
 - Load theme CSS in order: `default.css` first, then optional overrides (`dark.css`, `acme.css`).
+- All plugin entry paths are completely free and fully customizable.
 
 ## Usage
 

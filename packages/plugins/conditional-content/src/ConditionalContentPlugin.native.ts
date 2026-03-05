@@ -460,7 +460,7 @@ function ensureStylesInjected(): void {
       display: flex;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
-      overflow: hidden;
+      background: #ffffff;
     }
 
     .rte-toolbar-group-items.conditional-content .rte-toolbar-item,

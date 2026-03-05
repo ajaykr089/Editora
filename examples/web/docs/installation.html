@@ -122,6 +122,19 @@ npm install @editora/react @editora/core react react-dom
 # Full-featured setup (recommended)
 npm install @editora/react @editora/core @editora/plugins @editora/themes react react-dom</code></pre>
 
+                            <h4>Plugin Entry Paths (React)</h4>
+                            <p>Choose the plugin import surface based on bundle and feature needs:</p>
+                            <ul>
+                                <li><code>@editora/plugins</code> → full plugin catalog</li>
+                                <li><code>@editora/plugins/lite</code> → common/core subset</li>
+                                <li><code>@editora/plugins/enterprise</code> → advanced/specialized subset</li>
+                                <li><code>@editora/plugins/&lt;plugin-name&gt;</code> → per-plugin imports</li>
+                            </ul>
+                            <p class="alert alert-success">
+                                <strong>Licensing:</strong> Full, lite, and enterprise entry paths are all completely free and customizable.
+                            </p>
+                            <p><strong>Enterprise preset includes:</strong> Mention, Track Changes, Version Diff, Conditional Content, Data Binding, Content Rules, Citations, Approval Workflow, PII Redaction, Smart Paste, Blocks Library, Document Schema, Translation Workflow, Slash Commands, Spell Check, A11y Checker, Comments, Merge Tag, Template, Media Manager, and Document Manager plugins.</p>
+
                             <h4>Quick Start</h4>
                             <pre><code class="language-javascript">import { createEditor } from '@editora/core';
 

@@ -81,6 +81,15 @@ This package provides a complete set of plugins for building feature-rich text e
 
 ## 🚀 Quick Start
 
+### Entry Paths (All Free + Customizable)
+
+Every plugin entry path is MIT-licensed, free to use, and customizable:
+
+- `@editora/plugins`: full plugin catalog
+- `@editora/plugins/lite`: common/core plugin subset for lean bundles
+- `@editora/plugins/enterprise`: advanced/specialized workflow plugins
+- `@editora/plugins/<plugin-name>`: targeted per-plugin imports
+
 ### Recommended Imports For Smaller Bundles
 
 For best bundle size, avoid importing everything from `@editora/plugins` in large apps.
@@ -90,6 +99,9 @@ Use one of these patterns:
 ```ts
 // Lightweight preset entry
 import { BoldPlugin, ItalicPlugin, HistoryPlugin } from '@editora/plugins/lite';
+
+// Enterprise preset entry (advanced/specialized plugins)
+import { MentionPlugin, TrackChangesPlugin, SmartPastePlugin } from '@editora/plugins/enterprise';
 
 // Per-plugin subpath entry (most explicit)
 import { BoldPlugin } from '@editora/plugins/bold';
@@ -104,6 +116,16 @@ const { DocumentManagerPlugin } = await import('@editora/plugins/document-manage
 const { MediaManagerPlugin } = await import('@editora/plugins/media-manager');
 const { SpellCheckPlugin } = await import('@editora/plugins/spell-check');
 ```
+
+### Enterprise Preset Details
+
+`@editora/plugins/enterprise` includes advanced plugins for governance, compliance, workflow, and QA:
+
+- Collaboration/workflow: `TrackChangesPlugin`, `VersionDiffPlugin`, `CommentsPlugin`, `ApprovalWorkflowPlugin`
+- Validation/compliance: `ContentRulesPlugin`, `DocSchemaPlugin`, `A11yCheckerPlugin`, `SpellCheckPlugin`, `PIIRedactionPlugin`
+- Structured/dynamic authoring: `ConditionalContentPlugin`, `DataBindingPlugin`, `MergeTagPlugin`, `TemplatePlugin`, `CitationsPlugin`
+- Productivity/runtime intelligence: `SmartPastePlugin`, `SlashCommandsPlugin`, `MentionPlugin`, `BlocksLibraryPlugin`, `TranslationWorkflowPlugin`
+- Manager-backed advanced plugins: `MediaManagerPlugin`, `DocumentManagerPlugin`
 
 ### Basic Formatting
 

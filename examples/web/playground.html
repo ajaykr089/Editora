@@ -212,6 +212,7 @@
       Using <code>toolbar-items="undo redo | bold italic underline"</code>
     </div>
     <editora-editor
+      id="test1-editor"
       height="300"
       plugins="bold italic underline history"
       toolbar-items="undo redo | bold italic underline"
@@ -222,17 +223,22 @@
     <div id="test1-status" class="status"></div>
   </div>
 
-  <!-- Test 2: Using all native plugins -->
+  <!-- Test 2: Using all native + enterprise plugins -->
   <div class="test-section">
-    <h2>Test 2: Full Toolbar (All Native Plugins)</h2>
+    <h2>Test 2: Full Toolbar (All Native + Enterprise Plugins)</h2>
     <div class="test-info">
-      Using <code>toolbar-items</code> with multiple groups and all 39 native plugins
+      Using <code>toolbar-items</code> with multiple groups, all native plugins, and all enterprise workflow plugins
+      <br>
+      Enterprise set included here: <code>mentions trackChanges version-diff conditional-content data-binding content-rules citations approval-workflow pii-redaction smart-paste blocks-library doc-schema translation-workflow slash-commands spellCheck a11yChecker comments mergeTag template image document-manager</code>
+      <br>
+      <small>Note: <code>image</code> is the Media Manager plugin id in Web Components.</small>
     </div>
     <editora-editor
+      id="test2-editor"
       statusbar="true"
       height="400"
-      plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template"
-      toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | importWord exportWord exportPdf | fullscreen preview print | a11yChecker spellCheck | comments footnote insertMergeTag pageBreak template | clearFormatting"
+      plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis mentions trackChanges version-diff conditional-content data-binding content-rules citations approval-workflow pii-redaction smart-paste blocks-library doc-schema translation-workflow slash-commands a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template"
+      toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | insertMention openSlashCommands | trackChanges openVersionDiff | conditionalContent dataBinding | contentRules citations | approvalWorkflow piiRedaction | smartPaste blocksLibrary | docSchema translationWorkflow | importWord exportWord exportPdf | fullscreen preview print | a11yChecker toggleSpellCheck | addComment toggleComments footnote insertMergeTag pageBreak insertTemplate | clearFormatting"
     >
       <h2>Full Feature Test</h2>
       <p>This editor should have a complete toolbar with all groups visible.</p>
@@ -252,6 +258,32 @@
     <div id="test2-status" class="status"></div>
   </div>
 
+  <div class="test-section">
+    <h2>Test 2B: Full Toolbar (All Native + Enterprise Plugins, Dark Mode)</h2>
+    <div class="test-info">
+      Same feature coverage as Test 2, rendered in <code>theme="dark"</code>.
+      <br>
+      Enterprise set included here: <code>mentions trackChanges version-diff conditional-content data-binding content-rules citations approval-workflow pii-redaction smart-paste blocks-library doc-schema translation-workflow slash-commands spellCheck a11yChecker comments mergeTag template image document-manager</code>
+    </div>
+    <editora-editor
+      id="test2-dark-editor"
+      statusbar="true"
+      height="400"
+      theme="dark"
+      plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis mentions trackChanges version-diff conditional-content data-binding content-rules citations approval-workflow pii-redaction smart-paste blocks-library doc-schema translation-workflow slash-commands a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template"
+      toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | insertMention openSlashCommands | trackChanges openVersionDiff | conditionalContent dataBinding | contentRules citations | approvalWorkflow piiRedaction | smartPaste blocksLibrary | docSchema translationWorkflow | importWord exportWord exportPdf | fullscreen preview print | a11yChecker toggleSpellCheck | addComment toggleComments footnote insertMergeTag pageBreak insertTemplate | clearFormatting"
+    >
+      <h2>Dark Mode Full Feature Test</h2>
+      <p>This editor should show the same toolbar groups as Test 2 with dark-mode visuals.</p>
+      <ul>
+        <li>All core formatting and insertion controls</li>
+        <li>All enterprise workflow toolbar commands</li>
+        <li>Dark-theme styling for toolbar, dialogs, and panels</li>
+      </ul>
+    </editora-editor>
+    <div id="test2-dark-status" class="status"></div>
+  </div>
+
   <!-- Test 3: No toolbar-items (should use all registered plugins) -->
   <div class="test-section">
     <h2>Test 3: Auto Toolbar (No toolbar-items specified)</h2>
@@ -259,6 +291,7 @@
       No <code>toolbar-items</code> attribute - should automatically create toolbar from registered plugins
     </div>
     <editora-editor
+      id="test3-editor"
       height="300"
       plugins="bold italic underline link"
       statusbar="true"
@@ -466,9 +499,9 @@
         </div>
     </footer>
 
-    <!-- <script src="https://unpkg.com/@editora/core@latest/dist/editora.min.js"></script> -->
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css">
+    <!-- Local bundle for file:// testing (non-module avoids module CORS restrictions on file origin) -->
+    <script src="../../packages/core/dist/webcomponent.min.js"></script>
+    <link rel="stylesheet" href="../../packages/core/dist/webcomponent.min.css">
     <script src="assets/js/main.js"></script>
    <script>
     // Wait for custom element to be defined
@@ -591,7 +624,7 @@
       };
       // Test 1: Check toolbar buttons
       setTimeout(() => {
-        const test1 = document.querySelectorAll('editora-editor')[0];
+        const test1 = document.getElementById('test1-editor');
         const toolbar1 = test1.querySelector('.editora-toolbar');
         const buttons1 = toolbar1?.querySelectorAll('.editora-toolbar-button');
         
@@ -606,22 +639,36 @@
         }
 
         // Test 2: Check full toolbar
-        const test2 = document.querySelectorAll('editora-editor')[1];
+        const test2 = document.getElementById('test2-editor');
         const toolbar2 = test2.querySelector('.editora-toolbar');
         const buttons2 = toolbar2?.querySelectorAll('.editora-toolbar-button');
         
         const status2 = document.getElementById('test2-status');
-        if (buttons2 && buttons2.length >= 10) {
-          status2.textContent = `✅ PASS: Found ${buttons2.length} toolbar buttons (expected 10+)`;
+        if (buttons2 && buttons2.length >= 20) {
+          status2.textContent = `✅ PASS: Found ${buttons2.length} toolbar buttons (expected 20+)`;
           status2.className = 'status success';
           
         } else {
-          status2.textContent = `❌ FAIL: Expected 10+ buttons, found ${buttons2?.length || 0}`;
+          status2.textContent = `❌ FAIL: Expected 20+ buttons, found ${buttons2?.length || 0}`;
           status2.className = 'status error';
         }
 
+        // Test 2B: Check full toolbar dark mode
+        const test2Dark = document.getElementById('test2-dark-editor');
+        const toolbar2Dark = test2Dark.querySelector('.editora-toolbar');
+        const buttons2Dark = toolbar2Dark?.querySelectorAll('.editora-toolbar-button');
+        
+        const status2Dark = document.getElementById('test2-dark-status');
+        if (buttons2Dark && buttons2Dark.length >= 20) {
+          status2Dark.textContent = `✅ PASS: Found ${buttons2Dark.length} toolbar buttons in dark mode (expected 20+)`;
+          status2Dark.className = 'status success';
+        } else {
+          status2Dark.textContent = `❌ FAIL: Dark mode expected 20+ buttons, found ${buttons2Dark?.length || 0}`;
+          status2Dark.className = 'status error';
+        }
+
         // Test 3: Check auto toolbar
-        const test3 = document.querySelectorAll('editora-editor')[2];
+        const test3 = document.getElementById('test3-editor');
         const toolbar3 = test3.querySelector('.editora-toolbar');
         const buttons3 = toolbar3?.querySelectorAll('.editora-toolbar-button');
         
@@ -656,6 +703,10 @@
     document.addEventListener('DOMContentLoaded', () => {
       const editor = document.querySelector('editora-editor');
       if (editor) {
+        if (typeof editor.getAPI !== 'function') {
+          console.error('Editora web component is not upgraded yet. If using file://, use webcomponent.min.js or serve via http://localhost.');
+          return;
+        }
         const api = editor.getAPI();
         if (api && typeof api.getContent === 'function') {
           console.log('Editor Content:', api.getContent());

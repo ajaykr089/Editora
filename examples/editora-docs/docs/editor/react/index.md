@@ -44,10 +44,16 @@ export function App() {
 ## CRA and bundler compatibility
 
 - If you load plugins from `@editora/plugins`, import `@editora/plugins/styles.css`.
+- Plugin entry options:
+  - `@editora/plugins` (full)
+  - `@editora/plugins/lite` (common/core)
+  - `@editora/plugins/enterprise` (advanced/specialized)
+  - `@editora/plugins/<plugin-name>` (per-plugin)
 - Keep theme imports layered as:
   1. `@editora/themes/themes/default.css` (base)
   2. `@editora/themes/themes/dark.css` or `@editora/themes/themes/acme.css` (overrides)
 - `acme.css` is an override theme and does not replace the default base styles.
+- All plugin entry paths are completely free and fully customizable.
 
 ## Capabilities matrix
 

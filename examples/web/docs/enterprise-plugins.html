@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora Enterprise Plugins - detailed React and Web Component examples.">
+    <meta name="keywords" content="editora, enterprise plugins, react, web components">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Editora - Enterprise Plugins">
+    <meta property="og:description" content="Detailed guide for Editora enterprise plugins with React and Web Component usage.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editora-free.netlify.app/">
+    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="Editora - Enterprise Plugins">
+    <meta property="twitter:description" content="Detailed guide for Editora enterprise plugins with React and Web Component usage.">
+    <meta name="theme-color" content="#007bff">
+
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <title>Editora - Enterprise Plugins</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="../index.html" class="logo">
+                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
+                </a>
+                <button class="menu-toggle">☰</button>
+                <ul class="nav-links">
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="installation.html" class="active">Docs</a></li>
+                    <li><a href="features.html">Features</a></li>
+                    <li><a href="../plugins/index.html">Plugins</a></li>
+                    <li><a href="api.html">API</a></li>
+                    <li><a href="../toast-demo.html">Toast Demo</a></li>
+                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+        <div class="container">
+            <h1 style="color: white; margin-bottom: 0.5rem;">🏢 Enterprise Plugins</h1>
+            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Detailed React and Web Component examples for advanced workflows</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <div class="docs-wrapper">
+                <aside class="docs-sidebar">
+                    <h3>Documentation</h3>
+                    <ul>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="enterprise-plugins.html" class="active">Enterprise Plugins</a></li>
+                        <li><a href="api.html">API Reference</a></li>
+                        <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                        <li><a href="examples.html">Examples</a></li>
+                        <li><a href="custom-plugins.html">Custom Plugins</a></li>
+                        <li><a href="icons.html">@editora/icons</a></li>
+                        <li><a href="react-icons.html">@editora/react-icons</a></li>
+                        <li><a href="ui-core.html">@editora/ui-core</a></li>
+                        <li><a href="ui-react.html">@editora/ui-react</a></li>
+                        <li><a href="../light-code-editor-demo.html">@editora/light-code-editor</a></li>
+                        <li><a href="about.html">About</a></li>
+                    </ul>
+
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="../playground.html">Live Playground</a></li>
+                        <li><a href="../toast-demo.html">Toast Demo</a></li>
+                        <li><a href="../plugins/index.html">All Plugins</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank">GitHub</a></li>
+                    </ul>
+                </aside>
+
+                <main class="docs-content">
+                    <h2>Overview</h2>
+                    <p>Enterprise plugins are available at <code>@editora/plugins/enterprise</code> for React and by plugin IDs in Web Components. Full, lite, and enterprise plugin paths are all free and customizable.</p>
+
+                    <h3>React Setup Pattern</h3>
+                    <pre><code class="language-ts">import { EditoraEditor } from "@editora/react";
+import {
+  MentionPlugin,
+  TrackChangesPlugin,
+  VersionDiffPlugin
+} from "@editora/plugins/enterprise";
+
+const plugins = [
+  MentionPlugin(),
+  TrackChangesPlugin(),
+  VersionDiffPlugin()
+];</code></pre>
+
+                    <h3>Web Component Setup Pattern</h3>
+                    <pre><code class="language-html">&lt;editora-editor
+  id="enterprise-editor"
+  plugins="mention trackChanges version-diff"
+  toolbar-items="mention | trackChanges versionDiff"
+&gt;&lt;/editora-editor&gt;
+
+&lt;script type="module"&gt;
+const editor = document.getElementById("enterprise-editor");
+await editor.setConfig({
+  pluginConfig: {
+    mention: { minChars: 1, maxSuggestions: 8 },
+    trackChanges: { author: "QA Reviewer" },
+    "version-diff": { mode: "word" }
+  }
+});
+&lt;/script&gt;</code></pre>
+
+                    <h3>Detailed Plugin Examples</h3>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Mention</strong> - contextual @mentions with API/local suggestions</summary>
+                        <pre><code class="language-ts">MentionPlugin({
+  triggerChars: ["@"],
+  minChars: 1,
+  maxSuggestions: 8,
+  items: [
+    { id: "u-1", label: "Ajay Kumar", meta: "Product Owner" },
+    { id: "u-2", label: "Nina Chen", meta: "Translator" }
+  ]
+});</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="mention-demo" plugins="mention"&gt;&lt;/editora-editor&gt;
+&lt;script type="module"&gt;
+await document.getElementById("mention-demo").setConfig({
+  pluginConfig: { mention: { triggerChars: ["@"], minChars: 1, maxSuggestions: 8 } }
+});
+&lt;/script&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Track Changes</strong> - reviewer-author diffs and accept/reject workflow</summary>
+                        <pre><code class="language-ts">TrackChangesPlugin({
+  author: "Legal Reviewer",
+  enabledByDefault: true,
+  includeTimestamp: true
+});</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="track-demo" plugins="trackChanges"&gt;&lt;/editora-editor&gt;
+&lt;script type="module"&gt;
+await document.getElementById("track-demo").setConfig({
+  pluginConfig: {
+    trackChanges: { author: "Legal Reviewer", enabledByDefault: true, includeTimestamp: true }
+  }
+});
+&lt;/script&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Version Diff</strong> - compare baseline vs current draft</summary>
+                        <pre><code class="language-ts">VersionDiffPlugin({
+  mode: "word",
+  ignoreWhitespace: true,
+  maxTokens: 20000
+});</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="diff-demo" plugins="version-diff"&gt;&lt;/editora-editor&gt;
+&lt;script type="module"&gt;
+await document.getElementById("diff-demo").setConfig({
+  pluginConfig: { "version-diff": { mode: "word", ignoreWhitespace: true, maxTokens: 20000 } }
+});
+&lt;/script&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Conditional Content</strong> - audience/locale-driven blocks</summary>
+                        <pre><code class="language-ts">ConditionalContentPlugin({
+  defaultCondition: "country === 'US'",
+  currentAudience: ["enterprise"],
+  currentLocale: ["en-US"],
+  enableElseByDefault: true
+});</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="conditional-demo" plugins="conditional-content"&gt;&lt;/editora-editor&gt;
+&lt;script type="module"&gt;
+await document.getElementById("conditional-demo").setConfig({
+  pluginConfig: {
+    "conditional-content": {
+      defaultCondition: "country === 'US'",
+      currentAudience: ["enterprise"],
+      currentLocale: ["en-US"],
+      enableElseByDefault: true
+    }
+  }
+});
+&lt;/script&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Data Binding</strong> - runtime token resolution from data sources</summary>
+                        <pre><code class="language-ts">DataBindingPlugin({
+  data: {
+    customer: { name: "Acme Corp", tier: "Gold" },
+    invoice: { total: 12500.55 }
+  },
+  defaultFormat: "text",
+  defaultFallback: "N/A"
+});</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="binding-demo" plugins="data-binding"&gt;&lt;/editora-editor&gt;
+&lt;script type="module"&gt;
+await document.getElementById("binding-demo").setConfig({
+  pluginConfig: {
+    "data-binding": {
+      data: {
+        customer: { name: "Acme Corp", tier: "Gold" },
+        invoice: { total: 12500.55 }
+      },
+      defaultFormat: "text",
+      defaultFallback: "N/A"
+    }
+  }
+});
+&lt;/script&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Content Rules</strong> - policy linting and editorial quality gates</summary>
+                        <pre><code class="language-ts">ContentRulesPlugin({
+  bannedWords: ["obviously", "simply"],
+  requiredHeadings: ["Overview", "Risks"],
+  maxSentenceWords: 25,
+  enableRealtime: true
+});</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="rules-demo" plugins="content-rules"&gt;&lt;/editora-editor&gt;
+&lt;script type="module"&gt;
+await document.getElementById("rules-demo").setConfig({
+  pluginConfig: {
+    "content-rules": {
+      bannedWords: ["obviously", "simply"],
+      requiredHeadings: ["Overview", "Risks"],
+      maxSentenceWords: 25,
+      enableRealtime: true
+    }
+  }
+});
+&lt;/script&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Citations</strong> - legal/academic citation and bibliography support</summary>
+                        <pre><code class="language-ts">CitationsPlugin({
+  defaultStyle: "apa",
+  enableFootnoteSync: true,
+  maxRecentCitations: 15
+});</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="citations-demo" plugins="citations"&gt;&lt;/editora-editor&gt;
+&lt;script type="module"&gt;
+await document.getElementById("citations-demo").setConfig({
+  pluginConfig: {
+    citations: { defaultStyle: "apa", enableFootnoteSync: true, maxRecentCitations: 15 }
+  }
+});
+&lt;/script&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Approval Workflow</strong> - draft/review/approved lifecycle</summary>
+                        <pre><code class="language-ts">ApprovalWorkflowPlugin({
+  defaultStatus: "draft",
+  lockOnApproval: true,
+  requireCommentOnApprove: true,
+  defaultActor: "Ops Lead"
+});</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="approval-demo" plugins="approval-workflow"&gt;&lt;/editora-editor&gt;
+&lt;script type="module"&gt;
+await document.getElementById("approval-demo").setConfig({
+  pluginConfig: {
+    "approval-workflow": {
+      defaultStatus: "draft",
+      lockOnApproval: true,
+      requireCommentOnApprove: true,
+      defaultActor: "Ops Lead"
+    }
+  }
+});
+&lt;/script&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>PII Redaction</strong> - scan and redact sensitive information</summary>
+                        <pre><code class="language-ts">PIIRedactionPlugin({
+  enableRealtime: true,
+  redactionMode: "mask",
+  maskChar: "•",
+  maxFindings: 200,
+  detectors: { email: true, phone: true, jwt: true, "api-key": true }
+});</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="pii-demo" plugins="pii-redaction"&gt;&lt;/editora-editor&gt;
+&lt;script type="module"&gt;
+await document.getElementById("pii-demo").setConfig({
+  pluginConfig: {
+    "pii-redaction": {
+      enableRealtime: true,
+      redactionMode: "mask",
+      maskChar: "•",
+      maxFindings: 200,
+      detectors: { email: true, phone: true, jwt: true, "api-key": true }
+    }
+  }
+});
+&lt;/script&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Smart Paste</strong> - source-aware cleanup for Word/Docs/HTML</summary>
+                        <pre><code class="language-ts">SmartPastePlugin({
+  enabled: true,
+  defaultProfile: "balanced",
+  normalizeWhitespace: false,
+  profileOptions: {
+    fidelity: { keepStyles: true, preserveTables: true },
+    plain: { keepStyles: false, keepClasses: false }
+  }
+});</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="paste-demo" plugins="smart-paste"&gt;&lt;/editora-editor&gt;
+&lt;script type="module"&gt;
+await document.getElementById("paste-demo").setConfig({
+  pluginConfig: {
+    "smart-paste": {
+      enabled: true,
+      defaultProfile: "balanced",
+      normalizeWhitespace: false,
+      profileOptions: {
+        fidelity: { keepStyles: true, preserveTables: true },
+        plain: { keepStyles: false, keepClasses: false }
+      }
+    }
+  }
+});
+&lt;/script&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Blocks Library</strong> - reusable content block insertion</summary>
+                        <pre><code class="language-ts">BlocksLibraryPlugin({
+  maxResults: 50,
+  maxRecentBlocks: 10,
+  blocks: [
+    { id: "hero", label: "Hero Banner", category: "Marketing", html: "&lt;h2&gt;Launch&lt;/h2&gt;&lt;p&gt;Campaign copy&lt;/p&gt;" },
+    { id: "cta", label: "CTA", category: "Marketing", html: "&lt;p&gt;&lt;a href='#'&gt;Get started&lt;/a&gt;&lt;/p&gt;" }
+  ]
+});</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="blocks-demo" plugins="blocks-library"&gt;&lt;/editora-editor&gt;
+&lt;script type="module"&gt;
+await document.getElementById("blocks-demo").setConfig({
+  pluginConfig: {
+    "blocks-library": {
+      maxResults: 50,
+      maxRecentBlocks: 10,
+      blocks: [
+        { id: "hero", label: "Hero Banner", category: "Marketing", html: "&lt;h2&gt;Launch&lt;/h2&gt;&lt;p&gt;Campaign copy&lt;/p&gt;" }
+      ]
+    }
+  }
+});
+&lt;/script&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Document Schema</strong> - enforce document section structure</summary>
+                        <pre><code class="language-ts">DocSchemaPlugin({
+  enableRealtime: true,
+  defaultSchemaId: "release-notes",
+  schemas: [
+    {
+      id: "release-notes",
+      label: "Release Notes",
+      strictOrder: true,
+      sections: [
+        { id: "summary", title: "Summary", minOccurrences: 1, maxOccurrences: 1 },
+        { id: "impacts", title: "Customer Impact", minOccurrences: 1, maxOccurrences: 1 }
+      ]
+    }
+  ]
+});</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="schema-demo" plugins="doc-schema"&gt;&lt;/editora-editor&gt;
+&lt;script type="module"&gt;
+await document.getElementById("schema-demo").setConfig({
+  pluginConfig: {
+    "doc-schema": {
+      enableRealtime: true,
+      defaultSchemaId: "release-notes",
+      schemas: [
+        {
+          id: "release-notes",
+          label: "Release Notes",
+          strictOrder: true,
+          sections: [
+            { id: "summary", title: "Summary", minOccurrences: 1, maxOccurrences: 1 },
+            { id: "impacts", title: "Customer Impact", minOccurrences: 1, maxOccurrences: 1 }
+          ]
+        }
+      ]
+    }
+  }
+});
+&lt;/script&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Translation Workflow</strong> - source capture, segment locks, locale QA</summary>
+                        <pre><code class="language-ts">TranslationWorkflowPlugin({
+  sourceLocale: "en-US",
+  targetLocale: "fr-FR",
+  enableRealtime: true,
+  segmentSelector: "p, li, td",
+  localeRules: [
+    { locale: "fr-FR", minLengthRatio: 0.7, maxLengthRatio: 1.5, preserveTokens: true }
+  ]
+});</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="translation-demo" plugins="translation-workflow"&gt;&lt;/editora-editor&gt;
+&lt;script type="module"&gt;
+await document.getElementById("translation-demo").setConfig({
+  pluginConfig: {
+    "translation-workflow": {
+      sourceLocale: "en-US",
+      targetLocale: "fr-FR",
+      enableRealtime: true,
+      segmentSelector: "p, li, td",
+      localeRules: [
+        { locale: "fr-FR", minLengthRatio: 0.7, maxLengthRatio: 1.5, preserveTokens: true }
+      ]
+    }
+  }
+});
+&lt;/script&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Slash Commands</strong> - command palette from <code>/</code> trigger</summary>
+                        <pre><code class="language-ts">SlashCommandsPlugin({
+  triggerChar: "/",
+  minChars: 0,
+  includeDefaultItems: true,
+  items: [
+    { id: "insert-warning", label: "Warning Box", insertHTML: "&lt;blockquote&gt;⚠ Review required&lt;/blockquote&gt;" }
+  ]
+});</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="slash-demo" plugins="slash-commands"&gt;&lt;/editora-editor&gt;
+&lt;script type="module"&gt;
+await document.getElementById("slash-demo").setConfig({
+  pluginConfig: {
+    "slash-commands": {
+      triggerChar: "/",
+      minChars: 0,
+      includeDefaultItems: true,
+      items: [
+        { id: "insert-warning", label: "Warning Box", insertHTML: "&lt;blockquote&gt;⚠ Review required&lt;/blockquote&gt;" }
+      ]
+    }
+  }
+});
+&lt;/script&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Spell Check</strong> - in-editor spelling diagnostics</summary>
+                        <pre><code class="language-ts">SpellCheckPlugin();</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor
+  id="spell-demo"
+  plugins="spellCheck"
+  spellcheck='{"enabled":true,"provider":"browser"}'
+&gt;&lt;/editora-editor&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>A11y Checker</strong> - content accessibility checks</summary>
+                        <pre><code class="language-ts">A11yCheckerPlugin();</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor
+  id="a11y-demo"
+  plugins="a11yChecker"
+  accessibility='{"enableARIA":true,"keyboardNavigation":true,"checker":true}'
+&gt;&lt;/editora-editor&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Comments</strong> - inline review comments and discussion threads</summary>
+                        <pre><code class="language-ts">CommentsPlugin();</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="comments-demo" plugins="comments"&gt;&lt;/editora-editor&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Merge Tag</strong> - CRM/transactional personalization tokens</summary>
+                        <pre><code class="language-ts">MergeTagPlugin({
+  categories: [
+    {
+      id: "CUSTOMER",
+      name: "Customer",
+      tags: [
+        { key: "first_name", label: "First Name", value: "{{customer.first_name}}", preview: "Ava" },
+        { key: "email", label: "Email", value: "{{customer.email}}", preview: "ava@acme.com" }
+      ]
+    }
+  ],
+  defaultCategory: "CUSTOMER",
+  tokenTemplate: "{value}"
+});</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="mergetag-demo" plugins="mergeTag"&gt;&lt;/editora-editor&gt;
+&lt;script type="module"&gt;
+await document.getElementById("mergetag-demo").setConfig({
+  pluginConfig: {
+    mergeTag: {
+      categories: [
+        {
+          id: "CUSTOMER",
+          name: "Customer",
+          tags: [
+            { key: "first_name", label: "First Name", value: "{{customer.first_name}}" }
+          ]
+        }
+      ],
+      defaultCategory: "CUSTOMER"
+    }
+  }
+});
+&lt;/script&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Template</strong> - curated starter documents</summary>
+                        <pre><code class="language-ts">import { TemplatePlugin, addCustomTemplate } from "@editora/plugins/enterprise";
+
+addCustomTemplate({
+  id: "incident-postmortem",
+  name: "Incident Postmortem",
+  category: "Operations",
+  description: "Root-cause and corrective action structure",
+  html: "&lt;h1&gt;Incident Summary&lt;/h1&gt;&lt;p&gt;Impact...&lt;/p&gt;"
+});
+
+TemplatePlugin();</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="template-demo" plugins="template"&gt;&lt;/editora-editor&gt;
+&lt;!-- Register templates before editor mount in host app bootstrap code --&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Media Manager</strong> - managed uploads and media library</summary>
+                        <pre><code class="language-ts">import { MediaManagerPlugin, setMediaManagerConfig } from "@editora/plugins/enterprise";
+
+setMediaManagerConfig({
+  apiUrl: "https://api.acme.com",
+  apiEndpoints: {
+    upload: "/media/upload",
+    library: "/media/library",
+    delete: "/media/library"
+  },
+  maxFileSize: 25 * 1024 * 1024,
+  allowedTypes: ["image/jpeg", "image/png", "video/mp4"]
+});
+
+MediaManagerPlugin();</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="media-demo" plugins="image"&gt;&lt;/editora-editor&gt;
+&lt;!-- "image" plugin id maps to Media Manager in Web Components --&gt;</code></pre>
+                    </details>
+
+                    <details style="margin-bottom: 1rem;">
+                        <summary><strong>Document Manager</strong> - export workflows (Word and fallback)</summary>
+                        <pre><code class="language-ts">import { DocumentManagerPlugin, setDocumentManagerConfig } from "@editora/plugins/enterprise";
+
+setDocumentManagerConfig({
+  apiUrl: "https://api.acme.com",
+  apiEndpoints: { exportWord: "/documents/export-word" },
+  useClientSideFallback: true
+});
+
+DocumentManagerPlugin();</code></pre>
+                        <pre><code class="language-html">&lt;editora-editor id="document-demo" plugins="document-manager"&gt;&lt;/editora-editor&gt;</code></pre>
+                    </details>
+
+                    <div style="margin-top: 2rem; padding: 1rem; background: var(--gray-50); border-radius: var(--border-radius);">
+                        <a href="features.html">← Back to Features</a>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>📚 Documentation</h5>
+                    <ul>
+                        <li><a href="installation.html">Installation</a></li>
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="enterprise-plugins.html">Enterprise Plugins</a></li>
+                        <li><a href="api.html">API Reference</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔌 Plugins</h5>
+                    <ul>
+                        <li><a href="../plugins/index.html">All Plugins</a></li>
+                        <li><a href="../plugins/media-manager.html">Media Manager</a></li>
+                        <li><a href="../plugins/table.html">Tables</a></li>
+                        <li><a href="../plugins/code-sample.html">Code Samples</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>🔗 Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>ℹ️ About</h5>
+                    <ul>
+                        <li><a href="about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024-2026 Editora. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>

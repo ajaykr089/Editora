@@ -43,8 +43,26 @@ import "@editora/plugins/styles.css";
 | `setGlobalApiConfig/getGlobalApiConfig/getGlobalApiHeaders/buildApiUrl` | Functions | Shared API config layer |
 | `ApiConfig`, `MediaManagerConfig`, `DocumentManagerConfig` | Type exports | Config contracts |
 | `@editora/plugins/lite` | Entry export | Lightweight subset for smaller bundles |
+| `@editora/plugins/enterprise` | Entry export | Advanced/specialized workflow, compliance, and QA plugins |
 | `@editora/plugins/<plugin-name>` | Subpath exports | Per-plugin imports for tree-shaking/lazy loading |
 | `@editora/plugins/styles.css` | CSS export | Plugin UI styles (table toolbar, dialogs, color pickers) |
+
+## Entry Paths
+
+All plugin entry paths are completely free (MIT) and fully customizable.
+
+- `@editora/plugins`: full catalog
+- `@editora/plugins/lite`: common/core subset
+- `@editora/plugins/enterprise`: advanced/specialized subset
+- `@editora/plugins/<plugin-name>`: granular subpath imports
+
+### Enterprise Subset Includes
+
+- `MentionPlugin`, `TrackChangesPlugin`, `VersionDiffPlugin`, `ConditionalContentPlugin`, `DataBindingPlugin`
+- `ContentRulesPlugin`, `CitationsPlugin`, `ApprovalWorkflowPlugin`, `PIIRedactionPlugin`, `SmartPastePlugin`
+- `BlocksLibraryPlugin`, `DocSchemaPlugin`, `TranslationWorkflowPlugin`, `SlashCommandsPlugin`
+- `SpellCheckPlugin`, `A11yCheckerPlugin`, `CommentsPlugin`, `MergeTagPlugin`, `TemplatePlugin`
+- `MediaManagerPlugin`, `DocumentManagerPlugin`
 
 ## Usage Example
 
@@ -139,4 +157,4 @@ Ensure all plugin dialogs and sidebars are keyboard accessible and announce stat
 
 ## Performance Notes
 
-Prefer subpath imports and `@editora/plugins/lite` when you need a smaller default bundle.
+Prefer subpath imports, `@editora/plugins/lite`, or `@editora/plugins/enterprise` when you need a smaller default bundle.

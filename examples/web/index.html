@@ -4,18 +4,18 @@
     <!-- Meta Tags for SEO -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Editora - Best Free Premium Rich Text Editor. Free enterprise WYSIWYG editor with 30+ plugins, keyboard shortcuts, table formatting, and advanced features. Free alternative to TinyMCE and Quill.">
+    <meta name="description" content="Editora - Best Free Premium Rich Text Editor. Free enterprise WYSIWYG editor with 40+ plugins, 33+ keyboard shortcuts, table formatting, and advanced workflows. Free alternative to TinyMCE and Quill.">
     <meta name="keywords" content="free rich text editor, best free editor, premium features free, enterprise editor, WYSIWYG editor, free HTML editor, open source editor, TinyMCE alternative, Quill alternative, accessible editor, a11y editor, text editor, document editor, React editor, Vue editor">
     <meta name="author" content="Editora Contributors">
     <meta name="robots" content="index, follow">
     <meta property="og:title" content="Editora - Best Free Premium Rich Text Editor with Enterprise Features">
-    <meta property="og:description" content="Free rich text editor with premium enterprise features. 30+ free plugins, accessibility support, table editor, keyboard shortcuts, and more. No subscription required.">
+    <meta property="og:description" content="Free rich text editor with premium enterprise features. 40+ free plugins, 33+ keyboard shortcuts, accessibility support, and advanced workflows. No subscription required.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://editora-free.netlify.app/">
     <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:title" content="Editora - Best Free Premium Rich Text Editor">
-    <meta property="twitter:description" content="Free enterprise rich text editor with 30+ plugins and advanced features">
+    <meta property="twitter:description" content="Free enterprise rich text editor with 40+ plugins and advanced features">
     <meta name="theme-color" content="#007bff">
     
     <!-- Favicon -->
@@ -53,7 +53,7 @@
     <section class="hero">
         <div class="container">
             <h1>Best Free Premium Rich Text Editor - Editora</h1>
-            <p>The best free rich text editor with enterprise features. Get 30+ free plugins, keyboard shortcuts, accessibility support, and advanced formatting—no subscriptions required. Free alternative to TinyMCE and Quill.</p>
+            <p>The best free rich text editor with enterprise features. Get 40+ free plugins, 33+ keyboard shortcuts, accessibility support, and advanced formatting workflows with zero subscription cost.</p>
             <div class="hero-buttons">
                 <a href="docs/installation.html" class="btn btn-secondary btn-large">Get Started Free</a>
                 <a href="docs/features.html" class="btn btn-outline btn-large">View All Features</a>
@@ -69,7 +69,7 @@
                 <div class="feature-box">
                     <div class="feature-icon">⚡</div>
                     <h3>Lightning Fast</h3>
-                    <p>Optimized performance with minimal footprint. Only 12KB gzipped with all features included.</p>
+                    <p>Optimized performance with modular loading, tree-shakable imports, and multi-instance-safe plugin behavior.</p>
                 </div>
                 <div class="feature-box">
                     <div class="feature-icon">🔧</div>
@@ -93,8 +93,13 @@
                 </div>
                 <div class="feature-box">
                     <div class="feature-icon">📦</div>
-                    <h3>30+ Plugins</h3>
-                    <p>Extended functionality with media manager, tables, code samples, templates, and more.</p>
+                    <h3>40+ Plugins</h3>
+                    <p>Extended functionality with full/lite/enterprise presets plus per-plugin imports for strict bundle control.</p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">🏢</div>
+                    <h3>Enterprise Preset</h3>
+                    <p>Use <code>@editora/plugins/enterprise</code> for advanced workflows like track changes, compliance checks, PII redaction, and translation QA.</p>
                 </div>
                 <div class="feature-box">
                     <div class="feature-icon">🧩</div>
@@ -119,6 +124,7 @@ npm install @editora/core @editora/themes
 # React
 npm install @editora/react @editora/core @editora/plugins @editora/themes react react-dom</code></pre>
                     <p>For no-build HTML usage, load <code>@editora/core/dist/webcomponent.js</code> via CDN.</p>
+                    <p>For React imports, choose <code>@editora/plugins</code> (full), <code>@editora/plugins/lite</code> (common), or <code>@editora/plugins/enterprise</code> (advanced).</p>
                 </div>
                 <div class="col">
                     <h3>2. Import</h3>
@@ -186,7 +192,7 @@ editor.mount(document.getElementById('editor'));</code></pre>
     <!-- Plugins Preview -->
     <section>
         <div class="container">
-            <h2>🔌 30+ Plugins</h2>
+            <h2>🔌 40+ Plugins</h2>
             <p class="text-center mb-4">Extend functionality with our comprehensive plugin ecosystem.</p>
             <div class="plugin-grid">
                 <div class="plugin-card">
@@ -232,6 +238,45 @@ editor.mount(document.getElementById('editor'));</code></pre>
         </div>
     </section>
 
+    <!-- Enterprise Plugins Spotlight -->
+    <section class="alternate">
+        <div class="container">
+            <h2>🏢 Enterprise Plugins (All Free)</h2>
+            <p class="text-center mb-4">
+                Advanced workflows are available through <code>@editora/plugins/enterprise</code>. Full/lite/enterprise entry paths are all free and fully customizable.
+            </p>
+            <div class="row">
+                <div class="col">
+                    <h3>Workflow & Collaboration</h3>
+                    <ul>
+                        <li>Mention, Track Changes, Version Diff</li>
+                        <li>Comments, Approval Workflow</li>
+                        <li>Translation Workflow</li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <h3>Compliance & Quality</h3>
+                    <ul>
+                        <li>Content Rules, Document Schema</li>
+                        <li>PII Redaction, Spell Check, A11y Checker</li>
+                        <li>Citations</li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <h3>Structured Authoring</h3>
+                    <ul>
+                        <li>Conditional Content, Data Binding</li>
+                        <li>Merge Tag, Template, Slash Commands</li>
+                        <li>Smart Paste, Blocks Library</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <a href="docs/api.html" class="btn btn-primary">See Enterprise Import Paths</a>
+            </div>
+        </div>
+    </section>
+
     <!-- Ecosystem Section -->
     <section>
         <div class="container">
@@ -258,7 +303,7 @@ editor.mount(document.getElementById('editor'));</code></pre>
                 <div class="plugin-card">
                     <div class="plugin-icon">🔌</div>
                     <h4>@editora/plugins</h4>
-                    <p>Native plugin suite for formatting, media, tables, and productivity.</p>
+                    <p>Native plugin suite with full/lite/enterprise entry paths for common and advanced workflows.</p>
                     <a href="plugins/index.html" class="plugin-link">View Plugins →</a>
                 </div>
                 <div class="plugin-card">

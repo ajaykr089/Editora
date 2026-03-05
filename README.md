@@ -75,7 +75,23 @@ npm install @editora/react @editora/core react react-dom
 ```
 
 Bundle-size note:
-Prefer `@editora/plugins/lite` or per-plugin subpaths (for example `@editora/plugins/bold`, `@editora/plugins/spell-check`) and lazy-load heavy plugins with dynamic `import(...)`.
+Choose the import strategy based on your use case:
+- `@editora/plugins` for the full catalog
+- `@editora/plugins/lite` for common/core plugins
+- `@editora/plugins/enterprise` for advanced/specialized workflows
+- Per-plugin subpaths (for example `@editora/plugins/bold`, `@editora/plugins/spell-check`) for the smallest bundles
+
+All three entry paths (`full`, `lite`, `enterprise`) are completely free and fully customizable.
+
+### Enterprise Plugin Preset (`@editora/plugins/enterprise`)
+
+Use the enterprise preset when you need advanced workflows (all free + customizable):
+
+- Collaboration/workflow: `MentionPlugin`, `TrackChangesPlugin`, `VersionDiffPlugin`, `CommentsPlugin`, `ApprovalWorkflowPlugin`
+- Validation/compliance: `ContentRulesPlugin`, `DocSchemaPlugin`, `A11yCheckerPlugin`, `SpellCheckPlugin`, `PIIRedactionPlugin`
+- Structured/dynamic authoring: `ConditionalContentPlugin`, `DataBindingPlugin`, `MergeTagPlugin`, `TemplatePlugin`, `CitationsPlugin`
+- Automation/productivity: `SmartPastePlugin`, `SlashCommandsPlugin`, `BlocksLibraryPlugin`, `TranslationWorkflowPlugin`
+- Manager-backed advanced plugins: `MediaManagerPlugin`, `DocumentManagerPlugin`
 
 ## 🏗️ Architecture
 

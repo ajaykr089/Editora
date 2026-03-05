@@ -8,6 +8,15 @@ Get Editora Rich Text Editor up and running in 5 minutes!
 npm install @editora/react @editora/core @editora/plugins @editora/themes
 ```
 
+Plugin import paths:
+
+- `@editora/plugins`: full catalog
+- `@editora/plugins/lite`: common/core subset
+- `@editora/plugins/enterprise`: advanced/specialized subset
+- `@editora/plugins/<plugin-name>`: per-plugin imports
+
+All plugin entry paths are completely free and fully customizable.
+
 ## Basic Setup
 
 ### 1. Import Packages

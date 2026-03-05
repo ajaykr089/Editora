@@ -1147,6 +1147,7 @@ function ensureStylesInjected(): void {
       display: flex;
       border: 1px solid #ccc;
       border-radius: 3px;
+      background: #fff;
     }
     .rte-toolbar-group-items.track-changes .rte-toolbar-button,
     .editora-toolbar-group-items.track-changes .editora-toolbar-button {

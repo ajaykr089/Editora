@@ -980,6 +980,7 @@ function ensureStylesInjected(): void {
       display: flex;
       border: 1px solid #ccc;
       border-radius: 3px;
+      background: #fff;
     }
 
     .rte-toolbar-group-items.content-rules .rte-toolbar-button,
@@ -1002,11 +1003,9 @@ function ensureStylesInjected(): void {
     }
 
     ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.content-rules,
-    ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.content-rules,
-    .${PANEL_CLASS}.rte-content-rules-theme-dark {
-      border-color: rgba(148, 163, 184, 0.34);
-      background: rgba(30, 41, 59, 0.9);
-    }
+    ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.content-rules {
+      border-color: #566275;
+    }    
     ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.content-rules .rte-toolbar-button,
     ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.content-rules .editora-toolbar-button
     {

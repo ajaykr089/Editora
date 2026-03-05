@@ -29,7 +29,7 @@ const plugins = [BoldPlugin(), ItalicPlugin(), HistoryPlugin()];
 
 ## Usage
 
-Use root exports for fast integration, subpath exports for bundle control, and `lite` for minimal stacks.
+Use root exports for fast integration, subpath exports for bundle control, `lite` for minimal stacks, and `enterprise` for advanced/specialized stacks.
 
 ## Examples
 
@@ -50,8 +50,26 @@ Use root exports for fast integration, subpath exports for bundle control, and `
 | Manager config helpers | Functions | `setMediaManagerConfig`, `getMediaManagerConfig`, `setDocumentManagerConfig`, `getDocumentManagerConfig` |
 | Global API config | Functions/types | `setGlobalApiConfig`, `getGlobalApiConfig`, `getGlobalApiHeaders`, `buildApiUrl`, `ApiConfig` |
 | `@editora/plugins/lite` | Entry export | Lightweight subset focused on common commands |
+| `@editora/plugins/enterprise` | Entry export | Advanced/specialized workflow, compliance, and QA plugins |
 | Subpath exports | Package exports | Individual plugin paths (`@editora/plugins/<plugin-name>`) |
 | `@editora/plugins/styles.css` | CSS export | Plugin UI styles for table toolbar, dialogs, and color pickers |
+
+## Entry Paths
+
+All entry paths are free and fully customizable.
+
+- `@editora/plugins`: full plugin catalog
+- `@editora/plugins/lite`: common/core plugin subset
+- `@editora/plugins/enterprise`: advanced/specialized plugin subset
+- `@editora/plugins/<plugin-name>`: targeted imports for strict bundle control
+
+### Enterprise Subset Includes
+
+- `MentionPlugin`, `TrackChangesPlugin`, `VersionDiffPlugin`, `ConditionalContentPlugin`, `DataBindingPlugin`
+- `ContentRulesPlugin`, `CitationsPlugin`, `ApprovalWorkflowPlugin`, `PIIRedactionPlugin`, `SmartPastePlugin`
+- `BlocksLibraryPlugin`, `DocSchemaPlugin`, `TranslationWorkflowPlugin`, `SlashCommandsPlugin`
+- `SpellCheckPlugin`, `A11yCheckerPlugin`, `CommentsPlugin`, `MergeTagPlugin`, `TemplatePlugin`
+- `MediaManagerPlugin`, `DocumentManagerPlugin`
 
 ## Best Practices
 
@@ -65,4 +83,4 @@ Ensure every plugin dialog/panel is keyboard navigable and theme-consistent in b
 
 ## Performance Notes
 
-Prefer subpath imports and split optional plugins by route/context to keep baseline bundles lean.
+Prefer subpath imports, `@editora/plugins/lite`, or `@editora/plugins/enterprise` and split optional plugins by route/context to keep baseline bundles lean.

@@ -54,6 +54,12 @@
       "require": "./dist/lite.cjs.js",
       "default": "./dist/lite.esm.js"
     },
+    "./enterprise": {
+      "types": "./index.d.ts",
+      "import": "./dist/enterprise.esm.js",
+      "require": "./dist/enterprise.cjs.js",
+      "default": "./dist/enterprise.esm.js"
+    },
     "./shared-config": {
       "types": "./index.d.ts",
       "import": "./dist/shared-config.esm.js",

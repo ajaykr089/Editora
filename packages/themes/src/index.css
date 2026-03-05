@@ -7,8 +7,8 @@
   align-items: center;
   border-radius: var(--rte-radius);
   overflow: hidden;
-  border: 1px solid var(--rte-color-border-light);
-  background: var(--rte-color-bg-secondary, #f9fafb);
+  /* border: 1px solid var(--rte-color-border-light); */
+  /* background: var(--rte-color-bg-secondary, #f9fafb); */
   margin-right: 0.5rem;
   padding: 0;
 }
