@@ -237,8 +237,8 @@
       id="test2-editor"
       statusbar="true"
       height="400"
-      plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emoji a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template"
-      toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | importWord exportWord exportPdf | fullscreen preview print | a11yChecker toggleSpellCheck | addComment toggleComments footnote insertMergeTag pageBreak insertTemplate | clearFormatting"
+      plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis mentions trackChanges version-diff conditional-content data-binding content-rules citations approval-workflow pii-redaction smart-paste blocks-library doc-schema translation-workflow slash-commands a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template"
+      toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | insertMention openSlashCommands | trackChanges openVersionDiff | conditionalContent dataBinding | contentRules citations | approvalWorkflow piiRedaction | smartPaste blocksLibrary | docSchema translationWorkflow | importWord exportWord exportPdf | fullscreen preview print | a11yChecker toggleSpellCheck | addComment toggleComments footnote insertMergeTag pageBreak insertTemplate | clearFormatting"
     >
       <h2>Full Feature Test</h2>
       <p>This editor should have a complete toolbar with all groups visible.</p>
@@ -500,8 +500,8 @@
     </footer>
 
     <!-- Local bundle for file:// testing (non-module avoids module CORS restrictions on file origin) -->
-    <script src="../../packages/core/dist/webcomponent.min.js"></script>
-    <link rel="stylesheet" href="../../packages/core/dist/webcomponent.min.css">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css">
     <script src="assets/js/main.js"></script>
    <script>
     // Wait for custom element to be defined
