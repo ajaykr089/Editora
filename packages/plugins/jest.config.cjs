@@ -8,6 +8,7 @@ module.exports = {
     '<rootDir>/smart-paste/src/**/*.test.js',
     '<rootDir>/blocks-library/src/**/*.test.js',
     '<rootDir>/doc-schema/src/**/*.test.js',
+    '<rootDir>/translation-workflow/src/**/*.test.js',
   ],
   transform: {
     '^.+\\.tsx?$': [

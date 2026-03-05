@@ -492,13 +492,13 @@ function ensureStylesInjected(): void {
     ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.data-binding,
     .${DIALOG_OVERLAY_CLASS}.rte-data-binding-theme-dark .rte-toolbar-group-items.data-binding,
     ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.data-binding {
-      border-color: #656567;
+      border-color: #566275;
       background: #111827;
     }
 
     ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.data-binding .rte-toolbar-button,
     ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.data-binding .editora-toolbar-button {
-      border-right-color: #656567;
+      border-right-color: #566275;
     }
 
     ${DARK_THEME_SELECTOR} .rte-data-binding-dialog,

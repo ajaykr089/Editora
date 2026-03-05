@@ -1,0 +1,38 @@
+{
+  "name": "@editora/translation-workflow",
+  "version": "1.0.0",
+  "description": "Native translation workflow plugin for Editora with segment locking, source-target view, and locale-aware validation",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "vite build"
+  },
+  "keywords": [
+    "editora",
+    "translation",
+    "localization",
+    "i18n",
+    "workflow"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@editora/core": "^1.0.7"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
+    }
+  }
+}

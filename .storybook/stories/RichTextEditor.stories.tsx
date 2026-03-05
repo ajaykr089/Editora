@@ -63,6 +63,7 @@ import {
   SmartPastePlugin,
   BlocksLibraryPlugin,
   DocSchemaPlugin,
+  TranslationWorkflowPlugin,
 } from "@editora/plugins";
 import { Box, Flex, Grid} from '@editora/ui-react';
 
@@ -77,7 +78,7 @@ const meta: Meta = {
 # Editora Web Component - Framework Agnostic Rich Text Editor
 
 **Bundle Size**: 115 KB minified (28.65 KB gzipped)  
-**Native Plugins**: 41  
+**Native Plugins**: 42  
 **Framework Dependencies**: 0  
 **Supports**: React, Vue, Angular, Svelte, Vanilla JS
 
@@ -86,7 +87,7 @@ const meta: Meta = {
 - ✅ 91% bundle size reduction
 - ✅ TinyMCE-style declarative API
 - ✅ Works everywhere
-- ✅ 38 native plugins including Code Sample, Media Manager, Math, Merge Tags, Page Break, Template, A11y Checker, Comments, and more
+- ✅ 39 native plugins including Code Sample, Media Manager, Math, Merge Tags, Page Break, Template, A11y Checker, Comments, and more
         `,
       },
     },
@@ -221,6 +222,12 @@ const allNativePlugins = [
       },
     ],
   }),
+  TranslationWorkflowPlugin({
+    sourceLocale: "en-US",
+    targetLocale: "fr-FR",
+    enableRealtime: true,
+    locales: ["en-US", "fr-FR", "de-DE", "es-ES", "ja-JP"],
+  }),
   SlashCommandsPlugin(),
   MentionPlugin({
     items: [
@@ -233,7 +240,7 @@ const allNativePlugins = [
 
 /**
  * Basic usage with default configuration
- * All 38 native plugins loaded automatically
+ * All 39 native plugins loaded automatically
  */
 export const Basic: Story = {
   render: () => (
@@ -243,7 +250,7 @@ export const Basic: Story = {
       floatingToolbar={true}
       defaultValue={`
         <h2>Welcome to Editora!!</h2>
-        <p>This is a <strong>framework-agnostic</strong> rich text editor with <mark style="background: #ffeb3b;">38 native plugins</mark>.</p>
+        <p>This is a <strong>framework-agnostic</strong> rich text editor with <mark style="background: #ffeb3b;">39 native plugins</mark>.</p>
         <p>✨ <strong>Key Features:</strong></p>
         <ul>
           <li>Zero framework dependencies</li>
@@ -1076,6 +1083,34 @@ export const DocSchemaWorkflow: Story = {
           <p>All production access must be approved and logged.</p>
           <h3>Controls</h3>
           <p>Access reviews run monthly. Emergency access expires in 24 hours.</p>
+        `}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Translation Workflow Scenario
+ * Localization QA with segment locking + source-target validation.
+ */
+export const TranslationWorkflowScenario: Story = {
+  render: () => (
+    <div>
+      <Box style={{ marginBottom: "16px", padding: "14px", background: "#eff6ff", borderRadius: "8px" }}>
+        <h4 style={{ margin: "0 0 8px 0" }}>🌍 Translation Workflow Test Scenario</h4>
+        <p style={{ margin: 0, fontSize: "13px" }}>
+          Use <code>Ctrl/Cmd+Alt+Shift+L</code> to open panel, capture source, lock approved segments, and run locale QA.
+        </p>
+      </Box>
+
+      <EditoraEditor
+        plugins={allNativePlugins}
+        statusbar={{ enabled: true, position: "bottom" }}
+        defaultValue={`
+          <h2>Release Notes v4.8</h2>
+          <p>Welcome {{firstName}}! Your order ID is %ORDER_ID%.</p>
+          <p>Click <strong>Upgrade Now</strong> to activate premium analytics.</p>
+          <p>For support, contact support@acme.com within 24 hours.</p>
         `}
       />
     </div>

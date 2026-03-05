@@ -779,13 +779,13 @@ function ensureStylesInjected(): void {
     .${DIALOG_OVERLAY_CLASS}.rte-conditional-theme-dark .rte-toolbar-group-items.conditional-content,
     ${LOCAL_DARK_THEME_SCOPE} .rte-toolbar-group-items.conditional-content,
     ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.conditional-content {
-      border-color: #656567;
+      border-color: #566275;
     }
 
     ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.conditional-content .rte-toolbar-button,
     ${LOCAL_DARK_THEME_SCOPE} .rte-toolbar-group-items.conditional-content .rte-toolbar-button,
     ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.conditional-content .editora-toolbar-button {
-      border-right-color: #656567;
+      border-right-color: #566275;
     }
 
     ${DARK_THEME_SELECTOR} .${FLOATING_TOOLBAR_CLASS},

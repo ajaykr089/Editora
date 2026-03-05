@@ -1683,6 +1683,11 @@ function ensureStylesInjected(): void {
     {
       fill: none;
     }
+    ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.citations .rte-toolbar-button,
+    ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.citations .editora-toolbar-button
+    {
+      border-color: #566275;
+    }
 
     .${PANEL_CLASS} {
       position: fixed;

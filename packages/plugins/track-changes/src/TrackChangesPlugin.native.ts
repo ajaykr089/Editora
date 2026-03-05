@@ -1164,12 +1164,12 @@ function ensureStylesInjected(): void {
 
     :is([data-theme="dark"], .dark, .editora-theme-dark, .rte-theme-dark) .rte-toolbar-group-items.track-changes,
     :is([data-theme="dark"], .dark, .editora-theme-dark, .rte-theme-dark) .editora-toolbar-group-items.track-changes {
-      border-color: #656567;
+      border-color: #566275;
     }
 
     :is([data-theme="dark"], .dark, .editora-theme-dark, .rte-theme-dark) .rte-toolbar-group-items.track-changes .rte-toolbar-button,
     :is([data-theme="dark"], .dark, .editora-theme-dark, .rte-theme-dark) .editora-toolbar-group-items.track-changes .editora-toolbar-button {
-      border-right-color: #656567;
+      border-right-color: #566275;
     }
 
     .rte-toolbar-button[data-command="toggleTrackChanges"].active,

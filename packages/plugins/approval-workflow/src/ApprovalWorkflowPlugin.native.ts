@@ -1085,6 +1085,13 @@ function ensureStylesInjected(): void {
     {
       fill: none;
     }
+
+    ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.${TOOLBAR_GROUP_CLASS} .rte-toolbar-button,
+    ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.${TOOLBAR_GROUP_CLASS} .editora-toolbar-button
+    {
+      border-color: #566275;
+    }
+
     .rte-approval-locked-editor {
       background-image: repeating-linear-gradient(
         -45deg,

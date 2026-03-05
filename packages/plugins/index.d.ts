@@ -637,6 +637,109 @@ export interface DocSchemaRuntimeState {
   lastRunAt: string | null;
 }
 
+export type TranslationWorkflowIssueType =
+  | "missing-target"
+  | "token-mismatch"
+  | "untranslated"
+  | "length-out-of-range";
+export type TranslationWorkflowIssueSeverity = "error" | "warning" | "info";
+
+export interface TranslationWorkflowIssue {
+  id: string;
+  type: TranslationWorkflowIssueType;
+  severity: TranslationWorkflowIssueSeverity;
+  message: string;
+  segmentId?: string;
+  sourceText?: string;
+  targetText?: string;
+  suggestion?: string;
+}
+
+export interface TranslationWorkflowSegment {
+  id: string;
+  tagName: string;
+  index: number;
+  text: string;
+  sourceText: string;
+  locked: boolean;
+}
+
+export interface TranslationWorkflowSegmentState {
+  id: string;
+  tagName: string;
+  index: number;
+  sourceLength: number;
+  targetLength: number;
+  locked: boolean;
+}
+
+export interface TranslationWorkflowLocaleRule {
+  locale: string;
+  label?: string;
+  minLengthRatio?: number;
+  maxLengthRatio?: number;
+  requireDifferentFromSource?: boolean;
+  preserveTokens?: boolean;
+}
+
+export interface TranslationWorkflowLabels {
+  panelTitle?: string;
+  panelAriaLabel?: string;
+  sourceLocaleLabel?: string;
+  targetLocaleLabel?: string;
+  validateText?: string;
+  captureSourceText?: string;
+  lockSelectedText?: string;
+  unlockSelectedText?: string;
+  lockSegmentAriaLabel?: string;
+  unlockSegmentAriaLabel?: string;
+  realtimeOnText?: string;
+  realtimeOffText?: string;
+  closeText?: string;
+  summaryPrefix?: string;
+  noIssuesText?: string;
+  issuesLabel?: string;
+  segmentsLabel?: string;
+  sourcePreviewLabel?: string;
+  targetPreviewLabel?: string;
+  helperText?: string;
+  shortcutText?: string;
+  readonlySegmentMessage?: string;
+  sourceCapturedMessage?: string;
+  selectedSegmentPrefix?: string;
+  missingTargetMessage?: string;
+  tokenMismatchMessage?: string;
+  untranslatedMessage?: string;
+  lengthOutOfRangeMessage?: string;
+}
+
+export interface TranslationWorkflowPluginOptions {
+  sourceLocale?: string;
+  targetLocale?: string;
+  locales?: string[];
+  localeRules?: TranslationWorkflowLocaleRule[];
+  enableRealtime?: boolean;
+  debounceMs?: number;
+  maxIssues?: number;
+  maxSegments?: number;
+  minSourceLengthForRatio?: number;
+  segmentSelector?: string;
+  labels?: TranslationWorkflowLabels;
+  normalizeText?: (value: string) => string;
+}
+
+export interface TranslationWorkflowRuntimeState {
+  sourceLocale: string;
+  targetLocale: string;
+  realtimeEnabled: boolean;
+  selectedSegmentId: string | null;
+  segmentCount: number;
+  lockedSegmentCount: number;
+  issues: TranslationWorkflowIssue[];
+  segments: TranslationWorkflowSegmentState[];
+  lastRunAt: string | null;
+}
+
 export interface MentionItem {
   id: string;
   label: string;
@@ -770,6 +873,7 @@ export function PIIRedactionPlugin(options?: PIIRedactionPluginOptions): Plugin;
 export function SmartPastePlugin(options?: SmartPastePluginOptions): Plugin;
 export function BlocksLibraryPlugin(options?: BlocksLibraryPluginOptions): Plugin;
 export function DocSchemaPlugin(options?: DocSchemaPluginOptions): Plugin;
+export function TranslationWorkflowPlugin(options?: TranslationWorkflowPluginOptions): Plugin;
 export function SlashCommandsPlugin(options?: SlashCommandsPluginOptions): Plugin;
 
 export function MediaManagerPlugin(): Plugin;

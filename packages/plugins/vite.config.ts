@@ -20,6 +20,7 @@ const pluginEntryNames = [
   'content-rules',
   'data-binding',
   'doc-schema',
+  'translation-workflow',
   'direction',
   'document-manager',
   'embed-iframe',

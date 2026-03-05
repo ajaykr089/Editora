@@ -1474,7 +1474,11 @@ function ensureStylesInjected(): void {
     {
       fill: none;
     }
-
+    ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.${TOOLBAR_GROUP_CLASS} .rte-toolbar-button,
+    ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.${TOOLBAR_GROUP_CLASS} .editora-toolbar-button
+    {
+      border-color: #566275;
+    }
     .${PANEL_CLASS} {
       position: fixed;
       z-index: 12000;

@@ -150,6 +150,12 @@
       "require": "./dist/doc-schema.cjs.js",
       "default": "./dist/doc-schema.esm.js"
     },
+    "./translation-workflow": {
+      "types": "./index.d.ts",
+      "import": "./dist/translation-workflow.esm.js",
+      "require": "./dist/translation-workflow.cjs.js",
+      "default": "./dist/translation-workflow.esm.js"
+    },
     "./checklist": {
       "types": "./index.d.ts",
       "import": "./dist/checklist.esm.js",
@@ -400,7 +406,8 @@
     "test:smart-paste": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./smart-paste/src/SmartPastePlugin.native.test.js",
     "test:blocks-library": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./blocks-library/src/BlocksLibraryPlugin.native.test.js",
     "test:doc-schema": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./doc-schema/src/DocSchemaPlugin.native.test.js",
-    "verify:citations": "npm run typecheck:build && npm run test:citations && npm run test:content-rules && npm run test:approval-workflow && npm run test:pii-redaction && npm run test:smart-paste && npm run test:blocks-library && npm run test:doc-schema && npm run build"
+    "test:translation-workflow": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./translation-workflow/src/TranslationWorkflowPlugin.native.test.js",
+    "verify:citations": "npm run typecheck:build && npm run test:citations && npm run test:content-rules && npm run test:approval-workflow && npm run test:pii-redaction && npm run test:smart-paste && npm run test:blocks-library && npm run test:doc-schema && npm run test:translation-workflow && npm run build"
   },
   "peerDependencies": {
     "@editora/core": "^1.0.7"

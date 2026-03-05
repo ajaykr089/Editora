@@ -1007,6 +1007,11 @@ function ensureStylesInjected(): void {
       border-color: rgba(148, 163, 184, 0.34);
       background: rgba(30, 41, 59, 0.9);
     }
+    ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.content-rules .rte-toolbar-button,
+    ${DARK_THEME_SELECTOR} .editora-toolbar-group-items.content-rules .editora-toolbar-button
+    {
+      border-color: #566275;
+    }
     ${DARK_THEME_SELECTOR} .rte-toolbar-group-items.content-rules .rte-toolbar-button svg{
       fill: none;
     }
