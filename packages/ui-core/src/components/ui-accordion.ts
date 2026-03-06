@@ -4,6 +4,8 @@ type SourceItem = {
   headerHtml: string;
   panelHtml: string;
   disabled: boolean;
+  description: string;
+  badge: string;
 };
 
 const style = `
@@ -14,13 +16,13 @@ const style = `
     --ui-accordion-divider: color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.18)) 78%, transparent);
     --ui-accordion-surface: var(--ui-color-surface, #ffffff);
     --ui-accordion-surface-alt: var(--ui-color-surface-alt, #f8fafc);
-    --ui-accordion-open-surface: color-mix(in srgb, var(--ui-color-primary, #2563eb) 5%, var(--ui-color-surface, #ffffff));
+    --ui-accordion-open-surface: color-mix(in srgb, var(--ui-color-primary, #2563eb) 6%, var(--ui-color-surface, #ffffff));
     --ui-accordion-text: var(--ui-color-text, #0f172a);
     --ui-accordion-muted: var(--ui-color-muted, #475569);
     --ui-accordion-primary: var(--ui-color-primary, #2563eb);
     --ui-accordion-focus-ring: var(--ui-color-focus-ring, #2563eb);
-    --ui-accordion-shadow: var(--ui-shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 20px rgba(15, 23, 42, 0.04));
-    --ui-accordion-duration: 220ms;
+    --ui-accordion-shadow: var(--ui-shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.06), 0 10px 28px rgba(15, 23, 42, 0.07));
+    --ui-accordion-duration: 190ms;
     --ui-accordion-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
     --ui-accordion-padding-x: 16px;
     --ui-accordion-padding-y: 14px;
@@ -32,15 +34,17 @@ const style = `
     display: block;
     border: var(--ui-accordion-border);
     border-radius: var(--ui-accordion-radius);
-    background: var(--ui-accordion-surface);
-    overflow: hidden;
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-accordion-surface) 92%, var(--ui-accordion-surface-alt)) 0%, var(--ui-accordion-surface) 100%);
+    overflow: clip;
     box-shadow: var(--ui-accordion-shadow);
+    backdrop-filter: blur(2px);
   }
 
   .item {
     margin: 0;
     position: relative;
-    background: var(--ui-accordion-surface);
+    background: transparent;
     color: var(--ui-accordion-text);
     transition: background var(--ui-accordion-duration) var(--ui-accordion-easing);
   }
@@ -55,8 +59,9 @@ const style = `
     inset-block: 0;
     inset-inline-start: 0;
     width: 0;
-    background: var(--ui-accordion-primary);
+    background: linear-gradient(180deg, var(--ui-accordion-primary) 0%, color-mix(in srgb, var(--ui-accordion-primary) 70%, #0f172a) 100%);
     transition: width var(--ui-accordion-duration) var(--ui-accordion-easing);
+    pointer-events: none;
   }
 
   .item[open] {
@@ -65,6 +70,10 @@ const style = `
 
   .item[open]::before {
     width: var(--ui-accordion-indicator-size);
+  }
+
+  .item[data-disabled="true"] {
+    opacity: 0.62;
   }
 
   .trigger {
@@ -111,6 +120,35 @@ const style = `
 
   .label {
     min-width: 0;
+    flex: 1;
+    display: grid;
+    gap: 2px;
+  }
+
+  .label-title {
+    min-width: 0;
+    line-height: 1.35;
+  }
+
+  .label-description {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: color-mix(in srgb, var(--ui-accordion-text) 62%, var(--ui-accordion-muted) 38%);
+  }
+
+  .badge {
+    margin-inline-start: auto;
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    background: color-mix(in srgb, var(--ui-accordion-primary) 14%, transparent);
+    color: color-mix(in srgb, var(--ui-accordion-primary) 84%, var(--ui-accordion-text) 16%);
   }
 
   .chevron {
@@ -133,37 +171,42 @@ const style = `
   }
 
   .panel {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows var(--ui-accordion-duration) var(--ui-accordion-easing);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--ui-accordion-duration) var(--ui-accordion-easing);
+    will-change: max-height;
   }
 
   .panel-inner {
-    min-height: 0;
-    overflow: hidden;
     color: color-mix(in srgb, var(--ui-accordion-text) 88%, var(--ui-accordion-muted) 12%);
     font-size: 14px;
     line-height: 1.55;
-    padding: 0 var(--ui-accordion-padding-x);
+    padding: 0 var(--ui-accordion-padding-x) 14px;
     opacity: 0;
     border-top: 1px solid transparent;
     transform: translateY(-4px);
     transition:
       opacity var(--ui-accordion-duration) var(--ui-accordion-easing),
       transform var(--ui-accordion-duration) var(--ui-accordion-easing),
-      padding var(--ui-accordion-duration) var(--ui-accordion-easing),
       border-color var(--ui-accordion-duration) var(--ui-accordion-easing);
   }
 
   .item[open] .panel {
-    grid-template-rows: 1fr;
+    max-height: var(--ui-accordion-panel-height, 0px);
   }
 
   .item[open] .panel-inner {
     opacity: 1;
     transform: translateY(0);
-    padding: 0 var(--ui-accordion-padding-x) 14px;
     border-top-color: color-mix(in srgb, var(--ui-accordion-primary) 24%, transparent);
+  }
+
+  .panel-inner > :first-child {
+    margin-top: 12px;
+  }
+
+  .panel-inner > :last-child {
+    margin-bottom: 0;
   }
 
   .empty {
@@ -174,6 +217,13 @@ const style = `
 
   :host([headless]) .base {
     display: none;
+  }
+
+  @media (max-width: 720px) {
+    :host {
+      --ui-accordion-padding-x: 12px;
+      --ui-accordion-padding-y: 12px;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -224,6 +274,15 @@ function normalizeIndex(value: unknown): number {
   return rounded >= 0 ? rounded : -1;
 }
 
+function escapeHtml(value: string): string {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function toBoolean(value: string | null, fallback: boolean): boolean {
   if (value == null) return fallback;
   const normalized = value.toLowerCase();
@@ -260,11 +319,14 @@ export class UIAccordion extends ElementBase {
   private _uid = `ui-accordion-${Math.random().toString(36).slice(2, 8)}`;
   private _observer: MutationObserver | null = null;
   private _syncingOpenAttr = false;
+  private _panelResizeObserver: ResizeObserver | null = null;
+  private _heightSyncRaf = 0;
 
   constructor() {
     super();
     this._onClick = this._onClick.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
+    this._onMutations = this._onMutations.bind(this);
   }
 
   connectedCallback() {
@@ -272,13 +334,19 @@ export class UIAccordion extends ElementBase {
     this.root.addEventListener('click', this._onClick as EventListener);
     this.root.addEventListener('keydown', this._onKeyDown as EventListener);
 
-    this._observer = new MutationObserver(() => this.requestRender());
+    this._observer = new MutationObserver(this._onMutations);
     this._observer.observe(this, {
       childList: true,
       subtree: true,
       characterData: true,
       attributes: true,
     });
+
+    if (typeof ResizeObserver !== 'undefined') {
+      this._panelResizeObserver = new ResizeObserver(() => {
+        this._syncPanelHeights();
+      });
+    }
   }
 
   disconnectedCallback() {
@@ -287,6 +355,14 @@ export class UIAccordion extends ElementBase {
     if (this._observer) {
       this._observer.disconnect();
       this._observer = null;
+    }
+    if (this._panelResizeObserver) {
+      this._panelResizeObserver.disconnect();
+      this._panelResizeObserver = null;
+    }
+    if (this._heightSyncRaf) {
+      cancelAnimationFrame(this._heightSyncRaf);
+      this._heightSyncRaf = 0;
     }
     super.disconnectedCallback();
   }
@@ -319,7 +395,7 @@ export class UIAccordion extends ElementBase {
   }
 
   get open(): number | number[] {
-    const normalized = this._normalizeOpen(this._sourceItems().length);
+    const normalized = this._normalizeOpen(this._sourceItems());
     return this.multiple ? normalized : (normalized[0] ?? -1);
   }
 
@@ -342,44 +418,56 @@ export class UIAccordion extends ElementBase {
         headerHtml: trigger?.innerHTML || `Section ${index + 1}`,
         panelHtml: panel?.innerHTML || '',
         disabled: itemNode.hasAttribute('disabled') || trigger?.hasAttribute('disabled') || false,
+        description: itemNode.getAttribute('description') || itemNode.getAttribute('data-description') || '',
+        badge: itemNode.getAttribute('badge') || itemNode.getAttribute('data-badge') || '',
       };
     });
   }
 
-  private _normalizeOpen(totalItems: number): number[] {
+  private _normalizeOpen(items: SourceItem[]): number[] {
     const parsed = parseOpen(this.getAttribute('open'), this.multiple);
     const valid = Array.from(
-      new Set(parsed.map(normalizeIndex).filter((index) => index >= 0 && index < totalItems))
+      new Set(
+        parsed
+          .map(normalizeIndex)
+          .filter((index) => index >= 0 && index < items.length && !items[index]?.disabled)
+      )
     ).sort((a, b) => a - b);
+    const fallback = items.findIndex((item) => !item.disabled);
 
     if (this.multiple) {
-      if (this.collapsible || totalItems === 0 || valid.length > 0) return valid;
-      return [0];
+      if (this.collapsible || items.length === 0 || valid.length > 0) return valid;
+      return fallback >= 0 ? [fallback] : [];
     }
 
     if (valid.length > 0) return [valid[0]];
-    if (this.collapsible || totalItems === 0) return [];
-    return [0];
+    if (this.collapsible || items.length === 0) return [];
+    return fallback >= 0 ? [fallback] : [];
   }
 
-  private _normalizeNext(next: number[], totalItems: number): number[] {
+  private _normalizeNext(next: number[], items: SourceItem[]): number[] {
     const valid = Array.from(
-      new Set(next.map(normalizeIndex).filter((index) => index >= 0 && index < totalItems))
+      new Set(
+        next
+          .map(normalizeIndex)
+          .filter((index) => index >= 0 && index < items.length && !items[index]?.disabled)
+      )
     ).sort((a, b) => a - b);
+    const fallback = items.findIndex((item) => !item.disabled);
 
     if (this.multiple) {
-      if (this.collapsible || totalItems === 0 || valid.length > 0) return valid;
-      return [0];
+      if (this.collapsible || items.length === 0 || valid.length > 0) return valid;
+      return fallback >= 0 ? [fallback] : [];
     }
 
     if (valid.length > 0) return [valid[0]];
-    if (this.collapsible || totalItems === 0) return [];
-    return [0];
+    if (this.collapsible || items.length === 0) return [];
+    return fallback >= 0 ? [fallback] : [];
   }
 
   private _commitOpen(next: number[], emit: boolean) {
-    const total = this._sourceItems().length;
-    const normalized = this._normalizeNext(next, total);
+    const items = this._sourceItems();
+    const normalized = this._normalizeNext(next, items);
     const serialized = serializeOpen(normalized, this.multiple);
     const previous = this.getAttribute('open') ?? (this.multiple ? '[]' : '-1');
 
@@ -395,10 +483,10 @@ export class UIAccordion extends ElementBase {
     const itemNodes = Array.from(this.root.querySelectorAll('.item')) as HTMLElement[];
     if (itemNodes.length === 0) return false;
 
-    const sourceCount = this._sourceItems().length;
-    if (sourceCount !== itemNodes.length) return false;
+    const sourceItems = this._sourceItems();
+    if (sourceItems.length !== itemNodes.length) return false;
 
-    const normalized = this._normalizeOpen(sourceCount);
+    const normalized = this._normalizeOpen(sourceItems);
     const serialized = serializeOpen(normalized, this.multiple);
     const current = this.getAttribute('open') ?? (this.multiple ? '[]' : '-1');
     if (serialized !== current) {
@@ -413,20 +501,69 @@ export class UIAccordion extends ElementBase {
       if (isOpen) itemNode.setAttribute('open', '');
       else itemNode.removeAttribute('open');
 
-      const trigger = itemNode.querySelector('.trigger') as HTMLButtonElement | null;
       const panel = itemNode.querySelector('.panel') as HTMLElement | null;
+      const panelInner = itemNode.querySelector('.panel-inner') as HTMLElement | null;
+      if (panel && panelInner) {
+        panel.style.setProperty('--ui-accordion-panel-height', `${panelInner.scrollHeight}px`);
+      }
+
+      const trigger = itemNode.querySelector('.trigger') as HTMLButtonElement | null;
       if (trigger) trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
       if (panel) panel.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
     });
 
+    this._queuePanelHeightSync();
     return true;
+  }
+
+  private _observePanelInners() {
+    if (!this._panelResizeObserver) return;
+    this._panelResizeObserver.disconnect();
+    const panelInners = Array.from(this.root.querySelectorAll('.panel-inner')) as HTMLElement[];
+    panelInners.forEach((node) => this._panelResizeObserver?.observe(node));
+  }
+
+  private _syncPanelHeights() {
+    const itemNodes = Array.from(this.root.querySelectorAll('.item')) as HTMLElement[];
+    itemNodes.forEach((itemNode) => {
+      const panel = itemNode.querySelector('.panel') as HTMLElement | null;
+      const panelInner = itemNode.querySelector('.panel-inner') as HTMLElement | null;
+      if (!panel || !panelInner) return;
+      panel.style.setProperty('--ui-accordion-panel-height', `${panelInner.scrollHeight}px`);
+    });
+  }
+
+  private _queuePanelHeightSync() {
+    if (this._heightSyncRaf) {
+      cancelAnimationFrame(this._heightSyncRaf);
+      this._heightSyncRaf = 0;
+    }
+
+    this._heightSyncRaf = requestAnimationFrame(() => {
+      this._syncPanelHeights();
+      this._heightSyncRaf = requestAnimationFrame(() => {
+        this._syncPanelHeights();
+        this._heightSyncRaf = 0;
+      });
+    });
+  }
+
+  private _onMutations(records: MutationRecord[]) {
+    const shouldRender = records.some((record) => {
+      if (record.type !== 'attributes') return true;
+      if (record.target !== this) return true;
+      const attribute = record.attributeName || '';
+      return !['open', 'multiple', 'collapsible', 'headless'].includes(attribute);
+    });
+    if (!shouldRender) return;
+    this.requestRender();
   }
 
   private _toggleIndex(index: number) {
     const items = this._sourceItems();
     if (index < 0 || index >= items.length || items[index].disabled) return;
 
-    const current = this._normalizeOpen(items.length);
+    const current = this._normalizeOpen(items);
     const isOpen = current.includes(index);
     let next = [...current];
 
@@ -478,7 +615,7 @@ export class UIAccordion extends ElementBase {
 
   protected render() {
     const items = this._sourceItems();
-    const normalized = this._normalizeOpen(items.length);
+    const normalized = this._normalizeOpen(items);
     const serialized = serializeOpen(normalized, this.multiple);
     const current = this.getAttribute('open') ?? (this.multiple ? '[]' : '-1');
 
@@ -503,9 +640,11 @@ export class UIAccordion extends ElementBase {
         const headerId = `${this._uid}-header-${index}`;
         const panelId = `${this._uid}-panel-${index}`;
         const isOpen = openSet.has(index);
+        const description = item.description ? `<span class="label-description">${escapeHtml(item.description)}</span>` : '';
+        const badge = item.badge ? `<span class="badge" part="badge">${escapeHtml(item.badge)}</span>` : '';
 
         return `
-          <section class="item" part="item" ${isOpen ? 'open' : ''}>
+          <section class="item" part="item" data-disabled="${item.disabled ? 'true' : 'false'}" ${isOpen ? 'open' : ''}>
             <button
               class="trigger"
               part="trigger"
@@ -516,7 +655,11 @@ export class UIAccordion extends ElementBase {
               aria-expanded="${isOpen ? 'true' : 'false'}"
               ${item.disabled ? 'disabled aria-disabled="true"' : ''}
             >
-              <span class="label" part="label">${item.headerHtml}</span>
+              <span class="label" part="label">
+                <span class="label-title">${item.headerHtml}</span>
+                ${description}
+              </span>
+              ${badge}
               <span class="chevron" part="icon" aria-hidden="true">
                 <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M5 7.5 10 12.5 15 7.5"></path>
@@ -536,6 +679,7 @@ export class UIAccordion extends ElementBase {
       <div class="base" part="base" role="presentation">${renderedItems}</div>
     `);
 
+    this._observePanelInners();
     this._applyOpenState();
   }
 }

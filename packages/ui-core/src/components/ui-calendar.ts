@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { resolveDateTimeTranslations } from './date-time-i18n';
 
 /**
  * ui-calendar attributes
@@ -22,10 +23,16 @@ import { ElementBase } from '../ElementBase';
  * - size="sm|md|lg" (default: md)
  * - hide-today (hides today button)
  * - show-today="true|false" (optional override)
+ * - tone="neutral|info|success|warning|danger" (optional accent override)
+ * - state="idle|loading|error|success" (optional visual/interaction state)
+ * - aria-label="..." (optional calendar label)
  *
  * events
  * - select: { value } (single mode compatibility)
+ * - ui-select: { value, source }
  * - change: { mode, value, start?, end?, values? }
+ * - ui-change: { mode, value, start?, end?, values?, source }
+ * - month-change / ui-month-change: { year, month, source }
  *
  * methods
  * - focusDate(iso)
@@ -44,6 +51,8 @@ type SelectionMode = 'single' | 'range' | 'multiple';
 type OutsideClickMode = 'none' | 'navigate' | 'select';
 type EventsDisplay = 'dots' | 'badges' | 'count';
 type CalendarSize = 'sm' | 'md' | 'lg';
+type CalendarTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+type CalendarState = 'idle' | 'loading' | 'error' | 'success';
 
 type IsoParts = { y: number; m: number; d: number };
 
@@ -89,7 +98,35 @@ const style = `
     min-inline-size: 280px;
     max-inline-size: 100%;
     color-scheme: light dark;
-    font-family: "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  :host([tone="neutral"]) {
+    --ui-calendar-accent: color-mix(in srgb, var(--ui-color-muted, #64748b) 76%, var(--ui-color-text, #0f172a) 24%);
+  }
+
+  :host([tone="info"]) {
+    --ui-calendar-accent: var(--ui-color-primary, #2563eb);
+  }
+
+  :host([tone="success"]) {
+    --ui-calendar-accent: var(--ui-color-success, #16a34a);
+  }
+
+  :host([tone="warning"]) {
+    --ui-calendar-accent: var(--ui-color-warning, #d97706);
+  }
+
+  :host([tone="danger"]) {
+    --ui-calendar-accent: var(--ui-color-danger, #dc2626);
+  }
+
+  :host([state="error"]) {
+    --ui-calendar-accent: var(--ui-color-danger, #dc2626);
+  }
+
+  :host([state="success"]) {
+    --ui-calendar-accent: var(--ui-color-success, #16a34a);
   }
 
   :host([size="sm"]) {
@@ -111,6 +148,7 @@ const style = `
   }
 
   .frame {
+    position: relative;
     border: 1px solid var(--ui-calendar-border);
     border-radius: var(--ui-calendar-radius);
     background: var(--ui-calendar-bg);
@@ -119,6 +157,14 @@ const style = `
     display: grid;
     gap: var(--ui-calendar-gap);
     min-inline-size: 0;
+  }
+
+  :host([bare]) .frame {
+    border: 1px solid var(--ui-calendar-bare-border, var(--ui-calendar-border));
+    border-radius: var(--ui-calendar-bare-radius, var(--ui-calendar-radius));
+    background: var(--ui-calendar-bare-bg, var(--ui-calendar-bg));
+    box-shadow: none;
+    padding: var(--ui-calendar-bare-padding, 10px);
   }
 
   :host([headless]) .frame {
@@ -142,8 +188,49 @@ const style = `
 
   .title-wrap {
     display: flex;
+    position: relative;
     justify-content: center;
     min-inline-size: 0;
+    overflow: visible;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-block-size: 30px;
+    border: 1px solid color-mix(in srgb, var(--ui-calendar-border) 84%, transparent);
+    border-radius: 10px;
+    padding: 0 10px;
+    font: 600 12px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--ui-calendar-text);
+    background: color-mix(in srgb, var(--ui-calendar-bg) 96%, transparent);
+  }
+
+  .status[hidden] {
+    display: none !important;
+  }
+
+  .status-dot {
+    inline-size: 8px;
+    block-size: 8px;
+    border-radius: 999px;
+    background: var(--ui-calendar-accent);
+  }
+
+  :host([state="loading"]) .status-dot {
+    position: relative;
+    overflow: hidden;
+  }
+
+  :host([state="loading"]) .status-dot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 2px solid color-mix(in srgb, var(--ui-calendar-accent) 24%, transparent);
+    border-top-color: var(--ui-calendar-accent);
+    animation: ui-calendar-spin 800ms linear infinite;
   }
 
   .title-btn,
@@ -235,6 +322,11 @@ const style = `
   }
 
   .monthyear-pop {
+    position: absolute;
+    inset-block-start: calc(100% + 8px);
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
     border: 1px solid color-mix(in srgb, var(--ui-calendar-border) 84%, transparent);
     border-radius: 12px;
     background: color-mix(in srgb, var(--ui-calendar-bg) 96%, transparent);
@@ -283,6 +375,11 @@ const style = `
     gap: 6px;
   }
 
+  :host([state="loading"]) .grid-wrap {
+    opacity: 0.68;
+    pointer-events: none;
+  }
+
   .weekdays,
   .week {
     display: grid;
@@ -307,9 +404,10 @@ const style = `
     background: color-mix(in srgb, var(--ui-calendar-bg) 98%, transparent);
     color: var(--ui-calendar-text);
     display: grid;
-    align-content: start;
+    align-content: center;
+    justify-items: center;
     gap: 4px;
-    text-align: left;
+    text-align: center;
     cursor: pointer;
     position: relative;
     overflow: hidden;
@@ -352,16 +450,38 @@ const style = `
     background: color-mix(in srgb, var(--ui-calendar-accent) 7%, transparent);
   }
 
+  :host([state="loading"]) .day {
+    position: relative;
+    overflow: hidden;
+  }
+
+  :host([state="loading"]) .day::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      color-mix(in srgb, transparent 100%, #ffffff) 0%,
+      color-mix(in srgb, var(--ui-calendar-accent) 12%, transparent) 45%,
+      color-mix(in srgb, transparent 100%, #ffffff) 100%
+    );
+    background-size: 220% 100%;
+    animation: ui-calendar-shimmer 1.35s linear infinite;
+    pointer-events: none;
+  }
+
   .day-number {
     font-size: var(--ui-calendar-day-font-size);
     font-weight: 650;
     line-height: 1;
+    justify-self: center;
   }
 
   .events {
     min-block-size: 10px;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
     max-inline-size: 100%;
     overflow: hidden;
@@ -463,6 +583,14 @@ const style = `
     opacity: 0.74;
   }
 
+  :host([state="error"]) .frame {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-color-danger, #dc2626) 28%, transparent), var(--ui-calendar-shadow);
+  }
+
+  :host([state="success"]) .frame {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-color-success, #16a34a) 28%, transparent), var(--ui-calendar-shadow);
+  }
+
   @media (max-width: 420px) {
     .frame {
       padding: 10px;
@@ -487,6 +615,11 @@ const style = `
     .picker-month,
     .picker-year-btn {
       transition: none !important;
+    }
+
+    :host([state="loading"]) .day::after,
+    :host([state="loading"]) .status-dot::after {
+      animation: none !important;
     }
   }
 
@@ -532,6 +665,7 @@ const style = `
     .picker-year-btn,
     .monthyear-pop,
     .tooltip,
+    .status,
     .event-dot,
     .event-badge,
     .event-count {
@@ -563,6 +697,15 @@ const style = `
       border-color: Highlight;
     }
   }
+
+  @keyframes ui-calendar-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes ui-calendar-shimmer {
+    from { background-position: 120% 0; }
+    to { background-position: -120% 0; }
+  }
 `;
 
 const EVENT_TONES: Record<CalendarEventTone, string> = {
@@ -572,8 +715,6 @@ const EVENT_TONES: Record<CalendarEventTone, string> = {
   warning: 'var(--ui-color-warning, #d97706)',
   danger: 'var(--ui-color-danger, #dc2626)'
 };
-
-const MONTH_NAMES_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
@@ -735,6 +876,18 @@ function normalizeSize(raw: string | null): CalendarSize {
   return 'md';
 }
 
+function normalizeTone(raw: string | null): CalendarTone | null {
+  if (raw === 'neutral' || raw === 'info' || raw === 'success' || raw === 'warning' || raw === 'danger') {
+    return raw;
+  }
+  return null;
+}
+
+function normalizeState(raw: string | null): CalendarState {
+  if (raw === 'loading' || raw === 'error' || raw === 'success') return raw;
+  return 'idle';
+}
+
 function uniqueIsoList(values: string[]): string[] {
   const out: string[] = [];
   const seen = new Set<string>();
@@ -776,13 +929,18 @@ export class UICalendar extends ElementBase {
       'readonly',
       'week-start',
       'locale',
+      'translations',
       'outside-click',
       'events-max',
       'events-display',
       'max-selections',
       'size',
       'hide-today',
-      'show-today'
+      'show-today',
+      'tone',
+      'state',
+      'bare',
+      'aria-label'
     ];
   }
 
@@ -855,6 +1013,11 @@ export class UICalendar extends ElementBase {
       this._hoverIso = null;
     }
 
+    if (name === 'state' && normalizeState(newValue) === 'loading') {
+      this._pickerOpen = false;
+      this._hoverIso = null;
+    }
+
     if (!this.isConnected) return;
     this._syncDocumentListener();
     this.requestRender();
@@ -869,7 +1032,7 @@ export class UICalendar extends ElementBase {
     this.requestRender();
   }
 
-  goToMonth(year: number, month: number): void {
+  goToMonth(year: number, month: number, source: 'pointer' | 'keyboard' | 'api' = 'api'): void {
     if (!Number.isFinite(year) || !Number.isFinite(month)) return;
 
     let y = Math.trunc(year);
@@ -884,11 +1047,32 @@ export class UICalendar extends ElementBase {
       y += 1;
     }
 
+    let changed = false;
     if (String(y) !== (this.getAttribute('year') || '')) {
       this.setAttribute('year', String(y));
+      changed = true;
     }
     if (String(m) !== (this.getAttribute('month') || '')) {
       this.setAttribute('month', String(m));
+      changed = true;
+    }
+
+    if (changed) {
+      const detail = { year: y, month: m, source };
+      this.dispatchEvent(
+        new CustomEvent('month-change', {
+          detail,
+          bubbles: true,
+          composed: true
+        })
+      );
+      this.dispatchEvent(
+        new CustomEvent('ui-month-change', {
+          detail,
+          bubbles: true,
+          composed: true
+        })
+      );
     }
   }
 
@@ -971,6 +1155,47 @@ export class UICalendar extends ElementBase {
     return normalizeSize(this.getAttribute('size'));
   }
 
+  private _resolveTone(): CalendarTone | null {
+    return normalizeTone(this.getAttribute('tone'));
+  }
+
+  private _resolveState(): CalendarState {
+    return normalizeState(this.getAttribute('state'));
+  }
+
+  private _resolveLabel(): string {
+    const raw = (this.getAttribute('aria-label') || '').trim();
+    if (raw) return raw;
+    return this._translations().calendarLabel;
+  }
+
+  private _translations() {
+    return resolveDateTimeTranslations(
+      this.getAttribute('locale'),
+      this.getAttribute('translations')
+    );
+  }
+
+  private _resolveBounds(): { minIso: string | null; maxIso: string | null } {
+    let minIso = this._resolveMinIso();
+    let maxIso = this._resolveMaxIso();
+    if (minIso && maxIso && compareISO(minIso, maxIso) > 0) {
+      const swap = minIso;
+      minIso = maxIso;
+      maxIso = swap;
+    }
+    return { minIso, maxIso };
+  }
+
+  private _direction(): 'ltr' | 'rtl' {
+    const hostDir = this.getAttribute('dir');
+    if (hostDir === 'rtl' || hostDir === 'ltr') return hostDir;
+    const parentWithDir = this.closest('[dir]') as HTMLElement | null;
+    const parentDir = parentWithDir?.getAttribute('dir');
+    if (parentDir === 'rtl' || parentDir === 'ltr') return parentDir;
+    return getComputedStyle(this).direction === 'rtl' ? 'rtl' : 'ltr';
+  }
+
   private _maxSelections(): number {
     return readPositiveInt(this.getAttribute('max-selections'), Number.MAX_SAFE_INTEGER);
   }
@@ -992,6 +1217,10 @@ export class UICalendar extends ElementBase {
     return this.hasAttribute('readonly');
   }
 
+  private _isInteractionDisabled(): boolean {
+    return this._isDisabled() || this._resolveState() === 'loading';
+  }
+
   private _isDateOutOfBounds(iso: string, minIso: string | null, maxIso: string | null): boolean {
     if (minIso && compareISO(iso, minIso) < 0) return true;
     if (maxIso && compareISO(iso, maxIso) > 0) return true;
@@ -999,7 +1228,7 @@ export class UICalendar extends ElementBase {
   }
 
   private _isDateBlocked(iso: string, outside: boolean, minIso: string | null, maxIso: string | null): boolean {
-    if (this._isDisabled()) return true;
+    if (this._isInteractionDisabled()) return true;
     if (this._isDateOutOfBounds(iso, minIso, maxIso)) return true;
     if (outside && this._resolveOutsideClickMode() === 'none') return true;
     return false;
@@ -1080,18 +1309,29 @@ export class UICalendar extends ElementBase {
     return JSON.stringify(payload);
   }
 
-  private _emitSelectionEvents(selection: CalendarSelection, sourceIso: string | null): void {
+  private _emitSelectionEvents(
+    selection: CalendarSelection,
+    sourceIso: string | null,
+    source: 'pointer' | 'keyboard' | 'api'
+  ): void {
     if (selection.mode === 'single' && sourceIso) {
       this.dispatchEvent(
         new CustomEvent('select', {
-          detail: { value: sourceIso },
+          detail: { value: sourceIso, source },
+          bubbles: true,
+          composed: true
+        })
+      );
+      this.dispatchEvent(
+        new CustomEvent('ui-select', {
+          detail: { value: sourceIso, source },
           bubbles: true,
           composed: true
         })
       );
     }
 
-    const detail: Record<string, unknown> = { mode: selection.mode };
+    const detail: Record<string, unknown> = { mode: selection.mode, source };
     if (selection.mode === 'single') {
       detail.value = selection.value;
     } else if (selection.mode === 'range') {
@@ -1105,6 +1345,13 @@ export class UICalendar extends ElementBase {
 
     this.dispatchEvent(
       new CustomEvent('change', {
+        detail,
+        bubbles: true,
+        composed: true
+      })
+    );
+    this.dispatchEvent(
+      new CustomEvent('ui-change', {
         detail,
         bubbles: true,
         composed: true
@@ -1131,12 +1378,11 @@ export class UICalendar extends ElementBase {
     if (!parseISO(iso)) return;
 
     const mode = this._resolveSelectionMode();
-    const minIso = this._resolveMinIso();
-    const maxIso = this._resolveMaxIso();
+    const { minIso, maxIso } = this._resolveBounds();
     if (this._isDateOutOfBounds(iso, minIso, maxIso)) return;
 
     const wasReadonly = this._isReadonly();
-    if (this._isDisabled() || wasReadonly) return;
+    if (this._isInteractionDisabled() || wasReadonly) return;
 
     let nextSelection: CalendarSelection = this._normalizeValueForMode(mode);
 
@@ -1176,10 +1422,10 @@ export class UICalendar extends ElementBase {
 
     if (prevSerialized !== nextSerialized) {
       this._setValueAttribute(nextSerialized);
-      this._emitSelectionEvents(nextSelection, mode === 'single' ? iso : null);
+      this._emitSelectionEvents(nextSelection, mode === 'single' ? iso : null, source);
     } else if (mode === 'single') {
       // Backward compatibility: single mode always emits select on explicit interaction.
-      this._emitSelectionEvents(nextSelection, iso);
+      this._emitSelectionEvents(nextSelection, iso, source);
     }
 
     this._focusedIso = iso;
@@ -1199,7 +1445,19 @@ export class UICalendar extends ElementBase {
         timeZone: 'UTC'
       }).format(new Date(Date.UTC(year, month - 1, 1)));
     } catch {
-      return `${MONTH_NAMES_EN[month - 1] || 'Month'} ${year}`;
+      return `${String(month)} ${year}`;
+    }
+  }
+
+  private _monthPickerLabels(locale: string): string[] {
+    try {
+      const formatter = new Intl.DateTimeFormat(locale, {
+        month: 'short',
+        timeZone: 'UTC'
+      });
+      return Array.from({ length: 12 }, (_, idx) => formatter.format(new Date(Date.UTC(2024, idx, 1))));
+    } catch {
+      return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     }
   }
 
@@ -1355,11 +1613,11 @@ export class UICalendar extends ElementBase {
     const nextParts = parseISO(nextIso);
     if (!nextParts) return;
 
-    this.goToMonth(nextParts.y, nextParts.m);
+    this.goToMonth(nextParts.y, nextParts.m, 'keyboard');
     this._focusedIso = nextIso;
     this._shouldRefocus = true;
 
-    if (extendRange && this._resolveSelectionMode() === 'range' && !this._isReadonly() && !this._isDisabled()) {
+    if (extendRange && this._resolveSelectionMode() === 'range' && !this._isReadonly() && !this._isInteractionDisabled()) {
       this._applySelection(nextIso, true, 'keyboard');
     } else {
       this.requestRender();
@@ -1370,7 +1628,7 @@ export class UICalendar extends ElementBase {
     const nextIso = addMonthsISO(currentIso, amount);
     const nextParts = parseISO(nextIso);
     if (!nextParts) return;
-    this.goToMonth(nextParts.y, nextParts.m);
+    this.goToMonth(nextParts.y, nextParts.m, 'keyboard');
     this._focusedIso = nextIso;
     this._shouldRefocus = true;
     this.requestRender();
@@ -1381,42 +1639,6 @@ export class UICalendar extends ElementBase {
     const offsetFromStart = (currentWeekday - weekStart + 7) % 7;
     const move = end === 'start' ? -offsetFromStart : 6 - offsetFromStart;
     this._moveFocusByDays(currentIso, move, false);
-  }
-
-  private _internalFocusable(): HTMLElement[] {
-    const focusable = Array.from(
-      this.root.querySelectorAll<HTMLElement>(
-        'button:not([disabled]):not([aria-disabled="true"]), [tabindex]:not([tabindex="-1"]):not([disabled])'
-      )
-    );
-    return focusable.filter((node) => node.offsetParent !== null || node === this.root.activeElement);
-  }
-
-  private _trapTab(event: KeyboardEvent): boolean {
-    if (event.key !== 'Tab') return false;
-    const focusables = this._internalFocusable();
-    if (!focusables.length) return false;
-
-    const active = this.root.activeElement as HTMLElement | null;
-    const first = focusables[0];
-    const last = focusables[focusables.length - 1];
-
-    if (event.shiftKey) {
-      if (active === first) {
-        event.preventDefault();
-        last.focus();
-        return true;
-      }
-      return false;
-    }
-
-    if (active === last) {
-      event.preventDefault();
-      first.focus();
-      return true;
-    }
-
-    return false;
   }
 
   private _onPointerOver(event: PointerEvent): void {
@@ -1433,7 +1655,8 @@ export class UICalendar extends ElementBase {
     if (!parseISO(iso)) return;
 
     const outside = day.getAttribute('data-outside') === 'true';
-    const blocked = this._isDateBlocked(iso, outside, this._resolveMinIso(), this._resolveMaxIso());
+    const { minIso, maxIso } = this._resolveBounds();
+    const blocked = this._isDateBlocked(iso, outside, minIso, maxIso);
     if (blocked) return;
 
     if (this._hoverIso !== iso) {
@@ -1467,7 +1690,7 @@ export class UICalendar extends ElementBase {
   }
 
   private _toggleMonthYearPicker(next?: boolean): void {
-    if (this._isDisabled()) return;
+    if (this._isInteractionDisabled()) return;
     this._pickerOpen = typeof next === 'boolean' ? next : !this._pickerOpen;
     this._syncDocumentListener();
     this.requestRender();
@@ -1485,12 +1708,12 @@ export class UICalendar extends ElementBase {
     const todayParts = parseISO(todayIso) as IsoParts;
 
     if (action === 'prev-month' || action === 'next-month') {
-      if (this._isDisabled()) return;
+      if (this._isInteractionDisabled()) return;
       const delta = action === 'prev-month' ? -1 : 1;
       const focusedParts = this._focusedIso ? parseISO(this._focusedIso) : null;
       const anchor = focusedParts || { y: year, m: month, d: 1 };
       const next = addMonthsParts(anchor, delta);
-      this.goToMonth(next.y, next.m);
+      this.goToMonth(next.y, next.m, 'pointer');
       this._focusedIso = formatISO({ y: next.y, m: next.m, d: clamp(anchor.d, 1, daysInMonth(next.y, next.m)) });
       this._shouldRefocus = true;
       this.requestRender();
@@ -1498,8 +1721,8 @@ export class UICalendar extends ElementBase {
     }
 
     if (action === 'today') {
-      if (this._isDisabled()) return;
-      this.goToMonth(todayParts.y, todayParts.m);
+      if (this._isInteractionDisabled()) return;
+      this.goToMonth(todayParts.y, todayParts.m, 'pointer');
       this._focusedIso = todayIso;
       this._shouldRefocus = true;
       if (!this._isReadonly()) {
@@ -1516,9 +1739,9 @@ export class UICalendar extends ElementBase {
     }
 
     if (action === 'picker-prev-year' || action === 'picker-next-year') {
-      if (this._isDisabled()) return;
+      if (this._isInteractionDisabled()) return;
       const delta = action === 'picker-prev-year' ? -1 : 1;
-      this.goToMonth(year + delta, month);
+      this.goToMonth(year + delta, month, 'pointer');
       this._pickerOpen = true;
       this._shouldRefocus = true;
       this.requestRender();
@@ -1526,10 +1749,10 @@ export class UICalendar extends ElementBase {
     }
 
     if (action === 'pick-month') {
-      if (this._isDisabled()) return;
+      if (this._isInteractionDisabled()) return;
       const monthValue = Number(actionEl?.getAttribute('data-month') || '');
       if (!Number.isInteger(monthValue) || monthValue < 1 || monthValue > 12) return;
-      this.goToMonth(year, monthValue);
+      this.goToMonth(year, monthValue, 'pointer');
       this._pickerOpen = false;
       this._shouldRefocus = true;
       this.requestRender();
@@ -1543,14 +1766,15 @@ export class UICalendar extends ElementBase {
     if (!parseISO(iso)) return;
 
     const outside = day.getAttribute('data-outside') === 'true';
-    if (this._isDateBlocked(iso, outside, this._resolveMinIso(), this._resolveMaxIso())) return;
+    const { minIso, maxIso } = this._resolveBounds();
+    if (this._isDateBlocked(iso, outside, minIso, maxIso)) return;
 
     if (outside) {
       const outsideMode = this._resolveOutsideClickMode();
       if (outsideMode === 'none') return;
       if (outsideMode === 'navigate') {
         const parts = parseISO(iso) as IsoParts;
-        this.goToMonth(parts.y, parts.m);
+        this.goToMonth(parts.y, parts.m, 'pointer');
       }
     }
 
@@ -1565,8 +1789,6 @@ export class UICalendar extends ElementBase {
   }
 
   private _onKeyDown(event: KeyboardEvent): void {
-    if (this._trapTab(event)) return;
-
     if (event.key === 'Escape' && this._pickerOpen) {
       event.preventDefault();
       this._toggleMonthYearPicker(false);
@@ -1581,17 +1803,18 @@ export class UICalendar extends ElementBase {
     if (!parseISO(iso)) return;
 
     const weekStart = normalizeWeekStart(this.getAttribute('week-start'), this._resolveLocale());
+    const rtl = this._direction() === 'rtl';
     const shift = event.shiftKey;
 
     if (event.key === 'ArrowRight') {
       event.preventDefault();
-      this._moveFocusByDays(iso, 1, shift);
+      this._moveFocusByDays(iso, rtl ? -1 : 1, shift);
       return;
     }
 
     if (event.key === 'ArrowLeft') {
       event.preventDefault();
-      this._moveFocusByDays(iso, -1, shift);
+      this._moveFocusByDays(iso, rtl ? 1 : -1, shift);
       return;
     }
 
@@ -1634,10 +1857,11 @@ export class UICalendar extends ElementBase {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       const outside = day.getAttribute('data-outside') === 'true';
-      if (this._isDateBlocked(iso, outside, this._resolveMinIso(), this._resolveMaxIso())) return;
+      const { minIso, maxIso } = this._resolveBounds();
+      if (this._isDateBlocked(iso, outside, minIso, maxIso)) return;
       if (outside && this._resolveOutsideClickMode() === 'navigate') {
         const parts = parseISO(iso) as IsoParts;
-        this.goToMonth(parts.y, parts.m);
+        this.goToMonth(parts.y, parts.m, 'keyboard');
       }
       if (!this._isReadonly()) {
         this._applySelection(iso, false, 'keyboard');
@@ -1647,15 +1871,28 @@ export class UICalendar extends ElementBase {
 
   protected override render(): void {
     const locale = this._resolveLocale();
+    const t = this._translations();
     const weekStart = normalizeWeekStart(this.getAttribute('week-start'), locale);
     const { year, month } = this._resolvedView();
     const mode = this._resolveSelectionMode();
-    const minIso = this._resolveMinIso();
-    const maxIso = this._resolveMaxIso();
+    const { minIso, maxIso } = this._resolveBounds();
     const todayIso = this._todayIso();
     const eventsDisplay = this._resolveEventsDisplay();
     const eventsMax = this._eventsMax();
     const size = this._resolveCalendarSize();
+    const tone = this._resolveTone();
+    const state = this._resolveState();
+    const interactionDisabled = this._isInteractionDisabled();
+    const calendarLabel = this._resolveLabel();
+
+    if (tone) this.setAttribute('tone', tone);
+    else this.removeAttribute('tone');
+
+    if (state !== 'idle') this.setAttribute('state', state);
+    else this.removeAttribute('state');
+
+    if (state === 'loading') this.setAttribute('aria-busy', 'true');
+    else this.removeAttribute('aria-busy');
 
     this._ensureEventsCache();
 
@@ -1718,7 +1955,7 @@ export class UICalendar extends ElementBase {
               const visible = dayEvents.slice(0, eventsMax);
               eventsMarkup = visible
                 .map((event) => {
-                  const title = escapeHtml(event.title || 'Event');
+                  const title = escapeHtml(event.title || t.event);
                   const tone = EVENT_TONES[event.tone || 'default'];
                   return `<span class="event-badge" part="event-dot" style="--event-tone:${tone}" title="${title}">${title}</span>`;
                 })
@@ -1739,9 +1976,7 @@ export class UICalendar extends ElementBase {
           }
 
           const tooltipId = `ui-calendar-tip-${cell.iso}`;
-          const tooltipText = dayEvents.length
-            ? dayEvents.map((event) => escapeHtml(event.title || 'Event')).join('<br/>')
-            : '';
+          const tooltipText = dayEvents.length ? dayEvents.map((event) => escapeHtml(event.title || t.event)).join('<br/>') : '';
           const hasTooltip = tooltipText.length > 0;
 
           const ariaSelected = selected || inRange || isRangeStart || isRangeEnd;
@@ -1780,7 +2015,7 @@ export class UICalendar extends ElementBase {
       rows.push(`<div class="week" role="row">${days}</div>`);
     }
 
-    const monthButtons = MONTH_NAMES_EN.map((label, idx) => {
+    const monthButtons = this._monthPickerLabels(locale).map((label, idx) => {
       const value = idx + 1;
       const active = value === month;
       return `
@@ -1791,7 +2026,7 @@ export class UICalendar extends ElementBase {
           data-action="pick-month"
           data-month="${value}"
           data-active="${active ? 'true' : 'false'}"
-          ${this._isDisabled() ? 'disabled' : ''}
+          ${interactionDisabled ? 'disabled' : ''}
         >
           ${label}
         </button>
@@ -1803,20 +2038,36 @@ export class UICalendar extends ElementBase {
       .join('');
 
     const todayButton = this._showTodayButton()
-      ? `<button type="button" class="today-btn" part="today" data-action="today" ${this._isDisabled() ? 'disabled' : ''}>Today</button>`
+      ? `<button type="button" class="today-btn" part="today" data-action="today" ${interactionDisabled ? 'disabled' : ''}>${escapeHtml(t.today)}</button>`
       : '';
+
+    const statusLabel =
+      state === 'loading'
+        ? t.syncingSchedule
+        : state === 'error'
+          ? t.unableToSyncEvents
+          : state === 'success'
+            ? t.scheduleSynced
+            : '';
 
     this.setContent(`
       <style>${style}</style>
-      <section class="frame" part="frame" data-size="${size}" aria-disabled="${this._isDisabled() ? 'true' : 'false'}">
+      <section
+        class="frame"
+        part="frame"
+        data-size="${size}"
+        data-state="${state}"
+        aria-disabled="${interactionDisabled ? 'true' : 'false'}"
+        aria-label="${escapeHtml(calendarLabel)}"
+      >
         <div class="live-region" aria-live="polite" aria-atomic="true">${escapeHtml(monthLabel)}</div>
 
         <header class="header" part="header">
           <div class="nav" part="nav">
-            <button type="button" class="nav-btn" part="prev" data-action="prev-month" ${!canPrev || this._isDisabled() ? 'disabled' : ''} aria-label="Previous month">
+            <button type="button" class="nav-btn" part="prev" data-action="prev-month" ${!canPrev || interactionDisabled ? 'disabled' : ''} aria-label="${escapeHtml(t.previousMonth)}">
               <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M14.7 6.3a1 1 0 0 1 0 1.4L10.41 12l4.29 4.3a1 1 0 1 1-1.42 1.4l-5-5a1 1 0 0 1 0-1.4l5-5a1 1 0 0 1 1.42 0Z" fill="currentColor"/></svg>
             </button>
-            <button type="button" class="nav-btn" part="next" data-action="next-month" ${!canNext || this._isDisabled() ? 'disabled' : ''} aria-label="Next month">
+            <button type="button" class="nav-btn" part="next" data-action="next-month" ${!canNext || interactionDisabled ? 'disabled' : ''} aria-label="${escapeHtml(t.nextMonth)}">
               <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M9.3 17.7a1 1 0 0 1 0-1.4L13.59 12 9.3 7.7a1 1 0 0 1 1.4-1.4l5 5a1 1 0 0 1 0 1.4l-5 5a1 1 0 0 1-1.4 0Z" fill="currentColor"/></svg>
             </button>
           </div>
@@ -1827,13 +2078,21 @@ export class UICalendar extends ElementBase {
               class="title-btn"
               part="title monthyear"
               data-action="toggle-monthyear"
-              ${this._isDisabled() ? 'disabled' : ''}
+              ${interactionDisabled ? 'disabled' : ''}
               aria-expanded="${this._pickerOpen ? 'true' : 'false'}"
-              aria-label="Choose month and year"
+              aria-label="${escapeHtml(t.chooseMonthYear)}"
             >
               <span>${escapeHtml(monthLabel)}</span>
               <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M6.7 9.7a1 1 0 0 1 1.4 0L12 13.59l3.9-3.9a1 1 0 1 1 1.4 1.42l-4.6 4.6a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.42Z" fill="currentColor"/></svg>
             </button>
+            <section class="monthyear-pop" part="monthyear" ${this._pickerOpen ? '' : 'hidden'}>
+              <div class="picker-header">
+                <button type="button" class="picker-year-btn" part="prev" data-action="picker-prev-year" ${interactionDisabled ? 'disabled' : ''} aria-label="${escapeHtml(t.previousYear)}">-</button>
+                <span class="picker-year">${year}</span>
+                <button type="button" class="picker-year-btn" part="next" data-action="picker-next-year" ${interactionDisabled ? 'disabled' : ''} aria-label="${escapeHtml(t.nextYear)}">+</button>
+              </div>
+              <div class="picker-months">${monthButtons}</div>
+            </section>
           </div>
 
           <div class="header-actions">
@@ -1841,16 +2100,12 @@ export class UICalendar extends ElementBase {
           </div>
         </header>
 
-        <section class="monthyear-pop" part="monthyear" ${this._pickerOpen ? '' : 'hidden'}>
-          <div class="picker-header">
-            <button type="button" class="picker-year-btn" part="prev" data-action="picker-prev-year" ${this._isDisabled() ? 'disabled' : ''} aria-label="Previous year">-</button>
-            <span class="picker-year">${year}</span>
-            <button type="button" class="picker-year-btn" part="next" data-action="picker-next-year" ${this._isDisabled() ? 'disabled' : ''} aria-label="Next year">+</button>
-          </div>
-          <div class="picker-months">${monthButtons}</div>
-        </section>
+        <div class="status" part="status" ${statusLabel ? '' : 'hidden'}>
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>${escapeHtml(statusLabel)}</span>
+        </div>
 
-        <section class="grid-wrap" part="grid" role="grid" aria-label="Calendar grid">
+        <section class="grid-wrap" part="grid" role="grid" aria-label="${escapeHtml(calendarLabel)}">
           <div class="weekdays" role="row">${weekHeader}</div>
           ${rows.join('')}
         </section>

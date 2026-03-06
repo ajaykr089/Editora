@@ -19,10 +19,79 @@ export default {
   component: DataTable,
   argTypes: {
     pageSize: { control: { type: 'number', min: 3, max: 20, step: 1 } },
+    shape: { control: { type: 'radio', options: ['default', 'square', 'soft'] } },
+    variant: { control: { type: 'radio', options: ['default', 'flat', 'contrast'] } },
+    elevation: { control: { type: 'radio', options: ['default', 'none', 'low', 'high'] } },
     striped: { control: 'boolean' },
     hover: { control: 'boolean' },
-    stickyHeader: { control: 'boolean' }
+    stickyHeader: { control: 'boolean' },
+    stickyFooter: { control: 'boolean' }
   }
+};
+
+const dashboardShellStyle: React.CSSProperties = {
+  display: 'grid',
+  gap: 'var(--ui-space-lg, 16px)',
+  maxWidth: 1040
+};
+
+const panelStyle: React.CSSProperties = {
+  border: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent)',
+  borderRadius: 'calc(var(--ui-radius, 12px) + 4px)',
+  background:
+    'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent), color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 86%, transparent))',
+  boxShadow: 'var(--ui-shadow-sm, 0 10px 24px rgba(15, 23, 42, 0.08))',
+  padding: 'var(--ui-space-lg, 16px)'
+};
+
+const panelTitleStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: 'var(--ui-font-size-xl, 20px)',
+  lineHeight: 1.3,
+  color: 'var(--ui-color-text, #0f172a)',
+  letterSpacing: '-0.01em'
+};
+
+const panelSubtitleStyle: React.CSSProperties = {
+  margin: 'var(--ui-space-xs, 4px) 0 0',
+  fontSize: 'var(--ui-font-size-md, 14px)',
+  lineHeight: 1.45,
+  color: 'var(--ui-color-muted, #64748b)'
+};
+
+const metricGridStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+  gap: 'var(--ui-space-sm, 8px)'
+};
+
+const metricCardStyle: React.CSSProperties = {
+  border: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent)',
+  borderRadius: 'var(--ui-radius, 12px)',
+  background: 'color-mix(in srgb, var(--ui-color-surface, #ffffff) 95%, transparent)',
+  padding: 'var(--ui-space-sm, 8px) var(--ui-space-md, 12px)'
+};
+
+const metricLabelStyle: React.CSSProperties = {
+  fontSize: 'var(--ui-font-size-sm, 12px)',
+  color: 'var(--ui-color-muted, #64748b)',
+  textTransform: 'uppercase',
+  letterSpacing: '0.06em'
+};
+
+const metricValueStyle: React.CSSProperties = {
+  marginTop: 'var(--ui-space-xs, 4px)',
+  fontSize: 'var(--ui-font-size-xl, 20px)',
+  color: 'var(--ui-color-text, #0f172a)',
+  fontWeight: 700,
+  lineHeight: 1.2
+};
+
+const toolbarStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: 'var(--ui-space-sm, 8px)',
+  flexWrap: 'wrap',
+  alignItems: 'center'
 };
 
 const users = [
@@ -72,16 +141,46 @@ function statusTone(status: string): 'success' | 'warning' | 'danger' | 'info' {
 export const UsersTable = (args: any) => {
   const [page, setPage] = React.useState(1);
   const [selected, setSelected] = React.useState<number[]>([]);
+  const totalSignups = React.useMemo(() => users.reduce((sum, row) => sum + row.signups, 0), []);
 
   return (
-    <Grid style={{ display: 'grid', gap: 10, maxWidth: 980 }}>
+    <Grid style={dashboardShellStyle}>
+      <Box style={panelStyle}>
+        <Flex style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--ui-space-md, 12px)', flexWrap: 'wrap' }}>
+          <div>
+            <h3 style={panelTitleStyle}>Workforce Access Directory</h3>
+            <p style={panelSubtitleStyle}>Operational user inventory with multi-select workflows and in-row actions.</p>
+          </div>
+          <Badge tone="brand" variant="soft">Directory</Badge>
+        </Flex>
+
+        <Grid style={{ ...metricGridStyle, marginTop: 'var(--ui-space-md, 12px)' }}>
+          <Box style={metricCardStyle}>
+            <div style={metricLabelStyle}>Total Records</div>
+            <div style={metricValueStyle}>{users.length}</div>
+          </Box>
+          <Box style={metricCardStyle}>
+            <div style={metricLabelStyle}>Selected</div>
+            <div style={metricValueStyle}>{selected.length}</div>
+          </Box>
+          <Box style={metricCardStyle}>
+            <div style={metricLabelStyle}>Current Page</div>
+            <div style={metricValueStyle}>{page}</div>
+          </Box>
+        </Grid>
+      </Box>
+
       <DataTable
         sortable
         selectable
         multiSelect
+        shape={args.shape}
+        variant={args.variant}
+        elevation={args.elevation}
         striped={args.striped}
         hover={args.hover}
         stickyHeader={args.stickyHeader}
+        stickyFooter={args.stickyFooter}
         page={page}
         pageSize={args.pageSize}
         paginationId="users-pagination"
@@ -89,6 +188,7 @@ export const UsersTable = (args: any) => {
         onRowSelect={(detail) => setSelected(detail.indices)}
       >
         <table>
+          <caption>Click row actions to validate that controls do not toggle row selection.</caption>
           <thead>
             <tr>
               <th data-key="name">Name</th>
@@ -96,6 +196,7 @@ export const UsersTable = (args: any) => {
               <th data-key="role">Role</th>
               <th data-key="status">Status</th>
               <th data-key="signups">Signups</th>
+              <th data-key="actions">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -110,13 +211,23 @@ export const UsersTable = (args: any) => {
                   </Badge>
                 </td>
                 <td>{row.signups}</td>
+                <td>
+                  <Button size="sm" variant="ghost">View</Button>
+                </td>
               </tr>
             ))}
           </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan={4}>Total signups</td>
+              <td>{totalSignups}</td>
+              <td>{selected.length ? `${selected.length} selected` : ''}</td>
+            </tr>
+          </tfoot>
         </table>
       </DataTable>
 
-      <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--ui-space-sm, 8px)', flexWrap: 'wrap' }}>
         <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>
           Selected users: {selected.length ? selected.length : 'none'}
         </Box>
@@ -128,27 +239,147 @@ export const UsersTable = (args: any) => {
 
 UsersTable.args = {
   pageSize: 6,
+  shape: 'default',
+  variant: 'default',
+  elevation: 'default',
   striped: true,
   hover: true,
-  stickyHeader: false
+  stickyHeader: false,
+  stickyFooter: false
 };
+
+export const ShapeVariants = () => (
+  <Grid style={dashboardShellStyle}>
+    <Box style={panelStyle}>
+      <h3 style={panelTitleStyle}>Shape + Surface Variants</h3>
+      <p style={panelSubtitleStyle}>Use square corners and flat surfaces for utility-heavy enterprise screens, or softer/elevated styles for dashboards.</p>
+    </Box>
+
+    <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--ui-space-md, 12px)' }}>
+      <Box style={panelStyle}>
+        <h4 style={{ margin: 0, fontSize: 'var(--ui-font-size-lg, 16px)', color: 'var(--ui-color-text, #0f172a)' }}>Default</h4>
+        <p style={{ ...panelSubtitleStyle, marginBottom: 'var(--ui-space-sm, 8px)' }}>Balanced rounded enterprise table</p>
+        <DataTable sortable hover striped pageSize={4}>
+          <table>
+            <thead>
+              <tr>
+                <th data-key="id">Order</th>
+                <th data-key="customer">Customer</th>
+                <th data-key="status">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.slice(0, 4).map((row) => (
+                <tr key={`default-${row.id}`}>
+                  <td>{row.id}</td>
+                  <td>{row.customer}</td>
+                  <td><Badge tone={statusTone(row.status)} variant="soft" size="sm">{row.status}</Badge></td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={2}>Visible rows</td>
+                <td>{orders.slice(0, 4).length}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </DataTable>
+      </Box>
+
+      <Box style={panelStyle}>
+        <h4 style={{ margin: 0, fontSize: 'var(--ui-font-size-lg, 16px)', color: 'var(--ui-color-text, #0f172a)' }}>Flat Square</h4>
+        <p style={{ ...panelSubtitleStyle, marginBottom: 'var(--ui-space-sm, 8px)' }}>Minimal shape for dense operations</p>
+        <DataTable sortable hover striped stickyFooter shape="square" variant="flat" elevation="none" pageSize={4}>
+          <table>
+            <thead>
+              <tr>
+                <th data-key="id">Order</th>
+                <th data-key="customer">Customer</th>
+                <th data-key="status">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.slice(0, 4).map((row) => (
+                <tr key={`flat-${row.id}`}>
+                  <td>{row.id}</td>
+                  <td>{row.customer}</td>
+                  <td><Badge tone={statusTone(row.status)} variant="soft" size="sm">{row.status}</Badge></td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={2}>Flat footer</td>
+                <td>Sticky</td>
+              </tr>
+            </tfoot>
+          </table>
+        </DataTable>
+      </Box>
+
+      <Box style={panelStyle}>
+        <h4 style={{ margin: 0, fontSize: 'var(--ui-font-size-lg, 16px)', color: 'var(--ui-color-text, #0f172a)' }}>Soft High Elevation</h4>
+        <p style={{ ...panelSubtitleStyle, marginBottom: 'var(--ui-space-sm, 8px)' }}>Premium dashboard card treatment</p>
+        <DataTable sortable hover striped stickyFooter shape="soft" elevation="high" pageSize={4}>
+          <table>
+            <thead>
+              <tr>
+                <th data-key="id">Order</th>
+                <th data-key="customer">Customer</th>
+                <th data-key="status">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.slice(0, 4).map((row) => (
+                <tr key={`soft-${row.id}`}>
+                  <td>{row.id}</td>
+                  <td>{row.customer}</td>
+                  <td><Badge tone={statusTone(row.status)} variant="soft" size="sm">{row.status}</Badge></td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={2}>Surface style</td>
+                <td>Soft + High</td>
+              </tr>
+            </tfoot>
+          </table>
+        </DataTable>
+      </Box>
+    </Grid>
+  </Grid>
+);
 
 export const OrdersTable = () => {
   const [page, setPage] = React.useState(1);
+  const paidOrders = React.useMemo(() => orders.filter((order) => order.status === 'Paid').length, []);
 
   return (
-    <Grid style={{ display: 'grid', gap: 10, maxWidth: 980 }}>
+    <Grid style={dashboardShellStyle}>
+      <Box style={panelStyle}>
+        <Flex style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--ui-space-md, 12px)', flexWrap: 'wrap' }}>
+          <div>
+            <h3 style={panelTitleStyle}>Order Pipeline</h3>
+            <p style={panelSubtitleStyle}>Live commerce orders sorted by status, payout amount, and settlement date.</p>
+          </div>
+          <Badge tone="info" variant="soft">Revenue Ops</Badge>
+        </Flex>
+      </Box>
       <DataTable
         sortable
         striped
         hover
         stickyHeader
+        stickyFooter
         page={page}
         pageSize={4}
         paginationId="orders-pagination"
         onPageChange={(detail) => setPage(detail.page)}
       >
         <table>
+          <caption>Sortable order ledger for finance and support triage.</caption>
           <thead>
             <tr>
               <th data-key="id">Order</th>
@@ -173,6 +404,13 @@ export const OrdersTable = () => {
               </tr>
             ))}
           </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan={3}>Paid orders</td>
+              <td>{paidOrders}</td>
+              <td>{orders.length} total</td>
+            </tr>
+          </tfoot>
         </table>
       </DataTable>
 
@@ -191,8 +429,13 @@ export const FilterResizeReorder = () => {
   const [stats, setStats] = React.useState({ total: users.length, filtered: users.length });
 
   return (
-    <Grid style={{ display: 'grid', gap: 10, maxWidth: 980 }}>
-      <Flex style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+    <Grid style={dashboardShellStyle}>
+      <Box style={panelStyle}>
+        <h3 style={panelTitleStyle}>Analyst View Builder</h3>
+        <p style={panelSubtitleStyle}>Filter by token, resize columns, and drag headers to curate review-ready layouts.</p>
+      </Box>
+
+      <Flex style={toolbarStyle}>
         <Input
           value={query}
           onChange={(next) => {
@@ -243,6 +486,7 @@ export const FilterResizeReorder = () => {
         onColumnOrderChange={(detail) => setOrder(detail.order)}
       >
         <table>
+          <caption>Interactive analyst table with drag/reorder/resize behaviors.</caption>
           <thead>
             <tr>
               <th data-key="name">Name</th>
@@ -288,8 +532,13 @@ export const VirtualizedLargeDataset = () => {
   const [range, setRange] = React.useState({ start: 0, end: 0, visible: 0, total: virtualRows.length });
 
   return (
-    <Grid style={{ display: 'grid', gap: 10, maxWidth: 1020 }}>
-      <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+    <Grid style={dashboardShellStyle}>
+      <Box style={panelStyle}>
+        <h3 style={panelTitleStyle}>Large Dataset Performance</h3>
+        <p style={panelSubtitleStyle}>Virtualized rendering with overscan keeps interaction smooth at 1,200+ rows.</p>
+      </Box>
+
+      <Flex style={{ ...toolbarStyle, justifyContent: 'space-between' }}>
         <Input
           value={query}
           onChange={(next) => setQuery(next)}
@@ -315,6 +564,7 @@ export const VirtualizedLargeDataset = () => {
         onVirtualRangeChange={(detail) => setRange(detail)}
       >
         <table>
+          <caption>Virtualized enterprise directory. Scroll to test range window updates.</caption>
           <thead>
             <tr>
               <th data-key="id">ID</th>
@@ -346,7 +596,7 @@ export const VirtualizedLargeDataset = () => {
 };
 
 export const AccessibilityKeyboardMap = () => (
-  <Grid style={{ display: 'grid', gap: 10, maxWidth: 980 }}>
+  <Grid style={dashboardShellStyle}>
     <Box
       style={{
         border: '1px solid color-mix(in srgb, var(--ui-color-primary, #2563eb) 22%, var(--ui-color-border, #cbd5e1))',
@@ -388,25 +638,59 @@ export const AccessibilityKeyboardMap = () => (
 );
 
 export const LoadingErrorEmptyMatrix = () => (
-  <Grid style={{ display: 'grid', gap: 14 }}>
+  <Grid style={{ display: 'grid', gap: 'var(--ui-space-md, 12px)' }}>
+    <Box style={panelStyle}>
+      <h3 style={panelTitleStyle}>Operational States Matrix</h3>
+      <p style={panelSubtitleStyle}>Demonstrates loading, error, empty, and success table states for production flows.</p>
+    </Box>
+
     <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
       <Box style={{ border: '1px solid var(--ui-color-border, #cbd5e1)', borderRadius: 'calc(var(--ui-radius, 12px) + 2px)', padding: 'var(--ui-space-lg, 16px)' }}>
         <h4 style={{ margin: '0 0 10px' }}>Loading</h4>
-        <Skeleton variant="text" count={5} animated />
+        <DataTable loading state="loading" stateText="Syncing billing records">
+          <table>
+            <thead>
+              <tr>
+                <th data-key="metric">Metric</th>
+                <th data-key="value">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Pending invoices</td><td><Skeleton variant="text" count={1} animated /></td></tr>
+              <tr><td>Open disputes</td><td><Skeleton variant="text" count={1} animated /></td></tr>
+            </tbody>
+          </table>
+        </DataTable>
       </Box>
 
       <Box style={{ border: '1px solid var(--ui-color-border, #cbd5e1)', borderRadius: 'calc(var(--ui-radius, 12px) + 2px)', padding: 'var(--ui-space-lg, 16px)' }}>
         <h4 style={{ margin: '0 0 10px' }}>Error</h4>
-        <Alert
-          tone="danger"
-          title="Could not fetch orders"
-          description="API returned 502. Retry or contact platform team."
-          dismissible
-        >
-          <Box slot="actions">
-            <Button size="sm">Retry</Button>
-          </Box>
-        </Alert>
+        <DataTable state="error" stateText="Orders API timeout, retry required">
+          <table>
+            <thead>
+              <tr>
+                <th data-key="metric">Metric</th>
+                <th data-key="value">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Failed requests</td><td>12</td></tr>
+              <tr><td>Last healthy sync</td><td>2m ago</td></tr>
+            </tbody>
+          </table>
+        </DataTable>
+        <Box style={{ marginTop: 'var(--ui-space-sm, 8px)' }}>
+          <Alert
+            tone="danger"
+            title="Could not fetch orders"
+            description="API returned 502. Retry or contact platform team."
+            dismissible
+          >
+            <Box slot="actions">
+              <Button size="sm">Retry</Button>
+            </Box>
+          </Alert>
+        </Box>
       </Box>
 
       <Box style={{ border: '1px solid var(--ui-color-border, #cbd5e1)', borderRadius: 'calc(var(--ui-radius, 12px) + 2px)', padding: 'var(--ui-space-lg, 16px)' }}>
@@ -422,7 +706,7 @@ export const LoadingErrorEmptyMatrix = () => (
 
     <Box style={{ border: '1px solid var(--ui-color-border, #cbd5e1)', borderRadius: 'calc(var(--ui-radius, 12px) + 2px)', padding: 'var(--ui-space-lg, 16px)' }}>
       <h4 style={{ margin: '0 0 10px' }}>Success</h4>
-      <DataTable sortable striped hover page={1} pageSize={3}>
+      <DataTable sortable striped hover state="success" stateText="Data quality checks passed" page={1} pageSize={3}>
         <table>
           <thead>
             <tr>
@@ -466,8 +750,13 @@ export const PinnedFilterBuilderBulkActions = () => {
     : { left: ['name'], right: ['signups'] };
 
   return (
-    <Grid style={{ display: 'grid', gap: 10, maxWidth: 1020 }}>
-      <Flex style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+    <Grid style={dashboardShellStyle}>
+      <Box style={panelStyle}>
+        <h3 style={panelTitleStyle}>Pinned Columns + Bulk Operations</h3>
+        <p style={panelSubtitleStyle}>Segment users by filter rules, keep critical columns pinned, and run bulk workflows.</p>
+      </Box>
+
+      <Flex style={toolbarStyle}>
         <Input
           value={query}
           onChange={(next) => {
@@ -545,6 +834,7 @@ export const PinnedFilterBuilderBulkActions = () => {
         </Button>
 
         <table>
+          <caption>Pinned-column campaign table with reusable bulk actions.</caption>
           <thead>
             <tr>
               <th data-key="name">Name</th>

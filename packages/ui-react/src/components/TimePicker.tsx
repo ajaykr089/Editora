@@ -1,4 +1,5 @@
 import React, { useEffect, useImperativeHandle, useRef } from 'react';
+import { serializeTranslations } from './_internals';
 
 export type TimePickerDetail = {
   mode: 'time';
@@ -28,6 +29,7 @@ export type TimePickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'
   hint?: string;
   error?: string;
   locale?: string;
+  translations?: Record<string, string> | string;
   variant?: 'default' | 'contrast';
   onInput?: (detail: TimePickerDetail) => void;
   onChange?: (detail: TimePickerDetail) => void;
@@ -60,6 +62,7 @@ export const TimePicker = React.forwardRef<HTMLElement, TimePickerProps>(functio
     hint,
     error,
     locale,
+    translations,
     variant,
     onInput,
     onChange,
@@ -147,6 +150,7 @@ export const TimePicker = React.forwardRef<HTMLElement, TimePickerProps>(functio
     syncAttr('hint', hint ?? null);
     syncAttr('error', error ?? null);
     syncAttr('locale', locale ?? null);
+    syncAttr('translations', serializeTranslations(translations));
     syncAttr('variant', variant && variant !== 'default' ? variant : null);
   }, [
     value,
@@ -170,6 +174,7 @@ export const TimePicker = React.forwardRef<HTMLElement, TimePickerProps>(functio
     hint,
     error,
     locale,
+    translations,
     variant
   ]);
 
@@ -179,4 +184,3 @@ export const TimePicker = React.forwardRef<HTMLElement, TimePickerProps>(functio
 TimePicker.displayName = 'TimePicker';
 
 export default TimePicker;
-

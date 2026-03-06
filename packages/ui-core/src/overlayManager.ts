@@ -1,3 +1,5 @@
+import { acquireBodyScrollLock, releaseBodyScrollLock } from './scroll-lock';
+
 type OverlayItem = HTMLElement;
 
 export const OverlayManager = {
@@ -41,18 +43,12 @@ export const OverlayManager = {
   */
   acquireLock() {
     this._lockCount = Math.max(0, (this._lockCount || 0) + 1);
-    if (typeof document !== 'undefined' && this._lockCount === 1) {
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
-    }
+    acquireBodyScrollLock();
   },
 
   releaseLock() {
     this._lockCount = Math.max(0, (this._lockCount || 0) - 1);
-    if (typeof document !== 'undefined' && this._lockCount === 0) {
-      document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
-    }
+    releaseBodyScrollLock();
   },
 
   lockCount() {

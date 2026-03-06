@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Dropdown, Grid } from '@editora/ui-react';
+import { Box, Button, Dropdown, Grid, ThemeProvider, useFloating } from '@editora/ui-react';
 
 export default {
   title: 'UI/Dropdown',
@@ -16,8 +16,16 @@ export default {
   }
 };
 
+const cardStyle: React.CSSProperties = {
+  border: '1px solid var(--ui-color-border, rgba(15, 23, 42, 0.16))',
+  borderRadius: 12,
+  padding: 14,
+  background: 'var(--ui-color-surface, #ffffff)',
+  color: 'var(--ui-color-text, #0f172a)'
+};
+
 const MenuContent = () => (
-  <Box slot="content">
+  <Box slot="content" role="menu" style={{ minWidth: 200, padding: 0, borderRadius: 0, boxShadow: 'var(--ui-shadow-sm, 0 2px 6px rgba(16,24,40,0.08))' }}>
     <Box role="menuitem" tabIndex={-1}><span className="icon">✏</span><span className="label">Edit</span><span className="shortcut">E</span></Box>
     <Box role="menuitem" tabIndex={-1}><span className="icon">⧉</span><span className="label">Duplicate</span><span className="shortcut">D</span></Box>
     <Box className="separator" role="separator" />
@@ -37,6 +45,12 @@ export const Playground = (args: any) => (
       tone={args.tone}
       closeOnSelect={args.closeOnSelect}
       typeahead={args.typeahead}
+      style={{
+        ["--ui-dropdown-menu-padding" as any]: "0px",
+        ["--ui-dropdown-menu-radius" as any]: "0px",
+        ["--ui-dropdown-menu-border" as any]: "0",
+        ["--ui-dropdown-menu-shadow" as any]: "none",
+      }}
     >
       <Button slot="trigger">Open dropdown</Button>
       <MenuContent />
@@ -58,7 +72,7 @@ Playground.args = {
 
 export const VisualVariants = () => (
   <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(240px, 1fr))', gap: 16, padding: 20 }}>
-    <Box style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 14 }}>
+    <Box style={cardStyle}>
       <strong>Soft Default</strong>
       <Box style={{ marginTop: 10 }}>
         <Dropdown open shape="soft" placement="bottom">
@@ -68,7 +82,7 @@ export const VisualVariants = () => (
       </Box>
     </Box>
 
-    <Box style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 14 }}>
+    <Box style={cardStyle}>
       <strong>Square Flat</strong>
       <Box style={{ marginTop: 10 }}>
         <Dropdown open shape="square" variant="flat" elevation="none" density="compact">
@@ -78,7 +92,7 @@ export const VisualVariants = () => (
       </Box>
     </Box>
 
-    <Box style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 14 }}>
+    <Box style={cardStyle}>
       <strong>Line / Compact</strong>
       <Box style={{ marginTop: 10 }}>
         <Dropdown open variant="line" shape="square" density="compact" tone="warning">
@@ -88,7 +102,7 @@ export const VisualVariants = () => (
       </Box>
     </Box>
 
-    <Box style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 14 }}>
+    <Box style={cardStyle}>
       <strong>Solid Comfortable</strong>
       <Box style={{ marginTop: 10 }}>
         <Dropdown open variant="solid" density="comfortable" elevation="low">
@@ -98,7 +112,7 @@ export const VisualVariants = () => (
       </Box>
     </Box>
 
-    <Box style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 14, background: 'linear-gradient(135deg, #f8fafc, #eef2ff)' }}>
+    <Box style={{ ...cardStyle, background: 'var(--ui-color-surface-alt, #f8fafc)' }}>
       <strong>Glass Surface</strong>
       <Box style={{ marginTop: 10 }}>
         <Dropdown open variant="glass" shape="soft" elevation="high">
@@ -108,7 +122,7 @@ export const VisualVariants = () => (
       </Box>
     </Box>
 
-    <Box style={{ border: '1px solid #1e293b', borderRadius: 12, padding: 14, background: '#0f172a', color: '#e2e8f0' }}>
+    <Box style={cardStyle}>
       <strong>Contrast + Danger Tone</strong>
       <Box style={{ marginTop: 10 }}>
         <Dropdown open variant="contrast" tone="danger" elevation="high">
@@ -134,27 +148,98 @@ export const PersistentSelection = () => {
           <Box role="menuitemcheckbox" aria-checked="true" data-value="show-grid" tabIndex={-1}>Show grid</Box>
           <Box role="menuitemcheckbox" aria-checked="false" data-value="snap" tabIndex={-1}>Snap to guides</Box>
           <Box className="separator" role="separator" />
-          <Box role="menuitemradio" data-group="mode" aria-checked="true" data-value="mode-edit" tabIndex={-1}>Mode: Edit</Box>
-          <Box role="menuitemradio" data-group="mode" aria-checked="false" data-value="mode-read" tabIndex={-1}>Mode: Read</Box>
-        </Box>
+        <Box role="menuitemradio" data-group="mode" aria-checked="true" data-value="mode-edit" tabIndex={-1}>Mode: Edit</Box>
+        <Box role="menuitemradio" data-group="mode" aria-checked="false" data-value="mode-read" tabIndex={-1}>Mode: Read</Box>
+      </Box>
       </Dropdown>
-      <Box style={{ marginTop: 10, fontSize: 13, color: '#475569' }}>Last action: {last}</Box>
+      <Box style={{ marginTop: 10, fontSize: 13, color: 'var(--ui-color-muted, #64748b)' }}>Last action: {last}</Box>
     </Box>
   );
 };
 
 export const Headless = () => {
-  const { referenceRef, floatingRef, getReferenceProps, getFloatingProps, coords } = require('@editora/ui-react').useFloating({ placement: 'bottom', offset: 6 });
+  const { referenceRef, floatingRef, getReferenceProps, getFloatingProps, coords } = useFloating({ placement: 'bottom', offset: 6 });
   return (
     <Box style={{ padding: 80 }}>
-      <button {...getReferenceProps()} ref={referenceRef as any} style={{ padding: '8px 12px' }}>Headless trigger</button>
+      <button
+        {...getReferenceProps()}
+        ref={referenceRef as any}
+        style={{
+          padding: '8px 12px',
+          borderRadius: 8,
+          border: '1px solid var(--ui-color-border, rgba(15, 23, 42, 0.16))',
+          background: 'var(--ui-color-surface, #ffffff)',
+          color: 'var(--ui-color-text, #0f172a)'
+        }}
+      >
+        Headless trigger
+      </button>
       <Box {...getFloatingProps()} ref={floatingRef as any} style={{ position: 'absolute', top: coords.top, left: coords.left, pointerEvents: 'auto' }}>
-        <Box style={{ background: '#fff', border: '1px solid #e6e6e6', borderRadius: 6, boxShadow: '0 8px 30px rgba(2,6,23,0.08)', minWidth: 160 }} role="menu">
+        <Box
+          style={{
+            background: 'var(--ui-color-surface, #ffffff)',
+            color: 'var(--ui-color-text, #0f172a)',
+            border: '1px solid var(--ui-color-border, rgba(15, 23, 42, 0.16))',
+            borderRadius: 6,
+            boxShadow: 'var(--ui-shadow-md, 0 8px 30px rgba(2,6,23,0.12))',
+            minWidth: 160
+          }}
+          role="menu"
+        >
           <Box role="menuitem" tabIndex={-1} style={{ padding: 8 }}>First (headless)</Box>
           <Box role="menuitem" tabIndex={-1} style={{ padding: 8 }}>Second</Box>
           <Box role="menuitem" tabIndex={-1} style={{ padding: 8 }}>Third</Box>
         </Box>
       </Box>
     </Box>
+  );
+};
+
+export const ThemeProviderVerification = () => {
+  const [mode, setMode] = React.useState<'light' | 'dark'>('light');
+  const tokens =
+    mode === 'light'
+      ? {
+          colors: {
+            primary: '#0f766e',
+            surface: '#ffffff',
+            surfaceAlt: '#f8fafc',
+            text: '#0f172a',
+            muted: '#64748b',
+            border: 'rgba(15, 23, 42, 0.16)',
+            focusRing: '#0f766e',
+            success: '#15803d',
+            warning: '#b45309',
+            danger: '#b91c1c'
+          }
+        }
+      : {
+          colors: {
+            primary: '#38bdf8',
+            surface: '#0f172a',
+            surfaceAlt: '#111c33',
+            text: '#e2e8f0',
+            muted: '#94a3b8',
+            border: '#334155',
+            focusRing: '#7dd3fc',
+            success: '#22c55e',
+            warning: '#f59e0b',
+            danger: '#f87171'
+          }
+        };
+
+  return (
+    <ThemeProvider tokens={tokens as any}>
+      <Box style={{ padding: 32, background: 'var(--ui-color-background, #ffffff)', color: 'var(--ui-color-text, #0f172a)' }}>
+        <Flex style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          <Button size="sm" onClick={() => setMode('light')}>Light Tokens</Button>
+          <Button size="sm" variant="secondary" onClick={() => setMode('dark')}>Dark Tokens</Button>
+        </Flex>
+        <Dropdown open variant="soft" elevation="low" shape="soft">
+          <Button slot="trigger">Themed Dropdown</Button>
+          <MenuContent />
+        </Dropdown>
+      </Box>
+    </ThemeProvider>
   );
 };

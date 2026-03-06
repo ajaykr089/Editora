@@ -4,6 +4,9 @@ import { warnIfElementNotRegistered } from './_internals';
 export interface AspectRatioProps extends React.HTMLAttributes<HTMLElement> {
   ratio?: number | string;
   fit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
+  tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+  interactive?: boolean;
+  showRatioBadge?: boolean;
 }
 
 function normalizeRatio(value: number | string | undefined): string | undefined {
@@ -18,7 +21,7 @@ function normalizeRatio(value: number | string | undefined): string | undefined 
 }
 
 export const AspectRatio = React.forwardRef<HTMLElement, AspectRatioProps>(function AspectRatio(
-  { ratio, fit, children, ...rest },
+  { ratio, fit, tone, interactive, showRatioBadge, children, ...rest },
   forwardedRef
 ) {
   const ref = React.useRef<HTMLElement | null>(null);
@@ -39,7 +42,16 @@ export const AspectRatio = React.forwardRef<HTMLElement, AspectRatioProps>(funct
 
     if (fit) element.setAttribute('fit', fit);
     else element.removeAttribute('fit');
-  }, [ratio, fit]);
+
+    if (tone && tone !== 'neutral') element.setAttribute('tone', tone);
+    else element.removeAttribute('tone');
+
+    if (interactive) element.setAttribute('interactive', '');
+    else element.removeAttribute('interactive');
+
+    if (showRatioBadge) element.setAttribute('show-ratio-badge', '');
+    else element.removeAttribute('show-ratio-badge');
+  }, [ratio, fit, tone, interactive, showRatioBadge]);
 
   return React.createElement('ui-aspect-ratio', { ref, ...rest }, children);
 });

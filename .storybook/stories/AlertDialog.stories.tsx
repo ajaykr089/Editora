@@ -1,159 +1,174 @@
 import React from 'react';
+import type { Meta } from '@storybook/react';
 import { AlertDialog, Box, Button, Flex, Grid } from '@editora/ui-react';
+import { toastAdvanced } from '@editora/toast';
+import {
+  AlertTriangleIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  ShieldIcon,
+} from '@editora/react-icons';
+import '../../packages/editora-toast/src/toast.css';
+import '@editora/themes/themes/default.css';
 
-export default {
+const meta: Meta<typeof AlertDialog> = {
   title: 'UI/AlertDialog',
   component: AlertDialog,
-  argTypes: {
-    open: { control: 'boolean' },
-    headless: { control: 'boolean' },
-    dismissible: { control: 'boolean' },
-    closeOnEsc: { control: 'boolean' },
-    closeOnBackdrop: { control: 'boolean' },
-    size: { control: { type: 'radio', options: ['sm', 'md', 'lg'] } }
-  }
 };
 
-export const Default = (args: any) => {
-  const [open, setOpen] = React.useState(Boolean(args.open));
-  const [liveValue, setLiveValue] = React.useState('');
-  const [liveChecked, setLiveChecked] = React.useState(false);
-  const [result, setResult] = React.useState('none');
+export default meta;
 
-  React.useEffect(() => {
-    setOpen(Boolean(args.open));
-  }, [args.open]);
+function EnterpriseIncidentFlow() {
+  const [openCritical, setOpenCritical] = React.useState(false);
+  const [openReview, setOpenReview] = React.useState(false);
+  const [lastEvent, setLastEvent] = React.useState('None');
 
   return (
-    <Grid gap="12px">
-      <Flex gap="8px" wrap="wrap">
-        <Button onClick={() => setOpen(true)}>Delete Project</Button>
-        <Button variant="secondary" onClick={() => { setResult('none'); setLiveValue(''); setLiveChecked(false); }}>
-          Reset Log
+    <Grid style={{ gap: 14, maxInlineSize: 980 }}>
+      <Box
+        style={{
+          border: '1px solid var(--ui-color-border, #d8e1ec)',
+          borderRadius: 16,
+          padding: 16,
+          background:
+            'linear-gradient(135deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 7%, #fff) 0%, var(--ui-color-surface, #fff) 42%)',
+        }}
+      >
+        <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
+          <Box>
+            <Box style={{ fontWeight: 700, fontSize: 18 }}>Incident Command Dialogs</Box>
+            <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
+              Enterprise confirmation flows with accessible, layered safeguards.
+            </Box>
+          </Box>
+          <Flex align="center" style={{ gap: 6, color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>
+            <ClockIcon size={14} />
+            Operations status: Elevated risk
+          </Flex>
+        </Flex>
+      </Box>
+
+      <Flex style={{ gap: 8, flexWrap: 'wrap' }}>
+        <Button size="sm" onClick={() => setOpenCritical(true)}>
+          Open Critical Shutdown
+        </Button>
+        <Button size="sm" variant="secondary" onClick={() => setOpenReview(true)}>
+          Open Policy Review
         </Button>
       </Flex>
 
       <AlertDialog
-        {...args}
-        open={open}
+        open={openCritical}
+        tone="danger"
+        size="lg"
+        dismissible
         config={{
-          title: 'Delete this project?',
-          description: 'This action is permanent and removes all associated drafts.',
-          confirmText: 'Delete',
-          cancelText: 'Cancel',
-          size: args.size || 'md',
-          input: {
-            enabled: true,
-            label: 'Type DELETE to confirm',
-            placeholder: 'DELETE',
-            required: true
-          },
+          title: 'Confirm Emergency Ward Shutdown',
+          description: 'This action halts admissions, paging, and medication dispatch for the selected unit.',
+          confirmText: 'Confirm Shutdown',
+          cancelText: 'Keep Running',
+          tone: 'danger',
           checkbox: {
             enabled: true,
-            label: 'Also archive linked resources'
-          }
-        }}
-        onConfirm={(detail) => setResult(`confirm value=${detail.inputValue || ''} checked=${String(detail.checked)}`)}
-        onCancel={() => setResult('cancel')}
-        onDismiss={(detail) => setResult(`dismiss:${detail.source}`)}
-        onChange={(detail) => {
-          setLiveValue(detail.inputValue || '');
-          setLiveChecked(Boolean(detail.checked));
-        }}
-        onClose={(detail) => {
-          setResult(`close:${detail.action}${detail.source ? `:${detail.source}` : ''}`);
-          setOpen(false);
-        }}
-      />
-
-      <Box variant="surface" p="10px" radius="sm" color="#475569">
-        Live input: <strong>{liveValue || 'empty'}</strong> | Live checkbox: <strong>{String(liveChecked)}</strong>
-      </Box>
-      <Box variant="surface" p="10px" radius="sm" color="#475569">
-        Last result: <strong>{result}</strong>
-      </Box>
-    </Grid>
-  );
-};
-
-Default.args = {
-  open: false,
-  headless: false,
-  dismissible: true,
-  closeOnEsc: true,
-  closeOnBackdrop: true,
-  size: 'md'
-};
-
-export const PromptFlow = () => {
-  const [open, setOpen] = React.useState(false);
-  const [result, setResult] = React.useState('No action yet');
-
-  return (
-    <Grid gap="12px">
-      <Button onClick={() => setOpen(true)}>Open Rename Prompt</Button>
-      <AlertDialog
-        open={open}
-        config={{
-          title: 'Rename workspace',
-          description: 'Use at least 3 characters to keep naming consistent.',
-          confirmText: 'Save',
-          cancelText: 'Cancel',
+            label: 'Notify executive on-call immediately',
+            defaultChecked: true,
+          },
           input: {
             enabled: true,
-            label: 'Workspace name',
-            placeholder: 'e.g. Northwind Ops',
-            required: true
+            label: 'Type SHUTDOWN to continue',
+            placeholder: 'SHUTDOWN',
+            required: true,
           },
-          checkbox: {
-            enabled: true,
-            label: 'Notify all team members'
-          }
         }}
         onConfirm={(detail) => {
-          if ((detail.inputValue || '').trim().length < 3) {
-            setResult('Validation note: less than 3 characters.');
-            return;
-          }
-          setResult(`Saved: ${detail.inputValue} | Notify=${String(detail.checked)}`);
+          toastAdvanced.warning(`Shutdown initiated (${detail.inputValue || 'no-code'})`, { duration: 1900, theme: 'light' });
+          setLastEvent(`confirm:critical checked=${String(detail.checked)}`);
         }}
-        onDismiss={(detail) => setResult(`Dismissed via ${detail.source}`)}
-        onClose={() => setOpen(false)}
-      />
-      <Box variant="surface" p="10px" radius="sm" color="#475569">
-        {result}
+        onCancel={() => {
+          toastAdvanced.info('Critical shutdown canceled', { duration: 1400, theme: 'light' });
+          setLastEvent('cancel:critical');
+        }}
+        onDismiss={(detail) => {
+          toastAdvanced.info(`Critical dialog dismissed via ${detail.source}`, { duration: 1400, theme: 'light' });
+          setLastEvent(`dismiss:critical:${detail.source}`);
+        }}
+        onClose={(detail) => {
+          setOpenCritical(false);
+          setLastEvent(`close:critical:${detail.action}${detail.source ? `:${detail.source}` : ''}`);
+        }}
+      >
+        <Box slot="icon" aria-hidden="true" style={{ display: 'inline-flex' }}>
+          <AlertTriangleIcon size={16} />
+        </Box>
+        <Grid slot="content" style={{ gap: 10 }}>
+          <Flex align="start" style={{ gap: 8 }}>
+            <ShieldIcon size={14} style={{ marginTop: 2, color: '#b45309' }} />
+            <Box style={{ fontSize: 13, lineHeight: 1.5 }}>
+              Active trauma cases will be rerouted to fallback units immediately.
+            </Box>
+          </Flex>
+          <Flex align="start" style={{ gap: 8 }}>
+            <ShieldIcon size={14} style={{ marginTop: 2, color: '#b45309' }} />
+            <Box style={{ fontSize: 13, lineHeight: 1.5 }}>
+              Audit trail entry will include operator identity and confirmation payload.
+            </Box>
+          </Flex>
+        </Grid>
+      </AlertDialog>
+
+      <AlertDialog
+        open={openReview}
+        tone="info"
+        size="md"
+        dismissible
+        config={{
+          title: 'Approve Updated Escalation Policy',
+          description: 'This will publish revised response SLAs to all on-call teams.',
+          confirmText: 'Publish Policy',
+          cancelText: 'Review Later',
+          tone: 'info',
+          checkbox: {
+            enabled: true,
+            label: 'Require supervisor acknowledgment at next login',
+          },
+          showClose: true,
+        }}
+        onConfirm={(detail) => {
+          toastAdvanced.success('Policy published successfully', { duration: 1600, theme: 'light' });
+          setLastEvent(`confirm:policy checked=${String(detail.checked)}`);
+        }}
+        onCancel={() => {
+          toastAdvanced.info('Policy review deferred', { duration: 1400, theme: 'light' });
+          setLastEvent('cancel:policy');
+        }}
+        onDismiss={(detail) => {
+          toastAdvanced.info(`Policy dialog dismissed via ${detail.source}`, { duration: 1400, theme: 'light' });
+          setLastEvent(`dismiss:policy:${detail.source}`);
+        }}
+        onClose={(detail) => {
+          setOpenReview(false);
+          setLastEvent(`close:policy:${detail.action}${detail.source ? `:${detail.source}` : ''}`);
+        }}
+      >
+        <Box slot="icon" aria-hidden="true" style={{ display: 'inline-flex' }}>
+          <CheckCircleIcon size={16} />
+        </Box>
+      </AlertDialog>
+
+      <Box
+        style={{
+          border: '1px solid var(--ui-color-border, #d8e1ec)',
+          borderRadius: 12,
+          padding: 10,
+          color: 'var(--ui-color-muted, #64748b)',
+          fontSize: 13,
+        }}
+      >
+        Last event: <strong>{lastEvent}</strong>
       </Box>
     </Grid>
   );
-};
+}
 
-export const ControlledState = () => {
-  const [open, setOpen] = React.useState(false);
-  const [state, setState] = React.useState<'idle' | 'loading' | 'error'>('idle');
+export const EnterpriseIncidentResponse = () => <EnterpriseIncidentFlow />;
 
-  return (
-    <Grid gap="12px">
-      <Flex gap="8px" wrap="wrap">
-        <Button onClick={() => { setState('idle'); setOpen(true); }}>Open</Button>
-        <Button variant="secondary" onClick={() => setState('loading')}>Set Loading</Button>
-        <Button variant="ghost" onClick={() => setState('error')}>Set Error</Button>
-        <Button variant="secondary" onClick={() => setState('idle')}>Set Idle</Button>
-      </Flex>
-
-      <AlertDialog
-        open={open}
-        state={state}
-        lockWhileLoading
-        onClose={() => setOpen(false)}
-        config={{
-          title: 'Processing payment',
-          description: 'This example shows externally controlled loading/error states.',
-          confirmText: 'Retry',
-          cancelText: 'Close',
-          loadingText: 'Processing request...',
-          errorMessage: state === 'error' ? 'Payment provider returned a temporary error.' : ''
-        }}
-      />
-    </Grid>
-  );
-};

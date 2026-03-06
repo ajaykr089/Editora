@@ -22,6 +22,7 @@ import '../components/ui-portal';
 import '../components/ui-presence';
 import '../components/ui-table';
 import '../components/ui-data-table';
+import '../components/ui-field';
 
 function flushMicrotask() {
   return Promise.resolve();
@@ -62,6 +63,9 @@ describe('performance: non-template attribute updates should not rebuild shadow 
 
     el.setAttribute('anchor-id', 'perf-anchor');
     el.setAttribute('open', '');
+    el.setAttribute('variant', 'contrast');
+    el.setAttribute('density', 'comfortable');
+    el.setAttribute('shape', 'soft');
     el.removeAttribute('open');
     el.setAttribute('open', '');
     await flushMicrotask();
@@ -211,6 +215,27 @@ describe('performance: non-template attribute updates should not rebuild shadow 
 
     const portalAfter = el._portalEl;
     expect(portalAfter).toBe(portalBefore);
+    el.remove();
+  });
+
+  it('ui-field keeps frame node stable across visual-only attribute updates', async () => {
+    const el = document.createElement('ui-field') as HTMLElement;
+    el.innerHTML = '<input />';
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const frameBefore = el.shadowRoot?.querySelector('.frame');
+    expect(frameBefore).toBeTruthy();
+
+    el.setAttribute('variant', 'soft');
+    el.setAttribute('tone', 'warning');
+    el.setAttribute('shell', 'outline');
+    el.setAttribute('density', 'comfortable');
+    el.setAttribute('shape', 'soft');
+    await flushMicrotask();
+
+    const frameAfter = el.shadowRoot?.querySelector('.frame');
+    expect(frameAfter).toBe(frameBefore);
     el.remove();
   });
 

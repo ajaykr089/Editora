@@ -13,6 +13,8 @@ const style = `
     --ui-data-table-text: var(--ui-color-text, #0f172a);
     --ui-data-table-header-text: var(--ui-color-text, #1e293b);
     --ui-data-table-header-bg: var(--ui-color-surface-alt, #f8fafc);
+    --ui-data-table-footer-text: var(--ui-color-text, #0f172a);
+    --ui-data-table-footer-bg: color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 88%, var(--ui-color-surface, #ffffff));
     --ui-data-table-cell-border: color-mix(in srgb, var(--ui-data-table-border-color) 58%, transparent);
     --ui-data-table-striped-bg: color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 82%, transparent);
     --ui-data-table-hover-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent);
@@ -21,6 +23,13 @@ const style = `
     --ui-data-table-sort-active: var(--ui-color-primary, #2563eb);
     --ui-data-table-resize-handle: color-mix(in srgb, var(--ui-color-muted, #94a3b8) 70%, transparent);
     --ui-data-table-resize-handle-active: var(--ui-color-primary, #2563eb);
+    --ui-data-table-duration: 160ms;
+    --ui-data-table-ease: cubic-bezier(0.2, 0.9, 0.24, 1);
+    --ui-data-table-state-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, transparent);
+    --ui-data-table-state-border: color-mix(in srgb, var(--ui-data-table-border-color) 72%, transparent);
+    --ui-data-table-state-text: color-mix(in srgb, var(--ui-data-table-text, #0f172a) 72%, transparent);
+    --ui-data-table-loading-overlay: color-mix(in srgb, var(--ui-color-surface, #ffffff) 88%, transparent);
+    --ui-data-table-focus-ring: var(--ui-color-focus-ring, #2563eb);
     color-scheme: light dark;
   }
 
@@ -29,21 +38,148 @@ const style = `
     overflow: auto;
     border: var(--ui-data-table-border);
     border-radius: var(--ui-data-table-radius);
-    background: var(--ui-data-table-bg);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-data-table-bg) 96%, #ffffff 4%), var(--ui-data-table-bg)),
+      var(--ui-data-table-bg);
     box-shadow: var(--ui-data-table-shadow);
+    transition: border-color var(--ui-data-table-duration) var(--ui-data-table-ease), box-shadow var(--ui-data-table-duration) var(--ui-data-table-ease);
+  }
+
+  .frame::before {
+    content: '';
+    position: absolute;
+    left: 1px;
+    right: 1px;
+    top: 0;
+    height: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    background: color-mix(in srgb, #ffffff 66%, transparent);
+    opacity: 0.75;
+    z-index: 2;
+  }
+
+  .statebar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    min-height: 30px;
+    border-radius: 10px;
+    border: 1px solid var(--ui-data-table-state-border);
+    background: var(--ui-data-table-state-bg);
+    color: var(--ui-data-table-state-text);
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+  }
+
+  .statebar[hidden] {
+    display: none;
+  }
+
+  .state-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.85;
+    flex: 0 0 auto;
+  }
+
+  .loading-overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--ui-data-table-loading-overlay);
+    backdrop-filter: blur(2px);
+    z-index: 8;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .loading-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 34px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--ui-data-table-border-color) 86%, transparent);
+    background: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    color: var(--ui-data-table-text);
+    padding: 0 12px 0 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .loading-spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    border: 2px solid color-mix(in srgb, var(--ui-color-primary, #2563eb) 22%, transparent);
+    border-top-color: var(--ui-color-primary, #2563eb);
+    animation: ui-data-table-spin 700ms linear infinite;
   }
 
   :host([virtualize]) .frame {
     max-height: var(--ui-data-table-virtual-height, 420px);
   }
 
+  :host([shape="square"]) {
+    --ui-data-table-radius: 6px;
+  }
+
+  :host([shape="soft"]) {
+    --ui-data-table-radius: 20px;
+  }
+
+  :host([variant="flat"]) {
+    --ui-data-table-shadow: none;
+    --ui-data-table-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent);
+  }
+
+  :host([variant="flat"]) .frame::before {
+    display: none;
+  }
+
+  :host([variant="contrast"]) {
+    --ui-data-table-bg: #0f172a;
+    --ui-data-table-text: #e2e8f0;
+    --ui-data-table-header-text: #f8fafc;
+    --ui-data-table-header-bg: color-mix(in srgb, #1e293b 86%, #0f172a);
+    --ui-data-table-border-color: #334155;
+    --ui-data-table-cell-border: color-mix(in srgb, #64748b 52%, transparent);
+    --ui-data-table-summary-color: #94a3b8;
+    --ui-data-table-empty-color: #94a3b8;
+    --ui-data-table-sort-indicator: #94a3b8;
+    --ui-data-table-sort-active: #93c5fd;
+    --ui-data-table-focus-ring: #93c5fd;
+  }
+
+  :host([elevation="none"]) {
+    --ui-data-table-shadow: none;
+  }
+
+  :host([elevation="low"]) {
+    --ui-data-table-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  }
+
+  :host([elevation="high"]) {
+    --ui-data-table-shadow: 0 18px 46px rgba(15, 23, 42, 0.16);
+  }
+
   .bulk {
-    margin-top: 10px;
+    margin-top: 12px;
     border: var(--ui-data-table-border);
-    border-radius: 12px;
-    background: color-mix(in srgb, var(--ui-color-surface, #ffffff) 95%, transparent);
-    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
-    padding: 8px 10px;
+    border-radius: 14px;
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, #ffffff 2%), color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent)),
+      color-mix(in srgb, var(--ui-color-surface, #ffffff) 95%, transparent);
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.09);
+    padding: 8px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -90,10 +226,20 @@ const style = `
   }
 
   .empty {
-    padding: 24px 16px;
+    padding: 28px 16px;
     text-align: center;
     font-size: 13px;
     color: var(--ui-data-table-empty-color);
+  }
+
+  .empty::before {
+    content: 'No records';
+    display: block;
+    margin-bottom: 6px;
+    font-size: 15px;
+    font-weight: 650;
+    color: color-mix(in srgb, var(--ui-data-table-text, #0f172a) 86%, transparent);
+    letter-spacing: 0.01em;
   }
 
   .meta {
@@ -105,6 +251,37 @@ const style = `
     color: var(--ui-data-table-summary-color);
     font-size: 12px;
     line-height: 1.4;
+  }
+
+  :host([state="loading"]) .loading-overlay,
+  :host([loading]) .loading-overlay {
+    display: flex;
+  }
+
+  :host([state="loading"]) {
+    --ui-data-table-state-bg: color-mix(in srgb, #f59e0b 14%, transparent);
+    --ui-data-table-state-border: color-mix(in srgb, #f59e0b 42%, var(--ui-data-table-border-color));
+    --ui-data-table-state-text: #92400e;
+  }
+
+  :host([state="error"]) {
+    --ui-data-table-state-bg: color-mix(in srgb, #ef4444 13%, transparent);
+    --ui-data-table-state-border: color-mix(in srgb, #ef4444 42%, var(--ui-data-table-border-color));
+    --ui-data-table-state-text: #b91c1c;
+  }
+
+  :host([state="success"]) {
+    --ui-data-table-state-bg: color-mix(in srgb, #16a34a 13%, transparent);
+    --ui-data-table-state-border: color-mix(in srgb, #16a34a 42%, var(--ui-data-table-border-color));
+    --ui-data-table-state-text: #166534;
+  }
+
+  :host([state="error"]) .frame {
+    border-color: color-mix(in srgb, #ef4444 34%, var(--ui-data-table-border-color));
+  }
+
+  :host([state="success"]) .frame {
+    border-color: color-mix(in srgb, #16a34a 32%, var(--ui-data-table-border-color));
   }
 
   .summary {
@@ -135,6 +312,14 @@ const style = `
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .frame {
+      transition: none !important;
+    }
+
+    .loading-spinner {
+      animation: none !important;
+    }
+
     .bulk-clear {
       transition: none !important;
     }
@@ -158,11 +343,35 @@ const style = `
       --ui-data-table-text: CanvasText;
       --ui-data-table-header-text: CanvasText;
       --ui-data-table-header-bg: Canvas;
+      --ui-data-table-footer-text: CanvasText;
+      --ui-data-table-footer-bg: Canvas;
       --ui-data-table-cell-border: CanvasText;
       --ui-data-table-hover-bg: Highlight;
       --ui-data-table-selected-bg: Highlight;
       --ui-data-table-sort-indicator: CanvasText;
       --ui-data-table-sort-active: HighlightText;
+      --ui-data-table-state-bg: Canvas;
+      --ui-data-table-state-border: CanvasText;
+      --ui-data-table-state-text: CanvasText;
+      --ui-data-table-loading-overlay: Canvas;
+    }
+
+    .loading-indicator {
+      forced-color-adjust: none;
+      background: Canvas;
+      color: CanvasText;
+      border-color: CanvasText;
+    }
+
+    .loading-spinner {
+      border-color: CanvasText;
+      border-top-color: CanvasText;
+    }
+  }
+
+  @keyframes ui-data-table-spin {
+    to {
+      transform: rotate(360deg);
     }
   }
 `;
@@ -175,6 +384,16 @@ const lightDomStyle = `
     font-size: 13px;
     color: var(--ui-data-table-text, #0f172a);
     min-width: 680px;
+    table-layout: fixed;
+  }
+
+  ui-data-table:not([headless]) > table caption {
+    caption-side: bottom;
+    padding: 10px 14px 0;
+    text-align: left;
+    font-size: 12px;
+    line-height: 1.4;
+    color: color-mix(in srgb, var(--ui-data-table-text, #0f172a) 62%, transparent);
   }
 
   ui-data-table:not([headless]) > table thead th {
@@ -186,6 +405,10 @@ const lightDomStyle = `
     background: var(--ui-data-table-header-bg, linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.94)));
     border-bottom: 1px solid var(--ui-data-table-cell-border, rgba(15, 23, 42, 0.1));
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    transition: background-color 130ms ease, color 130ms ease;
   }
 
   ui-data-table:not([headless]) > table tbody td {
@@ -193,6 +416,36 @@ const lightDomStyle = `
     border-bottom: 1px solid var(--ui-data-table-cell-border, rgba(15, 23, 42, 0.08));
     vertical-align: middle;
     color: var(--ui-data-table-text, #0f172a);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background-color 130ms ease, color 130ms ease;
+  }
+
+  ui-data-table:not([headless]) > table tfoot td,
+  ui-data-table:not([headless]) > table tfoot th {
+    padding: 11px 14px;
+    border-top: 1px solid var(--ui-data-table-cell-border, rgba(15, 23, 42, 0.1));
+    color: var(--ui-data-table-footer-text, var(--ui-data-table-text, #0f172a));
+    background: var(--ui-data-table-footer-bg, color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 88%, #ffffff));
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+  }
+
+  ui-data-table:not([headless]) > table tbody td > * {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  ui-data-table:not([headless]) > table tbody tr {
+    transition: transform 130ms ease;
+  }
+
+  ui-data-table[hover]:not([headless]) > table tbody tr:hover {
+    transform: translateY(-0.5px);
   }
 
   ui-data-table:not([headless]) > table tbody tr:last-child td {
@@ -227,6 +480,16 @@ const lightDomStyle = `
     position: sticky;
     top: 0;
     z-index: 2;
+    backdrop-filter: blur(4px);
+  }
+
+  ui-data-table[sticky-footer]:not([headless]) > table tfoot td,
+  ui-data-table[sticky-footer]:not([headless]) > table tfoot th {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    backdrop-filter: blur(4px);
+    box-shadow: inset 0 1px 0 var(--ui-data-table-cell-border, rgba(15, 23, 42, 0.1));
   }
 
   ui-data-table[sortable]:not([headless]) > table thead th[data-sortable="true"] {
@@ -234,6 +497,10 @@ const lightDomStyle = `
     user-select: none;
     position: relative;
     padding-right: 24px;
+  }
+
+  ui-data-table[sortable]:not([headless]) > table thead th[data-sortable="true"]:hover {
+    background: color-mix(in srgb, var(--ui-data-table-header-bg, #f8fafc) 84%, var(--ui-color-primary, #2563eb) 16%);
   }
 
   ui-data-table[draggable-columns]:not([headless]) > table thead th[data-draggable="true"] {
@@ -286,6 +553,11 @@ const lightDomStyle = `
     pointer-events: none;
   }
 
+  ui-data-table[state="loading"]:not([headless]) > table tbody {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
   ui-data-table[resizable-columns]:not([headless]) > table thead th[data-resizable="true"] {
     position: relative;
   }
@@ -331,6 +603,12 @@ const lightDomStyle = `
     background: var(--ui-data-table-header-bg, #f8fafc);
   }
 
+  ui-data-table:not([headless]) > table tfoot [data-pinned="left"],
+  ui-data-table:not([headless]) > table tfoot [data-pinned="right"] {
+    z-index: 4;
+    background: var(--ui-data-table-footer-bg, color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 88%, #ffffff));
+  }
+
   ui-data-table:not([headless]) > table [data-pinned="left"][data-pin-edge="true"] {
     box-shadow: 1px 0 0 var(--ui-data-table-cell-border, rgba(15, 23, 42, 0.08)), 8px 0 14px rgba(15, 23, 42, 0.08);
   }
@@ -341,8 +619,20 @@ const lightDomStyle = `
 
   ui-data-table:not([headless]) > table thead th:focus-visible,
   ui-data-table:not([headless]) > table tbody tr[tabindex="0"]:focus-visible {
-    outline: 2px solid var(--ui-color-focus-ring, #2563eb);
+    outline: 2px solid var(--ui-data-table-focus-ring, var(--ui-color-focus-ring, #2563eb));
     outline-offset: -2px;
+  }
+
+  @media (max-width: 800px) {
+    ui-data-table:not([headless]) > table {
+      min-width: 620px;
+      font-size: 12px;
+    }
+
+    ui-data-table:not([headless]) > table thead th,
+    ui-data-table:not([headless]) > table tbody td {
+      padding-inline: 10px;
+    }
   }
 
   @media (prefers-contrast: more) {
@@ -402,21 +692,28 @@ function normalizeSortValue(value: string): string | number {
 }
 
 type SortDirection = 'asc' | 'desc';
+type DataTableState = 'idle' | 'loading' | 'error' | 'success';
 
 const DATA_TABLE_VISUAL_ONLY_ATTRS = new Set([
   'sticky-header',
+  'sticky-footer',
   'striped',
   'hover',
   'compact',
   'bordered',
   'loading',
-  'hide-summary'
+  'hide-summary',
+  'state',
+  'shape',
+  'variant',
+  'elevation'
 ]);
 
 const DATA_TABLE_LIGHT_SYNC_ATTRS = new Set([
   'pagination-id',
   'bulk-actions-label',
-  'bulk-clear-label'
+  'bulk-clear-label',
+  'state-text'
 ]);
 
 export class UIDataTable extends ElementBase {
@@ -428,11 +725,17 @@ export class UIDataTable extends ElementBase {
       'selectable',
       'multi-select',
       'sticky-header',
+      'sticky-footer',
       'striped',
       'hover',
       'compact',
       'bordered',
+      'shape',
+      'variant',
+      'elevation',
       'loading',
+      'state',
+      'state-text',
       'filter-query',
       'filter-column',
       'filters',
@@ -476,6 +779,12 @@ export class UIDataTable extends ElementBase {
   private _dragOverColumnIndex = -1;
   private _ignoreHeaderClickUntil = 0;
   private _syncRaf = 0;
+  private _virtualStart = -1;
+  private _virtualEnd = -1;
+  private _virtualVisibleTotal = -1;
+  private _resizeRaf = 0;
+  private _pendingResizeColumn = -1;
+  private _pendingResizeWidth: number | null = null;
 
   constructor() {
     super();
@@ -536,6 +845,12 @@ export class UIDataTable extends ElementBase {
       cancelAnimationFrame(this._virtualRaf);
       this._virtualRaf = 0;
     }
+    if (this._resizeRaf) {
+      cancelAnimationFrame(this._resizeRaf);
+      this._resizeRaf = 0;
+    }
+    this._pendingResizeColumn = -1;
+    this._pendingResizeWidth = null;
     if (this._syncRaf) {
       cancelAnimationFrame(this._syncRaf);
       this._syncRaf = 0;
@@ -571,6 +886,8 @@ export class UIDataTable extends ElementBase {
         this._syncPaginationBinding();
       } else if (name === 'bulk-actions-label' || name === 'bulk-clear-label') {
         this._updateBulkActions();
+      } else if (name === 'state-text') {
+        this._syncStateBar();
       }
       return;
     }
@@ -578,6 +895,8 @@ export class UIDataTable extends ElementBase {
     if (DATA_TABLE_VISUAL_ONLY_ATTRS.has(name)) {
       if (name === 'hide-summary') {
         this._updateSummary();
+      } else if (name === 'state' || name === 'loading') {
+        this._syncStateBar();
       }
       return;
     }
@@ -598,9 +917,19 @@ export class UIDataTable extends ElementBase {
     const emptyText = this.getAttribute('empty-text') || 'No data available.';
     this.setContent(`
       <style>${style}</style>
+      <div class="statebar" part="state" hidden role="status" aria-live="polite">
+        <span class="state-dot" aria-hidden="true"></span>
+        <span class="state-text"></span>
+      </div>
       <div class="frame" part="frame">
         <slot></slot>
         <div class="empty" part="empty" role="status" aria-live="polite" hidden>${emptyText}</div>
+        <div class="loading-overlay" part="loading-overlay" aria-hidden="true">
+          <div class="loading-indicator" part="loading-indicator">
+            <span class="loading-spinner" aria-hidden="true"></span>
+            <span class="loading-text">Updating data</span>
+          </div>
+        </div>
       </div>
       <div class="meta" part="meta">
         <span class="summary" part="summary" aria-live="polite"></span>
@@ -616,6 +945,7 @@ export class UIDataTable extends ElementBase {
     `);
 
     this._syncStructure();
+    this._syncStateBar();
   }
 
   private _findTable(): HTMLTableElement | null {
@@ -640,6 +970,9 @@ export class UIDataTable extends ElementBase {
     if (this._virtualBottomSpacer?.isConnected) this._virtualBottomSpacer.remove();
     this._virtualTopSpacer = null;
     this._virtualBottomSpacer = null;
+    this._virtualStart = -1;
+    this._virtualEnd = -1;
+    this._virtualVisibleTotal = -1;
   }
 
   private _parseRowHeight(): number {
@@ -652,6 +985,59 @@ export class UIDataTable extends ElementBase {
     const raw = Number(this.getAttribute('overscan') || 6);
     if (!Number.isFinite(raw) || raw < 0) return 6;
     return Math.max(0, Math.floor(raw));
+  }
+
+  private _state(): DataTableState {
+    const raw = (this.getAttribute('state') || 'idle').trim().toLowerCase();
+    if (raw === 'loading' || raw === 'error' || raw === 'success') return raw;
+    if (this.hasAttribute('loading')) return 'loading';
+    return 'idle';
+  }
+
+  private _stateText(state: DataTableState): string {
+    const explicit = (this.getAttribute('state-text') || '').trim();
+    if (explicit) return explicit;
+    if (state === 'loading') return 'Refreshing table data';
+    if (state === 'error') return 'Table data could not be loaded';
+    if (state === 'success') return 'Table data is up to date';
+    return '';
+  }
+
+  private _syncStateBar() {
+    const stateBar = this.root.querySelector('.statebar') as HTMLElement | null;
+    const stateText = this.root.querySelector('.state-text') as HTMLElement | null;
+    const loadingText = this.root.querySelector('.loading-text') as HTMLElement | null;
+    const frame = this.root.querySelector('.frame') as HTMLElement | null;
+    const table = this._table;
+    if (!stateBar) return;
+
+    const state = this._state();
+    const visible = state !== 'idle';
+    if (visible) stateBar.removeAttribute('hidden');
+    else stateBar.setAttribute('hidden', '');
+    stateBar.setAttribute('data-state', state);
+    stateBar.setAttribute('aria-live', state === 'error' ? 'assertive' : 'polite');
+    const label = this._stateText(state);
+    if (stateText) stateText.textContent = label;
+    if (loadingText) loadingText.textContent = this._stateText('loading');
+
+    const busy = state === 'loading' ? 'true' : 'false';
+    if (frame) frame.setAttribute('aria-busy', busy);
+    if (table) table.setAttribute('aria-busy', busy);
+  }
+
+  private _isInteractionBlocked() {
+    return this._state() === 'loading';
+  }
+
+  private _isInteractiveTarget(target: HTMLElement | null): boolean {
+    if (!target) return false;
+    const interactive = target.closest(
+      'button, a[href], input, select, textarea, label, summary, details, [contenteditable=""], [contenteditable="true"], [role="button"], [role="link"], [role="checkbox"], [role="switch"], [role="menuitem"]'
+    );
+    if (!interactive) return false;
+    if (interactive.classList.contains('resize-handle')) return false;
+    return true;
   }
 
   private _headerKey(header: HTMLTableCellElement | undefined, fallbackIndex: number): string {
@@ -1073,6 +1459,7 @@ export class UIDataTable extends ElementBase {
         this._filteredRows = 0;
         this._clearVirtualization(false);
         this._syncPaginationElement();
+        this._syncStateBar();
         return;
       }
 
@@ -1103,6 +1490,7 @@ export class UIDataTable extends ElementBase {
       this._updateBulkActions();
       this._updateSummary();
       this._syncPaginationElement();
+      this._syncStateBar();
     } finally {
       this._isSyncing = false;
     }
@@ -1327,16 +1715,53 @@ export class UIDataTable extends ElementBase {
     this._setVirtualSpacerHeight(topSpacer, topPad, columnCount);
     this._setVirtualSpacerHeight(bottomSpacer, bottomPad, columnCount);
 
-    activeRows.forEach((row, index) => {
-      const visible = index >= start && index < end;
+    const setRowVirtualVisibility = (row: HTMLTableRowElement, visible: boolean) => {
       if (visible) {
         if (row.style.display === 'none') row.style.display = '';
         row.removeAttribute('data-hidden-by-virtual');
       } else {
-        row.style.display = 'none';
+        if (row.style.display !== 'none') row.style.display = 'none';
         row.setAttribute('data-hidden-by-virtual', '');
       }
-    });
+    };
+
+    const canDiff =
+      this._virtualStart >= 0 &&
+      this._virtualEnd >= this._virtualStart &&
+      this._virtualVisibleTotal === activeRows.length;
+
+    if (!canDiff) {
+      activeRows.forEach((row, index) => {
+        setRowVirtualVisibility(row, index >= start && index < end);
+      });
+    } else {
+      const prevStart = this._virtualStart;
+      const prevEnd = this._virtualEnd;
+
+      for (let index = prevStart; index < Math.min(start, prevEnd); index += 1) {
+        const row = activeRows[index];
+        if (row) setRowVirtualVisibility(row, false);
+      }
+
+      for (let index = start; index < Math.min(prevStart, end); index += 1) {
+        const row = activeRows[index];
+        if (row) setRowVirtualVisibility(row, true);
+      }
+
+      for (let index = Math.max(end, prevStart); index < prevEnd; index += 1) {
+        const row = activeRows[index];
+        if (row) setRowVirtualVisibility(row, false);
+      }
+
+      for (let index = Math.max(prevEnd, start); index < end; index += 1) {
+        const row = activeRows[index];
+        if (row) setRowVirtualVisibility(row, true);
+      }
+    }
+
+    this._virtualStart = start;
+    this._virtualEnd = end;
+    this._virtualVisibleTotal = activeRows.length;
 
     if (emitEvent) {
       this.dispatchEvent(
@@ -1532,13 +1957,29 @@ export class UIDataTable extends ElementBase {
     if (!this._resizeState) return;
     const delta = event.clientX - this._resizeState.startX;
     const adjustedDelta = this._isRtl() ? -delta : delta;
-    this._setColumnWidth(this._resizeState.columnIndex, this._resizeState.startWidth + adjustedDelta, false);
+    this._pendingResizeColumn = this._resizeState.columnIndex;
+    this._pendingResizeWidth = this._resizeState.startWidth + adjustedDelta;
+    if (this._resizeRaf) return;
+    this._resizeRaf = requestAnimationFrame(() => {
+      this._resizeRaf = 0;
+      if (this._pendingResizeColumn < 0 || this._pendingResizeWidth == null) return;
+      this._setColumnWidth(this._pendingResizeColumn, this._pendingResizeWidth, false);
+    });
   }
 
   private _onPointerUp() {
     if (!this._resizeState) return;
     const state = this._resizeState;
     this._resizeState = null;
+    if (this._resizeRaf) {
+      cancelAnimationFrame(this._resizeRaf);
+      this._resizeRaf = 0;
+    }
+    if (this._pendingResizeColumn === state.columnIndex && this._pendingResizeWidth != null) {
+      this._setColumnWidth(state.columnIndex, this._pendingResizeWidth, false);
+    }
+    this._pendingResizeColumn = -1;
+    this._pendingResizeWidth = null;
     window.removeEventListener('pointermove', this._onPointerMove as EventListener);
     window.removeEventListener('pointerup', this._onPointerUp as EventListener);
 
@@ -1804,10 +2245,12 @@ export class UIDataTable extends ElementBase {
 
     if (target.closest('.resize-handle')) return;
     if (target.closest('th') && Date.now() < this._ignoreHeaderClickUntil) return;
+    if (this._isInteractionBlocked()) return;
 
     if (this.hasAttribute('sortable')) {
       const th = target.closest('th');
       if (th && this._table.contains(th)) {
+        if (target !== th && this._isInteractiveTarget(target)) return;
         const headers = this._headerCells();
         const columnIndex = headers.indexOf(th as HTMLTableCellElement);
         if (columnIndex >= 0) {
@@ -1820,6 +2263,7 @@ export class UIDataTable extends ElementBase {
     if (this.hasAttribute('selectable')) {
       const row = target.closest('tbody tr') as HTMLTableRowElement | null;
       if (row && this._table.contains(row) && !row.hidden && !this._isVirtualSpacerRow(row)) {
+        if (target !== row && this._isInteractiveTarget(target)) return;
         this._toggleRowSelection(row);
       }
     }
@@ -1838,6 +2282,8 @@ export class UIDataTable extends ElementBase {
       this.dispatchEvent(new CustomEvent('bulk-clear', { detail: { count, page: this._page }, bubbles: true }));
       return;
     }
+
+    if (this._isInteractionBlocked()) return;
 
     const th = target.closest('th') as HTMLTableCellElement | null;
     if (th && this._table.contains(th)) {
@@ -1875,6 +2321,7 @@ export class UIDataTable extends ElementBase {
         }
 
         if ((key === 'Enter' || key === ' ') && this.hasAttribute('sortable')) {
+          if (target !== th && this._isInteractiveTarget(target)) return;
           event.preventDefault();
           this._sortByColumn(columnIndex, th);
           return;
@@ -1885,6 +2332,7 @@ export class UIDataTable extends ElementBase {
     if (this.hasAttribute('selectable')) {
       const row = target.closest('tbody tr') as HTMLTableRowElement | null;
       if (row && this._table.contains(row) && !row.hidden && !this._isVirtualSpacerRow(row)) {
+        if (target !== row && this._isInteractiveTarget(target)) return;
         if (key === 'ArrowDown' || key === 'ArrowUp') {
           event.preventDefault();
           this._focusSelectableRow(row, key === 'ArrowDown' ? 1 : -1);

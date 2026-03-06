@@ -188,22 +188,21 @@ describe('overlay interaction (popover / dropdown / menu)', () => {
     toolbar.showForAnchorId && toolbar.showForAnchorId('ft-anchor');
     expect(toolbar.hasAttribute('open')).toBe(true);
 
-    const root = document.getElementById('ui-portal-root')!;
-    let panel = root.querySelector('.floating-toolbar') as HTMLElement | null;
+    const panel = toolbar.shadowRoot?.querySelector('.panel') as HTMLElement | null;
     expect(panel).toBeTruthy();
+    expect(panel?.getAttribute('data-side')).toBeTruthy();
 
     // hide anchor
     anchor.style.display = 'none';
-    document.body.dispatchEvent(new Event('resize'));
-    panel = root.querySelector('.floating-toolbar') as HTMLElement | null;
-    expect(panel).toBeNull();
+    toolbar._position && toolbar._position();
+    expect(toolbar.hasAttribute('open')).toBe(false);
 
     // reopen then remove anchor node entirely -> toolbar should cleanup
     toolbar.showForAnchorId && toolbar.showForAnchorId('ft-anchor');
-    expect(root.querySelector('.floating-toolbar')).toBeTruthy();
+    expect(toolbar.hasAttribute('open')).toBe(true);
     document.body.removeChild(anchor);
-    document.body.dispatchEvent(new Event('resize'));
-    expect(root.querySelector('.floating-toolbar')).toBeNull();
+    toolbar._position && toolbar._position();
+    expect(toolbar.hasAttribute('open')).toBe(false);
 
     toolbar.remove();
   });

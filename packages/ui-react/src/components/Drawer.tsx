@@ -9,15 +9,53 @@ type DrawerProps = React.HTMLAttributes<HTMLElement> & {
   elevation?: 'default' | 'none' | 'low' | 'high';
   tone?: 'default' | 'brand' | 'danger' | 'success' | 'warning';
   size?: 'default' | 'sm' | 'lg';
+  state?: 'idle' | 'loading' | 'error' | 'success';
   inset?: boolean;
   dismissible?: boolean;
+  closeOnOverlay?: boolean;
+  closeOnEsc?: boolean;
+  lockWhileLoading?: boolean;
+  showClose?: boolean;
+  initialFocus?: string;
+  title?: string;
+  description?: string;
+  ariaLabel?: string;
+  ariaLabelledBy?: string;
+  ariaDescribedBy?: string;
   onOpen?: () => void;
   onClose?: () => void;
   onChange?: (open: boolean) => void;
 };
 
 export const Drawer = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
-  { children, open, side, variant, density, shape, elevation, tone, size, inset, dismissible, onOpen, onClose, onChange, ...rest },
+  {
+    children,
+    open,
+    side,
+    variant,
+    density,
+    shape,
+    elevation,
+    tone,
+    size,
+    state,
+    inset,
+    dismissible,
+    closeOnOverlay,
+    closeOnEsc,
+    lockWhileLoading,
+    showClose,
+    initialFocus,
+    title,
+    description,
+    ariaLabel,
+    ariaLabelledBy,
+    ariaDescribedBy,
+    onOpen,
+    onClose,
+    onChange,
+    ...rest
+  },
   forwardedRef
 ) {
   const ref = useRef<HTMLElement | null>(null);
@@ -112,9 +150,86 @@ export const Drawer = React.forwardRef<HTMLElement, DrawerProps>(function Drawer
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (state && state !== 'idle') el.setAttribute('state', state);
+    else el.removeAttribute('state');
+  }, [state]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
     if (inset) el.setAttribute('inset', '');
     else el.removeAttribute('inset');
   }, [inset]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof closeOnOverlay === 'boolean') el.setAttribute('close-on-overlay', String(closeOnOverlay));
+    else el.removeAttribute('close-on-overlay');
+  }, [closeOnOverlay]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof closeOnEsc === 'boolean') el.setAttribute('close-on-esc', String(closeOnEsc));
+    else el.removeAttribute('close-on-esc');
+  }, [closeOnEsc]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof lockWhileLoading === 'boolean') el.setAttribute('lock-while-loading', String(lockWhileLoading));
+    else el.removeAttribute('lock-while-loading');
+  }, [lockWhileLoading]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof showClose === 'boolean') el.setAttribute('show-close', String(showClose));
+    else el.removeAttribute('show-close');
+  }, [showClose]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (initialFocus) el.setAttribute('initial-focus', initialFocus);
+    else el.removeAttribute('initial-focus');
+  }, [initialFocus]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (title) el.setAttribute('title', title);
+    else el.removeAttribute('title');
+  }, [title]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (description) el.setAttribute('description', description);
+    else el.removeAttribute('description');
+  }, [description]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (ariaLabel) el.setAttribute('aria-label', ariaLabel);
+    else el.removeAttribute('aria-label');
+  }, [ariaLabel]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (ariaLabelledBy) el.setAttribute('aria-labelledby', ariaLabelledBy);
+    else el.removeAttribute('aria-labelledby');
+  }, [ariaLabelledBy]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (ariaDescribedBy) el.setAttribute('aria-describedby', ariaDescribedBy);
+    else el.removeAttribute('aria-describedby');
+  }, [ariaDescribedBy]);
 
   return React.createElement('ui-drawer', { ref, ...rest }, children);
 });

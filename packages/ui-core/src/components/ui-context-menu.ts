@@ -1,6 +1,14 @@
 import { ElementBase } from '../ElementBase';
 
 type Point = { x: number; y: number };
+type ContextMenuState = 'idle' | 'loading' | 'error' | 'success';
+type ContextMenuOpenSource = 'api' | 'contextmenu' | 'anchor' | 'outside' | 'select' | 'escape' | 'attribute';
+
+type ContextMenuOpenDetail = {
+  open: boolean;
+  previousOpen: boolean;
+  source: ContextMenuOpenSource;
+};
 
 type MenuLikeItem = HTMLElement & {
   disabled?: boolean;
@@ -45,6 +53,11 @@ const style = `
     --ui-context-menu-separator-margin: 6px 10px;
     --ui-context-menu-submenu-radius: 11px;
     --ui-context-menu-submenu-padding: 5px;
+    --ui-context-menu-duration: 170ms;
+    --ui-context-menu-ease: cubic-bezier(0.2, 0.9, 0.24, 1);
+    --ui-context-menu-status-bg: color-mix(in srgb, var(--ui-context-menu-bg) 92%, transparent);
+    --ui-context-menu-status-border: color-mix(in srgb, var(--ui-context-menu-border-color) 76%, transparent);
+    --ui-context-menu-status-text: color-mix(in srgb, var(--ui-context-menu-color) 64%, transparent);
   }
 
   .surface {
@@ -68,7 +81,9 @@ const style = `
     pointer-events: none;
     transition:
       opacity var(--ui-context-menu-transition),
-      transform var(--ui-context-menu-transition);
+      transform var(--ui-context-menu-transition),
+      border-color var(--ui-context-menu-duration) var(--ui-context-menu-ease),
+      box-shadow var(--ui-context-menu-duration) var(--ui-context-menu-ease);
     outline: none;
   }
 
@@ -102,6 +117,59 @@ const style = `
     opacity: 1;
     transform: translateY(0) scale(1);
     pointer-events: auto;
+  }
+
+  .state-row {
+    display: none;
+    margin: 0 2px 5px;
+    min-height: 24px;
+    border-radius: 8px;
+    border: 1px solid var(--ui-context-menu-status-border);
+    background: var(--ui-context-menu-status-bg);
+    color: var(--ui-context-menu-status-text);
+    padding: 0 8px;
+    font: 650 10px/24px "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  :host([state="loading"]) .state-row,
+  :host([state="error"]) .state-row,
+  :host([state="success"]) .state-row {
+    display: block;
+  }
+
+  :host([state="loading"]) {
+    --ui-context-menu-status-bg: color-mix(in srgb, #f59e0b 16%, transparent);
+    --ui-context-menu-status-border: color-mix(in srgb, #f59e0b 46%, var(--ui-context-menu-border-color));
+    --ui-context-menu-status-text: #a16207;
+  }
+
+  :host([state="error"]) {
+    --ui-context-menu-status-bg: color-mix(in srgb, #ef4444 14%, transparent);
+    --ui-context-menu-status-border: color-mix(in srgb, #ef4444 46%, var(--ui-context-menu-border-color));
+    --ui-context-menu-status-text: #b91c1c;
+  }
+
+  :host([state="success"]) {
+    --ui-context-menu-status-bg: color-mix(in srgb, #16a34a 14%, transparent);
+    --ui-context-menu-status-border: color-mix(in srgb, #16a34a 46%, var(--ui-context-menu-border-color));
+    --ui-context-menu-status-text: #15803d;
+  }
+
+  :host([state="error"]) .surface {
+    border-color: color-mix(in srgb, #ef4444 48%, var(--ui-context-menu-border-color));
+  }
+
+  :host([state="success"]) .surface {
+    border-color: color-mix(in srgb, #16a34a 48%, var(--ui-context-menu-border-color));
+  }
+
+  :host([disabled]) .surface,
+  :host([state="loading"]) .surface {
+    pointer-events: none;
   }
 
   :host([headless]) .surface {
@@ -361,6 +429,19 @@ const lightDomStyle = `
     background: color-mix(in srgb, currentColor 18%, transparent);
   }
 
+  ui-context-menu [slot="menu"] .section-label,
+  ui-context-menu [slot="content"] .section-label {
+    padding: 7px 10px 5px;
+    font-size: 10px;
+    line-height: 1.25;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, currentColor 52%, transparent);
+    user-select: none;
+    pointer-events: none;
+  }
+
   ui-context-menu [slot="menu"] .icon,
   ui-context-menu [slot="content"] .icon {
     grid-column: 1;
@@ -373,14 +454,108 @@ const lightDomStyle = `
     font-size: 0.95em;
   }
 
+  ui-context-menu [slot="menu"] .selection-icon,
+  ui-context-menu [slot="content"] .selection-icon {
+    width: 0.95rem;
+    min-width: 0.95rem;
+    height: 0.95rem;
+    border-radius: 0.3rem;
+    border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+    background: color-mix(in srgb, var(--ui-context-menu-bg, #ffffff) 90%, transparent);
+    opacity: 0.94;
+    transition: background-color 140ms ease, border-color 140ms ease, transform 140ms ease;
+  }
+
+  ui-context-menu [slot="menu"] .selection-icon::after,
+  ui-context-menu [slot="content"] .selection-icon::after {
+    content: '';
+    display: block;
+    margin: auto;
+    width: 6px;
+    height: 3px;
+    border-inline-start: 2px solid currentColor;
+    border-block-end: 2px solid currentColor;
+    transform: rotate(-45deg) scale(0);
+    transform-origin: center;
+    transition: transform 140ms ease;
+  }
+
+  ui-context-menu [slot="menu"] [role="menuitemradio"] .selection-icon,
+  ui-context-menu [slot="content"] [role="menuitemradio"] .selection-icon {
+    border-radius: 999px;
+  }
+
+  ui-context-menu [slot="menu"] [role="menuitemradio"] .selection-icon::after,
+  ui-context-menu [slot="content"] [role="menuitemradio"] .selection-icon::after {
+    width: 6px;
+    height: 6px;
+    border: 0;
+    border-radius: 999px;
+    background: currentColor;
+    transform: scale(0);
+  }
+
+  ui-context-menu [slot="menu"] [role="menuitemcheckbox"][aria-checked="true"] .selection-icon,
+  ui-context-menu [slot="menu"] [role="menuitemradio"][aria-checked="true"] .selection-icon,
+  ui-context-menu [slot="content"] [role="menuitemcheckbox"][aria-checked="true"] .selection-icon,
+  ui-context-menu [slot="content"] [role="menuitemradio"][aria-checked="true"] .selection-icon {
+    border-color: color-mix(in srgb, var(--ui-context-menu-ring, #2563eb) 62%, transparent);
+    background: color-mix(in srgb, var(--ui-context-menu-ring, #2563eb) 16%, transparent);
+    color: color-mix(in srgb, var(--ui-context-menu-ring, #2563eb) 78%, #0f172a);
+  }
+
+  ui-context-menu [slot="menu"] [role="menuitemcheckbox"][aria-checked="true"] .selection-icon::after,
+  ui-context-menu [slot="menu"] [role="menuitemradio"][aria-checked="true"] .selection-icon::after,
+  ui-context-menu [slot="content"] [role="menuitemcheckbox"][aria-checked="true"] .selection-icon::after,
+  ui-context-menu [slot="content"] [role="menuitemradio"][aria-checked="true"] .selection-icon::after {
+    transform: rotate(-45deg) scale(1);
+  }
+
+  ui-context-menu [slot="menu"] [role="menuitemradio"][aria-checked="true"] .selection-icon::after,
+  ui-context-menu [slot="content"] [role="menuitemradio"][aria-checked="true"] .selection-icon::after {
+    transform: scale(1);
+  }
+
   ui-context-menu [slot="menu"] .label,
   ui-context-menu [slot="content"] .label {
     grid-column: 2;
-    display: block;
+    display: grid;
+    min-height: 0;
+    gap: 2px;
     min-width: 0;
+  }
+
+  ui-context-menu [slot="menu"] .label .text,
+  ui-context-menu [slot="content"] .label .text {
+    display: block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  ui-context-menu [slot="menu"] .label .caption,
+  ui-context-menu [slot="content"] .label .caption {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+    line-height: 1.25;
+    opacity: 0.7;
+    font-weight: 450;
+  }
+
+  ui-context-menu [slot="menu"] .shortcut,
+  ui-context-menu [slot="content"] .shortcut {
+    grid-column: 3;
+    margin-left: auto;
+    padding: 1px 6px;
+    border-radius: 6px;
+    border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+    font-size: 10px;
+    line-height: 1.3;
+    letter-spacing: 0.03em;
+    opacity: 0.72;
   }
 
   ui-context-menu [slot="menu"] .submenu-arrow,
@@ -558,9 +733,32 @@ function toPoint(x: number | Point, y?: number): Point {
   return x;
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export class UIContextMenu extends ElementBase {
   static get observedAttributes() {
-    return ['open', 'headless', 'variant', 'density', 'shape', 'elevation', 'tone', 'close-on-select', 'typeahead'];
+    return [
+      'open',
+      'headless',
+      'variant',
+      'density',
+      'shape',
+      'elevation',
+      'tone',
+      'close-on-select',
+      'close-on-escape',
+      'typeahead',
+      'state',
+      'state-text',
+      'disabled'
+    ];
   }
 
   private _isOpen = false;
@@ -572,6 +770,7 @@ export class UIContextMenu extends ElementBase {
   private _typeaheadBuffer = '';
   private _typeaheadTimer: number | null = null;
   private _globalListenersBound = false;
+  private _nextOpenSource: ContextMenuOpenSource = 'attribute';
 
   constructor() {
     super();
@@ -619,7 +818,28 @@ export class UIContextMenu extends ElementBase {
       return;
     }
 
-    if (name === 'close-on-select' || name === 'typeahead') {
+    if (name === 'close-on-select' || name === 'typeahead' || name === 'close-on-escape') {
+      return;
+    }
+
+    if (name === 'disabled') {
+      if (this.isDisabled && this._isOpen) {
+        this._setOpen(false, 'attribute');
+      }
+      if (this.isConnected) this.requestRender();
+      return;
+    }
+
+    if (name === 'state') {
+      if (this.state === 'loading' && this._isOpen) {
+        this._setOpen(false, 'attribute');
+      }
+      if (this.isConnected) this.requestRender();
+      return;
+    }
+
+    if (name === 'state-text') {
+      if (this.isConnected) this.requestRender();
       return;
     }
 
@@ -634,8 +854,7 @@ export class UIContextMenu extends ElementBase {
   }
 
   set open(value: boolean) {
-    if (value) this.setAttribute('open', '');
-    else this.removeAttribute('open');
+    this._setOpen(value, 'api');
   }
 
   get headless(): boolean {
@@ -657,6 +876,16 @@ export class UIContextMenu extends ElementBase {
     this.setAttribute('close-on-select', value ? 'true' : 'false');
   }
 
+  get closeOnEscape(): boolean {
+    const raw = this.getAttribute('close-on-escape');
+    if (raw == null) return true;
+    return raw !== 'false' && raw !== '0';
+  }
+
+  set closeOnEscape(value: boolean) {
+    this.setAttribute('close-on-escape', value ? 'true' : 'false');
+  }
+
   get typeahead(): boolean {
     const raw = this.getAttribute('typeahead');
     if (raw == null) return true;
@@ -667,17 +896,41 @@ export class UIContextMenu extends ElementBase {
     this.setAttribute('typeahead', value ? 'true' : 'false');
   }
 
+  get state(): ContextMenuState {
+    const raw = (this.getAttribute('state') || 'idle').toLowerCase();
+    if (raw === 'loading' || raw === 'error' || raw === 'success') return raw;
+    return 'idle';
+  }
+
+  set state(value: ContextMenuState) {
+    if (value === 'idle') this.removeAttribute('state');
+    else this.setAttribute('state', value);
+  }
+
+  get isDisabled(): boolean {
+    const raw = this.getAttribute('disabled');
+    if (raw == null) return false;
+    return raw !== 'false' && raw !== '0';
+  }
+
+  set disabled(value: boolean) {
+    if (value) this.setAttribute('disabled', '');
+    else this.removeAttribute('disabled');
+  }
+
   openAt(pointOrX: Point | number, y?: number): void {
+    if (this.headless || this.isDisabled || this.state === 'loading') return;
     const point = toPoint(pointOrX, y);
     this._anchorEl = null;
     this._position = { x: point.x, y: point.y };
-    this.open = true;
+    this._setOpen(true, 'api');
     this._schedulePosition();
   }
 
   openForAnchor(anchor: HTMLElement): void {
+    if (this.headless || this.isDisabled || this.state === 'loading') return;
     this._anchorEl = anchor;
-    this.open = true;
+    this._setOpen(true, 'anchor');
     this._schedulePosition();
   }
 
@@ -701,7 +954,7 @@ export class UIContextMenu extends ElementBase {
   }
 
   close(): void {
-    this.open = false;
+    this._setOpen(false, 'api');
   }
 
   private _cancelScheduledWork(): void {
@@ -724,8 +977,34 @@ export class UIContextMenu extends ElementBase {
     }
   }
 
+  private _stateText(): string {
+    const custom = this.getAttribute('state-text');
+    if (custom) return custom;
+    if (this.state === 'loading') return 'Loading actions';
+    if (this.state === 'error') return 'Action failed';
+    if (this.state === 'success') return 'Action complete';
+    return '';
+  }
+
+  private _emitOpenState(open: boolean, previousOpen: boolean, source: ContextMenuOpenSource): void {
+    const detail: ContextMenuOpenDetail = { open, previousOpen, source };
+    this.dispatchEvent(new CustomEvent(open ? 'open' : 'close', { detail, bubbles: true, composed: true }));
+    this.dispatchEvent(new CustomEvent(open ? 'ui-open' : 'ui-close', { detail, bubbles: true, composed: true }));
+    this.dispatchEvent(new CustomEvent('change', { detail: { ...detail }, bubbles: true, composed: true }));
+  }
+
+  private _setOpen(next: boolean, source: ContextMenuOpenSource = 'api'): void {
+    if (next === this.open) return;
+    if (next && (this.headless || this.isDisabled || this.state === 'loading')) return;
+    this._nextOpenSource = source;
+    if (next) this.setAttribute('open', '');
+    else this.removeAttribute('open');
+  }
+
   private _syncOpenState(): void {
     const nowOpen = this.hasAttribute('open');
+    const source = this._nextOpenSource;
+    this._nextOpenSource = 'attribute';
     if (nowOpen === this._isOpen) {
       this._syncSurfaceA11y();
       if (nowOpen) this._bindGlobalListeners();
@@ -743,8 +1022,8 @@ export class UIContextMenu extends ElementBase {
     if (nowOpen) {
       this._bindGlobalListeners();
       this._restoreFocusEl = document.activeElement as HTMLElement | null;
-      this.dispatchEvent(new CustomEvent('open', { bubbles: true }));
-      this.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { open: true } }));
+      this._normalizeMenuSemantics();
+      this._emitOpenState(true, false, source);
       this._schedulePosition();
       this._scheduleSubmenuLayout();
       requestAnimationFrame(() => {
@@ -758,8 +1037,7 @@ export class UIContextMenu extends ElementBase {
     this._cancelScheduledWork();
     this._anchorEl = null;
 
-    this.dispatchEvent(new CustomEvent('close', { bubbles: true }));
-    this.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { open: false } }));
+    this._emitOpenState(false, true, source);
 
     if (this._restoreFocusEl && this._restoreFocusEl.isConnected) {
       try {
@@ -775,6 +1053,7 @@ export class UIContextMenu extends ElementBase {
     const surface = this._getSurface();
     if (!surface) return;
     surface.setAttribute('aria-hidden', this._isOpen ? 'false' : 'true');
+    surface.setAttribute('aria-busy', this.state === 'loading' ? 'true' : 'false');
   }
 
   private _bindGlobalListeners(): void {
@@ -801,6 +1080,24 @@ export class UIContextMenu extends ElementBase {
     const slotMenu = this.querySelector('[slot="menu"]') as HTMLElement | null;
     if (slotMenu) return slotMenu;
     return this.querySelector('[slot="content"]') as HTMLElement | null;
+  }
+
+  private _normalizeMenuSemantics(): void {
+    const menu = this._getMenuHost();
+    if (!menu) return;
+    const items = Array.from(
+      menu.querySelectorAll<HTMLElement>('.menuitem, [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [data-menu-item]')
+    );
+    items.forEach((item) => {
+      const role = item.getAttribute('role');
+      if (!role) item.setAttribute('role', 'menuitem');
+      if (!item.hasAttribute('tabindex')) item.setAttribute('tabindex', '-1');
+      if (item.hasAttribute('disabled') && !item.hasAttribute('aria-disabled')) item.setAttribute('aria-disabled', 'true');
+      if (!item.hasAttribute('aria-disabled')) item.setAttribute('aria-disabled', 'false');
+      if (item.getAttribute('role') === 'menuitemcheckbox' || item.getAttribute('role') === 'menuitemradio') {
+        if (!item.hasAttribute('aria-checked')) item.setAttribute('aria-checked', 'false');
+      }
+    });
   }
 
   private _queryMenuItems(container?: HTMLElement | null): MenuLikeItem[] {
@@ -978,6 +1275,7 @@ export class UIContextMenu extends ElementBase {
     this.dispatchEvent(
       new CustomEvent('select', {
         bubbles: true,
+        composed: true,
         detail: {
           index,
           value: item.getAttribute('data-value') || item.getAttribute('value') || undefined,
@@ -1019,6 +1317,7 @@ export class UIContextMenu extends ElementBase {
 
   private _onRootClick(event: MouseEvent): void {
     if (!this._isOpen) return;
+    if (this.isDisabled || this.state === 'loading') return;
 
     const current = this._findCurrentItem(event);
     if (!current || isDisabled(current)) return;
@@ -1033,7 +1332,7 @@ export class UIContextMenu extends ElementBase {
     this._emitSelect(current);
 
     if (this.closeOnSelect) {
-      this.close();
+      this._setOpen(false, 'select');
     } else {
       this._focusItem(current);
     }
@@ -1046,10 +1345,13 @@ export class UIContextMenu extends ElementBase {
     if (this._handleTypeahead(event, current)) return;
 
     if (event.key === 'Escape') {
+      if (!this.closeOnEscape) return;
       event.preventDefault();
-      this.close();
+      this._setOpen(false, 'escape');
       return;
     }
+
+    if (this.isDisabled || this.state === 'loading') return;
 
     if (!current) {
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
@@ -1106,15 +1408,20 @@ export class UIContextMenu extends ElementBase {
     if (!this._isOpen) return;
     const path = event.composedPath();
     if (path.includes(this)) return;
-    this.close();
+    this._setOpen(false, 'outside');
   }
 
   private _onContextMenu(event: MouseEvent): void {
+    if (this.isDisabled || this.state === 'loading') return;
     if (event.defaultPrevented) return;
     if (event.target instanceof HTMLElement && event.target.closest('[slot="menu"], [slot="content"]')) return;
 
     event.preventDefault();
-    this.openAt(event.clientX, event.clientY);
+    const point = { x: event.clientX, y: event.clientY };
+    this._anchorEl = null;
+    this._position = point;
+    this._setOpen(true, 'contextmenu');
+    this._schedulePosition();
   }
 
   private _onViewportChange(): void {
@@ -1243,15 +1550,18 @@ export class UIContextMenu extends ElementBase {
   }
 
   protected render(): void {
+    const stateText = escapeHtml(this._stateText());
     this.setContent(`
       <style>${style}</style>
-      <div class="surface" part="menu" role="menu" aria-hidden="${this._isOpen ? 'false' : 'true'}" tabindex="-1">
+      <div class="surface" part="menu" role="menu" aria-hidden="${this._isOpen ? 'false' : 'true'}" aria-busy="${this.state === 'loading' ? 'true' : 'false'}" tabindex="-1">
+        <div class="state-row" part="state" data-state="${this.state}">${stateText}</div>
         <slot name="menu"></slot>
         <slot name="content"></slot>
       </div>
       <slot></slot>
     `);
 
+    this._normalizeMenuSemantics();
     if (this._isOpen) {
       this._schedulePosition();
       this._scheduleSubmenuLayout();

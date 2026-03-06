@@ -3,128 +3,182 @@ import { ElementBase } from '../ElementBase';
 type ComboboxOption = {
   value: string;
   label: string;
+  description: string;
   disabled: boolean;
   sourceIndex: number;
 };
 
+type ComboboxState = 'idle' | 'loading' | 'error' | 'success';
+type ComboboxOpenSource = 'api' | 'toggle' | 'keyboard' | 'outside' | 'selection' | 'clear' | 'attribute';
+
+type ComboboxOpenDetail = {
+  open: boolean;
+  previousOpen: boolean;
+  source: ComboboxOpenSource;
+};
+
 const style = `
   :host {
-    display: inline-block;
-    width: auto;
-    font-family: inherit;
-
     --ui-combobox-width: var(--ui-width, 100%);
-    --ui-combobox-min-width: 220px;
-    --ui-combobox-height: 40px;
+    --ui-combobox-min-width: 248px;
+    --ui-combobox-height: 42px;
     --ui-combobox-padding-x: 12px;
     --ui-combobox-radius: var(--ui-radius, 12px);
-    --ui-combobox-border-color: var(--ui-color-border, var(--ui-border, rgba(15, 23, 42, 0.14)));
+    --ui-combobox-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    --ui-combobox-text: var(--ui-color-text, #0f172a);
+    --ui-combobox-muted: var(--ui-color-muted, #64748b);
+    --ui-combobox-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
     --ui-combobox-border: 1px solid var(--ui-combobox-border-color);
-    --ui-combobox-bg: color-mix(in srgb, var(--ui-color-surface, var(--ui-surface, #ffffff)) 94%, transparent);
-    --ui-combobox-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-combobox-shadow: var(--ui-shadow-sm, 0 10px 32px rgba(2, 6, 23, 0.08));
-    --ui-combobox-focus: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
-    --ui-combobox-panel-bg: color-mix(in srgb, var(--ui-color-surface, var(--ui-surface, #ffffff)) 98%, transparent);
-    --ui-combobox-panel-border: 1px solid color-mix(in srgb, var(--ui-combobox-border-color) 72%, transparent);
-    --ui-combobox-panel-shadow: var(--ui-shadow-md, 0 22px 48px rgba(2, 6, 23, 0.16));
-    --ui-combobox-muted: var(--ui-color-muted, var(--ui-muted, #64748b));
-    --ui-combobox-option-hover: color-mix(in srgb, var(--ui-color-primary, var(--ui-primary, #2563eb)) 10%, transparent);
-    --ui-combobox-option-active: color-mix(in srgb, var(--ui-color-primary, var(--ui-primary, #2563eb)) 16%, transparent);
-    --ui-combobox-error: var(--ui-color-danger, var(--ui-error, #dc2626));
-    --ui-combobox-success: var(--ui-color-success, var(--ui-success, #16a34a));
+    --ui-combobox-shadow: 0 8px 24px rgba(2, 6, 23, 0.08);
+    --ui-combobox-focus: var(--ui-color-primary, #2563eb);
+    --ui-combobox-panel-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent);
+    --ui-combobox-panel-border: 1px solid color-mix(in srgb, var(--ui-combobox-border-color) 80%, transparent);
+    --ui-combobox-panel-shadow: 0 24px 46px rgba(2, 6, 23, 0.16);
+    --ui-combobox-option-hover: color-mix(in srgb, var(--ui-color-primary, #2563eb) 11%, transparent);
+    --ui-combobox-option-active: color-mix(in srgb, var(--ui-color-primary, #2563eb) 18%, transparent);
+    --ui-combobox-error: var(--ui-color-danger, #dc2626);
+    --ui-combobox-success: var(--ui-color-success, #16a34a);
+    --ui-combobox-warning: var(--ui-color-warning, #d97706);
+    --ui-combobox-duration: 150ms;
+    --ui-combobox-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    display: inline-block;
+    width: auto;
+    min-inline-size: min(100%, var(--ui-combobox-min-width));
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--ui-combobox-text);
     color-scheme: light dark;
   }
 
   .label-row {
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 6px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
+
   .label {
+    color: var(--ui-combobox-text);
     font-size: 13px;
-    color: var(--ui-combobox-color);
-    opacity: 0.85;
+    line-height: 1.3;
+    font-weight: 650;
+    letter-spacing: 0.01em;
   }
+
   .description {
-    font-size: 12px;
     color: var(--ui-combobox-muted);
+    font-size: 12px;
+    line-height: 1.4;
   }
 
   .root {
     position: relative;
     width: var(--ui-combobox-width);
     min-width: var(--ui-combobox-min-width);
+    max-width: 100%;
   }
 
   .control {
     position: relative;
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
     width: 100%;
     min-height: var(--ui-combobox-height);
     border: var(--ui-combobox-border);
     border-radius: var(--ui-combobox-radius);
-    background: var(--ui-combobox-bg);
+    background: linear-gradient(
+      170deg,
+      color-mix(in srgb, var(--ui-combobox-bg) 90%, #ffffff 10%),
+      var(--ui-combobox-bg)
+    );
     box-shadow: var(--ui-combobox-shadow);
-    transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+    transition:
+      border-color var(--ui-combobox-duration) var(--ui-combobox-ease),
+      box-shadow var(--ui-combobox-duration) var(--ui-combobox-ease),
+      background-color var(--ui-combobox-duration) var(--ui-combobox-ease),
+      transform var(--ui-combobox-duration) var(--ui-combobox-ease);
     overflow: hidden;
-    backdrop-filter: saturate(1.15) blur(10px);
+    backdrop-filter: saturate(1.08) blur(8px);
+  }
+
+  .control:hover {
+    border-color: color-mix(in srgb, var(--ui-combobox-focus) 34%, var(--ui-combobox-border-color));
+    box-shadow: 0 11px 30px rgba(2, 6, 23, 0.11);
   }
 
   input {
-    flex: 1 1 auto;
+    grid-column: 1 / 2;
+    min-width: 0;
     width: 100%;
     border: none;
     outline: none;
     background: transparent;
-    color: var(--ui-combobox-color);
-    padding: 9px calc(var(--ui-combobox-padding-x) + 36px) 9px var(--ui-combobox-padding-x);
+    color: var(--ui-combobox-text);
+    padding: 9px var(--ui-combobox-padding-x);
     font-size: 14px;
     line-height: 1.4;
-    min-height: var(--ui-combobox-height);
     font-family: inherit;
+    min-height: var(--ui-combobox-height);
   }
+
   input::placeholder {
     color: var(--ui-combobox-muted);
   }
 
   .control[data-focused="true"] {
-    border-color: color-mix(in srgb, var(--ui-combobox-focus) 68%, var(--ui-combobox-border-color));
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ui-combobox-focus) 15%, transparent), var(--ui-combobox-shadow);
+    border-color: color-mix(in srgb, var(--ui-combobox-focus) 72%, var(--ui-combobox-border-color));
+    box-shadow:
+      0 0 0 4px color-mix(in srgb, var(--ui-combobox-focus) 16%, transparent),
+      0 12px 32px rgba(2, 6, 23, 0.12);
+    transform: translateY(-1px);
   }
 
   .icon-btn {
-    position: absolute;
-    top: 50%;
+    align-self: center;
     border: none;
     background: transparent;
     color: var(--ui-combobox-muted);
-    width: 26px;
-    height: 26px;
-    margin-top: -13px;
+    inline-size: 28px;
+    block-size: 28px;
     border-radius: 8px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background-color 120ms ease, color 120ms ease;
+    margin-inline-end: 2px;
+    transition:
+      background-color var(--ui-combobox-duration) var(--ui-combobox-ease),
+      color var(--ui-combobox-duration) var(--ui-combobox-ease),
+      transform var(--ui-combobox-duration) var(--ui-combobox-ease);
   }
+
   .icon-btn:hover {
-    background: color-mix(in srgb, var(--ui-combobox-color) 10%, transparent);
-    color: var(--ui-combobox-color);
+    background: color-mix(in srgb, var(--ui-combobox-text) 8%, transparent);
+    color: var(--ui-combobox-text);
   }
+
+  .icon-btn:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--ui-combobox-focus) 70%, transparent);
+    outline-offset: 1px;
+  }
+
   .icon-btn[hidden] {
-    display: none;
+    display: none !important;
   }
+
+  .icon-btn[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
   .clear-btn {
-    right: 32px;
     font-size: 12px;
   }
+
   .toggle-btn {
-    right: 6px;
     font-size: 11px;
   }
+
   .toggle-btn[data-open="true"] {
     transform: rotate(180deg);
   }
@@ -138,20 +192,62 @@ const style = `
     border-radius: calc(var(--ui-combobox-radius) + 2px);
     background: var(--ui-combobox-panel-bg);
     box-shadow: var(--ui-combobox-panel-shadow);
-    max-height: min(320px, 46vh);
+    max-height: min(360px, 52vh);
     overflow: auto;
-    padding: 6px;
-    z-index: 90;
+    padding: 6px 6px 8px;
+    z-index: 120;
     display: none;
     opacity: 0;
     transform: translateY(-4px) scale(0.985);
-    transition: opacity 130ms ease, transform 130ms ease;
-    backdrop-filter: saturate(1.15) blur(10px);
+    transition:
+      opacity var(--ui-combobox-duration) var(--ui-combobox-ease),
+      transform var(--ui-combobox-duration) var(--ui-combobox-ease);
+    backdrop-filter: saturate(1.08) blur(8px);
   }
+
   .panel[data-open="true"] {
     display: block;
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+
+  .status-row {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    margin: 0 0 6px;
+    padding: 6px 8px;
+    border-radius: 9px;
+    border: 1px solid color-mix(in srgb, var(--ui-combobox-border-color) 82%, transparent);
+    background: color-mix(in srgb, var(--ui-combobox-bg) 95%, transparent);
+    color: var(--ui-combobox-muted);
+    font-size: 11px;
+    line-height: 1.35;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .status-row[data-state="loading"] {
+    border-color: color-mix(in srgb, var(--ui-combobox-warning) 40%, var(--ui-combobox-border-color));
+    color: var(--ui-combobox-warning);
+    background: color-mix(in srgb, var(--ui-combobox-warning) 12%, transparent);
+  }
+
+  .status-row[data-state="error"] {
+    border-color: color-mix(in srgb, var(--ui-combobox-error) 46%, var(--ui-combobox-border-color));
+    color: var(--ui-combobox-error);
+    background: color-mix(in srgb, var(--ui-combobox-error) 11%, transparent);
+  }
+
+  .status-row[data-state="success"] {
+    border-color: color-mix(in srgb, var(--ui-combobox-success) 46%, var(--ui-combobox-border-color));
+    color: var(--ui-combobox-success);
+    background: color-mix(in srgb, var(--ui-combobox-success) 12%, transparent);
+  }
+
+  .status-row[data-state="idle"] {
+    display: none;
   }
 
   .option {
@@ -161,45 +257,101 @@ const style = `
     text-align: left;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     border-radius: 10px;
-    padding: 9px 10px;
+    padding: 10px 10px;
     cursor: pointer;
-    color: var(--ui-combobox-color);
+    color: var(--ui-combobox-text);
     font-size: 13px;
     line-height: 1.35;
+    transition:
+      background-color var(--ui-combobox-duration) var(--ui-combobox-ease),
+      color var(--ui-combobox-duration) var(--ui-combobox-ease),
+      transform var(--ui-combobox-duration) var(--ui-combobox-ease);
   }
+
   .option:hover {
     background: var(--ui-combobox-option-hover);
   }
+
   .option[data-highlighted="true"] {
     background: var(--ui-combobox-option-active);
+    transform: translateX(1px);
   }
-  .option[data-selected="true"]::before {
-    content: '✓';
+
+  .option-text {
+    min-inline-size: 0;
+    display: grid;
+    gap: 2px;
+    flex: 1 1 auto;
+  }
+
+  .option-label {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    line-height: 1.35;
+    font-weight: 560;
+  }
+
+  .option-description {
+    color: var(--ui-combobox-muted);
+    font-size: 11px;
+    line-height: 1.35;
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .option-check {
+    inline-size: 14px;
+    text-align: center;
     font-size: 12px;
-    opacity: 0.9;
+    opacity: 0;
+    color: color-mix(in srgb, var(--ui-combobox-focus) 80%, var(--ui-combobox-text));
   }
-  .option[data-selected="false"]::before {
-    content: '';
-    width: 10px;
+
+  .option[data-selected="true"] .option-check {
+    opacity: 1;
   }
+
   .option[disabled] {
-    opacity: 0.48;
+    opacity: 0.46;
     cursor: not-allowed;
+    transform: none;
   }
 
   .empty {
-    padding: 12px 10px;
+    padding: 14px 10px;
     color: var(--ui-combobox-muted);
     font-size: 12px;
+    line-height: 1.45;
     text-align: center;
   }
 
   .error {
-    margin-top: 6px;
+    margin-top: 8px;
     color: var(--ui-combobox-error);
     font-size: 12px;
+    line-height: 1.35;
+    min-block-size: 16px;
+  }
+
+  :host([state="loading"]) .control {
+    border-color: color-mix(in srgb, var(--ui-combobox-warning) 52%, var(--ui-combobox-border-color));
+  }
+
+  :host([state="error"]) .control {
+    border-color: var(--ui-combobox-error);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ui-combobox-error) 19%, transparent), var(--ui-combobox-shadow);
+  }
+
+  :host([state="success"]) .control {
+    border-color: color-mix(in srgb, var(--ui-combobox-success) 72%, var(--ui-combobox-border-color));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-combobox-success) 13%, transparent), var(--ui-combobox-shadow);
   }
 
   :host([disabled]) .control {
@@ -208,32 +360,47 @@ const style = `
     background: color-mix(in srgb, var(--ui-combobox-muted) 20%, transparent);
   }
 
+  :host([readonly]) .control {
+    background: color-mix(in srgb, var(--ui-combobox-bg) 88%, var(--ui-combobox-muted) 12%);
+  }
+
+  :host([readonly]) .clear-btn {
+    display: none !important;
+  }
+
   :host([size="sm"]),
   :host([size="1"]) {
-    --ui-combobox-height: 34px;
+    --ui-combobox-height: 36px;
     --ui-combobox-padding-x: 10px;
   }
 
   :host([size="lg"]),
   :host([size="3"]) {
-    --ui-combobox-height: 46px;
+    --ui-combobox-height: 48px;
     --ui-combobox-padding-x: 13px;
   }
 
   :host([variant="surface"]) .control {
-    background: var(--ui-color-surface-alt, var(--ui-surface-alt, #f8fafc));
+    background: var(--ui-color-surface-alt, #f8fafc);
   }
+
   :host([variant="soft"]) .control {
-    background: color-mix(in srgb, var(--ui-combobox-color) 5%, transparent);
+    background: color-mix(in srgb, var(--ui-combobox-text) 4%, transparent);
     border-color: color-mix(in srgb, var(--ui-combobox-border-color) 70%, transparent);
+  }
+
+  :host([variant="classic"]) .control {
+    border-radius: 10px;
   }
 
   :host([radius="none"]) {
     --ui-combobox-radius: 0;
   }
+
   :host([radius="large"]) {
     --ui-combobox-radius: 16px;
   }
+
   :host([radius="full"]) {
     --ui-combobox-radius: 9999px;
   }
@@ -242,6 +409,7 @@ const style = `
     border-color: var(--ui-combobox-error);
     box-shadow: 0 0 0 4px color-mix(in srgb, var(--ui-combobox-error) 20%, transparent), var(--ui-combobox-shadow);
   }
+
   :host([validation="success"]) .control {
     border-color: var(--ui-combobox-success);
   }
@@ -256,7 +424,8 @@ const style = `
   @media (prefers-reduced-motion: reduce) {
     .control,
     .panel,
-    .icon-btn {
+    .icon-btn,
+    .option {
       transition: none !important;
     }
   }
@@ -272,10 +441,20 @@ const style = `
     }
   }
 
+  @media (max-width: 640px) {
+    :host {
+      --ui-combobox-min-width: 100%;
+    }
+
+    .panel {
+      max-height: min(50vh, 360px);
+    }
+  }
+
   @media (forced-colors: active) {
     :host {
       --ui-combobox-bg: Canvas;
-      --ui-combobox-color: CanvasText;
+      --ui-combobox-text: CanvasText;
       --ui-combobox-border-color: CanvasText;
       --ui-combobox-panel-bg: Canvas;
       --ui-combobox-panel-border: 1px solid CanvasText;
@@ -285,6 +464,12 @@ const style = `
       --ui-combobox-focus: Highlight;
       --ui-combobox-option-hover: Highlight;
       --ui-combobox-option-active: Highlight;
+    }
+
+    .status-row {
+      border-color: CanvasText;
+      color: CanvasText;
+      background: Canvas;
     }
 
     .option[data-highlighted="true"],
@@ -323,6 +508,8 @@ export class UICombobox extends ElementBase {
       'name',
       'required',
       'validation',
+      'state',
+      'state-text',
       'size',
       'variant',
       'radius',
@@ -352,10 +539,11 @@ export class UICombobox extends ElementBase {
   private _isFocused = false;
   private _suppressValueSync = false;
   private _globalListenersBound = false;
+  private _nextOpenSource: ComboboxOpenSource = 'attribute';
 
   constructor() {
     super();
-    this._onDocumentMouseDown = this._onDocumentMouseDown.bind(this);
+    this._onDocumentPointerDown = this._onDocumentPointerDown.bind(this);
     this._onInput = this._onInput.bind(this);
     this._onNativeChange = this._onNativeChange.bind(this);
     this._onFocusIn = this._onFocusIn.bind(this);
@@ -420,8 +608,26 @@ export class UICombobox extends ElementBase {
     if (name === 'open') {
       this._applyOpenState();
       if (oldVal !== newVal) {
-        this.dispatchEvent(new CustomEvent(newVal != null ? 'open' : 'close', { bubbles: true }));
+        this._emitOpenState(newVal != null, oldVal != null, this._nextOpenSource);
       }
+      this._nextOpenSource = 'attribute';
+      return;
+    }
+
+    if (name === 'disabled') {
+      if (this._isDisabled() && this.open) this._setOpen(false, 'attribute');
+      if (this.isConnected) this.requestRender();
+      return;
+    }
+
+    if (name === 'state') {
+      if (this._state() === 'loading' && this.open) this._setOpen(false, 'attribute');
+      if (this.isConnected) this.requestRender();
+      return;
+    }
+
+    if (name === 'state-text') {
+      this._renderList();
       return;
     }
 
@@ -443,13 +649,53 @@ export class UICombobox extends ElementBase {
   }
 
   set open(next: boolean) {
-    if (next === this.open) return;
-    if (next) this.setAttribute('open', '');
-    else this.removeAttribute('open');
+    this._setOpen(next, 'api');
   }
 
   private _isDisabled(): boolean {
     return isTruthyDisabledValue(this.getAttribute('disabled'));
+  }
+
+  private _isReadonly(): boolean {
+    return this.hasAttribute('readonly');
+  }
+
+  private _state(): ComboboxState {
+    const raw = (this.getAttribute('state') || 'idle').trim().toLowerCase();
+    if (raw === 'loading' || raw === 'error' || raw === 'success') return raw;
+    return 'idle';
+  }
+
+  private _isLoading(): boolean {
+    return this._state() === 'loading';
+  }
+
+  private _stateText(): string {
+    const custom = this.getAttribute('state-text');
+    if (custom) return custom;
+    const state = this._state();
+    if (state === 'loading') return 'Syncing results';
+    if (state === 'error') return 'Unable to load results';
+    if (state === 'success') return 'Results up to date';
+    return '';
+  }
+
+  private _emitOpenState(open: boolean, previousOpen: boolean, source: ComboboxOpenSource) {
+    const detail: ComboboxOpenDetail = { open, previousOpen, source };
+    this.dispatchEvent(
+      new CustomEvent(open ? 'open' : 'close', {
+        detail,
+        bubbles: true,
+        composed: true
+      })
+    );
+    this.dispatchEvent(
+      new CustomEvent(open ? 'ui-open' : 'ui-close', {
+        detail,
+        bubbles: true,
+        composed: true
+      })
+    );
   }
 
   private _attachFormRegistration() {
@@ -498,15 +744,21 @@ export class UICombobox extends ElementBase {
   }
 
   private _normalize(value: string): string {
-    return value.trim().toLowerCase();
+    return value
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
   }
 
   private _readOptions(): ComboboxOption[] {
     const optionElements = Array.from(
       this.querySelectorAll('option,[data-combobox-option]')
     ) as HTMLElement[];
+    const seen = new Set<string>();
 
-    return optionElements.map((node, index) => {
+    return optionElements
+      .map((node, index) => {
       const isNativeOption = node.tagName.toLowerCase() === 'option';
       const native = node as HTMLOptionElement;
 
@@ -516,19 +768,40 @@ export class UICombobox extends ElementBase {
       const label = isNativeOption
         ? (native.label || native.textContent || native.value || '').trim()
         : (node.getAttribute('label') || node.textContent || value).trim();
+      const description = (node.getAttribute('description') || node.getAttribute('data-description') || '').trim();
       const disabled = isNativeOption ? native.disabled : isTruthyDisabledValue(node.getAttribute('disabled'));
+      const normalizedValue = value.trim();
+
+      if (!normalizedValue && !label) return null;
+      const dedupeKey = `${normalizedValue}::${label}`;
+      if (seen.has(dedupeKey)) return null;
+      seen.add(dedupeKey);
 
       return {
-        value: value.trim(),
+        value: normalizedValue,
         label,
+        description,
         disabled,
         sourceIndex: index
       };
-    });
+    })
+      .filter((option): option is ComboboxOption => Boolean(option));
   }
 
   private _findOptionByValue(value: string): ComboboxOption | null {
     return this._options.find((option) => option.value === value) || null;
+  }
+
+  private _findExactOptionByQuery(query: string): ComboboxOption | null {
+    const normalized = this._normalize(query);
+    if (!normalized) return null;
+    return (
+      this._options.find(
+        (option) =>
+          !option.disabled &&
+          (this._normalize(option.label) === normalized || this._normalize(option.value) === normalized)
+      ) || null
+    );
   }
 
   private _rebuildFiltered(config?: { preserveHighlight?: boolean }) {
@@ -546,8 +819,10 @@ export class UICombobox extends ElementBase {
 
     if (config?.preserveHighlight && previous) {
       const keepIndex = this._filtered.findIndex((option) => option.sourceIndex === previous.sourceIndex);
-      this._highlightedIndex = keepIndex;
-      return;
+      if (keepIndex >= 0 && !this._filtered[keepIndex].disabled) {
+        this._highlightedIndex = keepIndex;
+        return;
+      }
     }
 
     const selected = this._findOptionByValue(this.value);
@@ -565,15 +840,16 @@ export class UICombobox extends ElementBase {
   private _renderList() {
     if (!this._panel) return;
 
+    const stateRow = this._renderStateRow();
     const emptyText = this.getAttribute('empty-text') || 'No matches found';
     if (this._filtered.length === 0) {
-      this._panel.innerHTML = `<div class="empty" part="empty">${escapeHtml(emptyText)}</div>`;
+      this._panel.innerHTML = `${stateRow}<div class="empty" part="empty">${escapeHtml(emptyText)}</div>`;
       this._syncActiveDescendant();
       return;
     }
 
     const currentValue = this.value;
-    this._panel.innerHTML = this._filtered
+    const optionsMarkup = this._filtered
       .map((option, filteredIndex) => {
         const selected = option.value === currentValue;
         const highlighted = filteredIndex === this._highlightedIndex;
@@ -592,14 +868,27 @@ export class UICombobox extends ElementBase {
             data-highlighted="${highlighted ? 'true' : 'false'}"
             data-selected="${selected ? 'true' : 'false'}"
             ${disabled ? 'disabled' : ''}>
-            <span class="option-label">${escapeHtml(option.label)}</span>
+            <span class="option-text">
+              <span class="option-label">${escapeHtml(option.label)}</span>
+              ${option.description ? `<span class="option-description">${escapeHtml(option.description)}</span>` : ''}
+            </span>
+            <span class="option-check" aria-hidden="true">✓</span>
           </button>
         `;
       })
       .join('');
 
+    this._panel.innerHTML = `${stateRow}${optionsMarkup}`;
+
     this._syncActiveDescendant();
     this._scrollHighlightedIntoView();
+  }
+
+  private _renderStateRow(): string {
+    const state = this._state();
+    const text = this._stateText();
+    if (!text) return '';
+    return `<div class="status-row" part="status" data-state="${escapeHtml(state)}" aria-live="polite">${escapeHtml(text)}</div>`;
   }
 
   private _syncInputFromValue() {
@@ -641,7 +930,12 @@ export class UICombobox extends ElementBase {
 
   private _updateClearButton() {
     if (!this._clearBtn) return;
-    const show = this.hasAttribute('clearable') && (this._query.length > 0 || this.value.length > 0);
+    const show =
+      this.hasAttribute('clearable') &&
+      !this._isDisabled() &&
+      !this._isReadonly() &&
+      !this._isLoading() &&
+      (this._query.length > 0 || this.value.length > 0);
     if (show) this._clearBtn.removeAttribute('hidden');
     else this._clearBtn.setAttribute('hidden', '');
   }
@@ -649,10 +943,12 @@ export class UICombobox extends ElementBase {
   private _applyOpenState() {
     if (!this._panel || !this._input || !this._toggleBtn) return;
     const open = this.open;
+    const loading = this._isLoading();
     if (open) {
       this._bindGlobalListeners();
       this._panel.setAttribute('data-open', 'true');
       this._panel.removeAttribute('hidden');
+      this._panel.setAttribute('aria-hidden', 'false');
       this._input.setAttribute('aria-expanded', 'true');
       this._toggleBtn.setAttribute('data-open', 'true');
       this._rebuildFiltered({ preserveHighlight: true });
@@ -661,35 +957,47 @@ export class UICombobox extends ElementBase {
       this._unbindGlobalListeners();
       this._panel.setAttribute('hidden', '');
       this._panel.removeAttribute('data-open');
+      this._panel.setAttribute('aria-hidden', 'true');
       this._input.setAttribute('aria-expanded', 'false');
       this._toggleBtn.setAttribute('data-open', 'false');
     }
+
+    this._toggleBtn.disabled = this._isDisabled();
+    if (this._clearBtn) this._clearBtn.disabled = this._isDisabled() || this._isReadonly() || loading;
+    this._input.setAttribute('aria-busy', loading ? 'true' : 'false');
+    this._panel.setAttribute('aria-busy', loading ? 'true' : 'false');
   }
 
   private _bindGlobalListeners() {
     if (this._globalListenersBound) return;
-    document.addEventListener('mousedown', this._onDocumentMouseDown as EventListener);
+    document.addEventListener('pointerdown', this._onDocumentPointerDown as EventListener, true);
     this._globalListenersBound = true;
   }
 
   private _unbindGlobalListeners() {
     if (!this._globalListenersBound) return;
-    document.removeEventListener('mousedown', this._onDocumentMouseDown as EventListener);
+    document.removeEventListener('pointerdown', this._onDocumentPointerDown as EventListener, true);
     this._globalListenersBound = false;
   }
 
-  private _openPanel() {
-    if (this._isDisabled()) return;
-    if (this.open) return;
-    this.open = true;
+  private _setOpen(next: boolean, source: ComboboxOpenSource = 'api') {
+    if (next === this.open) return;
+    if (next && this._isDisabled()) return;
+    this._nextOpenSource = source;
+    if (next) this.setAttribute('open', '');
+    else this.removeAttribute('open');
   }
 
-  private _closePanel() {
-    if (!this.open) return;
-    this.open = false;
+  private _openPanel(source: ComboboxOpenSource = 'api') {
+    this._setOpen(true, source);
+  }
+
+  private _closePanel(source: ComboboxOpenSource = 'api') {
+    this._setOpen(false, source);
   }
 
   private _commitSelection(option: ComboboxOption) {
+    if (this._isDisabled() || this._isReadonly() || this._isLoading()) return;
     if (option.disabled) return;
     const previous = this.value;
 
@@ -702,13 +1010,14 @@ export class UICombobox extends ElementBase {
     this._rebuildFiltered({ preserveHighlight: false });
     this._renderList();
     this._updateClearButton();
-    this._closePanel();
+    this._closePanel('selection');
 
     if (previous !== option.value) {
       this.dispatchEvent(
         new CustomEvent('change', {
           detail: { value: option.value, label: option.label },
-          bubbles: true
+          bubbles: true,
+          composed: true
         })
       );
     }
@@ -716,12 +1025,14 @@ export class UICombobox extends ElementBase {
     this.dispatchEvent(
       new CustomEvent('select', {
         detail: { value: option.value, label: option.label },
-        bubbles: true
+        bubbles: true,
+        composed: true
       })
     );
   }
 
   private _commitCustomValue() {
+    if (this._isDisabled() || this._isReadonly() || this._isLoading()) return;
     if (!this.hasAttribute('allow-custom')) return;
 
     const next = this._query.trim();
@@ -735,7 +1046,8 @@ export class UICombobox extends ElementBase {
       this.dispatchEvent(
         new CustomEvent('change', {
           detail: { value: next, label: next, custom: true },
-          bubbles: true
+          bubbles: true,
+          composed: true
         })
       );
     }
@@ -763,15 +1075,23 @@ export class UICombobox extends ElementBase {
     const headless = this.hasAttribute('headless');
     const disabledRaw = this.getAttribute('disabled');
     const disabled = isTruthyDisabledValue(disabledRaw);
-    const readOnly = this.hasAttribute('readonly');
+    const readOnly = this._isReadonly();
+    const state = this._state();
+    const loading = state === 'loading';
     const placeholder = this.getAttribute('placeholder') || 'Search...';
     const maxLength = this.getAttribute('maxlength');
     const required = this.hasAttribute('required');
     const label = this.getAttribute('label') || '';
     const description = this.getAttribute('description') || '';
     const currentError = this.getAttribute('data-error') || '';
+    const errorText = currentError || (state === 'error' ? this._stateText() || 'Unable to load options.' : '');
+    const hasValidationError = this.getAttribute('validation') === 'error' || state === 'error' || Boolean(errorText);
     const hasLabel = Boolean(label || this.querySelector('[slot="label"]'));
     const hasDescription = Boolean(description || this.querySelector('[slot="description"]'));
+    const errorId = `${this._uid}-error`;
+    const describedBy = [hasDescription ? `${this._uid}-description` : '', hasValidationError ? errorId : '']
+      .filter(Boolean)
+      .join(' ');
 
     this._options = this._readOptions();
     if (!this._query) {
@@ -790,7 +1110,7 @@ export class UICombobox extends ElementBase {
       ` : ''}
 
       <div class="root" part="root">
-        <div class="control" part="control" data-focused="${this._isFocused ? 'true' : 'false'}">
+        <div class="control" part="control" data-focused="${this._isFocused ? 'true' : 'false'}" data-state="${escapeHtml(state)}">
           <input
             id="${this._uid}-input"
             part="input"
@@ -800,8 +1120,9 @@ export class UICombobox extends ElementBase {
             aria-expanded="${this.open ? 'true' : 'false'}"
             aria-controls="${this._uid}-listbox"
             ${hasLabel ? `aria-labelledby="${this._uid}-label"` : ''}
-            ${hasDescription ? `aria-describedby="${this._uid}-description"` : ''}
-            ${this.getAttribute('validation') === 'error' ? 'aria-invalid="true"' : ''}
+            ${describedBy ? `aria-describedby="${describedBy}"` : ''}
+            ${hasValidationError ? 'aria-invalid="true"' : ''}
+            aria-busy="${loading ? 'true' : 'false'}"
             value="${escapeHtml(this._query)}"
             placeholder="${escapeHtml(placeholder)}"
             ${disabled ? 'disabled' : ''}
@@ -809,13 +1130,13 @@ export class UICombobox extends ElementBase {
             ${required ? 'required' : ''}
             ${maxLength ? `maxlength="${escapeHtml(maxLength)}"` : ''}
           />
-          <button type="button" part="clear" class="icon-btn clear-btn" aria-label="Clear value" hidden>✕</button>
-          <button type="button" part="toggle" class="icon-btn toggle-btn" data-open="${this.open ? 'true' : 'false'}" aria-label="Toggle options">▾</button>
+          <button type="button" part="clear" class="icon-btn clear-btn" aria-label="Clear value" hidden ${readOnly || loading ? 'disabled' : ''}>✕</button>
+          <button type="button" part="toggle" class="icon-btn toggle-btn" data-open="${this.open ? 'true' : 'false'}" aria-label="Toggle options" ${loading ? 'disabled' : ''}>▾</button>
         </div>
-        <div class="panel" id="${this._uid}-listbox" part="panel" role="listbox" ${this.open ? 'data-open="true"' : 'hidden'}></div>
+        <div class="panel" id="${this._uid}-listbox" part="panel" role="listbox" aria-busy="${loading ? 'true' : 'false'}" data-state="${escapeHtml(state)}" ${this.open ? 'data-open="true" aria-hidden="false"' : 'hidden aria-hidden="true"'}></div>
       </div>
       <slot hidden></slot>
-      <div class="error" part="error">${escapeHtml(currentError)}</div>
+      <div class="error" part="error" id="${errorId}" ${hasValidationError ? '' : 'hidden'}>${escapeHtml(errorText)}</div>
     `);
 
     this._detachDomListeners();
@@ -865,11 +1186,11 @@ export class UICombobox extends ElementBase {
   }
 
   private _onInput(event: Event) {
-    if (!this._input || this._isDisabled() || this.hasAttribute('readonly')) return;
+    if (!this._input || this._isDisabled() || this._isReadonly()) return;
 
     const nextQuery = (event.target as HTMLInputElement).value;
     this._query = nextQuery;
-    this._openPanel();
+    this._openPanel('keyboard');
     this._rebuildFiltered({ preserveHighlight: false });
     this._renderList();
     this._updateClearButton();
@@ -877,7 +1198,8 @@ export class UICombobox extends ElementBase {
     this.dispatchEvent(
       new CustomEvent('input', {
         detail: { query: nextQuery, value: this.value },
-        bubbles: true
+        bubbles: true,
+        composed: true
       })
     );
 
@@ -892,7 +1214,8 @@ export class UICombobox extends ElementBase {
         this.dispatchEvent(
           new CustomEvent('debounced-input', {
             detail: { query: nextQuery, value: this.value },
-            bubbles: true
+            bubbles: true,
+            composed: true
           })
         );
       }, debounceMs);
@@ -900,13 +1223,15 @@ export class UICombobox extends ElementBase {
       this.dispatchEvent(
         new CustomEvent('debounced-input', {
           detail: { query: nextQuery, value: this.value },
-          bubbles: true
+          bubbles: true,
+          composed: true
         })
       );
     }
   }
 
   private _onNativeChange() {
+    if (this._isDisabled() || this._isReadonly()) return;
     if (this.hasAttribute('allow-custom')) {
       this._commitCustomValue();
     }
@@ -915,28 +1240,55 @@ export class UICombobox extends ElementBase {
   private _onFocusIn() {
     this._isFocused = true;
     if (this._control) this._control.setAttribute('data-focused', 'true');
-    if (!this.hasAttribute('readonly')) this._openPanel();
+    if (!this._isReadonly()) this._openPanel('keyboard');
   }
 
   private _onFocusOut() {
     this._isFocused = false;
     if (this._control) this._control.setAttribute('data-focused', 'false');
+    queueMicrotask(() => {
+      const rootActive = (this.root as ShadowRoot).activeElement as Element | null;
+      if (rootActive) return;
+      if (!this.open) return;
+      if (this.hasAttribute('allow-custom')) this._commitCustomValue();
+      else this._syncInputFromValue();
+      this._closePanel('outside');
+    });
   }
 
   private _onKeyDown(event: KeyboardEvent) {
     if (this._isDisabled()) return;
     if (!this._input) return;
 
+    if (event.key === 'Home' && this.open) {
+      event.preventDefault();
+      this._highlightedIndex = this._filtered.findIndex((option) => !option.disabled);
+      this._renderList();
+      return;
+    }
+
+    if (event.key === 'End' && this.open) {
+      event.preventDefault();
+      for (let i = this._filtered.length - 1; i >= 0; i -= 1) {
+        if (!this._filtered[i].disabled) {
+          this._highlightedIndex = i;
+          break;
+        }
+      }
+      this._renderList();
+      return;
+    }
+
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      this._openPanel();
+      this._openPanel('keyboard');
       this._moveHighlight(1);
       return;
     }
 
     if (event.key === 'ArrowUp') {
       event.preventDefault();
-      this._openPanel();
+      this._openPanel('keyboard');
       this._moveHighlight(-1);
       return;
     }
@@ -947,8 +1299,19 @@ export class UICombobox extends ElementBase {
         const highlighted = this._filtered[this._highlightedIndex];
         if (highlighted) this._commitSelection(highlighted);
       } else if (this.hasAttribute('allow-custom')) {
+        event.preventDefault();
         this._commitCustomValue();
-        this._closePanel();
+        this._closePanel('keyboard');
+      } else if (this.open) {
+        event.preventDefault();
+        this._syncInputFromValue();
+        this._closePanel('keyboard');
+      } else {
+        const exact = this._findExactOptionByQuery(this._query);
+        if (exact) {
+          event.preventDefault();
+          this._commitSelection(exact);
+        }
       }
       return;
     }
@@ -957,7 +1320,7 @@ export class UICombobox extends ElementBase {
       if (this.open) {
         event.preventDefault();
         if (!this.hasAttribute('allow-custom')) this._syncInputFromValue();
-        this._closePanel();
+        this._closePanel('keyboard');
       }
       return;
     }
@@ -965,13 +1328,14 @@ export class UICombobox extends ElementBase {
     if (event.key === 'Tab') {
       if (this.hasAttribute('allow-custom')) this._commitCustomValue();
       else this._syncInputFromValue();
-      this._closePanel();
+      this._closePanel('keyboard');
     }
   }
 
   private _onClearClick(event: Event) {
     event.preventDefault();
     if (!this._input) return;
+    if (this._isDisabled() || this._isReadonly() || this._isLoading()) return;
 
     this._query = '';
     this._input.value = '';
@@ -982,19 +1346,21 @@ export class UICombobox extends ElementBase {
     this._rebuildFiltered({ preserveHighlight: false });
     this._renderList();
     this._updateClearButton();
-    this._openPanel();
+    this._openPanel('clear');
 
-    this.dispatchEvent(new CustomEvent('clear', { bubbles: true }));
+    this.dispatchEvent(new CustomEvent('clear', { bubbles: true, composed: true }));
     this.dispatchEvent(
       new CustomEvent('input', {
         detail: { query: '', value: '' },
-        bubbles: true
+        bubbles: true,
+        composed: true
       })
     );
     this.dispatchEvent(
       new CustomEvent('change', {
         detail: { value: '', label: '' },
-        bubbles: true
+        bubbles: true,
+        composed: true
       })
     );
   }
@@ -1002,12 +1368,13 @@ export class UICombobox extends ElementBase {
   private _onToggleClick(event: Event) {
     event.preventDefault();
     if (this._isDisabled()) return;
-    if (this.open) this._closePanel();
-    else this._openPanel();
+    if (this.open) this._closePanel('toggle');
+    else this._openPanel('toggle');
     this._input?.focus();
   }
 
   private _onPanelClick(event: Event) {
+    if (this._isReadonly() || this._isLoading()) return;
     const target = event.target as HTMLElement;
     const button = target.closest('[data-option-index]') as HTMLElement | null;
     if (!button) return;
@@ -1021,9 +1388,9 @@ export class UICombobox extends ElementBase {
     this._commitSelection(option);
   }
 
-  private _onDocumentMouseDown(event: MouseEvent) {
+  private _onDocumentPointerDown(event: PointerEvent) {
     if (!this.open) return;
-    const path = event.composedPath();
+    const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
     if (path.includes(this)) return;
 
     if (this.hasAttribute('allow-custom')) {
@@ -1031,7 +1398,7 @@ export class UICombobox extends ElementBase {
     } else {
       this._syncInputFromValue();
     }
-    this._closePanel();
+    this._closePanel('outside');
   }
 }
 

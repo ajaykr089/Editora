@@ -1,4 +1,5 @@
 import React, { useEffect, useImperativeHandle, useRef } from 'react';
+import { serializeTranslations, warnIfElementNotRegistered } from './_internals';
 
 export type CalendarEvent = {
   date: string;
@@ -6,11 +7,18 @@ export type CalendarEvent = {
   tone?: 'default' | 'success' | 'warning' | 'danger' | 'info';
 };
 
-export type CalendarSelectDetail = { value: string };
+export type CalendarSelectDetail = { value: string; source?: 'pointer' | 'keyboard' | 'api' };
 export type CalendarChangeDetail =
-  | { mode: 'single'; value: string | null }
-  | { mode: 'range'; value: { start: string; end: string } | null; start: string | null; end: string | null }
-  | { mode: 'multiple'; value: string[]; values: string[] };
+  | { mode: 'single'; value: string | null; source?: 'pointer' | 'keyboard' | 'api' }
+  | {
+      mode: 'range';
+      value: { start: string; end: string } | null;
+      start: string | null;
+      end: string | null;
+      source?: 'pointer' | 'keyboard' | 'api';
+    }
+  | { mode: 'multiple'; value: string[]; values: string[]; source?: 'pointer' | 'keyboard' | 'api' };
+export type CalendarMonthChangeDetail = { year: number; month: number; source?: 'pointer' | 'keyboard' | 'api' };
 
 type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect'> & {
   children?: React.ReactNode;
@@ -28,18 +36,24 @@ export type CalendarProps = BaseProps & {
   disabled?: boolean;
   readOnly?: boolean;
   locale?: string;
+  translations?: Record<string, string> | string;
   weekStart?: 0 | 1 | 6;
   outsideClick?: 'none' | 'navigate' | 'select';
   eventsMax?: number;
   eventsDisplay?: 'dots' | 'badges' | 'count';
   maxSelections?: number;
   size?: 'sm' | 'md' | 'lg';
+  bare?: boolean;
+  tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+  state?: 'idle' | 'loading' | 'error' | 'success';
   headless?: boolean;
   hideToday?: boolean;
   showToday?: boolean;
+  ariaLabel?: string;
   onSelect?: (detail: CalendarSelectDetail) => void;
   onChange?: (detail: CalendarSelectDetail) => void;
   onCalendarChange?: (detail: CalendarChangeDetail) => void;
+  onMonthChange?: (detail: CalendarMonthChangeDetail) => void;
   onValueChange?: (value: string) => void;
 };
 
@@ -56,18 +70,24 @@ export const Calendar = React.forwardRef<HTMLElement, CalendarProps>(function Ca
     disabled,
     readOnly,
     locale,
+    translations,
     weekStart,
     outsideClick,
     eventsMax,
     eventsDisplay,
     maxSelections,
     size,
+    bare,
+    tone,
+    state,
     headless,
     hideToday,
     showToday,
+    ariaLabel,
     onSelect,
     onChange,
     onCalendarChange,
+    onMonthChange,
     onValueChange,
     children,
     ...rest
@@ -77,6 +97,10 @@ export const Calendar = React.forwardRef<HTMLElement, CalendarProps>(function Ca
   const ref = useRef<HTMLElement | null>(null);
 
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+
+  useEffect(() => {
+    warnIfElementNotRegistered('ui-calendar', 'Calendar');
+  }, []);
 
   useEffect(() => {
     const el = ref.current;
@@ -96,13 +120,21 @@ export const Calendar = React.forwardRef<HTMLElement, CalendarProps>(function Ca
       onCalendarChange?.(detail);
     };
 
-    el.addEventListener('select', handleSelect as EventListener);
-    el.addEventListener('change', handleCalendarChange as EventListener);
-    return () => {
-      el.removeEventListener('select', handleSelect as EventListener);
-      el.removeEventListener('change', handleCalendarChange as EventListener);
+    const handleMonthChange = (event: Event) => {
+      const detail = (event as CustomEvent<CalendarMonthChangeDetail>).detail;
+      if (!detail) return;
+      onMonthChange?.(detail);
     };
-  }, [onSelect, onChange, onCalendarChange, onValueChange]);
+
+    el.addEventListener('ui-select', handleSelect as EventListener);
+    el.addEventListener('ui-change', handleCalendarChange as EventListener);
+    el.addEventListener('ui-month-change', handleMonthChange as EventListener);
+    return () => {
+      el.removeEventListener('ui-select', handleSelect as EventListener);
+      el.removeEventListener('ui-change', handleCalendarChange as EventListener);
+      el.removeEventListener('ui-month-change', handleMonthChange as EventListener);
+    };
+  }, [onSelect, onChange, onCalendarChange, onMonthChange, onValueChange]);
 
   useEffect(() => {
     const el = ref.current;
@@ -136,6 +168,7 @@ export const Calendar = React.forwardRef<HTMLElement, CalendarProps>(function Ca
     syncAttr('min', min || null);
     syncAttr('max', max || null);
     syncAttr('locale', locale || null);
+    syncAttr('translations', serializeTranslations(translations));
     syncAttr('week-start', typeof weekStart === 'number' ? String(weekStart) : null);
     syncAttr('outside-click', outsideClick && outsideClick !== 'navigate' ? outsideClick : null);
     syncAttr('events-max', typeof eventsMax === 'number' && Number.isFinite(eventsMax) ? String(eventsMax) : null);
@@ -145,7 +178,11 @@ export const Calendar = React.forwardRef<HTMLElement, CalendarProps>(function Ca
       typeof maxSelections === 'number' && Number.isFinite(maxSelections) ? String(maxSelections) : null
     );
     syncAttr('size', size && size !== 'md' ? size : null);
+    syncBool('bare', bare);
+    syncAttr('tone', tone || null);
+    syncAttr('state', state && state !== 'idle' ? state : null);
     syncAttr('show-today', typeof showToday === 'boolean' ? (showToday ? 'true' : 'false') : null);
+    syncAttr('aria-label', ariaLabel || null);
 
     syncBool('disabled', disabled);
     syncBool('readonly', readOnly);
@@ -175,15 +212,20 @@ export const Calendar = React.forwardRef<HTMLElement, CalendarProps>(function Ca
     disabled,
     readOnly,
     locale,
+    translations,
     weekStart,
     outsideClick,
     eventsMax,
     eventsDisplay,
     maxSelections,
     size,
+    bare,
+    tone,
+    state,
     headless,
     hideToday,
-    showToday
+    showToday,
+    ariaLabel
   ]);
 
   return React.createElement('ui-calendar', { ref, ...rest }, children);

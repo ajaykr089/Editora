@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { useFloating } from '../hooks/useFloating';
 
 function TestComponent() {
@@ -33,7 +33,7 @@ describe('useFloating hook', () => {
     // Floating should become visible (hidden prop false)
     expect(floating.getAttribute('hidden')).toBeNull();
 
-    const first = getByText('One');
+    getByText('One');
     // simulate ArrowDown on floating should focus next item
     fireEvent.keyDown(floating, { key: 'ArrowDown' });
     // we cannot rely on focus in jsdom for tabindex, but ensure no errors and open state remains
@@ -46,5 +46,29 @@ describe('useFloating hook', () => {
     // coords are numeric and placement present
     const coords = getByTestId('coords').textContent || '';
     expect(coords).toMatch(/\d+\/\d+\/top\/false/);
+  });
+
+  it('merges user event handlers without disabling built-in behavior', async () => {
+    const userClick = vi.fn();
+
+    function WithUserHandlers() {
+      const { getReferenceProps, getFloatingProps } = useFloating({ placement: 'bottom', offset: 8 });
+      return (
+        <div>
+          <button data-testid="trigger" {...getReferenceProps({ onClick: userClick })}>Open</button>
+          <div data-testid="popup" {...getFloatingProps()} />
+        </div>
+      );
+    }
+
+    const { getByTestId } = render(<WithUserHandlers />);
+    const trigger = getByTestId('trigger');
+    const popup = getByTestId('popup');
+
+    expect(popup.getAttribute('hidden')).not.toBeNull();
+    fireEvent.click(trigger);
+    await waitFor(() => expect(trigger.getAttribute('aria-expanded')).toBe('true'));
+    expect(userClick).toHaveBeenCalledTimes(1);
+    expect(popup.getAttribute('hidden')).toBeNull();
   });
 });

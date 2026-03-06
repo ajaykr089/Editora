@@ -200,4 +200,17 @@ describe('dialog manager', () => {
 
     await expect(pending).resolves.toMatchObject({ action: 'dismiss', source: 'unmount' });
   });
+
+  it('destroy resolves pending as dismiss/programmatic when called programmatically', async () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const manager = createDialogManager({ container: host });
+
+    const pending = manager.open({ title: 'Pending' });
+    await settle();
+
+    manager.destroy('programmatic');
+
+    await expect(pending).resolves.toMatchObject({ action: 'dismiss', source: 'programmatic' });
+  });
 });

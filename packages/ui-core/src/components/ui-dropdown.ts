@@ -2,23 +2,40 @@ import { ElementBase } from '../ElementBase';
 import { showPortalFor } from '../portal';
 
 type DropdownPlacement = 'top' | 'bottom' | 'left' | 'right';
+type DropdownCloseReason = 'outside' | 'escape' | 'select' | 'trigger' | 'tab' | 'programmatic' | 'disabled';
 
 type DropdownItem = HTMLElement & { disabled?: boolean };
 
+export type UIDropdownChangeDetail = {
+  open: boolean;
+  reason?: DropdownCloseReason;
+};
+
+export type UIDropdownSelectDetail = {
+  value?: string;
+  label?: string;
+  checked?: boolean;
+  item?: HTMLElement;
+};
+
+export type UIDropdownRequestCloseDetail = {
+  reason: DropdownCloseReason;
+};
+
 const style = `
   :host {
-    --ui-dropdown-menu-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
-    --ui-dropdown-menu-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-dropdown-menu-border-color: var(--ui-color-border, var(--ui-border, rgba(15, 23, 42, 0.14)));
-    --ui-dropdown-menu-border: 1px solid var(--ui-dropdown-menu-border-color);
-    --ui-dropdown-menu-shadow:
-      0 20px 44px rgba(2, 6, 23, 0.2),
-      0 2px 10px rgba(2, 6, 23, 0.12);
-    --ui-dropdown-menu-radius: 13px;
-    --ui-dropdown-menu-padding: 6px;
-    --ui-dropdown-menu-min-width: 196px;
-    --ui-dropdown-menu-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
+    --ui-dropdown-menu-bg: var(--ui-color-surface, #ffffff);
+    --ui-dropdown-menu-color: var(--ui-color-text, #0f172a);
+    --ui-dropdown-menu-muted: var(--ui-color-muted, #64748b);
+    --ui-dropdown-menu-min-width: 208px;
+    --ui-dropdown-menu-ring: var(--ui-color-focus-ring, #2563eb);
     --ui-dropdown-menu-backdrop: none;
+    --ui-dropdown-item-bg: transparent;
+    --ui-dropdown-item-active-bg: color-mix(in srgb, var(--ui-dropdown-menu-ring, #2563eb) 19%, transparent);
+    --ui-dropdown-item-hover-bg: color-mix(in srgb, var(--ui-dropdown-menu-ring, #2563eb) 11%, transparent);
+    --ui-dropdown-item-checked-bg: color-mix(in srgb, var(--ui-dropdown-menu-ring, #2563eb) 16%, transparent);
+    --ui-dropdown-duration: 170ms;
+    --ui-dropdown-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
     color-scheme: light dark;
     display: inline-block;
     position: relative;
@@ -41,62 +58,60 @@ const style = `
 
 const menuStyle = `
   .menu {
-    --ui-dropdown-item-radius: 8px;
-    --ui-dropdown-item-gap: 10px;
-    --ui-dropdown-item-min-height: 36px;
+    --ui-dropdown-item-radius: 10px;
+    --ui-dropdown-item-gap: 11px;
+    --ui-dropdown-item-min-height: 38px;
     --ui-dropdown-item-pad-y: 8px;
-    --ui-dropdown-item-pad-x: 11px;
+    --ui-dropdown-item-pad-x: 12px;
     --ui-dropdown-item-font-size: 13px;
-    --ui-dropdown-item-font-weight: 500;
+    --ui-dropdown-item-font-weight: 550;
     --ui-dropdown-item-line-height: 1.3;
     --ui-dropdown-separator-margin: 6px 10px;
-    --ui-dropdown-item-active-bg: color-mix(in srgb, #2563eb 18%, transparent);
-    --ui-dropdown-item-hover-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, #2563eb 16%, transparent),
-        color-mix(in srgb, #2563eb 10%, transparent)
-      );
+    --ui-dropdown-menu-arrow-size: 0px;
+
     position: absolute;
     display: grid;
     gap: 1px;
-    min-width: var(--ui-dropdown-menu-min-width, 196px);
-    max-width: min(360px, calc(100vw - 16px));
-    max-height: min(420px, calc(100vh - 16px));
-    padding: var(--ui-dropdown-menu-padding, 6px);
-    border: var(--ui-dropdown-menu-border, 1px solid rgba(15, 23, 42, 0.14));
-    border-radius: var(--ui-dropdown-menu-radius, 13px);
+    min-width: var(--ui-dropdown-menu-min-width, 208px);
+    max-width: min(380px, calc(100vw - 16px));
+    max-height: min(440px, calc(100vh - 16px));
+    padding: var(--ui-dropdown-menu-padding, 0px);
+    border: var(--ui-dropdown-menu-border, 0);
+    border-radius: var(--ui-dropdown-menu-radius, 0px);
     box-sizing: border-box;
     overflow: auto;
     isolation: isolate;
     background: var(--ui-dropdown-menu-bg, #fff);
     color: var(--ui-dropdown-menu-color, #0f172a);
-    box-shadow: var(--ui-dropdown-menu-shadow, 0 18px 48px rgba(2, 6, 23, 0.18));
+    box-shadow: var(--ui-dropdown-menu-shadow, none);
     backdrop-filter: var(--ui-dropdown-menu-backdrop, none);
     pointer-events: auto;
-    opacity: 0;
-    transform: translateY(5px) scale(0.982);
-    transform-origin: top center;
-    animation: ui-dropdown-enter 170ms cubic-bezier(0.2, 0.9, 0.24, 1) forwards;
     outline: none;
     scrollbar-gutter: stable both-edges;
+    transform-origin: top center;
     will-change: transform, opacity;
     z-index: var(--ui-dropdown-z, 1550);
+    animation: ui-dropdown-enter var(--ui-dropdown-duration, 170ms) var(--ui-dropdown-easing, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
   }
 
-  .menu[data-shape="square"] {
-    --ui-dropdown-menu-radius: 4px;
-    --ui-dropdown-item-radius: 3px;
+  .menu[data-state='closing'] {
+    pointer-events: none;
+    animation: ui-dropdown-exit calc(var(--ui-dropdown-duration, 170ms) - 30ms) cubic-bezier(0.4, 0.12, 1, 1) both;
   }
 
-  .menu[data-shape="soft"] {
+  .menu[data-shape='square'] {
+    --ui-dropdown-menu-radius: 5px;
+    --ui-dropdown-item-radius: 4px;
+  }
+
+  .menu[data-shape='soft'] {
     --ui-dropdown-menu-radius: 18px;
     --ui-dropdown-item-radius: 12px;
   }
 
-  .menu[data-density="compact"] {
+  .menu[data-density='compact'] {
     --ui-dropdown-menu-padding: 4px;
-    --ui-dropdown-item-min-height: 30px;
+    --ui-dropdown-item-min-height: 31px;
     --ui-dropdown-item-pad-y: 5px;
     --ui-dropdown-item-pad-x: 9px;
     --ui-dropdown-item-font-size: 12px;
@@ -104,7 +119,7 @@ const menuStyle = `
     --ui-dropdown-separator-margin: 4px 8px;
   }
 
-  .menu[data-density="comfortable"] {
+  .menu[data-density='comfortable'] {
     --ui-dropdown-menu-padding: 7px;
     --ui-dropdown-item-min-height: 40px;
     --ui-dropdown-item-pad-y: 9px;
@@ -114,100 +129,81 @@ const menuStyle = `
     --ui-dropdown-separator-margin: 7px 11px;
   }
 
-  .menu[data-elevation="none"] {
+  .menu[data-elevation='none'] {
     --ui-dropdown-menu-shadow: none;
   }
 
-  .menu[data-elevation="low"] {
+  .menu[data-elevation='low'] {
     --ui-dropdown-menu-shadow:
-      0 12px 28px rgba(2, 6, 23, 0.16),
-      0 2px 6px rgba(2, 6, 23, 0.08);
+      0 1px 2px rgba(2, 6, 23, 0.06),
+      0 12px 28px rgba(2, 6, 23, 0.16);
   }
 
-  .menu[data-elevation="high"] {
+  .menu[data-elevation='high'] {
     --ui-dropdown-menu-shadow:
-      0 30px 72px rgba(2, 6, 23, 0.26),
-      0 6px 18px rgba(2, 6, 23, 0.14);
+      0 2px 4px rgba(2, 6, 23, 0.1),
+      0 30px 72px rgba(2, 6, 23, 0.26);
   }
 
-  .menu[data-variant="solid"] {
+  .menu[data-variant='solid'] {
     background: var(--ui-dropdown-menu-bg, #fff);
     --ui-dropdown-menu-backdrop: none;
   }
 
-  .menu[data-variant="glass"] {
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--ui-dropdown-menu-bg, #fff) 88%, #ffffff 12%),
-        color-mix(in srgb, var(--ui-dropdown-menu-bg, #fff) 92%, transparent)
-      ),
-      var(--ui-dropdown-menu-bg, #fff);
+  .menu[data-variant='glass'] {
+    background: color-mix(in srgb, var(--ui-dropdown-menu-bg, #fff) 88%, #ffffff 12%);
     --ui-dropdown-menu-backdrop: blur(14px) saturate(1.08);
   }
 
-  .menu[data-variant="flat"] {
+  .menu[data-variant='flat'] {
     --ui-dropdown-menu-shadow: none;
     background: var(--ui-dropdown-menu-bg, #fff);
   }
 
-  .menu[data-variant="line"] {
+  .menu[data-variant='line'] {
     --ui-dropdown-menu-shadow: none;
-    --ui-dropdown-menu-radius: 8px;
-    border-color: color-mix(in srgb, var(--ui-dropdown-menu-color, #0f172a) 26%, transparent);
+    --ui-dropdown-menu-radius: 9px;
+    border-color: var(--ui-dropdown-menu-border-color, currentColor);
     background: color-mix(in srgb, var(--ui-dropdown-menu-bg, #fff) 98%, transparent);
   }
 
-  .menu[data-variant="flat"]::before,
-  .menu[data-variant="flat"]::after,
-  .menu[data-variant="line"]::before,
-  .menu[data-variant="line"]::after {
-    display: none;
-  }
-
-  .menu[data-variant="contrast"] {
+  .menu[data-variant='contrast'] {
     --ui-dropdown-menu-bg: #0f172a;
     --ui-dropdown-menu-color: #f8fafc;
+    --ui-dropdown-menu-muted: #94a3b8;
     --ui-dropdown-menu-border-color: #334155;
     --ui-dropdown-menu-ring: #93c5fd;
-    --ui-dropdown-item-hover-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, #ffffff 18%, transparent),
-        color-mix(in srgb, #ffffff 10%, transparent)
-      );
+    --ui-dropdown-item-hover-bg: color-mix(in srgb, #ffffff 12%, transparent);
+    --ui-dropdown-item-active-bg: color-mix(in srgb, #ffffff 18%, transparent);
+    --ui-dropdown-item-checked-bg: color-mix(in srgb, #ffffff 16%, transparent);
   }
 
-  .menu[data-tone="danger"] {
-    --ui-dropdown-menu-ring: #ef4444;
-    --ui-dropdown-item-hover-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, #ef4444 18%, transparent),
-        color-mix(in srgb, #ef4444 10%, transparent)
-      );
+  .menu[data-tone='danger'] {
+    --ui-dropdown-menu-ring: var(--ui-color-danger, #dc2626);
+    --ui-dropdown-item-hover-bg: color-mix(in srgb, var(--ui-color-danger, #dc2626) 12%, transparent);
+    --ui-dropdown-item-active-bg: color-mix(in srgb, var(--ui-color-danger, #dc2626) 18%, transparent);
+    --ui-dropdown-item-checked-bg: color-mix(in srgb, var(--ui-color-danger, #dc2626) 16%, transparent);
   }
 
-  .menu[data-tone="success"] {
-    --ui-dropdown-menu-ring: #16a34a;
-    --ui-dropdown-item-hover-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, #16a34a 18%, transparent),
-        color-mix(in srgb, #16a34a 10%, transparent)
-      );
-    --ui-dropdown-item-active-bg: color-mix(in srgb, #16a34a 20%, transparent);
+  .menu[data-tone='success'] {
+    --ui-dropdown-menu-ring: var(--ui-color-success, #16a34a);
+    --ui-dropdown-item-hover-bg: color-mix(in srgb, var(--ui-color-success, #16a34a) 12%, transparent);
+    --ui-dropdown-item-active-bg: color-mix(in srgb, var(--ui-color-success, #16a34a) 18%, transparent);
+    --ui-dropdown-item-checked-bg: color-mix(in srgb, var(--ui-color-success, #16a34a) 16%, transparent);
   }
 
-  .menu[data-tone="warning"] {
-    --ui-dropdown-menu-ring: #d97706;
-    --ui-dropdown-item-hover-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, #f59e0b 22%, transparent),
-        color-mix(in srgb, #f59e0b 14%, transparent)
-      );
-    --ui-dropdown-item-active-bg: color-mix(in srgb, #f59e0b 20%, transparent);
+  .menu[data-tone='warning'] {
+    --ui-dropdown-menu-ring: var(--ui-color-warning, #d97706);
+    --ui-dropdown-item-hover-bg: color-mix(in srgb, var(--ui-color-warning, #d97706) 15%, transparent);
+    --ui-dropdown-item-active-bg: color-mix(in srgb, var(--ui-color-warning, #d97706) 20%, transparent);
+    --ui-dropdown-item-checked-bg: color-mix(in srgb, var(--ui-color-warning, #d97706) 17%, transparent);
+  }
+
+  .menu[data-variant='flat']::before,
+  .menu[data-variant='flat']::after,
+  .menu[data-variant='line']::before,
+  .menu[data-variant='line']::after {
+    display: none;
   }
 
   .menu::before {
@@ -216,8 +212,8 @@ const menuStyle = `
     inset: 0;
     border-radius: inherit;
     pointer-events: none;
-    box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 56%, transparent);
-    opacity: 0.5;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 52%, transparent);
+    opacity: 0.46;
   }
 
   .menu::after {
@@ -226,27 +222,27 @@ const menuStyle = `
     left: 0;
     right: 0;
     top: 0;
-    height: 14px;
+    height: 0;
     pointer-events: none;
-    background: linear-gradient(180deg, color-mix(in srgb, #ffffff 24%, transparent), transparent);
-    opacity: 0.35;
+    background: transparent;
+    opacity: 0;
   }
 
-  .menu[data-placement="top"] {
+  .menu[data-placement='top'] {
     transform-origin: bottom center;
   }
 
-  .menu[data-placement="left"] {
+  .menu[data-placement='left'] {
     transform-origin: center right;
   }
 
-  .menu[data-placement="right"] {
+  .menu[data-placement='right'] {
     transform-origin: center left;
   }
 
-  .menu [role="menuitem"],
-  .menu [role="menuitemcheckbox"],
-  .menu [role="menuitemradio"],
+  .menu [role='menuitem'],
+  .menu [role='menuitemcheckbox'],
+  .menu [role='menuitemradio'],
   .menu .item,
   .menu [data-menu-item] {
     display: grid;
@@ -259,70 +255,73 @@ const menuStyle = `
     box-sizing: border-box;
     min-width: 0;
     max-width: 100%;
-    border: 0;
+    border: 1px solid transparent;
     border-radius: var(--ui-dropdown-item-radius, 8px);
-    background: transparent;
+    background: var(--ui-dropdown-item-bg, transparent);
     color: inherit;
-    font: var(--ui-dropdown-item-font-weight, 500) var(--ui-dropdown-item-font-size, 13px)/var(--ui-dropdown-item-line-height, 1.3) -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
-    letter-spacing: 0.01em;
+    font: var(--ui-dropdown-item-font-weight, 560) var(--ui-dropdown-item-font-size, 13px)/var(--ui-dropdown-item-line-height, 1.3)
+      Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    letter-spacing: -0.005em;
     text-align: left;
     cursor: default;
     outline: none;
     user-select: none;
     white-space: nowrap;
     position: relative;
-    transition: background-color 130ms ease, color 130ms ease, transform 130ms ease;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
+    transition:
+      background-color 130ms ease,
+      color 130ms ease,
+      border-color 130ms ease,
+      box-shadow 130ms ease,
+      transform 130ms ease;
   }
 
-  .menu [role="menuitem"]:hover,
-  .menu [role="menuitem"]:focus-visible,
-  .menu [role="menuitemcheckbox"]:hover,
-  .menu [role="menuitemcheckbox"]:focus-visible,
-  .menu [role="menuitemradio"]:hover,
-  .menu [role="menuitemradio"]:focus-visible,
+  .menu [role='menuitem']:hover,
+  .menu [role='menuitem']:focus-visible,
+  .menu [role='menuitemcheckbox']:hover,
+  .menu [role='menuitemcheckbox']:focus-visible,
+  .menu [role='menuitemradio']:hover,
+  .menu [role='menuitemradio']:focus-visible,
   .menu .item:hover,
   .menu .item:focus-visible,
   .menu [data-menu-item]:hover,
-  .menu [data-menu-item]:focus-visible {
+  .menu [data-menu-item]:focus-visible,
+  .menu [data-active='true'] {
     background: var(--ui-dropdown-item-hover-bg);
+    border-color: color-mix(in srgb, var(--ui-dropdown-menu-ring, #2563eb) 24%, transparent);
   }
 
-  .menu [role="menuitem"]:not([aria-disabled="true"]):active,
-  .menu [role="menuitemcheckbox"]:not([aria-disabled="true"]):active,
-  .menu [role="menuitemradio"]:not([aria-disabled="true"]):active,
-  .menu .item:not([aria-disabled="true"]):active,
-  .menu [data-menu-item]:not([aria-disabled="true"]):active {
+  .menu [role='menuitem']:not([aria-disabled='true']):active,
+  .menu [role='menuitemcheckbox']:not([aria-disabled='true']):active,
+  .menu [role='menuitemradio']:not([aria-disabled='true']):active,
+  .menu .item:not([aria-disabled='true']):active,
+  .menu [data-menu-item]:not([aria-disabled='true']):active {
     background: var(--ui-dropdown-item-active-bg);
     transform: translateY(1px);
   }
 
-  .menu [role="menuitem"]:focus-visible,
-  .menu [role="menuitemcheckbox"]:focus-visible,
-  .menu [role="menuitemradio"]:focus-visible,
+  .menu [role='menuitem']:focus-visible,
+  .menu [role='menuitemcheckbox']:focus-visible,
+  .menu [role='menuitemradio']:focus-visible,
   .menu .item:focus-visible,
   .menu [data-menu-item]:focus-visible {
-    box-shadow: inset 0 0 0 2px var(--ui-dropdown-menu-ring, #2563eb);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-dropdown-menu-ring, #2563eb) 58%, transparent);
+    border-color: color-mix(in srgb, var(--ui-dropdown-menu-ring, #2563eb) 42%, transparent);
   }
 
-  .menu [role="menuitemcheckbox"][aria-checked="true"],
-  .menu [role="menuitemradio"][aria-checked="true"] {
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--ui-dropdown-menu-ring, #2563eb) 22%, transparent),
-        color-mix(in srgb, var(--ui-dropdown-menu-ring, #2563eb) 12%, transparent)
-      );
+  .menu [role='menuitemcheckbox'][aria-checked='true'],
+  .menu [role='menuitemradio'][aria-checked='true'] {
+    background: var(--ui-dropdown-item-checked-bg);
+    border-color: color-mix(in srgb, var(--ui-dropdown-menu-ring, #2563eb) 28%, transparent);
   }
 
-  .menu [aria-disabled="true"],
+  .menu [aria-disabled='true'],
   .menu [disabled] {
-    opacity: 0.5;
+    opacity: 0.52;
     pointer-events: none;
   }
 
-  .menu [role="separator"],
+  .menu [role='separator'],
   .menu .separator {
     height: 1px;
     margin: var(--ui-dropdown-separator-margin, 6px 10px);
@@ -349,6 +348,16 @@ const menuStyle = `
     white-space: nowrap;
   }
 
+  .menu .description {
+    display: block;
+    grid-column: 2;
+    margin-top: 2px;
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--ui-dropdown-menu-muted, #64748b);
+    white-space: normal;
+  }
+
   .menu .shortcut,
   .menu .meta {
     grid-column: 3;
@@ -361,15 +370,15 @@ const menuStyle = `
 
   .menu .empty-state {
     padding: 10px 12px;
-    font: 500 12px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
+    font: 500 12px/1.45 Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     letter-spacing: 0.01em;
-    opacity: 0.72;
+    color: var(--ui-dropdown-menu-muted, #64748b);
   }
 
   @keyframes ui-dropdown-enter {
     from {
       opacity: 0;
-      transform: translateY(5px) scale(0.982);
+      transform: translateY(5px) scale(0.985);
     }
     to {
       opacity: 1;
@@ -377,9 +386,20 @@ const menuStyle = `
     }
   }
 
+  @keyframes ui-dropdown-exit {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(5px) scale(0.985);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .menu {
-      animation: none;
+      animation: none !important;
       opacity: 1;
       transform: none;
     }
@@ -406,9 +426,9 @@ const menuStyle = `
       display: none;
     }
 
-    .menu [role="menuitem"],
-    .menu [role="menuitemcheckbox"],
-    .menu [role="menuitemradio"],
+    .menu [role='menuitem'],
+    .menu [role='menuitemcheckbox'],
+    .menu [role='menuitemradio'],
     .menu .item,
     .menu [data-menu-item],
     .menu .empty-state {
@@ -417,12 +437,12 @@ const menuStyle = `
       color: CanvasText;
     }
 
-    .menu [role="menuitem"]:hover,
-    .menu [role="menuitem"]:focus-visible,
-    .menu [role="menuitemcheckbox"]:hover,
-    .menu [role="menuitemcheckbox"]:focus-visible,
-    .menu [role="menuitemradio"]:hover,
-    .menu [role="menuitemradio"]:focus-visible,
+    .menu [role='menuitem']:hover,
+    .menu [role='menuitem']:focus-visible,
+    .menu [role='menuitemcheckbox']:hover,
+    .menu [role='menuitemcheckbox']:focus-visible,
+    .menu [role='menuitemradio']:hover,
+    .menu [role='menuitemradio']:focus-visible,
     .menu .item:hover,
     .menu .item:focus-visible,
     .menu [data-menu-item]:hover,
@@ -457,10 +477,22 @@ function readVariantValue(host: HTMLElement, name: string): string {
   return host.getAttribute(name) || '';
 }
 
+function toBool(raw: string | null, fallback: boolean): boolean {
+  if (raw == null) return fallback;
+  const normalized = raw.trim().toLowerCase();
+  return normalized !== 'false' && normalized !== '0' && normalized !== 'off';
+}
+
+function isBrowser(): boolean {
+  return typeof window !== 'undefined' && typeof document !== 'undefined';
+}
+
 const DROPDOWN_VISUAL_ATTRS = new Set(['variant', 'density', 'shape', 'elevation', 'tone']);
+const DROPDOWN_A11Y_ATTRS = new Set(['aria-label', 'aria-labelledby', 'aria-describedby']);
 const DROPDOWN_TOKEN_NAMES = [
   '--ui-dropdown-menu-bg',
   '--ui-dropdown-menu-color',
+  '--ui-dropdown-menu-muted',
   '--ui-dropdown-menu-border-color',
   '--ui-dropdown-menu-border',
   '--ui-dropdown-menu-shadow',
@@ -468,7 +500,11 @@ const DROPDOWN_TOKEN_NAMES = [
   '--ui-dropdown-menu-padding',
   '--ui-dropdown-menu-min-width',
   '--ui-dropdown-menu-ring',
-  '--ui-dropdown-menu-backdrop'
+  '--ui-dropdown-menu-backdrop',
+  '--ui-dropdown-item-hover-bg',
+  '--ui-dropdown-item-active-bg',
+  '--ui-dropdown-duration',
+  '--ui-dropdown-easing'
 ];
 
 export class UIDropdown extends ElementBase {
@@ -483,22 +519,30 @@ export class UIDropdown extends ElementBase {
       'elevation',
       'tone',
       'close-on-select',
-      'typeahead'
+      'typeahead',
+      'aria-label',
+      'aria-labelledby',
+      'aria-describedby'
     ];
   }
+
+  private static _openStack: UIDropdown[] = [];
 
   private _isOpen = false;
   private _cleanup: (() => void) | null = null;
   private _portalEl: HTMLElement | null = null;
   private _menuId: string;
+  private _triggerId: string;
   private _restoreFocusEl: HTMLElement | null = null;
   private _typeaheadBuffer = '';
   private _typeaheadTimer: number | null = null;
   private _globalListenersBound = false;
+  private _closeReason: DropdownCloseReason = 'programmatic';
 
   constructor() {
     super();
     this._menuId = `ui-dropdown-menu-${Math.random().toString(36).slice(2, 10)}`;
+    this._triggerId = `ui-dropdown-trigger-${Math.random().toString(36).slice(2, 10)}`;
     this._onHostClick = this._onHostClick.bind(this);
     this._onDocumentPointerDown = this._onDocumentPointerDown.bind(this);
     this._onDocumentKeyDown = this._onDocumentKeyDown.bind(this);
@@ -514,12 +558,14 @@ export class UIDropdown extends ElementBase {
   override disconnectedCallback(): void {
     this.removeEventListener('click', this._onHostClick);
     this._unbindGlobalListeners();
-    this._teardownPortal();
+    this._removeFromStack();
+    this._teardownPortal(false);
     super.disconnectedCallback();
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
+
     if (name === 'open') {
       this._syncOpenState();
       return;
@@ -527,19 +573,24 @@ export class UIDropdown extends ElementBase {
 
     if (name === 'close-on-select' || name === 'typeahead') return;
 
-    if (name === 'placement' && this._isOpen) {
-      this._rebuildPortal();
+    if (name === 'disabled') {
+      if (this.hasAttribute('disabled') && this._isOpen) this.close('disabled');
+      this._syncTriggerA11y();
       return;
     }
 
-    if (DROPDOWN_VISUAL_ATTRS.has(name) && this._isOpen) {
+    if (name === 'placement' && this._isOpen) {
+      this._rebuildPortal(false);
+      return;
+    }
+
+    if (this._isOpen && DROPDOWN_VISUAL_ATTRS.has(name)) {
       this._syncPortalVisualState();
       return;
     }
 
-    if (name === 'disabled') {
-      if (this.hasAttribute('disabled')) this.close();
-      this._syncTriggerA11y();
+    if (this._isOpen && DROPDOWN_A11Y_ATTRS.has(name)) {
+      this._syncPortalA11y();
     }
   }
 
@@ -548,19 +599,31 @@ export class UIDropdown extends ElementBase {
     this.setAttribute('open', '');
   }
 
-  close(): void {
+  close(reason: DropdownCloseReason = 'programmatic'): void {
+    if (!this.hasAttribute('open')) return;
+    this._closeReason = reason;
     this.removeAttribute('open');
   }
 
+  closeDropdown(reason: DropdownCloseReason = 'programmatic'): void {
+    if (!this.hasAttribute('open')) return;
+    if (reason === 'programmatic') {
+      this.close('programmatic');
+      return;
+    }
+    this._requestClose(reason);
+  }
+
   toggle(): void {
-    if (this.hasAttribute('open')) this.close();
-    else this.open();
+    if (this.hasAttribute('open')) {
+      this._requestClose('trigger');
+      return;
+    }
+    this.open();
   }
 
   get closeOnSelect(): boolean {
-    const raw = this.getAttribute('close-on-select');
-    if (raw == null) return true;
-    return raw !== 'false' && raw !== '0';
+    return toBool(this.getAttribute('close-on-select'), true);
   }
 
   set closeOnSelect(value: boolean) {
@@ -568,9 +631,7 @@ export class UIDropdown extends ElementBase {
   }
 
   get typeahead(): boolean {
-    const raw = this.getAttribute('typeahead');
-    if (raw == null) return true;
-    return raw !== 'false' && raw !== '0';
+    return toBool(this.getAttribute('typeahead'), true);
   }
 
   set typeahead(value: boolean) {
@@ -585,9 +646,38 @@ export class UIDropdown extends ElementBase {
     return this.querySelector('[slot="content"]') as HTMLElement | null;
   }
 
+  private _isFocusable(node: HTMLElement): boolean {
+    if (!node || !node.isConnected) return false;
+    if ((node as HTMLButtonElement).disabled) return false;
+    if (node.getAttribute('aria-hidden') === 'true') return false;
+    if (!isBrowser()) return true;
+    const style = window.getComputedStyle(node);
+    return style.display !== 'none' && style.visibility !== 'hidden';
+  }
+
+  private _isTopMost(): boolean {
+    const stack = UIDropdown._openStack;
+    return stack.length > 0 && stack[stack.length - 1] === this;
+  }
+
+  private _pushToStack(): void {
+    const stack = UIDropdown._openStack;
+    const index = stack.indexOf(this);
+    if (index >= 0) stack.splice(index, 1);
+    stack.push(this);
+  }
+
+  private _removeFromStack(): void {
+    const stack = UIDropdown._openStack;
+    const index = stack.indexOf(this);
+    if (index >= 0) stack.splice(index, 1);
+  }
+
   private _syncTriggerA11y(): void {
     const trigger = this._getTrigger();
     if (!trigger) return;
+
+    if (!trigger.id) trigger.id = this._triggerId;
 
     trigger.setAttribute('aria-haspopup', 'menu');
     trigger.setAttribute('aria-expanded', this._isOpen ? 'true' : 'false');
@@ -607,12 +697,41 @@ export class UIDropdown extends ElementBase {
     }
   }
 
+  private _requestClose(reason: DropdownCloseReason): void {
+    if (!this._isOpen) return;
+
+    const requestClose = new CustomEvent<UIDropdownRequestCloseDetail>('request-close', {
+      detail: { reason },
+      bubbles: true,
+      composed: true,
+      cancelable: true
+    });
+    this.dispatchEvent(requestClose);
+
+    const uiRequestClose = new CustomEvent<UIDropdownRequestCloseDetail>('ui-request-close', {
+      detail: { reason },
+      bubbles: true,
+      composed: true,
+      cancelable: true
+    });
+    this.dispatchEvent(uiRequestClose);
+
+    if (requestClose.defaultPrevented || uiRequestClose.defaultPrevented) return;
+
+    this.close(reason);
+  }
+
   private _syncOpenState(): void {
     const nowOpen = this.hasAttribute('open') && !this.hasAttribute('disabled');
+
     if (nowOpen === this._isOpen) {
-      if (nowOpen) this._bindGlobalListeners();
-      else this._unbindGlobalListeners();
-      if (nowOpen) this._rebuildPortal();
+      if (nowOpen) {
+        this._pushToStack();
+        this._bindGlobalListeners();
+        if (!this._portalEl) this._rebuildPortal(false);
+      } else {
+        this._unbindGlobalListeners();
+      }
       this._syncTriggerA11y();
       return;
     }
@@ -621,52 +740,94 @@ export class UIDropdown extends ElementBase {
     this._syncTriggerA11y();
 
     if (nowOpen) {
+      this._pushToStack();
       this._bindGlobalListeners();
-      this._restoreFocusEl = document.activeElement as HTMLElement | null;
-      this._rebuildPortal();
-      this.dispatchEvent(new CustomEvent('open', { bubbles: true }));
-      this.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { open: true } }));
+      this._restoreFocusEl = (document.activeElement as HTMLElement) || null;
+      this._closeReason = 'programmatic';
+      this._rebuildPortal(false);
+
+      this.dispatchEvent(new CustomEvent('open', { bubbles: true, composed: true }));
+      this.dispatchEvent(
+        new CustomEvent<UIDropdownChangeDetail>('change', {
+          bubbles: true,
+          composed: true,
+          detail: { open: true }
+        })
+      );
+
       requestAnimationFrame(() => this._focusFirstItem());
       return;
     }
 
+    this._removeFromStack();
     this._unbindGlobalListeners();
-    this._teardownPortal();
-    this.dispatchEvent(new CustomEvent('close', { bubbles: true }));
-    this.dispatchEvent(new CustomEvent('change', { bubbles: true, detail: { open: false } }));
 
-    const trigger = this._getTrigger();
-    if (trigger) {
-      try {
-        trigger.focus();
-      } catch {
-        // no-op
+    const reason = this._closeReason;
+    const shouldRestoreFocus = reason !== 'tab';
+    this._teardownPortal(true);
+
+    this.dispatchEvent(
+      new CustomEvent<UIDropdownChangeDetail>('change', {
+        bubbles: true,
+        composed: true,
+        detail: { open: false, reason }
+      })
+    );
+    this.dispatchEvent(
+      new CustomEvent<{ reason: DropdownCloseReason }>('close', {
+        bubbles: true,
+        composed: true,
+        detail: { reason }
+      })
+    );
+
+    if (shouldRestoreFocus) {
+      const trigger = this._getTrigger();
+      if (trigger && this._isFocusable(trigger)) {
+        try {
+          trigger.focus();
+        } catch {
+          // no-op
+        }
+      } else if (this._restoreFocusEl && this._isFocusable(this._restoreFocusEl)) {
+        try {
+          this._restoreFocusEl.focus();
+        } catch {
+          // no-op
+        }
       }
-      return;
     }
 
-    if (this._restoreFocusEl && this._restoreFocusEl.isConnected) {
-      try {
-        this._restoreFocusEl.focus();
-      } catch {
-        // no-op
-      }
-    }
     this._restoreFocusEl = null;
+    this._closeReason = 'programmatic';
   }
 
   private _bindGlobalListeners(): void {
     if (this._globalListenersBound) return;
     document.addEventListener('pointerdown', this._onDocumentPointerDown, true);
-    document.addEventListener('keydown', this._onDocumentKeyDown);
+    document.addEventListener('keydown', this._onDocumentKeyDown, true);
     this._globalListenersBound = true;
   }
 
   private _unbindGlobalListeners(): void {
     if (!this._globalListenersBound) return;
     document.removeEventListener('pointerdown', this._onDocumentPointerDown, true);
-    document.removeEventListener('keydown', this._onDocumentKeyDown);
+    document.removeEventListener('keydown', this._onDocumentKeyDown, true);
     this._globalListenersBound = false;
+  }
+
+  private _syncMenuItemSemantics(menu: HTMLElement): void {
+    const items = Array.from(menu.querySelectorAll<DropdownItem>(menuItemSelector()));
+    items.forEach((item) => {
+      if (!item.getAttribute('role')) item.setAttribute('role', 'menuitem');
+      if (!item.hasAttribute('tabindex')) item.setAttribute('tabindex', '-1');
+      if (item.hasAttribute('disabled') && item.getAttribute('aria-disabled') !== 'true') {
+        item.setAttribute('aria-disabled', 'true');
+      }
+      if ((item.getAttribute('role') === 'menuitemcheckbox' || item.getAttribute('role') === 'menuitemradio') && !item.hasAttribute('aria-checked')) {
+        item.setAttribute('aria-checked', 'false');
+      }
+    });
   }
 
   private _buildPortalContent(): HTMLElement {
@@ -674,7 +835,10 @@ export class UIDropdown extends ElementBase {
     menu.className = 'menu';
     menu.id = this._menuId;
     menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-orientation', 'vertical');
     menu.setAttribute('tabindex', '-1');
+    menu.setAttribute('data-state', 'open');
+
     this._applyPortalVariantData(menu);
     this._applyPortalTokens(menu);
 
@@ -696,6 +860,9 @@ export class UIDropdown extends ElementBase {
       menu.appendChild(empty);
     }
 
+    this._syncMenuItemSemantics(menu);
+    this._syncPortalA11y(menu);
+
     menu.addEventListener('click', (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
       if (!target) return;
@@ -704,22 +871,25 @@ export class UIDropdown extends ElementBase {
       if (!item || isDisabledItem(item)) return;
 
       this._applySelectionBehavior(item);
+      this._focusItem(item);
+
+      const detail: UIDropdownSelectDetail = {
+        value: item.getAttribute('data-value') || item.getAttribute('value') || undefined,
+        label: item.getAttribute('aria-label') || item.textContent?.trim() || undefined,
+        checked: item.getAttribute('aria-checked') === 'true',
+        item
+      };
+
       this.dispatchEvent(
-        new CustomEvent('select', {
+        new CustomEvent<UIDropdownSelectDetail>('select', {
           bubbles: true,
-          detail: {
-            value: item.getAttribute('data-value') || item.getAttribute('value') || undefined,
-            label: item.getAttribute('aria-label') || item.textContent?.trim() || undefined,
-            checked: item.getAttribute('aria-checked') === 'true',
-            item
-          }
+          composed: true,
+          detail
         })
       );
 
       if (this.closeOnSelect) {
-        this.close();
-      } else {
-        this._focusItem(item);
+        this._requestClose('select');
       }
     });
 
@@ -758,6 +928,27 @@ export class UIDropdown extends ElementBase {
     });
   }
 
+  private _syncPortalA11y(menuEl?: HTMLElement): void {
+    const menu = menuEl || this._portalEl;
+    if (!menu) return;
+
+    const trigger = this._getTrigger();
+    const ariaLabel = this.getAttribute('aria-label') || '';
+    const explicitLabelledBy = this.getAttribute('aria-labelledby') || '';
+    const explicitDescribedBy = this.getAttribute('aria-describedby') || '';
+
+    const labelledBy = explicitLabelledBy || (!ariaLabel && trigger?.id ? trigger.id : '');
+
+    if (ariaLabel) menu.setAttribute('aria-label', ariaLabel);
+    else menu.removeAttribute('aria-label');
+
+    if (labelledBy) menu.setAttribute('aria-labelledby', labelledBy);
+    else menu.removeAttribute('aria-labelledby');
+
+    if (explicitDescribedBy) menu.setAttribute('aria-describedby', explicitDescribedBy);
+    else menu.removeAttribute('aria-describedby');
+  }
+
   private _syncPortalVisualState(): void {
     const menu = this._portalEl;
     if (!menu) return;
@@ -765,12 +956,12 @@ export class UIDropdown extends ElementBase {
     this._applyPortalTokens(menu);
   }
 
-  private _rebuildPortal(): void {
+  private _rebuildPortal(animateClose = false): void {
     if (!this._isOpen) return;
     const trigger = this._getTrigger();
     if (!trigger) return;
 
-    this._teardownPortal();
+    this._teardownPortal(animateClose);
 
     const content = this._buildPortalContent();
     this._portalEl = content;
@@ -785,25 +976,56 @@ export class UIDropdown extends ElementBase {
     this._cleanup = typeof cleanup === 'function' ? cleanup : null;
   }
 
-  private _teardownPortal(): void {
-    if (this._cleanup) {
-      try {
-        this._cleanup();
-      } catch {
-        // no-op
+  private _canAnimateClose(): boolean {
+    if (!isBrowser()) return false;
+    return !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  private _teardownPortal(animateClose: boolean): void {
+    const menu = this._portalEl;
+    const cleanup = this._cleanup;
+
+    this._portalEl = null;
+    this._cleanup = null;
+
+    const finalize = () => {
+      if (cleanup) {
+        try {
+          cleanup();
+        } catch {
+          // no-op
+        }
+      } else if (menu && menu.parentElement) {
+        try {
+          menu.parentElement.removeChild(menu);
+        } catch {
+          // no-op
+        }
       }
-      this._cleanup = null;
+      this._resetTypeahead();
+    };
+
+    if (!menu) {
+      finalize();
+      return;
     }
 
-    if (this._portalEl && this._portalEl.parentElement) {
-      try {
-        this._portalEl.parentElement.removeChild(this._portalEl);
-      } catch {
-        // no-op
-      }
+    if (!animateClose || !this._canAnimateClose()) {
+      finalize();
+      return;
     }
-    this._portalEl = null;
-    this._resetTypeahead();
+
+    menu.setAttribute('data-state', 'closing');
+
+    let done = false;
+    const complete = () => {
+      if (done) return;
+      done = true;
+      finalize();
+    };
+
+    menu.addEventListener('animationend', complete, { once: true });
+    window.setTimeout(complete, 220);
   }
 
   private _focusMenu(): void {
@@ -827,7 +1049,13 @@ export class UIDropdown extends ElementBase {
 
   private _focusItem(item: DropdownItem | null): void {
     if (!item) return;
-    if (!item.hasAttribute('tabindex')) item.setAttribute('tabindex', '-1');
+    const items = this._queryItems();
+    items.forEach((node) => {
+      node.setAttribute('tabindex', node === item ? '0' : '-1');
+      if (node === item) node.setAttribute('data-active', 'true');
+      else node.removeAttribute('data-active');
+    });
+
     try {
       item.focus({ preventScroll: true });
     } catch {
@@ -842,8 +1070,7 @@ export class UIDropdown extends ElementBase {
       return;
     }
 
-    const first = items[0];
-    this._focusItem(first);
+    this._focusItem(items[0]);
   }
 
   private _focusLastItem(): void {
@@ -853,8 +1080,7 @@ export class UIDropdown extends ElementBase {
       return;
     }
 
-    const last = items[items.length - 1];
-    this._focusItem(last);
+    this._focusItem(items[items.length - 1]);
   }
 
   private _moveFocus(step: 1 | -1): void {
@@ -869,8 +1095,7 @@ export class UIDropdown extends ElementBase {
     }
 
     const next = (index + step + items.length) % items.length;
-    const target = items[next];
-    this._focusItem(target);
+    this._focusItem(items[next]);
   }
 
   private _resetTypeahead(): void {
@@ -893,16 +1118,27 @@ export class UIDropdown extends ElementBase {
     const items = this._queryItems();
     if (!items.length) return false;
 
-    this._typeaheadBuffer = `${this._typeaheadBuffer}${event.key.toLowerCase()}`.slice(0, 24);
+    const key = event.key.toLowerCase();
+    this._typeaheadBuffer = `${this._typeaheadBuffer}${key}`.slice(0, 24);
     if (this._typeaheadTimer != null) {
       window.clearTimeout(this._typeaheadTimer);
     }
-    this._typeaheadTimer = window.setTimeout(() => this._resetTypeahead(), 420);
+    this._typeaheadTimer = window.setTimeout(() => this._resetTypeahead(), 460);
 
-    const matched = items.find((item) => {
-      const text = (item.getAttribute('aria-label') || item.textContent || '').trim().toLowerCase();
-      return text.startsWith(this._typeaheadBuffer);
-    });
+    const active = document.activeElement as HTMLElement | null;
+    const activeIndex = active ? items.indexOf(active as DropdownItem) : -1;
+
+    const findFrom = (start: number): DropdownItem | undefined => {
+      for (let offset = 1; offset <= items.length; offset += 1) {
+        const index = (start + offset + items.length) % items.length;
+        const candidate = items[index];
+        const text = (candidate.getAttribute('aria-label') || candidate.textContent || '').trim().toLowerCase();
+        if (text.startsWith(this._typeaheadBuffer)) return candidate;
+      }
+      return undefined;
+    };
+
+    const matched = findFrom(activeIndex);
     if (!matched) return false;
 
     event.preventDefault();
@@ -941,7 +1177,7 @@ export class UIDropdown extends ElementBase {
   private _isEventInsideTrigger(event: Event): boolean {
     const trigger = this._getTrigger();
     if (!trigger) return false;
-    const path = event.composedPath();
+    const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
     return path.includes(trigger);
   }
 
@@ -950,23 +1186,28 @@ export class UIDropdown extends ElementBase {
     if (!this._isEventInsideTrigger(event)) return;
 
     event.preventDefault();
-    this.toggle();
+    if (this._isOpen) {
+      this._requestClose('trigger');
+      return;
+    }
+
+    this.open();
   }
 
   private _onDocumentPointerDown(event: PointerEvent): void {
-    if (!this._isOpen) return;
+    if (!this._isOpen || !this._isTopMost()) return;
 
-    const path = event.composedPath();
+    const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
     if (path.includes(this)) return;
     if (this._portalEl && path.includes(this._portalEl)) return;
 
-    this.close();
+    this._requestClose('outside');
   }
 
   private _onDocumentKeyDown(event: KeyboardEvent): void {
     if (!this._isOpen) {
-      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
       if (!this._isEventInsideTrigger(event)) return;
+      if (!['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(event.key)) return;
 
       event.preventDefault();
       this.open();
@@ -977,11 +1218,13 @@ export class UIDropdown extends ElementBase {
       return;
     }
 
+    if (!this._isTopMost()) return;
     if (this._handleTypeahead(event)) return;
 
     if (event.key === 'Escape') {
       event.preventDefault();
-      this.close();
+      event.stopPropagation();
+      this._requestClose('escape');
       return;
     }
 
@@ -1010,7 +1253,7 @@ export class UIDropdown extends ElementBase {
     }
 
     if (event.key === 'Tab') {
-      this.close();
+      this._requestClose('tab');
       return;
     }
 
@@ -1037,8 +1280,8 @@ export class UIDropdown extends ElementBase {
     `);
 
     this._syncTriggerA11y();
-    if (this._isOpen) {
-      this._rebuildPortal();
+    if (this._isOpen && !this._portalEl) {
+      this._rebuildPortal(false);
     }
   }
 

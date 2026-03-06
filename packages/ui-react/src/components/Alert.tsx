@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-export type AlertProps = React.HTMLAttributes<HTMLElement> & {
+export type AlertProps = Omit<React.HTMLAttributes<HTMLElement>, 'onClose'> & {
   children?: React.ReactNode;
   title?: string;
   description?: string;
@@ -66,7 +66,7 @@ export function Alert(props: AlertProps) {
     if (typeof open === 'boolean') {
       if (open) el.removeAttribute('hidden');
       else el.setAttribute('hidden', '');
-    }
+    } else el.removeAttribute('hidden');
   }, [title, description, tone, variant, layout, dismissible, open, headless]);
 
   return React.createElement('ui-alert', { ref, ...rest }, children);

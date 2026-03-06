@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { acquireBodyScrollLock, releaseBodyScrollLock } from '../scroll-lock';
 
 const style = `
   :host {
@@ -9,34 +10,52 @@ const style = `
     pointer-events: none;
     isolation: isolate;
     color-scheme: light dark;
-    --ui-dialog-backdrop: rgba(2, 6, 23, 0.56);
-    --ui-dialog-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    --ui-dialog-backdrop: color-mix(in srgb, #020617 58%, transparent);
+    --ui-dialog-bg: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent) 0%,
+      color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 24%, var(--ui-color-surface, #ffffff)) 100%
+    );
     --ui-dialog-color: var(--ui-color-text, #0f172a);
-    --ui-dialog-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 68%, transparent);
-    --ui-dialog-shadow: 0 30px 80px rgba(2, 6, 23, 0.24);
+    --ui-dialog-muted: var(--ui-color-muted, #64748b);
+    --ui-dialog-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
+    --ui-dialog-border: 1px solid var(--ui-dialog-border-color);
+    --ui-dialog-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 28px 80px rgba(2, 6, 23, 0.28);
     --ui-dialog-radius: 16px;
-    --ui-dialog-padding: 18px;
+    --ui-dialog-padding-x: 24px;
+    --ui-dialog-padding-y: 20px;
     --ui-dialog-width: min(560px, calc(100vw - 24px));
     --ui-dialog-focus: var(--ui-color-focus-ring, #2563eb);
-    --ui-dialog-muted: var(--ui-color-muted, #64748b);
     --ui-dialog-danger: var(--ui-color-danger, #dc2626);
+    --ui-dialog-success: var(--ui-color-success, #16a34a);
     --ui-dialog-z: 1201;
     --ui-dialog-backdrop-z: 1200;
     --ui-dialog-btn-bg: color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 88%, transparent);
-    --ui-dialog-btn-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
-    --ui-dialog-btn-hover: color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 76%, var(--ui-color-border, #cbd5e1) 24%);
+    --ui-dialog-btn-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
+    --ui-dialog-btn-hover: color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 78%, var(--ui-color-border, #cbd5e1) 22%);
     --ui-dialog-submit-bg: var(--ui-color-primary, #2563eb);
     --ui-dialog-submit-color: var(--ui-color-primary-contrast, #ffffff);
+    --ui-dialog-duration: 170ms;
+    --ui-dialog-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
   :host([size='sm']),
   :host([size='1']) {
     --ui-dialog-width: min(420px, calc(100vw - 24px));
+    --ui-dialog-padding-x: 20px;
+    --ui-dialog-padding-y: 16px;
   }
 
   :host([size='lg']),
   :host([size='3']) {
     --ui-dialog-width: min(760px, calc(100vw - 24px));
+    --ui-dialog-padding-x: 28px;
+    --ui-dialog-padding-y: 24px;
+  }
+
+  :host([shape='flat']) {
+    --ui-dialog-radius: 8px;
+    --ui-dialog-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 12px 24px rgba(2, 6, 23, 0.14);
   }
 
   .overlay {
@@ -45,11 +64,13 @@ const style = `
     z-index: var(--ui-dialog-backdrop-z);
     display: grid;
     place-items: center;
+    padding: clamp(12px, 3vw, 28px);
+    box-sizing: border-box;
     pointer-events: auto;
     background: var(--ui-dialog-backdrop);
-    backdrop-filter: saturate(1.06) blur(3px);
+    backdrop-filter: saturate(1.05) blur(4px);
     opacity: 0;
-    transition: opacity 170ms ease;
+    transition: opacity var(--ui-dialog-duration) var(--ui-dialog-easing);
   }
 
   .overlay[data-open='true'] {
@@ -68,10 +89,14 @@ const style = `
     background: var(--ui-dialog-bg);
     color: var(--ui-dialog-color);
     box-shadow: var(--ui-dialog-shadow);
-    padding: var(--ui-dialog-padding);
-    transform: translateY(10px) scale(0.985);
+    padding: var(--ui-dialog-padding-y) var(--ui-dialog-padding-x);
+    transform: translateY(12px) scale(0.985);
     opacity: 0;
-    transition: transform 170ms ease, opacity 170ms ease;
+    transition:
+      transform var(--ui-dialog-duration) var(--ui-dialog-easing),
+      opacity var(--ui-dialog-duration) var(--ui-dialog-easing),
+      border-color var(--ui-dialog-duration) var(--ui-dialog-easing),
+      box-shadow var(--ui-dialog-duration) var(--ui-dialog-easing);
   }
 
   .overlay[data-open='true'] .panel {
@@ -79,68 +104,99 @@ const style = `
     opacity: 1;
   }
 
-  .panel:focus-visible,
-  .close:focus-visible,
-  .btn:focus-visible {
-    outline: 2px solid var(--ui-dialog-focus);
+  :host([state='error']) .panel {
+    border-color: color-mix(in srgb, var(--ui-dialog-danger) 42%, var(--ui-dialog-border-color));
+  }
+
+  :host([state='success']) .panel {
+    border-color: color-mix(in srgb, var(--ui-dialog-success) 46%, var(--ui-dialog-border-color));
+  }
+
+  .panel:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--ui-dialog-focus) 62%, transparent);
     outline-offset: 1px;
   }
 
   .header {
     display: grid;
-    gap: 4px;
-    margin-bottom: 10px;
-    padding-inline-end: 34px;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-inline-end: 44px;
+    min-width: 0;
   }
 
   .title {
     margin: 0;
-    font-size: 18px;
-    line-height: 1.3;
+    font-size: 20px;
+    line-height: 1.35;
     font-weight: 700;
     letter-spacing: -0.01em;
+    color: color-mix(in srgb, var(--ui-dialog-color) 96%, transparent);
   }
 
   .description {
     margin: 0;
     color: var(--ui-dialog-muted);
-    font-size: 13px;
-    line-height: 1.45;
+    font-size: 14px;
+    line-height: 1.55;
   }
 
   .close {
     position: absolute;
-    top: 10px;
-    inset-inline-end: 10px;
-    width: 28px;
-    height: 28px;
-    border: none;
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--ui-dialog-color) 10%, transparent);
+    top: 14px;
+    inset-inline-end: 14px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid color-mix(in srgb, var(--ui-dialog-btn-border) 88%, transparent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--ui-dialog-btn-bg) 92%, transparent);
     color: inherit;
     cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
+    display: inline-grid;
+    place-items: center;
     line-height: 1;
+    transition:
+      background var(--ui-dialog-duration) var(--ui-dialog-easing),
+      border-color var(--ui-dialog-duration) var(--ui-dialog-easing),
+      transform 120ms ease;
   }
 
   .close:hover {
-    background: color-mix(in srgb, var(--ui-dialog-color) 18%, transparent);
+    background: var(--ui-dialog-btn-hover);
+    border-color: color-mix(in srgb, var(--ui-dialog-btn-border) 72%, var(--ui-dialog-focus) 28%);
+  }
+
+  .close:active {
+    transform: translateY(1px);
+  }
+
+  .close-icon {
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+  }
+
+  .close:focus-visible,
+  .btn:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--ui-dialog-focus) 64%, transparent);
+    outline-offset: 1px;
   }
 
   .body {
     display: grid;
-    gap: 10px;
+    gap: 12px;
+    min-width: 0;
   }
 
   .footer {
-    margin-top: 14px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid color-mix(in srgb, var(--ui-dialog-border-color) 82%, transparent);
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .btn {
@@ -148,12 +204,17 @@ const style = `
     background: var(--ui-dialog-btn-bg);
     color: inherit;
     border-radius: 10px;
-    min-height: 36px;
+    min-height: 38px;
+    min-width: 88px;
     padding: 0 14px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+    transition:
+      background 120ms ease,
+      border-color 120ms ease,
+      color 120ms ease,
+      transform 120ms ease;
   }
 
   .btn:hover {
@@ -168,24 +229,33 @@ const style = `
     border-color: color-mix(in srgb, var(--ui-dialog-submit-bg) 64%, var(--ui-dialog-btn-border));
     background: var(--ui-dialog-submit-bg);
     color: var(--ui-dialog-submit-color);
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--ui-dialog-submit-bg) 44%, transparent);
   }
 
   .btn-submit:hover {
     background: color-mix(in srgb, var(--ui-dialog-submit-bg) 88%, #000000 12%);
   }
 
+  .btn:disabled,
+  .close:disabled {
+    cursor: not-allowed;
+    opacity: 0.56;
+    transform: none;
+  }
+
   .loading {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-size: 12px;
-    color: color-mix(in srgb, var(--ui-dialog-color) 75%, transparent);
+    font-size: 13px;
+    color: color-mix(in srgb, var(--ui-dialog-color) 76%, transparent);
     margin-inline-end: auto;
+    min-height: 20px;
   }
 
   .spinner {
-    width: 13px;
-    height: 13px;
+    width: 14px;
+    height: 14px;
     border-radius: 999px;
     border: 2px solid color-mix(in srgb, var(--ui-dialog-color) 30%, transparent);
     border-top-color: color-mix(in srgb, var(--ui-dialog-color) 80%, transparent);
@@ -193,10 +263,10 @@ const style = `
   }
 
   .error {
-    min-height: 18px;
-    margin-top: 10px;
+    min-height: 20px;
+    margin-top: 12px;
     font-size: 12px;
-    line-height: 1.35;
+    line-height: 1.45;
     color: var(--ui-dialog-danger);
   }
 
@@ -212,6 +282,39 @@ const style = `
   :host([headless]) .overlay,
   :host([headless]) .panel {
     display: none !important;
+  }
+
+  @media (max-width: 640px) {
+    .overlay {
+      align-items: end;
+      padding: 12px;
+    }
+
+    .panel {
+      width: min(100%, var(--ui-dialog-width));
+      max-height: min(88vh, 760px);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .header {
+      margin-bottom: 14px;
+      padding-inline-end: 40px;
+    }
+
+    .title {
+      font-size: 18px;
+    }
+
+    .footer {
+      margin-top: 16px;
+      padding-top: 12px;
+    }
+
+    .btn {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
   }
 
   @keyframes ui-dialog-spin {
@@ -244,6 +347,7 @@ const style = `
       --ui-dialog-backdrop: rgba(0, 0, 0, 0.72);
       --ui-dialog-bg: Canvas;
       --ui-dialog-color: CanvasText;
+      --ui-dialog-border-color: CanvasText;
       --ui-dialog-border: 1px solid CanvasText;
       --ui-dialog-shadow: none;
       --ui-dialog-muted: CanvasText;
@@ -269,9 +373,9 @@ const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 type UIDialogRole = 'dialog' | 'alertdialog';
-type UIDialogState = 'idle' | 'loading' | 'error';
+type UIDialogState = 'idle' | 'loading' | 'error' | 'success';
 type UIDialogAction = 'submit' | 'cancel' | 'dismiss';
-type UIDialogDismissSource = 'overlay' | 'esc' | 'close-icon' | 'abort' | 'unmount' | 'replace';
+type UIDialogDismissSource = 'overlay' | 'esc' | 'close-icon' | 'abort' | 'unmount' | 'replace' | 'programmatic';
 
 export type UIDialogRequestCloseReason =
   | 'button'
@@ -341,54 +445,6 @@ function isBrowser(): boolean {
   return typeof window !== 'undefined' && typeof document !== 'undefined';
 }
 
-type ScrollLockState = {
-  count: number;
-  bodyOverflow: string;
-  htmlOverflow: string;
-  bodyPaddingRight: string;
-};
-
-const scrollLock: ScrollLockState = {
-  count: 0,
-  bodyOverflow: '',
-  htmlOverflow: '',
-  bodyPaddingRight: ''
-};
-
-function acquireScrollLock() {
-  if (!isBrowser()) return;
-  scrollLock.count += 1;
-  if (scrollLock.count > 1) return;
-
-  const body = document.body;
-  const html = document.documentElement;
-  scrollLock.bodyOverflow = body.style.overflow;
-  scrollLock.htmlOverflow = html.style.overflow;
-  scrollLock.bodyPaddingRight = body.style.paddingRight;
-
-  const scrollBarWidth = Math.max(0, window.innerWidth - html.clientWidth);
-  if (scrollBarWidth > 0) {
-    const currentPadding = parseFloat(window.getComputedStyle(body).paddingRight || '0') || 0;
-    body.style.paddingRight = `${currentPadding + scrollBarWidth}px`;
-  }
-
-  body.style.overflow = 'hidden';
-  html.style.overflow = 'hidden';
-}
-
-function releaseScrollLock() {
-  if (!isBrowser()) return;
-  if (scrollLock.count <= 0) return;
-  scrollLock.count -= 1;
-  if (scrollLock.count > 0) return;
-
-  const body = document.body;
-  const html = document.documentElement;
-  body.style.overflow = scrollLock.bodyOverflow;
-  html.style.overflow = scrollLock.htmlOverflow;
-  body.style.paddingRight = scrollLock.bodyPaddingRight;
-}
-
 export class UIDialog extends ElementBase {
   static get observedAttributes() {
     return [
@@ -432,12 +488,14 @@ export class UIDialog extends ElementBase {
     this._onClick = this._onClick.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onFocusIn = this._onFocusIn.bind(this);
+    this._onSubmit = this._onSubmit.bind(this);
   }
 
   connectedCallback() {
     super.connectedCallback();
     this.root.addEventListener('click', this._onClick as EventListener);
     this.root.addEventListener('keydown', this._onKeyDown as EventListener);
+    this.addEventListener('submit', this._onSubmit as EventListener);
     this._syncFromAttributes();
     this._syncOpenState();
   }
@@ -445,6 +503,7 @@ export class UIDialog extends ElementBase {
   disconnectedCallback() {
     this.root.removeEventListener('click', this._onClick as EventListener);
     this.root.removeEventListener('keydown', this._onKeyDown as EventListener);
+    this.removeEventListener('submit', this._onSubmit as EventListener);
     if (this._isActive && !this._terminalEmitted) {
       this.close('dismiss', 'unmount');
     }
@@ -471,7 +530,7 @@ export class UIDialog extends ElementBase {
 
   set open(value: boolean) {
     if (value) this.setAttribute('open', '');
-    else this.close('dismiss', 'abort');
+    else this.close('dismiss', 'programmatic');
   }
 
   get dismissible() {
@@ -510,7 +569,7 @@ export class UIDialog extends ElementBase {
 
   get state(): UIDialogState {
     const raw = this.getAttribute('state');
-    if (raw === 'loading' || raw === 'error') return raw;
+    if (raw === 'loading' || raw === 'error' || raw === 'success') return raw;
     return 'idle';
   }
 
@@ -601,7 +660,7 @@ export class UIDialog extends ElementBase {
       return;
     }
 
-    this.close('dismiss', 'abort');
+    this.close('dismiss', 'programmatic');
   }
 
   close(action: UIDialogAction = 'dismiss', source?: UIDialogDismissSource, reason?: string) {
@@ -664,7 +723,7 @@ export class UIDialog extends ElementBase {
     }
 
     this._lastFocused = (document.activeElement as HTMLElement) || null;
-    acquireScrollLock();
+    acquireBodyScrollLock();
 
     if (isBrowser()) {
       document.addEventListener('focusin', this._onFocusIn as EventListener, true);
@@ -689,7 +748,7 @@ export class UIDialog extends ElementBase {
       document.removeEventListener('focusin', this._onFocusIn as EventListener, true);
     }
 
-    releaseScrollLock();
+    releaseBodyScrollLock();
 
     if (!this._terminalEmitted) {
       const meta = this._closeMeta || { action: 'dismiss' as UIDialogAction, source: 'abort' as UIDialogDismissSource };
@@ -719,10 +778,10 @@ export class UIDialog extends ElementBase {
 
     const returnFocus = this._lastFocused;
     this._lastFocused = null;
-    if (returnFocus) {
+    if (returnFocus && this._canRestoreFocus(returnFocus)) {
       setTimeout(() => {
         try {
-          returnFocus.focus();
+          if (this._canRestoreFocus(returnFocus)) returnFocus.focus();
         } catch {
           // noop
         }
@@ -760,6 +819,15 @@ export class UIDialog extends ElementBase {
 
   private _queryPanel(): HTMLElement | null {
     return this.root.querySelector('.panel') as HTMLElement | null;
+  }
+
+  private _canRestoreFocus(node: HTMLElement): boolean {
+    if (!node || !node.isConnected) return false;
+    if ((node as HTMLButtonElement).disabled) return false;
+    if (node.getAttribute('aria-hidden') === 'true') return false;
+    if (!isBrowser()) return true;
+    const style = window.getComputedStyle(node);
+    return style.display !== 'none' && style.visibility !== 'hidden';
   }
 
   private _collectFocusable(panel: HTMLElement): HTMLElement[] {
@@ -842,14 +910,12 @@ export class UIDialog extends ElementBase {
     }
   }
 
-  private _collectFormData(): Record<string, string | string[]> | undefined {
+  private _collectFormData(form?: HTMLFormElement | null): Record<string, string | string[]> | undefined {
     const panel = this._queryPanel();
-    if (!panel) return undefined;
+    const resolvedForm = form || (this.querySelector('form') as HTMLFormElement | null) || panel?.querySelector('form') || null;
+    if (!resolvedForm || typeof FormData === 'undefined') return undefined;
 
-    const form = panel.querySelector('form');
-    if (!form || typeof FormData === 'undefined') return undefined;
-
-    const entries = new FormData(form);
+    const entries = new FormData(resolvedForm);
     const record: Record<string, string | string[]> = {};
 
     for (const [key, raw] of entries.entries()) {
@@ -868,6 +934,14 @@ export class UIDialog extends ElementBase {
     }
 
     return Object.keys(record).length ? record : undefined;
+  }
+
+  private _resolveSubmitForm(target?: HTMLElement | null): HTMLFormElement | null {
+    if (target) {
+      const explicit = target.closest('form');
+      if (explicit && this.contains(explicit)) return explicit as HTMLFormElement;
+    }
+    return (this.querySelector('form') as HTMLFormElement | null) || (this._queryPanel()?.querySelector('form') as HTMLFormElement | null);
   }
 
   private _isInteractionLocked() {
@@ -891,12 +965,16 @@ export class UIDialog extends ElementBase {
     this.close('dismiss', source, reason);
   }
 
-  private _handleSubmit() {
+  private _handleSubmit(form?: HTMLFormElement | null) {
     if (this._isInteractionLocked()) return;
+    const targetForm = form ?? this._resolveSubmitForm();
+    if (targetForm && typeof targetForm.reportValidity === 'function' && !targetForm.reportValidity()) {
+      return;
+    }
 
     const detail: UIDialogSubmitDetail = {
       id: this.dialogId || this._uid,
-      formData: this._collectFormData()
+      formData: this._collectFormData(targetForm)
     };
     const submitEvent = this._dispatchWithLegacy<UIDialogSubmitDetail>('ui-submit', 'submit', detail, true);
     if (submitEvent.defaultPrevented) return;
@@ -914,24 +992,35 @@ export class UIDialog extends ElementBase {
     const target = event.target as HTMLElement | null;
     if (!target) return;
 
-    if (target.classList.contains('overlay') && this.closeOnOverlay) {
+    if (!target.closest('.panel') && target.closest('.overlay') && this.closeOnOverlay) {
       this._requestDismiss('overlay');
       return;
     }
 
-    if (target.classList.contains('close')) {
+    if (target.closest('.close')) {
       this._requestDismiss('close-icon');
       return;
     }
 
-    if (target.classList.contains('btn-submit')) {
+    if (target.closest('.btn-submit')) {
       this._handleSubmit();
       return;
     }
 
-    if (target.classList.contains('btn-cancel')) {
+    if (target.closest('.btn-cancel')) {
       this._handleCancel();
     }
+  }
+
+  private _onSubmit(event: Event) {
+    if (!this.open || !this._isTopMost()) return;
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+    if (!this.contains(target)) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    this._handleSubmit(target as HTMLFormElement);
   }
 
   private _onKeyDown(event: KeyboardEvent) {
@@ -960,8 +1049,12 @@ export class UIDialog extends ElementBase {
     const cancelText = this._config.cancelText ?? this.getAttribute('cancel-text') ?? 'Cancel';
     const loadingText = this._config.loadingText ?? this.getAttribute('loading-text') ?? 'Working...';
 
-    const hasTitle = Boolean(title || this.querySelector('[slot="title"]'));
-    const hasDescription = Boolean(description || this.querySelector('[slot="description"]'));
+    const titleText = title.trim();
+    const descriptionText = description.trim();
+    const hasTitleSlot = Boolean(this.querySelector('[slot="title"]'));
+    const hasDescriptionSlot = Boolean(this.querySelector('[slot="description"]'));
+    const hasTitle = Boolean(titleText || hasTitleSlot);
+    const hasDescription = Boolean(descriptionText || hasDescriptionSlot);
     const hasContentSlot = Boolean(this.querySelector('[slot="content"]'));
     const hasFooterSlot = Boolean(this.querySelector('[slot="footer"]'));
 
@@ -980,6 +1073,7 @@ export class UIDialog extends ElementBase {
     const explicitDescribedBy = this.getAttribute('aria-describedby') || '';
 
     const labelledBy = explicitLabelledBy || (hasTitle ? titleId : '');
+    const fallbackAriaLabel = ariaLabel || (!labelledBy ? 'Dialog' : '');
 
     const describedByIds: string[] = [];
     if (explicitDescribedBy) {
@@ -989,26 +1083,42 @@ export class UIDialog extends ElementBase {
       if (error) describedByIds.push(errorId);
     }
 
+    const headerTemplate =
+      hasTitle || hasDescription
+        ? `
+          <header class="header" part="header">
+            ${hasTitle
+              ? `<h2 id="${titleId}" class="title" part="title"><slot name="title">${escapeHtml(titleText)}</slot></h2>`
+              : ''}
+            ${hasDescription
+              ? `<p id="${descId}" class="description" part="description"><slot name="description">${escapeHtml(descriptionText)}</slot></p>`
+              : ''}
+          </header>
+        `
+        : '';
+
     this.setContent(`
       ${this.hasAttribute('headless') ? '' : `<style>${style}</style>`}
-      <div class="overlay" part="overlay" aria-hidden="true" data-open="${String(this.open)}">
+      <div class="overlay" part="overlay" data-open="${String(this.open)}">
         <section
           class="panel"
           part="panel"
           role="${escapeHtml(this.getAttribute('role') || 'dialog')}"
           aria-modal="true"
-          ${ariaLabel ? `aria-label="${escapeHtml(ariaLabel)}"` : ''}
+          ${fallbackAriaLabel ? `aria-label="${escapeHtml(fallbackAriaLabel)}"` : ''}
           ${labelledBy ? `aria-labelledby="${escapeHtml(labelledBy)}"` : ''}
           ${describedByIds.length ? `aria-describedby="${escapeHtml(describedByIds.join(' '))}"` : ''}
           tabindex="-1"
         >
-          ${showClose ? '<button class="close" part="close" aria-label="Close dialog">✕</button>' : ''}
-          ${hasTitle || hasDescription ? `
-            <header class="header" part="header">
-              <h2 id="${titleId}" class="title" part="title"><slot name="title">${escapeHtml(title)}</slot></h2>
-              <p id="${descId}" class="description" part="description"><slot name="description">${escapeHtml(description)}</slot></p>
-            </header>
-          ` : ''}
+          ${showClose
+            ? `<button class="close" part="close" aria-label="Close dialog" type="button" ${isLoading ? 'disabled' : ''}>
+                 <svg class="close-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+                   <path d="M3.5 3.5L12.5 12.5"></path>
+                   <path d="M12.5 3.5L3.5 12.5"></path>
+                 </svg>
+               </button>`
+            : ''}
+          ${headerTemplate}
           <div class="body" part="body">
             ${hasContentSlot ? '<slot name="content"></slot>' : '<slot></slot>'}
           </div>

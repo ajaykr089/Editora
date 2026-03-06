@@ -1,67 +1,173 @@
 import React from 'react';
-import { AspectRatio, Grid, Flex, Box } from '@editora/ui-react';
+import type { Meta } from '@storybook/react';
+import { AspectRatio, Box, Button, Flex, Grid } from '@editora/ui-react';
+import { toastAdvanced } from '@editora/toast';
+import {
+  CameraIcon,
+  CheckCircleIcon,
+  ImageIcon,
+  PlayCircleIcon,
+  SlidersIcon,
+} from '@editora/react-icons';
+import '../../packages/editora-toast/src/toast.css';
+import '@editora/themes/themes/default.css';
 
-export default {
+const meta: Meta<typeof AspectRatio> = {
   title: 'UI/AspectRatio',
   component: AspectRatio,
 };
 
-export const Default = () => (
-  <AspectRatio ratio="16/9" style={{ width: 360 }}>
-    <img
-      src="https://images.unsplash.com/photo-1506784365847-bbad939e9335?w=960&q=80"
-      alt="Office setup"
-    />
-  </AspectRatio>
-);
+export default meta;
 
-export const RatioMatrix = () => (
-  <Grid style={{ gap: 14 }}>
-    <AspectRatio ratio="1/1" style={{ width: 220 }}>
-      <Flex style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', background: '#0284c7', color: '#fff' }}>
-        1:1
-      </Flex>
-    </AspectRatio>
-    <AspectRatio ratio="4/3" style={{ width: 280 }}>
-      <Flex style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', background: '#7c3aed', color: '#fff' }}>
-        4:3
-      </Flex>
-    </AspectRatio>
-    <AspectRatio ratio="21/9" style={{ width: 420 }}>
-      <Flex style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', background: '#f59e0b', color: '#fff' }}>
-        21:9
-      </Flex>
-    </AspectRatio>
-  </Grid>
-);
+function EnterpriseMediaCanvas() {
+  const [ratio, setRatio] = React.useState<'16/9' | '4/3' | '1/1'>('16/9');
+  const [fit, setFit] = React.useState<'cover' | 'contain'>('cover');
 
-export const FitModes = () => (
-  <Grid style={{ gap: 14 }}>
-    <Box style={{ fontSize: 12, color: '#64748b' }}>cover</Box>
-    <AspectRatio ratio="3:2" fit="cover" style={{ width: 360 }}>
-      <img src="https://images.unsplash.com/photo-1507146426996-ef05306b995a?w=960&q=80" alt="Dog cover fit" />
-    </AspectRatio>
-    <Box style={{ fontSize: 12, color: '#64748b' }}>contain</Box>
-    <AspectRatio ratio="3:2" fit="contain" style={{ width: 360 }}>
-      <img src="https://images.unsplash.com/photo-1507146426996-ef05306b995a?w=960&q=80" alt="Dog contain fit" />
-    </AspectRatio>
-  </Grid>
-);
+  return (
+    <Grid style={{ gap: 14, maxInlineSize: 980 }}>
+      <Box
+        style={{
+          border: '1px solid var(--ui-color-border, #d8e1ec)',
+          borderRadius: 16,
+          padding: 16,
+          background:
+            'linear-gradient(135deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 7%, #fff) 0%, var(--ui-color-surface, #fff) 42%)',
+        }}
+      >
+        <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
+          <Box>
+            <Box style={{ fontWeight: 700, fontSize: 18 }}>Media Composition Surface</Box>
+            <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
+              Enterprise aspect-ratio layouts for thumbnails, previews, and campaign assets.
+            </Box>
+          </Box>
+          <Flex align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>
+            <SlidersIcon size={14} />
+            Ratio: {ratio} / Fit: {fit}
+          </Flex>
+        </Flex>
+      </Box>
 
-export const TokenStyled = () => (
-  <AspectRatio
-    ratio={2.35}
-    style={
-      {
-        width: 420,
-        '--ui-aspect-radius': '20px',
-        '--ui-aspect-border': '1px solid #c7d2fe',
-        '--ui-aspect-bg': '#eef2ff',
-      } as any
-    }
-  >
-    <Flex style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', background: '#4f46e5', color: '#fff' }}>
-      Cinematic 2.35:1
-    </Flex>
-  </AspectRatio>
-);
+      <Flex style={{ gap: 8, flexWrap: 'wrap' }}>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => {
+            setRatio('16/9');
+            toastAdvanced.info('Canvas ratio set to 16:9', { duration: 1300, theme: 'light' });
+          }}
+        >
+          16:9
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => {
+            setRatio('4/3');
+            toastAdvanced.info('Canvas ratio set to 4:3', { duration: 1300, theme: 'light' });
+          }}
+        >
+          4:3
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => {
+            setRatio('1/1');
+            toastAdvanced.info('Canvas ratio set to 1:1', { duration: 1300, theme: 'light' });
+          }}
+        >
+          1:1
+        </Button>
+        <Button
+          size="sm"
+          onClick={() => {
+            const next = fit === 'cover' ? 'contain' : 'cover';
+            setFit(next);
+            toastAdvanced.success(`Fit mode changed to ${next}`, { duration: 1300, theme: 'light' });
+          }}
+        >
+          Toggle Fit
+        </Button>
+      </Flex>
+
+      <Grid style={{ gap: 12 }}>
+        <AspectRatio ratio={ratio} fit={fit} tone="info" interactive showRatioBadge style={{ width: '100%' }}>
+          <img
+            src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1400&q=80"
+            alt="Operations team reviewing clinical dashboards"
+          />
+        </AspectRatio>
+
+        <Grid style={{ gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+          <AspectRatio ratio="1/1" tone="success" showRatioBadge style={{ width: '100%' }}>
+            <Flex
+              style={{
+                width: '100%',
+                height: '100%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                color: '#0f172a',
+              }}
+            >
+              <CheckCircleIcon size={16} />
+              Approved Thumbnail
+            </Flex>
+          </AspectRatio>
+
+          <AspectRatio ratio="4/3" tone="warning" showRatioBadge style={{ width: '100%' }}>
+            <Flex
+              style={{
+                width: '100%',
+                height: '100%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                color: '#0f172a',
+              }}
+            >
+              <CameraIcon size={16} />
+              Capture Queue
+            </Flex>
+          </AspectRatio>
+
+          <AspectRatio ratio="16/9" tone="danger" showRatioBadge style={{ width: '100%' }}>
+            <Flex
+              style={{
+                width: '100%',
+                height: '100%',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                color: '#0f172a',
+              }}
+            >
+              <PlayCircleIcon size={16} />
+              Pending Review
+            </Flex>
+          </AspectRatio>
+        </Grid>
+
+        <AspectRatio ratio="21/9" tone="neutral" showRatioBadge style={{ width: '100%' }} />
+      </Grid>
+
+      <Flex justify="end" style={{ gap: 8, flexWrap: 'wrap' }}>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => toastAdvanced.info('Preview generated for content team', { duration: 1400, theme: 'light' })}
+        >
+          <ImageIcon size={14} />
+          Generate Preview
+        </Button>
+        <Button size="sm" onClick={() => toastAdvanced.success('Media layout saved', { duration: 1400, theme: 'light' })}>
+          Save Layout
+        </Button>
+      </Flex>
+    </Grid>
+  );
+}
+
+export const EnterpriseMediaOps = () => <EnterpriseMediaCanvas />;
+

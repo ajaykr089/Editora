@@ -1,64 +1,143 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useImperativeHandle, useRef } from 'react';
+import { warnIfElementNotRegistered } from './_internals';
 
-type Props = React.HTMLAttributes<HTMLElement> & {
+type Props = Omit<React.HTMLAttributes<HTMLElement>, 'children'> & {
   children?: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'warning';
   size?: 'sm' | 'md' | 'lg';
   icon?: string;
+  startIcon?: React.ReactNode;
+  endIcon?: React.ReactNode;
   loading?: boolean;
+  loadingLabel?: string;
+  state?: 'idle' | 'loading' | 'error' | 'success';
+  tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
   block?: boolean;
   headless?: boolean;
   disabled?: boolean;
   animation?: 'scale' | 'pulse' | 'none';
   theme?: 'default' | 'dark' | 'brand';
+  type?: 'button' | 'submit' | 'reset';
+  ariaLabel?: string;
 };
 
-export function Button(props: Props) {
-  const { children, onClick, variant, size, icon, loading, block, headless, disabled, animation, theme, ...rest } = props as any;
+function setBooleanAttribute(el: HTMLElement, name: string, value: boolean | undefined) {
+  if (value == null || !value) {
+    el.removeAttribute(name);
+    return;
+  }
+  el.setAttribute(name, '');
+}
+
+function setStringAttribute(el: HTMLElement, name: string, value: string | undefined) {
+  if (!value) {
+    el.removeAttribute(name);
+    return;
+  }
+  el.setAttribute(name, value);
+}
+
+export const Button = React.forwardRef<HTMLElement, Props>(function Button(
+  {
+    children,
+    onClick,
+    variant,
+    size,
+    icon,
+    startIcon,
+    endIcon,
+    loading,
+    loadingLabel,
+    state,
+    tone,
+    block,
+    headless,
+    disabled,
+    animation,
+    theme,
+    type,
+    ariaLabel,
+    ...rest
+  },
+  forwardedRef
+) {
   const ref = useRef<HTMLElement | null>(null);
   const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
+  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+
+  useEffect(() => {
+    warnIfElementNotRegistered('ui-button', 'Button');
+  }, []);
+
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
-    const handler = (e: Event) => onClick && onClick(e as any);
-    if (onClick) el.addEventListener('click', handler as EventListener);
-    return () => { if (onClick) el.removeEventListener('click', handler as EventListener); };
+    if (!el || !onClick) return;
+
+    const handler = (e: Event) => onClick(e as unknown as React.MouseEvent<HTMLElement>);
+    el.addEventListener('click', handler as EventListener);
+    return () => el.removeEventListener('click', handler as EventListener);
   }, [onClick]);
 
-  // Reflect attributes for custom element before paint to avoid style flash (e.g. secondary -> primary -> secondary).
   useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (variant) el.setAttribute('variant', variant); else el.removeAttribute('variant');
-    if (size) el.setAttribute('size', size); else el.removeAttribute('size');
-    if (icon) el.setAttribute('icon', icon); else el.removeAttribute('icon');
-    if (loading) el.setAttribute('loading', ''); else el.removeAttribute('loading');
-    if (block) el.setAttribute('block', ''); else el.removeAttribute('block');
-    if (headless) el.setAttribute('headless', ''); else el.removeAttribute('headless');
-    // reflect disabled explicitly (support disabled={false} correctly)
-    if (disabled) el.setAttribute('disabled', ''); else el.removeAttribute('disabled');
-    // animation is opt-in (do not set by default)
-    if (animation) el.setAttribute('animation', animation); else el.removeAttribute('animation');
-    if (theme && theme !== 'default') el.setAttribute('theme', theme); else el.removeAttribute('theme');
-  }, [variant, size, icon, loading, block, headless, disabled, animation, theme]);
 
-  // Set style-critical attributes on initial render so connectedCallback sees the final variant immediately.
+    setStringAttribute(el, 'variant', variant);
+
+    if (size && size !== 'md') setStringAttribute(el, 'size', size);
+    else el.removeAttribute('size');
+
+    setStringAttribute(el, 'icon', icon);
+
+    const resolvedState = state || (loading ? 'loading' : 'idle');
+    if (resolvedState === 'idle') el.removeAttribute('state');
+    else setStringAttribute(el, 'state', resolvedState);
+
+    setBooleanAttribute(el, 'loading', !!loading);
+    setBooleanAttribute(el, 'block', !!block);
+    setBooleanAttribute(el, 'headless', !!headless);
+    setBooleanAttribute(el, 'disabled', !!disabled);
+
+    setStringAttribute(el, 'animation', animation);
+
+    if (theme && theme !== 'default') setStringAttribute(el, 'theme', theme);
+    else el.removeAttribute('theme');
+
+    setStringAttribute(el, 'tone', tone);
+
+    if (type && type !== 'button') setStringAttribute(el, 'type', type);
+    else el.removeAttribute('type');
+
+    if (loadingLabel !== undefined) setStringAttribute(el, 'loading-label', loadingLabel);
+    if (ariaLabel !== undefined) setStringAttribute(el, 'aria-label', ariaLabel);
+  }, [variant, size, icon, loading, state, block, headless, disabled, animation, theme, tone, type, loadingLabel, ariaLabel]);
+
   const hostProps: Record<string, unknown> = {
     ref,
     ...rest,
     variant,
-    size,
+    size: size && size !== 'md' ? size : undefined,
     icon,
     animation,
-    theme: theme && theme !== 'default' ? theme : undefined,
+    tone,
+    type: type && type !== 'button' ? type : undefined,
     loading: loading ? '' : undefined,
     block: block ? '' : undefined,
     headless: headless ? '' : undefined,
     disabled: disabled ? '' : undefined,
+    theme: theme && theme !== 'default' ? theme : undefined,
+    state: state && state !== 'idle' ? state : undefined,
+    'loading-label': loadingLabel,
+    'aria-label': ariaLabel,
   };
 
-  return React.createElement('ui-button', hostProps, children);
-}
+  const prefix = startIcon == null ? null : React.createElement('span', { slot: 'prefix', 'aria-hidden': 'true' }, startIcon);
+  const suffix = endIcon == null ? null : React.createElement('span', { slot: 'suffix', 'aria-hidden': 'true' }, endIcon);
+
+  return React.createElement('ui-button', hostProps, prefix, children, suffix);
+});
+
+Button.displayName = 'Button';
 
 export default Button;

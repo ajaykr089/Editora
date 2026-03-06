@@ -3,34 +3,71 @@ import { computePosition as coreComputePosition } from '@editora/ui-core';
 
 export type Placement = 'top' | 'bottom' | 'left' | 'right';
 
-export function useFloating(options?: { placement?: Placement; offset?: number; open?: boolean; onOpen?: () => void; onClose?: () => void; role?: string }) {
+type RefLike<T> =
+  | ((instance: T | null) => void)
+  | { current: T | null }
+  | null
+  | undefined;
+
+function assignRef<T>(ref: RefLike<T>, value: T | null) {
+  if (!ref) return;
+  if (typeof ref === 'function') {
+    ref(value);
+    return;
+  }
+  ref.current = value;
+}
+
+export function useFloating(options?: {
+  placement?: Placement;
+  offset?: number;
+  open?: boolean;
+  onOpen?: () => void;
+  onClose?: () => void;
+  role?: string;
+}) {
   const { placement = 'bottom', offset = 8, open: controlledOpen, onOpen, onClose, role = 'menu' } = options || {};
   const reference = useRef<HTMLElement | null>(null);
   const floating = useRef<HTMLElement | null>(null);
   const rafRef = useRef<number | null>(null);
+  const uid = useRef(`floating-${Math.random().toString(36).slice(2, 9)}`);
 
-  const [coords, setCoords] = useState<{ top: number; left: number; placement: Placement; arrow?: { x?: number; y?: number } }>({ top: 0, left: 0, placement });
+  const [coords, setCoords] = useState<{
+    top: number;
+    left: number;
+    placement: Placement;
+    arrow?: { x?: number; y?: number };
+  }>({ top: 0, left: 0, placement });
 
-  // controlled vs uncontrolled open state
   const isControlled = typeof controlledOpen !== 'undefined';
-  const [internalOpen, setInternalOpen] = useState<boolean>(!!controlledOpen);
-  const open = isControlled ? (controlledOpen as boolean) : internalOpen;
-
-  const setOpen = (v: boolean) => {
-    if (!isControlled) setInternalOpen(v);
-    if (v) onOpen && onOpen(); else onClose && onClose();
-  };
-  const toggle = () => setOpen(!open);
-  const openPopup = () => setOpen(true);
-  const closePopup = () => setOpen(false);
+  const [internalOpen, setInternalOpen] = useState<boolean>(Boolean(controlledOpen));
+  const open = isControlled ? Boolean(controlledOpen) : internalOpen;
 
   const update = useCallback(() => {
     const r = reference.current;
     const f = floating.current;
     if (!r || !f) return;
-    const pos = coreComputePosition(r, f as HTMLElement, { placement, offset });
-    setCoords({ top: Math.round(pos.top), left: Math.round(pos.left), placement: pos.placement as Placement, arrow: pos.x || pos.y ? { x: pos.x, y: pos.y } : undefined });
+    const pos = coreComputePosition(r, f, { placement, offset });
+    setCoords({
+      top: Math.round(pos.top),
+      left: Math.round(pos.left),
+      placement: pos.placement as Placement,
+      arrow: pos.x || pos.y ? { x: pos.x, y: pos.y } : undefined
+    });
   }, [placement, offset]);
+
+  const setOpen = useCallback(
+    (nextOpen: boolean) => {
+      if (!isControlled) setInternalOpen(nextOpen);
+      if (nextOpen) onOpen?.();
+      else onClose?.();
+    },
+    [isControlled, onOpen, onClose]
+  );
+
+  const toggle = useCallback(() => setOpen(!open), [open, setOpen]);
+  const openPopup = useCallback(() => setOpen(true), [setOpen]);
+  const closePopup = useCallback(() => setOpen(false), [setOpen]);
 
   useEffect(() => {
     if (!open) return;
@@ -44,6 +81,7 @@ export function useFloating(options?: { placement?: Placement; offset?: number; 
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(() => update());
     };
+
     const onResize = () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(() => update());
@@ -61,16 +99,17 @@ export function useFloating(options?: { placement?: Placement; offset?: number; 
         ro1.observe(r);
         ro2.observe(f);
       }
-    } catch (e) {
+    } catch {
       ro1 = ro2 = null;
     }
 
     return () => {
       window.removeEventListener('scroll', onScroll, true);
       window.removeEventListener('resize', onResize);
-      if (ro1) ro1.disconnect();
-      if (ro2) ro2.disconnect();
+      ro1?.disconnect();
+      ro2?.disconnect();
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
     };
   }, [open, update]);
 
@@ -82,12 +121,11 @@ export function useFloating(options?: { placement?: Placement; offset?: number; 
     floating.current = node;
   }, []);
 
-  // accessibility / keyboard helpers
-  const uid = useRef(`floating-${Math.random().toString(36).slice(2,9)}`);
-
   const getMenuItems = () => {
     if (!floating.current) return [] as HTMLElement[];
-    const items = Array.from(floating.current.querySelectorAll('[role="menuitem"], .item, [data-menu-item]')) as HTMLElement[];
+    const items = Array.from(
+      floating.current.querySelectorAll('[role="menuitem"], .item, [data-menu-item]')
+    ) as HTMLElement[];
     return items.filter(Boolean);
   };
 
@@ -95,8 +133,13 @@ export function useFloating(options?: { placement?: Placement; offset?: number; 
     const items = getMenuItems();
     if (!items.length) return;
     const i = Math.max(0, Math.min(items.length - 1, index));
-    try { items[i].focus(); } catch (e) {}
+    try {
+      items[i].focus();
+    } catch {
+      // noop
+    }
   };
+
   const focusFirstItem = () => focusItem(0);
   const focusLastItem = () => {
     const items = getMenuItems();
@@ -104,66 +147,86 @@ export function useFloating(options?: { placement?: Placement; offset?: number; 
   };
   const focusNext = () => {
     const items = getMenuItems();
-    const idx = items.findIndex(i => i === document.activeElement);
+    const idx = items.findIndex((item) => item === document.activeElement);
     focusItem(idx < 0 ? 0 : (idx + 1) % items.length);
   };
   const focusPrev = () => {
     const items = getMenuItems();
-    const idx = items.findIndex(i => i === document.activeElement);
+    const idx = items.findIndex((item) => item === document.activeElement);
     focusItem(idx <= 0 ? items.length - 1 : idx - 1);
   };
 
-  const getReferenceProps = (props: any = {}) => {
+  const getReferenceProps = (props: Record<string, any> = {}) => {
+    const { onClick: userOnClick, onKeyDown: userOnKeyDown, ref: userRef, ...rest } = props;
+
     return {
-      ref: referenceRef,
+      ...rest,
+      ref: (node: HTMLElement | null) => {
+        referenceRef(node);
+        assignRef(userRef, node);
+      },
       'aria-haspopup': role,
       'aria-controls': uid.current,
       'aria-expanded': open ? 'true' : 'false',
-      onClick: (e: Event) => {
-        props.onClick && props.onClick(e);
+      onClick: (event: Event) => {
+        userOnClick?.(event);
+        if ((event as Event & { defaultPrevented?: boolean }).defaultPrevented) return;
         toggle();
       },
-      onKeyDown: (e: KeyboardEvent) => {
-        props.onKeyDown && props.onKeyDown(e);
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
+      onKeyDown: (event: KeyboardEvent) => {
+        userOnKeyDown?.(event);
+        if (event.defaultPrevented) return;
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
           openPopup();
-          // delay focusing first item until rendered
           setTimeout(() => focusFirstItem(), 0);
         }
-      },
-      ...props
+      }
     };
   };
 
-  const getFloatingProps = (props: any = {}) => ({
-    id: uid.current,
-    ref: floatingRef,
-    role,
-    tabIndex: -1,
-    style: { position: 'absolute', top: `${coords.top}px`, left: `${coords.left}px` },
-    hidden: !open,
-    onKeyDown: (e: KeyboardEvent) => {
-      props.onKeyDown && props.onKeyDown(e);
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        closePopup();
-      } else if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        focusNext();
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        focusPrev();
-      } else if (e.key === 'Home') {
-        e.preventDefault();
-        focusFirstItem();
-      } else if (e.key === 'End') {
-        e.preventDefault();
-        focusLastItem();
+  const getFloatingProps = (props: Record<string, any> = {}) => {
+    const { onKeyDown: userOnKeyDown, style: userStyle, ref: userRef, ...rest } = props;
+
+    return {
+      ...rest,
+      id: uid.current,
+      ref: (node: HTMLElement | null) => {
+        floatingRef(node);
+        assignRef(userRef, node);
+      },
+      role,
+      tabIndex: -1,
+      style: {
+        ...(userStyle || {}),
+        position: 'absolute',
+        top: `${coords.top}px`,
+        left: `${coords.left}px`
+      },
+      hidden: !open,
+      onKeyDown: (event: KeyboardEvent) => {
+        userOnKeyDown?.(event);
+        if (event.defaultPrevented) return;
+
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          closePopup();
+        } else if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          focusNext();
+        } else if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          focusPrev();
+        } else if (event.key === 'Home') {
+          event.preventDefault();
+          focusFirstItem();
+        } else if (event.key === 'End') {
+          event.preventDefault();
+          focusLastItem();
+        }
       }
-    },
-    ...props
-  });
+    };
+  };
 
   return {
     referenceRef,
@@ -180,6 +243,7 @@ export function useFloating(options?: { placement?: Placement; offset?: number; 
     focusFirstItem,
     focusLastItem,
     focusNext,
-    focusPrev,
+    focusPrev
   } as const;
 }
+

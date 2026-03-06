@@ -1,5 +1,6 @@
 import { ElementBase } from '../ElementBase';
 import { compareISO } from './ui-calendar';
+import { resolveDateTimeTranslations } from './date-time-i18n';
 import {
   clampDateIso,
   computePopoverPosition,
@@ -33,41 +34,88 @@ type DatePickerDetail = {
   source: DatePickerSource;
 };
 
+type DatePickerState = 'idle' | 'loading' | 'error' | 'success';
+
+let datePickerUid = 0;
+
+const CALENDAR_ICON = `
+  <svg viewBox="0 0 20 20" class="icon-svg" aria-hidden="true" focusable="false">
+    <path d="M6 2a1 1 0 0 1 1 1v1h6V3a1 1 0 1 1 2 0v1h.5A2.5 2.5 0 0 1 18 6.5v9A2.5 2.5 0 0 1 15.5 18h-11A2.5 2.5 0 0 1 2 15.5v-9A2.5 2.5 0 0 1 4.5 4H5V3a1 1 0 0 1 1-1Zm10 7H4v6.5c0 .276.224.5.5.5h11a.5.5 0 0 0 .5-.5V9ZM4.5 6a.5.5 0 0 0-.5.5V7h12v-.5a.5.5 0 0 0-.5-.5h-11Z" fill="currentColor"/>
+  </svg>
+`;
+
+const CHEVRON_ICON = `
+  <svg viewBox="0 0 20 20" class="icon-svg" aria-hidden="true" focusable="false">
+    <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.12l3.71-3.9a.75.75 0 1 1 1.08 1.04l-4.25 4.47a.75.75 0 0 1-1.08 0L5.2 8.27a.75.75 0 0 1 .02-1.06Z" fill="currentColor"/>
+  </svg>
+`;
+
+const CLOSE_ICON = `
+  <svg viewBox="0 0 20 20" class="icon-svg" aria-hidden="true" focusable="false">
+    <path d="M5.22 5.22a.75.75 0 0 1 1.06 0L10 8.94l3.72-3.72a.75.75 0 1 1 1.06 1.06L11.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06L10 11.06l-3.72 3.72a.75.75 0 1 1-1.06-1.06L8.94 10 5.22 6.28a.75.75 0 0 1 0-1.06Z" fill="currentColor"/>
+  </svg>
+`;
+
 const style = `
   :host {
     --ui-dp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
-    --ui-dp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
+    --ui-dp-surface: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent),
+      color-mix(in srgb, var(--ui-color-surface, #ffffff) 92%, var(--ui-color-surface-alt, #f8fafc))
+    );
+    --ui-dp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
     --ui-dp-text: var(--ui-color-text, #0f172a);
     --ui-dp-muted: var(--ui-color-muted, #64748b);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
+    --ui-dp-success: var(--ui-color-success, #15803d);
     --ui-dp-radius: 12px;
+    --ui-dp-panel-radius: calc(var(--ui-dp-radius) + 2px);
     --ui-dp-shadow: 0 18px 34px rgba(2, 6, 23, 0.14);
-    --ui-dp-padding: 10px 12px;
     --ui-dp-z: 1100;
-    --ui-dp-gap: 8px;
-    --ui-dp-hit: 36px;
+    --ui-dp-gap: 12px;
+    --ui-dp-hit: 42px;
     --ui-dp-field-bg: var(--ui-dp-bg);
     --ui-dp-field-border: var(--ui-dp-border);
-    --ui-dp-field-focus: color-mix(in srgb, var(--ui-dp-accent) 55%, transparent);
+    --ui-dp-field-focus: color-mix(in srgb, var(--ui-dp-accent) 72%, transparent);
     --ui-dp-field-error: var(--ui-color-danger, #dc2626);
+    --ui-dp-focus-ring: color-mix(in srgb, var(--ui-dp-accent) 26%, transparent);
     --ui-dp-sheet-backdrop: rgba(15, 23, 42, 0.52);
     --ui-dp-sheet-bg: var(--ui-dp-bg);
+    --ui-dp-duration: 160ms;
+    --ui-dp-ease: cubic-bezier(0.2, 0.9, 0.24, 1);
     color-scheme: light dark;
     display: inline-grid;
     inline-size: min(100%, var(--ui-width, 320px));
     min-inline-size: min(220px, 100%);
     color: var(--ui-dp-text);
-    font-family: "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  :host([shape="square"]) {
+    --ui-dp-radius: 6px;
+  }
+
+  :host([shape="soft"]) {
+    --ui-dp-radius: 16px;
+  }
+
+  :host([size="sm"]) {
+    --ui-dp-hit: 38px;
+  }
+
+  :host([size="lg"]) {
+    --ui-dp-hit: 48px;
   }
 
   .root {
     min-inline-size: 0;
     display: grid;
-    gap: 6px;
+    gap: 8px;
   }
 
   .label {
-    font: 600 13px/1.35 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font: 600 13px/1.35 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     color: var(--ui-dp-text);
     display: inline-flex;
     align-items: center;
@@ -86,27 +134,51 @@ const style = `
     align-items: center;
     gap: 8px;
     min-block-size: var(--ui-dp-hit);
-    padding: 0 10px;
+    padding: 0 10px 0 11px;
     border: 1px solid var(--ui-dp-field-border);
     border-radius: var(--ui-dp-radius);
-    background: var(--ui-dp-field-bg);
-    box-shadow: 0 1px 2px rgba(2, 6, 23, 0.08);
-    transition: border-color 140ms ease, box-shadow 140ms ease;
+    background: var(--ui-dp-surface);
+    box-shadow: 0 1px 2px rgba(2, 6, 23, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    transition: border-color var(--ui-dp-duration) var(--ui-dp-ease), box-shadow var(--ui-dp-duration) var(--ui-dp-ease), transform var(--ui-dp-duration) var(--ui-dp-ease);
+  }
+
+  .field[data-open="true"] {
+    border-color: var(--ui-dp-field-focus);
+    box-shadow: 0 0 0 3px var(--ui-dp-focus-ring), 0 10px 24px rgba(2, 6, 23, 0.12);
   }
 
   .field:focus-within {
     border-color: var(--ui-dp-field-focus);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-dp-field-focus) 30%, transparent);
+    box-shadow: 0 0 0 3px var(--ui-dp-focus-ring), 0 4px 14px rgba(2, 6, 23, 0.09);
   }
 
   .field[data-invalid="true"] {
     border-color: color-mix(in srgb, var(--ui-dp-field-error) 68%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-dp-field-error) 20%, transparent);
+  }
+
+  .field[data-state="success"]:not([data-invalid="true"]) {
+    border-color: color-mix(in srgb, var(--ui-dp-success) 56%, var(--ui-dp-border));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-dp-success) 20%, transparent);
+  }
+
+  .field[data-state="loading"] {
+    pointer-events: none;
+    opacity: 0.92;
   }
 
   .icon {
     display: inline-grid;
     place-items: center;
     color: color-mix(in srgb, var(--ui-dp-text) 68%, transparent);
+    inline-size: 20px;
+    block-size: 20px;
+  }
+
+  .icon-svg {
+    inline-size: 16px;
+    block-size: 16px;
+    pointer-events: none;
   }
 
   .input {
@@ -117,7 +189,8 @@ const style = `
     color: var(--ui-dp-text);
     padding: 8px 0;
     outline: none;
-    font: 500 14px/1.35 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font: 500 14px/1.4 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: 0.005em;
   }
 
   .input::placeholder {
@@ -134,6 +207,7 @@ const style = `
     display: inline-grid;
     place-items: center;
     cursor: pointer;
+    transition: background-color var(--ui-dp-duration) var(--ui-dp-ease), color var(--ui-dp-duration) var(--ui-dp-ease), transform var(--ui-dp-duration) var(--ui-dp-ease);
   }
 
   .btn:hover {
@@ -141,9 +215,41 @@ const style = `
     color: var(--ui-dp-text);
   }
 
+  .btn:active {
+    transform: translateY(1px);
+  }
+
   .btn:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--ui-dp-accent) 62%, transparent);
+    outline: 2px solid color-mix(in srgb, var(--ui-dp-accent) 64%, transparent);
     outline-offset: 1px;
+  }
+
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .toggle-icon {
+    display: inline-grid;
+    place-items: center;
+  }
+
+  .spinner {
+    display: none;
+    inline-size: 14px;
+    block-size: 14px;
+    border-radius: 999px;
+    border: 2px solid color-mix(in srgb, var(--ui-dp-text) 20%, transparent);
+    border-top-color: color-mix(in srgb, var(--ui-dp-accent) 72%, transparent);
+    animation: ui-dp-spin 780ms linear infinite;
+  }
+
+  :host([state="loading"]) .toggle-icon {
+    display: none;
+  }
+
+  :host([state="loading"]) .spinner {
+    display: inline-block;
   }
 
   .btn[hidden] {
@@ -173,6 +279,10 @@ const style = `
     pointer-events: none;
   }
 
+  :host([readonly]) .field {
+    background: color-mix(in srgb, var(--ui-dp-field-bg) 92%, var(--ui-color-surface-alt, #f8fafc));
+  }
+
   :host([variant="contrast"]) {
     --ui-dp-bg: #0f172a;
     --ui-dp-border: #334155;
@@ -182,16 +292,30 @@ const style = `
     --ui-dp-field-bg: #0f172a;
     --ui-dp-sheet-bg: #0f172a;
     --ui-dp-sheet-backdrop: rgba(2, 6, 23, 0.74);
+    --ui-dp-surface: linear-gradient(180deg, color-mix(in srgb, #0f172a 86%, #1e293b), #0f172a);
+  }
+
+  :host([state="success"]) {
+    --ui-dp-field-focus: color-mix(in srgb, var(--ui-dp-success) 72%, transparent);
+    --ui-dp-focus-ring: color-mix(in srgb, var(--ui-dp-success) 26%, transparent);
   }
 
   .inline-panel {
     border: 1px solid var(--ui-dp-border);
-    border-radius: var(--ui-dp-radius);
-    background: var(--ui-dp-bg);
+    border-radius: var(--ui-dp-panel-radius);
+    background: var(--ui-dp-surface);
     box-shadow: var(--ui-dp-shadow);
-    padding: 8px;
+    padding: 10px;
     display: grid;
     gap: var(--ui-dp-gap);
+  }
+
+  .inline-panel[data-bare="true"] {
+    border: 0;
+    border-radius: 0;
+    background: var(--ui-dp-bare-bg, var(--ui-dp-bg));
+    box-shadow: none;
+    padding: 0;
   }
 
   .footer {
@@ -201,26 +325,90 @@ const style = `
     gap: 8px;
   }
 
+  .footer[hidden] {
+    display: none !important;
+  }
+
   .action {
     border: 1px solid color-mix(in srgb, var(--ui-dp-border) 85%, transparent);
     background: color-mix(in srgb, var(--ui-dp-bg) 95%, transparent);
     color: var(--ui-dp-text);
-    min-block-size: 30px;
+    min-block-size: 32px;
     border-radius: 8px;
-    padding: 0 10px;
-    font: 600 12px/1 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 0 12px;
+    font: 600 12px/1 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     cursor: pointer;
+    transition: border-color var(--ui-dp-duration) var(--ui-dp-ease), background-color var(--ui-dp-duration) var(--ui-dp-ease), transform var(--ui-dp-duration) var(--ui-dp-ease);
+  }
+
+  .action:hover {
+    border-color: color-mix(in srgb, var(--ui-dp-accent) 38%, var(--ui-dp-border));
+    background: color-mix(in srgb, var(--ui-dp-accent) 10%, transparent);
+  }
+
+  .action:active {
+    transform: translateY(1px);
+  }
+
+  .action:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--ui-dp-accent) 64%, transparent);
+    outline-offset: 1px;
   }
 
   .action[data-tone="primary"] {
     border-color: color-mix(in srgb, var(--ui-dp-accent) 60%, transparent);
-    background: color-mix(in srgb, var(--ui-dp-accent) 18%, transparent);
+    background: color-mix(in srgb, var(--ui-dp-accent) 20%, transparent);
+    color: color-mix(in srgb, var(--ui-dp-text) 94%, transparent);
+  }
+
+  .action:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  @media (max-width: 640px) {
+    :host {
+      inline-size: min(100%, var(--ui-width, 100%));
+    }
+
+    .field {
+      min-block-size: max(var(--ui-dp-hit), 40px);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .field,
-    .btn {
+    .btn,
+    .action,
+    .spinner {
       transition: none !important;
+      animation: none !important;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .field,
+    .inline-panel,
+    .action {
+      forced-color-adjust: none;
+      background: Canvas;
+      color: CanvasText;
+      border-color: CanvasText;
+    }
+    .field:focus-within,
+    .action:focus-visible,
+    .btn:focus-visible {
+      outline-color: Highlight;
+    }
+    .spinner {
+      border-color: CanvasText;
+      border-top-color: CanvasText;
+    }
+  }
+
+  @keyframes ui-dp-spin {
+    to {
+      transform: rotate(360deg);
     }
   }
 `;
@@ -235,15 +423,26 @@ const overlayStyle = `
   .panel {
     pointer-events: auto;
     border: 1px solid var(--ui-dp-border, #cbd5e1);
-    border-radius: var(--ui-dp-radius, 12px);
-    background: var(--ui-dp-bg, #fff);
+    border-radius: var(--ui-dp-panel-radius, 14px);
+    background: var(--ui-dp-surface, #fff);
     color: var(--ui-dp-text, #0f172a);
     box-shadow: var(--ui-dp-shadow, 0 18px 34px rgba(2, 6, 23, 0.14));
-    padding: 8px;
+    padding: 10px;
     display: grid;
-    gap: var(--ui-dp-gap, 8px);
+    gap: var(--ui-dp-gap, 12px);
     min-inline-size: min(320px, calc(100vw - 16px));
     max-inline-size: min(360px, calc(100vw - 16px));
+    transform-origin: top;
+    animation: ui-dp-pop-in var(--ui-dp-duration, 160ms) var(--ui-dp-ease, cubic-bezier(0.2, 0.9, 0.24, 1));
+  }
+
+  .panel[data-bare="true"],
+  .sheet[data-bare="true"] {
+    border: 0;
+    border-radius: 0;
+    background: var(--ui-dp-bare-bg, var(--ui-dp-bg));
+    box-shadow: none;
+    padding: 0;
   }
 
   .sheet-wrap {
@@ -273,6 +472,7 @@ const overlayStyle = `
     gap: 10px;
     max-block-size: min(82vh, 620px);
     overflow: auto;
+    animation: ui-dp-sheet-up var(--ui-dp-duration, 160ms) var(--ui-dp-ease, cubic-bezier(0.2, 0.9, 0.24, 1));
   }
 
   .header {
@@ -284,7 +484,7 @@ const overlayStyle = `
 
   .title {
     margin: 0;
-    font: 700 14px/1.3 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font: 700 14px/1.3 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     color: var(--ui-dp-text, #0f172a);
   }
 
@@ -295,20 +495,66 @@ const overlayStyle = `
     gap: 8px;
   }
 
+  .footer[hidden] {
+    display: none !important;
+  }
+
   .action {
     border: 1px solid color-mix(in srgb, var(--ui-dp-border, #cbd5e1) 85%, transparent);
-    background: color-mix(in srgb, var(--ui-dp-bg, #fff) 95%, transparent);
+    background: color-mix(in srgb, var(--ui-dp-bg, #fff) 94%, transparent);
     color: var(--ui-dp-text, #0f172a);
-    min-block-size: 30px;
+    min-block-size: 32px;
     border-radius: 8px;
-    padding: 0 10px;
-    font: 600 12px/1 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 0 12px;
+    font: 600 12px/1 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     cursor: pointer;
+    transition: border-color var(--ui-dp-duration, 160ms) var(--ui-dp-ease, cubic-bezier(0.2, 0.9, 0.24, 1)), background-color var(--ui-dp-duration, 160ms) var(--ui-dp-ease, cubic-bezier(0.2, 0.9, 0.24, 1));
+  }
+
+  .action:hover {
+    border-color: color-mix(in srgb, var(--ui-dp-accent, #2563eb) 38%, var(--ui-dp-border, #cbd5e1));
+    background: color-mix(in srgb, var(--ui-dp-accent, #2563eb) 10%, transparent);
+  }
+
+  .action:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--ui-dp-accent, #2563eb) 64%, transparent);
+    outline-offset: 1px;
   }
 
   .action[data-tone="primary"] {
     border-color: color-mix(in srgb, var(--ui-dp-accent, #2563eb) 60%, transparent);
     background: color-mix(in srgb, var(--ui-dp-accent, #2563eb) 18%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .panel,
+    .sheet,
+    .action {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+
+  @keyframes ui-dp-pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes ui-dp-sheet-up {
+    from {
+      opacity: 0.82;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 `;
 
@@ -331,9 +577,13 @@ export class UIDatePicker extends ElementBase {
       'min',
       'max',
       'locale',
+      'translations',
       'week-start',
       'size',
+      'shape',
+      'bare',
       'variant',
+      'state',
       'placeholder',
       'label',
       'hint',
@@ -351,7 +601,8 @@ export class UIDatePicker extends ElementBase {
       'events-max',
       'events-display',
       'format',
-      'display-format'
+      'display-format',
+      'show-footer'
     ];
   }
 
@@ -368,6 +619,14 @@ export class UIDatePicker extends ElementBase {
   private _isInitialized = false;
   private _hasView = false;
   private _overlayMode: 'sheet' | 'popover' | null = null;
+  private readonly _uid = `ui-dp-${++datePickerUid}`;
+  private readonly _inputId = `${this._uid}-input`;
+  private readonly _labelId = `${this._uid}-label`;
+  private readonly _hintId = `${this._uid}-hint`;
+  private readonly _errorId = `${this._uid}-error`;
+  private readonly _panelId = `${this._uid}-panel`;
+  private readonly _panelTitleId = `${this._uid}-panel-title`;
+  private _overlayFocusedOnOpen = false;
 
   private _schedulePosition = rafThrottle(() => this._positionOverlay());
 
@@ -391,8 +650,10 @@ export class UIDatePicker extends ElementBase {
     this.root.addEventListener('keydown', this._onRootKeyDownBound);
 
     if (!this._isInitialized) {
-      const initial = normalizeDateIso(this.getAttribute('value'))
-        || normalizeDateIso(this.getAttribute('default-value'));
+      const initial = this._clampToBounds(
+        normalizeDateIso(this.getAttribute('value'))
+          || normalizeDateIso(this.getAttribute('default-value'))
+      );
       this._value = initial;
       this._pendingValue = initial;
       this._draftInput = this._formatDisplay(initial);
@@ -418,7 +679,7 @@ export class UIDatePicker extends ElementBase {
     if (oldValue === newValue) return;
 
     if (name === 'value' && !this._syncing) {
-      this._value = normalizeDateIso(newValue);
+      this._value = this._clampToBounds(normalizeDateIso(newValue));
       this._pendingValue = this._value;
       this._draftInput = this._formatDisplay(this._value);
       this._inlineError = '';
@@ -434,6 +695,19 @@ export class UIDatePicker extends ElementBase {
     }
 
     if (name === 'disabled' && this.hasAttribute('disabled')) {
+      this._setOpen(false, 'outside');
+    }
+
+    if ((name === 'min' || name === 'max') && !this._syncing) {
+      const clampedValue = this._clampToBounds(this._value);
+      const clampedPending = this._clampToBounds(this._pendingValue);
+      this._value = clampedValue;
+      this._pendingValue = clampedPending;
+      this._draftInput = this._formatDisplay(this._allowInput() ? clampedPending : clampedValue);
+      this._syncValueAttribute(clampedValue);
+    }
+
+    if (name === 'state' && this._state() === 'loading') {
       this._setOpen(false, 'outside');
     }
 
@@ -473,8 +747,23 @@ export class UIDatePicker extends ElementBase {
     return isTruthyAttr(this.getAttribute('close-on-select'), true);
   }
 
+  private _showFooter(): boolean {
+    return isTruthyAttr(this.getAttribute('show-footer'), true);
+  }
+
+  private _isBare(): boolean {
+    return isTruthyAttr(this.getAttribute('bare'), false);
+  }
+
   private _locale(): string {
     return normalizeLocale(this.getAttribute('locale'));
+  }
+
+  private _translations() {
+    return resolveDateTimeTranslations(
+      this.getAttribute('locale'),
+      this.getAttribute('translations')
+    );
   }
 
   private _formatMode(): 'iso' | 'locale' | 'custom' {
@@ -489,9 +778,10 @@ export class UIDatePicker extends ElementBase {
   }
 
   private _placeholder(): string {
+    const t = this._translations();
     const placeholder = this.getAttribute('placeholder');
     if (placeholder) return placeholder;
-    return this._formatMode() === 'iso' ? 'YYYY-MM-DD' : 'Select date';
+    return this._formatMode() === 'iso' ? 'YYYY-MM-DD' : t.selectDate;
   }
 
   private _todayIso(): string {
@@ -499,6 +789,16 @@ export class UIDatePicker extends ElementBase {
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const dd = String(now.getDate()).padStart(2, '0');
     return `${now.getFullYear()}-${mm}-${dd}`;
+  }
+
+  private _state(): DatePickerState {
+    const value = (this.getAttribute('state') || '').trim().toLowerCase();
+    if (value === 'loading' || value === 'success' || value === 'error') return value;
+    return 'idle';
+  }
+
+  private _isInteractionBlocked(): boolean {
+    return this._isDisabled() || this._state() === 'loading';
   }
 
   private _minIso(): string | null {
@@ -509,9 +809,25 @@ export class UIDatePicker extends ElementBase {
     return parseConstraintDate(this.getAttribute('max'));
   }
 
+  private _resolvedBounds(): { min: string | null; max: string | null } {
+    let min = this._minIso();
+    let max = this._maxIso();
+    if (min && max && compareISO(min, max) > 0) {
+      const swap = min;
+      min = max;
+      max = swap;
+    }
+    return { min, max };
+  }
+
+  private _clampToBounds(iso: string | null): string | null {
+    if (!iso) return null;
+    const { min, max } = this._resolvedBounds();
+    return clampDateIso(iso, min, max);
+  }
+
   private _isWithinBounds(iso: string): boolean {
-    const minIso = this._minIso();
-    const maxIso = this._maxIso();
+    const { min: minIso, max: maxIso } = this._resolvedBounds();
     if (minIso && compareISO(iso, minIso) < 0) return false;
     if (maxIso && compareISO(iso, maxIso) > 0) return false;
     return true;
@@ -578,9 +894,10 @@ export class UIDatePicker extends ElementBase {
   }
 
   private _setOpen(next: boolean, source: DatePickerSource): void {
-    if (this._isDisabled()) return;
+    if (next && this._isInteractionBlocked()) return;
     if (this._open === next) return;
     this._open = next;
+    this._overlayFocusedOnOpen = false;
     this._lastOpenSource = source;
     this._syncOpenAttribute(next);
     this._syncOverlay(source);
@@ -599,7 +916,7 @@ export class UIDatePicker extends ElementBase {
     } else {
       this._destroyOverlay();
       if (source !== 'outside') {
-        const focusTarget = this._restoreFocusEl;
+        const focusTarget = this._restoreFocusEl || (this.root.querySelector('.input') as HTMLElement | null);
         this._restoreFocusEl = null;
         if (focusTarget && focusTarget.isConnected) {
           try {
@@ -673,31 +990,38 @@ export class UIDatePicker extends ElementBase {
   }
 
   private _commit(next: string | null, source: DatePickerSource): void {
-    if (this._isReadonly() || this._isDisabled()) return;
-    this._value = next;
-    this._pendingValue = next;
-    this._draftInput = this._formatDisplay(next);
+    if (this._isReadonly() || this._isInteractionBlocked()) return;
+    const bounded = this._clampToBounds(next);
+    this._value = bounded;
+    this._pendingValue = bounded;
+    this._draftInput = this._formatDisplay(bounded);
     this._inlineError = '';
-    this._syncValueAttribute(next);
+    this._syncValueAttribute(bounded);
     this._emitInput(source);
     this._emitChange(source);
     this._updateHostState();
   }
 
   private _renderPanelInner(isSheet: boolean): string {
-    const label = this.getAttribute('label') || 'Select date';
+    const t = this._translations();
+    const label = (this.getAttribute('label') || '').trim();
+    const showHeader = !!label || isSheet;
     const shouldShowApply = !this._closeOnSelect() || isSheet;
     const panelClass = isSheet ? 'sheet' : 'panel';
+    const ariaModal = isSheet ? 'true' : 'false';
     return `
       <style>${overlayStyle}</style>
       ${isSheet ? '<div class="sheet-backdrop" data-action="backdrop"></div>' : ''}
-      <section class="${panelClass}" part="${isSheet ? 'sheet' : 'popover'}" aria-label="Date picker panel">
-        ${isSheet ? `<header class="header" part="header"><p class="title">${escapeHtml(label)}</p><button type="button" class="action" data-action="cancel">Cancel</button></header>` : ''}
+      <section class="${panelClass}" id="${this._panelId}" part="${isSheet ? 'sheet' : 'popover'}" role="dialog" aria-modal="${ariaModal}" aria-labelledby="${this._panelTitleId}" aria-label="${escapeHtml(t.datePickerPanel)}">
+        <header class="header" part="header" ${showHeader ? '' : 'hidden'}>
+          <p class="title" id="${this._panelTitleId}" ${label ? '' : 'hidden'}>${escapeHtml(label)}</p>
+          ${isSheet ? `<button type="button" class="action" data-action="cancel">${escapeHtml(t.cancel)}</button>` : ''}
+        </header>
         <ui-calendar class="dp-calendar" part="calendar"></ui-calendar>
         <footer class="footer" part="footer">
-          <button type="button" class="action" data-action="today" part="presets">Today</button>
-          <button type="button" class="action" data-action="clear" part="clear">Clear</button>
-          ${shouldShowApply ? '<button type="button" class="action" data-tone="primary" data-action="apply" part="apply">Apply</button>' : ''}
+          <button type="button" class="action" data-action="today" part="presets">${escapeHtml(t.today)}</button>
+          <button type="button" class="action" data-action="clear" part="clear">${escapeHtml(t.clear)}</button>
+          ${shouldShowApply ? `<button type="button" class="action" data-tone="primary" data-action="apply" part="apply">${escapeHtml(t.apply)}</button>` : ''}
         </footer>
       </section>
     `;
@@ -719,11 +1043,13 @@ export class UIDatePicker extends ElementBase {
       }
     };
 
+    const { min, max } = this._resolvedBounds();
     syncAttr('selection', 'single');
     syncAttr('value', this._pendingValue);
-    syncAttr('min', this.getAttribute('min'));
-    syncAttr('max', this.getAttribute('max'));
+    syncAttr('min', min);
+    syncAttr('max', max);
     syncAttr('locale', this.getAttribute('locale'));
+    syncAttr('translations', this.getAttribute('translations'));
     syncAttr('week-start', this.getAttribute('week-start'));
     const sizeAttr = this.getAttribute('size');
     const effectiveSize = sizeAttr || 'sm';
@@ -748,7 +1074,10 @@ export class UIDatePicker extends ElementBase {
       calendarEl.style.removeProperty('--ui-calendar-title-font-size');
     }
     syncBool('readonly', this._isReadonly());
-    syncBool('disabled', this._isDisabled());
+    syncBool('disabled', this._isInteractionBlocked());
+    syncBool('bare', this._isBare());
+    syncAttr('tabindex', '-1');
+    syncAttr('aria-label', this.getAttribute('label') || this._translations().selectDate);
   }
 
   private _ensureOverlayContent(sheet: boolean): void {
@@ -764,18 +1093,56 @@ export class UIDatePicker extends ElementBase {
   private _syncOverlayState(): void {
     if (!this._overlay) return;
     const sheet = this._isMobileSheet();
+    if (sheet && !this._releaseScrollLock) {
+      this._releaseScrollLock = lockBodyScroll();
+    } else if (!sheet && this._releaseScrollLock) {
+      this._releaseScrollLock();
+      this._releaseScrollLock = null;
+    }
     this._ensureOverlayContent(sheet);
     const title = this._overlay.querySelector('.title') as HTMLElement | null;
-    if (title) title.textContent = this.getAttribute('label') || 'Select date';
+    const panel = this._overlay.querySelector('.panel, .sheet') as HTMLElement | null;
+    const header = this._overlay.querySelector('.header') as HTMLElement | null;
+    const footer = this._overlay.querySelector('.footer') as HTMLElement | null;
+    const t = this._translations();
+    if (panel) panel.dataset.bare = this._isBare() ? 'true' : 'false';
+    if (footer) footer.hidden = !this._showFooter();
+    if (header) header.hidden = !((this.getAttribute('label') || '').trim()) && !sheet;
+    if (title) {
+      const label = (this.getAttribute('label') || '').trim();
+      title.textContent = label;
+      title.hidden = !label;
+    }
+    const todayAction = this._overlay.querySelector('[data-action="today"]') as HTMLElement | null;
+    if (todayAction) todayAction.textContent = t.today;
+    const clearAction = this._overlay.querySelector('[data-action="clear"]') as HTMLElement | null;
+    if (clearAction) clearAction.textContent = t.clear;
+    const cancelAction = this._overlay.querySelector('[data-action="cancel"]') as HTMLElement | null;
+    if (cancelAction) cancelAction.textContent = t.cancel;
+    const applyAction = this._overlay.querySelector('[data-action="apply"]') as HTMLElement | null;
+    if (applyAction) applyAction.textContent = t.apply;
     const apply = this._overlay.querySelector('[data-action="apply"]') as HTMLButtonElement | null;
     if (apply) apply.hidden = this._closeOnSelect() && !sheet;
     const actions = this._overlay.querySelectorAll('.action');
-    const actionsDisabled = this._isDisabled();
+    const actionsDisabled = this._isInteractionBlocked();
     actions.forEach((node) => {
       (node as HTMLButtonElement).disabled = actionsDisabled;
     });
     const calendarEl = this._overlay.querySelector('.dp-calendar') as HTMLElement | null;
-    if (calendarEl) this._syncCalendarElement(calendarEl);
+    if (calendarEl) {
+      this._syncCalendarElement(calendarEl);
+      if (this._open && !this._overlayFocusedOnOpen && this._lastOpenSource !== 'attribute') {
+        this._overlayFocusedOnOpen = true;
+        requestAnimationFrame(() => {
+          if (!this._open || !this._overlay) return;
+          try {
+            calendarEl.focus({ preventScroll: true });
+          } catch {
+            // no-op
+          }
+        });
+      }
+    }
     if (!sheet) this._schedulePosition.run();
   }
 
@@ -797,13 +1164,13 @@ export class UIDatePicker extends ElementBase {
     }
     const parsed = this._parseAndValidate(raw);
     if (!parsed) {
-      this._inlineError = this.getAttribute('error') || 'Invalid date';
+      this._inlineError = this.getAttribute('error') || this._translations().invalidDate;
       this._emitInvalid(raw, 'parse');
       this._updateHostState();
       return;
     }
     if (!this._isWithinBounds(parsed)) {
-      this._inlineError = this.getAttribute('error') || 'Date is outside the allowed range';
+      this._inlineError = this.getAttribute('error') || this._translations().dateOutOfRange;
       this._emitInvalid(raw, 'range');
       this._updateHostState();
       return;
@@ -818,9 +1185,10 @@ export class UIDatePicker extends ElementBase {
 
     const actionEl = target.closest('[data-action]') as HTMLElement | null;
     const action = actionEl?.getAttribute('data-action');
+    if (!action || this._isInteractionBlocked()) return;
 
     if (action === 'toggle') {
-      this._restoreFocusEl = target;
+      this._restoreFocusEl = actionEl as HTMLElement;
       this._setOpen(!this._open, 'api');
       return;
     }
@@ -834,7 +1202,8 @@ export class UIDatePicker extends ElementBase {
       const today = this._todayIso();
       const clamped = this._parseAndValidate(today);
       if (!clamped) return;
-      const next = clampDateIso(clamped, this._minIso(), this._maxIso());
+      const { min, max } = this._resolvedBounds();
+      const next = clampDateIso(clamped, min, max);
       if (!next) return;
       this._pendingValue = next;
       this._emitInput('today');
@@ -867,6 +1236,7 @@ export class UIDatePicker extends ElementBase {
     const target = event.target as HTMLElement | null;
     if (!(target instanceof HTMLInputElement)) return;
     if (!target.classList.contains('input')) return;
+    if (this._isInteractionBlocked()) return;
     if (!this._allowInput()) return;
     this._draftInput = target.value;
     this._inlineError = '';
@@ -876,10 +1246,14 @@ export class UIDatePicker extends ElementBase {
   }
 
   private _onRootBlur(event: Event): void {
-    const target = event.target as HTMLElement | null;
+    const focusEvent = event as FocusEvent;
+    const target = focusEvent.target as HTMLElement | null;
     if (!(target instanceof HTMLInputElement)) return;
     if (!target.classList.contains('input')) return;
     if (!this._allowInput()) return;
+    const related = focusEvent.relatedTarget as Node | null;
+    if (related && this._overlay?.contains(related)) return;
+    if (this._open && !this._isInlineMode()) return;
     this._handleDraftCommit('blur');
   }
 
@@ -888,6 +1262,7 @@ export class UIDatePicker extends ElementBase {
     const target = keyboardEvent.target as HTMLElement | null;
     if (!(target instanceof HTMLInputElement)) return;
     if (!target.classList.contains('input')) return;
+    if (this._isInteractionBlocked()) return;
     if (keyboardEvent.key === 'Enter') {
       keyboardEvent.preventDefault();
       this._handleDraftCommit('enter');
@@ -925,6 +1300,7 @@ export class UIDatePicker extends ElementBase {
     const actionEl = target.closest('[data-action]') as HTMLElement | null;
     const action = actionEl?.getAttribute('data-action');
     if (!action) return;
+    if (this._isInteractionBlocked()) return;
 
     if (action === 'backdrop') {
       this._setOpen(false, 'outside');
@@ -934,7 +1310,9 @@ export class UIDatePicker extends ElementBase {
     if (action === 'today') {
       const clamped = this._parseAndValidate(this._todayIso());
       if (!clamped) return;
-      const next = clampDateIso(clamped, this._minIso(), this._maxIso());
+      const { min, max } = this._resolvedBounds();
+      const next = clampDateIso(clamped, min, max);
+      if (!next) return;
       this._pendingValue = next;
       this._emitInput('today');
       if (this._closeOnSelect()) {
@@ -968,6 +1346,7 @@ export class UIDatePicker extends ElementBase {
   }
 
   private _onCalendarSelect(event: Event): void {
+    if (this._isInteractionBlocked()) return;
     const customEvent = event as CustomEvent<{ value?: string; mode?: string }>;
     const target = event.target as HTMLElement | null;
     if (!target || target.tagName.toLowerCase() !== 'ui-calendar') return;
@@ -980,10 +1359,12 @@ export class UIDatePicker extends ElementBase {
       if (typeof value === 'string') iso = normalizeDateIso(value);
     }
     if (!iso) return;
-    this._pendingValue = iso;
+    const bounded = this._clampToBounds(iso);
+    if (!bounded) return;
+    this._pendingValue = bounded;
     this._emitInput('calendar');
     if (this._closeOnSelect()) {
-      this._commit(iso, 'calendar');
+      this._commit(bounded, 'calendar');
       if (!this._isInlineMode()) this._setOpen(false, 'calendar');
     } else {
       this._updateHostState();
@@ -997,10 +1378,14 @@ export class UIDatePicker extends ElementBase {
     const manualError = this.getAttribute('error') || '';
     const error = this._inlineError || manualError;
     const placeholder = this._placeholder();
-    const hasValue = !!this._value;
+    const t = this._translations();
+    const hasValue = !!(this._value || this._pendingValue);
     const name = this.getAttribute('name') || '';
     const isInline = this._isInlineMode();
-    const fieldValue = this._allowInput() ? this._draftInput : this._formatDisplay(this._value);
+    const state = error ? 'error' : this._state();
+    const fieldValue = this._allowInput()
+      ? this._draftInput
+      : this._formatDisplay(this._pendingValue || this._value);
 
     const labelEl = this.root.querySelector('.label') as HTMLElement | null;
     const labelText = this.root.querySelector('.label-text') as HTMLElement | null;
@@ -1013,35 +1398,87 @@ export class UIDatePicker extends ElementBase {
     const errorEl = this.root.querySelector('.error') as HTMLElement | null;
     const hiddenInput = this.root.querySelector('.hidden-input') as HTMLInputElement | null;
     const inlinePanel = this.root.querySelector('.inline-panel') as HTMLElement | null;
+    const inlineToday = this.root.querySelector('.inline-panel [data-action="today"]') as HTMLElement | null;
+    const inlineClear = this.root.querySelector('.inline-panel [data-action="clear"]') as HTMLElement | null;
+    const inlineApply = this.root.querySelector('.inline-panel [data-action="apply"]') as HTMLElement | null;
+    const inlineFooter = this.root.querySelector('.inline-panel .footer') as HTMLElement | null;
 
-    if (labelEl) labelEl.hidden = !label;
+    if (labelEl) {
+      labelEl.hidden = !label;
+      labelEl.id = this._labelId;
+      labelEl.setAttribute('for', this._inputId);
+    }
     if (labelText) labelText.textContent = label;
     if (requiredEl) requiredEl.hidden = !this.hasAttribute('required');
-    if (fieldEl) fieldEl.dataset.invalid = error ? 'true' : 'false';
+    if (fieldEl) {
+      fieldEl.dataset.invalid = error ? 'true' : 'false';
+      fieldEl.dataset.open = this._open && !isInline ? 'true' : 'false';
+      fieldEl.dataset.state = state;
+      fieldEl.setAttribute('aria-disabled', this._isInteractionBlocked() ? 'true' : 'false');
+    }
 
     if (inputEl) {
       if (inputEl.value !== fieldValue) inputEl.value = fieldValue;
+      inputEl.id = this._inputId;
       inputEl.placeholder = placeholder;
       inputEl.readOnly = !this._allowInput() || this._isReadonly();
-      inputEl.disabled = this._isDisabled();
+      inputEl.disabled = this._isInteractionBlocked();
       inputEl.required = this.hasAttribute('required');
+      inputEl.autocomplete = 'off';
+      inputEl.setAttribute('role', 'combobox');
+      inputEl.setAttribute('aria-haspopup', 'dialog');
+      inputEl.setAttribute('aria-expanded', isInline ? 'false' : String(this._open));
+      inputEl.setAttribute('aria-controls', this._panelId);
+      inputEl.setAttribute('aria-invalid', error ? 'true' : 'false');
+      if (label) inputEl.setAttribute('aria-labelledby', this._labelId);
+      else inputEl.removeAttribute('aria-labelledby');
     }
-    if (clearBtn) clearBtn.hidden = !(this._clearable() && hasValue);
-    if (toggleBtn) toggleBtn.hidden = isInline;
+    if (clearBtn) {
+      clearBtn.hidden = !(this._clearable() && hasValue);
+      clearBtn.disabled = this._isInteractionBlocked();
+      clearBtn.setAttribute('aria-label', t.clearDate);
+    }
+    if (toggleBtn) {
+      toggleBtn.hidden = isInline;
+      toggleBtn.disabled = this._isInteractionBlocked();
+      toggleBtn.setAttribute('aria-expanded', isInline ? 'false' : String(this._open));
+      toggleBtn.setAttribute('aria-controls', this._panelId);
+      toggleBtn.setAttribute('aria-label', t.toggleCalendar);
+    }
     if (hintEl) {
+      hintEl.id = this._hintId;
       hintEl.hidden = !hint;
       hintEl.textContent = hint;
     }
     if (errorEl) {
+      errorEl.id = this._errorId;
       errorEl.hidden = !error;
       errorEl.textContent = error;
+    }
+    if (inputEl) {
+      const describedBy: string[] = [];
+      if (hint && hintEl && !hintEl.hidden) describedBy.push(this._hintId);
+      if (error) describedBy.push(this._errorId);
+      if (describedBy.length) inputEl.setAttribute('aria-describedby', describedBy.join(' '));
+      else inputEl.removeAttribute('aria-describedby');
     }
     if (hiddenInput) {
       hiddenInput.disabled = !name;
       hiddenInput.name = name;
       hiddenInput.value = this._value || '';
     }
-    if (inlinePanel) inlinePanel.hidden = !isInline;
+    if (inlinePanel) {
+      inlinePanel.hidden = !isInline;
+      inlinePanel.id = this._panelId;
+      inlinePanel.dataset.bare = this._isBare() ? 'true' : 'false';
+      inlinePanel.setAttribute('role', 'dialog');
+      inlinePanel.setAttribute('aria-modal', 'false');
+      inlinePanel.setAttribute('aria-label', label || t.selectDate);
+    }
+    if (inlineFooter) inlineFooter.hidden = !this._showFooter();
+    if (inlineToday) inlineToday.textContent = t.today;
+    if (inlineClear) inlineClear.textContent = t.clear;
+    if (inlineApply) inlineApply.textContent = t.apply;
 
     if (isInline) {
       this._renderInlineCalendar();
@@ -1057,25 +1494,28 @@ export class UIDatePicker extends ElementBase {
       this.setContent(`
         <style>${style}</style>
         <div class="root">
-          <label class="label" part="label">
+          <label class="label" part="label" id="${this._labelId}">
             <span class="label-text"></span>
             <span class="required">*</span>
           </label>
           <div class="field" part="field input">
-            <span class="icon" part="icon" aria-hidden="true">📅</span>
-            <input class="input" part="input" />
-            <button type="button" class="btn" part="clear" data-action="clear" aria-label="Clear date">✕</button>
-            <button type="button" class="btn" part="toggle" data-action="toggle" aria-label="Toggle calendar">▾</button>
+            <span class="icon" part="icon" aria-hidden="true">${CALENDAR_ICON}</span>
+            <input class="input" id="${this._inputId}" part="input" />
+            <button type="button" class="btn" part="clear" data-action="clear">${CLOSE_ICON}</button>
+            <button type="button" class="btn" part="toggle" data-action="toggle">
+              <span class="toggle-icon">${CHEVRON_ICON}</span>
+              <span class="spinner" aria-hidden="true"></span>
+            </button>
           </div>
-          <div class="hint" part="hint"></div>
-          <div class="error" part="error" role="alert"></div>
+          <div class="hint" id="${this._hintId}" part="hint"></div>
+          <div class="error" id="${this._errorId}" part="error" role="alert"></div>
           <input class="hidden-input" type="hidden" disabled />
-          <section class="inline-panel" part="popover">
+          <section class="inline-panel" id="${this._panelId}" part="popover">
             <ui-calendar class="inline-calendar" part="calendar"></ui-calendar>
             <footer class="footer" part="footer">
-              <button type="button" class="action" data-action="today" part="presets">Today</button>
-              <button type="button" class="action" data-action="clear" part="clear">Clear</button>
-              <button type="button" class="action" data-tone="primary" data-action="apply" part="apply">Apply</button>
+              <button type="button" class="action" data-action="today" part="presets"></button>
+              <button type="button" class="action" data-action="clear" part="clear"></button>
+              <button type="button" class="action" data-tone="primary" data-action="apply" part="apply"></button>
             </footer>
           </section>
         </div>

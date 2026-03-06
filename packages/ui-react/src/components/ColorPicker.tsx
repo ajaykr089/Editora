@@ -22,6 +22,15 @@ export type ColorPickerDetail = {
   source: 'drag' | 'slider' | 'text' | 'preset' | 'recent' | 'eyedropper'
 }
 
+export type ColorPickerState = 'idle' | 'loading' | 'error' | 'success'
+export type ColorPickerTone = 'neutral' | 'brand' | 'success' | 'warning' | 'danger'
+export type ColorPickerOpenSource = 'api' | 'toggle' | 'outside' | 'escape' | 'apply' | 'attribute'
+export type ColorPickerOpenDetail = {
+  open: boolean
+  previousOpen: boolean
+  source: ColorPickerOpenSource
+}
+
 export type ColorPickerElement = HTMLElement & {
   setColor: (value: string) => void
   getColor: () => { hex: string; rgba: ColorPickerColor; hsva: { h: number; s: number; v: number; a: number } }
@@ -37,8 +46,11 @@ export type ColorPickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange
   readOnly?: boolean
   size?: 'sm' | 'md' | 'lg'
   variant?: 'default' | 'contrast'
+  state?: ColorPickerState
+  tone?: ColorPickerTone
   mode?: 'inline' | 'popover'
   open?: boolean
+  closeOnEscape?: boolean
   placeholder?: string
   presets?: string[]
   recent?: boolean
@@ -49,6 +61,8 @@ export type ColorPickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange
   onValueChange?: (value: string) => void
   onOpen?: () => void
   onClose?: () => void
+  onOpenDetail?: (detail: ColorPickerOpenDetail) => void
+  onCloseDetail?: (detail: ColorPickerOpenDetail) => void
   onInvalid?: (detail: { raw: string; reason: string }) => void
 }
 
@@ -61,8 +75,11 @@ export const ColorPicker = React.forwardRef<ColorPickerElement, ColorPickerProps
     readOnly,
     size,
     variant,
+    state,
+    tone,
     mode,
     open,
+    closeOnEscape,
     placeholder,
     presets,
     recent,
@@ -73,6 +90,8 @@ export const ColorPicker = React.forwardRef<ColorPickerElement, ColorPickerProps
     onValueChange,
     onOpen,
     onClose,
+    onOpenDetail,
+    onCloseDetail,
     onInvalid,
     children,
     ...rest
@@ -105,20 +124,32 @@ export const ColorPicker = React.forwardRef<ColorPickerElement, ColorPickerProps
       onInvalid?.(detail)
     }
 
+    const handleOpen = (event: Event) => {
+      const detail = (event as CustomEvent<ColorPickerOpenDetail>).detail
+      onOpen?.()
+      if (detail) onOpenDetail?.(detail)
+    }
+
+    const handleClose = (event: Event) => {
+      const detail = (event as CustomEvent<ColorPickerOpenDetail>).detail
+      onClose?.()
+      if (detail) onCloseDetail?.(detail)
+    }
+
     el.addEventListener('input', handleInput as EventListener)
     el.addEventListener('change', handleChange as EventListener)
-    el.addEventListener('open', onOpen as EventListener)
-    el.addEventListener('close', onClose as EventListener)
+    el.addEventListener('open', handleOpen as EventListener)
+    el.addEventListener('close', handleClose as EventListener)
     el.addEventListener('invalid', handleInvalid as EventListener)
 
     return () => {
       el.removeEventListener('input', handleInput as EventListener)
       el.removeEventListener('change', handleChange as EventListener)
-      el.removeEventListener('open', onOpen as EventListener)
-      el.removeEventListener('close', onClose as EventListener)
+      el.removeEventListener('open', handleOpen as EventListener)
+      el.removeEventListener('close', handleClose as EventListener)
       el.removeEventListener('invalid', handleInvalid as EventListener)
     }
-  }, [onInput, onChange, onValueChange, onOpen, onClose, onInvalid])
+  }, [onInput, onChange, onValueChange, onOpen, onClose, onOpenDetail, onCloseDetail, onInvalid])
 
   useEffect(() => {
     const el = ref.current
@@ -145,9 +176,12 @@ export const ColorPicker = React.forwardRef<ColorPickerElement, ColorPickerProps
     syncBool('readonly', readOnly)
     syncAttr('size', size && size !== 'md' ? size : null)
     syncAttr('variant', variant && variant !== 'default' ? variant : null)
+    syncAttr('state', state && state !== 'idle' ? state : null)
+    syncAttr('tone', tone && tone !== 'brand' ? tone : null)
     syncAttr('mode', mode && mode !== 'inline' ? mode : null)
     if (typeof open === 'boolean') syncBool('open', open)
     else syncAttr('open', null)
+    syncAttr('close-on-escape', typeof closeOnEscape === 'boolean' ? (closeOnEscape ? 'true' : 'false') : null)
     syncAttr('placeholder', placeholder ?? null)
     syncBool('recent', recent)
     syncAttr('max-recent', typeof maxRecent === 'number' ? String(maxRecent) : null)
@@ -162,7 +196,25 @@ export const ColorPicker = React.forwardRef<ColorPickerElement, ColorPickerProps
     } else {
       syncAttr('presets', null)
     }
-  }, [value, format, alpha, disabled, readOnly, size, variant, mode, open, placeholder, presets, recent, maxRecent, persist])
+  }, [
+    value,
+    format,
+    alpha,
+    disabled,
+    readOnly,
+    size,
+    variant,
+    state,
+    tone,
+    mode,
+    open,
+    closeOnEscape,
+    placeholder,
+    presets,
+    recent,
+    maxRecent,
+    persist
+  ])
 
   const initialAttrs: Record<string, unknown> = { ref, ...rest }
   if (mode && mode !== 'inline') initialAttrs.mode = mode
@@ -174,7 +226,10 @@ export const ColorPicker = React.forwardRef<ColorPickerElement, ColorPickerProps
   if (readOnly) initialAttrs.readonly = ''
   if (size && size !== 'md') initialAttrs.size = size
   if (variant && variant !== 'default') initialAttrs.variant = variant
+  if (state && state !== 'idle') initialAttrs.state = state
+  if (tone && tone !== 'brand') initialAttrs.tone = tone
   if (placeholder) initialAttrs.placeholder = placeholder
+  if (typeof closeOnEscape === 'boolean') initialAttrs['close-on-escape'] = closeOnEscape ? 'true' : 'false'
   if (recent) initialAttrs.recent = ''
   if (typeof maxRecent === 'number') initialAttrs['max-recent'] = String(maxRecent)
   if (persist) initialAttrs.persist = ''

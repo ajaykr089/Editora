@@ -88,6 +88,7 @@ export * from './theme';
 export * from './portal';
 export * from './focusManager';
 export * from './overlayManager';
+export * from './scroll-lock';
 export * from './plugin';
 export * from './icons';
 

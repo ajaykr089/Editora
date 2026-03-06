@@ -3,7 +3,7 @@ import { warnIfElementNotRegistered } from './_internals';
 
 type OpenValue = number | number[];
 
-export interface AccordionProps extends React.HTMLAttributes<HTMLElement> {
+export interface AccordionProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onToggle'> {
   multiple?: boolean;
   collapsible?: boolean;
   open?: OpenValue;
@@ -13,6 +13,8 @@ export interface AccordionProps extends React.HTMLAttributes<HTMLElement> {
 
 export interface AccordionItemProps extends React.HTMLAttributes<HTMLDivElement> {
   disabled?: boolean;
+  description?: string;
+  badge?: string;
 }
 
 export interface AccordionTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
@@ -84,7 +86,7 @@ export const Accordion = React.forwardRef<HTMLElement, AccordionProps>(function 
 Accordion.displayName = 'Accordion';
 
 export const AccordionItem = React.forwardRef<HTMLDivElement, AccordionItemProps>(function AccordionItem(
-  { disabled, children, ...rest },
+  { disabled, description, badge, children, ...rest },
   forwardedRef
 ) {
   const props: Record<string, unknown> = {
@@ -93,6 +95,8 @@ export const AccordionItem = React.forwardRef<HTMLDivElement, AccordionItemProps
     ...rest,
   };
   if (disabled) props.disabled = true;
+  if (description != null) props['data-description'] = String(description);
+  if (badge != null) props['data-badge'] = String(badge);
   return React.createElement('div', props, children);
 });
 

@@ -14,3 +14,15 @@ export function warnIfElementNotRegistered(tagName: string, componentName: strin
       `Import/register the matching web component before using this wrapper.`
   );
 }
+
+export function serializeTranslations(
+  translations: string | Record<string, string> | undefined
+): string | null {
+  if (!translations) return null;
+  if (typeof translations === 'string') return translations;
+  try {
+    return JSON.stringify(translations);
+  } catch {
+    return null;
+  }
+}

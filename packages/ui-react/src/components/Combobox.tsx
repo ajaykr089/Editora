@@ -3,10 +3,15 @@ import React, { useEffect, useRef } from 'react';
 type ComboboxProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
   value?: string;
+  open?: boolean;
+  state?: 'idle' | 'loading' | 'error' | 'success';
+  stateText?: string;
   onChange?: (value: string) => void;
   onInput?: (query: string) => void;
   onDebouncedInput?: (query: string) => void;
   onSelect?: (value: string, label: string) => void;
+  onOpenDetail?: (detail: { open: boolean; previousOpen: boolean; source: string }) => void;
+  onCloseDetail?: (detail: { open: boolean; previousOpen: boolean; source: string }) => void;
   onOpen?: () => void;
   onClose?: () => void;
   onClear?: () => void;
@@ -33,10 +38,15 @@ type ComboboxProps = React.HTMLAttributes<HTMLElement> & {
 export function Combobox(props: ComboboxProps) {
   const {
     value,
+    open,
+    state,
+    stateText,
     onChange,
     onInput,
     onDebouncedInput,
     onSelect,
+    onOpenDetail,
+    onCloseDetail,
     onOpen,
     onClose,
     onClear,
@@ -88,8 +98,16 @@ export function Combobox(props: ComboboxProps) {
       if (typeof detail?.value === 'string') onSelect?.(detail.value, detail.label || detail.value);
     };
 
-    const onOpenHandler = () => onOpen?.();
-    const onCloseHandler = () => onClose?.();
+    const onOpenHandler = (event: Event) => {
+      const detail = (event as CustomEvent<{ open: boolean; previousOpen: boolean; source: string }>).detail;
+      onOpen?.();
+      if (detail) onOpenDetail?.(detail);
+    };
+    const onCloseHandler = (event: Event) => {
+      const detail = (event as CustomEvent<{ open: boolean; previousOpen: boolean; source: string }>).detail;
+      onClose?.();
+      if (detail) onCloseDetail?.(detail);
+    };
     const onClearHandler = () => onClear?.();
 
     el.addEventListener('input', onInputHandler as EventListener);
@@ -109,7 +127,7 @@ export function Combobox(props: ComboboxProps) {
       el.removeEventListener('close', onCloseHandler as EventListener);
       el.removeEventListener('clear', onClearHandler as EventListener);
     };
-  }, [onChange, onInput, onDebouncedInput, onSelect, onOpen, onClose, onClear]);
+  }, [onChange, onInput, onDebouncedInput, onSelect, onOpen, onClose, onOpenDetail, onCloseDetail, onClear]);
 
   useEffect(() => {
     const el = ref.current;
@@ -123,6 +141,12 @@ export function Combobox(props: ComboboxProps) {
 
     if (validation && validation !== 'none') el.setAttribute('validation', validation);
     else el.removeAttribute('validation');
+
+    if (state && state !== 'idle') el.setAttribute('state', state);
+    else el.removeAttribute('state');
+
+    if (stateText) el.setAttribute('state-text', stateText);
+    else el.removeAttribute('state-text');
 
     if (size && size !== 'md' && size !== '2') el.setAttribute('size', String(size));
     else el.removeAttribute('size');
@@ -168,7 +192,15 @@ export function Combobox(props: ComboboxProps) {
 
     if (allowCustom) el.setAttribute('allow-custom', '');
     else el.removeAttribute('allow-custom');
+
+    if (typeof open === 'boolean') {
+      if (open) el.setAttribute('open', '');
+      else el.removeAttribute('open');
+    }
   }, [
+    open,
+    state,
+    stateText,
     clearable,
     debounce,
     validation,
@@ -189,7 +221,13 @@ export function Combobox(props: ComboboxProps) {
     allowCustom
   ]);
 
-  return React.createElement('ui-combobox', { ref, value, ...rest }, children);
+  const initialAttrs: Record<string, unknown> = { ref, ...rest };
+  if (value != null) initialAttrs.value = value;
+  if (typeof open === 'boolean' && open) initialAttrs.open = '';
+  if (state && state !== 'idle') initialAttrs.state = state;
+  if (stateText) initialAttrs['state-text'] = stateText;
+
+  return React.createElement('ui-combobox', initialAttrs, children);
 }
 
 export default Combobox;

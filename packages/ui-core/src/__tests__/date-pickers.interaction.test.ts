@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import '../components/ui-date-picker';
+import '../components/ui-date-range-picker';
 import '../components/ui-time-picker';
 import '../components/ui-date-time-picker';
 import '../components/ui-date-range-time-picker';
@@ -91,6 +92,117 @@ describe('date/time pickers interaction flows', () => {
     await settle();
     expect(el.getAttribute('value')).toBe('2026-04-10');
     expect(el.hasAttribute('open')).toBe(false);
+  });
+
+  it('ui-date-picker normalizes reversed min/max bounds and clamps external value updates', async () => {
+    const el = createElement('ui-date-picker', {
+      min: '2026-12-31',
+      max: '2026-01-01',
+      value: '2026-06-15'
+    });
+    await settle();
+    expect(el.getAttribute('value')).toBe('2026-06-15');
+
+    el.setAttribute('value', '2027-02-20');
+    await settle();
+    expect(el.getAttribute('value')).toBe('2026-12-31');
+  });
+
+  it('ui-date-picker does not commit invalid blur while popover is open', async () => {
+    const el = createElement('ui-date-picker', { locale: 'en-US' });
+    el.setAttribute('open', '');
+    await settle();
+
+    let invalidDetail: any = null;
+    el.addEventListener('invalid', (event: Event) => {
+      invalidDetail = (event as CustomEvent).detail;
+    });
+
+    const input = el.shadowRoot?.querySelector('.input') as HTMLInputElement | null;
+    const overlayCalendar = document.querySelector('.ui-date-picker-overlay-host ui-calendar') as HTMLElement | null;
+    expect(input).toBeTruthy();
+    expect(overlayCalendar).toBeTruthy();
+
+    input!.value = 'abc';
+    input!.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+    input!.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        composed: true,
+        relatedTarget: overlayCalendar
+      })
+    );
+
+    await settle();
+    expect(invalidDetail).toBeNull();
+    expect(el.getAttribute('value')).toBeNull();
+  });
+
+  it('ui-date-range-picker single-field accepts ISO date without splitting on hyphens', async () => {
+    const el = createElement('ui-date-range-picker', {
+      locale: 'en-US',
+      'range-variant': 'single-field'
+    });
+    let invalidDetail: any = null;
+    el.addEventListener('invalid', (event: Event) => {
+      invalidDetail = (event as CustomEvent).detail;
+    });
+
+    await settle();
+    const input = el.shadowRoot?.querySelector('.single') as HTMLInputElement | null;
+    expect(input).toBeTruthy();
+
+    input!.value = '2026-03-05';
+    input!.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+    input!.dispatchEvent(new FocusEvent('focusout', { bubbles: true, composed: true }));
+    await settle();
+
+    expect(invalidDetail).toBeNull();
+    expect(el.getAttribute('value')).toBe('{"start":"2026-03-05"}');
+  });
+
+  it('ui-date-range-picker normalizes reversed bounds and clamps external value updates', async () => {
+    const el = createElement('ui-date-range-picker', {
+      min: '2026-12-31',
+      max: '2026-01-01',
+      value: '{"start":"2026-02-10","end":"2026-02-18"}'
+    });
+    await settle();
+    expect(el.getAttribute('value')).toBe('{"start":"2026-02-10","end":"2026-02-18"}');
+
+    el.setAttribute('value', '{"start":"2027-02-10","end":"2027-02-18"}');
+    await settle();
+    expect(el.getAttribute('value')).toBe('{"start":"2026-12-31","end":"2026-12-31"}');
+  });
+
+  it('ui-date-range-picker does not parse/commit on blur while popover is open', async () => {
+    const el = createElement('ui-date-range-picker', { locale: 'en-US' });
+    el.setAttribute('open', '');
+    await settle();
+
+    let invalidDetail: any = null;
+    el.addEventListener('invalid', (event: Event) => {
+      invalidDetail = (event as CustomEvent).detail;
+    });
+
+    const startInput = el.shadowRoot?.querySelector('.start') as HTMLInputElement | null;
+    const overlayCalendar = document.querySelector('.ui-date-range-picker-overlay-host ui-calendar') as HTMLElement | null;
+    expect(startInput).toBeTruthy();
+    expect(overlayCalendar).toBeTruthy();
+
+    startInput!.value = 'abc';
+    startInput!.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+    startInput!.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        composed: true,
+        relatedTarget: overlayCalendar
+      })
+    );
+
+    await settle();
+    expect(invalidDetail).toBeNull();
+    expect(el.getAttribute('value')).toBeNull();
   });
 
   it('ui-time-picker applies panel selection and commits on Apply', async () => {
@@ -190,4 +302,3 @@ describe('date/time pickers interaction flows', () => {
     expect(parsed.start <= parsed.end).toBe(true);
   });
 });
-

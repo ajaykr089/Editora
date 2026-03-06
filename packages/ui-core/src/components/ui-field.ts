@@ -4,7 +4,7 @@ const style = `
   :host {
     --ui-field-gap: 8px;
     --ui-field-label-width: 192px;
-    --ui-field-radius: 14px;
+    --ui-field-radius: 12px;
     --ui-field-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-field-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-field-label-color: var(--ui-color-text, var(--ui-text, #0f172a));
@@ -14,15 +14,21 @@ const style = `
     --ui-field-border: 1px solid var(--ui-field-border-color);
     --ui-field-shadow:
       0 1px 3px rgba(2, 6, 23, 0.04),
-      0 10px 20px rgba(2, 6, 23, 0.05);
+      0 8px 18px rgba(2, 6, 23, 0.06);
     --ui-field-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     --ui-field-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
-    --ui-field-shell-bg: color-mix(in srgb, var(--ui-field-bg) 93%, transparent);
-    --ui-field-shell-border: color-mix(in srgb, var(--ui-field-border-color) 88%, transparent);
+    --ui-field-shell-padding: 0px;
+    --ui-field-shell-radius: 0px;
+    --ui-field-shell-bg: transparent;
+    --ui-field-shell-border: 0;
+    --ui-field-shell-border-color: color-mix(in srgb, var(--ui-field-border-color) 84%, transparent);
+    --ui-field-shell-shadow: none;
+    --ui-field-shell-focus-ring: color-mix(in srgb, var(--ui-field-focus-ring) 18%, transparent);
     color-scheme: light dark;
     display: block;
     width: 100%;
     min-width: 0;
+    font-family: "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 
   .frame {
@@ -37,19 +43,19 @@ const style = `
     box-shadow: var(--ui-field-shadow);
     padding: 12px;
     box-sizing: border-box;
-    transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
   }
 
   :host([orientation="horizontal"]) .frame {
     grid-template-columns: minmax(120px, var(--ui-field-label-width)) minmax(0, 1fr);
     align-items: start;
-    column-gap: 14px;
+    column-gap: 16px;
   }
 
   .meta {
     min-width: 0;
     display: grid;
-    gap: 5px;
+    gap: 4px;
     align-content: start;
   }
 
@@ -68,7 +74,7 @@ const style = `
     border: 0;
     background: transparent;
     color: var(--ui-field-label-color);
-    font: 600 13px/1.35 "IBM Plex Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font: 600 13px/1.35 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     letter-spacing: 0.01em;
     display: inline-flex;
     align-items: center;
@@ -98,7 +104,7 @@ const style = `
     margin: 0;
     min-width: 0;
     font-size: 12px;
-    line-height: 1.4;
+    line-height: 1.45;
     letter-spacing: 0.01em;
   }
 
@@ -106,6 +112,10 @@ const style = `
     color: var(--ui-field-description-color);
   }
 
+  .label-row[hidden],
+  .label[hidden],
+  .actions[hidden],
+  .meta[hidden],
   .description[hidden],
   .error[hidden] {
     display: none;
@@ -119,11 +129,13 @@ const style = `
 
   .control-shell {
     min-width: 0;
-    padding: 8px;
-    border-radius: calc(var(--ui-field-radius) - 5px);
-    border: 1px solid var(--ui-field-shell-border);
+    box-sizing: border-box;
+    padding: var(--ui-field-shell-padding, 0px);
+    border-radius: var(--ui-field-shell-radius, 0px);
+    border: var(--ui-field-shell-border, 0);
     background: var(--ui-field-shell-bg);
-    transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+    box-shadow: var(--ui-field-shell-shadow, none);
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
   }
 
   .control {
@@ -141,14 +153,10 @@ const style = `
       var(--ui-field-shadow);
   }
 
-  .frame:focus-within .control-shell {
-    border-color: color-mix(in srgb, var(--ui-field-focus-ring) 62%, var(--ui-field-shell-border));
-  }
-
   :host([invalid]) {
     --ui-field-label-color: var(--ui-field-error-color);
     --ui-field-border-color: color-mix(in srgb, var(--ui-field-error-color) 46%, transparent);
-    --ui-field-shell-border: color-mix(in srgb, var(--ui-field-error-color) 56%, transparent);
+    --ui-field-shell-border-color: color-mix(in srgb, var(--ui-field-error-color) 56%, transparent);
   }
 
   :host([variant="surface"]) {
@@ -161,14 +169,11 @@ const style = `
   :host([variant="outline"]) {
     --ui-field-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 90%, transparent);
     --ui-field-shadow: none;
-    --ui-field-shell-bg: color-mix(in srgb, var(--ui-field-bg) 92%, transparent);
   }
 
   :host([variant="soft"]) {
     --ui-field-bg: color-mix(in srgb, var(--ui-field-accent) 7%, var(--ui-color-surface, #ffffff));
     --ui-field-border-color: color-mix(in srgb, var(--ui-field-accent) 24%, var(--ui-color-border, #cbd5e1));
-    --ui-field-shell-bg: color-mix(in srgb, var(--ui-field-accent) 10%, var(--ui-color-surface, #ffffff));
-    --ui-field-shell-border: color-mix(in srgb, var(--ui-field-accent) 30%, var(--ui-field-border-color));
     --ui-field-shadow:
       0 1px 4px rgba(2, 6, 23, 0.04),
       0 8px 20px rgba(2, 6, 23, 0.06);
@@ -180,8 +185,7 @@ const style = `
     --ui-field-label-color: #f8fafc;
     --ui-field-description-color: #93a4bd;
     --ui-field-border-color: #334155;
-    --ui-field-shell-bg: #0b1220;
-    --ui-field-shell-border: #334155;
+    --ui-field-shell-border-color: #334155;
     --ui-field-focus-ring: #93c5fd;
     --ui-field-shadow:
       0 2px 8px rgba(2, 6, 23, 0.2),
@@ -192,32 +196,17 @@ const style = `
     --ui-field-bg: transparent;
     --ui-field-border: 0;
     --ui-field-shadow: none;
-    --ui-field-shell-bg: transparent;
-    --ui-field-shell-border: color-mix(in srgb, var(--ui-field-accent) 26%, var(--ui-color-border, #cbd5e1));
   }
 
   :host([variant="minimal"]) .frame {
     padding: 0;
   }
 
-  :host([variant="minimal"]) .control-shell {
-    padding: 8px 0;
-    border-left: none;
-    border-right: none;
-    border-top: none;
-    border-radius: 0;
-  }
-
   :host([variant="elevated"]) {
-    --ui-field-bg: linear-gradient(
-      160deg,
-      color-mix(in srgb, var(--ui-color-surface, #ffffff) 92%, #ffffff 8%),
-      color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent)
-    );
+    --ui-field-bg: var(--ui-color-surface, #ffffff);
     --ui-field-shadow:
       0 2px 10px rgba(2, 6, 23, 0.08),
       0 20px 40px rgba(2, 6, 23, 0.12);
-    --ui-field-shell-bg: color-mix(in srgb, #ffffff 72%, var(--ui-field-bg));
   }
 
   :host([tone="success"]) {
@@ -275,12 +264,57 @@ const style = `
     --ui-field-radius: 20px;
   }
 
+  :host([shell="outline"]) {
+    --ui-field-shell-padding: 8px;
+    --ui-field-shell-radius: calc(var(--ui-field-radius) - 4px);
+    --ui-field-shell-bg: color-mix(in srgb, var(--ui-field-bg) 94%, transparent);
+    --ui-field-shell-border: 1px solid var(--ui-field-shell-border-color);
+  }
+
+  :host([shell="filled"]) {
+    --ui-field-shell-padding: 8px;
+    --ui-field-shell-radius: calc(var(--ui-field-radius) - 4px);
+    --ui-field-shell-bg: color-mix(in srgb, var(--ui-field-color) 4%, var(--ui-field-bg));
+    --ui-field-shell-border: 1px solid transparent;
+  }
+
+  :host([shell="soft"]) {
+    --ui-field-shell-padding: 8px;
+    --ui-field-shell-radius: calc(var(--ui-field-radius) - 4px);
+    --ui-field-shell-bg: color-mix(in srgb, var(--ui-field-accent) 10%, var(--ui-field-bg));
+    --ui-field-shell-border: 1px solid color-mix(in srgb, var(--ui-field-accent) 32%, transparent);
+  }
+
+  :host([shell="line"]) {
+    --ui-field-shell-padding: 8px 0;
+    --ui-field-shell-radius: 0;
+    --ui-field-shell-bg: transparent;
+    --ui-field-shell-border: 0;
+  }
+
+  :host([shell="line"]) .control-shell {
+    border-bottom: 1px solid var(--ui-field-shell-border-color);
+  }
+
+  :host([shell="outline"]) .frame:focus-within .control-shell,
+  :host([shell="filled"]) .frame:focus-within .control-shell,
+  :host([shell="soft"]) .frame:focus-within .control-shell,
+  :host([shell="line"]) .frame:focus-within .control-shell {
+    border-color: color-mix(in srgb, var(--ui-field-focus-ring) 66%, var(--ui-field-shell-border-color));
+    box-shadow:
+      0 0 0 2px var(--ui-field-shell-focus-ring),
+      var(--ui-field-shell-shadow);
+  }
+
   :host([headless]) {
     --ui-field-bg: transparent;
     --ui-field-border: 0;
     --ui-field-shadow: none;
     --ui-field-shell-bg: transparent;
-    --ui-field-shell-border: transparent;
+    --ui-field-shell-border: 0;
+    --ui-field-shell-shadow: none;
+    --ui-field-shell-padding: 0;
+    --ui-field-shell-radius: 0;
   }
 
   :host([headless]) .frame {
@@ -312,7 +346,7 @@ const style = `
     }
 
     .control-shell {
-      border-width: 2px;
+      border-width: max(2px, 1px);
     }
   }
 
@@ -325,8 +359,10 @@ const style = `
       --ui-field-error-color: CanvasText;
       --ui-field-border-color: CanvasText;
       --ui-field-shell-bg: Canvas;
-      --ui-field-shell-border: CanvasText;
+      --ui-field-shell-border: 1px solid CanvasText;
+      --ui-field-shell-border-color: CanvasText;
       --ui-field-shadow: none;
+      --ui-field-shell-shadow: none;
     }
 
     .frame,
@@ -361,14 +397,29 @@ function slotHasMeaningfulContent(slot: HTMLSlotElement | null): boolean {
 
 function isFocusable(node: HTMLElement): boolean {
   if (node.hasAttribute('disabled') || node.getAttribute('aria-disabled') === 'true') return false;
+  if (node.getAttribute('tabindex') === '-1') return false;
   const styles = window.getComputedStyle(node);
   if (styles.display === 'none' || styles.visibility === 'hidden') return false;
   return true;
 }
 
+function isInteractiveTarget(node: HTMLElement): boolean {
+  if (
+    node.closest(
+      'button, a, input, select, textarea, summary, [contenteditable=""], [contenteditable="true"], [role="button"]'
+    )
+  ) {
+    return true;
+  }
+  return false;
+}
+
 function uniqueIds(existing: string[]): string[] {
   return Array.from(new Set(existing.filter(Boolean)));
 }
+
+const CONTROL_SELECTOR =
+  'ui-input, ui-textarea, ui-select, ui-combobox, input, textarea, select, button, [tabindex]:not([tabindex="-1"])';
 
 export class UIField extends ElementBase {
   static get observedAttributes() {
@@ -385,11 +436,14 @@ export class UIField extends ElementBase {
       'tone',
       'density',
       'shape',
+      'shell',
       'label-width'
     ];
   }
 
   private _uid = Math.random().toString(36).slice(2, 9);
+  private _controlCache: HTMLElement | null = null;
+  private _stateSyncQueued = false;
 
   constructor() {
     super();
@@ -401,7 +455,7 @@ export class UIField extends ElementBase {
     super.connectedCallback();
     this.root.addEventListener('click', this._onRootClick as EventListener);
     this.root.addEventListener('slotchange', this._onSlotChange as EventListener);
-    this._syncDerivedState();
+    this._scheduleDerivedStateSync();
   }
 
   override disconnectedCallback(): void {
@@ -412,6 +466,8 @@ export class UIField extends ElementBase {
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
+
+    if (name === 'for') this._invalidateControlCache();
 
     if (name === 'label-width') {
       const width = this.getAttribute('label-width');
@@ -424,18 +480,34 @@ export class UIField extends ElementBase {
       return;
     }
 
-    this._syncDerivedState();
+    if (name === 'invalid') this._scheduleDerivedStateSync();
   }
 
   private _onSlotChange(): void {
-    this._syncDerivedState();
+    this._invalidateControlCache();
+    this._scheduleDerivedStateSync();
   }
 
   private _onRootClick(event: MouseEvent): void {
     const target = event.target as HTMLElement | null;
     if (!target) return;
     if (!target.closest('.label')) return;
+    if (isInteractiveTarget(target)) return;
     this._focusControl();
+  }
+
+  private _invalidateControlCache(): void {
+    this._controlCache = null;
+  }
+
+  private _scheduleDerivedStateSync(): void {
+    if (this._stateSyncQueued) return;
+    this._stateSyncQueued = true;
+    queueMicrotask(() => {
+      this._stateSyncQueued = false;
+      if (!this.isConnected) return;
+      this._syncDerivedState();
+    });
   }
 
   private _focusControl(): void {
@@ -450,10 +522,17 @@ export class UIField extends ElementBase {
   }
 
   private _resolveControlElement(): HTMLElement | null {
+    if (this._controlCache && this._controlCache.isConnected && isFocusable(this._controlCache)) {
+      return this._controlCache;
+    }
+
     const explicitFor = this.getAttribute('for');
     if (explicitFor) {
       const target = document.getElementById(explicitFor);
-      if (target instanceof HTMLElement && isFocusable(target)) return target;
+      if (target instanceof HTMLElement && isFocusable(target)) {
+        this._controlCache = target;
+        return target;
+      }
     }
 
     const slot = this.root.querySelector('slot:not([name])') as HTMLSlotElement | null;
@@ -461,34 +540,70 @@ export class UIField extends ElementBase {
 
     for (const element of assigned) {
       if (!(element instanceof HTMLElement)) continue;
-      if (isFocusable(element)) return element;
+      if (isFocusable(element)) {
+        this._controlCache = element;
+        return element;
+      }
 
-      const nested = element.querySelector(
-        'ui-input, ui-textarea, ui-select, ui-combobox, input, textarea, select, button, [tabindex]:not([tabindex="-1"])'
-      ) as HTMLElement | null;
-      if (nested && isFocusable(nested)) return nested;
+      const nested = element.querySelector(CONTROL_SELECTOR) as HTMLElement | null;
+      if (nested && isFocusable(nested)) {
+        this._controlCache = nested;
+        return nested;
+      }
     }
 
-    const fallback = this.querySelector(
-      'ui-input, ui-textarea, ui-select, ui-combobox, input, textarea, select, button, [tabindex]:not([tabindex="-1"])'
-    ) as HTMLElement | null;
+    const fallback = this.querySelector(CONTROL_SELECTOR) as HTMLElement | null;
 
-    if (fallback && isFocusable(fallback)) return fallback;
+    if (fallback && isFocusable(fallback)) {
+      this._controlCache = fallback;
+      return fallback;
+    }
     return null;
   }
 
   private _syncDerivedState(): void {
+    const labelSlot = this.root.querySelector('slot[name="label"]') as HTMLSlotElement | null;
+    const actionsSlot = this.root.querySelector('slot[name="actions"]') as HTMLSlotElement | null;
     const descSlot = this.root.querySelector('slot[name="description"]') as HTMLSlotElement | null;
     const errorSlot = this.root.querySelector('slot[name="error"]') as HTMLSlotElement | null;
 
+    const labelText = (this.getAttribute('label') || '').trim();
     const descText = (this.getAttribute('description') || '').trim();
     const errorText = (this.getAttribute('error') || '').trim();
 
+    const labelVisible = !!labelText || slotHasMeaningfulContent(labelSlot);
+    const actionsVisible = slotHasMeaningfulContent(actionsSlot);
     const descVisible = !!descText || slotHasMeaningfulContent(descSlot);
     const errorVisible = !!errorText || slotHasMeaningfulContent(errorSlot);
+    const metaVisible = labelVisible || actionsVisible || descVisible;
+    const labelRowVisible = labelVisible || actionsVisible;
 
+    const metaEl = this.root.querySelector('.meta') as HTMLElement | null;
+    const labelRowEl = this.root.querySelector('.label-row') as HTMLElement | null;
+    const labelEl = this.root.querySelector('.label') as HTMLElement | null;
+    const actionsEl = this.root.querySelector('.actions') as HTMLElement | null;
     const descEl = this.root.querySelector('.description') as HTMLElement | null;
     const errorEl = this.root.querySelector('.error') as HTMLElement | null;
+
+    if (metaEl) {
+      if (metaVisible) metaEl.removeAttribute('hidden');
+      else metaEl.setAttribute('hidden', '');
+    }
+
+    if (labelRowEl) {
+      if (labelRowVisible) labelRowEl.removeAttribute('hidden');
+      else labelRowEl.setAttribute('hidden', '');
+    }
+
+    if (labelEl) {
+      if (labelVisible) labelEl.removeAttribute('hidden');
+      else labelEl.setAttribute('hidden', '');
+    }
+
+    if (actionsEl) {
+      if (actionsVisible) actionsEl.removeAttribute('hidden');
+      else actionsEl.setAttribute('hidden', '');
+    }
 
     if (descEl) {
       if (descVisible) descEl.removeAttribute('hidden');
@@ -500,10 +615,10 @@ export class UIField extends ElementBase {
       else errorEl.setAttribute('hidden', '');
     }
 
-    this._syncControlA11y(descVisible, errorVisible);
+    this._syncControlA11y(labelVisible, descVisible, errorVisible);
   }
 
-  private _syncControlA11y(descVisible: boolean, errorVisible: boolean): void {
+  private _syncControlA11y(labelVisible: boolean, descVisible: boolean, errorVisible: boolean): void {
     const control = this._resolveControlElement();
     if (!control) return;
 
@@ -511,9 +626,15 @@ export class UIField extends ElementBase {
     const descId = `${this._uid}-description`;
     const errorId = `${this._uid}-error`;
 
-    if (!control.hasAttribute('aria-label')) {
-      control.setAttribute('aria-labelledby', labelId);
-    }
+    const existingLabelledBy = (control.getAttribute('aria-labelledby') || '')
+      .split(/\s+/)
+      .filter((id) => id && id !== labelId);
+
+    if (!control.hasAttribute('aria-label') && labelVisible) existingLabelledBy.push(labelId);
+
+    const labelledBy = uniqueIds(existingLabelledBy);
+    if (labelledBy.length) control.setAttribute('aria-labelledby', labelledBy.join(' '));
+    else control.removeAttribute('aria-labelledby');
 
     const existing = (control.getAttribute('aria-describedby') || '')
       .split(/\s+/)
@@ -568,7 +689,8 @@ export class UIField extends ElementBase {
       </div>
     `);
 
-    this._syncDerivedState();
+    this._invalidateControlCache();
+    this._scheduleDerivedStateSync();
   }
 
   protected override shouldRenderOnAttributeChange(

@@ -22,6 +22,7 @@
       "@editora/core": ["packages/core/src"],
       "@editora/toast": ["packages/editora-toast/src"],
       "@editora/react": ["packages/react/src"],
+      "@editora/editor": ["packages/react/src"],
       "@editora/icons": ["packages/icons/src"],
       "@editora/react-icons": ["packages/react-icons/src"],
       "@editora/themes": ["packages/themes/src"],

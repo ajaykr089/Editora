@@ -1,211 +1,300 @@
 import React from 'react';
-import { Badge, Box, Calendar, Flex, Grid } from '@editora/ui-react';
+import type { Meta } from '@storybook/react';
+import { Badge, Box, Button, Calendar, Flex, Grid } from '@editora/ui-react';
+import { toastAdvanced } from '@editora/toast';
+import {
+  AlertTriangleIcon,
+  CalendarIcon,
+  CheckCircleIcon,
+  ClipboardCheckIcon,
+  RefreshCwIcon,
+  ShieldIcon,
+} from '@editora/react-icons';
+import '../../packages/editora-toast/src/toast.css';
+import '@editora/themes/themes/default.css';
 
-export default {
+const meta: Meta<typeof Calendar> = {
   title: 'UI/Calendar',
-  component: Calendar
+  component: Calendar,
+  argTypes: {
+    selection: { control: { type: 'radio', options: ['single', 'range', 'multiple'] } },
+    size: { control: { type: 'radio', options: ['sm', 'md', 'lg'] } },
+    state: { control: { type: 'radio', options: ['idle', 'loading', 'error', 'success'] } },
+    tone: { control: { type: 'radio', options: ['neutral', 'info', 'success', 'warning', 'danger'] } },
+    eventsDisplay: { control: { type: 'radio', options: ['dots', 'badges', 'count'] } },
+    outsideClick: { control: { type: 'radio', options: ['none', 'navigate', 'select'] } },
+    disabled: { control: 'boolean' },
+    readOnly: { control: 'boolean' },
+    bare: { control: 'boolean' },
+  },
 };
 
-const baseEvents = [
-  { date: '2026-02-05', title: 'Ops review', tone: 'info' as const },
-  { date: '2026-02-08', title: 'Billing run', tone: 'warning' as const },
-  { date: '2026-02-13', title: 'Release cut', tone: 'success' as const },
-  { date: '2026-02-13', title: 'Stakeholder demo', tone: 'default' as const },
-  { date: '2026-02-18', title: 'Incident drill', tone: 'danger' as const },
-  { date: '2026-02-24', title: 'Audit export', tone: 'info' as const }
+export default meta;
+
+const hospitalEvents = [
+  { date: '2026-03-05', title: 'ICU handover', tone: 'info' as const },
+  { date: '2026-03-06', title: 'Medication audit', tone: 'warning' as const },
+  { date: '2026-03-09', title: 'Surgery board', tone: 'success' as const },
+  { date: '2026-03-09', title: 'Insurance review', tone: 'default' as const },
+  { date: '2026-03-13', title: 'Emergency drill', tone: 'danger' as const },
+  { date: '2026-03-18', title: 'Radiology sync', tone: 'info' as const },
+  { date: '2026-03-22', title: 'Discharge planning', tone: 'success' as const },
+  { date: '2026-03-26', title: 'Pharmacy restock', tone: 'warning' as const },
 ];
 
-const denseEvents = [
-  { date: '2026-02-09', title: 'Daily round', tone: 'info' as const },
-  { date: '2026-02-09', title: 'Nursing sync', tone: 'success' as const },
-  { date: '2026-02-09', title: 'Lab review', tone: 'warning' as const },
-  { date: '2026-02-09', title: 'Escalation call', tone: 'danger' as const },
-  { date: '2026-02-10', title: 'Admissions report', tone: 'default' as const },
-  { date: '2026-02-10', title: 'Pharmacy audit', tone: 'info' as const },
-  { date: '2026-02-11', title: 'Budget check', tone: 'warning' as const },
-  { date: '2026-02-11', title: 'Release prep', tone: 'success' as const }
-];
-
-function serializeRange(detail: any): string {
-  const payload: { start?: string; end?: string } = {};
-  if (typeof detail?.start === 'string' && detail.start) payload.start = detail.start;
-  if (typeof detail?.end === 'string' && detail.end) payload.end = detail.end;
-  return Object.keys(payload).length ? JSON.stringify(payload) : '';
+function parseYearMonth(iso: string): { year: number; month: number } | null {
+  const match = /^(\d{4})-(\d{2})-\d{2}$/.exec((iso || '').trim());
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12) return null;
+  return { year, month };
 }
 
-function parseRange(value: string): { start?: string; end?: string } {
-  try {
-    const parsed = JSON.parse(value);
-    if (!parsed || typeof parsed !== 'object') return {};
-    const start = typeof parsed.start === 'string' ? parsed.start : undefined;
-    const end = typeof parsed.end === 'string' ? parsed.end : undefined;
-    return { start, end };
-  } catch {
-    return {};
-  }
-}
-
-function parseMultiple(value: string): string[] {
-  try {
-    const parsed = JSON.parse(value);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((entry) => typeof entry === 'string');
-  } catch {
-    return [];
-  }
-}
-
-export const SingleSelection = () => {
-  const [value, setValue] = React.useState('2026-02-13');
+function EnterpriseClinicalCalendar() {
+  const [state, setState] = React.useState<'idle' | 'loading' | 'error' | 'success'>('idle');
+  const [value, setValue] = React.useState('2026-03-09');
+  const [view, setView] = React.useState({ year: 2026, month: 3 });
 
   return (
-    <Box w="min(760px, 100%)">
-      <Grid gap="12px">
-        <Calendar
-          year={2026}
-          month={2}
-          value={value}
-          events={baseEvents}
-          selection="single"
-          onSelect={(detail) => setValue(detail.value)}
-        />
-        <Flex align="center" gap="8px" wrap="wrap">
-          <Badge tone="brand">Single</Badge>
-          <span style={{ fontSize: 13, color: '#475569' }}>Selected date: {value}</span>
+    <Grid style={{ gap: 16, maxInlineSize: 1040 }}>
+      <Box variant="gradient" tone="brand" radius="xl" p="16px" style={{ display: 'grid', gap: 10 }}>
+        <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 18 }}>Clinical Scheduling Calendar</div>
+            <div style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
+              Enterprise-grade calendar for capacity planning, compliance checks, and daily operation routing.
+            </div>
+          </div>
+          <Flex align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>
+            <ShieldIcon size={14} />
+            HIPAA-aware Workflow
+          </Flex>
         </Flex>
-      </Grid>
-    </Box>
-  );
-};
+      </Box>
 
-export const RangeSelection = () => {
-  const [value, setValue] = React.useState('{"start":"2026-02-10","end":"2026-02-14"}');
-  const range = parseRange(value);
+      <Calendar
+        year={view.year}
+        month={view.month}
+        value={value}
+        events={hospitalEvents}
+        selection="single"
+        eventsDisplay="badges"
+        eventsMax={2}
+        state={state}
+        tone={state === 'error' ? 'danger' : state === 'success' ? 'success' : 'info'}
+        ariaLabel="Hospital schedule calendar"
+        onSelect={(detail) => {
+          setValue(detail.value);
+          const nextView = parseYearMonth(detail.value);
+          if (nextView) setView(nextView);
+          toastAdvanced.info(`Selected ${detail.value}`, { duration: 1000, theme: 'light' });
+        }}
+        onMonthChange={(detail) => {
+          setView({ year: detail.year, month: detail.month });
+          toastAdvanced.info(`Navigated to ${detail.year}-${String(detail.month).padStart(2, '0')}`, {
+            duration: 900,
+            theme: 'light',
+          });
+        }}
+      />
 
-  return (
-    <Box w="min(760px, 100%)">
-      <Grid gap="12px">
-        <Calendar
-          year={2026}
-          month={2}
-          value={value}
-          selection="range"
-          events={baseEvents}
-          onCalendarChange={(detail) => {
-            if (detail.mode !== 'range') return;
-            setValue(serializeRange(detail));
+      <Flex align="center" style={{ gap: 8, flexWrap: 'wrap' }}>
+        <Badge tone="brand">
+          <CalendarIcon size={12} />
+          {value}
+        </Badge>
+        <Button
+          size="sm"
+          variant="secondary"
+          startIcon={<RefreshCwIcon size={14} />}
+          onClick={() => {
+            setState('loading');
+            toastAdvanced.loading('Syncing calendar events...', { duration: 900, theme: 'light' });
+            window.setTimeout(() => setState('idle'), 900);
           }}
-        />
-        <Flex align="center" gap="8px" wrap="wrap">
-          <Badge tone="success">Range</Badge>
-          <span style={{ fontSize: 13, color: '#475569' }}>
-            Start: <strong>{range.start || 'not set'}</strong> • End: <strong>{range.end || 'not set'}</strong>
-          </span>
-        </Flex>
-      </Grid>
-    </Box>
+        >
+          Sync
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          startIcon={<AlertTriangleIcon size={14} />}
+          onClick={() => {
+            setState('error');
+            toastAdvanced.error('Scheduling feed unavailable', { duration: 1300, theme: 'light' });
+          }}
+        >
+          Simulate Error
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          startIcon={<CheckCircleIcon size={14} />}
+          onClick={() => {
+            setState('success');
+            toastAdvanced.success('Schedule synced successfully', { duration: 1300, theme: 'light' });
+          }}
+        >
+          Mark Synced
+        </Button>
+        <Button
+          size="sm"
+          startIcon={<ClipboardCheckIcon size={14} />}
+          onClick={() => {
+            setState('idle');
+            toastAdvanced.info('State reset', { duration: 900, theme: 'light' });
+          }}
+        >
+          Reset
+        </Button>
+      </Flex>
+    </Grid>
   );
+}
+
+export const EnterpriseSchedule = () => <EnterpriseClinicalCalendar />;
+
+const PlaygroundTemplate = (args: Record<string, unknown>) => (
+  <Calendar
+    {...args}
+    year={2026}
+    month={3}
+    events={hospitalEvents}
+    value="2026-03-09"
+    ariaLabel="Playground calendar"
+  />
+);
+
+export const Playground = PlaygroundTemplate.bind({});
+Playground.args = {
+  selection: 'single',
+  size: 'md',
+  bare: false,
+  state: 'idle',
+  tone: 'info',
+  eventsDisplay: 'dots',
+  outsideClick: 'navigate',
+  disabled: false,
+  readOnly: false,
 };
 
-export const MultipleSelection = () => {
-  const [value, setValue] = React.useState('["2026-02-04","2026-02-07","2026-02-18"]');
-  const values = parseMultiple(value);
+export const BareFlat = () => (
+  <Grid style={{ gap: 12, maxInlineSize: 760 }}>
+    <Box variant="elevated" p="14px" radius="xl" style={{ display: 'grid', gap: 8 }}>
+      <Badge tone="info">Bare calendar surface</Badge>
+      <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+        `bare` removes calendar panel chrome (border/shadow/background) for flat UI surfaces.
+      </Box>
+      <Calendar
+        year={2026}
+        month={3}
+        value="2026-03-09"
+        selection="single"
+        events={hospitalEvents}
+        eventsDisplay="dots"
+        tone="info"
+        bare
+        ariaLabel="Bare calendar"
+      />
+    </Box>
+  </Grid>
+);
+
+export const Localization = () => {
+  const [locale, setLocale] = React.useState<'en-US' | 'zh-CN' | 'fr-FR'>('en-US');
+  const [value, setValue] = React.useState('2026-03-09');
+  const [weekStart, setWeekStart] = React.useState<0 | 1 | 6>(1);
+
+  const localeOptions: Array<{ value: 'en-US' | 'zh-CN' | 'fr-FR'; label: string }> = [
+    { value: 'en-US', label: 'English' },
+    { value: 'zh-CN', label: 'Chinese' },
+    { value: 'fr-FR', label: 'French' },
+  ];
+
+  const weekStartOptions: Array<{ value: 0 | 1 | 6; label: string }> = [
+    { value: 0, label: 'Sun first' },
+    { value: 1, label: 'Mon first' },
+    { value: 6, label: 'Sat first' },
+  ];
+
+  const frenchOverride = JSON.stringify({
+    fr: {
+      today: 'Aujourd hui',
+      chooseMonthYear: 'Choisir mois/annee',
+      scheduleSynced: 'Planning a jour',
+    },
+  });
 
   return (
-    <Box w="min(760px, 100%)">
-      <Grid gap="12px">
-        <Calendar
-          year={2026}
-          month={2}
-          value={value}
-          selection="multiple"
-          maxSelections={5}
-          events={baseEvents}
-          onCalendarChange={(detail) => {
-            if (detail.mode !== 'multiple') return;
-            setValue(JSON.stringify(detail.values || []));
-          }}
-        />
-        <Flex align="center" gap="8px" wrap="wrap">
-          <Badge tone="warning">Multiple</Badge>
-          <span style={{ fontSize: 13, color: '#475569' }}>
-            Selected ({values.length}/5): {values.length ? values.join(', ') : 'none'}
-          </span>
+    <Grid style={{ gap: 12, maxInlineSize: 980 }}>
+      <Box variant="elevated" p="14px" radius="xl" style={{ display: 'grid', gap: 10 }}>
+        <Badge tone="brand">Calendar localization</Badge>
+        <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+          Switch locale and week start to validate month labels, weekdays, and action text.
+        </Box>
+        <Flex align="center" style={{ gap: 8, flexWrap: 'wrap' }}>
+          {localeOptions.map((option) => (
+            <Button
+              key={option.value}
+              size="sm"
+              variant={locale === option.value ? undefined : 'secondary'}
+              onClick={() => setLocale(option.value)}
+            >
+              {option.label}
+            </Button>
+          ))}
         </Flex>
+        <Flex align="center" style={{ gap: 8, flexWrap: 'wrap' }}>
+          {weekStartOptions.map((option) => (
+            <Button
+              key={option.value}
+              size="sm"
+              variant={weekStart === option.value ? undefined : 'secondary'}
+              onClick={() => setWeekStart(option.value)}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </Flex>
+      </Box>
+
+      <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 12 }}>
+        <Box variant="elevated" p="14px" radius="xl">
+          <Grid style={{ gap: 10 }}>
+            <Badge tone="info">Built-in locale</Badge>
+            <Calendar
+              year={2026}
+              month={3}
+              value={value}
+              locale={locale}
+              weekStart={weekStart}
+              events={hospitalEvents}
+              eventsDisplay="dots"
+              onSelect={(detail) => setValue(detail.value)}
+              ariaLabel="Localized calendar"
+            />
+          </Grid>
+        </Box>
+
+        <Box variant="elevated" p="14px" radius="xl">
+          <Grid style={{ gap: 10 }}>
+            <Badge tone="success">French custom override</Badge>
+            <Calendar
+              year={2026}
+              month={3}
+              value={value}
+              locale="fr-FR"
+              weekStart={weekStart}
+              translations={frenchOverride}
+              events={hospitalEvents}
+              eventsDisplay="dots"
+              onSelect={(detail) => setValue(detail.value)}
+              ariaLabel="French override calendar"
+            />
+          </Grid>
+        </Box>
       </Grid>
-    </Box>
+    </Grid>
   );
 };
-
-export const EventDisplayModes = () => (
-  <Box w="min(1080px, 100%)">
-    <Grid columns="repeat(auto-fit, minmax(280px, 1fr))" gap="12px">
-      <Grid gap="8px">
-        <Badge tone="brand">Dots</Badge>
-        <Calendar year={2026} month={2} events={denseEvents} eventsDisplay="dots" eventsMax={3} />
-      </Grid>
-      <Grid gap="8px">
-        <Badge tone="success">Badges</Badge>
-        <Calendar year={2026} month={2} events={denseEvents} eventsDisplay="badges" eventsMax={2} />
-      </Grid>
-      <Grid gap="8px">
-        <Badge tone="warning">Count</Badge>
-        <Calendar year={2026} month={2} events={denseEvents} eventsDisplay="count" />
-      </Grid>
-    </Grid>
-  </Box>
-);
-
-export const ConstraintsAndOutsideClickModes = () => (
-  <Box w="min(1080px, 100%)">
-    <Grid columns="repeat(auto-fit, minmax(280px, 1fr))" gap="12px">
-      <Grid gap="8px">
-        <Badge tone="default">outside-click: none</Badge>
-        <Calendar year={2026} month={2} outsideClick="none" />
-      </Grid>
-      <Grid gap="8px">
-        <Badge tone="default">outside-click: navigate</Badge>
-        <Calendar year={2026} month={2} outsideClick="navigate" />
-      </Grid>
-      <Grid gap="8px">
-        <Badge tone="default">outside-click: select</Badge>
-        <Calendar year={2026} month={2} outsideClick="select" />
-      </Grid>
-    </Grid>
-    <Box mt="12px">
-      <Grid columns="repeat(auto-fit, minmax(280px, 1fr))" gap="12px">
-        <Grid gap="8px">
-          <Badge tone="danger">Constrained</Badge>
-          <Calendar year={2026} month={2} min="2026-02-06" max="2026-02-22" value="2026-02-13" />
-        </Grid>
-        <Grid gap="8px">
-          <Badge tone="warning">Read only</Badge>
-          <Calendar year={2026} month={2} value="2026-02-12" readOnly />
-        </Grid>
-        <Grid gap="8px">
-          <Badge tone="danger">Disabled</Badge>
-          <Calendar year={2026} month={2} value="2026-02-12" disabled />
-        </Grid>
-      </Grid>
-    </Box>
-  </Box>
-);
-
-export const LocaleWeekStartAndSizes = () => (
-  <Box w="min(1080px, 100%)">
-    <Grid columns="repeat(auto-fit, minmax(280px, 1fr))" gap="12px">
-      <Grid gap="8px">
-        <Badge tone="brand">en-IN, week start Monday</Badge>
-        <Calendar year={2026} month={2} locale="en-IN" weekStart={1} size="sm" />
-      </Grid>
-      <Grid gap="8px">
-        <Badge tone="brand">en-US, default week start</Badge>
-        <Calendar year={2026} month={2} locale="en-US" size="md" />
-      </Grid>
-      <Grid gap="8px">
-        <Badge tone="brand">contrast + large</Badge>
-        <Calendar variant="contrast" year={2026} month={2} locale="en-GB" weekStart={1} size="lg" />
-      </Grid>
-    </Grid>
-  </Box>
-);

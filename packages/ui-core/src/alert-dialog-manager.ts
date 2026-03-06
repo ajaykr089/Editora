@@ -75,6 +75,7 @@ export type AlertDialogCommonOptions = {
   closeOnBackdrop?: boolean;
   lockWhileLoading?: boolean;
   role?: 'alertdialog' | 'dialog';
+  tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   initialFocus?: string;
   checkbox?: AlertDialogCheckboxOptions;
@@ -487,6 +488,7 @@ export class AlertDialogManager implements AlertDialogManagerApi {
       closeOnBackdrop: options.closeOnBackdrop,
       lockWhileLoading: options.lockWhileLoading ?? true,
       role: options.role || 'alertdialog',
+      tone: options.tone || (isAlert ? 'info' : isPrompt ? 'neutral' : 'warning'),
       size: options.size || 'md',
       initialFocus: options.initialFocus,
       ariaLabel: options.ariaLabel,

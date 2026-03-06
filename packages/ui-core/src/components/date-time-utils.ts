@@ -1,4 +1,5 @@
 import { addDaysISO, compareISO, endOfMonth, parseISO, startOfMonth } from './ui-calendar';
+import { acquireBodyScrollLock } from '../scroll-lock';
 
 export type DateDisplayFormat = 'iso' | 'locale' | 'custom';
 export type OverlayPlacement = 'top' | 'bottom';
@@ -7,10 +8,6 @@ export type TimeParts = { hours: number; minutes: number; seconds: number };
 export type DateTimeParts = { date: string; time: string };
 
 const formatterCache = new Map<string, Intl.DateTimeFormat>();
-
-let bodyLockCount = 0;
-let prevBodyOverflow = '';
-let prevBodyPaddingRight = '';
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
@@ -332,30 +329,5 @@ export function shouldUseMobileSheet(mode: string | null): boolean {
 }
 
 export function lockBodyScroll(): () => void {
-  if (typeof document === 'undefined') return () => {};
-  const body = document.body;
-  if (!body) return () => {};
-
-  if (bodyLockCount === 0) {
-    prevBodyOverflow = body.style.overflow;
-    prevBodyPaddingRight = body.style.paddingRight;
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-    body.style.overflow = 'hidden';
-    if (scrollbarWidth > 0) {
-      body.style.paddingRight = `${scrollbarWidth}px`;
-    }
-  }
-  bodyLockCount += 1;
-
-  let unlocked = false;
-  return () => {
-    if (unlocked) return;
-    unlocked = true;
-    bodyLockCount = Math.max(0, bodyLockCount - 1);
-    if (bodyLockCount === 0) {
-      body.style.overflow = prevBodyOverflow;
-      body.style.paddingRight = prevBodyPaddingRight;
-    }
-  };
+  return acquireBodyScrollLock();
 }
-

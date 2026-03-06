@@ -11,6 +11,8 @@ type UIContextMenuElement = HTMLElement & {
 
 export type MenuItem = {
   label?: string;
+  description?: string;
+  shortcut?: string;
   icon?: string | React.ReactNode;
   disabled?: boolean;
   separator?: boolean;
@@ -24,6 +26,9 @@ export type ContextMenuProps = React.HTMLAttributes<HTMLElement> & {
   anchorId?: string;
   anchorPoint?: { x: number; y: number };
   open?: boolean;
+  disabled?: boolean;
+  state?: 'idle' | 'loading' | 'error' | 'success';
+  stateText?: string;
   items?: MenuItem[];
   variant?: 'default' | 'solid' | 'flat' | 'contrast';
   density?: 'default' | 'compact' | 'comfortable';
@@ -31,7 +36,10 @@ export type ContextMenuProps = React.HTMLAttributes<HTMLElement> & {
   elevation?: 'default' | 'none' | 'low' | 'high';
   tone?: 'default' | 'brand' | 'danger' | 'success';
   closeOnSelect?: boolean;
+  closeOnEscape?: boolean;
   typeahead?: boolean;
+  onOpenDetail?: (detail: { open: boolean; previousOpen: boolean; source: string }) => void;
+  onCloseDetail?: (detail: { open: boolean; previousOpen: boolean; source: string }) => void;
   onOpen?: () => void;
   onClose?: () => void;
   onChange?: (open: boolean) => void;
@@ -45,14 +53,20 @@ export function ContextMenu(props: ContextMenuProps) {
     anchorId,
     anchorPoint,
     open,
+    disabled,
+    state,
+    stateText,
     variant,
     density,
     shape,
     elevation,
     tone,
     closeOnSelect,
+    closeOnEscape,
     typeahead,
     children,
+    onOpenDetail,
+    onCloseDetail,
     onOpen,
     onClose,
     onChange,
@@ -64,8 +78,16 @@ export function ContextMenu(props: ContextMenuProps) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const openHandler = () => onOpen?.();
-    const closeHandler = () => onClose?.();
+    const openHandler = (event: Event) => {
+      const detail = (event as CustomEvent<{ open: boolean; previousOpen: boolean; source: string }>).detail;
+      onOpen?.();
+      if (detail) onOpenDetail?.(detail);
+    };
+    const closeHandler = (event: Event) => {
+      const detail = (event as CustomEvent<{ open: boolean; previousOpen: boolean; source: string }>).detail;
+      onClose?.();
+      if (detail) onCloseDetail?.(detail);
+    };
     const changeHandler = (event: Event) => {
       const next = (event as CustomEvent<{ open?: boolean }>).detail?.open;
       if (typeof next === 'boolean') onChange?.(next);
@@ -85,7 +107,7 @@ export function ContextMenu(props: ContextMenuProps) {
       el.removeEventListener('change', changeHandler as EventListener);
       el.removeEventListener('select', selectHandler as EventListener);
     };
-  }, [onOpen, onClose, onChange, onSelect]);
+  }, [onOpen, onClose, onOpenDetail, onCloseDetail, onChange, onSelect]);
 
   useEffect(() => {
     const el = ref.current;
@@ -125,7 +147,7 @@ export function ContextMenu(props: ContextMenuProps) {
       }
       let iconNode = null;
       if (item.icon) {
-        iconNode = typeof item.icon === 'string' ? <span className="icon">{item.icon}</span> : item.icon;
+        iconNode = <span className="icon">{item.icon}</span>;
       }
       let submenuNode = null;
       if (item.submenu) {
@@ -146,7 +168,11 @@ export function ContextMenu(props: ContextMenuProps) {
           onClick={item.disabled ? undefined : item.onClick}
         >
           {iconNode}
-          <span className="label">{item.label}</span>
+          <span className="label">
+            <span className="text">{item.label}</span>
+            {item.description ? <span className="caption">{item.description}</span> : null}
+          </span>
+          {item.shortcut ? <span className="shortcut">{item.shortcut}</span> : null}
           {item.submenu && <span className="submenu-arrow">▶</span>}
           {submenuNode}
         </div>
@@ -167,7 +193,11 @@ export function ContextMenu(props: ContextMenuProps) {
       {...(shape && shape !== 'default' ? { shape } : {})}
       {...(elevation && elevation !== 'default' ? { elevation } : {})}
       {...(tone && tone !== 'default' && tone !== 'brand' ? { tone } : {})}
+      {...(disabled ? { disabled: '' } : {})}
+      {...(state && state !== 'idle' ? { state } : {})}
+      {...(stateText ? { 'state-text': stateText } : {})}
       {...(closeOnSelect == null ? {} : { 'close-on-select': closeOnSelect ? 'true' : 'false' })}
+      {...(closeOnEscape == null ? {} : { 'close-on-escape': closeOnEscape ? 'true' : 'false' })}
       {...(typeahead == null ? {} : { typeahead: typeahead ? 'true' : 'false' })}
     >
       {hasChildren ? children : <div slot="menu">{renderMenuItems(items)}</div>}

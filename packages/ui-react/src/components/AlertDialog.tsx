@@ -9,13 +9,14 @@ import {
 } from '@editora/ui-core';
 
 type BaseProps = React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode };
+type NativeAlertDialogProps = Omit<BaseProps, 'onClose' | 'onChange' | 'onCancel' | 'onOpen'>;
 
 export type AlertDialogElement = HTMLElement & {
   open: boolean;
   config?: UIAlertDialogTemplateOptions;
 };
 
-export type AlertDialogProps = BaseProps & {
+export type AlertDialogProps = NativeAlertDialogProps & {
   open?: boolean;
   headless?: boolean;
   dismissible?: boolean;
@@ -23,6 +24,7 @@ export type AlertDialogProps = BaseProps & {
   closeOnBackdrop?: boolean;
   lockWhileLoading?: boolean;
   roleType?: 'alertdialog' | 'dialog';
+  tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   state?: 'idle' | 'loading' | 'error';
   initialFocus?: string;
@@ -48,6 +50,7 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
     closeOnBackdrop,
     lockWhileLoading,
     roleType,
+    tone,
     size,
     state,
     initialFocus,
@@ -103,7 +106,7 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
     if (typeof open === 'boolean') {
       if (open) el.setAttribute('open', '');
       else el.removeAttribute('open');
-    }
+    } else el.removeAttribute('open');
 
     if (headless) el.setAttribute('headless', '');
     else el.removeAttribute('headless');
@@ -123,6 +126,9 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
     if (roleType) el.setAttribute('role', roleType);
     else el.removeAttribute('role');
 
+    if (tone && tone !== 'neutral') el.setAttribute('tone', tone);
+    else el.removeAttribute('tone');
+
     if (size && size !== 'md') el.setAttribute('size', size);
     else el.removeAttribute('size');
 
@@ -135,6 +141,7 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
     if (dialogId) (el as any).dialogId = dialogId;
 
     if (config) (el as any).config = config;
+    else (el as any).config = {};
   }, [
     open,
     headless,
@@ -143,6 +150,7 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
     closeOnBackdrop,
     lockWhileLoading,
     roleType,
+    tone,
     size,
     state,
     initialFocus,

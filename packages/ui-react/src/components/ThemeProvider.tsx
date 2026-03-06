@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { applyTheme, defaultTokens, registerThemeHost, ThemeTokens } from '@editora/ui-core';
 
+export type ThemeUpdater = ThemeTokens | Partial<ThemeTokens> | ((prev: ThemeTokens) => ThemeTokens | Partial<ThemeTokens>);
+
 type ThemeContextValue = {
   tokens: ThemeTokens;
-  setTokens: (t: ThemeTokens) => void;
+  setTokens: (next: ThemeUpdater) => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -18,6 +20,29 @@ type Props = {
   storageKey?: string | null;
 };
 
+function mergeThemeTokens(base: ThemeTokens, patch?: Partial<ThemeTokens> | null): ThemeTokens {
+  if (!patch) return base;
+
+  return {
+    ...base,
+    ...patch,
+    colors: { ...base.colors, ...(patch.colors || {}) },
+    shadows: { ...(base.shadows || {}), ...(patch.shadows || {}) },
+    spacing: { ...(base.spacing || {}), ...(patch.spacing || {}) },
+    typography: {
+      ...(base.typography || {}),
+      ...(patch.typography || {}),
+      size: {
+        ...(base.typography?.size || {}),
+        ...(patch.typography?.size || {})
+      }
+    },
+    motion: { ...(base.motion || {}), ...(patch.motion || {}) },
+    zIndex: { ...(base.zIndex || {}), ...(patch.zIndex || {}) },
+    breakpoints: { ...(base.breakpoints || {}), ...(patch.breakpoints || {}) }
+  };
+}
+
 function readTokensFromDOM(): Partial<ThemeTokens> {
   try {
     const cs = getComputedStyle(document.documentElement);
@@ -30,79 +55,98 @@ function readTokensFromDOM(): Partial<ThemeTokens> {
         background: cs.getPropertyValue('--ui-color-background').trim() || undefined
       }
     } as Partial<ThemeTokens>;
-  } catch (e) {
+  } catch {
     return {};
   }
 }
 
+function resolveThemeUpdater(prev: ThemeTokens, next: ThemeUpdater): ThemeTokens {
+  const value = typeof next === 'function' ? next(prev) : next;
+  return mergeThemeTokens(prev, value);
+}
+
 export function ThemeProvider({ tokens, children, storageKey = 'editora.theme.tokens' }: Props) {
   const computeInitial = () => {
-    // prefer persisted value
     if (typeof window !== 'undefined' && storageKey) {
       try {
         const raw = localStorage.getItem(storageKey);
-        if (raw) return JSON.parse(raw) as ThemeTokens;
-      } catch (e) { /* ignore */ }
+        if (raw) {
+          const parsed = JSON.parse(raw) as Partial<ThemeTokens>;
+          return mergeThemeTokens(defaultTokens, parsed);
+        }
+      } catch {
+        // ignore malformed persisted payload
+      }
     }
 
-    // tokens prop wins next
-    if (tokens && Object.keys(tokens).length) return ({ ...defaultTokens, ...(tokens as any) } as ThemeTokens);
+    if (tokens && Object.keys(tokens).length) {
+      return mergeThemeTokens(defaultTokens, tokens);
+    }
 
-    // attempt to pick up server-rendered CSS variables (SSR hydration safety)
     if (typeof window !== 'undefined') {
-      const dom = readTokensFromDOM();
-      if (dom.colors && dom.colors.primary) return ({ ...defaultTokens, ...dom } as ThemeTokens);
+      const domTokens = readTokensFromDOM();
+      if (domTokens.colors && domTokens.colors.primary) {
+        return mergeThemeTokens(defaultTokens, domTokens);
+      }
     }
 
-    return ({ ...defaultTokens, ...(tokens || {}) } as ThemeTokens);
+    return mergeThemeTokens(defaultTokens, tokens || {});
   };
 
   const [current, setCurrent] = useState<ThemeTokens>(() => computeInitial());
 
-  // respond to external tokens prop changes (controlled usage / Storybook controls)
   useEffect(() => {
-    if (tokens && Object.keys(tokens).length) {
-      setCurrent((prev) => ({ ...prev, ...(tokens as any) }));
-    }
+    if (!tokens || !Object.keys(tokens).length) return;
+    setCurrent((prev) => mergeThemeTokens(prev, tokens));
   }, [tokens]);
 
-  // persist changes and apply tokens to document
   useEffect(() => {
     applyTheme(current);
-    try { registerThemeHost(document.documentElement); } catch (e) {}
-
-    // persist tokens lazily to avoid blocking UI when users rapidly change tokens (Storybook controls)
-    if (typeof window !== 'undefined' && storageKey) {
-      const payload = JSON.stringify(current);
-      let idleId: number | undefined;
-      const save = () => {
-        try { localStorage.setItem(storageKey, payload); } catch (e) {}
-      };
-
-      if ((window as any).requestIdleCallback) {
-        idleId = (window as any).requestIdleCallback(save, { timeout: 1000 });
-      } else {
-        idleId = window.setTimeout(save, 250);
-      }
-
-      return () => {
-        try {
-          if ((window as any).cancelIdleCallback && idleId) (window as any).cancelIdleCallback(idleId);
-          else if (idleId) clearTimeout(idleId);
-        } catch (e) {}
-      };
+    try {
+      registerThemeHost(document.documentElement);
+    } catch {
+      // noop
     }
 
-    return;
+    if (typeof window === 'undefined' || !storageKey) return;
+
+    const payload = JSON.stringify(current);
+    let idleId: number | undefined;
+    const save = () => {
+      try {
+        localStorage.setItem(storageKey, payload);
+      } catch {
+        // noop
+      }
+    };
+
+    if ((window as any).requestIdleCallback) {
+      idleId = (window as any).requestIdleCallback(save, { timeout: 1000 });
+    } else {
+      idleId = window.setTimeout(save, 250);
+    }
+
+    return () => {
+      try {
+        if ((window as any).cancelIdleCallback && idleId) (window as any).cancelIdleCallback(idleId);
+        else if (idleId) clearTimeout(idleId);
+      } catch {
+        // noop
+      }
+    };
   }, [current, storageKey]);
 
-  const setTokens = (t: ThemeTokens) => setCurrent(t);
-
-  return (
-    <ThemeContext.Provider value={{ tokens: current, setTokens }}>
-      {children}
-    </ThemeContext.Provider>
+  const value = useMemo<ThemeContextValue>(
+    () => ({
+      tokens: current,
+      setTokens: (next: ThemeUpdater) => {
+        setCurrent((prev) => resolveThemeUpdater(prev, next));
+      }
+    }),
+    [current]
   );
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {
@@ -112,3 +156,4 @@ export function useTheme() {
 }
 
 export default ThemeProvider;
+

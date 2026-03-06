@@ -7,7 +7,7 @@ import {
 
 export type DialogMode = 'queue' | 'replace' | 'stack';
 export type DialogAction = 'submit' | 'cancel' | 'dismiss';
-export type DialogDismissSource = 'overlay' | 'esc' | 'close-icon' | 'abort' | 'unmount' | 'replace';
+export type DialogDismissSource = 'overlay' | 'esc' | 'close-icon' | 'abort' | 'unmount' | 'replace' | 'programmatic';
 
 export type DialogResult = {
   id: string;
@@ -123,7 +123,7 @@ export class DialogManager implements DialogManagerApi {
       this._settle(request, {
         id: request.id,
         action: 'dismiss',
-        source: reason === 'programmatic' ? 'abort' : reason,
+        source: reason,
         reason
       }, false);
     }
@@ -289,7 +289,7 @@ export class DialogManager implements DialogManagerApi {
     if (request.dialog) {
       const dialog = request.dialog;
       if (!fromDialogEvent && dialog.open) {
-        dialog.close('dismiss', result.source === 'unmount' ? 'unmount' : 'abort', result.reason);
+        dialog.close('dismiss', result.source || 'abort', result.reason);
       }
       if (dialog.parentElement) {
         dialog.parentElement.removeChild(dialog);

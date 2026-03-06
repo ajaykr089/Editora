@@ -2,21 +2,25 @@ import React from 'react';
 
 type BreakpointKey = 'initial' | 'sm' | 'md' | 'lg' | 'xl';
 type Responsive<T> = T | Partial<Record<BreakpointKey, T>>;
+type CssValue = string | number;
 
 type Props = React.HTMLAttributes<HTMLElement> & {
-  p?: Responsive<string>; px?: Responsive<string>; py?: Responsive<string>; pt?: Responsive<string>; pr?: Responsive<string>; pb?: Responsive<string>; pl?: Responsive<string>;
-  m?: Responsive<string>; mx?: Responsive<string>; my?: Responsive<string>; mt?: Responsive<string>; mr?: Responsive<string>; mb?: Responsive<string>; ml?: Responsive<string>;
-  width?: Responsive<string>; w?: Responsive<string>; minWidth?: Responsive<string>; minW?: Responsive<string>; maxWidth?: Responsive<string>; maxW?: Responsive<string>; height?: Responsive<string>; h?: Responsive<string>; minHeight?: Responsive<string>; minH?: Responsive<string>; maxHeight?: Responsive<string>; maxH?: Responsive<string>;
-  display?: Responsive<string>; position?: Responsive<string>; inset?: Responsive<string>; top?: Responsive<string>; right?: Responsive<string>; bottom?: Responsive<string>; left?: Responsive<string>;
-  flexBasis?: Responsive<string>; flexGrow?: Responsive<string>; flexShrink?: Responsive<string>;
-  gridArea?: Responsive<string>; gridColumn?: Responsive<string>; gridColumnStart?: Responsive<string>; gridColumnEnd?: Responsive<string>; gridRow?: Responsive<string>; gridRowStart?: Responsive<string>; gridRowEnd?: Responsive<string>;
-  align?: Responsive<string>;
-  bg?: Responsive<string>; color?: Responsive<string>;
-  variant?: 'default' | 'surface' | 'elevated' | 'outline' | 'glass' | 'gradient' | 'contrast';
-  tone?: 'default' | 'brand' | 'success' | 'warning' | 'danger';
+  p?: Responsive<CssValue>; px?: Responsive<CssValue>; py?: Responsive<CssValue>; pt?: Responsive<CssValue>; pr?: Responsive<CssValue>; pb?: Responsive<CssValue>; pl?: Responsive<CssValue>;
+  m?: Responsive<CssValue>; mx?: Responsive<CssValue>; my?: Responsive<CssValue>; mt?: Responsive<CssValue>; mr?: Responsive<CssValue>; mb?: Responsive<CssValue>; ml?: Responsive<CssValue>;
+  width?: Responsive<CssValue>; w?: Responsive<CssValue>; minWidth?: Responsive<CssValue>; minW?: Responsive<CssValue>; maxWidth?: Responsive<CssValue>; maxW?: Responsive<CssValue>; height?: Responsive<CssValue>; h?: Responsive<CssValue>; minHeight?: Responsive<CssValue>; minH?: Responsive<CssValue>; maxHeight?: Responsive<CssValue>; maxH?: Responsive<CssValue>;
+  display?: Responsive<CssValue>; position?: Responsive<CssValue>; inset?: Responsive<CssValue>; top?: Responsive<CssValue>; right?: Responsive<CssValue>; bottom?: Responsive<CssValue>; left?: Responsive<CssValue>;
+  justify?: Responsive<CssValue>; align?: Responsive<CssValue>; alignSelf?: Responsive<CssValue>; alignContent?: Responsive<CssValue>;
+  gap?: Responsive<CssValue>; rowGap?: Responsive<CssValue>; columnGap?: Responsive<CssValue>;
+  flexBasis?: Responsive<CssValue>; flexGrow?: Responsive<CssValue>; flexShrink?: Responsive<CssValue>;
+  gridArea?: Responsive<CssValue>; gridColumn?: Responsive<CssValue>; gridColumnStart?: Responsive<CssValue>; gridColumnEnd?: Responsive<CssValue>; gridRow?: Responsive<CssValue>; gridRowStart?: Responsive<CssValue>; gridRowEnd?: Responsive<CssValue>;
+  bg?: Responsive<CssValue>; color?: Responsive<CssValue>; opacity?: Responsive<CssValue>; overflow?: Responsive<CssValue>; overflowX?: Responsive<CssValue>; overflowY?: Responsive<CssValue>; zIndex?: Responsive<CssValue>;
+  variant?: 'default' | 'surface' | 'elevated' | 'outline' | 'glass' | 'gradient' | 'soft' | 'contrast';
+  tone?: 'default' | 'neutral' | 'brand' | 'info' | 'success' | 'warning' | 'danger';
+  state?: 'idle' | 'loading' | 'error' | 'success';
   elevation?: 'default' | 'none' | 'low' | 'high';
-  radius?: 'default' | 'sm' | 'lg' | 'xl';
+  radius?: 'default' | 'none' | 'sm' | 'lg' | 'xl';
   interactive?: boolean;
+  disabled?: boolean;
   headless?: boolean;
 };
 
@@ -38,19 +42,28 @@ export function Box(props: Props) {
     className,
     variant,
     tone,
+    state,
     elevation,
     radius,
     interactive,
+    disabled,
     headless,
     p, px, py, pt, pr, pb, pl,
     m, mx, my, mt, mr, mb, ml,
     width, w, minWidth, minW, maxWidth, maxW, height, h, minHeight, minH, maxHeight, maxH,
     display, position, inset, top, right, bottom, left,
+    justify, alignSelf, alignContent,
+    gap, rowGap, columnGap,
     flexBasis, flexGrow, flexShrink,
     gridArea, gridColumn, gridColumnStart, gridColumnEnd, gridRow, gridRowStart, gridRowEnd,
     align,
     bg,
     color,
+    opacity,
+    overflow,
+    overflowX,
+    overflowY,
+    zIndex,
     ...rest
   } = props;
 
@@ -86,9 +99,15 @@ export function Box(props: Props) {
     right: serializeResponsive(right),
     bottom: serializeResponsive(bottom),
     left: serializeResponsive(left),
+    justify: serializeResponsive(justify),
     flexbasis: serializeResponsive(flexBasis),
     flexgrow: serializeResponsive(flexGrow),
     flexshrink: serializeResponsive(flexShrink),
+    alignself: serializeResponsive(alignSelf),
+    aligncontent: serializeResponsive(alignContent),
+    gap: serializeResponsive(gap),
+    rowgap: serializeResponsive(rowGap),
+    columngap: serializeResponsive(columnGap),
     gridarea: serializeResponsive(gridArea),
     gridcolumn: serializeResponsive(gridColumn),
     gridcolumnstart: serializeResponsive(gridColumnStart),
@@ -99,11 +118,18 @@ export function Box(props: Props) {
     align: serializeResponsive(align),
     bg: serializeResponsive(bg),
     color: serializeResponsive(color),
+    opacity: serializeResponsive(opacity),
+    overflow: serializeResponsive(overflow),
+    overflowx: serializeResponsive(overflowX),
+    overflowy: serializeResponsive(overflowY),
+    zindex: serializeResponsive(zIndex),
     variant: variant && variant !== 'default' ? variant : undefined,
     tone: tone && tone !== 'default' ? tone : undefined,
+    state: state && state !== 'idle' ? state : undefined,
     elevation: elevation && elevation !== 'default' ? elevation : undefined,
     radius: radius && radius !== 'default' ? radius : undefined,
     interactive: interactive ? '' : undefined,
+    disabled: disabled ? '' : undefined,
     headless: headless ? '' : undefined
   };
 

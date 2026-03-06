@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { lockBodyScroll } from '../components/date-time-utils';
 import OverlayManager from '../overlayManager';
+import { getBodyScrollLockCount, releaseBodyScrollLock } from '../scroll-lock';
 
 describe('OverlayManager lock-count API', () => {
   beforeEach(() => {
@@ -7,6 +9,7 @@ describe('OverlayManager lock-count API', () => {
     (OverlayManager as any).stack.length = 0;
     // @ts-ignore - reset private counter for deterministic tests
     (OverlayManager as any)._lockCount = 0;
+    while (getBodyScrollLockCount() > 0) releaseBodyScrollLock();
     document.body.style.overflow = '';
     document.documentElement.style.overflow = '';
   });
@@ -48,5 +51,17 @@ describe('OverlayManager lock-count API', () => {
     OverlayManager.releaseLock();
     OverlayManager.releaseLock();
     expect(OverlayManager.lockCount()).toBe(0);
+  });
+
+  it('keeps body locked while different overlay systems overlap', () => {
+    const releasePickerLock = lockBodyScroll();
+    expect(document.body.style.overflow).toBe('hidden');
+
+    OverlayManager.acquireLock();
+    releasePickerLock();
+
+    expect(document.body.style.overflow).toBe('hidden');
+    OverlayManager.releaseLock();
+    expect(document.body.style.overflow).toBe('');
   });
 });

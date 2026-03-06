@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { resolveDateTimeTranslations } from './date-time-i18n';
 import {
   compareTimes,
   computePopoverPosition,
@@ -173,6 +174,7 @@ export class UITimePicker extends ElementBase {
       'label',
       'hint',
       'error',
+      'translations',
       'locale',
       'variant'
     ];
@@ -300,6 +302,13 @@ export class UITimePicker extends ElementBase {
     const parsed = Number(this.getAttribute('step-seconds') || 1);
     if (!Number.isFinite(parsed) || parsed < 1) return 1;
     return Math.min(60, Math.trunc(parsed));
+  }
+
+  private _translations() {
+    return resolveDateTimeTranslations(
+      this.getAttribute('locale'),
+      this.getAttribute('translations')
+    );
   }
 
   private _normalizeCanonical(value: string | null): string | null {
@@ -478,6 +487,7 @@ export class UITimePicker extends ElementBase {
   }
 
   private _buildOverlayContent(sheet: boolean): string {
+    const t = this._translations();
     const parts = this._timeParts(this._pending);
     const format12 = this._is12h();
     const withSeconds = this._withSeconds();
@@ -500,11 +510,11 @@ export class UITimePicker extends ElementBase {
 
     const pickerContent = `
       <div class="pickers" data-seconds="${withSeconds ? 'true' : 'false'}" data-ampm="${format12 ? 'true' : 'false'}">
-        <div class="picker"><label>Hour</label><select data-segment="hours">${hourOptions}</select></div>
-        <div class="picker"><label>Minute</label><select data-segment="minutes">${minuteOptions}</select></div>
-        ${withSeconds ? `<div class="picker"><label>Second</label><select data-segment="seconds">${secondOptions}</select></div>` : ''}
+        <div class="picker"><label>${t.hour}</label><select data-segment="hours">${hourOptions}</select></div>
+        <div class="picker"><label>${t.minute}</label><select data-segment="minutes">${minuteOptions}</select></div>
+        ${withSeconds ? `<div class="picker"><label>${t.second}</label><select data-segment="seconds">${secondOptions}</select></div>` : ''}
         ${format12
-          ? `<div class="picker"><label>Meridiem</label><select data-segment="meridiem"><option value="am" ${parts.meridiem === 'am' ? 'selected' : ''}>AM</option><option value="pm" ${parts.meridiem === 'pm' ? 'selected' : ''}>PM</option></select></div>`
+          ? `<div class="picker"><label>${t.meridiem}</label><select data-segment="meridiem"><option value="am" ${parts.meridiem === 'am' ? 'selected' : ''}>${t.am}</option><option value="pm" ${parts.meridiem === 'pm' ? 'selected' : ''}>${t.pm}</option></select></div>`
           : ''}
       </div>
     `;
@@ -515,10 +525,10 @@ export class UITimePicker extends ElementBase {
       <section class="${sheet ? 'sheet' : 'panel'}" part="${sheet ? 'sheet' : 'popover'}">
         ${pickerContent}
         <footer class="footer" part="footer">
-          <button type="button" class="action" data-action="now">Now</button>
-          <button type="button" class="action" data-action="clear" part="clear">Clear</button>
-          <button type="button" class="action" data-action="cancel" part="cancel">Cancel</button>
-          <button type="button" class="action" data-action="apply" data-tone="primary" part="apply">Apply</button>
+          <button type="button" class="action" data-action="now">${t.now}</button>
+          <button type="button" class="action" data-action="clear" part="clear">${t.clear}</button>
+          <button type="button" class="action" data-action="cancel" part="cancel">${t.cancel}</button>
+          <button type="button" class="action" data-action="apply" data-tone="primary" part="apply">${t.apply}</button>
         </footer>
       </section>
     `;
@@ -530,7 +540,8 @@ export class UITimePicker extends ElementBase {
       this._is12h() ? '12h' : '24h',
       this._withSeconds() ? 'sec' : 'nosec',
       this._minuteStep(),
-      this._secondStep()
+      this._secondStep(),
+      this.getAttribute('translations') || ''
     ].join(':');
   }
 
@@ -656,7 +667,7 @@ export class UITimePicker extends ElementBase {
     }
     const parsed = this._normalizeCanonical(this._draft);
     if (!parsed) {
-      this._inlineError = this.getAttribute('error') || 'Invalid time';
+      this._inlineError = this.getAttribute('error') || this._translations().invalidTime;
       this._emitInvalid(this._draft, 'parse');
       this._updateHostState();
       return;
@@ -694,7 +705,7 @@ export class UITimePicker extends ElementBase {
       keyboardEvent.preventDefault();
       const parsed = this._normalizeCanonical(this._draft);
       if (!parsed && this._draft.trim()) {
-        this._inlineError = this.getAttribute('error') || 'Invalid time';
+        this._inlineError = this.getAttribute('error') || this._translations().invalidTime;
         this._emitInvalid(this._draft, 'parse');
         this._updateHostState();
         return;
@@ -780,6 +791,7 @@ export class UITimePicker extends ElementBase {
     const display = this._allowInput() ? this._draft : this._formatDisplay(this._value);
     const isInline = this._isInlineMode();
     const disabled = this._isDisabled();
+    const t = this._translations();
 
     const labelEl = this.root.querySelector('.label') as HTMLElement | null;
     const labelTextEl = this.root.querySelector('.label-text') as HTMLElement | null;
@@ -796,13 +808,19 @@ export class UITimePicker extends ElementBase {
     if (requiredEl) requiredEl.hidden = !this.hasAttribute('required');
     if (inputEl) {
       if (inputEl.value !== display) inputEl.value = display;
-      inputEl.placeholder = this._withSeconds() ? 'HH:mm:ss' : 'HH:mm';
+      inputEl.placeholder = this._withSeconds() ? t.timePlaceholderSeconds : t.timePlaceholder;
       inputEl.readOnly = !this._allowInput() || this._isReadonly();
       inputEl.disabled = disabled;
       inputEl.required = this.hasAttribute('required');
     }
-    if (clearBtn) clearBtn.hidden = !(this._clearable() && hasValue);
-    if (toggleBtn) toggleBtn.hidden = isInline;
+    if (clearBtn) {
+      clearBtn.hidden = !(this._clearable() && hasValue);
+      clearBtn.setAttribute('aria-label', t.clear);
+    }
+    if (toggleBtn) {
+      toggleBtn.hidden = isInline;
+      toggleBtn.setAttribute('aria-label', t.toggleCalendar);
+    }
     if (hintEl) {
       hintEl.hidden = !hint;
       hintEl.textContent = hint;

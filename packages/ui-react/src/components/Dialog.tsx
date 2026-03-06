@@ -32,7 +32,7 @@ export type DialogProps = React.HTMLAttributes<HTMLElement> & {
   lockWhileLoading?: boolean;
   roleType?: 'dialog' | 'alertdialog';
   size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
-  state?: 'idle' | 'loading' | 'error';
+  state?: 'idle' | 'loading' | 'error' | 'success';
   initialFocus?: string;
   submitText?: string;
   cancelText?: string;

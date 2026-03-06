@@ -6,25 +6,28 @@ const BREAKPOINTS: Record<Exclude<keyof ResponsiveMap, 'initial'>, string> = {
   sm: 'var(--ui-breakpoint-sm, 640px)',
   md: 'var(--ui-breakpoint-md, 768px)',
   lg: 'var(--ui-breakpoint-lg, 1024px)',
-  xl: 'var(--ui-breakpoint-xl, 1280px)'
+  xl: 'var(--ui-breakpoint-xl, 1280px)',
 };
 
 const STYLE_ATTRS = [
-  'p','px','py','pt','pr','pb','pl',
-  'm','mx','my','mt','mr','mb','ml',
-  'width','w','minwidth','minw','maxwidth','maxw','height','h','minheight','minh','maxheight','maxh',
-  'background','bg','color',
-  'display','position','inset','top','right','bottom','left','align',
-  'flexbasis','flexgrow','flexshrink',
-  'gridarea','gridcolumn','gridcolumnstart','gridcolumnend','gridrow','gridrowstart','gridrowend'
+  'p', 'px', 'py', 'pt', 'pr', 'pb', 'pl',
+  'm', 'mx', 'my', 'mt', 'mr', 'mb', 'ml',
+  'width', 'w', 'minwidth', 'minw', 'maxwidth', 'maxw', 'height', 'h', 'minheight', 'minh', 'maxheight', 'maxh',
+  'background', 'bg', 'color', 'opacity', 'overflow', 'overflowx', 'overflowy', 'zindex',
+  'display', 'position', 'inset', 'top', 'right', 'bottom', 'left', 'justify', 'align', 'alignself', 'aligncontent',
+  'flexbasis', 'flexgrow', 'flexshrink', 'gap', 'rowgap', 'columngap',
+  'gridarea', 'gridcolumn', 'gridcolumnstart', 'gridcolumnend', 'gridrow', 'gridrowstart', 'gridrowend',
 ] as const;
 
 const SPACE_TOKENS: Record<string, string> = {
+  none: '0',
+  xxs: 'var(--ui-space-2xs, 2px)',
   xs: 'var(--ui-space-xs, 4px)',
   sm: 'var(--ui-space-sm, 8px)',
   md: 'var(--ui-space-md, 12px)',
   lg: 'var(--ui-space-lg, 20px)',
-  xl: 'var(--ui-space-xl, 28px)'
+  xl: 'var(--ui-space-xl, 28px)',
+  '2xl': 'var(--ui-space-2xl, 40px)',
 };
 
 const style = `
@@ -32,12 +35,16 @@ const style = `
     --ui-box-bg: transparent;
     --ui-box-color: inherit;
     --ui-box-border-color: transparent;
-    --ui-box-border: 1px solid var(--ui-box-border-color);
+    --ui-box-border-width: 1px;
+    --ui-box-border-style: solid;
+    --ui-box-border: var(--ui-box-border-width) var(--ui-box-border-style) var(--ui-box-border-color);
     --ui-box-shadow: none;
     --ui-box-radius: 12px;
     --ui-box-backdrop: none;
     --ui-box-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
-    --ui-box-outline: color-mix(in srgb, var(--ui-box-accent) 36%, transparent);
+    --ui-box-outline: color-mix(in srgb, var(--ui-box-accent) 30%, transparent);
+    --ui-box-duration: 180ms;
+    --ui-box-font: "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     color-scheme: light dark;
     display: block;
     box-sizing: border-box;
@@ -50,28 +57,26 @@ const style = `
     box-shadow: var(--ui-box-shadow);
     backdrop-filter: var(--ui-box-backdrop);
     transition:
-      background-color 180ms ease,
-      border-color 180ms ease,
-      box-shadow 180ms ease,
-      transform 180ms ease;
+      background-color var(--ui-box-duration) cubic-bezier(0.2, 0.8, 0.2, 1),
+      border-color var(--ui-box-duration) cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow var(--ui-box-duration) cubic-bezier(0.2, 0.8, 0.2, 1),
+      transform var(--ui-box-duration) cubic-bezier(0.2, 0.8, 0.2, 1),
+      opacity var(--ui-box-duration) cubic-bezier(0.2, 0.8, 0.2, 1);
+    font-family: var(--ui-box-font);
   }
 
   :host([variant="surface"]) {
     --ui-box-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-box-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-box-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
-    --ui-box-shadow:
-      0 1px 3px rgba(2, 6, 23, 0.05),
-      0 10px 24px rgba(2, 6, 23, 0.06);
+    --ui-box-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 80%, transparent);
+    --ui-box-shadow: 0 1px 3px rgba(2, 6, 23, 0.05), 0 10px 24px rgba(2, 6, 23, 0.06);
   }
 
   :host([variant="elevated"]) {
     --ui-box-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-box-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-box-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 64%, transparent);
-    --ui-box-shadow:
-      0 2px 8px rgba(2, 6, 23, 0.08),
-      0 24px 52px rgba(2, 6, 23, 0.14);
+    --ui-box-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
+    --ui-box-shadow: 0 2px 8px rgba(2, 6, 23, 0.08), 0 24px 52px rgba(2, 6, 23, 0.14);
   }
 
   :host([variant="outline"]) {
@@ -90,9 +95,7 @@ const style = `
       );
     --ui-box-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-box-border-color: color-mix(in srgb, #ffffff 68%, var(--ui-color-border, #cbd5e1));
-    --ui-box-shadow:
-      0 1px 2px rgba(2, 6, 23, 0.06),
-      0 26px 58px rgba(2, 6, 23, 0.14);
+    --ui-box-shadow: 0 1px 2px rgba(2, 6, 23, 0.06), 0 26px 58px rgba(2, 6, 23, 0.14);
     --ui-box-backdrop: blur(12px) saturate(1.08);
   }
 
@@ -105,54 +108,100 @@ const style = `
       );
     --ui-box-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-box-border-color: color-mix(in srgb, var(--ui-box-accent) 24%, transparent);
-    --ui-box-shadow:
-      0 2px 10px rgba(2, 6, 23, 0.08),
-      0 16px 36px rgba(2, 6, 23, 0.1);
+    --ui-box-shadow: 0 2px 10px rgba(2, 6, 23, 0.08), 0 16px 36px rgba(2, 6, 23, 0.1);
+  }
+
+  :host([variant="soft"]) {
+    --ui-box-bg: color-mix(in srgb, var(--ui-box-accent) 7%, var(--ui-color-surface, #ffffff));
+    --ui-box-color: var(--ui-color-text, var(--ui-text, #0f172a));
+    --ui-box-border-color: color-mix(in srgb, var(--ui-box-accent) 18%, var(--ui-color-border, #cbd5e1));
+    --ui-box-shadow: 0 1px 2px rgba(2, 6, 23, 0.04), 0 8px 18px rgba(2, 6, 23, 0.08);
   }
 
   :host([variant="contrast"]) {
     --ui-box-bg: #0f172a;
     --ui-box-color: #e2e8f0;
     --ui-box-border-color: #334155;
-    --ui-box-shadow:
-      0 2px 10px rgba(2, 6, 23, 0.22),
-      0 18px 42px rgba(2, 6, 23, 0.34);
+    --ui-box-shadow: 0 2px 10px rgba(2, 6, 23, 0.22), 0 18px 42px rgba(2, 6, 23, 0.34);
   }
 
+  :host([tone="neutral"]) { --ui-box-accent: color-mix(in srgb, var(--ui-color-muted, #64748b) 72%, var(--ui-color-text, #0f172a) 28%); }
   :host([tone="brand"]) { --ui-box-accent: var(--ui-color-primary, var(--ui-primary, #2563eb)); }
+  :host([tone="info"]) { --ui-box-accent: var(--ui-color-primary, #2563eb); }
   :host([tone="success"]) { --ui-box-accent: #16a34a; }
   :host([tone="warning"]) { --ui-box-accent: #d97706; }
   :host([tone="danger"]) { --ui-box-accent: #dc2626; }
 
   :host([elevation="none"]) { --ui-box-shadow: none; }
-  :host([elevation="low"]) {
-    --ui-box-shadow:
-      0 1px 3px rgba(2, 6, 23, 0.06),
-      0 10px 24px rgba(2, 6, 23, 0.08);
-  }
-  :host([elevation="high"]) {
-    --ui-box-shadow:
-      0 2px 12px rgba(2, 6, 23, 0.12),
-      0 34px 72px rgba(2, 6, 23, 0.18);
-  }
+  :host([elevation="low"]) { --ui-box-shadow: 0 1px 3px rgba(2, 6, 23, 0.06), 0 10px 24px rgba(2, 6, 23, 0.08); }
+  :host([elevation="high"]) { --ui-box-shadow: 0 2px 12px rgba(2, 6, 23, 0.12), 0 34px 72px rgba(2, 6, 23, 0.18); }
 
+  :host([radius="none"]) { --ui-box-radius: 0; }
   :host([radius="sm"]) { --ui-box-radius: 8px; }
   :host([radius="lg"]) { --ui-box-radius: 18px; }
   :host([radius="xl"]) { --ui-box-radius: 24px; }
 
-  :host([interactive]) { cursor: pointer; }
-  :host([interactive]:hover) {
-    transform: translateY(-1px);
-    box-shadow:
-      0 2px 8px rgba(2, 6, 23, 0.09),
-      0 22px 44px rgba(2, 6, 23, 0.14);
+  :host([interactive]) {
+    cursor: pointer;
   }
-  :host([interactive]:active) { transform: translateY(0); }
+
+  :host([interactive]:not([disabled])):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(2, 6, 23, 0.09), 0 22px 44px rgba(2, 6, 23, 0.14);
+  }
+
+  :host([interactive]:not([disabled])):active {
+    transform: translateY(0) scale(0.995);
+  }
+
+  :host([interactive]):focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--ui-box-outline), var(--ui-box-shadow);
+  }
 
   :host(:focus-within) {
-    box-shadow:
-      0 0 0 2px var(--ui-box-outline),
-      var(--ui-box-shadow);
+    box-shadow: 0 0 0 2px var(--ui-box-outline), var(--ui-box-shadow);
+  }
+
+  :host([state="loading"]) {
+    cursor: progress;
+  }
+
+  :host([state="loading"])::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        100deg,
+        color-mix(in srgb, transparent 100%, #ffffff) 0%,
+        color-mix(in srgb, var(--ui-box-accent) 14%, transparent) 40%,
+        color-mix(in srgb, transparent 100%, #ffffff) 78%
+      );
+    background-size: 220% 100%;
+    animation: ui-box-shimmer 1.3s linear infinite;
+    opacity: 0.58;
+  }
+
+  :host([state="error"]) {
+    --ui-box-accent: var(--ui-color-danger, #dc2626);
+    --ui-box-border-color: color-mix(in srgb, var(--ui-box-accent) 42%, var(--ui-color-border, #cbd5e1));
+    --ui-box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-box-accent) 16%, transparent), var(--ui-box-shadow);
+  }
+
+  :host([state="success"]) {
+    --ui-box-accent: var(--ui-color-success, #16a34a);
+    --ui-box-border-color: color-mix(in srgb, var(--ui-box-accent) 42%, var(--ui-color-border, #cbd5e1));
+    --ui-box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-box-accent) 16%, transparent), var(--ui-box-shadow);
+  }
+
+  :host([disabled]) {
+    pointer-events: none;
+    opacity: 0.58;
+    filter: saturate(0.76);
+    transform: none !important;
   }
 
   :host([headless]) {
@@ -163,13 +212,22 @@ const style = `
     backdrop-filter: none;
   }
 
+  @keyframes ui-box-shimmer {
+    from { background-position: 120% 0; }
+    to { background-position: -120% 0; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    :host { transition: none !important; }
+    :host,
+    :host::after {
+      transition: none !important;
+      animation: none !important;
+    }
   }
 
   @media (prefers-contrast: more) {
     :host {
-      --ui-box-border: 2px solid var(--ui-box-border-color);
+      --ui-box-border-width: 2px;
       --ui-box-shadow: none;
       --ui-box-backdrop: none;
     }
@@ -191,12 +249,27 @@ function parseResponsive(raw: string | null): ResponsiveMap | null {
   const value = raw.trim();
   if (!value.startsWith('{')) return null;
   try {
-    const parsed = JSON.parse(value) as ResponsiveMap;
+    const parsed = JSON.parse(value) as Partial<Record<'initial' | 'sm' | 'md' | 'lg' | 'xl', string | number>>;
     if (!parsed || typeof parsed !== 'object') return null;
-    return parsed;
+
+    const normalized: ResponsiveMap = {};
+    (Object.keys(parsed) as Array<keyof typeof parsed>).forEach((key) => {
+      const v = parsed[key];
+      if (typeof v === 'string' || typeof v === 'number') {
+        normalized[key as keyof ResponsiveMap] = String(v);
+      }
+    });
+    return normalized;
   } catch {
     return null;
   }
+}
+
+function sanitizeCssValue(raw: string): string {
+  const value = raw.trim();
+  if (!value) return '';
+  if (/[;{}<>]/.test(value)) return '';
+  return value;
 }
 
 function normalizeSpace(value: string): string {
@@ -205,76 +278,192 @@ function normalizeSpace(value: string): string {
 }
 
 function mapAttrToStyles(attr: (typeof STYLE_ATTRS)[number], value: string): Record<string, string> {
+  const safe = sanitizeCssValue(value);
+  if (!safe) return {};
   switch (attr) {
-    case 'p': return { padding: normalizeSpace(value) };
-    case 'px': return { 'padding-left': normalizeSpace(value), 'padding-right': normalizeSpace(value) };
-    case 'py': return { 'padding-top': normalizeSpace(value), 'padding-bottom': normalizeSpace(value) };
-    case 'pt': return { 'padding-top': normalizeSpace(value) };
-    case 'pr': return { 'padding-right': normalizeSpace(value) };
-    case 'pb': return { 'padding-bottom': normalizeSpace(value) };
-    case 'pl': return { 'padding-left': normalizeSpace(value) };
-    case 'm': return { margin: normalizeSpace(value) };
-    case 'mx': return { 'margin-left': normalizeSpace(value), 'margin-right': normalizeSpace(value) };
-    case 'my': return { 'margin-top': normalizeSpace(value), 'margin-bottom': normalizeSpace(value) };
-    case 'mt': return { 'margin-top': normalizeSpace(value) };
-    case 'mr': return { 'margin-right': normalizeSpace(value) };
-    case 'mb': return { 'margin-bottom': normalizeSpace(value) };
-    case 'ml': return { 'margin-left': normalizeSpace(value) };
+    case 'p': return { padding: normalizeSpace(safe) };
+    case 'px': return { 'padding-left': normalizeSpace(safe), 'padding-right': normalizeSpace(safe) };
+    case 'py': return { 'padding-top': normalizeSpace(safe), 'padding-bottom': normalizeSpace(safe) };
+    case 'pt': return { 'padding-top': normalizeSpace(safe) };
+    case 'pr': return { 'padding-right': normalizeSpace(safe) };
+    case 'pb': return { 'padding-bottom': normalizeSpace(safe) };
+    case 'pl': return { 'padding-left': normalizeSpace(safe) };
+    case 'm': return { margin: normalizeSpace(safe) };
+    case 'mx': return { 'margin-left': normalizeSpace(safe), 'margin-right': normalizeSpace(safe) };
+    case 'my': return { 'margin-top': normalizeSpace(safe), 'margin-bottom': normalizeSpace(safe) };
+    case 'mt': return { 'margin-top': normalizeSpace(safe) };
+    case 'mr': return { 'margin-right': normalizeSpace(safe) };
+    case 'mb': return { 'margin-bottom': normalizeSpace(safe) };
+    case 'ml': return { 'margin-left': normalizeSpace(safe) };
     case 'background':
     case 'bg':
-      return { background: value };
+      return { background: safe };
     case 'w':
     case 'width':
-      return { width: value };
+      return { width: safe };
     case 'h':
     case 'height':
-      return { height: value };
+      return { height: safe };
     case 'minw':
     case 'minwidth':
-      return { 'min-width': value };
+      return { 'min-width': safe };
     case 'maxw':
     case 'maxwidth':
-      return { 'max-width': value };
+      return { 'max-width': safe };
     case 'minh':
     case 'minheight':
-      return { 'min-height': value };
+      return { 'min-height': safe };
     case 'maxh':
     case 'maxheight':
-      return { 'max-height': value };
+      return { 'max-height': safe };
     case 'align':
-      return { 'align-items': value };
+      return { 'align-items': safe };
+    case 'alignself':
+      return { 'align-self': safe };
+    case 'aligncontent':
+      return { 'align-content': safe };
+    case 'justify':
+      return { 'justify-content': safe };
     case 'flexbasis':
-      return { 'flex-basis': value };
+      return { 'flex-basis': safe };
     case 'flexgrow':
-      return { 'flex-grow': value };
+      return { 'flex-grow': safe };
     case 'flexshrink':
-      return { 'flex-shrink': value };
+      return { 'flex-shrink': safe };
     case 'gridarea':
-      return { 'grid-area': value };
+      return { 'grid-area': safe };
     case 'gridcolumn':
-      return { 'grid-column': value };
+      return { 'grid-column': safe };
     case 'gridcolumnstart':
-      return { 'grid-column-start': value };
+      return { 'grid-column-start': safe };
     case 'gridcolumnend':
-      return { 'grid-column-end': value };
+      return { 'grid-column-end': safe };
     case 'gridrow':
-      return { 'grid-row': value };
+      return { 'grid-row': safe };
     case 'gridrowstart':
-      return { 'grid-row-start': value };
+      return { 'grid-row-start': safe };
     case 'gridrowend':
-      return { 'grid-row-end': value };
+      return { 'grid-row-end': safe };
+    case 'rowgap':
+      return { 'row-gap': safe };
+    case 'columngap':
+      return { 'column-gap': safe };
+    case 'overflowx':
+      return { 'overflow-x': safe };
+    case 'overflowy':
+      return { 'overflow-y': safe };
+    case 'zindex':
+      return { 'z-index': safe };
     default:
-      return { [attr]: value };
+      return { [attr]: safe };
   }
 }
 
 export class UIBox extends ElementBase {
   static get observedAttributes() {
-    return ['classname', 'headless', 'variant', 'tone', 'elevation', 'radius', 'interactive', ...STYLE_ATTRS];
+    return [
+      'classname',
+      'headless',
+      'variant',
+      'tone',
+      'elevation',
+      'radius',
+      'interactive',
+      'disabled',
+      'state',
+      ...STYLE_ATTRS,
+    ];
   }
 
   private _lastClassname = '';
   private _appliedInlineProps = new Set<string>();
+  private _managedRole = false;
+  private _managedTabIndex = false;
+  private _managedAriaDisabled = false;
+  private _managedAriaBusy = false;
+
+  constructor() {
+    super();
+    this._onInteractiveKeyDown = this._onInteractiveKeyDown.bind(this);
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.addEventListener('keydown', this._onInteractiveKeyDown);
+    this._syncInteractiveA11y();
+    this._syncBusyState();
+  }
+
+  disconnectedCallback() {
+    this.removeEventListener('keydown', this._onInteractiveKeyDown);
+    super.disconnectedCallback();
+  }
+
+  attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
+    if (oldValue === newValue) return;
+    if (name === 'interactive' || name === 'disabled') this._syncInteractiveA11y();
+    if (name === 'state') this._syncBusyState();
+    if (this.isConnected) this.requestRender();
+  }
+
+  private _syncInteractiveA11y() {
+    const interactive = this.hasAttribute('interactive');
+    const disabled = this.hasAttribute('disabled');
+
+    if (interactive) {
+      if (!this.hasAttribute('role')) {
+        this.setAttribute('role', 'button');
+        this._managedRole = true;
+      }
+      if (!this.hasAttribute('tabindex')) {
+        this.setAttribute('tabindex', disabled ? '-1' : '0');
+        this._managedTabIndex = true;
+      } else if (this._managedTabIndex) {
+        this.setAttribute('tabindex', disabled ? '-1' : '0');
+      }
+      if (!this.hasAttribute('aria-disabled') || this._managedAriaDisabled) {
+        this.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+        this._managedAriaDisabled = true;
+      }
+      return;
+    }
+
+    if (this._managedRole) {
+      this.removeAttribute('role');
+      this._managedRole = false;
+    }
+    if (this._managedTabIndex) {
+      this.removeAttribute('tabindex');
+      this._managedTabIndex = false;
+    }
+    if (this._managedAriaDisabled) {
+      this.removeAttribute('aria-disabled');
+      this._managedAriaDisabled = false;
+    }
+  }
+
+  private _syncBusyState() {
+    const busy = this.getAttribute('state') === 'loading';
+    if (busy) {
+      if (!this.hasAttribute('aria-busy') || this._managedAriaBusy) {
+        this.setAttribute('aria-busy', 'true');
+        this._managedAriaBusy = true;
+      }
+      return;
+    }
+    if (this._managedAriaBusy) {
+      this.removeAttribute('aria-busy');
+      this._managedAriaBusy = false;
+    }
+  }
+
+  private _onInteractiveKeyDown(event: KeyboardEvent) {
+    if (!this.hasAttribute('interactive') || this.hasAttribute('disabled')) return;
+    if (event.target !== this) return;
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    this.click();
+  }
 
   private _syncLegacyClassname(): void {
     const next = this.getAttribute('classname') || '';
@@ -306,6 +495,7 @@ export class UIBox extends ElementBase {
 
       const mapped = mapAttrToStyles(attr, raw);
       Object.entries(mapped).forEach(([prop, value]) => {
+        if (!value) return;
         this.style.setProperty(prop, value);
         this._appliedInlineProps.add(prop);
       });
@@ -318,7 +508,7 @@ export class UIBox extends ElementBase {
       sm: {},
       md: {},
       lg: {},
-      xl: {}
+      xl: {},
     };
 
     STYLE_ATTRS.forEach((attr) => {
@@ -339,7 +529,7 @@ export class UIBox extends ElementBase {
     });
 
     const ruleFor = (selector: string, values: Record<string, string>): string => {
-      const entries = Object.entries(values);
+      const entries = Object.entries(values).filter(([, value]) => Boolean(value));
       if (!entries.length) return '';
       return `${selector} { ${entries.map(([k, v]) => `${k}: ${v};`).join(' ')} }`;
     };
@@ -358,6 +548,8 @@ export class UIBox extends ElementBase {
 
   protected override render(): void {
     this._syncLegacyClassname();
+    this._syncInteractiveA11y();
+    this._syncBusyState();
     this._applyInlineStyles();
 
     const responsiveCss = this._buildResponsiveCss();

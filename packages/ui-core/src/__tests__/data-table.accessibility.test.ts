@@ -232,4 +232,31 @@ describe('ui-data-table accessibility + keyboard behavior', () => {
     expect(rows[0].getAttribute('data-selected')).toBeNull();
     expect(rows[1].getAttribute('data-selected')).toBeNull();
   });
+
+  it('does not toggle row selection when interacting with controls inside cells', () => {
+    const el = createDataTable(`
+      <table>
+        <thead><tr><th data-key="name">Name</th><th data-key="actions">Actions</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Ava</td>
+            <td><button type="button" data-action="view">View</button></td>
+          </tr>
+        </tbody>
+      </table>
+    `, {
+      selectable: true
+    });
+
+    const row = el.querySelector('tbody tr') as HTMLTableRowElement;
+    const button = el.querySelector('button[data-action="view"]') as HTMLButtonElement;
+    expect(row).toBeTruthy();
+    expect(button).toBeTruthy();
+
+    button.click();
+    expect(row.getAttribute('data-selected')).toBeNull();
+
+    button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(row.getAttribute('data-selected')).toBeNull();
+  });
 });

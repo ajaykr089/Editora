@@ -5,6 +5,11 @@ export default {
   title: 'UI/Form',
   component: Form,
   argTypes: {
+    heading: { control: 'text' },
+    description: { control: 'text' },
+    state: { control: 'select', options: ['default', 'success', 'warning', 'error'] },
+    stateText: { control: 'text' },
+    loadingText: { control: 'text' },
     variant: { control: 'select', options: ['default', 'surface', 'outline', 'soft', 'contrast', 'minimal', 'elevated'] },
     tone: { control: 'select', options: ['default', 'brand', 'success', 'warning', 'danger'] },
     density: { control: 'select', options: ['default', 'compact', 'comfortable'] },
@@ -17,11 +22,17 @@ export default {
 
 export const Playground = (args: any) => {
   const { ref, submit, getValues, validate } = useForm();
+  const [message, setMessage] = useState('No action yet');
 
   return (
     <Box style={{ maxWidth: 620 }}>
       <Form
         ref={ref}
+        heading={args.heading}
+        description={args.description}
+        state={args.state}
+        stateText={args.stateText}
+        loadingText={args.loadingText}
         variant={args.variant}
         tone={args.tone}
         density={args.density}
@@ -29,9 +40,12 @@ export const Playground = (args: any) => {
         elevation={args.elevation}
         gap={args.gap}
         novalidate={args.novalidate}
-        onSubmit={(values) => alert(JSON.stringify(values, null, 2))}
-        onInvalid={(errors) => alert(`Invalid: ${JSON.stringify(errors, null, 2)}`)}
+        onSubmit={(values) => setMessage(`Submitted: ${JSON.stringify(values)}`)}
+        onInvalid={(errors) => setMessage(`Invalid: ${JSON.stringify(errors)}`)}
       >
+        <Button slot="actions" size="sm" variant="secondary" onClick={() => setMessage(`Preview values: ${JSON.stringify(getValues())}`)}>
+          Preview
+        </Button>
         <Grid style={{ display: 'grid', gap: 12 }}>
           <Field label="First name" htmlFor="form-first-name" required variant="outline">
             <Input id="form-first-name" name="firstName" placeholder="Jane" required />
@@ -48,12 +62,15 @@ export const Playground = (args: any) => {
 
         <Box style={{ marginTop: 12 }}>
           <Button onClick={() => submit()}>Submit</Button>
-          <Button style={{ marginLeft: 8 }} variant="secondary" onClick={async () => alert(JSON.stringify(await validate(), null, 2))}>
+          <Button style={{ marginLeft: 8 }} variant="secondary" onClick={async () => setMessage(JSON.stringify(await validate()))}>
             Validate
           </Button>
-          <Button style={{ marginLeft: 8 }} variant="ghost" onClick={() => alert(JSON.stringify(getValues(), null, 2))}>
+          <Button style={{ marginLeft: 8 }} variant="ghost" onClick={() => setMessage(JSON.stringify(getValues()))}>
             Get values
           </Button>
+        </Box>
+        <Box slot="status" style={{ fontSize: 'var(--ui-font-size-sm, 12px)' }}>
+          {message}
         </Box>
       </Form>
     </Box>
@@ -61,6 +78,11 @@ export const Playground = (args: any) => {
 };
 
 Playground.args = {
+  heading: 'Provider Profile',
+  description: 'Collect and validate core details before provisioning.',
+  state: 'default',
+  stateText: '',
+  loadingText: 'Saving profile...',
   variant: 'surface',
   tone: 'default',
   density: 'default',
@@ -73,15 +95,26 @@ Playground.args = {
 export const ValidationFlow = () => {
   const { ref, submit } = useForm();
   const [state, setState] = useState('idle');
+  const [formState, setFormState] = useState<'default' | 'success' | 'warning' | 'error'>('default');
 
   return (
     <Box style={{ maxWidth: 560 }}>
       <Form
         ref={ref}
+        heading="Project Access Policy"
+        description="Validation should prevent misconfigured policy codes."
         variant="outline"
         tone="warning"
-        onSubmit={() => setState('submitted')}
-        onInvalid={() => setState('invalid')}
+        state={formState}
+        stateText={state === 'idle' ? '' : `Validation state: ${state}`}
+        onSubmit={() => {
+          setState('submitted');
+          setFormState('success');
+        }}
+        onInvalid={() => {
+          setState('invalid');
+          setFormState('error');
+        }}
       >
         <Field label="Project code" htmlFor="form-code" required>
           <Input id="form-code" name="code" pattern="[A-Z]{3}-[0-9]{3}" required placeholder="ABC-123" />
@@ -100,7 +133,15 @@ export const ContrastMode = () => {
   const { ref, submit } = useForm();
   return (
     <Box style={{ maxWidth: 620, background: 'color-mix(in srgb, var(--ui-color-text, #0f172a) 94%, transparent)', padding: 'var(--ui-space-md, 12px)', borderRadius: 'calc(var(--ui-radius, 12px) + 2px)' }}>
-      <Form ref={ref} variant="contrast" shape="soft" elevation="high" onSubmit={() => {}}>
+      <Form
+        ref={ref}
+        heading="Dark Surface Audit Form"
+        description="High-contrast form with consistent typography and spacing."
+        variant="contrast"
+        shape="soft"
+        elevation="high"
+        onSubmit={() => {}}
+      >
         <Field label="Workspace" htmlFor="form-workspace" variant="contrast">
           <Input id="form-workspace" name="workspace" value="Editora" />
         </Field>
@@ -123,13 +164,14 @@ export const ProVisualModes = () => {
   return (
     <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(280px, 1fr))', gap: 14 }}>
       <Form ref={ref} variant="minimal" tone="brand" onSubmit={() => {}}>
+        <span slot="title">Minimal form</span>
         <Field label="Minimal form" htmlFor="form-minimal">
           <Input id="form-minimal" name="minimal" placeholder="Flat mode for dense pages" />
         </Field>
         <Button onClick={() => submit()}>Submit</Button>
       </Form>
 
-      <Form variant="elevated" tone="success" shape="soft" elevation="high" onSubmit={() => {}}>
+      <Form variant="elevated" tone="success" shape="soft" elevation="high" heading="Elevated approval form" onSubmit={() => {}}>
         <Field label="Elevated form" htmlFor="form-elevated" variant="elevated">
           <Input id="form-elevated" name="elevated" placeholder="Depth-rich mode" />
         </Field>
@@ -160,6 +202,8 @@ export const AdvancedAdminFlow = () => {
 
       <Form
         ref={ref}
+        heading="Tenant Provisioning Wizard"
+        description="Autosave and unsaved-change guard are active for this flow."
         variant="elevated"
         tone="brand"
         autosave

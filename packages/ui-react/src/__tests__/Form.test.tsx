@@ -19,4 +19,29 @@ describe('React Form wrapper', () => {
     expect(ok).toBe(true);
     expect(onSubmit).toHaveBeenCalled();
   });
+
+  it('maps heading/state props to ui-form attributes', () => {
+    const { container } = render(
+      <Form
+        heading="Clinical intake"
+        description="Theme-aware metadata section."
+        state="warning"
+        stateText="Unsaved changes"
+        loadingText="Saving intake..."
+        disabled
+      >
+        <Input name="firstName" value="Ava" />
+      </Form>
+    );
+
+    const element = container.querySelector('ui-form') as HTMLElement | null;
+    expect(element).toBeTruthy();
+    expect(element?.getAttribute('heading')).toBe('Clinical intake');
+    expect(element?.hasAttribute('title')).toBe(false);
+    expect(element?.getAttribute('description')).toBe('Theme-aware metadata section.');
+    expect(element?.getAttribute('state')).toBe('warning');
+    expect(element?.getAttribute('state-text')).toBe('Unsaved changes');
+    expect(element?.getAttribute('loading-text')).toBe('Saving intake...');
+    expect(element?.hasAttribute('disabled')).toBe(true);
+  });
 });

@@ -1,28 +1,54 @@
 import { ElementBase } from '../ElementBase';
+import { acquireBodyScrollLock, releaseBodyScrollLock } from '../scroll-lock';
 
 const style = `
   :host {
     display: block;
     color-scheme: light dark;
-    --ui-alert-radius: 14px;
-    --ui-alert-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    --ui-alert-radius: 16px;
+    --ui-alert-bg: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent) 0%,
+      color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 24%, var(--ui-color-surface, #ffffff)) 100%
+    );
     --ui-alert-text: var(--ui-color-text, #0f172a);
-    --ui-alert-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
-    --ui-alert-shadow: 0 26px 72px rgba(2, 6, 23, 0.24);
-    --ui-alert-padding: 22px;
+    --ui-alert-muted: var(--ui-color-muted, #64748b);
+    --ui-alert-accent: var(--ui-color-muted, #64748b);
+    --ui-alert-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
+    --ui-alert-shadow: 0 2px 4px rgba(2, 6, 23, 0.06), 0 28px 72px rgba(2, 6, 23, 0.24);
+    --ui-alert-padding: 24px;
     --ui-alert-min-width: 360px;
     --ui-alert-max-width: min(90vw, 560px);
     --ui-alert-z: 1001;
     --ui-alert-backdrop-z: 1000;
     --ui-alert-focus: var(--ui-color-focus-ring, #2563eb);
-    --ui-alert-muted: var(--ui-color-muted, #64748b);
     --ui-alert-danger: var(--ui-color-danger, #dc2626);
-    --ui-alert-backdrop: rgba(2, 6, 23, 0.56);
-    --ui-alert-btn-bg: color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 86%, transparent);
+    --ui-alert-backdrop: rgba(2, 6, 23, 0.58);
+    --ui-alert-btn-bg: color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 90%, transparent);
     --ui-alert-btn-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
-    --ui-alert-btn-hover: color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 74%, var(--ui-color-border, #cbd5e1) 26%);
-    --ui-alert-confirm-bg: var(--ui-color-primary, #2563eb);
+    --ui-alert-btn-hover: color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 76%, var(--ui-color-border, #cbd5e1) 24%);
+    --ui-alert-confirm-bg: var(--ui-alert-accent);
     --ui-alert-confirm-color: var(--ui-color-primary-contrast, #ffffff);
+    --ui-alert-icon-bg: color-mix(in srgb, var(--ui-alert-accent) 14%, transparent);
+    --ui-alert-icon-color: var(--ui-alert-accent);
+    --ui-alert-duration: 180ms;
+    --ui-alert-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  :host([tone='info']) {
+    --ui-alert-accent: var(--ui-color-primary, #2563eb);
+  }
+
+  :host([tone='success']) {
+    --ui-alert-accent: var(--ui-color-success, #16a34a);
+  }
+
+  :host([tone='warning']) {
+    --ui-alert-accent: var(--ui-color-warning, #d97706);
+  }
+
+  :host([tone='danger']) {
+    --ui-alert-accent: var(--ui-color-danger, #dc2626);
   }
 
   :host([size='sm']) {
@@ -32,7 +58,7 @@ const style = `
   }
 
   :host([size='lg']) {
-    --ui-alert-padding: 26px;
+    --ui-alert-padding: 28px;
     --ui-alert-min-width: 420px;
     --ui-alert-max-width: min(92vw, 680px);
   }
@@ -44,9 +70,9 @@ const style = `
     display: grid;
     place-items: center;
     background: var(--ui-alert-backdrop);
-    backdrop-filter: saturate(1.06) blur(2px);
+    backdrop-filter: saturate(1.04) blur(3px);
     opacity: 0;
-    transition: opacity 170ms ease;
+    transition: opacity var(--ui-alert-duration) var(--ui-alert-easing);
   }
 
   .dialog {
@@ -62,9 +88,28 @@ const style = `
     box-shadow: var(--ui-alert-shadow);
     padding: var(--ui-alert-padding);
     outline: none;
+    overflow: clip;
     opacity: 0;
-    transform: translateY(10px) scale(0.985);
-    transition: border-color 140ms ease, box-shadow 140ms ease, transform 170ms ease, opacity 170ms ease;
+    transform: translateY(12px) scale(0.985);
+    transition:
+      border-color var(--ui-alert-duration) var(--ui-alert-easing),
+      box-shadow var(--ui-alert-duration) var(--ui-alert-easing),
+      transform var(--ui-alert-duration) var(--ui-alert-easing),
+      opacity var(--ui-alert-duration) var(--ui-alert-easing);
+  }
+
+  .dialog::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 3px;
+    background: linear-gradient(
+      180deg,
+      var(--ui-alert-accent) 0%,
+      color-mix(in srgb, var(--ui-alert-accent) 74%, #0f172a) 100%
+    );
+    pointer-events: none;
   }
 
   .backdrop[data-open='true'] {
@@ -85,16 +130,51 @@ const style = `
 
   .header {
     display: grid;
-    gap: 8px;
+    gap: 10px;
     padding-inline-end: 40px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
+  }
+
+  .header-main {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
+  }
+
+  .icon-wrap {
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ui-alert-icon-bg);
+    color: var(--ui-alert-icon-color);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-alert-accent) 28%, transparent);
+  }
+
+  .icon {
+    width: 16px;
+    min-width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .heading {
+    min-width: 0;
+    display: grid;
+    gap: 6px;
   }
 
   .title {
     margin: 0;
-    font-size: 18px;
-    line-height: 1.3;
-    font-weight: 700;
+    font-size: 19px;
+    line-height: 1.28;
+    font-weight: 680;
     letter-spacing: -0.01em;
   }
 
@@ -109,21 +189,27 @@ const style = `
     position: absolute;
     top: 10px;
     inset-inline-end: 10px;
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     background: color-mix(in srgb, var(--ui-alert-text) 12%, transparent);
     color: inherit;
     display: inline-grid;
     place-items: center;
-    font-size: 14px;
+    transition:
+      background var(--ui-alert-duration) var(--ui-alert-easing),
+      transform 120ms ease;
     line-height: 1;
   }
 
   .close:hover {
     background: color-mix(in srgb, var(--ui-alert-text) 20%, transparent);
+  }
+
+  .close:active {
+    transform: translateY(1px);
   }
 
   .close:focus-visible,
@@ -135,7 +221,7 @@ const style = `
 
   .content {
     display: grid;
-    gap: 12px;
+    gap: 14px;
   }
 
   .input-wrap,
@@ -152,13 +238,13 @@ const style = `
 
   .input {
     width: 100%;
-    border-radius: 10px;
+    border-radius: 11px;
     border: 1px solid color-mix(in srgb, var(--ui-alert-border) 88%, transparent);
-    background: color-mix(in srgb, var(--ui-alert-bg) 96%, #ffffff 4%);
+    background: color-mix(in srgb, var(--ui-alert-bg) 94%, #ffffff 6%);
     color: inherit;
     box-sizing: border-box;
-    min-height: 38px;
-    padding: 8px 11px;
+    min-height: 40px;
+    padding: 9px 12px;
     font: inherit;
     line-height: 1.35;
   }
@@ -183,7 +269,9 @@ const style = `
   }
 
   .footer {
-    margin-top: 16px;
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in srgb, var(--ui-alert-border) 84%, transparent);
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -194,13 +282,17 @@ const style = `
     border: 1px solid var(--ui-alert-btn-border);
     background: var(--ui-alert-btn-bg);
     color: inherit;
-    border-radius: 10px;
-    min-height: 36px;
-    padding: 0 14px;
+    border-radius: 11px;
+    min-height: 38px;
+    padding: 0 15px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
+    transition:
+      background 120ms ease,
+      border-color 120ms ease,
+      color 120ms ease,
+      transform 120ms ease;
   }
 
   .btn:hover {
@@ -250,6 +342,18 @@ const style = `
     display: none;
   }
 
+  @media (max-width: 720px) {
+    :host {
+      --ui-alert-min-width: 0;
+      --ui-alert-max-width: calc(100vw - 16px);
+      --ui-alert-padding: 16px;
+    }
+
+    .header {
+      margin-bottom: 12px;
+    }
+  }
+
   @keyframes ui-alert-spin {
     to { transform: rotate(360deg); }
   }
@@ -295,10 +399,17 @@ const style = `
 
     .dialog,
     .btn,
+    .icon-wrap,
     .close,
     .input {
       forced-color-adjust: none;
       box-shadow: none;
+    }
+
+    .icon-wrap {
+      background: Canvas;
+      color: CanvasText;
+      border: 1px solid CanvasText;
     }
   }
 `;
@@ -309,8 +420,9 @@ const FOCUSABLE_SELECTOR =
 type UIAlertDialogRole = 'alertdialog' | 'dialog';
 type UIAlertDialogSize = 'sm' | 'md' | 'lg';
 type UIAlertDialogState = 'idle' | 'loading' | 'error';
+type UIAlertDialogTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
 type UIAlertDialogAction = 'confirm' | 'cancel' | 'dismiss';
-type UIAlertDialogDismissSource = 'esc' | 'backdrop' | 'close-icon' | 'abort' | 'unmount';
+type UIAlertDialogDismissSource = 'esc' | 'backdrop' | 'close-icon' | 'abort' | 'unmount' | 'programmatic';
 
 export interface UIAlertDialogTemplateOptions {
   id?: string;
@@ -338,6 +450,7 @@ export interface UIAlertDialogTemplateOptions {
   closeOnBackdrop?: boolean;
   lockWhileLoading?: boolean;
   role?: UIAlertDialogRole;
+  tone?: UIAlertDialogTone;
   size?: UIAlertDialogSize;
   ariaLabel?: string;
   ariaLabelledby?: string;
@@ -362,20 +475,6 @@ export type UIAlertDialogCloseDetail = {
   reason?: string;
 };
 
-type ScrollLockState = {
-  count: number;
-  bodyOverflow: string;
-  htmlOverflow: string;
-  bodyPaddingRight: string;
-};
-
-const scrollLock: ScrollLockState = {
-  count: 0,
-  bodyOverflow: '',
-  htmlOverflow: '',
-  bodyPaddingRight: ''
-};
-
 function toBool(raw: string | null, fallback: boolean): boolean {
   if (raw == null) return fallback;
   const normalized = raw.trim().toLowerCase();
@@ -383,12 +482,33 @@ function toBool(raw: string | null, fallback: boolean): boolean {
 }
 
 function escapeHtml(value: string): string {
-  return value
+  return String(value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function normalizeTone(raw: string | null): UIAlertDialogTone {
+  if (raw === 'info' || raw === 'success' || raw === 'warning' || raw === 'danger') return raw;
+  return 'neutral';
+}
+
+function toneIconSvg(tone: UIAlertDialogTone): string {
+  if (tone === 'success') {
+    return '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10.2 8.3 13.4 15 6.8"></path></svg>';
+  }
+  if (tone === 'warning') {
+    return '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.6 17 16.4H3L10 3.6Z"></path><path d="M10 8v3.4"></path><circle cx="10" cy="14.1" r="0.9" fill="currentColor" stroke="none"></circle></svg>';
+  }
+  if (tone === 'danger') {
+    return '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.1"></circle><path d="m7.5 7.5 5 5M12.5 7.5l-5 5"></path></svg>';
+  }
+  if (tone === 'info') {
+    return '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7.1"></circle><path d="M10 13v-3.8"></path><circle cx="10" cy="6.5" r="0.9" fill="currentColor" stroke="none"></circle></svg>';
+  }
+  return '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10h8"></path><circle cx="10" cy="10" r="7.1"></circle></svg>';
 }
 
 function isBrowser(): boolean {
@@ -401,40 +521,6 @@ function getDocumentActiveElement(): HTMLElement | null {
   return active instanceof HTMLElement ? active : null;
 }
 
-function acquireScrollLock() {
-  if (!isBrowser()) return;
-  scrollLock.count += 1;
-  if (scrollLock.count > 1) return;
-
-  const body = document.body;
-  const html = document.documentElement;
-  scrollLock.bodyOverflow = body.style.overflow;
-  scrollLock.htmlOverflow = html.style.overflow;
-  scrollLock.bodyPaddingRight = body.style.paddingRight;
-
-  const scrollBarWidth = Math.max(0, window.innerWidth - html.clientWidth);
-  if (scrollBarWidth > 0) {
-    const currentPadding = parseFloat(window.getComputedStyle(body).paddingRight || '0') || 0;
-    body.style.paddingRight = `${currentPadding + scrollBarWidth}px`;
-  }
-
-  body.style.overflow = 'hidden';
-  html.style.overflow = 'hidden';
-}
-
-function releaseScrollLock() {
-  if (!isBrowser()) return;
-  if (scrollLock.count <= 0) return;
-  scrollLock.count -= 1;
-  if (scrollLock.count > 0) return;
-
-  const body = document.body;
-  const html = document.documentElement;
-  body.style.overflow = scrollLock.bodyOverflow;
-  html.style.overflow = scrollLock.htmlOverflow;
-  body.style.paddingRight = scrollLock.bodyPaddingRight;
-}
-
 export class UIAlertDialog extends ElementBase {
   static get observedAttributes() {
     return [
@@ -445,6 +531,7 @@ export class UIAlertDialog extends ElementBase {
       'close-on-backdrop',
       'lock-while-loading',
       'role',
+      'tone',
       'size',
       'state',
       'aria-label',
@@ -522,7 +609,7 @@ export class UIAlertDialog extends ElementBase {
 
   set open(value: boolean) {
     if (value) this.setAttribute('open', '');
-    else this.close('dismiss', 'abort');
+    else this.close('dismiss', 'programmatic');
   }
 
   get headless() {
@@ -573,6 +660,18 @@ export class UIAlertDialog extends ElementBase {
 
   set roleType(value: UIAlertDialogRole) {
     this.setAttribute('role', value);
+  }
+
+  get tone(): UIAlertDialogTone {
+    return normalizeTone(this.getAttribute('tone'));
+  }
+
+  set tone(value: UIAlertDialogTone) {
+    if (value === 'neutral') {
+      this.removeAttribute('tone');
+      return;
+    }
+    this.setAttribute('tone', value);
   }
 
   get size(): UIAlertDialogSize {
@@ -636,6 +735,7 @@ export class UIAlertDialog extends ElementBase {
     if (this._config.closeOnBackdrop != null) this.closeOnBackdrop = Boolean(this._config.closeOnBackdrop);
     if (this._config.lockWhileLoading != null) this.lockWhileLoading = Boolean(this._config.lockWhileLoading);
     if (this._config.role) this.roleType = this._config.role;
+    this.tone = this._config.tone || 'neutral';
     if (this._config.size) this.size = this._config.size;
     if (this._config.ariaLabel) this.setAttribute('aria-label', this._config.ariaLabel);
     if (this._config.ariaLabelledby) this.setAttribute('aria-labelledby', this._config.ariaLabelledby);
@@ -724,7 +824,7 @@ export class UIAlertDialog extends ElementBase {
     }
 
     this._lastActive = getDocumentActiveElement();
-    acquireScrollLock();
+    acquireBodyScrollLock();
 
     if (isBrowser()) {
       document.addEventListener('focusin', this._onFocusIn as EventListener, true);
@@ -751,7 +851,7 @@ export class UIAlertDialog extends ElementBase {
       document.removeEventListener('focusin', this._onFocusIn as EventListener, true);
     }
 
-    releaseScrollLock();
+    releaseBodyScrollLock();
 
     if (!this._terminalEmitted) {
       const meta = this._closeMeta || { action: 'dismiss' as UIAlertDialogAction, source: 'abort' as UIAlertDialogDismissSource };
@@ -961,17 +1061,17 @@ export class UIAlertDialog extends ElementBase {
       return;
     }
 
-    if (target.classList.contains('close')) {
+    if (target.closest('.close')) {
       this._requestDismiss('close-icon');
       return;
     }
 
-    if (target.classList.contains('btn-confirm')) {
+    if (target.closest('.btn-confirm')) {
       this._handleConfirm();
       return;
     }
 
-    if (target.classList.contains('btn-cancel')) {
+    if (target.closest('.btn-cancel')) {
       this._handleCancel();
     }
   }
@@ -1019,19 +1119,23 @@ export class UIAlertDialog extends ElementBase {
 
     const hasTitleSlot = Boolean(this.querySelector('[slot="title"]'));
     const hasDescriptionSlot = Boolean(this.querySelector('[slot="description"]'));
+    const hasIconSlot = Boolean(this.querySelector('[slot="icon"]'));
     const hasFooterSlot = Boolean(this.querySelector('[slot="footer"]'));
     const hasContentSlot = Boolean(this.querySelector('[slot="content"]'));
 
     const hasTitle = hasTitleSlot || Boolean(titleFallback);
     const hasDescription = hasDescriptionSlot || Boolean(descriptionFallback);
+    const hasHeader = hasIconSlot || hasTitle || hasDescription;
     const showCancel = this._config.showCancel ?? this.dismissible;
     const showClose = this._config.showClose ?? this.dismissible;
+    const tone = this.tone;
 
-    const ariaLabel = this.getAttribute('aria-label') || '';
+    const explicitAriaLabel = this.getAttribute('aria-label') || '';
     const explicitLabelledBy = this.getAttribute('aria-labelledby') || '';
     const explicitDescribedBy = this.getAttribute('aria-describedby') || '';
 
     const labelledBy = explicitLabelledBy || (hasTitle ? titleId : '');
+    const ariaLabel = explicitAriaLabel || (!labelledBy ? titleFallback || descriptionFallback || 'Dialog' : '');
 
     const describedByIds: string[] = [];
     if (explicitDescribedBy) {
@@ -1056,12 +1160,27 @@ export class UIAlertDialog extends ElementBase {
           ${describedByIds.length ? `aria-describedby="${escapeHtml(describedByIds.join(' '))}"` : ''}
           tabindex="-1"
         >
-          ${showClose ? '<button class="close" part="close" aria-label="Close dialog">✕</button>' : ''}
+          ${showClose
+            ? `<button class="close" part="close" aria-label="Close dialog">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                  <path d="m6 6 8 8M14 6l-8 8"></path>
+                </svg>
+              </button>`
+            : ''}
 
-          ${(hasTitle || hasDescription)
+          ${hasHeader
             ? `<header class="header">
-                <h2 id="${titleId}" class="title" part="title"><slot name="title">${escapeHtml(titleFallback)}</slot></h2>
-                <p id="${descId}" class="description" part="description"><slot name="description">${escapeHtml(descriptionFallback)}</slot></p>
+                <div class="header-main">
+                  <span class="icon-wrap" part="icon-wrap" aria-hidden="true">
+                    <span class="icon" part="icon">
+                      <slot name="icon">${toneIconSvg(tone)}</slot>
+                    </span>
+                  </span>
+                  <div class="heading">
+                    ${hasTitle ? `<h2 id="${titleId}" class="title" part="title"><slot name="title">${escapeHtml(titleFallback)}</slot></h2>` : ''}
+                    ${hasDescription ? `<p id="${descId}" class="description" part="description"><slot name="description">${escapeHtml(descriptionFallback)}</slot></p>` : ''}
+                  </div>
+                </div>
               </header>`
             : ''}
 

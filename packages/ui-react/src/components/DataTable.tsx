@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
 export type DataTableSortDirection = 'asc' | 'desc';
+export type DataTableState = 'idle' | 'loading' | 'error' | 'success';
 
 export type DataTableSortChangeDetail = {
   columnIndex: number;
@@ -84,12 +85,18 @@ export type DataTableProps = React.HTMLAttributes<HTMLElement> & {
   sortable?: boolean;
   selectable?: boolean;
   multiSelect?: boolean;
+  shape?: 'default' | 'square' | 'soft';
+  variant?: 'default' | 'flat' | 'contrast';
+  elevation?: 'default' | 'none' | 'low' | 'high';
   striped?: boolean;
   hover?: boolean;
   compact?: boolean;
   bordered?: boolean;
   stickyHeader?: boolean;
+  stickyFooter?: boolean;
   loading?: boolean;
+  state?: DataTableState;
+  stateText?: string;
   headless?: boolean;
   hideSummary?: boolean;
   emptyText?: string;
@@ -123,12 +130,18 @@ export function DataTable(props: DataTableProps) {
     sortable,
     selectable,
     multiSelect,
+    shape,
+    variant,
+    elevation,
     striped,
     hover,
     compact,
     bordered,
     stickyHeader,
+    stickyFooter,
     loading,
+    state,
+    stateText,
     headless,
     hideSummary,
     emptyText,
@@ -266,12 +279,18 @@ export function DataTable(props: DataTableProps) {
       ...(sortable ? { sortable: '' } : {}),
       ...(selectable ? { selectable: '' } : {}),
       ...(multiSelect ? { 'multi-select': '' } : {}),
+      ...(shape && shape !== 'default' ? { shape } : {}),
+      ...(variant && variant !== 'default' ? { variant } : {}),
+      ...(elevation && elevation !== 'default' ? { elevation } : {}),
       ...(striped ? { striped: '' } : {}),
       ...(hover ? { hover: '' } : {}),
       ...(compact ? { compact: '' } : {}),
       ...(bordered ? { bordered: '' } : {}),
       ...(stickyHeader ? { 'sticky-header': '' } : {}),
+      ...(stickyFooter ? { 'sticky-footer': '' } : {}),
       ...(loading ? { loading: '' } : {}),
+      ...(state && state !== 'idle' ? { state } : {}),
+      ...(stateText ? { 'state-text': stateText } : {}),
       ...(headless ? { headless: '' } : {}),
       ...(hideSummary ? { 'hide-summary': '' } : {}),
       ...(emptyText ? { 'empty-text': emptyText } : {}),

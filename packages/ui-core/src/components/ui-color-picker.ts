@@ -26,6 +26,7 @@ import {
  *
  * attributes:
  * - value, format(hex|rgb|hsl), alpha, disabled, readonly, size(sm|md|lg), variant(default|contrast)
+ * - state(idle|loading|error|success), tone(neutral|brand|success|warning|danger), close-on-escape
  * - mode(inline|popover), open, placeholder, presets(JSON array), recent, max-recent, persist
  * - aria-label, aria-labelledby, aria-describedby
  *
@@ -35,12 +36,15 @@ import {
  * events:
  * - input / change: { value, hex, rgba, hsla, source }
  * - invalid: { raw, reason }
- * - open / close
+ * - open / close / ui-open / ui-close: { open, previousOpen, source }
  */
 
 type ColorFormat = 'hex' | 'rgb' | 'hsl'
 type ColorSource = 'drag' | 'slider' | 'text' | 'preset' | 'recent' | 'eyedropper'
 type DragTarget = 'sv' | 'hue' | 'alpha'
+type ColorPickerState = 'idle' | 'loading' | 'error' | 'success'
+type ColorPickerTone = 'neutral' | 'brand' | 'success' | 'warning' | 'danger'
+type OpenSource = 'api' | 'toggle' | 'outside' | 'escape' | 'apply' | 'attribute'
 
 type ColorDetail = {
   value: string
@@ -50,11 +54,18 @@ type ColorDetail = {
   source: ColorSource
 }
 
+type OpenDetail = {
+  open: boolean
+  previousOpen: boolean
+  source: OpenSource
+}
+
 type PanelRefs = {
   panel: HTMLElement
   label: HTMLElement | null
   valueText: HTMLElement | null
   preview: HTMLElement | null
+  status: HTMLElement | null
   sv: HTMLElement | null
   svThumb: HTMLElement | null
   hue: HTMLElement | null
@@ -99,9 +110,14 @@ const style = `
     --ui-cp-text: var(--ui-color-text, #0f172a);
     --ui-cp-muted: var(--ui-color-muted, #64748b);
     --ui-cp-accent: var(--ui-color-primary, #2563eb);
+    --ui-cp-success: var(--ui-color-success, #16a34a);
+    --ui-cp-warning: var(--ui-color-warning, #d97706);
+    --ui-cp-danger: var(--ui-color-danger, #dc2626);
     --ui-cp-radius: 14px;
     --ui-cp-shadow: 0 16px 36px rgba(2, 6, 23, 0.14);
     --ui-cp-padding: 10px;
+    --ui-cp-duration: 160ms;
+    --ui-cp-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
     --ui-cp-z: 1100;
     --ui-cp-thumb: #ffffff;
     --ui-cp-thumb-ring: color-mix(in srgb, var(--ui-cp-accent) 44%, transparent);
@@ -140,6 +156,30 @@ const style = `
     --ui-cp-shadow: 0 18px 40px rgba(2, 6, 23, 0.55);
   }
 
+  :host([tone="neutral"]) {
+    --ui-cp-accent: color-mix(in srgb, var(--ui-cp-text) 38%, var(--ui-cp-muted) 62%);
+  }
+
+  :host([tone="success"]) {
+    --ui-cp-accent: var(--ui-cp-success);
+  }
+
+  :host([tone="warning"]) {
+    --ui-cp-accent: var(--ui-cp-warning);
+  }
+
+  :host([tone="danger"]) {
+    --ui-cp-accent: var(--ui-cp-danger);
+  }
+
+  :host([state="error"]) {
+    --ui-cp-accent: var(--ui-cp-danger);
+  }
+
+  :host([state="success"]) {
+    --ui-cp-accent: var(--ui-cp-success);
+  }
+
   .root {
     display: grid;
     gap: 8px;
@@ -164,6 +204,20 @@ const style = `
     gap: 8px;
     text-align: left;
     cursor: pointer;
+    transition:
+      border-color var(--ui-cp-duration) var(--ui-cp-ease),
+      background-color var(--ui-cp-duration) var(--ui-cp-ease),
+      box-shadow var(--ui-cp-duration) var(--ui-cp-ease),
+      color var(--ui-cp-duration) var(--ui-cp-ease);
+  }
+
+  .trigger:hover {
+    border-color: color-mix(in srgb, var(--ui-cp-accent) 32%, var(--ui-cp-border));
+    box-shadow: 0 2px 8px rgba(2, 6, 23, 0.12);
+  }
+
+  .trigger:active {
+    transform: translateY(1px);
   }
 
   .trigger:focus-visible {
@@ -211,6 +265,23 @@ const style = `
     display: grid;
     gap: var(--ui-cp-gap);
     min-inline-size: 0;
+    transition:
+      border-color var(--ui-cp-duration) var(--ui-cp-ease),
+      box-shadow var(--ui-cp-duration) var(--ui-cp-ease),
+      background-color var(--ui-cp-duration) var(--ui-cp-ease),
+      opacity var(--ui-cp-duration) var(--ui-cp-ease);
+  }
+
+  .panel[data-state="error"] {
+    border-color: color-mix(in srgb, var(--ui-cp-danger) 46%, var(--ui-cp-border));
+  }
+
+  .panel[data-state="success"] {
+    border-color: color-mix(in srgb, var(--ui-cp-success) 42%, var(--ui-cp-border));
+  }
+
+  .panel[data-state="loading"] {
+    opacity: 0.92;
   }
 
   .panel,
@@ -251,6 +322,8 @@ const style = `
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
   .preview {
@@ -260,6 +333,24 @@ const style = `
     border: 1px solid color-mix(in srgb, var(--ui-cp-border) 86%, transparent);
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32);
     background: #2563eb;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 20px;
+    border-radius: 999px;
+    padding: 0 8px;
+    border: 1px solid color-mix(in srgb, var(--ui-cp-accent) 36%, var(--ui-cp-border));
+    background: color-mix(in srgb, var(--ui-cp-accent) 12%, transparent);
+    color: color-mix(in srgb, var(--ui-cp-accent) 82%, var(--ui-cp-text));
+    font: 650 10px/1 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .status-pill[hidden] {
+    display: none !important;
   }
 
   .icon-btn {
@@ -274,6 +365,10 @@ const style = `
     place-items: center;
     cursor: pointer;
     font: 600 11px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    transition:
+      border-color var(--ui-cp-duration) var(--ui-cp-ease),
+      background-color var(--ui-cp-duration) var(--ui-cp-ease),
+      color var(--ui-cp-duration) var(--ui-cp-ease);
   }
 
   .icon-btn:hover {
@@ -400,6 +495,9 @@ const style = `
     min-block-size: 30px;
     font: 650 11px/1 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     cursor: pointer;
+    transition:
+      background-color var(--ui-cp-duration) var(--ui-cp-ease),
+      color var(--ui-cp-duration) var(--ui-cp-ease);
   }
 
   .tab[data-active="true"] {
@@ -491,6 +589,16 @@ const style = `
     cursor: pointer;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32);
     padding: 0;
+    transition:
+      transform var(--ui-cp-duration) var(--ui-cp-ease),
+      box-shadow var(--ui-cp-duration) var(--ui-cp-ease),
+      border-color var(--ui-cp-duration) var(--ui-cp-ease);
+  }
+
+  .swatch:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--ui-cp-accent) 40%, var(--ui-cp-border));
+    box-shadow: 0 2px 8px rgba(2, 6, 23, 0.18);
   }
 
   .swatch[data-selected="true"] {
@@ -528,6 +636,10 @@ const style = `
     font: 650 12px/1 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     padding: 0 10px;
     cursor: pointer;
+    transition:
+      border-color var(--ui-cp-duration) var(--ui-cp-ease),
+      background-color var(--ui-cp-duration) var(--ui-cp-ease),
+      color var(--ui-cp-duration) var(--ui-cp-ease);
   }
 
   .actions .btn[data-tone="primary"] {
@@ -553,7 +665,9 @@ const style = `
   }
 
   :host([disabled]) .panel,
-  :host([disabled]) .trigger {
+  :host([disabled]) .trigger,
+  :host([state="loading"]) .panel,
+  :host([state="loading"]) .trigger {
     opacity: 0.66;
     pointer-events: none;
   }
@@ -695,8 +809,11 @@ export class UIColorPicker extends ElementBase {
       'readonly',
       'size',
       'variant',
+      'state',
+      'tone',
       'mode',
       'open',
+      'close-on-escape',
       'placeholder',
       'presets',
       'recent',
@@ -797,7 +914,8 @@ export class UIColorPicker extends ElementBase {
         if (!this._syncing) this._open = this.hasAttribute('open')
         break
       case 'disabled':
-        if (this.hasAttribute('disabled') && this._open) this._setOpen(false, 'text')
+      case 'state':
+        if ((this.hasAttribute('disabled') || this._isLoading()) && this._open) this._setOpen(false, 'attribute')
         break
       case 'alpha': {
         if (!this._alphaEnabled()) {
@@ -845,7 +963,7 @@ export class UIColorPicker extends ElementBase {
   }
 
   set open(next: boolean) {
-    this._setOpen(next, 'text')
+    this._setOpen(next, 'api')
   }
 
   setColor(value: string): void {
@@ -870,11 +988,11 @@ export class UIColorPicker extends ElementBase {
   }
 
   openPopover(): void {
-    this._setOpen(true, 'text')
+    this._setOpen(true, 'api')
   }
 
   closePopover(): void {
-    this._setOpen(false, 'text')
+    this._setOpen(false, 'api')
   }
 
   override focus(): void {
@@ -969,6 +1087,7 @@ export class UIColorPicker extends ElementBase {
           </div>
           <div class="header-actions">
             <span class="preview" data-role="preview" part="preview"></span>
+            <span class="status-pill" data-role="status" part="status" hidden></span>
             <button type="button" class="icon-btn" data-action="copy-hex" part="copy" title="Copy HEX">HEX</button>
             <button type="button" class="icon-btn" data-action="copy-rgb" part="copy" title="Copy RGB">RGB</button>
             <button type="button" class="icon-btn" data-action="eyedropper" part="copy" title="Eyedropper">Pick</button>
@@ -1074,6 +1193,22 @@ export class UIColorPicker extends ElementBase {
     return (this.getAttribute('mode') || 'inline') === 'popover'
   }
 
+  private _state(): ColorPickerState {
+    const raw = (this.getAttribute('state') || 'idle').trim().toLowerCase()
+    if (raw === 'loading' || raw === 'error' || raw === 'success') return raw
+    return 'idle'
+  }
+
+  private _tone(): ColorPickerTone {
+    const raw = (this.getAttribute('tone') || 'brand').trim().toLowerCase()
+    if (raw === 'neutral' || raw === 'success' || raw === 'warning' || raw === 'danger') return raw
+    return 'brand'
+  }
+
+  private _closeOnEscape(): boolean {
+    return isTruthyAttr(this.getAttribute('close-on-escape'), true)
+  }
+
   private _syncOverlayHostAttributes(): void {
     if (!this._overlay) return
     const sync = (name: string) => {
@@ -1087,6 +1222,9 @@ export class UIColorPicker extends ElementBase {
     }
     sync('size')
     sync('variant')
+    sync('state')
+    sync('tone')
+    sync('close-on-escape')
     sync('aria-label')
     sync('aria-labelledby')
     sync('aria-describedby')
@@ -1116,6 +1254,10 @@ export class UIColorPicker extends ElementBase {
 
   private _isReadonly(): boolean {
     return this.hasAttribute('readonly')
+  }
+
+  private _isLoading(): boolean {
+    return this._state() === 'loading'
   }
 
   private _maxRecent(): number {
@@ -1278,17 +1420,21 @@ export class UIColorPicker extends ElementBase {
     })
   }
 
-  private _setOpen(next: boolean, _source: ColorSource | 'text'): void {
+  private _setOpen(next: boolean, source: OpenSource = 'api'): void {
     if (!this._isPopoverMode()) return
-    if (this._isDisabled()) return
+    if (next && (this._isDisabled() || this._isLoading())) return
     if (this._open === next) return
+    const previousOpen = this._open
     this._open = next
     this._syncOpenAttribute(next)
+    const detail: OpenDetail = { open: next, previousOpen, source }
     if (next) {
       this._restoreFocusEl = typeof document !== 'undefined' ? (document.activeElement as HTMLElement | null) : null
-      this.dispatchEvent(new CustomEvent('open', { bubbles: true, composed: true }))
+      this.dispatchEvent(new CustomEvent<OpenDetail>('open', { detail, bubbles: true, composed: true }))
+      this.dispatchEvent(new CustomEvent<OpenDetail>('ui-open', { detail, bubbles: true, composed: true }))
     } else {
-      this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }))
+      this.dispatchEvent(new CustomEvent<OpenDetail>('close', { detail, bubbles: true, composed: true }))
+      this.dispatchEvent(new CustomEvent<OpenDetail>('ui-close', { detail, bubbles: true, composed: true }))
     }
     this.requestRender()
     if (!next && this._restoreFocusEl && this._restoreFocusEl.isConnected) {
@@ -1406,19 +1552,61 @@ export class UIColorPicker extends ElementBase {
 
   private _onDocumentPointerDown(event: PointerEvent): void {
     if (!this._overlay || !this._open) return
-    const target = event.target as Node | null
-    if (!target) return
-    if (this.contains(target)) return
     const path = typeof event.composedPath === 'function' ? event.composedPath() : []
-    if (this._overlay.contains(target) || path.includes(this._overlay)) return
-    this._setOpen(false, 'text')
+    if (path.includes(this)) return
+    const overlayPanel = this._overlayRoot?.querySelector('[data-cp-panel="overlay"]') as HTMLElement | null
+    if (overlayPanel && path.includes(overlayPanel)) return
+    this._setOpen(false, 'outside')
   }
 
   private _onDocumentKeyDown(event: KeyboardEvent): void {
     if (!this._open || !this._isPopoverMode()) return
-    if (event.key !== 'Escape') return
+    if (event.key === 'Tab') {
+      this._trapOverlayFocus(event)
+      return
+    }
+    if (event.key !== 'Escape' || !this._closeOnEscape()) return
     event.preventDefault()
-    this._setOpen(false, 'text')
+    this._setOpen(false, 'escape')
+  }
+
+  private _focusableInPanel(panel: HTMLElement): HTMLElement[] {
+    const candidates = panel.querySelectorAll<HTMLElement>(
+      'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"]),[contenteditable="true"]'
+    )
+    return Array.from(candidates).filter((el) => {
+      if (el.hasAttribute('disabled')) return false
+      if (el.getAttribute('aria-hidden') === 'true') return false
+      if (el.tabIndex < 0) return false
+      return el.getClientRects().length > 0
+    })
+  }
+
+  private _trapOverlayFocus(event: KeyboardEvent): void {
+    const panel = this._overlayRoot?.querySelector('[data-cp-panel="overlay"]') as HTMLElement | null
+    if (!panel) return
+    const focusables = this._focusableInPanel(panel)
+    if (!focusables.length) {
+      event.preventDefault()
+      panel.focus()
+      return
+    }
+    const rootNode = panel.getRootNode()
+    const active = (rootNode instanceof ShadowRoot
+      ? rootNode.activeElement
+      : panel.ownerDocument.activeElement) as HTMLElement | null
+    const current = active ? focusables.indexOf(active) : -1
+    if (event.shiftKey) {
+      if (current <= 0) {
+        event.preventDefault()
+        focusables[focusables.length - 1].focus()
+      }
+      return
+    }
+    if (current === -1 || current === focusables.length - 1) {
+      event.preventDefault()
+      focusables[0].focus()
+    }
   }
 
   private _forEachPanel(run: (refs: PanelRefs) => void): void {
@@ -1436,6 +1624,7 @@ export class UIColorPicker extends ElementBase {
       label: panel.querySelector('[data-role="label"]') as HTMLElement | null,
       valueText: panel.querySelector('[data-role="value"]') as HTMLElement | null,
       preview: panel.querySelector('[data-role="preview"]') as HTMLElement | null,
+      status: panel.querySelector('[data-role="status"]') as HTMLElement | null,
       sv: panel.querySelector('[data-cp="sv"]') as HTMLElement | null,
       svThumb: panel.querySelector('[data-role="sv-thumb"]') as HTMLElement | null,
       hue: panel.querySelector('[data-cp="hue"]') as HTMLElement | null,
@@ -1488,13 +1677,18 @@ export class UIColorPicker extends ElementBase {
     const inlinePanelWrap = this.root.querySelector('[data-role="inline-panel"]') as HTMLElement | null
 
     const modePopover = this._isPopoverMode()
+    const state = this._state()
+    const tone = this._tone()
+    const loading = state === 'loading'
     const disabled = this._isDisabled()
     const readonly = this._isReadonly()
     const triggerText = this._serializeValue() || this._placeholder()
 
     if (triggerWrap) triggerWrap.hidden = !modePopover
     if (trigger) {
-      trigger.disabled = disabled
+      trigger.disabled = disabled || loading
+      trigger.dataset.state = state
+      trigger.dataset.tone = tone
       trigger.setAttribute('aria-expanded', modePopover && this._open ? 'true' : 'false')
       this._applyAria(trigger)
     }
@@ -1502,28 +1696,61 @@ export class UIColorPicker extends ElementBase {
     if (triggerPreview) triggerPreview.style.background = formatRgbDisplay(this._rgba, true)
     if (inlinePanelWrap) inlinePanelWrap.hidden = modePopover
 
-    this._forEachPanel((refs) => this._updatePanel(refs, { skipSwatches, disabled, readonly, modePopover, liveOnly }))
+    this._forEachPanel((refs) => this._updatePanel(refs, { skipSwatches, disabled, readonly, loading, state, tone, modePopover, liveOnly }))
   }
 
   private _updatePanel(
     refs: PanelRefs,
-    opts: { skipSwatches: boolean; disabled: boolean; readonly: boolean; modePopover: boolean; liveOnly: boolean }
+    opts: {
+      skipSwatches: boolean
+      disabled: boolean
+      readonly: boolean
+      loading: boolean
+      state: ColorPickerState
+      tone: ColorPickerTone
+      modePopover: boolean
+      liveOnly: boolean
+    }
   ): void {
     const rgba = this._rgba
     const hsla = rgbaToHsla(rgba)
     const hsva = this._hsva
     const hueForBg = `hsl(${Math.round(hsva.h)} 100% 50%)`
+    const isOverlayPanel = refs.panel.getAttribute('data-cp-panel') === 'overlay'
+    const hasError = Boolean(this._error) || opts.state === 'error'
+    const blocked = opts.disabled || opts.readonly || opts.loading
 
     this._applyAria(refs.panel)
+    refs.panel.dataset.state = hasError ? 'error' : opts.state
+    refs.panel.dataset.tone = opts.tone
+    refs.panel.setAttribute('aria-busy', opts.loading ? 'true' : 'false')
+    if (isOverlayPanel && opts.modePopover) {
+      refs.panel.setAttribute('role', 'dialog')
+      refs.panel.setAttribute('aria-modal', 'true')
+      refs.panel.tabIndex = -1
+    } else {
+      refs.panel.removeAttribute('role')
+      refs.panel.removeAttribute('aria-modal')
+      refs.panel.removeAttribute('tabindex')
+    }
     if (refs.label) refs.label.textContent = this._labelText()
     if (refs.valueText) refs.valueText.textContent = this._serializeValue()
     if (refs.preview) refs.preview.style.background = formatRgbDisplay(rgba, true)
+    if (refs.status) {
+      let status = ''
+      if (hasError) status = 'Error'
+      else if (opts.state === 'loading') status = 'Syncing'
+      else if (opts.state === 'success') status = 'Saved'
+      refs.status.hidden = !status
+      refs.status.textContent = status
+      refs.status.dataset.tone = opts.tone
+    }
 
     if (refs.sv) {
       refs.sv.style.background = `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, ${hueForBg})`
       refs.sv.setAttribute('aria-valuetext', `Saturation ${Math.round(hsva.s)}%, Value ${Math.round(hsva.v)}%`)
-      refs.sv.setAttribute('aria-disabled', opts.disabled || opts.readonly ? 'true' : 'false')
-      refs.sv.tabIndex = opts.disabled ? -1 : 0
+      refs.sv.setAttribute('aria-disabled', blocked ? 'true' : 'false')
+      refs.sv.tabIndex = blocked ? -1 : 0
     }
     if (refs.svThumb) {
       const safeS = clamp(hsva.s, 1, 99)
@@ -1536,8 +1763,8 @@ export class UIColorPicker extends ElementBase {
       refs.hue.setAttribute('aria-valuemin', '0')
       refs.hue.setAttribute('aria-valuemax', '360')
       refs.hue.setAttribute('aria-valuenow', String(Math.round(hsva.h)))
-      refs.hue.setAttribute('aria-disabled', opts.disabled || opts.readonly ? 'true' : 'false')
-      refs.hue.tabIndex = opts.disabled ? -1 : 0
+      refs.hue.setAttribute('aria-disabled', blocked ? 'true' : 'false')
+      refs.hue.tabIndex = blocked ? -1 : 0
     }
     if (refs.hueThumb) refs.hueThumb.style.left = `${clamp((hsva.h / 360) * 100, 1, 99)}%`
 
@@ -1546,8 +1773,8 @@ export class UIColorPicker extends ElementBase {
       refs.alpha.setAttribute('aria-valuemin', '0')
       refs.alpha.setAttribute('aria-valuemax', '100')
       refs.alpha.setAttribute('aria-valuenow', String(Math.round(hsva.a * 100)))
-      refs.alpha.setAttribute('aria-disabled', opts.disabled || opts.readonly || !this._alphaEnabled() ? 'true' : 'false')
-      refs.alpha.tabIndex = opts.disabled ? -1 : 0
+      refs.alpha.setAttribute('aria-disabled', blocked || !this._alphaEnabled() ? 'true' : 'false')
+      refs.alpha.tabIndex = blocked ? -1 : 0
       refs.alpha.style.backgroundImage = `
         linear-gradient(45deg, var(--ui-cp-checker-a) 25%, transparent 25%),
         linear-gradient(-45deg, var(--ui-cp-checker-a) 25%, transparent 25%),
@@ -1580,29 +1807,33 @@ export class UIColorPicker extends ElementBase {
     if (refs.groupHex) refs.groupHex.hidden = this._format !== 'hex'
     if (refs.groupRgb) refs.groupRgb.hidden = this._format !== 'rgb'
     if (refs.groupHsl) refs.groupHsl.hidden = this._format !== 'hsl'
-    if (refs.inputA1) refs.inputA1.disabled = !this._alphaEnabled() || opts.disabled || opts.readonly
-    if (refs.inputA2) refs.inputA2.disabled = !this._alphaEnabled() || opts.disabled || opts.readonly
+    if (refs.inputA1) refs.inputA1.disabled = !this._alphaEnabled() || blocked
+    if (refs.inputA2) refs.inputA2.disabled = !this._alphaEnabled() || blocked
 
     if (refs.error) {
-      refs.error.hidden = !this._error
-      refs.error.textContent = this._error || ''
+      const errorText = this._error || (opts.state === 'error' ? 'Unable to validate current color value.' : '')
+      refs.error.hidden = !errorText
+      refs.error.textContent = errorText
     }
 
-    const blockInteract = opts.disabled || opts.readonly
-    if (refs.copyHex) refs.copyHex.disabled = opts.disabled
-    if (refs.copyRgb) refs.copyRgb.disabled = opts.disabled
+    const blockInteract = blocked
+    if (refs.copyHex) refs.copyHex.disabled = opts.disabled || opts.loading
+    if (refs.copyRgb) refs.copyRgb.disabled = opts.disabled || opts.loading
     if (refs.eyedropper) {
       const hasEyeDropper = typeof window !== 'undefined' && typeof (window as any).EyeDropper === 'function'
       refs.eyedropper.hidden = !hasEyeDropper
       refs.eyedropper.disabled = blockInteract || !hasEyeDropper
     }
     if (refs.clear) refs.clear.disabled = blockInteract
-    if (refs.apply) refs.apply.hidden = !opts.modePopover
+    if (refs.apply) {
+      refs.apply.hidden = !opts.modePopover
+      refs.apply.disabled = blockInteract
+    }
 
     const inputs = refs.panel.querySelectorAll('.input')
     inputs.forEach((input) => {
       const el = input as HTMLInputElement
-      el.disabled = opts.disabled || opts.readonly
+      el.disabled = blockInteract
     })
 
     if (!opts.skipSwatches && !this._renderingSwatches) {
@@ -1653,15 +1884,17 @@ export class UIColorPicker extends ElementBase {
 
     const action = actionEl.getAttribute('data-action')
     if (action === 'close-popover') {
-      this._setOpen(false, 'text')
+      this._setOpen(false, 'outside')
       return
     }
 
     if (action === 'toggle-popover') {
       if (!this._isPopoverMode()) return
-      this._setOpen(!this._open, 'text')
+      this._setOpen(!this._open, 'toggle')
       return
     }
+
+    if (this._isLoading()) return
 
     if (action === 'format') {
       const format = actionEl.getAttribute('data-format') as ColorFormat | null
@@ -1703,7 +1936,7 @@ export class UIColorPicker extends ElementBase {
     }
 
     if (action === 'apply') {
-      this._setOpen(false, 'text')
+      this._setOpen(false, 'apply')
       return
     }
 
@@ -1729,7 +1962,7 @@ export class UIColorPicker extends ElementBase {
     if (!(target instanceof HTMLInputElement)) return
     if (!target.hasAttribute('data-input')) return
     event.stopPropagation()
-    if (this._isDisabled() || this._isReadonly()) return
+    if (this._isDisabled() || this._isReadonly() || this._isLoading()) return
 
     const parsed = this._parseInputsFromPanel(target.closest('[data-cp-panel]') as HTMLElement | null)
     if (!parsed) {
@@ -1747,7 +1980,7 @@ export class UIColorPicker extends ElementBase {
     if (!(target instanceof HTMLInputElement)) return
     if (!target.hasAttribute('data-input')) return
     event.stopPropagation()
-    if (this._isDisabled() || this._isReadonly()) return
+    if (this._isDisabled() || this._isReadonly() || this._isLoading()) return
 
     const panel = target.closest('[data-cp-panel]') as HTMLElement | null
     const parsed = this._parseInputsFromPanel(panel)
@@ -1768,7 +2001,7 @@ export class UIColorPicker extends ElementBase {
   private _onPanelKeyDown(event: KeyboardEvent, _scope: 'root' | 'overlay'): void {
     const target = this._eventHTMLElement(event)
     if (!target) return
-    if (this._isDisabled()) return
+    if (this._isDisabled() || this._isLoading()) return
 
     if (target instanceof HTMLInputElement && target.hasAttribute('data-input') && event.key === 'Enter') {
       event.preventDefault()
@@ -1788,7 +2021,7 @@ export class UIColorPicker extends ElementBase {
     }
 
     const cp = target.getAttribute('data-cp') as DragTarget | null
-    if (!cp || this._isReadonly()) return
+    if (!cp || this._isReadonly() || this._isLoading()) return
     const step = event.shiftKey ? 5 : 1
     let changed = false
     const next = { ...this._hsva }
@@ -1907,7 +2140,7 @@ export class UIColorPicker extends ElementBase {
   }
 
   private _onPanelPointerDown(event: PointerEvent, _scope: 'root' | 'overlay'): void {
-    if (this._isDisabled() || this._isReadonly()) return
+    if (this._isDisabled() || this._isReadonly() || this._isLoading()) return
     const target = this._eventHTMLElement(event)
     if (!target) return
     const cp = target.closest<HTMLElement>('[data-cp]')?.getAttribute('data-cp') as DragTarget | null
@@ -2037,7 +2270,7 @@ export class UIColorPicker extends ElementBase {
   }
 
   private async _openEyeDropper(): Promise<void> {
-    if (this._isDisabled() || this._isReadonly()) return
+    if (this._isDisabled() || this._isReadonly() || this._isLoading()) return
     if (typeof window === 'undefined') return
     const EyeDropperCtor = (window as any).EyeDropper
     if (typeof EyeDropperCtor !== 'function') return

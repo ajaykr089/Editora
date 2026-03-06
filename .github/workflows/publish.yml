@@ -42,6 +42,9 @@ jobs:
       
       - name: Run tests
         run: npm test
+
+      - name: Run UI package tests
+        run: npm run test:ui
       
       - name: Version packages
         run: |

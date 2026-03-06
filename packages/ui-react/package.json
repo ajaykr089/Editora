@@ -17,17 +17,24 @@
     "dist"
   ],
   "scripts": {
-    "build": "vite build",
+    "build:tsc": "npm --prefix ../ui-core run build:tsc && tsc -p . --emitDeclarationOnly --noEmit false --outDir dist",
+    "build": "npm --prefix ../ui-core run build:tsc && vite build && npm run build:tsc",
     "dev": "vite build --watch",
     "dev:examples": "vite --config examples/vite.config.ts",
     "build:examples": "vite build --config examples/vite.config.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prepare": "npm run build"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.3.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "jsdom": "^22.1.0",
     "typescript": "^5.0.0",
-    "vite": "^7.3.1"
+    "vite": "^4.5.14",
+    "vitest": "^1.6.0"
   },
   "peerDependencies": {
     "react": ">=16.8 <21",
@@ -49,5 +56,6 @@
   ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
+  "sideEffects": true,
   "gitHead": "80e0808ae4909de63b8e0f1dd915b06b33a8ed44"
 }

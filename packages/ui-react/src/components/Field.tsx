@@ -13,6 +13,7 @@ export type FieldProps = React.HTMLAttributes<HTMLElement> & {
   tone?: 'default' | 'brand' | 'success' | 'warning' | 'danger';
   density?: 'default' | 'compact' | 'comfortable';
   shape?: 'default' | 'square' | 'soft';
+  shell?: 'none' | 'outline' | 'filled' | 'soft' | 'line';
   labelWidth?: string;
   headless?: boolean;
 };
@@ -31,6 +32,7 @@ export function Field(props: FieldProps) {
     tone,
     density,
     shape,
+    shell,
     labelWidth,
     headless,
     ...rest
@@ -75,6 +77,9 @@ export function Field(props: FieldProps) {
     if (shape && shape !== 'default') el.setAttribute('shape', shape);
     else el.removeAttribute('shape');
 
+    if (shell && shell !== 'none') el.setAttribute('shell', shell);
+    else el.removeAttribute('shell');
+
     if (labelWidth) el.setAttribute('label-width', labelWidth);
     else el.removeAttribute('label-width');
 
@@ -92,6 +97,7 @@ export function Field(props: FieldProps) {
     tone,
     density,
     shape,
+    shell,
     labelWidth,
     headless
   ]);
