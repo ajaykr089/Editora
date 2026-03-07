@@ -1,0 +1,24 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "baseUrl": "..",
+    "paths": {
+      "@editora/ui-react": ["packages/ui-react/src/index.tsx"],
+      "@editora/ui-react/*": ["packages/ui-react/src/*"],
+      "@editora/ui-core": ["packages/ui-core/src/index.ts"],
+      "@editora/ui-core/*": ["packages/ui-core/src/*"],
+      "@editora/toast": ["packages/editora-toast/src/index.ts"],
+      "@editora/toast/*": ["packages/editora-toast/src/*"],
+      "@editora/editor": ["packages/react/src/index.ts"],
+      "@editora/editor/*": ["packages/react/src/*"],
+      "@editora/react-icons": ["packages/react-icons/src/index.ts"],
+      "@editora/react-icons/*": ["packages/react-icons/src/*"],
+      "@editora/icons": ["packages/icons/src/index.ts"],
+      "@editora/icons/*": ["packages/icons/src/*"]
+    }
+  },
+  "include": [
+    "./**/*"
+  ]
+}

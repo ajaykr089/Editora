@@ -4,8 +4,8 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@editora/icons": ["../icons/dist/index"],
-      "@editora/icons/*": ["../icons/dist/*"]
+      "@editora/icons": ["../icons/dist/index", "../icons/src/index.ts"],
+      "@editora/icons/*": ["../icons/dist/*", "../icons/src/*"]
     },
     "outDir": "dist",
     "rootDir": "src",

@@ -37,9 +37,8 @@ export function normalizeOptions(options: SlashCommandsPluginOptions): Required<
     requireBoundary: options.requireBoundary !== false,
     includeDefaultItems,
     items: normalizeItems(sourceItems),
-    itemRenderer: options.itemRenderer,
+    itemRenderer: options.itemRenderer || ((item) => item.label),
     emptyStateText: options.emptyStateText || 'No commands found',
     panelLabel: options.panelLabel || 'Slash commands',
   };
 }
-

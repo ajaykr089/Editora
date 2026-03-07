@@ -1227,10 +1227,13 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
     updatePosition();
   }
 
+  const toolbar = floatingToolbar;
+  if (!toolbar) return;
+
   const isImage = media.tagName === 'IMG';
   const existingLink = (media as HTMLElement).closest('a');
 
-  floatingToolbar.innerHTML = `
+  toolbar.innerHTML = `
     <button class="media-floating-toolbar-btn btn-align-left" title="Align Left" type="button">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="17" y1="18" x2="3" y2="18"></line></svg>
     </button>
@@ -1269,7 +1272,7 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
   const handleReposition = () => updatePosition();
   
   // Listen for scroll events on parent elements and window
-  let currentElement: Element | null = selectedMedia.parentElement;
+  let currentElement: Element | null = media.parentElement;
   while (currentElement) {
     currentElement.addEventListener('scroll', handleReposition);
     currentElement = currentElement.parentElement;
@@ -1279,8 +1282,8 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
   window.addEventListener('resize', handleReposition);
   
   // Store cleanup function
-  (floatingToolbar as any)._cleanup = () => {
-    let element: Element | null = selectedMedia?.parentElement;
+  (toolbar as any)._cleanup = () => {
+    let element: Element | null = media.parentElement;
     while (element) {
       element.removeEventListener('scroll', handleReposition);
       element = element.parentElement;
@@ -1290,7 +1293,7 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
   };
 
   // Align Left
-  floatingToolbar.querySelector('.btn-align-left')?.addEventListener('click', () => {
+  toolbar.querySelector('.btn-align-left')?.addEventListener('click', () => {
     media.style.display = 'block';
     media.style.marginLeft = '0';
     media.style.marginRight = 'auto';
@@ -1298,7 +1301,7 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
   });
 
   // Align Center
-  floatingToolbar.querySelector('.btn-align-center')?.addEventListener('click', () => {
+  toolbar.querySelector('.btn-align-center')?.addEventListener('click', () => {
     media.style.display = 'block';
     media.style.marginLeft = 'auto';
     media.style.marginRight = 'auto';
@@ -1306,7 +1309,7 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
   });
 
   // Align Right
-  floatingToolbar.querySelector('.btn-align-right')?.addEventListener('click', () => {
+  toolbar.querySelector('.btn-align-right')?.addEventListener('click', () => {
     media.style.display = 'block';
     media.style.marginLeft = 'auto';
     media.style.marginRight = '0';
@@ -1314,25 +1317,25 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
   });
 
   // Edit Alt Text (Images only)
-  floatingToolbar.querySelector('.btn-alt')?.addEventListener('click', () => {
+  toolbar.querySelector('.btn-alt')?.addEventListener('click', () => {
     if (media.tagName === 'IMG') {
       showAltTextDialog(media as HTMLImageElement);
     }
   });
 
   // Add/Edit Link
-  floatingToolbar.querySelector('.btn-link')?.addEventListener('click', () => {
+  toolbar.querySelector('.btn-link')?.addEventListener('click', () => {
     showLinkDialogForMedia(media);
   });
 
   // Replace Image
-  floatingToolbar.querySelector('.btn-replace')?.addEventListener('click', () => {
+  toolbar.querySelector('.btn-replace')?.addEventListener('click', () => {
     if (media.tagName === 'IMG') {
       showReplaceImageDialog(media as HTMLImageElement);
     }
   });
 
-  floatingToolbar.querySelector('.btn-resize')?.addEventListener('click', () => {
+  toolbar.querySelector('.btn-resize')?.addEventListener('click', () => {
     const width = prompt('Enter width in pixels:', String(media.width || media.offsetWidth));
     if (width && !isNaN(parseInt(width))) {
       const w = parseInt(width);
@@ -1343,7 +1346,7 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
     }
   });
 
-  floatingToolbar.querySelector('.btn-remove')?.addEventListener('click', () => {
+  toolbar.querySelector('.btn-remove')?.addEventListener('click', () => {
     if (confirm('Remove this media?')) {
       media.remove();
       if (floatingToolbar) {
@@ -1360,7 +1363,7 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
 
   // Add scroll and resize event listeners (matching resize handles approach)
   // Store cleanup function for later removal
-  (floatingToolbar as any)._cleanup = () => {
+  (toolbar as any)._cleanup = () => {
     window.removeEventListener('scroll', updatePosition);
     window.removeEventListener('resize', updatePosition);
   };

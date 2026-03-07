@@ -4,10 +4,10 @@
     "jsx": "react",
     "baseUrl": ".",
     "paths": {
-      "@editora/ui-core": ["../ui-core/dist/index"],
-      "@editora/ui-core/*": ["../ui-core/dist/*"],
-      "@editora/toast": ["../editora-toast/dist/index"],
-      "@editora/toast/*": ["../editora-toast/dist/*"]
+      "@editora/ui-core": ["../ui-core/dist/index", "../ui-core/src/index.ts"],
+      "@editora/ui-core/*": ["../ui-core/dist/*", "../ui-core/src/*"],
+      "@editora/toast": ["../editora-toast/dist/index", "../editora-toast/src/index.ts"],
+      "@editora/toast/*": ["../editora-toast/dist/*", "../editora-toast/src/*"]
     },
     "outDir": "dist",
     "rootDir": "src",

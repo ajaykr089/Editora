@@ -57,6 +57,12 @@ export interface MentionApiConfig {
   onError?: (error: unknown, ctx: MentionApiRequestContext) => void;
 }
 
+type NormalizedMentionPluginOptions = Omit<
+  Required<MentionPluginOptions>,
+  'api' | 'search' | 'itemRenderer'
+> &
+  Pick<MentionPluginOptions, 'api' | 'search' | 'itemRenderer'>;
+
 interface MentionState {
   editor: HTMLElement;
   panel: HTMLDivElement | null;
@@ -319,7 +325,7 @@ function getCaretRect(editor: HTMLElement, range: Range): DOMRect {
   return rect;
 }
 
-function ensurePanel(state: MentionState, options: Required<MentionPluginOptions>): void {
+function ensurePanel(state: MentionState, options: NormalizedMentionPluginOptions): void {
   if (state.panel && state.list) return;
 
   const panel = document.createElement('div');
@@ -412,7 +418,7 @@ function highlightMatch(label: string, query: string): string {
   return `${start}<mark>${match}</mark>${end}`;
 }
 
-function renderMentionList(state: MentionState, options: Required<MentionPluginOptions>): void {
+function renderMentionList(state: MentionState, options: NormalizedMentionPluginOptions): void {
   if (!state.list) return;
 
   const list = state.list;
@@ -540,7 +546,7 @@ function buildMentionApiRequest(
 
 async function fetchMentionItemsFromApi(
   state: MentionState,
-  options: Required<MentionPluginOptions>,
+  options: NormalizedMentionPluginOptions,
   query: string,
   trigger: string,
 ): Promise<MentionItem[]> {
@@ -624,7 +630,7 @@ async function fetchMentionItemsFromApi(
 
 async function resolveSuggestions(
   state: MentionState,
-  options: Required<MentionPluginOptions>,
+  options: NormalizedMentionPluginOptions,
   query: string,
   trigger: string,
 ): Promise<MentionItem[]> {
@@ -651,7 +657,7 @@ async function resolveSuggestions(
   return normalizeMentionItems(items, options.maxSuggestions);
 }
 
-function insertMentionToken(state: MentionState, options: Required<MentionPluginOptions>, item: MentionItem): boolean {
+function insertMentionToken(state: MentionState, options: NormalizedMentionPluginOptions, item: MentionItem): boolean {
   const editor = state.editor;
   normalizeMentionNodes(editor);
   const selection = window.getSelection();
@@ -706,7 +712,7 @@ function insertMentionToken(state: MentionState, options: Required<MentionPlugin
   return true;
 }
 
-function selectMentionAtIndex(state: MentionState, options: Required<MentionPluginOptions>, index: number): void {
+function selectMentionAtIndex(state: MentionState, options: NormalizedMentionPluginOptions, index: number): void {
   if (index < 0 || index >= state.items.length) return;
   const item = state.items[index];
   insertMentionToken(state, options, item);
@@ -823,7 +829,7 @@ function removeAdjacentMention(editor: HTMLElement, direction: 'backward' | 'for
 
 function updateMentionPanel(
   state: MentionState,
-  options: Required<MentionPluginOptions>,
+  options: NormalizedMentionPluginOptions,
   range: Range,
   query: string,
   trigger: string,
@@ -875,7 +881,7 @@ function updateMentionPanel(
   }
 }
 
-function handleEditorInput(state: MentionState, options: Required<MentionPluginOptions>): void {
+function handleEditorInput(state: MentionState, options: NormalizedMentionPluginOptions): void {
   const editor = state.editor;
   normalizeMentionNodes(editor);
   let range = getSelectionRangeInEditor(editor);
@@ -957,7 +963,7 @@ function destroyMentionState(editor: HTMLElement): void {
   editorStates.delete(editor);
 }
 
-function attachEditorHandlers(editor: HTMLElement, state: MentionState, options: Required<MentionPluginOptions>): void {
+function attachEditorHandlers(editor: HTMLElement, state: MentionState, options: NormalizedMentionPluginOptions): void {
   if (editorHandlers.has(editor)) return;
   normalizeMentionNodes(editor);
 
@@ -1216,7 +1222,7 @@ function ensureStylesInjected(): void {
   document.head.appendChild(style);
 }
 
-function normalizeOptions(options: MentionPluginOptions): Required<MentionPluginOptions> {
+function normalizeOptions(options: MentionPluginOptions): NormalizedMentionPluginOptions {
   const triggerChars = (options.triggerChars || ['@'])
     .filter((value) => typeof value === 'string' && value.length > 0)
     .map((value) => value[0]);
@@ -1249,7 +1255,7 @@ function getOrCreateState(editor: HTMLElement): MentionState {
   return created;
 }
 
-function bindGlobalFocusIn(options: Required<MentionPluginOptions>): void {
+function bindGlobalFocusIn(options: NormalizedMentionPluginOptions): void {
   if (globalFocusInBound) return;
   globalFocusInBound = true;
 
