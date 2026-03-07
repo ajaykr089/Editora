@@ -28,9 +28,9 @@
     "README.md"
   ],
   "scripts": {
-    "build": "node ../../node_modules/vite/bin/vite.js build && npm run build:tsc",
-    "build:tsc": "node ../../node_modules/typescript/bin/tsc -p . --emitDeclarationOnly --noEmit false --outDir dist",
-    "dev": "node ../../node_modules/vite/bin/vite.js build --watch",
+    "build": "vite build --config vite.config.mts && npm run build:tsc",
+    "build:tsc": "tsc -p . --emitDeclarationOnly --noEmit false --outDir dist",
+    "dev": "vite build --config vite.config.mts --watch",
     "clean": "rimraf dist",
     "prepare": "npm run build"
   },

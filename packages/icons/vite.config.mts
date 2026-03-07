@@ -12,8 +12,8 @@ export default defineConfig({
       output: {
         exports: 'named',
         interop: 'auto',
-        esModule: true,
-      },
+        esModule: true
+      }
     }
   }
 });
