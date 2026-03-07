@@ -1,5 +1,10 @@
 # @editora/content-rules
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 `@editora/content-rules` adds native content governance checks to Editora (required sections, banned words, readability, and sentence-length rules).
 
 ## Features

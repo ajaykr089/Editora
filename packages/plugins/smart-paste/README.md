@@ -1,5 +1,10 @@
 # @editora/smart-paste
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 `@editora/smart-paste` provides high-fidelity clipboard handling for rich documents pasted from Microsoft Word, Google Docs, and arbitrary HTML sources.
 
 It applies cleanup profiles at paste-time, keeps instance state isolated per editor, and exposes native commands/shortcuts for quick operator control.

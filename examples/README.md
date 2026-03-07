@@ -1,5 +1,10 @@
 # Editora Examples
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 This directory contains example projects demonstrating different use cases of the Editora Rich Text Editor (v1.0.3).
 
 ## 📁 Examples

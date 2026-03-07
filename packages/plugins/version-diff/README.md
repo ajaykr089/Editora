@@ -1,5 +1,10 @@
 # @editora/version-diff
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 `@editora/version-diff` compares baseline and current editor content in an accessible diff dialog.
 
 ## Features

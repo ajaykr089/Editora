@@ -1,5 +1,10 @@
 # @editora/doc-schema
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 `@editora/doc-schema` provides structured authoring workflows for contracts, SOPs, and policy documents. It validates heading structure, highlights schema violations, and can insert missing required sections.
 
 ## Features

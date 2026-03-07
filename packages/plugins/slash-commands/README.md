@@ -1,5 +1,10 @@
 # @editora/slash-commands
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 Slash command palette plugin for Editora. Type `/` to quickly run editor commands.
 
 ## Features

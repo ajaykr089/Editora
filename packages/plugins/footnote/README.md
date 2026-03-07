@@ -1,5 +1,10 @@
 # @editora/footnote
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 Footnote plugin for Editora rich text editor.
 
 ## What It Does

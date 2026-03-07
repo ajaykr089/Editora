@@ -1,5 +1,10 @@
 # Fullscreen Plugin
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 A comprehensive fullscreen plugin for the Rich Text Editor that allows users to expand the editor to fill the entire viewport.
 
 ## Features

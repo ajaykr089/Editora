@@ -1,5 +1,10 @@
 # @editora/capitalization
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 Capitalization plugin for Editora rich text editor.
 
 ## What It Does

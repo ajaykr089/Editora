@@ -1,5 +1,10 @@
 # Editora Toast
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 > Advanced toast notification system with enterprise features, backward compatibility, and rich customization options.
 
 [![Version](https://img.shields.io/npm/v/@editora/toast)](https://www.npmjs.com/package/@editora/toast)
@@ -88,7 +93,7 @@ npm install @editora/toast
 
 You can also use Editora Toast directly from a CDN without installing it via npm. Include the following scripts in your HTML:
 ### Examples
-``` https://editora-free.netlify.app/toast-demo.html ```
+``` https://editora-ecosystem.netlify.app/toast-demo.html ```
 ### Basic CDN Setup
 
 ```html

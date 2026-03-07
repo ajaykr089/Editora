@@ -1,5 +1,10 @@
 # @editora/plugin-bold
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 Bold formatting plugin for Editora rich text editor.
 
 ## Installation

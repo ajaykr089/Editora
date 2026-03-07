@@ -1,5 +1,10 @@
 # @editora/pii-redaction
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 `@editora/pii-redaction` detects sensitive data patterns (PII/secrets) and helps redact them before documents are shared, exported, or approved.
 
 ## Features

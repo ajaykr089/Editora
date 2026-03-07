@@ -1,5 +1,10 @@
 # @editora/translation-workflow
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 `@editora/translation-workflow` adds localization QA workflows directly in the editor: segment locking, source-target preview, and per-locale validation.
 
 ## Features
