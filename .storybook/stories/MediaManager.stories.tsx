@@ -38,6 +38,11 @@ const meta: Meta<typeof EditoraEditor> = {
   component: EditoraEditor,
   parameters: {
     layout: "padded",
+    docs: {
+      source: {
+        type: "code",
+      },
+    },
   },
 };
 

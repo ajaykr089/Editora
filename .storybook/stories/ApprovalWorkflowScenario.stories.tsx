@@ -31,6 +31,9 @@ const meta: Meta = {
   parameters: {
     layout: "padded",
     docs: {
+      source: {
+        type: "code",
+      },
       description: {
         component:
           "Scenario story for validating Approval Workflow in a realistic editorial process with required sign-off comments, lock-on-approval, and multi-instance checks.",

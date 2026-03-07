@@ -28,6 +28,9 @@ const meta: Meta = {
   parameters: {
     layout: "padded",
     docs: {
+      source: {
+        type: "code",
+      },
       description: {
         component:
           "Scenario story for validating PII detection/redaction lifecycle with realtime scan, redact-all flow, and multi-instance isolation.",

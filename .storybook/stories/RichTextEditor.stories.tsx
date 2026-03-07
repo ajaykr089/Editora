@@ -68,11 +68,15 @@ import {
 import { Box, Flex, Grid} from '@editora/ui-react';
 
 
-const meta: Meta = {
+const meta: Meta<typeof EditoraEditor> = {
   title: "Editor/Rich Text Editor - Web Component",
+  component: EditoraEditor,
   parameters: {
     layout: "padded",
     docs: {
+      source: {
+        type: "code",
+      },
       description: {
         component: `
 # Editora Web Component - Framework Agnostic Rich Text Editor
@@ -95,10 +99,10 @@ const meta: Meta = {
 };
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof meta>;
 
 // All native plugins
-const allNativePlugins = [
+export const allNativePlugins = [
   BoldPlugin(),
   ItalicPlugin(),
   UnderlinePlugin(),

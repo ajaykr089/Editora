@@ -16,6 +16,13 @@ import '@editora/themes/themes/default.css';
 const meta: Meta<typeof Alert> = {
   title: 'UI/Alert',
   component: Alert,
+  parameters: {
+    docs: {
+      source: {
+        type: 'code',
+      },
+    },
+  },
 };
 
 export default meta;
@@ -195,4 +202,3 @@ function EnterpriseAlertCenter() {
 }
 
 export const EnterpriseClinicalAlerts = EnterpriseAlertCenter;
-

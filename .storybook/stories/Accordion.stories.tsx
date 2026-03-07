@@ -17,6 +17,13 @@ import '@editora/themes/themes/default.css';
 const meta: Meta<typeof Accordion> = {
   title: 'UI/Accordion',
   component: Accordion,
+  parameters: {
+    docs: {
+      source: {
+        type: 'code',
+      },
+    },
+  },
 };
 
 export default meta;
