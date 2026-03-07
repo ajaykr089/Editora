@@ -1,7 +1,16 @@
 {
   "name": "@editora/ui-react",
   "version": "0.1.4",
-  "description": "React wrappers and hooks for Web Components in the Editora UI ecosystem",
+  "description": "Enterprise React component library with SaaS UI components, modern design system patterns, and wrappers for Editora UI Core.",
+  "homepage": "https://editora-ecosystem.netlify.app/docs/ui-react",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/ui-react"
+  },
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -46,6 +55,12 @@
   },
   "keywords": [
     "editora",
+    "react ui library",
+    "react component library",
+    "saas ui components",
+    "enterprise react components",
+    "modern design system",
+    "rich text editor react",
     "editora ui ecosystem",
     "ui-react",
     "react",

@@ -1,7 +1,7 @@
 {
   "name": "@editora/light-code-editor",
   "version": "1.0.7",
-  "description": "Lightweight, extensible code editor for the web — syntax highlighting, line numbers, code folding, and a plugin-friendly API. Ideal for embedding in docs, demos, and web apps.",
+  "description": "Lightweight code editor for React and web apps with syntax highlighting, search/replace, extensions, and enterprise SaaS integration patterns.",
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
   ],
@@ -32,6 +32,12 @@
     "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
+    "react ui library",
+    "react component library",
+    "saas ui components",
+    "enterprise react components",
+    "modern design system",
+    "rich text editor react",
     "code-editor",
     "lightweight-editor",
     "syntax-highlighting",
@@ -48,7 +54,7 @@
     "url": "https://github.com/ajaykr089/Editora.git",
     "directory": "packages/light-code-editor"
   },
-  "homepage": "https://github.com/ajaykr089/Editora#readme",
+  "homepage": "https://editora-ecosystem.netlify.app/docs/packages/light-code-editor",
   "bugs": {
     "url": "https://github.com/ajaykr089/Editora/issues"
   },
@@ -61,7 +67,7 @@
   "devDependencies": {
     "@types/react": "^18.0.0",
     "typescript": "^5.0.0",
-    "vite": "^7.3.1"
+    "vite": "^4.5.14"
   },
   "gitHead": "80e0808ae4909de63b8e0f1dd915b06b33a8ed44"
 }

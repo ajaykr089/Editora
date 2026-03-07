@@ -1,0 +1,46 @@
+# Editora LLM Index
+
+Project: Editora
+Website: https://editora-ecosystem.netlify.app/
+Storybook: https://editora-ecosystem-storybook.netlify.app/
+Docs: https://editora-ecosystem.netlify.app/docs/intro
+AI Usage: https://editora-ecosystem.netlify.app/docs/ai-usage
+Prompt Pack: https://editora-ecosystem.netlify.app/docs/editora-prompts
+Editor AI Usage: https://editora-ecosystem.netlify.app/docs/editor/ai-usage
+Editor Prompt Pack: https://editora-ecosystem.netlify.app/docs/editor/editora-prompts
+Toast AI Usage: https://editora-ecosystem.netlify.app/docs/toast/ai-usage
+Toast Prompt Pack: https://editora-ecosystem.netlify.app/docs/toast/editora-prompts
+React Icons AI Usage: https://editora-ecosystem.netlify.app/docs/react-icons/ai-usage
+React Icons Prompt Pack: https://editora-ecosystem.netlify.app/docs/react-icons/editora-prompts
+Light Code Editor AI Usage: https://editora-ecosystem.netlify.app/docs/packages/light-code-editor-ai-usage
+Light Code Editor Prompt Pack: https://editora-ecosystem.netlify.app/docs/packages/light-code-editor-prompts
+
+Primary packages:
+- @editora/core (framework-agnostic editor runtime)
+- @editora/react (React adapter for editor)
+- @editora/plugins (plugin pack)
+- @editora/themes (theme tokens and presets)
+- @editora/ui-core (framework-agnostic UI web components)
+- @editora/ui-react (React wrappers for ui-core)
+- @editora/icons
+- @editora/react-icons
+- @editora/toast
+
+Machine-readable registries:
+- https://editora-ecosystem.netlify.app/components.json
+- https://editora-ecosystem.netlify.app/components.schema.json
+
+Authoring rules for AI-generated snippets:
+1. Use real imports from @editora/* packages.
+2. Prefer ui-core primitives for framework-agnostic examples.
+3. Use ui-react only as wrappers of ui-core components.
+4. Do not use placeholder/fake tags (for example, <EnterpriseClinicalAccordion />).
+5. Return runnable snippets with complete imports.
+
+CLI quick-add commands:
+- npx editora add button
+- npx editora add modal
+- npx editora add datatable
+- npx editora add editor
+- npx editora add toast
+- Supports all exported @editora/ui-react component names (for example: accordion, avatar, select, ui-date-picker).

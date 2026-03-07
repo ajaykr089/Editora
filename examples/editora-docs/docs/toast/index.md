@@ -8,6 +8,11 @@ keywords: [toast, notifications, ui, accessibility]
 
 Notification patterns and full API reference for `@editora/toast` in the Editora ecosystem.
 
+## AI Guides
+
+- [Toast AI Usage](./ai-usage)
+- [Toast Prompt Pack](./editora-prompts)
+
 ## Installation
 
 ```bash

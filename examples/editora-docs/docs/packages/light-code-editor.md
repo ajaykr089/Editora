@@ -8,6 +8,11 @@ keywords: [editora, light-code-editor, search, replace, regex, whole-word]
 
 `@editora/light-code-editor` is a small, extensible code editor focused on source editing flows.
 
+## AI Guides
+
+- [Light Code Editor AI Usage](./light-code-editor-ai-usage)
+- [Light Code Editor Prompt Pack](./light-code-editor-prompts)
+
 ## Installation
 
 ```bash
@@ -70,4 +75,3 @@ editor.executeCommand("replace");
 
 - Matching uses normalized text offsets to avoid marker-related range drift.
 - Search highlights use native `CSS Highlight API` when available, with fallback behavior where not supported.
-

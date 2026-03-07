@@ -1,0 +1,2419 @@
+{
+  "$schema": "./components.schema.json",
+  "meta": {
+    "schemaVersion": "1.0.0",
+    "generatedAt": "1970-01-01T00:00:00.000Z",
+    "project": "Editora",
+    "website": "https://editora-ecosystem.netlify.app/",
+    "storybook": "https://editora-ecosystem-storybook.netlify.app/",
+    "docs": "https://editora-ecosystem.netlify.app/docs/intro",
+    "status": "initial",
+    "notes": [
+      "This registry is intended for AI assistants and developer tooling.",
+      "Storybook paths are normalized guesses for quick lookup; verify exact story IDs when needed.",
+      "Use package exports as the source of truth for runtime integration."
+    ]
+  },
+  "packageDocs": {
+    "@editora/core": "https://editora-ecosystem.netlify.app/docs/editor/core",
+    "@editora/react": "https://editora-ecosystem.netlify.app/docs/editor/react",
+    "@editora/plugins": "https://editora-ecosystem.netlify.app/docs/editor/plugins",
+    "@editora/themes": "https://editora-ecosystem.netlify.app/docs/editor/themes",
+    "@editora/ui-core": "https://editora-ecosystem.netlify.app/docs/ui-core",
+    "@editora/ui-react": "https://editora-ecosystem.netlify.app/docs/ui-react",
+    "@editora/icons": "https://editora-ecosystem.netlify.app/docs/icons",
+    "@editora/react-icons": "https://editora-ecosystem.netlify.app/docs/react-icons",
+    "@editora/toast": "https://editora-ecosystem.netlify.app/docs/toast"
+  },
+  "aiDefaults": {
+    "requiredImports": [
+      "@editora/ui-react",
+      "@editora/react-icons",
+      "@editora/toast"
+    ],
+    "componentPriority": [
+      "ui-core for framework-agnostic primitives",
+      "ui-react only as wrappers"
+    ],
+    "codeStyle": [
+      "use real package imports",
+      "avoid placeholder components",
+      "prefer runnable snippets"
+    ]
+  },
+  "components": [
+    {
+      "id": "ui-core:ui-accordion",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "accordion",
+      "tagName": "ui-accordion",
+      "source": "packages/ui-core/src/components/ui-accordion.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-accordion--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-alert-dialog",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "alert-dialog",
+      "tagName": "ui-alert-dialog",
+      "source": "packages/ui-core/src/components/ui-alert-dialog.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-alert-dialog--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-alert",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "alert",
+      "tagName": "ui-alert",
+      "source": "packages/ui-core/src/components/ui-alert.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-alert--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-app-header",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "app-header",
+      "tagName": "ui-app-header",
+      "source": "packages/ui-core/src/components/ui-app-header.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-app-header--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-aspect-ratio",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "aspect-ratio",
+      "tagName": "ui-aspect-ratio",
+      "source": "packages/ui-core/src/components/ui-aspect-ratio.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-aspect-ratio--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-avatar",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "avatar",
+      "tagName": "ui-avatar",
+      "source": "packages/ui-core/src/components/ui-avatar.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-avatar--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-badge",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "badge",
+      "tagName": "ui-badge",
+      "source": "packages/ui-core/src/components/ui-badge.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-badge--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-block-controls",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "block-controls",
+      "tagName": "ui-block-controls",
+      "source": "packages/ui-core/src/components/ui-block-controls.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-block-controls--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-box",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "box",
+      "tagName": "ui-box",
+      "source": "packages/ui-core/src/components/ui-box.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-box--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-breadcrumb",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "breadcrumb",
+      "tagName": "ui-breadcrumb",
+      "source": "packages/ui-core/src/components/ui-breadcrumb.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-breadcrumb--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-button",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "button",
+      "tagName": "ui-button",
+      "source": "packages/ui-core/src/components/ui-button.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-button--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-calendar",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "calendar",
+      "tagName": "ui-calendar",
+      "source": "packages/ui-core/src/components/ui-calendar.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-calendar--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-chart",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "chart",
+      "tagName": "ui-chart",
+      "source": "packages/ui-core/src/components/ui-chart.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-chart--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-checkbox",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "checkbox",
+      "tagName": "ui-checkbox",
+      "source": "packages/ui-core/src/components/ui-checkbox.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-checkbox--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-collapsible",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "collapsible",
+      "tagName": "ui-collapsible",
+      "source": "packages/ui-core/src/components/ui-collapsible.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-collapsible--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-color-picker",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "color-picker",
+      "tagName": "ui-color-picker",
+      "source": "packages/ui-core/src/components/ui-color-picker.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-color-picker--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-combobox",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "combobox",
+      "tagName": "ui-combobox",
+      "source": "packages/ui-core/src/components/ui-combobox.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-combobox--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-command-palette",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "command-palette",
+      "tagName": "ui-command-palette",
+      "source": "packages/ui-core/src/components/ui-command-palette.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-command-palette--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-container",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "container",
+      "tagName": "ui-container",
+      "source": "packages/ui-core/src/components/ui-container.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-container--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-context-menu",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "context-menu",
+      "tagName": "ui-context-menu",
+      "source": "packages/ui-core/src/components/ui-context-menu.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-context-menu--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-data-table",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "data-table",
+      "tagName": "ui-data-table",
+      "source": "packages/ui-core/src/components/ui-data-table.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-data-table--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-date-picker",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "date-picker",
+      "tagName": "ui-date-picker",
+      "source": "packages/ui-core/src/components/ui-date-picker.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-date-picker--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-date-range-picker",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "date-range-picker",
+      "tagName": "ui-date-range-picker",
+      "source": "packages/ui-core/src/components/ui-date-range-picker.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-date-range-picker--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-date-range-time-picker",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "date-range-time-picker",
+      "tagName": "ui-date-range-time-picker",
+      "source": "packages/ui-core/src/components/ui-date-range-time-picker.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-date-range-time-picker--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-date-time-picker",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "date-time-picker",
+      "tagName": "ui-date-time-picker",
+      "source": "packages/ui-core/src/components/ui-date-time-picker.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-date-time-picker--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-dialog",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "dialog",
+      "tagName": "ui-dialog",
+      "source": "packages/ui-core/src/components/ui-dialog.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-dialog--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-direction-provider",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "direction-provider",
+      "tagName": "ui-direction-provider",
+      "source": "packages/ui-core/src/components/ui-direction-provider.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-direction-provider--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-drawer",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "drawer",
+      "tagName": "ui-drawer",
+      "source": "packages/ui-core/src/components/ui-drawer.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-drawer--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-dropdown",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "dropdown",
+      "tagName": "ui-dropdown",
+      "source": "packages/ui-core/src/components/ui-dropdown.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-dropdown--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-empty-state",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "empty-state",
+      "tagName": "ui-empty-state",
+      "source": "packages/ui-core/src/components/ui-empty-state.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-empty-state--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-field",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "field",
+      "tagName": "ui-field",
+      "source": "packages/ui-core/src/components/ui-field.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-field--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-flex",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "flex",
+      "tagName": "ui-flex",
+      "source": "packages/ui-core/src/components/ui-flex.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-flex--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-floating-toolbar",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "floating-toolbar",
+      "tagName": "ui-floating-toolbar",
+      "source": "packages/ui-core/src/components/ui-floating-toolbar.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-floating-toolbar--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-form",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "form",
+      "tagName": "ui-form",
+      "source": "packages/ui-core/src/components/ui-form.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-form--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-gantt",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "gantt",
+      "tagName": "ui-gantt",
+      "source": "packages/ui-core/src/components/ui-gantt.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-gantt--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-grid",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "grid",
+      "tagName": "ui-grid",
+      "source": "packages/ui-core/src/components/ui-grid.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-grid--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-hover-card",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "hover-card",
+      "tagName": "ui-hover-card",
+      "source": "packages/ui-core/src/components/ui-hover-card.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-hover-card--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-icon",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "icon",
+      "tagName": "ui-icon",
+      "source": "packages/ui-core/src/components/ui-icon.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-icon--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-input",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "input",
+      "tagName": "ui-input",
+      "source": "packages/ui-core/src/components/ui-input.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-input--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-label",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "label",
+      "tagName": "ui-label",
+      "source": "packages/ui-core/src/components/ui-label.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-label--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-layout",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "layout",
+      "tagName": "ui-layout",
+      "source": "packages/ui-core/src/components/ui-layout.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-layout--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-menu",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "menu",
+      "tagName": "ui-menu",
+      "source": "packages/ui-core/src/components/ui-menu.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-menu--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-menubar",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "menubar",
+      "tagName": "ui-menubar",
+      "source": "packages/ui-core/src/components/ui-menubar.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-menubar--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-navigation-menu",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "navigation-menu",
+      "tagName": "ui-navigation-menu",
+      "source": "packages/ui-core/src/components/ui-navigation-menu.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-navigation-menu--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-pagination",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "pagination",
+      "tagName": "ui-pagination",
+      "source": "packages/ui-core/src/components/ui-pagination.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-pagination--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-plugin-panel",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "plugin-panel",
+      "tagName": "ui-plugin-panel",
+      "source": "packages/ui-core/src/components/ui-plugin-panel.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-plugin-panel--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-popover",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "popover",
+      "tagName": "ui-popover",
+      "source": "packages/ui-core/src/components/ui-popover.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-popover--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-portal",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "portal",
+      "tagName": "ui-portal",
+      "source": "packages/ui-core/src/components/ui-portal.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-portal--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-presence",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "presence",
+      "tagName": "ui-presence",
+      "source": "packages/ui-core/src/components/ui-presence.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-presence--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-progress",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "progress",
+      "tagName": "ui-progress",
+      "source": "packages/ui-core/src/components/ui-progress.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-progress--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-quick-actions",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "quick-actions",
+      "tagName": "ui-quick-actions",
+      "source": "packages/ui-core/src/components/ui-quick-actions.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-quick-actions--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-radio-group",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "radio-group",
+      "tagName": "ui-radio-group",
+      "source": "packages/ui-core/src/components/ui-radio-group.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-radio-group--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-scroll-area",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "scroll-area",
+      "tagName": "ui-scroll-area",
+      "source": "packages/ui-core/src/components/ui-scroll-area.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-scroll-area--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-section",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "section",
+      "tagName": "ui-section",
+      "source": "packages/ui-core/src/components/ui-section.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-section--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-select",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "select",
+      "tagName": "ui-select",
+      "source": "packages/ui-core/src/components/ui-select.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-select--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-selection-popup",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "selection-popup",
+      "tagName": "ui-selection-popup",
+      "source": "packages/ui-core/src/components/ui-selection-popup.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-selection-popup--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-separator",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "separator",
+      "tagName": "ui-separator",
+      "source": "packages/ui-core/src/components/ui-separator.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-separator--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-sidebar",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "sidebar",
+      "tagName": "ui-sidebar",
+      "source": "packages/ui-core/src/components/ui-sidebar.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-sidebar--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-skeleton",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "skeleton",
+      "tagName": "ui-skeleton",
+      "source": "packages/ui-core/src/components/ui-skeleton.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-skeleton--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-slider",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "slider",
+      "tagName": "ui-slider",
+      "source": "packages/ui-core/src/components/ui-slider.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-slider--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-slot",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "slot",
+      "tagName": "ui-slot",
+      "source": "packages/ui-core/src/components/ui-slot.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-slot--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-stepper",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "stepper",
+      "tagName": "ui-stepper",
+      "source": "packages/ui-core/src/components/ui-stepper.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-stepper--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-switch",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "switch",
+      "tagName": "ui-switch",
+      "source": "packages/ui-core/src/components/ui-switch.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-switch--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-table",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "table",
+      "tagName": "ui-table",
+      "source": "packages/ui-core/src/components/ui-table.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-table--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-tabs",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "tabs",
+      "tagName": "ui-tabs",
+      "source": "packages/ui-core/src/components/ui-tabs.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-tabs--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-textarea",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "textarea",
+      "tagName": "ui-textarea",
+      "source": "packages/ui-core/src/components/ui-textarea.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-textarea--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-time-picker",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "time-picker",
+      "tagName": "ui-time-picker",
+      "source": "packages/ui-core/src/components/ui-time-picker.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-time-picker--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-timeline",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "timeline",
+      "tagName": "ui-timeline",
+      "source": "packages/ui-core/src/components/ui-timeline.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-timeline--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-toast",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "toast",
+      "tagName": "ui-toast",
+      "source": "packages/ui-core/src/components/ui-toast.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-toast--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-toggle-group",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "toggle-group",
+      "tagName": "ui-toggle-group",
+      "source": "packages/ui-core/src/components/ui-toggle-group.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-toggle-group--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-toggle",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "toggle",
+      "tagName": "ui-toggle",
+      "source": "packages/ui-core/src/components/ui-toggle.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-toggle--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-toolbar",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "toolbar",
+      "tagName": "ui-toolbar",
+      "source": "packages/ui-core/src/components/ui-toolbar.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-toolbar--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-tooltip",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "tooltip",
+      "tagName": "ui-tooltip",
+      "source": "packages/ui-core/src/components/ui-tooltip.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-tooltip--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-visually-hidden",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "visually-hidden",
+      "tagName": "ui-visually-hidden",
+      "source": "packages/ui-core/src/components/ui-visually-hidden.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-visually-hidden--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-wizard",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "wizard",
+      "tagName": "ui-wizard",
+      "source": "packages/ui-core/src/components/ui-wizard.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-wizard--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-react:Accordion",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Accordion",
+      "reactExport": "Accordion",
+      "source": "packages/ui-react/src/components/Accordion.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-accordion--playground",
+      "wrapperFor": "ui-accordion"
+    },
+    {
+      "id": "ui-react:Alert",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Alert",
+      "reactExport": "Alert",
+      "source": "packages/ui-react/src/components/Alert.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-alert--playground",
+      "wrapperFor": "ui-alert"
+    },
+    {
+      "id": "ui-react:AlertDialog",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "AlertDialog",
+      "reactExport": "AlertDialog",
+      "source": "packages/ui-react/src/components/AlertDialog.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-alert-dialog--playground",
+      "wrapperFor": "ui-alert-dialog"
+    },
+    {
+      "id": "ui-react:AlertDialogProvider",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "AlertDialogProvider",
+      "reactExport": "AlertDialogProvider",
+      "source": "packages/ui-react/src/components/AlertDialogProvider.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-alert-dialog-provider--playground",
+      "wrapperFor": null,
+      "notes": "Provider/API utility component"
+    },
+    {
+      "id": "ui-react:AppHeader",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "AppHeader",
+      "reactExport": "AppHeader",
+      "source": "packages/ui-react/src/components/AppHeader.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-app-header--playground",
+      "wrapperFor": "ui-app-header"
+    },
+    {
+      "id": "ui-react:AspectRatio",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "AspectRatio",
+      "reactExport": "AspectRatio",
+      "source": "packages/ui-react/src/components/AspectRatio.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-aspect-ratio--playground",
+      "wrapperFor": "ui-aspect-ratio"
+    },
+    {
+      "id": "ui-react:Avatar",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Avatar",
+      "reactExport": "Avatar",
+      "source": "packages/ui-react/src/components/Avatar.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-avatar--playground",
+      "wrapperFor": "ui-avatar"
+    },
+    {
+      "id": "ui-react:Badge",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Badge",
+      "reactExport": "Badge",
+      "source": "packages/ui-react/src/components/Badge.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-badge--playground",
+      "wrapperFor": "ui-badge"
+    },
+    {
+      "id": "ui-react:BlockControls",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "BlockControls",
+      "reactExport": "BlockControls",
+      "source": "packages/ui-react/src/components/BlockControls.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-block-controls--playground",
+      "wrapperFor": "ui-block-controls"
+    },
+    {
+      "id": "ui-react:Box",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Box",
+      "reactExport": "Box",
+      "source": "packages/ui-react/src/components/Box.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-box--playground",
+      "wrapperFor": "ui-box"
+    },
+    {
+      "id": "ui-react:Breadcrumb",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Breadcrumb",
+      "reactExport": "Breadcrumb",
+      "source": "packages/ui-react/src/components/Breadcrumb.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-breadcrumb--playground",
+      "wrapperFor": "ui-breadcrumb"
+    },
+    {
+      "id": "ui-react:Button",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Button",
+      "reactExport": "Button",
+      "source": "packages/ui-react/src/components/Button.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-button--playground",
+      "wrapperFor": "ui-button"
+    },
+    {
+      "id": "ui-react:Calendar",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Calendar",
+      "reactExport": "Calendar",
+      "source": "packages/ui-react/src/components/Calendar.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-calendar--playground",
+      "wrapperFor": "ui-calendar"
+    },
+    {
+      "id": "ui-react:Chart",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Chart",
+      "reactExport": "Chart",
+      "source": "packages/ui-react/src/components/Chart.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-chart--playground",
+      "wrapperFor": "ui-chart"
+    },
+    {
+      "id": "ui-react:Checkbox",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Checkbox",
+      "reactExport": "Checkbox",
+      "source": "packages/ui-react/src/components/Checkbox.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-checkbox--playground",
+      "wrapperFor": "ui-checkbox"
+    },
+    {
+      "id": "ui-react:Collapsible",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Collapsible",
+      "reactExport": "Collapsible",
+      "source": "packages/ui-react/src/components/Collapsible.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-collapsible--playground",
+      "wrapperFor": "ui-collapsible"
+    },
+    {
+      "id": "ui-react:ColorPicker",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "ColorPicker",
+      "reactExport": "ColorPicker",
+      "source": "packages/ui-react/src/components/ColorPicker.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-color-picker--playground",
+      "wrapperFor": "ui-color-picker"
+    },
+    {
+      "id": "ui-react:Combobox",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Combobox",
+      "reactExport": "Combobox",
+      "source": "packages/ui-react/src/components/Combobox.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-combobox--playground",
+      "wrapperFor": "ui-combobox"
+    },
+    {
+      "id": "ui-react:CommandPalette",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "CommandPalette",
+      "reactExport": "CommandPalette",
+      "source": "packages/ui-react/src/components/CommandPalette.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-command-palette--playground",
+      "wrapperFor": "ui-command-palette"
+    },
+    {
+      "id": "ui-react:Container",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Container",
+      "reactExport": "Container",
+      "source": "packages/ui-react/src/components/Container.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-container--playground",
+      "wrapperFor": "ui-container"
+    },
+    {
+      "id": "ui-react:ContextMenu",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "ContextMenu",
+      "reactExport": "ContextMenu",
+      "source": "packages/ui-react/src/components/ContextMenu.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-context-menu--playground",
+      "wrapperFor": "ui-context-menu"
+    },
+    {
+      "id": "ui-react:DataTable",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "DataTable",
+      "reactExport": "DataTable",
+      "source": "packages/ui-react/src/components/DataTable.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-data-table--playground",
+      "wrapperFor": "ui-data-table"
+    },
+    {
+      "id": "ui-react:DatePicker",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "DatePicker",
+      "reactExport": "DatePicker",
+      "source": "packages/ui-react/src/components/DatePicker.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-date-picker--playground",
+      "wrapperFor": "ui-date-picker"
+    },
+    {
+      "id": "ui-react:DateRangePicker",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "DateRangePicker",
+      "reactExport": "DateRangePicker",
+      "source": "packages/ui-react/src/components/DateRangePicker.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-date-range-picker--playground",
+      "wrapperFor": "ui-date-range-picker"
+    },
+    {
+      "id": "ui-react:DateRangeTimePicker",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "DateRangeTimePicker",
+      "reactExport": "DateRangeTimePicker",
+      "source": "packages/ui-react/src/components/DateRangeTimePicker.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-date-range-time-picker--playground",
+      "wrapperFor": "ui-date-range-time-picker"
+    },
+    {
+      "id": "ui-react:DateTimePicker",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "DateTimePicker",
+      "reactExport": "DateTimePicker",
+      "source": "packages/ui-react/src/components/DateTimePicker.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-date-time-picker--playground",
+      "wrapperFor": "ui-date-time-picker"
+    },
+    {
+      "id": "ui-react:Dialog",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Dialog",
+      "reactExport": "Dialog",
+      "source": "packages/ui-react/src/components/Dialog.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-dialog--playground",
+      "wrapperFor": "ui-dialog"
+    },
+    {
+      "id": "ui-react:DialogProvider",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "DialogProvider",
+      "reactExport": "DialogProvider",
+      "source": "packages/ui-react/src/components/DialogProvider.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-dialog-provider--playground",
+      "wrapperFor": null,
+      "notes": "Provider/API utility component"
+    },
+    {
+      "id": "ui-react:DirectionProvider",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "DirectionProvider",
+      "reactExport": "DirectionProvider",
+      "source": "packages/ui-react/src/components/DirectionProvider.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-direction-provider--playground",
+      "wrapperFor": "ui-direction-provider"
+    },
+    {
+      "id": "ui-react:Drawer",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Drawer",
+      "reactExport": "Drawer",
+      "source": "packages/ui-react/src/components/Drawer.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-drawer--playground",
+      "wrapperFor": "ui-drawer"
+    },
+    {
+      "id": "ui-react:Dropdown",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Dropdown",
+      "reactExport": "Dropdown",
+      "source": "packages/ui-react/src/components/Dropdown.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-dropdown--playground",
+      "wrapperFor": "ui-dropdown"
+    },
+    {
+      "id": "ui-react:EmptyState",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "EmptyState",
+      "reactExport": "EmptyState",
+      "source": "packages/ui-react/src/components/EmptyState.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-empty-state--playground",
+      "wrapperFor": "ui-empty-state"
+    },
+    {
+      "id": "ui-react:Field",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Field",
+      "reactExport": "Field",
+      "source": "packages/ui-react/src/components/Field.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-field--playground",
+      "wrapperFor": "ui-field"
+    },
+    {
+      "id": "ui-react:Flex",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Flex",
+      "reactExport": "Flex",
+      "source": "packages/ui-react/src/components/Flex.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-flex--playground",
+      "wrapperFor": "ui-flex"
+    },
+    {
+      "id": "ui-react:FloatingToolbar",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "FloatingToolbar",
+      "reactExport": "FloatingToolbar",
+      "source": "packages/ui-react/src/components/FloatingToolbar.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-floating-toolbar--playground",
+      "wrapperFor": "ui-floating-toolbar"
+    },
+    {
+      "id": "ui-react:Form",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Form",
+      "reactExport": "Form",
+      "source": "packages/ui-react/src/components/Form.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-form--playground",
+      "wrapperFor": "ui-form"
+    },
+    {
+      "id": "ui-react:Gantt",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Gantt",
+      "reactExport": "Gantt",
+      "source": "packages/ui-react/src/components/Gantt.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-gantt--playground",
+      "wrapperFor": "ui-gantt"
+    },
+    {
+      "id": "ui-react:Grid",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Grid",
+      "reactExport": "Grid",
+      "source": "packages/ui-react/src/components/Grid.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-grid--playground",
+      "wrapperFor": "ui-grid"
+    },
+    {
+      "id": "ui-react:HoverCard",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "HoverCard",
+      "reactExport": "HoverCard",
+      "source": "packages/ui-react/src/components/HoverCard.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-hover-card--playground",
+      "wrapperFor": "ui-hover-card"
+    },
+    {
+      "id": "ui-react:Icon",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Icon",
+      "reactExport": "Icon",
+      "source": "packages/ui-react/src/components/Icon.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-icon--playground",
+      "wrapperFor": "ui-icon"
+    },
+    {
+      "id": "ui-react:Input",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Input",
+      "reactExport": "Input",
+      "source": "packages/ui-react/src/components/Input.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-input--playground",
+      "wrapperFor": "ui-input"
+    },
+    {
+      "id": "ui-react:Label",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Label",
+      "reactExport": "Label",
+      "source": "packages/ui-react/src/components/Label.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-label--playground",
+      "wrapperFor": "ui-label"
+    },
+    {
+      "id": "ui-react:Layout",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Layout",
+      "reactExport": "Layout",
+      "source": "packages/ui-react/src/components/Layout.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-layout--playground",
+      "wrapperFor": "ui-layout"
+    },
+    {
+      "id": "ui-react:Menu",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Menu",
+      "reactExport": "Menu",
+      "source": "packages/ui-react/src/components/Menu.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-menu--playground",
+      "wrapperFor": "ui-menu"
+    },
+    {
+      "id": "ui-react:Menubar",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Menubar",
+      "reactExport": "Menubar",
+      "source": "packages/ui-react/src/components/Menubar.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-menubar--playground",
+      "wrapperFor": "ui-menubar"
+    },
+    {
+      "id": "ui-react:NavigationMenu",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "NavigationMenu",
+      "reactExport": "NavigationMenu",
+      "source": "packages/ui-react/src/components/NavigationMenu.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-navigation-menu--playground",
+      "wrapperFor": "ui-navigation-menu"
+    },
+    {
+      "id": "ui-react:Pagination",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Pagination",
+      "reactExport": "Pagination",
+      "source": "packages/ui-react/src/components/Pagination.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-pagination--playground",
+      "wrapperFor": "ui-pagination"
+    },
+    {
+      "id": "ui-react:PluginPanel",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "PluginPanel",
+      "reactExport": "PluginPanel",
+      "source": "packages/ui-react/src/components/PluginPanel.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-plugin-panel--playground",
+      "wrapperFor": "ui-plugin-panel"
+    },
+    {
+      "id": "ui-react:Popover",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Popover",
+      "reactExport": "Popover",
+      "source": "packages/ui-react/src/components/Popover.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-popover--playground",
+      "wrapperFor": "ui-popover"
+    },
+    {
+      "id": "ui-react:Portal",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Portal",
+      "reactExport": "Portal",
+      "source": "packages/ui-react/src/components/Portal.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-portal--playground",
+      "wrapperFor": "ui-portal"
+    },
+    {
+      "id": "ui-react:Presence",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Presence",
+      "reactExport": "Presence",
+      "source": "packages/ui-react/src/components/Presence.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-presence--playground",
+      "wrapperFor": "ui-presence"
+    },
+    {
+      "id": "ui-react:Progress",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Progress",
+      "reactExport": "Progress",
+      "source": "packages/ui-react/src/components/Progress.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-progress--playground",
+      "wrapperFor": "ui-progress"
+    },
+    {
+      "id": "ui-react:QuickActions",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "QuickActions",
+      "reactExport": "QuickActions",
+      "source": "packages/ui-react/src/components/QuickActions.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-quick-actions--playground",
+      "wrapperFor": "ui-quick-actions"
+    },
+    {
+      "id": "ui-react:RadioGroup",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "RadioGroup",
+      "reactExport": "RadioGroup",
+      "source": "packages/ui-react/src/components/RadioGroup.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-radio-group--playground",
+      "wrapperFor": "ui-radio-group"
+    },
+    {
+      "id": "ui-react:ScrollArea",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "ScrollArea",
+      "reactExport": "ScrollArea",
+      "source": "packages/ui-react/src/components/ScrollArea.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-scroll-area--playground",
+      "wrapperFor": "ui-scroll-area"
+    },
+    {
+      "id": "ui-react:Section",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Section",
+      "reactExport": "Section",
+      "source": "packages/ui-react/src/components/Section.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-section--playground",
+      "wrapperFor": "ui-section"
+    },
+    {
+      "id": "ui-react:Select",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Select",
+      "reactExport": "Select",
+      "source": "packages/ui-react/src/components/Select.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-select--playground",
+      "wrapperFor": "ui-select"
+    },
+    {
+      "id": "ui-react:SelectionPopup",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "SelectionPopup",
+      "reactExport": "SelectionPopup",
+      "source": "packages/ui-react/src/components/SelectionPopup.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-selection-popup--playground",
+      "wrapperFor": "ui-selection-popup"
+    },
+    {
+      "id": "ui-react:Separator",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Separator",
+      "reactExport": "Separator",
+      "source": "packages/ui-react/src/components/Separator.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-separator--playground",
+      "wrapperFor": "ui-separator"
+    },
+    {
+      "id": "ui-react:Sidebar",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Sidebar",
+      "reactExport": "Sidebar",
+      "source": "packages/ui-react/src/components/Sidebar.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-sidebar--playground",
+      "wrapperFor": "ui-sidebar"
+    },
+    {
+      "id": "ui-react:Skeleton",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Skeleton",
+      "reactExport": "Skeleton",
+      "source": "packages/ui-react/src/components/Skeleton.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-skeleton--playground",
+      "wrapperFor": "ui-skeleton"
+    },
+    {
+      "id": "ui-react:Slider",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Slider",
+      "reactExport": "Slider",
+      "source": "packages/ui-react/src/components/Slider.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-slider--playground",
+      "wrapperFor": "ui-slider"
+    },
+    {
+      "id": "ui-react:Slot",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Slot",
+      "reactExport": "Slot",
+      "source": "packages/ui-react/src/components/Slot.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-slot--playground",
+      "wrapperFor": "ui-slot"
+    },
+    {
+      "id": "ui-react:Stepper",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Stepper",
+      "reactExport": "Stepper",
+      "source": "packages/ui-react/src/components/Stepper.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-stepper--playground",
+      "wrapperFor": "ui-stepper"
+    },
+    {
+      "id": "ui-react:Switch",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Switch",
+      "reactExport": "Switch",
+      "source": "packages/ui-react/src/components/Switch.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-switch--playground",
+      "wrapperFor": "ui-switch"
+    },
+    {
+      "id": "ui-react:Table",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Table",
+      "reactExport": "Table",
+      "source": "packages/ui-react/src/components/Table.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-table--playground",
+      "wrapperFor": "ui-table"
+    },
+    {
+      "id": "ui-react:Tabs",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Tabs",
+      "reactExport": "Tabs",
+      "source": "packages/ui-react/src/components/Tabs.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-tabs--playground",
+      "wrapperFor": "ui-tabs"
+    },
+    {
+      "id": "ui-react:Textarea",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Textarea",
+      "reactExport": "Textarea",
+      "source": "packages/ui-react/src/components/Textarea.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-textarea--playground",
+      "wrapperFor": "ui-textarea"
+    },
+    {
+      "id": "ui-react:ThemeProvider",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "ThemeProvider",
+      "reactExport": "ThemeProvider",
+      "source": "packages/ui-react/src/components/ThemeProvider.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-theme-provider--playground",
+      "wrapperFor": null,
+      "notes": "Provider/API utility component"
+    },
+    {
+      "id": "ui-react:Timeline",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Timeline",
+      "reactExport": "Timeline",
+      "source": "packages/ui-react/src/components/Timeline.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-timeline--playground",
+      "wrapperFor": "ui-timeline"
+    },
+    {
+      "id": "ui-react:TimePicker",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "TimePicker",
+      "reactExport": "TimePicker",
+      "source": "packages/ui-react/src/components/TimePicker.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-time-picker--playground",
+      "wrapperFor": "ui-time-picker"
+    },
+    {
+      "id": "ui-react:Toast",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Toast",
+      "reactExport": "Toast",
+      "source": "packages/ui-react/src/components/Toast.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-toast--playground",
+      "wrapperFor": "ui-toast"
+    },
+    {
+      "id": "ui-react:ToastAPI",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "ToastAPI",
+      "reactExport": "ToastAPI",
+      "source": "packages/ui-react/src/components/ToastAPI.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-toast-api--playground",
+      "wrapperFor": null,
+      "notes": "Provider/API utility component"
+    },
+    {
+      "id": "ui-react:Toggle",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Toggle",
+      "reactExport": "Toggle",
+      "source": "packages/ui-react/src/components/Toggle.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-toggle--playground",
+      "wrapperFor": "ui-toggle"
+    },
+    {
+      "id": "ui-react:ToggleGroup",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "ToggleGroup",
+      "reactExport": "ToggleGroup",
+      "source": "packages/ui-react/src/components/ToggleGroup.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-toggle-group--playground",
+      "wrapperFor": "ui-toggle-group"
+    },
+    {
+      "id": "ui-react:Toolbar",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Toolbar",
+      "reactExport": "Toolbar",
+      "source": "packages/ui-react/src/components/Toolbar.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-toolbar--playground",
+      "wrapperFor": "ui-toolbar"
+    },
+    {
+      "id": "ui-react:Tooltip",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Tooltip",
+      "reactExport": "Tooltip",
+      "source": "packages/ui-react/src/components/Tooltip.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-tooltip--playground",
+      "wrapperFor": "ui-tooltip"
+    },
+    {
+      "id": "ui-react:VisuallyHidden",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "VisuallyHidden",
+      "reactExport": "VisuallyHidden",
+      "source": "packages/ui-react/src/components/VisuallyHidden.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-visually-hidden--playground",
+      "wrapperFor": "ui-visually-hidden"
+    },
+    {
+      "id": "ui-react:Wizard",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Wizard",
+      "reactExport": "Wizard",
+      "source": "packages/ui-react/src/components/Wizard.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-wizard--playground",
+      "wrapperFor": "ui-wizard"
+    }
+  ]
+}
