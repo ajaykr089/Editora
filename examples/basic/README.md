@@ -1,5 +1,10 @@
 # Basic Example
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 Simple Editora Rich Text Editor setup with minimal configuration.
 
 ## Features

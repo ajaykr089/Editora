@@ -1,5 +1,10 @@
 # @editora/approval-workflow
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 `@editora/approval-workflow` adds native editorial workflow controls to Editora with Draft -> Review -> Approved states, sign-off history, and optional lock-on-approval behavior.
 
 ## Features

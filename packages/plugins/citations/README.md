@@ -1,5 +1,10 @@
 # @editora/citations
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 `@editora/citations` adds native citation authoring to Editora with inline references, bibliography generation, and optional citation-note (footnote) sync.
 
 ## Features

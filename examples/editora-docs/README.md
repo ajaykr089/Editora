@@ -1,5 +1,10 @@
 # Editora Docs
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 Production documentation app for the Editora ecosystem, built with Docusaurus classic.
 
 ## Location

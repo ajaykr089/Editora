@@ -1,5 +1,10 @@
 # Editora Hospital Management Admin (Example)
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 Production-style hospital management dashboard built with the Editora UI ecosystem.
 
 ## Stack

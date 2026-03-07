@@ -4,6 +4,12 @@ description: Runnable live examples for Editora editor and ecosystem packages us
 keywords: [live examples, storybook, editor, ui, icons, toast]
 ---
 
+## Live URLs
+
+- **Website:** https://editora-ecosystem.netlify.app/
+- **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 # Live Examples
 
 Runnable live examples for Editora editor and ecosystem packages using local Storybook embeds.
@@ -24,7 +30,7 @@ Expected URL: `http://localhost:6006`
   src="http://localhost:6006/?path=/story/editor-rich-text-editor-web-component--basic&full=1"
   width="100%"
   height="620"
-  style="border:1px solid var(--ifm-toc-border-color); border-radius:12px; background:#fff;"
+  style={{ border: '1px solid var(--ifm-toc-border-color)', borderRadius: '12px', background: '#fff' }}
 ></iframe>
 
 Direct link: `http://localhost:6006/?path=/story/editor-rich-text-editor-web-component--basic`
@@ -35,7 +41,7 @@ Direct link: `http://localhost:6006/?path=/story/editor-rich-text-editor-web-com
   src="http://localhost:6006/?path=/story/editor-rich-text-editor-web-component--multiple-editors&full=1"
   width="100%"
   height="760"
-  style="border:1px solid var(--ifm-toc-border-color); border-radius:12px; background:#fff;"
+  style={{ border: '1px solid var(--ifm-toc-border-color)', borderRadius: '12px', background: '#fff' }}
 ></iframe>
 
 Direct link: `http://localhost:6006/?path=/story/editor-rich-text-editor-web-component--multiple-editors`
@@ -46,7 +52,7 @@ Direct link: `http://localhost:6006/?path=/story/editor-rich-text-editor-web-com
   src="http://localhost:6006/?path=/story/editor-rich-text-editor-web-component--test-7-theme-switcher-editor-only&full=1"
   width="100%"
   height="760"
-  style="border:1px solid var(--ifm-toc-border-color); border-radius:12px; background:#fff;"
+  style={{ border: '1px solid var(--ifm-toc-border-color)', borderRadius: '12px', background: '#fff' }}
 ></iframe>
 
 Direct link: `http://localhost:6006/?path=/story/editor-rich-text-editor-web-component--test-7-theme-switcher-editor-only`
@@ -57,7 +63,7 @@ Direct link: `http://localhost:6006/?path=/story/editor-rich-text-editor-web-com
   src="http://localhost:6006/?path=/story/ui-components-light-code-editor--feature-showcase&full=1"
   width="100%"
   height="760"
-  style="border:1px solid var(--ifm-toc-border-color); border-radius:12px; background:#fff;"
+  style={{ border: '1px solid var(--ifm-toc-border-color)', borderRadius: '12px', background: '#fff' }}
 ></iframe>
 
 Direct link: `http://localhost:6006/?path=/story/ui-components-light-code-editor--feature-showcase`
@@ -68,7 +74,7 @@ Direct link: `http://localhost:6006/?path=/story/ui-components-light-code-editor
   src="http://localhost:6006/?path=/story/ui-components-toast-notifications--toast-showcase&full=1"
   width="100%"
   height="760"
-  style="border:1px solid var(--ifm-toc-border-color); border-radius:12px; background:#fff;"
+  style={{ border: '1px solid var(--ifm-toc-border-color)', borderRadius: '12px', background: '#fff' }}
 ></iframe>
 
 Direct link: `http://localhost:6006/?path=/story/ui-components-toast-notifications--toast-showcase`
@@ -79,7 +85,7 @@ Direct link: `http://localhost:6006/?path=/story/ui-components-toast-notificatio
   src="http://localhost:6006/?path=/story/ui-icons-catalog--all-icons&full=1"
   width="100%"
   height="760"
-  style="border:1px solid var(--ifm-toc-border-color); border-radius:12px; background:#fff;"
+  style={{ border: '1px solid var(--ifm-toc-border-color)', borderRadius: '12px', background: '#fff' }}
 ></iframe>
 
 Direct link: `http://localhost:6006/?path=/story/ui-icons-catalog--all-icons`
@@ -92,7 +98,7 @@ Direct link: `http://localhost:6006/?path=/story/ui-icons-catalog--all-icons`
   src="http://localhost:6006/?path=/story/ui-datatable--users-table&full=1"
   width="100%"
   height="760"
-  style="border:1px solid var(--ifm-toc-border-color); border-radius:12px; background:#fff;"
+  style={{ border: '1px solid var(--ifm-toc-border-color)', borderRadius: '12px', background: '#fff' }}
 ></iframe>
 
 Direct link: `http://localhost:6006/?path=/story/ui-datatable--users-table`
@@ -103,7 +109,7 @@ Direct link: `http://localhost:6006/?path=/story/ui-datatable--users-table`
   src="http://localhost:6006/?path=/story/ui-dialog--default&full=1"
   width="100%"
   height="620"
-  style="border:1px solid var(--ifm-toc-border-color); border-radius:12px; background:#fff;"
+  style={{ border: '1px solid var(--ifm-toc-border-color)', borderRadius: '12px', background: '#fff' }}
 ></iframe>
 
 Direct link: `http://localhost:6006/?path=/story/ui-dialog--default`

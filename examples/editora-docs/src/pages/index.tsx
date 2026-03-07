@@ -93,7 +93,7 @@ export default function Home(): JSX.Element {
             <Link className="button button--primary button--lg" to="/docs/getting-started/overview">
               Get Started
             </Link>
-            <Link className="button button--secondary button--lg" to="/docs/advanced/architecture">
+            <Link className="button button--secondary button--lg" to="/docs/getting-started/about">
               Architecture
             </Link>
           </div>

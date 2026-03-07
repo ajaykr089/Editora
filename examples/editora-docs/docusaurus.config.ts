@@ -16,7 +16,7 @@ const config: Config = {
     v4: true,
   },
 
-  url: "https://docs.editora.dev",
+  url: "https://editora-ecosystem.netlify.app",
   baseUrl: "/",
   trailingSlash: false,
 
@@ -111,12 +111,12 @@ const config: Config = {
       },
       {
         property: "og:image",
-        content: "https://docs.editora.dev/img/editora-social-card.svg",
+        content: "https://editora-ecosystem.netlify.app/img/editora-social-card.svg",
       },
       { name: "twitter:card", content: "summary_large_image" },
       {
         name: "twitter:image",
-        content: "https://docs.editora.dev/img/editora-social-card.svg",
+        content: "https://editora-ecosystem.netlify.app/img/editora-social-card.svg",
       },
     ],
     navbar: {

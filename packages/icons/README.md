@@ -1,5 +1,10 @@
 # @editora/icons
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 Framework-agnostic SVG icon library for the Editora UI ecosystem.
 
 Use this package when you need:

@@ -1,5 +1,10 @@
 # @editora/code-sample
 
+> [!IMPORTANT]
+> **Live Website:** https://editora-ecosystem.netlify.app/  
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+
+
 Code sample plugin for Editora rich text editor.
 
 ## What It Does
