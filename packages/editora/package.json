@@ -1,0 +1,44 @@
+{
+  "name": "editora",
+  "version": "1.0.0",
+  "description": "Official Editora CLI for quickly adding UI components, editor packages, and SaaS-ready building blocks.",
+  "author": "Ajay Kumar <ajaykr089@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/editora"
+  },
+  "homepage": "https://editora-ecosystem.netlify.app/docs/reference/cli",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
+  },
+  "bin": {
+    "editora": "bin/editora.js"
+  },
+  "files": [
+    "bin",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node -e \"console.log('editora cli: no build step required')\"",
+    "dev": "node -e \"console.log('editora cli: no dev server')\"",
+    "clean": "node -e \"console.log('editora cli: no artifacts to clean')\"",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "editora",
+    "editora cli",
+    "npx editora",
+    "react ui library",
+    "react component library",
+    "saas ui components",
+    "enterprise react components",
+    "modern design system",
+    "rich text editor react",
+    "component generator"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

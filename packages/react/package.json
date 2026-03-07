@@ -9,11 +9,17 @@
     "url": "https://github.com/ajaykr089/Editora.git",
     "directory": "packages/react"
   },
-  "homepage": "https://editora-free.netlify.app/",
+  "homepage": "https://editora-ecosystem.netlify.app/",
   "bugs": {
     "url": "https://github.com/ajaykr089/Editora/issues"
   },
   "keywords": [
+    "react ui library",
+    "react component library",
+    "saas ui components",
+    "enterprise react components",
+    "modern design system",
+    "rich text editor react",
     "react",
     "editor",
     "rich-text",
@@ -80,7 +86,7 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "typescript": "^5.0.0",
-    "vite": "^7.3.1"
+    "vite": "^4.5.14"
   },
   "publishConfig": {
     "access": "public"

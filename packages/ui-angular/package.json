@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "typescript": "^5.0.0",
-    "vite": "^7.3.1"
+    "vite": "^4.5.14"
   },
   "license": "MIT",
   "gitHead": "80e0808ae4909de63b8e0f1dd915b06b33a8ed44"

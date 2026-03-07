@@ -1,7 +1,34 @@
 import { defineConfig } from 'vite';
 import path from 'path';
 
+const coreJsCompatResolvePlugin = {
+  name: 'core-js-compat-resolve',
+  enforce: 'pre' as const,
+  resolveId(source: string) {
+    if (
+      /define-globalThis-property(\.js)?$/.test(source) ||
+      /define-global-this-property(\.js)?$/.test(source)
+    ) {
+      return path.resolve(__dirname, '../../node_modules/core-js/internals/define-global-property.js');
+    }
+    if (/globalThis-this(\.js)?$/.test(source) || /global-this(\.js)?$/.test(source)) {
+      return path.resolve(__dirname, '../../node_modules/core-js/internals/global-this.js');
+    }
+    return null;
+  },
+  load(id: string) {
+    if (id.endsWith('/core-js/internals/define-globalThis-property.js')) {
+      return "import mod from 'core-js/internals/define-global-property.js'; export const __moduleExports = mod; export default mod;";
+    }
+    if (id.endsWith('/core-js/internals/globalThis-this.js')) {
+      return "import mod from 'core-js/internals/global-this.js'; export const __moduleExports = mod; export default mod;";
+    }
+    return null;
+  },
+};
+
 export default defineConfig({
+  plugins: [coreJsCompatResolvePlugin],
   define: {
     'process.env.NODE_ENV': JSON.stringify('production'),
     'process.env': '{}',

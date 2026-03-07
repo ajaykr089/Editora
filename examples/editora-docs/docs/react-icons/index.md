@@ -8,6 +8,11 @@ keywords: [react-icons, react, icons]
 
 React icon components and provider strategy for Editora apps.
 
+## AI Guides
+
+- [React Icons AI Usage](./ai-usage)
+- [React Icons Prompt Pack](./editora-prompts)
+
 ## Installation
 
 ```bash

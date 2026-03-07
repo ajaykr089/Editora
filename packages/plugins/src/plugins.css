@@ -1,0 +1,4 @@
+/* Shared plugin CSS source for consumers that bundle from source paths. */
+@import '../anchor/src/AnchorStyles.css';
+@import '../code-sample/src/CodeSampleStyles.css';
+@import '../table/src/table.css';

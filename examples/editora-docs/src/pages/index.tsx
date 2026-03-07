@@ -146,6 +146,33 @@ export default function Home(): JSX.Element {
           </ul>
         </section>
 
+        <section className={styles.section}>
+          <h2>AI Assistant Integration</h2>
+          <p>
+            Use the AI guide and machine-readable registries to generate runnable Editora code with real imports.
+          </p>
+          <p>
+            Editor-specific guides: <Link to="/docs/editor/ai-usage">Editor AI Usage</Link> and{" "}
+            <Link to="/docs/editor/editora-prompts">Editor Prompt Pack</Link>.
+          </p>
+          <p>
+            Package guides: <Link to="/docs/toast/ai-usage">Toast</Link>,{" "}
+            <Link to="/docs/react-icons/ai-usage">React Icons</Link>, and{" "}
+            <Link to="/docs/packages/light-code-editor-ai-usage">Light Code Editor</Link>.
+          </p>
+          <div className={styles.actions}>
+            <Link className="button button--primary" to="/docs/ai-usage">
+              AI Guide
+            </Link>
+            <Link className="button button--secondary" to="/docs/editora-prompts">
+              Prompt Pack
+            </Link>
+            <Link className="button button--secondary" href="https://editora-ecosystem.netlify.app/components.json">
+              components.json
+            </Link>
+          </div>
+        </section>
+
         <section className={styles.trust}>
           <h2>Built for long-term maintenance</h2>
           <p>
