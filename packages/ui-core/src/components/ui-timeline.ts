@@ -5,6 +5,7 @@ type TimelineItem = {
   description?: string;
   time?: string;
   tone?: 'default' | 'success' | 'warning' | 'danger' | 'info';
+  active?: boolean;
 };
 
 const style = `
@@ -14,6 +15,7 @@ const style = `
     --ui-timeline-text: var(--ui-color-text, #0f172a);
     --ui-timeline-muted: var(--ui-color-muted, #64748b);
     --ui-timeline-accent: var(--ui-color-primary, #2563eb);
+    --ui-timeline-indicator-duration: 1.8s;
 
     display: block;
     min-inline-size: 0;
@@ -64,12 +66,32 @@ const style = `
   }
 
   .dot {
+    position: relative;
     inline-size: 10px;
     block-size: 10px;
     margin-top: 3px;
     border-radius: 999px;
     background: var(--dot, var(--ui-timeline-accent));
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--dot, var(--ui-timeline-accent)) 20%, transparent);
+  }
+
+  .item[data-active="true"] .dot::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: inherit;
+    border: 1px solid color-mix(in srgb, var(--dot, var(--ui-timeline-accent)) 62%, transparent);
+    opacity: 0.5;
+    animation: ui-timeline-dot-pulse var(--ui-timeline-indicator-duration) ease-out infinite;
+    pointer-events: none;
+  }
+
+  .item[data-active="true"] .rail::before {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--dot, var(--ui-timeline-accent)) 44%, transparent),
+      color-mix(in srgb, var(--ui-timeline-border) 82%, transparent)
+    );
   }
 
   .content {
@@ -103,8 +125,25 @@ const style = `
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .dot {
+    .dot,
+    .dot::after {
       transition: none !important;
+      animation: none !important;
+    }
+  }
+
+  @keyframes ui-timeline-dot-pulse {
+    0% {
+      transform: scale(0.9);
+      opacity: 0.5;
+    }
+    70% {
+      transform: scale(1.25);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1.25);
+      opacity: 0;
     }
   }
 
@@ -132,6 +171,10 @@ const style = `
     .dot {
       forced-color-adjust: none;
       box-shadow: none;
+    }
+
+    .dot::after {
+      animation: none !important;
     }
 
     .frame {
@@ -181,7 +224,8 @@ function parseItems(raw: string | null): TimelineItem[] {
           title,
           description: (entry as any).description ? String((entry as any).description) : undefined,
           time: (entry as any).time ? String((entry as any).time) : undefined,
-          tone: (entry as any).tone
+          tone: (entry as any).tone,
+          active: !!(entry as any).active
         } as TimelineItem;
       })
       .filter(Boolean) as TimelineItem[];
@@ -197,13 +241,15 @@ export class UITimeline extends ElementBase {
 
   protected override render(): void {
     const items = parseItems(this.getAttribute('items'));
+    const hasExplicitActive = items.some((item) => item.active);
 
     const content = items.length
       ? items
-          .map((item) => {
+          .map((item, index) => {
             const tone = toneMap[item.tone || 'default'] || toneMap.default;
+            const isActive = hasExplicitActive ? !!item.active : index === 0;
             return `
-              <li class="item" part="item">
+              <li class="item" part="item" data-active="${isActive ? 'true' : 'false'}">
                 <div class="rail"><span class="dot" style="--dot:${tone}"></span></div>
                 <article class="content">
                   <span class="title">${escapeHtml(item.title)}</span>

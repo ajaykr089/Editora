@@ -127,3 +127,30 @@ export const VerticalAndContrast = () => (
 export const Disabled = () => (
   <Slider value={40} min={0} max={100} disabled label="Read-only metric" description="Disabled interaction state" />
 );
+
+export const AnimatedIndicators = () => (
+  <Grid gap="14px" style={{ maxWidth: 500 }}>
+    <Slider
+      value={42}
+      min={0}
+      max={100}
+      label="Interactive signal threshold"
+      description="Animated indicator follows active thumb."
+      variant="glass"
+      tone="brand"
+      marks={[0, 25, 50, 75, 100]}
+    />
+    <Slider
+      range
+      valueStart={28}
+      valueEnd={76}
+      min={0}
+      max={100}
+      format="range"
+      label="Range indicator"
+      description="Start and end indicators animate while active."
+      variant="soft"
+      tone="success"
+    />
+  </Grid>
+);

@@ -24,8 +24,16 @@ export type WizardProps = React.HTMLAttributes<HTMLElement> & {
   stepperPosition?: 'top' | 'bottom';
   hideControls?: boolean;
   keepMounted?: boolean;
-  variant?: 'default' | 'contrast' | 'minimal';
+  variant?: 'default' | 'soft' | 'glass' | 'flat' | 'contrast' | 'minimal';
+  orientation?: 'horizontal' | 'vertical';
+  density?: 'default' | 'compact' | 'comfortable';
+  shape?: 'rounded' | 'square' | 'pill';
+  showProgress?: boolean;
+  busy?: boolean;
   headless?: boolean;
+  title?: string;
+  description?: string;
+  emptyLabel?: string;
   nextLabel?: string;
   prevLabel?: string;
   finishLabel?: string;
@@ -44,7 +52,15 @@ export const Wizard = React.forwardRef<HTMLElement, WizardProps>(function Wizard
     hideControls,
     keepMounted,
     variant,
+    orientation,
+    density,
+    shape,
+    showProgress,
+    busy,
     headless,
+    title,
+    description,
+    emptyLabel,
     nextLabel,
     prevLabel,
     finishLabel,
@@ -135,11 +151,40 @@ export const Wizard = React.forwardRef<HTMLElement, WizardProps>(function Wizard
     syncBool('hide-controls', hideControls);
     syncBool('keep-mounted', keepMounted);
     syncAttr('variant', variant && variant !== 'default' ? variant : null);
+    syncAttr('orientation', orientation && orientation !== 'horizontal' ? orientation : null);
+    syncAttr('density', density && density !== 'default' ? density : null);
+    syncAttr('shape', shape && shape !== 'rounded' ? shape : null);
+    if (typeof showProgress === 'boolean') syncAttr('show-progress', showProgress ? 'true' : 'false');
+    else syncAttr('show-progress', null);
+    syncBool('busy', busy);
     syncBool('headless', headless);
+    syncAttr('title', title || null);
+    syncAttr('description', description || null);
+    syncAttr('empty-label', emptyLabel || null);
     syncAttr('next-label', nextLabel || null);
     syncAttr('prev-label', prevLabel || null);
     syncAttr('finish-label', finishLabel || null);
-  }, [value, linear, showStepper, stepperPosition, hideControls, keepMounted, variant, headless, nextLabel, prevLabel, finishLabel]);
+  }, [
+    value,
+    linear,
+    showStepper,
+    stepperPosition,
+    hideControls,
+    keepMounted,
+    variant,
+    orientation,
+    density,
+    shape,
+    showProgress,
+    busy,
+    headless,
+    title,
+    description,
+    emptyLabel,
+    nextLabel,
+    prevLabel,
+    finishLabel
+  ]);
 
   return React.createElement('ui-wizard', { ref, ...rest }, children);
 });

@@ -7,6 +7,7 @@ export type TimelineItem = {
   description?: string;
   time?: string;
   tone?: 'default' | 'success' | 'warning' | 'danger' | 'info';
+  active?: boolean;
 };
 
 export type TimelineProps = React.HTMLAttributes<HTMLElement> & {

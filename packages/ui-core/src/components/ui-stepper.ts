@@ -29,6 +29,7 @@ const style = `
     --ui-stepper-muted: var(--ui-color-muted, #64748b);
     --ui-stepper-accent: var(--ui-color-primary, #2563eb);
     --ui-stepper-focus: var(--ui-color-focus-ring, #2563eb);
+    --ui-stepper-indicator-duration: 1.6s;
 
     display: block;
     min-inline-size: 0;
@@ -98,6 +99,7 @@ const style = `
   }
 
   .index {
+    position: relative;
     inline-size: 20px;
     block-size: 20px;
     border-radius: 999px;
@@ -107,6 +109,17 @@ const style = `
     font-size: 11px;
     font-weight: 700;
     line-height: 1;
+  }
+
+  .item[data-state="current"] .index::after {
+    content: "";
+    position: absolute;
+    inset: -5px;
+    border-radius: inherit;
+    border: 1px solid color-mix(in srgb, var(--ui-stepper-accent) 56%, transparent);
+    opacity: 0.45;
+    animation: ui-stepper-current-pulse var(--ui-stepper-indicator-duration) ease-out infinite;
+    pointer-events: none;
   }
 
   .meta {
@@ -134,10 +147,12 @@ const style = `
   }
 
   .connector {
+    position: relative;
     inline-size: 100%;
     block-size: 2px;
     border-radius: 999px;
     background: color-mix(in srgb, var(--ui-stepper-border) 82%, transparent);
+    overflow: hidden;
   }
 
   :host([orientation="vertical"]) .connector {
@@ -160,6 +175,32 @@ const style = `
 
   .item[data-state="complete"] .connector {
     background: color-mix(in srgb, var(--ui-stepper-accent) 52%, transparent);
+  }
+
+  .item[data-state="current"] .connector::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in srgb, var(--ui-stepper-accent) 48%, transparent) 50%,
+      transparent 100%
+    );
+    transform: translateX(-100%);
+    animation: ui-stepper-connector-flow var(--ui-stepper-indicator-duration) linear infinite;
+    pointer-events: none;
+  }
+
+  :host([orientation="vertical"]) .item[data-state="current"] .connector::after {
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      color-mix(in srgb, var(--ui-stepper-accent) 48%, transparent) 50%,
+      transparent 100%
+    );
+    transform: translateY(-100%);
+    animation-name: ui-stepper-connector-flow-vertical;
   }
 
   .item[data-state="error"] .trigger {
@@ -196,8 +237,38 @@ const style = `
 
   @media (prefers-reduced-motion: reduce) {
     .trigger,
+    .index::after,
+    .connector::after,
     .frame {
       transition: none !important;
+      animation: none !important;
+    }
+  }
+
+  @keyframes ui-stepper-current-pulse {
+    0% {
+      transform: scale(0.9);
+      opacity: 0.45;
+    }
+    70% {
+      transform: scale(1.2);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1.2);
+      opacity: 0;
+    }
+  }
+
+  @keyframes ui-stepper-connector-flow {
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes ui-stepper-connector-flow-vertical {
+    to {
+      transform: translateY(100%);
     }
   }
 
@@ -231,6 +302,11 @@ const style = `
     .connector {
       forced-color-adjust: none;
       box-shadow: none;
+    }
+
+    .index::after,
+    .connector::after {
+      animation: none !important;
     }
 
     .frame,

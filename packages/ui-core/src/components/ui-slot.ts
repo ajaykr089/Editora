@@ -181,6 +181,9 @@ export class UISlot extends ElementBase {
   private _slotEl: HTMLSlotElement | null = null;
   private _shellEl: HTMLElement | null = null;
   private _lastEmpty = true;
+  private _lastCount = -1;
+  private _lastName = '';
+  private _initialized = false;
 
   constructor() {
     super();
@@ -191,7 +194,23 @@ export class UISlot extends ElementBase {
     if (this._slotEl) this._slotEl.removeEventListener('slotchange', this._onSlotChange);
     this._slotEl = null;
     this._shellEl = null;
+    this._initialized = false;
+    this._lastCount = -1;
+    this._lastName = '';
+    this._lastEmpty = true;
     super.disconnectedCallback();
+  }
+
+  override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+    if (oldValue === newValue) return;
+
+    // required only changes validation semantics; avoid full template rerender.
+    if (name === 'required') {
+      if (this.isConnected) this._syncState(true);
+      return;
+    }
+
+    super.attributeChangedCallback(name, oldValue, newValue);
   }
 
   private _assignedCount(): number {
@@ -204,33 +223,40 @@ export class UISlot extends ElementBase {
     }).length;
   }
 
-  private _syncState(): void {
+  private _syncState(force = false): void {
     const count = this._assignedCount();
     const empty = count === 0;
+    const name = this.getAttribute('name') || '';
+    const changed = force || !this._initialized || count !== this._lastCount || name !== this._lastName;
 
     if (this._shellEl) this._shellEl.setAttribute('data-empty', empty ? 'true' : 'false');
 
-    this.dispatchEvent(
-      new CustomEvent('slotchange', {
-        detail: {
-          name: this.getAttribute('name') || '',
-          count,
-          empty
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+    if (changed) {
+      this.dispatchEvent(
+        new CustomEvent('slotchange', {
+          detail: {
+            name,
+            count,
+            empty
+          },
+          bubbles: true,
+          composed: true
+        })
+      );
+    }
 
-    if (empty && this.hasAttribute('required') && !this._lastEmpty) {
+    if (empty && this.hasAttribute('required') && (!this._initialized || !this._lastEmpty)) {
       this.dispatchEvent(new CustomEvent('missing', { bubbles: true, composed: true }));
     }
 
-    if (!empty && this._lastEmpty) {
+    if (!empty && (!this._initialized || this._lastEmpty)) {
       this.dispatchEvent(new CustomEvent('resolved', { bubbles: true, composed: true }));
     }
 
     this._lastEmpty = empty;
+    this._lastCount = count;
+    this._lastName = name;
+    this._initialized = true;
   }
 
   private _onSlotChange(): void {
@@ -260,11 +286,12 @@ export class UISlot extends ElementBase {
   }
 
   protected override shouldRenderOnAttributeChange(
-    _name: string,
+    name: string,
     _oldValue: string | null,
     _newValue: string | null
   ): boolean {
-    return true;
+    // Only these attrs alter shadow template content.
+    return name === 'name' || name === 'fallback';
   }
 }
 

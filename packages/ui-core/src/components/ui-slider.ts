@@ -25,6 +25,9 @@ const style = `
     --ui-slider-radius: 14px;
     --ui-slider-label-size: 13px;
     --ui-slider-value-size: 12px;
+    --ui-slider-indicator-size: 10px;
+    --ui-slider-indicator-duration: 1.6s;
+    --ui-slider-indicator-glow: color-mix(in srgb, var(--ui-slider-fill) 24%, transparent);
     color-scheme: light dark;
     display: inline-grid;
     inline-size: var(--ui-slider-width);
@@ -113,6 +116,36 @@ const style = `
       var(--ui-slider-fill)
     );
     pointer-events: none;
+  }
+
+  .track-indicator {
+    position: absolute;
+    top: 50%;
+    left: var(--ui-slider-end, 0%);
+    inline-size: var(--ui-slider-indicator-size);
+    block-size: var(--ui-slider-indicator-size);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--ui-slider-fill) 92%, #ffffff 8%);
+    transform: translate(-50%, -50%);
+    box-shadow:
+      0 0 0 3px var(--ui-slider-indicator-glow),
+      0 2px 10px color-mix(in srgb, var(--ui-slider-fill) 34%, transparent);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .track-indicator.start {
+    left: var(--ui-slider-start, 0%);
+  }
+
+  .track-indicator::after {
+    content: "";
+    position: absolute;
+    inset: -5px;
+    border-radius: inherit;
+    border: 1px solid color-mix(in srgb, var(--ui-slider-fill) 54%, transparent);
+    opacity: 0.4;
+    animation: ui-slider-indicator-pulse var(--ui-slider-indicator-duration) ease-out infinite;
   }
 
   .inputs {
@@ -224,6 +257,10 @@ const style = `
     pointer-events: none;
   }
 
+  :host([disabled]) .track-indicator::after {
+    animation: none !important;
+  }
+
   :host([size="sm"]) {
     --ui-slider-track-size: 4px;
     --ui-slider-thumb-size: 14px;
@@ -317,6 +354,17 @@ const style = `
     );
   }
 
+  :host([orientation="vertical"]) .track-indicator {
+    left: 50%;
+    top: calc(100% - var(--ui-slider-end, 0%));
+    transform: translate(-50%, -50%);
+  }
+
+  :host([orientation="vertical"]) .track-indicator.start {
+    top: calc(100% - var(--ui-slider-start, 0%));
+    left: 50%;
+  }
+
   :host([orientation="vertical"]) .inputs {
     transform: rotate(-90deg);
     transform-origin: center;
@@ -354,9 +402,26 @@ const style = `
 
   @media (prefers-reduced-motion: reduce) {
     .shell,
+    .track-indicator::after,
     input[type="range"]::-webkit-slider-thumb,
     input[type="range"]::-moz-range-thumb {
       transition: none !important;
+      animation: none !important;
+    }
+  }
+
+  @keyframes ui-slider-indicator-pulse {
+    0% {
+      transform: scale(0.9);
+      opacity: 0.45;
+    }
+    70% {
+      transform: scale(1.25);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1.25);
+      opacity: 0;
     }
   }
 
@@ -386,6 +451,16 @@ const style = `
 
     .shell {
       border-color: CanvasText;
+    }
+
+    .track-indicator {
+      background: Highlight;
+      box-shadow: none;
+    }
+
+    .track-indicator::after {
+      border-color: Highlight;
+      animation: none !important;
     }
 
     input[type="range"]::-webkit-slider-thumb,
@@ -801,6 +876,8 @@ export class UISlider extends ElementBase {
           <div class="track-wrap" part="track-wrap">
             <div class="track" part="track"></div>
             <div class="range-fill" part="range"></div>
+            <span class="track-indicator start" part="indicator-start" ${this._rangeMode ? '' : 'hidden'}></span>
+            <span class="track-indicator end" part="indicator-end"></span>
             <div class="inputs" part="inputs">
               <input class="start" type="range" aria-label="${startAriaLabel}" />
               ${this._rangeMode ? `<input class="end" type="range" aria-label="${endAriaLabel}" />` : ''}

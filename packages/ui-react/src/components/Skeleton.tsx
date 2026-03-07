@@ -8,7 +8,11 @@ export type SkeletonProps = React.HTMLAttributes<HTMLElement> & {
   height?: string;
   radius?: string;
   gap?: string;
-  variant?: 'rect' | 'text' | 'circle';
+  duration?: string;
+  variant?: 'rect' | 'text' | 'circle' | 'pill' | 'avatar' | 'badge' | 'button';
+  animation?: 'none' | 'shimmer' | 'pulse' | 'wave';
+  density?: 'default' | 'compact' | 'comfortable';
+  tone?: 'default' | 'brand' | 'success' | 'warning' | 'danger';
   animated?: boolean;
   headless?: boolean;
 };
@@ -20,7 +24,11 @@ export function Skeleton(props: SkeletonProps) {
     height,
     radius,
     gap,
+    duration,
     variant,
+    animation,
+    density,
+    tone,
     animated,
     headless,
     ...rest
@@ -47,15 +55,28 @@ export function Skeleton(props: SkeletonProps) {
     if (gap) el.setAttribute('gap', gap);
     else el.removeAttribute('gap');
 
+    if (duration) el.setAttribute('duration', duration);
+    else el.removeAttribute('duration');
+
     if (variant) el.setAttribute('variant', variant);
     else el.removeAttribute('variant');
+
+    if (animation && animation !== 'none') el.setAttribute('animation', animation);
+    else if (animation === 'none') el.setAttribute('animation', 'none');
+    else el.removeAttribute('animation');
+
+    if (density && density !== 'default') el.setAttribute('density', density);
+    else el.removeAttribute('density');
+
+    if (tone && tone !== 'default') el.setAttribute('tone', tone);
+    else el.removeAttribute('tone');
 
     if (animated) el.setAttribute('animated', '');
     else el.removeAttribute('animated');
 
     if (headless) el.setAttribute('headless', '');
     else el.removeAttribute('headless');
-  }, [count, width, height, radius, gap, variant, animated, headless]);
+  }, [count, width, height, radius, gap, duration, variant, animation, density, tone, animated, headless]);
 
   return React.createElement('ui-skeleton', { ref, ...rest });
 }

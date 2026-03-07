@@ -62,3 +62,21 @@ export const ContrastVertical = () => (
     />
   </Box>
 );
+
+export const AnimatedCurrentStep = () => (
+  <Box style={{ maxWidth: 920, display: 'grid', gap: 10 }}>
+    <Stepper
+      clickable
+      value="policies"
+      steps={[
+        { value: 'org', label: 'Organization', description: 'Tenant profile', state: 'complete' },
+        { value: 'modules', label: 'Modules', description: 'Enable packages', state: 'complete' },
+        { value: 'policies', label: 'Policies', description: 'Current review step' },
+        { value: 'review', label: 'Review', description: 'Final confirmation' }
+      ]}
+    />
+    <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>
+      Current step shows animated indicator and connector flow.
+    </Box>
+  </Box>
+);

@@ -20,10 +20,29 @@ export type TabsProps = BaseProps & {
   value?: string;
   orientation?: 'horizontal' | 'vertical';
   activation?: 'auto' | 'manual';
-  variant?: 'default' | 'soft' | 'contrast' | 'minimal' | 'underline';
+  variant?:
+    | 'default'
+    | 'soft'
+    | 'outline'
+    | 'solid'
+    | 'ghost'
+    | 'glass'
+    | 'indicator'
+    | 'indicator-line'
+    | 'contrast'
+    | 'minimal'
+    | 'underline'
+    | 'line'
+    | 'segmented'
+    | 'cards';
   size?: 'sm' | 'md' | 'lg';
+  density?: 'compact' | 'default' | 'comfortable';
   tone?: 'brand' | 'success' | 'warning' | 'danger';
   stretched?: boolean;
+  shape?: 'rounded' | 'square' | 'pill';
+  elevation?: 'low' | 'none' | 'high';
+  loop?: boolean;
+  bare?: boolean;
   headless?: boolean;
   onChange?: (index: number) => void;
   onTabChange?: (detail: TabsDetail) => void;
@@ -38,8 +57,13 @@ export const Tabs = React.forwardRef<HTMLElement, TabsProps>(function Tabs(
     activation,
     variant,
     size,
+    density,
     tone,
     stretched,
+    shape,
+    elevation,
+    loop,
+    bare,
     headless,
     onChange,
     onTabChange,
@@ -93,10 +117,15 @@ export const Tabs = React.forwardRef<HTMLElement, TabsProps>(function Tabs(
     syncAttr('activation', activation && activation !== 'auto' ? activation : null);
     syncAttr('variant', variant && variant !== 'default' ? variant : null);
     syncAttr('size', size && size !== 'md' ? size : null);
+    syncAttr('density', density && density !== 'default' ? density : null);
     syncAttr('tone', tone && tone !== 'brand' ? tone : null);
+    syncAttr('shape', shape && shape !== 'rounded' ? shape : null);
+    syncAttr('elevation', elevation && elevation !== 'low' ? elevation : null);
+    syncAttr('loop', loop === false ? 'false' : loop === true ? '' : null);
     syncBool('stretched', stretched);
+    syncBool('bare', bare);
     syncBool('headless', headless);
-  }, [selected, value, orientation, activation, variant, size, tone, stretched, headless]);
+  }, [selected, value, orientation, activation, variant, size, density, tone, stretched, shape, elevation, loop, bare, headless]);
 
   return React.createElement('ui-tabs', { ref, ...rest }, children);
 });

@@ -10,7 +10,13 @@ const releaseTimeline = [
   { title: 'Spec freeze', time: 'Feb 10, 2026', description: 'Finalized sprint scope and acceptance criteria.', tone: 'info' as const },
   { title: 'Internal QA sign-off', time: 'Feb 14, 2026', description: 'All critical regressions resolved.', tone: 'success' as const },
   { title: 'Security review', time: 'Feb 18, 2026', description: 'Permission model and audit logs validated.', tone: 'warning' as const },
-  { title: 'Production release', time: 'Feb 21, 2026', description: 'Rolled out to all admin tenants.', tone: 'default' as const }
+  {
+    title: 'Production release',
+    time: 'Feb 21, 2026',
+    description: 'Rolled out to all admin tenants.',
+    tone: 'default' as const,
+    active: true
+  }
 ];
 
 export const Default = () => (

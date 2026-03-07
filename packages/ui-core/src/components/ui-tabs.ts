@@ -12,20 +12,32 @@ type TabModel = {
 
 const style = `
   :host {
-    --ui-tabs-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
-    --ui-tabs-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
+    --ui-tabs-nav-bg: var(--ui-color-surface, #ffffff);
+    --ui-tabs-panel-bg: var(--ui-color-surface, #ffffff);
+    --ui-tabs-border: var(--ui-color-border, #cbd5e1);
     --ui-tabs-text: var(--ui-color-text, #0f172a);
     --ui-tabs-muted: var(--ui-color-muted, #64748b);
     --ui-tabs-accent: var(--ui-tabs-active-bg, var(--ui-color-primary, #2563eb));
-    --ui-tabs-active-color: color-mix(in srgb, var(--ui-tabs-accent) 84%, #0f172a 16%);
-    --ui-tabs-radius: 14px;
-    --ui-tabs-tab-radius: 10px;
-    --ui-tabs-gap: 8px;
-    --ui-tabs-padding: 8px;
+    --ui-tabs-active-text: color-mix(in srgb, var(--ui-tabs-accent) 82%, #0f172a 18%);
     --ui-tabs-focus: var(--ui-color-focus-ring, #2563eb);
-    --ui-tabs-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.05),
-      0 14px 34px rgba(15, 23, 42, 0.08);
+    --ui-tabs-indicator-bg: color-mix(in srgb, var(--ui-tabs-accent) 16%, transparent);
+    --ui-tabs-indicator-border: color-mix(in srgb, var(--ui-tabs-accent) 32%, transparent);
+    --ui-tabs-indicator-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    --ui-tabs-indicator-transition: 220ms cubic-bezier(0.2, 0.9, 0.2, 1);
+
+    --ui-tabs-shell-gap: 12px;
+    --ui-tabs-nav-padding: 8px;
+    --ui-tabs-nav-gap: 8px;
+    --ui-tabs-tab-radius: 10px;
+    --ui-tabs-tab-min-h: 38px;
+    --ui-tabs-tab-pad-x: 14px;
+    --ui-tabs-tab-font-size: 13px;
+    --ui-tabs-radius: 12px;
+    --ui-tabs-panel-padding: 14px;
+
+    --ui-tabs-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 28px rgba(15, 23, 42, 0.08);
+    --ui-tabs-elevation: var(--ui-tabs-shadow);
+    --ui-tabs-transition: 170ms cubic-bezier(0.22, 0.8, 0.2, 1);
 
     color-scheme: light dark;
     display: block;
@@ -36,7 +48,7 @@ const style = `
   .shell {
     min-inline-size: 0;
     display: grid;
-    gap: 10px;
+    gap: var(--ui-tabs-shell-gap);
     color: var(--ui-tabs-text);
   }
 
@@ -44,23 +56,27 @@ const style = `
     min-inline-size: 0;
     display: flex;
     flex-wrap: nowrap;
-    gap: var(--ui-tabs-gap);
-    padding: var(--ui-tabs-padding);
+    align-items: center;
+    gap: var(--ui-tabs-nav-gap);
+    padding: var(--ui-tabs-nav-padding);
     border: 1px solid var(--ui-tabs-border);
     border-radius: var(--ui-tabs-radius);
-    background: var(--ui-tabs-bg);
-    box-shadow: var(--ui-tabs-shadow);
+    background: var(--ui-tabs-nav-bg);
+    box-shadow: var(--ui-tabs-elevation);
+    position: relative;
+    isolation: isolate;
     overflow-x: auto;
+    scrollbar-width: thin;
+    overscroll-behavior-x: contain;
   }
 
-  :host([orientation="vertical"]) .shell {
-    grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
-    align-items: start;
+  .nav::-webkit-scrollbar {
+    block-size: 6px;
   }
 
-  :host([orientation="vertical"]) .nav {
-    flex-direction: column;
-    overflow-x: visible;
+  .nav::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--ui-tabs-border) 70%, transparent);
+    border-radius: 999px;
   }
 
   .tab {
@@ -68,32 +84,36 @@ const style = `
     background: transparent;
     color: var(--ui-tabs-muted);
     border-radius: var(--ui-tabs-tab-radius);
-    min-block-size: 36px;
-    padding: 0 12px;
+    min-block-size: var(--ui-tabs-tab-min-h);
+    padding-inline: var(--ui-tabs-tab-pad-x);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    font: 600 13px/1.25 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font: 600 var(--ui-tabs-tab-font-size)/1.25 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: 0.005em;
     cursor: pointer;
     white-space: nowrap;
+    flex: 0 0 auto;
+    position: relative;
+    z-index: 1;
     transition:
-      background-color 170ms ease,
-      border-color 170ms ease,
-      color 170ms ease,
-      box-shadow 170ms ease,
-      transform 170ms ease;
-  }
-
-  .tab[aria-selected="true"] {
-    background: color-mix(in srgb, var(--ui-tabs-accent) 14%, transparent);
-    color: var(--ui-tabs-active-color);
-    border-color: color-mix(in srgb, var(--ui-tabs-accent) 36%, transparent);
+      background-color var(--ui-tabs-transition),
+      border-color var(--ui-tabs-transition),
+      color var(--ui-tabs-transition),
+      box-shadow var(--ui-tabs-transition),
+      transform var(--ui-tabs-transition);
   }
 
   .tab:hover {
     background: color-mix(in srgb, var(--ui-tabs-accent) 10%, transparent);
-    color: color-mix(in srgb, var(--ui-tabs-accent) 78%, #0f172a 22%);
+    color: color-mix(in srgb, var(--ui-tabs-accent) 82%, #0f172a 18%);
+  }
+
+  .tab[aria-selected="true"] {
+    color: var(--ui-tabs-active-text);
+    background: color-mix(in srgb, var(--ui-tabs-accent) 14%, transparent);
+    border-color: color-mix(in srgb, var(--ui-tabs-accent) 34%, transparent);
   }
 
   .tab:focus-visible {
@@ -108,6 +128,12 @@ const style = `
   .tab[disabled] {
     opacity: 0.48;
     cursor: not-allowed;
+    transform: none;
+  }
+
+  .tab[disabled]:hover {
+    background: transparent;
+    color: var(--ui-tabs-muted);
   }
 
   .tab-icon {
@@ -115,73 +141,232 @@ const style = `
     line-height: 1;
   }
 
+  .indicator {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: var(--ui-tabs-indicator-w, 0px);
+    block-size: var(--ui-tabs-indicator-h, 0px);
+    transform: translate(var(--ui-tabs-indicator-x, 0px), var(--ui-tabs-indicator-y, 0px));
+    border-radius: max(4px, calc(var(--ui-tabs-tab-radius) - 2px));
+    background: var(--ui-tabs-indicator-bg);
+    border: 1px solid var(--ui-tabs-indicator-border);
+    box-shadow: var(--ui-tabs-indicator-shadow);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+    transition:
+      transform var(--ui-tabs-indicator-transition),
+      inline-size var(--ui-tabs-indicator-transition),
+      block-size var(--ui-tabs-indicator-transition),
+      opacity 120ms ease;
+  }
+
+  :host([variant="indicator"]) .tab[aria-selected="true"],
+  :host([variant="indicator-line"]) .tab[aria-selected="true"] {
+    background: transparent;
+    border-color: transparent;
+    color: var(--ui-tabs-active-text);
+  }
+
+  :host([variant="indicator"]) .tab:hover,
+  :host([variant="indicator-line"]) .tab:hover {
+    background: transparent;
+  }
+
+  :host([variant="indicator"]) .nav[data-indicator-ready="true"] .indicator,
+  :host([variant="indicator-line"]) .nav[data-indicator-ready="true"] .indicator {
+    opacity: 1;
+  }
+
+  :host([variant="indicator-line"]) .indicator {
+    background: var(--ui-tabs-accent);
+    border: none;
+    box-shadow: none;
+    border-radius: 999px;
+  }
+
   .panel-wrap {
     min-inline-size: 0;
     border: 1px solid var(--ui-tabs-border);
     border-radius: var(--ui-tabs-radius);
-    background: var(--ui-tabs-bg);
-    box-shadow: var(--ui-tabs-shadow);
-    padding: 12px;
+    background: var(--ui-tabs-panel-bg);
+    box-shadow: var(--ui-tabs-elevation);
+    padding: var(--ui-tabs-panel-padding);
+  }
+
+  .panel-wrap[hidden] {
+    display: none;
   }
 
   .source-tabs {
     display: none;
   }
 
-  :host([stretched]) .tab {
+  :host([orientation="vertical"]) .shell {
+    grid-template-columns: minmax(200px, 280px) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  :host([orientation="vertical"]) .nav {
+    flex-direction: column;
+    overflow-x: visible;
+    overflow-y: auto;
+    max-block-size: min(70vh, 520px);
+  }
+
+  :host([orientation="vertical"][stretched]) .tab {
+    inline-size: 100%;
+    justify-content: flex-start;
+  }
+
+  :host([stretched]:not([orientation="vertical"])) .tab {
     flex: 1;
   }
 
   :host([size="sm"]) {
-    --ui-tabs-padding: 6px;
-    --ui-tabs-gap: 6px;
+    --ui-tabs-nav-padding: 6px;
+    --ui-tabs-nav-gap: 6px;
+    --ui-tabs-tab-min-h: 32px;
+    --ui-tabs-tab-pad-x: 11px;
+    --ui-tabs-tab-font-size: 12px;
     --ui-tabs-tab-radius: 8px;
-  }
-
-  :host([size="sm"]) .tab {
-    min-block-size: 32px;
-    padding-inline: 10px;
-    font-size: 12px;
+    --ui-tabs-radius: 10px;
+    --ui-tabs-panel-padding: 10px;
   }
 
   :host([size="lg"]) {
-    --ui-tabs-padding: 10px;
-    --ui-tabs-gap: 10px;
-    --ui-tabs-tab-radius: 11px;
+    --ui-tabs-nav-padding: 10px;
+    --ui-tabs-nav-gap: 10px;
+    --ui-tabs-tab-min-h: 42px;
+    --ui-tabs-tab-pad-x: 16px;
+    --ui-tabs-tab-font-size: 14px;
+    --ui-tabs-tab-radius: 12px;
+    --ui-tabs-radius: 14px;
+    --ui-tabs-panel-padding: 16px;
   }
 
-  :host([size="lg"]) .tab {
-    min-block-size: 40px;
-    padding-inline: 14px;
-    font-size: 14px;
+  :host([density="compact"]) {
+    --ui-tabs-shell-gap: 8px;
+    --ui-tabs-nav-padding: 4px;
+    --ui-tabs-nav-gap: 4px;
+    --ui-tabs-tab-min-h: 30px;
+    --ui-tabs-tab-pad-x: 10px;
+    --ui-tabs-tab-font-size: 12px;
+    --ui-tabs-panel-padding: 10px;
+  }
+
+  :host([density="comfortable"]) {
+    --ui-tabs-shell-gap: 14px;
+    --ui-tabs-nav-padding: 10px;
+    --ui-tabs-nav-gap: 10px;
+    --ui-tabs-tab-min-h: 42px;
+    --ui-tabs-tab-pad-x: 16px;
+    --ui-tabs-tab-font-size: 14px;
+    --ui-tabs-panel-padding: 16px;
+  }
+
+  :host([shape="square"]) {
+    --ui-tabs-tab-radius: 6px;
+    --ui-tabs-radius: 8px;
+  }
+
+  :host([shape="rounded"]) {
+    --ui-tabs-tab-radius: 8px;
+    --ui-tabs-radius: 10px;
+  }
+
+  :host([shape="pill"]) {
+    --ui-tabs-tab-radius: 999px;
+  }
+
+  :host([elevation="none"]) {
+    --ui-tabs-elevation: none;
+  }
+
+  :host([elevation="high"]) {
+    --ui-tabs-elevation: 0 2px 4px rgba(15, 23, 42, 0.1), 0 18px 36px rgba(15, 23, 42, 0.14);
   }
 
   :host([variant="soft"]) {
-    --ui-tabs-bg: color-mix(in srgb, var(--ui-tabs-accent) 8%, var(--ui-color-surface, #ffffff));
+    --ui-tabs-nav-bg: color-mix(in srgb, var(--ui-tabs-accent) 8%, var(--ui-color-surface, #ffffff));
+    --ui-tabs-panel-bg: color-mix(in srgb, var(--ui-tabs-accent) 4%, var(--ui-color-surface, #ffffff));
+    --ui-tabs-border: color-mix(in srgb, var(--ui-tabs-accent) 22%, var(--ui-color-border, #cbd5e1));
   }
 
-  :host([variant="contrast"]) {
-    --ui-tabs-bg: #0f172a;
-    --ui-tabs-border: #334155;
-    --ui-tabs-text: #e2e8f0;
-    --ui-tabs-muted: #93a4bd;
-    --ui-tabs-accent: var(--ui-tabs-active-bg, #93c5fd);
-    --ui-tabs-active-color: #dbeafe;
-    --ui-tabs-focus: #93c5fd;
-    --ui-tabs-shadow:
-      0 16px 34px rgba(2, 6, 23, 0.42),
-      0 32px 54px rgba(2, 6, 23, 0.4);
+  :host([variant="outline"]) {
+    --ui-tabs-nav-bg: transparent;
+    --ui-tabs-panel-bg: var(--ui-color-surface, #ffffff);
+    --ui-tabs-border: color-mix(in srgb, var(--ui-tabs-accent) 42%, var(--ui-color-border, #cbd5e1));
+    --ui-tabs-elevation: none;
   }
 
-  :host([variant="minimal"]) .nav,
-  :host([variant="minimal"]) .panel-wrap {
+  :host([variant="outline"]) .tab[aria-selected="true"] {
+    background: color-mix(in srgb, var(--ui-tabs-accent) 12%, transparent);
+    border-color: color-mix(in srgb, var(--ui-tabs-accent) 56%, var(--ui-tabs-border));
+  }
+
+  :host([variant="solid"]) {
+    --ui-tabs-nav-bg: var(--ui-tabs-accent);
+    --ui-tabs-panel-bg: var(--ui-color-surface, #ffffff);
+    --ui-tabs-border: color-mix(in srgb, var(--ui-tabs-accent) 76%, #0f172a 24%);
+    --ui-tabs-muted: color-mix(in srgb, var(--ui-color-primary-foreground, #ffffff) 80%, transparent);
+    --ui-tabs-active-text: color-mix(in srgb, var(--ui-tabs-accent) 78%, #0f172a 22%);
+    --ui-tabs-focus: color-mix(in srgb, var(--ui-color-primary-foreground, #ffffff) 72%, var(--ui-tabs-accent));
+  }
+
+  :host([variant="solid"]) .tab:hover {
+    background: color-mix(in srgb, var(--ui-color-primary-foreground, #ffffff) 14%, transparent);
+    color: var(--ui-color-primary-foreground, #ffffff);
+  }
+
+  :host([variant="solid"]) .tab[aria-selected="true"] {
+    background: var(--ui-color-primary-foreground, #ffffff);
+    border-color: color-mix(in srgb, var(--ui-tabs-accent) 44%, var(--ui-tabs-border));
+    color: var(--ui-tabs-active-text);
+  }
+
+  :host([variant="ghost"]) .nav,
+  :host([variant="ghost"]) .panel-wrap {
     border-color: transparent;
     box-shadow: none;
     background: transparent;
+  }
+
+  :host([variant="ghost"]) .nav {
     padding-inline: 0;
   }
 
-  :host([variant="underline"]) .tab {
+  :host([variant="ghost"]) .tab {
+    border-color: transparent;
+  }
+
+  :host([variant="ghost"]) .tab[aria-selected="true"] {
+    background: color-mix(in srgb, var(--ui-tabs-accent) 14%, transparent);
+    border-color: transparent;
+  }
+
+  :host([variant="glass"]) .nav,
+  :host([variant="glass"]) .panel-wrap {
+    background: color-mix(in srgb, var(--ui-color-surface, #ffffff) 72%, transparent);
+    border-color: color-mix(in srgb, var(--ui-tabs-border) 70%, transparent);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+
+  :host([variant="underline"]) .nav,
+  :host([variant="line"]) .nav {
+    border-radius: 0;
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    box-shadow: none;
+    padding-inline: 0;
+    background: transparent;
+  }
+
+  :host([variant="underline"]) .tab,
+  :host([variant="line"]) .tab {
     border-radius: 0;
     border-top: 0;
     border-left: 0;
@@ -189,9 +374,74 @@ const style = `
     border-bottom: 2px solid transparent;
   }
 
-  :host([variant="underline"]) .tab[aria-selected="true"] {
+  :host([variant="underline"]) .tab[aria-selected="true"],
+  :host([variant="line"]) .tab[aria-selected="true"] {
     background: transparent;
     border-bottom-color: var(--ui-tabs-accent);
+  }
+
+  :host([variant="segmented"]) .nav {
+    background: color-mix(in srgb, var(--ui-color-surface-alt, #e2e8f0) 72%, var(--ui-color-surface, #ffffff));
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  :host([variant="segmented"]) .tab[aria-selected="true"] {
+    background: var(--ui-color-surface, #ffffff);
+    border-color: color-mix(in srgb, var(--ui-tabs-accent) 28%, var(--ui-color-border, #cbd5e1));
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  }
+
+  :host([variant="cards"]) .nav,
+  :host([variant="cards"]) .panel-wrap {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    padding: 0;
+  }
+
+  :host([variant="cards"]) .nav {
+    gap: 10px;
+  }
+
+  :host([variant="cards"]) .tab {
+    border-color: color-mix(in srgb, var(--ui-tabs-border) 80%, transparent);
+    background: var(--ui-tabs-nav-bg);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  }
+
+  :host([variant="cards"]) .tab[aria-selected="true"] {
+    border-color: color-mix(in srgb, var(--ui-tabs-accent) 38%, var(--ui-tabs-border));
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--ui-tabs-accent) 18%, transparent);
+  }
+
+  :host([variant="minimal"]) .nav,
+  :host([variant="minimal"]) .panel-wrap,
+  :host([bare]) .nav,
+  :host([bare]) .panel-wrap {
+    border-color: transparent;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  :host([bare]) .nav,
+  :host([variant="minimal"]) .nav {
+    padding-inline: 0;
+  }
+
+  :host([variant="contrast"]) {
+    --ui-tabs-nav-bg: #111827;
+    --ui-tabs-panel-bg: #0f172a;
+    --ui-tabs-border: #334155;
+    --ui-tabs-text: #e2e8f0;
+    --ui-tabs-muted: #94a3b8;
+    --ui-tabs-accent: var(--ui-tabs-active-bg, #93c5fd);
+    --ui-tabs-active-text: #dbeafe;
+    --ui-tabs-focus: #93c5fd;
+    --ui-tabs-indicator-bg: color-mix(in srgb, #93c5fd 24%, transparent);
+    --ui-tabs-indicator-border: color-mix(in srgb, #93c5fd 46%, transparent);
+    --ui-tabs-indicator-shadow: 0 0 0 1px rgba(147, 197, 253, 0.24);
+    --ui-tabs-shadow: 0 16px 34px rgba(2, 6, 23, 0.42), 0 32px 54px rgba(2, 6, 23, 0.4);
   }
 
   :host([tone="success"]) {
@@ -212,8 +462,10 @@ const style = `
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .tab {
+    .tab,
+    .nav {
       transition: none !important;
+      scroll-behavior: auto !important;
     }
   }
 
@@ -227,13 +479,14 @@ const style = `
 
   @media (forced-colors: active) {
     :host {
-      --ui-tabs-bg: Canvas;
+      --ui-tabs-nav-bg: Canvas;
+      --ui-tabs-panel-bg: Canvas;
       --ui-tabs-border: CanvasText;
       --ui-tabs-text: CanvasText;
       --ui-tabs-muted: CanvasText;
       --ui-tabs-accent: Highlight;
       --ui-tabs-focus: Highlight;
-      --ui-tabs-shadow: none;
+      --ui-tabs-elevation: none;
     }
 
     .tab[aria-selected="true"] {
@@ -245,7 +498,7 @@ const style = `
 `;
 
 function escapeHtml(value: string): string {
-  return value
+  return String(value)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -259,6 +512,20 @@ function isTruthy(raw: string | null): boolean {
   return normalized !== 'false' && normalized !== '0' && normalized !== 'off';
 }
 
+const RENDER_ATTRS = new Set([
+  'orientation',
+  'activation',
+  'headless',
+  'variant',
+  'size',
+  'density',
+  'tone',
+  'stretched',
+  'shape',
+  'elevation',
+  'bare'
+]);
+
 export class UITabs extends ElementBase {
   static get observedAttributes() {
     return [
@@ -269,13 +536,19 @@ export class UITabs extends ElementBase {
       'headless',
       'variant',
       'size',
+      'density',
       'tone',
-      'stretched'
+      'stretched',
+      'shape',
+      'elevation',
+      'loop',
+      'bare'
     ];
   }
 
   private _uid = `ui-tabs-${Math.random().toString(36).slice(2, 9)}`;
   private _observer: MutationObserver | null = null;
+  private _resizeObserver: ResizeObserver | null = null;
   private _isSyncing = false;
   private _isSyncingSelectionAttributes = false;
 
@@ -283,6 +556,7 @@ export class UITabs extends ElementBase {
     super();
     this._onClick = this._onClick.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
+    this._onWindowResize = this._onWindowResize.bind(this);
   }
 
   override connectedCallback(): void {
@@ -303,6 +577,15 @@ export class UITabs extends ElementBase {
       attributes: true,
       attributeFilter: ['slot', 'data-label', 'data-value', 'data-icon', 'data-disabled', 'disabled', 'data-active']
     });
+
+    if (typeof ResizeObserver !== 'undefined') {
+      this._resizeObserver = new ResizeObserver(() => this._syncSelectionUi());
+      this._resizeObserver.observe(this);
+    } else {
+      window.addEventListener('resize', this._onWindowResize);
+    }
+
+    this._syncSelectionUi();
   }
 
   override disconnectedCallback(): void {
@@ -312,6 +595,13 @@ export class UITabs extends ElementBase {
     if (this._observer) {
       this._observer.disconnect();
       this._observer = null;
+    }
+
+    if (this._resizeObserver) {
+      this._resizeObserver.disconnect();
+      this._resizeObserver = null;
+    } else {
+      window.removeEventListener('resize', this._onWindowResize);
     }
 
     super.disconnectedCallback();
@@ -327,7 +617,9 @@ export class UITabs extends ElementBase {
       return;
     }
 
-    if (this.isConnected) this.requestRender();
+    if (RENDER_ATTRS.has(name) && this.isConnected) {
+      this.requestRender();
+    }
   }
 
   get selected(): string {
@@ -365,6 +657,7 @@ export class UITabs extends ElementBase {
 
     const selectedRaw = this.getAttribute('selected');
     const valueRaw = this.getAttribute('value');
+    const sourceTabs = this._sourceTabs();
 
     let index = -1;
 
@@ -379,25 +672,27 @@ export class UITabs extends ElementBase {
     }
 
     if (index < 0) {
-      index = model.findIndex((item, i) => {
-        const source = this._sourceTabs()[i];
-        return !!source?.hasAttribute('data-active') && !item.disabled;
-      });
+      index = model.findIndex((item, i) => !!sourceTabs[i]?.hasAttribute('data-active') && !item.disabled);
     }
 
     if (index < 0 || !model[index] || model[index].disabled) {
       index = model.findIndex((item) => !item.disabled);
     }
 
-    return Math.max(0, index);
+    return index;
   }
 
   private _syncSelectedAttributes(model: TabModel[], selectedIndex: number): void {
     const selected = model[selectedIndex];
-    if (!selected) return;
 
     this._isSyncingSelectionAttributes = true;
     try {
+      if (!selected) {
+        this.removeAttribute('selected');
+        this.removeAttribute('value');
+        return;
+      }
+
       if (this.getAttribute('selected') !== String(selectedIndex)) {
         this.setAttribute('selected', String(selectedIndex));
       }
@@ -431,7 +726,10 @@ export class UITabs extends ElementBase {
     if (!next || next.disabled) return;
 
     const currentIndex = this._resolveSelectedIndex(model);
-    if (currentIndex === nextIndex && !emitChange) return;
+    if (currentIndex === nextIndex) {
+      this._focusTab(nextIndex);
+      return;
+    }
 
     this.setAttribute('selected', String(nextIndex));
     this.setAttribute('value', next.value);
@@ -451,25 +749,31 @@ export class UITabs extends ElementBase {
 
     const model = this._tabsModel();
     if (!model.length) return;
+
     const selectedIndex = this._resolveSelectedIndex(model);
-    const selected = model[selectedIndex];
     this._syncSelectedAttributes(model, selectedIndex);
 
     const buttons = Array.from(this.root.querySelectorAll<HTMLButtonElement>('.tab'));
     buttons.forEach((button, index) => {
       const tab = model[index];
       if (!tab) return;
+
       const selectedState = index === selectedIndex;
       button.setAttribute('aria-selected', selectedState ? 'true' : 'false');
       button.setAttribute('tabindex', selectedState && !tab.disabled ? '0' : '-1');
       button.setAttribute('aria-controls', tab.panelId);
+      button.setAttribute('aria-disabled', tab.disabled ? 'true' : 'false');
+
       if (tab.disabled) button.setAttribute('disabled', '');
       else button.removeAttribute('disabled');
     });
 
+    const selected = model[selectedIndex];
+    this._syncIndicator(selectedIndex);
     if (selected) {
       this.setAttribute('aria-activedescendant', selected.tabId);
       this.setAttribute('aria-controls', selected.panelId);
+      this._scrollSelectedTabIntoView(selectedIndex);
     } else {
       this.removeAttribute('aria-activedescendant');
       this.removeAttribute('aria-controls');
@@ -478,8 +782,74 @@ export class UITabs extends ElementBase {
     this._syncPanels(model, selectedIndex);
   }
 
+  private _syncIndicator(selectedIndex: number): void {
+    const nav = this.root.querySelector('.nav') as HTMLElement | null;
+    if (!nav) return;
+
+    const variant = this.getAttribute('variant') || 'default';
+    const usePillIndicator = variant === 'indicator';
+    const useLineIndicator = variant === 'indicator-line';
+
+    if (!usePillIndicator && !useLineIndicator) {
+      nav.removeAttribute('data-indicator-ready');
+      nav.style.removeProperty('--ui-tabs-indicator-x');
+      nav.style.removeProperty('--ui-tabs-indicator-y');
+      nav.style.removeProperty('--ui-tabs-indicator-w');
+      nav.style.removeProperty('--ui-tabs-indicator-h');
+      return;
+    }
+
+    const selectedTab = this.root.querySelector(`.tab[data-index="${selectedIndex}"]`) as HTMLElement | null;
+    if (!selectedTab) {
+      nav.removeAttribute('data-indicator-ready');
+      return;
+    }
+
+    const orientation = this.getAttribute('orientation') === 'vertical' ? 'vertical' : 'horizontal';
+    const rtl = getComputedStyle(this).direction === 'rtl';
+
+    let x = selectedTab.offsetLeft;
+    let y = selectedTab.offsetTop;
+    let w = selectedTab.offsetWidth;
+    let h = selectedTab.offsetHeight;
+
+    if (usePillIndicator) {
+      const inset = 2;
+      x += inset;
+      y += inset;
+      w = Math.max(0, w - inset * 2);
+      h = Math.max(0, h - inset * 2);
+    } else if (orientation === 'vertical') {
+      const thickness = 3;
+      const inset = 5;
+      y += inset;
+      h = Math.max(8, h - inset * 2);
+      w = thickness;
+      x += rtl ? selectedTab.offsetWidth - thickness - 2 : 2;
+    } else {
+      const thickness = 2;
+      const inset = 8;
+      x += inset;
+      w = Math.max(12, w - inset * 2);
+      h = thickness;
+      y += selectedTab.offsetHeight - thickness - 2;
+    }
+
+    nav.style.setProperty('--ui-tabs-indicator-x', `${x}px`);
+    nav.style.setProperty('--ui-tabs-indicator-y', `${y}px`);
+    nav.style.setProperty('--ui-tabs-indicator-w', `${w}px`);
+    nav.style.setProperty('--ui-tabs-indicator-h', `${h}px`);
+    nav.setAttribute('data-indicator-ready', 'true');
+  }
+
   private _syncPanels(model: TabModel[], selectedIndex: number): void {
     const panels = this._sourcePanels();
+    const panelWrap = this.root.querySelector('.panel-wrap') as HTMLElement | null;
+
+    if (panelWrap) {
+      if (!panels.length) panelWrap.setAttribute('hidden', '');
+      else panelWrap.removeAttribute('hidden');
+    }
 
     this._isSyncing = true;
     try {
@@ -508,15 +878,36 @@ export class UITabs extends ElementBase {
     return model.filter((tab) => !tab.disabled).map((tab) => tab.index);
   }
 
+  private _onWindowResize(): void {
+    this._syncSelectionUi();
+  }
+
   private _focusTab(index: number): void {
     const node = this.root.querySelector(`.tab[data-index="${index}"]`) as HTMLButtonElement | null;
     node?.focus();
   }
 
+  private _scrollSelectedTabIntoView(index: number): void {
+    const nav = this.root.querySelector('.nav') as HTMLElement | null;
+    const button = this.root.querySelector(`.tab[data-index="${index}"]`) as HTMLElement | null;
+    if (!nav || !button) return;
+
+    const shouldCenter = this.getAttribute('orientation') !== 'vertical';
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    button.scrollIntoView({
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      block: 'nearest',
+      inline: shouldCenter ? 'center' : 'nearest'
+    });
+  }
+
   private _onClick(event: MouseEvent): void {
     const target = event.target as HTMLElement | null;
     const button = target?.closest('.tab') as HTMLButtonElement | null;
-    if (!button) return;
+    if (!button || button.disabled) return;
 
     const index = Number(button.getAttribute('data-index'));
     if (!Number.isFinite(index)) return;
@@ -535,6 +926,9 @@ export class UITabs extends ElementBase {
 
     const orientation = this.getAttribute('orientation') === 'vertical' ? 'vertical' : 'horizontal';
     const activation = this.getAttribute('activation') === 'manual' ? 'manual' : 'auto';
+    const shouldLoop = !this.hasAttribute('loop') || isTruthy(this.getAttribute('loop'));
+    const rtl = getComputedStyle(this).direction === 'rtl';
+
     const enabled = this._enabledIndices(model);
     if (!enabled.length) return;
 
@@ -542,8 +936,19 @@ export class UITabs extends ElementBase {
     if (!Number.isFinite(currentIndex)) return;
 
     const enabledPosition = enabled.indexOf(currentIndex);
+    if (enabledPosition < 0) return;
+
     const moveFocus = (nextEnabledPosition: number) => {
-      const resolved = enabled[(nextEnabledPosition + enabled.length) % enabled.length];
+      if (!shouldLoop && (nextEnabledPosition < 0 || nextEnabledPosition >= enabled.length)) {
+        return;
+      }
+
+      const resolved = shouldLoop
+        ? enabled[(nextEnabledPosition + enabled.length) % enabled.length]
+        : enabled[nextEnabledPosition];
+
+      if (resolved == null) return;
+
       this._focusTab(resolved);
       if (activation === 'auto') {
         this._setSelectedByIndex(model, resolved, true);
@@ -552,13 +957,19 @@ export class UITabs extends ElementBase {
       }
     };
 
-    if ((orientation === 'horizontal' && event.key === 'ArrowRight') || (orientation === 'vertical' && event.key === 'ArrowDown')) {
+    if (
+      (orientation === 'horizontal' && ((event.key === 'ArrowRight' && !rtl) || (event.key === 'ArrowLeft' && rtl))) ||
+      (orientation === 'vertical' && event.key === 'ArrowDown')
+    ) {
       event.preventDefault();
       moveFocus(enabledPosition + 1);
       return;
     }
 
-    if ((orientation === 'horizontal' && event.key === 'ArrowLeft') || (orientation === 'vertical' && event.key === 'ArrowUp')) {
+    if (
+      (orientation === 'horizontal' && ((event.key === 'ArrowLeft' && !rtl) || (event.key === 'ArrowRight' && rtl))) ||
+      (orientation === 'vertical' && event.key === 'ArrowUp')
+    ) {
       event.preventDefault();
       moveFocus(enabledPosition - 1);
       return;
@@ -585,9 +996,10 @@ export class UITabs extends ElementBase {
   protected override render(): void {
     const model = this._tabsModel();
     const selectedIndex = this._resolveSelectedIndex(model);
+
     this._syncSelectedAttributes(model, selectedIndex);
 
-    const selected = model[selectedIndex];
+    const orientation = this.getAttribute('orientation') === 'vertical' ? 'vertical' : 'horizontal';
     const nav = model
       .map((tab) => {
         const selectedState = tab.index === selectedIndex;
@@ -602,6 +1014,7 @@ export class UITabs extends ElementBase {
             data-index="${tab.index}"
             aria-selected="${selectedState ? 'true' : 'false'}"
             aria-controls="${tab.panelId}"
+            aria-disabled="${tab.disabled ? 'true' : 'false'}"
             tabindex="${selectedState && !tab.disabled ? '0' : '-1'}"
             ${tab.disabled ? 'disabled' : ''}
           >
@@ -615,7 +1028,8 @@ export class UITabs extends ElementBase {
     this.setContent(`
       <style>${style}</style>
       <section class="shell" part="shell">
-        <div class="nav" role="tablist" aria-orientation="${this.getAttribute('orientation') === 'vertical' ? 'vertical' : 'horizontal'}" part="nav">
+        <div class="nav" role="tablist" aria-orientation="${orientation}" part="nav">
+          <span class="indicator" part="indicator" aria-hidden="true"></span>
           ${nav}
         </div>
         <div class="panel-wrap" part="panel-wrap" aria-live="polite">
@@ -625,11 +1039,16 @@ export class UITabs extends ElementBase {
       <slot class="source-tabs" name="tab"></slot>
     `);
 
+    const selected = model[selectedIndex];
     if (selected) {
       this.setAttribute('aria-activedescendant', selected.tabId);
       this.setAttribute('aria-controls', selected.panelId);
+    } else {
+      this.removeAttribute('aria-activedescendant');
+      this.removeAttribute('aria-controls');
     }
 
+    this._syncIndicator(selectedIndex);
     this._syncPanels(model, selectedIndex);
   }
 }

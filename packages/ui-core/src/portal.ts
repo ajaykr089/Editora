@@ -87,9 +87,16 @@ export function autoUpdatePosition(anchor: HTMLElement, contentEl: HTMLElement, 
   let ro1: ResizeObserver | null = null;
   let ro2: ResizeObserver | null = null;
   let mo: MutationObserver | null = null;
+  let raf = 0;
   const handlers: Array<() => void> = [];
 
-  const schedule = () => requestAnimationFrame(onChange);
+  const schedule = () => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      onChange();
+    });
+  };
   const onScrollOrResize = () => schedule();
 
   if (typeof ResizeObserver !== 'undefined') {
@@ -101,7 +108,9 @@ export function autoUpdatePosition(anchor: HTMLElement, contentEl: HTMLElement, 
 
   if (typeof MutationObserver !== 'undefined') {
     mo = new MutationObserver(schedule);
-    try { mo.observe(anchor, { attributes: true, childList: true, subtree: true }); } catch (e) {}
+    // ResizeObserver already tracks geometry changes. Restrict mutation observation to
+    // top-level anchor attribute mutations to avoid high-frequency subtree churn.
+    try { mo.observe(anchor, { attributes: true, childList: false, subtree: false }); } catch (e) {}
   }
 
   window.addEventListener('scroll', onScrollOrResize, true);
@@ -112,6 +121,12 @@ export function autoUpdatePosition(anchor: HTMLElement, contentEl: HTMLElement, 
   handlers.push(() => { ro1 && ro1.disconnect(); ro1 = null; });
   handlers.push(() => { ro2 && ro2.disconnect(); ro2 = null; });
   handlers.push(() => { mo && mo.disconnect(); mo = null; });
+  handlers.push(() => {
+    if (raf) {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    }
+  });
 
   return () => handlers.forEach(h => { try { h(); } catch (e) {} });
 }
@@ -167,7 +182,9 @@ export function showPortalFor(anchor: HTMLElement | VirtualElement, contentEl: H
     // auto-cleanup: if anchor is an HTMLElement and has been removed from DOM or is not visible, teardown
     if (anchor && typeof (anchor as any).getBoundingClientRect === 'function' && anchor instanceof HTMLElement) {
       const el = anchor as HTMLElement;
-      const inDOM = document.body.contains(el);
+      const rootNode = el.getRootNode?.();
+      const shadowHost = rootNode instanceof ShadowRoot ? rootNode.host : null;
+      const inDOM = el.isConnected || document.body.contains(el) || (shadowHost ? document.body.contains(shadowHost) : false);
       const rects = (el.getClientRects && el.getClientRects().length) ? el.getClientRects().length : 0;
       const style = window.getComputedStyle(el);
       const isVisible = rects > 0 && style.display !== 'none' && style.visibility !== 'hidden' && parseFloat(style.opacity || '1') > 0;

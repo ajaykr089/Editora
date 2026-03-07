@@ -17,6 +17,8 @@ export type SwitchProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | '
   size?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'soft' | 'outline' | 'contrast' | 'minimal';
   tone?: 'brand' | 'success' | 'warning' | 'danger';
+  shape?: 'pill' | 'rounded' | 'square';
+  elevation?: 'none' | 'low' | 'high';
   label?: string;
   description?: string;
   name?: string;
@@ -36,6 +38,8 @@ export const Switch = React.forwardRef<HTMLElement, SwitchProps>(function Switch
     size,
     variant,
     tone,
+    shape,
+    elevation,
     label,
     description,
     name,
@@ -105,7 +109,9 @@ export const Switch = React.forwardRef<HTMLElement, SwitchProps>(function Switch
     syncAttr('description', description || null);
     syncAttr('name', name || null);
     syncAttr('value', value || null);
-  }, [checked, disabled, headless, loading, required, size, variant, tone, label, description, name, value]);
+    syncAttr('shape', shape && shape !== 'pill' ? shape : null);
+    syncAttr('elevation', elevation && elevation !== 'low' ? elevation : null);
+  }, [checked, disabled, headless, loading, required, size, variant, tone, shape, elevation, label, description, name, value]);
 
   return React.createElement('ui-switch', { ref, ...rest }, children);
 });

@@ -9,6 +9,7 @@ type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'>
 export type SelectProps = BaseProps & {
   value?: string;
   disabled?: boolean;
+  loading?: boolean;
   required?: boolean;
   invalid?: boolean;
   headless?: boolean;
@@ -18,9 +19,22 @@ export type SelectProps = BaseProps & {
   description?: string;
   error?: string;
   size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
-  variant?: 'classic' | 'surface' | 'soft' | 'filled' | 'glass' | 'contrast';
+  variant?:
+    | 'classic'
+    | 'surface'
+    | 'soft'
+    | 'filled'
+    | 'outline'
+    | 'line'
+    | 'minimal'
+    | 'ghost'
+    | 'solid'
+    | 'glass'
+    | 'contrast';
   tone?: 'default' | 'brand' | 'success' | 'warning' | 'danger';
   density?: 'default' | 'compact' | 'comfortable';
+  shape?: 'rounded' | 'square' | 'pill';
+  elevation?: 'low' | 'none' | 'high';
   radius?: 'none' | 'large' | 'full' | string;
   validation?: 'none' | 'success' | 'warning' | 'error';
   onChange?: (value: string) => void;
@@ -33,6 +47,7 @@ export const Select = React.forwardRef<HTMLElement, SelectProps>(function Select
     children,
     value,
     disabled,
+    loading,
     required,
     invalid,
     headless,
@@ -45,6 +60,8 @@ export const Select = React.forwardRef<HTMLElement, SelectProps>(function Select
     variant,
     tone,
     density,
+    shape,
+    elevation,
     radius,
     validation,
     onChange,
@@ -106,6 +123,7 @@ export const Select = React.forwardRef<HTMLElement, SelectProps>(function Select
 
     syncAttr('value', value != null ? String(value) : null);
     syncBoolean('disabled', disabled);
+    syncBoolean('loading', loading);
     syncBoolean('required', required);
     syncBoolean('headless', headless);
     syncBoolean('invalid', invalid);
@@ -120,11 +138,14 @@ export const Select = React.forwardRef<HTMLElement, SelectProps>(function Select
     syncAttr('variant', variant && variant !== 'classic' ? variant : null);
     syncAttr('tone', tone && tone !== 'default' ? tone : null);
     syncAttr('density', density && density !== 'default' ? density : null);
+    syncAttr('shape', shape && shape !== 'rounded' ? shape : null);
+    syncAttr('elevation', elevation && elevation !== 'low' ? elevation : null);
     syncAttr('radius', radius ? String(radius) : null);
     syncAttr('validation', validation && validation !== 'none' ? validation : null);
   }, [
     value,
     disabled,
+    loading,
     required,
     invalid,
     headless,
@@ -137,6 +158,8 @@ export const Select = React.forwardRef<HTMLElement, SelectProps>(function Select
     variant,
     tone,
     density,
+    shape,
+    elevation,
     radius,
     validation
   ]);
