@@ -26,7 +26,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@editora/core": "^1.0.6"
+    "@editora/core": "^1.0.9"
   },
   "optionalDependencies": {
     "prismjs": "^1.29.0"

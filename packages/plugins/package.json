@@ -422,7 +422,7 @@
     "verify:citations": "npm run typecheck:build && npm run test:citations && npm run test:content-rules && npm run test:approval-workflow && npm run test:pii-redaction && npm run test:smart-paste && npm run test:blocks-library && npm run test:doc-schema && npm run test:translation-workflow && npm run build"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.7"
+    "@editora/core": "^1.0.9"
   },
   "dependencies": {
     "katex": "^0.16.27",
