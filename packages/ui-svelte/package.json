@@ -18,6 +18,9 @@
     "typescript": "^5.0.0",
     "vite": "^4.5.14"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
-  "gitHead": "80e0808ae4909de63b8e0f1dd915b06b33a8ed44"
+  "gitHead": "2fb152bcf53bb1c5dde018b1ce1fc9eee6e6a632"
 }
