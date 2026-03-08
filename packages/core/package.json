@@ -1,6 +1,6 @@
 {
   "name": "@editora/core",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Framework-agnostic rich text editor core for React and web apps, built for enterprise editing workflows.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",

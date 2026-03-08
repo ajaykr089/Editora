@@ -1,6 +1,6 @@
 {
   "name": "editora",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Official Editora CLI for quickly adding UI components, editor packages, and SaaS-ready building blocks.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",

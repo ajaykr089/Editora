@@ -3,13 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## 2.0.4 (2026-03-05)
+## 2.0.5 (2026-03-08)
 
 **Note:** Version bump only for package @editora/toast
 
+## 2.0.4 (2026-03-05)
 
-
-
+**Note:** Version bump only for package @editora/toast
 
 ## 2.0.0 (2026-02-14)
 
@@ -20,28 +20,31 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 #### ✨ New Features
 
 - **Promise Lifecycle Toasts**: Automatic state transitions for async operations
+
   ```typescript
   toast.promise(uploadFile(), {
-    loading: 'Uploading...',
-    success: 'Uploaded!',
-    error: 'Failed'
+    loading: "Uploading...",
+    success: "Uploaded!",
+    error: "Failed",
   });
   ```
 
 - **Rich Content Support**: HTML, icons, actions, and progress bars
+
   ```typescript
   toast.show({
-    message: 'File uploaded',
-    icon: '✓',
-    actions: [{ label: 'View', onClick: () => {} }],
-    progress: { value: 75 }
+    message: "File uploaded",
+    icon: "✓",
+    actions: [{ label: "View", onClick: () => {} }],
+    progress: { value: 75 },
   });
   ```
 
 - **Toast Updates**: Modify existing toasts dynamically
+
   ```typescript
-  const toast = toast.loading('Saving...');
-  toast.update(toast.id, { message: 'Saved!', level: 'success' });
+  const toast = toast.loading("Saving...");
+  toast.update(toast.id, { message: "Saved!", level: "success" });
   ```
 
 - **Multiple Positions**: Support for all screen corners and center
@@ -97,14 +100,14 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 ```typescript
 toast.configure({
-  position: 'top-right',
+  position: "top-right",
   duration: 5000,
   maxVisible: 5,
-  theme: 'dark',
+  theme: "dark",
   pauseOnHover: true,
   enableAccessibility: true,
   swipeDismiss: true,
-  dragDismiss: false
+  dragDismiss: false,
 });
 ```
 

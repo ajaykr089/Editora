@@ -1,6 +1,6 @@
 {
   "name": "@editora/toast",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Enterprise toast notification library for React and web apps, with SaaS-ready UX patterns, accessibility, and high-performance lifecycle controls.",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",

@@ -1,6 +1,6 @@
 {
   "name": "@editora/icons",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Framework-agnostic SVG icon library for the Editora UI ecosystem with outline, solid, and duotone variants",
   "homepage": "https://editora-free.netlify.app/",
   "bugs": {

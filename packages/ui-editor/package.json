@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-editor",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Editor-focused UI extensions for Editora (floating toolbar, command palette, context menus)",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -18,7 +18,7 @@
     "@editora/ui-core": "^0.1.2"
   },
   "dependencies": {
-    "@editora/ui-core": "^0.1.3"
+    "@editora/ui-core": "^0.1.4"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
