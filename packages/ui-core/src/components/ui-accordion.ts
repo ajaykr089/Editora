@@ -21,7 +21,7 @@ const style = `
     --ui-accordion-muted: var(--ui-color-muted, #475569);
     --ui-accordion-primary: var(--ui-color-primary, #2563eb);
     --ui-accordion-focus-ring: var(--ui-color-focus-ring, #2563eb);
-    --ui-accordion-shadow: var(--ui-shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.06), 0 10px 28px rgba(15, 23, 42, 0.07));
+    --ui-accordion-shadow: none;
     --ui-accordion-duration: 190ms;
     --ui-accordion-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
     --ui-accordion-padding-x: 16px;

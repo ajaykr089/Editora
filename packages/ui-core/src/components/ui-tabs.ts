@@ -22,7 +22,7 @@ const style = `
     --ui-tabs-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-tabs-indicator-bg: color-mix(in srgb, var(--ui-tabs-accent) 16%, transparent);
     --ui-tabs-indicator-border: color-mix(in srgb, var(--ui-tabs-accent) 32%, transparent);
-    --ui-tabs-indicator-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    --ui-tabs-indicator-shadow: none;
     --ui-tabs-indicator-transition: 220ms cubic-bezier(0.2, 0.9, 0.2, 1);
 
     --ui-tabs-shell-gap: 12px;
@@ -35,8 +35,8 @@ const style = `
     --ui-tabs-radius: 12px;
     --ui-tabs-panel-padding: 14px;
 
-    --ui-tabs-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 28px rgba(15, 23, 42, 0.08);
-    --ui-tabs-elevation: var(--ui-tabs-shadow);
+    --ui-tabs-shadow: none;
+    --ui-tabs-elevation: none;
     --ui-tabs-transition: 170ms cubic-bezier(0.22, 0.8, 0.2, 1);
 
     color-scheme: light dark;

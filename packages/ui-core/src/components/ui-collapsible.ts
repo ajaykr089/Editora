@@ -22,7 +22,7 @@ const style = `
     --ui-collapsible-muted: var(--ui-color-muted, #64748b);
     --ui-collapsible-accent: var(--ui-color-primary, #2563eb);
     --ui-collapsible-radius: 14px;
-    --ui-collapsible-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    --ui-collapsible-shadow: none;
 
     --ui-collapsible-header-min-h: 46px;
     --ui-collapsible-padding-x: 14px;

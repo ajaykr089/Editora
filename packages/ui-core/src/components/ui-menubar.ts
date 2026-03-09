@@ -14,8 +14,7 @@ const hostStyle = `
     --ui-menubar-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 90%, #e2e8f0 10%);
     --ui-menubar-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 86%, transparent);
     --ui-menubar-shadow:
-      0 16px 40px rgba(2, 6, 23, 0.1),
-      0 2px 8px rgba(2, 6, 23, 0.06);
+      none;
     --ui-menubar-item-radius: 10px;
     --ui-menubar-item-padding: 8px 12px;
     --ui-menubar-item-font-size: 13px;
@@ -30,8 +29,7 @@ const hostStyle = `
     --ui-menubar-panel-border-color: color-mix(in srgb, #0f172a 14%, transparent);
     --ui-menubar-panel-border: 1px solid var(--ui-menubar-panel-border-color);
     --ui-menubar-panel-shadow:
-      0 26px 58px rgba(2, 6, 23, 0.22),
-      0 3px 12px rgba(2, 6, 23, 0.1);
+      none;
     --ui-menubar-panel-radius: 12px;
     --ui-menubar-panel-padding: 6px;
     --ui-menubar-panel-min-width: 220px;
@@ -254,7 +252,7 @@ const panelStyle = `
     border-radius: var(--ui-menubar-panel-radius, 12px);
     background: var(--ui-menubar-panel-bg, #fff);
     color: var(--ui-menubar-panel-color, #0f172a);
-    box-shadow: var(--ui-menubar-panel-shadow, 0 26px 58px rgba(2, 6, 23, 0.22));
+    box-shadow: var(--ui-menubar-panel-shadow);
     backdrop-filter: var(--ui-menubar-panel-backdrop, none);
     opacity: 0;
     transform: translateY(5px) scale(0.984);
@@ -531,6 +529,7 @@ export class UIMenubar extends ElementBase {
       'tone',
       'placement',
       'close-on-select',
+      'close-on-scroll',
       'typeahead'
     ];
   }
@@ -555,6 +554,7 @@ export class UIMenubar extends ElementBase {
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onDocPointerDown = this._onDocPointerDown.bind(this);
     this._onDocKeyDown = this._onDocKeyDown.bind(this);
+    this._onDocScroll = this._onDocScroll.bind(this);
     this._onSlotChange = this._onSlotChange.bind(this);
     this._onMouseMove = this._onMouseMove.bind(this);
   }
@@ -634,6 +634,14 @@ export class UIMenubar extends ElementBase {
 
   set closeOnSelect(value: boolean) {
     this.setAttribute('close-on-select', value ? 'true' : 'false');
+  }
+
+  get closeOnScroll(): boolean {
+    return toBooleanAttribute(this.getAttribute('close-on-scroll'), true);
+  }
+
+  set closeOnScroll(value: boolean) {
+    this.setAttribute('close-on-scroll', value ? 'true' : 'false');
   }
 
   get typeahead(): boolean {
@@ -753,6 +761,7 @@ export class UIMenubar extends ElementBase {
     if (this._globalListenersBound) return;
     document.addEventListener('pointerdown', this._onDocPointerDown as EventListener, true);
     document.addEventListener('keydown', this._onDocKeyDown as EventListener);
+    document.addEventListener('scroll', this._onDocScroll as EventListener, true);
     this._globalListenersBound = true;
   }
 
@@ -760,6 +769,7 @@ export class UIMenubar extends ElementBase {
     if (!this._globalListenersBound) return;
     document.removeEventListener('pointerdown', this._onDocPointerDown as EventListener, true);
     document.removeEventListener('keydown', this._onDocKeyDown as EventListener);
+    document.removeEventListener('scroll', this._onDocScroll as EventListener, true);
     this._globalListenersBound = false;
   }
 
@@ -1121,6 +1131,14 @@ export class UIMenubar extends ElementBase {
     if (!this._open) return;
     const path = event.composedPath();
     if (path.includes(this)) return;
+    if (this._portalEl && path.includes(this._portalEl)) return;
+    this.close();
+    this._syncState();
+  }
+
+  private _onDocScroll(event: Event): void {
+    if (!this._open || !this.closeOnScroll) return;
+    const path = typeof (event as any).composedPath === 'function' ? (event as any).composedPath() : [];
     if (this._portalEl && path.includes(this._portalEl)) return;
     this.close();
     this._syncState();

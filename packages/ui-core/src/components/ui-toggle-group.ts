@@ -10,8 +10,7 @@ const style = `
     --ui-toggle-group-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-toggle-group-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
     --ui-toggle-group-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.04),
-      0 10px 24px rgba(15, 23, 42, 0.08);
+      none;
 
     color-scheme: light dark;
     display: inline-flex;

@@ -21,8 +21,9 @@ const style = `
     --ui-select-warning: var(--ui-color-warning, #d97706);
     --ui-select-error: var(--ui-color-danger, #dc2626);
 
-    --ui-select-shadow: 0 1px 2px rgba(2, 6, 23, 0.06), 0 10px 22px rgba(2, 6, 23, 0.09);
-    --ui-select-elevation: var(--ui-select-shadow);
+    --ui-select-shadow: none;
+    --ui-select-elevation: none;
+    --ui-select-menu-shadow: none;
 
     --ui-select-label: var(--ui-select-text);
     --ui-select-description: var(--ui-select-muted);
@@ -486,9 +487,7 @@ const menuStyle = `
     border-radius: var(--ui-select-radius, 10px);
     background: var(--ui-select-bg, #ffffff);
     color: var(--ui-select-text, #0f172a);
-    box-shadow:
-      var(--ui-select-elevation, 0 1px 2px rgba(2, 6, 23, 0.06), 0 10px 22px rgba(2, 6, 23, 0.09)),
-      0 16px 34px rgba(2, 6, 23, 0.16);
+    box-shadow: var(--ui-select-menu-shadow, var(--ui-select-elevation, none));
     padding: 6px;
     z-index: var(--ui-select-menu-z, 1550);
     transform-origin: top center;
@@ -640,7 +639,8 @@ const LIVE_ATTRS = new Set([
   'validation',
   'invalid',
   'data-invalid',
-  'data-valid'
+  'data-valid',
+  'close-on-scroll'
 ]);
 
 const SELECT_TOKEN_NAMES = [
@@ -654,6 +654,7 @@ const SELECT_TOKEN_NAMES = [
   '--ui-select-accent',
   '--ui-select-radius',
   '--ui-select-elevation',
+  '--ui-select-menu-shadow',
   '--ui-select-menu-z'
 ];
 
@@ -682,7 +683,8 @@ export class UISelect extends ElementBase {
       'validation',
       'invalid',
       'data-invalid',
-      'data-valid'
+      'data-valid',
+      'close-on-scroll'
     ];
   }
 
@@ -713,6 +715,7 @@ export class UISelect extends ElementBase {
     this._onSlotChange = this._onSlotChange.bind(this);
     this._onDocumentPointerDown = this._onDocumentPointerDown.bind(this);
     this._onDocumentKeyDown = this._onDocumentKeyDown.bind(this);
+    this._onDocumentScroll = this._onDocumentScroll.bind(this);
   }
 
   override connectedCallback(): void {
@@ -806,6 +809,14 @@ export class UISelect extends ElementBase {
   set disabled(next: boolean) {
     if (next) this.setAttribute('disabled', '');
     else this.removeAttribute('disabled');
+  }
+
+  get closeOnScroll(): boolean {
+    return isTruthyAttr(this.getAttribute('close-on-scroll')) || !this.hasAttribute('close-on-scroll');
+  }
+
+  set closeOnScroll(next: boolean) {
+    this.setAttribute('close-on-scroll', next ? 'true' : 'false');
   }
 
   focus(options?: FocusOptions): void {
@@ -904,6 +915,13 @@ export class UISelect extends ElementBase {
     if (!this._open) return;
     const path = event.composedPath();
     if (path.includes(this)) return;
+    if (this._portalEl && path.includes(this._portalEl)) return;
+    this._closeMenu('outside');
+  }
+
+  private _onDocumentScroll(event: Event): void {
+    if (!this._open || !this.closeOnScroll) return;
+    const path = typeof (event as any).composedPath === 'function' ? (event as any).composedPath() : [];
     if (this._portalEl && path.includes(this._portalEl)) return;
     this._closeMenu('outside');
   }
@@ -1337,6 +1355,7 @@ export class UISelect extends ElementBase {
 
     window.addEventListener('pointerdown', this._onDocumentPointerDown, true);
     window.addEventListener('keydown', this._onDocumentKeyDown, true);
+    window.addEventListener('scroll', this._onDocumentScroll, true);
 
     this._syncPortalSelectionState();
     this._syncControlState();
@@ -1352,6 +1371,7 @@ export class UISelect extends ElementBase {
 
     window.removeEventListener('pointerdown', this._onDocumentPointerDown, true);
     window.removeEventListener('keydown', this._onDocumentKeyDown, true);
+    window.removeEventListener('scroll', this._onDocumentScroll, true);
 
     this._open = false;
 

@@ -42,7 +42,7 @@ Config resolution order:
 
 | Capability | Web component surface |
 | --- | --- |
-| Plugin loading | `plugins="..."` |
+| Plugin loading | `plugins="bold,italic,link"` |
 | Toolbar layout | `toolbar-items="..."`, `toolbar-floating`, `toolbar-sticky` |
 | Theme scope | `theme="light\\|dark\\|custom"` |
 | Readonly mode | `readonly="true\\|false"` |

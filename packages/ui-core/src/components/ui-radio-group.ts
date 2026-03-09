@@ -32,7 +32,7 @@ const style = `
     --ui-radio-border-selected: var(--ui-color-primary, #2563eb);
     --ui-radio-text: var(--ui-color-text, #0f172a);
     --ui-radio-muted: #64748b;
-    --ui-radio-shadow: 0 1px 2px rgba(2, 6, 23, 0.05);
+    --ui-radio-shadow: none;
     --ui-radio-ring: color-mix(in srgb, var(--ui-color-primary, #2563eb) 34%, transparent);
   }
 

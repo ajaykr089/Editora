@@ -20,7 +20,7 @@ const style = `
     --ui-alert-color: var(--ui-color-text, #0f172a);
     --ui-alert-muted: color-mix(in srgb, var(--ui-color-text, #0f172a) 62%, var(--ui-color-muted, #64748b) 38%);
     --ui-alert-accent: var(--ui-color-primary, #2563eb);
-    --ui-alert-shadow: var(--ui-shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.06), 0 14px 28px rgba(15, 23, 42, 0.08));
+    --ui-alert-shadow: none;
     --ui-alert-icon-bg: color-mix(in srgb, var(--ui-alert-accent) 14%, transparent);
     --ui-alert-icon-color: var(--ui-alert-accent);
     --ui-alert-dismiss-bg: color-mix(in srgb, var(--ui-alert-color) 10%, transparent);

@@ -5,7 +5,7 @@ const style = `
   :host {
     position: fixed;
     inset: 0;
-    z-index: 1180;
+    z-index: var(--ui-command-z, 1300);
     display: none;
     color-scheme: light dark;
     --ui-command-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
@@ -15,7 +15,7 @@ const style = `
     --ui-command-accent: var(--ui-color-primary, #2563eb);
     --ui-command-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-command-radius: 16px;
-    --ui-command-shadow: 0 28px 70px rgba(2, 6, 23, 0.26);
+    --ui-command-shadow: none;
     --ui-command-backdrop: rgba(2, 6, 23, 0.52);
   }
 

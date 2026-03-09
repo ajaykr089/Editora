@@ -15,11 +15,9 @@ const style = `
     --ui-slider-fill: var(--ui-color-primary, #2563eb);
     --ui-slider-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-slider-shadow:
-      0 1px 2px rgba(2, 6, 23, 0.05),
-      0 12px 28px rgba(2, 6, 23, 0.08);
+      none;
     --ui-slider-thumb-shadow:
-      0 2px 8px rgba(2, 6, 23, 0.22),
-      0 0 0 1px color-mix(in srgb, var(--ui-slider-fill) 24%, transparent);
+      none;
     --ui-slider-thumb-ring: 0 0 0 4px color-mix(in srgb, var(--ui-slider-focus) 18%, transparent);
     --ui-slider-padding: 10px;
     --ui-slider-radius: 14px;

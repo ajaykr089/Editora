@@ -41,8 +41,7 @@ const style = `
     --ui-sidebar-accent: var(--ui-color-primary, #2563eb);
     --ui-sidebar-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-sidebar-shadow:
-      0 1px 2px rgba(2, 6, 23, 0.05),
-      0 20px 44px rgba(2, 6, 23, 0.12);
+      none;
 
     --ui-sidebar-item-radius: 12px;
     --ui-sidebar-item-height: 42px;

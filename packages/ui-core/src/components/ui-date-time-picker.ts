@@ -72,8 +72,8 @@ const style = `
     --ui-dtp-error: var(--ui-color-danger, #dc2626);
     --ui-dtp-radius: 12px;
     --ui-dtp-panel-radius: 14px;
-    --ui-dtp-z: 1100;
-    --ui-dtp-shadow: 0 18px 36px rgba(2, 6, 23, 0.14);
+    --ui-dtp-z: 1600;
+    --ui-dtp-shadow: none;
     --ui-dtp-gap: 12px;
     --ui-dtp-hit: 42px;
     --ui-dtp-duration: 160ms;
@@ -304,7 +304,7 @@ const style = `
 `;
 
 const overlayStyle = `
-  .overlay { position: fixed; z-index: var(--ui-dp-z, 1100); pointer-events: none; }
+  .overlay { position: fixed; z-index: var(--ui-dtp-z, 1600); pointer-events: none; }
   .panel {
     pointer-events: auto;
     min-inline-size: min(560px, calc(100vw - 20px));
@@ -313,7 +313,7 @@ const overlayStyle = `
     border-radius: var(--ui-dtp-panel-radius, 14px);
     background: var(--ui-dtp-surface, #fff);
     color: var(--ui-dp-text, #0f172a);
-    box-shadow: var(--ui-dtp-shadow, 0 18px 36px rgba(2, 6, 23, 0.14));
+    box-shadow: var(--ui-dtp-shadow);
     padding: 12px;
     display: grid;
     gap: 12px;
@@ -326,7 +326,7 @@ const overlayStyle = `
     box-shadow: none;
     padding: 0;
   }
-  .sheet-wrap { position: fixed; inset: 0; display: grid; align-items: end; z-index: var(--ui-dp-z, 1100); }
+  .sheet-wrap { position: fixed; inset: 0; display: grid; align-items: end; z-index: var(--ui-dtp-z, 1600); }
   .sheet-backdrop { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.52); }
   .sheet {
     position: relative;

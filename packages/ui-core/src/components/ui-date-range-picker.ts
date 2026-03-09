@@ -65,7 +65,7 @@ const style = `
     --ui-dp-panel-radius: calc(var(--ui-dp-radius) + 2px);
     --ui-dp-field-error: var(--ui-color-danger, #dc2626);
     --ui-dp-focus-ring: color-mix(in srgb, var(--ui-dp-accent) 26%, transparent);
-    --ui-dp-z: 1100;
+    --ui-dp-z: 1600;
     --ui-dp-duration: 160ms;
     --ui-dp-ease: cubic-bezier(0.2, 0.9, 0.24, 1);
     color-scheme: light dark;
@@ -340,7 +340,7 @@ const style = `
 `;
 
 const overlayStyle = `
-  .overlay { position: fixed; z-index: var(--ui-dp-z, 1100); pointer-events: none; }
+  .overlay { position: fixed; z-index: var(--ui-dp-z, 1600); pointer-events: none; }
   .panel {
     pointer-events: auto;
     min-inline-size: min(420px, calc(100vw - 16px));
@@ -363,7 +363,7 @@ const overlayStyle = `
     box-shadow: none;
     padding: 0;
   }
-  .sheet-wrap { position: fixed; inset: 0; display: grid; align-items: end; z-index: var(--ui-dp-z, 1100); }
+  .sheet-wrap { position: fixed; inset: 0; display: grid; align-items: end; z-index: var(--ui-dp-z, 1600); }
   .sheet-backdrop { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.52); }
   .sheet {
     position: relative;

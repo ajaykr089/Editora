@@ -519,6 +519,7 @@ export class UIDropdown extends ElementBase {
       'elevation',
       'tone',
       'close-on-select',
+      'close-on-scroll',
       'typeahead',
       'aria-label',
       'aria-labelledby',
@@ -546,6 +547,7 @@ export class UIDropdown extends ElementBase {
     this._onHostClick = this._onHostClick.bind(this);
     this._onDocumentPointerDown = this._onDocumentPointerDown.bind(this);
     this._onDocumentKeyDown = this._onDocumentKeyDown.bind(this);
+    this._onDocumentScroll = this._onDocumentScroll.bind(this);
   }
 
   override connectedCallback(): void {
@@ -571,7 +573,7 @@ export class UIDropdown extends ElementBase {
       return;
     }
 
-    if (name === 'close-on-select' || name === 'typeahead') return;
+    if (name === 'close-on-select' || name === 'close-on-scroll' || name === 'typeahead') return;
 
     if (name === 'disabled') {
       if (this.hasAttribute('disabled') && this._isOpen) this.close('disabled');
@@ -628,6 +630,14 @@ export class UIDropdown extends ElementBase {
 
   set closeOnSelect(value: boolean) {
     this.setAttribute('close-on-select', value ? 'true' : 'false');
+  }
+
+  get closeOnScroll(): boolean {
+    return toBool(this.getAttribute('close-on-scroll'), true);
+  }
+
+  set closeOnScroll(value: boolean) {
+    this.setAttribute('close-on-scroll', value ? 'true' : 'false');
   }
 
   get typeahead(): boolean {
@@ -806,6 +816,7 @@ export class UIDropdown extends ElementBase {
     if (this._globalListenersBound) return;
     document.addEventListener('pointerdown', this._onDocumentPointerDown, true);
     document.addEventListener('keydown', this._onDocumentKeyDown, true);
+    document.addEventListener('scroll', this._onDocumentScroll, true);
     this._globalListenersBound = true;
   }
 
@@ -813,6 +824,7 @@ export class UIDropdown extends ElementBase {
     if (!this._globalListenersBound) return;
     document.removeEventListener('pointerdown', this._onDocumentPointerDown, true);
     document.removeEventListener('keydown', this._onDocumentKeyDown, true);
+    document.removeEventListener('scroll', this._onDocumentScroll, true);
     this._globalListenersBound = false;
   }
 
@@ -1201,6 +1213,13 @@ export class UIDropdown extends ElementBase {
     if (path.includes(this)) return;
     if (this._portalEl && path.includes(this._portalEl)) return;
 
+    this._requestClose('outside');
+  }
+
+  private _onDocumentScroll(event: Event): void {
+    if (!this._isOpen || !this._isTopMost() || !this.closeOnScroll) return;
+    const path = typeof (event as any).composedPath === 'function' ? (event as any).composedPath() : [];
+    if (this._portalEl && path.includes(this._portalEl)) return;
     this._requestClose('outside');
   }
 

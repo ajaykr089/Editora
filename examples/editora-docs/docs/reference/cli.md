@@ -1,7 +1,7 @@
 ---
 title: CLI
 description: Editora CLI quick-add commands for common UI and editor features.
-keywords: [editora cli, npx editora add, react ui library, rich text editor react]
+keywords: [editora cli, npx @editora/cli add, react ui library, rich text editor react]
 ---
 
 # Editora CLI
@@ -14,28 +14,28 @@ It also supports the optional `ui-` prefix (`accordion` and `ui-accordion` both 
 ## Quick add commands
 
 ```bash
-npx editora add button
-npx editora add modal
-npx editora add datatable
-npx editora add editor
-npx editora add toast
-npx editora add accordion
-npx editora add ui-select
+npx @editora/cli add button
+npx @editora/cli add modal
+npx @editora/cli add datatable
+npx @editora/cli add editor
+npx @editora/cli add toast
+npx @editora/cli add accordion
+npx @editora/cli add ui-select
 ```
 
 ## Additional examples
 
 ```bash
-npx editora add react-icons
-npx editora add light-code-editor
-npx editora add button modal toast
-npx editora add all
+npx @editora/cli add react-icons
+npx @editora/cli add light-code-editor
+npx @editora/cli add button modal toast
+npx @editora/cli add all
 ```
 
 ## Dry run
 
 ```bash
-npx editora add editor --dry-run
+npx @editora/cli add editor --dry-run
 ```
 
 ## Mapping

@@ -10,8 +10,10 @@ export function createPortalContainer(id = 'ui-portal-root') {
     el.style.width = '100%';
     el.style.height = '0';
     el.style.pointerEvents = 'none';
+    el.style.zIndex = 'var(--ui-portal-z, 1600)';
     document.body.appendChild(el);
   }
+  if (!el.style.zIndex) el.style.zIndex = 'var(--ui-portal-z, 1600)';
   return el;
 }
 
@@ -40,23 +42,24 @@ export function computePosition(anchor: HTMLElement | VirtualElement, content: H
   let top = 0, left = 0;
 
   // center by default (will be clamped/shifted later if needed)
+  // Coordinates are viewport-relative because portal root is fixed to viewport.
   if (placement === 'top') {
-    top = a.top - c.height - offset + (window.scrollY || 0);
-    left = a.left + (a.width - c.width) / 2 + (window.scrollX || 0);
+    top = a.top - c.height - offset;
+    left = a.left + (a.width - c.width) / 2;
   } else if (placement === 'bottom') {
-    top = a.bottom + offset + (window.scrollY || 0);
-    left = a.left + (a.width - c.width) / 2 + (window.scrollX || 0);
+    top = a.bottom + offset;
+    left = a.left + (a.width - c.width) / 2;
   } else if (placement === 'left') {
-    top = a.top + (a.height - c.height) / 2 + (window.scrollY || 0);
-    left = a.left - c.width - offset + (window.scrollX || 0);
+    top = a.top + (a.height - c.height) / 2;
+    left = a.left - c.width - offset;
   } else {
-    top = a.top + (a.height - c.height) / 2 + (window.scrollY || 0);
-    left = a.right + offset + (window.scrollX || 0);
+    top = a.top + (a.height - c.height) / 2;
+    left = a.right + offset;
   }
 
   // compute cross-axis offsets useful for arrow positioning
-  const anchorCenterX = a.left + a.width / 2 + (window.scrollX || 0);
-  const anchorCenterY = a.top + a.height / 2 + (window.scrollY || 0);
+  const anchorCenterX = a.left + a.width / 2;
+  const anchorCenterY = a.top + a.height / 2;
   const x = Math.round(anchorCenterX - left); // horizontal distance from content left -> anchor center
   const y = Math.round(anchorCenterY - top);  // vertical distance from content top -> anchor center
 
@@ -66,14 +69,14 @@ export function computePosition(anchor: HTMLElement | VirtualElement, content: H
     const vh = window.innerHeight || document.documentElement.clientHeight;
     // shift horizontally for top/bottom placements
     if (placement === 'top' || placement === 'bottom') {
-      const minLeft = 4 + (window.scrollX || 0);
-      const maxLeft = vw - c.width - 4 + (window.scrollX || 0);
+      const minLeft = 4;
+      const maxLeft = vw - c.width - 4;
       if (left < minLeft) left = Math.min(maxLeft, left + (minLeft - left));
       if (left > maxLeft) left = Math.max(minLeft, left - (left - maxLeft));
     } else {
       // shift vertically for left/right placements
-      const minTop = 4 + (window.scrollY || 0);
-      const maxTop = vh - c.height - 4 + (window.scrollY || 0);
+      const minTop = 4;
+      const maxTop = vh - c.height - 4;
       if (top < minTop) top = Math.min(maxTop, top + (minTop - top));
       if (top > maxTop) top = Math.max(minTop, top - (top - maxTop));
     }
@@ -158,8 +161,8 @@ export function showPortalFor(anchor: HTMLElement | VirtualElement, contentEl: H
     if (!arrowEl) return;
 
     const anchorRect = (anchor as any).getBoundingClientRect();
-    const anchorCenterX = anchorRect.left + anchorRect.width / 2 + (window.scrollX || 0);
-    const anchorCenterY = anchorRect.top + anchorRect.height / 2 + (window.scrollY || 0);
+    const anchorCenterX = anchorRect.left + anchorRect.width / 2;
+    const anchorCenterY = anchorRect.top + anchorRect.height / 2;
 
     if (finalPlacement === 'top' || finalPlacement === 'bottom') {
       const arrowX = anchorCenterX - finalLeft; // px from content left
@@ -209,10 +212,10 @@ export function showPortalFor(anchor: HTMLElement | VirtualElement, contentEl: H
     }
 
     // clamp horizontally and vertically (keep it on-screen)
-    if (final.left < 4 + (window.scrollX || 0)) final.left = 4 + (window.scrollX || 0);
-    if (final.left + contentEl.offsetWidth > vw - 4 + (window.scrollX || 0)) final.left = vw - contentEl.offsetWidth - 4 + (window.scrollX || 0);
-    if (final.top < 4 + (window.scrollY || 0)) final.top = 4 + (window.scrollY || 0);
-    if (final.top + contentEl.offsetHeight > vh - 4 + (window.scrollY || 0)) final.top = vh - contentEl.offsetHeight - 4 + (window.scrollY || 0);
+    if (final.left < 4) final.left = 4;
+    if (final.left + contentEl.offsetWidth > vw - 4) final.left = vw - contentEl.offsetWidth - 4;
+    if (final.top < 4) final.top = 4;
+    if (final.top + contentEl.offsetHeight > vh - 4) final.top = vh - contentEl.offsetHeight - 4;
 
     contentEl.style.top = `${Math.round(final.top)}px`;
     contentEl.style.left = `${Math.round(final.left)}px`;

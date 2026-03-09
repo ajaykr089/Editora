@@ -15,7 +15,7 @@ const style = `
     --ui-badge-bg: color-mix(in srgb, var(--ui-badge-accent) 10%, var(--ui-color-surface, #ffffff));
     --ui-badge-color: color-mix(in srgb, var(--ui-badge-accent) 78%, var(--ui-color-text, #0f172a) 22%);
     --ui-badge-border: color-mix(in srgb, var(--ui-badge-accent) 20%, var(--ui-color-border, rgba(15, 23, 42, 0.16)));
-    --ui-badge-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 18px rgba(15, 23, 42, 0.1);
+    --ui-badge-shadow: none;
     --ui-badge-dot-size: 7px;
     --ui-badge-dot-color: currentColor;
     --ui-badge-remove-size: 16px;

@@ -3,7 +3,8 @@ import { acquireBodyScrollLock, releaseBodyScrollLock } from './scroll-lock';
 type OverlayItem = HTMLElement;
 
 export const OverlayManager = {
-  baseZ: 1000,
+  // Keep manager-driven overlays above dialog/drawer defaults (1200/1201).
+  baseZ: 1300,
   stack: [] as OverlayItem[],
   _lockCount: 0,
 

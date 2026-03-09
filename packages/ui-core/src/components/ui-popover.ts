@@ -7,7 +7,7 @@ const style = `
     --ui-popover-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-popover-text: var(--ui-color-text, #0f172a);
     --ui-popover-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
-    --ui-popover-shadow: 0 18px 42px rgba(2, 6, 23, 0.2);
+    --ui-popover-shadow: none;
     --ui-popover-focus: var(--ui-color-focus-ring, #2563eb);
     background: var(--ui-popover-bg);
     color: var(--ui-popover-text);

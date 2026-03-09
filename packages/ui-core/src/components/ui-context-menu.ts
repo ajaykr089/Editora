@@ -29,8 +29,7 @@ const style = `
     --ui-context-menu-border: 1px solid var(--ui-context-menu-border-color);
     --ui-context-menu-radius: 13px;
     --ui-context-menu-shadow:
-      0 20px 44px rgba(2, 6, 23, 0.2),
-      0 2px 10px rgba(2, 6, 23, 0.12);
+      none;
     --ui-context-menu-min-width: 228px;
     --ui-context-menu-padding: 6px;
     --ui-context-menu-transition: 170ms cubic-bezier(0.2, 0.9, 0.24, 1);

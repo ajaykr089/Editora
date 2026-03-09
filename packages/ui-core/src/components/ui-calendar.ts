@@ -78,7 +78,7 @@ const style = `
     --ui-calendar-accent: var(--ui-color-primary, #2563eb);
 
     --ui-calendar-radius: 14px;
-    --ui-calendar-shadow: 0 14px 34px rgba(15, 23, 42, 0.1);
+    --ui-calendar-shadow: none;
     --ui-calendar-gap: 10px;
     --ui-calendar-day-radius: 10px;
     --ui-calendar-day-hover-bg: color-mix(in srgb, var(--ui-calendar-accent) 10%, transparent);

@@ -41,11 +41,14 @@ const style = `
     --ui-combobox-muted: var(--ui-color-muted, #64748b);
     --ui-combobox-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
     --ui-combobox-border: 1px solid var(--ui-combobox-border-color);
-    --ui-combobox-shadow: 0 8px 24px rgba(2, 6, 23, 0.08);
+    --ui-combobox-shadow: none;
+    --ui-combobox-shadow-hover: none;
+    --ui-combobox-shadow-focus: none;
     --ui-combobox-focus: var(--ui-color-primary, #2563eb);
     --ui-combobox-panel-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent);
     --ui-combobox-panel-border: 1px solid color-mix(in srgb, var(--ui-combobox-border-color) 80%, transparent);
-    --ui-combobox-panel-shadow: 0 24px 46px rgba(2, 6, 23, 0.16);
+    --ui-combobox-panel-shadow: none;
+    --ui-combobox-panel-z: 1600;
     --ui-combobox-option-hover: color-mix(in srgb, var(--ui-color-primary, #2563eb) 11%, transparent);
     --ui-combobox-option-active: color-mix(in srgb, var(--ui-color-primary, #2563eb) 18%, transparent);
     --ui-combobox-error: var(--ui-color-danger, #dc2626);
@@ -115,7 +118,7 @@ const style = `
 
   .control:hover {
     border-color: color-mix(in srgb, var(--ui-combobox-focus) 34%, var(--ui-combobox-border-color));
-    box-shadow: 0 11px 30px rgba(2, 6, 23, 0.11);
+    box-shadow: var(--ui-combobox-shadow-hover);
   }
 
   input {
@@ -141,7 +144,7 @@ const style = `
     border-color: color-mix(in srgb, var(--ui-combobox-focus) 72%, var(--ui-combobox-border-color));
     box-shadow:
       0 0 0 4px color-mix(in srgb, var(--ui-combobox-focus) 16%, transparent),
-      0 12px 32px rgba(2, 6, 23, 0.12);
+      var(--ui-combobox-shadow-focus);
     transform: translateY(-1px);
   }
 
@@ -205,7 +208,7 @@ const style = `
     max-height: min(360px, 52vh);
     overflow: auto;
     padding: 6px 6px 8px;
-    z-index: 120;
+    z-index: var(--ui-combobox-panel-z, 1600);
     display: none;
     opacity: 0;
     transform: translateY(-4px) scale(0.985);

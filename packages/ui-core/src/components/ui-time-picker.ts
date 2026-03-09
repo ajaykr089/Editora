@@ -44,7 +44,7 @@ const style = `
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
     --ui-dp-radius: 12px;
     --ui-dp-field-error: var(--ui-color-danger, #dc2626);
-    --ui-dp-z: 1100;
+    --ui-dp-z: 1600;
     color-scheme: light dark;
     display: inline-grid;
     inline-size: min(100%, var(--ui-width, 240px));
@@ -167,7 +167,7 @@ const style = `
 `;
 
 const overlayStyle = `
-  .overlay { position: fixed; z-index: var(--ui-dp-z, 1100); pointer-events: none; }
+  .overlay { position: fixed; z-index: var(--ui-dp-z, 1600); pointer-events: none; }
   .panel {
     pointer-events: auto;
     min-inline-size: min(300px, calc(100vw - 16px));
@@ -181,7 +181,7 @@ const overlayStyle = `
     display: grid;
     gap: 10px;
   }
-  .sheet-wrap { position: fixed; inset: 0; display: grid; align-items: end; z-index: var(--ui-dp-z, 1100); }
+  .sheet-wrap { position: fixed; inset: 0; display: grid; align-items: end; z-index: var(--ui-dp-z, 1600); }
   .sheet-backdrop { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.52); }
   .sheet {
     position: relative;

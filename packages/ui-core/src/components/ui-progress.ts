@@ -21,7 +21,7 @@ const style = `
     --ui-progress-buffer: color-mix(in srgb, var(--ui-progress-fill, #2563eb) 24%, transparent);
     --ui-progress-height: 10px;
     --ui-progress-radius: 999px;
-    --ui-progress-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38);
+    --ui-progress-shadow: none;
     --ui-progress-label: #334155;
     --ui-progress-duration: 220ms;
     --ui-progress-easing: cubic-bezier(0.2, 0.9, 0.24, 1);

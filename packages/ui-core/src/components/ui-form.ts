@@ -24,8 +24,7 @@ const style = `
     --ui-form-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 66%, transparent);
     --ui-form-border: 1px solid var(--ui-form-border-color);
     --ui-form-shadow:
-      0 1px 3px rgba(2, 6, 23, 0.05),
-      0 14px 30px rgba(2, 6, 23, 0.1);
+      none;
     --ui-form-padding: 16px;
     --ui-form-header-gap: 12px;
     --ui-form-header-border: color-mix(in srgb, var(--ui-form-border-color) 84%, transparent);

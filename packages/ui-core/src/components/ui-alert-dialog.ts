@@ -15,12 +15,12 @@ const style = `
     --ui-alert-muted: var(--ui-color-muted, #64748b);
     --ui-alert-accent: var(--ui-color-muted, #64748b);
     --ui-alert-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
-    --ui-alert-shadow: 0 2px 4px rgba(2, 6, 23, 0.06), 0 28px 72px rgba(2, 6, 23, 0.24);
+    --ui-alert-shadow: none;
     --ui-alert-padding: 24px;
     --ui-alert-min-width: 360px;
     --ui-alert-max-width: min(90vw, 560px);
-    --ui-alert-z: 1001;
-    --ui-alert-backdrop-z: 1000;
+    --ui-alert-z: 1301;
+    --ui-alert-backdrop-z: 1300;
     --ui-alert-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-alert-danger: var(--ui-color-danger, #dc2626);
     --ui-alert-backdrop: rgba(2, 6, 23, 0.58);

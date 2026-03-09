@@ -22,7 +22,7 @@ const style = `
     --ui-app-header-padding-x: 16px;
     --ui-app-header-radius: 0px;
     --ui-app-header-z: 60;
-    --ui-app-header-shadow: var(--ui-shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.06), 0 14px 24px rgba(15, 23, 42, 0.06));
+    --ui-app-header-shadow: none;
     --ui-app-header-duration: 170ms;
     --ui-app-header-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
     color-scheme: light dark;

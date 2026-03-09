@@ -15,8 +15,8 @@ const style = `
     --ui-checkbox-invalid-border: 1.5px solid var(--ui-color-danger, #dc2626);
     --ui-checkbox-invalid-focus: 0 0 0 4px color-mix(in srgb, var(--ui-color-danger, #dc2626) 24%, transparent);
     --ui-checkbox-focus: 0 0 0 4px color-mix(in srgb, var(--ui-color-focus-ring, #2563eb) 26%, transparent);
-    --ui-checkbox-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 70%, transparent), 0 1px 2px rgba(15, 23, 42, 0.08);
-    --ui-checkbox-shadow-checked: inset 0 1px 0 color-mix(in srgb, #ffffff 30%, transparent), 0 6px 14px color-mix(in srgb, var(--ui-primary, var(--ui-color-primary, #2563eb)) 30%, transparent);
+    --ui-checkbox-shadow: none;
+    --ui-checkbox-shadow-checked: none;
     --ui-checkbox-disabled-bg: color-mix(in srgb, var(--ui-color-surface-alt, #f1f5f9) 88%, #ffffff 12%);
     --ui-checkbox-disabled-border: 1.5px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
     --ui-checkbox-label-color: var(--ui-color-text, var(--ui-text, #0f172a));

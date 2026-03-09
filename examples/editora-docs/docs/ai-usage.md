@@ -65,11 +65,11 @@ const Modal = (props) => <Dialog {...props} />;
 ## CLI quick add
 
 ```bash
-npx editora add button
-npx editora add modal
-npx editora add datatable
-npx editora add editor
-npx editora add toast
+npx @editora/cli add button
+npx @editora/cli add modal
+npx @editora/cli add datatable
+npx @editora/cli add editor
+npx @editora/cli add toast
 ```
 
 ## Prompting rules
