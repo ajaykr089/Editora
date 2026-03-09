@@ -10,14 +10,14 @@ Usage:
   editora add <feature> [feature...] [--dry-run]
 
 Examples:
-  npx editora add button
-  npx editora add modal
-  npx editora add datatable
-  npx editora add editor
-  npx editora add toast
-  npx editora add accordion avatar select
-  npx editora add ui-accordion ui-select
-  npx editora add button modal toast
+  npx @editora/cli add button
+  npx @editora/cli add modal
+  npx @editora/cli add datatable
+  npx @editora/cli add editor
+  npx @editora/cli add toast
+  npx @editora/cli add accordion avatar select
+  npx @editora/cli add ui-accordion ui-select
+  npx @editora/cli add button modal toast
 `;
 
 const uiReactComponents = [
