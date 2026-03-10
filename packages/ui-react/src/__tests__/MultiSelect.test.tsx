@@ -118,4 +118,35 @@ describe('MultiSelect wrapper', () => {
       expect(latest).toEqual(['ops']);
     });
   });
+
+  it('syncs production attrs for indicator and state variants', () => {
+    const { container } = render(
+      <MultiSelect
+        options={[{ value: 'ops', label: 'Operations' }]}
+        selectionIndicator="none"
+        readOnly
+        clearable
+        loading
+        loadingText="Refreshing options..."
+        variant="contrast"
+        tone="warning"
+        density="compact"
+        shape="square"
+        size="sm"
+        renderLimit={40}
+      />
+    );
+    const el = container.querySelector('ui-multi-select') as HTMLElement | null;
+    expect(el?.getAttribute('selection-indicator')).toBe('none');
+    expect(el?.hasAttribute('readonly')).toBe(true);
+    expect(el?.hasAttribute('clearable')).toBe(true);
+    expect(el?.hasAttribute('loading')).toBe(true);
+    expect(el?.getAttribute('loading-text')).toBe('Refreshing options...');
+    expect(el?.getAttribute('variant')).toBe('contrast');
+    expect(el?.getAttribute('tone')).toBe('warning');
+    expect(el?.getAttribute('density')).toBe('compact');
+    expect(el?.getAttribute('shape')).toBe('square');
+    expect(el?.getAttribute('size')).toBe('sm');
+    expect(el?.getAttribute('render-limit')).toBe('40');
+  });
 });

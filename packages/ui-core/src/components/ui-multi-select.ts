@@ -8,6 +8,7 @@ type MultiSelectOption = {
   label: string;
   description?: string;
   disabled?: boolean;
+  group?: string;
 };
 
 let multiSelectUid = 0;
@@ -22,8 +23,10 @@ const style = `
     --ui-multi-select-muted: var(--ui-color-muted, #64748b);
     --ui-multi-select-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-multi-select-danger: var(--ui-color-danger, #dc2626);
+    --ui-multi-select-accent: var(--ui-color-primary, #2563eb);
     --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, transparent);
     --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-primary, #2563eb) 82%, #0f172a 18%);
+    --ui-multi-select-panel-bg: color-mix(in srgb, var(--ui-multi-select-bg) 98%, transparent);
     display: block;
     inline-size: 100%;
     min-inline-size: 0;
@@ -73,6 +76,10 @@ const style = `
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-multi-select-focus) 22%, transparent);
   }
 
+  .shell[data-readonly="true"] {
+    background: color-mix(in srgb, var(--ui-multi-select-bg) 92%, transparent);
+  }
+
   .shell[data-invalid="true"] {
     border-color: color-mix(in srgb, var(--ui-multi-select-danger) 62%, transparent);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-multi-select-danger) 18%, transparent);
@@ -101,6 +108,10 @@ const style = `
     color: inherit;
     cursor: pointer;
     font: 700 11px/1 "Inter", sans-serif;
+  }
+
+  .chip-remove:hover {
+    background: color-mix(in srgb, currentColor 14%, transparent);
   }
 
   .input {
@@ -138,6 +149,28 @@ const style = `
     color: var(--ui-multi-select-text);
   }
 
+  .clear {
+    border: none;
+    background: transparent;
+    color: color-mix(in srgb, var(--ui-multi-select-text) 64%, transparent);
+    inline-size: 28px;
+    block-size: 28px;
+    border-radius: 8px;
+    display: inline-grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background-color 140ms ease, color 140ms ease;
+  }
+
+  .clear:hover {
+    background: color-mix(in srgb, var(--ui-multi-select-text) 8%, transparent);
+    color: var(--ui-multi-select-text);
+  }
+
+  .clear[hidden] {
+    display: none;
+  }
+
   .toggle[data-open="true"] {
     transform: rotate(180deg);
   }
@@ -151,7 +184,7 @@ const style = `
     overflow: auto;
     border: 1px solid color-mix(in srgb, var(--ui-multi-select-border-color) 84%, transparent);
     border-radius: calc(var(--ui-multi-select-radius) + 2px);
-    background: color-mix(in srgb, var(--ui-multi-select-bg) 98%, transparent);
+    background: var(--ui-multi-select-panel-bg);
     box-shadow: 0 20px 34px rgba(2, 6, 23, 0.16);
     padding: 6px;
     box-sizing: border-box;
@@ -180,6 +213,15 @@ const style = `
 
   .option[data-selected="true"] {
     background: color-mix(in srgb, var(--ui-multi-select-focus) 14%, transparent);
+  }
+
+  .option[data-indicator="none"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .option[data-indicator="check"] .check {
+    border: none;
+    background: transparent;
   }
 
   .option[data-highlighted="true"] {
@@ -226,10 +268,18 @@ const style = `
     margin-top: 2px;
   }
 
-  .empty {
+  .status {
     padding: 12px 10px;
     color: var(--ui-multi-select-muted);
     font-size: 12px;
+  }
+
+  .group {
+    padding: 8px 10px 6px;
+    color: var(--ui-multi-select-muted);
+    font: 700 10px/1.3 "Inter", "IBM Plex Sans", sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .label[hidden], .description[hidden], .error[hidden], .meta[hidden] {
@@ -239,6 +289,135 @@ const style = `
   :host([disabled]) .shell {
     opacity: 0.68;
   }
+
+  :host([disabled]) .toggle,
+  :host([disabled]) .clear,
+  :host([readonly]) .toggle,
+  :host([readonly]) .clear,
+  :host([disabled]) .chip-remove,
+  :host([readonly]) .chip-remove {
+    pointer-events: none;
+  }
+
+  :host([readonly]) .chip-remove {
+    opacity: 0.6;
+  }
+
+  :host([size="sm"]) {
+    --ui-multi-select-radius: 10px;
+  }
+
+  :host([size="sm"]) .shell {
+    min-block-size: 38px;
+    padding: 6px 8px;
+  }
+
+  :host([size="sm"]) .input,
+  :host([size="sm"]) .option-label {
+    font-size: 12px;
+  }
+
+  :host([size="lg"]) .shell {
+    min-block-size: 48px;
+    padding: 10px 12px;
+  }
+
+  :host([size="lg"]) .input,
+  :host([size="lg"]) .option-label {
+    font-size: 15px;
+  }
+
+  :host([density="compact"]) .root {
+    gap: 6px;
+  }
+
+  :host([density="compact"]) .shell {
+    gap: 6px;
+  }
+
+  :host([density="compact"]) .option {
+    padding: 8px;
+  }
+
+  :host([density="comfortable"]) .root {
+    gap: 10px;
+  }
+
+  :host([density="comfortable"]) .shell {
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  :host([density="comfortable"]) .option {
+    padding: 12px;
+  }
+
+  :host([shape="square"]) {
+    --ui-multi-select-radius: 6px;
+  }
+
+  :host([shape="soft"]) {
+    --ui-multi-select-radius: 18px;
+  }
+
+  :host([variant="surface"]) {
+    --ui-multi-select-bg: var(--ui-color-surface-alt, #f8fafc);
+  }
+
+  :host([variant="soft"]) {
+    --ui-multi-select-bg: color-mix(in srgb, var(--ui-multi-select-accent) 8%, #ffffff);
+    --ui-multi-select-border-color: color-mix(in srgb, var(--ui-multi-select-accent) 26%, var(--ui-color-border, #cbd5e1));
+  }
+
+  :host([variant="filled"]) {
+    --ui-multi-select-bg: color-mix(in srgb, var(--ui-multi-select-text) 6%, #ffffff);
+    --ui-multi-select-border-color: transparent;
+  }
+
+  :host([variant="contrast"]) {
+    --ui-multi-select-bg: #0f172a;
+    --ui-multi-select-panel-bg: #0f172a;
+    --ui-multi-select-text: #e2e8f0;
+    --ui-multi-select-muted: #93a4bd;
+    --ui-multi-select-border-color: #334155;
+    --ui-multi-select-focus: #93c5fd;
+    --ui-multi-select-chip-bg: color-mix(in srgb, #93c5fd 18%, transparent);
+    --ui-multi-select-chip-text: #e2e8f0;
+  }
+
+  :host([variant="minimal"]) {
+    --ui-multi-select-bg: transparent;
+    --ui-multi-select-border: 0;
+  }
+
+  :host([variant="minimal"]) .shell {
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    border-radius: 0;
+    padding-inline: 0;
+  }
+
+  :host([tone="success"]) {
+    --ui-multi-select-accent: var(--ui-color-success, #16a34a);
+    --ui-multi-select-focus: var(--ui-color-success, #16a34a);
+    --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-success, #16a34a) 12%, transparent);
+    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-success, #16a34a) 82%, #0f172a 18%);
+  }
+
+  :host([tone="warning"]) {
+    --ui-multi-select-accent: var(--ui-color-warning, #d97706);
+    --ui-multi-select-focus: var(--ui-color-warning, #d97706);
+    --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-warning, #d97706) 12%, transparent);
+    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-warning, #d97706) 82%, #0f172a 18%);
+  }
+
+  :host([tone="danger"]) {
+    --ui-multi-select-accent: var(--ui-color-danger, #dc2626);
+    --ui-multi-select-focus: var(--ui-color-danger, #dc2626);
+    --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-danger, #dc2626) 12%, transparent);
+    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-danger, #dc2626) 82%, #0f172a 18%);
+  }
 `;
 
 function parseOptions(raw: string | null): MultiSelectOption[] {
@@ -246,19 +425,34 @@ function parseOptions(raw: string | null): MultiSelectOption[] {
   try {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed
-      .map((entry) => {
-        if (!entry || typeof entry !== 'object') return null;
-        const value = String((entry as Record<string, unknown>).value ?? '').trim();
-        if (!value) return null;
-        return {
-          value,
-          label: String((entry as Record<string, unknown>).label ?? value),
-          description: (entry as Record<string, unknown>).description ? String((entry as Record<string, unknown>).description) : undefined,
-          disabled: Boolean((entry as Record<string, unknown>).disabled)
-        } satisfies MultiSelectOption;
-      })
-      .filter(Boolean) as MultiSelectOption[];
+    const output: MultiSelectOption[] = [];
+    const pushOption = (entry: Record<string, unknown>, group?: string) => {
+      const value = String(entry.value ?? '').trim();
+      if (!value) return;
+      output.push({
+        value,
+        label: String(entry.label ?? value),
+        description: entry.description ? String(entry.description) : undefined,
+        disabled: Boolean(entry.disabled),
+        group
+      });
+    };
+
+    parsed.forEach((entry) => {
+      if (!entry || typeof entry !== 'object') return;
+      const record = entry as Record<string, unknown>;
+      if (Array.isArray(record.options)) {
+        const groupLabel = String(record.label ?? '').trim();
+        record.options.forEach((child) => {
+          if (!child || typeof child !== 'object') return;
+          pushOption(child as Record<string, unknown>, groupLabel || undefined);
+        });
+        return;
+      }
+      pushOption(record);
+    });
+
+    return output;
   } catch {
     return [];
   }
@@ -281,7 +475,30 @@ function parseSelected(raw: string | null): string[] {
 
 export class UIMultiSelect extends ElementBase {
   static get observedAttributes() {
-    return ['options', 'value', 'placeholder', 'label', 'description', 'data-error', 'name', 'required', 'disabled', 'open', 'max-selections'];
+    return [
+      'options',
+      'value',
+      'placeholder',
+      'label',
+      'description',
+      'data-error',
+      'name',
+      'required',
+      'disabled',
+      'readonly',
+      'loading',
+      'loading-text',
+      'clearable',
+      'open',
+      'max-selections',
+      'render-limit',
+      'selection-indicator',
+      'variant',
+      'tone',
+      'density',
+      'shape',
+      'size'
+    ];
   }
 
   private _options: MultiSelectOption[] = [];
@@ -361,6 +578,7 @@ export class UIMultiSelect extends ElementBase {
         <div class="shell" part="shell" data-open="false" data-invalid="false">
           <div class="chips" part="chips"></div>
           <input class="input" part="input" type="text" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="${this._uid}-panel" />
+          <button class="clear" part="clear" type="button" aria-label="Clear selection" hidden>×</button>
           <button class="toggle" part="toggle" type="button" aria-label="Toggle options">⌄</button>
           <ui-listbox class="panel" id="${this._uid}-panel" part="panel" role="listbox" aria-multiselectable="true" item-selector=".option" item-role="option" active-attribute="data-highlighted" hidden></ui-listbox>
         </div>
@@ -377,10 +595,21 @@ export class UIMultiSelect extends ElementBase {
     this._inputEl?.addEventListener('input', this._onInput);
     this._inputEl?.addEventListener('keydown', this._onKeyDown);
     this.root.querySelector('.toggle')?.addEventListener('click', this._onToggle);
+    this.root.querySelector('.clear')?.addEventListener('click', () => this._clearSelection('clear-button'));
     this._shellEl?.addEventListener('focusin', this._onFocusIn);
     this._shellEl?.addEventListener('focusout', this._onFocusOut);
 
     this._syncUi();
+  }
+
+  private _selectionIndicator(): 'checkbox' | 'check' | 'none' {
+    const raw = (this.getAttribute('selection-indicator') || 'checkbox').trim().toLowerCase();
+    if (raw === 'none' || raw === 'check') return raw;
+    return 'checkbox';
+  }
+
+  private _isInteractionLocked(): boolean {
+    return this.hasAttribute('disabled') || this.hasAttribute('readonly');
   }
 
   private _attachOutsideListener(): void {
@@ -406,6 +635,12 @@ export class UIMultiSelect extends ElementBase {
     return this._options.filter((option) => {
       return normalizeCollectionText(option.label).includes(normalized) || normalizeCollectionText(option.value).includes(normalized);
     });
+  }
+
+  private _renderLimit(): number {
+    const raw = Number(this.getAttribute('render-limit'));
+    if (Number.isFinite(raw) && raw > 0) return raw;
+    return 200;
   }
 
   private _findOptionNode(value: string | null): HTMLElement | null {
@@ -457,6 +692,7 @@ export class UIMultiSelect extends ElementBase {
   }
 
   private _toggleValue(value: string, source: string): void {
+    if (this._isInteractionLocked() || this.hasAttribute('loading')) return;
     const exists = this._selected.includes(value);
     const next = exists ? this._selected.filter((entry) => entry !== value) : [...this._selected, value];
     this._activeValue = value;
@@ -464,9 +700,22 @@ export class UIMultiSelect extends ElementBase {
   }
 
   private _removeChip(value: string): void {
-    if (this.hasAttribute('disabled')) return;
+    if (this._isInteractionLocked()) return;
     if (this._activeValue === value) this._activeValue = null;
     this._toggleValue(value, 'remove-chip');
+  }
+
+  private _clearSelection(source: string): void {
+    if (this._isInteractionLocked() || !this._selected.length) return;
+    this._activeValue = null;
+    this._setSelected([], source);
+    this._query = '';
+    if (this._inputEl) this._inputEl.value = '';
+    try {
+      this._inputEl?.focus({ preventScroll: true });
+    } catch {
+      this._inputEl?.focus();
+    }
   }
 
   private _registerWithForm(): void {
@@ -508,12 +757,14 @@ export class UIMultiSelect extends ElementBase {
   }
 
   private _onInput(event: Event): void {
+    if (this._isInteractionLocked()) return;
     this._query = (event.target as HTMLInputElement | null)?.value || '';
     if (!this.open) this.open = true;
     this._syncUi();
   }
 
   private _onKeyDown(event: KeyboardEvent): void {
+    if (this._isInteractionLocked()) return;
     if (event.key === 'ArrowDown') {
       event.preventDefault();
       if (!this.open) this.open = true;
@@ -588,14 +839,14 @@ export class UIMultiSelect extends ElementBase {
   }
 
   private _onToggle(): void {
-    if (this.hasAttribute('disabled')) return;
+    if (this._isInteractionLocked()) return;
     this.open = !this.open;
     this._syncUi();
     if (this.open) this._inputEl?.focus();
   }
 
   private _onFocusIn(): void {
-    if (!this.hasAttribute('disabled')) this.open = true;
+    if (!this._isInteractionLocked()) this.open = true;
     this._syncUi();
   }
 
@@ -623,7 +874,14 @@ export class UIMultiSelect extends ElementBase {
       const descriptionEl = this.root.querySelector('.description') as HTMLElement;
       const chipsHost = this.root.querySelector('.chips') as HTMLElement;
       const toggle = this.root.querySelector('.toggle') as HTMLButtonElement;
+      const clear = this.root.querySelector('.clear') as HTMLButtonElement;
       const errorEl = this.root.querySelector('.error') as HTMLElement;
+      const indicator = this._selectionIndicator();
+      const loading = this.hasAttribute('loading');
+      const loadingText = (this.getAttribute('loading-text') || 'Loading options...').trim();
+      const disabled = this.hasAttribute('disabled');
+      const readonly = this.hasAttribute('readonly');
+      const clearable = this.hasAttribute('clearable');
 
       metaEl.hidden = !label && !description;
       labelEl.hidden = !label;
@@ -636,11 +894,17 @@ export class UIMultiSelect extends ElementBase {
 
       this._shellEl.setAttribute('data-open', this.open ? 'true' : 'false');
       this._shellEl.setAttribute('data-invalid', error ? 'true' : 'false');
+      this._shellEl.setAttribute('data-readonly', readonly ? 'true' : 'false');
       toggle.setAttribute('data-open', this.open ? 'true' : 'false');
+      toggle.disabled = disabled || readonly;
+      clear.hidden = !clearable || this._selected.length === 0;
+      clear.disabled = disabled || readonly;
       this._inputEl.setAttribute('aria-expanded', this.open ? 'true' : 'false');
+      this._inputEl.setAttribute('aria-busy', loading ? 'true' : 'false');
       this._inputEl.placeholder = this._selected.length ? '' : (this.getAttribute('placeholder') || 'Select options');
-      this._inputEl.disabled = this.hasAttribute('disabled');
-      this._inputEl.value = this._query;
+      this._inputEl.disabled = disabled;
+      this._inputEl.readOnly = readonly;
+      if (this._inputEl.value !== this._query) this._inputEl.value = this._query;
       if (this.open) this._attachOutsideListener();
       else this._detachOutsideListener();
 
@@ -670,10 +934,21 @@ export class UIMultiSelect extends ElementBase {
       }));
 
       const filtered = this._filteredOptions();
+      const renderLimit = this._renderLimit();
+      const visibleOptions = filtered.slice(0, renderLimit);
+      const truncated = filtered.length > visibleOptions.length;
       this._panelEl.hidden = !this.open;
+      if (loading) {
+        const status = document.createElement('div');
+        status.className = 'status';
+        status.textContent = loadingText;
+        this._panelEl.replaceChildren(status);
+        this._inputEl.removeAttribute('aria-activedescendant');
+        return;
+      }
       if (!filtered.length) {
         const empty = document.createElement('div');
-        empty.className = 'empty';
+        empty.className = 'status';
         empty.textContent = 'No matching options';
         this._panelEl.replaceChildren(empty);
         this._inputEl.removeAttribute('aria-activedescendant');
@@ -682,7 +957,20 @@ export class UIMultiSelect extends ElementBase {
 
       const selectedIds = new Set(this._selected);
       const previousActiveValue = this._panelEl.getActiveItem()?.getAttribute('data-value');
-      const children = filtered.map((option, index) => {
+      const children: HTMLElement[] = [];
+      let currentGroup: string | null = null;
+      visibleOptions.forEach((option, index) => {
+        if (option.group && option.group !== currentGroup) {
+          const group = document.createElement('div');
+          group.className = 'group';
+          group.setAttribute('role', 'presentation');
+          group.textContent = option.group;
+          children.push(group);
+          currentGroup = option.group;
+        } else if (!option.group) {
+          currentGroup = null;
+        }
+
         const selected = selectedIds.has(option.value);
         const button = document.createElement('button');
         button.className = 'option';
@@ -691,8 +979,9 @@ export class UIMultiSelect extends ElementBase {
         button.setAttribute('role', 'option');
       button.setAttribute('data-value', option.value);
       button.setAttribute('data-selected', String(selected));
+      button.setAttribute('data-indicator', indicator);
       button.setAttribute('aria-selected', selected ? 'true' : 'false');
-      if (option.disabled) button.disabled = true;
+      if (option.disabled || disabled || readonly) button.disabled = true;
       button.addEventListener('pointerdown', (event) => {
         event.preventDefault();
       });
@@ -705,10 +994,6 @@ export class UIMultiSelect extends ElementBase {
           if (this._inputEl) this._inputEl.value = '';
           this._inputEl?.focus();
         });
-
-        const check = document.createElement('span');
-        check.className = 'check';
-        check.textContent = selected ? '✓' : '';
 
         const textWrap = document.createElement('div');
         textWrap.className = 'option-text';
@@ -724,9 +1009,22 @@ export class UIMultiSelect extends ElementBase {
           textWrap.append(descriptionNode);
         }
 
-        button.append(check, textWrap);
-        return button;
+        if (indicator !== 'none') {
+          const check = document.createElement('span');
+          check.className = 'check';
+          check.textContent = selected ? '✓' : '';
+          button.append(check);
+        }
+        button.append(textWrap);
+        children.push(button);
       });
+
+      if (truncated) {
+        const status = document.createElement('div');
+        status.className = 'status';
+        status.textContent = `Showing first ${visibleOptions.length} results. Keep typing to narrow the list.`;
+        children.push(status);
+      }
 
       this._panelEl.replaceChildren(...children);
       const restoreValue = previousActiveValue || this._activeValue || this._selected[this._selected.length - 1] || null;

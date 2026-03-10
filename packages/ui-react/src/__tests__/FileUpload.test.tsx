@@ -47,4 +47,44 @@ describe('FileUpload wrappers', () => {
     expect(el?.hasAttribute('show-previews')).toBe(true);
     expect(el?.getAttribute('progress')).toContain('60');
   });
+
+  it('forwards upload lifecycle props and uploadRequest bridge', async () => {
+    const events: string[] = [];
+    const onUploadRequest = async ({ setProgress }: { setProgress(progress: number): void }) => {
+      setProgress(55);
+    };
+    const { container } = render(
+      <FileUpload
+        uploadButtonText="Upload now"
+        onUploadRequest={onUploadRequest}
+        onUploadStart={() => events.push('start')}
+        onUploadProgress={() => events.push('progress')}
+        onUploadSuccess={() => events.push('success')}
+        onUploadComplete={() => events.push('complete')}
+      />
+    );
+
+    const el = container.querySelector('ui-file-upload') as (HTMLElement & {
+      setFiles(files: File[]): void;
+      startUpload(): Promise<void>;
+      uploadRequest?: unknown;
+    }) | null;
+
+    expect(typeof el?.uploadRequest).toBe('function');
+    expect(el?.getAttribute('upload-button-text')).toBe('Upload now');
+
+    const file = new File(['hello'], 'notes.txt', { type: 'text/plain', lastModified: 3 });
+    el?.setFiles([file]);
+    await el?.startUpload();
+
+    await waitFor(() => {
+      expect(events).toEqual(['start', 'progress', 'success', 'complete']);
+    });
+  });
+
+  it('syncs upload-on-select attribute', () => {
+    const { container } = render(<FileUpload uploadOnSelect />);
+    const el = container.querySelector('ui-file-upload') as HTMLElement | null;
+    expect(el?.hasAttribute('upload-on-select')).toBe(true);
+  });
 });

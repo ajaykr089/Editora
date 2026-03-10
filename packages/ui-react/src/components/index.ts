@@ -3,6 +3,7 @@ export { Tooltip } from './Tooltip';
 export { Alert } from './Alert';
 export { Dropdown } from './Dropdown';
 export { Input } from './Input';
+export { PasswordField } from './PasswordField';
 export { TagsInput } from './TagsInput';
 export { PinInput, OTPInput } from './PinInput';
 export { FileUpload, Dropzone } from './FileUpload';

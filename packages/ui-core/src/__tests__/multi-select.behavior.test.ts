@@ -117,4 +117,105 @@ describe('ui-multi-select', () => {
     input?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     expect(el.hasAttribute('open')).toBe(false);
   });
+
+  it('supports removing the option indicator entirely', async () => {
+    const el = document.createElement('ui-multi-select');
+    el.setAttribute('options', options);
+    el.setAttribute('selection-indicator', 'none');
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const input = el.shadowRoot?.querySelector('.input') as HTMLInputElement | null;
+    input?.focus();
+    await flushMicrotask();
+
+    expect(el.shadowRoot?.querySelector('.option[data-value="ops"] .check')).toBeNull();
+  });
+
+  it('supports clearable selection reset', async () => {
+    const el = document.createElement('ui-multi-select');
+    el.setAttribute('options', options);
+    el.setAttribute('value', '["ops","security"]');
+    el.setAttribute('clearable', '');
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const clear = el.shadowRoot?.querySelector('.clear') as HTMLButtonElement | null;
+    clear?.click();
+
+    expect(el.getAttribute('value')).toBeNull();
+  });
+
+  it('prevents readonly interaction changes', async () => {
+    const el = document.createElement('ui-multi-select');
+    el.setAttribute('options', options);
+    el.setAttribute('value', '["ops"]');
+    el.setAttribute('readonly', '');
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const input = el.shadowRoot?.querySelector('.input') as HTMLInputElement | null;
+    input?.focus();
+    await flushMicrotask();
+
+    expect(el.hasAttribute('open')).toBe(false);
+
+    const remove = el.shadowRoot?.querySelector('.chip-remove[data-value="ops"]') as HTMLButtonElement | null;
+    remove?.click();
+    expect(el.getAttribute('value')).toBe('["ops"]');
+  });
+
+  it('shows a loading status instead of selectable options', async () => {
+    const el = document.createElement('ui-multi-select');
+    el.setAttribute('options', options);
+    el.setAttribute('loading', '');
+    el.setAttribute('loading-text', 'Refreshing teams...');
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const input = el.shadowRoot?.querySelector('.input') as HTMLInputElement | null;
+    input?.focus();
+    await flushMicrotask();
+
+    const status = el.shadowRoot?.querySelector('.status') as HTMLElement | null;
+    expect(status?.textContent).toBe('Refreshing teams...');
+    expect(el.shadowRoot?.querySelector('.option')).toBeNull();
+  });
+
+  it('renders grouped options with section headers', async () => {
+    const grouped = JSON.stringify([
+      { label: 'Core response', options: [{ value: 'ops', label: 'Operations' }] },
+      { label: 'Platform delivery', options: [{ value: 'platform', label: 'Platform' }] }
+    ]);
+    const el = document.createElement('ui-multi-select');
+    el.setAttribute('options', grouped);
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const input = el.shadowRoot?.querySelector('.input') as HTMLInputElement | null;
+    input?.focus();
+    await flushMicrotask();
+
+    const groups = Array.from(el.shadowRoot?.querySelectorAll('.group') || []).map((node) => node.textContent);
+    expect(groups).toEqual(['Core response', 'Platform delivery']);
+  });
+
+  it('caps rendered options for large datasets and shows a narrowing hint', async () => {
+    const many = JSON.stringify(Array.from({ length: 80 }, (_, index) => ({
+      value: `team-${index + 1}`,
+      label: `Team ${index + 1}`
+    })));
+    const el = document.createElement('ui-multi-select');
+    el.setAttribute('options', many);
+    el.setAttribute('render-limit', '20');
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const input = el.shadowRoot?.querySelector('.input') as HTMLInputElement | null;
+    input?.focus();
+    await flushMicrotask();
+
+    expect(el.shadowRoot?.querySelectorAll('.option').length).toBe(20);
+    expect(el.shadowRoot?.querySelector('.status')?.textContent).toContain('Showing first 20 results');
+  });
 });

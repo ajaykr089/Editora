@@ -7,6 +7,26 @@ export type FileUploadRejectedFile = {
   reason: 'accept' | 'max-size' | 'max-files';
 };
 
+export type FileUploadUploadContext = {
+  file: File;
+  files: File[];
+  signal: AbortSignal;
+  setProgress: (progress: number) => void;
+};
+
+export type FileUploadUploadRequest = (context: FileUploadUploadContext) => Promise<unknown> | unknown;
+
+type UploadLifecycleDetail = {
+  file?: File;
+  fileKey?: string;
+  files?: File[];
+  progress?: number;
+  requestId?: number;
+  result?: unknown;
+  error?: string;
+  statuses?: Record<string, unknown>;
+};
+
 type BaseFileUploadProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'> & {
   name?: string;
   label?: string;
@@ -21,13 +41,31 @@ type BaseFileUploadProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'> &
   dropLabel?: string;
   showPreviews?: boolean;
   progress?: Record<string, number>;
+  uploadOnSelect?: boolean;
+  uploadButtonText?: string;
+  onUploadRequest?: FileUploadUploadRequest;
   onChange?: (files: File[]) => void;
   onReject?: (rejected: FileUploadRejectedFile[]) => void;
+  onUploadStart?: (detail: UploadLifecycleDetail) => void;
+  onUploadProgress?: (detail: UploadLifecycleDetail) => void;
+  onUploadSuccess?: (detail: UploadLifecycleDetail) => void;
+  onUploadError?: (detail: UploadLifecycleDetail) => void;
+  onUploadCancel?: (detail: UploadLifecycleDetail) => void;
+  onUploadComplete?: (detail: UploadLifecycleDetail) => void;
 };
 
 function useFileUploadBridge(
   ref: React.MutableRefObject<HTMLElement | null>,
-  { onChange, onReject }: Pick<BaseFileUploadProps, 'onChange' | 'onReject'>
+  {
+    onChange,
+    onReject,
+    onUploadStart,
+    onUploadProgress,
+    onUploadSuccess,
+    onUploadError,
+    onUploadCancel,
+    onUploadComplete
+  }: Pick<BaseFileUploadProps, 'onChange' | 'onReject' | 'onUploadStart' | 'onUploadProgress' | 'onUploadSuccess' | 'onUploadError' | 'onUploadCancel' | 'onUploadComplete'>
 ) {
   useEffect(() => {
     const el = ref.current;
@@ -43,13 +81,36 @@ function useFileUploadBridge(
       if (Array.isArray(detail?.rejected)) onReject?.(detail.rejected);
     };
 
+    const forward = (handler?: (detail: UploadLifecycleDetail) => void) => (event: Event) => {
+      handler?.((event as CustomEvent<UploadLifecycleDetail>).detail || {});
+    };
+
+    const handleUploadStart = forward(onUploadStart);
+    const handleUploadProgress = forward(onUploadProgress);
+    const handleUploadSuccess = forward(onUploadSuccess);
+    const handleUploadError = forward(onUploadError);
+    const handleUploadCancel = forward(onUploadCancel);
+    const handleUploadComplete = forward(onUploadComplete);
+
     el.addEventListener('change', handleChange as EventListener);
     el.addEventListener('reject', handleReject as EventListener);
+    el.addEventListener('upload-start', handleUploadStart as EventListener);
+    el.addEventListener('upload-progress', handleUploadProgress as EventListener);
+    el.addEventListener('upload-success', handleUploadSuccess as EventListener);
+    el.addEventListener('upload-error', handleUploadError as EventListener);
+    el.addEventListener('upload-cancel', handleUploadCancel as EventListener);
+    el.addEventListener('upload-complete', handleUploadComplete as EventListener);
     return () => {
       el.removeEventListener('change', handleChange as EventListener);
       el.removeEventListener('reject', handleReject as EventListener);
+      el.removeEventListener('upload-start', handleUploadStart as EventListener);
+      el.removeEventListener('upload-progress', handleUploadProgress as EventListener);
+      el.removeEventListener('upload-success', handleUploadSuccess as EventListener);
+      el.removeEventListener('upload-error', handleUploadError as EventListener);
+      el.removeEventListener('upload-cancel', handleUploadCancel as EventListener);
+      el.removeEventListener('upload-complete', handleUploadComplete as EventListener);
     };
-  }, [onChange, onReject, ref]);
+  }, [onChange, onReject, onUploadCancel, onUploadComplete, onUploadError, onUploadProgress, onUploadStart, onUploadSuccess, ref]);
 }
 
 function useFileUploadAttrs(
@@ -67,7 +128,10 @@ function useFileUploadAttrs(
     buttonText,
     dropLabel,
     showPreviews,
-    progress
+    progress,
+    uploadOnSelect,
+    uploadButtonText,
+    onUploadRequest
   }: Omit<BaseFileUploadProps, 'onChange' | 'onReject'>
 ) {
   useIsomorphicLayoutEffect(() => {
@@ -103,8 +167,11 @@ function useFileUploadAttrs(
     syncAttr('button-text', buttonText ?? null);
     syncAttr('drop-label', dropLabel ?? null);
     syncBoolean('show-previews', showPreviews);
+    syncBoolean('upload-on-select', uploadOnSelect);
+    syncAttr('upload-button-text', uploadButtonText ?? null);
     syncAttr('progress', progress ? JSON.stringify(progress) : null);
-  }, [accept, buttonText, description, disabled, dropLabel, label, maxFiles, maxSize, multiple, name, ref, required, showPreviews, progress]);
+    (el as HTMLElement & { uploadRequest?: FileUploadUploadRequest | null }).uploadRequest = onUploadRequest ?? null;
+  }, [accept, buttonText, description, disabled, dropLabel, label, maxFiles, maxSize, multiple, name, ref, required, showPreviews, progress, uploadOnSelect, uploadButtonText, onUploadRequest]);
 }
 
 export const FileUpload = React.forwardRef<HTMLElement, BaseFileUploadProps>(function FileUpload(
@@ -113,7 +180,7 @@ export const FileUpload = React.forwardRef<HTMLElement, BaseFileUploadProps>(fun
 ) {
   const ref = useRef<HTMLElement | null>(null);
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
-  useFileUploadBridge(ref, { onChange, onReject });
+  useFileUploadBridge(ref, { onChange, onReject, ...rest });
   useFileUploadAttrs(ref, rest);
   return React.createElement('ui-file-upload', { ref, ...rest }, children);
 });
@@ -124,7 +191,7 @@ export const Dropzone = React.forwardRef<HTMLElement, BaseFileUploadProps>(funct
 ) {
   const ref = useRef<HTMLElement | null>(null);
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
-  useFileUploadBridge(ref, { onChange, onReject });
+  useFileUploadBridge(ref, { onChange, onReject, ...rest });
   useFileUploadAttrs(ref, rest);
   return React.createElement('ui-dropzone', { ref, ...rest }, children);
 });

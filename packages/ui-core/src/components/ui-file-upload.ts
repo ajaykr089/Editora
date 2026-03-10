@@ -7,6 +7,24 @@ export type UIFileUploadRejectedFile = {
   reason: FileRejectReason;
 };
 
+export type UIFileUploadUploadState = 'pending' | 'uploading' | 'success' | 'error' | 'canceled';
+
+export type UIFileUploadUploadContext = {
+  file: File;
+  files: File[];
+  signal: AbortSignal;
+  setProgress: (progress: number) => void;
+};
+
+export type UIFileUploadUploadRequest = (context: UIFileUploadUploadContext) => Promise<unknown> | unknown;
+
+type UploadEntry = {
+  state: UIFileUploadUploadState;
+  progress: number | null;
+  error?: string;
+  result?: unknown;
+};
+
 const style = `
   :host {
     --ui-file-upload-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
@@ -130,6 +148,44 @@ const style = `
     gap: 8px;
   }
 
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid color-mix(in srgb, var(--ui-file-upload-border-color) 70%, transparent);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--ui-file-upload-bg) 97%, transparent);
+  }
+
+  .actions[hidden] {
+    display: none;
+  }
+
+  .actions-summary {
+    display: grid;
+    gap: 2px;
+    min-inline-size: 0;
+  }
+
+  .actions-title {
+    font: 600 12px/1.3 "Inter", "IBM Plex Sans", sans-serif;
+  }
+
+  .actions-subtitle {
+    color: var(--ui-file-upload-muted);
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .actions-row {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
   .file {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto auto;
@@ -179,6 +235,49 @@ const style = `
     color: var(--ui-file-upload-muted);
     font-size: 11px;
     white-space: nowrap;
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-block-size: 22px;
+    padding: 0 9px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--ui-file-upload-text) 8%, transparent);
+    color: var(--ui-file-upload-muted);
+    font: 600 10px/1 "Inter", sans-serif;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .status[data-state="pending"] {
+    background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, transparent);
+    color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 82%, #0f172a 18%);
+  }
+
+  .status[data-state="uploading"] {
+    background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 14%, transparent);
+    color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 84%, #0f172a 16%);
+  }
+
+  .status[data-state="success"] {
+    background: color-mix(in srgb, var(--ui-file-upload-success) 14%, transparent);
+    color: color-mix(in srgb, var(--ui-file-upload-success) 86%, #052e16 14%);
+  }
+
+  .status[data-state="error"] {
+    background: color-mix(in srgb, var(--ui-file-upload-danger) 14%, transparent);
+    color: color-mix(in srgb, var(--ui-file-upload-danger) 88%, #450a0a 12%);
+  }
+
+  .status[data-state="canceled"] {
+    background: color-mix(in srgb, var(--ui-file-upload-text) 8%, transparent);
+    color: var(--ui-file-upload-muted);
   }
 
   .progress {
@@ -217,6 +316,22 @@ const style = `
     font: 600 11px/1 "Inter", sans-serif;
   }
 
+  .file-remove[data-tone="danger"] {
+    color: var(--ui-file-upload-danger);
+  }
+
+  .file-remove[data-variant="primary"] {
+    background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent);
+    color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 84%, #0f172a 16%);
+  }
+
+  .file-error {
+    grid-column: 2 / 5;
+    color: var(--ui-file-upload-danger);
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
   .input {
     position: absolute;
     inline-size: 1px;
@@ -234,7 +349,8 @@ const style = `
   }
 
   :host([disabled]) .surface,
-  :host([disabled]) .file-remove {
+  :host([disabled]) .file-remove,
+  :host([disabled]) .cta {
     cursor: not-allowed;
     opacity: 0.68;
   }
@@ -283,19 +399,26 @@ export class UIFileUpload extends ElementBase {
       'surface',
       'data-error',
       'progress',
-      'show-previews'
+      'show-previews',
+      'upload-on-select',
+      'upload-button-text'
     ];
   }
 
   protected _files: File[] = [];
+  uploadRequest: UIFileUploadUploadRequest | null = null;
   private _formUnregister: (() => void) | null = null;
   private _surfaceEl: HTMLElement | null = null;
   private _inputEl: HTMLInputElement | null = null;
   private _listEl: HTMLElement | null = null;
   private _errorEl: HTMLElement | null = null;
+  private _actionsEl: HTMLElement | null = null;
   private _dragging = false;
   private _dragDepth = 0;
   private _previewUrls = new Map<string, string>();
+  private _uploadState = new Map<string, UploadEntry>();
+  private _uploadControllers = new Map<string, AbortController>();
+  private _uploadSequence = 0;
 
   constructor() {
     super();
@@ -312,6 +435,10 @@ export class UIFileUpload extends ElementBase {
     return [...this._files];
   }
 
+  get uploading(): boolean {
+    return Array.from(this._uploadState.values()).some((entry) => entry.state === 'uploading');
+  }
+
   setFiles(files: File[]): void {
     this._applyFiles(files, 'api', true);
   }
@@ -323,7 +450,9 @@ export class UIFileUpload extends ElementBase {
 
   clearFiles(): void {
     if (!this._files.length) return;
+    this.cancelUploads();
     this._files = [];
+    this._uploadState.clear();
     if (this._inputEl) this._inputEl.value = '';
     this._syncUi();
     this._emit('change', { files: [], source: 'clear' });
@@ -333,9 +462,42 @@ export class UIFileUpload extends ElementBase {
   removeFile(index: number): void {
     if (this._disabled()) return;
     if (index < 0 || index >= this._files.length) return;
+    const file = this._files[index];
+    this.cancelUpload(this._fileKey(file));
+    this._uploadState.delete(this._fileKey(file));
     this._files = this._files.filter((_, currentIndex) => currentIndex !== index);
     this._syncUi();
     this._emit('change', { files: this.files, source: 'remove' });
+  }
+
+  async startUpload(): Promise<void> {
+    if (!this.uploadRequest || this._disabled()) return;
+    const candidates = this._files.filter((file) => {
+      const entry = this._uploadState.get(this._fileKey(file));
+      return !entry || entry.state === 'pending' || entry.state === 'error' || entry.state === 'canceled';
+    });
+    if (!candidates.length) return;
+
+    const requestId = ++this._uploadSequence;
+    this._emit('upload-start', { files: candidates, requestId });
+    await Promise.all(candidates.map((file) => this._runUpload(file, requestId)));
+    this._emit('upload-complete', {
+      files: this.files,
+      requestId,
+      statuses: Object.fromEntries(Array.from(this._uploadState.entries()).map(([key, value]) => [key, { ...value }]))
+    });
+    this._syncUi();
+  }
+
+  cancelUploads(): void {
+    Array.from(this._uploadControllers.keys()).forEach((key) => this.cancelUpload(key));
+  }
+
+  cancelUpload(fileOrKey: string | File): void {
+    const key = typeof fileOrKey === 'string' ? fileOrKey : this._fileKey(fileOrKey);
+    const controller = this._uploadControllers.get(key);
+    if (!controller) return;
+    controller.abort();
   }
 
   override connectedCallback(): void {
@@ -377,6 +539,13 @@ export class UIFileUpload extends ElementBase {
           <input class="input" part="input" type="file" />
         </div>
         <div class="error" part="error" hidden></div>
+        <div class="actions" part="actions" hidden>
+          <div class="actions-summary">
+            <div class="actions-title"></div>
+            <div class="actions-subtitle"></div>
+          </div>
+          <div class="actions-row"></div>
+        </div>
         <div class="list" part="list" hidden></div>
       </div>
     `);
@@ -385,6 +554,7 @@ export class UIFileUpload extends ElementBase {
     this._inputEl = this.root.querySelector('.input');
     this._listEl = this.root.querySelector('.list');
     this._errorEl = this.root.querySelector('.error');
+    this._actionsEl = this.root.querySelector('.actions');
 
     this._surfaceEl?.addEventListener('click', this._onClick);
     this._surfaceEl?.addEventListener('keydown', this._onKeyDown);
@@ -448,10 +618,25 @@ export class UIFileUpload extends ElementBase {
       accepted.push(file);
     });
 
+    if (replace) {
+      this.cancelUploads();
+      this._uploadState.clear();
+    }
+
     this._files = [...current, ...accepted];
     if (!multiple && this._files.length > 1) {
       this._files = [this._files[this._files.length - 1]];
     }
+    const activeKeys = new Set(this._files.map((file) => this._fileKey(file)));
+    Array.from(this._uploadState.keys()).forEach((key) => {
+      if (!activeKeys.has(key)) this._uploadState.delete(key);
+    });
+    this._files.forEach((file) => {
+      const key = this._fileKey(file);
+      if (!this._uploadState.has(key)) {
+        this._uploadState.set(key, { state: 'pending', progress: null });
+      }
+    });
     this._syncUi();
     this._emit('change', { files: this.files, source });
     if (rejected.length) {
@@ -464,6 +649,9 @@ export class UIFileUpload extends ElementBase {
     } else {
       this.removeAttribute('data-error');
     }
+    if (accepted.length && this.hasAttribute('upload-on-select') && this.uploadRequest) {
+      void this.startUpload();
+    }
     this._syncUi();
   }
 
@@ -473,6 +661,56 @@ export class UIFileUpload extends ElementBase {
 
   private _fileKey(file: File): string {
     return `${file.name}::${file.size}::${file.lastModified}`;
+  }
+
+  private _setUploadEntry(fileKey: string, next: UploadEntry): void {
+    this._uploadState.set(fileKey, next);
+    this._syncUi();
+  }
+
+  private async _runUpload(file: File, requestId: number): Promise<void> {
+    if (!this.uploadRequest) return;
+    const fileKey = this._fileKey(file);
+    const controller = new AbortController();
+    this._uploadControllers.set(fileKey, controller);
+    this._setUploadEntry(fileKey, { state: 'uploading', progress: 0 });
+
+    const setProgress = (progress: number) => {
+      const current = this._uploadState.get(fileKey);
+      if (!current || current.state !== 'uploading') return;
+      const nextProgress = Number.isFinite(progress) ? Math.max(0, Math.min(100, progress)) : 0;
+      this._uploadState.set(fileKey, { ...current, progress: nextProgress });
+      this._emit('upload-progress', { file, fileKey, progress: nextProgress, requestId });
+      this._syncUi();
+    };
+
+    try {
+      const result = await this.uploadRequest({
+        file,
+        files: this.files,
+        signal: controller.signal,
+        setProgress
+      });
+      if (controller.signal.aborted) {
+        this._uploadState.set(fileKey, { state: 'canceled', progress: null });
+        this._emit('upload-cancel', { file, fileKey, requestId });
+      } else {
+        this._uploadState.set(fileKey, { state: 'success', progress: 100, result });
+        this._emit('upload-success', { file, fileKey, requestId, result });
+      }
+    } catch (error) {
+      if (controller.signal.aborted) {
+        this._uploadState.set(fileKey, { state: 'canceled', progress: null });
+        this._emit('upload-cancel', { file, fileKey, requestId });
+      } else {
+        const message = error instanceof Error ? error.message : 'Upload failed';
+        this._uploadState.set(fileKey, { state: 'error', progress: null, error: message });
+        this._emit('upload-error', { file, fileKey, requestId, error: message });
+      }
+    } finally {
+      this._uploadControllers.delete(fileKey);
+      this._syncUi();
+    }
   }
 
   private _parseProgress(): Record<string, number> {
@@ -490,6 +728,50 @@ export class UIFileUpload extends ElementBase {
     } catch {
       return {};
     }
+  }
+
+  private _statusLabel(state: UIFileUploadUploadState): string {
+    switch (state) {
+      case 'uploading':
+        return 'Uploading';
+      case 'success':
+        return 'Uploaded';
+      case 'error':
+        return 'Failed';
+      case 'canceled':
+        return 'Canceled';
+      default:
+        return 'Pending';
+    }
+  }
+
+  private _actionSummary(): { title: string; subtitle: string } {
+    const entries = this._files.map((file) => this._uploadState.get(this._fileKey(file)) || { state: 'pending', progress: null });
+    const uploading = entries.filter((entry) => entry.state === 'uploading').length;
+    const failed = entries.filter((entry) => entry.state === 'error').length;
+    const complete = entries.filter((entry) => entry.state === 'success').length;
+    if (uploading > 0) {
+      return {
+        title: 'Upload in progress',
+        subtitle: `${uploading} file${uploading === 1 ? '' : 's'} still uploading`
+      };
+    }
+    if (failed > 0) {
+      return {
+        title: 'Retry required',
+        subtitle: `${failed} file${failed === 1 ? '' : 's'} failed to upload`
+      };
+    }
+    if (complete > 0 && complete === this._files.length) {
+      return {
+        title: 'Uploads complete',
+        subtitle: `${complete} file${complete === 1 ? '' : 's'} uploaded successfully`
+      };
+    }
+    return {
+      title: 'Ready to upload',
+      subtitle: `${this._files.length} file${this._files.length === 1 ? '' : 's'} queued`
+    };
   }
 
   private _getPreviewUrl(file: File): string | null {
@@ -517,7 +799,7 @@ export class UIFileUpload extends ElementBase {
   }
 
   private _syncUi(): void {
-    if (!this._surfaceEl || !this._inputEl || !this._listEl || !this._errorEl) return;
+    if (!this._surfaceEl || !this._inputEl || !this._listEl || !this._errorEl || !this._actionsEl) return;
 
     const label = (this.getAttribute('label') || '').trim();
     const description = (this.getAttribute('description') || '').trim();
@@ -525,6 +807,7 @@ export class UIFileUpload extends ElementBase {
     const disabled = this._disabled();
     const dropLabel = this.getAttribute('drop-label') || 'Drag files here or browse from your device';
     const buttonText = this.getAttribute('button-text') || 'Choose files';
+    const uploadButtonText = this.getAttribute('upload-button-text') || 'Start upload';
     const error = (this.getAttribute('data-error') || '').trim();
     const progressByFile = this._parseProgress();
 
@@ -535,6 +818,9 @@ export class UIFileUpload extends ElementBase {
     const sublineEl = this.root.querySelector('.subline') as HTMLElement;
     const ctaEl = this.root.querySelector('.cta') as HTMLButtonElement;
     const requiredEl = this.root.querySelector('.required') as HTMLElement;
+    const actionsTitleEl = this.root.querySelector('.actions-title') as HTMLElement;
+    const actionsSubtitleEl = this.root.querySelector('.actions-subtitle') as HTMLElement;
+    const actionsRowEl = this.root.querySelector('.actions-row') as HTMLElement;
 
     labelEl.hidden = !label;
     labelEl.querySelector('.label-text')!.textContent = label;
@@ -560,6 +846,44 @@ export class UIFileUpload extends ElementBase {
     this._errorEl.hidden = !error;
     this._errorEl.textContent = error;
 
+    const canUpload = !!this.uploadRequest && this._files.length > 0;
+    const summary = this._actionSummary();
+    this._actionsEl.hidden = !canUpload;
+    actionsTitleEl.textContent = summary.title;
+    actionsSubtitleEl.textContent = summary.subtitle;
+    actionsRowEl.replaceChildren();
+    if (canUpload) {
+      const pendingOrFailed = this._files.some((file) => {
+        const state = this._uploadState.get(this._fileKey(file))?.state || 'pending';
+        return state === 'pending' || state === 'error' || state === 'canceled';
+      });
+      const startButton = document.createElement('button');
+      startButton.type = 'button';
+      startButton.className = 'file-remove';
+      startButton.dataset.variant = 'primary';
+      startButton.textContent = this.uploading ? 'Uploading…' : pendingOrFailed ? uploadButtonText : 'Upload complete';
+      startButton.disabled = disabled || this.uploading || !pendingOrFailed;
+      startButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        void this.startUpload();
+      });
+      actionsRowEl.append(startButton);
+
+      if (this.uploading) {
+        const cancelAllButton = document.createElement('button');
+        cancelAllButton.type = 'button';
+        cancelAllButton.className = 'file-remove';
+        cancelAllButton.dataset.tone = 'danger';
+        cancelAllButton.textContent = 'Cancel uploads';
+        cancelAllButton.disabled = disabled;
+        cancelAllButton.addEventListener('click', (event) => {
+          event.stopPropagation();
+          this.cancelUploads();
+        });
+        actionsRowEl.append(cancelAllButton);
+      }
+    }
+
     const activePreviewKeys = new Set<string>();
     this._listEl.hidden = this._files.length === 0;
     this._listEl.replaceChildren(...this._files.map((file, index) => {
@@ -567,6 +891,7 @@ export class UIFileUpload extends ElementBase {
       row.className = 'file';
       const fileKey = this._fileKey(file);
       activePreviewKeys.add(fileKey);
+      const uploadEntry = this._uploadState.get(fileKey) || { state: 'pending', progress: null };
 
       const preview = document.createElement('div');
       preview.className = 'preview';
@@ -589,21 +914,46 @@ export class UIFileUpload extends ElementBase {
       const metaEl = document.createElement('div');
       metaEl.className = 'file-meta';
       metaEl.textContent = formatBytes(file.size);
+      const statusEl = document.createElement('span');
+      statusEl.className = 'status';
+      statusEl.dataset.state = uploadEntry.state;
+      statusEl.textContent = this._statusLabel(uploadEntry.state);
+      metaEl.append(statusEl);
       nameEl.append(fileNameEl, metaEl);
 
-      const removeEl = document.createElement('button');
-      removeEl.type = 'button';
-      removeEl.className = 'file-remove';
-      removeEl.textContent = 'Remove';
-      removeEl.disabled = disabled;
-      removeEl.addEventListener('click', (event) => {
-        event.stopPropagation();
-        this.removeFile(index);
-      });
+      const actionEl = document.createElement('button');
+      actionEl.type = 'button';
+      actionEl.className = 'file-remove';
+      actionEl.disabled = disabled;
+      if (uploadEntry.state === 'uploading') {
+        actionEl.textContent = 'Cancel';
+        actionEl.dataset.tone = 'danger';
+        actionEl.addEventListener('click', (event) => {
+          event.stopPropagation();
+          this.cancelUpload(fileKey);
+        });
+      } else if (uploadEntry.state === 'error') {
+        actionEl.textContent = 'Retry';
+        actionEl.dataset.variant = 'primary';
+        actionEl.addEventListener('click', (event) => {
+          event.stopPropagation();
+          this._uploadState.set(fileKey, { state: 'pending', progress: null });
+          this._syncUi();
+          void this.startUpload();
+        });
+      } else {
+        actionEl.textContent = 'Remove';
+        actionEl.addEventListener('click', (event) => {
+          event.stopPropagation();
+          this.removeFile(index);
+        });
+      }
 
-      row.append(preview, nameEl, metaEl, removeEl);
+      row.append(preview, nameEl, actionEl);
 
-      const progressValue = progressByFile[fileKey] ?? progressByFile[file.name];
+      const progressValue = typeof uploadEntry.progress === 'number'
+        ? uploadEntry.progress
+        : (progressByFile[fileKey] ?? progressByFile[file.name]);
       if (typeof progressValue === 'number') {
         const progressWrap = document.createElement('div');
         progressWrap.className = 'progress';
@@ -617,10 +967,21 @@ export class UIFileUpload extends ElementBase {
 
         const text = document.createElement('div');
         text.className = 'progress-text';
-        text.textContent = progressValue >= 100 ? 'Upload complete' : `Uploading ${Math.round(progressValue)}%`;
+        text.textContent = uploadEntry.state === 'success'
+          ? 'Upload complete'
+          : uploadEntry.state === 'error'
+            ? (uploadEntry.error || 'Upload failed')
+            : uploadEntry.state === 'canceled'
+              ? 'Upload canceled'
+              : `Uploading ${Math.round(progressValue)}%`;
 
         progressWrap.append(track, text);
         row.append(progressWrap);
+      } else if (uploadEntry.state === 'error' && uploadEntry.error) {
+        const errorEl = document.createElement('div');
+        errorEl.className = 'file-error';
+        errorEl.textContent = uploadEntry.error;
+        row.append(errorEl);
       }
       return row;
     }));

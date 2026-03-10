@@ -9,8 +9,13 @@ type MultiSelectOption = {
   disabled?: boolean;
 };
 
-type MultiSelectProps = React.HTMLAttributes<HTMLElement> & {
+type MultiSelectOptionGroup = {
+  label: string;
   options: MultiSelectOption[];
+};
+
+type MultiSelectProps = React.HTMLAttributes<HTMLElement> & {
+  options: Array<MultiSelectOption | MultiSelectOptionGroup>;
   value?: string[];
   placeholder?: string;
   label?: string;
@@ -19,13 +24,50 @@ type MultiSelectProps = React.HTMLAttributes<HTMLElement> & {
   name?: string;
   required?: boolean;
   disabled?: boolean;
+  readOnly?: boolean;
+  loading?: boolean;
+  loadingText?: string;
+  clearable?: boolean;
   maxSelections?: number;
+  renderLimit?: number;
+  selectionIndicator?: 'checkbox' | 'check' | 'none';
+  variant?: 'default' | 'surface' | 'soft' | 'filled' | 'minimal' | 'contrast';
+  tone?: 'default' | 'success' | 'warning' | 'danger';
+  density?: 'default' | 'compact' | 'comfortable';
+  shape?: 'default' | 'square' | 'soft';
+  size?: 'sm' | 'md' | 'lg';
   onChange?: (detail: { value: string[]; previousValue: string[]; selectedItems: MultiSelectOption[]; source: string }) => void;
   onValueChange?: (value: string[]) => void;
 };
 
 export const MultiSelect = React.forwardRef<HTMLElement, MultiSelectProps>(function MultiSelect(
-  { options, value, placeholder, label, description, error, name, required, disabled, maxSelections, onChange, onValueChange, children, ...rest },
+  {
+    options,
+    value,
+    placeholder,
+    label,
+    description,
+    error,
+    name,
+    required,
+    disabled,
+    readOnly,
+    loading,
+    loadingText,
+    clearable,
+    maxSelections,
+    renderLimit,
+    selectionIndicator,
+    variant,
+    tone,
+    density,
+    shape,
+    size,
+    onChange,
+    onValueChange,
+    children,
+    ...rest
+  },
   forwardedRef
 ) {
   const ref = useRef<HTMLElement | null>(null);
@@ -73,9 +115,42 @@ export const MultiSelect = React.forwardRef<HTMLElement, MultiSelectProps>(funct
     syncAttr('data-error', error ?? null);
     syncAttr('name', name ?? null);
     syncAttr('max-selections', typeof maxSelections === 'number' ? String(maxSelections) : null);
+    syncAttr('render-limit', typeof renderLimit === 'number' ? String(renderLimit) : null);
+    syncAttr('loading-text', loadingText ?? null);
+    syncAttr('selection-indicator', selectionIndicator ?? null);
+    syncAttr('variant', variant && variant !== 'default' ? variant : null);
+    syncAttr('tone', tone && tone !== 'default' ? tone : null);
+    syncAttr('density', density && density !== 'default' ? density : null);
+    syncAttr('shape', shape && shape !== 'default' ? shape : null);
+    syncAttr('size', size && size !== 'md' ? size : null);
     syncBool('required', required);
     syncBool('disabled', disabled);
-  }, [options, value, placeholder, label, description, error, name, required, disabled, maxSelections]);
+    syncBool('readonly', readOnly);
+    syncBool('loading', loading);
+    syncBool('clearable', clearable);
+  }, [
+    options,
+    value,
+    placeholder,
+    label,
+    description,
+    error,
+    name,
+    required,
+    disabled,
+    readOnly,
+    loading,
+    loadingText,
+    clearable,
+    maxSelections,
+    renderLimit,
+    selectionIndicator,
+    variant,
+    tone,
+    density,
+    shape,
+    size
+  ]);
 
   return React.createElement('ui-multi-select', { ref, ...rest }, children);
 });
