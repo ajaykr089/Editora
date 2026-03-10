@@ -1,4 +1,11 @@
 import { ElementBase } from '../ElementBase';
+import {
+  focusRovingItem,
+  getRovingFocusBoundaryIndex,
+  moveRovingFocusIndex,
+  resolveRovingFocusIndex,
+  syncRovingTabStops
+} from '../primitives/roving-focus-group';
 
 type TabModel = {
   index: number;
@@ -551,6 +558,7 @@ export class UITabs extends ElementBase {
   private _resizeObserver: ResizeObserver | null = null;
   private _isSyncing = false;
   private _isSyncingSelectionAttributes = false;
+  private _focusIndex = -1;
 
   constructor() {
     super();
@@ -731,6 +739,7 @@ export class UITabs extends ElementBase {
       return;
     }
 
+    this._focusIndex = nextIndex;
     this.setAttribute('selected', String(nextIndex));
     this.setAttribute('value', next.value);
 
@@ -751,6 +760,7 @@ export class UITabs extends ElementBase {
     if (!model.length) return;
 
     const selectedIndex = this._resolveSelectedIndex(model);
+    const focusIndex = this._resolveFocusIndex(model, selectedIndex);
     this._syncSelectedAttributes(model, selectedIndex);
 
     const buttons = Array.from(this.root.querySelectorAll<HTMLButtonElement>('.tab'));
@@ -760,13 +770,13 @@ export class UITabs extends ElementBase {
 
       const selectedState = index === selectedIndex;
       button.setAttribute('aria-selected', selectedState ? 'true' : 'false');
-      button.setAttribute('tabindex', selectedState && !tab.disabled ? '0' : '-1');
       button.setAttribute('aria-controls', tab.panelId);
       button.setAttribute('aria-disabled', tab.disabled ? 'true' : 'false');
 
       if (tab.disabled) button.setAttribute('disabled', '');
       else button.removeAttribute('disabled');
     });
+    syncRovingTabStops(buttons, buttons[focusIndex] || null, { activeAttribute: null });
 
     const selected = model[selectedIndex];
     this._syncIndicator(selectedIndex);
@@ -878,13 +888,26 @@ export class UITabs extends ElementBase {
     return model.filter((tab) => !tab.disabled).map((tab) => tab.index);
   }
 
+  private _resolveFocusIndex(model: TabModel[], selectedIndex: number): number {
+    const resolved = resolveRovingFocusIndex(model, {
+      activeIndex: this._focusIndex,
+      selectedIndex,
+      getDisabled: (item) => item.disabled
+    });
+    this._focusIndex = resolved;
+    return resolved;
+  }
+
   private _onWindowResize(): void {
     this._syncSelectionUi();
   }
 
   private _focusTab(index: number): void {
+    this._focusIndex = index;
     const node = this.root.querySelector(`.tab[data-index="${index}"]`) as HTMLButtonElement | null;
-    node?.focus();
+    const buttons = Array.from(this.root.querySelectorAll<HTMLButtonElement>('.tab'));
+    syncRovingTabStops(buttons, node, { activeAttribute: null });
+    focusRovingItem(node);
   }
 
   private _scrollSelectedTabIntoView(index: number): void {
@@ -897,6 +920,7 @@ export class UITabs extends ElementBase {
       typeof window !== 'undefined' &&
       typeof window.matchMedia === 'function' &&
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (typeof button.scrollIntoView !== 'function') return;
     button.scrollIntoView({
       behavior: prefersReducedMotion ? 'auto' : 'smooth',
       block: 'nearest',
@@ -929,24 +953,15 @@ export class UITabs extends ElementBase {
     const shouldLoop = !this.hasAttribute('loop') || isTruthy(this.getAttribute('loop'));
     const rtl = getComputedStyle(this).direction === 'rtl';
 
-    const enabled = this._enabledIndices(model);
-    if (!enabled.length) return;
-
     const currentIndex = Number(button.getAttribute('data-index'));
     if (!Number.isFinite(currentIndex)) return;
 
-    const enabledPosition = enabled.indexOf(currentIndex);
-    if (enabledPosition < 0) return;
-
-    const moveFocus = (nextEnabledPosition: number) => {
-      if (!shouldLoop && (nextEnabledPosition < 0 || nextEnabledPosition >= enabled.length)) {
-        return;
-      }
-
-      const resolved = shouldLoop
-        ? enabled[(nextEnabledPosition + enabled.length) % enabled.length]
-        : enabled[nextEnabledPosition];
-
+    const moveFocus = (step: 1 | -1) => {
+      const resolved = moveRovingFocusIndex(model, currentIndex, step, {
+        wrap: shouldLoop,
+        fallbackIndex: this._resolveFocusIndex(model, this._resolveSelectedIndex(model)),
+        getDisabled: (item) => item.disabled
+      });
       if (resolved == null) return;
 
       this._focusTab(resolved);
@@ -962,7 +977,7 @@ export class UITabs extends ElementBase {
       (orientation === 'vertical' && event.key === 'ArrowDown')
     ) {
       event.preventDefault();
-      moveFocus(enabledPosition + 1);
+      moveFocus(1);
       return;
     }
 
@@ -971,19 +986,27 @@ export class UITabs extends ElementBase {
       (orientation === 'vertical' && event.key === 'ArrowUp')
     ) {
       event.preventDefault();
-      moveFocus(enabledPosition - 1);
+      moveFocus(-1);
       return;
     }
 
     if (event.key === 'Home') {
       event.preventDefault();
-      moveFocus(0);
+      const firstIndex = getRovingFocusBoundaryIndex(model, 'first', (item) => item.disabled);
+      if (firstIndex < 0) return;
+      this._focusTab(firstIndex);
+      if (activation === 'auto') this._setSelectedByIndex(model, firstIndex, true);
+      else this._emit('focus', model, firstIndex);
       return;
     }
 
     if (event.key === 'End') {
       event.preventDefault();
-      moveFocus(enabled.length - 1);
+      const lastIndex = getRovingFocusBoundaryIndex(model, 'last', (item) => item.disabled);
+      if (lastIndex < 0) return;
+      this._focusTab(lastIndex);
+      if (activation === 'auto') this._setSelectedByIndex(model, lastIndex, true);
+      else this._emit('focus', model, lastIndex);
       return;
     }
 
@@ -996,6 +1019,7 @@ export class UITabs extends ElementBase {
   protected override render(): void {
     const model = this._tabsModel();
     const selectedIndex = this._resolveSelectedIndex(model);
+    const focusIndex = this._resolveFocusIndex(model, selectedIndex);
 
     this._syncSelectedAttributes(model, selectedIndex);
 
@@ -1015,7 +1039,7 @@ export class UITabs extends ElementBase {
             aria-selected="${selectedState ? 'true' : 'false'}"
             aria-controls="${tab.panelId}"
             aria-disabled="${tab.disabled ? 'true' : 'false'}"
-            tabindex="${selectedState && !tab.disabled ? '0' : '-1'}"
+            tabindex="${tab.index === focusIndex && !tab.disabled ? '0' : '-1'}"
             ${tab.disabled ? 'disabled' : ''}
           >
             ${icon}

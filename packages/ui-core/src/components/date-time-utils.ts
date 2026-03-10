@@ -325,6 +325,7 @@ export function rafThrottle(fn: () => void): { run: () => void; cancel: () => vo
 export function shouldUseMobileSheet(mode: string | null): boolean {
   if ((mode || 'popover') === 'inline') return false;
   if (typeof window === 'undefined') return false;
+  if (typeof window.matchMedia !== 'function') return false;
   return window.matchMedia('(max-width: 639px)').matches;
 }
 

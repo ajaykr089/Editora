@@ -1,6 +1,7 @@
 import { ElementBase } from '../ElementBase';
 
 type SidebarTone = 'default' | 'brand' | 'success' | 'warning' | 'danger';
+type ResizeSource = 'pointer' | 'keyboard' | 'api' | 'attribute';
 
 type SidebarItemInput = {
   value?: string;
@@ -27,10 +28,23 @@ type SidebarItem = {
   tone: SidebarTone;
 };
 
+type DragState = {
+  pointerId: number;
+  startX: number;
+  startWidth: number;
+};
+
+const SIZE_WIDTHS: Record<string, { expanded: number; collapsed: number }> = {
+  sm: { expanded: 244, collapsed: 68 },
+  md: { expanded: 280, collapsed: 78 },
+  lg: { expanded: 304, collapsed: 84 }
+};
+
 const style = `
   :host {
     --ui-sidebar-width: 280px;
     --ui-sidebar-collapsed-width: 78px;
+    --ui-sidebar-current-width: var(--ui-sidebar-width);
     --ui-sidebar-padding: 12px;
     --ui-sidebar-gap: 10px;
     --ui-sidebar-radius: 16px;
@@ -42,6 +56,7 @@ const style = `
     --ui-sidebar-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-sidebar-shadow:
       none;
+    --ui-sidebar-resize-hit-area: 12px;
 
     --ui-sidebar-item-radius: 12px;
     --ui-sidebar-item-height: 42px;
@@ -50,13 +65,15 @@ const style = `
 
     color-scheme: light dark;
     display: block;
-    inline-size: var(--ui-sidebar-width);
+    inline-size: var(--ui-sidebar-current-width);
+    max-inline-size: 100%;
     min-inline-size: 0;
     box-sizing: border-box;
     font-family: "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 
   .shell {
+    position: relative;
     min-inline-size: 0;
     min-block-size: 100%;
     display: grid;
@@ -86,11 +103,6 @@ const style = `
   :host([position="right"]) .menu,
   :host([position="right"]) .footer {
     direction: ltr;
-  }
-
-  :host([collapsed]),
-  :host([rail]) {
-    inline-size: var(--ui-sidebar-collapsed-width);
   }
 
   .header,
@@ -300,7 +312,8 @@ const style = `
 
   .icon[hidden],
   .meta[hidden],
-  .badge[hidden] {
+  .badge[hidden],
+  .resize-handle[hidden] {
     display: none;
   }
 
@@ -404,6 +417,51 @@ const style = `
     display: none;
   }
 
+  .resize-handle {
+    position: absolute;
+    inset-block: 10px;
+    inset-inline-end: calc(var(--ui-sidebar-resize-hit-area) * -0.5);
+    inline-size: var(--ui-sidebar-resize-hit-area);
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: col-resize;
+    touch-action: none;
+    padding: 0;
+    z-index: 2;
+    outline: none;
+  }
+
+  :host([position="right"]) .resize-handle {
+    inset-inline-start: calc(var(--ui-sidebar-resize-hit-area) * -0.5);
+    inset-inline-end: auto;
+  }
+
+  .resize-handle::before {
+    content: "";
+    position: absolute;
+    inset-block: 8px;
+    inset-inline-start: 50%;
+    inline-size: 2px;
+    transform: translateX(-50%);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--ui-sidebar-border) 84%, transparent);
+    transition: background-color 140ms ease, transform 140ms ease;
+  }
+
+  .resize-handle:hover::before,
+  .resize-handle:focus-visible::before,
+  :host([data-resizing]) .resize-handle::before {
+    background: color-mix(in srgb, var(--ui-sidebar-accent) 78%, #ffffff 22%);
+    transform: translateX(-50%) scaleX(1.2);
+  }
+
+  :host([data-resizing]) .shell {
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--ui-sidebar-focus) 16%, transparent),
+      var(--ui-sidebar-shadow);
+  }
+
   .source-slot {
     display: none;
   }
@@ -411,7 +469,8 @@ const style = `
   @media (prefers-reduced-motion: reduce) {
     .shell,
     .collapse-btn,
-    .item {
+    .item,
+    .resize-handle::before {
       transition: none !important;
     }
   }
@@ -420,6 +479,10 @@ const style = `
     .shell {
       border-width: 2px;
       box-shadow: none;
+    }
+
+    .resize-handle::before {
+      inline-size: 3px;
     }
   }
 
@@ -438,6 +501,10 @@ const style = `
       background: Highlight;
       color: HighlightText;
       border-color: Highlight;
+    }
+
+    .resize-handle::before {
+      background: CanvasText;
     }
   }
 `;
@@ -473,6 +540,35 @@ function normalizeTone(raw: string | null | undefined): SidebarTone {
   return 'default';
 }
 
+function pxValue(raw: string | null, fallback: number, context: HTMLElement): number {
+  if (!raw) return fallback;
+  const value = raw.trim();
+  if (!value) return fallback;
+  if (/^-?\d+(\.\d+)?$/.test(value)) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+  if (value.endsWith('px')) {
+    const parsed = Number(value.slice(0, -2));
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+  if (value.endsWith('rem')) {
+    const parsed = Number(value.slice(0, -3));
+    const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize || '16');
+    return Number.isFinite(parsed) ? parsed * rootSize : fallback;
+  }
+  if (value.endsWith('em')) {
+    const parsed = Number(value.slice(0, -2));
+    const currentSize = Number.parseFloat(getComputedStyle(context).fontSize || '16');
+    return Number.isFinite(parsed) ? parsed * currentSize : fallback;
+  }
+  return fallback;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
 export class UISidebar extends ElementBase {
   static get observedAttributes() {
     return [
@@ -489,22 +585,39 @@ export class UISidebar extends ElementBase {
       'rail',
       'show-icons',
       'show-badges',
-      'aria-label'
+      'aria-label',
+      'resizable',
+      'width',
+      'min-width',
+      'max-width',
+      'collapsed-width',
+      'storage-key',
+      'auto-save'
     ];
   }
 
   private _observer: MutationObserver | null = null;
+  private _dragState: DragState | null = null;
+  private _expandedWidthPx: number | null = null;
 
   constructor() {
     super();
     this._onClick = this._onClick.bind(this);
+    this._onPointerDown = this._onPointerDown.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
+    this._onPointerMove = this._onPointerMove.bind(this);
+    this._onPointerUp = this._onPointerUp.bind(this);
   }
 
   override connectedCallback(): void {
+    if (!this.hasAttribute('width')) {
+      const persisted = this._loadPersistedWidth();
+      if (persisted != null) this._expandedWidthPx = persisted;
+    }
     super.connectedCallback();
 
     this.root.addEventListener('click', this._onClick as EventListener);
+    this.root.addEventListener('pointerdown', this._onPointerDown as EventListener);
     this.root.addEventListener('keydown', this._onKeyDown as EventListener);
 
     this._observer = new MutationObserver(() => {
@@ -532,10 +645,13 @@ export class UISidebar extends ElementBase {
         'data-tone'
       ]
     });
+
+    queueMicrotask(() => this._syncWidthState({ persist: false, emit: false, source: 'api' }));
   }
 
   override disconnectedCallback(): void {
     this.root.removeEventListener('click', this._onClick as EventListener);
+    this.root.removeEventListener('pointerdown', this._onPointerDown as EventListener);
     this.root.removeEventListener('keydown', this._onKeyDown as EventListener);
 
     if (this._observer) {
@@ -543,7 +659,34 @@ export class UISidebar extends ElementBase {
       this._observer = null;
     }
 
+    this._teardownResize();
     super.disconnectedCallback();
+  }
+
+  override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+    if (oldValue === newValue) return;
+
+    if (
+      name === 'width' ||
+      name === 'min-width' ||
+      name === 'max-width' ||
+      name === 'collapsed-width' ||
+      name === 'size' ||
+      name === 'storage-key' ||
+      name === 'auto-save'
+    ) {
+      if (name === 'width') {
+        const width = this._clampedExpandedWidth();
+        if (width != null) this._expandedWidthPx = width;
+      }
+      this._syncWidthState({ persist: false, emit: false, source: 'attribute' });
+      return;
+    }
+
+    super.attributeChangedCallback(name, oldValue, newValue);
+    if (name === 'collapsed' || name === 'rail' || name === 'resizable' || name === 'position') {
+      queueMicrotask(() => this._syncWidthState({ persist: false, emit: false, source: 'attribute' }));
+    }
   }
 
   get collapsed(): boolean {
@@ -576,10 +719,118 @@ export class UISidebar extends ElementBase {
   toggle(force?: boolean): void {
     const next = typeof force === 'boolean' ? force : !this.collapsed;
     this.collapsed = next;
+    this._syncWidthState({ persist: false, emit: false, source: 'api' });
 
     const detail = { collapsed: next };
     this.dispatchEvent(new CustomEvent('toggle', { detail, bubbles: true, composed: true }));
     this.dispatchEvent(new CustomEvent('collapse-change', { detail, bubbles: true, composed: true }));
+  }
+
+  private _persistedKey(): string | null {
+    const key = this.getAttribute('storage-key');
+    return key ? `ui-sidebar:${key}` : null;
+  }
+
+  private _loadPersistedWidth(): number | null {
+    const key = this._persistedKey();
+    if (!key) return null;
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return typeof parsed?.expandedWidth === 'number' && Number.isFinite(parsed.expandedWidth)
+        ? parsed.expandedWidth
+        : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private _persistWidth(): void {
+    if (!isTruthy(this.getAttribute('auto-save'))) return;
+    const key = this._persistedKey();
+    if (!key) return;
+    try {
+      window.localStorage.setItem(key, JSON.stringify({ expandedWidth: this._resolvedExpandedWidthPx() }));
+    } catch {
+      // ignore persistence failures
+    }
+  }
+
+  private _sizePreset(): { expanded: number; collapsed: number } {
+    return SIZE_WIDTHS[this.getAttribute('size') || 'md'] || SIZE_WIDTHS.md;
+  }
+
+  private _collapsedWidthPx(): number {
+    const preset = this._sizePreset().collapsed;
+    return Math.max(48, pxValue(this.getAttribute('collapsed-width'), preset, this));
+  }
+
+  private _minWidthPx(): number {
+    const preset = Math.max(this._collapsedWidthPx() + 36, 180);
+    return Math.max(this._collapsedWidthPx(), pxValue(this.getAttribute('min-width'), preset, this));
+  }
+
+  private _maxWidthPx(): number {
+    const preset = 420;
+    return Math.max(this._minWidthPx(), pxValue(this.getAttribute('max-width'), preset, this));
+  }
+
+  private _clampedExpandedWidth(): number | null {
+    const raw = this.getAttribute('width');
+    if (!raw) return null;
+    return clamp(pxValue(raw, this._sizePreset().expanded, this), this._minWidthPx(), this._maxWidthPx());
+  }
+
+  private _resolvedExpandedWidthPx(): number {
+    const explicit = this._clampedExpandedWidth();
+    if (explicit != null) return explicit;
+    const fallback = this._expandedWidthPx ?? this._sizePreset().expanded;
+    return clamp(fallback, this._minWidthPx(), this._maxWidthPx());
+  }
+
+  private _currentWidthPx(): number {
+    if (this.hasAttribute('collapsed') || this.hasAttribute('rail')) return this._collapsedWidthPx();
+    return this._resolvedExpandedWidthPx();
+  }
+
+  private _syncWidthState(options: { persist: boolean; emit: boolean; source: ResizeSource }): void {
+    const expanded = this._resolvedExpandedWidthPx();
+    const collapsed = this._collapsedWidthPx();
+    const current = this._currentWidthPx();
+
+    this._expandedWidthPx = expanded;
+    this.style.setProperty('--ui-sidebar-width', `${expanded}px`);
+    this.style.setProperty('--ui-sidebar-collapsed-width', `${collapsed}px`);
+    this.style.setProperty('--ui-sidebar-current-width', `${current}px`);
+
+    const handle = this.root.querySelector('.resize-handle') as HTMLElement | null;
+    if (handle) {
+      const hidden = !this.hasAttribute('resizable') || this.hasAttribute('rail');
+      handle.toggleAttribute('hidden', hidden);
+      handle.setAttribute('aria-valuemin', String(Math.round(this._minWidthPx())));
+      handle.setAttribute('aria-valuemax', String(Math.round(this._maxWidthPx())));
+      handle.setAttribute('aria-valuenow', String(Math.round(expanded)));
+      handle.setAttribute('aria-orientation', 'vertical');
+      handle.setAttribute('aria-label', this.getAttribute('position') === 'right' ? 'Resize right sidebar' : 'Resize sidebar');
+    }
+
+    if (options.persist) this._persistWidth();
+    if (options.emit) {
+      this.dispatchEvent(
+        new CustomEvent('width-change', {
+          detail: {
+            width: expanded,
+            collapsedWidth: collapsed,
+            minWidth: this._minWidthPx(),
+            maxWidth: this._maxWidthPx(),
+            source: options.source
+          },
+          bubbles: true,
+          composed: true
+        })
+      );
+    }
   }
 
   private _sourceItems(): HTMLElement[] {
@@ -687,6 +938,51 @@ export class UISidebar extends ElementBase {
     enabled[next].focus();
   }
 
+  private _startResize(pointerId: number, clientX: number): void {
+    if (!this.hasAttribute('resizable') || this.hasAttribute('rail') || this.collapsed) return;
+    this._dragState = {
+      pointerId,
+      startX: clientX,
+      startWidth: this._resolvedExpandedWidthPx()
+    };
+    this.setAttribute('data-resizing', '');
+    window.addEventListener('pointermove', this._onPointerMove);
+    window.addEventListener('pointerup', this._onPointerUp);
+    this.dispatchEvent(new CustomEvent('resize-start', { detail: { width: this._resolvedExpandedWidthPx() }, bubbles: true, composed: true }));
+  }
+
+  private _teardownResize(): void {
+    window.removeEventListener('pointermove', this._onPointerMove);
+    window.removeEventListener('pointerup', this._onPointerUp);
+    this.removeAttribute('data-resizing');
+    this._dragState = null;
+  }
+
+  private _applyExpandedWidth(width: number, source: ResizeSource, persist: boolean): void {
+    const next = clamp(width, this._minWidthPx(), this._maxWidthPx());
+    this._expandedWidthPx = next;
+    const reflected = `${Math.round(next)}px`;
+    if (this.getAttribute('width') !== reflected) this.setAttribute('width', reflected);
+    this.style.setProperty('--ui-sidebar-width', `${next}px`);
+    this.style.setProperty('--ui-sidebar-current-width', `${this._currentWidthPx()}px`);
+    this._syncWidthState({ persist, emit: true, source });
+  }
+
+  private _onPointerMove(event: PointerEvent): void {
+    if (!this._dragState || event.pointerId !== this._dragState.pointerId) return;
+    const direction = this.getAttribute('position') === 'right' ? -1 : 1;
+    const delta = (event.clientX - this._dragState.startX) * direction;
+    this._applyExpandedWidth(this._dragState.startWidth + delta, 'pointer', false);
+    this.dispatchEvent(new CustomEvent('resize', { detail: { width: this._resolvedExpandedWidthPx() }, bubbles: true, composed: true }));
+  }
+
+  private _onPointerUp(event: PointerEvent): void {
+    if (!this._dragState || event.pointerId !== this._dragState.pointerId) return;
+    this._persistWidth();
+    this.dispatchEvent(new CustomEvent('resize-end', { detail: { width: this._resolvedExpandedWidthPx() }, bubbles: true, composed: true }));
+    this._teardownResize();
+  }
+
   private _onClick(event: Event): void {
     const target = event.target as HTMLElement | null;
     if (!target) return;
@@ -705,7 +1001,30 @@ export class UISidebar extends ElementBase {
     this._selectByIndex(index);
   }
 
+  private _onPointerDown(event: PointerEvent): void {
+    const target = event.target as HTMLElement | null;
+    const resize = target?.closest('.resize-handle');
+    if (!resize) return;
+    event.preventDefault();
+    this._startResize(event.pointerId, event.clientX);
+  }
+
   private _onKeyDown(event: KeyboardEvent): void {
+    const resizeHandle = (event.target as HTMLElement | null)?.closest('.resize-handle') as HTMLElement | null;
+    if (resizeHandle) {
+      const right = this.getAttribute('position') === 'right';
+      const step = event.shiftKey ? 40 : 16;
+      let delta = 0;
+      if ((!right && event.key === 'ArrowRight') || (right && event.key === 'ArrowLeft')) delta = step;
+      if ((!right && event.key === 'ArrowLeft') || (right && event.key === 'ArrowRight')) delta = -step;
+      if (event.key === 'Home') delta = this._minWidthPx() - this._resolvedExpandedWidthPx();
+      if (event.key === 'End') delta = this._maxWidthPx() - this._resolvedExpandedWidthPx();
+      if (!delta) return;
+      event.preventDefault();
+      this._applyExpandedWidth(this._resolvedExpandedWidthPx() + delta, 'keyboard', true);
+      return;
+    }
+
     const target = event.target as HTMLElement | null;
     const item = target?.closest('.item') as HTMLButtonElement | null;
     if (!item) return;
@@ -768,6 +1087,7 @@ export class UISidebar extends ElementBase {
 
     const collapsed = this.collapsed || this.hasAttribute('rail');
     const collapsible = this.hasAttribute('collapsible') && !this.hasAttribute('rail');
+    const resizable = this.hasAttribute('resizable') && !this.hasAttribute('rail');
     const showSearch = this._hasSlot('search');
     const ariaLabel = this.getAttribute('aria-label') || 'Sidebar navigation';
 
@@ -838,17 +1158,33 @@ export class UISidebar extends ElementBase {
         </div>
 
         <footer class="footer" part="footer"><slot name="footer"></slot></footer>
+        <button type="button" class="resize-handle" part="resize-handle" ${resizable ? '' : 'hidden'}></button>
       </aside>
       <slot class="source-slot" name="item"></slot>
     `);
+
+    this._syncWidthState({ persist: false, emit: false, source: 'api' });
   }
 
   protected override shouldRenderOnAttributeChange(
-    _name: string,
+    name: string,
     _oldValue: string | null,
     _newValue: string | null
   ): boolean {
-    return true;
+    return !(
+      name === 'width' ||
+      name === 'min-width' ||
+      name === 'max-width' ||
+      name === 'collapsed-width' ||
+      name === 'storage-key' ||
+      name === 'auto-save'
+    );
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'ui-sidebar': UISidebar;
   }
 }
 

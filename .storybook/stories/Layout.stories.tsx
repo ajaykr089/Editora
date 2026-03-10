@@ -1,5 +1,5 @@
-import React from 'react';
-import { Layout, Box, Button, Flex, Grid, Section, Container } from '@editora/ui-react';
+import React, { useState } from 'react';
+import { Layout, Box, Button, Flex, Grid, Section, Container, Tree, TreeItem } from '@editora/ui-react';
 
 export default {
   title: 'UI/Layout',
@@ -14,14 +14,30 @@ export default {
   }
 };
 
-const SidebarList = () => (
-  <Grid style={{ display: 'grid', gap: 8 }}>
-    <Button variant="ghost">Dashboard</Button>
-    <Button variant="ghost">Users</Button>
-    <Button variant="ghost">Reports</Button>
-    <Button variant="ghost">Settings</Button>
-  </Grid>
-);
+const SidebarList = () => {
+  const [value, setValue] = useState('overview');
+
+  return (
+    <Tree
+      value={value}
+      indentSize="14px"
+      onSelect={(detail) => setValue(detail.value)}
+      style={{ minHeight: 260 }}
+    >
+      <TreeItem value="overview" label="Overview" />
+      <TreeItem value="workspace" label="Workspace" expanded>
+        <TreeItem value="customers" label="Customers" />
+        <TreeItem value="reports" label="Reports" />
+        <TreeItem value="revenue" label="Revenue" />
+      </TreeItem>
+      <TreeItem value="ops" label="Operations" expanded>
+        <TreeItem value="incidents" label="Incidents" />
+        <TreeItem value="queues" label="Queues" />
+      </TreeItem>
+      <TreeItem value="settings" label="Settings" />
+    </Tree>
+  );
+};
 
 const ContentCards = () => (
   <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>

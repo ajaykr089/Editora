@@ -1,5 +1,17 @@
 import { ElementBase } from '../ElementBase';
-import { showPortalFor } from '../portal';
+import { createPortalContainer } from '../portal';
+import { findTypeaheadMatch } from '../primitives/collection';
+import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
+import {
+  focusRovingItem,
+  getRovingFocusBoundaryIndex,
+  moveRovingFocusIndex,
+  resolveRovingFocusIndex,
+  syncRovingTabStops
+} from '../primitives/roving-focus-group';
+import { createPositioner, type PositionerHandle, type PositionerPlacement } from '../primitives/positioner';
+import './ui-listbox';
+import { UIListbox } from './ui-listbox';
 
 type MenubarReason = 'click' | 'keyboard' | 'programmatic';
 type PanelPlacement = 'top' | 'bottom' | 'left' | 'right';
@@ -482,6 +494,14 @@ function normalizePlacement(value: string | null): PanelPlacement {
   return 'bottom';
 }
 
+function toPositionerPlacement(value: string | null): PositionerPlacement {
+  const placement = normalizePlacement(value);
+  if (placement === 'top') return 'top';
+  if (placement === 'left') return 'left';
+  if (placement === 'right') return 'right';
+  return 'bottom';
+}
+
 function toBooleanAttribute(raw: string | null, fallback: boolean): boolean {
   if (raw == null) return fallback;
   const normalized = String(raw).toLowerCase();
@@ -508,6 +528,10 @@ function panelItemSelector(): string {
 
 function isDisabledPanelItem(item: PanelItem): boolean {
   return item.hasAttribute('disabled') || item.getAttribute('aria-disabled') === 'true' || !!item.disabled;
+}
+
+function isDisabledBarItem(item: MenubarItem): boolean {
+  return item.hasAttribute('disabled') || (item as HTMLButtonElement).disabled;
 }
 
 function readVariantValue(host: HTMLElement, name: string): string {
@@ -541,18 +565,19 @@ export class UIMenubar extends ElementBase {
   private _uid = Math.random().toString(36).slice(2, 8);
   private _ignoreSelected = false;
   private _open = false;
-  private _cleanup: (() => void) | null = null;
   private _portalEl: HTMLElement | null = null;
+  private _positioner: PositionerHandle | null = null;
+  private _dismissableLayer: DismissableLayerHandle | null = null;
   private _panelForIndex = -1;
   private _typeaheadBuffer = '';
   private _typeaheadTimer: number | null = null;
   private _globalListenersBound = false;
+  private _focusIndex = -1;
 
   constructor() {
     super();
     this._onClick = this._onClick.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
-    this._onDocPointerDown = this._onDocPointerDown.bind(this);
     this._onDocKeyDown = this._onDocKeyDown.bind(this);
     this._onDocScroll = this._onDocScroll.bind(this);
     this._onSlotChange = this._onSlotChange.bind(this);
@@ -584,14 +609,20 @@ export class UIMenubar extends ElementBase {
     this._syncBarA11y();
     if (
       this._open &&
-      (name === 'placement' ||
-        name === 'variant' ||
+      name === 'placement'
+    ) {
+      this._rebuildPanel();
+      return;
+    }
+    if (
+      this._open &&
+      (name === 'variant' ||
         name === 'density' ||
         name === 'shape' ||
         name === 'elevation' ||
         name === 'tone')
     ) {
-      this._rebuildPanel();
+      this._syncPanelVisualState();
       return;
     }
     this._syncState();
@@ -612,6 +643,8 @@ export class UIMenubar extends ElementBase {
     this._attachSlotListeners();
     this._syncStructure();
     this._syncBarA11y();
+    if (this._open && !this._portalEl) this._rebuildPanel();
+    else if (this._open) this._positioner?.update();
   }
 
   open(): void {
@@ -759,7 +792,6 @@ export class UIMenubar extends ElementBase {
 
   private _bindGlobalListeners(): void {
     if (this._globalListenersBound) return;
-    document.addEventListener('pointerdown', this._onDocPointerDown as EventListener, true);
     document.addEventListener('keydown', this._onDocKeyDown as EventListener);
     document.addEventListener('scroll', this._onDocScroll as EventListener, true);
     this._globalListenersBound = true;
@@ -767,7 +799,6 @@ export class UIMenubar extends ElementBase {
 
   private _unbindGlobalListeners(): void {
     if (!this._globalListenersBound) return;
-    document.removeEventListener('pointerdown', this._onDocPointerDown as EventListener, true);
     document.removeEventListener('keydown', this._onDocKeyDown as EventListener);
     document.removeEventListener('scroll', this._onDocScroll as EventListener, true);
     this._globalListenersBound = false;
@@ -778,6 +809,12 @@ export class UIMenubar extends ElementBase {
     this._contents = this._contentSlot ? (this._contentSlot.assignedElements({ flatten: true }) as HTMLElement[]) : [];
 
     const selected = this._selectedIndex();
+    const focusIndex = resolveRovingFocusIndex(this._items, {
+      activeIndex: this._focusIndex,
+      selectedIndex: selected,
+      getDisabled: isDisabledBarItem
+    });
+    this._focusIndex = focusIndex;
     const isOpen = this._isOpenAttribute();
 
     this._items.forEach((item, index) => {
@@ -786,12 +823,13 @@ export class UIMenubar extends ElementBase {
       const panelId = this._contents[index]?.id || `ui-menubar-content-${this._uid}-${index}`;
       item.id = itemId;
       item.setAttribute('role', 'menuitem');
-      item.setAttribute('tabindex', active ? '0' : '-1');
+      item.setAttribute('tabindex', index === focusIndex && !isDisabledBarItem(item) ? '0' : '-1');
       item.setAttribute('aria-haspopup', 'menu');
       item.setAttribute('aria-expanded', active && isOpen ? 'true' : 'false');
       item.setAttribute('aria-controls', panelId);
       item.setAttribute('data-active', active ? 'true' : 'false');
     });
+    syncRovingTabStops(this._items, this._items[focusIndex] || null, { activeAttribute: null });
 
     this._contents.forEach((content, index) => {
       const panelId = content.id || `ui-menubar-content-${this._uid}-${index}`;
@@ -814,43 +852,24 @@ export class UIMenubar extends ElementBase {
     });
   }
 
+  private _panelListbox(): UIListbox | null {
+    return this._portalEl instanceof UIListbox ? this._portalEl : null;
+  }
+
   private _buildPanelContent(selectedIndex: number): HTMLElement {
     const source = this._contents[selectedIndex];
-    const panel = document.createElement('div');
+    const panel = document.createElement('ui-listbox') as UIListbox;
     panel.className = 'menu-panel';
     panel.id = source?.id || `ui-menubar-panel-${this._uid}-${selectedIndex}`;
     panel.setAttribute('role', 'menu');
     panel.setAttribute('tabindex', '-1');
     panel.setAttribute('aria-labelledby', this._items[selectedIndex]?.id || '');
+    panel.setAttribute('item-selector', panelItemSelector());
+    panel.setAttribute('item-role', 'menuitem');
+    panel.setAttribute('active-attribute', 'data-active');
 
-    const variant = readVariantValue(this, 'variant');
-    const density = readVariantValue(this, 'density');
-    const shape = readVariantValue(this, 'shape');
-    const elevation = readVariantValue(this, 'elevation');
-    const tone = readVariantValue(this, 'tone');
-    if (variant && variant !== 'default') panel.setAttribute('data-variant', variant);
-    if (density && density !== 'default') panel.setAttribute('data-density', density);
-    if (shape && shape !== 'default') panel.setAttribute('data-shape', shape);
-    if (elevation && elevation !== 'default') panel.setAttribute('data-elevation', elevation);
-    if (tone && tone !== 'default' && tone !== 'brand') panel.setAttribute('data-tone', tone);
-
-    const computed = window.getComputedStyle(this);
-    const tokenNames = [
-      '--ui-menubar-ring',
-      '--ui-menubar-z',
-      '--ui-menubar-panel-bg',
-      '--ui-menubar-panel-color',
-      '--ui-menubar-panel-border-color',
-      '--ui-menubar-panel-border',
-      '--ui-menubar-panel-shadow',
-      '--ui-menubar-panel-radius',
-      '--ui-menubar-panel-padding',
-      '--ui-menubar-panel-min-width'
-    ];
-    tokenNames.forEach((token) => {
-      const value = computed.getPropertyValue(token).trim();
-      if (value) panel.style.setProperty(token, value);
-    });
+    this._applyPanelVariantData(panel);
+    this._applyPanelTokens(panel);
 
     const styleEl = document.createElement('style');
     styleEl.textContent = panelStyle;
@@ -863,6 +882,7 @@ export class UIMenubar extends ElementBase {
     }
 
     this._hydratePanelItems(panel);
+    panel.refresh();
     if (!panel.querySelector(panelItemSelector())) {
       const empty = document.createElement('div');
       empty.className = 'empty-state';
@@ -902,6 +922,53 @@ export class UIMenubar extends ElementBase {
     return panel;
   }
 
+  private _applyPanelVariantData(panel: HTMLElement): void {
+    const variant = readVariantValue(this, 'variant');
+    const density = readVariantValue(this, 'density');
+    const shape = readVariantValue(this, 'shape');
+    const elevation = readVariantValue(this, 'elevation');
+    const tone = readVariantValue(this, 'tone');
+
+    if (variant && variant !== 'default') panel.setAttribute('data-variant', variant);
+    else panel.removeAttribute('data-variant');
+    if (density && density !== 'default') panel.setAttribute('data-density', density);
+    else panel.removeAttribute('data-density');
+    if (shape && shape !== 'default') panel.setAttribute('data-shape', shape);
+    else panel.removeAttribute('data-shape');
+    if (elevation && elevation !== 'default') panel.setAttribute('data-elevation', elevation);
+    else panel.removeAttribute('data-elevation');
+    if (tone && tone !== 'default' && tone !== 'brand') panel.setAttribute('data-tone', tone);
+    else panel.removeAttribute('data-tone');
+  }
+
+  private _applyPanelTokens(panel: HTMLElement): void {
+    const computed = window.getComputedStyle(this);
+    const tokenNames = [
+      '--ui-menubar-ring',
+      '--ui-menubar-z',
+      '--ui-menubar-panel-bg',
+      '--ui-menubar-panel-color',
+      '--ui-menubar-panel-border-color',
+      '--ui-menubar-panel-border',
+      '--ui-menubar-panel-shadow',
+      '--ui-menubar-panel-radius',
+      '--ui-menubar-panel-padding',
+      '--ui-menubar-panel-min-width'
+    ];
+    tokenNames.forEach((token) => {
+      const value = computed.getPropertyValue(token).trim();
+      if (value) panel.style.setProperty(token, value);
+      else panel.style.removeProperty(token);
+    });
+  }
+
+  private _syncPanelVisualState(): void {
+    const panel = this._portalEl;
+    if (!panel) return;
+    this._applyPanelVariantData(panel);
+    this._applyPanelTokens(panel);
+  }
+
   private _rebuildPanel(): void {
     if (!this._open) return;
     const selected = this._selectedIndex();
@@ -915,25 +982,39 @@ export class UIMenubar extends ElementBase {
     const panel = this._buildPanelContent(selected);
     this._portalEl = panel;
     this._panelForIndex = selected;
+    const root = createPortalContainer();
+    if (!root) {
+      this._portalEl = null;
+      this._panelForIndex = -1;
+      return;
+    }
+    root.appendChild(panel);
 
-    const cleanup = showPortalFor(anchor, panel, {
-      placement: normalizePlacement(this.getAttribute('placement')),
+    this._positioner = createPositioner({
+      anchor,
+      floating: panel,
+      placement: toPositionerPlacement(this.getAttribute('placement')),
       offset: 6,
       flip: true,
-      shift: true
+      shift: true,
+      fitViewport: true,
+      observeScroll: false
     });
-    this._cleanup = typeof cleanup === 'function' ? cleanup : null;
+
+    this._dismissableLayer = createDismissableLayer({
+      node: panel,
+      trigger: anchor,
+      closeOnEscape: true,
+      closeOnPointerOutside: true,
+      onDismiss: () => this.close()
+    });
   }
 
   private _teardownPanel(): void {
-    if (this._cleanup) {
-      try {
-        this._cleanup();
-      } catch {
-        // no-op
-      }
-      this._cleanup = null;
-    }
+    this._dismissableLayer?.destroy();
+    this._dismissableLayer = null;
+    this._positioner?.destroy();
+    this._positioner = null;
 
     if (this._portalEl?.parentElement) {
       try {
@@ -968,58 +1049,41 @@ export class UIMenubar extends ElementBase {
   private _focusItem(index: number): void {
     const target = this._items[index];
     if (!target) return;
-    this._items.forEach((item, i) => item.setAttribute('tabindex', i === index ? '0' : '-1'));
-    try {
-      target.focus();
-    } catch {
-      // no-op
-    }
+    this._focusIndex = index;
+    syncRovingTabStops(this._items, target, { activeAttribute: null });
+    focusRovingItem(target);
   }
 
   private _queryPanelItems(): PanelItem[] {
-    const panel = this._portalEl;
+    const panel = this._panelListbox();
     if (!panel) return [];
-    return Array.from(panel.querySelectorAll<PanelItem>(panelItemSelector())).filter((item) => {
-      if (item.getClientRects().length === 0) return false;
-      return !isDisabledPanelItem(item);
-    });
+    return panel.queryEnabledItems() as PanelItem[];
   }
 
   private _focusPanelItem(item: PanelItem | null): void {
     if (!item) return;
-    if (!item.hasAttribute('tabindex')) item.setAttribute('tabindex', '-1');
-    try {
-      item.focus({ preventScroll: true });
-    } catch {
-      item.focus();
-    }
+    this._panelListbox()?.setActiveItem(item, { focus: true, owner: this._portalEl, scroll: true });
   }
 
   private _focusPanelFirst(): void {
-    const items = this._queryPanelItems();
-    if (items.length === 0) return;
-    this._focusPanelItem(items[0]);
+    this._panelListbox()?.focusBoundary('first', { focus: true, owner: this._portalEl, scroll: true });
   }
 
   private _focusPanelLast(): void {
-    const items = this._queryPanelItems();
-    if (items.length === 0) return;
-    this._focusPanelItem(items[items.length - 1]);
+    this._panelListbox()?.focusBoundary('last', { focus: true, owner: this._portalEl, scroll: true });
   }
 
   private _movePanelFocus(step: 1 | -1): void {
-    const items = this._queryPanelItems();
-    if (!items.length) return;
-
     const active = document.activeElement as HTMLElement | null;
-    const index = active ? items.indexOf(active as PanelItem) : -1;
-    if (index < 0) {
+    const moved = this._panelListbox()?.move(step, {
+      current: active && this._portalEl?.contains(active) ? active : null,
+      focus: true,
+      owner: this._portalEl,
+      scroll: true
+    }) || null;
+    if (!moved) {
       this._focusPanelFirst();
-      return;
     }
-
-    const next = (index + step + items.length) % items.length;
-    this._focusPanelItem(items[next]);
   }
 
   private _resetTypeahead(): void {
@@ -1043,9 +1107,11 @@ export class UIMenubar extends ElementBase {
     if (this._typeaheadTimer != null) window.clearTimeout(this._typeaheadTimer);
     this._typeaheadTimer = window.setTimeout(() => this._resetTypeahead(), 420);
 
-    const matchedIndex = this._items.findIndex((item) => {
-      const text = (item.getAttribute('aria-label') || item.textContent || '').trim().toLowerCase();
-      return text.startsWith(this._typeaheadBuffer);
+    const focusIndex = this._items.findIndex((item) => item === event.target || item.contains(event.target as Node));
+    const matchedIndex = findTypeaheadMatch(this._items, this._typeaheadBuffer, {
+      startIndex: focusIndex,
+      getLabel: (item) => item.getAttribute('aria-label') || item.textContent || '',
+      getDisabled: isDisabledBarItem
     });
     if (matchedIndex < 0) return false;
 
@@ -1059,21 +1125,20 @@ export class UIMenubar extends ElementBase {
     if (!this.typeahead) return false;
     if (!this._isTypeaheadKey(event)) return false;
 
-    const items = this._queryPanelItems();
-    if (!items.length) return false;
-
     this._typeaheadBuffer = `${this._typeaheadBuffer}${event.key.toLowerCase()}`.slice(0, 24);
     if (this._typeaheadTimer != null) window.clearTimeout(this._typeaheadTimer);
     this._typeaheadTimer = window.setTimeout(() => this._resetTypeahead(), 420);
 
-    const matched = items.find((item) => {
-      const text = (item.getAttribute('aria-label') || item.textContent || '').trim().toLowerCase();
-      return text.startsWith(this._typeaheadBuffer);
-    });
+    const active = document.activeElement as HTMLElement | null;
+    const matched = this._panelListbox()?.typeahead(this._typeaheadBuffer, {
+      current: active && this._portalEl?.contains(active) ? active : null,
+      focus: true,
+      owner: this._portalEl,
+      scroll: true
+    }) || null;
     if (!matched) return false;
 
     event.preventDefault();
-    this._focusPanelItem(matched);
     return true;
   }
 
@@ -1127,21 +1192,11 @@ export class UIMenubar extends ElementBase {
     this._selectIndex(index, 'programmatic');
   }
 
-  private _onDocPointerDown(event: PointerEvent): void {
-    if (!this._open) return;
-    const path = event.composedPath();
-    if (path.includes(this)) return;
-    if (this._portalEl && path.includes(this._portalEl)) return;
-    this.close();
-    this._syncState();
-  }
-
   private _onDocScroll(event: Event): void {
     if (!this._open || !this.closeOnScroll) return;
     const path = typeof (event as any).composedPath === 'function' ? (event as any).composedPath() : [];
     if (this._portalEl && path.includes(this._portalEl)) return;
     this.close();
-    this._syncState();
   }
 
   private _onKeyDown(event: KeyboardEvent): void {
@@ -1151,18 +1206,31 @@ export class UIMenubar extends ElementBase {
     const dir = getComputedStyle(this).direction === 'rtl' ? 'rtl' : 'ltr';
     let handled = false;
     let next = focusIndex;
+    const fallbackIndex = resolveRovingFocusIndex(this._items, {
+      activeIndex: focusIndex,
+      selectedIndex: this._selectedIndex(),
+      getDisabled: isDisabledBarItem
+    });
 
     if (event.key === 'ArrowRight') {
-      next = this._moveIndex(focusIndex, dir === 'rtl' ? -1 : 1);
+      next = moveRovingFocusIndex(this._items, focusIndex, dir === 'rtl' ? -1 : 1, {
+        wrap: this._loopEnabled(),
+        fallbackIndex,
+        getDisabled: isDisabledBarItem
+      });
       handled = true;
     } else if (event.key === 'ArrowLeft') {
-      next = this._moveIndex(focusIndex, dir === 'rtl' ? 1 : -1);
+      next = moveRovingFocusIndex(this._items, focusIndex, dir === 'rtl' ? 1 : -1, {
+        wrap: this._loopEnabled(),
+        fallbackIndex,
+        getDisabled: isDisabledBarItem
+      });
       handled = true;
     } else if (event.key === 'Home') {
-      next = this._items.length > 0 ? 0 : -1;
+      next = getRovingFocusBoundaryIndex(this._items, 'first', isDisabledBarItem);
       handled = true;
     } else if (event.key === 'End') {
-      next = this._items.length > 0 ? this._items.length - 1 : -1;
+      next = getRovingFocusBoundaryIndex(this._items, 'last', isDisabledBarItem);
       handled = true;
     } else if (event.key === 'Enter' || event.key === ' ') {
       this._selectIndex(focusIndex, 'keyboard');
@@ -1174,12 +1242,6 @@ export class UIMenubar extends ElementBase {
     } else if (event.key === 'ArrowUp') {
       this._selectIndex(focusIndex, 'keyboard');
       setTimeout(() => this._focusPanelLast(), 0);
-      handled = true;
-    } else if (event.key === 'Escape') {
-      if (this._open) {
-        this.close();
-        this._syncState();
-      }
       handled = true;
     }
 
@@ -1199,23 +1261,10 @@ export class UIMenubar extends ElementBase {
 
     const insidePanel = !!this._portalEl && event.composedPath().includes(this._portalEl);
     if (!insidePanel) {
-      if (event.key === 'Escape') {
-        this.close();
-        this._syncState();
-      }
       return;
     }
 
     if (this._typeaheadOnPanel(event)) return;
-
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      this.close();
-      this._syncState();
-      const selected = this._selectedIndex();
-      if (selected >= 0) this._focusItem(selected);
-      return;
-    }
 
     if (event.key === 'ArrowDown') {
       event.preventDefault();
@@ -1243,7 +1292,6 @@ export class UIMenubar extends ElementBase {
 
     if (event.key === 'Tab') {
       this.close();
-      this._syncState();
       return;
     }
 

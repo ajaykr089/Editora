@@ -1,5 +1,7 @@
 import { ElementBase } from '../ElementBase';
-import { showPortalFor } from '../portal';
+import { createPortalContainer } from '../portal';
+import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
+import { createPositioner, type PositionerHandle } from '../primitives/positioner';
 
 const style = `
   .panel {
@@ -71,19 +73,16 @@ const style = `
 export class UIPopover extends ElementBase {
   static get observedAttributes() { return ['open']; }
   private _portalEl: HTMLElement | null = null;
-  private _cleanup: (() => void) | undefined = undefined;
+  private _panelEl: HTMLElement | null = null;
+  private _positioner: PositionerHandle | null = null;
+  private _layer: DismissableLayerHandle | null = null;
   private _onHostClick: (e: Event) => void;
-  private _onDocumentPointerDown: (e: PointerEvent) => void;
-  private _onDocumentKeyDown: (e: KeyboardEvent) => void;
   private _isOpen = false;
-  private _globalListenersBound = false;
   private _restoreFocusEl: HTMLElement | null = null;
 
   constructor() {
     super();
     this._onHostClick = this._handleHostClick.bind(this);
-    this._onDocumentPointerDown = this._handleDocumentPointerDown.bind(this);
-    this._onDocumentKeyDown = this._handleDocumentKeyDown.bind(this);
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
@@ -99,31 +98,17 @@ export class UIPopover extends ElementBase {
 
   disconnectedCallback() {
     this.removeEventListener('click', this._onHostClick);
-    this._unbindGlobalListeners();
     this._teardownPortal();
     super.disconnectedCallback();
   }
 
   private _handleHostClick(e: Event) {
-    // support clicking any element inside a slotted trigger (use composedPath)
-    const path = e.composedPath() as any[];
-    const triggerEl = path.find((p) => p && p.getAttribute && p.getAttribute('slot') === 'trigger') as HTMLElement | undefined;
-    if (triggerEl) this.toggle();
-  }
-
-  private _handleDocumentPointerDown(event: PointerEvent): void {
-    if (!this._isOpen) return;
-    const path = event.composedPath();
-    if (path.includes(this)) return;
-    if (this._portalEl && path.includes(this._portalEl)) return;
-    this.close();
-  }
-
-  private _handleDocumentKeyDown(event: KeyboardEvent): void {
-    if (!this._isOpen) return;
-    if (event.key !== 'Escape') return;
-    event.preventDefault();
-    this.close();
+    const trigger = this._getTrigger();
+    if (!trigger) return;
+    const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
+    const target = e.target instanceof Node ? e.target : null;
+    const hitTrigger = path.includes(trigger) || (!!target && (trigger === target || trigger.contains(target)));
+    if (hitTrigger) this.toggle();
   }
 
   open() { this.setAttribute('open', ''); }
@@ -134,28 +119,16 @@ export class UIPopover extends ElementBase {
     return this.querySelector('[slot="trigger"]') as HTMLElement | null;
   }
 
-  private _bindGlobalListeners(): void {
-    if (this._globalListenersBound) return;
-    document.addEventListener('pointerdown', this._onDocumentPointerDown, true);
-    document.addEventListener('keydown', this._onDocumentKeyDown);
-    this._globalListenersBound = true;
-  }
-
-  private _unbindGlobalListeners(): void {
-    if (!this._globalListenersBound) return;
-    document.removeEventListener('pointerdown', this._onDocumentPointerDown, true);
-    document.removeEventListener('keydown', this._onDocumentKeyDown);
-    this._globalListenersBound = false;
-  }
-
   private _buildPortalContent(): HTMLElement {
     const wrapper = document.createElement('div');
+    wrapper.style.pointerEvents = 'auto';
     const styleEl = document.createElement('style');
     styleEl.textContent = style;
     wrapper.appendChild(styleEl);
 
     const panel = document.createElement('div');
     panel.className = 'panel show';
+    this._panelEl = panel;
 
     const arrow = document.createElement('div');
     arrow.className = 'arrow';
@@ -168,13 +141,17 @@ export class UIPopover extends ElementBase {
   }
 
   private _teardownPortal(): void {
-    if (this._cleanup) {
+    this._layer?.destroy();
+    this._layer = null;
+    this._positioner?.destroy();
+    this._positioner = null;
+    this._panelEl = null;
+    if (this._portalEl?.parentElement) {
       try {
-        this._cleanup();
+        this._portalEl.parentElement.removeChild(this._portalEl);
       } catch {
         // no-op
       }
-      this._cleanup = undefined;
     }
     this._portalEl = null;
   }
@@ -184,33 +161,50 @@ export class UIPopover extends ElementBase {
     if (!trigger) return;
     this._teardownPortal();
     this._portalEl = this._buildPortalContent();
-    const cleanup = showPortalFor(trigger, this._portalEl, { placement: 'bottom', shift: true });
-    this._cleanup = typeof cleanup === 'function' ? cleanup : undefined;
+    const root = createPortalContainer();
+    if (!root) return;
+    root.appendChild(this._portalEl);
+
+    this._positioner = createPositioner({
+      anchor: trigger,
+      floating: this._portalEl,
+      placement: 'bottom',
+      shift: true,
+      flip: true,
+      arrow: this._portalEl.querySelector('.arrow') as HTMLElement | null
+    });
+
+    if (this._panelEl) {
+      this._layer = createDismissableLayer({
+        node: this._panelEl,
+        trigger,
+        closeOnEscape: true,
+        closeOnPointerOutside: true,
+        onDismiss: () => this.close()
+      });
+    }
   }
 
   private _syncOpenState(): void {
     const nowOpen = this.hasAttribute('open');
     if (nowOpen === this._isOpen) {
       if (nowOpen) {
-        this._bindGlobalListeners();
         if (!this._portalEl || !this._portalEl.isConnected) {
           this._mountPortal();
+        } else {
+          this._positioner?.update();
         }
-      } else {
-        this._unbindGlobalListeners();
       }
       return;
     }
 
     this._isOpen = nowOpen;
     if (nowOpen) {
-      this._bindGlobalListeners();
       this._restoreFocusEl = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       this._mountPortal();
       this.dispatchEvent(new CustomEvent('open', { bubbles: true, composed: true }));
       return;
     }
-    this._unbindGlobalListeners();
     this._teardownPortal();
     this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
 

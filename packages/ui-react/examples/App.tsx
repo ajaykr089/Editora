@@ -85,29 +85,49 @@ function QuickStartCard() {
 
 function ContextMenuCard() {
   const [state, setState] = React.useState<{ open: boolean; point?: { x: number; y: number } }>({ open: false });
+  const [lastAction, setLastAction] = React.useState('None');
   return (
     <section style={card}>
       <h2 style={{ margin: '0 0 10px', fontSize: 16 }}>Context Menu</h2>
       <div
-        style={{ border: '1px dashed #94a3b8', borderRadius: 10, padding: 18, background: '#f8fafc' }}
+        style={{
+          border: '1px dashed #94a3b8',
+          borderRadius: 14,
+          padding: 20,
+          background: 'linear-gradient(155deg, #f8fafc 0%, #eef2ff 100%)',
+          color: '#334155'
+        }}
         onContextMenu={(e) => {
           e.preventDefault();
           setState({ open: true, point: { x: e.clientX, y: e.clientY } });
         }}
       >
-        Right-click in this box
+        <div style={{ fontWeight: 700, marginBottom: 6, color: '#0f172a' }}>Right-click in this box</div>
+        <div style={{ fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
+          Opens the point-based context menu with a production-style controlled close path.
+        </div>
       </div>
 
-      <ContextMenu open={state.open} anchorPoint={state.point}>
+      <div style={{ marginTop: 10, fontSize: 12, color: '#64748b' }}>Last action: {lastAction}</div>
+
+      <ContextMenu
+        open={state.open}
+        anchorPoint={state.point}
+        onClose={() => setState((current) => ({ ...current, open: false }))}
+        onSelect={(detail) => {
+          setLastAction(detail.label || detail.value || 'Unknown');
+          setState((current) => ({ ...current, open: false }));
+        }}
+      >
         <div slot="menu">
-          <div className="menuitem" role="menuitem" tabIndex={0}>
+          <div className="menuitem" role="menuitem" tabIndex={0} data-value="rename">
             Rename
           </div>
-          <div className="menuitem" role="menuitem" tabIndex={0}>
+          <div className="menuitem" role="menuitem" tabIndex={0} data-value="duplicate">
             Duplicate
           </div>
           <div className="separator" role="separator" />
-          <div className="menuitem" role="menuitem" tabIndex={-1} aria-disabled="true">
+          <div className="menuitem" role="menuitem" tabIndex={-1} aria-disabled="true" data-value="delete">
             Delete (disabled)
           </div>
         </div>

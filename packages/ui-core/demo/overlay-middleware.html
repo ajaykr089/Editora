@@ -1,46 +1,265 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Overlay middleware demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Overlay and Context Menu Demo</title>
   <style>
-    body { font-family: system-ui, Arial; padding: 32px; }
-    .btn { padding: 8px 12px; border-radius: 6px; border: 1px solid #e3e6ea; background: #fff; cursor: pointer; }
-    .demo-wrap { display: flex; gap: 16px; align-items: center; }
-    .panel { background: white; border: 1px solid rgba(0,0,0,0.08); padding: 8px 12px; border-radius: 6px; box-shadow: 0 8px 36px rgba(0,0,0,0.08); }
-    .arrow { width: 12px; height: 12px; background: white; transform: rotate(45deg); position: absolute; top: -6px; left: 50%; margin-left: -6px; box-shadow: -2px -2px 6px rgba(0,0,0,0.06); transition: left 220ms cubic-bezier(.2,.9,.2,1); }
+    :root {
+      color-scheme: light dark;
+      --page-bg: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+      --surface: rgba(255, 255, 255, 0.88);
+      --surface-strong: #ffffff;
+      --border: rgba(148, 163, 184, 0.32);
+      --text: #0f172a;
+      --muted: #64748b;
+      --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+      --accent: #2563eb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 32px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--page-bg);
+      color: var(--text);
+    }
+
+    .shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      gap: 24px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 12px;
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at top right, rgba(37, 99, 235, 0.12), transparent 28%),
+        var(--surface);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .eyebrow {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 40px;
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      max-width: 720px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      display: grid;
+      gap: 16px;
+      padding: 20px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface-strong);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.34);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      color: var(--text);
+      font: 600 14px/1 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      cursor: pointer;
+    }
+
+    .canvas {
+      min-height: 240px;
+      padding: 24px;
+      border-radius: 18px;
+      border: 1px dashed rgba(148, 163, 184, 0.52);
+      background:
+        linear-gradient(155deg, rgba(248, 250, 252, 1) 0%, rgba(238, 242, 255, 0.92) 48%, rgba(239, 246, 255, 0.86) 100%);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .canvas strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text);
+      font-size: 16px;
+    }
+
+    .metrics {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .metric {
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.08);
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+    }
   </style>
 </head>
 <body>
-  <h1>Overlay middleware demo</h1>
-  <div class="demo-wrap">
-    <ui-popover id="demoPopover">
-      <button slot="trigger" class="btn">Open popover</button>
-      <div slot="content">Popover body — arrow & shift demo</div>
-    </ui-popover>
-
-    <ui-dropdown id="demoDropdown">
-      <button slot="trigger" class="btn">Open dropdown</button>
-      <div slot="content">
-        <div class="item" role="menuitem">First</div>
-        <div class="item" role="menuitem">Second</div>
-        <div class="item" role="menuitem">Third</div>
+  <div class="shell">
+    <section class="hero">
+      <div class="eyebrow">UI Core Demo</div>
+      <h1>Overlay runtime with a lean context menu path</h1>
+      <div class="subtitle">
+        This demo keeps the context-menu experience intentionally simple: point invocation, anchored invocation, and stable menu selection
+        without extra middleware work.
       </div>
-    </ui-dropdown>
+      <div class="metrics">
+        <div class="metric">Right click</div>
+        <div class="metric">Keyboard nav</div>
+        <div class="metric">Anchor follow</div>
+      </div>
+    </section>
 
-    <div style="position:relative;">
-      <button id="ctxBtn" class="btn">Right-click me</button>
-      <ui-context-menu id="demoCtxMenu">
-        <div slot="content"><div class="panel">Context Menu Item</div></div>
-      </ui-context-menu>
-    </div>
+    <section class="grid">
+      <article class="card">
+        <h2>Popover</h2>
+        <p>Standard anchored overlay with a quiet visual treatment.</p>
+        <ui-popover id="demoPopover">
+          <button slot="trigger" class="btn">Open popover</button>
+          <div slot="content">Popover body with a lightweight, production-style surface.</div>
+        </ui-popover>
+      </article>
+
+      <article class="card">
+        <h2>Dropdown</h2>
+        <p>Menu-style actions mounted from a trigger surface.</p>
+        <ui-dropdown id="demoDropdown">
+          <button slot="trigger" class="btn">Open dropdown</button>
+          <div slot="content">
+            <div class="item" role="menuitem">Create snapshot</div>
+            <div class="item" role="menuitem">Export log</div>
+            <div class="item" role="menuitem">Archive signal</div>
+          </div>
+        </ui-dropdown>
+      </article>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Point Menu</h2>
+        <p>Right-click the canvas to open the context menu at the pointer position.</p>
+        <div id="contextArea" class="canvas">
+          <div>
+            <strong>Incident workspace</strong>
+            Open the point-based menu here to validate responsiveness and keyboard behavior.
+          </div>
+        </div>
+        <div class="hint">The menu closes on outside pointerdown, Escape, and after item selection.</div>
+        <ui-context-menu id="pointMenu">
+          <div slot="menu">
+            <div class="menuitem" role="menuitem" tabindex="0" data-value="inspect">Inspect signal</div>
+            <div class="menuitem" role="menuitem" tabindex="0" data-value="replay">Replay workflow</div>
+            <div class="separator" role="separator"></div>
+            <div class="menuitem" role="menuitem" tabindex="-1" aria-disabled="true">Delete incident</div>
+          </div>
+        </ui-context-menu>
+      </article>
+
+      <article class="card">
+        <h2>Anchor Menu</h2>
+        <p>Open the same menu from a stable anchor without forcing it open at page load.</p>
+        <button id="anchorBtn" class="btn">Open anchored menu</button>
+        <div class="hint">This path exercises anchored positioning only when requested.</div>
+        <ui-context-menu id="anchorMenu">
+          <div slot="menu">
+            <div class="menuitem" role="menuitemcheckbox" aria-checked="true" tabindex="0">
+              <span class="icon selection-icon" aria-hidden="true"></span>
+              <span class="label"><span class="text">Show health overlays</span><span class="caption">Surface system signals</span></span>
+            </div>
+            <div class="menuitem" role="menuitemradio" data-group="density" aria-checked="true" tabindex="0">
+              <span class="icon selection-icon" aria-hidden="true"></span>
+              <span class="label"><span class="text">Comfortable density</span><span class="caption">Balanced workspace spacing</span></span>
+            </div>
+            <div class="menuitem" role="menuitemradio" data-group="density" aria-checked="false" tabindex="0">
+              <span class="icon selection-icon" aria-hidden="true"></span>
+              <span class="label"><span class="text">Compact density</span><span class="caption">Information-dense view</span></span>
+            </div>
+          </div>
+        </ui-context-menu>
+      </article>
+    </section>
   </div>
 
   <script>
-    document.getElementById('ctxBtn').addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-      const cm = document.getElementById('demoCtxMenu');
-      cm && cm.openAt && cm.openAt(e.clientX, e.clientY);
+    const pointMenu = document.getElementById('pointMenu');
+    const anchorMenu = document.getElementById('anchorMenu');
+    const contextArea = document.getElementById('contextArea');
+    const anchorBtn = document.getElementById('anchorBtn');
+
+    contextArea.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+      if (pointMenu && typeof pointMenu.openAt === 'function') {
+        pointMenu.openAt(event.clientX, event.clientY);
+      }
+    });
+
+    anchorBtn.addEventListener('click', () => {
+      if (!anchorMenu || typeof anchorMenu.openForAnchor !== 'function') return;
+      anchorMenu.openForAnchor(anchorBtn);
     });
   </script>
 </body>

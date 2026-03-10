@@ -54,7 +54,7 @@ Then use components directly:
 ## Component Catalog
 
 ### Primitives and forms
-- `ui-button`, `ui-input`, `ui-textarea`, `ui-label`, `ui-field`, `ui-form`
+- `ui-button`, `ui-split-button`, `ui-input`, `ui-textarea`, `ui-label`, `ui-description`, `ui-field-error`, `ui-control-group`, `ui-fieldset`, `ui-field`, `ui-form`, `ui-pin-input`, `ui-otp-input`, `ui-inline-edit`
 - `ui-checkbox`, `ui-radio-group`, `ui-switch`, `ui-slider`, `ui-select`, `ui-combobox`
 - `ui-date-picker`, `ui-date-range-picker`, `ui-time-picker`, `ui-date-time-picker`, `ui-date-range-time-picker`
 - `ui-color-picker`
@@ -66,11 +66,11 @@ Then use components directly:
 
 ### Overlays and interactions
 - `ui-dialog`, `ui-alert-dialog`, `ui-popover`, `ui-dropdown`, `ui-menu`, `ui-context-menu`, `ui-tooltip`, `ui-hover-card`
-- `ui-command-palette`, `ui-quick-actions`, `ui-selection-popup`, `ui-plugin-panel`, `ui-floating-toolbar`, `ui-toolbar`
+- `ui-command`, `ui-command-palette`, `ui-quick-actions`, `ui-selection-popup`, `ui-plugin-panel`, `ui-floating-toolbar`, `ui-toolbar`
 - `ui-portal`, `ui-presence`, `ui-slot`, `ui-visually-hidden`
 
 ### Data and display
-- `ui-table`, `ui-data-table`, `ui-pagination`, `ui-empty-state`, `ui-skeleton`, `ui-alert`, `ui-badge`
+- `ui-table`, `ui-data-table`, `ui-pagination`, `ui-empty-state`, `ui-skeleton`, `ui-alert`, `ui-badge`, `ui-transfer-list`
 - `ui-chart`, `ui-timeline`, `ui-gantt`, `ui-calendar`, `ui-progress`, `ui-scroll-area`, `ui-separator`
 - `ui-accordion`, `ui-collapsible`, `ui-stepper`, `ui-wizard`, `ui-avatar`, `ui-aspect-ratio`, `ui-block-controls`, `ui-icon`
 
@@ -194,6 +194,12 @@ applyTheme({
   radius: '10px'
 });
 ```
+
+## Docs
+
+- `docs/ATTRIBUTE_RENDER_MATRIX.md` for component render strategy coverage
+- `docs/PRIMITIVE_GAP_MATRIX.md` for the missing primitive roadmap
+- `docs/PRIMITIVE_IMPLEMENTATION_PLAN.md` for proposed APIs and rollout order
 
 ## Developer Notes
 

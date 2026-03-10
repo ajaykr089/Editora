@@ -6,9 +6,10 @@ function flushMicrotask() {
 }
 
 describe('ui-field shell + accessibility behavior', () => {
-  it('keeps control-shell visuals disabled by default', () => {
+  it('keeps control-shell visuals disabled by default', async () => {
     const el = document.createElement('ui-field');
     document.body.appendChild(el);
+    await flushMicrotask();
 
     const css = (el.shadowRoot?.querySelector('style') as HTMLStyleElement | null)?.textContent || '';
     expect(css).toContain('padding: var(--ui-field-shell-padding, 0px);');
@@ -43,6 +44,7 @@ describe('ui-field shell + accessibility behavior', () => {
     expect(input?.hasAttribute('aria-labelledby')).toBe(false);
 
     el.setAttribute('label', 'Patient name');
+    await flushMicrotask();
     await flushMicrotask();
 
     const labelledBy = input?.getAttribute('aria-labelledby') || '';

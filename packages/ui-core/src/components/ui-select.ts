@@ -1,5 +1,11 @@
 import { ElementBase } from '../ElementBase';
-import { showPortalFor } from '../portal';
+import { createPortalContainer } from '../portal';
+import { findFirstEnabledIndex, findIndexByValue, findLastEnabledIndex } from '../primitives/collection';
+import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
+import { resolveListboxActiveIndex } from '../primitives/listbox';
+import { createPositioner, type PositionerHandle } from '../primitives/positioner';
+import './ui-listbox';
+import { UIListbox } from './ui-listbox';
 
 const style = `
   :host {
@@ -696,7 +702,8 @@ export class UISelect extends ElementBase {
 
   // names intentionally match ElementBase teardown helpers
   private _portalEl: HTMLElement | null = null;
-  private _cleanup: (() => void) | null = null;
+  private _positioner: PositionerHandle | null = null;
+  private _dismissableLayer: DismissableLayerHandle | null = null;
 
   private _uid = Math.random().toString(36).slice(2, 8);
   private _open = false;
@@ -713,8 +720,6 @@ export class UISelect extends ElementBase {
     this._onFocusIn = this._onFocusIn.bind(this);
     this._onFocusOut = this._onFocusOut.bind(this);
     this._onSlotChange = this._onSlotChange.bind(this);
-    this._onDocumentPointerDown = this._onDocumentPointerDown.bind(this);
-    this._onDocumentKeyDown = this._onDocumentKeyDown.bind(this);
     this._onDocumentScroll = this._onDocumentScroll.bind(this);
   }
 
@@ -911,27 +916,11 @@ export class UISelect extends ElementBase {
     this.requestRender();
   }
 
-  private _onDocumentPointerDown(event: PointerEvent): void {
-    if (!this._open) return;
-    const path = event.composedPath();
-    if (path.includes(this)) return;
-    if (this._portalEl && path.includes(this._portalEl)) return;
-    this._closeMenu('outside');
-  }
-
   private _onDocumentScroll(event: Event): void {
     if (!this._open || !this.closeOnScroll) return;
     const path = typeof (event as any).composedPath === 'function' ? (event as any).composedPath() : [];
     if (this._portalEl && path.includes(this._portalEl)) return;
     this._closeMenu('outside');
-  }
-
-  private _onDocumentKeyDown(event: KeyboardEvent): void {
-    if (!this._open) return;
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      this._closeMenu('escape');
-    }
   }
 
   private _emitValue(eventName: 'input' | 'change', nextValue: string): void {
@@ -1053,34 +1042,19 @@ export class UISelect extends ElementBase {
   }
 
   private _firstEnabledIndex(): number {
-    return this._options.findIndex((opt) => !opt.disabled);
+    return findFirstEnabledIndex(this._options, (option) => option.disabled);
   }
 
   private _lastEnabledIndex(): number {
-    for (let i = this._options.length - 1; i >= 0; i -= 1) {
-      if (!this._options[i]?.disabled) return i;
-    }
-    return -1;
+    return findLastEnabledIndex(this._options, (option) => option.disabled);
   }
 
   private _selectedIndex(): number {
-    const current = this.value;
-    return this._options.findIndex((opt) => opt.value === current);
+    return findIndexByValue(this._options, this.value, (option) => option.value);
   }
 
-  private _nextEnabledFrom(from: number, step: 1 | -1): number {
-    if (!this._options.length) return -1;
-
-    let cursor = from;
-    for (let i = 0; i < this._options.length; i += 1) {
-      cursor += step;
-      if (cursor < 0) cursor = this._options.length - 1;
-      if (cursor >= this._options.length) cursor = 0;
-      const option = this._options[cursor];
-      if (option && !option.disabled) return cursor;
-    }
-
-    return -1;
+  private _listbox(): UIListbox | null {
+    return this._portalEl instanceof UIListbox ? this._portalEl : null;
   }
 
   private _setActiveIndex(index: number): void {
@@ -1094,20 +1068,29 @@ export class UISelect extends ElementBase {
 
     const activeItem = index >= 0 ? this._menuItems[index] : null;
     if (activeItem) {
-      activeItem.setAttribute('data-active', 'true');
-      activeItem.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-      this._trigger?.setAttribute('aria-activedescendant', activeItem.id);
+      this._listbox()?.setActiveItem(activeItem, {
+        focus: false,
+        owner: this._trigger,
+        scroll: true
+      });
     } else {
-      this._trigger?.removeAttribute('aria-activedescendant');
+      this._listbox()?.clearActive();
+      if (this._trigger) this._trigger.removeAttribute('aria-activedescendant');
     }
   }
 
   private _moveActive(step: 1 | -1): void {
     if (!this._options.length) return;
-
-    const start = this._activeIndex >= 0 ? this._activeIndex : this._selectedIndex();
-    const next = this._nextEnabledFrom(start >= 0 ? start : step < 0 ? 0 : -1, step);
-    if (next >= 0) this._setActiveIndex(next);
+    const current = this._activeIndex >= 0 ? this._menuItems[this._activeIndex] : null;
+    const moved = this._listbox()?.move(step, {
+      current,
+      focus: false,
+      owner: this._trigger,
+      scroll: true
+    }) || null;
+    if (!moved) return;
+    const next = Number((moved as HTMLButtonElement).dataset.index || '-1');
+    if (next >= 0) this._activeIndex = next;
   }
 
   private _selectActiveOption(): void {
@@ -1208,10 +1191,13 @@ export class UISelect extends ElementBase {
   }
 
   private _buildPortalContent(): HTMLElement {
-    const menu = document.createElement('div');
+    const menu = document.createElement('ui-listbox') as UIListbox;
     menu.className = 'menu';
     menu.id = `${this._uid}-listbox`;
     menu.setAttribute('role', 'listbox');
+    menu.setAttribute('item-selector', '.menu-item[data-index]');
+    menu.setAttribute('item-role', 'option');
+    menu.setAttribute('active-attribute', 'data-active');
     this._menuItems = [];
 
     const styleEl = document.createElement('style');
@@ -1265,6 +1251,8 @@ export class UISelect extends ElementBase {
       this._menuItems.push(item);
     });
 
+    menu.refresh();
+
     menu.addEventListener('click', (event) => {
       const target = event.target as HTMLElement | null;
       const item = target?.closest('.menu-item[data-index]') as HTMLButtonElement | null;
@@ -1311,8 +1299,12 @@ export class UISelect extends ElementBase {
       item.setAttribute('aria-selected', isSelected ? 'true' : 'false');
     });
 
-    if (selectedIndex >= 0) this._setActiveIndex(selectedIndex);
-    else this._setActiveIndex(this._firstEnabledIndex());
+    this._setActiveIndex(
+      resolveListboxActiveIndex(this._options, {
+        selectedIndex,
+        getDisabled: (option) => option.disabled
+      })
+    );
   }
 
   private _syncPortalVisualState(): void {
@@ -1324,6 +1316,7 @@ export class UISelect extends ElementBase {
     const anchor = this._control || trigger;
     const anchorWidth = Math.round(anchor.getBoundingClientRect().width);
     menu.style.width = `${Math.max(anchorWidth, 180)}px`;
+    this._positioner?.update();
   }
 
   private _openMenu(): void {
@@ -1342,19 +1335,40 @@ export class UISelect extends ElementBase {
 
     const anchorWidth = Math.round(anchor.getBoundingClientRect().width);
     menu.style.width = `${Math.max(anchorWidth, 180)}px`;
+    const root = createPortalContainer();
+    if (!root) {
+      this._portalEl = null;
+      return;
+    }
+    root.appendChild(menu);
 
-    const cleanup = showPortalFor(anchor, menu, {
+    this._positioner = createPositioner({
+      anchor,
+      floating: menu,
       placement: 'bottom',
       offset: 6,
       flip: true,
-      shift: true
+      shift: true,
+      fitViewport: true,
+      observeScroll: false
     });
-
-    this._cleanup = typeof cleanup === 'function' ? cleanup : null;
+    this._dismissableLayer = createDismissableLayer({
+      node: menu,
+      trigger: anchor,
+      closeOnEscape: true,
+      closeOnPointerOutside: true,
+      onDismiss: (reason) => {
+        if (reason === 'outside-pointer') {
+          this._closeMenu('outside');
+          return;
+        }
+        if (reason === 'escape-key') {
+          this._closeMenu('escape');
+        }
+      }
+    });
     this._open = true;
 
-    window.addEventListener('pointerdown', this._onDocumentPointerDown, true);
-    window.addEventListener('keydown', this._onDocumentKeyDown, true);
     window.addEventListener('scroll', this._onDocumentScroll, true);
 
     this._syncPortalSelectionState();
@@ -1362,27 +1376,22 @@ export class UISelect extends ElementBase {
   }
 
   private _closeMenu(_reason: CloseReason): void {
-    if (!this._open && !this._portalEl && !this._cleanup) return;
+    if (!this._open && !this._portalEl && !this._positioner && !this._dismissableLayer) return;
 
     if (this._rebuildRaf) {
       cancelAnimationFrame(this._rebuildRaf);
       this._rebuildRaf = 0;
     }
 
-    window.removeEventListener('pointerdown', this._onDocumentPointerDown, true);
-    window.removeEventListener('keydown', this._onDocumentKeyDown, true);
     window.removeEventListener('scroll', this._onDocumentScroll, true);
 
     this._open = false;
+    this._dismissableLayer?.destroy();
+    this._dismissableLayer = null;
+    this._positioner?.destroy();
+    this._positioner = null;
 
-    if (this._cleanup) {
-      try {
-        this._cleanup();
-      } catch {
-        // no-op
-      }
-      this._cleanup = null;
-    } else if (this._portalEl?.parentElement) {
+    if (this._portalEl?.parentElement) {
       try {
         this._portalEl.parentElement.removeChild(this._portalEl);
       } catch {

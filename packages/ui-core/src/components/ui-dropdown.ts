@@ -1,5 +1,8 @@
 import { ElementBase } from '../ElementBase';
-import { showPortalFor } from '../portal';
+import { createPortalContainer } from '../portal';
+import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
+import { createPositioner, type PositionerHandle } from '../primitives/positioner';
+import { UIListbox } from './ui-listbox';
 
 type DropdownPlacement = 'top' | 'bottom' | 'left' | 'right';
 type DropdownCloseReason = 'outside' | 'escape' | 'select' | 'trigger' | 'tab' | 'programmatic' | 'disabled';
@@ -530,8 +533,9 @@ export class UIDropdown extends ElementBase {
   private static _openStack: UIDropdown[] = [];
 
   private _isOpen = false;
-  private _cleanup: (() => void) | null = null;
   private _portalEl: HTMLElement | null = null;
+  private _positioner: PositionerHandle | null = null;
+  private _dismissableLayer: DismissableLayerHandle | null = null;
   private _menuId: string;
   private _triggerId: string;
   private _restoreFocusEl: HTMLElement | null = null;
@@ -545,7 +549,6 @@ export class UIDropdown extends ElementBase {
     this._menuId = `ui-dropdown-menu-${Math.random().toString(36).slice(2, 10)}`;
     this._triggerId = `ui-dropdown-trigger-${Math.random().toString(36).slice(2, 10)}`;
     this._onHostClick = this._onHostClick.bind(this);
-    this._onDocumentPointerDown = this._onDocumentPointerDown.bind(this);
     this._onDocumentKeyDown = this._onDocumentKeyDown.bind(this);
     this._onDocumentScroll = this._onDocumentScroll.bind(this);
   }
@@ -656,6 +659,10 @@ export class UIDropdown extends ElementBase {
     return this.querySelector('[slot="content"]') as HTMLElement | null;
   }
 
+  private _listbox(): UIListbox | null {
+    return this._portalEl instanceof UIListbox ? this._portalEl : null;
+  }
+
   private _isFocusable(node: HTMLElement): boolean {
     if (!node || !node.isConnected) return false;
     if ((node as HTMLButtonElement).disabled) return false;
@@ -739,6 +746,7 @@ export class UIDropdown extends ElementBase {
         this._pushToStack();
         this._bindGlobalListeners();
         if (!this._portalEl) this._rebuildPortal(false);
+        else this._positioner?.update();
       } else {
         this._unbindGlobalListeners();
       }
@@ -814,7 +822,6 @@ export class UIDropdown extends ElementBase {
 
   private _bindGlobalListeners(): void {
     if (this._globalListenersBound) return;
-    document.addEventListener('pointerdown', this._onDocumentPointerDown, true);
     document.addEventListener('keydown', this._onDocumentKeyDown, true);
     document.addEventListener('scroll', this._onDocumentScroll, true);
     this._globalListenersBound = true;
@@ -822,20 +829,22 @@ export class UIDropdown extends ElementBase {
 
   private _unbindGlobalListeners(): void {
     if (!this._globalListenersBound) return;
-    document.removeEventListener('pointerdown', this._onDocumentPointerDown, true);
     document.removeEventListener('keydown', this._onDocumentKeyDown, true);
     document.removeEventListener('scroll', this._onDocumentScroll, true);
     this._globalListenersBound = false;
   }
 
   private _syncMenuItemSemantics(menu: HTMLElement): void {
+    if (menu instanceof UIListbox) {
+      menu.refresh();
+      return;
+    }
+
     const items = Array.from(menu.querySelectorAll<DropdownItem>(menuItemSelector()));
     items.forEach((item) => {
       if (!item.getAttribute('role')) item.setAttribute('role', 'menuitem');
       if (!item.hasAttribute('tabindex')) item.setAttribute('tabindex', '-1');
-      if (item.hasAttribute('disabled') && item.getAttribute('aria-disabled') !== 'true') {
-        item.setAttribute('aria-disabled', 'true');
-      }
+      if (item.hasAttribute('disabled') && item.getAttribute('aria-disabled') !== 'true') item.setAttribute('aria-disabled', 'true');
       if ((item.getAttribute('role') === 'menuitemcheckbox' || item.getAttribute('role') === 'menuitemradio') && !item.hasAttribute('aria-checked')) {
         item.setAttribute('aria-checked', 'false');
       }
@@ -843,13 +852,16 @@ export class UIDropdown extends ElementBase {
   }
 
   private _buildPortalContent(): HTMLElement {
-    const menu = document.createElement('div');
+    const menu = document.createElement('ui-listbox') as UIListbox;
     menu.className = 'menu';
     menu.id = this._menuId;
     menu.setAttribute('role', 'menu');
     menu.setAttribute('aria-orientation', 'vertical');
     menu.setAttribute('tabindex', '-1');
     menu.setAttribute('data-state', 'open');
+    menu.setAttribute('item-selector', menuItemSelector());
+    menu.setAttribute('item-role', 'menuitem');
+    menu.setAttribute('active-attribute', 'data-active');
 
     this._applyPortalVariantData(menu);
     this._applyPortalTokens(menu);
@@ -977,37 +989,58 @@ export class UIDropdown extends ElementBase {
 
     const content = this._buildPortalContent();
     this._portalEl = content;
+    const root = createPortalContainer();
+    if (!root) {
+      this._portalEl = null;
+      return;
+    }
+    root.appendChild(content);
 
-    const cleanup = showPortalFor(trigger, content, {
+    this._positioner = createPositioner({
+      anchor: trigger,
+      floating: content,
       placement: normalizePlacement(this.getAttribute('placement')),
       offset: 6,
       flip: true,
-      shift: true
+      shift: true,
+      fitViewport: true,
+      observeScroll: false
     });
 
-    this._cleanup = typeof cleanup === 'function' ? cleanup : null;
+    this._dismissableLayer = createDismissableLayer({
+      node: content,
+      trigger,
+      closeOnEscape: true,
+      closeOnPointerOutside: true,
+      onDismiss: (reason) => {
+        if (reason === 'outside-pointer') {
+          this._requestClose('outside');
+          return;
+        }
+        if (reason === 'escape-key') {
+          this._requestClose('escape');
+        }
+      }
+    });
   }
 
   private _canAnimateClose(): boolean {
     if (!isBrowser()) return false;
+    if (typeof window.matchMedia !== 'function') return false;
     return !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
   private _teardownPortal(animateClose: boolean): void {
     const menu = this._portalEl;
-    const cleanup = this._cleanup;
+    this._dismissableLayer?.destroy();
+    this._dismissableLayer = null;
+    this._positioner?.destroy();
+    this._positioner = null;
 
     this._portalEl = null;
-    this._cleanup = null;
 
     const finalize = () => {
-      if (cleanup) {
-        try {
-          cleanup();
-        } catch {
-          // no-op
-        }
-      } else if (menu && menu.parentElement) {
+      if (menu && menu.parentElement) {
         try {
           menu.parentElement.removeChild(menu);
         } catch {
@@ -1051,63 +1084,43 @@ export class UIDropdown extends ElementBase {
   }
 
   private _queryItems(): DropdownItem[] {
-    const menu = this._portalEl;
+    const menu = this._listbox();
     if (!menu) return [];
-    return Array.from(menu.querySelectorAll<DropdownItem>(menuItemSelector())).filter((item) => {
-      if (item.getClientRects().length === 0) return false;
-      return !isDisabledItem(item);
-    });
+    return menu.queryEnabledItems() as DropdownItem[];
   }
 
   private _focusItem(item: DropdownItem | null): void {
     if (!item) return;
-    const items = this._queryItems();
-    items.forEach((node) => {
-      node.setAttribute('tabindex', node === item ? '0' : '-1');
-      if (node === item) node.setAttribute('data-active', 'true');
-      else node.removeAttribute('data-active');
-    });
-
-    try {
-      item.focus({ preventScroll: true });
-    } catch {
-      item.focus();
-    }
+    this._listbox()?.setActiveItem(item, { focus: true, owner: this._portalEl, scroll: true });
   }
 
   private _focusFirstItem(): void {
-    const items = this._queryItems();
-    if (items.length === 0) {
+    const first = this._listbox()?.focusBoundary('first', { focus: true, owner: this._portalEl, scroll: true }) || null;
+    if (!first) {
       this._focusMenu();
       return;
     }
-
-    this._focusItem(items[0]);
   }
 
   private _focusLastItem(): void {
-    const items = this._queryItems();
-    if (items.length === 0) {
+    const last = this._listbox()?.focusBoundary('last', { focus: true, owner: this._portalEl, scroll: true }) || null;
+    if (!last) {
       this._focusMenu();
       return;
     }
-
-    this._focusItem(items[items.length - 1]);
   }
 
   private _moveFocus(step: 1 | -1): void {
-    const items = this._queryItems();
-    if (!items.length) return;
-
     const active = document.activeElement as HTMLElement | null;
-    const index = active ? items.indexOf(active as DropdownItem) : -1;
-    if (index < 0) {
+    const moved = this._listbox()?.move(step, {
+      current: active && this._portalEl?.contains(active) ? active : null,
+      focus: true,
+      owner: this._portalEl,
+      scroll: true
+    }) || null;
+    if (!moved) {
       this._focusFirstItem();
-      return;
     }
-
-    const next = (index + step + items.length) % items.length;
-    this._focusItem(items[next]);
   }
 
   private _resetTypeahead(): void {
@@ -1127,9 +1140,6 @@ export class UIDropdown extends ElementBase {
     if (!this.typeahead) return false;
     if (!this._isTypeaheadKey(event)) return false;
 
-    const items = this._queryItems();
-    if (!items.length) return false;
-
     const key = event.key.toLowerCase();
     this._typeaheadBuffer = `${this._typeaheadBuffer}${key}`.slice(0, 24);
     if (this._typeaheadTimer != null) {
@@ -1138,23 +1148,15 @@ export class UIDropdown extends ElementBase {
     this._typeaheadTimer = window.setTimeout(() => this._resetTypeahead(), 460);
 
     const active = document.activeElement as HTMLElement | null;
-    const activeIndex = active ? items.indexOf(active as DropdownItem) : -1;
-
-    const findFrom = (start: number): DropdownItem | undefined => {
-      for (let offset = 1; offset <= items.length; offset += 1) {
-        const index = (start + offset + items.length) % items.length;
-        const candidate = items[index];
-        const text = (candidate.getAttribute('aria-label') || candidate.textContent || '').trim().toLowerCase();
-        if (text.startsWith(this._typeaheadBuffer)) return candidate;
-      }
-      return undefined;
-    };
-
-    const matched = findFrom(activeIndex);
+    const matched = this._listbox()?.typeahead(this._typeaheadBuffer, {
+      current: active && this._portalEl?.contains(active) ? active : null,
+      focus: true,
+      owner: this._portalEl,
+      scroll: true
+    }) || null;
     if (!matched) return false;
 
     event.preventDefault();
-    this._focusItem(matched);
     return true;
   }
 
@@ -1206,16 +1208,6 @@ export class UIDropdown extends ElementBase {
     this.open();
   }
 
-  private _onDocumentPointerDown(event: PointerEvent): void {
-    if (!this._isOpen || !this._isTopMost()) return;
-
-    const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
-    if (path.includes(this)) return;
-    if (this._portalEl && path.includes(this._portalEl)) return;
-
-    this._requestClose('outside');
-  }
-
   private _onDocumentScroll(event: Event): void {
     if (!this._isOpen || !this._isTopMost() || !this.closeOnScroll) return;
     const path = typeof (event as any).composedPath === 'function' ? (event as any).composedPath() : [];
@@ -1239,13 +1231,6 @@ export class UIDropdown extends ElementBase {
 
     if (!this._isTopMost()) return;
     if (this._handleTypeahead(event)) return;
-
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      event.stopPropagation();
-      this._requestClose('escape');
-      return;
-    }
 
     if (event.key === 'ArrowDown') {
       event.preventDefault();
@@ -1301,6 +1286,8 @@ export class UIDropdown extends ElementBase {
     this._syncTriggerA11y();
     if (this._isOpen && !this._portalEl) {
       this._rebuildPortal(false);
+    } else if (this._isOpen) {
+      this._positioner?.update();
     }
   }
 

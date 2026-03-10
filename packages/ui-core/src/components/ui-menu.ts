@@ -1,5 +1,9 @@
 import { ElementBase } from '../ElementBase';
-import { showPortalFor } from '../portal';
+import { createPortalContainer } from '../portal';
+import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
+import { createPositioner, type PositionerHandle } from '../primitives/positioner';
+import './ui-listbox';
+import { UIListbox } from './ui-listbox';
 
 type MenuPlacement = 'top' | 'bottom' | 'left' | 'right';
 type MenuItem = HTMLElement & { disabled?: boolean };
@@ -483,8 +487,9 @@ export class UIMenu extends ElementBase {
   }
 
   private _isOpen = false;
-  private _cleanup: (() => void) | null = null;
   private _portalEl: HTMLElement | null = null;
+  private _positioner: PositionerHandle | null = null;
+  private _dismissableLayer: DismissableLayerHandle | null = null;
   private _menuId: string;
   private _restoreFocusEl: HTMLElement | null = null;
   private _typeaheadBuffer = '';
@@ -495,7 +500,6 @@ export class UIMenu extends ElementBase {
     super();
     this._menuId = `ui-menu-${Math.random().toString(36).slice(2, 10)}`;
     this._onHostClick = this._onHostClick.bind(this);
-    this._onDocumentPointerDown = this._onDocumentPointerDown.bind(this);
     this._onDocumentKeyDown = this._onDocumentKeyDown.bind(this);
     this._onDocumentScroll = this._onDocumentScroll.bind(this);
     this._onSlotChange = this._onSlotChange.bind(this);
@@ -592,6 +596,10 @@ export class UIMenu extends ElementBase {
     return this.querySelector('[slot="content"]') as HTMLElement | null;
   }
 
+  private _listbox(): UIListbox | null {
+    return this._portalEl instanceof UIListbox ? this._portalEl : null;
+  }
+
   private _getItemSources(): HTMLElement[] {
     return Array.from(this.querySelectorAll('[slot="item"]')) as HTMLElement[];
   }
@@ -619,7 +627,8 @@ export class UIMenu extends ElementBase {
     if (nowOpen === this._isOpen) {
       if (nowOpen) this._bindGlobalListeners();
       else this._unbindGlobalListeners();
-      if (nowOpen) this._rebuildPortal();
+      if (nowOpen && !this._portalEl) this._rebuildPortal();
+      else if (nowOpen) this._positioner?.update();
       this._syncTriggerA11y();
       return;
     }
@@ -664,7 +673,6 @@ export class UIMenu extends ElementBase {
 
   private _bindGlobalListeners(): void {
     if (this._globalListenersBound) return;
-    document.addEventListener('pointerdown', this._onDocumentPointerDown, true);
     document.addEventListener('keydown', this._onDocumentKeyDown);
     document.addEventListener('scroll', this._onDocumentScroll, true);
     this._globalListenersBound = true;
@@ -672,7 +680,6 @@ export class UIMenu extends ElementBase {
 
   private _unbindGlobalListeners(): void {
     if (!this._globalListenersBound) return;
-    document.removeEventListener('pointerdown', this._onDocumentPointerDown, true);
     document.removeEventListener('keydown', this._onDocumentKeyDown);
     document.removeEventListener('scroll', this._onDocumentScroll, true);
     this._globalListenersBound = false;
@@ -704,11 +711,14 @@ export class UIMenu extends ElementBase {
   }
 
   private _buildPortalContent(): HTMLElement {
-    const menu = document.createElement('div');
+    const menu = document.createElement('ui-listbox') as UIListbox;
     menu.className = 'menu';
     menu.id = this._menuId;
     menu.setAttribute('role', 'menu');
     menu.setAttribute('tabindex', '-1');
+    menu.setAttribute('item-selector', itemSelector());
+    menu.setAttribute('item-role', 'menuitem');
+    menu.setAttribute('active-attribute', 'data-active');
 
     this._applyPortalVariantData(menu);
     this._applyPortalTokens(menu);
@@ -728,6 +738,7 @@ export class UIMenu extends ElementBase {
     }
 
     this._hydrateMenuItems(menu);
+    menu.refresh();
     itemCount = itemCount || menu.querySelectorAll(itemSelector()).length;
 
     if (itemCount === 0) {
@@ -816,24 +827,38 @@ export class UIMenu extends ElementBase {
 
     const panel = this._buildPortalContent();
     this._portalEl = panel;
-    const cleanup = showPortalFor(trigger, panel, {
+    const root = createPortalContainer();
+    if (!root) {
+      this._portalEl = null;
+      return;
+    }
+    root.appendChild(panel);
+
+    this._positioner = createPositioner({
+      anchor: trigger,
+      floating: panel,
       placement: normalizePlacement(this.getAttribute('placement')),
       offset: 6,
       flip: true,
-      shift: true
+      shift: true,
+      fitViewport: true,
+      observeScroll: false
     });
-    this._cleanup = typeof cleanup === 'function' ? cleanup : null;
+
+    this._dismissableLayer = createDismissableLayer({
+      node: panel,
+      trigger,
+      closeOnEscape: true,
+      closeOnPointerOutside: true,
+      onDismiss: () => this.close()
+    });
   }
 
   private _teardownPortal(): void {
-    if (this._cleanup) {
-      try {
-        this._cleanup();
-      } catch {
-        // no-op
-      }
-      this._cleanup = null;
-    }
+    this._dismissableLayer?.destroy();
+    this._dismissableLayer = null;
+    this._positioner?.destroy();
+    this._positioner = null;
 
     if (this._portalEl?.parentElement) {
       try {
@@ -857,55 +882,43 @@ export class UIMenu extends ElementBase {
   }
 
   private _queryItems(): MenuItem[] {
-    const menu = this._portalEl;
+    const menu = this._listbox();
     if (!menu) return [];
-    return Array.from(menu.querySelectorAll<MenuItem>(itemSelector())).filter((item) => {
-      if (item.getClientRects().length === 0) return false;
-      return !isDisabledItem(item);
-    });
+    return menu.queryEnabledItems() as MenuItem[];
   }
 
   private _focusItem(item: MenuItem | null): void {
     if (!item) return;
-    if (!item.hasAttribute('tabindex')) item.setAttribute('tabindex', '-1');
-    try {
-      item.focus({ preventScroll: true });
-    } catch {
-      item.focus();
-    }
+    this._listbox()?.setActiveItem(item, { focus: true, owner: this._portalEl, scroll: true });
   }
 
   private _focusFirstItem(): void {
-    const items = this._queryItems();
-    if (items.length === 0) {
+    const first = this._listbox()?.focusBoundary('first', { focus: true, owner: this._portalEl, scroll: true }) || null;
+    if (!first) {
       this._focusMenu();
       return;
     }
-    this._focusItem(items[0]);
   }
 
   private _focusLastItem(): void {
-    const items = this._queryItems();
-    if (items.length === 0) {
+    const last = this._listbox()?.focusBoundary('last', { focus: true, owner: this._portalEl, scroll: true }) || null;
+    if (!last) {
       this._focusMenu();
       return;
     }
-    this._focusItem(items[items.length - 1]);
   }
 
   private _moveFocus(step: 1 | -1): void {
-    const items = this._queryItems();
-    if (!items.length) return;
-
     const active = document.activeElement as HTMLElement | null;
-    const index = active ? items.indexOf(active as MenuItem) : -1;
-    if (index < 0) {
+    const moved = this._listbox()?.move(step, {
+      current: active && this._portalEl?.contains(active) ? active : null,
+      focus: true,
+      owner: this._portalEl,
+      scroll: true
+    }) || null;
+    if (!moved) {
       this._focusFirstItem();
-      return;
     }
-
-    const next = (index + step + items.length) % items.length;
-    this._focusItem(items[next]);
   }
 
   private _resetTypeahead(): void {
@@ -925,21 +938,20 @@ export class UIMenu extends ElementBase {
     if (!this.typeahead) return false;
     if (!this._isTypeaheadKey(event)) return false;
 
-    const items = this._queryItems();
-    if (!items.length) return false;
-
     this._typeaheadBuffer = `${this._typeaheadBuffer}${event.key.toLowerCase()}`.slice(0, 24);
     if (this._typeaheadTimer != null) window.clearTimeout(this._typeaheadTimer);
     this._typeaheadTimer = window.setTimeout(() => this._resetTypeahead(), 420);
 
-    const matched = items.find((item) => {
-      const text = (item.getAttribute('aria-label') || item.textContent || '').trim().toLowerCase();
-      return text.startsWith(this._typeaheadBuffer);
-    });
+    const active = document.activeElement as HTMLElement | null;
+    const matched = this._listbox()?.typeahead(this._typeaheadBuffer, {
+      current: active && this._portalEl?.contains(active) ? active : null,
+      focus: true,
+      owner: this._portalEl,
+      scroll: true
+    }) || null;
     if (!matched) return false;
 
     event.preventDefault();
-    this._focusItem(matched);
     return true;
   }
 
@@ -987,14 +999,6 @@ export class UIMenu extends ElementBase {
     this.toggle();
   }
 
-  private _onDocumentPointerDown(event: PointerEvent): void {
-    if (!this._isOpen) return;
-    const path = event.composedPath();
-    if (path.includes(this)) return;
-    if (this._portalEl && path.includes(this._portalEl)) return;
-    this.close();
-  }
-
   private _onDocumentScroll(event: Event): void {
     if (!this._isOpen || !this.closeOnScroll) return;
     const path = typeof (event as any).composedPath === 'function' ? (event as any).composedPath() : [];
@@ -1016,7 +1020,6 @@ export class UIMenu extends ElementBase {
     }
 
     if (!this._isEventInsideTrigger(event) && !this._isEventInsideMenu(event)) {
-      if (event.key === 'Escape') this.close();
       return;
     }
 
@@ -1024,6 +1027,7 @@ export class UIMenu extends ElementBase {
 
     if (event.key === 'Escape') {
       event.preventDefault();
+      event.stopPropagation();
       this.close();
       return;
     }
@@ -1081,7 +1085,8 @@ export class UIMenu extends ElementBase {
     `);
 
     this._syncTriggerA11y();
-    if (this._isOpen) this._rebuildPortal();
+    if (this._isOpen && !this._portalEl) this._rebuildPortal();
+    else if (this._isOpen) this._positioner?.update();
   }
 
   protected override shouldRenderOnAttributeChange(

@@ -153,7 +153,7 @@ describe('overlay interaction (popover / dropdown / menu)', () => {
     el.openFor && el.openFor('tmp-anchor');
     expect(el.hasAttribute('open')).toBe(true);
 
-    const surface = el.shadowRoot?.querySelector('.surface') as HTMLElement | null;
+    const surface = document.getElementById('ui-portal-root')?.querySelector('.ui-context-menu-portal .surface') as HTMLElement | null;
     expect(surface).toBeTruthy();
     expect(surface!.textContent).toContain('A');
 

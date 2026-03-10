@@ -1,4 +1,11 @@
 import { ElementBase } from '../ElementBase';
+import {
+  focusRovingItem,
+  getRovingFocusBoundaryIndex,
+  moveRovingFocusIndex,
+  resolveRovingFocusIndex,
+  syncRovingTabStops
+} from '../primitives/roving-focus-group';
 
 type GroupValue = string | string[];
 
@@ -186,6 +193,7 @@ export class UIToggleGroup extends ElementBase {
 
   private _observer: MutationObserver | null = null;
   private _isSyncing = false;
+  private _focusIndex = -1;
 
   constructor() {
     super();
@@ -364,14 +372,13 @@ export class UIToggleGroup extends ElementBase {
         if (!toggle.hasAttribute('disabled') && firstEnabled < 0) firstEnabled = index;
       });
 
-      const focusIndex = activeIndex >= 0 ? activeIndex : firstEnabled;
-      toggles.forEach((toggle, index) => {
-        if (toggle.hasAttribute('disabled')) {
-          setAttr(toggle, 'tabindex', '-1');
-          return;
-        }
-        setAttr(toggle, 'tabindex', index === focusIndex ? '0' : '-1');
+      const focusIndex = resolveRovingFocusIndex(toggles, {
+        activeIndex: this._focusIndex,
+        selectedIndex: activeIndex >= 0 ? activeIndex : firstEnabled,
+        getDisabled: (toggle) => toggle.hasAttribute('disabled')
       });
+      this._focusIndex = focusIndex;
+      syncRovingTabStops(toggles, toggles[focusIndex] || null, { activeAttribute: null });
     } finally {
       this._isSyncing = false;
     }
@@ -388,6 +395,7 @@ export class UIToggleGroup extends ElementBase {
 
     const toggleValue = this._toggleValue(target, index);
     const pressed = (event as CustomEvent<{ pressed?: boolean }>).detail?.pressed ?? target.hasAttribute('pressed');
+    this._focusIndex = index;
 
     if (this.multiple) {
       const selected = this._selectedSet();
@@ -424,10 +432,17 @@ export class UIToggleGroup extends ElementBase {
     if (currentIndex < 0) return;
 
     const rtl = this._isHorizontalRtl();
-    const move = (nextIndex: number) => {
-      const resolved = enabled[(nextIndex + enabled.length) % enabled.length];
-      enabled.forEach((toggle) => toggle.setAttribute('tabindex', toggle === resolved ? '0' : '-1'));
-      (resolved as HTMLElement).focus();
+    const move = (direction: 1 | -1) => {
+      const resolvedIndex = moveRovingFocusIndex(enabled, currentIndex, direction, {
+        wrap: true,
+        fallbackIndex: resolveRovingFocusIndex(enabled, { activeIndex: currentIndex, getDisabled: () => false }),
+        getDisabled: () => false
+      });
+      if (resolvedIndex < 0) return;
+      const resolved = enabled[resolvedIndex];
+      this._focusIndex = this._toggles().indexOf(resolved);
+      syncRovingTabStops(enabled, resolved, { activeAttribute: null });
+      focusRovingItem(resolved as HTMLElement);
       if (activation === 'auto') {
         (resolved as any).toggle?.(true);
       }
@@ -440,25 +455,37 @@ export class UIToggleGroup extends ElementBase {
 
     if (goNext) {
       event.preventDefault();
-      move(currentIndex + 1);
+      move(1);
       return;
     }
 
     if (goPrev) {
       event.preventDefault();
-      move(currentIndex - 1);
+      move(-1);
       return;
     }
 
     if (event.key === 'Home') {
       event.preventDefault();
-      move(0);
+      const firstIndex = getRovingFocusBoundaryIndex(enabled, 'first', () => false);
+      if (firstIndex < 0) return;
+      const first = enabled[firstIndex];
+      this._focusIndex = this._toggles().indexOf(first);
+      syncRovingTabStops(enabled, first, { activeAttribute: null });
+      focusRovingItem(first);
+      if (activation === 'auto') (first as any).toggle?.(true);
       return;
     }
 
     if (event.key === 'End') {
       event.preventDefault();
-      move(enabled.length - 1);
+      const lastIndex = getRovingFocusBoundaryIndex(enabled, 'last', () => false);
+      if (lastIndex < 0) return;
+      const last = enabled[lastIndex];
+      this._focusIndex = this._toggles().indexOf(last);
+      syncRovingTabStops(enabled, last, { activeAttribute: null });
+      focusRovingItem(last);
+      if (activation === 'auto') (last as any).toggle?.(true);
     }
   }
 

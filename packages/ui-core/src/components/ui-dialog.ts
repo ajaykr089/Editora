@@ -1,5 +1,7 @@
 import { ElementBase } from '../ElementBase';
 import { acquireBodyScrollLock, releaseBodyScrollLock } from '../scroll-lock';
+import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
+import { createFocusScope, type FocusScopeHandle } from '../primitives/focus-scope';
 
 const style = `
   :host {
@@ -482,6 +484,8 @@ export class UIDialog extends ElementBase {
   private _closeMeta: { action: UIDialogAction; source?: UIDialogDismissSource; reason?: string } | null = null;
   private _runtimeError = '';
   private _config: UIDialogTemplateOptions = {};
+  private _dismissableLayer: DismissableLayerHandle | null = null;
+  private _focusScope: FocusScopeHandle | null = null;
 
   constructor() {
     super();
@@ -507,6 +511,7 @@ export class UIDialog extends ElementBase {
     if (this._isActive && !this._terminalEmitted) {
       this.close('dismiss', 'unmount');
     }
+    this._destroyRuntimeControllers();
     this._deactivate();
     super.disconnectedCallback();
   }
@@ -725,28 +730,20 @@ export class UIDialog extends ElementBase {
     this._lastFocused = (document.activeElement as HTMLElement) || null;
     acquireBodyScrollLock();
 
-    if (isBrowser()) {
-      document.addEventListener('focusin', this._onFocusIn as EventListener, true);
-    }
-
     const id = this.dialogId || this._uid;
     this._dispatchWithLegacy<UIDialogOpenDetail>('ui-open', 'open', { id });
     this.dispatchEvent(new CustomEvent('show', { bubbles: true, composed: true }));
 
-    setTimeout(() => this._focusInitial(), 0);
     this.requestRender();
   }
 
   private _deactivate() {
     if (!this._isActive) return;
     this._isActive = false;
+    this._destroyRuntimeControllers();
 
     const index = UIDialog._openStack.lastIndexOf(this);
     if (index >= 0) UIDialog._openStack.splice(index, 1);
-
-    if (isBrowser()) {
-      document.removeEventListener('focusin', this._onFocusIn as EventListener, true);
-    }
 
     releaseBodyScrollLock();
 
@@ -869,51 +866,61 @@ export class UIDialog extends ElementBase {
 
   private _onFocusIn(event: FocusEvent) {
     if (!this.open || !this._isTopMost()) return;
-    const panel = this._queryPanel();
-    if (!panel) return;
-
-    const target = event.target as Node | null;
-    const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
-    const inside = path.includes(panel) || (target ? panel.contains(target) : false);
-    if (inside) return;
-
-    this._focusInitial();
   }
 
   private _handleTab(event: KeyboardEvent) {
     if (event.key !== 'Tab') return;
+  }
+
+  private _destroyRuntimeControllers() {
+    this._dismissableLayer?.destroy();
+    this._dismissableLayer = null;
+    this._focusScope?.destroy();
+    this._focusScope = null;
+  }
+
+  private _syncRuntimeControllers() {
+    this._destroyRuntimeControllers();
+    if (!this.open || !this._isTopMost()) return;
     const panel = this._queryPanel();
     if (!panel) return;
 
-    const focusable = this._collectFocusable(panel);
-    if (!focusable.length) {
-      event.preventDefault();
-      panel.focus();
-      return;
-    }
-
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    const active = (this.root.activeElement as HTMLElement | null) || (document.activeElement as HTMLElement | null);
-
-    if (event.shiftKey) {
-      if (active === first || !active || !panel.contains(active)) {
-        event.preventDefault();
-        last.focus();
+    this._dismissableLayer = createDismissableLayer({
+      node: panel,
+      closeOnEscape: this.closeOnEsc,
+      closeOnPointerOutside: this.closeOnOverlay,
+      closeOnFocusOutside: false,
+      onBeforeDismiss: (dismissReason, originalEvent) => {
+        if (this._isInteractionLocked()) return false;
+        if (dismissReason === 'escape-key') {
+          this.closeDialog('escape');
+          return false;
+        }
+        if (dismissReason === 'outside-pointer') {
+          this.closeDialog('overlay');
+          return false;
+        }
+        return false;
       }
-      return;
-    }
+    });
 
-    if (active === last) {
-      event.preventDefault();
-      first.focus();
-    }
+    this._focusScope = createFocusScope({
+      node: panel,
+      trapped: true,
+      loop: true,
+      restoreFocus: false,
+      autoFocus: 'first',
+      initialFocus: () => {
+        const selector = this.getAttribute('initial-focus') || this._config.initialFocus || '';
+        return selector ? panel.querySelector<HTMLElement>(selector) : null;
+      }
+    });
   }
 
   private _collectFormData(form?: HTMLFormElement | null): Record<string, string | string[]> | undefined {
     const panel = this._queryPanel();
     const resolvedForm = form || (this.querySelector('form') as HTMLFormElement | null) || panel?.querySelector('form') || null;
-    if (!resolvedForm || typeof FormData === 'undefined') return undefined;
+    if (!(resolvedForm instanceof HTMLFormElement) || typeof FormData === 'undefined') return undefined;
 
     const entries = new FormData(resolvedForm);
     const record: Record<string, string | string[]> = {};
@@ -939,9 +946,12 @@ export class UIDialog extends ElementBase {
   private _resolveSubmitForm(target?: HTMLElement | null): HTMLFormElement | null {
     if (target) {
       const explicit = target.closest('form');
-      if (explicit && this.contains(explicit)) return explicit as HTMLFormElement;
+      if (explicit instanceof HTMLFormElement && this.contains(explicit)) return explicit;
     }
-    return (this.querySelector('form') as HTMLFormElement | null) || (this._queryPanel()?.querySelector('form') as HTMLFormElement | null);
+    const lightDomForm = this.querySelector('form');
+    if (lightDomForm instanceof HTMLFormElement) return lightDomForm;
+    const shadowForm = this._queryPanel()?.querySelector('form');
+    return shadowForm instanceof HTMLFormElement ? shadowForm : null;
   }
 
   private _isInteractionLocked() {
@@ -1016,6 +1026,7 @@ export class UIDialog extends ElementBase {
     if (!this.open || !this._isTopMost()) return;
     const target = event.target as HTMLElement | null;
     if (!target) return;
+    if (target === this) return;
     if (!this.contains(target)) return;
 
     event.preventDefault();
@@ -1033,12 +1044,11 @@ export class UIDialog extends ElementBase {
       this._requestDismiss('esc');
       return;
     }
-
-    this._handleTab(event);
   }
 
   protected render() {
     if (!this.open) {
+      this._destroyRuntimeControllers();
       this.setContent('');
       return;
     }
@@ -1097,6 +1107,7 @@ export class UIDialog extends ElementBase {
         `
         : '';
 
+    this._destroyRuntimeControllers();
     this.setContent(`
       ${this.hasAttribute('headless') ? '' : `<style>${style}</style>`}
       <div class="overlay" part="overlay" data-open="${String(this.open)}">
@@ -1138,6 +1149,7 @@ export class UIDialog extends ElementBase {
         </section>
       </div>
     `);
+    this._syncRuntimeControllers();
   }
 }
 
