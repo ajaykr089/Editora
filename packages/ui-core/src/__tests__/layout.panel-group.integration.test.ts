@@ -9,8 +9,8 @@ afterEach(() => {
   document.body.innerHTML = '';
 });
 
-describe('ui-layout panel-group adoption', () => {
-  it('mounts a panel group for dashboard shells and propagates layoutchange', async () => {
+describe('ui-layout shell behavior', () => {
+  it('mounts a stable shell and emits normalized layout details on meaningful changes', async () => {
     const el = document.createElement('ui-layout') as HTMLElement;
     el.innerHTML = `
       <div slot="sidebar">Sidebar</div>
@@ -20,19 +20,33 @@ describe('ui-layout panel-group adoption', () => {
     document.body.appendChild(el);
     await flushMicrotask();
 
-    const group = el.shadowRoot?.querySelector('ui-panel-group') as HTMLElement | null;
-    expect(group).toBeTruthy();
+    const body = el.shadowRoot?.querySelector('.body') as HTMLElement | null;
+    expect(body).toBeTruthy();
+    expect(body?.dataset.layout).toBe('dashboard-start');
 
-    let fired = 0;
-    el.addEventListener('layoutchange', () => {
-      fired += 1;
+    const details: any[] = [];
+    el.addEventListener('layoutchange', (event) => {
+      details.push((event as CustomEvent).detail);
     });
 
-    group?.dispatchEvent(new CustomEvent('layout-change', { bubbles: true, composed: true }));
-    expect(fired).toBe(1);
+    el.setAttribute('collapsed', '');
+    await flushMicrotask();
+
+    expect(details).toHaveLength(1);
+    expect(details[0]).toMatchObject({
+      mode: 'dashboard',
+      collapsed: true,
+      sidebarVisible: false,
+      asideVisible: true,
+      layout: 'dashboard-start-no-sidebar'
+    });
+
+    el.setAttribute('collapsed', '');
+    await flushMicrotask();
+    expect(details).toHaveLength(1);
   });
 
-  it('syncs collapsed host state into the sidebar panel', async () => {
+  it('syncs collapsed host state into the sidebar panel visibility', async () => {
     const el = document.createElement('ui-layout') as HTMLElement;
     el.innerHTML = `
       <div slot="sidebar">Sidebar</div>
@@ -45,7 +59,7 @@ describe('ui-layout panel-group adoption', () => {
     await flushMicrotask();
 
     const sidebarPanel = el.shadowRoot?.querySelector('.sidebar-panel') as HTMLElement | null;
-    expect(sidebarPanel?.hasAttribute('collapsed')).toBe(true);
+    expect(sidebarPanel?.hidden).toBe(true);
   });
 
   it('uses stacked body mode when mode=stack', async () => {
@@ -59,10 +73,10 @@ describe('ui-layout panel-group adoption', () => {
     document.body.appendChild(el);
     await flushMicrotask();
 
-    const group = el.shadowRoot?.querySelector('ui-panel-group') as HTMLElement | null;
-    const stackBody = el.shadowRoot?.querySelector('.stack-body') as HTMLElement | null;
-    expect(group?.hidden).toBe(true);
-    expect(stackBody?.hidden).toBe(false);
-    expect(stackBody?.children.length).toBe(3);
+    const body = el.shadowRoot?.querySelector('.body') as HTMLElement | null;
+    const panels = Array.from(el.shadowRoot?.querySelectorAll('.panel') ?? []).filter((panel) => !(panel as HTMLElement).hidden);
+    expect(body?.classList.contains('stack')).toBe(true);
+    expect(body?.dataset.mode).toBe('stack');
+    expect(panels.length).toBe(3);
   });
 });

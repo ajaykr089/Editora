@@ -1,8 +1,4 @@
 import { ElementBase } from '../ElementBase';
-import './ui-panel-group';
-import './ui-panel';
-import { UIPanel } from './ui-panel';
-import { UIPanelGroup } from './ui-panel-group';
 
 const style = `
   :host {
@@ -10,8 +6,7 @@ const style = `
     --ui-layout-surface: var(--ui-color-surface, #ffffff);
     --ui-layout-color: var(--ui-color-text, #0f172a);
     --ui-layout-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 80%, transparent);
-    --ui-layout-shadow:
-      none;
+    --ui-layout-shadow: none;
     --ui-layout-radius: 18px;
     --ui-layout-gap: 14px;
     --ui-layout-padding: 14px;
@@ -19,9 +14,12 @@ const style = `
     --ui-layout-footer-padding: 12px 14px;
     --ui-layout-content-padding: 14px;
     --ui-layout-max-width: none;
+    --ui-layout-sidebar-track: clamp(220px, 22vw, 320px);
+    --ui-layout-aside-track: clamp(240px, 26vw, 360px);
     display: block;
     color: var(--ui-layout-color);
     color-scheme: light dark;
+    overflow-anchor: none;
   }
 
   .layout {
@@ -98,7 +96,7 @@ const style = `
 
   .header,
   .footer,
-  .panel-surface {
+  .panel {
     min-width: 0;
     border-radius: calc(var(--ui-layout-radius) - 4px);
     border: var(--ui-layout-border);
@@ -116,45 +114,105 @@ const style = `
 
   .body {
     min-height: var(--ui-layout-min-height, 380px);
+    display: grid;
+    gap: var(--ui-layout-gap);
+    align-items: stretch;
   }
 
-  .body[hidden],
-  .header[hidden],
-  .footer[hidden] {
-    display: none;
+  .body[data-layout="dashboard-start"] {
+    grid-template-columns:
+      var(--ui-layout-sidebar-track, clamp(220px, 22vw, 320px))
+      minmax(0, 1fr)
+      var(--ui-layout-aside-track, clamp(240px, 26vw, 360px));
   }
 
-  .group {
-    min-height: inherit;
+  .body[data-layout="dashboard-start-no-aside"] {
+    grid-template-columns:
+      var(--ui-layout-sidebar-track, clamp(220px, 22vw, 320px))
+      minmax(0, 1fr);
+  }
+
+  .body[data-layout="dashboard-start-no-sidebar"] {
+    grid-template-columns:
+      minmax(0, 1fr)
+      var(--ui-layout-aside-track, clamp(240px, 26vw, 360px));
+  }
+
+  .body[data-layout="dashboard-end"] {
+    grid-template-columns:
+      minmax(0, 1fr)
+      var(--ui-layout-aside-track, clamp(240px, 26vw, 360px))
+      var(--ui-layout-sidebar-track, clamp(220px, 22vw, 320px));
+  }
+
+  .body[data-layout="dashboard-end-no-aside"] {
+    grid-template-columns:
+      minmax(0, 1fr)
+      var(--ui-layout-sidebar-track, clamp(220px, 22vw, 320px));
+  }
+
+  .body[data-layout="dashboard-end-no-sidebar"] {
+    grid-template-columns:
+      minmax(0, 1fr)
+      var(--ui-layout-aside-track, clamp(240px, 26vw, 360px));
+  }
+
+  .body[data-layout="split-with-aside"] {
+    grid-template-columns:
+      minmax(0, 1fr)
+      var(--ui-layout-aside-track, clamp(240px, 26vw, 360px));
+  }
+
+  .body[data-layout="split-with-sidebar-start"] {
+    grid-template-columns:
+      var(--ui-layout-sidebar-track, clamp(220px, 22vw, 320px))
+      minmax(0, 1fr);
+  }
+
+  .body[data-layout="split-with-sidebar-end"] {
+    grid-template-columns:
+      minmax(0, 1fr)
+      var(--ui-layout-sidebar-track, clamp(220px, 22vw, 320px));
+  }
+
+  .body[data-layout="content-only"] {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .panel {
-    min-width: 0;
     min-height: 0;
-  }
-
-  .panel.content-panel {
     padding: var(--ui-layout-content-padding);
-    min-height: 120px;
+    overflow: hidden;
   }
 
-  .panel.sidebar-panel,
-  .panel.aside-panel {
-    padding: var(--ui-layout-content-padding);
+  .content-panel {
+    min-height: 160px;
   }
 
-  .stack-body {
+  .panel[hidden],
+  .header[hidden],
+  .footer[hidden],
+  .body[hidden] {
+    display: none !important;
+  }
+
+  .stack {
     display: grid;
     gap: var(--ui-layout-gap);
-    min-height: inherit;
   }
 
-  .stack-body .panel {
+  .stack .panel {
     min-height: 120px;
   }
 
   :host([headless]) .layout {
     display: none !important;
+  }
+
+  @media (max-width: 980px) {
+    .body {
+      grid-template-columns: minmax(0, 1fr) !important;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -167,7 +225,7 @@ const style = `
     .layout,
     .header,
     .footer,
-    .panel-surface {
+    .panel {
       border-width: 2px;
       box-shadow: none;
     }
@@ -177,7 +235,7 @@ const style = `
     .layout,
     .header,
     .footer,
-    .panel-surface {
+    .panel {
       forced-color-adjust: none;
       background: Canvas;
       color: CanvasText;
@@ -187,11 +245,24 @@ const style = `
   }
 `;
 
-function toBoolean(value: string | null): boolean {
-  if (value == null) return false;
-  const normalized = String(value).toLowerCase();
-  return normalized !== 'false' && normalized !== '0';
-}
+type LayoutMode = 'dashboard' | 'split' | 'stack';
+type LayoutShellState = {
+  mode: LayoutMode;
+  sidebarSide: 'start' | 'end';
+  collapsed: boolean;
+  hasHeader: boolean;
+  hasFooter: boolean;
+  hasSidebarContent: boolean;
+  hasAsideContent: boolean;
+  hasContent: boolean;
+  sidebarVisible: boolean;
+  asideVisible: boolean;
+  bodyVisible: boolean;
+  layout: string;
+  stack: boolean;
+  sidebarTrack: string;
+  asideTrack: string;
+};
 
 function hasSlotContent(slot: HTMLSlotElement | null): boolean {
   if (!slot) return false;
@@ -202,24 +273,18 @@ function hasSlotContent(slot: HTMLSlotElement | null): boolean {
   });
 }
 
-function parseSizePercent(raw: string | null, containerPx: number, fallbackPercent: number): number {
-  if (!raw) return fallbackPercent;
-  const value = raw.trim();
-  if (!value) return fallbackPercent;
-  if (value.endsWith('%')) {
-    const parsed = Number(value.slice(0, -1));
-    return Number.isFinite(parsed) ? Math.min(100, Math.max(0, parsed)) : fallbackPercent;
-  }
-  if (value.endsWith('px')) {
-    const parsed = Number(value.slice(0, -2));
-    return Number.isFinite(parsed) && containerPx > 0 ? Math.min(100, Math.max(0, (parsed / containerPx) * 100)) : fallbackPercent;
-  }
-  const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return fallbackPercent;
-  return parsed <= 100 ? Math.min(100, Math.max(0, parsed)) : (containerPx > 0 ? Math.min(100, Math.max(0, (parsed / containerPx) * 100)) : fallbackPercent);
+function readBoolean(value: string | null): boolean {
+  if (value == null) return false;
+  const normalized = String(value).trim().toLowerCase();
+  return normalized !== 'false' && normalized !== '0';
 }
 
-type LayoutMode = 'dashboard' | 'split' | 'stack';
+function normalizeTrackSize(value: string | null, fallback: string): string {
+  const raw = value?.trim();
+  if (!raw) return fallback;
+  if (/^-?\d+(\.\d+)?$/.test(raw)) return `${raw}px`;
+  return raw;
+}
 
 export class UILayout extends ElementBase {
   static get observedAttributes() {
@@ -236,33 +301,33 @@ export class UILayout extends ElementBase {
     ];
   }
 
+  private _layoutNode: HTMLElement | null = null;
+  private _headerEl: HTMLElement | null = null;
+  private _bodyEl: HTMLElement | null = null;
+  private _footerEl: HTMLElement | null = null;
+  private _sidebarPanel: HTMLElement | null = null;
+  private _contentPanel: HTMLElement | null = null;
+  private _asidePanel: HTMLElement | null = null;
   private _headerSlot: HTMLSlotElement | null = null;
   private _sidebarSlot: HTMLSlotElement | null = null;
+  private _contentSlot: HTMLSlotElement | null = null;
+  private _defaultSlot: HTMLSlotElement | null = null;
   private _asideSlot: HTMLSlotElement | null = null;
   private _footerSlot: HTMLSlotElement | null = null;
-  private _panelGroup: UIPanelGroup | null = null;
-  private _sidebarPanel: UIPanel | null = null;
-  private _contentPanel: UIPanel | null = null;
-  private _asidePanel: UIPanel | null = null;
-  private _resizeObserver: ResizeObserver | null = null;
-  private _layoutNode: HTMLElement | null = null;
+  private _lastLayoutSignature = '';
 
   constructor() {
     super();
     this._onSlotChange = this._onSlotChange.bind(this);
-    this._onPanelLayoutChange = this._onPanelLayoutChange.bind(this);
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this._attachSlotHandlers();
-    this._ensureResizeObserver();
-    queueMicrotask(() => this._syncStructure());
+    queueMicrotask(() => this._syncShell({ emit: false }));
   }
 
   override disconnectedCallback(): void {
     this._detachSlotHandlers();
-    this._teardownResizeObserver();
     super.disconnectedCallback();
   }
 
@@ -275,12 +340,12 @@ export class UILayout extends ElementBase {
   }
 
   toggleSidebar(): void {
-    if (this.hasAttribute('collapsed')) this.expand();
+    if (this.collapsed) this.expand();
     else this.collapse();
   }
 
   get collapsed(): boolean {
-    return toBoolean(this.getAttribute('collapsed'));
+    return readBoolean(this.getAttribute('collapsed'));
   }
 
   set collapsed(value: boolean) {
@@ -290,13 +355,13 @@ export class UILayout extends ElementBase {
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
-
-    if (name === 'sidebar-width' || name === 'aside-width' || name === 'collapsed' || name === 'mode' || name === 'sidebar-side') {
-      this._syncStructure();
+    if (name === 'variant' || name === 'density' || name === 'max-width' || name === 'headless') {
+      super.attributeChangedCallback(name, oldValue, newValue);
+      queueMicrotask(() => this._syncShell({ emit: false }));
       return;
     }
 
-    super.attributeChangedCallback(name, oldValue, newValue);
+    queueMicrotask(() => this._syncShell({ emit: true }));
   }
 
   private _mode(): LayoutMode {
@@ -304,183 +369,146 @@ export class UILayout extends ElementBase {
     return mode === 'split' || mode === 'stack' ? mode : 'dashboard';
   }
 
-  private _onSlotChange(): void {
-    this._syncStructure();
-    this.dispatchEvent(new CustomEvent('layoutchange', { bubbles: true, composed: true }));
-  }
-
-  private _onPanelLayoutChange(): void {
-    this.dispatchEvent(new CustomEvent('layoutchange', { bubbles: true, composed: true }));
+  private _sidebarSide(): 'start' | 'end' {
+    return this.getAttribute('sidebar-side') === 'end' ? 'end' : 'start';
   }
 
   private _attachSlotHandlers(): void {
-    const header = this.root.querySelector('slot[name="header"]') as HTMLSlotElement | null;
-    const sidebar = this.root.querySelector('slot[name="sidebar"]') as HTMLSlotElement | null;
-    const aside = this.root.querySelector('slot[name="aside"]') as HTMLSlotElement | null;
-    const footer = this.root.querySelector('slot[name="footer"]') as HTMLSlotElement | null;
+    this._detachSlotHandlers();
+    this._headerSlot = this.root.querySelector('slot[name="header"]');
+    this._sidebarSlot = this.root.querySelector('slot[name="sidebar"]');
+    this._contentSlot = this.root.querySelector('slot[name="content"]');
+    this._defaultSlot = this.root.querySelector('slot:not([name])');
+    this._asideSlot = this.root.querySelector('slot[name="aside"]');
+    this._footerSlot = this.root.querySelector('slot[name="footer"]');
 
-    if (this._headerSlot && this._headerSlot !== header) this._headerSlot.removeEventListener('slotchange', this._onSlotChange as EventListener);
-    if (this._sidebarSlot && this._sidebarSlot !== sidebar) this._sidebarSlot.removeEventListener('slotchange', this._onSlotChange as EventListener);
-    if (this._asideSlot && this._asideSlot !== aside) this._asideSlot.removeEventListener('slotchange', this._onSlotChange as EventListener);
-    if (this._footerSlot && this._footerSlot !== footer) this._footerSlot.removeEventListener('slotchange', this._onSlotChange as EventListener);
-
-    header?.addEventListener('slotchange', this._onSlotChange as EventListener);
-    sidebar?.addEventListener('slotchange', this._onSlotChange as EventListener);
-    aside?.addEventListener('slotchange', this._onSlotChange as EventListener);
-    footer?.addEventListener('slotchange', this._onSlotChange as EventListener);
-
-    this._headerSlot = header;
-    this._sidebarSlot = sidebar;
-    this._asideSlot = aside;
-    this._footerSlot = footer;
+    [
+      this._headerSlot,
+      this._sidebarSlot,
+      this._contentSlot,
+      this._defaultSlot,
+      this._asideSlot,
+      this._footerSlot
+    ].forEach((slot) => slot?.addEventListener('slotchange', this._onSlotChange as EventListener));
   }
 
   private _detachSlotHandlers(): void {
-    this._headerSlot?.removeEventListener('slotchange', this._onSlotChange as EventListener);
-    this._sidebarSlot?.removeEventListener('slotchange', this._onSlotChange as EventListener);
-    this._asideSlot?.removeEventListener('slotchange', this._onSlotChange as EventListener);
-    this._footerSlot?.removeEventListener('slotchange', this._onSlotChange as EventListener);
+    [
+      this._headerSlot,
+      this._sidebarSlot,
+      this._contentSlot,
+      this._defaultSlot,
+      this._asideSlot,
+      this._footerSlot
+    ].forEach((slot) => slot?.removeEventListener('slotchange', this._onSlotChange as EventListener));
+
     this._headerSlot = null;
     this._sidebarSlot = null;
+    this._contentSlot = null;
+    this._defaultSlot = null;
     this._asideSlot = null;
     this._footerSlot = null;
   }
 
-  private _ensureResizeObserver(): void {
-    if (this._resizeObserver || typeof ResizeObserver === 'undefined') return;
-    this._resizeObserver = new ResizeObserver(() => this._syncPanelSizes());
-    if (this._layoutNode) this._resizeObserver.observe(this._layoutNode);
+  private _onSlotChange(): void {
+    this._syncShell({ emit: true });
   }
 
-  private _teardownResizeObserver(): void {
-    this._resizeObserver?.disconnect();
-    this._resizeObserver = null;
+  private _emitLayoutChange(detail: LayoutShellState): void {
+    this.dispatchEvent(new CustomEvent('layoutchange', { detail, bubbles: true, composed: true }));
   }
 
-  private _syncVisibility(): void {
-    const headerEl = this.root.querySelector('.header') as HTMLElement | null;
-    const footerEl = this.root.querySelector('.footer') as HTMLElement | null;
-    const bodyEl = this.root.querySelector('.body') as HTMLElement | null;
-
-    if (headerEl) headerEl.hidden = !hasSlotContent(this._headerSlot);
-    if (footerEl) footerEl.hidden = !hasSlotContent(this._footerSlot);
-
-    if (bodyEl) bodyEl.hidden = false;
+  private _signature(state: LayoutShellState): string {
+    return JSON.stringify(state);
   }
 
-  private _syncStructure(): void {
-    if (!this.isConnected || !this._panelGroup) return;
+  private _computeShellState(): LayoutShellState | null {
+    if (!this.isConnected || !this._layoutNode || !this._bodyEl) return null;
 
     const mode = this._mode();
-    const hasSidebar = hasSlotContent(this._sidebarSlot);
-    const hasAside = hasSlotContent(this._asideSlot);
+    const sidebarSide = this._sidebarSide();
     const collapsed = this.collapsed;
-    const sidebarSide = this.getAttribute('sidebar-side') === 'end' ? 'end' : 'start';
-    const layoutWidth = this._layoutNode?.getBoundingClientRect().width || this.getBoundingClientRect().width || 0;
-    const shouldStack = mode === 'stack' || layoutWidth > 0 && layoutWidth < 980;
-    const stackBody = this.root.querySelector('.stack-body') as HTMLElement | null;
-    const park = (panel: UIPanel | null) => {
-      if (!panel || !stackBody) return;
-      stackBody.append(panel);
-    };
+    const hasHeader = hasSlotContent(this._headerSlot);
+    const hasFooter = hasSlotContent(this._footerSlot);
+    const hasSidebarContent = hasSlotContent(this._sidebarSlot);
+    const hasAsideContent = hasSlotContent(this._asideSlot);
+    const hasContent = hasSlotContent(this._contentSlot) || hasSlotContent(this._defaultSlot);
+    const sidebarVisible = hasSidebarContent && (!collapsed || mode === 'stack') && !(mode === 'split' && hasAsideContent);
+    const asideVisible = hasAsideContent;
+    const bodyVisible = hasContent || sidebarVisible || asideVisible;
+    const stack = mode === 'stack';
 
-    if (this._sidebarPanel) {
-      const shouldShowSidebar = mode === 'dashboard' && hasSidebar;
-      this._sidebarPanel.hidden = !shouldShowSidebar;
-      this._sidebarPanel.toggleAttribute('collapsed', shouldShowSidebar && collapsed);
-      this._sidebarPanel.setAttribute('collapsed-size', shouldShowSidebar ? '0' : '0');
-    }
-
-    if (this._asidePanel) {
-      const shouldShowAside = mode !== 'stack' && hasAside;
-      this._asidePanel.hidden = !shouldShowAside;
-    }
-
-    if (this._contentPanel) {
-      this._contentPanel.hidden = false;
-    }
-
-    if (this._panelGroup) {
-      this._panelGroup.hidden = shouldStack;
-      this._panelGroup.setAttribute('orientation', 'horizontal');
-    }
-
-    if (stackBody) {
-      stackBody.hidden = !shouldStack;
-    }
-
-    if (this._sidebarPanel && this._contentPanel && this._asidePanel) {
-      if (shouldStack && stackBody) {
-        stackBody.append(this._contentPanel);
-        if (hasSidebar && !collapsed) stackBody.append(this._sidebarPanel);
-        else park(this._sidebarPanel);
-        if (hasAside) stackBody.append(this._asidePanel);
-        else park(this._asidePanel);
-      } else {
-        const ordered: UIPanel[] = [];
-        if (sidebarSide === 'end') {
-          ordered.push(this._contentPanel);
-          if (hasAside) ordered.push(this._asidePanel);
-          if (hasSidebar) ordered.push(this._sidebarPanel);
-        } else {
-          if (hasSidebar) ordered.push(this._sidebarPanel);
-          ordered.push(this._contentPanel);
-          if (hasAside) ordered.push(this._asidePanel);
-        }
-        this._panelGroup?.append(...ordered);
-        if (!hasSidebar) park(this._sidebarPanel);
-        if (!hasAside) park(this._asidePanel);
+    let layout = 'content-only';
+    if (!stack) {
+      if (mode === 'split') {
+        if (asideVisible && hasContent) layout = 'split-with-aside';
+        else if (sidebarVisible && hasContent) layout = sidebarSide === 'end' ? 'split-with-sidebar-end' : 'split-with-sidebar-start';
+      } else if (sidebarVisible && asideVisible) {
+        layout = sidebarSide === 'end' ? 'dashboard-end' : 'dashboard-start';
+      } else if (sidebarVisible) {
+        layout = sidebarSide === 'end' ? 'dashboard-end-no-aside' : 'dashboard-start-no-aside';
+      } else if (asideVisible) {
+        layout = sidebarSide === 'end' ? 'dashboard-end-no-sidebar' : 'dashboard-start-no-sidebar';
       }
     }
 
-    this._syncVisibility();
-    if (!shouldStack) this._syncPanelSizes();
+    return {
+      mode,
+      sidebarSide,
+      collapsed,
+      hasHeader,
+      hasFooter,
+      hasSidebarContent,
+      hasAsideContent,
+      hasContent,
+      sidebarVisible,
+      asideVisible,
+      bodyVisible,
+      layout,
+      stack,
+      sidebarTrack: sidebarVisible ? normalizeTrackSize(this.getAttribute('sidebar-width'), 'clamp(220px, 22vw, 320px)') : '0px',
+      asideTrack: asideVisible ? normalizeTrackSize(this.getAttribute('aside-width'), 'clamp(240px, 26vw, 360px)') : '0px'
+    };
   }
 
-  private _syncPanelSizes(): void {
-    if (!this._panelGroup || this._panelGroup.hidden) return;
+  private _syncShell(options: { emit: boolean }): void {
+    const state = this._computeShellState();
+    if (!state || !this._bodyEl) return;
 
-    const mode = this._mode();
-    const hasSidebar = this._panelGroup.contains(this._sidebarPanel);
-    const hasAside = this._panelGroup.contains(this._asidePanel);
-    const visiblePanels = [hasSidebar, true, hasAside].filter(Boolean).length;
-    const containerWidth = this._panelGroup.getBoundingClientRect().width || this.getBoundingClientRect().width || 1200;
+    if (this._headerEl) this._headerEl.hidden = !state.hasHeader;
+    if (this._footerEl) this._footerEl.hidden = !state.hasFooter;
 
-    const defaultSidebar = visiblePanels === 3 ? 22 : 24;
-    const defaultAside = visiblePanels === 3 ? 26 : 28;
-    const sidebarSize = hasSidebar ? parseSizePercent(this.getAttribute('sidebar-width'), containerWidth, defaultSidebar) : 0;
-    const asideSize = hasAside ? parseSizePercent(this.getAttribute('aside-width'), containerWidth, defaultAside) : 0;
-    const contentSize = Math.max(20, 100 - sidebarSize - asideSize);
+    this.style.setProperty('--ui-layout-sidebar-track', state.sidebarTrack);
+    this.style.setProperty('--ui-layout-aside-track', state.asideTrack);
 
-    if (this._sidebarPanel) {
-      this._sidebarPanel.setAttribute('size', String(sidebarSize));
-      this._sidebarPanel.setAttribute('min-size', hasSidebar ? '12' : '0');
-      this._sidebarPanel.setAttribute('max-size', hasSidebar ? '40' : '0');
-      this._sidebarPanel.setAttribute('collapsed-size', '0');
-      this._sidebarPanel.toggleAttribute('collapsible', true);
+    if (this._sidebarPanel) this._sidebarPanel.hidden = !state.sidebarVisible;
+    if (this._contentPanel) this._contentPanel.hidden = !state.hasContent;
+    if (this._asidePanel) this._asidePanel.hidden = !state.asideVisible;
+
+    this._bodyEl.hidden = !state.bodyVisible;
+    this._bodyEl.dataset.layout = state.layout;
+    this._bodyEl.dataset.mode = state.mode;
+    this._bodyEl.dataset.sidebarSide = state.sidebarSide;
+
+    if (state.stack) {
+      this._bodyEl.classList.add('stack');
+    } else {
+      this._bodyEl.classList.remove('stack');
     }
 
-    if (this._contentPanel) {
-      this._contentPanel.setAttribute('size', String(contentSize));
-      this._contentPanel.setAttribute('min-size', mode === 'split' ? '35' : '30');
-      this._contentPanel.setAttribute('max-size', '100');
+    const signature = this._signature(state);
+    if (options.emit && signature !== this._lastLayoutSignature) {
+      this._emitLayoutChange(state);
     }
+    this._lastLayoutSignature = signature;
+  }
 
-    if (this._asidePanel) {
-      this._asidePanel.setAttribute('size', String(asideSize));
-      this._asidePanel.setAttribute('min-size', hasAside ? '16' : '0');
-      this._asidePanel.setAttribute('max-size', hasAside ? '45' : '0');
-    }
-
-    const layoutByPanel = new Map<UIPanel, number>();
-    if (this._sidebarPanel) layoutByPanel.set(this._sidebarPanel, sidebarSize);
-    if (this._contentPanel) layoutByPanel.set(this._contentPanel, contentSize);
-    if (this._asidePanel) layoutByPanel.set(this._asidePanel, asideSize);
-    const layout = Array.from(this._panelGroup.children)
-      .filter((child): child is UIPanel => child instanceof UIPanel)
-      .map((panel) => layoutByPanel.get(panel) ?? 0);
-
-    if (layout.length > 1) this._panelGroup.setLayout(layout);
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return false;
   }
 
   protected override render(): void {
@@ -490,20 +518,17 @@ export class UILayout extends ElementBase {
         <header class="header" part="header">
           <slot name="header"></slot>
         </header>
-        <div class="body" part="body">
-          <ui-panel-group class="group" part="group">
-            <ui-panel class="panel panel-surface sidebar-panel" part="sidebar">
-              <slot name="sidebar"></slot>
-            </ui-panel>
-            <ui-panel class="panel panel-surface content-panel" part="content">
-              <slot name="content"></slot>
-              <slot></slot>
-            </ui-panel>
-            <ui-panel class="panel panel-surface aside-panel" part="aside">
-              <slot name="aside"></slot>
-            </ui-panel>
-          </ui-panel-group>
-          <div class="stack-body" hidden></div>
+        <div class="body" part="body" data-layout="content-only">
+          <section class="panel sidebar-panel" part="sidebar">
+            <slot name="sidebar"></slot>
+          </section>
+          <section class="panel content-panel" part="content">
+            <slot name="content"></slot>
+            <slot></slot>
+          </section>
+          <section class="panel aside-panel" part="aside">
+            <slot name="aside"></slot>
+          </section>
         </div>
         <footer class="footer" part="footer">
           <slot name="footer"></slot>
@@ -512,24 +537,14 @@ export class UILayout extends ElementBase {
     `);
 
     this._layoutNode = this.root.querySelector('.layout');
-    this._panelGroup = this.root.querySelector('ui-panel-group');
+    this._headerEl = this.root.querySelector('.header');
+    this._bodyEl = this.root.querySelector('.body');
+    this._footerEl = this.root.querySelector('.footer');
     this._sidebarPanel = this.root.querySelector('.sidebar-panel');
     this._contentPanel = this.root.querySelector('.content-panel');
     this._asidePanel = this.root.querySelector('.aside-panel');
-
-    this._panelGroup?.addEventListener('layout-change', this._onPanelLayoutChange as EventListener);
     this._attachSlotHandlers();
-    this._ensureResizeObserver();
-    if (this._layoutNode && this._resizeObserver) this._resizeObserver.observe(this._layoutNode);
-    queueMicrotask(() => this._syncStructure());
-  }
-
-  protected override shouldRenderOnAttributeChange(
-    name: string,
-    _oldValue: string | null,
-    _newValue: string | null
-  ): boolean {
-    return name === 'variant' || name === 'density' || name === 'max-width' || name === 'headless';
+    queueMicrotask(() => this._syncShell({ emit: false }));
   }
 }
 
