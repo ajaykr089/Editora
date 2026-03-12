@@ -77,10 +77,13 @@ export interface ThemeTokens {
   effects?: { backdropFilterPanel?: string };
   components?: {
     button?: ThemeScale;
+    badge?: ThemeScale;
     card?: ThemeScale;
     alert?: ThemeScale;
     alertDialog?: ThemeScale;
     appHeader?: ThemeScale;
+    aspectRatio?: ThemeScale;
+    avatar?: ThemeScale;
     menu?: ThemeScale;
     panel?: ThemeScale;
     input?: ThemeScale;
@@ -484,6 +487,16 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'classic-active-filter': 'brightness(0.985) saturate(0.98)',
     'solid-active-filter': 'brightness(0.96) saturate(1.02)'
   },
+  badge: {
+    radius: '999px',
+    shadow: 'none',
+    'font-size': '12px',
+    'font-weight': '600',
+    gap: '6px',
+    'padding-block': '5px',
+    'padding-inline': '10px',
+    'border-width': '1px'
+  },
   card: {
     bg: 'var(--color-panel-solid)',
     border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
@@ -530,6 +543,25 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'height-dense': '52px',
     'control-radius': 'var(--ui-radius)'
   },
+  aspectRatio: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
+    radius: 'var(--radius-4)',
+    shadow: 'none',
+    'empty-bg': 'color-mix(in srgb, var(--accent-a3) 24%, transparent)',
+    'badge-radius': '999px'
+  },
+  avatar: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
+    radius: '999px',
+    shadow: '0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 24px rgba(15, 23, 42, 0.12)',
+    'size-sm': '30px',
+    'size-md': '40px',
+    'size-lg': '52px',
+    'badge-radius': '999px',
+    'status-border': '2px solid var(--color-panel-solid)'
+  },
   menu: {
     bg: 'var(--color-panel)',
     border: '1px solid color-mix(in srgb, var(--gray-a5) 78%, transparent)',
@@ -570,6 +602,16 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     'classic-disabled-box-shadow': 'inset 0 0 0 1px var(--gray-a5), inset 0 4px 2px -2px var(--gray-a2), inset 0 1px 1px var(--gray-a5), inset 0 -1px 1px var(--black-a3), inset 0 0 0 1px var(--gray-a2)',
     'classic-active-filter': 'brightness(0.94) saturate(0.95)',
     'solid-active-filter': 'brightness(0.92) saturate(1.04)'
+  },
+  badge: {
+    radius: '999px',
+    shadow: 'none',
+    'font-size': '12px',
+    'font-weight': '600',
+    gap: '6px',
+    'padding-block': '5px',
+    'padding-inline': '10px',
+    'border-width': '1px'
   },
   card: {
     bg: 'var(--color-panel-solid)',
@@ -616,6 +658,25 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     height: '64px',
     'height-dense': '52px',
     'control-radius': 'var(--ui-radius)'
+  },
+  aspectRatio: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
+    radius: 'var(--radius-4)',
+    shadow: 'none',
+    'empty-bg': 'color-mix(in srgb, var(--accent-a3) 20%, transparent)',
+    'badge-radius': '999px'
+  },
+  avatar: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
+    radius: '999px',
+    shadow: '0 1px 2px rgba(2, 6, 23, 0.18), 0 12px 24px rgba(2, 6, 23, 0.28)',
+    'size-sm': '30px',
+    'size-md': '40px',
+    'size-lg': '52px',
+    'badge-radius': '999px',
+    'status-border': '2px solid var(--color-panel-solid)'
   },
   menu: {
     bg: 'var(--color-panel)',
@@ -987,10 +1048,13 @@ export function createThemeTokens(overrides?: Partial<ThemeTokens>, options?: { 
       ...(base.components || {}),
       ...(overrides?.components || {}),
       button: mergeScale(base.components?.button, overrides?.components?.button),
+      badge: mergeScale(base.components?.badge, overrides?.components?.badge),
       card: mergeScale(base.components?.card, overrides?.components?.card),
       alert: mergeScale(base.components?.alert, overrides?.components?.alert),
       alertDialog: mergeScale(base.components?.alertDialog, overrides?.components?.alertDialog),
       appHeader: mergeScale(base.components?.appHeader, overrides?.components?.appHeader),
+      aspectRatio: mergeScale(base.components?.aspectRatio, overrides?.components?.aspectRatio),
+      avatar: mergeScale(base.components?.avatar, overrides?.components?.avatar),
       menu: mergeScale(base.components?.menu, overrides?.components?.menu),
       panel: mergeScale(base.components?.panel, overrides?.components?.panel),
       input: mergeScale(base.components?.input, overrides?.components?.input)
@@ -1145,10 +1209,13 @@ function applyThemeToTarget(target: HTMLElement, next: ThemeTokens) {
   addScaleVariables(target, '--letter-spacing-', next.typography?.letterSpacing);
   addScaleVariables(target, '--shadow-', next.shadows as ThemeScale | undefined);
   addScaleVariables(target, '--base-button-', next.components?.button);
+  addScaleVariables(target, '--base-badge-', next.components?.badge);
   addScaleVariables(target, '--base-card-', next.components?.card);
   addScaleVariables(target, '--base-alert-', next.components?.alert);
   addScaleVariables(target, '--base-alert-dialog-', next.components?.alertDialog);
   addScaleVariables(target, '--base-app-header-', next.components?.appHeader);
+  addScaleVariables(target, '--base-aspect-ratio-', next.components?.aspectRatio);
+  addScaleVariables(target, '--base-avatar-', next.components?.avatar);
   addScaleVariables(target, '--base-menu-', next.components?.menu);
   addScaleVariables(target, '--base-panel-', next.components?.panel);
   addScaleVariables(target, '--base-input-', next.components?.input);

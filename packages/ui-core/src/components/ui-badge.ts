@@ -3,19 +3,20 @@ import { ElementBase } from '../ElementBase';
 const style = `
   :host {
     display: inline-flex;
-    --ui-badge-font-size: 12px;
-    --ui-badge-font-weight: 620;
+    --ui-badge-font-size: var(--base-badge-font-size, 12px);
+    --ui-badge-font-weight: var(--base-badge-font-weight, 600);
     --ui-badge-line-height: 1.2;
-    --ui-badge-gap: 6px;
-    --ui-badge-radius: 999px;
-    --ui-badge-padding-block: 5px;
-    --ui-badge-padding-inline: 10px;
-    --ui-badge-border-width: 1px;
+    --ui-badge-gap: var(--base-badge-gap, 6px);
+    --ui-badge-radius: var(--base-badge-radius, 999px);
+    --ui-badge-padding-block: var(--base-badge-padding-block, 5px);
+    --ui-badge-padding-inline: var(--base-badge-padding-inline, 10px);
+    --ui-badge-border-width: var(--base-badge-border-width, 1px);
     --ui-badge-accent: var(--ui-color-primary, #2563eb);
-    --ui-badge-bg: color-mix(in srgb, var(--ui-badge-accent) 10%, var(--ui-color-surface, #ffffff));
+    --ui-badge-bg-base: color-mix(in srgb, var(--ui-badge-accent) 10%, var(--ui-color-surface, #ffffff));
+    --ui-badge-bg: var(--ui-badge-bg-base);
     --ui-badge-color: color-mix(in srgb, var(--ui-badge-accent) 78%, var(--ui-color-text, #0f172a) 22%);
     --ui-badge-border: color-mix(in srgb, var(--ui-badge-accent) 20%, var(--ui-color-border, rgba(15, 23, 42, 0.16)));
-    --ui-badge-shadow: none;
+    --ui-badge-shadow: var(--base-badge-shadow, none);
     --ui-badge-dot-size: 7px;
     --ui-badge-dot-color: currentColor;
     --ui-badge-remove-size: 16px;
@@ -88,6 +89,10 @@ const style = `
       radial-gradient(120% 80% at 100% 0%, color-mix(in srgb, var(--ui-badge-accent) 20%, transparent), transparent 62%);
   }
 
+  :host([variant="surface"]) {
+    --ui-badge-bg: var(--ui-badge-bg-base);
+  }
+
   :host([variant="solid"]) {
     --ui-badge-bg: var(--ui-badge-accent);
     --ui-badge-color: #ffffff;
@@ -106,6 +111,18 @@ const style = `
     --ui-badge-bg: transparent;
     --ui-badge-border: color-mix(in srgb, var(--ui-badge-accent) 24%, transparent);
     --ui-badge-shadow: none;
+  }
+
+  :host([elevation="none"]) {
+    --ui-badge-shadow: none;
+  }
+
+  :host([elevation="low"]) {
+    --ui-badge-shadow: var(--base-badge-shadow, none);
+  }
+
+  :host([elevation="high"]) {
+    --ui-badge-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 14px 26px rgba(15, 23, 42, 0.14);
   }
 
   :host([size="xs"]),
@@ -406,6 +423,19 @@ type BadgeRemoveDetail = {
   source: 'button';
 };
 
+function normalizeRadius(raw: string | null): string {
+  if (!raw) return '';
+  const value = raw.trim().toLowerCase();
+  if (!value) return '';
+  if (value === 'none') return '0px';
+  if (value === 'sm') return '8px';
+  if (value === 'md' || value === 'large') return '12px';
+  if (value === 'lg') return '16px';
+  if (value === 'full' || value === 'pill') return '9999px';
+  if (/^\d+(\.\d+)?$/.test(value)) return `${value}px`;
+  return raw;
+}
+
 export class UIBadge extends ElementBase {
   static get observedAttributes() {
     return [
@@ -425,6 +455,7 @@ export class UIBadge extends ElementBase {
       'max-width',
       'state',
       'headless',
+      'elevation',
     ];
   }
 
@@ -447,6 +478,10 @@ export class UIBadge extends ElementBase {
     this.addEventListener('keydown', this._onHostKeyDown);
     this._syncInteractiveA11y();
     this._syncBusyState();
+    const normalizedRadius = normalizeRadius(this.getAttribute('radius'));
+    if (normalizedRadius) this.style.setProperty('--ui-badge-radius', normalizedRadius);
+    const maxWidth = this.getAttribute('max-width');
+    if (maxWidth) this.style.setProperty('--ui-badge-max-inline-size', maxWidth);
   }
 
   disconnectedCallback() {
@@ -459,6 +494,15 @@ export class UIBadge extends ElementBase {
     if (oldValue === newValue) return;
     if (name === 'interactive' || name === 'disabled') this._syncInteractiveA11y();
     if (name === 'state') this._syncBusyState();
+    if (name === 'radius') {
+      const normalizedRadius = normalizeRadius(newValue);
+      if (normalizedRadius) this.style.setProperty('--ui-badge-radius', normalizedRadius);
+      else this.style.removeProperty('--ui-badge-radius');
+    }
+    if (name === 'max-width') {
+      if (newValue) this.style.setProperty('--ui-badge-max-inline-size', newValue);
+      else this.style.removeProperty('--ui-badge-max-inline-size');
+    }
     if (this.isConnected) this.requestRender();
   }
 
@@ -476,10 +520,6 @@ export class UIBadge extends ElementBase {
     const hasLabel = !iconOnly && (text.length > 0 || hasSlotText);
     this._lastLabelText = text || (this.textContent || '').trim();
 
-    let vars = '';
-    const maxWidth = this.getAttribute('max-width');
-    if (maxWidth) vars += `--ui-badge-max-inline-size:${maxWidth};`;
-
     if (iconOnly && !this.hasAttribute('aria-label')) {
       this.setAttribute('aria-label', this._lastLabelText || 'Badge');
       this._managedAriaLabel = true;
@@ -490,7 +530,7 @@ export class UIBadge extends ElementBase {
 
     this.setContent(`
       <style>${style}</style>
-      <span class="badge" part="base" style="${vars}">
+      <span class="badge" part="base">
         <span class="dot" part="dot" aria-hidden="true" ${hasDot ? '' : 'hidden'}></span>
         <span class="spinner" part="spinner" aria-hidden="true" ${loading ? '' : 'hidden'}></span>
         <span class="icon-slot" part="icon" ${hasIcon ? '' : 'hidden'}><slot name="icon"></slot></span>
@@ -616,11 +656,23 @@ export class UIBadge extends ElementBase {
   }
 
   protected override shouldRenderOnAttributeChange(
-    _name: string,
-    _oldValue: string | null,
-    _newValue: string | null
+    name: string,
+    oldValue: string | null,
+    newValue: string | null
   ): boolean {
-    return true;
+    if (oldValue === newValue) return false;
+    return ![
+      'tone',
+      'variant',
+      'size',
+      'pill',
+      'radius',
+      'disabled',
+      'interactive',
+      'truncate',
+      'max-width',
+      'elevation',
+    ].includes(name);
   }
 }
 

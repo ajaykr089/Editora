@@ -3,26 +3,43 @@ import { ElementBase } from '../ElementBase';
 const style = `
   :host {
     display: inline-block;
-    --ui-avatar-size: 40px;
-    --ui-avatar-radius: 50%;
-    --ui-avatar-bg: linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--ui-color-surface, #ffffff) 92%, var(--ui-color-primary, #2563eb) 8%),
-      color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 62%, var(--ui-color-primary, #2563eb) 12%)
-    );
+    --ui-avatar-size: var(--base-avatar-size-md, 40px);
+    --ui-avatar-radius: var(--base-avatar-radius, 999px);
+    --ui-avatar-bg-base: var(--base-avatar-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
+    --ui-avatar-bg: var(--ui-avatar-bg-base);
     --ui-avatar-color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 78%, var(--ui-color-text, #0f172a) 22%);
     --ui-avatar-muted: var(--ui-color-muted, #64748b);
-    --ui-avatar-border: 1px solid color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.14)) 82%, transparent);
-    --ui-avatar-ring: 0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 24px rgba(15, 23, 42, 0.12);
-    --ui-avatar-font-size: 12px;
+    --ui-avatar-border: var(--base-avatar-border, 1px solid color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.14)) 82%, transparent));
+    --ui-avatar-ring: var(--base-avatar-shadow, 0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 24px rgba(15, 23, 42, 0.12));
+    --ui-avatar-font-size: var(--ui-default-font-size, 14px);
     --ui-avatar-font-weight: 650;
     --ui-avatar-status-size: 11px;
-    --ui-avatar-status-border: 2px solid var(--ui-color-surface, #ffffff);
+    --ui-avatar-status-border: var(--base-avatar-status-border, 2px solid var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-avatar-transition: 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
     --ui-avatar-accent: var(--ui-color-primary, #2563eb);
     --ui-avatar-badge-bg: color-mix(in srgb, var(--ui-avatar-accent) 14%, var(--ui-color-surface, #ffffff));
     --ui-avatar-badge-color: color-mix(in srgb, var(--ui-avatar-accent) 82%, var(--ui-color-text, #0f172a) 18%);
+    --ui-avatar-badge-radius: var(--base-avatar-badge-radius, 999px);
     color-scheme: light dark;
+  }
+
+  :host([size='1']),
+  :host([size='sm']) {
+    --ui-avatar-size: var(--base-avatar-size-sm, 30px);
+    --ui-avatar-font-size: 12px;
+    --ui-avatar-status-size: 10px;
+  }
+
+  :host([size='2']),
+  :host([size='md']) {
+    --ui-avatar-size: var(--base-avatar-size-md, 40px);
+  }
+
+  :host([size='3']),
+  :host([size='lg']) {
+    --ui-avatar-size: var(--base-avatar-size-lg, 52px);
+    --ui-avatar-font-size: 16px;
+    --ui-avatar-status-size: 13px;
   }
 
   :host([tone="info"]) {
@@ -41,6 +58,19 @@ const style = `
     --ui-avatar-accent: var(--ui-color-danger, #dc2626);
   }
 
+  :host([variant="surface"]) {
+    --ui-avatar-bg: var(--ui-avatar-bg-base);
+    --ui-avatar-color: color-mix(in srgb, var(--ui-avatar-accent) 78%, var(--ui-color-text, #0f172a) 22%);
+  }
+
+  :host([variant="soft"]) {
+    --ui-avatar-bg: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--ui-avatar-bg-base) 92%, var(--ui-avatar-accent) 8%),
+      color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 62%, var(--ui-avatar-accent) 12%)
+    );
+  }
+
   :host([variant="solid"]) {
     --ui-avatar-bg: var(--ui-avatar-accent);
     --ui-avatar-color: #ffffff;
@@ -51,6 +81,18 @@ const style = `
     --ui-avatar-border: 1px solid color-mix(in srgb, var(--ui-avatar-accent) 45%, var(--ui-color-border, rgba(15, 23, 42, 0.14)));
     --ui-avatar-color: color-mix(in srgb, var(--ui-avatar-accent) 82%, var(--ui-color-text, #0f172a) 18%);
     --ui-avatar-ring: none;
+  }
+
+  :host([elevation="none"]) {
+    --ui-avatar-ring: none;
+  }
+
+  :host([elevation="low"]) {
+    --ui-avatar-ring: var(--base-avatar-shadow, 0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 24px rgba(15, 23, 42, 0.12));
+  }
+
+  :host([elevation="high"]) {
+    --ui-avatar-ring: 0 2px 6px rgba(15, 23, 42, 0.08), 0 18px 34px rgba(15, 23, 42, 0.18);
   }
 
   .avatar {
@@ -168,7 +210,7 @@ const style = `
   }
 
   :host([shape="square"]) .avatar {
-    --ui-avatar-radius: 10px;
+    --ui-avatar-radius: 8px;
   }
 
   img {
@@ -246,7 +288,7 @@ const style = `
     inset-block-start: -4px;
     min-width: 16px;
     height: 16px;
-    border-radius: 999px;
+    border-radius: var(--ui-avatar-badge-radius);
     padding: 0 4px;
     font-size: 10px;
     font-weight: 700;
@@ -343,6 +385,15 @@ function normalizeSize(raw: string | null): string {
   return raw;
 }
 
+function normalizeRadius(raw: string | null): string {
+  if (!raw) return '';
+  const value = raw.trim().toLowerCase();
+  if (!value) return '';
+  if (value === 'full' || value === 'pill' || value === 'circle') return '999px';
+  if (/^\d+(\.\d+)?$/.test(value)) return `${value}px`;
+  return raw;
+}
+
 function toLoading(raw: string | null): 'lazy' | 'eager' {
   if (raw === 'eager') return 'eager';
   if (raw === 'lazy') return 'lazy';
@@ -373,6 +424,7 @@ export class UIAvatar extends ElementBase {
       'state',
       'loading',
       'headless',
+      'elevation',
     ];
   }
 
@@ -400,6 +452,16 @@ export class UIAvatar extends ElementBase {
     this.addEventListener('keydown', this._onInteractiveKeyDown);
     this._syncInteractiveA11y();
     this._syncBusyState();
+    const normalizedSize = normalizeSize(this.getAttribute('size'));
+    if (normalizedSize) this.style.setProperty('--ui-avatar-size', normalizedSize);
+    const normalizedRadius = normalizeRadius(this.getAttribute('radius'));
+    if (normalizedRadius) this.style.setProperty('--ui-avatar-radius', normalizedRadius);
+    const bg = this.getAttribute('bg');
+    if (bg) this.style.setProperty('--ui-avatar-bg', bg);
+    const color = this.getAttribute('color');
+    if (color) this.style.setProperty('--ui-avatar-color', color);
+    const fontWeight = this.getAttribute('fontweight');
+    if (fontWeight) this.style.setProperty('--ui-avatar-font-weight', fontWeight);
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
@@ -413,6 +475,28 @@ export class UIAvatar extends ElementBase {
     }
     if (name === 'state') {
       this._syncBusyState();
+    }
+    if (name === 'size') {
+      const normalizedSize = normalizeSize(newValue);
+      if (normalizedSize) this.style.setProperty('--ui-avatar-size', normalizedSize);
+      else this.style.removeProperty('--ui-avatar-size');
+    }
+    if (name === 'bg') {
+      if (newValue) this.style.setProperty('--ui-avatar-bg', newValue);
+      else this.style.removeProperty('--ui-avatar-bg');
+    }
+    if (name === 'color') {
+      if (newValue) this.style.setProperty('--ui-avatar-color', newValue);
+      else this.style.removeProperty('--ui-avatar-color');
+    }
+    if (name === 'radius') {
+      const normalizedRadius = normalizeRadius(newValue);
+      if (normalizedRadius) this.style.setProperty('--ui-avatar-radius', normalizedRadius);
+      else this.style.removeProperty('--ui-avatar-radius');
+    }
+    if (name === 'fontweight') {
+      if (newValue) this.style.setProperty('--ui-avatar-font-weight', newValue);
+      else this.style.removeProperty('--ui-avatar-font-weight');
     }
     if (this.isConnected) this.requestRender();
   }
@@ -525,18 +609,6 @@ export class UIAvatar extends ElementBase {
       this.setAttribute('aria-label', alt.trim() || fallback);
     }
 
-    let vars = '';
-    const normalizedSize = normalizeSize(this.getAttribute('size'));
-    if (normalizedSize) vars += `--ui-avatar-size:${normalizedSize};`;
-    const bg = this.getAttribute('bg');
-    const color = this.getAttribute('color');
-    const radius = this.getAttribute('radius');
-    const fontWeight = this.getAttribute('fontweight');
-    if (bg) vars += `--ui-avatar-bg:${bg};`;
-    if (color) vars += `--ui-avatar-color:${color};`;
-    if (radius) vars += `--ui-avatar-radius:${radius};`;
-    if (fontWeight) vars += `--ui-avatar-font-weight:${fontWeight};`;
-
     const showImage = Boolean(src) && !this._imgFailed;
     const showFallback = !showImage || !this._imgLoaded;
     const loading = toLoading(this.getAttribute('loading'));
@@ -546,7 +618,7 @@ export class UIAvatar extends ElementBase {
     this._detachImageListeners();
     this.setContent(`
       <style>${style}</style>
-      <div class="avatar" part="base" style="${vars}">
+      <div class="avatar" part="base">
         ${showImage ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" loading="${loading}" />` : ''}
         <span class="overlay" part="overlay" aria-hidden="true"></span>
         <span class="fallback" part="fallback" ${showFallback ? '' : 'hidden'}>
@@ -566,6 +638,28 @@ export class UIAvatar extends ElementBase {
       if (this._img.naturalWidth > 0) this._onImageLoad();
       else this._onImageError();
     }
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    name: string,
+    oldValue: string | null,
+    newValue: string | null
+  ): boolean {
+    if (oldValue === newValue) return false;
+    return ![
+      'size',
+      'bg',
+      'color',
+      'radius',
+      'fontweight',
+      'shape',
+      'tone',
+      'variant',
+      'ring',
+      'interactive',
+      'disabled',
+      'elevation',
+    ].includes(name);
   }
 }
 

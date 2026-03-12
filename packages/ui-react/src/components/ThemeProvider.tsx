@@ -69,10 +69,13 @@ function mergeThemeTokens(base: ThemeTokens, patch?: Partial<ThemeTokens> | null
       ...(base.components || {}),
       ...(patch.components || {}),
       button: { ...(base.components?.button || {}), ...(patch.components?.button || {}) },
+      badge: { ...(base.components?.badge || {}), ...(patch.components?.badge || {}) },
       card: { ...(base.components?.card || {}), ...(patch.components?.card || {}) },
       alert: { ...(base.components?.alert || {}), ...(patch.components?.alert || {}) },
       alertDialog: { ...(base.components?.alertDialog || {}), ...(patch.components?.alertDialog || {}) },
       appHeader: { ...(base.components?.appHeader || {}), ...(patch.components?.appHeader || {}) },
+      aspectRatio: { ...(base.components?.aspectRatio || {}), ...(patch.components?.aspectRatio || {}) },
+      avatar: { ...(base.components?.avatar || {}), ...(patch.components?.avatar || {}) },
       menu: { ...(base.components?.menu || {}), ...(patch.components?.menu || {}) },
       panel: { ...(base.components?.panel || {}), ...(patch.components?.panel || {}) },
       input: { ...(base.components?.input || {}), ...(patch.components?.input || {}) }
