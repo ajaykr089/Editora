@@ -80,6 +80,7 @@ export interface ThemeTokens {
     card?: ThemeScale;
     alert?: ThemeScale;
     alertDialog?: ThemeScale;
+    appHeader?: ThemeScale;
     menu?: ThemeScale;
     panel?: ThemeScale;
     input?: ThemeScale;
@@ -518,6 +519,17 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'header-gap': '10px',
     'footer-gap': '10px'
   },
+  appHeader: {
+    bg: 'var(--color-panel)',
+    border: '1px solid color-mix(in srgb, var(--gray-a5) 78%, transparent)',
+    radius: '0px',
+    shadow: 'none',
+    padding: '16px',
+    gap: '12px',
+    height: '64px',
+    'height-dense': '52px',
+    'control-radius': 'var(--ui-radius)'
+  },
   menu: {
     bg: 'var(--color-panel)',
     border: '1px solid color-mix(in srgb, var(--gray-a5) 78%, transparent)',
@@ -593,6 +605,17 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     'max-width': 'min(90vw, 560px)',
     'header-gap': '10px',
     'footer-gap': '10px'
+  },
+  appHeader: {
+    bg: 'var(--color-panel)',
+    border: '1px solid color-mix(in srgb, var(--gray-a6) 82%, transparent)',
+    radius: '0px',
+    shadow: 'none',
+    padding: '16px',
+    gap: '12px',
+    height: '64px',
+    'height-dense': '52px',
+    'control-radius': 'var(--ui-radius)'
   },
   menu: {
     bg: 'var(--color-panel)',
@@ -967,6 +990,7 @@ export function createThemeTokens(overrides?: Partial<ThemeTokens>, options?: { 
       card: mergeScale(base.components?.card, overrides?.components?.card),
       alert: mergeScale(base.components?.alert, overrides?.components?.alert),
       alertDialog: mergeScale(base.components?.alertDialog, overrides?.components?.alertDialog),
+      appHeader: mergeScale(base.components?.appHeader, overrides?.components?.appHeader),
       menu: mergeScale(base.components?.menu, overrides?.components?.menu),
       panel: mergeScale(base.components?.panel, overrides?.components?.panel),
       input: mergeScale(base.components?.input, overrides?.components?.input)
@@ -1124,6 +1148,7 @@ function applyThemeToTarget(target: HTMLElement, next: ThemeTokens) {
   addScaleVariables(target, '--base-card-', next.components?.card);
   addScaleVariables(target, '--base-alert-', next.components?.alert);
   addScaleVariables(target, '--base-alert-dialog-', next.components?.alertDialog);
+  addScaleVariables(target, '--base-app-header-', next.components?.appHeader);
   addScaleVariables(target, '--base-menu-', next.components?.menu);
   addScaleVariables(target, '--base-panel-', next.components?.panel);
   addScaleVariables(target, '--base-input-', next.components?.input);

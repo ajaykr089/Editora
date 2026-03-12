@@ -506,7 +506,7 @@ const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 type UIAlertDialogRole = 'alertdialog' | 'dialog';
-type UIAlertDialogSize = 'sm' | 'md' | 'lg';
+type UIAlertDialogSize = 'sm' | 'md' | 'lg' | '1' | '2' | '3';
 type UIAlertDialogState = 'idle' | 'loading' | 'error';
 type UIAlertDialogTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
 type UIAlertDialogVariant = 'surface' | 'soft' | 'outline' | 'solid';

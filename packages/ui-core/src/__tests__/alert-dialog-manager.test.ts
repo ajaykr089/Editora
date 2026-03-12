@@ -190,6 +190,70 @@ describe('alert dialog manager', () => {
     await expect(promise).resolves.toMatchObject({ action: 'cancel' });
   });
 
+  it('passes visual props through to the dialog config surface', async () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const manager = createAlertDialogManager({ container: host });
+
+    manager.setDefaults({
+      variant: 'outline',
+      radius: 12,
+      elevation: 'high',
+      indicator: 'none'
+    });
+
+    const promise = manager.confirm({
+      title: 'Delete environment',
+      tone: 'danger',
+      size: '3'
+    });
+    await settle();
+
+    const dialog = getDialog(host);
+    expect(dialog.getAttribute('tone')).toBe('danger');
+    expect(dialog.getAttribute('variant')).toBe('outline');
+    expect(dialog.getAttribute('size')).toBe('3');
+    expect(dialog.getAttribute('elevation')).toBe('high');
+    expect(dialog.getAttribute('indicator')).toBe('none');
+    expect(dialog.style.getPropertyValue('--ui-alert-radius')).toBe('12px');
+
+    getShadowButton(dialog, '.btn-confirm').click();
+    await expect(promise).resolves.toMatchObject({ action: 'confirm' });
+  });
+
+  it('runs onCancel and onDismiss side-effect hooks', async () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const manager = createAlertDialogManager({ container: host });
+
+    const onCancel = vi.fn(async () => {});
+    const onDismiss = vi.fn(async () => {});
+
+    const cancelPromise = manager.confirm({
+      title: 'Cancel test',
+      onCancel
+    });
+    await settle();
+
+    getShadowButton(getDialog(host), '.btn-cancel').click();
+    await expect(cancelPromise).resolves.toMatchObject({ action: 'cancel' });
+    expect(onCancel).toHaveBeenCalledTimes(1);
+
+    const dismissPromise = manager.confirm({
+      title: 'Dismiss test',
+      onDismiss
+    });
+    await settle();
+
+    const dialog = getDialog(host);
+    const backdrop = dialog.shadowRoot.querySelector('.backdrop') as HTMLElement;
+    backdrop.click();
+
+    await expect(dismissPromise).resolves.toMatchObject({ action: 'dismiss', source: 'backdrop' });
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+    expect(onDismiss.mock.calls[0]?.[0]?.source).toBe('backdrop');
+  });
+
   it('destroy resolves pending requests as dismiss (provider unmount equivalent)', async () => {
     const host = document.createElement('div');
     document.body.appendChild(host);

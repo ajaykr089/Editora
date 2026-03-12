@@ -1,128 +1,268 @@
 import React from 'react';
-import type { Meta } from '@storybook/react';
-import { AppHeader, Box, Button, Drawer, Flex, Grid, Sidebar } from '@editora/ui-react';
-import { toastAdvanced } from '@editora/toast';
+import type { Meta, StoryObj } from '@storybook/react';
 import {
-  BellIcon,
-  ClockIcon,
-  MenuIcon,
-  SearchIcon,
-  ShieldIcon,
-} from '@editora/react-icons';
-import '../../packages/editora-toast/src/toast.css';
-import '@editora/themes/themes/default.css';
+  AppHeader,
+  AppHeaderCenter,
+  AppHeaderEnd,
+  AppHeaderStart,
+  AppHeaderSubtitle,
+  AppHeaderTitle,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Flex,
+  Grid,
+} from '@editora/ui-react';
+import { BellIcon, SearchIcon, ShieldIcon, SparklesIcon } from '@editora/react-icons';
 
 const meta: Meta<typeof AppHeader> = {
   title: 'UI/AppHeader',
   component: AppHeader,
+  args: {
+    bordered: true,
+    sticky: false,
+    variant: 'surface',
+    tone: 'neutral',
+    size: 'md',
+    elevation: 'low',
+    radius: 12,
+  },
+  argTypes: {
+    variant: { control: 'select', options: ['surface', 'soft', 'outline', 'solid'] },
+    tone: { control: 'select', options: ['neutral', 'info', 'success', 'warning', 'danger'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
+    elevation: { control: 'select', options: ['none', 'low', 'high'] },
+    radius: { control: 'text' },
+  },
 };
 
 export default meta;
 
-function EnterpriseOpsHeader() {
-  const [menuOpen, setMenuOpen] = React.useState(false);
-  const [active, setActive] = React.useState('dashboard');
+type Story = StoryObj<typeof AppHeader>;
+
+function HeaderChrome(props: React.ComponentProps<typeof AppHeader>) {
+  return (
+    <AppHeader {...props} style={{ width: '100%' }}>
+      <AppHeaderStart>
+        <Flex align="center" style={{ gap: 10 }}>
+          <Box
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: 10,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent)',
+              color: 'var(--ui-color-primary, #2563eb)',
+            }}
+          >
+            <ShieldIcon size={15} />
+          </Box>
+          <Flex direction="column" style={{ gap: 0 }}>
+            <Box style={{ fontWeight: 600 }}>Editora Ops</Box>
+          </Flex>
+        </Flex>
+      </AppHeaderStart>
+
+      <AppHeaderCenter>
+        <Badge tone="info" variant="soft">Live</Badge>
+      </AppHeaderCenter>
+
+      <AppHeaderTitle>Clinical Command Center</AppHeaderTitle>
+      <AppHeaderSubtitle>North campus · Shift A · 08:15 UTC</AppHeaderSubtitle>
+
+      <AppHeaderEnd>
+        <Button size="sm" recipe="soft" variant="secondary">
+          <SearchIcon size={14} />
+          Search
+        </Button>
+        <Button size="sm" recipe="soft" variant="secondary">
+          <BellIcon size={14} />
+          Alerts
+        </Button>
+      </AppHeaderEnd>
+    </AppHeader>
+  );
+}
+
+function InteractiveHeaderShell(props: React.ComponentProps<typeof AppHeader>) {
+  const [navOpen, setNavOpen] = React.useState(false);
 
   return (
-    <Grid style={{ gap: 12, minHeight: 420 }}>
+    <Grid style={{ gap: 12 }}>
+      <HeaderChrome
+        {...props}
+        showMenuButton
+        onMenuTrigger={() => setNavOpen((open) => !open)}
+      />
       <Box
         style={{
-          border: '1px solid var(--ui-color-border, #d8e1ec)',
-          borderRadius: 16,
-          overflow: 'hidden',
-          background: 'var(--ui-color-surface, #fff)',
+          display: navOpen ? 'block' : 'none',
+          padding: 14,
+          borderRadius: 14,
+          border: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent)',
+          background: 'color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 78%, transparent)',
         }}
       >
-        <AppHeader
-          sticky
-          bordered
-          showMenuButton
-          onMenuTrigger={() => {
-            setMenuOpen(true);
-            toastAdvanced.info('Navigation opened', { duration: 1200, theme: 'light' });
-          }}
-          style={
-            {
-              '--ui-app-header-height': '66px',
-              '--ui-app-header-shadow': '0 1px 2px rgba(15, 23, 42, 0.06), 0 18px 30px rgba(15, 23, 42, 0.08)',
-            } as React.CSSProperties
-          }
-        >
-          <Flex slot="start" align="center" style={{ gap: 8 }}>
-            <Box
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: 9,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                background: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent)',
-                color: 'var(--ui-color-primary, #2563eb)',
-              }}
-            >
-              <ShieldIcon size={15} />
-            </Box>
-            <Box style={{ fontWeight: 700, fontSize: 14 }}>Editora CareOps</Box>
-          </Flex>
-
-          <Flex slot="center" align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>
-            <ClockIcon size={14} />
-            Live monitoring
-          </Flex>
-          <Box slot="title">Hospital Command Center</Box>
-          <Box slot="subtitle">Shift A / North Campus</Box>
-
-          <Flex slot="end" align="center" style={{ gap: 8 }}>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => toastAdvanced.info('Search shortcuts opened', { duration: 1200, theme: 'light' })}
-            >
-              <SearchIcon size={14} />
-              Search
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => toastAdvanced.warning('2 critical alerts require acknowledgment', { duration: 1600, theme: 'light' })}
-            >
-              <BellIcon size={14} />
-              Alerts
-            </Button>
-          </Flex>
-        </AppHeader>
-
-        <Box style={{ padding: 16, minHeight: 300, background: 'var(--ui-color-surface-alt, #f8fafc)' }}>
-          <Box style={{ fontWeight: 700, fontSize: 16 }}>Current View: {active}</Box>
-          <Box style={{ marginTop: 6, color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
-            Enterprise app header supports sticky layout, status context, and fast operations.
+        <Flex direction="column" style={{ gap: 8 }}>
+          <Box style={{ fontWeight: 600 }}>Navigation</Box>
+          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+            Dashboard, Patients, Staffing, and Billing are available from the app shell.
           </Box>
-        </Box>
-      </Box>
-
-      <Drawer open={menuOpen} side="left" dismissible onChange={setMenuOpen}>
-        <Flex slot="header" align="center" style={{ gap: 8, fontWeight: 700 }}>
-          <MenuIcon size={14} />
-          Navigation
         </Flex>
-        <Sidebar
-          value={active}
-          onSelect={(detail) => {
-            setActive(detail.value);
-            setMenuOpen(false);
-            toastAdvanced.success(`Switched to ${detail.value}`, { duration: 1200, theme: 'light' });
-          }}
-        >
-          <Box slot="item" data-value="dashboard" data-icon="🏥" data-active>Dashboard</Box>
-          <Box slot="item" data-value="patients" data-icon="🩺">Patients</Box>
-          <Box slot="item" data-value="staff" data-icon="👥">Staffing</Box>
-          <Box slot="item" data-value="billing" data-icon="💳">Billing</Box>
-        </Sidebar>
-      </Drawer>
+      </Box>
     </Grid>
   );
 }
 
-export const EnterpriseCommandCenter = EnterpriseOpsHeader;
+export const Playground: Story = {
+  render: (args) => (
+    <Grid style={{ gap: 16 }}>
+      <Card radius={16}>
+        <CardHeader>
+          <CardTitle>App header</CardTitle>
+        <CardDescription>
+          Token-backed shell for branding, title context, search/actions, and mobile navigation.
+        </CardDescription>
+        </CardHeader>
+        <Box slot="inset" style={{ padding: 12 }}>
+          <InteractiveHeaderShell {...args} />
+        </Box>
+      </Card>
+    </Grid>
+  ),
+};
 
+export const VariantGallery: Story = {
+  render: () => (
+    <Grid style={{ gap: 14 }}>
+      {[
+        { label: 'Surface', variant: 'surface', tone: 'neutral' },
+        { label: 'Soft', variant: 'soft', tone: 'info' },
+        { label: 'Outline', variant: 'outline', tone: 'warning' },
+        { label: 'Solid', variant: 'solid', tone: 'info' },
+      ].map((entry) => (
+        <Grid key={entry.label} style={{ gap: 8 }}>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <HeaderChrome
+            bordered
+            showMenuButton
+            variant={entry.variant as 'surface' | 'soft' | 'outline' | 'solid'}
+            tone={entry.tone as 'neutral' | 'info' | 'warning'}
+            radius={12}
+          />
+        </Grid>
+      ))}
+    </Grid>
+  ),
+};
+
+export const SizeGallery: Story = {
+  render: () => (
+    <Grid style={{ gap: 14 }}>
+      {[
+        { label: 'Small', size: 'sm' },
+        { label: 'Medium', size: 'md' },
+        { label: 'Large', size: 'lg' },
+      ].map((entry) => (
+        <Grid key={entry.label} style={{ gap: 8 }}>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <HeaderChrome
+            bordered
+            showMenuButton
+            size={entry.size as 'sm' | 'md' | 'lg'}
+            radius={entry.size === 'lg' ? 16 : 12}
+          />
+        </Grid>
+      ))}
+    </Grid>
+  ),
+};
+
+export const ProductShellPattern: Story = {
+  render: () => (
+    <Grid style={{ gap: 14 }}>
+      <InteractiveHeaderShell
+        sticky
+        bordered
+        variant="soft"
+        tone="info"
+        elevation="low"
+        radius={16}
+      />
+      <Grid style={{ gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+        {[
+          {
+            title: 'Critical escalations',
+            description: '3 cases require acknowledgment inside the next 30 minutes.',
+          },
+          {
+            title: 'Automation coverage',
+            description: '92% of nightly triage rules completed without manual intervention.',
+          },
+          {
+            title: 'Priority releases',
+            description: 'Two release trains are queued for clinical review and approval.',
+          },
+        ].map((card) => (
+          <Card key={card.title} variant="soft" radius={16}>
+            <CardHeader>
+              <CardTitle>{card.title}</CardTitle>
+              <CardDescription>{card.description}</CardDescription>
+            </CardHeader>
+          </Card>
+        ))}
+      </Grid>
+      <Box
+        style={{
+          padding: 16,
+          borderRadius: 16,
+          border: '1px dashed color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent)',
+          color: 'var(--ui-color-muted, #64748b)',
+        }}
+      >
+        Scrollable workspace content begins here. The header remains visually stable and can switch between surface,
+        soft, outline, and solid treatments without story-specific CSS overrides.
+      </Box>
+    </Grid>
+  ),
+};
+
+export const DenseUtilityRail: Story = {
+  render: () => (
+    <HeaderChrome
+      dense
+      bordered
+      showMenuButton
+      variant="outline"
+      tone="neutral"
+      radius={8}
+      elevation="none"
+    />
+  ),
+};
+
+export const SignalBar: Story = {
+  render: () => (
+    <AppHeader variant="solid" tone="success" size="sm" bordered radius={12}>
+      <AppHeaderStart>
+        <Flex align="center" style={{ gap: 8, fontWeight: 600 }}>
+          <SparklesIcon size={14} />
+          Deployment complete
+        </Flex>
+      </AppHeaderStart>
+      <AppHeaderTitle>Release 2026.03.12.4 is now active</AppHeaderTitle>
+      <AppHeaderSubtitle>Observability checks are healthy across all regions</AppHeaderSubtitle>
+      <AppHeaderEnd>
+        <Button size="sm" recipe="surface" variant="secondary">
+          View changes
+        </Button>
+      </AppHeaderEnd>
+    </AppHeader>
+  ),
+};

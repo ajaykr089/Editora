@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 import {
   AlertDialogAlertOptions,
+  AlertDialogCommonOptions,
   AlertDialogConfirmOptions,
   AlertDialogManager,
   AlertDialogPromptOptions,
@@ -22,13 +23,22 @@ const HOST_REFCOUNT_ATTR = 'data-ui-alert-dialog-react-host-refcount';
 export type AlertDialogProviderProps = {
   children: React.ReactNode;
   hostId?: string;
+  defaults?: Partial<AlertDialogCommonOptions>;
 };
 
-export function AlertDialogProvider({ children, hostId = 'ui-alert-dialog-react-host' }: AlertDialogProviderProps) {
+export function AlertDialogProvider({
+  children,
+  hostId = 'ui-alert-dialog-react-host',
+  defaults
+}: AlertDialogProviderProps) {
   const managerRef = useRef<AlertDialogManager | null>(null);
   if (!managerRef.current) {
     managerRef.current = createAlertDialogManager();
   }
+
+  useEffect(() => {
+    managerRef.current?.setDefaults(defaults || null);
+  }, [defaults]);
 
   useEffect(() => {
     if (typeof document === 'undefined') return;

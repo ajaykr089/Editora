@@ -72,6 +72,7 @@ function mergeThemeTokens(base: ThemeTokens, patch?: Partial<ThemeTokens> | null
       card: { ...(base.components?.card || {}), ...(patch.components?.card || {}) },
       alert: { ...(base.components?.alert || {}), ...(patch.components?.alert || {}) },
       alertDialog: { ...(base.components?.alertDialog || {}), ...(patch.components?.alertDialog || {}) },
+      appHeader: { ...(base.components?.appHeader || {}), ...(patch.components?.appHeader || {}) },
       menu: { ...(base.components?.menu || {}), ...(patch.components?.menu || {}) },
       panel: { ...(base.components?.panel || {}), ...(patch.components?.panel || {}) },
       input: { ...(base.components?.input || {}), ...(patch.components?.input || {}) }

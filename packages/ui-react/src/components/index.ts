@@ -63,7 +63,7 @@ export { Sidebar } from './Sidebar';
 export { PanelGroup, Panel, Splitter } from './PanelGroup';
 export { Tree, TreeItem } from './Tree';
 export { Breadcrumb } from './Breadcrumb';
-export { AppHeader } from './AppHeader';
+export { AppHeader, AppHeaderStart, AppHeaderCenter, AppHeaderTitle, AppHeaderSubtitle, AppHeaderEnd } from './AppHeader';
 export { Drawer } from './Drawer';
 export { Layout } from './Layout';
 

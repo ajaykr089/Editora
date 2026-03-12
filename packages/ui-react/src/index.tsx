@@ -65,7 +65,7 @@ export { Sidebar } from './components/Sidebar';
 export { PanelGroup, Panel, Splitter } from './components/PanelGroup';
 export { Tree, TreeItem } from './components/Tree';
 export { Breadcrumb } from './components/Breadcrumb';
-export { AppHeader } from './components/AppHeader';
+export { AppHeader, AppHeaderStart, AppHeaderCenter, AppHeaderTitle, AppHeaderSubtitle, AppHeaderEnd } from './components/AppHeader';
 export { Drawer } from './components/Drawer';
 export { Layout } from './components/Layout';
 
