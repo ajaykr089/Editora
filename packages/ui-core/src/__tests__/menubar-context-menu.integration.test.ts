@@ -64,6 +64,65 @@ describe('ui-menubar and ui-context-menu integration', () => {
     expect(el._portalEl).toBe(portalBefore);
   });
 
+  it('ui-menubar mounts a portal wrapper with a surface shell and content-host listbox', async () => {
+    const el = document.createElement('ui-menubar') as HTMLElement & { _portalEl?: HTMLElement | null };
+    el.innerHTML = `
+      <button slot="item">File</button>
+      <div slot="content"><button class="item">New</button></div>
+    `;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    el.setAttribute('open', '');
+    await flushMicrotask();
+
+    const portal = el._portalEl;
+    expect(portal?.classList.contains('ui-menubar-portal')).toBe(true);
+    expect(portal?.getAttribute('data-open')).toBe('true');
+    const surface = portal?.querySelector('.surface.menu-panel') as HTMLElement | null;
+    const stateRow = portal?.querySelector('.state-row') as HTMLElement | null;
+    const host = portal?.querySelector('ui-listbox.content-host') as HTMLElement | null;
+    expect(surface?.getAttribute('part')).toBe('menu');
+    expect(surface?.getAttribute('role')).toBe('menu');
+    expect(surface?.getAttribute('aria-hidden')).toBe('false');
+    expect(surface?.getAttribute('aria-busy')).toBe('false');
+    expect(stateRow?.getAttribute('part')).toBe('state');
+    expect(host).toBeTruthy();
+  });
+
+  it('ui-menubar opens nested submenus on hover inside the panel', async () => {
+    const el = document.createElement('ui-menubar') as HTMLElement & { _portalEl?: HTMLElement | null };
+    el.innerHTML = `
+      <button slot="item">File</button>
+      <div slot="content">
+        <div class="item" role="menuitem" tabindex="-1">New</div>
+        <div class="item" role="menuitem" tabindex="-1">
+          <span class="label"><span class="text">Export</span></span>
+          <span class="submenu-arrow">▶</span>
+          <div class="submenu">
+            <div class="item" role="menuitem" tabindex="-1">Export as PDF</div>
+            <div class="item" role="menuitem" tabindex="-1">Export as HTML</div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    el.setAttribute('open', '');
+    await flushMicrotask();
+
+    const trigger = el._portalEl?.querySelector('.item .submenu')?.parentElement as HTMLElement | null;
+    expect(trigger).toBeTruthy();
+
+    trigger?.dispatchEvent(new MouseEvent('pointerover', { bubbles: true }));
+    await flushMicrotask();
+
+    expect(trigger?.getAttribute('data-submenu-open')).toBe('true');
+    const submenu = trigger?.querySelector('.submenu') as HTMLElement | null;
+    expect(submenu).toBeTruthy();
+  });
+
   it('ui-context-menu closes on outside pointerdown', async () => {
     const outside = document.createElement('button');
     const el = document.createElement('ui-context-menu') as HTMLElement;

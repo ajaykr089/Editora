@@ -82,6 +82,7 @@ export interface ThemeTokens {
     box?: ThemeScale;
     breadcrumb?: ThemeScale;
     card?: ThemeScale;
+    menubar?: ThemeScale;
     contextMenu?: ThemeScale;
     alert?: ThemeScale;
     alertDialog?: ThemeScale;
@@ -536,6 +537,35 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'classic-hover-shadow': 'var(--shadow-3)',
     'classic-active-shadow': 'var(--shadow-2)'
   },
+  menubar: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
+    radius: 'var(--radius-4)',
+    shadow: 'var(--shadow-2)',
+    padding: '6px',
+    gap: '6px',
+    'item-radius': 'var(--radius-2)',
+    'item-padding-x': '14px',
+    'item-padding-y': '9px',
+    'item-font-size': '14px',
+    'item-font-weight': '600',
+    'item-line-height': '20px',
+    'panel-bg': 'var(--color-panel-solid)',
+    'panel-color': 'var(--ui-color-text)',
+    'panel-border': '1px solid color-mix(in srgb, var(--gray-a5) 80%, transparent)',
+    'panel-shadow': 'var(--shadow-5)',
+    'panel-radius': 'var(--radius-4)',
+    'panel-padding': '8px',
+    'panel-min-width': '232px',
+    'panel-item-height': '36px',
+    'panel-item-padding-x': '12px',
+    'panel-item-padding-y': '8px',
+    'panel-item-gap': '10px',
+    'panel-item-radius': 'var(--radius-2)',
+    'panel-item-font-size': '14px',
+    'panel-item-line-height': '20px',
+    'panel-separator-margin': '6px 10px'
+  },
   contextMenu: {
     bg: 'var(--color-panel-solid)',
     border: '1px solid color-mix(in srgb, var(--gray-a5) 80%, transparent)',
@@ -698,6 +728,35 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     'classic-shadow': 'var(--shadow-2)',
     'classic-hover-shadow': 'var(--shadow-3)',
     'classic-active-shadow': 'var(--shadow-2)'
+  },
+  menubar: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a6) 84%, transparent)',
+    radius: 'var(--radius-4)',
+    shadow: 'var(--shadow-2)',
+    padding: '6px',
+    gap: '6px',
+    'item-radius': 'var(--radius-2)',
+    'item-padding-x': '14px',
+    'item-padding-y': '9px',
+    'item-font-size': '14px',
+    'item-font-weight': '600',
+    'item-line-height': '20px',
+    'panel-bg': 'var(--color-panel-solid)',
+    'panel-color': 'var(--ui-color-text)',
+    'panel-border': '1px solid color-mix(in srgb, var(--gray-a6) 84%, transparent)',
+    'panel-shadow': 'var(--shadow-5)',
+    'panel-radius': 'var(--radius-4)',
+    'panel-padding': '8px',
+    'panel-min-width': '232px',
+    'panel-item-height': '36px',
+    'panel-item-padding-x': '12px',
+    'panel-item-padding-y': '8px',
+    'panel-item-gap': '10px',
+    'panel-item-radius': 'var(--radius-2)',
+    'panel-item-font-size': '14px',
+    'panel-item-line-height': '20px',
+    'panel-separator-margin': '6px 10px'
   },
   contextMenu: {
     bg: 'var(--color-panel-solid)',
@@ -1152,6 +1211,7 @@ export function createThemeTokens(overrides?: Partial<ThemeTokens>, options?: { 
       box: mergeScale(base.components?.box, overrides?.components?.box),
       breadcrumb: mergeScale(base.components?.breadcrumb, overrides?.components?.breadcrumb),
       contextMenu: mergeScale(base.components?.contextMenu, overrides?.components?.contextMenu),
+      menubar: mergeScale(base.components?.menubar, overrides?.components?.menubar),
       alert: mergeScale(base.components?.alert, overrides?.components?.alert),
       alertDialog: mergeScale(base.components?.alertDialog, overrides?.components?.alertDialog),
       appHeader: mergeScale(base.components?.appHeader, overrides?.components?.appHeader),
@@ -1316,6 +1376,7 @@ function applyThemeToTarget(target: HTMLElement, next: ThemeTokens) {
   addScaleVariables(target, '--base-box-', next.components?.box);
   addScaleVariables(target, '--base-breadcrumb-', next.components?.breadcrumb);
   addScaleVariables(target, '--base-card-', next.components?.card);
+  addScaleVariables(target, '--base-menubar-', next.components?.menubar);
   addScaleVariables(target, '--base-context-menu-', next.components?.contextMenu);
   addScaleVariables(target, '--base-alert-', next.components?.alert);
   addScaleVariables(target, '--base-alert-dialog-', next.components?.alertDialog);
