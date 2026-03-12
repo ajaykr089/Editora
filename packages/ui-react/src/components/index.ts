@@ -40,7 +40,7 @@ export { Dialog } from './Dialog';
 export { DialogProvider, useDialog } from './DialogProvider';
 export { Popover } from './Popover';
 export { Tabs } from './Tabs';
-export { Menu } from './Menu';
+export { Menu, MenuItem, MenuSeparator, MenuSectionLabel } from './Menu';
 export { Icon } from './Icon';
 export { ToastAPI, ToastProvider, useToast, toast, toastApi, toastAdvanced, toastPro, toastLegacy } from './ToastAPI';
 export { Toast } from './Toast';

@@ -608,15 +608,21 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'status-border': '2px solid var(--color-panel-solid)'
   },
   menu: {
-    bg: 'var(--color-panel)',
-    border: '1px solid color-mix(in srgb, var(--gray-a5) 78%, transparent)',
-    radius: 'var(--ui-radius)',
-    shadow: 'var(--shadow-4)',
-    backdrop: 'var(--backdrop-filter-panel)',
-    'content-padding': 'var(--ui-default-gap)',
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a5) 80%, transparent)',
+    radius: 'var(--radius-4)',
+    shadow: 'var(--shadow-5)',
+    backdrop: 'none',
+    'content-padding': '8px',
+    'min-width': '232px',
     'item-height': '36px',
-    'item-padding-x': 'var(--ui-default-gap)',
-    'item-radius': 'var(--ui-radius)'
+    'item-padding-x': '12px',
+    'item-padding-y': '8px',
+    'item-gap': '10px',
+    'item-radius': 'var(--radius-2)',
+    'item-font-size': '14px',
+    'item-line-height': '20px',
+    'separator-margin': '6px 10px'
   },
   panel: {
     bg: 'var(--color-panel)',
@@ -765,15 +771,21 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     'status-border': '2px solid var(--color-panel-solid)'
   },
   menu: {
-    bg: 'var(--color-panel)',
-    border: '1px solid color-mix(in srgb, var(--gray-a6) 82%, transparent)',
-    radius: 'var(--ui-radius)',
-    shadow: 'var(--shadow-4)',
-    backdrop: 'var(--backdrop-filter-panel)',
-    'content-padding': 'var(--ui-default-gap)',
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a6) 84%, transparent)',
+    radius: 'var(--radius-4)',
+    shadow: 'var(--shadow-5)',
+    backdrop: 'none',
+    'content-padding': '8px',
+    'min-width': '232px',
     'item-height': '36px',
-    'item-padding-x': 'var(--ui-default-gap)',
-    'item-radius': 'var(--ui-radius)'
+    'item-padding-x': '12px',
+    'item-padding-y': '8px',
+    'item-gap': '10px',
+    'item-radius': 'var(--radius-2)',
+    'item-font-size': '14px',
+    'item-line-height': '20px',
+    'separator-margin': '6px 10px'
   },
   panel: {
     bg: 'var(--color-panel)',

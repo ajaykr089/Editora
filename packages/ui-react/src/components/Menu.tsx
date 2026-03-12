@@ -12,14 +12,18 @@ export type MenuSelectDetail = {
   item?: HTMLElement;
 };
 
+type MenuItemRole = 'menuitem' | 'menuitemcheckbox' | 'menuitemradio';
+
 type MenuProps = Props & {
   open?: boolean;
   placement?: 'top' | 'bottom' | 'left' | 'right';
-  variant?: 'default' | 'solid' | 'flat' | 'line' | 'glass' | 'contrast';
+  variant?: 'surface' | 'soft' | 'solid' | 'outline' | 'flat' | 'contrast' | 'default' | 'line' | 'glass';
+  size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
   density?: 'default' | 'compact' | 'comfortable';
+  radius?: number | string;
   shape?: 'default' | 'square' | 'soft';
   elevation?: 'default' | 'none' | 'low' | 'high';
-  tone?: 'default' | 'brand' | 'danger' | 'success' | 'warning';
+  tone?: 'default' | 'brand' | 'neutral' | 'info' | 'danger' | 'success' | 'warning';
   closeOnSelect?: boolean;
   typeahead?: boolean;
   onOpen?: () => void;
@@ -29,13 +33,31 @@ type MenuProps = Props & {
   onSelectDetail?: (detail: MenuSelectDetail) => void;
 };
 
+type MenuItemProps = React.HTMLAttributes<HTMLDivElement> & {
+  children?: React.ReactNode;
+  icon?: React.ReactNode;
+  shortcut?: React.ReactNode;
+  caption?: React.ReactNode;
+  tone?: 'danger' | 'success' | 'warning';
+  role?: MenuItemRole;
+  checked?: boolean;
+};
+
+type MenuSeparatorProps = React.HTMLAttributes<HTMLDivElement>;
+
+type MenuSectionLabelProps = React.HTMLAttributes<HTMLDivElement> & {
+  children?: React.ReactNode;
+};
+
 export const Menu = React.forwardRef<HTMLElement, MenuProps>(function Menu(
   {
     children,
     open,
     placement,
     variant,
+    size,
     density,
+    radius,
     shape,
     elevation,
     tone,
@@ -97,9 +119,16 @@ export const Menu = React.forwardRef<HTMLElement, MenuProps>(function Menu(
   useIsomorphicLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (variant && variant !== 'default') el.setAttribute('variant', variant);
+    if (variant && variant !== 'default' && variant !== 'surface') el.setAttribute('variant', variant);
     else el.removeAttribute('variant');
   }, [variant]);
+
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (size && size !== 'md' && size !== '2') el.setAttribute('size', size);
+    else el.removeAttribute('size');
+  }, [size]);
 
   useIsomorphicLayoutEffect(() => {
     const el = ref.current;
@@ -107,6 +136,16 @@ export const Menu = React.forwardRef<HTMLElement, MenuProps>(function Menu(
     if (density && density !== 'default') el.setAttribute('density', density);
     else el.removeAttribute('density');
   }, [density]);
+
+  useIsomorphicLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (radius == null || radius === '' || radius === 'default') {
+      el.removeAttribute('radius');
+      return;
+    }
+    el.setAttribute('radius', String(radius));
+  }, [radius]);
 
   useIsomorphicLayoutEffect(() => {
     const el = ref.current;
@@ -153,5 +192,62 @@ export const Menu = React.forwardRef<HTMLElement, MenuProps>(function Menu(
 });
 
 Menu.displayName = 'Menu';
+
+export const MenuItem = React.forwardRef<HTMLDivElement, MenuItemProps>(function MenuItem(
+  { children, icon, shortcut, caption, tone, role = 'menuitem', checked, className, ...rest },
+  ref
+) {
+  const classes = ['item', className].filter(Boolean).join(' ');
+  const selectionIcon =
+    role === 'menuitemcheckbox' || role === 'menuitemradio' ? (
+      <span className="selection-icon" aria-hidden="true" />
+    ) : null;
+
+  return (
+    <div
+      {...rest}
+      ref={ref}
+      role={role}
+      tabIndex={rest.tabIndex ?? -1}
+      className={classes}
+      data-tone={tone}
+      aria-checked={
+        role === 'menuitemcheckbox' || role === 'menuitemradio'
+          ? checked
+            ? 'true'
+            : 'false'
+          : undefined
+      }
+    >
+      {selectionIcon}
+      {icon ? <span className="icon" aria-hidden="true">{icon}</span> : null}
+      <span className="label">
+        <span className="text">{children}</span>
+        {caption ? <span className="caption">{caption}</span> : null}
+      </span>
+      {shortcut ? <span className="shortcut">{shortcut}</span> : null}
+    </div>
+  );
+});
+
+export const MenuSeparator = React.forwardRef<HTMLDivElement, MenuSeparatorProps>(function MenuSeparator(
+  { className, ...rest },
+  ref
+) {
+  const classes = ['separator', className].filter(Boolean).join(' ');
+  return <div {...rest} ref={ref} role="separator" className={classes} />;
+});
+
+export const MenuSectionLabel = React.forwardRef<HTMLDivElement, MenuSectionLabelProps>(function MenuSectionLabel(
+  { children, className, ...rest },
+  ref
+) {
+  const classes = ['section-label', className].filter(Boolean).join(' ');
+  return (
+    <div {...rest} ref={ref} className={classes}>
+      {children}
+    </div>
+  );
+});
 
 export default Menu;

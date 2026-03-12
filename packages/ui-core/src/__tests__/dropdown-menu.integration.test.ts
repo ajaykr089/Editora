@@ -123,4 +123,24 @@ describe('ui-dropdown and ui-menu integration', () => {
 
     expect(el._portalEl).toBe(portalBefore);
   });
+
+  it('ui-menu mirrors size, radius, and tone onto the portaled menu surface', async () => {
+    const el = document.createElement('ui-menu') as HTMLElement & { _portalEl?: HTMLElement | null };
+    el.innerHTML = `
+      <button slot="trigger">Open</button>
+      <div slot="content"><button class="item">Export</button></div>
+    `;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    el.setAttribute('size', 'lg');
+    el.setAttribute('radius', '12');
+    el.setAttribute('tone', 'warning');
+    el.setAttribute('open', '');
+    await flushMicrotask();
+
+    expect(el._portalEl?.getAttribute('data-size')).toBe('lg');
+    expect(el._portalEl?.getAttribute('data-tone')).toBe('warning');
+    expect(el._portalEl?.style.getPropertyValue('--ui-menu-radius')).toBe('12px');
+  });
 });
