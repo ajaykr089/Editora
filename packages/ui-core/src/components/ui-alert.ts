@@ -1,34 +1,75 @@
 import { ElementBase } from '../ElementBase';
 
-type AlertTone = 'info' | 'success' | 'warning' | 'danger';
-type AlertVariant = 'soft' | 'outline' | 'solid';
+type AlertTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+type AlertVariant = 'surface' | 'soft' | 'outline' | 'solid';
 type AlertLayout = 'inline' | 'banner';
+type AlertSize = 'sm' | 'md' | 'lg';
+type AlertElevation = 'none' | 'low' | 'high';
+type AlertIndicator = 'line' | 'none';
 
 const style = `
   :host {
     display: block;
-    --ui-alert-radius: 14px;
-    --ui-alert-padding-y: 14px;
-    --ui-alert-padding-x: 16px;
-    --ui-alert-gap: 12px;
-    --ui-alert-border: 1px solid color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 84%, transparent);
-    --ui-alert-bg: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--ui-color-primary, #2563eb) 8%, var(--ui-color-surface, #ffffff)) 0%,
-      color-mix(in srgb, var(--ui-color-primary, #2563eb) 6%, var(--ui-color-surface, #ffffff)) 100%
-    );
-    --ui-alert-color: var(--ui-color-text, #0f172a);
-    --ui-alert-muted: color-mix(in srgb, var(--ui-color-text, #0f172a) 62%, var(--ui-color-muted, #64748b) 38%);
-    --ui-alert-accent: var(--ui-color-primary, #2563eb);
-    --ui-alert-shadow: none;
+    --ui-alert-radius: var(--base-alert-radius, var(--ui-radius, 4px));
+    --ui-alert-padding-y: var(--base-alert-padding-y, 14px);
+    --ui-alert-padding-x: var(--base-alert-padding-x, 16px);
+    --ui-alert-gap: var(--base-alert-gap, var(--ui-default-gap, 8px));
+    --ui-alert-border-color: color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 84%, transparent);
+    --ui-alert-border: var(--base-alert-border, 1px solid var(--ui-alert-border-color));
+    --ui-alert-surface-base: var(--base-alert-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
+    --ui-alert-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 6%, var(--ui-alert-surface-base));
+    --ui-alert-color: var(--ui-color-text, var(--ui-text, #202020));
+    --ui-alert-muted: color-mix(in srgb, var(--ui-alert-color) 62%, var(--ui-color-muted, var(--ui-muted, #64748b)) 38%);
+    --ui-alert-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
+    --ui-alert-shadow: var(--base-alert-shadow, var(--shadow-2, none));
     --ui-alert-icon-bg: color-mix(in srgb, var(--ui-alert-accent) 14%, transparent);
     --ui-alert-icon-color: var(--ui-alert-accent);
     --ui-alert-dismiss-bg: color-mix(in srgb, var(--ui-alert-color) 10%, transparent);
     --ui-alert-dismiss-bg-hover: color-mix(in srgb, var(--ui-alert-color) 18%, transparent);
-    --ui-alert-focus-ring: var(--ui-color-focus-ring, #2563eb);
-    --ui-alert-duration: 170ms;
-    --ui-alert-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --ui-alert-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
+    --ui-alert-title-size: var(--ui-default-font-size, 14px);
+    --ui-alert-title-line-height: var(--ui-default-line-height, 20px);
+    --ui-alert-title-weight: 650;
+    --ui-alert-description-size: 13px;
+    --ui-alert-description-line-height: 20px;
+    --ui-alert-icon-size: var(--base-alert-icon-size, 26px);
+    --ui-alert-dismiss-size: var(--base-alert-dismiss-size, 28px);
+    --ui-alert-duration: var(--ui-motion-base, 180ms);
+    --ui-alert-easing: var(--ui-motion-easing, cubic-bezier(0.2, 0.8, 0.2, 1));
     color-scheme: light dark;
+  }
+
+  :host([size="sm"]),
+  :host([size="1"]) {
+    --ui-alert-padding-y: 10px;
+    --ui-alert-padding-x: 12px;
+    --ui-alert-gap: 10px;
+    --ui-alert-title-size: 13px;
+    --ui-alert-title-line-height: 18px;
+    --ui-alert-description-size: 12px;
+    --ui-alert-description-line-height: 18px;
+    --ui-alert-icon-size: 24px;
+    --ui-alert-dismiss-size: 26px;
+  }
+
+  :host([size="md"]),
+  :host([size="2"]) {
+    --ui-alert-padding-y: var(--base-alert-padding-y, 14px);
+    --ui-alert-padding-x: var(--base-alert-padding-x, 16px);
+    --ui-alert-gap: var(--base-alert-gap, var(--ui-default-gap, 8px));
+  }
+
+  :host([size="lg"]),
+  :host([size="3"]) {
+    --ui-alert-padding-y: 18px;
+    --ui-alert-padding-x: 20px;
+    --ui-alert-gap: 14px;
+    --ui-alert-title-size: 15px;
+    --ui-alert-title-line-height: 22px;
+    --ui-alert-description-size: 14px;
+    --ui-alert-description-line-height: 22px;
+    --ui-alert-icon-size: 30px;
+    --ui-alert-dismiss-size: 30px;
   }
 
   :host([hidden]) {
@@ -60,6 +101,10 @@ const style = `
     pointer-events: none;
   }
 
+  :host([indicator="none"]) .alert::before {
+    display: none;
+  }
+
   .row {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
@@ -69,9 +114,9 @@ const style = `
 
   .icon-wrap {
     margin-top: 1px;
-    width: 26px;
-    min-width: 26px;
-    height: 26px;
+    width: var(--ui-alert-icon-size);
+    min-width: var(--ui-alert-icon-size);
+    height: var(--ui-alert-icon-size);
     border-radius: 999px;
     background: var(--ui-alert-icon-bg);
     color: var(--ui-alert-icon-color);
@@ -96,15 +141,15 @@ const style = `
   }
 
   .title {
-    font-size: 14px;
-    font-weight: 650;
-    letter-spacing: -0.01em;
-    line-height: 1.35;
+    font-size: var(--ui-alert-title-size);
+    font-weight: var(--ui-alert-title-weight);
+    letter-spacing: var(--ui-default-letter-spacing, 0em);
+    line-height: var(--ui-alert-title-line-height);
   }
 
   .description {
-    font-size: 13px;
-    line-height: 1.5;
+    font-size: var(--ui-alert-description-size);
+    line-height: var(--ui-alert-description-line-height);
     color: var(--ui-alert-muted);
   }
 
@@ -112,9 +157,9 @@ const style = `
     border: none;
     background: var(--ui-alert-dismiss-bg);
     color: inherit;
-    border-radius: 9px;
-    width: 28px;
-    height: 28px;
+    border-radius: max(8px, calc(var(--ui-alert-radius) - 4px));
+    width: var(--ui-alert-dismiss-size);
+    height: var(--ui-alert-dismiss-size);
     line-height: 1;
     cursor: pointer;
     display: inline-flex;
@@ -160,9 +205,9 @@ const style = `
   }
 
   :host([variant="outline"]) .alert {
-    --ui-alert-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 86%, transparent);
+    --ui-alert-bg: color-mix(in srgb, var(--ui-alert-surface-base) 86%, transparent);
     --ui-alert-shadow: none;
-    --ui-alert-border: 1px solid color-mix(in srgb, var(--ui-alert-accent) 44%, var(--ui-color-border, rgba(15, 23, 42, 0.2)));
+    --ui-alert-border: 1px solid color-mix(in srgb, var(--ui-alert-accent) 30%, var(--ui-alert-border-color));
   }
 
   :host([variant="solid"]) .alert {
@@ -175,6 +220,23 @@ const style = `
     --ui-alert-dismiss-bg: color-mix(in srgb, #ffffff 16%, transparent);
     --ui-alert-dismiss-bg-hover: color-mix(in srgb, #ffffff 24%, transparent);
     --ui-alert-focus-ring: color-mix(in srgb, #ffffff 74%, var(--ui-alert-accent) 26%);
+  }
+
+  :host([variant="surface"]) .alert {
+    --ui-alert-bg: var(--ui-alert-surface-base);
+    --ui-alert-border: 1px solid var(--ui-alert-border-color);
+  }
+
+  :host([elevation="none"]) .alert {
+    --ui-alert-shadow: none;
+  }
+
+  :host([elevation="low"]) .alert {
+    --ui-alert-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 22px rgba(15, 23, 42, 0.09);
+  }
+
+  :host([elevation="high"]) .alert {
+    --ui-alert-shadow: 0 2px 10px rgba(15, 23, 42, 0.08), 0 26px 54px rgba(15, 23, 42, 0.16);
   }
 
   :host([tone="info"]) .alert {
@@ -284,18 +346,44 @@ function escapeHtml(value: string): string {
 }
 
 function normalizeTone(value: string | null): AlertTone {
-  if (value === 'success' || value === 'warning' || value === 'danger') return value;
+  if (value === 'neutral' || value === 'success' || value === 'warning' || value === 'danger') return value;
   return 'info';
 }
 
 function normalizeVariant(value: string | null): AlertVariant {
-  if (value === 'outline' || value === 'solid') return value;
-  return 'soft';
+  if (value === 'surface' || value === 'outline' || value === 'solid' || value === 'soft') return value;
+  return 'surface';
+}
+
+function normalizeSize(value: string | null): AlertSize {
+  if (value === 'sm' || value === 'lg') return value;
+  if (value === '1') return 'sm';
+  if (value === '3') return 'lg';
+  return 'md';
 }
 
 function normalizeLayout(value: string | null): AlertLayout {
   if (value === 'banner') return 'banner';
   return 'inline';
+}
+
+function normalizeElevation(value: string | null): AlertElevation {
+  if (value === 'none' || value === 'low' || value === 'high') return value;
+  return 'low';
+}
+
+function normalizeIndicator(value: string | null): AlertIndicator {
+  if (value === 'none') return 'none';
+  return 'line';
+}
+
+function normalizeRadius(value: string | null, fallback = 'var(--base-alert-radius, var(--ui-radius, 4px))'): string {
+  if (!value || !value.trim()) return fallback;
+  const normalized = value.trim().toLowerCase();
+  if (normalized === 'full' || normalized === 'pill') return '999px';
+  if (normalized === 'square' || normalized === 'none') return '0px';
+  if (/^-?\d+(\.\d+)?$/.test(normalized)) return `${normalized}px`;
+  return value.trim();
 }
 
 function hasSlottedChild(host: Element, slotName?: string): boolean {
@@ -321,7 +409,7 @@ function defaultToneIcon(tone: AlertTone): string {
 
 export class UIAlert extends ElementBase {
   static get observedAttributes() {
-    return ['title', 'description', 'dismissible', 'tone', 'variant', 'layout', 'headless', 'hidden'];
+    return ['title', 'description', 'dismissible', 'tone', 'variant', 'layout', 'headless', 'hidden', 'size', 'radius', 'elevation', 'indicator'];
   }
 
   private _dismissBtn: HTMLButtonElement | null = null;
@@ -354,6 +442,20 @@ export class UIAlert extends ElementBase {
     else this.setAttribute('hidden', '');
   }
 
+  connectedCallback() {
+    super.connectedCallback();
+    this._syncHostStyles();
+  }
+
+  attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
+    if (oldValue === newValue) return;
+    if (name === 'radius') {
+      this._syncHostStyles();
+      return;
+    }
+    super.attributeChangedCallback(name, oldValue, newValue);
+  }
+
   private _onDismiss(event: Event) {
     event.preventDefault();
     const closeEvent = new CustomEvent('close', { bubbles: true, cancelable: true });
@@ -370,6 +472,15 @@ export class UIAlert extends ElementBase {
     actions.setAttribute('data-empty', hasAssigned ? 'false' : 'true');
   }
 
+  private _syncHostStyles() {
+    const radius = this.getAttribute('radius');
+    if (radius && radius.trim()) {
+      this.style.setProperty('--ui-alert-radius', normalizeRadius(radius));
+      return;
+    }
+    this.style.removeProperty('--ui-alert-radius');
+  }
+
   protected render() {
     const title = this.getAttribute('title') || '';
     const description = this.getAttribute('description') || '';
@@ -377,6 +488,9 @@ export class UIAlert extends ElementBase {
     const tone = normalizeTone(this.getAttribute('tone'));
     const variant = normalizeVariant(this.getAttribute('variant'));
     const layout = normalizeLayout(this.getAttribute('layout'));
+    const size = normalizeSize(this.getAttribute('size'));
+    const elevation = normalizeElevation(this.getAttribute('elevation'));
+    const indicator = normalizeIndicator(this.getAttribute('indicator'));
     const role = tone === 'danger' || tone === 'warning' ? 'alert' : 'status';
     const ariaLive = role === 'alert' ? 'assertive' : 'polite';
     const hasTitleSlot = hasSlottedChild(this, 'title');
@@ -394,7 +508,7 @@ export class UIAlert extends ElementBase {
 
     this.setContent(`
       <style>${style}</style>
-      <section class="alert tone-${tone} variant-${variant} layout-${layout}" part="base" role="${role}" aria-live="${ariaLive}" aria-atomic="true">
+      <section class="alert tone-${tone} variant-${variant} layout-${layout} size-${size} elevation-${elevation} indicator-${indicator}" part="base" role="${role}" aria-live="${ariaLive}" aria-atomic="true">
         <div class="row">
           <span class="icon-wrap" part="icon-wrap" aria-hidden="true">
             <span class="icon" part="icon">
@@ -440,10 +554,11 @@ export class UIAlert extends ElementBase {
   }
 
   protected override shouldRenderOnAttributeChange(
-    _name: string,
+    name: string,
     _oldValue: string | null,
     _newValue: string | null
   ): boolean {
+    if (name === 'radius') return false;
     return true;
   }
 }

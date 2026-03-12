@@ -1,6 +1,6 @@
 export { Button } from './Button';
 export { Tooltip } from './Tooltip';
-export { Alert } from './Alert';
+export { Alert, AlertIcon, AlertTitle, AlertDescription, AlertActions } from './Alert';
 export { Dropdown } from './Dropdown';
 export { Input } from './Input';
 export { PasswordField } from './PasswordField';
@@ -100,7 +100,14 @@ export { DirectionProvider } from './DirectionProvider';
 export { HoverCard } from './HoverCard';
 export { Card, CardHeader, CardFooter, CardInset, CardMedia, CardTitle, CardDescription } from './Card';
 export { Label } from './Label';
-export { AlertDialog } from './AlertDialog';
+export {
+  AlertDialog,
+  AlertDialogIcon,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogContent,
+  AlertDialogActions
+} from './AlertDialog';
 export { AlertDialogProvider, useAlertDialog } from './AlertDialogProvider';
 export { Select } from './Select';
 export { Slider } from './Slider';

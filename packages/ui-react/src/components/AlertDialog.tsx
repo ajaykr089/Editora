@@ -25,7 +25,11 @@ export type AlertDialogProps = NativeAlertDialogProps & {
   lockWhileLoading?: boolean;
   roleType?: 'alertdialog' | 'dialog';
   tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: 'surface' | 'soft' | 'outline' | 'solid';
+  size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
+  radius?: number | string;
+  elevation?: 'none' | 'low' | 'high';
+  indicator?: 'line' | 'none';
   state?: 'idle' | 'loading' | 'error';
   initialFocus?: string;
   dialogId?: string;
@@ -51,7 +55,11 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
     lockWhileLoading,
     roleType,
     tone,
+    variant,
     size,
+    radius,
+    elevation,
+    indicator,
     state,
     initialFocus,
     dialogId,
@@ -103,13 +111,13 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
     const el = ref.current;
     if (!el) return;
 
+    if (headless) el.setAttribute('headless', '');
+    else el.removeAttribute('headless');
+
     if (typeof open === 'boolean') {
       if (open) el.setAttribute('open', '');
       else el.removeAttribute('open');
     } else el.removeAttribute('open');
-
-    if (headless) el.setAttribute('headless', '');
-    else el.removeAttribute('headless');
 
     if (typeof dismissible === 'boolean') el.setAttribute('dismissible', String(dismissible));
     else el.removeAttribute('dismissible');
@@ -129,8 +137,20 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
     if (tone && tone !== 'neutral') el.setAttribute('tone', tone);
     else el.removeAttribute('tone');
 
-    if (size && size !== 'md') el.setAttribute('size', size);
+    if (variant && variant !== 'surface') el.setAttribute('variant', variant);
+    else el.removeAttribute('variant');
+
+    if (size && size !== 'md' && size !== '2') el.setAttribute('size', size);
     else el.removeAttribute('size');
+
+    if (radius != null) el.setAttribute('radius', String(radius));
+    else el.removeAttribute('radius');
+
+    if (elevation && elevation !== 'low') el.setAttribute('elevation', elevation);
+    else el.removeAttribute('elevation');
+
+    if (indicator && indicator !== 'line') el.setAttribute('indicator', indicator);
+    else el.removeAttribute('indicator');
 
     if (state && state !== 'idle') el.setAttribute('state', state);
     else el.removeAttribute('state');
@@ -151,7 +171,11 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
     lockWhileLoading,
     roleType,
     tone,
+    variant,
     size,
+    radius,
+    elevation,
+    indicator,
     state,
     initialFocus,
     dialogId,
@@ -162,5 +186,52 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
 });
 
 AlertDialog.displayName = 'AlertDialog';
+
+export interface AlertDialogSectionProps extends React.HTMLAttributes<HTMLElement> {
+  as?: keyof JSX.IntrinsicElements;
+  children?: React.ReactNode;
+}
+
+function createAlertDialogSection(
+  defaultTag: keyof JSX.IntrinsicElements,
+  displayName: string,
+  slot?: string,
+  dataAttr?: string
+) {
+  const Component = React.forwardRef<HTMLElement, AlertDialogSectionProps>(function AlertDialogSection(
+    { as, children, style, ...rest },
+    forwardedRef
+  ) {
+    const Tag = (as || defaultTag) as keyof JSX.IntrinsicElements;
+    const props: Record<string, unknown> = { ref: forwardedRef, ...rest };
+    if (slot) props.slot = slot;
+    if (dataAttr) props[dataAttr] = '';
+    if (style) props.style = style;
+    return React.createElement(Tag, props, children);
+  });
+  Component.displayName = displayName;
+  return Component;
+}
+
+export const AlertDialogIcon = createAlertDialogSection('span', 'AlertDialogIcon', 'icon', 'data-ui-alert-dialog-icon');
+export const AlertDialogTitle = createAlertDialogSection('div', 'AlertDialogTitle', 'title', 'data-ui-alert-dialog-title');
+export const AlertDialogDescription = createAlertDialogSection(
+  'div',
+  'AlertDialogDescription',
+  'description',
+  'data-ui-alert-dialog-description'
+);
+export const AlertDialogContent = createAlertDialogSection(
+  'div',
+  'AlertDialogContent',
+  'content',
+  'data-ui-alert-dialog-content'
+);
+export const AlertDialogActions = createAlertDialogSection(
+  'div',
+  'AlertDialogActions',
+  'footer',
+  'data-ui-alert-dialog-actions'
+);
 
 export default AlertDialog;

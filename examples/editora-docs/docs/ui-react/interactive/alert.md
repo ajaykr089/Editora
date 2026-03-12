@@ -8,6 +8,8 @@ sidebar_label: Alert
 
 The `Alert` component provides important messages with support for custom styling, comprehensive accessibility features, and smooth animations for enhanced user experience.
 
+Import `Alert`, `AlertTitle`, `AlertDescription`, `AlertActions`, and `AlertIcon` together when you want a structured message layout.
+
 ## Basic Usage
 
 ```tsx
@@ -15,7 +17,7 @@ import { Alert } from '@editora/ui-react';
 
 function BasicAlert() {
   return (
-    <Alert tone="info" title="Welcome to Editora">
+    <Alert tone="info" variant="surface" radius={12} title="Welcome to Editora">
       This is an informational alert message.
     </Alert>
   );
@@ -28,14 +30,39 @@ function BasicAlert() {
 |------|------|---------|-------------|
 | `title` | `string` | - | Alert title |
 | `description` | `string` | - | Alert description |
-| `tone` | `'info' \| 'success' \| 'warning' \| 'danger'` | - | Alert tone |
-| `variant` | `'soft' \| 'outline' \| 'solid'` | - | Alert variant |
+| `tone` | `'neutral' \| 'info' \| 'success' \| 'warning' \| 'danger'` | - | Alert tone |
+| `variant` | `'surface' \| 'soft' \| 'outline' \| 'solid'` | - | Alert variant |
 | `layout` | `'inline' \| 'banner'` | - | Alert layout |
+| `size` | `'sm' \| 'md' \| 'lg' \| '1' \| '2' \| '3'` | `'md'` | Density and typography scale |
+| `radius` | `number \| string` | theme radius | Corner radius; numbers are treated as pixels and `full` creates a pill shell |
+| `elevation` | `'none' \| 'low' \| 'high'` | `'low'` | Shadow depth |
+| `indicator` | `'line' \| 'none'` | `'line'` | Show or hide the left accent rail |
 | `dismissible` | `boolean` | `false` | Show dismiss button |
 | `open` | `boolean` | - | Alert open state |
 | `headless` | `boolean` | `false` | Remove default styling |
 | `onClose` | `() => void` | - | Close handler |
 | `children` | `React.ReactNode` | - | Alert content |
+
+## Structured Composition
+
+```tsx
+import { Alert, AlertActions, AlertDescription, AlertTitle } from '@editora/ui-react';
+
+function StructuredAlert() {
+  return (
+    <Alert tone="info" variant="surface" radius={12}>
+      <AlertTitle>Deployment notice</AlertTitle>
+      <AlertDescription>
+        Production rollout windows have shifted by 20 minutes for the eu-west cluster.
+      </AlertDescription>
+      <AlertActions>
+        <button type="button">Review plan</button>
+        <button type="button">Acknowledge</button>
+      </AlertActions>
+    </Alert>
+  );
+}
+```
 
 ## Basic Configuration
 
@@ -43,44 +70,28 @@ function BasicAlert() {
 Basic informational alert.
 
 ```tsx
-<Alert 
-  tone="info" 
-  title="Information" 
-  description="This is an informational message."
-/>
+<Alert tone="info" variant="surface" radius={12} title="Information" description="This is an informational message." />
 ```
 
 ### Success Alert
 Success message alert.
 
 ```tsx
-<Alert 
-  tone="success" 
-  title="Success" 
-  description="Your changes have been saved successfully."
-/>
+<Alert tone="success" variant="soft" radius={12} title="Success" description="Your changes have been saved successfully." />
 ```
 
 ### Warning Alert
 Warning message alert.
 
 ```tsx
-<Alert 
-  tone="warning" 
-  title="Warning" 
-  description="Please review your settings before proceeding."
-/>
+<Alert tone="warning" variant="outline" radius={12} title="Warning" description="Please review your settings before proceeding." />
 ```
 
 ### Error Alert
 Error message alert.
 
 ```tsx
-<Alert 
-  tone="danger" 
-  title="Error" 
-  description="An error occurred while processing your request."
-/>
+<Alert tone="danger" variant="solid" radius={12} title="Error" description="An error occurred while processing your request." />
 ```
 
 ### Dismissible Alert
@@ -108,36 +119,21 @@ function DismissibleAlert() {
 Soft styled alert.
 
 ```tsx
-<Alert 
-  variant="soft"
-  tone="info"
-  title="Information"
-  description="This is a soft styled alert."
-/>
+<Alert variant="soft" tone="info" radius={12} title="Information" description="This is a soft styled alert." />
 ```
 
 ### Outline Variant
 Outline styled alert.
 
 ```tsx
-<Alert 
-  variant="outline"
-  tone="success"
-  title="Success"
-  description="This is an outline styled alert."
-/>
+<Alert variant="outline" tone="success" radius={12} elevation="none" title="Success" description="This is an outline styled alert." />
 ```
 
 ### Solid Variant
 Solid styled alert.
 
 ```tsx
-<Alert 
-  variant="solid"
-  tone="warning"
-  title="Warning"
-  description="This is a solid styled alert."
-/>
+<Alert variant="solid" tone="warning" radius={12} elevation="low" title="Warning" description="This is a solid styled alert." />
 ```
 
 ## Alert Layouts
@@ -146,24 +142,14 @@ Solid styled alert.
 Standard inline alert.
 
 ```tsx
-<Alert 
-  layout="inline"
-  tone="info"
-  title="Inline Alert"
-  description="This is an inline layout alert."
-/>
+<Alert layout="inline" tone="info" variant="surface" title="Inline Alert" description="This is an inline layout alert." />
 ```
 
 ### Banner Layout
 Banner style alert.
 
 ```tsx
-<Alert 
-  layout="banner"
-  tone="success"
-  title="Banner Alert"
-  description="This is a banner layout alert."
-/>
+<Alert layout="banner" tone="success" variant="soft" title="Banner Alert" description="This is a banner layout alert." />
 ```
 
 ## Advanced Features

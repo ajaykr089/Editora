@@ -78,6 +78,8 @@ export interface ThemeTokens {
   components?: {
     button?: ThemeScale;
     card?: ThemeScale;
+    alert?: ThemeScale;
+    alertDialog?: ThemeScale;
     menu?: ThemeScale;
     panel?: ThemeScale;
     input?: ThemeScale;
@@ -492,6 +494,30 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'classic-hover-shadow': 'var(--shadow-3)',
     'classic-active-shadow': 'var(--shadow-2)'
   },
+  alert: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
+    radius: 'var(--ui-radius)',
+    shadow: 'var(--shadow-2)',
+    'padding-x': '16px',
+    'padding-y': '14px',
+    gap: 'var(--ui-default-gap)',
+    'icon-size': '26px',
+    'dismiss-size': '28px'
+  },
+  alertDialog: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
+    radius: 'var(--ui-radius)',
+    shadow: 'var(--shadow-4)',
+    backdrop: 'var(--color-overlay)',
+    padding: '20px',
+    gap: 'var(--ui-default-gap)',
+    'min-width': '360px',
+    'max-width': 'min(90vw, 560px)',
+    'header-gap': '10px',
+    'footer-gap': '10px'
+  },
   menu: {
     bg: 'var(--color-panel)',
     border: '1px solid color-mix(in srgb, var(--gray-a5) 78%, transparent)',
@@ -543,6 +569,30 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     'classic-shadow': 'var(--shadow-2)',
     'classic-hover-shadow': 'var(--shadow-3)',
     'classic-active-shadow': 'var(--shadow-2)'
+  },
+  alert: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
+    radius: 'var(--ui-radius)',
+    shadow: 'var(--shadow-2)',
+    'padding-x': '16px',
+    'padding-y': '14px',
+    gap: 'var(--ui-default-gap)',
+    'icon-size': '26px',
+    'dismiss-size': '28px'
+  },
+  alertDialog: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
+    radius: 'var(--ui-radius)',
+    shadow: 'var(--shadow-4)',
+    backdrop: 'var(--color-overlay)',
+    padding: '20px',
+    gap: 'var(--ui-default-gap)',
+    'min-width': '360px',
+    'max-width': 'min(90vw, 560px)',
+    'header-gap': '10px',
+    'footer-gap': '10px'
   },
   menu: {
     bg: 'var(--color-panel)',
@@ -915,6 +965,8 @@ export function createThemeTokens(overrides?: Partial<ThemeTokens>, options?: { 
       ...(overrides?.components || {}),
       button: mergeScale(base.components?.button, overrides?.components?.button),
       card: mergeScale(base.components?.card, overrides?.components?.card),
+      alert: mergeScale(base.components?.alert, overrides?.components?.alert),
+      alertDialog: mergeScale(base.components?.alertDialog, overrides?.components?.alertDialog),
       menu: mergeScale(base.components?.menu, overrides?.components?.menu),
       panel: mergeScale(base.components?.panel, overrides?.components?.panel),
       input: mergeScale(base.components?.input, overrides?.components?.input)
@@ -1070,6 +1122,8 @@ function applyThemeToTarget(target: HTMLElement, next: ThemeTokens) {
   addScaleVariables(target, '--shadow-', next.shadows as ThemeScale | undefined);
   addScaleVariables(target, '--base-button-', next.components?.button);
   addScaleVariables(target, '--base-card-', next.components?.card);
+  addScaleVariables(target, '--base-alert-', next.components?.alert);
+  addScaleVariables(target, '--base-alert-dialog-', next.components?.alertDialog);
   addScaleVariables(target, '--base-menu-', next.components?.menu);
   addScaleVariables(target, '--base-panel-', next.components?.panel);
   addScaleVariables(target, '--base-input-', next.components?.input);
