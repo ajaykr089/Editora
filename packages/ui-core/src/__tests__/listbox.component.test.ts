@@ -27,9 +27,11 @@ describe('ui-listbox component', () => {
     const moved = el.move(1, { current: first, focus: false, scroll: false });
     expect(moved?.textContent).toContain('Gamma');
     expect(moved?.getAttribute('data-active')).toBe('true');
+    expect(first?.hasAttribute('data-active')).toBe(false);
 
     const matched = el.typeahead('al', { current: moved, focus: false, scroll: false });
     expect(matched?.textContent).toContain('Alpha');
+    expect(moved?.hasAttribute('data-active')).toBe(false);
   });
 
   it('injects base option text styling into the host root', () => {

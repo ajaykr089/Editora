@@ -1,393 +1,411 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Badge, Box, Button, ContextMenu, Flex, Grid } from '@editora/ui-react';
-import {
-  AlertTriangleIcon,
-  CheckCircleIcon,
-  ClipboardCheckIcon,
-  LayersIcon,
-  RefreshCwIcon,
-  ShieldIcon,
-  SparklesIcon
-} from '@editora/react-icons';
-import '@editora/themes/themes/default.css';
+import { createThemeTokens, type AccentPaletteName, type ThemeTokens } from '@editora/ui-core';
+import { Badge, Box, Button, Card, CardDescription, CardHeader, CardTitle, ContextMenu, Flex, Grid, ThemeProvider } from '@editora/ui-react';
+import { CheckCircleIcon, ClipboardCheckIcon, FolderIcon, HomeIcon, LayersIcon, ShieldIcon, SparklesIcon, TrashIcon } from '@editora/react-icons';
+
+const baseItems = [
+  { label: 'Edit', shortcut: '⌘ E' },
+  { label: 'Duplicate', shortcut: '⌘ D' },
+  { separator: true },
+  { label: 'Archive', shortcut: '⌘ N' },
+  {
+    label: 'More',
+    submenu: [
+      { label: 'Move to project…' },
+      { label: 'Move to folder…' },
+      { separator: true },
+      { label: 'Advanced options…' },
+    ],
+  },
+  { separator: true },
+  { label: 'Share' },
+  { label: 'Add to favorites' },
+  { separator: true },
+  { label: 'Delete', shortcut: '⌘ ⌫', tone: 'danger' as const },
+] as const;
 
 const meta: Meta<typeof ContextMenu> = {
   title: 'UI/ContextMenu',
   component: ContextMenu,
+  args: {
+    variant: 'surface',
+    size: 'md',
+    radius: 12,
+    elevation: 'low',
+    tone: 'default',
+    state: 'idle',
+    closeOnSelect: true,
+    closeOnEscape: true,
+    typeahead: true,
+    disabled: false,
+  },
   argTypes: {
-    open: { control: 'boolean' },
-    anchorId: { control: 'text' },
-    disabled: { control: 'boolean' },
-    state: { control: { type: 'radio', options: ['idle', 'loading', 'error', 'success'] } },
-    stateText: { control: 'text' },
-    variant: { control: { type: 'radio', options: ['default', 'solid', 'flat', 'contrast'] } },
-    density: { control: { type: 'radio', options: ['default', 'compact', 'comfortable'] } },
-    shape: { control: { type: 'radio', options: ['default', 'square', 'soft'] } },
-    elevation: { control: { type: 'radio', options: ['default', 'none', 'low', 'high'] } },
-    tone: { control: { type: 'radio', options: ['default', 'brand', 'danger', 'success'] } },
+    variant: { control: 'select', options: ['surface', 'soft', 'solid', 'outline', 'contrast', 'flat'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg', '1', '2', '3'] },
+    radius: { control: 'text' },
+    elevation: { control: 'select', options: ['none', 'low', 'high'] },
+    tone: { control: 'select', options: ['default', 'neutral', 'info', 'success', 'warning', 'danger'] },
+    state: { control: 'select', options: ['idle', 'loading', 'error', 'success'] },
     closeOnSelect: { control: 'boolean' },
     closeOnEscape: { control: 'boolean' },
-    typeahead: { control: 'boolean' }
-  }
+    typeahead: { control: 'boolean' },
+    disabled: { control: 'boolean' },
+  },
 };
 
 export default meta;
 
-const shell: React.CSSProperties = {
-  maxInlineSize: 1040,
-  marginInline: 'auto',
-  padding: 24,
-  border: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent)',
-  borderRadius: 20,
-  background:
-    'radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 28%), linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
-  boxShadow: '0 24px 60px rgba(15, 23, 42, 0.08)'
-};
+type Story = StoryObj<typeof ContextMenu>;
 
-const panel: React.CSSProperties = {
-  padding: 20,
-  borderRadius: 16,
-  border: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent)',
-  background: 'color-mix(in srgb, white 94%, #eff6ff 6%)'
-};
-
-const workspace: React.CSSProperties = {
-  minHeight: 240,
-  borderRadius: 18,
-  border: '1px dashed #94a3b8',
-  background:
-    'linear-gradient(155deg, rgba(248, 250, 252, 1) 0%, rgba(238, 242, 255, 0.92) 48%, rgba(239, 246, 255, 0.86) 100%)',
-  display: 'grid',
-  placeItems: 'center',
-  padding: 24,
-  color: '#334155'
-};
-
-const anchorCard: React.CSSProperties = {
-  display: 'grid',
-  gap: 12,
-  padding: 16,
-  borderRadius: 14,
-  border: '1px solid rgba(148, 163, 184, 0.28)',
-  background: 'rgba(255, 255, 255, 0.82)'
-};
-
-const baseItems = [
-  {
-    label: 'Run Safety Validation',
-    description: 'Check policy consistency before publish',
-    icon: <ClipboardCheckIcon size={14} />,
-    shortcut: 'V'
-  },
-  {
-    label: 'Refresh Incident Stream',
-    description: 'Rehydrate timeline state from live events',
-    icon: <RefreshCwIcon size={14} />,
-    shortcut: 'R'
-  },
-  {
-    label: 'Open Command Workspace',
-    description: 'Jump into the elevated operator flow',
-    icon: <LayersIcon size={14} />,
-    shortcut: 'W'
-  },
-  { separator: true },
-  {
-    label: 'Escalate to Supervisor',
-    description: 'Requires privileged confirmation',
-    icon: <AlertTriangleIcon size={14} />,
-    shortcut: 'X'
-  }
-];
-
-function StoryShell(props: { eyebrow: string; title: string; subtitle: string; children: React.ReactNode }) {
+function TabButton(props: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <Box style={shell}>
-      <Grid style={{ display: 'grid', gap: 20 }}>
-        <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
-          <div>
-            <div style={{ marginBottom: 8, color: '#475569', fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              {props.eyebrow}
-            </div>
-            <div style={{ fontSize: 28, lineHeight: 1.15, fontWeight: 700, color: '#0f172a' }}>{props.title}</div>
-            <div style={{ marginTop: 8, maxInlineSize: 640, color: '#475569', fontSize: 14, lineHeight: 1.55 }}>{props.subtitle}</div>
-          </div>
-          <Badge tone="info">Context Menu</Badge>
-        </Flex>
-        {props.children}
-      </Grid>
-    </Box>
+    <button
+      type="button"
+      onClick={props.onClick}
+      style={{
+        appearance: 'none',
+        border: 'none',
+        borderBottom: props.active ? '3px solid var(--ui-color-primary, #2563eb)' : '3px solid transparent',
+        background: 'transparent',
+        color: props.active ? 'var(--ui-color-text, #0f172a)' : 'var(--ui-color-muted, #64748b)',
+        padding: '14px 4px 12px',
+        font: '600 15px/1.4 inherit',
+        cursor: 'pointer',
+      }}
+    >
+      {props.children}
+    </button>
   );
 }
 
-function PlaygroundStory(args: any) {
-  const generatedAnchorId = React.useId().replace(/:/g, '');
-  const anchorId = args.anchorId || `ctx-story-anchor-${generatedAnchorId}`;
+type StoryPaletteName = AccentPaletteName | 'purple';
+
+function paletteTokens(name: StoryPaletteName) {
+  if (name === 'purple') {
+    return createThemeTokens({
+      colors: {
+        primary: '#8b5cf6',
+        primaryHover: '#7c3aed',
+        focusRing: '#8b5cf6',
+      },
+      palette: {
+        accent: {
+          '1': '#fdfcff',
+          '2': '#faf7ff',
+          '3': '#f3ecff',
+          '4': '#eadcff',
+          '5': '#ddc7ff',
+          '6': '#cdb0ff',
+          '7': '#b693ff',
+          '8': '#9b70ff',
+          '9': '#8b5cf6',
+          '10': '#7c3aed',
+          '11': '#6d28d9',
+          '12': '#2e1065',
+        },
+        accentAlpha: {
+          '1': '#7c3aed03',
+          '2': '#7c3aed08',
+          '3': '#7c3aed14',
+          '4': '#7c3aed24',
+          '5': '#7c3aed38',
+          '6': '#7c3aed4d',
+          '7': '#7c3aed68',
+          '8': '#7c3aed8f',
+          '9': '#7c3aed',
+          '10': '#6d28d9',
+          '11': '#5b21b6',
+          '12': '#2e1065',
+        },
+        accentContrast: '#ffffff',
+        accentSurface: '#f5f0ffcc',
+        accentIndicator: '#8b5cf6',
+        accentTrack: '#8b5cf6',
+      },
+    } satisfies Partial<ThemeTokens>, { accentPalette: 'blue', mode: 'light' });
+  }
+  return createThemeTokens({}, { accentPalette: name, mode: 'light' });
+}
+
+function ContextZone(props: {
+  label: string;
+  variant: 'surface' | 'soft' | 'solid' | 'outline' | 'contrast' | 'flat';
+  size: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
+  tone?: 'default' | 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+  radius?: number | string;
+  elevation?: 'none' | 'low' | 'high';
+  state?: 'idle' | 'loading' | 'error' | 'success';
+  palette?: StoryPaletteName;
+}) {
   const [menu, setMenu] = React.useState<{ open: boolean; point?: { x: number; y: number } }>({ open: false });
 
-  const openFromAnchor = React.useCallback(() => {
-    const anchor = document.getElementById(anchorId);
-    if (!(anchor instanceof HTMLElement)) return;
-    const rect = anchor.getBoundingClientRect();
-    setMenu({
-      open: true,
-      point: {
-        x: rect.left + Math.min(32, Math.max(16, rect.width * 0.24)),
-        y: rect.bottom - 12
-      }
-    });
-  }, [anchorId]);
+  const content = (
+    <Box
+      onContextMenu={(event) => {
+        event.preventDefault();
+        setMenu({ open: true, point: { x: event.clientX, y: event.clientY } });
+      }}
+      style={{
+        display: 'grid',
+        placeItems: 'center',
+        minHeight: 92,
+        borderRadius: 14,
+        border: '2px dashed color-mix(in srgb, var(--ui-color-primary, #2563eb) 34%, transparent)',
+        color: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 70%, var(--ui-color-text, #0f172a))',
+        background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, white) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, white) 100%)',
+        fontSize: 17,
+        lineHeight: '24px',
+      }}
+    >
+      {props.label}
+      <ContextMenu
+        open={menu.open}
+        anchorPoint={menu.point}
+        items={baseItems as any}
+        variant={props.variant}
+        size={props.size}
+        tone={props.tone}
+        radius={props.radius}
+        elevation={props.elevation}
+        state={props.state}
+        onClose={() => setMenu((current) => ({ ...current, open: false }))}
+      />
+    </Box>
+  );
 
-  React.useEffect(() => {
-    if (args.open) {
-      openFromAnchor();
-      return;
-    }
-    setMenu((current) => (current.open ? { ...current, open: false } : current));
-  }, [args.open, openFromAnchor]);
+  if (!props.palette) return content;
 
-  const interactiveDisabled = !!args.disabled || args.state === 'loading';
+  return <ThemeProvider tokens={paletteTokens(props.palette)}>{content}</ThemeProvider>;
+}
+
+function ThemeTokenMatrixStory() {
+  const [tab, setTab] = React.useState<'theme' | 'colors' | 'sizes'>('theme');
 
   return (
-    <StoryShell
-      eyebrow="Anchored Surface"
-      title="Controlled anchor menu with premium spacing and low runtime churn"
-      subtitle="This story keeps the menu closed by default and lets you inspect visual variants, focus behavior, and layout density without forcing an always-open docs render."
-    >
-      <Grid style={{ display: 'grid', gap: 16 }}>
-        <Box style={panel}>
-          <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
-            <div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#0f172a' }}>Incident action rail</div>
-              <div style={{ marginTop: 4, color: '#64748b', fontSize: 13 }}>Click or right-click the anchor below to open the menu and inspect anchored behavior.</div>
-            </div>
-            <Flex align="center" style={{ gap: 10, flexWrap: 'wrap' }}>
-              <Badge tone="info">Docs-safe</Badge>
-              <Button
-                variant="secondary"
-                disabled={interactiveDisabled}
-                onClick={() => {
-                  if (menu.open) {
-                    setMenu((current) => ({ ...current, open: false }));
-                    return;
-                  }
-                  openFromAnchor();
-                }}
-                startIcon={<SparklesIcon size={14} />}
-              >
-                {menu.open ? 'Close menu' : 'Open menu'}
-              </Button>
-            </Flex>
-          </Flex>
-        </Box>
+    <Grid style={{ gap: 20, maxInlineSize: 1280 }}>
+      <div>
+        <div style={{ fontSize: 44, lineHeight: 1.05, fontWeight: 700, color: '#111827' }}>Context Menu</div>
+      </div>
 
-        <div
-          id={anchorId}
-          style={{
-            ...workspace,
-            minHeight: 180
-          }}
-          onClick={() => {
-            if (interactiveDisabled) return;
-            openFromAnchor();
-          }}
-          onContextMenu={(event) => {
-            event.preventDefault();
-            if (interactiveDisabled) return;
-            setMenu({ open: true, point: { x: event.clientX, y: event.clientY } });
-          }}
-        >
-          <div style={anchorCard}>
-            <Flex align="center" style={{ gap: 10 }}>
-              <ShieldIcon size={16} />
-              <div style={{ fontWeight: 700 }}>Policy Anchor Surface</div>
+      <Flex style={{ gap: 28, borderBottom: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent)' }}>
+        <TabButton active={tab === 'theme'} onClick={() => setTab('theme')}>Theme colors</TabButton>
+        <TabButton active={tab === 'colors'} onClick={() => setTab('colors')}>All colors</TabButton>
+        <TabButton active={tab === 'sizes'} onClick={() => setTab('sizes')}>All sizes</TabButton>
+      </Flex>
+
+      {tab === 'theme' ? (
+        <Grid style={{ gap: 22 }}>
+          <Grid style={{ gridTemplateColumns: '120px repeat(2, minmax(240px, 1fr)) repeat(2, minmax(240px, 1fr))', gap: 18, alignItems: 'center' }}>
+            <div />
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Accent</div>
+            <div />
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Gray</div>
+            <div />
+          </Grid>
+          <Grid style={{ gridTemplateColumns: '120px repeat(4, minmax(240px, 1fr))', gap: 18, alignItems: 'center' }}>
+            <div style={{ fontSize: 18, color: '#5b6574' }}>Solid</div>
+            <ContextZone label="Right-click here" variant="solid" size="md" elevation="low" palette="blue" />
+            <ContextZone label="Right-click here" variant="solid" size="md" elevation="low" palette="blue" tone="neutral" />
+            <ContextZone label="Right-click here" variant="solid" size="md" elevation="low" palette="gray" />
+            <ContextZone label="Right-click here" variant="solid" size="md" elevation="low" palette="gray" tone="neutral" />
+
+            <div style={{ fontSize: 18, color: '#5b6574' }}>Soft</div>
+            <ContextZone label="Right-click here" variant="soft" size="md" elevation="low" palette="blue" />
+            <ContextZone label="Right-click here" variant="soft" size="md" elevation="low" palette="blue" tone="neutral" />
+            <ContextZone label="Right-click here" variant="soft" size="md" elevation="low" palette="gray" />
+            <ContextZone label="Right-click here" variant="soft" size="md" elevation="low" palette="gray" tone="neutral" />
+          </Grid>
+        </Grid>
+      ) : null}
+
+      {tab === 'colors' ? (
+        <Grid style={{ gap: 16 }}>
+          <Grid style={{ gridTemplateColumns: '120px repeat(2, minmax(260px, 1fr))', gap: 18, alignItems: 'center' }}>
+            <div />
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Solid</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Soft</div>
+            {(['gray', 'amber', 'red', 'purple', 'blue', 'green'] as const satisfies readonly StoryPaletteName[]).map((name) => (
+              <React.Fragment key={name}>
+                <div style={{ fontSize: 18, color: '#5b6574', textTransform: 'capitalize' }}>{name}</div>
+                <ContextZone label="Right-click here" variant="solid" size="md" elevation="low" palette={name} />
+                <ContextZone label="Right-click here" variant="soft" size="md" elevation="low" palette={name} />
+              </React.Fragment>
+            ))}
+          </Grid>
+        </Grid>
+      ) : null}
+
+      {tab === 'sizes' ? (
+        <Grid style={{ gap: 18 }}>
+          <Grid style={{ gridTemplateColumns: '120px repeat(2, minmax(280px, 1fr))', gap: 18, alignItems: 'center' }}>
+            <div />
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Solid</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Soft</div>
+            {(['1', '2', '3'] as const).map((size) => (
+              <React.Fragment key={size}>
+                <div style={{ fontSize: 18, color: '#5b6574' }}>Size {size}</div>
+                <ContextZone label="Right-click here" variant="solid" size={size} elevation="low" palette="blue" />
+                <ContextZone label="Right-click here" variant="soft" size={size} elevation="low" palette="blue" />
+              </React.Fragment>
+            ))}
+          </Grid>
+        </Grid>
+      ) : null}
+    </Grid>
+  );
+}
+
+export const ThemeTokenMatrix: Story = {
+  render: () => <ThemeTokenMatrixStory />,
+};
+
+export const Playground: Story = {
+  render: (args) => {
+    const [menu, setMenu] = React.useState<{ open: boolean; point?: { x: number; y: number } }>({ open: false });
+    const [lastAction, setLastAction] = React.useState('No action yet');
+
+    return (
+      <Grid style={{ gap: 16, maxInlineSize: 1040 }}>
+        <Card radius={18}>
+          <CardHeader>
+            <CardTitle>Anchored production surface</CardTitle>
+            <CardDescription>
+              Right-click the canvas to inspect the real component contract: variants, size, radius, elevation, tone, state, keyboard support, and submenu handling.
+            </CardDescription>
+          </CardHeader>
+          <Box slot="inset" style={{ padding: 16, display: 'grid', gap: 16 }}>
+            <Box
+              onContextMenu={(event) => {
+                event.preventDefault();
+                setMenu({ open: true, point: { x: event.clientX, y: event.clientY } });
+              }}
+              style={{
+                minHeight: 220,
+                borderRadius: 18,
+                border: '2px dashed color-mix(in srgb, var(--ui-color-primary, #2563eb) 34%, transparent)',
+                background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, white) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, white) 100%)',
+                display: 'grid',
+                placeItems: 'center',
+                padding: 24,
+              }}
+            >
+              <Grid style={{ gap: 12, justifyItems: 'center', textAlign: 'center' }}>
+                <Flex align="center" style={{ gap: 10 }}>
+                  <ShieldIcon size={16} />
+                  <span style={{ fontWeight: 700 }}>Critical Escalation Workspace</span>
+                </Flex>
+                <div style={{ maxInlineSize: 560, color: '#64748b', fontSize: 14, lineHeight: 1.6 }}>
+                  Right-click anywhere in this surface to open the context menu. The component is portaled, typeahead-aware, submenu-capable, and theme-token driven.
+                </div>
+                <Badge tone="info">Right-click here</Badge>
+              </Grid>
+            </Box>
+
+            <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
+              <Flex align="center" style={{ gap: 10, flexWrap: 'wrap' }}>
+                <Button variant="secondary" onClick={() => setMenu((current) => ({ ...current, open: false }))}>
+                  Close menu
+                </Button>
+                <Badge tone="success">{lastAction}</Badge>
+              </Flex>
+              <Flex align="center" style={{ gap: 8, flexWrap: 'wrap' }}>
+                <Badge tone={args.state === 'error' ? 'danger' : args.state === 'success' ? 'success' : args.state === 'loading' ? 'warning' : 'neutral'}>
+                  {args.state}
+                </Badge>
+              </Flex>
             </Flex>
-            <div style={{ color: '#64748b', fontSize: 13, lineHeight: 1.5 }}>Click or right-click here to open the anchored menu. Use Storybook controls to inspect visual variants.</div>
-            <div style={{ color: '#94a3b8', fontSize: 12 }}>Anchor id: {anchorId}</div>
-          </div>
-        </div>
+          </Box>
+        </Card>
 
         <ContextMenu
           {...args}
           open={menu.open}
           anchorPoint={menu.point}
           items={baseItems as any}
-          onClose={() => {
-            setMenu((current) => ({ ...current, open: false }));
-            args.onClose?.();
-          }}
-          onChange={(nextOpen) => {
-            setMenu((current) => ({ ...current, open: nextOpen }));
-            args.onChange?.(nextOpen);
+          onClose={() => setMenu((current) => ({ ...current, open: false }))}
+          onSelect={(detail) => {
+            setLastAction(detail.label || detail.value || 'Unknown action');
+            args.onSelect?.(detail);
           }}
         />
       </Grid>
-    </StoryShell>
-  );
-}
-
-export const Playground: StoryObj<typeof ContextMenu> = {
-  render: (args) => <PlaygroundStory {...args} />,
-  args: {
-  open: false,
-  anchorId: 'ctx-story-anchor',
-  disabled: false,
-  state: 'idle',
-  stateText: '',
-  variant: 'default',
-  density: 'default',
-  shape: 'default',
-  elevation: 'default',
-  tone: 'default',
-  closeOnSelect: true,
-  closeOnEscape: true,
-  typeahead: true
-  }
+    );
+  },
 };
 
-export const IncidentWorkflow = () => {
-  const [menu, setMenu] = React.useState<{ open: boolean; point?: { x: number; y: number } }>({ open: false });
-  const [status, setStatus] = React.useState<'idle' | 'loading' | 'error' | 'success'>('idle');
-  const [lastAction, setLastAction] = React.useState('None');
+export const StructuredComposition: Story = {
+  render: () => {
+    const [menu, setMenu] = React.useState<{ open: boolean; point?: { x: number; y: number } }>({ open: false });
 
-  const statusText =
-    status === 'loading'
-      ? 'Syncing operator policies'
-      : status === 'error'
-        ? 'Escalation route unavailable'
-        : status === 'success'
-          ? 'Safety checks passed'
-          : '';
-
-  return (
-    <StoryShell
-      eyebrow="Point Invocation"
-      title="Right-click workflow designed for dense enterprise canvases"
-      subtitle="This is the high-stress context-menu path: point-based invocation, controlled close behavior, and lightweight state transitions without toasts or extra docs churn."
-    >
-      <Grid style={{ display: 'grid', gap: 16 }}>
-        <Box
-          style={workspace}
-          onContextMenu={(event) => {
-            event.preventDefault();
-            setMenu({ open: true, point: { x: event.clientX, y: event.clientY } });
-          }}
-        >
-          <Grid style={{ display: 'grid', gap: 12, justifyItems: 'center', textAlign: 'center' }}>
-            <Flex align="center" style={{ gap: 10 }}>
-              <ShieldIcon size={16} />
-              <span style={{ fontWeight: 700 }}>Critical Escalation Workspace</span>
-            </Flex>
-            <div style={{ maxInlineSize: 520, color: '#64748b', fontSize: 14, lineHeight: 1.6 }}>
-              Right-click anywhere in this surface to open incident actions. The menu stays lightweight so the story remains responsive under Storybook docs rendering.
-            </div>
-            <Badge tone={status === 'error' ? 'danger' : status === 'success' ? 'success' : status === 'loading' ? 'warning' : 'info'}>{status.toUpperCase()}</Badge>
-          </Grid>
-        </Box>
-
-        <Grid style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
-          <Button variant="secondary" onClick={() => setStatus('loading')} startIcon={<RefreshCwIcon size={14} />}>
-            Loading
-          </Button>
-          <Button variant="secondary" onClick={() => setStatus('error')} startIcon={<AlertTriangleIcon size={14} />}>
-            Error
-          </Button>
-          <Button variant="secondary" onClick={() => setStatus('success')} startIcon={<CheckCircleIcon size={14} />}>
-            Success
-          </Button>
-        </Grid>
-
-        <Box style={panel}>
-          <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
-            <div style={{ color: '#475569', fontSize: 14 }}>Last selected action</div>
-            <div style={{ fontWeight: 700, color: '#0f172a' }}>{lastAction}</div>
-          </Flex>
-        </Box>
+    return (
+      <Grid style={{ gap: 16, maxInlineSize: 920 }}>
+        <Card radius={18} variant="soft" tone="info">
+          <CardHeader>
+            <CardTitle>Structured composition</CardTitle>
+            <CardDescription>
+              Use custom slotted content when the built-in `items` model is not expressive enough for mixed labels, captions, and workflow-specific states.
+            </CardDescription>
+          </CardHeader>
+          <Box slot="inset" style={{ padding: 16 }}>
+            <Box
+              onContextMenu={(event) => {
+                event.preventDefault();
+                setMenu({ open: true, point: { x: event.clientX, y: event.clientY } });
+              }}
+              style={{
+                minHeight: 160,
+                borderRadius: 16,
+                border: '2px dashed color-mix(in srgb, var(--ui-color-primary, #2563eb) 34%, transparent)',
+                display: 'grid',
+                placeItems: 'center',
+                color: '#334155',
+              }}
+            >
+              <Flex align="center" style={{ gap: 10 }}>
+                <SparklesIcon size={16} />
+                <span>Right-click the workflow card</span>
+              </Flex>
+            </Box>
+          </Box>
+        </Card>
 
         <ContextMenu
           open={menu.open}
           anchorPoint={menu.point}
-          state={status}
-          stateText={statusText}
-          closeOnSelect
+          variant="soft"
+          size="md"
+          radius={12}
+          elevation="low"
           onClose={() => setMenu((current) => ({ ...current, open: false }))}
-          onSelect={(detail) => {
-            setLastAction(detail.label || detail.value || 'Unknown');
-            setMenu((current) => ({ ...current, open: false }));
-          }}
-          items={baseItems as any}
-        />
-      </Grid>
-    </StoryShell>
-  );
-};
-
-export const PersistentSelection = () => {
-  const [open, setOpen] = React.useState(false);
-  const [last, setLast] = React.useState('No change yet');
-
-  return (
-    <StoryShell
-      eyebrow="Persistent Controls"
-      title="Preference editing with non-destructive menu selection"
-      subtitle="This variant keeps the menu open while toggles and radios update, making it a better demo for production-style settings panels than an always-open static example."
-    >
-      <Grid style={{ display: 'grid', gap: 16 }}>
-        <Flex align="center" style={{ gap: 12, flexWrap: 'wrap' }}>
-          <Button id="ctx-persistent-anchor" variant="secondary" onClick={() => setOpen((value) => !value)} startIcon={<SparklesIcon size={14} />}>
-            {open ? 'Close preferences' : 'Open preferences'}
-          </Button>
-          <Badge tone="info">closeOnSelect=false</Badge>
-        </Flex>
-
-        <Box style={panel}>
-          <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
-            <div style={{ color: '#475569', fontSize: 14 }}>Most recent preference update</div>
-            <div style={{ fontWeight: 700, color: '#0f172a' }}>{last}</div>
-          </Flex>
-        </Box>
-
-        <ContextMenu
-          open={open}
-          anchorId="ctx-persistent-anchor"
-          closeOnSelect={false}
-          density="comfortable"
-          shape="soft"
-          onClose={() => setOpen(false)}
-          onSelect={(detail) => {
-            const label = detail.label || detail.value || 'item';
-            const checked = typeof detail.checked === 'boolean' ? ` (${detail.checked ? 'on' : 'off'})` : '';
-            setLast(`${label}${checked}`);
-          }}
         >
-          <div slot="menu">
-            <div className="section-label">Layout Preferences</div>
-            <div className="menuitem" role="menuitemcheckbox" aria-checked="true" data-value="grid" tabIndex={0}>
-              <span className="icon selection-icon" aria-hidden="true" />
-              <span className="label"><span className="text">Show Grid</span><span className="caption">Visual alignment overlay</span></span>
-              <span className="shortcut">G</span>
-            </div>
-            <div className="menuitem" role="menuitemcheckbox" aria-checked="false" data-value="guides" tabIndex={0}>
-              <span className="icon selection-icon" aria-hidden="true" />
-              <span className="label"><span className="text">Snap to Guides</span><span className="caption">Precision drag behavior</span></span>
-              <span className="shortcut">S</span>
-            </div>
-            <div className="separator" role="separator" />
-            <div className="section-label">Mode</div>
-            <div className="menuitem" role="menuitemradio" data-group="mode" aria-checked="true" data-value="review" tabIndex={0}>
-              <span className="icon selection-icon" aria-hidden="true" />
-              <span className="label"><span className="text">Review</span><span className="caption">High-signal inspection workflow</span></span>
-              <span className="shortcut">1</span>
-            </div>
-            <div className="menuitem" role="menuitemradio" data-group="mode" aria-checked="false" data-value="build" tabIndex={0}>
-              <span className="icon selection-icon" aria-hidden="true" />
-              <span className="label"><span className="text">Build</span><span className="caption">Fast execution mode</span></span>
-              <span className="shortcut">2</span>
-            </div>
+          <div className="section-label">Workflow actions</div>
+          <div className="menuitem" role="menuitem" tabIndex={0}>
+            <span className="icon"><HomeIcon size={14} /></span>
+            <span className="label">
+              <span className="text">Open review room</span>
+              <span className="caption">Continue moderated triage</span>
+            </span>
+            <span className="shortcut">⌘ R</span>
+          </div>
+          <div className="menuitem" role="menuitem" tabIndex={0}>
+            <span className="icon"><ClipboardCheckIcon size={14} /></span>
+            <span className="label">
+              <span className="text">Sync operator notes</span>
+              <span className="caption">Refresh assignee comments</span>
+            </span>
+            <span className="shortcut">⌘ S</span>
+          </div>
+          <div className="separator" role="separator" />
+          <div className="menuitem" role="menuitem" tabIndex={0} data-tone="danger">
+            <span className="icon"><TrashIcon size={14} /></span>
+            <span className="label">
+              <span className="text">Delete draft</span>
+              <span className="caption">This action cannot be undone</span>
+            </span>
           </div>
         </ContextMenu>
       </Grid>
-    </StoryShell>
-  );
+    );
+  },
 };

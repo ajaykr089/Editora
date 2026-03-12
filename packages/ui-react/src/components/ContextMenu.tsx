@@ -19,6 +19,7 @@ export type MenuItem = {
   description?: string;
   shortcut?: string;
   icon?: string | React.ReactNode;
+  tone?: 'default' | 'neutral' | 'info' | 'success' | 'warning' | 'danger';
   disabled?: boolean;
   separator?: boolean;
   submenu?: MenuItem[];
@@ -36,11 +37,13 @@ export type ContextMenuProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange
   state?: 'idle' | 'loading' | 'error' | 'success';
   stateText?: string;
   items?: MenuItem[];
-  variant?: 'default' | 'solid' | 'flat' | 'contrast';
+  variant?: 'default' | 'surface' | 'soft' | 'solid' | 'outline' | 'contrast' | 'flat';
+  size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
+  radius?: number | string | 'none' | 'sm' | 'md' | 'lg' | 'full';
   density?: 'default' | 'compact' | 'comfortable';
   shape?: 'default' | 'square' | 'soft';
   elevation?: 'default' | 'none' | 'low' | 'high';
-  tone?: 'default' | 'brand' | 'danger' | 'success';
+  tone?: 'default' | 'brand' | 'neutral' | 'info' | 'danger' | 'success' | 'warning';
   closeOnSelect?: boolean;
   closeOnEscape?: boolean;
   typeahead?: boolean;
@@ -64,6 +67,8 @@ export function ContextMenu(props: ContextMenuProps) {
     state,
     stateText,
     variant,
+    size,
+    radius,
     density,
     shape,
     elevation,
@@ -241,6 +246,7 @@ export function ContextMenu(props: ContextMenuProps) {
           tabIndex={item.disabled ? -1 : 0}
           aria-disabled={item.disabled ? 'true' : undefined}
           data-value={item.value}
+          data-tone={item.tone && item.tone !== 'default' ? item.tone : undefined}
           onClick={item.disabled ? undefined : item.onClick}
         >
           {iconNode}
@@ -266,9 +272,11 @@ export function ContextMenu(props: ContextMenuProps) {
         ref={ref}
         {...rest}
         {...(shouldReflectOpenAttr ? { open: '' } : {})}
-        {...(variant && variant !== 'default' ? { variant } : {})}
-        {...(density && density !== 'default' ? { density } : {})}
-        {...(shape && shape !== 'default' ? { shape } : {})}
+        {...(variant && variant !== 'default' && variant !== 'surface' ? { variant } : {})}
+        {...(size && size !== 'md' && size !== '2' ? { size } : {})}
+        {...(radius != null && radius !== '' && radius !== 'md' ? { radius: String(radius) } : {})}
+        {...(!size && density && density !== 'default' ? { density } : {})}
+        {...(!radius && shape && shape !== 'default' ? { shape } : {})}
         {...(elevation && elevation !== 'default' ? { elevation } : {})}
         {...(tone && tone !== 'default' && tone !== 'brand' ? { tone } : {})}
         {...(disabled ? { disabled: '' } : {})}

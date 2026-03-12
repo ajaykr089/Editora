@@ -14,8 +14,10 @@ type BreadcrumbProps = React.HTMLAttributes<HTMLElement> & {
   separator?: string;
   maxItems?: number;
   currentIndex?: number;
-  size?: 'sm' | 'md' | 'lg';
-  variant?: 'default' | 'solid' | 'minimal';
+  size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
+  variant?: 'default' | 'surface' | 'soft' | 'solid' | 'outline' | 'ghost' | 'minimal';
+  radius?: number | string | 'none' | 'sm' | 'md' | 'lg' | 'full';
+  elevation?: 'default' | 'none' | 'low' | 'high';
   tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
   state?: 'idle' | 'loading' | 'error' | 'success';
   disabled?: boolean;
@@ -31,6 +33,8 @@ export const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(functio
     currentIndex,
     size,
     variant,
+    radius,
+    elevation,
     tone,
     state,
     disabled,
@@ -95,11 +99,17 @@ export const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(functio
     const el = ref.current;
     if (!el) return;
 
-    if (size && size !== 'md') el.setAttribute('size', size);
+    if (size && size !== 'md' && size !== '2') el.setAttribute('size', String(size));
     else el.removeAttribute('size');
 
-    if (variant && variant !== 'default') el.setAttribute('variant', variant);
+    if (variant && variant !== 'default' && variant !== 'surface') el.setAttribute('variant', variant);
     else el.removeAttribute('variant');
+
+    if (radius != null && radius !== '' && radius !== 'md') el.setAttribute('radius', String(radius));
+    else el.removeAttribute('radius');
+
+    if (elevation && elevation !== 'default' && elevation !== 'none') el.setAttribute('elevation', elevation);
+    else el.removeAttribute('elevation');
 
     if (tone) el.setAttribute('tone', tone);
     else el.removeAttribute('tone');
@@ -113,7 +123,7 @@ export const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(functio
 
     if (ariaLabel) el.setAttribute('aria-label', ariaLabel);
     else el.removeAttribute('aria-label');
-  }, [size, variant, tone, state, disabled, ariaLabel]);
+  }, [size, variant, radius, elevation, tone, state, disabled, ariaLabel]);
 
   return React.createElement('ui-breadcrumb', { ref, ...rest }, children);
 });

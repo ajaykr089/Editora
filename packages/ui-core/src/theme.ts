@@ -78,7 +78,11 @@ export interface ThemeTokens {
   components?: {
     button?: ThemeScale;
     badge?: ThemeScale;
+    blockControls?: ThemeScale;
+    box?: ThemeScale;
+    breadcrumb?: ThemeScale;
     card?: ThemeScale;
+    contextMenu?: ThemeScale;
     alert?: ThemeScale;
     alertDialog?: ThemeScale;
     appHeader?: ThemeScale;
@@ -497,6 +501,30 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'padding-inline': '10px',
     'border-width': '1px'
   },
+  blockControls: {
+    bg: 'var(--color-panel)',
+    border: '1px solid color-mix(in srgb, var(--gray-a5) 80%, transparent)',
+    radius: 'var(--ui-radius)',
+    shadow: 'var(--shadow-2)',
+    gap: '6px',
+    padding: '8px',
+    'item-radius': 'var(--ui-radius)'
+  },
+  box: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
+    radius: 'var(--ui-radius)',
+    shadow: 'var(--shadow-2)',
+    backdrop: 'var(--backdrop-filter-panel)'
+  },
+  breadcrumb: {
+    radius: 'var(--ui-radius)',
+    gap: '8px',
+    'font-size': '14px',
+    shadow: 'none',
+    'item-padding-block': '4px',
+    'item-padding-inline': '9px'
+  },
   card: {
     bg: 'var(--color-panel-solid)',
     border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
@@ -507,6 +535,23 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'classic-shadow': 'var(--shadow-2)',
     'classic-hover-shadow': 'var(--shadow-3)',
     'classic-active-shadow': 'var(--shadow-2)'
+  },
+  contextMenu: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a5) 80%, transparent)',
+    radius: 'var(--radius-4)',
+    shadow: 'var(--shadow-5)',
+    padding: '8px',
+    'min-width': '232px',
+    'item-height': '36px',
+    'item-padding-x': '12px',
+    'item-padding-y': '8px',
+    'item-gap': '10px',
+    'item-radius': 'var(--radius-2)',
+    'item-font-size': '14px',
+    'item-line-height': '20px',
+    'submenu-radius': 'var(--radius-4)',
+    'submenu-padding': '8px'
   },
   alert: {
     bg: 'var(--color-panel-solid)',
@@ -613,6 +658,30 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     'padding-inline': '10px',
     'border-width': '1px'
   },
+  blockControls: {
+    bg: 'var(--color-panel)',
+    border: '1px solid color-mix(in srgb, var(--gray-a6) 86%, transparent)',
+    radius: 'var(--ui-radius)',
+    shadow: 'var(--shadow-2)',
+    gap: '6px',
+    padding: '8px',
+    'item-radius': 'var(--ui-radius)'
+  },
+  box: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
+    radius: 'var(--ui-radius)',
+    shadow: 'var(--shadow-2)',
+    backdrop: 'var(--backdrop-filter-panel)'
+  },
+  breadcrumb: {
+    radius: 'var(--ui-radius)',
+    gap: '8px',
+    'font-size': '14px',
+    shadow: 'none',
+    'item-padding-block': '4px',
+    'item-padding-inline': '9px'
+  },
   card: {
     bg: 'var(--color-panel-solid)',
     border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
@@ -623,6 +692,23 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     'classic-shadow': 'var(--shadow-2)',
     'classic-hover-shadow': 'var(--shadow-3)',
     'classic-active-shadow': 'var(--shadow-2)'
+  },
+  contextMenu: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a6) 84%, transparent)',
+    radius: 'var(--radius-4)',
+    shadow: 'var(--shadow-5)',
+    padding: '8px',
+    'min-width': '232px',
+    'item-height': '36px',
+    'item-padding-x': '12px',
+    'item-padding-y': '8px',
+    'item-gap': '10px',
+    'item-radius': 'var(--radius-2)',
+    'item-font-size': '14px',
+    'item-line-height': '20px',
+    'submenu-radius': 'var(--radius-4)',
+    'submenu-padding': '8px'
   },
   alert: {
     bg: 'var(--color-panel-solid)',
@@ -1050,6 +1136,10 @@ export function createThemeTokens(overrides?: Partial<ThemeTokens>, options?: { 
       button: mergeScale(base.components?.button, overrides?.components?.button),
       badge: mergeScale(base.components?.badge, overrides?.components?.badge),
       card: mergeScale(base.components?.card, overrides?.components?.card),
+      blockControls: mergeScale(base.components?.blockControls, overrides?.components?.blockControls),
+      box: mergeScale(base.components?.box, overrides?.components?.box),
+      breadcrumb: mergeScale(base.components?.breadcrumb, overrides?.components?.breadcrumb),
+      contextMenu: mergeScale(base.components?.contextMenu, overrides?.components?.contextMenu),
       alert: mergeScale(base.components?.alert, overrides?.components?.alert),
       alertDialog: mergeScale(base.components?.alertDialog, overrides?.components?.alertDialog),
       appHeader: mergeScale(base.components?.appHeader, overrides?.components?.appHeader),
@@ -1210,7 +1300,11 @@ function applyThemeToTarget(target: HTMLElement, next: ThemeTokens) {
   addScaleVariables(target, '--shadow-', next.shadows as ThemeScale | undefined);
   addScaleVariables(target, '--base-button-', next.components?.button);
   addScaleVariables(target, '--base-badge-', next.components?.badge);
+  addScaleVariables(target, '--base-block-controls-', next.components?.blockControls);
+  addScaleVariables(target, '--base-box-', next.components?.box);
+  addScaleVariables(target, '--base-breadcrumb-', next.components?.breadcrumb);
   addScaleVariables(target, '--base-card-', next.components?.card);
+  addScaleVariables(target, '--base-context-menu-', next.components?.contextMenu);
   addScaleVariables(target, '--base-alert-', next.components?.alert);
   addScaleVariables(target, '--base-alert-dialog-', next.components?.alertDialog);
   addScaleVariables(target, '--base-app-header-', next.components?.appHeader);

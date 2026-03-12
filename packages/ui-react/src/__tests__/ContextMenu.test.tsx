@@ -32,6 +32,20 @@ describe('ContextMenu wrapper', () => {
     await waitFor(() => expect(openAtSpy).toHaveBeenCalledTimes(1));
   });
 
+  it('forwards the public visual props to the host element', () => {
+    const { container } = render(
+      <ContextMenu variant="solid" size="lg" radius={12} elevation="high" tone="warning" state="loading" />
+    );
+
+    const el = container.querySelector('ui-context-menu') as HTMLElement | null;
+    expect(el?.getAttribute('variant')).toBe('solid');
+    expect(el?.getAttribute('size')).toBe('lg');
+    expect(el?.getAttribute('radius')).toBe('12');
+    expect(el?.getAttribute('elevation')).toBe('high');
+    expect(el?.getAttribute('tone')).toBe('warning');
+    expect(el?.getAttribute('state')).toBe('loading');
+  });
+
   it('keeps item callbacks working after the menu content is portaled by ui-core', async () => {
     const onClick = vi.fn();
     const point = { x: 48, y: 32 };

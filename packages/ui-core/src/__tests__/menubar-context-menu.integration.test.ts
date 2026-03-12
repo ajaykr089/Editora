@@ -82,6 +82,21 @@ describe('ui-menubar and ui-context-menu integration', () => {
     expect(el.hasAttribute('open')).toBe(false);
   });
 
+  it('ui-context-menu stays open when state changes to loading', async () => {
+    const el = document.createElement('ui-context-menu') as HTMLElement & { openAt?: (x: number, y: number) => void };
+    el.innerHTML = `<div slot="content"><button class="menuitem">Open</button></div>`;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    el.openAt?.(40, 40);
+    await flushMicrotask();
+    expect(el.hasAttribute('open')).toBe(true);
+
+    el.setAttribute('state', 'loading');
+    await flushMicrotask();
+    expect(el.hasAttribute('open')).toBe(true);
+  });
+
   it('ui-context-menu uses lean global listeners for point and anchor modes', async () => {
     const addSpy = vi.spyOn(window, 'addEventListener');
     const removeSpy = vi.spyOn(window, 'removeEventListener');
@@ -161,6 +176,25 @@ describe('ui-menubar and ui-context-menu integration', () => {
     parentLayer.destroy();
   });
 
+  it('ui-context-menu mirrors host theme tokens onto the portaled menu surface', async () => {
+    const el = document.createElement('ui-context-menu') as HTMLElement & { openAt?: (x: number, y: number) => void; _portalEl?: HTMLElement | null };
+    el.style.setProperty('--ui-color-primary', '#f59e0b');
+    el.style.setProperty('--ui-color-foreground-on-primary', '#111111');
+    el.style.setProperty('--accent-surface', '#fff7d6');
+    el.style.setProperty('--base-context-menu-bg', '#fffdf6');
+    el.innerHTML = `<div slot="content"><button class="menuitem">Inspect</button></div>`;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    el.openAt?.(32, 32);
+    await flushMicrotask();
+
+    expect(el._portalEl?.style.getPropertyValue('--ui-color-primary')).toBe('#f59e0b');
+    expect(el._portalEl?.style.getPropertyValue('--ui-color-foreground-on-primary')).toBe('#111111');
+    expect(el._portalEl?.style.getPropertyValue('--accent-surface')).toBe('#fff7d6');
+    expect(el._portalEl?.style.getPropertyValue('--base-context-menu-bg')).toBe('#fffdf6');
+  });
+
   it('ui-context-menu closes when an anchored trigger becomes hidden or removed', async () => {
     const anchor = document.createElement('div');
     anchor.id = 'cm-anchor';
@@ -225,6 +259,47 @@ describe('ui-menubar and ui-context-menu integration', () => {
     await flushMicrotask();
     expect(share?.getAttribute('data-submenu-open')).toBe('true');
     vi.useRealTimers();
+  });
+
+  it('ui-context-menu resets highlighted state when hover leaves the menu surface', async () => {
+    const el = document.createElement('ui-context-menu') as HTMLElement & { openAt?: (x: number, y: number) => void; _portalEl?: HTMLElement | null };
+    el.innerHTML = `
+      <div slot="content">
+        <button class="menuitem">Edit</button>
+        <button class="menuitem">Duplicate</button>
+      </div>
+    `;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    el.openAt?.(48, 48);
+    await flushMicrotask();
+
+    const items = el._portalEl?.querySelectorAll<HTMLElement>('.menuitem');
+    const first = items?.[0];
+    const second = items?.[1];
+    expect(first).toBeTruthy();
+    expect(second).toBeTruthy();
+
+    (el as HTMLElement & { _onRootPointerOver?: (event: Event) => void })._onRootPointerOver?.({
+      composedPath: () => [first as HTMLElement],
+    } as unknown as Event);
+    await flushMicrotask();
+    expect(first?.hasAttribute('data-highlighted')).toBe(false);
+    expect(second?.hasAttribute('data-highlighted')).toBe(false);
+
+    (el as HTMLElement & { _onRootPointerOver?: (event: Event) => void })._onRootPointerOver?.({
+      composedPath: () => [second as HTMLElement],
+    } as unknown as Event);
+    await flushMicrotask();
+    expect(first?.hasAttribute('data-highlighted')).toBe(false);
+    expect(second?.hasAttribute('data-highlighted')).toBe(false);
+
+    (el as HTMLElement & { _onRootPointerLeave?: () => void })._onRootPointerLeave?.();
+    await flushMicrotask();
+
+    expect(first?.hasAttribute('data-highlighted')).toBe(false);
+    expect(second?.hasAttribute('data-highlighted')).toBe(false);
   });
 
   it('ui-context-menu repositions anchored menus when the anchor rect changes without viewport events', async () => {

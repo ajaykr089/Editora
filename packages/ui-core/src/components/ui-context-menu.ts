@@ -30,6 +30,68 @@ const POSITION_GAP = 8;
 const ANCHOR_OFFSET = 6;
 const TYPEAHEAD_RESET_MS = 420;
 const SUBMENU_INTENT_MS = 110;
+const PORTAL_THEME_VARIABLES = [
+  '--ui-color-primary',
+  '--ui-color-primary-hover',
+  '--ui-color-foreground-on-primary',
+  '--ui-color-background',
+  '--ui-color-surface',
+  '--ui-color-surface-alt',
+  '--ui-color-text',
+  '--ui-color-muted',
+  '--ui-color-border',
+  '--ui-color-focus-ring',
+  '--ui-color-success',
+  '--ui-color-danger',
+  '--ui-color-warning',
+  '--ui-primary',
+  '--ui-primary-hover',
+  '--ui-foreground',
+  '--ui-background',
+  '--ui-surface',
+  '--ui-surface-alt',
+  '--ui-text',
+  '--ui-muted',
+  '--ui-border',
+  '--ui-focus-ring',
+  '--ui-radius',
+  '--color-background',
+  '--color-surface',
+  '--color-panel',
+  '--color-panel-solid',
+  '--color-panel-translucent',
+  '--color-overlay',
+  '--accent-contrast',
+  '--accent-surface',
+  '--accent-indicator',
+  '--accent-track'
+] as const;
+const PORTAL_THEME_SCALES = [
+  { prefix: '--accent-', from: 1, to: 12 },
+  { prefix: '--accent-a', from: 1, to: 12 },
+  { prefix: '--gray-', from: 1, to: 12 },
+  { prefix: '--gray-a', from: 1, to: 12 },
+  { prefix: '--black-a', from: 1, to: 12 },
+  { prefix: '--white-a', from: 1, to: 12 },
+  { prefix: '--shadow-', from: 1, to: 6 },
+  { prefix: '--radius-', from: 1, to: 6 }
+] as const;
+const PORTAL_CONTEXT_MENU_VARIABLES = [
+  '--base-context-menu-bg',
+  '--base-context-menu-radius',
+  '--base-context-menu-shadow',
+  '--base-context-menu-min-width',
+  '--base-context-menu-padding',
+  '--base-context-menu-item-radius',
+  '--base-context-menu-item-gap',
+  '--base-context-menu-item-height',
+  '--base-context-menu-item-padding-y',
+  '--base-context-menu-item-padding-x',
+  '--base-context-menu-item-font-size',
+  '--base-context-menu-item-line-height',
+  '--base-context-menu-submenu-radius',
+  '--base-context-menu-submenu-padding'
+] as const;
 
 const shadowStyle = `
   :host {
@@ -40,39 +102,87 @@ const shadowStyle = `
     z-index: var(--ui-context-menu-z, 1600);
     color-scheme: light dark;
 
-    --ui-context-menu-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
+    --ui-context-menu-bg: var(--base-context-menu-bg, var(--color-panel-solid, var(--ui-color-surface, var(--ui-surface, #ffffff))));
     --ui-context-menu-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-context-menu-border-color: color-mix(in srgb, var(--ui-color-border, var(--ui-border, #cbd5e1)) 78%, transparent);
+    --ui-context-menu-border-color: color-mix(in srgb, var(--ui-color-border, var(--ui-border, #cbd5e1)) 86%, transparent);
     --ui-context-menu-border: 1px solid var(--ui-context-menu-border-color);
-    --ui-context-menu-radius: 12px;
-    --ui-context-menu-shadow:
-      0 24px 56px rgba(15, 23, 42, 0.18),
-      0 8px 18px rgba(15, 23, 42, 0.1);
-    --ui-context-menu-min-width: 240px;
-    --ui-context-menu-padding: 6px;
+    --ui-context-menu-radius: var(--base-context-menu-radius, var(--ui-radius, 4px));
+    --ui-context-menu-shadow: var(--base-context-menu-shadow, var(--shadow-5));
+    --ui-context-menu-min-width: var(--base-context-menu-min-width, 240px);
+    --ui-context-menu-padding: var(--base-context-menu-padding, 6px);
     --ui-context-menu-transition: 150ms cubic-bezier(0.2, 0.9, 0.24, 1);
     --ui-context-menu-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     --ui-context-menu-submenu-gap: 4px;
-    --ui-context-menu-item-radius: 8px;
-    --ui-context-menu-item-gap: 12px;
-    --ui-context-menu-item-min-height: 36px;
-    --ui-context-menu-item-pad-y: 8px;
-    --ui-context-menu-item-pad-x: 10px;
-    --ui-context-menu-item-font-size: 13px;
-    --ui-context-menu-item-font-weight: 500;
-    --ui-context-menu-item-line-height: 1.4;
-    --ui-context-menu-item-hover-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--ui-color-primary, var(--ui-primary, #2563eb)) 16%, transparent),
-        color-mix(in srgb, var(--ui-color-primary, var(--ui-primary, #2563eb)) 10%, transparent)
-      );
+    --ui-context-menu-item-radius: var(--base-context-menu-item-radius, calc(var(--ui-context-menu-radius) - 1px));
+    --ui-context-menu-item-gap: var(--base-context-menu-item-gap, 12px);
+    --ui-context-menu-item-min-height: var(--base-context-menu-item-height, 36px);
+    --ui-context-menu-item-pad-y: var(--base-context-menu-item-padding-y, 8px);
+    --ui-context-menu-item-pad-x: var(--base-context-menu-item-padding-x, 10px);
+    --ui-context-menu-item-font-size: var(--base-context-menu-item-font-size, 14px);
+    --ui-context-menu-item-font-weight: 400;
+    --ui-context-menu-item-line-height: var(--base-context-menu-item-line-height, 20px);
+    --ui-context-menu-item-hover-bg: color-mix(in srgb, var(--gray-a4, rgba(15, 23, 42, 0.08)) 82%, transparent);
+    --ui-context-menu-item-active-color: inherit;
     --ui-context-menu-separator-margin: 6px 10px;
-    --ui-context-menu-submenu-radius: 10px;
-    --ui-context-menu-submenu-padding: 6px;
+    --ui-context-menu-submenu-radius: var(--base-context-menu-submenu-radius, var(--ui-context-menu-radius));
+    --ui-context-menu-submenu-padding: var(--base-context-menu-submenu-padding, 6px);
     --ui-context-menu-status-bg: color-mix(in srgb, var(--ui-context-menu-bg) 92%, transparent);
     --ui-context-menu-status-border: color-mix(in srgb, var(--ui-context-menu-border-color) 76%, transparent);
     --ui-context-menu-status-text: color-mix(in srgb, var(--ui-context-menu-color) 64%, transparent);
+  }
+
+  :host([size="sm"]),
+  :host([size="1"]) {
+    --ui-context-menu-padding: 4px;
+    --ui-context-menu-item-gap: 8px;
+    --ui-context-menu-item-min-height: 32px;
+    --ui-context-menu-item-pad-y: 6px;
+    --ui-context-menu-item-pad-x: 8px;
+    --ui-context-menu-item-font-size: 13px;
+    --ui-context-menu-item-line-height: 18px;
+    --ui-context-menu-separator-margin: 4px 8px;
+  }
+
+  :host([size="lg"]),
+  :host([size="3"]) {
+    --ui-context-menu-padding: 8px;
+    --ui-context-menu-item-gap: 12px;
+    --ui-context-menu-item-min-height: 40px;
+    --ui-context-menu-item-pad-y: 9px;
+    --ui-context-menu-item-pad-x: 12px;
+    --ui-context-menu-item-font-size: 15px;
+    --ui-context-menu-item-line-height: 22px;
+    --ui-context-menu-separator-margin: 8px 12px;
+  }
+
+  :host([radius="none"]) {
+    --ui-context-menu-radius: 0px;
+    --ui-context-menu-item-radius: 0px;
+    --ui-context-menu-submenu-radius: 0px;
+  }
+
+  :host([radius="sm"]) {
+    --ui-context-menu-radius: 8px;
+    --ui-context-menu-item-radius: 7px;
+    --ui-context-menu-submenu-radius: 8px;
+  }
+
+  :host([radius="md"]) {
+    --ui-context-menu-radius: 12px;
+    --ui-context-menu-item-radius: 10px;
+    --ui-context-menu-submenu-radius: 12px;
+  }
+
+  :host([radius="lg"]) {
+    --ui-context-menu-radius: 16px;
+    --ui-context-menu-item-radius: 14px;
+    --ui-context-menu-submenu-radius: 16px;
+  }
+
+  :host([radius="full"]) {
+    --ui-context-menu-radius: 999px;
+    --ui-context-menu-item-radius: 999px;
+    --ui-context-menu-submenu-radius: 20px;
   }
 
   :host([shape="square"]) {
@@ -123,6 +233,26 @@ const shadowStyle = `
       0 10px 24px rgba(15, 23, 42, 0.12);
   }
 
+  :host([variant="surface"]) {
+    --ui-context-menu-shadow: var(--base-context-menu-shadow, var(--shadow-4));
+  }
+
+  :host([variant="soft"]) {
+    --ui-context-menu-bg: color-mix(in srgb, var(--base-context-menu-bg, var(--color-panel-solid, #ffffff)) 94%, var(--accent-surface, transparent));
+    --ui-context-menu-item-hover-bg: color-mix(in srgb, var(--ui-context-menu-ring) 13%, transparent);
+  }
+
+  :host([variant="solid"]) {
+    --ui-context-menu-item-hover-bg: color-mix(in srgb, var(--ui-context-menu-ring) 88%, #0f172a 12%);
+    --ui-context-menu-item-active-color: var(--ui-color-foreground-on-primary, var(--ui-foreground, #ffffff));
+  }
+
+  :host([variant="outline"]) {
+    --ui-context-menu-shadow: none;
+    --ui-context-menu-bg: var(--base-context-menu-bg, var(--color-panel-solid, #ffffff));
+    --ui-context-menu-item-hover-bg: color-mix(in srgb, var(--ui-context-menu-ring) 8%, transparent);
+  }
+
   :host([variant="flat"]) {
     --ui-context-menu-shadow: none;
   }
@@ -132,32 +262,37 @@ const shadowStyle = `
     --ui-context-menu-color: #f8fafc;
     --ui-context-menu-border-color: #334155;
     --ui-context-menu-ring: #93c5fd;
-    --ui-context-menu-item-hover-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, #ffffff 18%, transparent),
-        color-mix(in srgb, #ffffff 10%, transparent)
-      );
+    --ui-context-menu-item-hover-bg: color-mix(in srgb, #ffffff 12%, transparent);
   }
 
   :host([tone="danger"]) {
     --ui-context-menu-ring: #ef4444;
-    --ui-context-menu-item-hover-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, #ef4444 18%, transparent),
-        color-mix(in srgb, #ef4444 10%, transparent)
-      );
+    --ui-context-menu-item-hover-bg: color-mix(in srgb, #ef4444 12%, transparent);
+    --ui-context-menu-item-active-color: inherit;
   }
 
   :host([tone="success"]) {
     --ui-context-menu-ring: #16a34a;
-    --ui-context-menu-item-hover-bg:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, #16a34a 18%, transparent),
-        color-mix(in srgb, #16a34a 10%, transparent)
-      );
+    --ui-context-menu-item-hover-bg: color-mix(in srgb, #16a34a 12%, transparent);
+    --ui-context-menu-item-active-color: inherit;
+  }
+
+  :host([tone="warning"]) {
+    --ui-context-menu-ring: #d97706;
+    --ui-context-menu-item-hover-bg: color-mix(in srgb, #d97706 12%, transparent);
+    --ui-context-menu-item-active-color: inherit;
+  }
+
+  :host([tone="info"]) {
+    --ui-context-menu-ring: var(--ui-color-primary, var(--ui-primary, #2563eb));
+    --ui-context-menu-item-hover-bg: color-mix(in srgb, var(--ui-color-primary, var(--ui-primary, #2563eb)) 12%, transparent);
+    --ui-context-menu-item-active-color: inherit;
+  }
+
+  :host([tone="neutral"]) {
+    --ui-context-menu-ring: color-mix(in srgb, var(--ui-color-muted, #64748b) 60%, var(--ui-color-text, #0f172a));
+    --ui-context-menu-item-hover-bg: color-mix(in srgb, var(--ui-color-muted, #64748b) 12%, transparent);
+    --ui-context-menu-item-active-color: inherit;
   }
 
   .surface {
@@ -169,13 +304,7 @@ const shadowStyle = `
     padding: var(--ui-context-menu-padding);
     border: var(--ui-context-menu-border);
     border-radius: var(--ui-context-menu-radius);
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--ui-context-menu-bg) 98%, #ffffff 2%),
-        color-mix(in srgb, var(--ui-context-menu-bg) 94%, transparent)
-      ),
-      var(--ui-context-menu-bg);
+    background: var(--ui-context-menu-bg);
     color: var(--ui-context-menu-color);
     box-shadow: var(--ui-context-menu-shadow);
     overflow: visible;
@@ -251,8 +380,9 @@ const shadowStyle = `
 const lightDomStyle = `
   ui-context-menu [slot="menu"],
   ui-context-menu [slot="content"] {
-    display: grid;
-    gap: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
   }
 
   ui-context-menu [slot="menu"] .section-label,
@@ -283,18 +413,25 @@ const lightDomStyle = `
   ui-context-menu [slot="content"] [role="menuitemcheckbox"],
   ui-context-menu [slot="content"] [role="menuitemradio"] {
     position: relative;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    display: flex;
     align-items: center;
     gap: var(--ui-context-menu-item-gap, 12px);
+    inline-size: 100%;
     min-height: var(--ui-context-menu-item-min-height, 36px);
     padding: var(--ui-context-menu-item-pad-y, 8px) var(--ui-context-menu-item-pad-x, 10px);
     border-radius: var(--ui-context-menu-item-radius, 8px);
+    box-sizing: border-box;
     color: inherit;
-    font: var(--ui-context-menu-item-font-weight, 500) var(--ui-context-menu-item-font-size, 13px)/var(--ui-context-menu-item-line-height, 1.4) Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font: var(--ui-context-menu-item-font-weight, 400) var(--ui-context-menu-item-font-size, 13px)/var(--ui-context-menu-item-line-height, 1.4) Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    letter-spacing: var(--ui-default-letter-spacing, 0em);
     outline: none;
     cursor: default;
+    scroll-margin: var(--ui-context-menu-padding, 6px) 0;
     user-select: none;
+    transition:
+      background-color var(--ui-context-menu-transition, 150ms cubic-bezier(0.2, 0.9, 0.24, 1)),
+      box-shadow var(--ui-context-menu-transition, 150ms cubic-bezier(0.2, 0.9, 0.24, 1)),
+      color var(--ui-context-menu-transition, 150ms cubic-bezier(0.2, 0.9, 0.24, 1));
   }
 
   ui-context-menu [slot="menu"] .menuitem:hover,
@@ -305,7 +442,7 @@ const lightDomStyle = `
   ui-context-menu [slot="menu"] [role="menuitemcheckbox"]:focus-visible,
   ui-context-menu [slot="menu"] [role="menuitemradio"]:hover,
   ui-context-menu [slot="menu"] [role="menuitemradio"]:focus-visible,
-  ui-context-menu [slot="menu"] .menuitem[data-highlighted="true"],
+  ui-context-menu [slot="menu"] .menuitem[data-submenu-open="true"],
   ui-context-menu [slot="content"] .menuitem:hover,
   ui-context-menu [slot="content"] .menuitem:focus-visible,
   ui-context-menu [slot="content"] [role="menuitem"]:hover,
@@ -314,8 +451,9 @@ const lightDomStyle = `
   ui-context-menu [slot="content"] [role="menuitemcheckbox"]:focus-visible,
   ui-context-menu [slot="content"] [role="menuitemradio"]:hover,
   ui-context-menu [slot="content"] [role="menuitemradio"]:focus-visible,
-  ui-context-menu [slot="content"] .menuitem[data-highlighted="true"] {
+  ui-context-menu [slot="content"] .menuitem[data-submenu-open="true"] {
     background: var(--ui-context-menu-item-hover-bg);
+    color: var(--ui-context-menu-item-active-color, inherit);
   }
 
   ui-context-menu [slot="menu"] .menuitem:focus-visible,
@@ -326,7 +464,7 @@ const lightDomStyle = `
   ui-context-menu [slot="content"] [role="menuitem"]:focus-visible,
   ui-context-menu [slot="content"] [role="menuitemcheckbox"]:focus-visible,
   ui-context-menu [slot="content"] [role="menuitemradio"]:focus-visible {
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-context-menu-ring, #2563eb) 50%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-context-menu-ring, #2563eb) 42%, transparent);
   }
 
   ui-context-menu [slot="menu"] .menuitem[aria-disabled="true"],
@@ -337,13 +475,35 @@ const lightDomStyle = `
     pointer-events: none;
   }
 
+  ui-context-menu [slot="menu"] .menuitem[data-tone="danger"],
+  ui-context-menu [slot="menu"] [data-tone="danger"],
+  ui-context-menu [slot="content"] .menuitem[data-tone="danger"],
+  ui-context-menu [slot="content"] [data-tone="danger"] {
+    color: #dc2626;
+  }
+
+  ui-context-menu [slot="menu"] .menuitem[data-tone="success"],
+  ui-context-menu [slot="menu"] [data-tone="success"],
+  ui-context-menu [slot="content"] .menuitem[data-tone="success"],
+  ui-context-menu [slot="content"] [data-tone="success"] {
+    color: #15803d;
+  }
+
+  ui-context-menu [slot="menu"] .menuitem[data-tone="warning"],
+  ui-context-menu [slot="menu"] [data-tone="warning"],
+  ui-context-menu [slot="content"] .menuitem[data-tone="warning"],
+  ui-context-menu [slot="content"] [data-tone="warning"] {
+    color: #b45309;
+  }
+
   ui-context-menu [slot="menu"] .icon,
   ui-context-menu [slot="content"] .icon {
     display: inline-grid;
     place-items: center;
     inline-size: 16px;
     block-size: 16px;
-    color: color-mix(in srgb, currentColor 78%, transparent);
+    flex: 0 0 16px;
+    color: color-mix(in srgb, currentColor 72%, transparent);
   }
 
   ui-context-menu [slot="menu"] .selection-icon,
@@ -353,6 +513,7 @@ const lightDomStyle = `
     place-items: center;
     inline-size: 16px;
     block-size: 16px;
+    flex: 0 0 16px;
     border-radius: 999px;
     color: transparent;
   }
@@ -364,7 +525,7 @@ const lightDomStyle = `
     block-size: 8px;
     border-radius: 2px;
     background: currentColor;
-    color: var(--ui-context-menu-ring, #2563eb);
+    color: currentColor;
   }
 
   ui-context-menu [slot="menu"] [role="menuitemradio"][aria-checked="true"] .selection-icon::before,
@@ -374,14 +535,16 @@ const lightDomStyle = `
     block-size: 8px;
     border-radius: 999px;
     background: currentColor;
-    color: var(--ui-context-menu-ring, #2563eb);
+    color: currentColor;
   }
 
   ui-context-menu [slot="menu"] .label,
   ui-context-menu [slot="content"] .label {
     min-width: 0;
     display: grid;
-    gap: 2px;
+    flex: 1 1 auto;
+    overflow: hidden;
+    gap: 1px;
   }
 
   ui-context-menu [slot="menu"] .label .text,
@@ -390,24 +553,35 @@ const lightDomStyle = `
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
   }
 
   ui-context-menu [slot="menu"] .label .caption,
   ui-context-menu [slot="content"] .label .caption {
     color: color-mix(in srgb, currentColor 58%, transparent);
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: calc(var(--ui-context-menu-item-font-size, 13px) - 1px);
+    line-height: 1.35;
+    letter-spacing: inherit;
   }
 
   ui-context-menu [slot="menu"] .shortcut,
   ui-context-menu [slot="content"] .shortcut {
+    margin-left: auto;
+    padding-left: 14px;
+    flex: 0 0 auto;
+    min-width: max-content;
     color: color-mix(in srgb, currentColor 54%, transparent);
-    font-size: 12px;
-    letter-spacing: 0.02em;
+    font-size: calc(var(--ui-context-menu-item-font-size, 13px) - 1px);
+    line-height: 1;
+    letter-spacing: inherit;
   }
 
   ui-context-menu [slot="menu"] .submenu-arrow,
   ui-context-menu [slot="content"] .submenu-arrow {
+    margin-left: 6px;
+    flex: 0 0 auto;
     color: color-mix(in srgb, currentColor 54%, transparent);
     font-size: 12px;
   }
@@ -421,13 +595,8 @@ const lightDomStyle = `
     padding: var(--ui-context-menu-submenu-padding, 6px);
     border: 1px solid var(--ui-context-menu-border-color, rgba(15, 23, 42, 0.14));
     border-radius: var(--ui-context-menu-submenu-radius, 10px);
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--ui-context-menu-bg, #ffffff) 98%, #ffffff 2%),
-        color-mix(in srgb, var(--ui-context-menu-bg, #ffffff) 94%, transparent)
-      ),
-      var(--ui-context-menu-bg, #ffffff);
+    background: var(--ui-context-menu-bg, #ffffff);
+    color: var(--ui-context-menu-color, #0f172a);
     box-shadow: var(--ui-context-menu-shadow, 0 24px 56px rgba(15, 23, 42, 0.18));
     opacity: 0;
     visibility: hidden;
@@ -525,6 +694,33 @@ function toPoint(x: number | Point, y?: number): Point {
 function parsePlacement(value: string | null): ContextMenuPlacement {
   if (value === 'top' || value === 'left' || value === 'right') return value;
   return 'bottom';
+}
+
+function normalizeMenuSize(value: string | null): 'sm' | 'md' | 'lg' | '' {
+  if (!value) return '';
+  const normalized = value.trim().toLowerCase();
+  if (normalized === '1') return 'sm';
+  if (normalized === '2') return 'md';
+  if (normalized === '3') return 'lg';
+  if (normalized === 'sm' || normalized === 'md' || normalized === 'lg') return normalized;
+  if (normalized === 'compact') return 'sm';
+  if (normalized === 'comfortable') return 'lg';
+  return '';
+}
+
+function normalizeMenuRadius(value: string | null): string {
+  if (!value) return '';
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return '';
+  if (normalized === 'none') return '0px';
+  if (normalized === 'sm') return '8px';
+  if (normalized === 'md') return '12px';
+  if (normalized === 'lg') return '16px';
+  if (normalized === 'full') return '999px';
+  if (normalized === 'square') return '6px';
+  if (normalized === 'soft') return '16px';
+  if (/^\d+(\.\d+)?$/.test(normalized)) return `${normalized}px`;
+  return value;
 }
 
 function isVisible(node: HTMLElement): boolean {
@@ -643,6 +839,8 @@ export class UIContextMenu extends ElementBase {
       'open',
       'headless',
       'variant',
+      'size',
+      'radius',
       'density',
       'shape',
       'elevation',
@@ -675,6 +873,7 @@ export class UIContextMenu extends ElementBase {
   private _typeaheadTimer: number | null = null;
   private _submenuIntentTimer: number | null = null;
   private _submenuIntentItem: MenuLikeItem | null = null;
+  private _hoveredItem: MenuLikeItem | null = null;
   private _lastAnchorRect: RectLike | null = null;
   private _resizeListenerBound = false;
   private _scrollListenerBound = false;
@@ -696,6 +895,7 @@ export class UIContextMenu extends ElementBase {
     super.connectedCallback();
     ensureLightDomStyle();
     this.addEventListener('contextmenu', this._onContextMenu as EventListener);
+    this._syncVisualState();
     this._syncOpenState();
   }
 
@@ -730,13 +930,16 @@ export class UIContextMenu extends ElementBase {
     }
 
     if (name === 'state' || name === 'state-text') {
-      if (this.state === 'loading' && this._isOpen) this._setOpen(false, 'attribute');
       this._syncPortalVisualState();
       if (this.isConnected) this.requestRender();
       return;
     }
 
-    if (this._isOpen && (name === 'placement' || name === 'variant' || name === 'density' || name === 'shape' || name === 'elevation' || name === 'tone')) {
+    if (name === 'variant' || name === 'size' || name === 'radius' || name === 'density' || name === 'shape' || name === 'elevation' || name === 'tone') {
+      this._syncVisualState();
+    }
+
+    if (this._isOpen && (name === 'placement' || name === 'variant' || name === 'size' || name === 'radius' || name === 'density' || name === 'shape' || name === 'elevation' || name === 'tone')) {
       this._syncPortalVisualState();
       this._schedulePosition();
       this._scheduleSubmenuLayout();
@@ -809,7 +1012,7 @@ export class UIContextMenu extends ElementBase {
   }
 
   openAt(pointOrX: Point | number, y?: number): void {
-    if (this.headless || this.isDisabled || this.state === 'loading') return;
+    if (this.headless || this.isDisabled) return;
     this._anchorEl = null;
     this._point = toPoint(pointOrX, y);
     if (this._isOpen) {
@@ -823,7 +1026,7 @@ export class UIContextMenu extends ElementBase {
   }
 
   openForAnchor(anchor: HTMLElement): void {
-    if (this.headless || this.isDisabled || this.state === 'loading') return;
+    if (this.headless || this.isDisabled) return;
     this._anchorEl = anchor;
     const rect = anchor.getBoundingClientRect();
     this._point = { x: rect.left, y: rect.bottom };
@@ -899,7 +1102,7 @@ export class UIContextMenu extends ElementBase {
 
   private _setOpen(next: boolean, source: ContextMenuOpenSource): void {
     if (next === this.open) return;
-    if (next && (this.headless || this.isDisabled || this.state === 'loading')) return;
+    if (next && (this.headless || this.isDisabled)) return;
     this._nextOpenSource = source;
     if (next) this.setAttribute('open', '');
     else this.removeAttribute('open');
@@ -975,6 +1178,52 @@ export class UIContextMenu extends ElementBase {
     surface.style.pointerEvents = interactive ? 'auto' : 'none';
   }
 
+  private _syncVisualState(): void {
+    const normalizedSize = normalizeMenuSize(this.getAttribute('size') || this.getAttribute('density'));
+    if (normalizedSize && normalizedSize !== 'md') this.setAttribute('data-ui-context-menu-size', normalizedSize);
+    else this.removeAttribute('data-ui-context-menu-size');
+
+    if (normalizedSize === 'sm') {
+      this.style.setProperty('--ui-context-menu-padding', '4px');
+      this.style.setProperty('--ui-context-menu-item-gap', '8px');
+      this.style.setProperty('--ui-context-menu-item-min-height', '32px');
+      this.style.setProperty('--ui-context-menu-item-pad-y', '6px');
+      this.style.setProperty('--ui-context-menu-item-pad-x', '8px');
+      this.style.setProperty('--ui-context-menu-item-font-size', '13px');
+      this.style.setProperty('--ui-context-menu-item-line-height', '18px');
+      this.style.setProperty('--ui-context-menu-separator-margin', '4px 8px');
+    } else if (normalizedSize === 'lg') {
+      this.style.setProperty('--ui-context-menu-padding', '8px');
+      this.style.setProperty('--ui-context-menu-item-gap', '12px');
+      this.style.setProperty('--ui-context-menu-item-min-height', '40px');
+      this.style.setProperty('--ui-context-menu-item-pad-y', '9px');
+      this.style.setProperty('--ui-context-menu-item-pad-x', '12px');
+      this.style.setProperty('--ui-context-menu-item-font-size', '15px');
+      this.style.setProperty('--ui-context-menu-item-line-height', '22px');
+      this.style.setProperty('--ui-context-menu-separator-margin', '8px 12px');
+    } else {
+      this.style.removeProperty('--ui-context-menu-padding');
+      this.style.removeProperty('--ui-context-menu-item-gap');
+      this.style.removeProperty('--ui-context-menu-item-min-height');
+      this.style.removeProperty('--ui-context-menu-item-pad-y');
+      this.style.removeProperty('--ui-context-menu-item-pad-x');
+      this.style.removeProperty('--ui-context-menu-item-font-size');
+      this.style.removeProperty('--ui-context-menu-item-line-height');
+      this.style.removeProperty('--ui-context-menu-separator-margin');
+    }
+
+    const normalizedRadius = normalizeMenuRadius(this.getAttribute('radius') || this.getAttribute('shape'));
+    if (normalizedRadius) {
+      this.style.setProperty('--ui-context-menu-radius', normalizedRadius);
+      this.style.setProperty('--ui-context-menu-item-radius', normalizedRadius);
+      this.style.setProperty('--ui-context-menu-submenu-radius', normalizedRadius);
+    } else {
+      this.style.removeProperty('--ui-context-menu-radius');
+      this.style.removeProperty('--ui-context-menu-item-radius');
+      this.style.removeProperty('--ui-context-menu-submenu-radius');
+    }
+  }
+
   private _syncGlobalListeners(open: boolean): void {
     const shouldBindResize = open;
     const shouldBindScroll = open && !!this._anchorEl;
@@ -1027,14 +1276,35 @@ export class UIContextMenu extends ElementBase {
     else this._portalEl.removeAttribute(`data-${name}`);
   }
 
+  private _syncPortalThemeVariables(): void {
+    if (!this._portalEl) return;
+    const computed = getComputedStyle(this);
+    const syncVar = (name: string) => {
+      const value = computed.getPropertyValue(name).trim();
+      if (value) this._portalEl!.style.setProperty(name, value);
+      else this._portalEl!.style.removeProperty(name);
+    };
+
+    PORTAL_THEME_VARIABLES.forEach(syncVar);
+    PORTAL_CONTEXT_MENU_VARIABLES.forEach(syncVar);
+    PORTAL_THEME_SCALES.forEach(({ prefix, from, to }) => {
+      for (let index = from; index <= to; index += 1) syncVar(`${prefix}${index}`);
+    });
+  }
+
   private _syncPortalVisualState(): void {
     if (!this._portalEl) return;
+    const normalizedSize = normalizeMenuSize(this.getAttribute('size') || this.getAttribute('density'));
+    const normalizedRadius = normalizeMenuRadius(this.getAttribute('radius') || this.getAttribute('shape'));
+    this._syncPortalThemeVariables();
     this._setPortalFlag('open', this._isOpen);
     this._setPortalFlag('headless', this.headless);
     this._setPortalFlag('disabled', this.isDisabled);
 
     const variant = this.getAttribute('variant');
+    const size = normalizeMenuSize(this.getAttribute('size') || this.getAttribute('density'));
     const density = this.getAttribute('density');
+    const radius = this.getAttribute('radius');
     const shape = this.getAttribute('shape');
     const elevation = this.getAttribute('elevation');
     const tone = this.getAttribute('tone');
@@ -1042,8 +1312,12 @@ export class UIContextMenu extends ElementBase {
 
     if (variant) this._portalEl.setAttribute('data-variant', variant);
     else this._portalEl.removeAttribute('data-variant');
+    if (size && size !== 'md') this._portalEl.setAttribute('data-size', size);
+    else this._portalEl.removeAttribute('data-size');
     if (density) this._portalEl.setAttribute('data-density', density);
     else this._portalEl.removeAttribute('data-density');
+    if (radius) this._portalEl.setAttribute('data-radius', radius);
+    else this._portalEl.removeAttribute('data-radius');
     if (shape) this._portalEl.setAttribute('data-shape', shape);
     else this._portalEl.removeAttribute('data-shape');
     if (elevation) this._portalEl.setAttribute('data-elevation', elevation);
@@ -1052,6 +1326,45 @@ export class UIContextMenu extends ElementBase {
     else this._portalEl.removeAttribute('data-tone');
     if (placement) this._portalEl.setAttribute('data-placement-request', placement);
     else this._portalEl.removeAttribute('data-placement-request');
+
+    if (normalizedSize === 'sm') {
+      this._portalEl.style.setProperty('--ui-context-menu-padding', '4px');
+      this._portalEl.style.setProperty('--ui-context-menu-item-gap', '8px');
+      this._portalEl.style.setProperty('--ui-context-menu-item-min-height', '32px');
+      this._portalEl.style.setProperty('--ui-context-menu-item-pad-y', '6px');
+      this._portalEl.style.setProperty('--ui-context-menu-item-pad-x', '8px');
+      this._portalEl.style.setProperty('--ui-context-menu-item-font-size', '13px');
+      this._portalEl.style.setProperty('--ui-context-menu-item-line-height', '18px');
+      this._portalEl.style.setProperty('--ui-context-menu-separator-margin', '4px 8px');
+    } else if (normalizedSize === 'lg') {
+      this._portalEl.style.setProperty('--ui-context-menu-padding', '8px');
+      this._portalEl.style.setProperty('--ui-context-menu-item-gap', '12px');
+      this._portalEl.style.setProperty('--ui-context-menu-item-min-height', '40px');
+      this._portalEl.style.setProperty('--ui-context-menu-item-pad-y', '9px');
+      this._portalEl.style.setProperty('--ui-context-menu-item-pad-x', '12px');
+      this._portalEl.style.setProperty('--ui-context-menu-item-font-size', '15px');
+      this._portalEl.style.setProperty('--ui-context-menu-item-line-height', '22px');
+      this._portalEl.style.setProperty('--ui-context-menu-separator-margin', '8px 12px');
+    } else {
+      this._portalEl.style.removeProperty('--ui-context-menu-padding');
+      this._portalEl.style.removeProperty('--ui-context-menu-item-gap');
+      this._portalEl.style.removeProperty('--ui-context-menu-item-min-height');
+      this._portalEl.style.removeProperty('--ui-context-menu-item-pad-y');
+      this._portalEl.style.removeProperty('--ui-context-menu-item-pad-x');
+      this._portalEl.style.removeProperty('--ui-context-menu-item-font-size');
+      this._portalEl.style.removeProperty('--ui-context-menu-item-line-height');
+      this._portalEl.style.removeProperty('--ui-context-menu-separator-margin');
+    }
+
+    if (normalizedRadius) {
+      this._portalEl.style.setProperty('--ui-context-menu-radius', normalizedRadius);
+      this._portalEl.style.setProperty('--ui-context-menu-item-radius', normalizedRadius);
+      this._portalEl.style.setProperty('--ui-context-menu-submenu-radius', normalizedRadius);
+    } else {
+      this._portalEl.style.removeProperty('--ui-context-menu-radius');
+      this._portalEl.style.removeProperty('--ui-context-menu-item-radius');
+      this._portalEl.style.removeProperty('--ui-context-menu-submenu-radius');
+    }
 
     if (this.state !== 'idle') this._portalEl.setAttribute('data-state', this.state);
     else this._portalEl.removeAttribute('data-state');
@@ -1103,7 +1416,7 @@ export class UIContextMenu extends ElementBase {
       <style>${portalStyle}</style>
       <div class="surface" part="menu" role="menu" aria-hidden="true" aria-busy="false" tabindex="-1">
         <div class="state-row" part="state"></div>
-        <ui-listbox class="content-host" slot="menu" role="menu" item-selector="${ITEM_SELECTOR.replace(/"/g, '&quot;')}" direct-item-selector="${ROOT_ITEM_SELECTOR.replace(/"/g, '&quot;')}" item-role="menuitem" active-attribute="data-highlighted"></ui-listbox>
+        <ui-listbox class="content-host" slot="menu" role="menu" item-selector="${ITEM_SELECTOR.replace(/"/g, '&quot;')}" direct-item-selector="${ROOT_ITEM_SELECTOR.replace(/"/g, '&quot;')}" item-role="menuitem" active-attribute="data-active"></ui-listbox>
       </div>
     `;
 
@@ -1248,9 +1561,7 @@ export class UIContextMenu extends ElementBase {
   }
 
   private _clearHighlights(): void {
-    const menu = this._menuHost();
-    if (!menu) return;
-    menu.querySelectorAll<HTMLElement>('[data-highlighted="true"]').forEach((item) => item.removeAttribute('data-highlighted'));
+    this._hoveredItem = null;
   }
 
   private _focusItem(item: MenuLikeItem | null): void {
@@ -1306,8 +1617,8 @@ export class UIContextMenu extends ElementBase {
       const current = active.closest(ITEM_SELECTOR);
       if (current instanceof HTMLElement) return current as MenuLikeItem;
     }
-    const highlighted = this._menuHost()?.querySelector<HTMLElement>('[data-highlighted="true"]');
-    return highlighted as MenuLikeItem | null;
+    if (this._hoveredItem?.isConnected) return this._hoveredItem;
+    return null;
   }
 
   private _moveFocus(current: MenuLikeItem, direction: 'next' | 'prev' | 'first' | 'last'): void {
@@ -1394,10 +1705,11 @@ export class UIContextMenu extends ElementBase {
 
   private _clearSubmenuState(): void {
     this._cancelSubmenuIntent();
+    this._hoveredItem = null;
     const menu = this._menuHost();
     if (!menu) return;
     menu.querySelectorAll<HTMLElement>('[data-submenu-open="true"]').forEach((item) => item.removeAttribute('data-submenu-open'));
-    menu.querySelectorAll<HTMLElement>('[data-highlighted="true"]').forEach((item) => item.removeAttribute('data-highlighted'));
+    this._listbox()?.clearActive({ container: menu });
   }
 
   private _handleTypeahead(event: KeyboardEvent, current: MenuLikeItem | null): boolean {
@@ -1574,7 +1886,7 @@ export class UIContextMenu extends ElementBase {
     if (!this._isOpen) return;
     const item = this._findCurrentItem(event);
     if (!item || isDisabled(item)) return;
-    item.setAttribute('data-highlighted', 'true');
+    this._hoveredItem = item;
     if (this._submenuFor(item)) {
       this._scheduleSubmenuIntent(item);
       return;
@@ -1585,6 +1897,7 @@ export class UIContextMenu extends ElementBase {
 
   private _onRootPointerLeave(): void {
     this._cancelSubmenuIntent();
+    this._clearHighlights();
   }
 
   private _onRootFocusIn(event: FocusEvent): void {
@@ -1592,7 +1905,13 @@ export class UIContextMenu extends ElementBase {
     this._cancelSubmenuIntent();
     const item = this._findCurrentItem(event);
     if (!item || isDisabled(item)) return;
-    item.setAttribute('data-highlighted', 'true');
+    const container = (item.closest('.submenu') as HTMLElement | null) || this._menuHost();
+    this._listbox()?.setActiveItem(item, {
+      container,
+      focus: false,
+      owner: this._surface(),
+      scroll: false
+    });
     this._setOpenBranch(item, false);
   }
 
@@ -1685,7 +2004,7 @@ export class UIContextMenu extends ElementBase {
   }
 
   private _onContextMenu(event: MouseEvent): void {
-    if (this.headless || this.isDisabled || this.state === 'loading') return;
+    if (this.headless || this.isDisabled) return;
     if (event.defaultPrevented) return;
     if (event.target instanceof HTMLElement && event.target.closest('[slot="menu"], [slot="content"]')) return;
     event.preventDefault();
@@ -1706,7 +2025,7 @@ export class UIContextMenu extends ElementBase {
       <style>${shadowStyle}</style>
       <div class="surface" part="menu" role="menu" aria-hidden="true" aria-busy="false" tabindex="-1">
         <div class="state-row" part="state" data-state="${this.state}">${stateText}</div>
-        <ui-listbox class="content-host" part="content" slot="menu" role="menu" item-selector="${ITEM_SELECTOR.replace(/"/g, '&quot;')}" direct-item-selector="${ROOT_ITEM_SELECTOR.replace(/"/g, '&quot;')}" item-role="menuitem" active-attribute="data-highlighted">
+        <ui-listbox class="content-host" part="content" slot="menu" role="menu" item-selector="${ITEM_SELECTOR.replace(/"/g, '&quot;')}" direct-item-selector="${ROOT_ITEM_SELECTOR.replace(/"/g, '&quot;')}" item-role="menuitem" active-attribute="data-active">
           <slot name="menu"></slot>
           <slot name="content"></slot>
         </ui-listbox>

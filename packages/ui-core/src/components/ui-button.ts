@@ -12,11 +12,11 @@ type ButtonScale = '1' | '2' | '3' | '4';
 
 const style = `
   :host {
-    --ui-btn-radius: var(--ui-radius, 4px);
-    --ui-btn-min-height: var(--base-button-height-md, 40px);
-    --ui-btn-padding-inline: 14px;
-    --ui-btn-gap: var(--ui-default-gap, 8px);
-    --ui-btn-font-size: var(--ui-default-font-size, var(--ui-font-size-md, var(--font-size-2, 14px)));
+    --ui-btn-radius: var(--ui-control-radius, var(--ui-radius, 4px));
+    --ui-btn-min-height: var(--ui-control-min-height, var(--base-button-height-md, 40px));
+    --ui-btn-padding-inline: var(--ui-control-padding-inline, 14px);
+    --ui-btn-gap: var(--ui-control-gap, var(--ui-default-gap, 8px));
+    --ui-btn-font-size: var(--ui-control-font-size, var(--ui-default-font-size, var(--ui-font-size-md, var(--font-size-2, 14px))));
     --ui-btn-font-weight: 400;
     --ui-btn-letter-spacing: var(--ui-default-letter-spacing, var(--letter-spacing-2, 0em));
     --ui-btn-duration: var(--ui-motion-base, 160ms);

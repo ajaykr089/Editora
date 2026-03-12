@@ -25,11 +25,18 @@ const LISTBOX_BASE_STYLE = `
     min-inline-size: 0;
   }
 
+  ui-listbox[role="menu"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-inline-size: 0;
+  }
+
   ui-listbox .option-text,
   ui-listbox [data-option-text] {
     min-inline-size: 0;
     display: grid;
-    gap: 2px;
+    gap: 1px;
     flex: 1 1 auto;
   }
 
@@ -40,6 +47,9 @@ const LISTBOX_BASE_STYLE = `
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
   }
 
   ui-listbox .option-description,
@@ -49,8 +59,16 @@ const LISTBOX_BASE_STYLE = `
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    color: color-mix(in srgb, currentColor 58%, transparent);
+    font-size: 0.92em;
+    line-height: 1.35;
+    letter-spacing: inherit;
   }
 `;
+
+function clearItemActiveState(item: HTMLElement, attr: string): void {
+  item.removeAttribute(attr);
+}
 
 function isFocusable(item: HTMLElement): boolean {
   const tabindex = item.getAttribute('tabindex');
@@ -85,7 +103,7 @@ export class UIListbox extends UICollection {
   clearActive(options: UICollectionQueryOptions = {}): void {
     const attr = this.activeAttribute;
     this.queryItems(options).forEach((item) => {
-      item.removeAttribute(attr);
+      clearItemActiveState(item, attr);
       if (!item.hasAttribute('disabled')) item.setAttribute('tabindex', '-1');
     });
   }
@@ -100,7 +118,7 @@ export class UIListbox extends UICollection {
         entry.setAttribute(attr, 'true');
         if (isFocusable(entry)) entry.setAttribute('tabindex', '0');
       } else {
-        entry.removeAttribute(attr);
+        clearItemActiveState(entry, attr);
         if (!entry.hasAttribute('disabled')) entry.setAttribute('tabindex', '-1');
       }
     });

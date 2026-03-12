@@ -3,9 +3,11 @@ import { ElementBase } from '../ElementBase';
 const style = `
   :host {
     display: block;
-    --ui-breadcrumb-gap: 8px;
-    --ui-breadcrumb-radius: 10px;
-    --ui-breadcrumb-font-size: 14px;
+    --ui-breadcrumb-gap: var(--base-breadcrumb-gap, 8px);
+    --ui-breadcrumb-radius: var(--base-breadcrumb-radius, var(--ui-radius, 4px));
+    --ui-breadcrumb-font-size: var(--base-breadcrumb-font-size, 14px);
+    --ui-breadcrumb-item-padding-block: var(--base-breadcrumb-item-padding-block, 4px);
+    --ui-breadcrumb-item-padding-inline: var(--base-breadcrumb-item-padding-inline, 9px);
     --ui-breadcrumb-accent: var(--ui-color-primary, #2563eb);
     --ui-breadcrumb-color: color-mix(in srgb, var(--ui-color-muted, #64748b) 76%, var(--ui-color-text, #0f172a) 24%);
     --ui-breadcrumb-muted: color-mix(in srgb, var(--ui-color-muted, #94a3b8) 70%, transparent);
@@ -14,6 +16,7 @@ const style = `
     --ui-breadcrumb-focus-ring: var(--ui-color-focus-ring, #2563eb);
     --ui-breadcrumb-current-bg: color-mix(in srgb, var(--ui-breadcrumb-accent) 12%, var(--ui-color-surface, #ffffff));
     --ui-breadcrumb-separator-bg: color-mix(in srgb, var(--ui-breadcrumb-accent) 22%, transparent);
+    --ui-breadcrumb-shadow: var(--base-breadcrumb-shadow, none);
     color-scheme: light dark;
   }
 
@@ -70,10 +73,11 @@ const style = `
     align-items: center;
     gap: 6px;
     border-radius: var(--ui-breadcrumb-radius);
-    padding: 4px 9px;
+    padding: var(--ui-breadcrumb-item-padding-block) var(--ui-breadcrumb-item-padding-inline);
     line-height: 1.2;
     min-inline-size: 0;
     white-space: nowrap;
+    box-shadow: var(--ui-breadcrumb-shadow);
   }
 
   .crumb-action {
@@ -134,17 +138,42 @@ const style = `
     --ui-breadcrumb-gap: 6px;
     --ui-breadcrumb-radius: 8px;
     --ui-breadcrumb-font-size: 13px;
+    --ui-breadcrumb-item-padding-block: 3px;
+    --ui-breadcrumb-item-padding-inline: 7px;
   }
 
   :host([size="lg"]) {
     --ui-breadcrumb-gap: 10px;
     --ui-breadcrumb-radius: 12px;
     --ui-breadcrumb-font-size: 15px;
+    --ui-breadcrumb-item-padding-block: 5px;
+    --ui-breadcrumb-item-padding-inline: 11px;
+  }
+
+  :host([variant="surface"]) {
+    --ui-breadcrumb-hover-bg: color-mix(in srgb, var(--ui-breadcrumb-accent) 10%, var(--ui-color-surface, #ffffff));
+    --ui-breadcrumb-current-bg: color-mix(in srgb, var(--ui-breadcrumb-accent) 12%, var(--ui-color-surface, #ffffff));
+  }
+
+  :host([variant="soft"]) {
+    --ui-breadcrumb-hover-bg: color-mix(in srgb, var(--ui-breadcrumb-accent) 8%, var(--ui-color-surface, #ffffff));
+    --ui-breadcrumb-current-bg: color-mix(in srgb, var(--ui-breadcrumb-accent) 16%, var(--ui-color-surface, #ffffff));
   }
 
   :host([variant="solid"]) {
     --ui-breadcrumb-hover-bg: color-mix(in srgb, var(--ui-breadcrumb-accent) 16%, var(--ui-color-surface, #ffffff));
     --ui-breadcrumb-current-bg: color-mix(in srgb, var(--ui-breadcrumb-accent) 24%, var(--ui-color-surface, #ffffff));
+  }
+
+  :host([variant="outline"]) {
+    --ui-breadcrumb-hover-bg: color-mix(in srgb, var(--ui-breadcrumb-accent) 6%, transparent);
+    --ui-breadcrumb-current-bg: transparent;
+  }
+
+  :host([variant="ghost"]) {
+    --ui-breadcrumb-hover-bg: transparent;
+    --ui-breadcrumb-current-bg: transparent;
+    --ui-breadcrumb-shadow: none;
   }
 
   :host([variant="minimal"]) .crumb-action,
@@ -156,6 +185,20 @@ const style = `
   :host([variant="minimal"]) .separator {
     opacity: 0.5;
   }
+
+  :host([elevation="low"]) {
+    --ui-breadcrumb-shadow: var(--base-breadcrumb-shadow, none);
+  }
+
+  :host([elevation="high"]) {
+    --ui-breadcrumb-shadow: 0 1px 2px rgba(2, 6, 23, 0.06), 0 8px 20px rgba(2, 6, 23, 0.12);
+  }
+
+  :host([radius="none"]) { --ui-breadcrumb-radius: 0px; }
+  :host([radius="sm"]) { --ui-breadcrumb-radius: 8px; }
+  :host([radius="md"]) { --ui-breadcrumb-radius: 12px; }
+  :host([radius="lg"]) { --ui-breadcrumb-radius: 16px; }
+  :host([radius="full"]) { --ui-breadcrumb-radius: 9999px; }
 
   :host([state="loading"]) .crumb-action,
   :host([state="loading"]) .crumb-current {
@@ -248,6 +291,29 @@ type SelectDetail = {
   source: 'click' | 'keyboard';
 };
 
+function normalizeRadius(raw: string | null): string {
+  if (!raw) return '';
+  const value = raw.trim().toLowerCase();
+  if (!value) return '';
+  if (value === 'none') return '0px';
+  if (value === 'sm') return '8px';
+  if (value === 'md') return '12px';
+  if (value === 'lg') return '16px';
+  if (value === 'full') return '9999px';
+  if (/^\d+(\.\d+)?$/.test(value)) return `${value}px`;
+  return raw;
+}
+
+function normalizeSize(raw: string | null): 'sm' | 'md' | 'lg' | '' {
+  if (!raw) return '';
+  const value = raw.trim().toLowerCase();
+  if (value === '1') return 'sm';
+  if (value === '2') return 'md';
+  if (value === '3') return 'lg';
+  if (value === 'sm' || value === 'md' || value === 'lg') return value;
+  return '';
+}
+
 function escapeHtml(value: string): string {
   return String(value)
     .replace(/&/g, '&amp;')
@@ -281,6 +347,8 @@ export class UIBreadcrumb extends ElementBase {
       'current-index',
       'size',
       'variant',
+      'radius',
+      'elevation',
       'tone',
       'state',
       'disabled',
@@ -304,6 +372,9 @@ export class UIBreadcrumb extends ElementBase {
     this.root.addEventListener('keydown', this._onRootKeyDown as EventListener);
     this._syncBusyState();
     this._syncDisabledState();
+    this._syncSizeState();
+    const normalizedRadius = normalizeRadius(this.getAttribute('radius'));
+    if (normalizedRadius) this.style.setProperty('--ui-breadcrumb-radius', normalizedRadius);
   }
 
   disconnectedCallback() {
@@ -317,7 +388,14 @@ export class UIBreadcrumb extends ElementBase {
     if (oldValue === newValue) return;
     if (name === 'state') this._syncBusyState();
     if (name === 'disabled') this._syncDisabledState();
-    if (this.isConnected) this.requestRender();
+    if (name === 'size') this._syncSizeState();
+    if (name === 'radius') {
+      const normalizedRadius = normalizeRadius(newValue);
+      if (normalizedRadius) this.style.setProperty('--ui-breadcrumb-radius', normalizedRadius);
+      else this.style.removeProperty('--ui-breadcrumb-radius');
+    }
+    if (!this.isConnected) return;
+    if (this.shouldRenderOnAttributeChange(name, oldValue, newValue)) this.requestRender();
   }
 
   get headless() {
@@ -338,6 +416,28 @@ export class UIBreadcrumb extends ElementBase {
   private _syncDisabledState() {
     if (this.hasAttribute('disabled')) this.setAttribute('aria-disabled', 'true');
     else this.removeAttribute('aria-disabled');
+  }
+
+  private _syncSizeState() {
+    const normalized = normalizeSize(this.getAttribute('size'));
+    if (normalized === 'sm') {
+      this.style.setProperty('--ui-breadcrumb-gap', '6px');
+      this.style.setProperty('--ui-breadcrumb-font-size', '13px');
+      this.style.setProperty('--ui-breadcrumb-item-padding-block', '3px');
+      this.style.setProperty('--ui-breadcrumb-item-padding-inline', '7px');
+      return;
+    }
+    if (normalized === 'lg') {
+      this.style.setProperty('--ui-breadcrumb-gap', '10px');
+      this.style.setProperty('--ui-breadcrumb-font-size', '15px');
+      this.style.setProperty('--ui-breadcrumb-item-padding-block', '5px');
+      this.style.setProperty('--ui-breadcrumb-item-padding-inline', '11px');
+      return;
+    }
+    this.style.removeProperty('--ui-breadcrumb-gap');
+    this.style.removeProperty('--ui-breadcrumb-font-size');
+    this.style.removeProperty('--ui-breadcrumb-item-padding-block');
+    this.style.removeProperty('--ui-breadcrumb-item-padding-inline');
   }
 
   private _attachSlotListeners() {
@@ -379,10 +479,13 @@ export class UIBreadcrumb extends ElementBase {
   }
 
   private _currentIndex(items: HTMLElement[]): number {
-    const attrIndex = Number(this.getAttribute('current-index'));
-    if (Number.isFinite(attrIndex)) {
-      const idx = Math.floor(attrIndex);
-      if (idx >= 0 && idx < items.length) return idx;
+    const attrValue = this.getAttribute('current-index');
+    if (attrValue != null && attrValue !== '') {
+      const attrIndex = Number(attrValue);
+      if (Number.isFinite(attrIndex)) {
+        const idx = Math.floor(attrIndex);
+        if (idx >= 0 && idx < items.length) return idx;
+      }
     }
     const marked = items.findIndex((item) => isCurrentItem(item));
     if (marked >= 0) return marked;
@@ -543,7 +646,7 @@ export class UIBreadcrumb extends ElementBase {
           const rel = token.item.getAttribute('rel');
           const target = token.item.getAttribute('target');
 
-          if (token.current || isLastToken) {
+          if (token.current) {
             content = `<span class="crumb-current" aria-current="page">${label}</span>`;
           } else if (hostDisabled || token.disabled || loading) {
             content = `<span class="crumb-disabled" aria-disabled="true">${label}</span>`;
@@ -576,11 +679,12 @@ export class UIBreadcrumb extends ElementBase {
   }
 
   protected override shouldRenderOnAttributeChange(
-    _name: string,
-    _oldValue: string | null,
-    _newValue: string | null
+    name: string,
+    oldValue: string | null,
+    newValue: string | null
   ): boolean {
-    return true;
+    if (oldValue === newValue) return false;
+    return !['size', 'variant', 'radius', 'elevation', 'tone', 'state', 'disabled'].includes(name);
   }
 }
 

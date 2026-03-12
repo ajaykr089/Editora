@@ -1,7 +1,6 @@
 import React from 'react';
-import type { Meta } from '@storybook/react';
-import { BlockControls, Box, Button, Flex, Grid } from '@editora/ui-react';
-import { toastAdvanced } from '@editora/toast';
+import type { Meta, StoryObj } from '@storybook/react';
+import { BlockControls, Box, Button, Card, CardDescription, CardHeader, CardTitle, Flex, Grid } from '@editora/ui-react';
 import {
   AlignCenterIcon,
   AlignLeftIcon,
@@ -13,222 +12,223 @@ import {
   CodeIcon,
   ItalicIcon,
   LinkIcon,
-  ShieldIcon,
   SparklesIcon,
 } from '@editora/react-icons';
-import '../../packages/editora-toast/src/toast.css';
-import '@editora/themes/themes/default.css';
 
 const meta: Meta<typeof BlockControls> = {
   title: 'UI/BlockControls',
   component: BlockControls,
+  args: {
+    variant: 'surface',
+    tone: 'neutral',
+    size: 'md',
+    radius: 12,
+    elevation: 'low',
+    state: 'idle',
+    orientation: 'horizontal',
+    density: 'compact',
+    wrap: true,
+  },
+  argTypes: {
+    variant: { control: 'select', options: ['surface', 'soft', 'solid', 'outline', 'ghost'] },
+    tone: { control: 'select', options: ['neutral', 'info', 'success', 'warning', 'danger'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg', '1', '2', '3'] },
+    radius: { control: 'text' },
+    elevation: { control: 'select', options: ['none', 'low', 'high'] },
+    state: { control: 'select', options: ['idle', 'loading', 'error', 'success'] },
+    orientation: { control: 'select', options: ['horizontal', 'vertical'] },
+    density: { control: 'select', options: ['compact', 'comfortable'] },
+    wrap: { control: 'boolean' },
+    loop: { control: 'boolean' },
+    disabled: { control: 'boolean' },
+  },
 };
 
 export default meta;
 
-function EnterpriseClinicalComposerControls() {
-  const [block, setBlock] = React.useState<'paragraph' | 'heading' | 'quote' | 'code'>('paragraph');
+type Story = StoryObj<typeof BlockControls>;
+
+function DemoToolbar(props: React.ComponentProps<typeof BlockControls>) {
   const [align, setAlign] = React.useState<'left' | 'center' | 'right'>('left');
   const [bold, setBold] = React.useState(false);
   const [italic, setItalic] = React.useState(false);
-  const [linking, setLinking] = React.useState(false);
-  const [state, setState] = React.useState<'idle' | 'loading' | 'error' | 'success'>('idle');
-
-  const applyChange = (label: string, callback: () => void) => {
-    callback();
-    toastAdvanced.info(`${label} updated`, { duration: 1200, theme: 'light' });
-  };
+  const [linked, setLinked] = React.useState(false);
 
   return (
-    <Grid style={{ gap: 14, maxInlineSize: 1020 }}>
-      <Box
-        style={{
-          border: '1px solid var(--ui-color-border, #d8e1ec)',
-          borderRadius: 16,
-          padding: 16,
-          background:
-            'linear-gradient(136deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 7%, #fff) 0%, var(--ui-color-surface, #fff) 44%)',
-        }}
-      >
-        <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
-          <Box>
-            <Box style={{ fontWeight: 700, fontSize: 18 }}>Clinical Note Block Controls</Box>
-            <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
-              Enterprise command strip for fast formatting, alignment, and assistive review actions.
-            </Box>
-          </Box>
-          <Flex align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>
-            <ShieldIcon size={14} />
-            Secure Shift Documentation
-          </Flex>
-        </Flex>
-      </Box>
-
-      <BlockControls
-        ariaLabel="Clinical note formatting controls"
-        variant="solid"
-        tone={state === 'error' ? 'danger' : state === 'success' ? 'success' : 'info'}
-        state={state}
-        wrap
-        onNavigate={(detail) => {
-          if (detail.key === 'Home' || detail.key === 'End') {
-            toastAdvanced.info(`Navigation moved to control ${detail.toIndex + 1}/${detail.total}`, {
-              duration: 1100,
-              theme: 'light',
-            });
-          }
-        }}
-      >
-        <Button
-          size="sm"
-          variant={block === 'paragraph' ? 'primary' : 'secondary'}
-          onClick={() => applyChange('Paragraph block', () => setBlock('paragraph'))}
-        >
-          P
-        </Button>
-        <Button
-          size="sm"
-          variant={block === 'heading' ? 'primary' : 'secondary'}
-          onClick={() => applyChange('Heading block', () => setBlock('heading'))}
-        >
-          H1
-        </Button>
-        <Button
-          size="sm"
-          variant={block === 'quote' ? 'primary' : 'secondary'}
-          onClick={() => applyChange('Quote block', () => setBlock('quote'))}
-        >
-          "
-        </Button>
-        <Button
-          size="sm"
-          variant={block === 'code' ? 'primary' : 'secondary'}
-          onClick={() => applyChange('Code block', () => setBlock('code'))}
-        >
-          <CodeIcon size={14} />
-        </Button>
-
-        <span data-separator aria-hidden="true" />
-
-        <Button
-          size="sm"
-          variant={bold ? 'primary' : 'secondary'}
-          onClick={() => applyChange('Bold', () => setBold((value) => !value))}
-        >
-          <BoldIcon size={14} />
-        </Button>
-        <Button
-          size="sm"
-          variant={italic ? 'primary' : 'secondary'}
-          onClick={() => applyChange('Italic', () => setItalic((value) => !value))}
-        >
-          <ItalicIcon size={14} />
-        </Button>
-        <Button
-          size="sm"
-          variant={linking ? 'primary' : 'secondary'}
-          onClick={() => applyChange('Clinical reference link', () => setLinking((value) => !value))}
-        >
-          <LinkIcon size={14} />
-        </Button>
-
-        <span data-separator aria-hidden="true" />
-
-        <Button
-          size="sm"
-          variant={align === 'left' ? 'primary' : 'secondary'}
-          onClick={() => applyChange('Align left', () => setAlign('left'))}
-        >
-          <AlignLeftIcon size={14} />
-        </Button>
-        <Button
-          size="sm"
-          variant={align === 'center' ? 'primary' : 'secondary'}
-          onClick={() => applyChange('Align center', () => setAlign('center'))}
-        >
-          <AlignCenterIcon size={14} />
-        </Button>
-        <Button
-          size="sm"
-          variant={align === 'right' ? 'primary' : 'secondary'}
-          onClick={() => applyChange('Align right', () => setAlign('right'))}
-        >
-          <AlignRightIcon size={14} />
-        </Button>
-
-        <span data-separator aria-hidden="true" />
-
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => {
-            setState('loading');
-            toastAdvanced.info('Clinical AI review in progress', { duration: 1200, theme: 'light' });
-            window.setTimeout(() => {
-              setState('success');
-              toastAdvanced.success('Safety suggestions applied', { duration: 1300, theme: 'light' });
-            }, 900);
-          }}
-        >
-          <SparklesIcon size={14} />
-          Suggest
-        </Button>
-      </BlockControls>
-
-      <Flex align="center" style={{ gap: 8, flexWrap: 'wrap' }}>
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => {
-            setState('idle');
-            toastAdvanced.info('Controls returned to idle', { duration: 1100, theme: 'light' });
-          }}
-        >
-          <ClockIcon size={14} />
-          Idle
-        </Button>
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => {
-            setState('error');
-            toastAdvanced.warning('Audit rule mismatch detected', { duration: 1400, theme: 'light' });
-          }}
-        >
-          <AlertTriangleIcon size={14} />
-          Simulate Error
-        </Button>
-        <Button
-          size="sm"
-          onClick={() => {
-            setState('success');
-            toastAdvanced.success('Documentation policy checks passed', { duration: 1400, theme: 'light' });
-          }}
-        >
-          <CheckCircleIcon size={14} />
-          Mark Success
-        </Button>
-      </Flex>
-
-      <Box
-        style={{
-          border: '1px solid var(--ui-color-border, #d8e1ec)',
-          borderRadius: 14,
-          padding: 12,
-          background: 'var(--ui-color-surface, #fff)',
-          fontSize: 13,
-          color: 'var(--ui-color-muted, #64748b)',
-        }}
-      >
-        Active block: <strong>{block}</strong> | Alignment: <strong>{align}</strong> | State: <strong>{state}</strong> | Style:{' '}
-        <strong>
-          {bold ? 'Bold ' : ''}
-          {italic ? 'Italic ' : ''}
-          {linking ? 'Linked' : 'Unlinked'}
-        </strong>
-      </Box>
-    </Grid>
+    <BlockControls {...props} ariaLabel="Formatting controls">
+      <Button variant={bold ? 'primary' : 'secondary'} onClick={() => setBold((value) => !value)}>
+        <BoldIcon size={14} />
+      </Button>
+      <Button variant={italic ? 'primary' : 'secondary'} onClick={() => setItalic((value) => !value)}>
+        <ItalicIcon size={14} />
+      </Button>
+      <Button variant={linked ? 'primary' : 'secondary'} onClick={() => setLinked((value) => !value)}>
+        <LinkIcon size={14} />
+      </Button>
+      <span data-separator aria-hidden="true" />
+      <Button variant={align === 'left' ? 'primary' : 'secondary'} onClick={() => setAlign('left')}>
+        <AlignLeftIcon size={14} />
+      </Button>
+      <Button variant={align === 'center' ? 'primary' : 'secondary'} onClick={() => setAlign('center')}>
+        <AlignCenterIcon size={14} />
+      </Button>
+      <Button variant={align === 'right' ? 'primary' : 'secondary'} onClick={() => setAlign('right')}>
+        <AlignRightIcon size={14} />
+      </Button>
+    </BlockControls>
   );
 }
 
-export const EnterpriseClinicalComposer = EnterpriseClinicalComposerControls;
+export const Playground: Story = {
+  render: (args) => (
+    <Grid style={{ gap: 16, maxInlineSize: 840 }}>
+      <Card radius={16}>
+        <CardHeader>
+          <CardTitle>Block controls</CardTitle>
+          <CardDescription>
+            Token-backed command strip for editor controls, inline formatting actions, and contextual action groups.
+          </CardDescription>
+        </CardHeader>
+        <Box slot="inset" style={{ padding: 16 }}>
+          <DemoToolbar {...args} />
+        </Box>
+      </Card>
+    </Grid>
+  ),
+};
+
+export const VariantGallery: Story = {
+  render: () => (
+    <Grid style={{ gap: 14, maxInlineSize: 920 }}>
+      {[
+        { label: 'Surface', variant: 'surface', tone: 'neutral' },
+        { label: 'Soft', variant: 'soft', tone: 'info' },
+        { label: 'Outline', variant: 'outline', tone: 'warning' },
+        { label: 'Solid', variant: 'solid', tone: 'success' },
+        { label: 'Ghost', variant: 'ghost', tone: 'danger' },
+      ].map((entry) => (
+        <Grid key={entry.label} style={{ gap: 8 }}>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <DemoToolbar variant={entry.variant as any} tone={entry.tone as any} size="md" radius={12} elevation="low" wrap />
+        </Grid>
+      ))}
+    </Grid>
+  ),
+};
+
+export const SizeGallery: Story = {
+  render: () => (
+    <Grid style={{ gap: 14, maxInlineSize: 920 }}>
+      {[
+        { label: 'Small', size: 'sm', radius: 8 },
+        { label: 'Medium', size: 'md', radius: 12 },
+        { label: 'Large', size: 'lg', radius: 16 },
+      ].map((entry) => (
+        <Grid key={entry.label} style={{ gap: 8 }}>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <DemoToolbar variant="surface" tone="info" size={entry.size as any} radius={entry.radius} elevation="low" wrap />
+        </Grid>
+      ))}
+    </Grid>
+  ),
+};
+
+export const EditorialWorkflow: Story = {
+  render: () => {
+    const [block, setBlock] = React.useState<'paragraph' | 'heading' | 'quote' | 'code'>('paragraph');
+    const [align, setAlign] = React.useState<'left' | 'center' | 'right'>('left');
+    const [state, setState] = React.useState<'idle' | 'loading' | 'error' | 'success'>('idle');
+
+    return (
+      <Grid style={{ gap: 14, maxInlineSize: 980 }}>
+        <Card radius={16}>
+          <CardHeader>
+            <CardTitle>Clinical note toolbar</CardTitle>
+            <CardDescription>
+              Baseline-themed command strip for formatting, alignment, and AI-assisted note review.
+            </CardDescription>
+          </CardHeader>
+
+          <Box slot="inset" style={{ padding: 16, display: 'grid', gap: 14 }}>
+            <BlockControls
+              ariaLabel="Clinical note formatting controls"
+              variant={state === 'error' ? 'outline' : state === 'success' ? 'soft' : 'surface'}
+              tone={state === 'error' ? 'danger' : state === 'success' ? 'success' : 'info'}
+              state={state}
+              size="md"
+              radius={12}
+              elevation="low"
+              wrap
+            >
+              <Button variant={block === 'paragraph' ? 'primary' : 'secondary'} onClick={() => setBlock('paragraph')}>
+                P
+              </Button>
+              <Button variant={block === 'heading' ? 'primary' : 'secondary'} onClick={() => setBlock('heading')}>
+                H1
+              </Button>
+              <Button variant={block === 'quote' ? 'primary' : 'secondary'} onClick={() => setBlock('quote')}>
+                "
+              </Button>
+              <Button variant={block === 'code' ? 'primary' : 'secondary'} onClick={() => setBlock('code')}>
+                <CodeIcon size={14} />
+              </Button>
+
+              <span data-separator aria-hidden="true" />
+
+              <Button variant={align === 'left' ? 'primary' : 'secondary'} onClick={() => setAlign('left')}>
+                <AlignLeftIcon size={14} />
+              </Button>
+              <Button variant={align === 'center' ? 'primary' : 'secondary'} onClick={() => setAlign('center')}>
+                <AlignCenterIcon size={14} />
+              </Button>
+              <Button variant={align === 'right' ? 'primary' : 'secondary'} onClick={() => setAlign('right')}>
+                <AlignRightIcon size={14} />
+              </Button>
+
+              <span data-separator aria-hidden="true" />
+
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setState('loading');
+                  window.setTimeout(() => setState('success'), 900);
+                }}
+              >
+                <SparklesIcon size={14} />
+                Suggest
+              </Button>
+            </BlockControls>
+
+            <Flex align="center" style={{ gap: 8, flexWrap: 'wrap' }}>
+              <Button size="sm" variant="secondary" onClick={() => setState('idle')}>
+                <ClockIcon size={14} />
+                Idle
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => setState('error')}>
+                <AlertTriangleIcon size={14} />
+                Error
+              </Button>
+              <Button size="sm" onClick={() => setState('success')}>
+                <CheckCircleIcon size={14} />
+                Success
+              </Button>
+            </Flex>
+
+            <Box
+              style={{
+                border: '1px solid var(--ui-color-border, #d8e1ec)',
+                borderRadius: 12,
+                padding: 12,
+                background: 'var(--ui-color-surface, #fff)',
+                fontSize: 13,
+                color: 'var(--ui-color-muted, #64748b)',
+              }}
+            >
+              Block: <strong>{block}</strong> | Alignment: <strong>{align}</strong> | State: <strong>{state}</strong>
+            </Box>
+          </Box>
+        </Card>
+      </Grid>
+    );
+  },
+};

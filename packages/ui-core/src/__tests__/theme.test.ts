@@ -33,6 +33,10 @@ describe('theme.applyTheme', () => {
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-panel-shadow').trim()).toBe(defaultTokens.components?.panel?.shadow);
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-avatar-radius').trim()).toBe(defaultTokens.components?.avatar?.radius);
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-badge-radius').trim()).toBe(defaultTokens.components?.badge?.radius);
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--base-breadcrumb-radius').trim()).toBe(defaultTokens.components?.breadcrumb?.radius);
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--base-context-menu-radius').trim()).toBe(defaultTokens.components?.contextMenu?.radius);
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--base-block-controls-radius').trim()).toBe(defaultTokens.components?.blockControls?.radius);
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--base-box-radius').trim()).toBe(defaultTokens.components?.box?.radius);
   });
 
   it('propagates tokens to registered Shadow hosts', () => {
