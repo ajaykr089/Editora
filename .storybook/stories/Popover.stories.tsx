@@ -3,12 +3,18 @@ import { Popover, Button , Box, Flex} from '@editora/ui-react';
 
 export default {
   title: 'UI/Popover',
-  component: Popover
+  component: Popover,
+  args: {
+    placement: 'bottom',
+    offset: 8,
+    closeOnEscape: true,
+    closeOnOutside: true
+  }
 };
 
 export const Default = (args: any) => (
   <Box style={{ padding: 60 }}>
-    <Popover>
+    <Popover {...args}>
       <Button slot="trigger">Show popover</Button>
       <Box slot="content" style={{ padding: 8 }}>Popover content with <strong>HTML</strong></Box>
     </Popover>
@@ -46,4 +52,17 @@ export const ArrowAndShift = () => (
       </Box>
     </Box>
   </Box>
+);
+
+export const PlacementMatrix = () => (
+  <Flex style={{ display: 'flex', gap: 24, flexWrap: 'wrap', padding: 60 }}>
+    {(['top', 'right', 'bottom-start', 'left-end'] as const).map((placement) => (
+      <Popover key={placement} placement={placement} offset={12} closeOnOutside>
+        <Button slot="trigger">{placement}</Button>
+        <Box slot="content" style={{ padding: 10, minWidth: 180 }}>
+          Placement: <strong>{placement}</strong>
+        </Box>
+      </Popover>
+    ))}
+  </Flex>
 );

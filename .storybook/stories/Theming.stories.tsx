@@ -10,27 +10,32 @@ export default { title: 'UI/Theming', component: ThemeProvider, argTypes: {
 }};
 
 function Demo() {
-  const { tokens, setTokens } = useTheme() as any;
+  const theme = useTheme() as any;
+  const setTokens = theme?.setTokens || (() => {});
+  const tokens = theme?.tokens;
+  const safeTokens = tokens || {
+    colors: { primary: '#2563eb', background: '#ffffff', text: '#111827' }
+  };
   const toggle = () => {
-    const dark = tokens.colors.background === '#111827';
+    const dark = safeTokens.colors.background === '#111827';
     setTokens({
-      ...tokens,
+      ...safeTokens,
       colors: dark
-        ? { ...tokens.colors, background: '#ffffff', text: '#111827', primary: '#2563eb' }
-        : { ...tokens.colors, background: '#111827', text: '#f8fafc', primary: '#7c3aed' }
+        ? { ...safeTokens.colors, background: '#ffffff', text: '#111827', primary: '#2563eb' }
+        : { ...safeTokens.colors, background: '#111827', text: '#f8fafc', primary: '#7c3aed' }
     });
   };
   return (
     <Box style={{ padding: 20, background: 'var(--ui-color-background)', color: 'var(--ui-color-text)' }}>
       <h3>Theme demo</h3>
-      <p>Primary color token: <strong style={{ color: 'var(--ui-color-primary)' }}>{tokens.colors.primary}</strong></p>
+      <p>Primary color token: <strong style={{ color: 'var(--ui-color-primary)' }}>{safeTokens.colors.primary}</strong></p>
       <Button onClick={toggle}>Toggle theme</Button>
     </Box>
   );
 }
 
-export const Interactive = (args: any) => (
-  <ThemeProvider tokens={{ colors: { primary: args.primary, background: args.background, text: args.text }, radius: args.radius, typography: { size: { md: args.fontSizeMd } } }}>
+export const Interactive = (args: any = {}) => (
+  <ThemeProvider tokens={{ colors: { primary: args.primary || '#2563eb', background: args.background || '#ffffff', text: args.text || '#111827' }, radius: args.radius || '6px', typography: { size: { md: args.fontSizeMd || '14px' } } }}>
     <Demo />
   </ThemeProvider>
 );

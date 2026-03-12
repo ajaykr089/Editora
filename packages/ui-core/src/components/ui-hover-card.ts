@@ -5,17 +5,16 @@ type HoverCardPlacement = 'top' | 'bottom' | 'left' | 'right';
 const style = `
   :host {
     --ui-hover-card-z: 1700;
-    --ui-hover-card-radius: 14px;
-    --ui-hover-card-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
+    --ui-hover-card-radius: var(--base-card-radius, var(--ui-radius, 4px));
+    --ui-hover-card-bg: var(--base-card-bg, var(--color-panel, var(--ui-color-surface, var(--ui-surface, #ffffff))));
     --ui-hover-card-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-hover-card-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
-    --ui-hover-card-border: 1px solid var(--ui-hover-card-border-color);
-    --ui-hover-card-shadow:
-      none;
-    --ui-hover-card-padding: 12px;
+    --ui-hover-card-border: var(--base-card-border, 1px solid var(--ui-hover-card-border-color));
+    --ui-hover-card-shadow: var(--base-card-shadow, var(--shadow-3, none));
+    --ui-hover-card-padding: var(--ui-default-gap, 8px);
     --ui-hover-card-min-width: 220px;
     --ui-hover-card-max-width: min(380px, calc(100vw - 16px));
-    --ui-hover-card-backdrop: none;
+    --ui-hover-card-backdrop: var(--base-panel-backdrop, var(--backdrop-filter-panel, none));
     --ui-hover-card-arrow-size: 10px;
     --ui-hover-card-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     --ui-hover-card-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
@@ -84,9 +83,9 @@ const style = `
     min-width: 0;
     padding: var(--ui-hover-card-padding);
     display: grid;
-    gap: 8px;
-    font: 500 13px/1.45 "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    letter-spacing: 0.01em;
+    gap: var(--ui-default-gap, 8px);
+    font: 500 var(--ui-default-font-size, var(--font-size-2, 14px))/var(--ui-default-line-height, var(--line-height-2, 20px)) var(--ui-font-family, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+    letter-spacing: var(--ui-default-letter-spacing, var(--letter-spacing-2, 0em));
   }
 
   .arrow {

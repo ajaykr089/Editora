@@ -12,11 +12,11 @@ const style = `
     --ui-input-border-color: var(--ui-color-border, var(--ui-border-color, #cbd5e1));
     --ui-input-border-width: 1px;
     --ui-input-border-style: solid;
-    --ui-input-border: var(--ui-input-border-width) var(--ui-input-border-style) var(--ui-input-border-color);
-    --ui-input-border-radius: var(--ui-radius, 10px);
-    --ui-input-min-height: var(--ui-min-height, 40px);
+    --ui-input-border: var(--base-input-border, var(--ui-input-border-width) var(--ui-input-border-style) var(--ui-input-border-color));
+    --ui-input-border-radius: var(--ui-radius, 4px);
+    --ui-input-min-height: var(--ui-min-height, var(--base-input-height-md, 40px));
     --ui-input-width: 100%;
-    --ui-input-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
+    --ui-input-bg: var(--base-input-bg, var(--ui-color-surface, var(--ui-surface, #ffffff)));
     --ui-input-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-label-color: var(--ui-color-muted, var(--ui-muted, #64748b));
     --ui-description-color: var(--ui-color-muted, var(--ui-muted, #64748b));
@@ -26,16 +26,16 @@ const style = `
     --ui-input-warning: var(--ui-color-warning, var(--ui-warning, #d97706));
     --ui-input-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
     --ui-input-shadow: none;
-    --ui-input-gap: 8px;
+    --ui-input-gap: var(--ui-default-gap, 8px);
     --ui-input-meta-gap: 4px;
-    --ui-input-shell-gap: 8px;
+    --ui-input-shell-gap: var(--ui-default-gap, 8px);
     --ui-input-placeholder: color-mix(in srgb, var(--ui-input-color) 40%, transparent);
     color-scheme: light dark;
     display: block;
     inline-size: var(--ui-input-width);
     max-inline-size: 100%;
     min-inline-size: 0;
-    font-family: "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: var(--ui-font-family, var(--default-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif));
   }
 
   .root {
@@ -57,10 +57,10 @@ const style = `
     min-inline-size: 0;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--ui-default-gap, 8px);
     color: var(--ui-label-color);
-    font: 600 13px/1.35 "IBM Plex Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    letter-spacing: 0.01em;
+    font: 600 var(--ui-default-font-size, var(--font-size-2, 14px))/var(--ui-default-line-height, 20px) var(--ui-font-family, var(--default-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif));
+    letter-spacing: var(--ui-default-letter-spacing, var(--letter-spacing-2, 0em));
   }
 
   .required {
@@ -73,9 +73,9 @@ const style = `
   .description {
     margin: 0;
     color: var(--ui-description-color);
-    font-size: 12px;
-    line-height: 1.4;
-    letter-spacing: 0.01em;
+    font-size: var(--font-size-1, 12px);
+    line-height: var(--ui-default-line-height, var(--line-height-2, 20px));
+    letter-spacing: var(--ui-default-letter-spacing, var(--letter-spacing-2, 0em));
   }
 
   .description[hidden],
@@ -108,7 +108,7 @@ const style = `
 
   .shell:focus-within {
     border-color: color-mix(in srgb, var(--ui-input-focus-ring) 56%, var(--ui-input-border-color));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-input-focus-ring) 24%, transparent);
+    box-shadow: var(--base-input-focus-ring, 0 0 0 3px color-mix(in srgb, var(--ui-input-focus-ring) 24%, transparent));
   }
 
   .prefix,
@@ -181,7 +181,7 @@ const style = `
     border: none;
     background: transparent;
     color: inherit;
-    font: 500 14px/1.4 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font: 500 var(--ui-default-font-size, var(--font-size-2, 14px))/var(--ui-default-line-height, var(--line-height-2, 20px)) var(--ui-font-family, var(--default-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif));
     padding: var(--ui-input-padding);
     min-block-size: calc(var(--ui-input-min-height) - 2px);
     margin: 0;
@@ -203,7 +203,7 @@ const style = `
     cursor: pointer;
     inline-size: 22px;
     block-size: 22px;
-    border-radius: 7px;
+    border-radius: var(--ui-radius, 4px);
     display: inline-grid;
     place-items: center;
     background: color-mix(in srgb, var(--ui-input-color) 8%, transparent);

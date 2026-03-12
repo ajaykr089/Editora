@@ -65,7 +65,7 @@ const style = `
 
 export class UICommandPalette extends ElementBase {
   static get observedAttributes() {
-    return ['open', 'headless', 'placeholder', 'empty-text'];
+    return ['open', 'headless', 'placeholder', 'empty-text', 'query'];
   }
 
   private _command: UICommand | null = null;
@@ -106,6 +106,11 @@ export class UICommandPalette extends ElementBase {
       if (this.isConnected) this.requestRender();
       return;
     }
+    if (name === 'query') {
+      const next = newValue || '';
+      if (this._command && this._command.query !== next) this._command.query = next;
+      return;
+    }
     if (name === 'headless' && this.isConnected) {
       this.requestRender();
     }
@@ -117,6 +122,27 @@ export class UICommandPalette extends ElementBase {
 
   closePalette() {
     this.removeAttribute('open');
+  }
+
+  get query(): string {
+    const attributeValue = this.getAttribute('query');
+    if (typeof attributeValue === 'string') return attributeValue;
+    return this._command?.query ?? '';
+  }
+
+  set query(next: string) {
+    const normalized = next || '';
+    if (normalized) this.setAttribute('query', normalized);
+    else this.removeAttribute('query');
+    if (this._command && this._command.query !== normalized) this._command.query = normalized;
+  }
+
+  focusSearch(): void {
+    this._command?.focusSearch();
+  }
+
+  clearQuery(): void {
+    this.query = '';
   }
 
   private _syncOpenState() {
@@ -159,6 +185,9 @@ export class UICommandPalette extends ElementBase {
     }
     this._command = nextCommand;
     this._command?.addEventListener('select', this._onSelect as EventListener);
+    if (this._command && this._command.query !== this.query) {
+      this._command.query = this.query;
+    }
   }
 
   private _bindGlobalListeners() {

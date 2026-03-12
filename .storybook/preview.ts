@@ -1,6 +1,5 @@
 
 import type { Preview } from '@storybook/react';
-import { withThemeSwitcher } from './withThemeSwitcher';
 
 const storyRawModules = import.meta.glob('./stories/**/*.stories.tsx', { as: 'raw', eager: true }) as Record<
   string,
@@ -370,7 +369,6 @@ if (typeof document !== 'undefined' && !document.getElementById('editora-not-def
 }
 
 const preview: Preview = {
-  decorators: [withThemeSwitcher],
   parameters: {
     docs: {
       canvas: {

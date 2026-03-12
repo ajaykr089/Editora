@@ -1,22 +1,28 @@
 import { ElementBase } from '../ElementBase';
 import { createPortalContainer } from '../portal';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
-import { createPositioner, type PositionerHandle } from '../primitives/positioner';
+import { createPositioner, type PositionerHandle, type PositionerPlacement } from '../primitives/positioner';
 
 const style = `
   .panel {
     color-scheme: light dark;
-    --ui-popover-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    --ui-popover-bg: var(--base-panel-bg, var(--color-panel, color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent)));
     --ui-popover-text: var(--ui-color-text, #0f172a);
-    --ui-popover-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
-    --ui-popover-shadow: none;
+    --ui-popover-border: var(--base-panel-border, 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent));
+    --ui-popover-shadow: var(--base-panel-shadow, var(--shadow-4, none));
+    --ui-popover-radius: var(--base-panel-radius, var(--ui-radius, 4px));
+    --ui-popover-padding: var(--base-panel-padding, var(--ui-default-gap, 8px));
+    --ui-popover-backdrop: var(--base-panel-backdrop, var(--backdrop-filter-panel, none));
     --ui-popover-focus: var(--ui-color-focus-ring, #2563eb);
     background: var(--ui-popover-bg);
     color: var(--ui-popover-text);
-    border: 1px solid var(--ui-popover-border);
-    border-radius: 10px;
-    padding: 8px;
+    border: var(--ui-popover-border);
+    border-radius: var(--ui-popover-radius);
+    padding: var(--ui-popover-padding);
     box-shadow: var(--ui-popover-shadow);
+    backdrop-filter: var(--ui-popover-backdrop);
+    font: 500 var(--ui-default-font-size, var(--font-size-2, var(--ui-font-size-md, 14px)))/var(--ui-default-line-height, var(--line-height-2, 20px)) var(--ui-font-family, system-ui, sans-serif);
+    letter-spacing: var(--ui-default-letter-spacing, var(--letter-spacing-2, 0em));
     opacity: 0;
     transform: translateY(6px) scale(0.99);
     transition: opacity var(--ui-motion-base, 200ms) var(--ui-motion-easing, ease), transform var(--ui-motion-base, 200ms) var(--ui-motion-easing, ease);
@@ -71,7 +77,9 @@ const style = `
 `;
 
 export class UIPopover extends ElementBase {
-  static get observedAttributes() { return ['open']; }
+  static get observedAttributes() {
+    return ['open', 'placement', 'offset', 'flip', 'shift', 'close-on-escape', 'close-on-outside'];
+  }
   private _portalEl: HTMLElement | null = null;
   private _panelEl: HTMLElement | null = null;
   private _positioner: PositionerHandle | null = null;
@@ -87,7 +95,17 @@ export class UIPopover extends ElementBase {
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
-    if (name === 'open') this._syncOpenState();
+    if (name === 'open') {
+      this._syncOpenState();
+      return;
+    }
+    if (this._isOpen && this._portalEl?.isConnected) {
+      if (name === 'placement' || name === 'offset' || name === 'flip' || name === 'shift') {
+        this._mountPortal();
+      } else if (name === 'close-on-escape' || name === 'close-on-outside') {
+        this._syncDismissableLayer();
+      }
+    }
   }
 
   connectedCallback() {
@@ -114,6 +132,7 @@ export class UIPopover extends ElementBase {
   open() { this.setAttribute('open', ''); }
   close() { this.removeAttribute('open'); }
   toggle() { this.hasAttribute('open') ? this.close() : this.open(); }
+  updatePosition() { this._positioner?.update(); }
 
   private _getTrigger(): HTMLElement | null {
     return this.querySelector('[slot="trigger"]') as HTMLElement | null;
@@ -138,6 +157,38 @@ export class UIPopover extends ElementBase {
     if (source) panel.appendChild(source.cloneNode(true));
     wrapper.appendChild(panel);
     return wrapper;
+  }
+
+  private _placement(): PositionerPlacement {
+    const placement = this.getAttribute('placement') as PositionerPlacement | null;
+    if (!placement) return 'bottom';
+    return placement;
+  }
+
+  private _offset(): number {
+    const value = Number(this.getAttribute('offset'));
+    return Number.isFinite(value) ? value : 8;
+  }
+
+  private _closeOnEscape(): boolean {
+    return this.getAttribute('close-on-escape') !== 'false';
+  }
+
+  private _closeOnOutside(): boolean {
+    return this.getAttribute('close-on-outside') !== 'false';
+  }
+
+  private _syncDismissableLayer(): void {
+    const trigger = this._getTrigger();
+    if (!trigger || !this._panelEl) return;
+    this._layer?.destroy();
+    this._layer = createDismissableLayer({
+      node: this._panelEl,
+      trigger,
+      closeOnEscape: this._closeOnEscape(),
+      closeOnPointerOutside: this._closeOnOutside(),
+      onDismiss: () => this.close()
+    });
   }
 
   private _teardownPortal(): void {
@@ -168,21 +219,14 @@ export class UIPopover extends ElementBase {
     this._positioner = createPositioner({
       anchor: trigger,
       floating: this._portalEl,
-      placement: 'bottom',
-      shift: true,
-      flip: true,
+      placement: this._placement(),
+      offset: this._offset(),
+      shift: this.getAttribute('shift') !== 'false',
+      flip: this.getAttribute('flip') !== 'false',
       arrow: this._portalEl.querySelector('.arrow') as HTMLElement | null
     });
 
-    if (this._panelEl) {
-      this._layer = createDismissableLayer({
-        node: this._panelEl,
-        trigger,
-        closeOnEscape: true,
-        closeOnPointerOutside: true,
-        onDismiss: () => this.close()
-      });
-    }
+    this._syncDismissableLayer();
   }
 
   private _syncOpenState(): void {
@@ -203,10 +247,12 @@ export class UIPopover extends ElementBase {
       this._restoreFocusEl = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       this._mountPortal();
       this.dispatchEvent(new CustomEvent('open', { bubbles: true, composed: true }));
+      this.dispatchEvent(new CustomEvent('open-change', { detail: { open: true }, bubbles: true, composed: true }));
       return;
     }
     this._teardownPortal();
     this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }));
+    this.dispatchEvent(new CustomEvent('open-change', { detail: { open: false }, bubbles: true, composed: true }));
 
     const trigger = this._getTrigger();
     const fallback = this._restoreFocusEl;

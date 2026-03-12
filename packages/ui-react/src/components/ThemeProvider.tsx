@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import { applyTheme, defaultTokens, registerThemeHost, ThemeTokens } from '@editora/ui-core';
+import React, { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { applyTheme, defaultTokens, ThemeTokens } from '@editora/ui-core';
 
 export type ThemeUpdater = ThemeTokens | Partial<ThemeTokens> | ((prev: ThemeTokens) => ThemeTokens | Partial<ThemeTokens>);
 
@@ -28,17 +28,52 @@ function mergeThemeTokens(base: ThemeTokens, patch?: Partial<ThemeTokens> | null
     ...base,
     ...patch,
     colors: { ...base.colors, ...(patch.colors || {}) },
+    palette: {
+      ...(base.palette || {}),
+      ...(patch.palette || {}),
+      gray: { ...(base.palette?.gray || {}), ...(patch.palette?.gray || {}) },
+      grayAlpha: { ...(base.palette?.grayAlpha || {}), ...(patch.palette?.grayAlpha || {}) },
+      blackAlpha: { ...(base.palette?.blackAlpha || {}), ...(patch.palette?.blackAlpha || {}) },
+      whiteAlpha: { ...(base.palette?.whiteAlpha || {}), ...(patch.palette?.whiteAlpha || {}) },
+      accent: { ...(base.palette?.accent || {}), ...(patch.palette?.accent || {}) },
+      accentAlpha: { ...(base.palette?.accentAlpha || {}), ...(patch.palette?.accentAlpha || {}) }
+    },
+    surfaces: { ...(base.surfaces || {}), ...(patch.surfaces || {}) },
     shadows: { ...(base.shadows || {}), ...(patch.shadows || {}) },
     spacing: { ...(base.spacing || {}), ...(patch.spacing || {}) },
+    spaceScale: { ...(base.spaceScale || {}), ...(patch.spaceScale || {}) },
+    radiusScale: { ...(base.radiusScale || {}), ...(patch.radiusScale || {}) },
     typography: {
       ...(base.typography || {}),
       ...(patch.typography || {}),
       size: {
         ...(base.typography?.size || {}),
         ...(patch.typography?.size || {})
+      },
+      fontScale: {
+        ...(base.typography?.fontScale || {}),
+        ...(patch.typography?.fontScale || {})
+      },
+      lineHeight: {
+        ...(base.typography?.lineHeight || {}),
+        ...(patch.typography?.lineHeight || {})
+      },
+      letterSpacing: {
+        ...(base.typography?.letterSpacing || {}),
+        ...(patch.typography?.letterSpacing || {})
       }
     },
     motion: { ...(base.motion || {}), ...(patch.motion || {}) },
+    effects: { ...(base.effects || {}), ...(patch.effects || {}) },
+    components: {
+      ...(base.components || {}),
+      ...(patch.components || {}),
+      button: { ...(base.components?.button || {}), ...(patch.components?.button || {}) },
+      card: { ...(base.components?.card || {}), ...(patch.components?.card || {}) },
+      menu: { ...(base.components?.menu || {}), ...(patch.components?.menu || {}) },
+      panel: { ...(base.components?.panel || {}), ...(patch.components?.panel || {}) },
+      input: { ...(base.components?.input || {}), ...(patch.components?.input || {}) }
+    },
     zIndex: { ...(base.zIndex || {}), ...(patch.zIndex || {}) },
     breakpoints: { ...(base.breakpoints || {}), ...(patch.breakpoints || {}) }
   };
@@ -67,6 +102,7 @@ function resolveThemeUpdater(prev: ThemeTokens, next: ThemeUpdater): ThemeTokens
 }
 
 export function ThemeProvider({ tokens, children, storageKey = 'editora.theme.tokens' }: Props) {
+  const hostRef = useRef<HTMLDivElement | null>(null);
   const computeInitial = () => {
     if (typeof window !== 'undefined' && storageKey) {
       try {
@@ -102,12 +138,9 @@ export function ThemeProvider({ tokens, children, storageKey = 'editora.theme.to
   }, [tokens]);
 
   useIsomorphicLayoutEffect(() => {
-    applyTheme(current);
-    try {
-      registerThemeHost(document.documentElement);
-    } catch {
-      // noop
-    }
+    const host = hostRef.current;
+    if (!host) return;
+    applyTheme(current, host);
   }, [current]);
 
   useEffect(() => {
@@ -149,7 +182,13 @@ export function ThemeProvider({ tokens, children, storageKey = 'editora.theme.to
     [current]
   );
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>
+      <div ref={hostRef} style={{ display: 'contents' }}>
+        {children}
+      </div>
+    </ThemeContext.Provider>
+  );
 }
 
 export function useTheme() {

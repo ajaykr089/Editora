@@ -137,4 +137,23 @@ describe('UIButton behavior', () => {
 
     expect(submitSpy).toHaveBeenCalledTimes(0);
   });
+
+  it('applies numeric radius values as px tokens', async () => {
+    const el = document.createElement('ui-button') as HTMLElement;
+    el.setAttribute('radius', '12');
+    document.body.appendChild(el);
+    await settle();
+
+    expect(el.style.getPropertyValue('--ui-btn-radius')).toBe('12px');
+  });
+
+  it('preserves explicit radius when size is present', async () => {
+    const el = document.createElement('ui-button') as HTMLElement;
+    el.setAttribute('radius', 'full');
+    el.setAttribute('size', 'lg');
+    document.body.appendChild(el);
+    await settle();
+
+    expect(el.style.getPropertyValue('--ui-btn-radius')).toBe('999px');
+  });
 });

@@ -10,17 +10,16 @@ type MenuItem = HTMLElement & { disabled?: boolean };
 
 const hostStyle = `
   :host {
-    --ui-menu-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
+    --ui-menu-bg: var(--base-menu-bg, var(--color-panel, var(--ui-color-surface, var(--ui-surface, #ffffff))));
     --ui-menu-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-menu-border-color: var(--ui-color-border, var(--ui-border, rgba(15, 23, 42, 0.14)));
-    --ui-menu-border: 1px solid var(--ui-menu-border-color);
-    --ui-menu-shadow:
-      none;
-    --ui-menu-radius: 14px;
-    --ui-menu-padding: 6px;
+    --ui-menu-border-color: color-mix(in srgb, var(--ui-color-border, var(--ui-border, rgba(15, 23, 42, 0.14))) 78%, transparent);
+    --ui-menu-border: var(--base-menu-border, 1px solid var(--ui-menu-border-color));
+    --ui-menu-shadow: var(--base-menu-shadow, var(--shadow-4, none));
+    --ui-menu-radius: var(--base-menu-radius, var(--ui-radius, 4px));
+    --ui-menu-padding: var(--base-menu-content-padding, 6px);
     --ui-menu-min-width: 196px;
     --ui-menu-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
-    --ui-menu-backdrop: none;
+    --ui-menu-backdrop: var(--base-menu-backdrop, var(--backdrop-filter-panel, none));
     --ui-menu-z: 1560;
     color-scheme: light dark;
     display: inline-block;
@@ -44,15 +43,15 @@ const hostStyle = `
 
 const menuStyle = `
   .menu {
-    --ui-menu-item-radius: 8px;
-    --ui-menu-item-gap: 10px;
-    --ui-menu-item-min-height: 36px;
-    --ui-menu-item-pad-y: 8px;
-    --ui-menu-item-pad-x: 11px;
-    --ui-menu-item-font-size: 13px;
+    --ui-menu-item-radius: var(--base-menu-item-radius, var(--ui-radius, 4px));
+    --ui-menu-item-gap: var(--ui-default-gap, 8px);
+    --ui-menu-item-min-height: var(--base-menu-item-height, 36px);
+    --ui-menu-item-pad-y: var(--ui-default-gap, 8px);
+    --ui-menu-item-pad-x: var(--base-menu-item-padding-x, 11px);
+    --ui-menu-item-font-size: var(--ui-default-font-size, var(--font-size-2, 14px));
     --ui-menu-item-font-weight: 500;
-    --ui-menu-item-line-height: 1.32;
-    --ui-menu-separator-margin: 6px 10px;
+    --ui-menu-item-line-height: var(--line-height-2, 20px);
+    --ui-menu-separator-margin: calc(var(--ui-default-gap, 8px) * 0.75) calc(var(--ui-default-gap, 8px) * 1.25);
     --ui-menu-item-hover-bg:
       linear-gradient(
         180deg,
@@ -253,8 +252,8 @@ const menuStyle = `
     border-radius: var(--ui-menu-item-radius, 8px);
     background: transparent;
     color: inherit;
-    font: var(--ui-menu-item-font-weight, 500) var(--ui-menu-item-font-size, 13px)/var(--ui-menu-item-line-height, 1.32) -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
-    letter-spacing: 0.01em;
+    font: var(--ui-menu-item-font-weight, 500) var(--ui-menu-item-font-size, 13px)/var(--ui-menu-item-line-height, 1.32) var(--ui-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif);
+    letter-spacing: var(--ui-default-letter-spacing, var(--letter-spacing-2, 0em));
     text-align: left;
     cursor: default;
     outline: none;

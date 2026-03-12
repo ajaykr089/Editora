@@ -13,6 +13,7 @@ import {
 } from '@editora/react-icons';
 import '../../packages/editora-toast/src/toast.css';
 import '@editora/themes/themes/default.css';
+import { ShowcasePage, ShowcaseSection, showcasePanelStyle } from './storybook-showcase';
 
 const meta: Meta<typeof Button> = {
   title: 'UI/Button',
@@ -20,6 +21,9 @@ const meta: Meta<typeof Button> = {
   argTypes: {
     variant: { control: { type: 'radio', options: ['primary', 'secondary', 'ghost', 'danger', 'success', 'warning'] } },
     size: { control: { type: 'radio', options: ['sm', 'md', 'lg'] } },
+    recipe: { control: { type: 'radio', options: ['classic', 'solid', 'soft', 'surface', 'outline', 'ghost'] } },
+    radius: { control: 'text' },
+    scale: { control: { type: 'radio', options: ['1', '2', '3', '4'] } },
     state: { control: { type: 'radio', options: ['idle', 'loading', 'error', 'success'] } },
     tone: { control: { type: 'radio', options: ['neutral', 'info', 'success', 'warning', 'danger'] } },
     theme: { control: { type: 'radio', options: ['default', 'dark', 'brand'] } },
@@ -138,6 +142,9 @@ export const Playground = PlaygroundTemplate.bind({});
 Playground.args = {
   variant: 'primary',
   size: 'md',
+  recipe: 'solid',
+  radius: '4',
+  scale: '2',
   state: 'idle',
   tone: 'info',
   theme: 'default',
