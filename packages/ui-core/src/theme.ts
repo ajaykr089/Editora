@@ -82,6 +82,7 @@ export interface ThemeTokens {
     box?: ThemeScale;
     breadcrumb?: ThemeScale;
     card?: ThemeScale;
+    navigationMenu?: ThemeScale;
     menubar?: ThemeScale;
     contextMenu?: ThemeScale;
     alert?: ThemeScale;
@@ -537,6 +538,25 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'classic-hover-shadow': 'var(--shadow-3)',
     'classic-active-shadow': 'var(--shadow-2)'
   },
+  navigationMenu: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a5) 80%, transparent)',
+    radius: 'var(--radius-4)',
+    shadow: 'var(--shadow-2)',
+    padding: '6px',
+    gap: '6px',
+    'item-radius': 'var(--radius-2)',
+    'item-padding-x': '12px',
+    'item-padding-y': '8px',
+    'item-font-size': '14px',
+    'item-font-weight': '600',
+    'item-line-height': '20px',
+    'panel-bg': 'var(--color-panel-solid)',
+    'panel-border': '1px solid color-mix(in srgb, var(--gray-a5) 80%, transparent)',
+    'panel-radius': 'var(--radius-4)',
+    'panel-shadow': 'var(--shadow-3)',
+    'panel-padding': '12px'
+  },
   menubar: {
     bg: 'var(--color-panel-solid)',
     border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
@@ -728,6 +748,25 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     'classic-shadow': 'var(--shadow-2)',
     'classic-hover-shadow': 'var(--shadow-3)',
     'classic-active-shadow': 'var(--shadow-2)'
+  },
+  navigationMenu: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a6) 84%, transparent)',
+    radius: 'var(--radius-4)',
+    shadow: 'var(--shadow-2)',
+    padding: '6px',
+    gap: '6px',
+    'item-radius': 'var(--radius-2)',
+    'item-padding-x': '12px',
+    'item-padding-y': '8px',
+    'item-font-size': '14px',
+    'item-font-weight': '600',
+    'item-line-height': '20px',
+    'panel-bg': 'var(--color-panel-solid)',
+    'panel-border': '1px solid color-mix(in srgb, var(--gray-a6) 84%, transparent)',
+    'panel-radius': 'var(--radius-4)',
+    'panel-shadow': 'var(--shadow-3)',
+    'panel-padding': '12px'
   },
   menubar: {
     bg: 'var(--color-panel-solid)',
@@ -1207,6 +1246,7 @@ export function createThemeTokens(overrides?: Partial<ThemeTokens>, options?: { 
       button: mergeScale(base.components?.button, overrides?.components?.button),
       badge: mergeScale(base.components?.badge, overrides?.components?.badge),
       card: mergeScale(base.components?.card, overrides?.components?.card),
+      navigationMenu: mergeScale(base.components?.navigationMenu, overrides?.components?.navigationMenu),
       blockControls: mergeScale(base.components?.blockControls, overrides?.components?.blockControls),
       box: mergeScale(base.components?.box, overrides?.components?.box),
       breadcrumb: mergeScale(base.components?.breadcrumb, overrides?.components?.breadcrumb),
@@ -1376,6 +1416,7 @@ function applyThemeToTarget(target: HTMLElement, next: ThemeTokens) {
   addScaleVariables(target, '--base-box-', next.components?.box);
   addScaleVariables(target, '--base-breadcrumb-', next.components?.breadcrumb);
   addScaleVariables(target, '--base-card-', next.components?.card);
+  addScaleVariables(target, '--base-navigation-menu-', next.components?.navigationMenu);
   addScaleVariables(target, '--base-menubar-', next.components?.menubar);
   addScaleVariables(target, '--base-context-menu-', next.components?.contextMenu);
   addScaleVariables(target, '--base-alert-', next.components?.alert);

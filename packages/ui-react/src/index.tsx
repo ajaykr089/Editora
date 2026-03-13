@@ -34,7 +34,17 @@ export { Gantt } from './components/Gantt';
 export { Stepper } from './components/Stepper';
 export { Wizard } from './components/Wizard';
 export { QuickActions } from './components/QuickActions';
-export { NavigationMenu } from './components/NavigationMenu';
+export {
+  NavigationMenu,
+  NavigationMenuRoot,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuTrigger,
+  NavigationMenuLink,
+  NavigationMenuContent,
+  NavigationMenuIndicator,
+  NavigationMenuViewport
+} from './components/NavigationMenu';
 export { Menubar } from './components/Menubar';
 export { Dialog } from './components/Dialog';
 export { DialogProvider, useDialog } from './components/DialogProvider';
