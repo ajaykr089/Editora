@@ -124,6 +124,7 @@ describe('MultiSelect wrapper', () => {
       <MultiSelect
         options={[{ value: 'ops', label: 'Operations' }]}
         selectionIndicator="none"
+        optionBorder
         readOnly
         clearable
         loading
@@ -131,13 +132,16 @@ describe('MultiSelect wrapper', () => {
         variant="contrast"
         tone="warning"
         density="compact"
-        shape="square"
-        size="sm"
+        radius={12}
+        optionRadius={16}
+        elevation="high"
+        size="1"
         renderLimit={40}
       />
     );
     const el = container.querySelector('ui-multi-select') as HTMLElement | null;
     expect(el?.getAttribute('selection-indicator')).toBe('none');
+    expect(el?.hasAttribute('option-border')).toBe(true);
     expect(el?.hasAttribute('readonly')).toBe(true);
     expect(el?.hasAttribute('clearable')).toBe(true);
     expect(el?.hasAttribute('loading')).toBe(true);
@@ -145,8 +149,10 @@ describe('MultiSelect wrapper', () => {
     expect(el?.getAttribute('variant')).toBe('contrast');
     expect(el?.getAttribute('tone')).toBe('warning');
     expect(el?.getAttribute('density')).toBe('compact');
-    expect(el?.getAttribute('shape')).toBe('square');
-    expect(el?.getAttribute('size')).toBe('sm');
+    expect(el?.getAttribute('radius')).toBe('12');
+    expect(el?.getAttribute('option-radius')).toBe('16');
+    expect(el?.getAttribute('elevation')).toBe('high');
+    expect(el?.getAttribute('size')).toBe('1');
     expect(el?.getAttribute('render-limit')).toBe('40');
   });
 });

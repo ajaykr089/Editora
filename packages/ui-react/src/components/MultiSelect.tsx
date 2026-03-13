@@ -31,11 +31,15 @@ type MultiSelectProps = React.HTMLAttributes<HTMLElement> & {
   maxSelections?: number;
   renderLimit?: number;
   selectionIndicator?: 'checkbox' | 'check' | 'none';
-  variant?: 'default' | 'surface' | 'soft' | 'filled' | 'minimal' | 'contrast';
-  tone?: 'default' | 'success' | 'warning' | 'danger';
+  optionBorder?: boolean;
+  variant?: 'default' | 'surface' | 'soft' | 'solid' | 'outline' | 'flat' | 'contrast' | 'filled' | 'minimal';
+  tone?: 'default' | 'neutral' | 'info' | 'success' | 'warning' | 'danger';
   density?: 'default' | 'compact' | 'comfortable';
   shape?: 'default' | 'square' | 'soft';
-  size?: 'sm' | 'md' | 'lg';
+  radius?: number | string;
+  optionRadius?: number | string;
+  elevation?: 'none' | 'low' | 'high';
+  size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
   onChange?: (detail: { value: string[]; previousValue: string[]; selectedItems: MultiSelectOption[]; source: string }) => void;
   onValueChange?: (value: string[]) => void;
 };
@@ -58,10 +62,14 @@ export const MultiSelect = React.forwardRef<HTMLElement, MultiSelectProps>(funct
     maxSelections,
     renderLimit,
     selectionIndicator,
+    optionBorder,
     variant,
     tone,
     density,
     shape,
+    radius,
+    optionRadius,
+    elevation,
     size,
     onChange,
     onValueChange,
@@ -118,11 +126,15 @@ export const MultiSelect = React.forwardRef<HTMLElement, MultiSelectProps>(funct
     syncAttr('render-limit', typeof renderLimit === 'number' ? String(renderLimit) : null);
     syncAttr('loading-text', loadingText ?? null);
     syncAttr('selection-indicator', selectionIndicator ?? null);
+    syncBool('option-border', optionBorder);
     syncAttr('variant', variant && variant !== 'default' ? variant : null);
     syncAttr('tone', tone && tone !== 'default' ? tone : null);
     syncAttr('density', density && density !== 'default' ? density : null);
     syncAttr('shape', shape && shape !== 'default' ? shape : null);
-    syncAttr('size', size && size !== 'md' ? size : null);
+    syncAttr('radius', radius != null ? String(radius) : null);
+    syncAttr('option-radius', optionRadius != null ? String(optionRadius) : null);
+    syncAttr('elevation', elevation && elevation !== 'low' ? elevation : null);
+    syncAttr('size', size && size !== 'md' && size !== '2' ? size : null);
     syncBool('required', required);
     syncBool('disabled', disabled);
     syncBool('readonly', readOnly);
@@ -145,10 +157,14 @@ export const MultiSelect = React.forwardRef<HTMLElement, MultiSelectProps>(funct
     maxSelections,
     renderLimit,
     selectionIndicator,
+    optionBorder,
     variant,
     tone,
     density,
     shape,
+    radius,
+    optionRadius,
+    elevation,
     size
   ]);
 

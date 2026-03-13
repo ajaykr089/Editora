@@ -82,6 +82,7 @@ export interface ThemeTokens {
     box?: ThemeScale;
     breadcrumb?: ThemeScale;
     card?: ThemeScale;
+    multiSelect?: ThemeScale;
     navigationMenu?: ThemeScale;
     menubar?: ThemeScale;
     contextMenu?: ThemeScale;
@@ -538,6 +539,29 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'classic-hover-shadow': 'var(--shadow-3)',
     'classic-active-shadow': 'var(--shadow-2)'
   },
+  multiSelect: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
+    radius: 'var(--ui-radius)',
+    shadow: 'none',
+    'height-sm': '38px',
+    'height-md': '44px',
+    'height-lg': '48px',
+    'padding-x': '10px',
+    'padding-y': '8px',
+    'panel-bg': 'var(--color-panel-solid)',
+    'panel-border': '1px solid color-mix(in srgb, var(--gray-a5) 84%, transparent)',
+    'panel-radius': 'calc(var(--ui-radius) + 2px)',
+    'panel-shadow': 'var(--shadow-4)',
+    'chip-radius': '999px',
+    'chip-gap': '6px',
+    'chip-padding-x': '10px',
+    'chip-padding-y': '6px',
+    'option-radius': '10px',
+    'option-gap': '10px',
+    'option-padding-x': '10px',
+    'option-padding-y': '10px'
+  },
   navigationMenu: {
     bg: 'var(--color-panel-solid)',
     border: '1px solid color-mix(in srgb, var(--gray-a5) 80%, transparent)',
@@ -748,6 +772,29 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     'classic-shadow': 'var(--shadow-2)',
     'classic-hover-shadow': 'var(--shadow-3)',
     'classic-active-shadow': 'var(--shadow-2)'
+  },
+  multiSelect: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
+    radius: 'var(--ui-radius)',
+    shadow: 'none',
+    'height-sm': '38px',
+    'height-md': '44px',
+    'height-lg': '48px',
+    'padding-x': '10px',
+    'padding-y': '8px',
+    'panel-bg': 'var(--color-panel-solid)',
+    'panel-border': '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
+    'panel-radius': 'calc(var(--ui-radius) + 2px)',
+    'panel-shadow': 'var(--shadow-4)',
+    'chip-radius': '999px',
+    'chip-gap': '6px',
+    'chip-padding-x': '10px',
+    'chip-padding-y': '6px',
+    'option-radius': '10px',
+    'option-gap': '10px',
+    'option-padding-x': '10px',
+    'option-padding-y': '10px'
   },
   navigationMenu: {
     bg: 'var(--color-panel-solid)',
@@ -1258,6 +1305,7 @@ export function createThemeTokens(overrides?: Partial<ThemeTokens>, options?: { 
       aspectRatio: mergeScale(base.components?.aspectRatio, overrides?.components?.aspectRatio),
       avatar: mergeScale(base.components?.avatar, overrides?.components?.avatar),
       menu: mergeScale(base.components?.menu, overrides?.components?.menu),
+      multiSelect: mergeScale(base.components?.multiSelect, overrides?.components?.multiSelect),
       panel: mergeScale(base.components?.panel, overrides?.components?.panel),
       input: mergeScale(base.components?.input, overrides?.components?.input)
     },
@@ -1416,6 +1464,7 @@ function applyThemeToTarget(target: HTMLElement, next: ThemeTokens) {
   addScaleVariables(target, '--base-box-', next.components?.box);
   addScaleVariables(target, '--base-breadcrumb-', next.components?.breadcrumb);
   addScaleVariables(target, '--base-card-', next.components?.card);
+  addScaleVariables(target, '--base-multi-select-', next.components?.multiSelect);
   addScaleVariables(target, '--base-navigation-menu-', next.components?.navigationMenu);
   addScaleVariables(target, '--base-menubar-', next.components?.menubar);
   addScaleVariables(target, '--base-context-menu-', next.components?.contextMenu);

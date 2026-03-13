@@ -11,27 +11,47 @@ type MultiSelectOption = {
   group?: string;
 };
 
+type MultiSelectSize = 'sm' | 'md' | 'lg';
+
 let multiSelectUid = 0;
 
 const style = `
   :host {
-    --ui-multi-select-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
-    --ui-multi-select-border: 1px solid var(--ui-multi-select-border-color);
-    --ui-multi-select-radius: var(--ui-radius, 12px);
-    --ui-multi-select-bg: var(--ui-color-surface, #ffffff);
-    --ui-multi-select-text: var(--ui-color-text, #0f172a);
-    --ui-multi-select-muted: var(--ui-color-muted, #64748b);
+    --ui-multi-select-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 82%, transparent);
+    --ui-multi-select-border: var(--base-multi-select-border, 1px solid var(--ui-multi-select-border-color));
+    --ui-multi-select-radius: var(--base-multi-select-radius, var(--ui-radius, 4px));
+    --ui-multi-select-bg: var(--base-multi-select-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
+    --ui-multi-select-text: var(--ui-color-text, var(--ui-text, #0f172a));
+    --ui-multi-select-muted: var(--ui-color-muted, var(--ui-muted, #64748b));
     --ui-multi-select-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-multi-select-danger: var(--ui-color-danger, #dc2626);
     --ui-multi-select-accent: var(--ui-color-primary, #2563eb);
     --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, transparent);
     --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-primary, #2563eb) 82%, #0f172a 18%);
-    --ui-multi-select-panel-bg: color-mix(in srgb, var(--ui-multi-select-bg) 98%, transparent);
+    --ui-multi-select-panel-bg: var(--base-multi-select-panel-bg, color-mix(in srgb, var(--ui-multi-select-bg) 98%, transparent));
+    --ui-multi-select-panel-border: var(--base-multi-select-panel-border, 1px solid color-mix(in srgb, var(--ui-multi-select-border-color) 84%, transparent));
+    --ui-multi-select-panel-shadow: var(--base-multi-select-panel-shadow, var(--shadow-4, 0 20px 34px rgba(2, 6, 23, 0.16)));
+    --ui-multi-select-height: var(--base-multi-select-height-md, 44px);
+    --ui-multi-select-padding-x: var(--base-multi-select-padding-x, 10px);
+    --ui-multi-select-padding-y: var(--base-multi-select-padding-y, 8px);
+    --ui-multi-select-chip-radius: var(--base-multi-select-chip-radius, 999px);
+    --ui-multi-select-chip-gap: var(--base-multi-select-chip-gap, 6px);
+    --ui-multi-select-chip-padding-x: var(--base-multi-select-chip-padding-x, 10px);
+    --ui-multi-select-chip-padding-y: var(--base-multi-select-chip-padding-y, 6px);
+    --ui-multi-select-option-radius: var(--base-multi-select-option-radius, 10px);
+    --ui-multi-select-option-gap: var(--base-multi-select-option-gap, 10px);
+    --ui-multi-select-option-padding-x: var(--base-multi-select-option-padding-x, 10px);
+    --ui-multi-select-option-padding-y: var(--base-multi-select-option-padding-y, 10px);
+    --ui-multi-select-option-border-color: color-mix(in srgb, var(--ui-multi-select-border-color) 84%, transparent);
+    --ui-multi-select-option-stroke: inset 0 0 0 1px transparent;
     display: block;
     inline-size: 100%;
     min-inline-size: 0;
     color: var(--ui-multi-select-text);
-    font-family: "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: var(--ui-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+    font-size: var(--ui-default-font-size, 14px);
+    line-height: var(--ui-default-line-height, 20px);
+    letter-spacing: var(--ui-default-letter-spacing, 0em);
     color-scheme: light dark;
   }
 
@@ -43,7 +63,7 @@ const style = `
     align-items: center;
     gap: 6px;
     color: var(--ui-multi-select-muted);
-    font: 600 13px/1.35 "IBM Plex Sans", "Inter", sans-serif;
+    font: 600 13px/1.35 var(--ui-font-family, "Inter", sans-serif);
   }
   .required { color: var(--ui-multi-select-danger); font-size: 12px; line-height: 1; }
   .description, .error {
@@ -57,17 +77,42 @@ const style = `
 
   .shell {
     position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    min-block-size: var(--ui-multi-select-height);
+    padding: var(--ui-multi-select-padding-y) var(--ui-multi-select-padding-x);
+    border: var(--ui-multi-select-border);
+    border-radius: var(--ui-multi-select-radius);
+    background: var(--ui-multi-select-bg);
+    box-shadow: var(--base-multi-select-shadow, none);
+    box-sizing: border-box;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+
+  .value-area {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
-    min-block-size: 44px;
-    padding: 8px 10px;
-    border: var(--ui-multi-select-border);
-    border-radius: var(--ui-multi-select-radius);
-    background: var(--ui-multi-select-bg);
-    box-sizing: border-box;
-    transition: border-color 160ms ease, box-shadow 160ms ease;
+    min-inline-size: 0;
+  }
+
+  .chips {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-inline-size: 0;
+  }
+
+  .controls {
+    display: inline-flex;
+    align-items: center;
+    align-self: center;
+    gap: 4px;
+    min-block-size: 28px;
   }
 
   .shell[data-open="true"],
@@ -88,12 +133,12 @@ const style = `
   .chip {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 8px 6px 10px;
-    border-radius: 999px;
+    gap: var(--ui-multi-select-chip-gap);
+    padding: var(--ui-multi-select-chip-padding-y) calc(var(--ui-multi-select-chip-padding-x) - 2px) var(--ui-multi-select-chip-padding-y) var(--ui-multi-select-chip-padding-x);
+    border-radius: var(--ui-multi-select-chip-radius);
     background: var(--ui-multi-select-chip-bg);
     color: var(--ui-multi-select-chip-text);
-    font: 600 12px/1.2 "Inter", "IBM Plex Sans", sans-serif;
+    font: 600 12px/1.2 var(--ui-font-family, "Inter", sans-serif);
   }
 
   .chip-remove {
@@ -121,7 +166,7 @@ const style = `
     background: transparent;
     color: inherit;
     outline: none;
-    font: 500 14px/1.4 "Inter", "IBM Plex Sans", sans-serif;
+    font: 500 14px/1.4 var(--ui-font-family, "Inter", sans-serif);
     padding: 4px 2px;
     margin: 0;
   }
@@ -131,7 +176,6 @@ const style = `
   }
 
   .toggle {
-    margin-inline-start: auto;
     border: none;
     background: transparent;
     color: color-mix(in srgb, var(--ui-multi-select-text) 64%, transparent);
@@ -141,7 +185,15 @@ const style = `
     display: inline-grid;
     place-items: center;
     cursor: pointer;
+    padding: 0;
+    line-height: 0;
     transition: background-color 140ms ease, color 140ms ease, transform 140ms ease;
+  }
+
+  .toggle svg {
+    inline-size: 14px;
+    block-size: 14px;
+    display: block;
   }
 
   .toggle:hover {
@@ -182,10 +234,10 @@ const style = `
     z-index: 20;
     max-block-size: min(320px, 45vh);
     overflow: auto;
-    border: 1px solid color-mix(in srgb, var(--ui-multi-select-border-color) 84%, transparent);
-    border-radius: calc(var(--ui-multi-select-radius) + 2px);
+    border: var(--ui-multi-select-panel-border);
+    border-radius: var(--base-multi-select-panel-radius, calc(var(--ui-multi-select-radius) + 2px));
     background: var(--ui-multi-select-panel-bg);
-    box-shadow: 0 20px 34px rgba(2, 6, 23, 0.16);
+    box-shadow: var(--ui-multi-select-panel-shadow);
     padding: 6px;
     box-sizing: border-box;
   }
@@ -193,26 +245,33 @@ const style = `
   .panel[hidden] { display: none; }
 
   .option {
+    position: relative;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    gap: 10px;
-    align-items: start;
+    gap: var(--ui-multi-select-option-gap);
+    align-items: center;
     width: 100%;
     border: none;
     background: transparent;
-    border-radius: 10px;
-    padding: 10px;
+    border-radius: var(--ui-multi-select-option-radius);
+    padding: var(--ui-multi-select-option-padding-y) var(--ui-multi-select-option-padding-x);
     text-align: left;
     color: inherit;
     cursor: pointer;
+    box-shadow: var(--ui-multi-select-option-stroke);
+    transition: background-color 140ms ease, color 140ms ease, box-shadow 140ms ease;
   }
 
   .option:hover {
     background: color-mix(in srgb, var(--ui-multi-select-focus) 9%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-multi-select-focus) 22%, transparent);
+    z-index: 1;
   }
 
   .option[data-selected="true"] {
     background: color-mix(in srgb, var(--ui-multi-select-focus) 14%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-multi-select-focus) 34%, transparent);
+    z-index: 1;
   }
 
   .option[data-indicator="none"] {
@@ -224,7 +283,7 @@ const style = `
     background: transparent;
   }
 
-  .option[data-highlighted="true"] {
+  .option[data-active="true"] {
     outline: 2px solid color-mix(in srgb, var(--ui-multi-select-focus) 24%, transparent);
     outline-offset: -2px;
   }
@@ -265,7 +324,6 @@ const style = `
     place-items: center;
     font-size: 11px;
     line-height: 1;
-    margin-top: 2px;
   }
 
   .status {
@@ -304,26 +362,38 @@ const style = `
   }
 
   :host([size="sm"]) {
-    --ui-multi-select-radius: 10px;
+    --ui-multi-select-height: var(--base-multi-select-height-sm, 38px);
   }
 
-  :host([size="sm"]) .shell {
-    min-block-size: 38px;
-    padding: 6px 8px;
+  :host([size="sm"]),
+  :host([size="1"]) {
+    --ui-multi-select-height: var(--base-multi-select-height-sm, 38px);
+    --ui-multi-select-padding-x: 8px;
+    --ui-multi-select-padding-y: 6px;
+    --ui-multi-select-option-padding-x: 8px;
+    --ui-multi-select-option-padding-y: 8px;
   }
 
   :host([size="sm"]) .input,
-  :host([size="sm"]) .option-label {
+  :host([size="sm"]) .option-label,
+  :host([size="1"]) .input,
+  :host([size="1"]) .option-label {
     font-size: 12px;
   }
 
-  :host([size="lg"]) .shell {
-    min-block-size: 48px;
-    padding: 10px 12px;
+  :host([size="lg"]),
+  :host([size="3"]) {
+    --ui-multi-select-height: var(--base-multi-select-height-lg, 48px);
+    --ui-multi-select-padding-x: 12px;
+    --ui-multi-select-padding-y: 10px;
+    --ui-multi-select-option-padding-x: 12px;
+    --ui-multi-select-option-padding-y: 12px;
   }
 
   :host([size="lg"]) .input,
-  :host([size="lg"]) .option-label {
+  :host([size="lg"]) .option-label,
+  :host([size="3"]) .input,
+  :host([size="3"]) .option-label {
     font-size: 15px;
   }
 
@@ -333,6 +403,14 @@ const style = `
 
   :host([density="compact"]) .shell {
     gap: 6px;
+  }
+
+  :host([density="compact"]) .value-area {
+    gap: 6px;
+  }
+
+  :host([density="compact"]) .chips {
+    gap: 4px;
   }
 
   :host([density="compact"]) .option {
@@ -348,16 +426,24 @@ const style = `
     padding: 10px 12px;
   }
 
+  :host([density="comfortable"]) .value-area {
+    gap: 10px;
+  }
+
+  :host([density="comfortable"]) .chips {
+    gap: 8px;
+  }
+
   :host([density="comfortable"]) .option {
     padding: 12px;
   }
 
-  :host([shape="square"]) {
-    --ui-multi-select-radius: 6px;
+  :host([option-border]) {
+    --ui-multi-select-option-stroke: inset 0 0 0 1px var(--ui-multi-select-option-border-color);
   }
 
-  :host([shape="soft"]) {
-    --ui-multi-select-radius: 18px;
+  :host([option-border]) .option + .option {
+    margin-top: -1px;
   }
 
   :host([variant="surface"]) {
@@ -369,9 +455,15 @@ const style = `
     --ui-multi-select-border-color: color-mix(in srgb, var(--ui-multi-select-accent) 26%, var(--ui-color-border, #cbd5e1));
   }
 
+  :host([variant="outline"]) {
+    --ui-multi-select-bg: var(--base-multi-select-bg, var(--color-panel-solid, #ffffff));
+    --base-multi-select-shadow: none;
+  }
+
+  :host([variant="solid"]),
   :host([variant="filled"]) {
-    --ui-multi-select-bg: color-mix(in srgb, var(--ui-multi-select-text) 6%, #ffffff);
-    --ui-multi-select-border-color: transparent;
+    --ui-multi-select-bg: color-mix(in srgb, var(--ui-multi-select-accent) 9%, #ffffff);
+    --ui-multi-select-border-color: color-mix(in srgb, var(--ui-multi-select-accent) 24%, transparent);
   }
 
   :host([variant="contrast"]) {
@@ -385,9 +477,11 @@ const style = `
     --ui-multi-select-chip-text: #e2e8f0;
   }
 
+  :host([variant="flat"]),
   :host([variant="minimal"]) {
     --ui-multi-select-bg: transparent;
     --ui-multi-select-border: 0;
+    --base-multi-select-shadow: none;
   }
 
   :host([variant="minimal"]) .shell {
@@ -396,6 +490,33 @@ const style = `
     border-top: none;
     border-radius: 0;
     padding-inline: 0;
+  }
+
+  :host([elevation="none"]) {
+    --base-multi-select-shadow: none;
+    --ui-multi-select-panel-shadow: none;
+  }
+
+  :host([elevation="low"]) {
+    --base-multi-select-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 16px rgba(15, 23, 42, 0.06);
+    --ui-multi-select-panel-shadow: 0 18px 34px rgba(15, 23, 42, 0.12), 0 4px 10px rgba(15, 23, 42, 0.08);
+  }
+
+  :host([elevation="high"]) {
+    --base-multi-select-shadow: 0 10px 24px rgba(15, 23, 42, 0.08), 0 24px 48px rgba(15, 23, 42, 0.1);
+    --ui-multi-select-panel-shadow: 0 24px 56px rgba(15, 23, 42, 0.2), 0 8px 18px rgba(15, 23, 42, 0.12);
+  }
+
+  :host([tone="neutral"]) {
+    --ui-multi-select-accent: color-mix(in srgb, var(--ui-color-muted, #64748b) 62%, var(--ui-color-text, #0f172a));
+    --ui-multi-select-focus: color-mix(in srgb, var(--ui-color-muted, #64748b) 62%, var(--ui-color-text, #0f172a));
+    --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-muted, #64748b) 12%, transparent);
+    --ui-multi-select-chip-text: var(--ui-multi-select-text);
+  }
+
+  :host([tone="info"]) {
+    --ui-multi-select-accent: var(--ui-color-primary, #2563eb);
+    --ui-multi-select-focus: var(--ui-color-primary, #2563eb);
   }
 
   :host([tone="success"]) {
@@ -473,6 +594,24 @@ function parseSelected(raw: string | null): string[] {
   return trimmed.split(',').map((entry) => entry.trim()).filter(Boolean);
 }
 
+function normalizeRadius(value: string | null): string | null {
+  if (!value || value === 'default') return null;
+  if (value === 'none' || value === 'square') return '0px';
+  if (value === 'sm') return '8px';
+  if (value === 'md' || value === 'soft') return '12px';
+  if (value === 'lg') return '16px';
+  if (value === 'full') return '999px';
+  if (/^\d+(\.\d+)?$/.test(value)) return `${value}px`;
+  if (/^\d+(\.\d+)?(px|rem|em|%)$/.test(value)) return value;
+  return null;
+}
+
+function normalizeSize(value: string | null): MultiSelectSize {
+  if (value === 'sm' || value === '1') return 'sm';
+  if (value === 'lg' || value === '3') return 'lg';
+  return 'md';
+}
+
 export class UIMultiSelect extends ElementBase {
   static get observedAttributes() {
     return [
@@ -493,11 +632,15 @@ export class UIMultiSelect extends ElementBase {
       'max-selections',
       'render-limit',
       'selection-indicator',
+      'option-border',
       'variant',
       'tone',
       'density',
       'shape',
-      'size'
+      'size',
+      'radius',
+      'option-radius',
+      'elevation'
     ];
   }
 
@@ -560,7 +703,13 @@ export class UIMultiSelect extends ElementBase {
     if (name === 'options') this._options = parseOptions(newValue);
     if (name === 'value') this._selected = parseSelected(newValue);
     if (name === 'name' && this.isConnected) this._registerWithForm();
-    if (this._shellEl) this._syncUi();
+    if (!this._shellEl) return;
+    if (name === 'variant' || name === 'tone' || name === 'density' || name === 'shape' || name === 'size' || name === 'radius' || name === 'option-radius' || name === 'elevation') {
+      this._syncVisualState();
+      if (name === 'size') this._syncUi();
+      return;
+    }
+    this._syncUi();
   }
 
   protected override shouldRenderOnAttributeChange(): boolean {
@@ -576,11 +725,19 @@ export class UIMultiSelect extends ElementBase {
           <div class="description" hidden></div>
         </div>
         <div class="shell" part="shell" data-open="false" data-invalid="false">
-          <div class="chips" part="chips"></div>
-          <input class="input" part="input" type="text" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="${this._uid}-panel" />
-          <button class="clear" part="clear" type="button" aria-label="Clear selection" hidden>×</button>
-          <button class="toggle" part="toggle" type="button" aria-label="Toggle options">⌄</button>
-          <ui-listbox class="panel" id="${this._uid}-panel" part="panel" role="listbox" aria-multiselectable="true" item-selector=".option" item-role="option" active-attribute="data-highlighted" hidden></ui-listbox>
+          <div class="value-area" part="value-area">
+            <div class="chips" part="chips"></div>
+            <input class="input" part="input" type="text" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="${this._uid}-panel" />
+          </div>
+          <div class="controls" part="controls">
+            <button class="clear" part="clear" type="button" aria-label="Clear selection" hidden>×</button>
+            <button class="toggle" part="toggle" type="button" aria-label="Toggle options">
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M4.25 6.5 8 10.25 11.75 6.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </div>
+          <ui-listbox class="panel" id="${this._uid}-panel" part="panel" role="listbox" aria-multiselectable="true" item-selector=".option" item-role="option" active-attribute="data-active" hidden></ui-listbox>
         </div>
         <div class="error" part="error" hidden></div>
       </div>
@@ -599,7 +756,27 @@ export class UIMultiSelect extends ElementBase {
     this._shellEl?.addEventListener('focusin', this._onFocusIn);
     this._shellEl?.addEventListener('focusout', this._onFocusOut);
 
+    this._syncVisualState();
     this._syncUi();
+  }
+
+  private _syncVisualState(): void {
+    const normalizedRadius = normalizeRadius(this.getAttribute('radius') || this.getAttribute('shape'));
+    if (normalizedRadius) {
+      this.style.setProperty('--ui-multi-select-radius', normalizedRadius);
+    } else {
+      this.style.removeProperty('--ui-multi-select-radius');
+    }
+
+    const normalizedOptionRadius = normalizeRadius(this.getAttribute('option-radius'));
+    if (normalizedOptionRadius) {
+      this.style.setProperty('--ui-multi-select-option-radius', normalizedOptionRadius);
+    } else {
+      this.style.removeProperty('--ui-multi-select-option-radius');
+    }
+
+    const normalizedSize = normalizeSize(this.getAttribute('size'));
+    this.setAttribute('data-size', normalizedSize);
   }
 
   private _selectionIndicator(): 'checkbox' | 'check' | 'none' {

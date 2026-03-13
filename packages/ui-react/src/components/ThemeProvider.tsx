@@ -81,6 +81,7 @@ function mergeThemeTokens(base: ThemeTokens, patch?: Partial<ThemeTokens> | null
       aspectRatio: { ...(base.components?.aspectRatio || {}), ...(patch.components?.aspectRatio || {}) },
       avatar: { ...(base.components?.avatar || {}), ...(patch.components?.avatar || {}) },
       menu: { ...(base.components?.menu || {}), ...(patch.components?.menu || {}) },
+      multiSelect: { ...(base.components?.multiSelect || {}), ...(patch.components?.multiSelect || {}) },
       panel: { ...(base.components?.panel || {}), ...(patch.components?.panel || {}) },
       input: { ...(base.components?.input || {}), ...(patch.components?.input || {}) }
     },

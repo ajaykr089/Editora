@@ -44,11 +44,14 @@ export default {
   component: MultiSelect,
   argTypes: {
     selectionIndicator: { control: 'radio', options: ['checkbox', 'check', 'none'] },
-    variant: { control: 'select', options: ['default', 'surface', 'soft', 'filled', 'minimal', 'contrast'] },
-    tone: { control: 'select', options: ['default', 'success', 'warning', 'danger'] },
+    optionBorder: { control: 'boolean' },
+    variant: { control: 'select', options: ['default', 'surface', 'soft', 'solid', 'outline', 'flat', 'contrast'] },
+    tone: { control: 'select', options: ['default', 'neutral', 'info', 'success', 'warning', 'danger'] },
     density: { control: 'select', options: ['default', 'compact', 'comfortable'] },
-    shape: { control: 'select', options: ['default', 'square', 'soft'] },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
+    radius: { control: 'text' },
+    optionRadius: { control: 'text' },
+    elevation: { control: 'select', options: ['none', 'low', 'high'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg', '1', '2', '3'] },
     clearable: { control: 'boolean' },
     loading: { control: 'boolean' },
     readOnly: { control: 'boolean' },
@@ -103,10 +106,13 @@ export const Playground = (args: any) => {
 
 Playground.args = {
   selectionIndicator: 'checkbox',
+  optionBorder: false,
   variant: 'surface',
   tone: 'default',
   density: 'default',
-  shape: 'default',
+  radius: 12,
+  optionRadius: 10,
+  elevation: 'low',
   size: 'md',
   clearable: true,
   loading: false,
@@ -124,6 +130,21 @@ export const IndicatorModes = () => (
       <MultiSelect label="Checkbox indicator" options={teamOptions} value={['ops']} selectionIndicator="checkbox" />
       <MultiSelect label="Check indicator" options={teamOptions} value={['security']} selectionIndicator="check" />
       <MultiSelect label="No indicator" options={teamOptions} value={['platform']} selectionIndicator="none" />
+    </Grid>
+  </ShowcaseSection>
+);
+
+export const OptionRadiusGallery = () => (
+  <ShowcaseSection
+    eyebrow="Option Geometry"
+    title="Option radius"
+    description="Option rows can follow the shell radius or use their own tighter or softer corners depending on the density of the menu."
+  >
+    <Grid style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+      <MultiSelect label="Sharp rows" options={teamOptions} value={['ops']} optionRadius={0} optionBorder clearable />
+      <MultiSelect label="Default rows" options={teamOptions} value={['security']} optionRadius={10} clearable />
+      <MultiSelect label="Soft rows" options={teamOptions} value={['platform']} optionRadius={16} clearable />
+      <MultiSelect label="Pill rows" options={teamOptions} value={['support']} optionRadius="full" clearable />
     </Grid>
   </ShowcaseSection>
 );
@@ -192,10 +213,10 @@ export const VariantGallery = () => (
     <Grid style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
       <MultiSelect label="Surface default" options={teamOptions} value={['ops']} variant="surface" />
       <MultiSelect label="Soft warning" options={teamOptions} value={['security']} variant="soft" tone="warning" />
-      <MultiSelect label="Filled compact" options={teamOptions} value={['platform']} variant="filled" density="compact" size="sm" />
-      <MultiSelect label="Minimal no indicator" options={teamOptions} value={['support']} variant="minimal" selectionIndicator="none" />
-      <MultiSelect label="Contrast shell" options={teamOptions} value={['ops']} variant="contrast" shape="soft" />
-      <MultiSelect label="Comfortable square" options={teamOptions} value={['security']} density="comfortable" shape="square" size="lg" />
+      <MultiSelect label="Solid compact" options={teamOptions} value={['platform']} variant="solid" density="compact" size="sm" />
+      <MultiSelect label="Flat no indicator" options={teamOptions} value={['support']} variant="flat" selectionIndicator="none" />
+      <MultiSelect label="Contrast shell" options={teamOptions} value={['ops']} variant="contrast" radius={16} />
+      <MultiSelect label="Comfortable outline" options={teamOptions} value={['security']} density="comfortable" variant="outline" radius={0} size="lg" />
     </Grid>
   </ShowcaseSection>
 );
