@@ -69,7 +69,17 @@ export { Flex } from './Flex';
 export { Grid } from './Grid';
 export { Section } from './Section';
 export { Container } from './Container';
-export { Sidebar } from './Sidebar';
+export {
+  Sidebar,
+  SidebarHeader,
+  SidebarSearch,
+  SidebarSearchInput,
+  SidebarContent,
+  SidebarGroup,
+  SidebarItem,
+  SidebarPromo,
+  SidebarFooter
+} from './Sidebar';
 export { PanelGroup, Panel, Splitter } from './PanelGroup';
 export { Tree, TreeItem } from './Tree';
 export { Breadcrumb } from './Breadcrumb';

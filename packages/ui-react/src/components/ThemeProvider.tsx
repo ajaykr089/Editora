@@ -70,6 +70,7 @@ function mergeThemeTokens(base: ThemeTokens, patch?: Partial<ThemeTokens> | null
       ...(patch.components || {}),
       button: { ...(base.components?.button || {}), ...(patch.components?.button || {}) },
       badge: { ...(base.components?.badge || {}), ...(patch.components?.badge || {}) },
+      sidebar: { ...(base.components?.sidebar || {}), ...(patch.components?.sidebar || {}) },
       blockControls: { ...(base.components?.blockControls || {}), ...(patch.components?.blockControls || {}) },
       box: { ...(base.components?.box || {}), ...(patch.components?.box || {}) },
       breadcrumb: { ...(base.components?.breadcrumb || {}), ...(patch.components?.breadcrumb || {}) },

@@ -81,6 +81,7 @@ export interface ThemeTokens {
     blockControls?: ThemeScale;
     box?: ThemeScale;
     breadcrumb?: ThemeScale;
+    sidebar?: ThemeScale;
     card?: ThemeScale;
     multiSelect?: ThemeScale;
     navigationMenu?: ThemeScale;
@@ -528,6 +529,28 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'item-padding-block': '4px',
     'item-padding-inline': '9px'
   },
+  sidebar: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
+    radius: '4px',
+    shadow: 'var(--shadow-5)',
+    padding: '12px',
+    gap: '12px',
+    'header-padding': '6px 8px 10px',
+    'item-radius': '4px',
+    'item-height': '45px',
+    'item-padding-x': '6px',
+    'item-padding-y': '3px',
+    'item-gap': '8px',
+    'item-font-size': '12px',
+    'item-line-height': '22px',
+    'section-gap': '10px',
+    'section-label-size': '12px',
+    'section-label-spacing': '0.06em',
+    'submenu-indent': '18px',
+    'promo-radius': '4px',
+    'promo-padding': '18px'
+  },
   card: {
     bg: 'var(--color-panel-solid)',
     border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
@@ -761,6 +784,28 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     shadow: 'none',
     'item-padding-block': '4px',
     'item-padding-inline': '9px'
+  },
+  sidebar: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
+    radius: '4px',
+    shadow: 'var(--shadow-5)',
+    padding: '12px',
+    gap: '12px',
+    'header-padding': '6px 8px 10px',
+    'item-radius': '4px',
+    'item-height': '45px',
+    'item-padding-x': '6px',
+    'item-padding-y': '3px',
+    'item-gap': '8px',
+    'item-font-size': '12px',
+    'item-line-height': '22px',
+    'section-gap': '10px',
+    'section-label-size': '12px',
+    'section-label-spacing': '0.06em',
+    'submenu-indent': '18px',
+    'promo-radius': '4px',
+    'promo-padding': '18px'
   },
   card: {
     bg: 'var(--color-panel-solid)',
@@ -1292,6 +1337,7 @@ export function createThemeTokens(overrides?: Partial<ThemeTokens>, options?: { 
       ...(overrides?.components || {}),
       button: mergeScale(base.components?.button, overrides?.components?.button),
       badge: mergeScale(base.components?.badge, overrides?.components?.badge),
+      sidebar: mergeScale(base.components?.sidebar, overrides?.components?.sidebar),
       card: mergeScale(base.components?.card, overrides?.components?.card),
       navigationMenu: mergeScale(base.components?.navigationMenu, overrides?.components?.navigationMenu),
       blockControls: mergeScale(base.components?.blockControls, overrides?.components?.blockControls),
@@ -1460,6 +1506,7 @@ function applyThemeToTarget(target: HTMLElement, next: ThemeTokens) {
   addScaleVariables(target, '--shadow-', next.shadows as ThemeScale | undefined);
   addScaleVariables(target, '--base-button-', next.components?.button);
   addScaleVariables(target, '--base-badge-', next.components?.badge);
+  addScaleVariables(target, '--base-sidebar-', next.components?.sidebar);
   addScaleVariables(target, '--base-block-controls-', next.components?.blockControls);
   addScaleVariables(target, '--base-box-', next.components?.box);
   addScaleVariables(target, '--base-breadcrumb-', next.components?.breadcrumb);

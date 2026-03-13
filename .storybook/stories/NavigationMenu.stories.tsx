@@ -271,6 +271,30 @@ function HeroComposition(props: React.ComponentProps<typeof NavigationMenu>) {
   );
 }
 
+function GalleryNavigationPreview(
+  props: React.ComponentProps<typeof NavigationMenu> & {
+    frameStyle?: React.CSSProperties;
+  }
+) {
+  const { frameStyle, ...menuProps } = props;
+  const [selected, setSelected] = React.useState(-1);
+
+  return (
+    <div
+      style={frameStyle ?? galleryFrameStyle}
+      onMouseLeave={() => setSelected(-1)}
+      onBlur={(event) => {
+        const nextTarget = event.relatedTarget as Node | null;
+        if (!nextTarget || !event.currentTarget.contains(nextTarget)) {
+          setSelected(-1);
+        }
+      }}
+    >
+      <ReferenceNavigation {...menuProps} selected={selected} onSelect={(next) => setSelected(next)} />
+    </div>
+  );
+}
+
 export const Playground: Story = {
   render: (args) => (
     <ShowcasePage
@@ -299,9 +323,7 @@ export const VariantGallery: Story = {
         {(['surface', 'soft', 'solid', 'outline', 'flat', 'contrast'] as const).map((variant) => (
           <div key={variant} style={{ display: 'grid', gap: 10 }}>
             <div style={{ fontSize: 18, fontWeight: 700, color: '#475569', textTransform: 'capitalize' }}>{variant}</div>
-            <div style={galleryFrameStyle}>
-              <ReferenceNavigation variant={variant} size="md" elevation={variant === 'flat' ? 'none' : 'low'} />
-            </div>
+            <GalleryNavigationPreview variant={variant} size="md" elevation={variant === 'flat' ? 'none' : 'low'} />
           </div>
         ))}
       </div>
@@ -320,9 +342,7 @@ export const SizeGallery: Story = {
         {(['sm', 'md', 'lg'] as const).map((size) => (
           <div key={size} style={{ display: 'grid', gap: 10 }}>
             <div style={{ fontSize: 18, fontWeight: 700, color: '#475569', textTransform: 'capitalize' }}>{size}</div>
-            <div style={compactGalleryFrameStyle}>
-              <ReferenceNavigation size={size} />
-            </div>
+            <GalleryNavigationPreview size={size} frameStyle={compactGalleryFrameStyle} />
           </div>
         ))}
       </div>
@@ -341,9 +361,7 @@ export const ToneGallery: Story = {
         {(['neutral', 'info', 'success', 'warning', 'danger'] as const).map((tone) => (
           <div key={tone} style={{ display: 'grid', gap: 10 }}>
             <div style={{ fontSize: 18, fontWeight: 700, color: '#475569', textTransform: 'capitalize' }}>{tone}</div>
-            <div style={galleryFrameStyle}>
-              <ReferenceNavigation tone={tone} variant="soft" />
-            </div>
+            <GalleryNavigationPreview tone={tone} variant="soft" />
           </div>
         ))}
       </div>
@@ -363,9 +381,7 @@ export const ColorPaletteGallery: Story = {
           <ThemeProvider key={palette} tokens={paletteTokens(palette)}>
             <div style={{ display: 'grid', gap: 10 }}>
               <div style={{ fontSize: 18, fontWeight: 700, color: '#475569', textTransform: 'capitalize' }}>{palette}</div>
-              <div style={galleryFrameStyle}>
-                <ReferenceNavigation variant="soft" />
-              </div>
+              <GalleryNavigationPreview variant="soft" />
             </div>
           </ThemeProvider>
         ))}

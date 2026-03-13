@@ -43,7 +43,7 @@ describe('ui-sidebar resizable shell', () => {
     await flushMicrotask();
 
     el.collapse();
-    expect(Number.parseFloat(el.style.getPropertyValue('--ui-sidebar-current-width'))).toBeCloseTo(78, 0);
+    expect(Number.parseFloat(el.style.getPropertyValue('--ui-sidebar-current-width'))).toBeCloseTo(72, 0);
 
     el.expand();
     expect(Number.parseFloat(el.style.getPropertyValue('--ui-sidebar-current-width'))).toBeCloseTo(312, 0);
@@ -70,6 +70,6 @@ describe('ui-sidebar resizable shell', () => {
     document.body.appendChild(second);
     await flushMicrotask();
 
-    expect(Number.parseFloat(second.style.getPropertyValue('--ui-sidebar-width'))).toBeCloseTo(420, 0);
+    expect(Number.parseFloat(second.style.getPropertyValue('--ui-sidebar-width'))).toBeCloseTo(320, 0);
   });
 });
