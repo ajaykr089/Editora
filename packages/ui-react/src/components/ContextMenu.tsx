@@ -1,11 +1,16 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 type UIContextMenuElement = HTMLElement & {
   open: boolean;
   close?: () => void;
   openAt?: (point: { x: number; y: number }) => void;
   openForAnchorId?: (anchorId: string) => void;
+  openForAnchor?: (anchor: HTMLElement) => void;
+  openFor?: (anchor: string | HTMLElement) => void;
   showForAnchorId?: (anchorId: string) => void;
+  getPortalContentHost?: () => HTMLElement | null;
+  refreshLayout?: () => void;
 };
 
 
@@ -14,6 +19,7 @@ export type MenuItem = {
   description?: string;
   shortcut?: string;
   icon?: string | React.ReactNode;
+  tone?: 'default' | 'neutral' | 'info' | 'success' | 'warning' | 'danger';
   disabled?: boolean;
   separator?: boolean;
   submenu?: MenuItem[];
@@ -22,19 +28,22 @@ export type MenuItem = {
 };
 
 
-export type ContextMenuProps = React.HTMLAttributes<HTMLElement> & {
+export type ContextMenuProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect'> & {
   anchorId?: string;
+  anchorEl?: HTMLElement | null;
   anchorPoint?: { x: number; y: number };
   open?: boolean;
   disabled?: boolean;
   state?: 'idle' | 'loading' | 'error' | 'success';
   stateText?: string;
   items?: MenuItem[];
-  variant?: 'default' | 'solid' | 'flat' | 'contrast';
+  variant?: 'default' | 'surface' | 'soft' | 'solid' | 'outline' | 'contrast' | 'flat';
+  size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
+  radius?: number | string | 'none' | 'sm' | 'md' | 'lg' | 'full';
   density?: 'default' | 'compact' | 'comfortable';
   shape?: 'default' | 'square' | 'soft';
   elevation?: 'default' | 'none' | 'low' | 'high';
-  tone?: 'default' | 'brand' | 'danger' | 'success';
+  tone?: 'default' | 'brand' | 'neutral' | 'info' | 'danger' | 'success' | 'warning';
   closeOnSelect?: boolean;
   closeOnEscape?: boolean;
   typeahead?: boolean;
@@ -51,12 +60,15 @@ export function ContextMenu(props: ContextMenuProps) {
   const {
     items,
     anchorId,
+    anchorEl,
     anchorPoint,
     open,
     disabled,
     state,
     stateText,
     variant,
+    size,
+    radius,
     density,
     shape,
     elevation,
@@ -74,17 +86,33 @@ export function ContextMenu(props: ContextMenuProps) {
     ...rest
   } = props;
   const ref = useRef<UIContextMenuElement | null>(null);
+  const lastImperativeOpenRef = useRef<string>('');
+  const [portalHost, setPortalHost] = useState<HTMLElement | null>(null);
+
+  const syncPortalHostSoon = (el: UIContextMenuElement) => {
+    queueMicrotask(() => {
+      setPortalHost(el.getPortalContentHost?.() || null);
+    });
+    requestAnimationFrame(() => {
+      setPortalHost(el.getPortalContentHost?.() || null);
+    });
+    window.setTimeout(() => {
+      setPortalHost(el.getPortalContentHost?.() || null);
+    }, 0);
+  };
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const openHandler = (event: Event) => {
       const detail = (event as CustomEvent<{ open: boolean; previousOpen: boolean; source: string }>).detail;
+      setPortalHost(el.getPortalContentHost?.() || null);
       onOpen?.();
       if (detail) onOpenDetail?.(detail);
     };
     const closeHandler = (event: Event) => {
       const detail = (event as CustomEvent<{ open: boolean; previousOpen: boolean; source: string }>).detail;
+      setPortalHost(null);
       onClose?.();
       if (detail) onCloseDetail?.(detail);
     };
@@ -93,7 +121,8 @@ export function ContextMenu(props: ContextMenuProps) {
       if (typeof next === 'boolean') onChange?.(next);
     };
     const selectHandler = (event: Event) => {
-      onSelect?.((event as CustomEvent<{ index: number; value?: string; label?: string; checked?: boolean; item?: HTMLElement }>).detail);
+      const detail = (event as CustomEvent<{ index: number; value?: string; label?: string; checked?: boolean; item?: HTMLElement }>).detail;
+      onSelect?.(detail);
     };
 
     el.addEventListener('open', openHandler as EventListener);
@@ -114,29 +143,81 @@ export function ContextMenu(props: ContextMenuProps) {
     if (!el || open == null) return;
 
     if (!open) {
+      lastImperativeOpenRef.current = 'closed';
+      setPortalHost(null);
       if (el.close) el.close();
       else el.open = false;
       return;
     }
 
     if (anchorPoint && el.openAt) {
-      el.openAt(anchorPoint);
+      const nextKey = `point:${anchorPoint.x}:${anchorPoint.y}`;
+      if (lastImperativeOpenRef.current !== nextKey || !el.open) {
+        el.openAt(anchorPoint);
+        lastImperativeOpenRef.current = nextKey;
+      }
+      setPortalHost(el.getPortalContentHost?.() || null);
+      syncPortalHostSoon(el);
       return;
     }
 
-    if (anchorId) {
-      if (el.openForAnchorId) {
-        el.openForAnchorId(anchorId);
+    if (anchorEl) {
+      const nextKey = 'anchor:element';
+      if (el.openForAnchor) {
+        if (lastImperativeOpenRef.current !== nextKey || !el.open) {
+          el.openForAnchor(anchorEl);
+          lastImperativeOpenRef.current = nextKey;
+        }
+        setPortalHost(el.getPortalContentHost?.() || null);
+        syncPortalHostSoon(el);
         return;
       }
-      if (el.showForAnchorId) {
-        el.showForAnchorId(anchorId);
+      if (el.openFor) {
+        if (lastImperativeOpenRef.current !== nextKey || !el.open) {
+          el.openFor(anchorEl);
+          lastImperativeOpenRef.current = nextKey;
+        }
+        setPortalHost(el.getPortalContentHost?.() || null);
+        syncPortalHostSoon(el);
         return;
       }
     }
 
-    el.open = true;
-  }, [open, anchorId, anchorPoint]);
+    if (anchorId) {
+      const nextKey = `anchor:${anchorId}`;
+      if (el.openForAnchorId) {
+        if (lastImperativeOpenRef.current !== nextKey || !el.open) {
+          el.openForAnchorId(anchorId);
+          lastImperativeOpenRef.current = nextKey;
+        }
+        setPortalHost(el.getPortalContentHost?.() || null);
+        syncPortalHostSoon(el);
+        return;
+      }
+      if (el.showForAnchorId) {
+        if (lastImperativeOpenRef.current !== nextKey || !el.open) {
+          el.showForAnchorId(anchorId);
+          lastImperativeOpenRef.current = nextKey;
+        }
+        setPortalHost(el.getPortalContentHost?.() || null);
+        syncPortalHostSoon(el);
+        return;
+      }
+    }
+
+    if (!el.open) {
+      el.open = true;
+    }
+    lastImperativeOpenRef.current = 'open';
+    setPortalHost(el.getPortalContentHost?.() || null);
+    syncPortalHostSoon(el);
+  }, [open, anchorId, anchorEl, anchorPoint]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!portalHost || !el || !open) return;
+    el.refreshLayout?.();
+  }, [children, items, open, portalHost]);
 
   // Render menu items recursively
   const renderMenuItems = (menuItems?: MenuItem[]) => {
@@ -165,6 +246,7 @@ export function ContextMenu(props: ContextMenuProps) {
           tabIndex={item.disabled ? -1 : 0}
           aria-disabled={item.disabled ? 'true' : undefined}
           data-value={item.value}
+          data-tone={item.tone && item.tone !== 'default' ? item.tone : undefined}
           onClick={item.disabled ? undefined : item.onClick}
         >
           {iconNode}
@@ -182,26 +264,32 @@ export function ContextMenu(props: ContextMenuProps) {
 
   const hasChildren = React.Children.count(children) > 0;
   const shouldReflectOpenAttr = !!open && !anchorPoint && !anchorId;
+  const menuContent = hasChildren ? children : renderMenuItems(items);
 
   return (
-    <ui-context-menu
-      ref={ref}
-      {...rest}
-      {...(shouldReflectOpenAttr ? { open: '' } : {})}
-      {...(variant && variant !== 'default' ? { variant } : {})}
-      {...(density && density !== 'default' ? { density } : {})}
-      {...(shape && shape !== 'default' ? { shape } : {})}
-      {...(elevation && elevation !== 'default' ? { elevation } : {})}
-      {...(tone && tone !== 'default' && tone !== 'brand' ? { tone } : {})}
-      {...(disabled ? { disabled: '' } : {})}
-      {...(state && state !== 'idle' ? { state } : {})}
-      {...(stateText ? { 'state-text': stateText } : {})}
-      {...(closeOnSelect == null ? {} : { 'close-on-select': closeOnSelect ? 'true' : 'false' })}
-      {...(closeOnEscape == null ? {} : { 'close-on-escape': closeOnEscape ? 'true' : 'false' })}
-      {...(typeahead == null ? {} : { typeahead: typeahead ? 'true' : 'false' })}
-    >
-      {hasChildren ? children : <div slot="menu">{renderMenuItems(items)}</div>}
-    </ui-context-menu>
+    <>
+      <ui-context-menu
+        ref={ref}
+        {...rest}
+        {...(shouldReflectOpenAttr ? { open: '' } : {})}
+        {...(variant && variant !== 'default' && variant !== 'surface' ? { variant } : {})}
+        {...(size && size !== 'md' && size !== '2' ? { size } : {})}
+        {...(radius != null && radius !== '' && radius !== 'md' ? { radius: String(radius) } : {})}
+        {...(!size && density && density !== 'default' ? { density } : {})}
+        {...(!radius && shape && shape !== 'default' ? { shape } : {})}
+        {...(elevation && elevation !== 'default' ? { elevation } : {})}
+        {...(tone && tone !== 'default' && tone !== 'brand' ? { tone } : {})}
+        {...(disabled ? { disabled: '' } : {})}
+        {...(state && state !== 'idle' ? { state } : {})}
+        {...(stateText ? { 'state-text': stateText } : {})}
+        {...(closeOnSelect == null ? {} : { 'close-on-select': closeOnSelect ? 'true' : 'false' })}
+        {...(closeOnEscape == null ? {} : { 'close-on-escape': closeOnEscape ? 'true' : 'false' })}
+        {...(typeahead == null ? {} : { typeahead: typeahead ? 'true' : 'false' })}
+      />
+      {portalHost
+        ? createPortal(<div slot="menu">{menuContent}</div>, portalHost)
+        : null}
+    </>
   );
 }
 

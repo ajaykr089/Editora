@@ -72,6 +72,21 @@ const sections: Section[] = [
   },
 ];
 
+const showcaseFrameStyle: React.CSSProperties = {
+  border: '1px solid var(--ui-color-border, #d8e1ec)',
+  borderRadius: 16,
+  padding: 16,
+  background: 'var(--ui-color-surface, #fff)',
+};
+
+const showcaseHeadingStyle: React.CSSProperties = {
+  fontSize: 12,
+  textTransform: 'uppercase',
+  letterSpacing: '0.08em',
+  color: 'var(--ui-color-muted, #64748b)',
+  marginBottom: 10,
+};
+
 function toOpenArray(value: number | number[]): number[] {
   if (Array.isArray(value)) return value.filter((item) => Number.isFinite(item) && item >= 0);
   return Number.isFinite(value) && value >= 0 ? [value] : [];
@@ -89,8 +104,8 @@ function TriggerContent({ section }: { section: Section }) {
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'color-mix(in srgb, var(--ui-accordion-primary, #2563eb) 12%, transparent)',
-          color: 'var(--ui-accordion-primary, #2563eb)',
+          background: 'color-mix(in srgb, var(--ui-accordion-accent, #2563eb) 12%, transparent)',
+          color: 'var(--ui-accordion-accent, #2563eb)',
         }}
       >
         {section.icon}
@@ -99,6 +114,255 @@ function TriggerContent({ section }: { section: Section }) {
         <Box style={{ fontSize: 14, fontWeight: 650, lineHeight: 1.3 }}>{section.title}</Box>
       </Grid>
     </Flex>
+  );
+}
+
+function DemoAccordion(props: React.ComponentProps<typeof Accordion>) {
+  return (
+    <Accordion collapsible {...props}>
+      <AccordionItem description="What the product does" badge="Overview">
+        <AccordionTrigger>What is Editora?</AccordionTrigger>
+        <AccordionPanel>
+          Editora is a rich text editing system with a web-component core and React wrappers.
+        </AccordionPanel>
+      </AccordionItem>
+      <AccordionItem description="Runtime model" badge="Core">
+        <AccordionTrigger>How does it work?</AccordionTrigger>
+        <AccordionPanel>
+          It composes token-aware web components behind React wrappers and shared theme primitives.
+        </AccordionPanel>
+      </AccordionItem>
+      <AccordionItem description="Production guidance" badge="Usage">
+        <AccordionTrigger>When should teams use it?</AccordionTrigger>
+        <AccordionPanel>
+          Use it for disclosure-heavy settings panels, FAQ groups, and operational workflows that need clear hierarchy.
+        </AccordionPanel>
+      </AccordionItem>
+    </Accordion>
+  );
+}
+
+export function BaselineStyles() {
+  return (
+    <Grid style={{ gap: 18, maxInlineSize: 1100 }}>
+      <Box style={showcaseFrameStyle}>
+        <Box style={showcaseHeadingStyle}>Variants</Box>
+        <Grid style={{ gap: 16 }}>
+          <Grid style={{ gap: 10 }}>
+            <Box style={{ fontWeight: 650 }}>Surface</Box>
+            <DemoAccordion variant="surface" tone="neutral" radius={12} elevation="low" />
+          </Grid>
+          <Grid style={{ gap: 10 }}>
+            <Box style={{ fontWeight: 650 }}>Outline</Box>
+            <DemoAccordion variant="outline" tone="info" radius={12} elevation="none" />
+          </Grid>
+          <Grid style={{ gap: 10 }}>
+            <Box style={{ fontWeight: 650 }}>Soft</Box>
+            <DemoAccordion variant="soft" tone="success" radius={12} elevation="none" />
+          </Grid>
+          <Grid style={{ gap: 10 }}>
+            <Box style={{ fontWeight: 650 }}>Solid</Box>
+            <DemoAccordion variant="solid" tone="warning" radius={12} elevation="low" />
+          </Grid>
+          <Grid style={{ gap: 10 }}>
+            <Box style={{ fontWeight: 650 }}>Ghost</Box>
+            <DemoAccordion variant="ghost" tone="danger" radius={12} elevation="none" />
+          </Grid>
+          <Grid style={{ gap: 10 }}>
+            <Box style={{ fontWeight: 650 }}>Without indicator</Box>
+            <DemoAccordion variant="outline" tone="info" radius={12} elevation="none" indicator="none" />
+          </Grid>
+        </Grid>
+      </Box>
+
+      <Grid columns={2} style={{ gap: 16 }}>
+        <Box style={showcaseFrameStyle}>
+          <Box style={showcaseHeadingStyle}>Sizes</Box>
+          <Grid style={{ gap: 14 }}>
+            <Grid style={{ gap: 8 }}>
+              <Box style={{ fontWeight: 650 }}>Small</Box>
+              <DemoAccordion size="sm" radius={8} />
+            </Grid>
+            <Grid style={{ gap: 8 }}>
+              <Box style={{ fontWeight: 650 }}>Medium</Box>
+              <DemoAccordion size="md" radius={12} />
+            </Grid>
+            <Grid style={{ gap: 8 }}>
+              <Box style={{ fontWeight: 650 }}>Large</Box>
+              <DemoAccordion size="lg" radius={16} />
+            </Grid>
+          </Grid>
+        </Box>
+
+        <Box style={showcaseFrameStyle}>
+          <Box style={showcaseHeadingStyle}>Radius</Box>
+          <Grid style={{ gap: 14 }}>
+            <Grid style={{ gap: 8 }}>
+              <Box style={{ fontWeight: 650 }}>0</Box>
+              <DemoAccordion radius={0} variant="outline" />
+            </Grid>
+            <Grid style={{ gap: 8 }}>
+              <Box style={{ fontWeight: 650 }}>4</Box>
+              <DemoAccordion radius={4} variant="outline" />
+            </Grid>
+            <Grid style={{ gap: 8 }}>
+              <Box style={{ fontWeight: 650 }}>12</Box>
+              <DemoAccordion radius={12} variant="outline" />
+            </Grid>
+            <Grid style={{ gap: 8 }}>
+              <Box style={{ fontWeight: 650 }}>Full</Box>
+              <DemoAccordion radius="full" variant="outline" />
+            </Grid>
+          </Grid>
+        </Box>
+      </Grid>
+    </Grid>
+  );
+}
+
+export function FAQPattern() {
+  return (
+    <Grid style={{ gap: 16, maxInlineSize: 860 }}>
+      <Box style={{ ...showcaseFrameStyle, padding: 24 }}>
+        <Box style={{ fontWeight: 700, fontSize: 28, lineHeight: 1.15, marginBottom: 8 }}>Frequently asked questions</Box>
+        <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 15, lineHeight: 1.6, marginBottom: 18 }}>
+          A cleaner, customer-facing disclosure pattern with low-noise borders and generous reading rhythm.
+        </Box>
+        <Accordion collapsible variant="outline" radius={12} size="lg" tone="neutral" elevation="none">
+          <AccordionItem description="Deployment model and editor surface">
+            <AccordionTrigger>Can teams use Editora in both React and plain web components?</AccordionTrigger>
+            <AccordionPanel>
+              Yes. The system ships a custom-element core and React wrappers so product teams can adopt the same
+              primitives across both integration styles.
+            </AccordionPanel>
+          </AccordionItem>
+          <AccordionItem description="Lifecycle, upgrades, and adoption strategy">
+            <AccordionTrigger>How should we roll it out inside an existing design system?</AccordionTrigger>
+            <AccordionPanel>
+              Start with infrastructure primitives and form controls, then move high-traffic composed components such
+              as menus, dialogs, and editor workflows.
+            </AccordionPanel>
+          </AccordionItem>
+          <AccordionItem description="Tokens, themes, and Storybook alignment">
+            <AccordionTrigger>Does it support product-level theming without forking styles?</AccordionTrigger>
+            <AccordionPanel>
+              Yes. The baseline theme system exposes semantic and component-level tokens so teams can tune color,
+              radius, motion, density, and elevation without rewriting component CSS.
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+      </Box>
+    </Grid>
+  );
+}
+
+export function SettingsSidebarPattern() {
+  return (
+    <Grid columns={2} style={{ gap: 18, maxInlineSize: 1180, alignItems: 'start' }}>
+      <Box style={{ ...showcaseFrameStyle, padding: 18 }}>
+        <Box style={showcaseHeadingStyle}>Compact sidebar pattern</Box>
+        <Accordion multiple variant="ghost" tone="neutral" size="sm" radius={8} elevation="none" open={[0, 2]}>
+          <AccordionItem description="Identity, roles, workspace metadata" badge="Core">
+            <AccordionTrigger>Workspace settings</AccordionTrigger>
+            <AccordionPanel>
+              Naming rules, environment labels, ownership metadata, and internal access settings.
+            </AccordionPanel>
+          </AccordionItem>
+          <AccordionItem description="Data retention and access events" badge="Audit">
+            <AccordionTrigger>Security and compliance</AccordionTrigger>
+            <AccordionPanel>
+              Access reviews, retention windows, export controls, and event retention policies.
+            </AccordionPanel>
+          </AccordionItem>
+          <AccordionItem description="Theme, typography, and interaction defaults" badge="Brand">
+            <AccordionTrigger>Appearance controls</AccordionTrigger>
+            <AccordionPanel>
+              Color system, density preferences, component radius, and motion policy configuration.
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+      </Box>
+
+      <Box style={{ ...showcaseFrameStyle, padding: 18 }}>
+        <Box style={showcaseHeadingStyle}>High-signal sections</Box>
+        <Grid style={{ gap: 12 }}>
+          <Box style={{ padding: 16, borderRadius: 12, background: 'var(--ui-color-surface-alt, #f8fafc)' }}>
+            Keep sidebar accordions compact, border-light, and collapsible by default.
+          </Box>
+          <Box style={{ padding: 16, borderRadius: 12, background: 'var(--ui-color-surface-alt, #f8fafc)' }}>
+            Use `ghost` or `outline` for utility-heavy settings shells where the accordion should recede behind content.
+          </Box>
+          <Box style={{ padding: 16, borderRadius: 12, background: 'var(--ui-color-surface-alt, #f8fafc)' }}>
+            Reserve `solid` or stronger tones for workflows where state emphasis matters more than chrome reduction.
+          </Box>
+        </Grid>
+      </Box>
+    </Grid>
+  );
+}
+
+export function ControlledSingleOpen() {
+  const [open, setOpen] = React.useState<number | number[]>(0);
+
+  return (
+    <Grid style={{ gap: 16, maxInlineSize: 900 }}>
+      <Box style={{ ...showcaseFrameStyle, padding: 20 }}>
+        <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
+          <Box>
+            <Box style={{ fontWeight: 700, fontSize: 20 }}>Controlled operations review</Box>
+            <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
+              Single-open mode managed by React state.
+            </Box>
+          </Box>
+          <Flex style={{ gap: 8, flexWrap: 'wrap' }}>
+            <Button size="sm" variant="secondary" onClick={() => setOpen(0)}>
+              Open Summary
+            </Button>
+            <Button size="sm" variant="secondary" onClick={() => setOpen(1)}>
+              Open Safety
+            </Button>
+            <Button size="sm" variant="secondary" onClick={() => setOpen(2)}>
+              Open Discharge
+            </Button>
+          </Flex>
+        </Flex>
+
+        <Accordion open={open} onToggle={setOpen} variant="soft" tone="info" radius={12} size="md">
+          {sections.map((section, index) => (
+            <AccordionItem key={section.title} description={section.subtitle} badge={section.badge}>
+              <AccordionTrigger>{section.title}</AccordionTrigger>
+              <AccordionPanel>
+                {section.points[index % section.points.length]}
+              </AccordionPanel>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </Box>
+    </Grid>
+  );
+}
+
+export function ToneGallery() {
+  return (
+    <Grid columns={2} style={{ gap: 16, maxInlineSize: 1100 }}>
+      {[
+        ['Info', 'info', 'outline'],
+        ['Success', 'success', 'soft'],
+        ['Warning', 'warning', 'solid'],
+        ['Danger', 'danger', 'outline'],
+      ].map(([label, tone, variant]) => (
+        <Box key={label} style={{ ...showcaseFrameStyle, padding: 18 }}>
+          <Box style={{ ...showcaseHeadingStyle, marginBottom: 12 }}>{label}</Box>
+          <DemoAccordion
+            variant={variant as React.ComponentProps<typeof Accordion>['variant']}
+            tone={tone as React.ComponentProps<typeof Accordion>['tone']}
+            radius={12}
+            size="md"
+            elevation={variant === 'solid' ? 'low' : 'none'}
+          />
+        </Box>
+      ))}
+    </Grid>
   );
 }
 
@@ -157,16 +421,11 @@ function EnterpriseClinicalAccordion() {
         multiple
         open={open}
         onToggle={onToggle}
-        style={
-          {
-            '--ui-accordion-radius': '16px',
-            '--ui-accordion-shadow': '0 1px 2px rgba(15, 23, 42, 0.06), 0 16px 28px rgba(15, 23, 42, 0.08)',
-            '--ui-accordion-border': '1px solid color-mix(in srgb, var(--ui-color-border, #d8e1ec) 90%, transparent)',
-            '--ui-accordion-divider': 'color-mix(in srgb, var(--ui-color-border, #d8e1ec) 85%, transparent)',
-            '--ui-accordion-open-surface': 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 6%, var(--ui-color-surface, #fff))',
-            '--ui-accordion-duration': '190ms',
-          } as React.CSSProperties
-        }
+        variant="surface"
+        tone="info"
+        size="md"
+        radius={16}
+        elevation="low"
       >
         {sections.map((section) => (
           <AccordionItem key={section.title} description={section.subtitle} badge={section.badge}>

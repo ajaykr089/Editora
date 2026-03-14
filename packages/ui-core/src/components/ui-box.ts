@@ -19,6 +19,8 @@ const STYLE_ATTRS = [
   'gridarea', 'gridcolumn', 'gridcolumnstart', 'gridcolumnend', 'gridrow', 'gridrowstart', 'gridrowend',
 ] as const;
 
+type StyleAttr = (typeof STYLE_ATTRS)[number];
+
 const SPACE_TOKENS: Record<string, string> = {
   none: '0',
   xxs: 'var(--ui-space-2xs, 2px)',
@@ -34,16 +36,16 @@ const style = `
   :host {
     --ui-box-bg: transparent;
     --ui-box-color: inherit;
+    --ui-box-border: none;
     --ui-box-border-color: transparent;
     --ui-box-border-width: 1px;
     --ui-box-border-style: solid;
     --ui-box-shadow: none;
-    --ui-box-radius: 12px;
+    --ui-box-radius: var(--base-box-radius, var(--ui-radius, 4px));
     --ui-box-backdrop: none;
     --ui-box-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
     --ui-box-outline: color-mix(in srgb, var(--ui-box-accent) 30%, transparent);
     --ui-box-duration: 180ms;
-    --ui-box-font: "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     color-scheme: light dark;
     display: block;
     box-sizing: border-box;
@@ -56,7 +58,7 @@ const style = `
     box-shadow: var(--ui-box-shadow);
     backdrop-filter: var(--ui-box-backdrop);
     transition: none;
-    font-family: var(--ui-box-font);
+    font-family: var(--ui-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
   }
 
   :host([data-ui-ready]) {
@@ -75,10 +77,10 @@ const style = `
   }
 
   :host([variant="surface"]) {
-    --ui-box-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
+    --ui-box-bg: var(--base-box-bg, var(--ui-color-surface, var(--ui-surface, #ffffff)));
     --ui-box-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-box-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 80%, transparent);
-    --ui-box-shadow: 0 1px 3px rgba(2, 6, 23, 0.05), 0 10px 24px rgba(2, 6, 23, 0.06);
+    --ui-box-shadow: var(--base-box-shadow, 0 1px 3px rgba(2, 6, 23, 0.05), 0 10px 24px rgba(2, 6, 23, 0.06));
   }
 
   :host([variant="elevated"]) {
@@ -105,7 +107,7 @@ const style = `
     --ui-box-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-box-border-color: color-mix(in srgb, #ffffff 68%, var(--ui-color-border, #cbd5e1));
     --ui-box-shadow: 0 1px 2px rgba(2, 6, 23, 0.06), 0 26px 58px rgba(2, 6, 23, 0.14);
-    --ui-box-backdrop: blur(12px) saturate(1.08);
+    --ui-box-backdrop: var(--base-box-backdrop, blur(12px) saturate(1.08));
   }
 
   :host([variant="gradient"]) {
@@ -147,8 +149,10 @@ const style = `
 
   :host([radius="none"]) { --ui-box-radius: 0; }
   :host([radius="sm"]) { --ui-box-radius: 8px; }
+  :host([radius="md"]) { --ui-box-radius: 12px; }
   :host([radius="lg"]) { --ui-box-radius: 18px; }
   :host([radius="xl"]) { --ui-box-radius: 24px; }
+  :host([radius="full"]) { --ui-box-radius: 9999px; }
 
   :host([interactive]) {
     cursor: pointer;
@@ -286,6 +290,25 @@ function normalizeSpace(value: string): string {
   return token || value;
 }
 
+function normalizeRadius(raw: string | null): string {
+  if (!raw) return '';
+  const value = raw.trim().toLowerCase();
+  if (!value) return '';
+  if (value === 'none') return '0px';
+  if (value === 'sm') return '8px';
+  if (value === 'md') return '12px';
+  if (value === 'lg') return '18px';
+  if (value === 'xl') return '24px';
+  if (value === 'full') return '9999px';
+  if (/^\d+(\.\d+)?$/.test(value)) return `${value}px`;
+  return raw;
+}
+
+function isResponsiveStyleAttr(attr: StyleAttr, value: string | null): boolean {
+  if (!value) return false;
+  return parseResponsive(value) !== null;
+}
+
 function mapAttrToStyles(attr: (typeof STYLE_ATTRS)[number], value: string): Record<string, string> {
   const safe = sanitizeCssValue(value);
   if (!safe) return {};
@@ -402,6 +425,8 @@ export class UIBox extends ElementBase {
     this.addEventListener('keydown', this._onInteractiveKeyDown);
     this._syncInteractiveA11y();
     this._syncBusyState();
+    const normalizedRadius = normalizeRadius(this.getAttribute('radius'));
+    if (normalizedRadius) this.style.setProperty('--ui-box-radius', normalizedRadius);
     if (!this.hasAttribute('data-ui-ready')) {
       if (typeof requestAnimationFrame === 'function') {
         this._readyFrame = requestAnimationFrame(() => {
@@ -431,7 +456,24 @@ export class UIBox extends ElementBase {
     if (oldValue === newValue) return;
     if (name === 'interactive' || name === 'disabled') this._syncInteractiveA11y();
     if (name === 'state') this._syncBusyState();
-    if (this.isConnected) this.requestRender();
+    if (name === 'radius') {
+      const normalizedRadius = normalizeRadius(newValue);
+      if (normalizedRadius) this.style.setProperty('--ui-box-radius', normalizedRadius);
+      else this.style.removeProperty('--ui-box-radius');
+    }
+    if (!this.isConnected) return;
+
+    if (name === 'classname') {
+      this._syncLegacyClassname();
+      return;
+    }
+
+    if ((STYLE_ATTRS as readonly string[]).includes(name) && !isResponsiveStyleAttr(name as StyleAttr, newValue) && !isResponsiveStyleAttr(name as StyleAttr, oldValue)) {
+      this._applyInlineStyles();
+      return;
+    }
+
+    if (this.shouldRenderOnAttributeChange(name, oldValue, newValue)) this.requestRender();
   }
 
   private _syncInteractiveA11y() {
@@ -585,11 +627,18 @@ export class UIBox extends ElementBase {
   }
 
   protected override shouldRenderOnAttributeChange(
-    _name: string,
-    _oldValue: string | null,
-    _newValue: string | null
+    name: string,
+    oldValue: string | null,
+    newValue: string | null
   ): boolean {
-    return true;
+    if (oldValue === newValue) return false;
+    if (['variant', 'tone', 'elevation', 'radius', 'interactive', 'disabled', 'state', 'headless'].includes(name)) {
+      return false;
+    }
+    if ((STYLE_ATTRS as readonly string[]).includes(name)) {
+      return isResponsiveStyleAttr(name as StyleAttr, oldValue) || isResponsiveStyleAttr(name as StyleAttr, newValue);
+    }
+    return name === 'classname';
   }
 }
 

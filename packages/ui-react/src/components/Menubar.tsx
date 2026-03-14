@@ -17,11 +17,13 @@ export type MenubarProps = React.HTMLAttributes<HTMLElement> & {
   headless?: boolean;
   orientation?: 'horizontal' | 'vertical';
   placement?: 'top' | 'bottom' | 'left' | 'right';
-  variant?: 'default' | 'solid' | 'flat' | 'line' | 'glass' | 'contrast';
+  variant?: 'default' | 'surface' | 'soft' | 'solid' | 'outline' | 'flat' | 'line' | 'glass' | 'contrast';
+  size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
   density?: 'default' | 'compact' | 'comfortable';
+  radius?: number | string;
   shape?: 'default' | 'square' | 'soft';
   elevation?: 'default' | 'none' | 'low' | 'high';
-  tone?: 'default' | 'brand' | 'danger' | 'success' | 'warning';
+  tone?: 'default' | 'brand' | 'neutral' | 'info' | 'danger' | 'success' | 'warning';
   closeOnSelect?: boolean;
   typeahead?: boolean;
   onChange?: (detail: MenubarChangeDetail) => void;
@@ -39,7 +41,9 @@ export function Menubar(props: MenubarProps) {
     orientation,
     placement,
     variant,
+    size,
     density,
+    radius,
     shape,
     elevation,
     tone,
@@ -110,11 +114,17 @@ export function Menubar(props: MenubarProps) {
     if (placement) el.setAttribute('placement', placement);
     else el.removeAttribute('placement');
 
-    if (variant && variant !== 'default') el.setAttribute('variant', variant);
+    if (variant && variant !== 'default' && variant !== 'surface') el.setAttribute('variant', variant);
     else el.removeAttribute('variant');
+
+    if (size && size !== 'md' && size !== '2') el.setAttribute('size', size);
+    else el.removeAttribute('size');
 
     if (density && density !== 'default') el.setAttribute('density', density);
     else el.removeAttribute('density');
+
+    if (radius == null || radius === '' || radius === 'default') el.removeAttribute('radius');
+    else el.setAttribute('radius', String(radius));
 
     if (shape && shape !== 'default') el.setAttribute('shape', shape);
     else el.removeAttribute('shape');
@@ -138,7 +148,9 @@ export function Menubar(props: MenubarProps) {
     orientation,
     placement,
     variant,
+    size,
     density,
+    radius,
     shape,
     elevation,
     tone,

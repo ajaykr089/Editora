@@ -23,7 +23,14 @@ export const Default = (args: any) => {
         <Button size="sm" variant="secondary" onClick={() => setPosition('bottom')}>Bottom</Button>
       </Flex>
 
-      <PluginPanel open={open} position={position}>
+      <PluginPanel
+        open={open}
+        position={position}
+        title="Plugin inspector"
+        description="Review plugin output and close the panel with the built-in dismiss action."
+        dismissible
+        onOpenChange={(detail) => setOpen(detail.open)}
+      >
         <Box style={{ padding: 12, minWidth: 220 }}>
           <strong>Plugin Panel</strong>
           <p style={{ margin: '8px 0 0', color: '#475569' }}>Position: {position}</p>

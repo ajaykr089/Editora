@@ -22,4 +22,18 @@ describe('React Button theme prop', () => {
     const host = container.querySelector('ui-button') as HTMLElement | null;
     expect(host?.getAttribute('theme')).toBe('brand');
   });
-});
+
+  it('reflects radius prop as a host attribute', () => {
+    const { container } = render(<Button radius={12}>Hi</Button>);
+    const host = container.querySelector('ui-button') as HTMLElement | null;
+    expect(host?.getAttribute('radius')).toBe('12');
+  });
+
+  it('preserves full radius value on the host', async () => {
+    const { container } = render(<Button radius="full">Hi</Button>);
+    const host = container.querySelector('ui-button') as HTMLElement | null;
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(host?.getAttribute('radius')).toBe('full');
+    expect(host?.style.getPropertyValue('--ui-btn-radius')).toBe('999px');
+  });
+}); 

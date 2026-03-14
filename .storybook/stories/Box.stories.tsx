@@ -1,27 +1,26 @@
 import React from 'react';
-import type { Meta } from '@storybook/react';
-import { Box, Button, Flex, Grid } from '@editora/ui-react';
-import { toastAdvanced } from '@editora/toast';
-import {
-  ActivityIcon,
-  AlertTriangleIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  ShieldIcon,
-  SparklesIcon,
-} from '@editora/react-icons';
-import '../../packages/editora-toast/src/toast.css';
-import '@editora/themes/themes/default.css';
+import type { Meta, StoryObj } from '@storybook/react';
+import { Box, Button, Card, CardDescription, CardHeader, CardTitle, Flex, Grid } from '@editora/ui-react';
+import { ActivityIcon, AlertTriangleIcon, CheckCircleIcon, ClockIcon, ShieldIcon, SparklesIcon } from '@editora/react-icons';
 
 const meta: Meta<typeof Box> = {
   title: 'UI/Box',
   component: Box,
+  args: {
+    variant: 'surface',
+    tone: 'default',
+    state: 'idle',
+    elevation: 'low',
+    radius: 12,
+    interactive: false,
+    disabled: false,
+  },
   argTypes: {
     variant: { control: 'select', options: ['default', 'surface', 'elevated', 'outline', 'glass', 'gradient', 'soft', 'contrast'] },
     tone: { control: 'select', options: ['default', 'neutral', 'brand', 'info', 'success', 'warning', 'danger'] },
     state: { control: 'select', options: ['idle', 'loading', 'error', 'success'] },
     elevation: { control: 'select', options: ['default', 'none', 'low', 'high'] },
-    radius: { control: 'select', options: ['default', 'none', 'sm', 'lg', 'xl'] },
+    radius: { control: 'text' },
     interactive: { control: 'boolean' },
     disabled: { control: 'boolean' },
   },
@@ -29,166 +28,164 @@ const meta: Meta<typeof Box> = {
 
 export default meta;
 
-function EnterpriseOperationsBoxes() {
-  const [activeCard, setActiveCard] = React.useState<'triage' | 'bed' | 'audit'>('triage');
-  const [state, setState] = React.useState<'idle' | 'loading' | 'error' | 'success'>('idle');
+type Story = StoryObj<typeof Box>;
 
-  const cardStyle: React.CSSProperties = {
-    padding: '16px',
-    minHeight: '134px',
-    display: 'grid',
-    gap: '10px',
-  };
+export const Playground: Story = {
+  render: (args) => (
+    <Grid style={{ gap: 16, maxInlineSize: 760 }}>
+      <Card radius={16}>
+        <CardHeader>
+          <CardTitle>Box</CardTitle>
+          <CardDescription>
+            Low-level surface and layout primitive for spacing, state, elevation, and responsive container styling.
+          </CardDescription>
+        </CardHeader>
+        <Box slot="inset" style={{ padding: 16 }}>
+          <Box p="16px" {...args}>
+            Modern `ui-box` surface with theme-backed variants, tone, state, elevation, and radius.
+          </Box>
+        </Box>
+      </Card>
+    </Grid>
+  ),
+};
 
-  return (
+export const VariantGallery: Story = {
+  render: () => (
+    <Grid style={{ gap: 14, maxInlineSize: 980 }}>
+      {[
+        { label: 'Surface', variant: 'surface', tone: 'default' },
+        { label: 'Elevated', variant: 'elevated', tone: 'default' },
+        { label: 'Outline', variant: 'outline', tone: 'info' },
+        { label: 'Soft', variant: 'soft', tone: 'success' },
+        { label: 'Glass', variant: 'glass', tone: 'brand' },
+        { label: 'Gradient', variant: 'gradient', tone: 'warning' },
+        { label: 'Contrast', variant: 'contrast', tone: 'default' },
+      ].map((entry) => (
+        <Grid key={entry.label} style={{ gap: 8 }}>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <Box
+            variant={entry.variant as any}
+            tone={entry.tone as any}
+            elevation="low"
+            radius={12}
+            p="16px"
+            style={{ display: 'grid', gap: 8 }}
+          >
+            <Flex align="center" style={{ gap: 8 }}>
+              <ShieldIcon size={15} />
+              <strong>{entry.label} container</strong>
+            </Flex>
+            <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+              Shared theme tokens control border, background, radius, shadow, and tone treatment.
+            </Box>
+          </Box>
+        </Grid>
+      ))}
+    </Grid>
+  ),
+};
+
+export const InteractiveStates: Story = {
+  render: () => {
+    const [state, setState] = React.useState<'idle' | 'loading' | 'error' | 'success'>('idle');
+
+    return (
+      <Grid style={{ gap: 14, maxInlineSize: 860 }}>
+        <Box
+          variant="outline"
+          tone={state === 'error' ? 'danger' : state === 'success' ? 'success' : 'info'}
+          state={state}
+          elevation="low"
+          radius={16}
+          interactive
+          p="16px"
+          style={{ display: 'grid', gap: 10 }}
+        >
+          <Flex align="center" justify="space-between" style={{ gap: 10, flexWrap: 'wrap' }}>
+            <Flex align="center" style={{ gap: 8 }}>
+              <ActivityIcon size={16} />
+              <strong>Realtime monitoring panel</strong>
+            </Flex>
+            <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>State: {state}</Box>
+          </Flex>
+          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+            This surface demonstrates interactive focus styling plus loading, error, and success state treatments.
+          </Box>
+        </Box>
+
+        <Flex align="center" style={{ gap: 8, flexWrap: 'wrap' }}>
+          <Button size="sm" variant="secondary" onClick={() => setState('idle')}>
+            <ClockIcon size={14} />
+            Idle
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => setState('loading')}>
+            <SparklesIcon size={14} />
+            Loading
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => setState('error')}>
+            <AlertTriangleIcon size={14} />
+            Error
+          </Button>
+          <Button size="sm" onClick={() => setState('success')}>
+            <CheckCircleIcon size={14} />
+            Success
+          </Button>
+        </Flex>
+      </Grid>
+    );
+  },
+};
+
+export const ResponsiveLayoutPattern: Story = {
+  render: () => (
     <Grid style={{ gap: 14, maxInlineSize: 1080 }}>
-      <Box variant="gradient" tone="brand" radius="xl" p="16px">
+      <Box variant="gradient" tone="brand" radius={16} p="16px">
         <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
-          <div>
-            <div style={{ fontWeight: 700, fontSize: 18 }}>Hospital Operations Surface</div>
-            <div style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
-              Enterprise layout primitives with responsive spacing, states, and interactive behavior.
-            </div>
-          </div>
+          <Box>
+            <Box style={{ fontWeight: 700, fontSize: 18 }}>Operations dashboard shell</Box>
+            <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
+              Responsive spacing and surface composition using `ui-box` as the layout substrate.
+            </Box>
+          </Box>
           <Flex align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>
             <ShieldIcon size={14} />
-            Command Center / Shift-B
+            Shift B
           </Flex>
         </Flex>
       </Box>
 
       <Grid style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))' }}>
-        <Box
-          variant={activeCard === 'triage' ? 'gradient' : 'surface'}
-          tone="info"
-          elevation="low"
-          interactive
-          style={cardStyle}
-          onClick={() => {
-            setActiveCard('triage');
-            toastAdvanced.info('Triage queue card selected', { duration: 1200, theme: 'light' });
-          }}
-        >
+        <Box variant="surface" tone="info" elevation="low" interactive p="16px" style={{ minHeight: 134, display: 'grid', gap: 10 }}>
           <Flex align="center" style={{ gap: 8 }}>
             <ActivityIcon size={16} />
-            <strong>Triage Queue</strong>
+            <strong>Triage queue</strong>
           </Flex>
-          <div style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
-            22 pending assessments, average wait 9 minutes.
-          </div>
+          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>22 pending assessments, average wait 9 minutes.</Box>
         </Box>
 
-        <Box
-          variant={activeCard === 'bed' ? 'gradient' : 'surface'}
-          tone="success"
-          elevation="low"
-          interactive
-          style={cardStyle}
-          onClick={() => {
-            setActiveCard('bed');
-            toastAdvanced.success('Bed allocation card selected', { duration: 1200, theme: 'light' });
-          }}
-        >
+        <Box variant="soft" tone="success" elevation="low" interactive p="16px" style={{ minHeight: 134, display: 'grid', gap: 10 }}>
           <Flex align="center" style={{ gap: 8 }}>
             <CheckCircleIcon size={16} />
-            <strong>Bed Allocation</strong>
+            <strong>Bed allocation</strong>
           </Flex>
-          <div style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
-            94% occupancy, 4 discharge-ready patients.
-          </div>
+          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>94% occupancy, 4 discharge-ready patients.</Box>
         </Box>
 
-        <Box
-          variant={activeCard === 'audit' ? 'gradient' : 'surface'}
-          tone="warning"
-          elevation="low"
-          interactive
-          style={cardStyle}
-          onClick={() => {
-            setActiveCard('audit');
-            toastAdvanced.warning('Compliance audit card selected', { duration: 1200, theme: 'light' });
-          }}
-        >
+        <Box variant="outline" tone="warning" elevation="low" interactive p="16px" style={{ minHeight: 134, display: 'grid', gap: 10 }}>
           <Flex align="center" style={{ gap: 8 }}>
             <AlertTriangleIcon size={16} />
-            <strong>Compliance Audit</strong>
+            <strong>Compliance audit</strong>
           </Flex>
-          <div style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
-            2 notes require signature validation.
-          </div>
+          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>2 notes require signature validation.</Box>
         </Box>
       </Grid>
 
-      <Box variant="elevated" radius="lg" p="12px" style={{ display: 'grid', gap: 10 }}>
-        <Flex align="center" justify="space-between" style={{ gap: 8, flexWrap: 'wrap' }}>
-          <div style={{ fontWeight: 650 }}>State Simulation</div>
-          <Flex style={{ gap: 8, flexWrap: 'wrap' }}>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => {
-                setState('loading');
-                toastAdvanced.info('Refreshing dashboard insights', { duration: 1200, theme: 'light' });
-              }}
-            >
-              <ClockIcon size={14} />
-              Loading
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => {
-                setState('error');
-                toastAdvanced.warning('Data sync delay detected', { duration: 1400, theme: 'light' });
-              }}
-            >
-              <AlertTriangleIcon size={14} />
-              Error
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => {
-                setState('success');
-                toastAdvanced.success('Dashboard synced successfully', { duration: 1400, theme: 'light' });
-              }}
-            >
-              <SparklesIcon size={14} />
-              Success
-            </Button>
-          </Flex>
-        </Flex>
-
-        <Box
-          variant="outline"
-          tone={state === 'error' ? 'danger' : state === 'success' ? 'success' : 'info'}
-          state={state}
-          p={{ initial: '12px', md: '16px' }}
-          radius="lg"
-        >
-          <div style={{ fontSize: 13, color: 'var(--ui-color-muted, #64748b)' }}>
-            Current state: <strong>{state}</strong>. This uses `ui-box` state visuals (`loading`, `error`, `success`) for real operational feedback.
-          </div>
+      <Box variant="elevated" radius={16} p={{ initial: '12px', md: '16px' }} style={{ display: 'grid', gap: 10 }}>
+        <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #64748b)' }}>
+          Responsive padding here is driven by the layout props, while variant, elevation, and radius stay theme-backed.
         </Box>
       </Box>
     </Grid>
-  );
-}
-
-export const EnterpriseCareOps = EnterpriseOperationsBoxes;
-
-const PlaygroundTemplate = (args: Record<string, unknown>) => (
-  <Box p="16px" style={{ maxWidth: 460 }} {...args}>
-    Modern `ui-box` visual mode with production interaction and state support.
-  </Box>
-);
-
-export const Playground = PlaygroundTemplate.bind({});
-Playground.args = {
-  variant: 'surface',
-  tone: 'default',
-  state: 'idle',
-  elevation: 'default',
-  radius: 'default',
-  interactive: false,
-  disabled: false,
+  ),
 };

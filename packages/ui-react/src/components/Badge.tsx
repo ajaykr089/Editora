@@ -11,9 +11,10 @@ export type BadgeProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
   text?: string;
   tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'purple';
-  variant?: 'solid' | 'soft' | 'outline' | 'ghost';
+  variant?: 'surface' | 'solid' | 'soft' | 'outline' | 'ghost';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '1' | '2' | '3';
-  radius?: 'none' | 'sm' | 'md' | 'lg' | 'large' | 'full' | string;
+  radius?: 'none' | 'sm' | 'md' | 'lg' | 'large' | 'full' | number | string;
+  elevation?: 'none' | 'low' | 'high';
   state?: 'idle' | 'loading' | 'error' | 'success';
   pill?: boolean;
   dot?: boolean;
@@ -34,6 +35,7 @@ export function Badge(props: BadgeProps) {
     variant,
     size,
     radius,
+    elevation,
     state,
     pill,
     dot,
@@ -70,14 +72,17 @@ export function Badge(props: BadgeProps) {
     if (tone) el.setAttribute('tone', tone);
     else el.removeAttribute('tone');
 
-    if (variant) el.setAttribute('variant', variant);
+    if (variant && variant !== 'surface') el.setAttribute('variant', variant);
     else el.removeAttribute('variant');
 
     if (size && size !== 'md' && size !== '2') el.setAttribute('size', size);
     else el.removeAttribute('size');
 
-    if (radius) el.setAttribute('radius', String(radius));
+    if (radius != null) el.setAttribute('radius', String(radius));
     else el.removeAttribute('radius');
+
+    if (elevation && elevation !== 'none') el.setAttribute('elevation', elevation);
+    else el.removeAttribute('elevation');
 
     if (state && state !== 'idle') el.setAttribute('state', state);
     else el.removeAttribute('state');
@@ -108,7 +113,7 @@ export function Badge(props: BadgeProps) {
 
     if (disabled) el.setAttribute('disabled', '');
     else el.removeAttribute('disabled');
-  }, [text, tone, variant, size, radius, state, pill, dot, interactive, truncate, maxWidth, removable, autoRemove, iconOnly, disabled]);
+  }, [text, tone, variant, size, radius, elevation, state, pill, dot, interactive, truncate, maxWidth, removable, autoRemove, iconOnly, disabled]);
 
   return React.createElement('ui-badge', { ref, ...rest }, children);
 }

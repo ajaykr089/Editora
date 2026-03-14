@@ -1,4 +1,11 @@
 import { ElementBase } from '../ElementBase';
+import {
+  focusRovingItem,
+  getRovingFocusBoundaryIndex,
+  moveRovingFocusIndex,
+  resolveRovingFocusIndex,
+  syncRovingTabStops
+} from '../primitives/roving-focus-group';
 
 const style = `
   :host {
@@ -125,8 +132,6 @@ const style = `
 function isFocusable(el: Element): el is HTMLElement {
   if (!(el instanceof HTMLElement)) return false;
   if (el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true') return false;
-  const tabIndex = el.getAttribute('tabindex');
-  if (tabIndex === '-1') return false;
 
   const tag = el.tagName.toLowerCase();
   if (['button', 'input', 'select', 'textarea', 'a'].includes(tag)) return true;
@@ -157,6 +162,7 @@ export class UIToolbar extends ElementBase {
   override connectedCallback(): void {
     super.connectedCallback();
     this.root.addEventListener('keydown', this._onKeyDown as EventListener);
+    queueMicrotask(() => this._syncRovingState());
   }
 
   override disconnectedCallback(): void {
@@ -197,18 +203,22 @@ export class UIToolbar extends ElementBase {
     const index = items.indexOf(current);
     if (index < 0) return;
 
-    const loop = this.hasAttribute('loop') || !this.hasAttribute('no-loop');
-    let next = index + direction;
+    const targetIndex = moveRovingFocusIndex(items, index, direction, {
+      wrap: this.hasAttribute('loop') || !this.hasAttribute('no-loop'),
+      fallbackIndex: resolveRovingFocusIndex(items, { activeIndex: index, getDisabled: () => false }),
+      getDisabled: () => false
+    });
+    if (targetIndex < 0) return;
+    const target = items[targetIndex];
+    syncRovingTabStops(items, target, { activeAttribute: null });
+    focusRovingItem(target);
+  }
 
-    if (loop) {
-      next = (next + items.length) % items.length;
-    } else {
-      if (next < 0 || next >= items.length) return;
-    }
-
-    const target = items[next];
-    items.forEach((item) => item.setAttribute('tabindex', item === target ? '0' : '-1'));
-    target.focus();
+  private _syncRovingState(): void {
+    const items = this._focusables();
+    if (!items.length) return;
+    const active = items.find((item) => item === document.activeElement) || items[resolveRovingFocusIndex(items, { getDisabled: () => false })];
+    syncRovingTabStops(items, active || null, { activeAttribute: null });
   }
 
   private _onKeyDown(event: KeyboardEvent): void {
@@ -233,8 +243,10 @@ export class UIToolbar extends ElementBase {
       const items = this._focusables();
       if (!items.length) return;
       event.preventDefault();
-      items.forEach((item, index) => item.setAttribute('tabindex', index === 0 ? '0' : '-1'));
-      items[0].focus();
+      const firstIndex = getRovingFocusBoundaryIndex(items, 'first', () => false);
+      if (firstIndex < 0) return;
+      syncRovingTabStops(items, items[firstIndex], { activeAttribute: null });
+      focusRovingItem(items[firstIndex]);
       return;
     }
 
@@ -242,10 +254,19 @@ export class UIToolbar extends ElementBase {
       const items = this._focusables();
       if (!items.length) return;
       event.preventDefault();
-      const last = items.length - 1;
-      items.forEach((item, index) => item.setAttribute('tabindex', index === last ? '0' : '-1'));
-      items[last].focus();
+      const lastIndex = getRovingFocusBoundaryIndex(items, 'last', () => false);
+      if (lastIndex < 0) return;
+      syncRovingTabStops(items, items[lastIndex], { activeAttribute: null });
+      focusRovingItem(items[lastIndex]);
     }
+  }
+
+  protected override shouldRenderOnAttributeChange(
+    _name: string,
+    _oldValue: string | null,
+    _newValue: string | null
+  ): boolean {
+    return true;
   }
 
   protected override render(): void {
@@ -258,14 +279,8 @@ export class UIToolbar extends ElementBase {
         <slot></slot>
       </div>
     `);
-  }
 
-  protected override shouldRenderOnAttributeChange(
-    _name: string,
-    _oldValue: string | null,
-    _newValue: string | null
-  ): boolean {
-    return true;
+    queueMicrotask(() => this._syncRovingState());
   }
 }
 

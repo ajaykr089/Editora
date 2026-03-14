@@ -5,6 +5,9 @@ type Props = Omit<React.HTMLAttributes<HTMLElement>, 'children'> & {
   children?: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'warning';
   size?: 'sm' | 'md' | 'lg';
+  recipe?: 'classic' | 'solid' | 'soft' | 'surface' | 'outline' | 'ghost';
+  radius?: number | string;
+  scale?: '1' | '2' | '3' | '4';
   icon?: string;
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
@@ -43,6 +46,9 @@ export const Button = React.forwardRef<HTMLElement, Props>(function Button(
     onClick,
     variant,
     size,
+    recipe,
+    radius,
+    scale,
     icon,
     startIcon,
     endIcon,
@@ -111,13 +117,19 @@ export const Button = React.forwardRef<HTMLElement, Props>(function Button(
 
     if (loadingLabel !== undefined) setStringAttribute(el, 'loading-label', loadingLabel);
     if (ariaLabel !== undefined) setStringAttribute(el, 'aria-label', ariaLabel);
-  }, [variant, size, icon, loading, state, block, headless, disabled, animation, theme, tone, type, loadingLabel, ariaLabel]);
+    setStringAttribute(el, 'recipe', recipe);
+    setStringAttribute(el, 'radius', radius != null ? String(radius) : undefined);
+    setStringAttribute(el, 'scale', scale);
+  }, [variant, size, recipe, radius, scale, icon, loading, state, block, headless, disabled, animation, theme, tone, type, loadingLabel, ariaLabel]);
 
   const hostProps: Record<string, unknown> = {
     ref,
     ...rest,
     variant,
     size: size && size !== 'md' ? size : undefined,
+    recipe,
+    radius: radius != null ? String(radius) : undefined,
+    scale,
     icon,
     animation,
     tone,

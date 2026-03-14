@@ -13,6 +13,10 @@ import '../components/ui-popover';
 import '../components/ui-hover-card';
 import '../components/ui-form';
 import '../components/ui-input';
+import '../components/ui-number-field';
+import '../components/ui-panel-group';
+import '../components/ui-panel';
+import '../components/ui-layout';
 import '../components/ui-select';
 import '../components/ui-textarea';
 import '../components/ui-radio-group';
@@ -23,6 +27,11 @@ import '../components/ui-presence';
 import '../components/ui-table';
 import '../components/ui-data-table';
 import '../components/ui-field';
+import '../components/ui-sidebar';
+import '../components/ui-date-field';
+import '../components/ui-time-field';
+import '../components/ui-file-upload';
+import '../components/ui-multi-select';
 
 function flushMicrotask() {
   return Promise.resolve();
@@ -239,22 +248,23 @@ describe('performance: non-template attribute updates should not rebuild shadow 
     el.remove();
   });
 
-  it('ui-context-menu keeps surface node stable across open and visual attribute updates', async () => {
-    const el = document.createElement('ui-context-menu') as HTMLElement;
+  it('ui-context-menu keeps portal node stable across open and visual attribute updates', async () => {
+    const el = document.createElement('ui-context-menu') as HTMLElement & { _portalEl?: HTMLElement | null };
     el.innerHTML = `<div slot="content"><button class="menuitem">Open chart</button></div>`;
     document.body.appendChild(el);
     await flushMicrotask();
 
-    const surfaceBefore = el.shadowRoot?.querySelector('.surface');
-    expect(surfaceBefore).toBeTruthy();
-
     el.setAttribute('open', '');
+    await flushMicrotask();
+
+    const portalBefore = el._portalEl;
+    expect(portalBefore).toBeTruthy();
+
     el.setAttribute('variant', 'contrast');
     el.setAttribute('density', 'comfortable');
     await flushMicrotask();
 
-    const surfaceAfter = el.shadowRoot?.querySelector('.surface');
-    expect(surfaceAfter).toBe(surfaceBefore);
+    expect(el._portalEl).toBe(portalBefore);
     el.remove();
   });
 
@@ -404,6 +414,165 @@ describe('performance: non-template attribute updates should not rebuild shadow 
     el.setAttribute('value', 'beta');
     el.setAttribute('placeholder', 'Search');
     el.setAttribute('disabled', '');
+    await flushMicrotask();
+
+    const shellAfter = el.shadowRoot?.querySelector('.shell');
+    expect(shellAfter).toBe(shellBefore);
+    el.remove();
+  });
+
+  it('ui-number-field keeps shell node stable across value/control attribute updates', async () => {
+    const el = document.createElement('ui-number-field') as HTMLElement;
+    el.setAttribute('value', '42');
+    el.setAttribute('show-steppers', '');
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const shellBefore = el.shadowRoot?.querySelector('.shell');
+    expect(shellBefore).toBeTruthy();
+
+    el.setAttribute('value', '43');
+    el.setAttribute('precision', '2');
+    el.setAttribute('disabled', '');
+    await flushMicrotask();
+
+    const shellAfter = el.shadowRoot?.querySelector('.shell');
+    expect(shellAfter).toBe(shellBefore);
+    el.remove();
+  });
+
+  it('ui-panel-group keeps group node stable across orientation and storage updates', async () => {
+    const el = document.createElement('ui-panel-group') as HTMLElement;
+    el.innerHTML = `
+      <ui-panel size="30"></ui-panel>
+      <ui-panel size="70"></ui-panel>
+    `;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const groupBefore = el.shadowRoot?.querySelector('.group');
+    expect(groupBefore).toBeTruthy();
+
+    el.setAttribute('orientation', 'vertical');
+    el.setAttribute('storage-key', 'perf-layout');
+    el.setAttribute('auto-save', '');
+    await flushMicrotask();
+
+    const groupAfter = el.shadowRoot?.querySelector('.group');
+    expect(groupAfter).toBe(groupBefore);
+    el.remove();
+  });
+
+  it('ui-date-field keeps shell node stable across value and locale updates', async () => {
+    const el = document.createElement('ui-date-field') as HTMLElement;
+    el.setAttribute('value', '2026-03-09');
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const shellBefore = el.shadowRoot?.querySelector('.shell');
+    expect(shellBefore).toBeTruthy();
+
+    el.setAttribute('locale', 'en-GB');
+    el.setAttribute('value', '2026-03-10');
+    await flushMicrotask();
+
+    const shellAfter = el.shadowRoot?.querySelector('.shell');
+    expect(shellAfter).toBe(shellBefore);
+    el.remove();
+  });
+
+  it('ui-time-field keeps shell node stable across value and format updates', async () => {
+    const el = document.createElement('ui-time-field') as HTMLElement;
+    el.setAttribute('value', '09:30');
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const shellBefore = el.shadowRoot?.querySelector('.shell');
+    expect(shellBefore).toBeTruthy();
+
+    el.setAttribute('format', '12h');
+    el.setAttribute('seconds', '');
+    el.setAttribute('value', '09:30:15');
+    await flushMicrotask();
+
+    const shellAfter = el.shadowRoot?.querySelector('.shell');
+    expect(shellAfter).toBe(shellBefore);
+    el.remove();
+  });
+
+  it('ui-file-upload keeps surface node stable across file metadata updates', async () => {
+    const el = document.createElement('ui-file-upload') as HTMLElement;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const surfaceBefore = el.shadowRoot?.querySelector('.surface');
+    expect(surfaceBefore).toBeTruthy();
+
+    el.setAttribute('label', 'Attachments');
+    el.setAttribute('show-previews', '');
+    el.setAttribute('progress', '{"demo.txt::4::1":50}');
+    await flushMicrotask();
+
+    const surfaceAfter = el.shadowRoot?.querySelector('.surface');
+    expect(surfaceAfter).toBe(surfaceBefore);
+    el.remove();
+  });
+
+  it('ui-multi-select keeps shell node stable across value and filter updates', async () => {
+    const el = document.createElement('ui-multi-select') as HTMLElement;
+    el.setAttribute('options', JSON.stringify([{ value: 'ops', label: 'Operations' }, { value: 'security', label: 'Security' }]));
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const shellBefore = el.shadowRoot?.querySelector('.shell');
+    expect(shellBefore).toBeTruthy();
+
+    el.setAttribute('value', '["ops"]');
+    el.setAttribute('placeholder', 'Filter teams');
+    el.setAttribute('max-selections', '2');
+    await flushMicrotask();
+
+    const shellAfter = el.shadowRoot?.querySelector('.shell');
+    expect(shellAfter).toBe(shellBefore);
+    el.remove();
+  });
+
+  it('ui-layout keeps layout node stable across collapse and width updates', async () => {
+    const el = document.createElement('ui-layout') as HTMLElement;
+    el.innerHTML = `
+      <div slot="sidebar">Sidebar</div>
+      <div slot="content">Content</div>
+      <div slot="aside">Aside</div>
+    `;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const layoutBefore = el.shadowRoot?.querySelector('.layout');
+    expect(layoutBefore).toBeTruthy();
+
+    el.setAttribute('collapsed', '');
+    el.setAttribute('sidebar-width', '280px');
+    el.setAttribute('aside-width', '320px');
+    await flushMicrotask();
+
+    const layoutAfter = el.shadowRoot?.querySelector('.layout');
+    expect(layoutAfter).toBe(layoutBefore);
+    el.remove();
+  });
+
+  it('ui-sidebar keeps shell node stable across width constraint updates', async () => {
+    const el = document.createElement('ui-sidebar') as HTMLElement;
+    el.setAttribute('resizable', '');
+    el.innerHTML = `<div slot="item" data-value="home" data-active>Home</div>`;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const shellBefore = el.shadowRoot?.querySelector('.shell');
+    expect(shellBefore).toBeTruthy();
+
+    el.setAttribute('width', '312px');
+    el.setAttribute('min-width', '220px');
+    el.setAttribute('max-width', '420px');
     await flushMicrotask();
 
     const shellAfter = el.shadowRoot?.querySelector('.shell');

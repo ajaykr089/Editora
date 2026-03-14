@@ -9,8 +9,13 @@ export interface AccordionProps extends Omit<React.HTMLAttributes<HTMLElement>, 
   multiple?: boolean;
   collapsible?: boolean;
   open?: OpenValue;
+  variant?: 'surface' | 'outline' | 'soft' | 'solid' | 'ghost' | 'glass';
+  size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
+  radius?: number | string;
+  tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+  indicator?: 'line' | 'none';
   shape?: 'default' | 'square' | 'pill';
-  elevation?: 'default' | 'none';
+  elevation?: 'default' | 'none' | 'low' | 'high';
   onToggle?: (open: OpenValue) => void;
   onChangeOpen?: (open: OpenValue) => void;
 }
@@ -48,7 +53,7 @@ function readOpen(event: Event): OpenValue | undefined {
 }
 
 export const Accordion = React.forwardRef<HTMLElement, AccordionProps>(function Accordion(
-  { multiple, collapsible, open, shape, elevation, onToggle, onChangeOpen, children, ...rest },
+  { multiple, collapsible, open, variant, size, radius, tone, indicator, shape, elevation, onToggle, onChangeOpen, children, ...rest },
   forwardedRef
 ) {
   const ref = React.useRef<HTMLElement | null>(null);
@@ -69,9 +74,14 @@ export const Accordion = React.forwardRef<HTMLElement, AccordionProps>(function 
 
     if (open == null) element.removeAttribute('open');
     else element.setAttribute('open', Array.isArray(open) ? JSON.stringify(open) : String(open));
+    setAttributeValue(element, 'variant', variant && variant !== 'surface' ? variant : null);
+    setAttributeValue(element, 'size', size && size !== 'md' ? size : null);
+    setAttributeValue(element, 'radius', radius != null ? String(radius) : null);
+    setAttributeValue(element, 'tone', tone && tone !== 'neutral' ? tone : null);
+    setAttributeValue(element, 'indicator', indicator && indicator !== 'line' ? indicator : null);
     setAttributeValue(element, 'shape', shape && shape !== 'default' ? shape : null);
     setAttributeValue(element, 'elevation', elevation && elevation !== 'default' ? elevation : null);
-  }, [multiple, collapsible, open, shape, elevation]);
+  }, [multiple, collapsible, open, variant, size, radius, tone, indicator, shape, elevation]);
 
   React.useEffect(() => {
     const element = ref.current;

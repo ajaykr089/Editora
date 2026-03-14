@@ -61,6 +61,24 @@ export type AlertDialogConfirmContext = {
   signal?: AbortSignal;
 };
 
+export type AlertDialogCancelContext = {
+  id: string;
+  value?: string;
+  checked?: boolean;
+  dialog: UIAlertDialog;
+  signal?: AbortSignal;
+};
+
+export type AlertDialogDismissContext = {
+  id: string;
+  value?: string;
+  checked?: boolean;
+  dialog: UIAlertDialog;
+  signal?: AbortSignal;
+  source: AlertDialogDismissSource;
+  reason?: string;
+};
+
 export type AlertDialogCommonOptions = {
   id?: string;
   mode?: AlertDialogMode;
@@ -76,7 +94,11 @@ export type AlertDialogCommonOptions = {
   lockWhileLoading?: boolean;
   role?: 'alertdialog' | 'dialog';
   tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: 'surface' | 'soft' | 'outline' | 'solid';
+  size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
+  radius?: string | number;
+  elevation?: 'none' | 'low' | 'high';
+  indicator?: 'line' | 'none';
   initialFocus?: string;
   checkbox?: AlertDialogCheckboxOptions;
   signal?: AbortSignal;
@@ -85,6 +107,8 @@ export type AlertDialogCommonOptions = {
   ariaDescribedby?: string;
   headless?: boolean;
   onConfirm?: (ctx: AlertDialogConfirmContext) => void | Promise<void>;
+  onCancel?: (ctx: AlertDialogCancelContext) => void | Promise<void>;
+  onDismiss?: (ctx: AlertDialogDismissContext) => void | Promise<void>;
 };
 
 export type AlertDialogAlertOptions = AlertDialogCommonOptions;
@@ -218,6 +242,7 @@ export type AlertDialogManagerApi = {
   prompt: (options?: AlertDialogPromptOptions) => Promise<PromptResult>;
   destroy: (reason?: 'unmount' | 'abort' | 'programmatic') => void;
   setContainer: (container: HTMLElement | null) => void;
+  setDefaults: (defaults: Partial<AlertDialogCommonOptions> | null) => void;
 };
 
 export class AlertDialogManager implements AlertDialogManagerApi {
@@ -227,6 +252,7 @@ export class AlertDialogManager implements AlertDialogManagerApi {
   private _active: Array<Request<any>> = [];
   private _disposed = false;
   private _seed = 0;
+  private _defaults: Partial<AlertDialogCommonOptions> = {};
 
   constructor(container?: HTMLElement | null) {
     this._container = container ?? null;
@@ -235,6 +261,10 @@ export class AlertDialogManager implements AlertDialogManagerApi {
   setContainer(container: HTMLElement | null) {
     this._container = container;
     this._ownsContainer = false;
+  }
+
+  setDefaults(defaults: Partial<AlertDialogCommonOptions> | null) {
+    this._defaults = defaults ? { ...defaults } : {};
   }
 
   alert(options: AlertDialogAlertOptions = {}): Promise<AlertResult> {
@@ -269,31 +299,32 @@ export class AlertDialogManager implements AlertDialogManagerApi {
   }
 
   private _enqueue<T extends AnyResult>(kind: DialogKind, options: AnyDialogOptions): Promise<T> {
+    const mergedOptions = this._mergeOptions(options);
     if (!isBrowser() || this._disposed) {
       const immediate = {
-        id: options.id || nextRequestId(++this._seed),
+        id: mergedOptions.id || nextRequestId(++this._seed),
         action: 'dismiss',
         source: 'unmount'
       } as T;
       return Promise.resolve(immediate);
     }
 
-    const id = options.id || nextRequestId(++this._seed);
-    const mode = normalizeMode(options.mode);
+    const id = mergedOptions.id || nextRequestId(++this._seed);
+    const mode = normalizeMode(mergedOptions.mode);
 
     return new Promise<T>((resolve) => {
       const request: Request<T> = {
         id,
         kind,
         mode,
-        options,
+        options: mergedOptions,
         settled: false,
         processing: false,
         resolve,
         cleanup: []
       };
 
-      if (options.signal?.aborted) {
+      if (mergedOptions.signal?.aborted) {
         this._settle(request, createDismissResult(request, 'abort'), false);
         return;
       }
@@ -395,7 +426,7 @@ export class AlertDialogManager implements AlertDialogManagerApi {
     const onClose = (event: Event) => {
       if (request.settled) return;
       const detail = (event as CustomEvent<UIAlertDialogCloseDetail>).detail;
-      this._settle(request, resultFromClose(request, detail), true);
+      this._handleClose(request, detail);
     };
 
     dialog.addEventListener('ui-confirm', onConfirm as EventListener);
@@ -512,6 +543,10 @@ export class AlertDialogManager implements AlertDialogManagerApi {
       role: options.role || 'alertdialog',
       tone: options.tone || (isAlert ? 'info' : isPrompt ? 'neutral' : 'warning'),
       size: options.size || 'md',
+      variant: options.variant || 'surface',
+      radius: options.radius,
+      elevation: options.elevation || 'low',
+      indicator: options.indicator || 'line',
       initialFocus: options.initialFocus,
       ariaLabel: options.ariaLabel,
       ariaLabelledby: options.ariaLabelledby,
@@ -532,6 +567,55 @@ export class AlertDialogManager implements AlertDialogManagerApi {
         checked: options.checkbox?.defaultChecked
       }
     };
+  }
+
+  private _buildLifecycleContext<T extends AnyResult>(request: Request<T>) {
+    return {
+      id: request.id,
+      value: request.dialog?.getInputValue() ?? request.value,
+      checked: request.dialog?.getChecked() ?? request.checked,
+      dialog: request.dialog as UIAlertDialog,
+      signal: request.options.signal
+    };
+  }
+
+  private _handleClose<T extends AnyResult>(request: Request<T>, detail: UIAlertDialogCloseDetail) {
+    const result = resultFromClose(request, detail);
+
+    if (detail.action === 'cancel' && request.options.onCancel) {
+      Promise.resolve(request.options.onCancel(this._buildLifecycleContext(request)))
+        .finally(() => {
+          this._settle(request, result, true);
+        });
+      return;
+    }
+
+    if (detail.action === 'dismiss' && request.options.onDismiss) {
+      Promise.resolve(
+        request.options.onDismiss({
+          ...this._buildLifecycleContext(request),
+          source: (detail.source || 'programmatic') as AlertDialogDismissSource,
+          reason: detail.reason
+        })
+      ).finally(() => {
+        this._settle(request, result, true);
+      });
+      return;
+    }
+
+    this._settle(request, result, true);
+  }
+
+  private _mergeOptions<T extends AnyDialogOptions>(options: T): T {
+    const defaults = this._defaults;
+    return {
+      ...defaults,
+      ...options,
+      checkbox: {
+        ...(defaults.checkbox || {}),
+        ...(options.checkbox || {})
+      }
+    } as T;
   }
 
   private _ensureContainer(): HTMLElement | null {

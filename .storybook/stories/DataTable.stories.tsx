@@ -231,7 +231,7 @@ export const UsersTable = (args: any) => {
         <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>
           Selected users: {selected.length ? selected.length : 'none'}
         </Box>
-        <Pagination id="users-pagination" page={String(page)} />
+        <Pagination id="users-pagination" page={page} />
       </Flex>
     </Grid>
   );
@@ -415,7 +415,7 @@ export const OrdersTable = () => {
       </DataTable>
 
       <Flex style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Pagination id="orders-pagination" page={String(page)} />
+        <Pagination id="orders-pagination" page={page} />
       </Flex>
     </Grid>
   );
@@ -521,7 +521,7 @@ export const FilterResizeReorder = () => {
         <Box style={{ fontSize: 'var(--ui-font-size-sm, 12px)', color: 'var(--ui-color-muted, #64748b)' }}>
           Order: <code>{order}</code>
         </Box>
-        <Pagination id="filter-pagination" page={String(page)} />
+        <Pagination id="filter-pagination" page={page} />
       </Flex>
     </Grid>
   );
@@ -866,7 +866,7 @@ export const PinnedFilterBuilderBulkActions = () => {
         <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>
           Selected rows: <strong>{selected.length}</strong> {message ? `• ${message}` : ''}
         </Box>
-        <Pagination id="pinned-pagination" page={String(page)} />
+        <Pagination id="pinned-pagination" page={page} />
       </Flex>
     </Grid>
   );

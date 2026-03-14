@@ -145,4 +145,21 @@ describe('ui-breadcrumb', () => {
     const listText = el.shadowRoot?.textContent || '';
     expect(listText).toContain('Audit');
   });
+
+  it('normalizes radius values into the host style contract', async () => {
+    const el = mountBreadcrumb(
+      `
+        <span slot="item">Workspace</span>
+        <span slot="item">Audit logs</span>
+      `,
+      { radius: 'full' }
+    );
+
+    await settle();
+    expect(el.style.getPropertyValue('--ui-breadcrumb-radius')).toBe('9999px');
+
+    el.setAttribute('radius', '12');
+    await settle();
+    expect(el.style.getPropertyValue('--ui-breadcrumb-radius')).toBe('12px');
+  });
 });

@@ -399,7 +399,9 @@ export class UIScrollArea extends ElementBase {
     const children = Array.from(content.children) as HTMLElement[];
     const target = children[index];
     if (!target) return;
-    target.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior });
+    if (typeof target.scrollIntoView === 'function') {
+      target.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior });
+    }
   }
 
   private _syncFromAttributes(): void {

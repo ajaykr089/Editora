@@ -1,17 +1,19 @@
 import { ElementBase } from '../ElementBase';
-import { showPortalFor } from '../portal';
+import { findFirstEnabledIndex, findIndexByValue, findLastEnabledIndex } from '../primitives/collection';
+import { resolveListboxActiveIndex } from '../primitives/listbox';
+import './ui-listbox';
+import { UIListbox } from './ui-listbox';
 
 const style = `
   :host {
     --ui-select-width: var(--ui-width, min(340px, 100%));
-    --ui-select-min-height: 42px;
-    --ui-select-radius: var(--ui-radius, 10px);
-    --ui-select-padding-x: 12px;
-    --ui-select-gap: 8px;
+    --ui-select-min-height: var(--base-select-height-md, 42px);
+    --ui-select-radius: var(--base-select-radius, var(--ui-radius, 4px));
+    --ui-select-padding-x: var(--base-select-padding-x, 12px);
 
-    --ui-select-bg: var(--ui-color-surface, #ffffff);
-    --ui-select-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
-    --ui-select-border: 1px solid var(--ui-select-border-color);
+    --ui-select-bg: var(--base-select-bg, var(--ui-color-surface, #ffffff));
+    --ui-select-border: var(--base-select-border, 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent));
+    --ui-select-border-color: color-mix(in srgb, var(--ui-select-border) 100%, transparent);
     --ui-select-text: var(--ui-color-text, #0f172a);
     --ui-select-muted: var(--ui-color-muted, #64748b);
     --ui-select-placeholder: color-mix(in srgb, var(--ui-select-text) 44%, transparent);
@@ -21,21 +23,40 @@ const style = `
     --ui-select-warning: var(--ui-color-warning, #d97706);
     --ui-select-error: var(--ui-color-danger, #dc2626);
 
-    --ui-select-shadow: none;
-    --ui-select-elevation: none;
-    --ui-select-menu-shadow: none;
+    --ui-select-shadow: var(--base-select-shadow, none);
+    --ui-select-elevation: var(--ui-select-shadow);
+    --ui-select-menu-bg: var(--base-select-menu-bg, color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent));
+    --ui-select-menu-color: var(--base-select-menu-color, var(--ui-select-text));
+    --ui-select-menu-border-color: color-mix(in srgb, var(--ui-select-border-color) 82%, transparent);
+    --ui-select-menu-border: 1px solid var(--ui-select-menu-border-color);
+    --ui-select-menu-radius: var(--base-select-menu-radius, var(--ui-select-radius));
+    --ui-select-menu-shadow:
+      0 14px 34px rgba(15, 23, 42, 0.16),
+      0 3px 10px rgba(15, 23, 42, 0.08);
+    --ui-select-menu-padding: 0px;
+    --ui-select-menu-gap: 8px;
+    --ui-select-menu-max-height: min(320px, var(--ui-select-available-height, 320px));
+    --ui-select-menu-item-height: 38px;
+    --ui-select-menu-item-radius: 0px;
+    --ui-select-menu-item-border-color: color-mix(in srgb, var(--ui-select-border-color) 72%, transparent);
 
-    --ui-select-label: var(--ui-select-text);
-    --ui-select-description: var(--ui-select-muted);
+    --ui-select-label: var(--base-select-label-color, var(--ui-select-text));
+    --ui-select-description: var(--base-select-description-color, var(--ui-select-muted));
     --ui-select-indicator-color: color-mix(in srgb, var(--ui-select-text) 58%, transparent);
     --ui-select-transition: 170ms cubic-bezier(0.22, 0.8, 0.2, 1);
-    --ui-select-menu-z: 1550;
 
     color-scheme: light dark;
     display: inline-grid;
     inline-size: var(--ui-select-width);
     min-inline-size: min(220px, 100%);
+    position: relative;
+    isolation: isolate;
+    z-index: 0;
     font-family: "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  :host([open]) {
+    z-index: 40;
   }
 
   .root {
@@ -43,6 +64,10 @@ const style = `
     display: grid;
     gap: 8px;
     color: var(--ui-select-text);
+  }
+
+  .content-slot {
+    display: none;
   }
 
   .meta {
@@ -73,6 +98,11 @@ const style = `
     line-height: 1.4;
   }
 
+  .field-shell {
+    position: relative;
+    min-inline-size: 0;
+  }
+
   .control {
     min-inline-size: 0;
     position: relative;
@@ -91,7 +121,8 @@ const style = `
       opacity var(--ui-select-transition);
   }
 
-  .control[data-open="true"] {
+  .control[data-open="true"],
+  .control:focus-within {
     border-color: color-mix(in srgb, var(--ui-select-focus) 62%, var(--ui-select-border-color));
     box-shadow:
       0 0 0 4px color-mix(in srgb, var(--ui-select-focus) 18%, transparent),
@@ -128,7 +159,8 @@ const style = `
   .description[hidden],
   .label[hidden],
   .error[hidden],
-  .meta[hidden] {
+  .meta[hidden],
+  .panel[hidden] {
     display: none;
   }
 
@@ -189,7 +221,6 @@ const style = `
   }
 
   .indicator {
-    pointer-events: none;
     color: var(--ui-select-indicator-color);
     transform-origin: 50% 48%;
     transition: transform var(--ui-select-transition), color var(--ui-select-transition), opacity var(--ui-select-transition);
@@ -214,10 +245,203 @@ const style = `
     border: 2px solid color-mix(in srgb, var(--ui-select-accent) 22%, transparent);
     border-top-color: var(--ui-select-accent);
     opacity: 0;
-    pointer-events: none;
     inset-block-start: calc(50% - 9px);
     transform: none;
     animation: ui-select-spin 760ms linear infinite;
+  }
+
+  .panel {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: calc(100% + var(--ui-select-menu-gap));
+    z-index: 24;
+    pointer-events: auto;
+  }
+
+  .panel[data-placement="top"] {
+    inset-block-start: auto;
+    inset-block-end: calc(100% + var(--ui-select-menu-gap));
+  }
+
+  .menu {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-inline-size: 100%;
+    max-inline-size: 100%;
+    max-block-size: var(--ui-select-menu-max-height);
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: var(--ui-select-menu-border);
+    border-radius: var(--ui-select-menu-radius);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-select-accent) 3%, transparent) 0%, transparent 100%),
+      var(--ui-select-menu-bg);
+    color: var(--ui-select-menu-color);
+    box-shadow: var(--ui-select-menu-shadow);
+    padding: var(--ui-select-menu-padding);
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--ui-select-menu-border-color) 82%, transparent) transparent;
+    scrollbar-gutter: auto;
+    backdrop-filter: saturate(1.04) blur(10px);
+  }
+
+  .menu::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .menu::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .menu::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--ui-select-menu-border-color) 82%, transparent);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .menu:hover::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--ui-select-accent) 28%, var(--ui-select-menu-border-color));
+    background-clip: padding-box;
+  }
+
+  .panel[data-placement="top"] .menu {
+    transform-origin: bottom center;
+    animation: ui-select-menu-enter-top 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .panel[data-placement="bottom"] .menu {
+    transform-origin: top center;
+    animation: ui-select-menu-enter-bottom 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .menu-group {
+    color: color-mix(in srgb, var(--ui-select-muted) 88%, transparent);
+    font: 700 11px/1.3 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 9px 10px 5px;
+  }
+
+  .menu-item {
+    inline-size: 100%;
+    min-inline-size: 0;
+    min-block-size: var(--ui-select-menu-item-height);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border: 1px solid transparent;
+    border-radius: var(--ui-select-menu-item-radius);
+    background: transparent;
+    color: inherit;
+    padding: 9px 10px;
+    text-align: left;
+    font: 500 13px/1.35 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    cursor: pointer;
+    transition:
+      background-color 130ms ease,
+      border-color 130ms ease,
+      color 130ms ease,
+      transform 130ms ease,
+      box-shadow 130ms ease;
+  }
+
+  .menu-item[data-check-placement="start"] {
+    justify-content: flex-start;
+  }
+
+  .menu-item[data-edge-start="true"] {
+    border-start-start-radius: max(0px, calc(var(--ui-select-menu-radius) - 1px));
+    border-start-end-radius: max(0px, calc(var(--ui-select-menu-radius) - 1px));
+  }
+
+  .menu-item[data-edge-end="true"] {
+    border-end-start-radius: max(0px, calc(var(--ui-select-menu-radius) - 1px));
+    border-end-end-radius: max(0px, calc(var(--ui-select-menu-radius) - 1px));
+  }
+
+  :host([option-border]) .menu-item {
+    border-color: var(--ui-select-menu-item-border-color);
+  }
+
+  .menu-item:hover,
+  .menu-item[data-active="true"] {
+    background: color-mix(in srgb, var(--ui-select-accent) 12%, transparent);
+    border-color: color-mix(in srgb, var(--ui-select-accent) 24%, transparent);
+  }
+
+  .menu-item[data-active="true"] {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-select-accent) 12%, transparent);
+  }
+
+  .menu-item:active {
+    transform: translateY(1px);
+    background: color-mix(in srgb, var(--ui-select-accent) 18%, transparent);
+  }
+
+  .menu-item[aria-selected="true"] {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--ui-select-accent) 18%, transparent) 0%, color-mix(in srgb, var(--ui-select-accent) 12%, transparent) 100%);
+    border-color: color-mix(in srgb, var(--ui-select-accent) 30%, transparent);
+    color: color-mix(in srgb, var(--ui-select-menu-color) 92%, var(--ui-select-accent));
+  }
+
+  .menu-item[aria-disabled="true"] {
+    opacity: 0.52;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .menu-item-label {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .menu-item-check {
+    inline-size: 14px;
+    block-size: 14px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+    background: transparent;
+    opacity: 0;
+    transition: opacity 130ms ease, background-color 130ms ease, border-color 130ms ease;
+    flex: 0 0 auto;
+  }
+
+  .menu-item-check[hidden] {
+    display: none;
+  }
+
+  .menu-item-check::before {
+    content: "";
+    inline-size: 6px;
+    block-size: 6px;
+    border-radius: 999px;
+    background: currentColor;
+  }
+
+  .menu-item[aria-selected="true"] .menu-item-check {
+    opacity: 1;
+    background: color-mix(in srgb, var(--ui-select-accent) 84%, #ffffff);
+    border-color: color-mix(in srgb, var(--ui-select-accent) 75%, transparent);
+    color: var(--ui-color-primary-foreground, #ffffff);
+  }
+
+  .menu-empty {
+    margin: 0;
+    padding: 10px;
+    color: var(--ui-select-muted);
+    font-size: 12px;
+    line-height: 1.4;
+    text-align: center;
   }
 
   .error {
@@ -260,7 +484,8 @@ const style = `
   :host([size="1"]) {
     --ui-select-min-height: 34px;
     --ui-select-padding-x: 10px;
-    --ui-select-gap: 6px;
+    --ui-select-menu-gap: 6px;
+    --ui-select-menu-item-height: 34px;
   }
 
   :host([size="sm"]) .trigger,
@@ -268,16 +493,29 @@ const style = `
     font-size: 12px;
   }
 
+  :host([size="sm"]) .menu-item,
+  :host([size="1"]) .menu-item {
+    font-size: 12px;
+    padding: 8px 9px;
+  }
+
   :host([size="lg"]),
   :host([size="3"]) {
     --ui-select-min-height: 46px;
     --ui-select-padding-x: 13px;
-    --ui-select-gap: 9px;
+    --ui-select-menu-gap: 10px;
+    --ui-select-menu-item-height: 42px;
   }
 
   :host([size="lg"]) .trigger,
   :host([size="3"]) .trigger {
     font-size: 15px;
+  }
+
+  :host([size="lg"]) .menu-item,
+  :host([size="3"]) .menu-item {
+    font-size: 14px;
+    padding: 10px 12px;
   }
 
   :host([density="compact"]) .root {
@@ -322,6 +560,7 @@ const style = `
   :host([variant="soft"]) {
     --ui-select-bg: color-mix(in srgb, var(--ui-select-accent) 8%, var(--ui-color-surface, #ffffff));
     --ui-select-border-color: color-mix(in srgb, var(--ui-select-accent) 30%, var(--ui-color-border, #cbd5e1));
+    --ui-select-menu-bg: color-mix(in srgb, var(--ui-select-accent) 5%, var(--ui-color-surface, #ffffff));
   }
 
   :host([variant="filled"]) {
@@ -360,15 +599,19 @@ const style = `
     --ui-select-border-color: color-mix(in srgb, var(--ui-select-accent) 76%, #0f172a 24%);
     --ui-select-focus: color-mix(in srgb, #ffffff 72%, var(--ui-select-accent));
     --ui-select-indicator-color: color-mix(in srgb, #ffffff 88%, transparent);
+    --ui-select-menu-bg: color-mix(in srgb, var(--ui-select-accent) 20%, #08111f 80%);
+    --ui-select-menu-color: var(--ui-color-primary-foreground, #ffffff);
   }
 
   :host([variant="glass"]) {
     --ui-select-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 72%, transparent);
     --ui-select-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 50%, transparent);
     --ui-select-elevation: 0 8px 18px rgba(2, 6, 23, 0.1), 0 26px 52px rgba(2, 6, 23, 0.08);
+    --ui-select-menu-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 80%, transparent);
   }
 
-  :host([variant="glass"]) .control {
+  :host([variant="glass"]) .control,
+  :host([variant="glass"]) .menu {
     -webkit-backdrop-filter: saturate(1.08) blur(10px);
     backdrop-filter: saturate(1.08) blur(10px);
   }
@@ -382,6 +625,9 @@ const style = `
     --ui-select-focus: #93c5fd;
     --ui-select-indicator-color: #9fb3cf;
     --ui-select-elevation: 0 10px 30px rgba(2, 6, 23, 0.35);
+    --ui-select-menu-bg: #0b1324;
+    --ui-select-menu-color: #e2e8f0;
+    --ui-select-menu-border-color: #334155;
   }
 
   :host([tone="success"]) {
@@ -430,11 +676,35 @@ const style = `
     }
   }
 
+  @keyframes ui-select-menu-enter-bottom {
+    from {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes ui-select-menu-enter-top {
+    from {
+      opacity: 0;
+      transform: translateY(4px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .control,
     .indicator,
     .spinner,
-    .trigger {
+    .trigger,
+    .menu,
+    .menu-item {
       transition: none !important;
       animation: none !important;
     }
@@ -444,9 +714,12 @@ const style = `
     :host {
       --ui-select-border: 2px solid var(--ui-select-border-color);
       --ui-select-elevation: none;
+      --ui-select-menu-border: 2px solid var(--ui-select-menu-border-color);
+      --ui-select-menu-shadow: none;
     }
 
-    .control[data-open="true"] {
+    .control[data-open="true"],
+    .control:focus-within {
       box-shadow: none;
       outline: 2px solid var(--ui-select-focus);
       outline-offset: 1px;
@@ -465,132 +738,15 @@ const style = `
       --ui-select-success: CanvasText;
       --ui-select-elevation: none;
       --ui-select-indicator-color: CanvasText;
+      --ui-select-menu-bg: Canvas;
+      --ui-select-menu-color: CanvasText;
+      --ui-select-menu-border-color: CanvasText;
+      --ui-select-menu-shadow: none;
     }
 
     .indicator::before {
       border-right-color: CanvasText;
       border-bottom-color: CanvasText;
-    }
-  }
-`;
-
-const menuStyle = `
-  .menu {
-    position: absolute;
-    box-sizing: border-box;
-    min-width: 180px;
-    max-width: min(420px, calc(100vw - 8px));
-    max-height: min(320px, calc(100vh - 12px));
-    overflow-y: auto;
-    overflow-x: hidden;
-    border: var(--ui-select-border, 1px solid rgba(148, 163, 184, 0.55));
-    border-radius: var(--ui-select-radius, 10px);
-    background: var(--ui-select-bg, #ffffff);
-    color: var(--ui-select-text, #0f172a);
-    box-shadow: var(--ui-select-menu-shadow, var(--ui-select-elevation, none));
-    padding: 6px;
-    z-index: var(--ui-select-menu-z, 1550);
-    transform-origin: top center;
-    animation: ui-select-menu-enter 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
-    scrollbar-gutter: stable both-edges;
-  }
-
-  .menu[data-placement="top"] {
-    transform-origin: bottom center;
-  }
-
-  .menu-group {
-    color: var(--ui-select-muted, #64748b);
-    font: 650 11px/1.3 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    padding: 8px 10px 5px;
-  }
-
-  .menu-item {
-    inline-size: 100%;
-    min-inline-size: 0;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    border: 1px solid transparent;
-    border-radius: calc(var(--ui-select-radius, 10px) - 4px);
-    background: transparent;
-    color: inherit;
-    padding: 8px 10px;
-    text-align: left;
-    font: 500 13px/1.35 "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    cursor: pointer;
-    transition:
-      background-color 130ms ease,
-      border-color 130ms ease,
-      color 130ms ease,
-      transform 130ms ease;
-  }
-
-  .menu-item:hover,
-  .menu-item[data-active="true"] {
-    background: color-mix(in srgb, var(--ui-select-accent, #2563eb) 12%, transparent);
-    border-color: color-mix(in srgb, var(--ui-select-accent, #2563eb) 22%, transparent);
-  }
-
-  .menu-item:active {
-    transform: translateY(1px);
-    background: color-mix(in srgb, var(--ui-select-accent, #2563eb) 18%, transparent);
-  }
-
-  .menu-item[aria-selected="true"] {
-    background: color-mix(in srgb, var(--ui-select-accent, #2563eb) 16%, transparent);
-    border-color: color-mix(in srgb, var(--ui-select-accent, #2563eb) 28%, transparent);
-  }
-
-  .menu-item[aria-disabled="true"] {
-    opacity: 0.52;
-    cursor: not-allowed;
-  }
-
-  .menu-item-label {
-    min-inline-size: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .menu-item-check {
-    inline-size: 14px;
-    block-size: 14px;
-    border-radius: 999px;
-    border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
-    background: transparent;
-    opacity: 0;
-    transition: opacity 130ms ease;
-  }
-
-  .menu-item[aria-selected="true"] .menu-item-check {
-    opacity: 1;
-    background: color-mix(in srgb, var(--ui-select-accent, #2563eb) 84%, #ffffff);
-    border-color: color-mix(in srgb, var(--ui-select-accent, #2563eb) 75%, transparent);
-  }
-
-  .menu-empty {
-    margin: 0;
-    padding: 10px;
-    color: var(--ui-select-muted, #64748b);
-    font-size: 12px;
-    line-height: 1.4;
-    text-align: center;
-  }
-
-  @keyframes ui-select-menu-enter {
-    from {
-      opacity: 0;
-      transform: translateY(-4px) scale(0.985);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
     }
   }
 `;
@@ -602,7 +758,7 @@ type SelectOption = {
   group: string;
 };
 
-type CloseReason = 'outside' | 'escape' | 'select' | 'tab' | 'programmatic' | 'disabled';
+type PanelPlacement = 'top' | 'bottom';
 
 function isTruthyAttr(raw: string | null): boolean {
   if (raw == null) return false;
@@ -617,6 +773,17 @@ function escapeHtml(value: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function normalizeLengthValue(raw: string | null): string | null {
+  if (!raw) return null;
+  const value = String(raw).trim();
+  if (!value) return null;
+  if (value === 'none') return '4px';
+  if (value === 'full') return '999px';
+  if (value === 'large') return '16px';
+  if (/^-?\\d+(\\.\\d+)?$/.test(value)) return `${value}px`;
+  return value;
 }
 
 const LIVE_ATTRS = new Set([
@@ -635,6 +802,12 @@ const LIVE_ATTRS = new Set([
   'radius',
   'shape',
   'elevation',
+  'option-border',
+  'show-check',
+  'check-placement',
+  'label',
+  'description',
+  'error',
   'aria-label',
   'validation',
   'invalid',
@@ -642,21 +815,6 @@ const LIVE_ATTRS = new Set([
   'data-valid',
   'close-on-scroll'
 ]);
-
-const SELECT_TOKEN_NAMES = [
-  '--ui-select-bg',
-  '--ui-select-border',
-  '--ui-select-border-color',
-  '--ui-select-text',
-  '--ui-select-muted',
-  '--ui-select-placeholder',
-  '--ui-select-focus',
-  '--ui-select-accent',
-  '--ui-select-radius',
-  '--ui-select-elevation',
-  '--ui-select-menu-shadow',
-  '--ui-select-menu-z'
-];
 
 export class UISelect extends ElementBase {
   static get observedAttributes() {
@@ -676,6 +834,9 @@ export class UISelect extends ElementBase {
       'radius',
       'shape',
       'elevation',
+      'option-border',
+      'show-check',
+      'check-placement',
       'label',
       'description',
       'error',
@@ -688,34 +849,31 @@ export class UISelect extends ElementBase {
     ];
   }
 
-  private _control: HTMLElement | null = null;
-  private _trigger: HTMLButtonElement | null = null;
+  private _controlEl: HTMLElement | null = null;
+  private _triggerEl: HTMLButtonElement | null = null;
   private _valueEl: HTMLElement | null = null;
+  private _panelEl: HTMLElement | null = null;
+  private _menuEl: UIListbox | null = null;
   private _observer: MutationObserver | null = null;
   private _formUnregister: (() => void) | null = null;
-
-  // names intentionally match ElementBase teardown helpers
-  private _portalEl: HTMLElement | null = null;
-  private _cleanup: (() => void) | null = null;
-
   private _uid = Math.random().toString(36).slice(2, 8);
-  private _open = false;
-  private _activeIndex = -1;
   private _options: SelectOption[] = [];
   private _menuItems: HTMLButtonElement[] = [];
   private _optionsFingerprint = '';
-  private _rebuildRaf = 0;
+  private _open = false;
+  private _activeIndex = -1;
+  private _placement: PanelPlacement = 'bottom';
 
   constructor() {
     super();
     this._onRootClick = this._onRootClick.bind(this);
     this._onRootKeyDown = this._onRootKeyDown.bind(this);
-    this._onFocusIn = this._onFocusIn.bind(this);
-    this._onFocusOut = this._onFocusOut.bind(this);
+    this._onRootPointerDown = this._onRootPointerDown.bind(this);
+    this._onRootPointerMove = this._onRootPointerMove.bind(this);
     this._onSlotChange = this._onSlotChange.bind(this);
     this._onDocumentPointerDown = this._onDocumentPointerDown.bind(this);
-    this._onDocumentKeyDown = this._onDocumentKeyDown.bind(this);
-    this._onDocumentScroll = this._onDocumentScroll.bind(this);
+    this._onWindowResize = this._onWindowResize.bind(this);
+    this._onWindowScroll = this._onWindowScroll.bind(this);
   }
 
   override connectedCallback(): void {
@@ -723,29 +881,28 @@ export class UISelect extends ElementBase {
 
     this.root.addEventListener('click', this._onRootClick);
     this.root.addEventListener('keydown', this._onRootKeyDown as EventListener);
-    this.root.addEventListener('focusin', this._onFocusIn as EventListener);
-    this.root.addEventListener('focusout', this._onFocusOut as EventListener);
+    this.root.addEventListener('pointerdown', this._onRootPointerDown as EventListener);
+    this.root.addEventListener('pointermove', this._onRootPointerMove as EventListener, { passive: true });
     this.root.addEventListener('slotchange', this._onSlotChange as EventListener);
 
     this._observer = new MutationObserver((records) => {
-      // Ignore host-only attribute churn (for example, internal value sync).
       const hasMeaningfulOptionMutation = records.some((record) => {
-        if (record.type === 'childList') return true;
-        if (record.type !== 'attributes') return false;
-        return record.target !== this;
+        if (!(record.target instanceof HTMLElement)) return record.type === 'childList';
+        if (record.target === this) return record.type === 'childList';
+        const tag = record.target.tagName.toLowerCase();
+        return tag === 'option' || tag === 'optgroup';
       });
 
       if (!hasMeaningfulOptionMutation) return;
-
       const optionsChanged = this._syncOptionsData();
-      if (this._open && optionsChanged) this._schedulePortalRebuild();
+      if (optionsChanged && this._open) this._renderMenu();
     });
 
     this._observer.observe(this, {
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ['value', 'selected', 'disabled', 'label', 'slot', 'data-label', 'data-value']
+      attributeFilter: ['value', 'selected', 'disabled', 'label', 'slot']
     });
 
     this._attachFormRegistration();
@@ -754,42 +911,43 @@ export class UISelect extends ElementBase {
   override disconnectedCallback(): void {
     this.root.removeEventListener('click', this._onRootClick);
     this.root.removeEventListener('keydown', this._onRootKeyDown as EventListener);
-    this.root.removeEventListener('focusin', this._onFocusIn as EventListener);
-    this.root.removeEventListener('focusout', this._onFocusOut as EventListener);
+    this.root.removeEventListener('pointerdown', this._onRootPointerDown as EventListener);
+    this.root.removeEventListener('pointermove', this._onRootPointerMove as EventListener);
     this.root.removeEventListener('slotchange', this._onSlotChange as EventListener);
-
+    this._teardownOpenListeners();
     if (this._observer) {
       this._observer.disconnect();
       this._observer = null;
     }
-
     if (this._formUnregister) {
       this._formUnregister();
       this._formUnregister = null;
     }
-
-    if (this._rebuildRaf) {
-      cancelAnimationFrame(this._rebuildRaf);
-      this._rebuildRaf = 0;
-    }
-
-    this._closeMenu('programmatic');
     super.disconnectedCallback();
+  }
+
+  protected override shouldRenderOnAttributeChange(name: string): boolean {
+    return !LIVE_ATTRS.has(name);
   }
 
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
     if (name === 'name') this._attachFormRegistration();
 
-    if (this._trigger && LIVE_ATTRS.has(name)) {
-      if (name === 'placeholder' || name === 'required') this._syncOptionsData();
+    if (this._triggerEl && LIVE_ATTRS.has(name)) {
+      if (name === 'value' || name === 'placeholder' || name === 'required') {
+        this._syncOptionsData();
+        if (this._open) this._renderMenu();
+      }
+      if ((name === 'show-check' || name === 'check-placement') && this._open) {
+        this._renderMenu();
+      }
       this._syncControlState();
-      if (this._open && name !== 'value') this._syncPortalVisualState();
-      if (this._open) this._syncPortalSelectionState();
+      if (this.disabled && this._open) this._closeMenu({ restoreFocus: false });
       return;
     }
 
-    if (this.isConnected) this.requestRender();
+    super.attributeChangedCallback(name, oldValue, newValue);
   }
 
   get value(): string {
@@ -819,20 +977,52 @@ export class UISelect extends ElementBase {
     this.setAttribute('close-on-scroll', next ? 'true' : 'false');
   }
 
+  get showCheck(): boolean {
+    return isTruthyAttr(this.getAttribute('show-check'));
+  }
+
+  set showCheck(next: boolean) {
+    if (next) this.setAttribute('show-check', 'true');
+    else this.removeAttribute('show-check');
+  }
+
   focus(options?: FocusOptions): void {
-    if (this._trigger) {
-      this._trigger.focus(options);
+    if (this._triggerEl) {
+      this._triggerEl.focus(options);
       return;
     }
     super.focus(options);
   }
 
   blur(): void {
-    if (this._trigger) {
-      this._trigger.blur();
+    if (this._triggerEl) {
+      this._triggerEl.blur();
       return;
     }
     super.blur();
+  }
+
+  private _onSlotChange(): void {
+    this.requestRender();
+  }
+
+  private _onRootPointerDown(event: PointerEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+    if (target.closest('.menu-item')) {
+      event.preventDefault();
+    }
+  }
+
+  private _onRootPointerMove(event: PointerEvent): void {
+    if (!this._open) return;
+    const target = event.target as HTMLElement | null;
+    const item = target?.closest('.menu-item[data-index]') as HTMLButtonElement | null;
+    if (!item) return;
+    const index = Number(item.dataset.index || '-1');
+    const option = this._options[index];
+    if (!option || option.disabled || index === this._activeIndex) return;
+    this._setActiveIndex(index);
   }
 
   private _onRootClick(event: Event): void {
@@ -840,29 +1030,43 @@ export class UISelect extends ElementBase {
     if (!target) return;
 
     if (target.closest('.trigger')) {
-      if (this.disabled) {
-        this._closeMenu('disabled');
-        return;
-      }
-      if (this._open) this._closeMenu('programmatic');
+      if (this.disabled) return;
+      if (this._open) this._closeMenu({ restoreFocus: false });
       else this._openMenu();
+      return;
     }
+
+    const item = target.closest('.menu-item[data-index]') as HTMLButtonElement | null;
+    if (!item) return;
+
+    const index = Number(item.dataset.index || '-1');
+    const option = this._options[index];
+    if (!option || option.disabled) return;
+    this._applyValueFromUser(option.value);
+    this._closeMenu();
   }
 
   private _onRootKeyDown(event: KeyboardEvent): void {
     const target = event.target as HTMLElement | null;
-    if (!target || target !== this._trigger || this.disabled) return;
+    if (!target || (target !== this._triggerEl && !target.closest('.menu'))) return;
+    if (this.disabled) return;
 
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault();
-        if (!this._open) this._openMenu();
-        this._moveActive(1);
+        if (!this._open) {
+          this._openMenu();
+        } else {
+          this._moveActive(1);
+        }
         break;
       case 'ArrowUp':
         event.preventDefault();
-        if (!this._open) this._openMenu();
-        this._moveActive(-1);
+        if (!this._open) {
+          this._openMenu();
+        } else {
+          this._moveActive(-1);
+        }
         break;
       case 'Home':
         if (!this._open) return;
@@ -887,51 +1091,53 @@ export class UISelect extends ElementBase {
       case 'Escape':
         if (!this._open) return;
         event.preventDefault();
-        this._closeMenu('escape');
+        this._closeMenu();
         break;
       case 'Tab':
-        if (this._open) this._closeMenu('tab');
+        if (this._open) this._closeMenu({ restoreFocus: false });
         break;
       default:
         break;
     }
   }
 
-  private _onFocusIn(event: FocusEvent): void {
-    if (event.target !== this._trigger) return;
-    this.dispatchEvent(new CustomEvent('focus', { bubbles: true, composed: true }));
-  }
-
-  private _onFocusOut(event: FocusEvent): void {
-    if (event.target !== this._trigger) return;
-    this.dispatchEvent(new CustomEvent('blur', { bubbles: true, composed: true }));
-  }
-
-  private _onSlotChange(): void {
-    this.requestRender();
-  }
-
-  private _onDocumentPointerDown(event: PointerEvent): void {
+  private _onDocumentPointerDown(event: Event): void {
     if (!this._open) return;
-    const path = event.composedPath();
-    if (path.includes(this)) return;
-    if (this._portalEl && path.includes(this._portalEl)) return;
-    this._closeMenu('outside');
+    const path = typeof (event as { composedPath?: () => EventTarget[] }).composedPath === 'function'
+      ? (event as { composedPath: () => EventTarget[] }).composedPath()
+      : [];
+    if (path.includes(this) || path.includes(this.root)) return;
+    this._closeMenu({ restoreFocus: false });
   }
 
-  private _onDocumentScroll(event: Event): void {
-    if (!this._open || !this.closeOnScroll) return;
-    const path = typeof (event as any).composedPath === 'function' ? (event as any).composedPath() : [];
-    if (this._portalEl && path.includes(this._portalEl)) return;
-    this._closeMenu('outside');
-  }
-
-  private _onDocumentKeyDown(event: KeyboardEvent): void {
+  private _onWindowResize(): void {
     if (!this._open) return;
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      this._closeMenu('escape');
+    this._syncPanelPlacement();
+  }
+
+  private _onWindowScroll(event: Event): void {
+    if (!this._open) return;
+    const path = typeof (event as { composedPath?: () => EventTarget[] }).composedPath === 'function'
+      ? (event as { composedPath: () => EventTarget[] }).composedPath()
+      : [];
+    if (path.includes(this) || path.includes(this.root)) return;
+    if (this.closeOnScroll) {
+      this._closeMenu({ restoreFocus: false });
+      return;
     }
+    this._syncPanelPlacement();
+  }
+
+  private _attachOpenListeners(): void {
+    document.addEventListener('pointerdown', this._onDocumentPointerDown, true);
+    window.addEventListener('resize', this._onWindowResize, { passive: true });
+    window.addEventListener('scroll', this._onWindowScroll, true);
+  }
+
+  private _teardownOpenListeners(): void {
+    document.removeEventListener('pointerdown', this._onDocumentPointerDown, true);
+    window.removeEventListener('resize', this._onWindowResize);
+    window.removeEventListener('scroll', this._onWindowScroll, true);
   }
 
   private _emitValue(eventName: 'input' | 'change', nextValue: string): void {
@@ -946,11 +1152,10 @@ export class UISelect extends ElementBase {
 
   private _applyValueFromUser(nextValue: string): void {
     const current = this.getAttribute('value') || '';
-    if (current !== nextValue) {
-      this.setAttribute('value', nextValue);
-      this._emitValue('input', nextValue);
-      this._emitValue('change', nextValue);
-    }
+    if (current === nextValue) return;
+    this.setAttribute('value', nextValue);
+    this._emitValue('input', nextValue);
+    this._emitValue('change', nextValue);
   }
 
   private _attachFormRegistration(): void {
@@ -965,7 +1170,6 @@ export class UISelect extends ElementBase {
     const rootNode = this.getRootNode();
     const rootHost = rootNode instanceof ShadowRoot ? (rootNode.host as HTMLElement | null) : null;
     const parentForm = rootHost?.closest?.('ui-form') || this.closest('ui-form');
-
     if (!parentForm || typeof (parentForm as any).registerField !== 'function') return;
 
     this._formUnregister = (parentForm as any).registerField(name, {
@@ -996,22 +1200,32 @@ export class UISelect extends ElementBase {
     return !!this.querySelector(`[slot="${name}"]`);
   }
 
+  private _setValueAttr(next: string): void {
+    const normalized = String(next ?? '');
+    if (this.getAttribute('value') === normalized) return;
+    this.setAttribute('value', normalized);
+  }
+
   private _buildOptionsFromChildren(): SelectOption[] {
     const options: SelectOption[] = [];
 
     const pushOption = (opt: HTMLOptionElement, group: string) => {
       const label = (opt.label || opt.textContent || opt.value || '').trim();
-      const value = opt.value ?? '';
+      const value = String(opt.value ?? '');
       options.push({
-        value: String(value),
-        label: label || String(value),
+        value,
+        label: label || value,
         disabled: !!opt.disabled,
         group
       });
     };
 
-    Array.from(this.children).forEach((node) => {
-      if (!(node instanceof HTMLElement)) return;
+    const unnamedChildren = Array.from(this.children).filter((node) => {
+      if (!(node instanceof HTMLElement)) return false;
+      return !node.hasAttribute('slot');
+    });
+
+    unnamedChildren.forEach((node) => {
       const tag = node.tagName.toLowerCase();
       if (tag === 'option') {
         pushOption(node as HTMLOptionElement, '');
@@ -1019,18 +1233,25 @@ export class UISelect extends ElementBase {
       }
 
       if (tag === 'optgroup') {
-        const groupEl = node as HTMLOptGroupElement;
-        const groupLabel = (groupEl.label || groupEl.getAttribute('label') || '').trim();
-        Array.from(groupEl.children).forEach((child) => {
-          if (child instanceof HTMLOptionElement) pushOption(child, groupLabel);
+        const group = node as HTMLOptGroupElement;
+        const groupLabel = (group.label || '').trim();
+        Array.from(group.children).forEach((child) => {
+          if (!(child instanceof HTMLOptionElement)) return;
+          options.push({
+            value: String(child.value ?? ''),
+            label: (child.label || child.textContent || child.value || '').trim() || String(child.value ?? ''),
+            disabled: !!child.disabled || !!group.disabled,
+            group: groupLabel
+          });
         });
       }
     });
 
-    const required = isTruthyAttr(this.getAttribute('required')) || this.hasAttribute('required');
     const placeholder = (this.getAttribute('placeholder') || '').trim();
+    const required = isTruthyAttr(this.getAttribute('required')) || this.hasAttribute('required');
+    const hasExplicitEmptyValue = options.some((option) => option.value === '');
 
-    if (placeholder && !required) {
+    if (placeholder && !required && !hasExplicitEmptyValue) {
       options.unshift({ value: '', label: placeholder, disabled: false, group: '' });
     }
 
@@ -1038,84 +1259,23 @@ export class UISelect extends ElementBase {
   }
 
   private _computeOptionsFingerprint(options: SelectOption[]): string {
-    if (!options.length) return '';
-    return options
-      .map((option) => `${option.value}\u0001${option.label}\u0001${option.disabled ? '1' : '0'}\u0001${option.group}`)
-      .join('\u0002');
-  }
-
-  private _schedulePortalRebuild(): void {
-    if (!this._open || this._rebuildRaf) return;
-    this._rebuildRaf = requestAnimationFrame(() => {
-      this._rebuildRaf = 0;
-      if (this._open) this._rebuildPortal();
-    });
+    return options.map((option) => `${option.value}\u0001${option.label}\u0001${option.disabled ? '1' : '0'}\u0001${option.group}`).join('\u0002');
   }
 
   private _firstEnabledIndex(): number {
-    return this._options.findIndex((opt) => !opt.disabled);
+    return findFirstEnabledIndex(this._options, (option) => option.disabled);
   }
 
   private _lastEnabledIndex(): number {
-    for (let i = this._options.length - 1; i >= 0; i -= 1) {
-      if (!this._options[i]?.disabled) return i;
-    }
-    return -1;
+    return findLastEnabledIndex(this._options, (option) => option.disabled);
   }
 
   private _selectedIndex(): number {
-    const current = this.value;
-    return this._options.findIndex((opt) => opt.value === current);
+    return findIndexByValue(this._options, this.value, (option) => option.value);
   }
 
-  private _nextEnabledFrom(from: number, step: 1 | -1): number {
-    if (!this._options.length) return -1;
-
-    let cursor = from;
-    for (let i = 0; i < this._options.length; i += 1) {
-      cursor += step;
-      if (cursor < 0) cursor = this._options.length - 1;
-      if (cursor >= this._options.length) cursor = 0;
-      const option = this._options[cursor];
-      if (option && !option.disabled) return cursor;
-    }
-
-    return -1;
-  }
-
-  private _setActiveIndex(index: number): void {
-    if (index === this._activeIndex) return;
-
-    const previousIndex = this._activeIndex;
-    this._activeIndex = index;
-
-    const previousItem = previousIndex >= 0 ? this._menuItems[previousIndex] : null;
-    if (previousItem) previousItem.removeAttribute('data-active');
-
-    const activeItem = index >= 0 ? this._menuItems[index] : null;
-    if (activeItem) {
-      activeItem.setAttribute('data-active', 'true');
-      activeItem.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-      this._trigger?.setAttribute('aria-activedescendant', activeItem.id);
-    } else {
-      this._trigger?.removeAttribute('aria-activedescendant');
-    }
-  }
-
-  private _moveActive(step: 1 | -1): void {
-    if (!this._options.length) return;
-
-    const start = this._activeIndex >= 0 ? this._activeIndex : this._selectedIndex();
-    const next = this._nextEnabledFrom(start >= 0 ? start : step < 0 ? 0 : -1, step);
-    if (next >= 0) this._setActiveIndex(next);
-  }
-
-  private _selectActiveOption(): void {
-    if (this._activeIndex < 0) return;
-    const option = this._options[this._activeIndex];
-    if (!option || option.disabled) return;
-    this._applyValueFromUser(option.value);
-    this._closeMenu('select');
+  private _checkPlacement(): 'start' | 'end' {
+    return this.getAttribute('check-placement') === 'start' ? 'start' : 'end';
   }
 
   private _syncOptionsData(): boolean {
@@ -1126,104 +1286,79 @@ export class UISelect extends ElementBase {
     this._options = nextOptions;
     this._optionsFingerprint = nextFingerprint;
 
-    const hasValueAttr = this.hasAttribute('value');
     const current = this.getAttribute('value') || '';
+    const hasValueAttr = this.hasAttribute('value');
+    const hasMatch = this._options.some((option) => option.value === current);
     const required = isTruthyAttr(this.getAttribute('required')) || this.hasAttribute('required');
-    const placeholder = (this.getAttribute('placeholder') || '').trim();
-
-    const hasMatch = this._options.some((opt) => opt.value === current);
+    const firstEnabled = this._options.find((option) => !option.disabled)?.value || '';
+    const fallback = !required && this._options.some((option) => option.value === '') ? '' : firstEnabled;
 
     if (!hasValueAttr) {
-      const fallback = placeholder ? '' : (this._options.find((opt) => !opt.disabled)?.value || '');
-      this.setAttribute('value', fallback);
+      this._setValueAttr(fallback);
     } else if (!hasMatch) {
-      const fallback = !required ? '' : (this._options.find((opt) => !opt.disabled)?.value || '');
-      if (current !== fallback) this.setAttribute('value', fallback);
+      this._setValueAttr(fallback);
     }
 
-    if (this._open) this._syncPortalSelectionState();
     return optionsChanged;
   }
 
   private _currentDisplayText(): string {
     const value = this.value;
     const placeholder = (this.getAttribute('placeholder') || '').trim();
-
     if (value === '' && placeholder) return placeholder;
-
-    const selected = this._options.find((opt) => opt.value === value);
-    if (selected) return selected.label;
-
-    return value;
+    const selected = this._options.find((option) => option.value === value);
+    return selected?.label || value;
   }
 
-  private _syncControlState(): void {
-    const trigger = this._trigger;
-    const control = this._control;
-    const valueEl = this._valueEl;
-    if (!trigger || !control || !valueEl) return;
+  private _setActiveIndex(index: number): void {
+    if (!this._menuEl) return;
+    if (index === this._activeIndex) return;
 
-    const labelAttr = this.getAttribute('label') || '';
-    const ariaLabel = this.getAttribute('aria-label') || labelAttr || 'Select';
-    const loading = isTruthyAttr(this.getAttribute('loading'));
-    const required = isTruthyAttr(this.getAttribute('required')) || this.hasAttribute('required');
-    const tabindex = this.getAttribute('tabindex');
-    const isInvalid =
-      (this.hasAttribute('validation') && this.getAttribute('validation') === 'error') ||
-      this.hasAttribute('invalid') ||
-      this.getAttribute('data-invalid') === 'true';
-
-    const displayValue = this._currentDisplayText();
-    const placeholder = (this.getAttribute('placeholder') || '').trim();
-    const isPlaceholderShown = !!placeholder && this.value === '';
-
-    valueEl.textContent = displayValue;
-    control.setAttribute('data-placeholder-shown', isPlaceholderShown ? 'true' : 'false');
-    control.setAttribute('data-open', this._open ? 'true' : 'false');
-
-    trigger.disabled = this.disabled;
-    trigger.setAttribute('aria-label', ariaLabel);
-    trigger.setAttribute('aria-expanded', this._open ? 'true' : 'false');
-    trigger.setAttribute('aria-busy', loading ? 'true' : 'false');
-    trigger.setAttribute('aria-required', required ? 'true' : 'false');
-
-    if (isInvalid) trigger.setAttribute('aria-invalid', 'true');
-    else trigger.removeAttribute('aria-invalid');
-
-    if (tabindex != null && !this.disabled) trigger.setAttribute('tabindex', tabindex);
-    else if (!this.disabled) trigger.setAttribute('tabindex', '0');
-    else trigger.setAttribute('tabindex', '-1');
-
-    this.setAttribute('aria-disabled', this.disabled ? 'true' : 'false');
-    this.setAttribute('aria-busy', loading ? 'true' : 'false');
-  }
-
-  private _applyPortalTokens(menu: HTMLElement): void {
-    const computed = window.getComputedStyle(this);
-    SELECT_TOKEN_NAMES.forEach((token) => {
-      const value = computed.getPropertyValue(token).trim();
-      if (value) menu.style.setProperty(token, value);
-      else menu.style.removeProperty(token);
+    this._activeIndex = index;
+    const item = index >= 0 ? this._menuItems[index] || null : null;
+    this._menuEl.setActiveItem(item, {
+      focus: false,
+      owner: this._triggerEl,
+      scroll: true
     });
   }
 
-  private _buildPortalContent(): HTMLElement {
-    const menu = document.createElement('div');
-    menu.className = 'menu';
-    menu.id = `${this._uid}-listbox`;
-    menu.setAttribute('role', 'listbox');
-    this._menuItems = [];
+  private _moveActive(step: 1 | -1): void {
+    if (!this._menuEl || !this._options.length) return;
+    const current = this._activeIndex >= 0 ? this._menuItems[this._activeIndex] : null;
+    const moved = this._menuEl.move(step, {
+      current,
+      focus: false,
+      owner: this._triggerEl,
+      scroll: true
+    }) as HTMLButtonElement | null;
+    if (!moved) return;
+    const next = Number(moved.dataset.index || '-1');
+    if (next >= 0) this._activeIndex = next;
+  }
 
-    const styleEl = document.createElement('style');
-    styleEl.textContent = menuStyle;
-    menu.appendChild(styleEl);
+  private _selectActiveOption(): void {
+    if (this._activeIndex < 0) return;
+    const option = this._options[this._activeIndex];
+    if (!option || option.disabled) return;
+    this._applyValueFromUser(option.value);
+    this._closeMenu();
+  }
+
+  private _renderMenu(): void {
+    const menu = this._menuEl;
+    if (!menu) return;
+
+    menu.replaceChildren();
+    this._menuItems = [];
 
     if (!this._options.length) {
       const empty = document.createElement('p');
       empty.className = 'menu-empty';
       empty.textContent = 'No options available';
       menu.appendChild(empty);
-      return menu;
+      menu.refresh();
+      return;
     }
 
     let previousGroup = '__none__';
@@ -1245,6 +1380,7 @@ export class UISelect extends ElementBase {
       item.id = `${this._uid}-opt-${index}`;
       item.setAttribute('role', 'option');
       item.setAttribute('data-index', String(index));
+      item.setAttribute('data-value', option.value);
       item.setAttribute('aria-selected', option.value === this.value ? 'true' : 'false');
       item.setAttribute('aria-disabled', option.disabled ? 'true' : 'false');
       item.tabIndex = -1;
@@ -1257,151 +1393,175 @@ export class UISelect extends ElementBase {
       const check = document.createElement('span');
       check.className = 'menu-item-check';
       check.setAttribute('aria-hidden', 'true');
+      const showCheck = this.showCheck;
+      const checkPlacement = this._checkPlacement();
+      check.hidden = !showCheck;
+      item.setAttribute('data-check-placement', checkPlacement);
 
-      item.appendChild(label);
-      item.appendChild(check);
-
+      if (showCheck && checkPlacement === 'start') {
+        item.append(check, label);
+      } else {
+        item.append(label, check);
+      }
       menu.appendChild(item);
       this._menuItems.push(item);
     });
 
-    menu.addEventListener('click', (event) => {
-      const target = event.target as HTMLElement | null;
-      const item = target?.closest('.menu-item[data-index]') as HTMLButtonElement | null;
-      if (!item) return;
+    const firstItem = this._menuItems[0] || null;
+    const lastItem = this._menuItems[this._menuItems.length - 1] || null;
+    if (firstItem) firstItem.setAttribute('data-edge-start', 'true');
+    if (lastItem) lastItem.setAttribute('data-edge-end', 'true');
 
-      const index = Number(item.dataset.index || '-1');
-      const option = this._options[index];
-      if (!option || option.disabled) return;
-
-      this._setActiveIndex(index);
-      this._applyValueFromUser(option.value);
-      this._closeMenu('select');
-      this.focus();
-    });
-
-    menu.addEventListener(
-      'pointermove',
-      (event) => {
-        const target = event.target as HTMLElement | null;
-        const item = target?.closest('.menu-item[data-index]') as HTMLButtonElement | null;
-        if (!item) return;
-
-        const index = Number(item.dataset.index || '-1');
-        if (index < 0 || index === this._activeIndex) return;
-
-        const option = this._options[index];
-        if (!option || option.disabled) return;
-        this._setActiveIndex(index);
-      },
-      { passive: true }
-    );
-
-    return menu;
+    menu.refresh();
+    this._syncMenuSelectionState();
+    this._syncPanelPlacement();
   }
 
-  private _syncPortalSelectionState(): void {
-    const menu = this._portalEl;
-    if (!menu) return;
-
+  private _syncMenuSelectionState(): void {
+    if (!this._menuEl) return;
     const selectedIndex = this._selectedIndex();
+
     this._menuItems.forEach((item) => {
       const index = Number(item.dataset.index || '-1');
-      const isSelected = index === selectedIndex;
-      item.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+      item.setAttribute('aria-selected', index === selectedIndex ? 'true' : 'false');
     });
 
-    if (selectedIndex >= 0) this._setActiveIndex(selectedIndex);
-    else this._setActiveIndex(this._firstEnabledIndex());
+    this._activeIndex = resolveListboxActiveIndex(this._options, {
+      selectedIndex,
+      getDisabled: (option) => option.disabled
+    });
+    const activeItem = this._activeIndex >= 0 ? this._menuItems[this._activeIndex] || null : null;
+    this._menuEl.setActiveItem(activeItem, {
+      focus: false,
+      owner: this._triggerEl,
+      scroll: true
+    });
   }
 
-  private _syncPortalVisualState(): void {
-    const menu = this._portalEl;
-    const trigger = this._trigger;
-    if (!menu || !trigger) return;
+  private _syncPanelPlacement(): void {
+    const panel = this._panelEl;
+    const control = this._controlEl;
+    const menu = this._menuEl;
+    if (!panel || !control || !menu || !this._open) return;
 
-    this._applyPortalTokens(menu);
-    const anchor = this._control || trigger;
-    const anchorWidth = Math.round(anchor.getBoundingClientRect().width);
-    menu.style.width = `${Math.max(anchorWidth, 180)}px`;
+    const controlRect = control.getBoundingClientRect();
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+    const belowSpace = Math.max(0, viewportHeight - controlRect.bottom - 12);
+    const aboveSpace = Math.max(0, controlRect.top - 12);
+    const menuHeight = Math.min(Math.max(menu.scrollHeight, menu.offsetHeight) + 4, 320);
+    const placeTop = belowSpace < menuHeight && aboveSpace > belowSpace;
+
+    this._placement = placeTop ? 'top' : 'bottom';
+    panel.setAttribute('data-placement', this._placement);
+    panel.style.setProperty('--ui-select-available-height', `${Math.floor(placeTop ? aboveSpace : belowSpace)}px`);
   }
 
   private _openMenu(): void {
     if (this._open || this.disabled) return;
-
     this._syncOptionsData();
-    const trigger = this._trigger;
-    if (!trigger) return;
-    const anchor = this._control || trigger;
-
-    this._closeMenu('programmatic');
-
-    const menu = this._buildPortalContent();
-    this._portalEl = menu;
-    this._applyPortalTokens(menu);
-
-    const anchorWidth = Math.round(anchor.getBoundingClientRect().width);
-    menu.style.width = `${Math.max(anchorWidth, 180)}px`;
-
-    const cleanup = showPortalFor(anchor, menu, {
-      placement: 'bottom',
-      offset: 6,
-      flip: true,
-      shift: true
-    });
-
-    this._cleanup = typeof cleanup === 'function' ? cleanup : null;
     this._open = true;
-
-    window.addEventListener('pointerdown', this._onDocumentPointerDown, true);
-    window.addEventListener('keydown', this._onDocumentKeyDown, true);
-    window.addEventListener('scroll', this._onDocumentScroll, true);
-
-    this._syncPortalSelectionState();
     this._syncControlState();
+    this._renderMenu();
+    this._attachOpenListeners();
   }
 
-  private _closeMenu(_reason: CloseReason): void {
-    if (!this._open && !this._portalEl && !this._cleanup) return;
-
-    if (this._rebuildRaf) {
-      cancelAnimationFrame(this._rebuildRaf);
-      this._rebuildRaf = 0;
-    }
-
-    window.removeEventListener('pointerdown', this._onDocumentPointerDown, true);
-    window.removeEventListener('keydown', this._onDocumentKeyDown, true);
-    window.removeEventListener('scroll', this._onDocumentScroll, true);
-
-    this._open = false;
-
-    if (this._cleanup) {
-      try {
-        this._cleanup();
-      } catch {
-        // no-op
-      }
-      this._cleanup = null;
-    } else if (this._portalEl?.parentElement) {
-      try {
-        this._portalEl.parentElement.removeChild(this._portalEl);
-      } catch {
-        // no-op
-      }
-    }
-
-    this._portalEl = null;
-    this._menuItems = [];
-    this._activeIndex = -1;
-    this._syncControlState();
-  }
-
-  private _rebuildPortal(): void {
+  private _closeMenu(options: { restoreFocus?: boolean } = {}): void {
     if (!this._open) return;
+    this._open = false;
+    this._activeIndex = -1;
+    this._teardownOpenListeners();
+    this._syncControlState();
 
-    const wasOpen = this._open;
-    this._closeMenu('programmatic');
-    if (wasOpen) this._openMenu();
+    if (options.restoreFocus !== false) {
+      try {
+        this._triggerEl?.focus({ preventScroll: true });
+      } catch {
+        this._triggerEl?.focus();
+      }
+    }
+  }
+
+  private _syncControlState(): void {
+    const trigger = this._triggerEl;
+    const control = this._controlEl;
+    const valueEl = this._valueEl;
+    const panel = this._panelEl;
+    if (!trigger || !control || !valueEl || !panel) return;
+
+    const labelAttr = this.getAttribute('label') || '';
+    const descriptionAttr = this.getAttribute('description') || '';
+    const errorAttr = this.getAttribute('error') || '';
+    const ariaLabel = this.getAttribute('aria-label') || labelAttr || 'Select';
+    const loading = isTruthyAttr(this.getAttribute('loading'));
+    const required = isTruthyAttr(this.getAttribute('required')) || this.hasAttribute('required');
+    const tabindex = this.getAttribute('tabindex');
+    const isInvalid =
+      (this.hasAttribute('validation') && this.getAttribute('validation') === 'error') ||
+      this.hasAttribute('invalid') ||
+      this.getAttribute('data-invalid') === 'true';
+    const customRadius = normalizeLengthValue(this.getAttribute('radius'));
+
+    const labelEl = this.root.querySelector('.label') as HTMLElement | null;
+    const labelText = this.root.querySelector('.label-text') as HTMLElement | null;
+    const descriptionEl = this.root.querySelector('.description') as HTMLElement | null;
+    const descriptionText = this.root.querySelector('.description-text') as HTMLElement | null;
+    const errorEl = this.root.querySelector('.error') as HTMLElement | null;
+    const errorText = this.root.querySelector('.error-text') as HTMLElement | null;
+    const metaEl = this.root.querySelector('.meta') as HTMLElement | null;
+    const requiredEl = this.root.querySelector('.required') as HTMLElement | null;
+
+    const hasLabel = !!labelAttr || this._hasSlotContent('label');
+    const hasDescription = !!descriptionAttr || this._hasSlotContent('description');
+    const hasError = !!errorAttr || this._hasSlotContent('error');
+    const hasLeading = this._hasSlotContent('leading');
+    const hasTrailing = this._hasSlotContent('trailing');
+    const placeholder = (this.getAttribute('placeholder') || '').trim();
+    const isPlaceholderShown = !!placeholder && this.value === '';
+
+    if (labelText) labelText.textContent = labelAttr;
+    if (descriptionText) descriptionText.textContent = descriptionAttr;
+    if (errorText) errorText.textContent = errorAttr;
+
+    if (labelEl) labelEl.hidden = !hasLabel;
+    if (descriptionEl) descriptionEl.hidden = !hasDescription;
+    if (errorEl) errorEl.hidden = !hasError;
+    if (metaEl) metaEl.hidden = !hasLabel && !hasDescription;
+    if (requiredEl) requiredEl.hidden = !required;
+
+    valueEl.textContent = this._currentDisplayText();
+    control.setAttribute('data-open', this._open ? 'true' : 'false');
+    control.setAttribute('data-placeholder-shown', isPlaceholderShown ? 'true' : 'false');
+    control.setAttribute('data-has-leading', String(hasLeading));
+    control.setAttribute('data-has-trailing', String(hasTrailing));
+
+    trigger.disabled = this.disabled;
+    trigger.setAttribute('aria-label', ariaLabel);
+    trigger.setAttribute('aria-expanded', this._open ? 'true' : 'false');
+    trigger.setAttribute('aria-busy', loading ? 'true' : 'false');
+    trigger.setAttribute('aria-required', required ? 'true' : 'false');
+
+    if (isInvalid) trigger.setAttribute('aria-invalid', 'true');
+    else trigger.removeAttribute('aria-invalid');
+
+    if (tabindex != null && !this.disabled) trigger.setAttribute('tabindex', tabindex);
+    else if (!this.disabled) trigger.setAttribute('tabindex', '0');
+    else trigger.setAttribute('tabindex', '-1');
+
+    panel.hidden = !this._open;
+    panel.setAttribute('data-placement', this._placement);
+    if (this._open) trigger.setAttribute('aria-controls', `${this._uid}-listbox`);
+    else trigger.removeAttribute('aria-controls');
+
+    if (customRadius && !['none', 'full', 'large'].includes(this.getAttribute('radius') || '')) {
+      this.style.setProperty('--ui-select-radius', customRadius);
+    } else {
+      this.style.removeProperty('--ui-select-radius');
+    }
+
+    this.setAttribute('aria-disabled', this.disabled ? 'true' : 'false');
+    this.setAttribute('aria-busy', loading ? 'true' : 'false');
+    this.toggleAttribute('open', this._open);
+    if (this._open) this._syncPanelPlacement();
   }
 
   protected override render(): void {
@@ -1422,66 +1582,73 @@ export class UISelect extends ElementBase {
     const errorId = `${this._uid}-error`;
     const triggerId = `${this._uid}-trigger`;
     const listboxId = `${this._uid}-listbox`;
-
     const describedBy = [hasDescription ? descriptionId : '', hasError ? errorId : ''].filter(Boolean).join(' ');
 
     this.setContent(`
       <style>${style}</style>
+      <slot class="content-slot"></slot>
       <div class="root" part="root">
         <div class="meta" part="meta" ${hasLabel || hasDescription ? '' : 'hidden'}>
           <label class="label" part="label" id="${labelId}" for="${triggerId}" ${hasLabel ? '' : 'hidden'}>
-            <slot name="label">${escapeHtml(labelAttr)}</slot>
-            ${required ? '<span class="required" aria-hidden="true">*</span>' : ''}
+            <slot name="label"><span class="label-text">${escapeHtml(labelAttr)}</span></slot>
+            <span class="required" aria-hidden="true" ${required ? '' : 'hidden'}>*</span>
           </label>
           <p class="description" part="description" id="${descriptionId}" ${hasDescription ? '' : 'hidden'}>
-            <slot name="description">${escapeHtml(descriptionAttr)}</slot>
+            <slot name="description"><span class="description-text">${escapeHtml(descriptionAttr)}</span></slot>
           </p>
         </div>
-        <div class="control" part="control" data-has-leading="${hasLeading}" data-has-trailing="${hasTrailing}" data-placeholder-shown="false" data-open="false">
-          <span class="leading" part="leading" ${hasLeading ? '' : 'hidden'}>
-            <slot name="leading"></slot>
-          </span>
-          <button
-            id="${triggerId}"
-            type="button"
-            class="trigger"
-            part="trigger"
-            role="combobox"
-            aria-haspopup="listbox"
-            aria-controls="${listboxId}"
-            aria-expanded="false"
-            aria-label="${escapeHtml(ariaLabel)}"
-            ${hasLabel ? `aria-labelledby="${labelId}"` : ''}
-            ${describedBy ? `aria-describedby="${escapeHtml(describedBy)}"` : ''}
-          >
-            <span class="value" part="value"></span>
-          </button>
-          <span class="trailing" part="trailing" ${hasTrailing ? '' : 'hidden'}>
-            <slot name="trailing"></slot>
-          </span>
-          <span class="indicator" part="indicator" aria-hidden="true"></span>
-          <span class="spinner" part="spinner" aria-hidden="true"></span>
+        <div class="field-shell" part="field-shell">
+          <div class="control" part="control" data-has-leading="${hasLeading}" data-has-trailing="${hasTrailing}" data-open="false">
+            <span class="leading" part="leading" ${hasLeading ? '' : 'hidden'}>
+              <slot name="leading"></slot>
+            </span>
+            <button
+              id="${triggerId}"
+              type="button"
+              class="trigger native"
+              part="trigger"
+              role="combobox"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+              aria-label="${escapeHtml(ariaLabel)}"
+              ${hasLabel ? `aria-labelledby="${labelId}"` : ''}
+              ${describedBy ? `aria-describedby="${escapeHtml(describedBy)}"` : ''}
+            >
+              <span class="value" part="value"></span>
+            </button>
+            <span class="trailing" part="trailing" ${hasTrailing ? '' : 'hidden'}>
+              <slot name="trailing"></slot>
+            </span>
+            <span class="indicator" part="indicator" aria-hidden="true"></span>
+            <span class="spinner" part="spinner" aria-hidden="true"></span>
+          </div>
+          <div class="panel" part="panel" hidden data-placement="bottom">
+            <ui-listbox
+              id="${listboxId}"
+              class="menu"
+              role="listbox"
+              item-selector=".menu-item[data-index]"
+              item-role="option"
+              active-attribute="data-active"
+            ></ui-listbox>
+          </div>
         </div>
         <p class="error" part="error" id="${errorId}" ${hasError ? '' : 'hidden'}>
-          <slot name="error">${escapeHtml(errorAttr)}</slot>
+          <slot name="error"><span class="error-text">${escapeHtml(errorAttr)}</span></slot>
         </p>
       </div>
     `);
 
-    this._control = this.root.querySelector('.control') as HTMLElement | null;
-    this._trigger = this.root.querySelector('.trigger') as HTMLButtonElement | null;
+    this._controlEl = this.root.querySelector('.control') as HTMLElement | null;
+    this._triggerEl = this.root.querySelector('.trigger') as HTMLButtonElement | null;
     this._valueEl = this.root.querySelector('.value') as HTMLElement | null;
+    this._panelEl = this.root.querySelector('.panel') as HTMLElement | null;
+    this._menuEl = this.root.querySelector('.menu') as UIListbox | null;
 
     this._syncOptionsData();
+    this._renderMenu();
+    if (!this._open && this._panelEl) this._panelEl.hidden = true;
     this._syncControlState();
-  }
-
-  protected override shouldRenderOnAttributeChange(
-    name: string,
-    _oldValue: string | null,
-    _newValue: string | null
-  ): boolean {
-    return name === 'label' || name === 'description' || name === 'error';
   }
 }
 

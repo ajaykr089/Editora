@@ -16,8 +16,7 @@ const style = `
     --ui-pagination-muted: var(--ui-color-muted, #64748b);
     --ui-pagination-padding: 6px 11px;
     --ui-pagination-font-size: 13px;
-    --ui-pagination-shadow:
-      none;
+    --ui-pagination-shadow: none;
     color-scheme: light dark;
   }
 
@@ -91,6 +90,11 @@ const style = `
     --ui-pagination-font-size: 14px;
   }
 
+  :host([variant="classic"]) .pagination {
+    background: var(--ui-pagination-bg);
+  }
+
+  :host([variant="flat"]) .pagination,
   :host([variant="minimal"]) .pagination {
     border-color: transparent;
     background: transparent;
@@ -98,6 +102,45 @@ const style = `
     padding: 0;
   }
 
+  :host([variant="flat"]) button,
+  :host([variant="minimal"]) button {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+    min-width: 30px;
+  }
+
+  :host([variant="flat"]) button:hover:not(:disabled),
+  :host([variant="minimal"]) button:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, transparent);
+    border-color: transparent;
+  }
+
+  :host([variant="flat"]) button[aria-current="page"],
+  :host([variant="minimal"]) button[aria-current="page"] {
+    background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 16%, transparent);
+    color: var(--ui-color-primary, #2563eb);
+    border-color: transparent;
+  }
+
+  :host([variant="outline"]) .pagination {
+    background: transparent;
+    border-color: var(--ui-pagination-border);
+    box-shadow: none;
+  }
+
+  :host([variant="outline"]) button {
+    background: var(--ui-color-surface, #ffffff);
+    border-color: var(--ui-pagination-border);
+  }
+
+  :host([variant="outline"]) button[aria-current="page"] {
+    background: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, var(--ui-color-surface, #ffffff));
+    color: var(--ui-color-primary, #2563eb);
+    border-color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 45%, var(--ui-pagination-border));
+  }
+
+  :host([variant="solid"]),
   :host([variant="contrast"]) {
     --ui-pagination-bg: #0f172a;
     --ui-pagination-item-bg: #111827;
@@ -108,6 +151,16 @@ const style = `
     --ui-pagination-active-bg: #93c5fd;
     --ui-pagination-active-color: #0f172a;
     --ui-pagination-shadow: none;
+  }
+
+  :host([variant="solid"]) .pagination,
+  :host([variant="contrast"]) .pagination {
+    padding: 8px;
+  }
+
+  :host([variant="solid"]) button,
+  :host([variant="contrast"]) button {
+    border-color: transparent;
   }
 
   :host([headless]) .pagination { display: none; }
@@ -160,6 +213,26 @@ export class UIPagination extends ElementBase {
     this._onKeyDown = this._onKeyDown.bind(this);
   }
 
+  get page(): number {
+    return this._page;
+  }
+
+  set page(next: number) {
+    this.goToPage(next);
+  }
+
+  get count(): number {
+    return this._count;
+  }
+
+  set count(next: number) {
+    const normalized = Math.max(1, Number(next) || 1);
+    this.setAttribute('count', String(normalized));
+    if (this._page > normalized) {
+      this.setAttribute('page', String(normalized));
+    }
+  }
+
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
     if (name === 'page' || name === 'count' || name === 'headless') {
       this._page = Math.max(1, Number(this.getAttribute('page')) || 1);
@@ -210,6 +283,33 @@ export class UIPagination extends ElementBase {
     }
   }
 
+  goToPage(next: number): void {
+    const page = Math.max(1, Math.min(this._count, Number(next) || 1));
+    if (page === this._page) return;
+    this._applyPageChange(page);
+  }
+
+  nextPage(): void {
+    this.goToPage(this._page + 1);
+  }
+
+  prevPage(): void {
+    this.goToPage(this._page - 1);
+  }
+
+  firstPage(): void {
+    this.goToPage(1);
+  }
+
+  lastPage(): void {
+    this.goToPage(this._count);
+  }
+
+  focusCurrent(): void {
+    const current = this.root.querySelector('button[aria-current="page"]') as HTMLElement | null;
+    current?.focus();
+  }
+
   private _getPageRange(page: number, count: number): [number, number] {
     if (count <= 5) return [1, count];
     if (page <= 3) return [1, 5];
@@ -222,15 +322,7 @@ export class UIPagination extends ElementBase {
     if (!btn || btn.hasAttribute('disabled')) return;
     const page = Number(btn.getAttribute('data-page'));
     if (isNaN(page) || page < 1 || page > this._count || page === this._page) return;
-    const type =
-      page === 1 && this._page !== 1 ? 'first'
-      : page === this._count && this._page !== this._count ? 'last'
-      : page === this._page - 1 ? 'prev'
-      : page === this._page + 1 ? 'next'
-      : 'change';
-    this.setAttribute('page', String(page));
-    this.dispatchEvent(new CustomEvent(type, { detail: { page }, bubbles: true }));
-    this.dispatchEvent(new CustomEvent('change', { detail: { page }, bubbles: true }));
+    this._applyPageChange(page);
   }
 
   private _onKeyDown(e: KeyboardEvent) {
@@ -254,6 +346,31 @@ export class UIPagination extends ElementBase {
       (buttons[buttons.length - 1] as HTMLElement).focus();
       e.preventDefault();
     }
+  }
+
+  private _applyPageChange(nextPage: number): void {
+    const previousPage = this._page;
+    const page = Math.max(1, Math.min(this._count, Number(nextPage) || 1));
+    if (page === previousPage) return;
+
+    const reason =
+      page === 1 && previousPage !== 1 ? 'first'
+      : page === this._count && previousPage !== this._count ? 'last'
+      : page === previousPage - 1 ? 'prev'
+      : page === previousPage + 1 ? 'next'
+      : 'change';
+
+    this.setAttribute('page', String(page));
+
+    const detail = {
+      page,
+      previousPage,
+      count: this._count,
+      reason
+    };
+
+    this.dispatchEvent(new CustomEvent(reason, { detail, bubbles: true, composed: true }));
+    this.dispatchEvent(new CustomEvent('change', { detail, bubbles: true, composed: true }));
   }
 }
 

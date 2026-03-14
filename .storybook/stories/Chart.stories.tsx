@@ -27,6 +27,9 @@ const meta: Meta<typeof Chart> = {
     showLegend: { control: 'boolean' },
     showSummary: { control: 'boolean' },
     disabled: { control: 'boolean' },
+    valuePrefix: { control: 'text' },
+    valueSuffix: { control: 'text' },
+    series: { control: false },
   },
 };
 
@@ -57,6 +60,49 @@ const allocationSeries = [
   { label: 'Pharmacy', value: 15, tone: '#d97706' },
   { label: 'Labs', value: 10, tone: '#dc2626' },
 ];
+
+const executiveSeries = [
+  {
+    name: 'New MRR',
+    tone: '#2f7ef7',
+    fill: true,
+    data: [
+      { label: 'May', value: 10 },
+      { label: 'Jun', value: 13 },
+      { label: 'Jul', value: 14 },
+      { label: 'Aug', value: 13 },
+      { label: 'Sep', value: 18 },
+      { label: 'Oct', value: 22 },
+      { label: 'Nov', value: 21 },
+      { label: 'Dec', value: 18 },
+      { label: 'Jan', value: 19 },
+      { label: 'Feb', value: 24 },
+      { label: 'Mar', value: 30 },
+      { label: 'Apr', value: 38 },
+    ],
+  },
+  {
+    name: 'Earnings',
+    tone: '#8cc6ff',
+    fill: false,
+    strokeWidth: 1.4,
+    opacity: 0.95,
+    data: [
+      { label: 'May', value: 6 },
+      { label: 'Jun', value: 8 },
+      { label: 'Jul', value: 14 },
+      { label: 'Aug', value: 10 },
+      { label: 'Sep', value: 11 },
+      { label: 'Oct', value: 12 },
+      { label: 'Nov', value: 15 },
+      { label: 'Dec', value: 13 },
+      { label: 'Jan', value: 12 },
+      { label: 'Feb', value: 17 },
+      { label: 'Mar', value: 26 },
+      { label: 'Apr', value: 34 },
+    ],
+  },
+] as const;
 
 function EnterpriseChartDashboard() {
   const [state, setState] = React.useState<'idle' | 'loading' | 'error' | 'success'>('idle');
@@ -237,6 +283,40 @@ function EnterpriseChartDashboard() {
 
 export const EnterpriseAnalytics = EnterpriseChartDashboard;
 
+export const ExecutiveComparison = () => (
+  <Box style={{ maxInlineSize: 1180 }}>
+    <Chart.Root
+      type="area"
+      series={executiveSeries as any}
+      showSummary={false}
+      showLegend
+      valueSuffix="%"
+      onPointSelect={(detail) => {
+        toastAdvanced.info(`${detail.label} selected`, { duration: 800, theme: 'light' });
+      }}
+    >
+      <Chart.Title>Revenue comparison</Chart.Title>
+      <Chart.Subtitle>01 May 2023 - 30 Apr 2024</Chart.Subtitle>
+      <Chart.Header
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          flexWrap: 'wrap',
+        }}
+      >
+        <Flex align="center" style={{ gap: 8, flexWrap: 'wrap' }}>
+          <Button size="sm" variant="secondary">Users</Button>
+          <Button size="sm" variant="ghost">Last 12 months</Button>
+          <Button size="sm" variant="ghost">All teams</Button>
+        </Flex>
+        <Button size="sm" variant="ghost">01 May 2023 - 30 Apr 2024</Button>
+      </Chart.Header>
+    </Chart.Root>
+  </Box>
+);
+
 const PlaygroundTemplate = (args: Record<string, unknown>) => (
   <Box style={{ maxInlineSize: 860 }}>
     <Chart
@@ -260,6 +340,7 @@ Playground.args = {
   showLegend: true,
   showSummary: true,
   disabled: false,
+  valueSuffix: '',
 };
 
 export const Contrast = () => (

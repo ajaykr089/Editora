@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta } from '@storybook/react';
-import { Alert, Box, Button, Flex, Grid } from '@editora/ui-react';
+import { Alert, AlertActions, AlertDescription, AlertIcon, AlertTitle, Box, Button, Flex, Grid } from '@editora/ui-react';
 import { EditoraEditor } from '@editora/editor';
 import { toastAdvanced } from '@editora/toast';
 import {
@@ -26,6 +26,87 @@ const meta: Meta<typeof Alert> = {
 };
 
 export default meta;
+
+function DemoAlert(props: React.ComponentProps<typeof Alert>) {
+  return (
+    <Alert {...props}>
+      <AlertTitle>Deployment notice</AlertTitle>
+      <AlertDescription>Production rollout windows have shifted by 20 minutes for the eu-west cluster.</AlertDescription>
+      <AlertActions style={{ display: 'inline-flex', gap: 8, flexWrap: 'wrap' }}>
+        <Button size="sm" variant="secondary">
+          Review plan
+        </Button>
+        <Button size="sm">Acknowledge</Button>
+      </AlertActions>
+    </Alert>
+  );
+}
+
+export function BaselineStyles() {
+  return (
+    <Grid style={{ gap: 18, maxInlineSize: 1100 }}>
+      <Box
+        style={{
+          border: '1px solid var(--ui-color-border, #d8e1ec)',
+          borderRadius: 16,
+          padding: 16,
+          background: 'var(--ui-color-surface, #fff)',
+          display: 'grid',
+          gap: 14,
+        }}
+      >
+        <Box style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ui-color-muted, #64748b)' }}>
+          Variants
+        </Box>
+        <Grid style={{ gap: 14 }}>
+          <DemoAlert variant="surface" tone="info" radius={12} elevation="low" />
+          <DemoAlert variant="outline" tone="success" radius={12} elevation="none" />
+          <DemoAlert variant="soft" tone="warning" radius={12} elevation="none" />
+          <DemoAlert variant="solid" tone="danger" radius={12} elevation="low" />
+        </Grid>
+      </Box>
+
+      <Grid columns={2} style={{ gap: 16 }}>
+        <Box
+          style={{
+            border: '1px solid var(--ui-color-border, #d8e1ec)',
+            borderRadius: 16,
+            padding: 16,
+            background: 'var(--ui-color-surface, #fff)',
+            display: 'grid',
+            gap: 14,
+          }}
+        >
+          <Box style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ui-color-muted, #64748b)' }}>
+            Sizes
+          </Box>
+          <DemoAlert size="sm" radius={8} />
+          <DemoAlert size="md" radius={12} />
+          <DemoAlert size="lg" radius={16} />
+        </Box>
+
+        <Box
+          style={{
+            border: '1px solid var(--ui-color-border, #d8e1ec)',
+            borderRadius: 16,
+            padding: 16,
+            background: 'var(--ui-color-surface, #fff)',
+            display: 'grid',
+            gap: 14,
+          }}
+        >
+          <Box style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ui-color-muted, #64748b)' }}>
+            Radius and indicator
+          </Box>
+          <DemoAlert radius={0} variant="outline" />
+          <DemoAlert radius={4} variant="outline" />
+          <DemoAlert radius={12} variant="outline" />
+          <DemoAlert radius="full" variant="outline" indicator="none" />
+        </Box>
+      </Grid>
+    </Grid>
+  );
+}
 
 function EnterpriseAlertCenter() {
   const [showCritical, setShowCritical] = React.useState(true);
@@ -63,27 +144,23 @@ function EnterpriseAlertCenter() {
         <Alert
           tone="danger"
           variant="soft"
+          size="md"
+          radius={16}
+          elevation="low"
           dismissible
           onClose={() => {
             setShowCritical(false);
             toastAdvanced.warning('Critical alert dismissed', { duration: 1800, theme: 'light' });
           }}
-          style={
-            {
-              '--ui-alert-radius': '16px',
-              '--ui-alert-padding-x': '16px',
-              '--ui-alert-padding-y': '14px',
-            } as React.CSSProperties
-          }
         >
-          <Box slot="icon" aria-hidden="true" style={{ display: 'inline-flex' }}>
+          <AlertIcon aria-hidden="true" style={{ display: 'inline-flex' }}>
             <AlertTriangleIcon size={16} />
-          </Box>
-          <Box slot="title" style={{ fontWeight: 700 }}>
-            Sepsis protocol breach detected
-          </Box>
-          Medication administration delayed by 11 minutes in Ward 4C. Immediate physician acknowledgment required.
-          <Flex slot="actions" style={{ gap: 8, flexWrap: 'wrap' }}>
+          </AlertIcon>
+          <AlertTitle>Sepsis protocol breach detected</AlertTitle>
+          <AlertDescription>
+            Medication administration delayed by 11 minutes in Ward 4C. Immediate physician acknowledgment required.
+          </AlertDescription>
+          <AlertActions as="div" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <Button
               size="sm"
               variant="secondary"
@@ -97,7 +174,7 @@ function EnterpriseAlertCenter() {
             >
               Escalate Now
             </Button>
-          </Flex>
+          </AlertActions>
         </Alert>
       ) : (
         <Button
@@ -116,20 +193,22 @@ function EnterpriseAlertCenter() {
         <Alert
           tone="info"
           variant="outline"
+          radius={16}
+          elevation="none"
           dismissible
           onClose={() => {
             setShowOps(false);
             toastAdvanced.info('Operations notice dismissed', { duration: 1400, theme: 'light' });
           }}
         >
-          <Box slot="icon" aria-hidden="true" style={{ display: 'inline-flex' }}>
+          <AlertIcon aria-hidden="true" style={{ display: 'inline-flex' }}>
             <ShieldIcon size={16} />
-          </Box>
-          <Box slot="title" style={{ fontWeight: 700 }}>
-            Overnight audit reminder
-          </Box>
-          Ensure narcotics log reconciliation is complete before 06:00 handoff.
-          <Flex slot="actions" style={{ gap: 8, flexWrap: 'wrap' }}>
+          </AlertIcon>
+          <AlertTitle>Overnight audit reminder</AlertTitle>
+          <AlertDescription>
+            Ensure narcotics log reconciliation is complete before 06:00 handoff.
+          </AlertDescription>
+          <AlertActions as="div" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <Button
               size="sm"
               variant="secondary"
@@ -144,7 +223,7 @@ function EnterpriseAlertCenter() {
             >
               Snooze
             </Button>
-          </Flex>
+          </AlertActions>
         </Alert>
       ) : (
         <Button

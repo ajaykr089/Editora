@@ -1,4 +1,9 @@
 import { ElementBase } from '../ElementBase';
+import { normalizeCollectionText } from '../primitives/collection';
+import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
+import { resolveListboxActiveIndex } from '../primitives/listbox';
+import './ui-listbox';
+import type { UIListbox } from './ui-listbox';
 
 type ComboboxOption = {
   value: string;
@@ -538,7 +543,7 @@ export class UICombobox extends ElementBase {
 
   private _input: HTMLInputElement | null = null;
   private _control: HTMLElement | null = null;
-  private _panel: HTMLElement | null = null;
+  private _panel: UIListbox | null = null;
   private _clearBtn: HTMLButtonElement | null = null;
   private _toggleBtn: HTMLButtonElement | null = null;
   private _options: ComboboxOption[] = [];
@@ -552,12 +557,13 @@ export class UICombobox extends ElementBase {
   private _isFocused = false;
   private _suppressValueSync = false;
   private _globalListenersBound = false;
+  private _dismissableLayer: DismissableLayerHandle | null = null;
   private _nextOpenSource: ComboboxOpenSource = 'attribute';
   private _optionsRefreshScheduled = false;
+  private _panelPointerDown = false;
 
   constructor() {
     super();
-    this._onDocumentPointerDown = this._onDocumentPointerDown.bind(this);
     this._onInput = this._onInput.bind(this);
     this._onNativeChange = this._onNativeChange.bind(this);
     this._onFocusIn = this._onFocusIn.bind(this);
@@ -565,6 +571,7 @@ export class UICombobox extends ElementBase {
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onClearClick = this._onClearClick.bind(this);
     this._onToggleClick = this._onToggleClick.bind(this);
+    this._onPanelPointerDown = this._onPanelPointerDown.bind(this);
     this._onPanelClick = this._onPanelClick.bind(this);
   }
 
@@ -588,6 +595,8 @@ export class UICombobox extends ElementBase {
   disconnectedCallback() {
     this._unbindGlobalListeners();
     this._detachDomListeners();
+    this._dismissableLayer?.destroy();
+    this._dismissableLayer = null;
 
     if (this._observer) {
       this._observer.disconnect();
@@ -633,7 +642,6 @@ export class UICombobox extends ElementBase {
     }
 
     if (name === 'state') {
-      if (this._state() === 'loading' && this.open) this._setOpen(false, 'attribute');
       if (this.isConnected) this.requestRender();
       return;
     }
@@ -755,14 +763,6 @@ export class UICombobox extends ElementBase {
     return this._options.some((option) => option.value === value);
   }
 
-  private _normalize(value: string): string {
-    return value
-      .trim()
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
-  }
-
   private _readOptions(): ComboboxOption[] {
     const optionElements = Array.from(
       this.querySelectorAll('option,[data-combobox-option]')
@@ -805,27 +805,27 @@ export class UICombobox extends ElementBase {
   }
 
   private _findExactOptionByQuery(query: string): ComboboxOption | null {
-    const normalized = this._normalize(query);
+    const normalized = normalizeCollectionText(query);
     if (!normalized) return null;
     return (
       this._options.find(
         (option) =>
           !option.disabled &&
-          (this._normalize(option.label) === normalized || this._normalize(option.value) === normalized)
+          (normalizeCollectionText(option.label) === normalized || normalizeCollectionText(option.value) === normalized)
       ) || null
     );
   }
 
   private _rebuildFiltered(config?: { preserveHighlight?: boolean }) {
-    const query = this._normalize(this._query);
+    const query = normalizeCollectionText(this._query);
     const noFilter = this.hasAttribute('no-filter');
     const previous = this._filtered[this._highlightedIndex];
 
     this._filtered = this._options.filter((option) => {
       if (noFilter || !query) return true;
       return (
-        this._normalize(option.label).includes(query) ||
-        this._normalize(option.value).includes(query)
+        normalizeCollectionText(option.label).includes(query) ||
+        normalizeCollectionText(option.value).includes(query)
       );
     });
 
@@ -846,7 +846,9 @@ export class UICombobox extends ElementBase {
       }
     }
 
-    this._highlightedIndex = this._filtered.findIndex((option) => !option.disabled);
+    this._highlightedIndex = resolveListboxActiveIndex(this._filtered, {
+      getDisabled: (option) => option.disabled
+    });
   }
 
   private _renderList() {
@@ -856,6 +858,8 @@ export class UICombobox extends ElementBase {
     const emptyText = this.getAttribute('empty-text') || 'No matches found';
     if (this._filtered.length === 0) {
       this._panel.innerHTML = `${stateRow}<div class="empty" part="empty">${escapeHtml(emptyText)}</div>`;
+      this._panel.refresh();
+      this._panel.clearActive();
       this._syncActiveDescendant();
       return;
     }
@@ -891,6 +895,7 @@ export class UICombobox extends ElementBase {
       .join('');
 
     this._panel.innerHTML = `${stateRow}${optionsMarkup}`;
+    this._panel.refresh();
 
     this._syncActiveDescendant();
     this._scrollHighlightedIntoView();
@@ -922,22 +927,28 @@ export class UICombobox extends ElementBase {
 
   private _syncActiveDescendant() {
     if (!this._input) return;
-    const highlighted = this._filtered[this._highlightedIndex];
-    if (!highlighted) {
-      this._input.removeAttribute('aria-activedescendant');
+    const node = this._panel?.querySelector(`[data-option-index="${this._highlightedIndex}"]`) as HTMLElement | null;
+    if (node && this._panel) {
+      this._panel.setActiveItem(node, {
+        focus: false,
+        owner: this._input,
+        scroll: false
+      });
       return;
     }
-    this._input.setAttribute('aria-activedescendant', `${this._uid}-option-${highlighted.sourceIndex}`);
+    this._panel?.clearActive();
+    this._input.removeAttribute('aria-activedescendant');
   }
 
   private _scrollHighlightedIntoView() {
     if (!this._panel) return;
     if (this._highlightedIndex < 0) return;
-    const node = this._panel.querySelector(
-      `[data-option-index="${this._highlightedIndex}"]`
-    ) as HTMLElement | null;
-    if (!node) return;
-    node.scrollIntoView({ block: 'nearest' });
+    const node = this._panel.querySelector(`[data-option-index="${this._highlightedIndex}"]`) as HTMLElement | null;
+    this._panel.setActiveItem(node, {
+      focus: false,
+      owner: this._input,
+      scroll: true
+    });
   }
 
   private _updateClearButton() {
@@ -965,8 +976,11 @@ export class UICombobox extends ElementBase {
       this._toggleBtn.setAttribute('data-open', 'true');
       this._rebuildFiltered({ preserveHighlight: true });
       this._renderList();
+      this._syncDismissableLayer();
     } else {
       this._unbindGlobalListeners();
+      this._dismissableLayer?.destroy();
+      this._dismissableLayer = null;
       this._panel.setAttribute('hidden', '');
       this._panel.removeAttribute('data-open');
       this._panel.setAttribute('aria-hidden', 'true');
@@ -975,21 +989,39 @@ export class UICombobox extends ElementBase {
     }
 
     this._toggleBtn.disabled = this._isDisabled();
-    if (this._clearBtn) this._clearBtn.disabled = this._isDisabled() || this._isReadonly() || loading;
+    if (this._clearBtn) this._clearBtn.disabled = this._isDisabled() || this._isReadonly();
     this._input.setAttribute('aria-busy', loading ? 'true' : 'false');
     this._panel.setAttribute('aria-busy', loading ? 'true' : 'false');
   }
 
   private _bindGlobalListeners() {
     if (this._globalListenersBound) return;
-    document.addEventListener('pointerdown', this._onDocumentPointerDown as EventListener, true);
     this._globalListenersBound = true;
   }
 
   private _unbindGlobalListeners() {
     if (!this._globalListenersBound) return;
-    document.removeEventListener('pointerdown', this._onDocumentPointerDown as EventListener, true);
     this._globalListenersBound = false;
+  }
+
+  private _syncDismissableLayer() {
+    if (!this.open || !this._panel) return;
+    this._dismissableLayer?.destroy();
+    this._dismissableLayer = createDismissableLayer({
+      node: this._panel,
+      trigger: this._control,
+      closeOnEscape: false,
+      closeOnPointerOutside: true,
+      onDismiss: (reason) => {
+        if (reason !== 'outside-pointer') return;
+        if (this.hasAttribute('allow-custom')) {
+          this._commitCustomValue();
+        } else {
+          this._syncInputFromValue();
+        }
+        this._closePanel('outside');
+      }
+    });
   }
 
   private _setOpen(next: boolean, source: ComboboxOpenSource = 'api') {
@@ -1009,7 +1041,7 @@ export class UICombobox extends ElementBase {
   }
 
   private _commitSelection(option: ComboboxOption) {
-    if (this._isDisabled() || this._isReadonly() || this._isLoading()) return;
+    if (this._isDisabled() || this._isReadonly()) return;
     if (option.disabled) return;
     const previous = this.value;
 
@@ -1044,7 +1076,7 @@ export class UICombobox extends ElementBase {
   }
 
   private _commitCustomValue() {
-    if (this._isDisabled() || this._isReadonly() || this._isLoading()) return;
+    if (this._isDisabled() || this._isReadonly()) return;
     if (!this.hasAttribute('allow-custom')) return;
 
     const next = this._query.trim();
@@ -1067,18 +1099,16 @@ export class UICombobox extends ElementBase {
 
   private _moveHighlight(delta: number) {
     if (this._filtered.length === 0) return;
-
-    let next = this._highlightedIndex;
-    const maxAttempts = this._filtered.length;
-    let attempts = 0;
-    do {
-      next = next + delta;
-      if (next < 0) next = this._filtered.length - 1;
-      if (next >= this._filtered.length) next = 0;
-      attempts += 1;
-    } while (this._filtered[next]?.disabled && attempts < maxAttempts);
-
-    if (this._filtered[next]?.disabled) return;
+    const current = this._panel?.querySelector(`[data-option-index="${this._highlightedIndex}"]`) as HTMLElement | null;
+    const moved = this._panel?.move(delta > 0 ? 1 : -1, {
+      current,
+      focus: false,
+      owner: this._input,
+      scroll: true
+    }) || null;
+    if (!moved) return;
+    const next = Number(moved.getAttribute('data-option-index') || '-1');
+    if (next < 0) return;
     this._highlightedIndex = next;
     this._renderList();
   }
@@ -1142,10 +1172,10 @@ export class UICombobox extends ElementBase {
             ${required ? 'required' : ''}
             ${maxLength ? `maxlength="${escapeHtml(maxLength)}"` : ''}
           />
-          <button type="button" part="clear" class="icon-btn clear-btn" aria-label="Clear value" hidden ${readOnly || loading ? 'disabled' : ''}>${CLEAR_ICON}</button>
-          <button type="button" part="toggle" class="icon-btn toggle-btn" data-open="${this.open ? 'true' : 'false'}" aria-label="Toggle options" ${loading ? 'disabled' : ''}>${CHEVRON_ICON}</button>
+          <button type="button" part="clear" class="icon-btn clear-btn" aria-label="Clear value" hidden ${readOnly ? 'disabled' : ''}>${CLEAR_ICON}</button>
+          <button type="button" part="toggle" class="icon-btn toggle-btn" data-open="${this.open ? 'true' : 'false'}" aria-label="Toggle options">${CHEVRON_ICON}</button>
         </div>
-        <div class="panel" id="${this._uid}-listbox" part="panel" role="listbox" aria-busy="${loading ? 'true' : 'false'}" data-state="${escapeHtml(state)}" ${this.open ? 'data-open="true" aria-hidden="false"' : 'hidden aria-hidden="true"'}></div>
+        <ui-listbox class="panel" id="${this._uid}-listbox" part="panel" role="listbox" item-selector=".option[data-option-index]" item-role="option" active-attribute="data-highlighted" aria-busy="${loading ? 'true' : 'false'}" data-state="${escapeHtml(state)}" ${this.open ? 'data-open="true" aria-hidden="false"' : 'hidden aria-hidden="true"'}></ui-listbox>
       </div>
       <slot hidden></slot>
       <div class="error" part="error" id="${errorId}" ${hasValidationError ? '' : 'hidden'}>${escapeHtml(errorText)}</div>
@@ -1155,7 +1185,7 @@ export class UICombobox extends ElementBase {
 
     this._input = this.root.querySelector('input');
     this._control = this.root.querySelector('.control');
-    this._panel = this.root.querySelector('.panel');
+    this._panel = this.root.querySelector('ui-listbox.panel');
     this._clearBtn = this.root.querySelector('.clear-btn');
     this._toggleBtn = this.root.querySelector('.toggle-btn');
 
@@ -1180,7 +1210,10 @@ export class UICombobox extends ElementBase {
 
     if (this._clearBtn) this._clearBtn.addEventListener('click', this._onClearClick);
     if (this._toggleBtn) this._toggleBtn.addEventListener('click', this._onToggleClick);
-    if (this._panel) this._panel.addEventListener('click', this._onPanelClick);
+    if (this._panel) {
+      this._panel.addEventListener('pointerdown', this._onPanelPointerDown);
+      this._panel.addEventListener('click', this._onPanelClick);
+    }
   }
 
   private _detachDomListeners() {
@@ -1194,7 +1227,10 @@ export class UICombobox extends ElementBase {
 
     if (this._clearBtn) this._clearBtn.removeEventListener('click', this._onClearClick);
     if (this._toggleBtn) this._toggleBtn.removeEventListener('click', this._onToggleClick);
-    if (this._panel) this._panel.removeEventListener('click', this._onPanelClick);
+    if (this._panel) {
+      this._panel.removeEventListener('pointerdown', this._onPanelPointerDown);
+      this._panel.removeEventListener('click', this._onPanelClick);
+    }
   }
 
   private _onInput(event: Event) {
@@ -1259,6 +1295,10 @@ export class UICombobox extends ElementBase {
     this._isFocused = false;
     if (this._control) this._control.setAttribute('data-focused', 'false');
     queueMicrotask(() => {
+      if (this._panelPointerDown) {
+        this._panelPointerDown = false;
+        return;
+      }
       const rootActive = (this.root as ShadowRoot).activeElement as Element | null;
       if (rootActive) return;
       if (!this.open) return;
@@ -1291,19 +1331,16 @@ export class UICombobox extends ElementBase {
 
     if (event.key === 'Home' && this.open) {
       event.preventDefault();
-      this._highlightedIndex = this._filtered.findIndex((option) => !option.disabled);
+      const first = this._panel?.focusBoundary('first', { focus: false, owner: this._input, scroll: true }) || null;
+      this._highlightedIndex = Number(first?.getAttribute('data-option-index') || '-1');
       this._renderList();
       return;
     }
 
     if (event.key === 'End' && this.open) {
       event.preventDefault();
-      for (let i = this._filtered.length - 1; i >= 0; i -= 1) {
-        if (!this._filtered[i].disabled) {
-          this._highlightedIndex = i;
-          break;
-        }
-      }
+      const last = this._panel?.focusBoundary('last', { focus: false, owner: this._input, scroll: true }) || null;
+      this._highlightedIndex = Number(last?.getAttribute('data-option-index') || '-1');
       this._renderList();
       return;
     }
@@ -1364,7 +1401,7 @@ export class UICombobox extends ElementBase {
   private _onClearClick(event: Event) {
     event.preventDefault();
     if (!this._input) return;
-    if (this._isDisabled() || this._isReadonly() || this._isLoading()) return;
+    if (this._isDisabled() || this._isReadonly()) return;
 
     this._query = '';
     this._input.value = '';
@@ -1402,8 +1439,17 @@ export class UICombobox extends ElementBase {
     this._input?.focus();
   }
 
+  private _onPanelPointerDown(event: PointerEvent) {
+    if (this._isReadonly()) return;
+    const target = event.target as HTMLElement | null;
+    const option = target?.closest('[data-option-index]') as HTMLElement | null;
+    if (!option) return;
+    this._panelPointerDown = true;
+    event.preventDefault();
+  }
+
   private _onPanelClick(event: Event) {
-    if (this._isReadonly() || this._isLoading()) return;
+    if (this._isReadonly()) return;
     const target = event.target as HTMLElement;
     const button = target.closest('[data-option-index]') as HTMLElement | null;
     if (!button) return;
@@ -1415,19 +1461,6 @@ export class UICombobox extends ElementBase {
     const option = this._filtered[index];
     if (!option || option.disabled) return;
     this._commitSelection(option);
-  }
-
-  private _onDocumentPointerDown(event: PointerEvent) {
-    if (!this.open) return;
-    const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
-    if (path.includes(this)) return;
-
-    if (this.hasAttribute('allow-custom')) {
-      this._commitCustomValue();
-    } else {
-      this._syncInputFromValue();
-    }
-    this._closePanel('outside');
   }
 }
 

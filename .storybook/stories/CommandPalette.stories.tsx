@@ -18,6 +18,7 @@ const commands = [
 export const Default = (args: any) => {
   const [open, setOpen] = useState(!!args.open);
   const [selected, setSelected] = useState<number | null>(null);
+  const [query, setQuery] = useState('');
 
   return (
     <Grid style={{ display: 'grid', gap: 12 }}>
@@ -28,8 +29,12 @@ export const Default = (args: any) => {
 
       <CommandPalette
         open={open}
-        onSelect={(idx) => {
-          setSelected(idx);
+        query={query}
+        placeholder="Search workflows"
+        emptyText="No command matches"
+        onQueryChange={(detail) => setQuery(detail.value)}
+        onSelect={(detail) => {
+          setSelected(detail.index);
           setOpen(false);
         }}
       >
@@ -41,7 +46,7 @@ export const Default = (args: any) => {
       </CommandPalette>
 
       <Box style={{ fontSize: 13, color: '#475569' }}>
-        Selected: {selected == null ? 'none' : commands[selected]}
+        Selected: {selected == null ? 'none' : commands[selected]} • query: {query || 'empty'}
       </Box>
     </Grid>
   );

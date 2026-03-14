@@ -4,25 +4,24 @@ const style = `
   :host {
     display: inline-flex;
     min-inline-size: 0;
-    --ui-block-controls-gap: 6px;
-    --ui-block-controls-padding: 8px;
-    --ui-block-controls-radius: 14px;
-    --ui-block-controls-border: 1px solid color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 88%, transparent);
-    --ui-block-controls-bg:
-      linear-gradient(
-        150deg,
-        color-mix(in srgb, var(--ui-color-primary, #2563eb) 8%, var(--ui-color-surface, #ffffff)),
-        color-mix(in srgb, var(--ui-color-surface, #ffffff) 94%, transparent)
-      );
-    --ui-block-controls-shadow:
-      none;
+    --ui-block-controls-gap: var(--base-block-controls-gap, 6px);
+    --ui-block-controls-padding: var(--base-block-controls-padding, 8px);
+    --ui-block-controls-radius: var(--base-block-controls-radius, var(--ui-radius, 4px));
+    --ui-block-controls-border: var(--base-block-controls-border, 1px solid color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 88%, transparent));
+    --ui-block-controls-bg: var(--base-block-controls-bg, var(--color-panel, var(--ui-color-surface, #ffffff)));
+    --ui-block-controls-shadow: var(--base-block-controls-shadow, var(--shadow-2, none));
     --ui-block-controls-accent: var(--ui-color-primary, #2563eb);
     --ui-block-controls-focus-ring: var(--ui-color-focus-ring, #2563eb);
     --ui-block-controls-duration: 170ms;
-    --ui-block-controls-font: "Inter", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --ui-block-controls-item-radius: var(--base-block-controls-item-radius, var(--ui-radius, 4px));
+    --ui-control-radius: var(--ui-block-controls-item-radius);
+    --ui-control-min-height: 32px;
+    --ui-control-padding-inline: 10px;
+    --ui-control-gap: 6px;
+    --ui-control-font-size: 13px;
     color-scheme: light dark;
     box-sizing: border-box;
-    font-family: var(--ui-block-controls-font);
+    font-family: var(--ui-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
   }
 
   :host([tone="neutral"]) {
@@ -57,7 +56,7 @@ const style = `
     border: var(--ui-block-controls-border);
     background: var(--ui-block-controls-bg);
     box-shadow: var(--ui-block-controls-shadow);
-    backdrop-filter: saturate(1.08) blur(10px);
+    backdrop-filter: var(--backdrop-filter-panel, saturate(1.04) blur(10px));
     transition:
       transform var(--ui-block-controls-duration) cubic-bezier(0.2, 0.8, 0.2, 1),
       border-color var(--ui-block-controls-duration) cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -72,9 +71,9 @@ const style = `
     border-radius: inherit;
     pointer-events: none;
     background:
-      radial-gradient(120% 70% at 100% 0%, color-mix(in srgb, var(--ui-block-controls-accent) 20%, transparent), transparent 64%),
-      linear-gradient(180deg, color-mix(in srgb, #ffffff 40%, transparent), transparent 48%);
-    opacity: 0.66;
+      radial-gradient(120% 70% at 100% 0%, color-mix(in srgb, var(--ui-block-controls-accent) 14%, transparent), transparent 64%),
+      linear-gradient(180deg, color-mix(in srgb, #ffffff 28%, transparent), transparent 48%);
+    opacity: 0.52;
   }
 
   .toolbar:focus-within {
@@ -100,30 +99,51 @@ const style = `
   :host([density="compact"]) {
     --ui-block-controls-gap: 4px;
     --ui-block-controls-padding: 6px;
-    --ui-block-controls-radius: 12px;
+    --ui-block-controls-radius: calc(var(--ui-radius, 4px) + 2px);
   }
 
   :host([density="comfortable"]) {
     --ui-block-controls-gap: 8px;
     --ui-block-controls-padding: 10px;
-    --ui-block-controls-radius: 16px;
+    --ui-block-controls-radius: calc(var(--ui-radius, 4px) + 6px);
+  }
+
+  :host([variant="surface"]) {
+    --ui-block-controls-bg: var(--base-block-controls-bg, var(--color-panel, var(--ui-color-surface, #ffffff)));
+    --ui-block-controls-border: var(--base-block-controls-border, 1px solid color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 88%, transparent));
+  }
+
+  :host([variant="soft"]) {
+    --ui-block-controls-bg: color-mix(in srgb, var(--ui-block-controls-accent) 8%, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
+    --ui-block-controls-border: 1px solid color-mix(in srgb, var(--ui-block-controls-accent) 16%, var(--ui-color-border, rgba(15, 23, 42, 0.16)));
+    --ui-block-controls-shadow: none;
   }
 
   :host([variant="solid"]) {
-    --ui-block-controls-bg: color-mix(in srgb, var(--ui-block-controls-accent) 12%, var(--ui-color-surface, #ffffff));
+    --ui-block-controls-bg: color-mix(in srgb, var(--ui-block-controls-accent) 14%, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-block-controls-border: 1px solid color-mix(in srgb, var(--ui-block-controls-accent) 24%, var(--ui-color-border, rgba(15, 23, 42, 0.16)));
   }
 
   :host([variant="outline"]) {
-    --ui-block-controls-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 88%, transparent);
+    --ui-block-controls-bg: color-mix(in srgb, var(--color-panel-solid, var(--ui-color-surface, #ffffff)) 88%, transparent);
     --ui-block-controls-border: 1px solid color-mix(in srgb, var(--ui-block-controls-accent) 42%, var(--ui-color-border, rgba(15, 23, 42, 0.16)));
     --ui-block-controls-shadow: none;
   }
 
-  :host([variant="minimal"]) .toolbar {
-    box-shadow: none;
-    background: transparent;
-    border-color: transparent;
+  :host([variant="ghost"]) {
+    --ui-block-controls-bg: transparent;
+    --ui-block-controls-border: 1px solid transparent;
+    --ui-block-controls-shadow: none;
+  }
+
+  :host([variant="minimal"]) {
+    --ui-block-controls-bg: transparent;
+    --ui-block-controls-border: 1px solid transparent;
+    --ui-block-controls-shadow: none;
+  }
+
+  :host([variant="minimal"]) .toolbar,
+  :host([variant="ghost"]) .toolbar {
     padding-inline: 2px;
   }
 
@@ -131,10 +151,57 @@ const style = `
     box-shadow: none;
   }
 
+  :host([elevation="low"]) .toolbar {
+    box-shadow: var(--base-block-controls-shadow, var(--shadow-2, none));
+  }
+
   :host([elevation="high"]) {
     --ui-block-controls-shadow:
       0 2px 6px rgba(15, 23, 42, 0.08),
       0 20px 38px rgba(15, 23, 42, 0.16);
+  }
+
+  :host([size="sm"]),
+  :host([size="1"]) {
+    --ui-block-controls-gap: 4px;
+    --ui-block-controls-padding: 6px;
+    --ui-block-controls-item-radius: calc(var(--ui-radius, 4px) + 2px);
+    --ui-control-min-height: 28px;
+    --ui-control-padding-inline: 8px;
+    --ui-control-gap: 5px;
+    --ui-control-font-size: 12px;
+  }
+
+  :host([size="lg"]),
+  :host([size="3"]) {
+    --ui-block-controls-gap: 8px;
+    --ui-block-controls-padding: 10px;
+    --ui-block-controls-item-radius: calc(var(--ui-radius, 4px) + 4px);
+    --ui-control-min-height: 36px;
+    --ui-control-padding-inline: 12px;
+    --ui-control-gap: 7px;
+    --ui-control-font-size: 14px;
+  }
+
+  :host([radius="none"]) {
+    --ui-block-controls-radius: 0px;
+  }
+
+  :host([radius="sm"]) {
+    --ui-block-controls-radius: 8px;
+  }
+
+  :host([radius="md"]),
+  :host([radius="large"]) {
+    --ui-block-controls-radius: 12px;
+  }
+
+  :host([radius="lg"]) {
+    --ui-block-controls-radius: 16px;
+  }
+
+  :host([radius="full"]) {
+    --ui-block-controls-radius: 9999px;
   }
 
   :host([state="loading"]) .toolbar::after {
@@ -200,7 +267,7 @@ const style = `
 
   .toolbar ::slotted([data-active="true"]) {
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-block-controls-accent) 38%, transparent);
-    border-radius: 10px;
+    border-radius: var(--ui-block-controls-item-radius);
   }
 
   :host([disabled]) {
@@ -301,6 +368,19 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
+function normalizeRadius(raw: string | null): string {
+  if (!raw) return '';
+  const value = raw.trim().toLowerCase();
+  if (!value) return '';
+  if (value === 'none') return '0px';
+  if (value === 'sm') return '8px';
+  if (value === 'md' || value === 'large') return '12px';
+  if (value === 'lg') return '16px';
+  if (value === 'full' || value === 'pill') return '9999px';
+  if (/^\d+(\.\d+)?$/.test(value)) return `${value}px`;
+  return raw;
+}
+
 function isDisabled(element: HTMLElement): boolean {
   if (element.hasAttribute('disabled')) return true;
   const ariaDisabled = element.getAttribute('aria-disabled');
@@ -333,10 +413,12 @@ export class UIBlockControls extends ElementBase {
       'orientation',
       'headless',
       'density',
+      'size',
       'variant',
       'tone',
       'state',
       'elevation',
+      'radius',
       'wrap',
       'loop',
       'no-loop',
@@ -361,6 +443,8 @@ export class UIBlockControls extends ElementBase {
     this.root.addEventListener('focusin', this._onFocusIn as EventListener);
     this._syncBusyState();
     this._syncDisabledState();
+    const normalizedRadius = normalizeRadius(this.getAttribute('radius'));
+    if (normalizedRadius) this.style.setProperty('--ui-block-controls-radius', normalizedRadius);
   }
 
   disconnectedCallback() {
@@ -375,7 +459,13 @@ export class UIBlockControls extends ElementBase {
     if (name === 'disabled') this._syncDisabledState();
     if (name === 'state') this._syncBusyState();
     if (name === 'active-index') this._applyRovingTabIndex();
-    if (this.isConnected) this.requestRender();
+    if (name === 'radius') {
+      const normalizedRadius = normalizeRadius(newValue);
+      if (normalizedRadius) this.style.setProperty('--ui-block-controls-radius', normalizedRadius);
+      else this.style.removeProperty('--ui-block-controls-radius');
+    }
+    if (!this.isConnected) return;
+    if (['orientation', 'headless', 'aria-label'].includes(name)) this.requestRender();
   }
 
   private _orientation(): 'horizontal' | 'vertical' {
@@ -601,11 +691,23 @@ export class UIBlockControls extends ElementBase {
   }
 
   protected override shouldRenderOnAttributeChange(
-    _name: string,
-    _oldValue: string | null,
-    _newValue: string | null
+    name: string,
+    oldValue: string | null,
+    newValue: string | null
   ): boolean {
-    return true;
+    if (oldValue === newValue) return false;
+    return ![
+      'density',
+      'size',
+      'variant',
+      'tone',
+      'elevation',
+      'radius',
+      'wrap',
+      'loop',
+      'no-loop',
+      'disabled',
+    ].includes(name);
   }
 }
 

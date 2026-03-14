@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import toastLegacy, { toastAdvanced, toastPro } from '@editora/toast';
 import type { ToastConfig, ToastOptionsAdvanced } from '@editora/toast';
 
@@ -62,6 +62,15 @@ type ToastAPIProps = {
   config?: Partial<ToastConfig>;
 };
 
+export type ToastContextValue = typeof toastApi;
+
+const ToastContext = createContext<ToastContextValue | null>(null);
+
+export type ToastProviderProps = {
+  children: React.ReactNode;
+  config?: Partial<ToastConfig>;
+};
+
 export function ToastAPI({ config }: ToastAPIProps = {}) {
   useEffect(() => {
     if (!config) return;
@@ -69,6 +78,25 @@ export function ToastAPI({ config }: ToastAPIProps = {}) {
   }, [config]);
 
   return null;
+}
+
+export function ToastProvider({ children, config }: ToastProviderProps) {
+  useEffect(() => {
+    if (!config) return;
+    toastAdvanced.configure(config);
+  }, [config]);
+
+  const value = useMemo(() => toastApi, []);
+
+  return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
+}
+
+export function useToast(): ToastContextValue {
+  const context = useContext(ToastContext);
+  if (!context) {
+    return toastApi;
+  }
+  return context;
 }
 
 export { toastAdvanced, toastPro, toastLegacy };

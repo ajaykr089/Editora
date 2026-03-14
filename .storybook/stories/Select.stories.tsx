@@ -1,223 +1,374 @@
 import React from 'react';
-import { Box, Flex, Grid, Select, Separator } from '@editora/ui-react';
+import type { Meta, StoryObj } from '@storybook/react';
+import { createThemeTokens, type AccentPaletteName, type ThemeTokens } from '@editora/ui-core';
+import { Badge, Box, Button, Card, CardDescription, CardHeader, CardTitle, Flex, Grid, Select, ThemeProvider } from '@editora/ui-react';
 
-export default {
+const meta: Meta<typeof Select> = {
   title: 'UI/Select',
   component: Select,
+  args: {
+    value: 'review',
+    disabled: false,
+    loading: false,
+    required: false,
+    invalid: false,
+    placeholder: 'Choose a status',
+    size: 'md',
+    variant: 'soft',
+    tone: 'default',
+    density: 'default',
+    shape: 'rounded',
+    elevation: 'low',
+    radius: 12,
+    optionBorder: false,
+    validation: 'none',
+  },
   argTypes: {
     value: { control: 'text' },
     disabled: { control: 'boolean' },
     loading: { control: 'boolean' },
+    required: { control: 'boolean' },
+    invalid: { control: 'boolean' },
+    placeholder: { control: 'text' },
     variant: {
       control: 'select',
-      options: ['classic', 'surface', 'soft', 'filled', 'outline', 'line', 'minimal', 'ghost', 'solid', 'glass', 'contrast']
+      options: ['classic', 'surface', 'soft', 'filled', 'outline', 'line', 'minimal', 'ghost', 'solid', 'glass', 'contrast'],
     },
-    size: { control: 'select', options: ['sm', 'md', 'lg'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg', '1', '2', '3'] },
     density: { control: 'select', options: ['default', 'compact', 'comfortable'] },
     shape: { control: 'select', options: ['rounded', 'square', 'pill'] },
-    elevation: { control: 'select', options: ['low', 'none', 'high'] },
+    elevation: { control: 'select', options: ['none', 'low', 'high'] },
     tone: { control: 'select', options: ['default', 'brand', 'success', 'warning', 'danger'] },
-    validation: { control: 'select', options: ['none', 'success', 'warning', 'error'] }
-  }
+    validation: { control: 'select', options: ['none', 'success', 'warning', 'error'] },
+    radius: { control: 'text' },
+    optionBorder: { control: 'boolean' },
+  },
 };
 
-export const EnterpriseWorkflow = (args: any) => {
-  const [value, setValue] = React.useState(args.value || 'draft');
+export default meta;
 
+type Story = StoryObj<typeof Select>;
+type StoryPaletteName = AccentPaletteName | 'purple';
+
+const workflowOptions = [
+  { value: "draft", label: "Draft" },
+  { value: "review", label: "In review" },
+  { value: "approved", label: "Approved" },
+  { value: "published1", label: "Published1" },
+  { value: "published2", label: "Published2" },
+  { value: "published3", label: "Published3" },
+  { value: "published4", label: "Published4" },
+  { value: "published5", label: "Published5" },
+  { value: "published6", label: "Published6" },
+  { value: "published7", label: "Published7" },
+  { value: "published8", label: "Published8" },
+  { value: "published9", label: "Published9" },
+  { value: "published10", label: "Published10" },
+  { value: "published11", label: "Published11" },
+  { value: "published12", label: "Published12" },
+  { value: "published13", label: "Published13" },
+  { value: "published14", label: "Published14" },
+  { value: "published15", label: "Published15" },
+  { value: "published16", label: "Published16" },
+  { value: "published17", label: "Published17" },
+  { value: "published18", label: "Published18" },
+  { value: "published19", label: "Published19" },
+  { value: "published20", label: "Published20" },
+  { value: "published21", label: "Published21" },
+  { value: "published22", label: "Published22" },
+  { value: "published23", label: "Published23" },
+  { value: "published24", label: "Published24" },
+  { value: "published25", label: "Published25" },
+] as const;
+
+function TabButton(props: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <Grid style={{ display: 'grid', gap: 14, maxWidth: 420 }}>
-      <Select
-        {...args}
-        label="Workflow status"
-        description="Used by approvers and automations."
-        value={value}
-        onChange={setValue}
-        variant={args.variant || 'soft'}
-        tone={args.tone || 'brand'}
-        shape={args.shape || 'rounded'}
-        elevation={args.elevation || 'low'}
-        density={args.density || 'default'}
-        validation={args.validation && args.validation !== 'none' ? args.validation : undefined}
-      >
-        <option value="draft">Draft</option>
-        <option value="review">In Review</option>
-        <option value="published">Published</option>
-        <option value="archived">Archived</option>
-      </Select>
-      <Box style={{ fontSize: 13, color: '#475569' }}>Selected value: {value}</Box>
-    </Grid>
-  );
-};
-
-EnterpriseWorkflow.args = {
-  value: 'draft',
-  disabled: false,
-  loading: false,
-  size: 'md',
-  density: 'default',
-  shape: 'rounded',
-  elevation: 'low',
-  variant: 'soft',
-  tone: 'brand',
-  validation: 'none'
-};
-
-export const DesignPatterns = () => {
-  const [priority, setPriority] = React.useState('high');
-  return (
-    <Grid style={{ display: 'grid', gap: 16, maxWidth: 980 }}>
-      <Flex style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <Box style={{ minWidth: 220 }}>
-          <Select label="Classic" value={priority} onChange={setPriority} variant="classic">
-            <option value="low">Low priority</option>
-            <option value="medium">Medium priority</option>
-            <option value="high">High priority</option>
-            <option value="critical">Critical</option>
-          </Select>
-        </Box>
-        <Box style={{ minWidth: 220 }}>
-          <Select label="Outline" value="healthy" variant="outline" tone="success" validation="success">
-            <option value="healthy">Healthy</option>
-            <option value="degraded">Degraded</option>
-            <option value="outage">Outage</option>
-          </Select>
-        </Box>
-        <Box style={{ minWidth: 220 }}>
-          <Select label="Line" value="ops" variant="line" tone="warning" description="Dense dashboard pattern">
-            <option value="ops">Ops</option>
-            <option value="support">Support</option>
-            <option value="security">Security</option>
-          </Select>
-        </Box>
-        <Box style={{ minWidth: 220 }}>
-          <Select label="Solid" value="team-a" variant="solid" tone="brand" shape="pill">
-            <option value="team-a">Team A</option>
-            <option value="team-b">Team B</option>
-            <option value="team-c">Team C</option>
-          </Select>
-        </Box>
-      </Flex>
-
-      <Separator label="Glass / Contrast / Ghost" variant="gradient" />
-
-      <Flex style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <Box style={{ minWidth: 220 }}>
-          <Select label="Glass" value="monthly" variant="glass" shape="rounded">
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="quarterly">Quarterly</option>
-          </Select>
-        </Box>
-        <Box style={{ minWidth: 220 }}>
-          <Select label="Ghost" value="api" variant="ghost" elevation="none">
-            <option value="api">API</option>
-            <option value="sdk">SDK</option>
-            <option value="cli">CLI</option>
-          </Select>
-        </Box>
-        <Box style={{ minWidth: 220 }}>
-          <Select label="Contrast" value="p1" variant="contrast" tone="warning">
-            <option value="p0">P0</option>
-            <option value="p1">P1</option>
-            <option value="p2">P2</option>
-          </Select>
-        </Box>
-        <Box style={{ minWidth: 220 }}>
-          <Select label="Minimal" value="en" variant="minimal" elevation="none">
-            <option value="en">English</option>
-            <option value="fr">French</option>
-            <option value="zh">Chinese</option>
-          </Select>
-        </Box>
-      </Flex>
-    </Grid>
-  );
-};
-
-export const FlatAdminSystem = () => (
-  <Grid style={{ display: 'grid', gap: 12, maxWidth: 900 }}>
-    <Box
-      variant="surface"
-      p="12px"
+    <button
+      type="button"
+      onClick={props.onClick}
       style={{
-        border: '1px solid #cbd5e1',
-        borderRadius: 6,
-        ['--ui-select-border-color' as any]: '#94a3b8',
-        ['--ui-select-bg' as any]: '#ffffff',
-        ['--ui-select-accent' as any]: '#0f172a',
-        ['--ui-select-elevation' as any]: 'none'
+        appearance: 'none',
+        border: 'none',
+        borderBottom: props.active ? '3px solid var(--ui-color-primary, #2563eb)' : '3px solid transparent',
+        background: 'transparent',
+        color: props.active ? 'var(--ui-color-text, #0f172a)' : 'var(--ui-color-muted, #64748b)',
+        padding: '14px 4px 12px',
+        font: '600 15px/1.4 inherit',
+        cursor: 'pointer',
       }}
     >
-      <Flex style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-        <Box style={{ minWidth: 220 }}>
-          <Select label="Square flat" variant="outline" shape="square" elevation="none" value="ready">
-            <option value="ready">Ready</option>
-            <option value="blocked">Blocked</option>
-            <option value="done">Done</option>
-          </Select>
-        </Box>
-        <Box style={{ minWidth: 220 }}>
-          <Select label="Compact" density="compact" variant="line" shape="square" value="7d">
-            <option value="24h">24h</option>
-            <option value="7d">7d</option>
-            <option value="30d">30d</option>
-          </Select>
-        </Box>
-        <Box style={{ minWidth: 220 }}>
-          <Select label="Comfortable" density="comfortable" variant="surface" shape="rounded" value="all">
-            <option value="all">All projects</option>
-            <option value="active">Active</option>
-            <option value="archived">Archived</option>
-          </Select>
-        </Box>
-      </Flex>
-    </Box>
-  </Grid>
-);
+      {props.children}
+    </button>
+  );
+}
 
-export const EdgeScenarios = () => {
-  const [owner, setOwner] = React.useState('');
-  return (
-    <Grid style={{ display: 'grid', gap: 12, maxWidth: 760 }}>
-      <Select
-        label="Required with placeholder"
-        description="Placeholder remains visible until user picks a value."
-        required
-        placeholder="Choose owner"
-        value={owner}
-        validation={owner ? 'success' : 'error'}
-        error={owner ? '' : 'Owner is required'}
-        onChange={setOwner}
+function paletteTokens(name: StoryPaletteName) {
+  if (name === 'purple') {
+    return createThemeTokens(
+      {
+        colors: {
+          primary: '#8b5cf6',
+          primaryHover: '#7c3aed',
+          focusRing: '#8b5cf6',
+        },
+        palette: {
+          accent: {
+            '1': '#fdfcff',
+            '2': '#faf7ff',
+            '3': '#f3ecff',
+            '4': '#eadcff',
+            '5': '#ddc7ff',
+            '6': '#cdb0ff',
+            '7': '#b693ff',
+            '8': '#9b70ff',
+            '9': '#8b5cf6',
+            '10': '#7c3aed',
+            '11': '#6d28d9',
+            '12': '#2e1065',
+          },
+          accentAlpha: {
+            '1': '#7c3aed03',
+            '2': '#7c3aed08',
+            '3': '#7c3aed14',
+            '4': '#7c3aed24',
+            '5': '#7c3aed38',
+            '6': '#7c3aed4d',
+            '7': '#7c3aed68',
+            '8': '#7c3aed8f',
+            '9': '#7c3aed',
+            '10': '#6d28d9',
+            '11': '#5b21b6',
+            '12': '#2e1065',
+          },
+          accentContrast: '#ffffff',
+          accentSurface: '#f5f0ffcc',
+          accentIndicator: '#8b5cf6',
+          accentTrack: '#8b5cf6',
+        },
+      } satisfies Partial<ThemeTokens>,
+      { accentPalette: 'blue', mode: 'light' }
+    );
+  }
+
+  return createThemeTokens({}, { accentPalette: name, mode: 'light' });
+}
+
+function SelectPreview(props: {
+  variant: 'surface' | 'soft' | 'solid' | 'outline' | 'contrast';
+  size: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
+  palette?: StoryPaletteName;
+  elevation?: 'none' | 'low' | 'high';
+  radius?: number | string;
+  validation?: 'none' | 'success' | 'warning' | 'error';
+  optionBorder?: boolean;
+  label?: string;
+  caption?: string;
+  placeholder?: string;
+  defaultValue?: string;
+}) {
+  const [value, setValue] = React.useState(props.defaultValue ?? 'review');
+
+  const content = (
+    <Grid style={{ gap: 12 }}>
+      <Box
+        style={{
+          minHeight: 148,
+          borderRadius: 16,
+          border: '2px dashed color-mix(in srgb, var(--ui-color-primary, #2563eb) 30%, transparent)',
+          background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, white) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, white) 100%)',
+          display: 'grid',
+          placeItems: 'center',
+          padding: 20,
+        }}
       >
-        <option value="ajay">Ajay Kumar</option>
-        <option value="sarah">Sarah Lee</option>
-        <option value="alex">Alex Chen</option>
-      </Select>
-
-      <Select label="Grouped options" value="ap-south">
-        <optgroup label="US">
-          <option value="us-east">US East</option>
-          <option value="us-west">US West</option>
-        </optgroup>
-        <optgroup label="APAC">
-          <option value="ap-south">AP South</option>
-          <option value="ap-southeast">AP Southeast</option>
-        </optgroup>
-      </Select>
-
-      <Flex style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <Box style={{ minWidth: 220 }}>
-          <Select label="Loading" loading value="sync" description="Shows non-blocking spinner state">
-            <option value="sync">Syncing…</option>
-            <option value="done">Done</option>
+        <Box style={{ width: 'min(280px, 100%)' }}>
+          <Select
+            label={props.label || 'Workflow status'}
+            description="Open the menu to inspect option rendering."
+            placeholder={props.placeholder || 'Choose a status'}
+            value={value}
+            onChange={setValue}
+            variant={props.variant}
+            size={props.size}
+            elevation={props.elevation}
+            radius={props.radius}
+            validation={props.validation && props.validation !== 'none' ? props.validation : undefined}
+            optionBorder={props.optionBorder}
+          >
+            {props.placeholder ? <option value="">{props.placeholder}</option> : null}
+            {workflowOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </Select>
         </Box>
-        <Box style={{ minWidth: 220 }}>
-          <Select label="Disabled" disabled value="readonly">
-            <option value="readonly">Read only</option>
-          </Select>
-        </Box>
-      </Flex>
+      </Box>
+      {props.caption ? <div style={{ fontSize: 13, color: '#64748b', textAlign: 'center' }}>{props.caption}</div> : null}
     </Grid>
   );
+
+  if (!props.palette) return content;
+  return <ThemeProvider tokens={paletteTokens(props.palette)}>{content}</ThemeProvider>;
+}
+
+function ThemeTokenMatrixStory() {
+  const [tab, setTab] = React.useState<'theme' | 'colors' | 'sizes'>('theme');
+
+  return (
+    <Grid style={{ gap: 20, maxInlineSize: 1280 }}>
+      <div>
+        <div style={{ fontSize: 44, lineHeight: 1.05, fontWeight: 700, color: '#111827' }}>Select</div>
+      </div>
+
+      <Flex style={{ gap: 28, borderBottom: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent)' }}>
+        <TabButton active={tab === 'theme'} onClick={() => setTab('theme')}>
+          Theme colors
+        </TabButton>
+        <TabButton active={tab === 'colors'} onClick={() => setTab('colors')}>
+          All colors
+        </TabButton>
+        <TabButton active={tab === 'sizes'} onClick={() => setTab('sizes')}>
+          All sizes
+        </TabButton>
+      </Flex>
+
+      {tab === 'theme' ? (
+        <Grid style={{ gap: 22 }}>
+          <Grid style={{ gridTemplateColumns: '120px repeat(4, minmax(240px, 1fr))', gap: 18, alignItems: 'start' }}>
+            <div style={{ fontSize: 18, color: '#5b6574' }}>Surface</div>
+            <SelectPreview variant="surface" size="md" elevation="low" palette="blue" />
+            <SelectPreview variant="surface" size="md" elevation="low" palette="gray" />
+            <SelectPreview variant="surface" size="md" elevation="low" palette="purple" />
+            <SelectPreview variant="surface" size="md" elevation="low" palette="green" />
+
+            <div style={{ fontSize: 18, color: '#5b6574' }}>Soft</div>
+            <SelectPreview variant="soft" size="md" elevation="low" palette="blue" />
+            <SelectPreview variant="soft" size="md" elevation="low" palette="gray" />
+            <SelectPreview variant="soft" size="md" elevation="low" palette="purple" />
+            <SelectPreview variant="soft" size="md" elevation="low" palette="green" />
+
+            <div style={{ fontSize: 18, color: '#5b6574' }}>Solid</div>
+            <SelectPreview variant="solid" size="md" elevation="low" palette="blue" />
+            <SelectPreview variant="solid" size="md" elevation="low" palette="gray" />
+            <SelectPreview variant="solid" size="md" elevation="low" palette="purple" />
+            <SelectPreview variant="solid" size="md" elevation="low" palette="green" />
+
+            <div style={{ fontSize: 18, color: '#5b6574' }}>Contrast</div>
+            <SelectPreview variant="contrast" size="md" elevation="low" palette="blue" />
+            <SelectPreview variant="contrast" size="md" elevation="low" palette="gray" />
+            <SelectPreview variant="contrast" size="md" elevation="low" palette="purple" />
+            <SelectPreview variant="contrast" size="md" elevation="low" palette="green" />
+          </Grid>
+        </Grid>
+      ) : null}
+
+      {tab === 'colors' ? (
+        <Grid style={{ gap: 16 }}>
+          <Grid style={{ gridTemplateColumns: '120px repeat(3, minmax(240px, 1fr))', gap: 18, alignItems: 'start' }}>
+            <div />
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Surface</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Soft</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Solid</div>
+            {(['gray', 'amber', 'red', 'purple', 'blue', 'green'] as const satisfies readonly StoryPaletteName[]).map((name) => (
+              <React.Fragment key={name}>
+                <div style={{ fontSize: 18, color: '#5b6574', textTransform: 'capitalize' }}>{name}</div>
+                <SelectPreview variant="surface" size="md" elevation="low" palette={name} />
+                <SelectPreview variant="soft" size="md" elevation="low" palette={name} />
+                <SelectPreview variant="solid" size="md" elevation="low" palette={name} />
+              </React.Fragment>
+            ))}
+          </Grid>
+        </Grid>
+      ) : null}
+
+      {tab === 'sizes' ? (
+        <Grid style={{ gap: 18 }}>
+          <Grid style={{ gridTemplateColumns: '120px repeat(3, minmax(240px, 1fr))', gap: 18, alignItems: 'start' }}>
+            <div />
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Surface</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Soft</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Solid</div>
+            {(['1', '2', '3'] as const).map((size) => (
+              <React.Fragment key={size}>
+                <div style={{ fontSize: 18, color: '#5b6574' }}>Size {size}</div>
+                <SelectPreview variant="surface" size={size} elevation="low" palette="blue" />
+                <SelectPreview variant="soft" size={size} elevation="low" palette="blue" />
+                <SelectPreview variant="solid" size={size} elevation="low" palette="blue" />
+              </React.Fragment>
+            ))}
+          </Grid>
+        </Grid>
+      ) : null}
+    </Grid>
+  );
+}
+
+export const ThemeTokenMatrix: Story = {
+  render: () => <ThemeTokenMatrixStory />,
+};
+
+export const Playground: Story = {
+  render: (args) => {
+    const [value, setValue] = React.useState(args.value || 'review');
+
+    React.useEffect(() => {
+      setValue(args.value || '');
+    }, [args.value]);
+
+    return (
+      <Grid style={{ gap: 16, maxInlineSize: 1040 }}>
+        <Card radius={18}>
+          <CardHeader>
+            <CardTitle>Production select surface</CardTitle>
+            <CardDescription>
+              Controlled wrapper around `ui-select` with theme-backed variants, sizing, validation, and option-surface styling.
+            </CardDescription>
+          </CardHeader>
+          <Box slot="inset" style={{ padding: 16, display: 'grid', gap: 16 }}>
+            <Box
+              style={{
+                minHeight: 220,
+                borderRadius: 18,
+                border: '2px dashed color-mix(in srgb, var(--ui-color-primary, #2563eb) 30%, transparent)',
+                background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, white) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, white) 100%)',
+                display: 'grid',
+                placeItems: 'center',
+                padding: 24,
+              }}
+            >
+              <Box style={{ width: 'min(320px, 100%)' }}>
+                <Select
+                  {...args}
+                  label="Workflow status"
+                  description="Used by reviewers and publish automations."
+                  value={value}
+                  onChange={setValue}
+                  validation={args.validation && args.validation !== 'none' ? args.validation : undefined}
+                  radius={"4px"}
+                >
+                  {args.placeholder ? <option value="">{args.placeholder}</option> : null}
+                  {workflowOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </Select>
+              </Box>
+            </Box>
+
+            <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
+              <Flex align="center" style={{ gap: 8, flexWrap: 'wrap' }}>
+                <Button variant="secondary" onClick={() => setValue('draft')}>
+                  Reset to draft
+                </Button>
+                <Badge tone="info">value: {value || 'placeholder'}</Badge>
+              </Flex>
+              <Badge tone="neutral">variant: {String(args.variant || 'classic')}</Badge>
+            </Flex>
+          </Box>
+        </Card>
+      </Grid>
+    );
+  },
 };

@@ -5,34 +5,41 @@ const style = `
   :host {
     display: block;
     color-scheme: light dark;
-    --ui-alert-radius: 16px;
-    --ui-alert-bg: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent) 0%,
-      color-mix(in srgb, var(--ui-color-surface-alt, #f8fafc) 24%, var(--ui-color-surface, #ffffff)) 100%
-    );
-    --ui-alert-text: var(--ui-color-text, #0f172a);
-    --ui-alert-muted: var(--ui-color-muted, #64748b);
+    --ui-alert-radius: var(--base-alert-dialog-radius, var(--ui-radius, 4px));
+    --ui-alert-bg-base: var(--base-alert-dialog-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
+    --ui-alert-bg: var(--ui-alert-bg-base);
+    --ui-alert-text: var(--ui-color-text, var(--ui-text, #202020));
+    --ui-alert-muted: color-mix(in srgb, var(--ui-alert-text) 62%, var(--ui-color-muted, var(--ui-muted, #646464)) 38%);
     --ui-alert-accent: var(--ui-color-muted, #64748b);
-    --ui-alert-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
-    --ui-alert-shadow: none;
-    --ui-alert-padding: 24px;
-    --ui-alert-min-width: 360px;
-    --ui-alert-max-width: min(90vw, 560px);
+    --ui-alert-border-color: color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 82%, transparent);
+    --ui-alert-border: var(--base-alert-dialog-border, 1px solid var(--ui-alert-border-color));
+    --ui-alert-shadow: var(--base-alert-dialog-shadow, var(--shadow-4, none));
+    --ui-alert-padding: var(--base-alert-dialog-padding, 20px);
+    --ui-alert-gap: var(--base-alert-dialog-gap, var(--ui-default-gap, 8px));
+    --ui-alert-min-width: var(--base-alert-dialog-min-width, 360px);
+    --ui-alert-max-width: var(--base-alert-dialog-max-width, min(90vw, 560px));
     --ui-alert-z: 1301;
     --ui-alert-backdrop-z: 1300;
-    --ui-alert-focus: var(--ui-color-focus-ring, #2563eb);
+    --ui-alert-focus: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     --ui-alert-danger: var(--ui-color-danger, #dc2626);
-    --ui-alert-backdrop: rgba(2, 6, 23, 0.58);
-    --ui-alert-btn-bg: color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 90%, transparent);
-    --ui-alert-btn-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
-    --ui-alert-btn-hover: color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 76%, var(--ui-color-border, #cbd5e1) 24%);
+    --ui-alert-backdrop: var(--base-alert-dialog-backdrop, var(--color-overlay, rgba(2, 6, 23, 0.52)));
+    --ui-alert-btn-bg: color-mix(in srgb, var(--ui-alert-bg-base) 90%, var(--ui-color-background, #ffffff) 10%);
+    --ui-alert-btn-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
+    --ui-alert-btn-hover: color-mix(in srgb, var(--ui-alert-btn-bg) 76%, var(--ui-color-border, #cbd5e1) 24%);
     --ui-alert-confirm-bg: var(--ui-alert-accent);
-    --ui-alert-confirm-color: var(--ui-color-primary-contrast, #ffffff);
+    --ui-alert-confirm-color: var(--ui-color-foreground-on-primary, #ffffff);
     --ui-alert-icon-bg: color-mix(in srgb, var(--ui-alert-accent) 14%, transparent);
     --ui-alert-icon-color: var(--ui-alert-accent);
     --ui-alert-duration: 180ms;
     --ui-alert-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --ui-alert-title-size: var(--ui-default-font-size, 14px);
+    --ui-alert-title-line-height: var(--ui-default-line-height, 20px);
+    --ui-alert-title-weight: 650;
+    --ui-alert-description-size: 13px;
+    --ui-alert-description-line-height: 20px;
+    --ui-alert-icon-size: 28px;
+    --ui-alert-button-height: var(--base-button-height-md, 36px);
+    --ui-alert-button-radius: var(--ui-radius, 4px);
   }
 
   :host([tone='info']) {
@@ -51,16 +58,75 @@ const style = `
     --ui-alert-accent: var(--ui-color-danger, #dc2626);
   }
 
-  :host([size='sm']) {
-    --ui-alert-padding: 18px;
+  :host([size='sm']),
+  :host([size='1']) {
+    --ui-alert-padding: 16px;
+    --ui-alert-gap: 10px;
     --ui-alert-min-width: 300px;
     --ui-alert-max-width: min(88vw, 440px);
+    --ui-alert-title-size: 13px;
+    --ui-alert-title-line-height: 18px;
+    --ui-alert-description-size: 12px;
+    --ui-alert-description-line-height: 18px;
+    --ui-alert-icon-size: 24px;
+    --ui-alert-button-height: var(--base-button-height-sm, 32px);
   }
 
-  :host([size='lg']) {
-    --ui-alert-padding: 28px;
+  :host([size='md']),
+  :host([size='2']) {
+    --ui-alert-padding: var(--base-alert-dialog-padding, 20px);
+    --ui-alert-gap: var(--base-alert-dialog-gap, var(--ui-default-gap, 8px));
+  }
+
+  :host([size='lg']),
+  :host([size='3']) {
+    --ui-alert-padding: 24px;
+    --ui-alert-gap: 14px;
     --ui-alert-min-width: 420px;
     --ui-alert-max-width: min(92vw, 680px);
+    --ui-alert-title-size: 16px;
+    --ui-alert-title-line-height: 24px;
+    --ui-alert-description-size: 14px;
+    --ui-alert-description-line-height: 22px;
+    --ui-alert-icon-size: 32px;
+    --ui-alert-button-height: var(--base-button-height-lg, 44px);
+  }
+
+  :host([variant='outline']) {
+    --ui-alert-bg: color-mix(in srgb, var(--ui-alert-bg-base) 86%, transparent);
+    --ui-alert-border: 1px solid color-mix(in srgb, var(--ui-alert-accent) 30%, var(--ui-alert-border-color));
+    --ui-alert-shadow: none;
+  }
+
+  :host([variant='soft']) {
+    --ui-alert-bg: color-mix(in srgb, var(--ui-alert-accent) 8%, var(--ui-alert-bg-base));
+    --ui-alert-border: 1px solid color-mix(in srgb, var(--ui-alert-accent) 16%, var(--ui-alert-border-color));
+  }
+
+  :host([variant='solid']) {
+    --ui-alert-bg: var(--ui-alert-accent);
+    --ui-alert-border: 1px solid color-mix(in srgb, #000000 16%, transparent);
+    --ui-alert-text: #ffffff;
+    --ui-alert-muted: color-mix(in srgb, #ffffff 78%, transparent);
+    --ui-alert-btn-bg: color-mix(in srgb, #ffffff 16%, transparent);
+    --ui-alert-btn-border: color-mix(in srgb, #ffffff 22%, transparent);
+    --ui-alert-btn-hover: color-mix(in srgb, #ffffff 24%, transparent);
+    --ui-alert-confirm-bg: color-mix(in srgb, #000000 22%, transparent);
+    --ui-alert-confirm-color: #ffffff;
+    --ui-alert-icon-bg: color-mix(in srgb, #ffffff 18%, transparent);
+    --ui-alert-icon-color: #ffffff;
+  }
+
+  :host([elevation='none']) {
+    --ui-alert-shadow: none;
+  }
+
+  :host([elevation='low']) {
+    --ui-alert-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 22px rgba(15, 23, 42, 0.09);
+  }
+
+  :host([elevation='high']) {
+    --ui-alert-shadow: 0 2px 10px rgba(15, 23, 42, 0.08), 0 26px 54px rgba(15, 23, 42, 0.16);
   }
 
   .backdrop {
@@ -112,6 +178,10 @@ const style = `
     pointer-events: none;
   }
 
+  :host([indicator='none']) .dialog::before {
+    display: none;
+  }
+
   .backdrop[data-open='true'] {
     opacity: 1;
   }
@@ -130,7 +200,7 @@ const style = `
 
   .header {
     display: grid;
-    gap: 10px;
+    gap: var(--base-alert-dialog-header-gap, 10px);
     padding-inline-end: 40px;
     margin-bottom: 14px;
   }
@@ -143,9 +213,9 @@ const style = `
   }
 
   .icon-wrap {
-    width: 28px;
-    min-width: 28px;
-    height: 28px;
+    width: var(--ui-alert-icon-size);
+    min-width: var(--ui-alert-icon-size);
+    height: var(--ui-alert-icon-size);
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
@@ -172,16 +242,16 @@ const style = `
 
   .title {
     margin: 0;
-    font-size: 19px;
-    line-height: 1.28;
-    font-weight: 680;
-    letter-spacing: -0.01em;
+    font-size: var(--ui-alert-title-size);
+    line-height: var(--ui-alert-title-line-height);
+    font-weight: var(--ui-alert-title-weight);
+    letter-spacing: var(--ui-default-letter-spacing, 0em);
   }
 
   .description {
     margin: 0;
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: var(--ui-alert-description-size);
+    line-height: var(--ui-alert-description-line-height);
     color: var(--ui-alert-muted);
   }
 
@@ -221,7 +291,7 @@ const style = `
 
   .content {
     display: grid;
-    gap: 14px;
+    gap: max(12px, var(--ui-alert-gap));
   }
 
   .input-wrap,
@@ -238,12 +308,12 @@ const style = `
 
   .input {
     width: 100%;
-    border-radius: 11px;
-    border: 1px solid color-mix(in srgb, var(--ui-alert-border) 88%, transparent);
-    background: color-mix(in srgb, var(--ui-alert-bg) 94%, #ffffff 6%);
+    border-radius: var(--ui-radius, 4px);
+    border: var(--base-input-border, 1px solid color-mix(in srgb, var(--ui-alert-border-color) 88%, transparent));
+    background: var(--base-input-bg, color-mix(in srgb, var(--ui-alert-bg-base) 94%, #ffffff 6%));
     color: inherit;
     box-sizing: border-box;
-    min-height: 40px;
+    min-height: var(--base-input-height-md, 36px);
     padding: 9px 12px;
     font: inherit;
     line-height: 1.35;
@@ -275,18 +345,19 @@ const style = `
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 10px;
+    gap: var(--base-alert-dialog-footer-gap, 10px);
   }
 
   .btn {
     border: 1px solid var(--ui-alert-btn-border);
     background: var(--ui-alert-btn-bg);
     color: inherit;
-    border-radius: 11px;
-    min-height: 38px;
+    border-radius: var(--ui-alert-button-radius);
+    min-height: var(--ui-alert-button-height);
     padding: 0 15px;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--ui-default-font-size, 14px);
+    line-height: var(--ui-default-line-height, 20px);
+    font-weight: 500;
     cursor: pointer;
     transition:
       background 120ms ease,
@@ -337,9 +408,26 @@ const style = `
     animation: ui-alert-spin 720ms linear infinite;
   }
 
-  :host([headless]) .backdrop,
+  :host([headless]) .backdrop {
+    position: static;
+    inset: auto;
+    z-index: auto;
+    display: block;
+    background: transparent;
+    backdrop-filter: none;
+    opacity: 1;
+    transition: none;
+  }
+
   :host([headless]) .dialog {
-    display: none;
+    position: relative;
+    z-index: auto;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 
   @media (max-width: 720px) {
@@ -418,9 +506,12 @@ const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 type UIAlertDialogRole = 'alertdialog' | 'dialog';
-type UIAlertDialogSize = 'sm' | 'md' | 'lg';
+type UIAlertDialogSize = 'sm' | 'md' | 'lg' | '1' | '2' | '3';
 type UIAlertDialogState = 'idle' | 'loading' | 'error';
 type UIAlertDialogTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+type UIAlertDialogVariant = 'surface' | 'soft' | 'outline' | 'solid';
+type UIAlertDialogElevation = 'none' | 'low' | 'high';
+type UIAlertDialogIndicator = 'line' | 'none';
 type UIAlertDialogAction = 'confirm' | 'cancel' | 'dismiss';
 type UIAlertDialogDismissSource = 'esc' | 'backdrop' | 'close-icon' | 'abort' | 'unmount' | 'replace' | 'programmatic';
 
@@ -452,6 +543,10 @@ export interface UIAlertDialogTemplateOptions {
   role?: UIAlertDialogRole;
   tone?: UIAlertDialogTone;
   size?: UIAlertDialogSize;
+  variant?: UIAlertDialogVariant;
+  elevation?: UIAlertDialogElevation;
+  indicator?: UIAlertDialogIndicator;
+  radius?: string | number;
   ariaLabel?: string;
   ariaLabelledby?: string;
   ariaDescribedby?: string;
@@ -495,6 +590,37 @@ function normalizeTone(raw: string | null): UIAlertDialogTone {
   return 'neutral';
 }
 
+function normalizeSize(raw: string | null): UIAlertDialogSize {
+  if (raw === 'sm' || raw === '1') return 'sm';
+  if (raw === 'lg' || raw === '3') return 'lg';
+  return 'md';
+}
+
+function normalizeVariant(raw: string | null): UIAlertDialogVariant {
+  if (raw === 'soft' || raw === 'outline' || raw === 'solid') return raw;
+  return 'surface';
+}
+
+function normalizeElevation(raw: string | null): UIAlertDialogElevation {
+  if (raw === 'none' || raw === 'high') return raw;
+  return 'low';
+}
+
+function normalizeIndicator(raw: string | null): UIAlertDialogIndicator {
+  return raw === 'none' ? 'none' : 'line';
+}
+
+function normalizeRadius(value: string | null, fallback = 'var(--base-alert-dialog-radius, var(--ui-radius, 4px))'): string {
+  if (value == null) return fallback;
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return fallback;
+  if (normalized === 'full' || normalized === 'pill') return '999px';
+  if (/^-?\d+(\.\d+)?$/.test(normalized)) return `${normalized}px`;
+  return value;
+}
+
+const STYLE_ONLY_ATTRIBUTES = new Set(['tone', 'size', 'variant', 'elevation', 'indicator', 'radius']);
+
 function toneIconSvg(tone: UIAlertDialogTone): string {
   if (tone === 'success') {
     return '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10.2 8.3 13.4 15 6.8"></path></svg>';
@@ -533,6 +659,10 @@ export class UIAlertDialog extends ElementBase {
       'role',
       'tone',
       'size',
+      'variant',
+      'elevation',
+      'indicator',
+      'radius',
       'state',
       'aria-label',
       'aria-labelledby',
@@ -560,6 +690,7 @@ export class UIAlertDialog extends ElementBase {
   private _inputValue = '';
   private _checked = false;
   private _runtimeError = '';
+  private _activeHeadless = false;
 
   constructor() {
     super();
@@ -576,6 +707,7 @@ export class UIAlertDialog extends ElementBase {
     this.root.addEventListener('keydown', this._onKeyDown as EventListener);
     this.root.addEventListener('input', this._onInput as EventListener);
     this._syncFromAttributes();
+    this._syncVisualTokens();
     this._syncOpenState();
   }
 
@@ -592,6 +724,15 @@ export class UIAlertDialog extends ElementBase {
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
     if (oldValue === newValue) return;
+    if (STYLE_ONLY_ATTRIBUTES.has(name)) {
+      this._syncVisualTokens();
+      return;
+    }
+    if (name === 'headless') {
+      this._syncActiveEnvironment();
+      this.requestRender();
+      return;
+    }
     if (name === 'open') {
       this._syncOpenState();
       return;
@@ -675,9 +816,7 @@ export class UIAlertDialog extends ElementBase {
   }
 
   get size(): UIAlertDialogSize {
-    const raw = this.getAttribute('size');
-    if (raw === 'sm' || raw === 'lg') return raw;
-    return 'md';
+    return normalizeSize(this.getAttribute('size'));
   }
 
   set size(value: UIAlertDialogSize) {
@@ -686,6 +825,54 @@ export class UIAlertDialog extends ElementBase {
       return;
     }
     this.setAttribute('size', value);
+  }
+
+  get variant(): UIAlertDialogVariant {
+    return normalizeVariant(this.getAttribute('variant'));
+  }
+
+  set variant(value: UIAlertDialogVariant) {
+    if (value === 'surface') {
+      this.removeAttribute('variant');
+      return;
+    }
+    this.setAttribute('variant', value);
+  }
+
+  get elevation(): UIAlertDialogElevation {
+    return normalizeElevation(this.getAttribute('elevation'));
+  }
+
+  set elevation(value: UIAlertDialogElevation) {
+    if (value === 'low') {
+      this.removeAttribute('elevation');
+      return;
+    }
+    this.setAttribute('elevation', value);
+  }
+
+  get indicator(): UIAlertDialogIndicator {
+    return normalizeIndicator(this.getAttribute('indicator'));
+  }
+
+  set indicator(value: UIAlertDialogIndicator) {
+    if (value === 'line') {
+      this.removeAttribute('indicator');
+      return;
+    }
+    this.setAttribute('indicator', value);
+  }
+
+  get radius() {
+    return this.getAttribute('radius') || '';
+  }
+
+  set radius(value: string) {
+    if (!value) {
+      this.removeAttribute('radius');
+      return;
+    }
+    this.setAttribute('radius', value);
   }
 
   get state(): UIAlertDialogState {
@@ -735,8 +922,12 @@ export class UIAlertDialog extends ElementBase {
     if (this._config.closeOnBackdrop != null) this.closeOnBackdrop = Boolean(this._config.closeOnBackdrop);
     if (this._config.lockWhileLoading != null) this.lockWhileLoading = Boolean(this._config.lockWhileLoading);
     if (this._config.role) this.roleType = this._config.role;
-    this.tone = this._config.tone || 'neutral';
+    if (this._config.tone) this.tone = this._config.tone;
     if (this._config.size) this.size = this._config.size;
+    if (this._config.variant) this.variant = this._config.variant;
+    if (this._config.elevation) this.elevation = this._config.elevation;
+    if (this._config.indicator) this.indicator = this._config.indicator;
+    if (this._config.radius != null) this.radius = String(this._config.radius);
     if (this._config.ariaLabel) this.setAttribute('aria-label', this._config.ariaLabel);
     if (this._config.ariaLabelledby) this.setAttribute('aria-labelledby', this._config.ariaLabelledby);
     if (this._config.ariaDescribedby) this.setAttribute('aria-describedby', this._config.ariaDescribedby);
@@ -747,6 +938,7 @@ export class UIAlertDialog extends ElementBase {
     this._checked = this._config.checkbox?.checked ?? this._checked;
     this._runtimeError = this._config.errorMessage || '';
 
+    this._syncVisualTokens();
     this.requestRender();
   }
 
@@ -803,6 +995,10 @@ export class UIAlertDialog extends ElementBase {
     }
   }
 
+  private _syncVisualTokens() {
+    this.style.setProperty('--ui-alert-radius', normalizeRadius(this.getAttribute('radius')));
+  }
+
   private _syncOpenState() {
     const shouldBeOpen = this.hasAttribute('open');
     if (shouldBeOpen && !this._active) {
@@ -816,6 +1012,7 @@ export class UIAlertDialog extends ElementBase {
 
   private _activate() {
     this._active = true;
+    this._activeHeadless = this.headless;
     this._terminalEmitted = false;
     this._closeMeta = null;
 
@@ -823,19 +1020,21 @@ export class UIAlertDialog extends ElementBase {
       UIAlertDialog._openStack.push(this);
     }
 
-    this._lastActive = getDocumentActiveElement();
-    acquireBodyScrollLock();
+    this._lastActive = this.headless ? null : getDocumentActiveElement();
+    if (!this.headless) acquireBodyScrollLock();
 
-    if (isBrowser()) {
+    if (isBrowser() && !this.headless) {
       document.addEventListener('focusin', this._onFocusIn as EventListener, true);
     }
 
     const id = this.dialogId || this._uid;
     this._dispatchWithLegacy<UIAlertDialogOpenDetail>('ui-open', 'open', { id });
 
-    setTimeout(() => {
-      this._focusInitial();
-    }, 0);
+    if (!this.headless) {
+      setTimeout(() => {
+        this._focusInitial();
+      }, 0);
+    }
 
     this.requestRender();
   }
@@ -847,11 +1046,11 @@ export class UIAlertDialog extends ElementBase {
     const index = UIAlertDialog._openStack.lastIndexOf(this);
     if (index >= 0) UIAlertDialog._openStack.splice(index, 1);
 
-    if (isBrowser()) {
+    if (isBrowser() && !this._activeHeadless) {
       document.removeEventListener('focusin', this._onFocusIn as EventListener, true);
     }
 
-    releaseBodyScrollLock();
+    if (!this._activeHeadless) releaseBodyScrollLock();
 
     if (!this._terminalEmitted) {
       const meta = this._closeMeta || { action: 'dismiss' as UIAlertDialogAction, source: 'abort' as UIAlertDialogDismissSource };
@@ -880,7 +1079,7 @@ export class UIAlertDialog extends ElementBase {
 
     const returnFocus = this._lastActive;
     this._lastActive = null;
-    if (returnFocus) {
+    if (returnFocus && !this._activeHeadless) {
       setTimeout(() => {
         try {
           returnFocus.focus();
@@ -890,7 +1089,33 @@ export class UIAlertDialog extends ElementBase {
       }, 0);
     }
 
+    this._activeHeadless = false;
     this.requestRender();
+  }
+
+  private _syncActiveEnvironment() {
+    if (!this._active) return;
+    if (this.headless === this._activeHeadless) return;
+
+    if (this.headless) {
+      if (isBrowser()) {
+        document.removeEventListener('focusin', this._onFocusIn as EventListener, true);
+      }
+      releaseBodyScrollLock();
+      this._lastActive = null;
+      this._activeHeadless = true;
+      return;
+    }
+
+    this._lastActive = getDocumentActiveElement();
+    acquireBodyScrollLock();
+    if (isBrowser()) {
+      document.addEventListener('focusin', this._onFocusIn as EventListener, true);
+    }
+    this._activeHeadless = false;
+    setTimeout(() => {
+      this._focusInitial();
+    }, 0);
   }
 
   private _dispatchWithLegacy<T>(name: string, legacyName: string, detail: T, cancelable = false): CustomEvent<T> {
@@ -1148,7 +1373,7 @@ export class UIAlertDialog extends ElementBase {
     const isLoading = state === 'loading';
 
     this.setContent(`
-      ${this.headless ? '' : `<style>${style}</style>`}
+      <style>${style}</style>
       <div class="backdrop" part="backdrop" role="presentation" data-open="${String(this.open)}">
         <section
           class="dialog"

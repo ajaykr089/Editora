@@ -18,7 +18,7 @@ type Props = React.HTMLAttributes<HTMLElement> & {
   tone?: 'default' | 'neutral' | 'brand' | 'info' | 'success' | 'warning' | 'danger';
   state?: 'idle' | 'loading' | 'error' | 'success';
   elevation?: 'default' | 'none' | 'low' | 'high';
-  radius?: 'default' | 'none' | 'sm' | 'lg' | 'xl';
+  radius?: 'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full' | number | string;
   interactive?: boolean;
   disabled?: boolean;
   headless?: boolean;

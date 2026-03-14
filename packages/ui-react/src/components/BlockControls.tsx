@@ -14,10 +14,12 @@ export type BlockControlsNavigateDetail = {
 export interface BlockControlsProps extends React.HTMLAttributes<HTMLElement> {
   children?: React.ReactNode;
   orientation?: 'horizontal' | 'vertical';
-  variant?: 'floating' | 'solid' | 'outline' | 'minimal';
+  variant?: 'surface' | 'soft' | 'solid' | 'outline' | 'ghost' | 'floating' | 'minimal';
   tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
   state?: 'idle' | 'loading' | 'error' | 'success';
-  elevation?: 'none' | 'md' | 'high';
+  elevation?: 'none' | 'low' | 'md' | 'high';
+  size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
+  radius?: number | string;
   density?: 'compact' | 'comfortable';
   wrap?: boolean;
   loop?: boolean;
@@ -35,6 +37,8 @@ export const BlockControls = React.forwardRef<HTMLElement, BlockControlsProps>(f
     tone,
     state,
     elevation,
+    size,
+    radius,
     density,
     wrap,
     loop,
@@ -70,7 +74,7 @@ export const BlockControls = React.forwardRef<HTMLElement, BlockControlsProps>(f
     if (orientation) element.setAttribute('orientation', orientation);
     else element.removeAttribute('orientation');
 
-    if (variant && variant !== 'floating') element.setAttribute('variant', variant);
+    if (variant && variant !== 'surface' && variant !== 'floating') element.setAttribute('variant', variant);
     else element.removeAttribute('variant');
 
     if (tone && tone !== 'neutral') element.setAttribute('tone', tone);
@@ -79,8 +83,14 @@ export const BlockControls = React.forwardRef<HTMLElement, BlockControlsProps>(f
     if (state && state !== 'idle') element.setAttribute('state', state);
     else element.removeAttribute('state');
 
-    if (elevation && elevation !== 'md') element.setAttribute('elevation', elevation);
+    if (elevation && elevation !== 'low' && elevation !== 'md') element.setAttribute('elevation', elevation);
     else element.removeAttribute('elevation');
+
+    if (size && size !== 'md' && size !== '2') element.setAttribute('size', size);
+    else element.removeAttribute('size');
+
+    if (radius != null) element.setAttribute('radius', String(radius));
+    else element.removeAttribute('radius');
 
     if (density) element.setAttribute('density', density);
     else element.removeAttribute('density');
@@ -109,7 +119,7 @@ export const BlockControls = React.forwardRef<HTMLElement, BlockControlsProps>(f
 
     if (ariaLabel) element.setAttribute('aria-label', ariaLabel);
     else element.removeAttribute('aria-label');
-  }, [orientation, variant, tone, state, elevation, density, wrap, loop, disabled, activeIndex, ariaLabel]);
+  }, [orientation, variant, tone, state, elevation, size, radius, density, wrap, loop, disabled, activeIndex, ariaLabel]);
 
   return React.createElement('ui-block-controls', { ref, ...rest }, children);
 });

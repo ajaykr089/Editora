@@ -1,6 +1,5 @@
 
 import type { Preview } from '@storybook/react';
-import { withThemeSwitcher } from './withThemeSwitcher';
 
 const storyRawModules = import.meta.glob('./stories/**/*.stories.tsx', { as: 'raw', eager: true }) as Record<
   string,
@@ -370,7 +369,6 @@ if (typeof document !== 'undefined' && !document.getElementById('editora-not-def
 }
 
 const preview: Preview = {
-  decorators: [withThemeSwitcher],
   parameters: {
     docs: {
       canvas: {
@@ -379,8 +377,15 @@ const preview: Preview = {
       source: {
         state: 'open',
         type: 'dynamic',
-        transform: (source: string, context: { parameters?: { fileName?: string } }) =>
-          buildDocsSource(source, context?.parameters?.fileName),
+        transform: (source: string, context: { parameters?: { fileName?: string } }) => {
+          try {
+            return buildDocsSource(source, context?.parameters?.fileName);
+          } catch (error) {
+            const fileName = context?.parameters?.fileName || 'unknown-story';
+            console.warn(`[storybook] docs source transform failed for ${fileName}`, error);
+            return source;
+          }
+        },
       },
     },
     controls: {

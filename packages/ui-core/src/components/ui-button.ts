@@ -6,18 +6,21 @@ type ButtonAnimation = 'scale' | 'pulse' | 'none';
 type ButtonTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
 type ButtonState = 'idle' | 'loading' | 'error' | 'success';
 type ButtonType = 'button' | 'submit' | 'reset';
+type ButtonRecipe = 'classic' | 'solid' | 'soft' | 'surface' | 'outline' | 'ghost';
+type ButtonShape = 'none' | 'sm' | 'md' | 'lg' | 'full';
+type ButtonScale = '1' | '2' | '3' | '4';
 
 const style = `
   :host {
-    --ui-btn-radius: 10px;
-    --ui-btn-min-height: 40px;
-    --ui-btn-padding-inline: 14px;
-    --ui-btn-gap: 8px;
-    --ui-btn-font-size: 14px;
-    --ui-btn-font-weight: 600;
-    --ui-btn-letter-spacing: -0.01em;
-    --ui-btn-duration: 160ms;
-    --ui-btn-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --ui-btn-radius: var(--ui-control-radius, var(--ui-radius, 4px));
+    --ui-btn-min-height: var(--ui-control-min-height, var(--base-button-height-md, 40px));
+    --ui-btn-padding-inline: var(--ui-control-padding-inline, 14px);
+    --ui-btn-gap: var(--ui-control-gap, var(--ui-default-gap, 8px));
+    --ui-btn-font-size: var(--ui-control-font-size, var(--ui-default-font-size, var(--ui-font-size-md, var(--font-size-2, 14px))));
+    --ui-btn-font-weight: 400;
+    --ui-btn-letter-spacing: var(--ui-default-letter-spacing, var(--letter-spacing-2, 0em));
+    --ui-btn-duration: var(--ui-motion-base, 160ms);
+    --ui-btn-easing: var(--ui-motion-easing, cubic-bezier(0.2, 0.8, 0.2, 1));
 
     --ui-btn-accent: var(--ui-color-primary, #2563eb);
     --ui-btn-accent-strong: color-mix(in srgb, var(--ui-btn-accent) 82%, #0f172a 18%);
@@ -33,6 +36,7 @@ const style = `
     vertical-align: middle;
     box-sizing: border-box;
     color-scheme: light dark;
+    font-family: var(--ui-font-family, var(--default-font-family, system-ui, sans-serif));
   }
 
   :host([block]) {
@@ -79,6 +83,104 @@ const style = `
     --ui-btn-accent: color-mix(in srgb, var(--ui-color-primary, #2563eb) 78%, #0ea5e9 22%);
   }
 
+  :host([recipe="classic"]) .btn:not([disabled]) {
+    background-image: linear-gradient(180deg, color-mix(in srgb, white 18%, transparent), color-mix(in srgb, black 10%, transparent));
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, white 52%, transparent),
+      inset 0 -1px 0 color-mix(in srgb, black 22%, transparent),
+      0 1px 2px rgba(15, 23, 42, 0.08),
+      0 8px 18px color-mix(in srgb, var(--ui-btn-accent) 22%, transparent);
+  }
+
+  :host([recipe="solid"]) .btn {
+    background-image: none;
+  }
+
+  :host([recipe="soft"]) {
+    --ui-btn-surface: color-mix(in srgb, var(--ui-btn-accent) 10%, white);
+    --ui-btn-surface-alt: color-mix(in srgb, var(--ui-btn-accent) 14%, white);
+  }
+
+  :host([recipe="soft"]) .btn--secondary {
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  :host([recipe="surface"]) {
+    --ui-btn-surface: var(--color-panel-solid, var(--ui-color-surface));
+    --ui-btn-surface-alt: color-mix(in srgb, var(--ui-btn-accent) 5%, var(--color-panel-solid, var(--ui-color-surface)));
+  }
+
+  :host([recipe="surface"]) .btn--secondary {
+    border-color: color-mix(in srgb, var(--ui-btn-accent) 28%, var(--ui-color-border));
+    box-shadow: var(--shadow-1);
+  }
+
+  :host([recipe="outline"]) {
+    --ui-btn-surface: transparent;
+    --ui-btn-surface-alt: color-mix(in srgb, var(--ui-btn-accent) 6%, transparent);
+  }
+
+  :host([recipe="outline"]) .btn--secondary {
+    border-width: 1px;
+    border-style: solid;
+    border-color: color-mix(in srgb, var(--ui-btn-accent) 42%, var(--ui-color-border));
+    box-shadow: none;
+  }
+
+  :host([recipe="ghost"]) {
+    --ui-btn-surface: transparent;
+    --ui-btn-surface-alt: transparent;
+  }
+
+  :host([shape="none"]) {
+    --ui-btn-radius: 0px;
+  }
+
+  :host([shape="sm"]) {
+    --ui-btn-radius: 4px;
+  }
+
+  :host([shape="md"]) {
+    --ui-btn-radius: 8px;
+  }
+
+  :host([shape="lg"]) {
+    --ui-btn-radius: 12px;
+  }
+
+  :host([shape="full"]) {
+    --ui-btn-radius: 999px;
+  }
+
+  :host([scale="1"]) {
+    --ui-btn-min-height: 30px;
+    --ui-btn-padding-inline: 10px;
+    --ui-btn-font-size: 14px;
+    --ui-btn-gap: 6px;
+  }
+
+  :host([scale="2"]) {
+    --ui-btn-min-height: 36px;
+    --ui-btn-padding-inline: 14px;
+    --ui-btn-font-size: 14px;
+    --ui-btn-gap: 8px;
+  }
+
+  :host([scale="3"]) {
+    --ui-btn-min-height: 44px;
+    --ui-btn-padding-inline: 18px;
+    --ui-btn-font-size: 16px;
+    --ui-btn-gap: 8px;
+  }
+
+  :host([scale="4"]) {
+    --ui-btn-min-height: 56px;
+    --ui-btn-padding-inline: 24px;
+    --ui-btn-font-size: 18px;
+    --ui-btn-gap: 10px;
+  }
+
   .btn {
     position: relative;
     isolation: isolate;
@@ -95,7 +197,7 @@ const style = `
     font-size: var(--ui-btn-font-size);
     font-weight: var(--ui-btn-font-weight);
     letter-spacing: var(--ui-btn-letter-spacing);
-    line-height: 1.2;
+    line-height: var(--ui-default-line-height, 20px);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -204,19 +306,17 @@ const style = `
   }
 
   :host([size="sm"]) {
-    --ui-btn-font-size: 12px;
-    --ui-btn-min-height: 32px;
+    --ui-btn-font-size: var(--ui-font-size-sm, var(--font-size-1, 12px));
+    --ui-btn-min-height: var(--base-button-height-sm, 32px);
     --ui-btn-padding-inline: 10px;
     --ui-btn-gap: 6px;
-    --ui-btn-radius: 8px;
   }
 
   :host([size="lg"]) {
-    --ui-btn-font-size: 16px;
-    --ui-btn-min-height: 46px;
+    --ui-btn-font-size: var(--ui-font-size-lg, var(--font-size-3, 16px));
+    --ui-btn-min-height: var(--base-button-height-lg, 44px);
     --ui-btn-padding-inline: 18px;
     --ui-btn-gap: 10px;
-    --ui-btn-radius: 12px;
   }
 
   :host([state="loading"]) .btn,
@@ -288,8 +388,30 @@ const style = `
   }
 
   .slot--label {
+    display: inline-flex;
+    align-items: center;
+    line-height: inherit;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .slot--prefix,
+  .slot--suffix {
+    line-height: 0;
+  }
+
+  .slot--prefix ::slotted(*),
+  .slot--suffix ::slotted(*) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0;
+    vertical-align: middle;
+  }
+
+  .slot--label ::slotted(*) {
+    line-height: inherit;
+    vertical-align: middle;
   }
 
   .icon {
@@ -299,6 +421,8 @@ const style = `
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    line-height: 0;
+    vertical-align: middle;
     pointer-events: none;
   }
 
@@ -429,6 +553,32 @@ function toButtonType(value: string | null): ButtonType {
   return 'button';
 }
 
+function toRecipe(value: string | null): ButtonRecipe | null {
+  if (value === 'classic' || value === 'solid' || value === 'soft' || value === 'surface' || value === 'outline' || value === 'ghost') {
+    return value;
+  }
+  return null;
+}
+
+function toShape(value: string | null): ButtonShape | null {
+  if (value === 'none' || value === 'sm' || value === 'md' || value === 'lg' || value === 'full') return value;
+  return null;
+}
+
+function toScale(value: string | null): ButtonScale | null {
+  if (value === '1' || value === '2' || value === '3' || value === '4') return value;
+  return null;
+}
+
+function toRadius(value: string | null): string | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (trimmed === 'full') return '999px';
+  if (/^-?\d+(\.\d+)?$/.test(trimmed)) return `${trimmed}px`;
+  return trimmed;
+}
+
 function readHostString(el: HTMLElement, name: string): string | null {
   const attr = el.getAttribute(name);
   if (attr != null) return attr;
@@ -493,26 +643,36 @@ export class UIButton extends ElementBase {
       'tone',
       'state',
       'type',
+      'recipe',
+      'shape',
+      'radius',
+      'scale',
       'loading-label',
       'aria-label',
     ];
   }
 
   private _slots: HTMLSlotElement[] = [];
+  private _contentObserver: MutationObserver | null = null;
 
   constructor() {
     super();
     this._onRootClick = this._onRootClick.bind(this);
     this._onSlotChange = this._onSlotChange.bind(this);
+    this._onContentMutations = this._onContentMutations.bind(this);
   }
 
   connectedCallback() {
     super.connectedCallback();
     this.root.addEventListener('click', this._onRootClick as EventListener);
+    this._contentObserver = new MutationObserver(this._onContentMutations);
+    this._contentObserver.observe(this, { childList: true, subtree: false, characterData: true });
   }
 
   disconnectedCallback() {
     this.root.removeEventListener('click', this._onRootClick as EventListener);
+    this._contentObserver?.disconnect();
+    this._contentObserver = null;
     this._detachSlotListeners();
     super.disconnectedCallback();
   }
@@ -556,6 +716,10 @@ export class UIButton extends ElementBase {
     this.requestRender();
   }
 
+  private _onContentMutations() {
+    this.requestRender();
+  }
+
   protected render() {
     const disabled = readHostBoolean(this, 'disabled');
     const legacyLoading = readHostBoolean(this, 'loading');
@@ -574,6 +738,12 @@ export class UIButton extends ElementBase {
     const block = readHostBoolean(this, 'block');
     const headless = readHostBoolean(this, 'headless');
     const buttonType = toButtonType(readHostString(this, 'type'));
+    const recipe = toRecipe(readHostString(this, 'recipe'));
+    const rawShape = readHostString(this, 'shape');
+    const shape = toShape(rawShape);
+    const rawRadius = readHostString(this, 'radius');
+    const radius = toRadius(rawRadius);
+    const scale = toScale(readHostString(this, 'scale'));
     const buttonLabel = readHostString(this, 'aria-label');
     const loadingLabel = readHostString(this, 'loading-label') || 'Loading';
 
@@ -605,6 +775,23 @@ export class UIButton extends ElementBase {
       if (state === 'idle') this.removeAttribute('state');
       else this.setAttribute('state', state);
     }
+
+    if (recipe) this.setAttribute('recipe', recipe);
+    else this.removeAttribute('recipe');
+
+    if (rawShape != null) {
+      if (shape) this.setAttribute('shape', shape);
+      else this.removeAttribute('shape');
+    }
+
+    if (radius) {
+      this.style.setProperty('--ui-btn-radius', radius);
+    } else {
+      this.style.removeProperty('--ui-btn-radius');
+    }
+
+    if (scale) this.setAttribute('scale', scale);
+    else this.removeAttribute('scale');
 
     const buttonDisabled = disabled || loading;
     if (buttonDisabled) this.setAttribute('aria-disabled', 'true');

@@ -1,4 +1,11 @@
 import { ElementBase } from '../ElementBase';
+import {
+  focusRovingItem,
+  getRovingFocusBoundaryIndex,
+  moveRovingFocusIndex,
+  resolveRovingFocusIndex,
+  syncRovingTabStops
+} from '../primitives/roving-focus-group';
 
 type RadioOrientation = 'vertical' | 'horizontal';
 type RadioSize = 'sm' | 'md' | 'lg';
@@ -460,24 +467,21 @@ export class UIRadioGroup extends ElementBase {
   }
 
   private _moveSelection(step: number): void {
-    const total = this._options.length;
-    if (!total) return;
-
-    let next = this._focusIndex >= 0 ? this._focusIndex : this._findSelectedIndex();
-    if (next < 0) next = 0;
-
-    for (let i = 0; i < total; i += 1) {
-      next = (next + step + total) % total;
-      if (!this._options[next]?.disabled) {
-        this._selectIndex(next, 'keyboard');
-        return;
-      }
-    }
+    const next = moveRovingFocusIndex(this._options, this._focusIndex, step > 0 ? 1 : -1, {
+      wrap: true,
+      fallbackIndex: resolveRovingFocusIndex(this._options, {
+        activeIndex: this._focusIndex,
+        selectedIndex: this._findSelectedIndex(),
+        getDisabled: (item) => Boolean(item.disabled)
+      }),
+      getDisabled: (item) => Boolean(item.disabled)
+    });
+    if (next >= 0) this._selectIndex(next, 'keyboard');
   }
 
   private _focusOption(index: number): void {
     const next = this.root.querySelector<HTMLElement>(`.option[data-index="${index}"]`);
-    if (next) next.focus();
+    focusRovingItem(next);
   }
 
   private _syncInteractiveState(): void {
@@ -491,13 +495,11 @@ export class UIRadioGroup extends ElementBase {
 
     const selectedIndex = this._findSelectedIndex();
     const effectiveSelected = selectedIndex >= 0 ? selectedIndex : this._findFirstEnabledIndex();
-    if (
-      this._focusIndex < 0 ||
-      this._focusIndex >= this._options.length ||
-      this._options[this._focusIndex]?.disabled
-    ) {
-      this._focusIndex = effectiveSelected;
-    }
+    this._focusIndex = resolveRovingFocusIndex(this._options, {
+      activeIndex: this._focusIndex,
+      selectedIndex: effectiveSelected,
+      getDisabled: (item) => Boolean(item.disabled)
+    });
 
     const options = this.root.querySelectorAll<HTMLElement>('.option[data-index]');
     options.forEach((option) => {
@@ -516,6 +518,8 @@ export class UIRadioGroup extends ElementBase {
       option.setAttribute('aria-disabled', disabled ? 'true' : 'false');
       option.setAttribute('tabindex', String(tabIndex));
     });
+    const optionEls = Array.from(options);
+    syncRovingTabStops(optionEls, optionEls[this._focusIndex] || null, { activeAttribute: null });
   }
 
   private _onClick(event: Event): void {
@@ -548,19 +552,15 @@ export class UIRadioGroup extends ElementBase {
 
     if (key === 'Home') {
       event.preventDefault();
-      const first = this._findFirstEnabledIndex();
+      const first = getRovingFocusBoundaryIndex(this._options, 'first', (item) => Boolean(item.disabled));
       if (first >= 0) this._selectIndex(first, 'keyboard');
       return;
     }
 
     if (key === 'End') {
       event.preventDefault();
-      for (let i = this._options.length - 1; i >= 0; i -= 1) {
-        if (!this._options[i]?.disabled) {
-          this._selectIndex(i, 'keyboard');
-          return;
-        }
-      }
+      const last = getRovingFocusBoundaryIndex(this._options, 'last', (item) => Boolean(item.disabled));
+      if (last >= 0) this._selectIndex(last, 'keyboard');
       return;
     }
 

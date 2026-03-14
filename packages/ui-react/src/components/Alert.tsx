@@ -6,14 +6,23 @@ export type AlertProps = Omit<React.HTMLAttributes<HTMLElement>, 'onClose'> & {
   children?: React.ReactNode;
   title?: string;
   description?: string;
-  tone?: 'info' | 'success' | 'warning' | 'danger';
-  variant?: 'soft' | 'outline' | 'solid';
+  tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+  variant?: 'surface' | 'soft' | 'outline' | 'solid';
   layout?: 'inline' | 'banner';
+  size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
+  radius?: number | string;
+  elevation?: 'none' | 'low' | 'high';
+  indicator?: 'line' | 'none';
   dismissible?: boolean;
   open?: boolean;
   headless?: boolean;
   onClose?: () => void;
 };
+
+export interface AlertSectionProps extends React.HTMLAttributes<HTMLElement> {
+  as?: keyof JSX.IntrinsicElements;
+  children?: React.ReactNode;
+}
 
 export function Alert(props: AlertProps) {
   const {
@@ -22,6 +31,10 @@ export function Alert(props: AlertProps) {
     tone,
     variant,
     layout,
+    size,
+    radius,
+    elevation,
+    indicator,
     dismissible,
     open,
     headless,
@@ -59,6 +72,18 @@ export function Alert(props: AlertProps) {
     if (layout) el.setAttribute('layout', layout);
     else el.removeAttribute('layout');
 
+    if (size && size !== 'md') el.setAttribute('size', size);
+    else el.removeAttribute('size');
+
+    if (radius != null) el.setAttribute('radius', String(radius));
+    else el.removeAttribute('radius');
+
+    if (elevation && elevation !== 'low') el.setAttribute('elevation', elevation);
+    else el.removeAttribute('elevation');
+
+    if (indicator && indicator !== 'line') el.setAttribute('indicator', indicator);
+    else el.removeAttribute('indicator');
+
     if (dismissible) el.setAttribute('dismissible', '');
     else el.removeAttribute('dismissible');
 
@@ -69,9 +94,35 @@ export function Alert(props: AlertProps) {
       if (open) el.removeAttribute('hidden');
       else el.setAttribute('hidden', '');
     } else el.removeAttribute('hidden');
-  }, [title, description, tone, variant, layout, dismissible, open, headless]);
+  }, [title, description, tone, variant, layout, size, radius, elevation, indicator, dismissible, open, headless]);
 
   return React.createElement('ui-alert', { ref, ...rest }, children);
 }
+
+function createAlertSection(
+  defaultTag: keyof JSX.IntrinsicElements,
+  displayName: string,
+  slot?: string,
+  dataAttr?: string
+) {
+  const Component = React.forwardRef<HTMLElement, AlertSectionProps>(function AlertSection(
+    { as, children, style, ...rest },
+    forwardedRef
+  ) {
+    const Tag = (as || defaultTag) as keyof JSX.IntrinsicElements;
+    const props: Record<string, unknown> = { ref: forwardedRef, ...rest };
+    if (slot) props.slot = slot;
+    if (dataAttr) props[dataAttr] = '';
+    if (style) props.style = style;
+    return React.createElement(Tag, props, children);
+  });
+  Component.displayName = displayName;
+  return Component;
+}
+
+export const AlertIcon = createAlertSection('span', 'AlertIcon', 'icon', 'data-ui-alert-icon');
+export const AlertTitle = createAlertSection('div', 'AlertTitle', 'title', 'data-ui-alert-title');
+export const AlertDescription = createAlertSection('div', 'AlertDescription', undefined, 'data-ui-alert-description');
+export const AlertActions = createAlertSection('div', 'AlertActions', 'actions', 'data-ui-alert-actions');
 
 export default Alert;

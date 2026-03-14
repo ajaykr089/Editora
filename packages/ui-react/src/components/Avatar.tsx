@@ -7,14 +7,15 @@ export interface AvatarProps extends Omit<React.HTMLAttributes<HTMLElement>, 'on
   src?: string;
   alt?: string;
   initials?: string;
-  size?: number | string;
+  size?: number | string | 'sm' | 'md' | 'lg' | '1' | '2' | '3';
   bg?: string;
   color?: string;
-  radius?: string;
+  radius?: number | string;
   fontWeight?: number | string;
   shape?: 'circle' | 'rounded' | 'square';
   tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
-  variant?: 'soft' | 'solid' | 'outline';
+  variant?: 'surface' | 'soft' | 'solid' | 'outline';
+  elevation?: 'none' | 'low' | 'high';
   status?: 'online' | 'offline' | 'busy' | 'away';
   state?: 'idle' | 'loading' | 'error' | 'success';
   badge?: string;
@@ -59,6 +60,7 @@ export const Avatar = React.forwardRef<HTMLElement, AvatarProps>(function Avatar
     shape,
     tone,
     variant,
+    elevation,
     status,
     state,
     badge,
@@ -119,7 +121,7 @@ export const Avatar = React.forwardRef<HTMLElement, AvatarProps>(function Avatar
     if (color) element.setAttribute('color', color);
     else element.removeAttribute('color');
 
-    if (radius) element.setAttribute('radius', radius);
+    if (radius != null) element.setAttribute('radius', String(radius));
     else element.removeAttribute('radius');
 
     if (fontWeight != null) element.setAttribute('fontweight', String(fontWeight));
@@ -131,8 +133,11 @@ export const Avatar = React.forwardRef<HTMLElement, AvatarProps>(function Avatar
     if (tone && tone !== 'neutral') element.setAttribute('tone', tone);
     else element.removeAttribute('tone');
 
-    if (variant && variant !== 'soft') element.setAttribute('variant', variant);
+    if (variant && variant !== 'surface') element.setAttribute('variant', variant);
     else element.removeAttribute('variant');
+
+    if (elevation && elevation !== 'low') element.setAttribute('elevation', elevation);
+    else element.removeAttribute('elevation');
 
     if (status) element.setAttribute('status', status);
     else element.removeAttribute('status');
@@ -158,7 +163,7 @@ export const Avatar = React.forwardRef<HTMLElement, AvatarProps>(function Avatar
     const loadingAttr = toLoading(loading);
     if (loadingAttr) element.setAttribute('loading', loadingAttr);
     else element.removeAttribute('loading');
-  }, [src, alt, initials, size, bg, color, radius, fontWeight, shape, tone, variant, status, state, badge, ring, interactive, disabled, loading]);
+  }, [src, alt, initials, size, bg, color, radius, fontWeight, shape, tone, variant, elevation, status, state, badge, ring, interactive, disabled, loading]);
 
   return React.createElement('ui-avatar', { ref, ...rest }, fallback);
 });
