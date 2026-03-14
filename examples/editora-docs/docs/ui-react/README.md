@@ -2,6 +2,7 @@
 title: UI React
 description: React wrappers for @editora/ui-core Web Components with enhanced developer experience.
 sidebar_label: Overview
+slug: /ui-react/overview
 ---
 
 # UI React
@@ -54,23 +55,23 @@ export function App() {
 - [ColorPicker](./form-inputs/color-picker) - Color selection
 
 ### Data Display
-- [Table](./data-display/table) - Basic table component
-- [DataTable](./data-display/data-table) - Advanced data table
-- [Chart](./data-display/chart) - Data visualization
-- [Timeline](./data-display/timeline) - Timeline visualization
-- [Tree](./data-display/tree) - Hierarchical data display
+- [Table](./interactive/table) - Basic table component
+- [DataTable](./interactive/data-table) - Advanced data table
+- [Chart](./interactive/chart) - Data visualization
+- [Timeline](./interactive/timeline) - Timeline visualization
+- [Tree](./interactive/tree) - Hierarchical data display
 
 ### Overlay & Modal
-- [Dialog](./overlay-modal/dialog) - Modal dialog
-- [Tooltip](./overlay-modal/tooltip) - Hover information
-- [Popover](./overlay-modal/popover) - Floating content
-- [Toast](./overlay-modal/toast) - Toast notifications
+- [Dialog](./interactive/dialog) - Modal dialog
+- [Tooltip](./interactive/tooltip) - Hover information
+- [Popover](./interactive/popover) - Floating content
+- [Toast](./interactive/toast) - Toast notifications
 
 ### Navigation & Layout
-- [Layout](./navigation-layout/layout) - Application layout
-- [Sidebar](./navigation-layout/sidebar) - Side navigation
-- [Tabs](./navigation-layout/tabs) - Tabbed interface
-- [Breadcrumb](./navigation-layout/breadcrumb) - Navigation breadcrumbs
+- [Layout](./interactive/layout) - Application layout
+- [Sidebar](./interactive/sidebar) - Side navigation
+- [Tabs](./interactive/tabs) - Tabbed interface
+- [Breadcrumb](./interactive/breadcrumb) - Navigation breadcrumbs
 
 ### Interactive Components
 - [Button](./interactive/button) - Clickable button
@@ -183,9 +184,9 @@ Components include:
 
 For users migrating from other UI libraries:
 
-- [Props Mapping](./migration/props-mapping)
-- [Event Handling](./migration/event-handling)
-- [Styling Migration](./migration/styling)
+- [Examples](./EXAMPLES.md) - Real-world usage patterns
+- [Component Registry](./COMPONENT_REGISTRY.md) - Machine-readable component inventory
+- [UI React Overview](/docs/ui-react) - Canonical getting started guide
 
 ## Examples
 

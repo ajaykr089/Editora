@@ -38,6 +38,7 @@ yarn-error.log*
 next-env.d.ts
 
 *storybook.log
+.storybook
 storybook-static
 examples/storybook-demo/
 api/media/node_modules/
@@ -49,3 +50,4 @@ build/
 api/media/uploads/
 ai-docs/
 e2e-local/
+.storybook/*

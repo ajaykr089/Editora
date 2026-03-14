@@ -511,6 +511,6 @@ Access theme tokens directly in CSS.
 
 ## Related Components
 
-- [useTheme](./use-theme) - Hook for accessing theme tokens
-- [Theme Tokens](../guide/theming) - Comprehensive theming guide
-- [ThemeProvider](./theme-provider) - Theme context provider
+- [UI React Overview](../) - Main entry point for the ui-react docs
+- [Alert](../interactive/alert) - Theme-aware semantic messaging component
+- [Dialog](../interactive/dialog) - Modal surface that uses theme tokens

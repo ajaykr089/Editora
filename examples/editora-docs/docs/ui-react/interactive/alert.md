@@ -886,5 +886,4 @@ Alert components include proper ARIA attributes:
 
 - [Toast](./toast) - Temporary notification messages
 - [Dialog](./dialog) - Modal dialogs for important interactions
-- [Notification](./notification) - Persistent notification system
-- [Banner](./banner) - Site-wide announcements
+- [AlertDialog](./alert-dialog) - Confirmation and critical action dialogs

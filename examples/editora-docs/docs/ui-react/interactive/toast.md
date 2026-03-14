@@ -955,6 +955,6 @@ Toast components include proper ARIA attributes:
 ## Related Components
 
 - [Alert](./alert) - Persistent alert messages
-- [Notification](./notification) - Persistent notification system
-- [Banner](./banner) - Site-wide announcements
-- [Snackbar](./snackbar) - Material Design style notifications
+- [Dialog](./dialog) - Modal confirmation and workflow messages
+- [Popover](./popover) - Anchored contextual messaging
+- [Tooltip](./tooltip) - Lightweight inline helper messaging
