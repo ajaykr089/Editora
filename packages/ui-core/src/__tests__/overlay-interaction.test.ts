@@ -1,4 +1,19 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import '../components/ui-popover';
+import '../components/ui-dropdown';
+import '../components/ui-menu';
+import '../components/ui-context-menu';
+import '../components/ui-floating-toolbar';
+
+function flushMicrotask() {
+  return Promise.resolve();
+}
+
+function flushAnimationFrame() {
+  return new Promise<void>((resolve) => {
+    requestAnimationFrame(() => resolve());
+  });
+}
 
 describe('overlay interaction (popover / dropdown / menu)', () => {
   beforeEach(() => {
@@ -79,30 +94,25 @@ describe('overlay interaction (popover / dropdown / menu)', () => {
     el.remove();
   });
 
-  it('ui-dropdown: clicking a slotted trigger opens the dropdown and portal contains menu', () => {
+  it('ui-dropdown: clicking a slotted trigger opens the dropdown and renders an inline menu', async () => {
     const el = document.createElement('ui-dropdown') as any;
     el.innerHTML = `
       <button slot="trigger">Open</button>
       <div slot="content"><div class="item">Item A</div></div>
     `;
     document.body.appendChild(el);
+    await flushMicrotask();
 
     const trigger = el.querySelector('[slot="trigger"]') as HTMLElement;
     trigger.click();
+    await flushMicrotask();
 
     expect(el.hasAttribute('open')).toBe(true);
 
-    const root = document.getElementById('ui-portal-root')!;
-    const menu = root.querySelector('.menu') as HTMLElement | null;
+    const menu = el.shadowRoot?.querySelector('.menu') as HTMLElement | null;
     expect(menu).toBeTruthy();
     expect(menu!.textContent).toContain('Item A');
-    // ensure role and default item styling hooks are present
     expect(menu!.getAttribute('role')).toBe('menu');
-
-    // removing host must also cleanup the portal
-    el.remove();
-    const rootAfter = document.getElementById('ui-portal-root');
-    expect(rootAfter?.querySelector('.menu')).toBeNull();
   });
 
   it('ui-menu: clicking slotted trigger opens menu and selecting item emits select event with index', () => {
@@ -173,7 +183,7 @@ describe('overlay interaction (popover / dropdown / menu)', () => {
     el.remove();
   });
 
-  it('ui-floating-toolbar: showForAnchorId cleans up if anchor is removed/hidden', () => {
+  it('ui-floating-toolbar: showForAnchorId cleans up if anchor is removed/hidden', async () => {
     const anchor = document.createElement('div');
     anchor.id = 'ft-anchor';
     anchor.style.position = 'absolute';
@@ -184,8 +194,11 @@ describe('overlay interaction (popover / dropdown / menu)', () => {
     const toolbar = document.createElement('ui-floating-toolbar') as any;
     toolbar.innerHTML = `<div slot="toolbar">Toolbar</div>`;
     document.body.appendChild(toolbar);
+    await flushMicrotask();
 
     toolbar.showForAnchorId && toolbar.showForAnchorId('ft-anchor');
+    await flushMicrotask();
+    await flushAnimationFrame();
     expect(toolbar.hasAttribute('open')).toBe(true);
 
     const panel = toolbar.shadowRoot?.querySelector('.panel') as HTMLElement | null;

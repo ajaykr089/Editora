@@ -1097,9 +1097,9 @@ export class UIMenubar extends ElementBase {
     this._applyPanelTokens(portal);
 
     if (source) {
-      const clone = source.cloneNode(true) as HTMLElement;
-      clone.setAttribute('slot', 'menu');
-      panel.appendChild(clone);
+      const cloned = source.cloneNode(true) as HTMLElement;
+      cloned.setAttribute('slot', 'menu');
+      panel.appendChild(cloned);
     }
 
     this._hydratePanelItems(panel);

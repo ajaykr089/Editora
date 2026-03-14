@@ -52,11 +52,66 @@ describe('ui-dropdown and ui-menu integration', () => {
     expect(portalBefore).toBeTruthy();
 
     el.setAttribute('variant', 'contrast');
+    el.setAttribute('size', 'lg');
     el.setAttribute('density', 'comfortable');
-    el.setAttribute('shape', 'soft');
+    el.setAttribute('radius', '16');
     await flushMicrotask();
 
     expect(el._portalEl).toBe(portalBefore);
+    expect(el._portalEl?.getAttribute('data-size')).toBe('lg');
+    expect(el._portalEl?.style.getPropertyValue('--ui-dropdown-radius')).toBe('16px');
+  });
+
+  it('ui-dropdown mirrors theme surface props onto the portaled menu', async () => {
+    const el = document.createElement('ui-dropdown') as HTMLElement & { _portalEl?: HTMLElement | null };
+    el.innerHTML = `
+      <button slot="trigger">Open</button>
+      <div slot="content"><button class="item">One</button></div>
+    `;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    el.setAttribute('variant', 'glass');
+    el.setAttribute('size', 'sm');
+    el.setAttribute('tone', 'warning');
+    el.setAttribute('radius', 'full');
+    el.setAttribute('open', '');
+    await flushMicrotask();
+
+    expect(el._portalEl?.getAttribute('data-variant')).toBe('glass');
+    expect(el._portalEl?.getAttribute('data-size')).toBe('sm');
+    expect(el._portalEl?.getAttribute('data-tone')).toBe('warning');
+    expect(el._portalEl?.style.getPropertyValue('--ui-dropdown-radius')).toBe('999px');
+    expect(el._portalEl?.style.getPropertyValue('--ui-dropdown-item-radius')).toBe('999px');
+  });
+
+  it('ui-dropdown leaves size metrics to the menu size rules instead of copying host defaults inline', async () => {
+    const el = document.createElement('ui-dropdown') as HTMLElement & { _portalEl?: HTMLElement | null };
+    el.innerHTML = `
+      <button slot="trigger">Open</button>
+      <div slot="content"><button class="item">One</button></div>
+    `;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    el.setAttribute('size', 'sm');
+    el.setAttribute('open', '');
+    await flushMicrotask();
+
+    const menu = el._portalEl;
+    expect(menu).toBeTruthy();
+    expect(menu?.getAttribute('data-size')).toBe('sm');
+    expect(menu?.style.getPropertyValue('--ui-dropdown-item-font-size')).toBe('');
+    expect(menu?.style.getPropertyValue('--ui-dropdown-item-min-height')).toBe('');
+    expect(menu?.style.getPropertyValue('--ui-dropdown-item-pad-y')).toBe('');
+    expect(menu?.style.getPropertyValue('--ui-dropdown-separator-margin')).toBe('');
+
+    el.setAttribute('size', 'lg');
+    await flushMicrotask();
+
+    expect(menu?.getAttribute('data-size')).toBe('lg');
+    expect(menu?.style.getPropertyValue('--ui-dropdown-item-font-size')).toBe('');
+    expect(menu?.style.getPropertyValue('--ui-dropdown-item-min-height')).toBe('');
   });
 
   it('ui-menu opens from trigger click, emits select, and closes on outside pointerdown', async () => {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   findListboxTypeaheadIndex,
   getListboxBoundaryIndex,
@@ -36,9 +36,33 @@ describe('listbox primitive', () => {
 
   it('syncs aria-activedescendant and scrolls defensively', () => {
     const owner = document.createElement('input');
+    const container = document.createElement('div');
     const item = document.createElement('button');
     item.id = 'opt-1';
-    item.scrollIntoView = undefined as unknown as typeof item.scrollIntoView;
+    const nativeScrollSpy = vi.fn();
+    item.scrollIntoView = nativeScrollSpy as unknown as typeof item.scrollIntoView;
+
+    Object.defineProperties(container, {
+      clientHeight: { configurable: true, value: 80 },
+      scrollHeight: { configurable: true, value: 300 },
+      clientWidth: { configurable: true, value: 120 },
+      scrollWidth: { configurable: true, value: 120 }
+    });
+    Object.defineProperties(item, {
+      getBoundingClientRect: {
+        configurable: true,
+        value: () => ({ top: 140, left: 0, width: 80, height: 24, bottom: 164, right: 80, x: 0, y: 140, toJSON: () => ({}) })
+      }
+    });
+    Object.defineProperties(container, {
+      getBoundingClientRect: {
+        configurable: true,
+        value: () => ({ top: 0, left: 0, width: 120, height: 80, bottom: 80, right: 120, x: 0, y: 0, toJSON: () => ({}) })
+      }
+    });
+    container.style.overflowY = 'auto';
+    container.appendChild(item);
+    document.body.appendChild(container);
 
     syncActiveDescendant(owner, item.id);
     expect(owner.getAttribute('aria-activedescendant')).toBe('opt-1');
@@ -47,5 +71,7 @@ describe('listbox primitive', () => {
     expect(owner.hasAttribute('aria-activedescendant')).toBe(false);
 
     expect(() => scrollListboxItemIntoView(item)).not.toThrow();
+    expect(container.scrollTop).toBe(84);
+    expect(nativeScrollSpy).not.toHaveBeenCalled();
   });
 });

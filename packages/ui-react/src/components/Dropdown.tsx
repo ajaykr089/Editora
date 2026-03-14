@@ -1,17 +1,33 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-type Props = React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode };
+type BaseProps = React.HTMLAttributes<HTMLElement> & {
+  children?: React.ReactNode;
+};
 
-type DropdownProps = Props & {
+export type DropdownProps = BaseProps & {
   open?: boolean;
   placement?: 'top' | 'bottom' | 'left' | 'right';
-  variant?: 'default' | 'solid' | 'flat' | 'line' | 'glass' | 'contrast';
+  variant?:
+    | 'default'
+    | 'surface'
+    | 'soft'
+    | 'filled'
+    | 'outline'
+    | 'flat'
+    | 'line'
+    | 'minimal'
+    | 'ghost'
+    | 'glass'
+    | 'solid'
+    | 'contrast';
+  size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
   density?: 'default' | 'compact' | 'comfortable';
-  shape?: 'default' | 'square' | 'soft';
+  radius?: number | string;
+  shape?: 'default' | 'square' | 'soft' | 'rounded' | 'pill';
   elevation?: 'default' | 'none' | 'low' | 'high';
-  tone?: 'default' | 'brand' | 'danger' | 'success' | 'warning';
+  tone?: 'default' | 'brand' | 'neutral' | 'info' | 'danger' | 'success' | 'warning';
   closeOnSelect?: boolean;
   typeahead?: boolean;
   onOpen?: () => void;
@@ -28,7 +44,9 @@ export const Dropdown = React.forwardRef<HTMLElement, DropdownProps>(function Dr
     open,
     placement,
     variant,
+    size,
     density,
+    radius,
     shape,
     elevation,
     tone,
@@ -46,18 +64,18 @@ export const Dropdown = React.forwardRef<HTMLElement, DropdownProps>(function Dr
 ) {
   const ref = useRef<HTMLElement | null>(null);
 
-  React.useImperativeHandle(forwardedRef, () => ref.current as any);
+  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
     const handleOpen = () => onOpen?.();
     const handleClose = () => onClose?.();
     const handleChange = (event: Event) => {
       const detail = (event as CustomEvent<{ open?: boolean; reason?: string }>).detail || {};
-      const next = detail?.open;
-      if (typeof next === 'boolean') onChange?.(next);
-      if (typeof next === 'boolean') onChangeDetail?.({ open: next, reason: detail.reason });
+      if (typeof detail.open === 'boolean') onChange?.(detail.open);
+      if (typeof detail.open === 'boolean') onChangeDetail?.({ open: detail.open, reason: detail.reason });
     };
     const handleRequestClose = (event: Event) => {
       const detail = (event as CustomEvent<{ reason?: string }>).detail || {};
@@ -66,6 +84,7 @@ export const Dropdown = React.forwardRef<HTMLElement, DropdownProps>(function Dr
     const handleSelect = (event: Event) => {
       onSelect?.((event as CustomEvent<{ value?: string; label?: string; checked?: boolean; item?: HTMLElement }>).detail || {});
     };
+
     el.addEventListener('open', handleOpen as EventListener);
     el.addEventListener('close', handleClose as EventListener);
     el.addEventListener('change', handleChange as EventListener);
@@ -82,72 +101,48 @@ export const Dropdown = React.forwardRef<HTMLElement, DropdownProps>(function Dr
 
   useIsomorphicLayoutEffect(() => {
     const el = ref.current;
-    if (!el || open == null) return;
-    if (open) el.setAttribute('open', '');
-    else el.removeAttribute('open');
-  }, [open]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
     if (!el) return;
-    if (placement) el.setAttribute('placement', placement);
-    else el.removeAttribute('placement');
-  }, [placement]);
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (variant && variant !== 'default') el.setAttribute('variant', variant);
-    else el.removeAttribute('variant');
-  }, [variant]);
+    const syncAttr = (attr: string, next: string | null) => {
+      const current = el.getAttribute(attr);
+      if (next == null) {
+        if (current != null) el.removeAttribute(attr);
+        return;
+      }
+      if (current !== next) el.setAttribute(attr, next);
+    };
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (density && density !== 'default') el.setAttribute('density', density);
-    else el.removeAttribute('density');
-  }, [density]);
+    const syncBooleanish = (attr: string, next: boolean | undefined, mode: 'presence' | 'value' = 'presence') => {
+      if (mode === 'presence') {
+        if (next) {
+          if (!el.hasAttribute(attr)) el.setAttribute(attr, '');
+        } else if (el.hasAttribute(attr)) {
+          el.removeAttribute(attr);
+        }
+        return;
+      }
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (shape && shape !== 'default') el.setAttribute('shape', shape);
-    else el.removeAttribute('shape');
-  }, [shape]);
+      if (next == null) {
+        if (el.hasAttribute(attr)) el.removeAttribute(attr);
+        return;
+      }
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (elevation && elevation !== 'default') el.setAttribute('elevation', elevation);
-    else el.removeAttribute('elevation');
-  }, [elevation]);
+      const serialized = next ? 'true' : 'false';
+      if (el.getAttribute(attr) !== serialized) el.setAttribute(attr, serialized);
+    };
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (tone && tone !== 'default' && tone !== 'brand') el.setAttribute('tone', tone);
-    else el.removeAttribute('tone');
-  }, [tone]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (closeOnSelect == null) {
-      el.removeAttribute('close-on-select');
-      return;
-    }
-    el.setAttribute('close-on-select', closeOnSelect ? 'true' : 'false');
-  }, [closeOnSelect]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (typeahead == null) {
-      el.removeAttribute('typeahead');
-      return;
-    }
-    el.setAttribute('typeahead', typeahead ? 'true' : 'false');
-  }, [typeahead]);
+    syncBooleanish('open', open);
+    syncAttr('placement', placement || null);
+    syncAttr('variant', variant && variant !== 'default' && variant !== 'surface' ? variant : null);
+    syncAttr('size', size && size !== 'md' && size !== '2' ? size : null);
+    syncAttr('density', density && density !== 'default' ? density : null);
+    syncAttr('radius', radius == null || radius === '' || radius === 'default' ? null : String(radius));
+    syncAttr('shape', shape && shape !== 'default' && shape !== 'rounded' ? shape : null);
+    syncAttr('elevation', elevation && elevation !== 'default' ? elevation : null);
+    syncAttr('tone', tone && tone !== 'default' && tone !== 'brand' ? tone : null);
+    syncBooleanish('close-on-select', closeOnSelect, 'value');
+    syncBooleanish('typeahead', typeahead, 'value');
+  }, [open, placement, variant, size, density, radius, shape, elevation, tone, closeOnSelect, typeahead]);
 
   return React.createElement('ui-dropdown', { ref, ...rest }, children);
 });

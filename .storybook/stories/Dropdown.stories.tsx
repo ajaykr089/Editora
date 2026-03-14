@@ -1,245 +1,350 @@
 import React from 'react';
-import { Box, Button, Dropdown, Grid, ThemeProvider, useFloating } from '@editora/ui-react';
+import type { Meta, StoryObj } from '@storybook/react';
+import { createThemeTokens, type AccentPaletteName, type ThemeTokens } from '@editora/ui-core';
+import { Badge, Box, Button, Dropdown, Flex, Grid, ThemeProvider } from '@editora/ui-react';
 
-export default {
+const meta: Meta<typeof Dropdown> = {
   title: 'UI/Dropdown',
   component: Dropdown,
+  args: {
+    open: false,
+    placement: 'bottom',
+    variant: 'soft',
+    size: 'md',
+    density: 'default',
+    shape: 'rounded',
+    elevation: 'low',
+    radius: 12,
+    tone: 'default',
+    closeOnSelect: true,
+    typeahead: true,
+  },
   argTypes: {
+    open: { control: 'boolean' },
     placement: { control: 'select', options: ['bottom', 'top', 'left', 'right'] },
-    variant: { control: 'select', options: ['default', 'solid', 'flat', 'line', 'glass', 'contrast'] },
+    variant: {
+      control: 'select',
+      options: ['default', 'surface', 'soft', 'filled', 'outline', 'flat', 'line', 'minimal', 'ghost', 'glass', 'solid', 'contrast'],
+    },
+    size: { control: 'select', options: ['sm', 'md', 'lg', '1', '2', '3'] },
     density: { control: 'select', options: ['default', 'compact', 'comfortable'] },
-    shape: { control: 'select', options: ['default', 'square', 'soft'] },
-    elevation: { control: 'select', options: ['default', 'none', 'low', 'high'] },
-    tone: { control: 'select', options: ['default', 'brand', 'danger', 'success', 'warning'] },
+    shape: { control: 'select', options: ['rounded', 'square', 'soft', 'pill'] },
+    elevation: { control: 'select', options: ['none', 'low', 'high'] },
+    tone: { control: 'select', options: ['default', 'brand', 'neutral', 'info', 'danger', 'success', 'warning'] },
+    radius: { control: 'text' },
     closeOnSelect: { control: 'boolean' },
-    typeahead: { control: 'boolean' }
-  }
+    typeahead: { control: 'boolean' },
+  },
 };
 
-const cardStyle: React.CSSProperties = {
-  border: '1px solid var(--ui-color-border, rgba(15, 23, 42, 0.16))',
-  borderRadius: 12,
-  padding: 14,
-  background: 'var(--ui-color-surface, #ffffff)',
-  color: 'var(--ui-color-text, #0f172a)'
-};
+export default meta;
 
-const MenuContent = () => (
-  <Box slot="content" role="menu" style={{ minWidth: 200, padding: 0, borderRadius: 0, boxShadow: 'var(--ui-shadow-sm, 0 2px 6px rgba(16,24,40,0.08))' }}>
-    <Box role="menuitem" tabIndex={-1}><span className="icon">✏</span><span className="label">Edit</span><span className="shortcut">E</span></Box>
-    <Box role="menuitem" tabIndex={-1}><span className="icon">⧉</span><span className="label">Duplicate</span><span className="shortcut">D</span></Box>
-    <Box className="separator" role="separator" />
-    <Box role="menuitem" tabIndex={-1}><span className="icon">🗂</span><span className="label">Archive</span><span className="meta">⌘A</span></Box>
-  </Box>
-);
+type Story = StoryObj<typeof Dropdown>;
+type StoryPaletteName = AccentPaletteName | 'purple';
+const paletteTokenCache = new Map<StoryPaletteName, ThemeTokens>();
 
-export const Playground = (args: any) => (
-  <Box style={{ padding: 60 }}>
-    <Dropdown
-      open={args.open}
-      placement={args.placement}
-      variant={args.variant}
-      density={args.density}
-      shape={args.shape}
-      elevation={args.elevation}
-      tone={args.tone}
-      closeOnSelect={args.closeOnSelect}
-      typeahead={args.typeahead}
+const menuItems = [
+  { value: 'edit', label: 'Edit page', caption: 'Quick inline changes', icon: '✏', shortcut: 'E' },
+  { value: 'duplicate', label: 'Duplicate', caption: 'Clone current draft', icon: '⧉', shortcut: 'D' },
+  { value: 'review', label: 'Status: In review', type: 'radio' as const, group: 'status', checked: true },
+  { value: 'published', label: 'Status: Published', type: 'radio' as const, group: 'status', checked: false },
+  { value: 'delete', label: 'Delete', caption: 'Moves item to trash', icon: '⌫', tone: 'danger' as const },
+] as const;
+
+function TabButton(props: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={props.onClick}
       style={{
-        ["--ui-dropdown-menu-padding" as any]: "0px",
-        ["--ui-dropdown-menu-radius" as any]: "0px",
-        ["--ui-dropdown-menu-border" as any]: "0",
-        ["--ui-dropdown-menu-shadow" as any]: "none",
+        appearance: 'none',
+        border: 'none',
+        borderBottom: props.active ? '3px solid var(--ui-color-primary, #2563eb)' : '3px solid transparent',
+        background: 'transparent',
+        color: props.active ? 'var(--ui-color-text, #0f172a)' : 'var(--ui-color-muted, #64748b)',
+        padding: '14px 4px 12px',
+        font: '600 15px/1.4 inherit',
+        cursor: 'pointer',
       }}
     >
-      <Button slot="trigger">Open dropdown</Button>
-      <MenuContent />
-    </Dropdown>
-  </Box>
-);
+      {props.children}
+    </button>
+  );
+}
 
-Playground.args = {
-  open: false,
-  placement: 'bottom',
-  variant: 'default',
-  density: 'default',
-  shape: 'default',
-  elevation: 'default',
-  tone: 'default',
-  closeOnSelect: true,
-  typeahead: true
-};
+function paletteTokens(name: StoryPaletteName) {
+  const cached = paletteTokenCache.get(name);
+  if (cached) return cached;
 
-export const VisualVariants = () => (
-  <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(240px, 1fr))', gap: 16, padding: 20 }}>
-    <Box style={cardStyle}>
-      <strong>Soft Default</strong>
-      <Box style={{ marginTop: 10 }}>
-        <Dropdown open shape="soft" placement="bottom">
-          <Button slot="trigger">Trigger</Button>
-          <MenuContent />
-        </Dropdown>
-      </Box>
-    </Box>
+  let tokens: ThemeTokens;
+  if (name === 'purple') {
+    tokens = createThemeTokens(
+      {
+        colors: {
+          primary: '#8b5cf6',
+          primaryHover: '#7c3aed',
+          focusRing: '#8b5cf6',
+        },
+        palette: {
+          accent: {
+            '1': '#fdfcff',
+            '2': '#faf7ff',
+            '3': '#f3ecff',
+            '4': '#eadcff',
+            '5': '#ddc7ff',
+            '6': '#cdb0ff',
+            '7': '#b693ff',
+            '8': '#9b70ff',
+            '9': '#8b5cf6',
+            '10': '#7c3aed',
+            '11': '#6d28d9',
+            '12': '#2e1065',
+          },
+          accentAlpha: {
+            '1': '#7c3aed03',
+            '2': '#7c3aed08',
+            '3': '#7c3aed14',
+            '4': '#7c3aed24',
+            '5': '#7c3aed38',
+            '6': '#7c3aed4d',
+            '7': '#7c3aed68',
+            '8': '#7c3aed8f',
+            '9': '#7c3aed',
+            '10': '#6d28d9',
+            '11': '#5b21b6',
+            '12': '#2e1065',
+          },
+          accentContrast: '#ffffff',
+          accentSurface: '#f5f0ffcc',
+          accentIndicator: '#8b5cf6',
+          accentTrack: '#8b5cf6',
+        },
+      } satisfies Partial<ThemeTokens>,
+      { accentPalette: 'blue', mode: 'light' }
+    );
+  } else {
+    tokens = createThemeTokens({}, { accentPalette: name, mode: 'light' });
+  }
 
-    <Box style={cardStyle}>
-      <strong>Square Flat</strong>
-      <Box style={{ marginTop: 10 }}>
-        <Dropdown open shape="square" variant="flat" elevation="none" density="compact">
-          <Button slot="trigger">Trigger</Button>
-          <MenuContent />
-        </Dropdown>
-      </Box>
-    </Box>
+  paletteTokenCache.set(name, tokens);
+  return tokens;
+}
 
-    <Box style={cardStyle}>
-      <strong>Line / Compact</strong>
-      <Box style={{ marginTop: 10 }}>
-        <Dropdown open variant="line" shape="square" density="compact" tone="warning">
-          <Button slot="trigger">Trigger</Button>
-          <MenuContent />
-        </Dropdown>
-      </Box>
-    </Box>
-
-    <Box style={cardStyle}>
-      <strong>Solid Comfortable</strong>
-      <Box style={{ marginTop: 10 }}>
-        <Dropdown open variant="solid" density="comfortable" elevation="low">
-          <Button slot="trigger">Trigger</Button>
-          <MenuContent />
-        </Dropdown>
-      </Box>
-    </Box>
-
-    <Box style={{ ...cardStyle, background: 'var(--ui-color-surface-alt, #f8fafc)' }}>
-      <strong>Glass Surface</strong>
-      <Box style={{ marginTop: 10 }}>
-        <Dropdown open variant="glass" shape="soft" elevation="high">
-          <Button slot="trigger">Trigger</Button>
-          <MenuContent />
-        </Dropdown>
-      </Box>
-    </Box>
-
-    <Box style={cardStyle}>
-      <strong>Contrast + Danger Tone</strong>
-      <Box style={{ marginTop: 10 }}>
-        <Dropdown open variant="contrast" tone="danger" elevation="high">
-          <Button slot="trigger">Trigger</Button>
-          <MenuContent />
-        </Dropdown>
-      </Box>
-    </Box>
-  </Grid>
-);
-
-export const PersistentSelection = () => {
-  const [last, setLast] = React.useState<string>('none');
+function DropdownMenuContent() {
   return (
-    <Box style={{ padding: 56 }}>
-      <Dropdown
-        open
-        closeOnSelect={false}
-        onSelect={(d) => setLast(`${d.label || d.value || 'item'}${typeof d.checked === 'boolean' ? ` (${d.checked ? 'on' : 'off'})` : ''}`)}
-      >
-        <Button slot="trigger">Options</Button>
-        <Box slot="content">
-          <Box role="menuitemcheckbox" aria-checked="true" data-value="show-grid" tabIndex={-1}>Show grid</Box>
-          <Box role="menuitemcheckbox" aria-checked="false" data-value="snap" tabIndex={-1}>Snap to guides</Box>
-          <Box className="separator" role="separator" />
-        <Box role="menuitemradio" data-group="mode" aria-checked="true" data-value="mode-edit" tabIndex={-1}>Mode: Edit</Box>
-        <Box role="menuitemradio" data-group="mode" aria-checked="false" data-value="mode-read" tabIndex={-1}>Mode: Read</Box>
+    <Box slot="content" role="menu" style={{ display: 'grid', gap: 0 }}>
+      <Box role="menuitem" data-value={menuItems[0].value} tabIndex={-1} className="item">
+        <span className="icon" aria-hidden="true">{menuItems[0].icon}</span>
+        <span className="label">
+          <span className="text">{menuItems[0].label}</span>
+          <span className="caption">{menuItems[0].caption}</span>
+        </span>
+        <span className="shortcut">{menuItems[0].shortcut}</span>
       </Box>
-      </Dropdown>
-      <Box style={{ marginTop: 10, fontSize: 13, color: 'var(--ui-color-muted, #64748b)' }}>Last action: {last}</Box>
+
+      <Box role="menuitem" data-value={menuItems[1].value} tabIndex={-1} className="item">
+        <span className="icon" aria-hidden="true">{menuItems[1].icon}</span>
+        <span className="label">
+          <span className="text">{menuItems[1].label}</span>
+          <span className="caption">{menuItems[1].caption}</span>
+        </span>
+        <span className="shortcut">{menuItems[1].shortcut}</span>
+      </Box>
+
+      <Box role="separator" className="separator" />
+
+      <Box
+        role="menuitemradio"
+        data-group={menuItems[2].group}
+        data-value={menuItems[2].value}
+        aria-checked="true"
+        tabIndex={-1}
+        className="item"
+      >
+        <span className="selection-icon" aria-hidden="true" />
+        <span className="label">
+          <span className="text">{menuItems[2].label}</span>
+        </span>
+      </Box>
+
+      <Box
+        role="menuitemradio"
+        data-group={menuItems[3].group}
+        data-value={menuItems[3].value}
+        aria-checked="false"
+        tabIndex={-1}
+        className="item"
+      >
+        <span className="selection-icon" aria-hidden="true" />
+        <span className="label">
+          <span className="text">{menuItems[3].label}</span>
+        </span>
+      </Box>
+
+      <Box role="separator" className="separator" />
+
+      <Box role="menuitem" data-value={menuItems[4].value} tabIndex={-1} className="item" data-tone="danger">
+        <span className="icon" aria-hidden="true">{menuItems[4].icon}</span>
+        <span className="label">
+          <span className="text">{menuItems[4].label}</span>
+          <span className="caption">{menuItems[4].caption}</span>
+        </span>
+      </Box>
     </Box>
   );
-};
+}
 
-export const Headless = () => {
-  const { referenceRef, floatingRef, getReferenceProps, getFloatingProps, coords } = useFloating({ placement: 'bottom', offset: 6 });
-  return (
-    <Box style={{ padding: 80 }}>
-      <button
-        {...getReferenceProps()}
-        ref={referenceRef as any}
+function DropdownPreview(props: {
+  variant: 'surface' | 'soft' | 'solid' | 'contrast';
+  size: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
+  palette?: StoryPaletteName;
+  elevation?: 'none' | 'low' | 'high';
+  radius?: number | string;
+  tone?: 'default' | 'brand' | 'neutral' | 'info' | 'danger' | 'success' | 'warning';
+  label?: string;
+  caption?: string;
+}) {
+  const [open, setOpen] = React.useState(false);
+  const [lastAction, setLastAction] = React.useState('None');
+
+  const content = (
+    <Grid style={{ gap: 12 }}>
+      <Box
         style={{
-          padding: '8px 12px',
-          borderRadius: 8,
-          border: '1px solid var(--ui-color-border, rgba(15, 23, 42, 0.16))',
-          background: 'var(--ui-color-surface, #ffffff)',
-          color: 'var(--ui-color-text, #0f172a)'
+          minHeight: 148,
+          borderRadius: 16,
+          border: '2px dashed color-mix(in srgb, var(--ui-color-primary, #2563eb) 30%, transparent)',
+          background:
+            'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, white) 0%, color-mix(in srgb, var(--ui-color-primary, #2563eb) 2%, white) 100%)',
+          display: 'grid',
+          placeItems: 'center',
+          padding: 20,
         }}
       >
-        Headless trigger
-      </button>
-      <Box {...getFloatingProps()} ref={floatingRef as any} style={{ position: 'absolute', top: coords.top, left: coords.left, pointerEvents: 'auto' }}>
-        <Box
-          style={{
-            background: 'var(--ui-color-surface, #ffffff)',
-            color: 'var(--ui-color-text, #0f172a)',
-            border: '1px solid var(--ui-color-border, rgba(15, 23, 42, 0.16))',
-            borderRadius: 6,
-            boxShadow: 'var(--ui-shadow-md, 0 8px 30px rgba(2,6,23,0.12))',
-            minWidth: 160
-          }}
-          role="menu"
-        >
-          <Box role="menuitem" tabIndex={-1} style={{ padding: 8 }}>First (headless)</Box>
-          <Box role="menuitem" tabIndex={-1} style={{ padding: 8 }}>Second</Box>
-          <Box role="menuitem" tabIndex={-1} style={{ padding: 8 }}>Third</Box>
+        <Box style={{ width: 'min(280px, 100%)', display: 'grid', gap: 10 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-text, #0f172a)' }}>{props.label || 'Review actions'}</div>
+          <Dropdown
+            open={open}
+            onChange={setOpen}
+            onSelect={(detail) => setLastAction(detail.label || detail.value || 'Unknown')}
+            variant={props.variant}
+            size={props.size}
+            elevation={props.elevation}
+            radius={props.radius}
+            tone={props.tone}
+          >
+            <Button slot="trigger">{open ? 'Close menu' : 'Open menu'}</Button>
+            <DropdownMenuContent />
+          </Dropdown>
         </Box>
       </Box>
-    </Box>
+      <Flex justify="space-between" align="center" style={{ gap: 10, flexWrap: 'wrap' }}>
+        {props.caption ? <div style={{ fontSize: 13, color: '#64748b' }}>{props.caption}</div> : <span />}
+        <Badge tone="neutral">last action: {lastAction}</Badge>
+      </Flex>
+    </Grid>
   );
-};
 
-export const ThemeProviderVerification = () => {
-  const [mode, setMode] = React.useState<'light' | 'dark'>('light');
-  const tokens =
-    mode === 'light'
-      ? {
-          colors: {
-            primary: '#0f766e',
-            surface: '#ffffff',
-            surfaceAlt: '#f8fafc',
-            text: '#0f172a',
-            muted: '#64748b',
-            border: 'rgba(15, 23, 42, 0.16)',
-            focusRing: '#0f766e',
-            success: '#15803d',
-            warning: '#b45309',
-            danger: '#b91c1c'
-          }
-        }
-      : {
-          colors: {
-            primary: '#38bdf8',
-            surface: '#0f172a',
-            surfaceAlt: '#111c33',
-            text: '#e2e8f0',
-            muted: '#94a3b8',
-            border: '#334155',
-            focusRing: '#7dd3fc',
-            success: '#22c55e',
-            warning: '#f59e0b',
-            danger: '#f87171'
-          }
-        };
-
+  if (!props.palette) return content;
   return (
-    <ThemeProvider tokens={tokens as any}>
-      <Box style={{ padding: 32, background: 'var(--ui-color-background, #ffffff)', color: 'var(--ui-color-text, #0f172a)' }}>
-        <Flex style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-          <Button size="sm" onClick={() => setMode('light')}>Light Tokens</Button>
-          <Button size="sm" variant="secondary" onClick={() => setMode('dark')}>Dark Tokens</Button>
-        </Flex>
-        <Dropdown open variant="soft" elevation="low" shape="soft">
-          <Button slot="trigger">Themed Dropdown</Button>
-          <MenuContent />
-        </Dropdown>
-      </Box>
+    <ThemeProvider tokens={paletteTokens(props.palette)} storageKey={null}>
+      {content}
     </ThemeProvider>
   );
+}
+
+function ThemeTokenMatrixStory() {
+  const [tab, setTab] = React.useState<'theme' | 'colors' | 'sizes'>('theme');
+
+  return (
+    <Grid style={{ gap: 20, maxInlineSize: 1280 }}>
+      <div>
+        <div style={{ fontSize: 44, lineHeight: 1.05, fontWeight: 700, color: '#111827' }}>Dropdown</div>
+      </div>
+
+      <Flex style={{ gap: 28, borderBottom: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent)' }}>
+        <TabButton active={tab === 'theme'} onClick={() => setTab('theme')}>
+          Theme colors
+        </TabButton>
+        <TabButton active={tab === 'colors'} onClick={() => setTab('colors')}>
+          All colors
+        </TabButton>
+        <TabButton active={tab === 'sizes'} onClick={() => setTab('sizes')}>
+          All sizes
+        </TabButton>
+      </Flex>
+
+      {tab === 'theme' ? (
+        <Grid style={{ gap: 22 }}>
+          <Grid style={{ gridTemplateColumns: '120px repeat(4, minmax(240px, 1fr))', gap: 18, alignItems: 'start' }}>
+            <div style={{ fontSize: 18, color: '#5b6574' }}>Surface</div>
+            <DropdownPreview variant="surface" size="md" elevation="low" palette="blue" />
+            <DropdownPreview variant="surface" size="md" elevation="low" palette="gray" />
+            <DropdownPreview variant="surface" size="md" elevation="low" palette="purple" />
+            <DropdownPreview variant="surface" size="md" elevation="low" palette="green" />
+
+            <div style={{ fontSize: 18, color: '#5b6574' }}>Soft</div>
+            <DropdownPreview variant="soft" size="md" elevation="low" palette="blue" />
+            <DropdownPreview variant="soft" size="md" elevation="low" palette="gray" />
+            <DropdownPreview variant="soft" size="md" elevation="low" palette="purple" />
+            <DropdownPreview variant="soft" size="md" elevation="low" palette="green" />
+
+            <div style={{ fontSize: 18, color: '#5b6574' }}>Solid</div>
+            <DropdownPreview variant="solid" size="md" elevation="low" palette="blue" />
+            <DropdownPreview variant="solid" size="md" elevation="low" palette="gray" />
+            <DropdownPreview variant="solid" size="md" elevation="low" palette="purple" />
+            <DropdownPreview variant="solid" size="md" elevation="low" palette="green" />
+
+            <div style={{ fontSize: 18, color: '#5b6574' }}>Contrast</div>
+            <DropdownPreview variant="contrast" size="md" elevation="low" palette="blue" />
+            <DropdownPreview variant="contrast" size="md" elevation="low" palette="gray" />
+            <DropdownPreview variant="contrast" size="md" elevation="low" palette="purple" />
+            <DropdownPreview variant="contrast" size="md" elevation="low" palette="green" />
+          </Grid>
+        </Grid>
+      ) : null}
+
+      {tab === 'colors' ? (
+        <Grid style={{ gap: 16 }}>
+          <Grid style={{ gridTemplateColumns: '120px repeat(3, minmax(240px, 1fr))', gap: 18, alignItems: 'start' }}>
+            <div />
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Surface</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Soft</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Solid</div>
+            {(['gray', 'amber', 'red', 'purple', 'blue', 'green'] as const satisfies readonly StoryPaletteName[]).map((name) => (
+              <React.Fragment key={name}>
+                <div style={{ fontSize: 18, color: '#5b6574', textTransform: 'capitalize' }}>{name}</div>
+                <DropdownPreview variant="surface" size="md" elevation="low" palette={name} />
+                <DropdownPreview variant="soft" size="md" elevation="low" palette={name} />
+                <DropdownPreview variant="solid" size="md" elevation="low" palette={name} />
+              </React.Fragment>
+            ))}
+          </Grid>
+        </Grid>
+      ) : null}
+
+      {tab === 'sizes' ? (
+        <Grid style={{ gap: 18 }}>
+          <Grid style={{ gridTemplateColumns: '120px repeat(3, minmax(240px, 1fr))', gap: 18, alignItems: 'start' }}>
+            <div />
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Surface</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Soft</div>
+            <div style={{ textAlign: 'center', fontSize: 18, color: '#5b6574' }}>Solid</div>
+            {(['1', '2', '3'] as const).map((size) => (
+              <React.Fragment key={size}>
+                <div style={{ fontSize: 18, color: '#5b6574' }}>Size {size}</div>
+                <DropdownPreview variant="surface" size={size} elevation="low" palette="blue" />
+                <DropdownPreview variant="soft" size={size} elevation="low" palette="blue" />
+                <DropdownPreview variant="solid" size={size} elevation="low" palette="blue" />
+              </React.Fragment>
+            ))}
+          </Grid>
+        </Grid>
+      ) : null}
+    </Grid>
+  );
+}
+
+export const ThemeTokenMatrix: Story = {
+  render: () => <ThemeTokenMatrixStory />,
 };

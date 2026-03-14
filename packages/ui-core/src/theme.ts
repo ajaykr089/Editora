@@ -81,6 +81,8 @@ export interface ThemeTokens {
     blockControls?: ThemeScale;
     box?: ThemeScale;
     breadcrumb?: ThemeScale;
+    dropdown?: ThemeScale;
+    select?: ThemeScale;
     sidebar?: ThemeScale;
     card?: ThemeScale;
     multiSelect?: ThemeScale;
@@ -529,6 +531,51 @@ const baselineLightComponentTokens: NonNullable<ThemeTokens['components']> = {
     'item-padding-block': '4px',
     'item-padding-inline': '9px'
   },
+  dropdown: {
+    bg: 'color-mix(in srgb, var(--color-panel-solid) 98%, transparent)',
+    border: '1px solid color-mix(in srgb, var(--gray-a6) 84%, transparent)',
+    radius: 'var(--radius-4)',
+    shadow: 'var(--shadow-5)',
+    backdrop: 'none',
+    'content-padding': '0px',
+    'min-width': '224px',
+    'item-height': '36px',
+    'item-padding-x': '12px',
+    'item-padding-y': '8px',
+    'item-gap': '10px',
+    'item-radius': '0px',
+    'item-font-size': '14px',
+    'item-line-height': '20px',
+    'separator-margin': '6px 10px'
+  },
+  select: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
+    radius: 'var(--ui-radius)',
+    shadow: 'none',
+    'height-sm': '34px',
+    'height-md': '42px',
+    'height-lg': '46px',
+    'padding-x': '12px',
+    gap: '8px',
+    'label-color': 'var(--ui-color-text)',
+    'description-color': 'var(--ui-color-muted)',
+    'menu-bg': 'var(--color-panel-solid)',
+    'menu-color': 'var(--ui-color-text)',
+    'menu-border': '1px solid color-mix(in srgb, var(--gray-a5) 80%, transparent)',
+    'menu-radius': 'var(--radius-4)',
+    'menu-shadow': 'var(--shadow-5)',
+    'menu-padding': '8px',
+    'menu-min-width': '232px',
+    'menu-item-height': '36px',
+    'menu-item-padding-x': '12px',
+    'menu-item-padding-y': '8px',
+    'menu-item-gap': '10px',
+    'menu-item-radius': 'var(--radius-2)',
+    'menu-item-font-size': '14px',
+    'menu-item-line-height': '20px',
+    'menu-separator-margin': '6px 10px'
+  },
   sidebar: {
     bg: 'var(--color-panel-solid)',
     border: '1px solid color-mix(in srgb, var(--gray-a5) 82%, transparent)',
@@ -784,6 +831,51 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
     shadow: 'none',
     'item-padding-block': '4px',
     'item-padding-inline': '9px'
+  },
+  dropdown: {
+    bg: 'color-mix(in srgb, var(--color-panel-solid) 98%, transparent)',
+    border: '1px solid color-mix(in srgb, var(--gray-a6) 84%, transparent)',
+    radius: 'var(--radius-4)',
+    shadow: 'var(--shadow-5)',
+    backdrop: 'none',
+    'content-padding': '0px',
+    'min-width': '224px',
+    'item-height': '36px',
+    'item-padding-x': '12px',
+    'item-padding-y': '8px',
+    'item-gap': '10px',
+    'item-radius': '0px',
+    'item-font-size': '14px',
+    'item-line-height': '20px',
+    'separator-margin': '6px 10px'
+  },
+  select: {
+    bg: 'var(--color-panel-solid)',
+    border: '1px solid color-mix(in srgb, var(--gray-a6) 88%, transparent)',
+    radius: 'var(--ui-radius)',
+    shadow: 'none',
+    'height-sm': '34px',
+    'height-md': '42px',
+    'height-lg': '46px',
+    'padding-x': '12px',
+    gap: '8px',
+    'label-color': 'var(--ui-color-text)',
+    'description-color': 'var(--ui-color-muted)',
+    'menu-bg': 'var(--color-panel-solid)',
+    'menu-color': 'var(--ui-color-text)',
+    'menu-border': '1px solid color-mix(in srgb, var(--gray-a6) 84%, transparent)',
+    'menu-radius': 'var(--radius-4)',
+    'menu-shadow': 'var(--shadow-5)',
+    'menu-padding': '8px',
+    'menu-min-width': '232px',
+    'menu-item-height': '36px',
+    'menu-item-padding-x': '12px',
+    'menu-item-padding-y': '8px',
+    'menu-item-gap': '10px',
+    'menu-item-radius': 'var(--radius-2)',
+    'menu-item-font-size': '14px',
+    'menu-item-line-height': '20px',
+    'menu-separator-margin': '6px 10px'
   },
   sidebar: {
     bg: 'var(--color-panel-solid)',
@@ -1337,6 +1429,8 @@ export function createThemeTokens(overrides?: Partial<ThemeTokens>, options?: { 
       ...(overrides?.components || {}),
       button: mergeScale(base.components?.button, overrides?.components?.button),
       badge: mergeScale(base.components?.badge, overrides?.components?.badge),
+      dropdown: mergeScale(base.components?.dropdown, overrides?.components?.dropdown),
+      select: mergeScale(base.components?.select, overrides?.components?.select),
       sidebar: mergeScale(base.components?.sidebar, overrides?.components?.sidebar),
       card: mergeScale(base.components?.card, overrides?.components?.card),
       navigationMenu: mergeScale(base.components?.navigationMenu, overrides?.components?.navigationMenu),
@@ -1506,6 +1600,8 @@ function applyThemeToTarget(target: HTMLElement, next: ThemeTokens) {
   addScaleVariables(target, '--shadow-', next.shadows as ThemeScale | undefined);
   addScaleVariables(target, '--base-button-', next.components?.button);
   addScaleVariables(target, '--base-badge-', next.components?.badge);
+  addScaleVariables(target, '--base-dropdown-', next.components?.dropdown);
+  addScaleVariables(target, '--base-select-', next.components?.select);
   addScaleVariables(target, '--base-sidebar-', next.components?.sidebar);
   addScaleVariables(target, '--base-block-controls-', next.components?.blockControls);
   addScaleVariables(target, '--base-box-', next.components?.box);

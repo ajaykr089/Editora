@@ -36,6 +36,9 @@ export type SelectProps = BaseProps & {
   shape?: 'rounded' | 'square' | 'pill';
   elevation?: 'low' | 'none' | 'high';
   radius?: 'none' | 'large' | 'full' | string;
+  optionBorder?: boolean;
+  showCheck?: boolean;
+  checkPlacement?: 'start' | 'end';
   validation?: 'none' | 'success' | 'warning' | 'error';
   onChange?: (value: string) => void;
   onInput?: (value: string) => void;
@@ -63,6 +66,9 @@ export const Select = React.forwardRef<HTMLElement, SelectProps>(function Select
     shape,
     elevation,
     radius,
+    optionBorder,
+    showCheck,
+    checkPlacement,
     validation,
     onChange,
     onInput,
@@ -141,6 +147,9 @@ export const Select = React.forwardRef<HTMLElement, SelectProps>(function Select
     syncAttr('shape', shape && shape !== 'rounded' ? shape : null);
     syncAttr('elevation', elevation && elevation !== 'low' ? elevation : null);
     syncAttr('radius', radius ? String(radius) : null);
+    syncBoolean('option-border', optionBorder);
+    syncBoolean('show-check', showCheck);
+    syncAttr('check-placement', showCheck ? checkPlacement || 'end' : null);
     syncAttr('validation', validation && validation !== 'none' ? validation : null);
   }, [
     value,
@@ -161,6 +170,9 @@ export const Select = React.forwardRef<HTMLElement, SelectProps>(function Select
     shape,
     elevation,
     radius,
+    optionBorder,
+    showCheck,
+    checkPlacement,
     validation
   ]);
 

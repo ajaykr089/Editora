@@ -38,6 +38,10 @@ describe('theme.applyTheme', () => {
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-context-menu-radius').trim()).toBe(defaultTokens.components?.contextMenu?.radius);
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-menubar-radius').trim()).toBe(defaultTokens.components?.menubar?.radius);
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-multi-select-radius').trim()).toBe(defaultTokens.components?.multiSelect?.radius);
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--base-dropdown-bg').trim()).toBe(defaultTokens.components?.dropdown?.bg);
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--base-dropdown-radius').trim()).toBe(defaultTokens.components?.dropdown?.radius);
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--base-dropdown-content-padding').trim()).toBe(defaultTokens.components?.dropdown?.['content-padding']);
+    expect(getComputedStyle(document.documentElement).getPropertyValue('--base-select-radius').trim()).toBe(defaultTokens.components?.select?.radius);
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-block-controls-radius').trim()).toBe(defaultTokens.components?.blockControls?.radius);
     expect(getComputedStyle(document.documentElement).getPropertyValue('--base-box-radius').trim()).toBe(defaultTokens.components?.box?.radius);
   });

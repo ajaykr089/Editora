@@ -1,13 +1,19 @@
 import React from 'react';
+import type { Meta } from '@storybook/react';
 import { ThemeProvider, useTheme, Button , Box} from '@editora/ui-react';
 
-export default { title: 'UI/Theming', component: ThemeProvider, argTypes: {
-  primary: { control: 'color' },
-  background: { control: 'color' },
-  text: { control: 'color' },
-  radius: { control: 'text' },
-  fontSizeMd: { control: 'text' }
-}};
+const meta: Meta = {
+  title: 'UI/Theming',
+  argTypes: {
+    primary: { control: 'color' },
+    background: { control: 'color' },
+    text: { control: 'color' },
+    radius: { control: 'text' },
+    fontSizeMd: { control: 'text' }
+  }
+};
+
+export default meta;
 
 function Demo() {
   const theme = useTheme() as any;

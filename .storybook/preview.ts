@@ -377,8 +377,15 @@ const preview: Preview = {
       source: {
         state: 'open',
         type: 'dynamic',
-        transform: (source: string, context: { parameters?: { fileName?: string } }) =>
-          buildDocsSource(source, context?.parameters?.fileName),
+        transform: (source: string, context: { parameters?: { fileName?: string } }) => {
+          try {
+            return buildDocsSource(source, context?.parameters?.fileName);
+          } catch (error) {
+            const fileName = context?.parameters?.fileName || 'unknown-story';
+            console.warn(`[storybook] docs source transform failed for ${fileName}`, error);
+            return source;
+          }
+        },
       },
     },
     controls: {

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import '../components/ui-combobox';
 import '../components/ui-select';
 
@@ -9,19 +9,80 @@ function flushMicrotask() {
 describe('ui-select and ui-combobox integration', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
-    const root = document.getElementById('ui-portal-root');
-    if (root?.parentElement) root.parentElement.removeChild(root);
   });
 
-  it('ui-select opens from trigger click and closes on outside pointerdown', async () => {
-    const outside = document.createElement('button');
+  it('ui-select opens a styled listbox, renders grouped options, and keeps required placeholders out of the menu', async () => {
+    const el = document.createElement('ui-select') as HTMLElement;
+    el.setAttribute('placeholder', 'Choose status');
+    el.setAttribute('required', '');
+    el.innerHTML = `
+      <option value="draft">Draft</option>
+      <optgroup label="Published">
+        <option value="review">In review</option>
+        <option value="approved">Approved</option>
+      </optgroup>
+    `;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const trigger = el.shadowRoot?.querySelector('.trigger') as HTMLButtonElement | null;
+    expect(trigger).toBeTruthy();
+    expect(trigger?.textContent).toContain('Draft');
+
+    trigger?.click();
+    await flushMicrotask();
+
+    const panel = el.shadowRoot?.querySelector('.panel') as HTMLElement | null;
+    const menuItems = el.shadowRoot?.querySelectorAll('.menu-item') || [];
+    const group = el.shadowRoot?.querySelector('.menu-group') as HTMLElement | null;
+
+    expect(panel?.hidden).toBe(false);
+    expect(menuItems).toHaveLength(3);
+    expect(Array.from(menuItems).map((item) => item.textContent?.trim())).toEqual(['Draft', 'In review', 'Approved']);
+    expect(group?.textContent).toBe('Published');
+  });
+
+  it('ui-select syncs host value changes into the trigger shell without replacing the control node', async () => {
     const el = document.createElement('ui-select') as HTMLElement;
     el.innerHTML = `
       <option value="one">One</option>
       <option value="two">Two</option>
     `;
-    document.body.append(outside, el);
+    el.setAttribute('value', 'one');
+    document.body.appendChild(el);
     await flushMicrotask();
+
+    const controlBefore = el.shadowRoot?.querySelector('.control');
+    const triggerBefore = el.shadowRoot?.querySelector('.trigger') as HTMLButtonElement | null;
+    expect(controlBefore).toBeTruthy();
+    expect(triggerBefore?.textContent).toContain('One');
+
+    el.setAttribute('value', 'two');
+    el.setAttribute('disabled', '');
+    el.setAttribute('validation', 'error');
+    await flushMicrotask();
+
+    const controlAfter = el.shadowRoot?.querySelector('.control');
+    const triggerAfter = el.shadowRoot?.querySelector('.trigger') as HTMLButtonElement | null;
+    expect(controlAfter).toBe(controlBefore);
+    expect(triggerAfter?.textContent).toContain('Two');
+    expect(triggerAfter?.disabled).toBe(true);
+    expect(triggerAfter?.getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('ui-select emits a single host change event when a menu option is chosen', async () => {
+    const el = document.createElement('ui-select') as HTMLElement;
+    el.innerHTML = `
+      <option value="draft">Draft</option>
+      <option value="review">Review</option>
+    `;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const onChange = vi.fn();
+    const onInput = vi.fn();
+    el.addEventListener('change', onChange);
+    el.addEventListener('input', onInput);
 
     const trigger = el.shadowRoot?.querySelector('.trigger') as HTMLButtonElement | null;
     expect(trigger).toBeTruthy();
@@ -29,16 +90,44 @@ describe('ui-select and ui-combobox integration', () => {
     trigger?.click();
     await flushMicrotask();
 
-    expect((el as HTMLElement & { _portalEl?: HTMLElement | null })._portalEl).toBeTruthy();
-
-    outside.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true }));
+    const option = el.shadowRoot?.querySelector('.menu-item[data-index="1"]') as HTMLButtonElement | null;
+    option?.click();
     await flushMicrotask();
 
-    expect((el as HTMLElement & { _portalEl?: HTMLElement | null })._portalEl).toBeNull();
+    expect(el.getAttribute('value')).toBe('review');
+    expect(onInput).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect((onChange.mock.calls[0]?.[0] as CustomEvent<{ value: string }>).detail.value).toBe('review');
   });
 
-  it('ui-select keeps its portal node stable across visual updates while open', async () => {
-    const el = document.createElement('ui-select') as HTMLElement & { _portalEl?: HTMLElement | null };
+  it('ui-select updates the rendered menu items when light-dom options change', async () => {
+    const el = document.createElement('ui-select') as HTMLElement;
+    el.innerHTML = `
+      <option value="one">One</option>
+      <option value="two">Two</option>
+    `;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const added = document.createElement('option');
+    added.value = 'three';
+    added.textContent = 'Three';
+    el.appendChild(added);
+    await flushMicrotask();
+
+    const trigger = el.shadowRoot?.querySelector('.trigger') as HTMLButtonElement | null;
+    trigger?.click();
+    await flushMicrotask();
+
+    const items = el.shadowRoot?.querySelectorAll('.menu-item') || [];
+    expect(items).toHaveLength(3);
+    expect(Array.from(items).map((item) => item.textContent?.trim())).toEqual(['One', 'Two', 'Three']);
+  });
+
+  it('ui-select hides checks by default and can render them before labels when configured', async () => {
+    const el = document.createElement('ui-select') as HTMLElement;
+    el.setAttribute('show-check', 'true');
+    el.setAttribute('check-placement', 'start');
     el.innerHTML = `
       <option value="one">One</option>
       <option value="two">Two</option>
@@ -50,15 +139,21 @@ describe('ui-select and ui-combobox integration', () => {
     trigger?.click();
     await flushMicrotask();
 
-    const portalBefore = el._portalEl;
-    expect(portalBefore).toBeTruthy();
+    const item = el.shadowRoot?.querySelector('.menu-item[data-value="one"]') as HTMLButtonElement | null;
+    const check = item?.querySelector('.menu-item-check') as HTMLElement | null;
+    const label = item?.querySelector('.menu-item-label') as HTMLElement | null;
 
-    el.setAttribute('variant', 'contrast');
-    el.setAttribute('tone', 'success');
-    el.setAttribute('shape', 'pill');
+    expect(check).toBeTruthy();
+    expect(check?.hidden).toBe(false);
+    expect(item?.getAttribute('data-check-placement')).toBe('start');
+    expect(item?.firstElementChild).toBe(check);
+    expect(item?.lastElementChild).toBe(label);
+
+    el.removeAttribute('show-check');
     await flushMicrotask();
 
-    expect(el._portalEl).toBe(portalBefore);
+    const updatedCheck = el.shadowRoot?.querySelector('.menu-item[data-value="one"] .menu-item-check') as HTMLElement | null;
+    expect(updatedCheck?.hidden).toBe(true);
   });
 
   it('ui-combobox opens on focus, selects an option, and closes on outside pointerdown', async () => {
