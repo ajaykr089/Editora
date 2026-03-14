@@ -1,14 +1,30 @@
 import { ElementBase } from '../ElementBase';
 
 type ChartPoint = { label: string; value: number; tone?: string };
+type ChartSeries = {
+  name: string;
+  data: ChartPoint[];
+  tone?: string;
+  fill?: boolean;
+  dash?: string;
+  strokeWidth?: number;
+  opacity?: number;
+};
 type ChartKind = 'line' | 'area' | 'bar' | 'donut' | 'step' | 'scatter' | 'radial';
 type ChartState = 'idle' | 'loading' | 'error' | 'success';
+type SeriesValueDetail = {
+  series: string;
+  value: number | null;
+  tone?: string;
+};
 
 type PointSelectDetail = {
   index: number;
   label: string;
   value: number;
   tone?: string;
+  series?: string;
+  seriesValues?: SeriesValueDetail[];
   type: ChartKind;
   total: number;
   min: number;
@@ -28,6 +44,24 @@ type ChartStats = {
 type PlotRender = {
   svg: string;
   hits: string;
+  anchors: Array<{ xPct: number; yPct: number }>;
+  yTicks: string[];
+};
+
+type NormalizedSeries = {
+  name: string;
+  data: ChartPoint[];
+  tone?: string;
+  fill?: boolean;
+  dash?: string;
+  strokeWidth?: number;
+  opacity?: number;
+};
+
+type NormalizedChartData = {
+  labels: string[];
+  series: NormalizedSeries[];
+  truncated: number;
 };
 
 const MAX_POINTS = 180;
@@ -48,6 +82,7 @@ const style = `
     --ui-chart-shadow: none;
     --ui-chart-plot-height: 220px;
     --ui-chart-plot-min-height: 188px;
+    --ui-chart-plot-min-width: 420px;
 
     display: block;
     min-inline-size: 0;
@@ -105,6 +140,23 @@ const style = `
     gap: 12px;
   }
 
+  .toolbar {
+    display: grid;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid color-mix(in srgb, var(--ui-chart-border) 82%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--ui-chart-surface) 96%, transparent);
+  }
+
+  .toolbar[hidden] {
+    display: none;
+  }
+
+  .toolbar ::slotted(*) {
+    display: block;
+  }
+
   .meta {
     min-inline-size: 0;
     display: grid;
@@ -120,6 +172,27 @@ const style = `
   }
 
   .subtitle {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--ui-chart-muted);
+  }
+
+  .title-slot,
+  .subtitle-slot {
+    display: contents;
+  }
+
+  .title-slot::slotted(*) {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: var(--ui-chart-text);
+  }
+
+  .subtitle-slot::slotted(*) {
     margin: 0;
     font-size: 12px;
     line-height: 1.4;
@@ -211,13 +284,73 @@ const style = `
     background: color-mix(in srgb, var(--ui-chart-surface) 97%, transparent);
     min-block-size: var(--ui-chart-plot-min-height);
     block-size: var(--ui-chart-plot-height);
-    overflow: hidden;
+    overflow: auto hidden;
+  }
+
+  .plot-body {
+    display: grid;
+    grid-template-columns: minmax(32px, auto) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    inline-size: 100%;
+    min-inline-size: calc(var(--ui-chart-plot-min-width) + 38px);
+    block-size: 100%;
+    min-block-size: 0;
   }
 
   .plot {
     inline-size: 100%;
     block-size: 100%;
     display: block;
+  }
+
+  .axis-y {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 8px 6px 24px 0;
+    color: var(--ui-chart-muted);
+    font-size: 11px;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .axis-x {
+    grid-column: 2;
+    grid-row: 2;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 0;
+    padding: 6px 10px 8px;
+    color: var(--ui-chart-muted);
+    font-size: 11px;
+    line-height: 1.2;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .axis-x-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .axis-x-label[data-hidden="true"] {
+    visibility: hidden;
+  }
+
+  .plot-stage {
+    position: relative;
+    grid-column: 2;
+    grid-row: 1;
+    min-inline-size: var(--ui-chart-plot-min-width);
+    min-block-size: 0;
   }
 
   .plot-grid line,
@@ -282,6 +415,66 @@ const style = `
     color: var(--ui-chart-muted);
     font-size: 11px;
     line-height: 1;
+  }
+
+  .tooltip {
+    position: absolute;
+    inset-inline-start: clamp(72px, calc(var(--x, 50) * 1%), calc(100% - 72px));
+    inset-block-start: clamp(10px, calc(var(--y, 20) * 1%), calc(100% - 72px));
+    transform: translate(-50%, calc(-100% - 10px));
+    min-inline-size: 132px;
+    max-inline-size: min(220px, calc(100% - 16px));
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--ui-chart-border) 86%, transparent);
+    background: color-mix(in srgb, var(--ui-chart-surface) 98%, transparent);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+    color: var(--ui-chart-text);
+    display: grid;
+    gap: 8px;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .tooltip-title {
+    font-size: 12px;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+
+  .tooltip-list {
+    display: grid;
+    gap: 6px;
+  }
+
+  .tooltip-row {
+    display: grid;
+    grid-template-columns: 8px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .tooltip-dot {
+    inline-size: 8px;
+    block-size: 8px;
+    border-radius: 999px;
+    background: var(--dot, var(--ui-chart-accent));
+  }
+
+  .tooltip-series {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ui-chart-muted);
+  }
+
+  .tooltip-value {
+    font-weight: 700;
+    color: var(--ui-chart-text);
+    white-space: nowrap;
   }
 
   .insight {
@@ -409,6 +602,7 @@ const style = `
     :host {
       --ui-chart-plot-height: 188px;
       --ui-chart-plot-min-height: 168px;
+      --ui-chart-plot-min-width: 320px;
     }
 
     .frame {
@@ -558,6 +752,63 @@ function parsePoints(rawData: string | null, rawValues: string | null, rawLabels
   }));
 }
 
+function parsePointArray(input: unknown): ChartPoint[] {
+  if (!Array.isArray(input)) return [];
+  return input
+    .map((entry, index) => {
+      if (typeof entry === 'number') {
+        if (!Number.isFinite(entry)) return null;
+        return { label: String(index + 1), value: entry } satisfies ChartPoint;
+      }
+      if (entry && typeof entry === 'object') {
+        const value = Number((entry as { value?: unknown }).value);
+        if (!Number.isFinite(value)) return null;
+        const labelRaw = (entry as { label?: unknown }).label;
+        const toneRaw = (entry as { tone?: unknown }).tone;
+        return {
+          label: typeof labelRaw === 'string' && labelRaw.trim() ? labelRaw.trim() : String(index + 1),
+          value,
+          tone: typeof toneRaw === 'string' && toneRaw.trim() ? toneRaw.trim() : undefined
+        } satisfies ChartPoint;
+      }
+      return null;
+    })
+    .filter((entry): entry is ChartPoint => !!entry);
+}
+
+function parseSeries(rawSeries: string | null): ChartSeries[] {
+  if (!rawSeries) return [];
+  try {
+    const parsed = JSON.parse(rawSeries);
+    if (!Array.isArray(parsed)) return [];
+    const series = parsed
+      .map((entry, index) => {
+        if (!entry || typeof entry !== 'object') return null;
+        const nameRaw = (entry as { name?: unknown }).name;
+        const data = parsePointArray((entry as { data?: unknown }).data);
+        if (!data.length) return null;
+        const toneRaw = (entry as { tone?: unknown }).tone;
+        const dashRaw = (entry as { dash?: unknown }).dash;
+        const strokeWidthRaw = Number((entry as { strokeWidth?: unknown }).strokeWidth);
+        const opacityRaw = Number((entry as { opacity?: unknown }).opacity);
+        const fillRaw = (entry as { fill?: unknown }).fill;
+        return {
+          name: typeof nameRaw === 'string' && nameRaw.trim() ? nameRaw.trim() : `Series ${index + 1}`,
+          data,
+          tone: typeof toneRaw === 'string' && toneRaw.trim() ? toneRaw.trim() : undefined,
+          dash: typeof dashRaw === 'string' && dashRaw.trim() ? dashRaw.trim() : undefined,
+          strokeWidth: Number.isFinite(strokeWidthRaw) && strokeWidthRaw > 0 ? strokeWidthRaw : undefined,
+          opacity: Number.isFinite(opacityRaw) && opacityRaw > 0 ? opacityRaw : undefined,
+          fill: typeof fillRaw === 'boolean' ? fillRaw : undefined
+        } satisfies ChartSeries;
+      })
+      .filter((entry): entry is NonNullable<typeof entry> => !!entry);
+    return series;
+  } catch {
+    return [];
+  }
+}
+
 function normalizePoints(points: ChartPoint[]): { points: ChartPoint[]; truncated: number } {
   const sanitized = points
     .map((point, index) => ({
@@ -571,6 +822,60 @@ function normalizePoints(points: ChartPoint[]): { points: ChartPoint[]; truncate
 
   const truncated = sanitized.length - MAX_POINTS;
   return { points: sanitized.slice(sanitized.length - MAX_POINTS), truncated };
+}
+
+function normalizeSeries(
+  rawSeries: ChartSeries[],
+  fallbackPoints: ChartPoint[]
+): NormalizedChartData {
+  const sourceSeries: ChartSeries[] = rawSeries.length
+    ? rawSeries
+    : fallbackPoints.length
+      ? [{ name: 'Series 1', data: fallbackPoints }]
+      : [];
+
+  const normalizedSeries = sourceSeries
+    .map((series) => {
+      const normalized = normalizePoints(series.data);
+      return {
+        name: series.name,
+        data: normalized.points,
+        tone: series.tone,
+        fill: series.fill,
+        dash: series.dash,
+        strokeWidth: series.strokeWidth,
+        opacity: series.opacity,
+        truncated: normalized.truncated
+      };
+    })
+    .filter((series) => series.data.length > 0);
+
+  const labelSet = new Set<string>();
+  normalizedSeries.forEach((series) => {
+    series.data.forEach((point) => labelSet.add(point.label));
+  });
+  let labels = Array.from(labelSet);
+  let truncated = normalizedSeries.reduce((sum, series) => Math.max(sum, series.truncated), 0);
+
+  if (labels.length > MAX_POINTS) {
+    truncated += labels.length - MAX_POINTS;
+    labels = labels.slice(labels.length - MAX_POINTS);
+  }
+
+  const trimmedSeries: NormalizedSeries[] = normalizedSeries.map((series) => {
+    const allowed = new Set(labels);
+    return {
+      name: series.name,
+      data: series.data.filter((point) => allowed.has(point.label)),
+      tone: series.tone,
+      fill: series.fill,
+      dash: series.dash,
+      strokeWidth: series.strokeWidth,
+      opacity: series.opacity
+    };
+  });
+
+  return { labels, series: trimmedSeries, truncated };
 }
 
 function statusText(state: ChartState): string {
@@ -589,6 +894,7 @@ export class UIChart extends ElementBase {
   static get observedAttributes() {
     return [
       'data',
+      'series',
       'values',
       'labels',
       'type',
@@ -601,6 +907,8 @@ export class UIChart extends ElementBase {
       'interactive',
       'show-legend',
       'show-summary',
+      'value-prefix',
+      'value-suffix',
       'aria-label'
     ];
   }
@@ -643,9 +951,10 @@ export class UIChart extends ElementBase {
     super.attributeChangedCallback(name, oldValue, newValue);
   }
 
-  private _points(): { points: ChartPoint[]; truncated: number } {
-    const parsed = parsePoints(this.getAttribute('data'), this.getAttribute('values'), this.getAttribute('labels'));
-    return normalizePoints(parsed);
+  private _data(): NormalizedChartData {
+    const points = parsePoints(this.getAttribute('data'), this.getAttribute('values'), this.getAttribute('labels'));
+    const series = parseSeries(this.getAttribute('series'));
+    return normalizeSeries(series, points);
   }
 
   private _type(): ChartKind {
@@ -686,6 +995,18 @@ export class UIChart extends ElementBase {
     const raw = (this.getAttribute('show-summary') || '').trim().toLowerCase();
     if (!raw) return true;
     return raw !== 'false' && raw !== '0' && raw !== 'off';
+  }
+
+  private _primarySeries(data: NormalizedChartData): NormalizedSeries | null {
+    return data.series[0] || null;
+  }
+
+  private _valuePrefix(): string {
+    return this.getAttribute('value-prefix') || '';
+  }
+
+  private _valueSuffix(): string {
+    return this.getAttribute('value-suffix') || '';
   }
 
   private _resolveStats(points: ChartPoint[]): ChartStats {
@@ -739,29 +1060,55 @@ export class UIChart extends ElementBase {
   }
 
   private _formatValue(value: number, options?: Intl.NumberFormatOptions): string {
+    const prefix = this._valuePrefix();
+    const suffix = this._valueSuffix();
     try {
-      return new Intl.NumberFormat(undefined, {
+      const formatted = new Intl.NumberFormat(undefined, {
         maximumFractionDigits: Math.abs(value) >= 100 ? 0 : 1,
         ...options
       }).format(value);
+      return `${prefix}${formatted}${suffix}`;
     } catch {
-      return value.toFixed(Math.abs(value) >= 100 ? 0 : 1);
+      return `${prefix}${value.toFixed(Math.abs(value) >= 100 ? 0 : 1)}${suffix}`;
     }
   }
 
-  private _pointTone(point: ChartPoint, index: number): string {
-    return point.tone || palette[index % palette.length] || 'var(--ui-chart-accent)';
+  private _seriesTone(series: NormalizedSeries, seriesIndex: number): string {
+    return series.tone || palette[seriesIndex % palette.length] || 'var(--ui-chart-accent)';
   }
 
-  private _pointDetail(index: number, points: ChartPoint[], type: ChartKind, source: PointSelectDetail['source']): PointSelectDetail | null {
-    const point = points[index];
+  private _pointTone(point: ChartPoint, index: number, fallback?: string): string {
+    return point.tone || fallback || palette[index % palette.length] || 'var(--ui-chart-accent)';
+  }
+
+  private _seriesValueDetails(labels: string[], series: NormalizedSeries[], index: number): SeriesValueDetail[] {
+    const label = labels[index];
+    return series.map((entry, seriesIndex) => {
+      const point = entry.data.find((item) => item.label === label) || null;
+      return {
+        series: entry.name,
+        value: point?.value ?? null,
+        tone: point?.tone || this._seriesTone(entry, seriesIndex)
+      };
+    });
+  }
+
+  private _pointDetail(index: number, data: NormalizedChartData, type: ChartKind, source: PointSelectDetail['source']): PointSelectDetail | null {
+    const primary = this._primarySeries(data);
+    if (!primary) return null;
+    const label = data.labels[index];
+    if (!label) return null;
+    const point = primary.data.find((entry) => entry.label === label) || primary.data[index];
     if (!point) return null;
-    const stats = this._resolveStats(points);
+    const stats = this._resolveStats(primary.data);
+    const seriesValues = this._seriesValueDetails(data.labels, data.series, index);
     return {
       index,
-      label: point.label,
+      label,
       value: point.value,
-      tone: point.tone,
+      tone: point.tone || this._seriesTone(primary, 0),
+      series: primary.name,
+      seriesValues,
       type,
       total: stats.total,
       min: stats.min,
@@ -770,8 +1117,8 @@ export class UIChart extends ElementBase {
     };
   }
 
-  private _emitPointSelect(index: number, points: ChartPoint[], source: PointSelectDetail['source']): void {
-    const detail = this._pointDetail(index, points, this._type(), source);
+  private _emitPointSelect(index: number, data: NormalizedChartData, source: PointSelectDetail['source']): void {
+    const detail = this._pointDetail(index, data, this._type(), source);
     if (!detail) return;
 
     this.dispatchEvent(
@@ -842,31 +1189,31 @@ export class UIChart extends ElementBase {
   private _onClick(event: MouseEvent): void {
     if (!this._isInteractive()) return;
 
-    const { points } = this._points();
-    if (!points.length) return;
+    const data = this._data();
+    if (!data.labels.length || !data.series.length) return;
 
     const idx = this._indexFromTarget(event.target);
-    if (idx == null || idx >= points.length) return;
+    if (idx == null || idx >= data.labels.length) return;
 
     const nextPinned = !(this._activePinned && this._activeIndex === idx);
     this._activeIndex = idx;
     this._activePinned = nextPinned;
     this.requestRender();
-    this._emitPointSelect(idx, points, 'pointer');
+    this._emitPointSelect(idx, data, 'pointer');
   }
 
   private _onKeyDown(event: KeyboardEvent): void {
     if (!this._isInteractive()) return;
 
-    const { points } = this._points();
-    if (!points.length) return;
+    const data = this._data();
+    if (!data.labels.length || !data.series.length) return;
 
     const targetIndex = this._indexFromTarget(event.target);
     const current = targetIndex ?? this._activeIndex ?? 0;
 
     if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
       event.preventDefault();
-      const next = clamp(current + 1, 0, points.length - 1);
+      const next = clamp(current + 1, 0, data.labels.length - 1);
       this._setActiveIndex(next, true);
       this._focusIndex(next);
       return;
@@ -874,7 +1221,7 @@ export class UIChart extends ElementBase {
 
     if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
       event.preventDefault();
-      const next = clamp(current - 1, 0, points.length - 1);
+      const next = clamp(current - 1, 0, data.labels.length - 1);
       this._setActiveIndex(next, true);
       this._focusIndex(next);
       return;
@@ -889,7 +1236,7 @@ export class UIChart extends ElementBase {
 
     if (event.key === 'End') {
       event.preventDefault();
-      const last = points.length - 1;
+      const last = data.labels.length - 1;
       this._setActiveIndex(last, true);
       this._focusIndex(last);
       return;
@@ -905,16 +1252,28 @@ export class UIChart extends ElementBase {
     if (event.key !== 'Enter' && event.key !== ' ') return;
 
     event.preventDefault();
-    const idx = clamp(current, 0, points.length - 1);
+    const idx = clamp(current, 0, data.labels.length - 1);
     this._setActiveIndex(idx, true);
-    this._emitPointSelect(idx, points, 'keyboard');
+    this._emitPointSelect(idx, data, 'keyboard');
   }
 
-  private _plotLineOrArea(
-    points: ChartPoint[],
-    fillArea: boolean,
-    activeIndex: number | null,
-    stepped = false
+  private _axisXLabels(labels: string[]): string[] {
+    if (labels.length <= 8) return labels.map(() => 'visible');
+    const interval = Math.max(1, Math.ceil(labels.length / 6));
+    return labels.map((_label, index) => {
+      if (index === 0 || index === labels.length - 1 || index % interval === 0) return 'visible';
+      return 'hidden';
+    });
+  }
+
+  private _buildCartesianTicks(min: number, max: number): string[] {
+    return [1, 0.75, 0.5, 0.25, 0].map((ratio) => this._formatValue(min + (max - min) * ratio));
+  }
+
+  private _plotCartesian(
+    data: NormalizedChartData,
+    type: 'line' | 'area' | 'step' | 'scatter' | 'bar',
+    activeIndex: number | null
   ): PlotRender {
     const width = 220;
     const height = 64;
@@ -924,58 +1283,147 @@ export class UIChart extends ElementBase {
     const padB = 10;
     const axisW = width - padL - padR;
     const axisH = height - padT - padB;
-
-    const domain = this._valueDomain(points, { includeZero: false });
+    const labels = data.labels;
+    const series = data.series;
+    const includeZero = type === 'bar';
+    const values = series.flatMap((entry) => entry.data.map((point) => point.value));
+    const domain = this._valueDomain(values.map((value, index) => ({ label: String(index), value })), { includeZero });
     const min = domain.min;
     const max = domain.max;
     const span = domain.span;
-    const step = points.length > 1 ? axisW / (points.length - 1) : 0;
+    const step = labels.length > 1 ? axisW / (labels.length - 1) : 0;
 
     const baselineValue = domain.zeroInDomain ? 0 : min;
     const baselineY = padT + ((max - baselineValue) / span) * axisH;
-
-    const mapped = points.map((point, index) => {
+    const gridLines = [0, 0.25, 0.5, 0.75, 1]
+      .map((stepValue) => {
+        const y = padT + axisH * stepValue;
+        const strong = domain.zeroInDomain && Math.abs(y - baselineY) < 0.5;
+        return `<line x1="${padL}" y1="${y.toFixed(2)}" x2="${(padL + axisW).toFixed(2)}" y2="${y.toFixed(2)}" stroke="var(--ui-chart-grid)" stroke-width="${strong ? '0.75' : '0.45'}" />`;
+      })
+      .join('');
+    const lookup = series.map((entry) => new Map(entry.data.map((point) => [point.label, point])));
+    const anchors = labels.map((label, index) => {
       const x = padL + step * index;
-      const y = padT + ((max - point.value) / span) * axisH;
-      return { x, y, point, index };
+      const yValues = lookup
+        .map((map) => map.get(label))
+        .filter((point): point is ChartPoint => !!point)
+        .map((point) => padT + ((max - point.value) / span) * axisH);
+      const y = yValues.length ? Math.min(...yValues) : padT + axisH / 2;
+      return {
+        xPct: clamp((x / width) * 100, 0, 100),
+        yPct: clamp((y / height) * 100, 0, 100)
+      };
     });
 
-    const path = stepped
-      ? mapped
-          .map((item, index) => {
-            if (index === 0) return `M${item.x.toFixed(2)} ${item.y.toFixed(2)}`;
-            return `H${item.x.toFixed(2)} V${item.y.toFixed(2)}`;
+    const hits = labels
+      .map((label, index) => {
+        const anchor = anchors[index];
+        const active = activeIndex === index;
+        return `<button type="button" class="plot-hit" data-role="plot-hit" data-point-index="${index}" data-active="${active ? 'true' : 'false'}" style="--x:${anchor.xPct.toFixed(3)};--y:${anchor.yPct.toFixed(3)};" aria-label="${escapeHtml(label)}" ${this._isInteractive() ? '' : 'disabled'}></button>`;
+      })
+      .join('');
+
+    if (type === 'bar') {
+      const band = axisW / Math.max(1, labels.length);
+      const slotWidth = clamp(band * 0.82, 6, 22);
+      const groupWidth = slotWidth / Math.max(1, series.length);
+      const bars = series
+        .map((entry, seriesIndex) => {
+          const seriesTone = this._seriesTone(entry, seriesIndex);
+          return labels
+            .map((label, index) => {
+              const point = lookup[seriesIndex].get(label);
+              if (!point) return '';
+              const x = padL + index * band + (band - slotWidth) / 2 + groupWidth * seriesIndex;
+              const yValue = padT + ((max - point.value) / span) * axisH;
+              const y = Math.min(yValue, baselineY);
+              const heightValue = Math.max(1, Math.abs(baselineY - yValue));
+              const active = activeIndex === index;
+              const opacity = activeIndex == null || active ? entry.opacity ?? 1 : 0.72;
+              return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${Math.max(2, groupWidth - 1).toFixed(2)}" height="${heightValue.toFixed(2)}" rx="1.4" fill="${seriesTone}" opacity="${opacity}" />`;
+            })
+            .join('');
+        })
+        .join('');
+
+      return {
+        svg: `
+          <svg class="plot" part="plot" viewBox="0 0 ${width} ${height}" width="100%" height="100%" role="img" aria-label="${escapeHtml(this._ariaLabel())}" preserveAspectRatio="none">
+            <g class="plot-grid">${gridLines}</g>
+            ${bars}
+          </svg>
+        `,
+        hits,
+        anchors,
+        yTicks: this._buildCartesianTicks(min, max)
+      };
+    }
+
+    const renderSeries = series
+      .map((entry, seriesIndex) => {
+        const seriesTone = this._seriesTone(entry, seriesIndex);
+        const mapped = labels.map((label, index) => {
+          const point = lookup[seriesIndex].get(label) || null;
+          const x = padL + step * index;
+          const y = point ? padT + ((max - point.value) / span) * axisH : null;
+          return { x, y, point, index };
+        });
+
+        const segments: Array<Array<{ x: number; y: number; point: ChartPoint; index: number }>> = [];
+        let current: Array<{ x: number; y: number; point: ChartPoint; index: number }> = [];
+        mapped.forEach((item) => {
+          if (!item.point || item.y == null) {
+            if (current.length) segments.push(current);
+            current = [];
+            return;
+          }
+          current.push({ x: item.x, y: item.y, point: item.point, index: item.index });
+        });
+        if (current.length) segments.push(current);
+
+        const pathForSegment = (segment: Array<{ x: number; y: number }>) =>
+          segment
+            .map((item, index) => {
+              if (index === 0) return `M${item.x.toFixed(2)} ${item.y.toFixed(2)}`;
+              if (type === 'step') return `H${item.x.toFixed(2)} V${item.y.toFixed(2)}`;
+              return `L${item.x.toFixed(2)} ${item.y.toFixed(2)}`;
+            })
+            .join(' ');
+
+        const fills = type === 'area'
+          ? segments
+              .map((segment) => {
+                const fillEnabled = typeof entry.fill === 'boolean' ? entry.fill : seriesIndex === 0;
+                if (!fillEnabled) return '';
+                const path = pathForSegment(segment);
+                const first = segment[0];
+                const last = segment[segment.length - 1];
+                return `<path d="${path} L ${last.x.toFixed(2)} ${baselineY.toFixed(2)} L ${first.x.toFixed(2)} ${baselineY.toFixed(2)} Z" fill="color-mix(in srgb, ${seriesTone} 18%, transparent)" opacity="${entry.opacity ?? (seriesIndex === 0 ? 1 : 0.65)}" />`;
+              })
+              .join('')
+          : '';
+
+        const strokePaths = type === 'scatter'
+          ? ''
+          : segments
+              .map((segment) => {
+                const path = pathForSegment(segment);
+                return `<path d="${path}" fill="none" stroke="${seriesTone}" stroke-width="${(entry.strokeWidth || (seriesIndex === 0 ? 1.9 : 1.55)).toFixed(2)}" stroke-linecap="round" stroke-linejoin="round" ${entry.dash ? `stroke-dasharray="${escapeHtml(entry.dash)}"` : ''} opacity="${entry.opacity ?? 1}" />`;
+              })
+              .join('');
+
+        const circles = mapped
+          .map((item) => {
+            if (!item.point || item.y == null) return '';
+            const active = activeIndex === item.index;
+            const radius = active ? 2.35 : 1.6;
+            const opacity = activeIndex == null || active ? entry.opacity ?? 1 : 0.72;
+            return `<circle cx="${item.x.toFixed(2)}" cy="${item.y.toFixed(2)}" r="${radius.toFixed(2)}" fill="${this._pointTone(item.point, item.index, seriesTone)}" opacity="${opacity}" />`;
           })
-          .join(' ')
-      : mapped.map((item, index) => `${index === 0 ? 'M' : 'L'}${item.x.toFixed(2)} ${item.y.toFixed(2)}`).join(' ');
+          .join('');
 
-    const areaPath = fillArea
-      ? `${path} L ${(padL + axisW).toFixed(2)} ${baselineY.toFixed(2)} L ${padL.toFixed(2)} ${baselineY.toFixed(2)} Z`
-      : '';
-
-    const gridLines = [0, 0.25, 0.5, 0.75, 1]
-      .map((stepValue) => {
-        const y = padT + axisH * stepValue;
-        const strong = domain.zeroInDomain && Math.abs(y - baselineY) < 0.5;
-        return `<line x1="${padL}" y1="${y.toFixed(2)}" x2="${(padL + axisW).toFixed(2)}" y2="${y.toFixed(2)}" stroke="var(--ui-chart-grid)" stroke-width="${strong ? '0.75' : '0.45'}" />`;
-      })
-      .join('');
-
-    const circles = mapped
-      .map((item) => {
-        const tone = this._pointTone(item.point, item.index);
-        const active = activeIndex === item.index;
-        return `<circle cx="${item.x.toFixed(2)}" cy="${item.y.toFixed(2)}" r="${active ? '2.35' : '1.75'}" fill="${tone}" opacity="${active || activeIndex == null ? '1' : '0.78'}" />`;
-      })
-      .join('');
-
-    const hits = mapped
-      .map((item) => {
-        const xPct = clamp((item.x / width) * 100, 0, 100).toFixed(3);
-        const yPct = clamp((item.y / height) * 100, 0, 100).toFixed(3);
-        const active = activeIndex === item.index;
-        const label = `${item.point.label}: ${this._formatValue(item.point.value)}`;
-        return `<button type="button" class="plot-hit" data-role="plot-hit" data-point-index="${item.index}" data-active="${active ? 'true' : 'false'}" style="--x:${xPct};--y:${yPct};" aria-label="${escapeHtml(label)}" ${this._isInteractive() ? '' : 'disabled'}></button>`;
+        return `${fills}${strokePaths}${circles}`;
       })
       .join('');
 
@@ -983,138 +1431,12 @@ export class UIChart extends ElementBase {
       svg: `
         <svg class="plot" part="plot" viewBox="0 0 ${width} ${height}" width="100%" height="100%" role="img" aria-label="${escapeHtml(this._ariaLabel())}" preserveAspectRatio="none">
           <g class="plot-grid">${gridLines}</g>
-          ${fillArea ? `<path d="${areaPath}" fill="color-mix(in srgb, var(--ui-chart-accent) 18%, transparent)" />` : ''}
-          <path d="${path}" fill="none" stroke="var(--ui-chart-accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-          ${circles}
+          ${renderSeries}
         </svg>
       `,
-      hits
-    };
-  }
-
-  private _plotBars(points: ChartPoint[], activeIndex: number | null): PlotRender {
-    const width = 220;
-    const height = 64;
-    const padL = 8;
-    const padR = 4;
-    const padT = 6;
-    const padB = 10;
-    const axisW = width - padL - padR;
-    const axisH = height - padT - padB;
-
-    const domain = this._valueDomain(points, { includeZero: true });
-    const min = domain.min;
-    const max = domain.max;
-    const span = domain.span;
-    const baselineY = padT + ((max - 0) / span) * axisH;
-
-    const band = axisW / points.length;
-    const barWidth = clamp(band * 0.74, 2.8, 14);
-
-    const bars = points
-      .map((point, index) => {
-        const tone = this._pointTone(point, index);
-        const x = padL + index * band + (band - barWidth) / 2;
-        const yValue = padT + ((max - point.value) / span) * axisH;
-        const y = Math.min(yValue, baselineY);
-        const heightValue = Math.max(1, Math.abs(baselineY - yValue));
-        const active = activeIndex === index;
-        const opacity = activeIndex == null || active ? '1' : '0.72';
-        return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${barWidth.toFixed(2)}" height="${heightValue.toFixed(2)}" rx="1.6" fill="${tone}" opacity="${opacity}" />`;
-      })
-      .join('');
-
-    const gridLines = [0, 0.25, 0.5, 0.75, 1]
-      .map((stepValue) => {
-        const y = padT + axisH * stepValue;
-        const strong = Math.abs(y - baselineY) < 0.5;
-        return `<line x1="${padL}" y1="${y.toFixed(2)}" x2="${(padL + axisW).toFixed(2)}" y2="${y.toFixed(2)}" stroke="var(--ui-chart-grid)" stroke-width="${strong ? '0.75' : '0.45'}" />`;
-      })
-      .join('');
-
-    const hits = points
-      .map((point, index) => {
-        const x = padL + index * band + band / 2;
-        const yValue = padT + ((max - point.value) / span) * axisH;
-        const focusY = point.value >= 0 ? yValue : baselineY;
-        const xPct = clamp((x / width) * 100, 0, 100).toFixed(3);
-        const yPct = clamp((focusY / height) * 100, 0, 100).toFixed(3);
-        const active = activeIndex === index;
-        const label = `${point.label}: ${this._formatValue(point.value)}`;
-        return `<button type="button" class="plot-hit" data-role="plot-hit" data-point-index="${index}" data-active="${active ? 'true' : 'false'}" style="--x:${xPct};--y:${yPct};" aria-label="${escapeHtml(label)}" ${this._isInteractive() ? '' : 'disabled'}></button>`;
-      })
-      .join('');
-
-    return {
-      svg: `
-        <svg class="plot" part="plot" viewBox="0 0 ${width} ${height}" width="100%" height="100%" role="img" aria-label="${escapeHtml(this._ariaLabel())}" preserveAspectRatio="none">
-          <g class="plot-grid">${gridLines}</g>
-          ${bars}
-        </svg>
-      `,
-      hits
-    };
-  }
-
-  private _plotScatter(points: ChartPoint[], activeIndex: number | null): PlotRender {
-    const width = 220;
-    const height = 64;
-    const padL = 8;
-    const padR = 4;
-    const padT = 6;
-    const padB = 10;
-    const axisW = width - padL - padR;
-    const axisH = height - padT - padB;
-
-    const domain = this._valueDomain(points, { includeZero: false });
-    const min = domain.min;
-    const max = domain.max;
-    const span = domain.span;
-    const step = points.length > 1 ? axisW / (points.length - 1) : 0;
-    const baselineY = padT + ((max - min) / span) * axisH;
-
-    const mapped = points.map((point, index) => {
-      const x = padL + step * index;
-      const y = padT + ((max - point.value) / span) * axisH;
-      return { x, y, point, index };
-    });
-
-    const gridLines = [0, 0.25, 0.5, 0.75, 1]
-      .map((stepValue) => {
-        const y = padT + axisH * stepValue;
-        const strong = domain.zeroInDomain && Math.abs(y - baselineY) < 0.5;
-        return `<line x1="${padL}" y1="${y.toFixed(2)}" x2="${(padL + axisW).toFixed(2)}" y2="${y.toFixed(2)}" stroke="var(--ui-chart-grid)" stroke-width="${strong ? '0.75' : '0.45'}" />`;
-      })
-      .join('');
-
-    const circles = mapped
-      .map((item) => {
-        const tone = this._pointTone(item.point, item.index);
-        const active = activeIndex === item.index;
-        const r = active ? 2.4 : 1.95;
-        const opacity = activeIndex == null || active ? '1' : '0.72';
-        return `<circle cx="${item.x.toFixed(2)}" cy="${item.y.toFixed(2)}" r="${r.toFixed(2)}" fill="${tone}" opacity="${opacity}" />`;
-      })
-      .join('');
-
-    const hits = mapped
-      .map((item) => {
-        const xPct = clamp((item.x / width) * 100, 0, 100).toFixed(3);
-        const yPct = clamp((item.y / height) * 100, 0, 100).toFixed(3);
-        const active = activeIndex === item.index;
-        const label = `${item.point.label}: ${this._formatValue(item.point.value)}`;
-        return `<button type="button" class="plot-hit" data-role="plot-hit" data-point-index="${item.index}" data-active="${active ? 'true' : 'false'}" style="--x:${xPct};--y:${yPct};" aria-label="${escapeHtml(label)}" ${this._isInteractive() ? '' : 'disabled'}></button>`;
-      })
-      .join('');
-
-    return {
-      svg: `
-        <svg class="plot" part="plot" viewBox="0 0 ${width} ${height}" width="100%" height="100%" role="img" aria-label="${escapeHtml(this._ariaLabel())}" preserveAspectRatio="none">
-          <g class="plot-grid">${gridLines}</g>
-          ${circles}
-        </svg>
-      `,
-      hits
+      hits,
+      anchors,
+      yTicks: this._buildCartesianTicks(min, max)
     };
   }
 
@@ -1177,7 +1499,12 @@ export class UIChart extends ElementBase {
           ${pointsMarkup}
         </svg>
       `,
-      hits
+      hits,
+      anchors: mapped.map((item) => ({
+        xPct: clamp((item.x / size) * 100, 0, 100),
+        yPct: clamp((item.y / size) * 100, 0, 100)
+      })),
+      yTicks: []
     };
   }
 
@@ -1252,18 +1579,36 @@ export class UIChart extends ElementBase {
           <text x="${centerX}" y="36" text-anchor="middle" font-size="6" font-weight="700" fill="var(--ui-chart-text)">${escapeHtml(this._formatValue(positiveTotal))}</text>
         </svg>
       `,
-      hits
+      hits,
+      anchors: points.map((_point, index) => {
+        let runningSweep = 0;
+        for (let cursor = 0; cursor <= index; cursor += 1) {
+          const normalized = Math.max(0, points[cursor].value);
+          const ratio = normalized / total;
+          const sweep = ratio * Math.PI * 2;
+          if (cursor === index) {
+            const mid = -Math.PI / 2 + runningSweep + sweep / 2;
+            const x = centerX + Math.cos(mid) * (radius + 6);
+            const y = centerY + Math.sin(mid) * (radius + 6);
+            return {
+              xPct: clamp((x / 64) * 100, 0, 100),
+              yPct: clamp((y / 64) * 100, 0, 100)
+            };
+          }
+          runningSweep += sweep;
+        }
+        return { xPct: 50, yPct: 50 };
+      }),
+      yTicks: []
     };
   }
 
-  private _plot(points: ChartPoint[], type: ChartKind, activeIndex: number | null): PlotRender {
-    if (type === 'bar') return this._plotBars(points, activeIndex);
-    if (type === 'donut') return this._plotDonut(points, activeIndex);
-    if (type === 'scatter') return this._plotScatter(points, activeIndex);
-    if (type === 'radial') return this._plotRadial(points, activeIndex);
-    if (type === 'step') return this._plotLineOrArea(points, false, activeIndex, true);
-    if (type === 'area') return this._plotLineOrArea(points, true, activeIndex);
-    return this._plotLineOrArea(points, false, activeIndex);
+  private _plot(data: NormalizedChartData, type: ChartKind, activeIndex: number | null): PlotRender {
+    const primary = this._primarySeries(data);
+    if (!primary) return { svg: '', hits: '', anchors: [], yTicks: [] };
+    if (type === 'donut') return this._plotDonut(primary.data, activeIndex);
+    if (type === 'radial') return this._plotRadial(primary.data, activeIndex);
+    return this._plotCartesian(data, type, activeIndex);
   }
 
   private _ariaLabel(): string {
@@ -1271,10 +1616,48 @@ export class UIChart extends ElementBase {
     return this.getAttribute('aria-label') || title;
   }
 
-  private _activeInsight(points: ChartPoint[]): string {
+  private _hasToolbarSlot(): boolean {
+    return !!this.querySelector('[slot="header"]');
+  }
+
+  private _hasSlot(name: string): boolean {
+    return !!this.querySelector(`[slot="${name}"]`);
+  }
+
+  private _tooltipMarkup(data: NormalizedChartData, plot: PlotRender): string {
     const idx = this._activeIndex;
-    if (idx == null || !points[idx]) {
-      const stats = this._resolveStats(points);
+    if (idx == null || !plot.anchors[idx]) return '';
+    const label = data.labels[idx];
+    if (!label) return '';
+    const values = this._seriesValueDetails(data.labels, data.series, idx).filter((entry) => entry.value != null);
+    if (!values.length) return '';
+    const anchor = plot.anchors[idx];
+    return `
+      <div class="tooltip" part="tooltip" style="--x:${anchor.xPct.toFixed(3)};--y:${anchor.yPct.toFixed(3)};">
+        <div class="tooltip-title">${escapeHtml(label)}</div>
+        <div class="tooltip-list">
+          ${values
+            .map(
+              (entry) => `
+                <div class="tooltip-row">
+                  <span class="tooltip-dot" style="--dot:${entry.tone || 'var(--ui-chart-accent)'};"></span>
+                  <span class="tooltip-series">${escapeHtml(entry.series)}</span>
+                  <span class="tooltip-value">${escapeHtml(this._formatValue(entry.value || 0))}</span>
+                </div>
+              `
+            )
+            .join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  private _activeInsight(data: NormalizedChartData): string {
+    const primary = this._primarySeries(data);
+    if (!primary) return '';
+    const idx = this._activeIndex;
+    if (idx == null || !data.labels[idx]) {
+      const stats = this._resolveStats(primary.data);
       const trendTone = stats.delta > 0 ? 'up' : stats.delta < 0 ? 'down' : 'flat';
       const trend = `${stats.delta >= 0 ? '+' : ''}${this._formatValue(stats.delta)}${
         stats.deltaPct == null ? '' : ` (${stats.deltaPct >= 0 ? '+' : ''}${this._formatValue(stats.deltaPct, { maximumFractionDigits: 1 })}%)`
@@ -1287,35 +1670,45 @@ export class UIChart extends ElementBase {
       `;
     }
 
-    const point = points[idx];
+    const label = data.labels[idx];
+    const values = this._seriesValueDetails(data.labels, data.series, idx).filter((entry) => entry.value != null);
+    const total = values.reduce((sum, entry) => sum + (entry.value || 0), 0);
     return `
       <div class="insight" part="insight">
-        <span>Selected <strong>${escapeHtml(point.label)}</strong></span>
-        <strong>${escapeHtml(this._formatValue(point.value))}</strong>
+        <span>Selected <strong>${escapeHtml(label)}</strong></span>
+        <strong>${escapeHtml(this._formatValue(data.series.length > 1 ? total : values[0]?.value || 0))}</strong>
       </div>
     `;
   }
 
   protected override render(): void {
-    const { points, truncated } = this._points();
+    const data = this._data();
+    const primary = this._primarySeries(data);
     const type = this._type();
     const state = this._state();
     const disabled = this._isDisabled();
     const interactive = this._isInteractive();
-    const title = this.getAttribute('title') || 'Chart';
-    const subtitle = this.getAttribute('subtitle') || '';
+    const title = (this.getAttribute('title') || '').trim();
+    const subtitle = (this.getAttribute('subtitle') || '').trim();
     const showLegend = this._showLegend();
     const showSummary = this._showSummary();
+    const hasToolbar = this._hasToolbarSlot();
+    const hasTitleSlot = this._hasSlot('title');
+    const hasSubtitleSlot = this._hasSlot('subtitle');
+    const headerVisible = hasTitleSlot || hasSubtitleSlot || !!title || !!subtitle || state !== 'idle';
 
-    if (!points.length) {
+    if (!primary || !data.labels.length) {
       const message = state === 'error' ? 'Chart data failed to load' : 'No series data available';
       this.setContent(`
         <style>${style}</style>
         <section class="frame" part="frame" data-state="${state}" data-disabled="${disabled ? 'true' : 'false'}" aria-disabled="${disabled ? 'true' : 'false'}">
-          <header class="header" part="header">
+          <div class="toolbar" part="toolbar" ${hasToolbar ? '' : 'hidden'}>
+            <slot name="header"></slot>
+          </div>
+          <header class="header" part="header" ${headerVisible ? '' : 'hidden'}>
             <div class="meta">
-              <h3 class="title" part="title">${escapeHtml(title)}</h3>
-              ${subtitle ? `<p class="subtitle" part="subtitle">${escapeHtml(subtitle)}</p>` : ''}
+              ${hasTitleSlot ? '<slot class="title-slot" name="title"></slot>' : title ? `<h3 class="title" part="title">${escapeHtml(title)}</h3>` : ''}
+              ${hasSubtitleSlot ? '<slot class="subtitle-slot" name="subtitle"></slot>' : subtitle ? `<p class="subtitle" part="subtitle">${escapeHtml(subtitle)}</p>` : ''}
             </div>
             <span class="status-pill" data-state="${state}">${statusText(state)}</span>
           </header>
@@ -1325,39 +1718,47 @@ export class UIChart extends ElementBase {
       return;
     }
 
-    if (this._activeIndex != null && (this._activeIndex < 0 || this._activeIndex >= points.length)) {
+    if (this._activeIndex != null && (this._activeIndex < 0 || this._activeIndex >= data.labels.length)) {
       this._activeIndex = null;
       this._activePinned = false;
     }
 
-    const stats = this._resolveStats(points);
-    const plot = this._plot(points, type, this._activeIndex);
+    const stats = this._resolveStats(primary.data);
+    const plot = this._plot(data, type, this._activeIndex);
+    const xVisibility = this._axisXLabels(data.labels);
 
-    const firstLabel = points[0]?.label || '';
-    const middleLabel = points[Math.floor(points.length / 2)]?.label || '';
-    const lastLabel = points[points.length - 1]?.label || '';
-
-    const legend = points
-      .map((point, index) => {
-        const active = this._activeIndex === index;
-        const tone = this._pointTone(point, index);
-        const label = `${point.label}: ${this._formatValue(point.value)}`;
-        return `
-          <button
-            type="button"
-            class="legend-item"
-            data-role="legend-item"
-            data-point-index="${index}"
-            data-active="${active ? 'true' : 'false'}"
-            aria-label="${escapeHtml(label)}"
-            ${interactive ? '' : 'disabled'}
-          >
-            <span class="legend-dot" style="--dot:${tone};"></span>
-            <span>${escapeHtml(point.label)}</span>
-          </button>
-        `;
-      })
-      .join('');
+    const legend = data.series.length > 1
+      ? data.series
+          .map(
+            (entry, index) => `
+              <div class="legend-item" aria-label="${escapeHtml(entry.name)}">
+                <span class="legend-dot" style="--dot:${this._seriesTone(entry, index)};"></span>
+                <span>${escapeHtml(entry.name)}</span>
+              </div>
+            `
+          )
+          .join('')
+      : primary.data
+          .map((point, index) => {
+            const active = this._activeIndex === index;
+            const tone = this._pointTone(point, index);
+            const label = `${point.label}: ${this._formatValue(point.value)}`;
+            return `
+              <button
+                type="button"
+                class="legend-item"
+                data-role="legend-item"
+                data-point-index="${index}"
+                data-active="${active ? 'true' : 'false'}"
+                aria-label="${escapeHtml(label)}"
+                ${interactive ? '' : 'disabled'}
+              >
+                <span class="legend-dot" style="--dot:${tone};"></span>
+                <span>${escapeHtml(point.label)}</span>
+              </button>
+            `;
+          })
+          .join('');
 
     const deltaTone = stats.delta > 0 ? 'up' : stats.delta < 0 ? 'down' : 'flat';
     const deltaText = `${stats.delta >= 0 ? '+' : ''}${this._formatValue(stats.delta)}`;
@@ -1380,10 +1781,14 @@ export class UIChart extends ElementBase {
       >
         <div class="sr-only" aria-live="polite">${escapeHtml(title)} ${escapeHtml(statusText(state))}</div>
 
-        <header class="header" part="header">
+        <div class="toolbar" part="toolbar" ${hasToolbar ? '' : 'hidden'}>
+          <slot name="header"></slot>
+        </div>
+
+        <header class="header" part="header" ${headerVisible ? '' : 'hidden'}>
           <div class="meta">
-            <h3 class="title" part="title">${escapeHtml(title)}</h3>
-            ${subtitle ? `<p class="subtitle" part="subtitle">${escapeHtml(subtitle)}</p>` : ''}
+            ${hasTitleSlot ? '<slot class="title-slot" name="title"></slot>' : title ? `<h3 class="title" part="title">${escapeHtml(title)}</h3>` : ''}
+            ${hasSubtitleSlot ? '<slot class="subtitle-slot" name="subtitle"></slot>' : subtitle ? `<p class="subtitle" part="subtitle">${escapeHtml(subtitle)}</p>` : ''}
           </div>
           <span class="status-pill" data-state="${state}">${statusText(state)}</span>
         </header>
@@ -1410,17 +1815,35 @@ export class UIChart extends ElementBase {
         ` : ''}
 
         <section class="plot-shell" part="plot-shell">
-          ${plot.svg}
-          <div class="plot-hit-layer" part="plot-hits">${plot.hits}</div>
-          ${type === 'donut' || type === 'radial' ? '' : `<div class="axis-labels" part="axis-labels"><span>${escapeHtml(firstLabel)}</span><span>${escapeHtml(middleLabel)}</span><span>${escapeHtml(lastLabel)}</span></div>`}
-          ${state === 'loading' ? '<div class="loading-overlay" part="loading-overlay" aria-hidden="true"></div>' : ''}
+          <div class="plot-body">
+            ${type === 'donut' || type === 'radial' ? '' : `
+              <div class="axis-y" part="axis-y">
+                ${plot.yTicks.map((tick) => `<span>${escapeHtml(tick)}</span>`).join('')}
+              </div>
+            `}
+            <div class="plot-stage">
+              ${plot.svg}
+              <div class="plot-hit-layer" part="plot-hits">${plot.hits}</div>
+              ${this._tooltipMarkup(data, plot)}
+              ${state === 'loading' ? '<div class="loading-overlay" part="loading-overlay" aria-hidden="true"></div>' : ''}
+            </div>
+            ${type === 'donut' || type === 'radial' ? '' : `
+              <div class="axis-x" part="axis-x">
+                ${data.labels
+                  .map(
+                    (label, index) => `<span class="axis-x-label" data-hidden="${xVisibility[index] === 'hidden' ? 'true' : 'false'}">${escapeHtml(label)}</span>`
+                  )
+                  .join('')}
+              </div>
+            `}
+          </div>
         </section>
 
-        ${this._activeInsight(points)}
+        ${this._activeInsight(data)}
 
         ${showLegend ? `<section class="legend" part="legend">${legend}</section>` : ''}
 
-        ${truncated > 0 ? `<div class="message" part="message">Showing last ${truncated + points.length} records (truncated to ${MAX_POINTS}).</div>` : ''}
+        ${data.truncated > 0 ? `<div class="message" part="message">Showing last ${data.truncated + data.labels.length} records (truncated to ${MAX_POINTS}).</div>` : ''}
 
         ${stateMessage}
       </section>
