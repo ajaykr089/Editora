@@ -11,8 +11,7 @@ const style = `
     --ui-hover-card-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
     --ui-hover-card-border: 1px solid var(--ui-hover-card-border-color);
     --ui-hover-card-shadow:
-      0 2px 8px rgba(2, 6, 23, 0.08),
-      0 26px 54px rgba(2, 6, 23, 0.18);
+      none;
     --ui-hover-card-padding: 12px;
     --ui-hover-card-min-width: 220px;
     --ui-hover-card-max-width: min(380px, calc(100vw - 16px));

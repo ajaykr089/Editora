@@ -23,7 +23,7 @@ const style = `
   :host {
     position: fixed;
     inset: 0;
-    z-index: var(--ui-floating-toolbar-z, 1160);
+    z-index: var(--ui-floating-toolbar-z, 1300);
     pointer-events: none;
     display: none;
     color-scheme: light dark;
@@ -35,8 +35,7 @@ const style = `
     --ui-floating-toolbar-border: 1px solid var(--ui-floating-toolbar-border-color);
     --ui-floating-toolbar-radius: 12px;
     --ui-floating-toolbar-shadow:
-      0 2px 10px rgba(2, 6, 23, 0.14),
-      0 20px 44px rgba(2, 6, 23, 0.18);
+      none;
     --ui-floating-toolbar-padding: 6px;
     --ui-floating-toolbar-gap: 6px;
     --ui-floating-toolbar-focus-ring: var(--ui-color-focus-ring, #2563eb);

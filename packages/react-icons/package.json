@@ -1,8 +1,8 @@
 {
   "name": "@editora/react-icons",
-  "version": "0.1.5",
-  "description": "React SVG icon components and theming context for the Editora UI ecosystem",
-  "homepage": "https://editora-free.netlify.app/",
+  "version": "0.1.6",
+  "description": "React icon component library for SaaS dashboards and enterprise products, with provider-driven theming and design-system consistency.",
+  "homepage": "https://editora-ecosystem.netlify.app/docs/react-icons",
   "bugs": {
     "url": "https://github.com/ajaykr089/Editora/issues"
   },
@@ -38,15 +38,21 @@
     "react": ">=16.8 <21"
   },
   "dependencies": {
-    "@editora/icons": "^0.1.4"
+    "@editora/icons": "^0.1.5"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
     "rimraf": "^5.0.0",
     "typescript": "^5.0.0",
-    "vite": "^7.3.1"
+    "vite": "^4.5.14"
   },
   "keywords": [
+    "react ui library",
+    "react component library",
+    "saas ui components",
+    "enterprise react components",
+    "modern design system",
+    "rich text editor react",
     "editora",
     "editora ui ecosystem",
     "icons",
@@ -63,5 +69,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "80e0808ae4909de63b8e0f1dd915b06b33a8ed44"
+  "gitHead": "7883627e823aa99dd5ecb66a5201116df972f88b"
 }

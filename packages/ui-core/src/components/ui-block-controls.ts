@@ -15,8 +15,7 @@ const style = `
         color-mix(in srgb, var(--ui-color-surface, #ffffff) 94%, transparent)
       );
     --ui-block-controls-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.06),
-      0 14px 30px rgba(15, 23, 42, 0.12);
+      none;
     --ui-block-controls-accent: var(--ui-color-primary, #2563eb);
     --ui-block-controls-focus-ring: var(--ui-color-focus-ring, #2563eb);
     --ui-block-controls-duration: 170ms;

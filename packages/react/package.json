@@ -1,6 +1,6 @@
 {
   "name": "@editora/react",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "React components for Editora - Best Free Premium Rich Text Editor. Free React WYSIWYG editor with enterprise features, 30+ free plugins, and accessibility support.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
@@ -9,11 +9,17 @@
     "url": "https://github.com/ajaykr089/Editora.git",
     "directory": "packages/react"
   },
-  "homepage": "https://editora-free.netlify.app/",
+  "homepage": "https://editora-ecosystem.netlify.app/",
   "bugs": {
     "url": "https://github.com/ajaykr089/Editora/issues"
   },
   "keywords": [
+    "react ui library",
+    "react component library",
+    "saas ui components",
+    "enterprise react components",
+    "modern design system",
+    "rich text editor react",
     "react",
     "editor",
     "rich-text",
@@ -58,9 +64,9 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.7",
-    "@editora/plugins": "^1.0.8",
-    "@editora/themes": "^1.0.8",
+    "@editora/core": "^1.0.9",
+    "@editora/plugins": "^1.0.10",
+    "@editora/themes": "^1.0.10",
     "react": ">=16.8 <21",
     "react-dom": ">=16.8 <21"
   },
@@ -73,17 +79,17 @@
     }
   },
   "dependencies": {
-    "@editora/light-code-editor": "^1.0.7"
+    "@editora/light-code-editor": "^1.0.8"
   },
   "devDependencies": {
-    "@editora/core": "^1.0.8",
+    "@editora/core": "^1.0.9",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "typescript": "^5.0.0",
-    "vite": "^7.3.1"
+    "vite": "^4.5.14"
   },
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "80e0808ae4909de63b8e0f1dd915b06b33a8ed44"
+  "gitHead": "7883627e823aa99dd5ecb66a5201116df972f88b"
 }

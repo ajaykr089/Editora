@@ -7,8 +7,7 @@ const style = `
     --ui-layout-color: var(--ui-color-text, #0f172a);
     --ui-layout-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 80%, transparent);
     --ui-layout-shadow:
-      0 26px 62px rgba(2, 6, 23, 0.12),
-      0 3px 12px rgba(2, 6, 23, 0.08);
+      none;
     --ui-layout-radius: 18px;
     --ui-layout-gap: 14px;
     --ui-layout-padding: 14px;

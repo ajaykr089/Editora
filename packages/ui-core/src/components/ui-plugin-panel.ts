@@ -4,7 +4,7 @@ const style = `
   :host {
     position: fixed;
     display: block;
-    z-index: 1120;
+    z-index: var(--ui-plugin-panel-z, 1300);
     pointer-events: none;
     color-scheme: light dark;
     --ui-plugin-panel-width: min(340px, 92vw);
@@ -12,7 +12,7 @@ const style = `
     --ui-plugin-panel-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 94%, transparent);
     --ui-plugin-panel-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-plugin-panel-radius: 14px;
-    --ui-plugin-panel-shadow: 0 18px 48px rgba(15, 23, 42, 0.16);
+    --ui-plugin-panel-shadow: none;
     --ui-plugin-panel-color: var(--ui-color-text, #0f172a);
   }
 

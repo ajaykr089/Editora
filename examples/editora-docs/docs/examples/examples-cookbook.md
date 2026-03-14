@@ -83,7 +83,7 @@ function MyEditor() {
 | --- | --- | --- |
 | `@editora/core/dist/webcomponent-core.js` | Bundle entry | Lightweight web component runtime path |
 | `@editora/core/dist/webcomponent.js` | Bundle entry | Full-feature web component runtime path |
-| `<editora-editor ...>` | Web component API | Declarative setup and runtime config updates |
+| `<editora-editor plugins="bold,italic,link" toolbar-items="bold,italic,link,undo,redo">` | Web component API | Declarative setup and runtime config updates |
 | `EditoraEditor` + plugin factories | React API | Component-driven integration pattern |
 | Runtime config blocks (`autosave/security/accessibility/performance`) | Operational API | Cross-integration behavior tuning |
 

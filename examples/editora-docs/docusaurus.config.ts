@@ -130,6 +130,7 @@ const config: Config = {
         { to: "/docs/getting-started/overview", label: "Getting Started", position: "left" },
         { to: "/docs/editor/core", label: "Core", position: "left" },
         { to: "/docs/ui-react", label: "UI React", position: "left" },
+        { to: "/docs/ai-usage", label: "AI", position: "left" },
         { type: "search", position: "right" },
         { type: "docsVersionDropdown", position: "right" },
         {
@@ -165,6 +166,15 @@ const config: Config = {
           items: [
             { label: "Contributing", to: "/docs/contributing/overview" },
             { label: "Migration", to: "/docs/migration/versioning-and-releases" },
+            { label: "CLI", to: "/docs/reference/cli" },
+            { label: "AI Guide", to: "/docs/ai-usage" },
+            { label: "Prompt Pack", to: "/docs/editora-prompts" },
+            { label: "Editor AI Guide", to: "/docs/editor/ai-usage" },
+            { label: "Editor Prompt Pack", to: "/docs/editor/editora-prompts" },
+            { label: "Toast AI Guide", to: "/docs/toast/ai-usage" },
+            { label: "React Icons AI Guide", to: "/docs/react-icons/ai-usage" },
+            { label: "Light Code Editor AI Guide", to: "/docs/packages/light-code-editor-ai-usage" },
+            { label: "components.json", href: "https://editora-ecosystem.netlify.app/components.json" },
             { label: "GitHub", href: "https://github.com/ajaykr089/Editora" },
           ],
         },

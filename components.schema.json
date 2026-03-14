@@ -1,0 +1,148 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Editora Component Registry",
+  "type": "object",
+  "required": [
+    "$schema",
+    "meta",
+    "packageDocs",
+    "aiDefaults",
+    "components"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "meta": {
+      "type": "object",
+      "required": [
+        "schemaVersion",
+        "generatedAt",
+        "project",
+        "website",
+        "storybook",
+        "docs"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "type": "string"
+        },
+        "generatedAt": {
+          "type": "string"
+        },
+        "project": {
+          "type": "string"
+        },
+        "website": {
+          "type": "string"
+        },
+        "storybook": {
+          "type": "string"
+        },
+        "docs": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "packageDocs": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "aiDefaults": {
+      "type": "object",
+      "properties": {
+        "requiredImports": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "componentPriority": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "codeStyle": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "package",
+          "framework",
+          "name",
+          "source",
+          "docsPath"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "package": {
+            "type": "string"
+          },
+          "framework": {
+            "enum": [
+              "web-component",
+              "react"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "tagName": {
+            "type": "string"
+          },
+          "reactExport": {
+            "type": "string"
+          },
+          "wrapperFor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source": {
+            "type": "string"
+          },
+          "docsPath": {
+            "type": "string"
+          },
+          "storybookPath": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "styleApi": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

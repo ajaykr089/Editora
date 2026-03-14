@@ -17,8 +17,7 @@ const style = `
     --ui-pagination-padding: 6px 11px;
     --ui-pagination-font-size: 13px;
     --ui-pagination-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.05),
-      0 12px 26px rgba(15, 23, 42, 0.08);
+      none;
     color-scheme: light dark;
   }
 

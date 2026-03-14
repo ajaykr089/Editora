@@ -45,7 +45,9 @@ const style = `
     --ui-chart-warning: var(--ui-color-warning, #d97706);
     --ui-chart-danger: var(--ui-color-danger, #dc2626);
     --ui-chart-radius: 16px;
-    --ui-chart-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+    --ui-chart-shadow: none;
+    --ui-chart-plot-height: 220px;
+    --ui-chart-plot-min-height: 188px;
 
     display: block;
     min-inline-size: 0;
@@ -85,7 +87,7 @@ const style = `
     --ui-chart-success: #34d399;
     --ui-chart-warning: #fbbf24;
     --ui-chart-danger: #f87171;
-    --ui-chart-shadow: 0 16px 36px rgba(2, 6, 23, 0.42);
+    --ui-chart-shadow: none;
   }
 
   .frame[data-state="loading"] {
@@ -202,16 +204,19 @@ const style = `
 
   .plot-shell {
     position: relative;
+    inline-size: 100%;
+    min-inline-size: 0;
     border: 1px solid color-mix(in srgb, var(--ui-chart-border) 80%, transparent);
     border-radius: 12px;
     background: color-mix(in srgb, var(--ui-chart-surface) 97%, transparent);
-    min-block-size: 188px;
+    min-block-size: var(--ui-chart-plot-min-height);
+    block-size: var(--ui-chart-plot-height);
     overflow: hidden;
   }
 
   .plot {
     inline-size: 100%;
-    block-size: 188px;
+    block-size: 100%;
     display: block;
   }
 
@@ -401,6 +406,11 @@ const style = `
   }
 
   @media (max-width: 720px) {
+    :host {
+      --ui-chart-plot-height: 188px;
+      --ui-chart-plot-min-height: 168px;
+    }
+
     .frame {
       padding: 12px;
       gap: 10px;
@@ -408,12 +418,6 @@ const style = `
 
     .summary {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .plot,
-    .plot-shell {
-      min-block-size: 168px;
-      block-size: 168px;
     }
   }
 
@@ -912,7 +916,7 @@ export class UIChart extends ElementBase {
     activeIndex: number | null,
     stepped = false
   ): PlotRender {
-    const width = 100;
+    const width = 220;
     const height = 64;
     const padL = 8;
     const padR = 4;
@@ -977,7 +981,7 @@ export class UIChart extends ElementBase {
 
     return {
       svg: `
-        <svg class="plot" part="plot" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(this._ariaLabel())}" preserveAspectRatio="none">
+        <svg class="plot" part="plot" viewBox="0 0 ${width} ${height}" width="100%" height="100%" role="img" aria-label="${escapeHtml(this._ariaLabel())}" preserveAspectRatio="none">
           <g class="plot-grid">${gridLines}</g>
           ${fillArea ? `<path d="${areaPath}" fill="color-mix(in srgb, var(--ui-chart-accent) 18%, transparent)" />` : ''}
           <path d="${path}" fill="none" stroke="var(--ui-chart-accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
@@ -989,7 +993,7 @@ export class UIChart extends ElementBase {
   }
 
   private _plotBars(points: ChartPoint[], activeIndex: number | null): PlotRender {
-    const width = 100;
+    const width = 220;
     const height = 64;
     const padL = 8;
     const padR = 4;
@@ -1043,7 +1047,7 @@ export class UIChart extends ElementBase {
 
     return {
       svg: `
-        <svg class="plot" part="plot" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(this._ariaLabel())}" preserveAspectRatio="none">
+        <svg class="plot" part="plot" viewBox="0 0 ${width} ${height}" width="100%" height="100%" role="img" aria-label="${escapeHtml(this._ariaLabel())}" preserveAspectRatio="none">
           <g class="plot-grid">${gridLines}</g>
           ${bars}
         </svg>
@@ -1053,7 +1057,7 @@ export class UIChart extends ElementBase {
   }
 
   private _plotScatter(points: ChartPoint[], activeIndex: number | null): PlotRender {
-    const width = 100;
+    const width = 220;
     const height = 64;
     const padL = 8;
     const padR = 4;
@@ -1105,7 +1109,7 @@ export class UIChart extends ElementBase {
 
     return {
       svg: `
-        <svg class="plot" part="plot" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(this._ariaLabel())}" preserveAspectRatio="none">
+        <svg class="plot" part="plot" viewBox="0 0 ${width} ${height}" width="100%" height="100%" role="img" aria-label="${escapeHtml(this._ariaLabel())}" preserveAspectRatio="none">
           <g class="plot-grid">${gridLines}</g>
           ${circles}
         </svg>
@@ -1166,7 +1170,7 @@ export class UIChart extends ElementBase {
 
     return {
       svg: `
-        <svg class="plot" part="plot" viewBox="0 0 ${size} ${size}" role="img" aria-label="${escapeHtml(this._ariaLabel())}" preserveAspectRatio="xMidYMid meet">
+        <svg class="plot" part="plot" viewBox="0 0 ${size} ${size}" width="100%" height="100%" role="img" aria-label="${escapeHtml(this._ariaLabel())}" preserveAspectRatio="xMidYMid meet">
           ${gridRings}
           ${spokes}
           <path d="${polygonPath}" fill="color-mix(in srgb, var(--ui-chart-accent) 16%, transparent)" stroke="var(--ui-chart-accent)" stroke-width="1.2" />
@@ -1241,7 +1245,7 @@ export class UIChart extends ElementBase {
 
     return {
       svg: `
-        <svg class="plot" part="plot" viewBox="0 0 64 64" role="img" aria-label="${escapeHtml(this._ariaLabel())}" preserveAspectRatio="xMidYMid meet">
+        <svg class="plot" part="plot" viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="${escapeHtml(this._ariaLabel())}" preserveAspectRatio="xMidYMid meet">
           <circle cx="${centerX}" cy="${centerY}" r="${radius}" fill="none" stroke="var(--ui-chart-grid)" stroke-width="${stroke}" />
           ${slices}
           <text x="${centerX}" y="30" text-anchor="middle" font-size="4.5" fill="var(--ui-chart-muted)">Total</text>

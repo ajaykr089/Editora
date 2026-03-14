@@ -1,8 +1,8 @@
 {
-  "name": "editora",
+  "name": "editora-monorepo",
   "version": "1.0.0",
-  "description": "Editora - A Production-grade Rich Text Editor",
-  "homepage": "https://editora-free.netlify.app/",
+  "description": "Editora ecosystem monorepo for modern design system UI components and rich text editor packages.",
+  "homepage": "https://editora-ecosystem.netlify.app/",
   "private": true,
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
@@ -11,18 +11,34 @@
     "packages/*",
     "packages/plugins/*"
   ],
+  "keywords": [
+    "react ui library",
+    "react component library",
+    "saas ui components",
+    "enterprise react components",
+    "modern design system",
+    "rich text editor react",
+    "web components",
+    "typescript"
+  ],
   "scripts": {
     "build": "lerna run build",
     "build:watch": "lerna run dev",
     "clean": "lerna run clean",
-    "test": "jest",
-    "test:ui-core": "npm run test:run --prefix packages/ui-core",
-    "test:ui-react": "npm run test --prefix packages/ui-react",
+    "test": "npm run verify:citations",
+    "test:ui-core": "npm run build:tsc --prefix packages/ui-core",
+    "test:ui-react": "npm run build:tsc --prefix packages/ui-react",
+    "test:ui-core:unit": "npm run test:run --prefix packages/ui-core",
+    "test:ui-react:unit": "npm run test --prefix packages/ui-react",
+    "test:ui:unit": "npm run test:ui-core:unit && npm run test:ui-react:unit",
     "test:ui": "npm run test:ui-core && npm run test:ui-react",
     "lint": "eslint packages/*/src/**/*.{ts,tsx}",
     "typecheck": "tsc --noEmit -p tsconfig.release.json",
+    "generate:components": "node scripts/generate-components-registry.js",
+    "check:components": "npm run generate:components && git diff --exit-code -- components.json components.schema.json examples/editora-docs/static/components.json examples/editora-docs/static/components.schema.json",
+    "cli": "node packages/cli/bin/editora.js",
     "verify:citations": "npm run verify:citations --prefix packages/plugins",
-    "verify:release": "npm run build -w @editora/core && npm run build -w @editora/themes && npm run build -w @editora/plugins && npm run build -w @editora/performance && npm run build -w @editora/icons && npm run build -w @editora/ui-core && npm run build -w @editora/ui-react && npm run build -w @editora/react-icons && npm run build -w @editora/toast && npm run build -w @editora/light-code-editor && npm run build -w @editora/react && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/core > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/themes > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/plugins > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/performance > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/icons > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/ui-core > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/ui-react > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/react-icons > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/toast > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/light-code-editor > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/react > /dev/null",
+    "verify:release": "npm run build -w @editora/core && npm run build -w @editora/themes && npm run build -w @editora/plugins && npm run build -w @editora/performance && npm run build -w @editora/icons && npm run build -w @editora/ui-core && npm run build -w @editora/ui-react && npm run build -w @editora/react-icons && npm run build -w @editora/toast && npm run build -w @editora/light-code-editor && npm run build -w @editora/react && npm run build -w packages/cli && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/core > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/themes > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/plugins > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/performance > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/icons > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/ui-core > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/ui-react > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/react-icons > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/toast > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/light-code-editor > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=@editora/react > /dev/null && npm_config_cache=/tmp/.npm-cache-editora npm pack --dry-run --workspace=packages/cli > /dev/null",
     "dev": "lerna run dev",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
@@ -65,7 +81,7 @@
     "vite": "^4.5.14"
   },
   "engines": {
-    "node": ">=18.0.0",
+    "node": ">=16.0.0",
     "npm": ">=8.0.0"
   }
 }

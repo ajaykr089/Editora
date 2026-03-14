@@ -10,7 +10,7 @@ const style = `
     --ui-table-text: var(--ui-color-text, #0f172a);
     --ui-table-muted: var(--ui-color-muted, #64748b);
     --ui-table-accent: var(--ui-color-primary, #2563eb);
-    --ui-table-shadow: 0 14px 40px rgba(15, 23, 42, 0.09);
+    --ui-table-shadow: none;
     --ui-table-empty-color: var(--ui-table-muted);
   }
 

@@ -13,8 +13,7 @@ const style = `
     --ui-field-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-field-border: 1px solid var(--ui-field-border-color);
     --ui-field-shadow:
-      0 1px 3px rgba(2, 6, 23, 0.04),
-      0 8px 18px rgba(2, 6, 23, 0.06);
+      none;
     --ui-field-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     --ui-field-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
     --ui-field-shell-padding: 0px;

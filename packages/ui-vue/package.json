@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-vue",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Vue 3 adapters for @editora UI web components",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -19,7 +19,10 @@
   },
   "devDependencies": {
     "typescript": "^5.0.0",
-    "vite": "^7.3.1"
+    "vite": "^4.5.14"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "license": "MIT",
   "exports": {
@@ -30,5 +33,5 @@
       "default": "./dist/index.esm.js"
     }
   },
-  "gitHead": "80e0808ae4909de63b8e0f1dd915b06b33a8ed44"
+  "gitHead": "7883627e823aa99dd5ecb66a5201116df972f88b"
 }

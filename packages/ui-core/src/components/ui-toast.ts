@@ -42,8 +42,7 @@ const style = `
     --ui-toast-color: var(--ui-color-text, #0f172a);
     --ui-toast-muted: var(--ui-color-muted, #64748b);
     --ui-toast-shadow:
-      0 1px 3px rgba(2, 6, 23, 0.08),
-      0 14px 30px rgba(2, 6, 23, 0.16);
+      none;
     --ui-toast-focus-ring: var(--ui-color-focus-ring, #2563eb);
   }
 

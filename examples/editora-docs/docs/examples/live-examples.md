@@ -1,6 +1,6 @@
 ---
 title: Live Examples
-description: Runnable live examples for Editora editor and ecosystem packages using local Storybook embeds.
+description: Runnable live examples for Editora editor and ecosystem packages using the hosted Storybook.
 keywords: [live examples, storybook, editor, ui, icons, toast]
 ---
 
@@ -12,113 +12,107 @@ keywords: [live examples, storybook, editor, ui, icons, toast]
 
 # Live Examples
 
-Runnable live examples for Editora editor and ecosystem packages using local Storybook embeds.
+Runnable live examples for Editora editor and ecosystem packages using the hosted Storybook.
 
-## Prerequisite
+## Storybook Host
 
-Start Storybook before opening these demos:
-
-```bash
-npm run storybook
-```
-
-Expected URL: `http://localhost:6006`
+Primary URL: `https://editora-ecosystem-storybook.netlify.app`
 
 ## 1. Editor (Web Component) - Basic
 
 <iframe
-  src="http://localhost:6006/?path=/story/editor-rich-text-editor-web-component--basic&full=1"
+  src="https://editora-ecosystem-storybook.netlify.app/?path=/story/editor-rich-text-editor-web-component--basic&full=1"
   width="100%"
   height="620"
   style={{ border: '1px solid var(--ifm-toc-border-color)', borderRadius: '12px', background: '#fff' }}
 ></iframe>
 
-Direct link: `http://localhost:6006/?path=/story/editor-rich-text-editor-web-component--basic`
+Direct link: `https://editora-ecosystem-storybook.netlify.app/?path=/story/editor-rich-text-editor-web-component--basic`
 
 ## 2. Editor - Multiple Instances
 
 <iframe
-  src="http://localhost:6006/?path=/story/editor-rich-text-editor-web-component--multiple-editors&full=1"
+  src="https://editora-ecosystem-storybook.netlify.app/?path=/story/editor-rich-text-editor-web-component--multiple-editors&full=1"
   width="100%"
   height="760"
   style={{ border: '1px solid var(--ifm-toc-border-color)', borderRadius: '12px', background: '#fff' }}
 ></iframe>
 
-Direct link: `http://localhost:6006/?path=/story/editor-rich-text-editor-web-component--multiple-editors`
+Direct link: `https://editora-ecosystem-storybook.netlify.app/?path=/story/editor-rich-text-editor-web-component--multiple-editors`
 
 ## 3. Editor - Theme Switcher
 
 <iframe
-  src="http://localhost:6006/?path=/story/editor-rich-text-editor-web-component--test-7-theme-switcher-editor-only&full=1"
+  src="https://editora-ecosystem-storybook.netlify.app/?path=/story/editor-rich-text-editor-web-component--test-7-theme-switcher-editor-only&full=1"
   width="100%"
   height="760"
   style={{ border: '1px solid var(--ifm-toc-border-color)', borderRadius: '12px', background: '#fff' }}
 ></iframe>
 
-Direct link: `http://localhost:6006/?path=/story/editor-rich-text-editor-web-component--test-7-theme-switcher-editor-only`
+Direct link: `https://editora-ecosystem-storybook.netlify.app/?path=/story/editor-rich-text-editor-web-component--test-7-theme-switcher-editor-only`
 
 ## 4. Light Code Editor
 
 <iframe
-  src="http://localhost:6006/?path=/story/ui-components-light-code-editor--feature-showcase&full=1"
+  src="https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-components-light-code-editor--feature-showcase&full=1"
   width="100%"
   height="760"
   style={{ border: '1px solid var(--ifm-toc-border-color)', borderRadius: '12px', background: '#fff' }}
 ></iframe>
 
-Direct link: `http://localhost:6006/?path=/story/ui-components-light-code-editor--feature-showcase`
+Direct link: `https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-components-light-code-editor--feature-showcase`
 
 ## 5. Toast Package
 
 <iframe
-  src="http://localhost:6006/?path=/story/ui-components-toast-notifications--toast-showcase&full=1"
+  src="https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-components-toast-notifications--toast-showcase&full=1"
   width="100%"
   height="760"
   style={{ border: '1px solid var(--ifm-toc-border-color)', borderRadius: '12px', background: '#fff' }}
 ></iframe>
 
-Direct link: `http://localhost:6006/?path=/story/ui-components-toast-notifications--toast-showcase`
+Direct link: `https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-components-toast-notifications--toast-showcase`
 
 ## 6. Icons Catalog
 
 <iframe
-  src="http://localhost:6006/?path=/story/ui-icons-catalog--all-icons&full=1"
+  src="https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-icons-catalog--all-icons&full=1"
   width="100%"
   height="760"
   style={{ border: '1px solid var(--ifm-toc-border-color)', borderRadius: '12px', background: '#fff' }}
 ></iframe>
 
-Direct link: `http://localhost:6006/?path=/story/ui-icons-catalog--all-icons`
+Direct link: `https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-icons-catalog--all-icons`
 
 ## 7. UI React / UI Core Components
 
 ### Data Table
 
 <iframe
-  src="http://localhost:6006/?path=/story/ui-datatable--users-table&full=1"
+  src="https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-datatable--users-table&full=1"
   width="100%"
   height="760"
   style={{ border: '1px solid var(--ifm-toc-border-color)', borderRadius: '12px', background: '#fff' }}
 ></iframe>
 
-Direct link: `http://localhost:6006/?path=/story/ui-datatable--users-table`
+Direct link: `https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-datatable--users-table`
 
 ### Dialog
 
 <iframe
-  src="http://localhost:6006/?path=/story/ui-dialog--default&full=1"
+  src="https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-dialog--default&full=1"
   width="100%"
   height="620"
   style={{ border: '1px solid var(--ifm-toc-border-color)', borderRadius: '12px', background: '#fff' }}
 ></iframe>
 
-Direct link: `http://localhost:6006/?path=/story/ui-dialog--default`
+Direct link: `https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-dialog--default`
 
 ## If embeds do not load
 
 - Open each direct link above in a new tab.
-- Confirm Storybook is running on `6006`.
-- If your Storybook uses another port, replace `6006` in all iframe URLs.
+- Confirm `https://editora-ecosystem-storybook.netlify.app/` is reachable from your network.
+- If needed, run Storybook locally and replace the host with your local URL.
 
 ## Related pages
 

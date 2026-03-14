@@ -39,7 +39,7 @@ const style = `
     --ui-drawer-muted: var(--ui-color-muted, #64748b);
     --ui-drawer-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
     --ui-drawer-border: 1px solid var(--ui-drawer-border-color);
-    --ui-drawer-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 28px 78px rgba(2, 6, 23, 0.3);
+    --ui-drawer-shadow: none;
     --ui-drawer-focus-ring: var(--ui-color-focus-ring, #2563eb);
     --ui-drawer-control-bg: color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 90%, transparent);
     --ui-drawer-control-bg-hover: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, var(--ui-drawer-control-bg));

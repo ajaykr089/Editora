@@ -9,7 +9,7 @@ const style = `
     --ui-nav-radius: 14px;
     --ui-nav-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 86%, transparent);
     --ui-nav-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
-    --ui-nav-shadow: 0 12px 34px rgba(15, 23, 42, 0.09);
+    --ui-nav-shadow: none;
     --ui-nav-item-radius: 10px;
     --ui-nav-item-padding: 8px 10px;
     --ui-nav-item-color: var(--ui-color-muted, #334155);
@@ -19,7 +19,7 @@ const style = `
     --ui-nav-panel-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 93%, transparent);
     --ui-nav-panel-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 68%, transparent);
     --ui-nav-panel-radius: 12px;
-    --ui-nav-panel-shadow: 0 18px 42px rgba(15, 23, 42, 0.1);
+    --ui-nav-panel-shadow: none;
   }
 
   .root {

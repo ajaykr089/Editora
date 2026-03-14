@@ -25,8 +25,14 @@ Token-driven theming guide for default, dark, and custom Editora visual systems.
 ### React
 
 ```tsx
+import { EditoraEditor } from '@editora/react';
+import { BoldPlugin, ItalicPlugin } from '@editora/plugins';
+
 <div className="editora-theme-dark">
-  <EditoraEditor ... />
+  <EditoraEditor
+    plugins={[BoldPlugin(), ItalicPlugin()]}
+    placeholder="Start writing..."
+  />
 </div>
 ```
 

@@ -1,7 +1,7 @@
 {
   "name": "@editora/toast",
-  "version": "2.0.4",
-  "description": "Advanced toast notification system for the Editora UI ecosystem with enterprise features and rich customization",
+  "version": "2.0.5",
+  "description": "Enterprise toast notification library for React and web apps, with SaaS-ready UX patterns, accessibility, and high-performance lifecycle controls.",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "browser": "dist/index.umd.js",
@@ -26,6 +26,12 @@
     "CHANGELOG.md"
   ],
   "keywords": [
+    "react ui library",
+    "react component library",
+    "saas ui components",
+    "enterprise react components",
+    "modern design system",
+    "rich text editor react",
     "editora",
     "editora ui ecosystem",
     "toast",
@@ -51,7 +57,7 @@
   "bugs": {
     "url": "https://github.com/ajaykr089/Editora/issues"
   },
-  "homepage": "https://github.com/ajaykr089/Editora/tree/main/packages/editora-toast#readme",
+  "homepage": "https://editora-ecosystem.netlify.app/docs/toast",
   "style": "dist/toast.css",
   "publishConfig": {
     "access": "public"
@@ -65,7 +71,7 @@
   },
   "devDependencies": {
     "typescript": "^5.0.0",
-    "vite": "^7.3.1"
+    "vite": "^4.5.14"
   },
-  "gitHead": "80e0808ae4909de63b8e0f1dd915b06b33a8ed44"
+  "gitHead": "7883627e823aa99dd5ecb66a5201116df972f88b"
 }

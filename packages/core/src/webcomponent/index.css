@@ -10,4 +10,4 @@
 @import '../../../themes/src/index.css';
 
 /* Import plugin styles */
-@import '../../../plugins/dist/plugins.css';
+@import '../../../plugins/src/plugins.css';

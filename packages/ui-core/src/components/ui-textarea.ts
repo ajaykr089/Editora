@@ -20,9 +20,7 @@ const style = `
     --ui-textarea-padding-x: 12px;
     --ui-textarea-padding-y: 10px;
     --ui-textarea-min-height: 110px;
-    --ui-textarea-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.05),
-      0 10px 24px rgba(15, 23, 42, 0.08);
+    --ui-textarea-shadow: none;
 
     color-scheme: light dark;
     display: inline-grid;

@@ -7,7 +7,7 @@ const style = `
     --ui-data-table-border-color: var(--ui-color-border, rgba(15, 23, 42, 0.14));
     --ui-data-table-border: 1px solid var(--ui-data-table-border-color);
     --ui-data-table-bg: var(--ui-color-surface, rgba(255, 255, 255, 0.96));
-    --ui-data-table-shadow: var(--ui-shadow-md, 0 16px 42px rgba(15, 23, 42, 0.08));
+    --ui-data-table-shadow: none;
     --ui-data-table-empty-color: var(--ui-color-muted, #64748b);
     --ui-data-table-summary-color: var(--ui-color-muted, #475569);
     --ui-data-table-text: var(--ui-color-text, #0f172a);

@@ -24,7 +24,7 @@
       "allowBranch": [
         "main",
         "develop",
-        "v1.0.4"
+        "v*"
       ]
     }
   }

@@ -119,11 +119,11 @@ const style = `
     --ui-cp-warning: var(--ui-color-warning, #d97706);
     --ui-cp-danger: var(--ui-color-danger, #dc2626);
     --ui-cp-radius: 14px;
-    --ui-cp-shadow: 0 16px 36px rgba(2, 6, 23, 0.14);
+    --ui-cp-shadow: none;
     --ui-cp-padding: 10px;
     --ui-cp-duration: 160ms;
     --ui-cp-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-    --ui-cp-z: 1100;
+    --ui-cp-z: 1600;
     --ui-cp-thumb: #ffffff;
     --ui-cp-thumb-ring: color-mix(in srgb, var(--ui-cp-accent) 44%, transparent);
     --ui-cp-checker-a: #e2e8f0;
@@ -761,7 +761,7 @@ const overlayStyle = `
   .overlay {
     position: fixed;
     inset: 0;
-    z-index: var(--ui-cp-z, 1100);
+    z-index: var(--ui-cp-z, 1600);
     pointer-events: none;
   }
 
@@ -1504,7 +1504,7 @@ export class UIColorPicker extends ElementBase {
     const overlay = document.createElement('div')
     overlay.style.position = 'fixed'
     overlay.style.inset = '0'
-    overlay.style.zIndex = 'var(--ui-cp-z, 1100)'
+    overlay.style.zIndex = 'var(--ui-cp-z, 1600)'
     overlay.style.pointerEvents = 'auto'
     const root = overlay.attachShadow({ mode: 'open' })
     overlay.addEventListener('click', (event) => this._onPanelClick(event, 'overlay'))

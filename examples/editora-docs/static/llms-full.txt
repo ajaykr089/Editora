@@ -1,0 +1,82 @@
+# Editora LLM Full Guide
+
+Last updated: 2026-03-07
+
+## Canonical endpoints
+- Website: https://editora-ecosystem.netlify.app/
+- Storybook: https://editora-ecosystem-storybook.netlify.app/
+- Docs entry: https://editora-ecosystem.netlify.app/docs/intro
+- AI usage docs: https://editora-ecosystem.netlify.app/docs/ai-usage
+- Prompt pack docs: https://editora-ecosystem.netlify.app/docs/editora-prompts
+- Editor AI usage docs: https://editora-ecosystem.netlify.app/docs/editor/ai-usage
+- Editor prompt pack docs: https://editora-ecosystem.netlify.app/docs/editor/editora-prompts
+- Toast AI usage docs: https://editora-ecosystem.netlify.app/docs/toast/ai-usage
+- Toast prompt pack docs: https://editora-ecosystem.netlify.app/docs/toast/editora-prompts
+- React Icons AI usage docs: https://editora-ecosystem.netlify.app/docs/react-icons/ai-usage
+- React Icons prompt pack docs: https://editora-ecosystem.netlify.app/docs/react-icons/editora-prompts
+- Light Code Editor AI usage docs: https://editora-ecosystem.netlify.app/docs/packages/light-code-editor-ai-usage
+- Light Code Editor prompt pack docs: https://editora-ecosystem.netlify.app/docs/packages/light-code-editor-prompts
+- Component registry: https://editora-ecosystem.netlify.app/components.json
+- Registry schema: https://editora-ecosystem.netlify.app/components.schema.json
+
+## Package map
+- @editora/core: web component runtime and framework-agnostic editor APIs.
+- @editora/react: React integration for editor runtime.
+- @editora/plugins: native plugin packages and presets.
+- @editora/themes: theming primitives and tokens.
+- @editora/ui-core: framework-agnostic UI component library built as custom elements.
+- @editora/ui-react: React wrappers around ui-core components.
+- @editora/icons and @editora/react-icons: icon packages.
+- @editora/toast: notification APIs and primitives.
+
+## Coding contract for AI assistants
+1. Use concrete imports from @editora/* packages.
+2. Keep snippets executable in Vite/React and browser web component setups.
+3. Prefer accessible defaults: keyboard support, aria labels, focus states.
+4. Respect theme tokens and CSS custom properties for styling.
+5. Avoid framework lock-in when the request is framework-agnostic.
+6. For UI wrappers, preserve one-to-one mapping with ui-core behavior.
+
+## Output quality constraints
+- Include exact import lines.
+- Include minimum setup code (mount/root/provider as needed).
+- Include configuration as data, not pseudo placeholders.
+- Mention required peer/runtime dependencies where relevant.
+
+## Example import patterns
+React UI wrappers:
+```tsx
+import { Button, Dialog, ThemeProvider } from '@editora/ui-react';
+import { toastAdvanced } from '@editora/toast';
+import { Icon } from '@editora/react-icons';
+```
+
+Framework-agnostic UI web components:
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@editora/ui-core/dist/index.js"></script>
+<ui-button variant="primary">Save</ui-button>
+```
+
+Editor with plugins:
+```ts
+import { createEditor } from '@editora/core';
+import { BoldPlugin, MentionPlugin } from '@editora/plugins';
+```
+
+## Discovery hints for assistants
+- Prefer component metadata from components.json.
+- If a component exists in both ui-core and ui-react, ui-core is source-of-truth behavior.
+- Use Storybook for visual/state validation and docs for API guarantees.
+
+## CLI quick-add commands
+- npx editora add button
+- npx editora add modal
+- npx editora add datatable
+- npx editora add editor
+- npx editora add toast
+- Supports all exported @editora/ui-react component names (for example: accordion, avatar, select, ui-date-picker).
+
+## Known intent patterns
+- "pixel-perfect" => deliver production-grade visual states and interaction polish.
+- "performance" => avoid repeated event listeners, avoid forced sync layout, avoid redundant renders.
+- "theme" => expose token overrides and avoid hardcoded colors/radii unless explicitly requested.

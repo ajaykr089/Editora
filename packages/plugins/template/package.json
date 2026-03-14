@@ -24,8 +24,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@editora/core": "^1.0.6",
-    "@editora/toast": "^2.0.3",
+    "@editora/core": "^1.0.9",
+    "@editora/toast": "^2.0.5",
     "dompurify": "^3.0.8"
   },
   "devDependencies": {

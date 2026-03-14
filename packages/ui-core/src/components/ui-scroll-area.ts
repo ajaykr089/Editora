@@ -22,8 +22,7 @@ const style = `
     --ui-scroll-bg: transparent;
     --ui-scroll-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
     --ui-scroll-shadow:
-      0 1px 2px rgba(2, 6, 23, 0.05),
-      0 14px 28px rgba(2, 6, 23, 0.08);
+      none;
   }
 
   .shell {

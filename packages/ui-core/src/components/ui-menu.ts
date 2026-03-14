@@ -11,8 +11,7 @@ const hostStyle = `
     --ui-menu-border-color: var(--ui-color-border, var(--ui-border, rgba(15, 23, 42, 0.14)));
     --ui-menu-border: 1px solid var(--ui-menu-border-color);
     --ui-menu-shadow:
-      0 24px 52px rgba(2, 6, 23, 0.22),
-      0 3px 14px rgba(2, 6, 23, 0.1);
+      none;
     --ui-menu-radius: 14px;
     --ui-menu-padding: 6px;
     --ui-menu-min-width: 196px;
@@ -71,7 +70,7 @@ const menuStyle = `
     border-radius: var(--ui-menu-radius, 14px);
     background: var(--ui-menu-bg, #fff);
     color: var(--ui-menu-color, #0f172a);
-    box-shadow: var(--ui-menu-shadow, 0 24px 52px rgba(2, 6, 23, 0.22));
+    box-shadow: var(--ui-menu-shadow);
     backdrop-filter: var(--ui-menu-backdrop, none);
     opacity: 0;
     transform: translateY(5px) scale(0.984);
@@ -478,6 +477,7 @@ export class UIMenu extends ElementBase {
       'elevation',
       'tone',
       'close-on-select',
+      'close-on-scroll',
       'typeahead'
     ];
   }
@@ -497,6 +497,7 @@ export class UIMenu extends ElementBase {
     this._onHostClick = this._onHostClick.bind(this);
     this._onDocumentPointerDown = this._onDocumentPointerDown.bind(this);
     this._onDocumentKeyDown = this._onDocumentKeyDown.bind(this);
+    this._onDocumentScroll = this._onDocumentScroll.bind(this);
     this._onSlotChange = this._onSlotChange.bind(this);
   }
 
@@ -523,7 +524,7 @@ export class UIMenu extends ElementBase {
       return;
     }
 
-    if (name === 'close-on-select' || name === 'typeahead') return;
+    if (name === 'close-on-select' || name === 'close-on-scroll' || name === 'typeahead') return;
 
     if (name === 'disabled') {
       if (this.hasAttribute('disabled')) this.close();
@@ -561,6 +562,14 @@ export class UIMenu extends ElementBase {
 
   set closeOnSelect(value: boolean) {
     this.setAttribute('close-on-select', value ? 'true' : 'false');
+  }
+
+  get closeOnScroll(): boolean {
+    return booleanAttr(this.getAttribute('close-on-scroll'), true);
+  }
+
+  set closeOnScroll(value: boolean) {
+    this.setAttribute('close-on-scroll', value ? 'true' : 'false');
   }
 
   get typeahead(): boolean {
@@ -657,6 +666,7 @@ export class UIMenu extends ElementBase {
     if (this._globalListenersBound) return;
     document.addEventListener('pointerdown', this._onDocumentPointerDown, true);
     document.addEventListener('keydown', this._onDocumentKeyDown);
+    document.addEventListener('scroll', this._onDocumentScroll, true);
     this._globalListenersBound = true;
   }
 
@@ -664,6 +674,7 @@ export class UIMenu extends ElementBase {
     if (!this._globalListenersBound) return;
     document.removeEventListener('pointerdown', this._onDocumentPointerDown, true);
     document.removeEventListener('keydown', this._onDocumentKeyDown);
+    document.removeEventListener('scroll', this._onDocumentScroll, true);
     this._globalListenersBound = false;
   }
 
@@ -980,6 +991,13 @@ export class UIMenu extends ElementBase {
     if (!this._isOpen) return;
     const path = event.composedPath();
     if (path.includes(this)) return;
+    if (this._portalEl && path.includes(this._portalEl)) return;
+    this.close();
+  }
+
+  private _onDocumentScroll(event: Event): void {
+    if (!this._isOpen || !this.closeOnScroll) return;
+    const path = typeof (event as any).composedPath === 'function' ? (event as any).composedPath() : [];
     if (this._portalEl && path.includes(this._portalEl)) return;
     this.close();
   }

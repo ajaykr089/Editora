@@ -93,7 +93,7 @@ await editor.setConfig({
 | `createEditor(options)` | Core factory | Creates framework-agnostic editor runtime |
 | `editor.getContent()`, `editor.setContent(html)` | Core methods | Read/write editor HTML |
 | `editor.execCommand(command, args?)` | Core method | Execute command from runtime/plugin registry |
-| `<editora-editor ...>` attributes | Web component API | Declarative setup for plugins, toolbar, theme, behavior |
+| `<editora-editor plugins="bold,italic" toolbar-items="bold,italic,link" theme="dark">` attributes | Web component API | Declarative setup for plugins, toolbar, theme, behavior |
 | `editorElement.setConfig(config)` | Web component method | Runtime updates for toolbar/autosave/security/performance/accessibility |
 | `change`, `selectionChange`, `focus`, `blur` | Event surface | Primary integration events for state and UI sync |
 | `EditoraEditor` props | React wrapper API | Content, lifecycle, behavior, runtime config props |

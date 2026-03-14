@@ -8,8 +8,7 @@ const style = `
     --ui-toolbar-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-toolbar-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
     --ui-toolbar-shadow:
-      0 1px 2px rgba(15, 23, 42, 0.05),
-      0 12px 26px rgba(15, 23, 42, 0.08);
+      none;
 
     color-scheme: light dark;
     display: block;

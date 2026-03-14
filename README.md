@@ -11,9 +11,29 @@
 
 The **best free rich text editor** with enterprise-grade features. A comprehensive, production-ready WYSIWYG editor built with React, TypeScript, and modern web technologies. Get premium features completely free—no subscriptions, no limitations.
 
-**🌐 [Try it Live](https://editora-free.netlify.app/)** | **🔗 [GitHub](https://github.com/ajaykr089/Editora)** | **📦 [NPM](https://www.npmjs.com/org/editora)**
+**🌐 [Try it Live](https://editora-ecosystem.netlify.app/)** | **🔗 [GitHub](https://github.com/ajaykr089/Editora)** | **📦 [NPM](https://www.npmjs.com/org/editora)**
 
 **Free alternative to TinyMCE, Quill, Draft.js, and Slate.**
+
+## 🤖 AI-Ready Metadata
+
+- **LLM Index:** [llms.txt](./llms.txt)
+- **LLM Full Guide:** [llms-full.txt](./llms-full.txt)
+- **Component Registry:** [components.json](./components.json)
+- **Registry Schema:** [components.schema.json](./components.schema.json)
+- **Regenerate Registry:** `npm run generate:components`
+
+### CLI Quick Add
+
+```bash
+npx editora add button
+npx editora add modal
+npx editora add datatable
+npx editora add editor
+npx editora add toast
+npx editora add accordion
+npx editora add ui-select
+```
 
 ## 🚀 Why Editora? (Free Premium Features)
 

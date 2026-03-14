@@ -11,7 +11,7 @@ const style = `
     --ui-empty-description: var(--ui-color-muted, #64748b);
     --ui-empty-icon-bg: color-mix(in srgb, var(--ui-color-muted, #64748b) 18%, transparent);
     --ui-empty-icon-color: color-mix(in srgb, var(--ui-color-text, #334155) 82%, transparent);
-    --ui-empty-shadow: var(--ui-shadow-md, 0 10px 34px rgba(15, 23, 42, 0.08));
+    --ui-empty-shadow: none;
     --ui-empty-action-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 14%, transparent);
     --ui-empty-action-border: color-mix(in srgb, var(--ui-color-primary, #2563eb) 36%, transparent);
     --ui-empty-action-color: var(--ui-color-primary, #1d4ed8);

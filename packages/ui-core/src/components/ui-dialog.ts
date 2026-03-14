@@ -20,7 +20,7 @@ const style = `
     --ui-dialog-muted: var(--ui-color-muted, #64748b);
     --ui-dialog-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
     --ui-dialog-border: 1px solid var(--ui-dialog-border-color);
-    --ui-dialog-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 28px 80px rgba(2, 6, 23, 0.28);
+    --ui-dialog-shadow: none;
     --ui-dialog-radius: 16px;
     --ui-dialog-padding-x: 24px;
     --ui-dialog-padding-y: 20px;

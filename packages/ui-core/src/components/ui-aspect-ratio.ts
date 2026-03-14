@@ -15,7 +15,7 @@ const style = `
     --ui-aspect-muted: var(--ui-color-muted, #64748b);
     --ui-aspect-accent: var(--ui-color-primary, #2563eb);
     --ui-aspect-empty-bg: color-mix(in srgb, var(--ui-aspect-accent) 9%, transparent);
-    --ui-aspect-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 18px 34px rgba(15, 23, 42, 0.1);
+    --ui-aspect-shadow: none;
     --ui-aspect-fit: cover;
     --ui-aspect-transition: 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
     --ui-aspect-highlight: color-mix(in srgb, var(--ui-aspect-accent) 28%, transparent);

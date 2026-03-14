@@ -71,8 +71,8 @@ const style = `
     --ui-dp-success: var(--ui-color-success, #15803d);
     --ui-dp-radius: 12px;
     --ui-dp-panel-radius: calc(var(--ui-dp-radius) + 2px);
-    --ui-dp-shadow: 0 18px 34px rgba(2, 6, 23, 0.14);
-    --ui-dp-z: 1100;
+    --ui-dp-shadow: none;
+    --ui-dp-z: 1600;
     --ui-dp-gap: 12px;
     --ui-dp-hit: 42px;
     --ui-dp-field-bg: var(--ui-dp-bg);
@@ -416,7 +416,7 @@ const style = `
 const overlayStyle = `
   .overlay {
     position: fixed;
-    z-index: var(--ui-dp-z, 1100);
+    z-index: var(--ui-dp-z, 1600);
     pointer-events: none;
   }
 
@@ -426,7 +426,7 @@ const overlayStyle = `
     border-radius: var(--ui-dp-panel-radius, 14px);
     background: var(--ui-dp-surface, #fff);
     color: var(--ui-dp-text, #0f172a);
-    box-shadow: var(--ui-dp-shadow, 0 18px 34px rgba(2, 6, 23, 0.14));
+    box-shadow: var(--ui-dp-shadow);
     padding: 10px;
     display: grid;
     gap: var(--ui-dp-gap, 12px);
@@ -450,7 +450,7 @@ const overlayStyle = `
     inset: 0;
     display: grid;
     align-items: end;
-    z-index: var(--ui-dp-z, 1100);
+    z-index: var(--ui-dp-z, 1600);
   }
 
   .sheet-backdrop {

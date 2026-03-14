@@ -1,7 +1,7 @@
 {
   "name": "@editora/plugins",
-  "version": "1.0.9",
-  "description": "40+ Free Premium Plugins for Editora Rich Text Editor. Table editor, code formatting, accessibility, math, media, and more. Free enterprise plugin collection.",
+  "version": "1.0.11",
+  "description": "Enterprise plugin suite for Editora rich text editor in React and web apps, including tables, media, workflow, and compliance tooling.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
   "repository": {
@@ -9,11 +9,17 @@
     "url": "https://github.com/ajaykr089/Editora.git",
     "directory": "packages/plugins"
   },
-  "homepage": "https://editora-free.netlify.app/",
+  "homepage": "https://editora-ecosystem.netlify.app/",
   "bugs": {
     "url": "https://github.com/ajaykr089/Editora/issues"
   },
   "keywords": [
+    "react ui library",
+    "react component library",
+    "saas ui components",
+    "enterprise react components",
+    "modern design system",
+    "rich text editor react",
     "editor-plugins",
     "rich-text",
     "formatting",
@@ -416,20 +422,20 @@
     "verify:citations": "npm run typecheck:build && npm run test:citations && npm run test:content-rules && npm run test:approval-workflow && npm run test:pii-redaction && npm run test:smart-paste && npm run test:blocks-library && npm run test:doc-schema && npm run test:translation-workflow && npm run build"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.7"
+    "@editora/core": "^1.0.9"
   },
   "dependencies": {
     "katex": "^0.16.27",
     "mathjax": "^3.2.2"
   },
   "devDependencies": {
-    "@editora/core": "^1.0.8",
+    "@editora/core": "^1.0.9",
     "@types/katex": "^0.16.8",
     "typescript": "^5.0.0",
-    "vite": "^7.3.1"
+    "vite": "^4.5.14"
   },
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "80e0808ae4909de63b8e0f1dd915b06b33a8ed44"
+  "gitHead": "7883627e823aa99dd5ecb66a5201116df972f88b"
 }

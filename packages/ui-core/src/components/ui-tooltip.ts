@@ -12,9 +12,7 @@ const style = `
     --ui-tooltip-bg: color-mix(in srgb, var(--ui-color-text, #0f172a) 92%, #0b1220 8%);
     --ui-tooltip-color: var(--ui-color-surface, #f8fafc);
     --ui-tooltip-border: color-mix(in srgb, var(--ui-color-border, #475569) 62%, transparent);
-    --ui-tooltip-shadow:
-      0 1px 2px rgba(2, 6, 23, 0.12),
-      0 14px 30px rgba(2, 6, 23, 0.28);
+    --ui-tooltip-shadow: none;
     --ui-tooltip-radius: 10px;
     --ui-tooltip-padding-y: 7px;
     --ui-tooltip-padding-x: 10px;

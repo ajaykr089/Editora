@@ -15,8 +15,7 @@ const style = `
     --ui-selection-popup-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-selection-popup-accent: var(--ui-color-primary, #2563eb);
     --ui-selection-popup-shadow:
-      0 12px 30px rgba(2, 6, 23, 0.16),
-      0 32px 58px rgba(2, 6, 23, 0.14);
+      none;
     color-scheme: light dark;
     position: fixed;
     inset: 0;

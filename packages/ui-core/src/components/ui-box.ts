@@ -37,7 +37,6 @@ const style = `
     --ui-box-border-color: transparent;
     --ui-box-border-width: 1px;
     --ui-box-border-style: solid;
-    --ui-box-border: var(--ui-box-border-width) var(--ui-box-border-style) var(--ui-box-border-color);
     --ui-box-shadow: none;
     --ui-box-radius: 12px;
     --ui-box-backdrop: none;
@@ -67,6 +66,12 @@ const style = `
       box-shadow var(--ui-box-duration) cubic-bezier(0.2, 0.8, 0.2, 1),
       transform var(--ui-box-duration) cubic-bezier(0.2, 0.8, 0.2, 1),
       opacity var(--ui-box-duration) cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  :host([variant]),
+  :host([state="error"]),
+  :host([state="success"]) {
+    --ui-box-border: var(--ui-box-border-width) var(--ui-box-border-style) var(--ui-box-border-color);
   }
 
   :host([variant="surface"]) {
