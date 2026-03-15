@@ -15,6 +15,7 @@ export { TagsInput } from './components/TagsInput';
 export { PinInput, OTPInput } from './components/PinInput';
 export { FileUpload, Dropzone } from './components/FileUpload';
 export { Textarea } from './components/Textarea';
+export type { TextareaProps, TextareaLabelProps, TextareaDescriptionProps, TextareaErrorProps } from './components/Textarea';
 export { Field } from './components/Field';
 export { Description, FieldError, ControlGroup, Fieldset } from './components/FieldSemantics';
 export { Combobox } from './components/Combobox';
@@ -57,6 +58,7 @@ export { Dialog } from './components/Dialog';
 export { DialogProvider, useDialog } from './components/DialogProvider';
 export { Popover } from './components/Popover';
 export { Tabs } from './components/Tabs';
+export type { TabsProps, TabsTabProps, TabsPanelProps } from './components/Tabs';
 export { Menu, MenuItem, MenuSeparator, MenuSectionLabel } from './components/Menu';
 export { Icon } from './components/Icon';
 export { ToastAPI, ToastProvider, useToast, toast, toastApi, toastAdvanced, toastPro, toastLegacy } from './components/ToastAPI';
@@ -79,15 +81,7 @@ export { Grid } from './components/Grid';
 export { Section } from './components/Section';
 export { Container } from './components/Container';
 export {
-  Sidebar,
-  SidebarHeader,
-  SidebarSearch,
-  SidebarSearchInput,
-  SidebarContent,
-  SidebarGroup,
-  SidebarItem,
-  SidebarPromo,
-  SidebarFooter
+  Sidebar
 } from './components/Sidebar';
 export { PanelGroup, Panel, Splitter } from './components/PanelGroup';
 export { Tree, TreeItem } from './components/Tree';
@@ -111,6 +105,7 @@ export { Anchor } from './components/Anchor';
 export { Checkbox } from './components/Checkbox';
 export { RadioGroup } from './components/RadioGroup';
 export { Switch } from './components/Switch';
+export type { SwitchProps, SwitchDescriptionProps } from './components/Switch';
 export { Toggle } from './components/Toggle';
 export { ToggleGroup } from './components/ToggleGroup';
 export { AspectRatio } from './components/AspectRatio';

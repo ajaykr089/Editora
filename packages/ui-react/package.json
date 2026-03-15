@@ -128,6 +128,30 @@
       "import": "./dist/SelectionPopup.esm.js",
       "require": "./dist/SelectionPopup.cjs.js",
       "default": "./dist/SelectionPopup.esm.js"
+    },
+    "./Sidebar": {
+      "types": "./dist/Sidebar.d.ts",
+      "import": "./dist/Sidebar.esm.js",
+      "require": "./dist/Sidebar.cjs.js",
+      "default": "./dist/Sidebar.esm.js"
+    },
+    "./Switch": {
+      "types": "./dist/Switch.d.ts",
+      "import": "./dist/Switch.esm.js",
+      "require": "./dist/Switch.cjs.js",
+      "default": "./dist/Switch.esm.js"
+    },
+    "./Tabs": {
+      "types": "./dist/Tabs.d.ts",
+      "import": "./dist/Tabs.esm.js",
+      "require": "./dist/Tabs.cjs.js",
+      "default": "./dist/Tabs.esm.js"
+    },
+    "./Textarea": {
+      "types": "./dist/Textarea.d.ts",
+      "import": "./dist/Textarea.esm.js",
+      "require": "./dist/Textarea.cjs.js",
+      "default": "./dist/Textarea.esm.js"
     }
   },
   "files": [

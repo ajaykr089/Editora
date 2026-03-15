@@ -24,6 +24,10 @@ const refactoredComponents = [
   'QuickActions',
   'Select',
   'SelectionPopup',
+  'Sidebar',
+  'Switch',
+  'Tabs',
+  'Textarea',
 ];
 
 // Build entry points for refactored components

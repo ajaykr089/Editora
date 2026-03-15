@@ -8,6 +8,10 @@ type TextareaDetail = {
   name: string;
 };
 
+export type TextareaLabelProps = React.HTMLAttributes<HTMLElement>;
+export type TextareaDescriptionProps = React.HTMLAttributes<HTMLElement>;
+export type TextareaErrorProps = React.HTMLAttributes<HTMLElement>;
+
 type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'> & {
   children?: React.ReactNode;
 };
@@ -45,7 +49,7 @@ export type TextareaProps = BaseProps & {
   headless?: boolean;
 };
 
-export const Textarea = React.forwardRef<HTMLElement, TextareaProps>(function Textarea(
+const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Textarea(
   {
     value,
     onChange,
@@ -198,6 +202,33 @@ export const Textarea = React.forwardRef<HTMLElement, TextareaProps>(function Te
   return React.createElement('ui-textarea', { ref, ...rest }, children);
 });
 
-Textarea.displayName = 'Textarea';
+TextareaRoot.displayName = 'Textarea';
+
+const TextareaLabel = React.forwardRef<HTMLElement, TextareaLabelProps>(
+  function TextareaLabel({ ...props }, ref) {
+    return React.createElement('span', { ref, slot: 'label', ...props });
+  }
+);
+TextareaLabel.displayName = 'Textarea.Label';
+
+const TextareaDescription = React.forwardRef<HTMLElement, TextareaDescriptionProps>(
+  function TextareaDescription({ ...props }, ref) {
+    return React.createElement('span', { ref, slot: 'description', ...props });
+  }
+);
+TextareaDescription.displayName = 'Textarea.Description';
+
+const TextareaError = React.forwardRef<HTMLElement, TextareaErrorProps>(
+  function TextareaError({ ...props }, ref) {
+    return React.createElement('span', { ref, slot: 'error', ...props });
+  }
+);
+TextareaError.displayName = 'Textarea.Error';
+
+export const Textarea = Object.assign(TextareaRoot, {
+  Label: TextareaLabel,
+  Description: TextareaDescription,
+  Error: TextareaError,
+});
 
 export default Textarea;

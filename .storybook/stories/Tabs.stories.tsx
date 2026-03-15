@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box, Flex, Grid, Tabs } from '@editora/ui-react';
+import { Box, Flex, Grid } from '@editora/ui-react';
+import { Tabs } from '@editora/ui-react/Tabs';
 
 export default {
   title: 'UI/Tabs',
@@ -11,20 +12,9 @@ export default {
     variant: {
       control: 'select',
       options: [
-        'default',
-        'soft',
-        'outline',
-        'solid',
-        'ghost',
-        'glass',
-        'indicator',
-        'indicator-line',
-        'underline',
-        'line',
-        'segmented',
-        'cards',
-        'contrast',
-        'minimal'
+        'default', 'soft', 'outline', 'solid', 'ghost', 'glass',
+        'indicator', 'indicator-line', 'underline', 'line',
+        'segmented', 'cards', 'contrast', 'minimal'
       ]
     },
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
@@ -58,17 +48,17 @@ export const EnterpriseWorkspace = (args: any) => {
         loop={args.loop ?? true}
         onChange={setSelected}
       >
-        <div slot="tab" data-value="overview" data-icon="📊">Overview</div>
-        <div slot="panel">Workspace KPIs, revenue velocity, and trend deltas for this week.</div>
+        <Tabs.Tab value="overview" icon="📊">Overview</Tabs.Tab>
+        <Tabs.Panel>Workspace KPIs, revenue velocity, and trend deltas for this week.</Tabs.Panel>
 
-        <div slot="tab" data-value="activity" data-icon="🕒">Activity</div>
-        <div slot="panel">Approvals, assignments, and SLA response timeline across teams.</div>
+        <Tabs.Tab value="activity" icon="🕒">Activity</Tabs.Tab>
+        <Tabs.Panel>Approvals, assignments, and SLA response timeline across teams.</Tabs.Panel>
 
-        <div slot="tab" data-value="permissions" data-icon="🔐">Permissions</div>
-        <div slot="panel">Role-based access mapping with tenant-level override rules.</div>
+        <Tabs.Tab value="permissions" icon="🔐">Permissions</Tabs.Tab>
+        <Tabs.Panel>Role-based access mapping with tenant-level override rules.</Tabs.Panel>
 
-        <div slot="tab" data-value="webhooks" data-icon="⚡">Webhooks</div>
-        <div slot="panel">Delivery retries, endpoint errors, and queue throughput analytics.</div>
+        <Tabs.Tab value="webhooks" icon="⚡">Webhooks</Tabs.Tab>
+        <Tabs.Panel>Delivery retries, endpoint errors, and queue throughput analytics.</Tabs.Panel>
       </Tabs>
 
       <Box style={{ fontSize: 13, color: '#475569' }}>
@@ -96,40 +86,40 @@ EnterpriseWorkspace.args = {
 export const DesignPatterns = () => (
   <Grid gap="14px" style={{ maxWidth: 980 }}>
     <Tabs variant="segmented" selected={0}>
-      <div slot="tab" data-value="board">Board</div>
-      <div slot="panel">Segmented pattern: compact for switch-like workflows.</div>
-      <div slot="tab" data-value="list">List</div>
-      <div slot="panel">Best for light mode admin dashboards with dense controls.</div>
-      <div slot="tab" data-value="timeline">Timeline</div>
-      <div slot="panel">Provides clear mode switching with high scanability.</div>
+      <Tabs.Tab value="board">Board</Tabs.Tab>
+      <Tabs.Panel>Segmented pattern: compact for switch-like workflows.</Tabs.Panel>
+      <Tabs.Tab value="list">List</Tabs.Tab>
+      <Tabs.Panel>Best for light mode admin dashboards with dense controls.</Tabs.Panel>
+      <Tabs.Tab value="timeline">Timeline</Tabs.Tab>
+      <Tabs.Panel>Provides clear mode switching with high scanability.</Tabs.Panel>
     </Tabs>
 
     <Tabs variant="line" selected={1}>
-      <div slot="tab" data-value="critical">Critical</div>
-      <div slot="panel">Line pattern: minimal visual noise for data-heavy layouts.</div>
-      <div slot="tab" data-value="standard">Standard</div>
-      <div slot="panel">Keeps the active state clear while preserving table focus.</div>
-      <div slot="tab" data-value="longtail">Long-tail</div>
-      <div slot="panel">Great for settings surfaces with many small sections.</div>
+      <Tabs.Tab value="critical">Critical</Tabs.Tab>
+      <Tabs.Panel>Line pattern: minimal visual noise for data-heavy layouts.</Tabs.Panel>
+      <Tabs.Tab value="standard">Standard</Tabs.Tab>
+      <Tabs.Panel>Keeps the active state clear while preserving table focus.</Tabs.Panel>
+      <Tabs.Tab value="longtail">Long-tail</Tabs.Tab>
+      <Tabs.Panel>Great for settings surfaces with many small sections.</Tabs.Panel>
     </Tabs>
 
     <Tabs variant="cards" shape="square" selected={0}>
-      <div slot="tab" data-value="pending" data-icon="🩺">Pending</div>
-      <div slot="panel">Cards pattern: stronger surface separation for enterprise portals.</div>
-      <div slot="tab" data-value="approved" data-icon="✅">Approved</div>
-      <div slot="panel">Works well in operations dashboards and compliance screens.</div>
-      <div slot="tab" data-value="archived" data-icon="📦">Archived</div>
-      <div slot="panel">Square corners support flat UI systems without custom CSS forks.</div>
+      <Tabs.Tab value="pending" icon="🩺">Pending</Tabs.Tab>
+      <Tabs.Panel>Cards pattern: stronger surface separation for enterprise portals.</Tabs.Panel>
+      <Tabs.Tab value="approved" icon="✅">Approved</Tabs.Tab>
+      <Tabs.Panel>Works well in operations dashboards and compliance screens.</Tabs.Panel>
+      <Tabs.Tab value="archived" icon="📦">Archived</Tabs.Tab>
+      <Tabs.Panel>Square corners support flat UI systems without custom CSS forks.</Tabs.Panel>
     </Tabs>
 
     <Box variant="contrast" p="14px" radius="lg">
       <Tabs variant="contrast" tone="warning" size="lg" stretched selected={2}>
-        <div slot="tab" data-value="alerts">Alerts</div>
-        <div slot="panel">Contrast pattern for command-center and dark operational themes.</div>
-        <div slot="tab" data-value="runtime">Runtime</div>
-        <div slot="panel">Large hit targets improve usability in high-pressure contexts.</div>
-        <div slot="tab" data-value="logs">Logs</div>
-        <div slot="panel">Color contrast and focus ring remain WCAG-friendly.</div>
+        <Tabs.Tab value="alerts">Alerts</Tabs.Tab>
+        <Tabs.Panel>Contrast pattern for command-center and dark operational themes.</Tabs.Panel>
+        <Tabs.Tab value="runtime">Runtime</Tabs.Tab>
+        <Tabs.Panel>Large hit targets improve usability in high-pressure contexts.</Tabs.Panel>
+        <Tabs.Tab value="logs">Logs</Tabs.Tab>
+        <Tabs.Panel>Color contrast and focus ring remain WCAG-friendly.</Tabs.Panel>
       </Tabs>
     </Box>
   </Grid>
@@ -138,39 +128,39 @@ export const DesignPatterns = () => (
 export const AdditionalVariants = () => (
   <Grid gap="14px" style={{ maxWidth: 980 }}>
     <Tabs variant="outline" selected={0}>
-      <div slot="tab" data-value="summary">Summary</div>
-      <div slot="panel">Outline style for admin dashboards that prefer clear strokes over fills.</div>
-      <div slot="tab" data-value="queues">Queues</div>
-      <div slot="panel">Strong contrast in low-noise layouts.</div>
-      <div slot="tab" data-value="history">History</div>
-      <div slot="panel">Easy to theme with token overrides.</div>
+      <Tabs.Tab value="summary">Summary</Tabs.Tab>
+      <Tabs.Panel>Outline style for admin dashboards that prefer clear strokes over fills.</Tabs.Panel>
+      <Tabs.Tab value="queues">Queues</Tabs.Tab>
+      <Tabs.Panel>Strong contrast in low-noise layouts.</Tabs.Panel>
+      <Tabs.Tab value="history">History</Tabs.Tab>
+      <Tabs.Panel>Easy to theme with token overrides.</Tabs.Panel>
     </Tabs>
 
     <Tabs variant="solid" tone="success" selected={1}>
-      <div slot="tab" data-value="healthy">Healthy</div>
-      <div slot="panel">Solid style acts like mode chips for operational UIs.</div>
-      <div slot="tab" data-value="monitoring">Monitoring</div>
-      <div slot="panel">Selected tab remains highly visible.</div>
-      <div slot="tab" data-value="alerts">Alerts</div>
-      <div slot="panel">Works with success/warning/danger tones.</div>
+      <Tabs.Tab value="healthy">Healthy</Tabs.Tab>
+      <Tabs.Panel>Solid style acts like mode chips for operational UIs.</Tabs.Panel>
+      <Tabs.Tab value="monitoring">Monitoring</Tabs.Tab>
+      <Tabs.Panel>Selected tab remains highly visible.</Tabs.Panel>
+      <Tabs.Tab value="alerts">Alerts</Tabs.Tab>
+      <Tabs.Panel>Works with success/warning/danger tones.</Tabs.Panel>
     </Tabs>
 
     <Tabs variant="ghost" selected={0}>
-      <div slot="tab" data-value="week">Week</div>
-      <div slot="panel">Ghost style removes container chrome for embedded views.</div>
-      <div slot="tab" data-value="month">Month</div>
-      <div slot="panel">Good with tables/charts where tab chrome should be minimal.</div>
-      <div slot="tab" data-value="quarter">Quarter</div>
-      <div slot="panel">Still keyboard/focus accessible.</div>
+      <Tabs.Tab value="week">Week</Tabs.Tab>
+      <Tabs.Panel>Ghost style removes container chrome for embedded views.</Tabs.Panel>
+      <Tabs.Tab value="month">Month</Tabs.Tab>
+      <Tabs.Panel>Good with tables/charts where tab chrome should be minimal.</Tabs.Panel>
+      <Tabs.Tab value="quarter">Quarter</Tabs.Tab>
+      <Tabs.Panel>Still keyboard/focus accessible.</Tabs.Panel>
     </Tabs>
 
     <Tabs variant="glass" selected={2}>
-      <div slot="tab" data-value="north">North</div>
-      <div slot="panel">Glass style for modern high-end SaaS shells.</div>
-      <div slot="tab" data-value="south">South</div>
-      <div slot="panel">Uses transparent surfaces and backdrop blur.</div>
-      <div slot="tab" data-value="global">Global</div>
-      <div slot="panel">Useful when page backgrounds are textured.</div>
+      <Tabs.Tab value="north">North</Tabs.Tab>
+      <Tabs.Panel>Glass style for modern high-end SaaS shells.</Tabs.Panel>
+      <Tabs.Tab value="south">South</Tabs.Tab>
+      <Tabs.Panel>Uses transparent surfaces and backdrop blur.</Tabs.Panel>
+      <Tabs.Tab value="global">Global</Tabs.Tab>
+      <Tabs.Panel>Useful when page backgrounds are textured.</Tabs.Panel>
     </Tabs>
   </Grid>
 );
@@ -178,36 +168,36 @@ export const AdditionalVariants = () => (
 export const AnimatedIndicators = () => (
   <Grid gap="14px" style={{ maxWidth: 980 }}>
     <Tabs variant="indicator" selected={1}>
-      <div slot="tab" data-value="triage">Triage</div>
-      <div slot="panel">Moving pill indicator for modern SaaS top navigation.</div>
-      <div slot="tab" data-value="review">Review</div>
-      <div slot="panel">Selection motion follows click and keyboard transitions.</div>
-      <div slot="tab" data-value="approved">Approved</div>
-      <div slot="panel">Tab labels stay readable while indicator animates beneath.</div>
-      <div slot="tab" data-value="done">Done</div>
-      <div slot="panel">Works with overflow and reduced motion settings.</div>
+      <Tabs.Tab value="triage">Triage</Tabs.Tab>
+      <Tabs.Panel>Moving pill indicator for modern SaaS top navigation.</Tabs.Panel>
+      <Tabs.Tab value="review">Review</Tabs.Tab>
+      <Tabs.Panel>Selection motion follows click and keyboard transitions.</Tabs.Panel>
+      <Tabs.Tab value="approved">Approved</Tabs.Tab>
+      <Tabs.Panel>Tab labels stay readable while indicator animates beneath.</Tabs.Panel>
+      <Tabs.Tab value="done">Done</Tabs.Tab>
+      <Tabs.Panel>Works with overflow and reduced motion settings.</Tabs.Panel>
     </Tabs>
 
     <Tabs variant="indicator-line" selected={0}>
-      <div slot="tab" data-value="overview">Overview</div>
-      <div slot="panel">Animated underline indicator for low-noise enterprise surfaces.</div>
-      <div slot="tab" data-value="ops">Ops</div>
-      <div slot="panel">The line tracks active tab width and position.</div>
-      <div slot="tab" data-value="audit">Audit</div>
-      <div slot="panel">Strong visual hierarchy for data-dense workflows.</div>
-      <div slot="tab" data-value="logs">Logs</div>
-      <div slot="panel">Keyboard navigation updates the line instantly.</div>
+      <Tabs.Tab value="overview">Overview</Tabs.Tab>
+      <Tabs.Panel>Animated underline indicator for low-noise enterprise surfaces.</Tabs.Panel>
+      <Tabs.Tab value="ops">Ops</Tabs.Tab>
+      <Tabs.Panel>The line tracks active tab width and position.</Tabs.Panel>
+      <Tabs.Tab value="audit">Audit</Tabs.Tab>
+      <Tabs.Panel>Strong visual hierarchy for data-dense workflows.</Tabs.Panel>
+      <Tabs.Tab value="logs">Logs</Tabs.Tab>
+      <Tabs.Panel>Keyboard navigation updates the line instantly.</Tabs.Panel>
     </Tabs>
 
     <Tabs variant="indicator-line" orientation="vertical" activation="manual" loop={false} selected={2}>
-      <div slot="tab" data-value="profile">Profile</div>
-      <div slot="panel">Vertical mode uses a side indicator rail.</div>
-      <div slot="tab" data-value="billing">Billing</div>
-      <div slot="panel">Manual activation remains supported.</div>
-      <div slot="tab" data-value="security">Security</div>
-      <div slot="panel">Line indicator adapts to vertical dimensions.</div>
-      <div slot="tab" data-value="notifications">Notifications</div>
-      <div slot="panel">Loop disabled prevents wrap-around navigation.</div>
+      <Tabs.Tab value="profile">Profile</Tabs.Tab>
+      <Tabs.Panel>Vertical mode uses a side indicator rail.</Tabs.Panel>
+      <Tabs.Tab value="billing">Billing</Tabs.Tab>
+      <Tabs.Panel>Manual activation remains supported.</Tabs.Panel>
+      <Tabs.Tab value="security">Security</Tabs.Tab>
+      <Tabs.Panel>Line indicator adapts to vertical dimensions.</Tabs.Panel>
+      <Tabs.Tab value="notifications">Notifications</Tabs.Tab>
+      <Tabs.Panel>Loop disabled prevents wrap-around navigation.</Tabs.Panel>
     </Tabs>
   </Grid>
 );
@@ -215,17 +205,17 @@ export const AnimatedIndicators = () => (
 export const VerticalEdgeScenarios = () => (
   <Box style={{ maxWidth: 980 }}>
     <Tabs orientation="vertical" activation="manual" variant="underline" loop={false} selected={1}>
-      <div slot="tab" data-value="profile">Profile</div>
-      <div slot="panel">Manual activation: arrow keys move focus; Enter/Space commits selection.</div>
+      <Tabs.Tab value="profile">Profile</Tabs.Tab>
+      <Tabs.Panel>Manual activation: arrow keys move focus; Enter/Space commits selection.</Tabs.Panel>
 
-      <div slot="tab" data-value="billing">Billing</div>
-      <div slot="panel">Loop disabled: navigation stops at first/last enabled tab.</div>
+      <Tabs.Tab value="billing">Billing</Tabs.Tab>
+      <Tabs.Panel>Loop disabled: navigation stops at first/last enabled tab.</Tabs.Panel>
 
-      <div slot="tab" data-value="security" data-disabled="true">Security (Disabled)</div>
-      <div slot="panel">Disabled tabs are skipped in keyboard traversal and cannot be selected.</div>
+      <Tabs.Tab value="security" disabled>Security (Disabled)</Tabs.Tab>
+      <Tabs.Panel>Disabled tabs are skipped in keyboard traversal and cannot be selected.</Tabs.Panel>
 
-      <div slot="tab" data-value="notifications">Notifications</div>
-      <div slot="panel">Vertical overflow remains scrollable for large tab sets.</div>
+      <Tabs.Tab value="notifications">Notifications</Tabs.Tab>
+      <Tabs.Panel>Vertical overflow remains scrollable for large tab sets.</Tabs.Panel>
     </Tabs>
   </Box>
 );
@@ -245,37 +235,29 @@ export const FlatBareEnterprise = () => (
       }}
     >
       <Tabs variant="minimal" shape="square" elevation="none" bare selected={0}>
-        <div slot="tab" data-value="summary">Summary</div>
-        <div slot="panel">Flat tabs: no default shadow, sharp edges, token-based control retained.</div>
-
-        <div slot="tab" data-value="financials">Financials</div>
-        <div slot="panel">Useful for teams that enforce strict flat design language.</div>
-
-        <div slot="tab" data-value="notes">Notes</div>
-        <div slot="panel">Still supports tone/size variants without visual debt.</div>
+        <Tabs.Tab value="summary">Summary</Tabs.Tab>
+        <Tabs.Panel>Flat tabs: no default shadow, sharp edges, token-based control retained.</Tabs.Panel>
+        <Tabs.Tab value="financials">Financials</Tabs.Tab>
+        <Tabs.Panel>Useful for teams that enforce strict flat design language.</Tabs.Panel>
+        <Tabs.Tab value="notes">Notes</Tabs.Tab>
+        <Tabs.Panel>Still supports tone/size variants without visual debt.</Tabs.Panel>
       </Tabs>
     </Box>
 
     <Flex gap="10px" wrap="wrap">
       <Tabs variant="default" size="sm" shape="square" elevation="none" selected={0}>
-        <div slot="tab" data-value="a">A</div>
-        <div slot="panel">Small</div>
-        <div slot="tab" data-value="b">B</div>
-        <div slot="panel">Small</div>
+        <Tabs.Tab value="a">A</Tabs.Tab><Tabs.Panel>Small</Tabs.Panel>
+        <Tabs.Tab value="b">B</Tabs.Tab><Tabs.Panel>Small</Tabs.Panel>
       </Tabs>
 
       <Tabs variant="default" size="md" shape="rounded" elevation="low" selected={0}>
-        <div slot="tab" data-value="a">A</div>
-        <div slot="panel">Medium</div>
-        <div slot="tab" data-value="b">B</div>
-        <div slot="panel">Medium</div>
+        <Tabs.Tab value="a">A</Tabs.Tab><Tabs.Panel>Medium</Tabs.Panel>
+        <Tabs.Tab value="b">B</Tabs.Tab><Tabs.Panel>Medium</Tabs.Panel>
       </Tabs>
 
       <Tabs variant="default" size="lg" shape="pill" elevation="high" selected={0}>
-        <div slot="tab" data-value="a">A</div>
-        <div slot="panel">Large</div>
-        <div slot="tab" data-value="b">B</div>
-        <div slot="panel">Large</div>
+        <Tabs.Tab value="a">A</Tabs.Tab><Tabs.Panel>Large</Tabs.Panel>
+        <Tabs.Tab value="b">B</Tabs.Tab><Tabs.Panel>Large</Tabs.Panel>
       </Tabs>
     </Flex>
   </Grid>
@@ -284,37 +266,37 @@ export const FlatBareEnterprise = () => (
 export const DensityModes = () => (
   <Grid gap="12px" style={{ maxWidth: 980 }}>
     <Tabs variant="soft" density="compact" selected={0}>
-      <div slot="tab" data-value="compact-a">Compact A</div>
-      <div slot="panel">Compact density for data-heavy enterprise screens.</div>
-      <div slot="tab" data-value="compact-b">Compact B</div>
-      <div slot="panel">Tighter spacing with preserved tap targets.</div>
+      <Tabs.Tab value="compact-a">Compact A</Tabs.Tab>
+      <Tabs.Panel>Compact density for data-heavy enterprise screens.</Tabs.Panel>
+      <Tabs.Tab value="compact-b">Compact B</Tabs.Tab>
+      <Tabs.Panel>Tighter spacing with preserved tap targets.</Tabs.Panel>
     </Tabs>
 
     <Tabs variant="soft" density="default" selected={0}>
-      <div slot="tab" data-value="default-a">Default A</div>
-      <div slot="panel">Balanced default density for most dashboard workflows.</div>
-      <div slot="tab" data-value="default-b">Default B</div>
-      <div slot="panel">Good middle ground for mixed content.</div>
+      <Tabs.Tab value="default-a">Default A</Tabs.Tab>
+      <Tabs.Panel>Balanced default density for most dashboard workflows.</Tabs.Panel>
+      <Tabs.Tab value="default-b">Default B</Tabs.Tab>
+      <Tabs.Panel>Good middle ground for mixed content.</Tabs.Panel>
     </Tabs>
 
     <Tabs variant="soft" density="comfortable" selected={0}>
-      <div slot="tab" data-value="comfortable-a">Comfortable A</div>
-      <div slot="panel">Comfortable density for touch-heavy and executive views.</div>
-      <div slot="tab" data-value="comfortable-b">Comfortable B</div>
-      <div slot="panel">Improved spacing and larger targets.</div>
+      <Tabs.Tab value="comfortable-a">Comfortable A</Tabs.Tab>
+      <Tabs.Panel>Comfortable density for touch-heavy and executive views.</Tabs.Panel>
+      <Tabs.Tab value="comfortable-b">Comfortable B</Tabs.Tab>
+      <Tabs.Panel>Improved spacing and larger targets.</Tabs.Panel>
     </Tabs>
   </Grid>
 );
 
 export const OverflowWithScroll = () => (
   <Tabs variant="soft" selected={5}>
-    <div slot="tab" data-value="mon">Mon</div><div slot="panel">Mon capacity</div>
-    <div slot="tab" data-value="tue">Tue</div><div slot="panel">Tue capacity</div>
-    <div slot="tab" data-value="wed">Wed</div><div slot="panel">Wed capacity</div>
-    <div slot="tab" data-value="thu">Thu</div><div slot="panel">Thu capacity</div>
-    <div slot="tab" data-value="fri">Fri</div><div slot="panel">Fri capacity</div>
-    <div slot="tab" data-value="sat">Sat</div><div slot="panel">Sat capacity</div>
-    <div slot="tab" data-value="sun">Sun</div><div slot="panel">Sun capacity</div>
-    <div slot="tab" data-value="next">Next Week</div><div slot="panel">Next week planning</div>
+    <Tabs.Tab value="mon">Mon</Tabs.Tab><Tabs.Panel>Mon capacity</Tabs.Panel>
+    <Tabs.Tab value="tue">Tue</Tabs.Tab><Tabs.Panel>Tue capacity</Tabs.Panel>
+    <Tabs.Tab value="wed">Wed</Tabs.Tab><Tabs.Panel>Wed capacity</Tabs.Panel>
+    <Tabs.Tab value="thu">Thu</Tabs.Tab><Tabs.Panel>Thu capacity</Tabs.Panel>
+    <Tabs.Tab value="fri">Fri</Tabs.Tab><Tabs.Panel>Fri capacity</Tabs.Panel>
+    <Tabs.Tab value="sat">Sat</Tabs.Tab><Tabs.Panel>Sat capacity</Tabs.Panel>
+    <Tabs.Tab value="sun">Sun</Tabs.Tab><Tabs.Panel>Sun capacity</Tabs.Panel>
+    <Tabs.Tab value="next">Next Week</Tabs.Tab><Tabs.Panel>Next week planning</Tabs.Panel>
   </Tabs>
 );

@@ -1,25 +1,61 @@
 ---
 title: Textarea
-description: Interactive textarea wrapper with autosize and counter support.
+description: Interactive textarea wrapper with autosize, counter, and composition slots.
 sidebar_label: Textarea
 ---
 
 # Textarea
 
+A multi-line text input with autosize, character counter, debounced input, and clearable support.
+
+## Import
+
 ```tsx
 import { Textarea } from '@editora/ui-react';
+// or subpath
+import { Textarea } from '@editora/ui-react/Textarea';
+```
 
+## Quick Example
+
+```tsx
 <Textarea
-  label="Notes"
   autosize
   maxRows={8}
   showCount
   maxlength={280}
   variant="soft"
   onInput={(value) => console.log(value)}
-/>;
+>
+  <Textarea.Label>Notes</Textarea.Label>
+  <Textarea.Description>Grows up to 8 rows automatically.</Textarea.Description>
+</Textarea>
 ```
+
+## Composition
+
+| Sub-component          | Slot          | Description                          |
+|------------------------|---------------|--------------------------------------|
+| `Textarea.Label`       | `label`       | Label text above the field           |
+| `Textarea.Description` | `description` | Helper text below the label          |
+| `Textarea.Error`       | `error`       | Error message shown in the footer    |
 
 ## Key Props
 
-`value`, `onChange`, `onInput`, `onDebouncedInput`, `onClear`, `clearable`, `debounce`, `validation`, `size`, `minlength`, `maxlength`, `rows`, `readOnly`, `autofocus`, `disabled`, `name`, `required`, `placeholder`, `resize`, `variant`, `color`, `radius`, `label`, `description`, `autosize`, `maxRows`, `showCount`, `density`, `tone`, `headless`
+| Prop               | Type                                                                     | Default      |
+|--------------------|--------------------------------------------------------------------------|--------------|
+| `value`            | `string`                                                                 | —            |
+| `rows`             | `number`                                                                 | `4`          |
+| `autosize`         | `boolean`                                                                | `false`      |
+| `maxRows`          | `number`                                                                 | —            |
+| `showCount`        | `boolean`                                                                | `false`      |
+| `maxlength`        | `number`                                                                 | —            |
+| `clearable`        | `boolean`                                                                | `false`      |
+| `debounce`         | `number`                                                                 | —            |
+| `validation`       | `'error' \| 'success' \| 'none'`                                         | `'none'`     |
+| `variant`          | `'classic' \| 'surface' \| 'soft' \| 'filled' \| 'ghost' \| 'contrast'` | `'classic'`  |
+| `onChange`         | `(value: string) => void`                                                | —            |
+| `onInput`          | `(value: string) => void`                                                | —            |
+| `onDebouncedInput` | `(value: string) => void`                                                | —            |
+
+For the full props reference and all examples see [form-inputs/textarea](../form-inputs/textarea.md).
