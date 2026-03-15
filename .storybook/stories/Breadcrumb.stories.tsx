@@ -151,8 +151,9 @@ export const WorkflowPattern: Story = {
               elevation="low"
               ariaLabel="Governance review trail"
               onSelect={(detail) => {
-                setCurrentIndex(detail.index);
-                setState(detail.index === trail.length - 1 ? 'success' : 'idle');
+                const selectDetail = detail as any;
+                setCurrentIndex(selectDetail.index);
+                setState(selectDetail.index === trail.length - 1 ? 'success' : 'idle');
               }}
             >
               <Breadcrumb.Item label="Workspace" index={0}>

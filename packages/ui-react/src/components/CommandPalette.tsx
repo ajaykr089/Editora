@@ -40,7 +40,17 @@ export type CommandPaletteProps = Omit<React.HTMLAttributes<HTMLElement>, 'onSel
   onQueryChange?: (detail: CommandPaletteQueryChangeDetail) => void;
 };
 
-export const CommandPalette = React.forwardRef<CommandPaletteElement, CommandPaletteProps>(function CommandPalette(
+export type CommandPaletteItemProps = React.HTMLAttributes<HTMLDivElement> & {
+  value?: string;
+  label?: string;
+  keywords?: string;
+};
+
+type CommandPaletteComponent = React.ForwardRefExoticComponent<CommandPaletteProps & React.RefAttributes<CommandPaletteElement>> & {
+  Item: typeof CommandPaletteItem;
+};
+
+const CommandPaletteRoot = React.forwardRef<CommandPaletteElement, CommandPaletteProps>(function CommandPalette(
   { children, open, query, placeholder, emptyText, headless, onOpen, onClose, onOpenChange, onSelect, onQueryChange, ...rest },
   forwardedRef
 ) {
@@ -115,6 +125,33 @@ export const CommandPalette = React.forwardRef<CommandPaletteElement, CommandPal
   return React.createElement('ui-command-palette', { ref, ...rest }, children);
 });
 
-CommandPalette.displayName = 'CommandPalette';
+CommandPaletteRoot.displayName = 'CommandPalette';
+
+export const CommandPaletteItem = React.forwardRef<HTMLDivElement, CommandPaletteItemProps>(function CommandPaletteItem(
+  { value, label, keywords, ...props },
+  ref
+) {
+  return (
+    <div
+      {...props}
+      ref={ref}
+      slot="command"
+      data-value={value}
+      data-label={label}
+      data-keywords={keywords}
+      style={{
+        display: 'block',
+        cursor: 'pointer',
+        ...((props as any).style || {})
+      }}
+    />
+  );
+});
+
+CommandPaletteItem.displayName = 'CommandPalette.Item';
+
+export const CommandPalette = Object.assign(CommandPaletteRoot, {
+  Item: CommandPaletteItem
+}) as CommandPaletteComponent;
 
 export default CommandPalette;

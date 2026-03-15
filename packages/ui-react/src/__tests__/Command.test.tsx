@@ -20,8 +20,12 @@ describe('Command wrapper', () => {
           latestValue = detail.value;
         }}
       >
-        <button slot="command" data-value="open">Open file</button>
-        <button slot="command" data-value="rename">Rename symbol</button>
+        <Command.Item value="open" label="Open file">
+          Open file
+        </Command.Item>
+        <Command.Item value="rename" label="Rename symbol">
+          Rename symbol
+        </Command.Item>
       </Command>
     );
 

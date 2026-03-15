@@ -52,9 +52,9 @@ const staffOptions = [
 
 const renderOptions = () =>
   staffOptions.map((option) => (
-    <option key={option.value} value={option.value} data-description={option.description}>
+    <Combobox.Option key={option.value} value={option.value} description={option.description}>
       {option.label}
-    </option>
+    </Combobox.Option>
   ));
 
 export const Playground = (args: any) => (
@@ -67,7 +67,7 @@ export const Playground = (args: any) => (
             Test keyboard filtering, async states, and validation feedback.
           </div>
         </div>
-        <Badge tone="brand">SaaS Ready</Badge>
+        <Badge tone="info">SaaS Ready</Badge>
       </Flex>
 
       <Combobox
@@ -122,7 +122,7 @@ export const EnterpriseTriageWorkflow = () => {
             <ShieldIcon size={15} />
             <span style={{ fontWeight: 700 }}>Critical Incident Routing</span>
           </Flex>
-          <Badge tone={state === 'error' ? 'danger' : state === 'success' ? 'success' : 'brand'}>
+          <Badge tone={state === 'error' ? 'danger' : state === 'success' ? 'success' : 'info'}>
             {state.toUpperCase()}
           </Badge>
         </Flex>
@@ -148,13 +148,13 @@ export const EnterpriseTriageWorkflow = () => {
           validation={state === 'error' ? 'error' : state === 'success' ? 'success' : 'none'}
           onOpen={() => setOpen(true)}
           onClose={() => setOpen(false)}
-          onInput={(nextQuery) => {
-            setQuery(nextQuery);
+          onInput={((query: string) => {
+            setQuery(query);
             setState('loading');
             window.setTimeout(() => {
-              setState(nextQuery.trim().length > 1 ? 'success' : 'idle');
+              setState(query.trim().length > 1 ? 'success' : 'idle');
             }, 500);
-          }}
+          }) as any}
           onChange={(next) => {
             setValue(next);
             toastAdvanced.success(`Incident assigned to ${next || 'unassigned'}`, { duration: 1200, theme: 'light' });
@@ -237,15 +237,15 @@ export const EdgeCases = () => {
               toastAdvanced.info(`Tag set to ${next || '(empty)'}`, { duration: 900, theme: 'light' });
             }}
           >
-            <option value="high-risk" data-description="Immediate supervisory review">
+            <Combobox.Option value="high-risk" description="Immediate supervisory review">
               High Risk
-            </option>
-            <option value="compliance" data-description="Policy validation required">
+            </Combobox.Option>
+            <Combobox.Option value="compliance" description="Policy validation required">
               Compliance
-            </option>
-            <option value="handover" data-description="Shift transition dependency">
+            </Combobox.Option>
+            <Combobox.Option value="handover" description="Shift transition dependency">
               Handover
-            </option>
+            </Combobox.Option>
           </Combobox>
           <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>
             Current tag: <code>{value || '(none)'}</code>

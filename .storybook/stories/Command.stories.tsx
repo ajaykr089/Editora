@@ -23,7 +23,9 @@ const statusCard: React.CSSProperties = {
 
 const commandItem: React.CSSProperties = {
   display: 'grid',
-  gap: 2
+  gap: 2,
+  padding: '10px 12px',
+  borderRadius: 8
 };
 
 const commandMeta: React.CSSProperties = {
@@ -71,22 +73,42 @@ export const WorkspaceActions = () => {
                 setLastSelected(detail.value || detail.label);
               }}
             >
-              <div slot="command" data-value="open-file" data-keywords="file open workspace" style={commandItem}>
+              <Command.Item
+                value="open-file"
+                label="Open file"
+                keywords="file open workspace"
+                style={commandItem}
+              >
                 <strong>Open file</strong>
                 <span style={commandMeta}>Jump to a document or asset in the current workspace.</span>
-              </div>
-              <div slot="command" data-value="rename-symbol" data-keywords="rename refactor symbol" style={commandItem}>
+              </Command.Item>
+              <Command.Item
+                value="rename-symbol"
+                label="Rename symbol"
+                keywords="rename refactor symbol"
+                style={commandItem}
+              >
                 <strong>Rename symbol</strong>
                 <span style={commandMeta}>Safely update references across the current project.</span>
-              </div>
-              <div slot="command" data-value="format-document" data-keywords="format prettier code" style={commandItem}>
+              </Command.Item>
+              <Command.Item
+                value="format-document"
+                label="Format document"
+                keywords="format prettier code"
+                style={commandItem}
+              >
                 <strong>Format document</strong>
                 <span style={commandMeta}>Apply the shared formatting policy to the active editor.</span>
-              </div>
-              <div slot="command" data-value="toggle-sidebar" data-keywords="sidebar navigation layout" style={commandItem}>
+              </Command.Item>
+              <Command.Item
+                value="toggle-sidebar"
+                label="Toggle sidebar"
+                keywords="sidebar navigation layout"
+                style={commandItem}
+              >
                 <strong>Toggle sidebar</strong>
                 <span style={commandMeta}>Show or hide the surrounding navigation chrome.</span>
-              </div>
+              </Command.Item>
             </Command>
           </Box>
 

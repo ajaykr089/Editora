@@ -63,8 +63,8 @@ export { ToastAPI, ToastProvider, useToast, toast, toastApi, toastAdvanced, toas
 export { Toast } from './components/Toast';
 export { FloatingToolbar } from './components/FloatingToolbar';
 export { BlockControls } from './components/BlockControls';
-export { Command } from './components/Command';
-export { CommandPalette } from './components/CommandPalette';
+export { Command, CommandItem, type CommandProps, type CommandItemProps, type CommandSelectDetail } from './components/Command';
+export { CommandPalette, CommandPaletteItem, type CommandPaletteProps, type CommandPaletteItemProps, type CommandPaletteSelectDetail, type CommandPaletteQueryChangeDetail, type CommandPaletteOpenChangeDetail, type CommandPaletteElement } from './components/CommandPalette';
 export { ContextMenu } from './components/ContextMenu';
 export { SelectionPopup } from './components/SelectionPopup';
 export { PluginPanel } from './components/PluginPanel';
