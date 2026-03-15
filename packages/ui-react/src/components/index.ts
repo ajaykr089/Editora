@@ -55,6 +55,7 @@ export { Icon } from './Icon';
 export { ToastAPI, ToastProvider, useToast, toast, toastApi, toastAdvanced, toastPro, toastLegacy } from './ToastAPI';
 export { Toast } from './Toast';
 export { FloatingToolbar } from './FloatingToolbar';
+export type { FloatingToolbarProps, FloatingToolbarToolbarProps } from './FloatingToolbar';
 export { BlockControls } from './BlockControls';
 export { Command } from './Command';
 export { CommandPalette } from './CommandPalette';

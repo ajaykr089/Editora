@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useImperativeHandle } from 'react';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 import { warnIfElementNotRegistered } from './_internals';
@@ -10,7 +10,7 @@ type UIFloatingToolbarElement = HTMLElement & {
   closeToolbar?: (reason?: string) => void;
 };
 
-type FloatingToolbarProps = React.HTMLAttributes<HTMLElement> & {
+export type FloatingToolbarProps = Omit<React.HTMLAttributes<HTMLElement>, 'onOpen' | 'onClose'> & {
   anchorId?: string;
   open?: boolean;
   placement?: 'auto' | 'top' | 'bottom';
@@ -29,8 +29,14 @@ type FloatingToolbarProps = React.HTMLAttributes<HTMLElement> & {
   onRequestClose?: (detail: { reason: string }) => void;
 };
 
-export function FloatingToolbar(props: FloatingToolbarProps) {
-  const {
+export type FloatingToolbarToolbarProps = React.HTMLAttributes<HTMLDivElement>;
+
+type FloatingToolbarComponent = React.ForwardRefExoticComponent<FloatingToolbarProps & React.RefAttributes<HTMLElement>> & {
+  Toolbar: typeof FloatingToolbarToolbar;
+};
+
+const FloatingToolbarRoot = React.forwardRef<HTMLElement, FloatingToolbarProps>(function FloatingToolbar(
+  {
     children,
     anchorId,
     open,
@@ -49,9 +55,12 @@ export function FloatingToolbar(props: FloatingToolbarProps) {
     onOpenChange,
     onRequestClose,
     ...rest
-  } = props;
-
+  },
+  forwardedRef
+) {
   const ref = useRef<UIFloatingToolbarElement | null>(null);
+
+  useImperativeHandle(forwardedRef, () => ref.current as any);
 
   useEffect(() => {
     warnIfElementNotRegistered('ui-floating-toolbar', 'FloatingToolbar');
@@ -152,6 +161,21 @@ export function FloatingToolbar(props: FloatingToolbarProps) {
   ]);
 
   return React.createElement('ui-floating-toolbar', { ref, ...rest }, children);
-}
+});
+
+FloatingToolbarRoot.displayName = 'FloatingToolbar';
+
+export const FloatingToolbarToolbar = React.forwardRef<HTMLDivElement, FloatingToolbarToolbarProps>(function FloatingToolbarToolbar(
+  props,
+  ref
+) {
+  return <div {...props} ref={ref} slot="toolbar" />;
+});
+
+FloatingToolbarToolbar.displayName = 'FloatingToolbar.Toolbar';
+
+export const FloatingToolbar = Object.assign(FloatingToolbarRoot, {
+  Toolbar: FloatingToolbarToolbar
+}) as FloatingToolbarComponent;
 
 export default FloatingToolbar;
