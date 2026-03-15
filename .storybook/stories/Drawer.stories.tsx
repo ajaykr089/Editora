@@ -38,16 +38,16 @@ export const Controlled = (args: any) => {
         inset={args.inset}
         onChange={setOpen}
       >
-        <Box slot="header" style={{ fontWeight: 700 }}>Filters</Box>
+        <Drawer.Header style={{ fontWeight: 700 }}>Filters</Drawer.Header>
         <Grid style={{ display: 'grid', gap: 10 }}>
           <label><input type="checkbox" defaultChecked /> Active only</label>
           <label><input type="checkbox" /> Include archived</label>
           <label><input type="checkbox" /> Assigned to me</label>
         </Grid>
-        <Flex slot="footer" style={{ display: 'flex', gap: 8 }}>
+        <Drawer.Footer style={{ display: 'flex', gap: 8 }}>
           <Button size="sm" variant="secondary" onClick={() => setOpen(false)}>Cancel</Button>
           <Button size="sm" onClick={() => setOpen(false)}>Apply</Button>
-        </Flex>
+        </Drawer.Footer>
       </Drawer>
     </Box>
   );
@@ -66,7 +66,7 @@ Controlled.args = {
 };
 
 export const VisualVariants = () => {
-  const [open, setOpen] = useState<string | null>('default');
+  const [open, setOpen] = useState<string | null>(null);
 
   return (
     <Grid style={{ display: 'grid', gap: 12 }}>
@@ -80,39 +80,39 @@ export const VisualVariants = () => {
       </Flex>
 
       <Drawer open={open === 'default'} side="left" dismissible onChange={(next) => !next && setOpen(null)}>
-        <Box slot="header">Default / Soft</Box>
+        <Drawer.Header>Default / Soft</Drawer.Header>
         <p style={{ margin: 0 }}>Balanced admin panel style.</p>
-        <Box slot="footer"><Button size="sm" onClick={() => setOpen(null)}>Close</Button></Box>
+        <Drawer.Footer><Button size="sm" onClick={() => setOpen(null)}>Close</Button></Drawer.Footer>
       </Drawer>
 
       <Drawer open={open === 'square'} side="right" dismissible variant="flat" elevation="none" shape="square" density="compact" onChange={(next) => !next && setOpen(null)}>
-        <Box slot="header">Square / Flat / Compact</Box>
+        <Drawer.Header>Square / Flat / Compact</Drawer.Header>
         <p style={{ margin: 0 }}>Sharp, low-ornament variant.</p>
-        <Box slot="footer"><Button size="sm" variant="secondary" onClick={() => setOpen(null)}>Close</Button></Box>
+        <Drawer.Footer><Button size="sm" variant="secondary" onClick={() => setOpen(null)}>Close</Button></Drawer.Footer>
       </Drawer>
 
       <Drawer open={open === 'line'} side="right" dismissible variant="line" tone="warning" shape="square" density="compact" inset onChange={(next) => !next && setOpen(null)}>
-        <Box slot="header">Line / Warning / Inset</Box>
+        <Drawer.Header>Line / Warning / Inset</Drawer.Header>
         <p style={{ margin: 0 }}>Floating side panel with crisp borders and no heavy shadows.</p>
-        <Box slot="footer"><Button size="sm" variant="secondary" onClick={() => setOpen(null)}>Close</Button></Box>
+        <Drawer.Footer><Button size="sm" variant="secondary" onClick={() => setOpen(null)}>Close</Button></Drawer.Footer>
       </Drawer>
 
       <Drawer open={open === 'comfortable'} side="left" dismissible density="comfortable" elevation="high" size="lg" onChange={(next) => !next && setOpen(null)}>
-        <Box slot="header">Comfortable / Large</Box>
+        <Drawer.Header>Comfortable / Large</Drawer.Header>
         <p style={{ margin: 0 }}>Roomier spacing for content-dense workflows.</p>
-        <Box slot="footer"><Button size="sm" onClick={() => setOpen(null)}>Done</Button></Box>
+        <Drawer.Footer><Button size="sm" onClick={() => setOpen(null)}>Done</Button></Drawer.Footer>
       </Drawer>
 
       <Drawer open={open === 'glass'} side="left" dismissible variant="glass" shape="soft" elevation="high" inset onChange={(next) => !next && setOpen(null)}>
-        <Box slot="header">Glass / Soft / Inset</Box>
+        <Drawer.Header>Glass / Soft / Inset</Drawer.Header>
         <p style={{ margin: 0 }}>High-polish floating drawer for analytics and detail views.</p>
-        <Box slot="footer"><Button size="sm" onClick={() => setOpen(null)}>Done</Button></Box>
+        <Drawer.Footer><Button size="sm" onClick={() => setOpen(null)}>Done</Button></Drawer.Footer>
       </Drawer>
 
       <Drawer open={open === 'contrast'} side="right" dismissible variant="contrast" tone="danger" onChange={(next) => !next && setOpen(null)}>
-        <Box slot="header">Contrast / Danger Tone</Box>
+        <Drawer.Header>Contrast / Danger Tone</Drawer.Header>
         <p style={{ margin: 0 }}>High-contrast critical action panel.</p>
-        <Box slot="footer"><Button size="sm" variant="secondary" onClick={() => setOpen(null)}>Dismiss</Button></Box>
+        <Drawer.Footer><Button size="sm" variant="secondary" onClick={() => setOpen(null)}>Dismiss</Button></Drawer.Footer>
       </Drawer>
     </Grid>
   );
@@ -140,11 +140,11 @@ export const SideVariants = () => {
             if (!next && openSide === side) setOpenSide(null);
           }}
         >
-          <Box slot="header" style={{ fontWeight: 700, textTransform: 'capitalize' }}>{side} drawer</Box>
+          <Drawer.Header style={{ fontWeight: 700, textTransform: 'capitalize' }}>{side} drawer</Drawer.Header>
           <p style={{ margin: 0 }}>Reusable panel for {side} anchored workflows.</p>
-          <Box slot="footer">
+          <Drawer.Footer>
             <Button size="sm" onClick={() => setOpenSide(null)}>Close</Button>
-          </Box>
+          </Drawer.Footer>
         </Drawer>
       ))}
     </Grid>
@@ -152,7 +152,7 @@ export const SideVariants = () => {
 };
 
 export const TokenStyled = () => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   return (
     <Drawer
@@ -168,11 +168,11 @@ export const TokenStyled = () => {
         ['--ui-drawer-overlay' as any]: 'rgba(2, 6, 23, 0.72)'
       }}
     >
-      <Box slot="header" style={{ fontWeight: 700 }}>Dark Drawer</Box>
+      <Drawer.Header style={{ fontWeight: 700 }}>Dark Drawer</Drawer.Header>
       <p style={{ margin: 0, color: '#cbd5e1' }}>Use tokens to align drawer with your dashboard theme.</p>
-      <Box slot="footer">
+      <Drawer.Footer>
         <Button size="sm" variant="secondary" onClick={() => setOpen(false)}>Close</Button>
-      </Box>
+      </Drawer.Footer>
     </Drawer>
   );
 };
@@ -203,26 +203,27 @@ export const AccessibilityKeyboardMap = () => {
       </Flex>
 
       <Drawer open={open} side="left" dismissible onChange={setOpen}>
-        <Box slot="header" style={{ fontWeight: 700 }}>Keyboard & Focus</Box>
+        <Drawer.Header style={{ fontWeight: 700 }}>Keyboard & Focus</Drawer.Header>
         <Grid style={{ display: 'grid', gap: 10 }}>
           <Button size="sm">Primary Action</Button>
           <Button size="sm" variant="secondary">Secondary Action</Button>
         </Grid>
-        <Box slot="footer">
+        <Drawer.Footer>
           <Button size="sm" onClick={() => setOpen(false)}>Close</Button>
-        </Box>
+        </Drawer.Footer>
       </Drawer>
 
       <Box dir="rtl" style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 12 }}>
         <h4 style={{ margin: '0 0 10px' }}>RTL Preview</h4>
         <Drawer open side="right" dismissible onChange={() => {}}>
-          <Box slot="header" style={{ fontWeight: 700 }}>RTL Header</Box>
+          <Drawer.Header style={{ fontWeight: 700 }}>RTL Header</Drawer.Header>
           <p style={{ margin: 0 }}>Drawer in RTL context with right-side anchor.</p>
-          <Box slot="footer">
+          <Drawer.Footer>
             <Button size="sm" variant="secondary">Close</Button>
-          </Box>
+          </Drawer.Footer>
         </Drawer>
       </Box>
     </Grid>
   );
 };
+

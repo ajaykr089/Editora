@@ -85,6 +85,7 @@ export { Tree, TreeItem } from './Tree';
 export { Breadcrumb } from './Breadcrumb';
 export { AppHeader, AppHeaderStart, AppHeaderCenter, AppHeaderTitle, AppHeaderSubtitle, AppHeaderEnd } from './AppHeader';
 export { Drawer } from './Drawer';
+export type { DrawerProps, DrawerHeaderProps, DrawerFooterProps } from './Drawer';
 export { Layout } from './Layout';
 
 export { ThemeProvider, useTheme } from './ThemeProvider';

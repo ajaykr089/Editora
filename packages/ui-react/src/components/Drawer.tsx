@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from '
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-type DrawerProps = React.HTMLAttributes<HTMLElement> & {
+export type DrawerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'> & {
   open?: boolean;
   side?: 'left' | 'right' | 'top' | 'bottom' | 'start' | 'end';
   variant?: 'default' | 'solid' | 'flat' | 'line' | 'glass' | 'contrast';
@@ -29,7 +29,16 @@ type DrawerProps = React.HTMLAttributes<HTMLElement> & {
   onChange?: (open: boolean) => void;
 };
 
-export const Drawer = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
+export type DrawerHeaderProps = React.HTMLAttributes<HTMLDivElement>;
+
+export type DrawerFooterProps = React.HTMLAttributes<HTMLDivElement>;
+
+type DrawerComponent = React.ForwardRefExoticComponent<DrawerProps & React.RefAttributes<HTMLElement>> & {
+  Header: typeof DrawerHeader;
+  Footer: typeof DrawerFooter;
+};
+
+const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
   {
     children,
     open,
@@ -236,6 +245,29 @@ export const Drawer = React.forwardRef<HTMLElement, DrawerProps>(function Drawer
   return React.createElement('ui-drawer', { ref, ...rest }, children);
 });
 
-Drawer.displayName = 'Drawer';
+DrawerRoot.displayName = 'Drawer';
+
+export const DrawerHeader = React.forwardRef<HTMLDivElement, DrawerHeaderProps>(function DrawerHeader(
+  props,
+  ref
+) {
+  return <div {...props} ref={ref} slot="header" />;
+});
+
+DrawerHeader.displayName = 'Drawer.Header';
+
+export const DrawerFooter = React.forwardRef<HTMLDivElement, DrawerFooterProps>(function DrawerFooter(
+  props,
+  ref
+) {
+  return <div {...props} ref={ref} slot="footer" />;
+});
+
+DrawerFooter.displayName = 'Drawer.Footer';
+
+export const Drawer = Object.assign(DrawerRoot, {
+  Header: DrawerHeader,
+  Footer: DrawerFooter
+}) as DrawerComponent;
 
 export default Drawer;
