@@ -98,6 +98,24 @@
       "import": "./dist/Menubar.esm.js",
       "require": "./dist/Menubar.cjs.js",
       "default": "./dist/Menubar.esm.js"
+    },
+    "./Label": {
+      "types": "./dist/Label.d.ts",
+      "import": "./dist/Label.esm.js",
+      "require": "./dist/Label.cjs.js",
+      "default": "./dist/Label.esm.js"
+    },
+    "./Popover": {
+      "types": "./dist/Popover.d.ts",
+      "import": "./dist/Popover.esm.js",
+      "require": "./dist/Popover.cjs.js",
+      "default": "./dist/Popover.esm.js"
+    },
+    "./QuickActions": {
+      "types": "./dist/QuickActions.d.ts",
+      "import": "./dist/QuickActions.esm.js",
+      "require": "./dist/QuickActions.cjs.js",
+      "default": "./dist/QuickActions.esm.js"
     }
   },
   "files": [

@@ -34,6 +34,7 @@ export { Gantt } from './Gantt';
 export { Stepper } from './Stepper';
 export { Wizard } from './Wizard';
 export { QuickActions } from './QuickActions';
+export type { QuickActionsActionProps, QuickActionSelectDetail } from './QuickActions';
 export {
   NavigationMenu,
   NavigationMenuRoot,
@@ -49,6 +50,7 @@ export { Menubar } from './Menubar';
 export { Dialog } from './Dialog';
 export { DialogProvider, useDialog } from './DialogProvider';
 export { Popover } from './Popover';
+export type { PopoverTriggerProps, PopoverContentProps, PopoverPlacement, PopoverOpenChangeDetail, PopoverElement } from './Popover';
 export { Tabs } from './Tabs';
 export { Menu, MenuItem, MenuSeparator, MenuSectionLabel } from './Menu';
 export { Icon } from './Icon';
