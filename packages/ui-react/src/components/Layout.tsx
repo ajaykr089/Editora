@@ -2,13 +2,13 @@ import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-type LayoutMode = 'dashboard' | 'split' | 'stack';
-type LayoutVariant = 'default' | 'flat' | 'elevated' | 'glass' | 'contrast';
-type LayoutDensity = 'default' | 'compact' | 'comfortable';
-type LayoutMaxWidth = 'sm' | 'md' | 'lg' | 'xl';
-type LayoutSidebarSide = 'start' | 'end';
+export type LayoutMode = 'dashboard' | 'split' | 'stack';
+export type LayoutVariant = 'default' | 'flat' | 'elevated' | 'glass' | 'contrast';
+export type LayoutDensity = 'default' | 'compact' | 'comfortable';
+export type LayoutMaxWidth = 'sm' | 'md' | 'lg' | 'xl';
+export type LayoutSidebarSide = 'start' | 'end';
 
-type Props = React.HTMLAttributes<HTMLElement> & {
+export type LayoutProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
   mode?: LayoutMode;
   variant?: LayoutVariant;
@@ -22,7 +22,7 @@ type Props = React.HTMLAttributes<HTMLElement> & {
   onLayoutChange?: () => void;
 };
 
-export const Layout = React.forwardRef<HTMLElement, Props>(function Layout(
+export const Layout = React.forwardRef<HTMLElement, LayoutProps>(function Layout(
   {
     children,
     mode,
@@ -86,5 +86,53 @@ export const Layout = React.forwardRef<HTMLElement, Props>(function Layout(
 });
 
 Layout.displayName = 'Layout';
+
+export const LayoutHeader = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
+  function LayoutHeader({ ...props }, ref) {
+    return React.createElement('div', { ref, slot: 'header', ...props });
+  }
+);
+
+LayoutHeader.displayName = 'Layout.Header';
+
+export const LayoutSidebar = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
+  function LayoutSidebar({ ...props }, ref) {
+    return React.createElement('div', { ref, slot: 'sidebar', ...props });
+  }
+);
+
+LayoutSidebar.displayName = 'Layout.Sidebar';
+
+export const LayoutContent = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
+  function LayoutContent({ ...props }, ref) {
+    return React.createElement('div', { ref, slot: 'content', ...props });
+  }
+);
+
+LayoutContent.displayName = 'Layout.Content';
+
+export const LayoutAside = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
+  function LayoutAside({ ...props }, ref) {
+    return React.createElement('div', { ref, slot: 'aside', ...props });
+  }
+);
+
+LayoutAside.displayName = 'Layout.Aside';
+
+export const LayoutFooter = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
+  function LayoutFooter({ ...props }, ref) {
+    return React.createElement('div', { ref, slot: 'footer', ...props });
+  }
+);
+
+LayoutFooter.displayName = 'Layout.Footer';
+
+Object.assign(Layout, {
+  Header: LayoutHeader,
+  Sidebar: LayoutSidebar,
+  Content: LayoutContent,
+  Aside: LayoutAside,
+  Footer: LayoutFooter,
+});
 
 export default Layout;

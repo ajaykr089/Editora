@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Flex, Grid, Menu, MenuItem, MenuSectionLabel, MenuSeparator } from '@editora/ui-react';
+import { Box, Button, Flex, Grid, Menu } from '@editora/ui-react';
 
 export default {
   title: 'UI/Menu',
@@ -18,16 +18,16 @@ export default {
 
 function menuContent() {
   return (
-    <div slot="content">
-      <MenuItem icon="✏" shortcut="R">Rename</MenuItem>
-      <MenuItem icon="⧉" shortcut="D">Duplicate</MenuItem>
-      <MenuSeparator />
-      <MenuItem role="menuitemcheckbox" checked shortcut="⌘L" caption="Editor preference">
+    <Menu.Content>
+      <Menu.Item icon="✏" shortcut="R">Rename</Menu.Item>
+      <Menu.Item icon="⧉" shortcut="D">Duplicate</Menu.Item>
+      <Menu.Separator />
+      <Menu.Item role="menuitemcheckbox" checked shortcut="⌘L" caption="Editor preference">
         Show line numbers
-      </MenuItem>
-      <MenuSeparator />
-      <MenuItem tone="danger" icon="🗑" shortcut="⌘⌫">Delete permanently</MenuItem>
-    </div>
+      </Menu.Item>
+      <Menu.Separator />
+      <Menu.Item tone="danger" icon="🗑" shortcut="⌘⌫">Delete permanently</Menu.Item>
+    </Menu.Content>
   );
 }
 
@@ -49,12 +49,14 @@ function PreviewMenu({
       {children}
       <Menu
         open={open}
-        onOpenChange={(next) => setOpen(Boolean(next))}
+        onChange={(next) => setOpen(Boolean(next))}
         {...menuProps}
       >
-        <Button slot="trigger" recipe={buttonRecipe}>
-          {label}
-        </Button>
+        <Menu.Trigger>
+          <Button recipe={buttonRecipe}>
+            {label}
+          </Button>
+        </Menu.Trigger>
         {menuContent()}
       </Menu>
     </Flex>
@@ -80,7 +82,9 @@ export const Playground = (args: any) => {
           setLastAction(detail.label || detail.value || (typeof detail.index === 'number' ? `item-${detail.index}` : 'item'));
         }}
       >
-        <Button slot="trigger" recipe="solid">Open menu</Button>
+        <Menu.Trigger>
+          <Button recipe="solid">Open menu</Button>
+        </Menu.Trigger>
         {menuContent()}
       </Menu>
       <Box style={{ marginTop: 12, fontSize: 13, color: '#475569' }}>Last action: {lastAction}</Box>
@@ -102,17 +106,17 @@ Playground.args = {
 
 export const VariantGallery = () => (
   <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(260px, 1fr))', gap: 18, padding: 20 }}>
-    {[
+    {([
       ['Surface', { variant: 'surface' }],
       ['Soft', { variant: 'soft' }],
       ['Solid', { variant: 'solid' }],
       ['Outline', { variant: 'outline' }],
       ['Flat', { variant: 'flat', elevation: 'none' }],
       ['Contrast', { variant: 'contrast', elevation: 'high' }],
-    ].map(([label, props]) => (
-      <Box key={label as string} style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 14 }}>
+    ] as const).map(([label, props]) => (
+      <Box key={label} style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 14 }}>
         <div style={{ fontWeight: 600, marginBottom: 12 }}>{label}</div>
-        <PreviewMenu label="Open menu" menuProps={props as Record<string, unknown>} />
+        <PreviewMenu label="Open menu" menuProps={props} />
       </Box>
     ))}
   </Grid>
@@ -141,24 +145,26 @@ export const SelectionModes = () => {
   return (
     <Flex style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 24 }}>
       <Menu closeOnSelect={false} onSelectDetail={(detail) => setLast(detail.label || detail.value || 'item')}>
-        <Button slot="trigger" recipe="surface">View options</Button>
-        <div slot="content">
-          <MenuSectionLabel>Canvas</MenuSectionLabel>
-          <MenuItem role="menuitemcheckbox" checked data-value="show-grid">
+        <Menu.Trigger>
+          <Button recipe="surface">View options</Button>
+        </Menu.Trigger>
+        <Menu.Content>
+          <Menu.SectionLabel>Canvas</Menu.SectionLabel>
+          <Menu.Item role="menuitemcheckbox" checked data-value="show-grid">
             Show grid
-          </MenuItem>
-          <MenuItem role="menuitemcheckbox" data-value="snap-guides">
+          </Menu.Item>
+          <Menu.Item role="menuitemcheckbox" data-value="snap-guides">
             Snap to guides
-          </MenuItem>
-          <MenuSeparator />
-          <MenuSectionLabel>Mode</MenuSectionLabel>
-          <MenuItem role="menuitemradio" data-group="mode" checked data-value="mode-edit">
+          </Menu.Item>
+          <Menu.Separator />
+          <Menu.SectionLabel>Mode</Menu.SectionLabel>
+          <Menu.Item role="menuitemradio" data-group="mode" checked data-value="mode-edit">
             Mode: Edit
-          </MenuItem>
-          <MenuItem role="menuitemradio" data-group="mode" data-value="mode-review">
+          </Menu.Item>
+          <Menu.Item role="menuitemradio" data-group="mode" data-value="mode-review">
             Mode: Review
-          </MenuItem>
-        </div>
+          </Menu.Item>
+        </Menu.Content>
       </Menu>
       <Box style={{ fontSize: 13, color: '#475569' }}>Last action: {last}</Box>
     </Flex>

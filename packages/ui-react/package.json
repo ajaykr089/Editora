@@ -80,6 +80,18 @@
       "import": "./dist/Input.esm.js",
       "require": "./dist/Input.cjs.js",
       "default": "./dist/Input.esm.js"
+    },
+    "./Layout": {
+      "types": "./dist/Layout.d.ts",
+      "import": "./dist/Layout.esm.js",
+      "require": "./dist/Layout.cjs.js",
+      "default": "./dist/Layout.esm.js"
+    },
+    "./Menu": {
+      "types": "./dist/Menu.d.ts",
+      "import": "./dist/Menu.esm.js",
+      "require": "./dist/Menu.cjs.js",
+      "default": "./dist/Menu.esm.js"
     }
   },
   "files": [
