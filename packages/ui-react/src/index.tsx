@@ -9,7 +9,7 @@ export {
   DropdownSeparator,
   DropdownSectionLabel
 } from './components/Dropdown';
-export { Input } from './components/Input';
+export { Input, type InputProps, type InputPrefixProps, type InputSuffixProps, type InputErrorProps } from './components/Input';
 export { PasswordField } from './components/PasswordField';
 export { TagsInput } from './components/TagsInput';
 export { PinInput, OTPInput } from './components/PinInput';

@@ -2,7 +2,7 @@ import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from '
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-export type InputProps = React.HTMLAttributes<HTMLElement> & {
+export type InputProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'> & {
   children?: React.ReactNode;
   value?: string;
   onChange?: (value: string) => void;
@@ -42,7 +42,13 @@ export type InputProps = React.HTMLAttributes<HTMLElement> & {
   description?: string;
 };
 
-export const Input = React.forwardRef<HTMLElement, InputProps>(function Input(props, forwardedRef) {
+export type InputPrefixProps = React.HTMLAttributes<HTMLElement>;
+
+export type InputSuffixProps = React.HTMLAttributes<HTMLElement>;
+
+export type InputErrorProps = React.HTMLAttributes<HTMLElement>;
+
+const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props, forwardedRef) {
   const {
     value,
     onChange,
@@ -257,6 +263,65 @@ export const Input = React.forwardRef<HTMLElement, InputProps>(function Input(pr
   return React.createElement('ui-input', { ref, value: value ?? undefined, ...rest }, children);
 });
 
-Input.displayName = 'Input';
+InputRoot.displayName = 'Input';
+
+/**
+ * Input.Prefix - Renders content in the prefix slot
+ * @example
+ * ```tsx
+ * <Input>
+ *   <Input.Prefix>🔍</Input.Prefix>
+ *   <Input.Suffix><button>Go</button></Input.Suffix>
+ * </Input>
+ * ```
+ */
+const InputPrefix = React.forwardRef<HTMLElement, InputPrefixProps>(
+  function InputPrefix({ ...props }, ref) {
+    return React.createElement('span', { ref, slot: 'prefix', ...props });
+  }
+);
+
+InputPrefix.displayName = 'Input.Prefix';
+
+/**
+ * Input.Suffix - Renders content in the suffix slot
+ * @example
+ * ```tsx
+ * <Input>
+ *   <Input.Prefix>🔍</Input.Prefix>
+ *   <Input.Suffix><button>Go</button></Input.Suffix>
+ * </Input>
+ * ```
+ */
+const InputSuffix = React.forwardRef<HTMLElement, InputSuffixProps>(
+  function InputSuffix({ ...props }, ref) {
+    return React.createElement('span', { ref, slot: 'suffix', ...props });
+  }
+);
+
+InputSuffix.displayName = 'Input.Suffix';
+
+/**
+ * Input.Error - Renders error message in the error slot
+ * @example
+ * ```tsx
+ * <Input validation="error">
+ *   <Input.Error>Field is required</Input.Error>
+ * </Input>
+ * ```
+ */
+const InputError = React.forwardRef<HTMLElement, InputErrorProps>(
+  function InputError({ ...props }, ref) {
+    return React.createElement('span', { ref, slot: 'error', ...props });
+  }
+);
+
+InputError.displayName = 'Input.Error';
+
+export const Input = Object.assign(InputRoot, {
+  Prefix: InputPrefix,
+  Suffix: InputSuffix,
+  Error: InputError,
+});
 
 export default Input;

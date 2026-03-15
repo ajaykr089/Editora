@@ -74,6 +74,12 @@
       "import": "./dist/HoverCard.esm.js",
       "require": "./dist/HoverCard.cjs.js",
       "default": "./dist/HoverCard.esm.js"
+    },
+    "./Input": {
+      "types": "./dist/Input.d.ts",
+      "import": "./dist/Input.esm.js",
+      "require": "./dist/Input.cjs.js",
+      "default": "./dist/Input.esm.js"
     }
   },
   "files": [
