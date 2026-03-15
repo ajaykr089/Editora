@@ -292,8 +292,9 @@ export class UILabel extends ElementBase {
   private _onRootClick(event: MouseEvent): void {
     if (this.hasAttribute('disabled')) return;
 
-    const target = event.target as HTMLElement | null;
-    if (!target?.closest('.label')) return;
+    const path = event.composedPath();
+    const labelEl = this.root.querySelector('.label');
+    if (!labelEl || !path.includes(labelEl)) return;
 
     this._focusControl();
     this.dispatchEvent(new CustomEvent('click', { bubbles: true }));

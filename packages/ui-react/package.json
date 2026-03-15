@@ -116,6 +116,18 @@
       "import": "./dist/QuickActions.esm.js",
       "require": "./dist/QuickActions.cjs.js",
       "default": "./dist/QuickActions.esm.js"
+    },
+    "./Select": {
+      "types": "./dist/Select.d.ts",
+      "import": "./dist/Select.esm.js",
+      "require": "./dist/Select.cjs.js",
+      "default": "./dist/Select.esm.js"
+    },
+    "./SelectionPopup": {
+      "types": "./dist/SelectionPopup.d.ts",
+      "import": "./dist/SelectionPopup.esm.js",
+      "require": "./dist/SelectionPopup.cjs.js",
+      "default": "./dist/SelectionPopup.esm.js"
     }
   },
   "files": [

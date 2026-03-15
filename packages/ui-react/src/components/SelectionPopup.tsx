@@ -8,7 +8,9 @@ type UISelectionPopupElement = HTMLElement & {
   close?: () => void;
 };
 
-type Props = React.HTMLAttributes<HTMLElement> & {
+export type SelectionPopupContentProps = React.HTMLAttributes<HTMLElement>;
+
+export type SelectionPopupProps = React.HTMLAttributes<HTMLElement> & {
   anchorId?: string;
   open?: boolean;
   placement?: 'top' | 'bottom' | 'left' | 'right' | 'auto';
@@ -26,7 +28,7 @@ type Props = React.HTMLAttributes<HTMLElement> & {
   onOpenChange?: (open: boolean) => void;
 };
 
-export function SelectionPopup(props: Props) {
+const SelectionPopupRoot = React.forwardRef<UISelectionPopupElement, SelectionPopupProps>(function SelectionPopup(props, forwardedRef) {
   const {
     children,
     anchorId,
@@ -47,6 +49,8 @@ export function SelectionPopup(props: Props) {
     ...rest
   } = props;
   const ref = useRef<UISelectionPopupElement | null>(null);
+
+  React.useImperativeHandle(forwardedRef, () => ref.current as UISelectionPopupElement);
 
   useEffect(() => {
     warnIfElementNotRegistered('ui-selection-popup', 'SelectionPopup');
@@ -135,6 +139,32 @@ export function SelectionPopup(props: Props) {
   ]);
 
   return React.createElement('ui-selection-popup', { ref, ...rest }, children);
-}
+});
+
+SelectionPopupRoot.displayName = 'SelectionPopup';
+
+/**
+ * SelectionPopup.Content - Renders content in the `content` slot
+ * @example
+ * ```tsx
+ * <SelectionPopup anchorId="my-anchor" open>
+ *   <SelectionPopup.Content>
+ *     <button>Bold</button>
+ *     <button>Comment</button>
+ *   </SelectionPopup.Content>
+ * </SelectionPopup>
+ * ```
+ */
+const SelectionPopupContent = React.forwardRef<HTMLElement, SelectionPopupContentProps>(
+  function SelectionPopupContent({ children, ...props }, ref) {
+    return React.createElement('div', { ref, slot: 'content', ...props }, children);
+  }
+);
+
+SelectionPopupContent.displayName = 'SelectionPopup.Content';
+
+export const SelectionPopup = Object.assign(SelectionPopupRoot, {
+  Content: SelectionPopupContent,
+});
 
 export default SelectionPopup;

@@ -2,6 +2,9 @@ import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from '
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
+export type LabelTextProps = React.HTMLAttributes<HTMLElement>;
+export type LabelDescriptionProps = React.HTMLAttributes<HTMLElement>;
+
 export type LabelProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
   htmlFor?: string;
@@ -17,7 +20,7 @@ export type LabelProps = React.HTMLAttributes<HTMLElement> & {
   headless?: boolean;
 };
 
-export const Label = React.forwardRef<HTMLElement, LabelProps>(function Label(
+const LabelRoot = React.forwardRef<HTMLElement, LabelProps>(function Label(
   {
     children,
     htmlFor,
@@ -78,6 +81,25 @@ export const Label = React.forwardRef<HTMLElement, LabelProps>(function Label(
   return React.createElement('ui-label', { ref, ...rest }, children);
 });
 
-Label.displayName = 'Label';
+LabelRoot.displayName = 'Label';
+
+const LabelText = React.forwardRef<HTMLElement, LabelTextProps>(
+  function LabelText({ ...props }, ref) {
+    return React.createElement('span', { ref, ...props });
+  }
+);
+LabelText.displayName = 'Label.Text';
+
+const LabelDescription = React.forwardRef<HTMLElement, LabelDescriptionProps>(
+  function LabelDescription({ ...props }, ref) {
+    return React.createElement('span', { ref, slot: 'description', ...props });
+  }
+);
+LabelDescription.displayName = 'Label.Description';
+
+export const Label = Object.assign(LabelRoot, {
+  Text: LabelText,
+  Description: LabelDescription,
+});
 
 export default Label;

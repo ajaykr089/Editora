@@ -63,6 +63,7 @@ export { Command } from './Command';
 export { CommandPalette } from './CommandPalette';
 export { ContextMenu } from './ContextMenu';
 export { SelectionPopup } from './SelectionPopup';
+export type { SelectionPopupProps, SelectionPopupContentProps } from './SelectionPopup';
 export { PluginPanel } from './PluginPanel';
 export { Form } from './Form';
 export type { FormProps, FormActionsProps, FormStatusProps, FormTitleProps } from './Form';
@@ -135,5 +136,14 @@ export {
 } from './AlertDialog';
 export { AlertDialogProvider, useAlertDialog } from './AlertDialogProvider';
 export { Select } from './Select';
+export type {
+  SelectOptionProps,
+  SelectOptGroupProps,
+  SelectLabelProps,
+  SelectDescriptionProps,
+  SelectErrorProps,
+  SelectLeadingProps,
+  SelectTrailingProps,
+} from './Select';
 export { Slider } from './Slider';
 export { Skeleton } from './Skeleton';

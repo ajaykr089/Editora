@@ -6,6 +6,14 @@ type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'>
   children?: React.ReactNode;
 };
 
+export type SelectOptionProps = React.OptionHTMLAttributes<HTMLOptionElement>;
+export type SelectOptGroupProps = React.OptgroupHTMLAttributes<HTMLOptGroupElement>;
+export type SelectLabelProps = React.HTMLAttributes<HTMLElement>;
+export type SelectDescriptionProps = React.HTMLAttributes<HTMLElement>;
+export type SelectErrorProps = React.HTMLAttributes<HTMLElement>;
+export type SelectLeadingProps = React.HTMLAttributes<HTMLElement>;
+export type SelectTrailingProps = React.HTMLAttributes<HTMLElement>;
+
 export type SelectProps = BaseProps & {
   value?: string;
   disabled?: boolean;
@@ -45,7 +53,7 @@ export type SelectProps = BaseProps & {
   onValueChange?: (value: string) => void;
 };
 
-export const Select = React.forwardRef<HTMLElement, SelectProps>(function Select(
+const SelectRoot = React.forwardRef<HTMLElement, SelectProps>(function Select(
   {
     children,
     value,
@@ -179,6 +187,72 @@ export const Select = React.forwardRef<HTMLElement, SelectProps>(function Select
   return React.createElement('ui-select', { ref, ...rest }, children);
 });
 
-Select.displayName = 'Select';
+SelectRoot.displayName = 'Select';
+
+/** Select.Option - Renders a native `<option>` inside the select */
+const SelectOption = React.forwardRef<HTMLOptionElement, SelectOptionProps>(
+  function SelectOption(props, ref) {
+    return <option ref={ref} {...props} />;
+  }
+);
+SelectOption.displayName = 'Select.Option';
+
+/** Select.OptGroup - Renders a native `<optgroup>` inside the select */
+const SelectOptGroup = React.forwardRef<HTMLOptGroupElement, SelectOptGroupProps>(
+  function SelectOptGroup(props, ref) {
+    return <optgroup ref={ref} {...props} />;
+  }
+);
+SelectOptGroup.displayName = 'Select.OptGroup';
+
+/** Select.Label - Renders content in the `label` slot */
+const SelectLabel = React.forwardRef<HTMLElement, SelectLabelProps>(
+  function SelectLabel({ children, ...props }, ref) {
+    return React.createElement('span', { ref, slot: 'label', ...props }, children);
+  }
+);
+SelectLabel.displayName = 'Select.Label';
+
+/** Select.Description - Renders content in the `description` slot */
+const SelectDescription = React.forwardRef<HTMLElement, SelectDescriptionProps>(
+  function SelectDescription({ children, ...props }, ref) {
+    return React.createElement('span', { ref, slot: 'description', ...props }, children);
+  }
+);
+SelectDescription.displayName = 'Select.Description';
+
+/** Select.Error - Renders content in the `error` slot */
+const SelectError = React.forwardRef<HTMLElement, SelectErrorProps>(
+  function SelectError({ children, ...props }, ref) {
+    return React.createElement('span', { ref, slot: 'error', ...props }, children);
+  }
+);
+SelectError.displayName = 'Select.Error';
+
+/** Select.Leading - Renders content in the `leading` slot (left side of trigger) */
+const SelectLeading = React.forwardRef<HTMLElement, SelectLeadingProps>(
+  function SelectLeading({ children, ...props }, ref) {
+    return React.createElement('span', { ref, slot: 'leading', ...props }, children);
+  }
+);
+SelectLeading.displayName = 'Select.Leading';
+
+/** Select.Trailing - Renders content in the `trailing` slot (right side of trigger) */
+const SelectTrailing = React.forwardRef<HTMLElement, SelectTrailingProps>(
+  function SelectTrailing({ children, ...props }, ref) {
+    return React.createElement('span', { ref, slot: 'trailing', ...props }, children);
+  }
+);
+SelectTrailing.displayName = 'Select.Trailing';
+
+export const Select = Object.assign(SelectRoot, {
+  Option: SelectOption,
+  OptGroup: SelectOptGroup,
+  Label: SelectLabel,
+  Description: SelectDescription,
+  Error: SelectError,
+  Leading: SelectLeading,
+  Trailing: SelectTrailing,
+});
 
 export default Select;

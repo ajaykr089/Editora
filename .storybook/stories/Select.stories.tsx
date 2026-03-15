@@ -195,11 +195,11 @@ function SelectPreview(props: {
             validation={props.validation && props.validation !== 'none' ? props.validation : undefined}
             optionBorder={props.optionBorder}
           >
-            {props.placeholder ? <option value="">{props.placeholder}</option> : null}
+            {props.placeholder ? <Select.Option value="">{props.placeholder}</Select.Option> : null}
             {workflowOptions.map((option) => (
-              <option key={option.value} value={option.value}>
+              <Select.Option key={option.value} value={option.value}>
                 {option.label}
-              </option>
+              </Select.Option>
             ))}
           </Select>
         </Box>
@@ -347,11 +347,11 @@ export const Playground: Story = {
                   validation={args.validation && args.validation !== 'none' ? args.validation : undefined}
                   radius={"4px"}
                 >
-                  {args.placeholder ? <option value="">{args.placeholder}</option> : null}
+                  {args.placeholder ? <Select.Option value="">{args.placeholder}</Select.Option> : null}
                   {workflowOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
+                    <Select.Option key={option.value} value={option.value}>
                       {option.label}
-                    </option>
+                    </Select.Option>
                   ))}
                 </Select>
               </Box>
@@ -369,6 +369,87 @@ export const Playground: Story = {
           </Box>
         </Card>
       </Grid>
+    );
+  },
+};
+
+export const CompositionSlots: Story = {
+  render: () => {
+    const [value, setValue] = React.useState('review');
+
+    return (
+      <Grid style={{ gap: 20, maxInlineSize: 480 }}>
+        {/* Option + OptGroup */}
+        <Box style={{ display: 'grid', gap: 6 }}>
+          <Box style={{ fontSize: 12, color: '#94a3b8' }}>Option + OptGroup</Box>
+          <Select label="Workflow status" value={value} onChange={setValue} variant="surface">
+            <Select.Option value="">Choose a status</Select.Option>
+            <Select.OptGroup label="Active">
+              <Select.Option value="draft">Draft</Select.Option>
+              <Select.Option value="review">In review</Select.Option>
+            </Select.OptGroup>
+            <Select.OptGroup label="Final">
+              <Select.Option value="approved">Approved</Select.Option>
+              <Select.Option value="published">Published</Select.Option>
+            </Select.OptGroup>
+          </Select>
+        </Box>
+
+        {/* Label + Description slots */}
+        <Box style={{ display: 'grid', gap: 6 }}>
+          <Box style={{ fontSize: 12, color: '#94a3b8' }}>Label + Description slots</Box>
+          <Select value={value} onChange={setValue} variant="soft">
+            <Select.Label>
+              Workflow status <span style={{ color: '#dc2626' }}>*</span>
+            </Select.Label>
+            <Select.Description>Controls publish automation triggers.</Select.Description>
+            <Select.Option value="draft">Draft</Select.Option>
+            <Select.Option value="review">In review</Select.Option>
+            <Select.Option value="approved">Approved</Select.Option>
+          </Select>
+        </Box>
+
+        {/* Leading + Trailing slots */}
+        <Box style={{ display: 'grid', gap: 6 }}>
+          <Box style={{ fontSize: 12, color: '#94a3b8' }}>Leading + Trailing slots</Box>
+          <Select label="Assignee" value={value} onChange={setValue} variant="outline">
+            <Select.Leading>👤</Select.Leading>
+            <Select.Trailing>▾</Select.Trailing>
+            <Select.Option value="draft">Alice</Select.Option>
+            <Select.Option value="review">Bob</Select.Option>
+            <Select.Option value="approved">Carol</Select.Option>
+          </Select>
+        </Box>
+
+        {/* Error slot */}
+        <Box style={{ display: 'grid', gap: 6 }}>
+          <Box style={{ fontSize: 12, color: '#94a3b8' }}>Error slot</Box>
+          <Select label="Status" value="" onChange={setValue} variant="surface" validation="error" required>
+            <Select.Option value="">Choose a status</Select.Option>
+            <Select.Option value="draft">Draft</Select.Option>
+            <Select.Option value="review">In review</Select.Option>
+            <Select.Error>Please select a status to continue.</Select.Error>
+          </Select>
+        </Box>
+      </Grid>
+    );
+  },
+};
+
+export const WithLeadingIcon: Story = {
+  render: () => {
+    const [value, setValue] = React.useState('usd');
+
+    return (
+      <Box style={{ maxInlineSize: 320 }}>
+        <Select label="Currency" value={value} onChange={setValue} variant="surface" showCheck>
+          <Select.Leading>💱</Select.Leading>
+          <Select.Option value="usd">USD — US Dollar</Select.Option>
+          <Select.Option value="eur">EUR — Euro</Select.Option>
+          <Select.Option value="gbp">GBP — British Pound</Select.Option>
+          <Select.Option value="jpy">JPY — Japanese Yen</Select.Option>
+        </Select>
+      </Box>
     );
   },
 };
