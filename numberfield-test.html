@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NumberField SVG Icons Test</title>
+  <script type="module" src="../packages/ui-core/dist/index.js"></script>
+  <link rel="stylesheet" href="../packages/themes/dist/themes/default.css">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 20px;
+      background: #f8fafc;
+    }
+    .test-container {
+      max-width: 400px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    ui-number-field {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>NumberField SVG Icons Test</h1>
+    <p>This tests that the steppers now use SVG icons instead of Unicode characters.</p>
+
+    <ui-number-field
+      label="Test Number Field"
+      value="42"
+      show-steppers
+      min="0"
+      max="100"
+      step="1"
+    ></ui-number-field>
+
+    <p>Check that the up/down buttons show SVG arrows instead of ▴/▾ characters.</p>
+  </div>
+</body>
+</html>

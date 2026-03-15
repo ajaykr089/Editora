@@ -12,9 +12,7 @@ import {
   Flex,
   Grid,
   Menubar,
-  MenuItem,
-  MenuSectionLabel,
-  MenuSeparator,
+  Menu,
   ThemeProvider,
 } from '@editora/ui-react';
 
@@ -125,55 +123,55 @@ function paletteTokens(name: StoryPaletteName) {
 function MenubarContent() {
   return (
     <>
-      <div slot="content">
-        <MenuItem shortcut="⌘N">New file</MenuItem>
-        <MenuItem shortcut="⌘O">Open…</MenuItem>
-        <MenuSeparator />
+      <Menubar.Content>
+        <Menu.Item shortcut="⌘N">New file</Menu.Item>
+        <Menu.Item shortcut="⌘O">Open…</Menu.Item>
+        <Menu.Separator />
         <div role="menuitem" tabIndex={-1} className="item" data-menu-item>
           <span className="label">
             <span className="text">Export</span>
           </span>
           <span className="submenu-arrow">▶</span>
           <div className="submenu">
-            <MenuItem>Export as PDF</MenuItem>
-            <MenuItem>Export as HTML</MenuItem>
-            <MenuItem>Export as Markdown</MenuItem>
+            <Menu.Item>Export as PDF</Menu.Item>
+            <Menu.Item>Export as HTML</Menu.Item>
+            <Menu.Item>Export as Markdown</Menu.Item>
           </div>
         </div>
-      </div>
+      </Menubar.Content>
 
-      <div slot="content">
-        <MenuItem shortcut="⌘Z">Undo</MenuItem>
-        <MenuItem shortcut="⇧⌘Z">Redo</MenuItem>
-        <MenuSeparator />
-        <MenuItem shortcut="⌘F">Find</MenuItem>
-        <MenuItem shortcut="⌘H">Replace</MenuItem>
-      </div>
+      <Menubar.Content>
+        <Menu.Item shortcut="⌘Z">Undo</Menu.Item>
+        <Menu.Item shortcut="⇧⌘Z">Redo</Menu.Item>
+        <Menu.Separator />
+        <Menu.Item shortcut="⌘F">Find</Menu.Item>
+        <Menu.Item shortcut="⌘H">Replace</Menu.Item>
+      </Menubar.Content>
 
-      <div slot="content">
-        <MenuItem role="menuitemcheckbox" checked>
+      <Menubar.Content>
+        <Menu.Item role="menuitemcheckbox" checked>
           Show line numbers
-        </MenuItem>
-        <MenuItem role="menuitemcheckbox">Wrap lines</MenuItem>
-        <MenuSeparator />
-        <MenuItem role="menuitemradio" data-group="zoom" checked>
+        </Menu.Item>
+        <Menu.Item role="menuitemcheckbox">Wrap lines</Menu.Item>
+        <Menu.Separator />
+        <Menu.Item role="menuitemradio" data-group="zoom" checked>
           100%
-        </MenuItem>
-        <MenuItem role="menuitemradio" data-group="zoom">
+        </Menu.Item>
+        <Menu.Item role="menuitemradio" data-group="zoom">
           125%
-        </MenuItem>
-        <MenuItem role="menuitemradio" data-group="zoom">
+        </Menu.Item>
+        <Menu.Item role="menuitemradio" data-group="zoom">
           150%
-        </MenuItem>
-      </div>
+        </Menu.Item>
+      </Menubar.Content>
 
-      <div slot="content">
-        <MenuSectionLabel>Workspace</MenuSectionLabel>
-        <MenuItem>Profile settings</MenuItem>
-        <MenuItem>Team access</MenuItem>
-        <MenuSeparator />
-        <MenuItem tone="danger">Sign out</MenuItem>
-      </div>
+      <Menubar.Content>
+        <Menu.SectionLabel>Workspace</Menu.SectionLabel>
+        <Menu.Item>Profile settings</Menu.Item>
+        <Menu.Item>Team access</Menu.Item>
+        <Menu.Separator />
+        <Menu.Item tone="danger">Sign out</Menu.Item>
+      </Menubar.Content>
     </>
   );
 }

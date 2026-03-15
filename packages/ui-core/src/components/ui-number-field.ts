@@ -211,12 +211,16 @@ const style = `
 
   .stepper-icon {
     display: block;
-    font-size: 16px;
-    line-height: 1;
-    letter-spacing: -0.04em;
-    transform: translateY(-0.5px);
+    width: 12px;
+    height: 12px;
     user-select: none;
     pointer-events: none;
+  }
+
+  .stepper-icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
   }
 
   .stepper-slot:last-child .stepper-icon {
@@ -265,7 +269,8 @@ const style = `
   }
 
   :host([size="sm"]) .stepper-icon {
-    font-size: 10px;
+    width: 8px;
+    height: 8px;
   }
 
   :host([size="lg"]) {
@@ -279,7 +284,8 @@ const style = `
   }
 
   :host([size="lg"]) .stepper-icon {
-    font-size: 12px;
+    width: 14px;
+    height: 14px;
   }
 
   :host([variant="surface"]) {
@@ -1047,12 +1053,12 @@ export class UINumberField extends ElementBase {
           <div class="steppers">
             <span class="stepper-slot">
               <slot name="decrement-trigger">
-                <button class="stepper-btn" type="button" data-step-action="down" aria-label="Decrease value"><span class="stepper-icon" aria-hidden="true">▾</span></button>
+                <button class="stepper-btn" type="button" data-step-action="down" aria-label="Decrease value"><span class="stepper-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M6 8.5L2.5 5h7L6 8.5z"/></svg></span></button>
               </slot>
             </span>
             <span class="stepper-slot">
               <slot name="increment-trigger">
-                <button class="stepper-btn" type="button" data-step-action="up" aria-label="Increase value"><span class="stepper-icon" aria-hidden="true">▴</span></button>
+                <button class="stepper-btn" type="button" data-step-action="up" aria-label="Increase value"><span class="stepper-icon" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><path d="M6 3.5L9.5 7H2.5L6 3.5z"/></svg></span></button>
               </slot>
             </span>
           </div>

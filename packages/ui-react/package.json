@@ -92,6 +92,12 @@
       "import": "./dist/Menu.esm.js",
       "require": "./dist/Menu.cjs.js",
       "default": "./dist/Menu.esm.js"
+    },
+    "./Menubar": {
+      "types": "./dist/Menubar.d.ts",
+      "import": "./dist/Menubar.esm.js",
+      "require": "./dist/Menubar.cjs.js",
+      "default": "./dist/Menubar.esm.js"
     }
   },
   "files": [

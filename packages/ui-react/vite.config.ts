@@ -17,7 +17,8 @@ const refactoredComponents = [
   'HoverCard',
   'Input',
   'Layout',
-  'Menu'
+  'Menu',
+  'Menubar'
 ];
 
 // Build entry points for refactored components
