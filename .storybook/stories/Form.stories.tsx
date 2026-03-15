@@ -43,9 +43,11 @@ export const Playground = (args: any) => {
         onSubmit={(values) => setMessage(`Submitted: ${JSON.stringify(values)}`)}
         onInvalid={(errors) => setMessage(`Invalid: ${JSON.stringify(errors)}`)}
       >
-        <Button slot="actions" size="sm" variant="secondary" onClick={() => setMessage(`Preview values: ${JSON.stringify(getValues())}`)}>
+        <Form.Actions>
+          <Button size="sm" variant="secondary" onClick={() => setMessage(`Preview values: ${JSON.stringify(getValues())}`)}>
           Preview
         </Button>
+        </Form.Actions>
         <Grid style={{ display: 'grid', gap: 12 }}>
           <Field label="First name" htmlFor="form-first-name" required variant="outline">
             <Input id="form-first-name" name="firstName" placeholder="Jane" required />
@@ -69,9 +71,9 @@ export const Playground = (args: any) => {
             Get values
           </Button>
         </Box>
-        <Box slot="status" style={{ fontSize: 'var(--ui-font-size-sm, 12px)' }}>
+        <Form.Status style={{ fontSize: 'var(--ui-font-size-sm, 12px)' }}>
           {message}
-        </Box>
+        </Form.Status>
       </Form>
     </Box>
   );
@@ -164,7 +166,7 @@ export const ProVisualModes = () => {
   return (
     <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(280px, 1fr))', gap: 14 }}>
       <Form ref={ref} variant="minimal" tone="brand" onSubmit={() => {}}>
-        <span slot="title">Minimal form</span>
+        <Form.Title>Minimal form</Form.Title>
         <Field label="Minimal form" htmlFor="form-minimal">
           <Input id="form-minimal" name="minimal" placeholder="Flat mode for dense pages" />
         </Field>

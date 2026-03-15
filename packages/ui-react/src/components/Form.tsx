@@ -12,7 +12,7 @@ type FormElement = HTMLElement & {
   reset?: (values?: Record<string, any>) => void;
 };
 
-export type FormProps = React.HTMLAttributes<HTMLElement> & {
+export type FormProps = Omit<React.HTMLAttributes<HTMLElement>, 'onSubmit'> & {
   children?: React.ReactNode;
   onSubmit?: (values: Record<string, any>) => void;
   onInvalid?: (errors: Record<string, string | undefined>, values: Record<string, any>) => void;
@@ -39,8 +39,20 @@ export type FormProps = React.HTMLAttributes<HTMLElement> & {
   disabled?: boolean;
 };
 
-export const Form = React.forwardRef<HTMLElement, FormProps>(function Form(props, forwardedRef) {
-  const {
+export type FormActionsProps = React.HTMLAttributes<HTMLDivElement>;
+
+export type FormStatusProps = React.HTMLAttributes<HTMLDivElement>;
+
+export type FormTitleProps = React.HTMLAttributes<HTMLDivElement>;
+
+type FormComponent = React.ForwardRefExoticComponent<FormProps & React.RefAttributes<HTMLElement>> & {
+  Actions: typeof FormActions;
+  Status: typeof FormStatus;
+  Title: typeof FormTitle;
+};
+
+const FormRoot = React.forwardRef<HTMLElement, FormProps>(function Form(
+  {
     children,
     onSubmit,
     onInvalid,
@@ -66,8 +78,9 @@ export const Form = React.forwardRef<HTMLElement, FormProps>(function Form(props
     loading,
     disabled,
     ...rest
-  } = props;
-
+  },
+  forwardedRef
+) {
   const ref = useRef<FormElement | null>(null);
 
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
@@ -200,6 +213,30 @@ export const Form = React.forwardRef<HTMLElement, FormProps>(function Form(props
   return React.createElement('ui-form', { ref, ...rest }, children);
 });
 
-Form.displayName = 'Form';
+FormRoot.displayName = 'Form';
+
+export const FormActions = React.forwardRef<HTMLDivElement, FormActionsProps>(function FormActions(props, ref) {
+  return <div {...props} ref={ref} slot="actions" />;
+});
+
+FormActions.displayName = 'Form.Actions';
+
+export const FormStatus = React.forwardRef<HTMLDivElement, FormStatusProps>(function FormStatus(props, ref) {
+  return <div {...props} ref={ref} slot="status" />;
+});
+
+FormStatus.displayName = 'Form.Status';
+
+export const FormTitle = React.forwardRef<HTMLDivElement, FormTitleProps>(function FormTitle(props, ref) {
+  return <div {...props} ref={ref} slot="title" />;
+});
+
+FormTitle.displayName = 'Form.Title';
+
+export const Form = Object.assign(FormRoot, {
+  Actions: FormActions,
+  Status: FormStatus,
+  Title: FormTitle
+}) as FormComponent;
 
 export default Form;

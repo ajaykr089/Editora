@@ -63,6 +63,7 @@ export { ContextMenu } from './ContextMenu';
 export { SelectionPopup } from './SelectionPopup';
 export { PluginPanel } from './PluginPanel';
 export { Form } from './Form';
+export type { FormProps, FormActionsProps, FormStatusProps, FormTitleProps } from './Form';
 
 // layout
 export { Box } from './Box';

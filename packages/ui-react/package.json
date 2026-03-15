@@ -20,6 +20,60 @@
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js",
       "default": "./dist/index.esm.js"
+    },
+    "./Breadcrumb": {
+      "types": "./dist/Breadcrumb.d.ts",
+      "import": "./dist/Breadcrumb.esm.js",
+      "require": "./dist/Breadcrumb.cjs.js",
+      "default": "./dist/Breadcrumb.esm.js"
+    },
+    "./Collapsible": {
+      "types": "./dist/Collapsible.d.ts",
+      "import": "./dist/Collapsible.esm.js",
+      "require": "./dist/Collapsible.cjs.js",
+      "default": "./dist/Collapsible.esm.js"
+    },
+    "./Combobox": {
+      "types": "./dist/Combobox.d.ts",
+      "import": "./dist/Combobox.esm.js",
+      "require": "./dist/Combobox.cjs.js",
+      "default": "./dist/Combobox.esm.js"
+    },
+    "./Command": {
+      "types": "./dist/Command.d.ts",
+      "import": "./dist/Command.esm.js",
+      "require": "./dist/Command.cjs.js",
+      "default": "./dist/Command.esm.js"
+    },
+    "./CommandPalette": {
+      "types": "./dist/CommandPalette.d.ts",
+      "import": "./dist/CommandPalette.esm.js",
+      "require": "./dist/CommandPalette.cjs.js",
+      "default": "./dist/CommandPalette.esm.js"
+    },
+    "./Drawer": {
+      "types": "./dist/Drawer.d.ts",
+      "import": "./dist/Drawer.esm.js",
+      "require": "./dist/Drawer.cjs.js",
+      "default": "./dist/Drawer.esm.js"
+    },
+    "./FloatingToolbar": {
+      "types": "./dist/FloatingToolbar.d.ts",
+      "import": "./dist/FloatingToolbar.esm.js",
+      "require": "./dist/FloatingToolbar.cjs.js",
+      "default": "./dist/FloatingToolbar.esm.js"
+    },
+    "./Form": {
+      "types": "./dist/Form.d.ts",
+      "import": "./dist/Form.esm.js",
+      "require": "./dist/Form.cjs.js",
+      "default": "./dist/Form.esm.js"
+    },
+    "./HoverCard": {
+      "types": "./dist/HoverCard.d.ts",
+      "import": "./dist/HoverCard.esm.js",
+      "require": "./dist/HoverCard.cjs.js",
+      "default": "./dist/HoverCard.esm.js"
     }
   },
   "files": [
