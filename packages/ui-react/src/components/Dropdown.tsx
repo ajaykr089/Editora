@@ -6,6 +6,8 @@ type BaseProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
 };
 
+type DropdownItemRole = 'menuitem' | 'menuitemcheckbox' | 'menuitemradio';
+
 export type DropdownProps = BaseProps & {
   open?: boolean;
   placement?: 'top' | 'bottom' | 'left' | 'right';
@@ -38,7 +40,39 @@ export type DropdownProps = BaseProps & {
   onSelect?: (detail: { value?: string; label?: string; checked?: boolean; item?: HTMLElement }) => void;
 };
 
-export const Dropdown = React.forwardRef<HTMLElement, DropdownProps>(function Dropdown(
+export type DropdownTriggerProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
+
+export type DropdownContentProps = React.HTMLAttributes<HTMLDivElement> & {
+  as?: 'div' | 'section' | 'ul' | 'nav';
+};
+
+export type DropdownItemProps = React.HTMLAttributes<HTMLDivElement> & {
+  children?: React.ReactNode;
+  icon?: React.ReactNode;
+  shortcut?: React.ReactNode;
+  caption?: React.ReactNode;
+  tone?: 'danger' | 'success' | 'warning';
+  role?: DropdownItemRole;
+  checked?: boolean;
+  value?: string;
+  label?: string;
+};
+
+export type DropdownSeparatorProps = React.HTMLAttributes<HTMLDivElement>;
+
+export type DropdownSectionLabelProps = React.HTMLAttributes<HTMLDivElement> & {
+  children?: React.ReactNode;
+};
+
+type DropdownComponent = React.ForwardRefExoticComponent<DropdownProps & React.RefAttributes<HTMLElement>> & {
+  Trigger: typeof DropdownTrigger;
+  Content: typeof DropdownContent;
+  Item: typeof DropdownItem;
+  Separator: typeof DropdownSeparator;
+  SectionLabel: typeof DropdownSectionLabel;
+};
+
+const DropdownRoot = React.forwardRef<HTMLElement, DropdownProps>(function Dropdown(
   {
     children,
     open,
@@ -147,6 +181,111 @@ export const Dropdown = React.forwardRef<HTMLElement, DropdownProps>(function Dr
   return React.createElement('ui-dropdown', { ref, ...rest }, children);
 });
 
-Dropdown.displayName = 'Dropdown';
+DropdownRoot.displayName = 'Dropdown';
+
+export const DropdownTrigger = React.forwardRef<HTMLButtonElement, DropdownTriggerProps>(function DropdownTrigger(
+  props,
+  ref
+) {
+  return <button {...props} ref={ref} slot="trigger" />;
+});
+
+DropdownTrigger.displayName = 'Dropdown.Trigger';
+
+export const DropdownContent = React.forwardRef<HTMLElement, DropdownContentProps>(function DropdownContent(
+  { as = 'div', ...props },
+  ref
+) {
+  return React.createElement(as, { ...props, ref, slot: 'content' });
+});
+
+DropdownContent.displayName = 'Dropdown.Content';
+
+export const DropdownItem = React.forwardRef<HTMLDivElement, DropdownItemProps>(function DropdownItem(
+  {
+    children,
+    icon,
+    shortcut,
+    caption,
+    tone,
+    role = 'menuitem',
+    checked,
+    className,
+    value,
+    label,
+    'aria-label': ariaLabel,
+    ...rest
+  },
+  ref
+) {
+  const classes = ['item', className].filter(Boolean).join(' ');
+  const selectionIcon =
+    role === 'menuitemcheckbox' || role === 'menuitemradio' ? (
+      <span className="selection-icon" aria-hidden="true" />
+    ) : null;
+
+  return (
+    <div
+      {...rest}
+      ref={ref}
+      role={role}
+      tabIndex={rest.tabIndex ?? -1}
+      className={classes}
+      data-tone={tone}
+      data-value={value}
+      aria-label={label ?? ariaLabel}
+      aria-checked={
+        role === 'menuitemcheckbox' || role === 'menuitemradio'
+          ? checked
+            ? 'true'
+            : 'false'
+          : undefined
+      }
+      data-menu-item="true"
+    >
+      {selectionIcon}
+      {icon ? <span className="icon" aria-hidden="true">{icon}</span> : null}
+      <span className="label">
+        <span className="text">{children}</span>
+        {caption ? <span className="caption">{caption}</span> : null}
+      </span>
+      {shortcut ? <span className="shortcut">{shortcut}</span> : null}
+    </div>
+  );
+});
+
+DropdownItem.displayName = 'Dropdown.Item';
+
+export const DropdownSeparator = React.forwardRef<HTMLDivElement, DropdownSeparatorProps>(function DropdownSeparator(
+  { className, ...rest },
+  ref
+) {
+  const classes = ['separator', className].filter(Boolean).join(' ');
+  return <div {...rest} ref={ref} role="separator" className={classes} />;
+});
+
+DropdownSeparator.displayName = 'Dropdown.Separator';
+
+export const DropdownSectionLabel = React.forwardRef<HTMLDivElement, DropdownSectionLabelProps>(function DropdownSectionLabel(
+  { children, className, ...rest },
+  ref
+) {
+  const classes = ['section-label', className].filter(Boolean).join(' ');
+  return (
+    <div {...rest} ref={ref} className={classes}>
+      {children}
+    </div>
+  );
+});
+
+DropdownSectionLabel.displayName = 'Dropdown.SectionLabel';
+
+export const Dropdown = Object.assign(DropdownRoot, {
+  Trigger: DropdownTrigger,
+  Content: DropdownContent,
+  Item: DropdownItem,
+  Separator: DropdownSeparator,
+  SectionLabel: DropdownSectionLabel
+}) as DropdownComponent;
 
 export default Dropdown;

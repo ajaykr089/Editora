@@ -21,10 +21,10 @@ function Example() {
       tone="info"
       radius={12}
     >
-      <span slot="item">Workspace</span>
-      <span slot="item">Programs</span>
-      <span slot="item">Spring release</span>
-      <span slot="item">Audit logs</span>
+      <Breadcrumb.Item label="Workspace" index={0}>Workspace</Breadcrumb.Item>
+      <Breadcrumb.Item label="Programs" index={1}>Programs</Breadcrumb.Item>
+      <Breadcrumb.Item label="Spring release" index={2}>Spring release</Breadcrumb.Item>
+      <Breadcrumb.Item label="Audit logs" index={3}>Audit logs</Breadcrumb.Item>
     </Breadcrumb>
   );
 }
@@ -47,11 +47,30 @@ function Example() {
 | `ariaLabel` | `string` | `'Breadcrumb'` | Accessible label for the navigation landmark. |
 | `onSelect` | `(detail) => void` | - | Fired when a breadcrumb item is selected. |
 
-## Item Content
+## Sub-components
 
-Provide breadcrumb items as slotted children:
+Use `Breadcrumb.Item` to render breadcrumb items:
 
 ```tsx
+<Breadcrumb currentIndex={2}>
+  <Breadcrumb.Item label="Workspace" index={0} href="/workspace">
+    Workspace
+  </Breadcrumb.Item>
+  <Breadcrumb.Item label="Programs" index={1} href="/workspace/programs">
+    Programs
+  </Breadcrumb.Item>
+  <Breadcrumb.Item label="Audit logs" index={2}>
+    Audit logs
+  </Breadcrumb.Item>
+</Breadcrumb>
+```
+
+Items can contain:
+
+- plain text
+- links
+- icon + label content
+- any custom content
 <Breadcrumb currentIndex={2}>
   <a slot="item" href="/workspace">Workspace</a>
   <a slot="item" href="/workspace/programs">Programs</a>
@@ -64,11 +83,34 @@ Items can be:
 - plain text spans
 - links
 - icon + label content
-- explicitly marked with `current`, `data-current`, or `aria-current`
+  <Breadcrumb.Item label="Home" index={0}>Home</Breadcrumb.Item>
+  <Breadcrumb.Item label="Products" index={1}>Products</Breadcrumb.Item>
+</Breadcrumb>
 
-## Variants
+<Breadcrumb variant="soft" tone="info">
+  <Breadcrumb.Item label="Home" index={0}>Home</Breadcrumb.Item>
+  <Breadcrumb.Item label="Products" index={1}>Products</Breadcrumb.Item>
+</Breadcrumb>
 
-```tsx
+<Breadcrumb variant="solid" tone="success" elevation="low">
+  <Breadcrumb.Item label="Home" index={0}>Home</Breadcrumb.Item>
+  <Breadcrumb.Item label="Products" index={1}>Products</Breadcrumb.Item>
+</Breadcrumb>
+
+<Breadcrumb variant="outline" tone="warning">
+  <Breadcrumb.Item label="Home" index={0}>Home</Breadcrumb.Item>
+  <Breadcrumb.Item label="Products" index={1}>Products</Breadcrumb.Item>
+</BBreadcrumb.Item label="Workspace" index={0}>Workspace</Breadcrumb.Item>
+  <Breadcrumb.Item label="Programs" index={1}>Programs</Breadcrumb.Item>
+  <Breadcrumb.Item label="Audit logs" index={2}>Audit logs</Breadcrumb.Itemnger">
+  <Breadcrumb.Item label="Home" index={0}>Home</Breadcrumb.Item>
+  <Breadcrumb.Item label="Products" index={1}>Products</Breadcrumb.Item>
+</Breadcrumb>
+
+<Breadcrumb variant="minimal" tone="neutral">
+  <Breadcrumb.Item label="Home" index={0}>Home</Breadcrumb.Item>
+  <Breadcrumb.Item label="Products" index={1}>Products</Breadcrumb.Item>
+
 <Breadcrumb variant="surface" tone="neutral">...</Breadcrumb>
 <Breadcrumb variant="soft" tone="info">...</Breadcrumb>
 <Breadcrumb variant="solid" tone="success" elevation="low">...</Breadcrumb>

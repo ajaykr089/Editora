@@ -50,17 +50,17 @@ export const Playground: Story = {
         </CardHeader>
         <Box slot="inset" style={{ padding: 16, display: 'grid', gap: 12 }}>
           <Breadcrumb {...args} ariaLabel="Release navigation">
-            <span slot="item">
+            <Breadcrumb.Item label="Workspace" index={0}>
               <HomeIcon size={13} style={{ marginInlineEnd: 4 }} />
               Workspace
-            </span>
-            <span slot="item">
+            </Breadcrumb.Item>
+            <Breadcrumb.Item label="Programs" index={1}>
               <FolderIcon size={13} style={{ marginInlineEnd: 4 }} />
               Programs
-            </span>
-            <span slot="item">Spring release</span>
-            <span slot="item">Governance</span>
-            <span slot="item">Audit logs</span>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item label="Spring release" index={2}>Spring release</Breadcrumb.Item>
+            <Breadcrumb.Item label="Governance" index={3}>Governance</Breadcrumb.Item>
+            <Breadcrumb.Item label="Audit logs" index={4}>Audit logs</Breadcrumb.Item>
           </Breadcrumb>
           <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
             Uses the real breadcrumb API: `variant`, `size`, `radius`, `elevation`, `tone`, `state`, and `onSelect`.
@@ -92,10 +92,10 @@ export const VariantGallery: Story = {
             radius={entry.variant === 'ghost' ? 'none' : 'md'}
             elevation={entry.variant === 'solid' ? 'low' : 'none'}
           >
-            <span slot="item">Workspace</span>
-            <span slot="item">Programs</span>
-            <span slot="item">Governance</span>
-            <span slot="item">Audit logs</span>
+            <Breadcrumb.Item label="Workspace" index={0}>Workspace</Breadcrumb.Item>
+            <Breadcrumb.Item label="Programs" index={1}>Programs</Breadcrumb.Item>
+            <Breadcrumb.Item label="Governance" index={2}>Governance</Breadcrumb.Item>
+            <Breadcrumb.Item label="Audit logs" index={3}>Audit logs</Breadcrumb.Item>
           </Breadcrumb>
         </Grid>
       ))}
@@ -114,10 +114,10 @@ export const SizeGallery: Story = {
         <Grid key={entry.label} style={{ gap: 8 }}>
           <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
           <Breadcrumb separator="/" currentIndex={3} size={entry.size as any} variant="surface" tone="info" radius={12}>
-            <span slot="item">Workspace</span>
-            <span slot="item">Programs</span>
-            <span slot="item">Governance</span>
-            <span slot="item">Audit logs</span>
+            <Breadcrumb.Item label="Workspace" index={0}>Workspace</Breadcrumb.Item>
+            <Breadcrumb.Item label="Programs" index={1}>Programs</Breadcrumb.Item>
+            <Breadcrumb.Item label="Governance" index={2}>Governance</Breadcrumb.Item>
+            <Breadcrumb.Item label="Audit logs" index={3}>Audit logs</Breadcrumb.Item>
           </Breadcrumb>
         </Grid>
       ))}
@@ -155,17 +155,17 @@ export const WorkflowPattern: Story = {
                 setState(detail.index === trail.length - 1 ? 'success' : 'idle');
               }}
             >
-              <span slot="item">
+              <Breadcrumb.Item label="Workspace" index={0}>
                 <HomeIcon size={13} style={{ marginInlineEnd: 4 }} />
                 Workspace
-              </span>
-              <span slot="item">Programs</span>
-              <span slot="item">Spring release</span>
-              <span slot="item">Governance</span>
-              <span slot="item">
+              </Breadcrumb.Item>
+              <Breadcrumb.Item label="Programs" index={1}>Programs</Breadcrumb.Item>
+              <Breadcrumb.Item label="Spring release" index={2}>Spring release</Breadcrumb.Item>
+              <Breadcrumb.Item label="Governance" index={3}>Governance</Breadcrumb.Item>
+              <Breadcrumb.Item label="Audit logs" index={4}>
                 <ShieldIcon size={13} style={{ marginInlineEnd: 4 }} />
                 Audit logs
-              </span>
+              </Breadcrumb.Item>
             </Breadcrumb>
 
             <Flex align="center" style={{ gap: 10, flexWrap: 'wrap', color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>

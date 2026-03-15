@@ -1,11 +1,60 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { createThemeTokens, type AccentPaletteName, type ThemeTokens } from '@editora/ui-core';
-import { Badge, Box, Button, Dropdown, Flex, Grid, ThemeProvider } from '@editora/ui-react';
+import { Badge, Box, Dropdown, Flex, Grid, ThemeProvider } from '@editora/ui-react';
 
 const meta: Meta<typeof Dropdown> = {
   title: 'UI/Dropdown',
   component: Dropdown,
+  parameters: {
+    docs: {
+      source: {
+        code: `import { Dropdown } from '@editora/ui-react';
+
+function Example() {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <Dropdown
+      open={open}
+      onChange={setOpen}
+      variant="soft"
+      size="md"
+      placement="bottom"
+      closeOnSelect
+      typeahead
+    >
+      <Dropdown.Trigger type="button">{open ? 'Close menu' : 'Open menu'}</Dropdown.Trigger>
+
+      <Dropdown.Content role="menu">
+        <Dropdown.Item value="edit" icon="✏" caption="Quick inline changes" shortcut="E">
+          Edit page
+        </Dropdown.Item>
+        <Dropdown.Item value="duplicate" icon="⧉" caption="Clone current draft" shortcut="D">
+          Duplicate
+        </Dropdown.Item>
+
+        <Dropdown.Separator />
+
+        <Dropdown.Item role="menuitemradio" data-group="status" value="review" checked>
+          Status: In review
+        </Dropdown.Item>
+        <Dropdown.Item role="menuitemradio" data-group="status" value="published" checked={false}>
+          Status: Published
+        </Dropdown.Item>
+
+        <Dropdown.Separator />
+
+        <Dropdown.Item value="delete" icon="⌫" caption="Moves item to trash" tone="danger">
+          Delete
+        </Dropdown.Item>
+      </Dropdown.Content>
+    </Dropdown>
+  );
+}`,
+      },
+    },
+  },
   args: {
     open: false,
     placement: 'bottom',
@@ -132,65 +181,31 @@ function paletteTokens(name: StoryPaletteName) {
 
 function DropdownMenuContent() {
   return (
-    <Box slot="content" role="menu" style={{ display: 'grid', gap: 0 }}>
-      <Box role="menuitem" data-value={menuItems[0].value} tabIndex={-1} className="item">
-        <span className="icon" aria-hidden="true">{menuItems[0].icon}</span>
-        <span className="label">
-          <span className="text">{menuItems[0].label}</span>
-          <span className="caption">{menuItems[0].caption}</span>
-        </span>
-        <span className="shortcut">{menuItems[0].shortcut}</span>
-      </Box>
+    <Dropdown.Content role="menu" style={{ display: 'grid', gap: 0 }}>
+      <Dropdown.Item value={menuItems[0].value} icon={menuItems[0].icon} caption={menuItems[0].caption} shortcut={menuItems[0].shortcut}>
+        {menuItems[0].label}
+      </Dropdown.Item>
 
-      <Box role="menuitem" data-value={menuItems[1].value} tabIndex={-1} className="item">
-        <span className="icon" aria-hidden="true">{menuItems[1].icon}</span>
-        <span className="label">
-          <span className="text">{menuItems[1].label}</span>
-          <span className="caption">{menuItems[1].caption}</span>
-        </span>
-        <span className="shortcut">{menuItems[1].shortcut}</span>
-      </Box>
+      <Dropdown.Item value={menuItems[1].value} icon={menuItems[1].icon} caption={menuItems[1].caption} shortcut={menuItems[1].shortcut}>
+        {menuItems[1].label}
+      </Dropdown.Item>
 
-      <Box role="separator" className="separator" />
+      <Dropdown.Separator />
 
-      <Box
-        role="menuitemradio"
-        data-group={menuItems[2].group}
-        data-value={menuItems[2].value}
-        aria-checked="true"
-        tabIndex={-1}
-        className="item"
-      >
-        <span className="selection-icon" aria-hidden="true" />
-        <span className="label">
-          <span className="text">{menuItems[2].label}</span>
-        </span>
-      </Box>
+      <Dropdown.Item role="menuitemradio" data-group={menuItems[2].group} value={menuItems[2].value} checked>
+        {menuItems[2].label}
+      </Dropdown.Item>
 
-      <Box
-        role="menuitemradio"
-        data-group={menuItems[3].group}
-        data-value={menuItems[3].value}
-        aria-checked="false"
-        tabIndex={-1}
-        className="item"
-      >
-        <span className="selection-icon" aria-hidden="true" />
-        <span className="label">
-          <span className="text">{menuItems[3].label}</span>
-        </span>
-      </Box>
+      <Dropdown.Item role="menuitemradio" data-group={menuItems[3].group} value={menuItems[3].value} checked={false}>
+        {menuItems[3].label}
+      </Dropdown.Item>
 
-      <Box role="separator" className="separator" />
+      <Dropdown.Separator />
 
-      <Box role="menuitem" data-value={menuItems[4].value} tabIndex={-1} className="item" data-tone="danger">
-        <span className="icon" aria-hidden="true">{menuItems[4].icon}</span>
-        <span className="label">
-          <span className="text">{menuItems[4].label}</span>
-          <span className="caption">{menuItems[4].caption}</span>
-        </span>
-      </Box>
-    </Box>
+      <Dropdown.Item value={menuItems[4].value} icon={menuItems[4].icon} caption={menuItems[4].caption} tone="danger">
+        {menuItems[4].label}
+      </Dropdown.Item>
+    </Dropdown.Content>
   );
 }
 
@@ -225,15 +240,34 @@ function DropdownPreview(props: {
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-text, #0f172a)' }}>{props.label || 'Review actions'}</div>
           <Dropdown
             open={open}
-            onChange={setOpen}
-            onSelect={(detail) => setLastAction(detail.label || detail.value || 'Unknown')}
+            onChange={(next: boolean | React.FormEvent<HTMLElement>) => {
+              if (typeof next === 'boolean') setOpen(next);
+            }}
+            onSelect={(detail) => {
+              if ('nativeEvent' in detail) return;
+              setLastAction(detail.label || detail.value || 'Unknown');
+            }}
             variant={props.variant}
             size={props.size}
             elevation={props.elevation}
             radius={props.radius}
             tone={props.tone}
           >
-            <Button slot="trigger">{open ? 'Close menu' : 'Open menu'}</Button>
+            <Dropdown.Trigger
+              type="button"
+              style={{
+                appearance: 'none',
+                borderRadius: 10,
+                border: '1px solid color-mix(in srgb, var(--ui-color-primary, #2563eb) 35%, transparent)',
+                background: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 7%, white)',
+                color: 'var(--ui-color-text, #0f172a)',
+                fontWeight: 600,
+                padding: '10px 14px',
+                cursor: 'pointer'
+              }}
+            >
+              {open ? 'Close menu' : 'Open menu'}
+            </Dropdown.Trigger>
             <DropdownMenuContent />
           </Dropdown>
         </Box>
@@ -347,4 +381,121 @@ function ThemeTokenMatrixStory() {
 
 export const ThemeTokenMatrix: Story = {
   render: () => <ThemeTokenMatrixStory />,
+};
+
+export const ReactComposition: Story = {
+  name: 'React composition',
+  render: (args) => {
+    const [open, setOpen] = React.useState(false);
+
+    return (
+      <Box style={{ width: 'min(320px, 100%)', display: 'grid', gap: 12 }}>
+        <Dropdown
+          open={open}
+          onChange={(next: boolean | React.FormEvent<HTMLElement>) => {
+            if (typeof next === 'boolean') setOpen(next);
+          }}
+          variant={args.variant}
+          size={args.size}
+          density={args.density}
+          shape={args.shape}
+          elevation={args.elevation}
+          radius={args.radius}
+          tone={args.tone}
+          closeOnSelect={args.closeOnSelect}
+          typeahead={args.typeahead}
+          placement={args.placement}
+        >
+          <Dropdown.Trigger
+            type="button"
+            style={{
+              appearance: 'none',
+              borderRadius: 10,
+              border: '1px solid color-mix(in srgb, var(--ui-color-primary, #2563eb) 35%, transparent)',
+              background: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 7%, white)',
+              color: 'var(--ui-color-text, #0f172a)',
+              fontWeight: 600,
+              padding: '10px 14px',
+              cursor: 'pointer',
+            }}
+          >
+            {open ? 'Close menu' : 'Open menu'}
+          </Dropdown.Trigger>
+
+          <Dropdown.Content role="menu" style={{ display: 'grid', gap: 0 }}>
+            <Dropdown.Item value="edit" icon="✏" caption="Quick inline changes" shortcut="E">
+              Edit page
+            </Dropdown.Item>
+            <Dropdown.Item value="duplicate" icon="⧉" caption="Clone current draft" shortcut="D">
+              Duplicate
+            </Dropdown.Item>
+
+            <Dropdown.Separator />
+
+            <Dropdown.Item role="menuitemradio" data-group="status" value="review" checked>
+              Status: In review
+            </Dropdown.Item>
+            <Dropdown.Item role="menuitemradio" data-group="status" value="published" checked={false}>
+              Status: Published
+            </Dropdown.Item>
+
+            <Dropdown.Separator />
+
+            <Dropdown.Item value="delete" icon="⌫" caption="Moves item to trash" tone="danger">
+              Delete
+            </Dropdown.Item>
+          </Dropdown.Content>
+        </Dropdown>
+      </Box>
+    );
+  },
+  parameters: {
+    docs: {
+      source: {
+        code: `import { Dropdown } from '@editora/ui-react';
+
+function Example() {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <Dropdown
+      open={open}
+      onChange={setOpen}
+      variant="soft"
+      size="md"
+      placement="bottom"
+      closeOnSelect
+      typeahead
+    >
+      <Dropdown.Trigger type="button">{open ? 'Close menu' : 'Open menu'}</Dropdown.Trigger>
+
+      <Dropdown.Content role="menu">
+        <Dropdown.Item value="edit" icon="✏" caption="Quick inline changes" shortcut="E">
+          Edit page
+        </Dropdown.Item>
+        <Dropdown.Item value="duplicate" icon="⧉" caption="Clone current draft" shortcut="D">
+          Duplicate
+        </Dropdown.Item>
+
+        <Dropdown.Separator />
+
+        <Dropdown.Item role="menuitemradio" data-group="status" value="review" checked>
+          Status: In review
+        </Dropdown.Item>
+        <Dropdown.Item role="menuitemradio" data-group="status" value="published" checked={false}>
+          Status: Published
+        </Dropdown.Item>
+
+        <Dropdown.Separator />
+
+        <Dropdown.Item value="delete" icon="⌫" caption="Moves item to trash" tone="danger">
+          Delete
+        </Dropdown.Item>
+      </Dropdown.Content>
+    </Dropdown>
+  );
+}`,
+      },
+    },
+  },
 };

@@ -119,6 +119,7 @@ Components for user interaction and utility functions.
 | **Button** | Clickable button | Variants, sizes, loading, icons |
 | **SplitButton** | Button with dropdown | Primary action, additional options |
 | **Badge** | Status indicator | Colors, variants, positioning |
+| **Breadcrumb** | Navigation breadcrumb | Hierarchical navigation, collapse, keyboard support |
 | **Alert** | Alert messages | Types, dismissible, actions |
 | **EmptyState** | Empty content display | Illustrations, actions, messaging |
 | **Skeleton** | Loading placeholder | Animation, shapes, sizing |

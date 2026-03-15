@@ -1,7 +1,14 @@
 export { Button } from './components/Button';
 export { Tooltip } from './components/Tooltip';
 export { Alert, AlertIcon, AlertTitle, AlertDescription, AlertActions } from './components/Alert';
-export { Dropdown } from './components/Dropdown';
+export {
+  Dropdown,
+  DropdownTrigger,
+  DropdownContent,
+  DropdownItem,
+  DropdownSeparator,
+  DropdownSectionLabel
+} from './components/Dropdown';
 export { Input } from './components/Input';
 export { PasswordField } from './components/PasswordField';
 export { TagsInput } from './components/TagsInput';

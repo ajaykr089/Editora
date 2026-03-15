@@ -25,11 +25,11 @@ export function Example() {
       closeOnSelect
       onSelect={(detail) => console.log(detail.value)}
     >
-      <button slot="trigger">Open actions</button>
-      <div slot="content">
-        <button role="menuitem" value="duplicate">Duplicate</button>
-        <button role="menuitem" value="archive">Archive</button>
-      </div>
+      <Dropdown.Trigger>Open actions</Dropdown.Trigger>
+      <Dropdown.Content>
+        <Dropdown.Item value="duplicate">Duplicate</Dropdown.Item>
+        <Dropdown.Item value="archive">Archive</Dropdown.Item>
+      </Dropdown.Content>
     </Dropdown>
   );
 }
@@ -52,11 +52,11 @@ export function ControlledDropdown() {
         console.log('request close:', reason);
       }}
     >
-      <button slot="trigger">Toggle menu</button>
-      <div slot="content">
-        <button role="menuitem" value="edit">Edit</button>
-        <button role="menuitem" value="remove">Remove</button>
-      </div>
+      <Dropdown.Trigger>Toggle menu</Dropdown.Trigger>
+      <Dropdown.Content>
+        <Dropdown.Item value="edit">Edit</Dropdown.Item>
+        <Dropdown.Item value="remove">Remove</Dropdown.Item>
+      </Dropdown.Content>
     </Dropdown>
   );
 }
@@ -92,11 +92,13 @@ export function ControlledDropdown() {
 
 ## Slot Structure
 
-- `slot="trigger"`: interactive element that opens/closes the menu.
-- `slot="content"`: menu markup cloned into the internal panel.
+- `Dropdown.Trigger`: renders a `button` with `slot="trigger"`.
+- `Dropdown.Content`: renders a container with `slot="content"`.
+- `Dropdown.Item`: helper for menu rows (`role="menuitem"` by default).
 
 ## Notes
 
 - For selection behavior, use menu items with roles like `menuitem`, `menuitemcheckbox`, or `menuitemradio`.
+- `Dropdown.Item` supports `role`, `checked`, `icon`, `caption`, and `shortcut` helpers.
 - `closeOnSelect` and `typeahead` are serialized as string attributes on `ui-dropdown`.
 - Standard `React.HTMLAttributes<HTMLElement>` are supported via passthrough props.

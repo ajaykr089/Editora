@@ -17,7 +17,7 @@ This document tracks the documentation status for all components in the `@editor
 | **Badge** | `Badge.tsx` | `badge.md` | ✅ **VERIFIED** | Props corrected to match source code |
 | **BlockControls** | `BlockControls.tsx` | ❌ Missing | ⚠️ **NEEDS DOCUMENTATION** | No documentation found |
 | **Box** | `Box.tsx` | ❌ Missing | ⚠️ **NEEDS DOCUMENTATION** | No documentation found |
-| **Breadcrumb** | `Breadcrumb.tsx` | ❌ Missing | ⚠️ **NEEDS DOCUMENTATION** | No documentation found |
+| **Breadcrumb** | `Breadcrumb.tsx` | `breadcrumb.md` | ✅ **VERIFIED** | Added to component registry and docs exist |
 | **Button** | `Button.tsx` | `button.md` | ✅ **VERIFIED** | Props corrected to match source code |
 | **Calendar** | `Calendar.tsx` | `calendar.md` | ✅ **VERIFIED** | Created from scratch, matches source code |
 | **Chart** | `Chart.tsx` | `chart.md` | ✅ **VERIFIED** | Created from scratch, matches source code |

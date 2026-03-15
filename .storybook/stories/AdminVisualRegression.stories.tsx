@@ -130,9 +130,9 @@ function SnapshotPanel({
         </Sidebar>
 
         <Breadcrumb separator="/" maxItems={5}>
-          <span slot="item">Workspace</span>
-          <span slot="item">Admin</span>
-          <span slot="item">Users</span>
+          <Breadcrumb.Item label="Workspace" index={0}>Workspace</Breadcrumb.Item>
+          <Breadcrumb.Item label="Admin" index={1}>Admin</Breadcrumb.Item>
+          <Breadcrumb.Item label="Users" index={2}>Users</Breadcrumb.Item>
         </Breadcrumb>
 
         <Flex style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
