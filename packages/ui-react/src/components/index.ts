@@ -77,7 +77,7 @@ export { Container } from './Container';
 export { Sidebar } from './Sidebar';
 export type { SidebarProps, SidebarGroupProps, SidebarItemProps, SidebarSlotProps, SidebarSearchInputProps, SidebarSelectDetail, SidebarTone } from './Sidebar';
 export { PanelGroup, Panel, Splitter } from './PanelGroup';
-export { Tree, TreeItem } from './Tree';
+export { Tree } from './Tree';
 export { Breadcrumb } from './Breadcrumb';
 export { AppHeader, AppHeaderStart, AppHeaderCenter, AppHeaderTitle, AppHeaderSubtitle, AppHeaderEnd } from './AppHeader';
 export { Drawer } from './Drawer';

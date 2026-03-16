@@ -43,7 +43,37 @@ export type WizardProps = React.HTMLAttributes<HTMLElement> & {
   onComplete?: (detail: { index: number; value: string; title: string }) => void;
 };
 
-export const Wizard = React.forwardRef<HTMLElement, WizardProps>(function Wizard(
+export type WizardStepProps = React.HTMLAttributes<HTMLElement> & {
+  value: string;
+  title?: string;
+  description?: string;
+  state?: 'default' | 'success' | 'warning' | 'error';
+  optional?: boolean;
+  children?: React.ReactNode;
+};
+
+const WizardStepComponent = React.forwardRef<HTMLElement, WizardStepProps>(function WizardStep(
+  { children, value, title, description, state, optional, ...rest },
+  forwardedRef
+) {
+  const ref = useRef<HTMLElement | null>(null);
+  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.setAttribute('data-value', value);
+    if (title) el.setAttribute('data-title', title);
+    if (description) el.setAttribute('data-description', description);
+    if (state && state !== 'default') el.setAttribute('data-state', state);
+    if (optional) el.setAttribute('data-optional', '');
+  }, [value, title, description, state, optional]);
+
+  return React.createElement('div', { ref, slot: 'step', ...rest }, children);
+});
+WizardStepComponent.displayName = 'Wizard.Step';
+
+const WizardRoot = React.forwardRef<HTMLElement, WizardProps>(function WizardRoot(
   {
     value,
     linear,
@@ -118,7 +148,7 @@ export const Wizard = React.forwardRef<HTMLElement, WizardProps>(function Wizard
     };
   }, [onBeforeChange, onChange, onStepChange, onComplete]);
 
-  useIsomorphicLayoutEffect(() => {
+  useEffect(() => {
     const el = ref.current;
     if (!el) return;
 
@@ -189,6 +219,10 @@ export const Wizard = React.forwardRef<HTMLElement, WizardProps>(function Wizard
   return React.createElement('ui-wizard', { ref, ...rest }, children);
 });
 
-Wizard.displayName = 'Wizard';
+WizardRoot.displayName = 'Wizard';
+
+export const Wizard = Object.assign(WizardRoot, {
+  Step: WizardStepComponent,
+});
 
 export default Wizard;

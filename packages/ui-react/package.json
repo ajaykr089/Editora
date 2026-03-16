@@ -152,6 +152,24 @@
       "import": "./dist/Textarea.esm.js",
       "require": "./dist/Textarea.cjs.js",
       "default": "./dist/Textarea.esm.js"
+    },
+    "./ToggleGroup": {
+      "types": "./dist/ToggleGroup.d.ts",
+      "import": "./dist/ToggleGroup.esm.js",
+      "require": "./dist/ToggleGroup.cjs.js",
+      "default": "./dist/ToggleGroup.esm.js"
+    },
+    "./Tree": {
+      "types": "./dist/Tree.d.ts",
+      "import": "./dist/Tree.esm.js",
+      "require": "./dist/Tree.cjs.js",
+      "default": "./dist/Tree.esm.js"
+    },
+    "./Wizard": {
+      "types": "./dist/Wizard.d.ts",
+      "import": "./dist/Wizard.esm.js",
+      "require": "./dist/Wizard.cjs.js",
+      "default": "./dist/Wizard.esm.js"
     }
   },
   "files": [

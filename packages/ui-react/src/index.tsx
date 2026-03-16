@@ -84,7 +84,8 @@ export {
   Sidebar
 } from './components/Sidebar';
 export { PanelGroup, Panel, Splitter } from './components/PanelGroup';
-export { Tree, TreeItem } from './components/Tree';
+export { Tree } from './components/Tree';
+export type { TreeProps, TreeItemProps, TreeSelectDetail, TreeExpandedChangeDetail } from './components/Tree';
 export { Breadcrumb } from './components/Breadcrumb';
 export { AppHeader, AppHeaderStart, AppHeaderCenter, AppHeaderTitle, AppHeaderSubtitle, AppHeaderEnd } from './components/AppHeader';
 export { Drawer } from './components/Drawer';
@@ -108,6 +109,7 @@ export { Switch } from './components/Switch';
 export type { SwitchProps, SwitchDescriptionProps } from './components/Switch';
 export { Toggle } from './components/Toggle';
 export { ToggleGroup } from './components/ToggleGroup';
+export type { ToggleGroupProps, ToggleGroupItemProps } from './components/ToggleGroup';
 export { AspectRatio } from './components/AspectRatio';
 export { Avatar } from './components/Avatar';
 export { Presence } from './components/Presence';
