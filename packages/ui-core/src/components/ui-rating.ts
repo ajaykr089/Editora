@@ -1,11 +1,11 @@
-import { ElementBase } from "../ElementBase";
+import { ElementBase } from '../ElementBase';
 
-type RatingVariant = "default" | "soft" | "glass" | "contrast" | "minimal";
-type RatingSize = "sm" | "md" | "lg";
-type RatingShape = "rounded" | "square" | "pill";
-type RatingTone = "neutral" | "info" | "success" | "warning" | "danger";
-type RatingState = "idle" | "hover" | "focus" | "disabled";
-type RatingAnimation = "scale" | "pulse" | "none";
+type RatingVariant = 'default' | 'soft' | 'glass' | 'contrast' | 'minimal';
+type RatingSize = 'sm' | 'md' | 'lg';
+type RatingShape = 'rounded' | 'square' | 'pill';
+type RatingTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+type RatingState = 'idle' | 'hover' | 'focus' | 'disabled';
+type RatingAnimation = 'scale' | 'pulse' | 'none';
 
 const style = `
   :host {
@@ -158,19 +158,12 @@ const style = `
     border: none;
     padding: 0;
     margin: 0;
+    flex: 0 0 auto;
   }
 
   .star:focus-visible {
     outline: 2px solid color-mix(in srgb, var(--ui-rating-color) 70%, transparent);
     outline-offset: 2px;
-  }
-
-  .star[data-state="active"] {
-    color: var(--ui-rating-color-active);
-  }
-
-  .star[data-state="hover"] {
-    color: var(--ui-rating-color-hover);
   }
 
   .star[data-state="disabled"] {
@@ -179,11 +172,67 @@ const style = `
     pointer-events: none;
   }
 
-  .star svg {
+  .star-icon {
+    position: relative;
+    inline-size: 100%;
+    block-size: 100%;
+    display: block;
+  }
+
+  .star-base,
+  .star-fill {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    display: block;
+  }
+
+  .star-base {
+    color: var(--ui-rating-color-empty);
+  }
+
+  .star-fill {
+    color: var(--ui-rating-color-active);
+  }
+
+  .star[data-state="hover"] .star-fill {
+    color: var(--ui-rating-color-hover);
+  }
+
+  /* The clip area changes width, but the inner icon stays full-size */
+  .star-fill-clip {
+    position: absolute;
+    inset: 0 auto 0 0;
+    inline-size: var(--fill-percent, 0%);
+    block-size: 100%;
+    overflow: hidden;
+  }
+
+  .star-base svg {
+    position: absolute;
+    inset: 0;
     inline-size: 100%;
     block-size: 100%;
     width: 100%;
     height: 100%;
+    fill: currentColor;
+    stroke: currentColor;
+    stroke-width: 1;
+    filter: drop-shadow(var(--ui-rating-shadow, none));
+    pointer-events: none;
+  }
+
+  /* Critical fix: full-size icon inside the clip, never shrink with clip width */
+  .star-fill-svg {
+    position: absolute;
+    inset: 0;
+    inline-size: var(--ui-rating-size);
+    block-size: var(--ui-rating-size);
+    width: var(--ui-rating-size);
+    height: var(--ui-rating-size);
+    min-inline-size: var(--ui-rating-size);
+    min-block-size: var(--ui-rating-size);
     fill: currentColor;
     stroke: currentColor;
     stroke-width: 1;
@@ -270,61 +319,46 @@ const style = `
       background: ButtonFace;
     }
 
-    .star[data-state="active"],
-    .star[data-state="hover"] {
-      color: Highlight;
-      background: Highlight;
+    .star-base,
+    .star-fill {
+      forced-color-adjust: auto;
     }
   }
 `;
 
 function isTruthyAttr(value: string | null): boolean {
-  return value !== null && value.toLowerCase() !== "false" && value !== "0";
+  return value !== null && value.toLowerCase() !== 'false' && value !== '0';
 }
 
 function toVariant(value: string | null): RatingVariant {
-  if (
-    value === "soft" ||
-    value === "glass" ||
-    value === "contrast" ||
-    value === "minimal"
-  ) {
-    return value;
-  }
-  return "default";
+  if (value === 'soft' || value === 'glass' || value === 'contrast' || value === 'minimal') return value;
+  return 'default';
 }
 
 function toSize(value: string | null): RatingSize {
-  if (value === "sm" || value === "lg") return value;
-  return "md";
+  if (value === 'sm' || value === 'lg') return value;
+  return 'md';
 }
 
 function toShape(value: string | null): RatingShape {
-  if (value === "square" || value === "pill") return value;
-  return "rounded";
+  if (value === 'square' || value === 'pill') return value;
+  return 'rounded';
 }
 
 function toTone(value: string | null): RatingTone | null {
-  if (
-    value === "neutral" ||
-    value === "info" ||
-    value === "success" ||
-    value === "warning" ||
-    value === "danger"
-  ) {
+  if (value === 'neutral' || value === 'info' || value === 'success' || value === 'warning' || value === 'danger') {
     return value;
   }
   return null;
 }
 
 function toState(value: string | null): RatingState {
-  if (value === "hover" || value === "focus" || value === "disabled")
-    return value;
-  return "idle";
+  if (value === 'hover' || value === 'focus' || value === 'disabled') return value;
+  return 'idle';
 }
 
 function toAnimation(value: string | null): RatingAnimation | null {
-  if (value === "scale" || value === "pulse" || value === "none") return value;
+  if (value === 'scale' || value === 'pulse' || value === 'none') return value;
   return null;
 }
 
@@ -332,43 +366,55 @@ function toRadius(value: string | null): string | null {
   if (!value) return null;
   const trimmed = value.trim();
   if (!trimmed) return null;
-  if (trimmed === "full") return "999px";
+  if (trimmed === 'full') return '999px';
   if (/^-?\\d+(\\.\\d+)?$/.test(trimmed)) return `${trimmed}px`;
   return trimmed;
+}
+
+function toPrecision(value: string | null): number {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return 1;
+  if (n === 0.5) return 0.5;
+  return 1;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function roundToStep(value: number, step: number): number {
+  const rounded = Math.round(value / step) * step;
+  return Number(rounded.toFixed(2));
 }
 
 function readHostString(el: HTMLElement, name: string): string | null {
   const attr = el.getAttribute(name);
   if (attr != null) return attr;
-
   const prop = (el as unknown as Record<string, unknown>)[name];
-  if (typeof prop === "string" && prop.length > 0) return prop;
-
+  if (typeof prop === 'string' && prop.length > 0) return prop;
   return null;
 }
 
 function readHostBoolean(el: HTMLElement, name: string): boolean {
   const attr = el.getAttribute(name);
   if (attr != null) return isTruthyAttr(attr);
-
   const prop = (el as unknown as Record<string, unknown>)[name];
-  if (typeof prop === "boolean") return prop;
-  if (typeof prop === "string") return isTruthyAttr(prop);
-
+  if (typeof prop === 'boolean') return prop;
+  if (typeof prop === 'string') return isTruthyAttr(prop);
   return false;
 }
 
 function escapeHtml(value: string): string {
   return value
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
-function createStarSVG(): string {
+function createStarSVG(className?: string): string {
   return `
-    <svg viewBox="0 0 24 24" aria-hidden="true">
+    <svg viewBox="0 0 24 24" aria-hidden="true"${className ? ` class="${className}"` : ''}>
       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
     </svg>
   `;
@@ -377,30 +423,32 @@ function createStarSVG(): string {
 export class UIRating extends ElementBase {
   static get observedAttributes() {
     return [
-      "value",
-      "max",
-      "disabled",
-      "readonly",
-      "variant",
-      "size",
-      "headless",
-      "theme",
-      "tone",
-      "state",
-      "animation",
-      "shape",
-      "radius",
-      "aria-label",
-      "aria-labelledby",
-      "aria-describedby",
-      "label",
-      "show-value",
+      'value',
+      'max',
+      'precision',
+      'disabled',
+      'readonly',
+      'variant',
+      'size',
+      'headless',
+      'theme',
+      'tone',
+      'state',
+      'animation',
+      'shape',
+      'radius',
+      'aria-label',
+      'aria-labelledby',
+      'aria-describedby',
+      'label',
+      'show-value'
     ];
   }
 
   private _stars: HTMLButtonElement[] = [];
   private _value = 0;
   private _max = 5;
+  private _precision = 1;
   private _disabled = false;
   private _readonly = false;
   private _hoverValue = 0;
@@ -408,7 +456,7 @@ export class UIRating extends ElementBase {
   constructor() {
     super();
     this._onRootClick = this._onRootClick.bind(this);
-    this._onRootMouseOver = this._onRootMouseOver.bind(this);
+    this._onRootMouseMove = this._onRootMouseMove.bind(this);
     this._onRootMouseLeave = this._onRootMouseLeave.bind(this);
     this._onRootFocusIn = this._onRootFocusIn.bind(this);
     this._onRootFocusOut = this._onRootFocusOut.bind(this);
@@ -417,59 +465,65 @@ export class UIRating extends ElementBase {
 
   connectedCallback() {
     super.connectedCallback();
-    this.root.addEventListener("click", this._onRootClick, true);
-    this.root.addEventListener("mouseover", this._onRootMouseOver, true);
-    this.root.addEventListener("mouseleave", this._onRootMouseLeave, true);
-    this.root.addEventListener("focusin", this._onRootFocusIn, true);
-    this.root.addEventListener("focusout", this._onRootFocusOut, true);
-    this.root.addEventListener("keydown", this._onRootKeyDown, true);
+    this.root.addEventListener('click', this._onRootClick, true);
+    this.root.addEventListener('mousemove', this._onRootMouseMove, true);
+    this.root.addEventListener('mouseleave', this._onRootMouseLeave, true);
+    this.root.addEventListener('focusin', this._onRootFocusIn, true);
+    this.root.addEventListener('focusout', this._onRootFocusOut, true);
+    this.root.addEventListener('keydown', this._onRootKeyDown, true);
   }
 
   disconnectedCallback() {
-    this.root.removeEventListener("click", this._onRootClick, true);
-    this.root.removeEventListener("mouseover", this._onRootMouseOver, true);
-    this.root.removeEventListener("mouseleave", this._onRootMouseLeave, true);
-    this.root.removeEventListener("focusin", this._onRootFocusIn, true);
-    this.root.removeEventListener("focusout", this._onRootFocusOut, true);
-    this.root.removeEventListener("keydown", this._onRootKeyDown, true);
+    this.root.removeEventListener('click', this._onRootClick, true);
+    this.root.removeEventListener('mousemove', this._onRootMouseMove, true);
+    this.root.removeEventListener('mouseleave', this._onRootMouseLeave, true);
+    this.root.removeEventListener('focusin', this._onRootFocusIn, true);
+    this.root.removeEventListener('focusout', this._onRootFocusOut, true);
+    this.root.removeEventListener('keydown', this._onRootKeyDown, true);
     super.disconnectedCallback();
   }
 
-  attributeChangedCallback(
-    name: string,
-    oldValue: string | null,
-    newValue: string | null,
-  ) {
+  attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
     if (oldValue === newValue) return;
 
-    if (name === "value") {
+    if (name === 'value') {
       const next = Number(newValue);
       if (Number.isFinite(next)) {
-        this._value = Math.max(0, Math.min(this._max, next));
+        this._value = clamp(roundToStep(next, this._precision), 0, this._max);
         this._syncStars();
         this._syncAria();
       }
     }
 
-    if (name === "max") {
+    if (name === 'max') {
       const next = Number(newValue);
       if (Number.isFinite(next) && next > 0) {
         this._max = Math.max(1, next);
+        if (this._value > this._max) {
+          this._value = this._max;
+        }
+        this._syncStars();
+        this._syncAria();
       }
     }
 
-    if (name === "disabled") {
-      this._disabled = newValue !== null;
+    if (name === 'precision') {
+      this._precision = toPrecision(newValue);
+      this._value = clamp(roundToStep(this._value, this._precision), 0, this._max);
+      this._hoverValue = this._hoverValue > 0
+        ? clamp(roundToStep(this._hoverValue, this._precision), 0, this._max)
+        : 0;
+      this._syncStars();
+      this._syncAria();
     }
 
-    if (name === "readonly") {
-      this._readonly = newValue !== null;
-    }
+    if (name === 'disabled') this._disabled = newValue !== null;
+    if (name === 'readonly') this._readonly = newValue !== null;
 
-    if (name === "animation") {
+    if (name === 'animation') {
       const animation = toAnimation(newValue);
-      if (animation) this.setAttribute("data-animation", animation);
-      else this.removeAttribute("data-animation");
+      if (animation) this.setAttribute('data-animation', animation);
+      else this.removeAttribute('data-animation');
     }
 
     if (this.isConnected) this.requestRender();
@@ -483,17 +537,16 @@ export class UIRating extends ElementBase {
     const normalized = Number(next);
     if (!Number.isFinite(normalized)) return;
 
-    const clamped = Math.max(0, Math.min(this._max, normalized));
+    const clamped = clamp(roundToStep(normalized, this._precision), 0, this._max);
     const oldValue = this._value;
-
     if (oldValue === clamped) return;
 
     this._value = clamped;
-    this.setAttribute("value", String(this._value));
+    this.setAttribute('value', String(this._value));
     this._syncStars();
     this._syncAria();
-    this._emit("change");
-    this._emit("input");
+    this._emit('change');
+    this._emit('input');
   }
 
   get max(): number {
@@ -505,13 +558,24 @@ export class UIRating extends ElementBase {
     if (!Number.isFinite(normalized)) return;
 
     this._max = Math.max(1, normalized);
-    this.setAttribute("max", String(this._max));
+    this.setAttribute('max', String(this._max));
 
     if (this._value > this._max) {
       this._value = this._max;
-      this.setAttribute("value", String(this._value));
+      this.setAttribute('value', String(this._value));
     }
 
+    this.requestRender();
+  }
+
+  get precision(): number {
+    return this._precision;
+  }
+
+  set precision(next: number) {
+    this._precision = next === 0.5 ? 0.5 : 1;
+    this.setAttribute('precision', String(this._precision));
+    this._value = clamp(roundToStep(this._value, this._precision), 0, this._max);
     this.requestRender();
   }
 
@@ -521,8 +585,8 @@ export class UIRating extends ElementBase {
 
   set disabled(next: boolean) {
     this._disabled = !!next;
-    if (this._disabled) this.setAttribute("disabled", "");
-    else this.removeAttribute("disabled");
+    if (this._disabled) this.setAttribute('disabled', '');
+    else this.removeAttribute('disabled');
     this.requestRender();
   }
 
@@ -532,16 +596,14 @@ export class UIRating extends ElementBase {
 
   set readonly(next: boolean) {
     this._readonly = !!next;
-    if (this._readonly) this.setAttribute("readonly", "");
-    else this.removeAttribute("readonly");
+    if (this._readonly) this.setAttribute('readonly', '');
+    else this.removeAttribute('readonly');
     this.requestRender();
   }
 
-  private _getStarFromEventTarget(
-    target: EventTarget | null,
-  ): HTMLButtonElement | null {
+  private _getStarFromEventTarget(target: EventTarget | null): HTMLButtonElement | null {
     if (!(target instanceof Element)) return null;
-    return target.closest(".star") as HTMLButtonElement | null;
+    return target.closest('.star') as HTMLButtonElement | null;
   }
 
   private _getStarIndex(star: HTMLButtonElement | null): number {
@@ -550,26 +612,51 @@ export class UIRating extends ElementBase {
     return Number.isFinite(index) ? index : -1;
   }
 
-  private _onRootClick(event: Event): void {
-    if (this._disabled || this._readonly) return;
-    const star = this._getStarFromEventTarget(event.target);
-    const starIndex = this._getStarIndex(star);
-    if (starIndex === -1) return;
-    this._handleStarClick(starIndex);
+  private _getValueFromPointer(event: MouseEvent, star: HTMLButtonElement): number {
+    const index = this._getStarIndex(star);
+    if (index === -1) return this._value;
+
+    if (this._precision !== 0.5) {
+      return index + 1;
+    }
+
+    const rect = star.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const half = x <= rect.width / 2 ? 0.5 : 1;
+    return index + half;
   }
 
-  private _onRootMouseOver(event: Event): void {
+  private _formatValue(value: number): string {
+    return Number.isInteger(value) ? String(value) : value.toFixed(1);
+  }
+
+  private _getAriaValueText(value: number): string {
+    return `${this._formatValue(value)} out of ${this._max}`;
+  }
+
+  private _onRootClick(event: Event): void {
     if (this._disabled || this._readonly) return;
-    const star = this._getStarFromEventTarget(event.target);
-    const starIndex = this._getStarIndex(star);
-    if (starIndex === -1) return;
-    this._handleStarMouseEnter(starIndex);
+    const mouseEvent = event as MouseEvent;
+    const star = this._getStarFromEventTarget(mouseEvent.target);
+    if (!star) return;
+    this.value = this._getValueFromPointer(mouseEvent, star);
+  }
+
+  private _onRootMouseMove(event: Event): void {
+    if (this._disabled || this._readonly) return;
+    const mouseEvent = event as MouseEvent;
+    const star = this._getStarFromEventTarget(mouseEvent.target);
+    if (!star) return;
+
+    this._hoverValue = this._getValueFromPointer(mouseEvent, star);
+    this.setAttribute('state', 'hover');
+    this._syncStars();
   }
 
   private _onRootMouseLeave(): void {
     if (this._disabled || this._readonly) return;
     this._hoverValue = 0;
-    this.removeAttribute("state");
+    this.removeAttribute('state');
     this._syncStars();
   }
 
@@ -578,12 +665,16 @@ export class UIRating extends ElementBase {
     const star = this._getStarFromEventTarget(event.target);
     const starIndex = this._getStarIndex(star);
     if (starIndex === -1) return;
-    this._handleStarFocus(starIndex);
+    this._hoverValue = starIndex + 1;
+    this.setAttribute('state', 'focus');
+    this._syncStars();
   }
 
   private _onRootFocusOut(): void {
     if (this._disabled || this._readonly) return;
-    this._handleStarBlur();
+    this._hoverValue = 0;
+    this.removeAttribute('state');
+    this._syncStars();
   }
 
   private _onRootKeyDown(event: Event): void {
@@ -592,87 +683,72 @@ export class UIRating extends ElementBase {
     const star = this._getStarFromEventTarget(keyboardEvent.target);
     const starIndex = this._getStarIndex(star);
     if (starIndex === -1) return;
-    this._handleKeyDown(keyboardEvent, starIndex);
-  }
 
-  private _handleStarClick(starIndex: number): void {
-    const newValue = starIndex + 1;
-    this.value = newValue;
-  }
-
-  private _handleStarMouseEnter(starIndex: number): void {
-    this._hoverValue = starIndex + 1;
-    this.setAttribute("state", "hover");
-    this._syncStars();
-  }
-
-  private _handleStarFocus(starIndex: number): void {
-    this._hoverValue = starIndex + 1;
-    this.setAttribute("state", "focus");
-    this._syncStars();
-  }
-
-  private _handleStarBlur(): void {
-    this._hoverValue = 0;
-    this.removeAttribute("state");
-    this._syncStars();
-  }
-
-  private _handleKeyDown(event: KeyboardEvent, _starIndex: number): void {
     let newValue = this._value;
+    const step = this._precision;
 
-    switch (event.key) {
-      case "ArrowRight":
-      case "ArrowUp":
-      case "+":
-        newValue = Math.min(this._max, this._value + 1);
+    switch (keyboardEvent.key) {
+      case 'ArrowRight':
+      case 'ArrowUp':
+      case '+':
+        newValue = clamp(this._value + step, 0, this._max);
         break;
-      case "ArrowLeft":
-      case "ArrowDown":
-      case "-":
-        newValue = Math.max(0, this._value - 1);
+      case 'ArrowLeft':
+      case 'ArrowDown':
+      case '-':
+        newValue = clamp(this._value - step, 0, this._max);
         break;
-      case "Home":
+      case 'Home':
         newValue = 0;
         break;
-      case "End":
+      case 'End':
         newValue = this._max;
         break;
-      case " ":
-      case "Enter":
-        newValue = Math.min(this._max, _starIndex + 1);
+      case ' ':
+      case 'Enter':
+        newValue = starIndex + 1;
         break;
       default:
         return;
     }
 
-    event.preventDefault();
+    keyboardEvent.preventDefault();
     this.value = newValue;
   }
 
+  private _getFillPercent(starNumber: number, targetValue: number): number {
+    const diff = targetValue - (starNumber - 1);
+    if (diff >= 1) return 100;
+    if (diff <= 0) return 0;
+    return diff * 100;
+  }
+
   private _syncStars(): void {
+    const targetValue = this._hoverValue > 0 ? this._hoverValue : this._value;
+
     this._stars.forEach((star, index) => {
+      const starNumber = index + 1;
+      const fill = this._getFillPercent(starNumber, targetValue);
+      star.style.setProperty('--fill-percent', `${fill}%`);
+
       if (this._disabled) {
-        star.setAttribute("data-state", "disabled");
-        star.setAttribute("aria-disabled", "true");
+        star.setAttribute('data-state', 'disabled');
+        star.setAttribute('aria-disabled', 'true');
         return;
       }
 
-      star.removeAttribute("aria-disabled");
+      star.removeAttribute('aria-disabled');
 
       if (this._hoverValue > 0) {
-        if (index < this._hoverValue) {
-          star.setAttribute("data-state", "hover");
-        } else {
-          star.removeAttribute("data-state");
-        }
+        if (fill > 0) star.setAttribute('data-state', 'hover');
+        else star.removeAttribute('data-state');
         return;
       }
 
-      if (index < this._value) {
-        star.setAttribute("data-state", "active");
+      if (fill > 0) {
+        star.setAttribute('data-state', 'active');
       } else {
-        star.removeAttribute("data-state");
+        star.removeAttribute('data-state');
       }
     });
 
@@ -680,17 +756,34 @@ export class UIRating extends ElementBase {
   }
 
   private _syncAria(): void {
-    this.setAttribute("role", "radiogroup");
-    this.setAttribute("aria-valuemin", "0");
-    this.setAttribute("aria-valuemax", String(this._max));
-    this.setAttribute("aria-valuenow", String(this._value));
-    this.setAttribute("aria-disabled", this._disabled ? "true" : "false");
-    this.setAttribute("aria-readonly", this._readonly ? "true" : "false");
+    const currentValueText = this._getAriaValueText(this._value);
+
+    this.setAttribute('role', 'slider');
+    this.setAttribute('tabindex', this._disabled || this._readonly ? '-1' : '0');
+    this.setAttribute('aria-valuemin', '0');
+    this.setAttribute('aria-valuemax', String(this._max));
+    this.setAttribute('aria-valuenow', String(this._value));
+    this.setAttribute('aria-valuetext', currentValueText);
+    this.setAttribute('aria-orientation', 'horizontal');
+    this.setAttribute('aria-disabled', this._disabled ? 'true' : 'false');
+    this.setAttribute('aria-readonly', this._readonly ? 'true' : 'false');
 
     this._stars.forEach((star, index) => {
-      const checked = index + 1 === this._value;
-      star.setAttribute("aria-checked", checked ? "true" : "false");
-      star.tabIndex = this._disabled || this._readonly ? -1 : 0;
+      const starNumber = index + 1;
+      const fill = this._getFillPercent(starNumber, this._hoverValue > 0 ? this._hoverValue : this._value);
+
+      star.setAttribute('role', 'presentation');
+      star.setAttribute('tabindex', '-1');
+      star.setAttribute('aria-hidden', 'true');
+      star.setAttribute('aria-checked', 'false');
+
+      const labelValue = this._precision === 0.5
+        ? `${index + 0.5} to ${index + 1}`
+        : `${index + 1}`;
+
+      star.setAttribute('data-fill', String(fill));
+      star.setAttribute('data-star-value', String(starNumber));
+      star.setAttribute('aria-label', `${labelValue}`);
     });
   }
 
@@ -700,146 +793,137 @@ export class UIRating extends ElementBase {
         detail: {
           value: this._value,
           max: this._max,
+          precision: this._precision,
           disabled: this._disabled,
-          readonly: this._readonly,
+          readonly: this._readonly
         },
         bubbles: true,
-        composed: true,
-      }),
+        composed: true
+      })
     );
   }
 
   protected render() {
-    const disabled = readHostBoolean(this, "disabled");
-    const readonly = readHostBoolean(this, "readonly");
-    const variant = toVariant(readHostString(this, "variant"));
-    const size = toSize(readHostString(this, "size"));
-    const theme = readHostString(this, "theme");
-    const tone = toTone(readHostString(this, "tone"));
-    const state = toState(readHostString(this, "state"));
-    const animation = toAnimation(readHostString(this, "animation"));
-    const shape = toShape(readHostString(this, "shape"));
-    const radius = toRadius(readHostString(this, "radius"));
-    const ariaLabel = readHostString(this, "aria-label");
-    const ariaLabelledBy = readHostString(this, "aria-labelledby");
-    const ariaDescribedBy = readHostString(this, "aria-describedby");
-    const label = readHostString(this, "label");
-    const showValue = readHostBoolean(this, "show-value");
+    const disabled = readHostBoolean(this, 'disabled');
+    const readonly = readHostBoolean(this, 'readonly');
+    const variant = toVariant(readHostString(this, 'variant'));
+    const size = toSize(readHostString(this, 'size'));
+    const theme = readHostString(this, 'theme');
+    const tone = toTone(readHostString(this, 'tone'));
+    const state = toState(readHostString(this, 'state'));
+    const animation = toAnimation(readHostString(this, 'animation'));
+    const shape = toShape(readHostString(this, 'shape'));
+    const radius = toRadius(readHostString(this, 'radius'));
+    const precision = toPrecision(readHostString(this, 'precision'));
+    const ariaLabel = readHostString(this, 'aria-label');
+    const ariaLabelledBy = readHostString(this, 'aria-labelledby');
+    const ariaDescribedBy = readHostString(this, 'aria-describedby');
+    const label = readHostString(this, 'label');
+    const showValue = readHostBoolean(this, 'show-value');
 
-    const rawValue = readHostString(this, "value");
-    const rawMax = readHostString(this, "max");
+    const rawValue = readHostString(this, 'value');
+    const rawMax = readHostString(this, 'max');
 
     this._max = Math.max(1, Number(rawMax) || 5);
-    this._value = Math.max(0, Math.min(this._max, Number(rawValue) || 0));
+    this._precision = precision;
+    this._value = clamp(roundToStep(Number(rawValue) || 0, this._precision), 0, this._max);
     this._disabled = disabled;
     this._readonly = readonly;
 
-    if (animation) this.setAttribute("data-animation", animation);
-    else this.removeAttribute("data-animation");
+    if (animation) this.setAttribute('data-animation', animation);
+    else this.removeAttribute('data-animation');
 
-    if (theme === "dark" || theme === "brand")
-      this.setAttribute("theme", theme);
-    else this.removeAttribute("theme");
+    if (theme === 'dark' || theme === 'brand') this.setAttribute('theme', theme);
+    else this.removeAttribute('theme');
 
-    if (tone) this.setAttribute("tone", tone);
-    else this.removeAttribute("tone");
+    if (tone) this.setAttribute('tone', tone);
+    else this.removeAttribute('tone');
 
-    if (state === "disabled") this.setAttribute("state", "disabled");
-    else if (state !== "idle") this.setAttribute("state", state);
-    else this.removeAttribute("state");
+    if (state === 'disabled') this.setAttribute('state', 'disabled');
+    else if (state !== 'idle') this.setAttribute('state', state);
+    else this.removeAttribute('state');
 
-    if (shape === "square" || shape === "pill")
-      this.setAttribute("shape", shape);
-    else this.removeAttribute("shape");
+    if (shape === 'square' || shape === 'pill') this.setAttribute('shape', shape);
+    else this.removeAttribute('shape');
 
-    if (variant === "default") this.removeAttribute("variant");
-    else this.setAttribute("variant", variant);
+    if (variant === 'default') this.removeAttribute('variant');
+    else this.setAttribute('variant', variant);
 
-    if (size === "md") this.removeAttribute("size");
-    else this.setAttribute("size", size);
+    if (size === 'md') this.removeAttribute('size');
+    else this.setAttribute('size', size);
 
-    if (radius) {
-      this.style.setProperty("--ui-rating-radius", radius);
-    } else {
-      this.style.removeProperty("--ui-rating-radius");
-    }
+    if (radius) this.style.setProperty('--ui-rating-radius', radius);
+    else this.style.removeProperty('--ui-rating-radius');
 
-    const starsHtml = Array.from({ length: this._max }, (_, index) => {
-      const isActive = index < this._value;
-      const starState = this._disabled ? "disabled" : isActive ? "active" : "";
+    this.setAttribute('precision', String(this._precision));
 
-      const tabIndex = this._disabled || this._readonly ? "-1" : "0";
-      const ariaChecked = index + 1 === this._value ? "true" : "false";
+    const starsHtml = Array.from({ length: this._max }, (_, index) => `
+      <button
+        type="button"
+        class="star"
+        tabindex="-1"
+        data-index="${index}"
+        part="star"
+        style="--fill-percent: 0%;"
+      >
+        <span class="star-icon">
+          <span class="star-base">${createStarSVG()}</span>
+          <span class="star-fill">
+            <span class="star-fill-clip">
+              ${createStarSVG('star-fill-svg')}
+            </span>
+          </span>
+        </span>
+      </button>
+    `).join('');
 
-      return `
-        <button
-          type="button"
-          class="star"
-          role="radio"
-          aria-checked="${ariaChecked}"
-          aria-label="${index + 1} of ${this._max}"
-          tabindex="${tabIndex}"
-          data-index="${index}"
-          ${starState ? `data-state="${starState}"` : ""}
-          part="star"
-        >
-          ${createStarSVG()}
-        </button>
-      `;
-    }).join("");
-
-    const valueText = showValue ? `${this._value} / ${this._max}` : "";
+    const valueText = showValue ? `${this._formatValue(this._value)} / ${this._max}` : '';
 
     this.setContent(`
       <style>${style}</style>
       <div
         class="stars"
         part="stars"
-        role="radiogroup"
-        ${ariaLabelledBy ? `aria-labelledby="${escapeHtml(ariaLabelledBy)}"` : ""}
-        ${ariaDescribedBy ? `aria-describedby="${escapeHtml(ariaDescribedBy)}"` : ""}
+        aria-hidden="true"
       >
         ${starsHtml}
-        ${ariaLabel ? `<span class="sr-only">${escapeHtml(ariaLabel)}</span>` : ""}
       </div>
       ${
         label || showValue
           ? `
             <div class="label" part="label">
-              ${label ? `<span class="label-text">${escapeHtml(label)}</span>` : ""}
-              ${showValue ? `<span class="value">${escapeHtml(valueText)}</span>` : ""}
+              ${label ? `<span class="label-text">${escapeHtml(label)}</span>` : ''}
+              ${showValue ? `<span class="value">${escapeHtml(valueText)}</span>` : ''}
             </div>
           `
-          : ""
+          : ''
       }
     `);
 
     queueMicrotask(() => {
-      this._stars = Array.from(
-        this.root.querySelectorAll(".star"),
-      ) as HTMLButtonElement[];
+      this._stars = Array.from(this.root.querySelectorAll('.star')) as HTMLButtonElement[];
       this._syncStars();
     });
 
-    if (ariaLabel) this.setAttribute("aria-label", ariaLabel);
-    else this.removeAttribute("aria-label");
+    if (ariaLabel) this.setAttribute('aria-label', ariaLabel);
+    else this.removeAttribute('aria-label');
 
-    if (ariaLabelledBy) this.setAttribute("aria-labelledby", ariaLabelledBy);
-    else this.removeAttribute("aria-labelledby");
+    if (ariaLabelledBy) this.setAttribute('aria-labelledby', ariaLabelledBy);
+    else this.removeAttribute('aria-labelledby');
 
-    if (ariaDescribedBy) this.setAttribute("aria-describedby", ariaDescribedBy);
-    else this.removeAttribute("aria-describedby");
+    if (ariaDescribedBy) this.setAttribute('aria-describedby', ariaDescribedBy);
+    else this.removeAttribute('aria-describedby');
 
-    if (this._disabled) this.setAttribute("disabled", "");
-    else this.removeAttribute("disabled");
+    if (this._disabled) this.setAttribute('disabled', '');
+    else this.removeAttribute('disabled');
 
-    if (this._readonly) this.setAttribute("readonly", "");
-    else this.removeAttribute("readonly");
+    if (this._readonly) this.setAttribute('readonly', '');
+    else this.removeAttribute('readonly');
 
     this._syncAria();
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("ui-rating")) {
-  customElements.define("ui-rating", UIRating);
+if (typeof customElements !== 'undefined' && !customElements.get('ui-rating')) {
+  customElements.define('ui-rating', UIRating);
 }

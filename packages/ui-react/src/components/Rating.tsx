@@ -11,6 +11,7 @@ const useIsomorphicLayoutEffect =
 export type RatingChangeEvent = {
   value: number;
   max: number;
+  precision: number;
   disabled: boolean;
   readonly: boolean;
 };
@@ -21,6 +22,7 @@ export type RatingProps = Omit<
 > & {
   value?: number;
   max?: number;
+  precision?: 1 | 0.5;
   disabled?: boolean;
   readonly?: boolean;
   variant?: "default" | "soft" | "glass" | "contrast" | "minimal";
@@ -44,6 +46,7 @@ const RatingRoot = React.forwardRef<HTMLElement, RatingProps>(
     {
       value,
       max,
+      precision,
       disabled,
       readonly,
       variant,
@@ -75,13 +78,10 @@ const RatingRoot = React.forwardRef<HTMLElement, RatingProps>(
 
       const handleChange = (event: Event) => {
         const detail = (event as CustomEvent<RatingChangeEvent>).detail;
-        if (detail) {
-          onChange?.(detail);
-        }
+        if (detail) onChange?.(detail);
       };
 
       el.addEventListener("change", handleChange as EventListener);
-
       return () => {
         el.removeEventListener("change", handleChange as EventListener);
       };
@@ -111,14 +111,17 @@ const RatingRoot = React.forwardRef<HTMLElement, RatingProps>(
 
       const finalValue = value ?? 0;
       const finalMax = max ?? 5;
+      const finalPrecision = precision ?? 1;
 
       syncProp("value", finalValue);
       syncProp("max", finalMax);
+      syncProp("precision", finalPrecision);
       syncProp("disabled", !!disabled);
       syncProp("readonly", !!readonly);
 
       syncAttr("value", String(finalValue));
       syncAttr("max", String(finalMax));
+      syncAttr("precision", String(finalPrecision));
       syncBool("disabled", disabled);
       syncBool("readonly", readonly);
 
@@ -145,6 +148,7 @@ const RatingRoot = React.forwardRef<HTMLElement, RatingProps>(
     }, [
       value,
       max,
+      precision,
       disabled,
       readonly,
       variant,
@@ -162,14 +166,7 @@ const RatingRoot = React.forwardRef<HTMLElement, RatingProps>(
       showValue,
     ]);
 
-    return React.createElement(
-      "ui-rating",
-      {
-        ref,
-        ...rest,
-      },
-      children,
-    );
+    return React.createElement("ui-rating", { ref, ...rest }, children);
   },
 );
 
