@@ -117,6 +117,12 @@
       "require": "./dist/QuickActions.cjs.js",
       "default": "./dist/QuickActions.esm.js"
     },
+    "./Rating": {
+      "types": "./dist/Rating.d.ts",
+      "import": "./dist/Rating.esm.js",
+      "require": "./dist/Rating.cjs.js",
+      "default": "./dist/Rating.esm.js"
+    },
     "./Select": {
       "types": "./dist/Select.d.ts",
       "import": "./dist/Select.esm.js",

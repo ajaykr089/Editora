@@ -33,6 +33,7 @@ export { DateRangeTimePicker } from './DateRangeTimePicker';
 export { Gantt } from './Gantt';
 export { Stepper } from './Stepper';
 export { Wizard } from './Wizard';
+export { Rating } from './Rating';
 export { QuickActions } from './QuickActions';
 export type { QuickActionsActionProps, QuickActionSelectDetail } from './QuickActions';
 export {

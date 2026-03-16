@@ -41,6 +41,7 @@ export { DateRangeTimePicker } from './components/DateRangeTimePicker';
 export { Gantt } from './components/Gantt';
 export { Stepper } from './components/Stepper';
 export { Wizard } from './components/Wizard';
+export { Rating } from './components/Rating';
 export { QuickActions } from './components/QuickActions';
 export {
   NavigationMenu,

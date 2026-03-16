@@ -22,6 +22,7 @@ const refactoredComponents = [
   "Menubar",
   "Popover",
   "QuickActions",
+  "Rating",
   "Select",
   "SelectionPopup",
   "Sidebar",
