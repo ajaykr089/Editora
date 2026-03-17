@@ -1,12 +1,14 @@
 ---
 title: Breadcrumb
-description: Hierarchical navigation trail with collapse logic, visual variants, and keyboard-friendly selection.
+description: Hierarchical navigation trail with composed React sub-components, collapse logic, visual variants, and keyboard-friendly selection.
 sidebar_label: Breadcrumb
 ---
 
 # Breadcrumb
 
-Use `Breadcrumb` to show the current path through a workspace, settings flow, or deep document hierarchy.
+Import the main `Breadcrumb` component and use its sub-components as properties. Use `Breadcrumb` to show the current path through a workspace, settings flow, or deep document hierarchy.
+
+## Basic Usage
 
 ```tsx
 import { Breadcrumb } from '@editora/ui-react';
@@ -30,6 +32,12 @@ function Example() {
 }
 ```
 
+## Composed Sub-Components
+
+All Breadcrumb sub-components are available as properties on the main Breadcrumb component:
+
+- `Breadcrumb.Item` - Individual breadcrumb item with optional links and labels
+
 ## Props
 
 | Prop | Type | Default | Description |
@@ -47,42 +55,10 @@ function Example() {
 | `ariaLabel` | `string` | `'Breadcrumb'` | Accessible label for the navigation landmark. |
 | `onSelect` | `(detail) => void` | - | Fired when a breadcrumb item is selected. |
 
-## Sub-components
-
-Use `Breadcrumb.Item` to render breadcrumb items:
+## Variants
 
 ```tsx
-<Breadcrumb currentIndex={2}>
-  <Breadcrumb.Item label="Workspace" index={0} href="/workspace">
-    Workspace
-  </Breadcrumb.Item>
-  <Breadcrumb.Item label="Programs" index={1} href="/workspace/programs">
-    Programs
-  </Breadcrumb.Item>
-  <Breadcrumb.Item label="Audit logs" index={2}>
-    Audit logs
-  </Breadcrumb.Item>
-</Breadcrumb>
-```
-
-Items can contain:
-
-- plain text
-- links
-- icon + label content
-- any custom content
-<Breadcrumb currentIndex={2}>
-  <a slot="item" href="/workspace">Workspace</a>
-  <a slot="item" href="/workspace/programs">Programs</a>
-  <span slot="item">Audit logs</span>
-</Breadcrumb>
-```
-
-Items can be:
-
-- plain text spans
-- links
-- icon + label content
+<Breadcrumb variant="surface" tone="neutral">
   <Breadcrumb.Item label="Home" index={0}>Home</Breadcrumb.Item>
   <Breadcrumb.Item label="Products" index={1}>Products</Breadcrumb.Item>
 </Breadcrumb>
@@ -100,9 +76,9 @@ Items can be:
 <Breadcrumb variant="outline" tone="warning">
   <Breadcrumb.Item label="Home" index={0}>Home</Breadcrumb.Item>
   <Breadcrumb.Item label="Products" index={1}>Products</Breadcrumb.Item>
-</BBreadcrumb.Item label="Workspace" index={0}>Workspace</Breadcrumb.Item>
-  <Breadcrumb.Item label="Programs" index={1}>Programs</Breadcrumb.Item>
-  <Breadcrumb.Item label="Audit logs" index={2}>Audit logs</Breadcrumb.Itemnger">
+</Breadcrumb>
+
+<Breadcrumb variant="ghost" tone="danger">
   <Breadcrumb.Item label="Home" index={0}>Home</Breadcrumb.Item>
   <Breadcrumb.Item label="Products" index={1}>Products</Breadcrumb.Item>
 </Breadcrumb>
@@ -110,13 +86,7 @@ Items can be:
 <Breadcrumb variant="minimal" tone="neutral">
   <Breadcrumb.Item label="Home" index={0}>Home</Breadcrumb.Item>
   <Breadcrumb.Item label="Products" index={1}>Products</Breadcrumb.Item>
-
-<Breadcrumb variant="surface" tone="neutral">...</Breadcrumb>
-<Breadcrumb variant="soft" tone="info">...</Breadcrumb>
-<Breadcrumb variant="solid" tone="success" elevation="low">...</Breadcrumb>
-<Breadcrumb variant="outline" tone="warning">...</Breadcrumb>
-<Breadcrumb variant="ghost" tone="danger">...</Breadcrumb>
-<Breadcrumb variant="minimal" tone="neutral">...</Breadcrumb>
+</Breadcrumb>
 ```
 
 ## Selection
@@ -129,8 +99,8 @@ Items can be:
     console.log(detail.index, detail.label, detail.source);
   }}
 >
-  <span slot="item">Workspace</span>
-  <span slot="item">Programs</span>
-  <span slot="item">Audit logs</span>
+  <Breadcrumb.Item label="Workspace" index={0}>Workspace</Breadcrumb.Item>
+  <Breadcrumb.Item label="Programs" index={1}>Programs</Breadcrumb.Item>
+  <Breadcrumb.Item label="Audit logs" index={2}>Audit logs</Breadcrumb.Item>
 </Breadcrumb>
 ```

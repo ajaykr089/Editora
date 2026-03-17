@@ -72,8 +72,8 @@ import { Input } from '@editora/ui-react';
 | `autofocus` | `boolean` | `false` | Focuses the field on mount |
 | `disabled` | `boolean` | `false` | Disables the field |
 | `size` | `'sm' \| 'md' \| 'lg' \| '1' \| '2' \| '3'` | `'md'` | Input size |
-| `variant` | see [interactive/input](/ui-react/interactive/input) | `'classic'` | Visual style |
-| `tone` | see [interactive/input](/ui-react/interactive/input) | `'default'` | Color tone |
+| `variant` | `'classic'` | Visual style |
+| `tone` | `'default'` | Color tone |
 | `density` | `'default' \| 'compact' \| 'comfortable'` | `'default'` | Vertical spacing |
 | `shape` | `'default' \| 'square' \| 'soft'` | `'default'` | Border-radius preset |
 | `radius` | `'none' \| 'large' \| 'full' \| string` | — | Custom border-radius override |
