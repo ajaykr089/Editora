@@ -1,6 +1,16 @@
-import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 export type WizardChangeDetail = {
   index: number;
@@ -17,17 +27,26 @@ export type WizardBeforeChangeDetail = {
   trigger: string;
 };
 
+export type WizardBlockedNextDetail = {
+  reason: "validation" | "disabled" | "linear" | "busy" | "bounds";
+  currentIndex: number;
+  nextIndex: number;
+  currentValue: string;
+  nextValue: string;
+};
+
 export type WizardProps = React.HTMLAttributes<HTMLElement> & {
   value?: string;
   linear?: boolean;
   showStepper?: boolean;
-  stepperPosition?: 'top' | 'bottom';
+  stepperPosition?: "top" | "bottom";
   hideControls?: boolean;
   keepMounted?: boolean;
-  variant?: 'default' | 'soft' | 'glass' | 'flat' | 'contrast' | 'minimal';
-  orientation?: 'horizontal' | 'vertical';
-  density?: 'default' | 'compact' | 'comfortable';
-  shape?: 'rounded' | 'square' | 'pill';
+  lazyMount?: boolean;
+  variant?: "default" | "soft" | "glass" | "flat" | "contrast" | "minimal";
+  orientation?: "horizontal" | "vertical";
+  density?: "default" | "compact" | "comfortable";
+  shape?: "rounded" | "square" | "pill";
   showProgress?: boolean;
   busy?: boolean;
   headless?: boolean;
@@ -40,186 +59,317 @@ export type WizardProps = React.HTMLAttributes<HTMLElement> & {
   onBeforeChange?: (detail: WizardBeforeChangeDetail) => boolean | void;
   onChange?: (detail: WizardChangeDetail) => void;
   onStepChange?: (detail: WizardChangeDetail) => void;
-  onComplete?: (detail: { index: number; value: string; title: string }) => void;
+  onBlockedNext?: (detail: WizardBlockedNextDetail) => void;
+  onComplete?: (detail: {
+    index: number;
+    value: string;
+    title: string;
+  }) => void;
 };
 
 export type WizardStepProps = React.HTMLAttributes<HTMLElement> & {
   value: string;
   title?: string;
   description?: string;
-  state?: 'default' | 'success' | 'warning' | 'error';
+  state?: "default" | "complete" | "success" | "warning" | "error";
   optional?: boolean;
+  disabled?: boolean;
+  invalid?: boolean;
   children?: React.ReactNode;
 };
 
-const WizardStepComponent = React.forwardRef<HTMLElement, WizardStepProps>(function WizardStep(
-  { children, value, title, description, state, optional, ...rest },
-  forwardedRef
-) {
-  const ref = useRef<HTMLElement | null>(null);
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+type WizardRuntime = {
+  activeValue?: string;
+  visited: Set<string>;
+  lazyMount: boolean;
+  keepMounted: boolean;
+};
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    el.setAttribute('data-value', value);
-    if (title) el.setAttribute('data-title', title);
-    if (description) el.setAttribute('data-description', description);
-    if (state && state !== 'default') el.setAttribute('data-state', state);
-    if (optional) el.setAttribute('data-optional', '');
-  }, [value, title, description, state, optional]);
-
-  return React.createElement('div', { ref, slot: 'step', ...rest }, children);
+const WizardRuntimeContext = createContext<WizardRuntime>({
+  activeValue: undefined,
+  visited: new Set<string>(),
+  lazyMount: false,
+  keepMounted: false,
 });
-WizardStepComponent.displayName = 'Wizard.Step';
 
-const WizardRoot = React.forwardRef<HTMLElement, WizardProps>(function WizardRoot(
-  {
-    value,
-    linear,
-    showStepper,
-    stepperPosition,
-    hideControls,
-    keepMounted,
-    variant,
-    orientation,
-    density,
-    shape,
-    showProgress,
-    busy,
-    headless,
-    title,
-    description,
-    emptyLabel,
-    nextLabel,
-    prevLabel,
-    finishLabel,
-    onBeforeChange,
-    onChange,
-    onStepChange,
-    onComplete,
-    children,
-    ...rest
+const WizardStepComponent = React.forwardRef<HTMLElement, WizardStepProps>(
+  function WizardStep(
+    {
+      children,
+      value,
+      title,
+      description,
+      state,
+      optional,
+      disabled,
+      invalid,
+      ...rest
+    },
+    forwardedRef,
+  ) {
+    const ref = useRef<HTMLElement | null>(null);
+    const runtime = useContext(WizardRuntimeContext);
+
+    useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+
+    useIsomorphicLayoutEffect(() => {
+      const el = ref.current;
+      if (!el) return;
+
+      el.setAttribute("data-value", value);
+
+      if (title) el.setAttribute("data-title", title);
+      else el.removeAttribute("data-title");
+
+      if (description) el.setAttribute("data-description", description);
+      else el.removeAttribute("data-description");
+
+      if (state && state !== "default") el.setAttribute("data-state", state);
+      else el.removeAttribute("data-state");
+
+      if (optional) el.setAttribute("data-optional", "");
+      else el.removeAttribute("data-optional");
+
+      if (disabled) el.setAttribute("disabled", "");
+      else el.removeAttribute("disabled");
+
+      if (invalid) el.setAttribute("data-invalid", "true");
+      else el.removeAttribute("data-invalid");
+    }, [value, title, description, state, optional, disabled, invalid]);
+
+    const isActive = runtime.activeValue === value;
+    const hasVisited = runtime.visited.has(value);
+
+    const shouldRenderChildren = !runtime.lazyMount || isActive || hasVisited;
+    const shouldKeepAfterVisit = runtime.keepMounted || runtime.lazyMount;
+
+    return React.createElement(
+      "div",
+      {
+        ...rest,
+        ref,
+        slot: "step",
+        "data-react-lazy-mounted":
+          shouldKeepAfterVisit && (isActive || hasVisited) ? "true" : "false",
+      },
+      shouldRenderChildren ? children : null,
+    );
   },
-  forwardedRef
-) {
-  const ref = useRef<HTMLElement | null>(null);
+);
 
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+WizardStepComponent.displayName = "Wizard.Step";
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+const WizardRoot = React.forwardRef<HTMLElement, WizardProps>(
+  function WizardRoot(
+    {
+      value,
+      linear,
+      showStepper,
+      stepperPosition,
+      hideControls,
+      keepMounted,
+      lazyMount,
+      variant,
+      orientation,
+      density,
+      shape,
+      showProgress,
+      busy,
+      headless,
+      title,
+      description,
+      emptyLabel,
+      nextLabel,
+      prevLabel,
+      finishLabel,
+      onBeforeChange,
+      onChange,
+      onStepChange,
+      onBlockedNext,
+      onComplete,
+      children,
+      ...rest
+    },
+    forwardedRef,
+  ) {
+    const ref = useRef<HTMLElement | null>(null);
+    const [visited, setVisited] = useState<Set<string>>(
+      () => new Set(value ? [value] : []),
+    );
 
-    const handleBefore = (event: Event) => {
-      if (!onBeforeChange) return;
-      const detail = (event as CustomEvent<WizardBeforeChangeDetail>).detail;
-      const result = onBeforeChange(detail);
-      if (result === false) event.preventDefault();
-    };
+    useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
-    const handleChange = (event: Event) => {
-      const detail = (event as CustomEvent<WizardChangeDetail>).detail;
-      if (!detail) return;
-      onChange?.(detail);
-    };
+    useEffect(() => {
+      if (!value) return;
+      setVisited((prev) => {
+        if (prev.has(value)) return prev;
+        const next = new Set(prev);
+        next.add(value);
+        return next;
+      });
+    }, [value]);
 
-    const handleStepChange = (event: Event) => {
-      const detail = (event as CustomEvent<WizardChangeDetail>).detail;
-      if (!detail) return;
-      onStepChange?.(detail);
-    };
+    useEffect(() => {
+      const el = ref.current;
+      if (!el) return;
 
-    const handleComplete = (event: Event) => {
-      const detail = (event as CustomEvent<{ index: number; value: string; title: string }>).detail;
-      if (detail) onComplete?.(detail);
-    };
+      const handleBefore = (event: Event) => {
+        if (!onBeforeChange) return;
+        const detail = (event as CustomEvent<WizardBeforeChangeDetail>).detail;
+        const result = onBeforeChange(detail);
+        if (result === false) event.preventDefault();
+      };
 
-    el.addEventListener('before-change', handleBefore as EventListener);
-    el.addEventListener('change', handleChange as EventListener);
-    el.addEventListener('step-change', handleStepChange as EventListener);
-    el.addEventListener('complete', handleComplete as EventListener);
+      const handleChange = (event: Event) => {
+        const detail = (event as CustomEvent<WizardChangeDetail>).detail;
+        if (!detail) return;
 
-    return () => {
-      el.removeEventListener('before-change', handleBefore as EventListener);
-      el.removeEventListener('change', handleChange as EventListener);
-      el.removeEventListener('step-change', handleStepChange as EventListener);
-      el.removeEventListener('complete', handleComplete as EventListener);
-    };
-  }, [onBeforeChange, onChange, onStepChange, onComplete]);
+        setVisited((prev) => {
+          if (prev.has(detail.value)) return prev;
+          const next = new Set(prev);
+          next.add(detail.value);
+          return next;
+        });
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+        onChange?.(detail);
+      };
 
-    const syncAttr = (name: string, next: string | null) => {
-      const current = el.getAttribute(name);
-      if (next == null) {
-        if (current != null) el.removeAttribute(name);
-        return;
-      }
-      if (current !== next) el.setAttribute(name, next);
-    };
+      const handleStepChange = (event: Event) => {
+        const detail = (event as CustomEvent<WizardChangeDetail>).detail;
+        if (!detail) return;
+        onStepChange?.(detail);
+      };
 
-    const syncBool = (name: string, enabled: boolean | undefined, defaultValue?: boolean) => {
-      if (typeof enabled === 'boolean') {
-        if (enabled) syncAttr(name, '');
-        else syncAttr(name, null);
-        return;
-      }
-      if (defaultValue !== undefined) {
-        if (defaultValue) syncAttr(name, '');
-        else syncAttr(name, null);
-      }
-    };
+      const handleBlockedNext = (event: Event) => {
+        const detail = (event as CustomEvent<WizardBlockedNextDetail>).detail;
+        if (!detail) return;
+        onBlockedNext?.(detail);
+      };
 
-    syncAttr('value', value || null);
-    syncBool('linear', linear);
-    if (typeof showStepper === 'boolean') syncAttr('show-stepper', showStepper ? 'true' : 'false');
-    else syncAttr('show-stepper', null);
-    syncAttr('stepper-position', stepperPosition && stepperPosition !== 'top' ? stepperPosition : null);
-    syncBool('hide-controls', hideControls);
-    syncBool('keep-mounted', keepMounted);
-    syncAttr('variant', variant && variant !== 'default' ? variant : null);
-    syncAttr('orientation', orientation && orientation !== 'horizontal' ? orientation : null);
-    syncAttr('density', density && density !== 'default' ? density : null);
-    syncAttr('shape', shape && shape !== 'rounded' ? shape : null);
-    if (typeof showProgress === 'boolean') syncAttr('show-progress', showProgress ? 'true' : 'false');
-    else syncAttr('show-progress', null);
-    syncBool('busy', busy);
-    syncBool('headless', headless);
-    syncAttr('title', title || null);
-    syncAttr('description', description || null);
-    syncAttr('empty-label', emptyLabel || null);
-    syncAttr('next-label', nextLabel || null);
-    syncAttr('prev-label', prevLabel || null);
-    syncAttr('finish-label', finishLabel || null);
-  }, [
-    value,
-    linear,
-    showStepper,
-    stepperPosition,
-    hideControls,
-    keepMounted,
-    variant,
-    orientation,
-    density,
-    shape,
-    showProgress,
-    busy,
-    headless,
-    title,
-    description,
-    emptyLabel,
-    nextLabel,
-    prevLabel,
-    finishLabel
-  ]);
+      const handleComplete = (event: Event) => {
+        const detail = (
+          event as CustomEvent<{ index: number; value: string; title: string }>
+        ).detail;
+        if (detail) onComplete?.(detail);
+      };
 
-  return React.createElement('ui-wizard', { ref, ...rest }, children);
-});
+      el.addEventListener("before-change", handleBefore as EventListener);
+      el.addEventListener("change", handleChange as EventListener);
+      el.addEventListener("step-change", handleStepChange as EventListener);
+      el.addEventListener("blocked-next", handleBlockedNext as EventListener);
+      el.addEventListener("complete", handleComplete as EventListener);
 
-WizardRoot.displayName = 'Wizard';
+      return () => {
+        el.removeEventListener("before-change", handleBefore as EventListener);
+        el.removeEventListener("change", handleChange as EventListener);
+        el.removeEventListener(
+          "step-change",
+          handleStepChange as EventListener,
+        );
+        el.removeEventListener(
+          "blocked-next",
+          handleBlockedNext as EventListener,
+        );
+        el.removeEventListener("complete", handleComplete as EventListener);
+      };
+    }, [onBeforeChange, onChange, onStepChange, onBlockedNext, onComplete]);
+
+    useIsomorphicLayoutEffect(() => {
+      const el = ref.current;
+      if (!el) return;
+
+      const syncAttr = (name: string, next: string | null) => {
+        const current = el.getAttribute(name);
+        if (next == null) {
+          if (current != null) el.removeAttribute(name);
+          return;
+        }
+        if (current !== next) el.setAttribute(name, next);
+      };
+
+      const syncBool = (name: string, enabled: boolean | undefined) => {
+        if (typeof enabled === "boolean") {
+          if (enabled) syncAttr(name, "");
+          else syncAttr(name, null);
+        }
+      };
+
+      syncAttr("value", value || null);
+      syncBool("linear", linear);
+
+      if (typeof showStepper === "boolean")
+        syncAttr("show-stepper", showStepper ? "true" : "false");
+      else syncAttr("show-stepper", null);
+
+      syncAttr(
+        "stepper-position",
+        stepperPosition && stepperPosition !== "top" ? stepperPosition : null,
+      );
+      syncBool("hide-controls", hideControls);
+      syncBool("keep-mounted", keepMounted);
+      syncBool("lazy-mount", lazyMount);
+
+      syncAttr("variant", variant && variant !== "default" ? variant : null);
+      syncAttr(
+        "orientation",
+        orientation && orientation !== "horizontal" ? orientation : null,
+      );
+      syncAttr("density", density && density !== "default" ? density : null);
+      syncAttr("shape", shape && shape !== "rounded" ? shape : null);
+
+      if (typeof showProgress === "boolean")
+        syncAttr("show-progress", showProgress ? "true" : "false");
+      else syncAttr("show-progress", null);
+
+      syncBool("busy", busy);
+      syncBool("headless", headless);
+      syncAttr("title", title || null);
+      syncAttr("description", description || null);
+      syncAttr("empty-label", emptyLabel || null);
+      syncAttr("next-label", nextLabel || null);
+      syncAttr("prev-label", prevLabel || null);
+      syncAttr("finish-label", finishLabel || null);
+    }, [
+      value,
+      linear,
+      showStepper,
+      stepperPosition,
+      hideControls,
+      keepMounted,
+      lazyMount,
+      variant,
+      orientation,
+      density,
+      shape,
+      showProgress,
+      busy,
+      headless,
+      title,
+      description,
+      emptyLabel,
+      nextLabel,
+      prevLabel,
+      finishLabel,
+    ]);
+
+    const runtimeValue = useMemo<WizardRuntime>(() => {
+      return {
+        activeValue: value,
+        visited,
+        lazyMount: Boolean(lazyMount),
+        keepMounted: Boolean(keepMounted),
+      };
+    }, [value, visited, lazyMount, keepMounted]);
+
+    return (
+      <WizardRuntimeContext.Provider value={runtimeValue}>
+        {React.createElement("ui-wizard", { ref, ...rest }, children)}
+      </WizardRuntimeContext.Provider>
+    );
+  },
+);
+
+WizardRoot.displayName = "Wizard";
 
 export const Wizard = Object.assign(WizardRoot, {
   Step: WizardStepComponent,
