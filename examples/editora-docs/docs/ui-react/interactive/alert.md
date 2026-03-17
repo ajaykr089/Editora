@@ -1,19 +1,17 @@
 ---
 title: Alert
-description: Alert component for displaying important messages with customizable appearance, animations, and accessibility support.
+description: Token-backed alert surface with composed React sub-components for inline and banner notifications.
 sidebar_label: Alert
 ---
 
 # Alert
 
-The `Alert` component provides important messages with support for custom styling, comprehensive accessibility features, and smooth animations for enhanced user experience.
-
-Import `Alert`, `AlertTitle`, `AlertDescription`, `AlertActions`, and `AlertIcon` together when you want a structured message layout.
+Import the main `Alert` component and use its sub-components as properties. The `Alert` component provides important messages with support for custom styling, comprehensive accessibility features, and smooth animations for enhanced user experience.
 
 ## Basic Usage
 
 ```tsx
-import { Alert } from '@editora/ui-react';
+import { Alert, Button } from '@editora/ui-react';
 
 function BasicAlert() {
   return (
@@ -43,22 +41,35 @@ function BasicAlert() {
 | `onClose` | `() => void` | - | Close handler |
 | `children` | `React.ReactNode` | - | Alert content |
 
+## Composed Sub-Components
+
+All Alert sub-components are available as properties on the main Alert component:
+
+- `Alert.Icon` - Alert icon slot
+- `Alert.Title` - Alert title slot
+- `Alert.Description` - Alert description slot
+- `Alert.Actions` - Alert actions slot
+
 ## Structured Composition
 
 ```tsx
-import { Alert, AlertActions, AlertDescription, AlertTitle } from '@editora/ui-react';
+import { Alert, Button } from '@editora/ui-react';
 
 function StructuredAlert() {
   return (
     <Alert tone="info" variant="surface" radius={12}>
-      <AlertTitle>Deployment notice</AlertTitle>
-      <AlertDescription>
+      <Alert.Title>Deployment notice</Alert.Title>
+      <Alert.Description>
         Production rollout windows have shifted by 20 minutes for the eu-west cluster.
-      </AlertDescription>
-      <AlertActions>
-        <button type="button">Review plan</button>
-        <button type="button">Acknowledge</button>
-      </AlertActions>
+      </Alert.Description>
+      <Alert.Actions>
+        <Button size="sm" recipe="soft" variant="secondary">
+          Review plan
+        </Button>
+        <Button size="sm" recipe="soft" variant="secondary">
+          Acknowledge
+        </Button>
+      </Alert.Actions>
     </Alert>
   );
 }

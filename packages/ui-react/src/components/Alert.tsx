@@ -24,7 +24,7 @@ export interface AlertSectionProps extends React.HTMLAttributes<HTMLElement> {
   children?: React.ReactNode;
 }
 
-export function Alert(props: AlertProps) {
+function Alert(props: AlertProps) {
   const {
     title,
     description,
@@ -120,9 +120,25 @@ function createAlertSection(
   return Component;
 }
 
-export const AlertIcon = createAlertSection('span', 'AlertIcon', 'icon', 'data-ui-alert-icon');
-export const AlertTitle = createAlertSection('div', 'AlertTitle', 'title', 'data-ui-alert-title');
-export const AlertDescription = createAlertSection('div', 'AlertDescription', undefined, 'data-ui-alert-description');
-export const AlertActions = createAlertSection('div', 'AlertActions', 'actions', 'data-ui-alert-actions');
+const AlertIcon = createAlertSection('span', 'AlertIcon', 'icon', 'data-ui-alert-icon');
+const AlertTitle = createAlertSection('div', 'AlertTitle', 'title', 'data-ui-alert-title');
+const AlertDescription = createAlertSection('div', 'AlertDescription', undefined, 'data-ui-alert-description');
+const AlertActions = createAlertSection('div', 'AlertActions', 'actions', 'data-ui-alert-actions');
 
-export default Alert;
+// Create composed component with sub-components as properties
+const ComposedAlert = Object.assign(Alert, {
+  Icon: AlertIcon,
+  Title: AlertTitle,
+  Description: AlertDescription,
+  Actions: AlertActions,
+  displayName: 'Alert',
+}) as typeof Alert & {
+  Icon: typeof AlertIcon;
+  Title: typeof AlertTitle;
+  Description: typeof AlertDescription;
+  Actions: typeof AlertActions;
+  displayName: string;
+};
+
+export { ComposedAlert as Alert, AlertIcon, AlertTitle, AlertDescription, AlertActions };
+export default ComposedAlert;

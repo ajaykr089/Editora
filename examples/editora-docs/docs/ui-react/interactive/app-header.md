@@ -1,52 +1,44 @@
 ---
 title: AppHeader
-description: Application header shell for product branding, workspace context, and action rails.
+description: Application header shell with composed React sub-components for product branding, workspace context, and action rails.
 sidebar_label: AppHeader
 ---
 
 # AppHeader
 
-`AppHeader` is a token-backed application shell for product branding, workspace titles, status context, and fast actions. It supports the same baseline visual model used across the newer surfaces in `ui-react`: `variant`, `tone`, `size`, `radius`, and `elevation`.
+Import the main `AppHeader` component and use its sub-components as properties. `AppHeader` is a token-backed application shell for product branding, workspace titles, status context, and fast actions. It supports the same baseline visual model used across the newer surfaces in `ui-react`: `variant`, `tone`, `size`, `radius`, and `elevation`.
 
 ## Basic usage
 
 ```tsx
-import {
-  AppHeader,
-  AppHeaderCenter,
-  AppHeaderEnd,
-  AppHeaderStart,
-  AppHeaderSubtitle,
-  AppHeaderTitle,
-  Button,
-} from '@editora/ui-react';
+import { AppHeader, Button } from '@editora/ui-react';
 
 function WorkspaceHeader() {
   return (
     <AppHeader bordered showMenuButton variant="surface" radius={12}>
-      <AppHeaderStart>Acme Health</AppHeaderStart>
-      <AppHeaderCenter>Live monitoring</AppHeaderCenter>
-      <AppHeaderTitle>Clinical Command Center</AppHeaderTitle>
-      <AppHeaderSubtitle>North campus · Shift A</AppHeaderSubtitle>
-      <AppHeaderEnd>
+      <AppHeader.Start>Acme Health</AppHeader.Start>
+      <AppHeader.Center>Live monitoring</AppHeader.Center>
+      <AppHeader.Title>Clinical Command Center</AppHeader.Title>
+      <AppHeader.Subtitle>North campus · Shift A</AppHeader.Subtitle>
+      <AppHeader.End>
         <Button size="sm" recipe="soft" variant="secondary">
           Search
         </Button>
-      </AppHeaderEnd>
+      </AppHeader.End>
     </AppHeader>
   );
 }
 ```
 
-## Structured sections
+## Composed Sub-Components
 
-Use the helper components to target the built-in slots directly:
+All AppHeader sub-components are available as properties on the main AppHeader component:
 
-- `AppHeaderStart`
-- `AppHeaderCenter`
-- `AppHeaderTitle`
-- `AppHeaderSubtitle`
-- `AppHeaderEnd`
+- `AppHeader.Start` - Product branding and navigation
+- `AppHeader.Center` - Workspace context and status
+- `AppHeader.Title` - Primary workspace title
+- `AppHeader.Subtitle` - Secondary context information
+- `AppHeader.End` - Action buttons and controls
 
 ## Props
 
@@ -94,13 +86,13 @@ function ShellHeader() {
       bordered
       onMenuTrigger={() => setDrawerOpen(true)}
     >
-      <AppHeaderStart>Editora Ops</AppHeaderStart>
-      <AppHeaderTitle>Operations Center</AppHeaderTitle>
-      <AppHeaderEnd>
+      <AppHeader.Start>Editora Ops</AppHeader.Start>
+      <AppHeader.Title>Operations Center</AppHeader.Title>
+      <AppHeader.End>
         <Button size="sm" recipe="soft" variant="secondary">
           Search
         </Button>
-      </AppHeaderEnd>
+      </AppHeader.End>
     </AppHeader>
   );
 }
