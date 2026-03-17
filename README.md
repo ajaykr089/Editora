@@ -26,13 +26,13 @@ The **best free rich text editor** with enterprise-grade features. A comprehensi
 ### CLI Quick Add
 
 ```bash
-npx editora add button
-npx editora add modal
-npx editora add datatable
-npx editora add editor
-npx editora add toast
-npx editora add accordion
-npx editora add ui-select
+npx @editora/cli add button
+npx @editora/cli add modal
+npx @editora/cli add datatable
+npx @editora/cli add editor
+npx @editora/cli add toast
+npx @editora/cli add accordion
+npx @editora/cli add ui-select
 ```
 
 ## 🚀 Why Editora? (Free Premium Features)

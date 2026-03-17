@@ -40,7 +40,7 @@ import { Select } from '@editora/ui-react/Select';
 
 `value`, `onChange`, `onInput`, `onValueChange`, `placeholder`, `name`, `label`, `description`, `error`, `required`, `disabled`, `loading`, `invalid`, `validation`, `size`, `variant`, `tone`, `density`, `shape`, `elevation`, `radius`, `optionBorder`, `showCheck`, `checkPlacement`, `headless`
 
-See [form-inputs/select](/ui-react/form-inputs/select) for the full props table.
+See the Props section below for the full props table.
 
 ## Notes
 

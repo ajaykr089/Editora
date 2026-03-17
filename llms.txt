@@ -38,9 +38,9 @@ Authoring rules for AI-generated snippets:
 5. Return runnable snippets with complete imports.
 
 CLI quick-add commands:
-- npx editora add button
-- npx editora add modal
-- npx editora add datatable
-- npx editora add editor
-- npx editora add toast
+- npx @editora/cli add button
+- npx @editora/cli add modal
+- npx @editora/cli add datatable
+- npx @editora/cli add editor
+- npx @editora/cli add toast
 - Supports all exported @editora/ui-react component names (for example: accordion, avatar, select, ui-date-picker).
