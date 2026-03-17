@@ -230,7 +230,7 @@ export function FAQPattern() {
         </Box>
         <Accordion collapsible variant="outline" radius={12} size="lg" tone="neutral" elevation="none">
           <Accordion.Item description="Deployment model and editor surface">
-            <Accordion.Trigger>Can teams use Editora in both React and plain web components?</AccordionTrigger>
+            <Accordion.Trigger>Can teams use Editora in both React and plain web components?</Accordion.Trigger>
             <Accordion.Panel>
               Yes. The system ships a custom-element core and React wrappers so product teams can adopt the same
               primitives across both integration styles.

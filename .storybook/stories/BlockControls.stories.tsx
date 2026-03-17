@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { BlockControls, Box, Button, Card, CardDescription, CardHeader, CardTitle, Flex, Grid } from '@editora/ui-react';
+import { BlockControls, Box, Button, Card, Flex, Grid } from '@editora/ui-react';
 import {
   AlignCenterIcon,
   AlignLeftIcon,
@@ -83,12 +83,12 @@ export const Playground: Story = {
   render: (args) => (
     <Grid style={{ gap: 16, maxInlineSize: 840 }}>
       <Card radius={16}>
-        <CardHeader>
-          <CardTitle>Block controls</CardTitle>
-          <CardDescription>
+        <Card.Header>
+          <Card.Title>Block controls</Card.Title>
+          <Card.Description>
             Token-backed command strip for editor controls, inline formatting actions, and contextual action groups.
-          </CardDescription>
-        </CardHeader>
+          </Card.Description>
+        </Card.Header>
         <Box slot="inset" style={{ padding: 16 }}>
           <DemoToolbar {...args} />
         </Box>
@@ -142,12 +142,12 @@ export const EditorialWorkflow: Story = {
     return (
       <Grid style={{ gap: 14, maxInlineSize: 980 }}>
         <Card radius={16}>
-          <CardHeader>
-            <CardTitle>Clinical note toolbar</CardTitle>
-            <CardDescription>
+          <Card.Header>
+            <Card.Title>Clinical note toolbar</Card.Title>
+            <Card.Description>
               Baseline-themed command strip for formatting, alignment, and AI-assisted note review.
-            </CardDescription>
-          </CardHeader>
+            </Card.Description>
+          </Card.Header>
 
           <Box slot="inset" style={{ padding: 16, display: 'grid', gap: 14 }}>
             <BlockControls

@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { createThemeTokens, type AccentPaletteName, type ThemeTokens } from '@editora/ui-core';
-import { Badge, Box, Button, Card, CardDescription, CardHeader, CardTitle, Flex, Grid, Select, ThemeProvider } from '@editora/ui-react';
+import { Badge, Box, Button, Card, Flex, Grid, Select, ThemeProvider } from '@editora/ui-react';
 
 const meta: Meta<typeof Select> = {
   title: 'UI/Select',
@@ -19,7 +19,7 @@ const meta: Meta<typeof Select> = {
     density: 'default',
     shape: 'rounded',
     elevation: 'low',
-    radius: 12,
+    radius: "4px",
     optionBorder: false,
     validation: 'none',
   },
@@ -319,12 +319,12 @@ export const Playground: Story = {
     return (
       <Grid style={{ gap: 16, maxInlineSize: 1040 }}>
         <Card radius={18}>
-          <CardHeader>
-            <CardTitle>Production select surface</CardTitle>
-            <CardDescription>
+          <Card.Header>
+            <Card.Title>Production select surface</Card.Title>
+            <Card.Description>
               Controlled wrapper around `ui-select` with theme-backed variants, sizing, validation, and option-surface styling.
-            </CardDescription>
-          </CardHeader>
+            </Card.Description>
+          </Card.Header>
           <Box slot="inset" style={{ padding: 16, display: 'grid', gap: 16 }}>
             <Box
               style={{

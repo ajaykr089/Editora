@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Box, Breadcrumb, Card, CardDescription, CardHeader, CardTitle, Flex, Grid } from '@editora/ui-react';
+import { Box, Breadcrumb, Card, Flex, Grid } from '@editora/ui-react';
 import { CheckCircleIcon, FolderIcon, HomeIcon, ShieldIcon, SparklesIcon } from '@editora/react-icons';
 
 const meta: Meta<typeof Breadcrumb> = {
@@ -42,12 +42,12 @@ export const Playground: Story = {
   render: (args) => (
     <Grid style={{ gap: 16, maxInlineSize: 860 }}>
       <Card radius={16}>
-        <CardHeader>
-          <CardTitle>Breadcrumb</CardTitle>
-          <CardDescription>
+        <Card.Header>
+          <Card.Title>Breadcrumb</Card.Title>
+          <Card.Description>
             Hierarchical navigation with collapse logic, keyboard support, and theme-backed visual variants.
-          </CardDescription>
-        </CardHeader>
+          </Card.Description>
+        </Card.Header>
         <Box slot="inset" style={{ padding: 16, display: 'grid', gap: 12 }}>
           <Breadcrumb {...args} ariaLabel="Release navigation">
             <Breadcrumb.Item label="Workspace" index={0}>
@@ -133,12 +133,12 @@ export const WorkflowPattern: Story = {
     return (
       <Grid style={{ gap: 16, maxInlineSize: 980 }}>
         <Card radius={18} variant="soft" tone="info">
-          <CardHeader>
-            <CardTitle>Governance review trail</CardTitle>
-            <CardDescription>
+          <Card.Header>
+            <Card.Title>Governance review trail</Card.Title>
+            <Card.Description>
               Collapsed breadcrumb for deep navigation paths with state feedback and keyboard-friendly selection.
-            </CardDescription>
-          </CardHeader>
+            </Card.Description>
+          </Card.Header>
           <Box slot="inset" style={{ padding: 16, display: 'grid', gap: 14 }}>
             <Breadcrumb
               separator="/"

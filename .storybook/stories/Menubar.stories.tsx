@@ -6,9 +6,6 @@ import {
   Box,
   Button,
   Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
   Flex,
   Grid,
   Menubar,
@@ -309,12 +306,12 @@ export const Playground: Story = {
     return (
       <Grid style={{ gap: 16, maxInlineSize: 1040 }}>
         <Card radius={18}>
-          <CardHeader>
-            <CardTitle>Production menubar surface</CardTitle>
-            <CardDescription>
+          <Card.Header>
+            <Card.Title>Production menubar surface</Card.Title>
+            <Card.Description>
               A baseline-token driven menubar with real panels, hover-open submenus, selection modes, and palette-aware variants.
-            </CardDescription>
-          </CardHeader>
+            </Card.Description>
+          </Card.Header>
           <Box slot="inset" style={{ padding: 16, display: 'grid', gap: 16 }}>
             <Box
               style={{
@@ -368,21 +365,21 @@ export const Vertical: Story = {
         <button slot="item">Team</button>
         <button slot="item">Settings</button>
 
-        <div slot="content">
-          <MenuItem>Overview</MenuItem>
-          <MenuItem>Files</MenuItem>
-          <MenuItem>Activity</MenuItem>
-        </div>
-        <div slot="content">
-          <MenuItem>Members</MenuItem>
-          <MenuItem>Roles</MenuItem>
-          <MenuItem>Invites</MenuItem>
-        </div>
-        <div slot="content">
-          <MenuItem>Preferences</MenuItem>
-          <MenuItem>Billing</MenuItem>
-          <MenuItem>API keys</MenuItem>
-        </div>
+        <Menubar.Content>
+          <Menu.Item>Overview</Menu.Item>
+          <Menu.Item>Files</Menu.Item>
+          <Menu.Item>Activity</Menu.Item>
+        </Menubar.Content>
+        <Menubar.Content>
+          <Menu.Item>Members</Menu.Item>
+          <Menu.Item>Roles</Menu.Item>
+          <Menu.Item>Invites</Menu.Item>
+        </Menubar.Content>
+        <Menubar.Content>
+          <Menu.Item>Preferences</Menu.Item>
+          <Menu.Item>Billing</Menu.Item>
+          <Menu.Item>API keys</Menu.Item>
+        </Menubar.Content>
       </Menubar>
 
       <Box style={{ fontSize: 13, color: '#64748b', maxInlineSize: 280 }}>

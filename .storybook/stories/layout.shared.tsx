@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Container, Flex, Grid, Layout, Section, Tree, TreeItem } from '@editora/ui-react';
+import { Box, Button, Container, Flex, Grid, Layout, Section, Tree } from '@editora/ui-react';
 
 export const layoutArgTypes = {
   mode: { control: 'select', options: ['dashboard', 'split', 'stack'] },
@@ -22,17 +22,17 @@ export function SidebarList() {
       onSelect={(detail) => setValue(detail.value)}
       style={{ minHeight: 260 }}
     >
-      <TreeItem value="overview" label="Overview" />
-      <TreeItem value="workspace" label="Workspace" expanded>
-        <TreeItem value="customers" label="Customers" />
-        <TreeItem value="reports" label="Reports" />
-        <TreeItem value="revenue" label="Revenue" />
-      </TreeItem>
-      <TreeItem value="ops" label="Operations" expanded>
-        <TreeItem value="incidents" label="Incidents" />
-        <TreeItem value="queues" label="Queues" />
-      </TreeItem>
-      <TreeItem value="settings" label="Settings" />
+      <Tree.Item value="overview" label="Overview" />
+      <Tree.Item value="workspace" label="Workspace" expanded>
+        <Tree.Item value="customers" label="Customers" />
+        <Tree.Item value="reports" label="Reports" />
+        <Tree.Item value="revenue" label="Revenue" />
+      </Tree.Item>
+      <Tree.Item value="ops" label="Operations" expanded>
+        <Tree.Item value="incidents" label="Incidents" />
+        <Tree.Item value="queues" label="Queues" />
+      </Tree.Item>
+      <Tree.Item value="settings" label="Settings" />
     </Tree>
   );
 }
