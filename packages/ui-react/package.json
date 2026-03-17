@@ -27,6 +27,12 @@
       "require": "./dist/components/*.cjs.js",
       "default": "./dist/components/*.esm.js"
     },
+    "./Accordion": {
+      "types": "./dist/Accordion.d.ts",
+      "import": "./dist/Accordion.esm.js",
+      "require": "./dist/Accordion.cjs.js",
+      "default": "./dist/Accordion.esm.js"
+    },
     "./AppHeader": {
       "types": "./dist/AppHeader.d.ts",
       "import": "./dist/AppHeader.esm.js",

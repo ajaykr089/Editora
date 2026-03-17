@@ -6,6 +6,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Only include components we've created entry files for
 const refactoredComponents = [
+  "Accordion",
   "AppHeader",
   "Breadcrumb",
   "Card",

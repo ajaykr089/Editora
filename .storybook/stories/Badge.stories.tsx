@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Badge, Box, Button, Card, CardDescription, CardHeader, CardTitle, Flex, Grid } from '@editora/ui-react';
+import { Badge, Box, Button, Card, Flex, Grid } from '@editora/ui-react';
 import { ActivityIcon, AlertTriangleIcon, CheckCircleIcon, ClockIcon, ShieldIcon, XCircleIcon } from '@editora/react-icons';
 
 const meta: Meta<typeof Badge> = {
@@ -44,12 +44,12 @@ export const Playground: Story = {
   render: (args) => (
     <Grid style={{ gap: 16, maxInlineSize: 760 }}>
       <Card radius={16}>
-        <CardHeader>
-          <CardTitle>Badge</CardTitle>
-          <CardDescription>
+        <Card.Header>
+          <Card.Title>Badge</Card.Title>
+          <Card.Description>
             Compact status surface for workflow labels, queue states, live filters, and removable metadata chips.
-          </CardDescription>
-        </CardHeader>
+          </Card.Description>
+        </Card.Header>
         <Box slot="inset" style={{ padding: 16 }}>
           <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
             <Flex align="center" style={{ gap: 10, flexWrap: 'wrap' }}>
@@ -173,12 +173,12 @@ export const OperationsFilterPattern: Story = {
     return (
       <Grid style={{ gap: 14, maxInlineSize: 980 }}>
         <Card radius={16}>
-          <CardHeader>
-            <CardTitle>Incident filter rail</CardTitle>
-            <CardDescription>
+          <Card.Header>
+            <Card.Title>Incident filter rail</Card.Title>
+            <Card.Description>
               Interactive triage labels, queue states, and removable routing chips for production monitoring surfaces.
-            </CardDescription>
-          </CardHeader>
+            </Card.Description>
+          </Card.Header>
 
           <Box slot="inset" style={{ padding: 14, display: 'grid', gap: 14 }}>
             <Grid style={{ gap: 8 }}>
