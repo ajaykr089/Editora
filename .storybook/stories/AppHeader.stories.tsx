@@ -2,18 +2,10 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import {
   AppHeader,
-  AppHeaderCenter,
-  AppHeaderEnd,
-  AppHeaderStart,
-  AppHeaderSubtitle,
-  AppHeaderTitle,
   Badge,
   Box,
   Button,
   Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
   Flex,
   Grid,
 } from '@editora/ui-react';
@@ -47,7 +39,7 @@ type Story = StoryObj<typeof AppHeader>;
 function HeaderChrome(props: React.ComponentProps<typeof AppHeader>) {
   return (
     <AppHeader {...props} style={{ width: '100%' }}>
-      <AppHeaderStart>
+      <AppHeader.Start>
         <Flex align="center" style={{ gap: 10 }}>
           <Box
             style={{
@@ -67,16 +59,16 @@ function HeaderChrome(props: React.ComponentProps<typeof AppHeader>) {
             <Box style={{ fontWeight: 600 }}>Editora Ops</Box>
           </Flex>
         </Flex>
-      </AppHeaderStart>
+      </AppHeader.Start>
 
-      <AppHeaderCenter>
+      <AppHeader.Center>
         <Badge tone="info" variant="soft">Live</Badge>
-      </AppHeaderCenter>
+      </AppHeader.Center>
 
-      <AppHeaderTitle>Clinical Command Center</AppHeaderTitle>
-      <AppHeaderSubtitle>North campus · Shift A · 08:15 UTC</AppHeaderSubtitle>
+      <AppHeader.Title>Clinical Command Center</AppHeader.Title>
+      <AppHeader.Subtitle>North campus · Shift A · 08:15 UTC</AppHeader.Subtitle>
 
-      <AppHeaderEnd>
+      <AppHeader.End>
         <Button size="sm" recipe="soft" variant="secondary">
           <SearchIcon size={14} />
           Search
@@ -85,7 +77,7 @@ function HeaderChrome(props: React.ComponentProps<typeof AppHeader>) {
           <BellIcon size={14} />
           Alerts
         </Button>
-      </AppHeaderEnd>
+      </AppHeader.End>
     </AppHeader>
   );
 }
@@ -124,12 +116,12 @@ export const Playground: Story = {
   render: (args) => (
     <Grid style={{ gap: 16 }}>
       <Card radius={16}>
-        <CardHeader>
-          <CardTitle>App header</CardTitle>
-        <CardDescription>
-          Token-backed shell for branding, title context, search/actions, and mobile navigation.
-        </CardDescription>
-        </CardHeader>
+        <Card.Header>
+          <Card.Title>App header</Card.Title>
+          <Card.Description>
+            Token-backed shell for branding, title context, search/actions, and mobile navigation.
+          </Card.Description>
+        </Card.Header>
         <Box slot="inset" style={{ padding: 12 }}>
           <InteractiveHeaderShell {...args} />
         </Box>
@@ -211,10 +203,10 @@ export const ProductShellPattern: Story = {
           },
         ].map((card) => (
           <Card key={card.title} variant="soft" radius={16}>
-            <CardHeader>
-              <CardTitle>{card.title}</CardTitle>
-              <CardDescription>{card.description}</CardDescription>
-            </CardHeader>
+            <Card.Header>
+              <Card.Title>{card.title}</Card.Title>
+              <Card.Description>{card.description}</Card.Description>
+            </Card.Header>
           </Card>
         ))}
       </Grid>
@@ -250,19 +242,19 @@ export const DenseUtilityRail: Story = {
 export const SignalBar: Story = {
   render: () => (
     <AppHeader variant="solid" tone="success" size="sm" bordered radius={12}>
-      <AppHeaderStart>
+      <AppHeader.Start>
         <Flex align="center" style={{ gap: 8, fontWeight: 600 }}>
           <SparklesIcon size={14} />
           Deployment complete
         </Flex>
-      </AppHeaderStart>
-      <AppHeaderTitle>Release 2026.03.12.4 is now active</AppHeaderTitle>
-      <AppHeaderSubtitle>Observability checks are healthy across all regions</AppHeaderSubtitle>
-      <AppHeaderEnd>
+      </AppHeader.Start>
+      <AppHeader.Title>Release 2026.03.12.4 is now active</AppHeader.Title>
+      <AppHeader.Subtitle>Observability checks are healthy across all regions</AppHeader.Subtitle>
+      <AppHeader.End>
         <Button size="sm" recipe="surface" variant="secondary">
           View changes
         </Button>
-      </AppHeaderEnd>
+      </AppHeader.End>
     </AppHeader>
   ),
 };

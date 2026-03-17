@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta } from '@storybook/react';
-import { Card, CardDescription, CardFooter, CardHeader, CardInset, CardMedia, CardTitle, Flex, Grid } from '@editora/ui-react';
+import { Card, Flex, Grid } from '@editora/ui-react';
 import { ShowcasePage, ShowcaseSection } from './storybook-showcase';
 
 const meta: Meta<typeof Card> = {
@@ -76,19 +76,19 @@ export const Playground = {
   },
   render: (args: Record<string, unknown>) => (
     <Card {...args} style={{ maxInlineSize: 360 }}>
-      <CardHeader>
-        <CardTitle>Project overview</CardTitle>
-        <CardDescription>
+      <Card.Header>
+        <Card.Title>Project overview</Card.Title>
+        <Card.Description>
           Launch health and release readiness.
-        </CardDescription>
-      </CardHeader>
+        </Card.Description>
+      </Card.Header>
       <div style={{ fontSize: 14, lineHeight: '20px', color: '#334155' }}>
         Track migration progress, QA handoff, and final release blockers from one place.
       </div>
-      <CardFooter style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, lineHeight: '18px', color: '#64748b' }}>
+      <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, lineHeight: '18px', color: '#64748b' }}>
         <span>Updated 2m ago</span>
         <span>12 items</span>
-      </CardFooter>
+      </Card.Footer>
     </Card>
   )
 };
@@ -101,13 +101,13 @@ export const WithInsetContent = () => (
   >
     <ShowcaseSection title="Inset media" description="Full-bleed artwork and a readable text block can live in the same card without custom wrappers.">
       <Card variant="surface" size="lg" radius={8} style={{ maxInlineSize: 520 }}>
-        <CardInset>
+        <Card.Inset>
           <InsetArtwork />
-        </CardInset>
+        </Card.Inset>
         <div style={{ display: 'grid', gap: 10 }}>
-          <CardTitle as="div">
+          <Card.Title as="div">
             Typography is the art and technique of arranging type.
-          </CardTitle>
+          </Card.Title>
           <div style={{ fontSize: 15, lineHeight: '24px', color: '#334155' }}>
             Use inset sections when imagery, charts, or media should sit flush against the card frame while the rest of the content stays comfortably padded.
           </div>
@@ -130,13 +130,13 @@ export const VariantGallery = () => (
           ['glass', 'Overlay surface']
         ].map(([variant, title]) => (
           <Card key={variant} variant={variant as any} size="md" radius={8} style={{ minBlockSize: 132 }}>
-            <CardHeader>
+            <Card.Header>
               <div style={{ fontSize: 14, lineHeight: '18px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{variant}</div>
-              <CardTitle as="div">{title}</CardTitle>
-            </CardHeader>
-            <CardDescription as="div">
+              <Card.Title as="div">{title}</Card.Title>
+            </Card.Header>
+            <Card.Description as="div">
               Start building your next project in minutes.
-            </CardDescription>
+            </Card.Description>
           </Card>
         ))}
       </Grid>
@@ -171,14 +171,14 @@ export const SizeGallery = () => (
                 T
               </div>
               <div style={{ display: 'grid', gap: 'var(--ui-card-header-gap, 4px)' }}>
-                <CardTitle as="div">Teodros Girmay</CardTitle>
-                <CardDescription as="div">Engineering</CardDescription>
+                <Card.Title as="div">Teodros Girmay</Card.Title>
+                <Card.Description as="div">Engineering</Card.Description>
               </div>
             </div>
-            <CardFooter style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Card.Footer style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span>{String(size).toUpperCase()} density</span>
               <span>Footer follows size too</span>
-            </CardFooter>
+            </Card.Footer>
           </Card>
         ))}
       </Flex>
@@ -194,7 +194,7 @@ export const StructuredComposition = () => (
   >
     <ShowcaseSection title="Semantic sections" description="Header, media, inset, title, description, and footer helpers keep the structure clear for developers.">
         <Card variant="soft" tone="info" size="lg" radius={12} style={{ maxInlineSize: 540 }}>
-          <CardMedia>
+          <Card.Media>
             <div
             style={{
               aspectRatio: '16 / 8',
@@ -208,20 +208,20 @@ export const StructuredComposition = () => (
           >
             Q3
           </div>
-        </CardMedia>
-        <CardHeader>
-          <CardTitle>Quarterly planning workspace</CardTitle>
-          <CardDescription style={{ color: '#475569' }}>
+        </Card.Media>
+        <Card.Header>
+          <Card.Title>Quarterly planning workspace</Card.Title>
+          <Card.Description style={{ color: '#475569' }}>
             Centralize milestones, owner updates, and launch decisions for the quarter.
-          </CardDescription>
-        </CardHeader>
+          </Card.Description>
+        </Card.Header>
         <div style={{ color: '#334155', fontSize: 14, lineHeight: '22px' }}>
           Use the convenience exports when teams want a clear authoring model without remembering slot names for every section.
         </div>
-        <CardFooter style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: 13, lineHeight: '18px' }}>
+        <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: 13, lineHeight: '18px' }}>
           <span>6 active workstreams</span>
           <span>Updated today</span>
-        </CardFooter>
+        </Card.Footer>
       </Card>
     </ShowcaseSection>
   </ShowcasePage>
@@ -246,23 +246,99 @@ export const InteractiveStates = () => (
           onClick={() => window.alert('Card activated')}
           style={{ minBlockSize: 152 }}
         >
-          <CardHeader>
-            <CardTitle>Interactive project summary</CardTitle>
-            <CardDescription>Press Enter or Space after focusing the card to activate it.</CardDescription>
-          </CardHeader>
+          <Card.Header>
+            <Card.Title>Interactive project summary</Card.Title>
+            <Card.Description>Press Enter or Space after focusing the card to activate it.</Card.Description>
+          </Card.Header>
           <div style={{ color: '#334155', fontSize: 14, lineHeight: '22px' }}>
             This is the production interaction model for clickable cards.
           </div>
         </Card>
 
         <Card interactive disabled variant="outline" radius={12} style={{ minBlockSize: 152 }}>
-          <CardHeader>
-            <CardTitle>Disabled state</CardTitle>
-            <CardDescription>The disabled card is not focusable and exposes aria-disabled.</CardDescription>
-          </CardHeader>
+          <Card.Header>
+            <Card.Title>Disabled state</Card.Title>
+            <Card.Description>The disabled card is not focusable and exposes aria-disabled.</Card.Description>
+          </Card.Header>
           <div style={{ color: '#64748b', fontSize: 14, lineHeight: '22px' }}>
             Use disabled when the whole card surface should be unavailable.
           </div>
+        </Card>
+      </Grid>
+    </ShowcaseSection>
+  </ShowcasePage>
+);
+
+export const ComposedComponentPattern = () => (
+  <ShowcasePage
+    eyebrow="Composition"
+    title="Composed component pattern"
+    description="Card sub-components are available as properties on the Card component, enabling clean and readable markup."
+  >
+    <ShowcaseSection title="Composed sub-components" description="All Card sub-components are available as properties: Card.Header, Card.Title, Card.Description, Card.Media, Card.Inset, Card.Footer.">
+      <Grid style={{ gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
+        <Card variant="soft" size="md" radius={10} style={{ minBlockSize: 200 }}>
+          <Card.Header>
+            <Card.Title>Project Dashboard</Card.Title>
+            <Card.Description>Overview of current project status and metrics.</Card.Description>
+          </Card.Header>
+          <div style={{ color: '#334155', fontSize: 14, lineHeight: '22px' }}>
+            This demonstrates the composed component pattern where all sub-components are accessed as properties of the main Card component.
+          </div>
+          <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: 13, lineHeight: '18px' }}>
+            <span>Updated 5m ago</span>
+            <span>4 metrics</span>
+          </Card.Footer>
+        </Card>
+
+        <Card variant="outline" size="md" radius={10} style={{ minBlockSize: 200 }}>
+          <Card.Media>
+            <div
+              style={{
+                aspectRatio: '16 / 9',
+                background: 'linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%)',
+                display: 'grid',
+                placeItems: 'center',
+                color: '#0369a1',
+                fontSize: 24,
+                fontWeight: 700
+              }}
+            >
+              MEDIA
+            </div>
+          </Card.Media>
+          <Card.Header>
+            <Card.Title>Content Preview</Card.Title>
+            <Card.Description>Preview of the media content with structured layout.</Card.Description>
+          </Card.Header>
+          <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: 13, lineHeight: '18px' }}>
+            <span>Preview mode</span>
+            <span>Click to view</span>
+          </Card.Footer>
+        </Card>
+
+        <Card variant="surface" size="md" radius={10} style={{ minBlockSize: 200 }}>
+          <Card.Inset>
+            <div
+              style={{
+                padding: 16,
+                background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+                borderRadius: 8,
+                border: '1px solid rgba(15, 23, 42, 0.08)'
+              }}
+            >
+              <div style={{ fontSize: 12, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+                Inset Content
+              </div>
+              <div style={{ fontSize: 14, color: '#334155', lineHeight: '20px' }}>
+                This content sits flush against the card edges while maintaining proper spacing.
+              </div>
+            </div>
+          </Card.Inset>
+          <Card.Header>
+            <Card.Title>Inset Example</Card.Title>
+            <Card.Description>Demonstrates the inset slot for full-bleed content.</Card.Description>
+          </Card.Header>
         </Card>
       </Grid>
     </ShowcaseSection>

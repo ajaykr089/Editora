@@ -113,10 +113,10 @@ export { Separator } from './Separator';
 export { Slot } from './Slot';
 export { Toolbar } from './Toolbar';
 export { VisuallyHidden } from './VisuallyHidden';
-export { Accordion, AccordionItem, AccordionTrigger, AccordionPanel } from './Accordion';
+export { Accordion} from './Accordion';
 export { DirectionProvider } from './DirectionProvider';
 export { HoverCard } from './HoverCard';
-export { Card, CardHeader, CardFooter, CardInset, CardMedia, CardTitle, CardDescription } from './Card';
+export { Card } from './Card';
 export { Label } from './Label';
 export {
   AlertDialog,

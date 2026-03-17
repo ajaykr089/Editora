@@ -56,7 +56,7 @@ export type CardProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
 };
 
-export const Card = React.forwardRef<HTMLElement, CardProps>(function Card(
+const Card = React.forwardRef<HTMLElement, CardProps>(function Card(
   { variant, size, radius, tone, elevation, interactive, disabled, children, ...rest },
   ref
 ) {
@@ -102,11 +102,22 @@ function createCardSection(
   return Component;
 }
 
-export const CardHeader = createCardSection('div', 'CardHeader', 'header', 'data-ui-card-header');
-export const CardFooter = createCardSection('div', 'CardFooter', 'footer', 'data-ui-card-footer');
-export const CardInset = createCardSection('div', 'CardInset', 'inset');
-export const CardMedia = createCardSection('div', 'CardMedia', 'media', 'data-ui-card-media');
-export const CardTitle = createCardSection('h3', 'CardTitle', undefined, 'data-ui-card-title');
-export const CardDescription = createCardSection('p', 'CardDescription', undefined, 'data-ui-card-description');
+const CardHeader = createCardSection('div', 'CardHeader', 'header', 'data-ui-card-header');
+const CardFooter = createCardSection('div', 'CardFooter', 'footer', 'data-ui-card-footer');
+const CardInset = createCardSection('div', 'CardInset', 'inset');
+const CardMedia = createCardSection('div', 'CardMedia', 'media', 'data-ui-card-media');
+const CardTitle = createCardSection('h3', 'CardTitle', undefined, 'data-ui-card-title');
+const CardDescription = createCardSection('p', 'CardDescription', undefined, 'data-ui-card-description');
 
-export default Card;
+// Create composed component with sub-components as properties
+const ComposedCard = Object.assign(Card, {
+  Header: CardHeader,
+  Footer: CardFooter,
+  Inset: CardInset,
+  Media: CardMedia,
+  Title: CardTitle,
+  Description: CardDescription,
+});
+
+export { ComposedCard as Card, CardHeader, CardFooter, CardInset, CardMedia, CardTitle, CardDescription };
+export default ComposedCard;

@@ -21,6 +21,18 @@
       "require": "./dist/index.cjs.js",
       "default": "./dist/index.esm.js"
     },
+    "./components/*": {
+      "types": "./dist/components/*.d.ts",
+      "import": "./dist/components/*.esm.js",
+      "require": "./dist/components/*.cjs.js",
+      "default": "./dist/components/*.esm.js"
+    },
+    "./Card": {
+      "types": "./dist/Card.d.ts",
+      "import": "./dist/Card.esm.js",
+      "require": "./dist/Card.cjs.js",
+      "default": "./dist/Card.esm.js"
+    },
     "./Breadcrumb": {
       "types": "./dist/Breadcrumb.d.ts",
       "import": "./dist/Breadcrumb.esm.js",

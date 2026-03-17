@@ -124,10 +124,10 @@ export { Toolbar } from './components/Toolbar';
 export { VisuallyHidden } from './components/VisuallyHidden';
 export { Collapsible } from './components/Collapsible';
 export { Pagination } from './components/Pagination';
-export { Accordion, AccordionItem, AccordionTrigger, AccordionPanel } from './components/Accordion';
+export { Accordion } from './components/Accordion';
 export { DirectionProvider } from './components/DirectionProvider';
 export { HoverCard, type HoverCardProps, type HoverCardTriggerProps, type HoverCardContentProps } from './components/HoverCard';
-export { Card, CardHeader, CardFooter, CardInset, CardMedia, CardTitle, CardDescription } from './components/Card';
+export { Card } from './components/Card';
 export { Label } from './components/Label';
 export {
   AlertDialog,

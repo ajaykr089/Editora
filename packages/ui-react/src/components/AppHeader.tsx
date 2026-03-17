@@ -73,7 +73,7 @@ function setStringAttr(el: HTMLElement, name: string, value?: string | number | 
   else el.setAttribute(name, String(value));
 }
 
-export const AppHeader = React.forwardRef<HTMLElement, AppHeaderProps>(function AppHeader(
+const AppHeader = React.forwardRef<HTMLElement, AppHeaderProps>(function AppHeader(
   {
     children,
     sticky,
@@ -145,12 +145,22 @@ function createAppHeaderSection(
   return Component;
 }
 
-export const AppHeaderStart = createAppHeaderSection('div', 'AppHeaderStart', 'start', 'data-ui-app-header-start');
-export const AppHeaderCenter = createAppHeaderSection('div', 'AppHeaderCenter', 'center', 'data-ui-app-header-center');
-export const AppHeaderTitle = createAppHeaderSection('div', 'AppHeaderTitle', 'title', 'data-ui-app-header-title');
-export const AppHeaderSubtitle = createAppHeaderSection('div', 'AppHeaderSubtitle', 'subtitle', 'data-ui-app-header-subtitle');
-export const AppHeaderEnd = createAppHeaderSection('div', 'AppHeaderEnd', 'end', 'data-ui-app-header-end');
+const AppHeaderStart = createAppHeaderSection('div', 'AppHeaderStart', 'start', 'data-ui-app-header-start');
+const AppHeaderCenter = createAppHeaderSection('div', 'AppHeaderCenter', 'center', 'data-ui-app-header-center');
+const AppHeaderTitle = createAppHeaderSection('div', 'AppHeaderTitle', 'title', 'data-ui-app-header-title');
+const AppHeaderSubtitle = createAppHeaderSection('div', 'AppHeaderSubtitle', 'subtitle', 'data-ui-app-header-subtitle');
+const AppHeaderEnd = createAppHeaderSection('div', 'AppHeaderEnd', 'end', 'data-ui-app-header-end');
 
-AppHeader.displayName = 'AppHeader';
+// Create composed component with sub-components as properties
+const ComposedAppHeader = Object.assign(AppHeader, {
+  Start: AppHeaderStart,
+  Center: AppHeaderCenter,
+  Title: AppHeaderTitle,
+  Subtitle: AppHeaderSubtitle,
+  End: AppHeaderEnd,
+});
 
-export default AppHeader;
+ComposedAppHeader.displayName = 'AppHeader';
+
+export { ComposedAppHeader as AppHeader, AppHeaderStart, AppHeaderCenter, AppHeaderTitle, AppHeaderSubtitle, AppHeaderEnd };
+export default ComposedAppHeader;

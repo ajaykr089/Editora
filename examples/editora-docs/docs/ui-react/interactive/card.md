@@ -7,17 +7,17 @@ sidebar_label: Card
 # Card
 
 ```tsx
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@editora/ui-react';
+import { Card } from '@editora/ui-react';
 
 <Card variant="surface" size="md" radius={8}>
-  <CardHeader>
-    <CardTitle>Quick start</CardTitle>
-    <CardDescription>Start building your next project in minutes.</CardDescription>
-  </CardHeader>
+  <Card.Header>
+    <Card.Title>Quick start</Card.Title>
+    <Card.Description>Start building your next project in minutes.</Card.Description>
+  </Card.Header>
 
   <p>Use cards to group related content and actions inside a single surface.</p>
 
-  <CardFooter>Updated 2m ago</CardFooter>
+  <Card.Footer>Updated 2m ago</Card.Footer>
 </Card>;
 ```
 
@@ -25,9 +25,16 @@ import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@edito
 
 `variant`, `size`, `radius`, `tone`, `elevation`, `interactive`, `disabled`
 
-## Convenience Exports
+## Composed Sub-Components
 
-`CardHeader`, `CardFooter`, `CardInset`, `CardMedia`, `CardTitle`, `CardDescription`
+All Card sub-components are available as properties on the main Card component:
+
+- `Card.Header` - Top section content
+- `Card.Title` - Title text element
+- `Card.Description` - Description text element
+- `Card.Footer` - Bottom section content
+- `Card.Media` - Media block rendered above the body
+- `Card.Inset` - Full-bleed content inside the card frame
 
 ## Slots
 
