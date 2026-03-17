@@ -6,15 +6,10 @@ import {
   Box,
   Button,
   Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
   Flex,
   Grid,
   Menubar,
-  MenuItem,
-  MenuSectionLabel,
-  MenuSeparator,
+  Menu,
   ThemeProvider,
 } from '@editora/ui-react';
 
@@ -125,55 +120,55 @@ function paletteTokens(name: StoryPaletteName) {
 function MenubarContent() {
   return (
     <>
-      <div slot="content">
-        <MenuItem shortcut="⌘N">New file</MenuItem>
-        <MenuItem shortcut="⌘O">Open…</MenuItem>
-        <MenuSeparator />
+      <Menubar.Content>
+        <Menu.Item shortcut="⌘N">New file</Menu.Item>
+        <Menu.Item shortcut="⌘O">Open…</Menu.Item>
+        <Menu.Separator />
         <div role="menuitem" tabIndex={-1} className="item" data-menu-item>
           <span className="label">
             <span className="text">Export</span>
           </span>
           <span className="submenu-arrow">▶</span>
           <div className="submenu">
-            <MenuItem>Export as PDF</MenuItem>
-            <MenuItem>Export as HTML</MenuItem>
-            <MenuItem>Export as Markdown</MenuItem>
+            <Menu.Item>Export as PDF</Menu.Item>
+            <Menu.Item>Export as HTML</Menu.Item>
+            <Menu.Item>Export as Markdown</Menu.Item>
           </div>
         </div>
-      </div>
+      </Menubar.Content>
 
-      <div slot="content">
-        <MenuItem shortcut="⌘Z">Undo</MenuItem>
-        <MenuItem shortcut="⇧⌘Z">Redo</MenuItem>
-        <MenuSeparator />
-        <MenuItem shortcut="⌘F">Find</MenuItem>
-        <MenuItem shortcut="⌘H">Replace</MenuItem>
-      </div>
+      <Menubar.Content>
+        <Menu.Item shortcut="⌘Z">Undo</Menu.Item>
+        <Menu.Item shortcut="⇧⌘Z">Redo</Menu.Item>
+        <Menu.Separator />
+        <Menu.Item shortcut="⌘F">Find</Menu.Item>
+        <Menu.Item shortcut="⌘H">Replace</Menu.Item>
+      </Menubar.Content>
 
-      <div slot="content">
-        <MenuItem role="menuitemcheckbox" checked>
+      <Menubar.Content>
+        <Menu.Item role="menuitemcheckbox" checked>
           Show line numbers
-        </MenuItem>
-        <MenuItem role="menuitemcheckbox">Wrap lines</MenuItem>
-        <MenuSeparator />
-        <MenuItem role="menuitemradio" data-group="zoom" checked>
+        </Menu.Item>
+        <Menu.Item role="menuitemcheckbox">Wrap lines</Menu.Item>
+        <Menu.Separator />
+        <Menu.Item role="menuitemradio" data-group="zoom" checked>
           100%
-        </MenuItem>
-        <MenuItem role="menuitemradio" data-group="zoom">
+        </Menu.Item>
+        <Menu.Item role="menuitemradio" data-group="zoom">
           125%
-        </MenuItem>
-        <MenuItem role="menuitemradio" data-group="zoom">
+        </Menu.Item>
+        <Menu.Item role="menuitemradio" data-group="zoom">
           150%
-        </MenuItem>
-      </div>
+        </Menu.Item>
+      </Menubar.Content>
 
-      <div slot="content">
-        <MenuSectionLabel>Workspace</MenuSectionLabel>
-        <MenuItem>Profile settings</MenuItem>
-        <MenuItem>Team access</MenuItem>
-        <MenuSeparator />
-        <MenuItem tone="danger">Sign out</MenuItem>
-      </div>
+      <Menubar.Content>
+        <Menu.SectionLabel>Workspace</Menu.SectionLabel>
+        <Menu.Item>Profile settings</Menu.Item>
+        <Menu.Item>Team access</Menu.Item>
+        <Menu.Separator />
+        <Menu.Item tone="danger">Sign out</Menu.Item>
+      </Menubar.Content>
     </>
   );
 }
@@ -311,12 +306,12 @@ export const Playground: Story = {
     return (
       <Grid style={{ gap: 16, maxInlineSize: 1040 }}>
         <Card radius={18}>
-          <CardHeader>
-            <CardTitle>Production menubar surface</CardTitle>
-            <CardDescription>
+          <Card.Header>
+            <Card.Title>Production menubar surface</Card.Title>
+            <Card.Description>
               A baseline-token driven menubar with real panels, hover-open submenus, selection modes, and palette-aware variants.
-            </CardDescription>
-          </CardHeader>
+            </Card.Description>
+          </Card.Header>
           <Box slot="inset" style={{ padding: 16, display: 'grid', gap: 16 }}>
             <Box
               style={{
@@ -370,21 +365,21 @@ export const Vertical: Story = {
         <button slot="item">Team</button>
         <button slot="item">Settings</button>
 
-        <div slot="content">
-          <MenuItem>Overview</MenuItem>
-          <MenuItem>Files</MenuItem>
-          <MenuItem>Activity</MenuItem>
-        </div>
-        <div slot="content">
-          <MenuItem>Members</MenuItem>
-          <MenuItem>Roles</MenuItem>
-          <MenuItem>Invites</MenuItem>
-        </div>
-        <div slot="content">
-          <MenuItem>Preferences</MenuItem>
-          <MenuItem>Billing</MenuItem>
-          <MenuItem>API keys</MenuItem>
-        </div>
+        <Menubar.Content>
+          <Menu.Item>Overview</Menu.Item>
+          <Menu.Item>Files</Menu.Item>
+          <Menu.Item>Activity</Menu.Item>
+        </Menubar.Content>
+        <Menubar.Content>
+          <Menu.Item>Members</Menu.Item>
+          <Menu.Item>Roles</Menu.Item>
+          <Menu.Item>Invites</Menu.Item>
+        </Menubar.Content>
+        <Menubar.Content>
+          <Menu.Item>Preferences</Menu.Item>
+          <Menu.Item>Billing</Menu.Item>
+          <Menu.Item>API keys</Menu.Item>
+        </Menubar.Content>
       </Menubar>
 
       <Box style={{ fontSize: 13, color: '#64748b', maxInlineSize: 280 }}>

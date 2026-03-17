@@ -1,4 +1,5 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
+import { Toggle, type ToggleProps } from './Toggle';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -31,7 +32,14 @@ export type ToggleGroupProps = BaseProps & {
   onValueChange?: (detail: ToggleGroupDetail) => void;
 };
 
-export const ToggleGroup = React.forwardRef<HTMLElement, ToggleGroupProps>(function ToggleGroup(
+export type ToggleGroupItemProps = ToggleProps;
+
+const ToggleGroupItem = React.forwardRef<HTMLElement, ToggleGroupItemProps>(function ToggleGroupItem(props, ref) {
+  return <Toggle ref={ref} {...props} />;
+});
+ToggleGroupItem.displayName = 'ToggleGroup.Item';
+
+const ToggleGroupRoot = React.forwardRef<HTMLElement, ToggleGroupProps>(function ToggleGroupRoot(
   {
     children,
     value,
@@ -129,6 +137,10 @@ export const ToggleGroup = React.forwardRef<HTMLElement, ToggleGroupProps>(funct
   return React.createElement('ui-toggle-group', { ref, ...rest }, children);
 });
 
-ToggleGroup.displayName = 'ToggleGroup';
+ToggleGroupRoot.displayName = 'ToggleGroup';
+
+export const ToggleGroup = Object.assign(ToggleGroupRoot, {
+  Item: ToggleGroupItem,
+});
 
 export default ToggleGroup;

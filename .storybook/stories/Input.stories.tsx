@@ -88,9 +88,11 @@ Playground.args = {
 export const WithSlots = () => (
   <Box style={{ inlineSize: 'min(480px, 100%)' }}>
     <Input label="Search users" description="Prefix, suffix, and custom error slot." clearable variant="outlined" placeholder="Find by name or email">
-      <span slot="prefix">🔍</span>
-      <button slot="suffix" style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>Go</button>
-      <span slot="error">No matching user in current workspace.</span>
+      <Input.Prefix>🔍</Input.Prefix>
+      <Input.Suffix>
+        <button style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}>Go</button>
+      </Input.Suffix>
+      <Input.Error>No matching user in current workspace.</Input.Error>
     </Input>
   </Box>
 );
@@ -120,7 +122,7 @@ export const DesignDirections = () => (
 export const ValidationAndCounter = () => (
   <Grid style={{ display: 'grid', gap: 12, inlineSize: 'min(480px, 100%)' }}>
     <Input label="Release note" description="Validation + counter mode." validation="error" counter maxlength={48} value="Need update" clearable>
-      <span slot="error">Please include the ticket reference.</span>
+      <Input.Error>Please include the ticket reference.</Input.Error>
     </Input>
     <Input label="Tag" validation="success" value="approved" size="sm" tone="success" />
   </Grid>

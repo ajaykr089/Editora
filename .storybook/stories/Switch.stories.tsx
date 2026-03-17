@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box, Flex, Grid, Switch } from '@editora/ui-react';
+import { Box, Flex, Grid } from '@editora/ui-react';
+import { Switch } from '@editora/ui-react/Switch';
 
 export default {
   title: 'UI/Switch',
@@ -33,7 +34,7 @@ export const Controlled = (args: any) => {
         onChange={(detail) => setChecked(detail.checked)}
       >
         Enable workspace automations
-        <span slot="description">Run triggers when publishing or archiving content.</span>
+        <Switch.Description>Run triggers when publishing or archiving content.</Switch.Description>
       </Switch>
 
       <Box variant="surface" p="10px" style={{ fontSize: 13, color: '#475569' }}>
@@ -66,7 +67,7 @@ export const VisualModes = () => (
     <Box variant="contrast" p="12px" radius="lg">
       <Switch checked variant="contrast" tone="warning">
         Contrast mode
-        <span slot="description">Improved visibility for command center layouts.</span>
+        <Switch.Description>Improved visibility for command center layouts.</Switch.Description>
       </Switch>
     </Box>
 
@@ -100,7 +101,7 @@ export const FlatEnterpriseShapes = () => (
       <Grid gap="10px">
         <Switch checked shape="square" elevation="none" variant="outline">
           Flat square
-          <span slot="description">No shadow, crisp border for dense dashboards.</span>
+          <Switch.Description>No shadow, crisp border for dense dashboards.</Switch.Description>
         </Switch>
         <Switch shape="rounded" elevation="none" variant="outline">Flat rounded</Switch>
       </Grid>
@@ -120,13 +121,15 @@ export const KeyboardAndEdgeCases = () => (
       <Grid gap="10px">
         <Switch checked name="alerts" value="email-alerts" required>
           Press Arrow Left/Right, Home, End
-          <span slot="description">Label click also toggles. Inner links are non-toggling interactive targets.</span>
+          <Switch.Description>Label click also toggles. Inner links are non-toggling interactive targets.</Switch.Description>
         </Switch>
         <Switch>
           Incident digest
-          <a slot="description" href="#" data-ui-switch-no-toggle onClick={(e) => e.preventDefault()}>
-            Open policy (does not toggle)
-          </a>
+          <Switch.Description>
+            <a href="#" data-ui-switch-no-toggle onClick={(e) => e.preventDefault()}>
+              Open policy (does not toggle)
+            </a>
+          </Switch.Description>
         </Switch>
       </Grid>
     </Box>

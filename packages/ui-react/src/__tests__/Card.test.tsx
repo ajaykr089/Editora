@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import '../components/Card';
 import '../../../ui-core/src/components/ui-card';
 
-import { Card, CardDescription, CardFooter, CardHeader, CardInset, CardMedia, CardTitle } from '../components/Card';
+import { Card } from '../Card';
 
 describe('Card wrapper', () => {
   it('forwards public props to the host element', () => {
@@ -26,14 +26,14 @@ describe('Card wrapper', () => {
   it('maps convenience subcomponents to the card slot contract', () => {
     const { container } = render(
       <Card>
-        <CardMedia>Media</CardMedia>
-        <CardInset>Inset</CardInset>
-        <CardHeader>
-          <CardTitle>Quick start</CardTitle>
-          <CardDescription>Start building your next project in minutes.</CardDescription>
-        </CardHeader>
+        <Card.Media>Media</Card.Media>
+        <Card.Inset>Inset</Card.Inset>
+        <Card.Header>
+          <Card.Title>Quick start</Card.Title>
+          <Card.Description>Start building your next project in minutes.</Card.Description>
+        </Card.Header>
         <div>Body</div>
-        <CardFooter>Footer</CardFooter>
+        <Card.Footer>Footer</Card.Footer>
       </Card>
     );
 
@@ -60,10 +60,10 @@ describe('Card wrapper', () => {
   it('gives title and description usable default styles', () => {
     const { container } = render(
       <Card>
-        <CardHeader>
-          <CardTitle>Title</CardTitle>
-          <CardDescription>Description</CardDescription>
-        </CardHeader>
+        <Card.Header>
+          <Card.Title>Title</Card.Title>
+          <Card.Description>Description</Card.Description>
+        </Card.Header>
       </Card>
     );
 

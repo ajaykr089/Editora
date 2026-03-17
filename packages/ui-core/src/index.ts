@@ -101,6 +101,7 @@ import './components/ui-gantt';
 import './components/ui-stepper';
 import './components/ui-wizard';
 import './components/ui-quick-actions';
+import './components/ui-rating';
 
 
 // layout primitives
@@ -255,3 +256,4 @@ export { UIGantt } from './components/ui-gantt';
 export { UIStepper } from './components/ui-stepper';
 export { UIWizard } from './components/ui-wizard';
 export { UIQuickActions } from './components/ui-quick-actions';
+export { UIRating } from './components/ui-rating';

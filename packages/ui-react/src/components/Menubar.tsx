@@ -32,8 +32,12 @@ export type MenubarProps = React.HTMLAttributes<HTMLElement> & {
   onSelect?: (detail: { selected?: number; index?: number; value?: string; label?: string; checked?: boolean; item?: HTMLElement }) => void;
 };
 
-export function Menubar(props: MenubarProps) {
-  const {
+type MenubarContentProps = React.HTMLAttributes<HTMLDivElement> & {
+  children?: React.ReactNode;
+};
+
+const MenubarRoot = React.forwardRef<HTMLElement, MenubarProps>(function Menubar(
+  {
     selected,
     open,
     loop,
@@ -55,9 +59,11 @@ export function Menubar(props: MenubarProps) {
     onSelect,
     children,
     ...rest
-  } = props;
-
+  },
+  forwardedRef
+) {
   const ref = useRef<HTMLElement | null>(null);
+  React.useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
   useEffect(() => {
     const el = ref.current;
@@ -159,6 +165,33 @@ export function Menubar(props: MenubarProps) {
   ]);
 
   return React.createElement('ui-menubar', { ref, ...rest }, children);
-}
+});
+
+MenubarRoot.displayName = 'Menubar';
+
+const MenubarContent = React.forwardRef<HTMLDivElement, MenubarContentProps>(function MenubarContent(
+  { children, ...rest },
+  ref
+) {
+  return (
+    <div {...rest} ref={ref} slot="content">
+      {children}
+    </div>
+  );
+});
+
+MenubarContent.displayName = 'Menubar.Content';
+
+type MenubarComponent = React.ForwardRefExoticComponent<
+  MenubarProps & React.RefAttributes<HTMLElement>
+> & {
+  Content: typeof MenubarContent;
+};
+
+export type { MenubarContentProps };
+
+export const Menubar = Object.assign(MenubarRoot, {
+  Content: MenubarContent
+}) as MenubarComponent;
 
 export default Menubar;

@@ -3,21 +3,31 @@ import { warnIfElementNotRegistered } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-type CommandSelectDetail = {
+export type CommandSelectDetail = {
   index: number;
   item: HTMLElement;
   label: string;
   value?: string;
 };
 
-type CommandProps = Omit<React.HTMLAttributes<HTMLElement>, 'onSelect'> & {
+export type CommandProps = Omit<React.HTMLAttributes<HTMLElement>, 'onSelect'> & {
   placeholder?: string;
   emptyText?: string;
   onSelect?: (detail: CommandSelectDetail) => void;
   onQueryChange?: (value: string) => void;
 };
 
-export const Command = React.forwardRef<HTMLElement, CommandProps>(function Command(
+export type CommandItemProps = React.HTMLAttributes<HTMLDivElement> & {
+  value?: string;
+  label?: string;
+  keywords?: string;
+};
+
+type CommandComponent = React.ForwardRefExoticComponent<CommandProps & React.RefAttributes<HTMLElement>> & {
+  Item: typeof CommandItem;
+};
+
+const CommandRoot = React.forwardRef<HTMLElement, CommandProps>(function Command(
   { placeholder, emptyText, children, onSelect, onQueryChange, ...rest },
   forwardedRef
 ) {
@@ -69,6 +79,33 @@ export const Command = React.forwardRef<HTMLElement, CommandProps>(function Comm
   return React.createElement('ui-command', { ref, ...rest }, children);
 });
 
-Command.displayName = 'Command';
+CommandRoot.displayName = 'Command';
+
+export const CommandItem = React.forwardRef<HTMLDivElement, CommandItemProps>(function CommandItem(
+  { value, label, keywords, ...props },
+  ref
+) {
+  return (
+    <div
+      {...props}
+      ref={ref}
+      slot="command"
+      data-value={value}
+      data-label={label}
+      data-keywords={keywords}
+      style={{
+        display: 'block',
+        cursor: 'pointer',
+        ...((props as any).style || {})
+      }}
+    />
+  );
+});
+
+CommandItem.displayName = 'Command.Item';
+
+export const Command = Object.assign(CommandRoot, {
+  Item: CommandItem
+}) as CommandComponent;
 
 export default Command;

@@ -1,34 +1,34 @@
 ---
 title: Accordion
-description: Disclosure group with separate React exports for container, item, trigger, and panel.
+description: Disclosure group with composed React sub-components for container, item, trigger, and panel.
 sidebar_label: Accordion
 ---
 
 # Accordion
 
-Import `Accordion`, `AccordionItem`, `AccordionTrigger`, and `AccordionPanel` together.
+Import the main `Accordion` component and use its sub-components as properties.
 
 ## Basic Usage
 
 ```tsx
-import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger } from '@editora/ui-react';
+import { Accordion } from '@editora/ui-react';
 
 function BasicAccordion() {
   return (
     <Accordion collapsible variant="outline" radius={12} size="md">
-      <AccordionItem description="What the product does" badge="Overview">
-        <AccordionTrigger>What is Editora?</AccordionTrigger>
-        <AccordionPanel>
+      <Accordion.Item description="What the product does" badge="Overview">
+        <Accordion.Trigger>What is Editora?</Accordion.Trigger>
+        <Accordion.Panel>
           Editora is a rich text editing system with a web-component core and React wrappers.
-        </AccordionPanel>
-      </AccordionItem>
+        </Accordion.Panel>
+      </Accordion.Item>
 
-      <AccordionItem description="Architecture summary">
-        <AccordionTrigger>How does it work?</AccordionTrigger>
-        <AccordionPanel>
+      <Accordion.Item description="Architecture summary">
+        <Accordion.Trigger>How does it work?</Accordion.Trigger>
+        <Accordion.Panel>
           It composes `ui-core` custom elements behind `ui-react` wrappers.
-        </AccordionPanel>
-      </AccordionItem>
+        </Accordion.Panel>
+      </Accordion.Item>
     </Accordion>
   );
 }
@@ -61,8 +61,8 @@ function BasicAccordion() {
 
 ## Trigger and Panel
 
-- `AccordionTrigger` renders a button with `data-ui-accordion-trigger`.
-- `AccordionPanel` renders a panel with `data-ui-accordion-panel`.
+- `Accordion.Trigger` renders a button with `data-ui-accordion-trigger`.
+- `Accordion.Panel` renders a panel with `data-ui-accordion-panel`.
 
 ## Controlled Multiple Open State
 
@@ -72,18 +72,26 @@ function ControlledAccordion() {
 
   return (
     <Accordion multiple open={open} onToggle={setOpen} variant="soft" tone="info" radius={12}>
-      <AccordionItem>
-        <AccordionTrigger>Section one</AccordionTrigger>
-        <AccordionPanel>First panel</AccordionPanel>
-      </AccordionItem>
-      <AccordionItem>
-        <AccordionTrigger>Section two</AccordionTrigger>
-        <AccordionPanel>Second panel</AccordionPanel>
-      </AccordionItem>
+      <Accordion.Item>
+        <Accordion.Trigger>Section one</Accordion.Trigger>
+        <Accordion.Panel>First panel</Accordion.Panel>
+      </Accordion.Item>
+      <Accordion.Item>
+        <Accordion.Trigger>Section two</Accordion.Trigger>
+        <Accordion.Panel>Second panel</Accordion.Panel>
+      </Accordion.Item>
     </Accordion>
   );
 }
 ```
+
+## Composed Sub-Components
+
+All Accordion sub-components are available as properties on the main Accordion component:
+
+- `Accordion.Item` - Individual accordion item container
+- `Accordion.Trigger` - Button to toggle accordion item
+- `Accordion.Panel` - Content panel for accordion item
 
 ## Notes
 

@@ -49,7 +49,41 @@ type MenuSectionLabelProps = React.HTMLAttributes<HTMLDivElement> & {
   children?: React.ReactNode;
 };
 
-export const Menu = React.forwardRef<HTMLElement, MenuProps>(function Menu(
+type MenuTriggerProps = React.HTMLAttributes<HTMLDivElement> & {
+  children?: React.ReactNode;
+};
+
+type MenuContentProps = React.HTMLAttributes<HTMLDivElement> & {
+  children?: React.ReactNode;
+};
+
+const MenuTrigger = React.forwardRef<HTMLDivElement, MenuTriggerProps>(function MenuTrigger(
+  { children, ...rest },
+  ref
+) {
+  return (
+    <div {...rest} ref={ref} slot="trigger">
+      {children}
+    </div>
+  );
+});
+
+MenuTrigger.displayName = 'Menu.Trigger';
+
+const MenuContent = React.forwardRef<HTMLDivElement, MenuContentProps>(function MenuContent(
+  { children, ...rest },
+  ref
+) {
+  return (
+    <div {...rest} ref={ref} slot="content">
+      {children}
+    </div>
+  );
+});
+
+MenuContent.displayName = 'Menu.Content';
+
+const MenuRoot = React.forwardRef<HTMLElement, MenuProps>(function Menu(
   {
     children,
     open,
@@ -191,7 +225,7 @@ export const Menu = React.forwardRef<HTMLElement, MenuProps>(function Menu(
   return React.createElement('ui-menu', { ref, ...rest }, children);
 });
 
-Menu.displayName = 'Menu';
+MenuRoot.displayName = 'Menu';
 
 export const MenuItem = React.forwardRef<HTMLDivElement, MenuItemProps>(function MenuItem(
   { children, icon, shortcut, caption, tone, role = 'menuitem', checked, className, ...rest },
@@ -230,6 +264,8 @@ export const MenuItem = React.forwardRef<HTMLDivElement, MenuItemProps>(function
   );
 });
 
+MenuItem.displayName = 'Menu.Item';
+
 export const MenuSeparator = React.forwardRef<HTMLDivElement, MenuSeparatorProps>(function MenuSeparator(
   { className, ...rest },
   ref
@@ -237,6 +273,8 @@ export const MenuSeparator = React.forwardRef<HTMLDivElement, MenuSeparatorProps
   const classes = ['separator', className].filter(Boolean).join(' ');
   return <div {...rest} ref={ref} role="separator" className={classes} />;
 });
+
+MenuSeparator.displayName = 'Menu.Separator';
 
 export const MenuSectionLabel = React.forwardRef<HTMLDivElement, MenuSectionLabelProps>(function MenuSectionLabel(
   { children, className, ...rest },
@@ -249,5 +287,27 @@ export const MenuSectionLabel = React.forwardRef<HTMLDivElement, MenuSectionLabe
     </div>
   );
 });
+
+MenuSectionLabel.displayName = 'Menu.SectionLabel';
+
+type MenuComponent = React.ForwardRefExoticComponent<
+  MenuProps & React.RefAttributes<HTMLElement>
+> & {
+  Item: typeof MenuItem;
+  Separator: typeof MenuSeparator;
+  SectionLabel: typeof MenuSectionLabel;
+  Trigger: typeof MenuTrigger;
+  Content: typeof MenuContent;
+};
+
+export type { MenuProps, MenuItemProps, MenuSeparatorProps, MenuSectionLabelProps, MenuTriggerProps, MenuContentProps };
+
+export const Menu = Object.assign(MenuRoot, {
+  Item: MenuItem,
+  Separator: MenuSeparator,
+  SectionLabel: MenuSectionLabel,
+  Trigger: MenuTrigger,
+  Content: MenuContent
+}) as MenuComponent;
 
 export default Menu;

@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { createThemeTokens, type AccentPaletteName, type ThemeTokens } from '@editora/ui-core';
-import { Badge, Box, Button, Card, CardDescription, CardHeader, CardTitle, ContextMenu, Flex, Grid, ThemeProvider } from '@editora/ui-react';
+import { Badge, Box, Button, Card, ContextMenu, Flex, Grid, ThemeProvider } from '@editora/ui-react';
 import { CheckCircleIcon, ClipboardCheckIcon, FolderIcon, HomeIcon, LayersIcon, ShieldIcon, SparklesIcon, TrashIcon } from '@editora/react-icons';
 
 const baseItems = [
@@ -268,12 +268,12 @@ export const Playground: Story = {
     return (
       <Grid style={{ gap: 16, maxInlineSize: 1040 }}>
         <Card radius={18}>
-          <CardHeader>
-            <CardTitle>Anchored production surface</CardTitle>
-            <CardDescription>
+          <Card.Header>
+            <Card.Title>Anchored production surface</Card.Title>
+            <Card.Description>
               Right-click the canvas to inspect the real component contract: variants, size, radius, elevation, tone, state, keyboard support, and submenu handling.
-            </CardDescription>
-          </CardHeader>
+            </Card.Description>
+          </Card.Header>
           <Box slot="inset" style={{ padding: 16, display: 'grid', gap: 16 }}>
             <Box
               onContextMenu={(event) => {
@@ -341,12 +341,12 @@ export const StructuredComposition: Story = {
     return (
       <Grid style={{ gap: 16, maxInlineSize: 920 }}>
         <Card radius={18} variant="soft" tone="info">
-          <CardHeader>
-            <CardTitle>Structured composition</CardTitle>
-            <CardDescription>
+          <Card.Header>
+            <Card.Title>Structured composition</Card.Title>
+            <Card.Description>
               Use custom slotted content when the built-in `items` model is not expressive enough for mixed labels, captions, and workflow-specific states.
-            </CardDescription>
-          </CardHeader>
+            </Card.Description>
+          </Card.Header>
           <Box slot="inset" style={{ padding: 16 }}>
             <Box
               onContextMenu={(event) => {

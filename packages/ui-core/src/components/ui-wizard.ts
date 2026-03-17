@@ -1,6 +1,6 @@
-import { ElementBase } from '../ElementBase';
+import { ElementBase } from "../ElementBase";
 
-type WizardStepState = 'default' | 'complete' | 'success' | 'warning' | 'error';
+type WizardStepState = "default" | "complete" | "success" | "warning" | "error";
 
 type WizardStep = {
   index: number;
@@ -13,7 +13,13 @@ type WizardStep = {
   node: HTMLElement;
 };
 
-type VisualStepState = 'upcoming' | 'current' | 'complete' | 'success' | 'warning' | 'error';
+type VisualStepState =
+  | "upcoming"
+  | "current"
+  | "complete"
+  | "success"
+  | "warning"
+  | "error";
 
 const style = `
   :host {
@@ -32,8 +38,10 @@ const style = `
     --ui-wizard-gap: 12px;
     --ui-wizard-padding: 12px;
     --ui-wizard-step-min-width: 180px;
-    --ui-wizard-duration: 160ms;
+    --ui-wizard-duration: 180ms;
     --ui-wizard-progress: 0%;
+    --ui-wizard-panel-y: 8px;
+    --ui-wizard-panel-scale: 0.985;
 
     display: block;
     min-inline-size: 0;
@@ -287,11 +295,64 @@ const style = `
     border-radius: calc(var(--ui-wizard-radius) - 4px);
     background: color-mix(in srgb, var(--ui-wizard-surface) 97%, transparent);
     padding: 12px;
+    position: relative;
+    overflow: clip;
   }
 
   .panel ::slotted([slot="step"]) {
     display: block;
     min-inline-size: 0;
+  }
+
+  .panel ::slotted([slot="step"][hidden]) {
+    display: none !important;
+  }
+
+  .panel ::slotted([slot="step"][data-keep-mounted="true"]) {
+    transition:
+      opacity var(--ui-wizard-duration) ease,
+      transform var(--ui-wizard-duration) ease,
+      visibility var(--ui-wizard-duration) ease;
+    will-change: opacity, transform;
+  }
+
+  .panel ::slotted([slot="step"][data-keep-mounted="true"][data-visible="true"]) {
+    position: relative;
+    visibility: visible;
+    opacity: 1;
+    transform: translateX(0) translateY(0) scale(1);
+    pointer-events: auto;
+    z-index: 1;
+  }
+
+  .panel ::slotted([slot="step"][data-keep-mounted="true"][data-visible="false"][data-nav-direction="forward"]) {
+    position: absolute;
+    inset: 12px;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateX(-10px) scale(0.985);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .panel ::slotted([slot="step"][data-keep-mounted="true"][data-visible="false"][data-nav-direction="backward"]) {
+    position: absolute;
+    inset: 12px;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateX(10px) scale(0.985);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .panel ::slotted([slot="step"][data-keep-mounted="true"][data-visible="false"][data-nav-direction="none"]) {
+    position: absolute;
+    inset: 12px;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(var(--ui-wizard-panel-y)) scale(var(--ui-wizard-panel-scale));
+    pointer-events: none;
+    z-index: 0;
   }
 
   .empty {
@@ -508,7 +569,8 @@ const style = `
     .btn,
     .progress::after,
     .step-badge::after,
-    .btn.primary::after {
+    .btn.primary::after,
+    .panel ::slotted([slot="step"][data-keep-mounted="true"]) {
       transition: none !important;
       animation: none !important;
     }
@@ -573,17 +635,17 @@ const style = `
 
 function escapeHtml(value: string): string {
   return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function isTruthy(raw: string | null): boolean {
   if (raw == null) return false;
   const normalized = String(raw).toLowerCase();
-  return normalized !== 'false' && normalized !== '0' && normalized !== 'off';
+  return normalized !== "false" && normalized !== "0" && normalized !== "off";
 }
 
 let wizardInstanceId = 0;
@@ -591,32 +653,36 @@ let wizardInstanceId = 0;
 export class UIWizard extends ElementBase {
   static get observedAttributes() {
     return [
-      'value',
-      'linear',
-      'show-stepper',
-      'stepper-position',
-      'hide-controls',
-      'variant',
-      'headless',
-      'keep-mounted',
-      'next-label',
-      'prev-label',
-      'finish-label',
-      'aria-label',
-      'orientation',
-      'density',
-      'shape',
-      'show-progress',
-      'busy',
-      'title',
-      'description',
-      'empty-label'
+      "value",
+      "linear",
+      "show-stepper",
+      "stepper-position",
+      "hide-controls",
+      "variant",
+      "headless",
+      "keep-mounted",
+      "lazy-mount",
+      "animate",
+      "next-label",
+      "prev-label",
+      "finish-label",
+      "aria-label",
+      "orientation",
+      "density",
+      "shape",
+      "show-progress",
+      "busy",
+      "title",
+      "description",
+      "empty-label",
     ];
   }
 
   private _observer: MutationObserver | null = null;
   private readonly _instanceId = ++wizardInstanceId;
   private _isSyncingValueAttribute = false;
+  private _visited = new Set<string>();
+  private _lastDirection: "forward" | "backward" | "none" = "none";
 
   private _stepButtons: HTMLButtonElement[] = [];
   private _progressEl: HTMLElement | null = null;
@@ -634,21 +700,24 @@ export class UIWizard extends ElementBase {
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.root.addEventListener('click', this._onClick as EventListener);
-    this.root.addEventListener('keydown', this._onKeyDown as EventListener);
+    this.root.addEventListener("click", this._onClick as EventListener);
+    this.root.addEventListener("keydown", this._onKeyDown as EventListener);
 
     this._observer = new MutationObserver((records) => {
       const shouldRender = records.some((record) => {
-        if (record.type === 'childList') {
+        if (record.type === "childList") {
           return record.target === this;
         }
 
-        if (record.type !== 'attributes') return false;
+        if (record.type !== "attributes") return false;
         const target = record.target as HTMLElement;
-        const attribute = record.attributeName || '';
+        const attribute = record.attributeName || "";
 
-        if (attribute === 'slot') {
-          return target.getAttribute('slot') === 'step' || target.matches('[slot="step"]');
+        if (attribute === "slot") {
+          return (
+            target.getAttribute("slot") === "step" ||
+            target.matches('[slot="step"]')
+          );
         }
 
         const stepNode = target.closest('[slot="step"]') as HTMLElement | null;
@@ -656,13 +725,15 @@ export class UIWizard extends ElementBase {
         if (target !== stepNode) return false;
 
         return (
-          attribute === 'data-value' ||
-          attribute === 'data-title' ||
-          attribute === 'data-description' ||
-          attribute === 'data-optional' ||
-          attribute === 'data-disabled' ||
-          attribute === 'data-state' ||
-          attribute === 'disabled'
+          attribute === "data-value" ||
+          attribute === "data-title" ||
+          attribute === "data-description" ||
+          attribute === "data-optional" ||
+          attribute === "data-disabled" ||
+          attribute === "data-state" ||
+          attribute === "data-invalid" ||
+          attribute === "disabled" ||
+          attribute === "invalid"
         );
       });
 
@@ -673,13 +744,24 @@ export class UIWizard extends ElementBase {
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ['slot', 'data-value', 'data-title', 'data-description', 'data-optional', 'data-disabled', 'data-state', 'disabled']
+      attributeFilter: [
+        "slot",
+        "data-value",
+        "data-title",
+        "data-description",
+        "data-optional",
+        "data-disabled",
+        "data-state",
+        "data-invalid",
+        "disabled",
+        "invalid",
+      ],
     });
   }
 
   override disconnectedCallback(): void {
-    this.root.removeEventListener('click', this._onClick as EventListener);
-    this.root.removeEventListener('keydown', this._onKeyDown as EventListener);
+    this.root.removeEventListener("click", this._onClick as EventListener);
+    this.root.removeEventListener("keydown", this._onKeyDown as EventListener);
     if (this._observer) {
       this._observer.disconnect();
       this._observer = null;
@@ -687,10 +769,14 @@ export class UIWizard extends ElementBase {
     super.disconnectedCallback();
   }
 
-  override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
+  override attributeChangedCallback(
+    name: string,
+    oldValue: string | null,
+    newValue: string | null,
+  ): void {
     if (oldValue === newValue) return;
 
-    if (name === 'value') {
+    if (name === "value") {
       if (!this._isSyncingValueAttribute) this._syncValueUi();
       return;
     }
@@ -699,40 +785,60 @@ export class UIWizard extends ElementBase {
   }
 
   get value(): string {
-    return this.getAttribute('value') || '';
+    return this.getAttribute("value") || "";
   }
 
   set value(next: string) {
-    const normalized = String(next || '');
-    if (!normalized) this.removeAttribute('value');
-    else this.setAttribute('value', normalized);
+    const normalized = String(next || "");
+    if (!normalized) this.removeAttribute("value");
+    else this.setAttribute("value", normalized);
   }
 
   private _isBusy(): boolean {
-    return isTruthy(this.getAttribute('busy')) || this.hasAttribute('busy');
+    return isTruthy(this.getAttribute("busy")) || this.hasAttribute("busy");
+  }
+
+  private _isAnimationEnabled(): boolean {
+    const raw = this.getAttribute("animate");
+    if (raw == null) return true;
+    return isTruthy(raw) || raw === "";
   }
 
   private _steps(): WizardStep[] {
-    const nodes = Array.from(this.children).filter((node): node is HTMLElement => {
-      return node instanceof HTMLElement && node.getAttribute('slot') === 'step';
-    });
+    const nodes = Array.from(this.children).filter(
+      (node): node is HTMLElement => {
+        return (
+          node instanceof HTMLElement && node.getAttribute("slot") === "step"
+        );
+      },
+    );
 
     return nodes.map((node, index) => {
-      const rawState = (node.getAttribute('data-state') || '').trim().toLowerCase();
+      const rawState = (node.getAttribute("data-state") || "")
+        .trim()
+        .toLowerCase();
       const state: WizardStepState =
-        rawState === 'complete' || rawState === 'success' || rawState === 'warning' || rawState === 'error'
+        rawState === "complete" ||
+        rawState === "success" ||
+        rawState === "warning" ||
+        rawState === "error"
           ? (rawState as WizardStepState)
-          : 'default';
+          : "default";
 
       return {
         index,
-        value: node.getAttribute('data-value') || String(index + 1),
-        title: node.getAttribute('data-title') || node.getAttribute('title') || `Step ${index + 1}`,
-        description: node.getAttribute('data-description') || '',
-        optional: isTruthy(node.getAttribute('data-optional')),
-        disabled: node.hasAttribute('disabled') || isTruthy(node.getAttribute('data-disabled')),
+        value: node.getAttribute("data-value") || String(index + 1),
+        title:
+          node.getAttribute("data-title") ||
+          node.getAttribute("title") ||
+          `Step ${index + 1}`,
+        description: node.getAttribute("data-description") || "",
+        optional: isTruthy(node.getAttribute("data-optional")),
+        disabled:
+          node.hasAttribute("disabled") ||
+          isTruthy(node.getAttribute("data-disabled")),
         state,
-        node
+        node,
       };
     });
   }
@@ -748,81 +854,204 @@ export class UIWizard extends ElementBase {
   private _activeIndex(steps: WizardStep[]): number {
     if (!steps.length) return -1;
 
-    const current = this.getAttribute('value') || '';
+    const current = this.getAttribute("value") || "";
     if (current) {
       const byValue = steps.findIndex((step) => step.value === current);
       if (byValue >= 0) return byValue;
     }
 
     const firstEnabled = steps.find((step) => !step.disabled) || steps[0];
-    if (firstEnabled && this.getAttribute('value') !== firstEnabled.value) {
-      this.setAttribute('value', firstEnabled.value);
+    if (firstEnabled && this.getAttribute("value") !== firstEnabled.value) {
+      this.setAttribute("value", firstEnabled.value);
     }
 
     return steps.findIndex((step) => step.value === firstEnabled.value);
   }
 
-  private _visualStatus(step: WizardStep, index: number, activeIndex: number): VisualStepState {
-    if (step.state === 'error') return 'error';
-    if (step.state === 'warning') return 'warning';
-    if (step.state === 'success') return 'success';
-    if (step.state === 'complete') return 'complete';
-    if (index < activeIndex) return 'complete';
-    if (index === activeIndex) return 'current';
-    return 'upcoming';
+  private _visualStatus(
+    step: WizardStep,
+    index: number,
+    activeIndex: number,
+  ): VisualStepState {
+    if (step.state === "error") return "error";
+    if (step.state === "warning") return "warning";
+    if (step.state === "success") return "success";
+    if (step.state === "complete") return "complete";
+    if (index < activeIndex) return "complete";
+    if (index === activeIndex) return "current";
+    return "upcoming";
+  }
+
+  private _markVisited(steps: WizardStep[], activeIndex: number): void {
+    const active = steps[activeIndex];
+    if (active) this._visited.add(active.value);
+  }
+
+  private _dispatchBlockedNext(
+    reason: "validation" | "disabled" | "linear" | "busy" | "bounds",
+    steps: WizardStep[],
+    activeIndex: number,
+    targetIndex: number,
+  ): void {
+    const current = steps[activeIndex];
+    const next = steps[targetIndex];
+
+    this.dispatchEvent(
+      new CustomEvent("blocked-next", {
+        detail: {
+          reason,
+          currentIndex: activeIndex,
+          nextIndex: targetIndex,
+          currentValue: current?.value || "",
+          nextValue: next?.value || "",
+        },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  private _isStepInvalid(step: WizardStep, index: number): boolean {
+    if (!step) return true;
+
+    if (
+      step.node.hasAttribute("invalid") ||
+      isTruthy(step.node.getAttribute("data-invalid"))
+    ) {
+      return true;
+    }
+
+    const event = new CustomEvent("validate-step", {
+      detail: {
+        index,
+        value: step.value,
+        title: step.title,
+        node: step.node,
+      },
+      bubbles: true,
+      composed: true,
+      cancelable: true,
+    });
+
+    const allowed = this.dispatchEvent(event);
+    return !allowed;
+  }
+
+  validateCurrentStep(): boolean {
+    const steps = this._steps();
+    if (!steps.length) return false;
+    const activeIndex = this._activeIndex(steps);
+    if (activeIndex < 0) return false;
+    return !this._isStepInvalid(steps[activeIndex], activeIndex);
   }
 
   private _syncPanels(steps: WizardStep[], activeIndex: number): void {
-    const keepMounted = this.hasAttribute('keep-mounted');
+    const keepMounted = this.hasAttribute("keep-mounted");
+    const animationsEnabled = this._isAnimationEnabled();
+
+    this._markVisited(steps, activeIndex);
 
     steps.forEach((step, index) => {
       const active = index === activeIndex;
       const panelId = this._panelId(index);
       const tabId = this._tabId(index);
+      const visited = this._visited.has(step.value);
 
       step.node.id = panelId;
-      step.node.setAttribute('role', 'tabpanel');
-      step.node.setAttribute('aria-labelledby', tabId);
-      step.node.setAttribute('tabindex', active ? '0' : '-1');
-      step.node.setAttribute('data-active', active ? 'true' : 'false');
-      step.node.setAttribute('aria-hidden', active ? 'false' : 'true');
+      step.node.setAttribute("role", "tabpanel");
+      step.node.setAttribute("aria-labelledby", tabId);
+      step.node.setAttribute("tabindex", active ? "0" : "-1");
+      step.node.setAttribute("data-active", active ? "true" : "false");
+      step.node.setAttribute("aria-hidden", active ? "false" : "true");
+      step.node.setAttribute(
+        "data-keep-mounted",
+        keepMounted ? "true" : "false",
+      );
+      step.node.setAttribute("data-visible", active ? "true" : "false");
+      step.node.setAttribute("data-visited", visited ? "true" : "false");
+      step.node.setAttribute(
+        "data-nav-direction",
+        animationsEnabled ? this._lastDirection : "none",
+      );
 
-      if (keepMounted) step.node.hidden = false;
-      else step.node.hidden = !active;
+      if (keepMounted) {
+        step.node.hidden = false;
+      } else {
+        step.node.hidden = !active;
+      }
     });
   }
 
-  private _attemptChange(steps: WizardStep[], activeIndex: number, targetIndex: number, trigger: string): boolean {
-    if (this._isBusy()) return false;
+  private _attemptChange(
+    steps: WizardStep[],
+    activeIndex: number,
+    targetIndex: number,
+    trigger: string,
+  ): boolean {
+    if (this._isBusy()) {
+      this._dispatchBlockedNext("busy", steps, activeIndex, targetIndex);
+      return false;
+    }
+
     if (targetIndex === activeIndex) return true;
-    if (targetIndex < 0 || targetIndex >= steps.length) return false;
+
+    if (targetIndex < 0 || targetIndex >= steps.length) {
+      this._dispatchBlockedNext("bounds", steps, activeIndex, targetIndex);
+      return false;
+    }
 
     const target = steps[targetIndex];
-    if (!target || target.disabled) return false;
-    if (this.hasAttribute('linear') && targetIndex > activeIndex + 1) return false;
+    if (!target || target.disabled) {
+      this._dispatchBlockedNext("disabled", steps, activeIndex, targetIndex);
+      return false;
+    }
+
+    if (this.hasAttribute("linear") && targetIndex > activeIndex + 1) {
+      this._dispatchBlockedNext("linear", steps, activeIndex, targetIndex);
+      return false;
+    }
 
     const current = steps[activeIndex];
-    const before = new CustomEvent('before-change', {
+    const movingForward = targetIndex > activeIndex;
+
+    if (movingForward && current && this._isStepInvalid(current, activeIndex)) {
+      this._dispatchBlockedNext("validation", steps, activeIndex, targetIndex);
+      return false;
+    }
+
+    const before = new CustomEvent("before-change", {
       detail: {
         currentIndex: activeIndex,
         nextIndex: targetIndex,
-        currentValue: current?.value || '',
+        currentValue: current?.value || "",
         nextValue: target.value,
-        trigger
+        trigger,
       },
       bubbles: true,
       composed: true,
-      cancelable: true
+      cancelable: true,
     });
 
     if (!this.dispatchEvent(before)) return false;
 
+    this._lastDirection = movingForward ? "forward" : "backward";
     this.value = target.value;
 
-    const detail = { index: targetIndex, value: target.value, title: target.title, trigger };
-    this.dispatchEvent(new CustomEvent('input', { detail, bubbles: true, composed: true }));
-    this.dispatchEvent(new CustomEvent('change', { detail, bubbles: true, composed: true }));
-    this.dispatchEvent(new CustomEvent('step-change', { detail, bubbles: true, composed: true }));
+    const detail = {
+      index: targetIndex,
+      value: target.value,
+      title: target.title,
+      trigger,
+    };
+    this.dispatchEvent(
+      new CustomEvent("input", { detail, bubbles: true, composed: true }),
+    );
+    this.dispatchEvent(
+      new CustomEvent("change", { detail, bubbles: true, composed: true }),
+    );
+    this.dispatchEvent(
+      new CustomEvent("step-change", { detail, bubbles: true, composed: true }),
+    );
     return true;
   }
 
@@ -831,8 +1060,11 @@ export class UIWizard extends ElementBase {
     if (!steps.length) return false;
 
     const activeIndex = this._activeIndex(steps);
-    const targetIndex = typeof step === 'number' ? step : steps.findIndex((entry) => entry.value === String(step));
-    return this._attemptChange(steps, activeIndex, targetIndex, 'api');
+    const targetIndex =
+      typeof step === "number"
+        ? step
+        : steps.findIndex((entry) => entry.value === String(step));
+    return this._attemptChange(steps, activeIndex, targetIndex, "api");
   }
 
   next(): boolean {
@@ -842,12 +1074,18 @@ export class UIWizard extends ElementBase {
     const activeIndex = this._activeIndex(steps);
     if (activeIndex >= steps.length - 1) {
       if (this._isBusy()) return false;
-      const detail = { index: activeIndex, value: steps[activeIndex]?.value || '', title: steps[activeIndex]?.title || '' };
-      this.dispatchEvent(new CustomEvent('complete', { detail, bubbles: true, composed: true }));
+      const detail = {
+        index: activeIndex,
+        value: steps[activeIndex]?.value || "",
+        title: steps[activeIndex]?.title || "",
+      };
+      this.dispatchEvent(
+        new CustomEvent("complete", { detail, bubbles: true, composed: true }),
+      );
       return true;
     }
 
-    return this._attemptChange(steps, activeIndex, activeIndex + 1, 'next');
+    return this._attemptChange(steps, activeIndex, activeIndex + 1, "next");
   }
 
   prev(): boolean {
@@ -855,40 +1093,51 @@ export class UIWizard extends ElementBase {
     if (!steps.length) return false;
 
     const activeIndex = this._activeIndex(steps);
-    return this._attemptChange(steps, activeIndex, activeIndex - 1, 'prev');
+    return this._attemptChange(steps, activeIndex, activeIndex - 1, "prev");
   }
 
   private _onClick(event: MouseEvent): void {
     const target = event.target as HTMLElement | null;
     if (!target) return;
 
-    if (target.closest('.btn-prev')) {
+    if (target.closest(".btn-prev")) {
       this.prev();
       return;
     }
 
-    if (target.closest('.btn-next')) {
+    if (target.closest(".btn-next")) {
       this.next();
       return;
     }
 
-    const stepTrigger = target.closest('.step') as HTMLButtonElement | null;
+    const stepTrigger = target.closest(".step") as HTMLButtonElement | null;
     if (!stepTrigger) return;
 
-    const index = Number(stepTrigger.getAttribute('data-index'));
+    const index = Number(stepTrigger.getAttribute("data-index"));
     if (!Number.isInteger(index)) return;
 
     const steps = this._steps();
     const activeIndex = this._activeIndex(steps);
-    this._attemptChange(steps, activeIndex, index, 'stepper');
+    this._attemptChange(steps, activeIndex, index, "stepper");
   }
 
   private _onKeyDown(event: KeyboardEvent): void {
-    const orientation = this.getAttribute('orientation') === 'vertical' ? 'vertical' : 'horizontal';
-    const rtl = orientation === 'horizontal' && getComputedStyle(this).direction === 'rtl';
+    const orientation =
+      this.getAttribute("orientation") === "vertical"
+        ? "vertical"
+        : "horizontal";
+    const rtl =
+      orientation === "horizontal" &&
+      getComputedStyle(this).direction === "rtl";
 
-    const nextArrow = orientation === 'vertical' ? 'ArrowDown' : rtl ? 'ArrowLeft' : 'ArrowRight';
-    const prevArrow = orientation === 'vertical' ? 'ArrowUp' : rtl ? 'ArrowRight' : 'ArrowLeft';
+    const nextArrow =
+      orientation === "vertical"
+        ? "ArrowDown"
+        : rtl
+          ? "ArrowLeft"
+          : "ArrowRight";
+    const prevArrow =
+      orientation === "vertical" ? "ArrowUp" : rtl ? "ArrowRight" : "ArrowLeft";
 
     if (event.altKey && event.key === nextArrow) {
       event.preventDefault();
@@ -903,7 +1152,7 @@ export class UIWizard extends ElementBase {
     }
 
     const target = event.target as HTMLElement | null;
-    const step = target?.closest('.step') as HTMLButtonElement | null;
+    const step = target?.closest(".step") as HTMLButtonElement | null;
     if (!step) return;
 
     const enabledSteps = this._stepButtons.filter((button) => !button.disabled);
@@ -920,17 +1169,22 @@ export class UIWizard extends ElementBase {
 
     if (event.key === prevArrow) {
       event.preventDefault();
-      enabledSteps[(index - 1 + enabledSteps.length) % enabledSteps.length].focus();
+      enabledSteps[
+        (index - 1 + enabledSteps.length) % enabledSteps.length
+      ].focus();
       return;
     }
 
-    if (event.key === 'Home' || event.key === 'End') {
+    if (event.key === "Home" || event.key === "End") {
       event.preventDefault();
-      (event.key === 'Home' ? enabledSteps[0] : enabledSteps[enabledSteps.length - 1]).focus();
+      (event.key === "Home"
+        ? enabledSteps[0]
+        : enabledSteps[enabledSteps.length - 1]
+      ).focus();
       return;
     }
 
-    if (event.key === ' ' || event.key === 'Enter') {
+    if (event.key === " " || event.key === "Enter") {
       event.preventDefault();
       step.click();
     }
@@ -938,7 +1192,7 @@ export class UIWizard extends ElementBase {
 
   private _syncValueUi(): void {
     if (!this.isConnected) return;
-    if (!this.root.querySelector('.frame')) {
+    if (!this.root.querySelector(".frame")) {
       this.requestRender();
       return;
     }
@@ -959,31 +1213,40 @@ export class UIWizard extends ElementBase {
     this._stepButtons.forEach((button, index) => {
       const selected = index === activeIndex;
       const visual = this._visualStatus(steps[index], index, activeIndex);
-      button.setAttribute('data-active', selected ? 'true' : 'false');
-      button.setAttribute('data-status', visual);
-      button.setAttribute('aria-selected', selected ? 'true' : 'false');
-      button.setAttribute('tabindex', selected ? '0' : '-1');
+      button.setAttribute("data-active", selected ? "true" : "false");
+      button.setAttribute("data-status", visual);
+      button.setAttribute("aria-selected", selected ? "true" : "false");
+      button.setAttribute("tabindex", selected ? "0" : "-1");
 
-      const badge = button.querySelector('.step-badge') as HTMLElement | null;
+      const badge = button.querySelector(".step-badge") as HTMLElement | null;
       if (badge) {
-        if (visual === 'complete' || visual === 'success') badge.textContent = '✓';
-        else if (visual === 'warning') badge.textContent = '!';
-        else if (visual === 'error') badge.textContent = '×';
+        if (visual === "complete" || visual === "success")
+          badge.textContent = "✓";
+        else if (visual === "warning") badge.textContent = "!";
+        else if (visual === "error") badge.textContent = "×";
         else badge.textContent = String(index + 1);
       }
 
-      const container = button.closest('.step-item') as HTMLElement | null;
+      const container = button.closest(".step-item") as HTMLElement | null;
       if (container) {
-        container.setAttribute('data-status', visual);
-        container.setAttribute('data-complete', index < activeIndex ? 'true' : 'false');
-        container.setAttribute('data-current', selected ? 'true' : 'false');
+        container.setAttribute("data-status", visual);
+        container.setAttribute(
+          "data-complete",
+          index < activeIndex ? "true" : "false",
+        );
+        container.setAttribute("data-current", selected ? "true" : "false");
       }
     });
 
     const total = steps.length;
-    const percent = total <= 1 || activeIndex < 0 ? 0 : Math.round((activeIndex / (total - 1)) * 100);
-    if (this._progressEl) this._progressEl.style.setProperty('--ui-wizard-progress', `${percent}%`);
-    if (this._statusStepEl) this._statusStepEl.textContent = `Step ${Math.max(1, activeIndex + 1)} of ${total}`;
+    const percent =
+      total <= 1 || activeIndex < 0
+        ? 0
+        : Math.round((activeIndex / (total - 1)) * 100);
+    if (this._progressEl)
+      this._progressEl.style.setProperty("--ui-wizard-progress", `${percent}%`);
+    if (this._statusStepEl)
+      this._statusStepEl.textContent = `Step ${Math.max(1, activeIndex + 1)} of ${total}`;
     if (this._statusValueEl) this._statusValueEl.textContent = `${percent}%`;
 
     const busy = this._isBusy();
@@ -994,41 +1257,50 @@ export class UIWizard extends ElementBase {
 
     if (this._nextBtn) {
       const atLast = activeIndex >= total - 1;
-      const nextLabel = this.getAttribute('next-label') || 'Next';
-      const finishLabel = this.getAttribute('finish-label') || 'Finish';
+      const nextLabel = this.getAttribute("next-label") || "Next";
+      const finishLabel = this.getAttribute("finish-label") || "Finish";
       this._nextBtn.textContent = atLast ? finishLabel : nextLabel;
-      this._nextBtn.setAttribute('data-loading', busy ? 'true' : 'false');
-      this._nextBtn.disabled = busy || activeIndex < 0 || steps[activeIndex]?.disabled === true;
+      this._nextBtn.setAttribute("data-loading", busy ? "true" : "false");
+      this._nextBtn.disabled =
+        busy || activeIndex < 0 || steps[activeIndex]?.disabled === true;
     }
 
-    const frame = this.root.querySelector('.frame') as HTMLElement | null;
-    if (frame) frame.setAttribute('aria-busy', busy ? 'true' : 'false');
+    const frame = this.root.querySelector(".frame") as HTMLElement | null;
+    if (frame) frame.setAttribute("aria-busy", busy ? "true" : "false");
 
     if (this._progressRow) {
-      const showProgress = this.getAttribute('show-progress') !== 'false' && total > 0;
-      if (showProgress) this._progressRow.removeAttribute('hidden');
-      else this._progressRow.setAttribute('hidden', '');
+      const showProgress =
+        this.getAttribute("show-progress") !== "false" && total > 0;
+      if (showProgress) this._progressRow.removeAttribute("hidden");
+      else this._progressRow.setAttribute("hidden", "");
     }
   }
 
   protected override render(): void {
     const steps = this._steps();
     const activeIndex = this._activeIndex(steps);
+    this._markVisited(steps, activeIndex);
     this._syncPanels(steps, activeIndex);
 
-    const title = this.getAttribute('title') || '';
-    const description = this.getAttribute('description') || '';
+    const title = this.getAttribute("title") || "";
+    const description = this.getAttribute("description") || "";
 
-    const showStepper = this.getAttribute('show-stepper') !== 'false' && steps.length > 0;
-    const showProgress = this.getAttribute('show-progress') !== 'false' && steps.length > 0;
-    const stepperPosition = this.getAttribute('stepper-position') === 'bottom' ? 'bottom' : 'top';
-    const hideControls = this.hasAttribute('hide-controls') || steps.length === 0;
+    const showStepper =
+      this.getAttribute("show-stepper") !== "false" && steps.length > 0;
+    const showProgress =
+      this.getAttribute("show-progress") !== "false" && steps.length > 0;
+    const stepperPosition =
+      this.getAttribute("stepper-position") === "bottom" ? "bottom" : "top";
+    const hideControls =
+      this.hasAttribute("hide-controls") || steps.length === 0;
 
-    const prevLabel = this.getAttribute('prev-label') || 'Previous';
-    const nextLabel = this.getAttribute('next-label') || 'Next';
-    const finishLabel = this.getAttribute('finish-label') || 'Finish';
+    const prevLabel = this.getAttribute("prev-label") || "Previous";
+    const nextLabel = this.getAttribute("next-label") || "Next";
+    const finishLabel = this.getAttribute("finish-label") || "Finish";
 
-    const emptyLabel = this.getAttribute('empty-label') || 'No wizard steps configured. Add elements with slot="step".';
+    const emptyLabel =
+      this.getAttribute("empty-label") ||
+      'No wizard steps configured. Add elements with slot="step".';
 
     const stepper = showStepper
       ? `
@@ -1036,17 +1308,24 @@ export class UIWizard extends ElementBase {
             class="stepper"
             part="stepper"
             role="tablist"
-            aria-orientation="${this.getAttribute('orientation') === 'vertical' ? 'vertical' : 'horizontal'}"
-            aria-label="${escapeHtml(this.getAttribute('aria-label') || 'Wizard steps')}"
+            aria-orientation="${this.getAttribute("orientation") === "vertical" ? "vertical" : "horizontal"}"
+            aria-label="${escapeHtml(this.getAttribute("aria-label") || "Wizard steps")}"
           >
             ${steps
               .map((step, index) => {
                 const visual = this._visualStatus(step, index, activeIndex);
                 const tabId = this._tabId(index);
                 const panelId = this._panelId(index);
-                const badge = visual === 'complete' || visual === 'success' ? '✓' : visual === 'warning' ? '!' : visual === 'error' ? '×' : String(index + 1);
+                const badge =
+                  visual === "complete" || visual === "success"
+                    ? "✓"
+                    : visual === "warning"
+                      ? "!"
+                      : visual === "error"
+                        ? "×"
+                        : String(index + 1);
                 return `
-                  <div class="step-item" part="step-item" data-index="${index}" data-last="${index === steps.length - 1 ? 'true' : 'false'}" data-status="${visual}" data-complete="${index < activeIndex ? 'true' : 'false'}" data-current="${index === activeIndex ? 'true' : 'false'}">
+                  <div class="step-item" part="step-item" data-index="${index}" data-last="${index === steps.length - 1 ? "true" : "false"}" data-status="${visual}" data-complete="${index < activeIndex ? "true" : "false"}" data-current="${index === activeIndex ? "true" : "false"}">
                     <button
                       type="button"
                       class="step"
@@ -1055,23 +1334,23 @@ export class UIWizard extends ElementBase {
                       role="tab"
                       aria-controls="${panelId}"
                       data-index="${index}"
-                      data-active="${index === activeIndex ? 'true' : 'false'}"
+                      data-active="${index === activeIndex ? "true" : "false"}"
                       data-status="${visual}"
-                      aria-selected="${index === activeIndex ? 'true' : 'false'}"
-                      aria-disabled="${step.disabled ? 'true' : 'false'}"
-                      tabindex="${index === activeIndex ? '0' : '-1'}"
-                      ${step.disabled ? 'disabled' : ''}
+                      aria-selected="${index === activeIndex ? "true" : "false"}"
+                      aria-disabled="${step.disabled ? "true" : "false"}"
+                      tabindex="${index === activeIndex ? "0" : "-1"}"
+                      ${step.disabled ? "disabled" : ""}
                     >
                       <span class="step-badge" part="step-badge">${badge}</span>
                       <span class="step-main" part="step-main">
-                        <span class="step-title" part="step-title">${escapeHtml(step.title)}${step.optional ? ' (optional)' : ''}</span>
-                        ${step.description ? `<span class="step-description" part="step-description">${escapeHtml(step.description)}</span>` : ''}
+                        <span class="step-title" part="step-title">${escapeHtml(step.title)}${step.optional ? " (optional)" : ""}</span>
+                        ${step.description ? `<span class="step-description" part="step-description">${escapeHtml(step.description)}</span>` : ""}
                       </span>
                     </button>
                   </div>
                 `;
               })
-              .join('')}
+              .join("")}
           </div>
         `
       : '<div class="stepper" hidden></div>';
@@ -1081,11 +1360,11 @@ export class UIWizard extends ElementBase {
 
     this.setContent(`
       <style>${style}</style>
-      <section class="frame" part="frame" role="group" aria-label="${escapeHtml(this.getAttribute('aria-label') || 'Wizard')}" aria-busy="${this._isBusy() ? 'true' : 'false'}">
-        <h3 class="title" part="title" ${title ? '' : 'hidden'}>${escapeHtml(title)}</h3>
-        <p class="description" part="description" ${description ? '' : 'hidden'}>${escapeHtml(description)}</p>
+      <section class="frame" part="frame" role="group" aria-label="${escapeHtml(this.getAttribute("aria-label") || "Wizard")}" aria-busy="${this._isBusy() ? "true" : "false"}">
+        <h3 class="title" part="title" ${title ? "" : "hidden"}>${escapeHtml(title)}</h3>
+        <p class="description" part="description" ${description ? "" : "hidden"}>${escapeHtml(description)}</p>
 
-        <div class="status" part="status" ${showProgress ? '' : 'hidden'}>
+        <div class="status" part="status" ${showProgress ? "" : "hidden"}>
           <div class="status-row">
             <span class="status-step" part="status-step"></span>
             <span class="status-value" part="status-value"></span>
@@ -1093,36 +1372,52 @@ export class UIWizard extends ElementBase {
           <div class="progress" part="progress"></div>
         </div>
 
-        ${stepperPosition === 'top' ? stepper : ''}
+        ${stepperPosition === "top" ? stepper : ""}
 
-        <div class="panel" part="panel" ${steps.length ? '' : 'hidden'}><slot></slot></div>
-        <p class="empty" part="empty" ${steps.length ? 'hidden' : ''}>${escapeHtml(emptyLabel)}</p>
+        <div class="panel" part="panel" ${steps.length ? "" : "hidden"}>
+          <slot name="step"></slot>
+        </div>
+        <p class="empty" part="empty" ${steps.length ? "hidden" : ""}>${escapeHtml(emptyLabel)}</p>
 
-        ${stepperPosition === 'bottom' ? stepper : ''}
+        ${stepperPosition === "bottom" ? stepper : ""}
 
-        <div class="controls" part="controls" ${hideControls ? 'hidden' : ''}>
+        <div class="controls" part="controls" ${hideControls ? "hidden" : ""}>
           <div class="group" part="controls-start"><slot name="controls-start"></slot></div>
           <div class="group" part="controls-end">
-            <button type="button" class="btn btn-prev" part="button-prev" ${atFirst ? 'disabled' : ''}>${escapeHtml(prevLabel)}</button>
-            <button type="button" class="btn primary btn-next" part="button-next" data-loading="${this._isBusy() ? 'true' : 'false'}">${escapeHtml(atLast ? finishLabel : nextLabel)}</button>
+            <button type="button" class="btn btn-prev" part="button-prev" ${atFirst ? "disabled" : ""}>${escapeHtml(prevLabel)}</button>
+            <button type="button" class="btn primary btn-next" part="button-next" data-loading="${this._isBusy() ? "true" : "false"}">${escapeHtml(atLast ? finishLabel : nextLabel)}</button>
             <slot name="controls-end"></slot>
           </div>
         </div>
       </section>
     `);
 
-    this._stepButtons = Array.from(this.root.querySelectorAll<HTMLButtonElement>('.step'));
-    this._progressEl = this.root.querySelector('.progress') as HTMLElement | null;
-    this._progressRow = this.root.querySelector('.status') as HTMLElement | null;
-    this._statusStepEl = this.root.querySelector('.status-step') as HTMLElement | null;
-    this._statusValueEl = this.root.querySelector('.status-value') as HTMLElement | null;
-    this._prevBtn = this.root.querySelector('.btn-prev') as HTMLButtonElement | null;
-    this._nextBtn = this.root.querySelector('.btn-next') as HTMLButtonElement | null;
+    this._stepButtons = Array.from(
+      this.root.querySelectorAll<HTMLButtonElement>(".step"),
+    );
+    this._progressEl = this.root.querySelector(
+      ".progress",
+    ) as HTMLElement | null;
+    this._progressRow = this.root.querySelector(
+      ".status",
+    ) as HTMLElement | null;
+    this._statusStepEl = this.root.querySelector(
+      ".status-step",
+    ) as HTMLElement | null;
+    this._statusValueEl = this.root.querySelector(
+      ".status-value",
+    ) as HTMLElement | null;
+    this._prevBtn = this.root.querySelector(
+      ".btn-prev",
+    ) as HTMLButtonElement | null;
+    this._nextBtn = this.root.querySelector(
+      ".btn-next",
+    ) as HTMLButtonElement | null;
 
     this._syncValueUi();
   }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get('ui-wizard')) {
-  customElements.define('ui-wizard', UIWizard);
+if (typeof customElements !== "undefined" && !customElements.get("ui-wizard")) {
+  customElements.define("ui-wizard", UIWizard);
 }

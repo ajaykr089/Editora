@@ -2,8 +2,11 @@ import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-type ComboboxProps = React.HTMLAttributes<HTMLElement> & {
+type BaseProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
+};
+
+export type ComboboxProps = Omit<BaseProps, 'onChange'> & {
   value?: string;
   open?: boolean;
   state?: 'idle' | 'loading' | 'error' | 'success';
@@ -37,8 +40,17 @@ type ComboboxProps = React.HTMLAttributes<HTMLElement> & {
   allowCustom?: boolean;
 };
 
-export function Combobox(props: ComboboxProps) {
-  const {
+export type ComboboxOptionProps = React.OptionHTMLAttributes<HTMLOptionElement> & {
+  children?: React.ReactNode;
+  description?: string;
+};
+
+type ComboboxComponent = React.ForwardRefExoticComponent<ComboboxProps & React.RefAttributes<HTMLElement>> & {
+  Option: typeof ComboboxOption;
+};
+
+const ComboboxRoot = React.forwardRef<HTMLElement, ComboboxProps>(function Combobox(
+  {
     value,
     open,
     state,
@@ -72,9 +84,12 @@ export function Combobox(props: ComboboxProps) {
     allowCustom,
     children,
     ...rest
-  } = props;
-
+  },
+  forwardedRef
+) {
   const ref = useRef<HTMLElement | null>(null);
+
+  React.useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
   useEffect(() => {
     const el = ref.current;
@@ -135,71 +150,49 @@ export function Combobox(props: ComboboxProps) {
     const el = ref.current;
     if (!el) return;
 
-    if (clearable) el.setAttribute('clearable', '');
-    else el.removeAttribute('clearable');
+    const syncBooleanish = (attr: string, next: boolean | undefined) => {
+      if (next) {
+        if (!el.hasAttribute(attr)) el.setAttribute(attr, '');
+      } else if (el.hasAttribute(attr)) {
+        el.removeAttribute(attr);
+      }
+    };
 
-    if (typeof debounce === 'number' && Number.isFinite(debounce)) el.setAttribute('debounce', String(debounce));
-    else el.removeAttribute('debounce');
+    const syncAttr = (attr: string, next: string | null) => {
+      const current = el.getAttribute(attr);
+      if (next == null) {
+        if (current != null) el.removeAttribute(attr);
+        return;
+      }
+      if (current !== next) el.setAttribute(attr, next);
+    };
 
-    if (validation && validation !== 'none') el.setAttribute('validation', validation);
-    else el.removeAttribute('validation');
+    syncBooleanish('clearable', clearable);
+    syncAttr('debounce', typeof debounce === 'number' && Number.isFinite(debounce) ? String(debounce) : null);
+    syncAttr('validation', validation && validation !== 'none' ? validation : null);
+    syncAttr('state', state && state !== 'idle' ? state : null);
+    syncAttr('state-text', stateText || null);
+    syncAttr('size', size && size !== 'md' && size !== '2' ? String(size) : null);
+    syncAttr('maxlength', typeof maxlength === 'number' ? String(maxlength) : null);
+    syncBooleanish('readonly', readOnly);
+    syncBooleanish('autofocus', autofocus);
+    syncBooleanish('disabled', disabled);
+    syncAttr('name', name || null);
+    syncBooleanish('required', required);
+    syncAttr('placeholder', placeholder || null);
+    syncAttr('variant', variant || null);
+    syncAttr('radius', radius ? String(radius) : null);
+    syncAttr('label', label || null);
+    syncAttr('description', description || null);
+    syncAttr('empty-text', emptyText || null);
+    syncBooleanish('no-filter', noFilter);
+    syncBooleanish('allow-custom', allowCustom);
+    syncBooleanish('open', typeof open === 'boolean' ? open : undefined);
 
-    if (state && state !== 'idle') el.setAttribute('state', state);
-    else el.removeAttribute('state');
-
-    if (stateText) el.setAttribute('state-text', stateText);
-    else el.removeAttribute('state-text');
-
-    if (size && size !== 'md' && size !== '2') el.setAttribute('size', String(size));
-    else el.removeAttribute('size');
-
-    if (typeof maxlength === 'number') el.setAttribute('maxlength', String(maxlength));
-    else el.removeAttribute('maxlength');
-
-    if (readOnly) el.setAttribute('readonly', '');
-    else el.removeAttribute('readonly');
-
-    if (autofocus) el.setAttribute('autofocus', '');
-    else el.removeAttribute('autofocus');
-
-    if (disabled) el.setAttribute('disabled', '');
-    else el.removeAttribute('disabled');
-
-    if (name) el.setAttribute('name', name);
-    else el.removeAttribute('name');
-
-    if (required) el.setAttribute('required', '');
-    else el.removeAttribute('required');
-
-    if (placeholder) el.setAttribute('placeholder', placeholder);
-    else el.removeAttribute('placeholder');
-
-    if (variant) el.setAttribute('variant', variant);
-    else el.removeAttribute('variant');
-
-    if (radius) el.setAttribute('radius', String(radius));
-    else el.removeAttribute('radius');
-
-    if (label) el.setAttribute('label', label);
-    else el.removeAttribute('label');
-
-    if (description) el.setAttribute('description', description);
-    else el.removeAttribute('description');
-
-    if (emptyText) el.setAttribute('empty-text', emptyText);
-    else el.removeAttribute('empty-text');
-
-    if (noFilter) el.setAttribute('no-filter', '');
-    else el.removeAttribute('no-filter');
-
-    if (allowCustom) el.setAttribute('allow-custom', '');
-    else el.removeAttribute('allow-custom');
-
-    if (typeof open === 'boolean') {
-      if (open) el.setAttribute('open', '');
-      else el.removeAttribute('open');
-    }
+    if (value != null) el.setAttribute('value', value);
+    else el.removeAttribute('value');
   }, [
+    value,
     open,
     state,
     stateText,
@@ -223,13 +216,24 @@ export function Combobox(props: ComboboxProps) {
     allowCustom
   ]);
 
-  const initialAttrs: Record<string, unknown> = { ref, ...rest };
-  if (value != null) initialAttrs.value = value;
-  if (typeof open === 'boolean' && open) initialAttrs.open = '';
-  if (state && state !== 'idle') initialAttrs.state = state;
-  if (stateText) initialAttrs['state-text'] = stateText;
+  return React.createElement('ui-combobox', { ref, ...rest }, children);
+});
 
-  return React.createElement('ui-combobox', initialAttrs, children);
-}
+ComboboxRoot.displayName = 'Combobox';
+
+export const ComboboxOption = React.forwardRef<HTMLOptionElement, ComboboxOptionProps>(function ComboboxOption(
+  { description, ...props },
+  ref
+) {
+  return (
+    <option {...props} ref={ref} data-description={description} />
+  );
+});
+
+ComboboxOption.displayName = 'Combobox.Option';
+
+export const Combobox = Object.assign(ComboboxRoot, {
+  Option: ComboboxOption,
+}) as ComboboxComponent;
 
 export default Combobox;

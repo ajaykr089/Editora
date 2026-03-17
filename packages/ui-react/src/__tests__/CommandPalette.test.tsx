@@ -25,8 +25,12 @@ describe('CommandPalette wrapper', () => {
           latestValue = detail.value || '';
         }}
       >
-        <button slot="command" data-value="open">Open project</button>
-        <button slot="command" data-value="rename">Rename item</button>
+        <CommandPalette.Item value="open" label="Open project">
+          Open project
+        </CommandPalette.Item>
+        <CommandPalette.Item value="rename" label="Rename item">
+          Rename item
+        </CommandPalette.Item>
       </CommandPalette>
     );
 
@@ -54,7 +58,9 @@ describe('CommandPalette wrapper', () => {
 
     render(
       <CommandPalette ref={ref}>
-        <button slot="command" data-value="open">Open project</button>
+        <CommandPalette.Item value="open" label="Open project">
+          Open project
+        </CommandPalette.Item>
       </CommandPalette>
     );
 

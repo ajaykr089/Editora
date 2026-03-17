@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box, Grid, Textarea, ThemeProvider } from '@editora/ui-react';
+import { Box, Grid, ThemeProvider } from '@editora/ui-react';
+import { Textarea } from '@editora/ui-react/Textarea';
 
 export default {
   title: 'UI/Textarea',
@@ -47,11 +48,12 @@ export const ControlledWithDebounce = () => {
         debounce={320}
         rows={5}
         variant="soft"
-        label="Release notes"
-        description="Debounced output updates after 320ms"
         onInput={setValue}
         onDebouncedInput={setDebounced}
-      />
+      >
+        <Textarea.Label>Release notes</Textarea.Label>
+        <Textarea.Description>Debounced output updates after 320ms</Textarea.Description>
+      </Textarea>
 
       <Box variant="surface" p="10px" style={{ fontSize: 13, color: '#475569' }}>
         <div><strong>Live:</strong> {value || '(empty)'}</div>
@@ -64,8 +66,6 @@ export const ControlledWithDebounce = () => {
 export const ValidationAndCounter = () => (
   <Grid gap="12px" style={{ maxWidth: 620 }}>
     <Textarea
-      label="Change reason"
-      description="Required for audit trails"
       maxlength={160}
       showCount
       validation="error"
@@ -73,12 +73,12 @@ export const ValidationAndCounter = () => (
       placeholder="Describe what changed and why..."
       clearable
     >
-      <Box slot="error">Please provide a clear reason before publishing.</Box>
+      <Textarea.Label>Change reason</Textarea.Label>
+      <Textarea.Description>Required for audit trails</Textarea.Description>
+      <Textarea.Error>Please provide a clear reason before publishing.</Textarea.Error>
     </Textarea>
 
     <Textarea
-      label="Internal context"
-      description="Autosize grows up to 8 rows"
       autosize
       maxRows={8}
       rows={3}
@@ -87,7 +87,10 @@ export const ValidationAndCounter = () => (
       variant="filled"
       tone="success"
       placeholder="Add operational context for support and QA teams..."
-    />
+    >
+      <Textarea.Label>Internal context</Textarea.Label>
+      <Textarea.Description>Autosize grows up to 8 rows</Textarea.Description>
+    </Textarea>
   </Grid>
 );
 
@@ -108,12 +111,13 @@ export const ContrastVariant = () => (
         variant="contrast"
         size="lg"
         rows={4}
-        label="Command center note"
-        description="High-contrast operational annotation"
         placeholder="Type a runtime directive..."
         showCount
         maxlength={220}
-      />
+      >
+        <Textarea.Label>Command center note</Textarea.Label>
+        <Textarea.Description>High-contrast operational annotation</Textarea.Description>
+      </Textarea>
     </Box>
   </ThemeProvider>
 );

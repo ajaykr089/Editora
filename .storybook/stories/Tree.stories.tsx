@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Box, Grid, Tree, TreeItem } from '@editora/ui-react';
+import { Box, Grid } from '@editora/ui-react';
+import { Tree } from '@editora/ui-react/Tree';
 
 export default {
   title: 'UI/Tree',
@@ -17,21 +18,21 @@ export const Explorer = () => {
         onSelect={(detail) => setValue(detail.value)}
         style={{ minHeight: 360 }}
       >
-        <TreeItem value="src" label="src" expanded>
-          <TreeItem value="components" label="components" expanded>
-            <TreeItem value="button" label="button.tsx" />
-            <TreeItem value="dialog" label="dialog.tsx" />
-            <TreeItem value="tree" label="tree.tsx" />
-          </TreeItem>
-          <TreeItem value="hooks" label="hooks" expanded>
-            <TreeItem value="use-floating" label="useFloating.ts" />
-            <TreeItem value="use-theme" label="useTheme.ts" />
-          </TreeItem>
-        </TreeItem>
-        <TreeItem value="docs" label="docs" expanded>
-          <TreeItem value="changelog" label="changelog.md" />
-          <TreeItem value="roadmap" label="roadmap.md" />
-        </TreeItem>
+        <Tree.Item value="src" label="src" expanded>
+          <Tree.Item value="components" label="components" expanded>
+            <Tree.Item value="button" label="button.tsx" />
+            <Tree.Item value="dialog" label="dialog.tsx" />
+            <Tree.Item value="tree" label="tree.tsx" />
+          </Tree.Item>
+          <Tree.Item value="hooks" label="hooks" expanded>
+            <Tree.Item value="use-floating" label="useFloating.ts" />
+            <Tree.Item value="use-theme" label="useTheme.ts" />
+          </Tree.Item>
+        </Tree.Item>
+        <Tree.Item value="docs" label="docs" expanded>
+          <Tree.Item value="changelog" label="changelog.md" />
+          <Tree.Item value="roadmap" label="roadmap.md" />
+        </Tree.Item>
       </Tree>
 
       <Box

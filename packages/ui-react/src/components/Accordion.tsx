@@ -52,7 +52,7 @@ function readOpen(event: Event): OpenValue | undefined {
   return (event as CustomEvent<{ open?: OpenValue }>).detail?.open;
 }
 
-export const Accordion = React.forwardRef<HTMLElement, AccordionProps>(function Accordion(
+const Accordion = React.forwardRef<HTMLElement, AccordionProps>(function Accordion(
   { multiple, collapsible, open, variant, size, radius, tone, indicator, shape, elevation, onToggle, onChangeOpen, children, ...rest },
   forwardedRef
 ) {
@@ -110,7 +110,7 @@ export const Accordion = React.forwardRef<HTMLElement, AccordionProps>(function 
 
 Accordion.displayName = 'Accordion';
 
-export const AccordionItem = React.forwardRef<HTMLDivElement, AccordionItemProps>(function AccordionItem(
+const AccordionItem = React.forwardRef<HTMLDivElement, AccordionItemProps>(function AccordionItem(
   { disabled, description, badge, children, ...rest },
   forwardedRef
 ) {
@@ -127,7 +127,7 @@ export const AccordionItem = React.forwardRef<HTMLDivElement, AccordionItemProps
 
 AccordionItem.displayName = 'AccordionItem';
 
-export const AccordionTrigger = React.forwardRef<HTMLButtonElement, AccordionTriggerProps>(function AccordionTrigger(
+const AccordionTrigger = React.forwardRef<HTMLButtonElement, AccordionTriggerProps>(function AccordionTrigger(
   { type, children, ...rest },
   forwardedRef
 ) {
@@ -145,7 +145,7 @@ export const AccordionTrigger = React.forwardRef<HTMLButtonElement, AccordionTri
 
 AccordionTrigger.displayName = 'AccordionTrigger';
 
-export const AccordionPanel = React.forwardRef<HTMLDivElement, AccordionPanelProps>(function AccordionPanel(
+const AccordionPanel = React.forwardRef<HTMLDivElement, AccordionPanelProps>(function AccordionPanel(
   { children, ...rest },
   forwardedRef
 ) {
@@ -161,3 +161,15 @@ export const AccordionPanel = React.forwardRef<HTMLDivElement, AccordionPanelPro
 });
 
 AccordionPanel.displayName = 'AccordionPanel';
+
+// Create composed component with sub-components as properties
+const ComposedAccordion = Object.assign(Accordion, {
+  Item: AccordionItem,
+  Trigger: AccordionTrigger,
+  Panel: AccordionPanel,
+});
+
+ComposedAccordion.displayName = 'Accordion';
+
+export { ComposedAccordion as Accordion, AccordionItem, AccordionTrigger, AccordionPanel };
+export default ComposedAccordion;

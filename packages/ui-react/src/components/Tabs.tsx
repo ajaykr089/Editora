@@ -15,6 +15,14 @@ type BaseProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
 };
 
+export type TabsTabProps = React.HTMLAttributes<HTMLElement> & {
+  value?: string;
+  icon?: string;
+  disabled?: boolean;
+};
+
+export type TabsPanelProps = React.HTMLAttributes<HTMLElement>;
+
 export type TabsProps = BaseProps & {
   selected?: number | string;
   value?: string;
@@ -48,7 +56,7 @@ export type TabsProps = BaseProps & {
   onTabChange?: (detail: TabsDetail) => void;
 };
 
-export const Tabs = React.forwardRef<HTMLElement, TabsProps>(function Tabs(
+const TabsRoot = React.forwardRef<HTMLElement, TabsProps>(function Tabs(
   {
     children,
     selected,
@@ -130,6 +138,32 @@ export const Tabs = React.forwardRef<HTMLElement, TabsProps>(function Tabs(
   return React.createElement('ui-tabs', { ref, ...rest }, children);
 });
 
-Tabs.displayName = 'Tabs';
+TabsRoot.displayName = 'Tabs';
+
+const TabsTab = React.forwardRef<HTMLDivElement, TabsTabProps>(
+  function TabsTab({ value, icon, disabled, ...props }, ref) {
+    return React.createElement('div', {
+      ref,
+      slot: 'tab',
+      'data-value': value,
+      'data-icon': icon,
+      'data-disabled': disabled ? 'true' : undefined,
+      ...props
+    });
+  }
+);
+TabsTab.displayName = 'Tabs.Tab';
+
+const TabsPanel = React.forwardRef<HTMLDivElement, TabsPanelProps>(
+  function TabsPanel({ ...props }, ref) {
+    return React.createElement('div', { ref, slot: 'panel', ...props });
+  }
+);
+TabsPanel.displayName = 'Tabs.Panel';
+
+export const Tabs = Object.assign(TabsRoot, {
+  Tab: TabsTab,
+  Panel: TabsPanel,
+});
 
 export default Tabs;

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Avatar, Box, Button, Card, CardDescription, CardHeader, CardTitle, Flex, Grid } from '@editora/ui-react';
+import { Avatar, Box, Button, Card, Flex, Grid } from '@editora/ui-react';
 import { ActivityIcon, BellIcon, CheckCircleIcon, ClockIcon, ShieldIcon } from '@editora/react-icons';
 
 const meta: Meta<typeof Avatar> = {
@@ -59,12 +59,12 @@ export const Playground: Story = {
   render: (args) => (
     <Grid style={{ gap: 16 }}>
       <Card radius={16}>
-        <CardHeader>
-          <CardTitle>Avatar</CardTitle>
-          <CardDescription>
+        <Card.Header>
+          <Card.Title>Avatar</Card.Title>
+          <Card.Description>
             Identity surface for people, queues, and entities with presence, badge, and fallback states.
-          </CardDescription>
-        </CardHeader>
+          </Card.Description>
+        </Card.Header>
         <Box slot="inset" style={{ padding: 12 }}>
           <Flex align="center" style={{ gap: 12 }}>
             <Avatar

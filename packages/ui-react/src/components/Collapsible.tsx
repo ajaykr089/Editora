@@ -14,10 +14,11 @@ export type CollapsibleToggleDetail = {
   source?: 'pointer' | 'keyboard' | 'api';
 };
 
-export interface CollapsibleProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onToggle' | 'onChange'> {
-  header?: React.ReactNode;
-  caption?: React.ReactNode;
-  meta?: React.ReactNode;
+type BaseProps = React.HTMLAttributes<HTMLElement> & {
+  children?: React.ReactNode;
+};
+
+export interface CollapsibleProps extends Omit<BaseProps, 'onToggle' | 'onChange'> {
   open?: boolean;
   headless?: boolean;
   disabled?: boolean;
@@ -26,12 +27,29 @@ export interface CollapsibleProps extends Omit<React.HTMLAttributes<HTMLElement>
   size?: CollapsibleSize;
   variant?: CollapsibleVariant;
   tone?: CollapsibleTone;
+  radius?: number | string | 'none' | 'sm' | 'md' | 'lg' | 'full';
   iconPosition?: CollapsibleIconPosition;
   closeOnEscape?: boolean;
   onToggle?: (open: boolean) => void;
   onChangeOpen?: (open: boolean) => void;
   onToggleDetail?: (detail: CollapsibleToggleDetail) => void;
   onChangeDetail?: (detail: CollapsibleToggleDetail) => void;
+}
+
+export interface CollapsibleHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  children?: React.ReactNode;
+}
+
+export interface CollapsibleCaptionProps extends React.HTMLAttributes<HTMLDivElement> {
+  children?: React.ReactNode;
+}
+
+export interface CollapsibleMetaProps extends React.HTMLAttributes<HTMLDivElement> {
+  children?: React.ReactNode;
+}
+
+export interface CollapsibleContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  children?: React.ReactNode;
 }
 
 function setBooleanAttribute(element: HTMLElement, name: string, value: boolean | undefined) {
@@ -47,11 +65,15 @@ function readDetail(event: Event): CollapsibleToggleDetail | undefined {
   return (event as CustomEvent<CollapsibleToggleDetail>).detail;
 }
 
-export const Collapsible = React.forwardRef<HTMLElement, CollapsibleProps>(function Collapsible(
+type CollapsibleComponent = React.ForwardRefExoticComponent<CollapsibleProps & React.RefAttributes<HTMLElement>> & {
+  Header: typeof CollapsibleHeader;
+  Caption: typeof CollapsibleCaption;
+  Meta: typeof CollapsibleMeta;
+  Content: typeof CollapsibleContent;
+};
+
+const CollapsibleRoot = React.forwardRef<HTMLElement, CollapsibleProps>(function Collapsible(
   {
-    header,
-    caption,
-    meta,
     open,
     headless,
     disabled,
@@ -60,6 +82,7 @@ export const Collapsible = React.forwardRef<HTMLElement, CollapsibleProps>(funct
     size,
     variant,
     tone,
+    radius,
     iconPosition,
     closeOnEscape,
     onToggle,
@@ -77,6 +100,32 @@ export const Collapsible = React.forwardRef<HTMLElement, CollapsibleProps>(funct
   React.useEffect(() => {
     warnIfElementNotRegistered('ui-collapsible', 'Collapsible');
   }, []);
+
+  useIsomorphicLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    // Handle radius CSS variable
+    if (radius != null && radius !== '' && radius !== 'md') {
+      let radiusValue = String(radius);
+      // Convert named radius to pixels if needed
+      if (typeof radius === 'string' && !radius.includes('px') && !radius.includes('em') && !radius.includes('rem')) {
+        const radiusMap: Record<string, string> = {
+          'none': '0px',
+          'sm': '6px',
+          'md': '14px',
+          'lg': '20px',
+          'full': '9999px',
+        };
+        radiusValue = radiusMap[radius] || String(radius);
+      } else if (typeof radius === 'number') {
+        radiusValue = `${radius}px`;
+      }
+      element.style.setProperty('--ui-collapsible-radius', radiusValue);
+    } else {
+      element.style.removeProperty('--ui-collapsible-radius');
+    }
+  }, [radius]);
 
   useIsomorphicLayoutEffect(() => {
     const element = ref.current;
@@ -104,7 +153,7 @@ export const Collapsible = React.forwardRef<HTMLElement, CollapsibleProps>(funct
       'close-on-escape',
       typeof closeOnEscape === 'boolean' ? (closeOnEscape ? 'true' : 'false') : null
     );
-  }, [open, headless, disabled, readOnly, state, size, variant, tone, iconPosition, closeOnEscape]);
+  }, [open, headless, disabled, readOnly, state, size, variant, tone, radius, iconPosition, closeOnEscape]);
 
   React.useEffect(() => {
     const element = ref.current;
@@ -132,33 +181,70 @@ export const Collapsible = React.forwardRef<HTMLElement, CollapsibleProps>(funct
     };
   }, [onToggle, onChangeOpen, onToggleDetail, onChangeDetail]);
 
-  let headerNode: React.ReactNode = null;
-  let captionNode: React.ReactNode = null;
-  let metaNode: React.ReactNode = null;
-
-  const toSlottedNode = (node: React.ReactNode, slot: 'header' | 'caption' | 'meta'): React.ReactNode => {
-    if (node == null) return null;
-    if (typeof node === 'string' || typeof node === 'number') {
-      return <span slot={slot}>{node}</span>;
-    }
-    if (React.isValidElement(node)) {
-      return React.cloneElement(node as React.ReactElement<any>, { slot } as any);
-    }
-    return <span slot={slot}>{node}</span>;
-  };
-
-  headerNode = toSlottedNode(header, 'header');
-  captionNode = toSlottedNode(caption, 'caption');
-  metaNode = toSlottedNode(meta, 'meta');
-
   return (
     <ui-collapsible ref={ref as any} {...rest}>
-      {headerNode}
-      {captionNode}
-      {metaNode}
       {children}
     </ui-collapsible>
   );
 });
 
-Collapsible.displayName = 'Collapsible';
+CollapsibleRoot.displayName = 'Collapsible';
+
+export const CollapsibleHeader = React.forwardRef<HTMLDivElement, CollapsibleHeaderProps>(function CollapsibleHeader(
+  { children, ...rest },
+  ref
+) {
+  return (
+    <div {...rest} ref={ref} slot="header">
+      {children}
+    </div>
+  );
+});
+
+CollapsibleHeader.displayName = 'Collapsible.Header';
+
+export const CollapsibleCaption = React.forwardRef<HTMLDivElement, CollapsibleCaptionProps>(
+  function CollapsibleCaption({ children, ...rest }, ref) {
+    return (
+      <div {...rest} ref={ref} slot="caption">
+        {children}
+      </div>
+    );
+  }
+);
+
+CollapsibleCaption.displayName = 'Collapsible.Caption';
+
+export const CollapsibleMeta = React.forwardRef<HTMLDivElement, CollapsibleMetaProps>(function CollapsibleMeta(
+  { children, ...rest },
+  ref
+) {
+  return (
+    <div {...rest} ref={ref} slot="meta">
+      {children}
+    </div>
+  );
+});
+
+CollapsibleMeta.displayName = 'Collapsible.Meta';
+
+export const CollapsibleContent = React.forwardRef<HTMLDivElement, CollapsibleContentProps>(
+  function CollapsibleContent({ children, ...rest }, ref) {
+    return (
+      <div {...rest} ref={ref}>
+        {children}
+      </div>
+    );
+  }
+);
+
+CollapsibleContent.displayName = 'Collapsible.Content';
+
+export const Collapsible = Object.assign(CollapsibleRoot, {
+  Header: CollapsibleHeader,
+  Caption: CollapsibleCaption,
+  Meta: CollapsibleMeta,
+  Content: CollapsibleContent,
+}) as CollapsibleComponent;
+
+export default Collapsible;

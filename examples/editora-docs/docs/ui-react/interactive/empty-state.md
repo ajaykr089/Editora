@@ -765,4 +765,4 @@ Empty state components include proper ARIA attributes:
 - [Alert](./alert) - Alert messages for important information
 - [Toast](./toast) - Temporary notification component
 - [Dialog](./dialog) - Modal dialog component
-- [EmptyStateProvider](./empty-state-provider) - Empty state context provider
+- [Card](./card) - Structured container for empty and loading states

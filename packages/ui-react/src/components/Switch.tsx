@@ -9,6 +9,8 @@ type SwitchDetail = {
   required: boolean;
 };
 
+export type SwitchDescriptionProps = React.HTMLAttributes<HTMLElement>;
+
 export type SwitchProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'> & {
   checked?: boolean;
   disabled?: boolean;
@@ -28,7 +30,7 @@ export type SwitchProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | '
   onChange?: (detail: SwitchDetail) => void;
 };
 
-export const Switch = React.forwardRef<HTMLElement, SwitchProps>(function Switch(
+const SwitchRoot = React.forwardRef<HTMLElement, SwitchProps>(function Switch(
   {
     children,
     checked,
@@ -116,6 +118,17 @@ export const Switch = React.forwardRef<HTMLElement, SwitchProps>(function Switch
   return React.createElement('ui-switch', { ref, ...rest }, children);
 });
 
-Switch.displayName = 'Switch';
+SwitchRoot.displayName = 'Switch';
+
+const SwitchDescription = React.forwardRef<HTMLElement, SwitchDescriptionProps>(
+  function SwitchDescription({ ...props }, ref) {
+    return React.createElement('span', { ref, slot: 'description', ...props });
+  }
+);
+SwitchDescription.displayName = 'Switch.Description';
+
+export const Switch = Object.assign(SwitchRoot, {
+  Description: SwitchDescription,
+});
 
 export default Switch;

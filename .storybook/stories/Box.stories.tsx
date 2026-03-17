@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Box, Button, Card, CardDescription, CardHeader, CardTitle, Flex, Grid } from '@editora/ui-react';
+import { Box, Button, Card, Flex, Grid } from '@editora/ui-react';
 import { ActivityIcon, AlertTriangleIcon, CheckCircleIcon, ClockIcon, ShieldIcon, SparklesIcon } from '@editora/react-icons';
 
 const meta: Meta<typeof Box> = {
@@ -34,12 +34,12 @@ export const Playground: Story = {
   render: (args) => (
     <Grid style={{ gap: 16, maxInlineSize: 760 }}>
       <Card radius={16}>
-        <CardHeader>
-          <CardTitle>Box</CardTitle>
-          <CardDescription>
+        <Card.Header>
+          <Card.Title>Box</Card.Title>
+          <Card.Description>
             Low-level surface and layout primitive for spacing, state, elevation, and responsive container styling.
-          </CardDescription>
-        </CardHeader>
+          </Card.Description>
+        </Card.Header>
         <Box slot="inset" style={{ padding: 16 }}>
           <Box p="16px" {...args}>
             Modern `ui-box` surface with theme-backed variants, tone, state, elevation, and radius.

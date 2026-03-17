@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta } from '@storybook/react';
-import { Accordion, AccordionItem, AccordionPanel, AccordionTrigger, Box, Button, Flex, Grid } from '@editora/ui-react';
+import { Accordion, Box, Button, Flex, Grid } from '@editora/ui-react';
 import { EditoraEditor } from '@editora/editor';
 import { toastAdvanced } from '@editora/toast';
 import {
@@ -120,24 +120,24 @@ function TriggerContent({ section }: { section: Section }) {
 function DemoAccordion(props: React.ComponentProps<typeof Accordion>) {
   return (
     <Accordion collapsible {...props}>
-      <AccordionItem description="What the product does" badge="Overview">
-        <AccordionTrigger>What is Editora?</AccordionTrigger>
-        <AccordionPanel>
+      <Accordion.Item description="What the product does" badge="Overview">
+        <Accordion.Trigger>What is Editora?</Accordion.Trigger>
+        <Accordion.Panel>
           Editora is a rich text editing system with a web-component core and React wrappers.
-        </AccordionPanel>
-      </AccordionItem>
-      <AccordionItem description="Runtime model" badge="Core">
-        <AccordionTrigger>How does it work?</AccordionTrigger>
-        <AccordionPanel>
+        </Accordion.Panel>
+      </Accordion.Item>
+      <Accordion.Item description="Runtime model" badge="Core">
+        <Accordion.Trigger>How does it work?</Accordion.Trigger>
+        <Accordion.Panel>
           It composes token-aware web components behind React wrappers and shared theme primitives.
-        </AccordionPanel>
-      </AccordionItem>
-      <AccordionItem description="Production guidance" badge="Usage">
-        <AccordionTrigger>When should teams use it?</AccordionTrigger>
-        <AccordionPanel>
+        </Accordion.Panel>
+      </Accordion.Item>
+      <Accordion.Item description="Production guidance" badge="Usage">
+        <Accordion.Trigger>When should teams use it?</Accordion.Trigger>
+        <Accordion.Panel>
           Use it for disclosure-heavy settings panels, FAQ groups, and operational workflows that need clear hierarchy.
-        </AccordionPanel>
-      </AccordionItem>
+        </Accordion.Panel>
+      </Accordion.Item>
     </Accordion>
   );
 }
@@ -229,27 +229,27 @@ export function FAQPattern() {
           A cleaner, customer-facing disclosure pattern with low-noise borders and generous reading rhythm.
         </Box>
         <Accordion collapsible variant="outline" radius={12} size="lg" tone="neutral" elevation="none">
-          <AccordionItem description="Deployment model and editor surface">
-            <AccordionTrigger>Can teams use Editora in both React and plain web components?</AccordionTrigger>
-            <AccordionPanel>
+          <Accordion.Item description="Deployment model and editor surface">
+            <Accordion.Trigger>Can teams use Editora in both React and plain web components?</Accordion.Trigger>
+            <Accordion.Panel>
               Yes. The system ships a custom-element core and React wrappers so product teams can adopt the same
               primitives across both integration styles.
-            </AccordionPanel>
-          </AccordionItem>
-          <AccordionItem description="Lifecycle, upgrades, and adoption strategy">
-            <AccordionTrigger>How should we roll it out inside an existing design system?</AccordionTrigger>
-            <AccordionPanel>
+            </Accordion.Panel>
+          </Accordion.Item>
+          <Accordion.Item description="Lifecycle, upgrades, and adoption strategy">
+            <Accordion.Trigger>How should we roll it out inside an existing design system?</Accordion.Trigger>
+            <Accordion.Panel>
               Start with infrastructure primitives and form controls, then move high-traffic composed components such
               as menus, dialogs, and editor workflows.
-            </AccordionPanel>
-          </AccordionItem>
-          <AccordionItem description="Tokens, themes, and Storybook alignment">
-            <AccordionTrigger>Does it support product-level theming without forking styles?</AccordionTrigger>
-            <AccordionPanel>
+            </Accordion.Panel>
+          </Accordion.Item>
+          <Accordion.Item description="Tokens, themes, and Storybook alignment">
+            <Accordion.Trigger>Does it support product-level theming without forking styles?</Accordion.Trigger>
+            <Accordion.Panel>
               Yes. The baseline theme system exposes semantic and component-level tokens so teams can tune color,
               radius, motion, density, and elevation without rewriting component CSS.
-            </AccordionPanel>
-          </AccordionItem>
+            </Accordion.Panel>
+          </Accordion.Item>
         </Accordion>
       </Box>
     </Grid>
@@ -262,24 +262,24 @@ export function SettingsSidebarPattern() {
       <Box style={{ ...showcaseFrameStyle, padding: 18 }}>
         <Box style={showcaseHeadingStyle}>Compact sidebar pattern</Box>
         <Accordion multiple variant="ghost" tone="neutral" size="sm" radius={8} elevation="none" open={[0, 2]}>
-          <AccordionItem description="Identity, roles, workspace metadata" badge="Core">
-            <AccordionTrigger>Workspace settings</AccordionTrigger>
-            <AccordionPanel>
+          <Accordion.Item description="Identity, roles, workspace metadata" badge="Core">
+            <Accordion.Trigger>Workspace settings</Accordion.Trigger>
+            <Accordion.Panel>
               Naming rules, environment labels, ownership metadata, and internal access settings.
-            </AccordionPanel>
-          </AccordionItem>
-          <AccordionItem description="Data retention and access events" badge="Audit">
-            <AccordionTrigger>Security and compliance</AccordionTrigger>
-            <AccordionPanel>
+            </Accordion.Panel>
+          </Accordion.Item>
+          <Accordion.Item description="Data retention and access events" badge="Audit">
+            <Accordion.Trigger>Security and compliance</Accordion.Trigger>
+            <Accordion.Panel>
               Access reviews, retention windows, export controls, and event retention policies.
-            </AccordionPanel>
-          </AccordionItem>
-          <AccordionItem description="Theme, typography, and interaction defaults" badge="Brand">
-            <AccordionTrigger>Appearance controls</AccordionTrigger>
-            <AccordionPanel>
+            </Accordion.Panel>
+          </Accordion.Item>
+          <Accordion.Item description="Theme, typography, and interaction defaults" badge="Brand">
+            <Accordion.Trigger>Appearance controls</Accordion.Trigger>
+            <Accordion.Panel>
               Color system, density preferences, component radius, and motion policy configuration.
-            </AccordionPanel>
-          </AccordionItem>
+            </Accordion.Panel>
+          </Accordion.Item>
         </Accordion>
       </Box>
 
@@ -329,12 +329,12 @@ export function ControlledSingleOpen() {
 
         <Accordion open={open} onToggle={setOpen} variant="soft" tone="info" radius={12} size="md">
           {sections.map((section, index) => (
-            <AccordionItem key={section.title} description={section.subtitle} badge={section.badge}>
-              <AccordionTrigger>{section.title}</AccordionTrigger>
-              <AccordionPanel>
+            <Accordion.Item key={section.title} description={section.subtitle} badge={section.badge}>
+              <Accordion.Trigger>{section.title}</Accordion.Trigger>
+              <Accordion.Panel>
                 {section.points[index % section.points.length]}
-              </AccordionPanel>
-            </AccordionItem>
+              </Accordion.Panel>
+            </Accordion.Item>
           ))}
         </Accordion>
       </Box>
@@ -428,11 +428,11 @@ function EnterpriseClinicalAccordion() {
         elevation="low"
       >
         {sections.map((section) => (
-          <AccordionItem key={section.title} description={section.subtitle} badge={section.badge}>
-            <AccordionTrigger aria-label={`Toggle ${section.title}`}>
+          <Accordion.Item key={section.title} description={section.subtitle} badge={section.badge}>
+            <Accordion.Trigger aria-label={`Toggle ${section.title}`}>
               <TriggerContent section={section} />
-            </AccordionTrigger>
-            <AccordionPanel>
+            </Accordion.Trigger>
+            <Accordion.Panel>
               <Grid style={{ gap: 10 }}>
                 {section.points.map((point) => (
                   <Flex key={point} align="start" style={{ gap: 8 }}>
@@ -441,8 +441,8 @@ function EnterpriseClinicalAccordion() {
                   </Flex>
                 ))}
               </Grid>
-            </AccordionPanel>
-          </AccordionItem>
+            </Accordion.Panel>
+          </Accordion.Item>
         ))}
       </Accordion>
 

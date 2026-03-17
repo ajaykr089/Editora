@@ -344,17 +344,6 @@ SidebarItem.__sidebarMarker = SIDEBAR_ITEM_MARKER;
 
 const SidebarContent: React.FC<{ children?: React.ReactNode }> = ({ children }) => <>{renderSidebarItems(children)}</>;
 
-type SidebarComponent = React.ForwardRefExoticComponent<SidebarProps & React.RefAttributes<HTMLElement>> & {
-  Header: typeof SidebarHeader;
-  Search: typeof SidebarSearch;
-  SearchInput: typeof SidebarSearchInput;
-  Content: typeof SidebarContent;
-  Group: typeof SidebarGroup;
-  Item: typeof SidebarItem;
-  Promo: typeof SidebarPromo;
-  Footer: typeof SidebarFooter;
-};
-
 const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar(
   {
     children,
@@ -559,37 +548,27 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
   return React.createElement('ui-sidebar', { ref, ...rest }, children);
 });
 
-const Sidebar = SidebarRoot as SidebarComponent;
+SidebarRoot.displayName = 'Sidebar';
+SidebarHeader.displayName = 'Sidebar.Header';
+SidebarSearch.displayName = 'Sidebar.Search';
+SidebarSearchInput.displayName = 'Sidebar.SearchInput';
+SidebarContent.displayName = 'Sidebar.Content';
+SidebarGroup.displayName = 'Sidebar.Group';
+SidebarItem.displayName = 'Sidebar.Item';
+SidebarPromo.displayName = 'Sidebar.Promo';
+SidebarFooter.displayName = 'Sidebar.Footer';
 
-Sidebar.Header = SidebarHeader;
-Sidebar.Search = SidebarSearch;
-Sidebar.SearchInput = SidebarSearchInput;
-Sidebar.Content = SidebarContent;
-Sidebar.Group = SidebarGroup;
-Sidebar.Item = SidebarItem;
-Sidebar.Promo = SidebarPromo;
-Sidebar.Footer = SidebarFooter;
+export type { SidebarProps, SidebarGroupProps, SidebarItemProps, SidebarSlotProps, SidebarSearchInputProps, SidebarSelectDetail, SidebarTone };
 
-Sidebar.displayName = 'Sidebar';
-SidebarHeader.displayName = 'SidebarHeader';
-SidebarSearch.displayName = 'SidebarSearch';
-SidebarSearchInput.displayName = 'SidebarSearchInput';
-SidebarContent.displayName = 'SidebarContent';
-SidebarGroup.displayName = 'SidebarGroup';
-SidebarItem.displayName = 'SidebarItem';
-SidebarPromo.displayName = 'SidebarPromo';
-SidebarFooter.displayName = 'SidebarFooter';
-
-export {
-  Sidebar,
-  SidebarHeader,
-  SidebarSearch,
-  SidebarSearchInput,
-  SidebarContent,
-  SidebarGroup,
-  SidebarItem,
-  SidebarPromo,
-  SidebarFooter
-};
+export const Sidebar = Object.assign(SidebarRoot, {
+  Header: SidebarHeader,
+  Search: SidebarSearch,
+  SearchInput: SidebarSearchInput,
+  Content: SidebarContent,
+  Group: SidebarGroup,
+  Item: SidebarItem,
+  Promo: SidebarPromo,
+  Footer: SidebarFooter,
+});
 
 export default Sidebar;

@@ -1,12 +1,12 @@
 ---
 title: Layout
-description: Slot-based application shell for header, sidebar, content, aside, and footer regions.
+description: Slot-based application shell with composed React sub-components for header, sidebar, content, aside, and footer regions.
 sidebar_label: Layout
 ---
 
 # Layout
 
-`Layout` is a shell wrapper around `ui-layout`. Use regular children with `slot="header" | "sidebar" | "content" | "aside" | "footer"`.
+Import the main `Layout` component and use its sub-components as properties. The Layout component provides a shell wrapper around `ui-layout` with a clean, hierarchical API.
 
 ## Basic Usage
 
@@ -16,15 +16,17 @@ import { Box, Button, Flex, Layout } from '@editora/ui-react';
 function BasicLayout() {
   return (
     <Layout mode="dashboard" maxWidth="xl" sidebarWidth="280px" asideWidth="320px">
-      <Flex slot="header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <strong>Workspace</strong>
-        <Button>Primary action</Button>
-      </Flex>
+      <Layout.Header>
+        <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <strong>Workspace</strong>
+          <Button>Primary action</Button>
+        </Flex>
+      </Layout.Header>
 
-      <Box slot="sidebar">Navigation</Box>
-      <Box slot="content">Main content</Box>
-      <Box slot="aside">Context rail</Box>
-      <Box slot="footer">Footer actions</Box>
+      <Layout.Sidebar>Navigation</Layout.Sidebar>
+      <Layout.Content>Main content</Layout.Content>
+      <Layout.Aside>Context rail</Layout.Aside>
+      <Layout.Footer>Footer actions</Layout.Footer>
     </Layout>
   );
 }
@@ -46,15 +48,15 @@ function BasicLayout() {
 | `onLayoutChange` | `() => void` | - | Fired when the host emits `layoutchange` |
 | `children` | `React.ReactNode` | - | Slotted shell content |
 
-## Slots
+## Composed Sub-Components
 
-| Slot | Purpose |
-|------|---------|
-| `header` | Top app bar / workspace header |
-| `sidebar` | Primary navigation or filters |
-| `content` | Main content region |
-| `aside` | Secondary rail for context or activity |
-| `footer` | Footer controls |
+All Layout sub-components are available as properties on the main Layout component:
+
+- `Layout.Header` - Top app bar / workspace header
+- `Layout.Sidebar` - Primary navigation or filters
+- `Layout.Content` - Main content region
+- `Layout.Aside` - Secondary rail for context or activity
+- `Layout.Footer` - Footer controls
 
 ## Split Workspace
 
@@ -64,9 +66,9 @@ import { Box, Layout } from '@editora/ui-react';
 function SplitWorkspace() {
   return (
     <Layout mode="split" maxWidth="xl" asideWidth="340px">
-      <Box slot="header">Review workflow</Box>
-      <Box slot="content">Document canvas</Box>
-      <Box slot="aside">Review notes</Box>
+      <Layout.Header>Review workflow</Layout.Header>
+      <Layout.Content>Document canvas</Layout.Content>
+      <Layout.Aside>Review notes</Layout.Aside>
     </Layout>
   );
 }
@@ -80,10 +82,10 @@ import { Box, Layout } from '@editora/ui-react';
 function CollapsedShell() {
   return (
     <Layout collapsed sidebarWidth="260px" asideWidth="300px">
-      <Box slot="header">Operations</Box>
-      <Box slot="sidebar">Navigation</Box>
-      <Box slot="content">Primary dashboard</Box>
-      <Box slot="aside">Activity</Box>
+      <Layout.Header>Operations</Layout.Header>
+      <Layout.Sidebar>Navigation</Layout.Sidebar>
+      <Layout.Content>Primary dashboard</Layout.Content>
+      <Layout.Aside>Activity</Layout.Aside>
     </Layout>
   );
 }

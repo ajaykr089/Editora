@@ -15,22 +15,8 @@ import {
   SettingsIcon,
   SparklesIcon
 } from '@editora/react-icons';
-import {
-  Box,
-  Button,
-  Flex,
-  Grid,
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarHeader,
-  SidebarItem,
-  SidebarPromo,
-  SidebarSearch,
-  SidebarSearchInput,
-  ThemeProvider
-} from '@editora/ui-react';
+import { Box, Button, Flex, Grid, ThemeProvider } from '@editora/ui-react';
+import { Sidebar } from '@editora/ui-react/Sidebar';
 
 export default {
   title: 'UI/Sidebar',
@@ -147,14 +133,10 @@ function PremiumPromoCard() {
   );
 }
 
-function PremiumSidebarStructure({
-  value
-}: {
-  value: string;
-}) {
+function PremiumSidebarStructure({ value }: { value: string }) {
   return (
     <>
-      <SidebarHeader>
+      <Sidebar.Header>
         <Flex align="center" gap="12px" style={{ color: '#ffffff', fontWeight: 900, fontSize: 21 }}>
           <span
             style={{
@@ -171,41 +153,41 @@ function PremiumSidebarStructure({
           </span>
           <span>Publify</span>
         </Flex>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup title="Library">
-          <SidebarItem value="dashboard" label="Dashboard" icon={<DashboardIcon />} active={value === 'dashboard'} />
-          <SidebarItem value="library" label="My Library" icon={<FolderOpenIcon />} active={value === 'library'} />
-          <SidebarItem value="books" label="Books" icon={<BookIcon />} active={value === 'books'} />
-          <SidebarItem value="magazines" label="Magazines" icon={<FileIcon />} active={value === 'magazines'}>
-            <SidebarItem value="editorial" label="Editorial picks" description="Weekly hand-picked reads" />
-            <SidebarItem value="trending" label="Trending now" description="Most opened this week" />
-            <SidebarItem value="collections" href="#collections">
+      </Sidebar.Header>
+      <Sidebar.Content>
+        <Sidebar.Group title="Library">
+          <Sidebar.Item value="dashboard" label="Dashboard" icon={<DashboardIcon />} active={value === 'dashboard'} />
+          <Sidebar.Item value="library" label="My Library" icon={<FolderOpenIcon />} active={value === 'library'} />
+          <Sidebar.Item value="books" label="Books" icon={<BookIcon />} active={value === 'books'} />
+          <Sidebar.Item value="magazines" label="Magazines" icon={<FileIcon />} active={value === 'magazines'}>
+            <Sidebar.Item value="editorial" label="Editorial picks" description="Weekly hand-picked reads" />
+            <Sidebar.Item value="trending" label="Trending now" description="Most opened this week" />
+            <Sidebar.Item value="collections" href="#collections">
               <span>Collections</span>
               <span>Curated reading lists</span>
-            </SidebarItem>
-          </SidebarItem>
-          <SidebarItem value="bookmarks" label="Bookmarks" icon={<BookmarkIcon />} active={value === 'bookmarks'} />
-          <SidebarItem value="history" label="Reading History" icon={<HistoryIcon />} active={value === 'history'} />
-        </SidebarGroup>
-        <SidebarGroup title="Account">
-          <SidebarItem value="subscription" label="Subscription" icon={<CreditCardIcon />} active={value === 'subscription'} />
-          <SidebarItem value="downloads" label="Downloads" icon={<DownloadIcon />} active={value === 'downloads'} />
-          <SidebarItem value="payments" label="Payments" icon={<ReceiptIcon />} active={value === 'payments'} />
-          <SidebarItem value="settings" label="Settings" icon={<SettingsIcon />} active={value === 'settings'}>
-            <SidebarItem value="preferences" label="Preferences" />
-            <SidebarItem value="devices" label="Devices" />
-            <SidebarItem value="security" label="Security" />
-          </SidebarItem>
-          <SidebarItem value="support" label="Help & Support" icon={<HelpCircleIcon />} active={value === 'support'} />
-        </SidebarGroup>
-      </SidebarContent>
-      <SidebarPromo>
+            </Sidebar.Item>
+          </Sidebar.Item>
+          <Sidebar.Item value="bookmarks" label="Bookmarks" icon={<BookmarkIcon />} active={value === 'bookmarks'} />
+          <Sidebar.Item value="history" label="Reading History" icon={<HistoryIcon />} active={value === 'history'} />
+        </Sidebar.Group>
+        <Sidebar.Group title="Account">
+          <Sidebar.Item value="subscription" label="Subscription" icon={<CreditCardIcon />} active={value === 'subscription'} />
+          <Sidebar.Item value="downloads" label="Downloads" icon={<DownloadIcon />} active={value === 'downloads'} />
+          <Sidebar.Item value="payments" label="Payments" icon={<ReceiptIcon />} active={value === 'payments'} />
+          <Sidebar.Item value="settings" label="Settings" icon={<SettingsIcon />} active={value === 'settings'}>
+            <Sidebar.Item value="preferences" label="Preferences" />
+            <Sidebar.Item value="devices" label="Devices" />
+            <Sidebar.Item value="security" label="Security" />
+          </Sidebar.Item>
+          <Sidebar.Item value="support" label="Help & Support" icon={<HelpCircleIcon />} active={value === 'support'} />
+        </Sidebar.Group>
+      </Sidebar.Content>
+      <Sidebar.Promo>
         <PremiumPromoCard />
-      </SidebarPromo>
-      <SidebarFooter>
+      </Sidebar.Promo>
+      <Sidebar.Footer>
         <div style={{ color: 'rgba(255,255,255,0.72)' }}>Signed in as premium@publify.app</div>
-      </SidebarFooter>
+      </Sidebar.Footer>
     </>
   );
 }
@@ -238,50 +220,29 @@ export const PremiumReadingShell = (args: any) => {
             style={{
               minHeight: 760,
               borderRadius: 28,
-              border: "1px solid rgba(158, 197, 255, 0.16)",
-              background:
-                "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))",
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08)",
+              border: '1px solid rgba(158, 197, 255, 0.16)',
+              background: 'linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
               padding: 26,
-              color: "#f7fbff",
+              color: '#f7fbff',
             }}
           >
-            <div style={{ display: "grid", gap: 12, maxWidth: 720 }}>
-              <div
-                style={{
-                  fontSize: 14,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.54)",
-                }}
-              >
+            <div style={{ display: 'grid', gap: 12, maxWidth: 720 }}>
+              <div style={{ fontSize: 14, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.54)' }}>
                 Reading dashboard
               </div>
               <div style={{ fontSize: 40, lineHeight: 1.05, fontWeight: 900 }}>
                 Sidebar-driven premium shell
               </div>
-              <div
-                style={{
-                  fontSize: 16,
-                  lineHeight: 1.7,
-                  color: "rgba(255,255,255,0.78)",
-                }}
-              >
-                The sidebar keeps the reading app navigation structured with
-                grouped links, expandable subsections, and a dedicated promo
-                rail without sacrificing keyboard support or resize persistence.
+              <div style={{ fontSize: 16, lineHeight: 1.7, color: 'rgba(255,255,255,0.78)' }}>
+                The sidebar keeps the reading app navigation structured with grouped links, expandable subsections, and a dedicated promo rail without sacrificing keyboard support or resize persistence.
               </div>
               <Flex gap="10px" wrap="wrap">
                 <Button recipe="solid" scale="2" radius={14}>
                   Open active module
                 </Button>
-                <Button
-                  recipe="surface"
-                  scale="2"
-                  radius={14}
-                  onClick={() => setCollapsed((current) => !current)}
-                >
-                  {collapsed ? "Expand sidebar" : "Collapse sidebar"}
+                <Button recipe="surface" scale="2" radius={14} onClick={() => setCollapsed((c) => !c)}>
+                  {collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                 </Button>
               </Flex>
             </div>
@@ -313,34 +274,34 @@ export const OperationsWorkspace = () => {
         resizable
         variant="surface"
       >
-        <SidebarHeader>
+        <Sidebar.Header>
           <Flex align="center" justify="space-between" style={{ fontWeight: 800, fontSize: 18 }}>
-          <span>Operations Hub</span>
-          <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>24/7</Box>
+            <span>Operations Hub</span>
+            <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>24/7</Box>
           </Flex>
-        </SidebarHeader>
-        <SidebarSearchInput
+        </Sidebar.Header>
+        <Sidebar.SearchInput
           placeholder="Search orders, audiences, incidents…"
           icon={<SearchIcon width={16} height={16} />}
         />
-        <SidebarPromo>
+        <Sidebar.Promo>
           <Box
-          style={{
-            borderRadius: 18,
-            padding: 18,
-            background: 'linear-gradient(140deg, color-mix(in srgb, var(--ui-color-primary) 92%, #1d4ed8 8%), color-mix(in srgb, var(--ui-color-primary) 22%, #ffffff 78%))',
-            color: '#ffffff',
-            display: 'grid',
-            gap: 12
-          }}
-        >
+            style={{
+              borderRadius: 18,
+              padding: 18,
+              background: 'linear-gradient(140deg, color-mix(in srgb, var(--ui-color-primary) 92%, #1d4ed8 8%), color-mix(in srgb, var(--ui-color-primary) 22%, #ffffff 78%))',
+              color: '#ffffff',
+              display: 'grid',
+              gap: 12
+            }}
+          >
             <Flex align="center" gap="8px" style={{ fontWeight: 800 }}>
               <SparklesIcon width={16} height={16} />
               <strong>Quarter-end launch</strong>
             </Flex>
-          <span style={{ color: 'rgba(255,255,255,0.8)', lineHeight: 1.5 }}>Review every open operational blocker before the release checklist closes.</span>
-        </Box>
-        </SidebarPromo>
+            <span style={{ color: 'rgba(255,255,255,0.8)', lineHeight: 1.5 }}>Review every open operational blocker before the release checklist closes.</span>
+          </Box>
+        </Sidebar.Promo>
       </Sidebar>
 
       <Box p="24px" style={{ background: 'var(--ui-color-surface-alt, #f8fafc)' }}>
@@ -363,13 +324,9 @@ export const VariantGallery = () => {
   return (
     <div style={{ display: 'grid', gap: 18 }}>
       {rows.map((variant) => (
-          <div key={variant} style={{ display: 'grid', gridTemplateColumns: '120px auto', alignItems: 'start', gap: 18 }}>
+        <div key={variant} style={{ display: 'grid', gridTemplateColumns: '120px auto', alignItems: 'start', gap: 18 }}>
           <div style={{ fontWeight: 800, textTransform: 'capitalize' }}>{variant}</div>
-          <Sidebar
-            items={operationsItems.slice(0, 4)}
-            variant={variant}
-            style={{ height: 340 }}
-          >
+          <Sidebar items={operationsItems.slice(0, 4)} variant={variant} style={{ height: 340 }}>
             <Box slot="header" style={{ fontWeight: 800 }}>Shell</Box>
           </Sidebar>
         </div>
@@ -411,34 +368,34 @@ export const NavigationLinksAndCustomContent = () => {
         resizable
         sectionLabelTransform="none"
       >
-        <SidebarHeader>
+        <Sidebar.Header>
           <Flex align="center" justify="space-between" style={{ fontWeight: 800, fontSize: 18 }}>
             <span>Product docs</span>
             <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>v4.2</Box>
           </Flex>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup title="Getting started">
-            <SidebarItem value="dashboard" label="Overview" icon={<DashboardIcon />} href="#overview" active={value === 'dashboard'} />
-            <SidebarItem value="guides" href="#guides">
+        </Sidebar.Header>
+        <Sidebar.Content>
+          <Sidebar.Group title="Getting started">
+            <Sidebar.Item value="dashboard" label="Overview" icon={<DashboardIcon />} href="#overview" active={value === 'dashboard'} />
+            <Sidebar.Item value="guides" href="#guides">
               <BookIcon />
               <span>Guides</span>
               <span>Patterns, conventions, and implementation notes</span>
-            </SidebarItem>
-            <SidebarItem value="components" label="Components" icon={<FolderOpenIcon />}>
-              <SidebarItem value="navigation" label="Navigation" href="#navigation" />
-              <SidebarItem value="feedback" label="Feedback" href="#feedback" />
-              <SidebarItem value="data-entry" label="Data entry" href="#data-entry" />
-            </SidebarItem>
-          </SidebarGroup>
-          <SidebarGroup title="Resources">
-            <SidebarItem value="releases" label="Release notes" icon={<SparklesIcon />} href="#releases" />
-            <SidebarItem value="support" label="Help & Support" icon={<HelpCircleIcon />} href="#support" />
-          </SidebarGroup>
-        </SidebarContent>
-        <SidebarFooter>
+            </Sidebar.Item>
+            <Sidebar.Item value="components" label="Components" icon={<FolderOpenIcon />}>
+              <Sidebar.Item value="navigation" label="Navigation" href="#navigation" />
+              <Sidebar.Item value="feedback" label="Feedback" href="#feedback" />
+              <Sidebar.Item value="data-entry" label="Data entry" href="#data-entry" />
+            </Sidebar.Item>
+          </Sidebar.Group>
+          <Sidebar.Group title="Resources">
+            <Sidebar.Item value="releases" label="Release notes" icon={<SparklesIcon />} href="#releases" />
+            <Sidebar.Item value="support" label="Help & Support" icon={<HelpCircleIcon />} href="#support" />
+          </Sidebar.Group>
+        </Sidebar.Content>
+        <Sidebar.Footer>
           <div style={{ color: 'var(--ui-color-muted, #64748b)' }}>Links use real anchor navigation and still emit sidebar selection.</div>
-        </SidebarFooter>
+        </Sidebar.Footer>
       </Sidebar>
 
       <Box p="28px" style={{ display: 'grid', gap: 14, alignContent: 'start' }}>
@@ -447,7 +404,7 @@ export const NavigationLinksAndCustomContent = () => {
         </div>
         <div style={{ fontSize: 34, lineHeight: 1.05, fontWeight: 900 }}>{value}</div>
         <div style={{ maxWidth: 720, fontSize: 16, lineHeight: 1.7, color: 'var(--ui-color-muted, #64748b)' }}>
-          This story demonstrates two new sidebar capabilities: leaf items can be real links through <code>href</code>, and display content can be authored directly inside <code>SidebarItem</code> instead of relying only on <code>label</code> and <code>description</code>.
+          This story demonstrates two new sidebar capabilities: leaf items can be real links through <code>href</code>, and display content can be authored directly inside <code>Sidebar.Item</code> instead of relying only on <code>label</code> and <code>description</code>.
         </div>
         <Box
           style={{
@@ -459,18 +416,12 @@ export const NavigationLinksAndCustomContent = () => {
         >
           <div style={{ fontWeight: 800, marginBottom: 8 }}>API example</div>
           <pre
-            style={{
-              margin: 0,
-              whiteSpace: 'pre-wrap',
-              fontSize: 13,
-              lineHeight: 1.55,
-              color: 'var(--ui-color-text, #202020)'
-            }}
-          >{`<SidebarItem value="guides" href="#guides">
+            style={{ margin: 0, whiteSpace: 'pre-wrap', fontSize: 13, lineHeight: 1.55, color: 'var(--ui-color-text, #202020)' }}
+          >{`<Sidebar.Item value="guides" href="#guides">
   <BookIcon />
   <span>Guides</span>
   <span>Patterns, conventions, and implementation notes</span>
-</SidebarItem>`}</pre>
+</Sidebar.Item>`}</pre>
         </Box>
         <Box
           style={{
@@ -499,38 +450,28 @@ export const SectionLabelTransformGallery = () => (
       { title: 'None', transform: 'none' as const },
       { title: 'Capitalize', transform: 'capitalize' as const }
     ]).map((example) => (
-      <div
-        key={example.transform}
-        style={{
-          display: 'grid',
-          gap: 14
-        }}
-      >
+      <div key={example.transform} style={{ display: 'grid', gap: 14 }}>
         <div style={{ fontWeight: 800 }}>{example.title}</div>
-        <Sidebar
-          variant="surface"
-          sectionLabelTransform={example.transform}
-          style={{ height: 360 }}
-        >
-          <SidebarHeader>
+        <Sidebar variant="surface" sectionLabelTransform={example.transform} style={{ height: 360 }}>
+          <Sidebar.Header>
             <Flex align="center" justify="space-between" style={{ fontWeight: 800 }}>
               <span>Sidebar labels</span>
               <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>{example.transform}</Box>
             </Flex>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup title="Primary navigation">
-              <SidebarItem value="overview" label="Overview" icon={<DashboardIcon />} />
-              <SidebarItem value="reading" icon={<BookIcon />}>
+          </Sidebar.Header>
+          <Sidebar.Content>
+            <Sidebar.Group title="Primary navigation">
+              <Sidebar.Item value="overview" label="Overview" icon={<DashboardIcon />} />
+              <Sidebar.Item value="reading" icon={<BookIcon />}>
                 <span>Reading lists</span>
                 <span>Custom content rendered inside the row</span>
-              </SidebarItem>
-            </SidebarGroup>
-            <SidebarGroup title="Account settings">
-              <SidebarItem value="billing" label="Billing" icon={<CreditCardIcon />} />
-              <SidebarItem value="preferences" label="Preferences" icon={<SettingsIcon />} />
-            </SidebarGroup>
-          </SidebarContent>
+              </Sidebar.Item>
+            </Sidebar.Group>
+            <Sidebar.Group title="Account settings">
+              <Sidebar.Item value="billing" label="Billing" icon={<CreditCardIcon />} />
+              <Sidebar.Item value="preferences" label="Preferences" icon={<SettingsIcon />} />
+            </Sidebar.Group>
+          </Sidebar.Content>
         </Sidebar>
       </div>
     ))}
@@ -557,38 +498,38 @@ export const SubmenuMotionAndCustomIcons = () => {
         variant="soft"
         sectionLabelTransform="capitalize"
       >
-        <SidebarHeader>
+        <Sidebar.Header>
           <Flex align="center" justify="space-between" style={{ fontWeight: 800, fontSize: 18 }}>
             <span>Docs navigation</span>
             <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>animated</Box>
           </Flex>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup title="Core guides">
-            <SidebarItem value="overview" href="#overview">
+        </Sidebar.Header>
+        <Sidebar.Content>
+          <Sidebar.Group title="Core guides">
+            <Sidebar.Item value="overview" href="#overview">
               <DashboardIcon />
               <span>Overview</span>
               <span>Entry points, architecture, and release notes</span>
-            </SidebarItem>
-            <SidebarItem value="patterns">
+            </Sidebar.Item>
+            <Sidebar.Item value="patterns">
               <BookIcon />
               <span>Patterns</span>
               <span>Open this item to preview submenu motion</span>
-              <SidebarItem value="forms" href="#forms" label="Forms" />
-              <SidebarItem value="navigation" href="#navigation" label="Navigation" />
-              <SidebarItem value="feedback" href="#feedback" label="Feedback" />
-            </SidebarItem>
-            <SidebarItem value="tooling" href="#tooling">
+              <Sidebar.Item value="forms" href="#forms" label="Forms" />
+              <Sidebar.Item value="navigation" href="#navigation" label="Navigation" />
+              <Sidebar.Item value="feedback" href="#feedback" label="Feedback" />
+            </Sidebar.Item>
+            <Sidebar.Item value="tooling" href="#tooling">
               <SparklesIcon />
               <span>Tooling</span>
               <span>Storybook, E2E, and docs automation</span>
-            </SidebarItem>
-          </SidebarGroup>
-          <SidebarGroup title="Support links">
-            <SidebarItem value="account" href="#account" icon={<CreditCardIcon />} label="Account" />
-            <SidebarItem value="support" href="#support" icon={<HelpCircleIcon />} label="Help & Support" />
-          </SidebarGroup>
-        </SidebarContent>
+            </Sidebar.Item>
+          </Sidebar.Group>
+          <Sidebar.Group title="Support links">
+            <Sidebar.Item value="account" href="#account" icon={<CreditCardIcon />} label="Account" />
+            <Sidebar.Item value="support" href="#support" icon={<HelpCircleIcon />} label="Help & Support" />
+          </Sidebar.Group>
+        </Sidebar.Content>
       </Sidebar>
 
       <Box p="28px" style={{ display: 'grid', gap: 16, alignContent: 'start' }}>
@@ -597,7 +538,7 @@ export const SubmenuMotionAndCustomIcons = () => {
         </div>
         <div style={{ fontSize: 34, lineHeight: 1.05, fontWeight: 900 }}>Animated submenus and icon-as-child rows</div>
         <div style={{ maxWidth: 720, fontSize: 16, lineHeight: 1.7, color: 'var(--ui-color-muted, #64748b)' }}>
-          This example is tuned for visual review. Open the “Patterns” group to inspect the submenu transition, and check that icon spacing remains correct even when icons are authored directly as children inside each <code>SidebarItem</code>.
+          This example is tuned for visual review. Open the "Patterns" group to inspect the submenu transition, and check that icon spacing remains correct even when icons are authored directly as children inside each <code>Sidebar.Item</code>.
         </div>
       </Box>
     </Grid>

@@ -2,13 +2,13 @@ import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-type LayoutMode = 'dashboard' | 'split' | 'stack';
-type LayoutVariant = 'default' | 'flat' | 'elevated' | 'glass' | 'contrast';
-type LayoutDensity = 'default' | 'compact' | 'comfortable';
-type LayoutMaxWidth = 'sm' | 'md' | 'lg' | 'xl';
-type LayoutSidebarSide = 'start' | 'end';
+export type LayoutMode = 'dashboard' | 'split' | 'stack';
+export type LayoutVariant = 'default' | 'flat' | 'elevated' | 'glass' | 'contrast';
+export type LayoutDensity = 'default' | 'compact' | 'comfortable';
+export type LayoutMaxWidth = 'sm' | 'md' | 'lg' | 'xl';
+export type LayoutSidebarSide = 'start' | 'end';
 
-type Props = React.HTMLAttributes<HTMLElement> & {
+export type LayoutProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
   mode?: LayoutMode;
   variant?: LayoutVariant;
@@ -22,7 +22,7 @@ type Props = React.HTMLAttributes<HTMLElement> & {
   onLayoutChange?: () => void;
 };
 
-export const Layout = React.forwardRef<HTMLElement, Props>(function Layout(
+const Layout = React.forwardRef<HTMLElement, LayoutProps>(function Layout(
   {
     children,
     mode,
@@ -87,4 +87,56 @@ export const Layout = React.forwardRef<HTMLElement, Props>(function Layout(
 
 Layout.displayName = 'Layout';
 
-export default Layout;
+const LayoutHeader = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
+  function LayoutHeader({ ...props }, ref) {
+    return React.createElement('div', { ref, slot: 'header', ...props });
+  }
+);
+
+LayoutHeader.displayName = 'Layout.Header';
+
+const LayoutSidebar = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
+  function LayoutSidebar({ ...props }, ref) {
+    return React.createElement('div', { ref, slot: 'sidebar', ...props });
+  }
+);
+
+LayoutSidebar.displayName = 'Layout.Sidebar';
+
+const LayoutContent = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
+  function LayoutContent({ ...props }, ref) {
+    return React.createElement('div', { ref, slot: 'content', ...props });
+  }
+);
+
+LayoutContent.displayName = 'Layout.Content';
+
+const LayoutAside = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
+  function LayoutAside({ ...props }, ref) {
+    return React.createElement('div', { ref, slot: 'aside', ...props });
+  }
+);
+
+LayoutAside.displayName = 'Layout.Aside';
+
+const LayoutFooter = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
+  function LayoutFooter({ ...props }, ref) {
+    return React.createElement('div', { ref, slot: 'footer', ...props });
+  }
+);
+
+LayoutFooter.displayName = 'Layout.Footer';
+
+// Create composed component with sub-components as properties
+const ComposedLayout = Object.assign(Layout, {
+  Header: LayoutHeader,
+  Sidebar: LayoutSidebar,
+  Content: LayoutContent,
+  Aside: LayoutAside,
+  Footer: LayoutFooter,
+});
+
+ComposedLayout.displayName = 'Layout';
+
+export { ComposedLayout as Layout, LayoutHeader, LayoutSidebar, LayoutContent, LayoutAside, LayoutFooter };
+export default ComposedLayout;

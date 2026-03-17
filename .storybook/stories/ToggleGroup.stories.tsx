@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box, Grid, Toggle, ToggleGroup } from '@editora/ui-react';
+import { Box, Grid } from '@editora/ui-react';
+import { ToggleGroup } from '@editora/ui-react/ToggleGroup';
 
 export default {
   title: 'UI/ToggleGroup',
@@ -25,9 +26,9 @@ export const SingleSelect = () => {
           if (typeof detail.value === 'string') setValue(detail.value);
         }}
       >
-        <Toggle value="left">Left</Toggle>
-        <Toggle value="center">Center</Toggle>
-        <Toggle value="right">Right</Toggle>
+        <ToggleGroup.Item value="left">Left</ToggleGroup.Item>
+        <ToggleGroup.Item value="center">Center</ToggleGroup.Item>
+        <ToggleGroup.Item value="right">Right</ToggleGroup.Item>
       </ToggleGroup>
 
       <Box style={{ fontSize: 13, color: '#475569' }}>Alignment: <strong>{value}</strong></Box>
@@ -48,10 +49,10 @@ export const MultipleSelect = () => {
           if (Array.isArray(detail.value)) setValue(detail.value);
         }}
       >
-        <Toggle value="bold">Bold</Toggle>
-        <Toggle value="italic">Italic</Toggle>
-        <Toggle value="underline">Underline</Toggle>
-        <Toggle value="strike">Strike</Toggle>
+        <ToggleGroup.Item value="bold">Bold</ToggleGroup.Item>
+        <ToggleGroup.Item value="italic">Italic</ToggleGroup.Item>
+        <ToggleGroup.Item value="underline">Underline</ToggleGroup.Item>
+        <ToggleGroup.Item value="strike">Strike</ToggleGroup.Item>
       </ToggleGroup>
 
       <Box style={{ fontSize: 13, color: '#475569' }}>
@@ -63,11 +64,11 @@ export const MultipleSelect = () => {
 
 export const VerticalContrast = () => (
   <Box variant="contrast" p="12px" radius="lg" style={{ maxWidth: 280 }}>
-    <ToggleGroup orientation="vertical" variant="contrast" multiple value={["overview", "alerts"]}>
-      <Toggle value="overview">Overview</Toggle>
-      <Toggle value="analytics">Analytics</Toggle>
-      <Toggle value="alerts">Alerts</Toggle>
-      <Toggle value="settings">Settings</Toggle>
+    <ToggleGroup orientation="vertical" variant="contrast" multiple value={['overview', 'alerts']}>
+      <ToggleGroup.Item value="overview">Overview</ToggleGroup.Item>
+      <ToggleGroup.Item value="analytics">Analytics</ToggleGroup.Item>
+      <ToggleGroup.Item value="alerts">Alerts</ToggleGroup.Item>
+      <ToggleGroup.Item value="settings">Settings</ToggleGroup.Item>
     </ToggleGroup>
   </Box>
 );

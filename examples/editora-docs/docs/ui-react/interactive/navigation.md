@@ -1,13 +1,13 @@
 ---
 title: Navigation
-description: Keyboard-navigable navigation built with NavigationMenu.
+description: Keyboard-navigable navigation with composed React sub-components built with NavigationMenu.
 sidebar_label: Navigation
 source_component: NavigationMenu
 ---
 
 # Navigation
 
-Use `NavigationMenu` for product-level section navigation where a selected item reveals a matching content panel.
+Import the main `NavigationMenu` component and use its sub-components as properties. Use `NavigationMenu` for product-level section navigation where a selected item reveals a matching content panel.
 
 ## Basic Usage
 
@@ -16,7 +16,7 @@ import { NavigationMenu } from '@editora/ui-react';
 
 function PrimaryNavigation() {
   return (
-    <NavigationMenu
+    <NavigationMenu.Root
       selected={0}
       orientation="horizontal"
       variant="soft"
@@ -24,17 +24,38 @@ function PrimaryNavigation() {
       radius={12}
       elevation="low"
     >
-      <button slot="item">Overview</button>
-      <button slot="item">Analytics</button>
-      <button slot="item">Reports</button>
-
-      <section slot="panel">Overview content</section>
-      <section slot="panel">Analytics content</section>
-      <section slot="panel">Reports content</section>
-    </NavigationMenu>
+      <NavigationMenu.List>
+        <NavigationMenu.Item>
+          <NavigationMenu.Trigger>Overview</NavigationMenu.Trigger>
+          <NavigationMenu.Content>Overview content</NavigationMenu.Content>
+        </NavigationMenu.Item>
+        <NavigationMenu.Item>
+          <NavigationMenu.Trigger>Analytics</NavigationMenu.Trigger>
+          <NavigationMenu.Content>Analytics content</NavigationMenu.Content>
+        </NavigationMenu.Item>
+        <NavigationMenu.Item>
+          <NavigationMenu.Trigger>Reports</NavigationMenu.Trigger>
+          <NavigationMenu.Content>Reports content</NavigationMenu.Content>
+        </NavigationMenu.Item>
+      </NavigationMenu.List>
+      <NavigationMenu.Indicator />
+      <NavigationMenu.Viewport />
+    </NavigationMenu.Root>
   );
 }
 ```
+
+## Composed Sub-Components
+
+All NavigationMenu sub-components are available as properties on the main NavigationMenu component:
+
+- `NavigationMenu.Root` - Root container for the navigation menu
+- `NavigationMenu.List` - Container for navigation items
+- `NavigationMenu.Item` - Individual navigation item
+- `NavigationMenu.Trigger` - Trigger element for dropdown content
+- `NavigationMenu.Content` - Content area for each navigation item
+- `NavigationMenu.Indicator` - Visual indicator for selected item
+- `NavigationMenu.Viewport` - Viewport for dropdown content
 
 ## Props
 
@@ -53,8 +74,3 @@ function PrimaryNavigation() {
 | `headless` | `boolean` | Remove default visuals |
 | `onChange` | `(detail: NavigationMenuChangeDetail) => void` | Full change detail callback |
 | `onSelect` | `(selected: number) => void` | Selected index callback |
-
-## Notes
-
-- Compose `NavigationMenu` with your own buttons, links, or other interactive children in the `item` slot.
-- Keep each `panel` slot aligned with its matching `item` by order.

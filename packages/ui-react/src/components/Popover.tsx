@@ -26,6 +26,10 @@ export type PopoverElement = HTMLElement & {
   updatePosition: () => void;
 };
 
+export type PopoverTriggerProps = React.HTMLAttributes<HTMLElement>;
+
+export type PopoverContentProps = React.HTMLAttributes<HTMLElement>;
+
 export type PopoverProps = React.HTMLAttributes<HTMLElement> & {
   open?: boolean;
   placement?: PopoverPlacement;
@@ -39,7 +43,7 @@ export type PopoverProps = React.HTMLAttributes<HTMLElement> & {
   onOpenChange?: (detail: PopoverOpenChangeDetail) => void;
 };
 
-export const Popover = React.forwardRef<PopoverElement, PopoverProps>(function Popover(
+const PopoverRoot = React.forwardRef<PopoverElement, PopoverProps>(function Popover(
   {
     children,
     open,
@@ -112,6 +116,47 @@ export const Popover = React.forwardRef<PopoverElement, PopoverProps>(function P
   return React.createElement('ui-popover', { ref, ...rest }, children);
 });
 
-Popover.displayName = 'Popover';
+PopoverRoot.displayName = 'Popover';
+
+/**
+ * Popover.Trigger - Renders the trigger element in the `trigger` slot
+ * @example
+ * ```tsx
+ * <Popover>
+ *   <Popover.Trigger><button>Open</button></Popover.Trigger>
+ *   <Popover.Content>Content here</Popover.Content>
+ * </Popover>
+ * ```
+ */
+const PopoverTrigger = React.forwardRef<HTMLElement, PopoverTriggerProps>(
+  function PopoverTrigger({ children, ...props }, ref) {
+    return React.createElement('span', { ref, slot: 'trigger', ...props }, children);
+  }
+);
+
+PopoverTrigger.displayName = 'Popover.Trigger';
+
+/**
+ * Popover.Content - Renders the panel body in the `content` slot
+ * @example
+ * ```tsx
+ * <Popover>
+ *   <Popover.Trigger><button>Open</button></Popover.Trigger>
+ *   <Popover.Content>Content here</Popover.Content>
+ * </Popover>
+ * ```
+ */
+const PopoverContent = React.forwardRef<HTMLElement, PopoverContentProps>(
+  function PopoverContent({ children, ...props }, ref) {
+    return React.createElement('div', { ref, slot: 'content', ...props }, children);
+  }
+);
+
+PopoverContent.displayName = 'Popover.Content';
+
+export const Popover = Object.assign(PopoverRoot, {
+  Trigger: PopoverTrigger,
+  Content: PopoverContent,
+});
 
 export default Popover;

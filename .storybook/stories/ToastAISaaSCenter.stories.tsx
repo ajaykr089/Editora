@@ -2,7 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { toastAdvanced } from '@editora/toast';
 import '@editora/toast/toast.css';
-import { Box, Button, Dialog, Flex, Grid, Tabs } from '@editora/ui-react';
+import { Box, Button, Dialog, Flex, Grid } from '@editora/ui-react';
+import { Tabs } from '@editora/ui-react/Tabs';
 
 const meta: Meta = {
   title: 'AI/Toast SaaS Center'
@@ -88,17 +89,17 @@ export const NotificationCommandCenter: Story = {
 
         <Box variant="surface" p="12px" radius="md" style={{ border: '1px solid #e2e8f0' }}>
           <Tabs selected={tab} variant="soft" onChange={setTab}>
-            <div slot="tab" data-value="signal">Signal</div>
-            <div slot="panel">
+            <Tabs.Tab value="signal">Signal</Tabs.Tab>
+            <Tabs.Panel>
               <Flex gap="8px" wrap="wrap">
                 <Button size="sm" onClick={() => toastAdvanced.success('Deployment healthy', { theme: 'light' })}>Success</Button>
                 <Button size="sm" variant="warning" onClick={() => toastAdvanced.warning('Latency above baseline', { theme: 'light' })}>Warning</Button>
                 <Button size="sm" variant="danger" onClick={() => toastAdvanced.error('Webhook delivery failed', { theme: 'light' })}>Error</Button>
               </Flex>
-            </div>
+            </Tabs.Panel>
 
-            <div slot="tab" data-value="queue">Queue</div>
-            <div slot="panel">
+            <Tabs.Tab value="queue">Queue</Tabs.Tab>
+            <Tabs.Panel>
               <Button
                 size="sm"
                 onClick={() => {
@@ -109,10 +110,10 @@ export const NotificationCommandCenter: Story = {
               >
                 Simulate Group Stream
               </Button>
-            </div>
+            </Tabs.Panel>
 
-            <div slot="tab" data-value="config">Config</div>
-            <div slot="panel">
+            <Tabs.Tab value="config">Config</Tabs.Tab>
+            <Tabs.Panel>
               <Button
                 size="sm"
                 onClick={() => {
@@ -122,7 +123,7 @@ export const NotificationCommandCenter: Story = {
               >
                 Apply Runtime Config
               </Button>
-            </div>
+            </Tabs.Panel>
           </Tabs>
         </Box>
 

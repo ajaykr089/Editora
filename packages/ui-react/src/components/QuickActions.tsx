@@ -8,6 +8,8 @@ export type QuickActionSelectDetail = {
   label: string;
 };
 
+export type QuickActionsActionProps = React.HTMLAttributes<HTMLElement>;
+
 export type QuickActionsProps = React.HTMLAttributes<HTMLElement> & {
   open?: boolean;
   mode?: 'bar' | 'fab';
@@ -23,7 +25,7 @@ export type QuickActionsProps = React.HTMLAttributes<HTMLElement> & {
   onToggle?: (open: boolean) => void;
 };
 
-export const QuickActions = React.forwardRef<HTMLElement, QuickActionsProps>(function QuickActions(
+const QuickActionsRoot = React.forwardRef<HTMLElement, QuickActionsProps>(function QuickActions(
   {
     open,
     mode,
@@ -110,6 +112,28 @@ export const QuickActions = React.forwardRef<HTMLElement, QuickActionsProps>(fun
   return React.createElement('ui-quick-actions', { ref, ...rest }, children);
 });
 
-QuickActions.displayName = 'QuickActions';
+QuickActionsRoot.displayName = 'QuickActions';
+
+/**
+ * QuickActions.Action - Renders an action item in the `action` slot
+ * @example
+ * ```tsx
+ * <QuickActions>
+ *   <QuickActions.Action>Save</QuickActions.Action>
+ *   <QuickActions.Action>Discard</QuickActions.Action>
+ * </QuickActions>
+ * ```
+ */
+const QuickActionsAction = React.forwardRef<HTMLElement, QuickActionsActionProps>(
+  function QuickActionsAction({ children, ...props }, ref) {
+    return React.createElement('button', { ref, slot: 'action', type: 'button', ...props }, children);
+  }
+);
+
+QuickActionsAction.displayName = 'QuickActions.Action';
+
+export const QuickActions = Object.assign(QuickActionsRoot, {
+  Action: QuickActionsAction,
+});
 
 export default QuickActions;

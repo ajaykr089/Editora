@@ -1,13 +1,21 @@
 export { Button } from './components/Button';
 export { Tooltip } from './components/Tooltip';
 export { Alert, AlertIcon, AlertTitle, AlertDescription, AlertActions } from './components/Alert';
-export { Dropdown } from './components/Dropdown';
-export { Input } from './components/Input';
+export {
+  Dropdown,
+  DropdownTrigger,
+  DropdownContent,
+  DropdownItem,
+  DropdownSeparator,
+  DropdownSectionLabel
+} from './components/Dropdown';
+export { Input, type InputProps, type InputPrefixProps, type InputSuffixProps, type InputErrorProps } from './components/Input';
 export { PasswordField } from './components/PasswordField';
 export { TagsInput } from './components/TagsInput';
 export { PinInput, OTPInput } from './components/PinInput';
 export { FileUpload, Dropzone } from './components/FileUpload';
 export { Textarea } from './components/Textarea';
+export type { TextareaProps, TextareaLabelProps, TextareaDescriptionProps, TextareaErrorProps } from './components/Textarea';
 export { Field } from './components/Field';
 export { Description, FieldError, ControlGroup, Fieldset } from './components/FieldSemantics';
 export { Combobox } from './components/Combobox';
@@ -33,6 +41,7 @@ export { DateRangeTimePicker } from './components/DateRangeTimePicker';
 export { Gantt } from './components/Gantt';
 export { Stepper } from './components/Stepper';
 export { Wizard } from './components/Wizard';
+export { Rating } from './components/Rating';
 export { QuickActions } from './components/QuickActions';
 export {
   NavigationMenu,
@@ -50,14 +59,15 @@ export { Dialog } from './components/Dialog';
 export { DialogProvider, useDialog } from './components/DialogProvider';
 export { Popover } from './components/Popover';
 export { Tabs } from './components/Tabs';
+export type { TabsProps, TabsTabProps, TabsPanelProps } from './components/Tabs';
 export { Menu, MenuItem, MenuSeparator, MenuSectionLabel } from './components/Menu';
 export { Icon } from './components/Icon';
 export { ToastAPI, ToastProvider, useToast, toast, toastApi, toastAdvanced, toastPro, toastLegacy } from './components/ToastAPI';
 export { Toast } from './components/Toast';
 export { FloatingToolbar } from './components/FloatingToolbar';
 export { BlockControls } from './components/BlockControls';
-export { Command } from './components/Command';
-export { CommandPalette } from './components/CommandPalette';
+export { Command, CommandItem, type CommandProps, type CommandItemProps, type CommandSelectDetail } from './components/Command';
+export { CommandPalette, CommandPaletteItem, type CommandPaletteProps, type CommandPaletteItemProps, type CommandPaletteSelectDetail, type CommandPaletteQueryChangeDetail, type CommandPaletteOpenChangeDetail, type CommandPaletteElement } from './components/CommandPalette';
 export { ContextMenu } from './components/ContextMenu';
 export { SelectionPopup } from './components/SelectionPopup';
 export { PluginPanel } from './components/PluginPanel';
@@ -72,18 +82,11 @@ export { Grid } from './components/Grid';
 export { Section } from './components/Section';
 export { Container } from './components/Container';
 export {
-  Sidebar,
-  SidebarHeader,
-  SidebarSearch,
-  SidebarSearchInput,
-  SidebarContent,
-  SidebarGroup,
-  SidebarItem,
-  SidebarPromo,
-  SidebarFooter
+  Sidebar
 } from './components/Sidebar';
 export { PanelGroup, Panel, Splitter } from './components/PanelGroup';
-export { Tree, TreeItem } from './components/Tree';
+export { Tree } from './components/Tree';
+export type { TreeProps, TreeItemProps, TreeSelectDetail, TreeExpandedChangeDetail } from './components/Tree';
 export { Breadcrumb } from './components/Breadcrumb';
 export { AppHeader, AppHeaderStart, AppHeaderCenter, AppHeaderTitle, AppHeaderSubtitle, AppHeaderEnd } from './components/AppHeader';
 export { Drawer } from './components/Drawer';
@@ -104,8 +107,10 @@ export { Anchor } from './components/Anchor';
 export { Checkbox } from './components/Checkbox';
 export { RadioGroup } from './components/RadioGroup';
 export { Switch } from './components/Switch';
+export type { SwitchProps, SwitchDescriptionProps } from './components/Switch';
 export { Toggle } from './components/Toggle';
 export { ToggleGroup } from './components/ToggleGroup';
+export type { ToggleGroupProps, ToggleGroupItemProps } from './components/ToggleGroup';
 export { AspectRatio } from './components/AspectRatio';
 export { Avatar } from './components/Avatar';
 export { Presence } from './components/Presence';
@@ -119,10 +124,10 @@ export { Toolbar } from './components/Toolbar';
 export { VisuallyHidden } from './components/VisuallyHidden';
 export { Collapsible } from './components/Collapsible';
 export { Pagination } from './components/Pagination';
-export { Accordion, AccordionItem, AccordionTrigger, AccordionPanel } from './components/Accordion';
+export { Accordion } from './components/Accordion';
 export { DirectionProvider } from './components/DirectionProvider';
-export { HoverCard } from './components/HoverCard';
-export { Card, CardHeader, CardFooter, CardInset, CardMedia, CardTitle, CardDescription } from './components/Card';
+export { HoverCard, type HoverCardProps, type HoverCardTriggerProps, type HoverCardContentProps } from './components/HoverCard';
+export { Card } from './components/Card';
 export { Label } from './components/Label';
 export {
   AlertDialog,

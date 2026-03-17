@@ -6,7 +6,7 @@ type HoverCardElement = HTMLElement & {
   open: boolean;
 };
 
-export type HoverCardProps = React.HTMLAttributes<HTMLElement> & {
+export type HoverCardProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'> & {
   open?: boolean;
   delay?: number;
   closeDelay?: number;
@@ -23,7 +23,11 @@ export type HoverCardProps = React.HTMLAttributes<HTMLElement> & {
   onChange?: (open: boolean) => void;
 };
 
-export const HoverCard = React.forwardRef<HTMLElement, HoverCardProps>(function HoverCard(
+export type HoverCardTriggerProps = React.HTMLAttributes<HTMLElement>;
+
+export type HoverCardContentProps = React.HTMLAttributes<HTMLElement>;
+
+const HoverCardRoot = React.forwardRef<HTMLElement, HoverCardProps>(function HoverCard(
   {
     children,
     open,
@@ -115,6 +119,52 @@ export const HoverCard = React.forwardRef<HTMLElement, HoverCardProps>(function 
   return React.createElement('ui-hover-card', { ref, ...rest }, children);
 });
 
-HoverCard.displayName = 'HoverCard';
+HoverCardRoot.displayName = 'HoverCard';
+
+/**
+ * HoverCard.Trigger - Wraps the interactive trigger element
+ * @example
+ * ```tsx
+ * <HoverCard>
+ *   <HoverCard.Trigger asChild>
+ *     <button>Hover me</button>
+ *   </HoverCard.Trigger>
+ *   <HoverCard.Content>Hover content</HoverCard.Content>
+ * </HoverCard>
+ * ```
+ */
+const HoverCardTrigger = React.forwardRef<HTMLElement, HoverCardTriggerProps>(
+  function HoverCardTrigger({ ...props }, ref) {
+    return React.createElement('div', { ref, ...props });
+  }
+);
+
+HoverCardTrigger.displayName = 'HoverCard.Trigger';
+
+/**
+ * HoverCard.Content - Wraps the hover card content with slot="card"
+ * @example
+ * ```tsx
+ * <HoverCard>
+ *   <button>Hover me</button>
+ *   <HoverCard.Content>
+ *     <strong>Title</strong>
+ *     <p>Description</p>
+ *   </HoverCard.Content>
+ * </HoverCard>
+ * ```
+ */
+const HoverCardContent = React.forwardRef<HTMLElement, HoverCardContentProps>(
+  function HoverCardContent({ children, ...props }, ref) {
+    return React.createElement('div', { ref, slot: 'card', ...props }, children);
+  }
+);
+
+HoverCardContent.displayName = 'HoverCard.Content';
+
+export const HoverCard = Object.assign(HoverCardRoot, {
+  Trigger: HoverCardTrigger,
+  Content: HoverCardContent,
+});
 
 export default HoverCard;

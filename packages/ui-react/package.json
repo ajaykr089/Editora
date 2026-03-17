@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-react",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Enterprise React component library with SaaS UI components, modern design system patterns, and wrappers for Editora UI Core.",
   "homepage": "https://editora-ecosystem.netlify.app/docs/ui-react",
   "bugs": {
@@ -20,6 +20,186 @@
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js",
       "default": "./dist/index.esm.js"
+    },
+    "./components/*": {
+      "types": "./dist/components/*.d.ts",
+      "import": "./dist/components/*.esm.js",
+      "require": "./dist/components/*.cjs.js",
+      "default": "./dist/components/*.esm.js"
+    },
+    "./Accordion": {
+      "types": "./dist/Accordion.d.ts",
+      "import": "./dist/Accordion.esm.js",
+      "require": "./dist/Accordion.cjs.js",
+      "default": "./dist/Accordion.esm.js"
+    },
+    "./AppHeader": {
+      "types": "./dist/AppHeader.d.ts",
+      "import": "./dist/AppHeader.esm.js",
+      "require": "./dist/AppHeader.cjs.js",
+      "default": "./dist/AppHeader.esm.js"
+    },
+    "./Card": {
+      "types": "./dist/Card.d.ts",
+      "import": "./dist/Card.esm.js",
+      "require": "./dist/Card.cjs.js",
+      "default": "./dist/Card.esm.js"
+    },
+    "./Breadcrumb": {
+      "types": "./dist/Breadcrumb.d.ts",
+      "import": "./dist/Breadcrumb.esm.js",
+      "require": "./dist/Breadcrumb.cjs.js",
+      "default": "./dist/Breadcrumb.esm.js"
+    },
+    "./Collapsible": {
+      "types": "./dist/Collapsible.d.ts",
+      "import": "./dist/Collapsible.esm.js",
+      "require": "./dist/Collapsible.cjs.js",
+      "default": "./dist/Collapsible.esm.js"
+    },
+    "./Combobox": {
+      "types": "./dist/Combobox.d.ts",
+      "import": "./dist/Combobox.esm.js",
+      "require": "./dist/Combobox.cjs.js",
+      "default": "./dist/Combobox.esm.js"
+    },
+    "./Command": {
+      "types": "./dist/Command.d.ts",
+      "import": "./dist/Command.esm.js",
+      "require": "./dist/Command.cjs.js",
+      "default": "./dist/Command.esm.js"
+    },
+    "./CommandPalette": {
+      "types": "./dist/CommandPalette.d.ts",
+      "import": "./dist/CommandPalette.esm.js",
+      "require": "./dist/CommandPalette.cjs.js",
+      "default": "./dist/CommandPalette.esm.js"
+    },
+    "./Drawer": {
+      "types": "./dist/Drawer.d.ts",
+      "import": "./dist/Drawer.esm.js",
+      "require": "./dist/Drawer.cjs.js",
+      "default": "./dist/Drawer.esm.js"
+    },
+    "./FloatingToolbar": {
+      "types": "./dist/FloatingToolbar.d.ts",
+      "import": "./dist/FloatingToolbar.esm.js",
+      "require": "./dist/FloatingToolbar.cjs.js",
+      "default": "./dist/FloatingToolbar.esm.js"
+    },
+    "./Form": {
+      "types": "./dist/Form.d.ts",
+      "import": "./dist/Form.esm.js",
+      "require": "./dist/Form.cjs.js",
+      "default": "./dist/Form.esm.js"
+    },
+    "./HoverCard": {
+      "types": "./dist/HoverCard.d.ts",
+      "import": "./dist/HoverCard.esm.js",
+      "require": "./dist/HoverCard.cjs.js",
+      "default": "./dist/HoverCard.esm.js"
+    },
+    "./Input": {
+      "types": "./dist/Input.d.ts",
+      "import": "./dist/Input.esm.js",
+      "require": "./dist/Input.cjs.js",
+      "default": "./dist/Input.esm.js"
+    },
+    "./Layout": {
+      "types": "./dist/Layout.d.ts",
+      "import": "./dist/Layout.esm.js",
+      "require": "./dist/Layout.cjs.js",
+      "default": "./dist/Layout.esm.js"
+    },
+    "./Menu": {
+      "types": "./dist/Menu.d.ts",
+      "import": "./dist/Menu.esm.js",
+      "require": "./dist/Menu.cjs.js",
+      "default": "./dist/Menu.esm.js"
+    },
+    "./Menubar": {
+      "types": "./dist/Menubar.d.ts",
+      "import": "./dist/Menubar.esm.js",
+      "require": "./dist/Menubar.cjs.js",
+      "default": "./dist/Menubar.esm.js"
+    },
+    "./Label": {
+      "types": "./dist/Label.d.ts",
+      "import": "./dist/Label.esm.js",
+      "require": "./dist/Label.cjs.js",
+      "default": "./dist/Label.esm.js"
+    },
+    "./Popover": {
+      "types": "./dist/Popover.d.ts",
+      "import": "./dist/Popover.esm.js",
+      "require": "./dist/Popover.cjs.js",
+      "default": "./dist/Popover.esm.js"
+    },
+    "./QuickActions": {
+      "types": "./dist/QuickActions.d.ts",
+      "import": "./dist/QuickActions.esm.js",
+      "require": "./dist/QuickActions.cjs.js",
+      "default": "./dist/QuickActions.esm.js"
+    },
+    "./Rating": {
+      "types": "./dist/Rating.d.ts",
+      "import": "./dist/Rating.esm.js",
+      "require": "./dist/Rating.cjs.js",
+      "default": "./dist/Rating.esm.js"
+    },
+    "./Select": {
+      "types": "./dist/Select.d.ts",
+      "import": "./dist/Select.esm.js",
+      "require": "./dist/Select.cjs.js",
+      "default": "./dist/Select.esm.js"
+    },
+    "./SelectionPopup": {
+      "types": "./dist/SelectionPopup.d.ts",
+      "import": "./dist/SelectionPopup.esm.js",
+      "require": "./dist/SelectionPopup.cjs.js",
+      "default": "./dist/SelectionPopup.esm.js"
+    },
+    "./Sidebar": {
+      "types": "./dist/Sidebar.d.ts",
+      "import": "./dist/Sidebar.esm.js",
+      "require": "./dist/Sidebar.cjs.js",
+      "default": "./dist/Sidebar.esm.js"
+    },
+    "./Switch": {
+      "types": "./dist/Switch.d.ts",
+      "import": "./dist/Switch.esm.js",
+      "require": "./dist/Switch.cjs.js",
+      "default": "./dist/Switch.esm.js"
+    },
+    "./Tabs": {
+      "types": "./dist/Tabs.d.ts",
+      "import": "./dist/Tabs.esm.js",
+      "require": "./dist/Tabs.cjs.js",
+      "default": "./dist/Tabs.esm.js"
+    },
+    "./Textarea": {
+      "types": "./dist/Textarea.d.ts",
+      "import": "./dist/Textarea.esm.js",
+      "require": "./dist/Textarea.cjs.js",
+      "default": "./dist/Textarea.esm.js"
+    },
+    "./ToggleGroup": {
+      "types": "./dist/ToggleGroup.d.ts",
+      "import": "./dist/ToggleGroup.esm.js",
+      "require": "./dist/ToggleGroup.cjs.js",
+      "default": "./dist/ToggleGroup.esm.js"
+    },
+    "./Tree": {
+      "types": "./dist/Tree.d.ts",
+      "import": "./dist/Tree.esm.js",
+      "require": "./dist/Tree.cjs.js",
+      "default": "./dist/Tree.esm.js"
+    },
+    "./Wizard": {
+      "types": "./dist/Wizard.d.ts",
+      "import": "./dist/Wizard.esm.js",
+      "require": "./dist/Wizard.cjs.js",
+      "default": "./dist/Wizard.esm.js"
     }
   },
   "files": [

@@ -33,7 +33,9 @@ export { DateRangeTimePicker } from './DateRangeTimePicker';
 export { Gantt } from './Gantt';
 export { Stepper } from './Stepper';
 export { Wizard } from './Wizard';
+export { Rating } from './Rating';
 export { QuickActions } from './QuickActions';
+export type { QuickActionsActionProps, QuickActionSelectDetail } from './QuickActions';
 export {
   NavigationMenu,
   NavigationMenuRoot,
@@ -49,19 +51,23 @@ export { Menubar } from './Menubar';
 export { Dialog } from './Dialog';
 export { DialogProvider, useDialog } from './DialogProvider';
 export { Popover } from './Popover';
+export type { PopoverTriggerProps, PopoverContentProps, PopoverPlacement, PopoverOpenChangeDetail, PopoverElement } from './Popover';
 export { Tabs } from './Tabs';
 export { Menu, MenuItem, MenuSeparator, MenuSectionLabel } from './Menu';
 export { Icon } from './Icon';
 export { ToastAPI, ToastProvider, useToast, toast, toastApi, toastAdvanced, toastPro, toastLegacy } from './ToastAPI';
 export { Toast } from './Toast';
 export { FloatingToolbar } from './FloatingToolbar';
+export type { FloatingToolbarProps, FloatingToolbarToolbarProps } from './FloatingToolbar';
 export { BlockControls } from './BlockControls';
 export { Command } from './Command';
 export { CommandPalette } from './CommandPalette';
 export { ContextMenu } from './ContextMenu';
 export { SelectionPopup } from './SelectionPopup';
+export type { SelectionPopupProps, SelectionPopupContentProps } from './SelectionPopup';
 export { PluginPanel } from './PluginPanel';
 export { Form } from './Form';
+export type { FormProps, FormActionsProps, FormStatusProps, FormTitleProps } from './Form';
 
 // layout
 export { Box } from './Box';
@@ -69,22 +75,14 @@ export { Flex } from './Flex';
 export { Grid } from './Grid';
 export { Section } from './Section';
 export { Container } from './Container';
-export {
-  Sidebar,
-  SidebarHeader,
-  SidebarSearch,
-  SidebarSearchInput,
-  SidebarContent,
-  SidebarGroup,
-  SidebarItem,
-  SidebarPromo,
-  SidebarFooter
-} from './Sidebar';
+export { Sidebar } from './Sidebar';
+export type { SidebarProps, SidebarGroupProps, SidebarItemProps, SidebarSlotProps, SidebarSearchInputProps, SidebarSelectDetail, SidebarTone } from './Sidebar';
 export { PanelGroup, Panel, Splitter } from './PanelGroup';
-export { Tree, TreeItem } from './Tree';
+export { Tree } from './Tree';
 export { Breadcrumb } from './Breadcrumb';
 export { AppHeader, AppHeaderStart, AppHeaderCenter, AppHeaderTitle, AppHeaderSubtitle, AppHeaderEnd } from './AppHeader';
 export { Drawer } from './Drawer';
+export type { DrawerProps, DrawerHeaderProps, DrawerFooterProps } from './Drawer';
 export { Layout } from './Layout';
 
 export { ThemeProvider, useTheme } from './ThemeProvider';
@@ -115,10 +113,10 @@ export { Separator } from './Separator';
 export { Slot } from './Slot';
 export { Toolbar } from './Toolbar';
 export { VisuallyHidden } from './VisuallyHidden';
-export { Accordion, AccordionItem, AccordionTrigger, AccordionPanel } from './Accordion';
+export { Accordion} from './Accordion';
 export { DirectionProvider } from './DirectionProvider';
 export { HoverCard } from './HoverCard';
-export { Card, CardHeader, CardFooter, CardInset, CardMedia, CardTitle, CardDescription } from './Card';
+export { Card } from './Card';
 export { Label } from './Label';
 export {
   AlertDialog,
@@ -130,5 +128,14 @@ export {
 } from './AlertDialog';
 export { AlertDialogProvider, useAlertDialog } from './AlertDialogProvider';
 export { Select } from './Select';
+export type {
+  SelectOptionProps,
+  SelectOptGroupProps,
+  SelectLabelProps,
+  SelectDescriptionProps,
+  SelectErrorProps,
+  SelectLeadingProps,
+  SelectTrailingProps,
+} from './Select';
 export { Slider } from './Slider';
 export { Skeleton } from './Skeleton';

@@ -10,7 +10,11 @@ type BreadcrumbSelectDetail = {
   source?: 'click' | 'keyboard';
 };
 
-type BreadcrumbProps = React.HTMLAttributes<HTMLElement> & {
+type BaseProps = React.HTMLAttributes<HTMLElement> & {
+  children?: React.ReactNode;
+};
+
+export type BreadcrumbProps = BaseProps & {
   separator?: string;
   maxItems?: number;
   currentIndex?: number;
@@ -25,7 +29,18 @@ type BreadcrumbProps = React.HTMLAttributes<HTMLElement> & {
   onSelect?: (detail: BreadcrumbSelectDetail) => void;
 };
 
-export const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(function Breadcrumb(
+export type BreadcrumbItemProps = React.HTMLAttributes<HTMLDivElement> & {
+  children?: React.ReactNode;
+  href?: string;
+  label?: string;
+  index?: number;
+};
+
+type BreadcrumbComponent = React.ForwardRefExoticComponent<BreadcrumbProps & React.RefAttributes<HTMLElement>> & {
+  Item: typeof BreadcrumbItem;
+};
+
+const BreadcrumbRoot = React.forwardRef<HTMLElement, BreadcrumbProps>(function Breadcrumb(
   {
     children,
     separator,
@@ -46,7 +61,7 @@ export const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(functio
 ) {
   const ref = useRef<HTMLElement | null>(null);
 
-  useImperativeHandle(forwardedRef, () => ref.current as any);
+  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
   useEffect(() => {
     warnIfElementNotRegistered('ui-breadcrumb', 'Breadcrumb');
@@ -69,65 +84,76 @@ export const Breadcrumb = React.forwardRef<HTMLElement, BreadcrumbProps>(functio
     const el = ref.current;
     if (!el) return;
 
-    if (separator != null && separator !== '') el.setAttribute('separator', separator);
-    else el.removeAttribute('separator');
-  }, [separator]);
+    const syncAttr = (attr: string, next: string | null) => {
+      const current = el.getAttribute(attr);
+      if (next == null) {
+        if (current != null) el.removeAttribute(attr);
+        return;
+      }
+      if (current !== next) el.setAttribute(attr, next);
+    };
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const syncBooleanish = (attr: string, next: boolean | undefined, mode: 'presence' | 'value' = 'presence') => {
+      if (mode === 'presence') {
+        if (next) {
+          if (!el.hasAttribute(attr)) el.setAttribute(attr, '');
+        } else if (el.hasAttribute(attr)) {
+          el.removeAttribute(attr);
+        }
+        return;
+      }
 
-    if (typeof maxItems === 'number' && Number.isFinite(maxItems)) {
-      el.setAttribute('max-items', String(maxItems));
-    } else {
-      el.removeAttribute('max-items');
-    }
-  }, [maxItems]);
+      if (next == null) {
+        if (el.hasAttribute(attr)) el.removeAttribute(attr);
+        return;
+      }
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+      const serialized = next ? 'true' : 'false';
+      if (el.getAttribute(attr) !== serialized) el.setAttribute(attr, serialized);
+    };
 
-    if (typeof currentIndex === 'number' && Number.isFinite(currentIndex)) {
-      el.setAttribute('current-index', String(currentIndex));
-    } else {
-      el.removeAttribute('current-index');
-    }
-  }, [currentIndex]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    if (size && size !== 'md' && size !== '2') el.setAttribute('size', String(size));
-    else el.removeAttribute('size');
-
-    if (variant && variant !== 'default' && variant !== 'surface') el.setAttribute('variant', variant);
-    else el.removeAttribute('variant');
-
-    if (radius != null && radius !== '' && radius !== 'md') el.setAttribute('radius', String(radius));
-    else el.removeAttribute('radius');
-
-    if (elevation && elevation !== 'default' && elevation !== 'none') el.setAttribute('elevation', elevation);
-    else el.removeAttribute('elevation');
-
-    if (tone) el.setAttribute('tone', tone);
-    else el.removeAttribute('tone');
-
-    if (state && state !== 'idle') el.setAttribute('state', state);
-    else el.removeAttribute('state');
-
-    if (disabled == null) el.removeAttribute('disabled');
-    else if (disabled) el.setAttribute('disabled', '');
-    else el.removeAttribute('disabled');
-
-    if (ariaLabel) el.setAttribute('aria-label', ariaLabel);
-    else el.removeAttribute('aria-label');
-  }, [size, variant, radius, elevation, tone, state, disabled, ariaLabel]);
+    syncAttr('separator', separator || null);
+    syncAttr('max-items', maxItems != null && Number.isFinite(maxItems) ? String(maxItems) : null);
+    syncAttr('current-index', currentIndex != null && Number.isFinite(currentIndex) ? String(currentIndex) : null);
+    syncAttr('size', size && size !== 'md' && size !== '2' ? size : null);
+    syncAttr('variant', variant && variant !== 'default' && variant !== 'surface' ? variant : null);
+    syncAttr('radius', radius != null && radius !== '' && radius !== 'md' ? String(radius) : null);
+    syncAttr('elevation', elevation && elevation !== 'default' && elevation !== 'none' ? elevation : null);
+    syncAttr('tone', tone || null);
+    syncAttr('state', state && state !== 'idle' ? state : null);
+    syncBooleanish('disabled', disabled);
+    syncAttr('aria-label', ariaLabel || null);
+  }, [separator, maxItems, currentIndex, size, variant, radius, elevation, tone, state, disabled, ariaLabel]);
 
   return React.createElement('ui-breadcrumb', { ref, ...rest }, children);
 });
 
-Breadcrumb.displayName = 'Breadcrumb';
+BreadcrumbRoot.displayName = 'Breadcrumb';
+
+export const BreadcrumbItem = React.forwardRef<HTMLDivElement, BreadcrumbItemProps>(function BreadcrumbItem(
+  { children, href, label, index, className, ...rest },
+  ref
+) {
+  const classes = ['item', className].filter(Boolean).join(' ');
+
+  return (
+    <div
+      {...rest}
+      ref={ref}
+      className={classes}
+      data-label={label}
+      data-index={index}
+      data-href={href}
+    >
+      {children}
+    </div>
+  );
+});
+
+BreadcrumbItem.displayName = 'Breadcrumb.Item';
+
+export const Breadcrumb = Object.assign(BreadcrumbRoot, {
+  Item: BreadcrumbItem
+}) as BreadcrumbComponent;
 
 export default Breadcrumb;

@@ -22,13 +22,13 @@ export default {
 
 function ToolbarActions() {
   return (
-    <Flex slot="toolbar" style={{ display: 'flex', gap: 6 }}>
+    <FloatingToolbar.Toolbar style={{ display: 'flex', gap: 6 }}>
       <Button size="sm">Bold</Button>
       <Button size="sm">Italic</Button>
       <Button size="sm">Underline</Button>
       <Button size="sm" variant="secondary">Link</Button>
       <Button size="sm" variant="secondary">Comment</Button>
-    </Flex>
+    </FloatingToolbar.Toolbar>
   );
 }
 
@@ -158,7 +158,7 @@ export const EnterpriseDocumentEditor = () => {
         align="start"
         offset={10}
       >
-        <Flex slot="toolbar" style={{ display: 'flex', gap: 6 }}>
+        <FloatingToolbar.Toolbar style={{ display: 'flex', gap: 6 }}>
           <Button size="sm">H1</Button>
           <Button size="sm">H2</Button>
           <Button size="sm">B</Button>
@@ -174,7 +174,7 @@ export const EnterpriseDocumentEditor = () => {
           >
             {saved ? 'Saved' : 'Save'}
           </Button>
-        </Flex>
+        </FloatingToolbar.Toolbar>
       </FloatingToolbar>
     </Grid>
   );
@@ -209,11 +209,11 @@ export const FlatToolbar = () => (
         ['--ui-floating-toolbar-bg' as any]: 'var(--ui-color-surface, #ffffff)'
       }}
     >
-      <Flex slot="toolbar" style={{ display: 'flex', gap: 4 }}>
+      <FloatingToolbar.Toolbar style={{ display: 'flex', gap: 4 }}>
         <Button size="sm" variant="secondary">Cut</Button>
         <Button size="sm" variant="secondary">Copy</Button>
         <Button size="sm" variant="secondary">Paste</Button>
-      </Flex>
+      </FloatingToolbar.Toolbar>
     </FloatingToolbar>
   </Grid>
 );
@@ -267,11 +267,11 @@ export const ThemeProviderVerification = () => {
         </Box>
 
         <FloatingToolbar anchorId="ft-theme-anchor" open variant="soft" tone="brand">
-          <Flex slot="toolbar" style={{ display: 'flex', gap: 6 }}>
+          <FloatingToolbar.Toolbar style={{ display: 'flex', gap: 6 }}>
             <Button size="sm">A</Button>
             <Button size="sm">B</Button>
             <Button size="sm" variant="secondary">C</Button>
-          </Flex>
+          </FloatingToolbar.Toolbar>
         </FloatingToolbar>
       </Grid>
     </ThemeProvider>

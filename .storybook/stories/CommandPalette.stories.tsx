@@ -8,16 +8,16 @@ export default {
 };
 
 const commands = [
-  'Create document',
-  'Insert image',
-  'Toggle sidebar',
-  'Export as PDF',
-  'Open settings'
+  { value: 'create-doc', label: 'Create document' },
+  { value: 'insert-image', label: 'Insert image' },
+  { value: 'toggle-sidebar', label: 'Toggle sidebar' },
+  { value: 'export-pdf', label: 'Export as PDF' },
+  { value: 'settings', label: 'Open settings' }
 ];
 
 export const Default = (args: any) => {
   const [open, setOpen] = useState(!!args.open);
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
   const [query, setQuery] = useState('');
 
   return (
@@ -34,19 +34,24 @@ export const Default = (args: any) => {
         emptyText="No command matches"
         onQueryChange={(detail) => setQuery(detail.value)}
         onSelect={(detail) => {
-          setSelected(detail.index);
+          setSelected(detail.value || null);
           setOpen(false);
         }}
       >
         {commands.map((command) => (
-          <Box key={command} slot="command" style={{ padding: 8, borderRadius: 6 }}>
-            {command}
-          </Box>
+          <CommandPalette.Item
+            key={command.value}
+            value={command.value}
+            label={command.label}
+            style={{ padding: 8, borderRadius: 6 }}
+          >
+            {command.label}
+          </CommandPalette.Item>
         ))}
       </CommandPalette>
 
       <Box style={{ fontSize: 13, color: '#475569' }}>
-        Selected: {selected == null ? 'none' : commands[selected]} • query: {query || 'empty'}
+        Selected: {selected || 'none'} • query: {query || 'empty'}
       </Box>
     </Grid>
   );
@@ -54,30 +59,49 @@ export const Default = (args: any) => {
 Default.args = { open: false };
 
 export const FilteredList = () => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
 
   const filtered = useMemo(
-    () => commands.filter((command) => command.toLowerCase().includes(query.toLowerCase())),
+    () => commands.filter((cmd) => cmd.label.toLowerCase().includes(query.toLowerCase())),
     [query]
   );
 
   return (
     <Grid style={{ display: 'grid', gap: 12 }}>
+      <Flex style={{ display: 'flex', gap: 8 }}>
+        <Button onClick={() => setOpen(true)}>Open Palette</Button>
+        <Button variant="secondary" onClick={() => setOpen(false)}>Close</Button>
+      </Flex>
+
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Filter commands before rendering"
         style={{ maxWidth: 320, padding: 8, border: '1px solid #cbd5e1', borderRadius: 8 }}
       />
-      <CommandPalette open={open} onSelect={() => setOpen(false)}>
+
+      <CommandPalette 
+        open={open} 
+        query={query}
+        placeholder="Search commands..."
+        onQueryChange={(detail) => setQuery(detail.value)}
+        onSelect={() => setOpen(false)}
+      >
         {filtered.map((command) => (
-          <div key={command} slot="command">{command}</div>
+          <CommandPalette.Item
+            key={command.value}
+            value={command.value}
+            label={command.label}
+          >
+            {command.label}
+          </CommandPalette.Item>
         ))}
       </CommandPalette>
-      <Button size="sm" variant="secondary" onClick={() => setOpen((v) => !v)}>
-        Toggle palette
-      </Button>
+
+      <Box style={{ fontSize: 13, color: '#475569' }}>
+        Palette is {open ? 'open' : 'closed'} • Filtered results: {filtered.length}
+      </Box>
     </Grid>
   );
 };

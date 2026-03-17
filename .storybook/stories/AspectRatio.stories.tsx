@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { AspectRatio, Box, Button, Card, CardDescription, CardHeader, CardTitle, Flex, Grid } from '@editora/ui-react';
+import { AspectRatio, Box, Button, Card, Flex, Grid } from '@editora/ui-react';
 import { CameraIcon, CheckCircleIcon, ImageIcon, PlayCircleIcon } from '@editora/react-icons';
 
 const meta: Meta<typeof AspectRatio> = {
@@ -34,12 +34,12 @@ export const Playground: Story = {
   render: (args) => (
     <Grid style={{ gap: 16 }}>
       <Card radius={16}>
-        <CardHeader>
-          <CardTitle>Aspect ratio</CardTitle>
-          <CardDescription>
+        <Card.Header>
+          <Card.Title>Aspect ratio</Card.Title>
+          <Card.Description>
             Stable media frames for previews, thumbnails, editorial cards, and workflow canvases.
-          </CardDescription>
-        </CardHeader>
+          </Card.Description>
+        </Card.Header>
         <Box slot="inset" style={{ padding: 12 }}>
           <AspectRatio {...args} showRatioBadge style={{ width: '100%' }}>
             <img src={imageUrl} alt="Operations team reviewing dashboards" />

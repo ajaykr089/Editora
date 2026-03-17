@@ -31,10 +31,10 @@ export const Playground = (args: any) => (
     style={{ display: 'inline-block' }}
   >
     <button style={{ padding: '8px 12px' }}>Hover me</button>
-    <div slot="card">
+    <HoverCard.Content>
       <strong>Editora</strong>
       <p style={{ margin: '6px 0 0', fontSize: 13, color: '#475569' }}>Composable editor UI primitives.</p>
-    </div>
+    </HoverCard.Content>
   </HoverCard>
 );
 
@@ -55,63 +55,63 @@ export const VisualModes = () => (
     <Box style={{ padding: 14, border: '1px solid #e2e8f0', borderRadius: 12 }}>
       <HoverCard variant="line" tone="brand" placement="right" closeDelay={180}>
         <button style={{ padding: '8px 12px' }}>Line / Brand</button>
-        <Box slot="card" style={{ display: 'grid', gap: 6 }}>
+        <HoverCard.Content style={{ display: 'grid', gap: 6 }}>
           <strong>Activity</strong>
           <span>Last edited by Priya</span>
           <span>2 minutes ago</span>
-        </Box>
+        </HoverCard.Content>
       </HoverCard>
     </Box>
 
     <Box style={{ padding: 14, border: '1px solid #e2e8f0', borderRadius: 12, background: 'linear-gradient(145deg, #f8fafc, #eef2ff)' }}>
       <HoverCard variant="glass" shape="soft" elevation="high" placement="left">
         <button style={{ padding: '8px 12px' }}>Glass / Soft</button>
-        <Box slot="card" style={{ display: 'grid', gap: 6 }}>
+        <HoverCard.Content style={{ display: 'grid', gap: 6 }}>
           <strong>Workspace</strong>
           <span>12 collaborators online</span>
           <span>Theme-safe surface</span>
-        </Box>
+        </HoverCard.Content>
       </HoverCard>
     </Box>
 
     <Box style={{ padding: 14, border: '1px solid #e2e8f0', borderRadius: 12 }}>
       <HoverCard variant="default" tone="success" density="compact" placement="top">
         <button style={{ padding: '8px 12px' }}>Compact / Success</button>
-        <Box slot="card" style={{ display: 'grid', gap: 4 }}>
+        <HoverCard.Content style={{ display: 'grid', gap: 4 }}>
           <strong>Deployment</strong>
           <span>Build healthy</span>
           <span>All checks passed</span>
-        </Box>
+        </HoverCard.Content>
       </HoverCard>
     </Box>
 
     <Box style={{ padding: 14, border: '1px solid #1e293b', borderRadius: 12, background: '#020617', color: '#e2e8f0' }}>
       <HoverCard variant="contrast" tone="danger" placement="bottom" shape="square">
         <button style={{ padding: '8px 12px' }}>Contrast / Danger</button>
-        <Box slot="card" style={{ display: 'grid', gap: 6 }}>
+        <HoverCard.Content style={{ display: 'grid', gap: 6 }}>
           <strong>Critical Action</strong>
           <span>This cannot be undone.</span>
-        </Box>
+        </HoverCard.Content>
       </HoverCard>
     </Box>
 
     <Box style={{ padding: 14, border: '1px dashed #94a3b8', borderRadius: 12 }}>
       <HoverCard variant="minimal" tone="brand" placement="bottom">
         <button style={{ padding: '8px 12px' }}>Minimal / Brand</button>
-        <Box slot="card" style={{ display: 'grid', gap: 6 }}>
+        <HoverCard.Content style={{ display: 'grid', gap: 6 }}>
           <strong>Quick details</strong>
           <span>Low-noise compact surface.</span>
-        </Box>
+        </HoverCard.Content>
       </HoverCard>
     </Box>
 
     <Box style={{ padding: 14, border: '1px solid #e2e8f0', borderRadius: 12, background: 'linear-gradient(155deg, #f8fafc, #eef2ff)' }}>
       <HoverCard variant="elevated" tone="warning" placement="right" elevation="high">
         <button style={{ padding: '8px 12px' }}>Elevated / Warning</button>
-        <Box slot="card" style={{ display: 'grid', gap: 6 }}>
+        <HoverCard.Content style={{ display: 'grid', gap: 6 }}>
           <strong>Review required</strong>
           <span>Premium floating card with depth.</span>
-        </Box>
+        </HoverCard.Content>
       </HoverCard>
     </Box>
   </Grid>
@@ -120,10 +120,10 @@ export const VisualModes = () => (
 export const RichCardContent = () => (
   <HoverCard>
     <span tabIndex={0} style={{ display: 'inline-block', padding: 8, borderBottom: '1px dashed #94a3b8' }}>Product details</span>
-    <Grid slot="card" style={{ display: 'grid', gap: 6 }}>
+    <HoverCard.Content style={{ display: 'grid', gap: 6 }}>
       <div>Release: <strong>2.0</strong></div>
       <div>Support: LTR / RTL</div>
       <div>Theme-ready tokens</div>
-    </Grid>
+    </HoverCard.Content>
   </HoverCard>
 );
