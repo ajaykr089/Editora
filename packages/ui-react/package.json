@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-react",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Enterprise React component library with SaaS UI components, modern design system patterns, and wrappers for Editora UI Core.",
   "homepage": "https://editora-ecosystem.netlify.app/docs/ui-react",
   "bugs": {
@@ -26,6 +26,12 @@
       "import": "./dist/components/*.esm.js",
       "require": "./dist/components/*.cjs.js",
       "default": "./dist/components/*.esm.js"
+    },
+    "./AppHeader": {
+      "types": "./dist/AppHeader.d.ts",
+      "import": "./dist/AppHeader.esm.js",
+      "require": "./dist/AppHeader.cjs.js",
+      "default": "./dist/AppHeader.esm.js"
     },
     "./Card": {
       "types": "./dist/Card.d.ts",
