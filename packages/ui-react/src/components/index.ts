@@ -26,6 +26,17 @@ export { NumberField } from './NumberField';
 export { MultiSelect } from './MultiSelect';
 export { SplitButton } from './SplitButton';
 export { TransferList } from './TransferList';
+export type {
+  TransferListProps,
+  TransferListOption,
+  TransferListChangeDetail,
+  TransferListElement,
+  TransferListVariant,
+  TransferListTone,
+  TransferListSize,
+  TransferListElevation,
+  TransferListSelectionIndicator
+} from './TransferList';
 export { InlineEdit } from './InlineEdit';
 export { TimePicker } from './TimePicker';
 export { DateTimePicker } from './DateTimePicker';
