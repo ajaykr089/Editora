@@ -175,6 +175,21 @@ export type {
   AnimatedListElevation,
   AnimatedListElement,
 } from './AnimatedList';
+export { AnimatedBeam } from './AnimatedBeam';
+export type {
+  AnimatedBeamProps,
+  AnimatedBeamNodeProps,
+  AnimatedBeamHubProps,
+  AnimatedBeamConnectionProps,
+  AnimatedBeamElement,
+  AnimatedBeamVariant,
+  AnimatedBeamTone,
+  AnimatedBeamSize,
+  AnimatedBeamElevation,
+  AnimatedBeamAnimation,
+  AnimatedBeamCurve,
+  AnimatedBeamDirection,
+} from './AnimatedBeam';
 export { Dock } from './Dock';
 export type {
   DockProps,

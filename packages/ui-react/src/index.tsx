@@ -188,6 +188,20 @@ export type {
   AnimatedListElevation,
   AnimatedListElement,
 } from './components/AnimatedList';
+export { AnimatedBeam } from './components/AnimatedBeam';
+export type {
+  AnimatedBeamProps,
+  AnimatedBeamNodeProps,
+  AnimatedBeamHubProps,
+  AnimatedBeamConnectionProps,
+  AnimatedBeamElement,
+  AnimatedBeamVariant,
+  AnimatedBeamTone,
+  AnimatedBeamSize,
+  AnimatedBeamElevation,
+  AnimatedBeamAnimation,
+  AnimatedBeamCurve,
+} from './components/AnimatedBeam';
 export { Dock } from './components/Dock';
 export type {
   DockProps,

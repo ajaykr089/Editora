@@ -74,6 +74,12 @@
       "require": "./dist/AnimatedList.cjs.js",
       "default": "./dist/AnimatedList.esm.js"
     },
+    "./AnimatedBeam": {
+      "types": "./dist/components/AnimatedBeam.d.ts",
+      "import": "./dist/AnimatedBeam.esm.js",
+      "require": "./dist/AnimatedBeam.cjs.js",
+      "default": "./dist/AnimatedBeam.esm.js"
+    },
     "./Anchor": {
       "types": "./dist/components/Anchor.d.ts",
       "import": "./dist/Anchor.esm.js",

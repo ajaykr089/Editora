@@ -35,13 +35,14 @@ import "@editora/ui-core";
 | `UIButton`, `UITooltip`, `UIDropdown`, `UIInput`, `UIForm`, `UIPopover`, `UITabs`, `UIMenu`, `UIIcon`, `UIToast`, `UILabel` | Component class exports | Core controls |
 | `UIPagination`, `UIHoverCard`, `UICollapsible`, `UIDirectionProvider`, `UIAccordion`, `UICheckbox`, `UIRadioGroup`, `UISwitch`, `UISlider`, `UISelect`, `UIToggle`, `UIToggleGroup` | Component class exports | Inputs + interaction controls |
 | `UIAlertDialog`, `UIAspectRatio`, `UIAvatar`, `UIBadge`, `UITable`, `UINavigationMenu`, `UIMenubar`, `UIContextMenu` | Component class exports | Data/navigation primitives |
-| `UIPresence`, `UIProgress`, `UIMarquee`, `UIAnimatedText`, `UIDock`, `UIOrbiter`, `UIScrollArea`, `UISeparator`, `UISlot`, `UIToolbar`, `UIPortal`, `UIVisuallyHidden` | Component class exports | Accessibility/layout utilities |
+| `UIPresence`, `UIProgress`, `UIMarquee`, `UIAnimatedText`, `UIAnimatedBeam`, `UIDock`, `UIOrbiter`, `UIScrollArea`, `UISeparator`, `UISlot`, `UIToolbar`, `UIPortal`, `UIVisuallyHidden` | Component class exports | Accessibility/layout utilities |
 
 ## Component Docs
 
 - [Dock](/docs/ui-core/dock) - MacOS-style launcher and command shelf with magnification and roving focus
 - [Marquee](/docs/ui-core/marquee) - Infinite scrolling rail for text, cards, media, and vertical feeds
 - [AnimatedText](/docs/ui-core/animated-text) - Text-first animation primitive for hero copy, status callouts, and narrative UI
+- [AnimatedBeam](/docs/ui-core/animated-beam) - Animated integration-diagram beams between nodes and hubs
 - [Orbiter](/docs/ui-core/orbiter) - Multi-ring orbital motion around a central focal point
 | `UIBox`, `UIFlex`, `UIGrid`, `UISection`, `UIContainer`, `UIBreadcrumb`, `UISidebar`, `UIAppHeader`, `UIDrawer`, `UIDialog`, `UILayout` | Component class exports | Layout and shell components |
 | `UIBlockControls`, `UIPluginPanel`, `UIFloatingToolbar`, `UISelectionPopup`, `UICommandPalette` | Component class exports | Editor-oriented controls |
