@@ -11,7 +11,7 @@ type TabsDetail = {
   panelId: string;
 };
 
-type BaseProps = React.HTMLAttributes<HTMLElement> & {
+type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'> & {
   children?: React.ReactNode;
 };
 

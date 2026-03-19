@@ -6,7 +6,7 @@ type HoverCardElement = HTMLElement & {
   open: boolean;
 };
 
-export type HoverCardProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'> & {
+export type HoverCardProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onOpen' | 'onClose'> & {
   open?: boolean;
   delay?: number;
   closeDelay?: number;

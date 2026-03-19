@@ -62,6 +62,12 @@
       "require": "./dist/AlertDialogProvider.cjs.js",
       "default": "./dist/AlertDialogProvider.esm.js"
     },
+    "./AnimatedText": {
+      "types": "./dist/components/AnimatedText.d.ts",
+      "import": "./dist/AnimatedText.esm.js",
+      "require": "./dist/AnimatedText.cjs.js",
+      "default": "./dist/AnimatedText.esm.js"
+    },
     "./Anchor": {
       "types": "./dist/components/Anchor.d.ts",
       "import": "./dist/Anchor.esm.js",

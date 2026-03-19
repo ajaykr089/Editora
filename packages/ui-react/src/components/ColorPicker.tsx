@@ -40,7 +40,7 @@ export type ColorPickerElement = HTMLElement & {
   closePopover: () => void
 }
 
-export type ColorPickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'> & {
+export type ColorPickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput' | 'onOpen' | 'onClose' | 'onInvalid'> & {
   value?: string
   format?: 'hex' | 'rgb' | 'hsl'
   alpha?: boolean

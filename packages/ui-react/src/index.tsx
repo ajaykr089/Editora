@@ -20,6 +20,7 @@ export { Field } from './components/Field';
 export { Description, FieldError, ControlGroup, Fieldset } from './components/FieldSemantics';
 export { Combobox } from './components/Combobox';
 export { Badge } from './components/Badge';
+export type { BadgeProps, BadgeRemoveDetail } from './components/Badge';
 export { EmptyState } from './components/EmptyState';
 export { Table } from './components/Table';
 export { DataTable } from './components/DataTable';
@@ -64,6 +65,7 @@ export { Menu, MenuItem, MenuSeparator, MenuSectionLabel } from './components/Me
 export { Icon } from './components/Icon';
 export { ToastAPI, ToastProvider, useToast, toast, toastApi, toastAdvanced, toastPro, toastLegacy } from './components/ToastAPI';
 export { Toast } from './components/Toast';
+export type { ToastElement, ToastProps, ToastShowDetail, ToastHideDetail, ToastShowOptions } from './components/Toast';
 export { FloatingToolbar } from './components/FloatingToolbar';
 export { BlockControls } from './components/BlockControls';
 export { Command, CommandItem, type CommandProps, type CommandItemProps, type CommandSelectDetail } from './components/Command';
@@ -83,6 +85,16 @@ export { Section } from './components/Section';
 export { Container } from './components/Container';
 export {
   Sidebar
+} from './components/Sidebar';
+export type {
+  SidebarProps,
+  SidebarGroupProps,
+  SidebarItemInput,
+  SidebarItemProps,
+  SidebarSlotProps,
+  SidebarSearchInputProps,
+  SidebarSelectDetail,
+  SidebarTone
 } from './components/Sidebar';
 export { PanelGroup, Panel, Splitter } from './components/PanelGroup';
 export { Tree } from './components/Tree';
@@ -138,6 +150,20 @@ export {
   AlertDialogActions
 } from './components/AlertDialog';
 export { AlertDialogProvider, useAlertDialog } from './components/AlertDialogProvider';
+export { AnimatedText } from './components/AnimatedText';
+export type {
+  BuiltinAnimatedTextEffect,
+  AnimatedTextElement,
+  AnimatedTextProps,
+  AnimatedTextEffect,
+  AnimatedTextSplit,
+  AnimatedTextTrigger,
+  AnimatedTextVariant,
+  AnimatedTextTone,
+  AnimatedTextSize,
+  AnimatedTextElevation,
+  AnimatedTextAlign,
+} from './components/AnimatedText';
 export { Marquee } from './components/Marquee';
 export type { MarqueeProps, MarqueeItemProps, MarqueeDirection } from './components/Marquee';
 export { Select } from './components/Select';

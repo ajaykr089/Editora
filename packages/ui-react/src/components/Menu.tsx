@@ -2,7 +2,9 @@ import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-type Props = React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode };
+type Props = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect' | 'onOpen' | 'onClose'> & {
+  children?: React.ReactNode;
+};
 
 export type MenuSelectDetail = {
   index?: number;

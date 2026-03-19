@@ -9,7 +9,7 @@ export type TimePickerDetail = {
   source: string;
 };
 
-export type TimePickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'> & {
+export type TimePickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput' | 'onOpen' | 'onClose' | 'onInvalid'> & {
   value?: string;
   defaultValue?: string;
   open?: boolean;

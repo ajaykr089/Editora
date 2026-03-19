@@ -13,7 +13,7 @@ export type PluginPanelElement = HTMLElement & {
   togglePanel: () => void;
 };
 
-export type PluginPanelProps = React.HTMLAttributes<HTMLElement> & {
+export type PluginPanelProps = Omit<React.HTMLAttributes<HTMLElement>, 'onOpen' | 'onClose'> & {
   open?: boolean;
   position?: 'right' | 'left' | 'bottom';
   size?: 'sm' | 'md' | 'lg';

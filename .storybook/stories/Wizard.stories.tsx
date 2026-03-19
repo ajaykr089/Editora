@@ -8,7 +8,7 @@ import {
   Select,
   Textarea,
 } from "@editora/ui-react";
-import { Wizard } from "@editora/ui-react/Wizard";
+import { Wizard } from "@editora/ui-react";
 
 export default {
   title: "UI/Wizard",

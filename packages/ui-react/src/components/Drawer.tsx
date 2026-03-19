@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from '
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-export type DrawerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'> & {
+export type DrawerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onOpen' | 'onClose'> & {
   open?: boolean;
   side?: 'left' | 'right' | 'top' | 'bottom' | 'start' | 'end';
   variant?: 'default' | 'solid' | 'flat' | 'line' | 'glass' | 'contrast';

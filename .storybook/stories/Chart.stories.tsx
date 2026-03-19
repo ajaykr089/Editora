@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Meta } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { Badge, Box, Button, Chart, Flex, Grid } from '@editora/ui-react';
 import { toastAdvanced } from '@editora/toast';
 import {
@@ -34,6 +34,7 @@ const meta: Meta<typeof Chart> = {
 };
 
 export default meta;
+type Story = StoryObj<typeof meta>;
 
 const throughputSeries = [
   { label: 'Mon', value: 182 },
@@ -317,7 +318,7 @@ export const ExecutiveComparison = () => (
   </Box>
 );
 
-const PlaygroundTemplate = (args: Record<string, unknown>) => (
+const PlaygroundTemplate = (args: React.ComponentProps<typeof Chart>) => (
   <Box style={{ maxInlineSize: 860 }}>
     <Chart
       {...args}
@@ -331,8 +332,9 @@ const PlaygroundTemplate = (args: Record<string, unknown>) => (
   </Box>
 );
 
-export const Playground = PlaygroundTemplate.bind({});
-Playground.args = {
+export const Playground: Story = {
+  render: PlaygroundTemplate,
+  args: {
   type: 'line',
   variant: 'default',
   state: 'idle',
@@ -341,6 +343,7 @@ Playground.args = {
   showSummary: true,
   disabled: false,
   valueSuffix: '',
+  },
 };
 
 export const Contrast = () => (

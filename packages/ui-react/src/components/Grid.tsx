@@ -2,23 +2,24 @@ import React from 'react';
 
 type BreakpointKey = 'initial' | 'sm' | 'md' | 'lg' | 'xl';
 type Responsive<T> = T | Partial<Record<BreakpointKey, T>>;
+type CssValue = string | number;
 
 type Props = React.HTMLAttributes<HTMLElement> & {
-  columns?: Responsive<string>;
-  rows?: Responsive<string>;
-  gap?: Responsive<string>;
-  rowGap?: Responsive<string>;
-  columnGap?: Responsive<string>;
-  autoFlow?: Responsive<string>;
-  autoRows?: Responsive<string>;
-  autoColumns?: Responsive<string>;
-  align?: Responsive<string>;
-  justify?: Responsive<string>;
-  place?: Responsive<string>;
-  alignContent?: Responsive<string>;
-  justifyContent?: Responsive<string>;
-  placeContent?: Responsive<string>;
-  display?: Responsive<'grid' | 'inline-grid' | string>;
+  columns?: Responsive<CssValue>;
+  rows?: Responsive<CssValue>;
+  gap?: Responsive<CssValue>;
+  rowGap?: Responsive<CssValue>;
+  columnGap?: Responsive<CssValue>;
+  autoFlow?: Responsive<CssValue>;
+  autoRows?: Responsive<CssValue>;
+  autoColumns?: Responsive<CssValue>;
+  align?: Responsive<CssValue>;
+  justify?: Responsive<CssValue>;
+  place?: Responsive<CssValue>;
+  alignContent?: Responsive<CssValue>;
+  justifyContent?: Responsive<CssValue>;
+  placeContent?: Responsive<CssValue>;
+  display?: Responsive<'grid' | 'inline-grid' | CssValue>;
   headless?: boolean;
 };
 

@@ -57,6 +57,7 @@ export { Menu, MenuItem, MenuSeparator, MenuSectionLabel } from './Menu';
 export { Icon } from './Icon';
 export { ToastAPI, ToastProvider, useToast, toast, toastApi, toastAdvanced, toastPro, toastLegacy } from './ToastAPI';
 export { Toast } from './Toast';
+export type { ToastElement, ToastProps, ToastShowDetail, ToastHideDetail, ToastShowOptions } from './Toast';
 export { FloatingToolbar } from './FloatingToolbar';
 export type { FloatingToolbarProps, FloatingToolbarToolbarProps } from './FloatingToolbar';
 export { BlockControls } from './BlockControls';
@@ -76,7 +77,16 @@ export { Grid } from './Grid';
 export { Section } from './Section';
 export { Container } from './Container';
 export { Sidebar } from './Sidebar';
-export type { SidebarProps, SidebarGroupProps, SidebarItemProps, SidebarSlotProps, SidebarSearchInputProps, SidebarSelectDetail, SidebarTone } from './Sidebar';
+export type {
+  SidebarProps,
+  SidebarGroupProps,
+  SidebarItemInput,
+  SidebarItemProps,
+  SidebarSlotProps,
+  SidebarSearchInputProps,
+  SidebarSelectDetail,
+  SidebarTone
+} from './Sidebar';
 export { PanelGroup, Panel, Splitter } from './PanelGroup';
 export { Tree } from './Tree';
 export { Breadcrumb } from './Breadcrumb';
@@ -127,6 +137,20 @@ export {
   AlertDialogActions
 } from './AlertDialog';
 export { AlertDialogProvider, useAlertDialog } from './AlertDialogProvider';
+export { AnimatedText } from './AnimatedText';
+export type {
+  BuiltinAnimatedTextEffect,
+  AnimatedTextElement,
+  AnimatedTextProps,
+  AnimatedTextEffect,
+  AnimatedTextSplit,
+  AnimatedTextTrigger,
+  AnimatedTextVariant,
+  AnimatedTextTone,
+  AnimatedTextSize,
+  AnimatedTextElevation,
+  AnimatedTextAlign,
+} from './AnimatedText';
 export { Marquee } from './Marquee';
 export type { MarqueeProps, MarqueeItemProps, MarqueeDirection } from './Marquee';
 export { Select } from './Select';

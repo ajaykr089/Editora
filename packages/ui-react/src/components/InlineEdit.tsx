@@ -2,7 +2,7 @@ import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from '
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-export type InlineEditProps = React.HTMLAttributes<HTMLElement> & {
+export type InlineEditProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onCancel'> & {
   value?: string;
   placeholder?: string;
   editing?: boolean;

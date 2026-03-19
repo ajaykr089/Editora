@@ -11,7 +11,7 @@ export type DateRangeTimePickerDetail = {
   source: string;
 };
 
-export type DateRangeTimePickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'> & {
+export type DateRangeTimePickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput' | 'onOpen' | 'onClose' | 'onInvalid'> & {
   value?: string;
   defaultValue?: string;
   open?: boolean;

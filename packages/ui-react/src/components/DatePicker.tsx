@@ -12,7 +12,7 @@ export type DatePickerDetail = {
 
 export type DatePickerState = 'idle' | 'loading' | 'error' | 'success';
 
-export type DatePickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'> & {
+export type DatePickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput' | 'onOpen' | 'onClose' | 'onInvalid'> & {
   value?: string;
   defaultValue?: string;
   open?: boolean;

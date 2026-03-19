@@ -30,7 +30,7 @@ export type PopoverTriggerProps = React.HTMLAttributes<HTMLElement>;
 
 export type PopoverContentProps = React.HTMLAttributes<HTMLElement>;
 
-export type PopoverProps = React.HTMLAttributes<HTMLElement> & {
+export type PopoverProps = Omit<React.HTMLAttributes<HTMLElement>, 'onOpen' | 'onClose'> & {
   open?: boolean;
   placement?: PopoverPlacement;
   offset?: number;

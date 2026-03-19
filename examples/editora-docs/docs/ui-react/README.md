@@ -61,6 +61,7 @@ export function App() {
 - [Timeline](./interactive/timeline) - Timeline visualization
 - [Tree](./interactive/tree) - Hierarchical data display
 - [Marquee](./interactive/marquee) - Infinite scrolling content rail
+- [AnimatedText](./interactive/animated-text) - Text-first animation for headlines, callouts, and hero copy
 
 ### Overlay & Modal
 - [Dialog](./interactive/dialog) - Modal dialog

@@ -10,7 +10,7 @@ export type QuickActionSelectDetail = {
 
 export type QuickActionsActionProps = React.HTMLAttributes<HTMLElement>;
 
-export type QuickActionsProps = React.HTMLAttributes<HTMLElement> & {
+export type QuickActionsProps = Omit<React.HTMLAttributes<HTMLElement>, 'onSelect' | 'onToggle'> & {
   open?: boolean;
   mode?: 'bar' | 'fab';
   orientation?: 'horizontal' | 'vertical';

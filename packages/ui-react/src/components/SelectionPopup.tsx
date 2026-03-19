@@ -10,7 +10,7 @@ type UISelectionPopupElement = HTMLElement & {
 
 export type SelectionPopupContentProps = React.HTMLAttributes<HTMLElement>;
 
-export type SelectionPopupProps = React.HTMLAttributes<HTMLElement> & {
+export type SelectionPopupProps = Omit<React.HTMLAttributes<HTMLElement>, 'onOpen' | 'onClose'> & {
   anchorId?: string;
   open?: boolean;
   placement?: 'top' | 'bottom' | 'left' | 'right' | 'auto';

@@ -11,7 +11,7 @@ type SplitButtonItem = {
   disabled?: boolean;
 };
 
-export type SplitButtonProps = React.HTMLAttributes<HTMLElement> & {
+export type SplitButtonProps = Omit<React.HTMLAttributes<HTMLElement>, 'onSelect'> & {
   children?: React.ReactNode;
   label?: string;
   menuLabel?: string;

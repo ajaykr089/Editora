@@ -2,11 +2,11 @@ import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-type BaseProps = React.HTMLAttributes<HTMLElement> & {
+type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput' | 'onSelect' | 'onOpen' | 'onClose'> & {
   children?: React.ReactNode;
 };
 
-export type ComboboxProps = Omit<BaseProps, 'onChange'> & {
+export type ComboboxProps = BaseProps & {
   value?: string;
   open?: boolean;
   state?: 'idle' | 'loading' | 'error' | 'success';

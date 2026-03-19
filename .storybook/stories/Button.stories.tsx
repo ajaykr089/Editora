@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Meta } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { Box, Button, Flex, Grid } from '@editora/ui-react';
 import { toastAdvanced } from '@editora/toast';
 import {
@@ -37,6 +37,7 @@ const meta: Meta<typeof Button> = {
 };
 
 export default meta;
+type Story = StoryObj<typeof meta>;
 
 function EnterpriseClinicalActions() {
   const [saving, setSaving] = React.useState(false);
@@ -132,14 +133,15 @@ function EnterpriseClinicalActions() {
 
 export const EnterpriseWorkflow = EnterpriseClinicalActions;
 
-const PlaygroundTemplate = (args: Record<string, unknown>) => (
+const PlaygroundTemplate = (args: React.ComponentProps<typeof Button>) => (
   <Button {...args} startIcon={<SaveIcon size={14} />} endIcon={<CheckCircleIcon size={14} />}>
     Save Changes
   </Button>
 );
 
-export const Playground = PlaygroundTemplate.bind({});
-Playground.args = {
+export const Playground: Story = {
+  render: PlaygroundTemplate,
+  args: {
   variant: 'primary',
   size: 'md',
   recipe: 'solid',
@@ -154,4 +156,5 @@ Playground.args = {
   block: false,
   headless: false,
   type: 'button',
+  },
 };

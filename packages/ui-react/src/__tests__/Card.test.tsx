@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import '../components/Card';
 import '../../../ui-core/src/components/ui-card';
 
+import * as CardModule from '../components/Card';
 import { Card } from '../components/Card';
 
 describe('Card wrapper', () => {
@@ -77,5 +78,16 @@ describe('Card wrapper', () => {
     expect(document.getElementById('editora-ui-react-card-runtime-styles')?.textContent).toContain(
       'line-height: var(--ui-card-description-line-height, 20px)'
     );
+  });
+
+  it('exposes only the composed Card API publicly', () => {
+    expect(Card.Header.displayName).toBe('Card.Header');
+    expect(Card.Title.displayName).toBe('Card.Title');
+    expect('CardHeader' in CardModule).toBe(false);
+    expect('CardFooter' in CardModule).toBe(false);
+    expect('CardTitle' in CardModule).toBe(false);
+    expect('CardDescription' in CardModule).toBe(false);
+    expect('CardMedia' in CardModule).toBe(false);
+    expect('CardInset' in CardModule).toBe(false);
   });
 });

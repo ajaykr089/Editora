@@ -18,7 +18,7 @@ export type ToastElement = {
   configure: (config: Partial<ToastConfig>) => void;
 };
 
-type ToastProps = React.HTMLAttributes<HTMLDivElement> & {
+export type ToastProps = React.HTMLAttributes<HTMLDivElement> & {
   position?: ToastPosition;
   maxVisible?: number;
   theme?: ToastTheme;
