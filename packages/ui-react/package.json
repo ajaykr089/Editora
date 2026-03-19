@@ -242,6 +242,12 @@
       "require": "./dist/DialogProvider.cjs.js",
       "default": "./dist/DialogProvider.esm.js"
     },
+    "./Dock": {
+      "types": "./dist/components/Dock.d.ts",
+      "import": "./dist/Dock.esm.js",
+      "require": "./dist/Dock.cjs.js",
+      "default": "./dist/Dock.esm.js"
+    },
     "./DirectionProvider": {
       "types": "./dist/components/DirectionProvider.d.ts",
       "import": "./dist/DirectionProvider.esm.js",

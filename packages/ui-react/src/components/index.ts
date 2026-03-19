@@ -151,6 +151,22 @@ export type {
   AnimatedTextElevation,
   AnimatedTextAlign,
 } from './AnimatedText';
+export { Dock } from './Dock';
+export type {
+  DockProps,
+  DockItemProps,
+  DockItemSlotProps,
+  DockElement,
+  DockOrientation,
+  DockVariant,
+  DockTone,
+  DockSize,
+  DockAnimation,
+  DockElevation,
+  DockLabelMode,
+  DockLabelPlacement,
+  DockFocusTarget,
+} from './Dock';
 export { Marquee } from './Marquee';
 export type { MarqueeProps, MarqueeItemProps, MarqueeDirection } from './Marquee';
 export { Select } from './Select';

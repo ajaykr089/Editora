@@ -62,6 +62,7 @@ export function App() {
 - [Tree](./interactive/tree) - Hierarchical data display
 - [Marquee](./interactive/marquee) - Infinite scrolling content rail
 - [AnimatedText](./interactive/animated-text) - Text-first animation for headlines, callouts, and hero copy
+- [Dock](./interactive/dock) - MacOS-style magnifying launcher and command shelf
 
 ### Overlay & Modal
 - [Dialog](./interactive/dialog) - Modal dialog

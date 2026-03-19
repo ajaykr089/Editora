@@ -35,7 +35,7 @@ export function App() {
 | Surface | Type | Notes |
 | --- | --- | --- |
 | `Button`, `Tooltip`, `Alert`, `Dropdown`, `Input`, `Textarea`, `Field`, `Combobox` | Component exports | Base controls |
-| `Badge`, `EmptyState`, `Table`, `DataTable`, `Chart`, `Timeline`, `Calendar`, `Marquee`, `AnimatedText` | Component exports | Data display controls |
+| `Badge`, `EmptyState`, `Table`, `DataTable`, `Chart`, `Timeline`, `Calendar`, `Marquee`, `AnimatedText`, `Dock` | Component exports | Data display and launcher controls |
 | `ColorPicker`, `DatePicker`, `DateRangePicker`, `TimePicker`, `DateTimePicker`, `DateRangeTimePicker` | Component exports | Date/time and color controls |
 | `Gantt`, `Stepper`, `Wizard`, `QuickActions` | Component exports | Workflow controls |
 | `NavigationMenu`, `Menubar`, `Dialog`, `Popover`, `Tabs`, `Menu`, `ContextMenu` | Component exports | Nav + overlay components |
