@@ -1,1 +1,0 @@
-export { Rating, type RatingChangeEvent } from './components/Rating';

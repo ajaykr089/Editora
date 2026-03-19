@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import '../components/Card';
 import '../../../ui-core/src/components/ui-card';
 
-import { Card } from '../Card';
+import { Card } from '../components/Card';
 
 describe('Card wrapper', () => {
   it('forwards public props to the host element', () => {
