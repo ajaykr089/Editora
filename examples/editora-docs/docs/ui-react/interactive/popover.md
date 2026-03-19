@@ -14,14 +14,23 @@ import { Popover } from '@editora/ui-react/Popover';
 
 ## Composition Pattern
 
-`Popover` uses a composition pattern. Use `Popover.Trigger` and `Popover.Content` as named sub-components to declare the trigger and panel body:
+`Popover` uses a composition pattern. Use `Popover.Trigger` and `Popover.Content` as named sub-components to declare the trigger and panel body. It now follows the same surface-token pattern as newer components like `Card`, `Dialog`, and `TransferList`, so you can theme the floating panel directly from the root:
 
 ```tsx
-<Popover placement="bottom" offset={8} closeOnOutside closeOnEscape>
+<Popover
+  placement="bottom"
+  offset={8}
+  closeOnOutside
+  closeOnEscape
+  variant="soft"
+  tone="brand"
+  size="md"
+  elevation="low"
+>
   <Popover.Trigger>
     <Button>Open</Button>
   </Popover.Trigger>
-  <Popover.Content style={{ padding: 12, minWidth: 220 }}>
+  <Popover.Content style={{ minWidth: 220 }}>
     Popover content with <strong>HTML</strong>.
   </Popover.Content>
 </Popover>
@@ -45,6 +54,11 @@ import { Popover } from '@editora/ui-react/Popover';
 | `flip` | `boolean` | `true` | Flip to opposite side when there is no space |
 | `closeOnEscape` | `boolean` | `true` | Close on `Escape` key |
 | `closeOnOutside` | `boolean` | `true` | Close on click outside |
+| `variant` | `'surface' \| 'soft' \| 'solid' \| 'glass' \| 'contrast' \| 'minimal'` | `'surface'` | Visual surface treatment for the floating panel |
+| `tone` | `'brand' \| 'neutral' \| 'info' \| 'success' \| 'warning' \| 'danger'` | `'brand'` | Accent tone used by themed variants |
+| `size` | `'sm' \| 'md' \| 'lg' \| '1' \| '2' \| '3'` | `'md'` | Panel spacing, type scale, and radius preset |
+| `radius` | `number \| string` | — | Overrides the panel corner radius |
+| `elevation` | `'none' \| 'low' \| 'high'` | `'low'` | Shadow depth for the floating panel |
 | `onOpen` | `() => void` | — | Fires when the popover opens |
 | `onClose` | `() => void` | — | Fires when the popover closes |
 | `onOpenChange` | `(detail: { open: boolean }) => void` | — | Fires on any open state change |
@@ -63,11 +77,19 @@ import { Popover } from '@editora/ui-react/Popover';
 ### Rich content panel
 
 ```tsx
-<Popover placement="bottom-start" offset={8} closeOnOutside closeOnEscape>
+<Popover
+  placement="bottom-start"
+  offset={8}
+  closeOnOutside
+  closeOnEscape
+  variant="soft"
+  tone="brand"
+  size="md"
+>
   <Popover.Trigger>
     <Button>Workspace</Button>
   </Popover.Trigger>
-  <Popover.Content style={{ padding: 16, minWidth: 240 }}>
+  <Popover.Content style={{ minWidth: 240 }}>
     <strong>Workspace settings</strong>
     <p style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
       Manage members, billing, and integrations.
@@ -79,12 +101,26 @@ import { Popover } from '@editora/ui-react/Popover';
 ### Any element as trigger
 
 ```tsx
-<Popover placement="top" offset={8} closeOnOutside>
+<Popover placement="top" offset={8} closeOnOutside variant="minimal" tone="neutral" size="sm">
   <Popover.Trigger>
     <span style={{ cursor: 'pointer', textDecoration: 'underline' }}>What is this?</span>
   </Popover.Trigger>
-  <Popover.Content style={{ padding: 12, maxWidth: 220, fontSize: 13 }}>
+  <Popover.Content style={{ maxWidth: 220, fontSize: 13 }}>
     Any element can be a trigger — not just buttons.
+  </Popover.Content>
+</Popover>
+```
+
+### Surface variants
+
+```tsx
+<Popover variant="glass" tone="info" elevation="high">
+  <Popover.Trigger>
+    <Button variant="secondary">Inspect</Button>
+  </Popover.Trigger>
+  <Popover.Content style={{ minWidth: 220 }}>
+    Glass, contrast, soft, solid, and minimal variants all inherit the same
+    token-driven surface treatment pattern used across the library.
   </Popover.Content>
 </Popover>
 ```
@@ -115,5 +151,7 @@ const [open, setOpen] = React.useState(false);
 
 - `Popover.Trigger` renders a `<span slot="trigger">` — wrap any clickable element inside it.
 - `Popover.Content` renders a `<div slot="content">` — suitable for any block content.
+- `variant`, `tone`, `size`, `radius`, and `elevation` style the floating panel itself, not the trigger.
 - Focus is returned to the trigger element when the popover closes.
+- Open popovers resync their portaled content when the source content changes dynamically.
 - For a fully headless floating system use the `useFloating` hook from `@editora/ui-react`.
