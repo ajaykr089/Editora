@@ -175,6 +175,19 @@ export type {
   AnimatedTextElevation,
   AnimatedTextAlign,
 } from './components/AnimatedText';
+export { AnimatedList } from './components/AnimatedList';
+export type {
+  AnimatedListProps,
+  AnimatedListItemProps,
+  AnimatedListEffect,
+  AnimatedListAnimation,
+  AnimatedListTrigger,
+  AnimatedListVariant,
+  AnimatedListTone,
+  AnimatedListSize,
+  AnimatedListElevation,
+  AnimatedListElement,
+} from './components/AnimatedList';
 export { Dock } from './components/Dock';
 export type {
   DockProps,
@@ -191,6 +204,19 @@ export type {
   DockLabelPlacement,
   DockFocusTarget,
 } from './components/Dock';
+export { Orbiter } from './components/Orbiter';
+export type {
+  OrbiterProps,
+  OrbiterItemProps,
+  OrbiterCenterProps,
+  OrbiterElement,
+  OrbiterDirection,
+  OrbiterAnimation,
+  OrbiterVariant,
+  OrbiterTone,
+  OrbiterSize,
+  OrbiterElevation,
+} from './components/Orbiter';
 export { Marquee } from './components/Marquee';
 export type { MarqueeProps, MarqueeItemProps, MarqueeDirection } from './components/Marquee';
 export { Select } from './components/Select';

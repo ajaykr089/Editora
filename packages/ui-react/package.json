@@ -68,6 +68,12 @@
       "require": "./dist/AnimatedText.cjs.js",
       "default": "./dist/AnimatedText.esm.js"
     },
+    "./AnimatedList": {
+      "types": "./dist/components/AnimatedList.d.ts",
+      "import": "./dist/AnimatedList.esm.js",
+      "require": "./dist/AnimatedList.cjs.js",
+      "default": "./dist/AnimatedList.esm.js"
+    },
     "./Anchor": {
       "types": "./dist/components/Anchor.d.ts",
       "import": "./dist/Anchor.esm.js",
@@ -247,6 +253,12 @@
       "import": "./dist/Dock.esm.js",
       "require": "./dist/Dock.cjs.js",
       "default": "./dist/Dock.esm.js"
+    },
+    "./Orbiter": {
+      "types": "./dist/components/Orbiter.d.ts",
+      "import": "./dist/Orbiter.esm.js",
+      "require": "./dist/Orbiter.cjs.js",
+      "default": "./dist/Orbiter.esm.js"
     },
     "./DirectionProvider": {
       "types": "./dist/components/DirectionProvider.d.ts",

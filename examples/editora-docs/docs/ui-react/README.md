@@ -63,6 +63,7 @@ export function App() {
 - [Marquee](./interactive/marquee) - Infinite scrolling content rail
 - [AnimatedText](./interactive/animated-text) - Text-first animation for headlines, callouts, and hero copy
 - [Dock](./interactive/dock) - MacOS-style magnifying launcher and command shelf
+- [Orbiter](./interactive/orbiter) - Multi-ring orbital motion around a central focal point
 
 ### Overlay & Modal
 - [Dialog](./interactive/dialog) - Modal dialog

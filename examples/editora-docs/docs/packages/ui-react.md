@@ -19,7 +19,7 @@ npm i @editora/ui-react @editora/ui-core
 | Surface | Type | Notes |
 | --- | --- | --- |
 | `Button`, `Tooltip`, `Alert`, `Dropdown`, `Input`, `Textarea`, `Field`, `Combobox` | Component exports | Base form/interaction components |
-| `Badge`, `EmptyState`, `Table`, `DataTable`, `Chart`, `Timeline`, `Calendar`, `Marquee`, `AnimatedText`, `Dock` | Component exports | Data display and launcher components |
+| `Badge`, `EmptyState`, `Table`, `DataTable`, `Chart`, `Timeline`, `Calendar`, `Marquee`, `AnimatedText`, `Dock`, `Orbiter` | Component exports | Data display, launcher, and motion components |
 | `ColorPicker`, `DatePicker`, `DateRangePicker`, `TimePicker`, `DateTimePicker`, `DateRangeTimePicker` | Component exports | Date/time and color controls |
 | `Gantt`, `Stepper`, `Wizard`, `QuickActions` | Component exports | Workflow components |
 | `NavigationMenu`, `Menubar`, `ContextMenu`, `Menu`, `Tabs`, `Popover`, `Dialog` | Component exports | Navigation and overlay components |
