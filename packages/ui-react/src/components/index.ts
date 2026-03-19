@@ -127,6 +127,8 @@ export {
   AlertDialogActions
 } from './AlertDialog';
 export { AlertDialogProvider, useAlertDialog } from './AlertDialogProvider';
+export { Marquee } from './Marquee';
+export type { MarqueeProps, MarqueeItemProps, MarqueeDirection } from './Marquee';
 export { Select } from './Select';
 export type {
   SelectOptionProps,

@@ -60,6 +60,7 @@ export function App() {
 - [Chart](./interactive/chart) - Data visualization
 - [Timeline](./interactive/timeline) - Timeline visualization
 - [Tree](./interactive/tree) - Hierarchical data display
+- [Marquee](./interactive/marquee) - Infinite scrolling content rail
 
 ### Overlay & Modal
 - [Dialog](./interactive/dialog) - Modal dialog

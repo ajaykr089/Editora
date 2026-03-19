@@ -35,7 +35,7 @@ import "@editora/ui-core";
 | `UIButton`, `UITooltip`, `UIDropdown`, `UIInput`, `UIForm`, `UIPopover`, `UITabs`, `UIMenu`, `UIIcon`, `UIToast`, `UILabel` | Component class exports | Core controls |
 | `UIPagination`, `UIHoverCard`, `UICollapsible`, `UIDirectionProvider`, `UIAccordion`, `UICheckbox`, `UIRadioGroup`, `UISwitch`, `UISlider`, `UISelect`, `UIToggle`, `UIToggleGroup` | Component class exports | Inputs + interaction controls |
 | `UIAlertDialog`, `UIAspectRatio`, `UIAvatar`, `UIBadge`, `UITable`, `UINavigationMenu`, `UIMenubar`, `UIContextMenu` | Component class exports | Data/navigation primitives |
-| `UIPresence`, `UIProgress`, `UIScrollArea`, `UISeparator`, `UISlot`, `UIToolbar`, `UIPortal`, `UIVisuallyHidden` | Component class exports | Accessibility/layout utilities |
+| `UIPresence`, `UIProgress`, `UIMarquee`, `UIScrollArea`, `UISeparator`, `UISlot`, `UIToolbar`, `UIPortal`, `UIVisuallyHidden` | Component class exports | Accessibility/layout utilities |
 | `UIBox`, `UIFlex`, `UIGrid`, `UISection`, `UIContainer`, `UIBreadcrumb`, `UISidebar`, `UIAppHeader`, `UIDrawer`, `UIDialog`, `UILayout` | Component class exports | Layout and shell components |
 | `UIBlockControls`, `UIPluginPanel`, `UIFloatingToolbar`, `UISelectionPopup`, `UICommandPalette` | Component class exports | Editor-oriented controls |
 | `UITextarea`, `UIField`, `UICombobox`, `UIAlert`, `UISkeleton`, `UIEmptyState`, `UIDataTable`, `UIChart`, `UITimeline`, `UICalendar` | Component class exports | Form/data presentation |

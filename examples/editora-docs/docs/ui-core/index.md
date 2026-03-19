@@ -40,7 +40,7 @@ showToast({ message: "Saved", level: "success" });
 | `UIButton`, `UITooltip`, `UIDropdown`, `UIInput`, `UIForm`, `UIPopover`, `UITabs`, `UIMenu`, `UIIcon`, `UIToast`, `UILabel` | Class exports | Core controls |
 | `UIPagination`, `UIHoverCard`, `UICollapsible`, `UIDirectionProvider`, `UIAccordion`, `UICheckbox`, `UIRadioGroup`, `UISwitch`, `UISlider`, `UISelect`, `UIToggle`, `UIToggleGroup` | Class exports | Interaction controls |
 | `UIAlertDialog`, `UIAspectRatio`, `UIAvatar`, `UIBadge`, `UITable`, `UINavigationMenu`, `UIMenubar`, `UIContextMenu` | Class exports | Navigation/data primitives |
-| `UIPresence`, `UIProgress`, `UIScrollArea`, `UISeparator`, `UISlot`, `UIToolbar`, `UIPortal`, `UIVisuallyHidden` | Class exports | Utility primitives |
+| `UIPresence`, `UIProgress`, `UIMarquee`, `UIScrollArea`, `UISeparator`, `UISlot`, `UIToolbar`, `UIPortal`, `UIVisuallyHidden` | Class exports | Utility primitives |
 | `UIBox`, `UIFlex`, `UIGrid`, `UISection`, `UIContainer`, `UIBreadcrumb`, `UISidebar`, `UIAppHeader`, `UIDrawer`, `UIDialog`, `UILayout` | Class exports | Layout system |
 | `UIBlockControls`, `UIPluginPanel`, `UIFloatingToolbar`, `UISelectionPopup`, `UICommandPalette` | Class exports | Editor-oriented controls |
 | `UITextarea`, `UIField`, `UICombobox`, `UIAlert`, `UISkeleton`, `UIEmptyState`, `UIDataTable`, `UIChart`, `UITimeline`, `UICalendar` | Class exports | Form/data components |
@@ -60,3 +60,7 @@ Check keyboard focus, escape handling, and role semantics for all overlay compon
 ## Performance Notes
 
 Avoid repetitive global registrations and keep portal-driven overlays lightweight.
+
+## Component Docs
+
+- [Marquee](/docs/ui-core/marquee) - Infinite scrolling rail for text, cards, media, and vertical feeds

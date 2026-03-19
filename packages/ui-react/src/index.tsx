@@ -138,6 +138,8 @@ export {
   AlertDialogActions
 } from './components/AlertDialog';
 export { AlertDialogProvider, useAlertDialog } from './components/AlertDialogProvider';
+export { Marquee } from './components/Marquee';
+export type { MarqueeProps, MarqueeItemProps, MarqueeDirection } from './components/Marquee';
 export { Select } from './components/Select';
 export { Slider } from './components/Slider';
 export { Skeleton } from './components/Skeleton';

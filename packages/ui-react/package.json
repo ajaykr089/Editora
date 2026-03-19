@@ -14,6 +14,17 @@
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "components/*": [
+        "dist/components/*"
+      ],
+      "*": [
+        "dist/components/*",
+        "dist/*"
+      ]
+    }
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -344,6 +355,12 @@
       "import": "./dist/Layout.esm.js",
       "require": "./dist/Layout.cjs.js",
       "default": "./dist/Layout.esm.js"
+    },
+    "./Marquee": {
+      "types": "./dist/components/Marquee.d.ts",
+      "import": "./dist/Marquee.esm.js",
+      "require": "./dist/Marquee.cjs.js",
+      "default": "./dist/Marquee.esm.js"
     },
     "./Listbox": {
       "types": "./dist/components/Listbox.d.ts",

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Editora UI Marquee demo showing infinite scrolling text, cards, and vertical activity feeds with the ui-marquee web component.">
+    <meta name="keywords" content="Editora marquee demo, ui-marquee, web component marquee, infinite scrolling">
+    <meta name="author" content="Editora Contributors">
+    <meta name="robots" content="index, follow">
+    <title>Editora - Marquee Demo</title>
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        :root {
+            color-scheme: light;
+            --demo-bg:
+                radial-gradient(circle at top right, rgba(59, 130, 246, 0.18), transparent 30%),
+                linear-gradient(180deg, #f7fbff 0%, #eef4fb 100%);
+            --demo-border: rgba(148, 163, 184, 0.22);
+            --demo-card-border: rgba(148, 163, 184, 0.18);
+            --demo-shadow: 0 24px 56px rgba(15, 23, 42, 0.08);
+            --demo-text: #0f172a;
+            --demo-muted: #475569;
+            --demo-soft: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--demo-bg);
+            color: var(--demo-text);
+            font-family: "Inter", "Segoe UI", Roboto, sans-serif;
+        }
+
+        .page {
+            width: min(1200px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 24px 0 48px;
+            display: grid;
+            gap: 22px;
+        }
+
+        .hero,
+        .section {
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid var(--demo-border);
+            border-radius: 28px;
+            box-shadow: var(--demo-shadow);
+            backdrop-filter: blur(12px);
+        }
+
+        .hero {
+            padding: 28px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .hero-head {
+            display: grid;
+            gap: 10px;
+        }
+
+        .eyebrow {
+            font-size: 12px;
+            line-height: 1.4;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #2563eb;
+        }
+
+        h1, h2, h3, p {
+            margin: 0;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.4rem);
+            line-height: 0.98;
+            letter-spacing: -0.04em;
+        }
+
+        .hero-body,
+        .section-copy {
+            max-width: 760px;
+            color: var(--demo-muted);
+            line-height: 1.7;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .btn {
+            appearance: none;
+            border: 0;
+            border-radius: 999px;
+            padding: 11px 16px;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.26);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--demo-text);
+            border: 1px solid rgba(148, 163, 184, 0.24);
+        }
+
+        .hero-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .meta-card {
+            display: grid;
+            gap: 6px;
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid var(--demo-card-border);
+            background: rgba(248, 250, 252, 0.92);
+        }
+
+        .meta-card span:first-child {
+            font-size: 12px;
+            line-height: 1.4;
+            color: var(--demo-soft);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+        }
+
+        .meta-card span:last-child {
+            font-size: 1.05rem;
+            line-height: 1.35;
+            font-weight: 700;
+        }
+
+        .section {
+            padding: 24px;
+            display: grid;
+            gap: 16px;
+        }
+
+        .section-head {
+            display: grid;
+            gap: 8px;
+        }
+
+        .rail-stack {
+            display: grid;
+            gap: 18px;
+        }
+
+        .chip-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+        }
+
+        .chip-dot {
+            inline-size: 10px;
+            block-size: 10px;
+            border-radius: 999px;
+            background: currentColor;
+            opacity: 0.85;
+        }
+
+        .chip-tag {
+            font-size: 11px;
+            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+        }
+
+        .media-card,
+        .feed-card {
+            display: grid;
+            gap: 12px;
+            min-inline-size: 260px;
+        }
+
+        .feed-card {
+            min-inline-size: 0;
+        }
+
+        .media-card img {
+            display: block;
+            inline-size: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+        }
+
+        .media-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            color: var(--demo-soft);
+            font-size: 12px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            padding: 0 9px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.12);
+            color: #1d4ed8;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .vertical-wrap {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .notes {
+            display: grid;
+            gap: 10px;
+            padding: 18px;
+            border-radius: 20px;
+            border: 1px solid var(--demo-card-border);
+            background: linear-gradient(180deg, rgba(239, 246, 255, 0.95), rgba(248, 250, 252, 0.92));
+        }
+
+        .notes ul {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--demo-muted);
+            line-height: 1.6;
+        }
+
+        code {
+            font-family: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 900px) {
+            .vertical-wrap {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page {
+                width: min(100% - 20px, 100%);
+                padding-top: 16px;
+            }
+
+            .hero,
+            .section {
+                padding: 18px;
+                border-radius: 22px;
+            }
+
+            .media-card {
+                min-inline-size: 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header class="hero">
+            <div class="hero-head">
+                <div class="eyebrow">Editora UI Core</div>
+                <h1>Marquee Production Demo</h1>
+                <p class="hero-body">
+                    This page exercises <code>ui-marquee</code> directly from the built <code>@editora/ui-core</code> bundle. It covers
+                    horizontal and vertical motion, themed variants, pause and refresh controls, mixed card content, and a compact operations feed.
+                </p>
+            </div>
+
+            <div class="hero-actions">
+                <button class="btn btn-primary" type="button" id="pause-all">Pause all marquees</button>
+                <button class="btn btn-secondary" type="button" id="play-all">Resume all marquees</button>
+                <button class="btn btn-secondary" type="button" id="refresh-all">Refresh layout</button>
+            </div>
+
+            <div class="hero-meta">
+                <div class="meta-card">
+                    <span>Direction modes</span>
+                    <span>Left, right, up, down</span>
+                </div>
+                <div class="meta-card">
+                    <span>Design API</span>
+                    <span>Variant, tone, size, radius, elevation</span>
+                </div>
+                <div class="meta-card">
+                    <span>Motion guard</span>
+                    <span>Reduced-motion aware with pause hooks</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="section">
+            <div class="section-head">
+                <div class="eyebrow">Ticker Rail</div>
+                <h2>Operational status stream</h2>
+                <p class="section-copy">
+                    A lightweight horizontal rail for urgent workflow context, capacity flags, and release notes.
+                </p>
+            </div>
+
+            <ui-marquee variant="soft" tone="info" size="md" gap="14" speed="54" fade fade-size="56" pause-on-hover pause-on-focus radius="18" padding="10px 14px">
+                <div data-ui-marquee-item class="chip-item" style="color: #2563eb;">
+                    <span class="chip-dot"></span>
+                    <span>Realtime collaboration synced</span>
+                    <span class="chip-tag">active</span>
+                </div>
+                <div data-ui-marquee-item class="chip-item" style="color: #15803d;">
+                    <span class="chip-dot"></span>
+                    <span>Release train ready for sign-off</span>
+                    <span class="chip-tag">success</span>
+                </div>
+                <div data-ui-marquee-item class="chip-item" style="color: #b45309;">
+                    <span class="chip-dot"></span>
+                    <span>ICU occupancy crossed 85%</span>
+                    <span class="chip-tag">warning</span>
+                </div>
+                <div data-ui-marquee-item class="chip-item" style="color: #0f766e;">
+                    <span class="chip-dot"></span>
+                    <span>Imaging queue normalized in 11 minutes</span>
+                    <span class="chip-tag">recovered</span>
+                </div>
+                <div data-ui-marquee-item class="chip-item" style="color: #be123c;">
+                    <span class="chip-dot"></span>
+                    <span>Audit export awaiting clinical review</span>
+                    <span class="chip-tag">attention</span>
+                </div>
+            </ui-marquee>
+        </section>
+
+        <section class="section">
+            <div class="section-head">
+                <div class="eyebrow">Mixed Content</div>
+                <h2>Media shelf marquee</h2>
+                <p class="section-copy">
+                    This rail uses richer cards instead of plain text to simulate a discovery surface for editorial, analytics, or campaign assets.
+                </p>
+            </div>
+
+            <ui-marquee variant="glass" tone="brand" size="lg" gap="22" speed="46" fade fade-size="72" pause-on-hover radius="20" padding="16px 20px">
+                <article data-ui-marquee-item class="media-card">
+                    <img alt="Analytics dashboard poster" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='960' height='540' viewBox='0 0 960 540'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%230f172a'/%3E%3Cstop offset='100%25' stop-color='%232563eb'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='960' height='540' rx='40' fill='url(%23g)'/%3E%3Ccircle cx='760' cy='110' r='120' fill='%2393c5fd' fill-opacity='0.18'/%3E%3Ctext x='72' y='116' fill='%23f8fbff' font-family='Inter, Arial, sans-serif' font-size='30' font-weight='700' letter-spacing='6'%3EEDITORA STREAM%3C/text%3E%3Ctext x='72' y='308' fill='%23ffffff' font-family='Inter, Arial, sans-serif' font-size='84' font-weight='800'%3EAnalytics%3C/text%3E%3Crect x='72' y='362' width='252' height='52' rx='26' fill='rgba(255,255,255,0.18)'/%3E%3Ctext x='112' y='396' fill='%23ffffff' font-family='Inter, Arial, sans-serif' font-size='26' font-weight='600'%3EPreview asset%3C/text%3E%3C/svg%3E">
+                    <div>
+                        <h3>Analytics snapshot</h3>
+                        <p style="color: var(--demo-muted); line-height: 1.6;">Executive metrics packaged as a moving shelf card instead of a static dashboard tile.</p>
+                    </div>
+                    <div class="media-label">
+                        <span>42 sec preview</span>
+                        <span class="pill">video</span>
+                    </div>
+                </article>
+
+                <article data-ui-marquee-item class="media-card">
+                    <img alt="Editorial campaign poster" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='960' height='540' viewBox='0 0 960 540'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%231d4ed8'/%3E%3Cstop offset='100%25' stop-color='%230ea5e9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='960' height='540' rx='40' fill='url(%23g)'/%3E%3Ccircle cx='760' cy='110' r='120' fill='%23ffffff' fill-opacity='0.14'/%3E%3Ccircle cx='190' cy='430' r='140' fill='%23ffffff' fill-opacity='0.08'/%3E%3Ctext x='72' y='116' fill='%23f8fbff' font-family='Inter, Arial, sans-serif' font-size='30' font-weight='700' letter-spacing='6'%3EEDITORA STREAM%3C/text%3E%3Ctext x='72' y='308' fill='%23ffffff' font-family='Inter, Arial, sans-serif' font-size='84' font-weight='800'%3EEditorial%3C/text%3E%3Crect x='72' y='362' width='252' height='52' rx='26' fill='rgba(255,255,255,0.18)'/%3E%3Ctext x='118' y='396' fill='%23ffffff' font-family='Inter, Arial, sans-serif' font-size='26' font-weight='600'%3EHero image%3C/text%3E%3C/svg%3E">
+                    <div>
+                        <h3>Editorial launch rail</h3>
+                        <p style="color: var(--demo-muted); line-height: 1.6;">A polished content card using the glass surface and built-in marquee duplication.</p>
+                    </div>
+                    <div class="media-label">
+                        <span>New campaign artwork</span>
+                        <span class="pill">approved</span>
+                    </div>
+                </article>
+
+                <article data-ui-marquee-item class="media-card">
+                    <img alt="Playback campaign poster" src="data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='960' height='540' viewBox='0 0 960 540'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23111827'/%3E%3Cstop offset='100%25' stop-color='%237c3aed'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='960' height='540' rx='40' fill='url(%23g)'/%3E%3Ccircle cx='740' cy='120' r='110' fill='%23c4b5fd' fill-opacity='0.18'/%3E%3Ctext x='72' y='116' fill='%23f8fbff' font-family='Inter, Arial, sans-serif' font-size='30' font-weight='700' letter-spacing='6'%3EEDITORA STREAM%3C/text%3E%3Ctext x='72' y='308' fill='%23ffffff' font-family='Inter, Arial, sans-serif' font-size='84' font-weight='800'%3EPlayback%3C/text%3E%3Crect x='72' y='362' width='252' height='52' rx='26' fill='rgba(255,255,255,0.18)'/%3E%3Ctext x='112' y='396' fill='%23ffffff' font-family='Inter, Arial, sans-serif' font-size='26' font-weight='600'%3EMotion rail%3C/text%3E%3C/svg%3E">
+                    <div>
+                        <h3>Campaign playback</h3>
+                        <p style="color: var(--demo-muted); line-height: 1.6;">Useful when the marquee is acting more like a moving shelf than a classic news ticker.</p>
+                    </div>
+                    <div class="media-label">
+                        <span>Updated 6 minutes ago</span>
+                        <span class="pill">draft</span>
+                    </div>
+                </article>
+            </ui-marquee>
+        </section>
+
+        <section class="section">
+            <div class="section-head">
+                <div class="eyebrow">Vertical Feed</div>
+                <h2>Always-on operations monitor</h2>
+                <p class="section-copy">
+                    Vertical mode works well for monitoring rails, alert stacks, and audit timelines where we want motion without collapsing the surrounding layout.
+                </p>
+            </div>
+
+            <div class="vertical-wrap">
+                <ui-marquee direction="up" variant="contrast" tone="info" size="md" gap="16" speed="42" fade fade-size="52" pause-on-hover style="block-size: 360px;">
+                    <article data-ui-marquee-item class="feed-card">
+                        <h3>Deployment 4.2.1</h3>
+                        <p style="color: rgba(248,251,255,0.78); line-height: 1.6;">Canary rollout reached 60% of premium traffic with healthy error budgets.</p>
+                        <div class="media-label" style="color: rgba(248,251,255,0.62);">
+                            <span>2 minutes ago</span>
+                            <span class="pill" style="background: rgba(255,255,255,0.12); color: #ffffff;">success</span>
+                        </div>
+                    </article>
+                    <article data-ui-marquee-item class="feed-card">
+                        <h3>Policy drift check</h3>
+                        <p style="color: rgba(248,251,255,0.78); line-height: 1.6;">Two workspaces still need the updated retention rule package.</p>
+                        <div class="media-label" style="color: rgba(248,251,255,0.62);">
+                            <span>6 minutes ago</span>
+                            <span class="pill" style="background: rgba(255,255,255,0.12); color: #ffffff;">warning</span>
+                        </div>
+                    </article>
+                    <article data-ui-marquee-item class="feed-card">
+                        <h3>Audit export</h3>
+                        <p style="color: rgba(248,251,255,0.78); line-height: 1.6;">Nightly compliance packet generated, signed, and queued for review.</p>
+                        <div class="media-label" style="color: rgba(248,251,255,0.62);">
+                            <span>11 minutes ago</span>
+                            <span class="pill" style="background: rgba(255,255,255,0.12); color: #ffffff;">info</span>
+                        </div>
+                    </article>
+                    <article data-ui-marquee-item class="feed-card">
+                        <h3>Incident triage</h3>
+                        <p style="color: rgba(248,251,255,0.78); line-height: 1.6;">Latency spike isolated to the image proxy cluster and mitigation is rolling out.</p>
+                        <div class="media-label" style="color: rgba(248,251,255,0.62);">
+                            <span>15 minutes ago</span>
+                            <span class="pill" style="background: rgba(255,255,255,0.12); color: #ffffff;">critical</span>
+                        </div>
+                    </article>
+                </ui-marquee>
+
+                <aside class="notes">
+                    <h3>Manual QA checklist</h3>
+                    <ul>
+                        <li>Hover each marquee to confirm motion pauses and resumes.</li>
+                        <li>Resize the browser and verify the loop stays seamless.</li>
+                        <li>Tab into the page to exercise <code>pause-on-focus</code>.</li>
+                        <li>Toggle the buttons above to validate the imperative API.</li>
+                        <li>Check a reduced-motion environment to confirm animation suppression.</li>
+                    </ul>
+                </aside>
+            </div>
+        </section>
+    </div>
+
+    <script type="module">
+        import '../../packages/ui-core/dist/index.esm.js';
+
+        const marquees = Array.from(document.querySelectorAll('ui-marquee'));
+
+        document.getElementById('pause-all')?.addEventListener('click', () => {
+            marquees.forEach((el) => el.pause());
+        });
+
+        document.getElementById('play-all')?.addEventListener('click', () => {
+            marquees.forEach((el) => el.play());
+        });
+
+        document.getElementById('refresh-all')?.addEventListener('click', () => {
+            marquees.forEach((el) => el.refresh());
+        });
+    </script>
+</body>
+</html>

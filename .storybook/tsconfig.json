@@ -5,7 +5,7 @@
     "baseUrl": "..",
     "paths": {
       "@editora/ui-react": ["packages/ui-react/src/index.tsx"],
-      "@editora/ui-react/*": ["packages/ui-react/src/*"],
+      "@editora/ui-react/*": ["packages/ui-react/src/components/*", "packages/ui-react/src/*"],
       "@editora/ui-core": ["packages/ui-core/src/index.ts"],
       "@editora/ui-core/*": ["packages/ui-core/src/*"],
       "@editora/toast": ["packages/editora-toast/src/index.ts"],
