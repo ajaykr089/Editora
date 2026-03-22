@@ -8,7 +8,7 @@ describe('AnimatedBeam wrapper', () => {
   it('forwards beam attributes and compound markers to the host and children', () => {
     const { container } = render(
       <AnimatedBeam
-        animation="snappy"
+        animation="heartbeat"
         variant="glass"
         tone="info"
         size="lg"
@@ -56,7 +56,7 @@ describe('AnimatedBeam wrapper', () => {
     );
 
     const el = container.querySelector('ui-animated-beam') as HTMLElement | null;
-    expect(el?.getAttribute('animation')).toBe('snappy');
+    expect(el?.getAttribute('animation')).toBe('heartbeat');
     expect(el?.getAttribute('variant')).toBe('glass');
     expect(el?.getAttribute('tone')).toBe('info');
     expect(el?.getAttribute('size')).toBe('lg');

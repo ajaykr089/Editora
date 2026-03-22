@@ -4,11 +4,12 @@ type AnimatedBeamVariant = 'surface' | 'soft' | 'solid' | 'glass' | 'contrast' |
 type AnimatedBeamTone = 'brand' | 'neutral' | 'info' | 'success' | 'warning' | 'danger';
 type AnimatedBeamSize = 'xxs' | 'xs' | 'sm' | 'md' | 'lg' | '0' | '1' | '2' | '3';
 type AnimatedBeamElevation = 'none' | 'low' | 'high';
-type AnimatedBeamAnimation = 'calm' | 'smooth' | 'snappy' | 'surge';
+type AnimatedBeamAnimation = 'calm' | 'smooth' | 'snappy' | 'surge' | 'pulse' | 'heartbeat';
 type AnimatedBeamCurve = 'auto' | 'straight' | 'soft' | 'arc';
 type AnimatedBeamDirection = 'forward' | 'reverse';
 type AnimatedBeamNodeEffect = 'none' | 'glow' | 'pulse' | 'ring' | 'shake';
 type AnimatedBeamNodeKind = 'node' | 'hub';
+type AnimatedBeamMotionPattern = 'progress' | 'pulse' | 'heartbeat';
 
 type AnimatedBeamSizePreset = {
   nodeSize: number;
@@ -25,6 +26,7 @@ type AnimatedBeamMotionPreset = {
   glowOpacity: number;
   glowBlur: number;
   beamFactor: number;
+  pattern: AnimatedBeamMotionPattern;
 };
 
 type AnimatedBeamNodeRecord = {
@@ -99,7 +101,7 @@ const VARIANTS = new Set<AnimatedBeamVariant>(['surface', 'soft', 'solid', 'glas
 const TONES = new Set<AnimatedBeamTone>(['brand', 'neutral', 'info', 'success', 'warning', 'danger']);
 const SIZES = new Set<AnimatedBeamSize>(['xxs', 'xs', 'sm', 'md', 'lg', '0', '1', '2', '3']);
 const ELEVATIONS = new Set<AnimatedBeamElevation>(['none', 'low', 'high']);
-const ANIMATIONS = new Set<AnimatedBeamAnimation>(['calm', 'smooth', 'snappy', 'surge']);
+const ANIMATIONS = new Set<AnimatedBeamAnimation>(['calm', 'smooth', 'snappy', 'surge', 'pulse', 'heartbeat']);
 const CURVES = new Set<AnimatedBeamCurve>(['auto', 'straight', 'soft', 'arc']);
 const DIRECTIONS = new Set<AnimatedBeamDirection>(['forward', 'reverse']);
 const NODE_EFFECTS = new Set<AnimatedBeamNodeEffect>(['none', 'glow', 'pulse', 'ring', 'shake']);
@@ -178,24 +180,42 @@ const MOTION_PRESETS: Record<AnimatedBeamAnimation, AnimatedBeamMotionPreset> = 
     glowOpacity: 0.26,
     glowBlur: 9,
     beamFactor: 0.15,
+    pattern: 'progress',
   },
   smooth: {
     durationScale: 1,
     glowOpacity: 0.34,
     glowBlur: 11,
     beamFactor: DEFAULT_BEAM_FACTOR,
+    pattern: 'progress',
   },
   snappy: {
     durationScale: 0.82,
     glowOpacity: 0.38,
     glowBlur: 10,
     beamFactor: 0.2,
+    pattern: 'progress',
   },
   surge: {
     durationScale: 0.68,
     glowOpacity: 0.44,
     glowBlur: 13,
     beamFactor: 0.24,
+    pattern: 'progress',
+  },
+  pulse: {
+    durationScale: 0.92,
+    glowOpacity: 0.42,
+    glowBlur: 14,
+    beamFactor: 0.22,
+    pattern: 'pulse',
+  },
+  heartbeat: {
+    durationScale: 0.86,
+    glowOpacity: 0.48,
+    glowBlur: 15,
+    beamFactor: 0.18,
+    pattern: 'heartbeat',
   },
 };
 
@@ -488,6 +508,18 @@ const style = `
     --ui-animated-beam-glow-opacity: ${MOTION_PRESETS.surge.glowOpacity};
     --ui-animated-beam-glow-blur: ${MOTION_PRESETS.surge.glowBlur}px;
     --ui-animated-beam-beam-factor: ${MOTION_PRESETS.surge.beamFactor};
+  }
+
+  :host([animation="pulse"]) {
+    --ui-animated-beam-glow-opacity: ${MOTION_PRESETS.pulse.glowOpacity};
+    --ui-animated-beam-glow-blur: ${MOTION_PRESETS.pulse.glowBlur}px;
+    --ui-animated-beam-beam-factor: ${MOTION_PRESETS.pulse.beamFactor};
+  }
+
+  :host([animation="heartbeat"]) {
+    --ui-animated-beam-glow-opacity: ${MOTION_PRESETS.heartbeat.glowOpacity};
+    --ui-animated-beam-glow-blur: ${MOTION_PRESETS.heartbeat.glowBlur}px;
+    --ui-animated-beam-beam-factor: ${MOTION_PRESETS.heartbeat.beamFactor};
   }
 
   .root {
@@ -1208,6 +1240,7 @@ export class UIAnimatedBeam extends ElementBase {
     const metrics = this._lastLayoutMetrics || this._layoutMetrics();
     const strokeScale = clampNumber(metrics.scale, 0.72, 1);
     const nodeEffect = this._nodeEffect();
+    const motionPreset = this._motionPreset();
     const nodeMap = new Map(this._nodes.map((record) => [record.nodeId, record]));
     const renderRecords: Array<{
       connection: AnimatedBeamConnectionRecord;
@@ -1246,7 +1279,8 @@ export class UIAnimatedBeam extends ElementBase {
     renderRecords.forEach((record) => {
       const delayMs = scheduledDelays.get(record.connection) ?? this._delayMs();
       const arrivalMs = delayMs + record.connection.durationMs;
-      nodeArrivalTimes.set(record.connection.to, Math.max(nodeArrivalTimes.get(record.connection.to) ?? 0, arrivalMs));
+      const visualEndNodeId = connectionVisualEnd(record.connection);
+      nodeArrivalTimes.set(visualEndNodeId, Math.max(nodeArrivalTimes.get(visualEndNodeId) ?? 0, arrivalMs));
     });
     const cycleDurationMs = Math.max(
       baseCycleDurationMs,
@@ -1255,20 +1289,49 @@ export class UIAnimatedBeam extends ElementBase {
 
     renderRecords.forEach((record) => {
       const { connection, geometry, travelDistance } = record;
+      const beamGeometry = connection.reverse ? reverseGeometry(geometry) : geometry;
       const gradientId = `${this._uid}-gradient-${connection.index}`;
       const trailWidthValue = Math.max(1, connection.trailWidthPx * strokeScale);
       const beamWidthValue = Math.max(1.5, connection.beamWidthPx * strokeScale);
       const trailWidth = trailWidthValue.toFixed(2);
       const beamWidth = beamWidthValue.toFixed(2);
-      const glowWidth = Math.max(beamWidthValue * 2, beamWidthValue + 4 * strokeScale).toFixed(2);
-      const gradientStart = connection.reverse ? geometry.end : geometry.start;
-      const gradientEnd = connection.reverse ? geometry.start : geometry.end;
-      const progressOffset = connection.reverse ? -travelDistance : 0;
+      const glowWidthValue = Math.max(beamWidthValue * 2, beamWidthValue + 4 * strokeScale);
+      const glowWidth = glowWidthValue.toFixed(2);
+      const gradientStart = beamGeometry.start;
+      const gradientEnd = beamGeometry.end;
+      const progressOffset = 0;
+      const beamSpan = clampNumber(travelDistance * connection.beamFactor, beamWidthValue * 6, travelDistance * 0.72);
       connection.delayMs = scheduledDelays.get(connection) ?? this._delayMs();
       const glowAnimationName = `${this._uid}-glow-${connection.index}`;
       const coreAnimationName = `${this._uid}-core-${connection.index}`;
-      animationRules.push(createBeamProgressKeyframes(glowAnimationName, cycleDurationMs, connection.delayMs, connection.durationMs, 'var(--ui-animated-beam-glow-opacity)'));
-      animationRules.push(createBeamProgressKeyframes(coreAnimationName, cycleDurationMs, connection.delayMs, connection.durationMs, 'var(--ui-animated-beam-core-opacity)'));
+      animationRules.push(
+        createBeamMotionKeyframes(
+          glowAnimationName,
+          cycleDurationMs,
+          connection.delayMs,
+          connection.durationMs,
+          'var(--ui-animated-beam-glow-opacity)',
+          motionPreset.pattern,
+          travelDistance,
+          glowWidthValue,
+          glowWidthValue * 1.18,
+          beamSpan,
+        ),
+      );
+      animationRules.push(
+        createBeamMotionKeyframes(
+          coreAnimationName,
+          cycleDurationMs,
+          connection.delayMs,
+          connection.durationMs,
+          'var(--ui-animated-beam-core-opacity)',
+          motionPreset.pattern,
+          travelDistance,
+          beamWidthValue,
+          beamWidthValue * 1.22,
+          beamSpan,
+        ),
+      );
 
       defs.push(`
         <linearGradient id="${gradientId}" gradientUnits="userSpaceOnUse" x1="${gradientStart.x}" y1="${gradientStart.y}" x2="${gradientEnd.x}" y2="${gradientEnd.y}">
@@ -1301,7 +1364,7 @@ export class UIAnimatedBeam extends ElementBase {
           <path
             class="beam-glow"
             part="beam beam-glow"
-            d="${geometry.d}"
+            d="${beamGeometry.d}"
             stroke="url(#${gradientId})"
             stroke-width="${glowWidth}"
             style="animation-name:${glowAnimationName};"
@@ -1309,7 +1372,7 @@ export class UIAnimatedBeam extends ElementBase {
           <path
             class="beam-core"
             part="beam beam-core"
-            d="${geometry.d}"
+            d="${beamGeometry.d}"
             stroke="url(#${gradientId})"
             stroke-width="${beamWidth}"
             style="animation-name:${coreAnimationName};"
@@ -1615,6 +1678,30 @@ function createBeamGeometry(
   };
 }
 
+function reverseGeometry(geometry: CubicGeometry): CubicGeometry {
+  if (geometry.kind === 'line') {
+    return {
+      kind: 'line',
+      start: geometry.end,
+      end: geometry.start,
+      d: `M ${round(geometry.end.x)} ${round(geometry.end.y)} L ${round(geometry.start.x)} ${round(geometry.start.y)}`,
+      length: geometry.length,
+    };
+  }
+
+  const c1 = geometry.c2!;
+  const c2 = geometry.c1!;
+  return {
+    kind: 'cubic',
+    start: geometry.end,
+    end: geometry.start,
+    c1,
+    c2,
+    d: `M ${round(geometry.end.x)} ${round(geometry.end.y)} C ${round(c1.x)} ${round(c1.y)} ${round(c2.x)} ${round(c2.y)} ${round(geometry.start.x)} ${round(geometry.start.y)}`,
+    length: geometry.length,
+  };
+}
+
 function scheduleConnectionDelays(
   renderRecords: Array<{
     connection: AnimatedBeamConnectionRecord;
@@ -1630,9 +1717,10 @@ function scheduleConnectionDelays(
   const resolvingConnections = new Set<AnimatedBeamConnectionRecord>();
 
   for (const record of renderRecords) {
-    const existing = incomingByNode.get(record.connection.to);
+    const visualEndNodeId = connectionVisualEnd(record.connection);
+    const existing = incomingByNode.get(visualEndNodeId);
     if (existing) existing.push(record);
-    else incomingByNode.set(record.connection.to, [record]);
+    else incomingByNode.set(visualEndNodeId, [record]);
   }
 
   const resolveNodeArrival = (nodeId: string): number => {
@@ -1662,7 +1750,7 @@ function scheduleConnectionDelays(
     if (resolvingConnections.has(connection)) return rootDelay;
 
     resolvingConnections.add(connection);
-    const inheritedDelay = resolveNodeArrival(connection.from);
+    const inheritedDelay = resolveNodeArrival(connectionVisualStart(connection));
     const siblingDelay = connection.hasExplicitDelay ? 0 : connection.siblingIndex * stagger;
     const scheduledDelay = inheritedDelay + siblingDelay + connection.localDelayMs;
     resolvingConnections.delete(connection);
@@ -1677,12 +1765,17 @@ function scheduleConnectionDelays(
   return connectionDelayCache;
 }
 
-function createBeamProgressKeyframes(
+function createBeamMotionKeyframes(
   animationName: string,
   cycleDurationMs: number,
   delayMs: number,
   durationMs: number,
   targetOpacity: string,
+  motionPattern: AnimatedBeamMotionPattern,
+  travelDistance: number,
+  baseStrokeWidth: number,
+  peakStrokeWidth: number,
+  beamSpan: number,
 ): string {
   const safeCycle = Math.max(cycleDurationMs, 1);
   const startPercent = clampNumber((delayMs / safeCycle) * 100, 0, 100);
@@ -1691,23 +1784,142 @@ function createBeamProgressKeyframes(
   const start = roundPercent(startPercent);
   const reveal = roundPercent(revealPercent);
   const end = roundPercent(endPercent);
+  const baseWidth = round(baseStrokeWidth);
+  const peakWidth = round(peakStrokeWidth);
+  const travel = round(travelDistance);
+  const span = round(beamSpan);
+
+  if (motionPattern === 'pulse') {
+    const peakPercent = clampNumber(startPercent + (endPercent - startPercent) * 0.42, revealPercent, endPercent);
+    const settlePercent = clampNumber(startPercent + (endPercent - startPercent) * 0.82, peakPercent, endPercent);
+    const peak = roundPercent(peakPercent);
+    const settle = roundPercent(settlePercent);
+
+    return `
+      @keyframes ${animationName} {
+        0%, ${start}% {
+          opacity: 0;
+          stroke-dasharray: ${span} ${travel};
+          stroke-dashoffset: 0;
+          stroke-width: ${baseWidth};
+        }
+        ${reveal}% {
+          opacity: calc(${targetOpacity} * 0.72);
+          stroke-dasharray: ${span} ${travel};
+          stroke-dashoffset: 0;
+          stroke-width: ${baseWidth};
+        }
+        ${peak}% {
+          opacity: ${targetOpacity};
+          stroke-dasharray: ${span} ${travel};
+          stroke-dashoffset: ${round(-travelDistance * 0.44)};
+          stroke-width: ${peakWidth};
+        }
+        ${settle}% {
+          opacity: calc(${targetOpacity} * 0.68);
+          stroke-dasharray: ${span} ${travel};
+          stroke-dashoffset: ${round(-travelDistance * 0.84)};
+          stroke-width: ${baseWidth};
+        }
+        ${end}%,
+        100% {
+          opacity: 0;
+          stroke-dasharray: ${span} ${travel};
+          stroke-dashoffset: ${round(-travelDistance)};
+          stroke-width: ${baseWidth};
+        }
+      }
+    `;
+  }
+
+  if (motionPattern === 'heartbeat') {
+    const beatSpan = clampNumber(beamSpan * 0.72, baseStrokeWidth * 4.5, travelDistance * 0.42);
+    const beat = round(beatSpan);
+    const beatOnePercent = clampNumber(startPercent + (endPercent - startPercent) * 0.24, revealPercent, endPercent);
+    const valleyPercent = clampNumber(startPercent + (endPercent - startPercent) * 0.34, beatOnePercent, endPercent);
+    const beatTwoPercent = clampNumber(startPercent + (endPercent - startPercent) * 0.48, valleyPercent, endPercent);
+    const settlePercent = clampNumber(startPercent + (endPercent - startPercent) * 0.82, beatTwoPercent, endPercent);
+    const beatOne = roundPercent(beatOnePercent);
+    const valley = roundPercent(valleyPercent);
+    const beatTwo = roundPercent(beatTwoPercent);
+    const settle = roundPercent(settlePercent);
+
+    return `
+      @keyframes ${animationName} {
+        0%, ${start}% {
+          opacity: 0;
+          stroke-dasharray: ${beat} ${travel};
+          stroke-dashoffset: 0;
+          stroke-width: ${baseWidth};
+        }
+        ${reveal}% {
+          opacity: calc(${targetOpacity} * 0.7);
+          stroke-dasharray: ${beat} ${travel};
+          stroke-dashoffset: 0;
+          stroke-width: ${baseWidth};
+        }
+        ${beatOne}% {
+          opacity: calc(${targetOpacity} * 0.88);
+          stroke-dasharray: ${beat} ${travel};
+          stroke-dashoffset: ${round(-travelDistance * 0.24)};
+          stroke-width: ${round(baseStrokeWidth * 1.08)};
+        }
+        ${valley}% {
+          opacity: calc(${targetOpacity} * 0.5);
+          stroke-dasharray: ${beat} ${travel};
+          stroke-dashoffset: ${round(-travelDistance * 0.34)};
+          stroke-width: ${baseWidth};
+        }
+        ${beatTwo}% {
+          opacity: ${targetOpacity};
+          stroke-dasharray: ${beat} ${travel};
+          stroke-dashoffset: ${round(-travelDistance * 0.5)};
+          stroke-width: ${peakWidth};
+        }
+        ${settle}% {
+          opacity: calc(${targetOpacity} * 0.7);
+          stroke-dasharray: ${beat} ${travel};
+          stroke-dashoffset: ${round(-travelDistance * 0.84)};
+          stroke-width: ${baseWidth};
+        }
+        ${end}%,
+        100% {
+          opacity: 0;
+          stroke-dasharray: ${beat} ${travel};
+          stroke-dashoffset: ${round(-travelDistance)};
+          stroke-width: ${baseWidth};
+        }
+      }
+    `;
+  }
 
   return `
     @keyframes ${animationName} {
       0%, ${start}% {
         opacity: 0;
-        stroke-dasharray: 0 var(--ui-animated-beam-travel-distance, 320);
+        stroke-dasharray: 0 ${travel};
+        stroke-width: ${baseWidth};
       }
       ${reveal}% {
         opacity: ${targetOpacity};
-        stroke-dasharray: 0 var(--ui-animated-beam-travel-distance, 320);
+        stroke-dasharray: 0 ${travel};
+        stroke-width: ${baseWidth};
       }
       ${end}%, 100% {
         opacity: ${targetOpacity};
-        stroke-dasharray: var(--ui-animated-beam-travel-distance, 320) 0;
+        stroke-dasharray: ${travel} 0;
+        stroke-width: ${baseWidth};
       }
     }
   `;
+}
+
+function connectionVisualStart(connection: AnimatedBeamConnectionRecord): string {
+  return connection.reverse ? connection.to : connection.from;
+}
+
+function connectionVisualEnd(connection: AnimatedBeamConnectionRecord): string {
+  return connection.reverse ? connection.from : connection.to;
 }
 
 function resolveNodeEffectDuration(cycleDurationMs: number): number {

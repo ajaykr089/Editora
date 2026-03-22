@@ -93,7 +93,7 @@ describe('ui-animated-beam', () => {
     expect(el.style.getPropertyValue('--ui-animated-beam-beam-width')).toBe('7px');
     expect(getIterationCount(0)).toBe('1');
     expect(getIterationCount(1)).toBe('1');
-    expect(getProgressOffset(0)).toBeLessThan(0);
+    expect(getProgressOffset(0)).toBe(0);
     expect(getProgressOffset(1)).toBe(0);
 
     el.pause();
@@ -246,5 +246,41 @@ describe('ui-animated-beam', () => {
     expect(connectionGroups).toHaveLength(3);
     expect(getBeamPath(1)).toBe(getTrackPath(1));
     expect(getBeamPath(2)).toBe(getTrackPath(2));
+  });
+
+  it('uses reversed visual direction when scheduling reverse connections', async () => {
+    const el = document.createElement('ui-animated-beam');
+    el.setAttribute('duration', '1000ms');
+    el.setAttribute('direction', 'reverse');
+    el.innerHTML = `
+      <div node-id="drive" column="1" row="1">Drive</div>
+      <div slot="hub" node-id="hub" column="2" row="2">Hub</div>
+      <div node-id="user" column="3" row="2">User</div>
+      <div slot="connections" from="drive" to="hub"></div>
+      <div slot="connections" from="hub" to="user"></div>
+    `;
+    document.body.appendChild(el);
+    await wait();
+
+    const connectionGroups = Array.from(el.shadowRoot?.querySelectorAll('.connection') || []);
+    const getDelayMs = (index: number) => {
+      const style = connectionGroups[index]?.getAttribute('style') || '';
+      const match = style.match(/--ui-animated-beam-connection-delay:([0-9.]+)ms/);
+      return match ? Number.parseFloat(match[1]) : NaN;
+    };
+    const getProgressOffset = (index: number) => {
+      const style = connectionGroups[index]?.getAttribute('style') || '';
+      const match = style.match(/--ui-animated-beam-progress-offset:([0-9.-]+);/);
+      return match ? Number.parseFloat(match[1]) : NaN;
+    };
+    const getBeamPath = (index: number) => connectionGroups[index]?.querySelector('.beam-core')?.getAttribute('d') || '';
+    const getTrackPath = (index: number) => connectionGroups[index]?.querySelector('.trail')?.getAttribute('d') || '';
+
+    expect(getDelayMs(0)).toBe(1000);
+    expect(getDelayMs(1)).toBe(0);
+    expect(getProgressOffset(0)).toBe(0);
+    expect(getProgressOffset(1)).toBe(0);
+    expect(getBeamPath(0)).not.toBe(getTrackPath(0));
+    expect(getBeamPath(1)).not.toBe(getTrackPath(1));
   });
 });

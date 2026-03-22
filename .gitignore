@@ -49,4 +49,3 @@ build/
 api/media/uploads/
 ai-docs/
 e2e-local/
-.storybook/*
