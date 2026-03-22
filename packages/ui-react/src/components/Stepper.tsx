@@ -18,7 +18,7 @@ export type StepperChangeDetail = {
   trigger: string;
 };
 
-export type StepperProps = React.HTMLAttributes<HTMLElement> & {
+export type StepperProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect'> & {
   steps?: StepperStep[];
   value?: string;
   orientation?: 'horizontal' | 'vertical';

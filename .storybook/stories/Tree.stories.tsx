@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Grid } from '@editora/ui-react';
-import { Tree } from '@editora/ui-react/Tree';
+import { Tree } from '@editora/ui-react';
 
 export default {
   title: 'UI/Tree',

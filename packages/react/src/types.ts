@@ -72,7 +72,7 @@ export interface RichTextEditorProps {
 
   // Toolbar configuration
   toolbar?: {
-    items?: string[] | any[]; // Support both string refs and full item objects
+    items?: string | string[] | any[]; // Support legacy string syntax and full item objects
     floating?: boolean;
     sticky?: boolean;
     showMoreOptions?: boolean;
@@ -175,10 +175,17 @@ export interface RichTextEditorProps {
     enabled?: boolean;
   };
   mediaConfig?: {
-    uploadUrl: string;
-    libraryUrl: string;
-    maxFileSize: number;
-    allowedTypes: string[];
+    uploadUrl?: string;
+    libraryUrl?: string;
+    maxFileSize?: number;
+    allowedTypes?: string[];
+    offline?: {
+      enabled?: boolean;
+      useBase64Permanently?: boolean;
+      fallbackToBase64?: boolean;
+      customUploadUrl?: string;
+      customUploadHeaders?: Record<string, string>;
+    };
   };
 }
 

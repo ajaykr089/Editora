@@ -1,7 +1,8 @@
 import React from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { Table , Box, Grid} from '@editora/ui-react';
 
-export default {
+const meta: Meta<typeof Table> = {
   title: 'UI/Table',
   component: Table,
   argTypes: {
@@ -16,6 +17,9 @@ export default {
     loading: { control: 'boolean' }
   }
 };
+
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 const teamRows = [
   { name: 'Ava Johnson', role: 'Designer', status: 'Active', tasks: 12, updated: '2026-02-15' },
@@ -52,7 +56,7 @@ function TeamMarkup() {
   );
 }
 
-const Template = (args: any) => (
+const Template = (args: React.ComponentProps<typeof Table>) => (
   <Box style={{ maxWidth: 900 }}>
     <Table {...args}>
       <TeamMarkup />
@@ -60,10 +64,12 @@ const Template = (args: any) => (
   </Box>
 );
 
-export const Default = Template.bind({});
-Default.args = {
-  striped: true,
-  hover: true
+export const Default: Story = {
+  render: Template,
+  args: {
+    striped: true,
+    hover: true
+  }
 };
 
 export const Sortable = () => {
@@ -92,14 +98,18 @@ export const SelectableRows = () => {
   );
 };
 
-export const CompactBordered = Template.bind({});
-CompactBordered.args = {
-  compact: true,
-  bordered: true
+export const CompactBordered: Story = {
+  render: Template,
+  args: {
+    compact: true,
+    bordered: true
+  }
 };
 
-export const LoadingState = Template.bind({});
-LoadingState.args = {
-  loading: true,
-  striped: true
+export const LoadingState: Story = {
+  render: Template,
+  args: {
+    loading: true,
+    striped: true
+  }
 };

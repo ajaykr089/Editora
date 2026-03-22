@@ -35,7 +35,7 @@
       "@editora/ui-core": ["packages/ui-core/src/index.ts"],
       "@editora/ui-core/*": ["packages/ui-core/src/*"],
       "@editora/ui-react": ["packages/ui-react/src/index.tsx"],
-      "@editora/ui-react/*": ["packages/ui-react/src/*"],
+      "@editora/ui-react/*": ["packages/ui-react/src/components/*", "packages/ui-react/src/*"],
       "@editora/ui-editor": ["packages/ui-editor/src/index.ts"],
       "@editora/ui-editor/*": ["packages/ui-editor/src/*"],
       "@editora/ui-angular": ["packages/ui-angular/src/index.ts"],

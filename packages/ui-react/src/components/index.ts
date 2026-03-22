@@ -26,6 +26,17 @@ export { NumberField } from './NumberField';
 export { MultiSelect } from './MultiSelect';
 export { SplitButton } from './SplitButton';
 export { TransferList } from './TransferList';
+export type {
+  TransferListProps,
+  TransferListOption,
+  TransferListChangeDetail,
+  TransferListElement,
+  TransferListVariant,
+  TransferListTone,
+  TransferListSize,
+  TransferListElevation,
+  TransferListSelectionIndicator
+} from './TransferList';
 export { InlineEdit } from './InlineEdit';
 export { TimePicker } from './TimePicker';
 export { DateTimePicker } from './DateTimePicker';
@@ -57,6 +68,7 @@ export { Menu, MenuItem, MenuSeparator, MenuSectionLabel } from './Menu';
 export { Icon } from './Icon';
 export { ToastAPI, ToastProvider, useToast, toast, toastApi, toastAdvanced, toastPro, toastLegacy } from './ToastAPI';
 export { Toast } from './Toast';
+export type { ToastElement, ToastProps, ToastShowDetail, ToastHideDetail, ToastShowOptions } from './Toast';
 export { FloatingToolbar } from './FloatingToolbar';
 export type { FloatingToolbarProps, FloatingToolbarToolbarProps } from './FloatingToolbar';
 export { BlockControls } from './BlockControls';
@@ -76,7 +88,16 @@ export { Grid } from './Grid';
 export { Section } from './Section';
 export { Container } from './Container';
 export { Sidebar } from './Sidebar';
-export type { SidebarProps, SidebarGroupProps, SidebarItemProps, SidebarSlotProps, SidebarSearchInputProps, SidebarSelectDetail, SidebarTone } from './Sidebar';
+export type {
+  SidebarProps,
+  SidebarGroupProps,
+  SidebarItemInput,
+  SidebarItemProps,
+  SidebarSlotProps,
+  SidebarSearchInputProps,
+  SidebarSelectDetail,
+  SidebarTone
+} from './Sidebar';
 export { PanelGroup, Panel, Splitter } from './PanelGroup';
 export { Tree } from './Tree';
 export { Breadcrumb } from './Breadcrumb';
@@ -127,6 +148,79 @@ export {
   AlertDialogActions
 } from './AlertDialog';
 export { AlertDialogProvider, useAlertDialog } from './AlertDialogProvider';
+export { AnimatedText } from './AnimatedText';
+export type {
+  BuiltinAnimatedTextEffect,
+  AnimatedTextElement,
+  AnimatedTextProps,
+  AnimatedTextEffect,
+  AnimatedTextSplit,
+  AnimatedTextTrigger,
+  AnimatedTextVariant,
+  AnimatedTextTone,
+  AnimatedTextSize,
+  AnimatedTextElevation,
+  AnimatedTextAlign,
+} from './AnimatedText';
+export { AnimatedList } from './AnimatedList';
+export type {
+  AnimatedListProps,
+  AnimatedListItemProps,
+  AnimatedListEffect,
+  AnimatedListAnimation,
+  AnimatedListTrigger,
+  AnimatedListVariant,
+  AnimatedListTone,
+  AnimatedListSize,
+  AnimatedListElevation,
+  AnimatedListElement,
+} from './AnimatedList';
+export { AnimatedBeam } from './AnimatedBeam';
+export type {
+  AnimatedBeamProps,
+  AnimatedBeamNodeProps,
+  AnimatedBeamHubProps,
+  AnimatedBeamConnectionProps,
+  AnimatedBeamElement,
+  AnimatedBeamVariant,
+  AnimatedBeamTone,
+  AnimatedBeamSize,
+  AnimatedBeamElevation,
+  AnimatedBeamAnimation,
+  AnimatedBeamCurve,
+  AnimatedBeamDirection,
+} from './AnimatedBeam';
+export { Dock } from './Dock';
+export type {
+  DockProps,
+  DockItemProps,
+  DockItemSlotProps,
+  DockElement,
+  DockOrientation,
+  DockVariant,
+  DockTone,
+  DockSize,
+  DockAnimation,
+  DockElevation,
+  DockLabelMode,
+  DockLabelPlacement,
+  DockFocusTarget,
+} from './Dock';
+export { Orbiter } from './Orbiter';
+export type {
+  OrbiterProps,
+  OrbiterItemProps,
+  OrbiterCenterProps,
+  OrbiterElement,
+  OrbiterDirection,
+  OrbiterAnimation,
+  OrbiterVariant,
+  OrbiterTone,
+  OrbiterSize,
+  OrbiterElevation,
+} from './Orbiter';
+export { Marquee } from './Marquee';
+export type { MarqueeProps, MarqueeItemProps, MarqueeDirection } from './Marquee';
 export { Select } from './Select';
 export type {
   SelectOptionProps,

@@ -10,7 +10,7 @@ export type BadgeRemoveDetail = {
 export type BadgeProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
   text?: string;
-  tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'purple';
+  tone?: 'brand' | 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'purple';
   variant?: 'surface' | 'solid' | 'soft' | 'outline' | 'ghost';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '1' | '2' | '3';
   radius?: 'none' | 'sm' | 'md' | 'lg' | 'large' | 'full' | number | string;

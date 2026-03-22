@@ -32,6 +32,7 @@ const style = `
     --ui-badge-accent: color-mix(in srgb, var(--ui-color-muted, #64748b) 74%, var(--ui-color-text, #0f172a) 26%);
   }
 
+  :host([tone="brand"]),
   :host([tone="info"]) {
     --ui-badge-accent: var(--ui-color-primary, #2563eb);
   }

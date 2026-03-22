@@ -14,7 +14,7 @@ type MultiSelectOptionGroup = {
   options: MultiSelectOption[];
 };
 
-type MultiSelectProps = React.HTMLAttributes<HTMLElement> & {
+type MultiSelectProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'> & {
   options: Array<MultiSelectOption | MultiSelectOptionGroup>;
   value?: string[];
   placeholder?: string;

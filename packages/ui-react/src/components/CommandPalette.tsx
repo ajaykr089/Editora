@@ -27,7 +27,7 @@ export type CommandPaletteElement = HTMLElement & {
   query: string;
 };
 
-export type CommandPaletteProps = Omit<React.HTMLAttributes<HTMLElement>, 'onSelect'> & {
+export type CommandPaletteProps = Omit<React.HTMLAttributes<HTMLElement>, 'onSelect' | 'onOpen' | 'onClose'> & {
   open?: boolean;
   query?: string;
   placeholder?: string;

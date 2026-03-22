@@ -17,7 +17,7 @@ interface ToolbarProps {
   floating?: boolean;
   readonly?: boolean;
   showMoreOptions?: boolean;
-  itemsOverride?: string[] | ToolbarItem[];
+  itemsOverride?: string | string[] | ToolbarItem[];
 }
 
 const normalizeToolbarToken = (value: string): string =>
@@ -58,15 +58,20 @@ const COMMAND_ALIASES: Record<string, string> = {
 
 const resolveToolbarItems = (
   pluginItems: ToolbarItem[],
-  itemsOverride?: string[] | ToolbarItem[],
+  itemsOverride?: string | string[] | ToolbarItem[],
 ): ToolbarItemLike[] => {
-  if (!Array.isArray(itemsOverride) || itemsOverride.length === 0) {
+  if (itemsOverride == null || itemsOverride === '') {
     return pluginItems;
   }
 
-  const hasStringItems = itemsOverride.every((item) => typeof item === 'string');
+  const overrideItems = typeof itemsOverride === 'string' ? [itemsOverride] : itemsOverride;
+  if (!Array.isArray(overrideItems) || overrideItems.length === 0) {
+    return pluginItems;
+  }
+
+  const hasStringItems = overrideItems.every((item) => typeof item === 'string');
   if (!hasStringItems) {
-    return itemsOverride as ToolbarItem[];
+    return overrideItems as ToolbarItem[];
   }
 
   const byNormalizedCommand = new Map<string, ToolbarItem>();
@@ -77,7 +82,7 @@ const resolveToolbarItems = (
     byNormalizedLabel.set(normalizeToolbarToken(item.label || ''), item);
   });
 
-  const tokens = (itemsOverride as string[])
+  const tokens = (overrideItems as string[])
     .flatMap((entry) => entry.split(/\s+/))
     .map((entry) => entry.trim())
     .filter(Boolean);

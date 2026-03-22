@@ -2,7 +2,7 @@ import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from '
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-type BaseDateFieldProps = React.HTMLAttributes<HTMLElement> & {
+type BaseDateFieldProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'> & {
   value?: string;
   min?: string;
   max?: string;

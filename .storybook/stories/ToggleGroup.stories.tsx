@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Grid } from '@editora/ui-react';
-import { ToggleGroup } from '@editora/ui-react/ToggleGroup';
+import { ToggleGroup } from '@editora/ui-react';
 
 export default {
   title: 'UI/ToggleGroup',

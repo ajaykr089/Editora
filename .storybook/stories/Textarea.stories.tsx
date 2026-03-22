@@ -1,8 +1,9 @@
 import React from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { Box, Grid, ThemeProvider } from '@editora/ui-react';
-import { Textarea } from '@editora/ui-react/Textarea';
+import { Textarea } from '@editora/ui-react';
 
-export default {
+const meta: Meta<typeof Textarea> = {
   title: 'UI/Textarea',
   component: Textarea,
   argTypes: {
@@ -21,19 +22,24 @@ export default {
   }
 };
 
-const Template = (args: any) => <Textarea {...args} />;
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-export const Playground = Template.bind({});
-Playground.args = {
-  value: '',
-  placeholder: 'Write a release summary for stakeholders...',
-  clearable: true,
-  debounce: 250,
-  validation: 'none',
-  rows: 4,
-  resize: 'vertical',
-  variant: 'surface',
-  size: 'md'
+const Template = (args: React.ComponentProps<typeof Textarea>) => <Textarea {...args} />;
+
+export const Playground: Story = {
+  render: Template,
+  args: {
+    value: '',
+    placeholder: 'Write a release summary for stakeholders...',
+    clearable: true,
+    debounce: 250,
+    validation: 'none',
+    rows: 4,
+    resize: 'vertical',
+    variant: 'surface',
+    size: 'md'
+  }
 };
 
 export const ControlledWithDebounce = () => {

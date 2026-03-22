@@ -7,9 +7,21 @@ import '../../../ui-core/src/components/ui-popover';
 import { Popover, type PopoverElement } from '../components/Popover';
 
 describe('Popover wrapper', () => {
-  it('syncs placement and close-behavior props to the host element', async () => {
+  it('syncs placement, surface, and close-behavior props to the host element', async () => {
     const { container } = render(
-      <Popover placement="right-start" offset={14} flip={false} shift={false} closeOnEscape={false} closeOnOutside={false}>
+      <Popover
+        placement="right-start"
+        offset={14}
+        flip={false}
+        shift={false}
+        closeOnEscape={false}
+        closeOnOutside={false}
+        variant="glass"
+        tone="warning"
+        size="lg"
+        radius={20}
+        elevation="high"
+      >
         <button slot="trigger">Trigger</button>
         <div slot="content">Body</div>
       </Popover>
@@ -23,6 +35,11 @@ describe('Popover wrapper', () => {
       expect(el?.getAttribute('shift')).toBe('false');
       expect(el?.getAttribute('close-on-escape')).toBe('false');
       expect(el?.getAttribute('close-on-outside')).toBe('false');
+      expect(el?.getAttribute('variant')).toBe('glass');
+      expect(el?.getAttribute('tone')).toBe('warning');
+      expect(el?.getAttribute('size')).toBe('lg');
+      expect(el?.getAttribute('radius')).toBe('20');
+      expect(el?.getAttribute('elevation')).toBe('high');
     });
   });
 

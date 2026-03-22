@@ -2,8 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { toastAdvanced } from '@editora/toast';
 import '@editora/toast/toast.css';
-import { Box, Button, Dialog, Flex, Grid } from '@editora/ui-react';
-import { Tabs } from '@editora/ui-react/Tabs';
+import { Box, Button, Dialog, Flex, Grid, Tabs } from '@editora/ui-react';
 
 const meta: Meta = {
   title: 'AI/Toast SaaS Center'

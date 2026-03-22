@@ -28,7 +28,7 @@ export type MenuItem = {
 };
 
 
-export type ContextMenuProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect'> & {
+export type ContextMenuProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect' | 'onOpen' | 'onClose'> & {
   anchorId?: string;
   anchorEl?: HTMLElement | null;
   anchorPoint?: { x: number; y: number };

@@ -8,7 +8,7 @@ export type NavigationMenuChangeDetail = {
   reason: 'click' | 'keyboard' | 'programmatic';
 };
 
-export type NavigationMenuProps = React.HTMLAttributes<HTMLElement> & {
+export type NavigationMenuProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect'> & {
   children?: React.ReactNode;
   selected?: number;
   orientation?: 'horizontal' | 'vertical';

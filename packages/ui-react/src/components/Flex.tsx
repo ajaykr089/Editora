@@ -2,16 +2,17 @@ import React from 'react';
 
 type BreakpointKey = 'initial' | 'sm' | 'md' | 'lg' | 'xl';
 type Responsive<T> = T | Partial<Record<BreakpointKey, T>>;
+type CssValue = string | number;
 
 type Props = React.HTMLAttributes<HTMLElement> & {
   direction?: Responsive<'row' | 'column' | 'row-reverse' | 'column-reverse'>;
-  align?: Responsive<string>;
-  justify?: Responsive<string>;
-  wrap?: Responsive<string>;
-  gap?: Responsive<string>;
-  rowGap?: Responsive<string>;
-  columnGap?: Responsive<string>;
-  display?: Responsive<'flex' | 'inline-flex' | string>;
+  align?: Responsive<CssValue>;
+  justify?: Responsive<CssValue>;
+  wrap?: Responsive<CssValue>;
+  gap?: Responsive<CssValue>;
+  rowGap?: Responsive<CssValue>;
+  columnGap?: Responsive<CssValue>;
+  display?: Responsive<'flex' | 'inline-flex' | CssValue>;
   headless?: boolean;
 };
 

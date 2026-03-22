@@ -6,7 +6,7 @@ type TooltipChangeDetail = {
   open: boolean;
 };
 
-type BaseProps = React.HTMLAttributes<HTMLElement> & {
+type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onOpen' | 'onClose'> & {
   children?: React.ReactNode;
 };
 

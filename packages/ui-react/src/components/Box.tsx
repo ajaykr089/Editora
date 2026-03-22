@@ -4,7 +4,7 @@ type BreakpointKey = 'initial' | 'sm' | 'md' | 'lg' | 'xl';
 type Responsive<T> = T | Partial<Record<BreakpointKey, T>>;
 type CssValue = string | number;
 
-type Props = React.HTMLAttributes<HTMLElement> & {
+export type BoxProps = React.HTMLAttributes<HTMLElement> & {
   p?: Responsive<CssValue>; px?: Responsive<CssValue>; py?: Responsive<CssValue>; pt?: Responsive<CssValue>; pr?: Responsive<CssValue>; pb?: Responsive<CssValue>; pl?: Responsive<CssValue>;
   m?: Responsive<CssValue>; mx?: Responsive<CssValue>; my?: Responsive<CssValue>; mt?: Responsive<CssValue>; mr?: Responsive<CssValue>; mb?: Responsive<CssValue>; ml?: Responsive<CssValue>;
   width?: Responsive<CssValue>; w?: Responsive<CssValue>; minWidth?: Responsive<CssValue>; minW?: Responsive<CssValue>; maxWidth?: Responsive<CssValue>; maxW?: Responsive<CssValue>; height?: Responsive<CssValue>; h?: Responsive<CssValue>; minHeight?: Responsive<CssValue>; minH?: Responsive<CssValue>; maxHeight?: Responsive<CssValue>; maxH?: Responsive<CssValue>;
@@ -36,7 +36,7 @@ function serializeResponsive(value: unknown): string | undefined {
   return String(value);
 }
 
-export function Box(props: Props) {
+export const Box = React.forwardRef<HTMLElement, BoxProps>(function Box(props, forwardedRef) {
   const {
     children,
     className,
@@ -68,6 +68,7 @@ export function Box(props: Props) {
   } = props;
 
   const hostProps: Record<string, unknown> = {
+    ref: forwardedRef,
     className,
     ...rest,
     p: serializeResponsive(p),
@@ -134,6 +135,8 @@ export function Box(props: Props) {
   };
 
   return React.createElement('ui-box', hostProps, children);
-}
+});
+
+Box.displayName = 'Box';
 
 export default Box;

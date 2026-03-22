@@ -15,8 +15,7 @@ import {
   SettingsIcon,
   SparklesIcon
 } from '@editora/react-icons';
-import { Box, Button, Flex, Grid, ThemeProvider } from '@editora/ui-react';
-import { Sidebar } from '@editora/ui-react/Sidebar';
+import { Box, Button, Flex, Grid, Sidebar, ThemeProvider, type SidebarItemInput } from '@editora/ui-react';
 
 export default {
   title: 'UI/Sidebar',
@@ -52,7 +51,7 @@ const operationsItems = [
   { section: 'Growth', value: 'campaigns', label: 'Campaigns', icon: <SparklesIcon /> },
   { section: 'Growth', value: 'audiences', label: 'Audiences' },
   { section: 'System', value: 'settings', label: 'Settings', icon: <SettingsIcon /> }
-];
+] satisfies SidebarItemInput[];
 
 const premiumTokens = withAccentPalette(
   createThemeTokens({

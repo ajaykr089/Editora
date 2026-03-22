@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Flex, Grid } from '@editora/ui-react';
-import { Tabs } from '@editora/ui-react/Tabs';
+import { Tabs } from '@editora/ui-react';
 
 export default {
   title: 'UI/Tabs',

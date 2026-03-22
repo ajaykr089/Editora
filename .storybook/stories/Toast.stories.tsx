@@ -2,12 +2,20 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { useEffect, useState } from "react";
 
 // Import the toast library
-import { toast, toastAdvanced } from "@editora/toast";
+import { toast, toastAdvanced, type ToastLevelAdvanced, type ToastPosition, type ToastTheme, type ToastOptionsAdvanced } from "@editora/toast";
 import "../../packages/editora-toast/dist/toast.css";
 import { Box, Grid, Flex} from '@editora/ui-react';
 
 
-const meta: Meta = {
+type ToastStoryArgs = {
+  theme?: ToastTheme;
+  position?: ToastPosition;
+  rtl?: boolean;
+  swipeDirection?: ToastOptionsAdvanced["swipeDirection"];
+  pauseOnWindowBlur?: boolean;
+};
+
+const meta: Meta<ToastStoryArgs> = {
   title: "UI Components/Toast Notifications",
   parameters: {
     layout: "padded",
@@ -63,7 +71,7 @@ const meta: Meta = {
 };
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<ToastStoryArgs>;
 
 const ToastDemo = ({ 
   theme = "light", 
@@ -71,11 +79,11 @@ const ToastDemo = ({
   rtl = false,
   swipeDirection = "any",
   pauseOnWindowBlur = false
-}: { 
-  theme?: string; 
-  position?: string;
+}: {
+  theme?: ToastTheme;
+  position?: ToastPosition;
   rtl?: boolean;
-  swipeDirection?: string;
+  swipeDirection?: ToastOptionsAdvanced["swipeDirection"];
   pauseOnWindowBlur?: boolean;
 }) => {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -767,7 +775,7 @@ const ToastDemo = ({
           </div>
           <div>
             <strong>Groups:</strong>{" "}
-            {Object.keys(toastAdvanced.getGroups()).length}
+            {toastAdvanced.getGroups().length}
           </div>
           <div>
             <strong>Config:</strong>
@@ -1147,7 +1155,7 @@ export const BulkNotifications: Story = {
       <h2>Bulk Notifications</h2>
       <p>Multiple notifications appearing in sequence.</p>
       <button onClick={() => {
-        const notifications = [
+        const notifications: Array<{ message: string; level: ToastLevelAdvanced; delay: number }> = [
           { message: '📧 New email from support@editora.dev', level: 'info', delay: 0 },
           { message: '🔄 Database backup completed successfully', level: 'success', delay: 500 },
           { message: '⚠️ High CPU usage detected on server-01', level: 'warning', delay: 1000 }
@@ -1240,7 +1248,7 @@ export const AdvancedProgressScenarios: Story = {
                 progress: undefined
               });
             } else {
-              toastAdvanced.update(toast, {
+              toastAdvanced.update(toast.id, {
                 progress: { value: progress, showPercentage: true }
               });
             }
@@ -1324,7 +1332,6 @@ export const AdvancedProgressScenarios: Story = {
           toastAdvanced.show({
             message: '🔄 Synchronizing with cloud...',
             level: 'loading',
-            progress: { indeterminate: true },
             duration: 8000
           });
         }}>
@@ -1518,7 +1525,7 @@ export const AsyncOperations: Story = {
       <p>Promise-based operations with loading states and success/error handling.</p>
       <Grid style={{ display: "grid", gap: "10px", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
         <button onClick={() => {
-          const promise = new Promise((resolve, reject) => {
+          const promise = new Promise<{ data: string; status: number }>((resolve, reject) => {
             setTimeout(() => {
               Math.random() > 0.1 ? resolve({ data: 'Sample API response', status: 200 }) : reject(new Error('Network Error'));
             }, 2000);
@@ -1534,7 +1541,7 @@ export const AsyncOperations: Story = {
         </button>
 
         <button onClick={() => {
-          const promise = new Promise((resolve, reject) => {
+          const promise = new Promise<string>((resolve, reject) => {
             setTimeout(() => {
               Math.random() > 0.3 ? resolve('File processed successfully') : reject(new Error('File corrupted'));
             }, 2500);
@@ -1550,7 +1557,7 @@ export const AsyncOperations: Story = {
         </button>
 
         <button onClick={() => {
-          const promise = new Promise((resolve, reject) => {
+          const promise = new Promise<{ transactionId: string }>((resolve, reject) => {
             setTimeout(() => {
               Math.random() > 0.2 ? resolve({ transactionId: 'TXN_' + Date.now() }) : reject(new Error('Payment declined'));
             }, 3000);

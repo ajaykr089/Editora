@@ -68,6 +68,7 @@ const style = `
     --ui-card-media-min-height: 196px;
   }
 
+  :host([tone="brand"]),
   :host([tone="info"]) {
     --ui-card-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
   }
@@ -118,6 +119,18 @@ const style = `
         color-mix(in srgb, var(--color-panel-solid, var(--ui-color-surface, #ffffff)) 94%, transparent)
       );
     --ui-card-backdrop: var(--base-panel-backdrop, var(--backdrop-filter-panel, blur(16px)));
+  }
+
+  :host([variant="contrast"]) {
+    --ui-card-bg:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--ui-card-accent) 20%, #0f172a 80%),
+        color-mix(in srgb, var(--ui-card-accent) 10%, #020617 90%)
+      );
+    --ui-card-color: #f8fafc;
+    --ui-card-border-color: color-mix(in srgb, var(--ui-card-accent) 28%, rgba(248, 250, 252, 0.28));
+    --ui-card-shadow: 0 20px 40px rgba(2, 6, 23, 0.34);
   }
 
   :host([elevation="none"]) {

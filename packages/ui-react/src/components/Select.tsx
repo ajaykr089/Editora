@@ -43,7 +43,7 @@ export type SelectProps = BaseProps & {
   density?: 'default' | 'compact' | 'comfortable';
   shape?: 'rounded' | 'square' | 'pill';
   elevation?: 'low' | 'none' | 'high';
-  radius?: 'none' | 'large' | 'full' | string;
+  radius?: 'none' | 'large' | 'full' | number | string;
   optionBorder?: boolean;
   showCheck?: boolean;
   checkPlacement?: 'start' | 'end';
