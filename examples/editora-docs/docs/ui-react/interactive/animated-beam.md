@@ -130,12 +130,15 @@ For launch-page diagrams, `3` columns with a central hub and `3` to `5` rows is 
 - Use `animation="smooth"` for the balanced default.
 - Use `animation="snappy"` when the map should feel sharper and more product-like.
 - Use `animation="surge"` when the beam itself is part of the story.
+- Use `animation="pulse"` when you want the beam to read like a traveling burst instead of a simple path fill.
+- Use `animation="heartbeat"` when you want a more expressive double-hit cadence that feels closer to a heartbeat rhythm.
 - Downstream connections wait until the beam reaches their `from` node, so fan-out follows the declared path.
 - Use `stagger` when you want sibling branches to sequence instead of firing together.
 - Use per-connection `delay` to add extra offset after that handoff.
 - Use `repeat={false}` when the sequence should run once and stay completed.
 - Use `direction="reverse"` on the root or a connection to send the beam back toward the source.
 - Use `reverse` on a connection when the motion should travel back toward the source.
+- Use `nodeEffect="pulse"` when the destination node should pulse on arrival. That is separate from the beam-level `animation="pulse"` and `animation="heartbeat"` presets.
 
 ## Variants And Tone
 
@@ -149,6 +152,15 @@ For launch-page diagrams, `3` columns with a central hub and `3` to `5` rows is 
 - `minimal` when you mostly want the nodes and beams without a heavy shell
 
 The selected `tone` affects the shell accents and the default beam palette. You can override beam colors directly with `colorStart`, `colorEnd`, and `trailColor`.
+
+## Beam Color Direction
+
+When you want a few quick gradient directions to try, these combinations are good starting points:
+
+- `#8b5cf6 -> #fb923c` for a launch-page, AI-system look
+- `#06b6d4 -> #2563eb` for a cooler infrastructure or systems feel
+- `#84cc16 -> #f59e0b` for a more energetic, electric route
+- `#f43f5e -> #fb923c` for alerting or high-signal state-change moments
 
 ## Imperative API
 
@@ -179,7 +191,7 @@ const ref = React.useRef<HTMLElement & {
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `animation` | `'calm' \| 'smooth' \| 'snappy' \| 'surge'` | `'smooth'` | Named motion preset |
+| `animation` | `'calm' \| 'smooth' \| 'snappy' \| 'surge' \| 'pulse' \| 'heartbeat'` | `'smooth'` | Named beam-motion preset |
 | `variant` | `'surface' \| 'soft' \| 'solid' \| 'glass' \| 'contrast' \| 'minimal'` | `'minimal'` | Surface treatment |
 | `tone` | `'brand' \| 'neutral' \| 'info' \| 'success' \| 'warning' \| 'danger'` | `'brand'` | Accent tone |
 | `size` | `'xxs' \| 'xs' \| 'sm' \| 'md' \| 'lg' \| '0' \| '1' \| '2' \| '3'` | `'md'` | Preset shell scale |
@@ -193,7 +205,7 @@ const ref = React.useRef<HTMLElement & {
 | `minHeight` | `number \| string` | size-based | Minimum canvas height |
 | `nodeSize` | `number \| string` | size-based | Endpoint node size |
 | `hubSize` | `number \| string` | size-based | Hub size |
-| `duration` | `number \| string` | `2200ms` | Base beam travel duration |
+| `duration` | `number \| string` | `3200ms` | Base beam travel duration |
 | `delay` | `number \| string` | `0ms` | Global playback delay |
 | `stagger` | `number \| string` | `0ms` | Additional delay between sibling connections without their own `delay` |
 | `trailWidth` | `number \| string` | size-based | Static path width |
@@ -201,6 +213,7 @@ const ref = React.useRef<HTMLElement & {
 | `beamFactor` | `number \| string` | animation-based | Beam segment length multiplier |
 | `path` | `boolean` | `true` | Shows the underlying path guide |
 | `glow` | `boolean` | `true` | Enables beam glow treatment |
+| `nodeEffect` | `'none' \| 'glow' \| 'pulse' \| 'ring' \| 'shake'` | `'none'` | Arrival effect applied to hubs and nodes when the beam lands |
 | `paused` | `boolean` | `false` | Forces playback to pause |
 | `repeat` | `boolean` | `true` | Repeats the sequence or runs it once |
 | `direction` | `'forward' \| 'reverse'` | `'forward'` | Beam travel direction |

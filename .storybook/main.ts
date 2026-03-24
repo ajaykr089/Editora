@@ -7,6 +7,12 @@ const config: StorybookConfig = {
   docs: {
     autodocs: true,
   },
+  typescript: {
+    // The default docgen pass trips over a few locally-aliased source types
+    // during static Storybook builds. We keep authored docs enabled and skip
+    // runtime prop introspection so preview/docs builds stay reliable.
+    reactDocgen: false,
+  },
   addons: [
     '@storybook/addon-links',
     '@storybook/addon-essentials',

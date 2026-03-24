@@ -68,6 +68,18 @@
       "require": "./dist/AnimatedText.cjs.js",
       "default": "./dist/AnimatedText.esm.js"
     },
+    "./SpinningText": {
+      "types": "./dist/components/SpinningText.d.ts",
+      "import": "./dist/SpinningText.esm.js",
+      "require": "./dist/SpinningText.cjs.js",
+      "default": "./dist/SpinningText.esm.js"
+    },
+    "./NumberTicker": {
+      "types": "./dist/components/NumberTicker.d.ts",
+      "import": "./dist/NumberTicker.esm.js",
+      "require": "./dist/NumberTicker.cjs.js",
+      "default": "./dist/NumberTicker.esm.js"
+    },
     "./AnimatedList": {
       "types": "./dist/components/AnimatedList.d.ts",
       "import": "./dist/AnimatedList.esm.js",
@@ -79,6 +91,12 @@
       "import": "./dist/AnimatedBeam.esm.js",
       "require": "./dist/AnimatedBeam.cjs.js",
       "default": "./dist/AnimatedBeam.esm.js"
+    },
+    "./IconCloud": {
+      "types": "./dist/components/IconCloud.d.ts",
+      "import": "./dist/IconCloud.esm.js",
+      "require": "./dist/IconCloud.cjs.js",
+      "default": "./dist/IconCloud.esm.js"
     },
     "./Anchor": {
       "types": "./dist/components/Anchor.d.ts",
@@ -349,6 +367,18 @@
       "import": "./dist/Grid.esm.js",
       "require": "./dist/Grid.cjs.js",
       "default": "./dist/Grid.esm.js"
+    },
+    "./PlacementGrid": {
+      "types": "./dist/components/PlacementGrid.d.ts",
+      "import": "./dist/PlacementGrid.esm.js",
+      "require": "./dist/PlacementGrid.cjs.js",
+      "default": "./dist/PlacementGrid.esm.js"
+    },
+    "./MasonryGrid": {
+      "types": "./dist/components/MasonryGrid.d.ts",
+      "import": "./dist/MasonryGrid.esm.js",
+      "require": "./dist/MasonryGrid.cjs.js",
+      "default": "./dist/MasonryGrid.esm.js"
     },
     "./HoverCard": {
       "types": "./dist/components/HoverCard.d.ts",

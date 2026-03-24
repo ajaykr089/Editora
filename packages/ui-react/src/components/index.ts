@@ -85,6 +85,8 @@ export type { FormProps, FormActionsProps, FormStatusProps, FormTitleProps } fro
 export { Box } from './Box';
 export { Flex } from './Flex';
 export { Grid } from './Grid';
+export { PlacementGrid } from './PlacementGrid';
+export { MasonryGrid } from './MasonryGrid';
 export { Section } from './Section';
 export { Container } from './Container';
 export { Sidebar } from './Sidebar';
@@ -162,6 +164,36 @@ export type {
   AnimatedTextElevation,
   AnimatedTextAlign,
 } from './AnimatedText';
+export { SpinningText } from './SpinningText';
+export type {
+  SpinningTextProps,
+  SpinningTextCenterProps,
+  SpinningTextElement,
+  SpinningTextDirection,
+  SpinningTextVariant,
+  SpinningTextTone,
+  SpinningTextSize,
+  SpinningTextElevation,
+} from './SpinningText';
+export { NumberTicker } from './NumberTicker';
+export type {
+  NumberTickerProps,
+  NumberTickerElement,
+  NumberTickerTone,
+  NumberTickerSize,
+  NumberTickerAlign,
+  NumberTickerEasing,
+  NumberTickerAnimation,
+  NumberTickerTrigger,
+  NumberTickerStaggerFrom,
+  NumberTickerFormatStyle,
+  NumberTickerCurrencyDisplay,
+  NumberTickerNotation,
+  NumberTickerCompactDisplay,
+  NumberTickerSignDisplay,
+  NumberTickerFormatterContext,
+  NumberTickerFormatter,
+} from './NumberTicker';
 export { AnimatedList } from './AnimatedList';
 export type {
   AnimatedListProps,
@@ -190,6 +222,18 @@ export type {
   AnimatedBeamCurve,
   AnimatedBeamDirection,
 } from './AnimatedBeam';
+export { IconCloud } from './IconCloud';
+export type {
+  IconCloudProps,
+  IconCloudItemProps,
+  IconCloudCenterProps,
+  IconCloudElement,
+  IconCloudDirection,
+  IconCloudVariant,
+  IconCloudTone,
+  IconCloudSize,
+  IconCloudElevation,
+} from './IconCloud';
 export { Dock } from './Dock';
 export type {
   DockProps,
