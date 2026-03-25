@@ -77,12 +77,15 @@ Every node or hub should have a stable `node-id`, and every connection must refe
 - `animation="smooth"` is the balanced default.
 - `animation="snappy"` makes the beam feel sharper and more product-like.
 - `animation="surge"` makes the beam itself more pronounced and theatrical.
+- `animation="pulse"` turns the beam into a traveling burst instead of a simple fill-across-progress effect.
+- `animation="heartbeat"` adds a more expressive double-beat cadence for routes that should feel more alive.
 - Connections follow their declared path, so downstream beams wait until the upstream route reaches their `from` node.
 - Use `stagger` when you want sibling branches to sequence instead of firing together.
 - Individual `delay` values on connection elements add extra offset after that upstream handoff.
 - Set `repeat="false"` when the sequence should run once and hold the finished state.
 - Use `direction="reverse"` on the root or a connection to send the beam back toward the source.
 - Add `reverse` on the root or a specific connection when the motion should travel back toward the source.
+- Use `node-effect="pulse"` when the slotted node or hub should pulse on arrival. That is separate from the beam-level `animation="pulse"` and `animation="heartbeat"` presets.
 
 ## Variants And Tone
 
@@ -97,11 +100,20 @@ Every node or hub should have a stable `node-id`, and every connection must refe
 
 The selected `tone` affects the shell accents and default beam palette. Use `color-start`, `color-end`, and `trail-color` when you want a custom beam treatment for the story you are telling.
 
+## Beam Color Direction
+
+These beam gradients are useful starting points when you want quick visual variations without changing the diagram structure:
+
+- `color-start="#8b5cf6"` with `color-end="#fb923c"` for an editorial AI-system feel
+- `color-start="#06b6d4"` with `color-end="#2563eb"` for a cooler systems or infrastructure direction
+- `color-start="#84cc16"` with `color-end="#f59e0b"` for a brighter, more energetic route
+- `color-start="#f43f5e"` with `color-end="#fb923c"` for alerting or high-signal motion states
+
 ## Attributes
 
 | Attribute | Type | Default | Description |
 | --- | --- | --- | --- |
-| `animation` | `calm \| smooth \| snappy \| surge` | `smooth` | Named motion preset |
+| `animation` | `calm \| smooth \| snappy \| surge \| pulse \| heartbeat` | `smooth` | Named beam-motion preset |
 | `variant` | `surface \| soft \| solid \| glass \| contrast \| minimal` | `minimal` | Surface treatment |
 | `tone` | `brand \| neutral \| info \| success \| warning \| danger` | `brand` | Accent tone |
 | `size` | `xxs \| xs \| sm \| md \| lg \| 0 \| 1 \| 2 \| 3` | `md` | Preset shell scale |
@@ -115,7 +127,7 @@ The selected `tone` affects the shell accents and default beam palette. Use `col
 | `min-height` | CSS length | size-based | Minimum canvas height |
 | `node-size` | CSS length | size-based | Standard node size |
 | `hub-size` | CSS length | size-based | Hub size |
-| `duration` | CSS time | `2200ms` | Base beam travel duration |
+| `duration` | CSS time | `3200ms` | Base beam travel duration |
 | `delay` | CSS time | `0ms` | Global playback delay |
 | `stagger` | CSS time | `0ms` | Additional delay between sibling connections without their own `delay` |
 | `trail-width` | CSS length | size-based | Static path width |
@@ -123,6 +135,7 @@ The selected `tone` affects the shell accents and default beam palette. Use `col
 | `beam-factor` | `number` | animation-based | Relative beam segment length |
 | `path` | boolean-like | `true` | Shows the underlying path guide |
 | `glow` | boolean-like | `true` | Enables beam glow |
+| `node-effect` | `none \| glow \| pulse \| ring \| shake` | `none` | Arrival effect applied to hubs and nodes when the beam lands |
 | `paused` | boolean | absent | Forces playback to pause |
 | `repeat` | boolean-like | `true` | Repeats the sequence or runs it once |
 | `direction` | `forward \| reverse` | `forward` | Beam travel direction |

@@ -92,6 +92,8 @@ export { useFloating } from './hooks/useFloating';
 export { Box } from './components/Box';
 export { Flex } from './components/Flex';
 export { Grid } from './components/Grid';
+export { PlacementGrid } from './components/PlacementGrid';
+export { MasonryGrid } from './components/MasonryGrid';
 export { Section } from './components/Section';
 export { Container } from './components/Container';
 export {
@@ -175,6 +177,36 @@ export type {
   AnimatedTextElevation,
   AnimatedTextAlign,
 } from './components/AnimatedText';
+export { SpinningText } from './components/SpinningText';
+export type {
+  SpinningTextProps,
+  SpinningTextCenterProps,
+  SpinningTextElement,
+  SpinningTextDirection,
+  SpinningTextVariant,
+  SpinningTextTone,
+  SpinningTextSize,
+  SpinningTextElevation,
+} from './components/SpinningText';
+export { NumberTicker } from './components/NumberTicker';
+export type {
+  NumberTickerProps,
+  NumberTickerElement,
+  NumberTickerTone,
+  NumberTickerSize,
+  NumberTickerAlign,
+  NumberTickerEasing,
+  NumberTickerAnimation,
+  NumberTickerTrigger,
+  NumberTickerStaggerFrom,
+  NumberTickerFormatStyle,
+  NumberTickerCurrencyDisplay,
+  NumberTickerNotation,
+  NumberTickerCompactDisplay,
+  NumberTickerSignDisplay,
+  NumberTickerFormatterContext,
+  NumberTickerFormatter,
+} from './components/NumberTicker';
 export { AnimatedList } from './components/AnimatedList';
 export type {
   AnimatedListProps,
@@ -202,6 +234,18 @@ export type {
   AnimatedBeamAnimation,
   AnimatedBeamCurve,
 } from './components/AnimatedBeam';
+export { IconCloud } from './components/IconCloud';
+export type {
+  IconCloudProps,
+  IconCloudItemProps,
+  IconCloudCenterProps,
+  IconCloudElement,
+  IconCloudDirection,
+  IconCloudVariant,
+  IconCloudTone,
+  IconCloudSize,
+  IconCloudElevation,
+} from './components/IconCloud';
 export { Dock } from './components/Dock';
 export type {
   DockProps,

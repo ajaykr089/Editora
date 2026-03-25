@@ -300,6 +300,30 @@ function RegistrationForm() {
 
 ## Layout Examples
 
+### MasonryGrid Patterns
+```tsx
+import { Card, MasonryGrid } from '@editora/ui-react';
+
+function MasonryPatterns() {
+  return (
+    <MasonryGrid columns={{ initial: 1, md: 2, lg: 3 }} gap="lg">
+      <Card style={{ padding: 20, minHeight: 140 }}>Uneven-height card</Card>
+      <Card style={{ padding: 20, minHeight: 280 }}>Gallery or editorial card</Card>
+      <Card style={{ padding: 20, minHeight: 180 }}>Dashboard module</Card>
+      <Card style={{ padding: 20, minHeight: 320 }}>Tall narrative panel</Card>
+    </MasonryGrid>
+  );
+}
+```
+
+Use `MasonryGrid` for:
+- uneven-height cards
+- gallery-style layouts
+- dashboard and content walls
+- visually packed columns
+
+If row order must exactly match reading order, use `PlacementGrid` instead.
+
 ### Dashboard Layout
 ```tsx
 import React from 'react';

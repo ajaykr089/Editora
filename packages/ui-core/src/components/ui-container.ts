@@ -165,7 +165,7 @@ export class UIContainer extends ElementBase {
   private _observeResize() {
     if (this._resizeObserver) this._resizeObserver.disconnect();
     const el = this.root?.querySelector('.container');
-    if (!el) return;
+    if (!el || typeof ResizeObserver === 'undefined') return;
     this._resizeObserver = new ResizeObserver(() => {
       this.dispatchEvent(new CustomEvent('resize', { bubbles: true }));
     });

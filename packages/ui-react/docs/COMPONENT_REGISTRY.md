@@ -107,6 +107,8 @@ Components for application structure and navigation.
 | **Box** | Layout primitive | Flex, grid, spacing, sizing |
 | **Flex** | Flexbox layout | Direction, wrap, alignment |
 | **Grid** | CSS Grid layout | Columns, rows, gaps, areas |
+| **PlacementGrid** | Explicit placement grid | Row-major ordering, exact coordinates, keyboard navigation, draggable swaps |
+| **MasonryGrid** | Masonry-style card layout | Responsive columns, column width, packed vertical flow |
 | **Separator** | Visual separator | Horizontal/vertical, styling |
 | **VisuallyHidden** | Screen reader content | Accessibility, hidden content |
 
@@ -125,6 +127,9 @@ Components for user interaction and utility functions.
 | **Skeleton** | Loading placeholder | Animation, shapes, sizing |
 | **Progress** | Progress indicator | Determinate/indeterminate, labels |
 | **Meter** | Meter/bar indicator | Value ranges, colors, labels |
+| **SpinningText** | Circular animated text | Speed, direction, center slot, reduced-motion support |
+| **NumberTicker** | Animated numeric counter | Count up/down, odometer mode, viewport trigger, formatting, pause controls |
+| **IconCloud** | Interactive 3D icon cloud | Sphere projection, pointer tilt, center slot, pause controls |
 | **Avatar** | User/profile image | Fallbacks, sizes, status |
 | **Icon** | Icon component | SVG, custom, sizing, colors |
 | **AspectRatio** | Aspect ratio container | Responsive, content fitting |
@@ -237,6 +242,106 @@ function AdvancedExample() {
   );
 }
 ```
+
+### MasonryGrid Usage
+```tsx
+import { Card, MasonryGrid } from '@editora/ui-react';
+
+function MasonryGridExample() {
+  return (
+    <MasonryGrid columns={{ initial: 1, md: 2, lg: 3 }} gap="lg">
+      <Card style={{ padding: 20, minHeight: 140 }}>Uneven-height card</Card>
+      <Card style={{ padding: 20, minHeight: 280 }}>Gallery tile</Card>
+      <Card style={{ padding: 20, minHeight: 180 }}>Dashboard module</Card>
+      <Card style={{ padding: 20, minHeight: 320 }}>Tall narrative panel</Card>
+    </MasonryGrid>
+  );
+}
+```
+
+Recommended use cases:
+- uneven-height cards
+- gallery-style layouts
+- dashboard and content walls
+- visually packed columns
+
+### SpinningText Usage
+```tsx
+import { SpinningText } from '@editora/ui-react';
+
+function SpinningTextExample() {
+  return (
+    <SpinningText
+      text="Editora launch systems editorial motion"
+      repeat={2}
+      speed={4}
+      variant="glass"
+      tone="brand"
+      size="xl"
+      pauseOnHover
+    >
+      <SpinningText.Center>ET</SpinningText.Center>
+    </SpinningText>
+  );
+}
+```
+
+Recommended use cases:
+- hero seals and launch badges
+- trust marks and verification medallions
+- brand loops and editorial motion accents
+- center-slot icon or image treatments
+
+### NumberTicker Usage
+```tsx
+import { NumberTicker } from '@editora/ui-react';
+
+function NumberTickerExample() {
+  return (
+    <NumberTicker
+      value={128420}
+      from={120000}
+      duration={1400}
+      formatStyle="currency"
+      currency="USD"
+      animation="odometer"
+      stagger={20}
+      size="xl"
+      tone="brand"
+    />
+  );
+}
+```
+
+Recommended use cases:
+- KPI cards and dashboard metrics
+- growth deltas and percentage summaries
+- financial counters and revenue blocks
+- compact usage totals and operational stats
+- hero stats with odometer-style digit motion
+- long pages that should animate only when the metric enters view
+
+### IconCloud Usage
+```tsx
+import { IconCloud } from '@editora/ui-react';
+
+function IconCloudExample() {
+  return (
+    <IconCloud radius={124} perspective={940} speed={1} interactive autoFit pauseOnHover>
+      <IconCloud.Center>Core</IconCloud.Center>
+      <IconCloud.Item clickable aria-label="Search">S</IconCloud.Item>
+      <IconCloud.Item clickable aria-label="Trust">T</IconCloud.Item>
+      <IconCloud.Item clickable aria-label="Metrics">M</IconCloud.Item>
+    </IconCloud>
+  );
+}
+```
+
+Recommended use cases:
+- integration and product ecosystems
+- spatial launchers and navigable icon clusters
+- interactive hero compositions
+- animated tag clouds with a center focal point
 
 ## Migration and Compatibility
 
