@@ -102,6 +102,7 @@ import './components/ui-stepper';
 import './components/ui-wizard';
 import './components/ui-quick-actions';
 import './components/ui-rating';
+import './components/ui-odometer';
 
 
 // layout primitives
@@ -257,3 +258,4 @@ export { UIStepper } from './components/ui-stepper';
 export { UIWizard } from './components/ui-wizard';
 export { UIQuickActions } from './components/ui-quick-actions';
 export { UIRating } from './components/ui-rating';
+export { UIOdometer } from './components/ui-odometer';

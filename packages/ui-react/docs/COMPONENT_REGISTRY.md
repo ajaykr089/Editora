@@ -125,6 +125,7 @@ Components for user interaction and utility functions.
 | **Skeleton** | Loading placeholder | Animation, shapes, sizing |
 | **Progress** | Progress indicator | Determinate/indeterminate, labels |
 | **Meter** | Meter/bar indicator | Value ranges, colors, labels |
+| **AnimatedNumber** | Animated numeric display | Odometer, inline, digital, analog variants; locale-aware formatting |
 | **Avatar** | User/profile image | Fallbacks, sizes, status |
 | **Icon** | Icon component | SVG, custom, sizing, colors |
 | **AspectRatio** | Aspect ratio container | Responsive, content fitting |

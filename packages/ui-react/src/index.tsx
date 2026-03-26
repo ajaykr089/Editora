@@ -141,5 +141,17 @@ export { AlertDialogProvider, useAlertDialog } from './components/AlertDialogPro
 export { Select } from './components/Select';
 export { Slider } from './components/Slider';
 export { Skeleton } from './components/Skeleton';
+export {
+  AnimatedNumber,
+  useAnimatedNumber,
+  useAnimatedNumberValue,
+  type AnimatedNumberProps,
+  type AnimatedNumberAnimation,
+  type AnimatedNumberVariant,
+  type AnimatedNumberFormat,
+  type AnimatedNumberNotation,
+  type AnimatedNumberDirection,
+  type AnimatedNumberCompleteEvent,
+} from './components/AnimatedNumber';
 // Ensure all web components are registered when this package is imported
 import '@editora/ui-core';
