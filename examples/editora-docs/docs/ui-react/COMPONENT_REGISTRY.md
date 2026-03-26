@@ -235,6 +235,53 @@ Each component entry includes:
 }
 ```
 
+#### AnimatedNumber
+```json
+{
+  "id": "ui-react:AnimatedNumber",
+  "package": "@editora/ui-react",
+  "framework": "react",
+  "name": "AnimatedNumber",
+  "reactExport": "AnimatedNumber",
+  "source": "packages/ui-react/src/components/AnimatedNumber.tsx",
+  "docsPath": "/docs/ui-react/interactive/animated-number",
+  "storybookPath": "/story/ui-animatednumber--playground",
+  "wrapperFor": "ui-odometer",
+  "props": {
+    "value": "number",
+    "variant": "'odometer' | 'inline' | 'digital' | 'analog'",
+    "format": "'decimal' | 'currency' | 'percent' | 'number'",
+    "locale": "string",
+    "currency": "string",
+    "notation": "'standard' | 'compact'",
+    "fractionDigits": "number",
+    "minimumFractionDigits": "number",
+    "maximumFractionDigits": "number",
+    "duration": "number",
+    "animation": "'ease' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'linear' | 'spring'",
+    "direction": "'auto' | 'up' | 'down'",
+    "animate": "boolean",
+    "animateOnMount": "boolean",
+    "prefix": "string",
+    "suffix": "string",
+    "decimalSeparator": "string",
+    "groupSeparator": "string",
+    "min": "number",
+    "max": "number",
+    "label": "string",
+    "onComplete": "(event: CustomEvent<{ value: number }>) => void"
+  },
+  "usage": "Animated numeric display with inline, digital, analog, and odometer variants",
+  "examples": [
+    "KPI dashboard counters",
+    "Revenue and finance totals",
+    "Mechanical odometer displays",
+    "Digital panel readouts",
+    "Instrument-style analog counters"
+  ]
+}
+```
+
 ### Overlay & Modal Components
 
 #### Dialog

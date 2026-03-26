@@ -38,7 +38,7 @@ import "@editora/ui-core";
 | `UIPresence`, `UIProgress`, `UIScrollArea`, `UISeparator`, `UISlot`, `UIToolbar`, `UIPortal`, `UIVisuallyHidden` | Component class exports | Accessibility/layout utilities |
 | `UIBox`, `UIFlex`, `UIGrid`, `UISection`, `UIContainer`, `UIBreadcrumb`, `UISidebar`, `UIAppHeader`, `UIDrawer`, `UIDialog`, `UILayout` | Component class exports | Layout and shell components |
 | `UIBlockControls`, `UIPluginPanel`, `UIFloatingToolbar`, `UISelectionPopup`, `UICommandPalette` | Component class exports | Editor-oriented controls |
-| `UITextarea`, `UIField`, `UICombobox`, `UIAlert`, `UISkeleton`, `UIEmptyState`, `UIDataTable`, `UIChart`, `UITimeline`, `UICalendar` | Component class exports | Form/data presentation |
+| `UITextarea`, `UIField`, `UICombobox`, `UIAlert`, `UISkeleton`, `UIEmptyState`, `UIDataTable`, `UIChart`, `UITimeline`, `UICalendar`, `UIOdometer` | Component class exports | Form/data presentation |
 | `UIColorPicker`, `UIDatePicker`, `UIDateRangePicker`, `UITimePicker`, `UIDateTimePicker`, `UIDateRangeTimePicker`, `UIGantt`, `UIStepper`, `UIWizard`, `UIQuickActions` | Component class exports | Advanced input + workflow components |
 | `UIAlertDialog*` and `UIDialog*` detail/template types | Type exports | Dialog event/detail typing |
 

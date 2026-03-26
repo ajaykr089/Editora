@@ -55,6 +55,7 @@ export function App() {
 - [ColorPicker](./form-inputs/color-picker) - Color selection
 
 ### Data Display
+- [AnimatedNumber](./interactive/animated-number) - Animated numeric display with multiple visual variants
 - [Table](./interactive/table) - Basic table component
 - [DataTable](./interactive/data-table) - Advanced data table
 - [Chart](./interactive/chart) - Data visualization

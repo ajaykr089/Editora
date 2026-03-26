@@ -44,3 +44,7 @@ CLI quick-add commands:
 - npx editora add editor
 - npx editora add toast
 - Supports all exported @editora/ui-react component names (for example: accordion, avatar, select, ui-date-picker).
+
+Notable numeric display components:
+- `AnimatedNumber` from `@editora/ui-react` wraps `ui-odometer` from `@editora/ui-core`.
+- Supported `AnimatedNumber` variants: `odometer`, `inline`, `digital`, `analog`.
