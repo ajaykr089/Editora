@@ -50,7 +50,7 @@ export const SingleDate = () => {
   return (
     <Box w="min(560px, 100%)" variant="elevated" p="14px" radius="xl">
       <Grid gap="10px">
-        <Badge tone="brand">Single date picker</Badge>
+        <Badge tone="purple">Single date picker</Badge>
         <DatePicker
           // label="Admission date"
           hint="Accepts ISO and locale-like input."
@@ -78,7 +78,7 @@ export const DatePickerEnterpriseStates = () => {
     <Grid gap="12px" style={{ maxWidth: 960 }}>
       <Box variant="elevated" p="16px" radius="xl">
         <Grid gap="8px">
-          <Badge tone="brand">Enterprise date picker states</Badge>
+          <Badge tone="purple">Enterprise date picker states</Badge>
           <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: '14px' }}>
             Includes loading/success visuals, square + soft shape variants, and reversed min/max safety.
           </Box>
@@ -180,7 +180,7 @@ export const DateRangeEnterpriseStates = () => {
     <Grid gap="12px" style={{ maxWidth: 980 }}>
       <Box variant="elevated" p="16px" radius="xl">
         <Grid gap="8px">
-          <Badge tone="brand">Enterprise date range states</Badge>
+          <Badge tone="purple">Enterprise date range states</Badge>
           <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: '14px' }}>
             Covers loading/success states, single-field parsing, and reversed min/max normalization.
           </Box>
@@ -283,7 +283,7 @@ export const DateTime = () => {
   return (
     <Box w="min(760px, 100%)" variant="elevated" p="14px" radius="xl">
       <Grid gap="10px">
-        <Badge tone="brand">Date-time picker</Badge>
+        <Badge tone="purple">Date-time picker</Badge>
         <DateTimePicker
           label="Procedure schedule"
           value={value || undefined}
@@ -340,7 +340,7 @@ export const BareAndFooterVariants = () => {
     <Grid gap="12px" style={{ maxWidth: 1100 }}>
       <Box variant="elevated" p="16px" radius="xl">
         <Grid gap="8px">
-          <Badge tone="brand">`bare` + `showFooter` configuration</Badge>
+          <Badge tone="purple">`bare` + `showFooter` configuration</Badge>
           <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: '14px' }}>
             Use <code>bare</code> for flat/no-panel chrome and <code>showFooter</code> to control actions.
             Calendar-only inline layouts use <code>showFooter=&#123;false&#125;</code>.
@@ -441,7 +441,7 @@ export const Localization = () => {
     <Grid gap="12px" style={{ maxWidth: 1100 }}>
       <Box variant="elevated" p="16px" radius="xl">
         <Grid gap="10px">
-          <Badge tone="brand">Localization demo</Badge>
+          <Badge tone="purple">Localization demo</Badge>
           <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: '14px' }}>
             Built-in localization supports English, Chinese, and French. Switch locale and inspect calendar labels,
             time labels, and action text.
@@ -534,7 +534,7 @@ export const MobileSheetBehavior = () => {
   return (
     <Box w="360px" variant="elevated" p="14px" radius="xl">
       <Grid gap="10px">
-        <Badge tone="brand">Forced mobile sheet preview</Badge>
+        <Badge tone="purple">Forced mobile sheet preview</Badge>
         <DatePicker
           label="Mobile sheet date picker"
           value={value || undefined}
