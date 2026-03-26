@@ -93,6 +93,11 @@ const style = `
     --ui-calendar-day-font-size: 12px;
     --ui-calendar-weekday-font-size: 11px;
     --ui-calendar-title-font-size: 14px;
+    --ui-calendar-day-padding-block: 6px;
+    --ui-calendar-day-padding-inline: 6px;
+    --ui-calendar-frame-padding: 12px;
+    --ui-calendar-week-gap: 6px;
+    --ui-calendar-control-height: 30px;
 
     display: block;
     min-inline-size: 280px;
@@ -153,7 +158,7 @@ const style = `
     border-radius: var(--ui-calendar-radius);
     background: var(--ui-calendar-bg);
     box-shadow: var(--ui-calendar-shadow);
-    padding: 12px;
+    padding: var(--ui-calendar-frame-padding);
     display: grid;
     gap: var(--ui-calendar-gap);
     min-inline-size: 0;
@@ -198,7 +203,7 @@ const style = `
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    min-block-size: 30px;
+    min-block-size: var(--ui-calendar-control-height);
     border: 1px solid color-mix(in srgb, var(--ui-calendar-border) 84%, transparent);
     border-radius: 10px;
     padding: 0 10px;
@@ -250,12 +255,12 @@ const style = `
   .nav-btn,
   .today-btn,
   .picker-year-btn {
-    min-block-size: 30px;
+    min-block-size: var(--ui-calendar-control-height);
     padding: 0 10px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: var(--ui-calendar-week-gap);
     font: 600 12px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 
@@ -372,7 +377,7 @@ const style = `
   .grid-wrap {
     min-inline-size: 0;
     display: grid;
-    gap: 6px;
+    gap: var(--ui-calendar-week-gap);
   }
 
   :host([state="loading"]) .grid-wrap {
@@ -384,7 +389,7 @@ const style = `
   .week {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 6px;
+    gap: var(--ui-calendar-week-gap);
   }
 
   .weekday {
@@ -400,7 +405,7 @@ const style = `
     border: 1px solid color-mix(in srgb, var(--ui-calendar-border) 78%, transparent);
     border-radius: var(--ui-calendar-day-radius);
     min-block-size: var(--ui-calendar-day-height);
-    padding: 6px;
+    padding: var(--ui-calendar-day-padding-block) var(--ui-calendar-day-padding-inline);
     background: color-mix(in srgb, var(--ui-calendar-bg) 98%, transparent);
     color: var(--ui-calendar-text);
     display: grid;
@@ -1978,6 +1983,10 @@ export class UICalendar extends ElementBase {
           const tooltipId = `ui-calendar-tip-${cell.iso}`;
           const tooltipText = dayEvents.length ? dayEvents.map((event) => escapeHtml(event.title || t.event)).join('<br/>') : '';
           const hasTooltip = tooltipText.length > 0;
+          const eventsSlot = eventsMarkup ? `<span class="events" part="events">${eventsMarkup}</span>` : '';
+          const tooltipSlot = hasTooltip
+            ? `<span class="tooltip" part="tooltip" id="${tooltipId}">${tooltipText}</span>`
+            : '';
 
           const ariaSelected = selected || inRange || isRangeStart || isRangeEnd;
           const part = inRange || isRangeStart || isRangeEnd ? 'day range' : 'day';
@@ -2005,8 +2014,8 @@ export class UICalendar extends ElementBase {
               tabindex="${tabIndex}"
             >
               <span class="day-number" part="day-number">${cell.parts.d}</span>
-              <span class="events" part="events">${eventsMarkup}</span>
-              <span class="tooltip" part="tooltip" id="${tooltipId}" ${hasTooltip ? '' : 'hidden'}>${tooltipText}</span>
+              ${eventsSlot}
+              ${tooltipSlot}
             </button>
           `;
         })

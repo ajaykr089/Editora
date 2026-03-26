@@ -104,4 +104,26 @@ describe('ui-calendar behavior', () => {
     expect(detail.month).toBe(4);
     expect(detail.source).toBe('pointer');
   });
+
+  it('does not render empty events or tooltip containers for days without events', async () => {
+    const el = mountCalendar({
+      year: '2026',
+      month: '3',
+      events: JSON.stringify([{ date: '2026-03-15', title: 'Launch', tone: 'info' }]),
+    });
+    await settle();
+
+    const emptyDay = el.shadowRoot?.querySelector('.day[data-date="2026-03-09"]') as HTMLButtonElement | null;
+    const eventDay = el.shadowRoot?.querySelector('.day[data-date="2026-03-15"]') as HTMLButtonElement | null;
+
+    expect(emptyDay).toBeTruthy();
+    expect(emptyDay?.querySelector('.events')).toBeNull();
+    expect(emptyDay?.querySelector('.tooltip')).toBeNull();
+    expect(emptyDay?.getAttribute('aria-describedby')).toBeNull();
+
+    expect(eventDay).toBeTruthy();
+    expect(eventDay?.querySelector('.events')).toBeTruthy();
+    expect(eventDay?.querySelector('.tooltip')).toBeTruthy();
+    expect(eventDay?.getAttribute('aria-describedby')).toBeTruthy();
+  });
 });
