@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Box, Button, Chart, Flex, Grid, Timeline } from '@editora/ui-react';
+import { Alert, Badge, Box, Button, Chart, Flex, Grid, Marquee, Timeline } from '@editora/ui-react';
 import { Icon } from '@editora/react-icons';
 import { useDashboardQuery } from '@/shared/query/hooks';
 import { PageHeader } from '@/shared/components/PageHeader';
@@ -25,6 +25,85 @@ function KpiCard({ label, value, icon }: { label: string; value: string; icon: s
   );
 }
 
+type LiveRailItem = {
+  label: string;
+  value: string;
+  meta: string;
+  icon: string;
+  tone: 'info' | 'success' | 'warning' | 'danger' | 'neutral';
+};
+
+function LiveOperationsRail({ items }: { items: LiveRailItem[] }) {
+  return (
+    <Box
+      variant="surface"
+      p="14px"
+      radius="lg"
+      style={{
+        border: '1px solid var(--ui-color-border, #dbe4ef)',
+        display: 'grid',
+        gap: 10,
+        overflow: 'hidden'
+      }}
+    >
+      <Flex justify="space-between" align="center" style={{ gap: 10, flexWrap: 'wrap' }}>
+        <Box>
+          <Box style={{ fontWeight: 700, fontSize: 16 }}>Live operations rail</Box>
+          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>
+            Realtime service updates, capacity markers, and workflow signals driven by the current dashboard data.
+          </Box>
+        </Box>
+        <Badge tone="info" variant="soft" size="sm">
+          Auto-scrolling
+        </Badge>
+      </Flex>
+
+      <Marquee
+        variant="soft"
+        tone="info"
+        size="md"
+        gap={14}
+        speed={54}
+        fade
+        fadeSize={56}
+        pauseOnHover
+        pauseOnFocus
+        radius={18}
+        elevation="none"
+        padding="10px 14px"
+      >
+        {items.map((item) => (
+          <Marquee.Item key={`${item.label}-${item.value}`} style={{ minInlineSize: 220 }}>
+            <Box style={{ display: 'grid', gap: 8, minInlineSize: 0 }}>
+              <Flex justify="space-between" align="center" style={{ gap: 10 }}>
+                <Flex align="center" style={{ gap: 8, minInlineSize: 0 }}>
+                  <Box
+                    style={{
+                      inlineSize: 28,
+                      blockSize: 28,
+                      borderRadius: 999,
+                      display: 'grid',
+                      placeItems: 'center',
+                      background: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent)'
+                    }}
+                  >
+                    <Icon name={item.icon as any} size={14} aria-hidden="true" />
+                  </Box>
+                  <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)', whiteSpace: 'nowrap' }}>{item.label}</Box>
+                </Flex>
+                <Badge tone={item.tone as any} variant="soft" size="sm">
+                  {item.meta}
+                </Badge>
+              </Flex>
+              <Box style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.1 }}>{item.value}</Box>
+            </Box>
+          </Marquee.Item>
+        ))}
+      </Marquee>
+    </Box>
+  );
+}
+
 export default function DashboardPage() {
   const navigate = useNavigate();
   const dashboard = useDashboardQuery();
@@ -38,6 +117,43 @@ export default function DashboardPage() {
 
   const trendData = (trend as Array<{ label: string; appointments: number; occupancy: number }>).map((item) => ({ label: item.label, value: item.appointments }));
   const occupancyData = (trend as Array<{ label: string; appointments: number; occupancy: number }>).map((item) => ({ label: item.label, value: item.occupancy }));
+  const railItems: LiveRailItem[] = [
+    {
+      label: 'Today appointments',
+      value: String(kpis.todaysAppointments),
+      meta: 'schedule',
+      icon: 'calendar',
+      tone: 'info'
+    },
+    {
+      label: 'Admissions',
+      value: String(kpis.admissions),
+      meta: 'intake',
+      icon: 'users',
+      tone: 'success'
+    },
+    {
+      label: 'Bed occupancy',
+      value: `${kpis.occupancyPct}%`,
+      meta: kpis.occupancyPct >= 85 ? 'capacity risk' : 'stable',
+      icon: 'layout',
+      tone: kpis.occupancyPct >= 85 ? 'warning' : 'success'
+    },
+    {
+      label: 'Pending lab reports',
+      value: String(kpis.pendingLab),
+      meta: kpis.pendingLab > 12 ? 'queue high' : 'lab',
+      icon: 'activity',
+      tone: kpis.pendingLab > 12 ? 'warning' : 'info'
+    },
+    ...((activity as ActivityEvent[]).slice(0, 4).map((row) => ({
+      label: row.message,
+      value: row.time,
+      meta: row.level,
+      icon: row.level === 'critical' ? 'alert-triangle' : row.level === 'warning' ? 'clock' : row.level === 'success' ? 'check-circle' : 'shield',
+      tone: row.level === 'critical' ? 'danger' : row.level === 'warning' ? 'warning' : row.level === 'success' ? 'success' : 'info'
+    })) as LiveRailItem[])
+  ];
 
   return (
     <Grid style={{ display: 'grid', gap: 14 }}>
@@ -51,6 +167,8 @@ export default function DashboardPage() {
           { label: 'Create invoice', onClick: () => navigate('/billing'), icon: 'receipt', variant: 'secondary' }
         ]}
       />
+
+      <LiveOperationsRail items={railItems} />
 
       <Grid className="kpi-grid">
         <KpiCard label="Today appointments" value={String(kpis.todaysAppointments)} icon="calendar" />

@@ -1,62 +1,31 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const componentsDir = path.resolve(__dirname, 'src/components');
+const components = fs.readdirSync(componentsDir)
+  .filter((file) => file.endsWith('.tsx') && !file.startsWith('_'))
+  .map((file) => path.basename(file, '.tsx'))
+  .sort();
 
-// Only include components we've created entry files for
-const refactoredComponents = [
-  "Accordion",
-  "Alert",
-  "AppHeader",
-  "Breadcrumb",
-  "Card",
-  "Collapsible",
-  "Combobox",
-  "Command",
-  "CommandPalette",
-  "Drawer",
-  "FloatingToolbar",
-  "Form",
-  "HoverCard",
-  "Input",
-  "Label",
-  "Layout",
-  "Menu",
-  "Menubar",
-  "Popover",
-  "QuickActions",
-  "Rating",
-  "Select",
-  "SelectionPopup",
-  "Sidebar",
-  "Switch",
-  "Tabs",
-  "Textarea",
-  "ToggleGroup",
-  "Tree",
-  "Wizard",
-];
+const rootComponentEntries = Object.fromEntries(
+  components.map((component) => [component, path.resolve(componentsDir, `${component}.tsx`)])
+);
 
-// Build entry points for refactored components
-const input: Record<string, string> = {
-  index: path.resolve(__dirname, 'src/index.tsx'),
-};
-
-refactoredComponents.forEach(component => {
-  input[component] = path.resolve(__dirname, `src/${component}.tsx`);
-});
-
-// Build entry points for components directory (wildcard exports)
-const componentsInput: Record<string, string> = {};
-refactoredComponents.forEach(component => {
-  componentsInput[`components/${component}`] = path.resolve(__dirname, `src/${component}.tsx`);
-});
+const nestedComponentEntries = Object.fromEntries(
+  components.map((component) => [`components/${component}`, path.resolve(componentsDir, `${component}.tsx`)])
+);
 
 export default defineConfig({
   build: {
     lib: {
-      entry: { ...input, ...componentsInput },
+      entry: {
+        index: path.resolve(__dirname, 'src/index.tsx'),
+        ...rootComponentEntries,
+        ...nestedComponentEntries,
+      },
       formats: ['es', 'cjs'],
       fileName: (format, entryName) => {
         if (entryName === 'index') {

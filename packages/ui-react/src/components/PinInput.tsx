@@ -2,7 +2,7 @@ import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from '
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-export type PinInputProps = React.HTMLAttributes<HTMLElement> & {
+export type PinInputProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'> & {
   children?: React.ReactNode;
   value?: string;
   onChange?: (value: string) => void;

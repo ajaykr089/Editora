@@ -46,10 +46,10 @@ function ensureCardRuntimeStyles() {
 }
 
 export type CardProps = React.HTMLAttributes<HTMLElement> & {
-  variant?: 'surface' | 'outline' | 'soft' | 'solid' | 'ghost' | 'glass';
+  variant?: 'surface' | 'outline' | 'soft' | 'solid' | 'ghost' | 'glass' | 'contrast';
   size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
   radius?: number | string;
-  tone?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+  tone?: 'brand' | 'neutral' | 'info' | 'success' | 'warning' | 'danger';
   elevation?: 'none' | 'low' | 'high';
   interactive?: boolean;
   disabled?: boolean;
@@ -102,12 +102,12 @@ function createCardSection(
   return Component;
 }
 
-const CardHeader = createCardSection('div', 'CardHeader', 'header', 'data-ui-card-header');
-const CardFooter = createCardSection('div', 'CardFooter', 'footer', 'data-ui-card-footer');
-const CardInset = createCardSection('div', 'CardInset', 'inset');
-const CardMedia = createCardSection('div', 'CardMedia', 'media', 'data-ui-card-media');
-const CardTitle = createCardSection('h3', 'CardTitle', undefined, 'data-ui-card-title');
-const CardDescription = createCardSection('p', 'CardDescription', undefined, 'data-ui-card-description');
+const CardHeader = createCardSection('div', 'Card.Header', 'header', 'data-ui-card-header');
+const CardFooter = createCardSection('div', 'Card.Footer', 'footer', 'data-ui-card-footer');
+const CardInset = createCardSection('div', 'Card.Inset', 'inset');
+const CardMedia = createCardSection('div', 'Card.Media', 'media', 'data-ui-card-media');
+const CardTitle = createCardSection('h3', 'Card.Title', undefined, 'data-ui-card-title');
+const CardDescription = createCardSection('p', 'Card.Description', undefined, 'data-ui-card-description');
 
 // Create composed component with sub-components as properties
 const ComposedCard = Object.assign(Card, {
@@ -119,5 +119,5 @@ const ComposedCard = Object.assign(Card, {
   Description: CardDescription,
 });
 
-export { ComposedCard as Card, CardHeader, CardFooter, CardInset, CardMedia, CardTitle, CardDescription };
+export { ComposedCard as Card };
 export default ComposedCard;

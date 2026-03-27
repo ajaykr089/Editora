@@ -13,7 +13,7 @@ export type DateRangePickerDetail = {
 
 export type DateRangePickerState = 'idle' | 'loading' | 'error' | 'success';
 
-export type DateRangePickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'> & {
+export type DateRangePickerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput' | 'onOpen' | 'onClose' | 'onInvalid'> & {
   value?: string;
   defaultValue?: string;
   open?: boolean;

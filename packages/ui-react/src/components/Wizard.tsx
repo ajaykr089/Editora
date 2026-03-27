@@ -35,7 +35,9 @@ export type WizardBlockedNextDetail = {
   nextValue: string;
 };
 
-export type WizardProps = React.HTMLAttributes<HTMLElement> & {
+type WizardBaseProps = Omit<React.HTMLAttributes<HTMLElement>, "onChange">;
+
+export type WizardProps = WizardBaseProps & {
   value?: string;
   linear?: boolean;
   showStepper?: boolean;

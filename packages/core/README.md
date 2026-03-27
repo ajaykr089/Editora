@@ -276,7 +276,7 @@ MIT © [Ajay Kumar](https://github.com/ajaykr089)
 
 ## 🔗 Links
 
-- [Documentation](https://github.com/ajaykr089/Editora#readme)
+- [Documentation](https://editora-ecosystem.netlify.app/)
 - [GitHub Repository](https://github.com/ajaykr089/Editora)
 - [Issue Tracker](https://github.com/ajaykr089/Editora/issues)
 - [npm Package](https://www.npmjs.com/package/@editora/core)

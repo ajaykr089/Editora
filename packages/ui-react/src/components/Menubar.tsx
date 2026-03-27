@@ -9,7 +9,7 @@ export type MenubarChangeDetail = {
   reason: 'click' | 'keyboard' | 'programmatic';
 };
 
-export type MenubarProps = React.HTMLAttributes<HTMLElement> & {
+export type MenubarProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect' | 'onOpen' | 'onClose'> & {
   children?: React.ReactNode;
   selected?: number;
   open?: boolean;

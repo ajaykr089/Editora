@@ -30,7 +30,7 @@ export type PopoverTriggerProps = React.HTMLAttributes<HTMLElement>;
 
 export type PopoverContentProps = React.HTMLAttributes<HTMLElement>;
 
-export type PopoverProps = React.HTMLAttributes<HTMLElement> & {
+export type PopoverProps = Omit<React.HTMLAttributes<HTMLElement>, 'onOpen' | 'onClose'> & {
   open?: boolean;
   placement?: PopoverPlacement;
   offset?: number;
@@ -38,6 +38,11 @@ export type PopoverProps = React.HTMLAttributes<HTMLElement> & {
   flip?: boolean;
   closeOnEscape?: boolean;
   closeOnOutside?: boolean;
+  variant?: 'surface' | 'soft' | 'solid' | 'glass' | 'contrast' | 'minimal';
+  tone?: 'brand' | 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+  size?: 'sm' | 'md' | 'lg' | '1' | '2' | '3';
+  radius?: number | string;
+  elevation?: 'none' | 'low' | 'high';
   onOpen?: () => void;
   onClose?: () => void;
   onOpenChange?: (detail: PopoverOpenChangeDetail) => void;
@@ -53,6 +58,11 @@ const PopoverRoot = React.forwardRef<PopoverElement, PopoverProps>(function Popo
     flip,
     closeOnEscape,
     closeOnOutside,
+    variant,
+    tone,
+    size,
+    radius,
+    elevation,
     onOpen,
     onClose,
     onOpenChange,
@@ -111,7 +121,16 @@ const PopoverRoot = React.forwardRef<PopoverElement, PopoverProps>(function Popo
     syncAttr('flip', flip === undefined ? null : String(flip), flip !== undefined);
     syncAttr('close-on-escape', closeOnEscape === undefined ? null : String(closeOnEscape), closeOnEscape !== undefined);
     syncAttr('close-on-outside', closeOnOutside === undefined ? null : String(closeOnOutside), closeOnOutside !== undefined);
-  }, [open, placement, offset, shift, flip, closeOnEscape, closeOnOutside]);
+    syncAttr('variant', variant && variant !== 'surface' ? variant : null, variant !== undefined);
+    syncAttr('tone', tone && tone !== 'brand' ? tone : null, tone !== undefined);
+    syncAttr('size', size && size !== 'md' && size !== '2' ? size : null, size !== undefined);
+    syncAttr(
+      'radius',
+      radius !== undefined && radius !== null && String(radius).trim() !== '' ? String(radius) : null,
+      radius !== undefined
+    );
+    syncAttr('elevation', elevation && elevation !== 'low' ? elevation : null, elevation !== undefined);
+  }, [open, placement, offset, shift, flip, closeOnEscape, closeOnOutside, variant, tone, size, radius, elevation]);
 
   return React.createElement('ui-popover', { ref, ...rest }, children);
 });

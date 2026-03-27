@@ -12,7 +12,7 @@ const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffec
 
 type SidebarTone = 'default' | 'brand' | 'success' | 'warning' | 'danger';
 
-type SidebarItemInput = {
+export type SidebarItemInput = {
   value?: string;
   label?: string;
   href?: string;
@@ -37,7 +37,7 @@ type SidebarSelectDetail = {
   item?: SidebarItemInput;
 };
 
-type SidebarProps = React.HTMLAttributes<HTMLElement> & {
+type SidebarProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect' | 'onToggle'> & {
   collapsed?: boolean;
   collapsible?: boolean;
   rail?: boolean;
@@ -558,7 +558,15 @@ SidebarItem.displayName = 'Sidebar.Item';
 SidebarPromo.displayName = 'Sidebar.Promo';
 SidebarFooter.displayName = 'Sidebar.Footer';
 
-export type { SidebarProps, SidebarGroupProps, SidebarItemProps, SidebarSlotProps, SidebarSearchInputProps, SidebarSelectDetail, SidebarTone };
+export type {
+  SidebarProps,
+  SidebarGroupProps,
+  SidebarItemProps,
+  SidebarSlotProps,
+  SidebarSearchInputProps,
+  SidebarSelectDetail,
+  SidebarTone
+};
 
 export const Sidebar = Object.assign(SidebarRoot, {
   Header: SidebarHeader,

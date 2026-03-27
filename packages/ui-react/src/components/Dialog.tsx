@@ -20,7 +20,7 @@ export type DialogElement = HTMLElement & {
   config?: UIDialogTemplateOptions;
 };
 
-export type DialogProps = React.HTMLAttributes<HTMLElement> & {
+export type DialogProps = Omit<React.HTMLAttributes<HTMLElement>, 'onOpen' | 'onClose'> & {
   children?: React.ReactNode;
   open?: boolean;
   title?: string;

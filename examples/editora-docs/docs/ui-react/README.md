@@ -61,6 +61,11 @@ export function App() {
 - [Chart](./interactive/chart) - Data visualization
 - [Timeline](./interactive/timeline) - Timeline visualization
 - [Tree](./interactive/tree) - Hierarchical data display
+- [Marquee](./interactive/marquee) - Infinite scrolling content rail
+- [AnimatedText](./interactive/animated-text) - Text-first animation for headlines, callouts, and hero copy
+- [AnimatedBeam](./interactive/animated-beam) - Integration and orchestration diagram with animated beam paths
+- [Dock](./interactive/dock) - MacOS-style magnifying launcher and command shelf
+- [Orbiter](./interactive/orbiter) - Multi-ring orbital motion around a central focal point
 
 ### Overlay & Modal
 - [Dialog](./interactive/dialog) - Modal dialog

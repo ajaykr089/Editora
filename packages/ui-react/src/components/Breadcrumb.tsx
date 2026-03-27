@@ -10,7 +10,7 @@ type BreadcrumbSelectDetail = {
   source?: 'click' | 'keyboard';
 };
 
-type BaseProps = React.HTMLAttributes<HTMLElement> & {
+type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onSelect'> & {
   children?: React.ReactNode;
 };
 

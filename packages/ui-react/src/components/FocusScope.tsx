@@ -2,7 +2,7 @@ import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from '
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-export type FocusScopeProps = React.HTMLAttributes<HTMLElement> & {
+export type FocusScopeProps = Omit<React.HTMLAttributes<HTMLElement>, 'autoFocus'> & {
   active?: boolean;
   trapped?: boolean;
   loop?: boolean;

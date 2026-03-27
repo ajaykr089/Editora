@@ -7,7 +7,7 @@ export type DismissableLayerDetail = {
   originalEvent?: Event;
 };
 
-export type DismissableLayerProps = React.HTMLAttributes<HTMLElement> & {
+export type DismissableLayerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onClose'> & {
   open?: boolean;
   modal?: boolean;
   closeOnEscape?: boolean;

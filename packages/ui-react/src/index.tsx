@@ -20,6 +20,7 @@ export { Field } from './components/Field';
 export { Description, FieldError, ControlGroup, Fieldset } from './components/FieldSemantics';
 export { Combobox } from './components/Combobox';
 export { Badge } from './components/Badge';
+export type { BadgeProps, BadgeRemoveDetail } from './components/Badge';
 export { EmptyState } from './components/EmptyState';
 export { Table } from './components/Table';
 export { DataTable } from './components/DataTable';
@@ -34,6 +35,17 @@ export { NumberField } from './components/NumberField';
 export { MultiSelect } from './components/MultiSelect';
 export { SplitButton } from './components/SplitButton';
 export { TransferList } from './components/TransferList';
+export type {
+  TransferListProps,
+  TransferListOption,
+  TransferListChangeDetail,
+  TransferListElement,
+  TransferListVariant,
+  TransferListTone,
+  TransferListSize,
+  TransferListElevation,
+  TransferListSelectionIndicator
+} from './components/TransferList';
 export { InlineEdit } from './components/InlineEdit';
 export { TimePicker } from './components/TimePicker';
 export { DateTimePicker } from './components/DateTimePicker';
@@ -64,6 +76,7 @@ export { Menu, MenuItem, MenuSeparator, MenuSectionLabel } from './components/Me
 export { Icon } from './components/Icon';
 export { ToastAPI, ToastProvider, useToast, toast, toastApi, toastAdvanced, toastPro, toastLegacy } from './components/ToastAPI';
 export { Toast } from './components/Toast';
+export type { ToastElement, ToastProps, ToastShowDetail, ToastHideDetail, ToastShowOptions } from './components/Toast';
 export { FloatingToolbar } from './components/FloatingToolbar';
 export { BlockControls } from './components/BlockControls';
 export { Command, CommandItem, type CommandProps, type CommandItemProps, type CommandSelectDetail } from './components/Command';
@@ -79,10 +92,22 @@ export { useFloating } from './hooks/useFloating';
 export { Box } from './components/Box';
 export { Flex } from './components/Flex';
 export { Grid } from './components/Grid';
+export { PlacementGrid } from './components/PlacementGrid';
+export { MasonryGrid } from './components/MasonryGrid';
 export { Section } from './components/Section';
 export { Container } from './components/Container';
 export {
   Sidebar
+} from './components/Sidebar';
+export type {
+  SidebarProps,
+  SidebarGroupProps,
+  SidebarItemInput,
+  SidebarItemProps,
+  SidebarSlotProps,
+  SidebarSearchInputProps,
+  SidebarSelectDetail,
+  SidebarTone
 } from './components/Sidebar';
 export { PanelGroup, Panel, Splitter } from './components/PanelGroup';
 export { Tree } from './components/Tree';
@@ -138,6 +163,120 @@ export {
   AlertDialogActions
 } from './components/AlertDialog';
 export { AlertDialogProvider, useAlertDialog } from './components/AlertDialogProvider';
+export { AnimatedText } from './components/AnimatedText';
+export type {
+  BuiltinAnimatedTextEffect,
+  AnimatedTextElement,
+  AnimatedTextProps,
+  AnimatedTextEffect,
+  AnimatedTextSplit,
+  AnimatedTextTrigger,
+  AnimatedTextVariant,
+  AnimatedTextTone,
+  AnimatedTextSize,
+  AnimatedTextElevation,
+  AnimatedTextAlign,
+} from './components/AnimatedText';
+export { SpinningText } from './components/SpinningText';
+export type {
+  SpinningTextProps,
+  SpinningTextCenterProps,
+  SpinningTextElement,
+  SpinningTextDirection,
+  SpinningTextVariant,
+  SpinningTextTone,
+  SpinningTextSize,
+  SpinningTextElevation,
+} from './components/SpinningText';
+export { NumberTicker } from './components/NumberTicker';
+export type {
+  NumberTickerProps,
+  NumberTickerElement,
+  NumberTickerTone,
+  NumberTickerSize,
+  NumberTickerAlign,
+  NumberTickerEasing,
+  NumberTickerAnimation,
+  NumberTickerTrigger,
+  NumberTickerStaggerFrom,
+  NumberTickerFormatStyle,
+  NumberTickerCurrencyDisplay,
+  NumberTickerNotation,
+  NumberTickerCompactDisplay,
+  NumberTickerSignDisplay,
+  NumberTickerFormatterContext,
+  NumberTickerFormatter,
+} from './components/NumberTicker';
+export { AnimatedList } from './components/AnimatedList';
+export type {
+  AnimatedListProps,
+  AnimatedListItemProps,
+  AnimatedListEffect,
+  AnimatedListAnimation,
+  AnimatedListTrigger,
+  AnimatedListVariant,
+  AnimatedListTone,
+  AnimatedListSize,
+  AnimatedListElevation,
+  AnimatedListElement,
+} from './components/AnimatedList';
+export { AnimatedBeam } from './components/AnimatedBeam';
+export type {
+  AnimatedBeamProps,
+  AnimatedBeamNodeProps,
+  AnimatedBeamHubProps,
+  AnimatedBeamConnectionProps,
+  AnimatedBeamElement,
+  AnimatedBeamVariant,
+  AnimatedBeamTone,
+  AnimatedBeamSize,
+  AnimatedBeamElevation,
+  AnimatedBeamAnimation,
+  AnimatedBeamCurve,
+} from './components/AnimatedBeam';
+export { IconCloud } from './components/IconCloud';
+export type {
+  IconCloudProps,
+  IconCloudItemProps,
+  IconCloudCenterProps,
+  IconCloudElement,
+  IconCloudDirection,
+  IconCloudVariant,
+  IconCloudTone,
+  IconCloudSize,
+  IconCloudElevation,
+} from './components/IconCloud';
+export { Dock } from './components/Dock';
+export type {
+  DockProps,
+  DockItemProps,
+  DockItemSlotProps,
+  DockElement,
+  DockOrientation,
+  DockVariant,
+  DockTone,
+  DockSize,
+  DockAnimation,
+  DockElevation,
+  DockLabelMode,
+  DockLabelPlacement,
+  DockFocusTarget,
+} from './components/Dock';
+export { Orbiter } from './components/Orbiter';
+export type {
+  OrbiterProps,
+  OrbiterItemProps,
+  OrbiterCenterProps,
+  OrbiterElement,
+  OrbiterDirection,
+  OrbiterAnimation,
+  OrbiterVariant,
+  OrbiterTone,
+  OrbiterSize,
+  OrbiterElevation,
+} from './components/Orbiter';
+export { Marquee } from './components/Marquee';
+export type { MarqueeProps, MarqueeItemProps, MarqueeDirection } from './components/Marquee';
 export { Select } from './components/Select';
 export { Slider } from './components/Slider';
 export { Skeleton } from './components/Skeleton';

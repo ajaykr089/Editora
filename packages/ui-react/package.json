@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-react",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Enterprise React component library with SaaS UI components, modern design system patterns, and wrappers for Editora UI Core.",
   "homepage": "https://editora-ecosystem.netlify.app/docs/ui-react",
   "bugs": {
@@ -14,6 +14,17 @@
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "components/*": [
+        "dist/components/*"
+      ],
+      "*": [
+        "dist/components/*",
+        "dist/*"
+      ]
+    }
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -28,175 +39,685 @@
       "default": "./dist/components/*.esm.js"
     },
     "./Accordion": {
-      "types": "./dist/Accordion.d.ts",
+      "types": "./dist/components/Accordion.d.ts",
       "import": "./dist/Accordion.esm.js",
       "require": "./dist/Accordion.cjs.js",
       "default": "./dist/Accordion.esm.js"
     },
+    "./Alert": {
+      "types": "./dist/components/Alert.d.ts",
+      "import": "./dist/Alert.esm.js",
+      "require": "./dist/Alert.cjs.js",
+      "default": "./dist/Alert.esm.js"
+    },
+    "./AlertDialog": {
+      "types": "./dist/components/AlertDialog.d.ts",
+      "import": "./dist/AlertDialog.esm.js",
+      "require": "./dist/AlertDialog.cjs.js",
+      "default": "./dist/AlertDialog.esm.js"
+    },
+    "./AlertDialogProvider": {
+      "types": "./dist/components/AlertDialogProvider.d.ts",
+      "import": "./dist/AlertDialogProvider.esm.js",
+      "require": "./dist/AlertDialogProvider.cjs.js",
+      "default": "./dist/AlertDialogProvider.esm.js"
+    },
+    "./AnimatedText": {
+      "types": "./dist/components/AnimatedText.d.ts",
+      "import": "./dist/AnimatedText.esm.js",
+      "require": "./dist/AnimatedText.cjs.js",
+      "default": "./dist/AnimatedText.esm.js"
+    },
+    "./SpinningText": {
+      "types": "./dist/components/SpinningText.d.ts",
+      "import": "./dist/SpinningText.esm.js",
+      "require": "./dist/SpinningText.cjs.js",
+      "default": "./dist/SpinningText.esm.js"
+    },
+    "./NumberTicker": {
+      "types": "./dist/components/NumberTicker.d.ts",
+      "import": "./dist/NumberTicker.esm.js",
+      "require": "./dist/NumberTicker.cjs.js",
+      "default": "./dist/NumberTicker.esm.js"
+    },
+    "./AnimatedList": {
+      "types": "./dist/components/AnimatedList.d.ts",
+      "import": "./dist/AnimatedList.esm.js",
+      "require": "./dist/AnimatedList.cjs.js",
+      "default": "./dist/AnimatedList.esm.js"
+    },
+    "./AnimatedBeam": {
+      "types": "./dist/components/AnimatedBeam.d.ts",
+      "import": "./dist/AnimatedBeam.esm.js",
+      "require": "./dist/AnimatedBeam.cjs.js",
+      "default": "./dist/AnimatedBeam.esm.js"
+    },
+    "./IconCloud": {
+      "types": "./dist/components/IconCloud.d.ts",
+      "import": "./dist/IconCloud.esm.js",
+      "require": "./dist/IconCloud.cjs.js",
+      "default": "./dist/IconCloud.esm.js"
+    },
+    "./Anchor": {
+      "types": "./dist/components/Anchor.d.ts",
+      "import": "./dist/Anchor.esm.js",
+      "require": "./dist/Anchor.cjs.js",
+      "default": "./dist/Anchor.esm.js"
+    },
     "./AppHeader": {
-      "types": "./dist/AppHeader.d.ts",
+      "types": "./dist/components/AppHeader.d.ts",
       "import": "./dist/AppHeader.esm.js",
       "require": "./dist/AppHeader.cjs.js",
       "default": "./dist/AppHeader.esm.js"
     },
+    "./AspectRatio": {
+      "types": "./dist/components/AspectRatio.d.ts",
+      "import": "./dist/AspectRatio.esm.js",
+      "require": "./dist/AspectRatio.cjs.js",
+      "default": "./dist/AspectRatio.esm.js"
+    },
+    "./Avatar": {
+      "types": "./dist/components/Avatar.d.ts",
+      "import": "./dist/Avatar.esm.js",
+      "require": "./dist/Avatar.cjs.js",
+      "default": "./dist/Avatar.esm.js"
+    },
+    "./Badge": {
+      "types": "./dist/components/Badge.d.ts",
+      "import": "./dist/Badge.esm.js",
+      "require": "./dist/Badge.cjs.js",
+      "default": "./dist/Badge.esm.js"
+    },
+    "./BlockControls": {
+      "types": "./dist/components/BlockControls.d.ts",
+      "import": "./dist/BlockControls.esm.js",
+      "require": "./dist/BlockControls.cjs.js",
+      "default": "./dist/BlockControls.esm.js"
+    },
+    "./Box": {
+      "types": "./dist/components/Box.d.ts",
+      "import": "./dist/Box.esm.js",
+      "require": "./dist/Box.cjs.js",
+      "default": "./dist/Box.esm.js"
+    },
     "./Card": {
-      "types": "./dist/Card.d.ts",
+      "types": "./dist/components/Card.d.ts",
       "import": "./dist/Card.esm.js",
       "require": "./dist/Card.cjs.js",
       "default": "./dist/Card.esm.js"
     },
     "./Breadcrumb": {
-      "types": "./dist/Breadcrumb.d.ts",
+      "types": "./dist/components/Breadcrumb.d.ts",
       "import": "./dist/Breadcrumb.esm.js",
       "require": "./dist/Breadcrumb.cjs.js",
       "default": "./dist/Breadcrumb.esm.js"
     },
+    "./Button": {
+      "types": "./dist/components/Button.d.ts",
+      "import": "./dist/Button.esm.js",
+      "require": "./dist/Button.cjs.js",
+      "default": "./dist/Button.esm.js"
+    },
+    "./Calendar": {
+      "types": "./dist/components/Calendar.d.ts",
+      "import": "./dist/Calendar.esm.js",
+      "require": "./dist/Calendar.cjs.js",
+      "default": "./dist/Calendar.esm.js"
+    },
+    "./Chart": {
+      "types": "./dist/components/Chart.d.ts",
+      "import": "./dist/Chart.esm.js",
+      "require": "./dist/Chart.cjs.js",
+      "default": "./dist/Chart.esm.js"
+    },
+    "./Checkbox": {
+      "types": "./dist/components/Checkbox.d.ts",
+      "import": "./dist/Checkbox.esm.js",
+      "require": "./dist/Checkbox.cjs.js",
+      "default": "./dist/Checkbox.esm.js"
+    },
     "./Collapsible": {
-      "types": "./dist/Collapsible.d.ts",
+      "types": "./dist/components/Collapsible.d.ts",
       "import": "./dist/Collapsible.esm.js",
       "require": "./dist/Collapsible.cjs.js",
       "default": "./dist/Collapsible.esm.js"
     },
+    "./Collection": {
+      "types": "./dist/components/Collection.d.ts",
+      "import": "./dist/Collection.esm.js",
+      "require": "./dist/Collection.cjs.js",
+      "default": "./dist/Collection.esm.js"
+    },
+    "./ColorPicker": {
+      "types": "./dist/components/ColorPicker.d.ts",
+      "import": "./dist/ColorPicker.esm.js",
+      "require": "./dist/ColorPicker.cjs.js",
+      "default": "./dist/ColorPicker.esm.js"
+    },
     "./Combobox": {
-      "types": "./dist/Combobox.d.ts",
+      "types": "./dist/components/Combobox.d.ts",
       "import": "./dist/Combobox.esm.js",
       "require": "./dist/Combobox.cjs.js",
       "default": "./dist/Combobox.esm.js"
     },
     "./Command": {
-      "types": "./dist/Command.d.ts",
+      "types": "./dist/components/Command.d.ts",
       "import": "./dist/Command.esm.js",
       "require": "./dist/Command.cjs.js",
       "default": "./dist/Command.esm.js"
     },
     "./CommandPalette": {
-      "types": "./dist/CommandPalette.d.ts",
+      "types": "./dist/components/CommandPalette.d.ts",
       "import": "./dist/CommandPalette.esm.js",
       "require": "./dist/CommandPalette.cjs.js",
       "default": "./dist/CommandPalette.esm.js"
     },
+    "./Container": {
+      "types": "./dist/components/Container.d.ts",
+      "import": "./dist/Container.esm.js",
+      "require": "./dist/Container.cjs.js",
+      "default": "./dist/Container.esm.js"
+    },
+    "./ContextMenu": {
+      "types": "./dist/components/ContextMenu.d.ts",
+      "import": "./dist/ContextMenu.esm.js",
+      "require": "./dist/ContextMenu.cjs.js",
+      "default": "./dist/ContextMenu.esm.js"
+    },
+    "./DataTable": {
+      "types": "./dist/components/DataTable.d.ts",
+      "import": "./dist/DataTable.esm.js",
+      "require": "./dist/DataTable.cjs.js",
+      "default": "./dist/DataTable.esm.js"
+    },
+    "./DateField": {
+      "types": "./dist/components/DateField.d.ts",
+      "import": "./dist/DateField.esm.js",
+      "require": "./dist/DateField.cjs.js",
+      "default": "./dist/DateField.esm.js"
+    },
+    "./DatePicker": {
+      "types": "./dist/components/DatePicker.d.ts",
+      "import": "./dist/DatePicker.esm.js",
+      "require": "./dist/DatePicker.cjs.js",
+      "default": "./dist/DatePicker.esm.js"
+    },
+    "./DateRangePicker": {
+      "types": "./dist/components/DateRangePicker.d.ts",
+      "import": "./dist/DateRangePicker.esm.js",
+      "require": "./dist/DateRangePicker.cjs.js",
+      "default": "./dist/DateRangePicker.esm.js"
+    },
+    "./DateRangeTimePicker": {
+      "types": "./dist/components/DateRangeTimePicker.d.ts",
+      "import": "./dist/DateRangeTimePicker.esm.js",
+      "require": "./dist/DateRangeTimePicker.cjs.js",
+      "default": "./dist/DateRangeTimePicker.esm.js"
+    },
+    "./DateTimePicker": {
+      "types": "./dist/components/DateTimePicker.d.ts",
+      "import": "./dist/DateTimePicker.esm.js",
+      "require": "./dist/DateTimePicker.cjs.js",
+      "default": "./dist/DateTimePicker.esm.js"
+    },
+    "./Dialog": {
+      "types": "./dist/components/Dialog.d.ts",
+      "import": "./dist/Dialog.esm.js",
+      "require": "./dist/Dialog.cjs.js",
+      "default": "./dist/Dialog.esm.js"
+    },
+    "./DialogProvider": {
+      "types": "./dist/components/DialogProvider.d.ts",
+      "import": "./dist/DialogProvider.esm.js",
+      "require": "./dist/DialogProvider.cjs.js",
+      "default": "./dist/DialogProvider.esm.js"
+    },
+    "./Dock": {
+      "types": "./dist/components/Dock.d.ts",
+      "import": "./dist/Dock.esm.js",
+      "require": "./dist/Dock.cjs.js",
+      "default": "./dist/Dock.esm.js"
+    },
+    "./Orbiter": {
+      "types": "./dist/components/Orbiter.d.ts",
+      "import": "./dist/Orbiter.esm.js",
+      "require": "./dist/Orbiter.cjs.js",
+      "default": "./dist/Orbiter.esm.js"
+    },
+    "./DirectionProvider": {
+      "types": "./dist/components/DirectionProvider.d.ts",
+      "import": "./dist/DirectionProvider.esm.js",
+      "require": "./dist/DirectionProvider.cjs.js",
+      "default": "./dist/DirectionProvider.esm.js"
+    },
+    "./DismissableLayer": {
+      "types": "./dist/components/DismissableLayer.d.ts",
+      "import": "./dist/DismissableLayer.esm.js",
+      "require": "./dist/DismissableLayer.cjs.js",
+      "default": "./dist/DismissableLayer.esm.js"
+    },
     "./Drawer": {
-      "types": "./dist/Drawer.d.ts",
+      "types": "./dist/components/Drawer.d.ts",
       "import": "./dist/Drawer.esm.js",
       "require": "./dist/Drawer.cjs.js",
       "default": "./dist/Drawer.esm.js"
     },
+    "./Dropdown": {
+      "types": "./dist/components/Dropdown.d.ts",
+      "import": "./dist/Dropdown.esm.js",
+      "require": "./dist/Dropdown.cjs.js",
+      "default": "./dist/Dropdown.esm.js"
+    },
+    "./EmptyState": {
+      "types": "./dist/components/EmptyState.d.ts",
+      "import": "./dist/EmptyState.esm.js",
+      "require": "./dist/EmptyState.cjs.js",
+      "default": "./dist/EmptyState.esm.js"
+    },
+    "./Field": {
+      "types": "./dist/components/Field.d.ts",
+      "import": "./dist/Field.esm.js",
+      "require": "./dist/Field.cjs.js",
+      "default": "./dist/Field.esm.js"
+    },
+    "./FieldSemantics": {
+      "types": "./dist/components/FieldSemantics.d.ts",
+      "import": "./dist/FieldSemantics.esm.js",
+      "require": "./dist/FieldSemantics.cjs.js",
+      "default": "./dist/FieldSemantics.esm.js"
+    },
+    "./FileUpload": {
+      "types": "./dist/components/FileUpload.d.ts",
+      "import": "./dist/FileUpload.esm.js",
+      "require": "./dist/FileUpload.cjs.js",
+      "default": "./dist/FileUpload.esm.js"
+    },
+    "./Flex": {
+      "types": "./dist/components/Flex.d.ts",
+      "import": "./dist/Flex.esm.js",
+      "require": "./dist/Flex.cjs.js",
+      "default": "./dist/Flex.esm.js"
+    },
     "./FloatingToolbar": {
-      "types": "./dist/FloatingToolbar.d.ts",
+      "types": "./dist/components/FloatingToolbar.d.ts",
       "import": "./dist/FloatingToolbar.esm.js",
       "require": "./dist/FloatingToolbar.cjs.js",
       "default": "./dist/FloatingToolbar.esm.js"
     },
+    "./FocusScope": {
+      "types": "./dist/components/FocusScope.d.ts",
+      "import": "./dist/FocusScope.esm.js",
+      "require": "./dist/FocusScope.cjs.js",
+      "default": "./dist/FocusScope.esm.js"
+    },
     "./Form": {
-      "types": "./dist/Form.d.ts",
+      "types": "./dist/components/Form.d.ts",
       "import": "./dist/Form.esm.js",
       "require": "./dist/Form.cjs.js",
       "default": "./dist/Form.esm.js"
     },
+    "./Gantt": {
+      "types": "./dist/components/Gantt.d.ts",
+      "import": "./dist/Gantt.esm.js",
+      "require": "./dist/Gantt.cjs.js",
+      "default": "./dist/Gantt.esm.js"
+    },
+    "./Grid": {
+      "types": "./dist/components/Grid.d.ts",
+      "import": "./dist/Grid.esm.js",
+      "require": "./dist/Grid.cjs.js",
+      "default": "./dist/Grid.esm.js"
+    },
+    "./PlacementGrid": {
+      "types": "./dist/components/PlacementGrid.d.ts",
+      "import": "./dist/PlacementGrid.esm.js",
+      "require": "./dist/PlacementGrid.cjs.js",
+      "default": "./dist/PlacementGrid.esm.js"
+    },
+    "./MasonryGrid": {
+      "types": "./dist/components/MasonryGrid.d.ts",
+      "import": "./dist/MasonryGrid.esm.js",
+      "require": "./dist/MasonryGrid.cjs.js",
+      "default": "./dist/MasonryGrid.esm.js"
+    },
     "./HoverCard": {
-      "types": "./dist/HoverCard.d.ts",
+      "types": "./dist/components/HoverCard.d.ts",
       "import": "./dist/HoverCard.esm.js",
       "require": "./dist/HoverCard.cjs.js",
       "default": "./dist/HoverCard.esm.js"
     },
+    "./Icon": {
+      "types": "./dist/components/Icon.d.ts",
+      "import": "./dist/Icon.esm.js",
+      "require": "./dist/Icon.cjs.js",
+      "default": "./dist/Icon.esm.js"
+    },
+    "./InlineEdit": {
+      "types": "./dist/components/InlineEdit.d.ts",
+      "import": "./dist/InlineEdit.esm.js",
+      "require": "./dist/InlineEdit.cjs.js",
+      "default": "./dist/InlineEdit.esm.js"
+    },
     "./Input": {
-      "types": "./dist/Input.d.ts",
+      "types": "./dist/components/Input.d.ts",
       "import": "./dist/Input.esm.js",
       "require": "./dist/Input.cjs.js",
       "default": "./dist/Input.esm.js"
     },
+    "./Label": {
+      "types": "./dist/components/Label.d.ts",
+      "import": "./dist/Label.esm.js",
+      "require": "./dist/Label.cjs.js",
+      "default": "./dist/Label.esm.js"
+    },
     "./Layout": {
-      "types": "./dist/Layout.d.ts",
+      "types": "./dist/components/Layout.d.ts",
       "import": "./dist/Layout.esm.js",
       "require": "./dist/Layout.cjs.js",
       "default": "./dist/Layout.esm.js"
     },
+    "./Marquee": {
+      "types": "./dist/components/Marquee.d.ts",
+      "import": "./dist/Marquee.esm.js",
+      "require": "./dist/Marquee.cjs.js",
+      "default": "./dist/Marquee.esm.js"
+    },
+    "./Listbox": {
+      "types": "./dist/components/Listbox.d.ts",
+      "import": "./dist/Listbox.esm.js",
+      "require": "./dist/Listbox.cjs.js",
+      "default": "./dist/Listbox.esm.js"
+    },
     "./Menu": {
-      "types": "./dist/Menu.d.ts",
+      "types": "./dist/components/Menu.d.ts",
       "import": "./dist/Menu.esm.js",
       "require": "./dist/Menu.cjs.js",
       "default": "./dist/Menu.esm.js"
     },
     "./Menubar": {
-      "types": "./dist/Menubar.d.ts",
+      "types": "./dist/components/Menubar.d.ts",
       "import": "./dist/Menubar.esm.js",
       "require": "./dist/Menubar.cjs.js",
       "default": "./dist/Menubar.esm.js"
     },
-    "./Label": {
-      "types": "./dist/Label.d.ts",
-      "import": "./dist/Label.esm.js",
-      "require": "./dist/Label.cjs.js",
-      "default": "./dist/Label.esm.js"
+    "./Meter": {
+      "types": "./dist/components/Meter.d.ts",
+      "import": "./dist/Meter.esm.js",
+      "require": "./dist/Meter.cjs.js",
+      "default": "./dist/Meter.esm.js"
+    },
+    "./MultiSelect": {
+      "types": "./dist/components/MultiSelect.d.ts",
+      "import": "./dist/MultiSelect.esm.js",
+      "require": "./dist/MultiSelect.cjs.js",
+      "default": "./dist/MultiSelect.esm.js"
+    },
+    "./NavigationMenu": {
+      "types": "./dist/components/NavigationMenu.d.ts",
+      "import": "./dist/NavigationMenu.esm.js",
+      "require": "./dist/NavigationMenu.cjs.js",
+      "default": "./dist/NavigationMenu.esm.js"
+    },
+    "./NumberField": {
+      "types": "./dist/components/NumberField.d.ts",
+      "import": "./dist/NumberField.esm.js",
+      "require": "./dist/NumberField.cjs.js",
+      "default": "./dist/NumberField.esm.js"
+    },
+    "./Pagination": {
+      "types": "./dist/components/Pagination.d.ts",
+      "import": "./dist/Pagination.esm.js",
+      "require": "./dist/Pagination.cjs.js",
+      "default": "./dist/Pagination.esm.js"
+    },
+    "./PanelGroup": {
+      "types": "./dist/components/PanelGroup.d.ts",
+      "import": "./dist/PanelGroup.esm.js",
+      "require": "./dist/PanelGroup.cjs.js",
+      "default": "./dist/PanelGroup.esm.js"
+    },
+    "./PasswordField": {
+      "types": "./dist/components/PasswordField.d.ts",
+      "import": "./dist/PasswordField.esm.js",
+      "require": "./dist/PasswordField.cjs.js",
+      "default": "./dist/PasswordField.esm.js"
+    },
+    "./PinInput": {
+      "types": "./dist/components/PinInput.d.ts",
+      "import": "./dist/PinInput.esm.js",
+      "require": "./dist/PinInput.cjs.js",
+      "default": "./dist/PinInput.esm.js"
+    },
+    "./PluginPanel": {
+      "types": "./dist/components/PluginPanel.d.ts",
+      "import": "./dist/PluginPanel.esm.js",
+      "require": "./dist/PluginPanel.cjs.js",
+      "default": "./dist/PluginPanel.esm.js"
     },
     "./Popover": {
-      "types": "./dist/Popover.d.ts",
+      "types": "./dist/components/Popover.d.ts",
       "import": "./dist/Popover.esm.js",
       "require": "./dist/Popover.cjs.js",
       "default": "./dist/Popover.esm.js"
     },
+    "./Portal": {
+      "types": "./dist/components/Portal.d.ts",
+      "import": "./dist/Portal.esm.js",
+      "require": "./dist/Portal.cjs.js",
+      "default": "./dist/Portal.esm.js"
+    },
+    "./Positioner": {
+      "types": "./dist/components/Positioner.d.ts",
+      "import": "./dist/Positioner.esm.js",
+      "require": "./dist/Positioner.cjs.js",
+      "default": "./dist/Positioner.esm.js"
+    },
+    "./Presence": {
+      "types": "./dist/components/Presence.d.ts",
+      "import": "./dist/Presence.esm.js",
+      "require": "./dist/Presence.cjs.js",
+      "default": "./dist/Presence.esm.js"
+    },
+    "./Progress": {
+      "types": "./dist/components/Progress.d.ts",
+      "import": "./dist/Progress.esm.js",
+      "require": "./dist/Progress.cjs.js",
+      "default": "./dist/Progress.esm.js"
+    },
     "./QuickActions": {
-      "types": "./dist/QuickActions.d.ts",
+      "types": "./dist/components/QuickActions.d.ts",
       "import": "./dist/QuickActions.esm.js",
       "require": "./dist/QuickActions.cjs.js",
       "default": "./dist/QuickActions.esm.js"
     },
+    "./RadioGroup": {
+      "types": "./dist/components/RadioGroup.d.ts",
+      "import": "./dist/RadioGroup.esm.js",
+      "require": "./dist/RadioGroup.cjs.js",
+      "default": "./dist/RadioGroup.esm.js"
+    },
     "./Rating": {
-      "types": "./dist/Rating.d.ts",
+      "types": "./dist/components/Rating.d.ts",
       "import": "./dist/Rating.esm.js",
       "require": "./dist/Rating.cjs.js",
       "default": "./dist/Rating.esm.js"
     },
+    "./RovingFocusGroup": {
+      "types": "./dist/components/RovingFocusGroup.d.ts",
+      "import": "./dist/RovingFocusGroup.esm.js",
+      "require": "./dist/RovingFocusGroup.cjs.js",
+      "default": "./dist/RovingFocusGroup.esm.js"
+    },
+    "./ScrollArea": {
+      "types": "./dist/components/ScrollArea.d.ts",
+      "import": "./dist/ScrollArea.esm.js",
+      "require": "./dist/ScrollArea.cjs.js",
+      "default": "./dist/ScrollArea.esm.js"
+    },
+    "./Section": {
+      "types": "./dist/components/Section.d.ts",
+      "import": "./dist/Section.esm.js",
+      "require": "./dist/Section.cjs.js",
+      "default": "./dist/Section.esm.js"
+    },
     "./Select": {
-      "types": "./dist/Select.d.ts",
+      "types": "./dist/components/Select.d.ts",
       "import": "./dist/Select.esm.js",
       "require": "./dist/Select.cjs.js",
       "default": "./dist/Select.esm.js"
     },
     "./SelectionPopup": {
-      "types": "./dist/SelectionPopup.d.ts",
+      "types": "./dist/components/SelectionPopup.d.ts",
       "import": "./dist/SelectionPopup.esm.js",
       "require": "./dist/SelectionPopup.cjs.js",
       "default": "./dist/SelectionPopup.esm.js"
     },
+    "./Separator": {
+      "types": "./dist/components/Separator.d.ts",
+      "import": "./dist/Separator.esm.js",
+      "require": "./dist/Separator.cjs.js",
+      "default": "./dist/Separator.esm.js"
+    },
     "./Sidebar": {
-      "types": "./dist/Sidebar.d.ts",
+      "types": "./dist/components/Sidebar.d.ts",
       "import": "./dist/Sidebar.esm.js",
       "require": "./dist/Sidebar.cjs.js",
       "default": "./dist/Sidebar.esm.js"
     },
+    "./Skeleton": {
+      "types": "./dist/components/Skeleton.d.ts",
+      "import": "./dist/Skeleton.esm.js",
+      "require": "./dist/Skeleton.cjs.js",
+      "default": "./dist/Skeleton.esm.js"
+    },
+    "./Slider": {
+      "types": "./dist/components/Slider.d.ts",
+      "import": "./dist/Slider.esm.js",
+      "require": "./dist/Slider.cjs.js",
+      "default": "./dist/Slider.esm.js"
+    },
+    "./Slot": {
+      "types": "./dist/components/Slot.d.ts",
+      "import": "./dist/Slot.esm.js",
+      "require": "./dist/Slot.cjs.js",
+      "default": "./dist/Slot.esm.js"
+    },
+    "./SplitButton": {
+      "types": "./dist/components/SplitButton.d.ts",
+      "import": "./dist/SplitButton.esm.js",
+      "require": "./dist/SplitButton.cjs.js",
+      "default": "./dist/SplitButton.esm.js"
+    },
+    "./Stepper": {
+      "types": "./dist/components/Stepper.d.ts",
+      "import": "./dist/Stepper.esm.js",
+      "require": "./dist/Stepper.cjs.js",
+      "default": "./dist/Stepper.esm.js"
+    },
     "./Switch": {
-      "types": "./dist/Switch.d.ts",
+      "types": "./dist/components/Switch.d.ts",
       "import": "./dist/Switch.esm.js",
       "require": "./dist/Switch.cjs.js",
       "default": "./dist/Switch.esm.js"
     },
+    "./Table": {
+      "types": "./dist/components/Table.d.ts",
+      "import": "./dist/Table.esm.js",
+      "require": "./dist/Table.cjs.js",
+      "default": "./dist/Table.esm.js"
+    },
     "./Tabs": {
-      "types": "./dist/Tabs.d.ts",
+      "types": "./dist/components/Tabs.d.ts",
       "import": "./dist/Tabs.esm.js",
       "require": "./dist/Tabs.cjs.js",
       "default": "./dist/Tabs.esm.js"
     },
+    "./TagsInput": {
+      "types": "./dist/components/TagsInput.d.ts",
+      "import": "./dist/TagsInput.esm.js",
+      "require": "./dist/TagsInput.cjs.js",
+      "default": "./dist/TagsInput.esm.js"
+    },
     "./Textarea": {
-      "types": "./dist/Textarea.d.ts",
+      "types": "./dist/components/Textarea.d.ts",
       "import": "./dist/Textarea.esm.js",
       "require": "./dist/Textarea.cjs.js",
       "default": "./dist/Textarea.esm.js"
     },
+    "./ThemeProvider": {
+      "types": "./dist/components/ThemeProvider.d.ts",
+      "import": "./dist/ThemeProvider.esm.js",
+      "require": "./dist/ThemeProvider.cjs.js",
+      "default": "./dist/ThemeProvider.esm.js"
+    },
+    "./TimePicker": {
+      "types": "./dist/components/TimePicker.d.ts",
+      "import": "./dist/TimePicker.esm.js",
+      "require": "./dist/TimePicker.cjs.js",
+      "default": "./dist/TimePicker.esm.js"
+    },
+    "./Timeline": {
+      "types": "./dist/components/Timeline.d.ts",
+      "import": "./dist/Timeline.esm.js",
+      "require": "./dist/Timeline.cjs.js",
+      "default": "./dist/Timeline.esm.js"
+    },
+    "./Toast": {
+      "types": "./dist/components/Toast.d.ts",
+      "import": "./dist/Toast.esm.js",
+      "require": "./dist/Toast.cjs.js",
+      "default": "./dist/Toast.esm.js"
+    },
+    "./ToastAPI": {
+      "types": "./dist/components/ToastAPI.d.ts",
+      "import": "./dist/ToastAPI.esm.js",
+      "require": "./dist/ToastAPI.cjs.js",
+      "default": "./dist/ToastAPI.esm.js"
+    },
+    "./Toggle": {
+      "types": "./dist/components/Toggle.d.ts",
+      "import": "./dist/Toggle.esm.js",
+      "require": "./dist/Toggle.cjs.js",
+      "default": "./dist/Toggle.esm.js"
+    },
     "./ToggleGroup": {
-      "types": "./dist/ToggleGroup.d.ts",
+      "types": "./dist/components/ToggleGroup.d.ts",
       "import": "./dist/ToggleGroup.esm.js",
       "require": "./dist/ToggleGroup.cjs.js",
       "default": "./dist/ToggleGroup.esm.js"
     },
+    "./Toolbar": {
+      "types": "./dist/components/Toolbar.d.ts",
+      "import": "./dist/Toolbar.esm.js",
+      "require": "./dist/Toolbar.cjs.js",
+      "default": "./dist/Toolbar.esm.js"
+    },
+    "./Tooltip": {
+      "types": "./dist/components/Tooltip.d.ts",
+      "import": "./dist/Tooltip.esm.js",
+      "require": "./dist/Tooltip.cjs.js",
+      "default": "./dist/Tooltip.esm.js"
+    },
+    "./TransferList": {
+      "types": "./dist/components/TransferList.d.ts",
+      "import": "./dist/TransferList.esm.js",
+      "require": "./dist/TransferList.cjs.js",
+      "default": "./dist/TransferList.esm.js"
+    },
     "./Tree": {
-      "types": "./dist/Tree.d.ts",
+      "types": "./dist/components/Tree.d.ts",
       "import": "./dist/Tree.esm.js",
       "require": "./dist/Tree.cjs.js",
       "default": "./dist/Tree.esm.js"
     },
+    "./VisuallyHidden": {
+      "types": "./dist/components/VisuallyHidden.d.ts",
+      "import": "./dist/VisuallyHidden.esm.js",
+      "require": "./dist/VisuallyHidden.cjs.js",
+      "default": "./dist/VisuallyHidden.esm.js"
+    },
     "./Wizard": {
-      "types": "./dist/Wizard.d.ts",
+      "types": "./dist/components/Wizard.d.ts",
       "import": "./dist/Wizard.esm.js",
       "require": "./dist/Wizard.cjs.js",
       "default": "./dist/Wizard.esm.js"
