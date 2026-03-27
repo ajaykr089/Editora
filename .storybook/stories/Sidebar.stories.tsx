@@ -17,6 +17,18 @@ import {
 } from '@editora/react-icons';
 import { Box, Button, Flex, Grid, Sidebar, ThemeProvider, type SidebarItemInput } from '@editora/ui-react';
 
+const sidebarMetaTextStyle: React.CSSProperties = {
+  fontSize: 'var(--ui-font-size-sm, 12px)',
+  color: 'var(--ui-color-muted, #64748b)'
+};
+
+const sidebarKickerStyle: React.CSSProperties = {
+  fontSize: 'var(--ui-font-size-sm, 12px)',
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  color: 'var(--ui-color-muted, #64748b)'
+};
+
 export default {
   title: 'UI/Sidebar',
   component: Sidebar,
@@ -113,15 +125,15 @@ function PremiumPromoCard() {
         padding: 22,
         borderRadius: 20,
         background: 'linear-gradient(140deg, rgba(16, 96, 226, 0.96), rgba(98, 154, 255, 0.42))',
-        color: '#ffffff',
+        color: 'var(--ui-color-foreground-on-primary, #ffffff)',
         display: 'grid',
         gap: 18,
         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18)'
       }}
     >
       <div style={{ display: 'grid', gap: 10 }}>
-        <div style={{ fontSize: 18, lineHeight: '1.25', fontWeight: 800 }}>Upgrade to Premium</div>
-        <div style={{ fontSize: 14, lineHeight: '1.55', color: 'rgba(255,255,255,0.82)' }}>
+        <div style={{ fontSize: 'var(--ui-font-size-lg, 18px)', lineHeight: '1.25', fontWeight: 800 }}>Upgrade to Premium</div>
+        <div style={{ fontSize: 'var(--ui-font-size-md, 14px)', lineHeight: '1.55', color: 'color-mix(in srgb, var(--ui-color-foreground-on-primary, #ffffff) 82%, transparent)' }}>
           Unlock unlimited reading and offline access across your whole library.
         </div>
       </div>
@@ -136,7 +148,7 @@ function PremiumSidebarStructure({ value }: { value: string }) {
   return (
     <>
       <Sidebar.Header>
-        <Flex align="center" gap="12px" style={{ color: '#ffffff', fontWeight: 900, fontSize: 21 }}>
+        <Flex align="center" gap="12px" style={{ color: 'var(--ui-color-foreground-on-primary, #ffffff)', fontWeight: 900, fontSize: 'var(--ui-font-size-xl, 20px)' }}>
           <span
             style={{
               display: 'inline-grid',
@@ -185,7 +197,7 @@ function PremiumSidebarStructure({ value }: { value: string }) {
         <PremiumPromoCard />
       </Sidebar.Promo>
       <Sidebar.Footer>
-        <div style={{ color: 'rgba(255,255,255,0.72)' }}>Signed in as premium@publify.app</div>
+        <div style={{ color: 'color-mix(in srgb, var(--ui-color-foreground-on-primary, #ffffff) 72%, transparent)' }}>Signed in as premium@publify.app</div>
       </Sidebar.Footer>
     </>
   );
@@ -223,11 +235,11 @@ export const PremiumReadingShell = (args: any) => {
               background: 'linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))',
               boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
               padding: 26,
-              color: '#f7fbff',
+              color: 'color-mix(in srgb, var(--ui-color-foreground-on-primary, #ffffff) 92%, var(--ui-color-text, #0f172a))',
             }}
           >
             <div style={{ display: 'grid', gap: 12, maxWidth: 720 }}>
-              <div style={{ fontSize: 14, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.54)' }}>
+              <div style={{ fontSize: 'var(--ui-font-size-sm, 12px)', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'color-mix(in srgb, var(--ui-color-foreground-on-primary, #ffffff) 54%, transparent)' }}>
                 Reading dashboard
               </div>
               <div style={{ fontSize: 40, lineHeight: 1.05, fontWeight: 900 }}>
@@ -274,9 +286,9 @@ export const OperationsWorkspace = () => {
         variant="surface"
       >
         <Sidebar.Header>
-          <Flex align="center" justify="space-between" style={{ fontWeight: 800, fontSize: 18 }}>
+          <Flex align="center" justify="space-between" style={{ fontWeight: 800, fontSize: 'var(--ui-font-size-lg, 18px)' }}>
             <span>Operations Hub</span>
-            <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>24/7</Box>
+            <Box style={sidebarMetaTextStyle}>24/7</Box>
           </Flex>
         </Sidebar.Header>
         <Sidebar.SearchInput
@@ -289,7 +301,7 @@ export const OperationsWorkspace = () => {
               borderRadius: 18,
               padding: 18,
               background: 'linear-gradient(140deg, color-mix(in srgb, var(--ui-color-primary) 92%, #1d4ed8 8%), color-mix(in srgb, var(--ui-color-primary) 22%, #ffffff 78%))',
-              color: '#ffffff',
+              color: 'var(--ui-color-foreground-on-primary, #ffffff)',
               display: 'grid',
               gap: 12
             }}
@@ -305,7 +317,7 @@ export const OperationsWorkspace = () => {
 
       <Box p="24px" style={{ background: 'var(--ui-color-surface-alt, #f8fafc)' }}>
         <div style={{ display: 'grid', gap: 10, maxWidth: 760 }}>
-          <div style={{ fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ui-color-muted, #64748b)' }}>
+          <div style={sidebarKickerStyle}>
             Selected module
           </div>
           <div style={{ fontSize: 34, lineHeight: 1.08, fontWeight: 900 }}>{value}</div>
@@ -368,9 +380,9 @@ export const NavigationLinksAndCustomContent = () => {
         sectionLabelTransform="none"
       >
         <Sidebar.Header>
-          <Flex align="center" justify="space-between" style={{ fontWeight: 800, fontSize: 18 }}>
+          <Flex align="center" justify="space-between" style={{ fontWeight: 800, fontSize: 'var(--ui-font-size-lg, 18px)' }}>
             <span>Product docs</span>
-            <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>v4.2</Box>
+            <Box style={sidebarMetaTextStyle}>v4.2</Box>
           </Flex>
         </Sidebar.Header>
         <Sidebar.Content>
@@ -398,7 +410,7 @@ export const NavigationLinksAndCustomContent = () => {
       </Sidebar>
 
       <Box p="28px" style={{ display: 'grid', gap: 14, alignContent: 'start' }}>
-        <div style={{ fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ui-color-muted, #64748b)' }}>
+        <div style={sidebarKickerStyle}>
           Current selection
         </div>
         <div style={{ fontSize: 34, lineHeight: 1.05, fontWeight: 900 }}>{value}</div>
@@ -415,7 +427,7 @@ export const NavigationLinksAndCustomContent = () => {
         >
           <div style={{ fontWeight: 800, marginBottom: 8 }}>API example</div>
           <pre
-            style={{ margin: 0, whiteSpace: 'pre-wrap', fontSize: 13, lineHeight: 1.55, color: 'var(--ui-color-text, #202020)' }}
+            style={{ margin: 0, whiteSpace: 'pre-wrap', fontSize: 'var(--ui-font-size-sm, 12px)', lineHeight: 1.55, color: 'var(--ui-color-text, #202020)' }}
           >{`<Sidebar.Item value="guides" href="#guides">
   <BookIcon />
   <span>Guides</span>
@@ -455,7 +467,7 @@ export const SectionLabelTransformGallery = () => (
           <Sidebar.Header>
             <Flex align="center" justify="space-between" style={{ fontWeight: 800 }}>
               <span>Sidebar labels</span>
-              <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>{example.transform}</Box>
+              <Box style={sidebarMetaTextStyle}>{example.transform}</Box>
             </Flex>
           </Sidebar.Header>
           <Sidebar.Content>
@@ -498,9 +510,9 @@ export const SubmenuMotionAndCustomIcons = () => {
         sectionLabelTransform="capitalize"
       >
         <Sidebar.Header>
-          <Flex align="center" justify="space-between" style={{ fontWeight: 800, fontSize: 18 }}>
+          <Flex align="center" justify="space-between" style={{ fontWeight: 800, fontSize: 'var(--ui-font-size-lg, 18px)' }}>
             <span>Docs navigation</span>
-            <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>animated</Box>
+            <Box style={sidebarMetaTextStyle}>animated</Box>
           </Flex>
         </Sidebar.Header>
         <Sidebar.Content>
@@ -532,7 +544,7 @@ export const SubmenuMotionAndCustomIcons = () => {
       </Sidebar>
 
       <Box p="28px" style={{ display: 'grid', gap: 16, alignContent: 'start' }}>
-        <div style={{ fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ui-color-muted, #64748b)' }}>
+        <div style={sidebarKickerStyle}>
           Demo focus
         </div>
         <div style={{ fontSize: 34, lineHeight: 1.05, fontWeight: 900 }}>Animated submenus and icon-as-child rows</div>

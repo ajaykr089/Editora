@@ -1,3 +1,8 @@
+'use client';
+import { primeUICoreRegistration } from './core-registration';
+
+primeUICoreRegistration();
+
 export { Button } from './components/Button';
 export { Tooltip } from './components/Tooltip';
 export { Alert, AlertIcon, AlertTitle, AlertDescription, AlertActions } from './components/Alert';
@@ -292,5 +297,3 @@ export {
   type AnimatedNumberDirection,
   type AnimatedNumberCompleteEvent,
 } from './components/AnimatedNumber';
-// Ensure all web components are registered when this package is imported
-import '@editora/ui-core';

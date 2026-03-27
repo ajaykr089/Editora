@@ -1,6 +1,14 @@
-import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncJsonAttribute,
+  syncNumberAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 type SliderValueDetail = {
   value: number;
@@ -77,95 +85,53 @@ export const Slider = React.forwardRef<HTMLElement, SliderProps>(function Slider
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const handleInput = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<SliderValueDetail>(event);
+    if (!detail) return;
+    onInput?.(Number(detail.value));
+    onValueChange?.(detail);
+  }, [onInput, onValueChange]);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const handleChange = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<SliderValueDetail>(event);
+    if (!detail) return;
+    onChange?.(Number(detail.value));
+    onValueChange?.(detail);
+  }, [onChange, onValueChange]);
 
-    const handleInput = (event: Event) => {
-      const detail = (event as CustomEvent<SliderValueDetail>).detail;
-      if (!detail) return;
-      onInput?.(Number(detail.value));
-      onValueChange?.(detail);
-    };
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'input', listener: handleInput },
+      { type: 'change', listener: handleChange },
+    ],
+    [handleInput, handleChange]
+  );
 
-    const handleChange = (event: Event) => {
-      const detail = (event as CustomEvent<SliderValueDetail>).detail;
-      if (!detail) return;
-      onChange?.(Number(detail.value));
-      onValueChange?.(detail);
-    };
-
-    el.addEventListener('input', handleInput as EventListener);
-    el.addEventListener('change', handleChange as EventListener);
-
-    return () => {
-      el.removeEventListener('input', handleInput as EventListener);
-      el.removeEventListener('change', handleChange as EventListener);
-    };
-  }, [onInput, onChange, onValueChange]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const syncAttr = (name: string, next: string | null) => {
-      const current = el.getAttribute(name);
-      if (next == null) {
-        if (current != null) el.removeAttribute(name);
-        return;
-      }
-      if (current !== next) el.setAttribute(name, next);
-    };
-
-    const syncBool = (name: string, enabled: boolean | undefined, defaultValue?: boolean) => {
-      if (enabled == null) {
-        if (defaultValue !== undefined && defaultValue === false) syncAttr(name, null);
-        return;
-      }
-      if (enabled) syncAttr(name, '');
-      else syncAttr(name, null);
-    };
-
-    syncAttr('value', typeof value === 'number' && Number.isFinite(value) ? String(value) : null);
-    syncAttr('value-start', typeof valueStart === 'number' && Number.isFinite(valueStart) ? String(valueStart) : null);
-    syncAttr('value-end', typeof valueEnd === 'number' && Number.isFinite(valueEnd) ? String(valueEnd) : null);
-
-    syncAttr('min', typeof min === 'number' && Number.isFinite(min) ? String(min) : null);
-    syncAttr('max', typeof max === 'number' && Number.isFinite(max) ? String(max) : null);
-    syncAttr('step', typeof step === 'number' && Number.isFinite(step) ? String(step) : null);
-
-    syncBool('range', range);
-    syncBool('disabled', disabled);
-    syncBool('headless', headless);
-
-    syncAttr('orientation', orientation && orientation !== 'horizontal' ? orientation : null);
-    syncAttr('size', size && size !== 'md' ? size : null);
-    syncAttr('variant', variant && variant !== 'default' ? variant : null);
-    syncAttr('tone', tone && tone !== 'brand' ? tone : null);
-
-    if (typeof showValue === 'boolean') syncAttr('show-value', showValue ? 'true' : 'false');
-    else syncAttr('show-value', null);
-
-    syncAttr('format', format ? format : null);
-    syncAttr('label', label ? label : null);
-    syncAttr('description', description ? description : null);
-    syncAttr('name', name ? name : null);
-    syncAttr('name-start', nameStart ? nameStart : null);
-    syncAttr('name-end', nameEnd ? nameEnd : null);
-
-    if (marks && marks.length) {
-      try {
-        syncAttr('marks', JSON.stringify(marks));
-      } catch {
-        syncAttr('marks', null);
-      }
-    } else {
-      syncAttr('marks', null);
-    }
+  useElementAttributes(ref, (el) => {
+    syncNumberAttribute(el, 'value', typeof value === 'number' && Number.isFinite(value) ? value : undefined);
+    syncNumberAttribute(el, 'value-start', typeof valueStart === 'number' && Number.isFinite(valueStart) ? valueStart : undefined);
+    syncNumberAttribute(el, 'value-end', typeof valueEnd === 'number' && Number.isFinite(valueEnd) ? valueEnd : undefined);
+    syncNumberAttribute(el, 'min', typeof min === 'number' && Number.isFinite(min) ? min : undefined);
+    syncNumberAttribute(el, 'max', typeof max === 'number' && Number.isFinite(max) ? max : undefined);
+    syncNumberAttribute(el, 'step', typeof step === 'number' && Number.isFinite(step) ? step : undefined);
+    syncBooleanAttribute(el, 'range', range);
+    syncBooleanAttribute(el, 'disabled', disabled);
+    syncBooleanAttribute(el, 'headless', headless);
+    syncStringAttribute(el, 'orientation', orientation && orientation !== 'horizontal' ? orientation : null);
+    syncStringAttribute(el, 'size', size && size !== 'md' ? size : null);
+    syncStringAttribute(el, 'variant', variant && variant !== 'default' ? variant : null);
+    syncStringAttribute(el, 'tone', tone && tone !== 'brand' ? tone : null);
+    syncStringAttribute(el, 'show-value', typeof showValue === 'boolean' ? (showValue ? 'true' : 'false') : null);
+    syncStringAttribute(el, 'format', format ? format : null);
+    syncStringAttribute(el, 'label', label ? label : null);
+    syncStringAttribute(el, 'description', description ? description : null);
+    syncStringAttribute(el, 'name', name ? name : null);
+    syncStringAttribute(el, 'name-start', nameStart ? nameStart : null);
+    syncStringAttribute(el, 'name-end', nameEnd ? nameEnd : null);
+    syncJsonAttribute(el, 'marks', marks?.length ? marks : null);
   }, [
     value,
     valueStart,

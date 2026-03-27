@@ -1,6 +1,13 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncNumberAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 type ProgressProps = React.HTMLAttributes<HTMLElement> & {
   value?: number | string;
@@ -55,68 +62,51 @@ export const Progress = React.forwardRef<HTMLElement, ProgressProps>(function Pr
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
-  React.useImperativeHandle(forwardedRef, () => ref.current as any);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const changeHandler = (event: Event) => {
-      const detail = (event as CustomEvent<any>).detail;
-      if (detail) onValueChange?.(detail);
-    };
-    const completeHandler = (event: Event) => {
-      const detail = (event as CustomEvent<{ value: number; max: number }>).detail;
-      if (detail) onComplete?.(detail);
-    };
-    el.addEventListener('change', changeHandler as EventListener);
-    el.addEventListener('complete', completeHandler as EventListener);
-    return () => {
-      el.removeEventListener('change', changeHandler as EventListener);
-      el.removeEventListener('complete', completeHandler as EventListener);
-    };
-  }, [onValueChange, onComplete]);
+  const changeHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{
+      value: number;
+      buffer: number;
+      max: number;
+      min: number;
+      percent: number;
+      bufferPercent: number;
+    }>(event);
+    if (detail) onValueChange?.(detail);
+  }, [onValueChange]);
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const completeHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ value: number; max: number }>(event);
+    if (detail) onComplete?.(detail);
+  }, [onComplete]);
 
-    const syncAttr = (name: string, next: string | null) => {
-      const current = el.getAttribute(name);
-      if (next == null) {
-        if (current != null) el.removeAttribute(name);
-        return;
-      }
-      if (current !== next) el.setAttribute(name, next);
-    };
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'change', listener: changeHandler },
+      { type: 'complete', listener: completeHandler },
+    ],
+    [changeHandler, completeHandler]
+  );
 
-    const syncBooleanAttr = (name: string, enabled: boolean | undefined) => {
-      if (enabled) {
-        if (!el.hasAttribute(name)) el.setAttribute(name, '');
-      } else if (el.hasAttribute(name)) {
-        el.removeAttribute(name);
-      }
-    };
-
-    syncAttr('value', value != null ? String(value) : null);
-    syncAttr('buffer', buffer != null ? String(buffer) : null);
-    syncAttr('max', max != null ? String(max) : null);
-    syncAttr('min', min != null ? String(min) : null);
-
-    syncBooleanAttr('indeterminate', indeterminate);
-    syncBooleanAttr('striped', striped);
-    syncBooleanAttr('animated', animated);
-    syncBooleanAttr('show-label', showLabel);
-
-    syncAttr('label', label != null && label !== '' ? label : null);
-    syncAttr('format', format != null && format !== 'percent' ? format : null);
-    syncAttr('precision', precision != null ? String(precision) : null);
-
-    syncAttr('size', size && size !== 'md' ? size : null);
-    syncAttr('variant', variant && variant !== 'default' ? variant : null);
-    syncAttr('tone', tone && tone !== 'brand' ? tone : null);
-    syncAttr('shape', shape && shape !== 'pill' ? shape : null);
-    syncAttr('mode', mode && mode !== 'line' ? mode : null);
+  useElementAttributes(ref, (el) => {
+    syncStringAttribute(el, 'value', value != null ? String(value) : null);
+    syncStringAttribute(el, 'buffer', buffer != null ? String(buffer) : null);
+    syncStringAttribute(el, 'max', max != null ? String(max) : null);
+    syncStringAttribute(el, 'min', min != null ? String(min) : null);
+    syncBooleanAttribute(el, 'indeterminate', indeterminate);
+    syncBooleanAttribute(el, 'striped', striped);
+    syncBooleanAttribute(el, 'animated', animated);
+    syncBooleanAttribute(el, 'show-label', showLabel);
+    syncStringAttribute(el, 'label', label != null && label !== '' ? label : null);
+    syncStringAttribute(el, 'format', format != null && format !== 'percent' ? format : null);
+    syncNumberAttribute(el, 'precision', typeof precision === 'number' ? precision : undefined);
+    syncStringAttribute(el, 'size', size && size !== 'md' ? size : null);
+    syncStringAttribute(el, 'variant', variant && variant !== 'default' ? variant : null);
+    syncStringAttribute(el, 'tone', tone && tone !== 'brand' ? tone : null);
+    syncStringAttribute(el, 'shape', shape && shape !== 'pill' ? shape : null);
+    syncStringAttribute(el, 'mode', mode && mode !== 'line' ? mode : null);
   }, [value, buffer, max, min, indeterminate, striped, animated, showLabel, label, format, precision, size, variant, tone, shape, mode]);
 
   return React.createElement('ui-progress', { ref, ...rest }, children);

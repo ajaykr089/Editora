@@ -1,7 +1,14 @@
-import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
-import { serializeTranslations } from './_internals';
+import React from 'react';
+import {
+  getCustomEventDetail,
+  serializeTranslations,
+  syncBooleanAttribute,
+  syncNumberAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 export type TimePickerDetail = {
   mode: 'time';
@@ -77,83 +84,64 @@ export const TimePicker = React.forwardRef<HTMLElement, TimePickerProps>(functio
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const handleInput = (event: Event) => {
-      const detail = (event as CustomEvent<TimePickerDetail>).detail;
-      if (!detail) return;
-      onInput?.(detail);
-    };
-    const handleChange = (event: Event) => {
-      const detail = (event as CustomEvent<TimePickerDetail>).detail;
-      if (!detail) return;
-      onChange?.(detail);
-      onValueChange?.(detail.value);
-    };
-    const handleInvalid = (event: Event) => {
-      const detail = (event as CustomEvent<{ raw: string; reason: string }>).detail;
-      if (!detail) return;
-      onInvalid?.(detail);
-    };
+  const handleInput = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<TimePickerDetail>(event);
+    if (!detail) return;
+    onInput?.(detail);
+  }, [onInput]);
 
-    el.addEventListener('input', handleInput as EventListener);
-    el.addEventListener('change', handleChange as EventListener);
-    el.addEventListener('open', onOpen as EventListener);
-    el.addEventListener('close', onClose as EventListener);
-    el.addEventListener('invalid', handleInvalid as EventListener);
-    return () => {
-      el.removeEventListener('input', handleInput as EventListener);
-      el.removeEventListener('change', handleChange as EventListener);
-      el.removeEventListener('open', onOpen as EventListener);
-      el.removeEventListener('close', onClose as EventListener);
-      el.removeEventListener('invalid', handleInvalid as EventListener);
-    };
-  }, [onInput, onChange, onValueChange, onOpen, onClose, onInvalid]);
+  const handleChange = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<TimePickerDetail>(event);
+    if (!detail) return;
+    onChange?.(detail);
+    onValueChange?.(detail.value);
+  }, [onChange, onValueChange]);
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const syncAttr = (name: string, next: string | null) => {
-      const current = el.getAttribute(name);
-      if (next == null) {
-        if (current != null) el.removeAttribute(name);
-      } else if (current !== next) {
-        el.setAttribute(name, next);
-      }
-    };
-    const syncBool = (name: string, next: boolean | undefined) => {
-      if (next) syncAttr(name, '');
-      else syncAttr(name, null);
-    };
+  const handleInvalid = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ raw: string; reason: string }>(event);
+    if (!detail) return;
+    onInvalid?.(detail);
+  }, [onInvalid]);
 
-    syncAttr('value', value ?? null);
-    syncAttr('default-value', defaultValue ?? null);
-    if (typeof open === 'boolean') syncBool('open', open);
-    else syncAttr('open', null);
-    syncBool('default-open', defaultOpen);
-    syncAttr('format', format && format !== '24h' ? format : null);
-    syncAttr('step', typeof step === 'number' ? String(step) : null);
-    syncBool('seconds', seconds);
-    syncAttr('step-seconds', typeof stepSeconds === 'number' ? String(stepSeconds) : null);
-    syncAttr('min', min ?? null);
-    syncAttr('max', max ?? null);
-    syncBool('disabled', disabled);
-    syncBool('readonly', readOnly);
-    syncBool('required', required);
-    syncAttr('name', name ?? null);
-    syncBool('clearable', clearable);
-    syncBool('allow-input', allowInput);
-    syncAttr('mode', mode && mode !== 'popover' ? mode : null);
-    syncAttr('label', label ?? null);
-    syncAttr('hint', hint ?? null);
-    syncAttr('error', error ?? null);
-    syncAttr('locale', locale ?? null);
-    syncAttr('translations', serializeTranslations(translations));
-    syncAttr('variant', variant && variant !== 'default' ? variant : null);
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'input', listener: handleInput },
+      { type: 'change', listener: handleChange },
+      { type: 'open', listener: onOpen as EventListener | undefined },
+      { type: 'close', listener: onClose as EventListener | undefined },
+      { type: 'invalid', listener: handleInvalid },
+    ],
+    [handleInput, handleChange, onOpen, onClose, handleInvalid]
+  );
+
+  useElementAttributes(ref, (el) => {
+    syncStringAttribute(el, 'value', value ?? null);
+    syncStringAttribute(el, 'default-value', defaultValue ?? null);
+    if (typeof open === 'boolean') syncBooleanAttribute(el, 'open', open);
+    else syncStringAttribute(el, 'open', null);
+    syncBooleanAttribute(el, 'default-open', defaultOpen);
+    syncStringAttribute(el, 'format', format && format !== '24h' ? format : null);
+    syncNumberAttribute(el, 'step', step);
+    syncBooleanAttribute(el, 'seconds', seconds);
+    syncNumberAttribute(el, 'step-seconds', stepSeconds);
+    syncStringAttribute(el, 'min', min ?? null);
+    syncStringAttribute(el, 'max', max ?? null);
+    syncBooleanAttribute(el, 'disabled', disabled);
+    syncBooleanAttribute(el, 'readonly', readOnly);
+    syncBooleanAttribute(el, 'required', required);
+    syncStringAttribute(el, 'name', name ?? null);
+    syncBooleanAttribute(el, 'clearable', clearable);
+    syncBooleanAttribute(el, 'allow-input', allowInput);
+    syncStringAttribute(el, 'mode', mode && mode !== 'popover' ? mode : null);
+    syncStringAttribute(el, 'label', label ?? null);
+    syncStringAttribute(el, 'hint', hint ?? null);
+    syncStringAttribute(el, 'error', error ?? null);
+    syncStringAttribute(el, 'locale', locale ?? null);
+    syncStringAttribute(el, 'translations', serializeTranslations(translations));
+    syncStringAttribute(el, 'variant', variant && variant !== 'default' ? variant : null);
   }, [
     value,
     defaultValue,

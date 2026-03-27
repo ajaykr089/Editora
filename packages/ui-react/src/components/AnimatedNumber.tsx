@@ -1,7 +1,13 @@
-import React, { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
-import { warnIfElementNotRegistered } from './_internals';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  syncBooleanAttribute,
+  syncNumberAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+  warnIfElementNotRegistered,
+} from './_internals';
 
 export type AnimatedNumberAnimation = 'ease' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'linear' | 'spring';
 export type AnimatedNumberVariant = 'odometer' | 'inline' | 'digital' | 'analog';
@@ -41,33 +47,6 @@ export type AnimatedNumberProps = Omit<React.HTMLAttributes<HTMLElement>, 'child
   label?: string;
 };
 
-function syncStringAttribute(el: HTMLElement, name: string, value: string | null) {
-  const current = el.getAttribute(name);
-  if (value == null || value === '') {
-    if (current != null) el.removeAttribute(name);
-    return;
-  }
-
-  if (current !== value) {
-    el.setAttribute(name, value);
-  }
-}
-
-function syncNumberAttribute(el: HTMLElement, name: string, value: number | undefined) {
-  syncStringAttribute(el, name, value == null ? null : String(value));
-}
-
-function syncBooleanAttribute(el: HTMLElement, name: string, value: boolean | undefined) {
-  if (value) {
-    if (!el.hasAttribute(name)) el.setAttribute(name, '');
-    return;
-  }
-
-  if (el.hasAttribute(name)) {
-    el.removeAttribute(name);
-  }
-}
-
 export const AnimatedNumber = React.forwardRef<HTMLElement, AnimatedNumberProps>(function AnimatedNumber(
   {
     value = 0,
@@ -102,33 +81,22 @@ export const AnimatedNumber = React.forwardRef<HTMLElement, AnimatedNumberProps>
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
   const resolvedAnimateOnMount = animateOnMount ?? countUp;
   const resolvedMinimumFractionDigits = minimumFractionDigits ?? fractionDigits ?? decimals;
   const resolvedMaximumFractionDigits = maximumFractionDigits ?? fractionDigits ?? decimals;
-
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
   useEffect(() => {
     warnIfElementNotRegistered('ui-odometer', 'AnimatedNumber');
   }, []);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !onComplete) return;
-
-    const handler = (event: Event) => {
-      onComplete(event as AnimatedNumberCompleteEvent);
-    };
-
-    el.addEventListener('complete', handler);
-    return () => el.removeEventListener('complete', handler);
+  const handleComplete = React.useCallback((event: Event) => {
+    onComplete?.(event as AnimatedNumberCompleteEvent);
   }, [onComplete]);
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  useElementEventListeners(ref, [{ type: 'complete', listener: handleComplete }], [handleComplete]);
 
+  useElementAttributes(ref, (el) => {
     syncNumberAttribute(el, 'value', value);
     syncNumberAttribute(el, 'duration', duration);
     syncNumberAttribute(el, 'min', min);

@@ -71,6 +71,7 @@ export class UIPortal extends ElementBase {
   private _syncing = false;
   private _guardTimer: number | null = null;
   private _targetObserver: MutationObserver | null = null;
+  private _pendingSlotSync = false;
 
   constructor() {
     super();
@@ -170,6 +171,10 @@ export class UIPortal extends ElementBase {
     this._guardTimer = window.setTimeout(() => {
       this._syncing = false;
       this._guardTimer = null;
+      if (this._pendingSlotSync) {
+        this._pendingSlotSync = false;
+        this._mountAllFromSlot();
+      }
     }, 0);
   }
 
@@ -258,7 +263,11 @@ export class UIPortal extends ElementBase {
   }
 
   private _onSlotChange(): void {
-    if (this._syncing || this._headless) return;
+    if (this._headless) return;
+    if (this._syncing) {
+      this._pendingSlotSync = true;
+      return;
+    }
     this._pruneDetachedEntries();
     this._mountAllFromSlot();
   }

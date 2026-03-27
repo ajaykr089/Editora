@@ -1,6 +1,13 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncJsonAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 type RadioOption = {
   value: string;
@@ -44,56 +51,30 @@ export const RadioGroup = React.forwardRef<HTMLElement, RadioGroupProps>(functio
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
-  React.useImperativeHandle(forwardedRef, () => ref.current as any);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const handler = (event: Event) => {
-      const detail = (event as CustomEvent<any>).detail;
-      if (detail) onValueChange?.(detail);
-    };
-    el.addEventListener('change', handler as EventListener);
-    return () => el.removeEventListener('change', handler as EventListener);
+  const handler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{
+      value: string;
+      option?: RadioOption;
+      reason?: 'click' | 'keyboard';
+      name?: string;
+    }>(event);
+    if (detail) onValueChange?.(detail);
   }, [onValueChange]);
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  useElementEventListeners(ref, [{ type: 'change', listener: handler }], [handler]);
 
-    const syncAttr = (key: string, next: string | null) => {
-      const current = el.getAttribute(key);
-      if (next == null) {
-        if (current != null) el.removeAttribute(key);
-        return;
-      }
-      if (current !== next) el.setAttribute(key, next);
-    };
-
-    const syncBool = (key: string, enabled: boolean | undefined) => {
-      if (enabled) {
-        if (!el.hasAttribute(key)) el.setAttribute(key, '');
-      } else if (el.hasAttribute(key)) {
-        el.removeAttribute(key);
-      }
-    };
-
-    syncAttr('value', value != null ? value : null);
-    syncBool('disabled', disabled);
-    syncBool('required', required);
-    syncAttr('name', name || null);
-
-    syncAttr('orientation', orientation && orientation !== 'vertical' ? orientation : null);
-    syncAttr('variant', variant && variant !== 'default' ? variant : null);
-    syncAttr('size', size && size !== 'md' ? size : null);
-    syncAttr('tone', tone && tone !== 'brand' ? tone : null);
-
-    if (options && options.length) {
-      syncAttr('options', JSON.stringify(options));
-    } else {
-      syncAttr('options', null);
-    }
+  useElementAttributes(ref, (el) => {
+    syncStringAttribute(el, 'value', value != null ? value : null);
+    syncBooleanAttribute(el, 'disabled', disabled);
+    syncBooleanAttribute(el, 'required', required);
+    syncStringAttribute(el, 'name', name || null);
+    syncStringAttribute(el, 'orientation', orientation && orientation !== 'vertical' ? orientation : null);
+    syncStringAttribute(el, 'variant', variant && variant !== 'default' ? variant : null);
+    syncStringAttribute(el, 'size', size && size !== 'md' ? size : null);
+    syncStringAttribute(el, 'tone', tone && tone !== 'brand' ? tone : null);
+    syncJsonAttribute(el, 'options', options?.length ? options : null);
   }, [value, disabled, required, name, orientation, variant, size, tone, options]);
 
   return React.createElement('ui-radio-group', { ref, ...rest }, children);

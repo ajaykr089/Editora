@@ -756,11 +756,11 @@ export class UIDrawer extends ElementBase {
       if (!result.includes(node)) result.push(node);
     };
 
+    this.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR).forEach(add);
+
     if (panel) {
       panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR).forEach(add);
     }
-
-    this.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR).forEach(add);
 
     return result;
   }
@@ -851,7 +851,8 @@ export class UIDrawer extends ElementBase {
         // no-op
       }
 
-      queueMicrotask(() => this._focusInitial());
+      this._focusInitial();
+      queueMicrotask(() => this._ensureFocusTrap());
 
       this.dispatchEvent(new CustomEvent('open', { bubbles: true, composed: true }));
       this.dispatchEvent(new CustomEvent('show', { bubbles: true, composed: true }));
@@ -897,13 +898,11 @@ export class UIDrawer extends ElementBase {
     this._closeReason = 'programmatic';
 
     if (restoreTarget && this._canRestoreFocus(restoreTarget)) {
-      setTimeout(() => {
-        try {
-          if (this._canRestoreFocus(restoreTarget)) restoreTarget.focus();
-        } catch {
-          // no-op
-        }
-      }, 0);
+      try {
+        if (this._canRestoreFocus(restoreTarget)) restoreTarget.focus();
+      } catch {
+        // no-op
+      }
     }
   }
 

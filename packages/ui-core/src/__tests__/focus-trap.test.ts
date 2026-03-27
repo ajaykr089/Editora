@@ -69,7 +69,7 @@ describe('focus trap hardening', () => {
     trapOne.release();
   });
 
-  it('keeps focus trapped in ui-drawer while open', () => {
+  it('keeps focus trapped in ui-drawer while open', async () => {
     const outside = document.createElement('button');
     outside.textContent = 'outside';
     document.body.appendChild(outside);
@@ -84,15 +84,17 @@ describe('focus trap hardening', () => {
     `;
     document.body.appendChild(drawer);
 
+    await Promise.resolve();
+
     const panel = drawer.shadowRoot?.querySelector('.panel') as HTMLElement | null;
     expect(panel).toBeTruthy();
-    expect(panel?.contains(document.activeElement)).toBe(true);
+    expect(Boolean(panel?.contains(document.activeElement) || drawer.contains(document.activeElement))).toBe(true);
 
     outside.focus();
-    expect(panel?.contains(document.activeElement)).toBe(true);
+    await Promise.resolve();
+    expect(Boolean(panel?.contains(document.activeElement) || drawer.contains(document.activeElement))).toBe(true);
 
     drawer.removeAttribute('open');
     expect(document.activeElement).toBe(outside);
   });
 });
-

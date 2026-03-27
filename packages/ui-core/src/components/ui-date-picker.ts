@@ -704,6 +704,7 @@ export class UIDatePicker extends ElementBase {
       this._pendingValue = this._value;
       this._draftInput = this._formatDisplay(this._value);
       this._inlineError = '';
+      this._syncValueAttribute(this._value);
     }
 
     if (name === 'open' && !this._syncing) {
@@ -1082,7 +1083,6 @@ export class UIDatePicker extends ElementBase {
     syncAttr('events-max', this.getAttribute('events-max'));
     syncAttr('events-display', this.getAttribute('events-display'));
     const isInlineCalendar = calendarEl.classList.contains('inline-calendar');
-    console.log("isInlineCalendar", isInlineCalendar);
     if (effectiveSize === 'lg') {
       calendarEl.style.setProperty('--ui-calendar-day-height', '1.95em');
       calendarEl.style.setProperty('--ui-calendar-day-padding-block', '0.2em');
@@ -1325,6 +1325,7 @@ export class UIDatePicker extends ElementBase {
     if (!(target instanceof HTMLInputElement)) return;
     if (!target.classList.contains('input')) return;
     if (!this._allowInput()) return;
+    this._draftInput = target.value;
     const related = focusEvent.relatedTarget as Node | null;
     if (related && this._overlay?.contains(related)) return;
     if (this._open && !this._isInlineMode()) return;
@@ -1339,6 +1340,7 @@ export class UIDatePicker extends ElementBase {
     if (this._isInteractionBlocked()) return;
     if (keyboardEvent.key === 'Enter') {
       keyboardEvent.preventDefault();
+      this._draftInput = target.value;
       this._handleDraftCommit('enter');
       if (!this._isInlineMode()) this._setOpen(false, 'enter');
       return;

@@ -1,6 +1,11 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+} from './_internals';
 
 export type BadgeRemoveDetail = {
   text: string;
@@ -51,68 +56,32 @@ export function Badge(props: BadgeProps) {
     ...rest
   } = props;
 
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = React.useRef<HTMLElement | null>(null);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const onRemoveHandler = (event: Event) => onRemove?.((event as CustomEvent<BadgeRemoveDetail>).detail);
-    el.addEventListener('remove', onRemoveHandler as EventListener);
-    return () => el.removeEventListener('remove', onRemoveHandler as EventListener);
+  const onRemoveHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<BadgeRemoveDetail>(event);
+    if (detail) onRemove?.(detail);
   }, [onRemove]);
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  useElementEventListeners(ref, [{ type: 'remove', listener: onRemoveHandler }], [onRemoveHandler]);
 
-    if (text) el.setAttribute('text', text);
-    else el.removeAttribute('text');
-
-    if (tone) el.setAttribute('tone', tone);
-    else el.removeAttribute('tone');
-
-    if (variant && variant !== 'surface') el.setAttribute('variant', variant);
-    else el.removeAttribute('variant');
-
-    if (size && size !== 'md' && size !== '2') el.setAttribute('size', size);
-    else el.removeAttribute('size');
-
-    if (radius != null) el.setAttribute('radius', String(radius));
-    else el.removeAttribute('radius');
-
-    if (elevation && elevation !== 'none') el.setAttribute('elevation', elevation);
-    else el.removeAttribute('elevation');
-
-    if (state && state !== 'idle') el.setAttribute('state', state);
-    else el.removeAttribute('state');
-
-    if (pill) el.setAttribute('pill', '');
-    else el.removeAttribute('pill');
-
-    if (dot) el.setAttribute('dot', '');
-    else el.removeAttribute('dot');
-
-    if (interactive) el.setAttribute('interactive', '');
-    else el.removeAttribute('interactive');
-
-    if (truncate) el.setAttribute('truncate', '');
-    else el.removeAttribute('truncate');
-
-    if (maxWidth) el.setAttribute('max-width', maxWidth);
-    else el.removeAttribute('max-width');
-
-    if (removable) el.setAttribute('removable', '');
-    else el.removeAttribute('removable');
-
-    if (autoRemove) el.setAttribute('auto-remove', '');
-    else el.removeAttribute('auto-remove');
-
-    if (iconOnly) el.setAttribute('icon-only', '');
-    else el.removeAttribute('icon-only');
-
-    if (disabled) el.setAttribute('disabled', '');
-    else el.removeAttribute('disabled');
+  useElementAttributes(ref, (el) => {
+    syncStringAttribute(el, 'text', text ?? null);
+    syncStringAttribute(el, 'tone', tone ?? null);
+    syncStringAttribute(el, 'variant', variant && variant !== 'surface' ? variant : null);
+    syncStringAttribute(el, 'size', size && size !== 'md' && size !== '2' ? size : null);
+    syncStringAttribute(el, 'radius', radius != null ? String(radius) : null);
+    syncStringAttribute(el, 'elevation', elevation && elevation !== 'none' ? elevation : null);
+    syncStringAttribute(el, 'state', state && state !== 'idle' ? state : null);
+    syncBooleanAttribute(el, 'pill', pill);
+    syncBooleanAttribute(el, 'dot', dot);
+    syncBooleanAttribute(el, 'interactive', interactive);
+    syncBooleanAttribute(el, 'truncate', truncate);
+    syncStringAttribute(el, 'max-width', maxWidth ?? null);
+    syncBooleanAttribute(el, 'removable', removable);
+    syncBooleanAttribute(el, 'auto-remove', autoRemove);
+    syncBooleanAttribute(el, 'icon-only', iconOnly);
+    syncBooleanAttribute(el, 'disabled', disabled);
   }, [text, tone, variant, size, radius, elevation, state, pill, dot, interactive, truncate, maxWidth, removable, autoRemove, iconOnly, disabled]);
 
   return React.createElement('ui-badge', { ref, ...rest }, children);

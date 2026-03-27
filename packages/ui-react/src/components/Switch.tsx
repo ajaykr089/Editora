@@ -1,6 +1,12 @@
-import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 type SwitchDetail = {
   checked: boolean;
@@ -53,66 +59,42 @@ const SwitchRoot = React.forwardRef<HTMLElement, SwitchProps>(function Switch(
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const handleInput = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<SwitchDetail>(event);
+    if (detail) onInput?.(detail);
+  }, [onInput]);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const handleChange = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<SwitchDetail>(event);
+    if (detail) onChange?.(detail);
+  }, [onChange]);
 
-    const handleInput = (event: Event) => {
-      const detail = (event as CustomEvent<SwitchDetail>).detail;
-      if (detail) onInput?.(detail);
-    };
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'input', listener: handleInput },
+      { type: 'change', listener: handleChange },
+    ],
+    [handleInput, handleChange]
+  );
 
-    const handleChange = (event: Event) => {
-      const detail = (event as CustomEvent<SwitchDetail>).detail;
-      if (detail) onChange?.(detail);
-    };
-
-    el.addEventListener('input', handleInput as EventListener);
-    el.addEventListener('change', handleChange as EventListener);
-
-    return () => {
-      el.removeEventListener('input', handleInput as EventListener);
-      el.removeEventListener('change', handleChange as EventListener);
-    };
-  }, [onInput, onChange]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const syncAttr = (attr: string, next: string | null) => {
-      const current = el.getAttribute(attr);
-      if (next == null) {
-        if (current != null) el.removeAttribute(attr);
-        return;
-      }
-      if (current !== next) el.setAttribute(attr, next);
-    };
-
-    const syncBool = (attr: string, enabled: boolean | undefined) => {
-      if (enabled) syncAttr(attr, '');
-      else syncAttr(attr, null);
-    };
-
-    syncBool('checked', checked);
-    syncBool('disabled', disabled);
-    syncBool('headless', headless);
-    syncBool('loading', loading);
-    syncBool('required', required);
-
-    syncAttr('size', size && size !== 'md' ? size : null);
-    syncAttr('variant', variant && variant !== 'default' ? variant : null);
-    syncAttr('tone', tone && tone !== 'brand' ? tone : null);
-    syncAttr('label', label || null);
-    syncAttr('description', description || null);
-    syncAttr('name', name || null);
-    syncAttr('value', value || null);
-    syncAttr('shape', shape && shape !== 'pill' ? shape : null);
-    syncAttr('elevation', elevation && elevation !== 'low' ? elevation : null);
+  useElementAttributes(ref, (el) => {
+    syncBooleanAttribute(el, 'checked', checked);
+    syncBooleanAttribute(el, 'disabled', disabled);
+    syncBooleanAttribute(el, 'headless', headless);
+    syncBooleanAttribute(el, 'loading', loading);
+    syncBooleanAttribute(el, 'required', required);
+    syncStringAttribute(el, 'size', size && size !== 'md' ? size : null);
+    syncStringAttribute(el, 'variant', variant && variant !== 'default' ? variant : null);
+    syncStringAttribute(el, 'tone', tone && tone !== 'brand' ? tone : null);
+    syncStringAttribute(el, 'label', label || null);
+    syncStringAttribute(el, 'description', description || null);
+    syncStringAttribute(el, 'name', name || null);
+    syncStringAttribute(el, 'value', value || null);
+    syncStringAttribute(el, 'shape', shape && shape !== 'pill' ? shape : null);
+    syncStringAttribute(el, 'elevation', elevation && elevation !== 'low' ? elevation : null);
   }, [checked, disabled, headless, loading, required, size, variant, tone, shape, elevation, label, description, name, value]);
 
   return React.createElement('ui-switch', { ref, ...rest }, children);

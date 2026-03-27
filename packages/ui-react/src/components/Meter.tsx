@@ -1,6 +1,13 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncNumberAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 type MeterProps = React.HTMLAttributes<HTMLElement> & {
   value?: number | string;
@@ -53,58 +60,40 @@ export const Meter = React.forwardRef<HTMLElement, MeterProps>(function Meter(
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
-  React.useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const handleChange = (event: Event) => {
-      const detail = (event as CustomEvent<any>).detail;
-      if (detail) onValueChange?.(detail);
-    };
-    el.addEventListener('change', handleChange as EventListener);
-    return () => {
-      el.removeEventListener('change', handleChange as EventListener);
-    };
+  const handleChange = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{
+      value: number;
+      min: number;
+      max: number;
+      low: number;
+      high: number;
+      optimum: number | null;
+      percent: number;
+      state: 'low' | 'optimum' | 'suboptimum' | 'high';
+    }>(event);
+    if (detail) onValueChange?.(detail);
   }, [onValueChange]);
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  useElementEventListeners(ref, [{ type: 'change', listener: handleChange }], [handleChange]);
 
-    const syncAttr = (name: string, next: string | null) => {
-      const current = el.getAttribute(name);
-      if (next == null) {
-        if (current != null) el.removeAttribute(name);
-        return;
-      }
-      if (current !== next) el.setAttribute(name, next);
-    };
-
-    const syncBooleanAttr = (name: string, enabled: boolean | undefined) => {
-      if (enabled) {
-        if (!el.hasAttribute(name)) el.setAttribute(name, '');
-      } else if (el.hasAttribute(name)) {
-        el.removeAttribute(name);
-      }
-    };
-
-    syncAttr('value', value != null ? String(value) : null);
-    syncAttr('min', min != null ? String(min) : null);
-    syncAttr('max', max != null ? String(max) : null);
-    syncAttr('low', low != null ? String(low) : null);
-    syncAttr('high', high != null ? String(high) : null);
-    syncAttr('optimum', optimum != null ? String(optimum) : null);
-    syncAttr('label', label != null && label !== '' ? label : null);
-    syncBooleanAttr('show-label', showLabel);
-    syncAttr('format', format != null && format !== 'value' ? format : null);
-    syncAttr('precision', precision != null ? String(precision) : null);
-    syncAttr('size', size && size !== 'md' ? size : null);
-    syncAttr('variant', variant && variant !== 'default' ? variant : null);
-    syncAttr('tone', tone && tone !== 'auto' ? tone : null);
-    syncAttr('shape', shape && shape !== 'pill' ? shape : null);
-    syncAttr('mode', mode && mode !== 'line' ? mode : null);
+  useElementAttributes(ref, (el) => {
+    syncStringAttribute(el, 'value', value != null ? String(value) : null);
+    syncStringAttribute(el, 'min', min != null ? String(min) : null);
+    syncStringAttribute(el, 'max', max != null ? String(max) : null);
+    syncStringAttribute(el, 'low', low != null ? String(low) : null);
+    syncStringAttribute(el, 'high', high != null ? String(high) : null);
+    syncStringAttribute(el, 'optimum', optimum != null ? String(optimum) : null);
+    syncStringAttribute(el, 'label', label != null && label !== '' ? label : null);
+    syncBooleanAttribute(el, 'show-label', showLabel);
+    syncStringAttribute(el, 'format', format != null && format !== 'value' ? format : null);
+    syncNumberAttribute(el, 'precision', typeof precision === 'number' ? precision : undefined);
+    syncStringAttribute(el, 'size', size && size !== 'md' ? size : null);
+    syncStringAttribute(el, 'variant', variant && variant !== 'default' ? variant : null);
+    syncStringAttribute(el, 'tone', tone && tone !== 'auto' ? tone : null);
+    syncStringAttribute(el, 'shape', shape && shape !== 'pill' ? shape : null);
+    syncStringAttribute(el, 'mode', mode && mode !== 'line' ? mode : null);
   }, [value, min, max, low, high, optimum, label, showLabel, format, precision, size, variant, tone, shape, mode]);
 
   return React.createElement('ui-meter', { ref, ...rest }, children);

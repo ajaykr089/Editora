@@ -188,9 +188,8 @@ export function showPortalFor(anchor: HTMLElement | VirtualElement, contentEl: H
       const rootNode = el.getRootNode?.();
       const shadowHost = rootNode instanceof ShadowRoot ? rootNode.host : null;
       const inDOM = el.isConnected || document.body.contains(el) || (shadowHost ? document.body.contains(shadowHost) : false);
-      const rects = (el.getClientRects && el.getClientRects().length) ? el.getClientRects().length : 0;
       const style = window.getComputedStyle(el);
-      const isVisible = rects > 0 && style.display !== 'none' && style.visibility !== 'hidden' && parseFloat(style.opacity || '1') > 0;
+      const isVisible = style.display !== 'none' && style.visibility !== 'hidden' && parseFloat(style.opacity || '1') > 0;
 
       if (!inDOM || !isVisible) {
         try { if (contentEl.parentElement) contentEl.parentElement.removeChild(contentEl); } catch (e) {}

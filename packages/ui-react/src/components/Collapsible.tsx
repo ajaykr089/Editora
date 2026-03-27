@@ -1,7 +1,13 @@
 import * as React from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
-import { warnIfElementNotRegistered } from './_internals';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+  warnIfElementNotRegistered,
+} from './_internals';
 
 export type CollapsibleState = 'idle' | 'loading' | 'error' | 'success';
 export type CollapsibleSize = 'sm' | 'md' | 'lg';
@@ -52,19 +58,6 @@ export interface CollapsibleContentProps extends React.HTMLAttributes<HTMLDivEle
   children?: React.ReactNode;
 }
 
-function setBooleanAttribute(element: HTMLElement, name: string, value: boolean | undefined) {
-  if (value == null) {
-    element.removeAttribute(name);
-    return;
-  }
-  if (value) element.setAttribute(name, '');
-  else element.removeAttribute(name);
-}
-
-function readDetail(event: Event): CollapsibleToggleDetail | undefined {
-  return (event as CustomEvent<CollapsibleToggleDetail>).detail;
-}
-
 type CollapsibleComponent = React.ForwardRefExoticComponent<CollapsibleProps & React.RefAttributes<HTMLElement>> & {
   Header: typeof CollapsibleHeader;
   Caption: typeof CollapsibleCaption;
@@ -94,28 +87,22 @@ const CollapsibleRoot = React.forwardRef<HTMLElement, CollapsibleProps>(function
   },
   forwardedRef
 ) {
-  const ref = React.useRef<HTMLElement | null>(null);
-  React.useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
   React.useEffect(() => {
     warnIfElementNotRegistered('ui-collapsible', 'Collapsible');
   }, []);
 
-  useIsomorphicLayoutEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    // Handle radius CSS variable
+  useElementAttributes(ref, (element) => {
     if (radius != null && radius !== '' && radius !== 'md') {
       let radiusValue = String(radius);
-      // Convert named radius to pixels if needed
       if (typeof radius === 'string' && !radius.includes('px') && !radius.includes('em') && !radius.includes('rem')) {
         const radiusMap: Record<string, string> = {
-          'none': '0px',
-          'sm': '6px',
-          'md': '14px',
-          'lg': '20px',
-          'full': '9999px',
+          none: '0px',
+          sm: '6px',
+          md: '14px',
+          lg: '20px',
+          full: '9999px',
         };
         radiusValue = radiusMap[radius] || String(radius);
       } else if (typeof radius === 'number') {
@@ -127,59 +114,45 @@ const CollapsibleRoot = React.forwardRef<HTMLElement, CollapsibleProps>(function
     }
   }, [radius]);
 
-  useIsomorphicLayoutEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-    setBooleanAttribute(element, 'open', open);
-    setBooleanAttribute(element, 'headless', headless);
-    setBooleanAttribute(element, 'disabled', disabled);
-    setBooleanAttribute(element, 'readonly', readOnly);
-
-    const syncAttr = (name: string, next: string | null) => {
-      const current = element.getAttribute(name);
-      if (next == null) {
-        if (current != null) element.removeAttribute(name);
-        return;
-      }
-      if (current !== next) element.setAttribute(name, next);
-    };
-
-    syncAttr('state', state && state !== 'idle' ? state : null);
-    syncAttr('size', size && size !== 'md' ? size : null);
-    syncAttr('variant', variant && variant !== 'default' ? variant : null);
-    syncAttr('tone', tone && tone !== 'neutral' ? tone : null);
-    syncAttr('icon-position', iconPosition && iconPosition !== 'right' ? iconPosition : null);
-    syncAttr(
+  useElementAttributes(ref, (element) => {
+    syncBooleanAttribute(element, 'open', open);
+    syncBooleanAttribute(element, 'headless', headless);
+    syncBooleanAttribute(element, 'disabled', disabled);
+    syncBooleanAttribute(element, 'readonly', readOnly);
+    syncStringAttribute(element, 'state', state && state !== 'idle' ? state : null);
+    syncStringAttribute(element, 'size', size && size !== 'md' ? size : null);
+    syncStringAttribute(element, 'variant', variant && variant !== 'default' ? variant : null);
+    syncStringAttribute(element, 'tone', tone && tone !== 'neutral' ? tone : null);
+    syncStringAttribute(element, 'icon-position', iconPosition && iconPosition !== 'right' ? iconPosition : null);
+    syncStringAttribute(
+      element,
       'close-on-escape',
       typeof closeOnEscape === 'boolean' ? (closeOnEscape ? 'true' : 'false') : null
     );
-  }, [open, headless, disabled, readOnly, state, size, variant, tone, radius, iconPosition, closeOnEscape]);
+  }, [open, headless, disabled, readOnly, state, size, variant, tone, iconPosition, closeOnEscape]);
 
-  React.useEffect(() => {
-    const element = ref.current;
-    if (!element || (!onToggle && !onChangeOpen && !onToggleDetail && !onChangeDetail)) return;
+  const handleToggle = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<CollapsibleToggleDetail>(event);
+    if (!detail) return;
+    onToggle?.(detail.open);
+    onToggleDetail?.(detail);
+  }, [onToggle, onToggleDetail]);
 
-    const handleToggle = (event: Event) => {
-      const detail = readDetail(event);
-      if (!detail) return;
-      onToggle?.(detail.open);
-      onToggleDetail?.(detail);
-    };
+  const handleChange = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<CollapsibleToggleDetail>(event);
+    if (!detail) return;
+    onChangeOpen?.(detail.open);
+    onChangeDetail?.(detail);
+  }, [onChangeOpen, onChangeDetail]);
 
-    const handleChange = (event: Event) => {
-      const detail = readDetail(event);
-      if (!detail) return;
-      onChangeOpen?.(detail.open);
-      onChangeDetail?.(detail);
-    };
-
-    element.addEventListener('toggle', handleToggle as EventListener);
-    element.addEventListener('change', handleChange as EventListener);
-    return () => {
-      element.removeEventListener('toggle', handleToggle as EventListener);
-      element.removeEventListener('change', handleChange as EventListener);
-    };
-  }, [onToggle, onChangeOpen, onToggleDetail, onChangeDetail]);
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'toggle', listener: handleToggle },
+      { type: 'change', listener: handleChange },
+    ],
+    [handleToggle, handleChange]
+  );
 
   return (
     <ui-collapsible ref={ref as any} {...rest}>

@@ -1,5 +1,13 @@
 import * as React from 'react';
-import { warnIfElementNotRegistered } from './_internals';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+  warnIfElementNotRegistered,
+} from './_internals';
 
 type CheckedDetail = {
   checked?: boolean;
@@ -20,24 +28,6 @@ export interface CheckboxProps extends Omit<React.HTMLAttributes<HTMLElement>, '
   onInput?: (event: CustomEvent<CheckedDetail>) => void;
 }
 
-function setBooleanAttribute(element: HTMLElement, name: string, value: boolean | undefined) {
-  if (value == null) {
-    element.removeAttribute(name);
-    return;
-  }
-  if (value) element.setAttribute(name, '');
-  else element.removeAttribute(name);
-}
-
-function setStringAttribute(element: HTMLElement, name: string, value: string | undefined, fallback?: string) {
-  const next = value && value !== fallback ? value : undefined;
-  if (!next) {
-    element.removeAttribute(name);
-    return;
-  }
-  element.setAttribute(name, next);
-}
-
 export const Checkbox = React.forwardRef<HTMLElement, CheckboxProps>(function Checkbox(
   {
     checked,
@@ -56,51 +46,43 @@ export const Checkbox = React.forwardRef<HTMLElement, CheckboxProps>(function Ch
   },
   forwardedRef
 ) {
-  const ref = React.useRef<HTMLElement | null>(null);
-  React.useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
-  const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
   React.useEffect(() => {
     warnIfElementNotRegistered('ui-checkbox', 'Checkbox');
   }, []);
 
-  useIsomorphicLayoutEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-    setBooleanAttribute(element, 'checked', checked);
-    setBooleanAttribute(element, 'disabled', disabled);
-    setBooleanAttribute(element, 'indeterminate', indeterminate);
-    setBooleanAttribute(element, 'loading', loading);
-    setBooleanAttribute(element, 'headless', headless);
-    setBooleanAttribute(element, 'invalid', invalid);
-    setStringAttribute(element, 'density', density, 'default');
-    setStringAttribute(element, 'preset', preset, 'default');
+  useElementAttributes(ref, (element) => {
+    syncBooleanAttribute(element, 'checked', checked);
+    syncBooleanAttribute(element, 'disabled', disabled);
+    syncBooleanAttribute(element, 'indeterminate', indeterminate);
+    syncBooleanAttribute(element, 'loading', loading);
+    syncBooleanAttribute(element, 'headless', headless);
+    syncBooleanAttribute(element, 'invalid', invalid);
+    syncStringAttribute(element, 'density', density && density !== 'default' ? density : null);
+    syncStringAttribute(element, 'preset', preset && preset !== 'default' ? preset : null);
   }, [checked, disabled, indeterminate, loading, headless, invalid, density, preset]);
 
-  React.useEffect(() => {
-    const element = ref.current;
-    if (!element || (!onCheckedChange && !onChange && !onInput)) return;
+  const handleInput = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<CheckedDetail>(event) ?? {};
+    onInput?.(event as CustomEvent<CheckedDetail>);
+    if (typeof detail.checked === 'boolean') {
+      onCheckedChange?.(detail.checked, detail);
+    }
+  }, [onCheckedChange, onInput]);
 
-    const handleInput = (event: Event) => {
-      const custom = event as CustomEvent<CheckedDetail>;
-      onInput?.(custom);
-      if (typeof custom.detail?.checked === 'boolean') {
-        onCheckedChange?.(custom.detail.checked, custom.detail);
-      }
-    };
+  const handleChange = React.useCallback((event: Event) => {
+    onChange?.(event as CustomEvent<CheckedDetail>);
+  }, [onChange]);
 
-    const handleChange = (event: Event) => {
-      const custom = event as CustomEvent<CheckedDetail>;
-      onChange?.(custom);
-    };
-
-    element.addEventListener('input', handleInput as EventListener);
-    element.addEventListener('change', handleChange as EventListener);
-    return () => {
-      element.removeEventListener('input', handleInput as EventListener);
-      element.removeEventListener('change', handleChange as EventListener);
-    };
-  }, [onCheckedChange, onChange, onInput]);
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'input', listener: handleInput },
+      { type: 'change', listener: handleChange },
+    ],
+    [handleInput, handleChange]
+  );
 
   const hostProps: Record<string, unknown> = {
     ref,

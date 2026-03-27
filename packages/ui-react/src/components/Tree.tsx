@@ -108,4 +108,6 @@ export const Tree = Object.assign(TreeRoot, {
   Item: TreeItemComponent,
 });
 
+export const TreeItem = TreeItemComponent;
+
 export default Tree;

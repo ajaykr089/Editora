@@ -1,6 +1,13 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncNumberAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 export type MenubarChangeDetail = {
   selected: number;
@@ -62,90 +69,63 @@ const MenubarRoot = React.forwardRef<HTMLElement, MenubarProps>(function Menubar
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
-  React.useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const onChangeHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<MenubarChangeDetail>(event);
+    if (detail) onChange?.(detail);
+  }, [onChange]);
 
-    const onChangeHandler = (event: Event) => {
-      const detail = (event as CustomEvent<MenubarChangeDetail>).detail;
-      if (detail) onChange?.(detail);
-    };
-    const onOpenHandler = (event: Event) => {
-      const detail = (event as CustomEvent<{ selected?: number }>).detail;
-      if (typeof detail?.selected === 'number') onOpen?.(detail.selected);
-      else onOpen?.(-1);
-    };
-    const onCloseHandler = () => onClose?.();
-    const onSelectHandler = (event: Event) => {
-      const detail = (event as CustomEvent<{ selected?: number; index?: number; value?: string; label?: string; checked?: boolean; item?: HTMLElement }>).detail;
-      if (detail) onSelect?.(detail);
-    };
+  const onOpenHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ selected?: number }>(event);
+    if (typeof detail?.selected === 'number') onOpen?.(detail.selected);
+    else onOpen?.(-1);
+  }, [onOpen]);
 
-    el.addEventListener('change', onChangeHandler as EventListener);
-    el.addEventListener('open', onOpenHandler as EventListener);
-    el.addEventListener('close', onCloseHandler as EventListener);
-    el.addEventListener('select', onSelectHandler as EventListener);
-    return () => {
-      el.removeEventListener('change', onChangeHandler as EventListener);
-      el.removeEventListener('open', onOpenHandler as EventListener);
-      el.removeEventListener('close', onCloseHandler as EventListener);
-      el.removeEventListener('select', onSelectHandler as EventListener);
-    };
-  }, [onChange, onOpen, onClose, onSelect]);
+  const onCloseHandler = React.useCallback(() => {
+    onClose?.();
+  }, [onClose]);
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const onSelectHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{
+      selected?: number;
+      index?: number;
+      value?: string;
+      label?: string;
+      checked?: boolean;
+      item?: HTMLElement;
+    }>(event);
+    if (detail) onSelect?.(detail);
+  }, [onSelect]);
 
-    if (typeof selected === 'number') el.setAttribute('selected', String(selected));
-    else el.removeAttribute('selected');
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'change', listener: onChangeHandler },
+      { type: 'open', listener: onOpenHandler },
+      { type: 'close', listener: onCloseHandler as EventListener },
+      { type: 'select', listener: onSelectHandler },
+    ],
+    [onChangeHandler, onOpenHandler, onCloseHandler, onSelectHandler]
+  );
 
-    if (typeof open === 'boolean') {
-      if (open) el.setAttribute('open', '');
-      else el.removeAttribute('open');
-    } else el.removeAttribute('open');
-
-    if (typeof loop === 'boolean') el.setAttribute('loop', String(loop));
-    else el.removeAttribute('loop');
-
-    if (headless) el.setAttribute('headless', '');
-    else el.removeAttribute('headless');
-
-    if (orientation && orientation !== 'horizontal') el.setAttribute('orientation', orientation);
-    else el.removeAttribute('orientation');
-
-    if (placement) el.setAttribute('placement', placement);
-    else el.removeAttribute('placement');
-
-    if (variant && variant !== 'default' && variant !== 'surface') el.setAttribute('variant', variant);
-    else el.removeAttribute('variant');
-
-    if (size && size !== 'md' && size !== '2') el.setAttribute('size', size);
-    else el.removeAttribute('size');
-
-    if (density && density !== 'default') el.setAttribute('density', density);
-    else el.removeAttribute('density');
-
-    if (radius == null || radius === '' || radius === 'default') el.removeAttribute('radius');
-    else el.setAttribute('radius', String(radius));
-
-    if (shape && shape !== 'default') el.setAttribute('shape', shape);
-    else el.removeAttribute('shape');
-
-    if (elevation && elevation !== 'default') el.setAttribute('elevation', elevation);
-    else el.removeAttribute('elevation');
-
-    if (tone && tone !== 'default' && tone !== 'brand') el.setAttribute('tone', tone);
-    else el.removeAttribute('tone');
-
-    if (closeOnSelect == null) el.removeAttribute('close-on-select');
-    else el.setAttribute('close-on-select', closeOnSelect ? 'true' : 'false');
-
-    if (typeahead == null) el.removeAttribute('typeahead');
-    else el.setAttribute('typeahead', typeahead ? 'true' : 'false');
+  useElementAttributes(ref, (el) => {
+    syncNumberAttribute(el, 'selected', typeof selected === 'number' ? selected : undefined);
+    if (typeof open === 'boolean') syncBooleanAttribute(el, 'open', open);
+    else syncStringAttribute(el, 'open', null);
+    syncStringAttribute(el, 'loop', typeof loop === 'boolean' ? String(loop) : null);
+    syncBooleanAttribute(el, 'headless', headless);
+    syncStringAttribute(el, 'orientation', orientation && orientation !== 'horizontal' ? orientation : null);
+    syncStringAttribute(el, 'placement', placement ?? null);
+    syncStringAttribute(el, 'variant', variant && variant !== 'default' && variant !== 'surface' ? variant : null);
+    syncStringAttribute(el, 'size', size && size !== 'md' && size !== '2' ? size : null);
+    syncStringAttribute(el, 'density', density && density !== 'default' ? density : null);
+    syncStringAttribute(el, 'radius', radius == null || radius === '' || radius === 'default' ? null : String(radius));
+    syncStringAttribute(el, 'shape', shape && shape !== 'default' ? shape : null);
+    syncStringAttribute(el, 'elevation', elevation && elevation !== 'default' ? elevation : null);
+    syncStringAttribute(el, 'tone', tone && tone !== 'default' && tone !== 'brand' ? tone : null);
+    syncStringAttribute(el, 'close-on-select', closeOnSelect == null ? null : closeOnSelect ? 'true' : 'false');
+    syncStringAttribute(el, 'typeahead', typeahead == null ? null : typeahead ? 'true' : 'false');
   }, [
     selected,
     open,

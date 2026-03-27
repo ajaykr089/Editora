@@ -67,8 +67,13 @@ const RatingRoot = React.forwardRef<HTMLElement, RatingProps>(
       ...rest
     },
     forwardedRef,
-  ) {
+    ) {
     const ref = useRef<HTMLElement | null>(null);
+    const resolvedVariant = variant ?? "default";
+    const resolvedSize = size ?? "md";
+    const resolvedTheme = theme ?? "light";
+    const resolvedState = state ?? "idle";
+    const resolvedShape = shape ?? "rounded";
 
     useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
@@ -125,13 +130,13 @@ const RatingRoot = React.forwardRef<HTMLElement, RatingProps>(
       syncBool("disabled", disabled);
       syncBool("readonly", readonly);
 
-      syncAttr("variant", variant && variant !== "default" ? variant : null);
-      syncAttr("size", size && size !== "md" ? size : null);
-      syncAttr("theme", theme && theme !== "light" ? theme : null);
+      syncAttr("variant", resolvedVariant);
+      syncAttr("size", resolvedSize);
+      syncAttr("theme", resolvedTheme);
       syncAttr("tone", tone || null);
-      syncAttr("state", state && state !== "idle" ? state : null);
+      syncAttr("state", resolvedState);
       syncAttr("animation", animation || null);
-      syncAttr("shape", shape && shape !== "rounded" ? shape : null);
+      syncAttr("shape", resolvedShape);
       syncAttr("aria-label", ariaLabel || null);
       syncAttr("aria-labelledby", ariaLabelledBy || null);
       syncAttr("aria-describedby", ariaDescribedBy || null);
@@ -151,13 +156,13 @@ const RatingRoot = React.forwardRef<HTMLElement, RatingProps>(
       precision,
       disabled,
       readonly,
-      variant,
-      size,
-      theme,
+      resolvedVariant,
+      resolvedSize,
+      resolvedTheme,
       tone,
-      state,
+      resolvedState,
       animation,
-      shape,
+      resolvedShape,
       radius,
       ariaLabel,
       ariaLabelledBy,

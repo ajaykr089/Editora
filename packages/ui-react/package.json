@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-react",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Enterprise React component library with SaaS UI components, modern design system patterns, and wrappers for Editora UI Core.",
   "homepage": "https://editora-ecosystem.netlify.app/docs/ui-react",
   "bugs": {
@@ -31,6 +31,18 @@
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js",
       "default": "./dist/index.esm.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.esm.js",
+      "require": "./dist/client.cjs.js",
+      "default": "./dist/client.esm.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.esm.js",
+      "require": "./dist/server.cjs.js",
+      "default": "./dist/server.esm.js"
     },
     "./components/*": {
       "types": "./dist/components/*.d.ts",
@@ -67,6 +79,12 @@
       "import": "./dist/AnimatedText.esm.js",
       "require": "./dist/AnimatedText.cjs.js",
       "default": "./dist/AnimatedText.esm.js"
+    },
+    "./AnimatedNumber": {
+      "types": "./dist/components/AnimatedNumber.d.ts",
+      "import": "./dist/AnimatedNumber.esm.js",
+      "require": "./dist/AnimatedNumber.cjs.js",
+      "default": "./dist/AnimatedNumber.esm.js"
     },
     "./SpinningText": {
       "types": "./dist/components/SpinningText.d.ts",

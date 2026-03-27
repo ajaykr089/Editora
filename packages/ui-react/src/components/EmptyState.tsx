@@ -1,6 +1,10 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  syncBooleanAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+} from './_internals';
 
 export type EmptyStateProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
@@ -26,37 +30,21 @@ export function EmptyState(props: EmptyStateProps) {
     ...rest
   } = props;
 
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = React.useRef<HTMLElement | null>(null);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const handler = () => onAction?.();
-    el.addEventListener('action', handler as EventListener);
-    return () => el.removeEventListener('action', handler as EventListener);
+  const handler = React.useCallback(() => {
+    onAction?.();
   }, [onAction]);
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  useElementEventListeners(ref, [{ type: 'action', listener: handler as EventListener }], [handler]);
 
-    if (title) el.setAttribute('title', title);
-    else el.removeAttribute('title');
-
-    if (description) el.setAttribute('description', description);
-    else el.removeAttribute('description');
-
-    if (actionLabel) el.setAttribute('action-label', actionLabel);
-    else el.removeAttribute('action-label');
-
-    if (tone) el.setAttribute('tone', tone);
-    else el.removeAttribute('tone');
-
-    if (compact) el.setAttribute('compact', '');
-    else el.removeAttribute('compact');
-
-    if (headless) el.setAttribute('headless', '');
-    else el.removeAttribute('headless');
+  useElementAttributes(ref, (el) => {
+    syncStringAttribute(el, 'title', title ?? null);
+    syncStringAttribute(el, 'description', description ?? null);
+    syncStringAttribute(el, 'action-label', actionLabel ?? null);
+    syncStringAttribute(el, 'tone', tone ?? null);
+    syncBooleanAttribute(el, 'compact', compact);
+    syncBooleanAttribute(el, 'headless', headless);
   }, [title, description, actionLabel, tone, compact, headless]);
 
   return React.createElement('ui-empty-state', { ref, ...rest }, children);

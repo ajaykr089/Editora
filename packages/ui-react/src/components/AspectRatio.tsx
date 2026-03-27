@@ -1,7 +1,4 @@
 import * as React from 'react';
-import { warnIfElementNotRegistered } from './_internals';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
 export interface AspectRatioProps extends React.HTMLAttributes<HTMLElement> {
   ratio?: number | string;
@@ -31,51 +28,22 @@ export const AspectRatio = React.forwardRef<HTMLElement, AspectRatioProps>(funct
   { ratio, fit, tone, variant, size, radius, elevation, interactive, showRatioBadge, headless, children, ...rest },
   forwardedRef
 ) {
-  const ref = React.useRef<HTMLElement | null>(null);
+  const hostProps: Record<string, unknown> = {
+    ref: forwardedRef,
+    ...rest,
+    ratio: normalizeRatio(ratio),
+    fit: fit || undefined,
+    tone: tone && tone !== 'neutral' ? tone : undefined,
+    variant: variant && variant !== 'surface' ? variant : undefined,
+    size: size && size !== 'md' ? size : undefined,
+    radius: radius != null ? String(radius) : undefined,
+    elevation: elevation && elevation !== 'none' ? elevation : undefined,
+    interactive: interactive ? '' : undefined,
+    'show-ratio-badge': showRatioBadge ? '' : undefined,
+    headless: headless ? '' : undefined,
+  };
 
-  React.useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
-
-  React.useEffect(() => {
-    warnIfElementNotRegistered('ui-aspect-ratio', 'AspectRatio');
-  }, []);
-
-  useIsomorphicLayoutEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    const nextRatio = normalizeRatio(ratio);
-    if (nextRatio) element.setAttribute('ratio', nextRatio);
-    else element.removeAttribute('ratio');
-
-    if (fit) element.setAttribute('fit', fit);
-    else element.removeAttribute('fit');
-
-    if (tone && tone !== 'neutral') element.setAttribute('tone', tone);
-    else element.removeAttribute('tone');
-
-    if (variant && variant !== 'surface') element.setAttribute('variant', variant);
-    else element.removeAttribute('variant');
-
-    if (size && size !== 'md') element.setAttribute('size', size);
-    else element.removeAttribute('size');
-
-    if (radius != null) element.setAttribute('radius', String(radius));
-    else element.removeAttribute('radius');
-
-    if (elevation && elevation !== 'none') element.setAttribute('elevation', elevation);
-    else element.removeAttribute('elevation');
-
-    if (interactive) element.setAttribute('interactive', '');
-    else element.removeAttribute('interactive');
-
-    if (showRatioBadge) element.setAttribute('show-ratio-badge', '');
-    else element.removeAttribute('show-ratio-badge');
-
-    if (headless) element.setAttribute('headless', '');
-    else element.removeAttribute('headless');
-  }, [ratio, fit, tone, variant, size, radius, elevation, interactive, showRatioBadge, headless]);
-
-  return React.createElement('ui-aspect-ratio', { ref, ...rest }, children);
+  return React.createElement('ui-aspect-ratio', hostProps, children);
 });
 
 AspectRatio.displayName = 'AspectRatio';

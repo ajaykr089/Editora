@@ -20,6 +20,10 @@ export abstract class ElementBase extends HTMLElement {
         this._visibilityGuardApplied = true;
       }
     }
+    if (!this._hasRendered) {
+      this._requestRender();
+      return;
+    }
     this._scheduleRender();
   }
 

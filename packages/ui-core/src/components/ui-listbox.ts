@@ -77,9 +77,17 @@ function isFocusable(item: HTMLElement): boolean {
 }
 
 export class UIListbox extends UICollection {
+  private readonly _onClickBound = this._onClick.bind(this);
+
   connectedCallback(): void {
     this._ensureBaseStyle();
     super.connectedCallback();
+    this.addEventListener('click', this._onClickBound);
+  }
+
+  disconnectedCallback(): void {
+    this.removeEventListener('click', this._onClickBound);
+    super.disconnectedCallback();
   }
 
   static get observedAttributes(): string[] {
@@ -195,6 +203,27 @@ export class UIListbox extends UICollection {
     style.setAttribute(LISTBOX_BASE_STYLE_ATTR, '');
     style.textContent = LISTBOX_BASE_STYLE;
     document.head.append(style);
+  }
+
+  private _onClick(event: Event): void {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+    const item = target.closest(this.itemSelector) as HTMLElement | null;
+    if (!item || !this.contains(item) || this.isItemDisabled(item)) return;
+
+    const active = this.setActiveItem(item, { focus: false, scroll: false });
+    if (!active) return;
+
+    this.dispatchEvent(
+      new CustomEvent('select', {
+        detail: {
+          value: active.getAttribute('data-value') || active.getAttribute('value') || active.textContent || '',
+          item: active,
+        },
+        bubbles: true,
+        composed: true,
+      })
+    );
   }
 }
 

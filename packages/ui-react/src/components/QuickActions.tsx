@@ -1,6 +1,12 @@
-import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 export type QuickActionSelectDetail = {
   index: number;
@@ -44,69 +50,44 @@ const QuickActionsRoot = React.forwardRef<HTMLElement, QuickActionsProps>(functi
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const handleSelect = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<QuickActionSelectDetail>(event);
+    if (detail) onSelect?.(detail);
+  }, [onSelect]);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const handleChange = React.useCallback((event: Event) => {
+    const next = getCustomEventDetail<{ open?: boolean }>(event)?.open;
+    if (typeof next === 'boolean') onOpenChange?.(next);
+  }, [onOpenChange]);
 
-    const handleSelect = (event: Event) => {
-      const detail = (event as CustomEvent<QuickActionSelectDetail>).detail;
-      if (detail) onSelect?.(detail);
-    };
+  const handleToggle = React.useCallback((event: Event) => {
+    const next = getCustomEventDetail<{ open?: boolean }>(event)?.open;
+    if (typeof next === 'boolean') onToggle?.(next);
+  }, [onToggle]);
 
-    const handleChange = (event: Event) => {
-      const next = (event as CustomEvent<{ open?: boolean }>).detail?.open;
-      if (typeof next === 'boolean') onOpenChange?.(next);
-    };
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'select', listener: handleSelect },
+      { type: 'change', listener: handleChange },
+      { type: 'toggle', listener: handleToggle },
+    ],
+    [handleSelect, handleChange, handleToggle]
+  );
 
-    const handleToggle = (event: Event) => {
-      const next = (event as CustomEvent<{ open?: boolean }>).detail?.open;
-      if (typeof next === 'boolean') onToggle?.(next);
-    };
-
-    el.addEventListener('select', handleSelect as EventListener);
-    el.addEventListener('change', handleChange as EventListener);
-    el.addEventListener('toggle', handleToggle as EventListener);
-
-    return () => {
-      el.removeEventListener('select', handleSelect as EventListener);
-      el.removeEventListener('change', handleChange as EventListener);
-      el.removeEventListener('toggle', handleToggle as EventListener);
-    };
-  }, [onSelect, onOpenChange, onToggle]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const syncAttr = (name: string, next: string | null) => {
-      const current = el.getAttribute(name);
-      if (next == null) {
-        if (current != null) el.removeAttribute(name);
-        return;
-      }
-      if (current !== next) el.setAttribute(name, next);
-    };
-
-    const syncBool = (name: string, enabled: boolean | undefined) => {
-      if (enabled) syncAttr(name, '');
-      else syncAttr(name, null);
-    };
-
-    if (typeof open === 'boolean') syncBool('open', open);
-    else syncAttr('open', null);
-
-    syncAttr('mode', mode && mode !== 'bar' ? mode : null);
-    syncAttr('orientation', orientation && orientation !== 'horizontal' ? orientation : null);
-    syncAttr('variant', variant && variant !== 'default' ? variant : null);
-    syncBool('floating', floating);
-    syncAttr('placement', placement && placement !== 'bottom-right' ? placement : null);
-    syncBool('collapsible', collapsible);
-    syncAttr('label', label || null);
-    syncBool('headless', headless);
+  useElementAttributes(ref, (el) => {
+    if (typeof open === 'boolean') syncBooleanAttribute(el, 'open', open);
+    else syncStringAttribute(el, 'open', null);
+    syncStringAttribute(el, 'mode', mode && mode !== 'bar' ? mode : null);
+    syncStringAttribute(el, 'orientation', orientation && orientation !== 'horizontal' ? orientation : null);
+    syncStringAttribute(el, 'variant', variant && variant !== 'default' ? variant : null);
+    syncBooleanAttribute(el, 'floating', floating);
+    syncStringAttribute(el, 'placement', placement && placement !== 'bottom-right' ? placement : null);
+    syncBooleanAttribute(el, 'collapsible', collapsible);
+    syncStringAttribute(el, 'label', label || null);
+    syncBooleanAttribute(el, 'headless', headless);
   }, [open, mode, orientation, variant, floating, placement, collapsible, label, headless]);
 
   return React.createElement('ui-quick-actions', { ref, ...rest }, children);

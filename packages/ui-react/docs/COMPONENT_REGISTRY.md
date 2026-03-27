@@ -12,6 +12,13 @@ This document provides a comprehensive overview of all components available in t
 - Peer Dependencies: `react`, `react-dom`
 - License: MIT
 
+**Import Paths:**
+- `@editora/ui-react`: compatibility entrypoint for existing usage
+- `@editora/ui-react/client`: explicit client entrypoint for interactive components in Next/Remix/RSC apps
+- `@editora/ui-react/server`: server-safe subset for RSC/SSR imports
+
+Current `server` subset: `Box`, `Flex`, `Grid`, `Container`, `DirectionProvider`, `Anchor`, `AspectRatio`, `Field`, `Icon`, `Label`, `Section`, `Separator`, `VisuallyHidden`
+
 ## Component Categories
 
 ### 1. Form and Input Components

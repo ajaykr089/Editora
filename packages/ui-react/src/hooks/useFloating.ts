@@ -1,5 +1,6 @@
+'use client';
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { computePosition as coreComputePosition } from '@editora/ui-core';
+import { computePosition as coreComputePosition } from '@editora/ui-core/runtime';
 
 export type Placement = 'top' | 'bottom' | 'left' | 'right';
 
@@ -246,4 +247,3 @@ export function useFloating(options?: {
     focusPrev
   } as const;
 }
-

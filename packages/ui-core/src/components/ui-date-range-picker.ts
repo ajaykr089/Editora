@@ -595,6 +595,7 @@ export class UIDateRangePicker extends ElementBase {
       this._pending = { ...this._value };
       this._refreshDraftFromValue();
       this._inlineError = '';
+      this._syncValueAttribute(this._value);
     }
 
     if (name === 'open' && !this._syncing) {
@@ -962,7 +963,6 @@ export class UIDateRangePicker extends ElementBase {
     syncAttr('variant', this.getAttribute('variant'));
     syncAttr('outside-click', this.getAttribute('outside-click'));
     const isInlineCalendar = calendarEl.classList.contains('inline-calendar');
-    console.log("isInlineCalendar", isInlineCalendar);
     if (effectiveSize === 'lg') {
       calendarEl.style.setProperty('--ui-calendar-day-height', '1.95em');
       calendarEl.style.setProperty('--ui-calendar-day-padding-block', '0.2em');
@@ -1402,6 +1402,9 @@ export class UIDateRangePicker extends ElementBase {
     if (related && this._overlay?.contains(related)) return;
     if (this._open && !this._isInlineMode()) return;
     if (target.classList.contains('single') || target.classList.contains('start') || target.classList.contains('end')) {
+      if (target.classList.contains('single')) this._draftSingle = target.value;
+      if (target.classList.contains('start')) this._draftStart = target.value;
+      if (target.classList.contains('end')) this._draftEnd = target.value;
       this._commitFromDraft('blur');
     }
   }
@@ -1413,6 +1416,9 @@ export class UIDateRangePicker extends ElementBase {
       const target = keyboardEvent.target as HTMLElement | null;
       if (!this._isReadonly() && target instanceof HTMLInputElement && (target.classList.contains('single') || target.classList.contains('start') || target.classList.contains('end'))) {
         keyboardEvent.preventDefault();
+        if (target.classList.contains('single')) this._draftSingle = target.value;
+        if (target.classList.contains('start')) this._draftStart = target.value;
+        if (target.classList.contains('end')) this._draftEnd = target.value;
         const committed = this._commitFromDraft('enter');
         if (committed && !this._isInlineMode()) this._setOpen(false, 'enter');
         return;

@@ -1,6 +1,13 @@
-import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncNumberAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 type NumberFieldChangeDetail = {
   value: number | null;
@@ -72,73 +79,49 @@ export const NumberField = React.forwardRef<HTMLElement, NumberFieldProps>(funct
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const handleValueChange = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<NumberFieldChangeDetail>(event);
+    if (detail) onValueChange?.(detail);
+  }, [onValueChange]);
 
-    const handleValueChange = (event: Event) => {
-      const detail = (event as CustomEvent<NumberFieldChangeDetail>).detail;
-      if (detail) onValueChange?.(detail);
-    };
+  const handleInvalid = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ reason?: string }>(event);
+    if (detail?.reason) onInvalidValue?.(detail.reason);
+  }, [onInvalidValue]);
 
-    const handleInvalid = (event: Event) => {
-      const detail = (event as CustomEvent<{ reason?: string }>).detail;
-      if (detail?.reason) onInvalidValue?.(detail.reason);
-    };
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'value-change', listener: handleValueChange },
+      { type: 'invalid', listener: handleInvalid },
+    ],
+    [handleValueChange, handleInvalid]
+  );
 
-    el.addEventListener('value-change', handleValueChange as EventListener);
-    el.addEventListener('invalid', handleInvalid as EventListener);
-    return () => {
-      el.removeEventListener('value-change', handleValueChange as EventListener);
-      el.removeEventListener('invalid', handleInvalid as EventListener);
-    };
-  }, [onInvalidValue, onValueChange]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const syncAttr = (name: string, next: string | null) => {
-      const current = el.getAttribute(name);
-      if (next == null) {
-        if (current != null) el.removeAttribute(name);
-        return;
-      }
-      if (current !== next) el.setAttribute(name, next);
-    };
-
-    const syncBoolean = (name: string, enabled: boolean | undefined) => {
-      if (enabled) {
-        if (!el.hasAttribute(name)) el.setAttribute(name, '');
-      } else if (el.hasAttribute(name)) {
-        el.removeAttribute(name);
-      }
-    };
-
-    syncAttr('value', value != null && value !== '' ? String(value) : null);
-    syncAttr('min', min != null ? String(min) : null);
-    syncAttr('max', max != null ? String(max) : null);
-    syncAttr('step', step != null ? String(step) : null);
-    syncAttr('precision', precision != null ? String(precision) : null);
-    syncAttr('locale', locale ?? null);
-    syncAttr('format', format && format !== 'grouped' ? format : null);
-    syncAttr('placeholder', placeholder ?? null);
-    syncAttr('label', label ?? null);
-    syncAttr('description', description ?? null);
-    syncAttr('data-error', error ?? null);
-    syncAttr('name', name ?? null);
-    syncAttr('autocomplete', autoComplete ?? null);
-    syncAttr('inputmode', inputMode ?? null);
-    syncBoolean('required', required);
-    syncBoolean('disabled', disabled);
-    syncBoolean('readonly', readOnly);
-    syncBoolean('allow-wheel', allowWheel);
-    syncBoolean('show-steppers', showSteppers);
-    syncBoolean('clamp-on-blur', clampOnBlur);
-    syncBoolean('invalid', invalid);
+  useElementAttributes(ref, (el) => {
+    syncStringAttribute(el, 'value', value != null && value !== '' ? String(value) : null);
+    syncStringAttribute(el, 'min', min != null ? String(min) : null);
+    syncStringAttribute(el, 'max', max != null ? String(max) : null);
+    syncStringAttribute(el, 'step', step != null ? String(step) : null);
+    syncNumberAttribute(el, 'precision', precision);
+    syncStringAttribute(el, 'locale', locale ?? null);
+    syncStringAttribute(el, 'format', format && format !== 'grouped' ? format : null);
+    syncStringAttribute(el, 'placeholder', placeholder ?? null);
+    syncStringAttribute(el, 'label', label ?? null);
+    syncStringAttribute(el, 'description', description ?? null);
+    syncStringAttribute(el, 'data-error', error ?? null);
+    syncStringAttribute(el, 'name', name ?? null);
+    syncStringAttribute(el, 'autocomplete', autoComplete ?? null);
+    syncStringAttribute(el, 'inputmode', inputMode ?? null);
+    syncBooleanAttribute(el, 'required', required);
+    syncBooleanAttribute(el, 'disabled', disabled);
+    syncBooleanAttribute(el, 'readonly', readOnly);
+    syncBooleanAttribute(el, 'allow-wheel', allowWheel);
+    syncBooleanAttribute(el, 'show-steppers', showSteppers);
+    syncBooleanAttribute(el, 'clamp-on-blur', clampOnBlur);
+    syncBooleanAttribute(el, 'invalid', invalid);
   }, [
     autoComplete,
     allowWheel,

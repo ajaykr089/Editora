@@ -465,7 +465,6 @@ export class UIForm extends ElementBase {
   private _controller = new FormController();
   private _submitting = false;
   private _autosaveTimer: ReturnType<typeof setTimeout> | null = null;
-  private _initTimer: ReturnType<typeof setTimeout> | null = null;
   private _readyFrame: number | null = null;
   private _dirtyFrame: number | null = null;
   private _initialSnapshot = '';
@@ -520,12 +519,10 @@ export class UIForm extends ElementBase {
       window.addEventListener('beforeunload', this._onBeforeUnload as EventListener);
     }
 
-    this._initTimer = setTimeout(() => {
-      const baseline = this.getValues();
-      this._setBaseline(baseline, false);
-      this._baselineReady = true;
-      this._initTimer = null;
-    }, 0);
+    queueMicrotask(() => {
+      if (!this.isConnected || this._baselineReady) return;
+      this._setBaseline(this.getValues(), false);
+    });
 
     if (!this.hasAttribute('data-ui-ready')) {
       if (typeof requestAnimationFrame === 'function') {
@@ -548,10 +545,6 @@ export class UIForm extends ElementBase {
     this.removeEventListener('input', this._onValueEvent as EventListener);
     this.removeEventListener('change', this._onValueEvent as EventListener);
 
-    if (this._initTimer) {
-      clearTimeout(this._initTimer);
-      this._initTimer = null;
-    }
     if (this._readyFrame != null) {
       if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(this._readyFrame);
       clearTimeout(this._readyFrame);
@@ -896,17 +889,11 @@ export class UIForm extends ElementBase {
 
   private _scheduleDirtyRefresh(): void {
     if (this._dirtyFrame != null) return;
-    if (typeof requestAnimationFrame === 'function') {
-      this._dirtyFrame = requestAnimationFrame(() => {
-        this._dirtyFrame = null;
-        this._refreshDirtyState();
-      });
-      return;
-    }
-    this._dirtyFrame = window.setTimeout(() => {
+    const schedule = typeof window !== 'undefined' ? window.setTimeout.bind(window) : setTimeout;
+    this._dirtyFrame = schedule(() => {
       this._dirtyFrame = null;
       this._refreshDirtyState();
-    }, 16) as unknown as number;
+    }, 0) as unknown as number;
   }
 
   private _refreshDirtyState(): void {

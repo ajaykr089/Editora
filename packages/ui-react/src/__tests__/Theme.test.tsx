@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { ThemeProvider, useTheme, Button } from '../components';
+import { defaultTokens } from '@editora/ui-core';
 
 function Consumer() {
   const { tokens, setTokens } = useTheme() as any;
@@ -36,7 +37,7 @@ describe('ThemeProvider (React)', () => {
     );
 
     expect(getByTestId('primary').textContent).toBe('#123456');
-    expect(getByTestId('text').textContent).toBe('#111827');
+    expect(getByTestId('text').textContent).toBe(defaultTokens.colors.text);
 
     rerender(
       <ThemeProvider tokens={{ colors: { primary: '#654321' } }}>
@@ -45,6 +46,6 @@ describe('ThemeProvider (React)', () => {
     );
 
     expect(getByTestId('primary').textContent).toBe('#654321');
-    expect(getByTestId('text').textContent).toBe('#111827');
+    expect(getByTestId('text').textContent).toBe(defaultTokens.colors.text);
   });
 });

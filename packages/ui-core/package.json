@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-core",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Framework-agnostic Web Components and primitives for the Editora UI ecosystem",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -11,6 +11,12 @@
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js",
       "default": "./dist/index.esm.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime.d.ts",
+      "import": "./dist/runtime.esm.js",
+      "require": "./dist/runtime.cjs.js",
+      "default": "./dist/runtime.esm.js"
     }
   },
   "files": [

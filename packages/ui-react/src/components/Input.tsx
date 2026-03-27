@@ -1,6 +1,13 @@
-import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncNumberAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 export type InputProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'> & {
   children?: React.ReactNode;
@@ -90,142 +97,70 @@ const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props
     ...rest
   } = props;
 
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const onInputHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ value?: string }>(event);
+    if (typeof detail?.value === 'string') onInput?.(detail.value);
+  }, [onInput]);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const onChangeHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ value?: string }>(event);
+    if (typeof detail?.value === 'string') onChange?.(detail.value);
+  }, [onChange]);
 
-    const onInputHandler = (event: Event) => {
-      const detail = (event as CustomEvent<{ value?: string }>).detail;
-      if (typeof detail?.value === 'string') onInput?.(detail.value);
-    };
+  const onDebouncedHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ value?: string }>(event);
+    if (typeof detail?.value === 'string') onDebouncedInput?.(detail.value);
+  }, [onDebouncedInput]);
 
-    const onChangeHandler = (event: Event) => {
-      const detail = (event as CustomEvent<{ value?: string }>).detail;
-      if (typeof detail?.value === 'string') onChange?.(detail.value);
-    };
+  const onClearHandler = React.useCallback(() => {
+    onClear?.();
+  }, [onClear]);
 
-    const onDebouncedHandler = (event: Event) => {
-      const detail = (event as CustomEvent<{ value?: string }>).detail;
-      if (typeof detail?.value === 'string') onDebouncedInput?.(detail.value);
-    };
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'input', listener: onInputHandler },
+      { type: 'change', listener: onChangeHandler },
+      { type: 'debounced-input', listener: onDebouncedHandler },
+      { type: 'clear', listener: onClearHandler as EventListener },
+    ],
+    [onInputHandler, onChangeHandler, onDebouncedHandler, onClearHandler]
+  );
 
-    const onClearHandler = () => {
-      onClear?.();
-    };
-
-    el.addEventListener('input', onInputHandler as EventListener);
-    el.addEventListener('change', onChangeHandler as EventListener);
-    el.addEventListener('debounced-input', onDebouncedHandler as EventListener);
-    el.addEventListener('clear', onClearHandler as EventListener);
-
-    return () => {
-      el.removeEventListener('input', onInputHandler as EventListener);
-      el.removeEventListener('change', onChangeHandler as EventListener);
-      el.removeEventListener('debounced-input', onDebouncedHandler as EventListener);
-      el.removeEventListener('clear', onClearHandler as EventListener);
-    };
-  }, [onChange, onInput, onDebouncedInput, onClear]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    if (clearable) el.setAttribute('clearable', '');
-    else el.removeAttribute('clearable');
-
-    if (typeof debounce === 'number' && Number.isFinite(debounce)) el.setAttribute('debounce', String(debounce));
-    else el.removeAttribute('debounce');
-
-    if (validation && validation !== 'none') el.setAttribute('validation', validation);
-    else el.removeAttribute('validation');
-
-    if (size && size !== 'md' && size !== '2') el.setAttribute('size', String(size));
-    else el.removeAttribute('size');
-
-    if (typeof minlength === 'number') el.setAttribute('minlength', String(minlength));
-    else el.removeAttribute('minlength');
-
-    if (typeof maxlength === 'number') el.setAttribute('maxlength', String(maxlength));
-    else el.removeAttribute('maxlength');
-
-    if (readOnly) el.setAttribute('readonly', '');
-    else el.removeAttribute('readonly');
-
-    if (autofocus) el.setAttribute('autofocus', '');
-    else el.removeAttribute('autofocus');
-
-    if (disabled) el.setAttribute('disabled', '');
-    else el.removeAttribute('disabled');
-
-    if (counter) el.setAttribute('counter', '');
-    else el.removeAttribute('counter');
-
-    if (floatingLabel) el.setAttribute('floating-label', '');
-    else el.removeAttribute('floating-label');
-
-    if (type) el.setAttribute('type', type);
-    else el.removeAttribute('type');
-
-    if (name) el.setAttribute('name', name);
-    else el.removeAttribute('name');
-
-    if (required) el.setAttribute('required', '');
-    else el.removeAttribute('required');
-
-    if (pattern) el.setAttribute('pattern', pattern);
-    else el.removeAttribute('pattern');
-
-    if (inputMode) el.setAttribute('inputmode', inputMode);
-    else el.removeAttribute('inputmode');
-
-    if (autoComplete) el.setAttribute('autocomplete', autoComplete);
-    else el.removeAttribute('autocomplete');
-
-    if (min != null && min !== '') el.setAttribute('min', String(min));
-    else el.removeAttribute('min');
-
-    if (max != null && max !== '') el.setAttribute('max', String(max));
-    else el.removeAttribute('max');
-
-    if (step != null && step !== '') el.setAttribute('step', String(step));
-    else el.removeAttribute('step');
-
-    if (typeof spellCheck === 'boolean') el.setAttribute('spellcheck', spellCheck ? 'true' : 'false');
-    else el.removeAttribute('spellcheck');
-
-    if (placeholder) el.setAttribute('placeholder', placeholder);
-    else el.removeAttribute('placeholder');
-
-    if (headless) el.setAttribute('headless', '');
-    else el.removeAttribute('headless');
-
-    if (variant && variant !== 'classic') el.setAttribute('variant', variant);
-    else el.removeAttribute('variant');
-
-    if (tone && tone !== 'default') el.setAttribute('tone', tone);
-    else el.removeAttribute('tone');
-
-    if (density && density !== 'default') el.setAttribute('density', density);
-    else el.removeAttribute('density');
-
-    if (shape && shape !== 'default') el.setAttribute('shape', shape);
-    else el.removeAttribute('shape');
-
-    if (color) el.setAttribute('color', color);
-    else el.removeAttribute('color');
-
-    if (radius) el.setAttribute('radius', String(radius));
-    else el.removeAttribute('radius');
-
-    if (label) el.setAttribute('label', label);
-    else el.removeAttribute('label');
-
-    if (description) el.setAttribute('description', description);
-    else el.removeAttribute('description');
+  useElementAttributes(ref, (el) => {
+    syncBooleanAttribute(el, 'clearable', clearable);
+    syncNumberAttribute(el, 'debounce', typeof debounce === 'number' && Number.isFinite(debounce) ? debounce : undefined);
+    syncStringAttribute(el, 'validation', validation && validation !== 'none' ? validation : null);
+    syncStringAttribute(el, 'size', size && size !== 'md' && size !== '2' ? String(size) : null);
+    syncNumberAttribute(el, 'minlength', minlength);
+    syncNumberAttribute(el, 'maxlength', maxlength);
+    syncBooleanAttribute(el, 'readonly', readOnly);
+    syncBooleanAttribute(el, 'autofocus', autofocus);
+    syncBooleanAttribute(el, 'disabled', disabled);
+    syncBooleanAttribute(el, 'counter', counter);
+    syncBooleanAttribute(el, 'floating-label', floatingLabel);
+    syncStringAttribute(el, 'type', type ?? null);
+    syncStringAttribute(el, 'name', name ?? null);
+    syncBooleanAttribute(el, 'required', required);
+    syncStringAttribute(el, 'pattern', pattern ?? null);
+    syncStringAttribute(el, 'inputmode', inputMode ?? null);
+    syncStringAttribute(el, 'autocomplete', autoComplete ?? null);
+    syncStringAttribute(el, 'min', min != null && min !== '' ? String(min) : null);
+    syncStringAttribute(el, 'max', max != null && max !== '' ? String(max) : null);
+    syncStringAttribute(el, 'step', step != null && step !== '' ? String(step) : null);
+    syncStringAttribute(el, 'spellcheck', typeof spellCheck === 'boolean' ? (spellCheck ? 'true' : 'false') : null);
+    syncStringAttribute(el, 'placeholder', placeholder ?? null);
+    syncBooleanAttribute(el, 'headless', headless);
+    syncStringAttribute(el, 'variant', variant && variant !== 'classic' ? variant : null);
+    syncStringAttribute(el, 'tone', tone && tone !== 'default' ? tone : null);
+    syncStringAttribute(el, 'density', density && density !== 'default' ? density : null);
+    syncStringAttribute(el, 'shape', shape && shape !== 'default' ? shape : null);
+    syncStringAttribute(el, 'color', color ?? null);
+    syncStringAttribute(el, 'radius', radius ? String(radius) : null);
+    syncStringAttribute(el, 'label', label ?? null);
+    syncStringAttribute(el, 'description', description ?? null);
   }, [
     clearable,
     debounce,
