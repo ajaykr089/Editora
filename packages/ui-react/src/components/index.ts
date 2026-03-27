@@ -277,3 +277,8 @@ export type {
 } from './Select';
 export { Slider } from './Slider';
 export { Skeleton } from './Skeleton';
+export {
+  AnimatedNumber,
+  useAnimatedNumber,
+  useAnimatedNumberValue,
+} from './AnimatedNumber';

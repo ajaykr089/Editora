@@ -43,7 +43,7 @@ showToast({ message: "Saved", level: "success" });
 | `UIPresence`, `UIProgress`, `UIMarquee`, `UIAnimatedText`, `UIAnimatedBeam`, `UIDock`, `UIOrbiter`, `UIScrollArea`, `UISeparator`, `UISlot`, `UIToolbar`, `UIPortal`, `UIVisuallyHidden` | Class exports | Utility primitives |
 | `UIBox`, `UIFlex`, `UIGrid`, `UISection`, `UIContainer`, `UIBreadcrumb`, `UISidebar`, `UIAppHeader`, `UIDrawer`, `UIDialog`, `UILayout` | Class exports | Layout system |
 | `UIBlockControls`, `UIPluginPanel`, `UIFloatingToolbar`, `UISelectionPopup`, `UICommandPalette` | Class exports | Editor-oriented controls |
-| `UITextarea`, `UIField`, `UICombobox`, `UIAlert`, `UISkeleton`, `UIEmptyState`, `UIDataTable`, `UIChart`, `UITimeline`, `UICalendar` | Class exports | Form/data components |
+| `UITextarea`, `UIField`, `UICombobox`, `UIAlert`, `UISkeleton`, `UIEmptyState`, `UIDataTable`, `UIChart`, `UITimeline`, `UICalendar`, `UIOdometer` | Class exports | Form/data components |
 | `UIColorPicker`, `UIDatePicker`, `UIDateRangePicker`, `UITimePicker`, `UIDateTimePicker`, `UIDateRangeTimePicker`, `UIGantt`, `UIStepper`, `UIWizard`, `UIQuickActions` | Class exports | Advanced input/workflow components |
 | Dialog type contracts (`UIAlertDialog*`, `UIDialog*`) | Type exports | Typed dialog payload/event details |
 

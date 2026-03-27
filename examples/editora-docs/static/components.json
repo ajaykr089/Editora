@@ -923,6 +923,26 @@
       }
     },
     {
+      "id": "ui-core:ui-odometer",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "odometer",
+      "tagName": "ui-odometer",
+      "source": "packages/ui-core/src/components/ui-odometer.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-animatednumber--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "animate",
+          "animate-on-mount",
+          "theme",
+          "variant"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-pagination",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -1586,6 +1606,17 @@
       "storybookPath": "/story/ui-alert-dialog-provider--playground",
       "wrapperFor": null,
       "notes": "Provider/API utility component"
+    },
+    {
+      "id": "ui-react:AnimatedNumber",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "AnimatedNumber",
+      "reactExport": "AnimatedNumber",
+      "source": "packages/ui-react/src/components/AnimatedNumber.tsx",
+      "docsPath": "/docs/ui-react/interactive/animated-number",
+      "storybookPath": "/story/ui-animatednumber--playground",
+      "wrapperFor": "ui-odometer"
     },
     {
       "id": "ui-react:AppHeader",

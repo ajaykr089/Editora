@@ -305,9 +305,21 @@ const style = `
     border-radius: var(--ui-dp-panel-radius);
     background: var(--ui-dp-surface);
     box-shadow: var(--ui-dp-shadow);
+    inline-size: fit-content;
+    max-inline-size: 100%;
+    justify-self: start;
     padding: 10px;
     display: grid;
     gap: var(--ui-dp-gap);
+  }
+
+  .inline-panel .footer {
+    gap: 6px;
+  }
+
+  .inline-panel .action {
+    min-block-size: 30px;
+    padding: 0 10px;
   }
 
   .inline-panel[data-bare="true"] {
@@ -316,6 +328,10 @@ const style = `
     background: var(--ui-dp-bare-bg, var(--ui-dp-bg));
     box-shadow: none;
     padding: 0;
+  }
+
+  .inline-panel[hidden] {
+    display: none !important;
   }
 
   .footer {
@@ -430,8 +446,8 @@ const overlayStyle = `
     padding: 10px;
     display: grid;
     gap: var(--ui-dp-gap, 12px);
-    min-inline-size: min(320px, calc(100vw - 16px));
-    max-inline-size: min(360px, calc(100vw - 16px));
+    inline-size: min(var(--ui-dp-panel-width, 20rem), calc(100vw - 16px));
+    max-inline-size: calc(100vw - 16px);
     transform-origin: top;
     animation: ui-dp-pop-in var(--ui-dp-duration, 160ms) var(--ui-dp-ease, cubic-bezier(0.2, 0.9, 0.24, 1));
   }
@@ -627,6 +643,8 @@ export class UIDatePicker extends ElementBase {
   private readonly _panelId = `${this._uid}-panel`;
   private readonly _panelTitleId = `${this._uid}-panel-title`;
   private _overlayFocusedOnOpen = false;
+  private _inlineCalendarFramePending = false;
+  private _inlineCalendarUpgradePending = false;
 
   private _schedulePosition = rafThrottle(() => this._positionOverlay());
 
@@ -663,6 +681,9 @@ export class UIDatePicker extends ElementBase {
 
     if (this._open && !this._isInlineMode()) {
       this._ensureOverlay();
+    }
+    if (this._isInlineMode()) {
+      this._scheduleInlineCalendarSync();
     }
   }
 
@@ -977,6 +998,7 @@ export class UIDatePicker extends ElementBase {
     const panel = this._overlay.querySelector('.panel') as HTMLElement | null;
     if (!field || !panel) return;
     const anchorRect = field.getBoundingClientRect();
+    panel.style.setProperty('--ui-dp-panel-width', `${Math.round(anchorRect.width)}px`);
     const panelRect = panel.getBoundingClientRect();
     const position = computePopoverPosition(anchorRect, panelRect);
     panel.style.position = 'absolute';
@@ -1053,25 +1075,46 @@ export class UIDatePicker extends ElementBase {
     syncAttr('week-start', this.getAttribute('week-start'));
     const sizeAttr = this.getAttribute('size');
     const effectiveSize = sizeAttr || 'sm';
-    syncAttr('size', effectiveSize);
+    syncAttr('size', effectiveSize === 'lg' ? 'md' : 'sm');
     syncAttr('variant', this.getAttribute('variant'));
     syncAttr('outside-click', this.getAttribute('outside-click'));
     syncAttr('events', this.getAttribute('events'));
     syncAttr('events-max', this.getAttribute('events-max'));
     syncAttr('events-display', this.getAttribute('events-display'));
-    const compact = !sizeAttr || sizeAttr === 'sm';
-    if (compact) {
-      calendarEl.style.setProperty('--ui-calendar-day-height', '38px');
-      calendarEl.style.setProperty('--ui-calendar-gap', '8px');
-      calendarEl.style.setProperty('--ui-calendar-day-font-size', '11px');
-      calendarEl.style.setProperty('--ui-calendar-weekday-font-size', '10px');
-      calendarEl.style.setProperty('--ui-calendar-title-font-size', '13px');
+    const isInlineCalendar = calendarEl.classList.contains('inline-calendar');
+    console.log("isInlineCalendar", isInlineCalendar);
+    if (effectiveSize === 'lg') {
+      calendarEl.style.setProperty('--ui-calendar-day-height', '1.95em');
+      calendarEl.style.setProperty('--ui-calendar-day-padding-block', '0.2em');
+      calendarEl.style.setProperty('--ui-calendar-day-padding-inline', '0.26em');
+      calendarEl.style.setProperty('--ui-calendar-gap', '0.42em');
+      calendarEl.style.setProperty('--ui-calendar-day-font-size', '0.78em');
+      calendarEl.style.setProperty('--ui-calendar-weekday-font-size', '0.7em');
+      calendarEl.style.setProperty('--ui-calendar-title-font-size', '0.88em');
     } else {
-      calendarEl.style.removeProperty('--ui-calendar-day-height');
-      calendarEl.style.removeProperty('--ui-calendar-gap');
-      calendarEl.style.removeProperty('--ui-calendar-day-font-size');
-      calendarEl.style.removeProperty('--ui-calendar-weekday-font-size');
-      calendarEl.style.removeProperty('--ui-calendar-title-font-size');
+      calendarEl.style.setProperty('--ui-calendar-day-height', '2.4em');
+      calendarEl.style.setProperty('--ui-calendar-day-padding-block', '0.14em');
+      calendarEl.style.setProperty('--ui-calendar-day-padding-inline', '0.22em');
+      calendarEl.style.setProperty('--ui-calendar-gap', '0.34em');
+      calendarEl.style.setProperty('--ui-calendar-day-font-size', '0.72em');
+      calendarEl.style.setProperty('--ui-calendar-weekday-font-size', '0.64em');
+      calendarEl.style.setProperty('--ui-calendar-title-font-size', '0.8em');
+    }
+    if (isInlineCalendar) {
+      calendarEl.style.setProperty('--ui-calendar-day-height', effectiveSize === 'lg' ? '2.1em' : '1.92em');
+      calendarEl.style.setProperty('--ui-calendar-day-padding-block', '0.08em');
+      calendarEl.style.setProperty('--ui-calendar-day-padding-inline', '0.14em');
+      calendarEl.style.setProperty('--ui-calendar-frame-padding', '0.28em');
+      calendarEl.style.setProperty('--ui-calendar-week-gap', '0.16em');
+      calendarEl.style.setProperty('--ui-calendar-control-height', '1.64em');
+      calendarEl.style.setProperty('--ui-calendar-gap', '0.2em');
+      calendarEl.style.setProperty('--ui-calendar-day-font-size', effectiveSize === 'lg' ? '0.76em' : '0.68em');
+      calendarEl.style.setProperty('--ui-calendar-weekday-font-size', effectiveSize === 'lg' ? '0.66em' : '0.58em');
+      calendarEl.style.setProperty('--ui-calendar-title-font-size', effectiveSize === 'lg' ? '0.84em' : '0.76em');
+    } else {
+      calendarEl.style.removeProperty('--ui-calendar-frame-padding');
+      calendarEl.style.removeProperty('--ui-calendar-week-gap');
+      calendarEl.style.removeProperty('--ui-calendar-control-height');
     }
     syncBool('readonly', this._isReadonly());
     syncBool('disabled', this._isInteractionBlocked());
@@ -1154,6 +1197,37 @@ export class UIDatePicker extends ElementBase {
     const calendarEl = this.root.querySelector('.inline-calendar') as HTMLElement | null;
     if (!calendarEl) return;
     this._syncCalendarElement(calendarEl);
+  }
+
+  private _scheduleInlineCalendarSync(): void {
+    const sync = () => {
+      if (!this.isConnected || !this._hasView || !this._isInlineMode()) return;
+      this._renderInlineCalendar();
+    };
+
+    sync();
+
+    if (!this._inlineCalendarFramePending) {
+      this._inlineCalendarFramePending = true;
+      requestAnimationFrame(() => {
+        this._inlineCalendarFramePending = false;
+        sync();
+      });
+    }
+
+    if (
+      !this._inlineCalendarUpgradePending
+      && typeof customElements !== 'undefined'
+      && !customElements.get('ui-calendar')
+    ) {
+      this._inlineCalendarUpgradePending = true;
+      customElements.whenDefined('ui-calendar').then(() => {
+        this._inlineCalendarUpgradePending = false;
+        requestAnimationFrame(() => {
+          sync();
+        });
+      });
+    }
   }
 
   private _handleDraftCommit(source: DatePickerSource): void {
@@ -1481,7 +1555,7 @@ export class UIDatePicker extends ElementBase {
     if (inlineApply) inlineApply.textContent = t.apply;
 
     if (isInline) {
-      this._renderInlineCalendar();
+      this._scheduleInlineCalendarSync();
       this._destroyOverlay();
       return;
     }
@@ -1510,7 +1584,7 @@ export class UIDatePicker extends ElementBase {
           <div class="hint" id="${this._hintId}" part="hint"></div>
           <div class="error" id="${this._errorId}" part="error" role="alert"></div>
           <input class="hidden-input" type="hidden" disabled />
-          <section class="inline-panel" id="${this._panelId}" part="popover">
+          <section class="inline-panel" id="${this._panelId}" part="popover" hidden>
             <ui-calendar class="inline-calendar" part="calendar"></ui-calendar>
             <footer class="footer" part="footer">
               <button type="button" class="action" data-action="today" part="presets"></button>

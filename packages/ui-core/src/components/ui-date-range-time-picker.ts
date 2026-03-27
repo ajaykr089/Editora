@@ -217,9 +217,39 @@ const style = `
     border-radius: var(--ui-drtp-panel-radius);
     background: var(--ui-drtp-surface);
     box-shadow: var(--ui-drtp-shadow);
+    inline-size: fit-content;
+    max-inline-size: 100%;
+    justify-self: start;
     padding: 12px;
     display: grid;
     gap: 12px;
+  }
+
+  .inline-panel .content {
+    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) 248px;
+  }
+
+  .inline-panel .time-groups {
+    gap: 8px;
+  }
+
+  .inline-panel .time-card {
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .inline-panel .time-table {
+    gap: 4px;
+  }
+
+  .inline-panel .time-row + .time-row {
+    padding-top: 6px;
+  }
+
+  .inline-panel .footer,
+  .inline-panel .presets {
+    gap: 6px;
   }
 
   .inline-panel[data-bare="true"] {
@@ -1078,25 +1108,39 @@ export class UIDateRangeTimePicker extends ElementBase {
     syncAttr('week-start', this.getAttribute('week-start'));
     const sizeAttr = this.getAttribute('size');
     const effectiveSize = sizeAttr || 'sm';
-    syncAttr('size', effectiveSize);
+    const isInlineCalendar = calendarEl.classList.contains('drtp-calendar-inline');
+    syncAttr('size', effectiveSize === 'lg' ? 'md' : 'sm');
     syncAttr('variant', this.getAttribute('variant'));
     syncBool('readonly', this._isReadonly());
     syncBool('disabled', this._isInteractionBlocked());
     syncBool('bare', this._isBare());
     syncAttr('tabindex', '-1');
-    const compact = !sizeAttr || sizeAttr === 'sm';
-    if (compact) {
-      calendarEl.style.setProperty('--ui-calendar-day-height', '38px');
-      calendarEl.style.setProperty('--ui-calendar-gap', '8px');
-      calendarEl.style.setProperty('--ui-calendar-day-font-size', '11px');
-      calendarEl.style.setProperty('--ui-calendar-weekday-font-size', '10px');
-      calendarEl.style.setProperty('--ui-calendar-title-font-size', '13px');
+    if (effectiveSize === 'lg') {
+      calendarEl.style.setProperty('--ui-calendar-day-height', '1.95em');
+      calendarEl.style.setProperty('--ui-calendar-day-padding-block', '0.2em');
+      calendarEl.style.setProperty('--ui-calendar-day-padding-inline', '0.26em');
+      calendarEl.style.setProperty('--ui-calendar-gap', '0.42em');
+      calendarEl.style.setProperty('--ui-calendar-day-font-size', '0.78em');
+      calendarEl.style.setProperty('--ui-calendar-weekday-font-size', '0.7em');
+      calendarEl.style.setProperty('--ui-calendar-title-font-size', '0.88em');
     } else {
-      calendarEl.style.removeProperty('--ui-calendar-day-height');
-      calendarEl.style.removeProperty('--ui-calendar-gap');
-      calendarEl.style.removeProperty('--ui-calendar-day-font-size');
-      calendarEl.style.removeProperty('--ui-calendar-weekday-font-size');
-      calendarEl.style.removeProperty('--ui-calendar-title-font-size');
+      calendarEl.style.setProperty('--ui-calendar-day-height', '2.4em');
+      calendarEl.style.setProperty('--ui-calendar-day-padding-block', '0.14em');
+      calendarEl.style.setProperty('--ui-calendar-day-padding-inline', '0.22em');
+      calendarEl.style.setProperty('--ui-calendar-gap', '0.34em');
+      calendarEl.style.setProperty('--ui-calendar-day-font-size', '0.72em');
+      calendarEl.style.setProperty('--ui-calendar-weekday-font-size', '0.64em');
+      calendarEl.style.setProperty('--ui-calendar-title-font-size', '0.8em');
+    }
+    if (isInlineCalendar) {
+      calendarEl.style.setProperty('--ui-calendar-frame-padding', '0.32em');
+      calendarEl.style.setProperty('--ui-calendar-week-gap', '0.18em');
+      calendarEl.style.setProperty('--ui-calendar-control-height', '1.72em');
+      calendarEl.style.setProperty('--ui-calendar-gap', '0.24em');
+    } else {
+      calendarEl.style.removeProperty('--ui-calendar-frame-padding');
+      calendarEl.style.removeProperty('--ui-calendar-week-gap');
+      calendarEl.style.removeProperty('--ui-calendar-control-height');
     }
     syncAttr('aria-label', this.getAttribute('label') || this._translations().selectDateRange);
   }

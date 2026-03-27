@@ -67,6 +67,8 @@ import { BoldPlugin, MentionPlugin } from '@editora/plugins';
 - Prefer component metadata from components.json.
 - If a component exists in both ui-core and ui-react, ui-core is source-of-truth behavior.
 - Use Storybook for visual/state validation and docs for API guarantees.
+- `AnimatedNumber` is the React wrapper for `ui-odometer`.
+- `AnimatedNumber` supports `odometer`, `inline`, `digital`, and `analog` variants.
 
 ## CLI quick-add commands
 - npx editora add button
