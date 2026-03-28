@@ -37,6 +37,24 @@ Then use components directly:
 <ui-button variant="primary">Save</ui-button>
 ```
 
+## Standalone Component Imports
+
+If you only want a specific custom element instead of registering the full catalog, import its standalone subpath:
+
+```ts
+import '@editora/ui-core/button';
+import '@editora/ui-core/input';
+import '@editora/ui-core/date-picker';
+```
+
+That registers only those elements and keeps the rest of the catalog out of the import path. The dedicated sortable entry remains:
+
+```ts
+import '@editora/ui-core/sortable';
+```
+
+The standalone wrappers live in `src/standalone` and are checked into the package. The build reads from that folder directly, so there is no generator step in the normal build or publish flow.
+
 ## What You Get
 
 ### Core utilities
