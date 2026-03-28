@@ -26,6 +26,7 @@ It covers:
 - Screen-reader live announcements
 - Filter/sort-aware drag locking
 - Visual drop feedback and drag ghosting
+- Configurable line-style or container-style dropzones
 - Persistence payloads for local or server-side ordering
 - Custom JSX item rendering through `renderItem`
 - Custom list headers and empty states through `renderListHeader` and `renderEmptyState`
@@ -59,6 +60,7 @@ If you only want the raw custom element without the rest of `ui-core`, install `
     { id: 'a', label: 'Alpha', listId: 'queue' },
     { id: 'b', label: 'Beta', listId: 'queue' }
   ]));
+  sortable?.setAttribute('dropzone-style', 'container');
 </script>
 
 <ui-sortable></ui-sortable>
@@ -162,6 +164,24 @@ const items: SortableItem[] = [
   { id: 'email-series', label: 'Lifecycle email series', listId: 'library', cloneOnDrag: true },
   { id: 'owner-sync', label: 'Owner sync', listId: 'campaign' }
 ];
+```
+
+## Dropzone Styles
+
+Use the default indicator rails when you want the canvas to stay quiet, or switch to container dropzones when you want the active insertion target to feel like a full card-sized landing zone.
+
+```tsx
+<Sortable
+  lists={lists}
+  items={items}
+  dropzoneStyle="container"
+/>
+```
+
+For the raw custom element, use the matching attribute:
+
+```html
+<ui-sortable dropzone-style="container"></ui-sortable>
 ```
 
 ## Custom JSX Items
@@ -281,6 +301,7 @@ type SortableItem = {
 | `allowFilteredDrag` | `boolean` | `false` | Re-enables dragging while a filter is active |
 | `allowNesting` | `boolean` | `true` | Enables dropping inside another item |
 | `dropIndicatorVisibility` | `'active' \| 'always'` | `'active'` | Keeps idle drop rails hidden by default, or shows them all the time for more explicit affordances |
+| `dropzoneStyle` | `'indicator' \| 'container'` | `'indicator'` | Uses slim rail targets by default, or expands the active drop target into an item-sized container surface |
 | `dragPreviewSize` | `'match-item' \| 'compact'` | `'match-item'` | Controls whether the floating drop preview matches the dragged item size or uses the older compact preview card |
 | `dragHandleMode` | `'handle' \| 'item'` | `'handle'` | Uses the built-in handle button, or lets the whole item surface initiate drag |
 | `dragHandleSelector` | `string` | — | React wrapper only. Marks matching elements inside `renderItem` content as drag handles |
@@ -353,6 +374,7 @@ This is designed for storage in a database as explicit ordering metadata.
 - `renderListHeader` customizes the top chrome of each lane without affecting drop logic
 - `renderEmptyState` customizes only the empty message area; the dropzone still remains active below it
 - `dropIndicatorVisibility="active"` keeps the canvas visually clean until a drag is in progress, while `"always"` restores fully visible rails
+- `dropzoneStyle="container"` turns the active drop target into a larger card-like landing surface sized from nearby sortable content
 - `dragPreviewSize="match-item"` makes the floating drop preview mirror the dragged card dimensions, while `"compact"` restores the smaller older preview style
 - `dragHandleMode="item"` lets the entire card initiate drag while still preserving click-to-select when the pointer does not move
 - `dragHandleSelector` is useful with `renderItem` when your custom JSX already has a grip button or icon that should be the drag affordance

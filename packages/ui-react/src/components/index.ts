@@ -48,6 +48,7 @@ export type {
   SortableSortMode,
   SortableChangeSource,
   SortableOperation,
+  SortableDropzoneStyle,
   SortableRenderEmptyStateContext,
   SortableRenderItemContext,
   SortableRenderListHeaderContext,

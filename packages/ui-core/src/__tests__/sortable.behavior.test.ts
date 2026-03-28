@@ -124,6 +124,75 @@ describe('ui-sortable', () => {
     expect(epic?.textContent).not.toContain('Selected');
   });
 
+  it('does not display the selection badge for unselected items', async () => {
+    const el = document.createElement('ui-sortable') as any;
+    el.setAttribute('lists', JSON.stringify(lists));
+    el.setAttribute('items', JSON.stringify(items));
+    el.setAttribute('selection', JSON.stringify(['epic']));
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const taskA = el.shadowRoot?.querySelector('.item[data-id="task-a"]') as HTMLElement | null;
+    const badge = taskA?.querySelector('[data-selection-badge="true"]') as HTMLElement | null;
+
+    expect(badge?.hidden).toBe(true);
+    expect(badge?.textContent).toBe('');
+    expect(window.getComputedStyle(badge as HTMLElement).display).toBe('none');
+  });
+
+  it('supports container-style dropzones for item-sized insertion targets', async () => {
+    const el = document.createElement('ui-sortable') as any;
+    el.setAttribute('lists', JSON.stringify(lists));
+    el.setAttribute('items', JSON.stringify(items));
+    el.setAttribute('dropzone-style', 'container');
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    el._dragState = {
+      snapshot: el._items.map((item: any) => ({ ...item })),
+      movedRootIds: ['task-a'],
+      originId: 'task-a',
+      clone: false,
+      keyboard: false,
+      dropTarget: {
+        listId: 'todo',
+        parentId: null,
+        beforeId: 'task-b',
+        mode: 'before',
+      },
+      committed: false,
+    };
+
+    el.requestRender();
+    await flushMicrotask();
+    await flushMicrotask();
+
+    const root = el.shadowRoot?.querySelector('.root') as HTMLElement | null;
+    const zone = el.shadowRoot?.querySelector('.dropzone[data-list-id="todo"][data-before-id="task-b"][data-mode="before"]') as HTMLElement | null;
+    const reference = el.shadowRoot?.querySelector('.item[data-id="task-b"]') as HTMLElement | null;
+
+    reference!.getBoundingClientRect = () => ({
+      x: 0,
+      y: 0,
+      top: 0,
+      left: 0,
+      right: 1459,
+      bottom: 51,
+      width: 1459,
+      height: 51,
+      toJSON() {
+        return {};
+      }
+    });
+
+    el._syncDropzoneContainerSize(zone, el._dragState.dropTarget);
+
+    expect(root?.getAttribute('data-dropzone-style')).toBe('container');
+    expect(zone?.getAttribute('data-active')).toBe('true');
+    expect(zone?.style.getPropertyValue('--ui-sortable-dropzone-match-block-size')).toBe('76px');
+    expect(zone?.style.getPropertyValue('--ui-sortable-dropzone-match-inline-size')).toBe('1459px');
+  });
+
   it('uses clean active-only drop indicators by default and allows always-visible rails', async () => {
     const el = document.createElement('ui-sortable') as any;
     el.setAttribute('lists', JSON.stringify(lists));

@@ -214,6 +214,7 @@ const meta = {
     sort: 'manual',
     allowNesting: true,
     dropIndicatorVisibility: 'active',
+    dropzoneStyle: 'indicator',
     dragPreviewSize: 'match-item',
     dragHandleMode: 'handle',
     showSelectionBadge: true,
@@ -224,6 +225,7 @@ const meta = {
     allowFilteredDrag: { control: 'boolean' },
     allowNesting: { control: 'boolean' },
     dropIndicatorVisibility: { control: 'select', options: ['active', 'always'] },
+    dropzoneStyle: { control: 'select', options: ['indicator', 'container'] },
     dragPreviewSize: { control: 'select', options: ['match-item', 'compact'] },
     dragHandleMode: { control: 'select', options: ['handle', 'item'] },
     dragHandleSelector: { control: 'text' },
@@ -724,6 +726,35 @@ export const ExplicitDropRails: Story = {
       dropIndicatorVisibility="always"
       showSelectionBadge={false}
     />
+  )
+};
+
+export const ContainerDropzones: Story = {
+  render: () => (
+    <Box style={{ display: 'grid', gap: 24 }}>
+      <StatefulSortable
+        title="Indicator dropzones"
+        description="This is the default insertion style: slim rails stay subtle until drag is active."
+        showFilter={false}
+        lists={flatListLists}
+        items={flatListItems}
+        selection={['headline']}
+        allowNesting={false}
+        dropzoneStyle="indicator"
+        showSelectionBadge={false}
+      />
+      <StatefulSortable
+        title="Container dropzones"
+        description="Switch to container mode when you want the active insertion target to feel like a full card-sized landing zone instead of a thin rail."
+        showFilter={false}
+        lists={flatListLists}
+        items={flatListItems}
+        selection={['legal']}
+        allowNesting={false}
+        dropzoneStyle="container"
+        showSelectionBadge={false}
+      />
+    </Box>
   )
 };
 

@@ -14,6 +14,7 @@ export type {
   UISortablePersistenceSnapshot,
   UISortableChangeDetail,
   UISortableDropIndicatorVisibility,
+  UISortableDropzoneStyle,
   UISortableDragHandleMode,
   UISortableListOrientation
 } from './components/ui-sortable';

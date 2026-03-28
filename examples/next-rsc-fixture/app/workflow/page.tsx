@@ -92,6 +92,7 @@ export default function WorkflowPage() {
   const [sortableSelection, setSortableSelection] = React.useState<string[]>(['epic-release']);
   const [sortableFilter, setSortableFilter] = React.useState('');
   const [sortableSort, setSortableSort] = React.useState<'manual' | 'label'>('manual');
+  const [sortableDropzoneStyle, setSortableDropzoneStyle] = React.useState<'indicator' | 'container'>('container');
   const [sortableStatus, setSortableStatus] = React.useState('Waiting for drag-and-drop activity.');
 
   return (
@@ -158,12 +159,12 @@ export default function WorkflowPage() {
           <ShowcaseCard
             eyebrow="Drag And Drop"
             title="Multi-list sortable workspace"
-            description="This surface demonstrates single-list reordering, multi-list transfer, nesting, multi-selection, handle-only dragging, cloning, keyboard cancel, filter-aware drag locks, and persisted ordering."
+            description="This surface demonstrates single-list reordering, multi-list transfer, nesting, multi-selection, handle-only dragging, cloning, configurable dropzone styles, keyboard cancel, filter-aware drag locks, and persisted ordering."
           >
             <Grid style={{ display: 'grid', gap: 16, justifyItems: 'stretch', alignItems: 'start' }}>
               <Box style={{ ...stageStyle, width: '100%', display: 'grid', gap: 12 }}>
                 <Box style={eyebrowStyle}>Controls</Box>
-                <Grid style={{ display: 'grid', gap: 12, gridTemplateColumns: 'minmax(0, 1fr) auto auto' }}>
+                <Grid style={{ display: 'grid', gap: 12, gridTemplateColumns: 'minmax(0, 1fr) auto auto auto auto' }}>
                   <Input
                     label="Filter cards"
                     placeholder="Type to filter labels and descriptions"
@@ -184,9 +185,23 @@ export default function WorkflowPage() {
                   >
                     A-Z lock
                   </Button>
+                  <Button
+                    recipe={sortableDropzoneStyle === 'indicator' ? 'solid' : 'outline'}
+                    size="sm"
+                    onClick={() => setSortableDropzoneStyle('indicator')}
+                  >
+                    Line targets
+                  </Button>
+                  <Button
+                    recipe={sortableDropzoneStyle === 'container' ? 'solid' : 'outline'}
+                    size="sm"
+                    onClick={() => setSortableDropzoneStyle('container')}
+                  >
+                    Container targets
+                  </Button>
                 </Grid>
                 <Box style={hintStyle}>
-                  Try multi-select with Cmd/Ctrl-click or Shift-click. Press Space on a focused item to lift it, arrow keys to move the destination, and Escape to cancel.
+                  Try multi-select with Cmd/Ctrl-click or Shift-click. Press Space on a focused item to lift it, arrow keys to move the destination, and Escape to cancel. Switch between line-style and container-style dropzones to match how explicit you want insertion targets to feel.
                 </Box>
               </Box>
 
@@ -196,6 +211,7 @@ export default function WorkflowPage() {
                 selection={sortableSelection}
                 filterQuery={sortableFilter}
                 sort={sortableSort}
+                dropzoneStyle={sortableDropzoneStyle}
                 persistKey="workflow-sortable-demo"
                 onItemsChange={setSortableItems}
                 onSelectionChange={(detail: SortableSelectionChangeDetail) => setSortableSelection(detail.selection)}

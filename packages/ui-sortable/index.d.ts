@@ -12,6 +12,7 @@ export type {
   UISortablePersistenceSnapshot,
   UISortableChangeDetail,
   UISortableDropIndicatorVisibility,
+  UISortableDropzoneStyle,
   UISortableDragHandleMode,
   UISortableListOrientation
 } from '@editora/ui-core/sortable';

@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-sortable",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Standalone install for the Editora sortable web component, with reordering, transfer, hierarchy, cloning, and keyboard-accessible drag and drop.",
   "homepage": "https://editora-ecosystem.netlify.app/docs/ui-react/interactive/sortable",
   "bugs": {
@@ -33,7 +33,7 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "@editora/ui-core": "^0.1.8"
+    "@editora/ui-core": "^0.1.9"
   },
   "devDependencies": {
     "rimraf": "^5.0.0",

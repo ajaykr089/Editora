@@ -18,6 +18,7 @@ export type SortableDropMode = 'before' | 'inside';
 export type SortableChangeSource = 'pointer' | 'keyboard' | 'api' | 'restore';
 export type SortableOperation = 'reorder' | 'transfer' | 'nest' | 'clone';
 export type SortableDropIndicatorVisibility = 'active' | 'always';
+export type SortableDropzoneStyle = 'indicator' | 'container';
 export type SortableDragPreviewSize = 'match-item' | 'compact';
 export type SortableDragHandleMode = 'handle' | 'item';
 export type SortableRadiusPreset = 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
@@ -129,6 +130,7 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   allowFilteredDrag?: boolean;
   allowNesting?: boolean;
   dropIndicatorVisibility?: SortableDropIndicatorVisibility;
+  dropzoneStyle?: SortableDropzoneStyle;
   dragPreviewSize?: SortableDragPreviewSize;
   dragHandleMode?: SortableDragHandleMode;
   dragHandleSelector?: string;
@@ -205,6 +207,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
     allowFilteredDrag,
     allowNesting,
     dropIndicatorVisibility,
+    dropzoneStyle,
     dragPreviewSize,
     dragHandleMode,
     dragHandleSelector,
@@ -287,6 +290,9 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
       if (dropIndicatorVisibility === 'always') element.setAttribute('drop-indicator-visibility', 'always');
       else element.removeAttribute('drop-indicator-visibility');
 
+      if (dropzoneStyle === 'container') element.setAttribute('dropzone-style', 'container');
+      else element.removeAttribute('dropzone-style');
+
       if (dragPreviewSize === 'compact') element.setAttribute('drag-preview-size', 'compact');
       else element.removeAttribute('drag-preview-size');
 
@@ -315,7 +321,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
 
       syncBooleanAttribute(element, 'disabled', disabled);
     },
-    [lists, items, selection, filterQuery, sort, persistKey, allowFilteredDrag, allowNesting, dropIndicatorVisibility, dragPreviewSize, dragHandleMode, dragHandleSelector, itemRadius, handleRadius, listGap, itemSpacing, renderItem, showSelectionBadge, disabled]
+    [lists, items, selection, filterQuery, sort, persistKey, allowFilteredDrag, allowNesting, dropIndicatorVisibility, dropzoneStyle, dragPreviewSize, dragHandleMode, dragHandleSelector, itemRadius, handleRadius, listGap, itemSpacing, renderItem, showSelectionBadge, disabled]
   );
 
   useIsomorphicLayoutEffect(() => {

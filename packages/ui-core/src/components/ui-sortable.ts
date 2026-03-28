@@ -7,6 +7,7 @@ export type UISortableChangeSource = 'pointer' | 'keyboard' | 'api' | 'restore';
 export type UISortableOperation = 'reorder' | 'transfer' | 'nest' | 'clone';
 export type UISortableDropIndicatorVisibility = 'active' | 'always';
 export type UISortableDragHandleMode = 'handle' | 'item';
+export type UISortableDropzoneStyle = 'indicator' | 'container';
 
 export type UISortableList = {
   id: string;
@@ -172,6 +173,8 @@ const style = `
     --ui-sortable-item-gap: 12px;
     --ui-sortable-dropzone-size: 10px;
     --ui-sortable-dropzone-inside-size: 16px;
+    --ui-sortable-dropzone-container-min-block-size: 76px;
+    --ui-sortable-dropzone-container-min-inline-size: 180px;
     --ui-sortable-indent: 22px;
     display: block;
     min-inline-size: 0;
@@ -562,6 +565,10 @@ const style = `
     font-weight: 600;
   }
 
+  .item-badge[hidden] {
+    display: none;
+  }
+
   .item[data-drop-inside-active="true"] .item-badge.drop-badge {
     background: color-mix(in srgb, var(--ui-sortable-accent) 18%, var(--ui-sortable-surface));
     color: color-mix(in srgb, var(--ui-sortable-accent) 78%, var(--ui-sortable-text));
@@ -635,9 +642,38 @@ const style = `
     transition: opacity 140ms ease, background 140ms ease;
   }
 
+  .root[data-dropzone-style="container"] .dropzone {
+    display: grid;
+    place-items: center;
+    min-block-size: var(--ui-sortable-dropzone-match-block-size, var(--ui-sortable-dropzone-container-min-block-size));
+    inline-size: min(100%, var(--ui-sortable-dropzone-match-inline-size, 100%));
+    max-inline-size: var(--ui-sortable-dropzone-container-max-inline-size, none);
+    padding: 12px;
+    border: 1px dashed color-mix(in srgb, var(--ui-sortable-accent) 40%, var(--ui-sortable-border));
+    border-radius: var(--ui-sortable-item-radius);
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--ui-sortable-accent) 9%, var(--ui-sortable-surface)),
+        color-mix(in srgb, var(--ui-sortable-accent) 5%, var(--ui-sortable-surface-muted))
+      );
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--ui-sortable-accent) 12%, transparent),
+      0 8px 18px rgba(15, 23, 42, 0.05);
+    opacity: 0.82;
+    overflow: hidden;
+  }
+
   .list[data-orientation="horizontal"] .dropzone {
     min-block-size: auto;
     min-inline-size: 16px;
+    align-self: stretch;
+  }
+
+  .root[data-dropzone-style="container"] .list[data-orientation="horizontal"] .dropzone {
+    min-block-size: var(--ui-sortable-dropzone-match-block-size, var(--ui-sortable-dropzone-container-min-block-size));
+    min-inline-size: var(--ui-sortable-dropzone-match-inline-size, var(--ui-sortable-dropzone-container-min-inline-size));
+    inline-size: auto;
     align-self: stretch;
   }
 
@@ -667,6 +703,19 @@ const style = `
     opacity: 1;
   }
 
+  .root[data-dropzone-style="container"] .dropzone[data-active="true"] {
+    border-color: color-mix(in srgb, var(--ui-sortable-accent) 56%, var(--ui-sortable-border));
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--ui-sortable-accent) 14%, var(--ui-sortable-surface)),
+        color-mix(in srgb, var(--ui-sortable-accent) 10%, var(--ui-sortable-surface-muted))
+      );
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--ui-sortable-accent) 16%, transparent),
+      0 12px 24px rgba(15, 23, 42, 0.08);
+  }
+
   .list[data-orientation="horizontal"] .dropzone[data-active="true"] {
     opacity: 1;
   }
@@ -684,6 +733,15 @@ const style = `
     min-block-size: var(--ui-sortable-dropzone-inside-size);
     margin-block-start: -2px;
     padding-inline-start: 6px;
+  }
+
+  .root[data-dropzone-style="container"] .dropzone[data-mode="inside"] {
+    min-block-size: max(
+      calc(var(--ui-sortable-dropzone-match-block-size, var(--ui-sortable-dropzone-container-min-block-size)) * 0.78),
+      var(--ui-sortable-dropzone-container-min-block-size)
+    );
+    margin-block-start: 0;
+    padding-inline-start: 12px;
   }
 
   .dropzone[data-mode="inside"]::before {
@@ -708,6 +766,25 @@ const style = `
     pointer-events: none;
   }
 
+  .root[data-dropzone-style="container"] .dropzone::before {
+    display: none;
+  }
+
+  .root[data-dropzone-style="container"] .dropzone-label {
+    position: static;
+    inset: auto;
+    transform: none;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    color: color-mix(in srgb, var(--ui-sortable-accent) 76%, var(--ui-sortable-text));
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    opacity: 1;
+    white-space: nowrap;
+  }
+
   .dropzone[data-active="true"] .dropzone-label {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
@@ -717,8 +794,22 @@ const style = `
     opacity: 0;
   }
 
+  .root[data-dropzone-style="container"][data-drag-preview="true"] .dropzone-label {
+    opacity: 1;
+  }
+
   .root[data-drop-indicator-visibility="active"] .dropzone {
     opacity: 0;
+  }
+
+  .root[data-dropzone-style="container"][data-drop-indicator-visibility="active"] .dropzone {
+    display: none;
+    opacity: 0;
+  }
+
+  .root[data-dropzone-style="container"][data-drop-indicator-visibility="active"] .dropzone[data-active="true"] {
+    display: grid;
+    opacity: 1;
   }
 
   .root[data-drop-indicator-visibility="active"] .dropzone::before {
@@ -1195,6 +1286,7 @@ export class UISortable extends ElementBase {
       'allow-filtered-drag',
       'allow-nesting',
       'drop-indicator-visibility',
+      'dropzone-style',
       'drag-preview-size',
       'drag-handle-mode',
       'drag-handle-selector',
@@ -1394,6 +1486,7 @@ export class UISortable extends ElementBase {
     const selectionCount = this._selection.length;
     const allowNesting = this.getAttribute('allow-nesting') !== 'false';
     const dropIndicatorVisibility = this.getAttribute('drop-indicator-visibility') === 'always' ? 'always' : 'active';
+    const dropzoneStyle = this._dropzoneStyle();
     const showSelectionBadge = this.getAttribute('show-selection-badge') !== 'false';
     const dragHandleMode = this._dragHandleMode();
     const usesCustomHandleSelector = this._usesCustomHandleSelector();
@@ -1420,6 +1513,7 @@ export class UISortable extends ElementBase {
         data-drag-locked="${dragLocked}"
         data-drag-preview="${placeholderIds.size || pointerPreviewActive ? 'true' : 'false'}"
         data-drop-indicator-visibility="${dropIndicatorVisibility}"
+        data-dropzone-style="${dropzoneStyle}"
       >
         <div class="toolbar" part="toolbar">
           <div class="helper">${escapeHtml(helper)}</div>
@@ -1585,6 +1679,10 @@ export class UISortable extends ElementBase {
     return parseDragHandleMode(this.getAttribute('drag-handle-mode'));
   }
 
+  private _dropzoneStyle(): UISortableDropzoneStyle {
+    return this.getAttribute('dropzone-style') === 'container' ? 'container' : 'indicator';
+  }
+
   private _usesCustomHandleSelector(): boolean {
     return !!this.getAttribute('drag-handle-selector')?.trim();
   }
@@ -1607,7 +1705,12 @@ export class UISortable extends ElementBase {
 
   private _setDropTargetVisualState(target: DropTarget | null, active: boolean): void {
     if (!target) return;
-    this._findDropzone(target)?.setAttribute('data-active', active ? 'true' : 'false');
+    const zone = this._findDropzone(target);
+    if (zone) {
+      zone.setAttribute('data-active', active ? 'true' : 'false');
+      if (active) this._syncDropzoneContainerSize(zone, target);
+      else this._clearDropzoneContainerSize(zone);
+    }
     if (target.mode === 'inside' && target.parentId) {
       this._findItemElement(target.parentId)?.setAttribute('data-drop-inside-active', active ? 'true' : 'false');
     }
@@ -1675,6 +1778,49 @@ export class UISortable extends ElementBase {
     if (selectionText) {
       selectionText.textContent = this._selection.length === 1 ? 'item selected' : 'items selected';
     }
+  }
+
+  private _clearDropzoneContainerSize(zone: HTMLElement): void {
+    zone.style.removeProperty('--ui-sortable-dropzone-match-block-size');
+    zone.style.removeProperty('--ui-sortable-dropzone-match-inline-size');
+  }
+
+  private _dropzoneReferenceElement(target: DropTarget, zone: HTMLElement): HTMLElement | null {
+    if (target.mode === 'inside' && target.parentId) return this._findItemElement(target.parentId);
+
+    let next = zone.nextElementSibling;
+    while (next) {
+      if (next instanceof HTMLElement && next.classList.contains('item-shell')) {
+        return next.querySelector<HTMLElement>('.item[data-id]');
+      }
+      next = next.nextElementSibling;
+    }
+
+    let previous = zone.previousElementSibling;
+    while (previous) {
+      if (previous instanceof HTMLElement && previous.classList.contains('item-shell')) {
+        return previous.querySelector<HTMLElement>('.item[data-id]');
+      }
+      previous = previous.previousElementSibling;
+    }
+
+    const listId = this._escapeSelectorValue(target.listId);
+    const listItems = this.root.querySelector<HTMLElement>(`.list[data-list-id="${listId}"] .items`);
+    const firstItem = listItems?.querySelector<HTMLElement>('.item[data-id]');
+    if (firstItem) return firstItem;
+
+    return listItems || null;
+  }
+
+  private _syncDropzoneContainerSize(zone: HTMLElement, target: DropTarget): void {
+    this._clearDropzoneContainerSize(zone);
+    if (this._dropzoneStyle() !== 'container') return;
+
+    const reference = this._dropzoneReferenceElement(target, zone);
+    if (!reference) return;
+    const rect = reference.getBoundingClientRect();
+    zone.style.setProperty('--ui-sortable-dropzone-match-block-size', `${Math.max(76, Math.round(rect.height))}px`);
+    zone.style.setProperty('--ui-sortable-dropzone-match-inline-size', `${Math.max(180, Math.round(rect.width))}px`);
   }
 
   private _ensureDragPreviewOverlay(): HTMLElement {

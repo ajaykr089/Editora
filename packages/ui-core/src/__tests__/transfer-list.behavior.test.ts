@@ -28,6 +28,31 @@ describe('ui-transfer-list', () => {
     expect(el.getAttribute('value')).toBe('["read"]');
   });
 
+  it('does not double-toggle selection after a rerender', async () => {
+    const el = document.createElement('ui-transfer-list') as HTMLElement & { requestRender?: () => void };
+    el.setAttribute(
+      'options',
+      JSON.stringify([
+        { value: 'read', label: 'Read' },
+        { value: 'write', label: 'Write' }
+      ])
+    );
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    el.requestRender?.();
+    await flushMicrotask();
+
+    const readItem = el.shadowRoot?.querySelector('[data-side="available"][data-value="read"]') as HTMLElement | null;
+    readItem?.click();
+
+    const add = el.shadowRoot?.querySelector('[data-action="add"]') as HTMLButtonElement | null;
+    expect(add?.disabled).toBe(false);
+
+    add?.click();
+    expect(el.getAttribute('value')).toBe('["read"]');
+  });
+
   it('supports the shared surface attributes and custom panel copy', async () => {
     const el = document.createElement('ui-transfer-list') as HTMLElement;
     el.setAttribute(
