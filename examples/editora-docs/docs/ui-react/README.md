@@ -15,10 +15,16 @@ React wrappers for `@editora/ui-core` Web Components, providing React-friendly p
 npm install @editora/ui-react @editora/ui-core
 ```
 
-If you only need the standalone sortable custom element without the broader packages:
+If you only need sortable without the broader packages:
 
 ```bash
 npm install @editora/ui-sortable
+```
+
+Use the standalone React wrapper from:
+
+```tsx
+import { Sortable } from '@editora/ui-sortable/react';
 ```
 
 ```tsx
@@ -67,7 +73,7 @@ export function App() {
 - [Chart](./interactive/chart) - Data visualization
 - [Timeline](./interactive/timeline) - Timeline visualization
 - [Tree](./interactive/tree) - Hierarchical data display
-- [Sortable](./interactive/sortable) - Production-ready drag and drop for reorder, transfer, hierarchy, persistence, and standalone web component usage
+- [Sortable](./interactive/sortable) - Production-ready drag and drop for reorder, transfer, hierarchy, persistence, standalone web component usage, and a standalone React wrapper
 - [Marquee](./interactive/marquee) - Infinite scrolling content rail
 - [AnimatedText](./interactive/animated-text) - Text-first animation for headlines, callouts, and hero copy
 - [AnimatedBeam](./interactive/animated-beam) - Integration and orchestration diagram with animated beam paths

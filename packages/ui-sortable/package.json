@@ -20,25 +20,51 @@
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js",
       "default": "./dist/index.esm.js"
+    },
+    "./react": {
+      "types": "./react.d.ts",
+      "import": "./dist/react.esm.js",
+      "require": "./dist/react.cjs.js",
+      "default": "./dist/react.esm.js"
     }
   },
   "files": [
     "dist",
-    "index.d.ts"
+    "index.d.ts",
+    "react.d.ts"
   ],
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "clean": "rimraf dist",
     "prepare": "npm run build"
   },
   "dependencies": {
     "@editora/ui-core": "^0.1.9"
   },
+  "peerDependencies": {
+    "react": ">=16.8 <21",
+    "react-dom": ">=16.8 <21"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
   "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "jsdom": "^22.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "rimraf": "^5.0.0",
     "typescript": "^5.0.0",
-    "vite": "^4.5.14"
+    "vite": "^4.5.14",
+    "vitest": "^1.6.1"
   },
   "keywords": [
     "editora",

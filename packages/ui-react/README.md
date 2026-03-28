@@ -15,6 +15,18 @@ This package gives React-friendly props, typed callback details, and hooks/provi
 npm install @editora/ui-react @editora/ui-core
 ```
 
+If you only need sortable as a standalone package, use:
+
+```bash
+npm install @editora/ui-sortable
+```
+
+And for the standalone React wrapper only:
+
+```tsx
+import { Sortable } from '@editora/ui-sortable/react';
+```
+
 Peer dependencies:
 - `react`
 - `react-dom`

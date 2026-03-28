@@ -14,11 +14,16 @@ React-first UI package for Editora application and editor interfaces.
 npm i @editora/ui-react @editora/ui-core
 ```
 
-If you only need the sortable web component without the broader UI bundles:
+If you only need sortable without the broader UI bundles:
 
 ```bash
 npm i @editora/ui-sortable
 ```
+
+You can use it either as:
+
+- a standalone web component via `import '@editora/ui-sortable'`
+- a standalone React wrapper via `import { Sortable } from '@editora/ui-sortable/react'`
 
 ## Quick Start
 
@@ -43,7 +48,7 @@ export function App() {
 | `Button`, `Tooltip`, `Alert`, `Dropdown`, `Input`, `Textarea`, `Field`, `Combobox` | Component exports | Base controls |
 | `Badge`, `EmptyState`, `Table`, `DataTable`, `Chart`, `Timeline`, `Calendar`, `Marquee`, `AnimatedText`, `AnimatedBeam`, `Dock`, `Orbiter` | Component exports | Data display, motion, and launcher controls |
 | `ColorPicker`, `DatePicker`, `DateRangePicker`, `TimePicker`, `DateTimePicker`, `DateRangeTimePicker` | Component exports | Date/time and color controls |
-| `Gantt`, `Stepper`, `Wizard`, `QuickActions`, `Sortable` | Component exports | Workflow controls, including standalone-installable sortable drag and drop |
+| `Gantt`, `Stepper`, `Wizard`, `QuickActions`, `Sortable` | Component exports | Workflow controls, including standalone-installable sortable drag and drop for both web component and standalone React wrapper use |
 | `NavigationMenu`, `Menubar`, `Dialog`, `Popover`, `Tabs`, `Menu`, `ContextMenu` | Component exports | Nav + overlay components |
 | `FloatingToolbar`, `BlockControls`, `CommandPalette`, `SelectionPopup`, `PluginPanel` | Component exports | Editor-specific surfaces |
 | `Form`, `useForm`, `useFloating` | Component + hooks | Form and floating behavior |

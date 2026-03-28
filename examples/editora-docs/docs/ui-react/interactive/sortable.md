@@ -13,6 +13,7 @@ It is available as:
 - `@editora/ui-react` for the React wrapper
 - `@editora/ui-core` for the broader web component bundle
 - `@editora/ui-sortable` for a standalone `ui-sortable` install
+- `@editora/ui-sortable/react` for a standalone React wrapper around `ui-sortable`
 
 It covers:
 
@@ -40,6 +41,9 @@ import { Sortable } from '@editora/ui-react';
 // Subpath
 import { Sortable } from '@editora/ui-react/Sortable';
 
+// Standalone React wrapper
+import { Sortable } from '@editora/ui-sortable/react';
+
 // Standalone web component package
 import '@editora/ui-sortable';
 ```
@@ -64,6 +68,46 @@ If you only want the raw custom element without the rest of `ui-core`, install `
 </script>
 
 <ui-sortable></ui-sortable>
+```
+
+## Standalone React Wrapper Usage
+
+If you only want the sortable React wrapper without the rest of `@editora/ui-react`, use `@editora/ui-sortable/react`.
+
+```tsx
+import * as React from 'react';
+import { Sortable, type SortableItem, type SortableList } from '@editora/ui-sortable/react';
+
+const lists: SortableList[] = [
+  { id: 'backlog', label: 'Backlog' },
+  { id: 'done', label: 'Done' }
+];
+
+const initialItems: SortableItem[] = [
+  { id: 'story-1', label: 'Audit onboarding', listId: 'backlog' },
+  { id: 'story-2', label: 'Ship release notes', listId: 'done' }
+];
+
+export function StandaloneSortableExample() {
+  const [items, setItems] = React.useState(initialItems);
+
+  return (
+    <Sortable
+      lists={lists}
+      items={items}
+      onItemsChange={setItems}
+      dropzoneStyle="container"
+    />
+  );
+}
+```
+
+For Next.js App Router or other SSR/RSC setups, import the standalone React wrapper from a client component:
+
+```tsx
+'use client';
+
+import { Sortable } from '@editora/ui-sortable/react';
 ```
 
 ## Basic Usage
