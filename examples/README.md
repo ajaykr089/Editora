@@ -153,7 +153,47 @@ Includes:
 - In-memory API + TanStack Query + RHF/Zod forms
 - Toasts, confirmations, loading/empty/error states
 
-### 7. Collaborative Editor (`collaborative/`)
+### 7. ui-core Direct in Vue (`ui-core-vue-direct/`)
+Vue 3 example using `@editora/ui-core` custom elements directly, without `@editora/ui-vue`.
+
+```bash
+source /usr/local/opt/nvm/nvm.sh
+nvm use 22.12.0
+npm run build --prefix packages/ui-core
+npm run dev --prefix examples/ui-core-vue-direct
+```
+
+Includes:
+- standalone component imports
+- direct `CustomEvent` handling from Vue
+- direct `ui-sortable` property assignment through refs
+
+### 8. ui-core Direct in Svelte (`ui-core-svelte-direct/`)
+Svelte example using `@editora/ui-core` directly, without `@editora/ui-svelte`.
+
+```bash
+source /usr/local/opt/nvm/nvm.sh
+nvm use 22.12.0
+npm run build --prefix packages/ui-core
+npm run dev --prefix examples/ui-core-svelte-direct
+```
+
+Includes:
+- direct custom element markup
+- `on:*` handlers for `CustomEvent` payloads
+- `bind:this` for `ui-sortable` property bridging
+
+### 9. ui-core Direct in Angular (`ui-core-angular-direct/`)
+Production-style Angular integration example showing direct `ui-core` usage without `@editora/ui-angular`.
+
+This example is documented and source-backed, but not runnable in the current workspace because the Angular bootstrap/compiler packages are not installed locally.
+
+Includes:
+- `CUSTOM_ELEMENTS_SCHEMA`
+- direct custom event handling
+- `@ViewChild` for `ui-sortable` property assignment
+
+### 10. Collaborative Editor (`collaborative/`)
 Editor with comments, mentions, and real-time collaboration features.
 
 ```bash

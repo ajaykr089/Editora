@@ -1,0 +1,148 @@
+:root {
+  color: #10221b;
+  background:
+    radial-gradient(circle at top left, rgba(15, 118, 110, 0.14), transparent 32%),
+    linear-gradient(180deg, #f6f4ed 0%, #efe8dd 100%);
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+code {
+  font-family: "SFMono-Regular", "Menlo", monospace;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 24px;
+  padding: 24px;
+}
+
+.control-panel,
+.board-panel {
+  background: rgba(255, 253, 247, 0.86);
+  border: 1px solid rgba(16, 34, 27, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(16, 34, 27, 0.08);
+  backdrop-filter: blur(16px);
+}
+
+.control-panel {
+  padding: 24px;
+  display: grid;
+  gap: 20px;
+  align-content: start;
+}
+
+.board-panel {
+  padding: 20px;
+  display: grid;
+  gap: 20px;
+}
+
+.eyebrow {
+  margin: 0;
+  font: 600 0.82rem/1.2 "SFMono-Regular", "Menlo", monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #0f766e;
+}
+
+h1,
+h2,
+h3,
+.lede,
+.board-caption,
+.legend li {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  line-height: 1;
+}
+
+h2 {
+  font-size: 1.3rem;
+}
+
+.lede,
+.board-caption,
+.legend li {
+  color: rgba(16, 34, 27, 0.74);
+}
+
+.field-stack,
+.button-row,
+.legend {
+  display: grid;
+  gap: 14px;
+}
+
+.button-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.board-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.list-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.list-summary article {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(15, 118, 110, 0.08);
+}
+
+.list-summary p {
+  margin: 6px 0 0;
+  color: rgba(16, 34, 27, 0.6);
+  font-size: 0.92rem;
+}
+
+.legend ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+ui-alert,
+ui-sortable {
+  display: block;
+}
+
+ui-sortable {
+  min-height: 520px;
+}
+
+@media (max-width: 960px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .button-row,
+  .list-summary {
+    grid-template-columns: 1fr;
+  }
+}

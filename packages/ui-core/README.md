@@ -55,6 +55,22 @@ import '@editora/ui-core/sortable';
 
 The standalone wrappers live in `src/standalone` and are checked into the package. The build reads from that folder directly, so there is no generator step in the normal build or publish flow.
 
+## Framework Direct Usage
+
+`@editora/ui-core` can be used directly in Vue, Svelte, and Angular because the package ships standards-based custom elements.
+
+- Vue and Svelte work well directly for attribute/event-driven components, and can also handle richer elements like `ui-sortable` through refs.
+- Angular also works directly, but you should add `CUSTOM_ELEMENTS_SCHEMA` and use `@ViewChild` for array or object-valued properties.
+- Production wrappers are optional DX improvements, not a requirement for using `ui-core`.
+
+Examples:
+
+- Vue direct example: [`examples/ui-core-vue-direct`](/Users/etelligens/Documents/Rich-Text-Editor/examples/ui-core-vue-direct)
+- Svelte direct example: [`examples/ui-core-svelte-direct`](/Users/etelligens/Documents/Rich-Text-Editor/examples/ui-core-svelte-direct)
+- Angular direct example: [`examples/ui-core-angular-direct`](/Users/etelligens/Documents/Rich-Text-Editor/examples/ui-core-angular-direct)
+
+More guidance lives in [`docs/FRAMEWORK_DIRECT_USAGE.md`](/Users/etelligens/Documents/Rich-Text-Editor/packages/ui-core/docs/FRAMEWORK_DIRECT_USAGE.md).
+
 ## What You Get
 
 ### Core utilities
@@ -215,6 +231,7 @@ applyTheme({
 
 ## Docs
 
+- `docs/FRAMEWORK_DIRECT_USAGE.md` for Vue, Svelte, and Angular direct-use guidance
 - `docs/ATTRIBUTE_RENDER_MATRIX.md` for component render strategy coverage
 - `docs/PRIMITIVE_GAP_MATRIX.md` for the missing primitive roadmap
 - `docs/PRIMITIVE_IMPLEMENTATION_PLAN.md` for proposed APIs and rollout order
