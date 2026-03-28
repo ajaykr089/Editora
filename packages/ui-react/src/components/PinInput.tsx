@@ -1,6 +1,13 @@
-import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncNumberAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 export type PinInputProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'> & {
   children?: React.ReactNode;
@@ -49,65 +56,42 @@ export const PinInput = React.forwardRef<HTMLElement, PinInputProps>(function Pi
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const handleChange = React.useCallback((event: Event) => {
+    onChange?.(getCustomEventDetail<{ value?: string }>(event)?.value || '');
+  }, [onChange]);
 
-    const handleChange = (event: Event) => {
-      onChange?.(((event as CustomEvent<{ value?: string }>).detail.value || '') as string);
-    };
+  const handleComplete = React.useCallback((event: Event) => {
+    onComplete?.(getCustomEventDetail<{ value?: string }>(event)?.value || '');
+  }, [onComplete]);
 
-    const handleComplete = (event: Event) => {
-      onComplete?.(((event as CustomEvent<{ value?: string }>).detail.value || '') as string);
-    };
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'change', listener: handleChange },
+      { type: 'complete', listener: handleComplete },
+    ],
+    [handleChange, handleComplete]
+  );
 
-    el.addEventListener('change', handleChange as EventListener);
-    el.addEventListener('complete', handleComplete as EventListener);
-    return () => {
-      el.removeEventListener('change', handleChange as EventListener);
-      el.removeEventListener('complete', handleComplete as EventListener);
-    };
-  }, [onChange, onComplete]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    if (value != null && value !== '') el.setAttribute('value', value);
-    else el.removeAttribute('value');
-    if (typeof length === 'number' && Number.isFinite(length)) el.setAttribute('length', String(length));
-    else el.removeAttribute('length');
-    if (name) el.setAttribute('name', name);
-    else el.removeAttribute('name');
-    if (label) el.setAttribute('label', label);
-    else el.removeAttribute('label');
-    if (description) el.setAttribute('description', description);
-    else el.removeAttribute('description');
-    if (error) el.setAttribute('error', error);
-    else el.removeAttribute('error');
-    if (mode && mode !== 'numeric') el.setAttribute('mode', mode);
-    else el.removeAttribute('mode');
-    if (mask) el.setAttribute('mask', '');
-    else el.removeAttribute('mask');
-    if (required) el.setAttribute('required', '');
-    else el.removeAttribute('required');
-    if (disabled) el.setAttribute('disabled', '');
-    else el.removeAttribute('disabled');
-    if (readOnly) el.setAttribute('readonly', '');
-    else el.removeAttribute('readonly');
-    if (placeholderChar) el.setAttribute('placeholder-char', placeholderChar);
-    else el.removeAttribute('placeholder-char');
-    if (size && size !== 'md' && size !== '2') el.setAttribute('size', size);
-    else el.removeAttribute('size');
-    if (density && density !== 'default') el.setAttribute('density', density);
-    else el.removeAttribute('density');
-    if (shape && shape !== 'default') el.setAttribute('shape', shape);
-    else el.removeAttribute('shape');
-    if (invalid) el.setAttribute('invalid', '');
-    else el.removeAttribute('invalid');
+  useElementAttributes(ref, (el) => {
+    syncStringAttribute(el, 'value', value != null && value !== '' ? value : null);
+    syncNumberAttribute(el, 'length', typeof length === 'number' && Number.isFinite(length) ? length : undefined);
+    syncStringAttribute(el, 'name', name || null);
+    syncStringAttribute(el, 'label', label || null);
+    syncStringAttribute(el, 'description', description || null);
+    syncStringAttribute(el, 'error', error || null);
+    syncStringAttribute(el, 'mode', mode && mode !== 'numeric' ? mode : null);
+    syncBooleanAttribute(el, 'mask', mask);
+    syncBooleanAttribute(el, 'required', required);
+    syncBooleanAttribute(el, 'disabled', disabled);
+    syncBooleanAttribute(el, 'readonly', readOnly);
+    syncStringAttribute(el, 'placeholder-char', placeholderChar || null);
+    syncStringAttribute(el, 'size', size && size !== 'md' && size !== '2' ? size : null);
+    syncStringAttribute(el, 'density', density && density !== 'default' ? density : null);
+    syncStringAttribute(el, 'shape', shape && shape !== 'default' ? shape : null);
+    syncBooleanAttribute(el, 'invalid', invalid);
   }, [value, length, name, label, description, error, mode, mask, required, disabled, readOnly, placeholderChar, size, density, shape, invalid]);
 
   return React.createElement('ui-pin-input', { ref, ...rest }, children);

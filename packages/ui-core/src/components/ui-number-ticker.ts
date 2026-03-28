@@ -383,14 +383,15 @@ export class UINumberTicker extends ElementBase {
   }
 
   override connectedCallback(): void {
+    this._bindReducedMotion();
     super.connectedCallback();
     if (!this.hasAttribute('aria-live')) this.setAttribute('aria-live', 'off');
     this.addEventListener('pointerenter', this._onPointerEnter);
     this.addEventListener('pointerleave', this._onPointerLeave);
     this.addEventListener('focusin', this._onFocusIn);
     this.addEventListener('focusout', this._onFocusOut);
-    this._bindReducedMotion();
     this._syncVisibilityObserver();
+    this._syncFromAttributes(false);
   }
 
   override disconnectedCallback(): void {

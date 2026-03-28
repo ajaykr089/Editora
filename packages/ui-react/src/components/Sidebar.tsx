@@ -6,9 +6,24 @@ import React, {
   useLayoutEffect,
   useRef
 } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+const VOID_HTML_TAGS = new Set([
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'param',
+  'source',
+  'track',
+  'wbr'
+]);
 
 type SidebarTone = 'default' | 'brand' | 'success' | 'warning' | 'danger';
 
@@ -113,6 +128,97 @@ type SidebarMarkerComponent<P> = React.FC<P> & {
   __sidebarMarker?: string;
 };
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function cssPropertyName(name: string): string {
+  if (name.startsWith('--')) return name;
+  return name.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`);
+}
+
+function serializeStyleValue(style: React.CSSProperties): string {
+  const parts: string[] = [];
+  for (const [key, value] of Object.entries(style)) {
+    if (value == null || value === '') continue;
+    parts.push(`${cssPropertyName(key)}:${String(value)}`);
+  }
+  return parts.join(';');
+}
+
+function getAttributeName(propName: string): string {
+  if (propName === 'className') return 'class';
+  if (propName === 'htmlFor') return 'for';
+  return propName;
+}
+
+function serializeReactNodeToHtml(node: React.ReactNode): string {
+  if (node == null || typeof node === 'boolean') return '';
+  if (typeof node === 'string' || typeof node === 'number') return escapeHtml(String(node));
+  if (Array.isArray(node)) return node.map((child) => serializeReactNodeToHtml(child)).join('');
+  if (!isValidElement(node)) return '';
+
+  if (node.type === React.Fragment) {
+    return serializeReactNodeToHtml(node.props.children);
+  }
+
+  if (typeof node.type === 'function') {
+    const component = node.type as React.JSXElementConstructor<any>;
+    const isClassComponent = Boolean((component as { prototype?: { isReactComponent?: unknown } }).prototype?.isReactComponent);
+    if (isClassComponent) return '';
+    try {
+      return serializeReactNodeToHtml((component as (props: Record<string, unknown>) => React.ReactNode)(node.props));
+    } catch {
+      return '';
+    }
+  }
+
+  if (typeof node.type !== 'string') return '';
+
+  const tagName = node.type;
+  const props = node.props as Record<string, unknown>;
+  const attributes: string[] = [];
+  let innerHtml: string | undefined;
+
+  for (const [rawName, rawValue] of Object.entries(props)) {
+    if (rawName === 'children') continue;
+    if (rawName === 'dangerouslySetInnerHTML') {
+      const value = rawValue as { __html?: string } | undefined;
+      if (typeof value?.__html === 'string') innerHtml = value.__html;
+      continue;
+    }
+    if (rawName === 'ref' || rawName === 'key') continue;
+    if (rawName === 'suppressHydrationWarning' || rawName === 'suppressContentEditableWarning') continue;
+    if (rawName.startsWith('on')) continue;
+    if (rawValue == null || rawValue === false) continue;
+
+    const attrName = getAttributeName(rawName);
+    if (rawName === 'style' && typeof rawValue === 'object') {
+      const cssText = serializeStyleValue(rawValue as React.CSSProperties);
+      if (cssText) attributes.push(` style="${escapeHtml(cssText)}"`);
+      continue;
+    }
+    if (rawValue === true) {
+      attributes.push(` ${attrName}`);
+      continue;
+    }
+    if (typeof rawValue === 'string' || typeof rawValue === 'number') {
+      attributes.push(` ${attrName}="${escapeHtml(String(rawValue))}"`);
+    }
+  }
+
+  const content = innerHtml ?? serializeReactNodeToHtml(props.children as React.ReactNode);
+  if (!content && VOID_HTML_TAGS.has(tagName)) {
+    return `<${tagName}${attributes.join('')}>`;
+  }
+  return `<${tagName}${attributes.join('')}>${content}</${tagName}>`;
+}
+
 function isSidebarMarker<P>(node: React.ReactNode, marker: string): node is React.ReactElement<P> {
   return isValidElement(node) && (node.type as SidebarMarkerComponent<P>).__sidebarMarker === marker;
 }
@@ -212,7 +318,7 @@ function normalizeMetric(value: number | string | undefined): string | null {
 function serializeSidebarIcon(icon: React.ReactNode | string | undefined): string | undefined {
   if (!icon || typeof icon === 'string') return undefined;
   if (!isValidElement(icon)) return undefined;
-  return renderToStaticMarkup(
+  const html = serializeReactNodeToHtml(
     React.cloneElement(icon as React.ReactElement<any>, {
       width: (icon as React.ReactElement<any>).props.width ?? 18,
       height: (icon as React.ReactElement<any>).props.height ?? 18,
@@ -220,11 +326,13 @@ function serializeSidebarIcon(icon: React.ReactNode | string | undefined): strin
       focusable: 'false'
     })
   );
+  return html || undefined;
 }
 
 function serializeSidebarContent(children: React.ReactNode[]): string | undefined {
   if (!children.length) return undefined;
-  return renderToStaticMarkup(<>{children}</>);
+  const html = serializeReactNodeToHtml(<>{children}</>);
+  return html || undefined;
 }
 
 function renderSidebarItems(children: React.ReactNode, inheritedSection = ''): React.ReactNode[] {
@@ -566,6 +674,17 @@ export type {
   SidebarSearchInputProps,
   SidebarSelectDetail,
   SidebarTone
+};
+
+export {
+  SidebarHeader,
+  SidebarSearch,
+  SidebarSearchInput,
+  SidebarContent,
+  SidebarGroup,
+  SidebarItem,
+  SidebarPromo,
+  SidebarFooter,
 };
 
 export const Sidebar = Object.assign(SidebarRoot, {

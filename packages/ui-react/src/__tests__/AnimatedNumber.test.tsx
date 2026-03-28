@@ -3,9 +3,13 @@ import { act, render } from '@testing-library/react';
 import { vi } from 'vitest';
 import { AnimatedNumber, useAnimatedNumber, useAnimatedNumberValue } from '../components/AnimatedNumber';
 
-vi.mock('../components/_internals', () => ({
-  warnIfElementNotRegistered: vi.fn(),
-}));
+vi.mock('../components/_internals', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../components/_internals')>();
+  return {
+    ...actual,
+    warnIfElementNotRegistered: vi.fn(),
+  };
+});
 
 describe('AnimatedNumber', () => {
   beforeAll(() => {

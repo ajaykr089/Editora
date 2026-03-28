@@ -1,10 +1,13 @@
-import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
-
-type HoverCardElement = HTMLElement & {
-  open: boolean;
-};
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncNumberAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 export type HoverCardProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onOpen' | 'onClose'> & {
   open?: boolean;
@@ -48,73 +51,45 @@ const HoverCardRoot = React.forwardRef<HTMLElement, HoverCardProps>(function Hov
   },
   forwardedRef
 ) {
-  const ref = useRef<HoverCardElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const handleOpen = React.useCallback(() => {
+    onOpen?.();
+  }, [onOpen]);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const handleClose = React.useCallback(() => {
+    onClose?.();
+  }, [onClose]);
 
-    const handleOpen = () => onOpen?.();
-    const handleClose = () => onClose?.();
-    const handleChange = (event: Event) => {
-      const next = (event as CustomEvent<{ open?: boolean }>).detail?.open;
-      if (typeof next === 'boolean') onChange?.(next);
-    };
+  const handleChange = React.useCallback((event: Event) => {
+    const next = getCustomEventDetail<{ open?: boolean }>(event)?.open;
+    if (typeof next === 'boolean') onChange?.(next);
+  }, [onChange]);
 
-    el.addEventListener('open', handleOpen as EventListener);
-    el.addEventListener('close', handleClose as EventListener);
-    el.addEventListener('change', handleChange as EventListener);
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'open', listener: handleOpen as EventListener },
+      { type: 'close', listener: handleClose as EventListener },
+      { type: 'change', listener: handleChange },
+    ],
+    [handleOpen, handleClose, handleChange]
+  );
 
-    return () => {
-      el.removeEventListener('open', handleOpen as EventListener);
-      el.removeEventListener('close', handleClose as EventListener);
-      el.removeEventListener('change', handleChange as EventListener);
-    };
-  }, [onOpen, onClose, onChange]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el || open == null) return;
-    if (open) el.setAttribute('open', '');
-    else el.removeAttribute('open');
-  }, [open]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    if (typeof delay === 'number') el.setAttribute('delay', String(delay));
-    else el.removeAttribute('delay');
-
-    if (typeof closeDelay === 'number') el.setAttribute('close-delay', String(closeDelay));
-    else el.removeAttribute('close-delay');
-
-    if (placement) el.setAttribute('placement', placement);
-    else el.removeAttribute('placement');
-
-    if (typeof offset === 'number') el.setAttribute('offset', String(offset));
-    else el.removeAttribute('offset');
-
-    if (variant && variant !== 'default') el.setAttribute('variant', variant);
-    else el.removeAttribute('variant');
-
-    if (tone && tone !== 'default') el.setAttribute('tone', tone);
-    else el.removeAttribute('tone');
-
-    if (density && density !== 'default') el.setAttribute('density', density);
-    else el.removeAttribute('density');
-
-    if (shape && shape !== 'default') el.setAttribute('shape', shape);
-    else el.removeAttribute('shape');
-
-    if (elevation && elevation !== 'default') el.setAttribute('elevation', elevation);
-    else el.removeAttribute('elevation');
-
-    if (headless) el.setAttribute('headless', '');
-    else el.removeAttribute('headless');
-  }, [delay, closeDelay, placement, offset, variant, tone, density, shape, elevation, headless]);
+  useElementAttributes(ref, (el) => {
+    if (typeof open === 'boolean') syncBooleanAttribute(el, 'open', open);
+    else syncStringAttribute(el, 'open', null);
+    syncNumberAttribute(el, 'delay', delay);
+    syncNumberAttribute(el, 'close-delay', closeDelay);
+    syncStringAttribute(el, 'placement', placement ?? null);
+    syncNumberAttribute(el, 'offset', offset);
+    syncStringAttribute(el, 'variant', variant && variant !== 'default' ? variant : null);
+    syncStringAttribute(el, 'tone', tone && tone !== 'default' ? tone : null);
+    syncStringAttribute(el, 'density', density && density !== 'default' ? density : null);
+    syncStringAttribute(el, 'shape', shape && shape !== 'default' ? shape : null);
+    syncStringAttribute(el, 'elevation', elevation && elevation !== 'default' ? elevation : null);
+    syncBooleanAttribute(el, 'headless', headless);
+  }, [open, delay, closeDelay, placement, offset, variant, tone, density, shape, elevation, headless]);
 
   return React.createElement('ui-hover-card', { ref, ...rest }, children);
 });

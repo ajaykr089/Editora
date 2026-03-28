@@ -1,6 +1,4 @@
-import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
 
 export type LabelTextProps = React.HTMLAttributes<HTMLElement>;
 export type LabelDescriptionProps = React.HTMLAttributes<HTMLElement>;
@@ -38,47 +36,23 @@ const LabelRoot = React.forwardRef<HTMLElement, LabelProps>(function Label(
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
+  const targetFor = htmlFor || forProp;
+  const hostProps: Record<string, unknown> = {
+    ref: forwardedRef,
+    ...rest,
+    for: targetFor || undefined,
+    required: required ? '' : undefined,
+    description: description || undefined,
+    variant: variant && variant !== 'default' ? variant : undefined,
+    tone: tone && tone !== 'default' ? tone : undefined,
+    size: size && size !== 'md' && size !== '2' ? size : undefined,
+    density: density && density !== 'default' ? density : undefined,
+    shape: shape && shape !== 'default' ? shape : undefined,
+    disabled: disabled ? '' : undefined,
+    headless: headless ? '' : undefined,
+  };
 
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const targetFor = htmlFor || forProp;
-    if (targetFor) el.setAttribute('for', targetFor);
-    else el.removeAttribute('for');
-
-    if (required) el.setAttribute('required', '');
-    else el.removeAttribute('required');
-
-    if (description) el.setAttribute('description', description);
-    else el.removeAttribute('description');
-
-    if (variant && variant !== 'default') el.setAttribute('variant', variant);
-    else el.removeAttribute('variant');
-
-    if (tone && tone !== 'default') el.setAttribute('tone', tone);
-    else el.removeAttribute('tone');
-
-    if (size && size !== 'md' && size !== '2') el.setAttribute('size', size);
-    else el.removeAttribute('size');
-
-    if (density && density !== 'default') el.setAttribute('density', density);
-    else el.removeAttribute('density');
-
-    if (shape && shape !== 'default') el.setAttribute('shape', shape);
-    else el.removeAttribute('shape');
-
-    if (disabled) el.setAttribute('disabled', '');
-    else el.removeAttribute('disabled');
-
-    if (headless) el.setAttribute('headless', '');
-    else el.removeAttribute('headless');
-  }, [htmlFor, forProp, required, description, variant, tone, size, density, shape, disabled, headless]);
-
-  return React.createElement('ui-label', { ref, ...rest }, children);
+  return React.createElement('ui-label', hostProps, children);
 });
 
 LabelRoot.displayName = 'Label';

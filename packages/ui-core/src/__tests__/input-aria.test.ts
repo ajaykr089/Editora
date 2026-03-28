@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import '../components/ui-input';
 
 describe('UIInput accessibility & form attributes', () => {
   it('links label & description with aria attributes', () => {

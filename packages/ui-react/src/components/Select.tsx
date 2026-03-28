@@ -1,6 +1,12 @@
-import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'> & {
   children?: React.ReactNode;
@@ -85,80 +91,57 @@ const SelectRoot = React.forwardRef<HTMLElement, SelectProps>(function Select(
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const resolveValue = React.useCallback((event: Event) => {
+    return (
+      getCustomEventDetail<{ value?: string }>(event)?.value ??
+      ((event.target as HTMLSelectElement | null)?.value ?? '')
+    );
+  }, []);
 
-    const resolveValue = (event: Event) =>
-      (event as CustomEvent<{ value?: string }>).detail?.value ??
-      ((event.target as HTMLSelectElement | null)?.value ?? '');
+  const inputHandler = React.useCallback((event: Event) => {
+    onInput?.(resolveValue(event));
+  }, [onInput, resolveValue]);
 
-    const inputHandler = (event: Event) => {
-      onInput?.(resolveValue(event));
-    };
+  const changeHandler = React.useCallback((event: Event) => {
+    const next = resolveValue(event);
+    onChange?.(next);
+    onValueChange?.(next);
+  }, [onChange, onValueChange, resolveValue]);
 
-    const changeHandler = (event: Event) => {
-      const next = resolveValue(event);
-      onChange?.(next);
-      onValueChange?.(next);
-    };
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'input', listener: inputHandler },
+      { type: 'change', listener: changeHandler },
+    ],
+    [inputHandler, changeHandler]
+  );
 
-    el.addEventListener('input', inputHandler as EventListener);
-    el.addEventListener('change', changeHandler as EventListener);
-    return () => {
-      el.removeEventListener('input', inputHandler as EventListener);
-      el.removeEventListener('change', changeHandler as EventListener);
-    };
-  }, [onChange, onInput, onValueChange]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const syncAttr = (attr: string, next: string | null) => {
-      const current = el.getAttribute(attr);
-      if (next == null) {
-        if (current != null) el.removeAttribute(attr);
-        return;
-      }
-      if (current !== next) el.setAttribute(attr, next);
-    };
-
-    const syncBoolean = (attr: string, enabled: boolean | undefined) => {
-      if (enabled) {
-        if (!el.hasAttribute(attr)) el.setAttribute(attr, '');
-      } else if (el.hasAttribute(attr)) {
-        el.removeAttribute(attr);
-      }
-    };
-
-    syncAttr('value', value != null ? String(value) : null);
-    syncBoolean('disabled', disabled);
-    syncBoolean('loading', loading);
-    syncBoolean('required', required);
-    syncBoolean('headless', headless);
-    syncBoolean('invalid', invalid);
-
-    syncAttr('placeholder', placeholder ? placeholder : null);
-    syncAttr('name', name ? name : null);
-    syncAttr('label', label ? label : null);
-    syncAttr('description', description ? description : null);
-    syncAttr('error', error ? error : null);
-
-    syncAttr('size', size && size !== 'md' && size !== '2' ? size : null);
-    syncAttr('variant', variant && variant !== 'classic' ? variant : null);
-    syncAttr('tone', tone && tone !== 'default' ? tone : null);
-    syncAttr('density', density && density !== 'default' ? density : null);
-    syncAttr('shape', shape && shape !== 'rounded' ? shape : null);
-    syncAttr('elevation', elevation && elevation !== 'low' ? elevation : null);
-    syncAttr('radius', radius ? String(radius) : null);
-    syncBoolean('option-border', optionBorder);
-    syncBoolean('show-check', showCheck);
-    syncAttr('check-placement', showCheck ? checkPlacement || 'end' : null);
-    syncAttr('validation', validation && validation !== 'none' ? validation : null);
+  useElementAttributes(ref, (el) => {
+    syncStringAttribute(el, 'value', value != null ? String(value) : null);
+    syncBooleanAttribute(el, 'disabled', disabled);
+    syncBooleanAttribute(el, 'loading', loading);
+    syncBooleanAttribute(el, 'required', required);
+    syncBooleanAttribute(el, 'headless', headless);
+    syncBooleanAttribute(el, 'invalid', invalid);
+    syncStringAttribute(el, 'placeholder', placeholder ? placeholder : null);
+    syncStringAttribute(el, 'name', name ? name : null);
+    syncStringAttribute(el, 'label', label ? label : null);
+    syncStringAttribute(el, 'description', description ? description : null);
+    syncStringAttribute(el, 'error', error ? error : null);
+    syncStringAttribute(el, 'size', size && size !== 'md' && size !== '2' ? size : null);
+    syncStringAttribute(el, 'variant', variant && variant !== 'classic' ? variant : null);
+    syncStringAttribute(el, 'tone', tone && tone !== 'default' ? tone : null);
+    syncStringAttribute(el, 'density', density && density !== 'default' ? density : null);
+    syncStringAttribute(el, 'shape', shape && shape !== 'rounded' ? shape : null);
+    syncStringAttribute(el, 'elevation', elevation && elevation !== 'low' ? elevation : null);
+    syncStringAttribute(el, 'radius', radius ? String(radius) : null);
+    syncBooleanAttribute(el, 'option-border', optionBorder);
+    syncBooleanAttribute(el, 'show-check', showCheck);
+    syncStringAttribute(el, 'check-placement', showCheck ? checkPlacement || 'end' : null);
+    syncStringAttribute(el, 'validation', validation && validation !== 'none' ? validation : null);
   }, [
     value,
     disabled,

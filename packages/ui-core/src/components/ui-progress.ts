@@ -422,7 +422,7 @@ export class UIProgress extends ElementBase {
   override attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void {
     if (oldValue === newValue) return;
     this._syncFromAttributes();
-    if (this.isConnected) this.requestRender();
+    if (this.isConnected) this.render();
     if (name === 'value' || name === 'buffer' || name === 'max' || name === 'min' || name === 'indeterminate') {
       this._emitState();
     }

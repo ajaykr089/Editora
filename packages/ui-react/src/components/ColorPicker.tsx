@@ -1,6 +1,13 @@
-import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react'
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+import React from 'react'
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncJsonAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals'
 
 export type ColorPickerColor = {
   r: number
@@ -100,104 +107,70 @@ export const ColorPicker = React.forwardRef<ColorPickerElement, ColorPickerProps
   },
   forwardedRef
 ) {
-  const ref = useRef<ColorPickerElement | null>(null)
-  useImperativeHandle(forwardedRef, () => ref.current as ColorPickerElement)
+  const ref = useForwardedHostRef<ColorPickerElement>(forwardedRef)
 
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
+  const handleInput = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<ColorPickerDetail>(event)
+    if (!detail) return
+    onInput?.(detail)
+  }, [onInput])
 
-    const handleInput = (event: Event) => {
-      const detail = (event as CustomEvent<ColorPickerDetail>).detail
-      if (!detail) return
-      onInput?.(detail)
-    }
+  const handleChange = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<ColorPickerDetail>(event)
+    if (!detail) return
+    onChange?.(detail)
+    onValueChange?.(detail.value)
+  }, [onChange, onValueChange])
 
-    const handleChange = (event: Event) => {
-      const detail = (event as CustomEvent<ColorPickerDetail>).detail
-      if (!detail) return
-      onChange?.(detail)
-      onValueChange?.(detail.value)
-    }
+  const handleInvalid = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ raw: string; reason: string }>(event)
+    if (!detail) return
+    onInvalid?.(detail)
+  }, [onInvalid])
 
-    const handleInvalid = (event: Event) => {
-      const detail = (event as CustomEvent<{ raw: string; reason: string }>).detail
-      if (!detail) return
-      onInvalid?.(detail)
-    }
+  const handleOpen = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<ColorPickerOpenDetail>(event)
+    onOpen?.()
+    if (detail) onOpenDetail?.(detail)
+  }, [onOpen, onOpenDetail])
 
-    const handleOpen = (event: Event) => {
-      const detail = (event as CustomEvent<ColorPickerOpenDetail>).detail
-      onOpen?.()
-      if (detail) onOpenDetail?.(detail)
-    }
+  const handleClose = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<ColorPickerOpenDetail>(event)
+    onClose?.()
+    if (detail) onCloseDetail?.(detail)
+  }, [onClose, onCloseDetail])
 
-    const handleClose = (event: Event) => {
-      const detail = (event as CustomEvent<ColorPickerOpenDetail>).detail
-      onClose?.()
-      if (detail) onCloseDetail?.(detail)
-    }
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'input', listener: handleInput },
+      { type: 'change', listener: handleChange },
+      { type: 'open', listener: handleOpen },
+      { type: 'close', listener: handleClose },
+      { type: 'invalid', listener: handleInvalid },
+    ],
+    [handleInput, handleChange, handleOpen, handleClose, handleInvalid]
+  )
 
-    el.addEventListener('input', handleInput as EventListener)
-    el.addEventListener('change', handleChange as EventListener)
-    el.addEventListener('open', handleOpen as EventListener)
-    el.addEventListener('close', handleClose as EventListener)
-    el.addEventListener('invalid', handleInvalid as EventListener)
-
-    return () => {
-      el.removeEventListener('input', handleInput as EventListener)
-      el.removeEventListener('change', handleChange as EventListener)
-      el.removeEventListener('open', handleOpen as EventListener)
-      el.removeEventListener('close', handleClose as EventListener)
-      el.removeEventListener('invalid', handleInvalid as EventListener)
-    }
-  }, [onInput, onChange, onValueChange, onOpen, onClose, onOpenDetail, onCloseDetail, onInvalid])
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current
-    if (!el) return
-
-    const syncAttr = (name: string, next: string | null) => {
-      const current = el.getAttribute(name)
-      if (next == null) {
-        if (current != null) el.removeAttribute(name)
-      } else if (current !== next) {
-        el.setAttribute(name, next)
-      }
-    }
-
-    const syncBool = (name: string, next: boolean | undefined) => {
-      if (next) syncAttr(name, '')
-      else syncAttr(name, null)
-    }
-
-    syncAttr('value', value ?? null)
-    syncAttr('format', format && format !== 'hex' ? format : null)
-    syncBool('alpha', alpha)
-    syncBool('disabled', disabled)
-    syncBool('readonly', readOnly)
-    syncAttr('size', size && size !== 'md' ? size : null)
-    syncAttr('variant', variant && variant !== 'default' ? variant : null)
-    syncAttr('state', state && state !== 'idle' ? state : null)
-    syncAttr('tone', tone && tone !== 'brand' ? tone : null)
-    syncAttr('mode', mode && mode !== 'inline' ? mode : null)
-    if (typeof open === 'boolean') syncBool('open', open)
-    else syncAttr('open', null)
-    syncAttr('close-on-escape', typeof closeOnEscape === 'boolean' ? (closeOnEscape ? 'true' : 'false') : null)
-    syncAttr('placeholder', placeholder ?? null)
-    syncBool('recent', recent)
-    syncAttr('max-recent', typeof maxRecent === 'number' ? String(maxRecent) : null)
-    syncBool('persist', persist)
-
-    if (presets && presets.length > 0) {
-      try {
-        syncAttr('presets', JSON.stringify(presets))
-      } catch {
-        syncAttr('presets', null)
-      }
-    } else {
-      syncAttr('presets', null)
-    }
+  useElementAttributes(ref, (el) => {
+    syncStringAttribute(el, 'value', value ?? null)
+    syncStringAttribute(el, 'format', format && format !== 'hex' ? format : null)
+    syncBooleanAttribute(el, 'alpha', alpha)
+    syncBooleanAttribute(el, 'disabled', disabled)
+    syncBooleanAttribute(el, 'readonly', readOnly)
+    syncStringAttribute(el, 'size', size && size !== 'md' ? size : null)
+    syncStringAttribute(el, 'variant', variant && variant !== 'default' ? variant : null)
+    syncStringAttribute(el, 'state', state && state !== 'idle' ? state : null)
+    syncStringAttribute(el, 'tone', tone && tone !== 'brand' ? tone : null)
+    syncStringAttribute(el, 'mode', mode && mode !== 'inline' ? mode : null)
+    if (typeof open === 'boolean') syncBooleanAttribute(el, 'open', open)
+    else syncStringAttribute(el, 'open', null)
+    syncStringAttribute(el, 'close-on-escape', typeof closeOnEscape === 'boolean' ? (closeOnEscape ? 'true' : 'false') : null)
+    syncStringAttribute(el, 'placeholder', placeholder ?? null)
+    syncBooleanAttribute(el, 'recent', recent)
+    syncStringAttribute(el, 'max-recent', typeof maxRecent === 'number' ? String(maxRecent) : null)
+    syncBooleanAttribute(el, 'persist', persist)
+    syncJsonAttribute(el, 'presets', presets && presets.length > 0 ? presets : null)
   }, [
     value,
     format,

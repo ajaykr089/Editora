@@ -901,10 +901,13 @@ export class UIDataTable extends ElementBase {
       return;
     }
 
-    this._queueSyncStructure();
     if (name === 'filter-query' || name === 'filter-column' || name === 'filters') {
+      this._syncStructure();
       this._dispatchFilterChange();
+      return;
     }
+
+    this._queueSyncStructure();
   }
 
   protected render() {
@@ -1959,12 +1962,7 @@ export class UIDataTable extends ElementBase {
     const adjustedDelta = this._isRtl() ? -delta : delta;
     this._pendingResizeColumn = this._resizeState.columnIndex;
     this._pendingResizeWidth = this._resizeState.startWidth + adjustedDelta;
-    if (this._resizeRaf) return;
-    this._resizeRaf = requestAnimationFrame(() => {
-      this._resizeRaf = 0;
-      if (this._pendingResizeColumn < 0 || this._pendingResizeWidth == null) return;
-      this._setColumnWidth(this._pendingResizeColumn, this._pendingResizeWidth, false);
-    });
+    this._setColumnWidth(this._pendingResizeColumn, this._pendingResizeWidth, false);
   }
 
   private _onPointerUp() {
@@ -2230,7 +2228,8 @@ export class UIDataTable extends ElementBase {
 
   private _onClick(event: MouseEvent) {
     if (!this._table) return;
-    const target = event.target as HTMLElement;
+    const pathTarget = event.composedPath().find((node) => node instanceof HTMLElement) as HTMLElement | undefined;
+    const target = pathTarget || (event.target as HTMLElement);
     const clearBtn = target.closest('.bulk-clear');
     if (clearBtn) {
       const count = this._selectedRows.size;

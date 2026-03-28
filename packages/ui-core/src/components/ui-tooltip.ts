@@ -293,7 +293,8 @@ export class UITooltip extends ElementBase {
       return;
     }
 
-    if (this.isConnected) this.requestRender();
+    // The host template is static after the first render; subsequent attribute
+    // updates either drive portal content directly or only affect interaction timing.
   }
 
   private _clearTimers(): void {

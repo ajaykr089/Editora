@@ -241,7 +241,7 @@ export const IntegrationHub = () => (
     meta={[
       { label: 'Use case', value: 'Launch hero + integration storytelling' },
       { label: 'Layout', value: '1 inbound, 5 outbound' },
-      { label: 'Motion', value: 'surge', tone: 'brand' },
+      { label: 'Motion', value: 'surge', tone: 'neutral' },
     ]}
   >
     <ShowcaseSection
@@ -381,7 +381,7 @@ export const ColorwayGallery = () => (
     meta={[
       { label: 'Inputs', value: 'colorStart / colorEnd / trailColor' },
       { label: 'Layout', value: 'Same topology in every card' },
-      { label: 'Best for', value: 'Brand fitting and motion art direction', tone: 'info' },
+      { label: 'Best for', value: 'Brand fitting and motion art direction', tone: 'neutral' },
     ]}
   >
     <ShowcaseSection
@@ -487,7 +487,7 @@ export const MotionGallery = () => (
     meta={[
       { label: 'Modes', value: 'smooth / surge / pulse / heartbeat' },
       { label: 'Focus', value: 'Beam travel, not node activation' },
-      { label: 'Tip', value: 'Use lower beamFactor for tighter heartbeat bursts', tone: 'info' },
+      { label: 'Tip', value: 'Use lower beamFactor for tighter heartbeat bursts', tone: 'neutral' },
     ]}
   >
     <ShowcaseSection
@@ -599,7 +599,7 @@ export const SizeGallery = () => (
     meta={[
       { label: "Presets", value: "xxs / xs / sm / md / lg" },
       { label: "Aliases", value: "0 / 1 / 2 / 3" },
-      { label: "Best for", value: "Compact UI to hero layouts", tone: "info" },
+      { label: "Best for", value: "Compact UI to hero layouts", tone: "neutral" },
     ]}
   >
     <ShowcaseSection
@@ -770,7 +770,7 @@ export const NodeEffectGallery = () => (
     meta={[
       { label: 'Effects', value: 'glow / pulse / ring / shake' },
       { label: 'Trigger', value: 'On beam arrival' },
-      { label: 'Best for', value: 'Routing and state change cues', tone: 'info' },
+      { label: 'Best for', value: 'Routing and state change cues', tone: 'neutral' },
     ]}
   >
     <ShowcaseSection
@@ -916,7 +916,7 @@ export const ReverseDirection = () => (
     meta={[
       { label: "Topology", value: "User -> hub -> 2 targets" },
       { label: "Comparison", value: "Forward vs reverse" },
-      { label: "Best for", value: "Mirrored motion narratives", tone: "info" },
+      { label: "Best for", value: "Mirrored motion narratives", tone: "neutral" },
     ]}
   >
     <ShowcaseSection
@@ -1003,7 +1003,7 @@ export const ServiceMesh = () => (
     meta={[
       { label: "Topology", value: "User -> hub -> 5 systems" },
       { label: "Flow", value: "Right to left" },
-      { label: "Best for", value: "Ops + automation pages", tone: "info" },
+      { label: "Best for", value: "Ops + automation pages", tone: "neutral" },
     ]}
   >
     <ShowcaseSection

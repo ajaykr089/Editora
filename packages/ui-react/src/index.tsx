@@ -1,3 +1,8 @@
+'use client';
+import { primeUICoreRegistration } from './core-registration';
+
+primeUICoreRegistration();
+
 export { Button } from './components/Button';
 export { Tooltip } from './components/Tooltip';
 export { Alert, AlertIcon, AlertTitle, AlertDescription, AlertActions } from './components/Alert';
@@ -46,6 +51,26 @@ export type {
   TransferListElevation,
   TransferListSelectionIndicator
 } from './components/TransferList';
+export { Sortable } from './components/Sortable';
+export type {
+  SortableProps,
+  SortableElement,
+  SortableList,
+  SortableItem,
+  SortableMoveOptions,
+  SortableDropMode,
+  SortableSortMode,
+  SortableChangeSource,
+  SortableOperation,
+  SortableDropzoneStyle,
+  SortableRenderEmptyStateContext,
+  SortableRenderItemContext,
+  SortableRenderListHeaderContext,
+  SortableSelectionChangeDetail,
+  SortablePersistenceRecord,
+  SortablePersistenceSnapshot,
+  SortableChangeDetail
+} from './components/Sortable';
 export { InlineEdit } from './components/InlineEdit';
 export { TimePicker } from './components/TimePicker';
 export { DateTimePicker } from './components/DateTimePicker';
@@ -292,5 +317,3 @@ export {
   type AnimatedNumberDirection,
   type AnimatedNumberCompleteEvent,
 } from './components/AnimatedNumber';
-// Ensure all web components are registered when this package is imported
-import '@editora/ui-core';

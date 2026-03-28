@@ -1,7 +1,14 @@
-import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
-import { warnIfElementNotRegistered } from './_internals';
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncNumberAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+  warnIfElementNotRegistered,
+} from './_internals';
 
 type BreadcrumbSelectDetail = {
   index: number;
@@ -59,70 +66,43 @@ const BreadcrumbRoot = React.forwardRef<HTMLElement, BreadcrumbProps>(function B
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
-
-  useEffect(() => {
+  React.useEffect(() => {
     warnIfElementNotRegistered('ui-breadcrumb', 'Breadcrumb');
   }, []);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || !onSelect) return;
-
-    const handleSelect = (event: Event) => {
-      const detail = (event as CustomEvent<BreadcrumbSelectDetail>).detail;
-      if (detail) onSelect(detail);
-    };
-
-    el.addEventListener('ui-select', handleSelect as EventListener);
-    return () => el.removeEventListener('ui-select', handleSelect as EventListener);
+  const handleSelect = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<BreadcrumbSelectDetail>(event);
+    if (detail) onSelect?.(detail);
   }, [onSelect]);
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  useElementEventListeners(ref, [{ type: 'ui-select', listener: handleSelect }], [handleSelect]);
 
-    const syncAttr = (attr: string, next: string | null) => {
-      const current = el.getAttribute(attr);
-      if (next == null) {
-        if (current != null) el.removeAttribute(attr);
-        return;
-      }
-      if (current !== next) el.setAttribute(attr, next);
-    };
-
-    const syncBooleanish = (attr: string, next: boolean | undefined, mode: 'presence' | 'value' = 'presence') => {
-      if (mode === 'presence') {
-        if (next) {
-          if (!el.hasAttribute(attr)) el.setAttribute(attr, '');
-        } else if (el.hasAttribute(attr)) {
-          el.removeAttribute(attr);
-        }
-        return;
-      }
-
-      if (next == null) {
-        if (el.hasAttribute(attr)) el.removeAttribute(attr);
-        return;
-      }
-
-      const serialized = next ? 'true' : 'false';
-      if (el.getAttribute(attr) !== serialized) el.setAttribute(attr, serialized);
-    };
-
-    syncAttr('separator', separator || null);
-    syncAttr('max-items', maxItems != null && Number.isFinite(maxItems) ? String(maxItems) : null);
-    syncAttr('current-index', currentIndex != null && Number.isFinite(currentIndex) ? String(currentIndex) : null);
-    syncAttr('size', size && size !== 'md' && size !== '2' ? size : null);
-    syncAttr('variant', variant && variant !== 'default' && variant !== 'surface' ? variant : null);
-    syncAttr('radius', radius != null && radius !== '' && radius !== 'md' ? String(radius) : null);
-    syncAttr('elevation', elevation && elevation !== 'default' && elevation !== 'none' ? elevation : null);
-    syncAttr('tone', tone || null);
-    syncAttr('state', state && state !== 'idle' ? state : null);
-    syncBooleanish('disabled', disabled);
-    syncAttr('aria-label', ariaLabel || null);
+  useElementAttributes(ref, (el) => {
+    syncStringAttribute(el, 'separator', separator || null);
+    syncNumberAttribute(el, 'max-items', maxItems != null && Number.isFinite(maxItems) ? maxItems : undefined);
+    syncNumberAttribute(
+      el,
+      'current-index',
+      currentIndex != null && Number.isFinite(currentIndex) ? currentIndex : undefined
+    );
+    syncStringAttribute(el, 'size', size && size !== 'md' && size !== '2' ? size : null);
+    syncStringAttribute(
+      el,
+      'variant',
+      variant && variant !== 'default' && variant !== 'surface' ? variant : null
+    );
+    syncStringAttribute(el, 'radius', radius != null && radius !== '' && radius !== 'md' ? String(radius) : null);
+    syncStringAttribute(
+      el,
+      'elevation',
+      elevation && elevation !== 'default' && elevation !== 'none' ? elevation : null
+    );
+    syncStringAttribute(el, 'tone', tone || null);
+    syncStringAttribute(el, 'state', state && state !== 'idle' ? state : null);
+    syncBooleanAttribute(el, 'disabled', disabled);
+    syncStringAttribute(el, 'aria-label', ariaLabel || null);
   }, [separator, maxItems, currentIndex, size, variant, radius, elevation, tone, state, disabled, ariaLabel]);
 
   return React.createElement('ui-breadcrumb', { ref, ...rest }, children);

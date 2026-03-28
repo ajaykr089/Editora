@@ -497,7 +497,7 @@ export const LandingPageStats = () => (
         { label: 'Format', value: 'Cards' },
         { label: 'Effect', value: 'rotate-in' },
         { label: 'Profile', value: 'calm' },
-        { label: 'Surface', value: 'minimal', tone: 'info' }
+        { label: 'Surface', value: 'minimal', tone: 'neutral' }
       ]}
   >
     <ShowcaseSection

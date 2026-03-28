@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { applyTheme, defaultTokens, ThemeTokens } from '@editora/ui-core';
+import { applyTheme, defaultTokens, type ThemeTokens } from '@editora/ui-core/runtime';
 
 export type ThemeUpdater = ThemeTokens | Partial<ThemeTokens> | ((prev: ThemeTokens) => ThemeTokens | Partial<ThemeTokens>);
 
@@ -115,6 +115,7 @@ function resolveThemeUpdater(prev: ThemeTokens, next: ThemeUpdater): ThemeTokens
 
 export function ThemeProvider({ tokens, children, storageKey = 'editora.theme.tokens' }: Props) {
   const hostRef = useRef<HTMLDivElement | null>(null);
+  const explicitTokens = tokens && Object.keys(tokens).length ? tokens : null;
   const computeInitial = () => {
     if (typeof window !== 'undefined' && storageKey) {
       try {
@@ -128,8 +129,8 @@ export function ThemeProvider({ tokens, children, storageKey = 'editora.theme.to
       }
     }
 
-    if (tokens && Object.keys(tokens).length) {
-      return mergeThemeTokens(defaultTokens, tokens);
+    if (explicitTokens) {
+      return mergeThemeTokens(defaultTokens, explicitTokens);
     }
 
     if (typeof window !== 'undefined') {
@@ -139,49 +140,38 @@ export function ThemeProvider({ tokens, children, storageKey = 'editora.theme.to
       }
     }
 
-    return mergeThemeTokens(defaultTokens, tokens || {});
+    return mergeThemeTokens(defaultTokens, explicitTokens || {});
   };
 
   const [current, setCurrent] = useState<ThemeTokens>(() => computeInitial());
 
   useEffect(() => {
-    if (!tokens || !Object.keys(tokens).length) return;
-    setCurrent((prev) => mergeThemeTokens(prev, tokens));
-  }, [tokens]);
+    if (!explicitTokens) return;
+    setCurrent((prev) => {
+      const next = mergeThemeTokens(defaultTokens, explicitTokens);
+      return JSON.stringify(prev) === JSON.stringify(next) ? prev : next;
+    });
+  }, [explicitTokens]);
 
   useIsomorphicLayoutEffect(() => {
+    if (typeof document !== 'undefined') {
+      applyTheme(current, document);
+    }
+
     const host = hostRef.current;
-    if (!host) return;
-    applyTheme(current, host);
+    if (host) {
+      applyTheme(current, host);
+    }
   }, [current]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !storageKey) return;
 
-    const payload = JSON.stringify(current);
-    let idleId: number | undefined;
-    const save = () => {
-      try {
-        localStorage.setItem(storageKey, payload);
-      } catch {
-        // noop
-      }
-    };
-
-    if ((window as any).requestIdleCallback) {
-      idleId = (window as any).requestIdleCallback(save, { timeout: 1000 });
-    } else {
-      idleId = window.setTimeout(save, 250);
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(current));
+    } catch {
+      // noop
     }
-
-    return () => {
-      try {
-        if ((window as any).cancelIdleCallback && idleId) (window as any).cancelIdleCallback(idleId);
-        else if (idleId) clearTimeout(idleId);
-      } catch {
-        // noop
-      }
-    };
   }, [current, storageKey]);
 
   const value = useMemo<ThemeContextValue>(

@@ -12,6 +12,13 @@ This document provides a comprehensive overview of all components available in t
 - Peer Dependencies: `react`, `react-dom`
 - License: MIT
 
+**Import Paths:**
+- `@editora/ui-react`: compatibility entrypoint for existing usage
+- `@editora/ui-react/client`: explicit client entrypoint for interactive components in Next/Remix/RSC apps
+- `@editora/ui-react/server`: server-safe subset for RSC/SSR imports
+
+Current `server` subset: `Box`, `Flex`, `Grid`, `Container`, `DirectionProvider`, `Anchor`, `AspectRatio`, `Field`, `Icon`, `Label`, `Section`, `Separator`, `VisuallyHidden`
+
 ## Component Categories
 
 ### 1. Form and Input Components
@@ -61,6 +68,7 @@ Components for displaying and managing data collections.
 | **Tree** | Hierarchical data display | Expand/collapse, selection, drag-drop |
 | **Listbox** | List selection component | Single/multi select, virtualization |
 | **TransferList** | Dual-list selection | Move items between lists |
+| **Sortable** | Production drag-and-drop workspace | Reordering, multi-list transfer, nesting, cloning, keyboard sorting, persistence |
 | **DataTable** | Advanced data grid | Sorting, filtering, grouping, export |
 
 ### 3. Overlay and Modal Components

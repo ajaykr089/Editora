@@ -299,10 +299,10 @@ export class UIPresence extends ElementBase {
     this._dispatch('before-enter');
     const start = () => {
       this._setState('entering');
+      this._dispatch('enter');
       requestAnimationFrame(() => {
         this._setState('present');
         this._hasEntered = true;
-        this._dispatch('enter');
       });
     };
     if (delay > 0) {

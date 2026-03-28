@@ -1,6 +1,16 @@
 import React from 'react';
 import { Box, Flex, QuickActions } from '@editora/ui-react';
 
+const metaTextStyle: React.CSSProperties = {
+  fontSize: 'var(--ui-font-size-sm, 12px)',
+  color: 'var(--ui-color-muted, #64748b)'
+};
+
+const subtleTextStyle: React.CSSProperties = {
+  fontSize: 'var(--ui-font-size-xs, 11px)',
+  color: 'color-mix(in srgb, var(--ui-color-muted, #64748b) 82%, transparent)'
+};
+
 export default {
   title: 'UI/QuickActions',
   component: QuickActions,
@@ -32,7 +42,7 @@ export const Playground = (args: any) => {
         <QuickActions.Action>Assign</QuickActions.Action>
         <QuickActions.Action>Export</QuickActions.Action>
       </QuickActions>
-      <Box style={{ fontSize: 13, color: '#64748b' }}>{message}</Box>
+      <Box style={metaTextStyle}>{message}</Box>
     </Box>
   );
 };
@@ -53,7 +63,7 @@ export const CompositionSlots = () => {
     <Box style={{ display: 'grid', gap: 24, padding: 16 }}>
       {/* Bar — horizontal */}
       <Box style={{ display: 'grid', gap: 6 }}>
-        <Box style={{ fontSize: 12, color: '#94a3b8' }}>Bar · horizontal</Box>
+        <Box style={subtleTextStyle}>Bar · horizontal</Box>
         <QuickActions mode="bar" orientation="horizontal" onSelect={(d) => setLast(d.label)}>
           <QuickActions.Action>Save</QuickActions.Action>
           <QuickActions.Action>Duplicate</QuickActions.Action>
@@ -63,7 +73,7 @@ export const CompositionSlots = () => {
 
       {/* Bar — vertical */}
       <Box style={{ display: 'grid', gap: 6 }}>
-        <Box style={{ fontSize: 12, color: '#94a3b8' }}>Bar · vertical</Box>
+        <Box style={subtleTextStyle}>Bar · vertical</Box>
         <QuickActions mode="bar" orientation="vertical" onSelect={(d) => setLast(d.label)}>
           <QuickActions.Action>Alerts</QuickActions.Action>
           <QuickActions.Action>Incidents</QuickActions.Action>
@@ -73,7 +83,7 @@ export const CompositionSlots = () => {
 
       {/* Collapsible */}
       <Box style={{ display: 'grid', gap: 6 }}>
-        <Box style={{ fontSize: 12, color: '#94a3b8' }}>Collapsible bar</Box>
+        <Box style={subtleTextStyle}>Collapsible bar</Box>
         <QuickActions mode="bar" collapsible label="Document actions" onSelect={(d) => setLast(d.label)}>
           <QuickActions.Action>Publish</QuickActions.Action>
           <QuickActions.Action>Preview</QuickActions.Action>
@@ -81,7 +91,7 @@ export const CompositionSlots = () => {
         </QuickActions>
       </Box>
 
-      <Box style={{ fontSize: 13, color: '#64748b' }}>Last selected: <strong>{last}</strong></Box>
+      <Box style={metaTextStyle}>Last selected: <strong>{last}</strong></Box>
     </Box>
   );
 };
@@ -90,7 +100,7 @@ export const Variants = () => (
   <Box style={{ display: 'grid', gap: 20, padding: 16 }}>
     {(['default', 'soft', 'contrast', 'minimal'] as const).map((variant) => (
       <Box key={variant} style={{ display: 'grid', gap: 6 }}>
-        <Box style={{ fontSize: 12, color: '#94a3b8' }}>{variant}</Box>
+        <Box style={subtleTextStyle}>{variant}</Box>
         <QuickActions mode="bar" variant={variant}>
           <QuickActions.Action>Create</QuickActions.Action>
           <QuickActions.Action>Edit</QuickActions.Action>
@@ -102,8 +112,8 @@ export const Variants = () => (
 );
 
 export const FloatingFab = () => (
-  <Box style={{ minHeight: 320, border: '1px solid #e2e8f0', borderRadius: 12, position: 'relative', padding: 16 }}>
-    <Flex style={{ fontSize: 13, color: '#64748b' }}>
+  <Box style={{ minHeight: 320, border: '1px solid var(--ui-color-border, #e2e8f0)', borderRadius: 12, position: 'relative', padding: 16 }}>
+    <Flex style={metaTextStyle}>
       Floating FAB — fixed to bottom-right of its containing block.
     </Flex>
     <QuickActions mode="fab" floating placement="bottom-right" label="Quick actions">
@@ -134,7 +144,7 @@ export const Controlled = () => {
         <QuickActions.Action>Reject</QuickActions.Action>
         <QuickActions.Action>Defer</QuickActions.Action>
       </QuickActions>
-      <Box style={{ fontSize: 13, color: '#64748b' }}>open: <strong>{String(open)}</strong></Box>
+      <Box style={metaTextStyle}>open: <strong>{String(open)}</strong></Box>
     </Box>
   );
 };

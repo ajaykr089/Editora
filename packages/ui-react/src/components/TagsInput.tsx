@@ -1,6 +1,13 @@
-import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncNumberAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 export type TagsInputProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'> & {
   value?: string[] | string;
@@ -48,71 +55,46 @@ export const TagsInput = React.forwardRef<HTMLElement, TagsInputProps>(function 
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const handleChange = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ value?: string[] }>(event);
+    if (Array.isArray(detail?.value)) onChange?.(detail.value);
+  }, [onChange]);
 
-    const handleChange = (event: Event) => {
-      const detail = (event as CustomEvent<{ value?: string[] }>).detail;
-      if (Array.isArray(detail?.value)) onChange?.(detail.value);
-    };
+  const handleAdd = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ tag: string; value: string[] }>(event);
+    if (detail) onTagAdd?.(detail);
+  }, [onTagAdd]);
 
-    const handleAdd = (event: Event) => {
-      const detail = (event as CustomEvent<{ tag: string; value: string[] }>).detail;
-      if (detail) onTagAdd?.(detail);
-    };
+  const handleRemove = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ tag: string; index: number; value: string[] }>(event);
+    if (detail) onTagRemove?.(detail);
+  }, [onTagRemove]);
 
-    const handleRemove = (event: Event) => {
-      const detail = (event as CustomEvent<{ tag: string; index: number; value: string[] }>).detail;
-      if (detail) onTagRemove?.(detail);
-    };
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'change', listener: handleChange },
+      { type: 'tag-add', listener: handleAdd },
+      { type: 'tag-remove', listener: handleRemove },
+    ],
+    [handleChange, handleAdd, handleRemove]
+  );
 
-    el.addEventListener('change', handleChange as EventListener);
-    el.addEventListener('tag-add', handleAdd as EventListener);
-    el.addEventListener('tag-remove', handleRemove as EventListener);
-    return () => {
-      el.removeEventListener('change', handleChange as EventListener);
-      el.removeEventListener('tag-add', handleAdd as EventListener);
-      el.removeEventListener('tag-remove', handleRemove as EventListener);
-    };
-  }, [onChange, onTagAdd, onTagRemove]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const syncAttr = (attr: string, next: string | null) => {
-      const current = el.getAttribute(attr);
-      if (next == null) {
-        if (current != null) el.removeAttribute(attr);
-        return;
-      }
-      if (current !== next) el.setAttribute(attr, next);
-    };
-
-    const syncBoolean = (attr: string, enabled: boolean | undefined) => {
-      if (enabled) {
-        if (!el.hasAttribute(attr)) el.setAttribute(attr, '');
-      } else if (el.hasAttribute(attr)) {
-        el.removeAttribute(attr);
-      }
-    };
-
-    syncAttr('value', serializeValue(value));
-    syncAttr('name', name ?? null);
-    syncAttr('label', label ?? null);
-    syncAttr('description', description ?? null);
-    syncAttr('placeholder', placeholder ?? null);
-    syncBoolean('required', required);
-    syncBoolean('disabled', disabled);
-    syncBoolean('readonly', readOnly);
-    syncBoolean('counter', counter);
-    syncBoolean('allow-duplicates', allowDuplicates);
-    syncBoolean('add-on-blur', addOnBlur);
-    syncAttr('max-tags', typeof maxTags === 'number' ? String(maxTags) : null);
+  useElementAttributes(ref, (el) => {
+    syncStringAttribute(el, 'value', serializeValue(value));
+    syncStringAttribute(el, 'name', name ?? null);
+    syncStringAttribute(el, 'label', label ?? null);
+    syncStringAttribute(el, 'description', description ?? null);
+    syncStringAttribute(el, 'placeholder', placeholder ?? null);
+    syncBooleanAttribute(el, 'required', required);
+    syncBooleanAttribute(el, 'disabled', disabled);
+    syncBooleanAttribute(el, 'readonly', readOnly);
+    syncBooleanAttribute(el, 'counter', counter);
+    syncBooleanAttribute(el, 'allow-duplicates', allowDuplicates);
+    syncBooleanAttribute(el, 'add-on-blur', addOnBlur);
+    syncNumberAttribute(el, 'max-tags', maxTags);
   }, [value, name, label, description, placeholder, required, disabled, readOnly, counter, allowDuplicates, addOnBlur, maxTags]);
 
   return React.createElement('ui-tags-input', { ref, ...rest }, children);

@@ -1,6 +1,4 @@
-import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
 
 export type IconProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
@@ -53,97 +51,32 @@ export const Icon = React.forwardRef<HTMLElement, IconProps>(function Icon(
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
+  const hostProps: Record<string, unknown> = {
+    ref: forwardedRef,
+    ...rest,
+    name: name || undefined,
+    'icon-variant': iconVariant || undefined,
+    size: size != null && size !== '' ? String(size) : undefined,
+    color: color || undefined,
+    'secondary-color': secondaryColor || undefined,
+    variant: variant && variant !== 'default' ? variant : undefined,
+    tone: tone && tone !== 'default' ? tone : undefined,
+    shape: shape && shape !== 'default' ? shape : undefined,
+    spin: spin ? '' : undefined,
+    pulse: pulse ? '' : undefined,
+    badge: badge ? '' : undefined,
+    label: label || undefined,
+    decorative: decorative ? '' : undefined,
+    'stroke-width': strokeWidth != null && strokeWidth !== '' ? String(strokeWidth) : undefined,
+    'absolute-stroke-width': absoluteStrokeWidth ? '' : undefined,
+    'stroke-linecap': strokeLinecap || undefined,
+    'stroke-linejoin': strokeLinejoin || undefined,
+    rotate: typeof rotate === 'number' && Number.isFinite(rotate) ? rotate : undefined,
+    flip: flip || undefined,
+    rtl: rtl ? '' : undefined,
+  };
 
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    if (name) el.setAttribute('name', name);
-    else el.removeAttribute('name');
-
-    if (iconVariant) el.setAttribute('icon-variant', iconVariant);
-    else el.removeAttribute('icon-variant');
-
-    if (size != null && size !== '') el.setAttribute('size', String(size));
-    else el.removeAttribute('size');
-
-    if (color) el.setAttribute('color', color);
-    else el.removeAttribute('color');
-
-    if (secondaryColor) el.setAttribute('secondary-color', secondaryColor);
-    else el.removeAttribute('secondary-color');
-
-    if (variant && variant !== 'default') el.setAttribute('variant', variant);
-    else el.removeAttribute('variant');
-
-    if (tone && tone !== 'default') el.setAttribute('tone', tone);
-    else el.removeAttribute('tone');
-
-    if (shape && shape !== 'default') el.setAttribute('shape', shape);
-    else el.removeAttribute('shape');
-
-    if (spin) el.setAttribute('spin', '');
-    else el.removeAttribute('spin');
-
-    if (pulse) el.setAttribute('pulse', '');
-    else el.removeAttribute('pulse');
-
-    if (badge) el.setAttribute('badge', '');
-    else el.removeAttribute('badge');
-
-    if (label) el.setAttribute('label', label);
-    else el.removeAttribute('label');
-
-    if (decorative) el.setAttribute('decorative', '');
-    else el.removeAttribute('decorative');
-
-    if (strokeWidth != null && strokeWidth !== '') el.setAttribute('stroke-width', String(strokeWidth));
-    else el.removeAttribute('stroke-width');
-
-    if (absoluteStrokeWidth) el.setAttribute('absolute-stroke-width', '');
-    else el.removeAttribute('absolute-stroke-width');
-
-    if (strokeLinecap) el.setAttribute('stroke-linecap', strokeLinecap);
-    else el.removeAttribute('stroke-linecap');
-
-    if (strokeLinejoin) el.setAttribute('stroke-linejoin', strokeLinejoin);
-    else el.removeAttribute('stroke-linejoin');
-
-    if (rotate != null && Number.isFinite(rotate)) el.setAttribute('rotate', String(rotate));
-    else el.removeAttribute('rotate');
-
-    if (flip) el.setAttribute('flip', flip);
-    else el.removeAttribute('flip');
-
-    if (rtl) el.setAttribute('rtl', '');
-    else el.removeAttribute('rtl');
-  }, [
-    name,
-    iconVariant,
-    size,
-    color,
-    secondaryColor,
-    variant,
-    tone,
-    shape,
-    spin,
-    pulse,
-    badge,
-    label,
-    decorative,
-    strokeWidth,
-    absoluteStrokeWidth,
-    strokeLinecap,
-    strokeLinejoin,
-    rotate,
-    flip,
-    rtl
-  ]);
-
-  return React.createElement('ui-icon', { ref, ...rest }, children);
+  return React.createElement('ui-icon', hostProps, children);
 });
 
 Icon.displayName = 'Icon';

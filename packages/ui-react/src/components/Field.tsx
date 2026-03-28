@@ -1,6 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
 
 export type FieldProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
@@ -40,71 +38,25 @@ export function Field(props: FieldProps) {
     ...rest
   } = props;
 
-  const ref = useRef<HTMLElement | null>(null);
+  const hostProps: Record<string, unknown> = {
+    ...rest,
+    label: label != null && label !== '' ? label : undefined,
+    description: description != null && description !== '' ? description : undefined,
+    error: error != null && error !== '' ? error : undefined,
+    for: htmlFor || undefined,
+    required: required ? '' : undefined,
+    invalid: invalid ? '' : undefined,
+    orientation: orientation && orientation !== 'vertical' ? orientation : undefined,
+    variant: variant && variant !== 'default' ? variant : undefined,
+    tone: tone && tone !== 'default' ? tone : undefined,
+    density: density && density !== 'default' ? density : undefined,
+    shape: shape && shape !== 'default' ? shape : undefined,
+    shell: shell && shell !== 'none' ? shell : undefined,
+    'label-width': labelWidth || undefined,
+    headless: headless ? '' : undefined,
+  };
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    if (label != null && label !== '') el.setAttribute('label', label);
-    else el.removeAttribute('label');
-
-    if (description != null && description !== '') el.setAttribute('description', description);
-    else el.removeAttribute('description');
-
-    if (error != null && error !== '') el.setAttribute('error', error);
-    else el.removeAttribute('error');
-
-    if (htmlFor) el.setAttribute('for', htmlFor);
-    else el.removeAttribute('for');
-
-    if (required) el.setAttribute('required', '');
-    else el.removeAttribute('required');
-
-    if (invalid) el.setAttribute('invalid', '');
-    else el.removeAttribute('invalid');
-
-    if (orientation && orientation !== 'vertical') el.setAttribute('orientation', orientation);
-    else el.removeAttribute('orientation');
-
-    if (variant && variant !== 'default') el.setAttribute('variant', variant);
-    else el.removeAttribute('variant');
-
-    if (tone && tone !== 'default') el.setAttribute('tone', tone);
-    else el.removeAttribute('tone');
-
-    if (density && density !== 'default') el.setAttribute('density', density);
-    else el.removeAttribute('density');
-
-    if (shape && shape !== 'default') el.setAttribute('shape', shape);
-    else el.removeAttribute('shape');
-
-    if (shell && shell !== 'none') el.setAttribute('shell', shell);
-    else el.removeAttribute('shell');
-
-    if (labelWidth) el.setAttribute('label-width', labelWidth);
-    else el.removeAttribute('label-width');
-
-    if (headless) el.setAttribute('headless', '');
-    else el.removeAttribute('headless');
-  }, [
-    label,
-    description,
-    error,
-    htmlFor,
-    required,
-    invalid,
-    orientation,
-    variant,
-    tone,
-    density,
-    shape,
-    shell,
-    labelWidth,
-    headless
-  ]);
-
-  return React.createElement('ui-field', { ref, ...rest }, children);
+  return React.createElement('ui-field', hostProps, children);
 }
 
 export default Field;

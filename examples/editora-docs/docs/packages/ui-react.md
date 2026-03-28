@@ -8,6 +8,16 @@ keywords: [editora, ui-react, react components, provider, ui]
 
 React wrapper layer for `@editora/ui-core` components and utilities.
 
+## Runtime Entry Points
+
+`@editora/ui-react` remains the compatibility entry and is client-oriented.
+
+- `@editora/ui-react`: existing broad entrypoint, safe for current consumers
+- `@editora/ui-react/client`: explicit client entry for Next/Remix/RSC apps
+- `@editora/ui-react/server`: server-safe subset for RSC/SSR imports
+
+The current server-safe subset is intentionally small and only includes components that do not rely on effects or imperative DOM syncing: `Box`, `Flex`, `Grid`, `Container`, `DirectionProvider`, `Anchor`, `AspectRatio`, `Field`, `Icon`, `Label`, `Section`, `Separator`, and `VisuallyHidden`.
+
 ## Installation
 
 ```bash
@@ -38,6 +48,7 @@ npm i @editora/ui-react @editora/ui-core
 - Mount providers at app-shell level.
 - Keep provider order consistent across routes/layouts.
 - Co-locate component examples with domain pages for discoverability.
+- In Next/Remix/RSC apps, prefer `@editora/ui-react/client` for interactive wrappers and `@editora/ui-react/server` for server-safe layout primitives.
 
 ## Accessibility
 

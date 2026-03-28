@@ -288,7 +288,7 @@ export const AdvancedVariations = () => (
     description="Use the advanced NumberTicker variations when you want a more expressive entrance, per-digit motion, or final text that needs lightweight product-specific decoration."
     meta={[
       { label: 'Mode', value: 'Odometer digits' },
-      { label: 'Trigger', value: 'Viewport-aware start', tone: 'info' },
+      { label: 'Trigger', value: 'Viewport-aware start', tone: 'neutral' },
       { label: 'Motion', value: 'Spring / bounce / overshoot', tone: 'success' },
     ]}
   >

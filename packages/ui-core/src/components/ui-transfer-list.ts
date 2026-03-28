@@ -766,6 +766,7 @@ export class UITransferList extends ElementBase {
   private _selectedChosen = new Set<string>();
   private _formUnregister: (() => void) | null = null;
   private _suppressValueAttr = false;
+  private _delegatedListenersAttached = false;
 
   get value(): string[] {
     return [...this._value];
@@ -777,11 +778,13 @@ export class UITransferList extends ElementBase {
 
   override connectedCallback(): void {
     super.connectedCallback();
+    this._attachDelegatedListeners();
     this._registerWithForm();
   }
 
   override disconnectedCallback(): void {
     if (this._formUnregister) this._formUnregister();
+    this._detachDelegatedListeners();
     super.disconnectedCallback();
   }
 
@@ -924,15 +927,10 @@ export class UITransferList extends ElementBase {
         ${error ? `<p class="error" part="error">${escapeHtml(error)}</p>` : ''}
       </div>
     `);
-
-    this.root.querySelectorAll('.item').forEach((item) => item.addEventListener('click', (event) => this._toggleItem(event)));
-    this.root.querySelectorAll('.item').forEach((item) => item.addEventListener('keydown', (event) => this._onItemKeyDown(event as KeyboardEvent)));
-    this.root.querySelectorAll('.move-btn').forEach((button) => button.addEventListener('click', (event) => this._move(event)));
   }
 
-  private _toggleItem(event: Event): void {
+  private _toggleItem(item: HTMLElement): void {
     if (this.hasAttribute('disabled')) return;
-    const item = event.currentTarget as HTMLElement;
     const side = item.getAttribute('data-side');
     const value = item.getAttribute('data-value') || '';
     if (!value) return;
@@ -945,14 +943,13 @@ export class UITransferList extends ElementBase {
     this._syncActionButtons();
   }
 
-  private _onItemKeyDown(event: KeyboardEvent): void {
-    const item = event.currentTarget as HTMLElement;
+  private _onItemKeyDown(event: KeyboardEvent, item: HTMLElement): void {
     const side = item.getAttribute('data-side');
     if (!side) return;
 
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      this._toggleItem(event);
+      this._toggleItem(item);
       return;
     }
 
@@ -977,9 +974,8 @@ export class UITransferList extends ElementBase {
     items[nextIndex]?.focus();
   }
 
-  private _move(event: Event): void {
+  private _move(action: string | null): void {
     if (this.hasAttribute('disabled')) return;
-    const action = (event.currentTarget as HTMLElement).getAttribute('data-action');
     if (action === 'add') {
       const next = [...this._value, ...Array.from(this._selectedAvailable).filter((value) => !this._value.includes(value))];
       this._selectedAvailable.clear();
@@ -993,6 +989,41 @@ export class UITransferList extends ElementBase {
       this._applyValue(next, 'transfer-left');
     }
   }
+
+  private _attachDelegatedListeners(): void {
+    if (this._delegatedListenersAttached) return;
+    this.root.addEventListener('click', this._handleRootClick as EventListener);
+    this.root.addEventListener('keydown', this._handleRootKeyDown as EventListener);
+    this._delegatedListenersAttached = true;
+  }
+
+  private _detachDelegatedListeners(): void {
+    if (!this._delegatedListenersAttached) return;
+    this.root.removeEventListener('click', this._handleRootClick as EventListener);
+    this.root.removeEventListener('keydown', this._handleRootKeyDown as EventListener);
+    this._delegatedListenersAttached = false;
+  }
+
+  private _handleRootClick = (event: Event): void => {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+
+    const moveButton = target.closest('.move-btn') as HTMLElement | null;
+    if (moveButton && this.root.contains(moveButton)) {
+      this._move(moveButton.getAttribute('data-action'));
+      return;
+    }
+
+    const item = target.closest('.item') as HTMLElement | null;
+    if (item && this.root.contains(item)) this._toggleItem(item);
+  };
+
+  private _handleRootKeyDown = (event: KeyboardEvent): void => {
+    const target = event.target as HTMLElement | null;
+    if (!target) return;
+    const item = target.closest('.item') as HTMLElement | null;
+    if (item && this.root.contains(item)) this._onItemKeyDown(event, item);
+  };
 
   private _applyValue(next: string[], source: string): void {
     const knownValues = new Set(this._options.map((option) => option.value));

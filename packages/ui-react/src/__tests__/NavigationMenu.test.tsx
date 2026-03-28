@@ -1,4 +1,5 @@
 import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { render, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import '../../../ui-core/src/components/ui-navigation-menu';
@@ -145,5 +146,32 @@ describe('NavigationMenu wrapper', () => {
     await waitFor(() => {
       expect((trigger.querySelector('svg') as SVGElement | null)?.style.transform).toContain('180deg');
     });
+  });
+
+  it('keeps item keys stable across server renders so hydration can match panels to items', () => {
+    const renderMarkup = () =>
+      renderToStaticMarkup(
+        <NavigationMenu.Root selected={1} variant="soft">
+          <NavigationMenu.List>
+            <NavigationMenu.Item>
+              <NavigationMenu.Trigger>Learn</NavigationMenu.Trigger>
+              <NavigationMenu.Content>Learn content</NavigationMenu.Content>
+            </NavigationMenu.Item>
+            <NavigationMenu.Item>
+              <NavigationMenu.Link href="https://example.com">Github</NavigationMenu.Link>
+              <NavigationMenu.Content>Github content</NavigationMenu.Content>
+            </NavigationMenu.Item>
+          </NavigationMenu.List>
+          <NavigationMenu.Indicator />
+          <NavigationMenu.Viewport />
+        </NavigationMenu.Root>
+      );
+
+    const first = renderMarkup();
+    const second = renderMarkup();
+
+    expect(first).toBe(second);
+    expect(first).toContain('data-nav-key=');
+    expect(first).toContain('data-nav-panel-for=');
   });
 });

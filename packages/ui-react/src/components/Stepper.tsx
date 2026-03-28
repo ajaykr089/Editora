@@ -1,6 +1,13 @@
-import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncJsonAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 export type StepperStep = {
   value?: string;
@@ -48,68 +55,36 @@ export const Stepper = React.forwardRef<HTMLElement, StepperProps>(function Step
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const handleChange = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<StepperChangeDetail>(event);
+    if (detail) onChange?.(detail);
+  }, [onChange]);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const handleSelect = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<StepperChangeDetail>(event);
+    if (detail) onSelect?.(detail);
+  }, [onSelect]);
 
-    const handleChange = (event: Event) => {
-      const detail = (event as CustomEvent<StepperChangeDetail>).detail;
-      if (detail) onChange?.(detail);
-    };
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'change', listener: handleChange },
+      { type: 'select', listener: handleSelect },
+    ],
+    [handleChange, handleSelect]
+  );
 
-    const handleSelect = (event: Event) => {
-      const detail = (event as CustomEvent<StepperChangeDetail>).detail;
-      if (detail) onSelect?.(detail);
-    };
-
-    el.addEventListener('change', handleChange as EventListener);
-    el.addEventListener('select', handleSelect as EventListener);
-
-    return () => {
-      el.removeEventListener('change', handleChange as EventListener);
-      el.removeEventListener('select', handleSelect as EventListener);
-    };
-  }, [onChange, onSelect]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const syncAttr = (name: string, next: string | null) => {
-      const current = el.getAttribute(name);
-      if (next == null) {
-        if (current != null) el.removeAttribute(name);
-        return;
-      }
-      if (current !== next) el.setAttribute(name, next);
-    };
-
-    const syncBool = (name: string, enabled: boolean | undefined) => {
-      if (enabled) syncAttr(name, '');
-      else syncAttr(name, null);
-    };
-
-    if (steps && steps.length) {
-      try {
-        syncAttr('steps', JSON.stringify(steps));
-      } catch {
-        syncAttr('steps', null);
-      }
-    } else {
-      syncAttr('steps', null);
-    }
-
-    syncAttr('value', value || null);
-    syncAttr('orientation', orientation && orientation !== 'horizontal' ? orientation : null);
-    syncAttr('variant', variant && variant !== 'default' ? variant : null);
-    syncAttr('size', size && size !== 'md' ? size : null);
-    syncBool('clickable', clickable);
-    syncBool('linear', linear);
-    syncBool('headless', headless);
+  useElementAttributes(ref, (el) => {
+    syncJsonAttribute(el, 'steps', steps?.length ? steps : null);
+    syncStringAttribute(el, 'value', value || null);
+    syncStringAttribute(el, 'orientation', orientation && orientation !== 'horizontal' ? orientation : null);
+    syncStringAttribute(el, 'variant', variant && variant !== 'default' ? variant : null);
+    syncStringAttribute(el, 'size', size && size !== 'md' ? size : null);
+    syncBooleanAttribute(el, 'clickable', clickable);
+    syncBooleanAttribute(el, 'linear', linear);
+    syncBooleanAttribute(el, 'headless', headless);
   }, [steps, value, orientation, variant, size, clickable, linear, headless]);
 
   return React.createElement('ui-stepper', { ref, ...rest }, children);

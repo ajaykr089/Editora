@@ -1,6 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
 
 type SectionProps = React.HTMLAttributes<HTMLElement> & {
   size?: 'small' | 'medium' | 'large';
@@ -24,39 +22,18 @@ export const Section = React.forwardRef<HTMLElement, SectionProps>(function Sect
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
-  React.useImperativeHandle(forwardedRef, () => ref.current as any);
+  const hostProps: Record<string, unknown> = {
+    ref: forwardedRef,
+    ...rest,
+    size: size !== 'medium' ? size : undefined,
+    variant: variant !== 'default' ? variant : undefined,
+    tone: tone !== 'neutral' ? tone : undefined,
+    radius: radius !== 'md' ? radius : undefined,
+    density: density !== 'comfortable' ? density : undefined,
+    inset: inset ? '' : undefined,
+  };
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const syncAttr = (name: string, value: string | null) => {
-      const current = el.getAttribute(name);
-      if (value == null) {
-        if (current != null) el.removeAttribute(name);
-        return;
-      }
-      if (current !== value) el.setAttribute(name, value);
-    };
-
-    const syncBool = (name: string, enabled: boolean | undefined) => {
-      if (enabled) {
-        if (!el.hasAttribute(name)) el.setAttribute(name, '');
-      } else if (el.hasAttribute(name)) {
-        el.removeAttribute(name);
-      }
-    };
-
-    syncAttr('size', size !== 'medium' ? size : null);
-    syncAttr('variant', variant !== 'default' ? variant : null);
-    syncAttr('tone', tone !== 'neutral' ? tone : null);
-    syncAttr('radius', radius !== 'md' ? radius : null);
-    syncAttr('density', density !== 'comfortable' ? density : null);
-    syncBool('inset', inset);
-  }, [size, variant, tone, radius, density, inset]);
-
-  return React.createElement('ui-section', { ref, ...rest }, children);
+  return React.createElement('ui-section', hostProps, children);
 });
 
 Section.displayName = 'Section';

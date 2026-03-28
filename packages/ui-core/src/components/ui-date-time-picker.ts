@@ -899,6 +899,7 @@ export class UIDateTimePicker extends ElementBase {
     el.addEventListener('click', this._onOverlayClickBound);
     el.addEventListener('change', this._onOverlayChangeBound);
     el.addEventListener('change', this._onOverlayCalendarBound as EventListener);
+    el.addEventListener('select', this._onOverlayCalendarBound as EventListener);
     document.body.appendChild(el);
     this._overlay = el;
     document.addEventListener('pointerdown', this._onDocumentPointerDownBound, true);
@@ -918,6 +919,7 @@ export class UIDateTimePicker extends ElementBase {
     this._overlay.removeEventListener('click', this._onOverlayClickBound);
     this._overlay.removeEventListener('change', this._onOverlayChangeBound);
     this._overlay.removeEventListener('change', this._onOverlayCalendarBound as EventListener);
+    this._overlay.removeEventListener('select', this._onOverlayCalendarBound as EventListener);
     if (this._overlay.parentElement) this._overlay.parentElement.removeChild(this._overlay);
     this._overlay = null;
     this._overlayKey = null;

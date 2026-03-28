@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import '../components/ui-tooltip';
 
 describe('ui-tooltip', () => {
   beforeEach(() => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -40,7 +40,6 @@ export type NavigationMenuContentProps = React.HTMLAttributes<HTMLElement>;
 type NavigationMenuItemContextValue = {
   itemKey: string;
   hasContent: boolean;
-  setHasContent: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const NavigationMenuItemContext = React.createContext<NavigationMenuItemContextValue | null>(null);
@@ -127,11 +126,19 @@ function NavigationMenuList({ children }: NavigationMenuListProps) {
 }
 
 function NavigationMenuItem({ children }: NavigationMenuItemProps) {
-  const keyRef = useRef(`ui-nav-item-${Math.random().toString(36).slice(2, 10)}`);
-  const [hasContent, setHasContent] = useState(false);
+  const reactId = React.useId();
+  const itemKey = `ui-nav-item-${reactId.replace(/:/g, '')}`;
+  const hasContent = useMemo(
+    () =>
+      React.Children.toArray(children).some((child) => {
+        if (!React.isValidElement(child)) return false;
+        return child.type === NavigationMenuContent;
+      }),
+    [children]
+  );
 
   return (
-    <NavigationMenuItemContext.Provider value={{ itemKey: keyRef.current, hasContent, setHasContent }}>
+    <NavigationMenuItemContext.Provider value={{ itemKey, hasContent }}>
       {children}
     </NavigationMenuItemContext.Provider>
   );
@@ -140,14 +147,16 @@ function NavigationMenuItem({ children }: NavigationMenuItemProps) {
 function NavigationMenuTrigger({ children, ...rest }: NavigationMenuTriggerProps) {
   const itemContext = React.useContext(NavigationMenuItemContext);
   const ref = useRef<HTMLButtonElement | null>(null);
-  const [expanded, setExpanded] = useState(false);
+  const caretRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    const caret = caretRef.current;
+    if (!el || !caret) return;
 
     const syncExpanded = () => {
-      setExpanded(el.getAttribute('aria-expanded') === 'true');
+      const expanded = el.getAttribute('aria-expanded') === 'true';
+      caret.style.transform = expanded ? 'rotate(180deg)' : 'rotate(0deg)';
     };
 
     syncExpanded();
@@ -167,6 +176,7 @@ function NavigationMenuTrigger({ children, ...rest }: NavigationMenuTriggerProps
       {itemContext?.hasContent ? (
         <span aria-hidden="true" style={{ marginLeft: 6, display: 'inline-flex', alignItems: 'center', lineHeight: 1 }}>
           <svg
+            ref={caretRef}
             width="12"
             height="12"
             viewBox="0 0 12 12"
@@ -174,7 +184,7 @@ function NavigationMenuTrigger({ children, ...rest }: NavigationMenuTriggerProps
             xmlns="http://www.w3.org/2000/svg"
             style={{
               display: 'block',
-              transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+              transform: 'rotate(0deg)',
               transition: 'transform 180ms cubic-bezier(0.2, 0.9, 0.24, 1)'
             }}
           >
@@ -203,12 +213,6 @@ function NavigationMenuLink({ children, ...rest }: NavigationMenuLinkProps) {
 
 function NavigationMenuContent({ children, ...rest }: NavigationMenuContentProps) {
   const itemContext = React.useContext(NavigationMenuItemContext);
-
-  useEffect(() => {
-    if (!itemContext) return;
-    itemContext.setHasContent(true);
-    return () => itemContext.setHasContent(false);
-  }, [itemContext]);
 
   return (
     <section slot="panel" data-nav-panel-for={itemContext?.itemKey ?? undefined} {...rest}>

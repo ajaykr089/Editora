@@ -160,6 +160,9 @@ export function formatDateForDisplay(
 }
 
 export function parseUserDateInput(raw: string, locale: string): string | null {
+  const direct = normalizeDateIso(raw.trim());
+  if (direct) return direct;
+
   const normalized = normalizeSeparator(raw);
   if (!normalized) return null;
 

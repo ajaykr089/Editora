@@ -1,7 +1,14 @@
 import * as React from 'react';
 
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
-import { warnIfElementNotRegistered } from './_internals';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+  warnIfElementNotRegistered,
+} from './_internals';
 
 export interface AvatarProps extends Omit<React.HTMLAttributes<HTMLElement>, 'onLoad' | 'onError'> {
   src?: string;
@@ -75,94 +82,52 @@ export const Avatar = React.forwardRef<HTMLElement, AvatarProps>(function Avatar
   },
   forwardedRef
 ) {
-  const ref = React.useRef<HTMLElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
   const fallback = React.useMemo(() => toFallback(initials, alt, children), [initials, alt, children]);
-
-  React.useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
 
   React.useEffect(() => {
     warnIfElementNotRegistered('ui-avatar', 'Avatar');
   }, []);
 
-  React.useEffect(() => {
-    const element = ref.current;
-    if (!element || (!onAvatarLoad && !onAvatarError)) return;
+  const handleLoad = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ src: string }>(event);
+    if (detail) onAvatarLoad?.(detail);
+  }, [onAvatarLoad]);
 
-    const handleLoad = (event: Event) => onAvatarLoad?.((event as CustomEvent<{ src: string }>).detail);
-    const handleError = (event: Event) => onAvatarError?.((event as CustomEvent<{ src: string }>).detail);
+  const handleError = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ src: string }>(event);
+    if (detail) onAvatarError?.(detail);
+  }, [onAvatarError]);
 
-    element.addEventListener('avatar-load', handleLoad as EventListener);
-    element.addEventListener('avatar-error', handleError as EventListener);
-    return () => {
-      element.removeEventListener('avatar-load', handleLoad as EventListener);
-      element.removeEventListener('avatar-error', handleError as EventListener);
-    };
-  }, [onAvatarLoad, onAvatarError]);
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'avatar-load', listener: handleLoad },
+      { type: 'avatar-error', listener: handleError },
+    ],
+    [handleLoad, handleError]
+  );
 
-  useIsomorphicLayoutEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    if (src) element.setAttribute('src', src);
-    else element.removeAttribute('src');
-
-    if (alt) element.setAttribute('alt', alt);
-    else element.removeAttribute('alt');
-
-    if (initials) element.setAttribute('initials', initials);
-    else element.removeAttribute('initials');
-
-    if (size != null) element.setAttribute('size', String(size));
-    else element.removeAttribute('size');
-
-    if (bg) element.setAttribute('bg', bg);
-    else element.removeAttribute('bg');
-
-    if (color) element.setAttribute('color', color);
-    else element.removeAttribute('color');
-
-    if (radius != null) element.setAttribute('radius', String(radius));
-    else element.removeAttribute('radius');
-
-    if (fontWeight != null) element.setAttribute('fontweight', String(fontWeight));
-    else element.removeAttribute('fontweight');
-
-    if (shape) element.setAttribute('shape', shape);
-    else element.removeAttribute('shape');
-
-    if (tone && tone !== 'neutral') element.setAttribute('tone', tone);
-    else element.removeAttribute('tone');
-
-    if (variant && variant !== 'surface') element.setAttribute('variant', variant);
-    else element.removeAttribute('variant');
-
-    if (elevation && elevation !== 'low') element.setAttribute('elevation', elevation);
-    else element.removeAttribute('elevation');
-
-    if (status) element.setAttribute('status', status);
-    else element.removeAttribute('status');
-
-    if (state && state !== 'idle') element.setAttribute('state', state);
-    else element.removeAttribute('state');
-
-    if (badge) element.setAttribute('badge', badge);
-    else element.removeAttribute('badge');
-
-    if (ring == null) element.removeAttribute('ring');
-    else if (ring) element.setAttribute('ring', '');
-    else element.removeAttribute('ring');
-
-    if (interactive == null) element.removeAttribute('interactive');
-    else if (interactive) element.setAttribute('interactive', '');
-    else element.removeAttribute('interactive');
-
-    if (disabled == null) element.removeAttribute('disabled');
-    else if (disabled) element.setAttribute('disabled', '');
-    else element.removeAttribute('disabled');
-
-    const loadingAttr = toLoading(loading);
-    if (loadingAttr) element.setAttribute('loading', loadingAttr);
-    else element.removeAttribute('loading');
+  useElementAttributes(ref, (element) => {
+    syncStringAttribute(element, 'src', src ?? null);
+    syncStringAttribute(element, 'alt', alt ?? null);
+    syncStringAttribute(element, 'initials', initials ?? null);
+    syncStringAttribute(element, 'size', size != null ? String(size) : null);
+    syncStringAttribute(element, 'bg', bg ?? null);
+    syncStringAttribute(element, 'color', color ?? null);
+    syncStringAttribute(element, 'radius', radius != null ? String(radius) : null);
+    syncStringAttribute(element, 'fontweight', fontWeight != null ? String(fontWeight) : null);
+    syncStringAttribute(element, 'shape', shape ?? null);
+    syncStringAttribute(element, 'tone', tone && tone !== 'neutral' ? tone : null);
+    syncStringAttribute(element, 'variant', variant && variant !== 'surface' ? variant : null);
+    syncStringAttribute(element, 'elevation', elevation && elevation !== 'low' ? elevation : null);
+    syncStringAttribute(element, 'status', status ?? null);
+    syncStringAttribute(element, 'state', state && state !== 'idle' ? state : null);
+    syncStringAttribute(element, 'badge', badge ?? null);
+    syncBooleanAttribute(element, 'ring', ring);
+    syncBooleanAttribute(element, 'interactive', interactive);
+    syncBooleanAttribute(element, 'disabled', disabled);
+    syncStringAttribute(element, 'loading', toLoading(loading) ?? null);
   }, [src, alt, initials, size, bg, color, radius, fontWeight, shape, tone, variant, elevation, status, state, badge, ring, interactive, disabled, loading]);
 
   return React.createElement('ui-avatar', { ref, ...rest }, fallback);

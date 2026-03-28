@@ -1,15 +1,15 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 import {
-  AlertDialogAlertOptions,
-  AlertDialogCommonOptions,
-  AlertDialogConfirmOptions,
-  AlertDialogManager,
-  AlertDialogPromptOptions,
-  AlertResult,
-  ConfirmResult,
-  PromptResult,
-  createAlertDialogManager
-} from '@editora/ui-core';
+  createAlertDialogManager,
+  type AlertDialogAlertOptions,
+  type AlertDialogCommonOptions,
+  type AlertDialogConfirmOptions,
+  type AlertDialogManager,
+  type AlertDialogPromptOptions,
+  type AlertResult,
+  type ConfirmResult,
+  type PromptResult,
+} from '@editora/ui-core/runtime';
 
 export type AlertDialogApi = {
   alert: (options?: AlertDialogAlertOptions) => Promise<AlertResult>;

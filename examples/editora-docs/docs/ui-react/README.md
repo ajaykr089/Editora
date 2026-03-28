@@ -15,6 +15,18 @@ React wrappers for `@editora/ui-core` Web Components, providing React-friendly p
 npm install @editora/ui-react @editora/ui-core
 ```
 
+If you only need sortable without the broader packages:
+
+```bash
+npm install @editora/ui-sortable
+```
+
+Use the standalone React wrapper from:
+
+```tsx
+import { Sortable } from '@editora/ui-sortable/react';
+```
+
 ```tsx
 import { Button, Input, ThemeProvider } from '@editora/ui-react';
 
@@ -61,6 +73,7 @@ export function App() {
 - [Chart](./interactive/chart) - Data visualization
 - [Timeline](./interactive/timeline) - Timeline visualization
 - [Tree](./interactive/tree) - Hierarchical data display
+- [Sortable](./interactive/sortable) - Production-ready drag and drop for reorder, transfer, hierarchy, persistence, standalone web component usage, and a standalone React wrapper
 - [Marquee](./interactive/marquee) - Infinite scrolling content rail
 - [AnimatedText](./interactive/animated-text) - Text-first animation for headlines, callouts, and hero copy
 - [AnimatedBeam](./interactive/animated-beam) - Integration and orchestration diagram with animated beam paths
@@ -185,6 +198,11 @@ Components include:
 - Screen reader compatibility
 - Focus management
 - High contrast support
+
+## Performance Notes
+
+- `Sortable` is production-ready for standard and moderately large boards, with tested pointer drag, keyboard sorting, transfer, and nested workflows
+- `Sortable` is not virtualized, so very large visible datasets should still be benchmarked with your real item count before release
 
 ## Migration Guide
 

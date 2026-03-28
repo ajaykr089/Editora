@@ -169,6 +169,45 @@ Each component entry includes:
 
 ### Data Display Components
 
+#### Sortable
+```json
+{
+  "id": "ui-react:Sortable",
+  "package": "@editora/ui-react",
+  "framework": "react",
+  "name": "Sortable",
+  "reactExport": "Sortable",
+  "source": "packages/ui-react/src/components/Sortable.tsx",
+  "docsPath": "/docs/ui-react/interactive/sortable",
+  "storybookPath": "/story/ui-sortable--playground",
+  "wrapperFor": "ui-sortable",
+  "props": {
+    "lists": "SortableList[]",
+    "items": "SortableItem[]",
+    "selection": "string[]",
+    "filterQuery": "string",
+    "sort": "'manual' | 'label'",
+    "persistKey": "string",
+    "allowFilteredDrag": "boolean",
+    "allowNesting": "boolean",
+    "disabled": "boolean",
+    "onChange": "(detail: SortableChangeDetail) => void",
+    "onItemsChange": "(items: SortableItem[]) => void",
+    "onSelectionChange": "(detail: SortableSelectionChangeDetail) => void",
+    "onPersistRequest": "(detail: SortableChangeDetail) => void"
+  },
+  "usage": "Production drag-and-drop workspace for reorder, kanban transfer, hierarchy building, cloning, keyboard sorting, and persistence",
+  "examples": [
+    "Single-list reordering",
+    "Kanban board transfer",
+    "Nested work breakdown tree",
+    "Template cloning shelf",
+    "Keyboard-only sorting",
+    "Database-backed persistence"
+  ]
+}
+```
+
 #### Table
 ```json
 {

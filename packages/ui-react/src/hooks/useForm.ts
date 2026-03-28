@@ -1,3 +1,4 @@
+'use client';
 import { useRef, useCallback } from 'react';
 
 export function useForm() {

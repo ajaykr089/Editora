@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@editora/ui-core": ["../ui-core/src/index.ts"],
+      "@editora/ui-core/*": ["../ui-core/src/*"]
+    }
+  },
+  "include": ["src"]
+}

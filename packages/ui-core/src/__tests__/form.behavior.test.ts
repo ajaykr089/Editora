@@ -38,26 +38,29 @@ describe('ui-form behavior', () => {
 
   it('autosave emits after dirty change when enabled', async () => {
     vi.useFakeTimers();
-    const el = document.createElement('ui-form') as any;
-    el.setAttribute('autosave', '');
-    el.setAttribute('autosave-delay', '10');
-    el.innerHTML = `<input name="name" value="Ava" />`;
-    document.body.appendChild(el);
-    await nextTick();
+    try {
+      const el = document.createElement('ui-form') as any;
+      el.setAttribute('autosave', '');
+      el.setAttribute('autosave-delay', '10');
+      el.innerHTML = `<input name="name" value="Ava" />`;
+      document.body.appendChild(el);
+      await Promise.resolve();
 
-    const autosave = vi.fn();
-    el.addEventListener('autosave', autosave);
+      const autosave = vi.fn();
+      el.addEventListener('autosave', autosave);
 
-    const input = el.querySelector('input') as HTMLInputElement | null;
-    expect(input).toBeTruthy();
-    input!.value = 'Ava Dev';
-    input!.dispatchEvent(new Event('input', { bubbles: true }));
+      const input = el.querySelector('input') as HTMLInputElement | null;
+      expect(input).toBeTruthy();
+      input!.value = 'Ava Dev';
+      input!.dispatchEvent(new Event('input', { bubbles: true }));
 
-    vi.advanceTimersByTime(40);
-    await nextTick();
+      vi.advanceTimersByTime(40);
+      await Promise.resolve();
 
-    expect(autosave).toHaveBeenCalled();
-    vi.useRealTimers();
+      expect(autosave).toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('markClean clears dirty state after value updates', async () => {

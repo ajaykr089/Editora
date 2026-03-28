@@ -1,6 +1,13 @@
-import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncNumberAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 type TextareaDetail = {
   value: string;
@@ -86,90 +93,65 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
   },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const inputHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<TextareaDetail>(event);
+    if (detail) onInput?.(detail.value);
+  }, [onInput]);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const changeHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<TextareaDetail>(event);
+    if (detail) onChange?.(detail.value);
+  }, [onChange]);
 
-    const inputHandler = (event: Event) => {
-      const detail = (event as CustomEvent<TextareaDetail>).detail;
-      if (detail) onInput?.(detail.value);
-    };
+  const debouncedHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<TextareaDetail>(event);
+    if (detail) onDebouncedInput?.(detail.value);
+  }, [onDebouncedInput]);
 
-    const changeHandler = (event: Event) => {
-      const detail = (event as CustomEvent<TextareaDetail>).detail;
-      if (detail) onChange?.(detail.value);
-    };
+  const clearHandler = React.useCallback(() => {
+    onClear?.();
+  }, [onClear]);
 
-    const debouncedHandler = (event: Event) => {
-      const detail = (event as CustomEvent<TextareaDetail>).detail;
-      if (detail) onDebouncedInput?.(detail.value);
-    };
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'input', listener: inputHandler },
+      { type: 'change', listener: changeHandler },
+      { type: 'debounced-input', listener: debouncedHandler },
+      { type: 'clear', listener: clearHandler as EventListener },
+    ],
+    [inputHandler, changeHandler, debouncedHandler, clearHandler]
+  );
 
-    const clearHandler = () => onClear?.();
-
-    el.addEventListener('input', inputHandler as EventListener);
-    el.addEventListener('change', changeHandler as EventListener);
-    el.addEventListener('debounced-input', debouncedHandler as EventListener);
-    el.addEventListener('clear', clearHandler as EventListener);
-
-    return () => {
-      el.removeEventListener('input', inputHandler as EventListener);
-      el.removeEventListener('change', changeHandler as EventListener);
-      el.removeEventListener('debounced-input', debouncedHandler as EventListener);
-      el.removeEventListener('clear', clearHandler as EventListener);
-    };
-  }, [onChange, onInput, onDebouncedInput, onClear]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const syncAttr = (attr: string, next: string | null) => {
-      const current = el.getAttribute(attr);
-      if (next == null) {
-        if (current != null) el.removeAttribute(attr);
-        return;
-      }
-      if (current !== next) el.setAttribute(attr, next);
-    };
-
-    const syncBool = (attr: string, enabled: boolean | undefined) => {
-      if (enabled) syncAttr(attr, '');
-      else syncAttr(attr, null);
-    };
-
-    syncAttr('value', value != null ? String(value) : null);
-
-    syncBool('clearable', clearable);
-    syncBool('readonly', readOnly);
-    syncBool('autofocus', autofocus);
-    syncBool('disabled', disabled);
-    syncBool('required', required);
-    syncBool('autosize', autosize);
-    syncBool('show-count', showCount);
-    syncBool('headless', headless);
-
-    syncAttr('debounce', typeof debounce === 'number' && Number.isFinite(debounce) ? String(debounce) : null);
-    syncAttr('validation', validation && validation !== 'none' ? validation : null);
-    syncAttr('size', size && size !== 'md' && size !== '2' ? String(size) : null);
-    syncAttr('minlength', typeof minlength === 'number' ? String(minlength) : null);
-    syncAttr('maxlength', typeof maxlength === 'number' ? String(maxlength) : null);
-    syncAttr('rows', typeof rows === 'number' ? String(rows) : null);
-    syncAttr('name', name || null);
-    syncAttr('placeholder', placeholder || null);
-    syncAttr('resize', resize || null);
-    syncAttr('variant', variant && variant !== 'classic' ? variant : null);
-    syncAttr('color', color || null);
-    syncAttr('radius', radius ? String(radius) : null);
-    syncAttr('label', label || null);
-    syncAttr('description', description || null);
-    syncAttr('max-rows', typeof maxRows === 'number' ? String(maxRows) : null);
-    syncAttr('density', density && density !== 'default' ? density : null);
-    syncAttr('tone', tone && tone !== 'brand' ? tone : null);
+  useElementAttributes(ref, (el) => {
+    syncStringAttribute(el, 'value', value != null ? String(value) : null);
+    syncBooleanAttribute(el, 'clearable', clearable);
+    syncBooleanAttribute(el, 'readonly', readOnly);
+    syncBooleanAttribute(el, 'autofocus', autofocus);
+    syncBooleanAttribute(el, 'disabled', disabled);
+    syncBooleanAttribute(el, 'required', required);
+    syncBooleanAttribute(el, 'autosize', autosize);
+    syncBooleanAttribute(el, 'show-count', showCount);
+    syncBooleanAttribute(el, 'headless', headless);
+    syncNumberAttribute(el, 'debounce', typeof debounce === 'number' && Number.isFinite(debounce) ? debounce : undefined);
+    syncStringAttribute(el, 'validation', validation && validation !== 'none' ? validation : null);
+    syncStringAttribute(el, 'size', size && size !== 'md' && size !== '2' ? String(size) : null);
+    syncNumberAttribute(el, 'minlength', minlength);
+    syncNumberAttribute(el, 'maxlength', maxlength);
+    syncNumberAttribute(el, 'rows', rows);
+    syncStringAttribute(el, 'name', name || null);
+    syncStringAttribute(el, 'placeholder', placeholder || null);
+    syncStringAttribute(el, 'resize', resize || null);
+    syncStringAttribute(el, 'variant', variant && variant !== 'classic' ? variant : null);
+    syncStringAttribute(el, 'color', color || null);
+    syncStringAttribute(el, 'radius', radius ? String(radius) : null);
+    syncStringAttribute(el, 'label', label || null);
+    syncStringAttribute(el, 'description', description || null);
+    syncNumberAttribute(el, 'max-rows', maxRows);
+    syncStringAttribute(el, 'density', density && density !== 'default' ? density : null);
+    syncStringAttribute(el, 'tone', tone && tone !== 'brand' ? tone : null);
   }, [
     value,
     clearable,

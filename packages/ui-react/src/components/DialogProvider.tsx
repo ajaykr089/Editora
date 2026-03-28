@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef } from 'react';
 import {
-  DialogManager,
-  DialogOptions,
-  DialogResult,
-  createDialogManager
-} from '@editora/ui-core';
+  createDialogManager,
+  type DialogManager,
+  type DialogOptions,
+  type DialogResult,
+} from '@editora/ui-core/runtime';
 
 export type DialogApi = {
   open: (options?: DialogOptions) => Promise<DialogResult>;

@@ -1,6 +1,13 @@
-import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncNumberAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 export type PasswordFieldProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput'> & {
   value?: string;
@@ -86,110 +93,84 @@ export const PasswordField = React.forwardRef<HTMLElement, PasswordFieldProps>(f
     ...rest
   } = props;
 
-  const ref = useRef<HTMLElement | null>(null);
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  const onInputHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ value?: string }>(event);
+    if (typeof detail?.value === 'string') onInput?.(detail.value);
+  }, [onInput]);
 
-    const onInputHandler = (event: Event) => {
-      const detail = (event as CustomEvent<{ value?: string }>).detail;
-      if (typeof detail?.value === 'string') onInput?.(detail.value);
-    };
+  const onChangeHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ value?: string }>(event);
+    if (typeof detail?.value === 'string') onChange?.(detail.value);
+  }, [onChange]);
 
-    const onChangeHandler = (event: Event) => {
-      const detail = (event as CustomEvent<{ value?: string }>).detail;
-      if (typeof detail?.value === 'string') onChange?.(detail.value);
-    };
+  const onDebouncedHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ value?: string }>(event);
+    if (typeof detail?.value === 'string') onDebouncedInput?.(detail.value);
+  }, [onDebouncedInput]);
 
-    const onDebouncedHandler = (event: Event) => {
-      const detail = (event as CustomEvent<{ value?: string }>).detail;
-      if (typeof detail?.value === 'string') onDebouncedInput?.(detail.value);
-    };
+  const onClearHandler = React.useCallback(() => {
+    onClear?.();
+  }, [onClear]);
 
-    const onClearHandler = () => onClear?.();
-    const onVisibilityHandler = (event: Event) => {
-      const detail = (event as CustomEvent<{ revealed?: boolean }>).detail;
-      onVisibilityChange?.(!!detail?.revealed);
-    };
-    const onStrengthHandler = (event: Event) => {
-      const detail = (event as CustomEvent<{ value: string; score: 1 | 2 | 3 | 4; label: string; caption: string }>).detail;
-      if (detail) onStrengthChange?.(detail);
-    };
+  const onVisibilityHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ revealed?: boolean }>(event);
+    onVisibilityChange?.(!!detail?.revealed);
+  }, [onVisibilityChange]);
 
-    el.addEventListener('input', onInputHandler as EventListener);
-    el.addEventListener('change', onChangeHandler as EventListener);
-    el.addEventListener('debounced-input', onDebouncedHandler as EventListener);
-    el.addEventListener('clear', onClearHandler as EventListener);
-    el.addEventListener('visibility-change', onVisibilityHandler as EventListener);
-    el.addEventListener('strength-change', onStrengthHandler as EventListener);
+  const onStrengthHandler = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ value: string; score: 1 | 2 | 3 | 4; label: string; caption: string }>(event);
+    if (detail) onStrengthChange?.(detail);
+  }, [onStrengthChange]);
 
-    return () => {
-      el.removeEventListener('input', onInputHandler as EventListener);
-      el.removeEventListener('change', onChangeHandler as EventListener);
-      el.removeEventListener('debounced-input', onDebouncedHandler as EventListener);
-      el.removeEventListener('clear', onClearHandler as EventListener);
-      el.removeEventListener('visibility-change', onVisibilityHandler as EventListener);
-      el.removeEventListener('strength-change', onStrengthHandler as EventListener);
-    };
-  }, [onChange, onClear, onDebouncedInput, onInput, onStrengthChange, onVisibilityChange]);
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'input', listener: onInputHandler },
+      { type: 'change', listener: onChangeHandler },
+      { type: 'debounced-input', listener: onDebouncedHandler },
+      { type: 'clear', listener: onClearHandler as EventListener },
+      { type: 'visibility-change', listener: onVisibilityHandler },
+      { type: 'strength-change', listener: onStrengthHandler },
+    ],
+    [onInputHandler, onChangeHandler, onDebouncedHandler, onClearHandler, onVisibilityHandler, onStrengthHandler]
+  );
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const syncAttr = (name: string, next: string | null) => {
-      const current = el.getAttribute(name);
-      if (next == null) {
-        if (current != null) el.removeAttribute(name);
-        return;
-      }
-      if (current !== next) el.setAttribute(name, next);
-    };
-
-    const syncBoolean = (name: string, enabled: boolean | undefined) => {
-      if (enabled) {
-        if (!el.hasAttribute(name)) el.setAttribute(name, '');
-      } else if (el.hasAttribute(name)) {
-        el.removeAttribute(name);
-      }
-    };
-
-    if (value !== undefined) syncAttr('value', value ?? null);
-    syncAttr('debounce', typeof debounce === 'number' && Number.isFinite(debounce) ? String(debounce) : null);
-    syncAttr('validation', validation && validation !== 'none' ? validation : null);
-    syncAttr('size', size && size !== 'md' && size !== '2' ? String(size) : null);
-    syncAttr('minlength', typeof minlength === 'number' ? String(minlength) : null);
-    syncAttr('maxlength', typeof maxlength === 'number' ? String(maxlength) : null);
-    syncAttr('pattern', pattern ?? null);
-    syncAttr('autocomplete', autoComplete ?? null);
-    syncAttr('spellcheck', typeof spellCheck === 'boolean' ? String(spellCheck) : null);
-    syncAttr('placeholder', placeholder ?? null);
-    syncAttr('variant', variant && variant !== 'classic' ? variant : null);
-    syncAttr('tone', tone && tone !== 'default' ? tone : null);
-    syncAttr('density', density && density !== 'default' ? density : null);
-    syncAttr('shape', shape && shape !== 'default' ? shape : null);
-    syncAttr('color', color ?? null);
-    syncAttr('radius', radius ? String(radius) : null);
-    syncAttr('label', label ?? null);
-    syncAttr('description', description ?? null);
-    syncAttr('data-error', error ?? null);
-    syncAttr('name', name ?? null);
-
-    syncBoolean('clearable', clearable);
-    syncBoolean('readonly', readOnly);
-    syncBoolean('autofocus', autofocus);
-    syncBoolean('disabled', disabled);
-    syncBoolean('counter', counter);
-    syncBoolean('floating-label', floatingLabel);
-    syncBoolean('required', required);
-    syncBoolean('show-strength', showStrength);
-
-    if (typeof revealable === 'boolean') syncAttr('revealable', String(revealable));
-    else el.removeAttribute('revealable');
-
-    (el as HTMLElement & { strengthEvaluator?: PasswordFieldProps['strengthEvaluator'] | null }).strengthEvaluator = strengthEvaluator ?? null;
+  useElementAttributes(ref, (el) => {
+    if (value !== undefined) {
+      syncStringAttribute(el, 'value', value ?? null);
+    }
+    syncNumberAttribute(el, 'debounce', typeof debounce === 'number' && Number.isFinite(debounce) ? debounce : undefined);
+    syncStringAttribute(el, 'validation', validation && validation !== 'none' ? validation : null);
+    syncStringAttribute(el, 'size', size && size !== 'md' && size !== '2' ? String(size) : null);
+    syncNumberAttribute(el, 'minlength', minlength);
+    syncNumberAttribute(el, 'maxlength', maxlength);
+    syncStringAttribute(el, 'pattern', pattern ?? null);
+    syncStringAttribute(el, 'autocomplete', autoComplete ?? null);
+    syncStringAttribute(el, 'spellcheck', typeof spellCheck === 'boolean' ? String(spellCheck) : null);
+    syncStringAttribute(el, 'placeholder', placeholder ?? null);
+    syncStringAttribute(el, 'variant', variant && variant !== 'classic' ? variant : null);
+    syncStringAttribute(el, 'tone', tone && tone !== 'default' ? tone : null);
+    syncStringAttribute(el, 'density', density && density !== 'default' ? density : null);
+    syncStringAttribute(el, 'shape', shape && shape !== 'default' ? shape : null);
+    syncStringAttribute(el, 'color', color ?? null);
+    syncStringAttribute(el, 'radius', radius ? String(radius) : null);
+    syncStringAttribute(el, 'label', label ?? null);
+    syncStringAttribute(el, 'description', description ?? null);
+    syncStringAttribute(el, 'data-error', error ?? null);
+    syncStringAttribute(el, 'name', name ?? null);
+    syncBooleanAttribute(el, 'clearable', clearable);
+    syncBooleanAttribute(el, 'readonly', readOnly);
+    syncBooleanAttribute(el, 'autofocus', autofocus);
+    syncBooleanAttribute(el, 'disabled', disabled);
+    syncBooleanAttribute(el, 'counter', counter);
+    syncBooleanAttribute(el, 'floating-label', floatingLabel);
+    syncBooleanAttribute(el, 'required', required);
+    syncBooleanAttribute(el, 'show-strength', showStrength);
+    syncStringAttribute(el, 'revealable', typeof revealable === 'boolean' ? String(revealable) : null);
+    (el as HTMLElement & { strengthEvaluator?: PasswordFieldProps['strengthEvaluator'] | null }).strengthEvaluator =
+      strengthEvaluator ?? null;
   }, [
     autoComplete,
     autofocus,

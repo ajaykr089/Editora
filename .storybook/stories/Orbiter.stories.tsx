@@ -675,7 +675,7 @@ export const InteractionModes = () => {
       description="Use one page to review the two common behaviors: a continuous decorative orbit and a launcher-style orbit that pauses only when you hover a node."
       meta={[
         { label: 'Mode A', value: 'continuous decorative' },
-        { label: 'Mode B', value: 'clickable + item hover pause', tone: 'info' },
+        { label: 'Mode B', value: 'clickable + item hover pause', tone: 'neutral' },
       ]}
     >
       <ShowcaseSection
@@ -751,7 +751,7 @@ export const InteractiveOrbit = () => {
       description="Orbiting circles can double as a launcher or integration cloud without giving up motion. This instance opts into button-style nodes and pause-on-item-hover."
       meta={[
         { label: 'Nodes', value: 'clickable' },
-        { label: 'Hover pause', value: 'item only', tone: 'info' },
+        { label: 'Hover pause', value: 'item only', tone: 'neutral' },
       ]}
     >
       <ShowcaseSection

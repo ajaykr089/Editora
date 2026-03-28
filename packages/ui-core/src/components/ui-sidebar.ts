@@ -726,6 +726,63 @@ const template = (body: string) => `
         transition: none !important;
       }
     }
+
+    @media (forced-colors: active) {
+      :host {
+        --ui-sidebar-bg: Canvas;
+        --ui-sidebar-color: CanvasText;
+        --ui-sidebar-muted: CanvasText;
+        --ui-sidebar-border: 1px solid CanvasText;
+        --ui-sidebar-item-hover: Highlight;
+        --ui-sidebar-item-active-bg: Highlight;
+        --ui-sidebar-item-active-color: HighlightText;
+        --ui-sidebar-item-border: Highlight;
+        --ui-sidebar-control-bg: Canvas;
+        --ui-sidebar-control-hover: Highlight;
+        --ui-sidebar-promo-bg: Canvas;
+        --ui-sidebar-promo-color: CanvasText;
+        --ui-sidebar-focus-ring: Highlight;
+        --ui-sidebar-shadow: none;
+      }
+
+      .shell,
+      .item-button,
+      .badge,
+      .submenu,
+      .resize-handle::before {
+        forced-color-adjust: none;
+      }
+
+      .shell,
+      .badge {
+        background: Canvas;
+        color: CanvasText;
+        border-color: CanvasText;
+        box-shadow: none;
+      }
+
+      .item-button {
+        background: Canvas;
+        color: CanvasText;
+        border-color: transparent;
+      }
+
+      .item-button:hover,
+      .item-button[aria-current="page"],
+      .item-button[data-active="true"] {
+        background: Highlight;
+        color: HighlightText;
+        border-color: Highlight;
+      }
+
+      .submenu {
+        border-inline-start-color: CanvasText;
+      }
+
+      .resize-handle::before {
+        background: CanvasText;
+      }
+    }
   </style>
   ${body}
 `;

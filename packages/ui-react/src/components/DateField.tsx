@@ -1,6 +1,12 @@
-import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
-
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+import React from 'react';
+import {
+  getCustomEventDetail,
+  syncBooleanAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 type BaseDateFieldProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange'> & {
   value?: string;
@@ -23,60 +29,35 @@ function useFieldChangeBridge(
   onChange: BaseDateFieldProps['onChange'],
   onValueChange: BaseDateFieldProps['onValueChange']
 ) {
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const handleChange = (event: Event) => {
-      const detail = (event as CustomEvent<{ value: string | null; previousValue: string | null; source: string }>).detail;
-      if (!detail) return;
-      onChange?.(detail);
-      onValueChange?.(detail.value);
-    };
-    el.addEventListener('change', handleChange as EventListener);
-    return () => {
-      el.removeEventListener('change', handleChange as EventListener);
-    };
-  }, [onChange, onValueChange, ref]);
+  const handleChange = React.useCallback((event: Event) => {
+    const detail = getCustomEventDetail<{ value: string | null; previousValue: string | null; source: string }>(event);
+    if (!detail) return;
+    onChange?.(detail);
+    onValueChange?.(detail.value);
+  }, [onChange, onValueChange]);
+
+  useElementEventListeners(ref, [{ type: 'change', listener: handleChange }], [handleChange]);
 }
 
 export const DateField = React.forwardRef<HTMLElement, BaseDateFieldProps>(function DateField(
   { value, min, max, locale, label, description, error, name, required, disabled, readOnly, onChange, onValueChange, children, ...rest },
   forwardedRef
 ) {
-  const ref = useRef<HTMLElement | null>(null);
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
   useFieldChangeBridge(ref, onChange, onValueChange);
 
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const syncAttr = (attr: string, next: string | null) => {
-      const current = el.getAttribute(attr);
-      if (next == null) {
-        if (current != null) el.removeAttribute(attr);
-        return;
-      }
-      if (current !== next) el.setAttribute(attr, next);
-    };
-    const syncBool = (attr: string, next: boolean | undefined) => {
-      if (next) {
-        if (!el.hasAttribute(attr)) el.setAttribute(attr, '');
-      } else if (el.hasAttribute(attr)) {
-        el.removeAttribute(attr);
-      }
-    };
-
-    syncAttr('value', value ?? null);
-    syncAttr('min', min ?? null);
-    syncAttr('max', max ?? null);
-    syncAttr('locale', locale ?? null);
-    syncAttr('label', label ?? null);
-    syncAttr('description', description ?? null);
-    syncAttr('data-error', error ?? null);
-    syncAttr('name', name ?? null);
-    syncBool('required', required);
-    syncBool('disabled', disabled);
-    syncBool('readonly', readOnly);
+  useElementAttributes(ref, (el) => {
+    syncStringAttribute(el, 'value', value ?? null);
+    syncStringAttribute(el, 'min', min ?? null);
+    syncStringAttribute(el, 'max', max ?? null);
+    syncStringAttribute(el, 'locale', locale ?? null);
+    syncStringAttribute(el, 'label', label ?? null);
+    syncStringAttribute(el, 'description', description ?? null);
+    syncStringAttribute(el, 'data-error', error ?? null);
+    syncStringAttribute(el, 'name', name ?? null);
+    syncBooleanAttribute(el, 'required', required);
+    syncBooleanAttribute(el, 'disabled', disabled);
+    syncBooleanAttribute(el, 'readonly', readOnly);
   }, [value, min, max, locale, label, description, error, name, required, disabled, readOnly]);
 
   return React.createElement('ui-date-field', { ref, ...rest }, children);
@@ -87,42 +68,23 @@ export const TimeField = React.forwardRef<HTMLElement, BaseDateFieldProps & { fo
     { value, min, max, locale, label, description, error, name, required, disabled, readOnly, format, seconds, onChange, onValueChange, children, ...rest },
     forwardedRef
   ) {
-    const ref = useRef<HTMLElement | null>(null);
-    useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+    const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
     useFieldChangeBridge(ref, onChange, onValueChange);
 
-    useIsomorphicLayoutEffect(() => {
-      const el = ref.current;
-      if (!el) return;
-      const syncAttr = (attr: string, next: string | null) => {
-        const current = el.getAttribute(attr);
-        if (next == null) {
-          if (current != null) el.removeAttribute(attr);
-          return;
-        }
-        if (current !== next) el.setAttribute(attr, next);
-      };
-      const syncBool = (attr: string, next: boolean | undefined) => {
-        if (next) {
-          if (!el.hasAttribute(attr)) el.setAttribute(attr, '');
-        } else if (el.hasAttribute(attr)) {
-          el.removeAttribute(attr);
-        }
-      };
-
-      syncAttr('value', value ?? null);
-      syncAttr('min', min ?? null);
-      syncAttr('max', max ?? null);
-      syncAttr('locale', locale ?? null);
-      syncAttr('label', label ?? null);
-      syncAttr('description', description ?? null);
-      syncAttr('data-error', error ?? null);
-      syncAttr('name', name ?? null);
-      syncAttr('format', format && format !== '24h' ? format : null);
-      syncBool('seconds', seconds);
-      syncBool('required', required);
-      syncBool('disabled', disabled);
-      syncBool('readonly', readOnly);
+    useElementAttributes(ref, (el) => {
+      syncStringAttribute(el, 'value', value ?? null);
+      syncStringAttribute(el, 'min', min ?? null);
+      syncStringAttribute(el, 'max', max ?? null);
+      syncStringAttribute(el, 'locale', locale ?? null);
+      syncStringAttribute(el, 'label', label ?? null);
+      syncStringAttribute(el, 'description', description ?? null);
+      syncStringAttribute(el, 'data-error', error ?? null);
+      syncStringAttribute(el, 'name', name ?? null);
+      syncStringAttribute(el, 'format', format && format !== '24h' ? format : null);
+      syncBooleanAttribute(el, 'seconds', seconds);
+      syncBooleanAttribute(el, 'required', required);
+      syncBooleanAttribute(el, 'disabled', disabled);
+      syncBooleanAttribute(el, 'readonly', readOnly);
     }, [value, min, max, locale, label, description, error, name, required, disabled, readOnly, format, seconds]);
 
     return React.createElement('ui-time-field', { ref, ...rest }, children);

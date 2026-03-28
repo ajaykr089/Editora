@@ -103,6 +103,86 @@
       }
     },
     {
+      "id": "ui-core:ui-anchor",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "anchor",
+      "tagName": "ui-anchor",
+      "source": "packages/ui-core/src/components/ui-anchor.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-anchor--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-animated-beam",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "animated-beam",
+      "tagName": "ui-animated-beam",
+      "source": "packages/ui-core/src/components/ui-animated-beam.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-animated-beam--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-animated-list",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "animated-list",
+      "tagName": "ui-animated-list",
+      "source": "packages/ui-core/src/components/ui-animated-list.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-animated-list--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-animated-text",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "animated-text",
+      "tagName": "ui-animated-text",
+      "source": "packages/ui-core/src/components/ui-animated-text.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-animated-text--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-app-header",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -283,6 +363,26 @@
       }
     },
     {
+      "id": "ui-core:ui-card",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "card",
+      "tagName": "ui-card",
+      "source": "packages/ui-core/src/components/ui-card.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-card--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-chart",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -331,6 +431,26 @@
       "source": "packages/ui-core/src/components/ui-collapsible.ts",
       "docsPath": "/docs/ui-core",
       "storybookPath": "/story/ui-collapsible--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-collection",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "collection",
+      "tagName": "ui-collection",
+      "source": "packages/ui-core/src/components/ui-collection.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-collection--playground",
       "styleApi": {
         "cssVars": true,
         "parts": true,
@@ -403,6 +523,26 @@
       }
     },
     {
+      "id": "ui-core:ui-command",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "command",
+      "tagName": "ui-command",
+      "source": "packages/ui-core/src/components/ui-command.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-command--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-container",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -443,6 +583,26 @@
       }
     },
     {
+      "id": "ui-core:ui-control-group",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "control-group",
+      "tagName": "ui-control-group",
+      "source": "packages/ui-core/src/components/ui-control-group.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-control-group--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-data-table",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -451,6 +611,26 @@
       "source": "packages/ui-core/src/components/ui-data-table.ts",
       "docsPath": "/docs/ui-core",
       "storybookPath": "/story/ui-data-table--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-date-field",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "date-field",
+      "tagName": "ui-date-field",
+      "source": "packages/ui-core/src/components/ui-date-field.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-date-field--playground",
       "styleApi": {
         "cssVars": true,
         "parts": true,
@@ -543,6 +723,26 @@
       }
     },
     {
+      "id": "ui-core:ui-description",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "description",
+      "tagName": "ui-description",
+      "source": "packages/ui-core/src/components/ui-description.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-description--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-dialog",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -571,6 +771,46 @@
       "source": "packages/ui-core/src/components/ui-direction-provider.ts",
       "docsPath": "/docs/ui-core",
       "storybookPath": "/story/ui-direction-provider--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-dismissable-layer",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "dismissable-layer",
+      "tagName": "ui-dismissable-layer",
+      "source": "packages/ui-core/src/components/ui-dismissable-layer.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-dismissable-layer--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-dock",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "dock",
+      "tagName": "ui-dock",
+      "source": "packages/ui-core/src/components/ui-dock.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-dock--playground",
       "styleApi": {
         "cssVars": true,
         "parts": true,
@@ -623,6 +863,26 @@
       }
     },
     {
+      "id": "ui-core:ui-dropzone",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "dropzone",
+      "tagName": "ui-dropzone",
+      "source": "packages/ui-core/src/components/ui-dropzone.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-dropzone--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-empty-state",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -643,6 +903,26 @@
       }
     },
     {
+      "id": "ui-core:ui-field-error",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "field-error",
+      "tagName": "ui-field-error",
+      "source": "packages/ui-core/src/components/ui-field-error.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-field-error--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-field",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -651,6 +931,46 @@
       "source": "packages/ui-core/src/components/ui-field.ts",
       "docsPath": "/docs/ui-core",
       "storybookPath": "/story/ui-field--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-fieldset",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "fieldset",
+      "tagName": "ui-fieldset",
+      "source": "packages/ui-core/src/components/ui-fieldset.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-fieldset--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-file-upload",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "file-upload",
+      "tagName": "ui-file-upload",
+      "source": "packages/ui-core/src/components/ui-file-upload.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-file-upload--playground",
       "styleApi": {
         "cssVars": true,
         "parts": true,
@@ -691,6 +1011,26 @@
       "source": "packages/ui-core/src/components/ui-floating-toolbar.ts",
       "docsPath": "/docs/ui-core",
       "storybookPath": "/story/ui-floating-toolbar--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-focus-scope",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "focus-scope",
+      "tagName": "ui-focus-scope",
+      "source": "packages/ui-core/src/components/ui-focus-scope.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-focus-scope--playground",
       "styleApi": {
         "cssVars": true,
         "parts": true,
@@ -783,6 +1123,26 @@
       }
     },
     {
+      "id": "ui-core:ui-icon-cloud",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "icon-cloud",
+      "tagName": "ui-icon-cloud",
+      "source": "packages/ui-core/src/components/ui-icon-cloud.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-icon-cloud--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-icon",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -791,6 +1151,26 @@
       "source": "packages/ui-core/src/components/ui-icon.ts",
       "docsPath": "/docs/ui-core",
       "storybookPath": "/story/ui-icon--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-inline-edit",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "inline-edit",
+      "tagName": "ui-inline-edit",
+      "source": "packages/ui-core/src/components/ui-inline-edit.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-inline-edit--playground",
       "styleApi": {
         "cssVars": true,
         "parts": true,
@@ -863,6 +1243,66 @@
       }
     },
     {
+      "id": "ui-core:ui-listbox",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "listbox",
+      "tagName": "ui-listbox",
+      "source": "packages/ui-core/src/components/ui-listbox.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-listbox--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-marquee",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "marquee",
+      "tagName": "ui-marquee",
+      "source": "packages/ui-core/src/components/ui-marquee.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-marquee--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-masonry-grid",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "masonry-grid",
+      "tagName": "ui-masonry-grid",
+      "source": "packages/ui-core/src/components/ui-masonry-grid.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-masonry-grid--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-menu",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -903,6 +1343,46 @@
       }
     },
     {
+      "id": "ui-core:ui-meter",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "meter",
+      "tagName": "ui-meter",
+      "source": "packages/ui-core/src/components/ui-meter.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-meter--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-multi-select",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "multi-select",
+      "tagName": "ui-multi-select",
+      "source": "packages/ui-core/src/components/ui-multi-select.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-multi-select--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-navigation-menu",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -923,6 +1403,86 @@
       }
     },
     {
+      "id": "ui-core:ui-number-field",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "number-field",
+      "tagName": "ui-number-field",
+      "source": "packages/ui-core/src/components/ui-number-field.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-number-field--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-number-ticker",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "number-ticker",
+      "tagName": "ui-number-ticker",
+      "source": "packages/ui-core/src/components/ui-number-ticker.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-number-ticker--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-odometer",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "odometer",
+      "tagName": "ui-odometer",
+      "source": "packages/ui-core/src/components/ui-odometer.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-odometer--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-orbiter",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "orbiter",
+      "tagName": "ui-orbiter",
+      "source": "packages/ui-core/src/components/ui-orbiter.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-orbiter--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-pagination",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -931,6 +1491,106 @@
       "source": "packages/ui-core/src/components/ui-pagination.ts",
       "docsPath": "/docs/ui-core",
       "storybookPath": "/story/ui-pagination--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-panel-group",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "panel-group",
+      "tagName": "ui-panel-group",
+      "source": "packages/ui-core/src/components/ui-panel-group.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-panel-group--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-panel",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "panel",
+      "tagName": "ui-panel",
+      "source": "packages/ui-core/src/components/ui-panel.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-panel--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-password-field",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "password-field",
+      "tagName": "ui-password-field",
+      "source": "packages/ui-core/src/components/ui-password-field.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-password-field--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-pin-input",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "pin-input",
+      "tagName": "ui-pin-input",
+      "source": "packages/ui-core/src/components/ui-pin-input.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-pin-input--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-placement-grid",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "placement-grid",
+      "tagName": "ui-placement-grid",
+      "source": "packages/ui-core/src/components/ui-placement-grid.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-placement-grid--playground",
       "styleApi": {
         "cssVars": true,
         "parts": true,
@@ -991,6 +1651,26 @@
       "source": "packages/ui-core/src/components/ui-portal.ts",
       "docsPath": "/docs/ui-core",
       "storybookPath": "/story/ui-portal--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-positioner",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "positioner",
+      "tagName": "ui-positioner",
+      "source": "packages/ui-core/src/components/ui-positioner.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-positioner--playground",
       "styleApi": {
         "cssVars": true,
         "parts": true,
@@ -1071,6 +1751,46 @@
       "source": "packages/ui-core/src/components/ui-radio-group.ts",
       "docsPath": "/docs/ui-core",
       "storybookPath": "/story/ui-radio-group--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-rating",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "rating",
+      "tagName": "ui-rating",
+      "source": "packages/ui-core/src/components/ui-rating.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-rating--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-roving-focus-group",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "roving-focus-group",
+      "tagName": "ui-roving-focus-group",
+      "source": "packages/ui-core/src/components/ui-roving-focus-group.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-roving-focus-group--playground",
       "styleApi": {
         "cssVars": true,
         "parts": true,
@@ -1263,6 +1983,86 @@
       }
     },
     {
+      "id": "ui-core:ui-sortable",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "sortable",
+      "tagName": "ui-sortable",
+      "source": "packages/ui-core/src/components/ui-sortable.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-sortable--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-spinning-text",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "spinning-text",
+      "tagName": "ui-spinning-text",
+      "source": "packages/ui-core/src/components/ui-spinning-text.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-spinning-text--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-split-button",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "split-button",
+      "tagName": "ui-split-button",
+      "source": "packages/ui-core/src/components/ui-split-button.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-split-button--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-splitter",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "splitter",
+      "tagName": "ui-splitter",
+      "source": "packages/ui-core/src/components/ui-splitter.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-splitter--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-stepper",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -1343,6 +2143,26 @@
       }
     },
     {
+      "id": "ui-core:ui-tags-input",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "tags-input",
+      "tagName": "ui-tags-input",
+      "source": "packages/ui-core/src/components/ui-tags-input.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-tags-input--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-textarea",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -1351,6 +2171,26 @@
       "source": "packages/ui-core/src/components/ui-textarea.ts",
       "docsPath": "/docs/ui-core",
       "storybookPath": "/story/ui-textarea--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-time-field",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "time-field",
+      "tagName": "ui-time-field",
+      "source": "packages/ui-core/src/components/ui-time-field.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-time-field--playground",
       "styleApi": {
         "cssVars": true,
         "parts": true,
@@ -1503,6 +2343,66 @@
       }
     },
     {
+      "id": "ui-core:ui-transfer-list",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "transfer-list",
+      "tagName": "ui-transfer-list",
+      "source": "packages/ui-core/src/components/ui-transfer-list.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-transfer-list--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-tree-item",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "tree-item",
+      "tagName": "ui-tree-item",
+      "source": "packages/ui-core/src/components/ui-tree-item.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-tree-item--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "ui-core:ui-tree",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "tree",
+      "tagName": "ui-tree",
+      "source": "packages/ui-core/src/components/ui-tree.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-tree--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-visually-hidden",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -1586,6 +2486,61 @@
       "storybookPath": "/story/ui-alert-dialog-provider--playground",
       "wrapperFor": null,
       "notes": "Provider/API utility component"
+    },
+    {
+      "id": "ui-react:Anchor",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Anchor",
+      "reactExport": "Anchor",
+      "source": "packages/ui-react/src/components/Anchor.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-anchor--playground",
+      "wrapperFor": "ui-anchor"
+    },
+    {
+      "id": "ui-react:AnimatedBeam",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "AnimatedBeam",
+      "reactExport": "AnimatedBeam",
+      "source": "packages/ui-react/src/components/AnimatedBeam.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-animated-beam--playground",
+      "wrapperFor": "ui-animated-beam"
+    },
+    {
+      "id": "ui-react:AnimatedList",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "AnimatedList",
+      "reactExport": "AnimatedList",
+      "source": "packages/ui-react/src/components/AnimatedList.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-animated-list--playground",
+      "wrapperFor": "ui-animated-list"
+    },
+    {
+      "id": "ui-react:AnimatedNumber",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "AnimatedNumber",
+      "reactExport": "AnimatedNumber",
+      "source": "packages/ui-react/src/components/AnimatedNumber.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-animated-number--playground",
+      "wrapperFor": "ui-animated-number"
+    },
+    {
+      "id": "ui-react:AnimatedText",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "AnimatedText",
+      "reactExport": "AnimatedText",
+      "source": "packages/ui-react/src/components/AnimatedText.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-animated-text--playground",
+      "wrapperFor": "ui-animated-text"
     },
     {
       "id": "ui-react:AppHeader",
@@ -1687,6 +2642,17 @@
       "wrapperFor": "ui-calendar"
     },
     {
+      "id": "ui-react:Card",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Card",
+      "reactExport": "Card",
+      "source": "packages/ui-react/src/components/Card.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-card--playground",
+      "wrapperFor": "ui-card"
+    },
+    {
       "id": "ui-react:Chart",
       "package": "@editora/ui-react",
       "framework": "react",
@@ -1720,6 +2686,17 @@
       "wrapperFor": "ui-collapsible"
     },
     {
+      "id": "ui-react:Collection",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Collection",
+      "reactExport": "Collection",
+      "source": "packages/ui-react/src/components/Collection.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-collection--playground",
+      "wrapperFor": "ui-collection"
+    },
+    {
       "id": "ui-react:ColorPicker",
       "package": "@editora/ui-react",
       "framework": "react",
@@ -1740,6 +2717,17 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-combobox--playground",
       "wrapperFor": "ui-combobox"
+    },
+    {
+      "id": "ui-react:Command",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Command",
+      "reactExport": "Command",
+      "source": "packages/ui-react/src/components/Command.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-command--playground",
+      "wrapperFor": "ui-command"
     },
     {
       "id": "ui-react:CommandPalette",
@@ -1784,6 +2772,17 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-data-table--playground",
       "wrapperFor": "ui-data-table"
+    },
+    {
+      "id": "ui-react:DateField",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "DateField",
+      "reactExport": "DateField",
+      "source": "packages/ui-react/src/components/DateField.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-date-field--playground",
+      "wrapperFor": "ui-date-field"
     },
     {
       "id": "ui-react:DatePicker",
@@ -1864,6 +2863,28 @@
       "wrapperFor": "ui-direction-provider"
     },
     {
+      "id": "ui-react:DismissableLayer",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "DismissableLayer",
+      "reactExport": "DismissableLayer",
+      "source": "packages/ui-react/src/components/DismissableLayer.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-dismissable-layer--playground",
+      "wrapperFor": "ui-dismissable-layer"
+    },
+    {
+      "id": "ui-react:Dock",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Dock",
+      "reactExport": "Dock",
+      "source": "packages/ui-react/src/components/Dock.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-dock--playground",
+      "wrapperFor": "ui-dock"
+    },
+    {
       "id": "ui-react:Drawer",
       "package": "@editora/ui-react",
       "framework": "react",
@@ -1908,6 +2929,28 @@
       "wrapperFor": "ui-field"
     },
     {
+      "id": "ui-react:FieldSemantics",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "FieldSemantics",
+      "reactExport": "FieldSemantics",
+      "source": "packages/ui-react/src/components/FieldSemantics.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-field-semantics--playground",
+      "wrapperFor": "ui-field-semantics"
+    },
+    {
+      "id": "ui-react:FileUpload",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "FileUpload",
+      "reactExport": "FileUpload",
+      "source": "packages/ui-react/src/components/FileUpload.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-file-upload--playground",
+      "wrapperFor": "ui-file-upload"
+    },
+    {
       "id": "ui-react:Flex",
       "package": "@editora/ui-react",
       "framework": "react",
@@ -1928,6 +2971,17 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-floating-toolbar--playground",
       "wrapperFor": "ui-floating-toolbar"
+    },
+    {
+      "id": "ui-react:FocusScope",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "FocusScope",
+      "reactExport": "FocusScope",
+      "source": "packages/ui-react/src/components/FocusScope.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-focus-scope--playground",
+      "wrapperFor": "ui-focus-scope"
     },
     {
       "id": "ui-react:Form",
@@ -1985,6 +3039,28 @@
       "wrapperFor": "ui-icon"
     },
     {
+      "id": "ui-react:IconCloud",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "IconCloud",
+      "reactExport": "IconCloud",
+      "source": "packages/ui-react/src/components/IconCloud.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-icon-cloud--playground",
+      "wrapperFor": "ui-icon-cloud"
+    },
+    {
+      "id": "ui-react:InlineEdit",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "InlineEdit",
+      "reactExport": "InlineEdit",
+      "source": "packages/ui-react/src/components/InlineEdit.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-inline-edit--playground",
+      "wrapperFor": "ui-inline-edit"
+    },
+    {
       "id": "ui-react:Input",
       "package": "@editora/ui-react",
       "framework": "react",
@@ -2018,6 +3094,39 @@
       "wrapperFor": "ui-layout"
     },
     {
+      "id": "ui-react:Listbox",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Listbox",
+      "reactExport": "Listbox",
+      "source": "packages/ui-react/src/components/Listbox.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-listbox--playground",
+      "wrapperFor": "ui-listbox"
+    },
+    {
+      "id": "ui-react:Marquee",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Marquee",
+      "reactExport": "Marquee",
+      "source": "packages/ui-react/src/components/Marquee.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-marquee--playground",
+      "wrapperFor": "ui-marquee"
+    },
+    {
+      "id": "ui-react:MasonryGrid",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "MasonryGrid",
+      "reactExport": "MasonryGrid",
+      "source": "packages/ui-react/src/components/MasonryGrid.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-masonry-grid--playground",
+      "wrapperFor": "ui-masonry-grid"
+    },
+    {
       "id": "ui-react:Menu",
       "package": "@editora/ui-react",
       "framework": "react",
@@ -2040,6 +3149,28 @@
       "wrapperFor": "ui-menubar"
     },
     {
+      "id": "ui-react:Meter",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Meter",
+      "reactExport": "Meter",
+      "source": "packages/ui-react/src/components/Meter.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-meter--playground",
+      "wrapperFor": "ui-meter"
+    },
+    {
+      "id": "ui-react:MultiSelect",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "MultiSelect",
+      "reactExport": "MultiSelect",
+      "source": "packages/ui-react/src/components/MultiSelect.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-multi-select--playground",
+      "wrapperFor": "ui-multi-select"
+    },
+    {
       "id": "ui-react:NavigationMenu",
       "package": "@editora/ui-react",
       "framework": "react",
@@ -2051,6 +3182,39 @@
       "wrapperFor": "ui-navigation-menu"
     },
     {
+      "id": "ui-react:NumberField",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "NumberField",
+      "reactExport": "NumberField",
+      "source": "packages/ui-react/src/components/NumberField.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-number-field--playground",
+      "wrapperFor": "ui-number-field"
+    },
+    {
+      "id": "ui-react:NumberTicker",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "NumberTicker",
+      "reactExport": "NumberTicker",
+      "source": "packages/ui-react/src/components/NumberTicker.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-number-ticker--playground",
+      "wrapperFor": "ui-number-ticker"
+    },
+    {
+      "id": "ui-react:Orbiter",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Orbiter",
+      "reactExport": "Orbiter",
+      "source": "packages/ui-react/src/components/Orbiter.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-orbiter--playground",
+      "wrapperFor": "ui-orbiter"
+    },
+    {
       "id": "ui-react:Pagination",
       "package": "@editora/ui-react",
       "framework": "react",
@@ -2060,6 +3224,50 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-pagination--playground",
       "wrapperFor": "ui-pagination"
+    },
+    {
+      "id": "ui-react:PanelGroup",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "PanelGroup",
+      "reactExport": "PanelGroup",
+      "source": "packages/ui-react/src/components/PanelGroup.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-panel-group--playground",
+      "wrapperFor": "ui-panel-group"
+    },
+    {
+      "id": "ui-react:PasswordField",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "PasswordField",
+      "reactExport": "PasswordField",
+      "source": "packages/ui-react/src/components/PasswordField.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-password-field--playground",
+      "wrapperFor": "ui-password-field"
+    },
+    {
+      "id": "ui-react:PinInput",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "PinInput",
+      "reactExport": "PinInput",
+      "source": "packages/ui-react/src/components/PinInput.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-pin-input--playground",
+      "wrapperFor": "ui-pin-input"
+    },
+    {
+      "id": "ui-react:PlacementGrid",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "PlacementGrid",
+      "reactExport": "PlacementGrid",
+      "source": "packages/ui-react/src/components/PlacementGrid.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-placement-grid--playground",
+      "wrapperFor": "ui-placement-grid"
     },
     {
       "id": "ui-react:PluginPanel",
@@ -2093,6 +3301,17 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-portal--playground",
       "wrapperFor": "ui-portal"
+    },
+    {
+      "id": "ui-react:Positioner",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Positioner",
+      "reactExport": "Positioner",
+      "source": "packages/ui-react/src/components/Positioner.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-positioner--playground",
+      "wrapperFor": "ui-positioner"
     },
     {
       "id": "ui-react:Presence",
@@ -2137,6 +3356,28 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-radio-group--playground",
       "wrapperFor": "ui-radio-group"
+    },
+    {
+      "id": "ui-react:Rating",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Rating",
+      "reactExport": "Rating",
+      "source": "packages/ui-react/src/components/Rating.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-rating--playground",
+      "wrapperFor": "ui-rating"
+    },
+    {
+      "id": "ui-react:RovingFocusGroup",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "RovingFocusGroup",
+      "reactExport": "RovingFocusGroup",
+      "source": "packages/ui-react/src/components/RovingFocusGroup.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-roving-focus-group--playground",
+      "wrapperFor": "ui-roving-focus-group"
     },
     {
       "id": "ui-react:ScrollArea",
@@ -2238,6 +3479,39 @@
       "wrapperFor": "ui-slot"
     },
     {
+      "id": "ui-react:Sortable",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Sortable",
+      "reactExport": "Sortable",
+      "source": "packages/ui-react/src/components/Sortable.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-sortable--playground",
+      "wrapperFor": "ui-sortable"
+    },
+    {
+      "id": "ui-react:SpinningText",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "SpinningText",
+      "reactExport": "SpinningText",
+      "source": "packages/ui-react/src/components/SpinningText.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-spinning-text--playground",
+      "wrapperFor": "ui-spinning-text"
+    },
+    {
+      "id": "ui-react:SplitButton",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "SplitButton",
+      "reactExport": "SplitButton",
+      "source": "packages/ui-react/src/components/SplitButton.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-split-button--playground",
+      "wrapperFor": "ui-split-button"
+    },
+    {
       "id": "ui-react:Stepper",
       "package": "@editora/ui-react",
       "framework": "react",
@@ -2280,6 +3554,17 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-tabs--playground",
       "wrapperFor": "ui-tabs"
+    },
+    {
+      "id": "ui-react:TagsInput",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "TagsInput",
+      "reactExport": "TagsInput",
+      "source": "packages/ui-react/src/components/TagsInput.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-tags-input--playground",
+      "wrapperFor": "ui-tags-input"
     },
     {
       "id": "ui-react:Textarea",
@@ -2392,6 +3677,28 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-tooltip--playground",
       "wrapperFor": "ui-tooltip"
+    },
+    {
+      "id": "ui-react:TransferList",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "TransferList",
+      "reactExport": "TransferList",
+      "source": "packages/ui-react/src/components/TransferList.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-transfer-list--playground",
+      "wrapperFor": "ui-transfer-list"
+    },
+    {
+      "id": "ui-react:Tree",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Tree",
+      "reactExport": "Tree",
+      "source": "packages/ui-react/src/components/Tree.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-tree--playground",
+      "wrapperFor": "ui-tree"
     },
     {
       "id": "ui-react:VisuallyHidden",

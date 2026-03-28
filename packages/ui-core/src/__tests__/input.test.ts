@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import '../components/ui-input';
 
 describe('UIInput advanced features', () => {
   it('shows clear button when clearable and value present and clears on click', () => {
@@ -61,16 +62,16 @@ describe('UIInput advanced features', () => {
 
     // focus and type multiple characters; focus should remain on the input
     input!.focus();
-    expect(document.activeElement).toBe(input);
+    expect(el.shadowRoot?.activeElement).toBe(input);
 
     input!.value = 'a';
     input!.dispatchEvent(new Event('input', { bubbles: true }));
     await Promise.resolve();
-    expect(document.activeElement).toBe(input);
+    expect(el.shadowRoot?.activeElement).toBe(input);
 
     input!.value = 'ab';
     input!.dispatchEvent(new Event('input', { bubbles: true }));
     await Promise.resolve();
-    expect(document.activeElement).toBe(input);
+    expect(el.shadowRoot?.activeElement).toBe(input);
   });
 });

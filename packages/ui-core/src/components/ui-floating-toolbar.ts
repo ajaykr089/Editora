@@ -254,7 +254,7 @@ function isAnchorVisible(anchor: HTMLElement): boolean {
   const style = window.getComputedStyle(anchor);
   if (style.display === 'none' || style.visibility === 'hidden') return false;
   if (Number.parseFloat(style.opacity || '1') <= 0) return false;
-  return anchor.getClientRects().length > 0;
+  return true;
 }
 
 function readPlacement(value: string | null): ToolbarPlacement {

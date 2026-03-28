@@ -1,5 +1,5 @@
 type ThemeScale = Record<string, string>;
-type ThemeMode = 'light' | 'dark';
+export type ThemeMode = 'light' | 'dark';
 
 export type AccentPaletteName = 'amber' | 'blue' | 'green' | 'red' | 'gray';
 

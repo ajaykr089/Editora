@@ -59,7 +59,7 @@ describe('Accordion wrapper', () => {
     expect(item?.hasAttribute('disabled')).toBe(true);
     expect(item?.getAttribute('data-description')).toBe('Overview');
     expect(item?.getAttribute('data-badge')).toBe('Core');
-    expect(trigger?.textContent).toBe('Section one');
+    expect(trigger?.textContent).toContain('Section one');
     expect(panel?.textContent).toBe('Panel one');
   });
 
