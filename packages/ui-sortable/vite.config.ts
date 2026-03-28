@@ -5,14 +5,12 @@ export default defineConfig({
     lib: {
       entry: {
         index: 'src/index.ts',
-        sortable: 'src/sortable.ts',
-        runtime: 'src/runtime.ts',
       },
       formats: ['es', 'cjs'],
       fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'esm' : 'cjs'}.js`
     },
     rollupOptions: {
-      external: ['@editora/icons'],
+      external: ['@editora/ui-core/sortable'],
       output: {
         exports: 'named',
         interop: 'auto',

@@ -68,6 +68,7 @@ Components for displaying and managing data collections.
 | **Tree** | Hierarchical data display | Expand/collapse, selection, drag-drop |
 | **Listbox** | List selection component | Single/multi select, virtualization |
 | **TransferList** | Dual-list selection | Move items between lists |
+| **Sortable** | Production drag-and-drop workspace | Reordering, multi-list transfer, nesting, cloning, keyboard sorting, persistence |
 | **DataTable** | Advanced data grid | Sorting, filtering, grouping, export |
 
 ### 3. Overlay and Modal Components

@@ -14,6 +14,12 @@ React-first UI package for Editora application and editor interfaces.
 npm i @editora/ui-react @editora/ui-core
 ```
 
+If you only need the sortable web component without the broader UI bundles:
+
+```bash
+npm i @editora/ui-sortable
+```
+
 ## Quick Start
 
 ```tsx
@@ -37,7 +43,7 @@ export function App() {
 | `Button`, `Tooltip`, `Alert`, `Dropdown`, `Input`, `Textarea`, `Field`, `Combobox` | Component exports | Base controls |
 | `Badge`, `EmptyState`, `Table`, `DataTable`, `Chart`, `Timeline`, `Calendar`, `Marquee`, `AnimatedText`, `AnimatedBeam`, `Dock`, `Orbiter` | Component exports | Data display, motion, and launcher controls |
 | `ColorPicker`, `DatePicker`, `DateRangePicker`, `TimePicker`, `DateTimePicker`, `DateRangeTimePicker` | Component exports | Date/time and color controls |
-| `Gantt`, `Stepper`, `Wizard`, `QuickActions` | Component exports | Workflow controls |
+| `Gantt`, `Stepper`, `Wizard`, `QuickActions`, `Sortable` | Component exports | Workflow controls, including standalone-installable sortable drag and drop |
 | `NavigationMenu`, `Menubar`, `Dialog`, `Popover`, `Tabs`, `Menu`, `ContextMenu` | Component exports | Nav + overlay components |
 | `FloatingToolbar`, `BlockControls`, `CommandPalette`, `SelectionPopup`, `PluginPanel` | Component exports | Editor-specific surfaces |
 | `Form`, `useForm`, `useFloating` | Component + hooks | Form and floating behavior |
@@ -61,3 +67,5 @@ Validate aria labels, tab order, and focus return for dialog + menu flows.
 ## Performance Notes
 
 Prevent broad context churn and avoid recreating large prop objects on every render.
+
+For `Sortable`, normal and moderately large boards are a good fit today. If you plan to render very large visible datasets, validate with your real item count because the surface is not virtualized.

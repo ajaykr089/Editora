@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@editora/ui-core": ["../ui-core/src/index.ts"],
+      "@editora/ui-core/*": ["../ui-core/src/*"]
+    }
+  },
+  "include": ["src"]
+}

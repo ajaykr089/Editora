@@ -51,6 +51,25 @@ export type {
   TransferListElevation,
   TransferListSelectionIndicator
 } from './components/TransferList';
+export { Sortable } from './components/Sortable';
+export type {
+  SortableProps,
+  SortableElement,
+  SortableList,
+  SortableItem,
+  SortableMoveOptions,
+  SortableDropMode,
+  SortableSortMode,
+  SortableChangeSource,
+  SortableOperation,
+  SortableRenderEmptyStateContext,
+  SortableRenderItemContext,
+  SortableRenderListHeaderContext,
+  SortableSelectionChangeDetail,
+  SortablePersistenceRecord,
+  SortablePersistenceSnapshot,
+  SortableChangeDetail
+} from './components/Sortable';
 export { InlineEdit } from './components/InlineEdit';
 export { TimePicker } from './components/TimePicker';
 export { DateTimePicker } from './components/DateTimePicker';

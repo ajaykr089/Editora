@@ -73,6 +73,7 @@ import './components/ui-dropzone';
 import './components/ui-multi-select';
 import './components/ui-split-button';
 import './components/ui-transfer-list';
+import './components/ui-sortable';
 import './components/ui-inline-edit';
 import './components/ui-combobox';
 import './components/ui-panel-group';
@@ -247,6 +248,22 @@ export { UIDropzone } from './components/ui-dropzone';
 export { UIMultiSelect } from './components/ui-multi-select';
 export { UISplitButton } from './components/ui-split-button';
 export { UITransferList } from './components/ui-transfer-list';
+export {
+  UISortable
+} from './components/ui-sortable';
+export type {
+  UISortableList,
+  UISortableItem,
+  UISortableMoveOptions,
+  UISortableDropMode,
+  UISortableSortMode,
+  UISortableChangeSource,
+  UISortableOperation,
+  UISortableSelectionChangeDetail,
+  UISortablePersistenceRecord,
+  UISortablePersistenceSnapshot,
+  UISortableChangeDetail
+} from './components/ui-sortable';
 export { UIInlineEdit } from './components/ui-inline-edit';
 export { UICombobox } from './components/ui-combobox';
 export { UIPanelGroup } from './components/ui-panel-group';

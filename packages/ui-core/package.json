@@ -12,6 +12,12 @@
       "require": "./dist/index.cjs.js",
       "default": "./dist/index.esm.js"
     },
+    "./sortable": {
+      "types": "./dist/sortable.d.ts",
+      "import": "./dist/sortable.esm.js",
+      "require": "./dist/sortable.cjs.js",
+      "default": "./dist/sortable.esm.js"
+    },
     "./runtime": {
       "types": "./dist/runtime.d.ts",
       "import": "./dist/runtime.esm.js",
@@ -48,6 +54,7 @@
     "editora",
     "editora ui ecosystem",
     "ui-core",
+    "ui-sortable",
     "design-system",
     "web-components",
     "typescript",

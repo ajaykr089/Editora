@@ -10,8 +10,13 @@ import {
   Dropzone,
   FileUpload,
   Grid,
+  Input,
   MultiSelect,
   Rating,
+  Sortable,
+  type SortableChangeDetail,
+  type SortableItem,
+  type SortableSelectionChangeDetail,
   Timeline,
   TransferList,
   Wizard,
@@ -38,6 +43,44 @@ const releaseTimeline = [
   { title: 'Launch window reserved', time: '14:05', tone: 'default' as const },
 ];
 
+const sortableLists = [
+  {
+    id: 'templates',
+    label: 'Templates',
+    description: 'Clone-only source list',
+    cloneOnDrag: true,
+    emptyLabel: 'No reusable templates left.'
+  },
+  {
+    id: 'backlog',
+    label: 'Backlog',
+    description: 'Primary planning queue',
+    emptyLabel: 'Drop backlog work here.'
+  },
+  {
+    id: 'active',
+    label: 'In Progress',
+    description: 'Current sprint focus',
+    emptyLabel: 'Nothing active right now.'
+  },
+  {
+    id: 'done',
+    label: 'Done',
+    description: 'Horizontal closeout lane',
+    orientation: 'horizontal' as const,
+    emptyLabel: 'Ship something to complete the lane.'
+  }
+];
+
+const initialSortableItems: SortableItem[] = [
+  { id: 'template-story', label: 'Story template', description: 'Reusable outline for content tickets', listId: 'templates', cloneOnDrag: true },
+  { id: 'template-qa', label: 'QA checklist', description: 'Regression and smoke test template', listId: 'templates', cloneOnDrag: true },
+  { id: 'epic-release', label: 'Release epic', description: 'Top-level parent for launch work', listId: 'backlog' },
+  { id: 'brief', label: 'Draft launch brief', description: 'Can be nested under the epic', listId: 'backlog', parentId: 'epic-release' },
+  { id: 'review', label: 'Design review', description: 'Currently blocked on content timing', listId: 'active' },
+  { id: 'handoff', label: 'Support handoff', description: 'Ready once QA signs off', listId: 'done' },
+];
+
 export default function WorkflowPage() {
   const [team, setTeam] = React.useState('engineering');
   const [notifyTeams, setNotifyTeams] = React.useState<string[]>(['ops', 'eng']);
@@ -45,6 +88,11 @@ export default function WorkflowPage() {
   const [rating, setRating] = React.useState(4);
   const [wizardValue, setWizardValue] = React.useState('details');
   const [uploadStatus, setUploadStatus] = React.useState('No upload event yet.');
+  const [sortableItems, setSortableItems] = React.useState(initialSortableItems);
+  const [sortableSelection, setSortableSelection] = React.useState<string[]>(['epic-release']);
+  const [sortableFilter, setSortableFilter] = React.useState('');
+  const [sortableSort, setSortableSort] = React.useState<'manual' | 'label'>('manual');
+  const [sortableStatus, setSortableStatus] = React.useState('Waiting for drag-and-drop activity.');
 
   return (
     <DirectionProvider dir="ltr">
@@ -104,6 +152,65 @@ export default function WorkflowPage() {
                 value={repos}
                 onValueChange={setRepos}
               />
+            </Grid>
+          </ShowcaseCard>
+
+          <ShowcaseCard
+            eyebrow="Drag And Drop"
+            title="Multi-list sortable workspace"
+            description="This surface demonstrates single-list reordering, multi-list transfer, nesting, multi-selection, handle-only dragging, cloning, keyboard cancel, filter-aware drag locks, and persisted ordering."
+          >
+            <Grid style={{ display: 'grid', gap: 16, justifyItems: 'stretch', alignItems: 'start' }}>
+              <Box style={{ ...stageStyle, width: '100%', display: 'grid', gap: 12 }}>
+                <Box style={eyebrowStyle}>Controls</Box>
+                <Grid style={{ display: 'grid', gap: 12, gridTemplateColumns: 'minmax(0, 1fr) auto auto' }}>
+                  <Input
+                    label="Filter cards"
+                    placeholder="Type to filter labels and descriptions"
+                    value={sortableFilter}
+                    onChange={setSortableFilter}
+                  />
+                  <Button
+                    recipe={sortableSort === 'manual' ? 'solid' : 'outline'}
+                    size="sm"
+                    onClick={() => setSortableSort('manual')}
+                  >
+                    Manual sort
+                  </Button>
+                  <Button
+                    recipe={sortableSort === 'label' ? 'solid' : 'outline'}
+                    size="sm"
+                    onClick={() => setSortableSort('label')}
+                  >
+                    A-Z lock
+                  </Button>
+                </Grid>
+                <Box style={hintStyle}>
+                  Try multi-select with Cmd/Ctrl-click or Shift-click. Press Space on a focused item to lift it, arrow keys to move the destination, and Escape to cancel.
+                </Box>
+              </Box>
+
+              <Sortable
+                lists={sortableLists}
+                items={sortableItems}
+                selection={sortableSelection}
+                filterQuery={sortableFilter}
+                sort={sortableSort}
+                persistKey="workflow-sortable-demo"
+                onItemsChange={setSortableItems}
+                onSelectionChange={(detail: SortableSelectionChangeDetail) => setSortableSelection(detail.selection)}
+                onPersistRequest={(detail: SortableChangeDetail) =>
+                  setSortableStatus(
+                    `${detail.operation} via ${detail.source}: ${detail.movedIds.join(', ')}. ` +
+                    `Persist ${detail.persistence.records.length} index records.`
+                  )
+                }
+              />
+
+              <Box style={{ ...stageStyle, width: '100%' }}>
+                <Box style={eyebrowStyle}>Persistence</Box>
+                <Box style={hintStyle}>{sortableStatus}</Box>
+              </Box>
             </Grid>
           </ShowcaseCard>
 

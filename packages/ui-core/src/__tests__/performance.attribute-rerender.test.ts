@@ -32,6 +32,7 @@ import '../components/ui-date-field';
 import '../components/ui-time-field';
 import '../components/ui-file-upload';
 import '../components/ui-multi-select';
+import '../components/ui-sortable';
 
 function flushMicrotask() {
   return Promise.resolve();
@@ -224,6 +225,66 @@ describe('performance: non-template attribute updates should not rebuild shadow 
 
     const portalAfter = el._portalEl;
     expect(portalAfter).toBe(portalBefore);
+    el.remove();
+  });
+
+  it('ui-sortable keeps root node stable across controlled selection updates', async () => {
+    const el = document.createElement('ui-sortable') as HTMLElement;
+    el.setAttribute('lists', JSON.stringify([
+      { id: 'queue', label: 'Queue' }
+    ]));
+    el.setAttribute('items', JSON.stringify([
+      { id: 'a', label: 'Alpha', listId: 'queue' },
+      { id: 'b', label: 'Beta', listId: 'queue' },
+      { id: 'c', label: 'Gamma', listId: 'queue' }
+    ]));
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const rootBefore = el.shadowRoot?.querySelector('.root');
+    expect(rootBefore).toBeTruthy();
+
+    el.setAttribute('selection', JSON.stringify(['b']));
+    el.setAttribute('selection', JSON.stringify(['c']));
+    await flushMicrotask();
+
+    const rootAfter = el.shadowRoot?.querySelector('.root');
+    const selectedItem = el.shadowRoot?.querySelector('.item[data-id="c"]');
+    expect(rootAfter).toBe(rootBefore);
+    expect(selectedItem?.getAttribute('data-selected')).toBe('true');
+    el.remove();
+  });
+
+  it('ui-sortable keeps root node stable across focusItem updates on a larger nested board', async () => {
+    const lists = [
+      { id: 'backlog', label: 'Backlog' },
+      { id: 'active', label: 'Active' }
+    ];
+    const items = Array.from({ length: 24 }, (_, index) => {
+      const rootIndex = index + 1;
+      return [
+        { id: `initiative-${rootIndex}`, label: `Initiative ${rootIndex}`, listId: 'backlog' },
+        { id: `task-${rootIndex}-1`, label: `Task ${rootIndex}.1`, listId: 'backlog', parentId: `initiative-${rootIndex}` },
+        { id: `task-${rootIndex}-2`, label: `Task ${rootIndex}.2`, listId: 'backlog', parentId: `initiative-${rootIndex}` }
+      ];
+    }).flat();
+
+    const el = document.createElement('ui-sortable') as HTMLElement & { focusItem(id: string): void };
+    el.setAttribute('lists', JSON.stringify(lists));
+    el.setAttribute('items', JSON.stringify(items));
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const rootBefore = el.shadowRoot?.querySelector('.root');
+    expect(rootBefore).toBeTruthy();
+
+    el.focusItem('task-18-2');
+    await flushMicrotask();
+
+    const rootAfter = el.shadowRoot?.querySelector('.root');
+    const focusedItem = el.shadowRoot?.querySelector('.item[data-id="task-18-2"]');
+    expect(rootAfter).toBe(rootBefore);
+    expect(focusedItem?.getAttribute('data-focused')).toBe('true');
     el.remove();
   });
 
