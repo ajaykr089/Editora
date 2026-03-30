@@ -31,10 +31,15 @@
     <header>
         <div class="container">
             <nav>
-                <a href="../index.html" class="logo">
+               <!-- <a href="../index.html" class="logo">
                     <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
-                </a>
-                <button class="menu-toggle">☰</button>
+                </a>-->
+                <a href="../index.html" class="logo d-flex flex-center">
+                     <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo">
+                         <span>Editora</span>
+                    </a>
+                <!--<button class="menu-toggle">☰</button>-->
+                <button class="menu-toggle" aria-label="Toggle Menu">☰</button>
                 <ul class="nav-links">
                     <li><a href="../index.html">Home</a></li>
                     <li><a href="installation.html" class="active">Docs</a></li>
@@ -51,7 +56,7 @@
     <!-- Hero -->
     <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
         <div class="container">
-            <h1 style="color: white; margin-bottom: 0.5rem;">📥 Installation Guide</h1>
+            <h1 style="color: white; margin-bottom: 0.5rem;">📥 Installations Guide</h1>
             <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Set up the Editora content authoring ecosystem in your project</p>
         </div>
     </section>
@@ -63,7 +68,7 @@
                 <!-- Sidebar Navigation -->
                 <aside class="docs-sidebar">
                     <h3>Documentation</h3>
-                    <ul>
+                    <ul class="plu1">
                         <li><a href="installation.html" class="active">Installation</a></li>
                         <li><a href="features.html">Features</a></li>
                         <li><a href="api.html">API Reference</a></li>
@@ -79,7 +84,7 @@
                     </ul>
 
                     <h3>Quick Links</h3>
-                    <ul>
+                    <ul class="plu1">
                         <li><a href="../playground.html">Live Playground</a></li>
                         <li><a href="../toast-demo.html">Toast Demo</a></li>
                         <li><a href="../plugins/index.html">All Plugins</a></li>
@@ -415,7 +420,7 @@ console.log(typeof createEditor); // Should print "function"</code></pre>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024-2026 Editora. All rights reserved.</p>
+                <p style="color:white">&copy; 2024-2026 Editora.Built with <span style="color: red;">&hearts;</span> by Editora Team. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
             </div>
         </div>
     </footer>

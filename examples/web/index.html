@@ -60,11 +60,10 @@
             </div>
         </div>
     </section>
-
     <!-- Features Section -->
     <section class="alternate">
         <div class="container">
-            <h2>🚀 Why Choose Editora?</h2>
+            <h2 style>🚀 Why Choose Editora?</h2>
             <div class="features-grid">
                 <div class="feature-box">
                     <div class="feature-icon">⚡</div>
@@ -81,6 +80,7 @@
                     <h3>Framework Agnostic</h3>
                     <p>Works with React, Vue, Angular, Svelte, or vanilla JavaScript. One editor for all platforms.</p>
                 </div>
+                
                 <div class="feature-box">
                     <div class="feature-icon">⌨️</div>
                     <h3>33+ Shortcuts</h3>
@@ -101,11 +101,17 @@
                     <h3>Enterprise Preset</h3>
                     <p>Use <code>@editora/plugins/enterprise</code> for advanced workflows like track changes, compliance checks, PII redaction, and translation QA.</p>
                 </div>
+                
                 <div class="feature-box">
                     <div class="feature-icon">🧩</div>
                     <h3>Build Custom Plugins</h3>
                     <p>Create your own plugins with a full tutorial and production-ready examples.</p>
                     <p><a href="docs/custom-plugins.html">Learn how to create plugins →</a></p>
+                </div>
+                <div class="feature-box">
+                    <div class="feature-icon">👥</div>
+                    <h3>Real-time Collaboration</h3>
+                    <p>Work together with your team in real-time, instantly seeing updates as they happen.</p>
                 </div>
             </div>
         </div>
@@ -114,7 +120,7 @@
     <!-- Quick Start Section -->
     <section>
         <div class="container">
-            <h2>⚡ Quick Start in 3 Minutes</h2>
+            <h2  >⚡ Quick Start in 3 Minutes</h2>
             <div class="row">
                 <div class="col">
                     <h3>1. Install</h3>
@@ -192,7 +198,7 @@ editor.mount(document.getElementById('editor'));</code></pre>
     <!-- Plugins Preview -->
     <section>
         <div class="container">
-            <h2>🔌 40+ Plugins</h2>
+            <h2  >🔌 40+ Plugins</h2>
             <p class="text-center mb-4">Extend functionality with our comprehensive plugin ecosystem.</p>
             <div class="plugin-grid">
                 <div class="plugin-card">
@@ -225,6 +231,18 @@ editor.mount(document.getElementById('editor'));</code></pre>
                     <p>Save and reuse document templates.</p>
                     <a href="plugins/template.html" class="plugin-link">Learn More →</a>
                 </div>
+                 <div class="plugin-card">
+                    <div class="plugin-icon">🏷️</div>
+                    <h4>Merge Tags</h4>
+                    <p>Insert dynamic values into content using customizable tags.</p>
+                    <a href="plugins/template.html" class="plugin-link">Learn More →</a>
+                </div>
+                 <div class="plugin-card">
+                    <div class="plugin-icon">🔗</div>
+                    <h4>Data Binding</h4>
+                    <p>Keep data and UI in sync with automatic updates in real-time.</p>
+                    <a href="plugins/template.html" class="plugin-link">Learn More →</a>
+                </div>
                 <div class="plugin-card">
                     <div class="plugin-icon">💬</div>
                     <h4>Comments</h4>
@@ -241,7 +259,7 @@ editor.mount(document.getElementById('editor'));</code></pre>
     <!-- Enterprise Plugins Spotlight -->
     <section class="alternate">
         <div class="container">
-            <h2>🏢 Enterprise Plugins (All Free)</h2>
+            <h2  >🏢 Enterprise Plugins (All Free)</h2>
             <p class="text-center mb-4">
                 Advanced workflows are available through <code>@editora/plugins/enterprise</code>. Full/lite/enterprise entry paths are all free and fully customizable.
             </p>
@@ -280,7 +298,7 @@ editor.mount(document.getElementById('editor'));</code></pre>
     <!-- Ecosystem Section -->
     <section>
         <div class="container">
-            <h2>🧩 Editora Ecosystem</h2>
+            <h2  >🧩 Editora Ecosystem</h2>
             <p class="text-center" style="margin-bottom: 0.75rem;">
                 Editora is a modular content-authoring platform, not just a rich text editor. It combines a core editing engine with UI foundations, themes, icons, performance utilities, and framework adapters.
             </p>
@@ -298,6 +316,12 @@ editor.mount(document.getElementById('editor'));</code></pre>
                     <div class="plugin-icon">⚛️</div>
                     <h4>@editora/react</h4>
                     <p>React wrapper with controlled/uncontrolled editor support.</p>
+                    <a href="docs/examples.html" class="plugin-link">Open Docs →</a>
+                </div>
+                <div class="plugin-card">
+                    <div class="plugin-icon">💾</div>
+                    <h4>@editora/Auto Save</h4>
+                    <p>Automatically save your work without interruption.</p>
                     <a href="docs/examples.html" class="plugin-link">Open Docs →</a>
                 </div>
                 <div class="plugin-card">
@@ -350,7 +374,7 @@ editor.mount(document.getElementById('editor'));</code></pre>
                 </div>
                 <div class="plugin-card">
                     <div class="plugin-icon">📈</div>
-                    <h4>@editora/performance</h4>
+                    <h4>@editora/-performance</h4>
                     <p>Performance utilities for debouncing, scans, and editor profiling.</p>
                     <a href="webcomponent-performance-accessibility-lab.html" class="plugin-link">Open Lab →</a>
                 </div>
@@ -419,12 +443,6 @@ editor.mount(document.getElementById('editor'));</code></pre>
                     <a href="test-code-sample.html" class="plugin-link">Try It →</a>
                 </div>
                 <div class="plugin-card">
-                    <div class="plugin-icon">♾️</div>
-                    <h4>Marquee Demo</h4>
-                    <p>Try <code>ui-marquee</code> with ticker rails, mixed media cards, and a vertical operations feed.</p>
-                    <a href="marquee-demo.html" class="plugin-link">Try It →</a>
-                </div>
-                <div class="plugin-card">
                     <div class="plugin-icon">📄</div>
                     <h4>PDF Export</h4>
                     <p>Export your documents to PDF with formatting preservation.</p>
@@ -442,12 +460,6 @@ editor.mount(document.getElementById('editor'));</code></pre>
                     <p>Validate sanitization and autosave behavior per editor instance.</p>
                     <a href="webcomponent-security-autosave-lab.html" class="plugin-link">Try It →</a>
                 </div>
-                <div class="plugin-card">
-                    <div class="plugin-icon">♿</div>
-                    <h4>Performance + A11y Lab</h4>
-                    <p>Test debounce, viewport-only scans, ARIA, and keyboard navigation.</p>
-                    <a href="webcomponent-performance-accessibility-lab.html" class="plugin-link">Try It →</a>
-                </div>
             </div>
             <div class="text-center mt-4">
                 <a href="playground.html" class="btn btn-primary">Open Full Playground</a>
@@ -456,7 +468,7 @@ editor.mount(document.getElementById('editor'));</code></pre>
     </section>
 
     <!-- Comparison -->
-    <section class="alternate">
+    <section >
         <div class="container">
             <h2>📊 Comparison</h2>
             <div style="overflow-x: auto;">
@@ -560,7 +572,7 @@ editor.mount(document.getElementById('editor'));</code></pre>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024-2026 Editora. Built with ❤️ by Ajay Kumar. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+                <p style="color:white">&copy; 2024-2026 Editora.Built with <span style="color: red;">&hearts;</span> by Editora Team. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
             </div>
         </div>
     </footer>
