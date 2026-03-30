@@ -65,11 +65,11 @@ The standalone wrappers live in `src/standalone` and are checked into the packag
 
 Examples:
 
-- Vue direct example: [`examples/ui-core-vue-direct`](/Users/etelligens/Documents/Rich-Text-Editor/examples/ui-core-vue-direct)
-- Svelte direct example: [`examples/ui-core-svelte-direct`](/Users/etelligens/Documents/Rich-Text-Editor/examples/ui-core-svelte-direct)
-- Angular direct example: [`examples/ui-core-angular-direct`](/Users/etelligens/Documents/Rich-Text-Editor/examples/ui-core-angular-direct)
+- Vue direct example: [`examples/ui-core-vue-direct`](https://github.com/ajaykr089/Editora/tree/main/examples/ui-core-vue-direct)
+- Svelte direct example: [`examples/ui-core-svelte-direct`](/https://github.com/ajaykr089/Editora/tree/main/examples/ui-core-svelte-direct)
+- Angular direct example: [`examples/ui-core-angular-direct`](https://github.com/ajaykr089/Editora/tree/main/examples/ui-core-angular-direct)
 
-More guidance lives in [`docs/FRAMEWORK_DIRECT_USAGE.md`](/Users/etelligens/Documents/Rich-Text-Editor/packages/ui-core/docs/FRAMEWORK_DIRECT_USAGE.md).
+More guidance lives in [`docs/FRAMEWORK_DIRECT_USAGE.md`](https://github.com/ajaykr089/Editora/tree/main/packages/ui-core/docs/FRAMEWORK_DIRECT_USAGE.md).
 
 ## What You Get
 

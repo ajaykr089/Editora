@@ -33,9 +33,9 @@ The main example in this category is `ui-sortable`, which expects array-valued p
 
 ## Example Projects
 
-- Vue: [`examples/ui-core-vue-direct`](/Users/etelligens/Documents/Rich-Text-Editor/examples/ui-core-vue-direct)
-- Svelte: [`examples/ui-core-svelte-direct`](/Users/etelligens/Documents/Rich-Text-Editor/examples/ui-core-svelte-direct)
-- Angular: [`examples/ui-core-angular-direct`](/Users/etelligens/Documents/Rich-Text-Editor/examples/ui-core-angular-direct)
+- Vue: [`examples/ui-core-vue-direct`](https://github.com/ajaykr089/Editora/tree/main/examples/ui-core-vue-direct)
+- Svelte: [`examples/ui-core-svelte-direct`](https://github.com/ajaykr089/Editora/tree/main/examples/ui-core-svelte-direct)
+- Angular: [`examples/ui-core-angular-direct`](https://github.com/ajaykr089/Editora/tree/main/examples/ui-core-angular-direct)
 
 ## Framework Notes
 
