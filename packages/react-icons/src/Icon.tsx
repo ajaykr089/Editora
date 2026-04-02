@@ -1,11 +1,17 @@
 import React from 'react';
 import { resolveIcon } from '@editora/icons';
 import type { IconNode } from '@editora/icons';
+import type { IconWeight } from '@editora/icons';
 import { useIconContext } from './IconContext';
 import type { IconProps } from './types';
 
 const DEFAULT_SIZE = 15;
 const DEFAULT_STROKE_WIDTH = 1.5;
+const STROKE_WIDTH_BY_WEIGHT: Record<IconWeight, number> = {
+  thin: 1.25,
+  regular: DEFAULT_STROKE_WIDTH,
+  bold: 1.75,
+};
 
 function normalizeSize(size: string | number | undefined): string | number {
   if (size == null || size === '') return DEFAULT_SIZE;
@@ -22,11 +28,24 @@ function parseViewBoxSize(viewBox: string): { width: number; height: number } {
     return { width: parts[2], height: parts[3] };
   }
 
-  return { width: 15, height: 15 };
+  return { width: 24, height: 24 };
 }
 
-function resolveStrokeWidth(options: { strokeWidth?: number; absoluteStrokeWidth?: boolean; size?: number | string }, viewBox: string): number {
-  const raw = options.strokeWidth ?? DEFAULT_STROKE_WIDTH;
+function resolveStrokeWidth(
+  options: {
+    strokeWidth?: number;
+    defaultStrokeWidth?: number;
+    iconWeight?: IconWeight;
+    absoluteStrokeWidth?: boolean;
+    size?: number | string;
+  },
+  viewBox: string
+): number {
+  const raw =
+    options.strokeWidth ??
+    (options.iconWeight ? STROKE_WIDTH_BY_WEIGHT[options.iconWeight] : undefined) ??
+    options.defaultStrokeWidth ??
+    DEFAULT_STROKE_WIDTH;
   if (!options.absoluteStrokeWidth) return raw;
 
   const pixelSize = Number(options.size ?? DEFAULT_SIZE);
@@ -125,6 +144,7 @@ export const Icon = React.forwardRef<SVGSVGElement, IconProps>(function Icon(
     name,
     variant,
     size,
+    iconWeight,
     color,
     secondaryColor,
     strokeWidth,
@@ -146,6 +166,7 @@ export const Icon = React.forwardRef<SVGSVGElement, IconProps>(function Icon(
   const defaults = useIconContext();
 
   const finalVariant = variant ?? defaults.variant ?? 'outline';
+  const finalIconWeight = iconWeight ?? defaults.iconWeight ?? 'regular';
   const resolved = resolveIcon(name, finalVariant);
   if (!resolved) return null;
 
@@ -156,7 +177,9 @@ export const Icon = React.forwardRef<SVGSVGElement, IconProps>(function Icon(
   const finalStrokeLinejoin = strokeLinejoin ?? defaults.strokeLinejoin ?? 'round';
   const finalStrokeWidth = resolveStrokeWidth(
     {
-      strokeWidth: strokeWidth ?? defaults.strokeWidth,
+      strokeWidth,
+      defaultStrokeWidth: defaults.strokeWidth,
+      iconWeight: finalIconWeight,
       absoluteStrokeWidth: absoluteStrokeWidth ?? defaults.absoluteStrokeWidth,
       size: finalSize
     },
@@ -199,6 +222,7 @@ export const Icon = React.forwardRef<SVGSVGElement, IconProps>(function Icon(
       viewBox={resolved.viewBox}
       fill="none"
       color={finalColor}
+      overflow="visible"
       shapeRendering="geometricPrecision"
       className={mergedClassName}
       role={role}

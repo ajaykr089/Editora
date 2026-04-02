@@ -10,6 +10,7 @@ export type {
   IconRenderOptions,
   IconTag,
   IconVariant,
+  IconWeight,
   ResolvedIcon
 } from './types';
 

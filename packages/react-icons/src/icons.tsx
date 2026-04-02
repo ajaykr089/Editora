@@ -313,6 +313,63 @@ export const LogoSlackIcon = createIcon('logo-slack', 'LogoSlackIcon');
 export const LogoDiscordIcon = createIcon('logo-discord', 'LogoDiscordIcon');
 export const LogoLinkedinIcon = createIcon('logo-linkedin', 'LogoLinkedinIcon');
 export const LogoYoutubeIcon = createIcon('logo-youtube', 'LogoYoutubeIcon');
+// Social Media Icons
+export const LogoInstagramIcon = createIcon('logo-instagram', 'LogoInstagramIcon');
+export const LogoFacebookIcon = createIcon('logo-facebook', 'LogoFacebookIcon');
+export const LogoTwitterIcon = createIcon('logo-twitter', 'LogoTwitterIcon');
+export const LogoWhatsappIcon = createIcon('logo-whatsapp', 'LogoWhatsappIcon');
+export const LogoTelegramIcon = createIcon('logo-telegram', 'LogoTelegramIcon');
+export const LogoTiktokIcon = createIcon('logo-tiktok', 'LogoTiktokIcon');
+export const LogoPinterestIcon = createIcon('logo-pinterest', 'LogoPinterestIcon');
+export const LogoRedditIcon = createIcon('logo-reddit', 'LogoRedditIcon');
+export const LogoSnapchatIcon = createIcon('logo-snapchat', 'LogoSnapchatIcon');
+export const LogoThreadsIcon = createIcon('logo-threads', 'LogoThreadsIcon');
+export const LogoMessengerIcon = createIcon('logo-messenger', 'LogoMessengerIcon');
+export const LogoSignalIcon = createIcon('logo-signal', 'LogoSignalIcon');
+export const LogoViberIcon = createIcon('logo-viber', 'LogoViberIcon');
+// Communication & Video Apps
+export const LogoZoomIcon = createIcon('logo-zoom', 'LogoZoomIcon');
+export const LogoSkypeIcon = createIcon('logo-skype', 'LogoSkypeIcon');
+// Tech & Cloud Brands
+export const LogoGoogleIcon = createIcon('logo-google', 'LogoGoogleIcon');
+export const LogoGoogleDriveIcon = createIcon('logo-google-drive', 'LogoGoogleDriveIcon');
+export const LogoGoogleMapsIcon = createIcon('logo-google-maps', 'LogoGoogleMapsIcon');
+export const LogoGooglePlayIcon = createIcon('logo-google-play', 'LogoGooglePlayIcon');
+export const LogoAppleIcon = createIcon('logo-apple', 'LogoAppleIcon');
+export const LogoMicrosoftIcon = createIcon('logo-microsoft', 'LogoMicrosoftIcon');
+export const LogoAmazonIcon = createIcon('logo-amazon', 'LogoAmazonIcon');
+export const LogoNetflixIcon = createIcon('logo-netflix', 'LogoNetflixIcon');
+export const LogoSpotifyIcon = createIcon('logo-spotify', 'LogoSpotifyIcon');
+export const LogoStripeIcon = createIcon('logo-stripe', 'LogoStripeIcon');
+export const LogoPaypalIcon = createIcon('logo-paypal', 'LogoPaypalIcon');
+// Developer & Cloud
+export const LogoAwsIcon = createIcon('logo-aws', 'LogoAwsIcon');
+export const LogoAzureIcon = createIcon('logo-azure', 'LogoAzureIcon');
+export const LogoFirebaseIcon = createIcon('logo-firebase', 'LogoFirebaseIcon');
+export const LogoVercelIcon = createIcon('logo-vercel', 'LogoVercelIcon');
+export const LogoNetlifyIcon = createIcon('logo-netlify', 'LogoNetlifyIcon');
+export const LogoDigitaloceanIcon = createIcon('logo-digitalocean', 'LogoDigitaloceanIcon');
+export const LogoCloudflareIcon = createIcon('logo-cloudflare', 'LogoCloudflareIcon');
+export const LogoNpmIcon = createIcon('logo-npm', 'LogoNpmIcon');
+export const LogoDockerIcon = createIcon('logo-docker', 'LogoDockerIcon');
+export const LogoKubernetesIcon = createIcon('logo-kubernetes', 'LogoKubernetesIcon');
+export const LogoOpenaiIcon = createIcon('logo-openai', 'LogoOpenaiIcon');
+// Food & Delivery
+export const LogoUberIcon = createIcon('logo-uber', 'LogoUberIcon');
+export const LogoLyftIcon = createIcon('logo-lyft', 'LogoLyftIcon');
+export const LogoDoordashIcon = createIcon('logo-doordash', 'LogoDoordashIcon');
+export const LogoAirbnbIcon = createIcon('logo-airbnb', 'LogoAirbnbIcon');
+export const LogoShopifyIcon = createIcon('logo-shopify', 'LogoShopifyIcon');
+// Messaging & Sharing
+export const LogoSendIcon = createIcon('logo-send', 'LogoSendIcon');
+export const LogoMessageCircleIcon = createIcon('logo-message-circle', 'LogoMessageCircleIcon');
+export const LogoMessageSquareIcon = createIcon('logo-message-square', 'LogoMessageSquareIcon');
+// Music & Audio
+export const LogoMusicIcon = createIcon('logo-music', 'LogoMusicIcon');
+export const LogoHeadphonesIcon = createIcon('logo-headphones', 'LogoHeadphonesIcon');
+export const LogoPodcastIcon = createIcon('logo-podcast', 'LogoPodcastIcon');
+// Maps & Location
+export const LogoMapPinIcon = createIcon('logo-map-pin', 'LogoMapPinIcon');
 export const AlignHCenterDistributeIcon = createIcon('align-h-center-distribute', 'AlignHCenterDistributeIcon');
 export const AlignVCenterDistributeIcon = createIcon('align-v-center-distribute', 'AlignVCenterDistributeIcon');
 export const AlignBaselineTypographyIcon = createIcon('align-baseline-typography', 'AlignBaselineTypographyIcon');
@@ -701,6 +758,63 @@ export const icons = {
   'logo-discord': LogoDiscordIcon,
   'logo-linkedin': LogoLinkedinIcon,
   'logo-youtube': LogoYoutubeIcon,
+  // Social Media Icons
+  'logo-instagram': LogoInstagramIcon,
+  'logo-facebook': LogoFacebookIcon,
+  'logo-twitter': LogoTwitterIcon,
+  'logo-whatsapp': LogoWhatsappIcon,
+  'logo-telegram': LogoTelegramIcon,
+  'logo-tiktok': LogoTiktokIcon,
+  'logo-pinterest': LogoPinterestIcon,
+  'logo-reddit': LogoRedditIcon,
+  'logo-snapchat': LogoSnapchatIcon,
+  'logo-threads': LogoThreadsIcon,
+  'logo-messenger': LogoMessengerIcon,
+  'logo-signal': LogoSignalIcon,
+  'logo-viber': LogoViberIcon,
+  // Communication & Video Apps
+  'logo-zoom': LogoZoomIcon,
+  'logo-skype': LogoSkypeIcon,
+  // Tech & Cloud Brands
+  'logo-google': LogoGoogleIcon,
+  'logo-google-drive': LogoGoogleDriveIcon,
+  'logo-google-maps': LogoGoogleMapsIcon,
+  'logo-google-play': LogoGooglePlayIcon,
+  'logo-apple': LogoAppleIcon,
+  'logo-microsoft': LogoMicrosoftIcon,
+  'logo-amazon': LogoAmazonIcon,
+  'logo-netflix': LogoNetflixIcon,
+  'logo-spotify': LogoSpotifyIcon,
+  'logo-stripe': LogoStripeIcon,
+  'logo-paypal': LogoPaypalIcon,
+  // Developer & Cloud
+  'logo-aws': LogoAwsIcon,
+  'logo-azure': LogoAzureIcon,
+  'logo-firebase': LogoFirebaseIcon,
+  'logo-vercel': LogoVercelIcon,
+  'logo-netlify': LogoNetlifyIcon,
+  'logo-digitalocean': LogoDigitaloceanIcon,
+  'logo-cloudflare': LogoCloudflareIcon,
+  'logo-npm': LogoNpmIcon,
+  'logo-docker': LogoDockerIcon,
+  'logo-kubernetes': LogoKubernetesIcon,
+  'logo-openai': LogoOpenaiIcon,
+  // Food & Delivery
+  'logo-uber': LogoUberIcon,
+  'logo-lyft': LogoLyftIcon,
+  'logo-doordash': LogoDoordashIcon,
+  'logo-airbnb': LogoAirbnbIcon,
+  'logo-shopify': LogoShopifyIcon,
+  // Messaging & Sharing
+  'logo-send': LogoSendIcon,
+  'logo-message-circle': LogoMessageCircleIcon,
+  'logo-message-square': LogoMessageSquareIcon,
+  // Music & Audio
+  'logo-music': LogoMusicIcon,
+  'logo-headphones': LogoHeadphonesIcon,
+  'logo-podcast': LogoPodcastIcon,
+  // Maps & Location
+  'logo-map-pin': LogoMapPinIcon,
   'align-h-center-distribute': AlignHCenterDistributeIcon,
   'align-v-center-distribute': AlignVCenterDistributeIcon,
   'align-baseline-typography': AlignBaselineTypographyIcon,

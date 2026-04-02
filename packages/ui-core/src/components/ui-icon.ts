@@ -231,6 +231,7 @@ export class UIIcon extends ElementBase {
       'color',
       'variant',
       'icon-variant',
+      'icon-weight',
       'secondary-color',
       'tone',
       'shape',
@@ -284,6 +285,7 @@ export class UIIcon extends ElementBase {
     const iconMarkup = name
       ? getIcon(name, {
           variant: (this.getAttribute('icon-variant') as 'outline' | 'solid' | 'duotone' | null) || undefined,
+          iconWeight: (this.getAttribute('icon-weight') as 'thin' | 'regular' | 'bold' | null) || undefined,
           secondaryColor: this.getAttribute('secondary-color') || undefined,
           strokeWidth: parseNumber(this.getAttribute('stroke-width')),
           absoluteStrokeWidth: this.hasAttribute('absolute-stroke-width'),

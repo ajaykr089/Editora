@@ -1,8 +1,13 @@
 import { resolveIcon } from './registry';
-import type { IconAttrValue, IconNode, IconRenderOptions } from './types';
+import type { IconAttrValue, IconNode, IconRenderOptions, IconWeight } from './types';
 
 const DEFAULT_SIZE = 15;
 const DEFAULT_STROKE_WIDTH = 1.5;
+const STROKE_WIDTH_BY_WEIGHT: Record<IconWeight, number> = {
+  thin: 1.25,
+  regular: DEFAULT_STROKE_WIDTH,
+  bold: 1.75,
+};
 
 function toKebabCase(value: string): string {
   return value.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`);
@@ -25,7 +30,7 @@ function parseViewBoxSize(viewBox: string): { width: number; height: number } {
   if (parts.length === 4 && Number.isFinite(parts[2]) && Number.isFinite(parts[3])) {
     return { width: parts[2], height: parts[3] };
   }
-  return { width: 15, height: 15 };
+  return { width: 24, height: 24 };
 }
 
 function normalizeSize(size: IconRenderOptions['size']): string {
@@ -38,7 +43,9 @@ function normalizeSize(size: IconRenderOptions['size']): string {
 }
 
 function resolveStrokeWidth(options: IconRenderOptions, viewBox: string): number {
-  const raw = options.strokeWidth ?? DEFAULT_STROKE_WIDTH;
+  const raw =
+    options.strokeWidth ??
+    (options.iconWeight ? STROKE_WIDTH_BY_WEIGHT[options.iconWeight] : DEFAULT_STROKE_WIDTH);
   if (!options.absoluteStrokeWidth) return raw;
 
   const size = Number(options.size ?? DEFAULT_SIZE);
@@ -152,7 +159,7 @@ export function renderIconSvg(name: string, options: IconRenderOptions = {}): st
     ? ' aria-hidden="true" role="presentation"'
     : ` role="img" aria-label="${escapeText(ariaLabel)}"`;
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${escapeText(size)}" height="${escapeText(size)}" viewBox="${escapeText(resolved.viewBox)}" fill="none" color="${escapeText(color)}" shape-rendering="geometricPrecision"${classAttr}${styleAttr}${a11yAttrs}${extraAttrs}>${title}${body}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${escapeText(size)}" height="${escapeText(size)}" viewBox="${escapeText(resolved.viewBox)}" fill="none" color="${escapeText(color)}" overflow="visible" shape-rendering="geometricPrecision"${classAttr}${styleAttr}${a11yAttrs}${extraAttrs}>${title}${body}</svg>`;
 }
 
 export function iconToDataUri(name: string, options: IconRenderOptions = {}): string {

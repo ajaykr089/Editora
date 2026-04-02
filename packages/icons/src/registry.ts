@@ -1,6 +1,8 @@
 import { iconDefinitions } from './definitions';
 import type { IconDefinition, IconGlyph, IconVariant, ResolvedIcon } from './types';
 
+const DEFAULT_ICON_VIEWBOX = '0 0 24 24';
+
 const iconMap = new Map<string, IconDefinition>();
 const aliasMap = new Map<string, string>();
 
@@ -99,7 +101,7 @@ export function resolveIcon(name: string, variant: IconVariant = 'outline'): Res
   const resolvedVariant: IconVariant = requested ? variant : 'outline';
   return {
     definition,
-    viewBox: definition.viewBox || '0 0 15 15',
+    viewBox: definition.viewBox || DEFAULT_ICON_VIEWBOX,
     variant: resolvedVariant,
     glyph
   };
