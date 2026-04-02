@@ -2,12 +2,13 @@
 
 > [!IMPORTANT]
 > **Live Website:** https://editora-ecosystem.netlify.app/  
-> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-icons-catalog--all-icons
 
 
-Framework-agnostic SVG icon library for the Editora UI ecosystem.
+Framework-agnostic SVG icon library for the Editora UI ecosystem, with 500+ ready-to-use icons.
 
 Use this package when you need:
+- 500+ generic UI, product, utility, and logo icons,
 - raw icon definitions and registry APIs,
 - SVG string rendering in any framework/runtime,
 - icon aliases and runtime extension,

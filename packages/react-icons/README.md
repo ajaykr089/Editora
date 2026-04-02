@@ -2,14 +2,14 @@
 
 > [!IMPORTANT]
 > **Live Website:** https://editora-ecosystem.netlify.app/  
-> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+> **Storybook:** https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-icons-catalog--all-icons
 
 
-React icon components and theming context for `@editora/icons`.
+React icon components and theming context for `@editora/icons`, covering 500+ ready-to-use icons.
 
 `@editora/react-icons` gives you:
 - a generic `<Icon name="...">` renderer,
-- named React icon components (e.g. `CheckIcon`, `ChartLineIcon`),
+- named React icon components for 500+ icons (e.g. `CheckIcon`, `ChartLineIcon`),
 - shared defaults via `IconProvider`,
 - type-safe icon names via `IconName`.
 

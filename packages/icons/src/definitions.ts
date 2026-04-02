@@ -144,9 +144,25 @@ export const iconDefinitions: IconDefinition[] = [
       }),
     ],
   }),
+  icon("triangle", [polygon("7.5,2.9 12.1,11.1 2.9,11.1")], {
+    solid: [
+      polygon("7.5,2.5 12.5,11.5 2.5,11.5", {
+        fill: "currentColor",
+        stroke: "none",
+      }),
+    ],
+  }),
   icon("diamond", [polygon("7.5,2.8 12.2,7.5 7.5,12.2 2.8,7.5")], {
     solid: [
       polygon("7.5,2.4 12.6,7.5 7.5,12.6 2.4,7.5", {
+        fill: "currentColor",
+        stroke: "none",
+      }),
+    ],
+  }),
+  icon("hexagon", [polygon("7.5,2.8 11.4,5.1 11.4,9.9 7.5,12.2 3.6,9.9 3.6,5.1")], {
+    solid: [
+      polygon("7.5,2.4 11.8,4.9 11.8,10.1 7.5,12.6 3.2,10.1 3.2,4.9", {
         fill: "currentColor",
         stroke: "none",
       }),
@@ -266,6 +282,8 @@ export const iconDefinitions: IconDefinition[] = [
     ],
     { aliases: ["open-in-new"] },
   ),
+  icon("undo", [polyline("4.4 3.4 1.9 5.6 4.4 7.8"), p("M2.2 5.6h5a3.8 3.8 0 1 1 0 7.6H4.7")]),
+  icon("redo", [polyline("10.6 3.4 13.1 5.6 10.6 7.8"), p("M12.8 5.6h-5a3.8 3.8 0 1 0 0 7.6h2.5")]),
 
   icon("menu", [l(3, 4.5, 12, 4.5), l(3, 7.5, 12, 7.5), l(3, 10.5, 12, 10.5)], {
     aliases: ["hamburger", "menu-alt"],
@@ -276,6 +294,22 @@ export const iconDefinitions: IconDefinition[] = [
   icon("more-vertical", [c(7.5, 4.25, 1), c(7.5, 7.5, 1), c(7.5, 10.75, 1)], {
     aliases: ["ellipsis-vertical", "menu-vertical"],
   }),
+  icon("grip-vertical", [
+    c(5.25, 4.2, 0.6, { fill: "currentColor", stroke: "none" }),
+    c(9.75, 4.2, 0.6, { fill: "currentColor", stroke: "none" }),
+    c(5.25, 7.5, 0.6, { fill: "currentColor", stroke: "none" }),
+    c(9.75, 7.5, 0.6, { fill: "currentColor", stroke: "none" }),
+    c(5.25, 10.8, 0.6, { fill: "currentColor", stroke: "none" }),
+    c(9.75, 10.8, 0.6, { fill: "currentColor", stroke: "none" }),
+  ]),
+  icon("grip-horizontal", [
+    c(4.2, 5.25, 0.6, { fill: "currentColor", stroke: "none" }),
+    c(7.5, 5.25, 0.6, { fill: "currentColor", stroke: "none" }),
+    c(10.8, 5.25, 0.6, { fill: "currentColor", stroke: "none" }),
+    c(4.2, 9.75, 0.6, { fill: "currentColor", stroke: "none" }),
+    c(7.5, 9.75, 0.6, { fill: "currentColor", stroke: "none" }),
+    c(10.8, 9.75, 0.6, { fill: "currentColor", stroke: "none" }),
+  ]),
 
   icon("search", [c(6.5, 6.5, 3.75), l(9.5, 9.5, 12, 12)], {
     aliases: ["magnifier"],
@@ -427,6 +461,40 @@ export const iconDefinitions: IconDefinition[] = [
     },
   ),
   icon(
+    "grid-2x2",
+    [
+      r(3, 3, 3.6, 3.6, { rx: 0.65 }),
+      r(8.4, 3, 3.6, 3.6, { rx: 0.65 }),
+      r(3, 8.4, 3.6, 3.6, { rx: 0.65 }),
+      r(8.4, 8.4, 3.6, 3.6, { rx: 0.65 }),
+    ],
+    {
+      solid: [
+        r(2.8, 2.8, 3.9, 3.9, {
+          rx: 0.75,
+          fill: "currentColor",
+          stroke: "none",
+        }),
+        r(8.3, 2.8, 3.9, 3.9, {
+          rx: 0.75,
+          fill: "currentColor",
+          stroke: "none",
+        }),
+        r(2.8, 8.3, 3.9, 3.9, {
+          rx: 0.75,
+          fill: "currentColor",
+          stroke: "none",
+        }),
+        r(8.3, 8.3, 3.9, 3.9, {
+          rx: 0.75,
+          fill: "currentColor",
+          stroke: "none",
+        }),
+      ],
+      categories: ["navigation"],
+    },
+  ),
+  icon(
     "layout",
     [
       r(2.75, 3, 9.5, 9, { rx: 1.1 }),
@@ -481,6 +549,18 @@ export const iconDefinitions: IconDefinition[] = [
     r(2.75, 3.2, 9.5, 8.6, { rx: 1.1 }),
     r(2.95, 9.15, 9.1, 2.45, { rx: 0.6 }),
   ]),
+  icon("split-horizontal", [
+    r(2.75, 3.1, 9.5, 8.8, { rx: 1.1 }),
+    l(3, 7.5, 12, 7.5),
+    polyline("6 5.8 7.5 4.3 9 5.8"),
+    polyline("6 9.2 7.5 10.7 9 9.2"),
+  ]),
+  icon("split-vertical", [
+    r(2.75, 3.1, 9.5, 8.8, { rx: 1.1 }),
+    l(7.5, 3.35, 7.5, 11.65),
+    polyline("5.8 6 4.3 7.5 5.8 9"),
+    polyline("9.2 6 10.7 7.5 9.2 9"),
+  ]),
   icon("list-view", [
     c(3.6, 4.6, 0.6, { fill: "currentColor", stroke: "none" }),
     c(3.6, 7.5, 0.6, { fill: "currentColor", stroke: "none" }),
@@ -504,6 +584,63 @@ export const iconDefinitions: IconDefinition[] = [
   ]),
   icon("columns-alt", [r(2.75, 3, 9.5, 9, { rx: 1 }), l(7.5, 3.1, 7.5, 11.9)]),
   icon("row", [r(2.75, 3, 9.5, 9, { rx: 1 }), l(2.9, 7.5, 12.1, 7.5)]),
+  icon("grid-3x3", [
+    r(3, 3.2, 2.1, 2.1, { rx: 0.35 }),
+    r(6.45, 3.2, 2.1, 2.1, { rx: 0.35 }),
+    r(9.9, 3.2, 2.1, 2.1, { rx: 0.35 }),
+    r(3, 6.45, 2.1, 2.1, { rx: 0.35 }),
+    r(6.45, 6.45, 2.1, 2.1, { rx: 0.35 }),
+    r(9.9, 6.45, 2.1, 2.1, { rx: 0.35 }),
+    r(3, 9.7, 2.1, 2.1, { rx: 0.35 }),
+    r(6.45, 9.7, 2.1, 2.1, { rx: 0.35 }),
+    r(9.9, 9.7, 2.1, 2.1, { rx: 0.35 }),
+  ]),
+  icon("text-align-left", [
+    l(3, 4, 12, 4),
+    l(3, 6.5, 10.5, 6.5),
+    l(3, 9, 12, 9),
+    l(3, 11.5, 9.6, 11.5),
+  ]),
+  icon("text-align-center", [
+    l(3, 4, 12, 4),
+    l(4.2, 6.5, 10.8, 6.5),
+    l(3, 9, 12, 9),
+    l(4.6, 11.5, 10.4, 11.5),
+  ]),
+  icon("text-align-right", [
+    l(3, 4, 12, 4),
+    l(4.5, 6.5, 12, 6.5),
+    l(3, 9, 12, 9),
+    l(5.4, 11.5, 12, 11.5),
+  ]),
+  icon("text-align-justify", [
+    l(3, 4, 12, 4),
+    l(3, 6.5, 12, 6.5),
+    l(3, 9, 12, 9),
+    l(3, 11.5, 12, 11.5),
+  ]),
+  icon("indent", [
+    l(3.2, 3.5, 3.2, 12),
+    l(5.3, 4, 12, 4),
+    l(5.3, 6.5, 10.9, 6.5),
+    l(5.3, 9, 12, 9),
+    l(5.3, 11.5, 10.9, 11.5),
+    polygon("4.5,7.5 6.9,5.7 6.9,9.3", {
+      fill: "currentColor",
+      stroke: "none",
+    }),
+  ]),
+  icon("outdent", [
+    l(3.2, 3.5, 3.2, 12),
+    l(5.3, 4, 12, 4),
+    l(5.3, 6.5, 10.9, 6.5),
+    l(5.3, 9, 12, 9),
+    l(5.3, 11.5, 10.9, 11.5),
+    polygon("6.8,7.5 4.4,5.7 4.4,9.3", {
+      fill: "currentColor",
+      stroke: "none",
+    }),
+  ]),
 
   icon(
     "folder",
@@ -532,6 +669,81 @@ export const iconDefinitions: IconDefinition[] = [
     { categories: commonTags.files },
   ),
   icon(
+    "folder-closed",
+    [
+      p(
+        "M2.55 5.35A1.3 1.3 0 0 1 3.85 4.05h2.28l1.02 1.08h3.9a1.3 1.3 0 0 1 1.3 1.3v4.5a1.3 1.3 0 0 1-1.3 1.3H3.85a1.3 1.3 0 0 1-1.3-1.3z",
+      ),
+      l(2.8, 6.5, 12.2, 6.5),
+    ],
+    { categories: commonTags.files },
+  ),
+  icon(
+    "folder-plus",
+    [
+      p(
+        "M2.55 5.35A1.3 1.3 0 0 1 3.85 4.05h2.3l1.02 1.1h3.88a1.3 1.3 0 0 1 1.3 1.3v4.6a1.3 1.3 0 0 1-1.3 1.3H3.85a1.3 1.3 0 0 1-1.3-1.3z",
+      ),
+      l(7.5, 6.75, 7.5, 10.35),
+      l(5.7, 8.55, 9.3, 8.55),
+    ],
+    { categories: commonTags.files },
+  ),
+  icon(
+    "folder-minus",
+    [
+      p(
+        "M2.55 5.35A1.3 1.3 0 0 1 3.85 4.05h2.3l1.02 1.1h3.88a1.3 1.3 0 0 1 1.3 1.3v4.6a1.3 1.3 0 0 1-1.3 1.3H3.85a1.3 1.3 0 0 1-1.3-1.3z",
+      ),
+      l(5.7, 8.55, 9.3, 8.55),
+    ],
+    { categories: commonTags.files },
+  ),
+  icon(
+    "folder-search",
+    [
+      p(
+        "M2.6 5.3A1.3 1.3 0 0 1 3.9 4h2.2l1 1.05h4a1.25 1.25 0 0 1 1.23 1.5l-.5 2.8",
+      ),
+      p("M2.85 6.35h8.9l-.45 4.1a1.3 1.3 0 0 1-1.3 1.15H4.15a1.3 1.3 0 0 1-1.3-1.45z"),
+      c(9.5, 9.5, 1.45),
+      l(10.55, 10.55, 12.1, 12.1),
+    ],
+    { categories: commonTags.files },
+  ),
+  icon(
+    "folder-check",
+    [
+      p(
+        "M2.55 5.35A1.3 1.3 0 0 1 3.85 4.05h2.3l1.02 1.1h3.88a1.3 1.3 0 0 1 1.3 1.3v4.6a1.3 1.3 0 0 1-1.3 1.3H3.85a1.3 1.3 0 0 1-1.3-1.3z",
+      ),
+      p("M5.55 8.55 6.85 9.85 9.55 7.15"),
+    ],
+    { categories: commonTags.files },
+  ),
+  icon(
+    "folder-lock",
+    [
+      p(
+        "M2.55 5.35A1.3 1.3 0 0 1 3.85 4.05h2.3l1.02 1.1h3.88a1.3 1.3 0 0 1 1.3 1.3v4.6a1.3 1.3 0 0 1-1.3 1.3H3.85a1.3 1.3 0 0 1-1.3-1.3z",
+      ),
+      r(5.45, 8.2, 4.1, 2.95, { rx: 0.55 }),
+      p("M6.35 8.2v-.65a1.15 1.15 0 1 1 2.3 0v.65"),
+    ],
+    { categories: commonTags.files },
+  ),
+  icon(
+    "folder-x",
+    [
+      p(
+        "M2.55 5.35A1.3 1.3 0 0 1 3.85 4.05h2.3l1.02 1.1h3.88a1.3 1.3 0 0 1 1.3 1.3v4.6a1.3 1.3 0 0 1-1.3 1.3H3.85a1.3 1.3 0 0 1-1.3-1.3z",
+      ),
+      l(5.9, 7.2, 9.1, 10.4),
+      l(9.1, 7.2, 5.9, 10.4),
+    ],
+    { categories: commonTags.files },
+  ),
+  icon(
     "file",
     [
       p(
@@ -541,19 +753,125 @@ export const iconDefinitions: IconDefinition[] = [
     ],
     {
       aliases: [
-        "file-text",
-        "file-code",
-        "file-image",
-        "file-video",
-        "file-audio",
         "file-pdf",
-        "file-zip",
         "file-doc",
         "file-xls",
         "file-ppt",
       ],
       categories: commonTags.files,
     },
+  ),
+  icon(
+    "file-text",
+    [
+      p(
+        "M4 2.75h4.5l2.5 2.5v6.95a1.3 1.3 0 0 1-1.3 1.3H4.3A1.3 1.3 0 0 1 3 12.2V4.05A1.3 1.3 0 0 1 4.3 2.75z",
+      ),
+      p("M8.5 2.9v2.35h2.35"),
+      l(4.9, 7.1, 9.9, 7.1),
+      l(4.9, 9.1, 9.9, 9.1),
+      l(4.9, 11.1, 8.6, 11.1),
+    ],
+    { categories: commonTags.files },
+  ),
+  icon(
+    "file-code",
+    [
+      p(
+        "M4 2.75h4.5l2.5 2.5v6.95a1.3 1.3 0 0 1-1.3 1.3H4.3A1.3 1.3 0 0 1 3 12.2V4.05A1.3 1.3 0 0 1 4.3 2.75z",
+      ),
+      p("M8.5 2.9v2.35h2.35"),
+      polyline("6.55 7.05 5.15 8.45 6.55 9.85"),
+      polyline("8.45 7.05 9.85 8.45 8.45 9.85"),
+    ],
+    { categories: commonTags.files },
+  ),
+  icon(
+    "file-image",
+    [
+      p(
+        "M4 2.75h4.5l2.5 2.5v6.95a1.3 1.3 0 0 1-1.3 1.3H4.3A1.3 1.3 0 0 1 3 12.2V4.05A1.3 1.3 0 0 1 4.3 2.75z",
+      ),
+      p("M8.5 2.9v2.35h2.35"),
+      c(5.75, 6.7, 0.55, { fill: "currentColor", stroke: "none" }),
+      p("M4.95 10.2 6.7 8.45 8 9.45 9.55 7.9 10.1 10.2"),
+    ],
+    { categories: commonTags.files },
+  ),
+  icon(
+    "file-video",
+    [
+      p(
+        "M4 2.75h4.5l2.5 2.5v6.95a1.3 1.3 0 0 1-1.3 1.3H4.3A1.3 1.3 0 0 1 3 12.2V4.05A1.3 1.3 0 0 1 4.3 2.75z",
+      ),
+      p("M8.5 2.9v2.35h2.35"),
+      polygon("6.1,7.15 9.45,8.45 6.1,9.75", {
+        fill: "currentColor",
+        stroke: "none",
+      }),
+    ],
+    { categories: commonTags.files },
+  ),
+  icon(
+    "file-audio",
+    [
+      p(
+        "M4 2.75h4.5l2.5 2.5v6.95a1.3 1.3 0 0 1-1.3 1.3H4.3A1.3 1.3 0 0 1 3 12.2V4.05A1.3 1.3 0 0 1 4.3 2.75z",
+      ),
+      p("M8.5 2.9v2.35h2.35"),
+      p("M8.7 6.7v2.7a1.2 1.2 0 1 1-.75-1.1V7.05l1.95-.45v2.15a1.2 1.2 0 1 1-.75-1.1V6.2z"),
+    ],
+    { categories: commonTags.files },
+  ),
+  icon(
+    "file-archive",
+    [
+      p(
+        "M4 2.75h4.5l2.5 2.5v6.95a1.3 1.3 0 0 1-1.3 1.3H4.3A1.3 1.3 0 0 1 3 12.2V4.05A1.3 1.3 0 0 1 4.3 2.75z",
+      ),
+      p("M8.5 2.9v2.35h2.35"),
+      r(6.55, 6.55, 1.9, 0.8, { rx: 0.2 }),
+      r(6.55, 7.75, 1.9, 0.8, { rx: 0.2 }),
+      r(6.55, 8.95, 1.9, 1.45, { rx: 0.2 }),
+    ],
+    { aliases: ["file-zip"], categories: commonTags.files },
+  ),
+  icon(
+    "file-lock",
+    [
+      p(
+        "M4 2.75h4.5l2.5 2.5v6.95a1.3 1.3 0 0 1-1.3 1.3H4.3A1.3 1.3 0 0 1 3 12.2V4.05A1.3 1.3 0 0 1 4.3 2.75z",
+      ),
+      p("M8.5 2.9v2.35h2.35"),
+      r(5.45, 8.35, 3.6, 2.65, { rx: 0.55 }),
+      p("M6.2 8.35V7.6a1.05 1.05 0 1 1 2.1 0v.75"),
+    ],
+    { categories: commonTags.files },
+  ),
+  icon(
+    "file-warning",
+    [
+      p(
+        "M4 2.75h4.5l2.5 2.5v6.95a1.3 1.3 0 0 1-1.3 1.3H4.3A1.3 1.3 0 0 1 3 12.2V4.05A1.3 1.3 0 0 1 4.3 2.75z",
+      ),
+      p("M8.5 2.9v2.35h2.35"),
+      polygon("7.1,7.1 9.45,11 4.75,11", { fill: "none" }),
+      l(7.1, 8.3, 7.1, 9.45),
+      c(7.1, 10.25, 0.3, { fill: "currentColor", stroke: "none" }),
+    ],
+    { categories: commonTags.files },
+  ),
+  icon(
+    "file-search",
+    [
+      p(
+        "M4 2.75h4.5l2.5 2.5v6.95a1.3 1.3 0 0 1-1.3 1.3H4.3A1.3 1.3 0 0 1 3 12.2V4.05A1.3 1.3 0 0 1 4.3 2.75z",
+      ),
+      p("M8.5 2.9v2.35h2.35"),
+      c(7.1, 8.4, 1.35),
+      l(8.1, 9.4, 9.7, 11),
+    ],
+    { categories: commonTags.files },
   ),
   icon("copy", [r(5, 5, 7, 7, { rx: 1 }), r(3, 3, 7, 7, { rx: 1 })], {
     aliases: ["duplicate"],
@@ -656,6 +974,11 @@ export const iconDefinitions: IconDefinition[] = [
     ],
     { aliases: ["link-off"] },
   ),
+  icon(
+    "paperclip",
+    [p("M9.8 4.9 5.25 9.45a2.15 2.15 0 1 1-3.05-3.05l4.95-4.95a2.95 2.95 0 1 1 4.18 4.18l-5.55 5.55a1.45 1.45 0 0 1-2.05-2.05l5.05-5.05")],
+    { aliases: ["attachment"] },
+  ),
   icon("share", [
     c(3.1, 7.5, 1),
     c(11.4, 4.2, 1),
@@ -670,6 +993,29 @@ export const iconDefinitions: IconDefinition[] = [
     polyline("4.2 7.05 10.2 4.8"),
     polyline("4.2 7.95 10.2 10.2"),
   ]),
+  icon(
+    "send",
+    [p("M2.55 7.45 12.1 3.25 8.75 12.15 6.7 8.95 2.55 7.45z"), l(6.7, 8.95, 12.1, 3.25)],
+    {
+      solid: [fp("M2.55 7.45 12.1 3.25 8.75 12.15 6.7 8.95 2.55 7.45z")],
+      aliases: ["paper-plane"],
+    },
+  ),
+  icon(
+    "reply",
+    [l(11.2, 5.1, 6.5, 5.1), polyline("8.2 3.3 6.4 5.1 8.2 6.9"), p("M6.5 5.1c-2.1 0-3.45 1-4.35 2.95")],
+    { rtlMirror: true },
+  ),
+  icon(
+    "reply-all",
+    [
+      l(11.4, 5.15, 7.3, 5.15),
+      polyline("8.95 3.35 7.15 5.15 8.95 6.95"),
+      polyline("5.95 3.35 4.15 5.15 5.95 6.95"),
+      p("M7.3 5.15c-2.15 0-3.65 1-4.95 2.95"),
+    ],
+    { rtlMirror: true },
+  ),
 
   icon(
     "user",
@@ -678,6 +1024,28 @@ export const iconDefinitions: IconDefinition[] = [
       aliases: ["profile", "account", "customer"],
       categories: commonTags.users,
     },
+  ),
+  icon(
+    "user-circle",
+    [
+      c(7.5, 7.5, 4.8),
+      c(7.5, 5.9, 1.55),
+      p("M4.75 10.35c.62-1.35 1.6-2.05 2.75-2.05s2.13.7 2.75 2.05"),
+    ],
+    { categories: commonTags.users },
+  ),
+  icon(
+    "user-cog",
+    [
+      c(5.5, 5.25, 1.9),
+      p("M2.65 11.75c.68-1.62 1.96-2.45 3.5-2.45 1.03 0 1.98.36 2.7 1.03"),
+      c(10.25, 8.65, 1.25),
+      l(10.25, 6.95, 10.25, 7.45),
+      l(10.25, 9.85, 10.25, 10.35),
+      l(8.55, 8.65, 9.05, 8.65),
+      l(11.45, 8.65, 11.95, 8.65),
+    ],
+    { categories: commonTags.users },
   ),
   icon(
     "users",
@@ -796,6 +1164,13 @@ export const iconDefinitions: IconDefinition[] = [
     ],
     { aliases: ["pin", "location"] },
   ),
+  icon("pin-off", [
+    p(
+      "M7.5 12.3s3.8-3.38 3.8-5.85A3.8 3.8 0 0 0 5.95 2.95",
+    ),
+    c(7.5, 6.45, 1.35),
+    l(2.4, 2.4, 12.6, 12.6),
+  ]),
   icon("map", [
     polygon(
       "2.6,4.5 5.8,3.2 9.2,4.5 12.4,3.2 12.4,10.5 9.2,11.8 5.8,10.5 2.6,11.8",
@@ -860,12 +1235,65 @@ export const iconDefinitions: IconDefinition[] = [
     },
   ),
   icon(
+    "calendar-range",
+    [
+      r(2.7, 3.6, 9.6, 8.7, { rx: 1 }),
+      l(5, 2.5, 5, 4.5),
+      l(10, 2.5, 10, 4.5),
+      l(2.7, 5.6, 12.3, 5.6),
+      r(4.3, 8.05, 1.4, 1.35, { rx: 0.3, fill: "currentColor", stroke: "none" }),
+      r(9.3, 8.05, 1.4, 1.35, { rx: 0.3, fill: "currentColor", stroke: "none" }),
+      l(5.9, 8.72, 8.95, 8.72),
+    ],
+  ),
+  icon(
+    "calendar-clock",
+    [
+      r(2.7, 3.6, 9.6, 8.7, { rx: 1 }),
+      l(5, 2.5, 5, 4.5),
+      l(10, 2.5, 10, 4.5),
+      l(2.7, 5.6, 12.3, 5.6),
+      c(8.9, 9.15, 2.1),
+      l(8.9, 9.15, 8.9, 8.05),
+      l(8.9, 9.15, 9.95, 9.75),
+    ],
+  ),
+  icon(
+    "calendar-days",
+    [
+      r(2.7, 3.6, 9.6, 8.7, { rx: 1 }),
+      l(5, 2.5, 5, 4.5),
+      l(10, 2.5, 10, 4.5),
+      l(2.7, 5.6, 12.3, 5.6),
+      c(5.25, 7.7, 0.45, { fill: "currentColor", stroke: "none" }),
+      c(7.5, 7.7, 0.45, { fill: "currentColor", stroke: "none" }),
+      c(9.75, 7.7, 0.45, { fill: "currentColor", stroke: "none" }),
+      c(5.25, 9.65, 0.45, { fill: "currentColor", stroke: "none" }),
+      c(7.5, 9.65, 0.45, { fill: "currentColor", stroke: "none" }),
+      c(9.75, 9.65, 0.45, { fill: "currentColor", stroke: "none" }),
+    ],
+  ),
+  icon(
     "clock",
     [c(7.5, 7.5, 4.7), l(7.5, 7.5, 7.5, 5), l(7.5, 7.5, 9.2, 8.7)],
     {
-      aliases: ["timer", "stopwatch", "watch"],
+      aliases: ["watch"],
     },
   ),
+  icon("timer", [
+    c(7.5, 8.1, 3.9),
+    l(7.5, 8.1, 7.5, 6.35),
+    l(7.5, 8.1, 9.05, 9.15),
+    l(6.1, 2.85, 8.9, 2.85),
+    l(7.5, 2.85, 7.5, 4.2),
+  ]),
+  icon("stopwatch", [
+    c(7.5, 8.3, 3.7),
+    l(7.5, 8.3, 7.5, 6.45),
+    l(7.5, 8.3, 8.95, 9.1),
+    r(6.55, 2.5, 1.9, 1.2, { rx: 0.3 }),
+    l(10.2, 4.1, 11.35, 2.95),
+  ]),
   icon("alarm", [
     c(7.5, 8, 3.8),
     l(7.5, 8, 7.5, 6.2),
@@ -1039,6 +1467,25 @@ export const iconDefinitions: IconDefinition[] = [
       aliases: ["bookmark-filled"],
     },
   ),
+  icon(
+    "bookmark-plus",
+    [
+      p(
+        "M4.2 2.8h6.1a.8.8 0 0 1 .8.8V12l-3.85-2.2L3.4 12V3.6a.8.8 0 0 1 .8-.8z",
+      ),
+      l(10.9, 4.9, 10.9, 7.3),
+      l(9.7, 6.1, 12.1, 6.1),
+    ],
+  ),
+  icon(
+    "bookmark-minus",
+    [
+      p(
+        "M4.2 2.8h6.1a.8.8 0 0 1 .8.8V12l-3.85-2.2L3.4 12V3.6a.8.8 0 0 1 .8-.8z",
+      ),
+      l(9.7, 6.1, 12.1, 6.1),
+    ],
+  ),
   icon("tag", [
     p(
       "M8.75 3h3.25v3.25l-5.35 5.35a1.1 1.1 0 0 1-1.56 0L3.4 9.9a1.1 1.1 0 0 1 0-1.56z",
@@ -1106,8 +1553,49 @@ export const iconDefinitions: IconDefinition[] = [
         ),
         p("M7.5 2.6 11.5 4v3.9c0 2.5-1.45 3.95-4 4.95-2.55-1-4-2.45-4-4.95V4z"),
       ],
-      aliases: ["shield-check", "shield-alert"],
+      aliases: ["shield-alert"],
     },
+  ),
+  icon(
+    "shield-check",
+    [
+      p("M7.5 2.6 11.5 4v3.9c0 2.5-1.45 3.95-4 4.95-2.55-1-4-2.45-4-4.95V4z"),
+      p("M5.95 7.45 7.2 8.7 9.7 6.2"),
+    ],
+    { categories: commonTags.status },
+  ),
+  icon(
+    "shield-off",
+    [
+      p("M7.5 2.6 11.5 4v3.9c0 2.5-1.45 3.95-4 4.95-2.55-1-4-2.45-4-4.95V4z"),
+      l(2.5, 2.5, 12.5, 12.5),
+    ],
+    { categories: commonTags.status },
+  ),
+  icon(
+    "verified",
+    [
+      c(7.5, 7.5, 4.7),
+      p("M5.35 7.55 7 9.2 9.95 6.25"),
+    ],
+    { categories: commonTags.status },
+  ),
+  icon(
+    "badge-check",
+    [
+      polygon("7.5,2.8 9.15,3.35 10.95,3.15 11.75,4.8 12.2,6.45 11.75,8.2 10.95,9.85 9.15,9.65 7.5,12.2 5.85,9.65 4.05,9.85 3.25,8.2 2.8,6.45 3.25,4.8 4.05,3.15 5.85,3.35"),
+      p("M5.65 6.6 7.05 8 9.55 5.5"),
+    ],
+    { categories: commonTags.status },
+  ),
+  icon(
+    "badge-alert",
+    [
+      polygon("7.5,2.8 9.15,3.35 10.95,3.15 11.75,4.8 12.2,6.45 11.75,8.2 10.95,9.85 9.15,9.65 7.5,12.2 5.85,9.65 4.05,9.85 3.25,8.2 2.8,6.45 3.25,4.8 4.05,3.15 5.85,3.35"),
+      l(7.5, 5.4, 7.5, 7.9),
+      c(7.5, 9.55, 0.38, { fill: "currentColor", stroke: "none" }),
+    ],
+    { categories: commonTags.status },
   ),
 
   icon(
@@ -1284,6 +1772,19 @@ export const iconDefinitions: IconDefinition[] = [
       stroke: "none",
     }),
     l(3.1, 5.1, 3.1, 9.9),
+  ]),
+  icon("shuffle", [
+    p("M3.2 4.8h1.8c1.15 0 1.8.35 2.45 1.2l2.55 3.2c.55.72 1.15 1.05 2.15 1.05h.95"),
+    p("M3.2 10.2h1.8c1.05 0 1.7-.32 2.25-.98l.7-.85"),
+    p("M10.4 4.8h1.8"),
+    polyline("11.1 3.6 12.3 4.8 11.1 6"),
+    polyline("11.1 9 12.3 10.2 11.1 11.4"),
+  ]),
+  icon("repeat", [
+    p("M3.4 5.1h6.9c.85 0 1.45.2 2 .8"),
+    polyline("10.9 3.55 12.25 4.9 10.9 6.25"),
+    p("M11.6 9.9H4.7c-.85 0-1.45-.2-2-.8"),
+    polyline("4.1 8.75 2.75 10.1 4.1 11.45"),
   ]),
   icon(
     "volume",
@@ -1783,8 +2284,15 @@ export const iconDefinitions: IconDefinition[] = [
       l(6.2, 9.4, 11.4, 9.4),
     ],
     {
-      aliases: ["cart-add", "cart-remove", "shopping-basket", "shopping-bag"],
+      aliases: ["cart-add", "cart-remove", "shopping-basket"],
     },
+  ),
+  icon(
+    "shopping-bag",
+    [
+      p("M4.1 4.9h6.8l-.6 6.6a1.2 1.2 0 0 1-1.2 1.1H5.9a1.2 1.2 0 0 1-1.2-1.1z"),
+      p("M5.7 5.1a1.8 1.8 0 0 1 3.6 0"),
+    ],
   ),
 
   icon(
@@ -1805,10 +2313,19 @@ export const iconDefinitions: IconDefinition[] = [
         "home-office",
         "factory",
         "warehouse",
-        "store",
         "shop",
       ],
     },
+  ),
+  icon(
+    "store",
+    [
+      r(3.1, 6, 8.8, 5.9, { rx: 0.75 }),
+      p("M2.7 5.95h9.6L11.3 3.4H3.7z"),
+      l(5.2, 6.1, 5.2, 11.9),
+      l(7.6, 3.45, 7.6, 5.95),
+      l(9.9, 3.45, 9.9, 5.95),
+    ],
   ),
   icon(
     "car",
@@ -1822,7 +2339,6 @@ export const iconDefinitions: IconDefinition[] = [
       aliases: [
         "bus",
         "train",
-        "truck",
         "bike",
         "scooter",
         "taxi",
@@ -1831,6 +2347,16 @@ export const iconDefinitions: IconDefinition[] = [
         "traffic-light",
       ],
     },
+  ),
+  icon(
+    "truck",
+    [
+      p("M2.9 5.5h5.9v4.1H2.9z"),
+      p("M8.8 6.5h1.85l1.35 1.35V9.6H8.8z"),
+      c(5, 10.7, 0.75, { fill: "currentColor", stroke: "none" }),
+      c(10.3, 10.7, 0.75, { fill: "currentColor", stroke: "none" }),
+      l(3.2, 9.6, 9.6, 9.6),
+    ],
   ),
   icon(
     "airplane",
@@ -1973,6 +2499,24 @@ export const iconDefinitions: IconDefinition[] = [
     l(8.8, 3.2, 12.2, 6.6),
     l(12.2, 3.2, 8.8, 6.6),
   ]),
+  icon(
+    "message-square",
+    [
+      r(2.8, 3.2, 9.4, 6.9, { rx: 1.1 }),
+      p("M5.85 10.1 4.85 12l.15-1.95"),
+      l(5, 5.7, 10, 5.7),
+      l(5, 7.55, 8.7, 7.55),
+    ],
+  ),
+  icon(
+    "message-circle",
+    [
+      c(7.4, 7, 4.35),
+      p("M5.6 10.55 5.1 12 6.45 11.55"),
+      l(5.4, 6.15, 9.4, 6.15),
+      l(5.4, 7.95, 8.55, 7.95),
+    ],
+  ),
   icon("chat", [r(2.8, 3.2, 9.4, 6.9, { rx: 1.1 }), p("M6.2 10.1 5 12l.3-2")], {
     aliases: [
       "chat-bubble",
@@ -2050,6 +2594,35 @@ export const iconDefinitions: IconDefinition[] = [
     r(4.5, 2.5, 6, 10.4, { rx: 1.1 }),
     c(7.5, 10.6, 0.45, { fill: "currentColor", stroke: "none" }),
   ]),
+  icon(
+    "cast",
+    [
+      r(2.8, 3.2, 9.4, 6.8, { rx: 0.9 }),
+      p("M3.5 10.5a2.6 2.6 0 0 1 2.6-2.6"),
+      p("M3.5 8.6a4.5 4.5 0 0 1 4.5 4.5"),
+      c(3.7, 10.3, 0.45, { fill: "currentColor", stroke: "none" }),
+    ],
+  ),
+  icon(
+    "router",
+    [
+      r(2.8, 8.2, 9.4, 2.5, { rx: 0.75 }),
+      l(4.7, 8.2, 4.7, 5.1),
+      l(10.3, 8.2, 10.3, 5.1),
+      p("M3.75 5.6a2 2 0 0 1 1.9-1.55"),
+      p("M11.25 5.6a2 2 0 0 0-1.9-1.55"),
+      c(5.35, 9.45, 0.35, { fill: "currentColor", stroke: "none" }),
+      c(7.5, 9.45, 0.35, { fill: "currentColor", stroke: "none" }),
+      c(9.65, 9.45, 0.35, { fill: "currentColor", stroke: "none" }),
+    ],
+  ),
+  icon(
+    "mouse",
+    [
+      p("M7.5 12.1A3.6 3.6 0 0 0 11.1 8.5V6.3a3.6 3.6 0 0 0-7.2 0v2.2a3.6 3.6 0 0 0 3.6 3.6z"),
+      l(7.5, 3.1, 7.5, 5.9),
+    ],
+  ),
 
   icon(
     "qr-code",
@@ -2081,6 +2654,21 @@ export const iconDefinitions: IconDefinition[] = [
     {
       aliases: ["scan"],
     },
+  ),
+  icon(
+    "scan-search",
+    [
+      l(3.2, 5.2, 3.2, 3.2),
+      l(3.2, 3.2, 5.2, 3.2),
+      l(11.8, 5.2, 11.8, 3.2),
+      l(11.8, 3.2, 9.8, 3.2),
+      l(3.2, 9.8, 3.2, 11.8),
+      l(3.2, 11.8, 5.2, 11.8),
+      l(11.8, 9.8, 11.8, 11.8),
+      l(11.8, 11.8, 9.8, 11.8),
+      c(7.2, 7.2, 2),
+      l(8.65, 8.65, 10.4, 10.4),
+    ],
   ),
 
   icon(
@@ -2195,8 +2783,17 @@ export const iconDefinitions: IconDefinition[] = [
       l(12, 5.2, 7.5, 7.4),
     ],
     {
-      aliases: ["box-open", "package", "panel", "container"],
+      aliases: ["box-open", "panel", "container"],
     },
+  ),
+  icon(
+    "package",
+    [
+      polygon("7.5,2.85 11.8,5.15 7.5,7.45 3.2,5.15"),
+      p("M3.2 5.15v5.3l4.3 2.3 4.3-2.3v-5.3"),
+      l(7.5, 7.45, 7.5, 12.75),
+      l(5.8, 4.25, 9.2, 6.1),
+    ],
   ),
   icon(
     "cube",
@@ -2255,6 +2852,20 @@ export const iconDefinitions: IconDefinition[] = [
       ],
     },
   ),
+  icon("move-horizontal", [
+    l(3, 7.5, 12, 7.5),
+    polyline("5 5.5 3 7.5 5 9.5"),
+    polyline("10 5.5 12 7.5 10 9.5"),
+  ]),
+  icon("move-vertical", [
+    l(7.5, 3, 7.5, 12),
+    polyline("5.5 5 7.5 3 9.5 5"),
+    polyline("5.5 10 7.5 12 9.5 10"),
+  ]),
+  icon(
+    "mouse-pointer",
+    [p("M3.2 3.2 8.6 8.7H6.4l1.25 3.25-1.2.45-1.3-3.35-1.95 1.6z")],
+  ),
   icon("resize", [
     polyline("5.4 3.8 11.2 3.8 11.2 9.6"),
     polyline("9.6 11.2 3.8 11.2 3.8 5.4"),
@@ -2271,7 +2882,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(3.2, 10.8, 8.5, 10.8),
     ],
     {
-      aliases: ["text-align-left", "text-direction-ltr"],
+      aliases: ["text-direction-ltr"],
     },
   ),
   icon(
@@ -2283,7 +2894,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(4.8, 10.8, 10.2, 10.8),
     ],
     {
-      aliases: ["text-align-center", "text-align-justify"],
+      aliases: ["align-middle-text"],
     },
   ),
   icon(
@@ -2295,7 +2906,7 @@ export const iconDefinitions: IconDefinition[] = [
       l(6.5, 10.8, 11.8, 10.8),
     ],
     {
-      aliases: ["text-align-right", "text-direction-rtl"],
+      aliases: ["text-direction-rtl"],
     },
   ),
   icon(
@@ -2334,10 +2945,42 @@ export const iconDefinitions: IconDefinition[] = [
     },
   ),
   icon(
+    "heading-1",
+    [
+      l(3.8, 3.8, 3.8, 11.2),
+      l(2.9, 4.7, 3.8, 3.8),
+      l(2.9, 11.2, 4.7, 11.2),
+      l(7.1, 3.8, 7.1, 11.2),
+      l(9.5, 3.8, 9.5, 11.2),
+      l(7.1, 7.5, 9.5, 7.5),
+      l(10.9, 3.8, 12, 3.8),
+      l(11.45, 3.8, 11.45, 11.2),
+    ],
+  ),
+  icon(
+    "heading-2",
+    [
+      l(3.8, 3.8, 3.8, 11.2),
+      l(2.9, 4.7, 3.8, 3.8),
+      l(2.9, 11.2, 4.7, 11.2),
+      p("M7 5.3a1.8 1.8 0 1 1 3.6 0c0 1.15-.75 1.75-1.6 2.35L7.1 9.05a2.2 2.2 0 0 0-.95 1.75h4.55"),
+    ],
+  ),
+  icon(
+    "heading-3",
+    [
+      l(3.8, 3.8, 3.8, 11.2),
+      l(2.9, 4.7, 3.8, 3.8),
+      l(2.9, 11.2, 4.7, 11.2),
+      p("M7 4.9h3.55L8.75 7l1.8 2.1H7"),
+      p("M8.1 7h1.1a1.7 1.7 0 1 1 0 3.4H7.2"),
+    ],
+  ),
+  icon(
     "italic",
     [l(6.2, 3.4, 10.2, 3.4), l(4.8, 11.4, 8.8, 11.4), l(9.2, 3.4, 5.8, 11.4)],
     {
-      aliases: ["heading-1", "font-size", "typography-alt"],
+      aliases: ["font-size", "typography-alt"],
     },
   ),
   icon(
@@ -2350,7 +2993,6 @@ export const iconDefinitions: IconDefinition[] = [
     ],
     {
       aliases: [
-        "heading-2",
         "text-wrap",
         "line-height",
         "letter-spacing",
@@ -2366,7 +3008,7 @@ export const iconDefinitions: IconDefinition[] = [
       p("M10.4 9.6a2 2 0 0 1-2 2H6.6a2 2 0 0 1-2-2"),
     ],
     {
-      aliases: ["heading-3", "text-truncate", "text-rotate"],
+      aliases: ["text-truncate", "text-rotate"],
     },
   ),
   icon(
@@ -2380,7 +3022,7 @@ export const iconDefinitions: IconDefinition[] = [
       p("M2.8 8.3h1a.5.5 0 0 1 .5.5v.4a.5.5 0 0 1-.5.5h-1"),
     ],
     {
-      aliases: ["checklist", "indent", "outdent"],
+      aliases: ["checklist"],
     },
   ),
   icon(
@@ -2394,8 +3036,23 @@ export const iconDefinitions: IconDefinition[] = [
       l(6.2, 10.7, 11.8, 10.7),
     ],
     {
-      aliases: ["paragraph", "quote"],
+      aliases: ["paragraph"],
     },
+  ),
+  icon(
+    "quote",
+    [
+      p("M4.3 5.2h2.3v2.1H5.1v1.4h1.5v2.1H4.3A1.3 1.3 0 0 1 3 9.5V6.5a1.3 1.3 0 0 1 1.3-1.3z"),
+      p("M8.4 5.2h2.3v2.1H9.2v1.4h1.5v2.1H8.4a1.3 1.3 0 0 1-1.3-1.3V6.5a1.3 1.3 0 0 1 1.3-1.3z"),
+    ],
+  ),
+  icon(
+    "at-sign",
+    [
+      c(7.3, 7.4, 4.4),
+      p("M9.75 5.7V9.4a1.2 1.2 0 1 0 2.4 0V7.4a4.85 4.85 0 1 0-1.65 3.64"),
+      c(7.25, 7.35, 1.75),
+    ],
   ),
   icon(
     "keyboard",
@@ -2406,8 +3063,18 @@ export const iconDefinitions: IconDefinition[] = [
       l(4.8, 9.6, 10.2, 9.6),
     ],
     {
-      aliases: ["mouse", "gamepad", "controller", "plug", "usb", "bluetooth"],
+      aliases: ["gamepad", "controller", "plug", "usb"],
     },
+  ),
+  icon(
+    "bluetooth",
+    [
+      l(7.2, 2.8, 7.2, 12.2),
+      polyline("7.2 2.8 10.4 5.35 7.2 7.2"),
+      polyline("7.2 7.2 10.4 4.65"),
+      polyline("7.2 7.2 10.4 9.75 7.2 12.2"),
+      polyline("4.8 5.35 7.2 7.2 4.8 9.05"),
+    ],
   ),
   icon(
     "branch",
@@ -5215,7 +5882,7 @@ export const iconDefinitions: IconDefinition[] = [
       polyline("9.5 6 10.75 4.75 12.05 6.05 10.8 7.3"),
       l(5.9, 9.1, 9.1, 5.9),
     ],
-    { aliases: ["chain-link", "attachment", "paperclip"] },
+    { aliases: ["chain-link"] },
   ),
   icon("command", [
     p(
