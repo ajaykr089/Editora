@@ -26,11 +26,17 @@ const style = `
     --ui-split-button-menu-separator: color-mix(in srgb, var(--ui-split-button-menu-color) 10%, transparent);
     --ui-split-button-menu-muted: color-mix(in srgb, var(--ui-split-button-menu-color) 58%, transparent);
     --ui-split-button-menu-danger: var(--ui-color-danger, #dc2626);
-    --ui-split-button-menu-list-gap: 0px;
+    --ui-split-button-menu-option-border: transparent;
+    --ui-split-button-menu-option-border-strong: color-mix(in srgb, var(--ui-split-button-bg) 24%, transparent);
+    --ui-split-button-menu-option-shadow: none;
+    --ui-split-button-menu-affordance-bg: transparent;
+    --ui-split-button-menu-affordance-border: color-mix(in srgb, var(--ui-split-button-menu-color) 24%, transparent);
+    --ui-split-button-menu-affordance-size: 18px;
+    --ui-split-button-menu-list-gap: 2px;
     --ui-split-button-menu-list-padding-top: 2px;
-    --ui-split-button-menu-item-min-height: 42px;
+    --ui-split-button-menu-item-min-height: 44px;
     --ui-split-button-menu-item-radius: 10px;
-    --ui-split-button-menu-item-padding: 10px 12px;
+    --ui-split-button-menu-item-padding: 10px 10px;
     --ui-split-button-focus: var(--ui-color-focus-ring, #2563eb);
     display: inline-flex;
     position: relative;
@@ -124,6 +130,7 @@ const style = `
     --ui-split-button-menu-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
     --ui-split-button-menu-accent: #eef4ff;
     --ui-split-button-menu-accent-strong: #e0ecff;
+    --ui-split-button-menu-option-border: transparent;
   }
 
   :host([variant="contrast"]) {
@@ -169,12 +176,12 @@ const menuStyle = `
   .menu {
     position: absolute;
     display: grid;
-    gap: 6px;
-    min-width: 220px;
+    gap: 8px;
+    min-width: 240px;
     max-width: min(360px, calc(100vw - 16px));
     max-height: min(420px, calc(100vh - 16px));
     overflow: auto;
-    padding: 10px 8px 8px;
+    padding: 8px;
     border: var(--ui-split-button-menu-border);
     border-radius: calc(var(--ui-split-button-menu-radius) + 2px);
     background: var(--ui-split-button-menu-bg);
@@ -210,9 +217,8 @@ const menuStyle = `
     content: "";
     position: absolute;
     inset: 0 0 auto 0;
-    block-size: 3px;
-    background: linear-gradient(90deg, var(--ui-split-button-bg), color-mix(in srgb, var(--ui-split-button-bg) 68%, white));
-    opacity: 0.96;
+    block-size: 1px;
+    background: color-mix(in srgb, var(--ui-split-button-menu-color) 10%, transparent);
     pointer-events: none;
   }
 
@@ -220,26 +226,30 @@ const menuStyle = `
     display: grid;
     gap: var(--ui-split-button-menu-list-gap);
     padding: var(--ui-split-button-menu-list-padding-top) 0 0;
+    position: relative;
+    z-index: 1;
   }
 
   .menu-header {
     display: grid;
-    gap: 3px;
-    padding: 2px 8px 6px;
+    gap: 4px;
+    padding: 4px 6px 2px;
+    position: relative;
+    z-index: 1;
   }
 
   .menu-heading {
     margin: 0;
     min-inline-size: 0;
     font: 700 13px/1.25 "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.015em;
     color: var(--ui-split-button-menu-color);
   }
 
   .menu-description {
     margin: 0;
     min-inline-size: 0;
-    font: 500 12px/1.45 "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font: 500 12px/1.5 "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     letter-spacing: 0.01em;
     color: var(--ui-split-button-menu-muted);
   }
@@ -249,15 +259,15 @@ const menuStyle = `
     appearance: none;
     -webkit-appearance: none;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     inline-size: 100%;
     gap: 12px;
-    align-items: center;
+    align-items: start;
     position: relative;
     min-height: var(--ui-split-button-menu-item-min-height);
     margin: 0;
     padding: var(--ui-split-button-menu-item-padding);
-    border: 0;
+    border: 1px solid var(--ui-split-button-menu-option-border);
     border-radius: var(--ui-split-button-menu-item-radius);
     background: transparent;
     color: inherit;
@@ -268,7 +278,14 @@ const menuStyle = `
     letter-spacing: 0.01em;
     cursor: pointer;
     outline: none;
-    transition: background-color 140ms ease, color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+    overflow: hidden;
+    isolation: isolate;
+    transition:
+      background-color 140ms ease,
+      border-color 140ms ease,
+      color 140ms ease,
+      transform 140ms ease,
+      box-shadow 140ms ease;
   }
 
   .menu [slot="menuitem"] + [slot="menuitem"],
@@ -276,24 +293,47 @@ const menuStyle = `
     box-shadow: inset 0 1px 0 var(--ui-split-button-menu-separator);
   }
 
-  .menu [slot="menuitem"]::before,
-  .menu [data-menu-item]::before {
-    content: "";
-    position: absolute;
-    inset-inline-start: 0;
-    inset-block: 8px;
-    inline-size: 3px;
+  .menu [data-menu-affordance] {
+    inline-size: var(--ui-split-button-menu-affordance-size);
+    block-size: var(--ui-split-button-menu-affordance-size);
+    display: inline-grid;
+    place-items: center;
     border-radius: 999px;
-    background: transparent;
-    transition: background-color 140ms ease;
+    background: var(--ui-split-button-menu-affordance-bg);
+    border: 1.5px solid var(--ui-split-button-menu-affordance-border);
+    color: color-mix(in srgb, var(--ui-split-button-bg) 82%, var(--ui-split-button-menu-color));
+    transition:
+      background-color 140ms ease,
+      border-color 140ms ease,
+      color 140ms ease,
+      transform 140ms ease;
   }
 
-  .menu [slot="menuitem"] > :first-child,
-  .menu [data-menu-item] > :first-child,
+  .menu [data-menu-affordance]::before {
+    content: "";
+    inline-size: 7px;
+    block-size: 7px;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0;
+    transition: transform 140ms ease, opacity 140ms ease;
+  }
+
+  .menu [slot="menuitem"] > :nth-child(2),
+  .menu [data-menu-item] > :nth-child(2),
   .menu [data-menu-label] {
     display: grid;
-    gap: 2px;
+    gap: 3px;
     min-inline-size: 0;
+  }
+
+  .menu [data-menu-text] {
+    padding-block-start: 1px;
+  }
+
+  .menu [slot="menuitem"][data-has-description="false"],
+  .menu [data-menu-item][data-has-description="false"] {
+    align-items: center;
   }
 
   .menu [data-menu-label] {
@@ -305,25 +345,26 @@ const menuStyle = `
   }
 
   .menu [data-menu-description] {
+    display: -webkit-box;
     min-inline-size: 0;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font: 500 12px/1.35 "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    white-space: normal;
+    font: 500 12px/1.45 "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     color: var(--ui-split-button-menu-muted);
   }
 
-  .menu [slot="menuitem"] > :last-child,
-  .menu [data-menu-item] > :last-child,
   .menu [data-menu-shortcut] {
     justify-self: end;
+    align-self: center;
+    white-space: nowrap;
     font: 600 12px/1 "IBM Plex Mono", "SFMono-Regular", "SF Mono", Consolas, monospace;
     letter-spacing: 0.03em;
     color: var(--ui-split-button-menu-shortcut);
-    padding: 5px 7px;
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--ui-split-button-menu-color) 5%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-split-button-menu-color) 10%, transparent);
+    padding: 0;
+    background: none;
+    box-shadow: none;
   }
 
   .menu [slot="menuitem"][data-tone="danger"],
@@ -336,6 +377,11 @@ const menuStyle = `
     color: color-mix(in srgb, var(--ui-split-button-menu-danger) 68%, transparent);
   }
 
+  .menu [slot="menuitem"][data-tone="danger"] [data-menu-affordance],
+  .menu [data-menu-item][data-tone="danger"] [data-menu-affordance] {
+    color: color-mix(in srgb, var(--ui-split-button-menu-danger) 88%, var(--ui-split-button-menu-color));
+  }
+
   .menu [slot="menuitem"][data-active="true"],
   .menu [data-menu-item][data-active="true"],
   .menu [slot="menuitem"]:hover,
@@ -343,7 +389,8 @@ const menuStyle = `
   .menu [slot="menuitem"]:focus-visible,
   .menu [data-menu-item]:focus-visible {
     background: var(--ui-split-button-menu-accent);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-split-button-bg) 16%, transparent);
+    border-color: var(--ui-split-button-menu-option-border-strong);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-split-button-bg) 10%, transparent);
   }
 
   .menu [slot="menuitem"][data-active="true"],
@@ -351,22 +398,46 @@ const menuStyle = `
     background: var(--ui-split-button-menu-accent-strong);
   }
 
-  .menu [slot="menuitem"][data-active="true"]::before,
-  .menu [data-menu-item][data-active="true"]::before,
-  .menu [slot="menuitem"]:hover::before,
-  .menu [data-menu-item]:hover::before,
-  .menu [slot="menuitem"]:focus-visible::before,
-  .menu [data-menu-item]:focus-visible::before {
-    background: var(--ui-split-button-bg);
+  .menu [slot="menuitem"][data-active="true"] [data-menu-affordance],
+  .menu [data-menu-item][data-active="true"] [data-menu-affordance],
+  .menu [slot="menuitem"]:hover [data-menu-affordance],
+  .menu [data-menu-item]:hover [data-menu-affordance],
+  .menu [slot="menuitem"]:focus-visible [data-menu-affordance],
+  .menu [data-menu-item]:focus-visible [data-menu-affordance] {
+    background: color-mix(in srgb, var(--ui-split-button-bg) 10%, transparent);
+    border-color: color-mix(in srgb, var(--ui-split-button-bg) 28%, transparent);
+    color: color-mix(in srgb, var(--ui-split-button-bg) 88%, var(--ui-split-button-menu-color));
   }
 
-  .menu [slot="menuitem"][data-tone="danger"][data-active="true"]::before,
-  .menu [data-menu-item][data-tone="danger"][data-active="true"]::before,
-  .menu [slot="menuitem"][data-tone="danger"]:hover::before,
-  .menu [data-menu-item][data-tone="danger"]:hover::before,
-  .menu [slot="menuitem"][data-tone="danger"]:focus-visible::before,
-  .menu [data-menu-item][data-tone="danger"]:focus-visible::before {
-    background: var(--ui-split-button-menu-danger);
+  .menu [slot="menuitem"][data-active="true"] [data-menu-affordance]::before,
+  .menu [data-menu-item][data-active="true"] [data-menu-affordance]::before,
+  .menu [slot="menuitem"]:hover [data-menu-affordance]::before,
+  .menu [data-menu-item]:hover [data-menu-affordance]::before,
+  .menu [slot="menuitem"]:focus-visible [data-menu-affordance]::before,
+  .menu [data-menu-item]:focus-visible [data-menu-affordance]::before {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .menu [slot="menuitem"][data-tone="danger"][data-active="true"],
+  .menu [data-menu-item][data-tone="danger"][data-active="true"],
+  .menu [slot="menuitem"][data-tone="danger"]:hover,
+  .menu [data-menu-item][data-tone="danger"]:hover,
+  .menu [slot="menuitem"][data-tone="danger"]:focus-visible,
+  .menu [data-menu-item][data-tone="danger"]:focus-visible {
+    border-color: color-mix(in srgb, var(--ui-split-button-menu-danger) 28%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-split-button-menu-danger) 14%, transparent);
+  }
+
+  .menu [slot="menuitem"][data-tone="danger"][data-active="true"] [data-menu-affordance],
+  .menu [data-menu-item][data-tone="danger"][data-active="true"] [data-menu-affordance],
+  .menu [slot="menuitem"][data-tone="danger"]:hover [data-menu-affordance],
+  .menu [data-menu-item][data-tone="danger"]:hover [data-menu-affordance],
+  .menu [slot="menuitem"][data-tone="danger"]:focus-visible [data-menu-affordance],
+  .menu [data-menu-item][data-tone="danger"]:focus-visible [data-menu-affordance] {
+    background: color-mix(in srgb, var(--ui-split-button-menu-danger) 14%, #ffffff);
+    border-color: color-mix(in srgb, var(--ui-split-button-menu-danger) 30%, transparent);
+    color: var(--ui-split-button-menu-danger);
   }
 
   .menu [slot="menuitem"][disabled],
@@ -375,22 +446,26 @@ const menuStyle = `
   .menu [data-menu-item][aria-disabled="true"] {
     opacity: 0.56;
     pointer-events: none;
+    transform: none;
+    box-shadow: none;
   }
 
   :host([menu-density="compact"]) {
-    --ui-split-button-menu-list-gap: 0px;
+    --ui-split-button-menu-list-gap: 1px;
     --ui-split-button-menu-list-padding-top: 2px;
-    --ui-split-button-menu-item-min-height: 40px;
+    --ui-split-button-menu-item-min-height: 38px;
     --ui-split-button-menu-item-radius: 8px;
-    --ui-split-button-menu-item-padding: 9px 11px;
+    --ui-split-button-menu-item-padding: 8px 10px;
+    --ui-split-button-menu-affordance-size: 16px;
   }
 
   :host([menu-density="airy"]) {
-    --ui-split-button-menu-list-gap: 6px;
+    --ui-split-button-menu-list-gap: 4px;
     --ui-split-button-menu-list-padding-top: 6px;
     --ui-split-button-menu-item-min-height: 50px;
     --ui-split-button-menu-item-radius: 14px;
-    --ui-split-button-menu-item-padding: 12px 14px;
+    --ui-split-button-menu-item-padding: 12px 12px;
+    --ui-split-button-menu-affordance-size: 20px;
   }
 
   :host([menu-shape="flat"]) {
@@ -416,7 +491,18 @@ function cloneMenuItem(node: HTMLElement, index: number): HTMLElement {
   clone.setAttribute('slot', 'menuitem');
   clone.setAttribute('data-menu-item', 'true');
   clone.setAttribute('data-index', String(index));
+  clone.setAttribute('role', 'menuitem');
   clone.setAttribute('tabindex', '-1');
+  clone.classList.add('menu-option');
+  clone.setAttribute('data-has-description', clone.querySelector('[data-menu-description]') ? 'true' : 'false');
+  clone.setAttribute('data-has-shortcut', clone.querySelector('[data-menu-shortcut]') ? 'true' : 'false');
+  if (clone.hasAttribute('disabled')) clone.setAttribute('aria-disabled', 'true');
+  if (!clone.querySelector('[data-menu-affordance]')) {
+    const affordance = document.createElement('span');
+    affordance.setAttribute('data-menu-affordance', 'true');
+    affordance.setAttribute('aria-hidden', 'true');
+    clone.prepend(affordance);
+  }
   if (!clone.id) clone.id = `ui-split-button-item-${Math.random().toString(36).slice(2, 9)}`;
   return clone;
 }
@@ -442,6 +528,8 @@ export class UISplitButton extends ElementBase {
     this._onPrimaryClick = this._onPrimaryClick.bind(this);
     this._onToggleClick = this._onToggleClick.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
+    this._onMenuPointerDown = this._onMenuPointerDown.bind(this);
+    this._onMenuPointerMove = this._onMenuPointerMove.bind(this);
   }
 
   openMenu(): void {
@@ -584,7 +672,7 @@ export class UISplitButton extends ElementBase {
     }
     const groupRect = this.root.querySelector('.group')?.getBoundingClientRect();
     if (groupRect && Number.isFinite(groupRect.width) && groupRect.width > 0) {
-      menu.style.minWidth = `${Math.max(236, Math.round(groupRect.width))}px`;
+      menu.style.minWidth = `${Math.max(260, Math.round(groupRect.width))}px`;
     }
     this._menuItems.forEach((item) => listbox.appendChild(item));
     listbox.refresh();
@@ -597,7 +685,7 @@ export class UISplitButton extends ElementBase {
     this._listbox = listbox;
     this._positioner = createPositioner({
       floating: menu,
-      anchor: this._toggleButton || this,
+      anchor: (this.root.querySelector('.group') as HTMLElement | null) || this._toggleButton || this,
       placement: 'bottom-start',
       offset: 6,
       fitViewport: true
@@ -611,6 +699,8 @@ export class UISplitButton extends ElementBase {
     });
 
     listbox.addEventListener('click', (event) => this._onMenuClick(event));
+    listbox.addEventListener('pointerdown', this._onMenuPointerDown);
+    listbox.addEventListener('pointermove', this._onMenuPointerMove, { passive: true });
     listbox.addEventListener('keydown', (event) => this._onMenuKeyDown(event as KeyboardEvent));
     const first = this._listbox.focusBoundary('first', { focus: false, scroll: false });
     if (first) this._listbox.setActiveItem(first, { focus: false, scroll: false });
@@ -642,6 +732,20 @@ export class UISplitButton extends ElementBase {
       return;
     }
     this._selectMenuItem(item);
+  }
+
+  private _onMenuPointerDown(event: PointerEvent): void {
+    const item = (event.target as HTMLElement | null)?.closest?.('[data-menu-item]') as HTMLElement | null;
+    if (!item) return;
+    event.preventDefault();
+  }
+
+  private _onMenuPointerMove(event: PointerEvent): void {
+    if (!this._listbox) return;
+    const item = (event.target as HTMLElement | null)?.closest?.('[data-menu-item]') as HTMLElement | null;
+    if (!item || item.hasAttribute('disabled') || item.getAttribute('aria-disabled') === 'true') return;
+    if (this._listbox.getActiveItem() === item) return;
+    this._listbox.setActiveItem(item, { focus: false, scroll: false });
   }
 
   private _onMenuKeyDown(event: KeyboardEvent): void {

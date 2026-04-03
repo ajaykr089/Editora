@@ -70,6 +70,7 @@ npx @editora/cli add ui-select
 - ✅ **Modern Stack**: React 18, TypeScript 5, modern build tools
 - ✅ **Tree Shaking**: Optimized bundle sizes
 - ✅ **SSR Compatible**: Next.js and server-side rendering support
+- ✅ **500+ Ready-to-Use Icons**: Generic UI icons, product icons, and logo icons via `@editora/icons` and `@editora/react-icons`
 
 ## 📸 Features Overview
 

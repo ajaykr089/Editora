@@ -14,6 +14,7 @@ function normalizeName(name: string): string {
 function cacheKey(name: string, options?: UIIconRenderOptions): string {
   if (!options) return `${name}::default`;
   const variant = options.variant || 'outline';
+  const iconWeight = options.iconWeight || '';
   const secondaryColor = options.secondaryColor || '';
   const strokeWidth = options.strokeWidth == null ? '' : String(options.strokeWidth);
   const absoluteStrokeWidth = options.absoluteStrokeWidth ? '1' : '0';
@@ -25,6 +26,7 @@ function cacheKey(name: string, options?: UIIconRenderOptions): string {
   return [
     name,
     variant,
+    iconWeight,
     secondaryColor,
     strokeWidth,
     absoluteStrokeWidth,
@@ -39,6 +41,7 @@ function cacheKey(name: string, options?: UIIconRenderOptions): string {
 export type UIIconRenderOptions = Pick<
   IconRenderOptions,
   | 'variant'
+  | 'iconWeight'
   | 'secondaryColor'
   | 'strokeWidth'
   | 'absoluteStrokeWidth'
@@ -90,6 +93,7 @@ export function getIcon(name: string, options?: UIIconRenderOptions): string {
 
   const svg = renderIconSvg(normalized, {
     variant: options?.variant || 'outline',
+    iconWeight: options?.iconWeight,
     secondaryColor: options?.secondaryColor,
     strokeWidth: options?.strokeWidth,
     absoluteStrokeWidth: options?.absoluteStrokeWidth,

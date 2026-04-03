@@ -8,7 +8,9 @@ export const MinusIcon = createIcon('minus', 'MinusIcon');
 export const DotIcon = createIcon('dot', 'DotIcon');
 export const CircleIcon = createIcon('circle', 'CircleIcon');
 export const SquareIcon = createIcon('square', 'SquareIcon');
+export const TriangleIcon = createIcon('triangle', 'TriangleIcon');
 export const DiamondIcon = createIcon('diamond', 'DiamondIcon');
+export const HexagonIcon = createIcon('hexagon', 'HexagonIcon');
 export const ChevronDownIcon = createIcon('chevron-down', 'ChevronDownIcon');
 export const ChevronUpIcon = createIcon('chevron-up', 'ChevronUpIcon');
 export const ChevronLeftIcon = createIcon('chevron-left', 'ChevronLeftIcon');
@@ -30,9 +32,13 @@ export const ArrowUpLeftIcon = createIcon('arrow-up-left', 'ArrowUpLeftIcon');
 export const ArrowDownRightIcon = createIcon('arrow-down-right', 'ArrowDownRightIcon');
 export const ArrowDownLeftIcon = createIcon('arrow-down-left', 'ArrowDownLeftIcon');
 export const ExternalLinkIcon = createIcon('external-link', 'ExternalLinkIcon');
+export const UndoIcon = createIcon('undo', 'UndoIcon');
+export const RedoIcon = createIcon('redo', 'RedoIcon');
 export const MenuIcon = createIcon('menu', 'MenuIcon');
 export const MoreHorizontalIcon = createIcon('more-horizontal', 'MoreHorizontalIcon');
 export const MoreVerticalIcon = createIcon('more-vertical', 'MoreVerticalIcon');
+export const GripVerticalIcon = createIcon('grip-vertical', 'GripVerticalIcon');
+export const GripHorizontalIcon = createIcon('grip-horizontal', 'GripHorizontalIcon');
 export const SearchIcon = createIcon('search', 'SearchIcon');
 export const SearchPlusIcon = createIcon('search-plus', 'SearchPlusIcon');
 export const SearchMinusIcon = createIcon('search-minus', 'SearchMinusIcon');
@@ -45,6 +51,8 @@ export const SettingsIcon = createIcon('settings', 'SettingsIcon');
 export const HomeIcon = createIcon('home', 'HomeIcon');
 export const DashboardIcon = createIcon('dashboard', 'DashboardIcon');
 export const AppGridIcon = createIcon('app-grid', 'AppGridIcon');
+export const Grid2x2Icon = createIcon('grid-2x2', 'Grid2x2Icon');
+export const Grid3x3Icon = createIcon('grid-3x3', 'Grid3x3Icon');
 export const LayoutIcon = createIcon('layout', 'LayoutIcon');
 export const LayoutListIcon = createIcon('layout-list', 'LayoutListIcon');
 export const LayoutSidebarIcon = createIcon('layout-sidebar', 'LayoutSidebarIcon');
@@ -56,14 +64,41 @@ export const PanelLeftIcon = createIcon('panel-left', 'PanelLeftIcon');
 export const PanelRightIcon = createIcon('panel-right', 'PanelRightIcon');
 export const PanelTopIcon = createIcon('panel-top', 'PanelTopIcon');
 export const PanelBottomIcon = createIcon('panel-bottom', 'PanelBottomIcon');
+export const SplitHorizontalIcon = createIcon('split-horizontal', 'SplitHorizontalIcon');
+export const SplitVerticalIcon = createIcon('split-vertical', 'SplitVerticalIcon');
 export const ListViewIcon = createIcon('list-view', 'ListViewIcon');
 export const TableIcon = createIcon('table', 'TableIcon');
 export const TableAltIcon = createIcon('table-alt', 'TableAltIcon');
 export const ColumnsAltIcon = createIcon('columns-alt', 'ColumnsAltIcon');
 export const RowIcon = createIcon('row', 'RowIcon');
+export const Heading1Icon = createIcon('heading-1', 'Heading1Icon');
+export const Heading2Icon = createIcon('heading-2', 'Heading2Icon');
+export const Heading3Icon = createIcon('heading-3', 'Heading3Icon');
+export const TextAlignLeftIcon = createIcon('text-align-left', 'TextAlignLeftIcon');
+export const TextAlignCenterIcon = createIcon('text-align-center', 'TextAlignCenterIcon');
+export const TextAlignRightIcon = createIcon('text-align-right', 'TextAlignRightIcon');
+export const TextAlignJustifyIcon = createIcon('text-align-justify', 'TextAlignJustifyIcon');
+export const IndentIcon = createIcon('indent', 'IndentIcon');
+export const OutdentIcon = createIcon('outdent', 'OutdentIcon');
 export const FolderIcon = createIcon('folder', 'FolderIcon');
 export const FolderOpenIcon = createIcon('folder-open', 'FolderOpenIcon');
+export const FolderClosedIcon = createIcon('folder-closed', 'FolderClosedIcon');
+export const FolderPlusIcon = createIcon('folder-plus', 'FolderPlusIcon');
+export const FolderMinusIcon = createIcon('folder-minus', 'FolderMinusIcon');
+export const FolderSearchIcon = createIcon('folder-search', 'FolderSearchIcon');
+export const FolderCheckIcon = createIcon('folder-check', 'FolderCheckIcon');
+export const FolderLockIcon = createIcon('folder-lock', 'FolderLockIcon');
+export const FolderXIcon = createIcon('folder-x', 'FolderXIcon');
 export const FileIcon = createIcon('file', 'FileIcon');
+export const FileTextIcon = createIcon('file-text', 'FileTextIcon');
+export const FileCodeIcon = createIcon('file-code', 'FileCodeIcon');
+export const FileImageIcon = createIcon('file-image', 'FileImageIcon');
+export const FileVideoIcon = createIcon('file-video', 'FileVideoIcon');
+export const FileAudioIcon = createIcon('file-audio', 'FileAudioIcon');
+export const FileArchiveIcon = createIcon('file-archive', 'FileArchiveIcon');
+export const FileSearchIcon = createIcon('file-search', 'FileSearchIcon');
+export const FileLockIcon = createIcon('file-lock', 'FileLockIcon');
+export const FileWarningIcon = createIcon('file-warning', 'FileWarningIcon');
 export const CopyIcon = createIcon('copy', 'CopyIcon');
 export const ClipboardIcon = createIcon('clipboard', 'ClipboardIcon');
 export const ClipboardCheckIcon = createIcon('clipboard-check', 'ClipboardCheckIcon');
@@ -75,9 +110,17 @@ export const EditIcon = createIcon('edit', 'EditIcon');
 export const PencilIcon = createIcon('pencil', 'PencilIcon');
 export const LinkIcon = createIcon('link', 'LinkIcon');
 export const UnlinkIcon = createIcon('unlink', 'UnlinkIcon');
+export const PaperclipIcon = createIcon('paperclip', 'PaperclipIcon');
 export const ShareIcon = createIcon('share', 'ShareIcon');
 export const Share2Icon = createIcon('share-2', 'Share2Icon');
+export const SendIcon = createIcon('send', 'SendIcon');
+export const ReplyIcon = createIcon('reply', 'ReplyIcon');
+export const ReplyAllIcon = createIcon('reply-all', 'ReplyAllIcon');
+export const QuoteIcon = createIcon('quote', 'QuoteIcon');
+export const AtSignIcon = createIcon('at-sign', 'AtSignIcon');
 export const UserIcon = createIcon('user', 'UserIcon');
+export const UserCircleIcon = createIcon('user-circle', 'UserCircleIcon');
+export const UserCogIcon = createIcon('user-cog', 'UserCogIcon');
 export const UsersIcon = createIcon('users', 'UsersIcon');
 export const UserPlusIcon = createIcon('user-plus', 'UserPlusIcon');
 export const UserRemoveIcon = createIcon('user-remove', 'UserRemoveIcon');
@@ -90,6 +133,7 @@ export const InboxIcon = createIcon('inbox', 'InboxIcon');
 export const ArchiveIcon = createIcon('archive', 'ArchiveIcon');
 export const PhoneIcon = createIcon('phone', 'PhoneIcon');
 export const MapPinIcon = createIcon('map-pin', 'MapPinIcon');
+export const PinOffIcon = createIcon('pin-off', 'PinOffIcon');
 export const MapIcon = createIcon('map', 'MapIcon');
 export const LocationArrowIcon = createIcon('location-arrow', 'LocationArrowIcon');
 export const CompassIcon = createIcon('compass', 'CompassIcon');
@@ -99,7 +143,12 @@ export const NavigationMenuIcon = createIcon('navigation-icon', 'NavigationMenuI
 export const RouteIcon = createIcon('route', 'RouteIcon');
 export const GlobeIcon = createIcon('globe', 'GlobeIcon');
 export const CalendarIcon = createIcon('calendar', 'CalendarIcon');
+export const CalendarRangeIcon = createIcon('calendar-range', 'CalendarRangeIcon');
+export const CalendarClockIcon = createIcon('calendar-clock', 'CalendarClockIcon');
+export const CalendarDaysIcon = createIcon('calendar-days', 'CalendarDaysIcon');
 export const ClockIcon = createIcon('clock', 'ClockIcon');
+export const TimerIcon = createIcon('timer', 'TimerIcon');
+export const StopwatchIcon = createIcon('stopwatch', 'StopwatchIcon');
 export const AlarmIcon = createIcon('alarm', 'AlarmIcon');
 export const HistoryIcon = createIcon('history', 'HistoryIcon');
 export const SignalIcon = createIcon('signal', 'SignalIcon');
@@ -118,12 +167,19 @@ export const TrendingDownIcon = createIcon('trending-down', 'TrendingDownIcon');
 export const StarIcon = createIcon('star', 'StarIcon');
 export const HeartIcon = createIcon('heart', 'HeartIcon');
 export const BookmarkIcon = createIcon('bookmark', 'BookmarkIcon');
+export const BookmarkPlusIcon = createIcon('bookmark-plus', 'BookmarkPlusIcon');
+export const BookmarkMinusIcon = createIcon('bookmark-minus', 'BookmarkMinusIcon');
 export const TagIcon = createIcon('tag', 'TagIcon');
 export const FlagIcon = createIcon('flag', 'FlagIcon');
 export const TagsIcon = createIcon('tags', 'TagsIcon');
 export const LockIcon = createIcon('lock', 'LockIcon');
 export const UnlockIcon = createIcon('unlock', 'UnlockIcon');
 export const ShieldIcon = createIcon('shield', 'ShieldIcon');
+export const ShieldCheckIcon = createIcon('shield-check', 'ShieldCheckIcon');
+export const ShieldOffIcon = createIcon('shield-off', 'ShieldOffIcon');
+export const VerifiedIcon = createIcon('verified', 'VerifiedIcon');
+export const BadgeCheckIcon = createIcon('badge-check', 'BadgeCheckIcon');
+export const BadgeAlertIcon = createIcon('badge-alert', 'BadgeAlertIcon');
 export const InfoIcon = createIcon('info', 'InfoIcon');
 export const AlertTriangleIcon = createIcon('alert-triangle', 'AlertTriangleIcon');
 export const AlertCircleIcon = createIcon('alert-circle', 'AlertCircleIcon');
@@ -146,6 +202,8 @@ export const ForwardIcon = createIcon('forward', 'ForwardIcon');
 export const RewindIcon = createIcon('rewind', 'RewindIcon');
 export const SkipNextIcon = createIcon('skip-next', 'SkipNextIcon');
 export const SkipPreviousIcon = createIcon('skip-previous', 'SkipPreviousIcon');
+export const ShuffleIcon = createIcon('shuffle', 'ShuffleIcon');
+export const RepeatIcon = createIcon('repeat', 'RepeatIcon');
 export const VolumeIcon = createIcon('volume', 'VolumeIcon');
 export const VolumeUpIcon = createIcon('volume-up', 'VolumeUpIcon');
 export const VolumeDownIcon = createIcon('volume-down', 'VolumeDownIcon');
@@ -199,8 +257,11 @@ export const CreditCardIcon = createIcon('credit-card', 'CreditCardIcon');
 export const InvoiceIcon = createIcon('invoice', 'InvoiceIcon');
 export const ReceiptIcon = createIcon('receipt', 'ReceiptIcon');
 export const CartIcon = createIcon('cart', 'CartIcon');
+export const ShoppingBagIcon = createIcon('shopping-bag', 'ShoppingBagIcon');
 export const BuildingIcon = createIcon('building', 'BuildingIcon');
+export const StoreIcon = createIcon('store', 'StoreIcon');
 export const CarIcon = createIcon('car', 'CarIcon');
+export const TruckIcon = createIcon('truck', 'TruckIcon');
 export const AirplaneIcon = createIcon('airplane', 'AirplaneIcon');
 export const AirplanIcon = createIcon('airplan', 'AirplanIcon');
 export const CloudSunIcon = createIcon('cloud-sun', 'CloudSunIcon');
@@ -218,6 +279,8 @@ export const RocketIcon = createIcon('rocket', 'RocketIcon');
 export const CoffeeIcon = createIcon('coffee', 'CoffeeIcon');
 export const PhoneCallIcon = createIcon('phone-call', 'PhoneCallIcon');
 export const PhoneMissedIcon = createIcon('phone-missed', 'PhoneMissedIcon');
+export const MessageSquareIcon = createIcon('message-square', 'MessageSquareIcon');
+export const MessageCircleIcon = createIcon('message-circle', 'MessageCircleIcon');
 export const ChatIcon = createIcon('chat', 'ChatIcon');
 export const CommentsIcon = createIcon('comments', 'CommentsIcon');
 export const MegaphoneIcon = createIcon('megaphone', 'MegaphoneIcon');
@@ -226,8 +289,12 @@ export const MonitorIcon = createIcon('monitor', 'MonitorIcon');
 export const LaptopIcon = createIcon('laptop', 'LaptopIcon');
 export const TabletIcon = createIcon('tablet', 'TabletIcon');
 export const SmartphoneIcon = createIcon('smartphone', 'SmartphoneIcon');
+export const CastIcon = createIcon('cast', 'CastIcon');
+export const RouterIcon = createIcon('router', 'RouterIcon');
+export const MouseIcon = createIcon('mouse', 'MouseIcon');
 export const QrCodeIcon = createIcon('qr-code', 'QrCodeIcon');
 export const BarcodeIcon = createIcon('barcode', 'BarcodeIcon');
+export const ScanSearchIcon = createIcon('scan-search', 'ScanSearchIcon');
 export const TicketIcon = createIcon('ticket', 'TicketIcon');
 export const IdCardIcon = createIcon('id-card', 'IdCardIcon');
 export const BriefcaseIcon = createIcon('briefcase', 'BriefcaseIcon');
@@ -237,10 +304,14 @@ export const BrainIcon = createIcon('brain', 'BrainIcon');
 export const TargetIcon = createIcon('target', 'TargetIcon');
 export const LayersIcon = createIcon('layers', 'LayersIcon');
 export const BoxIcon = createIcon('box', 'BoxIcon');
+export const PackageIcon = createIcon('package', 'PackageIcon');
 export const CubeIcon = createIcon('cube', 'CubeIcon');
 export const ToggleLeftIcon = createIcon('toggle-left', 'ToggleLeftIcon');
 export const ToggleRightIcon = createIcon('toggle-right', 'ToggleRightIcon');
 export const DragIcon = createIcon('drag', 'DragIcon');
+export const MoveHorizontalIcon = createIcon('move-horizontal', 'MoveHorizontalIcon');
+export const MoveVerticalIcon = createIcon('move-vertical', 'MoveVerticalIcon');
+export const MousePointerIcon = createIcon('mouse-pointer', 'MousePointerIcon');
 export const ResizeIcon = createIcon('resize', 'ResizeIcon');
 export const AlignLeftIcon = createIcon('align-left', 'AlignLeftIcon');
 export const AlignCenterIcon = createIcon('align-center', 'AlignCenterIcon');
@@ -255,6 +326,7 @@ export const StrikethroughIcon = createIcon('strikethrough', 'StrikethroughIcon'
 export const ListOrderedIcon = createIcon('list-ordered', 'ListOrderedIcon');
 export const ListUnorderedIcon = createIcon('list-unordered', 'ListUnorderedIcon');
 export const KeyboardIcon = createIcon('keyboard', 'KeyboardIcon');
+export const BluetoothIcon = createIcon('bluetooth', 'BluetoothIcon');
 export const BranchIcon = createIcon('branch', 'BranchIcon');
 export const AccessibilityIcon = createIcon('accessibility', 'AccessibilityIcon');
 export const ContrastIcon = createIcon('contrast', 'ContrastIcon');
@@ -313,6 +385,63 @@ export const LogoSlackIcon = createIcon('logo-slack', 'LogoSlackIcon');
 export const LogoDiscordIcon = createIcon('logo-discord', 'LogoDiscordIcon');
 export const LogoLinkedinIcon = createIcon('logo-linkedin', 'LogoLinkedinIcon');
 export const LogoYoutubeIcon = createIcon('logo-youtube', 'LogoYoutubeIcon');
+// Social Media Icons
+export const LogoInstagramIcon = createIcon('logo-instagram', 'LogoInstagramIcon');
+export const LogoFacebookIcon = createIcon('logo-facebook', 'LogoFacebookIcon');
+export const LogoTwitterIcon = createIcon('logo-twitter', 'LogoTwitterIcon');
+export const LogoWhatsappIcon = createIcon('logo-whatsapp', 'LogoWhatsappIcon');
+export const LogoTelegramIcon = createIcon('logo-telegram', 'LogoTelegramIcon');
+export const LogoTiktokIcon = createIcon('logo-tiktok', 'LogoTiktokIcon');
+export const LogoPinterestIcon = createIcon('logo-pinterest', 'LogoPinterestIcon');
+export const LogoRedditIcon = createIcon('logo-reddit', 'LogoRedditIcon');
+export const LogoSnapchatIcon = createIcon('logo-snapchat', 'LogoSnapchatIcon');
+export const LogoThreadsIcon = createIcon('logo-threads', 'LogoThreadsIcon');
+export const LogoMessengerIcon = createIcon('logo-messenger', 'LogoMessengerIcon');
+export const LogoSignalIcon = createIcon('logo-signal', 'LogoSignalIcon');
+export const LogoViberIcon = createIcon('logo-viber', 'LogoViberIcon');
+// Communication & Video Apps
+export const LogoZoomIcon = createIcon('logo-zoom', 'LogoZoomIcon');
+export const LogoSkypeIcon = createIcon('logo-skype', 'LogoSkypeIcon');
+// Tech & Cloud Brands
+export const LogoGoogleIcon = createIcon('logo-google', 'LogoGoogleIcon');
+export const LogoGoogleDriveIcon = createIcon('logo-google-drive', 'LogoGoogleDriveIcon');
+export const LogoGoogleMapsIcon = createIcon('logo-google-maps', 'LogoGoogleMapsIcon');
+export const LogoGooglePlayIcon = createIcon('logo-google-play', 'LogoGooglePlayIcon');
+export const LogoAppleIcon = createIcon('logo-apple', 'LogoAppleIcon');
+export const LogoMicrosoftIcon = createIcon('logo-microsoft', 'LogoMicrosoftIcon');
+export const LogoAmazonIcon = createIcon('logo-amazon', 'LogoAmazonIcon');
+export const LogoNetflixIcon = createIcon('logo-netflix', 'LogoNetflixIcon');
+export const LogoSpotifyIcon = createIcon('logo-spotify', 'LogoSpotifyIcon');
+export const LogoStripeIcon = createIcon('logo-stripe', 'LogoStripeIcon');
+export const LogoPaypalIcon = createIcon('logo-paypal', 'LogoPaypalIcon');
+// Developer & Cloud
+export const LogoAwsIcon = createIcon('logo-aws', 'LogoAwsIcon');
+export const LogoAzureIcon = createIcon('logo-azure', 'LogoAzureIcon');
+export const LogoFirebaseIcon = createIcon('logo-firebase', 'LogoFirebaseIcon');
+export const LogoVercelIcon = createIcon('logo-vercel', 'LogoVercelIcon');
+export const LogoNetlifyIcon = createIcon('logo-netlify', 'LogoNetlifyIcon');
+export const LogoDigitaloceanIcon = createIcon('logo-digitalocean', 'LogoDigitaloceanIcon');
+export const LogoCloudflareIcon = createIcon('logo-cloudflare', 'LogoCloudflareIcon');
+export const LogoNpmIcon = createIcon('logo-npm', 'LogoNpmIcon');
+export const LogoDockerIcon = createIcon('logo-docker', 'LogoDockerIcon');
+export const LogoKubernetesIcon = createIcon('logo-kubernetes', 'LogoKubernetesIcon');
+export const LogoOpenaiIcon = createIcon('logo-openai', 'LogoOpenaiIcon');
+// Food & Delivery
+export const LogoUberIcon = createIcon('logo-uber', 'LogoUberIcon');
+export const LogoLyftIcon = createIcon('logo-lyft', 'LogoLyftIcon');
+export const LogoDoordashIcon = createIcon('logo-doordash', 'LogoDoordashIcon');
+export const LogoAirbnbIcon = createIcon('logo-airbnb', 'LogoAirbnbIcon');
+export const LogoShopifyIcon = createIcon('logo-shopify', 'LogoShopifyIcon');
+// Messaging & Sharing
+export const LogoSendIcon = createIcon('logo-send', 'LogoSendIcon');
+export const LogoMessageCircleIcon = createIcon('logo-message-circle', 'LogoMessageCircleIcon');
+export const LogoMessageSquareIcon = createIcon('logo-message-square', 'LogoMessageSquareIcon');
+// Music & Audio
+export const LogoMusicIcon = createIcon('logo-music', 'LogoMusicIcon');
+export const LogoHeadphonesIcon = createIcon('logo-headphones', 'LogoHeadphonesIcon');
+export const LogoPodcastIcon = createIcon('logo-podcast', 'LogoPodcastIcon');
+// Maps & Location
+export const LogoMapPinIcon = createIcon('logo-map-pin', 'LogoMapPinIcon');
 export const AlignHCenterDistributeIcon = createIcon('align-h-center-distribute', 'AlignHCenterDistributeIcon');
 export const AlignVCenterDistributeIcon = createIcon('align-v-center-distribute', 'AlignVCenterDistributeIcon');
 export const AlignBaselineTypographyIcon = createIcon('align-baseline-typography', 'AlignBaselineTypographyIcon');
@@ -396,7 +525,9 @@ export const icons = {
   'dot': DotIcon,
   'circle': CircleIcon,
   'square': SquareIcon,
+  'triangle': TriangleIcon,
   'diamond': DiamondIcon,
+  'hexagon': HexagonIcon,
   'chevron-down': ChevronDownIcon,
   'chevron-up': ChevronUpIcon,
   'chevron-left': ChevronLeftIcon,
@@ -418,9 +549,13 @@ export const icons = {
   'arrow-down-right': ArrowDownRightIcon,
   'arrow-down-left': ArrowDownLeftIcon,
   'external-link': ExternalLinkIcon,
+  'undo': UndoIcon,
+  'redo': RedoIcon,
   'menu': MenuIcon,
   'more-horizontal': MoreHorizontalIcon,
   'more-vertical': MoreVerticalIcon,
+  'grip-vertical': GripVerticalIcon,
+  'grip-horizontal': GripHorizontalIcon,
   'search': SearchIcon,
   'search-plus': SearchPlusIcon,
   'search-minus': SearchMinusIcon,
@@ -433,6 +568,8 @@ export const icons = {
   'home': HomeIcon,
   'dashboard': DashboardIcon,
   'app-grid': AppGridIcon,
+  'grid-2x2': Grid2x2Icon,
+  'grid-3x3': Grid3x3Icon,
   'layout': LayoutIcon,
   'layout-list': LayoutListIcon,
   'layout-sidebar': LayoutSidebarIcon,
@@ -444,14 +581,41 @@ export const icons = {
   'panel-right': PanelRightIcon,
   'panel-top': PanelTopIcon,
   'panel-bottom': PanelBottomIcon,
+  'split-horizontal': SplitHorizontalIcon,
+  'split-vertical': SplitVerticalIcon,
   'list-view': ListViewIcon,
   'table': TableIcon,
   'table-alt': TableAltIcon,
   'columns-alt': ColumnsAltIcon,
   'row': RowIcon,
+  'heading-1': Heading1Icon,
+  'heading-2': Heading2Icon,
+  'heading-3': Heading3Icon,
+  'text-align-left': TextAlignLeftIcon,
+  'text-align-center': TextAlignCenterIcon,
+  'text-align-right': TextAlignRightIcon,
+  'text-align-justify': TextAlignJustifyIcon,
+  'indent': IndentIcon,
+  'outdent': OutdentIcon,
   'folder': FolderIcon,
   'folder-open': FolderOpenIcon,
+  'folder-closed': FolderClosedIcon,
+  'folder-plus': FolderPlusIcon,
+  'folder-minus': FolderMinusIcon,
+  'folder-search': FolderSearchIcon,
+  'folder-check': FolderCheckIcon,
+  'folder-lock': FolderLockIcon,
+  'folder-x': FolderXIcon,
   'file': FileIcon,
+  'file-text': FileTextIcon,
+  'file-code': FileCodeIcon,
+  'file-image': FileImageIcon,
+  'file-video': FileVideoIcon,
+  'file-audio': FileAudioIcon,
+  'file-archive': FileArchiveIcon,
+  'file-search': FileSearchIcon,
+  'file-lock': FileLockIcon,
+  'file-warning': FileWarningIcon,
   'copy': CopyIcon,
   'clipboard': ClipboardIcon,
   'clipboard-check': ClipboardCheckIcon,
@@ -463,9 +627,17 @@ export const icons = {
   'pencil': PencilIcon,
   'link': LinkIcon,
   'unlink': UnlinkIcon,
+  'paperclip': PaperclipIcon,
   'share': ShareIcon,
   'share-2': Share2Icon,
+  'send': SendIcon,
+  'reply': ReplyIcon,
+  'reply-all': ReplyAllIcon,
+  'quote': QuoteIcon,
+  'at-sign': AtSignIcon,
   'user': UserIcon,
+  'user-circle': UserCircleIcon,
+  'user-cog': UserCogIcon,
   'users': UsersIcon,
   'user-plus': UserPlusIcon,
   'user-remove': UserRemoveIcon,
@@ -478,6 +650,7 @@ export const icons = {
   'archive': ArchiveIcon,
   'phone': PhoneIcon,
   'map-pin': MapPinIcon,
+  'pin-off': PinOffIcon,
   'map': MapIcon,
   'location-arrow': LocationArrowIcon,
   'compass': CompassIcon,
@@ -487,7 +660,12 @@ export const icons = {
   'route': RouteIcon,
   'globe': GlobeIcon,
   'calendar': CalendarIcon,
+  'calendar-range': CalendarRangeIcon,
+  'calendar-clock': CalendarClockIcon,
+  'calendar-days': CalendarDaysIcon,
   'clock': ClockIcon,
+  'timer': TimerIcon,
+  'stopwatch': StopwatchIcon,
   'alarm': AlarmIcon,
   'history': HistoryIcon,
   'signal': SignalIcon,
@@ -506,12 +684,19 @@ export const icons = {
   'star': StarIcon,
   'heart': HeartIcon,
   'bookmark': BookmarkIcon,
+  'bookmark-plus': BookmarkPlusIcon,
+  'bookmark-minus': BookmarkMinusIcon,
   'tag': TagIcon,
   'flag': FlagIcon,
   'tags': TagsIcon,
   'lock': LockIcon,
   'unlock': UnlockIcon,
   'shield': ShieldIcon,
+  'shield-check': ShieldCheckIcon,
+  'shield-off': ShieldOffIcon,
+  'verified': VerifiedIcon,
+  'badge-check': BadgeCheckIcon,
+  'badge-alert': BadgeAlertIcon,
   'info': InfoIcon,
   'alert-triangle': AlertTriangleIcon,
   'alert-circle': AlertCircleIcon,
@@ -534,6 +719,8 @@ export const icons = {
   'rewind': RewindIcon,
   'skip-next': SkipNextIcon,
   'skip-previous': SkipPreviousIcon,
+  'shuffle': ShuffleIcon,
+  'repeat': RepeatIcon,
   'volume': VolumeIcon,
   'volume-up': VolumeUpIcon,
   'volume-down': VolumeDownIcon,
@@ -587,8 +774,11 @@ export const icons = {
   'invoice': InvoiceIcon,
   'receipt': ReceiptIcon,
   'cart': CartIcon,
+  'shopping-bag': ShoppingBagIcon,
   'building': BuildingIcon,
+  'store': StoreIcon,
   'car': CarIcon,
+  'truck': TruckIcon,
   'airplane': AirplaneIcon,
   'airplan': AirplanIcon,
   'cloud-sun': CloudSunIcon,
@@ -606,6 +796,8 @@ export const icons = {
   'coffee': CoffeeIcon,
   'phone-call': PhoneCallIcon,
   'phone-missed': PhoneMissedIcon,
+  'message-square': MessageSquareIcon,
+  'message-circle': MessageCircleIcon,
   'chat': ChatIcon,
   'comments': CommentsIcon,
   'megaphone': MegaphoneIcon,
@@ -614,8 +806,12 @@ export const icons = {
   'laptop': LaptopIcon,
   'tablet': TabletIcon,
   'smartphone': SmartphoneIcon,
+  'cast': CastIcon,
+  'router': RouterIcon,
+  'mouse': MouseIcon,
   'qr-code': QrCodeIcon,
   'barcode': BarcodeIcon,
+  'scan-search': ScanSearchIcon,
   'ticket': TicketIcon,
   'id-card': IdCardIcon,
   'briefcase': BriefcaseIcon,
@@ -625,10 +821,14 @@ export const icons = {
   'target': TargetIcon,
   'layers': LayersIcon,
   'box': BoxIcon,
+  'package': PackageIcon,
   'cube': CubeIcon,
   'toggle-left': ToggleLeftIcon,
   'toggle-right': ToggleRightIcon,
   'drag': DragIcon,
+  'move-horizontal': MoveHorizontalIcon,
+  'move-vertical': MoveVerticalIcon,
+  'mouse-pointer': MousePointerIcon,
   'resize': ResizeIcon,
   'align-left': AlignLeftIcon,
   'align-center': AlignCenterIcon,
@@ -643,6 +843,7 @@ export const icons = {
   'list-ordered': ListOrderedIcon,
   'list-unordered': ListUnorderedIcon,
   'keyboard': KeyboardIcon,
+  'bluetooth': BluetoothIcon,
   'branch': BranchIcon,
   'accessibility': AccessibilityIcon,
   'contrast': ContrastIcon,
@@ -701,6 +902,63 @@ export const icons = {
   'logo-discord': LogoDiscordIcon,
   'logo-linkedin': LogoLinkedinIcon,
   'logo-youtube': LogoYoutubeIcon,
+  // Social Media Icons
+  'logo-instagram': LogoInstagramIcon,
+  'logo-facebook': LogoFacebookIcon,
+  'logo-twitter': LogoTwitterIcon,
+  'logo-whatsapp': LogoWhatsappIcon,
+  'logo-telegram': LogoTelegramIcon,
+  'logo-tiktok': LogoTiktokIcon,
+  'logo-pinterest': LogoPinterestIcon,
+  'logo-reddit': LogoRedditIcon,
+  'logo-snapchat': LogoSnapchatIcon,
+  'logo-threads': LogoThreadsIcon,
+  'logo-messenger': LogoMessengerIcon,
+  'logo-signal': LogoSignalIcon,
+  'logo-viber': LogoViberIcon,
+  // Communication & Video Apps
+  'logo-zoom': LogoZoomIcon,
+  'logo-skype': LogoSkypeIcon,
+  // Tech & Cloud Brands
+  'logo-google': LogoGoogleIcon,
+  'logo-google-drive': LogoGoogleDriveIcon,
+  'logo-google-maps': LogoGoogleMapsIcon,
+  'logo-google-play': LogoGooglePlayIcon,
+  'logo-apple': LogoAppleIcon,
+  'logo-microsoft': LogoMicrosoftIcon,
+  'logo-amazon': LogoAmazonIcon,
+  'logo-netflix': LogoNetflixIcon,
+  'logo-spotify': LogoSpotifyIcon,
+  'logo-stripe': LogoStripeIcon,
+  'logo-paypal': LogoPaypalIcon,
+  // Developer & Cloud
+  'logo-aws': LogoAwsIcon,
+  'logo-azure': LogoAzureIcon,
+  'logo-firebase': LogoFirebaseIcon,
+  'logo-vercel': LogoVercelIcon,
+  'logo-netlify': LogoNetlifyIcon,
+  'logo-digitalocean': LogoDigitaloceanIcon,
+  'logo-cloudflare': LogoCloudflareIcon,
+  'logo-npm': LogoNpmIcon,
+  'logo-docker': LogoDockerIcon,
+  'logo-kubernetes': LogoKubernetesIcon,
+  'logo-openai': LogoOpenaiIcon,
+  // Food & Delivery
+  'logo-uber': LogoUberIcon,
+  'logo-lyft': LogoLyftIcon,
+  'logo-doordash': LogoDoordashIcon,
+  'logo-airbnb': LogoAirbnbIcon,
+  'logo-shopify': LogoShopifyIcon,
+  // Messaging & Sharing
+  'logo-send': LogoSendIcon,
+  'logo-message-circle': LogoMessageCircleIcon,
+  'logo-message-square': LogoMessageSquareIcon,
+  // Music & Audio
+  'logo-music': LogoMusicIcon,
+  'logo-headphones': LogoHeadphonesIcon,
+  'logo-podcast': LogoPodcastIcon,
+  // Maps & Location
+  'logo-map-pin': LogoMapPinIcon,
   'align-h-center-distribute': AlignHCenterDistributeIcon,
   'align-v-center-distribute': AlignVCenterDistributeIcon,
   'align-baseline-typography': AlignBaselineTypographyIcon,

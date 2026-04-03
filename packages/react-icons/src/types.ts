@@ -1,11 +1,12 @@
 import type React from 'react';
-import type { IconVariant } from '@editora/icons';
+import type { IconVariant, IconWeight } from '@editora/icons';
 
 export type IconFlip = 'horizontal' | 'vertical' | 'both';
 
 export type IconBaseProps = Omit<React.SVGProps<SVGSVGElement>, 'color'> & {
   name: string;
   variant?: IconVariant;
+  iconWeight?: IconWeight;
   size?: number | string;
   color?: string;
   secondaryColor?: string;
@@ -28,3 +29,5 @@ export type NamedIconProps = Omit<IconProps, 'name'>;
 export type IconContextValue = Omit<NamedIconProps, 'children' | 'dangerouslySetInnerHTML'>;
 
 export type IconComponent = React.ForwardRefExoticComponent<NamedIconProps & React.RefAttributes<SVGSVGElement>>;
+
+export type { IconWeight };

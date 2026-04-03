@@ -4,6 +4,7 @@ export type IconProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
   name?: string;
   iconVariant?: 'outline' | 'solid' | 'duotone';
+  iconWeight?: 'thin' | 'regular' | 'bold';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | string | number;
   color?: string;
   secondaryColor?: string;
@@ -29,6 +30,7 @@ export const Icon = React.forwardRef<HTMLElement, IconProps>(function Icon(
     children,
     name,
     iconVariant,
+    iconWeight,
     size,
     color,
     secondaryColor,
@@ -56,6 +58,7 @@ export const Icon = React.forwardRef<HTMLElement, IconProps>(function Icon(
     ...rest,
     name: name || undefined,
     'icon-variant': iconVariant || undefined,
+    'icon-weight': iconWeight || undefined,
     size: size != null && size !== '' ? String(size) : undefined,
     color: color || undefined,
     'secondary-color': secondaryColor || undefined,

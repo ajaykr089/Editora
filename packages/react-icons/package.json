@@ -1,6 +1,6 @@
 {
   "name": "@editora/react-icons",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "React icon component library for SaaS dashboards and enterprise products, with provider-driven theming and design-system consistency.",
   "homepage": "https://editora-ecosystem.netlify.app/docs/react-icons",
   "bugs": {

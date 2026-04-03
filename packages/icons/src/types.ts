@@ -1,4 +1,5 @@
 export type IconVariant = 'outline' | 'solid' | 'duotone';
+export type IconWeight = 'thin' | 'regular' | 'bold';
 
 export type IconTag =
   | 'path'
@@ -38,6 +39,7 @@ export type IconDefinition = {
 
 export type IconRenderOptions = {
   variant?: IconVariant;
+  iconWeight?: IconWeight;
   size?: number | string;
   color?: string;
   secondaryColor?: string;

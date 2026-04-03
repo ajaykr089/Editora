@@ -3,6 +3,7 @@ import type { IconContextValue } from './types';
 
 const defaultIconContext: IconContextValue = {
   variant: 'outline',
+  iconWeight: 'regular',
   size: 15,
   color: 'currentColor',
   secondaryColor: 'currentColor',
