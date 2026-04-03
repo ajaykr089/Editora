@@ -71,7 +71,7 @@ export const WorkspaceActions = () => {
           <div style={showcaseChipRowStyle}>
             <span style={showcaseChipStyle}>Primary emphasis</span>
             <span style={showcaseChipStyle}>Attached menu</span>
-            <span style={showcaseChipStyle}>Shortcut support</span>
+            <span style={showcaseChipStyle}>Select-inspired options</span>
           </div>
           <SplitButton
             label="Publish update"
@@ -244,6 +244,49 @@ export const FlatActions = () => {
               value: 'discard',
               label: 'Discard draft',
               description: 'Revert unpublished local changes.',
+              tone: 'danger'
+            }
+          ]}
+          onSelect={(detail) => setSelected(detail.value || '')}
+        />
+        <ActionEcho value={selected} />
+      </Box>
+    </ShowcaseSection>
+  );
+};
+
+export const HardEdgeActions = () => {
+  const [selected, setSelected] = React.useState('');
+  return (
+    <ShowcaseSection
+      eyebrow="Hard Edge"
+      title="Absolutely square split action"
+      description="A zero-radius treatment for dense admin surfaces, data tools, and product areas that use completely flat geometry for controls and menus."
+    >
+      <Box style={{ display: 'grid', gap: 16, maxWidth: 580 }}>
+        <SplitButton
+          label="Apply action"
+          menuHeading="Workflow actions"
+          menuDescription="Square button, square menu container, and square option rows."
+          variant="flat"
+          shape="square"
+          menuShape="square"
+          items={[
+            {
+              value: 'apply-now',
+              label: 'Apply now',
+              description: 'Run the standard action immediately.',
+              shortcut: '↵'
+            },
+            {
+              value: 'queue',
+              label: 'Queue action',
+              description: 'Move this task into the next processing batch.'
+            },
+            {
+              value: 'discard',
+              label: 'Discard request',
+              description: 'Permanently remove this request from the queue.',
               tone: 'danger'
             }
           ]}
