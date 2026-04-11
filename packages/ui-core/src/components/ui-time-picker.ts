@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import { resolveDateTimeTranslations } from './date-time-i18n';
 import {
   compareTimes,
@@ -321,6 +322,7 @@ export class UITimePicker extends ElementBase {
   private _open = false;
   private _syncing = false;
   private _overlay: HTMLDivElement | null = null;
+  private _dismissableLayer: DismissableLayerHandle | null = null;
   private _releaseScrollLock: (() => void) | null = null;
   private _isInitialized = false;
   private _hasView = false;
@@ -588,12 +590,12 @@ export class UITimePicker extends ElementBase {
     el.style.position = 'fixed';
     el.style.left = '0';
     el.style.top = '0';
-    el.style.zIndex = '1100';
     el.style.pointerEvents = 'none';
     el.addEventListener('click', this._onOverlayClickBound);
     el.addEventListener('change', this._onOverlayChangeBound);
     document.body.appendChild(el);
     this._overlay = el;
+    this._syncOverlayHostZIndex();
     document.addEventListener('pointerdown', this._onDocumentPointerDownBound, true);
     document.addEventListener('keydown', this._onDocumentKeyDownBound);
     window.addEventListener('resize', this._onWindowResizeBound);
@@ -601,7 +603,15 @@ export class UITimePicker extends ElementBase {
     if (this._isMobileSheet()) this._releaseScrollLock = lockBodyScroll();
   }
 
+  private _syncOverlayHostZIndex(): void {
+    if (!this._overlay || typeof window === 'undefined') return;
+    const resolved = window.getComputedStyle(this).getPropertyValue('--ui-dp-z').trim();
+    this._overlay.style.zIndex = resolved || '1600';
+  }
+
   private _destroyOverlay(): void {
+    this._dismissableLayer?.destroy();
+    this._dismissableLayer = null;
     if (!this._overlay) return;
     this._schedulePosition.cancel();
     document.removeEventListener('pointerdown', this._onDocumentPointerDownBound, true);
@@ -617,6 +627,32 @@ export class UITimePicker extends ElementBase {
       this._releaseScrollLock();
       this._releaseScrollLock = null;
     }
+  }
+
+  private _syncDismissableLayer(): void {
+    this._dismissableLayer?.destroy();
+    this._dismissableLayer = null;
+    if (!this._open || !this._overlay) return;
+    const panel = this._overlay.querySelector('.panel, .sheet') as HTMLElement | null;
+    if (!panel) return;
+    this._dismissableLayer = createDismissableLayer({
+      node: panel,
+      trigger: this._fieldEl,
+      closeOnEscape: true,
+      closeOnPointerOutside: true,
+      closeOnFocusOutside: false,
+      onBeforeDismiss: (reason) => {
+        if (reason === 'escape-key') {
+          this._setOpen(false, 'escape');
+          return false;
+        }
+        if (reason === 'outside-pointer') {
+          this._setOpen(false, 'outside');
+          return false;
+        }
+        return false;
+      }
+    });
   }
 
   private _positionOverlay(): void {
@@ -728,8 +764,10 @@ export class UITimePicker extends ElementBase {
 
   private _syncOverlayState(): void {
     if (!this._overlay) return;
+    this._syncOverlayHostZIndex();
     const sheet = this._isMobileSheet();
     this._ensureOverlayContent(sheet);
+    this._syncDismissableLayer();
     const parts = this._timeParts(this._pending);
     const hoursEl = this._overlay.querySelector('select[data-segment="hours"]') as HTMLSelectElement | null;
     const minutesEl = this._overlay.querySelector('select[data-segment="minutes"]') as HTMLSelectElement | null;

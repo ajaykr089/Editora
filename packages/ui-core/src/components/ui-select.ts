@@ -285,7 +285,6 @@ const style = `
     scrollbar-width: thin;
     scrollbar-color: color-mix(in srgb, var(--ui-select-menu-border-color) 82%, transparent) transparent;
     scrollbar-gutter: auto;
-    backdrop-filter: saturate(1.04) blur(10px);
   }
 
   .menu::-webkit-scrollbar {

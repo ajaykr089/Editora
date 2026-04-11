@@ -13,6 +13,7 @@ const style = `
     isolation: isolate;
     color-scheme: light dark;
     --ui-dialog-backdrop: color-mix(in srgb, #020617 58%, transparent);
+    --ui-dialog-backdrop-filter: none;
     --ui-dialog-bg: linear-gradient(
       180deg,
       color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent) 0%,
@@ -70,7 +71,8 @@ const style = `
     box-sizing: border-box;
     pointer-events: auto;
     background: var(--ui-dialog-backdrop);
-    backdrop-filter: saturate(1.05) blur(4px);
+    -webkit-backdrop-filter: var(--ui-dialog-backdrop-filter);
+    backdrop-filter: var(--ui-dialog-backdrop-filter);
     opacity: 0;
     transition: opacity var(--ui-dialog-duration) var(--ui-dialog-easing);
   }
