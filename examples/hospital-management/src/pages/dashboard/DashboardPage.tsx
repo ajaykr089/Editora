@@ -1,29 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Badge, Box, Button, Chart, Flex, Grid, Marquee, Timeline } from '@editora/ui-react';
+import { Alert, Badge, Box, Button, Chart, Flex, Grid, Marquee, MetricCard, Timeline } from '@editora/ui-react';
 import { Icon } from '@editora/react-icons';
 import { useDashboardQuery } from '@/shared/query/hooks';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { ErrorStateView, TableSkeleton } from '@/shared/components/StateViews';
 import { ActivityEvent } from '@/shared/types/domain';
 import { currency } from '@/shared/utils/format';
-
-function KpiCard({ label, value, icon }: { label: string; value: string; icon: string }) {
-  return (
-    <Box
-      variant="surface"
-      radius="lg"
-      p="14px"
-      style={{ border: '1px solid var(--ui-color-border, #dbe4ef)', display: 'grid', gap: 8 }}
-    >
-      <Flex justify="space-between" align="center">
-        <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>{label}</Box>
-        <Icon name={icon as any} size={16} aria-hidden="true" />
-      </Flex>
-      <Box style={{ fontSize: 24, fontWeight: 700 }}>{value}</Box>
-    </Box>
-  );
-}
 
 type LiveRailItem = {
   label: string;
@@ -171,12 +154,12 @@ export default function DashboardPage() {
       <LiveOperationsRail items={railItems} />
 
       <Grid className="kpi-grid">
-        <KpiCard label="Today appointments" value={String(kpis.todaysAppointments)} icon="calendar" />
-        <KpiCard label="Admissions" value={String(kpis.admissions)} icon="users" />
-        <KpiCard label="Discharges" value={String(kpis.discharges)} icon="check-circle" />
-        <KpiCard label="Bed occupancy" value={`${kpis.occupancyPct}%`} icon="layout" />
-        <KpiCard label="Revenue" value={currency(kpis.revenue)} icon="chart-bar" />
-        <KpiCard label="Pending lab reports" value={String(kpis.pendingLab)} icon="activity" />
+        <MetricCard label="Today appointments" value={String(kpis.todaysAppointments)} icon={<Icon name="calendar" size={16} aria-hidden="true" />} />
+        <MetricCard label="Admissions" value={String(kpis.admissions)} icon={<Icon name="users" size={16} aria-hidden="true" />} />
+        <MetricCard label="Discharges" value={String(kpis.discharges)} icon={<Icon name="check-circle" size={16} aria-hidden="true" />} />
+        <MetricCard label="Bed occupancy" value={`${kpis.occupancyPct}%`} icon={<Icon name="layout" size={16} aria-hidden="true" />} />
+        <MetricCard label="Revenue" value={currency(kpis.revenue)} icon={<Icon name="chart-bar" size={16} aria-hidden="true" />} />
+        <MetricCard label="Pending lab reports" value={String(kpis.pendingLab)} icon={<Icon name="activity" size={16} aria-hidden="true" />} />
       </Grid>
 
       <Grid style={{ display: 'grid', gridTemplateColumns: '2fr 1.3fr', gap: 12 }}>

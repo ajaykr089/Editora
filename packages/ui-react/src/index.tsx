@@ -1,9 +1,11 @@
+/// <reference path="./custom-elements.d.ts" />
 'use client';
 import { primeUICoreRegistration } from './core-registration';
 
 primeUICoreRegistration();
 
 export { Button } from './components/Button';
+export type { ButtonProps } from './components/Button';
 export { Tooltip } from './components/Tooltip';
 export { Alert, AlertIcon, AlertTitle, AlertDescription, AlertActions } from './components/Alert';
 export {
@@ -23,6 +25,8 @@ export { Textarea } from './components/Textarea';
 export type { TextareaProps, TextareaLabelProps, TextareaDescriptionProps, TextareaErrorProps } from './components/Textarea';
 export { Field } from './components/Field';
 export { Description, FieldError, ControlGroup, Fieldset } from './components/FieldSemantics';
+export { FiltersBar } from './components/FiltersBar';
+export type { FiltersBarOption, FiltersBarProps } from './components/FiltersBar';
 export { Combobox } from './components/Combobox';
 export { Badge } from './components/Badge';
 export type { BadgeProps, BadgeRemoveDetail } from './components/Badge';
@@ -31,6 +35,30 @@ export { Table } from './components/Table';
 export { DataTable } from './components/DataTable';
 export { Chart } from './components/Chart';
 export { Timeline } from './components/Timeline';
+export { Carousel } from './components/Carousel';
+export type {
+  CarouselProps,
+  CarouselItemProps,
+  CarouselControlsVariant,
+  CarouselControlsPosition,
+  CarouselControlsAlign,
+  CarouselControlsVisibility,
+  CarouselIndicatorsVariant,
+  CarouselDirection,
+  CarouselTransition
+} from './components/Carousel';
+export { CodeBlock } from './components/CodeBlock';
+export type { CodeBlockProps } from './components/CodeBlock';
+export { CodeSnippet } from './components/CodeSnippet';
+export type { CodeSnippetProps } from './components/CodeSnippet';
+export { CopyButton } from './components/CopyButton';
+export type { CopyButtonProps } from './components/CopyButton';
+export { DataViewToolbar } from './components/DataViewToolbar';
+export type { DataViewToolbarProps } from './components/DataViewToolbar';
+export { Stat } from './components/Stat';
+export type { StatProps } from './components/Stat';
+export { MetricCard } from './components/MetricCard';
+export type { MetricCardProps } from './components/MetricCard';
 export { Calendar } from './components/Calendar';
 export { ColorPicker } from './components/ColorPicker';
 export { DatePicker } from './components/DatePicker';
@@ -104,6 +132,10 @@ export { Toast } from './components/Toast';
 export type { ToastElement, ToastProps, ToastShowDetail, ToastHideDetail, ToastShowOptions } from './components/Toast';
 export { FloatingToolbar } from './components/FloatingToolbar';
 export { BlockControls } from './components/BlockControls';
+export { Kbd } from './components/Kbd';
+export type { KbdProps } from './components/Kbd';
+export { Shortcut } from './components/Shortcut';
+export type { ShortcutProps } from './components/Shortcut';
 export { Command, CommandItem, type CommandProps, type CommandItemProps, type CommandSelectDetail } from './components/Command';
 export { CommandPalette, CommandPaletteItem, type CommandPaletteProps, type CommandPaletteItemProps, type CommandPaletteSelectDetail, type CommandPaletteQueryChangeDetail, type CommandPaletteOpenChangeDetail, type CommandPaletteElement } from './components/CommandPalette';
 export { ContextMenu } from './components/ContextMenu';
@@ -139,6 +171,12 @@ export { Tree } from './components/Tree';
 export type { TreeProps, TreeItemProps, TreeSelectDetail, TreeExpandedChangeDetail } from './components/Tree';
 export { Breadcrumb } from './components/Breadcrumb';
 export { AppHeader, AppHeaderStart, AppHeaderCenter, AppHeaderTitle, AppHeaderSubtitle, AppHeaderEnd } from './components/AppHeader';
+export { PageHeader } from './components/PageHeader';
+export type { PageHeaderAction, PageHeaderProps, PageHeaderStatusChip } from './components/PageHeader';
+export { PageToolbar } from './components/PageToolbar';
+export type { PageToolbarProps } from './components/PageToolbar';
+export { RecordHeader } from './components/RecordHeader';
+export type { RecordHeaderProps, RecordHeaderDetail } from './components/RecordHeader';
 export { Drawer } from './components/Drawer';
 export { Layout } from './components/Layout';
 

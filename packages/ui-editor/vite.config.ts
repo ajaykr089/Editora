@@ -3,9 +3,10 @@ import path from 'path';
 
 export default defineConfig({
   resolve: {
-    alias: {
-      '@editora/ui-core': path.resolve(__dirname, '../ui-core/src')
-    }
+    alias: [
+      { find: '@editora/ui-core/runtime', replacement: path.resolve(__dirname, '../ui-core/src/runtime.ts') },
+      { find: '@editora/ui-core', replacement: path.resolve(__dirname, '../ui-core/src/index.ts') },
+    ]
   },
   build: {
     lib: {

@@ -16,7 +16,7 @@ import { useConfirmAction } from '@/shared/components/useConfirmAction';
 const patientSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(2, 'Name is required'),
-  age: z.number({ invalid_type_error: 'Age is required' }).min(0).max(120),
+  age: z.number().min(0, 'Age is required').max(120),
   gender: z.enum(['male', 'female', 'other']),
   phone: z.string().min(4),
   email: z.string().email(),

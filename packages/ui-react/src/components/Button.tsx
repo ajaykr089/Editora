@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useRef } from 'react';
 import { warnIfElementNotRegistered } from './_internals';
 
-type Props = Omit<React.HTMLAttributes<HTMLElement>, 'children'> & {
+export type ButtonProps = Omit<React.HTMLAttributes<HTMLElement>, 'children'> & {
   children?: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'warning';
   size?: 'sm' | 'md' | 'lg';
@@ -40,7 +40,7 @@ function setStringAttribute(el: HTMLElement, name: string, value: string | undef
   el.setAttribute(name, value);
 }
 
-export const Button = React.forwardRef<HTMLElement, Props>(function Button(
+export const Button = React.forwardRef<HTMLElement, ButtonProps>(function Button(
   {
     children,
     onClick,

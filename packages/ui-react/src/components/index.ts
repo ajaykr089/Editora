@@ -1,4 +1,5 @@
 export { Button } from './Button';
+export type { ButtonProps } from './Button';
 export { Tooltip } from './Tooltip';
 export { Alert, AlertIcon, AlertTitle, AlertDescription, AlertActions } from './Alert';
 export { Dropdown } from './Dropdown';
@@ -10,6 +11,8 @@ export { FileUpload, Dropzone } from './FileUpload';
 export { Textarea } from './Textarea';
 export { Field } from './Field';
 export { Description, FieldError, ControlGroup, Fieldset } from './FieldSemantics';
+export { FiltersBar } from './FiltersBar';
+export type { FiltersBarOption, FiltersBarProps } from './FiltersBar';
 export { Combobox } from './Combobox';
 export { Badge } from './Badge';
 export { EmptyState } from './EmptyState';
@@ -17,6 +20,30 @@ export { Table } from './Table';
 export { DataTable } from './DataTable';
 export { Chart } from './Chart';
 export { Timeline } from './Timeline';
+export { Carousel } from './Carousel';
+export type {
+  CarouselProps,
+  CarouselItemProps,
+  CarouselControlsVariant,
+  CarouselControlsPosition,
+  CarouselControlsAlign,
+  CarouselControlsVisibility,
+  CarouselIndicatorsVariant,
+  CarouselDirection,
+  CarouselTransition
+} from './Carousel';
+export { CodeBlock } from './CodeBlock';
+export type { CodeBlockProps } from './CodeBlock';
+export { CodeSnippet } from './CodeSnippet';
+export type { CodeSnippetProps } from './CodeSnippet';
+export { CopyButton } from './CopyButton';
+export type { CopyButtonProps } from './CopyButton';
+export { DataViewToolbar } from './DataViewToolbar';
+export type { DataViewToolbarProps } from './DataViewToolbar';
+export { Stat } from './Stat';
+export type { StatProps } from './Stat';
+export { MetricCard } from './MetricCard';
+export type { MetricCardProps } from './MetricCard';
 export { Calendar } from './Calendar';
 export { ColorPicker } from './ColorPicker';
 export { DatePicker } from './DatePicker';
@@ -67,6 +94,10 @@ export { Wizard } from './Wizard';
 export { Rating } from './Rating';
 export { QuickActions } from './QuickActions';
 export type { QuickActionsActionProps, QuickActionSelectDetail } from './QuickActions';
+export { Kbd } from './Kbd';
+export type { KbdProps } from './Kbd';
+export { Shortcut } from './Shortcut';
+export type { ShortcutProps } from './Shortcut';
 export {
   NavigationMenu,
   NavigationMenuRoot,
@@ -124,6 +155,12 @@ export { PanelGroup, Panel, Splitter } from './PanelGroup';
 export { Tree } from './Tree';
 export { Breadcrumb } from './Breadcrumb';
 export { AppHeader, AppHeaderStart, AppHeaderCenter, AppHeaderTitle, AppHeaderSubtitle, AppHeaderEnd } from './AppHeader';
+export { PageHeader } from './PageHeader';
+export type { PageHeaderAction, PageHeaderProps, PageHeaderStatusChip } from './PageHeader';
+export { PageToolbar } from './PageToolbar';
+export type { PageToolbarProps } from './PageToolbar';
+export { RecordHeader } from './RecordHeader';
+export type { RecordHeaderProps, RecordHeaderDetail } from './RecordHeader';
 export { Drawer } from './Drawer';
 export type { DrawerProps, DrawerHeaderProps, DrawerFooterProps } from './Drawer';
 export { Layout } from './Layout';

@@ -8,6 +8,7 @@ import {
   Badge,
   Box,
   Button,
+  Carousel,
   DirectionProvider,
   Dock,
   Grid,
@@ -41,8 +42,8 @@ export default function MotionPage() {
         >
           <ShowcaseCard
             eyebrow="Copy"
-            title="AnimatedText, SpinningText, and NumberTicker"
-            description="These wrappers are useful for premium hero moments, counters, and high-signal callouts."
+            title="AnimatedText, SpinningText, NumberTicker, and Carousel"
+            description="These wrappers are useful for premium hero moments, counters, high-signal callouts, and narrative slide sequences."
           >
             <Grid style={{ display: 'grid', gap: 16, justifyItems: 'stretch', alignItems: 'start' }}>
               <Box style={{ ...stageStyle, width: '100%' }}>
@@ -97,6 +98,45 @@ export default function MotionPage() {
                   </Button>
                 </Box>
               </Grid>
+
+              <Box style={{ ...stageStyle, width: '100%' }}>
+                <Box style={eyebrowStyle}>Carousel</Box>
+                <Carousel label="Launch storytelling carousel">
+                  <Carousel.Item label="Narrative setup">
+                    <Grid style={{ display: 'grid', gap: 12, alignItems: 'start', justifyItems: 'start' }}>
+                      <Badge tone="info">Story beat 1</Badge>
+                      <Box style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em' }}>
+                        Introduce the release in one high-clarity frame
+                      </Box>
+                      <Box style={hintStyle}>
+                        Carousel works best when each panel has a distinct job: context, momentum, and proof.
+                      </Box>
+                    </Grid>
+                  </Carousel.Item>
+                  <Carousel.Item label="Momentum">
+                    <Grid style={{ display: 'grid', gap: 12, alignItems: 'start', justifyItems: 'start' }}>
+                      <Badge tone="success">Story beat 2</Badge>
+                      <Box style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em' }}>
+                        Pair motion copy with a focused supporting metric
+                      </Box>
+                      <Box style={hintStyle}>
+                        This makes it useful for marketing heroes, gallery highlights, and launch recaps instead of only image rails.
+                      </Box>
+                    </Grid>
+                  </Carousel.Item>
+                  <Carousel.Item label="Action">
+                    <Grid style={{ display: 'grid', gap: 12, alignItems: 'start', justifyItems: 'start' }}>
+                      <Badge tone="warning">Story beat 3</Badge>
+                      <Box style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em' }}>
+                        Finish with an action or next step while the attention is warm
+                      </Box>
+                      <Button recipe="outline" size="sm">
+                        Review launch checklist
+                      </Button>
+                    </Grid>
+                  </Carousel.Item>
+                </Carousel>
+              </Box>
             </Grid>
           </ShowcaseCard>
 

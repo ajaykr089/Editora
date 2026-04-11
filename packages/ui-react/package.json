@@ -188,6 +188,12 @@
       "require": "./dist/Chart.cjs.js",
       "default": "./dist/Chart.esm.js"
     },
+    "./Carousel": {
+      "types": "./dist/components/Carousel.d.ts",
+      "import": "./dist/Carousel.esm.js",
+      "require": "./dist/Carousel.cjs.js",
+      "default": "./dist/Carousel.esm.js"
+    },
     "./Checkbox": {
       "types": "./dist/components/Checkbox.d.ts",
       "import": "./dist/Checkbox.esm.js",
@@ -211,6 +217,18 @@
       "import": "./dist/ColorPicker.esm.js",
       "require": "./dist/ColorPicker.cjs.js",
       "default": "./dist/ColorPicker.esm.js"
+    },
+    "./CodeBlock": {
+      "types": "./dist/components/CodeBlock.d.ts",
+      "import": "./dist/CodeBlock.esm.js",
+      "require": "./dist/CodeBlock.cjs.js",
+      "default": "./dist/CodeBlock.esm.js"
+    },
+    "./CodeSnippet": {
+      "types": "./dist/components/CodeSnippet.d.ts",
+      "import": "./dist/CodeSnippet.esm.js",
+      "require": "./dist/CodeSnippet.cjs.js",
+      "default": "./dist/CodeSnippet.esm.js"
     },
     "./Combobox": {
       "types": "./dist/components/Combobox.d.ts",
@@ -241,6 +259,18 @@
       "import": "./dist/ContextMenu.esm.js",
       "require": "./dist/ContextMenu.cjs.js",
       "default": "./dist/ContextMenu.esm.js"
+    },
+    "./CopyButton": {
+      "types": "./dist/components/CopyButton.d.ts",
+      "import": "./dist/CopyButton.esm.js",
+      "require": "./dist/CopyButton.cjs.js",
+      "default": "./dist/CopyButton.esm.js"
+    },
+    "./DataViewToolbar": {
+      "types": "./dist/components/DataViewToolbar.d.ts",
+      "import": "./dist/DataViewToolbar.esm.js",
+      "require": "./dist/DataViewToolbar.cjs.js",
+      "default": "./dist/DataViewToolbar.esm.js"
     },
     "./DataTable": {
       "types": "./dist/components/DataTable.d.ts",
@@ -344,6 +374,12 @@
       "require": "./dist/FieldSemantics.cjs.js",
       "default": "./dist/FieldSemantics.esm.js"
     },
+    "./FiltersBar": {
+      "types": "./dist/components/FiltersBar.d.ts",
+      "import": "./dist/FiltersBar.esm.js",
+      "require": "./dist/FiltersBar.cjs.js",
+      "default": "./dist/FiltersBar.esm.js"
+    },
     "./FileUpload": {
       "types": "./dist/components/FileUpload.d.ts",
       "import": "./dist/FileUpload.esm.js",
@@ -410,6 +446,12 @@
       "require": "./dist/Icon.cjs.js",
       "default": "./dist/Icon.esm.js"
     },
+    "./Kbd": {
+      "types": "./dist/components/Kbd.d.ts",
+      "import": "./dist/Kbd.esm.js",
+      "require": "./dist/Kbd.cjs.js",
+      "default": "./dist/Kbd.esm.js"
+    },
     "./InlineEdit": {
       "types": "./dist/components/InlineEdit.d.ts",
       "import": "./dist/InlineEdit.esm.js",
@@ -464,6 +506,12 @@
       "require": "./dist/Meter.cjs.js",
       "default": "./dist/Meter.esm.js"
     },
+    "./MetricCard": {
+      "types": "./dist/components/MetricCard.d.ts",
+      "import": "./dist/MetricCard.esm.js",
+      "require": "./dist/MetricCard.cjs.js",
+      "default": "./dist/MetricCard.esm.js"
+    },
     "./MultiSelect": {
       "types": "./dist/components/MultiSelect.d.ts",
       "import": "./dist/MultiSelect.esm.js",
@@ -494,6 +542,18 @@
       "require": "./dist/PanelGroup.cjs.js",
       "default": "./dist/PanelGroup.esm.js"
     },
+    "./PageHeader": {
+      "types": "./dist/components/PageHeader.d.ts",
+      "import": "./dist/PageHeader.esm.js",
+      "require": "./dist/PageHeader.cjs.js",
+      "default": "./dist/PageHeader.esm.js"
+    },
+    "./PageToolbar": {
+      "types": "./dist/components/PageToolbar.d.ts",
+      "import": "./dist/PageToolbar.esm.js",
+      "require": "./dist/PageToolbar.cjs.js",
+      "default": "./dist/PageToolbar.esm.js"
+    },
     "./PasswordField": {
       "types": "./dist/components/PasswordField.d.ts",
       "import": "./dist/PasswordField.esm.js",
@@ -517,6 +577,12 @@
       "import": "./dist/Popover.esm.js",
       "require": "./dist/Popover.cjs.js",
       "default": "./dist/Popover.esm.js"
+    },
+    "./RecordHeader": {
+      "types": "./dist/components/RecordHeader.d.ts",
+      "import": "./dist/RecordHeader.esm.js",
+      "require": "./dist/RecordHeader.cjs.js",
+      "default": "./dist/RecordHeader.esm.js"
     },
     "./Portal": {
       "types": "./dist/components/Portal.d.ts",
@@ -571,6 +637,12 @@
       "import": "./dist/ScrollArea.esm.js",
       "require": "./dist/ScrollArea.cjs.js",
       "default": "./dist/ScrollArea.esm.js"
+    },
+    "./Shortcut": {
+      "types": "./dist/components/Shortcut.d.ts",
+      "import": "./dist/Shortcut.esm.js",
+      "require": "./dist/Shortcut.cjs.js",
+      "default": "./dist/Shortcut.esm.js"
     },
     "./Section": {
       "types": "./dist/components/Section.d.ts",
@@ -631,6 +703,12 @@
       "import": "./dist/Stepper.esm.js",
       "require": "./dist/Stepper.cjs.js",
       "default": "./dist/Stepper.esm.js"
+    },
+    "./Stat": {
+      "types": "./dist/components/Stat.d.ts",
+      "import": "./dist/Stat.esm.js",
+      "require": "./dist/Stat.cjs.js",
+      "default": "./dist/Stat.esm.js"
     },
     "./Switch": {
       "types": "./dist/components/Switch.d.ts",

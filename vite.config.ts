@@ -3,14 +3,17 @@ import path from 'path';
 
 export default defineConfig({
   resolve: {
-    alias: {
-      '@editora/core': path.resolve(__dirname, './packages/core/src'),
-      '@editora/react': path.resolve(__dirname, './packages/react/src'),
-      '@editora/plugins': path.resolve(__dirname, './packages/plugins/src'),
-      '@editora/themes': path.resolve(__dirname, './packages/themes/src'),
-      '@editora/light-code-editor': path.resolve(__dirname, './packages/light-code-editor/src'),
-      '@editora/toast': path.resolve(__dirname, './packages/editora-toast/src'),
-    },
+    alias: [
+      { find: '@editora/ui-core/runtime', replacement: path.resolve(__dirname, './packages/ui-core/src/runtime.ts') },
+      { find: '@editora/ui-core', replacement: path.resolve(__dirname, './packages/ui-core/src/index.ts') },
+      { find: '@editora/ui-react', replacement: path.resolve(__dirname, './packages/ui-react/src/index.tsx') },
+      { find: '@editora/core', replacement: path.resolve(__dirname, './packages/core/src') },
+      { find: '@editora/react', replacement: path.resolve(__dirname, './packages/react/src') },
+      { find: '@editora/plugins', replacement: path.resolve(__dirname, './packages/plugins/src') },
+      { find: '@editora/themes', replacement: path.resolve(__dirname, './packages/themes/src') },
+      { find: '@editora/light-code-editor', replacement: path.resolve(__dirname, './packages/light-code-editor/src') },
+      { find: '@editora/toast', replacement: path.resolve(__dirname, './packages/editora-toast/src') },
+    ],
   },
   server: {
     proxy: {

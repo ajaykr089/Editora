@@ -21,6 +21,8 @@ const nestedComponentEntries = Object.fromEntries(
 const serverSafeComponents = new Set([
   'Anchor',
   'AspectRatio',
+  'CodeBlock',
+  'CodeSnippet',
   'Box',
   'Container',
   'DirectionProvider',
@@ -28,9 +30,13 @@ const serverSafeComponents = new Set([
   'Flex',
   'Grid',
   'Icon',
+  'Kbd',
   'Label',
+  'MetricCard',
   'Section',
   'Separator',
+  'Shortcut',
+  'Stat',
   'VisuallyHidden',
 ]);
 

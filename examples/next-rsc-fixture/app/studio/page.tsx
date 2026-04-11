@@ -14,6 +14,9 @@ import {
   Command,
   CommandPalette,
   ContextMenu,
+  CopyButton,
+  CodeBlock,
+  CodeSnippet,
   DirectionProvider,
   Flex,
   FloatingToolbar,
@@ -74,6 +77,7 @@ export default function StudioPage() {
   const [scrollStatus, setScrollStatus] = React.useState('Scroll the feed to inspect progress and reach events.');
   const [pluginOpen, setPluginOpen] = React.useState(true);
   const [pluginEvent, setPluginEvent] = React.useState('Plugin panel open.');
+  const [copyStatus, setCopyStatus] = React.useState('No copy action yet.');
 
   return (
     <DirectionProvider dir="ltr">
@@ -159,6 +163,28 @@ export default function StudioPage() {
                 </CommandPalette>
                 <Box style={hintStyle}>Palette query: <strong>{paletteQuery || 'empty'}</strong></Box>
                 <Box style={hintStyle}>{paletteSelection}</Box>
+              </Box>
+
+              <Box style={{ ...stageStyle, width: '100%' }}>
+                <Box style={eyebrowStyle}>CodeBlock + CopyButton</Box>
+                <CodeBlock
+                  title="Palette trigger"
+                  language="tsx"
+                  description="Docs-style example with a composed copy action."
+                  actions={(
+                    <CopyButton
+                      value={"window.addEventListener('keydown', (event) => {\n  if ((event.metaKey || event.ctrlKey) && event.key === 'k') {\n    event.preventDefault();\n  }\n});"}
+                      onCopy={(detail) => setCopyStatus(detail.success ? 'Snippet copied.' : 'Copy failed.')}
+                    />
+                  )}
+                  code={"window.addEventListener('keydown', (event) => {\n  if ((event.metaKey || event.ctrlKey) && event.key === 'k') {\n    event.preventDefault();\n  }\n});"}
+                />
+                <Flex style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <CodeSnippet code="CopyButton" tone="info" />
+                  <CodeSnippet code="CodeBlock" tone="brand" />
+                  <CodeSnippet code="CodeSnippet" tone="success" />
+                </Flex>
+                <Box style={hintStyle}>{copyStatus}</Box>
               </Box>
 
               <Box style={{ ...stageStyle, width: '100%' }}>

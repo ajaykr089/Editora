@@ -22,13 +22,32 @@ type EntityDataTableProps<T extends { id: string }> = {
 
 export function toneByStatus(value: string): 'info' | 'warning' | 'success' | 'danger' {
   const normalized = value.toLowerCase();
-  if (normalized.includes('paid') || normalized.includes('active') || normalized.includes('completed') || normalized.includes('available')) {
+  if (
+    normalized.includes('paid') ||
+    normalized.includes('active') ||
+    normalized.includes('completed') ||
+    normalized.includes('available') ||
+    normalized.includes('approved')
+  ) {
     return 'success';
   }
-  if (normalized.includes('partial') || normalized.includes('pending') || normalized.includes('arrived') || normalized.includes('reserved')) {
+  if (
+    normalized.includes('partial') ||
+    normalized.includes('pending') ||
+    normalized.includes('arrived') ||
+    normalized.includes('reserved') ||
+    normalized.includes('submitted') ||
+    normalized.includes('review')
+  ) {
     return 'warning';
   }
-  if (normalized.includes('critical') || normalized.includes('cancel') || normalized.includes('maintenance') || normalized.includes('error')) {
+  if (
+    normalized.includes('critical') ||
+    normalized.includes('cancel') ||
+    normalized.includes('maintenance') ||
+    normalized.includes('error') ||
+    normalized.includes('denied')
+  ) {
     return 'danger';
   }
   return 'info';

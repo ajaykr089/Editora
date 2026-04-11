@@ -13,7 +13,7 @@ const queryClient = new QueryClient({
   }
 });
 
-export function AppProviders({ children }: { children: React.ReactNode }) {
+export function AppProviders({ children }: { children: React.JSX.Element | React.JSX.Element[] }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider

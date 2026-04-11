@@ -10,15 +10,15 @@ Use this page to integrate Editora with AI coding assistants and model-driven to
 
 ## Live links
 
-- **Website:** https://editora-ecosystem.netlify.app/
+- **Website:** [current docs site](/)
 - **Storybook:** https://editora-ecosystem-storybook.netlify.app/
 
 ## Machine-readable metadata
 
-- **LLM index:** https://editora-ecosystem.netlify.app/llms.txt
-- **LLM full guide:** https://editora-ecosystem.netlify.app/llms-full.txt
-- **Component registry:** https://editora-ecosystem.netlify.app/components.json
-- **Component schema:** https://editora-ecosystem.netlify.app/components.schema.json
+- **LLM index:** [/llms.txt](/llms.txt)
+- **LLM full guide:** [/llms-full.txt](/llms-full.txt)
+- **Component registry:** [/components.json](/components.json)
+- **Component schema:** [/components.schema.json](/components.schema.json)
 
 ## Package contract (important)
 

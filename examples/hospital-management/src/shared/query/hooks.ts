@@ -48,6 +48,19 @@ export function useArchivePatientMutation() {
   });
 }
 
+export function useUploadPatientDocumentMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: mockApi.uploadPatientDocument,
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['patients'] });
+      queryClient.invalidateQueries({ queryKey: qk.patient(variables.patientId) });
+      queryClient.invalidateQueries({ queryKey: qk.dashboard });
+      queryClient.invalidateQueries({ queryKey: qk.settings });
+    }
+  });
+}
+
 export function useAppointmentsQuery(params: QueryListParams) {
   return useQuery({
     queryKey: qk.appointments(params),
@@ -124,7 +137,12 @@ export function usePharmacyQuery(params: QueryListParams) {
 
 export function useDispenseMedicineMutation() {
   const queryClient = useQueryClient();
-  return useMutation({
+  return useMutation<
+    Awaited<ReturnType<typeof mockApi.dispenseMedicine>>,
+    Error,
+    { id: string; quantity: number },
+    { previous: [readonly unknown[], unknown][] }
+  >({
     mutationFn: mockApi.dispenseMedicine,
     onMutate: async ({ id, quantity }: { id: string; quantity: number }) => {
       await queryClient.cancelQueries({ queryKey: ['pharmacy'] });
@@ -140,11 +158,23 @@ export function useDispenseMedicineMutation() {
       });
       return { previous };
     },
-    onError: (_error: unknown, _variables: unknown, ctx: any) => {
+    onError: (_error, _variables, ctx) => {
       ctx?.previous?.forEach(([queryKey, data]: [unknown, unknown]) => queryClient.setQueryData(queryKey as any, data));
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['pharmacy'] });
+    }
+  });
+}
+
+export function useRestockMedicineMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: mockApi.restockMedicine,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pharmacy'] });
+      queryClient.invalidateQueries({ queryKey: qk.dashboard });
+      queryClient.invalidateQueries({ queryKey: qk.settings });
     }
   });
 }
@@ -167,6 +197,18 @@ export function useUpdateLabResultMutation() {
   });
 }
 
+export function useCreateLabOrderMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: mockApi.createLabOrder,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['labs'] });
+      queryClient.invalidateQueries({ queryKey: qk.dashboard });
+      queryClient.invalidateQueries({ queryKey: qk.settings });
+    }
+  });
+}
+
 export function useInvoicesQuery(params: QueryListParams) {
   return useQuery({
     queryKey: qk.invoices(params),
@@ -185,6 +227,18 @@ export function useRecordPaymentMutation() {
   });
 }
 
+export function useCreateInvoiceMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: mockApi.createInvoice,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: qk.dashboard });
+      queryClient.invalidateQueries({ queryKey: qk.settings });
+    }
+  });
+}
+
 export function useReportsQuery(params: { from?: string; to?: string; department?: string; doctor?: string }) {
   return useQuery({
     queryKey: qk.reports(params),
@@ -196,6 +250,17 @@ export function useSettingsQuery() {
   return useQuery({
     queryKey: qk.settings,
     queryFn: () => mockApi.getSettings()
+  });
+}
+
+export function useSaveSettingsMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: mockApi.saveSettings,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: qk.settings });
+      queryClient.invalidateQueries({ queryKey: qk.dashboard });
+    }
   });
 }
 

@@ -2,13 +2,53 @@ import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
 
+const defaultSiteUrl = "https://editora-ecosystem.netlify.app";
+const defaultStorybookUrl = "https://editora-ecosystem-storybook.netlify.app";
+const siteUrl = (process.env.DOCS_SITE_URL || defaultSiteUrl).replace(/\/+$/, "");
+const storybookUrl = (process.env.DOCS_STORYBOOK_URL || defaultStorybookUrl).replace(/\/+$/, "");
+const siteTitle = process.env.DOCS_SITE_TITLE || "Editora";
+const siteDescription =
+  process.env.DOCS_SITE_DESCRIPTION ||
+  "Production-ready docs for Editora: core editor, React wrapper, plugins, themes, icons, and UI packages.";
+const googleSiteVerification = process.env.GOOGLE_SITE_VERIFICATION;
+const bingSiteVerification = process.env.BING_SITE_VERIFICATION;
+const twitterHandle = process.env.DOCS_TWITTER_HANDLE;
+const shouldNoIndex = /^(1|true|yes)$/i.test(process.env.DOCS_NO_INDEX || "");
+
 const hasAlgolia =
   Boolean(process.env.DOCSEARCH_APP_ID) &&
   Boolean(process.env.DOCSEARCH_API_KEY) &&
   Boolean(process.env.DOCSEARCH_INDEX_NAME);
 
+const siteStructuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: `${siteTitle} Documentation`,
+    url: siteUrl,
+    description: siteDescription,
+    publisher: {
+      "@type": "Organization",
+      name: siteTitle,
+      url: siteUrl,
+    },
+    inLanguage: "en",
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: siteTitle,
+    url: siteUrl,
+    logo: `${siteUrl}/img/editora-mark.svg`,
+    sameAs: [
+      "https://github.com/ajaykr089/Editora",
+      storybookUrl,
+    ],
+  },
+];
+
 const config: Config = {
-  title: "Editora",
+  title: siteTitle,
   tagline: "Enterprise-grade documentation for the Editora ecosystem",
   favicon: "img/editora-mark.svg",
 
@@ -16,9 +56,10 @@ const config: Config = {
     v4: true,
   },
 
-  url: "https://editora-ecosystem.netlify.app",
+  url: siteUrl,
   baseUrl: "/",
   trailingSlash: false,
+  noIndex: shouldNoIndex,
 
   organizationName: "editora",
   projectName: "editora-docs",
@@ -29,6 +70,23 @@ const config: Config = {
       onBrokenMarkdownLinks: "throw",
     },
   },
+  headTags: [
+    {
+      tagName: "link",
+      attributes: {
+        rel: "sitemap",
+        type: "application/xml",
+        href: `${siteUrl}/sitemap.xml`,
+      },
+    },
+    ...siteStructuredData.map((item) => ({
+      tagName: "script",
+      attributes: {
+        type: "application/ld+json",
+      },
+      innerHTML: JSON.stringify(item),
+    })),
+  ],
 
   i18n: {
     defaultLocale: "en",
@@ -94,30 +152,51 @@ const config: Config = {
     metadata: [
       {
         name: "description",
-        content:
-          "Production-ready docs for Editora: core editor, React wrapper, plugins, themes, icons, and UI packages.",
+        content: siteDescription,
       },
       {
         name: "keywords",
         content:
           "editora, rich text editor, react editor, web components, docs, plugins, ui-core, ui-react, icons",
       },
+      {
+        name: "robots",
+        content: shouldNoIndex
+          ? "noindex, nofollow"
+          : "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
+      },
+      {
+        name: "googlebot",
+        content: shouldNoIndex
+          ? "noindex, nofollow"
+          : "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
+      },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Editora Docs" },
       { property: "og:title", content: "Editora Documentation" },
       {
         property: "og:description",
-        content: "Enterprise-grade documentation for the Editora ecosystem.",
+        content: siteDescription,
       },
       {
         property: "og:image",
-        content: "https://editora-ecosystem.netlify.app/img/editora-social-card.svg",
+        content: `${siteUrl}/img/editora-social-card.svg`,
       },
+      { property: "og:url", content: siteUrl },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Editora Documentation" },
+      { name: "twitter:description", content: siteDescription },
       {
         name: "twitter:image",
-        content: "https://editora-ecosystem.netlify.app/img/editora-social-card.svg",
+        content: `${siteUrl}/img/editora-social-card.svg`,
       },
+      ...(twitterHandle ? [{ name: "twitter:site", content: twitterHandle }] : []),
+      ...(googleSiteVerification
+        ? [{ name: "google-site-verification", content: googleSiteVerification }]
+        : []),
+      ...(bingSiteVerification
+        ? [{ name: "msvalidate.01", content: bingSiteVerification }]
+        : []),
     ],
     navbar: {
       title: "Editora",
@@ -130,6 +209,7 @@ const config: Config = {
         { to: "/docs/getting-started/overview", label: "Getting Started", position: "left" },
         { to: "/docs/editor/core", label: "Core", position: "left" },
         { to: "/docs/ui-react", label: "UI React", position: "left" },
+        { to: "/docs/examples/hospital-management-showcase", label: "Showcase", position: "left" },
         { to: "/docs/ai-usage", label: "AI", position: "left" },
         { type: "search", position: "right" },
         { type: "docsVersionDropdown", position: "right" },
@@ -167,6 +247,8 @@ const config: Config = {
             { label: "Contributing", to: "/docs/contributing/overview" },
             { label: "Migration", to: "/docs/migration/versioning-and-releases" },
             { label: "CLI", to: "/docs/reference/cli" },
+            { label: "SEO", to: "/docs/advanced/seo" },
+            { label: "Hospital Showcase", to: "/docs/examples/hospital-management-showcase" },
             { label: "AI Guide", to: "/docs/ai-usage" },
             { label: "Prompt Pack", to: "/docs/editora-prompts" },
             { label: "Editor AI Guide", to: "/docs/editor/ai-usage" },
@@ -174,7 +256,7 @@ const config: Config = {
             { label: "Toast AI Guide", to: "/docs/toast/ai-usage" },
             { label: "React Icons AI Guide", to: "/docs/react-icons/ai-usage" },
             { label: "Light Code Editor AI Guide", to: "/docs/packages/light-code-editor-ai-usage" },
-            { label: "components.json", href: "https://editora-ecosystem.netlify.app/components.json" },
+            { label: "components.json", href: `${siteUrl}/components.json` },
             { label: "GitHub", href: "https://github.com/ajaykr089/Editora" },
           ],
         },

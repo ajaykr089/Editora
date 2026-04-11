@@ -19,8 +19,8 @@ Use this page when generating code specifically for the Editora rich text editor
 
 Use these metadata links in prompts or indexing pipelines:
 
-- `https://editora-ecosystem.netlify.app/llms.txt`
-- `https://editora-ecosystem.netlify.app/llms-full.txt`
+- [`/llms.txt`](/llms.txt)
+- [`/llms-full.txt`](/llms-full.txt)
 
 ## Starter integration (React)
 

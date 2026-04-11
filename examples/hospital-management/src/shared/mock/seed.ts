@@ -2,9 +2,11 @@ import {
   ActivityEvent,
   Appointment,
   Bed,
+  HospitalSettings,
   Invoice,
   LabOrder,
   Patient,
+  PatientDocument,
   PermissionMatrix,
   PharmacyItem,
   Role,
@@ -165,6 +167,31 @@ export function createInvoices(patients: Patient[]): Invoice[] {
   });
 }
 
+export function createPatientDocuments(patients: Patient[]): PatientDocument[] {
+  return patients.slice(0, 8).flatMap((patient, idx) => [
+    {
+      id: `doc-${idx + 1}-a`,
+      patientId: patient.id,
+      title: 'Insurance Card',
+      category: 'insurance',
+      fileName: `${patient.name.toLowerCase().replace(/\s+/g, '-')}-insurance.pdf`,
+      notes: 'Verified at check-in.',
+      uploadedAt: new Date(Date.now() - idx * 5_400_000).toISOString(),
+      uploadedBy: 'Front Desk'
+    },
+    {
+      id: `doc-${idx + 1}-b`,
+      patientId: patient.id,
+      title: 'Latest Lab Summary',
+      category: 'lab-report',
+      fileName: `${patient.name.toLowerCase().replace(/\s+/g, '-')}-labs.pdf`,
+      notes: 'Attached from laboratory workflow.',
+      uploadedAt: new Date(Date.now() - idx * 7_200_000).toISOString(),
+      uploadedBy: 'Lab Team'
+    }
+  ]);
+}
+
 export function createActivityFeed(): ActivityEvent[] {
   return [
     { id: 'act-1', level: 'success', message: '3 discharges completed in Ward-B', time: '08:34 AM' },
@@ -173,6 +200,19 @@ export function createActivityFeed(): ActivityEvent[] {
     { id: 'act-4', level: 'info', message: '12 lab reports marked completed', time: '10:10 AM' },
     { id: 'act-5', level: 'success', message: 'Billing reconciliation synced', time: '10:42 AM' }
   ];
+}
+
+export function createSettings(): HospitalSettings {
+  return {
+    hospitalName: 'Northstar General Hospital',
+    timezone: 'America/New_York',
+    departments: ['Cardiology', 'Orthopedics', 'Pediatrics', 'Oncology', 'Emergency', 'Laboratory'],
+    notifications: {
+      appointmentReminders: true,
+      dischargeAlerts: true,
+      lowStockAlerts: true
+    }
+  };
 }
 
 export function createPermissions(): PermissionMatrix {

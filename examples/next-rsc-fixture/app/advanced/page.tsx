@@ -9,9 +9,12 @@ import {
   Card,
   Chart,
   DataTable,
+  DataViewToolbar,
   DirectionProvider,
   Grid,
   Pagination,
+  PageToolbar,
+  RecordHeader,
   Table,
   Tabs,
 } from '@editora/ui-react';
@@ -68,9 +71,30 @@ export default function AdvancedPage() {
   const [selectedTab, setSelectedTab] = React.useState('overview');
   const [selectedPoint, setSelectedPoint] = React.useState('Tap a chart point to inspect its detail.');
   const [page, setPage] = React.useState(1);
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [statusFilter, setStatusFilter] = React.useState('all');
   const [selectedRows, setSelectedRows] = React.useState<number[]>([]);
 
-  const totalPages = Math.ceil(pipelineRows.length / 4);
+  const filteredRows = pipelineRows.filter((row) => {
+    const matchesStatus = statusFilter === 'all' || row.status === statusFilter;
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    if (!matchesStatus) return false;
+    if (!normalizedQuery) return true;
+
+    return [row.name, row.team, row.region, row.arr].some((value) => value.toLowerCase().includes(normalizedQuery));
+  });
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / 4));
+  const pagedRows = filteredRows.slice((page - 1) * 4, page * 4);
+
+  React.useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
+
+  React.useEffect(() => {
+    setSelectedRows([]);
+  }, [page, searchQuery, statusFilter]);
 
   return (
     <DirectionProvider dir="ltr">
@@ -89,6 +113,44 @@ export default function AdvancedPage() {
             alignItems: 'start',
           }}
         >
+          <ShowcaseCard
+            eyebrow="Page Patterns"
+            title="RecordHeader and PageToolbar"
+            description="These higher-level compositions sit one step above PageHeader and FiltersBar. They are useful once the same page-shell pattern shows up across multiple screens."
+          >
+            <Grid style={{ display: 'grid', gap: 16, justifyItems: 'stretch', alignItems: 'start' }}>
+              <RecordHeader
+                details={[
+                  { label: 'MRN', value: 'PT-1042' },
+                  { label: 'Owner', value: 'Dr. Maya Chen' },
+                  { label: 'Updated', value: 'Apr 9, 2026' },
+                ]}
+                statusChip={{ label: 'critical', tone: 'warning' }}
+                subtitle="Detail pages can promote the most important record facts into a structured header."
+                title="Ava Stone"
+              />
+
+              <PageToolbar
+                actions={[
+                  {
+                    label: 'Export report',
+                    onClick: () => setSelectedPoint('Toolbar action triggered from PageToolbar.'),
+                  },
+                ]}
+                footer={<Box style={hintStyle}>PageToolbar groups the page intro, filter row, and footer note inside one reusable shell.</Box>}
+                subtitle="This is useful when the header and controls travel together across list pages."
+                title="Operational reports"
+                toolbar={(
+                  <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10 }}>
+                    <Box style={{ ...stageStyle, minHeight: 72 }}>Date range</Box>
+                    <Box style={{ ...stageStyle, minHeight: 72 }}>Department</Box>
+                    <Box style={{ ...stageStyle, minHeight: 72 }}>Owner</Box>
+                  </Grid>
+                )}
+              />
+            </Grid>
+          </ShowcaseCard>
+
           <ShowcaseCard
             eyebrow="Disclosure"
             title="Accordion and tabs"
@@ -251,6 +313,40 @@ export default function AdvancedPage() {
 
               <Box style={{ ...stageStyle, width: '100%' }}>
                 <Box style={eyebrowStyle}>DataTable</Box>
+                <DataViewToolbar
+                  actions={(
+                    <Button recipe="outline" size="sm" variant="secondary">
+                      Export slice
+                    </Button>
+                  )}
+                  description="A higher-level pattern built on top of FiltersBar for list pages that need counts, search, filters, and actions in one place."
+                  itemLabel="account"
+                  search={searchQuery}
+                  searchPlaceholder="Search by name, team, region, or ARR"
+                  selectedCount={selectedRows.length}
+                  status={statusFilter}
+                  statusOptions={[
+                    { value: 'all', label: 'All status' },
+                    { value: 'Active', label: 'Active' },
+                    { value: 'Trial', label: 'Trial' },
+                    { value: 'At Risk', label: 'At Risk' },
+                  ]}
+                  title="DataViewToolbar"
+                  totalCount={filteredRows.length}
+                  onClear={() => {
+                    setSearchQuery('');
+                    setStatusFilter('all');
+                    setPage(1);
+                  }}
+                  onSearchChange={(value) => {
+                    setSearchQuery(value);
+                    setPage(1);
+                  }}
+                  onStatusChange={(value) => {
+                    setStatusFilter(value);
+                    setPage(1);
+                  }}
+                />
                 <Box style={hintStyle}>Selected rows: <strong>{selectedRows.length}</strong> / page <strong>{page}</strong></Box>
                 <Box style={scrollerStyle}>
                   <DataTable
@@ -278,7 +374,7 @@ export default function AdvancedPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {pipelineRows.map((row) => (
+                        {pagedRows.map((row) => (
                           <tr key={`${row.name}-${row.region}`}>
                             <td>{row.name}</td>
                             <td>{row.team}</td>

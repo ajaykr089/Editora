@@ -3,15 +3,21 @@ import {
   Anchor,
   AspectRatio,
   Box,
+  CodeBlock,
+  CodeSnippet,
   Container,
   DirectionProvider,
   Field,
   Flex,
   Grid,
   Icon,
+  Kbd,
   Label,
+  MetricCard,
   Section,
   Separator,
+  Shortcut,
+  Stat,
   VisuallyHidden,
 } from '@editora/ui-react/server';
 
@@ -23,11 +29,17 @@ const serverExports = [
   'DirectionProvider',
   'Anchor',
   'AspectRatio',
+  'CodeBlock',
+  'CodeSnippet',
   'Field',
   'Icon',
+  'Kbd',
   'Label',
+  'MetricCard',
   'Section',
   'Separator',
+  'Shortcut',
+  'Stat',
   'VisuallyHidden',
 ];
 
@@ -202,6 +214,76 @@ export default function ServerPage() {
             >
               <Grid style={{ display: 'grid', gap: 6 }}>
                 <Box style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+                  Metrics & Shortcuts
+                </Box>
+                <Box style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.15, color: '#0f172a' }}>
+                  Stat, MetricCard, Kbd, and Shortcut
+                </Box>
+                <Box style={{ fontSize: 14, lineHeight: 1.6, color: '#475569' }}>
+                  The newer React-only composites are also server-safe, which makes them useful for dashboards, docs, and keyboard hint surfaces in RSC or SSR routes.
+                </Box>
+              </Grid>
+
+              <Grid
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                  gap: 14,
+                }}
+              >
+                <MetricCard
+                  label="Published pages"
+                  value="128"
+                  meta="This week"
+                  trend="+12%"
+                  icon={<Icon name="sparkles" decorative />}
+                />
+                <Box
+                  style={{
+                    display: 'grid',
+                    gap: 12,
+                    padding: 16,
+                    borderRadius: 18,
+                    background: '#f8fafc',
+                    border: '1px solid rgba(148, 163, 184, 0.18)',
+                  }}
+                >
+                  <Stat
+                    label="Review coverage"
+                    value="84%"
+                    tone="success"
+                    trend="Stable"
+                    icon={<Icon name="shield-check" decorative />}
+                  />
+                  <Separator />
+                  <Grid style={{ display: 'grid', gap: 8 }}>
+                    <Box style={{ fontSize: 13, color: '#475569' }}>Open command palette</Box>
+                    <Shortcut>
+                      <span>Cmd</span>
+                      <span>K</span>
+                    </Shortcut>
+                  </Grid>
+                  <Grid style={{ display: 'grid', gap: 8 }}>
+                    <Box style={{ fontSize: 13, color: '#475569' }}>Navigate list results</Box>
+                    <Kbd keys={['ArrowDown', 'Enter']} separator="then" />
+                  </Grid>
+                </Box>
+              </Grid>
+            </Box>
+
+            <Box
+              style={{
+                display: 'grid',
+                gap: 16,
+                padding: 20,
+                borderRadius: 20,
+                border: '1px solid rgba(148, 163, 184, 0.24)',
+                background: 'rgba(255, 255, 255, 0.92)',
+                boxShadow: '0 18px 38px rgba(15, 23, 42, 0.08)',
+              }}
+            >
+              <Grid style={{ display: 'grid', gap: 6 }}>
+                <Box style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
                   Content
                 </Box>
                 <Box style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.15, color: '#0f172a' }}>
@@ -258,6 +340,46 @@ export default function ServerPage() {
                 <VisuallyHidden>Server-only accessibility helper text for assistive technology.</VisuallyHidden>
                 This paragraph also includes a hidden accessibility label rendered by <code>VisuallyHidden</code>.
               </Box>
+            </Box>
+
+            <Box
+              style={{
+                display: 'grid',
+                gap: 16,
+                padding: 20,
+                borderRadius: 20,
+                border: '1px solid rgba(148, 163, 184, 0.24)',
+                background: 'rgba(255, 255, 255, 0.92)',
+                boxShadow: '0 18px 38px rgba(15, 23, 42, 0.08)',
+              }}
+            >
+              <Grid style={{ display: 'grid', gap: 6 }}>
+                <Box style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+                  Code Surfaces
+                </Box>
+                <Box style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.15, color: '#0f172a' }}>
+                  CodeBlock and CodeSnippet
+                </Box>
+                <Box style={{ fontSize: 14, lineHeight: 1.6, color: '#475569' }}>
+                  These display-only code surfaces are safe to render from the server entry and work well for docs, install steps, and API references.
+                </Box>
+              </Grid>
+
+              <Grid style={{ display: 'grid', gap: 14 }}>
+                <CodeBlock
+                  title="Install packages"
+                  language="bash"
+                  description="Server-rendered code panel"
+                  code={"npm install @editora/ui-react @editora/ui-core\nnpm run build"}
+                />
+                <Flex style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <Box style={{ fontSize: 13, color: '#475569' }}>Use</Box>
+                  <CodeSnippet code="CodeBlock" />
+                  <Box style={{ fontSize: 13, color: '#475569' }}>for multi-line snippets and</Box>
+                  <CodeSnippet code="@editora/ui-react/server" tone="brand" />
+                  <Box style={{ fontSize: 13, color: '#475569' }}>for RSC-safe display imports.</Box>
+                </Flex>
+              </Grid>
             </Box>
 
             <Box

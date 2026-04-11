@@ -28,6 +28,19 @@ export type Patient = {
   updatedAt: string;
 };
 
+export type PatientDocumentCategory = 'id' | 'insurance' | 'discharge-summary' | 'lab-report' | 'prescription' | 'other';
+
+export type PatientDocument = {
+  id: string;
+  patientId: string;
+  title: string;
+  category: PatientDocumentCategory;
+  fileName: string;
+  notes?: string;
+  uploadedAt: string;
+  uploadedBy: string;
+};
+
 export type AppointmentStatus = 'scheduled' | 'arrived' | 'in-consultation' | 'completed' | 'cancelled';
 
 export type Appointment = {
@@ -103,6 +116,17 @@ export type ActivityEvent = {
   level: 'info' | 'warning' | 'critical' | 'success';
   message: string;
   time: string;
+};
+
+export type HospitalSettings = {
+  hospitalName: string;
+  timezone: string;
+  departments: string[];
+  notifications: {
+    appointmentReminders: boolean;
+    dischargeAlerts: boolean;
+    lowStockAlerts: boolean;
+  };
 };
 
 export type PermissionMatrix = Record<Role, Record<string, 'read' | 'write'>>;

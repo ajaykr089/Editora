@@ -9,10 +9,11 @@ export default defineConfig({
     setupFiles: ['src/__tests__/setup.ts']
   },
   resolve: {
-    alias: {
-      '@editora/ui-core': resolve(__dirname, 'src/index.ts'),
-      '@editora/ui-react': resolve(__dirname, '../ui-react/src/index.tsx'),
-      '@editora/icons': resolve(__dirname, '../icons/src/index.ts')
-    }
+    alias: [
+      { find: '@editora/ui-core/runtime', replacement: resolve(__dirname, 'src/runtime.ts') },
+      { find: '@editora/ui-core', replacement: resolve(__dirname, 'src/index.ts') },
+      { find: '@editora/ui-react', replacement: resolve(__dirname, '../ui-react/src/index.tsx') },
+      { find: '@editora/icons', replacement: resolve(__dirname, '../icons/src/index.ts') },
+    ]
   }
 });
