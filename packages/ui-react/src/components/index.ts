@@ -176,6 +176,7 @@ export { FocusScope } from './FocusScope';
 export { Positioner } from './Positioner';
 export { Anchor } from './Anchor';
 export { Checkbox } from './Checkbox';
+export { Radio } from './Radio';
 export { RadioGroup } from './RadioGroup';
 export { Switch } from './Switch';
 export { Toggle } from './Toggle';

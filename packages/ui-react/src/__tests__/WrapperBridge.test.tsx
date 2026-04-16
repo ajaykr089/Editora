@@ -26,6 +26,7 @@ import { PasswordField } from '../components/PasswordField';
 import { PinInput } from '../components/PinInput';
 import { Progress } from '../components/Progress';
 import { QuickActions } from '../components/QuickActions';
+import { Radio } from '../components/Radio';
 import { RadioGroup } from '../components/RadioGroup';
 import { Select } from '../components/Select';
 import { Slider } from '../components/Slider';
@@ -79,6 +80,7 @@ describe('wrapper bridge helpers', () => {
     ensureElement('ui-pin-input');
     ensureElement('ui-progress');
     ensureElement('ui-quick-actions');
+    ensureElement('ui-radio');
     ensureElement('ui-radio-group');
     ensureElement('ui-select');
     ensureElement('ui-slider');
@@ -839,6 +841,44 @@ describe('wrapper bridge helpers', () => {
 
     await waitFor(() => {
       expect(changedValue).toBe('monthly');
+    });
+  });
+
+  it('maps Radio props and checked detail events', async () => {
+    let checkedValue = false;
+
+    const { container } = render(
+      <Radio
+        checked
+        name="billing"
+        value="monthly"
+        tone="success"
+        onCheckedChange={(checked) => {
+          checkedValue = checked;
+        }}
+      />
+    );
+
+    const host = container.querySelector('ui-radio') as HTMLElement | null;
+
+    await waitFor(() => {
+      expect(host?.hasAttribute('checked')).toBe(true);
+      expect(host?.getAttribute('name')).toBe('billing');
+      expect(host?.getAttribute('value')).toBe('monthly');
+      expect(host?.getAttribute('tone')).toBe('success');
+    });
+
+    fireEvent(
+      host!,
+      new CustomEvent('input', {
+        detail: { checked: true, value: 'monthly', name: 'billing', reason: 'click' },
+        bubbles: true,
+        composed: true,
+      })
+    );
+
+    await waitFor(() => {
+      expect(checkedValue).toBe(true);
     });
   });
 

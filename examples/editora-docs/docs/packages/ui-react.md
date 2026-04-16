@@ -49,7 +49,7 @@ That app is the recommended advanced reference for how `@editora/ui-react` surfa
 | `DialogProvider`, `useDialog`, `AlertDialogProvider`, `useAlertDialog` | Provider/hooks | Dialog state orchestration |
 | `Icon` | Component export | Icon renderer wrapper |
 | `Toast`, `ToastAPI`, `toast`, `toastApi` | Toast exports | Toast component + APIs |
-| `Checkbox`, `RadioGroup`, `Switch`, `Toggle`, `ToggleGroup`, `AspectRatio`, `Avatar`, `Presence`, `Progress`, `Portal`, `ScrollArea`, `Separator`, `Slot`, `Toolbar`, `VisuallyHidden`, `Collapsible`, `Pagination`, `Accordion`, `AccordionItem`, `AccordionTrigger`, `AccordionPanel`, `DirectionProvider`, `HoverCard`, `Label`, `AlertDialog`, `Select`, `Slider`, `Skeleton` | Component exports | Full primitive/component catalog |
+| `Checkbox`, `Radio`, `RadioGroup`, `Switch`, `Toggle`, `ToggleGroup`, `AspectRatio`, `Avatar`, `Presence`, `Progress`, `Portal`, `ScrollArea`, `Separator`, `Slot`, `Toolbar`, `VisuallyHidden`, `Collapsible`, `Pagination`, `Accordion`, `AccordionItem`, `AccordionTrigger`, `AccordionPanel`, `DirectionProvider`, `HoverCard`, `Label`, `AlertDialog`, `Select`, `Slider`, `Skeleton` | Component exports | Full primitive/component catalog |
 
 ## Best Practices
 

@@ -1,9 +1,7 @@
 /// <reference path="./custom-elements.d.ts" />
 'use client';
 
-import { primeUICoreRegistration } from './core-registration';
-
-primeUICoreRegistration();
+import '@editora/ui-core';
 
 // RSC-safe client barrel:
 // keep this surface limited to commonly used wrappers that are safe to import
@@ -50,6 +48,7 @@ export { PageToolbar } from './components/PageToolbar';
 export { PasswordField } from './components/PasswordField';
 export { PinInput, OTPInput } from './components/PinInput';
 export { Progress } from './components/Progress';
+export { Radio } from './components/Radio';
 export { RadioGroup } from './components/RadioGroup';
 export { RecordHeader } from './components/RecordHeader';
 export { Section } from './components/Section';

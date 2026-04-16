@@ -41,7 +41,7 @@ const style = `
     border: 1px solid var(--ui-stepper-border);
     border-radius: var(--ui-stepper-radius);
     background: var(--ui-stepper-bg);
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
     padding: 10px;
   }
 
@@ -84,8 +84,8 @@ const style = `
   }
 
   .trigger:hover {
-    border-color: color-mix(in srgb, var(--ui-stepper-accent) 34%, var(--ui-stepper-border));
-    background: color-mix(in srgb, var(--ui-stepper-accent) 8%, transparent);
+    border-color: color-mix(in srgb, var(--ui-stepper-accent) 20%, var(--ui-stepper-border));
+    background: color-mix(in srgb, var(--ui-stepper-accent) 4%, transparent);
   }
 
   .trigger:focus-visible {
@@ -116,9 +116,8 @@ const style = `
     position: absolute;
     inset: -5px;
     border-radius: inherit;
-    border: 1px solid color-mix(in srgb, var(--ui-stepper-accent) 56%, transparent);
-    opacity: 0.45;
-    animation: ui-stepper-current-pulse var(--ui-stepper-indicator-duration) ease-out infinite;
+    border: 1px solid color-mix(in srgb, var(--ui-stepper-accent) 34%, transparent);
+    opacity: 0.18;
     pointer-events: none;
   }
 
@@ -162,19 +161,19 @@ const style = `
   }
 
   .item[data-state="current"] .trigger {
-    border-color: color-mix(in srgb, var(--ui-stepper-accent) 46%, transparent);
-    background: color-mix(in srgb, var(--ui-stepper-accent) 13%, transparent);
+    border-color: color-mix(in srgb, var(--ui-stepper-accent) 28%, var(--ui-stepper-border));
+    background: color-mix(in srgb, var(--ui-stepper-accent) 7%, transparent);
   }
 
   .item[data-state="current"] .index,
   .item[data-state="complete"] .index {
-    border-color: color-mix(in srgb, var(--ui-stepper-accent) 44%, transparent);
-    background: color-mix(in srgb, var(--ui-stepper-accent) 18%, transparent);
-    color: color-mix(in srgb, var(--ui-stepper-accent) 86%, #0f172a 14%);
+    border-color: color-mix(in srgb, var(--ui-stepper-accent) 28%, var(--ui-stepper-border));
+    background: color-mix(in srgb, var(--ui-stepper-accent) 10%, transparent);
+    color: color-mix(in srgb, var(--ui-stepper-accent) 68%, #0f172a 32%);
   }
 
   .item[data-state="complete"] .connector {
-    background: color-mix(in srgb, var(--ui-stepper-accent) 52%, transparent);
+    background: color-mix(in srgb, var(--ui-stepper-accent) 32%, transparent);
   }
 
   .item[data-state="current"] .connector::after {
@@ -184,11 +183,10 @@ const style = `
     background: linear-gradient(
       90deg,
       transparent 0%,
-      color-mix(in srgb, var(--ui-stepper-accent) 48%, transparent) 50%,
+      color-mix(in srgb, var(--ui-stepper-accent) 24%, transparent) 50%,
       transparent 100%
     );
-    transform: translateX(-100%);
-    animation: ui-stepper-connector-flow var(--ui-stepper-indicator-duration) linear infinite;
+    opacity: 0.45;
     pointer-events: none;
   }
 
@@ -196,11 +194,9 @@ const style = `
     background: linear-gradient(
       180deg,
       transparent 0%,
-      color-mix(in srgb, var(--ui-stepper-accent) 48%, transparent) 50%,
+      color-mix(in srgb, var(--ui-stepper-accent) 24%, transparent) 50%,
       transparent 100%
     );
-    transform: translateY(-100%);
-    animation-name: ui-stepper-connector-flow-vertical;
   }
 
   .item[data-state="error"] .trigger {
@@ -242,33 +238,6 @@ const style = `
     .frame {
       transition: none !important;
       animation: none !important;
-    }
-  }
-
-  @keyframes ui-stepper-current-pulse {
-    0% {
-      transform: scale(0.9);
-      opacity: 0.45;
-    }
-    70% {
-      transform: scale(1.2);
-      opacity: 0;
-    }
-    100% {
-      transform: scale(1.2);
-      opacity: 0;
-    }
-  }
-
-  @keyframes ui-stepper-connector-flow {
-    to {
-      transform: translateX(100%);
-    }
-  }
-
-  @keyframes ui-stepper-connector-flow-vertical {
-    to {
-      transform: translateY(100%);
     }
   }
 

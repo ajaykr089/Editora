@@ -64,6 +64,29 @@ describe('ui-menubar and ui-context-menu integration', () => {
     expect(el._portalEl).toBe(portalBefore);
   });
 
+  it('ui-menubar stays open when scroll events originate from inside its own panel', async () => {
+    const el = document.createElement('ui-menubar') as HTMLElement & { _portalEl?: HTMLElement | null };
+    el.innerHTML = `
+      <button slot="item">File</button>
+      <button slot="item">Edit</button>
+      <div slot="content">${Array.from({ length: 12 }, (_, index) => `<button class="item">File ${index}</button>`).join('')}</div>
+      <div slot="content"><button class="item">Undo</button></div>
+    `;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    el.setAttribute('open', '');
+    await flushMicrotask();
+
+    const portal = el._portalEl as HTMLElement | null;
+    expect(portal).toBeTruthy();
+
+    portal?.dispatchEvent(new Event('scroll', { bubbles: false, composed: true }));
+    await flushMicrotask();
+
+    expect(el.hasAttribute('open')).toBe(true);
+  });
+
   it('ui-menubar mounts a portal wrapper with a surface shell and content-host listbox', async () => {
     const el = document.createElement('ui-menubar') as HTMLElement & { _portalEl?: HTMLElement | null };
     el.innerHTML = `
@@ -195,7 +218,11 @@ describe('ui-menubar and ui-context-menu integration', () => {
     await flushMicrotask();
 
     expect(addSpy).toHaveBeenCalledWith('resize', expect.any(Function));
-    expect(addSpy).toHaveBeenCalledWith('scroll', expect.any(Function), true);
+    expect(addSpy).toHaveBeenCalledWith(
+      'scroll',
+      expect.any(Function),
+      expect.objectContaining({ capture: true, passive: true })
+    );
 
     el.close?.();
     await flushMicrotask();

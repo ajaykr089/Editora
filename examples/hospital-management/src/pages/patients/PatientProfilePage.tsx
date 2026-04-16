@@ -86,14 +86,6 @@ export default function PatientProfilePage() {
     return () => window.clearTimeout(timer);
   }, [isDirty, notesDraft]);
 
-  if (query.isLoading) return <TableSkeleton />;
-  if (query.isError || !query.data) {
-    return <ErrorStateView title="Failed to load profile" description={(query.error as Error)?.message} onRetry={() => query.refetch()} />;
-  }
-
-  const patient = query.data.patient;
-  const { encounters, labs, invoices, documents } = query.data;
-
   const resetDocumentDraft = React.useCallback(() => {
     setDocumentDraft({
       title: '',
@@ -102,6 +94,14 @@ export default function PatientProfilePage() {
       notes: ''
     });
   }, []);
+
+  if (query.isLoading) return <TableSkeleton />;
+  if (query.isError || !query.data) {
+    return <ErrorStateView title="Failed to load profile" description={(query.error as Error)?.message} onRetry={() => query.refetch()} />;
+  }
+
+  const patient = query.data.patient;
+  const { encounters, labs, invoices, documents } = query.data;
 
   const openWorkspace = (record: WorkspaceRecord) => {
     setWorkspaceRecord(record);
@@ -462,7 +462,7 @@ export default function PatientProfilePage() {
         </Drawer.Footer>
       </Drawer>
 
-      <Dialog open={documentOpen} title="Attach record document" onRequestClose={() => setDocumentOpen(false)}>
+      <Dialog open={documentOpen} title="Attach record document" onDialogClose={() => setDocumentOpen(false)}>
         <Grid style={{ display: 'grid', gap: 10 }}>
           <Input
             label="Document title"

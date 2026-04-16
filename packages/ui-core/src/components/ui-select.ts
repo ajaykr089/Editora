@@ -855,10 +855,13 @@ export class UISelect extends ElementBase {
   private _menuEl: UIListbox | null = null;
   private _observer: MutationObserver | null = null;
   private _formUnregister: (() => void) | null = null;
+  private _optionsSyncRaf = 0;
+  private _panelPlacementRaf = 0;
   private _uid = Math.random().toString(36).slice(2, 8);
   private _options: SelectOption[] = [];
   private _menuItems: HTMLButtonElement[] = [];
   private _optionsFingerprint = '';
+  private _menuRenderFingerprint = '';
   private _open = false;
   private _activeIndex = -1;
   private _placement: PanelPlacement = 'bottom';
@@ -893,8 +896,7 @@ export class UISelect extends ElementBase {
       });
 
       if (!hasMeaningfulOptionMutation) return;
-      const optionsChanged = this._syncOptionsData();
-      if (optionsChanged && this._open) this._renderMenu();
+      this._scheduleOptionsSync();
     });
 
     this._observer.observe(this, {
@@ -918,6 +920,8 @@ export class UISelect extends ElementBase {
       this._observer.disconnect();
       this._observer = null;
     }
+    this._cancelOptionsSync();
+    this._cancelPanelPlacement();
     if (this._formUnregister) {
       this._formUnregister();
       this._formUnregister = null;
@@ -1109,34 +1113,85 @@ export class UISelect extends ElementBase {
     this._closeMenu({ restoreFocus: false });
   }
 
+  private _isInternalEvent(event: Event): boolean {
+    const target = event.target;
+    const path = typeof (event as { composedPath?: () => EventTarget[] }).composedPath === 'function'
+      ? (event as { composedPath: () => EventTarget[] }).composedPath()
+      : [];
+
+    if (path.includes(this) || path.includes(this.root)) return true;
+
+    if (target instanceof Node) {
+      if (target === this) return true;
+      if (this.root.contains(target)) return true;
+      if (this._controlEl?.contains(target)) return true;
+      if (this._panelEl?.contains(target)) return true;
+      if (this._menuEl?.contains(target)) return true;
+    }
+
+    return Boolean(
+      (this._controlEl && path.includes(this._controlEl)) ||
+      (this._triggerEl && path.includes(this._triggerEl)) ||
+      (this._panelEl && path.includes(this._panelEl)) ||
+      (this._menuEl && path.includes(this._menuEl))
+    );
+  }
+
   private _onWindowResize(): void {
     if (!this._open) return;
-    this._syncPanelPlacement();
+    this._schedulePanelPlacement();
   }
 
   private _onWindowScroll(event: Event): void {
     if (!this._open) return;
-    const path = typeof (event as { composedPath?: () => EventTarget[] }).composedPath === 'function'
-      ? (event as { composedPath: () => EventTarget[] }).composedPath()
-      : [];
-    if (path.includes(this) || path.includes(this.root)) return;
+    if (this._isInternalEvent(event)) return;
     if (this.closeOnScroll) {
       this._closeMenu({ restoreFocus: false });
       return;
     }
-    this._syncPanelPlacement();
+    this._schedulePanelPlacement();
   }
 
   private _attachOpenListeners(): void {
     document.addEventListener('pointerdown', this._onDocumentPointerDown, true);
     window.addEventListener('resize', this._onWindowResize, { passive: true });
-    window.addEventListener('scroll', this._onWindowScroll, true);
+    window.addEventListener('scroll', this._onWindowScroll, { passive: true, capture: true });
   }
 
   private _teardownOpenListeners(): void {
     document.removeEventListener('pointerdown', this._onDocumentPointerDown, true);
     window.removeEventListener('resize', this._onWindowResize);
     window.removeEventListener('scroll', this._onWindowScroll, true);
+  }
+
+  private _scheduleOptionsSync(): void {
+    if (this._optionsSyncRaf) return;
+    this._optionsSyncRaf = requestAnimationFrame(() => {
+      this._optionsSyncRaf = 0;
+      const optionsChanged = this._syncOptionsData();
+      if (optionsChanged && this._open) this._renderMenu();
+      else this._syncControlState();
+    });
+  }
+
+  private _cancelOptionsSync(): void {
+    if (!this._optionsSyncRaf) return;
+    cancelAnimationFrame(this._optionsSyncRaf);
+    this._optionsSyncRaf = 0;
+  }
+
+  private _schedulePanelPlacement(): void {
+    if (this._panelPlacementRaf) return;
+    this._panelPlacementRaf = requestAnimationFrame(() => {
+      this._panelPlacementRaf = 0;
+      this._syncPanelPlacement();
+    });
+  }
+
+  private _cancelPanelPlacement(): void {
+    if (!this._panelPlacementRaf) return;
+    cancelAnimationFrame(this._panelPlacementRaf);
+    this._panelPlacementRaf = 0;
   }
 
   private _emitValue(eventName: 'input' | 'change', nextValue: string): void {
@@ -1348,6 +1403,18 @@ export class UISelect extends ElementBase {
     const menu = this._menuEl;
     if (!menu) return;
 
+    const nextRenderFingerprint = `${this._optionsFingerprint}\u0001${this.showCheck ? '1' : '0'}\u0001${this._checkPlacement()}`;
+    const canReuseMenu =
+      this._menuItems.length > 0 &&
+      nextRenderFingerprint === this._menuRenderFingerprint &&
+      this._menuItems.length === this._options.length;
+
+    if (canReuseMenu) {
+      this._syncMenuSelectionState();
+      this._schedulePanelPlacement();
+      return;
+    }
+
     menu.replaceChildren();
     this._menuItems = [];
 
@@ -1356,6 +1423,7 @@ export class UISelect extends ElementBase {
       empty.className = 'menu-empty';
       empty.textContent = 'No options available';
       menu.appendChild(empty);
+      this._menuRenderFingerprint = nextRenderFingerprint;
       menu.refresh();
       return;
     }
@@ -1412,8 +1480,9 @@ export class UISelect extends ElementBase {
     if (lastItem) lastItem.setAttribute('data-edge-end', 'true');
 
     menu.refresh();
+    this._menuRenderFingerprint = nextRenderFingerprint;
     this._syncMenuSelectionState();
-    this._syncPanelPlacement();
+    this._schedulePanelPlacement();
   }
 
   private _syncMenuSelectionState(): void {
@@ -1457,6 +1526,7 @@ export class UISelect extends ElementBase {
 
   private _openMenu(): void {
     if (this._open || this.disabled) return;
+    this._cancelPanelPlacement();
     this._syncOptionsData();
     this._open = true;
     this._syncControlState();
@@ -1468,6 +1538,7 @@ export class UISelect extends ElementBase {
     if (!this._open) return;
     this._open = false;
     this._activeIndex = -1;
+    this._cancelPanelPlacement();
     this._teardownOpenListeners();
     this._syncControlState();
 
@@ -1560,7 +1631,7 @@ export class UISelect extends ElementBase {
     this.setAttribute('aria-disabled', this.disabled ? 'true' : 'false');
     this.setAttribute('aria-busy', loading ? 'true' : 'false');
     this.toggleAttribute('open', this._open);
-    if (this._open) this._syncPanelPlacement();
+    if (this._open) this._schedulePanelPlacement();
   }
 
   protected override render(): void {
@@ -1643,6 +1714,8 @@ export class UISelect extends ElementBase {
     this._valueEl = this.root.querySelector('.value') as HTMLElement | null;
     this._panelEl = this.root.querySelector('.panel') as HTMLElement | null;
     this._menuEl = this.root.querySelector('.menu') as UIListbox | null;
+    this._menuItems = [];
+    this._menuRenderFingerprint = '';
 
     this._syncOptionsData();
     this._renderMenu();

@@ -36,6 +36,7 @@ Components for building forms, collecting user input, and managing form state.
 | **Combobox** | Searchable dropdown with filtering | Async loading, custom templates |
 | **MultiSelect** | Multi-select dropdown | Chip display, search, clearable |
 | **Checkbox** | Checkbox input | Indeterminate state, grouping |
+| **Radio** | Standalone radio input | Single choice, same-name grouping, keyboard navigation |
 | **RadioGroup** | Radio button group | Vertical/horizontal layout |
 | **Switch** | Toggle switch | On/off states, labels |
 | **Slider** | Range slider input | Min/max, step, marks |

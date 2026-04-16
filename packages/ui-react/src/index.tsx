@@ -1,8 +1,6 @@
 /// <reference path="./custom-elements.d.ts" />
 'use client';
-import { primeUICoreRegistration } from './core-registration';
-
-primeUICoreRegistration();
+import '@editora/ui-core';
 
 export { Button } from './components/Button';
 export type { ButtonProps } from './components/Button';
@@ -193,6 +191,7 @@ export { FocusScope } from './components/FocusScope';
 export { Positioner } from './components/Positioner';
 export { Anchor } from './components/Anchor';
 export { Checkbox } from './components/Checkbox';
+export { Radio } from './components/Radio';
 export { RadioGroup } from './components/RadioGroup';
 export { Switch } from './components/Switch';
 export type { SwitchProps, SwitchDescriptionProps } from './components/Switch';

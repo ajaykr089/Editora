@@ -254,7 +254,7 @@ export default function PharmacyPage() {
         ) : null}
       </Drawer>
 
-      <Dialog open={restockOpen} title="Purchase order intake" onRequestClose={() => setRestockOpen(false)}>
+      <Dialog open={restockOpen} title="Purchase order intake" onDialogClose={() => setRestockOpen(false)}>
         <Grid style={{ display: 'grid', gap: 10 }}>
           <Select
             label="Medicine"
@@ -280,7 +280,7 @@ export default function PharmacyPage() {
         </Flex>
       </Dialog>
 
-      <Dialog open={dispenseOpen} title="Dispense medicine" onRequestClose={() => setDispenseOpen(false)}>
+      <Dialog open={dispenseOpen} title="Dispense medicine" onDialogClose={() => setDispenseOpen(false)}>
         <Grid style={{ display: 'grid', gap: 10 }}>
           <Input label="Medicine" readOnly value={currentMedicine?.name || ''} />
           <Grid style={{ display: 'grid', gap: 8, gridTemplateColumns: '1fr 1fr' }}>

@@ -3468,6 +3468,17 @@
       "wrapperFor": "ui-quick-actions"
     },
     {
+      "id": "ui-react:Radio",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Radio",
+      "reactExport": "Radio",
+      "source": "packages/ui-react/src/components/Radio.tsx",
+      "docsPath": "/docs/ui-react/form-inputs/radio",
+      "storybookPath": "/story/ui-radio--playground",
+      "wrapperFor": "ui-radio"
+    },
+    {
       "id": "ui-react:RadioGroup",
       "package": "@editora/ui-react",
       "framework": "react",

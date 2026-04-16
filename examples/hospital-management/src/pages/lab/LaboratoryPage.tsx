@@ -161,7 +161,7 @@ export default function LaboratoryPage() {
         />
       )}
 
-      <Dialog open={createOpen} title="Create lab order" onRequestClose={() => setCreateOpen(false)}>
+      <Dialog open={createOpen} title="Create lab order" onDialogClose={() => setCreateOpen(false)}>
         <Grid style={{ display: 'grid', gap: 10 }}>
           <Select
             label="Patient"
@@ -195,7 +195,7 @@ export default function LaboratoryPage() {
         </Flex>
       </Dialog>
 
-      <Dialog open={resultOpen} title="Result entry" onRequestClose={() => setResultOpen(false)}>
+      <Dialog open={resultOpen} title="Result entry" onDialogClose={() => setResultOpen(false)}>
         <Grid style={{ display: 'grid', gap: 10 }}>
           <Grid style={{ display: 'grid', gap: 8, gridTemplateColumns: '1fr 1fr' }}>
             <Input label="Patient" readOnly value={selectedOrder?.patientName || ''} />
@@ -224,7 +224,7 @@ export default function LaboratoryPage() {
         </Flex>
       </Dialog>
 
-      <Dialog open={previewOpen} title="Printable lab report" onRequestClose={() => setPreviewOpen(false)}>
+      <Dialog open={previewOpen} title="Printable lab report" onDialogClose={() => setPreviewOpen(false)}>
         <Grid style={{ display: 'grid', gap: 10 }}>
           <Grid style={{ display: 'grid', gap: 8, gridTemplateColumns: '1fr 1fr' }}>
             <Input label="Patient" readOnly value={selectedOrder?.patientName || ''} />

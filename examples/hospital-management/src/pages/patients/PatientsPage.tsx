@@ -239,7 +239,7 @@ export default function PatientsPage() {
         />
       ) : null}
 
-      <Dialog open={dialogOpen} title={editing ? 'Edit patient' : 'Create patient'} onRequestClose={() => setDialogOpen(false)}>
+      <Dialog open={dialogOpen} title={editing ? 'Edit patient' : 'Create patient'} onDialogClose={() => setDialogOpen(false)}>
         <form onSubmit={submitPatient} style={{ display: 'grid', gap: 10 }}>
           <Input
             label="Full name"

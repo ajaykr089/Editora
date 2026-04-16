@@ -95,4 +95,48 @@ describe('ui-floating-toolbar behavior', () => {
     el.remove();
     anchor.remove();
   });
+
+  it('positions the panel with left/top instead of transform translation variables', () => {
+    const anchor = document.createElement('button');
+    anchor.id = 'ft-position-anchor';
+    document.body.appendChild(anchor);
+    Object.defineProperty(anchor, 'getBoundingClientRect', {
+      value: () => ({
+        left: 120,
+        top: 80,
+        right: 180,
+        bottom: 120,
+        width: 60,
+        height: 40
+      })
+    });
+
+    const el = document.createElement('ui-floating-toolbar') as HTMLElement & { _panel?: HTMLElement | null };
+    el.innerHTML = '<button slot="toolbar">Action</button>';
+    document.body.appendChild(el);
+
+    (el as any).showForAnchorId('ft-position-anchor');
+    const panel = el.shadowRoot?.querySelector('.panel') as HTMLElement | null;
+    expect(panel).toBeTruthy();
+    Object.defineProperty(panel!, 'getBoundingClientRect', {
+      value: () => ({
+        left: 0,
+        top: 0,
+        right: 160,
+        bottom: 48,
+        width: 160,
+        height: 48
+      })
+    });
+
+    (el as any)._position?.();
+
+    expect(panel?.style.left).toBeTruthy();
+    expect(panel?.style.top).toBeTruthy();
+    expect(el.style.getPropertyValue('--ui-floating-toolbar-x')).toBe('');
+    expect(el.style.getPropertyValue('--ui-floating-toolbar-y')).toBe('');
+
+    el.remove();
+    anchor.remove();
+  });
 });

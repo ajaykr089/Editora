@@ -1043,7 +1043,7 @@ export class UIContextMenu extends ElementBase {
     }
 
     if (shouldBindScroll && !this._scrollListenerBound) {
-      window.addEventListener('scroll', this._onViewportChange, true);
+      window.addEventListener('scroll', this._onViewportChange, { passive: true, capture: true });
       this._scrollListenerBound = true;
     } else if (!shouldBindScroll && this._scrollListenerBound) {
       window.removeEventListener('scroll', this._onViewportChange, true);

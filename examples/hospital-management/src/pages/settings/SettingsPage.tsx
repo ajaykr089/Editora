@@ -195,7 +195,7 @@ export default function SettingsPage() {
         </Box>
       </Grid>
 
-      <Dialog open={importOpen} title="Import settings" onRequestClose={() => setImportOpen(false)}>
+      <Dialog open={importOpen} title="Import settings" onDialogClose={() => setImportOpen(false)}>
         <Grid style={{ display: 'grid', gap: 10 }}>
           <Textarea
             label="Settings JSON"

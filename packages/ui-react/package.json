@@ -614,6 +614,12 @@
       "require": "./dist/QuickActions.cjs.js",
       "default": "./dist/QuickActions.esm.js"
     },
+    "./Radio": {
+      "types": "./dist/components/Radio.d.ts",
+      "import": "./dist/Radio.esm.js",
+      "require": "./dist/Radio.cjs.js",
+      "default": "./dist/Radio.esm.js"
+    },
     "./RadioGroup": {
       "types": "./dist/components/RadioGroup.d.ts",
       "import": "./dist/RadioGroup.esm.js",

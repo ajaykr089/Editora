@@ -77,6 +77,10 @@ const style = `
     transition: opacity var(--ui-dialog-duration) var(--ui-dialog-easing);
   }
 
+  .overlay[hidden] {
+    display: none;
+  }
+
   .overlay[data-open='true'] {
     opacity: 1;
   }
@@ -94,17 +98,19 @@ const style = `
     color: var(--ui-dialog-color);
     box-shadow: var(--ui-dialog-shadow);
     padding: var(--ui-dialog-padding-y) var(--ui-dialog-padding-x);
-    transform: translateY(12px) scale(0.985);
+    transform: translate3d(0, 12px, 0) scale(0.985);
     opacity: 0;
     transition:
       transform var(--ui-dialog-duration) var(--ui-dialog-easing),
       opacity var(--ui-dialog-duration) var(--ui-dialog-easing),
       border-color var(--ui-dialog-duration) var(--ui-dialog-easing),
       box-shadow var(--ui-dialog-duration) var(--ui-dialog-easing);
+    will-change: transform, opacity;
+    backface-visibility: hidden;
   }
 
   .overlay[data-open='true'] .panel {
-    transform: translateY(0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
     opacity: 1;
   }
 
@@ -449,6 +455,22 @@ function isBrowser(): boolean {
   return typeof window !== 'undefined' && typeof document !== 'undefined';
 }
 
+function scheduleDeferredFrame(callback: () => void): number {
+  if (typeof requestAnimationFrame === 'function') {
+    return requestAnimationFrame(() => callback());
+  }
+  return window.setTimeout(callback, 16) as unknown as number;
+}
+
+function cancelDeferredFrame(handle: number): void {
+  if (!handle) return;
+  if (typeof cancelAnimationFrame === 'function') {
+    cancelAnimationFrame(handle);
+    return;
+  }
+  window.clearTimeout(handle);
+}
+
 export class UIDialog extends ElementBase {
   static get observedAttributes() {
     return [
@@ -488,6 +510,8 @@ export class UIDialog extends ElementBase {
   private _config: UIDialogTemplateOptions = {};
   private _dismissableLayer: DismissableLayerHandle | null = null;
   private _focusScope: FocusScopeHandle | null = null;
+  private _disconnectCleanupFrame = 0;
+  private _restoreFocusFrame = 0;
 
   constructor() {
     super();
@@ -498,6 +522,10 @@ export class UIDialog extends ElementBase {
   }
 
   connectedCallback() {
+    if (this._disconnectCleanupFrame) {
+      cancelDeferredFrame(this._disconnectCleanupFrame);
+      this._disconnectCleanupFrame = 0;
+    }
     super.connectedCallback();
     this.root.addEventListener('click', this._onClick as EventListener);
     this.root.addEventListener('keydown', this._onKeyDown as EventListener);
@@ -510,12 +538,26 @@ export class UIDialog extends ElementBase {
     this.root.removeEventListener('click', this._onClick as EventListener);
     this.root.removeEventListener('keydown', this._onKeyDown as EventListener);
     this.removeEventListener('submit', this._onSubmit as EventListener);
-    if (this._isActive && !this._terminalEmitted) {
-      this.close('dismiss', 'unmount');
+    if (this._disconnectCleanupFrame) {
+      cancelDeferredFrame(this._disconnectCleanupFrame);
     }
-    this._destroyRuntimeControllers();
-    this._deactivate();
-    super.disconnectedCallback();
+    if (this._restoreFocusFrame) {
+      cancelDeferredFrame(this._restoreFocusFrame);
+      this._restoreFocusFrame = 0;
+    }
+    // Delay disconnect cleanup so transient React StrictMode remounts do not
+    // emit a real close/hide cycle and visibly flicker controlled dialogs.
+    this._disconnectCleanupFrame = scheduleDeferredFrame(() => {
+      this._disconnectCleanupFrame = 0;
+      if (this.isConnected) return;
+      if (this._isActive && !this._terminalEmitted) {
+        this.close('dismiss', 'unmount');
+      } else {
+        this._destroyRuntimeControllers();
+        this._deactivate();
+      }
+      super.disconnectedCallback();
+    });
   }
 
   attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null) {
@@ -713,11 +755,10 @@ export class UIDialog extends ElementBase {
     const shouldBeOpen = this.hasAttribute('open');
     if (shouldBeOpen && !this._isActive) {
       this._activate();
-      return;
-    }
-    if (!shouldBeOpen && this._isActive) {
+    } else if (!shouldBeOpen && this._isActive) {
       this._deactivate();
     }
+    this._syncOpenUi();
   }
 
   private _activate() {
@@ -735,8 +776,8 @@ export class UIDialog extends ElementBase {
     const id = this.dialogId || this._uid;
     this._dispatchWithLegacy<UIDialogOpenDetail>('ui-open', 'open', { id });
     this.dispatchEvent(new CustomEvent('show', { bubbles: true, composed: true }));
-
-    this.requestRender();
+    this._syncOpenUi();
+    this._syncRuntimeControllers();
   }
 
   private _deactivate() {
@@ -778,16 +819,17 @@ export class UIDialog extends ElementBase {
     const returnFocus = this._lastFocused;
     this._lastFocused = null;
     if (returnFocus && this._canRestoreFocus(returnFocus)) {
-      setTimeout(() => {
+      if (this._restoreFocusFrame) cancelDeferredFrame(this._restoreFocusFrame);
+      this._restoreFocusFrame = scheduleDeferredFrame(() => {
+        this._restoreFocusFrame = 0;
         try {
           if (this._canRestoreFocus(returnFocus)) returnFocus.focus();
         } catch {
           // noop
         }
-      }, 0);
+      });
     }
-
-    this.requestRender();
+    this._syncOpenUi();
   }
 
   private _dispatchWithLegacy<T>(name: string, legacyName: string, detail: T, cancelable = false): CustomEvent<T> {
@@ -879,6 +921,18 @@ export class UIDialog extends ElementBase {
     this._dismissableLayer = null;
     this._focusScope?.destroy();
     this._focusScope = null;
+  }
+
+  private _syncOpenUi() {
+    const overlay = this.root.querySelector('.overlay') as HTMLElement | null;
+    const panel = this._queryPanel();
+    const open = this.open;
+    if (!overlay || !panel) return;
+
+    overlay.hidden = !open;
+    overlay.setAttribute('data-open', String(open));
+    overlay.setAttribute('aria-hidden', open ? 'false' : 'true');
+    panel.setAttribute('aria-hidden', open ? 'false' : 'true');
   }
 
   private _syncRuntimeControllers() {
@@ -1049,12 +1103,6 @@ export class UIDialog extends ElementBase {
   }
 
   protected render() {
-    if (!this.open) {
-      this._destroyRuntimeControllers();
-      this.setContent('');
-      return;
-    }
-
     const title = this._config.title ?? this.getAttribute('title') ?? '';
     const description = this._config.description ?? this.getAttribute('description') ?? '';
     const submitText = this._config.submitText ?? this.getAttribute('submit-text') ?? 'Submit';
@@ -1112,7 +1160,7 @@ export class UIDialog extends ElementBase {
     this._destroyRuntimeControllers();
     this.setContent(`
       ${this.hasAttribute('headless') ? '' : `<style>${style}</style>`}
-      <div class="overlay" part="overlay" data-open="${String(this.open)}">
+      <div class="overlay" part="overlay" data-open="${String(this.open)}" ${this.open ? '' : 'hidden'} aria-hidden="${this.open ? 'false' : 'true'}">
         <section
           class="panel"
           part="panel"
@@ -1121,6 +1169,7 @@ export class UIDialog extends ElementBase {
           ${fallbackAriaLabel ? `aria-label="${escapeHtml(fallbackAriaLabel)}"` : ''}
           ${labelledBy ? `aria-labelledby="${escapeHtml(labelledBy)}"` : ''}
           ${describedByIds.length ? `aria-describedby="${escapeHtml(describedByIds.join(' '))}"` : ''}
+          aria-hidden="${this.open ? 'false' : 'true'}"
           tabindex="-1"
         >
           ${showClose
@@ -1151,7 +1200,9 @@ export class UIDialog extends ElementBase {
         </section>
       </div>
     `);
-    this._syncRuntimeControllers();
+    this._syncOpenUi();
+    if (this.open) this._syncRuntimeControllers();
+    else this._destroyRuntimeControllers();
   }
 }
 

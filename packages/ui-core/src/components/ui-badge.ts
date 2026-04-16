@@ -504,7 +504,9 @@ export class UIBadge extends ElementBase {
       if (newValue) this.style.setProperty('--ui-badge-max-inline-size', newValue);
       else this.style.removeProperty('--ui-badge-max-inline-size');
     }
-    if (this.isConnected) this.requestRender();
+    if (this.isConnected && this.shouldRenderOnAttributeChange(name, oldValue, newValue)) {
+      this.requestRender();
+    }
   }
 
   protected render() {
@@ -672,6 +674,7 @@ export class UIBadge extends ElementBase {
       'interactive',
       'truncate',
       'max-width',
+      'headless',
       'elevation',
     ].includes(name);
   }

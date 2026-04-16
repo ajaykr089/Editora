@@ -894,7 +894,7 @@ export class UIMenubar extends ElementBase {
   private _bindGlobalListeners(): void {
     if (this._globalListenersBound) return;
     document.addEventListener('keydown', this._onDocKeyDown as EventListener);
-    document.addEventListener('scroll', this._onDocScroll as EventListener, true);
+    document.addEventListener('scroll', this._onDocScroll as EventListener, { passive: true, capture: true });
     this._globalListenersBound = true;
   }
 
@@ -1526,10 +1526,25 @@ export class UIMenubar extends ElementBase {
     this._selectIndex(index, 'programmatic');
   }
 
+  private _isInternalScrollEvent(event: Event): boolean {
+    const path = typeof (event as { composedPath?: () => EventTarget[] }).composedPath === 'function'
+      ? (event as { composedPath: () => EventTarget[] }).composedPath()
+      : [];
+    if (this._portalEl && path.includes(this._portalEl)) return true;
+    if (this._items.some((item) => path.includes(item))) return true;
+
+    const target = event.target;
+    if (target instanceof Node) {
+      if (this._portalEl?.contains(target)) return true;
+      if (this._items.some((item) => item.contains(target))) return true;
+    }
+
+    return false;
+  }
+
   private _onDocScroll(event: Event): void {
     if (!this._open || !this.closeOnScroll) return;
-    const path = typeof (event as any).composedPath === 'function' ? (event as any).composedPath() : [];
-    if (this._portalEl && path.includes(this._portalEl)) return;
+    if (this._isInternalScrollEvent(event)) return;
     this.close();
   }
 

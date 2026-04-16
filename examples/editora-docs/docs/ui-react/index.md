@@ -65,7 +65,7 @@ It demonstrates `@editora/ui-react` components working together across routing, 
 | `DialogProvider`, `useDialog`, `AlertDialogProvider`, `useAlertDialog` | Providers/hooks | Dialog state APIs |
 | `Icon` | Component export | Icon wrapper |
 | `Toast`, `ToastAPI`, `toast`, `toastApi` | Toast exports | Notification APIs |
-| `Checkbox`, `RadioGroup`, `Switch`, `Toggle`, `ToggleGroup`, `AspectRatio`, `Avatar`, `Presence`, `Progress`, `Portal`, `ScrollArea`, `Separator`, `Slot`, `Toolbar`, `VisuallyHidden`, `Collapsible`, `Pagination`, `Accordion`, `AccordionItem`, `AccordionTrigger`, `AccordionPanel`, `DirectionProvider`, `HoverCard`, `Label`, `AlertDialog`, `Select`, `Slider`, `Skeleton` | Component exports | Primitive catalog |
+| `Checkbox`, `Radio`, `RadioGroup`, `Switch`, `Toggle`, `ToggleGroup`, `AspectRatio`, `Avatar`, `Presence`, `Progress`, `Portal`, `ScrollArea`, `Separator`, `Slot`, `Toolbar`, `VisuallyHidden`, `Collapsible`, `Pagination`, `Accordion`, `AccordionItem`, `AccordionTrigger`, `AccordionPanel`, `DirectionProvider`, `HoverCard`, `Label`, `AlertDialog`, `Select`, `Slider`, `Skeleton` | Component exports | Primitive catalog |
 
 ## Best Practices
 

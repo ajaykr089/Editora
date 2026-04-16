@@ -14,6 +14,7 @@ const style = `
     --ui-selection-popup-border: 1px solid var(--ui-selection-popup-border-color);
     --ui-selection-popup-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-selection-popup-accent: var(--ui-color-primary, #2563eb);
+    --ui-selection-popup-enter-y: 6px;
     --ui-selection-popup-shadow:
       none;
     color-scheme: light dark;
@@ -42,9 +43,7 @@ const style = `
     color: var(--ui-selection-popup-color);
     box-shadow: var(--ui-selection-popup-shadow);
     padding: var(--ui-selection-popup-padding);
-    transform:
-      translate3d(var(--ui-selection-popup-x, 0px), var(--ui-selection-popup-y, 0px), 0)
-      scale(0.96);
+    transform: translate3d(0, var(--ui-selection-popup-enter-y, 6px), 0) scale(0.96);
     transform-origin: var(--ui-selection-popup-origin-x, 50%) var(--ui-selection-popup-origin-y, 50%);
     opacity: 0;
     transition: transform 150ms cubic-bezier(0.2, 0.72, 0.2, 1), opacity 140ms ease;
@@ -53,9 +52,7 @@ const style = `
 
   :host([open]) .popup {
     opacity: 1;
-    transform:
-      translate3d(var(--ui-selection-popup-x, 0px), var(--ui-selection-popup-y, 0px), 0)
-      scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 
   .content {
@@ -392,7 +389,7 @@ export class UISelectionPopup extends ElementBase {
     if (this._globalListenersBound) return;
     document.addEventListener('pointerdown', this._onDocumentPointerDown, true);
     document.addEventListener('keydown', this._onDocumentKeyDown, true);
-    window.addEventListener('scroll', this._onWindowChange, true);
+    window.addEventListener('scroll', this._onWindowChange, { passive: true, capture: true });
     window.addEventListener('resize', this._onWindowChange);
     this._globalListenersBound = true;
   }
@@ -548,8 +545,8 @@ export class UISelectionPopup extends ElementBase {
       y += window.scrollY || 0;
     }
 
-    popup.style.setProperty('--ui-selection-popup-x', `${Math.round(x)}px`);
-    popup.style.setProperty('--ui-selection-popup-y', `${Math.round(y)}px`);
+    popup.style.left = `${Math.round(x)}px`;
+    popup.style.top = `${Math.round(y)}px`;
     popup.dataset.placement = best.placement;
 
     const anchorCenterX = anchorRect.left + anchorRect.width / 2;

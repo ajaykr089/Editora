@@ -6,6 +6,12 @@ function flushMicrotask() {
   return Promise.resolve();
 }
 
+function flushAnimationFrame() {
+  return new Promise<void>((resolve) => {
+    requestAnimationFrame(() => resolve());
+  });
+}
+
 describe('ui-select and ui-combobox integration', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
@@ -31,6 +37,7 @@ describe('ui-select and ui-combobox integration', () => {
 
     trigger?.click();
     await flushMicrotask();
+    await flushAnimationFrame();
 
     const panel = el.shadowRoot?.querySelector('.panel') as HTMLElement | null;
     const menuItems = el.shadowRoot?.querySelectorAll('.menu-item') || [];
@@ -89,6 +96,7 @@ describe('ui-select and ui-combobox integration', () => {
 
     trigger?.click();
     await flushMicrotask();
+    await flushAnimationFrame();
 
     const option = el.shadowRoot?.querySelector('.menu-item[data-index="1"]') as HTMLButtonElement | null;
     option?.click();
@@ -118,6 +126,7 @@ describe('ui-select and ui-combobox integration', () => {
     const trigger = el.shadowRoot?.querySelector('.trigger') as HTMLButtonElement | null;
     trigger?.click();
     await flushMicrotask();
+    await flushAnimationFrame();
 
     const items = el.shadowRoot?.querySelectorAll('.menu-item') || [];
     expect(items).toHaveLength(3);
@@ -138,6 +147,7 @@ describe('ui-select and ui-combobox integration', () => {
     const trigger = el.shadowRoot?.querySelector('.trigger') as HTMLButtonElement | null;
     trigger?.click();
     await flushMicrotask();
+    await flushAnimationFrame();
 
     const item = el.shadowRoot?.querySelector('.menu-item[data-value="one"]') as HTMLButtonElement | null;
     const check = item?.querySelector('.menu-item-check') as HTMLElement | null;
@@ -154,6 +164,65 @@ describe('ui-select and ui-combobox integration', () => {
 
     const updatedCheck = el.shadowRoot?.querySelector('.menu-item[data-value="one"] .menu-item-check') as HTMLElement | null;
     expect(updatedCheck?.hidden).toBe(true);
+  });
+
+  it('ui-select stays open when its own menu scrolls during or after open', async () => {
+    const el = document.createElement('ui-select') as HTMLElement;
+    el.innerHTML = Array.from({ length: 20 }, (_, index) => `<option value="opt-${index}">Option ${index}</option>`).join('');
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const trigger = el.shadowRoot?.querySelector('.trigger') as HTMLButtonElement | null;
+    expect(trigger).toBeTruthy();
+
+    trigger?.click();
+    await flushMicrotask();
+    await flushAnimationFrame();
+
+    const panel = el.shadowRoot?.querySelector('.panel') as HTMLElement | null;
+    const menu = el.shadowRoot?.querySelector('.menu') as HTMLElement | null;
+    expect(panel?.hidden).toBe(false);
+    expect(menu).toBeTruthy();
+
+    menu?.dispatchEvent(new Event('scroll', { bubbles: false, composed: true }));
+    await flushMicrotask();
+    await flushAnimationFrame();
+
+    expect(el.hasAttribute('open')).toBe(true);
+    expect(panel?.hidden).toBe(false);
+  });
+
+  it('ui-select reuses the existing menu items when reopening an unchanged dropdown', async () => {
+    const el = document.createElement('ui-select') as HTMLElement;
+    el.innerHTML = `
+      <option value="">Select department</option>
+      <option value="Cardiology">Cardiology</option>
+      <option value="Orthopedics">Orthopedics</option>
+      <option value="Pediatrics">Pediatrics</option>
+      <option value="Neurology">Neurology</option>
+    `;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const trigger = el.shadowRoot?.querySelector('.trigger') as HTMLButtonElement | null;
+    expect(trigger).toBeTruthy();
+
+    trigger?.click();
+    await flushMicrotask();
+    await flushAnimationFrame();
+
+    const firstItemBefore = el.shadowRoot?.querySelector('.menu-item[data-index="0"]') as HTMLButtonElement | null;
+    expect(firstItemBefore).toBeTruthy();
+
+    trigger?.click();
+    await flushMicrotask();
+    await flushAnimationFrame();
+    trigger?.click();
+    await flushMicrotask();
+    await flushAnimationFrame();
+
+    const firstItemAfter = el.shadowRoot?.querySelector('.menu-item[data-index="0"]') as HTMLButtonElement | null;
+    expect(firstItemAfter).toBe(firstItemBefore);
   });
 
   it('ui-combobox opens on focus, selects an option, and closes on outside pointerdown', async () => {
@@ -265,5 +334,33 @@ describe('ui-select and ui-combobox integration', () => {
 
     expect(el.getAttribute('value')).toBe('beta');
     expect(el.hasAttribute('open')).toBe(false);
+  });
+
+  it('ui-combobox keeps rendered option nodes stable while only the highlight changes', async () => {
+    const el = document.createElement('ui-combobox') as HTMLElement;
+    el.innerHTML = `
+      <option value="alpha">Alpha</option>
+      <option value="beta">Beta</option>
+      <option value="gamma">Gamma</option>
+    `;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const input = el.shadowRoot?.querySelector('input') as HTMLInputElement | null;
+    input?.focus();
+    input?.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
+    await flushMicrotask();
+
+    const firstOptionBefore = el.shadowRoot?.querySelector('[data-option-index="0"]') as HTMLButtonElement | null;
+    expect(firstOptionBefore).toBeTruthy();
+
+    input?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    await flushMicrotask();
+
+    const firstOptionAfter = el.shadowRoot?.querySelector('[data-option-index="0"]') as HTMLButtonElement | null;
+    const secondOption = el.shadowRoot?.querySelector('[data-option-index="1"]') as HTMLButtonElement | null;
+
+    expect(firstOptionAfter).toBe(firstOptionBefore);
+    expect(secondOption?.getAttribute('data-highlighted')).toBe('true');
   });
 });

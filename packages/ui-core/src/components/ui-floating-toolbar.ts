@@ -41,8 +41,6 @@ const style = `
     --ui-floating-toolbar-focus-ring: var(--ui-color-focus-ring, #2563eb);
     --ui-floating-toolbar-accent: var(--ui-color-primary, #2563eb);
     --ui-floating-toolbar-backdrop: none;
-    --ui-floating-toolbar-x: 0px;
-    --ui-floating-toolbar-y: 0px;
     --ui-floating-toolbar-enter-y: -4px;
     --ui-floating-toolbar-duration: 170ms;
     --ui-floating-toolbar-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -70,13 +68,7 @@ const style = `
     display: grid;
     gap: var(--ui-floating-toolbar-gap);
     outline: none;
-    transform:
-      translate3d(
-        var(--ui-floating-toolbar-x, 0px),
-        calc(var(--ui-floating-toolbar-y, 0px) + var(--ui-floating-toolbar-enter-y, -4px)),
-        0
-      )
-      scale(0.985);
+    transform: translate3d(0, var(--ui-floating-toolbar-enter-y, -4px), 0) scale(0.985);
     opacity: 0;
     transition:
       transform var(--ui-floating-toolbar-duration) var(--ui-floating-toolbar-easing),
@@ -89,9 +81,7 @@ const style = `
 
   :host([open]) .panel {
     opacity: 1;
-    transform:
-      translate3d(var(--ui-floating-toolbar-x, 0px), var(--ui-floating-toolbar-y, 0px), 0)
-      scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 
   .panel[data-side="bottom"] {
@@ -546,7 +536,7 @@ export class UIFloatingToolbar extends ElementBase {
 
   private _bindGlobalListeners(): void {
     if (this._globalListenersBound) return;
-    window.addEventListener('scroll', this._onWindowChangeBound, true);
+    window.addEventListener('scroll', this._onWindowChangeBound, { passive: true, capture: true });
     window.addEventListener('resize', this._onWindowChangeBound);
     document.addEventListener('pointerdown', this._onDocumentPointerDownBound, true);
     document.addEventListener('keydown', this._onDocumentKeyDownBound, true);
@@ -595,8 +585,8 @@ export class UIFloatingToolbar extends ElementBase {
     if (align === 'end') x = anchorRect.right - panelRect.width;
     x = clamp(x, viewportPadding, window.innerWidth - panelRect.width - viewportPadding);
 
-    this.style.setProperty('--ui-floating-toolbar-x', `${Math.round(x)}px`);
-    this.style.setProperty('--ui-floating-toolbar-y', `${Math.round(y)}px`);
+    this._panel.style.left = `${Math.round(x)}px`;
+    this._panel.style.top = `${Math.round(y)}px`;
     this.style.setProperty('--ui-floating-toolbar-origin-x', align === 'start' ? '0%' : align === 'end' ? '100%' : '50%');
     this._panel.setAttribute('data-side', side);
   }

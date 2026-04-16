@@ -8,6 +8,9 @@ const style = `
     --ui-app-header-height-large: 76px;
     --ui-app-header-bg-base: var(--base-app-header-bg, var(--color-panel, var(--ui-color-surface, #ffffff)));
     --ui-app-header-bg: var(--ui-app-header-bg-base);
+    --ui-app-header-sticky-bg-base: var(--base-app-header-sticky-bg, var(--ui-color-surface, #ffffff));
+    --ui-app-header-surface-bg: var(--ui-app-header-bg);
+    --ui-app-header-surface-backdrop: blur(6px) saturate(1.05);
     --ui-app-header-color: var(--ui-color-text, var(--ui-text, #202020));
     --ui-app-header-muted: color-mix(in srgb, var(--ui-app-header-color) 56%, var(--ui-color-muted, var(--ui-muted, #646464)) 44%);
     --ui-app-header-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
@@ -116,6 +119,22 @@ const style = `
     position: sticky;
     top: 0;
     z-index: var(--ui-app-header-z);
+    --ui-app-header-surface-bg: var(--ui-app-header-sticky-bg-base);
+    --ui-app-header-surface-backdrop: none;
+    contain: paint;
+  }
+
+  :host([sticky][variant='soft']) {
+    --ui-app-header-surface-bg: color-mix(in srgb, var(--ui-app-header-accent) 8%, var(--ui-app-header-sticky-bg-base));
+  }
+
+  :host([sticky][variant='solid']) {
+    --ui-app-header-surface-bg: var(--ui-app-header-accent);
+  }
+
+  :host([sticky]) header {
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   header {
@@ -125,14 +144,15 @@ const style = `
     grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(0, auto);
     align-items: center;
     gap: var(--ui-app-header-gap);
-    background: var(--ui-app-header-bg);
+    background: var(--ui-app-header-surface-bg);
     color: var(--ui-app-header-color);
     border: var(--ui-app-header-border);
     padding: 0 var(--ui-app-header-padding-x);
     box-sizing: border-box;
     border-radius: var(--ui-app-header-radius);
     box-shadow: var(--ui-app-header-shadow);
-    backdrop-filter: blur(6px) saturate(1.05);
+    -webkit-backdrop-filter: var(--ui-app-header-surface-backdrop);
+    backdrop-filter: var(--ui-app-header-surface-backdrop);
     transition:
       background var(--ui-app-header-duration) var(--ui-app-header-easing),
       border-color var(--ui-app-header-duration) var(--ui-app-header-easing),

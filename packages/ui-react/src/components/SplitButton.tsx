@@ -563,7 +563,7 @@ export const SplitButton = React.forwardRef<HTMLElement, SplitButtonProps>(funct
     const onResize = () => updateMenuPosition();
     const onScroll = () => updateMenuPosition();
     window.addEventListener('resize', onResize, { passive: true });
-    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('scroll', onScroll, { passive: true, capture: true });
 
     return () => {
       cancelAnimationFrame(raf);

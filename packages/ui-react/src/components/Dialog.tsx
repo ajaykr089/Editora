@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import {
   UIDialogCancelDetail,
   UIDialogCloseDetail,
@@ -8,6 +8,13 @@ import {
   UIDialogSubmitDetail,
   UIDialogTemplateOptions
 } from '@editora/ui-core';
+import {
+  syncBooleanAttribute,
+  syncStringAttribute,
+  useElementAttributes,
+  useElementEventListeners,
+  useForwardedHostRef,
+} from './_internals';
 
 export type DialogRequestCloseDetail = {
   reason: UIDialogRequestCloseReason;
@@ -52,7 +59,9 @@ export type DialogProps = Omit<React.HTMLAttributes<HTMLElement>, 'onOpen' | 'on
   onDialogClose?: (detail: UIDialogCloseDetail) => void;
 };
 
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
+function syncBooleanStateAttribute(el: HTMLElement, name: string, value: boolean | undefined): void {
+  syncStringAttribute(el, name, typeof value === 'boolean' ? String(value) : null);
+}
 
 export const Dialog = React.forwardRef<DialogElement, DialogProps>(function Dialog(props, forwardedRef) {
   const {
@@ -86,115 +95,83 @@ export const Dialog = React.forwardRef<DialogElement, DialogProps>(function Dial
     ...rest
   } = props;
 
-  const ref = useRef<DialogElement | null>(null);
+  const ref = useForwardedHostRef<DialogElement>(forwardedRef);
 
-  React.useImperativeHandle(forwardedRef, () => ref.current as DialogElement);
+  const openHandler = React.useCallback(() => onOpen?.(), [onOpen]);
+  const closeHandler = React.useCallback(() => onClose?.(), [onClose]);
+  const requestCloseHandler = React.useCallback((event: Event) => {
+    const detail = (event as CustomEvent<DialogRequestCloseDetail>).detail;
+    if (detail) onRequestClose?.(detail);
+  }, [onRequestClose]);
+  const dialogOpenHandler = React.useCallback(
+    (event: Event) => onDialogOpen?.((event as CustomEvent<UIDialogOpenDetail>).detail),
+    [onDialogOpen]
+  );
+  const dialogSubmitHandler = React.useCallback(
+    (event: Event) => onDialogSubmit?.((event as CustomEvent<UIDialogSubmitDetail>).detail),
+    [onDialogSubmit]
+  );
+  const dialogCancelHandler = React.useCallback(
+    (event: Event) => onDialogCancel?.((event as CustomEvent<UIDialogCancelDetail>).detail),
+    [onDialogCancel]
+  );
+  const dialogDismissHandler = React.useCallback(
+    (event: Event) => onDialogDismiss?.((event as CustomEvent<UIDialogDismissDetail>).detail),
+    [onDialogDismiss]
+  );
+  const dialogCloseHandler = React.useCallback(
+    (event: Event) => onDialogClose?.((event as CustomEvent<UIDialogCloseDetail>).detail),
+    [onDialogClose]
+  );
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+  useElementEventListeners(
+    ref,
+    [
+      { type: 'open', listener: openHandler as EventListener },
+      { type: 'close', listener: closeHandler as EventListener },
+      { type: 'request-close', listener: requestCloseHandler as EventListener },
+      { type: 'ui-open', listener: dialogOpenHandler as EventListener },
+      { type: 'ui-submit', listener: dialogSubmitHandler as EventListener },
+      { type: 'ui-cancel', listener: dialogCancelHandler as EventListener },
+      { type: 'ui-dismiss', listener: dialogDismissHandler as EventListener },
+      { type: 'ui-close', listener: dialogCloseHandler as EventListener },
+    ],
+    [openHandler, closeHandler, requestCloseHandler, dialogOpenHandler, dialogSubmitHandler, dialogCancelHandler, dialogDismissHandler, dialogCloseHandler]
+  );
 
-    const openHandler = () => onOpen?.();
-    const closeHandler = () => onClose?.();
-    const requestCloseHandler = (event: Event) => {
-      const detail = (event as CustomEvent<DialogRequestCloseDetail>).detail;
-      if (detail) onRequestClose?.(detail);
-    };
+  useElementAttributes(ref, (el) => {
+    if (typeof open === 'boolean') syncBooleanAttribute(el, 'open', open);
+    else syncStringAttribute(el, 'open', null);
 
-    const dialogOpenHandler = (event: Event) => onDialogOpen?.((event as CustomEvent<UIDialogOpenDetail>).detail);
-    const dialogSubmitHandler = (event: Event) => onDialogSubmit?.((event as CustomEvent<UIDialogSubmitDetail>).detail);
-    const dialogCancelHandler = (event: Event) => onDialogCancel?.((event as CustomEvent<UIDialogCancelDetail>).detail);
-    const dialogDismissHandler = (event: Event) => onDialogDismiss?.((event as CustomEvent<UIDialogDismissDetail>).detail);
-    const dialogCloseHandler = (event: Event) => onDialogClose?.((event as CustomEvent<UIDialogCloseDetail>).detail);
-
-    el.addEventListener('open', openHandler as EventListener);
-    el.addEventListener('close', closeHandler as EventListener);
-    el.addEventListener('request-close', requestCloseHandler as EventListener);
-
-    el.addEventListener('ui-open', dialogOpenHandler as EventListener);
-    el.addEventListener('ui-submit', dialogSubmitHandler as EventListener);
-    el.addEventListener('ui-cancel', dialogCancelHandler as EventListener);
-    el.addEventListener('ui-dismiss', dialogDismissHandler as EventListener);
-    el.addEventListener('ui-close', dialogCloseHandler as EventListener);
-
-    return () => {
-      el.removeEventListener('open', openHandler as EventListener);
-      el.removeEventListener('close', closeHandler as EventListener);
-      el.removeEventListener('request-close', requestCloseHandler as EventListener);
-
-      el.removeEventListener('ui-open', dialogOpenHandler as EventListener);
-      el.removeEventListener('ui-submit', dialogSubmitHandler as EventListener);
-      el.removeEventListener('ui-cancel', dialogCancelHandler as EventListener);
-      el.removeEventListener('ui-dismiss', dialogDismissHandler as EventListener);
-      el.removeEventListener('ui-close', dialogCloseHandler as EventListener);
-    };
-  }, [onOpen, onClose, onRequestClose, onDialogOpen, onDialogSubmit, onDialogCancel, onDialogDismiss, onDialogClose]);
-
-  useIsomorphicLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    if (typeof open === 'boolean') {
-      if (open) el.setAttribute('open', '');
-      else el.removeAttribute('open');
-    }
-
-    if (title) el.setAttribute('title', title);
-    else el.removeAttribute('title');
-
-    if (description) el.setAttribute('description', description);
-    else el.removeAttribute('description');
+    syncStringAttribute(el, 'title', title || null);
+    syncStringAttribute(el, 'description', description || null);
 
     const resolvedDismissible = typeof dismissible === 'boolean' ? dismissible : closable;
-    if (typeof resolvedDismissible === 'boolean') {
-      el.setAttribute('dismissible', String(resolvedDismissible));
-      el.setAttribute('closable', String(resolvedDismissible));
-    } else {
-      el.removeAttribute('dismissible');
-      el.removeAttribute('closable');
+    syncBooleanStateAttribute(el, 'dismissible', resolvedDismissible);
+    syncBooleanStateAttribute(el, 'closable', resolvedDismissible);
+
+    syncBooleanStateAttribute(el, 'close-on-overlay', closeOnOverlay);
+    syncBooleanStateAttribute(el, 'close-on-backdrop', closeOnOverlay);
+    syncBooleanStateAttribute(el, 'close-on-esc', closeOnEsc);
+    syncBooleanStateAttribute(el, 'lock-while-loading', lockWhileLoading);
+
+    syncStringAttribute(el, 'role', roleType || null);
+    syncStringAttribute(el, 'size', size && size !== 'md' && size !== '2' ? size : null);
+    syncStringAttribute(el, 'state', state && state !== 'idle' ? state : null);
+    syncStringAttribute(el, 'initial-focus', initialFocus || null);
+    syncStringAttribute(el, 'submit-text', submitText || null);
+    syncStringAttribute(el, 'cancel-text', cancelText || null);
+    syncStringAttribute(el, 'loading-text', loadingText || null);
+
+    if ((el as any).dialogId !== dialogId) {
+      (el as any).dialogId = dialogId;
     }
 
-    if (typeof closeOnOverlay === 'boolean') {
-      el.setAttribute('close-on-overlay', String(closeOnOverlay));
-      el.setAttribute('close-on-backdrop', String(closeOnOverlay));
-    } else {
-      el.removeAttribute('close-on-overlay');
-      el.removeAttribute('close-on-backdrop');
+    if ((el as any).config !== config) {
+      (el as any).config = config;
     }
 
-    if (typeof closeOnEsc === 'boolean') el.setAttribute('close-on-esc', String(closeOnEsc));
-    else el.removeAttribute('close-on-esc');
-
-    if (typeof lockWhileLoading === 'boolean') el.setAttribute('lock-while-loading', String(lockWhileLoading));
-    else el.removeAttribute('lock-while-loading');
-
-    if (roleType) el.setAttribute('role', roleType);
-    else el.removeAttribute('role');
-
-    if (size && size !== 'md' && size !== '2') el.setAttribute('size', size);
-    else el.removeAttribute('size');
-
-    if (state && state !== 'idle') el.setAttribute('state', state);
-    else el.removeAttribute('state');
-
-    if (initialFocus) el.setAttribute('initial-focus', initialFocus);
-    else el.removeAttribute('initial-focus');
-
-    if (submitText) el.setAttribute('submit-text', submitText);
-    else el.removeAttribute('submit-text');
-
-    if (cancelText) el.setAttribute('cancel-text', cancelText);
-    else el.removeAttribute('cancel-text');
-
-    if (loadingText) el.setAttribute('loading-text', loadingText);
-    else el.removeAttribute('loading-text');
-
-    if (dialogId) (el as any).dialogId = dialogId;
-
-    if (config) (el as any).config = config;
-
-    if (headless) el.setAttribute('headless', '');
-    else el.removeAttribute('headless');
+    syncBooleanAttribute(el, 'headless', headless);
   }, [
     open,
     title,

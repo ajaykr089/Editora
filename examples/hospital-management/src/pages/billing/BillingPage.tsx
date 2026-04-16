@@ -372,7 +372,7 @@ export default function BillingPage() {
         ) : null}
       </Drawer>
 
-      <Dialog open={invoiceOpen} title="Create invoice" onRequestClose={() => setInvoiceOpen(false)}>
+      <Dialog open={invoiceOpen} title="Create invoice" onDialogClose={() => setInvoiceOpen(false)}>
         <Grid style={{ display: 'grid', gap: 10 }}>
           <Select
             label="Patient"
@@ -396,7 +396,7 @@ export default function BillingPage() {
         </Flex>
       </Dialog>
 
-      <Dialog open={paymentOpen} title="Record payment" onRequestClose={() => setPaymentOpen(false)}>
+      <Dialog open={paymentOpen} title="Record payment" onDialogClose={() => setPaymentOpen(false)}>
         <Grid style={{ display: 'grid', gap: 10 }}>
           <Grid style={{ display: 'grid', gap: 8, gridTemplateColumns: '1fr 1fr' }}>
             <Input label="Invoice" readOnly value={selectedInvoice?.id || ''} />

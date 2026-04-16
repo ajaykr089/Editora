@@ -16,8 +16,47 @@ export type UIDrawerRequestCloseDetail = {
   reason: UIDrawerRequestCloseReason;
 };
 
+function scheduleDeferredFrame(callback: () => void): number {
+  if (typeof requestAnimationFrame === 'function') {
+    return requestAnimationFrame(() => callback());
+  }
+  return window.setTimeout(callback, 16) as unknown as number;
+}
+
+function cancelDeferredFrame(handle: number): void {
+  if (!handle) return;
+  if (typeof cancelAnimationFrame === 'function') {
+    cancelAnimationFrame(handle);
+    return;
+  }
+  window.clearTimeout(handle);
+}
+
 const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+const DRAWER_LIVE_UI_ATTRS = new Set([
+  'side',
+  'dismissible',
+  'headless',
+  'variant',
+  'density',
+  'shape',
+  'elevation',
+  'tone',
+  'size',
+  'inset',
+  'close-on-overlay',
+  'close-on-esc',
+  'lock-while-loading',
+  'show-close',
+  'state',
+  'role',
+  'aria-label',
+  'aria-labelledby',
+  'aria-describedby',
+  'initial-focus'
+]);
 
 const style = `
   :host {
@@ -586,6 +625,9 @@ export class UIDrawer extends ElementBase {
   private _restoreFocusEl: HTMLElement | null = null;
   private _globalListenersBound = false;
   private _closeReason: UIDrawerRequestCloseReason = 'programmatic';
+  private _focusInitialFrame = 0;
+  private _focusTrapFrame = 0;
+  private _restoreFocusFrame = 0;
 
   constructor() {
     super();
@@ -603,6 +645,7 @@ export class UIDrawer extends ElementBase {
   override disconnectedCallback(): void {
     this.root.removeEventListener('click', this._onRootClick as EventListener);
     this._unbindGlobalListeners();
+    this._cancelScheduledFocusWork();
     this._releaseOpenResources();
     this._restoreFocusEl = null;
     this._isOpen = false;
@@ -616,11 +659,15 @@ export class UIDrawer extends ElementBase {
       return;
     }
 
-    if (this.isConnected) this.requestRender();
-
-    if (this._isOpen && (name === 'initial-focus' || name === 'dismissible' || name === 'show-close')) {
-      queueMicrotask(() => this._ensureFocusTrap());
+    if (DRAWER_LIVE_UI_ATTRS.has(name)) {
+      this._syncLiveUi();
+      if (this._isOpen && (name === 'initial-focus' || name === 'dismissible' || name === 'show-close')) {
+        this._scheduleEnsureFocusTrap();
+      }
+      return;
     }
+
+    if (this.isConnected) this.requestRender();
   }
 
   open(): void {
@@ -719,6 +766,31 @@ export class UIDrawer extends ElementBase {
     return this.root.querySelector('.panel') as HTMLElement | null;
   }
 
+  private _getOverlay(): HTMLElement | null {
+    return this.root.querySelector('.overlay') as HTMLElement | null;
+  }
+
+  private _getHeader(): HTMLElement | null {
+    return this.root.querySelector('.header') as HTMLElement | null;
+  }
+
+  private _titleId(): string {
+    return `ui-drawer-title-${this._uid}`;
+  }
+
+  private _descriptionId(): string {
+    return `ui-drawer-description-${this._uid}`;
+  }
+
+  private _bodyId(): string {
+    return `ui-drawer-body-${this._uid}`;
+  }
+
+  private _resolvedSide(): DrawerSide {
+    const dirAttr = this.getAttribute('dir') || document.documentElement.getAttribute('dir') || 'ltr';
+    return normalizeSide(this.getAttribute('side') as LogicalDrawerSide | null, dirAttr === 'rtl' ? 'rtl' : 'ltr');
+  }
+
   private _isTopMost(): boolean {
     const topOverlay = OverlayManager.top();
     if (!topOverlay) return true;
@@ -765,6 +837,113 @@ export class UIDrawer extends ElementBase {
     return result;
   }
 
+  private _cancelScheduledFocusWork(): void {
+    if (this._focusInitialFrame) {
+      cancelDeferredFrame(this._focusInitialFrame);
+      this._focusInitialFrame = 0;
+    }
+    if (this._focusTrapFrame) {
+      cancelDeferredFrame(this._focusTrapFrame);
+      this._focusTrapFrame = 0;
+    }
+    if (this._restoreFocusFrame) {
+      cancelDeferredFrame(this._restoreFocusFrame);
+      this._restoreFocusFrame = 0;
+    }
+  }
+
+  private _scheduleFocusInitial(): void {
+    if (!this._isOpen) return;
+    if (this._focusInitialFrame) return;
+    this._focusInitialFrame = scheduleDeferredFrame(() => {
+      this._focusInitialFrame = 0;
+      this._focusInitial();
+    });
+  }
+
+  private _scheduleEnsureFocusTrap(): void {
+    if (!this._isOpen) return;
+    if (this._focusTrapFrame) return;
+    this._focusTrapFrame = scheduleDeferredFrame(() => {
+      this._focusTrapFrame = 0;
+      this._ensureFocusTrap();
+    });
+  }
+
+  private _scheduleRestoreFocus(target: HTMLElement | null): void {
+    if (!target || !this._canRestoreFocus(target)) return;
+    if (this._restoreFocusFrame) cancelDeferredFrame(this._restoreFocusFrame);
+    this._restoreFocusFrame = scheduleDeferredFrame(() => {
+      this._restoreFocusFrame = 0;
+      try {
+        if (this._canRestoreFocus(target)) {
+          target.focus({ preventScroll: true });
+        }
+      } catch {
+        try {
+          if (this._canRestoreFocus(target)) target.focus();
+        } catch {
+          // no-op
+        }
+      }
+    });
+  }
+
+  private _syncLiveUi(): void {
+    const open = this.hasAttribute('open');
+    const overlay = this._getOverlay();
+    const panel = this._getPanel();
+    const header = this._getHeader();
+    const closeButton = this.root.querySelector('.close-btn') as HTMLButtonElement | null;
+    if (overlay) overlay.setAttribute('aria-hidden', open ? 'false' : 'true');
+    if (!panel) return;
+
+    const side = this._resolvedSide();
+    panel.classList.remove('side-left', 'side-right', 'side-top', 'side-bottom');
+    panel.classList.add(`side-${side}`);
+
+    const isLoading = this.state === 'loading';
+    if (isLoading) panel.setAttribute('aria-busy', 'true');
+    else panel.removeAttribute('aria-busy');
+    const role = this.getAttribute('role') || 'dialog';
+    panel.setAttribute('role', role);
+
+    const title = (this.getAttribute('title') || '').trim();
+    const description = (this.getAttribute('description') || '').trim();
+    const hasHeaderSlot = hasSlotContent(this, 'header');
+    const showClose = this.showClose;
+    const hasHeader = showClose || hasHeaderSlot || Boolean(title) || Boolean(description);
+
+    if (header) {
+      header.classList.toggle('empty', !hasHeader);
+    }
+
+    if (closeButton) {
+      closeButton.hidden = !showClose;
+      closeButton.disabled = isLoading && this.lockWhileLoading;
+    }
+
+    const ariaLabel = this.getAttribute('aria-label') || '';
+    const explicitLabelledBy = this.getAttribute('aria-labelledby') || '';
+    const explicitDescribedBy = this.getAttribute('aria-describedby') || '';
+    const labelledBy = explicitLabelledBy || (!ariaLabel && (hasHeaderSlot || Boolean(title)) ? this._titleId() : '');
+    const describedByIds: string[] = [];
+    if (explicitDescribedBy) {
+      describedByIds.push(explicitDescribedBy);
+    } else {
+      if (Boolean(description)) describedByIds.push(this._descriptionId());
+      describedByIds.push(this._bodyId());
+    }
+    const fallbackLabel = ariaLabel || (!labelledBy ? 'Drawer' : '');
+
+    if (fallbackLabel) panel.setAttribute('aria-label', fallbackLabel);
+    else panel.removeAttribute('aria-label');
+    if (labelledBy) panel.setAttribute('aria-labelledby', labelledBy);
+    else panel.removeAttribute('aria-labelledby');
+    if (describedByIds.length) panel.setAttribute('aria-describedby', describedByIds.join(' '));
+    else panel.removeAttribute('aria-describedby');
+  }
+
   private _focusInitial(): void {
     if (!this._isOpen) return;
     const panel = this._getPanel();
@@ -775,10 +954,15 @@ export class UIDrawer extends ElementBase {
       const explicit = this.querySelector<HTMLElement>(selector) || panel.querySelector<HTMLElement>(selector);
       if (explicit && this._isFocusable(explicit)) {
         try {
-          explicit.focus();
+          explicit.focus({ preventScroll: true });
           return;
         } catch {
-          // no-op
+          try {
+            explicit.focus();
+            return;
+          } catch {
+            // no-op
+          }
         }
       }
     }
@@ -792,9 +976,13 @@ export class UIDrawer extends ElementBase {
     }
 
     try {
-      target.focus();
+      target.focus({ preventScroll: true });
     } catch {
-      // no-op
+      try {
+        target.focus();
+      } catch {
+        // no-op
+      }
     }
   }
 
@@ -826,13 +1014,15 @@ export class UIDrawer extends ElementBase {
 
   private _syncOpenState(): void {
     const nowOpen = this.hasAttribute('open');
+    this._syncLiveUi();
 
     if (nowOpen === this._isOpen) {
       if (nowOpen) {
         this._bindGlobalListeners();
-        queueMicrotask(() => this._ensureFocusTrap());
+        this._scheduleEnsureFocusTrap();
       } else {
         this._unbindGlobalListeners();
+        this._cancelScheduledFocusWork();
       }
       return;
     }
@@ -840,6 +1030,7 @@ export class UIDrawer extends ElementBase {
     this._isOpen = nowOpen;
 
     if (nowOpen) {
+      this._cancelScheduledFocusWork();
       this._bindGlobalListeners();
       this._restoreFocusEl = (document.activeElement as HTMLElement) || null;
       this._closeReason = 'programmatic';
@@ -851,8 +1042,8 @@ export class UIDrawer extends ElementBase {
         // no-op
       }
 
-      this._focusInitial();
-      queueMicrotask(() => this._ensureFocusTrap());
+      this._scheduleFocusInitial();
+      this._scheduleEnsureFocusTrap();
 
       this.dispatchEvent(new CustomEvent('open', { bubbles: true, composed: true }));
       this.dispatchEvent(new CustomEvent('show', { bubbles: true, composed: true }));
@@ -867,6 +1058,7 @@ export class UIDrawer extends ElementBase {
     }
 
     this._unbindGlobalListeners();
+    this._cancelScheduledFocusWork();
     this._releaseOpenResources();
 
     const reason = this._closeReason;
@@ -897,13 +1089,7 @@ export class UIDrawer extends ElementBase {
     this._restoreFocusEl = null;
     this._closeReason = 'programmatic';
 
-    if (restoreTarget && this._canRestoreFocus(restoreTarget)) {
-      try {
-        if (this._canRestoreFocus(restoreTarget)) restoreTarget.focus();
-      } catch {
-        // no-op
-      }
-    }
+    this._scheduleRestoreFocus(restoreTarget);
   }
 
   private _requestClose(reason: UIDrawerRequestCloseReason): void {
@@ -967,14 +1153,22 @@ export class UIDrawer extends ElementBase {
     if (event.shiftKey) {
       if (!activeInside || active === first) {
         event.preventDefault();
-        last.focus();
+        try {
+          last.focus({ preventScroll: true });
+        } catch {
+          last.focus();
+        }
       }
       return;
     }
 
     if (!activeInside || active === last) {
       event.preventDefault();
-      first.focus();
+      try {
+        first.focus({ preventScroll: true });
+      } catch {
+        first.focus();
+      }
     }
   }
 
@@ -1008,7 +1202,7 @@ export class UIDrawer extends ElementBase {
 
     if (inside) return;
 
-    this._focusInitial();
+    this._scheduleFocusInitial();
   }
 
   protected render(): void {
@@ -1083,9 +1277,8 @@ export class UIDrawer extends ElementBase {
       </aside>
     `);
 
-    if (this._isOpen) {
-      queueMicrotask(() => this._ensureFocusTrap());
-    }
+    this._syncLiveUi();
+    if (this._isOpen) this._scheduleEnsureFocusTrap();
   }
 
   private _bindGlobalListeners(): void {

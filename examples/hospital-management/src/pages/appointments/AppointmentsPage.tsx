@@ -9,16 +9,13 @@ import {
   Button,
   Calendar,
   DataViewToolbar,
-  DatePicker,
   Dialog,
   Drawer,
   Flex,
   Grid,
   HoverCard,
   Progress,
-  Select,
   Stat,
-  Stepper,
   Tabs
 } from '@editora/ui-react';
 import { toastAdvanced } from '@editora/toast';
@@ -29,6 +26,53 @@ import { useAppointmentsQuery, useCreateAppointmentMutation, usePatientsQuery, u
 import { Appointment } from '@/shared/types/domain';
 
 const pageSize = 8;
+const BOOKING_STEP_ORDER = ['patient', 'department', 'doctor', 'slot', 'confirm'] as const;
+const BOOKING_DEPARTMENTS = ['Cardiology', 'Orthopedics', 'Pediatrics', 'Neurology'] as const;
+const BOOKING_SLOT_OPTIONS = ['09:00', '09:30', '10:00', '10:30', '11:00'] as const;
+
+function buildBookingDefaults(date: string): BookingValues {
+  return {
+    patientId: '',
+    patientName: '',
+    department: '',
+    doctorId: '',
+    doctorName: '',
+    date,
+    slot: '09:00'
+  };
+}
+
+function bookingStepLabel(step: typeof BOOKING_STEP_ORDER[number]): string {
+  if (step === 'patient') return 'Patient';
+  if (step === 'department') return 'Department';
+  if (step === 'doctor') return 'Doctor';
+  if (step === 'slot') return 'Date & slot';
+  return 'Confirm';
+}
+
+function bookingStepDescription(step: typeof BOOKING_STEP_ORDER[number]): string {
+  if (step === 'patient') return 'Choose the patient record for this visit.';
+  if (step === 'department') return 'Route the booking to the right clinic.';
+  if (step === 'doctor') return 'Assign an available clinician.';
+  if (step === 'slot') return 'Pick a date and appointment time.';
+  return 'Review the visit details before confirming.';
+}
+
+function bookingChoiceStyle(selected: boolean): React.CSSProperties {
+  return {
+    width: '100%',
+    border: selected ? '1px solid var(--ui-color-primary, #2563eb)' : '1px solid var(--ui-color-border, #dbe4ef)',
+    borderRadius: 12,
+    padding: 12,
+    display: 'grid',
+    gap: 4,
+    textAlign: 'left',
+    cursor: 'pointer',
+    background: selected ? 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, white)' : 'var(--ui-color-surface, #ffffff)',
+    boxShadow: selected ? '0 0 0 3px color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, transparent)' : 'none',
+    transition: 'border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease'
+  };
+}
 
 const bookingSchema = z.object({
   patientId: z.string().min(2, 'Select patient'),
@@ -88,22 +132,21 @@ export default function AppointmentsPage() {
 
   const form = useForm<BookingValues>({
     resolver: zodResolver(bookingSchema),
-    defaultValues: {
-      patientId: '',
-      patientName: '',
-      department: '',
-      doctorId: '',
-      doctorName: '',
-      date: new Date().toISOString().slice(0, 10),
-      slot: '09:00'
-    }
+    defaultValues: buildBookingDefaults(new Date().toISOString().slice(0, 10))
   });
 
   const doctors = React.useMemo(
     () => (staff.data?.items || []).filter((member) => member.role === 'doctor'),
     [staff.data?.items]
   );
-  const selectedDepartment = form.watch('department');
+  const bookingPatientId = form.watch('patientId');
+  const bookingPatientName = form.watch('patientName');
+  const bookingDepartment = form.watch('department');
+  const bookingDoctorId = form.watch('doctorId');
+  const bookingDoctorName = form.watch('doctorName');
+  const bookingDate = form.watch('date');
+  const bookingSlot = form.watch('slot');
+  const selectedDepartment = bookingDepartment;
 
   const availableDoctors = React.useMemo(() => {
     if (!selectedDepartment) return doctors;
@@ -135,9 +178,7 @@ export default function AppointmentsPage() {
         status: 'scheduled'
       });
       toastAdvanced.success('Appointment created', { position: 'top-right', theme: 'light' });
-      setOpenBooking(false);
-      setBookingStep('patient');
-      form.reset();
+      closeBookingWizard();
       appointments.refetch();
     } catch (error) {
       toastAdvanced.error((error as Error).message, { position: 'top-right', theme: 'light' });
@@ -167,12 +208,21 @@ export default function AppointmentsPage() {
     [listRows]
   );
 
+  const resetBookingWizard = React.useCallback(() => {
+    setBookingStep('patient');
+    form.reset(buildBookingDefaults(new Date().toISOString().slice(0, 10)));
+  }, [form]);
+
+  const closeBookingWizard = React.useCallback(() => {
+    setOpenBooking(false);
+    resetBookingWizard();
+  }, [resetBookingWizard]);
+
   const moveBookingStep = (direction: 'previous' | 'next') => {
-    const order = ['patient', 'department', 'doctor', 'slot', 'confirm'];
-    const current = order.indexOf(bookingStep);
+    const current = BOOKING_STEP_ORDER.indexOf(bookingStep as (typeof BOOKING_STEP_ORDER)[number]);
 
     if (direction === 'previous') {
-      if (current > 0) setBookingStep(order[current - 1]);
+      if (current > 0) setBookingStep(BOOKING_STEP_ORDER[current - 1]);
       return;
     }
 
@@ -193,8 +243,9 @@ export default function AppointmentsPage() {
       return;
     }
 
-    if (current < order.length - 1) setBookingStep(order[current + 1]);
+    if (current < BOOKING_STEP_ORDER.length - 1) setBookingStep(BOOKING_STEP_ORDER[current + 1]);
   };
+  const currentBookingIndex = BOOKING_STEP_ORDER.indexOf(bookingStep as (typeof BOOKING_STEP_ORDER)[number]);
 
   if (appointments.isLoading) return <TableSkeleton />;
   if (appointments.isError) {
@@ -443,125 +494,285 @@ export default function AppointmentsPage() {
         ) : null}
       </Drawer>
 
-      <Dialog open={openBooking} title="Appointment booking wizard" onRequestClose={() => setOpenBooking(false)}>
-        <Grid style={{ display: 'grid', gap: 10 }}>
-          <Stepper
-            value={bookingStep}
-            clickable
-            steps={[
-              { value: 'patient', label: 'Patient' },
-              { value: 'department', label: 'Department' },
-              { value: 'doctor', label: 'Doctor' },
-              { value: 'slot', label: 'Slot' },
-              { value: 'confirm', label: 'Confirm' }
-            ]}
-            onChange={(detail) => setBookingStep((detail as any).value as string)}
-          />
+      <Dialog
+        open={openBooking}
+        title="Appointment booking wizard"
+        description="A rebuilt, stable booking flow for patient routing and slot selection."
+        onDialogClose={closeBookingWizard}
+      >
+        <Grid style={{ display: 'grid', gap: 16 }}>
+          <Box style={{ display: 'grid', gap: 10 }}>
+            <Flex style={{ gap: 8, flexWrap: 'wrap' }}>
+              {BOOKING_STEP_ORDER.map((stepValue, index) => {
+                const active = bookingStep === stepValue;
+                const complete = index < currentBookingIndex;
+                const reachable = index <= currentBookingIndex;
 
-          {bookingStep === 'patient' ? (
-            <Select
-              label="Patient"
-              value={form.watch('patientId')}
-              onChange={(next) => {
-                const patientId = String((next as any)?.target?.value ?? next);
-                const patient = patients.data?.items.find((item) => item.id === patientId);
-                form.setValue('patientId', patientId, { shouldDirty: true, shouldValidate: true });
-                form.setValue('patientName', patient?.name || '', { shouldDirty: true, shouldValidate: true });
-              }}
-            >
-              <option value="">Select patient</option>
-              {patients.data?.items.map((patient) => (
-                <option key={patient.id} value={patient.id}>
-                  {patient.name} • {patient.mrn}
-                </option>
-              ))}
-            </Select>
-          ) : null}
+                return (
+                  <button
+                    key={stepValue}
+                    type="button"
+                    onClick={() => {
+                      if (reachable) setBookingStep(stepValue);
+                    }}
+                    disabled={!reachable}
+                    style={{
+                      border: active ? '1px solid var(--ui-color-primary, #2563eb)' : '1px solid var(--ui-color-border, #dbe4ef)',
+                      borderRadius: 999,
+                      padding: '8px 12px',
+                      background: active
+                        ? 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, white)'
+                        : complete
+                          ? 'color-mix(in srgb, var(--ui-color-success, #16a34a) 10%, white)'
+                          : 'var(--ui-color-surface, #ffffff)',
+                      color: 'var(--ui-color-text, #0f172a)',
+                      cursor: reachable ? 'pointer' : 'default',
+                      opacity: reachable ? 1 : 0.55,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      fontSize: 12,
+                      fontWeight: 600
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: '50%',
+                        display: 'inline-grid',
+                        placeItems: 'center',
+                        background: complete
+                          ? 'var(--ui-color-success, #16a34a)'
+                          : active
+                            ? 'var(--ui-color-primary, #2563eb)'
+                            : 'var(--ui-color-surface-alt, #e2e8f0)',
+                        color: complete || active ? '#ffffff' : 'var(--ui-color-muted, #64748b)',
+                        fontSize: 11
+                      }}
+                    >
+                      {complete ? '✓' : index + 1}
+                    </span>
+                    {bookingStepLabel(stepValue)}
+                  </button>
+                );
+              })}
+            </Flex>
 
-          {bookingStep === 'department' ? (
-            <Select
-              label="Department"
-              value={form.watch('department')}
-              onChange={(next) => {
-                const department = String((next as any)?.target?.value ?? next);
-                form.setValue('department', department, { shouldDirty: true, shouldValidate: true });
-                form.setValue('doctorId', '', { shouldDirty: true });
-                form.setValue('doctorName', '', { shouldDirty: true });
-              }}
-            >
-              <option value="">Select department</option>
-              <option value="Cardiology">Cardiology</option>
-              <option value="Orthopedics">Orthopedics</option>
-              <option value="Pediatrics">Pediatrics</option>
-              <option value="Neurology">Neurology</option>
-            </Select>
-          ) : null}
+            <Progress
+              value={((currentBookingIndex + 1) / BOOKING_STEP_ORDER.length) * 100}
+              max={100}
+              tone="info"
+              size="sm"
+              label="Wizard progress"
+              showLabel
+            />
+          </Box>
 
-          {bookingStep === 'doctor' ? (
-            <Select
-              label="Doctor"
-              value={form.watch('doctorId')}
-              onChange={(next) => {
-                const doctorId = String((next as any)?.target?.value ?? next);
-                const doctor = availableDoctors.find((item) => item.id === doctorId);
-                form.setValue('doctorId', doctorId, { shouldDirty: true, shouldValidate: true });
-                form.setValue('doctorName', doctor?.name || '', { shouldDirty: true, shouldValidate: true });
-              }}
-            >
-              <option value="">Select doctor</option>
-              {availableDoctors.map((doctor) => (
-                <option key={doctor.id} value={doctor.id}>
-                  {doctor.name} • {doctor.department}
-                </option>
-              ))}
-            </Select>
-          ) : null}
-
-          {bookingStep === 'slot' ? (
-            <Grid style={{ display: 'grid', gap: 8, gridTemplateColumns: '1fr 1fr' }}>
-              <DatePicker
-                label="Date"
-                value={form.watch('date')}
-                min={todayDate}
-                clearable
-                closeOnSelect
-                onValueChange={(next) => form.setValue('date', next || '', { shouldDirty: true, shouldValidate: true })}
-              />
-              <Select label="Slot" value={form.watch('slot')} onChange={(next) => form.setValue('slot', next)}>
-                <option value="09:00">09:00</option>
-                <option value="09:30">09:30</option>
-                <option value="10:00">10:00</option>
-                <option value="10:30">10:30</option>
-                <option value="11:00">11:00</option>
-              </Select>
-            </Grid>
-          ) : null}
-
-          {bookingStep === 'confirm' ? (
-            <Box
-              style={{
-                border: '1px solid var(--ui-color-border, #dbe4ef)',
-                borderRadius: 12,
-                padding: 12,
-                display: 'grid',
-                gap: 6,
-                background: 'var(--ui-color-surface-alt, #f8fafc)'
-              }}
-            >
-              <span>Patient: {form.watch('patientName') || '—'}</span>
-              <span>Department: {form.watch('department') || '—'}</span>
-              <span>Doctor: {form.watch('doctorName') || '—'}</span>
-              <span>Date/slot: {form.watch('date')} • {form.watch('slot')}</span>
+          <Box
+            variant="surface"
+            radius="lg"
+            p="16px"
+            style={{
+              border: '1px solid var(--ui-color-border, #dbe4ef)',
+              display: 'grid',
+              gap: 14,
+              minHeight: 320,
+              alignContent: 'start'
+            }}
+          >
+            <Box style={{ display: 'grid', gap: 4 }}>
+              <Box style={{ fontSize: 18, fontWeight: 700 }}>{bookingStepLabel(bookingStep as (typeof BOOKING_STEP_ORDER)[number])}</Box>
+              <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #64748b)' }}>
+                {bookingStepDescription(bookingStep as (typeof BOOKING_STEP_ORDER)[number])}
+              </Box>
             </Box>
-          ) : null}
+
+            {bookingStep === 'patient' ? (
+              <Box style={{ display: 'grid', gap: 10 }}>
+                <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #64748b)' }}>
+                  Select the patient you want to book. The chosen record will carry through the rest of the flow.
+                </Box>
+                <Box style={{ display: 'grid', gap: 8, maxHeight: 220, overflowY: 'auto' }}>
+                  {patients.data?.items.map((patient) => {
+                    const selected = bookingPatientId === patient.id;
+                    return (
+                      <button
+                        key={patient.id}
+                        type="button"
+                        onClick={() => {
+                          form.setValue('patientId', patient.id, { shouldDirty: true, shouldValidate: true });
+                          form.setValue('patientName', patient.name, { shouldDirty: true, shouldValidate: true });
+                        }}
+                        style={bookingChoiceStyle(selected)}
+                      >
+                        <span style={{ fontWeight: 700 }}>{patient.name}</span>
+                        <span style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>{patient.mrn}</span>
+                      </button>
+                    );
+                  })}
+                </Box>
+              </Box>
+            ) : null}
+
+            {bookingStep === 'department' ? (
+              <Box style={{ display: 'grid', gap: 10 }}>
+                <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #64748b)' }}>
+                  Route the appointment to a department first, then we&apos;ll narrow down the available doctors.
+                </Box>
+                <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
+                  {BOOKING_DEPARTMENTS.map((department) => {
+                    const selected = bookingDepartment === department;
+                    return (
+                      <button
+                        key={department}
+                        type="button"
+                        onClick={() => {
+                          form.setValue('department', department, { shouldDirty: true, shouldValidate: true });
+                          form.setValue('doctorId', '', { shouldDirty: true });
+                          form.setValue('doctorName', '', { shouldDirty: true });
+                        }}
+                        style={bookingChoiceStyle(selected)}
+                      >
+                        <span style={{ fontWeight: 700 }}>{department}</span>
+                        <span style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>Choose care routing for this visit.</span>
+                      </button>
+                    );
+                  })}
+                </Grid>
+              </Box>
+            ) : null}
+
+            {bookingStep === 'doctor' ? (
+              <Box style={{ display: 'grid', gap: 10 }}>
+                <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #64748b)' }}>
+                  {bookingDepartment
+                    ? `Showing clinicians available in ${bookingDepartment}.`
+                    : 'Choose a department first to see matching doctors.'}
+                </Box>
+                {availableDoctors.length === 0 ? (
+                  <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #64748b)' }}>No doctors found for the current department.</Box>
+                ) : (
+                  <Box style={{ display: 'grid', gap: 8, maxHeight: 220, overflowY: 'auto' }}>
+                    {availableDoctors.map((doctor) => {
+                      const selected = bookingDoctorId === doctor.id;
+                      return (
+                        <button
+                          key={doctor.id}
+                          type="button"
+                          onClick={() => {
+                            form.setValue('doctorId', doctor.id, { shouldDirty: true, shouldValidate: true });
+                            form.setValue('doctorName', doctor.name, { shouldDirty: true, shouldValidate: true });
+                          }}
+                          style={bookingChoiceStyle(selected)}
+                        >
+                          <span style={{ fontWeight: 700 }}>{doctor.name}</span>
+                          <span style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>{doctor.department}</span>
+                        </button>
+                      );
+                    })}
+                  </Box>
+                )}
+              </Box>
+            ) : null}
+
+            {bookingStep === 'slot' ? (
+              <Box style={{ display: 'grid', gap: 14 }}>
+                <label style={{ display: 'grid', gap: 6, fontSize: 13, fontWeight: 600, color: 'var(--ui-color-text, #0f172a)' }}>
+                  Visit date
+                  <input
+                    type="date"
+                    value={bookingDate}
+                    min={todayDate}
+                    onChange={(event) => form.setValue('date', event.target.value, { shouldDirty: true, shouldValidate: true })}
+                    style={{
+                      border: '1px solid var(--ui-color-border, #dbe4ef)',
+                      borderRadius: 12,
+                      padding: '10px 12px',
+                      fontSize: 14,
+                      background: 'var(--ui-color-surface, #ffffff)',
+                      color: 'var(--ui-color-text, #0f172a)'
+                    }}
+                  />
+                </label>
+
+                <Box style={{ display: 'grid', gap: 8 }}>
+                  <Box style={{ fontSize: 13, fontWeight: 600 }}>Available time slots</Box>
+                  <Flex style={{ gap: 8, flexWrap: 'wrap' }}>
+                    {BOOKING_SLOT_OPTIONS.map((slot) => {
+                      const selected = bookingSlot === slot;
+                      return (
+                        <button
+                          key={slot}
+                          type="button"
+                          onClick={() => form.setValue('slot', slot, { shouldDirty: true, shouldValidate: true })}
+                          style={{
+                            border: selected ? '1px solid var(--ui-color-primary, #2563eb)' : '1px solid var(--ui-color-border, #dbe4ef)',
+                            borderRadius: 999,
+                            padding: '8px 14px',
+                            background: selected ? 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 12%, white)' : 'var(--ui-color-surface, #ffffff)',
+                            color: 'var(--ui-color-text, #0f172a)',
+                            cursor: 'pointer',
+                            fontSize: 13,
+                            fontWeight: 600
+                          }}
+                        >
+                          {slot}
+                        </button>
+                      );
+                    })}
+                  </Flex>
+                </Box>
+              </Box>
+            ) : null}
+
+            {bookingStep === 'confirm' ? (
+              <Box
+                style={{
+                  border: '1px solid var(--ui-color-border, #dbe4ef)',
+                  borderRadius: 16,
+                  padding: 16,
+                  display: 'grid',
+                  gap: 12,
+                  background: 'linear-gradient(180deg, color-mix(in srgb, var(--ui-color-primary, #2563eb) 6%, white), white)'
+                }}
+              >
+                <Box style={{ display: 'grid', gap: 8 }}>
+                  <Box style={{ fontWeight: 700, fontSize: 16 }}>Review booking</Box>
+                  <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #64748b)' }}>
+                    Confirm the final details before creating the appointment.
+                  </Box>
+                </Box>
+
+                <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
+                  <Box variant="soft" radius="lg" p="12px" style={{ display: 'grid', gap: 4 }}>
+                    <span style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>Patient</span>
+                    <strong>{bookingPatientName || '—'}</strong>
+                  </Box>
+                  <Box variant="soft" radius="lg" p="12px" style={{ display: 'grid', gap: 4 }}>
+                    <span style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>Department</span>
+                    <strong>{bookingDepartment || '—'}</strong>
+                  </Box>
+                  <Box variant="soft" radius="lg" p="12px" style={{ display: 'grid', gap: 4 }}>
+                    <span style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>Doctor</span>
+                    <strong>{bookingDoctorName || '—'}</strong>
+                  </Box>
+                  <Box variant="soft" radius="lg" p="12px" style={{ display: 'grid', gap: 4 }}>
+                    <span style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>Date & slot</span>
+                    <strong>{bookingDate} • {bookingSlot}</strong>
+                  </Box>
+                </Grid>
+              </Box>
+            ) : null}
+          </Box>
         </Grid>
         <Flex slot="footer" justify="space-between" align="center" style={{ width: '100%' }}>
-          <Button size="sm" variant="ghost" onClick={() => moveBookingStep('previous')}>
+          <Button size="sm" variant="ghost" onClick={() => moveBookingStep('previous')} disabled={currentBookingIndex === 0}>
             Previous
           </Button>
 
           <Flex style={{ gap: 8 }}>
-            <Button size="sm" variant="secondary" onClick={() => setOpenBooking(false)}>
+            <Button size="sm" variant="secondary" onClick={closeBookingWizard}>
               Close
             </Button>
 

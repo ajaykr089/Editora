@@ -145,7 +145,7 @@ export default function WardsPage() {
         ))}
       </Grid>
 
-      <Dialog open={assignOpen} title="Admission flow" onRequestClose={() => setAssignOpen(false)}>
+      <Dialog open={assignOpen} title="Admission flow" onDialogClose={() => setAssignOpen(false)}>
         <Grid style={{ display: 'grid', gap: 10 }}>
           <Select label="Bed" value={selectedBedId} onChange={(next) => setSelectedBedId(String((next as any)?.target?.value ?? next))}>
             <option value="">Select bed</option>

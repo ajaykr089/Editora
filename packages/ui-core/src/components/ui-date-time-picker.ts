@@ -6,6 +6,7 @@ import {
   combineDateTime,
   compareDateTimes,
   computePopoverPosition,
+  eventOriginatesWithin,
   formatDateForDisplay,
   isTruthyAttr,
   lockBodyScroll,
@@ -578,7 +579,10 @@ export class UIDateTimePicker extends ElementBase {
   private _onDocumentPointerDownBound = (event: PointerEvent) => this._onDocumentPointerDown(event);
   private _onDocumentKeyDownBound = (event: KeyboardEvent) => this._onDocumentKeyDown(event);
   private _onWindowResizeBound = () => this._schedulePosition.run();
-  private _onWindowScrollBound = () => this._schedulePosition.run();
+  private _onWindowScrollBound = (event: Event) => {
+    if (eventOriginatesWithin(event, [this._overlay])) return;
+    this._schedulePosition.run();
+  };
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -907,7 +911,7 @@ export class UIDateTimePicker extends ElementBase {
     document.addEventListener('pointerdown', this._onDocumentPointerDownBound, true);
     document.addEventListener('keydown', this._onDocumentKeyDownBound);
     window.addEventListener('resize', this._onWindowResizeBound);
-    window.addEventListener('scroll', this._onWindowScrollBound, true);
+    window.addEventListener('scroll', this._onWindowScrollBound, { passive: true, capture: true });
     if (this._isMobileSheet()) this._releaseScrollLock = lockBodyScroll();
   }
 
@@ -971,10 +975,18 @@ export class UIDateTimePicker extends ElementBase {
     const field = this.root.querySelector('.field') as HTMLElement | null;
     const panel = this._overlay.querySelector('.panel') as HTMLElement | null;
     if (!field || !panel) return;
-    const position = computePopoverPosition(field.getBoundingClientRect(), panel.getBoundingClientRect());
+    const currentPlacement = panel.getAttribute('data-placement');
+    const position = computePopoverPosition(
+      field.getBoundingClientRect(),
+      panel.getBoundingClientRect(),
+      8,
+      8,
+      currentPlacement === 'top' ? 'top' : currentPlacement === 'bottom' ? 'bottom' : null
+    );
     panel.style.position = 'absolute';
     panel.style.top = `${Math.round(position.top)}px`;
     panel.style.left = `${Math.round(position.left)}px`;
+    panel.setAttribute('data-placement', position.placement);
   }
 
   private _timeOptions(): { hours: string; minutes: string; meridiem: string } {

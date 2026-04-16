@@ -116,7 +116,7 @@ export function autoUpdatePosition(anchor: HTMLElement, contentEl: HTMLElement, 
     try { mo.observe(anchor, { attributes: true, childList: false, subtree: false }); } catch (e) {}
   }
 
-  window.addEventListener('scroll', onScrollOrResize, true);
+  window.addEventListener('scroll', onScrollOrResize, { passive: true, capture: true });
   window.addEventListener('resize', onScrollOrResize);
 
   handlers.push(() => window.removeEventListener('scroll', onScrollOrResize, true));

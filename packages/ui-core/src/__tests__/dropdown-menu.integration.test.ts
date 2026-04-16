@@ -179,6 +179,29 @@ describe('ui-dropdown and ui-menu integration', () => {
     expect(el._portalEl).toBe(portalBefore);
   });
 
+  it('ui-menu stays open when scroll events originate from inside its own portal', async () => {
+    const el = document.createElement('ui-menu') as HTMLElement & { _portalEl?: HTMLElement | null };
+    el.innerHTML = `
+      <button slot="trigger">Open</button>
+      <div slot="content">
+        ${Array.from({ length: 12 }, (_, index) => `<button class="item">Item ${index}</button>`).join('')}
+      </div>
+    `;
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    el.setAttribute('open', '');
+    await flushMicrotask();
+
+    const portal = el._portalEl as HTMLElement | null;
+    expect(portal).toBeTruthy();
+
+    portal?.dispatchEvent(new Event('scroll', { bubbles: false, composed: true }));
+    await flushMicrotask();
+
+    expect(el.hasAttribute('open')).toBe(true);
+  });
+
   it('ui-menu mirrors size, radius, and tone onto the portaled menu surface', async () => {
     const el = document.createElement('ui-menu') as HTMLElement & { _portalEl?: HTMLElement | null };
     el.innerHTML = `

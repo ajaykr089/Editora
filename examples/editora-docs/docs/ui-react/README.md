@@ -60,6 +60,7 @@ export function App() {
 - [Textarea](./form-inputs/textarea) - Multi-line text input
 - [Select](./form-inputs/select) - Dropdown selection
 - [Checkbox](./form-inputs/checkbox) - Checkbox input
+- [Radio](./form-inputs/radio) - Standalone radio input
 - [RadioGroup](./form-inputs/radio-group) - Radio button group
 - [Switch](./form-inputs/switch) - Toggle switch
 - [Slider](./form-inputs/slider) - Range slider
