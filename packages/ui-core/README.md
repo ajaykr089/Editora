@@ -89,7 +89,7 @@ More guidance lives in [`docs/FRAMEWORK_DIRECT_USAGE.md`](https://github.com/aja
 
 ### Primitives and forms
 - `ui-button`, `ui-split-button`, `ui-input`, `ui-textarea`, `ui-label`, `ui-description`, `ui-field-error`, `ui-control-group`, `ui-fieldset`, `ui-field`, `ui-form`, `ui-pin-input`, `ui-otp-input`, `ui-inline-edit`
-- `ui-checkbox`, `ui-radio-group`, `ui-switch`, `ui-slider`, `ui-select`, `ui-combobox`
+- `ui-checkbox`, `ui-radio`, `ui-radio-group`, `ui-switch`, `ui-slider`, `ui-select`, `ui-combobox`
 - `ui-date-picker`, `ui-date-range-picker`, `ui-time-picker`, `ui-date-time-picker`, `ui-date-range-time-picker`
 - `ui-color-picker`
 
