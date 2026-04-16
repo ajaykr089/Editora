@@ -10,6 +10,7 @@ import {
   Flex,
   Grid,
   Input,
+  QuickActions,
   Sidebar
 } from '@editora/ui-react';
 import { Icon } from '@editora/react-icons';
@@ -34,6 +35,7 @@ export function AppShell() {
 
   const [collapsed, setCollapsed] = React.useState(false);
   const [commandOpen, setCommandOpen] = React.useState(false);
+  const [floatingActionsOpen, setFloatingActionsOpen] = React.useState(false);
   const [offlineMode, setOfflineMode] = React.useState(false);
   const [globalSearch, setGlobalSearch] = React.useState('');
 
@@ -192,8 +194,9 @@ export function AppShell() {
 
       <CommandPalette
         open={commandOpen}
-        onSelect={(index) => {
-          const action = quickActions[index as number];
+        onSelect={(detail) => {
+          const index = Number((detail as any)?.index ?? detail);
+          const action = quickActions[index];
           if (action) navigate(action.to);
           setCommandOpen(false);
         }}
@@ -204,6 +207,28 @@ export function AppShell() {
           </Box>
         ))}
       </CommandPalette>
+
+      <QuickActions
+        open={floatingActionsOpen}
+        floating
+        collapsible
+        label="Jump to workflow"
+        variant="soft"
+        placement="bottom-right"
+        style={{ position: 'fixed', right: 20, bottom: 20, zIndex: 50 }}
+        onOpenChange={setFloatingActionsOpen}
+        onSelect={(detail) => {
+          const action = quickActions[detail.index];
+          if (action) navigate(action.to);
+          setFloatingActionsOpen(false);
+        }}
+      >
+        {quickActions.map((action) => (
+          <QuickActions.Action key={action.label}>
+            {action.label}
+          </QuickActions.Action>
+        ))}
+      </QuickActions>
     </Grid>
   );
 }

@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import { compareISO } from './ui-calendar';
 import { resolveDateTimeTranslations } from './date-time-i18n';
 import {
@@ -6,6 +7,7 @@ import {
   computeLastDaysRange,
   computeMonthRange,
   computePopoverPosition,
+  eventOriginatesWithin,
   formatDateForDisplay,
   isTruthyAttr,
   lockBodyScroll,
@@ -527,6 +529,7 @@ export class UIDateRangePicker extends ElementBase {
   private _open = false;
   private _syncing = false;
   private _overlay: HTMLDivElement | null = null;
+  private _dismissableLayer: DismissableLayerHandle | null = null;
   private _releaseScrollLock: (() => void) | null = null;
   private _isInitialized = false;
   private _hasView = false;
@@ -553,7 +556,10 @@ export class UIDateRangePicker extends ElementBase {
   private _onDocumentPointerDownBound = (event: PointerEvent) => this._onDocumentPointerDown(event);
   private _onDocumentKeyDownBound = (event: KeyboardEvent) => this._onDocumentKeyDown(event);
   private _onWindowResizeBound = () => this._schedulePosition.run();
-  private _onWindowScrollBound = () => this._schedulePosition.run();
+  private _onWindowScrollBound = (event: Event) => {
+    if (eventOriginatesWithin(event, [this._overlay])) return;
+    this._schedulePosition.run();
+  };
   private _onOverlayClickBound = (event: Event) => this._onOverlayClick(event);
   private _onOverlayCalendarBound = (event: Event) => this._onOverlayCalendarChange(event);
 
@@ -863,21 +869,29 @@ export class UIDateRangePicker extends ElementBase {
     el.style.position = 'fixed';
     el.style.left = '0';
     el.style.top = '0';
-    el.style.zIndex = '1100';
     el.style.pointerEvents = 'none';
     el.addEventListener('click', this._onOverlayClickBound);
     el.addEventListener('select', this._onOverlayCalendarBound as EventListener);
     el.addEventListener('change', this._onOverlayCalendarBound as EventListener);
     document.body.appendChild(el);
     this._overlay = el;
+    this._syncOverlayHostZIndex();
     document.addEventListener('pointerdown', this._onDocumentPointerDownBound, true);
     document.addEventListener('keydown', this._onDocumentKeyDownBound);
     window.addEventListener('resize', this._onWindowResizeBound);
-    window.addEventListener('scroll', this._onWindowScrollBound, true);
+    window.addEventListener('scroll', this._onWindowScrollBound, { passive: true, capture: true });
     if (this._isMobileSheet()) this._releaseScrollLock = lockBodyScroll();
   }
 
+  private _syncOverlayHostZIndex(): void {
+    if (!this._overlay || typeof window === 'undefined') return;
+    const resolved = window.getComputedStyle(this).getPropertyValue('--ui-dp-z').trim();
+    this._overlay.style.zIndex = resolved || '1600';
+  }
+
   private _destroyOverlay(): void {
+    this._dismissableLayer?.destroy();
+    this._dismissableLayer = null;
     if (!this._overlay) return;
     this._schedulePosition.cancel();
     document.removeEventListener('pointerdown', this._onDocumentPointerDownBound, true);
@@ -896,6 +910,33 @@ export class UIDateRangePicker extends ElementBase {
     }
   }
 
+  private _syncDismissableLayer(): void {
+    this._dismissableLayer?.destroy();
+    this._dismissableLayer = null;
+    if (!this._open || !this._overlay) return;
+    const panel = this._overlay.querySelector('.panel, .sheet') as HTMLElement | null;
+    const trigger = this.root.querySelector('.fields') as HTMLElement | null;
+    if (!panel) return;
+    this._dismissableLayer = createDismissableLayer({
+      node: panel,
+      trigger,
+      closeOnEscape: true,
+      closeOnPointerOutside: true,
+      closeOnFocusOutside: false,
+      onBeforeDismiss: (reason) => {
+        if (reason === 'escape-key') {
+          this._setOpen(false, 'escape');
+          return false;
+        }
+        if (reason === 'outside-pointer') {
+          this._setOpen(false, 'outside');
+          return false;
+        }
+        return false;
+      }
+    });
+  }
+
   private _positionOverlay(): void {
     if (!this._overlay || !this._open || this._isMobileSheet()) return;
     const field = this.root.querySelector('.fields') as HTMLElement | null;
@@ -904,10 +945,18 @@ export class UIDateRangePicker extends ElementBase {
     const anchorRect = field.getBoundingClientRect();
     panel.style.setProperty('--ui-drp-panel-width', `${Math.round(anchorRect.width)}px`);
     const panelRect = panel.getBoundingClientRect();
-    const position = computePopoverPosition(anchorRect, panelRect);
+    const currentPlacement = panel.getAttribute('data-placement');
+    const position = computePopoverPosition(
+      anchorRect,
+      panelRect,
+      8,
+      8,
+      currentPlacement === 'top' ? 'top' : currentPlacement === 'bottom' ? 'bottom' : null
+    );
     panel.style.position = 'absolute';
     panel.style.top = `${Math.round(position.top)}px`;
     panel.style.left = `${Math.round(position.left)}px`;
+    panel.setAttribute('data-placement', position.placement);
   }
 
   private _renderPanelInner(sheet: boolean): string {
@@ -1018,6 +1067,7 @@ export class UIDateRangePicker extends ElementBase {
 
   private _syncOverlayState(): void {
     if (!this._overlay) return;
+    this._syncOverlayHostZIndex();
     const sheet = this._isMobileSheet();
     if (sheet && !this._releaseScrollLock) {
       this._releaseScrollLock = lockBodyScroll();
@@ -1028,6 +1078,7 @@ export class UIDateRangePicker extends ElementBase {
     this._ensureOverlayContent(sheet);
     const title = this._overlay.querySelector('.title') as HTMLElement | null;
     const panel = this._overlay.querySelector('.panel, .sheet') as HTMLElement | null;
+    this._syncDismissableLayer();
     const header = this._overlay.querySelector('.header') as HTMLElement | null;
     const presetGroup = this._overlay.querySelector('.presets') as HTMLElement | null;
     const footer = this._overlay.querySelector('.footer') as HTMLElement | null;

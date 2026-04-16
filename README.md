@@ -19,6 +19,7 @@ The **best free rich text editor** with enterprise-grade features. A comprehensi
 
 - **LLM Index:** [llms.txt](./llms.txt)
 - **LLM Full Guide:** [llms-full.txt](./llms-full.txt)
+- **Canonical Inventory:** [COMPONENT_INVENTORY.md](./COMPONENT_INVENTORY.md)
 - **Component Registry:** [components.json](./components.json)
 - **Registry Schema:** [components.schema.json](./components.schema.json)
 - **Regenerate Registry:** `npm run generate:components`

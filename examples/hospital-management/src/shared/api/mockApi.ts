@@ -2,16 +2,18 @@ import {
   ActivityEvent,
   Appointment,
   Bed,
+  HospitalSettings,
   Invoice,
   LabOrder,
   Paginated,
   Patient,
+  PatientDocument,
   PharmacyItem,
   QueryListParams,
   Role,
   StaffMember
 } from '@/shared/types/domain';
-import { bumpRevision, getDb, setOffline } from '@/shared/mock/database';
+import { bumpRevision, getDb, recordActivity, setOffline } from '@/shared/mock/database';
 
 const delay = (ms = 280) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -40,6 +42,14 @@ function normalize(value?: string): string {
 
 function includesValue(value: string, query: string): boolean {
   return value.toLowerCase().includes(query);
+}
+
+function isWithinRange(value: string, from?: string, to?: string): boolean {
+  if (!from && !to) return true;
+  const date = value.slice(0, 10);
+  if (from && date < from) return false;
+  if (to && date > to) return false;
+  return true;
 }
 
 export const mockApi = {
@@ -168,12 +178,16 @@ export const mockApi = {
 
     const labs = getDb().labOrders.filter((row) => row.patientId === patientId);
     const invoices = getDb().invoices.filter((row) => row.patientId === patientId);
+    const documents = getDb().documents
+      .filter((row) => row.patientId === patientId)
+      .sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt));
 
     return {
       patient,
       encounters,
       labs,
       invoices,
+      documents,
       revision: getDb().revision
     };
   },
@@ -192,6 +206,7 @@ export const mockApi = {
         ...payload,
         updatedAt: new Date().toISOString()
       } as Patient;
+      recordActivity('info', `Patient record updated for ${db.patients[index].name}`);
       bumpRevision();
       return db.patients[index];
     }
@@ -216,6 +231,7 @@ export const mockApi = {
     };
 
     db.patients.unshift(newPatient);
+    recordActivity('success', `Patient profile created for ${newPatient.name}`);
     bumpRevision();
     return newPatient;
   },
@@ -228,8 +244,40 @@ export const mockApi = {
     const target = db.patients.find((row) => row.id === patientId);
     if (!target) throw new Error('Patient not found.');
     target.status = 'archived';
+    recordActivity('warning', `${target.name} moved to archived patient records`);
     bumpRevision();
     return { ok: true };
+  },
+
+  async uploadPatientDocument(payload: {
+    patientId: string;
+    title: string;
+    category: PatientDocument['category'];
+    fileName: string;
+    notes?: string;
+  }) {
+    await delay(180);
+    maybeThrowOffline();
+
+    const db = getDb();
+    const patient = db.patients.find((row) => row.id === payload.patientId);
+    if (!patient) throw new Error('Patient not found.');
+
+    const document: PatientDocument = {
+      id: `doc-${db.documents.length + 1}`,
+      patientId: patient.id,
+      title: payload.title,
+      category: payload.category,
+      fileName: payload.fileName,
+      notes: payload.notes,
+      uploadedAt: new Date().toISOString(),
+      uploadedBy: 'Records Desk'
+    };
+
+    db.documents.unshift(document);
+    recordActivity('info', `${document.title} uploaded for ${patient.name}`);
+    bumpRevision();
+    return document;
   },
 
   async listAppointments(params: QueryListParams = {}) {
@@ -270,6 +318,7 @@ export const mockApi = {
       status: payload.status || 'scheduled'
     };
     db.appointments.unshift(next);
+    recordActivity('success', `Appointment booked for ${next.patientName} with ${next.doctorName}`);
     bumpRevision();
     return next;
   },
@@ -283,6 +332,8 @@ export const mockApi = {
 
     target.status = payload.status;
     if (payload.status === 'arrived') target.queueToken = `Q-${100 + Number(payload.id.replace(/\D+/g, ''))}`;
+    if (payload.status === 'completed') target.queueToken = undefined;
+    recordActivity('info', `Appointment ${target.id} moved to ${payload.status}`);
     bumpRevision();
     return target;
   },
@@ -334,6 +385,7 @@ export const mockApi = {
     bed.patientName = patient.name;
     bed.assignedDoctor = payload.doctorName;
     patient.status = 'admitted';
+    recordActivity('success', `${patient.name} admitted to ${bed.id} in ${bed.ward}`);
     bumpRevision();
     return bed;
   },
@@ -355,6 +407,7 @@ export const mockApi = {
     bed.patientId = undefined;
     bed.patientName = undefined;
     bed.assignedDoctor = undefined;
+    recordActivity('warning', `${bed.id} moved to cleaning after discharge`);
     bumpRevision();
     return bed;
   },
@@ -382,6 +435,20 @@ export const mockApi = {
     const target = getDb().pharmacy.find((row) => row.id === payload.id);
     if (!target) throw new Error('Medicine not found.');
     target.stock = Math.max(0, target.stock - Math.max(1, payload.quantity));
+    recordActivity('info', `${payload.quantity} unit(s) dispensed from ${target.name}`);
+    bumpRevision();
+    return target;
+  },
+
+  async restockMedicine(payload: { id: string; quantity: number }) {
+    await delay(180);
+    maybeThrowOffline();
+
+    const target = getDb().pharmacy.find((row) => row.id === payload.id);
+    if (!target) throw new Error('Medicine not found.');
+
+    target.stock += Math.max(1, payload.quantity);
+    recordActivity('success', `${target.name} restocked by ${payload.quantity} unit(s)`);
     bumpRevision();
     return target;
   },
@@ -409,8 +476,33 @@ export const mockApi = {
     if (!target) throw new Error('Lab order not found.');
     target.status = payload.status;
     if (payload.result != null) target.result = payload.result;
+    recordActivity('info', `Lab order ${target.id} updated to ${payload.status}`);
     bumpRevision();
     return target;
+  },
+
+  async createLabOrder(payload: { patientId: string; testName: string; status?: LabOrder['status'] }) {
+    await delay(220);
+    maybeThrowOffline();
+
+    const db = getDb();
+    const patient = db.patients.find((row) => row.id === payload.patientId);
+    if (!patient) throw new Error('Patient not found.');
+
+    const order: LabOrder = {
+      id: `lab-${String(db.labOrders.length + 1).padStart(4, '0')}`,
+      patientId: patient.id,
+      patientName: patient.name,
+      testName: payload.testName,
+      orderedAt: new Date().toISOString(),
+      status: payload.status || 'ordered',
+      result: ''
+    };
+
+    db.labOrders.unshift(order);
+    recordActivity('success', `${payload.testName} ordered for ${patient.name}`);
+    bumpRevision();
+    return order;
   },
 
   async listInvoices(params: QueryListParams = {}) {
@@ -438,16 +530,48 @@ export const mockApi = {
 
     target.paid = Math.min(target.amount, target.paid + Math.max(1, payload.amount));
     target.status = target.paid === target.amount ? 'paid' : 'partial';
+    recordActivity('success', `Payment of $${Math.max(1, payload.amount)} recorded on ${target.id}`);
     bumpRevision();
     return target;
+  },
+
+  async createInvoice(payload: { patientId: string; amount: number }) {
+    await delay(180);
+    maybeThrowOffline();
+
+    const db = getDb();
+    const patient = db.patients.find((row) => row.id === payload.patientId);
+    if (!patient) throw new Error('Patient not found.');
+
+    const amount = Math.max(50, Math.round(payload.amount));
+    const invoice: Invoice = {
+      id: `inv-${String(db.invoices.length + 1).padStart(4, '0')}`,
+      patientId: patient.id,
+      patientName: patient.name,
+      amount,
+      paid: 0,
+      status: 'pending',
+      createdAt: new Date().toISOString().slice(0, 10)
+    };
+
+    db.invoices.unshift(invoice);
+    recordActivity('success', `Invoice ${invoice.id} created for ${patient.name}`);
+    bumpRevision();
+    return invoice;
   },
 
   async getReports(params: { from?: string; to?: string; department?: string; doctor?: string }) {
     await delay(260);
     maybeThrowOffline();
 
-    const appointments = getDb().appointments;
-    const invoices = getDb().invoices;
+    const appointments = getDb().appointments.filter((row) => {
+      return (
+        isWithinRange(row.date, params.from, params.to) &&
+        (!params.department || row.department === params.department) &&
+        (!params.doctor || row.doctorName === params.doctor)
+      );
+    });
+    const invoices = getDb().invoices.filter((row) => isWithinRange(row.createdAt, params.from, params.to));
 
     const revenueSummary = invoices.reduce((acc, row) => acc + row.paid, 0);
     const visits = appointments.filter((row) => row.status !== 'cancelled').length;
@@ -455,6 +579,8 @@ export const mockApi = {
     const labTurnaround = Math.round(
       (getDb().labOrders.filter((row) => row.status === 'completed').length / Math.max(1, getDb().labOrders.length)) * 100
     );
+    const completedVisits = appointments.filter((row) => row.status === 'completed').length;
+    const scheduledVisits = appointments.filter((row) => row.status === 'scheduled').length;
 
     const reportRows = [
       { metric: 'Revenue summary', value: `$${revenueSummary.toLocaleString()}` },
@@ -464,9 +590,41 @@ export const mockApi = {
       { metric: 'Pharmacy sales', value: `$${Math.round(revenueSummary * 0.16).toLocaleString()}` }
     ];
 
+    const byDay = new Map<string, { revenue: number; visits: number }>();
+
+    appointments.forEach((row) => {
+      const key = row.date;
+      const current = byDay.get(key) || { revenue: 0, visits: 0 };
+      current.visits += row.status === 'cancelled' ? 0 : 1;
+      byDay.set(key, current);
+    });
+
+    invoices.forEach((row) => {
+      const key = row.createdAt;
+      const current = byDay.get(key) || { revenue: 0, visits: 0 };
+      current.revenue += row.paid;
+      byDay.set(key, current);
+    });
+
+    const trend = [...byDay.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(-7)
+      .map(([date, value]) => ({
+        label: date.slice(5),
+        revenue: value.revenue,
+        visits: value.visits
+      }));
+
     return {
       filters: params,
       rows: reportRows,
+      summary: {
+        revenue: revenueSummary,
+        visits,
+        completedVisits,
+        scheduledVisits
+      },
+      trend,
       revision: getDb().revision
     };
   },
@@ -476,14 +634,27 @@ export const mockApi = {
     maybeThrowOffline();
 
     return {
-      hospitalName: 'Northstar General Hospital',
-      timezone: 'America/New_York',
-      departments: ['Cardiology', 'Orthopedics', 'Pediatrics', 'Oncology', 'Emergency', 'Laboratory'],
-      notifications: {
-        appointmentReminders: true,
-        dischargeAlerts: true,
-        lowStockAlerts: true
-      },
+      ...getDb().settings,
+      auditLogs: getDb().activity,
+      revision: getDb().revision
+    };
+  },
+
+  async saveSettings(payload: HospitalSettings) {
+    await delay(180);
+    maybeThrowOffline();
+
+    getDb().settings = {
+      hospitalName: payload.hospitalName,
+      timezone: payload.timezone,
+      departments: payload.departments,
+      notifications: payload.notifications
+    };
+    recordActivity('success', 'System settings updated');
+    bumpRevision();
+
+    return {
+      ...getDb().settings,
       auditLogs: getDb().activity,
       revision: getDb().revision
     };

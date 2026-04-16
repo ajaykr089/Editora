@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://editora-ecosystem.netlify.app/sitemap.xml

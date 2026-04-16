@@ -81,6 +81,7 @@ Wave 1 is complete. These wrappers now have stable typed props, lifecycle callba
 |---|---|---|---|---|
 | `High` | `Select` | [Select.tsx](/Users/etelligens/Documents/Rich-Text-Editor/packages/ui-react/src/components/Select.tsx) | child-only option model, no controlled/uncontrolled pair, raw attribute names like `autofocus` in sibling wrappers create family inconsistency | standardize controlled value and option composition patterns |
 | `High` | `Combobox` | [Combobox.tsx](/Users/etelligens/Documents/Rich-Text-Editor/packages/ui-react/src/components/Combobox.tsx) | stronger than `Select`, but still child-structure heavy and slightly inconsistent with input family naming | lock final search/select/custom-value API |
+| `High` | `Radio` | [Radio.tsx](/Users/etelligens/Documents/Rich-Text-Editor/packages/ui-react/src/components/Radio.tsx) | newly added wrapper; needs docs/story hardening and consistency review with `Checkbox`/`Switch` | standardized standalone single-choice boolean-control API |
 | `High` | `RadioGroup` | [RadioGroup.tsx](/Users/etelligens/Documents/Rich-Text-Editor/packages/ui-react/src/components/RadioGroup.tsx) | no dedicated `defaultValue`, no group helper components, limited item rendering contract | standardized single-choice group API |
 | `High` | `Checkbox` | [Checkbox.tsx](/Users/etelligens/Documents/Rich-Text-Editor/packages/ui-react/src/components/Checkbox.tsx) | workable, but lighter than modern React checkbox APIs | review label/help/error group story and naming consistency |
 | `High` | `Switch` | [Switch.tsx](/Users/etelligens/Documents/Rich-Text-Editor/packages/ui-react/src/components/Switch.tsx) | same family issue as `Checkbox` | normalize boolean-control API |
@@ -169,6 +170,7 @@ This should be corrected after each family hardening pass so the registry reflec
 
 - `Select`
 - `Combobox`
+- `Radio`
 - `RadioGroup`
 - `Checkbox`
 - `Switch`

@@ -10,10 +10,10 @@ Use this page as the canonical AI-oriented entry for Editora.
 
 ## AI discovery assets
 
-- `https://editora-ecosystem.netlify.app/llms.txt`
-- `https://editora-ecosystem.netlify.app/llms-full.txt`
-- `https://editora-ecosystem.netlify.app/components.json`
-- `https://editora-ecosystem.netlify.app/components.schema.json`
+- [`/llms.txt`](/llms.txt)
+- [`/llms-full.txt`](/llms-full.txt)
+- [`/components.json`](/components.json)
+- [`/components.schema.json`](/components.schema.json)
 
 ## Package metadata pattern
 

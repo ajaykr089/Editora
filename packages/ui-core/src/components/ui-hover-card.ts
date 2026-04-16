@@ -542,7 +542,7 @@ export class UIHoverCard extends ElementBase {
     if (this._globalListenersBound) return;
     document.addEventListener('pointerdown', this._onDocumentPointerDown, true);
     window.addEventListener('resize', this._onViewportChange);
-    window.addEventListener('scroll', this._onViewportChange, true);
+    window.addEventListener('scroll', this._onViewportChange, { passive: true, capture: true });
     this._globalListenersBound = true;
   }
 

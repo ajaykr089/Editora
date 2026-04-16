@@ -88,7 +88,7 @@ export function useFloating(options?: {
       rafRef.current = requestAnimationFrame(() => update());
     };
 
-    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('scroll', onScroll, { passive: true, capture: true });
     window.addEventListener('resize', onResize);
 
     let ro1: ResizeObserver | null = null;

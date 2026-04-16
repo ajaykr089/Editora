@@ -2,6 +2,12 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { FocusManager } from '../focusManager';
 import '../components/ui-drawer';
 
+function flushAnimationFrame() {
+  return new Promise<void>((resolve) => {
+    requestAnimationFrame(() => resolve());
+  });
+}
+
 describe('focus trap hardening', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
@@ -85,6 +91,7 @@ describe('focus trap hardening', () => {
     document.body.appendChild(drawer);
 
     await Promise.resolve();
+    await flushAnimationFrame();
 
     const panel = drawer.shadowRoot?.querySelector('.panel') as HTMLElement | null;
     expect(panel).toBeTruthy();
@@ -92,9 +99,41 @@ describe('focus trap hardening', () => {
 
     outside.focus();
     await Promise.resolve();
+    await flushAnimationFrame();
     expect(Boolean(panel?.contains(document.activeElement) || drawer.contains(document.activeElement))).toBe(true);
 
     drawer.removeAttribute('open');
+    await Promise.resolve();
+    await flushAnimationFrame();
     expect(document.activeElement).toBe(outside);
+  });
+
+  it('keeps the existing drawer panel node for live runtime attribute changes', async () => {
+    const drawer = document.createElement('ui-drawer');
+    drawer.setAttribute('open', '');
+    drawer.setAttribute('dismissible', '');
+    drawer.innerHTML = '<button>Action</button>';
+    document.body.appendChild(drawer);
+
+    await Promise.resolve();
+    await flushAnimationFrame();
+
+    const panelBefore = drawer.shadowRoot?.querySelector('.panel') as HTMLElement | null;
+    expect(panelBefore).toBeTruthy();
+
+    drawer.setAttribute('state', 'loading');
+    drawer.setAttribute('aria-label', 'Filters');
+    drawer.setAttribute('close-on-esc', 'false');
+    drawer.setAttribute('show-close', 'true');
+    await Promise.resolve();
+
+    const panelAfter = drawer.shadowRoot?.querySelector('.panel') as HTMLElement | null;
+    const closeButton = drawer.shadowRoot?.querySelector('.close-btn') as HTMLButtonElement | null;
+
+    expect(panelAfter).toBe(panelBefore);
+    expect(panelAfter?.getAttribute('aria-busy')).toBe('true');
+    expect(panelAfter?.getAttribute('aria-label')).toBe('Filters');
+    expect(closeButton?.hidden).toBe(false);
+    expect(closeButton?.disabled).toBe(true);
   });
 });

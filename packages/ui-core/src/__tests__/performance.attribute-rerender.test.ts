@@ -19,6 +19,7 @@ import '../components/ui-panel';
 import '../components/ui-layout';
 import '../components/ui-select';
 import '../components/ui-textarea';
+import '../components/ui-radio';
 import '../components/ui-radio-group';
 import '../components/ui-slider';
 import '../components/ui-scroll-area';
@@ -707,6 +708,28 @@ describe('performance: non-template attribute updates should not rebuild shadow 
 
     const rootAfter = el.shadowRoot?.querySelector('.root');
     expect(rootAfter).toBe(rootBefore);
+    el.remove();
+  });
+
+  it('ui-radio keeps row node stable across checked and state attribute updates', async () => {
+    const el = document.createElement('ui-radio') as HTMLElement;
+    el.textContent = 'Weekly summary';
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const rowBefore = el.shadowRoot?.querySelector('.row');
+    expect(rowBefore).toBeTruthy();
+
+    el.setAttribute('checked', '');
+    el.setAttribute('tone', 'success');
+    el.setAttribute('invalid', '');
+    el.removeAttribute('invalid');
+    el.setAttribute('loading', '');
+    el.removeAttribute('loading');
+    await flushMicrotask();
+
+    const rowAfter = el.shadowRoot?.querySelector('.row');
+    expect(rowAfter).toBe(rowBefore);
     el.remove();
   });
 

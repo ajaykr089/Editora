@@ -8,6 +8,12 @@ keywords: [editora, documentation]
 
 Practical integration patterns for web components and framework wrappers.
 
+## Advanced showcase
+
+For full app-level validation, start with the [Hospital Management Showcase](/docs/examples/hospital-management-showcase).
+It exercises `@editora/ui-react` components across appointments, billing, pharmacy, labs, patient profiles, and
+settings so you can test overlay behavior, filters, scheduling flows, and stateful workspaces in one place.
+
 ## Bundle strategy
 
 ### Core bundle (lighter)

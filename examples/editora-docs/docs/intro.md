@@ -36,3 +36,4 @@ Official documentation for the Editora ecosystem covering editor runtime, React 
 ## Quick links
 
 - Source/code editor package: [`@editora/light-code-editor`](./packages/light-code-editor)
+- Advanced example app: [`Hospital Management Showcase`](./examples/hospital-management-showcase)

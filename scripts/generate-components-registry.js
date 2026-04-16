@@ -4,11 +4,11 @@
 const fs = require("fs");
 const path = require("path");
 
-const root = process.cwd();
+const root = path.resolve(__dirname, "..");
 const generatedAt = process.env.COMPONENT_REGISTRY_GENERATED_AT || "1970-01-01T00:00:00.000Z";
 
-const website = "https://editora-ecosystem.netlify.app/";
-const storybook = "https://editora-ecosystem-storybook.netlify.app/";
+const website = `${(process.env.DOCS_SITE_URL || "https://editora-ecosystem.netlify.app").replace(/\/+$/, "")}/`;
+const storybook = `${(process.env.DOCS_STORYBOOK_URL || "https://editora-ecosystem-storybook.netlify.app").replace(/\/+$/, "")}/`;
 
 function list(dir, predicate) {
   return fs
@@ -30,6 +30,7 @@ function buildPayload() {
 
   const coreFiles = list(uiCoreDir, (file) => /^ui-[a-z0-9-]+\.ts$/.test(file));
   const reactFiles = list(uiReactDir, (file) => /^[A-Z][A-Za-z0-9]*\.tsx$/.test(file));
+  const coreTags = new Set(coreFiles.map((file) => file.replace(/\.ts$/, "")));
 
   const components = [];
 
@@ -53,12 +54,35 @@ function buildPayload() {
     });
   }
 
-  const specialReact = new Set(["ThemeProvider", "DialogProvider", "AlertDialogProvider", "ToastAPI"]);
+  const reactWrapperOverrides = new Map([
+    ["AlertDialogProvider", null],
+    ["AnimatedNumber", "ui-odometer"],
+    ["Carousel", null],
+    ["CodeBlock", null],
+    ["CodeSnippet", null],
+    ["CopyButton", null],
+    ["DataViewToolbar", null],
+    ["DialogProvider", null],
+    ["FieldSemantics", null],
+    ["FiltersBar", null],
+    ["PageHeader", null],
+    ["PageToolbar", null],
+    ["RecordHeader", null],
+    ["ThemeProvider", null],
+    ["ToastAPI", null],
+  ]);
+
   for (const file of reactFiles) {
     const componentName = file.replace(/\.tsx$/, "");
     const kebab = kebabFromPascal(componentName);
     const guessTag = `ui-${kebab}`;
-    const isSpecial = specialReact.has(componentName);
+    const hasOverride = reactWrapperOverrides.has(componentName);
+    const wrapperFor = hasOverride
+      ? reactWrapperOverrides.get(componentName)
+      : (coreTags.has(guessTag) ? guessTag : null);
+    const notes = wrapperFor
+      ? undefined
+      : (hasOverride ? "React composite or provider/API component" : "React-only component");
     components.push({
       id: `ui-react:${componentName}`,
       package: "@editora/ui-react",
@@ -68,7 +92,8 @@ function buildPayload() {
       source: `packages/ui-react/src/components/${file}`,
       docsPath: "/docs/ui-react",
       storybookPath: `/story/ui-${kebab}--playground`,
-      ...(isSpecial ? { wrapperFor: null, notes: "Provider/API utility component" } : { wrapperFor: guessTag }),
+      wrapperFor,
+      ...(notes ? { notes } : {}),
     });
   }
 

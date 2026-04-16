@@ -7,13 +7,14 @@ const rootDir = dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   root: rootDir,
   resolve: {
-    alias: {
-      '@editora/icons': resolve(rootDir, '../../icons/src/index.ts'),
-      '@editora/react-icons': resolve(rootDir, '../../react-icons/src/index.ts'),
-      '@editora/ui-core': resolve(rootDir, '../../ui-core/src/index.ts'),
-      '@editora/ui-react': resolve(rootDir, '../src/index.tsx'),
-      '@editora/toast': resolve(rootDir, '../../editora-toast/src/index.ts')
-    }
+    alias: [
+      { find: '@editora/icons', replacement: resolve(rootDir, '../../icons/src/index.ts') },
+      { find: '@editora/react-icons', replacement: resolve(rootDir, '../../react-icons/src/index.ts') },
+      { find: '@editora/ui-core/runtime', replacement: resolve(rootDir, '../../ui-core/src/runtime.ts') },
+      { find: '@editora/ui-core', replacement: resolve(rootDir, '../../ui-core/src/index.ts') },
+      { find: '@editora/ui-react', replacement: resolve(rootDir, '../src/index.tsx') },
+      { find: '@editora/toast', replacement: resolve(rootDir, '../../editora-toast/src/index.ts') },
+    ]
   },
   server: {
     port: 4173

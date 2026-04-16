@@ -592,7 +592,7 @@ function ExampleComponent() {
 
 Components are organized by category for easy discovery:
 
-- **Form & Input**: Form, Field, Input, Select, Checkbox, RadioGroup, etc.
+- **Form & Input**: Form, Field, Input, Select, Checkbox, Radio, RadioGroup, etc.
 - **Data Display**: Table, Chart, Timeline, Tree, etc.
 - **Overlay & Modal**: Dialog, Tooltip, Popover, Toast, etc.
 - **Navigation & Layout**: Layout, Sidebar, Tabs, Breadcrumb, etc.

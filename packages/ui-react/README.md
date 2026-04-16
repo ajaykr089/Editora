@@ -236,7 +236,7 @@ import { ThemeProvider } from '@editora/ui-react';
 
 ### Form and inputs
 - `Form`, `Field`, `Label`, `Input`, `Textarea`, `Select`, `Combobox`
-- `Checkbox`, `RadioGroup`, `Switch`, `Slider`
+- `Checkbox`, `Radio`, `RadioGroup`, `Switch`, `Slider`
 - `DatePicker`, `DateRangePicker`, `TimePicker`, `DateTimePicker`, `DateRangeTimePicker`
 - `ColorPicker`
 

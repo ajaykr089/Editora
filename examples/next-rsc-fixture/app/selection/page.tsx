@@ -10,11 +10,14 @@ import {
   DirectionProvider,
   Flex,
   Grid,
+  Icon,
   Meter,
+  MetricCard,
   Progress,
   RadioGroup,
   Select,
   Slider,
+  Stat,
   Stepper,
   Switch,
   Toggle,
@@ -53,7 +56,7 @@ export default function SelectionPage() {
           <ShowcaseCard
             eyebrow="Indicators"
             title="Animated numbers and status meters"
-            description="These components react to the same local state so it is easy to confirm they all stay in sync."
+            description="These components react to the same local state so it is easy to confirm they all stay in sync, whether you need a lightweight stat row or a fully framed metric card."
           >
             <Grid
               style={{
@@ -64,13 +67,33 @@ export default function SelectionPage() {
                 alignItems: 'start',
               }}
             >
-              <Box style={stageStyle}>
-                <Box style={eyebrowStyle}>AnimatedNumber</Box>
-                <AnimatedNumber value={metric} variant="inline" animate animateOnMount />
-              </Box>
+              <MetricCard
+                label="Active seats"
+                value={<AnimatedNumber value={metric} variant="inline" animate animateOnMount />}
+                meta="Live sessions"
+                trend={`+${Math.max(3, Math.round(progressValue / 10))}%`}
+                icon={<Icon name="activity" size={16} decorative />}
+              />
               <Box style={stageStyle}>
                 <Box style={eyebrowStyle}>Progress</Box>
                 <Progress value={progressValue} max={100} showLabel animated striped label="Completion" />
+              </Box>
+              <Box style={{ ...stageStyle, justifyItems: 'stretch' }}>
+                <Box style={eyebrowStyle}>Stat + Meter</Box>
+                <Stat
+                  label="Quality score"
+                  value={`${qualityScore}%`}
+                  description="Use Stat when you want metric hierarchy without forcing a framed card shell."
+                  tone={qualityScore >= 80 ? 'success' : qualityScore >= 60 ? 'warning' : 'danger'}
+                  trend={qualityScore >= 80 ? 'Stable' : 'Needs review'}
+                  icon={<Icon name="shield" size={16} decorative />}
+                >
+                  <Meter value={qualityScore} min={0} max={100} low={30} high={70} optimum={90} showLabel label="Quality" />
+                </Stat>
+              </Box>
+              <Box style={stageStyle}>
+                <Box style={eyebrowStyle}>AnimatedNumber</Box>
+                <AnimatedNumber value={metric * 3} variant="inline" format="decimal" animate animateOnMount />
               </Box>
               <Box style={stageStyle}>
                 <Box style={eyebrowStyle}>Meter</Box>
@@ -82,6 +105,9 @@ export default function SelectionPage() {
               <Button onClick={() => setMetric((current) => current + 125)}>Increase metric</Button>
               <Button recipe="outline" onClick={() => setProgressValue((current) => Math.min(100, current + 5))}>
                 Boost progress
+              </Button>
+              <Button recipe="outline" onClick={() => setQualityScore((current) => Math.min(100, current + 4))}>
+                Improve quality
               </Button>
             </Flex>
           </ShowcaseCard>

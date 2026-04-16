@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react';
 import { Editor } from '@editora/core';
 import { ToolbarItem } from '@editora/core';
 import { EditorIcons, EditorIconName } from './EditorIcons';
@@ -22,6 +22,12 @@ interface ToolbarProps {
 
 const normalizeToolbarToken = (value: string): string =>
   value.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+const getToolbarItemMeasureKey = (item: ToolbarItemLike, index: number): string =>
+  `${index}:${item.type}:${item.command || ''}:${item.label || ''}`;
+
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 const COMMAND_ALIASES: Record<string, string> = {
   undo: 'undo',
@@ -133,10 +139,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const [openInlineMenu, setOpenInlineMenu] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState<number | null>(null);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const visibleCountRef = useRef<number | null>(null);
+  const showMoreMenuRef = useRef(false);
   const storedSelectionRef = useRef<Range | null>(null);
   const storedExpandedSelectionRef = useRef<Range | null>(null);
   const buttonRefs = useRef<Record<string, React.RefObject<HTMLButtonElement>>>({});
-  const itemWidthCacheRef = useRef<number[]>([]);
+  const itemWidthCacheRef = useRef<Record<string, number>>({});
+  const itemSignatureRef = useRef<string>('');
   const toolbarRef = useRef<HTMLDivElement>(null);
   const itemsContainerRef = useRef<HTMLDivElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
@@ -144,6 +153,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     () => resolveToolbarItems(editor.pluginManager.getToolbarItems(), itemsOverride),
     [editor, itemsOverride],
   );
+  const itemMeasureKeys = useMemo(
+    () => items.map((item, index) => getToolbarItemMeasureKey(item, index)),
+    [items],
+  );
+
+  useEffect(() => {
+    visibleCountRef.current = visibleCount;
+  }, [visibleCount]);
+
+  useEffect(() => {
+    showMoreMenuRef.current = showMoreMenu;
+  }, [showMoreMenu]);
 
   const updateStoredSelection = (range: Range | null) => {
     storedSelectionRef.current = range;
@@ -296,12 +317,32 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   };
 
   // Calculate visible items based on available space
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!showMoreOptions) {
       setVisibleCount(null);
       setShowMoreMenu(false);
-      itemWidthCacheRef.current = [];
+      visibleCountRef.current = null;
+      showMoreMenuRef.current = false;
+      itemWidthCacheRef.current = {};
+      itemSignatureRef.current = '';
       return;
+    }
+
+    const nextSignature = itemMeasureKeys.join('|');
+    const itemsChanged = itemSignatureRef.current !== nextSignature;
+
+    if (itemsChanged) {
+      itemSignatureRef.current = nextSignature;
+      itemWidthCacheRef.current = {};
+      if (showMoreMenuRef.current) {
+        showMoreMenuRef.current = false;
+        setShowMoreMenu(false);
+      }
+      if (visibleCountRef.current !== null) {
+        visibleCountRef.current = null;
+        setVisibleCount(null);
+        return;
+      }
     }
 
     let rafId: number | null = null;
@@ -321,14 +362,20 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       const itemElements = itemsContainerRef.current.children;
       for (let i = 0; i < itemElements.length; i++) {
         const element = itemElements[i] as HTMLElement;
-        const measuredWidth = element.getBoundingClientRect().width;
+        const measureKey = itemMeasureKeys[i];
+        const cachedWidth = measureKey ? itemWidthCacheRef.current[measureKey] : undefined;
+        const measuredWidth =
+          typeof cachedWidth === 'number' && cachedWidth > 0
+            ? cachedWidth
+            : element.getBoundingClientRect().width;
 
         // Cache the non-zero width so hidden items keep a stable width estimate.
-        if (measuredWidth > 0) {
-          itemWidthCacheRef.current[i] = measuredWidth;
+        if (measureKey && measuredWidth > 0) {
+          itemWidthCacheRef.current[measureKey] = measuredWidth;
         }
 
-        const stableWidth = itemWidthCacheRef.current[i] ?? measuredWidth;
+        const stableWidth =
+          (measureKey ? itemWidthCacheRef.current[measureKey] : undefined) ?? measuredWidth;
         const itemWidth = (stableWidth > 0 ? stableWidth : 40) + gap;
 
         if (accumulatedWidth + itemWidth <= availableWidth) {
@@ -341,6 +388,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
       // Ensure at least one item is visible
       const nextVisibleCount = Math.max(1, Math.min(count, itemElements.length));
+      visibleCountRef.current = nextVisibleCount;
       setVisibleCount((prev) => (prev === nextVisibleCount ? prev : nextVisibleCount));
     };
 
@@ -351,10 +399,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       rafId = requestAnimationFrame(calculateVisibleItems);
     };
 
-    itemWidthCacheRef.current = [];
     scheduleCalculation();
 
-    // Recalculate on window/container resize
+    // Recalculate on toolbar resize
     const resizeObserver = new ResizeObserver(() => {
       scheduleCalculation();
     });
@@ -363,17 +410,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       resizeObserver.observe(toolbarRef.current);
     }
 
-    if (itemsContainerRef.current) {
-      resizeObserver.observe(itemsContainerRef.current);
-    }
-
     return () => {
       if (rafId !== null) {
         cancelAnimationFrame(rafId);
       }
       resizeObserver.disconnect();
     };
-  }, [items.length, showMoreOptions]);
+  }, [itemMeasureKeys, showMoreOptions]);
 
   // Auto-close expanded row when all items fit again.
   useEffect(() => {
@@ -470,6 +513,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       order: 2, // Move to bottom in flex container
     })
   };
+  const toolbarLayoutReady = !showMoreOptions || visibleCount !== null;
   const hasOverflow = showMoreOptions && visibleCount !== null && visibleCount < items.length;
 
   const handleToolbarMouseDownCapture = (e: React.MouseEvent) => {
@@ -611,7 +655,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     <>
       <div
         className="rte-toolbar-wrapper"
-        style={toolbarStyle}
+        style={{
+          ...toolbarStyle,
+          ...(toolbarLayoutReady ? null : { visibility: 'hidden' })
+        }}
         onMouseDownCapture={handleToolbarMouseDownCapture}
       >
         {/* Main toolbar row */}

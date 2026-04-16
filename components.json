@@ -2485,7 +2485,7 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-alert-dialog-provider--playground",
       "wrapperFor": null,
-      "notes": "Provider/API utility component"
+      "notes": "React composite or provider/API component"
     },
     {
       "id": "ui-react:Anchor",
@@ -2529,7 +2529,7 @@
       "source": "packages/ui-react/src/components/AnimatedNumber.tsx",
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-animated-number--playground",
-      "wrapperFor": "ui-animated-number"
+      "wrapperFor": "ui-odometer"
     },
     {
       "id": "ui-react:AnimatedText",
@@ -2653,6 +2653,18 @@
       "wrapperFor": "ui-card"
     },
     {
+      "id": "ui-react:Carousel",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Carousel",
+      "reactExport": "Carousel",
+      "source": "packages/ui-react/src/components/Carousel.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-carousel--playground",
+      "wrapperFor": null,
+      "notes": "React composite or provider/API component"
+    },
+    {
       "id": "ui-react:Chart",
       "package": "@editora/ui-react",
       "framework": "react",
@@ -2673,6 +2685,30 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-checkbox--playground",
       "wrapperFor": "ui-checkbox"
+    },
+    {
+      "id": "ui-react:CodeBlock",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "CodeBlock",
+      "reactExport": "CodeBlock",
+      "source": "packages/ui-react/src/components/CodeBlock.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-code-block--playground",
+      "wrapperFor": null,
+      "notes": "React composite or provider/API component"
+    },
+    {
+      "id": "ui-react:CodeSnippet",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "CodeSnippet",
+      "reactExport": "CodeSnippet",
+      "source": "packages/ui-react/src/components/CodeSnippet.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-code-snippet--playground",
+      "wrapperFor": null,
+      "notes": "React composite or provider/API component"
     },
     {
       "id": "ui-react:Collapsible",
@@ -2763,6 +2799,18 @@
       "wrapperFor": "ui-context-menu"
     },
     {
+      "id": "ui-react:CopyButton",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "CopyButton",
+      "reactExport": "CopyButton",
+      "source": "packages/ui-react/src/components/CopyButton.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-copy-button--playground",
+      "wrapperFor": null,
+      "notes": "React composite or provider/API component"
+    },
+    {
       "id": "ui-react:DataTable",
       "package": "@editora/ui-react",
       "framework": "react",
@@ -2772,6 +2820,18 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-data-table--playground",
       "wrapperFor": "ui-data-table"
+    },
+    {
+      "id": "ui-react:DataViewToolbar",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "DataViewToolbar",
+      "reactExport": "DataViewToolbar",
+      "source": "packages/ui-react/src/components/DataViewToolbar.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-data-view-toolbar--playground",
+      "wrapperFor": null,
+      "notes": "React composite or provider/API component"
     },
     {
       "id": "ui-react:DateField",
@@ -2849,7 +2909,7 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-dialog-provider--playground",
       "wrapperFor": null,
-      "notes": "Provider/API utility component"
+      "notes": "React composite or provider/API component"
     },
     {
       "id": "ui-react:DirectionProvider",
@@ -2937,7 +2997,8 @@
       "source": "packages/ui-react/src/components/FieldSemantics.tsx",
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-field-semantics--playground",
-      "wrapperFor": "ui-field-semantics"
+      "wrapperFor": null,
+      "notes": "React composite or provider/API component"
     },
     {
       "id": "ui-react:FileUpload",
@@ -2949,6 +3010,18 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-file-upload--playground",
       "wrapperFor": "ui-file-upload"
+    },
+    {
+      "id": "ui-react:FiltersBar",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "FiltersBar",
+      "reactExport": "FiltersBar",
+      "source": "packages/ui-react/src/components/FiltersBar.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-filters-bar--playground",
+      "wrapperFor": null,
+      "notes": "React composite or provider/API component"
     },
     {
       "id": "ui-react:Flex",
@@ -3072,6 +3145,18 @@
       "wrapperFor": "ui-input"
     },
     {
+      "id": "ui-react:Kbd",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Kbd",
+      "reactExport": "Kbd",
+      "source": "packages/ui-react/src/components/Kbd.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-kbd--playground",
+      "wrapperFor": null,
+      "notes": "React-only component"
+    },
+    {
       "id": "ui-react:Label",
       "package": "@editora/ui-react",
       "framework": "react",
@@ -3160,6 +3245,18 @@
       "wrapperFor": "ui-meter"
     },
     {
+      "id": "ui-react:MetricCard",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "MetricCard",
+      "reactExport": "MetricCard",
+      "source": "packages/ui-react/src/components/MetricCard.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-metric-card--playground",
+      "wrapperFor": null,
+      "notes": "React-only component"
+    },
+    {
       "id": "ui-react:MultiSelect",
       "package": "@editora/ui-react",
       "framework": "react",
@@ -3213,6 +3310,30 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-orbiter--playground",
       "wrapperFor": "ui-orbiter"
+    },
+    {
+      "id": "ui-react:PageHeader",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "PageHeader",
+      "reactExport": "PageHeader",
+      "source": "packages/ui-react/src/components/PageHeader.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-page-header--playground",
+      "wrapperFor": null,
+      "notes": "React composite or provider/API component"
+    },
+    {
+      "id": "ui-react:PageToolbar",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "PageToolbar",
+      "reactExport": "PageToolbar",
+      "source": "packages/ui-react/src/components/PageToolbar.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-page-toolbar--playground",
+      "wrapperFor": null,
+      "notes": "React composite or provider/API component"
     },
     {
       "id": "ui-react:Pagination",
@@ -3369,6 +3490,18 @@
       "wrapperFor": "ui-rating"
     },
     {
+      "id": "ui-react:RecordHeader",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "RecordHeader",
+      "reactExport": "RecordHeader",
+      "source": "packages/ui-react/src/components/RecordHeader.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-record-header--playground",
+      "wrapperFor": null,
+      "notes": "React composite or provider/API component"
+    },
+    {
       "id": "ui-react:RovingFocusGroup",
       "package": "@editora/ui-react",
       "framework": "react",
@@ -3433,6 +3566,18 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-separator--playground",
       "wrapperFor": "ui-separator"
+    },
+    {
+      "id": "ui-react:Shortcut",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Shortcut",
+      "reactExport": "Shortcut",
+      "source": "packages/ui-react/src/components/Shortcut.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-shortcut--playground",
+      "wrapperFor": null,
+      "notes": "React-only component"
     },
     {
       "id": "ui-react:Sidebar",
@@ -3512,6 +3657,18 @@
       "wrapperFor": "ui-split-button"
     },
     {
+      "id": "ui-react:Stat",
+      "package": "@editora/ui-react",
+      "framework": "react",
+      "name": "Stat",
+      "reactExport": "Stat",
+      "source": "packages/ui-react/src/components/Stat.tsx",
+      "docsPath": "/docs/ui-react",
+      "storybookPath": "/story/ui-stat--playground",
+      "wrapperFor": null,
+      "notes": "React-only component"
+    },
+    {
       "id": "ui-react:Stepper",
       "package": "@editora/ui-react",
       "framework": "react",
@@ -3587,7 +3744,7 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-theme-provider--playground",
       "wrapperFor": null,
-      "notes": "Provider/API utility component"
+      "notes": "React composite or provider/API component"
     },
     {
       "id": "ui-react:Timeline",
@@ -3632,7 +3789,7 @@
       "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-toast-api--playground",
       "wrapperFor": null,
-      "notes": "Provider/API utility component"
+      "notes": "React composite or provider/API component"
     },
     {
       "id": "ui-react:Toggle",

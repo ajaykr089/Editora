@@ -49,4 +49,17 @@ describe('ui-app-header', () => {
 
     expect(spy).toHaveBeenCalledTimes(1);
   });
+
+  it('disables backdrop blur for sticky headers to avoid scroll repaint flicker', async () => {
+    const el = document.createElement('ui-app-header');
+    el.setAttribute('sticky', '');
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const styleText = el.shadowRoot?.querySelector('style')?.textContent ?? '';
+    expect(styleText).toContain('--ui-app-header-surface-backdrop: none;');
+    expect(styleText).toContain('backdrop-filter: var(--ui-app-header-surface-backdrop);');
+    expect(styleText).toContain('contain: paint;');
+    expect(styleText).toContain('transform: translateZ(0);');
+  });
 });

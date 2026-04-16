@@ -24,19 +24,20 @@ const config: StorybookConfig = {
   async viteFinal(config) {
     return mergeConfig(config, {
       resolve: {
-        alias: {
-          '@editora/core': path.resolve(__dirname, '../packages/core/src'),
-          '@editora/react': path.resolve(__dirname, '../packages/react/src'),
-          '@editora/plugins': path.resolve(__dirname, '../packages/plugins/src'),
-          '@editora/themes': path.resolve(__dirname, '../packages/themes/src'),
-          '@editora/toast': path.resolve(__dirname, '../packages/editora-toast/src'),
-          '@editora/editor': path.resolve(__dirname, '../packages/react/src'),
-          '@editora/icons': path.resolve(__dirname, '../packages/icons/src'),
-          '@editora/react-icons': path.resolve(__dirname, '../packages/react-icons/src'),
-          // Resolve UI packages to local source during Storybook development
-          '@editora/ui-core': path.resolve(__dirname, '../packages/ui-core/src'),
-          '@editora/ui-react': path.resolve(__dirname, '../packages/ui-react/src'),
-        },
+        alias: [
+          { find: '@editora/core', replacement: path.resolve(__dirname, '../packages/core/src') },
+          { find: '@editora/react', replacement: path.resolve(__dirname, '../packages/react/src') },
+          { find: '@editora/plugins', replacement: path.resolve(__dirname, '../packages/plugins/src') },
+          { find: '@editora/themes', replacement: path.resolve(__dirname, '../packages/themes/src') },
+          { find: '@editora/toast', replacement: path.resolve(__dirname, '../packages/editora-toast/src') },
+          { find: '@editora/editor', replacement: path.resolve(__dirname, '../packages/react/src') },
+          { find: '@editora/icons', replacement: path.resolve(__dirname, '../packages/icons/src') },
+          { find: '@editora/react-icons', replacement: path.resolve(__dirname, '../packages/react-icons/src') },
+          // Resolve UI packages to local source during Storybook development.
+          { find: '@editora/ui-core/runtime', replacement: path.resolve(__dirname, '../packages/ui-core/src/runtime.ts') },
+          { find: '@editora/ui-core', replacement: path.resolve(__dirname, '../packages/ui-core/src/index.ts') },
+          { find: '@editora/ui-react', replacement: path.resolve(__dirname, '../packages/ui-react/src/index.tsx') },
+        ],
       }
     });
   },

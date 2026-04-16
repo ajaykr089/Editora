@@ -559,7 +559,9 @@ export class UICombobox extends ElementBase {
   private _globalListenersBound = false;
   private _dismissableLayer: DismissableLayerHandle | null = null;
   private _nextOpenSource: ComboboxOpenSource = 'attribute';
-  private _optionsRefreshScheduled = false;
+  private _optionsRefreshFrame = 0;
+  private _autofocusFrame = 0;
+  private _listStructureFingerprint = '';
   private _panelPointerDown = false;
 
   constructor() {
@@ -607,7 +609,14 @@ export class UICombobox extends ElementBase {
       clearTimeout(this._debounceTimer);
       this._debounceTimer = null;
     }
-    this._optionsRefreshScheduled = false;
+    if (this._optionsRefreshFrame) {
+      cancelAnimationFrame(this._optionsRefreshFrame);
+      this._optionsRefreshFrame = 0;
+    }
+    if (this._autofocusFrame) {
+      cancelAnimationFrame(this._autofocusFrame);
+      this._autofocusFrame = 0;
+    }
 
     if (this._formUnregister) {
       this._formUnregister();
@@ -856,8 +865,28 @@ export class UICombobox extends ElementBase {
 
     const stateRow = this._renderStateRow();
     const emptyText = this.getAttribute('empty-text') || 'No matches found';
+    const structureFingerprint = [
+      stateRow,
+      emptyText,
+      this._filtered.length === 0 ? 'empty' : 'options',
+      ...this._filtered.map((option) =>
+        [
+          option.sourceIndex,
+          option.value,
+          option.label,
+          option.description,
+          option.disabled ? '1' : '0'
+        ].join('\u0001')
+      )
+    ].join('\u0002');
+
+    if (structureFingerprint === this._listStructureFingerprint && this._syncRenderedListState()) {
+      return;
+    }
+
     if (this._filtered.length === 0) {
       this._panel.innerHTML = `${stateRow}<div class="empty" part="empty">${escapeHtml(emptyText)}</div>`;
+      this._listStructureFingerprint = structureFingerprint;
       this._panel.refresh();
       this._panel.clearActive();
       this._syncActiveDescendant();
@@ -895,10 +924,42 @@ export class UICombobox extends ElementBase {
       .join('');
 
     this._panel.innerHTML = `${stateRow}${optionsMarkup}`;
+    this._listStructureFingerprint = structureFingerprint;
     this._panel.refresh();
 
     this._syncActiveDescendant();
     this._scrollHighlightedIntoView();
+  }
+
+  private _syncRenderedListState(): boolean {
+    if (!this._panel) return false;
+
+    if (this._filtered.length === 0) {
+      if (!this._panel.querySelector('.empty')) return false;
+      this._panel.clearActive();
+      this._syncActiveDescendant();
+      return true;
+    }
+
+    const nodes = Array.from(this._panel.querySelectorAll<HTMLButtonElement>('.option[data-option-index]'));
+    if (nodes.length !== this._filtered.length) return false;
+
+    const currentValue = this.value;
+    nodes.forEach((node, filteredIndex) => {
+      const option = this._filtered[filteredIndex];
+      if (!option) return;
+      const selected = option.value === currentValue;
+      const highlighted = filteredIndex === this._highlightedIndex;
+      node.setAttribute('aria-selected', selected ? 'true' : 'false');
+      node.setAttribute('aria-disabled', option.disabled ? 'true' : 'false');
+      node.setAttribute('data-highlighted', highlighted ? 'true' : 'false');
+      node.setAttribute('data-selected', selected ? 'true' : 'false');
+      node.disabled = option.disabled;
+    });
+
+    this._syncActiveDescendant();
+    this._scrollHighlightedIntoView();
+    return true;
   }
 
   private _renderStateRow(): string {
@@ -1188,6 +1249,7 @@ export class UICombobox extends ElementBase {
     this._panel = this.root.querySelector('ui-listbox.panel');
     this._clearBtn = this.root.querySelector('.clear-btn');
     this._toggleBtn = this.root.querySelector('.toggle-btn');
+    this._listStructureFingerprint = '';
 
     this._renderList();
     this._updateClearButton();
@@ -1200,11 +1262,13 @@ export class UICombobox extends ElementBase {
       this._input.addEventListener('blur', this._onFocusOut);
       this._input.addEventListener('keydown', this._onKeyDown);
       if (this.hasAttribute('autofocus')) {
-        setTimeout(() => {
+        if (this._autofocusFrame) cancelAnimationFrame(this._autofocusFrame);
+        this._autofocusFrame = requestAnimationFrame(() => {
+          this._autofocusFrame = 0;
           try {
             this._input?.focus();
           } catch {}
-        }, 0);
+        });
       }
     }
 
@@ -1310,16 +1374,22 @@ export class UICombobox extends ElementBase {
 
   private _refreshOptionsFromDom(): void {
     this._options = this._readOptions();
-    this._rebuildFiltered({ preserveHighlight: false });
+    const preserveQuery = this._isFocused && this.open;
+    if (!preserveQuery) {
+      const selected = this._findOptionByValue(this.value);
+      const nextQuery = selected ? selected.label : this.value;
+      this._query = nextQuery;
+      if (this._input) this._input.value = nextQuery;
+    }
+    this._rebuildFiltered({ preserveHighlight: preserveQuery });
     this._renderList();
-    this._syncInputFromValue();
+    this._updateClearButton();
   }
 
   private _scheduleOptionsRefresh(): void {
-    if (this._optionsRefreshScheduled) return;
-    this._optionsRefreshScheduled = true;
-    queueMicrotask(() => {
-      this._optionsRefreshScheduled = false;
+    if (this._optionsRefreshFrame) return;
+    this._optionsRefreshFrame = requestAnimationFrame(() => {
+      this._optionsRefreshFrame = 0;
       if (!this.isConnected) return;
       this._refreshOptionsFromDom();
     });

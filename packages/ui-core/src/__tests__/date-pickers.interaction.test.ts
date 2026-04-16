@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import '../components/ui-color-picker';
 import '../components/ui-date-picker';
 import '../components/ui-date-range-picker';
 import '../components/ui-time-picker';
@@ -19,6 +20,12 @@ function createElement(tagName: string, attrs: Record<string, string | boolean> 
 async function settle() {
   await Promise.resolve();
   await new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+async function flushAnimationFrame() {
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => resolve());
+  });
 }
 
 describe('date/time pickers interaction flows', () => {
@@ -138,6 +145,22 @@ describe('date/time pickers interaction flows', () => {
     expect(el.getAttribute('value')).toBeNull();
   });
 
+  it('ui-date-picker ignores scroll events from inside its own overlay', async () => {
+    const el = createElement('ui-date-picker') as HTMLElement & { _overlay?: HTMLElement | null };
+    el.setAttribute('open', '');
+    await settle();
+    await flushAnimationFrame();
+
+    const spy = vi.spyOn(el as any, '_positionOverlay');
+    const panel = el._overlay?.querySelector('.panel') as HTMLElement | null;
+    expect(panel).toBeTruthy();
+
+    panel?.dispatchEvent(new Event('scroll', { bubbles: false, composed: true }));
+    await flushAnimationFrame();
+
+    expect(spy).not.toHaveBeenCalled();
+  });
+
   it('ui-date-range-picker single-field accepts ISO date without splitting on hyphens', async () => {
     const el = createElement('ui-date-range-picker', {
       locale: 'en-US',
@@ -205,6 +228,22 @@ describe('date/time pickers interaction flows', () => {
     expect(el.getAttribute('value')).toBeNull();
   });
 
+  it('ui-date-range-picker ignores scroll events from inside its own overlay', async () => {
+    const el = createElement('ui-date-range-picker') as HTMLElement & { _overlay?: HTMLElement | null };
+    el.setAttribute('open', '');
+    await settle();
+    await flushAnimationFrame();
+
+    const spy = vi.spyOn(el as any, '_positionOverlay');
+    const panel = el._overlay?.querySelector('.panel') as HTMLElement | null;
+    expect(panel).toBeTruthy();
+
+    panel?.dispatchEvent(new Event('scroll', { bubbles: false, composed: true }));
+    await flushAnimationFrame();
+
+    expect(spy).not.toHaveBeenCalled();
+  });
+
   it('ui-time-picker applies panel selection and commits on Apply', async () => {
     const el = createElement('ui-time-picker', { value: '09:00', step: '15' });
     el.setAttribute('open', '');
@@ -226,6 +265,22 @@ describe('date/time pickers interaction flows', () => {
     await settle();
     expect(el.getAttribute('value')).toBe('10:30');
     expect(el.hasAttribute('open')).toBe(false);
+  });
+
+  it('ui-time-picker ignores scroll events from inside its own overlay', async () => {
+    const el = createElement('ui-time-picker') as HTMLElement & { _overlay?: HTMLElement | null };
+    el.setAttribute('open', '');
+    await settle();
+    await flushAnimationFrame();
+
+    const spy = vi.spyOn(el as any, '_positionOverlay');
+    const panel = el._overlay?.querySelector('.panel') as HTMLElement | null;
+    expect(panel).toBeTruthy();
+
+    panel?.dispatchEvent(new Event('scroll', { bubbles: false, composed: true }));
+    await flushAnimationFrame();
+
+    expect(spy).not.toHaveBeenCalled();
   });
 
   it('ui-date-time-picker commits selected date + time from panel', async () => {
@@ -260,6 +315,22 @@ describe('date/time pickers interaction flows', () => {
 
     await settle();
     expect(el.getAttribute('value')).toBe('2026-02-24T11:20');
+  });
+
+  it('ui-date-time-picker ignores scroll events from inside its own overlay', async () => {
+    const el = createElement('ui-date-time-picker') as HTMLElement & { _overlay?: HTMLElement | null };
+    el.setAttribute('open', '');
+    await settle();
+    await flushAnimationFrame();
+
+    const spy = vi.spyOn(el as any, '_positionOverlay');
+    const panel = el._overlay?.querySelector('.panel') as HTMLElement | null;
+    expect(panel).toBeTruthy();
+
+    panel?.dispatchEvent(new Event('scroll', { bubbles: false, composed: true }));
+    await flushAnimationFrame();
+
+    expect(spy).not.toHaveBeenCalled();
   });
 
   it('ui-date-range-time-picker auto-normalizes reverse ranges on apply', async () => {
@@ -300,5 +371,42 @@ describe('date/time pickers interaction flows', () => {
     expect(serialized).toBeTruthy();
     const parsed = JSON.parse(serialized || '{}');
     expect(parsed.start <= parsed.end).toBe(true);
+  });
+
+  it('ui-date-range-time-picker ignores scroll events from inside its own overlay', async () => {
+    const el = createElement('ui-date-range-time-picker') as HTMLElement & { _overlay?: HTMLElement | null };
+    el.setAttribute('open', '');
+    await settle();
+    await flushAnimationFrame();
+
+    const spy = vi.spyOn(el as any, '_positionOverlay');
+    const panel = el._overlay?.querySelector('.panel') as HTMLElement | null;
+    expect(panel).toBeTruthy();
+
+    panel?.dispatchEvent(new Event('scroll', { bubbles: false, composed: true }));
+    await flushAnimationFrame();
+
+    expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('ui-color-picker ignores scroll events from inside its own overlay', async () => {
+    const el = createElement('ui-color-picker') as HTMLElement & {
+      openPopover?: () => void;
+      _overlayRoot?: ShadowRoot | null;
+    };
+    el.setAttribute('mode', 'popover');
+    await settle();
+    el.openPopover?.();
+    await settle();
+    await flushAnimationFrame();
+
+    const spy = vi.spyOn(el as any, '_positionOverlay');
+    const panel = el._overlayRoot?.querySelector('.panel') as HTMLElement | null;
+    expect(panel).toBeTruthy();
+
+    panel?.dispatchEvent(new Event('scroll', { bubbles: false, composed: true }));
+    await flushAnimationFrame();
+
+    expect(spy).not.toHaveBeenCalled();
   });
 });

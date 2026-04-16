@@ -6,7 +6,7 @@ keywords: [live examples, storybook, editor, ui, icons, toast]
 
 ## Live URLs
 
-- **Website:** https://editora-ecosystem.netlify.app/
+- **Website:** [current docs site](/)
 - **Storybook:** https://editora-ecosystem-storybook.netlify.app/
 
 
@@ -108,6 +108,26 @@ Direct link: `https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-da
 
 Direct link: `https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-dialog--default`
 
+## 8. Advanced App Showcase
+
+The repository also includes a full advanced application example built with `@editora/ui-react`:
+
+- **Hospital Management Showcase:** [`examples/hospital-management`](/docs/examples/hospital-management-showcase)
+
+Run it locally when you want to evaluate components inside a realistic admin workflow instead of isolated Storybook stories.
+
+```bash
+cd examples/hospital-management
+npm install
+npm run dev
+```
+
+Local app URL:
+
+```text
+http://127.0.0.1:4180/
+```
+
 ## If embeds do not load
 
 - Open each direct link above in a new tab.
@@ -117,5 +137,6 @@ Direct link: `https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-di
 ## Related pages
 
 - Capability checklist: `/docs/examples/capabilities-playground`
+- Hospital showcase: `/docs/examples/hospital-management-showcase`
 - React editor reference: `/docs/editor/react`
 - Web component editor reference: `/docs/editor/web-component`

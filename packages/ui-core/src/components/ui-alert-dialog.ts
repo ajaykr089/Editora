@@ -647,6 +647,22 @@ function getDocumentActiveElement(): HTMLElement | null {
   return active instanceof HTMLElement ? active : null;
 }
 
+function scheduleDeferredFrame(callback: () => void): number {
+  if (typeof requestAnimationFrame === 'function') {
+    return requestAnimationFrame(() => callback());
+  }
+  return window.setTimeout(callback, 16) as unknown as number;
+}
+
+function cancelDeferredFrame(handle: number): void {
+  if (!handle) return;
+  if (typeof cancelAnimationFrame === 'function') {
+    cancelAnimationFrame(handle);
+    return;
+  }
+  window.clearTimeout(handle);
+}
+
 export class UIAlertDialog extends ElementBase {
   static get observedAttributes() {
     return [
@@ -691,6 +707,8 @@ export class UIAlertDialog extends ElementBase {
   private _checked = false;
   private _runtimeError = '';
   private _activeHeadless = false;
+  private _focusInitialFrame = 0;
+  private _restoreFocusFrame = 0;
 
   constructor() {
     super();
@@ -715,6 +733,14 @@ export class UIAlertDialog extends ElementBase {
     this.root.removeEventListener('click', this._onClick as EventListener);
     this.root.removeEventListener('keydown', this._onKeyDown as EventListener);
     this.root.removeEventListener('input', this._onInput as EventListener);
+    if (this._focusInitialFrame) {
+      cancelDeferredFrame(this._focusInitialFrame);
+      this._focusInitialFrame = 0;
+    }
+    if (this._restoreFocusFrame) {
+      cancelDeferredFrame(this._restoreFocusFrame);
+      this._restoreFocusFrame = 0;
+    }
     if (this._active && !this._terminalEmitted) {
       this.close('dismiss', 'unmount');
     }
@@ -1031,9 +1057,11 @@ export class UIAlertDialog extends ElementBase {
     this._dispatchWithLegacy<UIAlertDialogOpenDetail>('ui-open', 'open', { id });
 
     if (!this.headless) {
-      setTimeout(() => {
+      if (this._focusInitialFrame) cancelDeferredFrame(this._focusInitialFrame);
+      this._focusInitialFrame = scheduleDeferredFrame(() => {
+        this._focusInitialFrame = 0;
         this._focusInitial();
-      }, 0);
+      });
     }
 
     this.requestRender();
@@ -1080,13 +1108,15 @@ export class UIAlertDialog extends ElementBase {
     const returnFocus = this._lastActive;
     this._lastActive = null;
     if (returnFocus && !this._activeHeadless) {
-      setTimeout(() => {
+      if (this._restoreFocusFrame) cancelDeferredFrame(this._restoreFocusFrame);
+      this._restoreFocusFrame = scheduleDeferredFrame(() => {
+        this._restoreFocusFrame = 0;
         try {
           returnFocus.focus();
         } catch {
           // noop
         }
-      }, 0);
+      });
     }
 
     this._activeHeadless = false;
@@ -1113,9 +1143,11 @@ export class UIAlertDialog extends ElementBase {
       document.addEventListener('focusin', this._onFocusIn as EventListener, true);
     }
     this._activeHeadless = false;
-    setTimeout(() => {
+    if (this._focusInitialFrame) cancelDeferredFrame(this._focusInitialFrame);
+    this._focusInitialFrame = scheduleDeferredFrame(() => {
+      this._focusInitialFrame = 0;
       this._focusInitial();
-    }, 0);
+    });
   }
 
   private _dispatchWithLegacy<T>(name: string, legacyName: string, detail: T, cancelable = false): CustomEvent<T> {

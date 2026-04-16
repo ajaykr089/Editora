@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "seo:prepare": "node ./scripts/write-seo-files.js",
+    "metadata:prepare": "node ../../scripts/generate-components-registry.js",
+    "prestart": "npm run seo:prepare",
+    "prebuild": "npm run metadata:prepare && npm run seo:prepare",
+    "preserve": "npm run seo:prepare",
     "start": "docusaurus start",
     "build": "docusaurus build",
     "serve": "docusaurus serve",

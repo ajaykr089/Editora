@@ -41,23 +41,31 @@ export function App() {
 }
 ```
 
+## Advanced Showcase
+
+For a full application example instead of isolated component snippets, use the hospital operations app:
+
+- [`Hospital Management Showcase`](/docs/examples/hospital-management-showcase)
+
+It demonstrates `@editora/ui-react` components working together across routing, drawers, dialogs, tables, date pickers, overlays, dashboards, and record-management workflows.
+
 ## API Reference
 
 | Surface | Type | Notes |
 | --- | --- | --- |
 | `Button`, `Tooltip`, `Alert`, `Dropdown`, `Input`, `Textarea`, `Field`, `Combobox` | Component exports | Base controls |
-| `Badge`, `EmptyState`, `Table`, `DataTable`, `Chart`, `Timeline`, `Calendar`, `Marquee`, `AnimatedText`, `AnimatedBeam`, `Dock`, `Orbiter` | Component exports | Data display, motion, and launcher controls |
+| `Badge`, `EmptyState`, `Table`, `DataTable`, `FiltersBar`, `DataViewToolbar`, `Chart`, `Timeline`, `Calendar`, `Carousel`, `Marquee`, `AnimatedText`, `AnimatedBeam`, `Dock`, `Orbiter`, `Stat`, `MetricCard`, `PageHeader`, `PageToolbar`, `RecordHeader`, `CodeBlock`, `CodeSnippet`, `CopyButton` | Component exports | Data display, motion, launcher, metrics, docs, and higher-level workflow/page-shell surfaces |
 | `ColorPicker`, `DatePicker`, `DateRangePicker`, `TimePicker`, `DateTimePicker`, `DateRangeTimePicker` | Component exports | Date/time and color controls |
 | `Gantt`, `Stepper`, `Wizard`, `QuickActions`, `Sortable` | Component exports | Workflow controls, including standalone-installable sortable drag and drop for both web component and standalone React wrapper use |
 | `NavigationMenu`, `Menubar`, `Dialog`, `Popover`, `Tabs`, `Menu`, `ContextMenu` | Component exports | Nav + overlay components |
 | `FloatingToolbar`, `BlockControls`, `CommandPalette`, `SelectionPopup`, `PluginPanel` | Component exports | Editor-specific surfaces |
 | `Form`, `useForm`, `useFloating` | Component + hooks | Form and floating behavior |
-| `Box`, `Flex`, `Grid`, `Section`, `Container`, `Sidebar`, `Breadcrumb`, `AppHeader`, `Drawer`, `Layout` | Component exports | Layout system |
+| `Box`, `Flex`, `Grid`, `Section`, `Container`, `Sidebar`, `Breadcrumb`, `AppHeader`, `Drawer`, `Layout`, `Kbd`, `Shortcut` | Component exports | Layout system plus server-safe keycap surfaces |
 | `ThemeProvider`, `useTheme` | Provider + hook | Theme control |
 | `DialogProvider`, `useDialog`, `AlertDialogProvider`, `useAlertDialog` | Providers/hooks | Dialog state APIs |
 | `Icon` | Component export | Icon wrapper |
 | `Toast`, `ToastAPI`, `toast`, `toastApi` | Toast exports | Notification APIs |
-| `Checkbox`, `RadioGroup`, `Switch`, `Toggle`, `ToggleGroup`, `AspectRatio`, `Avatar`, `Presence`, `Progress`, `Portal`, `ScrollArea`, `Separator`, `Slot`, `Toolbar`, `VisuallyHidden`, `Collapsible`, `Pagination`, `Accordion`, `AccordionItem`, `AccordionTrigger`, `AccordionPanel`, `DirectionProvider`, `HoverCard`, `Label`, `AlertDialog`, `Select`, `Slider`, `Skeleton` | Component exports | Primitive catalog |
+| `Checkbox`, `Radio`, `RadioGroup`, `Switch`, `Toggle`, `ToggleGroup`, `AspectRatio`, `Avatar`, `Presence`, `Progress`, `Portal`, `ScrollArea`, `Separator`, `Slot`, `Toolbar`, `VisuallyHidden`, `Collapsible`, `Pagination`, `Accordion`, `AccordionItem`, `AccordionTrigger`, `AccordionPanel`, `DirectionProvider`, `HoverCard`, `Label`, `AlertDialog`, `Select`, `Slider`, `Skeleton` | Component exports | Primitive catalog |
 
 ## Best Practices
 

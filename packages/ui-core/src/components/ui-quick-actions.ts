@@ -126,6 +126,7 @@ const style = `
   :host([floating]) {
     position: fixed;
     z-index: 1250;
+    contain: layout paint;
   }
 
   :host([floating][placement="bottom-right"]) {
@@ -146,6 +147,11 @@ const style = `
   :host([floating][placement="top-left"]) {
     left: 16px;
     top: 16px;
+  }
+
+  :host([floating]) .root {
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   :host([headless]) .root {

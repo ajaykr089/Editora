@@ -1,15 +1,18 @@
 import React from 'react';
-import { Box, Button, Chart, Flex, Grid, Input, Select } from '@editora/ui-react';
+import { Box, Button, Chart, DateRangePicker, Flex, Grid, MetricCard, Select } from '@editora/ui-react';
 import { toastAdvanced } from '@editora/toast';
-import { PageHeader } from '@/shared/components/PageHeader';
+import { PageToolbar } from '@/shared/components/PageToolbar';
 import { ErrorStateView, TableSkeleton } from '@/shared/components/StateViews';
-import { useReportsQuery } from '@/shared/query/hooks';
+import { useReportsQuery, useSettingsQuery, useStaffQuery } from '@/shared/query/hooks';
+import { currency } from '@/shared/utils/format';
 
 export default function ReportsPage() {
   const [from, setFrom] = React.useState(new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString().slice(0, 10));
   const [to, setTo] = React.useState(new Date().toISOString().slice(0, 10));
   const [department, setDepartment] = React.useState('all');
   const [doctor, setDoctor] = React.useState('all');
+  const settings = useSettingsQuery();
+  const staff = useStaffQuery({ page: 1, pageSize: 999 });
 
   const query = useReportsQuery({
     from,
@@ -23,11 +26,47 @@ export default function ReportsPage() {
     return <ErrorStateView description={(query.error as Error)?.message} onRetry={() => query.refetch()} />;
   }
 
+  const doctorOptions = (staff.data?.items || []).filter((member) => member.role === 'doctor');
+  const trendData = (query.data.trend as Array<{ label: string; revenue: number; visits: number }>) || [];
+  const reportWindowValue = JSON.stringify({ start: from, end: to });
+
   return (
     <Grid style={{ display: 'grid', gap: 12 }}>
-      <PageHeader
+      <PageToolbar
         title="Reports"
         subtitle="Date and department-driven operational reporting with CSV export."
+        toolbar={(
+          <Grid style={{ display: 'grid', gridTemplateColumns: '1.35fr repeat(2, minmax(0, 1fr))', gap: 8 }}>
+            <DateRangePicker
+              label="Reporting window"
+              value={reportWindowValue}
+              rangeVariant="two-fields"
+              clearable
+              closeOnSelect
+              onChange={(detail) => {
+                if (detail.start) setFrom(detail.start);
+                if (detail.end) setTo(detail.end);
+              }}
+            />
+            <Select label="Department" value={department} onChange={(next) => setDepartment(String((next as any)?.target?.value ?? next))}>
+              <option value="all">All departments</option>
+              {(settings.data?.departments || []).map((item) => (
+                <option key={item} value={item}>{item}</option>
+              ))}
+            </Select>
+            <Select label="Doctor" value={doctor} onChange={(next) => setDoctor(String((next as any)?.target?.value ?? next))}>
+              <option value="all">All doctors</option>
+              {doctorOptions.map((item) => (
+                <option key={item.id} value={item.name}>{item.name}</option>
+              ))}
+            </Select>
+          </Grid>
+        )}
+        footer={(
+          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>
+            Reporting window: {from} to {to}
+          </Box>
+        )}
         actions={[
           {
             label: 'Export CSV',
@@ -48,22 +87,11 @@ export default function ReportsPage() {
         ]}
       />
 
-      <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8 }}>
-        <Input type="date" label="From" value={from} onChange={(next) => setFrom(String((next as any)?.target?.value ?? next))} />
-        <Input type="date" label="To" value={to} onChange={(next) => setTo(String((next as any)?.target?.value ?? next))} />
-        <Select label="Department" value={department} onChange={(next) => setDepartment(String((next as any)?.target?.value ?? next))}>
-          <option value="all">All departments</option>
-          <option value="Cardiology">Cardiology</option>
-          <option value="Orthopedics">Orthopedics</option>
-          <option value="Pediatrics">Pediatrics</option>
-          <option value="Laboratory">Laboratory</option>
-        </Select>
-        <Select label="Doctor" value={doctor} onChange={(next) => setDoctor(String((next as any)?.target?.value ?? next))}>
-          <option value="all">All doctors</option>
-          <option value="Dr/Staff 1">Dr/Staff 1</option>
-          <option value="Dr/Staff 2">Dr/Staff 2</option>
-          <option value="Dr/Staff 3">Dr/Staff 3</option>
-        </Select>
+      <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 10 }}>
+        <MetricCard label="Collected revenue" value={currency(query.data.summary.revenue)} />
+        <MetricCard label="Visits" value={String(query.data.summary.visits)} />
+        <MetricCard label="Completed visits" value={String(query.data.summary.completedVisits)} />
+        <MetricCard label="Scheduled visits" value={String(query.data.summary.scheduledVisits)} />
       </Grid>
 
       <Grid style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 12 }}>
@@ -83,18 +111,17 @@ export default function ReportsPage() {
 
         <Box variant="surface" p="12px" radius="lg" style={{ border: '1px solid var(--ui-color-border, #dbe4ef)', display: 'grid', gap: 10 }}>
           <Chart
-            title="Revenue summary"
-            subtitle="Synthetic weekly trend"
+            title="Collected revenue trend"
+            subtitle="Last seven days in the selected window"
             type="bar"
-            data={[
-              { label: 'Mon', value: 12 },
-              { label: 'Tue', value: 16 },
-              { label: 'Wed', value: 14 },
-              { label: 'Thu', value: 18 },
-              { label: 'Fri', value: 21 },
-              { label: 'Sat', value: 11 },
-              { label: 'Sun', value: 9 }
-            ]}
+            data={trendData.map((item) => ({ label: item.label, value: item.revenue }))}
+          />
+          <Chart
+            title="Visit volume"
+            subtitle="Booked and completed traffic"
+            type="line"
+            variant="minimal"
+            data={trendData.map((item) => ({ label: item.label, value: item.visits }))}
           />
           <Flex justify="space-between" style={{ gap: 8 }}>
             <Button size="sm" variant="secondary" onClick={() => toastAdvanced.info('PDF export opened')}>Export PDF</Button>

@@ -264,7 +264,7 @@ function autoUpdate(anchor: PositionerAnchor, floating: HTMLElement, update: () 
     window.addEventListener('resize', onWindowChange);
   }
   if (options.observeScroll) {
-    window.addEventListener('scroll', onWindowChange, true);
+    window.addEventListener('scroll', onWindowChange, { passive: true, capture: true });
   }
 
   if (typeof ResizeObserver !== 'undefined') {

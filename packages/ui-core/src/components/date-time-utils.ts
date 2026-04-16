@@ -8,6 +8,7 @@ export type TimeParts = { hours: number; minutes: number; seconds: number };
 export type DateTimeParts = { date: string; time: string };
 
 const formatterCache = new Map<string, Intl.DateTimeFormat>();
+const OVERLAY_PLACEMENT_STICKY_MARGIN = 24;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
@@ -59,6 +60,28 @@ export function isTruthyAttr(raw: string | null, fallback = false): boolean {
   const normalized = raw.trim().toLowerCase();
   if (!normalized) return true;
   return normalized !== 'false' && normalized !== '0' && normalized !== 'off' && normalized !== 'no';
+}
+
+export function eventOriginatesWithin(
+  event: Event,
+  containers: Array<EventTarget | null | undefined>
+): boolean {
+  const path = typeof (event as { composedPath?: () => EventTarget[] }).composedPath === 'function'
+    ? (event as { composedPath: () => EventTarget[] }).composedPath()
+    : [];
+
+  for (const container of containers) {
+    if (container && path.includes(container)) return true;
+  }
+
+  const target = event.target;
+  if (!(target instanceof Node)) return false;
+
+  for (const container of containers) {
+    if (container instanceof Node && container.contains(target)) return true;
+  }
+
+  return false;
 }
 
 export function normalizeLocale(raw: string | null): string {
@@ -289,14 +312,44 @@ export function computeLastDaysRange(todayIso: string, days: number): { start: s
   };
 }
 
-export function computePopoverPosition(anchorRect: DOMRect, panelRect: DOMRect, padding = 8, gap = 8): OverlayPosition {
+export function computePopoverPosition(
+  anchorRect: DOMRect,
+  panelRect: DOMRect,
+  padding = 8,
+  gap = 8,
+  currentPlacement: OverlayPlacement | null = null
+): OverlayPosition {
   const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
   const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
   const scrollY = typeof window !== 'undefined' ? window.scrollY || 0 : 0;
   const scrollX = typeof window !== 'undefined' ? window.scrollX || 0 : 0;
 
-  const hasBottomSpace = anchorRect.bottom + gap + panelRect.height <= viewportHeight - padding;
-  const placement: OverlayPlacement = hasBottomSpace ? 'bottom' : 'top';
+  const belowSpace = viewportHeight - anchorRect.bottom - gap - padding;
+  const aboveSpace = anchorRect.top - gap - padding;
+  const fitsBelow = belowSpace >= panelRect.height;
+  const fitsAbove = aboveSpace >= panelRect.height;
+  const preferredPlacement = currentPlacement === 'top' ? 'top' : 'bottom';
+
+  let placement: OverlayPlacement;
+  if (fitsBelow && !fitsAbove) {
+    placement = 'bottom';
+  } else if (fitsAbove && !fitsBelow) {
+    placement = 'top';
+  } else if (fitsAbove && fitsBelow) {
+    placement = preferredPlacement;
+  } else {
+    const preferredSpace = preferredPlacement === 'bottom' ? belowSpace : aboveSpace;
+    const alternateSpace = preferredPlacement === 'bottom' ? aboveSpace : belowSpace;
+    if (
+      preferredSpace > 0 &&
+      alternateSpace <= preferredSpace + OVERLAY_PLACEMENT_STICKY_MARGIN
+    ) {
+      placement = preferredPlacement;
+    } else {
+      placement = belowSpace >= aboveSpace ? 'bottom' : 'top';
+    }
+  }
+
   const top = placement === 'bottom'
     ? anchorRect.bottom + gap + scrollY
     : anchorRect.top - panelRect.height - gap + scrollY;

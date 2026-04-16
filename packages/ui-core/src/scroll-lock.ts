@@ -3,6 +3,8 @@ type ScrollLockState = {
   bodyOverflow: string;
   htmlOverflow: string;
   bodyPaddingRight: string;
+  htmlScrollbarGutter: string;
+  bodyScrollbarGutter: string;
 };
 
 const GLOBAL_SCROLL_LOCK_KEY = '__editora_ui_scroll_lock_state__';
@@ -20,10 +22,26 @@ function getState(): ScrollLockState {
     count: 0,
     bodyOverflow: '',
     htmlOverflow: '',
-    bodyPaddingRight: ''
+    bodyPaddingRight: '',
+    htmlScrollbarGutter: '',
+    bodyScrollbarGutter: ''
   };
   globalObj[GLOBAL_SCROLL_LOCK_KEY] = created;
   return created;
+}
+
+function supportsStableScrollbarGutter(): boolean {
+  return typeof CSS !== 'undefined'
+    && typeof CSS.supports === 'function'
+    && CSS.supports('scrollbar-gutter: stable');
+}
+
+function composeScrollbarCompensation(existingPaddingRight: string): string {
+  const trimmed = existingPaddingRight.trim();
+  if (!trimmed || trimmed === '0' || trimmed === '0px') {
+    return 'calc(100vw - 100%)';
+  }
+  return `calc(${trimmed} + (100vw - 100%))`;
 }
 
 export function acquireBodyScrollLock(): () => void {
@@ -39,11 +57,14 @@ export function acquireBodyScrollLock(): () => void {
     state.bodyOverflow = body.style.overflow;
     state.htmlOverflow = html.style.overflow;
     state.bodyPaddingRight = body.style.paddingRight;
+    state.htmlScrollbarGutter = html.style.scrollbarGutter;
+    state.bodyScrollbarGutter = body.style.scrollbarGutter;
 
-    const scrollBarWidth = Math.max(0, window.innerWidth - html.clientWidth);
-    if (scrollBarWidth > 0) {
-      const currentPadding = parseFloat(window.getComputedStyle(body).paddingRight || '0') || 0;
-      body.style.paddingRight = `${currentPadding + scrollBarWidth}px`;
+    if (supportsStableScrollbarGutter()) {
+      html.style.scrollbarGutter = 'stable';
+      body.style.scrollbarGutter = 'stable';
+    } else {
+      body.style.paddingRight = composeScrollbarCompensation(state.bodyPaddingRight);
     }
 
     body.style.overflow = 'hidden';
@@ -71,9 +92,10 @@ export function releaseBodyScrollLock(): void {
   body.style.overflow = state.bodyOverflow;
   html.style.overflow = state.htmlOverflow;
   body.style.paddingRight = state.bodyPaddingRight;
+  html.style.scrollbarGutter = state.htmlScrollbarGutter;
+  body.style.scrollbarGutter = state.bodyScrollbarGutter;
 }
 
 export function getBodyScrollLockCount(): number {
   return getState().count;
 }
-

@@ -1,6 +1,7 @@
 import { ElementBase } from '../ElementBase'
 import {
   computePopoverPosition,
+  eventOriginatesWithin,
   isTruthyAttr,
   lockBodyScroll,
   rafThrottle,
@@ -877,7 +878,10 @@ export class UIColorPicker extends ElementBase {
   private readonly _onDocumentPointerDownBound = (event: PointerEvent) => this._onDocumentPointerDown(event)
   private readonly _onDocumentKeyDownBound = (event: KeyboardEvent) => this._onDocumentKeyDown(event)
   private readonly _onWindowResizeBound = () => this._scheduleOverlayPosition.run()
-  private readonly _onWindowScrollBound = () => this._scheduleOverlayPosition.run()
+  private readonly _onWindowScrollBound = (event: Event) => {
+    if (eventOriginatesWithin(event, [this._overlay])) return
+    this._scheduleOverlayPosition.run()
+  }
 
   constructor() {
     super()
@@ -1523,7 +1527,7 @@ export class UIColorPicker extends ElementBase {
     document.addEventListener('pointerdown', this._onDocumentPointerDownBound, true)
     document.addEventListener('keydown', this._onDocumentKeyDownBound)
     window.addEventListener('resize', this._onWindowResizeBound)
-    window.addEventListener('scroll', this._onWindowScrollBound, true)
+    window.addEventListener('scroll', this._onWindowScrollBound, { passive: true, capture: true })
   }
 
   private _destroyOverlay(): void {
@@ -1559,9 +1563,17 @@ export class UIColorPicker extends ElementBase {
     if (!trigger || !shell) return
     const panel = shell.querySelector('.panel') as HTMLElement | null
     if (!panel) return
-    const pos = computePopoverPosition(trigger.getBoundingClientRect(), panel.getBoundingClientRect(), 8, 8)
+    const currentPlacement = shell.getAttribute('data-placement')
+    const pos = computePopoverPosition(
+      trigger.getBoundingClientRect(),
+      panel.getBoundingClientRect(),
+      8,
+      8,
+      currentPlacement === 'top' ? 'top' : currentPlacement === 'bottom' ? 'bottom' : null
+    )
     shell.style.top = `${Math.round(pos.top)}px`
     shell.style.left = `${Math.round(pos.left)}px`
+    shell.setAttribute('data-placement', pos.placement)
   }
 
   private _onDocumentPointerDown(event: PointerEvent): void {

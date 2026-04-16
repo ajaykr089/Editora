@@ -60,6 +60,7 @@ export function App() {
 - [Textarea](./form-inputs/textarea) - Multi-line text input
 - [Select](./form-inputs/select) - Dropdown selection
 - [Checkbox](./form-inputs/checkbox) - Checkbox input
+- [Radio](./form-inputs/radio) - Standalone radio input
 - [RadioGroup](./form-inputs/radio-group) - Radio button group
 - [Switch](./form-inputs/switch) - Toggle switch
 - [Slider](./form-inputs/slider) - Range slider
@@ -68,6 +69,17 @@ export function App() {
 
 ### Data Display
 - [AnimatedNumber](./interactive/animated-number) - Animated numeric display with multiple visual variants
+- [Carousel](./interactive/carousel) - Slide-based storytelling and gallery surface with indicators and controls
+- [CodeBlock](./interactive/code-block) - Framed multi-line code panel for install and API examples
+- [CodeSnippet](./interactive/code-snippet) - Compact inline or block code token surface
+- [CopyButton](./interactive/copy-button) - Clipboard action for docs and code examples
+- [FiltersBar](./interactive/filters-bar) - Search and status-filter toolbar for list and table screens
+- [DataViewToolbar](./interactive/data-view-toolbar) - Higher-level list-page toolbar for counts, filters, and actions
+- [MetricCard](./interactive/metric-card) - Dashboard-friendly KPI tile built on top of Stat
+- [PageHeader](./interactive/page-header) - Page title, status chip, and action row shell
+- [PageToolbar](./interactive/page-toolbar) - Page-level shell that pairs a header with a reusable control row
+- [RecordHeader](./interactive/record-header) - Detail-page header with structured metadata chips and facts
+- [Stat](./interactive/stat) - Lightweight metric grouping surface for labels, values, and trends
 - [Table](./interactive/table) - Basic table component
 - [DataTable](./interactive/data-table) - Advanced data table
 - [Chart](./interactive/chart) - Data visualization
@@ -91,6 +103,8 @@ export function App() {
 - [Sidebar](./interactive/sidebar) - Side navigation
 - [Tabs](./interactive/tabs) - Tabbed interface
 - [Breadcrumb](./interactive/breadcrumb) - Navigation breadcrumbs
+- [Kbd](./interactive/kbd) - Keycap-style keyboard hint surface
+- [Shortcut](./interactive/shortcut) - Compact shortcut alias for command and menu hints
 
 ### Interactive Components
 - [Button](./interactive/button) - Clickable button

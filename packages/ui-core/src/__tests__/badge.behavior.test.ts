@@ -59,4 +59,24 @@ describe('ui-badge', () => {
       source: 'button',
     });
   });
+
+  it('keeps the badge node stable for live visual and a11y-only attribute changes', async () => {
+    const el = document.createElement('ui-badge');
+    el.setAttribute('text', 'Ops');
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    const badgeBefore = el.shadowRoot?.querySelector('.badge');
+    expect(badgeBefore).toBeTruthy();
+
+    el.setAttribute('tone', 'success');
+    el.setAttribute('variant', 'soft');
+    el.setAttribute('interactive', '');
+    el.setAttribute('disabled', '');
+    el.setAttribute('max-width', '120px');
+    await flushMicrotask();
+
+    const badgeAfter = el.shadowRoot?.querySelector('.badge');
+    expect(badgeAfter).toBe(badgeBefore);
+  });
 });
