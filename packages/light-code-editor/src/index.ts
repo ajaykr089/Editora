@@ -34,7 +34,19 @@ export type {
   SearchOptions,
   BracketMatch,
   FoldRange,
-  Theme
+  Theme,
+  DecorationStyle,
+  EditorDecoration,
+  InlineDecoration,
+  LineDecoration,
+  GutterDecoration,
+  DiagnosticSeverity,
+  EditorDiagnostic,
+  CompletionItemKind,
+  CompletionItem,
+  CompletionResult,
+  CompletionContext,
+  CompletionProvider
 } from './types';
 
 // Factory function for easy instantiation

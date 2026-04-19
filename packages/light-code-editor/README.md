@@ -15,6 +15,8 @@ A lightweight, modular code editor library inspired by CodeMirror, optimized for
 ✅ **Themes** - Light and dark theme support
 ✅ **Line Numbers** - Optional line number gutter
 ✅ **Search** - Find and highlight functionality
+✅ **Diagnostics** - Gutter markers, inline issue highlights, and issue navigation
+✅ **Completions** - Provider-based autocomplete popup with keyboard navigation
 ✅ **Bracket Matching** - Automatic bracket pair highlighting
 ✅ **Code Folding** - Collapse/expand code sections
 ✅ **Read-Only Mode** - Prevent text modifications
@@ -33,6 +35,8 @@ npm install @editora/light-code-editor
 import {
   BracketMatchingExtension,
   CodeFoldingExtension,
+  CompletionExtension,
+  DiagnosticsExtension,
   LineNumbersExtension,
   SearchExtension,
   SyntaxHighlightingExtension,
@@ -56,6 +60,8 @@ const editor = createEditor(container, {
     new LineNumbersExtension(),
     new SyntaxHighlightingExtension(),
     new SearchExtension(),
+    new DiagnosticsExtension(),
+    new CompletionExtension(),
     new BracketMatchingExtension(),
     new CodeFoldingExtension()
   ]
@@ -124,6 +130,9 @@ interface EditorAPI {
   addExtension(extension: EditorExtension): void;
   removeExtension(name: string): void;
   executeCommand(name: string, ...args: any[]): void;
+  setDecorations(layer: string, decorations: EditorDecoration[]): void;
+  clearDecorations(layer?: string): void;
+  getDecorations(layer?: string): EditorDecoration[];
   registerCommand(name: string, handler: Function): void;
 
   search(query: string, options?: Partial<SearchOptions>): SearchResult[];
@@ -143,6 +152,53 @@ interface EditorAPI {
 ```
 
 For extension authors, the editor also exposes `getView()` and `getConfig()` so custom extensions can coordinate with the rendered surface and startup config.
+
+### Decorations API
+
+The editor now exposes a lightweight decorations surface for features like diagnostics, active-line styling, inline markers, and gutter badges.
+
+```typescript
+import type { EditorDecoration } from '@editora/light-code-editor';
+
+const decorations: EditorDecoration[] = [
+  {
+    id: 'active-line',
+    type: 'line',
+    line: 3,
+    className: 'lce-decoration-line--active'
+  },
+  {
+    id: 'error-gutter',
+    type: 'gutter',
+    line: 3,
+    label: '●',
+    title: 'Syntax error',
+    className: 'lce-decoration-gutter--error'
+  },
+  {
+    id: 'error-inline',
+    type: 'inline',
+    range: {
+      start: { line: 3, column: 10 },
+      end: { line: 3, column: 18 }
+    },
+    style: {
+      backgroundColor: 'rgba(255, 107, 107, 0.18)',
+      textDecoration: 'underline wavy rgba(255, 107, 107, 0.95)'
+    }
+  }
+];
+
+editor.setDecorations('diagnostics', decorations);
+```
+
+Notes:
+
+- `line` and `gutter` decorations render in dedicated overlay layers without replacing the editable DOM.
+- `inline` decorations use the browser `CSS Highlight API` when available, which keeps range rendering fast and selection-safe.
+- Decoration layers are replace-by-layer. Call `setDecorations('diagnostics', nextDecorations)` with the full next set for that layer.
+- `clearDecorations('diagnostics')` removes one layer, while `clearDecorations()` clears all layers.
+- Inline decoration styling is best suited for backgrounds and underlines. When syntax highlighting is active, text color changes are less reliable than highlight backgrounds.
 
 ## Extensions
 
@@ -217,6 +273,79 @@ Advanced find/replace UI supports:
 
 If regex input is invalid, the status shows `Invalid regular expression` and matching is skipped until the pattern is fixed.
 
+#### `DiagnosticsExtension`
+Provides diagnostics rendering, issue navigation, and a lightweight status summary.
+
+```typescript
+import {
+  DiagnosticsExtension,
+  type EditorDiagnostic,
+} from '@editora/light-code-editor';
+
+const diagnostics = new DiagnosticsExtension();
+
+const editor = createEditor(container, {
+  extensions: [diagnostics]
+});
+
+diagnostics.setDiagnostics([
+  {
+    severity: 'error',
+    message: 'Unexpected token',
+    source: 'demo',
+    code: 'TS1005',
+    range: {
+      start: { line: 2, column: 8 },
+      end: { line: 2, column: 19 }
+    }
+  }
+]);
+```
+
+Notes:
+
+- Diagnostics render through the decorations pipeline, so gutter markers and inline highlights do not rewrite editor text DOM.
+- `nextDiagnostic` and `prevDiagnostic` move focus through the current issue set.
+- Set `clearOnChange: true` when you want diagnostics cleared after edits instead of waiting for a provider refresh.
+
+#### `CompletionExtension`
+Provides provider-based autocomplete suggestions with async-safe refresh, popup navigation, and insertion commands.
+
+```typescript
+import {
+  CompletionExtension,
+  type CompletionContext,
+} from '@editora/light-code-editor';
+
+const completion = new CompletionExtension({
+  providers: [
+    (context: CompletionContext) => {
+      if (context.prefix.startsWith('di')) {
+        return [
+          { label: 'div', kind: 'tag', detail: '<div>' },
+          { label: 'dialog', kind: 'tag', detail: '<dialog>' }
+        ];
+      }
+
+      return [];
+    }
+  ]
+});
+
+const editor = createEditor(container, {
+  extensions: [completion]
+});
+
+editor.executeCommand('showCompletions');
+```
+
+Notes:
+
+- `Ctrl/Cmd + Space` opens completions manually.
+- `ArrowUp`, `ArrowDown`, `Enter`, `Tab`, and `Escape` work while the popup is open.
+- Providers can return arrays or `{ items, from }` objects when they need to override the replacement range.
+- Stale async results are ignored automatically, and in-flight requests are aborted when a newer request replaces them.
+
 #### `BracketMatchingExtension`
 Highlights matching brackets.
 
@@ -274,6 +403,8 @@ The core editor always registers:
 Extensions add commands on top:
 
 - `SearchExtension`: `find`, `findNext`, `findPrev`, `replace`, `replaceAll`
+- `DiagnosticsExtension`: `setDiagnostics`, `clearDiagnostics`, `nextDiagnostic`, `prevDiagnostic`
+- `CompletionExtension`: `showCompletions`, `closeCompletions`, `nextCompletion`, `prevCompletion`, `acceptCompletion`
 - `ThemeExtension`: `setTheme`, `toggleTheme`
 - `ReadOnlyExtension`: `setReadOnly`, `toggleReadOnly`
 - `LineNumbersExtension`: `toggleLineNumbers`
@@ -296,8 +427,17 @@ The current renderer attaches data attributes instead of public class names:
 - `[data-lce-editor-container="true"]` - outer editor container
 - `[data-editora-editor="true"]` - shared scroll wrapper
 - `[data-editor-gutter="true"]` - line-number gutter
+- `[data-editor-line-decorations="true"]` - line decoration overlay
+- `[data-editor-gutter-decorations="true"]` - gutter decoration overlay
 
 For theming, prefer CSS custom properties such as `--editor-background`, `--editor-foreground`, `--editor-gutter-background`, and `--editor-gutter-foreground` instead of relying on internal selectors.
+
+Stable decoration hook classes:
+
+- `.lce-decoration-line`
+- `.lce-decoration-gutter`
+- `.lce-decoration-line--active`
+- `.lce-decoration-gutter--error`
 
 ## Architecture
 

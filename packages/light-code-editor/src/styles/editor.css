@@ -256,6 +256,26 @@
   color: #999;
 }
 
+/* Decorations */
+.lce-decoration-line {
+  background: transparent;
+}
+
+.lce-decoration-gutter {
+  color: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.lce-decoration-line--active {
+  background: var(--lce-active-line-bg, rgba(255, 255, 255, 0.05));
+}
+
+.lce-decoration-gutter--error {
+  color: var(--lce-decoration-gutter-error, #ff6b6b);
+}
+
 /* Editor Core Styles */
 .editor-container {
   font-family: monospace;
@@ -398,4 +418,88 @@
   line-height: 1.35;
   white-space: nowrap;
   opacity: 0.9;
+}
+
+/* Completion popup */
+.lce-completion-popup {
+  position: absolute;
+  z-index: 1001;
+  min-width: 240px;
+  max-width: min(420px, calc(100% - 24px));
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 1px solid var(--editor-gutter-border, #3e3e42);
+  background: var(--editor-background, #1e1e1e);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+
+.lce-completion-status {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--editor-gutter-border, #3e3e42);
+  color: var(--editor-gutter-foreground, #858585);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.lce-completion-list {
+  max-height: 304px;
+  overflow: auto;
+}
+
+.lce-completion-item,
+.lce-completion-empty {
+  padding: 8px 10px;
+}
+
+.lce-completion-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  cursor: pointer;
+}
+
+.lce-completion-item:hover,
+.lce-completion-item.is-active {
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.lce-completion-item-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.lce-completion-item-label {
+  color: var(--editor-foreground, #f8f9fa);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.lce-completion-item-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.lce-completion-item-kind,
+.lce-completion-item-detail {
+  color: var(--editor-gutter-foreground, #858585);
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.lce-completion-item-kind {
+  text-transform: capitalize;
+}
+
+.lce-completion-item-description,
+.lce-completion-empty {
+  color: var(--editor-gutter-foreground, #858585);
+  font-size: 11px;
+  line-height: 1.45;
 }

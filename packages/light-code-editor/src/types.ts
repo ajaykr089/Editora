@@ -51,6 +51,101 @@ export interface Theme {
   variables: Record<string, string>;
 }
 
+// Decoration style map used by line, gutter, and inline decorations.
+export interface DecorationStyle {
+  [property: string]: string;
+}
+
+export interface BaseEditorDecoration {
+  id: string;
+  className?: string;
+  style?: DecorationStyle;
+}
+
+export interface InlineDecoration extends BaseEditorDecoration {
+  type: 'inline';
+  range: Range;
+}
+
+export interface LineDecoration extends BaseEditorDecoration {
+  type: 'line';
+  line: number;
+}
+
+export interface GutterDecoration extends BaseEditorDecoration {
+  type: 'gutter';
+  line: number;
+  label?: string;
+  title?: string;
+}
+
+export type EditorDecoration =
+  | InlineDecoration
+  | LineDecoration
+  | GutterDecoration;
+
+export type DiagnosticSeverity = 'error' | 'warning' | 'info' | 'hint';
+
+export interface EditorDiagnostic {
+  id?: string;
+  message: string;
+  severity: DiagnosticSeverity;
+  range: Range;
+  source?: string;
+  code?: string;
+}
+
+export type CompletionItemKind =
+  | 'text'
+  | 'keyword'
+  | 'snippet'
+  | 'property'
+  | 'method'
+  | 'function'
+  | 'class'
+  | 'variable'
+  | 'tag'
+  | 'attribute'
+  | 'value';
+
+export interface CompletionItem {
+  id?: string;
+  label: string;
+  insertText?: string;
+  detail?: string;
+  description?: string;
+  filterText?: string;
+  sortText?: string;
+  kind?: CompletionItemKind;
+  replaceRange?: Range;
+}
+
+export interface CompletionResult {
+  items: CompletionItem[];
+  from?: Range;
+}
+
+export interface CompletionContext {
+  editor: EditorCore;
+  text: string;
+  cursor: Cursor;
+  selection?: Range;
+  lineText: string;
+  prefix: string;
+  wordRange: Range;
+  explicit: boolean;
+  triggerKind: 'manual' | 'input' | 'trigger-character';
+  triggerCharacter?: string;
+  abortSignal?: AbortSignal;
+}
+
+export type CompletionProvider = (
+  context: CompletionContext,
+) =>
+  | CompletionItem[]
+  | CompletionResult
+  | Promise<CompletionItem[] | CompletionResult>;
+
 // Extension interface
 export interface EditorExtension {
   name: string;
@@ -173,6 +268,11 @@ export interface View {
   setScrollTop(scrollTop: number): void;
   getScrollElement(): HTMLElement;
   updateLineNumbers(lineCount: number): void;
+  setDecorations(
+    lineDecorations: LineDecoration[],
+    gutterDecorations: GutterDecoration[],
+  ): void;
+  clearDecorations(): void;
   destroy(): void;
 }
 
@@ -197,6 +297,9 @@ export interface EditorAPI {
   addExtension(extension: EditorExtension): void;
   removeExtension(name: string): void;
   executeCommand(name: string, ...args: any[]): void;
+  setDecorations(layer: string, decorations: EditorDecoration[]): void;
+  clearDecorations(layer?: string): void;
+  getDecorations(layer?: string): EditorDecoration[];
 
   // Internal access for extensions
   getView(): View;

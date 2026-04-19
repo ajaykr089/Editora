@@ -10,7 +10,14 @@ import {
   ReadOnlyExtension,
   SearchExtension,
   BracketMatchingExtension,
-  CodeFoldingExtension
+  CodeFoldingExtension,
+  DiagnosticsExtension,
+  CompletionExtension,
+  type EditorDecoration,
+  type EditorDiagnostic,
+  type CompletionContext,
+  type CompletionItem,
+  type CompletionResult
 } from "@editora/light-code-editor";
 import "../../packages/light-code-editor/dist/light-code-editor.css";
 import { Box, Flex} from '@editora/ui-react';
@@ -26,7 +33,7 @@ const meta: Meta = {
 # Light Code Editor - Lightweight Code Editor Library
 
 **Bundle Size**: ~38 KB ES module (8.7 KB gzipped)  
-**Features**: Syntax highlighting, themes, search, folding, extensions  
+**Features**: Syntax highlighting, themes, search, completion, folding, extensions  
 **Zero Dependencies**: Framework agnostic, works everywhere  
 
 ## Features
@@ -36,6 +43,7 @@ const meta: Meta = {
 - ✅ Light and dark themes
 - ✅ Line numbers gutter
 - ✅ Search and replace
+- ✅ Provider-based completions
 - ✅ Bracket matching
 - ✅ Code folding
 - ✅ Read-only mode
@@ -74,6 +82,18 @@ const meta: Meta = {
     codeFolding: {
       control: { type: "boolean" },
       description: "Enable code folding",
+    },
+    showDecorations: {
+      control: { type: "boolean" },
+      description: "Demonstrate line, gutter, and inline decorations",
+    },
+    enableDiagnostics: {
+      control: { type: "boolean" },
+      description: "Enable diagnostics extension demo with gutter markers and inline issues",
+    },
+    enableCompletions: {
+      control: { type: "boolean" },
+      description: "Enable autocomplete popup demo with keyboard navigation and insertion",
     },
   },
 };
@@ -143,6 +163,281 @@ const sampleHTML = `<!DOCTYPE html>
 </body>
 </html>`;
 
+function findLineIndex(
+  lines: string[],
+  matchers: string[],
+  fallbackIndex = 0,
+): number {
+  for (const matcher of matchers) {
+    const index = lines.findIndex((line) => line.includes(matcher));
+    if (index !== -1) {
+      return index;
+    }
+  }
+
+  return Math.max(
+    0,
+    Math.min(
+      fallbackIndex,
+      Math.max(0, lines.length - 1),
+    ),
+  );
+}
+
+function buildDecorationDemo(text: string, toggles: {
+  line: boolean;
+  gutter: boolean;
+  inline: boolean;
+}): EditorDecoration[] {
+  const lines = text.split("\n");
+  const activeLine = findLineIndex(lines, [
+    '<div class="highlight">',
+    "<button",
+    "<section id=\"about\">",
+    "<h1>Hello World</h1>",
+    "Missing closing tags",
+  ], 0);
+  const issueLine = findLineIndex(lines, [
+    "onclick=",
+    "Missing closing tags",
+    "<img ",
+    "Get Started",
+    "<button",
+  ], activeLine);
+  const issueLineText = lines[issueLine] || "";
+
+  const inlineTarget =
+    ["alert", "Missing closing tags", "Get Started", "<img", "Click me"]
+      .find((candidate) => issueLineText.includes(candidate)) ||
+    issueLineText.trim().split(/\s+/)[0] ||
+    "";
+  const inlineStart = inlineTarget ? issueLineText.indexOf(inlineTarget) : -1;
+  const decorations: EditorDecoration[] = [];
+
+  if (toggles.line) {
+    decorations.push({
+      id: "storybook-active-line",
+      type: "line",
+      line: activeLine,
+      className: "lce-decoration-line--active",
+      style: {
+        backgroundColor: "rgba(56, 189, 248, 0.12)",
+        boxShadow: "inset 0 0 0 1px rgba(56, 189, 248, 0.22)",
+      },
+    });
+  }
+
+  if (toggles.gutter) {
+    decorations.push({
+      id: "storybook-gutter-warning",
+      type: "gutter",
+      line: issueLine,
+      label: "●",
+      title: "Storybook decoration marker",
+      className: "lce-decoration-gutter--error",
+      style: {
+        paddingRight: "8px",
+      },
+    });
+  }
+
+  if (toggles.inline && inlineStart >= 0 && inlineTarget.length > 0) {
+    decorations.push({
+      id: "storybook-inline-highlight",
+      type: "inline",
+      range: {
+        start: { line: issueLine, column: inlineStart },
+        end: { line: issueLine, column: inlineStart + inlineTarget.length },
+      },
+      style: {
+        backgroundColor: "rgba(248, 113, 113, 0.2)",
+        textDecoration: "underline wavy rgba(248, 113, 113, 0.95)",
+      },
+    });
+  }
+
+  return decorations;
+}
+
+function buildDiagnosticsDemo(text: string): EditorDiagnostic[] {
+  const lines = text.split("\n");
+  const issueLine = findLineIndex(lines, [
+    "onclick=",
+    "Missing closing tags",
+    "<img ",
+    "Get Started",
+    "<button",
+  ], 0);
+  const issueLineText = lines[issueLine] || "";
+
+  const messageTarget =
+    ["alert", "Missing closing tags", "Get Started", "<img", "Click me"]
+      .find((candidate) => issueLineText.includes(candidate)) ||
+    issueLineText.trim().split(/\s+/)[0] ||
+    "issue";
+  const messageStart = Math.max(0, issueLineText.indexOf(messageTarget));
+
+  const infoLine = findLineIndex(lines, [
+    "<div class=\"highlight\">",
+    "<section id=\"about\">",
+    "<h1>Hello World</h1>",
+  ], issueLine);
+  const infoLineText = lines[infoLine] || "";
+  const infoTarget =
+    ["highlight", "About", "Hello World"]
+      .find((candidate) => infoLineText.includes(candidate)) ||
+    infoLineText.trim().split(/\s+/)[0] ||
+    "note";
+  const infoStart = Math.max(0, infoLineText.indexOf(infoTarget));
+
+  const diagnostics: EditorDiagnostic[] = [
+    {
+      id: "story-error",
+      severity: "error",
+      message: issueLineText.includes("Missing closing tags")
+        ? "Unclosed or malformed markup"
+        : "Inline handler needs review",
+      source: "storybook",
+      code: issueLineText.includes("Missing closing tags") ? "HTML001" : "SEC201",
+      range: {
+        start: { line: issueLine, column: messageStart },
+        end: { line: issueLine, column: messageStart + Math.max(1, messageTarget.length) },
+      },
+    },
+  ];
+
+  if (infoLineText.trim().length > 0) {
+    diagnostics.push({
+      id: "story-info",
+      severity: issueLineText.includes("Missing closing tags") ? "warning" : "info",
+      message: issueLineText.includes("Missing closing tags")
+        ? "Parser recovery may shift following nodes"
+        : "Decorative content block worth reviewing",
+      source: "storybook",
+      code: issueLineText.includes("Missing closing tags") ? "HTML014" : "UX110",
+      range: {
+        start: { line: infoLine, column: infoStart },
+        end: { line: infoLine, column: infoStart + Math.max(1, infoTarget.length) },
+      },
+    });
+  }
+
+  return diagnostics;
+}
+
+const htmlTagSuggestions = [
+  "article",
+  "button",
+  "div",
+  "footer",
+  "form",
+  "header",
+  "img",
+  "input",
+  "label",
+  "li",
+  "main",
+  "nav",
+  "option",
+  "p",
+  "section",
+  "select",
+  "span",
+  "strong",
+  "textarea",
+  "ul",
+];
+
+const htmlAttributeSuggestions = [
+  "alt",
+  "aria-label",
+  "class",
+  "data-testid",
+  "disabled",
+  "href",
+  "id",
+  "name",
+  "placeholder",
+  "role",
+  "src",
+  "title",
+  "type",
+  "value",
+];
+
+function buildCompletionDemo(context: CompletionContext): CompletionItem[] | CompletionResult {
+  const cursor = context.cursor.position;
+  const beforeCursor = context.lineText.slice(0, cursor.column);
+  const tagMatch = beforeCursor.match(/<\/?([A-Za-z0-9-]*)$/);
+
+  if (tagMatch) {
+    const typedPrefix = (tagMatch[1] || "").toLowerCase();
+    return {
+      from: {
+        start: { line: cursor.line, column: cursor.column - tagMatch[1].length },
+        end: { line: cursor.line, column: cursor.column },
+      },
+      items: htmlTagSuggestions
+        .filter((tag) => tag.startsWith(typedPrefix))
+        .map((tag) => ({
+          label: tag,
+          insertText: tag,
+          kind: "tag",
+          detail: `<${tag}>`,
+          description: "HTML tag suggestion from the Storybook completion provider",
+        })),
+    };
+  }
+
+  const openTagMatch = beforeCursor.match(/<([A-Za-z][A-Za-z0-9-]*)([^>]*)$/);
+  const attributeMatch = beforeCursor.match(/\s([A-Za-z:_-]*)$/);
+  if (openTagMatch && attributeMatch) {
+    const typedPrefix = (attributeMatch[1] || "").toLowerCase();
+    return {
+      from: {
+        start: { line: cursor.line, column: cursor.column - attributeMatch[1].length },
+        end: { line: cursor.line, column: cursor.column },
+      },
+      items: htmlAttributeSuggestions
+        .filter((attribute) => attribute.startsWith(typedPrefix))
+        .map((attribute) => ({
+          label: attribute,
+          insertText: `${attribute}=""`,
+          kind: "attribute",
+          detail: openTagMatch[1],
+          description: "Press Enter or Tab to insert the attribute template",
+        })),
+    };
+  }
+
+  if (!context.explicit && context.prefix.length === 0) {
+    return [];
+  }
+
+  return [
+    ...htmlTagSuggestions.slice(0, 8).map((tag) => ({
+      label: tag,
+      insertText: tag,
+      kind: "tag" as const,
+      detail: `<${tag}>`,
+      description: "Manual completion suggestion",
+    })),
+    ...htmlAttributeSuggestions.slice(0, 6).map((attribute) => ({
+      label: attribute,
+      insertText: `${attribute}=""`,
+      kind: "attribute" as const,
+      detail: "attribute",
+      description: "Manual completion suggestion",
+    })),
+  ].filter((item) => {
+    const prefix = context.prefix.toLowerCase();
+    if (!prefix) {
+      return true;
+    }
+    return item.label.toLowerCase().includes(prefix);
+  });
+}
+
 const LightCodeEditorDemo = ({
   theme = "dark",
   showLineNumbers = true,
@@ -150,7 +445,10 @@ const LightCodeEditorDemo = ({
   readOnly = false,
   enableSearch = true,
   bracketMatching = true,
-  codeFolding = true
+  codeFolding = true,
+  showDecorations = true,
+  enableDiagnostics = false,
+  enableCompletions = false,
 }: {
   theme?: string;
   showLineNumbers?: boolean;
@@ -159,12 +457,26 @@ const LightCodeEditorDemo = ({
   enableSearch?: boolean;
   bracketMatching?: boolean;
   codeFolding?: boolean;
+  showDecorations?: boolean;
+  enableDiagnostics?: boolean;
+  enableCompletions?: boolean;
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorInstanceRef = useRef<any>(null);
+  const diagnosticsExtensionRef = useRef<DiagnosticsExtension | null>(null);
+  const completionExtensionRef = useRef<CompletionExtension | null>(null);
   const [currentContent, setCurrentContent] = useState(sampleHTML);
   const [searchQuery, setSearchQuery] = useState("");
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [lineDecorationsEnabled, setLineDecorationsEnabled] = useState(showDecorations);
+  const [gutterDecorationsEnabled, setGutterDecorationsEnabled] = useState(showDecorations);
+  const [inlineDecorationsEnabled, setInlineDecorationsEnabled] = useState(showDecorations);
+
+  useEffect(() => {
+    setLineDecorationsEnabled(showDecorations);
+    setGutterDecorationsEnabled(showDecorations);
+    setInlineDecorationsEnabled(showDecorations);
+  }, [showDecorations]);
 
   useEffect(() => {
     if (!editorRef.current) return;
@@ -203,6 +515,27 @@ const LightCodeEditorDemo = ({
       extensions.push(new CodeFoldingExtension());
     }
 
+    if (enableDiagnostics) {
+      diagnosticsExtensionRef.current = new DiagnosticsExtension({
+        showStatusBar: true,
+        clearOnChange: false,
+      });
+      extensions.push(diagnosticsExtensionRef.current);
+    } else {
+      diagnosticsExtensionRef.current = null;
+    }
+
+    if (enableCompletions) {
+      completionExtensionRef.current = new CompletionExtension({
+        minPrefixLength: 1,
+        triggerCharacters: ["<", "/", ":"],
+        providers: [buildCompletionDemo],
+      });
+      extensions.push(completionExtensionRef.current);
+    } else {
+      completionExtensionRef.current = null;
+    }
+
     // Create editor instance
     editorInstanceRef.current = createEditor(editorRef.current, {
       value: currentContent,
@@ -222,7 +555,49 @@ const LightCodeEditorDemo = ({
         editorInstanceRef.current.destroy?.();
       }
     };
-  }, [theme, showLineNumbers, syntaxHighlighting, readOnly, enableSearch, bracketMatching, codeFolding]);
+  }, [theme, showLineNumbers, syntaxHighlighting, readOnly, enableSearch, bracketMatching, codeFolding, enableDiagnostics, enableCompletions]);
+
+  useEffect(() => {
+    const editor = editorInstanceRef.current;
+    if (!editor) {
+      return;
+    }
+
+    const layerName = "storybook-demo";
+    const hasAnyDecorations =
+      lineDecorationsEnabled || gutterDecorationsEnabled || inlineDecorationsEnabled;
+
+    if (!showDecorations || !hasAnyDecorations) {
+      editor.clearDecorations?.(layerName);
+      return;
+    }
+
+    editor.setDecorations?.(
+      layerName,
+      buildDecorationDemo(currentContent, {
+        line: lineDecorationsEnabled,
+        gutter: gutterDecorationsEnabled,
+        inline: inlineDecorationsEnabled,
+      }),
+    );
+  }, [
+    currentContent,
+    showDecorations,
+    lineDecorationsEnabled,
+    gutterDecorationsEnabled,
+    inlineDecorationsEnabled,
+  ]);
+
+  useEffect(() => {
+    if (!enableDiagnostics) {
+      diagnosticsExtensionRef.current?.clearDiagnostics();
+      return;
+    }
+
+    diagnosticsExtensionRef.current?.setDiagnostics(
+      buildDiagnosticsDemo(currentContent),
+    );
+  }, [currentContent, enableDiagnostics]);
 
   const handleSearch = () => {
     if (editorInstanceRef.current && searchQuery) {
@@ -435,6 +810,131 @@ const LightCodeEditorDemo = ({
           </Flex>
         )}
 
+        {showDecorations && (
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: "bold" }}>Decorations:</span>
+            <button
+              onClick={() => setLineDecorationsEnabled((prev) => !prev)}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: lineDecorationsEnabled ? "#0ea5e9" : "transparent",
+                color: lineDecorationsEnabled ? "white" : theme === "dark" ? "#f8f9fa" : "#333",
+                border: `1px solid ${lineDecorationsEnabled ? "#0ea5e9" : theme === "dark" ? "#404040" : "#ddd"}`,
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Line
+            </button>
+            <button
+              onClick={() => setGutterDecorationsEnabled((prev) => !prev)}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: gutterDecorationsEnabled ? "#f97316" : "transparent",
+                color: gutterDecorationsEnabled ? "white" : theme === "dark" ? "#f8f9fa" : "#333",
+                border: `1px solid ${gutterDecorationsEnabled ? "#f97316" : theme === "dark" ? "#404040" : "#ddd"}`,
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Gutter
+            </button>
+            <button
+              onClick={() => setInlineDecorationsEnabled((prev) => !prev)}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: inlineDecorationsEnabled ? "#ef4444" : "transparent",
+                color: inlineDecorationsEnabled ? "white" : theme === "dark" ? "#f8f9fa" : "#333",
+                border: `1px solid ${inlineDecorationsEnabled ? "#ef4444" : theme === "dark" ? "#404040" : "#ddd"}`,
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Inline
+            </button>
+          </Flex>
+        )}
+
+        {enableDiagnostics && (
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: "bold" }}>Diagnostics:</span>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("prevDiagnostic")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#334155" : "#e2e8f0",
+                color: theme === "dark" ? "#f8f9fa" : "#0f172a",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Prev Issue
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("nextDiagnostic")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#7c3aed" : "#8b5cf6",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Next Issue
+            </button>
+            <button
+              onClick={() => diagnosticsExtensionRef.current?.setDiagnostics(buildDiagnosticsDemo(currentContent))}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#0f766e" : "#0d9488",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Reload Issues
+            </button>
+            <button
+              onClick={() => diagnosticsExtensionRef.current?.clearDiagnostics()}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: "transparent",
+                color: theme === "dark" ? "#f8f9fa" : "#333",
+                border: `1px solid ${theme === "dark" ? "#404040" : "#ddd"}`,
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Clear Issues
+            </button>
+          </Flex>
+        )}
+
+        {enableCompletions && !readOnly && (
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: "bold" }}>Completion:</span>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("showCompletions")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#0f766e" : "#0ea5e9",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Trigger Completion
+            </button>
+            <Box style={{ fontSize: "12px", opacity: 0.75 }}>
+              Try typing <code>&lt;di</code>, <code>&lt;/</code>, or an attribute like <code>cla</code> inside a tag. Shortcut: Ctrl/Cmd + Space.
+            </Box>
+          </Flex>
+        )}
+
         {/* Content Info */}
         <Box style={{ marginLeft: "auto", fontSize: "14px", opacity: 0.7 }}>
           {currentContent.split('\n').length} lines, {currentContent.length} characters
@@ -470,11 +970,18 @@ const LightCodeEditorDemo = ({
               readOnly && "Read Only",
               enableSearch && "Search",
               bracketMatching && "Bracket Matching",
-              codeFolding && "Code Folding"
+              codeFolding && "Code Folding",
+              showDecorations && "Decorations Demo",
+              enableDiagnostics && "Diagnostics",
+              enableCompletions && "Completions"
             ].filter(Boolean).join(", ") || "None"}
           </div>
           <div>
-            Theme: {theme} | Mode: {readOnly ? "Read-Only" : "Editable"}
+            Theme: {theme} | Mode: {readOnly ? "Read-Only" : "Editable"}{showDecorations ? ` | Decorations: ${[
+              lineDecorationsEnabled && "line",
+              gutterDecorationsEnabled && "gutter",
+              inlineDecorationsEnabled && "inline",
+            ].filter(Boolean).join(", ") || "off"}` : ""}
           </div>
         </Flex>
       </Box>
@@ -493,6 +1000,9 @@ export const Basic: Story = {
     enableSearch: true,
     bracketMatching: true,
     codeFolding: true,
+    showDecorations: true,
+    enableDiagnostics: false,
+    enableCompletions: true,
   },
 };
 
@@ -507,6 +1017,9 @@ export const Minimal: Story = {
     enableSearch: false,
     bracketMatching: false,
     codeFolding: false,
+    showDecorations: false,
+    enableDiagnostics: false,
+    enableCompletions: false,
   },
 };
 
@@ -521,6 +1034,9 @@ export const ReadOnly: Story = {
     enableSearch: true,
     bracketMatching: true,
     codeFolding: true,
+    showDecorations: true,
+    enableDiagnostics: true,
+    enableCompletions: false,
   },
 };
 
@@ -535,6 +1051,9 @@ export const LightTheme: Story = {
     enableSearch: true,
     bracketMatching: true,
     codeFolding: true,
+    showDecorations: true,
+    enableDiagnostics: true,
+    enableCompletions: true,
   },
 };
 
@@ -548,6 +1067,9 @@ export const FeatureShowcase: Story = {
       { id: "search", label: "Search & Replace", description: "Find and replace functionality across the document" },
       { id: "folding", label: "Code Folding", description: "Collapse and expand code sections" },
       { id: "brackets", label: "Bracket Matching", description: "Automatic bracket pair highlighting" },
+      { id: "decorations", label: "Decorations", description: "Line, gutter, and inline annotations rendered without rewriting editor text DOM" },
+      { id: "diagnostics", label: "Diagnostics", description: "Gutter markers, inline highlights, active issue navigation, and a status summary" },
+      { id: "completion", label: "Completion", description: "Provider-based autocomplete popup with async-safe refresh, keyboard navigation, and insertion commands" },
       { id: "themes", label: "Themes", description: "Light and dark theme support" },
       { id: "readonly", label: "Read-Only Mode", description: "Prevent text modifications" },
     ];
@@ -562,12 +1084,18 @@ export const FeatureShowcase: Story = {
           return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={true} />;
         case "brackets":
           return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={true} codeFolding={false} />;
+        case "decorations":
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={true} />;
+        case "diagnostics":
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={true} />;
+        case "completion":
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={false} enableCompletions={true} />;
         case "themes":
-          return <LightCodeEditorDemo theme="light" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} />;
+          return <LightCodeEditorDemo theme="light" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={true} enableDiagnostics={true} enableCompletions={true} />;
         case "readonly":
-          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} readOnly={true} enableSearch={true} bracketMatching={true} codeFolding={true} />;
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} readOnly={true} enableSearch={true} bracketMatching={true} codeFolding={true} showDecorations={true} enableDiagnostics={true} />;
         default:
-          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={true} bracketMatching={true} codeFolding={true} />;
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={true} bracketMatching={true} codeFolding={true} showDecorations={true} enableDiagnostics={false} enableCompletions={true} />;
       }
     };
 

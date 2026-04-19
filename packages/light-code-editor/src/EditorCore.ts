@@ -8,9 +8,13 @@ import { View } from './View';
 import {
   EditorAPI,
   EditorConfig,
+  EditorDecoration,
   EditorState,
   EditorEvents,
   EditorExtension,
+  GutterDecoration,
+  InlineDecoration,
+  LineDecoration,
   Position,
   Range,
   TextChange,
@@ -26,6 +30,8 @@ interface HistorySnapshot {
   anchorOffset?: number;
   focusOffset?: number;
 }
+
+let EDITOR_INSTANCE_COUNTER = 0;
 
 export class EditorCore implements EditorAPI {
   private static readonly CURSOR_SENTINEL = '\uE000';
@@ -49,6 +55,15 @@ export class EditorCore implements EditorAPI {
   private lastKnownSelection?: Range;
   private documentSelectionChangeHandler?: () => void;
   private pendingInputSnapshot?: HistorySnapshot;
+  private readonly editorInstanceId = ++EDITOR_INSTANCE_COUNTER;
+  private readonly decorationHighlightStyleId =
+    `editora-decoration-style-${this.editorInstanceId}`;
+  private readonly decorationHighlightLimit = 1000;
+  private readonly decorationLayers = new Map<string, EditorDecoration[]>();
+  private readonly inlineDecorationHighlightNames = new Set<string>();
+  private decorationRenderRaf: number | null = null;
+  private decorationMutationObserver: MutationObserver | null = null;
+  private hasCustomDecorationHighlightSupport = false;
 
   // Public accessors for extensions
   public getTextModel(): TextModel {
@@ -84,6 +99,8 @@ export class EditorCore implements EditorAPI {
     this.view.setTabSize(this.config.tabSize || 2);
     this.view.setLineWrapping(!!this.config.lineWrapping);
     this.view.setLineNumbersVisible(this.config.lineNumbers !== false);
+    this.hasCustomDecorationHighlightSupport = this.detectCustomHighlightSupport();
+    this.observeDecorationRelevantMutations();
 
     // Setup event handlers
     this.setupEventHandlers();
@@ -247,6 +264,15 @@ export class EditorCore implements EditorAPI {
     contentElement.addEventListener('keydown', (e) => {
       this.emit('keydown', e);
 
+      const extensions = Array.from(this.extensions.values()).reverse();
+      for (const extension of extensions) {
+        if (extension.onKeyDown && extension.onKeyDown(e) === false) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+      }
+
       // Handle Tab key directly to ensure consistent insertion
       if (e.key === 'Tab' && !this.config.readOnly) {
         this.insertTab();
@@ -276,15 +302,6 @@ export class EditorCore implements EditorAPI {
         e.stopPropagation();
         return;
       }
-
-      // Let extensions handle the event
-      for (const extension of this.extensions.values()) {
-        if (extension.onKeyDown && extension.onKeyDown(e) === false) {
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
-      }
     });
 
     // Handle mouse events
@@ -292,7 +309,8 @@ export class EditorCore implements EditorAPI {
       this.emit('mousedown', e);
 
       // Let extensions handle the event
-      for (const extension of this.extensions.values()) {
+      const extensions = Array.from(this.extensions.values()).reverse();
+      for (const extension of extensions) {
         if (extension.onMouseDown && extension.onMouseDown(e) === false) {
           e.preventDefault();
           e.stopPropagation();
@@ -471,6 +489,50 @@ export class EditorCore implements EditorAPI {
   // Register a command
   registerCommand(name: string, handler: Function): void {
     this.commands.set(name, handler);
+  }
+
+  setDecorations(layer: string, decorations: EditorDecoration[]): void {
+    const normalizedLayer = layer.trim();
+    if (!normalizedLayer) {
+      throw new Error('Decoration layer name must not be empty');
+    }
+
+    if (!Array.isArray(decorations) || decorations.length === 0) {
+      this.decorationLayers.delete(normalizedLayer);
+      this.scheduleDecorationRender();
+      return;
+    }
+
+    this.decorationLayers.set(
+      normalizedLayer,
+      decorations.map((decoration) => this.cloneDecoration(decoration)),
+    );
+    this.scheduleDecorationRender();
+  }
+
+  clearDecorations(layer?: string): void {
+    if (typeof layer === 'string') {
+      this.decorationLayers.delete(layer.trim());
+    } else {
+      this.decorationLayers.clear();
+    }
+    this.scheduleDecorationRender();
+  }
+
+  getDecorations(layer?: string): EditorDecoration[] {
+    if (typeof layer === 'string') {
+      return (this.decorationLayers.get(layer.trim()) || []).map((decoration) =>
+        this.cloneDecoration(decoration),
+      );
+    }
+
+    const decorations: EditorDecoration[] = [];
+    for (const layerDecorations of this.decorationLayers.values()) {
+      decorations.push(
+        ...layerDecorations.map((decoration) => this.cloneDecoration(decoration)),
+      );
+    }
+    return decorations;
   }
 
   // Search & Navigation
@@ -701,6 +763,7 @@ export class EditorCore implements EditorAPI {
           }
           this.view.setHighlightHTML(sh.highlightHTML(text));
           this.view.syncTrailingNewlineMarkerForText(text);
+          this.scheduleDecorationRender();
           return;
         }
 
@@ -776,6 +839,7 @@ export class EditorCore implements EditorAPI {
           });
         }
 
+        this.scheduleDecorationRender();
         return;
       } catch (e) {
         console.warn('Syntax highlighting failed, falling back to plain text', e);
@@ -784,6 +848,7 @@ export class EditorCore implements EditorAPI {
 
     // Fallback to plain text
     this.view.setText(text);
+    this.scheduleDecorationRender();
   }
 
   private hasCollapsedSelectionInEditor(): boolean {
@@ -879,6 +944,16 @@ export class EditorCore implements EditorAPI {
       document.removeEventListener('selectionchange', this.documentSelectionChangeHandler);
       this.documentSelectionChangeHandler = undefined;
     }
+
+    if (this.decorationRenderRaf !== null && typeof cancelAnimationFrame === 'function') {
+      cancelAnimationFrame(this.decorationRenderRaf);
+      this.decorationRenderRaf = null;
+    }
+    this.decorationMutationObserver?.disconnect();
+    this.decorationMutationObserver = null;
+    this.clearInlineDecorationHighlights(true);
+    this.decorationLayers.clear();
+    this.view.clearDecorations();
 
     // Destroy extensions
     for (const extension of this.extensions.values()) {
@@ -1239,5 +1314,308 @@ export class EditorCore implements EditorAPI {
       fold.end.line === range.end.line &&
       fold.end.column === range.end.column
     );
+  }
+
+  private scheduleDecorationRender(): void {
+    if (this.isDestroyed) {
+      return;
+    }
+
+    if (typeof requestAnimationFrame !== 'function') {
+      this.applyDecorations();
+      return;
+    }
+
+    if (this.decorationRenderRaf !== null) {
+      return;
+    }
+
+    this.decorationRenderRaf = requestAnimationFrame(() => {
+      this.decorationRenderRaf = null;
+      this.applyDecorations();
+    });
+  }
+
+  private applyDecorations(): void {
+    if (this.isDestroyed) {
+      return;
+    }
+
+    if (this.decorationLayers.size === 0) {
+      this.view.clearDecorations();
+      this.clearInlineDecorationHighlights();
+      return;
+    }
+
+    const lineDecorations: LineDecoration[] = [];
+    const gutterDecorations: GutterDecoration[] = [];
+    const inlineDecorations: InlineDecoration[] = [];
+
+    for (const [layer, decorations] of this.decorationLayers.entries()) {
+      for (const decoration of decorations) {
+        const layerDecorationId = `${layer}::${decoration.id}`;
+        if (decoration.type === 'line') {
+          lineDecorations.push({
+            ...decoration,
+            id: layerDecorationId,
+          });
+          continue;
+        }
+
+        if (decoration.type === 'gutter') {
+          gutterDecorations.push({
+            ...decoration,
+            id: layerDecorationId,
+          });
+          continue;
+        }
+
+        inlineDecorations.push({
+          ...decoration,
+          id: layerDecorationId,
+        });
+      }
+    }
+
+    this.view.setDecorations(
+      this.normalizeLineDecorations(lineDecorations),
+      this.normalizeGutterDecorations(gutterDecorations),
+    );
+    this.renderInlineDecorations(inlineDecorations);
+  }
+
+  private normalizeLineDecorations(
+    decorations: LineDecoration[],
+  ): LineDecoration[] {
+    const maxLine = Math.max(0, this.textModel.getLineCount() - 1);
+    return decorations
+      .filter((decoration) => Number.isFinite(decoration.line))
+      .map((decoration) => ({
+        ...decoration,
+        line: Math.max(0, Math.min(maxLine, Math.floor(decoration.line))),
+        style: decoration.style ? { ...decoration.style } : undefined,
+      }));
+  }
+
+  private normalizeGutterDecorations(
+    decorations: GutterDecoration[],
+  ): GutterDecoration[] {
+    const maxLine = Math.max(0, this.textModel.getLineCount() - 1);
+    return decorations
+      .filter((decoration) => Number.isFinite(decoration.line))
+      .map((decoration) => ({
+        ...decoration,
+        line: Math.max(0, Math.min(maxLine, Math.floor(decoration.line))),
+        style: decoration.style ? { ...decoration.style } : undefined,
+      }));
+  }
+
+  private renderInlineDecorations(decorations: InlineDecoration[]): void {
+    if (!this.hasCustomDecorationHighlightSupport) {
+      this.clearInlineDecorationHighlights();
+      return;
+    }
+
+    const cssAny = CSS as unknown as {
+      highlights?: Map<string, unknown>;
+    };
+    const HighlightCtor = (window as unknown as {
+      Highlight?: new (...ranges: globalThis.Range[]) => unknown;
+    }).Highlight;
+    if (!cssAny.highlights || !HighlightCtor) {
+      this.clearInlineDecorationHighlights();
+      return;
+    }
+
+    this.clearInlineDecorationHighlights();
+    if (decorations.length === 0) {
+      return;
+    }
+
+    const text = this.textModel.getText();
+    const rules: string[] = [];
+    let rendered = 0;
+
+    for (const decoration of decorations) {
+      if (rendered >= this.decorationHighlightLimit) {
+        break;
+      }
+
+      const normalized = this.normalizeInlineDecoration(decoration, text);
+      if (!normalized) {
+        continue;
+      }
+
+      const domRange = this.view.createDomRangeFromRange(normalized.range);
+      if (!domRange) {
+        continue;
+      }
+
+      const highlightName = this.buildInlineDecorationHighlightName(
+        normalized.id,
+      );
+      cssAny.highlights.set(highlightName, new HighlightCtor(domRange));
+      this.inlineDecorationHighlightNames.add(highlightName);
+      rules.push(`
+        ::highlight(${highlightName}) {
+          ${this.serializeInlineDecorationStyle(normalized.style)}
+        }
+      `);
+      rendered += 1;
+    }
+
+    const styleNode = this.ensureDecorationHighlightStyleNode();
+    styleNode.textContent = rules.join('\n');
+  }
+
+  private normalizeInlineDecoration(
+    decoration: InlineDecoration,
+    text: string,
+  ): InlineDecoration | null {
+    const normalizedRange = this.normalizeRange({
+      start: this.clampPositionToText(decoration.range.start, text),
+      end: this.clampPositionToText(decoration.range.end, text),
+    });
+    if (
+      normalizedRange.start.line === normalizedRange.end.line &&
+      normalizedRange.start.column === normalizedRange.end.column
+    ) {
+      return null;
+    }
+
+    return {
+      ...decoration,
+      range: normalizedRange,
+      style: decoration.style ? { ...decoration.style } : undefined,
+    };
+  }
+
+  private clearInlineDecorationHighlights(removeStyleNode: boolean = false): void {
+    try {
+      const cssAny = CSS as unknown as { highlights?: Map<string, unknown> };
+      if (cssAny.highlights) {
+        for (const name of this.inlineDecorationHighlightNames) {
+          cssAny.highlights.delete(name);
+        }
+      }
+    } catch {
+      // Ignore highlight cleanup failures during teardown or unsupported runtimes.
+    }
+
+    this.inlineDecorationHighlightNames.clear();
+
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const styleNode = document.getElementById(this.decorationHighlightStyleId);
+    if (removeStyleNode) {
+      if (styleNode?.parentNode) {
+        styleNode.parentNode.removeChild(styleNode);
+      }
+      return;
+    }
+
+    if (styleNode) {
+      styleNode.textContent = '';
+    }
+  }
+
+  private ensureDecorationHighlightStyleNode(): HTMLStyleElement {
+    let styleNode = document.getElementById(
+      this.decorationHighlightStyleId,
+    ) as HTMLStyleElement | null;
+    if (styleNode) {
+      return styleNode;
+    }
+
+    styleNode = document.createElement('style');
+    styleNode.id = this.decorationHighlightStyleId;
+    document.head.appendChild(styleNode);
+    return styleNode;
+  }
+
+  private observeDecorationRelevantMutations(): void {
+    if (typeof MutationObserver === 'undefined') {
+      return;
+    }
+
+    this.decorationMutationObserver = new MutationObserver(() => {
+      if (this.decorationLayers.size === 0) {
+        return;
+      }
+      this.scheduleDecorationRender();
+    });
+
+    this.decorationMutationObserver.observe(this.view.getContentElement(), {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+  }
+
+  private detectCustomHighlightSupport(): boolean {
+    try {
+      if (typeof CSS === 'undefined' || typeof window === 'undefined') {
+        return false;
+      }
+      const cssAny = CSS as unknown as { highlights?: Map<string, unknown> };
+      const highlightCtor = (window as unknown as { Highlight?: unknown }).Highlight;
+      return !!cssAny.highlights && !!highlightCtor;
+    } catch {
+      return false;
+    }
+  }
+
+  private buildInlineDecorationHighlightName(id: string): string {
+    return `editora-decoration-${this.editorInstanceId}-${this.sanitizeHighlightIdentifier(id)}`;
+  }
+
+  private sanitizeHighlightIdentifier(value: string): string {
+    return value.toLowerCase().replace(/[^a-z0-9_-]+/g, '-');
+  }
+
+  private serializeInlineDecorationStyle(
+    style: Record<string, string> | undefined,
+  ): string {
+    const serializedStyle = this.serializeStyleObject(style);
+    if (serializedStyle) {
+      return serializedStyle;
+    }
+
+    return 'background-color: var(--lce-inline-decoration-bg, rgba(86, 156, 214, 0.18)); border-radius: 2px;';
+  }
+
+  private serializeStyleObject(style: Record<string, string> | undefined): string {
+    if (!style) {
+      return '';
+    }
+
+    return Object.entries(style)
+      .filter(([, value]) => typeof value === 'string' && value.length > 0)
+      .map(([key, value]) => `${this.toKebabCase(key)}: ${value};`)
+      .join(' ');
+  }
+
+  private toKebabCase(value: string): string {
+    return value.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
+  }
+
+  private cloneDecoration(decoration: EditorDecoration): EditorDecoration {
+    if (decoration.type === 'inline') {
+      return {
+        ...decoration,
+        range: {
+          start: { ...decoration.range.start },
+          end: { ...decoration.range.end },
+        },
+        style: decoration.style ? { ...decoration.style } : undefined,
+      };
+    }
+
+    return {
+      ...decoration,
+      style: decoration.style ? { ...decoration.style } : undefined,
+    };
   }
 }

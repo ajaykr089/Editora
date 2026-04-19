@@ -3,7 +3,7 @@
  * Author: Ajay Kumar <ajaykr089@gmail.com>
  */
 
-import { Position, Range } from './types';
+import { GutterDecoration, LineDecoration, Position, Range } from './types';
 
 export class View {
   private container: HTMLElement;
@@ -13,6 +13,9 @@ export class View {
   private contentElement!: HTMLElement;
   private highlightElement!: HTMLElement;
   private lineNumbersElement!: HTMLElement;
+  private lineNumbersContentElement!: HTMLElement;
+  private gutterDecorationsElement!: HTMLElement;
+  private lineDecorationsElement!: HTMLElement;
   private gutterWidth = 50;
   private lineHeight = 21;
   private _rafId?: number;
@@ -23,6 +26,8 @@ export class View {
   private lastLineCount = 0;
   private lastHighlightHTML = '';
   private highlightOverlayActive = false;
+  private lastLineDecorationSnapshot = '';
+  private lastGutterDecorationSnapshot = '';
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -57,6 +62,7 @@ export class View {
     this.lineNumbersElement.style.cssText = `
       display: table-cell;
       vertical-align: top;
+      position: relative;
       width: ${this.gutterWidth}px;
       background: var(--editor-gutter-background, #252526);
       color: var(--editor-gutter-foreground, #858585);
@@ -64,7 +70,25 @@ export class View {
       text-align: right;
       border-right: 1px solid var(--editor-gutter-border, #3e3e42);
       user-select: none;
+      overflow: hidden;
       z-index: 1;
+    `;
+
+    this.lineNumbersContentElement = document.createElement('div');
+    this.lineNumbersContentElement.setAttribute('data-editor-gutter-content', 'true');
+    this.lineNumbersContentElement.style.cssText = `
+      position: relative;
+      z-index: 1;
+    `;
+
+    this.gutterDecorationsElement = document.createElement('div');
+    this.gutterDecorationsElement.setAttribute('data-editor-gutter-decorations', 'true');
+    this.gutterDecorationsElement.setAttribute('aria-hidden', 'true');
+    this.gutterDecorationsElement.style.cssText = `
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
     `;
 
     // Create content surface so highlight overlay can paint without replacing
@@ -97,6 +121,16 @@ export class View {
       user-select: none;
       background: transparent;
       visibility: hidden;
+    `;
+
+    this.lineDecorationsElement = document.createElement('div');
+    this.lineDecorationsElement.setAttribute('data-editor-line-decorations', 'true');
+    this.lineDecorationsElement.setAttribute('aria-hidden', 'true');
+    this.lineDecorationsElement.style.cssText = `
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
     `;
 
     // Create content area
@@ -136,7 +170,10 @@ export class View {
     scrollWrapper.style.cssText = `display: table; table-layout: fixed; width: 100%; height: 100%;`;
 
     // Put both into the same scroll surface by appending to the editor container
+    this.lineNumbersElement.appendChild(this.lineNumbersContentElement);
+    this.lineNumbersElement.appendChild(this.gutterDecorationsElement);
     scrollWrapper.appendChild(this.lineNumbersElement);
+    contentSurface.appendChild(this.lineDecorationsElement);
     contentSurface.appendChild(this.highlightElement);
     contentSurface.appendChild(this.contentElement);
     scrollWrapper.appendChild(contentSurface);
@@ -157,9 +194,28 @@ export class View {
     this.lastLineCount = lineCount;
     const maxLines = Math.max(lineCount, 20);
     const lineNumbers = Array.from({ length: maxLines }, (_, i) => i + 1);
-    this.lineNumbersElement.innerHTML = lineNumbers
+    this.lineNumbersContentElement.innerHTML = lineNumbers
       .map(num => `<div style="height: ${this.lineHeight}px; line-height: ${this.lineHeight}px; padding-right: 12px;">${num}</div>`)
       .join('');
+  }
+
+  setDecorations(
+    lineDecorations: LineDecoration[],
+    gutterDecorations: GutterDecoration[],
+  ): void {
+    this.renderLineDecorations(lineDecorations);
+    this.renderGutterDecorations(gutterDecorations);
+  }
+
+  clearDecorations(): void {
+    if (this.lastLineDecorationSnapshot) {
+      this.lineDecorationsElement.innerHTML = '';
+      this.lastLineDecorationSnapshot = '';
+    }
+    if (this.lastGutterDecorationSnapshot) {
+      this.gutterDecorationsElement.innerHTML = '';
+      this.lastGutterDecorationSnapshot = '';
+    }
   }
 
   // Get content element
@@ -626,6 +682,7 @@ export class View {
 
   // Destroy the view
   destroy(): void {
+    this.clearDecorations();
     if (this.container) {
       this.container.innerHTML = '';
     }
@@ -946,6 +1003,129 @@ export class View {
       total += this.getSourceLength(child);
     });
     return total;
+  }
+
+  private renderLineDecorations(lineDecorations: LineDecoration[]): void {
+    const normalized = [...lineDecorations]
+      .filter((decoration) => Number.isFinite(decoration.line) && decoration.line >= 0)
+      .sort((a, b) => a.line - b.line || a.id.localeCompare(b.id));
+    const snapshot = normalized
+      .map((decoration) =>
+        `${decoration.id}:${decoration.line}:${decoration.className || ''}:${this.serializeStyleObject(decoration.style)}`,
+      )
+      .join('|');
+    if (snapshot === this.lastLineDecorationSnapshot) {
+      return;
+    }
+
+    this.lineDecorationsElement.innerHTML = '';
+    this.lastLineDecorationSnapshot = snapshot;
+    if (normalized.length === 0) {
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    for (const decoration of normalized) {
+      const element = document.createElement('div');
+      element.className = this.joinClassNames(
+        'lce-decoration lce-decoration-line',
+        decoration.className,
+      );
+      element.setAttribute('data-decoration-id', decoration.id);
+      element.setAttribute('data-decoration-line', String(decoration.line));
+      element.style.cssText = this.joinStyleFragments([
+        'position: absolute',
+        `top: ${decoration.line * this.lineHeight}px`,
+        `height: ${this.lineHeight}px`,
+        'left: 12px',
+        'right: 12px',
+        'border-radius: 3px',
+        this.serializeStyleObject(decoration.style),
+      ]);
+      fragment.appendChild(element);
+    }
+
+    this.lineDecorationsElement.appendChild(fragment);
+  }
+
+  private renderGutterDecorations(gutterDecorations: GutterDecoration[]): void {
+    const normalized = [...gutterDecorations]
+      .filter((decoration) => Number.isFinite(decoration.line) && decoration.line >= 0)
+      .sort((a, b) => a.line - b.line || a.id.localeCompare(b.id));
+    const snapshot = normalized
+      .map((decoration) =>
+        `${decoration.id}:${decoration.line}:${decoration.label || ''}:${decoration.title || ''}:${decoration.className || ''}:${this.serializeStyleObject(decoration.style)}`,
+      )
+      .join('|');
+    if (snapshot === this.lastGutterDecorationSnapshot) {
+      return;
+    }
+
+    this.gutterDecorationsElement.innerHTML = '';
+    this.lastGutterDecorationSnapshot = snapshot;
+    if (normalized.length === 0) {
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    for (const decoration of normalized) {
+      const element = document.createElement('div');
+      element.className = this.joinClassNames(
+        'lce-decoration lce-decoration-gutter',
+        decoration.className,
+      );
+      element.setAttribute('data-decoration-id', decoration.id);
+      element.setAttribute('data-decoration-line', String(decoration.line));
+      element.style.cssText = this.joinStyleFragments([
+        'position: absolute',
+        `top: ${decoration.line * this.lineHeight}px`,
+        `height: ${this.lineHeight}px`,
+        'left: 0',
+        'right: 0',
+        'display: flex',
+        'align-items: center',
+        'justify-content: flex-end',
+        'padding-right: 4px',
+        'box-sizing: border-box',
+        this.serializeStyleObject(decoration.style),
+      ]);
+      if (decoration.title) {
+        element.title = decoration.title;
+      }
+      element.textContent = decoration.label || '';
+      fragment.appendChild(element);
+    }
+
+    this.gutterDecorationsElement.appendChild(fragment);
+  }
+
+  private joinClassNames(...parts: Array<string | undefined>): string {
+    return parts.filter(Boolean).join(' ').trim();
+  }
+
+  private joinStyleFragments(parts: Array<string | undefined>): string {
+    return parts
+      .filter((part) => !!part && part.trim().length > 0)
+      .map((part) => {
+        const trimmed = part!.trim();
+        return trimmed.endsWith(';') ? trimmed : `${trimmed};`;
+      })
+      .join(' ');
+  }
+
+  private serializeStyleObject(style: Record<string, string> | undefined): string {
+    if (!style) {
+      return '';
+    }
+
+    return Object.entries(style)
+      .filter(([, value]) => typeof value === 'string' && value.length > 0)
+      .map(([key, value]) => `${this.toKebabCase(key)}: ${value}`)
+      .join('; ');
+  }
+
+  private toKebabCase(value: string): string {
+    return value.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
   }
 
   private offsetToPositionInText(offset: number, text: string): Position {
