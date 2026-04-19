@@ -20,17 +20,79 @@ type FoldSnapshot = {
   lineSpan: number;
 };
 
+type LineInfo = {
+  text: string;
+  lineStarts: number[];
+  lines: string[];
+};
+
 export class CodeFoldingExtension implements EditorExtension {
   public readonly name = 'code-folding';
   private readonly lineHeight = 21;
+  private readonly voidMarkupTags = new Set([
+    'area',
+    'base',
+    'br',
+    'col',
+    'embed',
+    'hr',
+    'img',
+    'input',
+    'link',
+    'meta',
+    'param',
+    'source',
+    'track',
+    'wbr',
+  ]);
+  private readonly nonFoldableInlineMarkupTags = new Set([
+    'a',
+    'abbr',
+    'b',
+    'bdi',
+    'bdo',
+    'button',
+    'cite',
+    'code',
+    'data',
+    'del',
+    'dfn',
+    'em',
+    'i',
+    'ins',
+    'kbd',
+    'label',
+    'mark',
+    'output',
+    'q',
+    'ruby',
+    's',
+    'samp',
+    'small',
+    'span',
+    'strong',
+    'sub',
+    'sup',
+    'time',
+    'u',
+    'var',
+  ]);
+  private readonly rawTextMarkupTags = new Set([
+    'script',
+    'style',
+    'textarea',
+    'title',
+  ]);
   private editor: EditorAPI | null = null;
   private foldingUI: HTMLElement | null = null;
   private pendingUpdateRaf: number | null = null;
   private lastSnapshot = '';
+  private lastParsedText: string | null = null;
   private changeHandler: ((changes: unknown[]) => void) | null = null;
   private foldRegions: FoldRange[] = [];
   private foldSnapshots = new Map<string, FoldSnapshot>();
   private isDisplayingFolded = false;
+  private cachedLineInfo: LineInfo | null = null;
 
   setup(editor: EditorAPI): void {
     this.editor = editor;
@@ -97,9 +159,13 @@ export class CodeFoldingExtension implements EditorExtension {
 
     const text = this.editor.getValue();
     const previousSnapshots = this.foldSnapshots;
+    const textChanged = text !== this.lastParsedText;
 
-    this.foldRegions = this.buildFoldRegions(text);
-    this.pruneInvalidFolds(text, previousSnapshots);
+    if (textChanged) {
+      this.foldRegions = this.buildFoldRegions(text);
+      this.pruneInvalidFolds(text, previousSnapshots);
+      this.lastParsedText = text;
+    }
 
     if (this.hasActiveFolds()) {
       this.applyFoldedDisplay();
@@ -147,6 +213,15 @@ export class CodeFoldingExtension implements EditorExtension {
   }
 
   private buildFoldRegions(text: string): FoldRange[] {
+    const bracketRegions = this.buildBracketFoldRegions(text);
+    const markupRegions = this.shouldIncludeMarkupFolds(text)
+      ? this.buildMarkupFoldRegions(text)
+      : [];
+
+    return this.mergeFoldRegions([...bracketRegions, ...markupRegions]);
+  }
+
+  private buildBracketFoldRegions(text: string): FoldRange[] {
     const lines = text.split('\n');
     const stack: Array<{ char: string; line: number; column: number }> = [];
     const regions: FoldRange[] = [];
@@ -210,6 +285,261 @@ export class CodeFoldingExtension implements EditorExtension {
     });
 
     return regions;
+  }
+
+  private shouldIncludeMarkupFolds(text: string): boolean {
+    return (
+      /<!DOCTYPE\b/i.test(text) ||
+      (/<[A-Za-z][\w:-]*(?:\s|>)/.test(text) &&
+        /<\/[A-Za-z][\w:-]*\s*>/.test(text))
+    );
+  }
+
+  private buildMarkupFoldRegions(text: string): FoldRange[] {
+    const { lineStarts, lines } = this.buildLineStarts(text);
+    const regions: FoldRange[] = [];
+    const stack: Array<{ name: string; openEndLine: number }> = [];
+
+    let offset = 0;
+    while (offset < text.length) {
+      if (text[offset] !== '<') {
+        offset += 1;
+        continue;
+      }
+
+      if (text.startsWith('<!--', offset)) {
+        const commentEnd = text.indexOf('-->', offset + 4);
+        offset = commentEnd === -1 ? text.length : commentEnd + 3;
+        continue;
+      }
+
+      if (text.startsWith('<![CDATA[', offset)) {
+        const cdataEnd = text.indexOf(']]>', offset + 9);
+        offset = cdataEnd === -1 ? text.length : cdataEnd + 3;
+        continue;
+      }
+
+      const tag = this.parseMarkupTag(text, offset, lineStarts, lines);
+      if (!tag) {
+        offset += 1;
+        continue;
+      }
+
+      offset = tag.endOffset;
+
+      if (tag.isClosing) {
+        const matchIndex = stack.findIndex((entry) => entry.name === tag.name);
+        if (matchIndex === -1) {
+          continue;
+        }
+
+        const open = stack.splice(matchIndex, 1)[0];
+        const region = this.createMarkupFoldRegion(
+          open.openEndLine,
+          tag.startLine,
+          lines,
+        );
+        if (region) {
+          regions.push(region);
+        }
+        continue;
+      }
+
+      if (tag.isSelfClosing || this.voidMarkupTags.has(tag.name)) {
+        continue;
+      }
+
+      if (this.rawTextMarkupTags.has(tag.name)) {
+        const rawClosingTag = this.findClosingMarkupTag(
+          text,
+          tag.endOffset,
+          tag.name,
+          lineStarts,
+          lines,
+        );
+        if (rawClosingTag) {
+          const region = this.createMarkupFoldRegion(
+            tag.endLine,
+            rawClosingTag.startLine,
+            lines,
+          );
+          if (region) {
+            regions.push(region);
+          }
+          offset = rawClosingTag.endOffset;
+        }
+        continue;
+      }
+
+      if (this.nonFoldableInlineMarkupTags.has(tag.name)) {
+        continue;
+      }
+
+      stack.unshift({
+        name: tag.name,
+        openEndLine: tag.endLine,
+      });
+    }
+
+    return regions;
+  }
+
+  private parseMarkupTag(
+    text: string,
+    offset: number,
+    lineStarts: number[],
+    lines: string[],
+  ): {
+    name: string;
+    isClosing: boolean;
+    isSelfClosing: boolean;
+    startLine: number;
+    endLine: number;
+    endOffset: number;
+  } | null {
+    if (text[offset] !== '<') {
+      return null;
+    }
+
+    const next = text[offset + 1];
+    if (!next || (next !== '/' && !/[A-Za-z]/.test(next))) {
+      return null;
+    }
+
+    const isClosing = next === '/';
+    let cursor = offset + (isClosing ? 2 : 1);
+    const nameStart = cursor;
+
+    while (cursor < text.length && /[A-Za-z0-9:-]/.test(text[cursor])) {
+      cursor += 1;
+    }
+    const nameEnd = cursor;
+
+    if (cursor === nameStart) {
+      return null;
+    }
+
+    let quote: '"' | "'" | null = null;
+    while (cursor < text.length) {
+      const char = text[cursor];
+      if (quote) {
+        if (char === quote) {
+          quote = null;
+        }
+        cursor += 1;
+        continue;
+      }
+
+      if (char === '"' || char === "'") {
+        quote = char;
+        cursor += 1;
+        continue;
+      }
+
+      if (char === '>') {
+        break;
+      }
+
+      cursor += 1;
+    }
+
+    if (cursor >= text.length || text[cursor] !== '>') {
+      return null;
+    }
+
+    const name = text.slice(nameStart, nameEnd).toLowerCase();
+    if (!name) {
+      return null;
+    }
+
+    const rawTag = text.slice(offset, cursor + 1);
+    const startLine = this.offsetToLine(offset, lineStarts, lines);
+    const endLine = this.offsetToLine(cursor, lineStarts, lines);
+
+    return {
+      name,
+      isClosing,
+      isSelfClosing: !isClosing && /\/\s*>$/.test(rawTag),
+      startLine,
+      endLine,
+      endOffset: cursor + 1,
+    };
+  }
+
+  private findClosingMarkupTag(
+    text: string,
+    fromOffset: number,
+    tagName: string,
+    lineStarts: number[],
+    lines: string[],
+  ): {
+    startLine: number;
+    endOffset: number;
+  } | null {
+    const closeTag = `</${tagName}`;
+    const lowerText = text.toLowerCase();
+    let index = lowerText.indexOf(closeTag, fromOffset);
+
+    while (index !== -1) {
+      const parsed = this.parseMarkupTag(text, index, lineStarts, lines);
+      if (parsed && parsed.isClosing && parsed.name === tagName) {
+        return {
+          startLine: parsed.startLine,
+          endOffset: parsed.endOffset,
+        };
+      }
+      index = lowerText.indexOf(closeTag, index + closeTag.length);
+    }
+
+    return null;
+  }
+
+  private createMarkupFoldRegion(
+    openEndLine: number,
+    closeStartLine: number,
+    lines: string[],
+  ): FoldRange | null {
+    if (openEndLine >= closeStartLine) {
+      return null;
+    }
+
+    const safeOpenLine = Math.max(0, Math.min(openEndLine, lines.length - 1));
+    const safeCloseLine = Math.max(0, Math.min(closeStartLine, lines.length - 1));
+    const region: FoldRange = {
+      start: {
+        line: safeOpenLine,
+        column: lines[safeOpenLine]?.length || 0,
+      },
+      end: {
+        line: safeCloseLine,
+        column: 0,
+      },
+      collapsed: false,
+      level: 0,
+    };
+
+    return this.isValidFoldRegion(region) ? region : null;
+  }
+
+  private mergeFoldRegions(regions: FoldRange[]): FoldRange[] {
+    const merged = new Map<string, FoldRange>();
+
+    for (const region of regions) {
+      if (!this.isValidFoldRegion(region)) {
+        continue;
+      }
+      merged.set(this.getFoldKey(region), region);
+    }
+
+    return [...merged.values()].sort((a, b) => {
+      if (a.start.line !== b.start.line) {
+        return a.start.line - b.start.line;
+      }
+      if (a.end.line !== b.end.line) {
+        return a.end.line - b.end.line;
+      }
+      return a.start.column - b.start.column;
+    });
   }
 
   private createFoldIndicator(region: FoldRange, displayLine: number, isCollapsed: boolean): HTMLElement {
@@ -430,6 +760,7 @@ export class CodeFoldingExtension implements EditorExtension {
     const currentKeys = new Set(activeFolds.map((fold) => this.getFoldKey(fold)));
     const nextFolds: FoldRange[] = [];
     const claimedKeys = new Set<string>();
+    const lineInfo = this.getLineInfo(text);
 
     for (const fold of activeFolds) {
       const replacement = this.findReplacementFold(
@@ -437,6 +768,7 @@ export class CodeFoldingExtension implements EditorExtension {
         previousSnapshots.get(this.getFoldKey(fold)),
         claimedKeys,
         text,
+        lineInfo,
       );
       if (!replacement) {
         continue;
@@ -534,6 +866,7 @@ export class CodeFoldingExtension implements EditorExtension {
     previousSnapshot: FoldSnapshot | undefined,
     activeKeys: Set<string>,
     text: string,
+    lineInfo: LineInfo,
   ): FoldRange | null {
     const exactKey = this.getFoldKey(previous);
     const exactMatch = this.foldRegions.find(
@@ -546,11 +879,12 @@ export class CodeFoldingExtension implements EditorExtension {
     }
 
     const previousSpan = previous.end.line - previous.start.line;
-    const previousFallbackSnapshot = previousSnapshot ?? this.createFoldSnapshot(previous, text);
+    const previousFallbackSnapshot =
+      previousSnapshot ?? this.createFoldSnapshot(previous, text, lineInfo);
     const ranked = this.foldRegions
       .filter((region) => !activeKeys.has(this.getFoldKey(region)))
       .map((region) => {
-        const snapshot = this.createFoldSnapshot(region, text);
+        const snapshot = this.createFoldSnapshot(region, text, lineInfo);
         const startLineMatch =
           previousFallbackSnapshot &&
           snapshot?.startLineText === previousFallbackSnapshot.startLineText
@@ -630,9 +964,10 @@ export class CodeFoldingExtension implements EditorExtension {
 
   private rememberActiveFoldSnapshots(text: string): void {
     const nextSnapshots = new Map<string, FoldSnapshot>();
+    const lineInfo = this.getLineInfo(text);
 
     for (const fold of this.getActiveFolds()) {
-      const snapshot = this.createFoldSnapshot(fold, text);
+      const snapshot = this.createFoldSnapshot(fold, text, lineInfo);
       if (!snapshot) {
         continue;
       }
@@ -642,8 +977,12 @@ export class CodeFoldingExtension implements EditorExtension {
     this.foldSnapshots = nextSnapshots;
   }
 
-  private createFoldSnapshot(fold: FoldRange, text: string): FoldSnapshot | null {
-    const { lineStarts, lines } = this.buildLineStarts(text);
+  private createFoldSnapshot(
+    fold: FoldRange,
+    text: string,
+    lineInfo: LineInfo = this.getLineInfo(text),
+  ): FoldSnapshot | null {
+    const { lineStarts, lines } = lineInfo;
     if (lines.length === 0) {
       return null;
     }
@@ -701,7 +1040,7 @@ export class CodeFoldingExtension implements EditorExtension {
     }
 
     const text = this.editor.getValue();
-    const { lineStarts, lines } = this.buildLineStarts(text);
+    const { lineStarts, lines } = this.getLineInfo(text);
     const activeTopLevelFolds = this.getRenderableActiveFolds();
     if (activeTopLevelFolds.length === 0) {
       const maxOffset = text.length;
@@ -766,6 +1105,52 @@ export class CodeFoldingExtension implements EditorExtension {
     return { lineStarts, lines };
   }
 
+  private getLineInfo(text: string): LineInfo {
+    if (this.cachedLineInfo?.text === text) {
+      return this.cachedLineInfo;
+    }
+
+    const lineInfo: LineInfo = {
+      text,
+      ...this.buildLineStarts(text),
+    };
+    this.cachedLineInfo = lineInfo;
+    return lineInfo;
+  }
+
+  private offsetToLine(offset: number, lineStarts: number[], lines: string[]): number {
+    const maxOffset =
+      lineStarts.length > 0
+        ? lineStarts[lineStarts.length - 1] + (lines[lines.length - 1]?.length || 0)
+        : 0;
+    const boundedOffset = Math.max(0, Math.min(offset, maxOffset));
+    let low = 0;
+    let high = lineStarts.length - 1;
+
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      const lineStart = lineStarts[mid];
+      const nextLineStart =
+        mid + 1 < lineStarts.length
+          ? lineStarts[mid + 1]
+          : Number.POSITIVE_INFINITY;
+
+      if (boundedOffset < lineStart) {
+        high = mid - 1;
+        continue;
+      }
+
+      if (boundedOffset >= nextLineStart) {
+        low = mid + 1;
+        continue;
+      }
+
+      return mid;
+    }
+
+    return Math.max(0, Math.min(low, lineStarts.length - 1));
+  }
+
   private positionToOffset(position: Position, lineStarts: number[], lines: string[]): number {
     const safeLine = Math.max(0, Math.min(position.line, lines.length - 1));
     const safeColumn = Math.max(0, Math.min(position.column, lines[safeLine]?.length || 0));
@@ -826,8 +1211,10 @@ export class CodeFoldingExtension implements EditorExtension {
     this.restoreFullDisplay();
     this.changeHandler = null;
     this.lastSnapshot = '';
+    this.lastParsedText = null;
     this.foldingUI = null;
     this.foldRegions = [];
+    this.cachedLineInfo = null;
     this.editor = null;
   }
 }

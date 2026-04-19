@@ -50,7 +50,7 @@ const editor = createEditor(container, {
 
 - Search and replace commands with case-sensitive, whole-word, and regex modes
 - Visible bracket matching for paired delimiters
-- Fold and unfold support for multi-line bracketed blocks
+- Fold and unfold support for multi-line bracketed blocks and markup tag regions
 - Startup config for `tabSize`, `lineNumbers`, `lineWrapping`, `theme`, and `readOnly`
 
 ## Search And Replace (Advanced)

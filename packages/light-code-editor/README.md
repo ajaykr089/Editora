@@ -229,7 +229,7 @@ const editor = createEditor(container, {
 ```
 
 #### `CodeFoldingExtension`
-Enables code folding functionality.
+Enables code folding for multi-line bracketed blocks and markup tag regions.
 
 ```typescript
 import { CodeFoldingExtension } from '@editora/light-code-editor';
