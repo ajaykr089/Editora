@@ -29,37 +29,47 @@ npm install @editora/light-code-editor
 
 ## Quick Start
 
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <link rel="stylesheet" href="node_modules/@editora/light-code-editor/dist/light-code-editor.css">
-</head>
-<body>
-  <div id="editor"></div>
+```ts
+import {
+  BracketMatchingExtension,
+  CodeFoldingExtension,
+  LineNumbersExtension,
+  SearchExtension,
+  SyntaxHighlightingExtension,
+  createEditor
+} from '@editora/light-code-editor';
+import '@editora/light-code-editor/light-code-editor.css';
 
-  <script type="module">
-    import { createEditor, LineNumbersExtension, SyntaxHighlightingExtension } from '@editora/light-code-editor';
+const container = document.getElementById('editor');
 
-    const editor = createEditor(document.getElementById('editor'), {
-      value: '<div class="hello">Hello World</div>',
-      theme: 'dark',
-      extensions: [
-        new LineNumbersExtension(),
-        new SyntaxHighlightingExtension()
-      ]
-    });
+if (!container) {
+  throw new Error('Missing #editor container');
+}
 
-    // Get current content
-    console.log(editor.getValue());
+const editor = createEditor(container, {
+  value: '<div class="hello">Hello World</div>\n',
+  theme: 'dark',
+  tabSize: 2,
+  lineNumbers: true,
+  lineWrapping: false,
+  extensions: [
+    new LineNumbersExtension(),
+    new SyntaxHighlightingExtension(),
+    new SearchExtension(),
+    new BracketMatchingExtension(),
+    new CodeFoldingExtension()
+  ]
+});
 
-    // Listen for changes
-    editor.on('change', (changes) => {
-      console.log('Content changed:', changes);
-    });
-  </script>
-</body>
-</html>
+editor.on('change', (changes) => {
+  console.log('Content changed:', changes);
+});
+
+editor.executeCommand('find');
+
+const cleanup = () => {
+  editor.destroy();
+};
 ```
 
 ## API
@@ -77,40 +87,62 @@ Factory function to create a new editor instance.
 
 ```typescript
 interface EditorConfig {
-  value?: string;                    // Initial content
-  theme?: 'light' | 'dark';          // Theme
-  readOnly?: boolean;                // Read-only mode
-  extensions?: EditorExtension[];    // Extensions to load
-  keymap?: Record<string, string>;   // Custom key bindings
+  value?: string;
+  theme?: string;
+  readOnly?: boolean;
+  tabSize?: number;
+  lineWrapping?: boolean;
+  lineNumbers?: boolean;
+  extensions?: EditorExtension[];
+  keymap?: Keymap;
 }
 ```
+
+Common config flags:
+
+- `tabSize`: applies CSS tab rendering width in the editable surface
+- `lineWrapping`: toggles `pre` vs `pre-wrap` rendering
+- `lineNumbers`: controls the gutter at startup and at runtime through the line-numbers extension
+- `keymap`: custom shortcut bindings used by the default `KeymapExtension`
 
 ### Editor Methods
 
 ```typescript
 interface EditorAPI {
-  // Content
   getValue(): string;
   setValue(value: string): void;
+  getState(): EditorState;
 
-  // Focus & Selection
-  focus(): void;
-  hasFocus(): boolean;
+  getCursor(): Cursor;
+  setCursor(position: Position): void;
+  getSelection(): Range | undefined;
+  setSelection(range: Range): void;
 
-  // Theme & Appearance
-  setTheme(theme: 'light' | 'dark'): void;
-
-  // Read-only mode
+  setTheme(theme: string): void;
   setReadOnly(readOnly: boolean): void;
 
-  // Extensions
+  addExtension(extension: EditorExtension): void;
+  removeExtension(name: string): void;
+  executeCommand(name: string, ...args: any[]): void;
   registerCommand(name: string, handler: Function): void;
 
-  // Events
+  search(query: string, options?: Partial<SearchOptions>): SearchResult[];
+  replace(range: Range, text: string): void;
+  replaceAll(query: string, replacement: string, options?: Partial<SearchOptions>): number;
+
+  fold(range: Range): void;
+  unfold(range: Range): void;
+  getFolds(): FoldRange[];
+
+  focus(): void;
+  blur(): void;
+  destroy(): void;
   on(event: string, handler: Function): void;
   off(event: string, handler: Function): void;
 }
 ```
+
+For extension authors, the editor also exposes `getView()` and `getConfig()` so custom extensions can coordinate with the rendered surface and startup config.
 
 ## Extensions
 
@@ -230,22 +262,42 @@ class MyExtension implements EditorExtension {
 }
 ```
 
+## Built-In Commands
+
+The core editor always registers:
+
+- `undo`
+- `redo`
+- `insertTab`
+- `save`
+
+Extensions add commands on top:
+
+- `SearchExtension`: `find`, `findNext`, `findPrev`, `replace`, `replaceAll`
+- `ThemeExtension`: `setTheme`, `toggleTheme`
+- `ReadOnlyExtension`: `setReadOnly`, `toggleReadOnly`
+- `LineNumbersExtension`: `toggleLineNumbers`
+- `CodeFoldingExtension`: `fold`, `unfold`, `foldAll`, `unfoldAll`
+
 ## Styling
 
-The library includes its own CSS file that provides complete styling. Include it in your HTML:
+Import the stylesheet once in your app entry or component bundle:
 
-```html
-<link rel="stylesheet" href="dist/light-code-editor.css">
+```ts
+import '@editora/light-code-editor/light-code-editor.css';
 ```
 
-### CSS Classes
+The package also keeps `@editora/light-code-editor/dist/light-code-editor.css` available for compatibility, but the shorter exported path above is the preferred import for consumers.
 
-- `.rte-light-editor` - Main editor container
-- `.rte-light-editor-content` - Textarea element
-- `.rte-light-editor-gutter` - Line numbers gutter
-- `.rte-syntax-highlight-overlay` - Syntax highlighting overlay
-- `.rte-light-editor.dark` - Dark theme
-- `.rte-light-editor.light` - Light theme
+### Runtime Styling Surface
+
+The current renderer attaches data attributes instead of public class names:
+
+- `[data-lce-editor-container="true"]` - outer editor container
+- `[data-editora-editor="true"]` - shared scroll wrapper
+- `[data-editor-gutter="true"]` - line-number gutter
+
+For theming, prefer CSS custom properties such as `--editor-background`, `--editor-foreground`, `--editor-gutter-background`, and `--editor-gutter-foreground` instead of relying on internal selectors.
 
 ## Architecture
 

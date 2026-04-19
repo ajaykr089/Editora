@@ -100,16 +100,25 @@ export class SyntaxHighlightingExtension implements EditorExtension {
   private _highlightHTML(html: string, colors: Record<string,string>): string {
     const colorsLocal = colors;
     const escapeHTML = (str: string) => this.escapeHTML(str);
+    const incompleteTagTokens: string[] = [];
+    const stashIncompleteTag = (value: string) => {
+      const index = incompleteTagTokens.length;
+      incompleteTagTokens.push(value);
+      return `\u0002ht${index}\u0002`;
+    };
 
     let escaped = escapeHTML(html);
+    escaped = escaped.replace(
+      /&lt;\/?(?:(?!&gt;)[^\n\r<])*?(?=$|[\n\r])/g,
+      (segment) => stashIncompleteTag(segment),
+    );
 
     // Highlight contents of <style>...</style> blocks as CSS first so inner CSS isn't treated as HTML
     const highlightCSS = (cssContent: string) => {
       let css = cssContent.replace(/&quot;/g, '"').replace(/&#39;/g, "'");
       css = css.replace(/(\/\*[\s\S]*?\*\/)/g, `<span style=\"color: ${colorsLocal.comment};\">$1</span>`);
-      css = css.replace(/([a-zA-Z-]+)(\s*:\s*)([^;{]+)(;?)/g, (m, prop, sep, val, semi) => {
-        const v = String(val).trim();
-        const escVal = escapeHTML(v);
+      css = css.replace(/([a-zA-Z-]+)(\s*:\s*)([^;{}\n\r]+)(;?)/g, (m, prop, sep, val, semi) => {
+        const escVal = escapeHTML(String(val));
         return `<span style=\"color: ${colorsLocal.styleProp};\">${prop}</span>${sep}<span style=\"color: ${colorsLocal.styleVal};\">${escVal}</span>${semi}`;
       });
       return css;
@@ -144,7 +153,7 @@ export class SyntaxHighlightingExtension implements EditorExtension {
     escaped = escaped.replace(/(&lt;!--[\s\S]*?--&gt;)/g, `<span style="color: ${colorsLocal.comment};">$1</span>`);
     escaped = escaped.replace(/(&lt;!DOCTYPE[\s\S]*?&gt;)/i, `<span style="color: ${colorsLocal.doctype};">$1</span>`);
 
-    escaped = escaped.replace(/(&lt;\/?\s*)([^\s&>\/]+)([\s\S]*?)(\/?&gt;)/g, (whole, open, name, attrs, close) => {
+    escaped = escaped.replace(/(&lt;\/?\s*)([^\s&>\/]+)([^<]*?)(\/?&gt;)/g, (whole, open, name, attrs, close) => {
       const taggedName = `<span style="color: ${colorsLocal.tag};">${name}</span>`;
       let processedAttrs = attrs;
       processedAttrs = processedAttrs.replace(
@@ -159,7 +168,7 @@ export class SyntaxHighlightingExtension implements EditorExtension {
         let outVal = aval;
         if (nameLower === 'style') {
           const cssHighlighted = inner.replace(/([\w-]+)\s*:\s*([^;]+)(;?)/g, (_cm: string, prop: string, v: string, semi: string) => {
-            return `<span style="color: ${colorsLocal.styleProp};">${prop}</span>:<span style="color: ${colorsLocal.styleVal};">${v.trim()}</span>${semi}`;
+            return `<span style="color: ${colorsLocal.styleProp};">${prop}</span>:<span style="color: ${colorsLocal.styleVal};">${v}</span>${semi}`;
           });
           if (quote) outVal = `${quote}${cssHighlighted}${quote}`; else outVal = cssHighlighted;
           outVal = `<span style=\"color: ${colorsLocal.attrValue};\">${outVal}</span>`;
@@ -171,6 +180,10 @@ export class SyntaxHighlightingExtension implements EditorExtension {
         }
       );
       return `${open}${taggedName}${processedAttrs}${close}`;
+    });
+
+    escaped = escaped.replace(/\u0002ht(\d+)\u0002/g, (_whole, index) => {
+      return incompleteTagTokens[Number(index)] || '';
     });
 
     return escaped;

@@ -13,6 +13,7 @@ export class LineNumbersExtension implements EditorExtension {
 
   setup(editor: EditorCore): void {
     this.editor = editor;
+    this.isEnabled = editor.getConfig().lineNumbers !== false;
 
     // Create line numbers container
     this.createLineNumbers();
@@ -40,6 +41,7 @@ export class LineNumbersExtension implements EditorExtension {
     if (!gutter) return;
 
     this.lineNumbersElement = gutter;
+    view.setLineNumbersVisible(this.isEnabled);
   }
 
   private updateLineNumbers(): void {
@@ -55,14 +57,10 @@ export class LineNumbersExtension implements EditorExtension {
   private toggle(): void {
     if (!this.editor) return;
     this.isEnabled = !this.isEnabled;
+    this.editor.getView().setLineNumbersVisible(this.isEnabled);
 
     if (this.lineNumbersElement) {
-      this.lineNumbersElement.style.display = this.isEnabled ? 'block' : 'none';
-    }
-
-    const contentElement = this.editor.getView().getContentElement();
-    if (contentElement) {
-      contentElement.style.marginLeft = this.isEnabled ? '60px' : '0';
+      this.lineNumbersElement.style.display = this.isEnabled ? 'table-cell' : 'none';
     }
 
     this.updateLineNumbers();

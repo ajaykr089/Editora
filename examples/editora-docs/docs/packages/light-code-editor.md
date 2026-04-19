@@ -20,9 +20,38 @@ npm i @editora/light-code-editor
 ```
 
 ```ts
-import { createEditor } from "@editora/light-code-editor";
-import "@editora/light-code-editor/dist/light-code-editor.css";
+import {
+  BracketMatchingExtension,
+  CodeFoldingExtension,
+  LineNumbersExtension,
+  SearchExtension,
+  SyntaxHighlightingExtension,
+  createEditor,
+} from "@editora/light-code-editor";
+import "@editora/light-code-editor/light-code-editor.css";
+
+const editor = createEditor(container, {
+  value: initialCode,
+  theme: "dark",
+  tabSize: 2,
+  lineNumbers: true,
+  lineWrapping: false,
+  extensions: [
+    new LineNumbersExtension(),
+    new SyntaxHighlightingExtension(),
+    new SearchExtension(),
+    new BracketMatchingExtension(),
+    new CodeFoldingExtension(),
+  ],
+});
 ```
+
+## Core Capabilities
+
+- Search and replace commands with case-sensitive, whole-word, and regex modes
+- Visible bracket matching for paired delimiters
+- Fold and unfold support for multi-line bracketed blocks
+- Startup config for `tabSize`, `lineNumbers`, `lineWrapping`, `theme`, and `readOnly`
 
 ## Search And Replace (Advanced)
 
@@ -70,6 +99,9 @@ editor.executeCommand("replace");
 | `findNext` | Move to next match |
 | `findPrev` | Move to previous match |
 | `replace` | Open replace mode |
+| `replaceAll` | Replace all current matches |
+| `foldAll` | Collapse all top-level fold regions |
+| `unfoldAll` | Expand folded regions |
 
 ## Performance Notes
 

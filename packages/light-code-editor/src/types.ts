@@ -141,11 +141,28 @@ export interface View {
   getContentElement(): HTMLElement;
   getLineNumbersElement(): HTMLElement;
   getText(): string;
+  getSelectionOffsets(): {
+    isInEditor: boolean;
+    isCollapsed: boolean;
+    startOffset: number;
+    endOffset: number;
+    anchorOffset?: number;
+    focusOffset?: number;
+  };
   setText(text: string): void;
   setHTML(html: string): void;
+  setHighlightHTML(html: string): void;
+  syncTrailingNewlineMarkerForText(text: string): void;
+  setLineWrapping(enabled: boolean): void;
+  setLineNumbersVisible(visible: boolean): void;
+  setTabSize(tabSize: number): void;
   getCursorPosition(): Position;
   setCursorPosition(position: Position): void;
   getSelectionRange(): Range | undefined;
+  createDomRangeFromOffsets(startOffset: number, endOffset?: number): globalThis.Range | null;
+  createDomRangeFromRange(range: Range): globalThis.Range | null;
+  setSelectionOffsets(startOffset: number, endOffset?: number): void;
+  setSelectionBoundaryOffsets(anchorOffset: number, focusOffset: number): void;
   setSelectionRange(range: Range): void;
   focus(): void;
   blur(): void;
@@ -183,6 +200,7 @@ export interface EditorAPI {
 
   // Internal access for extensions
   getView(): View;
+  getConfig(): EditorConfig;
   registerCommand(name: string, handler: Function): void;
 
   // Search & Navigation

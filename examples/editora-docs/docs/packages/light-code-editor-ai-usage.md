@@ -16,12 +16,14 @@ Use this page when generating code editing workflows with `@editora/light-code-e
 
 ```ts
 import { createEditor, SearchExtension, ThemeExtension } from '@editora/light-code-editor';
-import '@editora/light-code-editor/dist/light-code-editor.css';
+import '@editora/light-code-editor/light-code-editor.css';
 
 const editor = createEditor(container, {
   value: '<h1>Code</h1>',
   extensions: [new ThemeExtension(), new SearchExtension()]
 });
+
+const cleanup = () => editor.destroy();
 ```
 
 ## AI prompt constraints
