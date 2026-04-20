@@ -25,6 +25,7 @@ import {
   CodeFoldingExtension,
   CompletionExtension,
   DiagnosticsExtension,
+  FormattingExtension,
   LineNumbersExtension,
   SearchExtension,
   SyntaxHighlightingExtension,
@@ -44,6 +45,7 @@ const editor = createEditor(container, {
     new SearchExtension(),
     new DiagnosticsExtension(),
     new CompletionExtension(),
+    new FormattingExtension(),
     new BracketMatchingExtension(),
     new CodeFoldingExtension(),
   ],
@@ -55,6 +57,7 @@ const editor = createEditor(container, {
 - Search and replace commands with case-sensitive, whole-word, and regex modes
 - Diagnostics extension for errors, warnings, info markers, and issue navigation
 - Completion extension for provider-based autocomplete suggestions
+- Formatting extension for document and selection formatting workflows
 - Visible bracket matching for paired delimiters
 - Fold and unfold support for multi-line bracketed blocks and markup tag regions
 - Decorations API for line, gutter, and inline range annotations
@@ -116,6 +119,8 @@ editor.executeCommand("replace");
 | `nextCompletion` | Move to the next suggestion |
 | `prevCompletion` | Move to the previous suggestion |
 | `acceptCompletion` | Insert the active suggestion |
+| `formatDocument` | Format the full document |
+| `formatSelection` | Format the current selection |
 | `foldAll` | Collapse all top-level fold regions |
 | `unfoldAll` | Expand folded regions |
 
@@ -194,6 +199,44 @@ Notes:
 - Providers can return `CompletionItem[]` or `{ items, from }` when they need to replace a range other than the current word.
 - Async providers are versioned so stale responses do not overwrite newer suggestions.
 
+## Formatting Extension
+
+```ts
+import {
+  FormattingExtension,
+  createEditor,
+  type Formatter,
+} from "@editora/light-code-editor";
+
+const formatter: Formatter = async (context) => {
+  if (context.mode === "selection") {
+    return context.input.trim();
+  }
+
+  return context.text.replace(/>\s+</g, ">\n<").trim();
+};
+
+const formatting = new FormattingExtension({
+  formatter,
+  timeoutMs: 3000,
+});
+
+const editor = createEditor(container, {
+  value: initialCode,
+  extensions: [formatting],
+});
+
+editor.executeCommand("formatDocument");
+editor.executeCommand("formatSelection");
+```
+
+Notes:
+
+- `Shift + Alt + F` runs `formatDocument` through the default keymap.
+- Formatters receive the full document text, the targeted input segment, the active range, cursor/selection state, and an `AbortSignal`.
+- Returning a string replaces the requested range. Returning `{ text, range, selection, cursor }` gives the formatter control over the applied edit and final editor state.
+- Async formatter runs are cancelled when a newer request or timeout supersedes them.
+
 ## Decorations API
 
 Use decoration layers for diagnostics, active-line styling, or custom annotations without rewriting editor text DOM.
@@ -242,3 +285,4 @@ Notes:
 - Search highlights use native `CSS Highlight API` when available, with fallback behavior where not supported.
 - Decorations avoid editable-DOM rewrites for line and gutter layers, and inline ranges reuse the browser highlight pipeline.
 - Completion requests are debounced, stale async responses are dropped, and manual accept only replaces the targeted range instead of rerendering the whole editor.
+- Formatting runs apply a single replacement, preserve selection or cursor state where possible, and abort stale async work so delayed formatters do not overwrite fresh edits.

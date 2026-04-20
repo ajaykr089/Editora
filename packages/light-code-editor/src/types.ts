@@ -146,6 +146,33 @@ export type CompletionProvider = (
   | CompletionResult
   | Promise<CompletionItem[] | CompletionResult>;
 
+export type FormattingMode = 'document' | 'selection';
+
+export interface FormattingContext {
+  editor: EditorCore;
+  text: string;
+  input: string;
+  cursor: Cursor;
+  selection?: Range;
+  range: Range;
+  mode: FormattingMode;
+  abortSignal?: AbortSignal;
+}
+
+export interface FormattingResult {
+  text: string;
+  range?: Range;
+  selection?: Range;
+  cursor?: Position;
+}
+
+export type Formatter = (
+  context: FormattingContext,
+) =>
+  | string
+  | FormattingResult
+  | Promise<string | FormattingResult>;
+
 // Extension interface
 export interface EditorExtension {
   name: string;

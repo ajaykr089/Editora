@@ -17,6 +17,7 @@ A lightweight, modular code editor library inspired by CodeMirror, optimized for
 ✅ **Search** - Find and highlight functionality
 ✅ **Diagnostics** - Gutter markers, inline issue highlights, and issue navigation
 ✅ **Completions** - Provider-based autocomplete popup with keyboard navigation
+✅ **Formatting** - Pluggable document and selection formatting with async safety
 ✅ **Bracket Matching** - Automatic bracket pair highlighting
 ✅ **Code Folding** - Collapse/expand code sections
 ✅ **Read-Only Mode** - Prevent text modifications
@@ -37,6 +38,7 @@ import {
   CodeFoldingExtension,
   CompletionExtension,
   DiagnosticsExtension,
+  FormattingExtension,
   LineNumbersExtension,
   SearchExtension,
   SyntaxHighlightingExtension,
@@ -62,6 +64,7 @@ const editor = createEditor(container, {
     new SearchExtension(),
     new DiagnosticsExtension(),
     new CompletionExtension(),
+    new FormattingExtension(),
     new BracketMatchingExtension(),
     new CodeFoldingExtension()
   ]
@@ -346,6 +349,45 @@ Notes:
 - Providers can return arrays or `{ items, from }` objects when they need to override the replacement range.
 - Stale async results are ignored automatically, and in-flight requests are aborted when a newer request replaces them.
 
+#### `FormattingExtension`
+Provides pluggable document and selection formatting with timeout handling, cancellation, and selection preservation.
+
+```typescript
+import {
+  FormattingExtension,
+  type Formatter,
+} from '@editora/light-code-editor';
+
+const formatter: Formatter = async (context) => {
+  if (context.mode === 'selection') {
+    return context.input.trim();
+  }
+
+  return context.text
+    .replace(/>\s+</g, '>\n<')
+    .trim();
+};
+
+const formatting = new FormattingExtension({
+  formatter,
+  timeoutMs: 3000,
+});
+
+const editor = createEditor(container, {
+  extensions: [formatting]
+});
+
+editor.executeCommand('formatDocument');
+editor.executeCommand('formatSelection');
+```
+
+Notes:
+
+- `Shift + Alt + F` runs `formatDocument` through the default keymap.
+- Formatters receive the full document, the target input segment, the active range, cursor/selection state, and an `AbortSignal`.
+- Returning a plain string replaces the requested range. Returning `{ text, range, selection, cursor }` gives the formatter explicit control over the applied edit and final editor state.
+- Timeouts and newer formatting runs cancel stale async work so old results do not overwrite newer edits.
+
 #### `BracketMatchingExtension`
 Highlights matching brackets.
 
@@ -405,6 +447,7 @@ Extensions add commands on top:
 - `SearchExtension`: `find`, `findNext`, `findPrev`, `replace`, `replaceAll`
 - `DiagnosticsExtension`: `setDiagnostics`, `clearDiagnostics`, `nextDiagnostic`, `prevDiagnostic`
 - `CompletionExtension`: `showCompletions`, `closeCompletions`, `nextCompletion`, `prevCompletion`, `acceptCompletion`
+- `FormattingExtension`: `formatDocument`, `formatSelection`
 - `ThemeExtension`: `setTheme`, `toggleTheme`
 - `ReadOnlyExtension`: `setReadOnly`, `toggleReadOnly`
 - `LineNumbersExtension`: `toggleLineNumbers`

@@ -46,7 +46,11 @@ export type {
   CompletionItem,
   CompletionResult,
   CompletionContext,
-  CompletionProvider
+  CompletionProvider,
+  FormattingMode,
+  FormattingContext,
+  FormattingResult,
+  Formatter
 } from './types';
 
 // Factory function for easy instantiation

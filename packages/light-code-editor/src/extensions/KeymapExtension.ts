@@ -98,6 +98,7 @@ export class KeymapExtension implements EditorExtension {
 
     // Theme switching
     this.addBinding(keymap, 't', { ctrlKey: !this.isMac, metaKey: this.isMac, shiftKey: true }, 'toggleTheme');
+    this.addBinding(keymap, 'f', { altKey: true, shiftKey: true }, 'formatDocument');
 
     return keymap;
   }

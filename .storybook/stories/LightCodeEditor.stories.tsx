@@ -13,11 +13,13 @@ import {
   CodeFoldingExtension,
   DiagnosticsExtension,
   CompletionExtension,
+  FormattingExtension,
   type EditorDecoration,
   type EditorDiagnostic,
   type CompletionContext,
   type CompletionItem,
-  type CompletionResult
+  type CompletionResult,
+  type Formatter
 } from "@editora/light-code-editor";
 import "../../packages/light-code-editor/dist/light-code-editor.css";
 import { Box, Flex} from '@editora/ui-react';
@@ -33,7 +35,7 @@ const meta: Meta = {
 # Light Code Editor - Lightweight Code Editor Library
 
 **Bundle Size**: ~38 KB ES module (8.7 KB gzipped)  
-**Features**: Syntax highlighting, themes, search, completion, folding, extensions  
+**Features**: Syntax highlighting, themes, search, completion, formatting, folding, extensions  
 **Zero Dependencies**: Framework agnostic, works everywhere  
 
 ## Features
@@ -44,6 +46,7 @@ const meta: Meta = {
 - ✅ Line numbers gutter
 - ✅ Search and replace
 - ✅ Provider-based completions
+- ✅ Pluggable document and selection formatting
 - ✅ Bracket matching
 - ✅ Code folding
 - ✅ Read-only mode
@@ -94,6 +97,10 @@ const meta: Meta = {
     enableCompletions: {
       control: { type: "boolean" },
       description: "Enable autocomplete popup demo with keyboard navigation and insertion",
+    },
+    enableFormatting: {
+      control: { type: "boolean" },
+      description: "Enable formatter extension demo with document and selection commands",
     },
   },
 };
@@ -438,6 +445,184 @@ function buildCompletionDemo(context: CompletionContext): CompletionItem[] | Com
   });
 }
 
+const htmlVoidTags = new Set([
+  "area",
+  "base",
+  "br",
+  "col",
+  "embed",
+  "hr",
+  "img",
+  "input",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr",
+]);
+
+function formatCssDemo(input: string): string {
+  const normalized = input
+    .replace(/\r\n?/g, "\n")
+    .replace(/\s*{\s*/g, " {\n")
+    .replace(/;\s*/g, ";\n")
+    .replace(/\s*}\s*/g, "\n}\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  if (!normalized) {
+    return "";
+  }
+
+  const lines = normalized
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  const output: string[] = [];
+  let depth = 0;
+
+  for (const line of lines) {
+    if (line === "}") {
+      depth = Math.max(0, depth - 1);
+    }
+
+    output.push(`${"  ".repeat(depth)}${line}`);
+
+    if (line.endsWith("{")) {
+      depth += 1;
+    }
+  }
+
+  return output.join("\n");
+}
+
+function looksLikeCss(input: string): boolean {
+  const trimmed = input.trim();
+  if (!trimmed || /</.test(trimmed)) {
+    return false;
+  }
+
+  return /{[\s\S]*}/.test(trimmed) && /[A-Za-z-]+\s*:/.test(trimmed);
+}
+
+function formatHtmlDemo(input: string): string {
+  const normalized = input.replace(/\r\n?/g, "\n").trim();
+
+  if (!normalized) {
+    return "";
+  }
+
+  const tokens = normalized.match(
+    /<!--[\s\S]*?-->|<!DOCTYPE[\s\S]*?>|<style\b[^>]*>[\s\S]*?<\/style>|<script\b[^>]*>[\s\S]*?<\/script>|<\/?[A-Za-z][^>]*?>|[^<]+/gi,
+  ) || [];
+  const output: string[] = [];
+  let depth = 0;
+
+  for (const token of tokens) {
+    const line = token.trim();
+    if (!line) {
+      continue;
+    }
+
+    const styleBlockMatch = line.match(/^<style\b([^>]*)>([\s\S]*?)<\/style>$/i);
+    if (styleBlockMatch) {
+      output.push(`${"  ".repeat(depth)}<style${styleBlockMatch[1]}>`);
+
+      const formattedCss = formatCssDemo(styleBlockMatch[2]);
+      if (formattedCss) {
+        formattedCss.split("\n").forEach((cssLine) => {
+          output.push(`${"  ".repeat(depth + 1)}${cssLine}`);
+        });
+      }
+
+      output.push(`${"  ".repeat(depth)}</style>`);
+      continue;
+    }
+
+    const scriptBlockMatch = line.match(/^<script\b([^>]*)>([\s\S]*?)<\/script>$/i);
+    if (scriptBlockMatch) {
+      output.push(`${"  ".repeat(depth)}<script${scriptBlockMatch[1]}>`);
+
+      const scriptBody = scriptBlockMatch[2]
+        .split("\n")
+        .map((scriptLine) => scriptLine.trim())
+        .filter((scriptLine) => scriptLine.length > 0);
+      scriptBody.forEach((scriptLine) => {
+        output.push(`${"  ".repeat(depth + 1)}${scriptLine}`);
+      });
+
+      output.push(`${"  ".repeat(depth)}</script>`);
+      continue;
+    }
+
+    if (!/^</.test(line)) {
+      line
+        .split(/\n+/)
+        .map((textLine) => textLine.trim())
+        .filter((textLine) => textLine.length > 0)
+        .forEach((textLine) => {
+          output.push(`${"  ".repeat(depth)}${textLine}`);
+        });
+      continue;
+    }
+
+    const closingTag = /^<\//.test(line);
+    const closingBlock = /^<\/(?!html|body)/.test(line);
+    if (closingTag || closingBlock) {
+      depth = Math.max(0, depth - 1);
+    }
+
+    output.push(`${"  ".repeat(depth)}${line}`);
+
+    if (shouldIndentHtmlLine(line)) {
+      depth += 1;
+    }
+  }
+
+  return output.join("\n");
+}
+
+function shouldIndentHtmlLine(line: string): boolean {
+  if (!/^</.test(line)) {
+    return false;
+  }
+
+  if (/^<\//.test(line) || /^<!--/.test(line) || /^<!DOCTYPE/i.test(line)) {
+    return false;
+  }
+
+  if (/\/>$/.test(line)) {
+    return false;
+  }
+
+  const tagMatch = line.match(/^<([A-Za-z][A-Za-z0-9-]*)/);
+  const tagName = tagMatch?.[1]?.toLowerCase();
+  if (!tagName || htmlVoidTags.has(tagName)) {
+    return false;
+  }
+
+  if (new RegExp(`^<${tagName}\\b[^>]*>.*</${tagName}>$`, "i").test(line)) {
+    return false;
+  }
+
+  return true;
+}
+
+const buildFormattingDemo: Formatter = async (context) => {
+  await new Promise((resolve) => window.setTimeout(resolve, 120));
+
+  if (context.abortSignal?.aborted) {
+    return context.input;
+  }
+
+  if (looksLikeCss(context.input)) {
+    return formatCssDemo(context.input);
+  }
+
+  return formatHtmlDemo(context.input);
+};
+
 const LightCodeEditorDemo = ({
   theme = "dark",
   showLineNumbers = true,
@@ -449,6 +634,7 @@ const LightCodeEditorDemo = ({
   showDecorations = true,
   enableDiagnostics = false,
   enableCompletions = false,
+  enableFormatting = false,
 }: {
   theme?: string;
   showLineNumbers?: boolean;
@@ -460,11 +646,13 @@ const LightCodeEditorDemo = ({
   showDecorations?: boolean;
   enableDiagnostics?: boolean;
   enableCompletions?: boolean;
+  enableFormatting?: boolean;
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorInstanceRef = useRef<any>(null);
   const diagnosticsExtensionRef = useRef<DiagnosticsExtension | null>(null);
   const completionExtensionRef = useRef<CompletionExtension | null>(null);
+  const formattingExtensionRef = useRef<FormattingExtension | null>(null);
   const [currentContent, setCurrentContent] = useState(sampleHTML);
   const [searchQuery, setSearchQuery] = useState("");
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -536,6 +724,17 @@ const LightCodeEditorDemo = ({
       completionExtensionRef.current = null;
     }
 
+    if (enableFormatting) {
+      formattingExtensionRef.current = new FormattingExtension({
+        formatter: buildFormattingDemo,
+        showStatusBar: true,
+        timeoutMs: 2500,
+      });
+      extensions.push(formattingExtensionRef.current);
+    } else {
+      formattingExtensionRef.current = null;
+    }
+
     // Create editor instance
     editorInstanceRef.current = createEditor(editorRef.current, {
       value: currentContent,
@@ -555,7 +754,7 @@ const LightCodeEditorDemo = ({
         editorInstanceRef.current.destroy?.();
       }
     };
-  }, [theme, showLineNumbers, syntaxHighlighting, readOnly, enableSearch, bracketMatching, codeFolding, enableDiagnostics, enableCompletions]);
+  }, [theme, showLineNumbers, syntaxHighlighting, readOnly, enableSearch, bracketMatching, codeFolding, enableDiagnostics, enableCompletions, enableFormatting]);
 
   useEffect(() => {
     const editor = editorInstanceRef.current;
@@ -618,6 +817,56 @@ const LightCodeEditorDemo = ({
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
+  };
+
+  const selectFormattingSample = () => {
+    const editor = editorInstanceRef.current;
+    if (!editor) {
+      return;
+    }
+
+    const startToken =
+      currentContent.includes('<div class="highlight">')
+        ? '<div class="highlight">'
+        : currentContent.includes('<section id="about">')
+          ? '<section id="about">'
+          : currentContent.includes("<header>")
+            ? "<header>"
+            : "";
+    if (!startToken) {
+      return;
+    }
+
+    const startOffset = currentContent.indexOf(startToken);
+    const closingTag = startToken.startsWith("<section")
+      ? "</section>"
+      : startToken === "<header>"
+        ? "</header>"
+        : "</div>";
+    const endTokenOffset = currentContent.indexOf(closingTag, startOffset);
+    const endOffset =
+      endTokenOffset >= 0 ? endTokenOffset + closingTag.length : startOffset + startToken.length;
+
+    const offsetToPosition = (text: string, offset: number) => {
+      const boundedOffset = Math.max(0, Math.min(offset, text.length));
+      let line = 0;
+      let column = 0;
+      for (let index = 0; index < boundedOffset; index++) {
+        if (text[index] === "\n") {
+          line += 1;
+          column = 0;
+        } else {
+          column += 1;
+        }
+      }
+      return { line, column };
+    };
+
+    editor.setSelection({
+      start: offsetToPosition(currentContent, startOffset),
+      end: offsetToPosition(currentContent, endOffset),
+    });
+    editor.focus();
   };
 
   const loadSampleContent = (contentType: string) => {
@@ -690,6 +939,9 @@ const LightCodeEditorDemo = ({
 </body>
 </html>`;
         break;
+      case "messy":
+        content = `<div class="wrapper"><header><nav><ul><li><a href="#home">Home</a></li><li><a href="#about">About</a></li></ul></nav></header><main><section id="about"><h2>About Us</h2><div class="grid"><div class="card"><h3>Feature 1</h3><p>Description of feature 1.</p></div><div class="card"><h3>Feature 2</h3><p>Description of feature 2.</p></div></div></section></main></div>`;
+        break;
     }
     setCurrentContent(content);
     if (editorInstanceRef.current) {
@@ -760,6 +1012,7 @@ const LightCodeEditorDemo = ({
             <option value="html">Full HTML</option>
             <option value="minimal">Minimal</option>
             <option value="complex">Complex Layout</option>
+            <option value="messy">Messy Markup</option>
             <option value="broken">Broken HTML</option>
           </select>
         </div>
@@ -935,6 +1188,54 @@ const LightCodeEditorDemo = ({
           </Flex>
         )}
 
+        {enableFormatting && !readOnly && (
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: "bold" }}>Formatting:</span>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("formatDocument")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#0369a1" : "#0284c7",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Format Document
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("formatSelection")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#1d4ed8" : "#2563eb",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Format Selection
+            </button>
+            <button
+              onClick={selectFormattingSample}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: "transparent",
+                color: theme === "dark" ? "#f8f9fa" : "#333",
+                border: `1px solid ${theme === "dark" ? "#404040" : "#ddd"}`,
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Select Demo Block
+            </button>
+            <Box style={{ fontSize: "12px", opacity: 0.75 }}>
+              Try the <code>Messy Markup</code> preset, then use <code>Shift + Alt + F</code> or the buttons above.
+            </Box>
+          </Flex>
+        )}
+
         {/* Content Info */}
         <Box style={{ marginLeft: "auto", fontSize: "14px", opacity: 0.7 }}>
           {currentContent.split('\n').length} lines, {currentContent.length} characters
@@ -973,7 +1274,8 @@ const LightCodeEditorDemo = ({
               codeFolding && "Code Folding",
               showDecorations && "Decorations Demo",
               enableDiagnostics && "Diagnostics",
-              enableCompletions && "Completions"
+              enableCompletions && "Completions",
+              enableFormatting && "Formatting"
             ].filter(Boolean).join(", ") || "None"}
           </div>
           <div>
@@ -1003,6 +1305,7 @@ export const Basic: Story = {
     showDecorations: true,
     enableDiagnostics: false,
     enableCompletions: true,
+    enableFormatting: true,
   },
 };
 
@@ -1020,6 +1323,7 @@ export const Minimal: Story = {
     showDecorations: false,
     enableDiagnostics: false,
     enableCompletions: false,
+    enableFormatting: false,
   },
 };
 
@@ -1037,6 +1341,7 @@ export const ReadOnly: Story = {
     showDecorations: true,
     enableDiagnostics: true,
     enableCompletions: false,
+    enableFormatting: false,
   },
 };
 
@@ -1054,6 +1359,7 @@ export const LightTheme: Story = {
     showDecorations: true,
     enableDiagnostics: true,
     enableCompletions: true,
+    enableFormatting: true,
   },
 };
 
@@ -1070,6 +1376,7 @@ export const FeatureShowcase: Story = {
       { id: "decorations", label: "Decorations", description: "Line, gutter, and inline annotations rendered without rewriting editor text DOM" },
       { id: "diagnostics", label: "Diagnostics", description: "Gutter markers, inline highlights, active issue navigation, and a status summary" },
       { id: "completion", label: "Completion", description: "Provider-based autocomplete popup with async-safe refresh, keyboard navigation, and insertion commands" },
+      { id: "formatting", label: "Formatting", description: "Pluggable document and selection formatting with timeout handling, cancellation, and preserved editor state" },
       { id: "themes", label: "Themes", description: "Light and dark theme support" },
       { id: "readonly", label: "Read-Only Mode", description: "Prevent text modifications" },
     ];
@@ -1090,12 +1397,14 @@ export const FeatureShowcase: Story = {
           return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={true} />;
         case "completion":
           return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={false} enableCompletions={true} />;
+        case "formatting":
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={false} enableCompletions={false} enableFormatting={true} />;
         case "themes":
-          return <LightCodeEditorDemo theme="light" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={true} enableDiagnostics={true} enableCompletions={true} />;
+          return <LightCodeEditorDemo theme="light" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={true} enableDiagnostics={true} enableCompletions={true} enableFormatting={true} />;
         case "readonly":
           return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} readOnly={true} enableSearch={true} bracketMatching={true} codeFolding={true} showDecorations={true} enableDiagnostics={true} />;
         default:
-          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={true} bracketMatching={true} codeFolding={true} showDecorations={true} enableDiagnostics={false} enableCompletions={true} />;
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={true} bracketMatching={true} codeFolding={true} showDecorations={true} enableDiagnostics={false} enableCompletions={true} enableFormatting={true} />;
       }
     };
 

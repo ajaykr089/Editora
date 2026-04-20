@@ -15,5 +15,7 @@ export { DiagnosticsExtension } from './DiagnosticsExtension';
 export type { DiagnosticsExtensionConfig } from './DiagnosticsExtension';
 export { CompletionExtension } from './CompletionExtension';
 export type { CompletionExtensionConfig } from './CompletionExtension';
+export { FormattingExtension } from './FormattingExtension';
+export type { FormattingExtensionConfig } from './FormattingExtension';
 export { SyntaxHighlightingExtension } from './SyntaxHighlightingExtension';
 export { KeymapExtension } from './KeymapExtension';
