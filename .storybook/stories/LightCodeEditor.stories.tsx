@@ -14,12 +14,15 @@ import {
   DiagnosticsExtension,
   CompletionExtension,
   FormattingExtension,
+  ContextMenuExtension,
+  EditingCommandsExtension,
   type EditorDecoration,
   type EditorDiagnostic,
   type CompletionContext,
   type CompletionItem,
   type CompletionResult,
-  type Formatter
+  type Formatter,
+  type ContextMenuItem
 } from "@editora/light-code-editor";
 import "../../packages/light-code-editor/dist/light-code-editor.css";
 import { Box, Flex} from '@editora/ui-react';
@@ -35,7 +38,7 @@ const meta: Meta = {
 # Light Code Editor - Lightweight Code Editor Library
 
 **Bundle Size**: ~38 KB ES module (8.7 KB gzipped)  
-**Features**: Syntax highlighting, themes, search, completion, formatting, folding, extensions  
+**Features**: syntax highlighting, themes, search, completion, formatting, context menu, editing commands, folding, extensions  
 **Zero Dependencies**: Framework agnostic, works everywhere  
 
 ## Features
@@ -47,6 +50,8 @@ const meta: Meta = {
 - ✅ Search and replace
 - ✅ Provider-based completions
 - ✅ Pluggable document and selection formatting
+- ✅ Context menu actions for find, replace, formatting, and navigation
+- ✅ Editing commands for comments, duplicate/move line, join lines, and go-to-line
 - ✅ Bracket matching
 - ✅ Code folding
 - ✅ Read-only mode
@@ -101,6 +106,14 @@ const meta: Meta = {
     enableFormatting: {
       control: { type: "boolean" },
       description: "Enable formatter extension demo with document and selection commands",
+    },
+    enableContextMenu: {
+      control: { type: "boolean" },
+      description: "Enable right-click context menu actions inside the editor",
+    },
+    enableEditingCommands: {
+      control: { type: "boolean" },
+      description: "Enable comment and line-editing commands like duplicate, move, join, and go-to-line",
     },
   },
 };
@@ -623,6 +636,107 @@ const buildFormattingDemo: Formatter = async (context) => {
   return formatHtmlDemo(context.input);
 };
 
+function buildContextMenuDemoItems(options: {
+  enableSearch: boolean;
+  enableFormatting: boolean;
+  enableDiagnostics: boolean;
+  enableEditingCommands: boolean;
+}): ContextMenuItem[] {
+  const items: ContextMenuItem[] = [
+    {
+      label: "Undo",
+      command: "undo",
+      shortcut: "Ctrl/Cmd+Z",
+      isEnabled: (editor) => !editor.getState().readOnly,
+    },
+    {
+      label: "Redo",
+      command: "redo",
+      shortcut: "Ctrl/Cmd+Shift+Z",
+      isEnabled: (editor) => !editor.getState().readOnly,
+    },
+  ];
+
+  if (options.enableSearch) {
+    items.push(
+      { type: "separator" },
+      {
+        label: "Find",
+        command: "find",
+        shortcut: "Ctrl/Cmd+F",
+      },
+      {
+        label: "Find & Replace",
+        command: "replace",
+        shortcut: "Ctrl/Cmd+H",
+        isEnabled: (editor) => !editor.getState().readOnly,
+      },
+    );
+  }
+
+  if (options.enableFormatting) {
+    items.push(
+      { type: "separator" },
+      {
+        label: "Format Selection",
+        command: "formatSelection",
+        shortcut: "Selection",
+        isEnabled: (editor) => !editor.getState().readOnly && !!editor.getSelection(),
+      },
+      {
+        label: "Format Document",
+        command: "formatDocument",
+        shortcut: "Shift+Alt+F",
+        isEnabled: (editor) => !editor.getState().readOnly,
+      },
+    );
+  }
+
+  if (options.enableDiagnostics) {
+    items.push(
+      { type: "separator" },
+      {
+        label: "Previous Issue",
+        command: "prevDiagnostic",
+      },
+      {
+        label: "Next Issue",
+        command: "nextDiagnostic",
+      },
+    );
+  }
+
+  if (options.enableEditingCommands) {
+    items.push(
+      { type: "separator" },
+      {
+        label: "Toggle Block Comment",
+        command: "toggleBlockComment",
+        shortcut: "Shift+Alt+A",
+        isEnabled: (editor) => !editor.getState().readOnly,
+      },
+      {
+        label: "Duplicate Line",
+        command: "duplicateLine",
+        shortcut: "Ctrl/Cmd+Shift+D",
+        isEnabled: (editor) => !editor.getState().readOnly,
+      },
+      {
+        label: "Join Lines",
+        command: "joinLines",
+        shortcut: "Ctrl/Cmd+J",
+        isEnabled: (editor) => !editor.getState().readOnly,
+      },
+      {
+        label: "Go To Line…",
+        command: "goToLine",
+      },
+    );
+  }
+
+  return items;
+}
+
 const LightCodeEditorDemo = ({
   theme = "dark",
   showLineNumbers = true,
@@ -635,6 +749,8 @@ const LightCodeEditorDemo = ({
   enableDiagnostics = false,
   enableCompletions = false,
   enableFormatting = false,
+  enableContextMenu = false,
+  enableEditingCommands = false,
 }: {
   theme?: string;
   showLineNumbers?: boolean;
@@ -647,12 +763,16 @@ const LightCodeEditorDemo = ({
   enableDiagnostics?: boolean;
   enableCompletions?: boolean;
   enableFormatting?: boolean;
+  enableContextMenu?: boolean;
+  enableEditingCommands?: boolean;
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorInstanceRef = useRef<any>(null);
   const diagnosticsExtensionRef = useRef<DiagnosticsExtension | null>(null);
   const completionExtensionRef = useRef<CompletionExtension | null>(null);
   const formattingExtensionRef = useRef<FormattingExtension | null>(null);
+  const contextMenuExtensionRef = useRef<ContextMenuExtension | null>(null);
+  const editingCommandsExtensionRef = useRef<EditingCommandsExtension | null>(null);
   const [currentContent, setCurrentContent] = useState(sampleHTML);
   const [searchQuery, setSearchQuery] = useState("");
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -735,6 +855,33 @@ const LightCodeEditorDemo = ({
       formattingExtensionRef.current = null;
     }
 
+    if (enableEditingCommands) {
+      editingCommandsExtensionRef.current = new EditingCommandsExtension({
+        lineCommentToken: null,
+        blockCommentTokens: {
+          open: "<!-- ",
+          close: " -->",
+        },
+      });
+      extensions.push(editingCommandsExtensionRef.current);
+    } else {
+      editingCommandsExtensionRef.current = null;
+    }
+
+    if (enableContextMenu) {
+      contextMenuExtensionRef.current = new ContextMenuExtension({
+        items: buildContextMenuDemoItems({
+          enableSearch,
+          enableFormatting,
+          enableDiagnostics,
+          enableEditingCommands,
+        }),
+      });
+      extensions.push(contextMenuExtensionRef.current);
+    } else {
+      contextMenuExtensionRef.current = null;
+    }
+
     // Create editor instance
     editorInstanceRef.current = createEditor(editorRef.current, {
       value: currentContent,
@@ -754,7 +901,7 @@ const LightCodeEditorDemo = ({
         editorInstanceRef.current.destroy?.();
       }
     };
-  }, [theme, showLineNumbers, syntaxHighlighting, readOnly, enableSearch, bracketMatching, codeFolding, enableDiagnostics, enableCompletions, enableFormatting]);
+  }, [theme, showLineNumbers, syntaxHighlighting, readOnly, enableSearch, bracketMatching, codeFolding, enableDiagnostics, enableCompletions, enableFormatting, enableContextMenu, enableEditingCommands]);
 
   useEffect(() => {
     const editor = editorInstanceRef.current;
@@ -867,6 +1014,22 @@ const LightCodeEditorDemo = ({
       end: offsetToPosition(currentContent, endOffset),
     });
     editor.focus();
+  };
+
+  const goToScriptBlock = () => {
+    const editor = editorInstanceRef.current;
+    if (!editor) {
+      return;
+    }
+
+    const lines = currentContent.split("\n");
+    const scriptLine = findLineIndex(
+      lines,
+      ["<script>", 'console.log("Page loaded successfully!")'],
+      lines.length - 1,
+    );
+
+    editor.executeCommand?.("goToLine", scriptLine + 1);
   };
 
   const loadSampleContent = (contentType: string) => {
@@ -1236,6 +1399,102 @@ const LightCodeEditorDemo = ({
           </Flex>
         )}
 
+        {enableContextMenu && (
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: "bold" }}>Context Menu:</span>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("openContextMenu")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#4f46e5" : "#4338ca",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Open Menu
+            </button>
+            <Box style={{ fontSize: "12px", opacity: 0.75 }}>
+              Right-click inside the editor to open actions for find, replace, formatting, undo/redo, and issue navigation.
+            </Box>
+          </Flex>
+        )}
+
+        {enableEditingCommands && !readOnly && (
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: "bold" }}>Editing Commands:</span>
+            <button
+              onClick={selectFormattingSample}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: "transparent",
+                color: theme === "dark" ? "#f8f9fa" : "#333",
+                border: `1px solid ${theme === "dark" ? "#404040" : "#ddd"}`,
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Select Demo Block
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("toggleBlockComment")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#b45309" : "#d97706",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Toggle Block Comment
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("duplicateLine")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#0f766e" : "#0d9488",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Duplicate Line
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("joinLines")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#1d4ed8" : "#2563eb",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Join Lines
+            </button>
+            <button
+              onClick={goToScriptBlock}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#7c3aed" : "#6d28d9",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Go To Script
+            </button>
+            <Box style={{ fontSize: "12px", opacity: 0.75 }}>
+              HTML demo uses block comments plus line editing commands. Try <code>Alt + Shift + A</code>, <code>Ctrl/Cmd + Shift + D</code>, <code>Alt + ↑/↓</code>, or <code>Ctrl/Cmd + J</code>.
+            </Box>
+          </Flex>
+        )}
+
         {/* Content Info */}
         <Box style={{ marginLeft: "auto", fontSize: "14px", opacity: 0.7 }}>
           {currentContent.split('\n').length} lines, {currentContent.length} characters
@@ -1275,7 +1534,9 @@ const LightCodeEditorDemo = ({
               showDecorations && "Decorations Demo",
               enableDiagnostics && "Diagnostics",
               enableCompletions && "Completions",
-              enableFormatting && "Formatting"
+              enableFormatting && "Formatting",
+              enableContextMenu && "Context Menu",
+              enableEditingCommands && "Editing Commands"
             ].filter(Boolean).join(", ") || "None"}
           </div>
           <div>
@@ -1306,6 +1567,8 @@ export const Basic: Story = {
     enableDiagnostics: false,
     enableCompletions: true,
     enableFormatting: true,
+    enableContextMenu: true,
+    enableEditingCommands: true,
   },
 };
 
@@ -1324,6 +1587,8 @@ export const Minimal: Story = {
     enableDiagnostics: false,
     enableCompletions: false,
     enableFormatting: false,
+    enableContextMenu: false,
+    enableEditingCommands: false,
   },
 };
 
@@ -1342,6 +1607,8 @@ export const ReadOnly: Story = {
     enableDiagnostics: true,
     enableCompletions: false,
     enableFormatting: false,
+    enableContextMenu: false,
+    enableEditingCommands: false,
   },
 };
 
@@ -1360,6 +1627,8 @@ export const LightTheme: Story = {
     enableDiagnostics: true,
     enableCompletions: true,
     enableFormatting: true,
+    enableContextMenu: true,
+    enableEditingCommands: true,
   },
 };
 
@@ -1377,6 +1646,8 @@ export const FeatureShowcase: Story = {
       { id: "diagnostics", label: "Diagnostics", description: "Gutter markers, inline highlights, active issue navigation, and a status summary" },
       { id: "completion", label: "Completion", description: "Provider-based autocomplete popup with async-safe refresh, keyboard navigation, and insertion commands" },
       { id: "formatting", label: "Formatting", description: "Pluggable document and selection formatting with timeout handling, cancellation, and preserved editor state" },
+      { id: "context-menu", label: "Context Menu", description: "Right-click or invoke a command-driven menu for find, replace, formatting, undo/redo, and issue navigation" },
+      { id: "editing", label: "Editing Commands", description: "Comment selections, duplicate or move lines, join adjacent lines, and jump directly to a target line" },
       { id: "themes", label: "Themes", description: "Light and dark theme support" },
       { id: "readonly", label: "Read-Only Mode", description: "Prevent text modifications" },
     ];
@@ -1399,12 +1670,16 @@ export const FeatureShowcase: Story = {
           return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={false} enableCompletions={true} />;
         case "formatting":
           return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={false} enableCompletions={false} enableFormatting={true} />;
+        case "context-menu":
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={true} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={true} enableCompletions={false} enableFormatting={true} enableContextMenu={true} />;
+        case "editing":
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={false} enableCompletions={false} enableFormatting={false} enableContextMenu={true} enableEditingCommands={true} />;
         case "themes":
-          return <LightCodeEditorDemo theme="light" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={true} enableDiagnostics={true} enableCompletions={true} enableFormatting={true} />;
+          return <LightCodeEditorDemo theme="light" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={true} enableDiagnostics={true} enableCompletions={true} enableFormatting={true} enableContextMenu={true} enableEditingCommands={true} />;
         case "readonly":
           return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} readOnly={true} enableSearch={true} bracketMatching={true} codeFolding={true} showDecorations={true} enableDiagnostics={true} />;
         default:
-          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={true} bracketMatching={true} codeFolding={true} showDecorations={true} enableDiagnostics={false} enableCompletions={true} enableFormatting={true} />;
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={true} bracketMatching={true} codeFolding={true} showDecorations={true} enableDiagnostics={false} enableCompletions={true} enableFormatting={true} enableContextMenu={true} enableEditingCommands={true} />;
       }
     };
 

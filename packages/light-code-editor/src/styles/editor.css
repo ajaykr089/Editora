@@ -503,3 +503,69 @@
   font-size: 11px;
   line-height: 1.45;
 }
+
+/* Context menu */
+.lce-context-menu {
+  position: absolute;
+  z-index: 1002;
+  min-width: 220px;
+  max-width: min(320px, calc(100% - 24px));
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid var(--editor-gutter-border, #3e3e42);
+  background: var(--editor-background, #1e1e1e);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.lce-context-menu-list {
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+}
+
+.lce-context-menu-item {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--editor-foreground, #f8f9fa);
+  text-align: left;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.lce-context-menu-item:hover,
+.lce-context-menu-item:focus-visible {
+  background: rgba(56, 189, 248, 0.12);
+  outline: none;
+}
+
+.lce-context-menu-item:disabled {
+  color: var(--editor-gutter-foreground, #858585);
+  cursor: not-allowed;
+}
+
+.lce-context-menu-item:disabled:hover {
+  background: transparent;
+}
+
+.lce-context-menu-item-shortcut {
+  color: var(--editor-gutter-foreground, #858585);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.lce-context-menu-separator {
+  height: 1px;
+  margin: 6px 4px;
+  background: var(--editor-gutter-border, #3e3e42);
+}

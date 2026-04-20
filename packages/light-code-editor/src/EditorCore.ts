@@ -319,6 +319,19 @@ export class EditorCore implements EditorAPI {
       }
     });
 
+    contentElement.addEventListener('contextmenu', (e) => {
+      this.emit('contextmenu', e);
+
+      const extensions = Array.from(this.extensions.values()).reverse();
+      for (const extension of extensions) {
+        if (extension.onContextMenu && extension.onContextMenu(e) === false) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+      }
+    });
+
     // Handle focus/blur
     contentElement.addEventListener('focus', () => {
       this.emit('focus');

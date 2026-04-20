@@ -180,6 +180,7 @@ export interface EditorExtension {
   onUpdate?(state: EditorState): void;
   onKeyDown?(event: KeyboardEvent): boolean | void;
   onMouseDown?(event: MouseEvent): boolean | void;
+  onContextMenu?(event: MouseEvent): boolean | void;
   destroy?(): void;
 }
 
@@ -255,6 +256,7 @@ export interface EditorEvents {
   blur: () => void;
   keydown: (event: KeyboardEvent) => void;
   mousedown: (event: MouseEvent) => void;
+  contextmenu: (event: MouseEvent) => void;
   save: () => void;
 }
 

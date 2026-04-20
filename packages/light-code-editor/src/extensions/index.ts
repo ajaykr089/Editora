@@ -17,5 +17,15 @@ export { CompletionExtension } from './CompletionExtension';
 export type { CompletionExtensionConfig } from './CompletionExtension';
 export { FormattingExtension } from './FormattingExtension';
 export type { FormattingExtensionConfig } from './FormattingExtension';
+export { ContextMenuExtension } from './ContextMenuExtension';
+export type {
+  ContextMenuExtensionConfig,
+  ContextMenuItem,
+  ContextMenuCommandItem,
+  ContextMenuActionItem,
+  ContextMenuSeparatorItem,
+} from './ContextMenuExtension';
+export { EditingCommandsExtension } from './EditingCommandsExtension';
+export type { EditingCommandsExtensionConfig } from './EditingCommandsExtension';
 export { SyntaxHighlightingExtension } from './SyntaxHighlightingExtension';
 export { KeymapExtension } from './KeymapExtension';

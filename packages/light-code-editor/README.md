@@ -18,6 +18,8 @@ A lightweight, modular code editor library inspired by CodeMirror, optimized for
 ✅ **Diagnostics** - Gutter markers, inline issue highlights, and issue navigation
 ✅ **Completions** - Provider-based autocomplete popup with keyboard navigation
 ✅ **Formatting** - Pluggable document and selection formatting with async safety
+✅ **Context Menus** - Right-click actions for search, replace, formatting, and navigation
+✅ **Editing Commands** - Toggle comments, duplicate/move lines, join lines, and go to line
 ✅ **Bracket Matching** - Automatic bracket pair highlighting
 ✅ **Code Folding** - Collapse/expand code sections
 ✅ **Read-Only Mode** - Prevent text modifications
@@ -37,7 +39,9 @@ import {
   BracketMatchingExtension,
   CodeFoldingExtension,
   CompletionExtension,
+  ContextMenuExtension,
   DiagnosticsExtension,
+  EditingCommandsExtension,
   FormattingExtension,
   LineNumbersExtension,
   SearchExtension,
@@ -65,6 +69,8 @@ const editor = createEditor(container, {
     new DiagnosticsExtension(),
     new CompletionExtension(),
     new FormattingExtension(),
+    new ContextMenuExtension(),
+    new EditingCommandsExtension(),
     new BracketMatchingExtension(),
     new CodeFoldingExtension()
   ]
@@ -388,6 +394,66 @@ Notes:
 - Returning a plain string replaces the requested range. Returning `{ text, range, selection, cursor }` gives the formatter explicit control over the applied edit and final editor state.
 - Timeouts and newer formatting runs cancel stale async work so old results do not overwrite newer edits.
 
+#### `ContextMenuExtension`
+Provides a right-click menu that can expose editor commands like find, replace, formatting, undo/redo, and diagnostics navigation.
+
+```typescript
+import {
+  ContextMenuExtension,
+  type ContextMenuItem,
+} from '@editora/light-code-editor';
+
+const items: ContextMenuItem[] = [
+  { label: 'Find', command: 'find', shortcut: 'Ctrl/Cmd+F' },
+  { label: 'Find & Replace', command: 'replace', shortcut: 'Ctrl/Cmd+H' },
+  { type: 'separator' },
+  { label: 'Format Document', command: 'formatDocument', shortcut: 'Shift+Alt+F' },
+];
+
+const contextMenu = new ContextMenuExtension({ items });
+
+const editor = createEditor(container, {
+  extensions: [contextMenu]
+});
+```
+
+Notes:
+
+- Right-click inside the editor opens the menu.
+- Use `openContextMenu` and `closeContextMenu` commands when you want to trigger the menu programmatically.
+- Menu items can call registered commands or run custom actions.
+- Item visibility and enabled state can be computed from the current editor state and selection.
+
+#### `EditingCommandsExtension`
+Provides lightweight authoring commands for comments and line editing without requiring a full language service.
+
+```typescript
+import { EditingCommandsExtension } from '@editora/light-code-editor';
+
+const editingCommands = new EditingCommandsExtension({
+  lineCommentToken: '//',
+  blockCommentTokens: {
+    open: '/* ',
+    close: ' */',
+  },
+});
+
+const editor = createEditor(container, {
+  extensions: [editingCommands]
+});
+
+editor.executeCommand('toggleLineComment');
+editor.executeCommand('duplicateLine');
+editor.executeCommand('goToLine', 12);
+```
+
+Notes:
+
+- Registers `toggleLineComment`, `toggleBlockComment`, `duplicateLine`, `moveLineUp`, `moveLineDown`, `joinLines`, and `goToLine`.
+- `goToLine` accepts a line number or falls back to a prompt when called without one.
+- Default key bindings include `Ctrl/Cmd + /`, `Alt + Shift + A`, `Ctrl/Cmd + Shift + D`, `Alt + Up/Down`, and `Ctrl/Cmd + J`.
+- Use custom comment tokens for non-JavaScript content such as HTML comments.
+
 #### `BracketMatchingExtension`
 Highlights matching brackets.
 
@@ -448,6 +514,8 @@ Extensions add commands on top:
 - `DiagnosticsExtension`: `setDiagnostics`, `clearDiagnostics`, `nextDiagnostic`, `prevDiagnostic`
 - `CompletionExtension`: `showCompletions`, `closeCompletions`, `nextCompletion`, `prevCompletion`, `acceptCompletion`
 - `FormattingExtension`: `formatDocument`, `formatSelection`
+- `ContextMenuExtension`: `openContextMenu`, `closeContextMenu`
+- `EditingCommandsExtension`: `toggleLineComment`, `toggleBlockComment`, `duplicateLine`, `moveLineUp`, `moveLineDown`, `joinLines`, `goToLine`
 - `ThemeExtension`: `setTheme`, `toggleTheme`
 - `ReadOnlyExtension`: `setReadOnly`, `toggleReadOnly`
 - `LineNumbersExtension`: `toggleLineNumbers`

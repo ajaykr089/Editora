@@ -24,7 +24,9 @@ import {
   BracketMatchingExtension,
   CodeFoldingExtension,
   CompletionExtension,
+  ContextMenuExtension,
   DiagnosticsExtension,
+  EditingCommandsExtension,
   FormattingExtension,
   LineNumbersExtension,
   SearchExtension,
@@ -46,6 +48,8 @@ const editor = createEditor(container, {
     new DiagnosticsExtension(),
     new CompletionExtension(),
     new FormattingExtension(),
+    new ContextMenuExtension(),
+    new EditingCommandsExtension(),
     new BracketMatchingExtension(),
     new CodeFoldingExtension(),
   ],
@@ -58,6 +62,8 @@ const editor = createEditor(container, {
 - Diagnostics extension for errors, warnings, info markers, and issue navigation
 - Completion extension for provider-based autocomplete suggestions
 - Formatting extension for document and selection formatting workflows
+- Context menu extension for right-click editor actions
+- Editing commands extension for comments, line duplication, line moves, joins, and go-to-line
 - Visible bracket matching for paired delimiters
 - Fold and unfold support for multi-line bracketed blocks and markup tag regions
 - Decorations API for line, gutter, and inline range annotations
@@ -121,6 +127,15 @@ editor.executeCommand("replace");
 | `acceptCompletion` | Insert the active suggestion |
 | `formatDocument` | Format the full document |
 | `formatSelection` | Format the current selection |
+| `openContextMenu` | Open the editor context menu |
+| `closeContextMenu` | Close the editor context menu |
+| `toggleLineComment` | Toggle line comments for the current line or selected lines |
+| `toggleBlockComment` | Wrap or unwrap the current selection with block comment tokens |
+| `duplicateLine` | Duplicate the current line or selected lines |
+| `moveLineUp` | Move the current line or selection one line up |
+| `moveLineDown` | Move the current line or selection one line down |
+| `joinLines` | Merge the current line with the next line or join a selected block |
+| `goToLine` | Jump to a specific line number |
 | `foldAll` | Collapse all top-level fold regions |
 | `unfoldAll` | Expand folded regions |
 
@@ -237,6 +252,70 @@ Notes:
 - Returning a string replaces the requested range. Returning `{ text, range, selection, cursor }` gives the formatter control over the applied edit and final editor state.
 - Async formatter runs are cancelled when a newer request or timeout supersedes them.
 
+## Context Menu Extension
+
+```ts
+import {
+  ContextMenuExtension,
+  createEditor,
+  type ContextMenuItem,
+} from "@editora/light-code-editor";
+
+const items: ContextMenuItem[] = [
+  { label: "Find", command: "find", shortcut: "Ctrl/Cmd+F" },
+  { label: "Find & Replace", command: "replace", shortcut: "Ctrl/Cmd+H" },
+  { type: "separator" },
+  { label: "Format Document", command: "formatDocument", shortcut: "Shift+Alt+F" },
+];
+
+const contextMenu = new ContextMenuExtension({ items });
+
+const editor = createEditor(container, {
+  value: initialCode,
+  extensions: [contextMenu],
+});
+```
+
+Notes:
+
+- Right-click inside the editor opens the menu.
+- `openContextMenu` and `closeContextMenu` can also be invoked as commands.
+- Items can be command-backed or custom action callbacks.
+- Enabled and visible state can be derived from current selection and editor state.
+
+## Editing Commands Extension
+
+```ts
+import {
+  EditingCommandsExtension,
+  createEditor,
+} from "@editora/light-code-editor";
+
+const editingCommands = new EditingCommandsExtension({
+  lineCommentToken: "//",
+  blockCommentTokens: {
+    open: "/* ",
+    close: " */",
+  },
+});
+
+const editor = createEditor(container, {
+  value: initialCode,
+  extensions: [editingCommands],
+});
+
+editor.executeCommand("toggleLineComment");
+editor.executeCommand("duplicateLine");
+editor.executeCommand("goToLine", 12);
+```
+
+Notes:
+
+- Commands: `toggleLineComment`, `toggleBlockComment`, `duplicateLine`, `moveLineUp`, `moveLineDown`, `joinLines`, and `goToLine`
+- `goToLine` accepts an explicit number or opens a prompt when triggered without one.
+- Default shortcuts include `Ctrl/Cmd + /`, `Alt + Shift + A`, `Ctrl/Cmd + Shift + D`, `Alt + Up/Down`, and `Ctrl/Cmd + J`.
+- Supply custom comment tokens for formats such as HTML where block comments differ from `/* */`.
+
 ## Decorations API
 
 Use decoration layers for diagnostics, active-line styling, or custom annotations without rewriting editor text DOM.
@@ -286,3 +365,4 @@ Notes:
 - Decorations avoid editable-DOM rewrites for line and gutter layers, and inline ranges reuse the browser highlight pipeline.
 - Completion requests are debounced, stale async responses are dropped, and manual accept only replaces the targeted range instead of rerendering the whole editor.
 - Formatting runs apply a single replacement, preserve selection or cursor state where possible, and abort stale async work so delayed formatters do not overwrite fresh edits.
+- Context menus render as lightweight overlays, close on outside interaction, and reuse the existing command system rather than duplicating editor logic.
