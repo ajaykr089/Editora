@@ -27,5 +27,30 @@ export type {
 } from './ContextMenuExtension';
 export { EditingCommandsExtension } from './EditingCommandsExtension';
 export type { EditingCommandsExtensionConfig } from './EditingCommandsExtension';
+export { ActiveLineAndIndentGuidesExtension } from './ActiveLineAndIndentGuidesExtension';
+export type { ActiveLineAndIndentGuidesExtensionConfig } from './ActiveLineAndIndentGuidesExtension';
+export { HoverTooltipAndCodeActionsExtension } from './HoverTooltipAndCodeActionsExtension';
+export type { HoverTooltipAndCodeActionsExtensionConfig } from './HoverTooltipAndCodeActionsExtension';
+export {
+  LanguageServiceExtension,
+  createLanguageServiceExtensions,
+} from './LanguageServiceExtension';
+export type {
+  LanguageServiceAdapterConfig,
+  LanguageServiceExtensionBundle,
+} from './LanguageServiceExtension';
+export type {
+  LanguageServiceCodeAction,
+  LanguageServiceCodeActionContext,
+  LanguageServiceCodeActionsProvider,
+  LanguageServiceDiagnosticsContext,
+  LanguageServiceDiagnosticsProvider,
+  LanguageServiceDocumentSnapshot,
+  LanguageServiceHighlightContext,
+  LanguageServiceHighlighter,
+  LanguageServiceHoverContext,
+  LanguageServiceHoverProvider,
+  LanguageServiceHoverResult,
+} from '../types';
 export { SyntaxHighlightingExtension } from './SyntaxHighlightingExtension';
 export { KeymapExtension } from './KeymapExtension';

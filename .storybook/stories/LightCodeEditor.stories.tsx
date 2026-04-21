@@ -16,13 +16,20 @@ import {
   FormattingExtension,
   ContextMenuExtension,
   EditingCommandsExtension,
+  ActiveLineAndIndentGuidesExtension,
+  createLanguageServiceExtensions,
   type EditorDecoration,
   type EditorDiagnostic,
   type CompletionContext,
   type CompletionItem,
   type CompletionResult,
   type Formatter,
-  type ContextMenuItem
+  type ContextMenuItem,
+  type LanguageServiceCodeAction,
+  type LanguageServiceCodeActionContext,
+  type LanguageServiceHighlightContext,
+  type LanguageServiceHoverContext,
+  type LanguageServiceHoverResult,
 } from "@editora/light-code-editor";
 import "../../packages/light-code-editor/dist/light-code-editor.css";
 import { Box, Flex} from '@editora/ui-react';
@@ -38,7 +45,7 @@ const meta: Meta = {
 # Light Code Editor - Lightweight Code Editor Library
 
 **Bundle Size**: ~38 KB ES module (8.7 KB gzipped)  
-**Features**: syntax highlighting, themes, search, completion, formatting, context menu, editing commands, folding, extensions  
+**Features**: syntax highlighting, themes, search, completion, formatting, context menu, editing commands, active line guides, language service adapter, hover tooltips, code actions, folding, extensions  
 **Zero Dependencies**: Framework agnostic, works everywhere  
 
 ## Features
@@ -52,6 +59,8 @@ const meta: Meta = {
 - ✅ Pluggable document and selection formatting
 - ✅ Context menu actions for find, replace, formatting, and navigation
 - ✅ Editing commands for comments, duplicate/move line, join lines, and go-to-line
+- ✅ Active line highlighting with lightweight indent guides
+- ✅ Language service adapter composing syntax, diagnostics, completions, formatting, hover info, and code actions
 - ✅ Bracket matching
 - ✅ Code folding
 - ✅ Read-only mode
@@ -114,6 +123,14 @@ const meta: Meta = {
     enableEditingCommands: {
       control: { type: "boolean" },
       description: "Enable comment and line-editing commands like duplicate, move, join, and go-to-line",
+    },
+    enableActiveLineGuides: {
+      control: { type: "boolean" },
+      description: "Highlight the active line and render indent guides using line decorations",
+    },
+    enableLanguageServiceAdapter: {
+      control: { type: "boolean" },
+      description: "Compose syntax highlighting, diagnostics, completions, formatting, hover info, and code actions from one language-service adapter",
     },
   },
 };
@@ -475,6 +492,268 @@ const htmlVoidTags = new Set([
   "wbr",
 ]);
 
+function escapeLanguageServiceHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function buildLanguageServiceHighlightDemo(
+  context: LanguageServiceHighlightContext,
+): string {
+  const escaped = escapeLanguageServiceHtml(context.text);
+  const commentColor = context.colors.comment || "#6a9955";
+  const doctypeColor = context.colors.doctype || "#808080";
+  const tagColor = context.colors.tag || "#569cd6";
+  const attrNameColor = context.colors.attrName || "#9cdcfe";
+  const attrValueColor = context.colors.attrValue || "#ce9178";
+
+  return escaped
+    .replace(
+      /(&lt;!--[\s\S]*?--&gt;)/g,
+      `<span style="color: ${commentColor};">$1</span>`,
+    )
+    .replace(
+      /(&lt;!DOCTYPE[\s\S]*?&gt;)/gi,
+      `<span style="color: ${doctypeColor};">$1</span>`,
+    )
+    .replace(
+      /(&lt;\/?)([A-Za-z][A-Za-z0-9-]*)([\s\S]*?)(\/?&gt;)/g,
+      (_whole, open, tagName, attrs, close) => {
+        const highlightedAttrs = String(attrs || "").replace(
+          /([A-Za-z_:][-A-Za-z0-9_:.]*)(\s*=\s*)(&quot;[\s\S]*?&quot;|&#39;[\s\S]*?&#39;|[^\s&>]+)/g,
+          (_attrWhole, attrName, separator, attrValue) =>
+            `<span style="color: ${attrNameColor};">${attrName}</span>${separator}<span style="color: ${attrValueColor};">${attrValue}</span>`,
+        );
+
+        return `${open}<span style="color: ${tagColor};">${tagName}</span>${highlightedAttrs}${close}`;
+      },
+    );
+}
+
+function createRangeForLine(
+  line: number,
+  startColumn: number,
+  endColumn: number,
+): {
+  start: { line: number; column: number };
+  end: { line: number; column: number };
+} {
+  return {
+    start: { line, column: startColumn },
+    end: { line, column: endColumn },
+  };
+}
+
+function getLineTextAt(text: string, line: number): string {
+  const lines = text.split("\n");
+  const safeLine = Math.max(0, Math.min(line, Math.max(0, lines.length - 1)));
+  return lines[safeLine] || "";
+}
+
+function findAttributeRangeInLine(
+  lineText: string,
+  attributeName: string,
+): { start: number; end: number } | null {
+  const match = lineText.match(
+    new RegExp(`\\b${attributeName}\\s*=\\s*(\"[^\"]*\"|'[^']*'|[^\\s>]+)`, "i"),
+  );
+  if (!match || match.index === undefined) {
+    return null;
+  }
+
+  return {
+    start: match.index,
+    end: match.index + match[0].length,
+  };
+}
+
+function findTagRangeInLine(
+  lineText: string,
+  tagName: string,
+): { start: number; end: number } | null {
+  const match = lineText.match(new RegExp(`<${tagName}\\b[^>]*>`, "i"));
+  if (!match || match.index === undefined) {
+    return null;
+  }
+
+  return {
+    start: match.index,
+    end: match.index + match[0].length,
+  };
+}
+
+function isColumnWithinRange(
+  column: number,
+  range: { start: number; end: number } | null,
+): boolean {
+  if (!range) {
+    return false;
+  }
+
+  return column >= range.start && column <= range.end;
+}
+
+function buildLanguageServiceHoverDemo(
+  context: LanguageServiceHoverContext,
+): LanguageServiceHoverResult | null {
+  const onclickRange = findAttributeRangeInLine(context.lineText, "onclick");
+  if (isColumnWithinRange(context.position.column, onclickRange)) {
+    return {
+      title: "Inline event handler",
+      content:
+        "Inline JavaScript handlers are harder to audit and reuse. Prefer wiring behavior from script or delegated listeners.",
+      range: createRangeForLine(
+        context.position.line,
+        onclickRange!.start,
+        onclickRange!.end,
+      ),
+    };
+  }
+
+  const imgRange = findTagRangeInLine(context.lineText, "img");
+  if (
+    imgRange &&
+    !/\balt\s*=/.test(context.lineText) &&
+    isColumnWithinRange(context.position.column, imgRange)
+  ) {
+    return {
+      title: "Image missing alt text",
+      content:
+        "Add an alt attribute so assistive technologies and fallback rendering have useful descriptive text.",
+      range: createRangeForLine(
+        context.position.line,
+        imgRange.start,
+        imgRange.end,
+      ),
+    };
+  }
+
+  const diagnostic = context.diagnostics[0];
+  if (diagnostic) {
+    return {
+      title: `${diagnostic.severity.toUpperCase()}${diagnostic.code ? ` · ${diagnostic.code}` : ""}`,
+      content: diagnostic.message,
+      range: diagnostic.range,
+    };
+  }
+
+  const buttonRange = findTagRangeInLine(context.lineText, "button");
+  if (buttonRange && isColumnWithinRange(context.position.column, buttonRange)) {
+    return {
+      title: "<button>",
+      content:
+        "Interactive elements are a good place to validate inline handlers, labels, and keyboard behavior while editing markup.",
+      range: createRangeForLine(
+        context.position.line,
+        buttonRange.start,
+        buttonRange.end,
+      ),
+    };
+  }
+
+  return null;
+}
+
+function buildLanguageServiceCodeActionsDemo(
+  context: LanguageServiceCodeActionContext,
+): LanguageServiceCodeAction[] {
+  const actions: LanguageServiceCodeAction[] = [];
+  const lineNumber = context.position.line;
+  const lineText = context.lineText;
+  const readOnly = context.editor.getState().readOnly;
+  const onclickRange = findAttributeRangeInLine(lineText, "onclick");
+  const imgRange = findTagRangeInLine(lineText, "img");
+  const lineHasMissingAlt = !!imgRange && !/\balt\s*=/.test(lineText);
+
+  if (onclickRange && !readOnly) {
+    actions.push({
+      label: "Remove inline onclick handler",
+      detail: "Quick fix",
+      run: (editor) => {
+        const liveLineText = getLineTextAt(editor.getValue(), lineNumber);
+        const liveRange = findAttributeRangeInLine(liveLineText, "onclick");
+        if (!liveRange) {
+          return;
+        }
+
+        const removeStart =
+          liveRange.start > 0 && /\s/.test(liveLineText[liveRange.start - 1] || "")
+            ? liveRange.start - 1
+            : liveRange.start;
+
+        editor.replace(
+          createRangeForLine(lineNumber, removeStart, liveRange.end),
+          "",
+        );
+      },
+    });
+  }
+
+  if (lineHasMissingAlt && !readOnly) {
+    actions.push({
+      label: 'Add alt="" attribute',
+      detail: "Accessibility quick fix",
+      run: (editor) => {
+        const liveLineText = getLineTextAt(editor.getValue(), lineNumber);
+        const liveImgRange = findTagRangeInLine(liveLineText, "img");
+        if (!liveImgRange || /\balt\s*=/.test(liveLineText)) {
+          return;
+        }
+
+        const selfClosingIndex = liveLineText.indexOf("/>", liveImgRange.start);
+        const closeIndex =
+          selfClosingIndex >= 0
+            ? selfClosingIndex
+            : liveLineText.indexOf(">", liveImgRange.start);
+        if (closeIndex < 0) {
+          return;
+        }
+
+        editor.replace(
+          createRangeForLine(lineNumber, closeIndex, closeIndex),
+          ' alt=""',
+        );
+      },
+    });
+  }
+
+  if (context.diagnostics.length > 0) {
+    actions.push({
+      label: "Go to next diagnostic",
+      detail: "Navigation",
+      run: (editor) => {
+        editor.executeCommand("nextDiagnostic");
+      },
+    });
+  }
+
+  if (!readOnly) {
+    actions.push({
+      label: "Format document",
+      detail: "Formatting",
+      run: (editor) => {
+        editor.executeCommand("formatDocument");
+      },
+    });
+  }
+
+  if (context.trigger === "manual") {
+    actions.push({
+      label: "Refresh diagnostics",
+      detail: "Language service",
+      run: (editor) => {
+        editor.executeCommand("refreshLanguageDiagnostics");
+      },
+    });
+  }
+
+  return actions;
+}
+
 function formatCssDemo(input: string): string {
   const normalized = input
     .replace(/\r\n?/g, "\n")
@@ -730,6 +1009,7 @@ function buildContextMenuDemoItems(options: {
       {
         label: "Go To Line…",
         command: "goToLine",
+        shortcut: "Ctrl/Cmd+L",
       },
     );
   }
@@ -751,6 +1031,8 @@ const LightCodeEditorDemo = ({
   enableFormatting = false,
   enableContextMenu = false,
   enableEditingCommands = false,
+  enableActiveLineGuides = false,
+  enableLanguageServiceAdapter = false,
 }: {
   theme?: string;
   showLineNumbers?: boolean;
@@ -765,6 +1047,8 @@ const LightCodeEditorDemo = ({
   enableFormatting?: boolean;
   enableContextMenu?: boolean;
   enableEditingCommands?: boolean;
+  enableActiveLineGuides?: boolean;
+  enableLanguageServiceAdapter?: boolean;
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorInstanceRef = useRef<any>(null);
@@ -773,6 +1057,7 @@ const LightCodeEditorDemo = ({
   const formattingExtensionRef = useRef<FormattingExtension | null>(null);
   const contextMenuExtensionRef = useRef<ContextMenuExtension | null>(null);
   const editingCommandsExtensionRef = useRef<EditingCommandsExtension | null>(null);
+  const activeLineGuidesExtensionRef = useRef<ActiveLineAndIndentGuidesExtension | null>(null);
   const [currentContent, setCurrentContent] = useState(sampleHTML);
   const [searchQuery, setSearchQuery] = useState("");
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -801,7 +1086,7 @@ const LightCodeEditorDemo = ({
       extensions.push(new LineNumbersExtension());
     }
 
-    if (syntaxHighlighting) {
+    if (syntaxHighlighting && !enableLanguageServiceAdapter) {
       extensions.push(new SyntaxHighlightingExtension());
     }
 
@@ -823,7 +1108,7 @@ const LightCodeEditorDemo = ({
       extensions.push(new CodeFoldingExtension());
     }
 
-    if (enableDiagnostics) {
+    if (enableDiagnostics && !enableLanguageServiceAdapter) {
       diagnosticsExtensionRef.current = new DiagnosticsExtension({
         showStatusBar: true,
         clearOnChange: false,
@@ -833,7 +1118,7 @@ const LightCodeEditorDemo = ({
       diagnosticsExtensionRef.current = null;
     }
 
-    if (enableCompletions) {
+    if (enableCompletions && !enableLanguageServiceAdapter) {
       completionExtensionRef.current = new CompletionExtension({
         minPrefixLength: 1,
         triggerCharacters: ["<", "/", ":"],
@@ -844,7 +1129,7 @@ const LightCodeEditorDemo = ({
       completionExtensionRef.current = null;
     }
 
-    if (enableFormatting) {
+    if (enableFormatting && !enableLanguageServiceAdapter) {
       formattingExtensionRef.current = new FormattingExtension({
         formatter: buildFormattingDemo,
         showStatusBar: true,
@@ -853,6 +1138,45 @@ const LightCodeEditorDemo = ({
       extensions.push(formattingExtensionRef.current);
     } else {
       formattingExtensionRef.current = null;
+    }
+
+    if (enableLanguageServiceAdapter) {
+      const bundle = createLanguageServiceExtensions({
+        languageId: "html",
+        highlight: buildLanguageServiceHighlightDemo,
+        diagnostics: async (context) => {
+          await new Promise((resolve) => window.setTimeout(resolve, 90));
+          if (context.abortSignal?.aborted) {
+            return [];
+          }
+          return buildDiagnosticsDemo(context.text);
+        },
+        hover: buildLanguageServiceHoverDemo,
+        codeActions: buildLanguageServiceCodeActionsDemo,
+        completionProviders: [buildCompletionDemo],
+        formatter: buildFormattingDemo,
+        diagnosticsDebounceMs: 140,
+        diagnosticsConfig: {
+          showStatusBar: true,
+        },
+        completionConfig: {
+          minPrefixLength: 1,
+          triggerCharacters: ["<", "/", ":"],
+        },
+        formattingConfig: {
+          showStatusBar: true,
+          timeoutMs: 2500,
+        },
+        hoverCodeActionsConfig: {
+          hoverDelayMs: 180,
+          maxCodeActions: 5,
+        },
+      });
+
+      diagnosticsExtensionRef.current = bundle.diagnosticsExtension || null;
+      completionExtensionRef.current = bundle.completionExtension || null;
+      formattingExtensionRef.current = bundle.formattingExtension || null;
+      extensions.push(...bundle.extensions);
     }
 
     if (enableEditingCommands) {
@@ -866,6 +1190,16 @@ const LightCodeEditorDemo = ({
       extensions.push(editingCommandsExtensionRef.current);
     } else {
       editingCommandsExtensionRef.current = null;
+    }
+
+    if (enableActiveLineGuides) {
+      activeLineGuidesExtensionRef.current = new ActiveLineAndIndentGuidesExtension({
+        activeLine: true,
+        indentGuides: true,
+      });
+      extensions.push(activeLineGuidesExtensionRef.current);
+    } else {
+      activeLineGuidesExtensionRef.current = null;
     }
 
     if (enableContextMenu) {
@@ -901,7 +1235,7 @@ const LightCodeEditorDemo = ({
         editorInstanceRef.current.destroy?.();
       }
     };
-  }, [theme, showLineNumbers, syntaxHighlighting, readOnly, enableSearch, bracketMatching, codeFolding, enableDiagnostics, enableCompletions, enableFormatting, enableContextMenu, enableEditingCommands]);
+  }, [theme, showLineNumbers, syntaxHighlighting, readOnly, enableSearch, bracketMatching, codeFolding, enableDiagnostics, enableCompletions, enableFormatting, enableContextMenu, enableEditingCommands, enableActiveLineGuides, enableLanguageServiceAdapter]);
 
   useEffect(() => {
     const editor = editorInstanceRef.current;
@@ -935,7 +1269,7 @@ const LightCodeEditorDemo = ({
   ]);
 
   useEffect(() => {
-    if (!enableDiagnostics) {
+    if (!enableDiagnostics && !enableLanguageServiceAdapter) {
       diagnosticsExtensionRef.current?.clearDiagnostics();
       return;
     }
@@ -943,7 +1277,7 @@ const LightCodeEditorDemo = ({
     diagnosticsExtensionRef.current?.setDiagnostics(
       buildDiagnosticsDemo(currentContent),
     );
-  }, [currentContent, enableDiagnostics]);
+  }, [currentContent, enableDiagnostics, enableLanguageServiceAdapter]);
 
   const handleSearch = () => {
     if (editorInstanceRef.current && searchQuery) {
@@ -1477,7 +1811,77 @@ const LightCodeEditorDemo = ({
               Join Lines
             </button>
             <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("goToLine")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#6d28d9" : "#7c3aed",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Open Go To Line
+            </button>
+            <button
               onClick={goToScriptBlock}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: "transparent",
+                color: theme === "dark" ? "#f8f9fa" : "#333",
+                border: `1px solid ${theme === "dark" ? "#404040" : "#ddd"}`,
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Jump To Script
+            </button>
+            <Box style={{ fontSize: "12px", opacity: 0.75 }}>
+              <code>goToLine()</code> now opens an inline panel like find. Try <code>Ctrl/Cmd + L</code>, <code>Alt + Shift + A</code>, <code>Ctrl/Cmd + Shift + D</code>, <code>Alt + ↑/↓</code>, or <code>Ctrl/Cmd + J</code>.
+            </Box>
+          </Flex>
+        )}
+
+        {enableActiveLineGuides && (
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: "bold" }}>Active Line & Guides:</span>
+            <Box style={{ fontSize: "12px", opacity: 0.75 }}>
+              Move the caret through nested markup to see the active line highlight and indentation guides update without rewriting the editor text DOM.
+            </Box>
+          </Flex>
+        )}
+
+        {enableLanguageServiceAdapter && (
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: "bold" }}>Language Service:</span>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("refreshLanguageDiagnostics")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#0f766e" : "#0d9488",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Refresh Diagnostics
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("showCompletions")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#1d4ed8" : "#2563eb",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Trigger Completion
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("formatDocument")}
               style={{
                 padding: "5px 10px",
                 backgroundColor: theme === "dark" ? "#7c3aed" : "#6d28d9",
@@ -1487,10 +1891,23 @@ const LightCodeEditorDemo = ({
                 cursor: "pointer"
               }}
             >
-              Go To Script
+              Format Via Adapter
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("showCodeActions")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#b45309" : "#d97706",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Show Code Actions
             </button>
             <Box style={{ fontSize: "12px", opacity: 0.75 }}>
-              HTML demo uses block comments plus line editing commands. Try <code>Alt + Shift + A</code>, <code>Ctrl/Cmd + Shift + D</code>, <code>Alt + ↑/↓</code>, or <code>Ctrl/Cmd + J</code>.
+              Hover over <code>onclick</code> or the sample <code>&lt;button&gt;</code> for inline info, or press <code>Ctrl/Cmd + .</code> to open code actions like quick fixes, formatting, and diagnostics refresh from the same adapter.
             </Box>
           </Flex>
         )}
@@ -1536,7 +1953,9 @@ const LightCodeEditorDemo = ({
               enableCompletions && "Completions",
               enableFormatting && "Formatting",
               enableContextMenu && "Context Menu",
-              enableEditingCommands && "Editing Commands"
+              enableEditingCommands && "Editing Commands",
+              enableActiveLineGuides && "Active Line & Indent Guides",
+              enableLanguageServiceAdapter && "Language Service Adapter"
             ].filter(Boolean).join(", ") || "None"}
           </div>
           <div>
@@ -1569,6 +1988,8 @@ export const Basic: Story = {
     enableFormatting: true,
     enableContextMenu: true,
     enableEditingCommands: true,
+    enableActiveLineGuides: true,
+    enableLanguageServiceAdapter: false,
   },
 };
 
@@ -1589,6 +2010,8 @@ export const Minimal: Story = {
     enableFormatting: false,
     enableContextMenu: false,
     enableEditingCommands: false,
+    enableActiveLineGuides: false,
+    enableLanguageServiceAdapter: false,
   },
 };
 
@@ -1609,6 +2032,8 @@ export const ReadOnly: Story = {
     enableFormatting: false,
     enableContextMenu: false,
     enableEditingCommands: false,
+    enableActiveLineGuides: false,
+    enableLanguageServiceAdapter: false,
   },
 };
 
@@ -1629,6 +2054,8 @@ export const LightTheme: Story = {
     enableFormatting: true,
     enableContextMenu: true,
     enableEditingCommands: true,
+    enableActiveLineGuides: true,
+    enableLanguageServiceAdapter: false,
   },
 };
 
@@ -1648,6 +2075,8 @@ export const FeatureShowcase: Story = {
       { id: "formatting", label: "Formatting", description: "Pluggable document and selection formatting with timeout handling, cancellation, and preserved editor state" },
       { id: "context-menu", label: "Context Menu", description: "Right-click or invoke a command-driven menu for find, replace, formatting, undo/redo, and issue navigation" },
       { id: "editing", label: "Editing Commands", description: "Comment selections, duplicate or move lines, join adjacent lines, and jump directly to a target line" },
+      { id: "guides", label: "Active Line & Guides", description: "Highlight the active line and render indentation guides using lightweight line decorations" },
+      { id: "language-service", label: "Language Service", description: "Compose syntax highlighting, diagnostics, completions, formatting, hover tooltips, and code actions from one shared adapter configuration" },
       { id: "themes", label: "Themes", description: "Light and dark theme support" },
       { id: "readonly", label: "Read-Only Mode", description: "Prevent text modifications" },
     ];
@@ -1674,12 +2103,16 @@ export const FeatureShowcase: Story = {
           return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={true} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={true} enableCompletions={false} enableFormatting={true} enableContextMenu={true} />;
         case "editing":
           return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={false} enableCompletions={false} enableFormatting={false} enableContextMenu={true} enableEditingCommands={true} />;
+        case "guides":
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={false} enableCompletions={false} enableFormatting={false} enableContextMenu={false} enableEditingCommands={false} enableActiveLineGuides={true} />;
+        case "language-service":
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={false} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={false} enableCompletions={false} enableFormatting={false} enableContextMenu={false} enableEditingCommands={false} enableActiveLineGuides={false} enableLanguageServiceAdapter={true} />;
         case "themes":
-          return <LightCodeEditorDemo theme="light" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={true} enableDiagnostics={true} enableCompletions={true} enableFormatting={true} enableContextMenu={true} enableEditingCommands={true} />;
+          return <LightCodeEditorDemo theme="light" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={true} enableDiagnostics={true} enableCompletions={true} enableFormatting={true} enableContextMenu={true} enableEditingCommands={true} enableActiveLineGuides={true} />;
         case "readonly":
           return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} readOnly={true} enableSearch={true} bracketMatching={true} codeFolding={true} showDecorations={true} enableDiagnostics={true} />;
         default:
-          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={true} bracketMatching={true} codeFolding={true} showDecorations={true} enableDiagnostics={false} enableCompletions={true} enableFormatting={true} enableContextMenu={true} enableEditingCommands={true} />;
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={true} bracketMatching={true} codeFolding={true} showDecorations={true} enableDiagnostics={false} enableCompletions={true} enableFormatting={true} enableContextMenu={true} enableEditingCommands={true} enableActiveLineGuides={true} enableLanguageServiceAdapter={false} />;
       }
     };
 

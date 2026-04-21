@@ -47,6 +47,16 @@ type LineTarget = {
 };
 
 export class EditingCommandsExtension implements EditorExtension {
+  private static readonly css = {
+    root: 'lce-goto-line-ui',
+    row: 'lce-goto-line-row',
+    input: 'lce-goto-line-input',
+    action: 'lce-goto-line-action',
+    close: 'lce-goto-line-close',
+    meta: 'lce-goto-line-meta',
+    status: 'lce-goto-line-status',
+  } as const;
+
   public readonly name = 'editing-commands';
 
   private editor: EditorAPI | null = null;
@@ -56,6 +66,10 @@ export class EditingCommandsExtension implements EditorExtension {
       removeKeyBinding?: (key: string, command?: string) => void;
     }
     | null = null;
+  private goToLineUI: HTMLElement | null = null;
+  private goToLineInput: HTMLInputElement | null = null;
+  private goToLineStatus: HTMLElement | null = null;
+  private isGoToLineVisible = false;
   private registeredBindings: KeybindingRegistration[] = [];
   private readonly config: RequiredEditingCommandsConfig;
 
@@ -102,8 +116,29 @@ export class EditingCommandsExtension implements EditorExtension {
       this.goToLine(lineNumber);
     });
 
+    editor.registerCommand('openGoToLine', () => {
+      this.showGoToLine();
+    });
+
+    editor.registerCommand('closeGoToLine', () => {
+      this.hideGoToLine();
+    });
+
+    this.createGoToLineUI();
+
     if (this.config.registerKeybindings) {
       this.registerKeybindings();
+    }
+  }
+
+  onKeyDown(event: KeyboardEvent): boolean | void {
+    if (!this.isGoToLineVisible) {
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      this.hideGoToLine();
+      return false;
     }
   }
 
@@ -401,9 +436,7 @@ export class EditingCommandsExtension implements EditorExtension {
       return false;
     }
 
-    const text = editor.getValue();
-    const lineCount = this.getLines(text).length;
-    let resolvedLineNumber =
+    const resolvedLineNumber =
       typeof lineNumber === 'number'
         ? lineNumber
         : typeof lineNumber === 'string'
@@ -411,20 +444,27 @@ export class EditingCommandsExtension implements EditorExtension {
           : Number.NaN;
 
     if (!Number.isFinite(resolvedLineNumber)) {
-      const response = typeof window !== 'undefined'
-        ? window.prompt('Go to line', `${editor.getCursor().position.line + 1}`)
-        : null;
-      if (response === null) {
-        return false;
-      }
-      resolvedLineNumber = Number.parseInt(response, 10);
-    }
-
-    if (!Number.isFinite(resolvedLineNumber)) {
+      this.showGoToLine();
       return false;
     }
 
-    const clampedLine = Math.max(1, Math.min(lineCount, Math.floor(resolvedLineNumber)));
+    return this.jumpToLine(resolvedLineNumber);
+  }
+
+  private jumpToLine(lineNumber: number): boolean {
+    const editor = this.editor;
+    if (!editor) {
+      return false;
+    }
+
+    const text = editor.getValue();
+    const lineCount = this.getLines(text).length;
+
+    if (!Number.isFinite(lineNumber)) {
+      return false;
+    }
+
+    const clampedLine = Math.max(1, Math.min(lineCount, Math.floor(lineNumber)));
     const position = this.clampPosition(
       {
         line: clampedLine - 1,
@@ -436,7 +476,158 @@ export class EditingCommandsExtension implements EditorExtension {
     editor.setCursor(position);
     editor.getView().scrollToPosition(position);
     editor.focus();
+    this.hideGoToLine();
     return true;
+  }
+
+  private showGoToLine(): void {
+    if (!this.editor) {
+      return;
+    }
+
+    if (!this.goToLineUI || !this.goToLineInput || !this.goToLineStatus) {
+      this.createGoToLineUI();
+    }
+
+    if (!this.goToLineUI || !this.goToLineInput || !this.goToLineStatus) {
+      return;
+    }
+
+    const currentLine = this.editor.getCursor().position.line + 1;
+    this.goToLineInput.value = `${currentLine}`;
+    this.goToLineUI.style.display = 'block';
+    this.isGoToLineVisible = true;
+    this.updateGoToLineStatus();
+    this.goToLineInput.focus();
+    this.goToLineInput.select();
+  }
+
+  private hideGoToLine(): void {
+    if (!this.goToLineUI) {
+      return;
+    }
+
+    this.goToLineUI.style.display = 'none';
+    this.isGoToLineVisible = false;
+    this.goToLineInput?.blur();
+    this.editor?.focus();
+  }
+
+  private createGoToLineUI(): void {
+    if (!this.editor || this.goToLineUI) {
+      return;
+    }
+
+    const container = this.getOverlayContainer();
+    if (!container) {
+      return;
+    }
+
+    if (window.getComputedStyle(container).position === 'static') {
+      container.style.position = 'relative';
+    }
+
+    const root = document.createElement('div');
+    root.className = EditingCommandsExtension.css.root;
+    root.style.display = 'none';
+    root.innerHTML = `
+      <div class="${EditingCommandsExtension.css.row}">
+        <input
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          class="${EditingCommandsExtension.css.input}"
+          placeholder="Go to line..."
+          aria-label="Go to line"
+        />
+        <button
+          type="button"
+          class="${EditingCommandsExtension.css.action}"
+          aria-label="Jump to line"
+        >Go</button>
+        <button
+          type="button"
+          class="${EditingCommandsExtension.css.close}"
+          aria-label="Close go to line"
+        >×</button>
+      </div>
+      <div class="${EditingCommandsExtension.css.meta}">
+        <div class="${EditingCommandsExtension.css.status}" aria-live="polite"></div>
+      </div>
+    `;
+
+    const input = root.querySelector(`.${EditingCommandsExtension.css.input}`) as HTMLInputElement;
+    const goButton = root.querySelector(`.${EditingCommandsExtension.css.action}`) as HTMLButtonElement;
+    const closeButton = root.querySelector(`.${EditingCommandsExtension.css.close}`) as HTMLButtonElement;
+    const status = root.querySelector(`.${EditingCommandsExtension.css.status}`) as HTMLElement;
+
+    input.addEventListener('input', () => {
+      this.updateGoToLineStatus();
+    });
+
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        const value = Number.parseInt(input.value, 10);
+        if (!Number.isFinite(value) || !this.jumpToLine(value)) {
+          this.updateGoToLineStatus(true);
+        }
+        return;
+      }
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        this.hideGoToLine();
+      }
+    });
+
+    goButton.addEventListener('click', () => {
+      const value = Number.parseInt(input.value, 10);
+      if (!Number.isFinite(value) || !this.jumpToLine(value)) {
+        this.updateGoToLineStatus(true);
+      }
+    });
+
+    closeButton.addEventListener('click', () => {
+      this.hideGoToLine();
+    });
+
+    root.addEventListener('mousedown', (event) => {
+      event.stopPropagation();
+    });
+
+    container.appendChild(root);
+    this.goToLineUI = root;
+    this.goToLineInput = input;
+    this.goToLineStatus = status;
+  }
+
+  private updateGoToLineStatus(showValidationError = false): void {
+    if (!this.editor || !this.goToLineStatus || !this.goToLineInput) {
+      return;
+    }
+
+    const lineCount = this.getLines(this.editor.getValue()).length;
+    const value = this.goToLineInput.value.trim();
+
+    if (!value) {
+      this.goToLineStatus.textContent = `Line 1-${lineCount}`;
+      return;
+    }
+
+    const lineNumber = Number.parseInt(value, 10);
+    if (!Number.isFinite(lineNumber)) {
+      this.goToLineStatus.textContent = showValidationError
+        ? 'Enter a valid line number.'
+        : `Line 1-${lineCount}`;
+      return;
+    }
+
+    const clampedLine = Math.max(1, Math.min(lineCount, Math.floor(lineNumber)));
+    this.goToLineStatus.textContent =
+      clampedLine === lineNumber
+        ? `Press Enter to jump to line ${clampedLine} of ${lineCount}.`
+        : `Line ${lineNumber} is out of range. Jumping to ${clampedLine} of ${lineCount}.`;
   }
 
   private registerKeybindings(): void {
@@ -463,6 +654,8 @@ export class EditingCommandsExtension implements EditorExtension {
       { key: 'arrowdown', altKey: true, command: 'moveLineDown' },
       { key: 'j', ctrlKey: true, command: 'joinLines' },
       { key: 'j', metaKey: true, command: 'joinLines' },
+      { key: 'l', ctrlKey: true, command: 'openGoToLine' },
+      { key: 'l', metaKey: true, command: 'openGoToLine' },
     ];
 
     bindings.forEach((binding) => {
@@ -476,6 +669,25 @@ export class EditingCommandsExtension implements EditorExtension {
 
   private getLines(text: string): string[] {
     return text.split('\n');
+  }
+
+  private getOverlayContainer(): HTMLElement | null {
+    const contentElement = this.editor?.getView().getContentElement();
+    if (!contentElement) {
+      return null;
+    }
+
+    const editorContainer = contentElement.closest(
+      '[data-lce-editor-container="true"]',
+    ) as HTMLElement | null;
+    const editorHost = editorContainer?.parentElement as HTMLElement | null;
+
+    return (
+      (contentElement.closest('.rte-source-editor-modal') as HTMLElement | null) ||
+      editorHost ||
+      editorContainer ||
+      contentElement.parentElement
+    );
   }
 
   private getTargetLines(
@@ -702,6 +914,11 @@ export class EditingCommandsExtension implements EditorExtension {
       });
     }
 
+    this.goToLineUI?.remove();
+    this.goToLineUI = null;
+    this.goToLineInput = null;
+    this.goToLineStatus = null;
+    this.isGoToLineVisible = false;
     this.registeredBindings = [];
     this.keymapExtension = null;
     this.editor = null;

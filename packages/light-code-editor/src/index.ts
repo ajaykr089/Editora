@@ -50,7 +50,18 @@ export type {
   FormattingMode,
   FormattingContext,
   FormattingResult,
-  Formatter
+  Formatter,
+  LanguageServiceDocumentSnapshot,
+  LanguageServiceHighlightContext,
+  LanguageServiceDiagnosticsContext,
+  LanguageServiceHoverContext,
+  LanguageServiceHoverResult,
+  LanguageServiceCodeActionContext,
+  LanguageServiceCodeAction,
+  LanguageServiceHighlighter,
+  LanguageServiceDiagnosticsProvider,
+  LanguageServiceHoverProvider,
+  LanguageServiceCodeActionsProvider
 } from './types';
 
 // Factory function for easy instantiation

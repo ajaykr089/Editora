@@ -272,6 +272,14 @@
   background: var(--lce-active-line-bg, rgba(255, 255, 255, 0.05));
 }
 
+.lce-decoration-line--active-line {
+  background: var(--lce-active-line-bg, rgba(59, 130, 246, 0.10));
+}
+
+.lce-decoration-line--indent-guides {
+  background-origin: padding-box;
+}
+
 .lce-decoration-gutter--error {
   color: var(--lce-decoration-gutter-error, #ff6b6b);
 }
@@ -418,6 +426,89 @@
   line-height: 1.35;
   white-space: nowrap;
   opacity: 0.9;
+}
+
+/* Go to line overlay */
+.lce-goto-line-ui {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1000;
+  min-width: 220px;
+  max-width: min(280px, calc(100% - 24px));
+  box-sizing: border-box;
+  border-radius: 6px;
+  border: 1px solid var(--editor-gutter-border, #3e3e42);
+  background: var(--editor-background, #1e1e1e);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+  padding: 8px;
+}
+
+.lce-goto-line-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lce-goto-line-input {
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  padding: 6px 10px;
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid var(--editor-gutter-border, #3e3e42);
+  background: var(--editor-gutter-background, #252526);
+  color: var(--editor-foreground, #f8f9fa);
+  font-size: 12px;
+  line-height: 1.4;
+  outline: none;
+}
+
+.lce-goto-line-input:focus {
+  border-color: var(--editor-cursor, #007acc);
+  box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+}
+
+.lce-goto-line-action,
+.lce-goto-line-close {
+  appearance: none;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 4px;
+  border: 1px solid var(--editor-gutter-border, #3e3e42);
+  background: var(--editor-gutter-background, #252526);
+  color: var(--editor-gutter-foreground, #858585);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lce-goto-line-close {
+  padding: 0;
+  width: 28px;
+}
+
+.lce-goto-line-action:hover,
+.lce-goto-line-close:hover {
+  color: var(--editor-foreground, #f8f9fa);
+}
+
+.lce-goto-line-meta {
+  margin-top: 6px;
+}
+
+.lce-goto-line-status {
+  min-height: 16px;
+  margin: 2px 2px 0;
+  color: var(--editor-gutter-foreground, #858585);
+  font-size: 11px;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Completion popup */
@@ -568,4 +659,105 @@
   height: 1px;
   margin: 6px 4px;
   background: var(--editor-gutter-border, #3e3e42);
+}
+
+/* Hover tooltip / code actions */
+.lce-hover-tooltip {
+  position: absolute;
+  z-index: 1003;
+  min-width: 260px;
+  max-width: min(420px, calc(100% - 24px));
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid var(--editor-gutter-border, #3e3e42);
+  background: var(--editor-background, #1e1e1e);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.32);
+  overflow: hidden;
+}
+
+.lce-hover-tooltip-header {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--editor-gutter-border, #3e3e42);
+  color: var(--editor-foreground, #f8f9fa);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.lce-hover-tooltip-section {
+  padding: 10px 12px 0;
+}
+
+.lce-hover-tooltip-content {
+  color: var(--editor-gutter-foreground, #cbd5e1);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.lce-hover-tooltip-section-title {
+  padding: 10px 12px 6px;
+  color: var(--editor-gutter-foreground, #94a3b8);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.lce-hover-tooltip-actions {
+  display: flex;
+  flex-direction: column;
+  padding: 0 8px 8px;
+  gap: 4px;
+}
+
+.lce-hover-tooltip-action {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--editor-foreground, #f8f9fa);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lce-hover-tooltip-action:hover,
+.lce-hover-tooltip-action:focus-visible {
+  background: rgba(56, 189, 248, 0.12);
+  outline: none;
+}
+
+.lce-hover-tooltip-action:disabled {
+  color: var(--editor-gutter-foreground, #858585);
+  cursor: not-allowed;
+}
+
+.lce-hover-tooltip-action:disabled:hover {
+  background: transparent;
+}
+
+.lce-hover-tooltip-action-label {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.lce-hover-tooltip-action-detail {
+  color: var(--editor-gutter-foreground, #94a3b8);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.lce-hover-tooltip-empty {
+  padding: 0 12px 12px;
+  color: var(--editor-gutter-foreground, #94a3b8);
+  font-size: 11px;
+  line-height: 1.45;
 }

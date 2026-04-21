@@ -20,6 +20,8 @@ A lightweight, modular code editor library inspired by CodeMirror, optimized for
 ✅ **Formatting** - Pluggable document and selection formatting with async safety
 ✅ **Context Menus** - Right-click actions for search, replace, formatting, and navigation
 ✅ **Editing Commands** - Toggle comments, duplicate/move lines, join lines, and go to line
+✅ **Active Line & Indent Guides** - Caret-aware line highlighting with low-overhead indentation guides
+✅ **Language Service Adapter** - Compose syntax, diagnostics, completions, formatting, hover tooltips, and code actions from one shared service contract
 ✅ **Bracket Matching** - Automatic bracket pair highlighting
 ✅ **Code Folding** - Collapse/expand code sections
 ✅ **Read-Only Mode** - Prevent text modifications
@@ -41,6 +43,7 @@ import {
   CompletionExtension,
   ContextMenuExtension,
   DiagnosticsExtension,
+  ActiveLineAndIndentGuidesExtension,
   EditingCommandsExtension,
   FormattingExtension,
   LineNumbersExtension,
@@ -71,6 +74,7 @@ const editor = createEditor(container, {
     new FormattingExtension(),
     new ContextMenuExtension(),
     new EditingCommandsExtension(),
+    new ActiveLineAndIndentGuidesExtension(),
     new BracketMatchingExtension(),
     new CodeFoldingExtension()
   ]
@@ -450,9 +454,109 @@ editor.executeCommand('goToLine', 12);
 Notes:
 
 - Registers `toggleLineComment`, `toggleBlockComment`, `duplicateLine`, `moveLineUp`, `moveLineDown`, `joinLines`, and `goToLine`.
-- `goToLine` accepts a line number or falls back to a prompt when called without one.
-- Default key bindings include `Ctrl/Cmd + /`, `Alt + Shift + A`, `Ctrl/Cmd + Shift + D`, `Alt + Up/Down`, and `Ctrl/Cmd + J`.
+- `goToLine(12)` jumps immediately. Calling `goToLine()` with no argument opens an inline go-to-line panel inside the editor, similar to find.
+- Default key bindings include `Ctrl/Cmd + /`, `Alt + Shift + A`, `Ctrl/Cmd + Shift + D`, `Alt + Up/Down`, `Ctrl/Cmd + J`, and `Ctrl/Cmd + L` for go to line.
 - Use custom comment tokens for non-JavaScript content such as HTML comments.
+
+#### `ActiveLineAndIndentGuidesExtension`
+Highlights the active line and renders indentation guides through the existing line-decoration pipeline.
+
+```typescript
+import { ActiveLineAndIndentGuidesExtension } from '@editora/light-code-editor';
+
+const guides = new ActiveLineAndIndentGuidesExtension({
+  activeLine: true,
+  indentGuides: true,
+});
+
+const editor = createEditor(container, {
+  extensions: [guides]
+});
+```
+
+Notes:
+
+- Designed to avoid per-character DOM work by reusing line decorations.
+- Indent guides automatically use the configured `tabSize` unless you override `guideStepColumns`.
+- `maxGuideDepth` and `maxGuideLines` keep guide rendering bounded on deeply nested or very large documents.
+
+#### `createLanguageServiceExtensions`
+Builds a coordinated extension bundle so one adapter config can drive syntax highlighting, diagnostics, completions, formatting, hover tooltips, and code actions together.
+
+```typescript
+import {
+  createLanguageServiceExtensions,
+  type CompletionContext,
+} from '@editora/light-code-editor';
+
+const languageService = createLanguageServiceExtensions({
+  languageId: 'html',
+  highlight: ({ text }) =>
+    text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+  diagnostics: async ({ text, abortSignal }) => {
+    if (abortSignal?.aborted) {
+      return [];
+    }
+
+    return text.includes('onclick=')
+      ? [{
+          severity: 'warning',
+          message: 'Inline handlers need review',
+          range: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 7 },
+          },
+        }]
+      : [];
+  },
+  completionProviders: [
+    (context: CompletionContext) =>
+      context.prefix.startsWith('di')
+        ? [{ label: 'div', kind: 'tag', insertText: 'div' }]
+        : [],
+  ],
+  hover: ({ diagnostics }) =>
+    diagnostics[0]
+      ? {
+          title: diagnostics[0].code || diagnostics[0].severity,
+          content: diagnostics[0].message,
+          range: diagnostics[0].range,
+        }
+      : null,
+  codeActions: ({ lineText, position }) =>
+    lineText.includes('onclick=')
+      ? [{
+          label: 'Remove inline onclick handler',
+          run: (editor) => {
+            const start = lineText.indexOf('onclick=');
+            editor.replace(
+              {
+                start: { line: position.line, column: Math.max(0, start - 1) },
+                end: { line: position.line, column: start + 'onclick=""'.length },
+              },
+              '',
+            );
+          },
+        }]
+      : [],
+});
+
+const editor = createEditor(container, {
+  extensions: languageService.extensions,
+});
+
+editor.executeCommand('refreshLanguageDiagnostics');
+editor.executeCommand('showCodeActions');
+```
+
+Notes:
+
+- Returns `{ extensions, languageServiceExtension, syntaxHighlightingExtension, diagnosticsExtension, completionExtension, formattingExtension, hoverCodeActionsExtension }`.
+- Diagnostics refresh is debounced and stale async requests are aborted automatically.
+- Use `refreshLanguageDiagnostics` when you want an explicit provider refresh in addition to change-triggered updates.
+- Use `showCodeActions` or `Ctrl/Cmd + .` to open code actions at the current cursor location.
+- Hover and code-action providers receive the shared language-service snapshot, current line text, matching diagnostics, and an `AbortSignal`.
+- Completion and formatting continue using the existing `CompletionExtension` and `FormattingExtension` config surfaces.
 
 #### `BracketMatchingExtension`
 Highlights matching brackets.
@@ -514,8 +618,10 @@ Extensions add commands on top:
 - `DiagnosticsExtension`: `setDiagnostics`, `clearDiagnostics`, `nextDiagnostic`, `prevDiagnostic`
 - `CompletionExtension`: `showCompletions`, `closeCompletions`, `nextCompletion`, `prevCompletion`, `acceptCompletion`
 - `FormattingExtension`: `formatDocument`, `formatSelection`
+- `HoverTooltipAndCodeActionsExtension`: `showCodeActions`, `hideHoverTooltip`
 - `ContextMenuExtension`: `openContextMenu`, `closeContextMenu`
-- `EditingCommandsExtension`: `toggleLineComment`, `toggleBlockComment`, `duplicateLine`, `moveLineUp`, `moveLineDown`, `joinLines`, `goToLine`
+- `EditingCommandsExtension`: `toggleLineComment`, `toggleBlockComment`, `duplicateLine`, `moveLineUp`, `moveLineDown`, `joinLines`, `goToLine`, `openGoToLine`, `closeGoToLine`
+- `LanguageServiceExtension`: `refreshLanguageDiagnostics`
 - `ThemeExtension`: `setTheme`, `toggleTheme`
 - `ReadOnlyExtension`: `setReadOnly`, `toggleReadOnly`
 - `LineNumbersExtension`: `toggleLineNumbers`

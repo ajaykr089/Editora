@@ -173,6 +173,81 @@ export type Formatter = (
   | FormattingResult
   | Promise<string | FormattingResult>;
 
+export interface LanguageServiceDocumentSnapshot {
+  editor: EditorCore;
+  languageId: string;
+  version: number;
+  text: string;
+  cursor: Cursor;
+  selection?: Range;
+}
+
+export interface LanguageServiceHighlightContext
+  extends LanguageServiceDocumentSnapshot {
+  theme: string;
+  colors: Record<string, string>;
+}
+
+export interface LanguageServiceDiagnosticsContext
+  extends LanguageServiceDocumentSnapshot {
+  abortSignal?: AbortSignal;
+}
+
+export interface LanguageServiceHoverContext
+  extends LanguageServiceDocumentSnapshot {
+  position: Position;
+  lineText: string;
+  diagnostics: EditorDiagnostic[];
+  abortSignal?: AbortSignal;
+}
+
+export interface LanguageServiceHoverResult {
+  title?: string;
+  content: string;
+  range?: Range;
+}
+
+export interface LanguageServiceCodeActionContext
+  extends LanguageServiceDocumentSnapshot {
+  position: Position;
+  lineText: string;
+  diagnostics: EditorDiagnostic[];
+  trigger: 'hover' | 'manual';
+  abortSignal?: AbortSignal;
+}
+
+export interface LanguageServiceCodeAction {
+  id?: string;
+  label: string;
+  kind?: string;
+  detail?: string;
+  disabled?: boolean;
+  run: (editor: EditorCore) => void | Promise<void>;
+}
+
+export type LanguageServiceHighlighter = (
+  context: LanguageServiceHighlightContext,
+) => string;
+
+export type LanguageServiceDiagnosticsProvider = (
+  context: LanguageServiceDiagnosticsContext,
+) =>
+  | EditorDiagnostic[]
+  | Promise<EditorDiagnostic[]>;
+
+export type LanguageServiceHoverProvider = (
+  context: LanguageServiceHoverContext,
+) =>
+  | LanguageServiceHoverResult
+  | null
+  | Promise<LanguageServiceHoverResult | null>;
+
+export type LanguageServiceCodeActionsProvider = (
+  context: LanguageServiceCodeActionContext,
+) =>
+  | LanguageServiceCodeAction[]
+  | Promise<LanguageServiceCodeAction[]>;
+
 // Extension interface
 export interface EditorExtension {
   name: string;
@@ -285,6 +360,7 @@ export interface View {
   getSelectionRange(): Range | undefined;
   createDomRangeFromOffsets(startOffset: number, endOffset?: number): globalThis.Range | null;
   createDomRangeFromRange(range: Range): globalThis.Range | null;
+  getPositionFromClientPoint(clientX: number, clientY: number): Position | null;
   setSelectionOffsets(startOffset: number, endOffset?: number): void;
   setSelectionBoundaryOffsets(anchorOffset: number, focusOffset: number): void;
   setSelectionRange(range: Range): void;

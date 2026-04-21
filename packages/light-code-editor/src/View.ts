@@ -62,16 +62,18 @@ export class View {
     this.lineNumbersElement.style.cssText = `
       display: table-cell;
       vertical-align: top;
-      position: relative;
+      position: sticky;
+      left: 0;
       width: ${this.gutterWidth}px;
       background: var(--editor-gutter-background, #252526);
       color: var(--editor-gutter-foreground, #858585);
       padding: 0 8px 0 0;
       text-align: right;
       border-right: 1px solid var(--editor-gutter-border, #3e3e42);
+      background-clip: padding-box;
       user-select: none;
       overflow: hidden;
-      z-index: 1;
+      z-index: 3;
     `;
 
     this.lineNumbersContentElement = document.createElement('div');
@@ -167,7 +169,13 @@ export class View {
     // Use a table-like layout so gutter and content are table-cells
     // inside the same scrollable container (`editorContainer`) and
     // therefore always scroll together naturally.
-    scrollWrapper.style.cssText = `display: table; table-layout: fixed; width: 100%; height: 100%;`;
+    scrollWrapper.style.cssText = `
+      position: relative;
+      display: table;
+      table-layout: fixed;
+      width: 100%;
+      height: 100%;
+    `;
 
     // Put both into the same scroll surface by appending to the editor container
     this.lineNumbersElement.appendChild(this.lineNumbersContentElement);
@@ -535,6 +543,19 @@ export class View {
     );
   }
 
+  getPositionFromClientPoint(clientX: number, clientY: number): Position | null {
+    const domRange = this.getDomRangeFromClientPoint(clientX, clientY);
+    if (!domRange || !this.isNodeInsideContent(domRange.startContainer)) {
+      return null;
+    }
+
+    const offset = this.sourceOffsetFromBoundary(
+      domRange.startContainer,
+      domRange.startOffset,
+    );
+    return this.offsetToPositionInText(offset, this.getText());
+  }
+
   setSelectionOffsets(startOffset: number, endOffset: number = startOffset): void {
     const domRange = this.createDomRangeFromOffsets(startOffset, endOffset);
     if (!domRange) return;
@@ -739,6 +760,48 @@ export class View {
       node: this.contentElement,
       offset: this.contentElement.childNodes.length,
     };
+  }
+
+  private getDomRangeFromClientPoint(
+    clientX: number,
+    clientY: number,
+  ): globalThis.Range | null {
+    const documentWithCaretPosition = document as Document & {
+      caretPositionFromPoint?: (
+        x: number,
+        y: number,
+      ) => {
+        offsetNode: Node | null;
+        offset: number;
+      } | null;
+      caretRangeFromPoint?: (
+        x: number,
+        y: number,
+      ) => globalThis.Range | null;
+    };
+
+    if (typeof documentWithCaretPosition.caretPositionFromPoint === 'function') {
+      const caretPosition = documentWithCaretPosition.caretPositionFromPoint(
+        clientX,
+        clientY,
+      );
+      if (caretPosition?.offsetNode) {
+        const range = document.createRange();
+        try {
+          range.setStart(caretPosition.offsetNode, caretPosition.offset);
+          range.collapse(true);
+          return range;
+        } catch {
+          return null;
+        }
+      }
+    }
+
+    if (typeof documentWithCaretPosition.caretRangeFromPoint === 'function') {
+      return documentWithCaretPosition.caretRangeFromPoint(clientX, clientY);
+    }
+
+    return null;
   }
 
   private buildVisibleToDomMap(text: string): number[] {
