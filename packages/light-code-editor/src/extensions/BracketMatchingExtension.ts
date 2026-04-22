@@ -5,34 +5,81 @@
 
 import { EditorExtension, EditorCore, BracketMatch, Position } from '../types';
 
+let BRACKET_MATCH_INSTANCE_COUNTER = 0;
+
 export class BracketMatchingExtension implements EditorExtension {
   public readonly name = 'bracket-matching';
   private editor: EditorCore | null = null;
-  private bracketPairs = {
+  private readonly bracketPairs = {
     '(': ')',
     '[': ']',
     '{': '}',
     '<': '>'
   };
-  private reverseBracketPairs = {
+  private readonly reverseBracketPairs = {
     ')': '(',
     ']': '[',
     '}': '{',
     '>': '<'
   };
+  private readonly highlightId = ++BRACKET_MATCH_INSTANCE_COUNTER;
+  private readonly highlightName = `editora-bracket-match-${this.highlightId}`;
+  private readonly highlightStyleId = `editora-bracket-match-style-${this.highlightId}`;
   private currentMatch: BracketMatch | null = null;
+  private hasCustomHighlightSupport = false;
+  private observer: MutationObserver | null = null;
+  private pendingUpdateRaf: number | null = null;
+  private updateRequestVersion = 0;
+  private cursorHandler: (() => void) | null = null;
+  private changeHandler: (() => void) | null = null;
 
   setup(editor: EditorCore): void {
     this.editor = editor;
+    this.hasCustomHighlightSupport = this.detectCustomHighlightSupport();
+    if (this.hasCustomHighlightSupport) {
+      this.ensureHighlightStyles();
+      this.observeContentMutations();
+    }
 
-    // Listen for cursor changes to update bracket matching
-    editor.on('cursor', () => {
-      this.updateBracketMatching();
-    });
+    this.cursorHandler = () => {
+      this.scheduleBracketUpdate();
+    };
+    this.changeHandler = () => {
+      this.scheduleBracketUpdate();
+    };
 
-    editor.on('change', () => {
+    editor.on('cursor', this.cursorHandler);
+    editor.on('change', this.changeHandler);
+    this.scheduleBracketUpdate();
+  }
+
+  private scheduleBracketUpdate(): void {
+    this.updateRequestVersion += 1;
+    const requestVersion = this.updateRequestVersion;
+    if (
+      this.pendingUpdateRaf !== null &&
+      typeof cancelAnimationFrame === 'function'
+    ) {
+      cancelAnimationFrame(this.pendingUpdateRaf);
+      this.pendingUpdateRaf = null;
+    }
+
+    const run = () => {
+      if (requestVersion !== this.updateRequestVersion) {
+        return;
+      }
+      this.pendingUpdateRaf = null;
       this.updateBracketMatching();
-    });
+    };
+
+    if (typeof requestAnimationFrame === 'function') {
+      this.pendingUpdateRaf = requestAnimationFrame(() => {
+        this.pendingUpdateRaf = requestAnimationFrame(run);
+      });
+      return;
+    }
+
+    run();
   }
 
   private updateBracketMatching(): void {
@@ -41,14 +88,11 @@ export class BracketMatchingExtension implements EditorExtension {
     const cursor = this.editor.getCursor();
     const text = this.editor.getValue();
 
-    // Clear previous highlighting
     this.clearBracketHighlighting();
 
-    // Find bracket at cursor position
-    const bracket = this.getBracketAtPosition(text, cursor.position);
+    const bracket = this.getBracketNearPosition(text, cursor.position);
     if (!bracket) return;
 
-    // Find matching bracket
     const match = this.findMatchingBracket(text, bracket);
     if (match) {
       this.currentMatch = match;
@@ -56,17 +100,35 @@ export class BracketMatchingExtension implements EditorExtension {
     }
   }
 
-  private getBracketAtPosition(text: string, position: Position): { char: string, position: Position } | null {
+  private getBracketNearPosition(text: string, position: Position): { char: string, position: Position } | null {
     const lines = text.split('\n');
-    if (position.line >= lines.length) return null;
+    if (position.line < 0 || position.line >= lines.length) return null;
 
+    const candidates: Position[] = [{ line: position.line, column: position.column }];
+    if (position.column > 0) {
+      candidates.push({ line: position.line, column: position.column - 1 });
+    }
+
+    for (const candidate of candidates) {
+      const bracket = this.getBracketAtPosition(lines, candidate);
+      if (bracket) {
+        return bracket;
+      }
+    }
+
+    return null;
+  }
+
+  private getBracketAtPosition(lines: string[], position: Position): { char: string, position: Position } | null {
+    if (position.line < 0 || position.line >= lines.length) return null;
     const line = lines[position.line];
-    if (position.column >= line.length) return null;
+    if (position.column < 0 || position.column >= line.length) return null;
 
     const char = line[position.column];
-
-    // Check if it's a bracket
-    if (this.bracketPairs[char as keyof typeof this.bracketPairs] || this.reverseBracketPairs[char as keyof typeof this.reverseBracketPairs]) {
+    if (
+      this.bracketPairs[char as keyof typeof this.bracketPairs] ||
+      this.reverseBracketPairs[char as keyof typeof this.reverseBracketPairs]
+    ) {
       return { char, position };
     }
 
@@ -79,20 +141,18 @@ export class BracketMatchingExtension implements EditorExtension {
     const startCol = bracket.position.column;
     const char = bracket.char;
 
-    // If it's an opening bracket, find closing
     if (this.bracketPairs[char as keyof typeof this.bracketPairs]) {
-      return this.findClosingBracket(text, lines, startLine, startCol, char);
+      return this.findClosingBracket(lines, startLine, startCol, char);
     }
 
-    // If it's a closing bracket, find opening
     if (this.reverseBracketPairs[char as keyof typeof this.reverseBracketPairs]) {
-      return this.findOpeningBracket(text, lines, startLine, startCol, char);
+      return this.findOpeningBracket(lines, startLine, startCol, char);
     }
 
     return null;
   }
 
-  private findClosingBracket(text: string, lines: string[], startLine: number, startCol: number, openChar: string): BracketMatch | null {
+  private findClosingBracket(lines: string[], startLine: number, startCol: number, openChar: string): BracketMatch | null {
     const closeChar = this.bracketPairs[openChar as keyof typeof this.bracketPairs];
     let depth = 0;
 
@@ -121,7 +181,7 @@ export class BracketMatchingExtension implements EditorExtension {
     return null;
   }
 
-  private findOpeningBracket(text: string, lines: string[], startLine: number, startCol: number, closeChar: string): BracketMatch | null {
+  private findOpeningBracket(lines: string[], startLine: number, startCol: number, closeChar: string): BracketMatch | null {
     const openChar = this.reverseBracketPairs[closeChar as keyof typeof this.reverseBracketPairs];
     let depth = 0;
 
@@ -151,13 +211,75 @@ export class BracketMatchingExtension implements EditorExtension {
   }
 
   private highlightBrackets(match: BracketMatch): void {
-    // This would apply CSS classes or styling to highlight the brackets
-    // For now, we'll just log the match for demonstration
+    if (!this.editor || !this.hasCustomHighlightSupport) return;
+
+    const view = this.editor.getView();
+    const openRange = view.createDomRangeFromRange(match.open);
+    const closeRange = view.createDomRangeFromRange(match.close);
+    if (!openRange || !closeRange) return;
+
+    try {
+      const cssAny = CSS as unknown as { highlights?: Map<string, unknown> };
+      const highlightCtor = (window as unknown as { Highlight?: new (...ranges: globalThis.Range[]) => unknown }).Highlight;
+      if (!cssAny.highlights || !highlightCtor) return;
+      cssAny.highlights.set(this.highlightName, new highlightCtor(openRange, closeRange));
+    } catch {
+      // Ignore highlight failures and keep the logical match state available.
+    }
   }
 
   private clearBracketHighlighting(): void {
     this.currentMatch = null;
-    // Clear any existing highlighting
+    if (!this.hasCustomHighlightSupport) return;
+
+    try {
+      const cssAny = CSS as unknown as { highlights?: Map<string, unknown> };
+      cssAny.highlights?.delete(this.highlightName);
+    } catch {
+      // no-op fallback for unsupported runtime paths
+    }
+  }
+
+  private observeContentMutations(): void {
+    if (!this.editor || typeof MutationObserver === 'undefined') return;
+    const contentElement = this.editor.getView().getContentElement();
+    this.observer = new MutationObserver(() => {
+      this.clearBracketHighlighting();
+      this.scheduleBracketUpdate();
+    });
+    this.observer.observe(contentElement, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+  }
+
+  private detectCustomHighlightSupport(): boolean {
+    try {
+      if (typeof CSS === 'undefined' || typeof window === 'undefined') {
+        return false;
+      }
+      const cssAny = CSS as unknown as { highlights?: Map<string, unknown> };
+      const highlightCtor = (window as unknown as { Highlight?: unknown }).Highlight;
+      return !!cssAny.highlights && !!highlightCtor;
+    } catch {
+      return false;
+    }
+  }
+
+  private ensureHighlightStyles(): void {
+    if (typeof document === 'undefined') return;
+    if (document.getElementById(this.highlightStyleId)) return;
+
+    const style = document.createElement('style');
+    style.id = this.highlightStyleId;
+    style.textContent = `
+      ::highlight(${this.highlightName}) {
+        background-color: var(--lce-bracket-match-bg, rgba(86, 156, 214, 0.4));
+        text-decoration: underline solid var(--lce-bracket-match-border, rgba(156, 220, 254, 0.95)) 2px;
+      }
+    `;
+    document.head.appendChild(style);
   }
 
   getCurrentMatch(): BracketMatch | null {
@@ -165,7 +287,30 @@ export class BracketMatchingExtension implements EditorExtension {
   }
 
   destroy(): void {
+    if (this.pendingUpdateRaf !== null && typeof cancelAnimationFrame === 'function') {
+      cancelAnimationFrame(this.pendingUpdateRaf);
+      this.pendingUpdateRaf = null;
+    }
     this.clearBracketHighlighting();
+    this.observer?.disconnect();
+    this.observer = null;
+
+    if (this.editor && this.cursorHandler) {
+      this.editor.off('cursor', this.cursorHandler);
+    }
+    if (this.editor && this.changeHandler) {
+      this.editor.off('change', this.changeHandler);
+    }
+
+    if (typeof document !== 'undefined') {
+      const styleNode = document.getElementById(this.highlightStyleId);
+      if (styleNode?.parentNode) {
+        styleNode.parentNode.removeChild(styleNode);
+      }
+    }
+
+    this.cursorHandler = null;
+    this.changeHandler = null;
     this.editor = null;
   }
 }

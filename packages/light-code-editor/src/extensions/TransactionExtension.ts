@@ -7,6 +7,7 @@ import { EditorCore, EditorExtension, TextChange, Transaction } from '../types';
 
 export class TransactionExtension implements EditorExtension {
   name = 'transaction';
+  private static readonly MAX_TRANSACTIONS = 200;
 
   private transactions: Transaction[] = [];
 
@@ -19,6 +20,12 @@ export class TransactionExtension implements EditorExtension {
         annotations: []
       };
       this.transactions.push(transaction);
+      if (this.transactions.length > TransactionExtension.MAX_TRANSACTIONS) {
+        this.transactions.splice(
+          0,
+          this.transactions.length - TransactionExtension.MAX_TRANSACTIONS,
+        );
+      }
     });
   }
 

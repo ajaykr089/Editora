@@ -10,7 +10,26 @@ import {
   ReadOnlyExtension,
   SearchExtension,
   BracketMatchingExtension,
-  CodeFoldingExtension
+  CodeFoldingExtension,
+  DiagnosticsExtension,
+  CompletionExtension,
+  FormattingExtension,
+  ContextMenuExtension,
+  EditingCommandsExtension,
+  ActiveLineAndIndentGuidesExtension,
+  createLanguageServiceExtensions,
+  type EditorDecoration,
+  type EditorDiagnostic,
+  type CompletionContext,
+  type CompletionItem,
+  type CompletionResult,
+  type Formatter,
+  type ContextMenuItem,
+  type LanguageServiceCodeAction,
+  type LanguageServiceCodeActionContext,
+  type LanguageServiceHighlightContext,
+  type LanguageServiceHoverContext,
+  type LanguageServiceHoverResult,
 } from "@editora/light-code-editor";
 import "../../packages/light-code-editor/dist/light-code-editor.css";
 import { Box, Flex} from '@editora/ui-react';
@@ -26,7 +45,7 @@ const meta: Meta = {
 # Light Code Editor - Lightweight Code Editor Library
 
 **Bundle Size**: ~38 KB ES module (8.7 KB gzipped)  
-**Features**: Syntax highlighting, themes, search, folding, extensions  
+**Features**: syntax highlighting, themes, search, completion, formatting, context menu, editing commands, active line guides, language service adapter, hover tooltips, code actions, folding, extensions  
 **Zero Dependencies**: Framework agnostic, works everywhere  
 
 ## Features
@@ -36,6 +55,12 @@ const meta: Meta = {
 - ✅ Light and dark themes
 - ✅ Line numbers gutter
 - ✅ Search and replace
+- ✅ Provider-based completions
+- ✅ Pluggable document and selection formatting
+- ✅ Context menu actions for find, replace, formatting, and navigation
+- ✅ Editing commands for comments, duplicate/move line, join lines, and go-to-line
+- ✅ Active line highlighting with lightweight indent guides
+- ✅ Language service adapter composing syntax, diagnostics, completions, formatting, hover info, and code actions
 - ✅ Bracket matching
 - ✅ Code folding
 - ✅ Read-only mode
@@ -74,6 +99,38 @@ const meta: Meta = {
     codeFolding: {
       control: { type: "boolean" },
       description: "Enable code folding",
+    },
+    showDecorations: {
+      control: { type: "boolean" },
+      description: "Demonstrate line, gutter, and inline decorations",
+    },
+    enableDiagnostics: {
+      control: { type: "boolean" },
+      description: "Enable diagnostics extension demo with gutter markers and inline issues",
+    },
+    enableCompletions: {
+      control: { type: "boolean" },
+      description: "Enable autocomplete popup demo with keyboard navigation and insertion",
+    },
+    enableFormatting: {
+      control: { type: "boolean" },
+      description: "Enable formatter extension demo with document and selection commands",
+    },
+    enableContextMenu: {
+      control: { type: "boolean" },
+      description: "Enable right-click context menu actions inside the editor",
+    },
+    enableEditingCommands: {
+      control: { type: "boolean" },
+      description: "Enable comment and line-editing commands like duplicate, move, join, and go-to-line",
+    },
+    enableActiveLineGuides: {
+      control: { type: "boolean" },
+      description: "Highlight the active line and render indent guides using line decorations",
+    },
+    enableLanguageServiceAdapter: {
+      control: { type: "boolean" },
+      description: "Compose syntax highlighting, diagnostics, completions, formatting, hover info, and code actions from one language-service adapter",
     },
   },
 };
@@ -143,126 +200,31 @@ const sampleHTML = `<!DOCTYPE html>
 </body>
 </html>`;
 
-const LightCodeEditorDemo = ({
-  theme = "dark",
-  showLineNumbers = true,
-  syntaxHighlighting = true,
-  readOnly = false,
-  enableSearch = true,
-  bracketMatching = true,
-  codeFolding = true
-}: {
-  theme?: string;
-  showLineNumbers?: boolean;
-  syntaxHighlighting?: boolean;
-  readOnly?: boolean;
-  enableSearch?: boolean;
-  bracketMatching?: boolean;
-  codeFolding?: boolean;
-}) => {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const editorInstanceRef = useRef<any>(null);
-  const [currentContent, setCurrentContent] = useState(sampleHTML);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  useEffect(() => {
-    if (!editorRef.current) return;
-
-    // Clean up previous instance
-    if (editorInstanceRef.current) {
-      editorInstanceRef.current.destroy?.();
-    }
-
-    // Create extensions array
-    const extensions = [];
-
-    if (showLineNumbers) {
-      extensions.push(new LineNumbersExtension());
-    }
-
-    if (syntaxHighlighting) {
-      extensions.push(new SyntaxHighlightingExtension());
-    }
-
-    extensions.push(new ThemeExtension());
-
-    if (readOnly) {
-      extensions.push(new ReadOnlyExtension());
-    }
-
-    if (enableSearch) {
-      extensions.push(new SearchExtension());
-    }
-
-    if (bracketMatching) {
-      extensions.push(new BracketMatchingExtension());
-    }
-
-    if (codeFolding) {
-      extensions.push(new CodeFoldingExtension());
-    }
-
-    // Create editor instance
-    editorInstanceRef.current = createEditor(editorRef.current, {
-      value: currentContent,
-      theme,
-      readOnly,
-      extensions
-    });
-
-    // Listen for changes
-    editorInstanceRef.current.on('change', () => {
-      const newContent = editorInstanceRef.current.getValue();
-      setCurrentContent(newContent);
-    });
-
-    return () => {
-      if (editorInstanceRef.current) {
-        editorInstanceRef.current.destroy?.();
-      }
-    };
-  }, [theme, showLineNumbers, syntaxHighlighting, readOnly, enableSearch, bracketMatching, codeFolding]);
-
-  const handleSearch = () => {
-    if (editorInstanceRef.current && searchQuery) {
-      const results = editorInstanceRef.current.search(searchQuery);
-      console.log('Search results:', results);
-    }
-  };
-
-  const handleReplace = () => {
-    if (editorInstanceRef.current && searchQuery) {
-      const replacement = prompt('Replace with:');
-      if (replacement !== null) {
-        const count = editorInstanceRef.current.replaceAll(searchQuery, replacement);
-        alert(`Replaced ${count} occurrences`);
-      }
-    }
-  };
-
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-  };
-
-  const loadSampleContent = (contentType: string) => {
-    let content = "";
-    switch (contentType) {
-      case "html":
-        content = sampleHTML;
-        break;
-      case "minimal":
-        content = `<!DOCTYPE html>
+const editorSamples = [
+  {
+    value: "html",
+    label: "HTML - Full Document",
+    language: "html",
+    content: sampleHTML,
+  },
+  {
+    value: "minimal",
+    label: "HTML - Minimal",
+    language: "html",
+    content: `<!DOCTYPE html>
 <html>
 <head><title>Minimal</title></head>
 <body>
   <h1>Hello World</h1>
   <p>This is a minimal HTML document.</p>
 </body>
-</html>`;
-        break;
-      case "complex":
-        content = `<div class="wrapper">
+</html>`,
+  },
+  {
+    value: "complex",
+    label: "HTML - Complex Layout",
+    language: "html",
+    content: `<div class="wrapper">
   <header>
     <nav>
       <ul>
@@ -298,10 +260,19 @@ const LightCodeEditorDemo = ({
   <footer>
     <p>&copy; 2024 Company Name. All rights reserved.</p>
   </footer>
-</div>`;
-        break;
-      case "broken":
-        content = `<html>
+</div>`,
+  },
+  {
+    value: "messy",
+    label: "HTML - Messy Markup",
+    language: "html",
+    content: `<div class="wrapper"><header><nav><ul><li><a href="#home">Home</a></li><li><a href="#about">About</a></li></ul></nav></header><main><section id="about"><h2>About Us</h2><div class="grid"><div class="card"><h3>Feature 1</h3><p>Description of feature 1.</p></div><div class="card"><h3>Feature 2</h3><p>Description of feature 2.</p></div></div></section></main></div>`,
+  },
+  {
+    value: "broken",
+    label: "HTML - Broken",
+    language: "html",
+    content: `<html>
 <head>
   <title>Broken HTML</title>
 <body>
@@ -313,11 +284,1500 @@ const LightCodeEditorDemo = ({
   </div>
   <p>More content
 </body>
-</html>`;
-        break;
+</html>`,
+  },
+  {
+    value: "css",
+    label: "CSS",
+    language: "css",
+    content: `:root {
+  --surface: #f8fafc;
+  --accent: #2563eb;
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  background: linear-gradient(135deg, var(--surface), #dbeafe);
+}
+
+.card {
+  display: grid;
+  gap: 1rem;
+  padding: 24px;
+  border-radius: 18px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.14);
+}`,
+  },
+  {
+    value: "javascript",
+    label: "JavaScript",
+    language: "javascript",
+    content: `const fruits = ["apple", "banana", "mango"];
+
+for (const fruit of fruits) {
+  console.log(\`Fresh fruit: \${fruit}\`);
+}
+
+async function loadInventory() {
+  const response = await fetch("/api/inventory");
+  return response.json();
+}`,
+  },
+  {
+    value: "typescript",
+    label: "TypeScript",
+    language: "typescript",
+    content: `type Fruit = {
+  id: string;
+  name: string;
+  stock: number;
+};
+
+const fruits: Fruit[] = [
+  { id: "apple", name: "Apple", stock: 12 },
+  { id: "mango", name: "Mango", stock: 8 },
+];
+
+export function getAvailableFruit(items: Fruit[]): Fruit[] {
+  return items.filter((item) => item.stock > 0);
+}`,
+  },
+  {
+    value: "json",
+    label: "JSON",
+    language: "json",
+    content: `{
+  "name": "@editora/light-code-editor",
+  "version": "1.0.8",
+  "features": ["syntax", "search", "diagnostics"],
+  "private": false
+}`,
+  },
+  {
+    value: "markdown",
+    label: "Markdown",
+    language: "markdown",
+    content: `---
+title: Light Code Editor
+status: ready
+---
+
+# Light Code Editor
+
+Use **syntax highlighting**, _formatting_, and \`find/replace\` in one small editor.
+
+- [x] HTML, CSS, and JavaScript
+- [x] Markdown fenced code blocks
+- [ ] Language-service integrations
+
+~~~typescript
+import { createEditor } from "@editora/light-code-editor";
+
+const editor = createEditor(container, {
+  extensions: []
+});
+~~~
+`,
+  },
+  {
+    value: "bash",
+    label: "Bash / Shell",
+    language: "bash",
+    content: `#!/usr/bin/env bash
+
+set -euo pipefail
+
+npm install @editora/light-code-editor
+npm run build --workspace=@editora/light-code-editor
+
+for package in core react light-code-editor; do
+  echo "Checking $package"
+done`,
+  },
+  {
+    value: "python",
+    label: "Python",
+    language: "python",
+    content: `fruits = ["apple", "banana", "mango"]
+
+for fruit in fruits:
+    print(fruit)
+
+def summarize(items):
+    return {"count": len(items), "first": items[0] if items else None}`,
+  },
+  {
+    value: "go",
+    label: "Go",
+    language: "go",
+    content: `package main
+
+import "fmt"
+
+type Fruit struct {
+	Name  string
+	Stock int
+}
+
+func main() {
+	fruits := []Fruit{{Name: "Apple", Stock: 12}}
+	for _, fruit := range fruits {
+		fmt.Println(fruit.Name)
+	}
+}`,
+  },
+  {
+    value: "c",
+    label: "C",
+    language: "c",
+    content: `#include <stdio.h>
+
+int main(void) {
+  const char *fruits[] = {"apple", "banana", "mango"};
+
+  for (int i = 0; i < 3; i++) {
+    printf("%s\\n", fruits[i]);
+  }
+
+  return 0;
+}`,
+  },
+  {
+    value: "cpp",
+    label: "C++",
+    language: "cpp",
+    content: `#include <iostream>
+#include <vector>
+
+int main() {
+  std::vector<std::string> fruits = {"apple", "banana", "mango"};
+
+  for (const auto& fruit : fruits) {
+    std::cout << fruit << std::endl;
+  }
+
+  return 0;
+}`,
+  },
+  {
+    value: "java",
+    label: "Java",
+    language: "java",
+    content: `import java.util.List;
+
+public class FruitDemo {
+  public static void main(String[] args) {
+    List<String> fruits = List.of("apple", "banana", "mango");
+
+    for (String fruit : fruits) {
+      System.out.println(fruit);
     }
+  }
+}`,
+  },
+  {
+    value: "csharp",
+    label: "C#",
+    language: "csharp",
+    content: `using System;
+using System.Collections.Generic;
+
+public class FruitDemo
+{
+    public static void Main()
+    {
+        var fruits = new List<string> { "apple", "banana", "mango" };
+
+        foreach (var fruit in fruits)
+        {
+            Console.WriteLine(fruit);
+        }
+    }
+}`,
+  },
+  {
+    value: "rust",
+    label: "Rust",
+    language: "rust",
+    content: `fn main() {
+    let fruits = vec!["apple", "banana", "mango"];
+
+    for fruit in fruits {
+        println!("{}", fruit);
+    }
+}`,
+  },
+  {
+    value: "ruby",
+    label: "Ruby",
+    language: "ruby",
+    content: `fruits = ["apple", "banana", "mango"]
+
+fruits.each do |fruit|
+  puts fruit
+end
+
+def first_fruit(items)
+  items.first
+end`,
+  },
+  {
+    value: "sql",
+    label: "SQL",
+    language: "sql",
+    content: `SELECT id, name, stock
+FROM fruits
+WHERE stock > 0
+ORDER BY name ASC;
+
+INSERT INTO fruits (name, stock)
+VALUES ('mango', 8);`,
+  },
+  {
+    value: "yaml",
+    label: "YAML",
+    language: "yaml",
+    content: `name: light-code-editor
+version: 1.0.8
+features:
+  - syntax-highlighting
+  - diagnostics
+  - formatting
+enabled: true`,
+  },
+  {
+    value: "xml",
+    label: "XML / SVG",
+    language: "xml",
+    content: `<?xml version="1.0" encoding="UTF-8"?>
+<catalog>
+  <fruit id="apple" stock="12">Apple</fruit>
+  <fruit id="mango" stock="8">Mango</fruit>
+</catalog>`,
+  },
+  {
+    value: "dockerfile",
+    label: "Dockerfile",
+    language: "dockerfile",
+    content: `FROM node:22-alpine
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+
+CMD ["npm", "run", "storybook"]`,
+  },
+  {
+    value: "php",
+    label: "PHP",
+    language: "php",
+    content: `<?php
+
+$fruits = ["apple", "banana", "mango"];
+
+foreach ($fruits as $fruit) {
+    echo strtoupper($fruit) . PHP_EOL;
+}
+`,
+  },
+] as const;
+
+function findLineIndex(
+  lines: string[],
+  matchers: string[],
+  fallbackIndex = 0,
+): number {
+  for (const matcher of matchers) {
+    const index = lines.findIndex((line) => line.includes(matcher));
+    if (index !== -1) {
+      return index;
+    }
+  }
+
+  return Math.max(
+    0,
+    Math.min(
+      fallbackIndex,
+      Math.max(0, lines.length - 1),
+    ),
+  );
+}
+
+function buildDecorationDemo(text: string, toggles: {
+  line: boolean;
+  gutter: boolean;
+  inline: boolean;
+}): EditorDecoration[] {
+  const lines = text.split("\n");
+  const activeLineMatchers = [
+    '<div class="highlight">',
+    "<button",
+    "<section id=\"about\">",
+    "<h1>Hello World</h1>",
+    "Missing closing tags",
+  ];
+  const issueLineMatchers = [
+    "onclick=",
+    "Missing closing tags",
+    "<img ",
+    "Get Started",
+    "<button",
+  ];
+  const hasDemoDecorationTarget = [...activeLineMatchers, ...issueLineMatchers].some(
+    (matcher) => lines.some((line) => line.includes(matcher)),
+  );
+
+  if (!hasDemoDecorationTarget) {
+    return [];
+  }
+
+  const activeLine = findLineIndex(lines, activeLineMatchers, 0);
+  const issueLine = findLineIndex(lines, issueLineMatchers, activeLine);
+  const issueLineText = lines[issueLine] || "";
+
+  const inlineTarget =
+    ["alert", "Missing closing tags", "Get Started", "<img", "Click me"]
+      .find((candidate) => issueLineText.includes(candidate)) ||
+    issueLineText.trim().split(/\s+/)[0] ||
+    "";
+  const inlineStart = inlineTarget ? issueLineText.indexOf(inlineTarget) : -1;
+  const decorations: EditorDecoration[] = [];
+
+  if (toggles.line) {
+    decorations.push({
+      id: "storybook-active-line",
+      type: "line",
+      line: activeLine,
+      className: "lce-decoration-line--active",
+      style: {
+        backgroundColor: "rgba(56, 189, 248, 0.12)",
+        boxShadow: "inset 0 0 0 1px rgba(56, 189, 248, 0.22)",
+      },
+    });
+  }
+
+  if (toggles.gutter) {
+    decorations.push({
+      id: "storybook-gutter-warning",
+      type: "gutter",
+      line: issueLine,
+      label: "●",
+      title: "Storybook decoration marker",
+      className: "lce-decoration-gutter--error",
+      style: {
+        paddingRight: "8px",
+      },
+    });
+  }
+
+  if (toggles.inline && inlineStart >= 0 && inlineTarget.length > 0) {
+    decorations.push({
+      id: "storybook-inline-highlight",
+      type: "inline",
+      range: {
+        start: { line: issueLine, column: inlineStart },
+        end: { line: issueLine, column: inlineStart + inlineTarget.length },
+      },
+      style: {
+        backgroundColor: "rgba(248, 113, 113, 0.2)",
+        textDecoration: "underline wavy rgba(248, 113, 113, 0.95)",
+      },
+    });
+  }
+
+  return decorations;
+}
+
+function buildDiagnosticsDemo(text: string): EditorDiagnostic[] {
+  const lines = text.split("\n");
+  const issueLineMatchers = [
+    "onclick=",
+    "Missing closing tags",
+    "<img ",
+    "Get Started",
+    "<button",
+  ];
+  const hasDemoDiagnosticTarget = issueLineMatchers.some((matcher) =>
+    lines.some((line) => line.includes(matcher)),
+  );
+
+  if (!hasDemoDiagnosticTarget) {
+    return [];
+  }
+
+  const issueLine = findLineIndex(lines, issueLineMatchers, 0);
+  const issueLineText = lines[issueLine] || "";
+
+  const messageTarget =
+    ["alert", "Missing closing tags", "Get Started", "<img", "Click me"]
+      .find((candidate) => issueLineText.includes(candidate)) ||
+    issueLineText.trim().split(/\s+/)[0] ||
+    "issue";
+  const messageStart = Math.max(0, issueLineText.indexOf(messageTarget));
+
+  const infoLine = findLineIndex(lines, [
+    "<div class=\"highlight\">",
+    "<section id=\"about\">",
+    "<h1>Hello World</h1>",
+  ], issueLine);
+  const infoLineText = lines[infoLine] || "";
+  const infoTarget =
+    ["highlight", "About", "Hello World"]
+      .find((candidate) => infoLineText.includes(candidate)) ||
+    infoLineText.trim().split(/\s+/)[0] ||
+    "note";
+  const infoStart = Math.max(0, infoLineText.indexOf(infoTarget));
+
+  const diagnostics: EditorDiagnostic[] = [
+    {
+      id: "story-error",
+      severity: "error",
+      message: issueLineText.includes("Missing closing tags")
+        ? "Unclosed or malformed markup"
+        : "Inline handler needs review",
+      source: "storybook",
+      code: issueLineText.includes("Missing closing tags") ? "HTML001" : "SEC201",
+      range: {
+        start: { line: issueLine, column: messageStart },
+        end: { line: issueLine, column: messageStart + Math.max(1, messageTarget.length) },
+      },
+    },
+  ];
+
+  if (infoLineText.trim().length > 0) {
+    diagnostics.push({
+      id: "story-info",
+      severity: issueLineText.includes("Missing closing tags") ? "warning" : "info",
+      message: issueLineText.includes("Missing closing tags")
+        ? "Parser recovery may shift following nodes"
+        : "Decorative content block worth reviewing",
+      source: "storybook",
+      code: issueLineText.includes("Missing closing tags") ? "HTML014" : "UX110",
+      range: {
+        start: { line: infoLine, column: infoStart },
+        end: { line: infoLine, column: infoStart + Math.max(1, infoTarget.length) },
+      },
+    });
+  }
+
+  return diagnostics;
+}
+
+const htmlTagSuggestions = [
+  "article",
+  "button",
+  "div",
+  "footer",
+  "form",
+  "header",
+  "img",
+  "input",
+  "label",
+  "li",
+  "main",
+  "nav",
+  "option",
+  "p",
+  "section",
+  "select",
+  "span",
+  "strong",
+  "textarea",
+  "ul",
+];
+
+const htmlAttributeSuggestions = [
+  "alt",
+  "aria-label",
+  "class",
+  "data-testid",
+  "disabled",
+  "href",
+  "id",
+  "name",
+  "placeholder",
+  "role",
+  "src",
+  "title",
+  "type",
+  "value",
+];
+
+function buildCompletionDemo(context: CompletionContext): CompletionItem[] | CompletionResult {
+  const cursor = context.cursor.position;
+  const beforeCursor = context.lineText.slice(0, cursor.column);
+  const tagMatch = beforeCursor.match(/<\/?([A-Za-z0-9-]*)$/);
+
+  if (tagMatch) {
+    const typedPrefix = (tagMatch[1] || "").toLowerCase();
+    return {
+      from: {
+        start: { line: cursor.line, column: cursor.column - tagMatch[1].length },
+        end: { line: cursor.line, column: cursor.column },
+      },
+      items: htmlTagSuggestions
+        .filter((tag) => tag.startsWith(typedPrefix))
+        .map((tag) => ({
+          label: tag,
+          insertText: tag,
+          kind: "tag",
+          detail: `<${tag}>`,
+          description: "HTML tag suggestion from the Storybook completion provider",
+        })),
+    };
+  }
+
+  const openTagMatch = beforeCursor.match(/<([A-Za-z][A-Za-z0-9-]*)([^>]*)$/);
+  const attributeMatch = beforeCursor.match(/\s([A-Za-z:_-]*)$/);
+  if (openTagMatch && attributeMatch) {
+    const typedPrefix = (attributeMatch[1] || "").toLowerCase();
+    return {
+      from: {
+        start: { line: cursor.line, column: cursor.column - attributeMatch[1].length },
+        end: { line: cursor.line, column: cursor.column },
+      },
+      items: htmlAttributeSuggestions
+        .filter((attribute) => attribute.startsWith(typedPrefix))
+        .map((attribute) => ({
+          label: attribute,
+          insertText: `${attribute}=""`,
+          kind: "attribute",
+          detail: openTagMatch[1],
+          description: "Press Enter or Tab to insert the attribute template",
+        })),
+    };
+  }
+
+  if (!context.explicit && context.prefix.length === 0) {
+    return [];
+  }
+
+  return [
+    ...htmlTagSuggestions.slice(0, 8).map((tag) => ({
+      label: tag,
+      insertText: tag,
+      kind: "tag" as const,
+      detail: `<${tag}>`,
+      description: "Manual completion suggestion",
+    })),
+    ...htmlAttributeSuggestions.slice(0, 6).map((attribute) => ({
+      label: attribute,
+      insertText: `${attribute}=""`,
+      kind: "attribute" as const,
+      detail: "attribute",
+      description: "Manual completion suggestion",
+    })),
+  ].filter((item) => {
+    const prefix = context.prefix.toLowerCase();
+    if (!prefix) {
+      return true;
+    }
+    return item.label.toLowerCase().includes(prefix);
+  });
+}
+
+const htmlVoidTags = new Set([
+  "area",
+  "base",
+  "br",
+  "col",
+  "embed",
+  "hr",
+  "img",
+  "input",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr",
+]);
+
+function escapeLanguageServiceHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function buildLanguageServiceHighlightDemo(
+  context: LanguageServiceHighlightContext,
+): string {
+  const escaped = escapeLanguageServiceHtml(context.text);
+  const commentColor = context.colors.comment || "#6a9955";
+  const doctypeColor = context.colors.doctype || "#808080";
+  const tagColor = context.colors.tag || "#569cd6";
+  const attrNameColor = context.colors.attrName || "#9cdcfe";
+  const attrValueColor = context.colors.attrValue || "#ce9178";
+
+  return escaped
+    .replace(
+      /(&lt;!--[\s\S]*?--&gt;)/g,
+      `<span style="color: ${commentColor};">$1</span>`,
+    )
+    .replace(
+      /(&lt;!DOCTYPE[\s\S]*?&gt;)/gi,
+      `<span style="color: ${doctypeColor};">$1</span>`,
+    )
+    .replace(
+      /(&lt;\/?)([A-Za-z][A-Za-z0-9-]*)([\s\S]*?)(\/?&gt;)/g,
+      (_whole, open, tagName, attrs, close) => {
+        const highlightedAttrs = String(attrs || "").replace(
+          /([A-Za-z_:][-A-Za-z0-9_:.]*)(\s*=\s*)(&quot;[\s\S]*?&quot;|&#39;[\s\S]*?&#39;|[^\s&>]+)/g,
+          (_attrWhole, attrName, separator, attrValue) =>
+            `<span style="color: ${attrNameColor};">${attrName}</span>${separator}<span style="color: ${attrValueColor};">${attrValue}</span>`,
+        );
+
+        return `${open}<span style="color: ${tagColor};">${tagName}</span>${highlightedAttrs}${close}`;
+      },
+    );
+}
+
+function createRangeForLine(
+  line: number,
+  startColumn: number,
+  endColumn: number,
+): {
+  start: { line: number; column: number };
+  end: { line: number; column: number };
+} {
+  return {
+    start: { line, column: startColumn },
+    end: { line, column: endColumn },
+  };
+}
+
+function getLineTextAt(text: string, line: number): string {
+  const lines = text.split("\n");
+  const safeLine = Math.max(0, Math.min(line, Math.max(0, lines.length - 1)));
+  return lines[safeLine] || "";
+}
+
+function findAttributeRangeInLine(
+  lineText: string,
+  attributeName: string,
+): { start: number; end: number } | null {
+  const match = lineText.match(
+    new RegExp(`\\b${attributeName}\\s*=\\s*(\"[^\"]*\"|'[^']*'|[^\\s>]+)`, "i"),
+  );
+  if (!match || match.index === undefined) {
+    return null;
+  }
+
+  return {
+    start: match.index,
+    end: match.index + match[0].length,
+  };
+}
+
+function findTagRangeInLine(
+  lineText: string,
+  tagName: string,
+): { start: number; end: number } | null {
+  const match = lineText.match(new RegExp(`<${tagName}\\b[^>]*>`, "i"));
+  if (!match || match.index === undefined) {
+    return null;
+  }
+
+  return {
+    start: match.index,
+    end: match.index + match[0].length,
+  };
+}
+
+function isColumnWithinRange(
+  column: number,
+  range: { start: number; end: number } | null,
+): boolean {
+  if (!range) {
+    return false;
+  }
+
+  return column >= range.start && column <= range.end;
+}
+
+function buildLanguageServiceHoverDemo(
+  context: LanguageServiceHoverContext,
+): LanguageServiceHoverResult | null {
+  const onclickRange = findAttributeRangeInLine(context.lineText, "onclick");
+  if (isColumnWithinRange(context.position.column, onclickRange)) {
+    return {
+      title: "Inline event handler",
+      content:
+        "Inline JavaScript handlers are harder to audit and reuse. Prefer wiring behavior from script or delegated listeners.",
+      range: createRangeForLine(
+        context.position.line,
+        onclickRange!.start,
+        onclickRange!.end,
+      ),
+    };
+  }
+
+  const imgRange = findTagRangeInLine(context.lineText, "img");
+  if (
+    imgRange &&
+    !/\balt\s*=/.test(context.lineText) &&
+    isColumnWithinRange(context.position.column, imgRange)
+  ) {
+    return {
+      title: "Image missing alt text",
+      content:
+        "Add an alt attribute so assistive technologies and fallback rendering have useful descriptive text.",
+      range: createRangeForLine(
+        context.position.line,
+        imgRange.start,
+        imgRange.end,
+      ),
+    };
+  }
+
+  const diagnostic = context.diagnostics[0];
+  if (diagnostic) {
+    return {
+      title: `${diagnostic.severity.toUpperCase()}${diagnostic.code ? ` · ${diagnostic.code}` : ""}`,
+      content: diagnostic.message,
+      range: diagnostic.range,
+    };
+  }
+
+  const buttonRange = findTagRangeInLine(context.lineText, "button");
+  if (buttonRange && isColumnWithinRange(context.position.column, buttonRange)) {
+    return {
+      title: "<button>",
+      content:
+        "Interactive elements are a good place to validate inline handlers, labels, and keyboard behavior while editing markup.",
+      range: createRangeForLine(
+        context.position.line,
+        buttonRange.start,
+        buttonRange.end,
+      ),
+    };
+  }
+
+  return null;
+}
+
+function buildLanguageServiceCodeActionsDemo(
+  context: LanguageServiceCodeActionContext,
+): LanguageServiceCodeAction[] {
+  const actions: LanguageServiceCodeAction[] = [];
+  const lineNumber = context.position.line;
+  const lineText = context.lineText;
+  const readOnly = context.editor.getState().readOnly;
+  const onclickRange = findAttributeRangeInLine(lineText, "onclick");
+  const imgRange = findTagRangeInLine(lineText, "img");
+  const lineHasMissingAlt = !!imgRange && !/\balt\s*=/.test(lineText);
+
+  if (onclickRange && !readOnly) {
+    actions.push({
+      label: "Remove inline onclick handler",
+      detail: "Quick fix",
+      run: (editor) => {
+        const liveLineText = getLineTextAt(editor.getValue(), lineNumber);
+        const liveRange = findAttributeRangeInLine(liveLineText, "onclick");
+        if (!liveRange) {
+          return;
+        }
+
+        const removeStart =
+          liveRange.start > 0 && /\s/.test(liveLineText[liveRange.start - 1] || "")
+            ? liveRange.start - 1
+            : liveRange.start;
+
+        editor.replace(
+          createRangeForLine(lineNumber, removeStart, liveRange.end),
+          "",
+        );
+      },
+    });
+  }
+
+  if (lineHasMissingAlt && !readOnly) {
+    actions.push({
+      label: 'Add alt="" attribute',
+      detail: "Accessibility quick fix",
+      run: (editor) => {
+        const liveLineText = getLineTextAt(editor.getValue(), lineNumber);
+        const liveImgRange = findTagRangeInLine(liveLineText, "img");
+        if (!liveImgRange || /\balt\s*=/.test(liveLineText)) {
+          return;
+        }
+
+        const selfClosingIndex = liveLineText.indexOf("/>", liveImgRange.start);
+        const closeIndex =
+          selfClosingIndex >= 0
+            ? selfClosingIndex
+            : liveLineText.indexOf(">", liveImgRange.start);
+        if (closeIndex < 0) {
+          return;
+        }
+
+        editor.replace(
+          createRangeForLine(lineNumber, closeIndex, closeIndex),
+          ' alt=""',
+        );
+      },
+    });
+  }
+
+  if (context.diagnostics.length > 0) {
+    actions.push({
+      label: "Go to next diagnostic",
+      detail: "Navigation",
+      run: (editor) => {
+        editor.executeCommand("nextDiagnostic");
+      },
+    });
+  }
+
+  if (!readOnly) {
+    actions.push({
+      label: "Format document",
+      detail: "Formatting",
+      run: (editor) => {
+        editor.executeCommand("formatDocument");
+      },
+    });
+  }
+
+  if (context.trigger === "manual") {
+    actions.push({
+      label: "Refresh diagnostics",
+      detail: "Language service",
+      run: (editor) => {
+        editor.executeCommand("refreshLanguageDiagnostics");
+      },
+    });
+  }
+
+  return actions;
+}
+
+function formatCssDemo(input: string): string {
+  const normalized = input
+    .replace(/\r\n?/g, "\n")
+    .replace(/\s*{\s*/g, " {\n")
+    .replace(/;\s*/g, ";\n")
+    .replace(/\s*}\s*/g, "\n}\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  if (!normalized) {
+    return "";
+  }
+
+  const lines = normalized
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  const output: string[] = [];
+  let depth = 0;
+
+  for (const line of lines) {
+    if (line === "}") {
+      depth = Math.max(0, depth - 1);
+    }
+
+    output.push(`${"  ".repeat(depth)}${line}`);
+
+    if (line.endsWith("{")) {
+      depth += 1;
+    }
+  }
+
+  return output.join("\n");
+}
+
+function looksLikeCss(input: string): boolean {
+  const trimmed = input.trim();
+  if (!trimmed || /</.test(trimmed)) {
+    return false;
+  }
+
+  return /{[\s\S]*}/.test(trimmed) && /[A-Za-z-]+\s*:/.test(trimmed);
+}
+
+function formatHtmlDemo(input: string): string {
+  const normalized = input.replace(/\r\n?/g, "\n").trim();
+
+  if (!normalized) {
+    return "";
+  }
+
+  const tokens = normalized.match(
+    /<!--[\s\S]*?-->|<!DOCTYPE[\s\S]*?>|<style\b[^>]*>[\s\S]*?<\/style>|<script\b[^>]*>[\s\S]*?<\/script>|<\/?[A-Za-z][^>]*?>|[^<]+/gi,
+  ) || [];
+  const output: string[] = [];
+  let depth = 0;
+
+  for (const token of tokens) {
+    const line = token.trim();
+    if (!line) {
+      continue;
+    }
+
+    const styleBlockMatch = line.match(/^<style\b([^>]*)>([\s\S]*?)<\/style>$/i);
+    if (styleBlockMatch) {
+      output.push(`${"  ".repeat(depth)}<style${styleBlockMatch[1]}>`);
+
+      const formattedCss = formatCssDemo(styleBlockMatch[2]);
+      if (formattedCss) {
+        formattedCss.split("\n").forEach((cssLine) => {
+          output.push(`${"  ".repeat(depth + 1)}${cssLine}`);
+        });
+      }
+
+      output.push(`${"  ".repeat(depth)}</style>`);
+      continue;
+    }
+
+    const scriptBlockMatch = line.match(/^<script\b([^>]*)>([\s\S]*?)<\/script>$/i);
+    if (scriptBlockMatch) {
+      output.push(`${"  ".repeat(depth)}<script${scriptBlockMatch[1]}>`);
+
+      const scriptBody = scriptBlockMatch[2]
+        .split("\n")
+        .map((scriptLine) => scriptLine.trim())
+        .filter((scriptLine) => scriptLine.length > 0);
+      scriptBody.forEach((scriptLine) => {
+        output.push(`${"  ".repeat(depth + 1)}${scriptLine}`);
+      });
+
+      output.push(`${"  ".repeat(depth)}</script>`);
+      continue;
+    }
+
+    if (!/^</.test(line)) {
+      line
+        .split(/\n+/)
+        .map((textLine) => textLine.trim())
+        .filter((textLine) => textLine.length > 0)
+        .forEach((textLine) => {
+          output.push(`${"  ".repeat(depth)}${textLine}`);
+        });
+      continue;
+    }
+
+    const closingTag = /^<\//.test(line);
+    const closingBlock = /^<\/(?!html|body)/.test(line);
+    if (closingTag || closingBlock) {
+      depth = Math.max(0, depth - 1);
+    }
+
+    output.push(`${"  ".repeat(depth)}${line}`);
+
+    if (shouldIndentHtmlLine(line)) {
+      depth += 1;
+    }
+  }
+
+  return output.join("\n");
+}
+
+function shouldIndentHtmlLine(line: string): boolean {
+  if (!/^</.test(line)) {
+    return false;
+  }
+
+  if (/^<\//.test(line) || /^<!--/.test(line) || /^<!DOCTYPE/i.test(line)) {
+    return false;
+  }
+
+  if (/\/>$/.test(line)) {
+    return false;
+  }
+
+  const tagMatch = line.match(/^<([A-Za-z][A-Za-z0-9-]*)/);
+  const tagName = tagMatch?.[1]?.toLowerCase();
+  if (!tagName || htmlVoidTags.has(tagName)) {
+    return false;
+  }
+
+  if (new RegExp(`^<${tagName}\\b[^>]*>.*</${tagName}>$`, "i").test(line)) {
+    return false;
+  }
+
+  return true;
+}
+
+const buildFormattingDemo: Formatter = async (context) => {
+  await new Promise((resolve) => window.setTimeout(resolve, 120));
+
+  if (context.abortSignal?.aborted) {
+    return context.input;
+  }
+
+  if (looksLikeCss(context.input)) {
+    return formatCssDemo(context.input);
+  }
+
+  return formatHtmlDemo(context.input);
+};
+
+function buildContextMenuDemoItems(options: {
+  enableSearch: boolean;
+  enableFormatting: boolean;
+  enableDiagnostics: boolean;
+  enableEditingCommands: boolean;
+}): ContextMenuItem[] {
+  const items: ContextMenuItem[] = [
+    {
+      label: "Undo",
+      command: "undo",
+      shortcut: "Ctrl/Cmd+Z",
+      isEnabled: (editor) => !editor.getState().readOnly,
+    },
+    {
+      label: "Redo",
+      command: "redo",
+      shortcut: "Ctrl/Cmd+Shift+Z",
+      isEnabled: (editor) => !editor.getState().readOnly,
+    },
+  ];
+
+  if (options.enableSearch) {
+    items.push(
+      { type: "separator" },
+      {
+        label: "Find",
+        command: "find",
+        shortcut: "Ctrl/Cmd+F",
+      },
+      {
+        label: "Find & Replace",
+        command: "replace",
+        shortcut: "Ctrl/Cmd+H",
+        isEnabled: (editor) => !editor.getState().readOnly,
+      },
+    );
+  }
+
+  if (options.enableFormatting) {
+    items.push(
+      { type: "separator" },
+      {
+        label: "Format Selection",
+        command: "formatSelection",
+        shortcut: "Selection",
+        isEnabled: (editor) => !editor.getState().readOnly && !!editor.getSelection(),
+      },
+      {
+        label: "Format Document",
+        command: "formatDocument",
+        shortcut: "Shift+Alt+F",
+        isEnabled: (editor) => !editor.getState().readOnly,
+      },
+    );
+  }
+
+  if (options.enableDiagnostics) {
+    items.push(
+      { type: "separator" },
+      {
+        label: "Previous Issue",
+        command: "prevDiagnostic",
+      },
+      {
+        label: "Next Issue",
+        command: "nextDiagnostic",
+      },
+    );
+  }
+
+  if (options.enableEditingCommands) {
+    items.push(
+      { type: "separator" },
+      {
+        label: "Toggle Block Comment",
+        command: "toggleBlockComment",
+        shortcut: "Shift+Alt+A",
+        isEnabled: (editor) => !editor.getState().readOnly,
+      },
+      {
+        label: "Duplicate Line",
+        command: "duplicateLine",
+        shortcut: "Ctrl/Cmd+Shift+D",
+        isEnabled: (editor) => !editor.getState().readOnly,
+      },
+      {
+        label: "Join Lines",
+        command: "joinLines",
+        shortcut: "Ctrl/Cmd+J",
+        isEnabled: (editor) => !editor.getState().readOnly,
+      },
+      {
+        label: "Go To Line…",
+        command: "goToLine",
+        shortcut: "Ctrl/Cmd+L",
+      },
+    );
+  }
+
+  return items;
+}
+
+const LightCodeEditorDemo = ({
+  theme = "dark",
+  showLineNumbers = true,
+  syntaxHighlighting = true,
+  readOnly = false,
+  enableSearch = true,
+  bracketMatching = true,
+  codeFolding = true,
+  showDecorations = true,
+  enableDiagnostics = false,
+  enableCompletions = false,
+  enableFormatting = false,
+  enableContextMenu = false,
+  enableEditingCommands = false,
+  enableActiveLineGuides = false,
+  enableLanguageServiceAdapter = false,
+}: {
+  theme?: string;
+  showLineNumbers?: boolean;
+  syntaxHighlighting?: boolean;
+  readOnly?: boolean;
+  enableSearch?: boolean;
+  bracketMatching?: boolean;
+  codeFolding?: boolean;
+  showDecorations?: boolean;
+  enableDiagnostics?: boolean;
+  enableCompletions?: boolean;
+  enableFormatting?: boolean;
+  enableContextMenu?: boolean;
+  enableEditingCommands?: boolean;
+  enableActiveLineGuides?: boolean;
+  enableLanguageServiceAdapter?: boolean;
+}) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const editorInstanceRef = useRef<any>(null);
+  const diagnosticsExtensionRef = useRef<DiagnosticsExtension | null>(null);
+  const completionExtensionRef = useRef<CompletionExtension | null>(null);
+  const formattingExtensionRef = useRef<FormattingExtension | null>(null);
+  const contextMenuExtensionRef = useRef<ContextMenuExtension | null>(null);
+  const editingCommandsExtensionRef = useRef<EditingCommandsExtension | null>(null);
+  const activeLineGuidesExtensionRef = useRef<ActiveLineAndIndentGuidesExtension | null>(null);
+  const [currentContent, setCurrentContent] = useState(sampleHTML);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [lineDecorationsEnabled, setLineDecorationsEnabled] = useState(showDecorations);
+  const [gutterDecorationsEnabled, setGutterDecorationsEnabled] = useState(showDecorations);
+  const [inlineDecorationsEnabled, setInlineDecorationsEnabled] = useState(showDecorations);
+
+  useEffect(() => {
+    setLineDecorationsEnabled(showDecorations);
+    setGutterDecorationsEnabled(showDecorations);
+    setInlineDecorationsEnabled(showDecorations);
+  }, [showDecorations]);
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+
+    // Clean up previous instance
+    if (editorInstanceRef.current) {
+      editorInstanceRef.current.destroy?.();
+    }
+
+    // Create extensions array
+    const extensions = [];
+
+    if (showLineNumbers) {
+      extensions.push(new LineNumbersExtension());
+    }
+
+    if (syntaxHighlighting && !enableLanguageServiceAdapter) {
+      extensions.push(new SyntaxHighlightingExtension());
+    }
+
+    extensions.push(new ThemeExtension());
+
+    if (readOnly) {
+      extensions.push(new ReadOnlyExtension());
+    }
+
+    if (enableSearch) {
+      extensions.push(new SearchExtension());
+    }
+
+    if (bracketMatching) {
+      extensions.push(new BracketMatchingExtension());
+    }
+
+    if (codeFolding) {
+      extensions.push(new CodeFoldingExtension());
+    }
+
+    if (enableDiagnostics && !enableLanguageServiceAdapter) {
+      diagnosticsExtensionRef.current = new DiagnosticsExtension({
+        showStatusBar: true,
+        clearOnChange: false,
+      });
+      extensions.push(diagnosticsExtensionRef.current);
+    } else {
+      diagnosticsExtensionRef.current = null;
+    }
+
+    if (enableCompletions && !enableLanguageServiceAdapter) {
+      completionExtensionRef.current = new CompletionExtension({
+        minPrefixLength: 1,
+        triggerCharacters: ["<", "/", ":"],
+        providers: [buildCompletionDemo],
+      });
+      extensions.push(completionExtensionRef.current);
+    } else {
+      completionExtensionRef.current = null;
+    }
+
+    if (enableFormatting && !enableLanguageServiceAdapter) {
+      formattingExtensionRef.current = new FormattingExtension({
+        formatter: buildFormattingDemo,
+        showStatusBar: true,
+        timeoutMs: 2500,
+      });
+      extensions.push(formattingExtensionRef.current);
+    } else {
+      formattingExtensionRef.current = null;
+    }
+
+    if (enableLanguageServiceAdapter) {
+      const bundle = createLanguageServiceExtensions({
+        languageId: "html",
+        highlight: buildLanguageServiceHighlightDemo,
+        diagnostics: async (context) => {
+          await new Promise((resolve) => window.setTimeout(resolve, 90));
+          if (context.abortSignal?.aborted) {
+            return [];
+          }
+          return buildDiagnosticsDemo(context.text);
+        },
+        hover: buildLanguageServiceHoverDemo,
+        codeActions: buildLanguageServiceCodeActionsDemo,
+        completionProviders: [buildCompletionDemo],
+        formatter: buildFormattingDemo,
+        diagnosticsDebounceMs: 140,
+        diagnosticsConfig: {
+          showStatusBar: true,
+        },
+        completionConfig: {
+          minPrefixLength: 1,
+          triggerCharacters: ["<", "/", ":"],
+        },
+        formattingConfig: {
+          showStatusBar: true,
+          timeoutMs: 2500,
+        },
+        hoverCodeActionsConfig: {
+          hoverDelayMs: 180,
+          maxCodeActions: 5,
+        },
+      });
+
+      diagnosticsExtensionRef.current = bundle.diagnosticsExtension || null;
+      completionExtensionRef.current = bundle.completionExtension || null;
+      formattingExtensionRef.current = bundle.formattingExtension || null;
+      extensions.push(...bundle.extensions);
+    }
+
+    if (enableEditingCommands) {
+      editingCommandsExtensionRef.current = new EditingCommandsExtension({
+        lineCommentToken: null,
+        blockCommentTokens: {
+          open: "<!-- ",
+          close: " -->",
+        },
+      });
+      extensions.push(editingCommandsExtensionRef.current);
+    } else {
+      editingCommandsExtensionRef.current = null;
+    }
+
+    if (enableActiveLineGuides) {
+      activeLineGuidesExtensionRef.current = new ActiveLineAndIndentGuidesExtension({
+        activeLine: true,
+        indentGuides: true,
+      });
+      extensions.push(activeLineGuidesExtensionRef.current);
+    } else {
+      activeLineGuidesExtensionRef.current = null;
+    }
+
+    if (enableContextMenu) {
+      contextMenuExtensionRef.current = new ContextMenuExtension({
+        items: buildContextMenuDemoItems({
+          enableSearch,
+          enableFormatting,
+          enableDiagnostics,
+          enableEditingCommands,
+        }),
+      });
+      extensions.push(contextMenuExtensionRef.current);
+    } else {
+      contextMenuExtensionRef.current = null;
+    }
+
+    // Create editor instance
+    editorInstanceRef.current = createEditor(editorRef.current, {
+      value: currentContent,
+      theme,
+      readOnly,
+      extensions
+    });
+
+    // Listen for changes
+    editorInstanceRef.current.on('change', () => {
+      const newContent = editorInstanceRef.current.getValue();
+      setCurrentContent(newContent);
+    });
+
+    return () => {
+      if (editorInstanceRef.current) {
+        editorInstanceRef.current.destroy?.();
+      }
+    };
+  }, [theme, showLineNumbers, syntaxHighlighting, readOnly, enableSearch, bracketMatching, codeFolding, enableDiagnostics, enableCompletions, enableFormatting, enableContextMenu, enableEditingCommands, enableActiveLineGuides, enableLanguageServiceAdapter]);
+
+  useEffect(() => {
+    const editor = editorInstanceRef.current;
+    if (!editor) {
+      return;
+    }
+
+    const layerName = "storybook-demo";
+    const hasAnyDecorations =
+      lineDecorationsEnabled || gutterDecorationsEnabled || inlineDecorationsEnabled;
+
+    if (!showDecorations || !hasAnyDecorations) {
+      editor.clearDecorations?.(layerName);
+      return;
+    }
+
+    editor.setDecorations?.(
+      layerName,
+      buildDecorationDemo(currentContent, {
+        line: lineDecorationsEnabled,
+        gutter: gutterDecorationsEnabled,
+        inline: inlineDecorationsEnabled,
+      }),
+    );
+  }, [
+    currentContent,
+    showDecorations,
+    lineDecorationsEnabled,
+    gutterDecorationsEnabled,
+    inlineDecorationsEnabled,
+  ]);
+
+  useEffect(() => {
+    if (!enableDiagnostics && !enableLanguageServiceAdapter) {
+      diagnosticsExtensionRef.current?.clearDiagnostics();
+      return;
+    }
+
+    diagnosticsExtensionRef.current?.setDiagnostics(
+      buildDiagnosticsDemo(currentContent),
+    );
+  }, [currentContent, enableDiagnostics, enableLanguageServiceAdapter]);
+
+  const handleSearch = () => {
+    if (editorInstanceRef.current && searchQuery) {
+      const results = editorInstanceRef.current.search(searchQuery);
+      console.log('Search results:', results);
+    }
+  };
+
+  const handleReplace = () => {
+    if (editorInstanceRef.current && searchQuery) {
+      const replacement = prompt('Replace with:');
+      if (replacement !== null) {
+        const count = editorInstanceRef.current.replaceAll(searchQuery, replacement);
+        alert(`Replaced ${count} occurrences`);
+      }
+    }
+  };
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
+  const selectFormattingSample = () => {
+    const editor = editorInstanceRef.current;
+    if (!editor) {
+      return;
+    }
+
+    const startToken =
+      currentContent.includes('<div class="highlight">')
+        ? '<div class="highlight">'
+        : currentContent.includes('<section id="about">')
+          ? '<section id="about">'
+          : currentContent.includes("<header>")
+            ? "<header>"
+            : "";
+    if (!startToken) {
+      return;
+    }
+
+    const startOffset = currentContent.indexOf(startToken);
+    const closingTag = startToken.startsWith("<section")
+      ? "</section>"
+      : startToken === "<header>"
+        ? "</header>"
+        : "</div>";
+    const endTokenOffset = currentContent.indexOf(closingTag, startOffset);
+    const endOffset =
+      endTokenOffset >= 0 ? endTokenOffset + closingTag.length : startOffset + startToken.length;
+
+    const offsetToPosition = (text: string, offset: number) => {
+      const boundedOffset = Math.max(0, Math.min(offset, text.length));
+      let line = 0;
+      let column = 0;
+      for (let index = 0; index < boundedOffset; index++) {
+        if (text[index] === "\n") {
+          line += 1;
+          column = 0;
+        } else {
+          column += 1;
+        }
+      }
+      return { line, column };
+    };
+
+    editor.setSelection({
+      start: offsetToPosition(currentContent, startOffset),
+      end: offsetToPosition(currentContent, endOffset),
+    });
+    editor.focus();
+  };
+
+  const goToScriptBlock = () => {
+    const editor = editorInstanceRef.current;
+    if (!editor) {
+      return;
+    }
+
+    const lines = currentContent.split("\n");
+    const scriptLine = findLineIndex(
+      lines,
+      ["<script>", 'console.log("Page loaded successfully!")'],
+      lines.length - 1,
+    );
+
+    editor.executeCommand?.("goToLine", scriptLine + 1);
+  };
+
+  const loadSampleContent = (contentType: string) => {
+    const sample =
+      editorSamples.find((candidate) => candidate.value === contentType) ||
+      editorSamples[0];
+    const content = sample.content;
+
     setCurrentContent(content);
     if (editorInstanceRef.current) {
+      editorInstanceRef.current.executeCommand?.("setSyntaxLanguage", sample.language);
       editorInstanceRef.current.setValue(content);
     }
   };
@@ -382,10 +1842,11 @@ const LightCodeEditorDemo = ({
               borderRadius: "4px"
             }}
           >
-            <option value="html">Full HTML</option>
-            <option value="minimal">Minimal</option>
-            <option value="complex">Complex Layout</option>
-            <option value="broken">Broken HTML</option>
+            {editorSamples.map((sample) => (
+              <option key={sample.value} value={sample.value}>
+                {sample.label}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -435,6 +1896,358 @@ const LightCodeEditorDemo = ({
           </Flex>
         )}
 
+        {showDecorations && (
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: "bold" }}>Decorations:</span>
+            <button
+              onClick={() => setLineDecorationsEnabled((prev) => !prev)}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: lineDecorationsEnabled ? "#0ea5e9" : "transparent",
+                color: lineDecorationsEnabled ? "white" : theme === "dark" ? "#f8f9fa" : "#333",
+                border: `1px solid ${lineDecorationsEnabled ? "#0ea5e9" : theme === "dark" ? "#404040" : "#ddd"}`,
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Line
+            </button>
+            <button
+              onClick={() => setGutterDecorationsEnabled((prev) => !prev)}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: gutterDecorationsEnabled ? "#f97316" : "transparent",
+                color: gutterDecorationsEnabled ? "white" : theme === "dark" ? "#f8f9fa" : "#333",
+                border: `1px solid ${gutterDecorationsEnabled ? "#f97316" : theme === "dark" ? "#404040" : "#ddd"}`,
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Gutter
+            </button>
+            <button
+              onClick={() => setInlineDecorationsEnabled((prev) => !prev)}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: inlineDecorationsEnabled ? "#ef4444" : "transparent",
+                color: inlineDecorationsEnabled ? "white" : theme === "dark" ? "#f8f9fa" : "#333",
+                border: `1px solid ${inlineDecorationsEnabled ? "#ef4444" : theme === "dark" ? "#404040" : "#ddd"}`,
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Inline
+            </button>
+          </Flex>
+        )}
+
+        {enableDiagnostics && (
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: "bold" }}>Diagnostics:</span>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("prevDiagnostic")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#334155" : "#e2e8f0",
+                color: theme === "dark" ? "#f8f9fa" : "#0f172a",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Prev Issue
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("nextDiagnostic")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#7c3aed" : "#8b5cf6",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Next Issue
+            </button>
+            <button
+              onClick={() => diagnosticsExtensionRef.current?.setDiagnostics(buildDiagnosticsDemo(currentContent))}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#0f766e" : "#0d9488",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Reload Issues
+            </button>
+            <button
+              onClick={() => diagnosticsExtensionRef.current?.clearDiagnostics()}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: "transparent",
+                color: theme === "dark" ? "#f8f9fa" : "#333",
+                border: `1px solid ${theme === "dark" ? "#404040" : "#ddd"}`,
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Clear Issues
+            </button>
+          </Flex>
+        )}
+
+        {enableCompletions && !readOnly && (
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: "bold" }}>Completion:</span>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("showCompletions")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#0f766e" : "#0ea5e9",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Trigger Completion
+            </button>
+            <Box style={{ fontSize: "12px", opacity: 0.75 }}>
+              Try typing <code>&lt;di</code>, <code>&lt;/</code>, or an attribute like <code>cla</code> inside a tag. Shortcut: Ctrl/Cmd + Space.
+            </Box>
+          </Flex>
+        )}
+
+        {enableFormatting && !readOnly && (
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: "bold" }}>Formatting:</span>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("formatDocument")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#0369a1" : "#0284c7",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Format Document
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("formatSelection")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#1d4ed8" : "#2563eb",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Format Selection
+            </button>
+            <button
+              onClick={selectFormattingSample}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: "transparent",
+                color: theme === "dark" ? "#f8f9fa" : "#333",
+                border: `1px solid ${theme === "dark" ? "#404040" : "#ddd"}`,
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Select Demo Block
+            </button>
+            <Box style={{ fontSize: "12px", opacity: 0.75 }}>
+              Try the <code>Messy Markup</code> preset, then use <code>Shift + Alt + F</code> or the buttons above.
+            </Box>
+          </Flex>
+        )}
+
+        {enableContextMenu && (
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: "bold" }}>Context Menu:</span>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("openContextMenu")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#4f46e5" : "#4338ca",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Open Menu
+            </button>
+            <Box style={{ fontSize: "12px", opacity: 0.75 }}>
+              Right-click inside the editor to open actions for find, replace, formatting, undo/redo, and issue navigation.
+            </Box>
+          </Flex>
+        )}
+
+        {enableEditingCommands && !readOnly && (
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: "bold" }}>Editing Commands:</span>
+            <button
+              onClick={selectFormattingSample}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: "transparent",
+                color: theme === "dark" ? "#f8f9fa" : "#333",
+                border: `1px solid ${theme === "dark" ? "#404040" : "#ddd"}`,
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Select Demo Block
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("toggleBlockComment")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#b45309" : "#d97706",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Toggle Block Comment
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("duplicateLine")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#0f766e" : "#0d9488",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Duplicate Line
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("joinLines")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#1d4ed8" : "#2563eb",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Join Lines
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("goToLine")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#6d28d9" : "#7c3aed",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Open Go To Line
+            </button>
+            <button
+              onClick={goToScriptBlock}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: "transparent",
+                color: theme === "dark" ? "#f8f9fa" : "#333",
+                border: `1px solid ${theme === "dark" ? "#404040" : "#ddd"}`,
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Jump To Script
+            </button>
+            <Box style={{ fontSize: "12px", opacity: 0.75 }}>
+              <code>goToLine()</code> now opens an inline panel like find. Try <code>Ctrl/Cmd + L</code>, <code>Alt + Shift + A</code>, <code>Ctrl/Cmd + Shift + D</code>, <code>Alt + ↑/↓</code>, or <code>Ctrl/Cmd + J</code>.
+            </Box>
+          </Flex>
+        )}
+
+        {enableActiveLineGuides && (
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: "bold" }}>Active Line & Guides:</span>
+            <Box style={{ fontSize: "12px", opacity: 0.75 }}>
+              Move the caret through nested markup to see the active line highlight and indentation guides update without rewriting the editor text DOM.
+            </Box>
+          </Flex>
+        )}
+
+        {enableLanguageServiceAdapter && (
+          <Flex style={{ display: "flex", gap: "10px", alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: "bold" }}>Language Service:</span>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("refreshLanguageDiagnostics")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#0f766e" : "#0d9488",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Refresh Diagnostics
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("showCompletions")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#1d4ed8" : "#2563eb",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Trigger Completion
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("formatDocument")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#7c3aed" : "#6d28d9",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Format Via Adapter
+            </button>
+            <button
+              onClick={() => editorInstanceRef.current?.executeCommand?.("showCodeActions")}
+              style={{
+                padding: "5px 10px",
+                backgroundColor: theme === "dark" ? "#b45309" : "#d97706",
+                color: "white",
+                border: "none",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Show Code Actions
+            </button>
+            <Box style={{ fontSize: "12px", opacity: 0.75 }}>
+              Hover over <code>onclick</code> or the sample <code>&lt;button&gt;</code> for inline info, or press <code>Ctrl/Cmd + .</code> to open code actions like quick fixes, formatting, and diagnostics refresh from the same adapter.
+            </Box>
+          </Flex>
+        )}
+
         {/* Content Info */}
         <Box style={{ marginLeft: "auto", fontSize: "14px", opacity: 0.7 }}>
           {currentContent.split('\n').length} lines, {currentContent.length} characters
@@ -470,11 +2283,23 @@ const LightCodeEditorDemo = ({
               readOnly && "Read Only",
               enableSearch && "Search",
               bracketMatching && "Bracket Matching",
-              codeFolding && "Code Folding"
+              codeFolding && "Code Folding",
+              showDecorations && "Decorations Demo",
+              enableDiagnostics && "Diagnostics",
+              enableCompletions && "Completions",
+              enableFormatting && "Formatting",
+              enableContextMenu && "Context Menu",
+              enableEditingCommands && "Editing Commands",
+              enableActiveLineGuides && "Active Line & Indent Guides",
+              enableLanguageServiceAdapter && "Language Service Adapter"
             ].filter(Boolean).join(", ") || "None"}
           </div>
           <div>
-            Theme: {theme} | Mode: {readOnly ? "Read-Only" : "Editable"}
+            Theme: {theme} | Mode: {readOnly ? "Read-Only" : "Editable"}{showDecorations ? ` | Decorations: ${[
+              lineDecorationsEnabled && "line",
+              gutterDecorationsEnabled && "gutter",
+              inlineDecorationsEnabled && "inline",
+            ].filter(Boolean).join(", ") || "off"}` : ""}
           </div>
         </Flex>
       </Box>
@@ -493,6 +2318,14 @@ export const Basic: Story = {
     enableSearch: true,
     bracketMatching: true,
     codeFolding: true,
+    showDecorations: true,
+    enableDiagnostics: false,
+    enableCompletions: true,
+    enableFormatting: true,
+    enableContextMenu: true,
+    enableEditingCommands: true,
+    enableActiveLineGuides: true,
+    enableLanguageServiceAdapter: false,
   },
 };
 
@@ -507,6 +2340,14 @@ export const Minimal: Story = {
     enableSearch: false,
     bracketMatching: false,
     codeFolding: false,
+    showDecorations: false,
+    enableDiagnostics: false,
+    enableCompletions: false,
+    enableFormatting: false,
+    enableContextMenu: false,
+    enableEditingCommands: false,
+    enableActiveLineGuides: false,
+    enableLanguageServiceAdapter: false,
   },
 };
 
@@ -521,6 +2362,14 @@ export const ReadOnly: Story = {
     enableSearch: true,
     bracketMatching: true,
     codeFolding: true,
+    showDecorations: true,
+    enableDiagnostics: true,
+    enableCompletions: false,
+    enableFormatting: false,
+    enableContextMenu: false,
+    enableEditingCommands: false,
+    enableActiveLineGuides: false,
+    enableLanguageServiceAdapter: false,
   },
 };
 
@@ -535,6 +2384,14 @@ export const LightTheme: Story = {
     enableSearch: true,
     bracketMatching: true,
     codeFolding: true,
+    showDecorations: true,
+    enableDiagnostics: true,
+    enableCompletions: true,
+    enableFormatting: true,
+    enableContextMenu: true,
+    enableEditingCommands: true,
+    enableActiveLineGuides: true,
+    enableLanguageServiceAdapter: false,
   },
 };
 
@@ -548,6 +2405,14 @@ export const FeatureShowcase: Story = {
       { id: "search", label: "Search & Replace", description: "Find and replace functionality across the document" },
       { id: "folding", label: "Code Folding", description: "Collapse and expand code sections" },
       { id: "brackets", label: "Bracket Matching", description: "Automatic bracket pair highlighting" },
+      { id: "decorations", label: "Decorations", description: "Line, gutter, and inline annotations rendered without rewriting editor text DOM" },
+      { id: "diagnostics", label: "Diagnostics", description: "Gutter markers, inline highlights, active issue navigation, and a status summary" },
+      { id: "completion", label: "Completion", description: "Provider-based autocomplete popup with async-safe refresh, keyboard navigation, and insertion commands" },
+      { id: "formatting", label: "Formatting", description: "Pluggable document and selection formatting with timeout handling, cancellation, and preserved editor state" },
+      { id: "context-menu", label: "Context Menu", description: "Right-click or invoke a command-driven menu for find, replace, formatting, undo/redo, and issue navigation" },
+      { id: "editing", label: "Editing Commands", description: "Comment selections, duplicate or move lines, join adjacent lines, and jump directly to a target line" },
+      { id: "guides", label: "Active Line & Guides", description: "Highlight the active line and render indentation guides using lightweight line decorations" },
+      { id: "language-service", label: "Language Service", description: "Compose syntax highlighting, diagnostics, completions, formatting, hover tooltips, and code actions from one shared adapter configuration" },
       { id: "themes", label: "Themes", description: "Light and dark theme support" },
       { id: "readonly", label: "Read-Only Mode", description: "Prevent text modifications" },
     ];
@@ -562,12 +2427,28 @@ export const FeatureShowcase: Story = {
           return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={true} />;
         case "brackets":
           return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={true} codeFolding={false} />;
+        case "decorations":
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={true} />;
+        case "diagnostics":
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={true} />;
+        case "completion":
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={false} enableCompletions={true} />;
+        case "formatting":
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={false} enableCompletions={false} enableFormatting={true} />;
+        case "context-menu":
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={true} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={true} enableCompletions={false} enableFormatting={true} enableContextMenu={true} />;
+        case "editing":
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={false} enableCompletions={false} enableFormatting={false} enableContextMenu={true} enableEditingCommands={true} />;
+        case "guides":
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={false} enableCompletions={false} enableFormatting={false} enableContextMenu={false} enableEditingCommands={false} enableActiveLineGuides={true} />;
+        case "language-service":
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={false} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={false} enableDiagnostics={false} enableCompletions={false} enableFormatting={false} enableContextMenu={false} enableEditingCommands={false} enableActiveLineGuides={false} enableLanguageServiceAdapter={true} />;
         case "themes":
-          return <LightCodeEditorDemo theme="light" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} />;
+          return <LightCodeEditorDemo theme="light" showLineNumbers={true} syntaxHighlighting={true} enableSearch={false} bracketMatching={false} codeFolding={false} showDecorations={true} enableDiagnostics={true} enableCompletions={true} enableFormatting={true} enableContextMenu={true} enableEditingCommands={true} enableActiveLineGuides={true} />;
         case "readonly":
-          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} readOnly={true} enableSearch={true} bracketMatching={true} codeFolding={true} />;
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} readOnly={true} enableSearch={true} bracketMatching={true} codeFolding={true} showDecorations={true} enableDiagnostics={true} />;
         default:
-          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={true} bracketMatching={true} codeFolding={true} />;
+          return <LightCodeEditorDemo theme="dark" showLineNumbers={true} syntaxHighlighting={true} enableSearch={true} bracketMatching={true} codeFolding={true} showDecorations={true} enableDiagnostics={false} enableCompletions={true} enableFormatting={true} enableContextMenu={true} enableEditingCommands={true} enableActiveLineGuides={true} enableLanguageServiceAdapter={false} />;
       }
     };
 

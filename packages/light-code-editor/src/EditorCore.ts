@@ -8,9 +8,13 @@ import { View } from './View';
 import {
   EditorAPI,
   EditorConfig,
+  EditorDecoration,
   EditorState,
   EditorEvents,
   EditorExtension,
+  GutterDecoration,
+  InlineDecoration,
+  LineDecoration,
   Position,
   Range,
   TextChange,
@@ -19,6 +23,15 @@ import {
   SearchOptions,
   FoldRange
 } from './types';
+
+interface HistorySnapshot {
+  text: string;
+  cursorOffset: number;
+  anchorOffset?: number;
+  focusOffset?: number;
+}
+
+let EDITOR_INSTANCE_COUNTER = 0;
 
 export class EditorCore implements EditorAPI {
   private static readonly CURSOR_SENTINEL = '\uE000';
@@ -31,13 +44,27 @@ export class EditorCore implements EditorAPI {
   private folds: FoldRange[] = [];
   private currentTheme = 'default';
   private isDestroyed = false;
-  private undoStack: Array<string | { text: string; cursorOffset?: number; anchorOffset?: number; focusOffset?: number }> = [];
-  private redoStack: Array<string | { text: string; cursorOffset?: number; anchorOffset?: number; focusOffset?: number }> = [];
+  private undoStack: HistorySnapshot[] = [];
+  private redoStack: HistorySnapshot[] = [];
   private suppressHistory = false;
   private highlightTimeout: ReturnType<typeof setTimeout> | null = null;
   // When true, callers are about to set the cursor programmatically after a render
   // and we should not auto-restore the caret from a saved offset (avoids clobbering).
   private expectingProgrammaticCursor: boolean = false;
+  private lastKnownCursor: Position = { line: 0, column: 0 };
+  private lastKnownSelection?: Range;
+  private documentSelectionChangeHandler?: () => void;
+  private pendingInputSnapshot?: HistorySnapshot;
+  private readonly editorInstanceId = ++EDITOR_INSTANCE_COUNTER;
+  private readonly decorationHighlightStyleId =
+    `editora-decoration-style-${this.editorInstanceId}`;
+  private readonly decorationHighlightLimit = 1000;
+  private readonly decorationLayers = new Map<string, EditorDecoration[]>();
+  private readonly inlineDecorationHighlightNames = new Set<string>();
+  private decorationRenderRaf: number | null = null;
+  private decorationMutationObserver: MutationObserver | null = null;
+  private hasCustomDecorationHighlightSupport = false;
+  private lastProgrammaticClipboardInsertAt = 0;
 
   // Public accessors for extensions
   public getTextModel(): TextModel {
@@ -70,6 +97,11 @@ export class EditorCore implements EditorAPI {
 
     // Initialize view
     this.view = new View(container);
+    this.view.setTabSize(this.config.tabSize || 2);
+    this.view.setLineWrapping(!!this.config.lineWrapping);
+    this.view.setLineNumbersVisible(this.config.lineNumbers !== false);
+    this.hasCustomDecorationHighlightSupport = this.detectCustomHighlightSupport();
+    this.observeDecorationRelevantMutations();
 
     // Setup event handlers
     this.setupEventHandlers();
@@ -113,6 +145,110 @@ export class EditorCore implements EditorAPI {
   private setupEventHandlers(): void {
     const contentElement = this.view.getContentElement();
 
+    // Capture pre-edit selection state before the browser mutates the
+    // contenteditable DOM so undo snapshots reflect the actual previous state.
+    contentElement.addEventListener('beforeinput', (event: InputEvent) => {
+      if (this.suppressHistory || this.config.readOnly) {
+        this.pendingInputSnapshot = undefined;
+        return;
+      }
+
+      if (
+        event.inputType === 'insertFromPaste' ||
+        event.inputType === 'insertFromPasteAsQuotation' ||
+        event.inputType === 'insertFromDrop'
+      ) {
+        const dataTransfer = (event as InputEvent & {
+          dataTransfer?: DataTransfer | null;
+        }).dataTransfer;
+        const text = this.getPlainTextFromDataTransfer(dataTransfer);
+
+        if (text.length === 0) {
+          return;
+        }
+
+        event.preventDefault();
+        this.pendingInputSnapshot = undefined;
+
+        if (Date.now() - this.lastProgrammaticClipboardInsertAt < 80) {
+          return;
+        }
+
+        this.insertClipboardText(text);
+        return;
+      }
+
+      if (
+        event.inputType === 'insertParagraph' ||
+        event.inputType === 'insertLineBreak'
+      ) {
+        event.preventDefault();
+        this.pendingInputSnapshot = undefined;
+        this.insertNewLine();
+        return;
+      }
+
+      if (
+        event.inputType === 'deleteContentBackward' ||
+        event.inputType === 'deleteWordBackward'
+      ) {
+        event.preventDefault();
+        this.pendingInputSnapshot = undefined;
+        this.deleteBackward();
+        return;
+      }
+
+      if (
+        event.inputType === 'deleteContentForward' ||
+        event.inputType === 'deleteWordForward'
+      ) {
+        event.preventDefault();
+        this.pendingInputSnapshot = undefined;
+        this.deleteForward();
+        return;
+      }
+
+      if (event.inputType === 'deleteByCut') {
+        event.preventDefault();
+        this.pendingInputSnapshot = undefined;
+        this.deleteSelection();
+        return;
+      }
+
+      if (
+        event.inputType === 'insertText' &&
+        typeof event.data === 'string' &&
+        !event.isComposing
+      ) {
+        event.preventDefault();
+        this.pendingInputSnapshot = undefined;
+        this.replaceSelectionWithText(event.data);
+        return;
+      }
+
+      this.pendingInputSnapshot = this.captureHistorySnapshot();
+    });
+
+    contentElement.addEventListener('paste', (event: ClipboardEvent) => {
+      if (this.config.readOnly) {
+        event.preventDefault();
+        return;
+      }
+
+      if (Date.now() - this.lastProgrammaticClipboardInsertAt < 80) {
+        event.preventDefault();
+        return;
+      }
+
+      const text = this.getPlainTextFromDataTransfer(event.clipboardData);
+      if (text.length === 0) {
+        return;
+      }
+
+      event.preventDefault();
+      this.insertClipboardText(text);
+    });
+
     // Handle input changes
     contentElement.addEventListener('input', () => {
       const newText = this.view.getText();
@@ -120,162 +256,97 @@ export class EditorCore implements EditorAPI {
 
       if (newText !== oldText) {
         if (!this.suppressHistory) {
-          // capture cursor and selection offsets so undo can restore caret/selection
-          const cursorPos = this.getCursor().position;
-          const cursorOffset = this.textModel.positionToOffset(cursorPos);
-          const sel = this.getSelection();
-          let anchorOffset: number | undefined;
-          let focusOffset: number | undefined;
-          if (sel) {
-            anchorOffset = this.textModel.positionToOffset(sel.start);
-            focusOffset = this.textModel.positionToOffset(sel.end);
-          }
-          this.undoStack.push({ text: oldText, cursorOffset, anchorOffset, focusOffset });
-          // limit stack
-          if (this.undoStack.length > 100) this.undoStack.shift();
-          this.redoStack.length = 0;
+          this.pushUndoSnapshot(
+            this.pendingInputSnapshot ?? this.captureHistorySnapshot(oldText),
+          );
         }
+        this.pendingInputSnapshot = undefined;
 
         this.textModel.setText(newText);
         this.view.syncTrailingNewlineMarkerForText(newText);
-        // Debounce re-render to avoid frequent DOM replacements during fast typing.
-        if (this.highlightTimeout) clearTimeout(this.highlightTimeout);
-        this.highlightTimeout = setTimeout(() => {
-          // Race guard: a key event can land near timeout boundary and mutate the DOM
-          // before input/model sync settles. Always reconcile with live DOM before render.
-          const latestText = this.view.getText();
-          if (latestText !== this.textModel.getText()) {
-            this.textModel.setText(latestText);
-          }
-          // When typing, don't force selection restore; keep caret where the browser placed it.
-          this.renderTextWithHighlight(this.textModel.getText(), false);
-          this.highlightTimeout = null;
-        }, 300);
+        if (this.hasRenderedFoldPlaceholders()) {
+          this.clearPendingHighlightRender();
+        } else {
+          // Debounce re-render to avoid frequent DOM replacements during fast typing.
+          this.clearPendingHighlightRender();
+          this.highlightTimeout = setTimeout(() => {
+            // Race guard: a key event can land near timeout boundary and mutate the DOM
+            // before input/model sync settles. Always reconcile with live DOM before render.
+            const latestText = this.view.getText();
+            if (latestText !== this.textModel.getText()) {
+              this.textModel.setText(latestText);
+            }
+            // When typing, don't force selection restore; keep caret where the browser placed it.
+            this.renderTextWithHighlight(this.textModel.getText(), false);
+            this.highlightTimeout = null;
+          }, 300);
+        }
 
         this.updateLineNumbers();
         this.emit('change', [{ range: this.getFullRange(), text: newText, oldText }]);
+      } else {
+        this.pendingInputSnapshot = undefined;
       }
     });
 
-    // Handle selection changes
-    contentElement.addEventListener('selectionchange', () => {
-      const cursor = this.getCursor();
-      const selection = this.getSelection();
-
-      this.emit('cursor', cursor);
-      if (selection) {
-        this.emit('selection', selection);
+    // Handle selection changes at the document level. `selectionchange`
+    // does not fire reliably on contenteditable roots themselves.
+    this.documentSelectionChangeHandler = () => {
+      const selectionState = this.syncSelectionCacheFromView();
+      if (!selectionState.isInEditor) {
+        return;
       }
-    });
+
+      const position = selectionState.cursor ?? this.lastKnownCursor;
+      this.emit('cursor', {
+        position,
+        anchor: selectionState.range?.start ?? position,
+      });
+      this.emit('selection', selectionState.isCollapsed ? undefined : selectionState.range);
+    };
+    document.addEventListener('selectionchange', this.documentSelectionChangeHandler);
 
     // Handle keyboard events
     contentElement.addEventListener('keydown', (e) => {
       this.emit('keydown', e);
 
-      // Handle Tab key directly to ensure consistent insertion
-      if (e.key === 'Tab') {
-        if (!this.config.readOnly) {
-          this.insertTab();
-        }
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-
-      // Handle Enter: insert newline into the editable DOM, then update model.
-      if (e.key === 'Enter') {
-        if (!this.config.readOnly) {
-          const selection = window.getSelection();
-          if (selection && selection.rangeCount > 0) {
-            // Capture pre-change state for history (before DOM mutation)
-            const preCursorPos = this.getCursor().position;
-            const preCursorOffset = this.textModel.positionToOffset(preCursorPos);
-            const preSel = this.getSelection();
-            let preAnchorOffset: number | undefined;
-            let preFocusOffset: number | undefined;
-            if (preSel) {
-              preAnchorOffset = this.textModel.positionToOffset(preSel.start);
-              preFocusOffset = this.textModel.positionToOffset(preSel.end);
-            }
-            const insertionStartOffset =
-              preSel && preAnchorOffset !== undefined && preFocusOffset !== undefined
-                ? Math.min(preAnchorOffset, preFocusOffset)
-                : preCursorOffset;
-            if (!this.suppressHistory) {
-              this.undoStack.push({ text: this.textModel.getText(), cursorOffset: preCursorOffset, anchorOffset: preAnchorOffset, focusOffset: preFocusOffset });
-              if (this.undoStack.length > 100) this.undoStack.shift();
-              this.redoStack.length = 0;
-            }
-
-            // Perform DOM insertion of newline
-            const range = selection.getRangeAt(0);
-            range.deleteContents();
-            const nl = document.createTextNode('\n');
-            range.insertNode(nl);
-            // Move caret after inserted newline
-            range.setStartAfter(nl);
-            range.collapse(true);
-            selection.removeAllRanges();
-            selection.addRange(range);
-            this.view.ensureCaretVisible();
-
-            // Update model from DOM before converting cursor/selection to offsets.
-            // Converting with the old model causes first-Enter caret restoration bugs.
-            const newText = this.view.getText();
-            this.textModel.setText(newText);
-            this.view.syncTrailingNewlineMarkerForText(newText);
-
-            // Enter always inserts a single newline and collapses caret right after it.
-            // Compute offset directly from pre-selection to avoid first-enter DOM/range drift.
-            const postCursorOffset = Math.min(
-              insertionStartOffset + 1,
-              this.textModel.getText().length
-            );
-
-            // Apply caret move immediately so Enter-at-end lands on the next line
-            // without waiting for the deferred syntax-highlight render.
-            try {
-              const immediatePos = this.textModel.offsetToPosition(postCursorOffset);
-              this.setCursor(immediatePos);
-              this.view.ensureCaretVisible();
-            } catch {
-              // ignore and allow delayed restore path below
-            }
-
-            // Debounce highlight rendering and restore caret/selection after render
-            if (this.highlightTimeout) clearTimeout(this.highlightTimeout);
-            this.highlightTimeout = setTimeout(() => {
-              this.renderTextWithHighlight(this.textModel.getText(), false);
-              // restore caret/selection on next frame after render
-              requestAnimationFrame(() => {
-                try {
-                  const pos = this.textModel.offsetToPosition(postCursorOffset);
-                  this.setCursor(pos);
-                  this.view.ensureCaretVisible();
-                } catch (e) {
-                  // ignore
-                }
-              });
-
-              this.highlightTimeout = null;
-            }, 300);
-
-            this.updateLineNumbers();
-            this.emit('change', [{ range: this.getFullRange(), text: this.getValue(), oldText: '' }]);
-          }
-        }
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-
-      // Let extensions handle the event
-      for (const extension of this.extensions.values()) {
+      const extensions = Array.from(this.extensions.values()).reverse();
+      for (const extension of extensions) {
         if (extension.onKeyDown && extension.onKeyDown(e) === false) {
           e.preventDefault();
           e.stopPropagation();
           return;
         }
+      }
+
+      // Handle Tab key directly to ensure consistent insertion
+      if (e.key === 'Tab' && !this.config.readOnly) {
+        this.insertTab();
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      if (e.key === 'Backspace' && !this.config.readOnly) {
+        this.deleteBackward();
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      if (e.key === 'Delete' && !this.config.readOnly) {
+        this.deleteForward();
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      // Handle Enter through the text model so DOM, selection, and scroll stay in sync.
+      if (e.key === 'Enter' && !this.config.readOnly) {
+        this.insertNewLine();
+        e.preventDefault();
+        e.stopPropagation();
+        return;
       }
     });
 
@@ -284,8 +355,22 @@ export class EditorCore implements EditorAPI {
       this.emit('mousedown', e);
 
       // Let extensions handle the event
-      for (const extension of this.extensions.values()) {
+      const extensions = Array.from(this.extensions.values()).reverse();
+      for (const extension of extensions) {
         if (extension.onMouseDown && extension.onMouseDown(e) === false) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+      }
+    });
+
+    contentElement.addEventListener('contextmenu', (e) => {
+      this.emit('contextmenu', e);
+
+      const extensions = Array.from(this.extensions.values()).reverse();
+      for (const extension of extensions) {
+        if (extension.onContextMenu && extension.onContextMenu(e) === false) {
           e.preventDefault();
           e.stopPropagation();
           return;
@@ -355,25 +440,44 @@ export class EditorCore implements EditorAPI {
 
   // Cursor & Selection
   getCursor(): Cursor {
-    const position = this.view.getCursorPosition();
+    const selectionState = this.syncSelectionCacheFromView();
+    const position = selectionState.cursor ?? this.lastKnownCursor;
     return {
       position,
-      anchor: position // For now, cursor and anchor are the same
+      anchor: selectionState.range?.start ?? position
     };
   }
 
   setCursor(position: Position): void {
-    this.view.setCursorPosition(position);
+    const text = this.textModel.getText();
+    const safePosition = this.clampPositionToText(position, text);
+    const offset = this.positionToOffsetInText(safePosition, text);
+    this.lastKnownCursor = safePosition;
+    this.lastKnownSelection = undefined;
+    this.view.setSelectionOffsets(offset);
     this.emit('cursor', this.getCursor());
   }
 
   getSelection(): Range | undefined {
-    return this.view.getSelectionRange();
+    const selectionState = this.syncSelectionCacheFromView();
+    if (!selectionState.isInEditor || selectionState.isCollapsed) {
+      return undefined;
+    }
+    return selectionState.range;
   }
 
   setSelection(range: Range): void {
-    this.view.setSelectionRange(range);
-    this.emit('selection', range);
+    const text = this.textModel.getText();
+    const normalizedRange = this.normalizeRange({
+      start: this.clampPositionToText(range.start, text),
+      end: this.clampPositionToText(range.end, text),
+    });
+    const startOffset = this.positionToOffsetInText(normalizedRange.start, text);
+    const endOffset = this.positionToOffsetInText(normalizedRange.end, text);
+    this.lastKnownSelection = normalizedRange;
+    this.lastKnownCursor = normalizedRange.end;
+    this.view.setSelectionOffsets(startOffset, endOffset);
+    this.emit('selection', normalizedRange);
   }
 
   // Configuration
@@ -435,7 +539,7 @@ export class EditorCore implements EditorAPI {
   executeCommand(name: string, ...args: any[]): void {
     const command = this.commands.get(name);
     if (command) {
-      command(this, ...args);
+      command(...args);
     } else {
       console.warn(`Command '${name}' not found`);
     }
@@ -444,6 +548,50 @@ export class EditorCore implements EditorAPI {
   // Register a command
   registerCommand(name: string, handler: Function): void {
     this.commands.set(name, handler);
+  }
+
+  setDecorations(layer: string, decorations: EditorDecoration[]): void {
+    const normalizedLayer = layer.trim();
+    if (!normalizedLayer) {
+      throw new Error('Decoration layer name must not be empty');
+    }
+
+    if (!Array.isArray(decorations) || decorations.length === 0) {
+      this.decorationLayers.delete(normalizedLayer);
+      this.scheduleDecorationRender();
+      return;
+    }
+
+    this.decorationLayers.set(
+      normalizedLayer,
+      decorations.map((decoration) => this.cloneDecoration(decoration)),
+    );
+    this.scheduleDecorationRender();
+  }
+
+  clearDecorations(layer?: string): void {
+    if (typeof layer === 'string') {
+      this.decorationLayers.delete(layer.trim());
+    } else {
+      this.decorationLayers.clear();
+    }
+    this.scheduleDecorationRender();
+  }
+
+  getDecorations(layer?: string): EditorDecoration[] {
+    if (typeof layer === 'string') {
+      return (this.decorationLayers.get(layer.trim()) || []).map((decoration) =>
+        this.cloneDecoration(decoration),
+      );
+    }
+
+    const decorations: EditorDecoration[] = [];
+    for (const layerDecorations of this.decorationLayers.values()) {
+      decorations.push(
+        ...layerDecorations.map((decoration) => this.cloneDecoration(decoration)),
+      );
+    }
+    return decorations;
   }
 
   // Search & Navigation
@@ -575,18 +723,7 @@ export class EditorCore implements EditorAPI {
   replace(range: Range, text: string): void {
     const old = this.getValue();
     if (!this.suppressHistory) {
-      const cursorPos = this.getCursor().position;
-      const cursorOffset = this.textModel.positionToOffset(cursorPos);
-      const sel = this.getSelection();
-      let anchorOffset: number | undefined;
-      let focusOffset: number | undefined;
-      if (sel) {
-        anchorOffset = this.textModel.positionToOffset(sel.start);
-        focusOffset = this.textModel.positionToOffset(sel.end);
-      }
-      this.undoStack.push({ text: old, cursorOffset, anchorOffset, focusOffset });
-      if (this.undoStack.length > 100) this.undoStack.shift();
-      this.redoStack.length = 0;
+      this.pushUndoSnapshot(this.captureHistorySnapshot(old));
     }
 
     const change = this.textModel.replaceRange(range, text);
@@ -613,20 +750,38 @@ export class EditorCore implements EditorAPI {
 
   // Folding (basic implementation)
   fold(range: Range): void {
-    // Basic folding - just mark the range
+    this.clearPendingHighlightRender();
+    const normalized = this.normalizeRange(range);
+    if (
+      normalized.start.line === normalized.end.line &&
+      normalized.start.column === normalized.end.column
+    ) {
+      return;
+    }
+
+    const existingIndex = this.folds.findIndex((fold) =>
+      this.isSameFoldRange(fold, normalized),
+    );
     const fold: FoldRange = {
-      start: range.start,
-      end: range.end,
+      start: normalized.start,
+      end: normalized.end,
       collapsed: true,
       level: 0
     };
-    this.folds.push(fold);
+
+    if (existingIndex !== -1) {
+      this.folds[existingIndex] = fold;
+    } else {
+      this.folds.push(fold);
+      this.folds.sort((a, b) => this.comparePositions(a.start, b.start));
+    }
   }
 
   unfold(range: Range): void {
-    // Remove fold
+    this.clearPendingHighlightRender();
+    const normalized = this.normalizeRange(range);
     this.folds = this.folds.filter(f =>
-      !(f.start.line === range.start.line && f.end.line === range.end.line)
+      !this.isSameFoldRange(f, normalized)
     );
   }
 
@@ -651,6 +806,30 @@ export class EditorCore implements EditorAPI {
     const sh = this.extensions.get('syntax-highlighting') as any;
     if (sh && typeof sh.highlightHTML === 'function') {
       try {
+        const supportsOverlayHighlight =
+          typeof this.view.setHighlightHTML === 'function';
+
+        if (supportsOverlayHighlight) {
+          const contentElement = this.view.getContentElement();
+          const hasFoldPlaceholders = !!contentElement.querySelector(
+            '[data-lce-fold-placeholder]',
+          );
+          if (hasFoldPlaceholders || contentElement.textContent !== text) {
+            // Compare against the live editable DOM, not serialized source text.
+            // Fold placeholders serialize back to the full source, so relying on
+            // `view.getText()` here can incorrectly skip the DOM reset on unfold.
+            this.view.setText(text);
+          }
+          const html =
+            typeof sh.highlight === 'function'
+              ? sh.highlight(text)
+              : sh.highlightHTML(text);
+          this.view.setHighlightHTML(html);
+          this.view.syncTrailingNewlineMarkerForText(text);
+          this.scheduleDecorationRender();
+          return;
+        }
+
         // Decide whether we should auto-preserve caret even when callers request
         // `restoreSelection = false`. We want to preserve the caret for user-driven
         // background highlight updates (debounced input), but avoid clobbering
@@ -661,16 +840,13 @@ export class EditorCore implements EditorAPI {
         let cursorOffset: number | undefined;
         let anchorOffset: number | undefined;
         let focusOffset: number | undefined;
+        const selectionState = this.view.getSelectionState();
+        const canRestoreLiveSelection =
+          selectionState.isInEditor && !!selectionState.cursor;
 
-        if (restoreSelection || shouldAutoPreserve) {
-          sel = this.getSelection();
-          const collapsedOffset = this.getCollapsedSelectionOffsetInEditor();
-          if (collapsedOffset !== undefined) {
-            cursorOffset = collapsedOffset;
-          } else {
-            const cursor = this.getCursor().position;
-            cursorOffset = this.textModel.positionToOffset(cursor);
-          }
+        if ((restoreSelection || shouldAutoPreserve) && canRestoreLiveSelection) {
+          sel = selectionState.isCollapsed ? undefined : selectionState.range;
+          cursorOffset = this.textModel.positionToOffset(selectionState.cursor!);
           if (sel) {
             anchorOffset = this.textModel.positionToOffset(sel.start);
             focusOffset = this.textModel.positionToOffset(sel.end);
@@ -678,6 +854,7 @@ export class EditorCore implements EditorAPI {
         }
 
         const shouldUseSentinel =
+          canRestoreLiveSelection &&
           (restoreSelection || shouldAutoPreserve) &&
           !sel &&
           cursorOffset !== undefined &&
@@ -686,7 +863,10 @@ export class EditorCore implements EditorAPI {
           ? this.insertSentinelAtOffset(text, cursorOffset!)
           : text;
 
-        const html = sh.highlightHTML(sourceForRender);
+        const html =
+          typeof sh.highlight === 'function'
+            ? sh.highlight(sourceForRender)
+            : sh.highlightHTML(sourceForRender);
         // Render highlights into the overlay to avoid replacing the editable DOM
         if (typeof (this.view as any).setHighlightHTML === 'function') {
           (this.view as any).setHighlightHTML(html);
@@ -699,7 +879,7 @@ export class EditorCore implements EditorAPI {
         this.view.syncTrailingNewlineMarkerForText(text);
 
         // Restore selection/caret on next animation frame after DOM updates settle.
-        if (restoreSelection || shouldAutoPreserve) {
+        if ((restoreSelection || shouldAutoPreserve) && canRestoreLiveSelection) {
           requestAnimationFrame(() => {
             try {
               if (shouldUseSentinel && this.restoreCursorFromSentinel()) {
@@ -725,6 +905,7 @@ export class EditorCore implements EditorAPI {
           });
         }
 
+        this.scheduleDecorationRender();
         return;
       } catch (e) {
         console.warn('Syntax highlighting failed, falling back to plain text', e);
@@ -733,6 +914,7 @@ export class EditorCore implements EditorAPI {
 
     // Fallback to plain text
     this.view.setText(text);
+    this.scheduleDecorationRender();
   }
 
   private hasCollapsedSelectionInEditor(): boolean {
@@ -818,6 +1000,27 @@ export class EditorCore implements EditorAPI {
 
     this.isDestroyed = true;
 
+    if (this.highlightTimeout) {
+      clearTimeout(this.highlightTimeout);
+      this.highlightTimeout = null;
+    }
+    this.pendingInputSnapshot = undefined;
+
+    if (this.documentSelectionChangeHandler) {
+      document.removeEventListener('selectionchange', this.documentSelectionChangeHandler);
+      this.documentSelectionChangeHandler = undefined;
+    }
+
+    if (this.decorationRenderRaf !== null && typeof cancelAnimationFrame === 'function') {
+      cancelAnimationFrame(this.decorationRenderRaf);
+      this.decorationRenderRaf = null;
+    }
+    this.decorationMutationObserver?.disconnect();
+    this.decorationMutationObserver = null;
+    this.clearInlineDecorationHighlights(true);
+    this.decorationLayers.clear();
+    this.view.clearDecorations();
+
     // Destroy extensions
     for (const extension of this.extensions.values()) {
       if (extension.destroy) {
@@ -838,46 +1041,15 @@ export class EditorCore implements EditorAPI {
   private undo(): void {
     if (this.undoStack.length === 0) return;
     const snapshot = this.undoStack.pop()!;
-    const currentSnapshot = { text: this.getValue(), cursorOffset: this.textModel.positionToOffset(this.getCursor().position) };
-    this.redoStack.push(currentSnapshot);
+    const currentSnapshot = this.captureHistorySnapshot();
+    this.pushSnapshot(this.redoStack, currentSnapshot);
 
     try {
-    this.suppressHistory = true;
-    // We're about to programmatically call setValue and then restore selection;
-    // prevent automatic caret preservation during that render to avoid conflicts.
-    this.expectingProgrammaticCursor = true;
-      let prevText: string;
-      let prevOffset: number | undefined;
-      if (typeof snapshot === 'string') {
-        prevText = snapshot;
-      } else {
-        prevText = snapshot.text;
-        prevOffset = snapshot.cursorOffset;
-      }
-
-      this.setValue(prevText);
-      // Restore selection/cursor on next animation frame to avoid timing races
-      requestAnimationFrame(() => {
-        try {
-          if (prevOffset !== undefined && prevOffset !== null) {
-            if (typeof snapshot !== 'string' && (snapshot.anchorOffset !== undefined || snapshot.focusOffset !== undefined)) {
-              const a = snapshot.anchorOffset !== undefined ? snapshot.anchorOffset : prevOffset;
-              const f = snapshot.focusOffset !== undefined ? snapshot.focusOffset : prevOffset;
-              const start = Math.min(a!, f!);
-              const end = Math.max(a!, f!);
-              const startPos = this.textModel.offsetToPosition(start);
-              const endPos = this.textModel.offsetToPosition(end);
-              this.setSelection({ start: startPos, end: endPos });
-            } else {
-              const pos = this.textModel.offsetToPosition(prevOffset);
-              this.setCursor(pos);
-            }
-          }
-        } catch (e) {
-          // ignore if conversion fails
-        }
-      });
-      // give the rAF a chance to run then clear the flag
+      this.suppressHistory = true;
+      // We're about to programmatically call setValue and then restore selection;
+      // prevent automatic caret preservation during that render to avoid conflicts.
+      this.expectingProgrammaticCursor = true;
+      this.restoreHistorySnapshot(snapshot);
       setTimeout(() => { this.expectingProgrammaticCursor = false; }, 30);
     } finally {
       this.suppressHistory = false;
@@ -887,43 +1059,13 @@ export class EditorCore implements EditorAPI {
   private redo(): void {
     if (this.redoStack.length === 0) return;
     const snapshot = this.redoStack.pop()!;
-    const currentSnapshot = { text: this.getValue(), cursorOffset: this.textModel.positionToOffset(this.getCursor().position) };
-    this.undoStack.push(currentSnapshot);
+    const currentSnapshot = this.captureHistorySnapshot();
+    this.pushSnapshot(this.undoStack, currentSnapshot);
 
     try {
-    this.suppressHistory = true;
-    this.expectingProgrammaticCursor = true;
-      let nextText: string;
-      let nextOffset: number | undefined;
-      if (typeof snapshot === 'string') {
-        nextText = snapshot;
-      } else {
-        nextText = snapshot.text;
-        nextOffset = snapshot.cursorOffset;
-      }
-
-      this.setValue(nextText);
-      // Restore selection/cursor on next animation frame
-      requestAnimationFrame(() => {
-        try {
-          if (nextOffset !== undefined && nextOffset !== null) {
-            if (typeof snapshot !== 'string' && (snapshot.anchorOffset !== undefined || snapshot.focusOffset !== undefined)) {
-              const a = snapshot.anchorOffset !== undefined ? snapshot.anchorOffset : nextOffset;
-              const f = snapshot.focusOffset !== undefined ? snapshot.focusOffset : nextOffset;
-              const start = Math.min(a!, f!);
-              const end = Math.max(a!, f!);
-              const startPos = this.textModel.offsetToPosition(start);
-              const endPos = this.textModel.offsetToPosition(end);
-              this.setSelection({ start: startPos, end: endPos });
-            } else {
-              const pos = this.textModel.offsetToPosition(nextOffset);
-              this.setCursor(pos);
-            }
-          }
-        } catch (e) {
-          // ignore
-        }
-      });
+      this.suppressHistory = true;
+      this.expectingProgrammaticCursor = true;
+      this.restoreHistorySnapshot(snapshot);
       setTimeout(() => { this.expectingProgrammaticCursor = false; }, 30);
     } finally {
       this.suppressHistory = false;
@@ -933,59 +1075,36 @@ export class EditorCore implements EditorAPI {
   // Insert a tab character or spaces at current cursor
   private insertTab(): void {
     if (this.config.readOnly) return;
-    const cursor = this.getCursor().position;
-    const cursorOffsetBefore = this.textModel.positionToOffset(cursor);
     const tabText = ' '.repeat(this.config.tabSize || 2);
-    const change = this.textModel.insertText(cursor, tabText);
-    const newPos = this.textModel.offsetToPosition(this.textModel.positionToOffset(cursor) + tabText.length);
-
-    if (!this.suppressHistory) {
-      const sel = this.getSelection();
-      let anchorOffset: number | undefined;
-      let focusOffset: number | undefined;
-      if (sel) {
-        anchorOffset = this.textModel.positionToOffset(sel.start);
-        focusOffset = this.textModel.positionToOffset(sel.end);
-      }
-      this.undoStack.push({ text: this.getValue(), cursorOffset: cursorOffsetBefore, anchorOffset, focusOffset });
-      this.redoStack.length = 0;
-    }
-
-    // Avoid renderer restoring previous selection; we set cursor explicitly below.
-    this.expectingProgrammaticCursor = true;
-    this.renderTextWithHighlight(this.getValue(), false);
-    this.setCursor(newPos);
-    // Clear the flag shortly after giving the browser a chance to apply the programmatic cursor.
-    setTimeout(() => { this.expectingProgrammaticCursor = false; }, 20);
-    this.emit('change', [change]);
+    this.replaceSelectionWithText(tabText);
   }
 
   // Insert a newline at current cursor position
   private insertNewLine(): void {
     if (this.config.readOnly) return;
-    const cursor = this.getCursor().position;
-    const cursorOffsetBefore = this.textModel.positionToOffset(cursor);
-    const change = this.textModel.insertText(cursor, '\n');
-    const newPos = this.textModel.offsetToPosition(this.textModel.positionToOffset(cursor) + 1);
+    this.replaceSelectionWithText('\n');
+  }
 
-    if (!this.suppressHistory) {
-      const sel = this.getSelection();
-      let anchorOffset: number | undefined;
-      let focusOffset: number | undefined;
-      if (sel) {
-        anchorOffset = this.textModel.positionToOffset(sel.start);
-        focusOffset = this.textModel.positionToOffset(sel.end);
-      }
-      this.undoStack.push({ text: this.getValue(), cursorOffset: cursorOffsetBefore, anchorOffset, focusOffset });
-      this.redoStack.length = 0;
+  private deleteBackward(): void {
+    if (this.config.readOnly) return;
+    this.deleteUsingDirection('backward');
+  }
+
+  private deleteForward(): void {
+    if (this.config.readOnly) return;
+    this.deleteUsingDirection('forward');
+  }
+
+  private deleteSelection(): void {
+    if (this.config.readOnly) return;
+    const currentText = this.textModel.getText();
+    const { startOffset, endOffset } = this.getActiveSelectionOffsets(currentText);
+    const fromOffset = Math.min(startOffset, endOffset);
+    const toOffset = Math.max(startOffset, endOffset);
+    if (fromOffset === toOffset) {
+      return;
     }
-
-    // Avoid renderer restoring previous selection; we set cursor explicitly below.
-    this.expectingProgrammaticCursor = true;
-    this.renderTextWithHighlight(this.getValue(), false);
-    this.setCursor(newPos);
-    setTimeout(() => { this.expectingProgrammaticCursor = false; }, 20);
-    this.emit('change', [change]);
+    this.replaceOffsetsWithText(fromOffset, toOffset, '');
   }
 
   // Events
@@ -1008,5 +1127,671 @@ export class EditorCore implements EditorAPI {
     } else {
       listeners.length = 0;
     }
+  }
+
+  private normalizeRange(range: Range): Range {
+    return this.comparePositions(range.start, range.end) <= 0
+      ? range
+      : { start: range.end, end: range.start };
+  }
+
+  private comparePositions(a: Position, b: Position): number {
+    if (a.line !== b.line) {
+      return a.line - b.line;
+    }
+    return a.column - b.column;
+  }
+
+  private captureHistorySnapshot(text: string = this.textModel.getText()): HistorySnapshot {
+    const selectionState = this.view.getSelectionState();
+    const liveSelection =
+      selectionState.isInEditor && !selectionState.isCollapsed
+        ? selectionState.range
+        : undefined;
+    const liveCursor =
+      selectionState.isInEditor && selectionState.cursor
+        ? selectionState.cursor
+        : undefined;
+
+    const selection = liveSelection ?? this.lastKnownSelection;
+    const cursor = liveCursor ?? this.lastKnownCursor;
+    const safeCursor = this.clampPositionToText(cursor, text);
+    const snapshot: HistorySnapshot = {
+      text,
+      cursorOffset: this.positionToOffsetInText(safeCursor, text),
+    };
+
+    if (selection) {
+      const anchor = this.clampPositionToText(selection.start, text);
+      const focus = this.clampPositionToText(selection.end, text);
+      snapshot.anchorOffset = this.positionToOffsetInText(anchor, text);
+      snapshot.focusOffset = this.positionToOffsetInText(focus, text);
+    }
+
+    return snapshot;
+  }
+
+  private restoreHistorySnapshot(snapshot: HistorySnapshot): void {
+    this.setValue(snapshot.text);
+
+    requestAnimationFrame(() => {
+      try {
+        const hasExpandedSelection =
+          snapshot.anchorOffset !== undefined &&
+          snapshot.focusOffset !== undefined &&
+          snapshot.anchorOffset !== snapshot.focusOffset;
+
+        if (hasExpandedSelection) {
+          const start = Math.min(snapshot.anchorOffset!, snapshot.focusOffset!);
+          const end = Math.max(snapshot.anchorOffset!, snapshot.focusOffset!);
+          this.setSelection({
+            start: this.textModel.offsetToPosition(start),
+            end: this.textModel.offsetToPosition(end),
+          });
+          return;
+        }
+
+        this.setCursor(this.textModel.offsetToPosition(snapshot.cursorOffset));
+      } catch {
+        // ignore if conversion fails
+      }
+    });
+  }
+
+  private pushUndoSnapshot(snapshot: HistorySnapshot): void {
+    this.pushSnapshot(this.undoStack, snapshot);
+    this.redoStack.length = 0;
+  }
+
+  private pushSnapshot(stack: HistorySnapshot[], snapshot: HistorySnapshot): void {
+    stack.push(snapshot);
+    if (stack.length > 100) {
+      stack.shift();
+    }
+  }
+
+  private clampPositionToText(position: Position, text: string): Position {
+    const lines = text.split('\n');
+    const safeLine = Math.max(0, Math.min(position.line, lines.length - 1));
+    const safeColumn = Math.max(
+      0,
+      Math.min(position.column, lines[safeLine]?.length ?? 0),
+    );
+    return {
+      line: safeLine,
+      column: safeColumn,
+    };
+  }
+
+  private positionToOffsetInText(position: Position, text: string): number {
+    const lines = text.split('\n');
+    const safe = this.clampPositionToText(position, text);
+    let offset = 0;
+    for (let i = 0; i < safe.line; i++) {
+      offset += (lines[i]?.length ?? 0) + 1;
+    }
+    return offset + safe.column;
+  }
+
+  private clearPendingHighlightRender(): void {
+    if (this.highlightTimeout) {
+      clearTimeout(this.highlightTimeout);
+      this.highlightTimeout = null;
+    }
+  }
+
+  private hasRenderedFoldPlaceholders(): boolean {
+    return !!this.view
+      .getContentElement()
+      .querySelector('[data-lce-fold-placeholder]');
+  }
+
+  private replaceSelectionWithText(text: string): TextChange {
+    const normalizedText = text.replace(/\r\n?/g, '\n');
+    const currentText = this.textModel.getText();
+    const { startOffset, endOffset } = this.getActiveSelectionOffsets(currentText);
+    const fromOffset = Math.max(0, Math.min(startOffset, endOffset));
+    const toOffset = Math.max(0, Math.max(startOffset, endOffset));
+    return this.replaceOffsetsWithText(fromOffset, toOffset, normalizedText);
+  }
+
+  private insertClipboardText(text: string): void {
+    this.pendingInputSnapshot = this.captureHistorySnapshot();
+    this.lastProgrammaticClipboardInsertAt = Date.now();
+    this.replaceSelectionWithText(this.normalizeClipboardText(text));
+  }
+
+  private normalizeClipboardText(text: string): string {
+    return text
+      .replace(/\r\n?/g, '\n')
+      .replace(/\u00a0/g, ' ');
+  }
+
+  private getPlainTextFromDataTransfer(dataTransfer?: DataTransfer | null): string {
+    if (!dataTransfer) {
+      return '';
+    }
+
+    const plainText = dataTransfer.getData('text/plain');
+    if (plainText) {
+      return plainText;
+    }
+
+    const html = dataTransfer.getData('text/html');
+    return html ? this.htmlClipboardToPlainText(html) : '';
+  }
+
+  private htmlClipboardToPlainText(html: string): string {
+    const doc = document.implementation.createHTMLDocument('');
+    doc.body.innerHTML = html;
+    const blockTags = new Set([
+      'ADDRESS',
+      'ARTICLE',
+      'ASIDE',
+      'BLOCKQUOTE',
+      'BR',
+      'DD',
+      'DIV',
+      'DL',
+      'DT',
+      'FIGCAPTION',
+      'FIGURE',
+      'FOOTER',
+      'H1',
+      'H2',
+      'H3',
+      'H4',
+      'H5',
+      'H6',
+      'HEADER',
+      'HR',
+      'LI',
+      'MAIN',
+      'NAV',
+      'OL',
+      'P',
+      'PRE',
+      'SECTION',
+      'TABLE',
+      'TR',
+      'UL',
+    ]);
+
+    const hasTrailingNewline = (output: string[]): boolean => {
+      for (let i = output.length - 1; i >= 0; i--) {
+        const segment = output[i] ?? '';
+        if (segment.length === 0) {
+          continue;
+        }
+        return segment.endsWith('\n');
+      }
+      return false;
+    };
+
+    const appendNodeText = (node: Node, output: string[]): void => {
+      if (node instanceof Text) {
+        output.push(node.data);
+        return;
+      }
+
+      if (!(node instanceof HTMLElement)) {
+        node.childNodes.forEach((child) => appendNodeText(child, output));
+        return;
+      }
+
+      if (node.tagName === 'BR') {
+        output.push('\n');
+        return;
+      }
+
+      const isBlock = blockTags.has(node.tagName);
+      if (isBlock && output.length > 0 && !hasTrailingNewline(output)) {
+        output.push('\n');
+      }
+
+      node.childNodes.forEach((child) => appendNodeText(child, output));
+
+      if (isBlock && !hasTrailingNewline(output)) {
+        output.push('\n');
+      }
+    };
+
+    const output: string[] = [];
+    doc.body.childNodes.forEach((child) => appendNodeText(child, output));
+    return output
+      .join('')
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/[ \t]+\n/g, '\n')
+      .trimEnd();
+  }
+
+  private getActiveSelectionOffsets(text: string): {
+    startOffset: number;
+    endOffset: number;
+  } {
+    const selectionOffsets = this.view.getSelectionOffsets();
+    if (selectionOffsets.isInEditor) {
+      return {
+        startOffset: selectionOffsets.startOffset,
+        endOffset: selectionOffsets.endOffset,
+      };
+    }
+
+    if (this.lastKnownSelection) {
+      return {
+        startOffset: this.positionToOffsetInText(this.lastKnownSelection.start, text),
+        endOffset: this.positionToOffsetInText(this.lastKnownSelection.end, text),
+      };
+    }
+
+    const cursorOffset = this.positionToOffsetInText(this.lastKnownCursor, text);
+    return {
+      startOffset: cursorOffset,
+      endOffset: cursorOffset,
+    };
+  }
+
+  private deleteUsingDirection(direction: 'backward' | 'forward'): void {
+    const currentText = this.textModel.getText();
+    const { startOffset, endOffset } = this.getActiveSelectionOffsets(currentText);
+    const fromOffset = Math.min(startOffset, endOffset);
+    const toOffset = Math.max(startOffset, endOffset);
+
+    if (fromOffset !== toOffset) {
+      this.replaceOffsetsWithText(fromOffset, toOffset, '');
+      return;
+    }
+
+    if (direction === 'backward') {
+      if (fromOffset === 0) {
+        return;
+      }
+      this.replaceOffsetsWithText(fromOffset - 1, fromOffset, '');
+      return;
+    }
+
+    if (toOffset >= currentText.length) {
+      return;
+    }
+    this.replaceOffsetsWithText(toOffset, toOffset + 1, '');
+  }
+
+  private replaceOffsetsWithText(
+    startOffset: number,
+    endOffset: number,
+    text: string,
+  ): TextChange {
+    this.ensureEditableSurfaceIsUnfolded();
+    const normalizedText = text.replace(/\r\n?/g, '\n');
+    const currentText = this.textModel.getText();
+    const previousSnapshot =
+      this.pendingInputSnapshot ?? this.captureHistorySnapshot(currentText);
+    const boundedStart = Math.max(0, Math.min(startOffset, currentText.length));
+    const boundedEnd = Math.max(0, Math.min(endOffset, currentText.length));
+    const fromOffset = Math.min(boundedStart, boundedEnd);
+    const toOffset = Math.max(boundedStart, boundedEnd);
+
+    const change = this.textModel.replaceRange(
+      {
+        start: this.textModel.offsetToPosition(fromOffset),
+        end: this.textModel.offsetToPosition(toOffset),
+      },
+      normalizedText,
+    );
+
+    this.pendingInputSnapshot = undefined;
+
+    if (!this.suppressHistory) {
+      this.pushUndoSnapshot(previousSnapshot);
+    }
+
+    const nextCursorOffset = fromOffset + normalizedText.length;
+    this.expectingProgrammaticCursor = true;
+    this.renderTextWithHighlight(this.textModel.getText(), false);
+    this.setCursor(this.textModel.offsetToPosition(nextCursorOffset));
+    setTimeout(() => {
+      this.expectingProgrammaticCursor = false;
+    }, 20);
+    this.emit('change', [change]);
+    return change;
+  }
+
+  private ensureEditableSurfaceIsUnfolded(): void {
+    if (!this.hasRenderedFoldPlaceholders() && this.folds.length === 0) {
+      return;
+    }
+
+    this.clearPendingHighlightRender();
+    this.folds = [];
+    this.expectingProgrammaticCursor = true;
+    this.renderTextWithHighlight(this.textModel.getText(), false);
+    setTimeout(() => {
+      this.expectingProgrammaticCursor = false;
+    }, 20);
+  }
+
+  private syncSelectionCacheFromView(): ReturnType<View['getSelectionState']> {
+    const selectionState = this.view.getSelectionState();
+
+    if (selectionState.isInEditor && selectionState.cursor) {
+      this.lastKnownCursor = selectionState.cursor;
+      this.lastKnownSelection = selectionState.isCollapsed
+        ? undefined
+        : selectionState.range;
+    }
+
+    return selectionState;
+  }
+
+  private isSameFoldRange(fold: FoldRange, range: Range): boolean {
+    return (
+      fold.start.line === range.start.line &&
+      fold.start.column === range.start.column &&
+      fold.end.line === range.end.line &&
+      fold.end.column === range.end.column
+    );
+  }
+
+  private scheduleDecorationRender(): void {
+    if (this.isDestroyed) {
+      return;
+    }
+
+    if (typeof requestAnimationFrame !== 'function') {
+      this.applyDecorations();
+      return;
+    }
+
+    if (this.decorationRenderRaf !== null) {
+      return;
+    }
+
+    this.decorationRenderRaf = requestAnimationFrame(() => {
+      this.decorationRenderRaf = null;
+      this.applyDecorations();
+    });
+  }
+
+  private applyDecorations(): void {
+    if (this.isDestroyed) {
+      return;
+    }
+
+    if (this.decorationLayers.size === 0) {
+      this.view.clearDecorations();
+      this.clearInlineDecorationHighlights();
+      return;
+    }
+
+    const lineDecorations: LineDecoration[] = [];
+    const gutterDecorations: GutterDecoration[] = [];
+    const inlineDecorations: InlineDecoration[] = [];
+
+    for (const [layer, decorations] of this.decorationLayers.entries()) {
+      for (const decoration of decorations) {
+        const layerDecorationId = `${layer}::${decoration.id}`;
+        if (decoration.type === 'line') {
+          lineDecorations.push({
+            ...decoration,
+            id: layerDecorationId,
+          });
+          continue;
+        }
+
+        if (decoration.type === 'gutter') {
+          gutterDecorations.push({
+            ...decoration,
+            id: layerDecorationId,
+          });
+          continue;
+        }
+
+        inlineDecorations.push({
+          ...decoration,
+          id: layerDecorationId,
+        });
+      }
+    }
+
+    this.view.setDecorations(
+      this.normalizeLineDecorations(lineDecorations),
+      this.normalizeGutterDecorations(gutterDecorations),
+    );
+    this.renderInlineDecorations(inlineDecorations);
+  }
+
+  private normalizeLineDecorations(
+    decorations: LineDecoration[],
+  ): LineDecoration[] {
+    const maxLine = Math.max(0, this.textModel.getLineCount() - 1);
+    return decorations
+      .filter((decoration) => Number.isFinite(decoration.line))
+      .map((decoration) => ({
+        ...decoration,
+        line: Math.max(0, Math.min(maxLine, Math.floor(decoration.line))),
+        style: decoration.style ? { ...decoration.style } : undefined,
+      }));
+  }
+
+  private normalizeGutterDecorations(
+    decorations: GutterDecoration[],
+  ): GutterDecoration[] {
+    const maxLine = Math.max(0, this.textModel.getLineCount() - 1);
+    return decorations
+      .filter((decoration) => Number.isFinite(decoration.line))
+      .map((decoration) => ({
+        ...decoration,
+        line: Math.max(0, Math.min(maxLine, Math.floor(decoration.line))),
+        style: decoration.style ? { ...decoration.style } : undefined,
+      }));
+  }
+
+  private renderInlineDecorations(decorations: InlineDecoration[]): void {
+    if (!this.hasCustomDecorationHighlightSupport) {
+      this.clearInlineDecorationHighlights();
+      return;
+    }
+
+    const cssAny = CSS as unknown as {
+      highlights?: Map<string, unknown>;
+    };
+    const HighlightCtor = (window as unknown as {
+      Highlight?: new (...ranges: globalThis.Range[]) => unknown;
+    }).Highlight;
+    if (!cssAny.highlights || !HighlightCtor) {
+      this.clearInlineDecorationHighlights();
+      return;
+    }
+
+    this.clearInlineDecorationHighlights();
+    if (decorations.length === 0) {
+      return;
+    }
+
+    const text = this.textModel.getText();
+    const rules: string[] = [];
+    let rendered = 0;
+
+    for (const decoration of decorations) {
+      if (rendered >= this.decorationHighlightLimit) {
+        break;
+      }
+
+      const normalized = this.normalizeInlineDecoration(decoration, text);
+      if (!normalized) {
+        continue;
+      }
+
+      const domRange = this.view.createDomRangeFromRange(normalized.range);
+      if (!domRange) {
+        continue;
+      }
+
+      const highlightName = this.buildInlineDecorationHighlightName(
+        normalized.id,
+      );
+      cssAny.highlights.set(highlightName, new HighlightCtor(domRange));
+      this.inlineDecorationHighlightNames.add(highlightName);
+      rules.push(`
+        ::highlight(${highlightName}) {
+          ${this.serializeInlineDecorationStyle(normalized.style)}
+        }
+      `);
+      rendered += 1;
+    }
+
+    const styleNode = this.ensureDecorationHighlightStyleNode();
+    styleNode.textContent = rules.join('\n');
+  }
+
+  private normalizeInlineDecoration(
+    decoration: InlineDecoration,
+    text: string,
+  ): InlineDecoration | null {
+    const normalizedRange = this.normalizeRange({
+      start: this.clampPositionToText(decoration.range.start, text),
+      end: this.clampPositionToText(decoration.range.end, text),
+    });
+    if (
+      normalizedRange.start.line === normalizedRange.end.line &&
+      normalizedRange.start.column === normalizedRange.end.column
+    ) {
+      return null;
+    }
+
+    return {
+      ...decoration,
+      range: normalizedRange,
+      style: decoration.style ? { ...decoration.style } : undefined,
+    };
+  }
+
+  private clearInlineDecorationHighlights(removeStyleNode: boolean = false): void {
+    try {
+      const cssAny = CSS as unknown as { highlights?: Map<string, unknown> };
+      if (cssAny.highlights) {
+        for (const name of this.inlineDecorationHighlightNames) {
+          cssAny.highlights.delete(name);
+        }
+      }
+    } catch {
+      // Ignore highlight cleanup failures during teardown or unsupported runtimes.
+    }
+
+    this.inlineDecorationHighlightNames.clear();
+
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const styleNode = document.getElementById(this.decorationHighlightStyleId);
+    if (removeStyleNode) {
+      if (styleNode?.parentNode) {
+        styleNode.parentNode.removeChild(styleNode);
+      }
+      return;
+    }
+
+    if (styleNode) {
+      styleNode.textContent = '';
+    }
+  }
+
+  private ensureDecorationHighlightStyleNode(): HTMLStyleElement {
+    let styleNode = document.getElementById(
+      this.decorationHighlightStyleId,
+    ) as HTMLStyleElement | null;
+    if (styleNode) {
+      return styleNode;
+    }
+
+    styleNode = document.createElement('style');
+    styleNode.id = this.decorationHighlightStyleId;
+    document.head.appendChild(styleNode);
+    return styleNode;
+  }
+
+  private observeDecorationRelevantMutations(): void {
+    if (typeof MutationObserver === 'undefined') {
+      return;
+    }
+
+    this.decorationMutationObserver = new MutationObserver(() => {
+      if (this.decorationLayers.size === 0) {
+        return;
+      }
+      this.scheduleDecorationRender();
+    });
+
+    this.decorationMutationObserver.observe(this.view.getContentElement(), {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+  }
+
+  private detectCustomHighlightSupport(): boolean {
+    try {
+      if (typeof CSS === 'undefined' || typeof window === 'undefined') {
+        return false;
+      }
+      const cssAny = CSS as unknown as { highlights?: Map<string, unknown> };
+      const highlightCtor = (window as unknown as { Highlight?: unknown }).Highlight;
+      return !!cssAny.highlights && !!highlightCtor;
+    } catch {
+      return false;
+    }
+  }
+
+  private buildInlineDecorationHighlightName(id: string): string {
+    return `editora-decoration-${this.editorInstanceId}-${this.sanitizeHighlightIdentifier(id)}`;
+  }
+
+  private sanitizeHighlightIdentifier(value: string): string {
+    return value.toLowerCase().replace(/[^a-z0-9_-]+/g, '-');
+  }
+
+  private serializeInlineDecorationStyle(
+    style: Record<string, string> | undefined,
+  ): string {
+    const serializedStyle = this.serializeStyleObject(style);
+    if (serializedStyle) {
+      return serializedStyle;
+    }
+
+    return 'background-color: var(--lce-inline-decoration-bg, rgba(86, 156, 214, 0.18)); border-radius: 2px;';
+  }
+
+  private serializeStyleObject(style: Record<string, string> | undefined): string {
+    if (!style) {
+      return '';
+    }
+
+    return Object.entries(style)
+      .filter(([, value]) => typeof value === 'string' && value.length > 0)
+      .map(([key, value]) => `${this.toKebabCase(key)}: ${value};`)
+      .join(' ');
+  }
+
+  private toKebabCase(value: string): string {
+    return value.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
+  }
+
+  private cloneDecoration(decoration: EditorDecoration): EditorDecoration {
+    if (decoration.type === 'inline') {
+      return {
+        ...decoration,
+        range: {
+          start: { ...decoration.range.start },
+          end: { ...decoration.range.end },
+        },
+        style: decoration.style ? { ...decoration.style } : undefined,
+      };
+    }
+
+    return {
+      ...decoration,
+      style: decoration.style ? { ...decoration.style } : undefined,
+    };
   }
 }

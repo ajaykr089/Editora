@@ -184,8 +184,10 @@ export class SearchExtension implements EditorExtension {
     const editorContainer = contentElement.closest(
       this.editorContainerSelector,
     ) as HTMLElement | null;
+    const editorHost = editorContainer?.parentElement as HTMLElement | null;
     const container =
       (contentElement.closest('.rte-source-editor-modal') as HTMLElement | null) ||
+      editorHost ||
       editorContainer ||
       contentElement.parentElement;
     if (!container) return;

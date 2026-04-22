@@ -61,31 +61,18 @@ export class TextModel {
 
   // Replace text in range
   replaceRange(range: Range, text: string): TextChange {
-    const oldText = this.getTextInRange(range);
+    const normalizedRange = this.normalizeRange(range);
+    const oldText = this.getTextInRange(normalizedRange);
+    const fullText = this.getText();
+    const startOffset = this.positionToOffset(normalizedRange.start);
+    const endOffset = this.positionToOffset(normalizedRange.end);
+    const nextText =
+      fullText.slice(0, startOffset) +
+      text +
+      fullText.slice(endOffset);
 
-    if (range.start.line === range.end.line) {
-      // Single line replacement
-      const line = this.getLine(range.start.line);
-      const newLine = line.substring(0, range.start.column) + text + line.substring(range.end.column);
-      this._lines[range.start.line] = newLine;
-    } else {
-      // Multi-line replacement
-      const startLine = this.getLine(range.start.line);
-      const endLine = this.getLine(range.end.line);
-
-      const newStartLine = startLine.substring(0, range.start.column) + text;
-      const newEndLine = endLine.substring(range.end.column);
-
-      // Replace the range with new content
-      const newLines = text.split('\n');
-      newLines[0] = newStartLine + newLines[0];
-      newLines[newLines.length - 1] = newLines[newLines.length - 1] + newEndLine;
-
-      this._lines.splice(range.start.line, range.end.line - range.start.line + 1, ...newLines);
-    }
-
-    this._version++;
-    return { range, text, oldText };
+    this.setText(nextText);
+    return { range: normalizedRange, text, oldText };
   }
 
   // Insert text at position
@@ -153,5 +140,23 @@ export class TextModel {
     clone._lines = [...this._lines];
     clone._version = this._version;
     return clone;
+  }
+
+  private normalizeRange(range: Range): Range {
+    if (this.comparePositions(range.start, range.end) <= 0) {
+      return range;
+    }
+
+    return {
+      start: range.end,
+      end: range.start,
+    };
+  }
+
+  private comparePositions(a: Position, b: Position): number {
+    if (a.line !== b.line) {
+      return a.line - b.line;
+    }
+    return a.column - b.column;
   }
 }

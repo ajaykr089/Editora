@@ -51,6 +51,203 @@ export interface Theme {
   variables: Record<string, string>;
 }
 
+// Decoration style map used by line, gutter, and inline decorations.
+export interface DecorationStyle {
+  [property: string]: string;
+}
+
+export interface BaseEditorDecoration {
+  id: string;
+  className?: string;
+  style?: DecorationStyle;
+}
+
+export interface InlineDecoration extends BaseEditorDecoration {
+  type: 'inline';
+  range: Range;
+}
+
+export interface LineDecoration extends BaseEditorDecoration {
+  type: 'line';
+  line: number;
+}
+
+export interface GutterDecoration extends BaseEditorDecoration {
+  type: 'gutter';
+  line: number;
+  label?: string;
+  title?: string;
+}
+
+export type EditorDecoration =
+  | InlineDecoration
+  | LineDecoration
+  | GutterDecoration;
+
+export type DiagnosticSeverity = 'error' | 'warning' | 'info' | 'hint';
+
+export interface EditorDiagnostic {
+  id?: string;
+  message: string;
+  severity: DiagnosticSeverity;
+  range: Range;
+  source?: string;
+  code?: string;
+}
+
+export type CompletionItemKind =
+  | 'text'
+  | 'keyword'
+  | 'snippet'
+  | 'property'
+  | 'method'
+  | 'function'
+  | 'class'
+  | 'variable'
+  | 'tag'
+  | 'attribute'
+  | 'value';
+
+export interface CompletionItem {
+  id?: string;
+  label: string;
+  insertText?: string;
+  detail?: string;
+  description?: string;
+  filterText?: string;
+  sortText?: string;
+  kind?: CompletionItemKind;
+  replaceRange?: Range;
+}
+
+export interface CompletionResult {
+  items: CompletionItem[];
+  from?: Range;
+}
+
+export interface CompletionContext {
+  editor: EditorCore;
+  text: string;
+  cursor: Cursor;
+  selection?: Range;
+  lineText: string;
+  prefix: string;
+  wordRange: Range;
+  explicit: boolean;
+  triggerKind: 'manual' | 'input' | 'trigger-character';
+  triggerCharacter?: string;
+  abortSignal?: AbortSignal;
+}
+
+export type CompletionProvider = (
+  context: CompletionContext,
+) =>
+  | CompletionItem[]
+  | CompletionResult
+  | Promise<CompletionItem[] | CompletionResult>;
+
+export type FormattingMode = 'document' | 'selection';
+
+export interface FormattingContext {
+  editor: EditorCore;
+  text: string;
+  input: string;
+  cursor: Cursor;
+  selection?: Range;
+  range: Range;
+  mode: FormattingMode;
+  abortSignal?: AbortSignal;
+}
+
+export interface FormattingResult {
+  text: string;
+  range?: Range;
+  selection?: Range;
+  cursor?: Position;
+}
+
+export type Formatter = (
+  context: FormattingContext,
+) =>
+  | string
+  | FormattingResult
+  | Promise<string | FormattingResult>;
+
+export interface LanguageServiceDocumentSnapshot {
+  editor: EditorCore;
+  languageId: string;
+  version: number;
+  text: string;
+  cursor: Cursor;
+  selection?: Range;
+}
+
+export interface LanguageServiceHighlightContext
+  extends LanguageServiceDocumentSnapshot {
+  theme: string;
+  colors: Record<string, string>;
+}
+
+export interface LanguageServiceDiagnosticsContext
+  extends LanguageServiceDocumentSnapshot {
+  abortSignal?: AbortSignal;
+}
+
+export interface LanguageServiceHoverContext
+  extends LanguageServiceDocumentSnapshot {
+  position: Position;
+  lineText: string;
+  diagnostics: EditorDiagnostic[];
+  abortSignal?: AbortSignal;
+}
+
+export interface LanguageServiceHoverResult {
+  title?: string;
+  content: string;
+  range?: Range;
+}
+
+export interface LanguageServiceCodeActionContext
+  extends LanguageServiceDocumentSnapshot {
+  position: Position;
+  lineText: string;
+  diagnostics: EditorDiagnostic[];
+  trigger: 'hover' | 'manual';
+  abortSignal?: AbortSignal;
+}
+
+export interface LanguageServiceCodeAction {
+  id?: string;
+  label: string;
+  kind?: string;
+  detail?: string;
+  disabled?: boolean;
+  run: (editor: EditorCore) => void | Promise<void>;
+}
+
+export type LanguageServiceHighlighter = (
+  context: LanguageServiceHighlightContext,
+) => string;
+
+export type LanguageServiceDiagnosticsProvider = (
+  context: LanguageServiceDiagnosticsContext,
+) =>
+  | EditorDiagnostic[]
+  | Promise<EditorDiagnostic[]>;
+
+export type LanguageServiceHoverProvider = (
+  context: LanguageServiceHoverContext,
+) =>
+  | LanguageServiceHoverResult
+  | null
+  | Promise<LanguageServiceHoverResult | null>;
+
+export type LanguageServiceCodeActionsProvider = (
+  context: LanguageServiceCodeActionContext,
+) =>
+  | LanguageServiceCodeAction[]
+  | Promise<LanguageServiceCodeAction[]>;
+
 // Extension interface
 export interface EditorExtension {
   name: string;
@@ -58,6 +255,7 @@ export interface EditorExtension {
   onUpdate?(state: EditorState): void;
   onKeyDown?(event: KeyboardEvent): boolean | void;
   onMouseDown?(event: MouseEvent): boolean | void;
+  onContextMenu?(event: MouseEvent): boolean | void;
   destroy?(): void;
 }
 
@@ -133,6 +331,7 @@ export interface EditorEvents {
   blur: () => void;
   keydown: (event: KeyboardEvent) => void;
   mousedown: (event: MouseEvent) => void;
+  contextmenu: (event: MouseEvent) => void;
   save: () => void;
 }
 
@@ -141,11 +340,29 @@ export interface View {
   getContentElement(): HTMLElement;
   getLineNumbersElement(): HTMLElement;
   getText(): string;
+  getSelectionOffsets(): {
+    isInEditor: boolean;
+    isCollapsed: boolean;
+    startOffset: number;
+    endOffset: number;
+    anchorOffset?: number;
+    focusOffset?: number;
+  };
   setText(text: string): void;
   setHTML(html: string): void;
+  setHighlightHTML(html: string): void;
+  syncTrailingNewlineMarkerForText(text: string): void;
+  setLineWrapping(enabled: boolean): void;
+  setLineNumbersVisible(visible: boolean): void;
+  setTabSize(tabSize: number): void;
   getCursorPosition(): Position;
   setCursorPosition(position: Position): void;
   getSelectionRange(): Range | undefined;
+  createDomRangeFromOffsets(startOffset: number, endOffset?: number): globalThis.Range | null;
+  createDomRangeFromRange(range: Range): globalThis.Range | null;
+  getPositionFromClientPoint(clientX: number, clientY: number): Position | null;
+  setSelectionOffsets(startOffset: number, endOffset?: number): void;
+  setSelectionBoundaryOffsets(anchorOffset: number, focusOffset: number): void;
   setSelectionRange(range: Range): void;
   focus(): void;
   blur(): void;
@@ -156,6 +373,11 @@ export interface View {
   setScrollTop(scrollTop: number): void;
   getScrollElement(): HTMLElement;
   updateLineNumbers(lineCount: number): void;
+  setDecorations(
+    lineDecorations: LineDecoration[],
+    gutterDecorations: GutterDecoration[],
+  ): void;
+  clearDecorations(): void;
   destroy(): void;
 }
 
@@ -180,9 +402,13 @@ export interface EditorAPI {
   addExtension(extension: EditorExtension): void;
   removeExtension(name: string): void;
   executeCommand(name: string, ...args: any[]): void;
+  setDecorations(layer: string, decorations: EditorDecoration[]): void;
+  clearDecorations(layer?: string): void;
+  getDecorations(layer?: string): EditorDecoration[];
 
   // Internal access for extensions
   getView(): View;
+  getConfig(): EditorConfig;
   registerCommand(name: string, handler: Function): void;
 
   // Search & Navigation
