@@ -200,6 +200,390 @@ const sampleHTML = `<!DOCTYPE html>
 </body>
 </html>`;
 
+const editorSamples = [
+  {
+    value: "html",
+    label: "HTML - Full Document",
+    language: "html",
+    content: sampleHTML,
+  },
+  {
+    value: "minimal",
+    label: "HTML - Minimal",
+    language: "html",
+    content: `<!DOCTYPE html>
+<html>
+<head><title>Minimal</title></head>
+<body>
+  <h1>Hello World</h1>
+  <p>This is a minimal HTML document.</p>
+</body>
+</html>`,
+  },
+  {
+    value: "complex",
+    label: "HTML - Complex Layout",
+    language: "html",
+    content: `<div class="wrapper">
+  <header>
+    <nav>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="home">
+      <h1>Welcome</h1>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+      <button class="btn-primary">Get Started</button>
+    </section>
+
+    <section id="about">
+      <h2>About Us</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Feature 1</h3>
+          <p>Description of feature 1.</p>
+        </div>
+        <div class="card">
+          <h3>Feature 2</h3>
+          <p>Description of feature 2.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 Company Name. All rights reserved.</p>
+  </footer>
+</div>`,
+  },
+  {
+    value: "messy",
+    label: "HTML - Messy Markup",
+    language: "html",
+    content: `<div class="wrapper"><header><nav><ul><li><a href="#home">Home</a></li><li><a href="#about">About</a></li></ul></nav></header><main><section id="about"><h2>About Us</h2><div class="grid"><div class="card"><h3>Feature 1</h3><p>Description of feature 1.</p></div><div class="card"><h3>Feature 2</h3><p>Description of feature 2.</p></div></div></section></main></div>`,
+  },
+  {
+    value: "broken",
+    label: "HTML - Broken",
+    language: "html",
+    content: `<html>
+<head>
+  <title>Broken HTML</title>
+<body>
+  <h1>Unclosed heading
+  <p>Missing closing tags
+  <div class="broken">
+    <span>Nested content
+    <img src="image.jpg" alt="Missing quote>
+  </div>
+  <p>More content
+</body>
+</html>`,
+  },
+  {
+    value: "css",
+    label: "CSS",
+    language: "css",
+    content: `:root {
+  --surface: #f8fafc;
+  --accent: #2563eb;
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  background: linear-gradient(135deg, var(--surface), #dbeafe);
+}
+
+.card {
+  display: grid;
+  gap: 1rem;
+  padding: 24px;
+  border-radius: 18px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.14);
+}`,
+  },
+  {
+    value: "javascript",
+    label: "JavaScript",
+    language: "javascript",
+    content: `const fruits = ["apple", "banana", "mango"];
+
+for (const fruit of fruits) {
+  console.log(\`Fresh fruit: \${fruit}\`);
+}
+
+async function loadInventory() {
+  const response = await fetch("/api/inventory");
+  return response.json();
+}`,
+  },
+  {
+    value: "typescript",
+    label: "TypeScript",
+    language: "typescript",
+    content: `type Fruit = {
+  id: string;
+  name: string;
+  stock: number;
+};
+
+const fruits: Fruit[] = [
+  { id: "apple", name: "Apple", stock: 12 },
+  { id: "mango", name: "Mango", stock: 8 },
+];
+
+export function getAvailableFruit(items: Fruit[]): Fruit[] {
+  return items.filter((item) => item.stock > 0);
+}`,
+  },
+  {
+    value: "json",
+    label: "JSON",
+    language: "json",
+    content: `{
+  "name": "@editora/light-code-editor",
+  "version": "1.0.8",
+  "features": ["syntax", "search", "diagnostics"],
+  "private": false
+}`,
+  },
+  {
+    value: "markdown",
+    label: "Markdown",
+    language: "markdown",
+    content: `---
+title: Light Code Editor
+status: ready
+---
+
+# Light Code Editor
+
+Use **syntax highlighting**, _formatting_, and \`find/replace\` in one small editor.
+
+- [x] HTML, CSS, and JavaScript
+- [x] Markdown fenced code blocks
+- [ ] Language-service integrations
+
+~~~typescript
+import { createEditor } from "@editora/light-code-editor";
+
+const editor = createEditor(container, {
+  extensions: []
+});
+~~~
+`,
+  },
+  {
+    value: "bash",
+    label: "Bash / Shell",
+    language: "bash",
+    content: `#!/usr/bin/env bash
+
+set -euo pipefail
+
+npm install @editora/light-code-editor
+npm run build --workspace=@editora/light-code-editor
+
+for package in core react light-code-editor; do
+  echo "Checking $package"
+done`,
+  },
+  {
+    value: "python",
+    label: "Python",
+    language: "python",
+    content: `fruits = ["apple", "banana", "mango"]
+
+for fruit in fruits:
+    print(fruit)
+
+def summarize(items):
+    return {"count": len(items), "first": items[0] if items else None}`,
+  },
+  {
+    value: "go",
+    label: "Go",
+    language: "go",
+    content: `package main
+
+import "fmt"
+
+type Fruit struct {
+	Name  string
+	Stock int
+}
+
+func main() {
+	fruits := []Fruit{{Name: "Apple", Stock: 12}}
+	for _, fruit := range fruits {
+		fmt.Println(fruit.Name)
+	}
+}`,
+  },
+  {
+    value: "c",
+    label: "C",
+    language: "c",
+    content: `#include <stdio.h>
+
+int main(void) {
+  const char *fruits[] = {"apple", "banana", "mango"};
+
+  for (int i = 0; i < 3; i++) {
+    printf("%s\\n", fruits[i]);
+  }
+
+  return 0;
+}`,
+  },
+  {
+    value: "cpp",
+    label: "C++",
+    language: "cpp",
+    content: `#include <iostream>
+#include <vector>
+
+int main() {
+  std::vector<std::string> fruits = {"apple", "banana", "mango"};
+
+  for (const auto& fruit : fruits) {
+    std::cout << fruit << std::endl;
+  }
+
+  return 0;
+}`,
+  },
+  {
+    value: "java",
+    label: "Java",
+    language: "java",
+    content: `import java.util.List;
+
+public class FruitDemo {
+  public static void main(String[] args) {
+    List<String> fruits = List.of("apple", "banana", "mango");
+
+    for (String fruit : fruits) {
+      System.out.println(fruit);
+    }
+  }
+}`,
+  },
+  {
+    value: "csharp",
+    label: "C#",
+    language: "csharp",
+    content: `using System;
+using System.Collections.Generic;
+
+public class FruitDemo
+{
+    public static void Main()
+    {
+        var fruits = new List<string> { "apple", "banana", "mango" };
+
+        foreach (var fruit in fruits)
+        {
+            Console.WriteLine(fruit);
+        }
+    }
+}`,
+  },
+  {
+    value: "rust",
+    label: "Rust",
+    language: "rust",
+    content: `fn main() {
+    let fruits = vec!["apple", "banana", "mango"];
+
+    for fruit in fruits {
+        println!("{}", fruit);
+    }
+}`,
+  },
+  {
+    value: "ruby",
+    label: "Ruby",
+    language: "ruby",
+    content: `fruits = ["apple", "banana", "mango"]
+
+fruits.each do |fruit|
+  puts fruit
+end
+
+def first_fruit(items)
+  items.first
+end`,
+  },
+  {
+    value: "sql",
+    label: "SQL",
+    language: "sql",
+    content: `SELECT id, name, stock
+FROM fruits
+WHERE stock > 0
+ORDER BY name ASC;
+
+INSERT INTO fruits (name, stock)
+VALUES ('mango', 8);`,
+  },
+  {
+    value: "yaml",
+    label: "YAML",
+    language: "yaml",
+    content: `name: light-code-editor
+version: 1.0.8
+features:
+  - syntax-highlighting
+  - diagnostics
+  - formatting
+enabled: true`,
+  },
+  {
+    value: "xml",
+    label: "XML / SVG",
+    language: "xml",
+    content: `<?xml version="1.0" encoding="UTF-8"?>
+<catalog>
+  <fruit id="apple" stock="12">Apple</fruit>
+  <fruit id="mango" stock="8">Mango</fruit>
+</catalog>`,
+  },
+  {
+    value: "dockerfile",
+    label: "Dockerfile",
+    language: "dockerfile",
+    content: `FROM node:22-alpine
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+
+CMD ["npm", "run", "storybook"]`,
+  },
+  {
+    value: "php",
+    label: "PHP",
+    language: "php",
+    content: `<?php
+
+$fruits = ["apple", "banana", "mango"];
+
+foreach ($fruits as $fruit) {
+    echo strtoupper($fruit) . PHP_EOL;
+}
+`,
+  },
+] as const;
+
 function findLineIndex(
   lines: string[],
   matchers: string[],
@@ -227,20 +611,30 @@ function buildDecorationDemo(text: string, toggles: {
   inline: boolean;
 }): EditorDecoration[] {
   const lines = text.split("\n");
-  const activeLine = findLineIndex(lines, [
+  const activeLineMatchers = [
     '<div class="highlight">',
     "<button",
     "<section id=\"about\">",
     "<h1>Hello World</h1>",
     "Missing closing tags",
-  ], 0);
-  const issueLine = findLineIndex(lines, [
+  ];
+  const issueLineMatchers = [
     "onclick=",
     "Missing closing tags",
     "<img ",
     "Get Started",
     "<button",
-  ], activeLine);
+  ];
+  const hasDemoDecorationTarget = [...activeLineMatchers, ...issueLineMatchers].some(
+    (matcher) => lines.some((line) => line.includes(matcher)),
+  );
+
+  if (!hasDemoDecorationTarget) {
+    return [];
+  }
+
+  const activeLine = findLineIndex(lines, activeLineMatchers, 0);
+  const issueLine = findLineIndex(lines, issueLineMatchers, activeLine);
   const issueLineText = lines[issueLine] || "";
 
   const inlineTarget =
@@ -298,13 +692,22 @@ function buildDecorationDemo(text: string, toggles: {
 
 function buildDiagnosticsDemo(text: string): EditorDiagnostic[] {
   const lines = text.split("\n");
-  const issueLine = findLineIndex(lines, [
+  const issueLineMatchers = [
     "onclick=",
     "Missing closing tags",
     "<img ",
     "Get Started",
     "<button",
-  ], 0);
+  ];
+  const hasDemoDiagnosticTarget = issueLineMatchers.some((matcher) =>
+    lines.some((line) => line.includes(matcher)),
+  );
+
+  if (!hasDemoDiagnosticTarget) {
+    return [];
+  }
+
+  const issueLine = findLineIndex(lines, issueLineMatchers, 0);
   const issueLineText = lines[issueLine] || "";
 
   const messageTarget =
@@ -1367,81 +1770,14 @@ const LightCodeEditorDemo = ({
   };
 
   const loadSampleContent = (contentType: string) => {
-    let content = "";
-    switch (contentType) {
-      case "html":
-        content = sampleHTML;
-        break;
-      case "minimal":
-        content = `<!DOCTYPE html>
-<html>
-<head><title>Minimal</title></head>
-<body>
-  <h1>Hello World</h1>
-  <p>This is a minimal HTML document.</p>
-</body>
-</html>`;
-        break;
-      case "complex":
-        content = `<div class="wrapper">
-  <header>
-    <nav>
-      <ul>
-        <li><a href="#home">Home</a></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#contact">Contact</a></li>
-      </ul>
-    </nav>
-  </header>
+    const sample =
+      editorSamples.find((candidate) => candidate.value === contentType) ||
+      editorSamples[0];
+    const content = sample.content;
 
-  <main>
-    <section id="home">
-      <h1>Welcome</h1>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-      <button class="btn-primary">Get Started</button>
-    </section>
-
-    <section id="about">
-      <h2>About Us</h2>
-      <div class="grid">
-        <div class="card">
-          <h3>Feature 1</h3>
-          <p>Description of feature 1.</p>
-        </div>
-        <div class="card">
-          <h3>Feature 2</h3>
-          <p>Description of feature 2.</p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <p>&copy; 2024 Company Name. All rights reserved.</p>
-  </footer>
-</div>`;
-        break;
-      case "broken":
-        content = `<html>
-<head>
-  <title>Broken HTML</title>
-<body>
-  <h1>Unclosed heading
-  <p>Missing closing tags
-  <div class="broken">
-    <span>Nested content
-    <img src="image.jpg" alt="Missing quote>
-  </div>
-  <p>More content
-</body>
-</html>`;
-        break;
-      case "messy":
-        content = `<div class="wrapper"><header><nav><ul><li><a href="#home">Home</a></li><li><a href="#about">About</a></li></ul></nav></header><main><section id="about"><h2>About Us</h2><div class="grid"><div class="card"><h3>Feature 1</h3><p>Description of feature 1.</p></div><div class="card"><h3>Feature 2</h3><p>Description of feature 2.</p></div></div></section></main></div>`;
-        break;
-    }
     setCurrentContent(content);
     if (editorInstanceRef.current) {
+      editorInstanceRef.current.executeCommand?.("setSyntaxLanguage", sample.language);
       editorInstanceRef.current.setValue(content);
     }
   };
@@ -1506,11 +1842,11 @@ const LightCodeEditorDemo = ({
               borderRadius: "4px"
             }}
           >
-            <option value="html">Full HTML</option>
-            <option value="minimal">Minimal</option>
-            <option value="complex">Complex Layout</option>
-            <option value="messy">Messy Markup</option>
-            <option value="broken">Broken HTML</option>
+            {editorSamples.map((sample) => (
+              <option key={sample.value} value={sample.value}>
+                {sample.label}
+              </option>
+            ))}
           </select>
         </div>
 

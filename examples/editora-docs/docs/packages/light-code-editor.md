@@ -61,6 +61,7 @@ const editor = createEditor(container, {
 ## Core Capabilities
 
 - Search and replace commands with case-sensitive, whole-word, and regex modes
+- Built-in syntax highlighting for HTML, CSS, JavaScript, TypeScript, JSON, Markdown, Bash/Shell, Python, Go, C/C++, Java, C#, Rust, Ruby, SQL, YAML, XML/SVG, Dockerfile, and PHP
 - Diagnostics extension for errors, warnings, info markers, and issue navigation
 - Completion extension for provider-based autocomplete suggestions
 - Formatting extension for document and selection formatting workflows
@@ -115,6 +116,7 @@ editor.executeCommand("replace");
 
 | Command | Purpose |
 | --- | --- |
+| `setSyntaxLanguage` | Switch the active syntax mode (`html`, `css`, `javascript`, `js`, `jsx`, `typescript`, `ts`, `tsx`, `json`, `markdown`, `md`, `bash`, `shell`, `sh`, `zsh`, `python`, `py`, `go`, `golang`, `c`, `cpp`, `c++`, `java`, `csharp`, `cs`, `rust`, `rs`, `ruby`, `rb`, `sql`, `yaml`, `yml`, `xml`, `svg`, `dockerfile`, `docker`, `php`) |
 | `find` | Open search panel |
 | `findNext` | Move to next match |
 | `findPrev` | Move to previous match |

@@ -11,7 +11,7 @@ A lightweight, modular code editor library inspired by CodeMirror, optimized for
 
 ✅ **Self-Contained Library** - Everything needed (including CSS) is bundled within the library
 ✅ **Modular Architecture** - Extension-based system for maximum flexibility
-✅ **Syntax Highlighting** - HTML syntax highlighting with VS Code-style colors
+✅ **Syntax Highlighting** - Built-in highlighting for HTML, CSS, JavaScript, TypeScript, JSON, Markdown, Bash/Shell, Python, Go, C/C++, Java, C#, Rust, Ruby, SQL, YAML, XML/SVG, Dockerfile, and PHP
 ✅ **Themes** - Light and dark theme support
 ✅ **Line Numbers** - Optional line number gutter
 ✅ **Search** - Find and highlight functionality
@@ -229,15 +229,25 @@ const editor = createEditor(container, {
 ```
 
 #### `SyntaxHighlightingExtension`
-Provides HTML syntax highlighting.
+Provides built-in syntax highlighting for `html`, `css`, `javascript` / `js` / `jsx`, `typescript` / `ts` / `tsx`, `json`, `markdown` / `md`, `bash` / `shell` / `sh` / `zsh`, `python` / `py`, `go` / `golang`, `c`, `cpp` / `c++`, `java`, `csharp` / `cs`, `rust` / `rs`, `ruby` / `rb`, `sql`, `yaml` / `yml`, `xml` / `svg`, `dockerfile` / `docker`, and `php`.
 
 ```typescript
 import { SyntaxHighlightingExtension } from '@editora/light-code-editor';
 
+const syntax = new SyntaxHighlightingExtension();
+
 const editor = createEditor(container, {
-  extensions: [new SyntaxHighlightingExtension()]
+  extensions: [syntax]
 });
+
+editor.executeCommand('setSyntaxLanguage', 'json');
 ```
+
+Notes:
+
+- The default language is `html`.
+- Use `setSyntaxLanguage` to switch the active built-in mode at runtime.
+- Use `syntax.registerMode(languageId, mode)` to add custom modes.
 
 #### `ThemeExtension`
 Enables theme switching.
@@ -614,6 +624,7 @@ The core editor always registers:
 
 Extensions add commands on top:
 
+- `SyntaxHighlightingExtension`: `setSyntaxLanguage`
 - `SearchExtension`: `find`, `findNext`, `findPrev`, `replace`, `replaceAll`
 - `DiagnosticsExtension`: `setDiagnostics`, `clearDiagnostics`, `nextDiagnostic`, `prevDiagnostic`
 - `CompletionExtension`: `showCompletions`, `closeCompletions`, `nextCompletion`, `prevCompletion`, `acceptCompletion`

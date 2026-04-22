@@ -64,6 +64,7 @@ export class EditorCore implements EditorAPI {
   private decorationRenderRaf: number | null = null;
   private decorationMutationObserver: MutationObserver | null = null;
   private hasCustomDecorationHighlightSupport = false;
+  private lastProgrammaticClipboardInsertAt = 0;
 
   // Public accessors for extensions
   public getTextModel(): TextModel {
@@ -153,6 +154,31 @@ export class EditorCore implements EditorAPI {
       }
 
       if (
+        event.inputType === 'insertFromPaste' ||
+        event.inputType === 'insertFromPasteAsQuotation' ||
+        event.inputType === 'insertFromDrop'
+      ) {
+        const dataTransfer = (event as InputEvent & {
+          dataTransfer?: DataTransfer | null;
+        }).dataTransfer;
+        const text = this.getPlainTextFromDataTransfer(dataTransfer);
+
+        if (text.length === 0) {
+          return;
+        }
+
+        event.preventDefault();
+        this.pendingInputSnapshot = undefined;
+
+        if (Date.now() - this.lastProgrammaticClipboardInsertAt < 80) {
+          return;
+        }
+
+        this.insertClipboardText(text);
+        return;
+      }
+
+      if (
         event.inputType === 'insertParagraph' ||
         event.inputType === 'insertLineBreak'
       ) {
@@ -201,6 +227,26 @@ export class EditorCore implements EditorAPI {
       }
 
       this.pendingInputSnapshot = this.captureHistorySnapshot();
+    });
+
+    contentElement.addEventListener('paste', (event: ClipboardEvent) => {
+      if (this.config.readOnly) {
+        event.preventDefault();
+        return;
+      }
+
+      if (Date.now() - this.lastProgrammaticClipboardInsertAt < 80) {
+        event.preventDefault();
+        return;
+      }
+
+      const text = this.getPlainTextFromDataTransfer(event.clipboardData);
+      if (text.length === 0) {
+        return;
+      }
+
+      event.preventDefault();
+      this.insertClipboardText(text);
     });
 
     // Handle input changes
@@ -774,7 +820,11 @@ export class EditorCore implements EditorAPI {
             // `view.getText()` here can incorrectly skip the DOM reset on unfold.
             this.view.setText(text);
           }
-          this.view.setHighlightHTML(sh.highlightHTML(text));
+          const html =
+            typeof sh.highlight === 'function'
+              ? sh.highlight(text)
+              : sh.highlightHTML(text);
+          this.view.setHighlightHTML(html);
           this.view.syncTrailingNewlineMarkerForText(text);
           this.scheduleDecorationRender();
           return;
@@ -813,7 +863,10 @@ export class EditorCore implements EditorAPI {
           ? this.insertSentinelAtOffset(text, cursorOffset!)
           : text;
 
-        const html = sh.highlightHTML(sourceForRender);
+        const html =
+          typeof sh.highlight === 'function'
+            ? sh.highlight(sourceForRender)
+            : sh.highlightHTML(sourceForRender);
         // Render highlights into the overlay to avoid replacing the editable DOM
         if (typeof (this.view as any).setHighlightHTML === 'function') {
           (this.view as any).setHighlightHTML(html);
@@ -1200,6 +1253,116 @@ export class EditorCore implements EditorAPI {
     const fromOffset = Math.max(0, Math.min(startOffset, endOffset));
     const toOffset = Math.max(0, Math.max(startOffset, endOffset));
     return this.replaceOffsetsWithText(fromOffset, toOffset, normalizedText);
+  }
+
+  private insertClipboardText(text: string): void {
+    this.pendingInputSnapshot = this.captureHistorySnapshot();
+    this.lastProgrammaticClipboardInsertAt = Date.now();
+    this.replaceSelectionWithText(this.normalizeClipboardText(text));
+  }
+
+  private normalizeClipboardText(text: string): string {
+    return text
+      .replace(/\r\n?/g, '\n')
+      .replace(/\u00a0/g, ' ');
+  }
+
+  private getPlainTextFromDataTransfer(dataTransfer?: DataTransfer | null): string {
+    if (!dataTransfer) {
+      return '';
+    }
+
+    const plainText = dataTransfer.getData('text/plain');
+    if (plainText) {
+      return plainText;
+    }
+
+    const html = dataTransfer.getData('text/html');
+    return html ? this.htmlClipboardToPlainText(html) : '';
+  }
+
+  private htmlClipboardToPlainText(html: string): string {
+    const doc = document.implementation.createHTMLDocument('');
+    doc.body.innerHTML = html;
+    const blockTags = new Set([
+      'ADDRESS',
+      'ARTICLE',
+      'ASIDE',
+      'BLOCKQUOTE',
+      'BR',
+      'DD',
+      'DIV',
+      'DL',
+      'DT',
+      'FIGCAPTION',
+      'FIGURE',
+      'FOOTER',
+      'H1',
+      'H2',
+      'H3',
+      'H4',
+      'H5',
+      'H6',
+      'HEADER',
+      'HR',
+      'LI',
+      'MAIN',
+      'NAV',
+      'OL',
+      'P',
+      'PRE',
+      'SECTION',
+      'TABLE',
+      'TR',
+      'UL',
+    ]);
+
+    const hasTrailingNewline = (output: string[]): boolean => {
+      for (let i = output.length - 1; i >= 0; i--) {
+        const segment = output[i] ?? '';
+        if (segment.length === 0) {
+          continue;
+        }
+        return segment.endsWith('\n');
+      }
+      return false;
+    };
+
+    const appendNodeText = (node: Node, output: string[]): void => {
+      if (node instanceof Text) {
+        output.push(node.data);
+        return;
+      }
+
+      if (!(node instanceof HTMLElement)) {
+        node.childNodes.forEach((child) => appendNodeText(child, output));
+        return;
+      }
+
+      if (node.tagName === 'BR') {
+        output.push('\n');
+        return;
+      }
+
+      const isBlock = blockTags.has(node.tagName);
+      if (isBlock && output.length > 0 && !hasTrailingNewline(output)) {
+        output.push('\n');
+      }
+
+      node.childNodes.forEach((child) => appendNodeText(child, output));
+
+      if (isBlock && !hasTrailingNewline(output)) {
+        output.push('\n');
+      }
+    };
+
+    const output: string[] = [];
+    doc.body.childNodes.forEach((child) => appendNodeText(child, output));
+    return output
+      .join('')
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/[ \t]+\n/g, '\n')
+      .trimEnd();
   }
 
   private getActiveSelectionOffsets(text: string): {

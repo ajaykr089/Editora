@@ -52,8 +52,9 @@ export class View {
       font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
       font-size: 14px;
       line-height: ${this.lineHeight}px;
-      /* make the outer container the single scrollable element so gutter and content scroll together */
-      overflow: auto;
+      /* vertical scrolling is shared; horizontal scrolling belongs to the code pane */
+      overflow-x: hidden;
+      overflow-y: auto;
     `;
 
     // Create gutter (line numbers)
