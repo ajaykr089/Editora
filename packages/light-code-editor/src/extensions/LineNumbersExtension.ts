@@ -47,11 +47,7 @@ export class LineNumbersExtension implements EditorExtension {
   private updateLineNumbers(): void {
     if (!this.lineNumbersElement || !this.editor || !this.isEnabled) return;
     const lineCount = this.editor.getValue().split('\n').length;
-    const lineNumbers = Array.from({ length: Math.max(lineCount, 20) }, (_, i) => i + 1);
-
-    this.lineNumbersElement.innerHTML = lineNumbers
-      .map(num => `<div style="height: ${21}px; line-height: ${21}px; padding-right: 12px;">${num}</div>`)
-      .join('');
+    this.editor.getView().updateLineNumbers(lineCount);
   }
 
   private toggle(): void {

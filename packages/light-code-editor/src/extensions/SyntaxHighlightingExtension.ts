@@ -224,6 +224,10 @@ export class SyntaxHighlightingExtension implements EditorExtension {
       return null;
     }
 
+    if (/^<\?(?:php\b|=)/i.test(trimmed) || /^\?php\b/i.test(trimmed)) {
+      return 'php';
+    }
+
     if (
       (/^[\[{]/.test(trimmed) && /[\]}]$/.test(trimmed)) ||
       /"[^"]+"\s*:/.test(trimmed)
@@ -280,6 +284,7 @@ export class SyntaxHighlightingExtension implements EditorExtension {
 
   private detectProgrammingLanguage(src: string): string | null {
     const scores: Record<string, number> = {
+      php: 0,
       python: 0,
       go: 0,
       cpp: 0,
@@ -339,6 +344,11 @@ export class SyntaxHighlightingExtension implements EditorExtension {
 
     add('dockerfile', /^\s*FROM\s+\S+/im, 3);
     add('dockerfile', /^\s*(RUN|COPY|ADD|CMD|ENTRYPOINT|WORKDIR|ENV|ARG)\b/im, 2);
+
+    add('php', /^<\?(?:php\b|=)/i, 3);
+    add('php', /^\?php\b/i, 3);
+    add('php', /\$[A-Za-z_\x80-\xff][A-Za-z0-9_\x80-\xff]*\s*=/, 2);
+    add('php', /\b(echo|foreach|function|namespace|use|PHP_EOL)\b/, 2);
 
     const [language, score] = Object.entries(scores).sort((a, b) => b[1] - a[1])[0] || ['', 0];
     return score >= 2 ? language : null;
@@ -928,6 +938,9 @@ export class SyntaxHighlightingExtension implements EditorExtension {
     while ((m = hashCommentRe.exec(rawSrc))) { const matched = m[0]; replaceFirst(this.escapeHTML(matched), store(`<span style=\"color: ${colors.comment};\">${this.escapeHTML(matched)}</span>`)); }
     while ((m = stringRe.exec(rawSrc))) { const matched = m[0]; replaceFirst(this.escapeHTML(matched), store(`<span style=\"color: ${colors.string};\">${this.escapeHTML(matched)}</span>`)); }
 
+    esc = esc.replace(/(&lt;\?(?:php\b|=)?|\?&gt;)/gi, (delimiter) =>
+      store(`<span style=\"color: ${colors.keyword};\">${delimiter}</span>`),
+    );
     esc = esc.replace(/(\$[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*)/g, `<span style=\"color: ${colors.variable};\">$1</span>`);
     esc = esc.replace(/\b(echo|print|function|class|if|else|elseif|foreach|as|return|namespace|use|new|extends|public|protected|private|static)\b/g, `<span style=\"color: ${colors.keyword};\">$1</span>`);
 

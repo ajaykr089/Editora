@@ -201,7 +201,7 @@ export class View {
       return;
     }
     this.lastLineCount = lineCount;
-    const maxLines = Math.max(lineCount, 20);
+    const maxLines = Math.max(lineCount, 1);
     const lineNumbers = Array.from({ length: maxLines }, (_, i) => i + 1);
     this.lineNumbersContentElement.innerHTML = lineNumbers
       .map(num => `<div style="height: ${this.lineHeight}px; line-height: ${this.lineHeight}px; padding-right: 12px;">${num}</div>`)

@@ -24,6 +24,28 @@ export function findLineIndex(
   );
 }
 
+function isMalformedDemoMarkupLine(line: string): boolean {
+  const trimmed = line.trim();
+  const textTagMatch = trimmed.match(/^<(h[1-6]|p|span|strong|em|li|title)\b[^>]*>[\s\S]+$/i);
+
+  return Boolean(
+    textTagMatch &&
+    !new RegExp(`</${textTagMatch[1]}\\s*>`, "i").test(trimmed),
+  );
+}
+
+function isDemoIssueLine(line: string): boolean {
+  return line.includes("onclick=") || isMalformedDemoMarkupLine(line);
+}
+
+function findDemoIssueLineIndex(lines: string[], fallbackIndex = 0): number {
+  const issueLine = lines.findIndex(isDemoIssueLine);
+
+  return issueLine >= 0
+    ? issueLine
+    : Math.max(0, Math.min(fallbackIndex, Math.max(0, lines.length - 1)));
+}
+
 export function buildDecorationDemo(text: string, toggles: {
   line: boolean;
   gutter: boolean;
@@ -39,15 +61,13 @@ export function buildDecorationDemo(text: string, toggles: {
   ];
   const issueLineMatchers = [
     "onclick=",
-    "Missing closing tags",
-    "<img ",
   ];
   const hasActiveDecorationTarget = activeLineMatchers.some(
     (matcher) => lines.some((line) => line.includes(matcher)),
   );
   const hasIssueDecorationTarget = issueLineMatchers.some(
     (matcher) => lines.some((line) => line.includes(matcher)),
-  );
+  ) || lines.some(isMalformedDemoMarkupLine);
 
   if (!hasActiveDecorationTarget && !hasIssueDecorationTarget) {
     return [];
@@ -55,7 +75,7 @@ export function buildDecorationDemo(text: string, toggles: {
 
   const activeLine = findLineIndex(lines, activeLineMatchers, 0);
   const issueLine = hasIssueDecorationTarget
-    ? findLineIndex(lines, issueLineMatchers, activeLine)
+    ? findDemoIssueLineIndex(lines, activeLine)
     : -1;
   const issueLineText = lines[issueLine] || "";
 
@@ -116,18 +136,16 @@ export function buildDiagnosticsDemo(text: string): EditorDiagnostic[] {
   const lines = text.split("\n");
   const issueLineMatchers = [
     "onclick=",
-    "Missing closing tags",
-    "<img ",
   ];
   const hasDemoDiagnosticTarget = issueLineMatchers.some((matcher) =>
     lines.some((line) => line.includes(matcher)),
-  );
+  ) || lines.some(isMalformedDemoMarkupLine);
 
   if (!hasDemoDiagnosticTarget) {
     return [];
   }
 
-  const issueLine = findLineIndex(lines, issueLineMatchers, 0);
+  const issueLine = findDemoIssueLineIndex(lines, 0);
   const issueLineText = lines[issueLine] || "";
 
   const messageTarget =
