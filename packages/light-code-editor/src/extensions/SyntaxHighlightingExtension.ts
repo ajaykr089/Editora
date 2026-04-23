@@ -22,10 +22,10 @@ export class SyntaxHighlightingExtension implements EditorExtension {
     this.registerMode('css', { name: 'css', highlight: (src, colors) => this._highlightCSS(src, colors) });
     this.registerMode('javascript', { name: 'javascript', highlight: (src, colors) => this._highlightJS(src, colors) });
     this.registerMode('js', { name: 'javascript', highlight: (src, colors) => this._highlightJS(src, colors) });
-    this.registerMode('jsx', { name: 'javascript', highlight: (src, colors) => this._highlightJS(src, colors) });
+    this.registerMode('jsx', { name: 'jsx', highlight: (src, colors) => this._highlightJSX(src, colors) });
     this.registerMode('typescript', { name: 'typescript', highlight: (src, colors) => this._highlightJS(src, colors) });
     this.registerMode('ts', { name: 'typescript', highlight: (src, colors) => this._highlightJS(src, colors) });
-    this.registerMode('tsx', { name: 'typescript', highlight: (src, colors) => this._highlightJS(src, colors) });
+    this.registerMode('tsx', { name: 'tsx', highlight: (src, colors) => this._highlightJSX(src, colors) });
     this.registerMode('json', { name: 'json', highlight: (src, colors) => this._highlightJSON(src, colors) });
     this.registerMode('markdown', { name: 'markdown', highlight: (src, colors) => this._highlightMarkdown(src, colors) });
     this.registerMode('md', { name: 'markdown', highlight: (src, colors) => this._highlightMarkdown(src, colors) });
@@ -54,6 +54,8 @@ export class SyntaxHighlightingExtension implements EditorExtension {
     this.registerMode('yml', { name: 'yaml', highlight: (src, colors) => this._highlightYAML(src, colors) });
     this.registerMode('xml', { name: 'xml', highlight: (src, colors) => this._highlightXML(src, colors) });
     this.registerMode('svg', { name: 'xml', highlight: (src, colors) => this._highlightXML(src, colors) });
+    this.registerMode('vue', { name: 'vue', highlight: (src, colors) => this._highlightHTML(src, colors) });
+    this.registerMode('ejs', { name: 'ejs', highlight: (src, colors) => this._highlightEJS(src, colors) });
     this.registerMode('dockerfile', { name: 'dockerfile', highlight: (src, colors) => this._highlightDockerfile(src, colors) });
     this.registerMode('docker', { name: 'dockerfile', highlight: (src, colors) => this._highlightDockerfile(src, colors) });
     this.registerMode('php', { name: 'php', highlight: (src, colors) => this._highlightPHP(src, colors) });
@@ -134,12 +136,12 @@ export class SyntaxHighlightingExtension implements EditorExtension {
       cjs: 'javascript',
       js: 'javascript',
       javascriptreact: 'javascript',
-      jsx: 'javascript',
+      jsx: 'jsx',
       mjs: 'javascript',
       mts: 'typescript',
       ts: 'typescript',
-      tsx: 'typescript',
-      typescriptreact: 'typescript',
+      tsx: 'tsx',
+      typescriptreact: 'tsx',
       md: 'markdown',
       mdx: 'markdown',
       shell: 'bash',
@@ -159,6 +161,8 @@ export class SyntaxHighlightingExtension implements EditorExtension {
       rb: 'ruby',
       yml: 'yaml',
       svg: 'xml',
+      vue: 'vue',
+      ejs: 'ejs',
     };
     return aliases[normalized] || normalized || 'html';
   }
@@ -236,14 +240,6 @@ export class SyntaxHighlightingExtension implements EditorExtension {
     const hasStrongHtmlSignal =
       /^<!DOCTYPE\s+html\b/i.test(trimmed) ||
       /<\/?(html|head|body|meta|title|style|script)\b/i.test(trimmed);
-    const looksLikeCss =
-      /[{][\s\S]*[}]/.test(trimmed) &&
-      /[A-Za-z_-][\w-]*\s*:\s*[^;{}]+;?/.test(trimmed) &&
-      !/\b(function|const|let|var|return|class|interface|type)\b/.test(trimmed);
-    if (!hasHtmlTag && looksLikeCss) {
-      return 'css';
-    }
-
     const markdownSignals = [
       /^---\s*\n[\s\S]*?\n---\s*(?:\n|$)/.test(trimmed),
       /^#{1,6}\s+\S/m.test(trimmed),
@@ -269,6 +265,14 @@ export class SyntaxHighlightingExtension implements EditorExtension {
     const detectedCodeLanguage = this.detectProgrammingLanguage(trimmed);
     if (detectedCodeLanguage) {
       return detectedCodeLanguage;
+    }
+
+    const looksLikeCss =
+      /[{][\s\S]*[}]/.test(trimmed) &&
+      /[A-Za-z_-][\w-]*\s*:\s*[^;{}]+;?/.test(trimmed) &&
+      !/\b(function|const|let|var|return|class|interface|type)\b/.test(trimmed);
+    if (!hasHtmlTag && looksLikeCss) {
+      return 'css';
     }
 
     return null;
@@ -759,6 +763,46 @@ export class SyntaxHighlightingExtension implements EditorExtension {
 
   private _highlightXML(src: string, colors: Record<string,string>): string {
     return this._highlightHTML(src, colors);
+  }
+
+  private _highlightJSX(src: string, colors: Record<string,string>): string {
+    const tokens: string[] = [];
+    const protectedSource = src.replace(
+      /<\/?[A-Za-z][\w.:-]*(?:\s+[^<>]*?)?\/?>/g,
+      (tag) => {
+        const index = tokens.length;
+        const escapedTag = this.escapeHTML(tag).replace(
+          /(&lt;\/?)([A-Za-z][\w.:-]*)([\s\S]*?)(\/?&gt;)/,
+          (_whole, open, tagName, attrs, close) => {
+            const formattedAttrs = String(attrs || '').replace(
+              /([A-Za-z_:][\w:.-]*)(\s*=\s*)/g,
+              `<span style="color: ${colors.attrName};">$1</span>$2`,
+            );
+            return `${open}<span style="color: ${colors.tag};">${tagName}</span>${formattedAttrs}${close}`;
+          },
+        );
+        tokens.push(escapedTag);
+        return `\u0004jsx${index}\u0004`;
+      },
+    );
+
+    return this._highlightJS(protectedSource, colors).replace(
+      /\u0004jsx(\d+)\u0004/g,
+      (_match, index) => tokens[Number(index)] || '',
+    );
+  }
+
+  private _highlightEJS(src: string, colors: Record<string,string>): string {
+    const tokens: string[] = [];
+    const protectedSource = src.replace(/<%[\s\S]*?%>/g, (segment) => {
+      const index = tokens.length;
+      tokens.push(`<span style="color: ${colors.keyword};">${this.escapeHTML(segment)}</span>`);
+      return `\u0003ejs${index}\u0003`;
+    });
+    return this._highlightHTML(protectedSource, colors).replace(
+      /\u0003ejs(\d+)\u0003/g,
+      (_match, index) => tokens[Number(index)] || '',
+    );
   }
 
   private _highlightDockerfile(src: string, colors: Record<string,string>): string {

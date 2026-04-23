@@ -18,12 +18,10 @@ import {
   EditingCommandsExtension,
   ActiveLineAndIndentGuidesExtension,
   createLanguageServiceExtensions,
-  type EditorDecoration,
-  type EditorDiagnostic,
+  createLightweightFormatter,
   type CompletionContext,
   type CompletionItem,
   type CompletionResult,
-  type Formatter,
   type ContextMenuItem,
   type LanguageServiceCodeAction,
   type LanguageServiceCodeActionContext,
@@ -33,6 +31,11 @@ import {
 } from "@editora/light-code-editor";
 import "../../packages/light-code-editor/dist/light-code-editor.css";
 import { Box, Flex} from '@editora/ui-react';
+import {
+  buildDecorationDemo,
+  buildDiagnosticsDemo,
+  findLineIndex,
+} from "./light-code-editor-demo-helpers";
 
 
 const meta: Meta = {
@@ -344,6 +347,42 @@ export function getAvailableFruit(items: Fruit[]): Fruit[] {
 }`,
   },
   {
+    value: "jsx",
+    label: "JSX",
+    language: "jsx",
+    content: `export function FruitList({ fruits }) {
+  return (
+    <section className="fruit-list">
+      <h2>Fresh fruit</h2>
+      {fruits.map((fruit) => (
+        <button key={fruit.id} type="button">
+          {fruit.name}
+        </button>
+      ))}
+    </section>
+  );
+}`,
+  },
+  {
+    value: "tsx",
+    label: "TSX",
+    language: "tsx",
+    content: `type Fruit = {
+  id: string;
+  name: string;
+};
+
+export function FruitList({ fruits }: { fruits: Fruit[] }) {
+  return (
+    <section className="fruit-list">
+      {fruits.map((fruit) => (
+        <button key={fruit.id}>{fruit.name}</button>
+      ))}
+    </section>
+  );
+}`,
+  },
+  {
     value: "json",
     label: "JSON",
     language: "json",
@@ -557,6 +596,42 @@ enabled: true`,
 </catalog>`,
   },
   {
+    value: "vue",
+    label: "Vue SFC",
+    language: "vue",
+    content: `<template>
+  <section class="fruit-list">
+    <h2>{{ title }}</h2>
+    <button v-for="fruit in fruits" :key="fruit">
+      {{ fruit }}
+    </button>
+  </section>
+</template>
+
+<script setup lang="ts">
+const title = "Fresh fruit";
+const fruits = ["apple", "banana", "mango"];
+</script>
+
+<style scoped>
+.fruit-list {
+  display: grid;
+  gap: 0.75rem;
+}
+</style>`,
+  },
+  {
+    value: "ejs",
+    label: "EJS Template",
+    language: "ejs",
+    content: `<section class="fruit-list">
+  <h2><%= title %></h2>
+  <% fruits.forEach((fruit) => { %>
+    <button type="button"><%= fruit %></button>
+  <% }) %>
+</section>`,
+  },
+  {
     value: "dockerfile",
     label: "Dockerfile",
     language: "dockerfile",
@@ -583,187 +658,6 @@ foreach ($fruits as $fruit) {
 `,
   },
 ] as const;
-
-function findLineIndex(
-  lines: string[],
-  matchers: string[],
-  fallbackIndex = 0,
-): number {
-  for (const matcher of matchers) {
-    const index = lines.findIndex((line) => line.includes(matcher));
-    if (index !== -1) {
-      return index;
-    }
-  }
-
-  return Math.max(
-    0,
-    Math.min(
-      fallbackIndex,
-      Math.max(0, lines.length - 1),
-    ),
-  );
-}
-
-function buildDecorationDemo(text: string, toggles: {
-  line: boolean;
-  gutter: boolean;
-  inline: boolean;
-}): EditorDecoration[] {
-  const lines = text.split("\n");
-  const activeLineMatchers = [
-    '<div class="highlight">',
-    "<button",
-    "<section id=\"about\">",
-    "<h1>Hello World</h1>",
-    "Missing closing tags",
-  ];
-  const issueLineMatchers = [
-    "onclick=",
-    "Missing closing tags",
-    "<img ",
-    "Get Started",
-    "<button",
-  ];
-  const hasDemoDecorationTarget = [...activeLineMatchers, ...issueLineMatchers].some(
-    (matcher) => lines.some((line) => line.includes(matcher)),
-  );
-
-  if (!hasDemoDecorationTarget) {
-    return [];
-  }
-
-  const activeLine = findLineIndex(lines, activeLineMatchers, 0);
-  const issueLine = findLineIndex(lines, issueLineMatchers, activeLine);
-  const issueLineText = lines[issueLine] || "";
-
-  const inlineTarget =
-    ["alert", "Missing closing tags", "Get Started", "<img", "Click me"]
-      .find((candidate) => issueLineText.includes(candidate)) ||
-    issueLineText.trim().split(/\s+/)[0] ||
-    "";
-  const inlineStart = inlineTarget ? issueLineText.indexOf(inlineTarget) : -1;
-  const decorations: EditorDecoration[] = [];
-
-  if (toggles.line) {
-    decorations.push({
-      id: "storybook-active-line",
-      type: "line",
-      line: activeLine,
-      className: "lce-decoration-line--active",
-      style: {
-        backgroundColor: "rgba(56, 189, 248, 0.12)",
-        boxShadow: "inset 0 0 0 1px rgba(56, 189, 248, 0.22)",
-      },
-    });
-  }
-
-  if (toggles.gutter) {
-    decorations.push({
-      id: "storybook-gutter-warning",
-      type: "gutter",
-      line: issueLine,
-      label: "●",
-      title: "Storybook decoration marker",
-      className: "lce-decoration-gutter--error",
-      style: {
-        paddingRight: "8px",
-      },
-    });
-  }
-
-  if (toggles.inline && inlineStart >= 0 && inlineTarget.length > 0) {
-    decorations.push({
-      id: "storybook-inline-highlight",
-      type: "inline",
-      range: {
-        start: { line: issueLine, column: inlineStart },
-        end: { line: issueLine, column: inlineStart + inlineTarget.length },
-      },
-      style: {
-        backgroundColor: "rgba(248, 113, 113, 0.2)",
-        textDecoration: "underline wavy rgba(248, 113, 113, 0.95)",
-      },
-    });
-  }
-
-  return decorations;
-}
-
-function buildDiagnosticsDemo(text: string): EditorDiagnostic[] {
-  const lines = text.split("\n");
-  const issueLineMatchers = [
-    "onclick=",
-    "Missing closing tags",
-    "<img ",
-    "Get Started",
-    "<button",
-  ];
-  const hasDemoDiagnosticTarget = issueLineMatchers.some((matcher) =>
-    lines.some((line) => line.includes(matcher)),
-  );
-
-  if (!hasDemoDiagnosticTarget) {
-    return [];
-  }
-
-  const issueLine = findLineIndex(lines, issueLineMatchers, 0);
-  const issueLineText = lines[issueLine] || "";
-
-  const messageTarget =
-    ["alert", "Missing closing tags", "Get Started", "<img", "Click me"]
-      .find((candidate) => issueLineText.includes(candidate)) ||
-    issueLineText.trim().split(/\s+/)[0] ||
-    "issue";
-  const messageStart = Math.max(0, issueLineText.indexOf(messageTarget));
-
-  const infoLine = findLineIndex(lines, [
-    "<div class=\"highlight\">",
-    "<section id=\"about\">",
-    "<h1>Hello World</h1>",
-  ], issueLine);
-  const infoLineText = lines[infoLine] || "";
-  const infoTarget =
-    ["highlight", "About", "Hello World"]
-      .find((candidate) => infoLineText.includes(candidate)) ||
-    infoLineText.trim().split(/\s+/)[0] ||
-    "note";
-  const infoStart = Math.max(0, infoLineText.indexOf(infoTarget));
-
-  const diagnostics: EditorDiagnostic[] = [
-    {
-      id: "story-error",
-      severity: "error",
-      message: issueLineText.includes("Missing closing tags")
-        ? "Unclosed or malformed markup"
-        : "Inline handler needs review",
-      source: "storybook",
-      code: issueLineText.includes("Missing closing tags") ? "HTML001" : "SEC201",
-      range: {
-        start: { line: issueLine, column: messageStart },
-        end: { line: issueLine, column: messageStart + Math.max(1, messageTarget.length) },
-      },
-    },
-  ];
-
-  if (infoLineText.trim().length > 0) {
-    diagnostics.push({
-      id: "story-info",
-      severity: issueLineText.includes("Missing closing tags") ? "warning" : "info",
-      message: issueLineText.includes("Missing closing tags")
-        ? "Parser recovery may shift following nodes"
-        : "Decorative content block worth reviewing",
-      source: "storybook",
-      code: issueLineText.includes("Missing closing tags") ? "HTML014" : "UX110",
-      range: {
-        start: { line: infoLine, column: infoStart },
-        end: { line: infoLine, column: infoStart + Math.max(1, infoTarget.length) },
-      },
-    });
-  }
-
-  return diagnostics;
-}
 
 const htmlTagSuggestions = [
   "article",
@@ -1157,166 +1051,7 @@ function buildLanguageServiceCodeActionsDemo(
   return actions;
 }
 
-function formatCssDemo(input: string): string {
-  const normalized = input
-    .replace(/\r\n?/g, "\n")
-    .replace(/\s*{\s*/g, " {\n")
-    .replace(/;\s*/g, ";\n")
-    .replace(/\s*}\s*/g, "\n}\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-
-  if (!normalized) {
-    return "";
-  }
-
-  const lines = normalized
-    .split("\n")
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
-  const output: string[] = [];
-  let depth = 0;
-
-  for (const line of lines) {
-    if (line === "}") {
-      depth = Math.max(0, depth - 1);
-    }
-
-    output.push(`${"  ".repeat(depth)}${line}`);
-
-    if (line.endsWith("{")) {
-      depth += 1;
-    }
-  }
-
-  return output.join("\n");
-}
-
-function looksLikeCss(input: string): boolean {
-  const trimmed = input.trim();
-  if (!trimmed || /</.test(trimmed)) {
-    return false;
-  }
-
-  return /{[\s\S]*}/.test(trimmed) && /[A-Za-z-]+\s*:/.test(trimmed);
-}
-
-function formatHtmlDemo(input: string): string {
-  const normalized = input.replace(/\r\n?/g, "\n").trim();
-
-  if (!normalized) {
-    return "";
-  }
-
-  const tokens = normalized.match(
-    /<!--[\s\S]*?-->|<!DOCTYPE[\s\S]*?>|<style\b[^>]*>[\s\S]*?<\/style>|<script\b[^>]*>[\s\S]*?<\/script>|<\/?[A-Za-z][^>]*?>|[^<]+/gi,
-  ) || [];
-  const output: string[] = [];
-  let depth = 0;
-
-  for (const token of tokens) {
-    const line = token.trim();
-    if (!line) {
-      continue;
-    }
-
-    const styleBlockMatch = line.match(/^<style\b([^>]*)>([\s\S]*?)<\/style>$/i);
-    if (styleBlockMatch) {
-      output.push(`${"  ".repeat(depth)}<style${styleBlockMatch[1]}>`);
-
-      const formattedCss = formatCssDemo(styleBlockMatch[2]);
-      if (formattedCss) {
-        formattedCss.split("\n").forEach((cssLine) => {
-          output.push(`${"  ".repeat(depth + 1)}${cssLine}`);
-        });
-      }
-
-      output.push(`${"  ".repeat(depth)}</style>`);
-      continue;
-    }
-
-    const scriptBlockMatch = line.match(/^<script\b([^>]*)>([\s\S]*?)<\/script>$/i);
-    if (scriptBlockMatch) {
-      output.push(`${"  ".repeat(depth)}<script${scriptBlockMatch[1]}>`);
-
-      const scriptBody = scriptBlockMatch[2]
-        .split("\n")
-        .map((scriptLine) => scriptLine.trim())
-        .filter((scriptLine) => scriptLine.length > 0);
-      scriptBody.forEach((scriptLine) => {
-        output.push(`${"  ".repeat(depth + 1)}${scriptLine}`);
-      });
-
-      output.push(`${"  ".repeat(depth)}</script>`);
-      continue;
-    }
-
-    if (!/^</.test(line)) {
-      line
-        .split(/\n+/)
-        .map((textLine) => textLine.trim())
-        .filter((textLine) => textLine.length > 0)
-        .forEach((textLine) => {
-          output.push(`${"  ".repeat(depth)}${textLine}`);
-        });
-      continue;
-    }
-
-    const closingTag = /^<\//.test(line);
-    const closingBlock = /^<\/(?!html|body)/.test(line);
-    if (closingTag || closingBlock) {
-      depth = Math.max(0, depth - 1);
-    }
-
-    output.push(`${"  ".repeat(depth)}${line}`);
-
-    if (shouldIndentHtmlLine(line)) {
-      depth += 1;
-    }
-  }
-
-  return output.join("\n");
-}
-
-function shouldIndentHtmlLine(line: string): boolean {
-  if (!/^</.test(line)) {
-    return false;
-  }
-
-  if (/^<\//.test(line) || /^<!--/.test(line) || /^<!DOCTYPE/i.test(line)) {
-    return false;
-  }
-
-  if (/\/>$/.test(line)) {
-    return false;
-  }
-
-  const tagMatch = line.match(/^<([A-Za-z][A-Za-z0-9-]*)/);
-  const tagName = tagMatch?.[1]?.toLowerCase();
-  if (!tagName || htmlVoidTags.has(tagName)) {
-    return false;
-  }
-
-  if (new RegExp(`^<${tagName}\\b[^>]*>.*</${tagName}>$`, "i").test(line)) {
-    return false;
-  }
-
-  return true;
-}
-
-const buildFormattingDemo: Formatter = async (context) => {
-  await new Promise((resolve) => window.setTimeout(resolve, 120));
-
-  if (context.abortSignal?.aborted) {
-    return context.input;
-  }
-
-  if (looksLikeCss(context.input)) {
-    return formatCssDemo(context.input);
-  }
-
-  return formatHtmlDemo(context.input);
-};
+const buildFormattingDemo = createLightweightFormatter();
 
 function buildContextMenuDemoItems(options: {
   enableSearch: boolean;

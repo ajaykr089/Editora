@@ -1763,6 +1763,26 @@
       }
     },
     {
+      "id": "ui-core:ui-radio",
+      "package": "@editora/ui-core",
+      "framework": "web-component",
+      "name": "radio",
+      "tagName": "ui-radio",
+      "source": "packages/ui-core/src/components/ui-radio.ts",
+      "docsPath": "/docs/ui-core",
+      "storybookPath": "/story/ui-radio--playground",
+      "styleApi": {
+        "cssVars": true,
+        "parts": true,
+        "states": [
+          "disabled",
+          "invalid",
+          "open",
+          "active"
+        ]
+      }
+    },
+    {
       "id": "ui-core:ui-rating",
       "package": "@editora/ui-core",
       "framework": "web-component",
@@ -3474,7 +3494,7 @@
       "name": "Radio",
       "reactExport": "Radio",
       "source": "packages/ui-react/src/components/Radio.tsx",
-      "docsPath": "/docs/ui-react/form-inputs/radio",
+      "docsPath": "/docs/ui-react",
       "storybookPath": "/story/ui-radio--playground",
       "wrapperFor": "ui-radio"
     },

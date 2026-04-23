@@ -11,7 +11,7 @@ A lightweight, modular code editor library inspired by CodeMirror, optimized for
 
 ✅ **Self-Contained Library** - Everything needed (including CSS) is bundled within the library
 ✅ **Modular Architecture** - Extension-based system for maximum flexibility
-✅ **Syntax Highlighting** - Built-in highlighting for HTML, CSS, JavaScript, TypeScript, JSON, Markdown, Bash/Shell, Python, Go, C/C++, Java, C#, Rust, Ruby, SQL, YAML, XML/SVG, Dockerfile, and PHP
+✅ **Syntax Highlighting** - Built-in highlighting for HTML, CSS, JavaScript/JSX, TypeScript/TSX, JSON, Markdown, Bash/Shell, Python, Go, C/C++, Java, C#, Rust, Ruby, SQL, YAML, XML/SVG, Vue, EJS, Dockerfile, and PHP
 ✅ **Themes** - Light and dark theme support
 ✅ **Line Numbers** - Optional line number gutter
 ✅ **Search** - Find and highlight functionality
@@ -229,7 +229,7 @@ const editor = createEditor(container, {
 ```
 
 #### `SyntaxHighlightingExtension`
-Provides built-in syntax highlighting for `html`, `css`, `javascript` / `js` / `jsx`, `typescript` / `ts` / `tsx`, `json`, `markdown` / `md`, `bash` / `shell` / `sh` / `zsh`, `python` / `py`, `go` / `golang`, `c`, `cpp` / `c++`, `java`, `csharp` / `cs`, `rust` / `rs`, `ruby` / `rb`, `sql`, `yaml` / `yml`, `xml` / `svg`, `dockerfile` / `docker`, and `php`.
+Provides built-in syntax highlighting for `html`, `css`, `javascript` / `js`, `jsx`, `typescript` / `ts`, `tsx`, `json`, `markdown` / `md`, `bash` / `shell` / `sh` / `zsh`, `python` / `py`, `go` / `golang`, `c`, `cpp` / `c++`, `java`, `csharp` / `cs`, `rust` / `rs`, `ruby` / `rb`, `sql`, `yaml` / `yml`, `xml` / `svg`, `vue`, `ejs`, `dockerfile` / `docker`, and `php`.
 
 ```typescript
 import { SyntaxHighlightingExtension } from '@editora/light-code-editor';
@@ -375,21 +375,11 @@ Provides pluggable document and selection formatting with timeout handling, canc
 ```typescript
 import {
   FormattingExtension,
-  type Formatter,
+  createLightweightFormatter,
 } from '@editora/light-code-editor';
 
-const formatter: Formatter = async (context) => {
-  if (context.mode === 'selection') {
-    return context.input.trim();
-  }
-
-  return context.text
-    .replace(/>\s+</g, '>\n<')
-    .trim();
-};
-
 const formatting = new FormattingExtension({
-  formatter,
+  formatter: createLightweightFormatter(),
   timeoutMs: 3000,
 });
 
@@ -407,6 +397,7 @@ Notes:
 - Formatters receive the full document, the target input segment, the active range, cursor/selection state, and an `AbortSignal`.
 - Returning a plain string replaces the requested range. Returning `{ text, range, selection, cursor }` gives the formatter explicit control over the applied edit and final editor state.
 - Timeouts and newer formatting runs cancel stale async work so old results do not overwrite newer edits.
+- `createLightweightFormatter()` provides dependency-free formatting for common snippets. It is conservative and safe for HTML, CSS, PHP, Python, Bash, Go, C/C++, Java, C#, Rust, Vue, JSX/TSX, EJS, Dockerfile, and plain text, but it is not a replacement for dedicated formatters like Prettier, Black, gofmt, or php-cs-fixer.
 
 #### `ContextMenuExtension`
 Provides a right-click menu that can expose editor commands like find, replace, formatting, undo/redo, and diagnostics navigation.
