@@ -141,7 +141,43 @@ export { SelectionPopup } from './components/SelectionPopup';
 export { PluginPanel } from './components/PluginPanel';
 export { Form } from './components/Form';
 export { useForm } from './hooks/useForm';
-export { useFloating } from './hooks/useFloating';
+export {
+  useFloating,
+  assignRef,
+  callAll,
+  composeEventHandlers,
+  mergeRefs,
+  type FloatingContext,
+  type FloatingMiddleware,
+  type FloatingOpenChangeReason,
+  type Placement,
+  type RefLike
+} from './hooks/useFloating';
+export {
+  Composite,
+  FloatingArrow,
+  FloatingDelayGroup,
+  FloatingFocusManager,
+  FloatingList,
+  FloatingListContext,
+  FloatingOverlay,
+  FloatingPortal,
+  FloatingTree,
+  useClick,
+  useClientPoint,
+  useDelayGroup,
+  useDismiss,
+  useFloatingList,
+  useFloatingNodeId,
+  useFloatingTree,
+  useFocus,
+  useHover,
+  useInteractions,
+  useListNavigation,
+  useRole,
+  useTransition,
+  useTypeahead
+} from './hooks/useFloatingInteractions';
 
 // layout exports
 export { Box } from './components/Box';

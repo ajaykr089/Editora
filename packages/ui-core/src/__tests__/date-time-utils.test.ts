@@ -62,4 +62,18 @@ describe('date-time utils', () => {
     expect(position.placement).toBe('top');
     expect(position.top).toBe(76);
   });
+
+  it('returns viewport-relative coordinates even when the page is scrolled', () => {
+    Object.defineProperty(window, 'scrollX', { value: 120, configurable: true, writable: true });
+    Object.defineProperty(window, 'scrollY', { value: 300, configurable: true, writable: true });
+
+    const anchor = rect({ top: 120, left: 40, width: 180, height: 32 });
+    const panel = rect({ width: 220, height: 96 });
+
+    const position = computePopoverPosition(anchor, panel, 8, 8, 'bottom');
+
+    expect(position.placement).toBe('bottom');
+    expect(position.top).toBe(160);
+    expect(position.left).toBe(40);
+  });
 });

@@ -8,6 +8,7 @@
     "Ajay Kumar <ajaykr089@gmail.com>"
   ],
   "workspaces": [
+    "sandbox",
     "packages/*",
     "packages/plugins/*"
   ],

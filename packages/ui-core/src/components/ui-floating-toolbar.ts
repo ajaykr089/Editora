@@ -1,4 +1,9 @@
 import { ElementBase } from '../ElementBase';
+import {
+  createPositioner,
+  type PositionerHandle,
+  type PositionerPlacement
+} from '../primitives/positioner';
 
 type ToolbarPlacement = 'top' | 'bottom' | 'auto';
 type ToolbarAlign = 'start' | 'center' | 'end';
@@ -235,10 +240,6 @@ function toBool(raw: string | null, fallback: boolean): boolean {
   return normalized !== 'false' && normalized !== '0' && normalized !== 'off';
 }
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
-}
-
 function isAnchorVisible(anchor: HTMLElement): boolean {
   if (!document.body.contains(anchor)) return false;
   const style = window.getComputedStyle(anchor);
@@ -255,6 +256,13 @@ function readPlacement(value: string | null): ToolbarPlacement {
 function readAlign(value: string | null): ToolbarAlign {
   if (value === 'start' || value === 'end') return value;
   return 'center';
+}
+
+function toPositionerPlacement(placement: ToolbarPlacement, align: ToolbarAlign): PositionerPlacement {
+  const side = placement === 'top' ? 'top' : 'bottom';
+  if (align === 'start') return `${side}-start` as PositionerPlacement;
+  if (align === 'end') return `${side}-end` as PositionerPlacement;
+  return side as PositionerPlacement;
 }
 
 function uniqueFocusableFrom(nodes: Element[]): HTMLElement[] {
@@ -298,6 +306,9 @@ export class UIFloatingToolbar extends ElementBase {
   private _raf: number | null = null;
   private _resizeObserver: ResizeObserver | null = null;
   private _mutationObserver: MutationObserver | null = null;
+  private _positioner: PositionerHandle | null = null;
+  private _positionerPlacement: PositionerPlacement | null = null;
+  private _positionerOffset = 0;
   private _globalListenersBound = false;
   private _isOpen = false;
   private _closeReason: ToolbarCloseReason = 'programmatic';
@@ -318,6 +329,8 @@ export class UIFloatingToolbar extends ElementBase {
   override disconnectedCallback(): void {
     this._unbindGlobalListeners();
     this._teardownObservers();
+    this._positioner?.destroy();
+    this._positioner = null;
     if (this._raf != null) {
       cancelAnimationFrame(this._raf);
       this._raf = null;
@@ -408,6 +421,10 @@ export class UIFloatingToolbar extends ElementBase {
 
     this._unbindGlobalListeners();
     this._teardownObservers();
+    this._positioner?.destroy();
+    this._positioner = null;
+    this._positionerPlacement = null;
+    this._positionerOffset = 0;
     if (this._raf != null) {
       cancelAnimationFrame(this._raf);
       this._raf = null;
@@ -563,32 +580,44 @@ export class UIFloatingToolbar extends ElementBase {
       return;
     }
     if (!this._panel) return;
-
-    const anchorRect = this._anchor.getBoundingClientRect();
-    const panelRect = this._panel.getBoundingClientRect();
-    const viewportPadding = 8;
     const offset = Math.max(0, parseNumber(this.getAttribute('offset'), 8));
     const placement = readPlacement(this.getAttribute('placement'));
     const align = readAlign(this.getAttribute('align'));
+    const resolvedPlacement = toPositionerPlacement(placement, align);
+    const shouldRebuild = !this._positioner ||
+      this._positionerPlacement !== resolvedPlacement ||
+      this._positionerOffset !== offset;
 
-    const spaceTop = anchorRect.top - viewportPadding;
-    const spaceBottom = window.innerHeight - anchorRect.bottom - viewportPadding;
-    const wantsBottom = placement === 'bottom';
-    const shouldPlaceBottom = wantsBottom || (placement === 'auto' && spaceBottom > spaceTop && spaceTop < panelRect.height + offset);
-    const side = shouldPlaceBottom ? 'bottom' : 'top';
+    if (shouldRebuild) {
+      this._positioner?.destroy();
+      this._positioner = createPositioner({
+        anchor: this._anchor,
+        floating: this._panel,
+        placement: resolvedPlacement,
+        strategy: 'fixed',
+        offset,
+        flip: true,
+        shift: true,
+        boundaryPadding: 8,
+        observeWindowResize: false,
+        observeScroll: false,
+        observeAncestorScroll: false,
+        observeAncestorResize: false,
+        observeLayoutShift: false,
+        observeAnchorResize: false,
+        observeFloatingResize: false,
+        onUpdate: (state) => {
+          const side = state.placement.startsWith('top') ? 'top' : 'bottom';
+          this.style.setProperty('--ui-floating-toolbar-origin-x', align === 'start' ? '0%' : align === 'end' ? '100%' : '50%');
+          this._panel?.setAttribute('data-side', side);
+        }
+      });
+      this._positionerPlacement = resolvedPlacement;
+      this._positionerOffset = offset;
+      return;
+    }
 
-    let y = shouldPlaceBottom ? anchorRect.bottom + offset : anchorRect.top - panelRect.height - offset;
-    y = clamp(y, viewportPadding, window.innerHeight - panelRect.height - viewportPadding);
-
-    let x = anchorRect.left + anchorRect.width / 2 - panelRect.width / 2;
-    if (align === 'start') x = anchorRect.left;
-    if (align === 'end') x = anchorRect.right - panelRect.width;
-    x = clamp(x, viewportPadding, window.innerWidth - panelRect.width - viewportPadding);
-
-    this._panel.style.left = `${Math.round(x)}px`;
-    this._panel.style.top = `${Math.round(y)}px`;
-    this.style.setProperty('--ui-floating-toolbar-origin-x', align === 'start' ? '0%' : align === 'end' ? '100%' : '50%');
-    this._panel.setAttribute('data-side', side);
+    this._positioner?.update();
   }
 
   private _onWindowChange(): void {

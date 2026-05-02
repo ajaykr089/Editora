@@ -1,9 +1,14 @@
 # @editora/ui-react
 
-> [!IMPORTANT]
-> **Live Website:** https://editora-ecosystem.netlify.app/  
-> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
 
+![Editora UI Components](../../images/editora-ui-components-linkedin-graphic.png)
+
+## Demos
+
+- **CodeSandbox:** https://qjr47y-5173.csb.app/button
+- **UI Component Catalog:** https://editora-ecosystem.netlify.app/
+- **Web Demo:** https://editora-free.netlify.app/
+- **Storybook:** https://editora-ecosystem-storybook.netlify.app/
 
 React wrappers for `@editora/ui-core` Web Components.
 
@@ -260,6 +265,76 @@ import { ThemeProvider } from '@editora/ui-react';
 - `AlertDialogProvider`, `useAlertDialog`
 - `ThemeProvider`, `useTheme`
 - `useForm`, `useFloating`
+
+## Floating Positioning
+
+`@editora/ui-react` exposes a first-party floating layer built on `@editora/ui-core`.
+
+Use `useFloating()` for shared positioning, then compose interaction hooks as needed:
+
+```tsx
+import {
+  FloatingArrow,
+  FloatingFocusManager,
+  FloatingPortal,
+  useClick,
+  useDismiss,
+  useFloating,
+  useInteractions
+} from '@editora/ui-react';
+
+function Example() {
+  const floating = useFloating({
+    placement: 'bottom-start',
+    offset: 10,
+    flip: true,
+    shift: true,
+    fitViewport: true
+  });
+
+  const interactions = useInteractions([
+    useClick(floating.context),
+    useDismiss(floating.context)
+  ]);
+
+  return (
+    <>
+      <button ref={floating.referenceRef} {...interactions.getReferenceProps()}>
+        Open
+      </button>
+
+      {floating.open ? (
+        <FloatingPortal>
+          <FloatingFocusManager context={floating.context}>
+            <div
+              ref={floating.floatingRef}
+              {...interactions.getFloatingProps({
+                style: {
+                  position: floating.strategy,
+                  top: floating.coords.top,
+                  left: floating.coords.left
+                }
+              })}
+            >
+              <FloatingArrow context={floating.context} fill="#fff" stroke="#111827" />
+              Floating content
+            </div>
+          </FloatingFocusManager>
+        </FloatingPortal>
+      ) : null}
+    </>
+  );
+}
+```
+
+Common React floating exports:
+
+- hooks: `useFloating`, `useInteractions`, `useClick`, `useHover`, `useFocus`, `useDismiss`, `useRole`, `useListNavigation`, `useTypeahead`, `useClientPoint`, `useTransition`
+- helpers: `FloatingArrow`, `FloatingPortal`, `FloatingOverlay`, `FloatingFocusManager`, `FloatingTree`, `FloatingList`, `FloatingDelayGroup`, `Composite`
+
+For the full core + React guide and the Floating UI concept map, see:
+
+- `../ui-core/docs/FLOATING_USAGE.md`
 
 ## SSR and StrictMode Notes
 

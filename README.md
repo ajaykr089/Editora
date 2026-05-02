@@ -1,13 +1,15 @@
 # Editora - Best Free Premium Rich Text Editor
-
-> [!IMPORTANT]
-> **Live Website:** https://editora-ecosystem.netlify.app/  
-> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
-
-
 <div align="center">
   <img src="images/editora_logo_blocks.svg" alt="Editora Logo" width="200" height="auto">
 </div>
+
+
+![Editora Ecosystem](./images/editora-linkedin-graphic.png)
+
+- **CodeSandbox:** https://qjr47y-5173.csb.app/editora-editor
+- **Editora Ecosystem:** https://editora-ecosystem.netlify.app/
+- **Web Demo:** https://editora-free.netlify.app/
+- **Storybook:** https://editora-ecosystem-storybook.netlify.app/
 
 The **best free rich text editor** with enterprise-grade features. A comprehensive, production-ready WYSIWYG editor built with React, TypeScript, and modern web technologies. Get premium features completely free—no subscriptions, no limitations.
 

@@ -1,9 +1,13 @@
 # @editora/ui-core
 
-> [!IMPORTANT]
-> **Live Website:** https://editora-ecosystem.netlify.app/  
-> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+![Editora UI Components](../../images/editora-ui-components-linkedin-graphic.png)
 
+## Demos
+
+- **CodeSandbox:** https://qjr47y-5173.csb.app/button
+- **UI Component Catalog:** https://editora-ecosystem.netlify.app/
+- **Web Demo:** https://editora-free.netlify.app/
+- **Storybook:** https://editora-ecosystem-storybook.netlify.app/
 
 Production-oriented Web Components for Editora UI.
 
@@ -78,6 +82,7 @@ More guidance lives in [`docs/FRAMEWORK_DIRECT_USAGE.md`](https://github.com/aja
 - `ElementBase`
 - `applyTheme`, `defaultTokens`
 - `showPortalFor`, `autoUpdatePosition`, portal helpers
+- `createPositioner`, `computePositionState`, `autoUpdatePositioner`, middleware helpers, virtual anchors
 - focus/overlay managers
 - `showToast`
 
@@ -229,10 +234,46 @@ applyTheme({
 });
 ```
 
+## Floating Positioning
+
+`@editora/ui-core` includes the shared floating engine used by menus, context menus, hover cards, floating toolbars, and picker overlays.
+
+Use `@editora/ui-core/runtime` for framework-agnostic floating behavior:
+
+```ts
+import { createPositioner } from '@editora/ui-core/runtime';
+
+const handle = createPositioner({
+  anchor: trigger,
+  floating: panel,
+  placement: 'bottom-start',
+  strategy: 'fixed',
+  offset: 8,
+  flip: true,
+  shift: true,
+  fitViewport: true
+});
+
+// later
+handle.destroy();
+```
+
+You can also use:
+
+- `computePositionState()` for one-shot coordinate calculation
+- `autoUpdatePositioner()` for observer-driven updates
+- `createVirtualPoint()`, `createVirtualRect()`, `createVirtualRange()` for virtual anchors
+- `detectPositionerOverflow()` for diagnostics and custom middleware
+
+Full guide:
+
+- `docs/FLOATING_USAGE.md`
+
 ## Docs
 
 - `docs/FRAMEWORK_DIRECT_USAGE.md` for Vue, Svelte, and Angular direct-use guidance
 - `docs/ATTRIBUTE_RENDER_MATRIX.md` for component render strategy coverage
+- `docs/FLOATING_USAGE.md` for first-party floating primitives and Floating UI-style usage
 - `docs/PRIMITIVE_GAP_MATRIX.md` for the missing primitive roadmap
 - `docs/PRIMITIVE_IMPLEMENTATION_PLAN.md` for proposed APIs and rollout order
 

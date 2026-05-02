@@ -1,6 +1,6 @@
 {
   "name": "@editora/plugins",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Enterprise plugin suite for Editora rich text editor in React and web apps, including tables, media, workflow, and compliance tooling.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",

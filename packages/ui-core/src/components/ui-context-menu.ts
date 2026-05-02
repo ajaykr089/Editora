@@ -1,6 +1,12 @@
 import { ElementBase } from '../ElementBase';
 import { createPortalContainer } from '../portal';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
+import {
+  createPositioner,
+  type PositionerHandle,
+  type PositionerPlacement,
+  type PositionerVirtualElement
+} from '../primitives/positioner';
 import { createSharedMenuItemCss } from './menu-item-styles';
 import './ui-listbox';
 import type { UIListbox } from './ui-listbox';
@@ -479,10 +485,6 @@ function toPortalLightDomStyle(css: string): string {
 
 const portalStyle = `${toPortalShadowStyle(shadowStyle)}\n${toPortalLightDomStyle(lightDomStyle)}`;
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
-}
-
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -500,6 +502,10 @@ function toPoint(x: number | Point, y?: number): Point {
 function parsePlacement(value: string | null): ContextMenuPlacement {
   if (value === 'top' || value === 'left' || value === 'right') return value;
   return 'bottom';
+}
+
+function toPositionerPlacement(value: ContextMenuPlacement): PositionerPlacement {
+  return `${value}-start` as PositionerPlacement;
 }
 
 function normalizeMenuSize(value: string | null): 'sm' | 'md' | 'lg' | '' {
@@ -591,54 +597,6 @@ function getRectForPoint(point: Point): RectLike {
   };
 }
 
-function computeMenuPosition(anchorRect: RectLike, menuWidth: number, menuHeight: number, placement: ContextMenuPlacement, offset: number) {
-  const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
-  const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
-  const maxX = Math.max(POSITION_GAP, viewportWidth - menuWidth - POSITION_GAP);
-  const maxY = Math.max(POSITION_GAP, viewportHeight - menuHeight - POSITION_GAP);
-
-  let resolvedPlacement = placement;
-  let x = placement === 'left'
-    ? anchorRect.left - menuWidth - offset
-    : placement === 'right'
-      ? anchorRect.right + offset
-      : anchorRect.left;
-  let y = placement === 'top'
-    ? anchorRect.top - menuHeight - offset
-    : placement === 'bottom'
-      ? anchorRect.bottom + offset
-      : anchorRect.top;
-
-  if (placement === 'top' || placement === 'bottom') {
-    if (resolvedPlacement === 'bottom' && y + menuHeight > viewportHeight - POSITION_GAP && anchorRect.top - menuHeight - offset >= POSITION_GAP) {
-      resolvedPlacement = 'top';
-      y = anchorRect.top - menuHeight - offset;
-    } else if (resolvedPlacement === 'top' && y < POSITION_GAP && anchorRect.bottom + offset + menuHeight <= viewportHeight - POSITION_GAP) {
-      resolvedPlacement = 'bottom';
-      y = anchorRect.bottom + offset;
-    }
-  } else if (placement === 'left' || placement === 'right') {
-    if (resolvedPlacement === 'right' && x + menuWidth > viewportWidth - POSITION_GAP && anchorRect.left - menuWidth - offset >= POSITION_GAP) {
-      resolvedPlacement = 'left';
-      x = anchorRect.left - menuWidth - offset;
-    } else if (resolvedPlacement === 'left' && x < POSITION_GAP && anchorRect.right + offset + menuWidth <= viewportWidth - POSITION_GAP) {
-      resolvedPlacement = 'right';
-      x = anchorRect.right + offset;
-    }
-  }
-
-  x = clamp(x, POSITION_GAP, maxX);
-  y = clamp(y, POSITION_GAP, maxY);
-
-  return {
-    x: Math.round(x),
-    y: Math.round(y),
-    placement: resolvedPlacement,
-    maxWidth: Math.max(160, viewportWidth - POSITION_GAP * 2),
-    maxHeight: Math.max(120, viewportHeight - POSITION_GAP * 2)
-  };
-}
-
 export class UIContextMenu extends ElementBase {
   static get observedAttributes() {
     return [
@@ -669,6 +627,10 @@ export class UIContextMenu extends ElementBase {
   private _portalSurfaceEl: HTMLElement | null = null;
   private _portalContentHostEl: UIListbox | null = null;
   private _dismissableLayer: DismissableLayerHandle | null = null;
+  private _positioner: PositionerHandle | null = null;
+  private _positionerPlacement: PositionerPlacement | null = null;
+  private _positionerOffset = 0;
+  private _positionerAnchorEl: HTMLElement | null = null;
   private _contentAnchor: Comment | null = null;
   private _contentSourceEl: HTMLElement | null = null;
   private _contentOriginalParent: Node | null = null;
@@ -1241,6 +1203,11 @@ export class UIContextMenu extends ElementBase {
   private _teardownPortal(): void {
     this._dismissableLayer?.destroy();
     this._dismissableLayer = null;
+    this._positioner?.destroy();
+    this._positioner = null;
+    this._positionerPlacement = null;
+    this._positionerOffset = 0;
+    this._positionerAnchorEl = null;
     this._unbindPortalInteractionListeners();
     this._restoreContentFromPortal();
     this._portalContentHostEl = null;
@@ -1301,6 +1268,56 @@ export class UIContextMenu extends ElementBase {
       width: rect.width,
       height: rect.height
     };
+  }
+
+  private _pointVirtualAnchor(): PositionerVirtualElement {
+    return {
+      getBoundingClientRect: () => {
+        const { x, y } = this._point;
+        return {
+          x,
+          y,
+          top: y,
+          left: x,
+          right: x,
+          bottom: y,
+          width: 0,
+          height: 0,
+          toJSON: () => ({})
+        } as DOMRect;
+      }
+    };
+  }
+
+  private _rebuildPositioner(surface: HTMLElement, placement: PositionerPlacement, offset: number): void {
+    this._positioner?.destroy();
+    this._positioner = createPositioner({
+      anchor: this._anchorEl || this._pointVirtualAnchor(),
+      floating: surface,
+      placement,
+      strategy: 'fixed',
+      offset,
+      flip: true,
+      shift: true,
+      boundaryPadding: POSITION_GAP,
+      observeWindowResize: false,
+      observeScroll: false,
+      observeAncestorScroll: false,
+      observeAncestorResize: false,
+      observeLayoutShift: false,
+      observeAnchorResize: false,
+      observeFloatingResize: false,
+      onUpdate: (state) => {
+        const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+        surface.style.maxWidth = `${Math.max(160, viewportWidth - POSITION_GAP * 2)}px`;
+        surface.style.maxHeight = `${Math.max(120, viewportHeight - POSITION_GAP * 2)}px`;
+        surface.setAttribute('data-placement', state.placement.split('-')[0]);
+      }
+    });
+    this._positionerPlacement = placement;
+    this._positionerOffset = offset;
+    this._positionerAnchorEl = this._anchorEl;
   }
 
   private _startAnchorTracking(): void {
@@ -1599,18 +1616,20 @@ export class UIContextMenu extends ElementBase {
       return;
     }
 
-    const anchorRect = this._anchorEl ? this._anchorEl.getBoundingClientRect() : getRectForPoint(this._point);
-    const rect = surface.getBoundingClientRect();
-    const width = rect.width || surface.offsetWidth || 240;
-    const height = rect.height || surface.offsetHeight || 0;
     const placement = parsePlacement(this.getAttribute('placement'));
-    const position = computeMenuPosition(anchorRect, width, height, placement, this._anchorEl ? ANCHOR_OFFSET : 0);
+    const resolvedPlacement = toPositionerPlacement(placement);
+    const offset = this._anchorEl ? ANCHOR_OFFSET : 0;
+    const shouldRebuild = !this._positioner ||
+      this._positionerPlacement !== resolvedPlacement ||
+      this._positionerOffset !== offset ||
+      this._positionerAnchorEl !== this._anchorEl;
 
-    surface.style.left = `${position.x}px`;
-    surface.style.top = `${position.y}px`;
-    surface.style.maxWidth = `${position.maxWidth}px`;
-    surface.style.maxHeight = `${position.maxHeight}px`;
-    surface.setAttribute('data-placement', position.placement);
+    if (shouldRebuild) {
+      this._rebuildPositioner(surface, resolvedPlacement, offset);
+      return;
+    }
+
+    this._positioner?.update();
   }
 
   private _scheduleSubmenuLayout(): void {
