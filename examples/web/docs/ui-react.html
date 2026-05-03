@@ -222,10 +222,65 @@ export function UsersTable() {
   );
 }</code></pre>
 
+                    <h3>4. Gantt planning workspace</h3>
+                    <p><code>Gantt</code> provides an interactive project timeline for release plans, delivery roadmaps, and dependency-heavy schedules. It supports task, summary, and milestone rows; baselines; critical tasks; split segments; dependency links; drag/resize editing; keyboard selection; and virtualized rendering for large plans.</p>
+                    <pre><code class="language-tsx">import { Gantt, type GanttLink, type GanttTask } from '@editora/ui-react';
+import { useState } from 'react';
+
+const initialTasks: GanttTask[] = [
+  {
+    id: 'foundation',
+    label: 'Foundation build',
+    start: '2026-02-01',
+    end: '2026-02-18',
+    progress: 68,
+    baselineStart: '2026-01-29',
+    baselineEnd: '2026-02-14',
+    critical: true
+  },
+  {
+    id: 'launch',
+    label: 'Launch milestone',
+    start: '2026-02-28',
+    type: 'milestone',
+    tone: 'success'
+  }
+];
+
+const links: GanttLink[] = [
+  { id: 'foundation-launch', source: 'foundation', target: 'launch', type: 'e2s' }
+];
+
+export function ReleasePlan() {
+  const [tasks, setTasks] = useState(initialTasks);
+
+  return (
+    &lt;Gantt
+      tasks={tasks}
+      links={links}
+      zoom="week"
+      sort="start"
+      barVariant="soft"
+      onTaskChange={({ id, start, end }) =&gt; {
+        setTasks((items) =&gt; items.map((task) =&gt; (
+          task.id === id ? { ...task, start: start ?? task.start, end: end ?? task.end } : task
+        )));
+      }}
+      onTaskDelete={({ id }) =&gt; setTasks((items) =&gt; items.filter((task) =&gt; task.id !== id))}
+      onLinkSelect={(detail) =&gt; console.log('dependency selected', detail)}
+    /&gt;
+  );
+}</code></pre>
+                    <ul>
+                        <li>Dependency types: <code>e2s</code>, <code>s2s</code>, <code>e2e</code>, and <code>s2e</code>.</li>
+                        <li>Bar variants: <code>solid</code>, <code>soft</code>, <code>striped</code>, <code>outline</code>, and <code>glass</code>.</li>
+                        <li>Scale support: automatic row virtualization for large schedules, including the 10,000-task Storybook example.</li>
+                    </ul>
+
                     <h2>Component Groups</h2>
                     <ul>
                         <li><strong>Forms:</strong> <code>Form</code>, <code>Field</code>, <code>Input</code>, <code>Textarea</code>, <code>Select</code>, <code>Combobox</code>, <code>Switch</code>, <code>Checkbox</code>, <code>DatePicker</code>, <code>ColorPicker</code></li>
-                        <li><strong>Data:</strong> <code>DataTable</code>, <code>Pagination</code>, <code>Table</code>, <code>Calendar</code>, <code>Chart</code>, <code>Timeline</code>, <code>Progress</code></li>
+                        <li><strong>Data:</strong> <code>DataTable</code>, <code>Pagination</code>, <code>Table</code>, <code>Calendar</code>, <code>Chart</code>, <code>Timeline</code>, <code>Gantt</code>, <code>Progress</code></li>
                         <li><strong>Overlay:</strong> <code>Dialog</code>, <code>AlertDialog</code>, <code>Popover</code>, <code>Tooltip</code>, <code>Dropdown</code>, <code>Drawer</code></li>
                         <li><strong>Layout:</strong> <code>Layout</code>, <code>Sidebar</code>, <code>Tabs</code>, <code>Grid</code>, <code>Flex</code>, <code>Container</code>, <code>Section</code></li>
                     </ul>

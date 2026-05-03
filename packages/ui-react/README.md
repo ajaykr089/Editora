@@ -237,6 +237,66 @@ import { ThemeProvider } from '@editora/ui-react';
 </ThemeProvider>
 ```
 
+## Gantt Planning Workspace
+
+`Gantt` is the React wrapper for the production planning timeline in `@editora/ui-core`. It supports task, summary, and milestone rows; dependency routing; drag/resize editing; keyboard selection; baselines; critical path highlighting; split task segments; and virtualized rendering for large schedules.
+
+```tsx
+import { Gantt, type GanttLink, type GanttTask } from '@editora/ui-react';
+import { useState } from 'react';
+
+const initialTasks: GanttTask[] = [
+  {
+    id: 'foundation',
+    label: 'Foundation',
+    start: '2026-02-01',
+    end: '2026-02-18',
+    progress: 68,
+    baselineStart: '2026-01-29',
+    baselineEnd: '2026-02-14',
+    critical: true
+  },
+  {
+    id: 'handoff',
+    label: 'Handoff milestone',
+    start: '2026-02-20',
+    type: 'milestone',
+    tone: 'success'
+  }
+];
+
+const links: GanttLink[] = [
+  { id: 'foundation-handoff', source: 'foundation', target: 'handoff', type: 'e2s' }
+];
+
+export function PlanningDemo() {
+  const [tasks, setTasks] = useState(initialTasks);
+
+  return (
+    <Gantt
+      tasks={tasks}
+      links={links}
+      zoom="week"
+      sort="start"
+      barVariant="soft"
+      onTaskChange={({ id, start, end }) => {
+        setTasks((items) => items.map((task) => task.id === id ? { ...task, start: start ?? task.start, end: end ?? task.end } : task));
+      }}
+      onTaskDelete={({ id }) => setTasks((items) => items.filter((task) => task.id !== id))}
+      onLinkSelect={(detail) => console.log('dependency selected', detail)}
+    />
+  );
+}
+```
+
+Highlights:
+
+- Dependency types: `e2s`, `s2s`, `e2e`, and `s2e`, with selectable SVG links and arrowheads.
+- Bar designs: `solid`, `soft`, `striped`, `outline`, and `glass`.
+- Planning data: baselines, critical tasks, milestones, parent/child summaries, assignees, progress, and split segments.
+- Interaction: drag, resize, keyboard task selection, delete events, toolbar zoom/filter/sort, and readonly mode.
+- Scale: row virtualization turns on automatically for large task sets; pass `virtualized={false}` only for small custom layouts.
+
 ## Component Catalog
 
 ### Form and inputs

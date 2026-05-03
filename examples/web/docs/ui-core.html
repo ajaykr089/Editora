@@ -134,7 +134,7 @@ if (result.action === 'submit') {
                     <p><code>ui-layout</code>, <code>ui-sidebar</code>, <code>ui-app-header</code>, <code>ui-breadcrumb</code>, <code>ui-navigation-menu</code>, <code>ui-menubar</code>, <code>ui-tabs</code>, <code>ui-grid</code>, <code>ui-container</code>.</p>
 
                     <h3>Data and display</h3>
-                    <p><code>ui-data-table</code>, <code>ui-pagination</code>, <code>ui-table</code>, <code>ui-chart</code>, <code>ui-calendar</code>, <code>ui-progress</code>, <code>ui-skeleton</code>, <code>ui-empty-state</code>.</p>
+                    <p><code>ui-data-table</code>, <code>ui-pagination</code>, <code>ui-table</code>, <code>ui-chart</code>, <code>ui-calendar</code>, <code>ui-gantt</code>, <code>ui-progress</code>, <code>ui-skeleton</code>, <code>ui-empty-state</code>.</p>
 
                     <h3>Overlays and interaction</h3>
                     <p><code>ui-dialog</code>, <code>ui-alert-dialog</code>, <code>ui-popover</code>, <code>ui-dropdown</code>, <code>ui-context-menu</code>, <code>ui-tooltip</code>, <code>ui-drawer</code>, <code>ui-floating-toolbar</code>, <code>ui-command-palette</code>.</p>
@@ -150,6 +150,49 @@ if (result.action === 'submit') {
   });
 &lt;/script&gt;</code></pre>
                     <p>Most events are dispatched as <code>CustomEvent</code> with typed <code>detail</code>, and usually bubble across shadow boundaries.</p>
+
+                    <h2>Gantt Planning Timeline</h2>
+                    <p><code>ui-gantt</code> is the framework-agnostic planning timeline behind the React <code>Gantt</code> wrapper. It supports task, summary, and milestone rows; dependency routing; drag/resize editing; keyboard selection; baselines; critical tasks; split segments; and row virtualization for large schedules.</p>
+                    <pre><code class="language-html">&lt;ui-gantt id="releasePlan" zoom="week" sort="start" bar-variant="soft"&gt;&lt;/ui-gantt&gt;
+
+&lt;script type="module"&gt;
+  import '@editora/ui-core';
+
+  const gantt = document.getElementById('releasePlan');
+
+  gantt.setAttribute('tasks', JSON.stringify([
+    {
+      id: 'api',
+      label: 'API contracts',
+      start: '2026-02-10',
+      end: '2026-02-24',
+      progress: 62,
+      baselineStart: '2026-02-07',
+      baselineEnd: '2026-02-21',
+      critical: true
+    },
+    {
+      id: 'qa',
+      label: 'QA sign-off',
+      start: '2026-02-27',
+      type: 'milestone',
+      tone: 'success'
+    }
+  ]));
+
+  gantt.setAttribute('links', JSON.stringify([
+    { id: 'api-qa', source: 'api', target: 'qa', type: 'e2s' }
+  ]));
+
+  gantt.addEventListener('taskchange', (event) =&gt; console.log('task changed', event.detail));
+  gantt.addEventListener('taskdelete', (event) =&gt; console.log('delete task', event.detail.id));
+  gantt.addEventListener('linkselect', (event) =&gt; console.log('dependency selected', event.detail));
+&lt;/script&gt;</code></pre>
+                    <ul>
+                        <li>Dependency types: <code>e2s</code>, <code>s2s</code>, <code>e2e</code>, and <code>s2e</code>, with routed SVG connectors and arrowheads.</li>
+                        <li>Bar variants: <code>solid</code>, <code>soft</code>, <code>striped</code>, <code>outline</code>, and <code>glass</code>.</li>
+                        <li>Toolbar controls: zoom, filter, and sort; use <code>readonly</code> for non-editable reports.</li>
+                    </ul>
 
                     <h2>Theming</h2>
                     <pre><code class="language-typescript">import { applyTheme, defaultTokens } from '@editora/ui-core';
