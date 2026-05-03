@@ -54,7 +54,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@editora/icons": "^0.1.5"
+    "@editora/icons": "^0.1.7"
   },
   "keywords": [
     "editora",
