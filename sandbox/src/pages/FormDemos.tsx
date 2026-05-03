@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import {
-  Box, Button, Checkbox, Combobox, Field,
+  Box, Button, Checkbox, ColorPicker, Combobox, DateField, DatePicker, DateRangePicker,
+  DateRangeTimePicker, DateTimePicker, Dropzone, Field, FileUpload,
   Flex, Grid, Input, Label, MultiSelect, NumberField, PasswordField,
-  PinInput, RadioGroup, Rating, Select, Slider, Switch, TagsInput,
-  Textarea, TransferList,
+  InlineEdit, PinInput, RadioGroup, Rating, Select, Slider, Switch, TagsInput,
+  Textarea, TimeField, TimePicker, TransferList,
 } from '@editora/ui-react';
 
 const panel: React.CSSProperties = { border: '1px solid #e2e8f0', borderRadius: 16, padding: 20, background: '#fff', marginBottom: 20 };
@@ -36,30 +37,192 @@ export function CheckboxDemo() {
 }
 
 export function InputDemo() {
+  const [email, setEmail] = useState('editor@editora.dev');
+  const [search, setSearch] = useState('');
   return (
     <div>
       <h2 style={h2}>Input</h2>
       <div style={panel}>
-        <h3 style={h3}>Variants</h3>
-        <Grid style={{ gap: 10 }}>
-          <Input placeholder="Surface input" variant="surface" />
-          <Input placeholder="Outline input" variant="outline" />
-          <Input placeholder="Soft input" variant="soft" />
-          <Input placeholder="Disabled" disabled />
-          <Input placeholder="With error" error="This field is required" />
+        <h3 style={h3}>Controlled fields</h3>
+        <Grid style={{ gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+          <Input label="Email" description="Controlled value with clear action." value={email} onChange={setEmail} clearable type="email" placeholder="you@example.com" variant="surface" />
+          <Input label="Search" value={search} onInput={setSearch} debounce={250} clearable placeholder="Search projects..." variant="soft">
+            <Input.Prefix>⌕</Input.Prefix>
+          </Input>
+          <Input label="Slug" placeholder="release-notes" floatingLabel maxlength={24} counter variant="outlined" />
+          <Input label="Disabled" value="Locked field" disabled variant="filled" />
+        </Grid>
+        <div style={{ marginTop: 8, fontSize: 13, color: '#64748b' }}>Email: {email || 'empty'} · Search: {search || 'empty'}</div>
+      </div>
+      <div style={panel}>
+        <h3 style={h3}>Variants and states</h3>
+        <Grid style={{ gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+          {(['classic', 'surface', 'soft', 'outlined', 'filled', 'flushed', 'minimal', 'contrast', 'elevated'] as const).map((variant) => (
+            <Input key={variant} label={variant} placeholder={`${variant} input`} variant={variant} />
+          ))}
+          <Input label="Success" placeholder="Validated input" validation="success" tone="success" />
+          <Input label="Error" placeholder="Required field" validation="error" tone="danger">
+            <Input.Error>This field is required.</Input.Error>
+          </Input>
         </Grid>
       </div>
       <div style={panel}>
-        <h3 style={h3}>Sizes</h3>
-        <Grid style={{ gap: 10 }}>
-          {(['sm','md','lg'] as const).map((s) => <Input key={s} placeholder={`Size ${s}`} size={s} />)}
+        <h3 style={h3}>Sizes, density, and adornments</h3>
+        <Grid style={{ gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+          {(['sm','md','lg'] as const).map((s) => <Input key={s} label={`Size ${s}`} placeholder={`Size ${s}`} size={s} />)}
+          <Input label="Compact" placeholder="Compact density" density="compact" />
+          <Input label="Amount" placeholder="0.00" inputMode="decimal">
+            <Input.Prefix>$</Input.Prefix>
+            <Input.Suffix>USD</Input.Suffix>
+          </Input>
         </Grid>
       </div>
+    </div>
+  );
+}
+
+export function ColorPickerDemo() {
+  const [brand, setBrand] = useState('#2563eb');
+  const presets = ['#2563eb', '#16a34a', '#f59e0b', '#dc2626', '#7c3aed', '#0f172a'];
+  return (
+    <div>
+      <h2 style={h2}>ColorPicker</h2>
       <div style={panel}>
-        <h3 style={h3}>With Prefix / Suffix</h3>
-        <Grid style={{ gap: 10 }}>
-          <Input placeholder="Search..."><Input.Prefix>🔍</Input.Prefix></Input>
-          <Input placeholder="Amount"><Input.Prefix>$</Input.Prefix><Input.Suffix>.00</Input.Suffix></Input>
+        <h3 style={h3}>Popover and inline modes</h3>
+        <Grid style={{ gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', alignItems: 'start' }}>
+          <ColorPicker value={brand} onValueChange={setBrand} presets={presets} recent alpha label="Brand color" />
+          <ColorPicker value="#16a34a" mode="inline" presets={presets} label="Inline picker" />
+          <ColorPicker value="#0f172a" variant="contrast" format="rgb" label="Contrast RGB" />
+        </Grid>
+        <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: '#64748b' }}>
+          <span style={{ width: 28, height: 28, borderRadius: 8, border: '1px solid #cbd5e1', background: brand }} />
+          Selected: {brand}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function FileUploadDemo() {
+  const [files, setFiles] = useState<string[]>([]);
+  const [rejected, setRejected] = useState('');
+  return (
+    <div>
+      <h2 style={h2}>FileUpload</h2>
+      <div style={panel}>
+        <h3 style={h3}>Upload field</h3>
+        <FileUpload
+          label="Product assets"
+          description="Upload PNG, JPG, or SVG assets up to 2 MB."
+          accept="image/png,image/jpeg,image/svg+xml"
+          multiple
+          maxFiles={4}
+          maxSize={2 * 1024 * 1024}
+          showPreviews
+          buttonText="Choose assets"
+          onChange={(next) => {
+            setFiles(next.map((file) => file.name));
+            setRejected('');
+          }}
+          onReject={(items) => setRejected(items.map((item) => `${item.file.name}: ${item.reason}`).join(', '))}
+        />
+        <div style={{ marginTop: 10, fontSize: 13, color: rejected ? '#b45309' : '#64748b' }}>
+          {rejected || `Selected: ${files.length ? files.join(', ') : 'none'}`}
+        </div>
+      </div>
+      <div style={panel}>
+        <h3 style={h3}>Dropzone with simulated upload</h3>
+        <Dropzone
+          label="Drop release notes"
+          description="Auto-upload Markdown or PDF files."
+          accept=".md,.pdf"
+          multiple
+          uploadOnSelect
+          uploadButtonText="Upload now"
+          dropLabel="Drop files here or browse"
+          onUploadRequest={async ({ setProgress }) => {
+            for (const progress of [20, 45, 70, 100]) {
+              setProgress(progress);
+              await new Promise((resolve) => window.setTimeout(resolve, 120));
+            }
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function InlineEditDemo() {
+  const [title, setTitle] = useState('Quarterly roadmap');
+  const [summary, setSummary] = useState('Click the text to edit this project summary.');
+  return (
+    <div>
+      <h2 style={h2}>InlineEdit</h2>
+      <div style={panel}>
+        <h3 style={h3}>Editable text</h3>
+        <Grid style={{ gap: 16 }}>
+          <Box style={{ padding: 14, border: '1px solid #e2e8f0', borderRadius: 12 }}>
+            <div style={{ fontSize: 12, color: '#64748b', marginBottom: 6 }}>Title</div>
+            <InlineEdit value={title} onValueChange={setTitle} placeholder="Untitled project" />
+          </Box>
+          <Box style={{ padding: 14, border: '1px solid #e2e8f0', borderRadius: 12 }}>
+            <div style={{ fontSize: 12, color: '#64748b', marginBottom: 6 }}>Multiline summary</div>
+            <InlineEdit value={summary} onValueChange={setSummary} multiline placeholder="Add summary..." />
+          </Box>
+          <Box style={{ padding: 14, border: '1px solid #e2e8f0', borderRadius: 12 }}>
+            <div style={{ fontSize: 12, color: '#64748b', marginBottom: 6 }}>Read only</div>
+            <InlineEdit value="Published changelog" readOnly />
+          </Box>
+        </Grid>
+      </div>
+    </div>
+  );
+}
+
+export function DateTimeFieldDemo() {
+  const [date, setDate] = useState<string | null>('2026-05-18');
+  const [time, setTime] = useState<string | null>('14:30');
+  return (
+    <div>
+      <h2 style={h2}>Date and Time Fields</h2>
+      <div style={panel}>
+        <h3 style={h3}>Segmented fields</h3>
+        <Grid style={{ gap: 14, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+          <DateField label="Launch date" description="Keyboard-friendly date segments." value={date || undefined} min="2026-01-01" max="2026-12-31" onValueChange={setDate} />
+          <TimeField label="Launch time" description="24-hour time with seconds." value={time || undefined} seconds onValueChange={setTime} />
+          <DateField label="Disabled date" value="2026-06-01" disabled />
+          <TimeField label="12-hour field" value="09:45" format="12h" />
+        </Grid>
+        <div style={{ marginTop: 10, fontSize: 13, color: '#64748b' }}>Selected: {date || 'none'} at {time || 'none'}</div>
+      </div>
+    </div>
+  );
+}
+
+export function DateTimePickersDemo() {
+  const [date, setDate] = useState<string | null>('2026-05-18');
+  const [dateTime, setDateTime] = useState<string | null>('2026-05-18T14:30');
+  return (
+    <div>
+      <h2 style={h2}>Date Time Pickers</h2>
+      <div style={panel}>
+        <h3 style={h3}>Popover pickers</h3>
+        <Grid style={{ gap: 14, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+          <DatePicker label="Due date" value={date || undefined} onValueChange={setDate} clearable allowInput showFooter events={[
+            { date: '2026-05-18', title: 'Release', tone: 'success' },
+            { date: '2026-05-21', title: 'Review', tone: 'info' },
+          ]} />
+          <DateRangePicker label="Sprint window" defaultValue='{"start":"2026-05-11","end":"2026-05-22"}' clearable allowSameDay showFooter />
+          <TimePicker label="Reminder" defaultValue="09:30" format="12h" clearable allowInput />
+          <DateTimePicker label="Publish at" value={dateTime || undefined} onValueChange={setDateTime} clearable allowInput showFooter />
+        </Grid>
+        <div style={{ marginTop: 10, fontSize: 13, color: '#64748b' }}>Date: {date || 'none'} · Date-time: {dateTime || 'none'}</div>
+      </div>
+      <div style={panel}>
+        <h3 style={h3}>Inline and range time pickers</h3>
+        <Grid style={{ gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', alignItems: 'start' }}>
+          <DatePicker label="Inline calendar" mode="inline" defaultValue="2026-05-18" showFooter eventsMax={2} />
+          <DateRangeTimePicker label="Maintenance window" defaultValue='{"start":"2026-05-18T20:00","end":"2026-05-18T22:30"}' clearable autoNormalize showFooter />
         </Grid>
       </div>
     </div>
@@ -92,23 +255,52 @@ export function LabelDemo() {
 }
 
 export function SelectDemo() {
-  const [val, setVal] = useState('');
+  const [val, setVal] = useState('review');
   return (
     <div>
       <h2 style={h2}>Select</h2>
       <div style={panel}>
-        <h3 style={h3}>Basic</h3>
-        <Grid style={{ gap: 10 }}>
-          <Select placeholder="Choose option" value={val} onChange={(d: any) => setVal(d.value)}>
-            <option value="a">Option A</option>
-            <option value="b">Option B</option>
-            <option value="c">Option C</option>
+        <h3 style={h3}>Styled select controls</h3>
+        <Grid style={{ gap: 14, gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
+          <Select label="Workflow status" description="Controls publish automation." placeholder="Choose status" value={val} onChange={setVal} variant="surface" elevation="high" showCheck optionBorder>
+            <Select.Option value="">Choose a status</Select.Option>
+            <Select.OptGroup label="Active">
+              <Select.Option value="draft">Draft</Select.Option>
+              <Select.Option value="review">In review</Select.Option>
+            </Select.OptGroup>
+            <Select.OptGroup label="Final">
+              <Select.Option value="approved">Approved</Select.Option>
+              <Select.Option value="published">Published</Select.Option>
+            </Select.OptGroup>
           </Select>
-          <Select placeholder="Disabled" disabled>
-            <option>Option</option>
+          <Select label="Assignee" value="maya" variant="soft" tone="brand" shape="pill" showCheck>
+            <Select.Leading>PM</Select.Leading>
+            <Select.Option value="maya">Maya Patel</Select.Option>
+            <Select.Option value="noah">Noah Smith</Select.Option>
+            <Select.Option value="ava">Ava Chen</Select.Option>
+          </Select>
+          <Select label="Release risk" value="high" variant="outline" tone="danger" validation="warning" error="High-risk release requires approval.">
+            <Select.Option value="low">Low</Select.Option>
+            <Select.Option value="medium">Medium</Select.Option>
+            <Select.Option value="high">High</Select.Option>
+          </Select>
+          <Select label="Disabled state" value="locked" disabled variant="surface">
+            <Select.Option value="locked">Locked by release policy</Select.Option>
           </Select>
         </Grid>
         <div style={{ marginTop: 8, fontSize: 13, color: '#64748b' }}>Selected: {val || 'none'}</div>
+      </div>
+      <div style={panel}>
+        <h3 style={h3}>Variant matrix</h3>
+        <Grid style={{ gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+          {(['surface', 'soft', 'outline', 'solid', 'glass', 'contrast'] as const).map((variant) => (
+            <Select key={variant} label={variant} value="review" variant={variant} tone={variant === 'solid' ? 'success' : 'default'} elevation="low">
+              <Select.Option value="draft">Draft</Select.Option>
+              <Select.Option value="review">In review</Select.Option>
+              <Select.Option value="approved">Approved</Select.Option>
+            </Select>
+          ))}
+        </Grid>
       </div>
     </div>
   );

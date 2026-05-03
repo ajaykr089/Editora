@@ -229,19 +229,65 @@ export function HoverCardDemo() {
 }
 
 export function MenuDemo() {
+  const [last, setLast] = useState('none');
+  const handleSelect = (label: string) => {
+    setLast(label);
+    toastAdvanced.info(label, { duration: 1200, theme: 'light' });
+  };
+
   return (
     <div>
       <h2 style={h2}>Menu</h2>
       <div style={panel}>
-        <Box style={{ maxWidth: 220, border: '1px solid #e2e8f0', borderRadius: 10, overflow: 'hidden' }}>
-          <Menu>
-            <MenuItem onSelect={() => toastAdvanced.info('Dashboard', { duration: 1200, theme: 'light' })}>Dashboard</MenuItem>
-            <MenuItem onSelect={() => toastAdvanced.info('Analytics', { duration: 1200, theme: 'light' })}>Analytics</MenuItem>
-            <MenuSeparator />
-            <MenuItem onSelect={() => toastAdvanced.info('Settings', { duration: 1200, theme: 'light' })}>Settings</MenuItem>
-            <MenuItem tone="danger" onSelect={() => toastAdvanced.error('Sign out', { duration: 1200, theme: 'light' })}>Sign out</MenuItem>
+        <h3 style={h3}>Interactive trigger menu</h3>
+        <Flex style={{ alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <Menu
+            variant="surface"
+            elevation="high"
+            radius={12}
+            closeOnSelect
+            typeahead
+            onSelectDetail={(detail) => setLast(detail.label || detail.value || `item-${detail.index}`)}
+          >
+            <Menu.Trigger>
+              <Button>Open actions</Button>
+            </Menu.Trigger>
+            <Menu.Content>
+              <MenuItem data-value="dashboard" icon={<span>D</span>} shortcut="G D" onClick={() => handleSelect('Dashboard')}>Dashboard</MenuItem>
+              <MenuItem data-value="analytics" icon={<span>A</span>} shortcut="G A" caption="Operational metrics" onClick={() => handleSelect('Analytics')}>Analytics</MenuItem>
+              <MenuSeparator />
+              <MenuItem data-value="settings" icon={<span>S</span>} onClick={() => handleSelect('Settings')}>Settings</MenuItem>
+              <MenuItem data-value="signout" tone="danger" shortcut="Esc" onClick={() => { setLast('Sign out'); toastAdvanced.error('Sign out', { duration: 1200, theme: 'light' }); }}>Sign out</MenuItem>
+            </Menu.Content>
           </Menu>
-        </Box>
+          <div style={{ fontSize: 13, color: '#64748b' }}>Last action: {last}</div>
+        </Flex>
+      </div>
+      <div style={panel}>
+        <h3 style={h3}>Visual variants</h3>
+        <Grid style={{ gap: 14, gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
+          {([
+            ['Surface', { variant: 'surface', elevation: 'high', tone: 'brand' }],
+            ['Soft', { variant: 'soft', elevation: 'low', tone: 'success' }],
+            ['Outline', { variant: 'outline', elevation: 'none', tone: 'neutral' }],
+            ['Contrast', { variant: 'contrast', elevation: 'high', tone: 'brand' }],
+          ] as const).map(([label, props]) => (
+            <Box key={label} style={{ display: 'grid', gap: 10, padding: 12, border: '1px solid #e2e8f0', borderRadius: 12, background: '#f8fafc' }}>
+              <div style={{ fontSize: 12, color: '#64748b', fontWeight: 700 }}>{label}</div>
+              <Menu {...props} radius={12} closeOnSelect>
+                <Menu.Trigger>
+                  <Button variant={label === 'Contrast' ? 'primary' : 'secondary'} size="sm">{label} menu</Button>
+                </Menu.Trigger>
+                <Menu.Content>
+                  <MenuItem data-value="open" caption="Open the workspace">Open</MenuItem>
+                  <MenuItem data-value="duplicate" shortcut="Cmd D">Duplicate</MenuItem>
+                  <MenuSeparator />
+                  <MenuItem data-value="archive" tone="warning">Archive</MenuItem>
+                </Menu.Content>
+              </Menu>
+            </Box>
+          ))}
+        </Grid>
       </div>
     </div>
   );

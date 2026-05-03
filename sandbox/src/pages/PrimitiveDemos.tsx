@@ -260,30 +260,111 @@ export function FiltersBarDemo() {
 }
 
 export function GanttDemo() {
-  const tasks = [
-    { id: '1', label: 'Design system', start: '2024-01-01', end: '2024-01-15', progress: 100 },
-    { id: '2', label: 'Component library', start: '2024-01-10', end: '2024-02-10', progress: 75 },
-    { id: '3', label: 'Documentation', start: '2024-01-20', end: '2024-02-20', progress: 40 },
-    { id: '4', label: 'Testing', start: '2024-02-01', end: '2024-02-28', progress: 20 },
-    { id: '5', label: 'Release', start: '2024-02-25', end: '2024-03-05', progress: 0 },
+  const initialTasks = [
+    { id: 'foundation', label: 'Foundation Workstream', start: '2026-01-26', end: '2026-03-20', progress: 64, tone: 'info' as const, type: 'summary' as const, assignee: 'Platform' },
+    { id: 'requirements', parent: 'foundation', label: 'Requirements mapping', start: '2026-01-26', end: '2026-02-09', progress: 100, tone: 'success' as const, assignee: 'Priya' },
+    { id: 'schema', parent: 'foundation', label: 'Schema and permissions model', start: '2026-02-03', end: '2026-02-20', baselineStart: '2026-02-01', baselineEnd: '2026-02-17', progress: 76, tone: 'success' as const, assignee: 'Jon' },
+    { id: 'api', parent: 'foundation', label: 'Public API contracts', start: '2026-02-14', end: '2026-03-03', baselineStart: '2026-02-11', baselineEnd: '2026-02-28', progress: 58, tone: 'default' as const, assignee: 'Lena' },
+    { id: 'foundation-freeze', parent: 'foundation', label: 'Architecture freeze', start: '2026-03-06', end: '2026-03-06', type: 'milestone' as const, tone: 'info' as const, assignee: 'CAB' },
+    { id: 'product', label: 'Product Experience', start: '2026-02-05', end: '2026-04-10', progress: 42, tone: 'default' as const, type: 'summary' as const, assignee: 'Product' },
+    { id: 'gantt-ui', parent: 'product', label: 'Planning workspace UI', start: '2026-02-05', end: '2026-03-04', progress: 70, tone: 'success' as const, assignee: 'Ava' },
+    { id: 'editorial', parent: 'product', label: 'Editorial review panel', start: '2026-02-18', end: '2026-03-18', progress: 36, tone: 'warning' as const, assignee: 'Maya' },
+    { id: 'automation', parent: 'product', label: 'Automation rule builder', start: '2026-03-08', end: '2026-04-07', baselineStart: '2026-03-01', baselineEnd: '2026-03-26', progress: 18, tone: 'danger' as const, assignee: 'Noah', critical: true },
+    { id: 'ux-review', parent: 'product', label: 'UX readiness review', start: '2026-04-10', end: '2026-04-10', type: 'milestone' as const, tone: 'warning' as const, assignee: 'Design' },
+    { id: 'governance', label: 'Governance and Release', start: '2026-02-24', end: '2026-04-24', progress: 28, tone: 'warning' as const, type: 'summary' as const, assignee: 'PMO' },
+    { id: 'security', parent: 'governance', label: 'Security signoff', start: '2026-02-24', end: '2026-03-18', progress: 40, tone: 'warning' as const, assignee: 'Iris' },
+    { id: 'migration', parent: 'governance', label: 'Customer migration rehearsal', start: '2026-03-14', end: '2026-04-08', baselineStart: '2026-03-10', baselineEnd: '2026-04-02', progress: 18, tone: 'default' as const, assignee: 'Omar', critical: true },
+    { id: 'docs', parent: 'governance', label: 'Developer docs and recipes', start: '2026-03-22', end: '2026-04-18', progress: 12, tone: 'default' as const, assignee: 'Nia', segments: [{ start: '2026-03-22', end: '2026-03-29', progress: 40 }, { start: '2026-04-07', end: '2026-04-18', progress: 5 }] },
+    { id: 'launch-ready', parent: 'governance', label: 'Launch readiness', start: '2026-04-24', end: '2026-04-24', type: 'milestone' as const, tone: 'success' as const, assignee: 'PMO' }
   ];
+  const links = [
+    { id: 'p1', source: 'requirements', target: 'schema', type: 'e2s' as const },
+    { id: 'p2', source: 'schema', target: 'api', type: 'e2s' as const },
+    { id: 'p3', source: 'api', target: 'foundation-freeze', type: 'e2s' as const },
+    { id: 'p4', source: 'foundation-freeze', target: 'gantt-ui', type: 'e2s' as const },
+    { id: 'p5', source: 'gantt-ui', target: 'editorial', type: 's2s' as const },
+    { id: 'p6', source: 'editorial', target: 'automation', type: 'e2s' as const },
+    { id: 'p7', source: 'security', target: 'migration', type: 'e2e' as const },
+    { id: 'p8', source: 'migration', target: 'launch-ready', type: 'e2s' as const },
+    { id: 'p9', source: 'docs', target: 'launch-ready', type: 's2e' as const }
+  ];
+  const [tasks, setTasks] = useState(initialTasks);
+  const [barVariant, setBarVariant] = useState<'solid' | 'soft' | 'striped' | 'outline' | 'glass'>('soft');
+  const [lastAction, setLastAction] = useState('Drag, resize, select a task, or select a dependency link');
+
   return (
     <div>
       <h2 style={h2}>Gantt</h2>
+      <div style={{ ...panel, display: 'grid', gap: 12 }}>
+        <Flex style={{ alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+          <div>
+            <h3 style={{ ...h3, marginBottom: 4 }}>Release planning workspace</h3>
+            <div style={{ color: '#64748b', fontSize: 13 }}>Baselines, critical path, milestones, split tasks, selectable dependencies, drag and resize.</div>
+          </div>
+          <Flex style={{ gap: 8, flexWrap: 'wrap' }}>
+            {(['solid', 'soft', 'striped', 'outline', 'glass'] as const).map((variant) => (
+              <Button key={variant} size="sm" variant={barVariant === variant ? 'primary' : 'secondary'} onClick={() => setBarVariant(variant)}>
+                {variant}
+              </Button>
+            ))}
+          </Flex>
+        </Flex>
+        <Gantt
+          tasks={tasks}
+          links={links}
+          zoom="week"
+          sort="start"
+          barVariant={barVariant}
+          onTaskChange={(detail: any) => {
+            setTasks((items) => items.map((task) => task.id === detail.id ? { ...task, start: detail.start ?? task.start, end: detail.end ?? task.end } : task));
+            setLastAction(`Updated ${detail.id}: ${detail.start || ''} ${detail.end || ''}`.trim());
+          }}
+          onTaskSelect={(detail: any) => setLastAction(`Selected task ${detail.id}`)}
+          onTaskDelete={(detail: any) => {
+            setTasks((items) => items.filter((task) => task.id !== detail.id));
+            setLastAction(`Deleted task ${detail.id}`);
+          }}
+          onLinkSelect={(detail: any) => setLastAction(`Selected ${detail.type} dependency ${detail.source} to ${detail.target}`)}
+        />
+        <div style={{ border: '1px solid #dbe4ef', borderRadius: 10, padding: '10px 12px', color: '#475569', fontSize: 13, background: '#f8fafc' }}>
+          {lastAction}
+        </div>
+      </div>
       <div style={panel}>
-        <Gantt tasks={tasks} />
+        <h3 style={h3}>Dependency type variations</h3>
+        <Grid style={{ gap: 14 }}>
+          {(['e2s', 's2s', 'e2e', 's2e'] as const).map((type) => (
+            <div key={type}>
+              <div style={{ color: '#64748b', fontSize: 12, fontWeight: 700, marginBottom: 6 }}>{type.toUpperCase()} routing</div>
+              <Gantt
+                tasks={tasks.slice(1, 6)}
+                links={[
+                  { id: `${type}-a`, source: 'requirements', target: 'schema', type },
+                  { id: `${type}-b`, source: 'schema', target: 'api', type },
+                  { id: `${type}-c`, source: 'api', target: 'foundation-freeze', type }
+                ]}
+                zoom="week"
+                barVariant="outline"
+                showToolbar={false}
+              />
+            </div>
+          ))}
+        </Grid>
       </div>
     </div>
   );
 }
 
 export function SortableDemo() {
+  const lists = [
+    { id: 'main', label: 'Release checklist', description: 'Drag tasks into priority order' },
+  ];
   const [items, setItems] = useState([
-    { id: '1', label: 'Design tokens' },
-    { id: '2', label: 'Component library' },
-    { id: '3', label: 'Documentation site' },
-    { id: '4', label: 'Storybook setup' },
-    { id: '5', label: 'Release pipeline' },
+    { id: '1', listId: 'main', label: 'Design tokens', description: 'Color, radius, spacing, and typography foundations', order: 1 },
+    { id: '2', listId: 'main', label: 'Component library', description: 'React wrappers and web component demos', order: 2 },
+    { id: '3', listId: 'main', label: 'Documentation site', description: 'Usage examples, API notes, and live links', order: 3 },
+    { id: '4', listId: 'main', label: 'Storybook setup', description: 'Full page examples and edge-case states', order: 4 },
+    { id: '5', listId: 'main', label: 'Release pipeline', description: 'Build, publish, sandbox, and docs checks', order: 5 },
   ]);
   return (
     <div>
@@ -291,13 +372,17 @@ export function SortableDemo() {
       <div style={panel}>
         <h3 style={h3}>Drag to reorder</h3>
         <Sortable
-          lists={[{ id: 'main', items }]}
+          lists={lists}
+          items={items}
+          itemRadius="md"
+          listGap="md"
           onChange={(d: any) => {
-            if (d.lists?.[0]) setItems(d.lists[0].items);
+            setItems(d.items);
           }}
-          renderItem={(ctx: any) => (
-            <Box style={{ padding: '10px 14px', background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 14, cursor: 'grab', userSelect: 'none' }}>
-              ⠿ {ctx.item.label}
+          renderItem={(item: any, ctx: any) => (
+            <Box style={{ padding: '10px 14px', background: ctx.selected ? '#eff6ff' : '#f8fafc', borderRadius: 12, border: `1px solid ${ctx.selected ? '#93c5fd' : '#e2e8f0'}`, fontSize: 14, cursor: ctx.dragDisabled ? 'default' : 'grab', userSelect: 'none' }}>
+              <div style={{ fontWeight: 700, color: '#0f172a' }}>☰ {item.label}</div>
+              <div style={{ marginTop: 4, color: '#64748b', fontSize: 12 }}>{item.description}</div>
             </Box>
           )}
         />

@@ -497,6 +497,14 @@ npm test -- packages/core
 npm run test:coverage
 ```
 
+## 🧩 UI Components
+
+Editora also ships a production UI component system through `@editora/ui-core` and `@editora/ui-react`. The latest Gantt planning workspace includes task, summary, and milestone bars; dependency links; drag/resize editing; baselines; critical tasks; split segments; keyboard selection; selectable links; bar design variants; and row virtualization for large plans.
+
+- **React package:** `@editora/ui-react`
+- **Web Components package:** `@editora/ui-core`
+- **Gantt demos:** https://qjr47y-5173.csb.app/gantt and https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-gantt--full-page-workspace
+
 ## 📚 API Documentation
 
 ### Core Classes

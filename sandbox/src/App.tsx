@@ -11,7 +11,7 @@ import { AnimatedBeamDemo, AnimatedListDemo, AnimatedNumberDemo, AnimatedTextDem
 // Layout
 import { AppHeaderDemo, AspectRatioDemo, BoxDemo, ContainerDemo, FlexDemo, GridDemo, SectionDemo, SidebarDemo, PanelGroupDemo } from './pages/LayoutDemos';
 // Form
-import { CheckboxDemo, InputDemo, LabelDemo, SelectDemo, SwitchDemo, TextareaDemo, SliderDemo, RadioGroupDemo, RatingDemo, TagsInputDemo, PasswordFieldDemo, PinInputDemo, NumberFieldDemo, ComboboxDemo, MultiSelectDemo, TransferListDemo, FieldDemo } from './pages/FormDemos';
+import { CheckboxDemo, ColorPickerDemo, DateTimeFieldDemo, DateTimePickersDemo, FileUploadDemo, InlineEditDemo, InputDemo, LabelDemo, SelectDemo, SwitchDemo, TextareaDemo, SliderDemo, RadioGroupDemo, RatingDemo, TagsInputDemo, PasswordFieldDemo, PinInputDemo, NumberFieldDemo, ComboboxDemo, MultiSelectDemo, TransferListDemo, FieldDemo } from './pages/FormDemos';
 // Overlays
 import { AlertDialogDemo, AlertDialogPromiseDemo, DialogDemo, DrawerDemo, DropdownDemo, TooltipDemo, PopoverDemo, HoverCardDemo, MenuDemo, MenubarDemo, ContextMenuDemo } from './pages/OverlayDemos';
 // Feedback
@@ -19,7 +19,7 @@ import { AccordionDemo, AlertDemo, CollapsibleDemo, EmptyStateDemo, ProgressDemo
 // Navigation
 import { BreadcrumbDemo, TabsDemo, TreeDemo, PaginationDemo, StepperDemo, CommandDemo, WizardDemo, TimelineDemo } from './pages/NavigationDemos';
 // Data Display
-import { AvatarDemo, BadgeDemo, CardDemo, ChartDemo, TableDemo, SkeletonDemo, ScrollAreaDemo } from './pages/DataDisplayDemos';
+import { AvatarDemo, BadgeDemo, CardDemo, ChartDemo, DataTableDemo, TableDemo, SkeletonDemo, ScrollAreaDemo } from './pages/DataDisplayDemos';
 // Buttons
 import { ButtonDemo, ButtonMatricesDemo, CopyButtonDemo, ToggleDemo, ToggleGroupDemo, ToolbarDemo, SplitButtonDemo, QuickActionsDemo } from './pages/ButtonDemos';
 // Typography
@@ -96,14 +96,14 @@ export default function App() {
 
             {/* Form Inputs */}
             <Route path="/checkbox" element={<CheckboxDemo />} />
-            <Route path="/color-picker" element={<InputDemo />} />
+            <Route path="/color-picker" element={<ColorPickerDemo />} />
             <Route path="/combobox" element={<ComboboxDemo />} />
-            <Route path="/date-time-field" element={<InputDemo />} />
-            <Route path="/date-time-pickers" element={<InputDemo />} />
+            <Route path="/date-time-field" element={<DateTimeFieldDemo />} />
+            <Route path="/date-time-pickers" element={<DateTimePickersDemo />} />
             <Route path="/field" element={<FieldDemo />} />
             <Route path="/field-semantics" element={<FieldDemo />} />
-            <Route path="/file-upload" element={<InputDemo />} />
-            <Route path="/inline-edit" element={<InputDemo />} />
+            <Route path="/file-upload" element={<FileUploadDemo />} />
+            <Route path="/inline-edit" element={<InlineEditDemo />} />
             <Route path="/input" element={<InputDemo />} />
             <Route path="/label" element={<LabelDemo />} />
             <Route path="/multi-select" element={<MultiSelectDemo />} />
@@ -168,7 +168,7 @@ export default function App() {
             <Route path="/chart" element={<ChartDemo />} />
             <Route path="/code-block" element={<CodeBlockDemo />} />
             <Route path="/code-snippet" element={<CodeBlockDemo />} />
-            <Route path="/data-table" element={<TableDemo />} />
+            <Route path="/data-table" element={<DataTableDemo />} />
             <Route path="/data-view-toolbar" element={<ToolbarDemo />} />
             <Route path="/filters-bar" element={<FiltersBarDemo />} />
             <Route path="/gantt" element={<GanttDemo />} />
