@@ -1,6 +1,4 @@
-<svg role="img" aria-labelledby="title desc" width="512" height="512" viewBox="0 0 196 206" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <title id="title">Editora logo</title>
-  <desc id="desc">Folded ribbon E mark with blue, purple, and green gradients.</desc>
+<svg width="512" height="512" viewBox="0 0 196 206" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="blueFold" x1="18" y1="62" x2="67" y2="17" gradientUnits="userSpaceOnUse">
       <stop stop-color="#255CFF"/><stop offset="1" stop-color="#12A8FF"/>
@@ -32,24 +30,24 @@
   </defs>
 
   <!-- 1. top-left folded blue triangle -->
-  <path id="blueFoldShape" d="M17 61 L62 18 H103 L57 62 H17 Z" fill="url(#blueFold)"/>
+  <path d="M17 61 L62 18 L112 18 L57 61 Z" fill="#0F172A"/>
   <!-- 2. top horizontal blue ribbon -->
-  <path id="blueTopShape" d="M62 18 H174 L145 46 H64 C60.2 46 57 49.2 57 53 V62 L103 18 Z" fill="url(#blueTop)"/>
+  <path d="M62 18 H174 L145 46 H57 Z" fill="#0F172A"/>
   <!-- 3. left vertical blue ribbon: widened to H57 -->
-  <path d="M17 61 H57 V118 L17 145 Z" fill="url(#blueSpine)"/>
+  <path d="M17 61 H57 V118 L17 145 Z" fill="#0F172A"/>
   <!-- 4. inner blue diagonal transition aligned to the new x=57 spine edge -->
-  <path d="M57 85 H103 L74 114 H57 Z" fill="url(#blueInner)" opacity="0.92"/>
+  <path d="M57 85 H103 L74 114 H57 Z" fill="#0F172A"/>
   <!-- 5. middle purple ribbon aligned with the shifted transition edge -->
-  <path d="M84 85 H151 L122 114 H58 Z" fill="url(#purpleMid)"/>
+  <path d="M84 85 H151 L122 114 H58 Z" fill="#0F172A"/>
   <!-- 6. lower-left white diagonal gap is the negative space between spine and fold -->
 
   <!-- 7. bottom-left purple fold aligned to x=57 vertical joint -->
-  <path d="M17 156 L57 118 L57 154 L86 154 L56 183 L37 183 Z" fill="url(#purpleFold)"/>
-  <path d="M17 156 L57 118 L57 154 L37 183 Z" fill="url(#purpleFoldShade)" opacity="0.45"/>
+  <path d="M17 156 L57 118 L57 154 L86 154 L56 183 L37 183 Z" fill="#0F172A"/>
+  <path d="M17 156 L57 118 L57 154 L37 183 Z" fill="#0F172A"/>
 
   <!-- 8. bottom green ribbon -->
-  <path d="M57 154 H174 L145 183 H37 L66 154 Z" fill="url(#greenBottom)"/>
+  <path d="M57 154 H174 L145 183 H37 L66 154 Z" fill="#0F172A"/>
 
   <!-- 9. subtle gradient overlays aligned to H57 geometry -->
-  <path d="M17 61 L62 18 H174 L145 46 H64 C60.2 46 57 49.2 57 53 V85 H151 L122 114 H58 L57 118 L17 156 L37 183 H145 L174 154 H57 L17 145 Z" fill="url(#softOverlay)" opacity="0.52"/>
+  <path d="M17 61 L62 18 H174 L145 46 H57 V85 H151 L122 114 H58 L57 118 L17 156 L37 183 H145 L174 154 H57 L17 145 Z" fill="#0F172A"/>
 </svg>
