@@ -1,6 +1,5 @@
-<svg role="img" aria-labelledby="title desc" width="512" height="512" viewBox="0 0 196 206" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <title id="title">Editora logo</title>
-  <desc id="desc">Folded ribbon E mark with blue, purple, and green gradients.</desc>
+<svg width="512" height="512" viewBox="0 0 196 206" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="196" height="206" rx="42" fill="#FFFFFF"/>
   <defs>
     <linearGradient id="blueFold" x1="18" y1="62" x2="67" y2="17" gradientUnits="userSpaceOnUse">
       <stop stop-color="#255CFF"/><stop offset="1" stop-color="#12A8FF"/>

@@ -3,28 +3,28 @@
   <desc id="desc">Folded ribbon E mark with blue, purple, and green gradients.</desc>
   <defs>
     <linearGradient id="blueFold" x1="18" y1="62" x2="67" y2="17" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#255CFF"/><stop offset="1" stop-color="#12A8FF"/>
+      <stop stop-color="#4F7CFF"/><stop offset="1" stop-color="#38C7FF"/>
     </linearGradient>
     <linearGradient id="blueTop" x1="54" y1="18" x2="174" y2="46" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1B7DFF"/><stop offset="1" stop-color="#0878EA"/>
+      <stop stop-color="#3A8BFF"/><stop offset="1" stop-color="#1A9BFF"/>
     </linearGradient>
     <linearGradient id="blueSpine" x1="16" y1="61" x2="57" y2="146" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1557F4"/><stop offset="1" stop-color="#4C44F2"/>
+      <stop stop-color="#5170FF"/><stop offset="1" stop-color="#8B6CFF"/>
     </linearGradient>
     <linearGradient id="blueInner" x1="57" y1="118" x2="101" y2="84" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#3E5EF7"/><stop offset="1" stop-color="#36B9F8"/>
+      <stop stop-color="#7890FF"/><stop offset="1" stop-color="#55D3FF"/>
     </linearGradient>
     <linearGradient id="purpleMid" x1="59" y1="86" x2="151" y2="114" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#6273F2"/><stop offset="1" stop-color="#765DE8"/>
+      <stop stop-color="#8E96FF"/><stop offset="1" stop-color="#A174FF"/>
     </linearGradient>
     <linearGradient id="purpleFold" x1="18" y1="157" x2="86" y2="156" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#5F4AF3"/><stop offset="0.55" stop-color="#6E55EF"/><stop offset="1" stop-color="#7A43D6"/>
+      <stop stop-color="#866DFF"/><stop offset="0.55" stop-color="#9B80FF"/><stop offset="1" stop-color="#B16BFF"/>
     </linearGradient>
     <linearGradient id="purpleFoldShade" x1="34" y1="183" x2="59" y2="119" gradientUnits="userSpaceOnUse">
       <stop stop-color="#4F39D6" stop-opacity="0.28"/><stop offset="1" stop-color="#ffffff" stop-opacity="0.08"/>
     </linearGradient>
     <linearGradient id="greenBottom" x1="57" y1="154" x2="174" y2="183" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#37A8CA"/><stop offset="0.35" stop-color="#14B9A8"/><stop offset="1" stop-color="#2EC38D"/>
+      <stop stop-color="#61C7E6"/><stop offset="0.35" stop-color="#2EE8C6"/><stop offset="1" stop-color="#55E6AC"/>
     </linearGradient>
     <linearGradient id="softOverlay" x1="35" y1="28" x2="150" y2="180" gradientUnits="userSpaceOnUse">
       <stop stop-color="white" stop-opacity="0.20"/><stop offset="0.45" stop-color="white" stop-opacity="0.06"/><stop offset="1" stop-color="white" stop-opacity="0"/>
