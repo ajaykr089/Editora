@@ -97,7 +97,7 @@ export default defineConfig({
       }
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime', '@editora/ui-core', '@editora/toast'],
+      external: ['react', 'react-dom', 'react/jsx-runtime', /^@editora\/ui-core(\/.*)?$/, '@editora/toast'],
       onwarn(warning, warn) {
         if (warning.code === 'MODULE_LEVEL_DIRECTIVE' && /use client/i.test(warning.message)) {
           return;

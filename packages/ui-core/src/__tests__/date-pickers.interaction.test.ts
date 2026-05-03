@@ -17,6 +17,20 @@ function createElement(tagName: string, attrs: Record<string, string | boolean> 
   return el;
 }
 
+function rect(values: Partial<DOMRect>): DOMRect {
+  return {
+    x: values.left ?? 0,
+    y: values.top ?? 0,
+    top: values.top ?? 0,
+    left: values.left ?? 0,
+    right: values.right ?? ((values.left ?? 0) + (values.width ?? 0)),
+    bottom: values.bottom ?? ((values.top ?? 0) + (values.height ?? 0)),
+    width: values.width ?? 0,
+    height: values.height ?? 0,
+    toJSON: () => ({})
+  } as DOMRect;
+}
+
 async function settle() {
   await Promise.resolve();
   await new Promise((resolve) => setTimeout(resolve, 0));
@@ -159,6 +173,32 @@ describe('date/time pickers interaction flows', () => {
     await flushAnimationFrame();
 
     expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('ui-date-picker positions its overlay from viewport-relative field coordinates', async () => {
+    Object.defineProperty(window, 'scrollX', { value: 120, configurable: true, writable: true });
+    Object.defineProperty(window, 'scrollY', { value: 300, configurable: true, writable: true });
+
+    const el = createElement('ui-date-picker') as HTMLElement & {
+      _overlay?: HTMLElement | null;
+      _positionOverlay?: () => void;
+    };
+    el.setAttribute('open', '');
+    await settle();
+
+    const field = el.shadowRoot?.querySelector('.field') as HTMLElement | null;
+    const panel = el._overlay?.querySelector('.panel') as HTMLElement | null;
+    expect(field).toBeTruthy();
+    expect(panel).toBeTruthy();
+
+    field!.getBoundingClientRect = () => rect({ top: 120, left: 40, width: 180, height: 32 });
+    panel!.getBoundingClientRect = () => rect({ width: 220, height: 96 });
+
+    el._positionOverlay?.();
+
+    expect(panel?.style.left).toBe('40px');
+    expect(panel?.style.top).toBe('160px');
+    expect(panel?.getAttribute('data-placement')).toBe('bottom');
   });
 
   it('ui-date-range-picker single-field accepts ISO date without splitting on hyphens', async () => {

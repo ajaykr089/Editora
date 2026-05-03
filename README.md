@@ -1,13 +1,15 @@
 # Editora - Best Free Premium Rich Text Editor
-
-> [!IMPORTANT]
-> **Live Website:** https://editora-ecosystem.netlify.app/  
-> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
-
-
 <div align="center">
   <img src="images/editora_logo_blocks.svg" alt="Editora Logo" width="200" height="auto">
 </div>
+
+
+![Editora Ecosystem](./images/editora-linkedin-graphic.png)
+
+- **CodeSandbox:** https://qjr47y-5173.csb.app/editora-editor
+- **Editora Ecosystem:** https://editora-ecosystem.netlify.app/
+- **Web Demo:** https://editora-free.netlify.app/
+- **Storybook:** https://editora-ecosystem-storybook.netlify.app/
 
 The **best free rich text editor** with enterprise-grade features. A comprehensive, production-ready WYSIWYG editor built with React, TypeScript, and modern web technologies. Get premium features completely free—no subscriptions, no limitations.
 
@@ -494,6 +496,14 @@ npm test -- packages/core
 # Run with coverage
 npm run test:coverage
 ```
+
+## 🧩 UI Components
+
+Editora also ships a production UI component system through `@editora/ui-core` and `@editora/ui-react`. The latest Gantt planning workspace includes task, summary, and milestone bars; dependency links; drag/resize editing; baselines; critical tasks; split segments; keyboard selection; selectable links; bar design variants; and row virtualization for large plans.
+
+- **React package:** `@editora/ui-react`
+- **Web Components package:** `@editora/ui-core`
+- **Gantt demos:** https://qjr47y-5173.csb.app/gantt and https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-gantt--full-page-workspace
 
 ## 📚 API Documentation
 

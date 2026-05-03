@@ -1,9 +1,13 @@
 # @editora/ui-core
 
-> [!IMPORTANT]
-> **Live Website:** https://editora-ecosystem.netlify.app/  
-> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+![Editora UI Components](../../images/editora-ui-components-linkedin-graphic.png)
 
+## Demos
+
+- **CodeSandbox:** https://qjr47y-5173.csb.app/button
+- **UI Component Catalog:** https://editora-ecosystem.netlify.app/
+- **Web Demo:** https://editora-free.netlify.app/
+- **Storybook:** https://editora-ecosystem-storybook.netlify.app/
 
 Production-oriented Web Components for Editora UI.
 
@@ -78,6 +82,7 @@ More guidance lives in [`docs/FRAMEWORK_DIRECT_USAGE.md`](https://github.com/aja
 - `ElementBase`
 - `applyTheme`, `defaultTokens`
 - `showPortalFor`, `autoUpdatePosition`, portal helpers
+- `createPositioner`, `computePositionState`, `autoUpdatePositioner`, middleware helpers, virtual anchors
 - focus/overlay managers
 - `showToast`
 
@@ -169,7 +174,56 @@ More guidance lives in [`docs/FRAMEWORK_DIRECT_USAGE.md`](https://github.com/aja
 <ui-pagination id="usersPager"></ui-pagination>
 ```
 
-### 4. Promise dialog manager
+### 4. Gantt planning timeline
+
+`ui-gantt` is a framework-agnostic planning workspace for schedules, release plans, and project roadmaps. It includes task, summary, and milestone rows; dependency links; drag/resize editing; baselines; critical tasks; split segments; keyboard navigation; and automatic row virtualization for large schedules.
+
+```html
+<ui-gantt id="releasePlan" zoom="week" sort="start" bar-variant="soft"></ui-gantt>
+
+<script type="module">
+  import '@editora/ui-core';
+
+  const gantt = document.getElementById('releasePlan');
+
+  gantt.setAttribute('tasks', JSON.stringify([
+    {
+      id: 'api',
+      label: 'API contracts',
+      start: '2026-02-10',
+      end: '2026-02-24',
+      progress: 62,
+      baselineStart: '2026-02-07',
+      baselineEnd: '2026-02-21',
+      critical: true
+    },
+    {
+      id: 'qa',
+      label: 'QA sign-off',
+      start: '2026-02-27',
+      type: 'milestone',
+      tone: 'success'
+    }
+  ]));
+
+  gantt.setAttribute('links', JSON.stringify([
+    { id: 'api-qa', source: 'api', target: 'qa', type: 'e2s' }
+  ]));
+
+  gantt.addEventListener('taskchange', (event) => console.log('task changed', event.detail));
+  gantt.addEventListener('taskdelete', (event) => console.log('delete task', event.detail.id));
+  gantt.addEventListener('linkselect', (event) => console.log('dependency selected', event.detail));
+</script>
+```
+
+Useful attributes:
+
+- `zoom`: `day`, `week`, `month`, `quarter`, or `year`
+- `sort`: `none`, `start`, `end`, `label`, or `progress`
+- `bar-variant`: `solid`, `soft`, `striped`, `outline`, or `glass`
+- `readonly`, `show-toolbar`, `show-today`, `filter`, `virtualized="false"`
+
+### 5. Promise dialog manager
 
 ```ts
 import '@editora/ui-core';
@@ -190,7 +244,7 @@ if (result.action === 'submit') {
 }
 ```
 
-### 5. Promise alert dialog manager
+### 6. Promise alert dialog manager
 
 ```ts
 import '@editora/ui-core';
@@ -229,10 +283,46 @@ applyTheme({
 });
 ```
 
+## Floating Positioning
+
+`@editora/ui-core` includes the shared floating engine used by menus, context menus, hover cards, floating toolbars, and picker overlays.
+
+Use `@editora/ui-core/runtime` for framework-agnostic floating behavior:
+
+```ts
+import { createPositioner } from '@editora/ui-core/runtime';
+
+const handle = createPositioner({
+  anchor: trigger,
+  floating: panel,
+  placement: 'bottom-start',
+  strategy: 'fixed',
+  offset: 8,
+  flip: true,
+  shift: true,
+  fitViewport: true
+});
+
+// later
+handle.destroy();
+```
+
+You can also use:
+
+- `computePositionState()` for one-shot coordinate calculation
+- `autoUpdatePositioner()` for observer-driven updates
+- `createVirtualPoint()`, `createVirtualRect()`, `createVirtualRange()` for virtual anchors
+- `detectPositionerOverflow()` for diagnostics and custom middleware
+
+Full guide:
+
+- `docs/FLOATING_USAGE.md`
+
 ## Docs
 
 - `docs/FRAMEWORK_DIRECT_USAGE.md` for Vue, Svelte, and Angular direct-use guidance
 - `docs/ATTRIBUTE_RENDER_MATRIX.md` for component render strategy coverage
+- `docs/FLOATING_USAGE.md` for first-party floating primitives and Floating UI-style usage
 - `docs/PRIMITIVE_GAP_MATRIX.md` for the missing primitive roadmap
 - `docs/PRIMITIVE_IMPLEMENTATION_PLAN.md` for proposed APIs and rollout order
 

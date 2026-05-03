@@ -1,3 +1,11 @@
+import {
+  autoUpdatePositioner,
+  computePositionState,
+  type PositionerAnchor,
+  type PositionerAutoUpdateOptions,
+  type PositionerPlacement
+} from './primitives/positioner';
+
 export function createPortalContainer(id = 'ui-portal-root') {
   if (typeof document === 'undefined') return null;
   let el = document.getElementById(id) as HTMLDivElement | null;
@@ -17,13 +25,22 @@ export function createPortalContainer(id = 'ui-portal-root') {
   return el;
 }
 
-export type Placement = 'top' | 'bottom' | 'left' | 'right';
+export type Placement = PositionerPlacement;
 
 export type ComputeOptions = {
   placement?: Placement;
   offset?: number; // px gap between anchor and floating
   flip?: boolean; // allow flip when out of viewport
   shift?: boolean; // allow shifting along cross-axis to avoid overflow
+  strategy?: 'absolute' | 'fixed';
+  boundary?: HTMLElement | null;
+  boundaryPadding?: number;
+  dir?: 'ltr' | 'rtl';
+  autoPlacement?: boolean;
+  allowedPlacements?: Placement[];
+  fallbackPlacements?: Placement[];
+  inline?: boolean;
+  hideWhenDetached?: boolean;
   // optional arrow element inside floating content to be positioned by the caller
   arrow?: HTMLElement | null;
 };
@@ -32,106 +49,53 @@ export type VirtualElement = { getBoundingClientRect: () => DOMRect };
 
 export function computePosition(anchor: HTMLElement | VirtualElement, content: HTMLElement, placementOrOptions: Placement | ComputeOptions = 'top') {
   const opts: ComputeOptions = typeof placementOrOptions === 'string' ? { placement: placementOrOptions } : placementOrOptions;
-  const placement = opts.placement || 'top';
-  const offset = typeof opts.offset === 'number' ? opts.offset : 8;
-  const doShift = !!opts.shift;
+  const floating = content instanceof HTMLElement
+    ? content
+    : typeof (content as unknown as { getBoundingClientRect?: () => DOMRect }).getBoundingClientRect === 'function'
+      ? (content as unknown as { getBoundingClientRect: () => DOMRect }).getBoundingClientRect()
+      : content;
+  const state = computePositionState(anchor as PositionerAnchor, floating as HTMLElement, {
+    placement: opts.placement || 'top',
+    strategy: opts.strategy || 'fixed',
+    offset: typeof opts.offset === 'number' ? opts.offset : 8,
+    flip: opts.flip,
+    shift: opts.shift,
+    arrow: opts.arrow ?? null,
+    boundary: opts.boundary ?? null,
+    boundaryPadding: opts.boundaryPadding,
+    dir: opts.dir,
+    autoPlacement: opts.autoPlacement,
+    allowedPlacements: opts.allowedPlacements,
+    fallbackPlacements: opts.fallbackPlacements,
+    inline: opts.inline,
+    hideWhenDetached: opts.hideWhenDetached
+  });
+  const anchorRect = (anchor as any).getBoundingClientRect();
+  const x = state.middlewareData?.arrow?.x ?? Math.round(anchorRect.left + anchorRect.width / 2 - state.x);
+  const y = state.middlewareData?.arrow?.y ?? Math.round(anchorRect.top + anchorRect.height / 2 - state.y);
 
-  // accept either a DOM element or a virtual element (useful for mouse coordinates)
-  const a = (anchor as any).getBoundingClientRect();
-  const c = content.getBoundingClientRect();
-  let top = 0, left = 0;
-
-  // center by default (will be clamped/shifted later if needed)
-  // Coordinates are viewport-relative because portal root is fixed to viewport.
-  if (placement === 'top') {
-    top = a.top - c.height - offset;
-    left = a.left + (a.width - c.width) / 2;
-  } else if (placement === 'bottom') {
-    top = a.bottom + offset;
-    left = a.left + (a.width - c.width) / 2;
-  } else if (placement === 'left') {
-    top = a.top + (a.height - c.height) / 2;
-    left = a.left - c.width - offset;
-  } else {
-    top = a.top + (a.height - c.height) / 2;
-    left = a.right + offset;
-  }
-
-  // compute cross-axis offsets useful for arrow positioning
-  const anchorCenterX = a.left + a.width / 2;
-  const anchorCenterY = a.top + a.height / 2;
-  const x = Math.round(anchorCenterX - left); // horizontal distance from content left -> anchor center
-  const y = Math.round(anchorCenterY - top);  // vertical distance from content top -> anchor center
-
-  // apply simple "shift" behavior: nudge the floating element along cross-axis so the anchor stays visible
-  if (doShift) {
-    const vw = window.innerWidth || document.documentElement.clientWidth;
-    const vh = window.innerHeight || document.documentElement.clientHeight;
-    // shift horizontally for top/bottom placements
-    if (placement === 'top' || placement === 'bottom') {
-      const minLeft = 4;
-      const maxLeft = vw - c.width - 4;
-      if (left < minLeft) left = Math.min(maxLeft, left + (minLeft - left));
-      if (left > maxLeft) left = Math.max(minLeft, left - (left - maxLeft));
-    } else {
-      // shift vertically for left/right placements
-      const minTop = 4;
-      const maxTop = vh - c.height - 4;
-      if (top < minTop) top = Math.min(maxTop, top + (minTop - top));
-      if (top > maxTop) top = Math.max(minTop, top - (top - maxTop));
-    }
-  }
-
-  return { top, left, placement, x, y };
+  return {
+    top: state.y,
+    left: state.x,
+    placement: state.placement,
+    x,
+    y,
+    strategy: state.strategy,
+    availableWidth: state.availableWidth,
+    availableHeight: state.availableHeight,
+    middlewareData: state.middlewareData,
+    referenceHidden: state.referenceHidden,
+    escaped: state.escaped
+  };
 }
 
-export function autoUpdatePosition(anchor: HTMLElement, contentEl: HTMLElement, onChange: () => void) {
-  // keep positioning responsive: observe size/position changes and window events
-  let ro1: ResizeObserver | null = null;
-  let ro2: ResizeObserver | null = null;
-  let mo: MutationObserver | null = null;
-  let raf = 0;
-  const handlers: Array<() => void> = [];
-
-  const schedule = () => {
-    if (raf) return;
-    raf = requestAnimationFrame(() => {
-      raf = 0;
-      onChange();
-    });
-  };
-  const onScrollOrResize = () => schedule();
-
-  if (typeof ResizeObserver !== 'undefined') {
-    ro1 = new ResizeObserver(schedule);
-    ro2 = new ResizeObserver(schedule);
-    try { ro1.observe(anchor); } catch (e) {}
-    try { ro2.observe(contentEl); } catch (e) {}
-  }
-
-  if (typeof MutationObserver !== 'undefined') {
-    mo = new MutationObserver(schedule);
-    // ResizeObserver already tracks geometry changes. Restrict mutation observation to
-    // top-level anchor attribute mutations to avoid high-frequency subtree churn.
-    try { mo.observe(anchor, { attributes: true, childList: false, subtree: false }); } catch (e) {}
-  }
-
-  window.addEventListener('scroll', onScrollOrResize, { passive: true, capture: true });
-  window.addEventListener('resize', onScrollOrResize);
-
-  handlers.push(() => window.removeEventListener('scroll', onScrollOrResize, true));
-  handlers.push(() => window.removeEventListener('resize', onScrollOrResize));
-  handlers.push(() => { ro1 && ro1.disconnect(); ro1 = null; });
-  handlers.push(() => { ro2 && ro2.disconnect(); ro2 = null; });
-  handlers.push(() => { mo && mo.disconnect(); mo = null; });
-  handlers.push(() => {
-    if (raf) {
-      cancelAnimationFrame(raf);
-      raf = 0;
-    }
-  });
-
-  return () => handlers.forEach(h => { try { h(); } catch (e) {} });
+export function autoUpdatePosition(
+  anchor: HTMLElement | VirtualElement,
+  contentEl: HTMLElement,
+  onChange: () => void,
+  options: PositionerAutoUpdateOptions = {}
+) {
+  return autoUpdatePositioner(anchor as PositionerAnchor, contentEl, onChange, options);
 }
 
 export type ShowPortalOptions = {
@@ -139,6 +103,16 @@ export type ShowPortalOptions = {
   offset?: number;
   flip?: boolean;
   shift?: boolean;
+  strategy?: 'absolute' | 'fixed';
+  boundary?: HTMLElement | null;
+  boundaryPadding?: number;
+  dir?: 'ltr' | 'rtl';
+  autoPlacement?: boolean;
+  allowedPlacements?: Placement[];
+  fallbackPlacements?: Placement[];
+  inline?: boolean;
+  hideWhenDetached?: boolean;
+  arrow?: HTMLElement | null;
 };
 
 export function showPortalFor(anchor: HTMLElement | VirtualElement, contentEl: HTMLElement, placementOrOptions: Placement | ShowPortalOptions = 'top') {
@@ -157,7 +131,7 @@ export function showPortalFor(anchor: HTMLElement | VirtualElement, contentEl: H
 
   function positionArrow(finalTop: number, finalLeft: number, finalPlacement: Placement) {
     // find an arrow element inside the portal content (common pattern: .arrow)
-    const arrowEl = contentEl.querySelector('.arrow') as HTMLElement | null;
+    const arrowEl = opts.arrow || contentEl.querySelector('.arrow') as HTMLElement | null;
     if (!arrowEl) return;
 
     const anchorRect = (anchor as any).getBoundingClientRect();
@@ -199,7 +173,22 @@ export function showPortalFor(anchor: HTMLElement | VirtualElement, contentEl: H
     }
 
     // compute initial position (supports virtual anchor)
-    const pos = computePosition(anchor, contentEl, { placement, offset, shift: doShift });
+    const pos = computePosition(anchor, contentEl, {
+      placement,
+      offset,
+      flip: doFlip,
+      shift: doShift,
+      strategy: opts.strategy || 'fixed',
+      boundary: opts.boundary ?? null,
+      boundaryPadding: opts.boundaryPadding,
+      dir: opts.dir,
+      autoPlacement: opts.autoPlacement,
+      allowedPlacements: opts.allowedPlacements,
+      fallbackPlacements: opts.fallbackPlacements,
+      inline: opts.inline,
+      hideWhenDetached: opts.hideWhenDetached,
+      arrow: opts.arrow ?? null
+    });
 
     // auto-flip if out of viewport vertically when allowed
     const vw = window.innerWidth || document.documentElement.clientWidth;
@@ -207,7 +196,22 @@ export function showPortalFor(anchor: HTMLElement | VirtualElement, contentEl: H
     let final = pos;
     if (doFlip && ((pos.top < 0 && placement === 'top') || (pos.top + contentEl.offsetHeight > vh && placement === 'bottom'))) {
       const altPlacement = placement === 'top' ? 'bottom' : 'top';
-      final = computePosition(anchor, contentEl, { placement: altPlacement, offset, shift: doShift });
+      final = computePosition(anchor, contentEl, {
+        placement: altPlacement,
+        offset,
+        flip: doFlip,
+        shift: doShift,
+        strategy: opts.strategy || 'fixed',
+        boundary: opts.boundary ?? null,
+        boundaryPadding: opts.boundaryPadding,
+        dir: opts.dir,
+        autoPlacement: opts.autoPlacement,
+        allowedPlacements: opts.allowedPlacements,
+        fallbackPlacements: opts.fallbackPlacements,
+        inline: opts.inline,
+        hideWhenDetached: opts.hideWhenDetached,
+        arrow: opts.arrow ?? null
+      });
     }
 
     // clamp horizontally and vertically (keep it on-screen)
@@ -227,7 +231,7 @@ export function showPortalFor(anchor: HTMLElement | VirtualElement, contentEl: H
   }
 
   reposition();
-  cleanupObservers = autoUpdatePosition(anchor as HTMLElement, contentEl, reposition);
+  cleanupObservers = autoUpdatePosition(anchor, contentEl, reposition);
 
   return () => {
     try { if (contentEl.parentElement) contentEl.parentElement.removeChild(contentEl); } catch (e) {}

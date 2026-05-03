@@ -7,6 +7,43 @@ export {
 export type { Placement, ComputeOptions, VirtualElement, ShowPortalOptions } from './portal';
 
 export {
+  autoUpdatePositioner,
+  arrowMiddleware,
+  autoPlacementMiddleware,
+  computePositionState,
+  createPositioner,
+  createVirtualPoint,
+  createVirtualRange,
+  createVirtualRect,
+  detectPositionerOverflow,
+  flipMiddleware,
+  hideMiddleware,
+  offsetMiddleware,
+  shiftMiddleware,
+  sizeMiddleware,
+} from './primitives/positioner';
+export type {
+  PositionerAnchor,
+  PositionerAlign,
+  PositionerAutoUpdateOptions,
+  PositionerBoundaryRect,
+  PositionerHandle,
+  PositionerMiddleware,
+  PositionerMiddlewareData,
+  PositionerMiddlewareReturn,
+  PositionerMiddlewareState,
+  PositionerOptions,
+  PositionerOverflow,
+  PositionerPlatform,
+  PositionerPlacement,
+  PositionerRects,
+  PositionerSide,
+  PositionerState,
+  PositionerStrategy,
+  PositionerVirtualElement,
+} from './primitives/positioner';
+
+export {
   applyTheme,
   defaultTokens,
   baselineLightTokens,

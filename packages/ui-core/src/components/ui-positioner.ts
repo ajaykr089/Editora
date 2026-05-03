@@ -59,6 +59,11 @@ export class UIPositioner extends ElementBase {
       'shift',
       'match-width',
       'fit-viewport',
+      'auto-placement',
+      'hide-when-detached',
+      'inline',
+      'boundary-padding',
+      'dir',
       'anchor',
       'headless'
     ];
@@ -142,12 +147,17 @@ export class UIPositioner extends ElementBase {
       floating,
       placement: parsePlacement(this.getAttribute('placement')),
       strategy: parseStrategy(this.getAttribute('strategy')),
+      dir: this.getAttribute('dir') === 'rtl' ? 'rtl' : 'ltr',
       offset: parseNumber(this.getAttribute('offset'), 8),
       crossOffset: parseNumber(this.getAttribute('cross-offset'), 0),
       flip: !this.hasAttribute('flip') || isTruthy(this.getAttribute('flip')),
       shift: !this.hasAttribute('shift') || isTruthy(this.getAttribute('shift')),
       matchWidth: isTruthy(this.getAttribute('match-width')),
       fitViewport: isTruthy(this.getAttribute('fit-viewport')),
+      autoPlacement: isTruthy(this.getAttribute('auto-placement')),
+      hideWhenDetached: isTruthy(this.getAttribute('hide-when-detached')),
+      inline: isTruthy(this.getAttribute('inline')),
+      boundaryPadding: parseNumber(this.getAttribute('boundary-padding'), 4),
       arrow: this.querySelector('[slot="arrow"], .arrow') as HTMLElement | null,
       onUpdate: (detail: PositionerState) => {
         this.dispatchEvent(new CustomEvent('position-change', { detail, bubbles: true, composed: true }));

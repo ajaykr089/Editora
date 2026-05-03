@@ -1,9 +1,14 @@
 # @editora/ui-react
 
-> [!IMPORTANT]
-> **Live Website:** https://editora-ecosystem.netlify.app/  
-> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
 
+![Editora UI Components](../../images/editora-ui-components-linkedin-graphic.png)
+
+## Demos
+
+- **CodeSandbox:** https://qjr47y-5173.csb.app/button
+- **UI Component Catalog:** https://editora-ecosystem.netlify.app/
+- **Web Demo:** https://editora-free.netlify.app/
+- **Storybook:** https://editora-ecosystem-storybook.netlify.app/
 
 React wrappers for `@editora/ui-core` Web Components.
 
@@ -232,6 +237,66 @@ import { ThemeProvider } from '@editora/ui-react';
 </ThemeProvider>
 ```
 
+## Gantt Planning Workspace
+
+`Gantt` is the React wrapper for the production planning timeline in `@editora/ui-core`. It supports task, summary, and milestone rows; dependency routing; drag/resize editing; keyboard selection; baselines; critical path highlighting; split task segments; and virtualized rendering for large schedules.
+
+```tsx
+import { Gantt, type GanttLink, type GanttTask } from '@editora/ui-react';
+import { useState } from 'react';
+
+const initialTasks: GanttTask[] = [
+  {
+    id: 'foundation',
+    label: 'Foundation',
+    start: '2026-02-01',
+    end: '2026-02-18',
+    progress: 68,
+    baselineStart: '2026-01-29',
+    baselineEnd: '2026-02-14',
+    critical: true
+  },
+  {
+    id: 'handoff',
+    label: 'Handoff milestone',
+    start: '2026-02-20',
+    type: 'milestone',
+    tone: 'success'
+  }
+];
+
+const links: GanttLink[] = [
+  { id: 'foundation-handoff', source: 'foundation', target: 'handoff', type: 'e2s' }
+];
+
+export function PlanningDemo() {
+  const [tasks, setTasks] = useState(initialTasks);
+
+  return (
+    <Gantt
+      tasks={tasks}
+      links={links}
+      zoom="week"
+      sort="start"
+      barVariant="soft"
+      onTaskChange={({ id, start, end }) => {
+        setTasks((items) => items.map((task) => task.id === id ? { ...task, start: start ?? task.start, end: end ?? task.end } : task));
+      }}
+      onTaskDelete={({ id }) => setTasks((items) => items.filter((task) => task.id !== id))}
+      onLinkSelect={(detail) => console.log('dependency selected', detail)}
+    />
+  );
+}
+```
+
+Highlights:
+
+- Dependency types: `e2s`, `s2s`, `e2e`, and `s2e`, with selectable SVG links and arrowheads.
+- Bar designs: `solid`, `soft`, `striped`, `outline`, and `glass`.
+- Planning data: baselines, critical tasks, milestones, parent/child summaries, assignees, progress, and split segments.
+- Interaction: drag, resize, keyboard task selection, delete events, toolbar zoom/filter/sort, and readonly mode.
+- Scale: row virtualization turns on automatically for large task sets; pass `virtualized={false}` only for small custom layouts.
+
 ## Component Catalog
 
 ### Form and inputs
@@ -260,6 +325,76 @@ import { ThemeProvider } from '@editora/ui-react';
 - `AlertDialogProvider`, `useAlertDialog`
 - `ThemeProvider`, `useTheme`
 - `useForm`, `useFloating`
+
+## Floating Positioning
+
+`@editora/ui-react` exposes a first-party floating layer built on `@editora/ui-core`.
+
+Use `useFloating()` for shared positioning, then compose interaction hooks as needed:
+
+```tsx
+import {
+  FloatingArrow,
+  FloatingFocusManager,
+  FloatingPortal,
+  useClick,
+  useDismiss,
+  useFloating,
+  useInteractions
+} from '@editora/ui-react';
+
+function Example() {
+  const floating = useFloating({
+    placement: 'bottom-start',
+    offset: 10,
+    flip: true,
+    shift: true,
+    fitViewport: true
+  });
+
+  const interactions = useInteractions([
+    useClick(floating.context),
+    useDismiss(floating.context)
+  ]);
+
+  return (
+    <>
+      <button ref={floating.referenceRef} {...interactions.getReferenceProps()}>
+        Open
+      </button>
+
+      {floating.open ? (
+        <FloatingPortal>
+          <FloatingFocusManager context={floating.context}>
+            <div
+              ref={floating.floatingRef}
+              {...interactions.getFloatingProps({
+                style: {
+                  position: floating.strategy,
+                  top: floating.coords.top,
+                  left: floating.coords.left
+                }
+              })}
+            >
+              <FloatingArrow context={floating.context} fill="#fff" stroke="#111827" />
+              Floating content
+            </div>
+          </FloatingFocusManager>
+        </FloatingPortal>
+      ) : null}
+    </>
+  );
+}
+```
+
+Common React floating exports:
+
+- hooks: `useFloating`, `useInteractions`, `useClick`, `useHover`, `useFocus`, `useDismiss`, `useRole`, `useListNavigation`, `useTypeahead`, `useClientPoint`, `useTransition`
+- helpers: `FloatingArrow`, `FloatingPortal`, `FloatingOverlay`, `FloatingFocusManager`, `FloatingTree`, `FloatingList`, `FloatingDelayGroup`, `Composite`
+
+For the full core + React guide and the Floating UI concept map, see:
+
+- `../ui-core/docs/FLOATING_USAGE.md`
 
 ## SSR and StrictMode Notes
 

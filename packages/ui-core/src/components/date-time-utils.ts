@@ -1,5 +1,6 @@
 import { addDaysISO, compareISO, endOfMonth, parseISO, startOfMonth } from './ui-calendar';
 import { acquireBodyScrollLock } from '../scroll-lock';
+import { computePositionState } from '../primitives/positioner';
 
 export type DateDisplayFormat = 'iso' | 'locale' | 'custom';
 export type OverlayPlacement = 'top' | 'bottom';
@@ -321,8 +322,6 @@ export function computePopoverPosition(
 ): OverlayPosition {
   const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
   const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
-  const scrollY = typeof window !== 'undefined' ? window.scrollY || 0 : 0;
-  const scrollX = typeof window !== 'undefined' ? window.scrollX || 0 : 0;
 
   const belowSpace = viewportHeight - anchorRect.bottom - gap - padding;
   const aboveSpace = anchorRect.top - gap - padding;
@@ -350,15 +349,16 @@ export function computePopoverPosition(
     }
   }
 
-  const top = placement === 'bottom'
-    ? anchorRect.bottom + gap + scrollY
-    : anchorRect.top - panelRect.height - gap + scrollY;
+  const state = computePositionState(anchorRect, panelRect, {
+    placement: `${placement}-start`,
+    strategy: 'fixed',
+    offset: gap,
+    shift: false,
+    flip: false,
+    boundaryPadding: padding
+  });
 
-  const unclampedLeft = anchorRect.left + scrollX;
-  const maxLeft = scrollX + viewportWidth - panelRect.width - padding;
-  const left = clamp(unclampedLeft, scrollX + padding, Math.max(scrollX + padding, maxLeft));
-
-  return { top, left, placement };
+  return { top: Math.round(state.y), left: Math.round(state.x), placement };
 }
 
 export function rafThrottle(fn: () => void): { run: () => void; cancel: () => void } {

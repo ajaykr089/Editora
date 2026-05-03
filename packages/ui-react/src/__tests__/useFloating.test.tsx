@@ -71,4 +71,74 @@ describe('useFloating hook', () => {
     expect(userClick).toHaveBeenCalledTimes(1);
     expect(popup.getAttribute('hidden')).toBeNull();
   });
+
+  it('positions correctly when the floating element mounts after opening', async () => {
+    function DeferredFloating() {
+      const { referenceRef, floatingRef, coords, getReferenceProps, getFloatingProps, open } = useFloating({ placement: 'bottom', offset: 8 });
+
+      return (
+        <div>
+          <button
+            data-testid="trigger"
+            {...getReferenceProps()}
+            ref={referenceRef as any}
+            style={{ position: 'absolute', top: 120, left: 80, width: 60, height: 30 }}
+          >
+            Open
+          </button>
+          {open ? (
+            <div
+              data-testid="popup"
+              {...getFloatingProps()}
+              ref={floatingRef as any}
+              style={{ position: 'absolute', width: 100, height: 40 }}
+            />
+          ) : null}
+          <div data-testid="coords">{coords.top}/{coords.left}</div>
+        </div>
+      );
+    }
+
+    const { getByTestId, queryByTestId } = render(<DeferredFloating />);
+    const trigger = getByTestId('trigger');
+
+    (trigger as any).getBoundingClientRect = () => ({ top: 120, bottom: 150, left: 80, right: 140, width: 60, height: 30 });
+
+    expect(queryByTestId('popup')).toBeNull();
+
+    fireEvent.click(trigger);
+
+    const popup = await waitFor(() => getByTestId('popup'));
+    (popup as any).getBoundingClientRect = () => ({ width: 100, height: 40, top: 0, left: 0, right: 100, bottom: 40 });
+    fireEvent(window, new Event('resize'));
+
+    await waitFor(() => {
+      const coords = getByTestId('coords').textContent || '';
+      expect(coords).toBe('158/60');
+    });
+  });
+
+  it('respects fixed strategy styles when requested', async () => {
+    function FixedFloating() {
+      const { referenceRef, floatingRef, getReferenceProps, getFloatingProps } = useFloating({ placement: 'bottom', offset: 8, strategy: 'fixed' });
+
+      return (
+        <div>
+          <button data-testid="trigger" {...getReferenceProps()} ref={referenceRef as any}>Open</button>
+          <div data-testid="popup" {...getFloatingProps()} ref={floatingRef as any} />
+        </div>
+      );
+    }
+
+    const { getByTestId } = render(<FixedFloating />);
+    const trigger = getByTestId('trigger');
+    const popup = getByTestId('popup');
+
+    (trigger as any).getBoundingClientRect = () => ({ top: 40, bottom: 70, left: 20, right: 100, width: 80, height: 30 });
+    (popup as any).getBoundingClientRect = () => ({ width: 120, height: 50, top: 0, left: 0, right: 120, bottom: 50 });
+
+    fireEvent.click(trigger);
+
+    await waitFor(() => expect(popup.style.position).toBe('fixed'));
+  });
 });

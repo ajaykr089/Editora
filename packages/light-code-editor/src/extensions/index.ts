@@ -17,6 +17,15 @@ export { CompletionExtension } from './CompletionExtension';
 export type { CompletionExtensionConfig } from './CompletionExtension';
 export { FormattingExtension } from './FormattingExtension';
 export type { FormattingExtensionConfig } from './FormattingExtension';
+export {
+  createLightweightFormatter,
+  detectLightweightFormattingLanguage,
+  formatCss,
+  formatLightweightCode,
+  lightweightFormatter,
+  normalizePlainCode,
+} from './LightweightFormatter';
+export type { LightweightFormattingLanguage } from './LightweightFormatter';
 export { ContextMenuExtension } from './ContextMenuExtension';
 export type {
   ContextMenuExtensionConfig,

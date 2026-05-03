@@ -1,6 +1,6 @@
 {
   "name": "@editora/light-code-editor",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Lightweight code editor for React and web apps with syntax highlighting, search/replace, extensions, and enterprise SaaS integration patterns.",
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"

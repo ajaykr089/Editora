@@ -1,4 +1,8 @@
 import { ElementBase } from '../ElementBase';
+import {
+  createPositioner,
+  type PositionerHandle
+} from '../primitives/positioner';
 
 type HoverCardPlacement = 'top' | 'bottom' | 'left' | 'right';
 
@@ -268,10 +272,6 @@ const style = `
   }
 `;
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, value));
-}
-
 function normalizePlacement(value: string | null): HoverCardPlacement {
   if (value === 'top' || value === 'left' || value === 'right') return value;
   return 'bottom';
@@ -297,6 +297,9 @@ export class UIHoverCard extends ElementBase {
   private _openTimer: number | null = null;
   private _closeTimer: number | null = null;
   private _positionRaf: number | null = null;
+  private _positioner: PositionerHandle | null = null;
+  private _positionerPlacement: HoverCardPlacement | null = null;
+  private _positionerOffset = 0;
   private _isOpen = false;
   private _globalListenersBound = false;
 
@@ -336,6 +339,8 @@ export class UIHoverCard extends ElementBase {
       cancelAnimationFrame(this._positionRaf);
       this._positionRaf = null;
     }
+    this._positioner?.destroy();
+    this._positioner = null;
     super.disconnectedCallback();
   }
 
@@ -523,6 +528,10 @@ export class UIHoverCard extends ElementBase {
       cancelAnimationFrame(this._positionRaf);
       this._positionRaf = null;
     }
+    this._positioner?.destroy();
+    this._positioner = null;
+    this._positionerPlacement = null;
+    this._positionerOffset = 0;
 
     if (panel) panel.setAttribute('data-ready', 'false');
 
@@ -579,57 +588,52 @@ export class UIHoverCard extends ElementBase {
       return;
     }
 
-    const panelRect = panel.getBoundingClientRect();
-    const width = panelRect.width || panel.offsetWidth || 220;
-    const height = panelRect.height || panel.offsetHeight || 80;
-
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const edgeGap = 8;
     const rawOffset = Number(this.getAttribute('offset'));
     const offset = Number.isFinite(rawOffset) ? rawOffset : 10;
+    const placement = normalizePlacement(this.getAttribute('placement'));
+    const arrow = panel.querySelector('.arrow') as HTMLElement | null;
+    const shouldRebuild = !this._positioner ||
+      this._positionerPlacement !== placement ||
+      this._positionerOffset !== offset;
 
-    let placement = normalizePlacement(this.getAttribute('placement'));
-
-    const fitsTop = anchorRect.top - offset - height >= edgeGap;
-    const fitsBottom = anchorRect.bottom + offset + height <= viewportHeight - edgeGap;
-    const fitsLeft = anchorRect.left - offset - width >= edgeGap;
-    const fitsRight = anchorRect.right + offset + width <= viewportWidth - edgeGap;
-
-    if (placement === 'top' && !fitsTop && fitsBottom) placement = 'bottom';
-    if (placement === 'bottom' && !fitsBottom && fitsTop) placement = 'top';
-    if (placement === 'left' && !fitsLeft && fitsRight) placement = 'right';
-    if (placement === 'right' && !fitsRight && fitsLeft) placement = 'left';
-
-    let left = 0;
-    let top = 0;
-
-    if (placement === 'top') {
-      left = anchorRect.left + (anchorRect.width - width) / 2;
-      top = anchorRect.top - height - offset;
-    } else if (placement === 'bottom') {
-      left = anchorRect.left + (anchorRect.width - width) / 2;
-      top = anchorRect.bottom + offset;
-    } else if (placement === 'left') {
-      left = anchorRect.left - width - offset;
-      top = anchorRect.top + (anchorRect.height - height) / 2;
-    } else {
-      left = anchorRect.right + offset;
-      top = anchorRect.top + (anchorRect.height - height) / 2;
+    if (shouldRebuild) {
+      this._positioner?.destroy();
+      this._positioner = createPositioner({
+        anchor,
+        floating: panel,
+        placement,
+        strategy: 'fixed',
+        offset,
+        flip: true,
+        shift: true,
+        boundaryPadding: 8,
+        arrow,
+        observeWindowResize: false,
+        observeScroll: false,
+        observeAncestorScroll: false,
+        observeAncestorResize: false,
+        observeLayoutShift: false,
+        observeAnchorResize: false,
+        observeFloatingResize: false,
+        onUpdate: (state) => {
+          const side = state.placement.split('-')[0];
+          panel.setAttribute('data-placement', side);
+          const arrowData = state.middlewareData?.arrow;
+          if (typeof arrowData?.x === 'number') {
+            panel.style.setProperty('--ui-hover-card-arrow-x', `${Math.round(arrowData.x)}px`);
+          }
+          if (typeof arrowData?.y === 'number') {
+            panel.style.setProperty('--ui-hover-card-arrow-y', `${Math.round(arrowData.y)}px`);
+          }
+          panel.setAttribute('data-ready', 'true');
+        }
+      });
+      this._positionerPlacement = placement;
+      this._positionerOffset = offset;
+      return;
     }
 
-    left = clamp(left, edgeGap, viewportWidth - width - edgeGap);
-    top = clamp(top, edgeGap, viewportHeight - height - edgeGap);
-
-    panel.style.left = `${Math.round(left)}px`;
-    panel.style.top = `${Math.round(top)}px`;
-    panel.setAttribute('data-placement', placement);
-
-    const arrowX = clamp(anchorRect.left + anchorRect.width / 2 - left, 14, width - 14);
-    const arrowY = clamp(anchorRect.top + anchorRect.height / 2 - top, 14, height - 14);
-    panel.style.setProperty('--ui-hover-card-arrow-x', `${Math.round(arrowX)}px`);
-    panel.style.setProperty('--ui-hover-card-arrow-y', `${Math.round(arrowY)}px`);
-    panel.setAttribute('data-ready', 'true');
+    this._positioner?.update();
   }
 
   protected override render(): void {
