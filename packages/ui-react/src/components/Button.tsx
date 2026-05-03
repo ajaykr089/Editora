@@ -119,6 +119,8 @@ export const Button = React.forwardRef<HTMLElement, ButtonProps>(function Button
     if (ariaLabel !== undefined) setStringAttribute(el, 'aria-label', ariaLabel);
     setStringAttribute(el, 'recipe', recipe);
     setStringAttribute(el, 'radius', radius != null ? String(radius) : undefined);
+    if (radius === 'full') el.style.setProperty('--ui-btn-radius', '999px');
+    else el.style.removeProperty('--ui-btn-radius');
     setStringAttribute(el, 'scale', scale);
   }, [variant, size, recipe, radius, scale, icon, loading, state, block, headless, disabled, animation, theme, tone, type, loadingLabel, ariaLabel]);
 

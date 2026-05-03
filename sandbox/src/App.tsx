@@ -9,7 +9,7 @@ import { LightCodeEditorCompletionDemo, LightCodeEditorDemo, LightCodeEditorDiag
 // Motion
 import { AnimatedBeamDemo, AnimatedListDemo, AnimatedNumberDemo, AnimatedTextDemo, MarqueeDemo, NumberTickerDemo, OrbiterDemo, SpinningTextDemo, DockDemo } from './pages/MotionDemos';
 // Layout
-import { AppHeaderDemo, AspectRatioDemo, BoxDemo, ContainerDemo, FlexDemo, GridDemo, SectionDemo, SidebarDemo, PanelGroupDemo } from './pages/LayoutDemos';
+import { AppHeaderDemo, AspectRatioDemo, BoxDemo, ContainerDemo, FlexDemo, GridDemo, LayoutDemo, MasonryGridDemo, PanelGroupDemo, PlacementGridDemo, SectionDemo, SidebarDemo } from './pages/LayoutDemos';
 // Form
 import { CheckboxDemo, ColorPickerDemo, DateTimeFieldDemo, DateTimePickersDemo, FileUploadDemo, InlineEditDemo, InputDemo, LabelDemo, SelectDemo, SwitchDemo, TextareaDemo, SliderDemo, RadioGroupDemo, RatingDemo, TagsInputDemo, PasswordFieldDemo, PinInputDemo, NumberFieldDemo, ComboboxDemo, MultiSelectDemo, TransferListDemo, FieldDemo } from './pages/FormDemos';
 // Overlays
@@ -17,16 +17,17 @@ import { AlertDialogDemo, AlertDialogPromiseDemo, DialogDemo, DrawerDemo, Dropdo
 // Feedback
 import { AccordionDemo, AlertDemo, CollapsibleDemo, EmptyStateDemo, ProgressDemo, MeterDemo, ToastAPIDemo } from './pages/FeedbackDemos';
 // Navigation
-import { BreadcrumbDemo, TabsDemo, TreeDemo, PaginationDemo, StepperDemo, CommandDemo, WizardDemo, TimelineDemo } from './pages/NavigationDemos';
+import { BreadcrumbDemo, TabsDemo, TreeDemo, PaginationDemo, StepperDemo, CommandDemo, CommandPaletteDemo, WizardDemo, TimelineDemo } from './pages/NavigationDemos';
 // Data Display
-import { AvatarDemo, BadgeDemo, CardDemo, ChartDemo, DataTableDemo, TableDemo, SkeletonDemo, ScrollAreaDemo } from './pages/DataDisplayDemos';
+import { AvatarDemo, BadgeDemo, CardDemo, CarouselDemo, ChartDemo, CodeSnippetDemo, DataTableDemo, DataViewToolbarDemo, MetricCardDemo, PageHeaderDemo, PageToolbarDemo, RecordHeaderDemo, ReportingDemo, StatDemo, TableDemo, SkeletonDemo, ScrollAreaDemo } from './pages/DataDisplayDemos';
 // Buttons
-import { ButtonDemo, ButtonMatricesDemo, CopyButtonDemo, ToggleDemo, ToggleGroupDemo, ToolbarDemo, SplitButtonDemo, QuickActionsDemo } from './pages/ButtonDemos';
+import { ButtonDemo, ButtonMatricesDemo, CopyButtonDemo, FloatingToolbarDemo, ToggleDemo, ToggleGroupDemo, ToolbarDemo, SplitButtonDemo, QuickActionsDemo } from './pages/ButtonDemos';
 // Typography
-import { IconDemo, ShortcutDemo, VisuallyHiddenDemo } from './pages/TypographyDemos';
+import { IconDemo, KbdDemo, SeparatorDemo, ShortcutDemo, VisuallyHiddenDemo } from './pages/TypographyDemos';
 import { IconCloudDemo, IconsCatalogDemo } from './pages/IconDemos';
+import { GanttDemo } from './pages/GanttDemos';
 // Primitives
-import { PortalDemo, PresenceDemo, SelectionPopupDemo, NavigationMenuDemo, CalendarDemo, CodeBlockDemo, FiltersBarDemo, GanttDemo, SortableDemo, DirectionProviderDemo, SlotDemo, BlockControlsDemo, PluginPanelDemo } from './pages/PrimitiveDemos';
+import { PortalDemo, PresenceDemo, SelectionPopupDemo, NavigationMenuDemo, CalendarDemo, CodeBlockDemo, FiltersBarDemo, SortableDemo, DirectionProviderDemo, SlotDemo, BlockControlsDemo, PluginPanelDemo } from './pages/PrimitiveDemos';
 
 const layoutStyle: React.CSSProperties = {
   display: 'flex',
@@ -41,7 +42,7 @@ const contentStyle: React.CSSProperties = {
   flex: 1,
   padding: '28px 32px',
   overflowY: 'auto',
-  maxWidth: 1100,
+  minWidth: 0,
 };
 
 export default function App() {
@@ -88,8 +89,8 @@ export default function App() {
             <Route path="/container" element={<ContainerDemo />} />
             <Route path="/flex" element={<FlexDemo />} />
             <Route path="/grid" element={<GridDemo />} />
-            <Route path="/layout" element={<GridDemo />} />
-            <Route path="/masonry-grid" element={<GridDemo />} />
+            <Route path="/layout" element={<LayoutDemo />} />
+            <Route path="/masonry-grid" element={<MasonryGridDemo />} />
             <Route path="/panel-group" element={<PanelGroupDemo />} />
             <Route path="/section" element={<SectionDemo />} />
             <Route path="/sidebar" element={<SidebarDemo />} />
@@ -128,7 +129,7 @@ export default function App() {
             <Route path="/dialog-promise" element={<DialogDemo />} />
             <Route path="/drawer" element={<DrawerDemo />} />
             <Route path="/dropdown" element={<DropdownDemo />} />
-            <Route path="/floating-toolbar" element={<ToolbarDemo />} />
+            <Route path="/floating-toolbar" element={<FloatingToolbarDemo />} />
             <Route path="/hover-card" element={<HoverCardDemo />} />
             <Route path="/menu" element={<MenuDemo />} />
             <Route path="/menubar" element={<MenubarDemo />} />
@@ -151,7 +152,7 @@ export default function App() {
             {/* Navigation */}
             <Route path="/breadcrumb" element={<BreadcrumbDemo />} />
             <Route path="/command" element={<CommandDemo />} />
-            <Route path="/command-palette" element={<CommandDemo />} />
+            <Route path="/command-palette" element={<CommandPaletteDemo />} />
             <Route path="/navigation-menu" element={<NavigationMenuDemo />} />
             <Route path="/pagination" element={<PaginationDemo />} />
             <Route path="/stepper" element={<StepperDemo />} />
@@ -164,23 +165,23 @@ export default function App() {
             <Route path="/badge" element={<BadgeDemo />} />
             <Route path="/calendar" element={<CalendarDemo />} />
             <Route path="/card" element={<CardDemo />} />
-            <Route path="/carousel" element={<CardDemo />} />
+            <Route path="/carousel" element={<CarouselDemo />} />
             <Route path="/chart" element={<ChartDemo />} />
             <Route path="/code-block" element={<CodeBlockDemo />} />
-            <Route path="/code-snippet" element={<CodeBlockDemo />} />
+            <Route path="/code-snippet" element={<CodeSnippetDemo />} />
             <Route path="/data-table" element={<DataTableDemo />} />
-            <Route path="/data-view-toolbar" element={<ToolbarDemo />} />
+            <Route path="/data-view-toolbar" element={<DataViewToolbarDemo />} />
             <Route path="/filters-bar" element={<FiltersBarDemo />} />
             <Route path="/gantt" element={<GanttDemo />} />
-            <Route path="/metric-card" element={<CardDemo />} />
-            <Route path="/page-header" element={<AppHeaderDemo />} />
-            <Route path="/page-toolbar" element={<ToolbarDemo />} />
-            <Route path="/placement-grid" element={<GridDemo />} />
-            <Route path="/record-header" element={<AppHeaderDemo />} />
-            <Route path="/reporting" element={<CardDemo />} />
+            <Route path="/metric-card" element={<MetricCardDemo />} />
+            <Route path="/page-header" element={<PageHeaderDemo />} />
+            <Route path="/page-toolbar" element={<PageToolbarDemo />} />
+            <Route path="/placement-grid" element={<PlacementGridDemo />} />
+            <Route path="/record-header" element={<RecordHeaderDemo />} />
+            <Route path="/reporting" element={<ReportingDemo />} />
             <Route path="/scroll-area" element={<ScrollAreaDemo />} />
             <Route path="/sortable" element={<SortableDemo />} />
-            <Route path="/stat" element={<CardDemo />} />
+            <Route path="/stat" element={<StatDemo />} />
             <Route path="/table" element={<TableDemo />} />
             <Route path="/timeline" element={<TimelineDemo />} />
 
@@ -198,8 +199,8 @@ export default function App() {
             <Route path="/icon" element={<IconDemo />} />
             <Route path="/icon-cloud" element={<IconCloudDemo />} />
             <Route path="/icons-catalog" element={<IconsCatalogDemo />} />
-            <Route path="/kbd" element={<ShortcutDemo />} />
-            <Route path="/separator" element={<VisuallyHiddenDemo />} />
+            <Route path="/kbd" element={<KbdDemo />} />
+            <Route path="/separator" element={<SeparatorDemo />} />
             <Route path="/shortcut" element={<ShortcutDemo />} />
             <Route path="/skeleton" element={<SkeletonDemo />} />
             <Route path="/visually-hidden" element={<VisuallyHiddenDemo />} />

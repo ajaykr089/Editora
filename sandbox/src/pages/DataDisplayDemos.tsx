@@ -1,18 +1,14 @@
 import React from 'react';
 import {
-  Avatar, Badge, Box, Button, Card, Chart, DataTable, Flex, Grid,
-  Pagination, ScrollArea, Separator, Skeleton, Table,
+  Avatar, Badge, Box, Button, Card, Carousel, Chart, CodeSnippet, DataTable,
+  DataViewToolbar, Flex, Grid, MetricCard, PageHeader, PageToolbar,
+  Pagination, RecordHeader, ScrollArea, Separator, Skeleton, Stat, Table,
 } from '@editora/ui-react';
 import { CheckCircleIcon, ClockIcon } from '@editora/react-icons';
 
 const panel: React.CSSProperties = { border: '1px solid #e2e8f0', borderRadius: 16, padding: 20, background: '#fff', marginBottom: 20 };
 const h2: React.CSSProperties = { fontSize: 22, fontWeight: 700, marginBottom: 16, color: '#0f172a' };
 const h3: React.CSSProperties = { fontSize: 15, fontWeight: 650, marginBottom: 12, color: '#334155' };
-const tableWrap: React.CSSProperties = { display: 'block', overflow: 'hidden', border: '1px solid #dbe4ef', borderRadius: 12, background: '#fff' };
-const tableEl: React.CSSProperties = { width: '100%', borderCollapse: 'separate', borderSpacing: 0, fontSize: 14 };
-const th: React.CSSProperties = { padding: '12px 14px', textAlign: 'left', fontSize: 12, fontWeight: 750, color: '#475569', background: '#f8fafc', borderBottom: '1px solid #dbe4ef', textTransform: 'uppercase', letterSpacing: '0.04em' };
-const td: React.CSSProperties = { padding: '12px 14px', color: '#0f172a', borderBottom: '1px solid #edf2f7', verticalAlign: 'middle' };
-const lastRowTd: React.CSSProperties = { ...td, borderBottom: 0 };
 
 export function AvatarDemo() {
   return (
@@ -121,6 +117,225 @@ export function CardDemo() {
   );
 }
 
+export function CarouselDemo() {
+  const slides = [
+    ['Editor workspace', 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=900&q=80'],
+    ['Design systems', 'https://images.unsplash.com/photo-1559028006-448665bd7c7f?w=900&q=80'],
+    ['Release planning', 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=900&q=80'],
+  ];
+
+  return (
+    <div>
+      <h2 style={h2}>Carousel</h2>
+      <div style={panel}>
+        <h3 style={h3}>Horizontal carousel</h3>
+        <Carousel controlsVariant="button" controlsPosition="center" indicatorsVariant="pill" loop style={{ maxWidth: 760 }}>
+          {slides.map(([title, src]) => (
+            <Carousel.Item key={title}>
+              <div style={{ position: 'relative', height: 320, borderRadius: 14, overflow: 'hidden' }}>
+                <img src={src} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <div style={{ position: 'absolute', left: 18, bottom: 18, color: '#fff', fontWeight: 800, fontSize: 24, textShadow: '0 2px 8px rgba(15,23,42,.55)' }}>{title}</div>
+              </div>
+            </Carousel.Item>
+          ))}
+        </Carousel>
+      </div>
+      <div style={panel}>
+        <h3 style={h3}>Fade transition</h3>
+        <Carousel transition="fade" controlsPosition="bottom" controlsAlign="center" indicatorsVariant="line" autoPlay interval={3200}>
+          {['Plan', 'Write', 'Review'].map((title, index) => (
+            <Carousel.Item key={title}>
+              <Box style={{ minHeight: 160, display: 'grid', placeItems: 'center', borderRadius: 14, background: ['#eff6ff', '#f0fdf4', '#fff7ed'][index], border: '1px solid #dbe4ef', fontSize: 24, fontWeight: 800 }}>{title}</Box>
+            </Carousel.Item>
+          ))}
+        </Carousel>
+      </div>
+    </div>
+  );
+}
+
+export function CodeSnippetDemo() {
+  return (
+    <div>
+      <h2 style={h2}>CodeSnippet</h2>
+      <div style={panel}>
+        <h3 style={h3}>Inline snippets</h3>
+        <Flex style={{ gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <CodeSnippet code="npm install @editora/ui-react" tone="brand" />
+          <CodeSnippet code="<Button />" tone="success" />
+          <CodeSnippet code="aria-label" tone="warning" size="sm" />
+          <CodeSnippet code="dangerouslySetInnerHTML" tone="danger" />
+        </Flex>
+      </div>
+      <div style={panel}>
+        <h3 style={h3}>Block snippet</h3>
+        <CodeSnippet block tone="neutral" code={`import { Button } from '@editora/ui-react';\n\nexport function SaveAction() {\n  return <Button>Save draft</Button>;\n}`} />
+      </div>
+    </div>
+  );
+}
+
+export function DataViewToolbarDemo() {
+  const [query, setQuery] = React.useState('');
+  const [status, setStatus] = React.useState('active');
+  return (
+    <div>
+      <h2 style={h2}>DataViewToolbar</h2>
+      <div style={panel}>
+        <DataViewToolbar
+          title="Project portfolio"
+          description="Search, filter, and act on a data collection."
+          selectedCount={2}
+          totalCount={42}
+          itemLabel="project"
+          search={query}
+          searchPlaceholder="Search projects..."
+          searchClearable
+          status={status}
+          statusOptions={[
+            { value: 'active', label: 'Active' },
+            { value: 'review', label: 'In review' },
+            { value: 'blocked', label: 'Blocked' },
+          ]}
+          actions={<Button size="sm">New project</Button>}
+          footer={<div style={{ fontSize: 12, color: '#64748b' }}>Query: {query || 'empty'} · Status: {status}</div>}
+          onSearchChange={setQuery}
+          onStatusChange={setStatus}
+          onClear={() => { setQuery(''); setStatus('active'); }}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function StatDemo() {
+  return (
+    <div>
+      <h2 style={h2}>Stat</h2>
+      <div style={panel}>
+        <h3 style={h3}>Plain and card stats</h3>
+        <Grid style={{ gap: 14, gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
+          <Stat label="Deploys" value="128" trend="+12%" meta="This week" tone="success" icon={<CheckCircleIcon size={16} />} />
+          <Stat label="Review time" value="2.4h" trend="-18%" meta="Median" tone="brand" icon={<ClockIcon size={16} />} />
+          <Stat label="Incidents" value="3" description="Open production incidents" tone="danger" size="lg" />
+        </Grid>
+      </div>
+      <div style={panel}>
+        <h3 style={h3}>Card variant</h3>
+        <Grid style={{ gap: 14, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+          {(['brand', 'success', 'warning', 'danger'] as const).map((tone, index) => (
+            <Stat key={tone} variant="card" tone={tone} label={`${tone} metric`} value={['$48.2k', '99.9%', '14', '2'][index]} meta="Updated today" />
+          ))}
+        </Grid>
+      </div>
+    </div>
+  );
+}
+
+export function MetricCardDemo() {
+  return (
+    <div>
+      <h2 style={h2}>MetricCard</h2>
+      <div style={panel}>
+        <Grid style={{ gap: 14, gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))' }}>
+          <MetricCard label="Monthly revenue" value="$84,210" trend="+8.2%" meta="vs last month" tone="success" icon={<CheckCircleIcon size={16} />} />
+          <MetricCard label="Queue time" value="41m" trend="-12m" meta="SLA improving" tone="brand" icon={<ClockIcon size={16} />} />
+          <MetricCard label="Failed jobs" value="7" trend="+3" meta="Needs review" tone="danger" />
+        </Grid>
+      </div>
+    </div>
+  );
+}
+
+export function PageHeaderDemo() {
+  return (
+    <div>
+      <h2 style={h2}>PageHeader</h2>
+      <div style={panel}>
+        <PageHeader
+          eyebrow="Workspace"
+          title="Editor dashboard"
+          subtitle="Monitor content operations, plugin usage, and release readiness."
+          statusChip={{ label: 'Healthy', tone: 'success' }}
+          actions={[
+            { label: 'Export', variant: 'secondary' },
+            { label: 'Create report', variant: 'primary' },
+          ]}
+        >
+          <Grid style={{ gap: 10, gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+            <Badge variant="soft" tone="brand">42 projects</Badge>
+            <Badge variant="soft" tone="success">99.9% uptime</Badge>
+            <Badge variant="soft" tone="warning">3 reviews</Badge>
+          </Grid>
+        </PageHeader>
+      </div>
+    </div>
+  );
+}
+
+export function PageToolbarDemo() {
+  const [query, setQuery] = React.useState('');
+  return (
+    <div>
+      <h2 style={h2}>PageToolbar</h2>
+      <div style={panel}>
+        <PageToolbar
+          title="Release notes"
+          subtitle="Search and filter release documents."
+          statusChip={{ label: 'Draft', tone: 'warning' }}
+          actions={<Button size="sm">Publish</Button>}
+          toolbar={<DataViewToolbar search={query} searchPlaceholder="Search notes..." searchClearable onSearchChange={setQuery} totalCount={18} itemLabel="note" style={{ background: 'transparent', border: 0, padding: 0 }} />}
+          footer={<div style={{ fontSize: 12, color: '#64748b' }}>Active search: {query || 'none'}</div>}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function RecordHeaderDemo() {
+  return (
+    <div>
+      <h2 style={h2}>RecordHeader</h2>
+      <div style={panel}>
+        <RecordHeader
+          eyebrow="Customer"
+          title="Acme Healthcare"
+          subtitle="Enterprise plan with active editor rollout."
+          statusChip={{ label: 'Renewing', tone: 'brand' }}
+          actions={[{ label: 'Edit', variant: 'secondary' }, { label: 'Open account', variant: 'primary' }]}
+          details={[
+            { label: 'Owner', value: 'Maya Patel' },
+            { label: 'ARR', value: '$128k' },
+            { label: 'Renewal', value: 'May 18, 2026' },
+            { label: 'Health', value: 'Good' },
+          ]}
+          footer={<div style={{ fontSize: 12, color: '#64748b' }}>Last activity: contract redlines approved.</div>}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function ReportingDemo() {
+  return (
+    <div>
+      <h2 style={h2}>Reporting Dashboard</h2>
+      <div style={panel}>
+        <PageHeader title="Executive report" subtitle="A composed dashboard using Editora data display components." actions={<Button size="sm">Download PDF</Button>} />
+        <Grid style={{ gap: 14, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginTop: 16 }}>
+          <MetricCard label="Revenue" value="$84.2k" trend="+8.2%" tone="success" />
+          <MetricCard label="Activation" value="71%" trend="+4.1%" tone="brand" />
+          <MetricCard label="Risk" value="Medium" trend="3 blockers" tone="warning" />
+        </Grid>
+        <Grid style={{ gap: 14, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', marginTop: 16 }}>
+          <Chart type="area" title="Adoption" data={[{ label: 'Jan', value: 24 }, { label: 'Feb', value: 38 }, { label: 'Mar', value: 55 }, { label: 'Apr', value: 71 }]} />
+          <Chart type="donut" title="Work mix" data={[{ label: 'Editor', value: 48 }, { label: 'Plugins', value: 27 }, { label: 'Docs', value: 25 }]} />
+        </Grid>
+      </div>
+    </div>
+  );
+}
+
 export function TableDemo() {
   const rows = [
     { id: 1, name: 'Alice Johnson', role: 'Engineer', status: 'Active', team: 'Platform' },
@@ -133,23 +348,23 @@ export function TableDemo() {
       <h2 style={h2}>Table</h2>
       <div style={panel}>
         <h3 style={h3}>Styled table wrapper</h3>
-        <Table hover striped bordered style={tableWrap}>
-          <table style={tableEl}>
+        <Table hover striped bordered>
+          <table>
             <thead>
               <tr>
-                <th style={th}>Name</th><th style={th}>Role</th><th style={th}>Team</th><th style={th}>Status</th><th style={th}>Actions</th>
+                <th>Name</th><th>Role</th><th>Team</th><th>Status</th><th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((r, index) => (
-                <tr key={r.id} style={{ background: index % 2 ? '#fbfdff' : '#fff' }}>
-                  <td style={index === rows.length - 1 ? lastRowTd : td}>{r.name}</td>
-                  <td style={index === rows.length - 1 ? lastRowTd : td}>{r.role}</td>
-                  <td style={index === rows.length - 1 ? lastRowTd : td}>{r.team}</td>
-                  <td style={index === rows.length - 1 ? lastRowTd : td}>
+              {rows.map((r) => (
+                <tr key={r.id}>
+                  <td>{r.name}</td>
+                  <td>{r.role}</td>
+                  <td>{r.team}</td>
+                  <td>
                     <Badge variant="soft" tone={r.status === 'Active' ? 'success' : r.status === 'Away' ? 'warning' : 'neutral'} size="sm">{r.status}</Badge>
                   </td>
-                  <td style={index === rows.length - 1 ? lastRowTd : td}><Button size="sm" variant="ghost">Edit</Button></td>
+                  <td><Button size="sm" variant="ghost">Edit</Button></td>
                 </tr>
               ))}
             </tbody>
@@ -164,26 +379,25 @@ export function TableDemo() {
           multiSelect
           hover
           striped
-          style={tableWrap}
           onSortChange={(detail: any) => console.log('table sort', detail)}
           onRowSelect={(detail: any) => console.log('table rows', detail.indices)}
         >
-          <table style={tableEl}>
+          <table>
             <thead>
               <tr>
-                <th style={th} data-key="name" data-sortable="true">Name</th>
-                <th style={th} data-key="role" data-sortable="true">Role</th>
-                <th style={th} data-key="team" data-sortable="true">Team</th>
-                <th style={th}>Status</th>
+                <th data-key="name" data-sortable="true">Name</th>
+                <th data-key="role" data-sortable="true">Role</th>
+                <th data-key="team" data-sortable="true">Team</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((r, index) => (
+              {rows.map((r) => (
                 <tr key={r.id}>
-                  <td style={index === rows.length - 1 ? lastRowTd : td}>{r.name}</td>
-                  <td style={index === rows.length - 1 ? lastRowTd : td}>{r.role}</td>
-                  <td style={index === rows.length - 1 ? lastRowTd : td}>{r.team}</td>
-                  <td style={index === rows.length - 1 ? lastRowTd : td}>{r.status}</td>
+                  <td>{r.name}</td>
+                  <td>{r.role}</td>
+                  <td>{r.team}</td>
+                  <td>{r.status}</td>
                 </tr>
               ))}
             </tbody>
@@ -192,12 +406,12 @@ export function TableDemo() {
       </div>
       <div style={panel}>
         <h3 style={h3}>Bordered + compact</h3>
-        <Table bordered compact style={tableWrap}>
-          <table style={tableEl}>
-            <thead><tr><th style={th}>Key</th><th style={th}>Value</th></tr></thead>
+        <Table bordered compact>
+          <table>
+            <thead><tr><th>Key</th><th>Value</th></tr></thead>
             <tbody>
-              {[['Version', '0.1.13'], ['License', 'MIT'], ['Framework', 'React 18'], ['Language', 'TypeScript 5']].map(([k, v], index, items) => (
-                <tr key={k}><td style={index === items.length - 1 ? lastRowTd : td}>{k}</td><td style={index === items.length - 1 ? lastRowTd : td}>{v}</td></tr>
+              {[['Version', '0.1.14'], ['License', 'MIT'], ['Framework', 'React 18'], ['Language', 'TypeScript 5']].map(([k, v]) => (
+                <tr key={k}><td>{k}</td><td>{v}</td></tr>
               ))}
             </tbody>
           </table>
@@ -235,34 +449,33 @@ export function DataTableDemo() {
           pageSize={4}
           paginationId="sandbox-data-table-pager"
           filterQuery=""
-          style={{ ...tableWrap, overflow: 'auto' }}
           onPageChange={(detail: any) => setPage(detail.page)}
           onSortChange={(detail: any) => console.log('data-table sort', detail)}
           onRowSelect={(detail: any) => console.log('data-table rows', detail.indices)}
         >
-          <table style={tableEl}>
-            <caption style={{ padding: '12px 14px', textAlign: 'left', color: '#64748b', fontSize: 13 }}>Project portfolio, selectable and sortable</caption>
+          <table>
+            <caption>Project portfolio, selectable and sortable</caption>
             <thead>
               <tr>
-                <th style={th} data-key="id" data-sortable="true">ID</th>
-                <th style={th} data-key="project" data-sortable="true">Project</th>
-                <th style={th} data-key="owner" data-sortable="true">Owner</th>
-                <th style={th} data-key="status" data-sortable="true">Status</th>
-                <th style={th} data-key="risk" data-sortable="true">Risk</th>
-                <th style={th} data-key="due" data-sortable="true">Due</th>
+                <th data-key="id" data-sortable="true">ID</th>
+                <th data-key="project" data-sortable="true">Project</th>
+                <th data-key="owner" data-sortable="true">Owner</th>
+                <th data-key="status" data-sortable="true">Status</th>
+                <th data-key="risk" data-sortable="true">Risk</th>
+                <th data-key="due" data-sortable="true">Due</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((r, index) => (
+              {rows.map((r) => (
                 <tr key={r.id}>
-                  <td style={index === rows.length - 1 ? lastRowTd : td}>{r.id}</td>
-                  <td style={index === rows.length - 1 ? lastRowTd : td}>{r.project}</td>
-                  <td style={index === rows.length - 1 ? lastRowTd : td}>{r.owner}</td>
-                  <td style={index === rows.length - 1 ? lastRowTd : td}>
+                  <td>{r.id}</td>
+                  <td>{r.project}</td>
+                  <td>{r.owner}</td>
+                  <td>
                     <Badge variant="soft" tone={r.status === 'Blocked' ? 'danger' : r.status === 'Review' ? 'warning' : 'success'} size="sm">{r.status}</Badge>
                   </td>
-                  <td style={index === rows.length - 1 ? lastRowTd : td}>{r.risk}</td>
-                  <td style={index === rows.length - 1 ? lastRowTd : td}>{r.due}</td>
+                  <td>{r.risk}</td>
+                  <td>{r.due}</td>
                 </tr>
               ))}
             </tbody>
@@ -275,9 +488,9 @@ export function DataTableDemo() {
       <div style={panel}>
         <h3 style={h3}>States and variants</h3>
         <Grid style={{ gap: 14, gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
-          <DataTable state="loading" stateText="Loading records..." style={{ minHeight: 120 }} />
-          <DataTable state="error" stateText="Could not load records" style={{ minHeight: 120 }} />
-          <DataTable state="success" stateText="All records synced" style={{ minHeight: 120 }} />
+          <DataTable state="loading" stateText="Loading records..." />
+          <DataTable state="error" stateText="Could not load records" />
+          <DataTable state="success" stateText="All records synced" />
         </Grid>
       </div>
     </div>

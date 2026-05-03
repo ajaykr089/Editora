@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Box, Button, CopyButton, Flex, Grid, QuickActions, SplitButton,
+  Box, Button, CopyButton, Flex, FloatingToolbar, Grid, QuickActions, SplitButton,
   Toggle, ToggleGroup, Toolbar,
 } from '@editora/ui-react';
 import { toastAdvanced } from '@editora/toast';
@@ -174,6 +174,34 @@ export function ToolbarDemo() {
           <button style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #e2e8f0', background: '#fff', cursor: 'pointer' }}>Middle</button>
           <button style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #e2e8f0', background: '#fff', cursor: 'pointer' }}>Bottom</button>
         </Toolbar>
+      </div>
+    </div>
+  );
+}
+
+export function FloatingToolbarDemo() {
+  const [open, setOpen] = useState(true);
+  return (
+    <div>
+      <h2 style={h2}>FloatingToolbar</h2>
+      <div style={{ ...panel, minHeight: 260, position: 'relative' }}>
+        <h3 style={h3}>Anchored toolbar</h3>
+        <Box id="floating-toolbar-anchor" style={{ marginTop: 40, padding: 20, border: '1px dashed #94a3b8', borderRadius: 12, background: '#f8fafc', maxWidth: 520 }}>
+          Select or focus an anchor region to show contextual editor actions.
+        </Box>
+        <Flex style={{ gap: 8, marginTop: 14 }}>
+          <Button size="sm" onClick={() => setOpen(true)}>Show</Button>
+          <Button size="sm" variant="secondary" onClick={() => setOpen(false)}>Hide</Button>
+        </Flex>
+        <FloatingToolbar anchorId="floating-toolbar-anchor" open={open} placement="top" variant="soft" elevation="high" onOpenChange={setOpen}>
+          <FloatingToolbar.Toolbar>
+            <Toolbar variant="minimal">
+              <button style={{ padding: '6px 10px', border: 0, background: 'transparent', fontWeight: 800 }}>B</button>
+              <button style={{ padding: '6px 10px', border: 0, background: 'transparent', fontStyle: 'italic' }}>I</button>
+              <button style={{ padding: '6px 10px', border: 0, background: 'transparent' }}>Link</button>
+            </Toolbar>
+          </FloatingToolbar.Toolbar>
+        </FloatingToolbar>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Box, Breadcrumb, Button, Card, Command, CommandItem,
+  Box, Breadcrumb, Button, Card, Command, CommandItem, CommandPalette,
   Flex, Grid, Pagination, Stepper, Tabs, Timeline, Tree, Wizard,
 } from '@editora/ui-react';
 import { toastAdvanced } from '@editora/toast';
@@ -185,6 +185,38 @@ export function CommandDemo() {
             <CommandItem value="logout" onSelect={() => toastAdvanced.warning('Signed out', { duration: 1200, theme: 'light' })}>Sign out</CommandItem>
           </Command>
         </Box>
+      </div>
+    </div>
+  );
+}
+
+export function CommandPaletteDemo() {
+  const [open, setOpen] = useState(true);
+  const [last, setLast] = useState('none');
+  return (
+    <div>
+      <h2 style={h2}>CommandPalette</h2>
+      <div style={{ ...panel, minHeight: 360 }}>
+        <Flex style={{ gap: 8, marginBottom: 14 }}>
+          <Button size="sm" onClick={() => setOpen(true)}>Open palette</Button>
+          <Button size="sm" variant="secondary" onClick={() => setOpen(false)}>Close</Button>
+        </Flex>
+        <CommandPalette
+          open={open}
+          placeholder="Search commands..."
+          emptyText="No commands found"
+          onOpenChange={(detail) => setOpen(detail.open)}
+          onSelect={(detail) => {
+            setLast(detail.label || detail.value || 'command');
+            toastAdvanced.info(detail.label || detail.value || 'Command', { duration: 1200, theme: 'light' });
+          }}
+        >
+          <CommandPalette.Item value="new-document" label="New document" keywords="create file" />
+          <CommandPalette.Item value="open-workspace" label="Open workspace" keywords="project folder" />
+          <CommandPalette.Item value="toggle-sidebar" label="Toggle sidebar" keywords="layout navigation" />
+          <CommandPalette.Item value="publish" label="Publish release" keywords="deploy ship" />
+        </CommandPalette>
+        <div style={{ marginTop: 14, fontSize: 13, color: '#64748b' }}>Last command: {last}</div>
       </div>
     </div>
   );

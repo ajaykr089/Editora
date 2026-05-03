@@ -456,18 +456,11 @@ function isBrowser(): boolean {
 }
 
 function scheduleDeferredFrame(callback: () => void): number {
-  if (typeof requestAnimationFrame === 'function') {
-    return requestAnimationFrame(() => callback());
-  }
   return window.setTimeout(callback, 16) as unknown as number;
 }
 
 function cancelDeferredFrame(handle: number): void {
   if (!handle) return;
-  if (typeof cancelAnimationFrame === 'function') {
-    cancelAnimationFrame(handle);
-    return;
-  }
   window.clearTimeout(handle);
 }
 

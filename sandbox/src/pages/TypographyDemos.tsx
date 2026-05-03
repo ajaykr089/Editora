@@ -62,6 +62,63 @@ export function ShortcutDemo() {
   );
 }
 
+export function KbdDemo() {
+  return (
+    <div>
+      <h2 style={h2}>Kbd</h2>
+      <div style={panel}>
+        <h3 style={h3}>Sizes</h3>
+        <Flex style={{ gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Kbd keys={['⌘', 'K']} size="sm" />
+          <Kbd keys={['⌘', '⇧', 'P']} size="md" />
+          <Kbd keys={['Ctrl', 'Alt', 'Delete']} size="lg" />
+        </Flex>
+      </div>
+      <div style={panel}>
+        <h3 style={h3}>Common shortcuts</h3>
+        <Grid style={{ gap: 10 }}>
+          {[
+            ['Open command palette', ['⌘', 'K']],
+            ['Save document', ['⌘', 'S']],
+            ['Toggle preview', ['⌘', '⇧', 'V']],
+          ].map(([label, keys]) => (
+            <Flex key={String(label)} style={{ gap: 12, alignItems: 'center', justifyContent: 'space-between', maxWidth: 420 }}>
+              <span style={{ fontSize: 13, color: '#475569' }}>{label}</span>
+              <Kbd keys={keys as string[]} />
+            </Flex>
+          ))}
+        </Grid>
+      </div>
+    </div>
+  );
+}
+
+export function SeparatorDemo() {
+  return (
+    <div>
+      <h2 style={h2}>Separator</h2>
+      <div style={panel}>
+        <h3 style={h3}>Horizontal</h3>
+        <Box style={{ padding: 16, background: '#f8fafc', borderRadius: 10 }}>
+          <div style={{ fontSize: 14 }}>Account settings</div>
+          <Separator style={{ margin: '12px 0' }} />
+          <div style={{ fontSize: 14, color: '#64748b' }}>Profile, billing, and notification preferences.</div>
+        </Box>
+      </div>
+      <div style={panel}>
+        <h3 style={h3}>Vertical</h3>
+        <Flex style={{ height: 42, alignItems: 'center', gap: 12, background: '#f8fafc', borderRadius: 10, padding: '0 14px' }}>
+          <span>Overview</span>
+          <Separator orientation="vertical" />
+          <span>Activity</span>
+          <Separator orientation="vertical" />
+          <span>Settings</span>
+        </Flex>
+      </div>
+    </div>
+  );
+}
+
 export function VisuallyHiddenDemo() {
   return (
     <div>
