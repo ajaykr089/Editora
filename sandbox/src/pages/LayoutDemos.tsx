@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   AppHeader, AspectRatio, Box, Button, Card, Container, Flex, Grid,
-  Layout, PanelGroup, Panel, Splitter, Section, Sidebar,
+  Layout, MasonryGrid, PanelGroup, Panel, PlacementGrid, Splitter, Section, Sidebar,
 } from '@editora/ui-react';
 import { BellIcon, SearchIcon, ShieldIcon } from '@editora/react-icons';
 
@@ -156,6 +156,119 @@ export function GridDemo() {
             </div>
           ))}
         </Grid>
+      </div>
+    </div>
+  );
+}
+
+export function MasonryGridDemo() {
+  const items = [
+    ['Launch notes', 130, '#eff6ff'],
+    ['Plugin checklist', 190, '#f0fdf4'],
+    ['Design review', 150, '#fff7ed'],
+    ['QA findings', 220, '#fef2f2'],
+    ['Roadmap', 170, '#f8fafc'],
+    ['Release metrics', 120, '#eef2ff'],
+    ['Docs backlog', 205, '#ecfeff'],
+    ['Customer quotes', 145, '#faf5ff'],
+  ];
+
+  return (
+    <div>
+      <h2 style={h2}>MasonryGrid</h2>
+      <div style={panel}>
+        <h3 style={h3}>Balanced card layout</h3>
+        <MasonryGrid columns={{ initial: 1, sm: 2, lg: 3 }} gap="14px" fill="balance">
+          {items.map(([title, height, bg], index) => (
+            <Box key={title} style={{ minHeight: Number(height), padding: 16, borderRadius: 12, border: '1px solid #dbe4ef', background: String(bg), breakInside: 'avoid' }}>
+              <div style={{ fontWeight: 700, marginBottom: 8 }}>#{index + 1} {title}</div>
+              <div style={{ color: '#64748b', fontSize: 13, lineHeight: 1.5 }}>Masonry items keep their natural heights while the grid balances columns responsively.</div>
+            </Box>
+          ))}
+        </MasonryGrid>
+      </div>
+    </div>
+  );
+}
+
+export function PlacementGridDemo() {
+  return (
+    <div>
+      <h2 style={h2}>PlacementGrid</h2>
+      <div style={panel}>
+        <h3 style={h3}>Explicit placement</h3>
+        <PlacementGrid columns={6} rows={4} gap="10px" interactive style={{ minHeight: 280 }}>
+          <PlacementGrid.Item row={1} column={1} columnSpan={3} value="hero" selected>
+            <Box style={{ height: '100%', padding: 14, borderRadius: 12, background: '#dbeafe', border: '1px solid #93c5fd', fontWeight: 700 }}>Hero</Box>
+          </PlacementGrid.Item>
+          <PlacementGrid.Item row={1} column={4} rowSpan={2} columnSpan={2} value="insights">
+            <Box style={{ height: '100%', padding: 14, borderRadius: 12, background: '#dcfce7', border: '1px solid #86efac', fontWeight: 700 }}>Insights</Box>
+          </PlacementGrid.Item>
+          <PlacementGrid.Item row={2} column={1} rowSpan={2} columnSpan={2} value="nav">
+            <Box style={{ height: '100%', padding: 14, borderRadius: 12, background: '#fef3c7', border: '1px solid #fcd34d', fontWeight: 700 }}>Navigation</Box>
+          </PlacementGrid.Item>
+          <PlacementGrid.Item row={3} column={3} columnSpan={3} value="timeline">
+            <Box style={{ height: '100%', padding: 14, borderRadius: 12, background: '#fce7f3', border: '1px solid #f9a8d4', fontWeight: 700 }}>Timeline</Box>
+          </PlacementGrid.Item>
+          <PlacementGrid.Item row={4} column={1} columnSpan={5} value="footer">
+            <Box style={{ height: '100%', padding: 14, borderRadius: 12, background: '#f8fafc', border: '1px solid #cbd5e1', fontWeight: 700 }}>Footer rail</Box>
+          </PlacementGrid.Item>
+        </PlacementGrid>
+      </div>
+    </div>
+  );
+}
+
+export function LayoutDemo() {
+  return (
+    <div>
+      <h2 style={h2}>Layout</h2>
+      <div style={panel}>
+        <h3 style={h3}>Dashboard shell</h3>
+        <Layout mode="dashboard" variant="elevated" sidebarWidth="220px" asideWidth="220px" style={{ height: 460, border: '1px solid #dbe4ef', borderRadius: 14, overflow: 'hidden' }}>
+          <Layout.Header>
+            <AppHeader bordered style={{ width: '100%' }}>
+              <AppHeader.Start><strong>Editora Cloud</strong></AppHeader.Start>
+              <AppHeader.Title>Operations</AppHeader.Title>
+              <AppHeader.End><Button size="sm">Create</Button></AppHeader.End>
+            </AppHeader>
+          </Layout.Header>
+          <Layout.Sidebar>
+            <Box style={{ padding: 14, display: 'grid', gap: 8 }}>
+              {['Overview', 'Projects', 'Reports', 'Settings'].map((item) => (
+                <Box key={item} style={{ padding: '9px 10px', borderRadius: 8, background: item === 'Overview' ? '#e0e7ff' : 'transparent', color: item === 'Overview' ? '#2563eb' : '#475569', fontWeight: 600 }}>{item}</Box>
+              ))}
+            </Box>
+          </Layout.Sidebar>
+          <Layout.Content>
+            <Box style={{ padding: 18, display: 'grid', gap: 12 }}>
+              <Grid columns={3} gap="10px">
+                {['Revenue', 'Deploys', 'Incidents'].map((item, index) => (
+                  <Card key={item} variant="surface" radius={12}>
+                    <Card.Header>
+                      <Card.Title>{index === 0 ? '$48.2k' : index === 1 ? '128' : '2'}</Card.Title>
+                      <Card.Description>{item}</Card.Description>
+                    </Card.Header>
+                  </Card>
+                ))}
+              </Grid>
+              <Box style={{ minHeight: 160, borderRadius: 12, border: '1px solid #dbe4ef', background: '#f8fafc', padding: 16 }}>Primary content region</Box>
+            </Box>
+          </Layout.Content>
+          <Layout.Aside>
+            <Box style={{ padding: 14, color: '#64748b', fontSize: 13, lineHeight: 1.5 }}>Aside panels can hold activity, filters, help text, or contextual details.</Box>
+          </Layout.Aside>
+          <Layout.Footer>
+            <Box style={{ padding: '10px 14px', borderTop: '1px solid #e2e8f0', fontSize: 12, color: '#64748b' }}>Synced just now</Box>
+          </Layout.Footer>
+        </Layout>
+      </div>
+      <div style={panel}>
+        <h3 style={h3}>Split mode</h3>
+        <Layout mode="split" variant="flat" maxWidth="lg" style={{ minHeight: 220, border: '1px solid #dbe4ef', borderRadius: 14, overflow: 'hidden' }}>
+          <Layout.Content><Box style={{ padding: 18, background: '#fff' }}>Editor canvas</Box></Layout.Content>
+          <Layout.Aside><Box style={{ padding: 18, background: '#f8fafc' }}>Inspector</Box></Layout.Aside>
+        </Layout>
       </div>
     </div>
   );

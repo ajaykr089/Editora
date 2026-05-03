@@ -277,7 +277,7 @@ export function GanttDemo() {
     { id: 'docs', parent: 'governance', label: 'Developer docs and recipes', start: '2026-03-22', end: '2026-04-18', progress: 12, tone: 'default' as const, assignee: 'Nia', segments: [{ start: '2026-03-22', end: '2026-03-29', progress: 40 }, { start: '2026-04-07', end: '2026-04-18', progress: 5 }] },
     { id: 'launch-ready', parent: 'governance', label: 'Launch readiness', start: '2026-04-24', end: '2026-04-24', type: 'milestone' as const, tone: 'success' as const, assignee: 'PMO' }
   ];
-  const links = [
+  const initialLinks = [
     { id: 'p1', source: 'requirements', target: 'schema', type: 'e2s' as const },
     { id: 'p2', source: 'schema', target: 'api', type: 'e2s' as const },
     { id: 'p3', source: 'api', target: 'foundation-freeze', type: 'e2s' as const },
@@ -288,20 +288,175 @@ export function GanttDemo() {
     { id: 'p8', source: 'migration', target: 'launch-ready', type: 'e2s' as const },
     { id: 'p9', source: 'docs', target: 'launch-ready', type: 's2e' as const }
   ];
+  const formatLocalDate = (value: Date) => {
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  const durationDays = (start: string, end?: string) => Math.max(1, Math.round((new Date(`${end || start}T00:00:00`).getTime() - new Date(`${start}T00:00:00`).getTime()) / 86400000));
+  const addWorkingDays = (value: string, days: number) => {
+    const date = new Date(`${value}T00:00:00`);
+    let remaining = days;
+    while (remaining > 0) {
+      date.setDate(date.getDate() + 1);
+      const day = date.getDay();
+      if (day !== 0 && day !== 6) remaining -= 1;
+    }
+    return formatLocalDate(date);
+  };
+  const reorder = <T,>(items: T[], from: number, to: number) => {
+    const next = [...items];
+    const [item] = next.splice(from, 1);
+    next.splice(to, 0, item);
+    return next;
+  };
+  const createLargeTasks = (count: number) => {
+    const groups = Array.from({ length: Math.ceil(count / 100) }, (_, index) => ({
+      id: `group-${index + 1}`,
+      label: `Program ${index + 1}`,
+      start: '2026-01-01',
+      end: '2026-12-31',
+      type: 'summary' as const,
+      progress: Math.round((index * 7) % 100),
+      tone: 'info' as const,
+      assignee: 'PMO'
+    }));
+    const items = Array.from({ length: count }, (_, index) => {
+      const start = new Date(2026, 0, 1 + (index % 260));
+      const end = new Date(2026, 0, 1 + (index % 260) + 4 + (index % 18));
+      return {
+        id: `task-${index + 1}`,
+        parent: `group-${Math.floor(index / 100) + 1}`,
+        label: `Implementation task ${index + 1}`,
+        start: formatLocalDate(start),
+        end: formatLocalDate(end),
+        progress: index % 100,
+        tone: (index % 11 === 0 ? 'warning' : index % 17 === 0 ? 'danger' : 'default') as const,
+        critical: index % 97 === 0,
+        assignee: ['Ava', 'Noah', 'Maya', 'Omar', 'Priya'][index % 5]
+      };
+    });
+    return [...groups, ...items];
+  };
+  const findCriticalTaskIds = (items: typeof initialTasks, dependencyLinks: typeof initialLinks) => {
+    const byId = new Map(items.map((task) => [task.id, task]));
+    const successors = new Map<string, string[]>();
+    dependencyLinks.forEach((link) => {
+      const list = successors.get(link.source) || [];
+      list.push(link.target);
+      successors.set(link.source, list);
+    });
+    const score = new Map<string, number>();
+    const visit = (id: string): number => {
+      if (score.has(id)) return score.get(id) || 0;
+      const task = byId.get(id);
+      if (!task) return 0;
+      const own = task.type === 'milestone' ? 0 : durationDays(task.start, task.end);
+      const downstream = Math.max(0, ...(successors.get(id) || []).map(visit));
+      const total = own + downstream;
+      score.set(id, total);
+      return total;
+    };
+    items.forEach((task) => visit(task.id));
+    const root = items.reduce((best, task) => (visit(task.id) > visit(best.id) ? task : best), items[0]);
+    const critical = new Set<string>();
+    let cursor: typeof initialTasks[number] | undefined = root;
+    while (cursor) {
+      critical.add(cursor.id);
+      const nextId = (successors.get(cursor.id) || []).sort((a, b) => visit(b) - visit(a))[0];
+      cursor = nextId ? byId.get(nextId) : undefined;
+    }
+    return critical;
+  };
+
   const [tasks, setTasks] = useState(initialTasks);
+  const [links, setLinks] = useState(initialLinks);
+  const [selectedId, setSelectedId] = useState('gantt-ui');
+  const [selectedLinkId, setSelectedLinkId] = useState('');
+  const [ownerFilter, setOwnerFilter] = useState('all');
+  const [toneFilter, setToneFilter] = useState('all');
+  const [query, setQuery] = useState('');
+  const [linkDraft, setLinkDraft] = useState({ source: 'gantt-ui', target: 'editorial', type: 'e2s' as const });
   const [barVariant, setBarVariant] = useState<'solid' | 'soft' | 'striped' | 'outline' | 'glass'>('soft');
   const [lastAction, setLastAction] = useState('Drag, resize, select a task, or select a dependency link');
+  const largeTasks = React.useMemo(() => createLargeTasks(10000), []);
+  const selected = tasks.find((task) => task.id === selectedId) || tasks[0];
+  const selectedLink = links.find((link) => link.id === selectedLinkId);
+  const owners = Array.from(new Set(tasks.map((task) => task.assignee).filter(Boolean))) as string[];
+  const criticalTaskIds = React.useMemo(() => findCriticalTaskIds(tasks, links), [tasks, links]);
+  const visibleTasks = tasks.filter((task) => {
+    if (ownerFilter !== 'all' && task.assignee !== ownerFilter) return false;
+    if (toneFilter !== 'all' && task.tone !== toneFilter) return false;
+    if (query && !`${task.label} ${task.assignee || ''}`.toLowerCase().includes(query.toLowerCase())) return false;
+    return true;
+  }).map((task) => ({ ...task, critical: task.critical || criticalTaskIds.has(task.id) }));
+  const complete = Math.round(tasks.reduce((total, task) => total + Number(task.progress || 0), 0) / tasks.filter((task) => task.type !== 'milestone').length);
+  const milestones = tasks.filter((task) => task.type === 'milestone').length;
+  const delayed = tasks.filter((task) => task.tone === 'danger' || task.tone === 'warning').length;
+  const updateSelected = (patch: Record<string, unknown>) => {
+    setTasks((items) => items.map((task) => task.id === selected.id ? { ...task, ...patch } : task));
+  };
+  const deleteTask = (id: string) => {
+    setTasks((items) => items.filter((task) => task.id !== id && task.parent !== id));
+    setLinks((items) => items.filter((link) => link.source !== id && link.target !== id));
+    setSelectedId(tasks.find((task) => task.id !== id)?.id || '');
+    setLastAction(`Deleted ${id}`);
+  };
+  const createTask = () => {
+    const id = `task-${Date.now()}`;
+    setTasks((items) => [...items, { id, label: 'New planning task', start: selected.start, end: selected.end, progress: 0, tone: 'default' as const, assignee: selected.assignee || 'PMO' }]);
+    setSelectedId(id);
+    setLastAction(`Created ${id}`);
+  };
+  const addDependency = () => {
+    if (!linkDraft.source || !linkDraft.target || linkDraft.source === linkDraft.target) return;
+    const id = `link-${Date.now()}`;
+    setLinks((items) => [...items, { ...linkDraft, id }]);
+    setSelectedLinkId(id);
+    setLastAction(`Created dependency ${linkDraft.source} to ${linkDraft.target}`);
+  };
+  const autoSchedule = () => {
+    setTasks((items) => {
+      const next = items.map((task) => ({ ...task }));
+      const byId = new Map(next.map((task) => [task.id, task]));
+      links.forEach((link) => {
+        const source = byId.get(link.source);
+        const target = byId.get(link.target);
+        if (!source || !target || target.type === 'summary') return;
+        const targetDuration = durationDays(target.start, target.end);
+        const earliest = addWorkingDays(source.end || source.start, 1);
+        if (new Date(`${target.start}T00:00:00`) < new Date(`${earliest}T00:00:00`)) {
+          target.start = earliest;
+          target.end = target.type === 'milestone' ? earliest : addWorkingDays(earliest, targetDuration);
+        }
+      });
+      return next;
+    });
+    setLastAction('Auto-scheduled dependent tasks using working days');
+  };
+  const exportJson = () => setLastAction(`Export ready: ${JSON.stringify({ tasks, links }).length} characters`);
+  const importSample = () => {
+    setTasks(initialTasks);
+    setLinks(initialLinks);
+    setSelectedId('gantt-ui');
+    setLastAction('Imported sample portfolio');
+  };
 
   return (
     <div>
       <h2 style={h2}>Gantt</h2>
-      <div style={{ ...panel, display: 'grid', gap: 12 }}>
+      <div style={{ ...panel, display: 'grid', gap: 14 }}>
         <Flex style={{ alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
           <div>
-            <h3 style={{ ...h3, marginBottom: 4 }}>Release planning workspace</h3>
-            <div style={{ color: '#64748b', fontSize: 13 }}>Baselines, critical path, milestones, split tasks, selectable dependencies, drag and resize.</div>
+            <h3 style={{ ...h3, marginBottom: 4 }}>Full-page release planning workspace</h3>
+            <div style={{ color: '#64748b', fontSize: 13 }}>Filters, metrics, detail editing, row reordering, task creation, dependency creation/deletion, auto-scheduling, baselines, critical path, milestones, and split tasks.</div>
           </div>
           <Flex style={{ gap: 8, flexWrap: 'wrap' }}>
+            <Button size="sm" variant="secondary" onClick={exportJson}>Export</Button>
+            <Button size="sm" variant="secondary" onClick={importSample}>Import sample</Button>
+            <Button size="sm" variant="secondary" onClick={autoSchedule}>Auto schedule</Button>
+            <Button size="sm" onClick={createTask}>New task</Button>
             {(['solid', 'soft', 'striped', 'outline', 'glass'] as const).map((variant) => (
               <Button key={variant} size="sm" variant={barVariant === variant ? 'primary' : 'secondary'} onClick={() => setBarVariant(variant)}>
                 {variant}
@@ -309,27 +464,140 @@ export function GanttDemo() {
             ))}
           </Flex>
         </Flex>
-        <Gantt
-          tasks={tasks}
-          links={links}
-          zoom="week"
-          sort="start"
-          barVariant={barVariant}
-          onTaskChange={(detail: any) => {
-            setTasks((items) => items.map((task) => task.id === detail.id ? { ...task, start: detail.start ?? task.start, end: detail.end ?? task.end } : task));
-            setLastAction(`Updated ${detail.id}: ${detail.start || ''} ${detail.end || ''}`.trim());
-          }}
-          onTaskSelect={(detail: any) => setLastAction(`Selected task ${detail.id}`)}
-          onTaskDelete={(detail: any) => {
-            setTasks((items) => items.filter((task) => task.id !== detail.id));
-            setLastAction(`Deleted task ${detail.id}`);
-          }}
-          onLinkSelect={(detail: any) => setLastAction(`Selected ${detail.type} dependency ${detail.source} to ${detail.target}`)}
-        />
+
+        <Grid style={{ gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
+          {[
+            ['Completion', `${complete}%`],
+            ['Tracked tasks', String(tasks.length)],
+            ['Milestones', String(milestones)],
+            ['Critical path', `${criticalTaskIds.size} tasks`],
+            ['Risk queue', `${delayed} risks`],
+          ].map(([label, value]) => (
+            <Box key={label} style={{ border: '1px solid #dbe4ef', borderRadius: 10, background: '#fff', padding: 12 }}>
+              <div style={{ color: '#64748b', fontSize: 12, fontWeight: 700 }}>{label}</div>
+              <strong style={{ display: 'block', marginTop: 6, fontSize: 22 }}>{value}</strong>
+            </Box>
+          ))}
+        </Grid>
+
+        <Grid style={{ gap: 14, gridTemplateColumns: 'minmax(0, 1fr) minmax(280px, 340px)', alignItems: 'start' }}>
+          <Box style={{ border: '1px solid #dbe4ef', borderRadius: 12, background: '#fff', overflow: 'hidden' }}>
+            <Flex style={{ padding: 12, gap: 8, borderBottom: '1px solid #dbe4ef', flexWrap: 'wrap' }}>
+              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Filter by task or owner" style={{ flex: '1 1 240px', minHeight: 34, border: '1px solid #dbe4ef', borderRadius: 8, padding: '0 9px', font: 'inherit', fontSize: 13 }} />
+              <select value={ownerFilter} onChange={(event) => setOwnerFilter(event.target.value)} style={{ minHeight: 34, border: '1px solid #dbe4ef', borderRadius: 8, padding: '0 9px', font: 'inherit', fontSize: 13 }}>
+                <option value="all">All owners</option>
+                {owners.map((owner) => <option key={owner} value={owner}>{owner}</option>)}
+              </select>
+              <select value={toneFilter} onChange={(event) => setToneFilter(event.target.value)} style={{ minHeight: 34, border: '1px solid #dbe4ef', borderRadius: 8, padding: '0 9px', font: 'inherit', fontSize: 13 }}>
+                <option value="all">All statuses</option>
+                <option value="success">Success</option>
+                <option value="default">Default</option>
+                <option value="warning">Warning</option>
+                <option value="danger">Danger</option>
+                <option value="info">Info</option>
+              </select>
+            </Flex>
+            <Gantt
+              tasks={visibleTasks}
+              links={links}
+              zoom="week"
+              sort="start"
+              barVariant={barVariant}
+              onTaskChange={(detail: any) => {
+                setTasks((items) => items.map((task) => task.id === detail.id ? { ...task, start: detail.start ?? task.start, end: detail.end ?? task.end } : task));
+                setLastAction(`Updated ${detail.id}: ${detail.start || ''} ${detail.end || ''}`.trim());
+              }}
+              onTaskSelect={(detail: any) => {
+                setSelectedId(detail.id);
+                setLastAction(`Selected task ${detail.id}`);
+              }}
+              onTaskDelete={(detail: any) => deleteTask(detail.id)}
+              onLinkSelect={(detail: any) => {
+                setSelectedLinkId(detail.id);
+                setLastAction(`Selected ${detail.type} dependency ${detail.source} to ${detail.target}`);
+              }}
+            />
+          </Box>
+
+          <Box style={{ display: 'grid', gap: 12 }}>
+            <Box style={{ border: '1px solid #dbe4ef', borderRadius: 12, background: '#fff', padding: 14 }}>
+              <div style={{ color: '#64748b', fontSize: 12, fontWeight: 750, textTransform: 'uppercase' }}>Selected task</div>
+              <input value={selected.label} onChange={(event) => updateSelected({ label: event.target.value })} style={{ width: '100%', minHeight: 34, border: '1px solid #dbe4ef', borderRadius: 8, padding: '0 9px', marginTop: 8, font: 'inherit', fontWeight: 700 }} />
+              <input value={selected.assignee || ''} onChange={(event) => updateSelected({ assignee: event.target.value })} placeholder="Owner" style={{ width: '100%', minHeight: 34, border: '1px solid #dbe4ef', borderRadius: 8, padding: '0 9px', marginTop: 8, font: 'inherit' }} />
+              <Grid style={{ gap: 8, marginTop: 12 }}>
+                <label style={{ display: 'grid', gap: 4, fontSize: 12, color: '#64748b' }}>Start<input type="date" value={selected.start} onChange={(event) => updateSelected({ start: event.target.value })} style={{ minHeight: 34, border: '1px solid #dbe4ef', borderRadius: 8, padding: '0 9px', font: 'inherit' }} /></label>
+                <label style={{ display: 'grid', gap: 4, fontSize: 12, color: '#64748b' }}>End<input type="date" value={selected.end || selected.start} onChange={(event) => updateSelected({ end: event.target.value })} style={{ minHeight: 34, border: '1px solid #dbe4ef', borderRadius: 8, padding: '0 9px', font: 'inherit' }} /></label>
+                <label style={{ display: 'grid', gap: 4, fontSize: 12, color: '#64748b' }}>Progress<input type="number" min={0} max={100} value={selected.progress ?? 0} onChange={(event) => updateSelected({ progress: Number(event.target.value) })} style={{ minHeight: 34, border: '1px solid #dbe4ef', borderRadius: 8, padding: '0 9px', font: 'inherit' }} /></label>
+                <label style={{ display: 'grid', gap: 4, fontSize: 12, color: '#64748b' }}>Status<select value={selected.tone || 'default'} onChange={(event) => updateSelected({ tone: event.target.value })} style={{ minHeight: 34, border: '1px solid #dbe4ef', borderRadius: 8, padding: '0 9px', font: 'inherit' }}><option value="default">Default</option><option value="success">Success</option><option value="warning">Warning</option><option value="danger">Danger</option><option value="info">Info</option></select></label>
+              </Grid>
+              <Grid style={{ gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 12 }}>
+                <Button size="sm" variant="secondary" onClick={() => setTasks((items) => reorder(items, Math.max(0, items.findIndex((task) => task.id === selected.id)), Math.max(0, items.findIndex((task) => task.id === selected.id) - 1)))}>Move up</Button>
+                <Button size="sm" variant="secondary" onClick={() => setTasks((items) => reorder(items, items.findIndex((task) => task.id === selected.id), Math.min(items.length - 1, items.findIndex((task) => task.id === selected.id) + 1)))}>Move down</Button>
+                <Button size="sm" variant="danger" style={{ gridColumn: '1 / -1' }} onClick={() => deleteTask(selected.id)}>Delete task</Button>
+              </Grid>
+            </Box>
+            <Box style={{ border: '1px solid #dbe4ef', borderRadius: 12, background: '#fff', padding: 14 }}>
+              <strong style={{ fontSize: 14 }}>Dependencies</strong>
+              <Grid style={{ gap: 8, marginTop: 10 }}>
+                <select value={linkDraft.source} onChange={(event) => setLinkDraft((draft) => ({ ...draft, source: event.target.value }))} style={{ minHeight: 34, border: '1px solid #dbe4ef', borderRadius: 8, padding: '0 9px', font: 'inherit' }}>{tasks.map((task) => <option key={task.id} value={task.id}>{task.label}</option>)}</select>
+                <select value={linkDraft.target} onChange={(event) => setLinkDraft((draft) => ({ ...draft, target: event.target.value }))} style={{ minHeight: 34, border: '1px solid #dbe4ef', borderRadius: 8, padding: '0 9px', font: 'inherit' }}>{tasks.map((task) => <option key={task.id} value={task.id}>{task.label}</option>)}</select>
+                <select value={linkDraft.type} onChange={(event) => setLinkDraft((draft) => ({ ...draft, type: event.target.value as typeof linkDraft.type }))} style={{ minHeight: 34, border: '1px solid #dbe4ef', borderRadius: 8, padding: '0 9px', font: 'inherit' }}><option value="e2s">Finish to start</option><option value="s2s">Start to start</option><option value="e2e">Finish to finish</option><option value="s2e">Start to finish</option></select>
+                <Button size="sm" variant="secondary" onClick={addDependency}>Add dependency</Button>
+              </Grid>
+              {selectedLink ? <div style={{ marginTop: 10, padding: 10, borderRadius: 8, background: '#eff6ff', color: '#1d4ed8', fontSize: 12 }}>Selected {selectedLink.type || 'e2s'} link: {selectedLink.source} to {selectedLink.target}</div> : null}
+              {links.slice(-5).map((link) => (
+                <Flex key={link.id} style={{ justifyContent: 'space-between', gap: 8, padding: '8px 0', borderTop: '1px solid #edf2f7', fontSize: 12 }}>
+                  <button style={{ border: 0, background: 'transparent', padding: 0, textAlign: 'left', color: selectedLinkId === link.id ? '#1d4ed8' : '#0f172a', cursor: 'pointer' }} onClick={() => setSelectedLinkId(link.id)}>{link.source} to {link.target} <span style={{ color: '#64748b' }}>({link.type || 'e2s'})</span></button>
+                  <button style={{ border: 0, background: 'transparent', color: '#b91c1c', cursor: 'pointer' }} onClick={() => setLinks((items) => items.filter((item) => item.id !== link.id))}>Delete</button>
+                </Flex>
+              ))}
+            </Box>
+          </Box>
+        </Grid>
         <div style={{ border: '1px solid #dbe4ef', borderRadius: 10, padding: '10px 12px', color: '#475569', fontSize: 13, background: '#f8fafc' }}>
           {lastAction}
         </div>
       </div>
+
+      <div style={panel}>
+        <h3 style={h3}>Storybook portfolio variants</h3>
+        <Grid style={{ gap: 16 }}>
+          <div>
+            <div style={{ color: '#64748b', fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Contrast</div>
+            <Box variant="contrast" p="12px" radius="lg"><Gantt tasks={initialTasks.slice(0, 6)} links={initialLinks.slice(0, 3)} variant="contrast" zoom="week" /></Box>
+          </div>
+          <div>
+            <div style={{ color: '#64748b', fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Readonly portfolio</div>
+            <Gantt tasks={initialTasks.slice(0, 6)} links={initialLinks.slice(0, 3)} readonly zoom="month" />
+          </div>
+          <div>
+            <div style={{ color: '#64748b', fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Dense portfolio with baselines and critical path</div>
+            <Gantt tasks={tasks} links={links} zoom="month" sort="start" barVariant="outline" />
+          </div>
+          <div>
+            <div style={{ color: '#64748b', fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Milestone roadmap</div>
+            <Gantt tasks={tasks.filter((task) => task.type === 'milestone' || !task.parent)} zoom="month" sort="start" barVariant="glass" readonly />
+          </div>
+        </Grid>
+      </div>
+
+      <div style={panel}>
+        <h3 style={h3}>Large dataset - 10,000 tasks</h3>
+        <Gantt tasks={largeTasks} zoom="month" sort="start" barVariant="outline" />
+      </div>
+
+      <div style={panel}>
+        <h3 style={h3}>Bar design variations</h3>
+        <Grid style={{ gap: 14 }}>
+          {(['solid', 'soft', 'striped', 'outline', 'glass'] as const).map((variant) => (
+            <div key={variant}>
+              <div style={{ color: '#64748b', fontSize: 12, fontWeight: 700, marginBottom: 6, textTransform: 'capitalize' }}>{variant}</div>
+              <Gantt tasks={initialTasks.slice(0, 6)} links={initialLinks.slice(0, 3)} barVariant={variant} showToolbar={false} zoom="week" />
+            </div>
+          ))}
+        </Grid>
+      </div>
+
       <div style={panel}>
         <h3 style={h3}>Dependency type variations</h3>
         <Grid style={{ gap: 14 }}>

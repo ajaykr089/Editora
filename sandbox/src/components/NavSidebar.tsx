@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { routeGroups } from '../routes';
 
+const editoraLogoUrl = new URL('../assets/editora_logo_blocks.svg', import.meta.url).href;
+
 const sidebarStyle: React.CSSProperties = {
   width: 220,
   minWidth: 220,
@@ -19,6 +21,12 @@ const logoStyle: React.CSSProperties = {
   padding: '0 16px 16px',
   borderBottom: '1px solid #e2e8f0',
   marginBottom: 8,
+};
+
+const logoImageStyle: React.CSSProperties = {
+  display: 'block',
+  height: 30,
+  width: 'auto',
 };
 
 const groupLabelStyle: React.CSSProperties = {
@@ -57,7 +65,7 @@ export function NavSidebar() {
   return (
     <nav style={sidebarStyle}>
       <div style={logoStyle}>
-        <div style={{ fontWeight: 800, fontSize: 16, color: '#0f172a' }}>Editora</div>
+        <img src={editoraLogoUrl} alt="Editora" style={logoImageStyle} />
         <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>Component Demos</div>
       </div>
 
