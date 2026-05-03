@@ -1455,6 +1455,7 @@ export class UISortable extends ElementBase {
   }
 
   moveSelection(options: UISortableMoveOptions): void {
+    this._syncSelectionFromAttribute(this.getAttribute('selection'));
     const movedRootIds = this._selectedRootIds();
     if (!movedRootIds.length) return;
     this._commitMove({

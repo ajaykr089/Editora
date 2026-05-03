@@ -6,6 +6,7 @@ import React, {
   useLayoutEffect,
   useRef
 } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 const VOID_HTML_TAGS = new Set([
@@ -318,14 +319,13 @@ function normalizeMetric(value: number | string | undefined): string | null {
 function serializeSidebarIcon(icon: React.ReactNode | string | undefined): string | undefined {
   if (!icon || typeof icon === 'string') return undefined;
   if (!isValidElement(icon)) return undefined;
-  const html = serializeReactNodeToHtml(
-    React.cloneElement(icon as React.ReactElement<any>, {
-      width: (icon as React.ReactElement<any>).props.width ?? 18,
-      height: (icon as React.ReactElement<any>).props.height ?? 18,
-      'aria-hidden': true,
-      focusable: 'false'
-    })
-  );
+  const node = React.cloneElement(icon as React.ReactElement<any>, {
+    width: (icon as React.ReactElement<any>).props.width ?? 18,
+    height: (icon as React.ReactElement<any>).props.height ?? 18,
+    'aria-hidden': true,
+    focusable: 'false'
+  });
+  const html = serializeReactNodeToHtml(node) || renderToStaticMarkup(node);
   return html || undefined;
 }
 

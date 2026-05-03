@@ -29,11 +29,11 @@ const portfolioLinks = [
   { id: 'p2', source: 'schema', target: 'api', type: 'e2s' as const },
   { id: 'p3', source: 'api', target: 'foundation-freeze', type: 'e2s' as const },
   { id: 'p4', source: 'foundation-freeze', target: 'gantt-ui', type: 'e2s' as const },
-  { id: 'p5', source: 'gantt-ui', target: 'editorial', type: 's2s' as const },
+  { id: 'p5', source: 'gantt-ui', target: 'editorial', type: 'e2s' as const },
   { id: 'p6', source: 'editorial', target: 'automation', type: 'e2s' as const },
-  { id: 'p7', source: 'security', target: 'migration', type: 'e2e' as const },
+  { id: 'p7', source: 'security', target: 'migration', type: 'e2s' as const },
   { id: 'p8', source: 'migration', target: 'launch-ready', type: 'e2s' as const },
-  { id: 'p9', source: 'docs', target: 'launch-ready', type: 's2e' as const }
+  { id: 'p9', source: 'docs', target: 'launch-ready', type: 'e2s' as const }
 ];
 
 const connectorTasks = [
@@ -102,6 +102,37 @@ function durationDays(start: string, end?: string) {
   return Math.max(1, Math.round((new Date(`${end || start}T00:00:00`).getTime() - new Date(`${start}T00:00:00`).getTime()) / 86400000));
 }
 
+function findCriticalTaskIds(items: typeof portfolioTasks, dependencyLinks: typeof portfolioLinks) {
+  const byId = new Map(items.map((task) => [task.id, task]));
+  const successors = new Map<string, string[]>();
+  dependencyLinks.forEach((link) => {
+    const list = successors.get(link.source) || [];
+    list.push(link.target);
+    successors.set(link.source, list);
+  });
+  const score = new Map<string, number>();
+  const visit = (id: string): number => {
+    if (score.has(id)) return score.get(id) || 0;
+    const task = byId.get(id);
+    if (!task) return 0;
+    const own = task.type === 'milestone' ? 0 : durationDays(task.start, task.end);
+    const downstream = Math.max(0, ...(successors.get(id) || []).map(visit));
+    const total = own + downstream;
+    score.set(id, total);
+    return total;
+  };
+  items.forEach((task) => visit(task.id));
+  const root = items.reduce((best, task) => (visit(task.id) > visit(best.id) ? task : best), items[0]);
+  const critical = new Set<string>();
+  let cursor: typeof portfolioTasks[number] | undefined = root;
+  while (cursor) {
+    critical.add(cursor.id);
+    const nextId = (successors.get(cursor.id) || []).sort((a, b) => visit(b) - visit(a))[0];
+    cursor = nextId ? byId.get(nextId) : undefined;
+  }
+  return critical;
+}
+
 function reorder<T>(items: T[], from: number, to: number) {
   const next = [...items];
   const [item] = next.splice(from, 1);
@@ -123,11 +154,12 @@ export function GanttDemo() {
   const owners = Array.from(new Set(tasks.map((task) => task.assignee).filter(Boolean))) as string[];
   const selected = tasks.find((task) => task.id === selectedId) || tasks[0];
   const selectedLink = links.find((link) => link.id === selectedLinkId);
+  const criticalTaskIds = useMemo(() => findCriticalTaskIds(tasks, links), [tasks, links]);
   const visibleTasks = tasks.filter((task) => {
     if (ownerFilter !== 'all' && task.assignee !== ownerFilter) return false;
     if (query && !`${task.label} ${task.assignee || ''}`.toLowerCase().includes(query.toLowerCase())) return false;
     return true;
-  });
+  }).map((task) => ({ ...task, critical: task.critical || criticalTaskIds.has(task.id) }));
 
   const updateSelected = (patch: Record<string, unknown>) => {
     setTasks((items) => items.map((task) => task.id === selected.id ? { ...task, ...patch } : task));
@@ -176,7 +208,7 @@ export function GanttDemo() {
   };
 
   return (
-    <div>
+    <div style={{ maxWidth: 1440, margin: '0 auto', display: 'grid', gap: 16 }}>
       <h2 style={h2}>Gantt</h2>
 
       <div style={{ ...panel, display: 'grid', gap: 14 }}>
@@ -280,6 +312,38 @@ export function GanttDemo() {
           </Box>
         </Grid>
         <div style={{ border: '1px solid #dbe4ef', borderRadius: 10, padding: '10px 12px', color: '#475569', fontSize: 13, background: '#f8fafc' }}>{lastAction}</div>
+      </div>
+
+      <div style={panel}>
+        <h3 style={h3}>Focused examples</h3>
+        <Grid style={{ gap: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(520px, 1fr))' }}>
+          <Box>
+            <div style={{ color: '#64748b', fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Calendar view - day scale</div>
+            <Gantt tasks={portfolioTasks.slice(0, 6)} links={portfolioLinks.slice(0, 3)} zoom="day" showToday sort="start" barVariant="soft" />
+          </Box>
+          <Box>
+            <div style={{ color: '#64748b', fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Links and connectors</div>
+            <Gantt
+              tasks={connectorTasks}
+              links={[
+                { id: 'focused-e2s', source: 'source', target: 'target', type: 'e2s' },
+                { id: 'focused-s2e', source: 'parallel', target: 'checkpoint', type: 's2e' }
+              ]}
+              zoom="week"
+              barVariant="outline"
+              showToolbar={false}
+              onLinkSelect={(detail) => setLastAction(`Selected ${detail.type} connector ${detail.source} to ${detail.target}`)}
+            />
+          </Box>
+          <Box>
+            <div style={{ color: '#64748b', fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Bar types - summary, task, milestone, split, baseline</div>
+            <Gantt tasks={barTasks} links={[{ id: 'focused-bar-link', source: 'normal', target: 'baseline', type: 'e2s' }]} zoom="week" barVariant="striped" showToolbar={false} />
+          </Box>
+          <Box>
+            <div style={{ color: '#64748b', fontSize: 12, fontWeight: 700, marginBottom: 6 }}>Calendar view - month scale</div>
+            <Gantt tasks={portfolioTasks} links={portfolioLinks} zoom="month" sort="start" barVariant="glass" />
+          </Box>
+        </Grid>
       </div>
 
       <div style={panel}>

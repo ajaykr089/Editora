@@ -42,7 +42,7 @@ const contentStyle: React.CSSProperties = {
   flex: 1,
   padding: '28px 32px',
   overflowY: 'auto',
-  maxWidth: 1100,
+  minWidth: 0,
 };
 
 export default function App() {
