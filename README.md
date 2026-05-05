@@ -6,7 +6,8 @@
 
 ![Editora Ecosystem](./images/editora-linkedin-graphic.png)
 
-- **CodeSandbox:** https://qjr47y-5173.csb.app/editora-editor
+- **CodeSandbox:** https://codesandbox.io/p/github/ajaykr089/editora-codesandbox/main
+- **Editor Example:** https://qjr47y-5173.csb.app/editora-editor
 - **Editora Ecosystem:** https://editora-ecosystem.netlify.app/
 - **Web Demo:** https://editora-free.netlify.app/
 - **Storybook:** https://editora-ecosystem-storybook.netlify.app/

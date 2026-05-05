@@ -4,7 +4,8 @@
 
 ## Demos
 
-- **CodeSandbox:** https://qjr47y-5173.csb.app/button
+- **CodeSandbox:** https://codesandbox.io/p/github/ajaykr089/editora-codesandbox/main
+- **CodeSandboxUI Components:** https://qjr47y-5173.csb.app/button
 - **UI Component Catalog:** https://editora-ecosystem.netlify.app/
 - **Web Demo:** https://editora-free.netlify.app/
 - **Storybook:** https://editora-ecosystem-storybook.netlify.app/
