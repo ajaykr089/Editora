@@ -105,5 +105,6 @@ export function Example() {
 
 ## Live Examples
 
-- CodeSandbox: https://qjr47y-5173.csb.app/gantt
+- CodeSandbox: https://codesandbox.io/p/github/ajaykr089/editora-codesandbox/main
+- Example: https://qjr47y-5173.csb.app/gantt
 - Storybook: https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-gantt--full-page-workspace
