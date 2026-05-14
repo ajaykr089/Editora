@@ -133,17 +133,14 @@ export class CodeFoldingExtension implements EditorExtension {
   private createFoldingUI(): void {
     if (!this.editor) return;
 
-    const contentElement = this.editor.getView().getContentElement();
-    const container = contentElement.closest(
-      '[data-lce-editor-container="true"]',
-    ) as HTMLElement | null;
-    if (!container) return;
+    const gutter = this.editor.getView().getLineNumbersElement();
+    if (!gutter) return;
 
     this.foldingUI = document.createElement('div');
     this.foldingUI.setAttribute('data-lce-folding-ui', 'true');
     this.foldingUI.style.cssText = `
       position: absolute;
-      left: 0;
+      right: 0;
       top: 0;
       bottom: 0;
       width: 20px;
@@ -151,7 +148,7 @@ export class CodeFoldingExtension implements EditorExtension {
       z-index: 3;
     `;
 
-    container.appendChild(this.foldingUI);
+    gutter.appendChild(this.foldingUI);
   }
 
   private syncFoldingState(): void {
@@ -589,7 +586,7 @@ export class CodeFoldingExtension implements EditorExtension {
       this.editor.fold(region);
     }
 
-    this.syncFoldingState();
+    this.syncFoldingStatePreservingScroll();
   }
 
   private foldAtCursor(): void {
@@ -598,7 +595,7 @@ export class CodeFoldingExtension implements EditorExtension {
     const region = this.findBestRegionForLine(cursorLine, false);
     if (!region) return;
     this.editor.fold(region);
-    this.syncFoldingState();
+    this.syncFoldingStatePreservingScroll();
   }
 
   private unfoldAtCursor(): void {
@@ -607,7 +604,7 @@ export class CodeFoldingExtension implements EditorExtension {
     const region = this.findBestRegionForLine(cursorLine, true);
     if (!region) return;
     this.editor.unfold(region);
-    this.syncFoldingState();
+    this.syncFoldingStatePreservingScroll();
   }
 
   private foldAll(): void {
@@ -616,7 +613,7 @@ export class CodeFoldingExtension implements EditorExtension {
     for (const region of topLevelRegions) {
       this.editor.fold(region);
     }
-    this.syncFoldingState();
+    this.syncFoldingStatePreservingScroll();
   }
 
   private unfoldAll(): void {
@@ -625,7 +622,42 @@ export class CodeFoldingExtension implements EditorExtension {
     for (const fold of activeFolds) {
       this.editor.unfold(fold);
     }
-    this.syncFoldingState();
+    this.syncFoldingStatePreservingScroll();
+  }
+
+  private syncFoldingStatePreservingScroll(): void {
+    this.withPreservedScroll(() => {
+      this.syncFoldingState();
+    });
+  }
+
+  private withPreservedScroll(updateDisplay: () => void): void {
+    const scrollElement = this.editor?.getView().getScrollElement();
+    if (!scrollElement) {
+      updateDisplay();
+      return;
+    }
+
+    const scrollLeft = scrollElement.scrollLeft;
+    const scrollTop = scrollElement.scrollTop;
+
+    updateDisplay();
+    this.restoreScrollPosition(scrollElement, scrollLeft, scrollTop);
+  }
+
+  private restoreScrollPosition(
+    scrollElement: HTMLElement,
+    scrollLeft: number,
+    scrollTop: number,
+  ): void {
+    scrollElement.scrollLeft = scrollLeft;
+    scrollElement.scrollTop = scrollTop;
+
+    requestAnimationFrame(() => {
+      if (!scrollElement.isConnected) return;
+      scrollElement.scrollLeft = scrollLeft;
+      scrollElement.scrollTop = scrollTop;
+    });
   }
 
   private applyFoldedDisplay(): void {
