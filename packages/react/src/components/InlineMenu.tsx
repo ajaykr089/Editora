@@ -129,6 +129,9 @@ export const InlineMenu: React.FC<InlineMenuProps> = ({
         <div
           key={option.value}
           className="rte-inline-menu-item"
+          onMouseDown={(event) => {
+            event.preventDefault();
+          }}
           onClick={() => {
             onSelect(option.value);
             onClose();

@@ -37,13 +37,8 @@ export const ClearFormattingPlugin = (): Plugin => ({
       const originalRange = range.cloneRange();
       content.focus({ preventScroll: true });
 
-      // Browser-level cleanup first.
-      document.execCommand("unlink", false);
-      document.execCommand("removeFormat", false);
-
-      // Normalize what native removeFormat often misses across complex selections.
-      normalizeBlockFormatting(content, originalRange);
       normalizeInlineFormatting(content, originalRange);
+      normalizeBlockFormatting(content, originalRange);
 
       content.dispatchEvent(new Event("input", { bubbles: true }));
       return true;
@@ -180,6 +175,68 @@ function unwrapElement(element: HTMLElement): void {
   parent.removeChild(element);
 }
 
+function isGeneratedEmptyParagraph(element: Element): boolean {
+  if (element.tagName !== "P") return false;
+  if (element.attributes.length > 0) return false;
+  if ((element.textContent || "").trim() !== "") return false;
+  return !element.querySelector("img, video, table, iframe, hr, pre, ul, ol");
+}
+
+function removeGeneratedEmptyParagraphs(element: HTMLElement): void {
+  Array.from(element.children).forEach((child) => {
+    if (isGeneratedEmptyParagraph(child)) {
+      child.remove();
+    }
+  });
+}
+
+function replaceElementWithChildren(element: HTMLElement): void {
+  removeGeneratedEmptyParagraphs(element);
+  unwrapElement(element);
+}
+
+function replaceBlockWithParagraph(block: HTMLElement): void {
+  const replacement = document.createElement("p");
+
+  Array.from(block.attributes).forEach((attribute) => {
+    replacement.setAttribute(attribute.name, attribute.value);
+  });
+
+  while (block.firstChild) {
+    replacement.appendChild(block.firstChild);
+  }
+
+  if (!replacement.innerHTML.trim()) {
+    replacement.innerHTML = "<br>";
+  }
+
+  block.parentNode?.replaceChild(replacement, block);
+}
+
+function normalizeBlockquote(blockquote: HTMLElement): void {
+  removeGeneratedEmptyParagraphs(blockquote);
+
+  const parent = blockquote.parentElement;
+  if (parent instanceof HTMLLIElement) {
+    replaceElementWithChildren(blockquote);
+    return;
+  }
+
+  const meaningfulChildren = Array.from(blockquote.childNodes).filter((node) => {
+    return node.nodeType !== Node.TEXT_NODE || (node.textContent || "").trim() !== "";
+  });
+  const hasBlockChildren = meaningfulChildren.some((node) => {
+    return node instanceof HTMLElement && /^(P|DIV|H[1-6]|UL|OL|PRE|TABLE|BLOCKQUOTE)$/.test(node.tagName);
+  });
+
+  if (hasBlockChildren) {
+    replaceElementWithChildren(blockquote);
+    return;
+  }
+
+  replaceBlockWithParagraph(blockquote);
+}
+
 function normalizeBlockFormatting(content: HTMLElement, range: Range): void {
   const blockNodes = Array.from(
     content.querySelectorAll("h1,h2,h3,h4,h5,h6,blockquote,pre"),
@@ -189,11 +246,12 @@ function normalizeBlockFormatting(content: HTMLElement, range: Range): void {
     if (!intersectsRange(range, block)) return;
     if (!BLOCK_FORMAT_TAGS.has(block.tagName)) return;
 
-    const replacement = document.createElement("p");
-    while (block.firstChild) {
-      replacement.appendChild(block.firstChild);
+    if (block.tagName === "BLOCKQUOTE") {
+      normalizeBlockquote(block);
+      return;
     }
-    block.parentNode?.replaceChild(replacement, block);
+
+    replaceBlockWithParagraph(block);
   });
 }
 

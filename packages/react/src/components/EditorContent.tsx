@@ -271,6 +271,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
   const contentRef = useRef<HTMLDivElement>(null);
   const isControlled = value !== undefined;
   const debounceTimerRef = useRef<NodeJS.Timeout>();
+  const pendingHistorySnapshotRef = useRef<{ beforeHTML: string; inputType: string | null } | null>(null);
   const autoHeightEnabled = contentConfig?.autoHeight === true;
   const minEditorHeight = typeof contentConfig?.minHeight === 'number' ? contentConfig.minHeight : 200;
   const maxEditorHeight = typeof contentConfig?.maxHeight === 'number' ? contentConfig.maxHeight : 0;
@@ -387,6 +388,33 @@ export const EditorContent: React.FC<EditorContentProps> = ({
   useEffect(() => {
     if (!contentRef.current) return;
 
+    const recordNativeInputHistory = (el: HTMLElement, afterHTML: string) => {
+      const snapshot = pendingHistorySnapshotRef.current;
+      pendingHistorySnapshotRef.current = null;
+      if (!snapshot || snapshot.beforeHTML === afterHTML) return;
+      if (snapshot.inputType === 'historyUndo' || snapshot.inputType === 'historyRedo') return;
+
+      const executor = (window as any).execEditorCommand;
+      if (typeof executor === 'function') {
+        executor('recordDomTransaction', el, snapshot.beforeHTML, afterHTML);
+      }
+    };
+
+    const handleBeforeInput = (event: InputEvent) => {
+      if (!contentRef.current || readonly) return;
+
+      const inputType = event.inputType || null;
+      if (inputType === 'historyUndo' || inputType === 'historyRedo') {
+        pendingHistorySnapshotRef.current = null;
+        return;
+      }
+
+      pendingHistorySnapshotRef.current = {
+        beforeHTML: contentRef.current.innerHTML,
+        inputType,
+      };
+    };
+
     const handleInput = () => {
       if (!contentRef.current) return;
       if (readonly) return;
@@ -424,6 +452,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
 
       setPlaceholderVisualState(contentRef.current, placeholder);
       syncAutoHeight(contentRef.current);
+      recordNativeInputHistory(contentRef.current, html);
 
       if (!onChange) return;
       
@@ -527,6 +556,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     };
 
     const el = contentRef.current;
+    el.addEventListener('beforeinput', handleBeforeInput as EventListener);
     el.addEventListener('input', handleInput);
     el.addEventListener('paste', handlePaste);
     el.addEventListener('click', handleClick);
@@ -543,6 +573,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
+      el.removeEventListener('beforeinput', handleBeforeInput as EventListener);
       el.removeEventListener('input', handleInput);
       el.removeEventListener('paste', handlePaste);
       el.removeEventListener('click', handleClick);

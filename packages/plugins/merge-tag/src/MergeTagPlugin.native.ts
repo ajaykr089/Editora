@@ -229,6 +229,7 @@ let lastKnownEditorContent: HTMLElement | null = null;
 let activeOverlay: HTMLDivElement | null = null;
 let activeCleanup: (() => void) | null = null;
 let mergeTagInteractionsInitialized = false;
+let selectedMergeTag: HTMLElement | null = null;
 
 function recordDomHistoryTransaction(editor: HTMLElement, beforeHTML: string): void {
   if (beforeHTML === editor.innerHTML) return;
@@ -366,6 +367,12 @@ function injectMergeTagStyles(): void {
       line-height: 1.3;
     }
 
+    .rte-merge-tag.rte-merge-tag-selected {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+    }
+
     :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-merge-tag {
       background: #223247;
       border-color: #3f5f84;
@@ -420,6 +427,24 @@ function resolveEditorContent(): HTMLElement | null {
   if (lastKnownEditorContent?.isConnected) return lastKnownEditorContent;
 
   return document.querySelector(EDITOR_CONTENT_SELECTOR) as HTMLElement | null;
+}
+
+function clearSelectedMergeTag(): void {
+  if (!selectedMergeTag) return;
+  selectedMergeTag.classList.remove('rte-merge-tag-selected');
+  selectedMergeTag.removeAttribute('data-rte-selected-object');
+  selectedMergeTag = null;
+}
+
+function selectMergeTagObject(tag: HTMLElement): void {
+  if (selectedMergeTag !== tag) {
+    clearSelectedMergeTag();
+    selectedMergeTag = tag;
+    tag.classList.add('rte-merge-tag-selected');
+    tag.setAttribute('data-rte-selected-object', 'true');
+  }
+
+  selectEntireMergeTag(tag);
 }
 
 function selectEntireMergeTag(tag: HTMLElement): void {
@@ -488,6 +513,9 @@ function removeMergeTagNode(tag: HTMLElement, key: 'Backspace' | 'Delete'): bool
   const nextSibling = tag.nextSibling;
 
   parent.removeChild(tag);
+  if (selectedMergeTag === tag) {
+    selectedMergeTag = null;
+  }
 
   if (key === 'Backspace') {
     removeAdjacentNbsp(nextSibling, true);
@@ -574,10 +602,16 @@ function initializeMergeTagInteractions(): void {
   if (mergeTagInteractionsInitialized || typeof document === 'undefined') return;
   mergeTagInteractionsInitialized = true;
 
-  document.addEventListener('click', (event) => {
+  document.addEventListener('pointerdown', (event) => {
     const target = event.target as HTMLElement | null;
     const tag = target?.closest('.rte-merge-tag') as HTMLElement | null;
-    if (!tag) return;
+    if (!tag) {
+      const targetElement = event.target as Element | null;
+      if (!targetElement?.closest?.('.rte-merge-tag-overlay')) {
+        clearSelectedMergeTag();
+      }
+      return;
+    }
 
     const editorContent = tag.closest(EDITOR_CONTENT_SELECTOR) as HTMLElement | null;
     if (!editorContent) return;
@@ -585,10 +619,15 @@ function initializeMergeTagInteractions(): void {
     event.preventDefault();
     event.stopPropagation();
     editorContent.focus({ preventScroll: true });
-    selectEntireMergeTag(tag);
-  });
+    selectMergeTagObject(tag);
+  }, true);
 
   document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && selectedMergeTag) {
+      clearSelectedMergeTag();
+      return;
+    }
+
     if (event.key !== 'Backspace' && event.key !== 'Delete') return;
 
     const selection = window.getSelection();
@@ -598,7 +637,13 @@ function initializeMergeTagInteractions(): void {
     const editorContent = resolveEditorContent();
     if (!editorContent || !editorContent.contains(range.commonAncestorContainer)) return;
 
-    let tag = resolveSelectedMergeTag(range);
+    let tag = selectedMergeTag?.isConnected ? selectedMergeTag : null;
+    if (tag && !editorContent.contains(tag)) {
+      tag = null;
+    }
+    if (!tag) {
+      tag = resolveSelectedMergeTag(range);
+    }
     if (!tag) {
       tag = findMergeTagForCaretDeletion(range, event.key);
     }

@@ -36,12 +36,14 @@ let savedSelection: Range | null = null;
 let editingMathElement: HTMLElement | null = null;
 let katexLoaded = false;
 let activeMathEditorContent: HTMLElement | null = null;
+let selectedMathElement: HTMLElement | null = null;
 const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
 
 // Global flag to ensure listener is added only once across all instances
 declare global {
   interface Window {
     __mathPluginDoubleClickInitialized?: boolean;
+    __mathPluginObjectSelectionInitialized?: boolean;
   }
 }
 
@@ -85,6 +87,163 @@ const getEditorContentFromSelection = (): HTMLElement | null => {
     ? (node as HTMLElement)
     : node.parentElement;
   return (element?.closest('.rte-content, .editora-content') as HTMLElement | null) || null;
+};
+
+const getElementForNode = (node: Node | null): HTMLElement | null => {
+  if (!node) return null;
+  return node.nodeType === Node.ELEMENT_NODE ? node as HTMLElement : node.parentElement;
+};
+
+const getEditorContentForNode = (node: Node | null): HTMLElement | null => {
+  const element = getElementForNode(node);
+  return (element?.closest('.rte-content, .editora-content, [contenteditable="true"]') as HTMLElement | null) || null;
+};
+
+const recordDomHistoryTransaction = (editor: HTMLElement, beforeHTML: string, afterHTML: string): void => {
+  if (beforeHTML === afterHTML) return;
+  if (typeof (window as any).execEditorCommand === 'function') {
+    (window as any).execEditorCommand('recordDomTransaction', editor, beforeHTML, afterHTML);
+    return;
+  }
+
+  if (typeof (window as any).executeEditorCommand !== 'function') return;
+
+  try {
+    (window as any).executeEditorCommand('recordDomTransaction', { editor, beforeHTML, afterHTML });
+  } catch {
+    // History plugin may be unavailable.
+  }
+};
+
+const getMathElementFromTarget = (target: EventTarget | null): HTMLElement | null => {
+  if (!(target instanceof Element)) return null;
+  const mathElement = target.closest('.math-formula, .math-block');
+  return mathElement instanceof HTMLElement ? mathElement : null;
+};
+
+const clearSelectedMathElement = (): void => {
+  if (!selectedMathElement) return;
+  selectedMathElement.classList.remove('math-object-selected');
+  selectedMathElement.removeAttribute('data-rte-selected-object');
+  selectedMathElement = null;
+};
+
+const selectMathElement = (mathElement: HTMLElement): void => {
+  if (selectedMathElement === mathElement) return;
+
+  clearSelectedMathElement();
+  selectedMathElement = mathElement;
+  mathElement.classList.add('math-object-selected');
+  mathElement.setAttribute('data-rte-selected-object', 'true');
+
+  const selection = window.getSelection();
+  if (!selection) return;
+
+  const range = document.createRange();
+  range.selectNode(mathElement);
+  selection.removeAllRanges();
+  selection.addRange(range);
+};
+
+const placeCaretAfterMathDeletion = (editorContent: HTMLElement, referenceNode: ChildNode | null): void => {
+  const selection = window.getSelection();
+  if (!selection) return;
+
+  const range = document.createRange();
+  if (referenceNode && referenceNode.parentNode === editorContent) {
+    range.setStartBefore(referenceNode);
+  } else {
+    range.selectNodeContents(editorContent);
+    range.collapse(false);
+  }
+
+  range.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(range);
+};
+
+const ensureMathEditorHasBlock = (editorContent: HTMLElement): void => {
+  if (editorContent.childNodes.length > 0) return;
+  const paragraph = document.createElement('p');
+  paragraph.appendChild(document.createElement('br'));
+  editorContent.appendChild(paragraph);
+};
+
+const deleteSelectedMathElement = (): boolean => {
+  if (!selectedMathElement || !selectedMathElement.isConnected) {
+    clearSelectedMathElement();
+    return false;
+  }
+
+  const mathElement = selectedMathElement;
+  const editorContent = getEditorContentForNode(mathElement);
+  if (!editorContent) {
+    clearSelectedMathElement();
+    return false;
+  }
+
+  const beforeHTML = editorContent.innerHTML;
+  const nextSibling = mathElement.nextSibling;
+  mathElement.remove();
+  ensureMathEditorHasBlock(editorContent);
+  clearSelectedMathElement();
+  placeCaretAfterMathDeletion(editorContent, nextSibling);
+
+  const afterHTML = editorContent.innerHTML;
+  recordDomHistoryTransaction(editorContent, beforeHTML, afterHTML);
+  editorContent.dispatchEvent(new window.Event('input', { bubbles: true }));
+  return beforeHTML !== afterHTML;
+};
+
+const injectMathObjectSelectionStyles = (): void => {
+  if (document.getElementById('math-object-selection-styles')) return;
+
+  const style = document.createElement('style');
+  style.id = 'math-object-selection-styles';
+  style.textContent = `
+    .math-object-selected {
+      outline: 2px solid #2563eb !important;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+    }
+  `;
+  document.head.appendChild(style);
+};
+
+const initializeMathObjectSelection = (): void => {
+  if (typeof window === 'undefined' || window.__mathPluginObjectSelectionInitialized) return;
+  window.__mathPluginObjectSelectionInitialized = true;
+  injectMathObjectSelectionStyles();
+
+  document.addEventListener('pointerdown', (event) => {
+    const mathElement = getMathElementFromTarget(event.target);
+    if (!mathElement) {
+      const target = event.target as Element | null;
+      if (!target?.closest?.('.math-dialog-overlay')) {
+        clearSelectedMathElement();
+      }
+      return;
+    }
+
+    event.preventDefault();
+    getEditorContentForNode(mathElement)?.focus();
+    selectMathElement(mathElement);
+  }, true);
+
+  document.addEventListener('keydown', (event) => {
+    if (!selectedMathElement) return;
+
+    if (event.key === 'Escape') {
+      clearSelectedMathElement();
+      return;
+    }
+
+    if (event.key !== 'Backspace' && event.key !== 'Delete') return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    deleteSelectedMathElement();
+  }, true);
 };
 
 const isDarkThemeContext = (editorContent?: HTMLElement | null): boolean => {
@@ -174,6 +333,7 @@ const showMathDialog = async (
     };
 
   const overlay = document.createElement('div');
+  overlay.className = 'math-dialog-overlay';
   overlay.style.cssText = `position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: ${palette.overlay}; display: flex; align-items: center; justify-content: center; z-index: 99999;`;
 
   const dialog = document.createElement('div');
@@ -461,6 +621,7 @@ if (typeof window !== 'undefined' && !window.__mathPluginDoubleClickInitialized)
       e.stopPropagation();
       e.stopImmediatePropagation();
       
+      clearSelectedMathElement();
       editingMathElement = mathEl;
       const formula = mathEl.getAttribute('data-math-formula') || '';
       const format = (mathEl.getAttribute('data-math-format') || 'latex') as 'latex' | 'mathml';
@@ -482,6 +643,7 @@ if (typeof window !== 'undefined' && !window.__mathPluginDoubleClickInitialized)
 
 export const MathPlugin = (): Plugin => ({
   name: "math",
+  init: initializeMathObjectSelection,
 
   toolbar: [
     {

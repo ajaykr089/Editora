@@ -33,11 +33,19 @@ const SIZE_OPTIONS = [
   { label: 'Responsive - 1x1', value: '1x1' },
 ];
 const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
+let selectedIframeObject: HTMLElement | null = null;
+
+declare global {
+  interface Window {
+    __embedIframeObjectSelectionInitialized?: boolean;
+  }
+}
 
 // Per-editor instance state
 const editorStates = new WeakMap<HTMLElement, {
   dialogElement: HTMLElement | null;
   escapeHandler: ((event: KeyboardEvent) => void) | null;
+  savedRange: Range | null;
   activeTab: 'general' | 'advanced';
   formData: {
     src: string;
@@ -62,6 +70,7 @@ const getEditorState = (editorElement: HTMLElement) => {
     editorStates.set(editorElement, {
       dialogElement: null,
       escapeHandler: null,
+      savedRange: null,
       activeTab: 'general',
       formData: {
         src: '',
@@ -92,9 +101,313 @@ function isDarkThemeContext(editorElement?: HTMLElement | null): boolean {
   return document.body.matches(DARK_THEME_SELECTOR) || document.documentElement.matches(DARK_THEME_SELECTOR);
 }
 
+function getElementForNode(node: Node | null): HTMLElement | null {
+  if (!node) return null;
+  return node.nodeType === Node.ELEMENT_NODE ? node as HTMLElement : node.parentElement;
+}
+
+function resolveEditorElement(context?: any): HTMLElement | null {
+  const contextEditor = context?.editorElement;
+  if (contextEditor instanceof HTMLElement) return contextEditor;
+
+  const contextContent = context?.contentElement;
+  if (contextContent instanceof HTMLElement) {
+    const root = contextContent.closest('[data-editora-editor], .rte-editor, .editora-editor, editora-editor');
+    if (root instanceof HTMLElement) return root;
+    return contextContent;
+  }
+
+  const commandRoot = (window as any).__editoraCommandEditorRoot;
+  if (commandRoot instanceof HTMLElement) return commandRoot;
+
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0) {
+    const selectedElement = getElementForNode(selection.getRangeAt(0).startContainer);
+    const root = selectedElement?.closest('[data-editora-editor], .rte-editor, .editora-editor, editora-editor');
+    if (root instanceof HTMLElement) return root;
+  }
+
+  const activeElement = document.activeElement;
+  if (activeElement instanceof HTMLElement) {
+    const root = activeElement.closest('[data-editora-editor], .rte-editor, .editora-editor, editora-editor');
+    if (root instanceof HTMLElement) return root;
+  }
+
+  return document.querySelector('[data-editora-editor], .rte-editor, .editora-editor, editora-editor') as HTMLElement | null;
+}
+
+function resolveContentElement(editorElement: HTMLElement): HTMLElement | null {
+  if (editorElement.getAttribute('contenteditable') === 'true') return editorElement;
+  return editorElement.querySelector('.rte-content, .editora-content, [contenteditable="true"]') as HTMLElement | null;
+}
+
+function getContentElementForNode(node: Node | null): HTMLElement | null {
+  const element = getElementForNode(node);
+  return element?.closest('.rte-content, .editora-content, [contenteditable="true"]') as HTMLElement | null;
+}
+
+function getSelectionRangeInContent(contentEl: HTMLElement): Range | null {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return null;
+
+  const range = selection.getRangeAt(0);
+  if (!contentEl.contains(range.startContainer) || !contentEl.contains(range.endContainer)) {
+    return null;
+  }
+
+  return range.cloneRange();
+}
+
+function recordDomHistoryTransaction(editor: HTMLElement, beforeHTML: string, afterHTML: string): void {
+  if (beforeHTML === afterHTML) return;
+  if (typeof (window as any).execEditorCommand === 'function') {
+    (window as any).execEditorCommand('recordDomTransaction', editor, beforeHTML, afterHTML);
+    return;
+  }
+
+  if (typeof (window as any).executeEditorCommand !== 'function') return;
+
+  try {
+    (window as any).executeEditorCommand('recordDomTransaction', { editor, beforeHTML, afterHTML });
+  } catch {
+    // History plugin may be unavailable.
+  }
+}
+
+function getTopLevelChildForNode(contentEl: HTMLElement, node: Node): ChildNode | null {
+  let current: Node | null = node;
+
+  while (current && current.parentNode && current.parentNode !== contentEl) {
+    current = current.parentNode;
+  }
+
+  return current && current.parentNode === contentEl ? current as ChildNode : null;
+}
+
+function isIframeWrapperElement(element: HTMLElement, iframe: HTMLIFrameElement): boolean {
+  if (element.tagName !== 'P') return false;
+
+  return Array.from(element.childNodes).every((child) => {
+    if (child === iframe) return true;
+    if (child.nodeType === Node.ELEMENT_NODE) return (child as Element).tagName === 'BR';
+    return child.nodeType === Node.TEXT_NODE && !child.textContent?.trim();
+  });
+}
+
+function getIframeObjectFromTarget(target: EventTarget | null): HTMLElement | null {
+  if (!(target instanceof Element)) return null;
+
+  const iframe = target.closest('iframe');
+  if (iframe instanceof HTMLIFrameElement) {
+    const contentEl = getContentElementForNode(iframe);
+    if (!contentEl) return null;
+
+    const parent = iframe.parentElement;
+    if (parent && parent.parentElement === contentEl && isIframeWrapperElement(parent, iframe)) {
+      return parent;
+    }
+
+    return iframe;
+  }
+
+  const wrapper = target.closest('p');
+  if (!(wrapper instanceof HTMLElement)) return null;
+
+  const wrapperContentEl = getContentElementForNode(wrapper);
+  if (!wrapperContentEl || wrapper.parentElement !== wrapperContentEl) return null;
+
+  const directIframe = Array.from(wrapper.children).find(
+    (child): child is HTMLIFrameElement => child instanceof HTMLIFrameElement,
+  );
+
+  return directIframe && isIframeWrapperElement(wrapper, directIframe) ? wrapper : null;
+}
+
+function clearSelectedIframeObject(): void {
+  if (!selectedIframeObject) return;
+  selectedIframeObject.classList.remove('rte-selected-embed-object');
+  selectedIframeObject.querySelector('iframe')?.removeAttribute('data-rte-selected-object');
+  if (selectedIframeObject instanceof HTMLIFrameElement) {
+    selectedIframeObject.removeAttribute('data-rte-selected-object');
+  }
+  selectedIframeObject = null;
+}
+
+function selectIframeObject(object: HTMLElement): void {
+  if (selectedIframeObject === object) return;
+
+  clearSelectedIframeObject();
+  selectedIframeObject = object;
+  object.classList.add('rte-selected-embed-object');
+
+  const iframe = object instanceof HTMLIFrameElement
+    ? object
+    : object.querySelector('iframe');
+  iframe?.setAttribute('data-rte-selected-object', 'true');
+
+  const selection = window.getSelection();
+  if (!selection) return;
+
+  const range = document.createRange();
+  range.selectNode(object);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+function placeCaretNearRemovedObject(contentEl: HTMLElement, referenceNode: ChildNode | null): void {
+  const selection = window.getSelection();
+  if (!selection) return;
+
+  const range = document.createRange();
+  if (referenceNode && referenceNode.parentNode === contentEl) {
+    range.setStartBefore(referenceNode);
+  } else {
+    range.selectNodeContents(contentEl);
+    range.collapse(false);
+  }
+
+  range.collapse(true);
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+function ensureEditableContentHasBlock(contentEl: HTMLElement): void {
+  if (contentEl.childNodes.length > 0) return;
+  const paragraph = document.createElement('p');
+  paragraph.appendChild(document.createElement('br'));
+  contentEl.appendChild(paragraph);
+}
+
+function deleteSelectedIframeObject(): boolean {
+  if (!selectedIframeObject || !selectedIframeObject.isConnected) {
+    clearSelectedIframeObject();
+    return false;
+  }
+
+  const object = selectedIframeObject;
+  const contentEl = getContentElementForNode(object);
+  if (!contentEl) {
+    clearSelectedIframeObject();
+    return false;
+  }
+
+  const beforeHTML = contentEl.innerHTML;
+  const nextSibling = object.nextSibling;
+  object.remove();
+  ensureEditableContentHasBlock(contentEl);
+  clearSelectedIframeObject();
+  placeCaretNearRemovedObject(contentEl, nextSibling);
+
+  const afterHTML = contentEl.innerHTML;
+  recordDomHistoryTransaction(contentEl, beforeHTML, afterHTML);
+  contentEl.dispatchEvent(new window.Event('input', { bubbles: true }));
+  return beforeHTML !== afterHTML;
+}
+
+function injectEmbedObjectSelectionStyles(): void {
+  if (document.getElementById('embed-iframe-object-selection-styles')) return;
+
+  const style = document.createElement('style');
+  style.id = 'embed-iframe-object-selection-styles';
+  style.textContent = `
+    .rte-selected-embed-object {
+      outline: 2px solid #2563eb;
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    .rte-content iframe,
+    .editora-content iframe,
+    [contenteditable="true"] iframe {
+      pointer-events: none;
+    }
+
+    .rte-selected-embed-object iframe,
+    iframe.rte-selected-embed-object {
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.28);
+    }
+  `;
+
+  document.head.appendChild(style);
+}
+
+function initializeIframeObjectSelection(): void {
+  if (typeof window === 'undefined' || window.__embedIframeObjectSelectionInitialized) return;
+  window.__embedIframeObjectSelectionInitialized = true;
+  injectEmbedObjectSelectionStyles();
+
+  document.addEventListener('pointerdown', (event) => {
+    const object = getIframeObjectFromTarget(event.target);
+    if (!object) {
+      const target = event.target as Element | null;
+      if (!target?.closest?.('.rte-embed-iframe-overlay')) {
+        clearSelectedIframeObject();
+      }
+      return;
+    }
+
+    event.preventDefault();
+    getContentElementForNode(object)?.focus();
+    selectIframeObject(object);
+  }, true);
+
+  document.addEventListener('keydown', (event) => {
+    if (!selectedIframeObject) return;
+
+    if (event.key === 'Escape') {
+      clearSelectedIframeObject();
+      return;
+    }
+
+    if (event.key !== 'Backspace' && event.key !== 'Delete') return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    deleteSelectedIframeObject();
+  }, true);
+}
+
+function convertToEmbedUrl(rawUrl: string): string {
+  try {
+    const url = new URL(rawUrl);
+    const host = url.hostname.replace(/^www\./, '');
+
+    if (host === 'youtu.be') {
+      const id = url.pathname.split('/').filter(Boolean)[0];
+      if (id) return `https://www.youtube.com/embed/${encodeURIComponent(id)}`;
+    }
+
+    if (host === 'youtube.com' || host === 'm.youtube.com') {
+      const id = url.searchParams.get('v');
+      if (id) return `https://www.youtube.com/embed/${encodeURIComponent(id)}`;
+      const embedMatch = url.pathname.match(/^\/embed\/([^/]+)/);
+      if (embedMatch?.[1]) return `https://www.youtube.com/embed/${encodeURIComponent(embedMatch[1])}`;
+    }
+
+    if (host === 'vimeo.com') {
+      const id = url.pathname.split('/').filter(Boolean)[0];
+      if (id && /^\d+$/.test(id)) return `https://player.vimeo.com/video/${id}`;
+    }
+
+    return rawUrl;
+  } catch {
+    return rawUrl;
+  }
+}
+
+function isValidEmbedUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' || url.protocol === 'http:';
+  } catch {
+    return false;
+  }
+}
+
 export const EmbedIframePlugin = (): Plugin => {
   return {
     name: 'embedIframe',
+    init: initializeIframeObjectSelection,
     
     toolbar: [
       {
@@ -107,8 +420,8 @@ export const EmbedIframePlugin = (): Plugin => {
     ],
 
     commands: {
-      openEmbedIframeDialog: (editorElement?: HTMLElement) => {
-        createEmbedDialog(editorElement);
+      openEmbedIframeDialog: (_params?: unknown, context?: any) => {
+        createEmbedDialog(resolveEditorElement(context) || undefined);
         return true;
       }
     },
@@ -139,6 +452,8 @@ function createEmbedDialog(editorElement?: HTMLElement): void {
   }
 
   const state = getEditorState(editorElement);
+  const contentEl = resolveContentElement(editorElement);
+  state.savedRange = contentEl ? getSelectionRangeInContent(contentEl) : null;
 
   // Reset form data
   state.formData = {
@@ -445,58 +760,63 @@ function insertIframe(editorElement: HTMLElement, data: {
   showBorder: boolean;
   enableScrollbar: boolean;
 }): void {
-  const contentEl = editorElement.querySelector('[contenteditable="true"]') as HTMLElement;
+  const state = getEditorState(editorElement);
+  const contentEl = resolveContentElement(editorElement);
   if (!contentEl) return;
 
-  contentEl.focus();
+  const beforeHTML = contentEl.innerHTML;
+  const iframe = document.createElement('iframe');
+  iframe.src = convertToEmbedUrl(data.src);
+  iframe.width = data.width;
+  iframe.height = data.height;
+  iframe.allowFullscreen = true;
+  iframe.setAttribute('frameborder', data.showBorder ? '1' : '0');
+  iframe.setAttribute('scrolling', data.enableScrollbar ? 'auto' : 'no');
+  iframe.setAttribute('data-aspect-ratio', data.aspectRatio);
 
-  setTimeout(() => {
-    const attributes = [
-      `src="${data.src}"`,
-      `width="${data.width}"`,
-      `height="${data.height}"`,
-      'allowfullscreen',
-      `frameborder="${data.showBorder ? '1' : '0'}"`,
-      `scrolling="${data.enableScrollbar ? 'auto' : 'no'}"`,
-    ];
+  if (data.aspectRatio !== 'inline') {
+    iframe.classList.add(`rte-iframe-${data.aspectRatio}`);
+  }
+  if (data.name) iframe.name = data.name;
+  if (data.title) iframe.title = data.title;
+  if (data.longDescription) iframe.setAttribute('data-long-description', data.longDescription);
+  if (data.descriptionUrl) iframe.setAttribute('longdesc', data.descriptionUrl);
 
-    if (data.name) attributes.push(`name="${data.name}"`);
-    if (data.title) attributes.push(`title="${data.title}"`);
-    if (data.longDescription) attributes.push(`longdesc="${data.longDescription}"`);
+  const wrapper = document.createElement('p');
+  wrapper.appendChild(iframe);
+  wrapper.appendChild(document.createElement('br'));
 
-    // Add CSS classes for responsive behavior
-    const classes = [];
-    if (data.aspectRatio !== 'inline') {
-      classes.push(`rte-iframe-${data.aspectRatio}`);
-    }
+  const range = state.savedRange && contentEl.contains(state.savedRange.commonAncestorContainer)
+    ? state.savedRange
+    : document.createRange();
 
-    const classAttr = classes.length > 0 ? `class="${classes.join(' ')}"` : '';
-    const dataAttr = `data-aspect-ratio="${data.aspectRatio}"`;
+  if (!state.savedRange || !contentEl.contains(state.savedRange.commonAncestorContainer)) {
+    range.selectNodeContents(contentEl);
+    range.collapse(false);
+  }
 
-    const iframeHtml = `<iframe ${attributes.join(' ')} ${classAttr} ${dataAttr}></iframe>`;
+  const topLevelBlock = getTopLevelChildForNode(contentEl, range.startContainer);
+  const referenceNode = topLevelBlock ? topLevelBlock.nextSibling : null;
+  contentEl.insertBefore(wrapper, referenceNode);
 
-    const result = document.execCommand('insertHTML', false, iframeHtml);
+  const nextRange = document.createRange();
+  nextRange.setStartAfter(wrapper);
+  nextRange.collapse(true);
+  const selection = window.getSelection();
+  if (selection) {
+    selection.removeAllRanges();
+    selection.addRange(nextRange);
+  }
 
-    if (!result) {
-      // Alternative approach
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        range.deleteContents();
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = iframeHtml;
-        const fragment = document.createDocumentFragment();
-        while (tempDiv.firstChild) {
-          fragment.appendChild(tempDiv.firstChild);
-        }
-        range.insertNode(fragment);
-      }
-    }
-  }, 10);
+  state.savedRange = null;
+  const afterHTML = contentEl.innerHTML;
+  recordDomHistoryTransaction(contentEl, beforeHTML, afterHTML);
+  contentEl.dispatchEvent(new window.Event('input', { bubbles: true }));
 }
 
 function closeDialog(editorElement: HTMLElement): void {
   const state = getEditorState(editorElement);
+  state.savedRange = null;
   if (state.escapeHandler) {
     document.removeEventListener('keydown', state.escapeHandler, true);
     state.escapeHandler = null;
@@ -508,6 +828,7 @@ function closeDialog(editorElement: HTMLElement): void {
 }
 
 function injectEmbedDialogStyles(): void {
+  injectEmbedObjectSelectionStyles();
   if (document.getElementById('embed-iframe-dialog-styles')) return;
 
   const style = document.createElement('style');

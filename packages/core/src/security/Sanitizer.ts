@@ -24,14 +24,15 @@ export class Sanitizer {
     this.config = {
       allowedTags: [
         'p', 'br', 'strong', 'em', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-        'ul', 'ol', 'li', 'blockquote', 'code', 'pre', 'a', 'img', 'table', 'tr', 'td', 'th', 'section'
+        'ul', 'ol', 'li', 'blockquote', 'code', 'pre', 'a', 'img', 'iframe', 'table', 'tr', 'td', 'th', 'section'
       ],
       allowedAttributes: {
         'a': ['href', 'title', 'target'],
         'img': ['src', 'alt', 'title', 'width', 'height'],
+        'iframe': ['src', 'width', 'height', 'name', 'title', 'longdesc', 'allow', 'allowfullscreen', 'frameborder', 'scrolling', 'loading', 'referrerpolicy'],
         'td': ['colspan', 'rowspan'],
         'th': ['colspan', 'rowspan'],
-        '*': ['class', 'style', 'id', 'data-*', 'role', 'aria-*', 'tabindex', 'contenteditable', 'spellcheck']
+        '*': ['class', 'style', 'id', 'data-*', 'role', 'aria-*', 'tabindex', 'contenteditable', 'spellcheck', 'dir', 'lang']
       },
       allowDataUrls: false,
       maxUrlLength: 2048,
@@ -105,6 +106,11 @@ export class Sanitizer {
       });
 
       if (!isAllowed) {
+        element.removeAttribute(attr.name);
+        continue;
+      }
+
+      if (attrName === 'dir' && !['ltr', 'rtl', 'auto'].includes(attr.value.trim().toLowerCase())) {
         element.removeAttribute(attr.name);
         continue;
       }

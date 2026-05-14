@@ -21,7 +21,7 @@ const DEFAULT_ALLOWED_TAGS = [
   'p', 'br', 'strong', 'em', 'u', 's', 'strike', 'del', 'b', 'i',
   'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
   'ul', 'ol', 'li',
-  'a', 'img', 'video', 'audio',
+  'a', 'img', 'video', 'audio', 'iframe',
   'table', 'thead', 'tbody', 'tr', 'th', 'td',
   'blockquote', 'pre', 'code',
   'span', 'div', 'section',
@@ -33,11 +33,12 @@ const DEFAULT_ALLOWED_TAGS = [
  * Default safe attributes per tag
  */
 const DEFAULT_ALLOWED_ATTRIBUTES: Record<string, string[]> = {
-  '*': ['class', 'style', 'id', 'data-*', 'role', 'aria-*', 'tabindex', 'contenteditable', 'spellcheck'],
+  '*': ['class', 'style', 'id', 'data-*', 'role', 'aria-*', 'tabindex', 'contenteditable', 'spellcheck', 'dir', 'lang'],
   'a': ['href', 'target', 'rel', 'title'],
   'img': ['src', 'alt', 'width', 'height', 'loading'],
   'video': ['src', 'controls', 'width', 'height', 'autoplay', 'loop', 'muted'],
   'audio': ['src', 'controls', 'autoplay', 'loop', 'muted'],
+  'iframe': ['src', 'width', 'height', 'name', 'title', 'longdesc', 'allow', 'allowfullscreen', 'frameborder', 'scrolling', 'loading', 'referrerpolicy'],
   'table': ['border', 'cellpadding', 'cellspacing'],
   'td': ['colspan', 'rowspan', 'align', 'valign'],
   'th': ['colspan', 'rowspan', 'align', 'valign'],
@@ -163,6 +164,10 @@ function sanitizeAttributes(
       (attrName === 'href' && attr.value.trim().toLowerCase().startsWith('javascript:')) ||
       (attrName === 'src' && attr.value.trim().toLowerCase().startsWith('javascript:'))
     ) {
+      isAllowed = false;
+    }
+
+    if (attrName === 'dir' && !['ltr', 'rtl', 'auto'].includes(attr.value.trim().toLowerCase())) {
       isAllowed = false;
     }
 

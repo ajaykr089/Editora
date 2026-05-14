@@ -83,12 +83,51 @@ const descriptions: Record<string, string> = {
 let isDialogOpen = false;
 const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
 
+const getElementForNode = (node: Node | null): HTMLElement | null => {
+  if (!node) return null;
+  return node.nodeType === Node.ELEMENT_NODE ? node as HTMLElement : node.parentElement;
+};
+
 const getEditorContentFromSelection = (): HTMLElement | null => {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return null;
-  const anchorNode = selection.anchorNode;
-  const anchorElement = anchorNode instanceof HTMLElement ? anchorNode : anchorNode?.parentElement;
-  return (anchorElement?.closest('.rte-content, .editora-content') as HTMLElement | null) || null;
+  const anchorElement = getElementForNode(selection.getRangeAt(0).startContainer);
+  return (anchorElement?.closest('.rte-content, .editora-content, [contenteditable="true"]') as HTMLElement | null) || null;
+};
+
+const getSelectionRangeInContent = (editorContent: HTMLElement): Range | null => {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return null;
+
+  const range = selection.getRangeAt(0);
+  if (!editorContent.contains(range.startContainer) || !editorContent.contains(range.endContainer)) {
+    return null;
+  }
+
+  return range.cloneRange();
+};
+
+const createRangeAtEnd = (editorContent: HTMLElement): Range => {
+  const range = document.createRange();
+  range.selectNodeContents(editorContent);
+  range.collapse(false);
+  return range;
+};
+
+const recordDomHistoryTransaction = (editor: HTMLElement, beforeHTML: string, afterHTML: string): void => {
+  if (beforeHTML === afterHTML) return;
+  if (typeof (window as any).execEditorCommand === 'function') {
+    (window as any).execEditorCommand('recordDomTransaction', editor, beforeHTML, afterHTML);
+    return;
+  }
+
+  if (typeof (window as any).executeEditorCommand !== 'function') return;
+
+  try {
+    (window as any).executeEditorCommand('recordDomTransaction', { editor, beforeHTML, afterHTML });
+  } catch {
+    // History plugin may be unavailable.
+  }
 };
 
 const isDarkThemeContext = (editorContent?: HTMLElement | null): boolean => {
@@ -381,18 +420,35 @@ const injectStyles = (): void => {
 /**
  * Insert character at cursor position
  */
-const insertCharacter = (character: string): void => {
+const insertCharacter = (
+  character: string,
+  editorContent: HTMLElement | null | undefined,
+  savedRange: Range | null,
+): void => {
+  const targetEditor = editorContent || getEditorContentFromSelection();
+  if (!targetEditor) return;
+
+  const range = savedRange && targetEditor.contains(savedRange.commonAncestorContainer)
+    ? savedRange
+    : createRangeAtEnd(targetEditor);
+  const beforeHTML = targetEditor.innerHTML;
+
+  range.deleteContents();
+  const textNode = document.createTextNode(character);
+  range.insertNode(textNode);
+  range.setStartAfter(textNode);
+  range.setEndAfter(textNode);
+
   const selection = window.getSelection();
-  if (selection && selection.rangeCount > 0) {
-    const range = selection.getRangeAt(0);
-    range.deleteContents();
-    const textNode = document.createTextNode(character);
-    range.insertNode(textNode);
-    range.setStartAfter(textNode);
-    range.setEndAfter(textNode);
+  if (selection) {
     selection.removeAllRanges();
     selection.addRange(range);
   }
+
+  const afterHTML = targetEditor.innerHTML;
+  recordDomHistoryTransaction(targetEditor, beforeHTML, afterHTML);
+  targetEditor.dispatchEvent(new window.Event('input', { bubbles: true }));
+  targetEditor.focus();
 };
 
 /**
@@ -403,6 +459,8 @@ const showSpecialCharactersDialog = (editorContent?: HTMLElement | null): void =
   
   isDialogOpen = true;
   injectStyles();
+  const targetEditorContent = editorContent || getEditorContentFromSelection();
+  const savedRange = targetEditorContent ? getSelectionRangeInContent(targetEditorContent) : null;
 
   let activeTab: CharacterCategory = 'all';
   let searchQuery = '';
@@ -470,16 +528,24 @@ const showSpecialCharactersDialog = (editorContent?: HTMLElement | null): void =
   const renderGrid = (): void => {
     if (!grid) return;
     const currentCharacters = getFilteredCharacters();
+    grid.textContent = '';
     if (currentCharacters.length === 0) {
-      grid.innerHTML = `<div class="special-characters-no-results">No characters found for "${searchQuery}"</div>`;
+      const emptyState = document.createElement('div');
+      emptyState.className = 'special-characters-no-results';
+      emptyState.textContent = `No characters found for "${searchQuery}"`;
+      grid.appendChild(emptyState);
       return;
     }
 
-    grid.innerHTML = currentCharacters.map((char) => `
-      <button class="special-characters-item" data-char="${char}" title="${descriptions[char] || char}">
-        ${char}
-      </button>
-    `).join('');
+    currentCharacters.forEach((char) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'special-characters-item';
+      button.dataset.char = char;
+      button.title = descriptions[char] || char;
+      button.textContent = char;
+      grid.appendChild(button);
+    });
   };
 
   const closeDialog = () => {
@@ -530,9 +596,9 @@ const showSpecialCharactersDialog = (editorContent?: HTMLElement | null): void =
     const target = event.target as HTMLElement;
     const item = target.closest('.special-characters-item') as HTMLElement | null;
     if (!item) return;
-    const char = item.getAttribute('data-char');
+    const char = item.dataset.char;
     if (!char) return;
-    insertCharacter(char);
+    insertCharacter(char, targetEditorContent, savedRange);
     closeDialog();
   });
 

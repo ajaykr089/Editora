@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Editor } from '@editora/core';
+import {
+  getToolbarSelectionState,
+  isToolbarCommandActive,
+  ToolbarSelectionState,
+} from '../utils/toolbarSelectionState';
 
 interface FloatingToolbarProps {
   editor: Editor;
@@ -16,6 +21,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [selectionState, setSelectionState] = useState<ToolbarSelectionState>(() => getToolbarSelectionState(null));
   const hostRef = useRef<HTMLSpanElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const selectionRef = useRef<Range | null>(null);
@@ -104,6 +110,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
       const selection = window.getSelection();
       if (!selection || selection.rangeCount === 0) {
         setIsVisible(false);
+        setSelectionState(getToolbarSelectionState(null));
         selectionRef.current = null;
         return;
       }
@@ -111,6 +118,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
       const range = selection.getRangeAt(0);
       if (range.collapsed) {
         setIsVisible(false);
+        setSelectionState(getToolbarSelectionState(null));
         selectionRef.current = null;
         return;
       }
@@ -122,12 +130,14 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
       const editorElement = getEditorContentElement(editorContainer);
       if (!editorElement || !editorElement.contains(range.commonAncestorContainer)) {
         setIsVisible(false);
+        setSelectionState(getToolbarSelectionState(null));
         selectionRef.current = null;
         return;
       }
 
       if (isRuntimeReadonly(editorElement)) {
         setIsVisible(false);
+        setSelectionState(getToolbarSelectionState(null));
         selectionRef.current = null;
         return;
       }
@@ -138,6 +148,7 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
         const hasFocus = document.activeElement === editorElement || editorElement.contains(document.activeElement);
         if (!inViewport && !hasFocus) {
           setIsVisible(false);
+          setSelectionState(getToolbarSelectionState(null));
           selectionRef.current = null;
           return;
         }
@@ -170,11 +181,13 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
           }
 
           setPosition({ top, left });
+          setSelectionState(getToolbarSelectionState(editorElement));
           setIsVisible(true);
           selectionRef.current = range.cloneRange();
         }
       } else {
         setIsVisible(false);
+        setSelectionState(getToolbarSelectionState(null));
         selectionRef.current = null;
       }
     };
@@ -273,21 +286,22 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
       }
     }
 
+    const executeEditorCommand = (commandName: string, commandValue?: string) => {
+      if (typeof window !== 'undefined' && (window as any).executeEditorCommand) {
+        (window as any).executeEditorCommand(commandName, commandValue);
+      }
+    };
+
     const commandMap: Record<string, () => void> = {
-      toggleBold: () => document.execCommand('bold', false),
-      toggleItalic: () => document.execCommand('italic', false),
-      toggleUnderline: () => document.execCommand('underline', false),
-      toggleStrikethrough: () => document.execCommand('strikeThrough', false),
+      toggleBold: () => executeEditorCommand('toggleBold'),
+      toggleItalic: () => executeEditorCommand('toggleItalic'),
+      toggleUnderline: () => executeEditorCommand('toggleUnderline'),
+      toggleStrikethrough: () => executeEditorCommand('toggleStrikethrough'),
       createLink: () => {
-        if (typeof window !== 'undefined' && (window as any).executeEditorCommand) {
-          (window as any).executeEditorCommand('openLinkDialog');
-        }
+        executeEditorCommand('openLinkDialog');
       },
       clearFormatting: () => {
-        // Remove all formatting from selected text
-        document.execCommand('removeFormat', false);
-        // Also remove links if present
-        document.execCommand('unlink', false);
+        executeEditorCommand('clearFormatting');
       },
       toggleCode: () => {
         const selection = window.getSelection();
@@ -298,31 +312,17 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
         }
       },
       setBlockType: () => {
+        if (typeof window === 'undefined' || !(window as any).executeEditorCommand) return;
         if (value === 'blockquote') {
-          // Toggle blockquote - check if current selection is already in a blockquote
-          const selection = window.getSelection();
-          if (selection && selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0);
-            const currentBlock = range.commonAncestorContainer.nodeType === Node.TEXT_NODE
-              ? range.commonAncestorContainer.parentElement
-              : range.commonAncestorContainer;
-
-            const blockquote = (currentBlock as Element)?.closest?.('blockquote');
-            if (blockquote) {
-              // Already in blockquote, convert to paragraph
-              document.execCommand('formatBlock', false, 'p');
-            } else {
-              // Not in blockquote, convert to blockquote
-              document.execCommand('formatBlock', false, 'blockquote');
-            }
-          }
+          (window as any).executeEditorCommand('toggleBlockquote');
         } else if (value) {
-          document.execCommand('formatBlock', false, value);
+          (window as any).executeEditorCommand('setBlockType', value);
         }
       }
     };
 
     commandMap[command]?.();
+    requestAnimationFrame(() => setSelectionState(getToolbarSelectionState(contentEl || null)));
     setIsVisible(false);
     selectionRef.current = null;
   };
@@ -349,14 +349,18 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
           }}
         >
           <button
-            className="floating-toolbar-btn"
+            className={`floating-toolbar-btn ${isToolbarCommandActive('toggleBold', selectionState) ? 'active' : ''}`}
+            data-active={isToolbarCommandActive('toggleBold', selectionState) ? 'true' : 'false'}
+            aria-pressed={isToolbarCommandActive('toggleBold', selectionState) ? 'true' : 'false'}
             onClick={() => handleCommand("toggleBold")}
             title="Bold (Ctrl+B)"
           > 
             <strong>B</strong>
           </button>
           <button
-            className="floating-toolbar-btn"
+            className={`floating-toolbar-btn ${isToolbarCommandActive('toggleItalic', selectionState) ? 'active' : ''}`}
+            data-active={isToolbarCommandActive('toggleItalic', selectionState) ? 'true' : 'false'}
+            aria-pressed={isToolbarCommandActive('toggleItalic', selectionState) ? 'true' : 'false'}
             onClick={() => handleCommand("toggleItalic")}
             title="Italic (Ctrl+I)"
           >
@@ -364,7 +368,9 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
           </button>
 
           <button
-            className="floating-toolbar-btn"
+            className={`floating-toolbar-btn ${isToolbarCommandActive('toggleUnderline', selectionState) ? 'active' : ''}`}
+            data-active={isToolbarCommandActive('toggleUnderline', selectionState) ? 'true' : 'false'}
+            aria-pressed={isToolbarCommandActive('toggleUnderline', selectionState) ? 'true' : 'false'}
             onClick={() => handleCommand("toggleUnderline")}
             title="Underline (Ctrl+U)"
           >
@@ -372,7 +378,9 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
           </button>
 
           <button
-            className="floating-toolbar-btn"
+            className={`floating-toolbar-btn ${isToolbarCommandActive('toggleStrikethrough', selectionState) ? 'active' : ''}`}
+            data-active={isToolbarCommandActive('toggleStrikethrough', selectionState) ? 'true' : 'false'}
+            aria-pressed={isToolbarCommandActive('toggleStrikethrough', selectionState) ? 'true' : 'false'}
             onClick={() => handleCommand("toggleStrikethrough")}
             title="Strikethrough"
           >
@@ -390,7 +398,9 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
           </button>
 
           <button
-            className="floating-toolbar-btn"
+            className={`floating-toolbar-btn ${isToolbarCommandActive('openLinkDialog', selectionState) ? 'active' : ''}`}
+            data-active={isToolbarCommandActive('openLinkDialog', selectionState) ? 'true' : 'false'}
+            aria-pressed={isToolbarCommandActive('openLinkDialog', selectionState) ? 'true' : 'false'}
             onClick={() => handleCommand("createLink")}
             title="Insert Link"
           >

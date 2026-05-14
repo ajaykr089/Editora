@@ -219,10 +219,19 @@
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button:active,
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button.active,
 :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button[data-active="true"] {
   background: linear-gradient(180deg, #5eaaf6 0%, #4a95de 100%);
   border-color: #67adf4;
   color: #0f1b2a;
+}
+
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button.active svg,
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button[data-active="true"] svg,
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button.active svg *,
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button[data-active="true"] svg * {
+  color: currentColor;
+  fill: currentColor;
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button:disabled {
@@ -273,7 +282,8 @@
   color: var(--rte-color-text-secondary);
 }
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-dropdown-item:hover {
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-dropdown-item:hover,
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-dropdown-item[data-active="true"] {
   background: #3a4554;
   color: var(--rte-color-text-primary);
 }

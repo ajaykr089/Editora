@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { applyInlineFormatting } from '../../src/utils/inlineFormatting';
 
 /**
  * Italic Plugin - Native Implementation
@@ -14,15 +15,17 @@ import { Plugin } from '@editora/core';
 /**
  * Toggle italic formatting on current selection
  */
-export const toggleItalic = (): boolean => {
-  document.execCommand('italic', false);
-  return true;
+export const toggleItalic = (_args?: unknown, context?: any): boolean => {
+  return applyInlineFormatting({
+    command: 'italic',
+    context,
+  });
 };
 
 /**
  * Register commands globally
  */
-const registerCommand = (command: string, handler: () => void): void => {
+const registerCommand = (command: string, handler: (...args: any[]) => void): void => {
   if (typeof window !== 'undefined') {
     (window as any).registerEditorCommand?.(command, handler);
   }

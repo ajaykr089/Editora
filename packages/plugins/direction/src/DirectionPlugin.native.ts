@@ -4,13 +4,13 @@ import type { Plugin } from '@editora/core';
  * DirectionPlugin - Native implementation for text direction (LTR/RTL)
  * 
  * Features:
- * - Set text direction to Left-to-Right (LTR) - removes dir attribute (default)
+ * - Set text direction to Left-to-Right (LTR) - sets dir="ltr"
  * - Set text direction to Right-to-Left (RTL) - sets dir="rtl"
  * - Essential for multilingual content (Arabic, Hebrew, Persian, Urdu, etc.)
  * 
  * Commands:
- * - setDirectionLTR: Remove dir attribute (default LTR behavior)
- * - setDirectionRTL: Set dir="rtl" on nearest block element
+ * - setDirectionLTR: Set dir="ltr" on selected block elements
+ * - setDirectionRTL: Set dir="rtl" on selected block elements
  * 
  * UI/UX Features:
  * - Detailed SVG icons matching React implementation
@@ -23,8 +23,12 @@ declare global {
   interface Window {
     execEditorCommand?: (command: string, ...args: any[]) => any;
     executeEditorCommand?: (command: string, ...args: any[]) => any;
+    __editoraCommandEditorRoot?: HTMLElement | null;
   }
 }
+
+const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content, [contenteditable="true"]';
+const ROOT_EDITOR_SELECTOR = '[data-editora-editor], .rte-editor, .editora-editor, editora-editor';
 
 // List of block-level elements that can have direction attributes
 const BLOCK_LEVEL_TAGS = new Set([
@@ -39,6 +43,10 @@ const BLOCK_LEVEL_TAGS = new Set([
   'LI',
   'BLOCKQUOTE',
   'PRE',
+  'TABLE',
+  'FIGURE',
+  'UL',
+  'OL',
 ]);
 
 const isBlockElement = (element: HTMLElement): boolean => {
@@ -48,44 +56,95 @@ const isBlockElement = (element: HTMLElement): boolean => {
   );
 };
 
-const findActiveEditor = (): HTMLElement | null => {
+const getElementForNode = (node: Node | null): HTMLElement | null => {
+  if (!node) return null;
+  return node.nodeType === Node.ELEMENT_NODE ? node as HTMLElement : node.parentElement;
+};
+
+const resolveEditorContent = (context?: any): HTMLElement | null => {
+  const contextContent = context?.contentElement;
+  if (contextContent instanceof HTMLElement) return contextContent;
+
+  const contextEditor = context?.editorElement;
+  if (contextEditor instanceof HTMLElement) {
+    const content = contextEditor.querySelector(EDITOR_CONTENT_SELECTOR);
+    if (content instanceof HTMLElement) return content;
+    if (contextEditor.getAttribute('contenteditable') === 'true') return contextEditor;
+  }
+
+  const commandRoot = window.__editoraCommandEditorRoot;
+  if (commandRoot instanceof HTMLElement) {
+    const content = commandRoot.querySelector(EDITOR_CONTENT_SELECTOR);
+    if (content instanceof HTMLElement) return content;
+    if (commandRoot.getAttribute('contenteditable') === 'true') return commandRoot;
+  }
+
   const selection = window.getSelection();
   if (selection && selection.rangeCount > 0) {
-    let node: Node | null = selection.getRangeAt(0).startContainer;
-    while (node && node !== document.body) {
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        const element = node as HTMLElement;
-        if (element.getAttribute('contenteditable') === 'true') {
-          return element;
-        }
-      }
-      node = node.parentNode;
-    }
+    const selectedElement = getElementForNode(selection.getRangeAt(0).startContainer);
+    const content = selectedElement?.closest(EDITOR_CONTENT_SELECTOR);
+    if (content instanceof HTMLElement) return content;
+
+    const editorRoot = selectedElement?.closest(ROOT_EDITOR_SELECTOR);
+    const rootContent = editorRoot?.querySelector(EDITOR_CONTENT_SELECTOR);
+    if (rootContent instanceof HTMLElement) return rootContent;
   }
 
   const activeElement = document.activeElement;
-  if (activeElement) {
-    if (activeElement.getAttribute('contenteditable') === 'true') {
-      return activeElement as HTMLElement;
-    }
-    const editor = activeElement.closest('[contenteditable="true"]');
-    if (editor) return editor as HTMLElement;
-  }
+  const activeContent = activeElement instanceof HTMLElement
+    ? activeElement.closest(EDITOR_CONTENT_SELECTOR)
+    : null;
+  if (activeContent instanceof HTMLElement) return activeContent;
 
-  return document.querySelector('[contenteditable="true"]');
+  return document.querySelector(EDITOR_CONTENT_SELECTOR) as HTMLElement | null;
 };
 
-const findContainingBlock = (node: Node): HTMLElement | null => {
-  let current: Node | null = node;
-  while (current && current !== document.body) {
-    if (current.nodeType === Node.ELEMENT_NODE) {
-      const element = current as HTMLElement;
-      if (isBlockElement(element)) return element;
-      if (element.getAttribute('contenteditable') === 'true') break;
-    }
-    current = current.parentNode;
+const getSelectionRangeInEditor = (editor: HTMLElement): Range | null => {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return null;
+
+  const range = selection.getRangeAt(0);
+  if (!editor.contains(range.startContainer) || !editor.contains(range.endContainer)) {
+    return null;
   }
-  return null;
+
+  return range;
+};
+
+const findNearestBlock = (editor: HTMLElement, node: Node): HTMLElement | null => {
+  let element = getElementForNode(node);
+  while (element && element !== editor && editor.contains(element)) {
+    if (isBlockElement(element)) return element;
+    element = element.parentElement;
+  }
+  return isBlockElement(editor) ? editor : null;
+};
+
+const resolveDirectionTargetBlock = (editor: HTMLElement, node: Node): HTMLElement | null => {
+  const block = findNearestBlock(editor, node);
+  if (!block || block === editor) return null;
+
+  const listItem = block.closest('li');
+  if (listItem instanceof HTMLElement && editor.contains(listItem)) {
+    return listItem;
+  }
+
+  return block;
+};
+
+const rangeIntersectsElement = (range: Range, element: HTMLElement): boolean => {
+  if (typeof range.intersectsNode === 'function') {
+    try {
+      return range.intersectsNode(element);
+    } catch {
+      return false;
+    }
+  }
+
+  const elementRange = document.createRange();
+  elementRange.selectNode(element);
+  return range.compareBoundaryPoints(Range.END_TO_START, elementRange) < 0
+    && range.compareBoundaryPoints(Range.START_TO_END, elementRange) > 0;
 };
 
 const getSelectedBlocks = (range: Range, editor: HTMLElement): HTMLElement[] => {
@@ -94,16 +153,19 @@ const getSelectedBlocks = (range: Range, editor: HTMLElement): HTMLElement[] => 
 
   const pushBlock = (element: HTMLElement | null) => {
     if (!element || seen.has(element)) return;
-    if (!editor.contains(element)) return;
+    if (element === editor || !editor.contains(element)) return;
     if (!isBlockElement(element)) return;
     seen.add(element);
     blocks.push(element);
   };
 
   if (range.collapsed) {
-    pushBlock(findContainingBlock(range.startContainer));
+    pushBlock(resolveDirectionTargetBlock(editor, range.startContainer));
     return blocks;
   }
+
+  pushBlock(resolveDirectionTargetBlock(editor, range.startContainer));
+  pushBlock(resolveDirectionTargetBlock(editor, range.endContainer));
 
   const walker = document.createTreeWalker(
     editor,
@@ -112,19 +174,11 @@ const getSelectedBlocks = (range: Range, editor: HTMLElement): HTMLElement[] => 
       acceptNode: (node: Node) => {
         const element = node as HTMLElement;
         if (!isBlockElement(element)) return NodeFilter.FILTER_SKIP;
+        if (element.closest('li') && element.tagName !== 'LI') return NodeFilter.FILTER_SKIP;
 
-        if (typeof range.intersectsNode === 'function') {
-          return range.intersectsNode(element)
-            ? NodeFilter.FILTER_ACCEPT
-            : NodeFilter.FILTER_SKIP;
-        }
-
-        const nodeRange = document.createRange();
-        nodeRange.selectNodeContents(element);
-        const intersects =
-          range.compareBoundaryPoints(Range.END_TO_START, nodeRange) > 0 &&
-          range.compareBoundaryPoints(Range.START_TO_END, nodeRange) < 0;
-        return intersects ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+        return rangeIntersectsElement(range, element)
+          ? NodeFilter.FILTER_ACCEPT
+          : NodeFilter.FILTER_SKIP;
       },
     },
   );
@@ -136,48 +190,50 @@ const getSelectedBlocks = (range: Range, editor: HTMLElement): HTMLElement[] => 
   }
 
   if (blocks.length === 0) {
-    pushBlock(findContainingBlock(range.commonAncestorContainer));
+    pushBlock(resolveDirectionTargetBlock(editor, range.commonAncestorContainer));
   }
 
-  return blocks;
+  return blocks.filter((block) => {
+    return !blocks.some((candidate) => candidate !== block && block.contains(candidate));
+  });
 };
 
-const recordDomHistoryTransaction = (editor: HTMLElement, beforeHTML: string): void => {
-  if (beforeHTML === editor.innerHTML) return;
-  const executor = window.execEditorCommand || window.executeEditorCommand;
-  if (typeof executor !== 'function') return;
+const recordDomHistoryTransaction = (editor: HTMLElement, beforeHTML: string, afterHTML: string): void => {
+  if (beforeHTML === afterHTML) return;
+  if (typeof window.execEditorCommand === 'function') {
+    window.execEditorCommand('recordDomTransaction', editor, beforeHTML, afterHTML);
+    return;
+  }
+
+  if (typeof window.executeEditorCommand !== 'function') return;
 
   try {
-    executor('recordDomTransaction', editor, beforeHTML, editor.innerHTML);
+    window.executeEditorCommand('recordDomTransaction', { editor, beforeHTML, afterHTML });
   } catch {
     // History plugin may be unavailable.
   }
 };
 
-const applyDirectionToSelection = (dir: 'rtl' | null): boolean => {
-  const editor = findActiveEditor();
+const applyDirectionToSelection = (dir: 'ltr' | 'rtl', context?: any): boolean => {
+  const editor = resolveEditorContent(context);
   if (!editor) return false;
 
-  const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) return false;
-
-  const range = selection.getRangeAt(0);
-  if (!editor.contains(range.commonAncestorContainer)) return false;
+  const range = getSelectionRangeInEditor(editor);
+  if (!range) return false;
 
   const blocks = getSelectedBlocks(range, editor);
   if (blocks.length === 0) return false;
   const beforeHTML = editor.innerHTML;
 
   blocks.forEach((block) => {
-    if (dir === 'rtl') {
-      block.setAttribute('dir', 'rtl');
-    } else {
-      block.removeAttribute('dir');
-    }
+    block.setAttribute('dir', dir);
   });
 
-  recordDomHistoryTransaction(editor, beforeHTML);
-  editor.dispatchEvent(new Event('input', { bubbles: true }));
+  const afterHTML = editor.innerHTML;
+  if (beforeHTML === afterHTML) return false;
+
+  recordDomHistoryTransaction(editor, beforeHTML, afterHTML);
+  editor.dispatchEvent(new window.Event('input', { bubbles: true }));
   return true;
 };
 
@@ -201,18 +257,18 @@ export const DirectionPlugin = (): Plugin => {
     ],
 
     commands: {
-      setDirectionLTR: () => {
+      setDirectionLTR: (_params?: unknown, context?: any) => {
         try {
-          return applyDirectionToSelection(null);
+          return applyDirectionToSelection('ltr', context);
         } catch (error) {
           console.error('Failed to set LTR direction:', error);
           return false;
         }
       },
 
-      setDirectionRTL: () => {
+      setDirectionRTL: (_params?: unknown, context?: any) => {
         try {
-          return applyDirectionToSelection('rtl');
+          return applyDirectionToSelection('rtl', context);
         } catch (error) {
           console.error('Failed to set RTL direction:', error);
           return false;

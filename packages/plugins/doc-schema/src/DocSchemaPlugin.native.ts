@@ -1496,13 +1496,17 @@ function ensurePanel(editor: HTMLElement): HTMLElement {
   return panel;
 }
 
+function getKeyboardEventKey(event: KeyboardEvent): string {
+  return typeof event.key === 'string' ? event.key.toLowerCase() : '';
+}
+
 function isTogglePanelShortcut(event: KeyboardEvent): boolean {
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'g';
 }
 
 function isRunValidationShortcut(event: KeyboardEvent): boolean {
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'j';
 }
 

@@ -950,9 +950,13 @@ function insertTokenAtSelection(editor: HTMLElement, token: HTMLElement): void {
   editor.normalize();
 }
 
+function getKeyboardEventKey(event: KeyboardEvent): string {
+  return typeof event.key === 'string' ? event.key.toLowerCase() : '';
+}
+
 function isOpenDialogShortcut(event: KeyboardEvent): boolean {
   const hasPrimary = event.metaKey || event.ctrlKey;
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   const modShortcut = hasPrimary && event.altKey && event.shiftKey && key === 'd';
   const fallbackShortcut = !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey && key === 'f7';
   return modShortcut || fallbackShortcut;
@@ -960,7 +964,7 @@ function isOpenDialogShortcut(event: KeyboardEvent): boolean {
 
 function isTogglePreviewShortcut(event: KeyboardEvent): boolean {
   const hasPrimary = event.metaKey || event.ctrlKey;
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   const modShortcut = hasPrimary && event.altKey && event.shiftKey && key === 'b';
   const fallbackShortcut = !event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey && key === 'f8';
   return modShortcut || fallbackShortcut;
