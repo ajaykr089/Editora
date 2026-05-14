@@ -1,6 +1,6 @@
 {
   "name": "@editora/themes",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Themes and styling system for Editora Rich Text Editor with light/dark mode support",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
