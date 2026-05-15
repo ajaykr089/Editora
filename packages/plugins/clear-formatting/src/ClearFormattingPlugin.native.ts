@@ -160,6 +160,9 @@ function removeFormattingStyles(element: HTMLElement): void {
   if (element.classList.contains("rte-bg-color")) {
     element.classList.remove("rte-bg-color");
   }
+  if (element.classList.contains("rte-format-painted")) {
+    element.classList.remove("rte-format-painted");
+  }
   if (element.classList.length === 0) {
     element.removeAttribute("class");
   }
@@ -211,6 +214,29 @@ function replaceBlockWithParagraph(block: HTMLElement): void {
   }
 
   block.parentNode?.replaceChild(replacement, block);
+}
+
+function isEmptyInlineElement(element: HTMLElement): boolean {
+  if (!/^(A|B|STRONG|I|EM|U|S|STRIKE|DEL|FONT|MARK|CODE|SUB|SUP|SPAN)$/.test(element.tagName)) {
+    return false;
+  }
+  if ((element.textContent || "").trim() !== "") return false;
+  return !element.querySelector("img, video, table, iframe, hr, svg, math");
+}
+
+function removeEmptyInlineElements(content: HTMLElement): void {
+  const candidates = Array.from(
+    content.querySelectorAll("a,b,strong,i,em,u,s,strike,del,font,mark,code,sub,sup,span"),
+  ) as HTMLElement[];
+
+  candidates
+    .sort((a, b) => getElementDepth(b) - getElementDepth(a))
+    .forEach((element) => {
+      if (!element.isConnected) return;
+      if (isEmptyInlineElement(element)) {
+        element.remove();
+      }
+    });
 }
 
 function normalizeBlockquote(blockquote: HTMLElement): void {
@@ -290,4 +316,6 @@ function normalizeInlineFormatting(content: HTMLElement, range: Range): void {
       unwrapElement(element);
     }
   });
+
+  removeEmptyInlineElements(content);
 }

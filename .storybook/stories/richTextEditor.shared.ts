@@ -23,6 +23,7 @@ import {
   EmojisPlugin,
   FontFamilyPlugin,
   FontSizePlugin,
+  FormatPainterPlugin,
   FootnotePlugin,
   FullscreenPlugin,
   HeadingPlugin,
@@ -74,6 +75,7 @@ export const allNativePlugins = [
   BackgroundColorPlugin(),
   FontSizePlugin(),
   FontFamilyPlugin(),
+  FormatPainterPlugin(),
   LineHeightPlugin(),
   CapitalizationPlugin(),
   LinkPlugin(),
@@ -193,4 +195,3 @@ export const allNativePlugins = [
     ],
   }),
 ];
-

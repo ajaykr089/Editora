@@ -44,6 +44,7 @@ const COMMAND_ALIASES: Record<string, string> = {
   textcolor: 'openTextColorPicker',
   backgroundcolor: 'openBackgroundColorPicker',
   fontsize: 'setFontSize',
+  formatpainter: 'toggleFormatPainter',
   increasefontsize: 'increaseFontSize',
   decreasefontsize: 'decreaseFontSize',
   heading: 'setHeading',
@@ -140,6 +141,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   itemsOverride,
 }) => {
   const [trackChangesEnabled, setTrackChangesEnabled] = useState(false);
+  const [formatPainterActive, setFormatPainterActive] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [openInlineMenu, setOpenInlineMenu] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState<number | null>(null);
@@ -245,6 +247,24 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     editorContainer.addEventListener('editora:track-changes-toggle', handleTrackChangesToggle as EventListener);
     return () => {
       editorContainer.removeEventListener('editora:track-changes-toggle', handleTrackChangesToggle as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    const editorContainer = toolbarRef.current?.closest('[data-editora-editor]') as HTMLElement | null;
+    if (!editorContainer) return;
+
+    const contentEl = editorContainer.querySelector('.rte-content, .editora-content') as HTMLElement | null;
+    setFormatPainterActive(contentEl?.classList.contains('rte-format-painter-active') ?? false);
+
+    const handleFormatPainterToggle = (event: Event) => {
+      const custom = event as CustomEvent<{ active?: boolean }>;
+      setFormatPainterActive(Boolean(custom.detail?.active));
+    };
+
+    editorContainer.addEventListener('editora:format-painter-toggle', handleFormatPainterToggle as EventListener);
+    return () => {
+      editorContainer.removeEventListener('editora:format-painter-toggle', handleFormatPainterToggle as EventListener);
     };
   }, []);
 
@@ -566,6 +586,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       const itemCommand = item.command || '';
       const isActive =
         (itemCommand === 'toggleTrackChanges' && trackChangesEnabled) ||
+        (itemCommand === 'toggleFormatPainter' && formatPainterActive) ||
         isToolbarCommandActive(itemCommand, selectionState);
       const itemOptions = 'options' in item ? item.options : undefined;
       const dropdownLabel =

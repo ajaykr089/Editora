@@ -234,6 +234,12 @@
       "require": "./dist/font-size.cjs.js",
       "default": "./dist/font-size.esm.js"
     },
+    "./format-painter": {
+      "types": "./index.d.ts",
+      "import": "./dist/format-painter.esm.js",
+      "require": "./dist/format-painter.cjs.js",
+      "default": "./dist/format-painter.esm.js"
+    },
     "./footnote": {
       "types": "./index.d.ts",
       "import": "./dist/footnote.esm.js",
@@ -419,7 +425,8 @@
     "test:blocks-library": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./blocks-library/src/BlocksLibraryPlugin.native.test.js",
     "test:doc-schema": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./doc-schema/src/DocSchemaPlugin.native.test.js",
     "test:translation-workflow": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./translation-workflow/src/TranslationWorkflowPlugin.native.test.js",
-    "verify:citations": "npm run typecheck:build && npm run test:citations && npm run test:content-rules && npm run test:approval-workflow && npm run test:pii-redaction && npm run test:smart-paste && npm run test:blocks-library && npm run test:doc-schema && npm run test:translation-workflow && npm run build"
+    "test:format-painter": "node -r ../../node_modules/ts-node/register ./format-painter/src/FormatPainterPlugin.native.test.js",
+    "verify:citations": "npm run typecheck:build && npm run test:citations && npm run test:content-rules && npm run test:approval-workflow && npm run test:pii-redaction && npm run test:smart-paste && npm run test:blocks-library && npm run test:doc-schema && npm run test:translation-workflow && npm run test:format-painter && npm run build"
   },
   "peerDependencies": {
     "@editora/core": "^1.0.11"

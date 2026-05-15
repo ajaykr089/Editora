@@ -27,6 +27,7 @@ const pluginEntryNames = [
   'emojis',
   'font-family',
   'font-size',
+  'format-painter',
   'footnote',
   'fullscreen',
   'heading',
