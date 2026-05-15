@@ -834,6 +834,40 @@ export interface Template {
   tags?: string[];
 }
 
+export interface FormatPainterPluginOptions {
+  ignoredFormats?: string[];
+  keepActiveAfterMouseApply?: boolean;
+}
+
+export interface FormatPainterSnapshot {
+  inline: {
+    marks: Partial<Record<"bold" | "italic" | "underline" | "strikethrough", boolean>>;
+    styles: Record<string, string>;
+  };
+  block: {
+    tagName: string;
+    styles: Record<string, string>;
+    attrs: Record<string, string>;
+  } | null;
+  list: {
+    tagName: "ul" | "ol";
+    styles: Record<string, string>;
+    attrs: Record<string, string>;
+    itemAttrs: Record<string, string>;
+  } | null;
+  table: {
+    table: {
+      styles: Record<string, string>;
+      attrs: Record<string, string>;
+    } | null;
+    cell: {
+      styles: Record<string, string>;
+      attrs: Record<string, string>;
+    } | null;
+  } | null;
+  ignoredFormats: string[];
+}
+
 export function HeadingPlugin(): Plugin;
 export function BoldPlugin(): Plugin;
 export function ItalicPlugin(): Plugin;
@@ -849,6 +883,7 @@ export function CodePlugin(): Plugin;
 export function TablePlugin(): Plugin;
 export function FontSizePlugin(): Plugin;
 export function FontFamilyPlugin(): Plugin;
+export function FormatPainterPlugin(options?: FormatPainterPluginOptions): Plugin;
 export function TextAlignmentPlugin(): Plugin;
 export function TextColorPlugin(): Plugin;
 export function BackgroundColorPlugin(): Plugin;

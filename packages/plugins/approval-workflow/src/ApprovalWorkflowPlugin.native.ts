@@ -852,23 +852,27 @@ function togglePanel(editor: HTMLElement, explicit?: boolean): boolean {
   return true;
 }
 
+function getKeyboardEventKey(event: KeyboardEvent): string {
+  return typeof event.key === 'string' ? event.key.toLowerCase() : '';
+}
+
 function isToggleShortcut(event: KeyboardEvent): boolean {
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'a';
 }
 
 function isRequestReviewShortcut(event: KeyboardEvent): boolean {
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'r';
 }
 
 function isApproveShortcut(event: KeyboardEvent): boolean {
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'p';
 }
 
 function isReopenShortcut(event: KeyboardEvent): boolean {
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'd';
 }
 

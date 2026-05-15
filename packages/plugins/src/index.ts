@@ -14,6 +14,11 @@ export { ClearFormattingPlugin } from '../clear-formatting/src/index';
 export { CodePlugin } from '../code/src/index';
 export { TablePlugin } from '../table/src/index';
 export { FontSizePlugin } from '../font-size/src/index';
+export {
+  FormatPainterPlugin,
+  type FormatPainterPluginOptions,
+  type FormatPainterSnapshot,
+} from '../format-painter/src/index';
 export { FontFamilyPlugin } from '../font-family/src/index';
 export { TextAlignmentPlugin } from '../text-alignment/src/index';
 export { TextColorPlugin } from '../text-color/src/index';

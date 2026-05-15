@@ -749,6 +749,8 @@ export class RichTextEditorElement extends HTMLElement {
       mention: ['mention', 'mentions'],
       slashCommands: ['slashcommands', 'slash-commands', 'slashCommands'],
       'slash-commands': ['slashcommands', 'slash-commands', 'slashCommands'],
+      formatPainter: ['formatpainter', 'format-painter', 'formatPainter'],
+      'format-painter': ['formatpainter', 'format-painter', 'formatPainter'],
     };
 
     const candidateKeys = [

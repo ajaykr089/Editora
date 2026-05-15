@@ -13,6 +13,11 @@ export { ClearFormattingPlugin } from './clear-formatting/src';
 export { MediaManagerPlugin } from './media-manager/src';
 export { CodePlugin } from './code/src';
 export { FontSizePlugin } from './font-size/src';
+export {
+  FormatPainterPlugin,
+  type FormatPainterPluginOptions,
+  type FormatPainterSnapshot,
+} from './format-painter/src';
 export { TextAlignmentPlugin } from './text-alignment/src';
 export { FontFamilyPlugin } from './font-family/src';
 export { LineHeightPlugin } from './line-height/src';

@@ -1489,13 +1489,17 @@ async function ensureBlocksLoaded(editor: HTMLElement, force: boolean): Promise<
   return run;
 }
 
+function getKeyboardEventKey(event: KeyboardEvent): string {
+  return typeof event.key === 'string' ? event.key.toLowerCase() : '';
+}
+
 function isTogglePanelShortcut(event: KeyboardEvent): boolean {
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'b';
 }
 
 function isInsertLastShortcut(event: KeyboardEvent): boolean {
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'l';
 }
 

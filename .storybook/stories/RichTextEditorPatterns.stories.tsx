@@ -182,3 +182,75 @@ export const ControlledEditor: Story = {
     );
   },
 };
+
+export const LiveHtmlOutput: Story = {
+  name: 'Live HTML output',
+  render: () => {
+    const initialHtml = `
+      <h2>Campaign brief</h2>
+      <p>Draft a <strong>launch note</strong> with the key message, audience, and next action.</p>
+      <ul>
+        <li>Keep formatting intentional</li>
+        <li>Add links, headings, and emphasis as needed</li>
+        <li>Watch the HTML update as you edit</li>
+      </ul>
+    `;
+    const [html, setHtml] = useState(initialHtml.trim());
+
+    return (
+      <div>
+        <Box style={{ marginBottom: '20px', padding: '15px', background: '#ecfeff', borderRadius: '4px' }}>
+          <h4 style={{ margin: '0 0 10px 0' }}>Live HTML output</h4>
+          <p style={{ margin: 0, fontSize: '14px' }}>Edit the document and inspect the emitted HTML in real time.</p>
+        </Box>
+
+        <Grid
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1.05fr) minmax(320px, 0.95fr)',
+            gap: '20px',
+            alignItems: 'stretch',
+          }}
+        >
+          <div style={{ minWidth: 0 }}>
+            <h4 style={{ margin: '0 0 8px 0' }}>Editor</h4>
+            <div style={{ minHeight: '420px' }}>
+              <EditoraEditor
+                plugins={allNativePlugins}
+                toolbar={{ showMoreOptions: false }}
+                statusbar={{ enabled: true }}
+                defaultValue={html}
+                onChange={setHtml}
+              />
+            </div>
+          </div>
+
+          <div style={{ minWidth: 0 }}>
+            <h4 style={{ margin: '0 0 8px 0' }}>HTML</h4>
+            <pre
+              aria-label="Live HTML output"
+              style={{
+                boxSizing: 'border-box',
+                minHeight: '420px',
+                height: '100%',
+                margin: 0,
+                padding: '16px',
+                overflow: 'auto',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                background: '#111827',
+                color: '#e5e7eb',
+                fontSize: '13px',
+                lineHeight: 1.6,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+              }}
+            >
+              {html}
+            </pre>
+          </div>
+        </Grid>
+      </div>
+    );
+  },
+};

@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { applyInlineFormatting } from '../../src/utils/inlineFormatting';
 
 /**
  * Underline Plugin - Native Implementation
@@ -32,10 +33,10 @@ export const UnderlinePlugin = (): Plugin => ({
     /**
      * Toggle underline formatting on current selection
      */
-    toggleUnderline: () => {
-      document.execCommand('underline', false);
-      return true;
-    }
+    toggleUnderline: (_args?: unknown, context?: any) => applyInlineFormatting({
+      command: 'underline',
+      context,
+    })
   },
   
   // Keyboard shortcuts

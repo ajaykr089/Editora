@@ -1482,18 +1482,22 @@ function togglePanel(editor: HTMLElement, explicit?: boolean): boolean {
   return true;
 }
 
+function getKeyboardEventKey(event: KeyboardEvent): string {
+  return typeof event.key === 'string' ? event.key.toLowerCase() : '';
+}
+
 function isOpenShortcut(event: KeyboardEvent): boolean {
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'c';
 }
 
 function isRefreshShortcut(event: KeyboardEvent): boolean {
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'b';
 }
 
 function isStyleShortcut(event: KeyboardEvent): boolean {
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'j';
 }
 

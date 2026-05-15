@@ -1373,23 +1373,27 @@ function scheduleRealtimeScan(editor: HTMLElement): void {
   debounceTimerByEditor.set(editor, timer);
 }
 
+function getKeyboardEventKey(event: KeyboardEvent): string {
+  return typeof event.key === 'string' ? event.key.toLowerCase() : '';
+}
+
 function isTogglePanelShortcut(event: KeyboardEvent): boolean {
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'i';
 }
 
 function isScanShortcut(event: KeyboardEvent): boolean {
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'u';
 }
 
 function isRedactShortcut(event: KeyboardEvent): boolean {
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'm';
 }
 
 function isRealtimeShortcut(event: KeyboardEvent): boolean {
-  const key = event.key.toLowerCase();
+  const key = getKeyboardEventKey(event);
   return (event.metaKey || event.ctrlKey) && event.altKey && event.shiftKey && key === 'y';
 }
 

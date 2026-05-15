@@ -3,6 +3,11 @@ import { Editor } from '@editora/core';
 import { ToolbarItem } from '@editora/core';
 import { EditorIcons, EditorIconName } from './EditorIcons';
 import { InlineMenu, InlineMenuOption } from './InlineMenu';
+import {
+  getToolbarSelectionState,
+  isToolbarCommandActive,
+  ToolbarSelectionState,
+} from '../utils/toolbarSelectionState';
 
 type ToolbarItemLike = ToolbarItem | {
   type: 'separator';
@@ -39,6 +44,7 @@ const COMMAND_ALIASES: Record<string, string> = {
   textcolor: 'openTextColorPicker',
   backgroundcolor: 'openBackgroundColorPicker',
   fontsize: 'setFontSize',
+  formatpainter: 'toggleFormatPainter',
   increasefontsize: 'increaseFontSize',
   decreasefontsize: 'decreaseFontSize',
   heading: 'setHeading',
@@ -135,10 +141,13 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   itemsOverride,
 }) => {
   const [trackChangesEnabled, setTrackChangesEnabled] = useState(false);
+  const [formatPainterActive, setFormatPainterActive] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [openInlineMenu, setOpenInlineMenu] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState<number | null>(null);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [selectionState, setSelectionState] = useState<ToolbarSelectionState>(() => getToolbarSelectionState(null));
+  const selectionStateSignatureRef = useRef('');
   const visibleCountRef = useRef<number | null>(null);
   const showMoreMenuRef = useRef(false);
   const storedSelectionRef = useRef<Range | null>(null);
@@ -170,12 +179,23 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     storedSelectionRef.current = range;
     if (range && !range.collapsed) {
       storedExpandedSelectionRef.current = range;
+    } else {
+      storedExpandedSelectionRef.current = null;
     }
   };
 
   const getEditorContentElement = (): HTMLElement | null => {
     const editorContainer = toolbarRef.current?.closest('[data-editora-editor]');
-    return (editorContainer?.querySelector('.rte-content') as HTMLElement) || null;
+    return (editorContainer?.querySelector('.rte-content, .editora-content') as HTMLElement) || null;
+  };
+
+  const updateToolbarSelectionState = () => {
+    const nextState = getToolbarSelectionState(getEditorContentElement());
+    const nextSignature = JSON.stringify(nextState);
+    if (nextSignature === selectionStateSignatureRef.current) return;
+
+    selectionStateSignatureRef.current = nextSignature;
+    setSelectionState(nextState);
   };
 
   const setActiveCommandEditorContext = () => {
@@ -231,13 +251,41 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   }, []);
 
   useEffect(() => {
-    const handleSelectionChange = () => {
-      captureSelectionFromEditor();
+    const editorContainer = toolbarRef.current?.closest('[data-editora-editor]') as HTMLElement | null;
+    if (!editorContainer) return;
+
+    const contentEl = editorContainer.querySelector('.rte-content, .editora-content') as HTMLElement | null;
+    setFormatPainterActive(contentEl?.classList.contains('rte-format-painter-active') ?? false);
+
+    const handleFormatPainterToggle = (event: Event) => {
+      const custom = event as CustomEvent<{ active?: boolean }>;
+      setFormatPainterActive(Boolean(custom.detail?.active));
     };
 
+    editorContainer.addEventListener('editora:format-painter-toggle', handleFormatPainterToggle as EventListener);
+    return () => {
+      editorContainer.removeEventListener('editora:format-painter-toggle', handleFormatPainterToggle as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      captureSelectionFromEditor();
+      updateToolbarSelectionState();
+    };
+
+    const contentEl = getEditorContentElement();
     document.addEventListener('selectionchange', handleSelectionChange);
+    contentEl?.addEventListener('input', updateToolbarSelectionState);
+    contentEl?.addEventListener('keyup', updateToolbarSelectionState);
+    contentEl?.addEventListener('mouseup', updateToolbarSelectionState);
+    updateToolbarSelectionState();
+
     return () => {
       document.removeEventListener('selectionchange', handleSelectionChange);
+      contentEl?.removeEventListener('input', updateToolbarSelectionState);
+      contentEl?.removeEventListener('keyup', updateToolbarSelectionState);
+      contentEl?.removeEventListener('mouseup', updateToolbarSelectionState);
     };
   }, []);
 
@@ -290,19 +338,34 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     const selection = window.getSelection();
     if (!selection) return false;
 
-    const hasCurrentSelectionInEditor =
-      selection.rangeCount > 0 &&
-      contentEl.contains(selection.getRangeAt(0).commonAncestorContainer);
+    const isRangeInEditor = (range: Range | null): range is Range => {
+      if (!range) return false;
+      return (
+        range.startContainer.isConnected &&
+        range.endContainer.isConnected &&
+        contentEl.contains(range.startContainer) &&
+        contentEl.contains(range.endContainer)
+      );
+    };
+
+    const currentRange =
+      selection.rangeCount > 0 && isRangeInEditor(selection.getRangeAt(0))
+        ? selection.getRangeAt(0)
+        : null;
+    const storedSelection = isRangeInEditor(storedSelectionRef.current)
+      ? storedSelectionRef.current
+      : null;
+    const storedExpandedSelection =
+      isRangeInEditor(storedExpandedSelectionRef.current) &&
+      !storedExpandedSelectionRef.current.collapsed
+        ? storedExpandedSelectionRef.current
+        : null;
 
     const candidateRange = preferExpanded
-      ? (storedExpandedSelectionRef.current || storedSelectionRef.current)
-      : (storedSelectionRef.current || storedExpandedSelectionRef.current);
+      ? (storedExpandedSelection || storedSelection || currentRange)
+      : (storedSelection || currentRange || storedExpandedSelection);
 
-    if (preferExpanded && candidateRange && candidateRange.collapsed) {
-      return false;
-    }
-
-    if (candidateRange && contentEl.contains(candidateRange.commonAncestorContainer)) {
+    if (candidateRange) {
       try {
         contentEl.focus({ preventScroll: true });
         selection.removeAllRanges();
@@ -313,7 +376,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       }
     }
 
-    return hasCurrentSelectionInEditor;
+    return false;
   };
 
   // Calculate visible items based on available space
@@ -441,23 +504,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       restoreSelectionToEditor(shouldPreferExpandedSelection(command));
     }
 
-    const nativeInlineCommandMap: Record<string, string> = {
-      toggleBold: 'bold',
-      toggleItalic: 'italic',
-      toggleUnderline: 'underline',
-    };
-
-    const nativeCommand = nativeInlineCommandMap[command];
-    if (nativeCommand) {
-      document.execCommand(nativeCommand, false);
-      setOpenDropdown(null);
-      return;
-    }
-
     // Use global command execution
     if (typeof window !== 'undefined' && (window as any).executeEditorCommand) {
       (window as any).executeEditorCommand(command, value);
     }
+    requestAnimationFrame(updateToolbarSelectionState);
     setOpenDropdown(null);
   };
 
@@ -481,8 +532,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     restoreSelectionToEditor();
 
     handleCommand(command, value);
-    updateStoredSelection(null);
-    storedExpandedSelectionRef.current = null;
     setOpenInlineMenu(null);
   };
 
@@ -535,7 +584,15 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   ) => {
     return itemsToRender.map((item, idx) => {
       const itemCommand = item.command || '';
-      const isActive = itemCommand === 'toggleTrackChanges' && trackChangesEnabled;
+      const isActive =
+        (itemCommand === 'toggleTrackChanges' && trackChangesEnabled) ||
+        (itemCommand === 'toggleFormatPainter' && formatPainterActive) ||
+        isToolbarCommandActive(itemCommand, selectionState);
+      const itemOptions = 'options' in item ? item.options : undefined;
+      const dropdownLabel =
+        itemCommand === 'setBlockType'
+          ? itemOptions?.find((option) => option.value === (selectionState.blockType || 'p'))?.label || item.label
+          : item.label;
       return (
         <div
           key={idx}
@@ -554,31 +611,37 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             <div className="rte-toolbar-separator" aria-hidden="true" />
           ) : item.type === "dropdown" ? (
             <div className="rte-toolbar-dropdown">
-                <button
-                  className={`rte-toolbar-button ${isActive ? "active" : ""}`}
-                  data-command={itemCommand}
-                  data-active={isActive ? "true" : "false"}
-                  onMouseDown={(e) => {
+              <button
+                className={`rte-toolbar-button ${isActive ? "active" : ""}`}
+                data-command={itemCommand}
+                data-active={isActive ? "true" : "false"}
+                aria-pressed={isActive ? "true" : "false"}
+                onMouseDown={(e) => {
                     e.preventDefault();
                     captureSelectionFromEditor();
                   }}
                   onClick={() => handleDropdownOpen(itemCommand)}
-                  disabled={readonly}
-                >
-                  {item.label} ▼
-                </button>
+                disabled={readonly}
+              >
+                {dropdownLabel} ▼
+              </button>
               {openDropdown === itemCommand && (
                 <div className="rte-toolbar-dropdown-menu">
-                  {item.options?.map((opt) => (
-                    <div
-                      key={opt.value}
-                      className="rte-toolbar-dropdown-item"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => handleCommand(itemCommand, opt.value)}
-                    >
-                      {opt.label}
-                    </div>
-                  ))}
+                  {item.options?.map((opt) => {
+                    const optionActive = itemCommand === 'setBlockType' && selectionState.blockType === opt.value;
+                    return (
+                      <div
+                        key={opt.value}
+                        className={`rte-toolbar-dropdown-item ${optionActive ? 'active' : ''}`}
+                        data-active={optionActive ? 'true' : 'false'}
+                        aria-selected={optionActive ? 'true' : 'false'}
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={() => handleCommand(itemCommand, opt.value)}
+                      >
+                        {opt.label}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -588,6 +651,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               className={`rte-toolbar-button ${isActive ? "active" : ""}`}
               data-command={itemCommand}
               data-active={isActive ? "true" : "false"}
+              aria-pressed={isActive ? "true" : "false"}
               onMouseDown={(e) => {
                 e.preventDefault();
                 captureSelectionFromEditor();
@@ -631,6 +695,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               className={`rte-toolbar-button ${isActive ? "active" : ""}`}
               data-command={itemCommand}
               data-active={isActive ? "true" : "false"}
+              aria-pressed={isActive ? "true" : "false"}
               onMouseDown={(e) => {
                 e.preventDefault();
                 captureSelectionFromEditor();

@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { applyInlineFormatting } from '../../src/utils/inlineFormatting';
 
 /**
  * Bold Plugin - Framework Agnostic
@@ -45,12 +46,10 @@ export const BoldPlugin = (): Plugin => ({
     /**
      * Toggle bold formatting on current selection
      */
-    toggleBold: () => {
-      // Use document.execCommand for now
-      // In production, this would manipulate EditorState directly
-      document.execCommand("bold", false);
-      return true;
-    },
+    toggleBold: (_args?: unknown, context?: any) => applyInlineFormatting({
+      command: 'bold',
+      context,
+    }),
   },
 
   // Keyboard shortcuts

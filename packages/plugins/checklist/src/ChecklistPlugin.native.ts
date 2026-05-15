@@ -16,6 +16,7 @@ import type { Plugin } from '@editora/core';
 declare global {
   interface Window {
     __checklistPluginClickInitialized?: boolean;
+    __checklistPluginKeydownInitialized?: boolean;
     execEditorCommand?: (command: string, ...args: any[]) => any;
     executeEditorCommand?: (command: string, ...args: any[]) => any;
   }
@@ -174,6 +175,100 @@ const ensureChecklistItemParagraph = (item: HTMLLIElement): HTMLParagraphElement
   }
 
   return paragraph;
+};
+
+const isNodeVisuallyEmpty = (element: HTMLElement): boolean => {
+  const text = (element.textContent || '').replace(/\u200B/g, '').trim();
+  if (text) return false;
+  return !element.querySelector('img, video, table, iframe, hr, pre, ul, ol');
+};
+
+const createEmptyParagraph = (): HTMLParagraphElement => {
+  const paragraph = document.createElement('p');
+  paragraph.innerHTML = '<br>';
+  return paragraph;
+};
+
+const placeCaretAtStart = (element: HTMLElement, editor: HTMLElement): void => {
+  if (!element.isConnected) {
+    editor.focus({ preventScroll: true });
+    return;
+  }
+
+  const selection = window.getSelection();
+  if (!selection) return;
+
+  const range = document.createRange();
+  range.selectNodeContents(element);
+  range.collapse(true);
+  selection.removeAllRanges();
+  try {
+    selection.addRange(range);
+  } catch {
+    editor.focus({ preventScroll: true });
+    return;
+  }
+  editor.focus({ preventScroll: true });
+};
+
+const appendFragmentOrPlaceholder = (paragraph: HTMLParagraphElement, fragment: DocumentFragment): void => {
+  paragraph.appendChild(fragment);
+  if (!paragraph.innerHTML.trim()) {
+    paragraph.innerHTML = '<br>';
+  }
+};
+
+const exitChecklistFromEmptyItem = (
+  editor: HTMLElement,
+  list: HTMLUListElement,
+  item: HTMLLIElement,
+): void => {
+  const paragraph = createEmptyParagraph();
+  list.parentNode?.insertBefore(paragraph, list.nextSibling);
+
+  item.remove();
+  if (getDirectListItems(list).length === 0) {
+    list.remove();
+  }
+
+  placeCaretAtStart(paragraph, editor);
+};
+
+const splitChecklistItemAtRange = (
+  editor: HTMLElement,
+  item: HTMLLIElement,
+  range: Range,
+): void => {
+  const paragraph = ensureChecklistItemParagraph(item);
+
+  const deleteRange = range.cloneRange();
+  deleteRange.deleteContents();
+
+  const tailRange = document.createRange();
+  tailRange.setStart(deleteRange.startContainer, deleteRange.startOffset);
+  tailRange.setEndAfter(paragraph.lastChild || paragraph);
+
+  const tailFragment = document.createDocumentFragment();
+  try {
+    tailFragment.appendChild(tailRange.extractContents());
+  } catch {
+    // If the range is temporarily invalid, fall back to an empty next item.
+  }
+
+  if (!paragraph.innerHTML.trim()) {
+    paragraph.innerHTML = '<br>';
+  }
+
+  const nextItem = document.createElement('li');
+  nextItem.setAttribute('data-type', 'checklist-item');
+  nextItem.setAttribute('data-checked', 'false');
+
+  const nextParagraph = document.createElement('p');
+  appendFragmentOrPlaceholder(nextParagraph, tailFragment);
+  nextItem.appendChild(nextParagraph);
+
+  item.parentNode?.insertBefore(nextItem, item.nextSibling);
+  placeCaretAtStart(nextParagraph, editor);
 };
 
 const createChecklistItemFromHTML = (html: string): HTMLLIElement => {
@@ -350,41 +445,87 @@ export const ChecklistPlugin = (): Plugin => {
     // Initialize click handler when plugin is loaded
     init: () => {
       if (typeof document === 'undefined' || typeof window === 'undefined') return;
-      if (window.__checklistPluginClickInitialized) return;
-      window.__checklistPluginClickInitialized = true;
 
-      const handleChecklistClick = (event: MouseEvent) => {
-        const target = event.target as HTMLElement;
-        const checklistItem = target.closest('li[data-type="checklist-item"]') as HTMLLIElement | null;
-        if (!checklistItem) return;
+      if (!window.__checklistPluginClickInitialized) {
+        window.__checklistPluginClickInitialized = true;
 
-        const rect = checklistItem.getBoundingClientRect();
-        const clickX = event.clientX - rect.left;
-        const isCheckboxArea = clickX < 32;
+        const handleChecklistClick = (event: MouseEvent) => {
+          const target = event.target as HTMLElement;
+          const checklistItem = target.closest('li[data-type="checklist-item"]') as HTMLLIElement | null;
+          if (!checklistItem) return;
 
-        if (!isCheckboxArea) return;
+          const rect = checklistItem.getBoundingClientRect();
+          const clickX = event.clientX - rect.left;
+          const isCheckboxArea = clickX < 32;
 
-        event.preventDefault();
-        event.stopPropagation();
+          if (!isCheckboxArea) return;
 
-        const editor = checklistItem.closest('[contenteditable], .rte-content, .editora-content') as HTMLElement | null;
-        const isReadonlyEditor =
-          editor?.getAttribute('contenteditable') === 'false' ||
-          !!editor?.closest('[data-readonly="true"], .editora-editor[readonly], editora-editor[readonly]');
-        if (isReadonlyEditor) return;
+          event.preventDefault();
+          event.stopPropagation();
 
-        const beforeHTML = editor?.innerHTML || '';
+          const editor = checklistItem.closest('[contenteditable], .rte-content, .editora-content') as HTMLElement | null;
+          const isReadonlyEditor =
+            editor?.getAttribute('contenteditable') === 'false' ||
+            !!editor?.closest('[data-readonly="true"], .editora-editor[readonly], editora-editor[readonly]');
+          if (isReadonlyEditor) return;
 
-        const isChecked = checklistItem.getAttribute('data-checked') === 'true';
-        checklistItem.setAttribute('data-checked', (!isChecked).toString());
+          const beforeHTML = editor?.innerHTML || '';
 
-        if (editor) {
+          const isChecked = checklistItem.getAttribute('data-checked') === 'true';
+          checklistItem.setAttribute('data-checked', (!isChecked).toString());
+
+          if (editor) {
+            recordDomHistoryTransaction(editor, beforeHTML);
+            dispatchEditorInput(editor);
+          }
+        };
+
+        document.addEventListener('click', handleChecklistClick);
+      }
+
+      if (!window.__checklistPluginKeydownInitialized) {
+        window.__checklistPluginKeydownInitialized = true;
+
+        const handleChecklistKeyDown = (event: KeyboardEvent) => {
+          if (event.key !== 'Enter' || event.shiftKey || event.altKey || event.ctrlKey || event.metaKey) return;
+          if (event.defaultPrevented) return;
+
+          const selection = window.getSelection();
+          if (!selection || selection.rangeCount === 0) return;
+
+          const range = selection.getRangeAt(0);
+          const startElement = getElementFromNode(range.startContainer);
+          const checklistItem = startElement?.closest('li[data-type="checklist-item"]') as HTMLLIElement | null;
+          if (!checklistItem) return;
+
+          const checklistList = checklistItem.closest('ul[data-type="checklist"]') as HTMLUListElement | null;
+          if (!checklistList) return;
+
+          const editor = checklistItem.closest('[contenteditable], .rte-content, .editora-content') as HTMLElement | null;
+          if (!editor) return;
+
+          const isReadonlyEditor =
+            editor.getAttribute('contenteditable') === 'false' ||
+            !!editor.closest('[data-readonly="true"], .editora-editor[readonly], editora-editor[readonly]');
+          if (isReadonlyEditor) return;
+
+          event.preventDefault();
+
+          const beforeHTML = editor.innerHTML;
+          const paragraph = ensureChecklistItemParagraph(checklistItem);
+
+          if (isNodeVisuallyEmpty(paragraph)) {
+            exitChecklistFromEmptyItem(editor, checklistList, checklistItem);
+          } else {
+            splitChecklistItemAtRange(editor, checklistItem, range);
+          }
+
           recordDomHistoryTransaction(editor, beforeHTML);
           dispatchEditorInput(editor);
-        }
-      };
+        };
 
-      document.addEventListener('click', handleChecklistClick);
+        document.addEventListener('keydown', handleChecklistKeyDown);
+      }
     },
     
     // Schema definition for checklist nodes

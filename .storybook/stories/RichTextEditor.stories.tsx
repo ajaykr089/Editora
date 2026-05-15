@@ -43,6 +43,9 @@ export const Basic: Story = {
       plugins={allNativePlugins}
       statusbar={{ enabled: true, position: 'bottom' }}
       floatingToolbar={true}
+      toolbar={{
+        items: 'undo redo | heading | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily formatPainter | bullist numlist checklist | link table image video | clearFormatting',
+      }}
       defaultValue={`
         <h2>Welcome to Editora</h2>
         <p>This is a <strong>framework-agnostic</strong> rich text editor with a broad native plugin surface.</p>

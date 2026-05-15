@@ -17,6 +17,11 @@ export class View {
   private gutterDecorationsElement!: HTMLElement;
   private lineDecorationsElement!: HTMLElement;
   private gutterWidth = 50;
+  private readonly gutterFoldColumnWidth = 20;
+  private readonly gutterFoldColumnGap = 4;
+  private readonly gutterLineNumberPaddingLeft = 8;
+  private readonly gutterLineNumberPaddingRight = 4;
+  private readonly gutterDigitWidth = 9;
   private lineHeight = 21;
   private _rafId?: number;
   private readonly trailingNewlineMarkerAttr = 'data-lce-trailing-newline-marker';
@@ -52,9 +57,7 @@ export class View {
       font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
       font-size: 14px;
       line-height: ${this.lineHeight}px;
-      /* vertical scrolling is shared; horizontal scrolling belongs to the code pane */
-      overflow-x: hidden;
-      overflow-y: auto;
+      overflow: auto;
     `;
 
     // Create gutter (line numbers)
@@ -66,11 +69,13 @@ export class View {
       position: sticky;
       left: 0;
       width: ${this.gutterWidth}px;
+      min-width: ${this.gutterWidth}px;
       background: var(--editor-gutter-background, #252526);
       color: var(--editor-gutter-foreground, #858585);
-      padding: 0 8px 0 0;
+      padding: 0;
       text-align: right;
       border-right: 1px solid var(--editor-gutter-border, #3e3e42);
+      box-sizing: border-box;
       background-clip: padding-box;
       user-select: none;
       overflow: hidden;
@@ -82,6 +87,8 @@ export class View {
     this.lineNumbersContentElement.style.cssText = `
       position: relative;
       z-index: 1;
+      box-sizing: border-box;
+      padding: 0 ${this.gutterFoldColumnWidth + this.gutterFoldColumnGap}px 0 ${this.gutterLineNumberPaddingLeft}px;
     `;
 
     this.gutterDecorationsElement = document.createElement('div');
@@ -104,6 +111,7 @@ export class View {
       vertical-align: top;
       position: relative;
       width: 100%;
+      min-width: max-content;
       min-height: 400px;
     `;
 
@@ -141,14 +149,16 @@ export class View {
     this.contentElement.style.cssText = `
       position: relative;
       z-index: 1;
+      display: block;
+      box-sizing: border-box;
       padding: 0 12px;
       background: transparent;
       border: none;
       outline: none;
       white-space: pre;
-      overflow-x: auto;
-      overflow-y: visible;
+      overflow: visible;
       width: 100%;
+      min-width: max-content;
       min-height: 400px;
       font-family: inherit;
       font-size: inherit;
@@ -173,8 +183,9 @@ export class View {
     scrollWrapper.style.cssText = `
       position: relative;
       display: table;
-      table-layout: fixed;
+      table-layout: auto;
       width: 100%;
+      min-width: 100%;
       height: 100%;
     `;
 
@@ -197,6 +208,8 @@ export class View {
 
   // Update line numbers
   updateLineNumbers(lineCount: number): void {
+    this.updateGutterWidth(lineCount);
+
     if (lineCount === this.lastLineCount) {
       return;
     }
@@ -204,8 +217,29 @@ export class View {
     const maxLines = Math.max(lineCount, 1);
     const lineNumbers = Array.from({ length: maxLines }, (_, i) => i + 1);
     this.lineNumbersContentElement.innerHTML = lineNumbers
-      .map(num => `<div style="height: ${this.lineHeight}px; line-height: ${this.lineHeight}px; padding-right: 12px;">${num}</div>`)
+      .map(num => `<div style="height: ${this.lineHeight}px; line-height: ${this.lineHeight}px;">${num}</div>`)
       .join('');
+  }
+
+  private updateGutterWidth(lineCount: number): void {
+    const digitCount = String(Math.max(lineCount, 1)).length;
+    const lineNumberWidth =
+      digitCount * this.gutterDigitWidth +
+      this.gutterLineNumberPaddingLeft +
+      this.gutterLineNumberPaddingRight;
+    const nextGutterWidth = Math.ceil(
+      lineNumberWidth + this.gutterFoldColumnGap + this.gutterFoldColumnWidth,
+    );
+
+    if (nextGutterWidth === this.gutterWidth) {
+      return;
+    }
+
+    this.gutterWidth = nextGutterWidth;
+    if (this.lineNumbersElement.style.display !== 'none') {
+      this.lineNumbersElement.style.width = `${this.gutterWidth}px`;
+      this.lineNumbersElement.style.minWidth = `${this.gutterWidth}px`;
+    }
   }
 
   setDecorations(
@@ -306,8 +340,9 @@ export class View {
 
   setLineWrapping(enabled: boolean): void {
     this.contentElement.style.whiteSpace = enabled ? 'pre-wrap' : 'pre';
-    this.contentElement.style.overflowX = enabled ? 'hidden' : 'auto';
-    this.contentElement.style.overflowY = 'visible';
+    this.contentElement.style.overflow = 'visible';
+    this.contentElement.style.minWidth = enabled ? '100%' : 'max-content';
+    this.contentSurface.style.minWidth = enabled ? '100%' : 'max-content';
     this.contentElement.style.wordBreak = 'normal';
     this.contentElement.style.overflowWrap = enabled ? 'anywhere' : 'normal';
     this.highlightElement.style.whiteSpace = enabled ? 'pre-wrap' : 'pre';
@@ -318,9 +353,10 @@ export class View {
   setLineNumbersVisible(visible: boolean): void {
     this.lineNumbersElement.style.display = visible ? 'table-cell' : 'none';
     this.lineNumbersElement.style.width = visible ? `${this.gutterWidth}px` : '0';
-    this.lineNumbersElement.style.paddingRight = visible ? '8px' : '0';
+    this.lineNumbersElement.style.minWidth = visible ? `${this.gutterWidth}px` : '0';
     this.lineNumbersElement.style.borderRightWidth = visible ? '1px' : '0';
-    this.scrollWrapper.style.width = visible ? '100%' : 'auto';
+    this.scrollWrapper.style.width = '100%';
+    this.scrollWrapper.style.minWidth = '100%';
   }
 
   setTabSize(tabSize: number): void {
@@ -640,10 +676,10 @@ export class View {
 
   // Scroll to position
   scrollToPosition(position: Position): void {
-    const lineElement = this.lineNumbersElement.children[position.line] as HTMLElement;
-    if (lineElement) {
-      lineElement.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    }
+    const safeLine = Math.max(0, Math.floor(position.line) || 0);
+    const targetTop = safeLine * this.lineHeight;
+    const centeredTop = targetTop - (this.editorContainer.clientHeight / 2) + (this.lineHeight / 2);
+    this.editorContainer.scrollTop = Math.max(0, centeredTop);
   }
 
   // Get scroll position
@@ -699,6 +735,12 @@ export class View {
       this.editorContainer.scrollTop += caretRect.bottom - (containerRect.bottom - padding);
     } else if (caretRect.top < containerRect.top + padding) {
       this.editorContainer.scrollTop -= (containerRect.top + padding) - caretRect.top;
+    }
+
+    if (caretRect.right > containerRect.right - padding) {
+      this.editorContainer.scrollLeft += caretRect.right - (containerRect.right - padding);
+    } else if (caretRect.left < containerRect.left + padding) {
+      this.editorContainer.scrollLeft -= (containerRect.left + padding) - caretRect.left;
     }
   }
 
