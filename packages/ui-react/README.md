@@ -1,5 +1,9 @@
 # @editora/ui-react
 
+[![Version](https://img.shields.io/npm/v/@editora/ui-react)](https://www.npmjs.com/package/@editora/ui-react)
+[![License](https://img.shields.io/npm/l/@editora/ui-react)](https://github.com/ajaykr089/Editora/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Size](https://img.shields.io/bundlephobia/minzip/@editora/ui-react)](https://bundlephobia.com/package/@editora/ui-react)
 
 ![Editora UI Components](../../images/editora-ui-components-linkedin-graphic.png)
 

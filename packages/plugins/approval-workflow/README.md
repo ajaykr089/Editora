@@ -1,5 +1,10 @@
 # @editora/approval-workflow
 
+[![Version](https://img.shields.io/npm/v/@editora/approval-workflow)](https://www.npmjs.com/package/@editora/approval-workflow)
+[![License](https://img.shields.io/npm/l/@editora/approval-workflow)](https://github.com/ajaykr089/Editora/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Size](https://img.shields.io/bundlephobia/minzip/@editora/approval-workflow)](https://bundlephobia.com/package/@editora/approval-workflow)
+
 > [!IMPORTANT]
 > **Live Website:** https://editora-ecosystem.netlify.app/  
 > **Storybook:** https://editora-ecosystem-storybook.netlify.app/
