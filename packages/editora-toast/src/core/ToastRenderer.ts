@@ -11,6 +11,14 @@ export class ToastRenderer {
     this.config = config;
   }
 
+  updateConfig(config: ToastConfig): void {
+    this.config = config;
+    this.containers.forEach((container, position) => {
+      this.applyContainerStyles(container, position);
+      this.applyStackState(container);
+    });
+  }
+
   // Ensure container exists for position
   ensureContainer(position: ToastPosition): HTMLElement {
     if (this.containers.has(position)) {
@@ -22,45 +30,9 @@ export class ToastRenderer {
     container.setAttribute('role', 'region');
     container.setAttribute('aria-label', 'Toast notifications');
     container.setAttribute('aria-live', 'polite');
-    
-    // Position styles
-    const styles: Partial<CSSStyleDeclaration> = {
-      position: 'fixed',
-      zIndex: (this.config.zIndex || 2147483647).toString(),
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '8px',
-      pointerEvents: 'none',
-      maxWidth: '100%',
-      boxSizing: 'border-box'
-    };
-
-    switch (position) {
-      case 'top-left':
-        styles.top = '16px';
-        styles.left = '16px';
-        break;
-      case 'top-right':
-        styles.top = '16px';
-        styles.right = '16px';
-        break;
-      case 'bottom-left':
-        styles.bottom = '16px';
-        styles.left = '16px';
-        break;
-      case 'bottom-right':
-        styles.bottom = '16px';
-        styles.right = '16px';
-        break;
-      case 'center':
-        styles.top = '50%';
-        styles.left = '50%';
-        styles.transform = 'translate(-50%, -50%)';
-        styles.alignItems = 'center';
-        break;
-    }
-
-    Object.assign(container.style, styles);
+    container.dataset.expand = String(this.config.expand);
+    container.dataset.stack = String(this.config.stack);
+    this.applyContainerStyles(container, position);
     document.body.appendChild(container);
     this.containers.set(position, container);
 
@@ -76,17 +48,25 @@ export class ToastRenderer {
     const element = document.createElement('div');
 
     element.className = `editora-toast editora-toast-${options.level || 'info'}`;
+    element.dataset.level = options.level || 'info';
     if (options.customClass) {
-      element.classList.add(options.customClass);
+      options.customClass.split(/\s+/).filter(Boolean).forEach(className => element.classList.add(className));
     }
 
-    element.setAttribute('role', 'alert');
+    element.setAttribute('role', options.role || (options.level === 'error' ? 'alert' : 'status'));
     element.setAttribute('aria-atomic', 'true');
+    if (options.ariaLive && options.ariaLive !== 'off') {
+      element.setAttribute('aria-live', options.ariaLive);
+    }
 
     // Apply theme to individual toast
     const theme = options.theme || this.config.theme;
     if (theme && theme !== 'system') {
       element.setAttribute('data-theme', theme);
+    }
+
+    if (this.config.richColors || theme === 'colored') {
+      element.setAttribute('data-rich-colors', 'true');
     }
 
     // Apply RTL support
@@ -96,37 +76,16 @@ export class ToastRenderer {
       element.setAttribute('dir', 'rtl');
     }
 
-    // Content structure
-    const content = document.createElement('div');
-    content.className = 'editora-toast-content';
-
-    // Icon
-    if (options.icon) {
-      const icon = document.createElement('span');
-      icon.className = 'editora-toast-icon';
-      icon.textContent = options.icon;
-      content.appendChild(icon);
-    }
-
-    // Message
-    const message = document.createElement('span');
-    message.className = 'editora-toast-message';
-
-    if (options.html && options.message) {
-      message.innerHTML = this.sanitizeHTML(options.message);
-    } else if (options.render) {
-      const customElement = options.render();
-      message.appendChild(customElement);
-    } else {
-      message.textContent = options.message || '';
-    }
-
-    content.appendChild(message);
+    const content = this.createContent(toast);
 
     // Progress bar
     if (options.progress) {
       const progress = document.createElement('div');
-      progress.className = 'editora-toast-progress';
+      progress.className = 'editora-toast-progress-track';
+      progress.setAttribute('role', 'progressbar');
+      progress.setAttribute('aria-valuemin', '0');
+      progress.setAttribute('aria-valuemax', '100');
+      progress.setAttribute('aria-valuenow', String(Math.min(100, Math.max(0, options.progress.value))));
 
       const bar = document.createElement('div');
       bar.className = 'editora-toast-progress-bar';
@@ -150,26 +109,17 @@ export class ToastRenderer {
       const actions = document.createElement('div');
       actions.className = 'editora-toast-actions';
 
-      options.actions.forEach(action => {
-        const button = document.createElement('button');
-        button.className = `editora-toast-action ${action.primary ? 'primary' : ''}`;
-        button.textContent = action.label;
-        button.onclick = (e) => {
-          e.stopPropagation();
-          action.onClick();
-        };
-        actions.appendChild(button);
-      });
+      options.actions.forEach(action => actions.appendChild(this.createActionButton(action, toast)));
 
       element.appendChild(actions);
     }
 
     // Close button
-    if (options.closable !== false) {
+    if (options.closable || options.closeButton) {
       const close = document.createElement('button');
       close.className = 'editora-toast-close';
       close.setAttribute('aria-label', 'Close notification');
-      close.innerHTML = '×';
+      close.textContent = '×';
       close.onclick = () => toast.dismiss();
       element.appendChild(close);
     }
@@ -203,6 +153,7 @@ export class ToastRenderer {
 
     toast.element = element;
     container.appendChild(element);
+    this.applyStackState(container);
 
     // Get animation config (toast-specific or global default)
     const animation = toast.options.animation || this.config.animation || { type: 'css' };
@@ -222,7 +173,7 @@ export class ToastRenderer {
     if (!toast.options.persistent && toast.options.duration !== 0) {
       const duration = toast.options.duration || this.config.duration;
       toast.timeoutId = window.setTimeout(() => {
-        this.hideToast(toast);
+        toast.dismiss();
       }, duration);
     }
   }
@@ -245,8 +196,10 @@ export class ToastRenderer {
 
     // Remove element after animation
     if (toast.element && toast.element.parentNode) {
+      const parent = toast.element.parentElement;
       toast.element.parentNode.removeChild(toast.element);
       toast.element = undefined;
+      if (parent) this.applyStackState(parent);
     }
 
     // Call onHide callback
@@ -272,42 +225,36 @@ export class ToastRenderer {
     // Update classes for level changes
     if (updates.level) {
       // Remove old level classes
-      toast.element.className = toast.element.className.replace(/editora-toast--(info|success|error|warning|loading|custom)/g, '');
+      toast.element.className = toast.element.className.replace(/editora-toast-(info|success|error|warning|loading|progress|promise|custom)/g, '');
       // Add new level class
-      toast.element.classList.add(`editora-toast--${updates.level}`);
+      toast.element.classList.add(`editora-toast-${updates.level}`);
+      toast.element.dataset.level = updates.level;
     }
 
-    // Update message content
-    const messageElement = toast.element.querySelector('.editora-toast-message');
-    if (messageElement && updates.message !== undefined) {
-      if (toast.options.html && updates.message) {
-        messageElement.innerHTML = this.sanitizeHTML(updates.message);
-      } else if (toast.options.render) {
-        // For custom render, we need to replace the content
-        const contentElement = toast.element.querySelector('.editora-toast-content');
-        if (contentElement) {
-          const customElement = toast.options.render();
-          contentElement.innerHTML = '';
-          contentElement.appendChild(customElement);
-        }
-      } else {
-        messageElement.textContent = updates.message || '';
-      }
+    if (updates.title !== undefined || updates.description !== undefined || updates.message !== undefined || updates.icon !== undefined || updates.render) {
+      const contentElement = toast.element.querySelector('.editora-toast-content');
+      const nextContent = this.createContent(toast);
+      contentElement?.replaceWith(nextContent);
     }
 
     // Update progress bar
     if (updates.progress !== undefined) {
-      let progressElement = toast.element.querySelector('.editora-toast-progress');
+      let progressElement = toast.element.querySelector('.editora-toast-progress-track');
       if (updates.progress) {
         if (!progressElement) {
           // Create progress element if it doesn't exist
           progressElement = document.createElement('div');
-          progressElement.className = 'editora-toast-progress';
+          progressElement.className = 'editora-toast-progress-track';
+          progressElement.setAttribute('role', 'progressbar');
+          progressElement.setAttribute('aria-valuemin', '0');
+          progressElement.setAttribute('aria-valuemax', '100');
           const contentElement = toast.element.querySelector('.editora-toast-content');
           if (contentElement) {
             contentElement.appendChild(progressElement);
           }
         }
+
+        progressElement.setAttribute('aria-valuenow', String(Math.min(100, Math.max(0, updates.progress.value))));
 
         const bar = progressElement.querySelector('.editora-toast-progress-bar') as HTMLElement;
         if (bar) {
@@ -335,9 +282,10 @@ export class ToastRenderer {
     }
 
     // Update actions
-    if (updates.actions !== undefined) {
+    if (updates.actions !== undefined || updates.action !== undefined || updates.cancel !== undefined) {
       let actionsElement = toast.element.querySelector('.editora-toast-actions');
-      if (updates.actions && updates.actions.length > 0) {
+      const nextActions = toast.options.actions || [];
+      if (nextActions.length > 0) {
         if (!actionsElement) {
           actionsElement = document.createElement('div');
           actionsElement.className = 'editora-toast-actions';
@@ -347,24 +295,178 @@ export class ToastRenderer {
         }
 
         if (actionsElement) {
-          updates.actions.forEach(action => {
-            const button = document.createElement('button');
-            button.className = `editora-toast-action ${action.primary ? 'primary' : ''}`;
-            button.textContent = action.label;
-            button.onclick = (e) => {
-              e.stopPropagation();
-              action.onClick();
-            };
-            actionsElement!.appendChild(button);
-          });
+          nextActions.forEach(action => actionsElement!.appendChild(this.createActionButton(action, toast)));
         }
       } else if (actionsElement) {
         actionsElement.remove();
       }
     }
 
+    if (updates.duration !== undefined || updates.persistent !== undefined || updates.level !== undefined) {
+      if (toast.timeoutId) {
+        clearTimeout(toast.timeoutId);
+        toast.timeoutId = undefined;
+      }
+      if (!toast.options.persistent && toast.options.duration !== 0) {
+        const duration = toast.options.duration || this.config.duration;
+        toast.timeoutId = window.setTimeout(() => {
+          toast.dismiss();
+        }, duration);
+      }
+    }
+
     // Call onUpdate callback
     toast.options.onUpdate?.(updates);
+  }
+
+  private createContent(toast: ToastInstance): HTMLElement {
+    const options = toast.options;
+    const content = document.createElement('div');
+    content.className = 'editora-toast-content';
+
+    if (options.icon) {
+      const icon = document.createElement('span');
+      icon.className = 'editora-toast-icon';
+      icon.setAttribute('aria-hidden', 'true');
+      icon.textContent = options.icon;
+      content.appendChild(icon);
+    }
+
+    const body = document.createElement('div');
+    body.className = 'editora-toast-body';
+
+    if (options.render) {
+      body.appendChild(options.render(toast));
+    } else {
+      if (options.title) {
+        const title = document.createElement('div');
+        title.className = 'editora-toast-title';
+        title.textContent = options.title;
+        body.appendChild(title);
+      }
+
+      if (options.message) {
+        const message = document.createElement('div');
+        message.className = 'editora-toast-message';
+        if (options.html) {
+          message.innerHTML = this.sanitizeHTML(options.message);
+        } else {
+          message.textContent = options.message;
+        }
+        body.appendChild(message);
+      }
+
+      if (options.description) {
+        const description = document.createElement('div');
+        description.className = 'editora-toast-description';
+        description.textContent = options.description;
+        body.appendChild(description);
+      }
+    }
+
+    content.appendChild(body);
+    return content;
+  }
+
+  private createActionButton(action: NonNullable<ToastInstance['options']['actions']>[number], toast: ToastInstance): HTMLButtonElement {
+    const button = document.createElement('button');
+    button.className = `editora-toast-action ${action.primary ? 'primary' : ''}`;
+    button.textContent = action.label;
+    if (action.altText) {
+      button.setAttribute('aria-label', action.altText);
+    }
+    button.onclick = (e) => {
+      e.stopPropagation();
+      action.onClick();
+      if (action.dismissOnClick !== false) {
+        toast.dismiss();
+      }
+    };
+    return button;
+  }
+
+  private applyContainerStyles(container: HTMLElement, position: ToastPosition): void {
+    const offset = this.toCssLength(this.config.offset);
+    const mobileOffset = this.toCssLength(this.config.mobileOffset);
+    const gap = this.toCssLength(this.config.gap);
+
+    container.dataset.position = position;
+    container.dataset.expand = String(this.config.expand);
+    container.dataset.stack = String(this.config.stack);
+    container.style.setProperty('--editora-toast-offset', offset);
+    container.style.setProperty('--editora-toast-mobile-offset', mobileOffset);
+    container.style.setProperty('--editora-toast-gap', gap);
+
+    const styles: Partial<CSSStyleDeclaration> = {
+      position: 'fixed',
+      zIndex: (this.config.zIndex || 2147483647).toString(),
+      display: 'flex',
+      flexDirection: position.startsWith('top') ? 'column' : 'column-reverse',
+      gap,
+      pointerEvents: 'none',
+      maxWidth: '100%',
+      boxSizing: 'border-box',
+      top: '',
+      right: '',
+      bottom: '',
+      left: '',
+      transform: '',
+      alignItems: position.includes('center') ? 'center' : 'stretch'
+    };
+
+    switch (position) {
+      case 'top-left':
+        styles.top = `max(${offset}, env(safe-area-inset-top))`;
+        styles.left = `max(${offset}, env(safe-area-inset-left))`;
+        break;
+      case 'top-center':
+        styles.top = `max(${offset}, env(safe-area-inset-top))`;
+        styles.left = '50%';
+        styles.transform = 'translateX(-50%)';
+        break;
+      case 'top-right':
+        styles.top = `max(${offset}, env(safe-area-inset-top))`;
+        styles.right = `max(${offset}, env(safe-area-inset-right))`;
+        break;
+      case 'bottom-left':
+        styles.bottom = `max(${offset}, env(safe-area-inset-bottom))`;
+        styles.left = `max(${offset}, env(safe-area-inset-left))`;
+        break;
+      case 'bottom-center':
+        styles.bottom = `max(${offset}, env(safe-area-inset-bottom))`;
+        styles.left = '50%';
+        styles.transform = 'translateX(-50%)';
+        break;
+      case 'bottom-right':
+        styles.bottom = `max(${offset}, env(safe-area-inset-bottom))`;
+        styles.right = `max(${offset}, env(safe-area-inset-right))`;
+        break;
+      case 'center':
+        styles.top = '50%';
+        styles.left = '50%';
+        styles.transform = 'translate(-50%, -50%)';
+        styles.alignItems = 'center';
+        break;
+    }
+
+    Object.assign(container.style, styles);
+    container.style.setProperty('--editora-toast-mobile-left', mobileOffset);
+  }
+
+  private applyStackState(container: HTMLElement): void {
+    const toasts = Array.from(container.querySelectorAll<HTMLElement>('.editora-toast'));
+    toasts.forEach((element, index) => {
+      const visualIndex = toasts.length - index - 1;
+      element.dataset.index = String(index);
+      element.dataset.front = String(visualIndex === 0);
+      element.style.setProperty('--editora-toast-index', String(index));
+      element.style.setProperty('--editora-toast-before', String(visualIndex));
+    });
+  }
+
+  private toCssLength(value: number | string | undefined): string {
+    if (typeof value === 'number') return `${value}px`;
+    return value || '16px';
   }
 
   // Pause/resume auto-dismiss
@@ -379,7 +481,7 @@ export class ToastRenderer {
     if (!toast.options.persistent && toast.options.duration !== 0) {
       const duration = toast.options.duration || this.config.duration;
       toast.timeoutId = window.setTimeout(() => {
-        this.hideToast(toast);
+        toast.dismiss();
       }, duration);
     }
   }
@@ -481,11 +583,6 @@ export class ToastRenderer {
           break;
       }
 
-      // Debug logging for vertical swipes
-      if (isVerticalSwipe) {
-        console.log(`Vertical swipe attempt: direction=${swipeDirection}, deltaY=${deltaY}, effectiveMinDistance=${effectiveMinDistance}, shouldDismiss=${shouldDismiss}`);
-      }
-
       if (shouldDismiss) {
         toast.dismiss();
       }
@@ -516,8 +613,10 @@ export class ToastRenderer {
 
   // Accessibility
   private announceToast(toast: ToastInstance): void {
+    if (toast.options.ariaLive === 'off') return;
+
     const announcement = document.createElement('div');
-    announcement.setAttribute('aria-live', 'assertive');
+    announcement.setAttribute('aria-live', toast.options.ariaLive || (toast.options.level === 'error' ? 'assertive' : 'polite'));
     announcement.setAttribute('aria-atomic', 'true');
     announcement.style.position = 'absolute';
     announcement.style.left = '-10000px';
@@ -525,7 +624,8 @@ export class ToastRenderer {
     announcement.style.height = '1px';
     announcement.style.overflow = 'hidden';
 
-    announcement.textContent = `${toast.options.level || 'info'}: ${toast.options.message}`;
+    const text = [toast.options.title, toast.options.message, toast.options.description].filter(Boolean).join('. ');
+    announcement.textContent = `${toast.options.level || 'info'}: ${text}`;
 
     document.body.appendChild(announcement);
 
@@ -552,10 +652,10 @@ export class ToastRenderer {
     );
 
     if (!existing) {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = '/packages/editora-toast/dist/toast.css';
-      document.head.appendChild(link);
+      const style = document.createElement('style');
+      style.setAttribute('data-editora-toast-fallback', 'true');
+      style.textContent = '.editora-toast{box-sizing:border-box;pointer-events:auto}.editora-toast-container{box-sizing:border-box;pointer-events:none}.editora-toast.show{opacity:1;transform:translateY(0) scale(1)}.editora-toast.hiding{opacity:0}';
+      document.head.appendChild(style);
     }
 
     this.cssInjected = true;

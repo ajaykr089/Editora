@@ -2,7 +2,7 @@
 // Backward compatible with the original API
 
 import { ToastManager } from './core/ToastManager';
-import { ToastOptions, ToastInstance, ToastConfig, ToastPlugin, ToastPromiseOptions, ToastTheme, ToastPosition } from './core/types';
+import { ToastOptions, ToastInstance, ToastConfig, ToastPlugin, ToastPromiseOptions, ToastTheme, ToastPosition, ToastSubscriber } from './core/types';
 
 // Legacy types for backward compatibility
 export type ToastLevel = 'info' | 'success' | 'error' | 'warning' | 'loading';
@@ -87,6 +87,8 @@ export type {
   ToastConfig,
   ToastPlugin,
   ToastPromiseOptions,
+  ToastState,
+  ToastSubscriber,
   // New animation types
   SpringConfig,
   AnimationType,
@@ -133,6 +135,8 @@ export const toastAdvanced = {
   getToasts: () => getManager().getToasts(),
   getGroups: () => getManager().getGroups(),
   getConfig: () => getManager().getConfig(),
+  getState: () => getManager().getState(),
+  subscribe: (listener: ToastSubscriber) => getManager().subscribe(listener),
 
   // Editor integration
   onEditorEvent: (event: string, callback: (toast: ToastInstance, ...args: any[]) => void) => getManager().onEditorEvent(event, callback),

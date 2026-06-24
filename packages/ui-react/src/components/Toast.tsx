@@ -1,5 +1,6 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 import { toastAdvanced } from '@editora/toast';
+import '@editora/toast/toast.css';
 import type { ToastConfig, ToastInstance, ToastOptionsAdvanced, ToastPosition, ToastTheme } from '@editora/toast';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
