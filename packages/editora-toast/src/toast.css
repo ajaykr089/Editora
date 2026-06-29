@@ -6,15 +6,15 @@
 /* ── Design tokens ─────────────────────────────────────────── */
 :root {
   /* Surface */
-  --et-bg:          #FFFFFF;
-  --et-bg-subtle:   #FAFAF9;
-  --et-border:      rgba(0,0,0,.08);
+  --et-bg:            #FFFFFF;
+  --et-bg-subtle:     #FAFAF9;
+  --et-border:        rgba(0,0,0,.08);
   --et-border-strong: rgba(0,0,0,.14);
 
   /* Text */
-  --et-text:        #1C1917;
-  --et-text-muted:  #78716C;
-  --et-text-inverse:#FAFAF9;
+  --et-text:          #1C1917;
+  --et-text-muted:    #78716C;
+  --et-text-inverse:  #FAFAF9;
 
   /* Semantics */
   --et-info:    #2563EB;
@@ -24,7 +24,7 @@
   --et-loading: #6366F1;
   --et-promise: #7C3AED;
 
-  /* Semantic tints (bg, border, glow) */
+  /* Semantic tints — light mode */
   --et-info-tint:    rgba(37,99,235,.06);
   --et-info-ring:    rgba(37,99,235,.18);
   --et-success-tint: rgba(22,163,74,.06);
@@ -39,30 +39,30 @@
   --et-promise-ring: rgba(124,58,237,.18);
 
   /* Shape */
-  --et-radius:  12px;
+  --et-radius:    12px;
   --et-radius-sm: 7px;
-  --et-width:   360px;
-  --et-offset:  20px;
-  --et-gap:     8px;
-  --et-z:       2147483647;
+  --et-width:     360px;
+  --et-offset:    20px;
+  --et-gap:       8px;
+  --et-z:         2147483647;
 
-  /* Shadow — two layers: ambient + direct */
+  /* Shadow */
   --et-shadow:
     0 1px 2px rgba(0,0,0,.04),
     0 4px 12px rgba(0,0,0,.08),
     0 0 0 1px rgba(0,0,0,.06);
 
   /* Motion */
-  --et-dur-enter: 280ms;
-  --et-dur-exit:  200ms;
-  --et-ease-enter: cubic-bezier(.16,1,.3,1);   /* overshoot spring feel */
+  --et-dur-enter:  280ms;
+  --et-dur-exit:   200ms;
+  --et-ease-enter: cubic-bezier(.16,1,.3,1);
   --et-ease-exit:  cubic-bezier(.4,0,1,1);
 
   /* Typography */
-  --et-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --et-font-size-title: 13.5px;
-  --et-font-size-body:  13px;
-  --et-font-size-desc:  12px;
+  --et-font:             system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --et-font-size-title:  13.5px;
+  --et-font-size-body:   13px;
+  --et-font-size-desc:   12px;
   --et-font-size-action: 12px;
 
   /* Legacy aliases */
@@ -82,21 +82,20 @@
   --editora-toast-mobile-offset: 12px;
 }
 
-/* ── Dark mode ──────────────────────────────────────────────── */
+/* ── System dark mode ───────────────────────────────────────── */
 @media (prefers-color-scheme: dark) {
   :root {
-    --et-bg:           #1C1917;
-    --et-bg-subtle:    #292524;
-    --et-border:       rgba(255,255,255,.08);
-    --et-border-strong:rgba(255,255,255,.14);
-    --et-text:         #F5F5F4;
-    --et-text-muted:   #A8A29E;
+    --et-bg:            #1C1917;
+    --et-bg-subtle:     #292524;
+    --et-border:        rgba(255,255,255,.08);
+    --et-border-strong: rgba(255,255,255,.14);
+    --et-text:          #F5F5F4;
+    --et-text-muted:    #A8A29E;
     --et-shadow:
       0 1px 3px rgba(0,0,0,.3),
       0 6px 20px rgba(0,0,0,.4),
       0 0 0 1px rgba(255,255,255,.06);
 
-    /* Darker semantic tints for dark bg */
     --et-info-tint:    rgba(59,130,246,.12);
     --et-info-ring:    rgba(59,130,246,.25);
     --et-success-tint: rgba(34,197,94,.10);
@@ -130,24 +129,23 @@
   box-sizing: border-box;
 }
 
-/* Positions */
-.editora-toast-top-left    { top: var(--et-offset); left: var(--et-offset); }
-.editora-toast-top-center  { top: var(--et-offset); left: 50%; transform: translateX(-50%); }
-.editora-toast-top-right   { top: var(--et-offset); right: var(--et-offset); }
-.editora-toast-bottom-left { bottom: var(--et-offset); left: var(--et-offset); }
+.editora-toast-top-left      { top: var(--et-offset); left: var(--et-offset); }
+.editora-toast-top-center    { top: var(--et-offset); left: 50%; transform: translateX(-50%); }
+.editora-toast-top-right     { top: var(--et-offset); right: var(--et-offset); }
+.editora-toast-bottom-left   { bottom: var(--et-offset); left: var(--et-offset); }
 .editora-toast-bottom-center { bottom: var(--et-offset); left: 50%; transform: translateX(-50%); }
-.editora-toast-bottom-right { bottom: var(--et-offset); right: var(--et-offset); }
-.editora-toast-center { top: 50%; left: 50%; transform: translate(-50%, -50%); align-items: center; }
+.editora-toast-bottom-right  { bottom: var(--et-offset); right: var(--et-offset); }
+.editora-toast-center        { top: 50%; left: 50%; transform: translate(-50%,-50%); align-items: center; }
 
 /* ── RTL ────────────────────────────────────────────────────── */
 [dir="rtl"] .editora-toast-container,
 .editora-toast-container[data-rtl="true"] { direction: rtl; }
 [dir="rtl"] .editora-toast,
-.editora-toast[data-rtl="true"] { direction: rtl; text-align: right; }
+.editora-toast[data-rtl="true"]           { direction: rtl; text-align: right; }
 [dir="rtl"] .editora-toast-actions,
-.editora-toast-actions[data-rtl="true"] { direction: rtl; flex-direction: row-reverse; }
+.editora-toast-actions[data-rtl="true"]   { direction: rtl; flex-direction: row-reverse; }
 
-/* ── Toast base ──────────────────────────────────────────────── */
+/* ── Toast base ─────────────────────────────────────────────── */
 .editora-toast {
   position: relative;
   width: var(--et-width);
@@ -155,7 +153,7 @@
   max-width: calc(100vw - 32px);
   background: var(--et-bg);
   color: var(--et-text);
-  padding: 14px 44px 14px 16px; /* right pad reserves space for close btn */
+  padding: 14px 44px 14px 16px;
   border-radius: var(--et-radius);
   box-shadow: var(--et-shadow);
   font-family: var(--et-font);
@@ -166,8 +164,6 @@
   overflow: hidden;
   outline: none;
   box-sizing: border-box;
-
-  /* Default hidden state */
   opacity: 0;
   transform: translateY(6px) scale(0.97);
   transition:
@@ -176,7 +172,6 @@
     box-shadow 200ms ease;
 }
 
-/* Shown */
 .editora-toast.show {
   opacity: 1;
   transform: translateY(0) scale(1);
@@ -186,7 +181,6 @@
   animation: et-enter var(--et-dur-enter) var(--et-ease-enter) both;
 }
 
-/* Hiding */
 .editora-toast.hiding {
   opacity: 0;
   transform: translateY(-6px) scale(0.96);
@@ -195,7 +189,6 @@
     transform var(--et-dur-exit) var(--et-ease-exit);
 }
 
-/* Hover lift */
 .editora-toast:hover {
   box-shadow:
     0 2px 4px rgba(0,0,0,.06),
@@ -203,46 +196,45 @@
     0 0 0 1px rgba(0,0,0,.06);
 }
 
-/* Spring mode hands off to JS */
 .editora-toast.spring-animation {
   transition: none !important;
   animation: none !important;
 }
 
-/* ── Level colors: tinted bg + accent border + soft glow ──── */
+/* ── Level colours — DEFAULT (light) ────────────────────────── */
+/*
+   These only apply when NO data-theme is set (or theme="system").
+   Every named theme overrides them completely below.
+*/
 .editora-toast-info {
   background: var(--et-info-tint);
   border: 1px solid var(--et-info-ring);
-  box-shadow:
-    0 0 0 4px var(--et-info-tint),
-    var(--et-shadow);
+  box-shadow: 0 0 0 4px var(--et-info-tint), var(--et-shadow);
+  color: var(--et-text);
 }
 .editora-toast-info::before { background: var(--et-info); }
 
 .editora-toast-success {
   background: var(--et-success-tint);
   border: 1px solid var(--et-success-ring);
-  box-shadow:
-    0 0 0 4px var(--et-success-tint),
-    var(--et-shadow);
+  box-shadow: 0 0 0 4px var(--et-success-tint), var(--et-shadow);
+  color: var(--et-text);
 }
 .editora-toast-success::before { background: var(--et-success); }
 
 .editora-toast-error {
   background: var(--et-error-tint);
   border: 1px solid var(--et-error-ring);
-  box-shadow:
-    0 0 0 4px var(--et-error-tint),
-    var(--et-shadow);
+  box-shadow: 0 0 0 4px var(--et-error-tint), var(--et-shadow);
+  color: var(--et-text);
 }
 .editora-toast-error::before { background: var(--et-error); }
 
 .editora-toast-warning {
   background: var(--et-warning-tint);
   border: 1px solid var(--et-warning-ring);
-  box-shadow:
-    0 0 0 4px var(--et-warning-tint),
-    var(--et-shadow);
+  box-shadow: 0 0 0 4px var(--et-warning-tint), var(--et-shadow);
+  color: var(--et-text);
 }
 .editora-toast-warning::before { background: var(--et-warning); }
 
@@ -250,14 +242,13 @@
 .editora-toast-promise {
   background: var(--et-loading-tint);
   border: 1px solid var(--et-loading-ring);
-  box-shadow:
-    0 0 0 4px var(--et-loading-tint),
-    var(--et-shadow);
+  box-shadow: 0 0 0 4px var(--et-loading-tint), var(--et-shadow);
+  color: var(--et-text);
 }
 .editora-toast-loading::before,
 .editora-toast-promise::before { background: var(--et-loading); }
 
-/* Accent stripe — replaces left border */
+/* Accent stripe */
 .editora-toast-info::before,
 .editora-toast-success::before,
 .editora-toast-error::before,
@@ -299,7 +290,7 @@
   letter-spacing: -0.01em;
   line-height: 1.3;
   margin: 0;
-  color: var(--et-text);
+  color: var(--et-text) !important;
 }
 
 .editora-toast-message {
@@ -307,7 +298,7 @@
   line-height: 1.45;
   word-wrap: break-word;
   overflow-wrap: anywhere;
-  color: var(--et-text);
+  color: var(--et-text) !important;
 }
 
 .editora-toast-title + .editora-toast-message,
@@ -317,7 +308,7 @@
 }
 
 .editora-toast-description {
-  color: var(--et-text-muted);
+  color: var(--et-text-muted) !important;
   font-size: var(--et-font-size-desc);
   line-height: 1.45;
   overflow-wrap: anywhere;
@@ -362,9 +353,7 @@
   box-shadow: 0 1px 3px rgba(0,0,0,.06);
 }
 
-.editora-toast-action:active {
-  transform: scale(0.97);
-}
+.editora-toast-action:active { transform: scale(0.97); }
 
 .editora-toast-action.primary {
   background: var(--et-text);
@@ -418,16 +407,12 @@
   color: var(--et-text);
 }
 
-.editora-toast-close:active {
-  transform: scale(0.92);
-}
+.editora-toast-close:active { transform: scale(0.92); }
 
 /* ── Progress bar ────────────────────────────────────────────── */
 .editora-toast-progress {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 0; left: 0; right: 0;
   height: 2px;
   background: transparent;
   overflow: hidden;
@@ -442,7 +427,6 @@
   position: relative;
 }
 
-/* Sheen effect on progress bar */
 .editora-toast-progress-bar::after {
   content: '';
   position: absolute;
@@ -461,7 +445,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Loading spinner ─────────────────────────────────────────── */
+/* ── Spinner ─────────────────────────────────────────────────── */
 .editora-toast-spinner {
   display: inline-block;
   width: 14px;
@@ -473,7 +457,7 @@
   flex-shrink: 0;
 }
 
-/* ── Grouping ────────────────────────────────────────────────── */
+/* ── Groups ──────────────────────────────────────────────────── */
 .editora-toast-group { margin-bottom: 4px; }
 
 .editora-toast-group-header {
@@ -485,15 +469,10 @@
   letter-spacing: 0.06em;
 }
 
-.editora-toast-group-collapsed {
-  max-height: 40px;
-  overflow: hidden;
-}
+.editora-toast-group-collapsed { max-height: 40px; overflow: hidden; }
 
 /* ── Stack mode ──────────────────────────────────────────────── */
-.editora-toast-container[data-stack="true"][data-expand="false"] {
-  gap: 0;
-}
+.editora-toast-container[data-stack="true"][data-expand="false"] { gap: 0; }
 
 .editora-toast-container[data-stack="true"][data-expand="false"] .editora-toast:not([data-front="true"]) {
   margin-top: calc(var(--et-gap) * -1);
@@ -510,9 +489,7 @@
 
 .editora-toast-container[data-stack="true"][data-expand="false"]:hover,
 .editora-toast-container[data-stack="true"][data-expand="false"]:focus-within,
-.editora-toast-container[data-expand="true"] {
-  gap: var(--et-gap);
-}
+.editora-toast-container[data-expand="true"] { gap: var(--et-gap); }
 
 .editora-toast-container[data-stack="true"][data-expand="false"]:hover .editora-toast,
 .editora-toast-container[data-stack="true"][data-expand="false"]:focus-within .editora-toast,
@@ -522,152 +499,288 @@
   filter: none;
 }
 
-/* ── Animations ──────────────────────────────────────────────── */
+/* ── Keyframes ───────────────────────────────────────────────── */
 @keyframes et-enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
 }
-
-@keyframes et-spin {
-  to { transform: rotate(360deg); }
-}
-
+@keyframes et-spin  { to { transform: rotate(360deg); } }
 @keyframes et-sheen {
   0%   { transform: translateX(-100%); }
   100% { transform: translateX(400%); }
 }
 
-/* ── Rich colors (semantic fills) ─────────────────────────────── */
-.editora-toast[data-rich-colors="true"].editora-toast-success {
-  --et-bg: #F0FDF4;
-  --et-text: #15803D;
-  --et-text-muted: #16A34A;
-  --et-border: rgba(22,163,74,.2);
-}
+/* ════════════════════════════════════════════════════════════
+   NAMED THEMES
+   Each theme is a complete, self-contained override. It sets
+   ALL surface + text tokens so level classes never produce
+   invisible-text combinations.
+   ════════════════════════════════════════════════════════════ */
 
-.editora-toast[data-rich-colors="true"].editora-toast-error {
-  --et-bg: #FEF2F2;
-  --et-text: #B91C1C;
-  --et-text-muted: #DC2626;
-  --et-border: rgba(220,38,38,.2);
-}
-
-.editora-toast[data-rich-colors="true"].editora-toast-warning {
-  --et-bg: #FFFBEB;
-  --et-text: #92400E;
-  --et-text-muted: #D97706;
-  --et-border: rgba(217,119,6,.2);
-}
-
-.editora-toast[data-rich-colors="true"].editora-toast-info {
-  --et-bg: #EFF6FF;
-  --et-text: #1E40AF;
-  --et-text-muted: #2563EB;
-  --et-border: rgba(37,99,235,.2);
-}
-
-/* ── Named themes ────────────────────────────────────────────── */
-
-/* light */
+/* ── LIGHT ───────────────────────────────────────────────────── */
 .editora-toast[data-theme="light"] {
-  --et-bg: #FFFFFF !important;
-  --et-text: #1C1917 !important;
-  --et-text-muted: #78716C !important;
-  --et-border: rgba(0,0,0,.08) !important;
-  --et-shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.06) !important;
+  --et-bg:            #FFFFFF;
+  --et-bg-subtle:     #FAFAF9;
+  --et-text:          #1C1917;
+  --et-text-muted:    #78716C;
+  --et-text-inverse:  #FAFAF9;
+  --et-border:        rgba(0,0,0,.08);
+  --et-border-strong: rgba(0,0,0,.14);
+  --et-shadow:        0 1px 2px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.06);
+  /* keep light tints */
+  --et-info-tint:    rgba(37,99,235,.06);
+  --et-info-ring:    rgba(37,99,235,.18);
+  --et-success-tint: rgba(22,163,74,.06);
+  --et-success-ring: rgba(22,163,74,.18);
+  --et-error-tint:   rgba(220,38,38,.06);
+  --et-error-ring:   rgba(220,38,38,.18);
+  --et-warning-tint: rgba(217,119,6,.06);
+  --et-warning-ring: rgba(217,119,6,.18);
+  --et-loading-tint: rgba(99,102,241,.06);
+  --et-loading-ring: rgba(99,102,241,.18);
 }
 
-/* dark */
+/* ── DARK ────────────────────────────────────────────────────── */
+/*
+   FIX: the old dark theme only set surface variables but the
+   level classes re-applied light-mode tint backgrounds via
+   .editora-toast-info etc. — causing dark-on-dark text.
+   Solution: also override the tint/ring variables so level
+   classes produce readable combinations on a dark surface.
+*/
 .editora-toast[data-theme="dark"] {
-  --et-bg: #1C1917 !important;
-  --et-text: #F5F5F4 !important;
-  --et-text-muted: #A8A29E !important;
-  --et-border: rgba(255,255,255,.08) !important;
-  --et-shadow: 0 1px 3px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.06) !important;
+  --et-bg:            #FFFFFF;
+  --et-bg-subtle:     #FAFAF9;
+  --et-text:          #1C1917;
+  --et-text-muted:    #78716C;
+  --et-text-inverse:  #FAFAF9;
+  --et-border:        rgba(255,255,255,.08);
+  --et-border-strong: rgba(255,255,255,.14);
+  --et-shadow:        0 1px 3px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.06);
+  /* dark-appropriate tints — more saturated so they're visible on dark bg */
+  --et-info-tint:    rgba(59,130,246,.14);
+  --et-info-ring:    rgba(59,130,246,.30);
+  --et-success-tint: rgba(34,197,94,.12);
+  --et-success-ring: rgba(34,197,94,.28);
+  --et-error-tint:   rgba(248,113,113,.12);
+  --et-error-ring:   rgba(248,113,113,.28);
+  --et-warning-tint: rgba(251,191,36,.12);
+  --et-warning-ring: rgba(251,191,36,.26);
+  --et-loading-tint: rgba(129,140,248,.12);
+  --et-loading-ring: rgba(129,140,248,.28);
+  --et-promise-tint: rgba(167,139,250,.12);
+  --et-promise-ring: rgba(167,139,250,.28);
 }
 
-/* minimal */
+/* ── MINIMAL ─────────────────────────────────────────────────── */
 .editora-toast[data-theme="minimal"] {
+  --et-bg:            #FFFFFF;
+  --et-bg-subtle:     #F9F9F8;
+  --et-text:          #1C1917;
+  --et-text-muted:    #78716C;
+  --et-text-inverse:  #FAFAF9;
+  --et-border:        rgba(0,0,0,.10);
+  --et-border-strong: rgba(0,0,0,.18);
   background: var(--et-bg) !important;
   border: 1px solid var(--et-border-strong) !important;
   box-shadow: 0 1px 4px rgba(0,0,0,.06) !important;
   border-radius: 6px !important;
 }
+/* No stripe — use left border instead */
 .editora-toast[data-theme="minimal"]::before { display: none !important; }
-.editora-toast[data-theme="minimal"].editora-toast-info    { border-left: 3px solid var(--et-info) !important; }
-.editora-toast[data-theme="minimal"].editora-toast-success { border-left: 3px solid var(--et-success) !important; }
-.editora-toast[data-theme="minimal"].editora-toast-error   { border-left: 3px solid var(--et-error) !important; }
-.editora-toast[data-theme="minimal"].editora-toast-warning { border-left: 3px solid var(--et-warning) !important; }
-.editora-toast[data-theme="minimal"].editora-toast-loading { border-left: 3px solid var(--et-loading) !important; }
-.editora-toast[data-theme="minimal"].editora-toast-promise { border-left: 3px solid var(--et-promise) !important; }
+.editora-toast[data-theme="minimal"].editora-toast-info    {
+  background: #fff !important;
+  border-left: 3px solid var(--et-info) !important;
+}
+.editora-toast[data-theme="minimal"].editora-toast-success {
+  background: #fff !important;
+  border-left: 3px solid var(--et-success) !important;
+}
+.editora-toast[data-theme="minimal"].editora-toast-error   {
+  background: #fff !important;
+  border-left: 3px solid var(--et-error) !important;
+}
+.editora-toast[data-theme="minimal"].editora-toast-warning {
+  background: #fff !important;
+  border-left: 3px solid var(--et-warning) !important;
+}
+.editora-toast[data-theme="minimal"].editora-toast-loading,
+.editora-toast[data-theme="minimal"].editora-toast-promise {
+  background: #fff !important;
+  border-left: 3px solid var(--et-loading) !important;
+}
 
-/* colored */
+/* ── COLORED ─────────────────────────────────────────────────── */
+/*
+   FIX: set ALL text tokens to white + matching white-alpha
+   variants for bg/border so action buttons stay readable
+   on the saturated background.
+*/
+.editora-toast[data-theme="colored"] {
+  --et-text:          #FFFFFF;
+  --et-text-muted:    rgba(255,255,255,.80);
+  --et-text-inverse:  #1C1917;
+  --et-bg:            rgba(255,255,255,.15);
+  --et-bg-subtle:     rgba(255,255,255,.22);
+  --et-border:        rgba(255,255,255,.20);
+  --et-border-strong: rgba(255,255,255,.32);
+}
+.editora-toast[data-theme="colored"]::before { display: none !important; }
+
 .editora-toast[data-theme="colored"].editora-toast-info {
   background: var(--et-info) !important;
-  color: #fff !important;
   border: none !important;
+  box-shadow: 0 4px 14px rgba(37,99,235,.4) !important;
+  color: #fff !important;
 }
 .editora-toast[data-theme="colored"].editora-toast-success {
   background: var(--et-success) !important;
-  color: #fff !important;
   border: none !important;
+  box-shadow: 0 4px 14px rgba(22,163,74,.4) !important;
 }
 .editora-toast[data-theme="colored"].editora-toast-error {
   background: var(--et-error) !important;
-  color: #fff !important;
   border: none !important;
+  box-shadow: 0 4px 14px rgba(220,38,38,.4) !important;
+  color: #fff !important;
 }
 .editora-toast[data-theme="colored"].editora-toast-warning {
   background: var(--et-warning) !important;
-  color: #fff !important;
   border: none !important;
+  box-shadow: 0 4px 14px rgba(217,119,6,.4) !important;
+  color: #fff !important;
 }
 .editora-toast[data-theme="colored"].editora-toast-loading,
 .editora-toast[data-theme="colored"].editora-toast-promise {
   background: var(--et-loading) !important;
-  color: #fff !important;
   border: none !important;
+  box-shadow: 0 4px 14px rgba(99,102,241,.4) !important;
+  color: #fff !important;
 }
-.editora-toast[data-theme="colored"]::before { display: none !important; }
 
-/* glass */
+/* ── GLASS ───────────────────────────────────────────────────── */
+/*
+   FIX: glass is designed for dark/image backdrops. Text must
+   be white. All token overrides are explicit so nothing leaks
+   from a parent dark-mode class.
+*/
 .editora-toast[data-theme="glass"] {
+  --et-text:          #1C1917;
+  --et-text-muted:    rgba(255,255,255,.72);
+  --et-text-inverse:  #1C1917;
+  --et-bg:            rgba(255,255,255,.15);
+  --et-bg-subtle:     rgba(255,255,255,.22);
+  --et-border:        rgba(255,255,255,.20);
+  --et-border-strong: rgba(255,255,255,.32);
   background: rgba(255,255,255,.12) !important;
   backdrop-filter: blur(24px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
   border: 1px solid rgba(255,255,255,.22) !important;
   color: #fff !important;
   box-shadow: 0 8px 32px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.18) !important;
+  /* Reset level-class backgrounds so glass wins */
+  --et-info-tint:    rgba(255,255,255,.04);
+  --et-info-ring:    rgba(255,255,255,.18);
+  --et-success-tint: rgba(255,255,255,.04);
+  --et-success-ring: rgba(255,255,255,.18);
+  --et-error-tint:   rgba(255,255,255,.04);
+  --et-error-ring:   rgba(255,255,255,.18);
+  --et-warning-tint: rgba(255,255,255,.04);
+  --et-warning-ring: rgba(255,255,255,.18);
+  --et-loading-tint: rgba(255,255,255,.04);
+  --et-loading-ring: rgba(255,255,255,.18);
+}
+.editora-toast[data-theme="glass"].editora-toast-info,
+.editora-toast[data-theme="glass"].editora-toast-success,
+.editora-toast[data-theme="glass"].editora-toast-error,
+.editora-toast[data-theme="glass"].editora-toast-warning,
+.editora-toast[data-theme="glass"].editora-toast-loading,
+.editora-toast[data-theme="glass"].editora-toast-promise {
+  background: rgba(255,255,255,.12) !important;
+  border: 1px solid rgba(255,255,255,.22) !important;
 }
 .editora-toast[data-theme="glass"].editora-toast-info::before    { background: #60a5fa; }
 .editora-toast[data-theme="glass"].editora-toast-success::before { background: #4ade80; }
 .editora-toast[data-theme="glass"].editora-toast-error::before   { background: #f87171; }
 .editora-toast[data-theme="glass"].editora-toast-warning::before { background: #fbbf24; }
-.editora-toast[data-theme="glass"].editora-toast-loading::before { background: #818cf8; }
-.editora-toast[data-theme="glass"].editora-toast-promise::before { background: #a78bfa; }
+.editora-toast[data-theme="glass"].editora-toast-loading::before,
+.editora-toast[data-theme="glass"].editora-toast-promise::before { background: #818cf8; }
 
-/* neon */
+/* ── NEON ────────────────────────────────────────────────────── */
+/*
+   FIX: was missing --et-text-muted override so description
+   text was falling back to #78716C (nearly invisible on #09090B).
+*/
 .editora-toast[data-theme="neon"] {
+  --et-text:          #09090B;
+  --et-text-muted:    #A1A1AA;
+  --et-text-inverse:  #09090B;
+  --et-bg:            #09090B;
+  --et-bg-subtle:     #18181B;
+  --et-border:        rgba(255,255,255,.06);
+  --et-border-strong: rgba(255,255,255,.16);
   background: #09090B !important;
   color: #E4E4E7 !important;
   border: 1px solid rgba(255,255,255,.06) !important;
+  --et-info-tint:    rgba(56,189,248,.08);
+  --et-info-ring:    rgba(56,189,248,.22);
+  --et-success-tint: rgba(74,222,128,.08);
+  --et-success-ring: rgba(74,222,128,.22);
+  --et-error-tint:   rgba(248,113,113,.08);
+  --et-error-ring:   rgba(248,113,113,.22);
+  --et-warning-tint: rgba(251,191,36,.08);
+  --et-warning-ring: rgba(251,191,36,.20);
+  --et-loading-tint: rgba(129,140,248,.08);
+  --et-loading-ring: rgba(129,140,248,.22);
 }
-.editora-toast[data-theme="neon"].editora-toast-info    { border-left: 1px solid #38bdf8 !important; box-shadow: 0 0 16px rgba(56,189,248,.18), 0 4px 12px rgba(0,0,0,.5) !important; }
-.editora-toast[data-theme="neon"].editora-toast-success { border-left: 1px solid #4ade80 !important; box-shadow: 0 0 16px rgba(74,222,128,.18), 0 4px 12px rgba(0,0,0,.5) !important; }
-.editora-toast[data-theme="neon"].editora-toast-error   { border-left: 1px solid #f87171 !important; box-shadow: 0 0 16px rgba(248,113,113,.18), 0 4px 12px rgba(0,0,0,.5) !important; }
-.editora-toast[data-theme="neon"].editora-toast-warning { border-left: 1px solid #fbbf24 !important; box-shadow: 0 0 16px rgba(251,191,36,.18), 0 4px 12px rgba(0,0,0,.5) !important; }
-.editora-toast[data-theme="neon"].editora-toast-loading { border-left: 1px solid #818cf8 !important; box-shadow: 0 0 16px rgba(129,140,248,.18), 0 4px 12px rgba(0,0,0,.5) !important; }
-.editora-toast[data-theme="neon"].editora-toast-promise { border-left: 1px solid #c084fc !important; box-shadow: 0 0 16px rgba(192,132,252,.18), 0 4px 12px rgba(0,0,0,.5) !important; }
 .editora-toast[data-theme="neon"]::before { display: none !important; }
+/* Neon glow replaces the accent stripe */
+.editora-toast[data-theme="neon"].editora-toast-info {
+  background: var(--et-info-tint) !important;
+  border: 1px solid #38bdf8 !important;
+  box-shadow: 0 0 18px rgba(56,189,248,.22), 0 4px 12px rgba(0,0,0,.5) !important;
+}
+.editora-toast[data-theme="neon"].editora-toast-success {
+  background: var(--et-success-tint) !important;
+  border: 1px solid #4ade80 !important;
+  box-shadow: 0 0 18px rgba(74,222,128,.22), 0 4px 12px rgba(0,0,0,.5) !important;
+}
+.editora-toast[data-theme="neon"].editora-toast-error {
+  background: var(--et-error-tint) !important;
+  border: 1px solid #f87171 !important;
+  box-shadow: 0 0 18px rgba(248,113,113,.22), 0 4px 12px rgba(0,0,0,.5) !important;
+}
+.editora-toast[data-theme="neon"].editora-toast-warning {
+  background: var(--et-warning-tint) !important;
+  border: 1px solid #fbbf24 !important;
+  box-shadow: 0 0 18px rgba(251,191,36,.22), 0 4px 12px rgba(0,0,0,.5) !important;
+}
+.editora-toast[data-theme="neon"].editora-toast-loading,
+.editora-toast[data-theme="neon"].editora-toast-promise {
+  background: var(--et-loading-tint) !important;
+  border: 1px solid #818cf8 !important;
+  box-shadow: 0 0 18px rgba(129,140,248,.22), 0 4px 12px rgba(0,0,0,.5) !important;
+}
 
-/* ocean */
+/* ── OCEAN ───────────────────────────────────────────────────── */
 .editora-toast[data-theme="ocean"] {
+  --et-text:          #E0F2FE;
+  --et-text-muted:    rgba(224,242,254,.72);
+  --et-text-inverse:  #0f2942;
+  --et-bg:            #0f2942;
+  --et-bg-subtle:     #1a3d5c;
+  --et-border:        rgba(186,230,253,.18);
+  --et-border-strong: rgba(186,230,253,.30);
+  --et-info-tint:    rgba(56,189,248,.12);
+  --et-info-ring:    rgba(56,189,248,.30);
+  --et-success-tint: rgba(52,211,153,.12);
+  --et-success-ring: rgba(52,211,153,.30);
+  --et-error-tint:   rgba(251,113,133,.12);
+  --et-error-ring:   rgba(251,113,133,.28);
+  --et-warning-tint: rgba(251,191,36,.10);
+  --et-warning-ring: rgba(251,191,36,.26);
+  --et-loading-tint: rgba(129,140,248,.12);
+  --et-loading-ring: rgba(129,140,248,.28);
   background: linear-gradient(135deg, #0f2942 0%, #1a3d5c 100%) !important;
   color: #e0f2fe !important;
   border: 1px solid rgba(186,230,253,.15) !important;
@@ -677,11 +790,28 @@
 .editora-toast[data-theme="ocean"].editora-toast-success::before { background: #34d399; }
 .editora-toast[data-theme="ocean"].editora-toast-error::before   { background: #fb7185; }
 .editora-toast[data-theme="ocean"].editora-toast-warning::before { background: #fbbf24; }
-.editora-toast[data-theme="ocean"].editora-toast-loading::before { background: #818cf8; }
-.editora-toast[data-theme="ocean"].editora-toast-promise::before { background: #c084fc; }
+.editora-toast[data-theme="ocean"].editora-toast-loading::before,
+.editora-toast[data-theme="ocean"].editora-toast-promise::before { background: #818cf8; }
 
-/* forest */
+/* ── FOREST ──────────────────────────────────────────────────── */
 .editora-toast[data-theme="forest"] {
+  --et-text:          #DCFCE7;
+  --et-text-muted:    rgba(220,252,231,.72);
+  --et-text-inverse:  #052e16;
+  --et-bg:            #052e16;
+  --et-bg-subtle:     #14532d;
+  --et-border:        rgba(220,252,231,.14);
+  --et-border-strong: rgba(220,252,231,.26);
+  --et-info-tint:    rgba(74,222,128,.10);
+  --et-info-ring:    rgba(74,222,128,.26);
+  --et-success-tint: rgba(134,239,172,.10);
+  --et-success-ring: rgba(134,239,172,.26);
+  --et-error-tint:   rgba(252,165,165,.10);
+  --et-error-ring:   rgba(252,165,165,.26);
+  --et-warning-tint: rgba(253,230,138,.10);
+  --et-warning-ring: rgba(253,230,138,.24);
+  --et-loading-tint: rgba(110,231,183,.10);
+  --et-loading-ring: rgba(110,231,183,.26);
   background: linear-gradient(135deg, #052e16 0%, #14532d 100%) !important;
   color: #dcfce7 !important;
   border: 1px solid rgba(220,252,231,.12) !important;
@@ -691,11 +821,28 @@
 .editora-toast[data-theme="forest"].editora-toast-success::before { background: #86efac; }
 .editora-toast[data-theme="forest"].editora-toast-error::before   { background: #fca5a5; }
 .editora-toast[data-theme="forest"].editora-toast-warning::before { background: #fde68a; }
-.editora-toast[data-theme="forest"].editora-toast-loading::before { background: #6ee7b7; }
-.editora-toast[data-theme="forest"].editora-toast-promise::before { background: #d8b4fe; }
+.editora-toast[data-theme="forest"].editora-toast-loading::before,
+.editora-toast[data-theme="forest"].editora-toast-promise::before { background: #6ee7b7; }
 
-/* sunset */
+/* ── SUNSET ──────────────────────────────────────────────────── */
 .editora-toast[data-theme="sunset"] {
+  --et-text:          #FED7AA;
+  --et-text-muted:    rgba(254,215,170,.72);
+  --et-text-inverse:  #431407;
+  --et-bg:            #431407;
+  --et-bg-subtle:     #7c2d12;
+  --et-border:        rgba(254,215,170,.14);
+  --et-border-strong: rgba(254,215,170,.26);
+  --et-info-tint:    rgba(251,146,60,.10);
+  --et-info-ring:    rgba(251,146,60,.26);
+  --et-success-tint: rgba(251,191,36,.10);
+  --et-success-ring: rgba(251,191,36,.26);
+  --et-error-tint:   rgba(248,113,113,.10);
+  --et-error-ring:   rgba(248,113,113,.24);
+  --et-warning-tint: rgba(253,230,138,.10);
+  --et-warning-ring: rgba(253,230,138,.24);
+  --et-loading-tint: rgba(192,132,252,.10);
+  --et-loading-ring: rgba(192,132,252,.26);
   background: linear-gradient(135deg, #431407 0%, #7c2d12 100%) !important;
   color: #fed7aa !important;
   border: 1px solid rgba(254,215,170,.12) !important;
@@ -705,11 +852,28 @@
 .editora-toast[data-theme="sunset"].editora-toast-success::before { background: #fbbf24; }
 .editora-toast[data-theme="sunset"].editora-toast-error::before   { background: #f87171; }
 .editora-toast[data-theme="sunset"].editora-toast-warning::before { background: #fde68a; }
-.editora-toast[data-theme="sunset"].editora-toast-loading::before { background: #c084fc; }
-.editora-toast[data-theme="sunset"].editora-toast-promise::before { background: #e879f9; }
+.editora-toast[data-theme="sunset"].editora-toast-loading::before,
+.editora-toast[data-theme="sunset"].editora-toast-promise::before { background: #c084fc; }
 
-/* midnight */
+/* ── MIDNIGHT ────────────────────────────────────────────────── */
 .editora-toast[data-theme="midnight"] {
+  --et-text:          #E2E8F0;
+  --et-text-muted:    rgba(226,232,240,.68);
+  --et-text-inverse:  #0a0a0f;
+  --et-bg:            #0a0a0f;
+  --et-bg-subtle:     #0f0f1a;
+  --et-border:        rgba(226,232,240,.07);
+  --et-border-strong: rgba(226,232,240,.18);
+  --et-info-tint:    rgba(96,165,250,.10);
+  --et-info-ring:    rgba(96,165,250,.26);
+  --et-success-tint: rgba(52,211,153,.10);
+  --et-success-ring: rgba(52,211,153,.26);
+  --et-error-tint:   rgba(248,113,113,.10);
+  --et-error-ring:   rgba(248,113,113,.24);
+  --et-warning-tint: rgba(251,191,36,.10);
+  --et-warning-ring: rgba(251,191,36,.24);
+  --et-loading-tint: rgba(129,140,248,.10);
+  --et-loading-ring: rgba(129,140,248,.26);
   background: #0a0a0f !important;
   color: #e2e8f0 !important;
   border: 1px solid rgba(226,232,240,.07) !important;
@@ -719,11 +883,33 @@
 .editora-toast[data-theme="midnight"].editora-toast-success::before { background: #34d399; }
 .editora-toast[data-theme="midnight"].editora-toast-error::before   { background: #f87171; }
 .editora-toast[data-theme="midnight"].editora-toast-warning::before { background: #fbbf24; }
-.editora-toast[data-theme="midnight"].editora-toast-loading::before { background: #818cf8; }
-.editora-toast[data-theme="midnight"].editora-toast-promise::before { background: #c084fc; }
+.editora-toast[data-theme="midnight"].editora-toast-loading::before,
+.editora-toast[data-theme="midnight"].editora-toast-promise::before { background: #818cf8; }
 
-/* retro */
+/* ── RETRO ───────────────────────────────────────────────────── */
+/*
+   FIX: retro is a light theme (cream bg) so text must be dark.
+   Also kill the tinted backgrounds from level classes.
+*/
 .editora-toast[data-theme="retro"] {
+  --et-text:          #1C1917;
+  --et-text-muted:    #57534E;
+  --et-text-inverse:  #FEFCE8;
+  --et-bg:            #FEFCE8;
+  --et-bg-subtle:     #FEF9C3;
+  --et-border:        #1C1917;
+  --et-border-strong: #1C1917;
+  /* Neutralise tints so level classes don't add colour */
+  --et-info-tint:    transparent;
+  --et-info-ring:    transparent;
+  --et-success-tint: transparent;
+  --et-success-ring: transparent;
+  --et-error-tint:   transparent;
+  --et-error-ring:   transparent;
+  --et-warning-tint: transparent;
+  --et-warning-ring: transparent;
+  --et-loading-tint: transparent;
+  --et-loading-ring: transparent;
   background: #FEFCE8 !important;
   color: #1C1917 !important;
   border: 2px solid #1C1917 !important;
@@ -731,18 +917,40 @@
   box-shadow: 4px 4px 0 #1C1917 !important;
   font-family: 'Courier New', 'Courier', monospace !important;
 }
-.editora-toast[data-theme="retro"].editora-toast-info    { border-color: #2563EB !important; box-shadow: 4px 4px 0 #2563EB !important; }
-.editora-toast[data-theme="retro"].editora-toast-success { border-color: #16A34A !important; box-shadow: 4px 4px 0 #16A34A !important; }
-.editora-toast[data-theme="retro"].editora-toast-error   { border-color: #DC2626 !important; box-shadow: 4px 4px 0 #DC2626 !important; }
-.editora-toast[data-theme="retro"].editora-toast-warning { border-color: #D97706 !important; box-shadow: 4px 4px 0 #D97706 !important; }
 .editora-toast[data-theme="retro"]::before { display: none !important; }
+/* Level border colours replace the level tinted backgrounds */
+.editora-toast[data-theme="retro"].editora-toast-info {
+  background: #FEFCE8 !important;
+  border-color: #2563EB !important;
+  box-shadow: 4px 4px 0 #2563EB !important;
+}
+.editora-toast[data-theme="retro"].editora-toast-success {
+  background: #FEFCE8 !important;
+  border-color: #16A34A !important;
+  box-shadow: 4px 4px 0 #16A34A !important;
+}
+.editora-toast[data-theme="retro"].editora-toast-error {
+  background: #FEFCE8 !important;
+  border-color: #DC2626 !important;
+  box-shadow: 4px 4px 0 #DC2626 !important;
+}
+.editora-toast[data-theme="retro"].editora-toast-warning {
+  background: #FEFCE8 !important;
+  border-color: #D97706 !important;
+  box-shadow: 4px 4px 0 #D97706 !important;
+}
+.editora-toast[data-theme="retro"].editora-toast-loading,
+.editora-toast[data-theme="retro"].editora-toast-promise {
+  background: #FEFCE8 !important;
+  border-color: #6366F1 !important;
+  box-shadow: 4px 4px 0 #6366F1 !important;
+}
 
-/* ── Accessibility ────────────────────────────────────────────── */
+/* ── Accessibility ───────────────────────────────────────────── */
 .editora-toast:focus-visible {
   outline: 2px solid var(--et-info);
   outline-offset: 2px;
 }
-
 .editora-toast-action:focus-visible,
 .editora-toast-close:focus-visible {
   outline: 2px solid var(--et-info);
@@ -758,14 +966,8 @@
     animation: none !important;
     transform: none !important;
   }
-
-  .editora-toast-progress-bar::after {
-    animation: none !important;
-  }
-
-  .editora-toast-spinner {
-    animation: et-spin 1.2s linear infinite;
-  }
+  .editora-toast-progress-bar::after { animation: none !important; }
+  .editora-toast-spinner { animation: et-spin 1.2s linear infinite; }
 }
 
 /* ── Mobile ──────────────────────────────────────────────────── */
@@ -776,14 +978,12 @@
     width: auto !important;
     transform: none !important;
   }
-
   .editora-toast {
     min-width: auto;
     width: 100%;
     max-width: none;
     border-radius: 10px;
   }
-
   .editora-toast-center {
     top: max(12px, env(safe-area-inset-top));
     left: max(12px, env(safe-area-inset-left));
@@ -791,28 +991,17 @@
     transform: none;
     align-items: stretch;
   }
-
-  .editora-toast-actions {
-    justify-content: stretch;
-  }
-
-  .editora-toast-action {
-    flex: 1;
-    justify-content: center;
-  }
+  .editora-toast-actions { justify-content: stretch; }
+  .editora-toast-action  { flex: 1; justify-content: center; }
 }
 
-/* ── Backward-compat aliases ────────────────────────────────── */
+/* ── Backward-compat ─────────────────────────────────────────── */
 .editora-toast .close {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  font-size: 16px;
-  opacity: 0.5;
+  top: 10px; right: 10px;
+  background: none; border: none;
+  color: inherit; cursor: pointer;
+  font-size: 16px; opacity: 0.5;
   transition: opacity 0.2s ease;
 }
 .editora-toast .close:hover { opacity: 1; }
