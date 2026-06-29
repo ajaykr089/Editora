@@ -1,5 +1,10 @@
 # @editora/background-color
 
+[![Version](https://img.shields.io/npm/v/@editora/background-color)](https://www.npmjs.com/package/@editora/background-color)
+[![License](https://img.shields.io/npm/l/@editora/background-color)](https://github.com/ajaykr089/Editora/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Size](https://img.shields.io/bundlephobia/minzip/@editora/background-color)](https://bundlephobia.com/package/@editora/background-color)
+
 > [!IMPORTANT]
 > **Live Website:** https://editora-ecosystem.netlify.app/  
 > **Storybook:** https://editora-ecosystem-storybook.netlify.app/

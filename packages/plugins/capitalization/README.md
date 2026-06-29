@@ -1,5 +1,10 @@
 # @editora/capitalization
 
+[![Version](https://img.shields.io/npm/v/@editora/capitalization)](https://www.npmjs.com/package/@editora/capitalization)
+[![License](https://img.shields.io/npm/l/@editora/capitalization)](https://github.com/ajaykr089/Editora/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Size](https://img.shields.io/bundlephobia/minzip/@editora/capitalization)](https://bundlephobia.com/package/@editora/capitalization)
+
 > [!IMPORTANT]
 > **Live Website:** https://editora-ecosystem.netlify.app/  
 > **Storybook:** https://editora-ecosystem-storybook.netlify.app/

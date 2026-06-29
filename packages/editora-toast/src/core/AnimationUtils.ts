@@ -146,12 +146,12 @@ export class AnimationManager {
           await Promise.resolve(animation.show(element, toast));
         } else {
           // Fallback to CSS animation
-          this.animateCssShow(element);
+          await this.animateCssShow(element);
         }
         break;
       case 'css':
       default:
-        this.animateCssShow(element);
+        await this.animateCssShow(element);
         break;
     }
   }
@@ -188,12 +188,12 @@ export class AnimationManager {
           await Promise.resolve(animation.hide(element, toast));
         } else {
           // Fallback to CSS animation
-          this.animateCssHide(element);
+          await this.animateCssHide(element);
         }
         break;
       case 'css':
       default:
-        this.animateCssHide(element);
+        await this.animateCssHide(element);
         break;
     }
   }
@@ -212,16 +212,22 @@ export class AnimationManager {
   }
 
   // CSS-based show animation (existing behavior)
-  private animateCssShow(element: HTMLElement): void {
-    requestAnimationFrame(() => {
-      element.classList.add('show');
+  private animateCssShow(element: HTMLElement): Promise<void> {
+    return new Promise((resolve) => {
+      requestAnimationFrame(() => {
+        element.classList.add('show');
+        window.setTimeout(resolve, 220);
+      });
     });
   }
 
   // CSS-based hide animation (existing behavior)
-  private animateCssHide(element: HTMLElement): void {
-    element.classList.remove('show');
-    element.classList.add('hiding');
+  private animateCssHide(element: HTMLElement): Promise<void> {
+    return new Promise((resolve) => {
+      element.classList.remove('show');
+      element.classList.add('hiding');
+      window.setTimeout(resolve, 220);
+    });
   }
 
   // Spring-based show animation

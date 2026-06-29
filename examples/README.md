@@ -38,7 +38,22 @@ Features:
 - Custom toolbar with JavaScript event handlers
 - Real-time content updates
 
-### 3. Web Component Examples
+### 3. Editora Toast (`editora-toast/`)
+Standalone CodeSandbox-ready Vite example for `@editora/toast`.
+
+```bash
+cd examples/editora-toast
+npm install
+npm run dev
+```
+
+Features:
+- stacked and expandable toast layouts
+- title/description content, rich colors, action/cancel buttons
+- promise, progress, important, duplicate-safe, and custom-rendered toasts
+- headless state subscription with `toast.subscribe()`
+
+### 4. Web Component Examples
 Standalone HTML files demonstrating web component usage:
 
 #### Basic Web Component (`webcomponent-basic.html`)
@@ -105,7 +120,7 @@ Features:
 - Customizable toolbar layouts
 - All 37+ native plugins available
 
-### 4. Legacy Static Docs (`web/`)
+### 5. Legacy Static Docs (`web/`)
 Legacy static HTML documentation website.
 
 ```bash
@@ -123,7 +138,7 @@ Includes:
 - Plugin documentation
 - Keyboard shortcuts guide
 
-### 5. Professional Docs (Docusaurus) (`editora-docs/`)
+### 6. Professional Docs (Docusaurus) (`editora-docs/`)
 Modern documentation site with structured navigation, themed UI, package references, and migration-ready markdown content.
 
 ```bash
@@ -137,7 +152,7 @@ Includes:
 - Getting started, guides, package docs, plugin docs, and API/FAQ sections
 - Mapped coverage of existing `examples/web/docs` topics
 
-### 6. Hospital Management Admin (`hospital-management/`)
+### 7. Hospital Management Admin (`hospital-management/`)
 Frontend-first SaaS-grade hospital admin dashboard built with the Editora UI ecosystem.
 
 ```bash
@@ -153,7 +168,7 @@ Includes:
 - In-memory API + TanStack Query + RHF/Zod forms
 - Toasts, confirmations, loading/empty/error states
 
-### 7. ui-core Direct in Vue (`ui-core-vue-direct/`)
+### 8. ui-core Direct in Vue (`ui-core-vue-direct/`)
 Vue 3 example using `@editora/ui-core` custom elements directly, without `@editora/ui-vue`.
 
 ```bash
@@ -168,7 +183,7 @@ Includes:
 - direct `CustomEvent` handling from Vue
 - direct `ui-sortable` property assignment through refs
 
-### 8. ui-core Direct in Svelte (`ui-core-svelte-direct/`)
+### 9. ui-core Direct in Svelte (`ui-core-svelte-direct/`)
 Svelte example using `@editora/ui-core` directly, without `@editora/ui-svelte`.
 
 ```bash

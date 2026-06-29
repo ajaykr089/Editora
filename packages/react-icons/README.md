@@ -1,5 +1,10 @@
 # @editora/react-icons
 
+[![Version](https://img.shields.io/npm/v/@editora/react-icons)](https://www.npmjs.com/package/@editora/react-icons)
+[![License](https://img.shields.io/npm/l/@editora/react-icons)](https://github.com/ajaykr089/Editora/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Size](https://img.shields.io/bundlephobia/minzip/@editora/react-icons)](https://bundlephobia.com/package/@editora/react-icons)
+
 > [!IMPORTANT]
 > **Live Website:** https://editora-ecosystem.netlify.app/  
 > **Storybook:** https://editora-ecosystem-storybook.netlify.app/?path=/story/ui-icons-catalog--all-icons

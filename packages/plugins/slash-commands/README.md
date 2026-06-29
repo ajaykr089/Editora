@@ -1,5 +1,10 @@
 # @editora/slash-commands
 
+[![Version](https://img.shields.io/npm/v/@editora/slash-commands)](https://www.npmjs.com/package/@editora/slash-commands)
+[![License](https://img.shields.io/npm/l/@editora/slash-commands)](https://github.com/ajaykr089/Editora/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Size](https://img.shields.io/bundlephobia/minzip/@editora/slash-commands)](https://bundlephobia.com/package/@editora/slash-commands)
+
 > [!IMPORTANT]
 > **Live Website:** https://editora-ecosystem.netlify.app/  
 > **Storybook:** https://editora-ecosystem-storybook.netlify.app/

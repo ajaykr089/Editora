@@ -101,6 +101,8 @@ export interface ToastAction {
   label: string;
   onClick: () => void;
   primary?: boolean;
+  dismissOnClick?: boolean;
+  altText?: string;
 }
 
 export interface ToastProgress {
@@ -109,12 +111,16 @@ export interface ToastProgress {
 }
 
 export interface ToastContent {
-  message: string;
+  message?: string;
+  title?: string;
+  description?: string;
   icon?: string;
   actions?: ToastAction[];
+  action?: ToastAction;
+  cancel?: ToastAction;
   progress?: ToastProgress;
   html?: boolean; // if true, message is treated as HTML
-  render?: () => HTMLElement; // custom render function
+  render?: (toast: ToastInstance) => HTMLElement; // custom render function
 }
 
 export interface ToastOptions extends Partial<ToastContent> {
@@ -126,6 +132,7 @@ export interface ToastOptions extends Partial<ToastContent> {
   group?: string; // for grouping related toasts
   persistent?: boolean; // if true, no auto-dismiss
   closable?: boolean; // show close button
+  closeButton?: boolean; // Sonner-compatible alias for closable
   pauseOnHover?: boolean;
   pauseOnFocus?: boolean;
   swipeDismiss?: boolean;
@@ -134,6 +141,12 @@ export interface ToastOptions extends Partial<ToastContent> {
   rtl?: boolean; // RTL support
   theme?: ToastTheme;
   customClass?: string;
+  important?: boolean; // bypass queue pressure and dismiss lower-priority visible toasts first
+  preventDuplicate?: boolean;
+  dedupeKey?: string;
+  dedupeScope?: 'visible' | 'queue' | 'all';
+  ariaLive?: 'polite' | 'assertive' | 'off';
+  role?: 'status' | 'alert';
   animation?: AnimationConfig; // Animation configuration
   onShow?: () => void;
   onHide?: () => void;
@@ -169,8 +182,15 @@ export interface ToastConfig {
   position: ToastPosition;
   duration: number;
   maxVisible: number;
+  visibleToasts?: number; // Sonner-compatible alias for maxVisible
   queueStrategy: QueueStrategy;
   theme: ToastTheme;
+  richColors: boolean;
+  expand: boolean;
+  stack: boolean;
+  offset: number | string;
+  mobileOffset: number | string;
+  gap: number;
   pauseOnHover: boolean;
   pauseOnFocus: boolean;
   pauseOnWindowBlur: boolean; // Pause toasts when window loses focus
@@ -179,10 +199,23 @@ export interface ToastConfig {
   dragDismiss: boolean;
   rtl: boolean; // RTL support
   enableAccessibility: boolean;
+  closeButton: boolean;
+  preventDuplicate: boolean;
+  dedupeScope: 'visible' | 'queue' | 'all';
   container?: HTMLElement;
   zIndex?: number;
   animation?: AnimationConfig; // Default animation configuration
 }
+
+export interface ToastState {
+  toasts: ToastInstance[];
+  visible: ToastInstance[];
+  queued: ToastInstance[];
+  groups: ToastGroup[];
+  config: ToastConfig;
+}
+
+export type ToastSubscriber = (state: ToastState) => void;
 
 export interface ToastPlugin {
   name: string;
@@ -201,5 +234,7 @@ export interface ToastManager {
   use(plugin: ToastPlugin): void;
   getConfig(): ToastConfig;
   getToasts(): ToastInstance[];
+  getState(): ToastState;
+  subscribe(listener: ToastSubscriber): () => void;
   getGroups(): ToastGroup[];
 }

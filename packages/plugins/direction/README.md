@@ -1,5 +1,10 @@
 # @editora/direction
 
+[![Version](https://img.shields.io/npm/v/@editora/direction)](https://www.npmjs.com/package/@editora/direction)
+[![License](https://img.shields.io/npm/l/@editora/direction)](https://github.com/ajaykr089/Editora/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Size](https://img.shields.io/bundlephobia/minzip/@editora/direction)](https://bundlephobia.com/package/@editora/direction)
+
 > [!IMPORTANT]
 > **Live Website:** https://editora-ecosystem.netlify.app/  
 > **Storybook:** https://editora-ecosystem-storybook.netlify.app/

@@ -1,5 +1,10 @@
 # @editora/template
 
+[![Version](https://img.shields.io/npm/v/@editora/template)](https://www.npmjs.com/package/@editora/template)
+[![License](https://img.shields.io/npm/l/@editora/template)](https://github.com/ajaykr089/Editora/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Size](https://img.shields.io/bundlephobia/minzip/@editora/template)](https://bundlephobia.com/package/@editora/template)
+
 > [!IMPORTANT]
 > **Live Website:** https://editora-ecosystem.netlify.app/  
 > **Storybook:** https://editora-ecosystem-storybook.netlify.app/

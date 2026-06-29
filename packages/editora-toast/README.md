@@ -16,6 +16,9 @@ A modern, framework-agnostic toast notification library designed for enterprise 
 
 ## 📸 Screenshots
 
+### Animated Toast Demo
+![Animated Toast Demo](toast-screenshots/toast-demo.gif)
+
 ### Hero Section
 ![Hero Section](toast-screenshots/hero-section.png)
 
@@ -29,7 +32,7 @@ A modern, framework-agnostic toast notification library designed for enterprise 
 ![Interactive Actions](toast-screenshots/interactive-actions.png)
 
 ### Interactive Feedback Form
-![Interactive Feedback Form](toast-screenshots/nteractive-feedback-form.png)
+![Interactive Feedback Form](toast-screenshots/interactive-feedback-form.png)
 
 ### Progress Scenarios
 ![Progress Scenarios](toast-screenshots/progress-scenarios.png)
@@ -63,6 +66,8 @@ A modern, framework-agnostic toast notification library designed for enterprise 
 ### Advanced Features (v2.0.0)
 - 🔄 **Toast Updates** - Modify existing toasts dynamically with smooth transitions
 - 🎯 **Toast Grouping** - Group related notifications with stacking and management
+- 🧱 **Stacked Layouts** - Sonner-style collapsed stacks with hover/focus expansion
+- 📝 **Title + Description API** - Modern content hierarchy for concise messages
 - 🎪 **Custom Animation Hooks** - User-defined animation functions for complete control
 - 📍 **Multiple Positions** - Support for all screen corners and center positioning
 - 🎨 **Animation Manager** - Centralized system supporting CSS, spring, and custom animations
@@ -71,8 +76,10 @@ A modern, framework-agnostic toast notification library designed for enterprise 
 - 🔄 **Promise Integration** - Seamless integration with async operations and promises
 - 📊 **Progress Tracking** - Built-in progress bars with percentage display
 - 🎯 **Action Buttons** - Interactive buttons within toasts for user actions
+- ↩️ **Action/Cancel Shortcuts** - First-class `action` and `cancel` options for undo flows
 - 🎨 **Theme Variants** - Light, dark, system, colored, minimal, glass, neon, retro, ocean, forest, sunset, midnight themes
 - 🔧 **Global Configuration** - Comprehensive configuration system for all aspects
+- 🧩 **Headless State** - `subscribe()` and `getState()` for custom renderers and framework adapters
 
 ### Performance & Architecture
 
@@ -228,28 +235,35 @@ import "@editora/toast/toast.css";
 // Global configuration with all available options
 toast.configure({
   // Positioning
-  position: 'top-right', // 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'
+  position: 'top-right', // 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'center'
+  offset: 16,
+  mobileOffset: 16,
 
   // Timing
   duration: 5000, // Default duration in milliseconds
   pauseOnHover: true, // Pause timer when hovering
+  pauseOnWindowBlur: true, // Pause timers when the tab/window is inactive
 
   // Display
-  maxVisible: 5, // Maximum visible toasts
+  maxVisible: 3, // Maximum visible toasts
+  visibleToasts: 3, // Sonner-compatible alias
+  stack: false, // Set true to collapse visible toasts into a stack
+  expand: true, // Keep stacked toasts expanded by default
+  richColors: false, // Use semantic colored surfaces
+  closeButton: true, // Show close buttons globally
   theme: 'system', // Theme: 'light' | 'dark' | 'system' | 'colored' | 'minimal' | 'glass' | 'neon' | 'retro' | 'ocean' | 'forest' | 'sunset' | 'midnight' | 'custom'
 
   // Accessibility
   enableAccessibility: true, // Enable screen reader support
-  enableKeyboardNavigation: true, // Enable keyboard navigation
 
   // Interactions
   swipeDismiss: true, // Enable swipe to dismiss on mobile
   dragDismiss: false, // Enable drag to dismiss
-  clickToDismiss: true, // Click anywhere to dismiss
 
   // Queue Management
-  queueStrategy: 'priority', // 'fifo' | 'priority' | 'stack'
-  maxQueueSize: 10, // Maximum queued toasts
+  queueStrategy: 'fifo', // 'fifo' | 'lifo'
+  preventDuplicate: true,
+  dedupeScope: 'all', // 'visible' | 'queue' | 'all'
 
   // Animations
   animation: {
@@ -263,10 +277,7 @@ toast.configure({
   },
 
   // Advanced
-  enableHtml: false, // Allow HTML in messages (use with caution)
-  sanitizeHtml: true, // Sanitize HTML content
-  zIndex: 9999, // Base z-index for toasts
-  containerClass: 'custom-container' // Custom container class
+  zIndex: 9999 // Base z-index for toasts
 });
 ```
 
@@ -513,7 +524,7 @@ toast.group('validation-errors', {
 ```
 
 ### Interactive Feedback Forms
-![Interactive Feedback Form](toast-screenshots/nteractive-feedback-form.png)
+![Interactive Feedback Form](toast-screenshots/interactive-feedback-form.png)
 
 Create interactive forms within toasts:
 
@@ -722,6 +733,8 @@ toast.triggerEditorEvent('media-upload-progress', { progress: 50 });
 - `toast.group(id, options)` - Group related toasts with stacking behavior
 - `toast.configure(config)` - Update global configuration
 - `toast.use(plugin)` - Install a plugin
+- `toast.getState()` - Read visible, queued, grouped, and configured toast state
+- `toast.subscribe(listener)` - Subscribe to state changes for headless/custom renderers
 - `toast.onEditorEvent(event, handler)` - Listen for editor integration events
 - `toast.triggerEditorEvent(event, data)` - Trigger editor integration events
 
@@ -730,22 +743,27 @@ toast.triggerEditorEvent('media-upload-progress', { progress: 50 });
 ```typescript
 interface ToastOptions {
   // Content
-  message: string;
+  message?: string;
+  title?: string;
+  description?: string;
   level?: 'info' | 'success' | 'error' | 'warning' | 'loading' | 'progress' | 'promise' | 'custom';
   icon?: string;
   html?: boolean;
-  render?: () => HTMLElement;
+  render?: (toast: ToastInstance) => HTMLElement;
 
   // Behavior
   duration?: number;
   pauseOnHover?: boolean;
-  clickToDismiss?: boolean;
+  persistent?: boolean;
+  closeButton?: boolean;
 
   // Positioning
-  position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
+  position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'center';
 
   // Interactions
   actions?: ToastAction[];
+  action?: ToastAction;
+  cancel?: ToastAction;
   swipeDismiss?: boolean;
   dragDismiss?: boolean;
 
@@ -754,30 +772,33 @@ interface ToastOptions {
 
   // Styling
   theme?: string;
-  className?: string;
+  customClass?: string;
 
   // Advanced
-  groupId?: string;
+  group?: string;
   priority?: number;
+  important?: boolean;
+  preventDuplicate?: boolean;
+  dedupeKey?: string;
+  dedupeScope?: 'visible' | 'queue' | 'all';
+  ariaLive?: 'polite' | 'assertive' | 'off';
   animation?: ToastAnimation;
-  onShow?: (toast: Toast) => void;
-  onHide?: (toast: Toast) => void;
-  onUpdate?: (toast: Toast, updates: Partial<ToastOptions>) => void;
+  onShow?: () => void;
+  onHide?: () => void;
+  onUpdate?: (updates: Partial<ToastOptions>) => void;
 }
 
 interface ToastAction {
   label: string;
-  onClick: (toast: Toast) => void;
-  variant?: 'primary' | 'secondary' | 'ghost';
+  onClick: () => void;
   primary?: boolean;
+  dismissOnClick?: boolean;
+  altText?: string;
 }
 
 interface ToastProgress {
   value: number; // 0-100
   showPercentage?: boolean;
-  indeterminate?: boolean;
-  color?: string;
-  size?: 'sm' | 'md' | 'lg';
 }
 
 interface ToastAnimation {
@@ -801,11 +822,10 @@ cd Editora/packages/editora-toast
 # Install dependencies
 npm install
 
-# Start the demo server
-npm run demo
-# or
-python3 -m http.server 8086
-# Then open: http://localhost:8086/examples/web/toast-demo.html
+# Start the standalone CodeSandbox-ready example
+cd ../../examples/editora-toast
+npm install
+npm run dev
 ```
 
 The demo showcases:

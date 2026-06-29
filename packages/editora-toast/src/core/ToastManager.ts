@@ -1,5 +1,5 @@
 // ToastManager - Main orchestrator for the toast notification system
-import { ToastInstance, ToastOptions, ToastConfig, ToastManager as IToastManager, ToastPromiseOptions, ToastPlugin } from './types';
+import { ToastInstance, ToastOptions, ToastConfig, ToastManager as IToastManager, ToastPromiseOptions, ToastPlugin, ToastState, ToastSubscriber } from './types';
 import { ToastStore } from './ToastStore';
 import { ToastQueue } from './ToastQueue';
 import { ToastRenderer } from './ToastRenderer';
@@ -8,17 +8,26 @@ import { ToastLifecycle } from './ToastLifecycle';
 const DEFAULT_CONFIG: ToastConfig = {
   position: 'bottom-right',
   duration: 4000,
-  maxVisible: 5,
+  maxVisible: 3,
   queueStrategy: 'fifo',
   theme: 'system',
+  richColors: false,
+  expand: true,
+  stack: false,
+  offset: 16,
+  mobileOffset: 16,
+  gap: 8,
   pauseOnHover: true,
   pauseOnFocus: false,
   pauseOnWindowBlur: false, // Don't pause by default
-  swipeDismiss: false,
+  swipeDismiss: true,
   swipeDirection: 'any', // Allow any direction by default
   dragDismiss: false,
   rtl: false, // LTR by default
   enableAccessibility: true,
+  closeButton: false,
+  preventDuplicate: false,
+  dedupeScope: 'all',
   animation: { type: 'css' } // Default to CSS animations
 };
 
@@ -30,12 +39,13 @@ export class ToastManager implements IToastManager {
   private config: ToastConfig;
   private idCounter = 0;
   private pausedToasts = new Set<string>();
+  private subscribers = new Set<ToastSubscriber>();
   private windowFocusHandler?: () => void;
   private windowBlurHandler?: () => void;
   private visibilityChangeHandler?: () => void;
 
   constructor(config: Partial<ToastConfig> = {}) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
+    this.config = this.normalizeConfig({ ...DEFAULT_CONFIG, ...config });
 
     this.store = new ToastStore(this.config);
     this.queue = new ToastQueue(this.config);
@@ -51,25 +61,20 @@ export class ToastManager implements IToastManager {
     const id = options.id || `toast-${++this.idCounter}`;
     const toast: ToastInstance = {
       id,
-      options: { ...this.config, ...options },
+      options: this.normalizeToastOptions({ ...this.config, ...options }),
       createdAt: Date.now(),
       dismiss: () => this.dismiss(id),
       update: (updates) => this.update(id, updates)
     };
 
-    // Lifecycle: beforeShow
     this.lifecycle.beforeShow(toast).then(async () => {
-      // Add to store
+      const changes = this.queue.enqueue(toast);
+      if (changes.rejected) return;
+
       this.store.addToast(toast);
-
-      // Add to queue (which handles visibility)
-      this.queue.enqueue(toast);
-
-      // Show the toast
-      await this.renderer.showToast(toast);
-
-      // Lifecycle: afterShow
-      this.lifecycle.afterShow(toast);
+      await this.hideToasts(changes.hide, true);
+      await this.showToasts(changes.show);
+      this.notify();
     });
 
     return toast;
@@ -81,14 +86,15 @@ export class ToastManager implements IToastManager {
 
     // Lifecycle: beforeUpdate
     this.lifecycle.beforeUpdate(toast, options).then(async () => {
-      // Update in store
-      this.store.updateToast(id, { options: { ...toast.options, ...options } });
+      const normalizedUpdates = this.normalizeToastOptions({ ...toast.options, ...options });
+      this.store.updateToast(id, { options: normalizedUpdates });
 
-      // Update rendering
-      await this.renderer.updateToast(toast, options);
+      if (this.queue.isVisible(id)) {
+        await this.renderer.updateToast(toast, options);
+      }
 
-      // Lifecycle: afterUpdate
       this.lifecycle.afterUpdate(toast, options);
+      this.notify();
     });
 
     return true;
@@ -98,29 +104,28 @@ export class ToastManager implements IToastManager {
     const toast = this.store.getToast(id);
     if (!toast) return false;
 
-    // Lifecycle: beforeHide
     this.lifecycle.beforeHide(toast).then(async () => {
-      // Remove from queue
-      this.queue.dequeue(id);
+      const wasVisible = this.queue.isVisible(id);
+      const changes = this.queue.dequeue(id);
 
-      // Hide the toast
-      await this.renderer.hideToast(toast);
+      if (wasVisible) {
+        await this.renderer.hideToast(toast);
+      }
 
-      // Remove from store
       this.store.removeToast(id);
-
-      // Lifecycle: afterHide
       this.lifecycle.afterHide(toast);
+      await this.showToasts(changes.show);
+      this.notify();
     });
 
     return true;
   }
 
   clear(): void {
-    const toasts = this.store.getAllToasts();
-    this.lifecycle.batchHide(toasts).then(() => {
-      this.queue.clear();
+    const toasts = this.queue.clear();
+    Promise.all(toasts.map(toast => this.hideOne(toast, false))).then(() => {
       this.store.clear();
+      this.notify();
     });
   }
 
@@ -136,6 +141,9 @@ export class ToastManager implements IToastManager {
         typeof options.success === 'function' ? options.success(result) : options.success,
         'success'
       );
+      if (successOptions.duration === undefined && !successOptions.persistent) {
+        successOptions.duration = this.config.duration;
+      }
       this.update(loadingToast.id, successOptions);
 
       options.onSuccess?.(result);
@@ -147,6 +155,9 @@ export class ToastManager implements IToastManager {
         typeof options.error === 'function' ? options.error(error) : options.error,
         'error'
       );
+      if (errorOptions.duration === undefined && !errorOptions.persistent) {
+        errorOptions.duration = this.config.duration;
+      }
       this.update(loadingToast.id, errorOptions);
 
       options.onError?.(error);
@@ -167,14 +178,15 @@ export class ToastManager implements IToastManager {
   // Configuration
   configure(config: Partial<ToastConfig>): void {
     const hadPauseOnWindowBlur = this.config.pauseOnWindowBlur;
-    this.config = { ...this.config, ...config };
-    this.store.updateConfig(config);
-    this.queue.updateConfig(config);
+    this.config = this.normalizeConfig({ ...this.config, ...config });
+    this.store.updateConfig(this.config);
+    this.renderer.updateConfig(this.config);
+    const changes = this.queue.updateConfig(this.config);
+    this.hideToasts(changes.hide, true).then(() => this.showToasts(changes.show)).then(() => this.notify());
     if (config.pauseOnWindowBlur !== undefined && config.pauseOnWindowBlur !== hadPauseOnWindowBlur) {
       this.teardownWindowFocusHandling();
       this.setupWindowFocusHandling();
     }
-    // Renderer will use updated config for new toasts
   }
 
   getConfig(): ToastConfig {
@@ -184,6 +196,24 @@ export class ToastManager implements IToastManager {
   // State queries
   getToasts(): ToastInstance[] {
     return this.store.getAllToasts();
+  }
+
+  getState(): ToastState {
+    return {
+      toasts: this.store.getAllToasts(),
+      visible: this.queue.getVisible(),
+      queued: this.queue.getQueued(),
+      groups: this.store.getAllGroups(),
+      config: this.getConfig()
+    };
+  }
+
+  subscribe(listener: ToastSubscriber): () => void {
+    this.subscribers.add(listener);
+    listener(this.getState());
+    return () => {
+      this.subscribers.delete(listener);
+    };
   }
 
   getGroups() {
@@ -217,6 +247,63 @@ export class ToastManager implements IToastManager {
       return { message: input, level: defaultLevel };
     }
     return { ...input, level: input.level || defaultLevel };
+  }
+
+  private normalizeConfig(config: ToastConfig): ToastConfig {
+    const maxVisible = config.visibleToasts || config.maxVisible || DEFAULT_CONFIG.maxVisible;
+    return {
+      ...config,
+      maxVisible,
+      visibleToasts: maxVisible
+    };
+  }
+
+  private normalizeToastOptions(options: ToastOptions): ToastOptions {
+    const closable = options.closeButton ?? options.closable ?? this.config.closeButton;
+    const action = options.action ? { ...options.action, primary: options.action.primary ?? true } : undefined;
+    const actions = [
+      ...(action ? [action] : []),
+      ...(options.cancel ? [options.cancel] : []),
+      ...(options.actions || [])
+    ];
+
+    return {
+      ...options,
+      closable,
+      actions: actions.length > 0 ? actions : undefined,
+      ariaLive: options.ariaLive || (options.level === 'error' || options.important ? 'assertive' : 'polite'),
+      role: options.role || (options.level === 'error' || options.important ? 'alert' : 'status'),
+      preventDuplicate: options.preventDuplicate ?? this.config.preventDuplicate,
+      dedupeScope: options.dedupeScope || this.config.dedupeScope
+    };
+  }
+
+  private async showToasts(toasts: ToastInstance[]): Promise<void> {
+    for (const toast of toasts) {
+      await this.renderer.showToast(toast);
+      await this.lifecycle.afterShow(toast);
+    }
+  }
+
+  private async hideToasts(toasts: ToastInstance[], removeFromStore: boolean): Promise<void> {
+    for (const toast of toasts) {
+      await this.hideOne(toast, removeFromStore);
+    }
+  }
+
+  private async hideOne(toast: ToastInstance, removeFromStore: boolean): Promise<void> {
+    await this.lifecycle.beforeHide(toast);
+    await this.renderer.hideToast(toast);
+    if (removeFromStore) {
+      this.store.removeToast(toast.id);
+    }
+    await this.lifecycle.afterHide(toast);
+  }
+
+  private notify(): void {
+    if (this.subscribers.size === 0) return;
+    const state = this.getState();
+    this.subscribers.forEach(listener => listener(state));
   }
 
   // Editor integration (for RTE)

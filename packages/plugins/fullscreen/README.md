@@ -1,5 +1,10 @@
 # Fullscreen Plugin
 
+[![Version](https://img.shields.io/npm/v/@editora/plugin-fullscreen)](https://www.npmjs.com/package/@editora/plugin-fullscreen)
+[![License](https://img.shields.io/npm/l/@editora/plugin-fullscreen)](https://github.com/ajaykr089/Editora/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Size](https://img.shields.io/bundlephobia/minzip/@editora/plugin-fullscreen)](https://bundlephobia.com/package/@editora/plugin-fullscreen)
+
 > [!IMPORTANT]
 > **Live Website:** https://editora-ecosystem.netlify.app/  
 > **Storybook:** https://editora-ecosystem-storybook.netlify.app/

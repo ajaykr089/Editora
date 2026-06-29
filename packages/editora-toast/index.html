@@ -1,575 +1,778 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editora Toast - Advanced Features Demo</title>
-    <link rel="stylesheet" href="dist/toast.css">
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            line-height: 1.6;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editora Toast — Production-Ready Notifications</title>
+  <link rel="stylesheet" href="dist/toast.css">
+  <style>
+    /* ── Reset & tokens ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .demo-section {
-            margin: 30px 0;
-            padding: 20px;
-            border: 1px solid #e1e5e9;
-            border-radius: 8px;
-        }
+    :root {
+      --bg:       #FAFAF9;
+      --bg-card:  #FFFFFF;
+      --fg:       #1C1917;
+      --fg-muted: #78716C;
+      --border:   #E7E5E4;
+      --border-hover: #D6D3D1;
+      --accent:   #1C1917;
+      --accent-fg:#FAFAF9;
+      --blue:     #2563EB;
+      --green:    #16A34A;
+      --red:      #DC2626;
+      --amber:    #D97706;
+      --radius:   10px;
+      --font:     system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
 
-        .demo-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin: 15px 0;
-        }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:       #0C0A09;
+        --bg-card:  #1C1917;
+        --fg:       #F5F5F4;
+        --fg-muted: #A8A29E;
+        --border:   #292524;
+        --border-hover: #44403C;
+        --accent:   #F5F5F4;
+        --accent-fg:#1C1917;
+      }
+    }
 
-        button {
-            padding: 10px 15px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            background: white;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
+    html { scroll-behavior: smooth; }
 
-        button:hover {
-            background: #f9fafb;
-            border-color: #9ca3af;
-        }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.5;
+      font-size: 14px;
+      min-height: 100vh;
+    }
 
-        button.primary {
-            background: #3b82f6;
-            color: white;
-            border-color: #3b82f6;
-        }
+    /* ── Layout ─────────────────────────────────────────────── */
+    .page { max-width: 860px; margin: 0 auto; padding: 0 24px 80px; }
 
-        button.primary:hover {
-            background: #2563eb;
-        }
+    /* ── Hero ───────────────────────────────────────────────── */
+    .hero {
+      padding: 72px 0 56px;
+      border-bottom: 1px solid var(--border);
+    }
 
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-        }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--fg-muted);
+      margin-bottom: 20px;
+    }
 
-        pre {
-            background: #f6f8fa;
-            padding: 15px;
-            border-radius: 6px;
-            overflow-x: auto;
-            font-size: 13px;
-        }
+    .hero-eyebrow-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+    }
 
-        code {
-            background: #f6f8fa;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 12px;
-        }
-    </style>
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--fg-muted);
+    }
+
+    .hero p {
+      font-size: 16px;
+      color: var(--fg-muted);
+      max-width: 520px;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* ── Buttons ─────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: var(--font);
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--fg);
+      transition: border-color 140ms, background 140ms, transform 100ms, box-shadow 140ms;
+      white-space: nowrap;
+      line-height: 1;
+      text-decoration: none;
+    }
+    .btn:hover {
+      border-color: var(--border-hover);
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--accent-fg);
+      border-color: var(--accent);
+    }
+    .btn-primary:hover { opacity: 0.88; }
+
+    .btn-sm {
+      height: 30px;
+      padding: 0 10px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    /* Color variants */
+    .btn-blue   { border-color: rgba(37,99,235,.3); color: var(--blue); }
+    .btn-green  { border-color: rgba(22,163,74,.3); color: var(--green); }
+    .btn-red    { border-color: rgba(220,38,38,.3); color: var(--red); }
+    .btn-amber  { border-color: rgba(217,119,6,.3); color: var(--amber); }
+    .btn-blue:hover   { background: rgba(37,99,235,.06); }
+    .btn-green:hover  { background: rgba(22,163,74,.06); }
+    .btn-red:hover    { background: rgba(220,38,38,.06); }
+    .btn-amber:hover  { background: rgba(217,119,6,.06); }
+
+    /* ── Sections ─────────────────────────────────────────────── */
+    .section {
+      padding: 40px 0 0;
+    }
+
+    .section-header {
+      margin-bottom: 20px;
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--fg-muted);
+      margin-bottom: 6px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .section-desc {
+      font-size: 13px;
+      color: var(--fg-muted);
+      line-height: 1.5;
+    }
+
+    /* ── Card ─────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 14px;
+      color: var(--fg);
+    }
+
+    /* ── Button grids ─────────────────────────────────────────── */
+    .btn-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* ── Code block ───────────────────────────────────────────── */
+    .code-block {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 14px 16px;
+      font-size: 12px;
+      font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+      line-height: 1.6;
+      color: var(--fg-muted);
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+
+    .code-block .kw   { color: var(--blue); }
+    .code-block .str  { color: var(--green); }
+    .code-block .fn   { color: var(--amber); }
+    .code-block .cmt  { color: var(--fg-muted); opacity: .65; font-style: italic; }
+    .code-block .fg   { color: var(--fg); }
+
+    /* ── Theme grid ───────────────────────────────────────────── */
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 8px;
+    }
+
+    .theme-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--fg);
+      transition: border-color 140ms, background 140ms, transform 100ms;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .theme-btn:hover {
+      border-color: var(--border-hover);
+      background: var(--bg);
+      transform: translateY(-1px);
+    }
+
+    .theme-btn:active { transform: scale(0.96); }
+
+    .theme-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    /* ── Position picker ──────────────────────────────────────── */
+    .position-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      max-width: 300px;
+    }
+
+    .position-btn {
+      padding: 8px 4px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--fg-muted);
+      transition: all 140ms;
+      text-align: center;
+    }
+
+    .position-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: rgba(37,99,235,.04);
+    }
+
+    /* ── Active theme badge ───────────────────────────────────── */
+    .active-theme-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      height: 24px;
+      padding: 0 9px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      font-size: 11px;
+      color: var(--fg-muted);
+      margin-top: 12px;
+    }
+
+    .active-theme-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    /* ── Divider ──────────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 40px 0 0;
+    }
+
+    /* ── Install banner ───────────────────────────────────────── */
+    .install-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: var(--fg-muted);
+      margin-top: 16px;
+    }
+
+    .install-bar-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--fg-muted);
+      flex-shrink: 0;
+    }
+
+    .install-bar-cmd { color: var(--fg); flex: 1; }
+
+    .install-bar-copy {
+      flex-shrink: 0;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--fg-muted);
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 3px 8px;
+      font-family: var(--font);
+      transition: all 140ms;
+    }
+
+    .install-bar-copy:hover { border-color: var(--border-hover); color: var(--fg); }
+  </style>
 </head>
 <body>
-    <h1>🎉 Editora Toast - Advanced Features Demo</h1>
-    <p>This demo showcases the advanced features of the upgraded toast notification system.</p>
+<div class="page">
 
-    <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+  <!-- ── Hero ──────────────────────────────────────────────── -->
+  <header class="hero">
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-dot"></span>
+      Editora Toast · v2.x
+    </div>
+    <h1>Notifications that<br><em>don't get in the way.</em></h1>
+    <p>A zero-dependency toast library with spring physics, promise lifecycle, 13 themes, swipe-to-dismiss, RTL, and full accessibility — shipped in &lt;8 KB gzipped.</p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="showHeroToast()">See it live</button>
+      <button class="btn" onclick="showPromiseDemo()">Promise lifecycle</button>
+      <button class="btn" onclick="showStackDemo()">Stack mode</button>
+    </div>
+    <div class="install-bar">
+      <span class="install-bar-label">npm</span>
+      <span class="install-bar-cmd">npm install @editora/toast</span>
+      <button class="install-bar-copy" onclick="copyInstall(this)">Copy</button>
+    </div>
+  </header>
 
-    <!-- Basic Toasts -->
-    <div class="demo-section">
-        <h2>📝 Basic Toasts (Backward Compatible)</h2>
-        <p>These work exactly like the original v1.x API:</p>
-        <div class="demo-buttons">
-            <button onclick="showBasic('info')">Info Toast</button>
-            <button onclick="showBasic('success')">Success Toast</button>
-            <button onclick="showBasic('error')">Error Toast</button>
-        </div>
-        <pre><code>// Original API (still works) — now accepts an optional advanced `options` object
-    import { toast } from '@editora/toast';
-    import "@editora/toast/toast.css";
+  <!-- ── Basic types ────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-label">Getting started</div>
+      <div class="section-title">Toast types</div>
+      <div class="section-desc">Four semantic levels plus loading and promise, all with auto-dismiss.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Fire a toast</div>
+      <div class="btn-grid">
+        <button class="btn btn-blue"  onclick="fire('info')">Info</button>
+        <button class="btn btn-green" onclick="fire('success')">Success</button>
+        <button class="btn btn-red"   onclick="fire('error')">Error</button>
+        <button class="btn btn-amber" onclick="fire('warning')">Warning</button>
+        <button class="btn"           onclick="fire('loading')">Loading</button>
+        <button class="btn"           onclick="fireWithTitle()">With title</button>
+        <button class="btn"           onclick="fireWithDesc()">With description</button>
+        <button class="btn"           onclick="fireWithActions()">With actions</button>
+      </div>
+      <div class="code-block"><span class="kw">import</span> <span class="fg">{ toast }</span> <span class="kw">from</span> <span class="str">'@editora/toast'</span><span class="fg">;</span>
+<span class="kw">import</span> <span class="str">'@editora/toast/toast.css'</span><span class="fg">;</span>
 
-    toast.info('Info message', { theme: 'light', position: 'top-right' });
-    toast.success('Success!', { theme: 'light', position: 'top-right' });
-    toast.error('Error occurred', { theme: 'light', position: 'top-right' });</code></pre>
+<span class="fn">toast</span><span class="fg">.</span><span class="fn">success</span><span class="fg">(</span><span class="str">'File saved.'</span><span class="fg">);</span>
+<span class="fn">toast</span><span class="fg">.</span><span class="fn">error</span><span class="fg">(</span><span class="str">'Upload failed.'</span><span class="fg">);</span>
+<span class="fn">toast</span><span class="fg">.</span><span class="fn">warning</span><span class="fg">(</span><span class="str">'Storage almost full.'</span><span class="fg">);</span></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── Promise ─────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-label">Async</div>
+      <div class="section-title">Promise lifecycle</div>
+      <div class="section-desc">Pass any promise and get automatic loading → success / error transitions.</div>
+    </div>
+    <div class="card">
+      <div class="btn-grid">
+        <button class="btn btn-green" onclick="showPromiseToast('success')">Resolve after 2s</button>
+        <button class="btn btn-red"   onclick="showPromiseToast('error')">Reject after 2s</button>
+        <button class="btn"           onclick="showFileUpload()">File upload sim</button>
+        <button class="btn"           onclick="showUpdateFlow()">Loading → Success</button>
+        <button class="btn"           onclick="showProgressToast()">Progress bar</button>
+      </div>
+      <div class="code-block"><span class="fn">toast</span><span class="fg">.</span><span class="fn">promise</span><span class="fg">(</span><span class="fn">uploadFile</span><span class="fg">(file), {</span>
+  <span class="fg">loading:</span> <span class="str">'Uploading…'</span><span class="fg">,</span>
+  <span class="fg">success:</span> <span class="str">'Upload complete!'</span><span class="fg">,</span>
+  <span class="fg">error:</span>   <span class="str">'Upload failed. Try again.'</span>
+<span class="fg">});</span></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── Positions ───────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-label">Placement</div>
+      <div class="section-title">Positions</div>
+      <div class="section-desc">Six anchors plus center. Can be set globally or per toast.</div>
+    </div>
+    <div class="card">
+      <div class="position-grid">
+        <button class="position-btn" onclick="pos('top-left')">↖ Top left</button>
+        <button class="position-btn" onclick="pos('top-center')">↑ Top center</button>
+        <button class="position-btn" onclick="pos('top-right')">↗ Top right</button>
+        <button class="position-btn" onclick="pos('bottom-left')">↙ Bot left</button>
+        <button class="position-btn" onclick="pos('bottom-center')">↓ Bot center</button>
+        <button class="position-btn" onclick="pos('bottom-right')">↘ Bot right</button>
+        <button class="position-btn" style="grid-column: span 3" onclick="pos('center')">⊕ Center</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── Themes ──────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-label">Appearance</div>
+      <div class="section-title">Themes</div>
+      <div class="section-desc">Thirteen built-in themes. Override any CSS variable for a fully custom look.</div>
+    </div>
+    <div class="card">
+      <div class="theme-grid">
+        <button class="theme-btn" onclick="setTheme('light')">
+          <div class="theme-swatch" style="background:#fff;border:1px solid #e7e5e4;"></div>
+          Light
+        </button>
+        <button class="theme-btn" onclick="setTheme('dark')">
+          <div class="theme-swatch" style="background:#1c1917;"></div>
+          Dark
+        </button>
+        <button class="theme-btn" onclick="setTheme('colored')">
+          <div class="theme-swatch" style="background:linear-gradient(135deg,#2563eb,#16a34a);"></div>
+          Colored
+        </button>
+        <button class="theme-btn" onclick="setTheme('minimal')">
+          <div class="theme-swatch" style="background:#f9f9f9;border:2px solid #d6d3d1;border-left:3px solid #2563eb;"></div>
+          Minimal
+        </button>
+        <button class="theme-btn" onclick="setTheme('glass')">
+          <div class="theme-swatch" style="background:linear-gradient(135deg,rgba(255,255,255,.2),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(8px);"></div>
+          Glass
+        </button>
+        <button class="theme-btn" onclick="setTheme('neon')">
+          <div class="theme-swatch" style="background:#09090b;border:1px solid #4ade80;box-shadow:0 0 8px rgba(74,222,128,.4);"></div>
+          Neon
+        </button>
+        <button class="theme-btn" onclick="setTheme('ocean')">
+          <div class="theme-swatch" style="background:linear-gradient(135deg,#0f2942,#1a3d5c);"></div>
+          Ocean
+        </button>
+        <button class="theme-btn" onclick="setTheme('forest')">
+          <div class="theme-swatch" style="background:linear-gradient(135deg,#052e16,#14532d);"></div>
+          Forest
+        </button>
+        <button class="theme-btn" onclick="setTheme('sunset')">
+          <div class="theme-swatch" style="background:linear-gradient(135deg,#431407,#7c2d12);"></div>
+          Sunset
+        </button>
+        <button class="theme-btn" onclick="setTheme('midnight')">
+          <div class="theme-swatch" style="background:#0a0a0f;border:1px solid rgba(255,255,255,.07);"></div>
+          Midnight
+        </button>
+        <button class="theme-btn" onclick="setTheme('retro')">
+          <div class="theme-swatch" style="background:#fefce8;border:2px solid #1c1917;box-shadow:3px 3px 0 #1c1917;"></div>
+          Retro
+        </button>
+      </div>
+      <div class="active-theme-badge">
+        <span class="active-theme-dot"></span>
+        Active: <span id="activeTheme">light</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── Advanced ────────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-label">Advanced</div>
+      <div class="section-title">More features</div>
+      <div class="section-desc">Stacking, custom content, RTL, swipe-to-dismiss, and plugin hooks.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Rich interactions</div>
+      <div class="btn-grid">
+        <button class="btn" onclick="showFeedbackForm()">Feedback form</button>
+        <button class="btn" onclick="showRichToast()">Custom render</button>
+        <button class="btn" onclick="showGrouped()">Grouped</button>
+        <button class="btn" onclick="showRTL()">RTL (Arabic)</button>
+        <button class="btn" onclick="showSwipe('left')">Swipe left</button>
+        <button class="btn" onclick="showSwipe('right')">Swipe right</button>
+        <button class="btn btn-red"   onclick="clearAll()">Clear all</button>
+      </div>
     </div>
 
-    <!-- Advanced Toasts -->
-    <div class="demo-section">
-        <h2>🚀 Advanced Toasts</h2>
-        <p>New features with rich content and interactions:</p>
-        <div class="demo-buttons">
-            <button onclick="showRichToast()">Rich Toast with Actions</button>
-            <button onclick="showProgressToast()">Progress Toast</button>
-            <button onclick="showCustomToast()">Custom Render Function</button>
-            <button onclick="showGroupedToast()">Grouped Toast</button>
-        </div>
-        <pre><code>// Advanced API
-import { toastAdvanced as toast } from '@editora/toast';
-
-toast.show({
-  message: 'File uploaded successfully',
-  level: 'success',
-  icon: '✓',
-  actions: [
-    { label: 'View', onClick: () => console.log('View clicked') },
-    { label: 'Dismiss', onClick: () => {} }
-  ]
-});</code></pre>
+    <div class="card">
+      <div class="card-title">Configuration</div>
+      <div class="btn-grid">
+        <button class="btn btn-sm" onclick="cfg('fast')">Fast (2s)</button>
+        <button class="btn btn-sm" onclick="cfg('slow')">Slow (10s)</button>
+        <button class="btn btn-sm" onclick="cfg('limit2')">Max 2 visible</button>
+        <button class="btn btn-sm" onclick="cfg('reset')">Reset defaults</button>
+      </div>
+      <div class="code-block"><span class="fn">toast</span><span class="fg">.</span><span class="fn">configure</span><span class="fg">({</span>
+  <span class="fg">position:</span>     <span class="str">'bottom-right'</span><span class="fg">,</span>
+  <span class="fg">theme:</span>        <span class="str">'light'</span><span class="fg">,</span>
+  <span class="fg">duration:</span>     <span class="fg">4000,</span>
+  <span class="fg">maxVisible:</span>   <span class="fg">5,</span>
+  <span class="fg">pauseOnHover:</span> <span class="fg">true,</span>
+  <span class="fg">swipeDismiss:</span> <span class="fg">true,</span>
+<span class="fg">});</span></div>
     </div>
+  </div>
 
-    <!-- Promise Toasts -->
-    <div class="demo-section">
-        <h2>⏳ Promise Lifecycle Toasts</h2>
-        <p>Automatic state transitions for async operations:</p>
-        <div class="demo-buttons">
-            <button onclick="showPromiseToast('success')">Successful Promise</button>
-            <button onclick="showPromiseToast('error')">Failed Promise</button>
-            <button onclick="showFileUpload()">File Upload Simulation</button>
-        </div>
-        <pre><code>// Promise API
-toast.promise(
-  uploadFile(file),
-  {
-    loading: 'Uploading file...',
-    success: 'File uploaded successfully!',
-    error: 'Upload failed'
-  }
-);</code></pre>
-    </div>
+</div><!-- /page -->
 
-    <!-- Toast Updates -->
-    <div class="demo-section">
-        <h2>🔄 Toast Updates</h2>
-        <p>Update existing toasts dynamically:</p>
-        <div class="demo-buttons">
-            <button onclick="showUpdateToast()">Loading → Success</button>
-            <button onclick="showProgressUpdate()">Progress Updates</button>
-        </div>
-        <pre><code>// Update API
-const loadingToast = toast.loading('Saving...');
-setTimeout(() => {
-  toast.update(loadingToast.id, {
-    message: 'Saved!',
-    level: 'success'
-  });
-}, 2000);</code></pre>
-    </div>
+<script src="dist/index.umd.js"></script>
+<script>
+  const initDemo = () => {
+    const t = window.toastPro || window.toast;
+    if (!t) return;
 
-    <!-- Positions -->
-    <div class="demo-section">
-        <h2>📍 Positions</h2>
-        <p>Toasts can appear in different positions:</p>
-        <div class="demo-buttons">
-            <button onclick="showPositionedToast('top-left')">Top Left</button>
-            <button onclick="showPositionedToast('top-right')">Top Right</button>
-            <button onclick="showPositionedToast('bottom-left')">Bottom Left</button>
-            <button onclick="showPositionedToast('bottom-right')">Bottom Right</button>
-            <button onclick="showPositionedToast('center')">Center</button>
-        </div>
-        <pre><code>// Position configuration
-toast.configure({
-  position: 'top-right'
-});
-
-toast.show({
-  message: 'Hello World',
-  position: 'center'
-});</code></pre>
-    </div>
-
-    <!-- Configuration -->
-    <div class="demo-section">
-        <h2>⚙️ Configuration</h2>
-        <p>Global configuration options:</p>
-        <div class="demo-buttons">
-            <button onclick="configureToast('fast')">Fast Duration (2s)</button>
-            <button onclick="configureToast('slow')">Slow Duration (10s)</button>
-            <button onclick="configureToast('max')">Max Visible (2)</button>
-            <button onclick="configureToast('reset')">Reset Config</button>
-        </div>
-        <pre><code>// Global configuration
-toast.configure({
-  position: 'top-right',
-  duration: 5000,
-  maxVisible: 5,
-  theme: 'dark',
-  pauseOnHover: true,
-  swipeDismiss: true,
-  swipeDirection: 'any'
-});</code></pre>
-    </div>
-
-    <!-- Plugins -->
-    <div class="demo-section">
-        <h2>🔌 Plugins</h2>
-        <p>Extensible with custom plugins:</p>
-        <div class="demo-buttons">
-            <button onclick="installAnalyticsPlugin()">Install Analytics Plugin</button>
-            <button onclick="showToastWithPlugin()">Show Toast (with plugin)</button>
-        </div>
-        <pre><code>// Plugin system
-const analyticsPlugin = {
-  name: 'analytics',
-  install(manager) {
-    manager.on('afterShow', (toast) => {
-      console.log('Toast shown:', toast.level);
+    t.configure && t.configure({
+      position: 'bottom-right',
+      theme: 'light',
+      duration: 4000,
+      pauseOnHover: true,
+      swipeDismiss: true
     });
-  }
-};
 
-toast.use(analyticsPlugin);</code></pre>
-    </div>
+    // ── Hero ──────────────────────────────────────────────────
+    window.showHeroToast = () => {
+      t.show && t.show({ message: 'Editora Toast is running ✓', level: 'success', title: 'Up and running' });
+    };
 
-    <!-- Themes -->
-    <div class="demo-section">
-        <h2>🎨 Themes</h2>
-        <p>Choose from 13 beautiful themes:</p>
-        <div class="demo-buttons">
-            <button onclick="setTheme('light')">Light</button>
-            <button onclick="setTheme('dark')">Dark</button>
-            <button onclick="setTheme('colored')">Colored</button>
-            <button onclick="setTheme('minimal')">Minimal</button>
-            <button onclick="setTheme('glass')">Glass</button>
-            <button onclick="setTheme('neon')">Neon</button>
-            <button onclick="setTheme('retro')">Retro</button>
-            <button onclick="setTheme('ocean')">Ocean</button>
-            <button onclick="setTheme('forest')">Forest</button>
-            <button onclick="setTheme('sunset')">Sunset</button>
-            <button onclick="setTheme('midnight')">Midnight</button>
-            <button onclick="setTheme('spring')">Spring</button>
-            <button onclick="setTheme('autumn')">Autumn</button>
-        </div>
-        <div style="margin-top: 15px;">
-            <strong>Current Theme:</strong> <span id="currentThemeDisplay">light</span>
-        </div>
-        <pre><code>// Theme configuration
-window.toastPro.configure({
-  theme: 'dark', // Options: light, dark, colored, minimal, glass, neon, retro, ocean, forest, sunset, midnight, spring, autumn
-  position: 'bottom-right'
-});
+    window.showStackDemo = () => {
+      ['success', 'info', 'warning'].forEach((lvl, i) => {
+        setTimeout(() => {
+          t.show && t.show({ message: `${lvl} toast stacked`, level: lvl });
+        }, i * 250);
+      });
+    };
 
-// Or per toast:
-window.toastPro.success('Success!', { theme: 'neon' });</code></pre>
-    </div>
+    // ── Basic ─────────────────────────────────────────────────
+    const labels = { info: 'Heads up — something worth knowing.', success: 'All changes saved.', error: 'Something went wrong. Please try again.', warning: 'Storage is 90% full.', loading: 'Processing your request…' };
+    window.fire = (lvl) => {
+      if (t[lvl]) t[lvl](labels[lvl] || lvl);
+      else if (t.show) t.show({ message: labels[lvl], level: lvl });
+    };
 
-    <!-- New Features -->
-    <div class="demo-section">
-        <h2>✨ New Features</h2>
-        <p>Latest additions to the toast library:</p>
+    window.fireWithTitle = () => t.show && t.show({ title: 'File uploaded', message: 'report-q4-2025.pdf was saved to /docs', level: 'success' });
+    window.fireWithDesc = () => t.show && t.show({ title: 'New message', message: 'Jordan left a comment on your draft.', description: 'Just now · Workspace → Design Reviews', level: 'info' });
+    window.fireWithActions = () => t.show && t.show({
+      title: 'Unsaved changes',
+      message: 'You have unsaved edits. What would you like to do?',
+      level: 'warning',
+      duration: 9000,
+      actions: [
+        { label: 'Save', primary: true, onClick: () => t.success && t.success('Changes saved!') },
+        { label: 'Discard', onClick: () => {} }
+      ]
+    });
 
-        <!-- RTL Support -->
-        <h3>🌍 RTL Support</h3>
-        <p>Right-to-left language support for international applications:</p>
-        <div class="demo-buttons">
-            <button onclick="showRTLToast()">RTL Toast (Arabic)</button>
-            <button onclick="showLTRToast()">LTR Toast (English)</button>
-        </div>
-        <pre><code>// RTL Support
-toast.show({
-  message: 'نص عربي من اليمين إلى اليسار',
-  level: 'info',
-  rtl: true
-});</code></pre>
+    // ── Promise ───────────────────────────────────────────────
+    window.showPromiseDemo = () => window.showPromiseToast('success');
+    window.showPromiseToast = (type) => {
+      if (!t.promise) return;
+      const p = new Promise((res, rej) => setTimeout(() => type === 'success' ? res('Report generated') : rej(new Error('Server timeout')), 2000));
+      t.promise(p, { loading: 'Generating report…', success: d => `Done — ${d}`, error: e => `Failed: ${e.message}` }).catch(() => {});
+    };
 
-        <!-- Swipe Direction Control -->
-        <h3>👆 Swipe Direction Control</h3>
-        <p>Control which swipe directions can dismiss toasts. Click a button below, then swipe the toast in the specified direction to dismiss it:</p>
-        <div class="demo-buttons">
-            <button onclick="showSwipeToast('left')">Swipe Left Only</button>
-            <button onclick="showSwipeToast('right')">Swipe Right Only</button>
-            <button onclick="showSwipeToast('up')">Swipe Up Only</button>
-            <button onclick="showSwipeToast('down')">Swipe Down Only</button>
-            <button onclick="showSwipeToast('horizontal')">Horizontal Only</button>
-            <button onclick="showSwipeToast('vertical')">Vertical Only</button>
-        </div>
-        <p><small><em>💡 Tip: The toast will move slightly as you drag to show it's responding to your swipe</em></small></p>
-        <pre><code>// Swipe Direction Control
-toast.show({
-  message: 'Swipe left to dismiss',
-  level: 'warning',
-  swipeDismiss: true,
-  swipeDirection: 'left',
-  duration: 10000
-});</code></pre>
+    window.showFileUpload = () => {
+      if (!t.promise) return;
+      const p = new Promise((res, rej) => {
+        setTimeout(() => Math.random() > 0.3 ? res() : rej(new Error('Network error')), 2000);
+      });
+      t.promise(p, { loading: 'Uploading file…', success: 'Upload complete!', error: 'Upload failed. Check connection.' }).catch(() => {});
+    };
 
-        <!-- Window Focus Pausing -->
-        <h3>👁️ Window Focus Pausing</h3>
-        <p>Automatically pause toasts when window loses focus:</p>
-        <div class="demo-buttons">
-            <button onclick="enableWindowFocusPause()">Enable Auto-Pause</button>
-            <button onclick="disableWindowFocusPause()">Disable Auto-Pause</button>
-            <button onclick="testWindowFocusPause()">Test Auto-Pause</button>
-        </div>
-        <pre><code>// Window Focus Pausing
-toast.configure({
-  pauseOnWindowBlur: true
-});
+    window.showUpdateFlow = () => {
+      if (!t.loading || !t.update) return;
+      const id = t.loading('Saving changes…');
+      setTimeout(() => t.update(id.id || id, { message: 'Changes saved!', level: 'success' }), 2000);
+    };
 
-// Toasts will pause when you switch tabs
-toast.show({
-  message: 'This toast pauses when window loses focus!',
-  level: 'info',
-  duration: 10000
-});</code></pre>
-    </div>
+    window.showProgressToast = () => {
+      if (!t.show) return;
+      const toast = t.show({ message: 'Compiling…', level: 'loading', progress: { value: 0, showPercentage: true } });
+      let v = 0;
+      const iv = setInterval(() => {
+        v += Math.random() * 15;
+        if (v >= 100) { v = 100; clearInterval(iv); }
+        t.update && t.update(toast.id, { progress: { value: Math.round(v), showPercentage: true }, message: v >= 100 ? 'Build complete!' : `Compiling… ${Math.round(v)}%`, level: v >= 100 ? 'success' : 'loading' });
+      }, 200);
+    };
 
-    <script src="dist/index.umd.js"></script>
-    <script>
-        // Initialize demo helpers once the toast library is available.
-        const initToastDemo = (event) => {
-            console.log('Toast library ready:', event && event.detail ? event.detail : { toast: window.toast });
-            console.log('Toast globals:', { toast: window.toast, toastPro: window.toastPro, toastAdvanced: window.toastAdvanced });
+    // ── Positions ─────────────────────────────────────────────
+    window.pos = (p) => t.show && t.show({ message: `Positioned: ${p}`, level: 'info', position: p });
 
-            // Provide a couple of initial toasts
-            if (window.toast && window.toast.success) {
-                window.toast.success('Hello from local UMD demo!');
-                window.toast.success('Hello from local UMD demo!', { theme: 'light', position: 'top-right' });
-            }
+    // ── Themes ────────────────────────────────────────────────
+    window.setTheme = (name) => {
+      t.configure && t.configure({ theme: name });
+      document.getElementById('activeTheme').textContent = name;
+      t.clear && t.clear();
+      setTimeout(() => {
+        t.success && t.success('Saved successfully', { theme: name });
+        setTimeout(() => t.info   && t.info  ('File synced', { theme: name }), 350);
+        setTimeout(() => t.warning && t.warning('Disk space low', { theme: name }), 700);
+        setTimeout(() => t.error  && t.error  ('Upload failed', { theme: name }), 1050);
+      }, 100);
+    };
 
-            // Theme toggle
-            window.toggleTheme = () => {
-                const isDark = document.body.dataset.theme === 'dark';
-                document.body.dataset.theme = isDark ? 'light' : 'dark';
-                window.toastPro && window.toastPro.configure({ theme: isDark ? 'light' : 'dark' });
-            };
+    // ── Advanced ──────────────────────────────────────────────
+    window.showRichToast = () => {
+      if (!t.show) return;
+      t.show({
+        render: () => {
+          const d = document.createElement('div');
+          d.style.cssText = 'display:flex;align-items:center;gap:10px;';
+          d.innerHTML = `<div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0;">🎨</div><div><div style="font-weight:600;font-size:13px;">Custom render</div><div style="font-size:12px;opacity:.7;margin-top:2px;">Built with <code>render()</code> — full control.</div></div>`;
+          return d;
+        },
+        level: 'custom',
+        duration: 5000
+      });
+    };
 
-            // Basic toasts (backward compatible)
-            window.showBasic = (level) => {
-                if (window.toast && window.toast[level]) {
-                    window.toast[level](`${level.charAt(0).toUpperCase() + level.slice(1)} message`, { theme: 'light', position: 'top-right' });
-                }
-            };
+    window.showFeedbackForm = () => {
+      if (!t.show) return;
+      let feedbackToast;
+      feedbackToast = t.show({
+        level: 'info',
+        duration: 12000,
+        closeButton: true,
+        render: () => {
+          const form = document.createElement('form');
+          form.setAttribute('aria-label', 'Toast feedback form');
+          form.style.cssText = 'display:grid;gap:10px;min-width:280px;';
+          form.innerHTML = `
+            <div>
+              <div style="font-weight:700;font-size:13px;">How was your editing flow?</div>
+              <div style="font-size:12px;color:#71717a;margin-top:2px;">Rate the experience and leave a quick note.</div>
+            </div>
+            <div role="radiogroup" aria-label="Rating" style="display:flex;gap:6px;">
+              ${['1','2','3','4','5'].map((value) => `
+                <label style="display:grid;place-items:center;width:34px;height:32px;border:1px solid #d4d4d8;border-radius:7px;cursor:pointer;background:#fff;">
+                  <input name="rating" value="${value}" type="radio" style="position:absolute;opacity:0;pointer-events:none;">
+                  <span aria-hidden="true">${['😞','😐','🙂','😃','😍'][Number(value) - 1]}</span>
+                </label>
+              `).join('')}
+            </div>
+            <textarea name="note" rows="2" placeholder="What should we improve?" style="width:100%;resize:none;border:1px solid #d4d4d8;border-radius:7px;padding:8px 9px;font:inherit;font-size:12px;color:#18181b;"></textarea>
+            <div style="display:flex;justify-content:flex-end;gap:8px;">
+              <button type="button" data-skip style="min-height:28px;border:1px solid #d4d4d8;border-radius:6px;background:#fff;padding:4px 10px;font:inherit;font-size:12px;">Skip</button>
+              <button type="submit" style="min-height:28px;border:1px solid #18181b;border-radius:6px;background:#18181b;color:#fff;padding:4px 10px;font:inherit;font-size:12px;font-weight:600;">Send</button>
+            </div>
+          `;
 
-            // Rich toast
-            window.showRichToast = () => {
-                window.toastPro && window.toastPro.show({
-                    message: 'Document saved successfully!',
-                    level: 'success',
-                    icon: '💾',
-                    actions: [
-                        { label: 'View Document', onClick: () => alert('Viewing document...') },
-                        { label: 'Share', onClick: () => alert('Sharing...') }
-                    ]
-                });
-            };
+          const labels = Array.from(form.querySelectorAll('label'));
+          labels.forEach((label) => {
+            label.addEventListener('click', () => {
+              labels.forEach((item) => {
+                item.style.borderColor = '#d4d4d8';
+                item.style.boxShadow = 'none';
+              });
+              label.style.borderColor = '#2563eb';
+              label.style.boxShadow = '0 0 0 3px rgba(37,99,235,.12)';
+            });
+          });
 
-            // Progress toast
-            window.showProgressToast = () => {
-                if (!window.toastPro) return;
-                const toast = window.toastPro.show({
-                    message: 'Processing...',
-                    level: 'loading',
-                    progress: { value: 0, showPercentage: true }
-                });
+          form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            feedbackToast?.dismiss?.();
+            t.success && t.success('Thanks for the feedback!', {
+              title: 'Feedback sent',
+              description: 'Your response helps improve Editora Toast.'
+            });
+          });
 
-                let progress = 0;
-                const interval = setInterval(() => {
-                    progress += 10;
-                    window.toastPro.update(toast.id, {
-                        progress: { value: progress, showPercentage: true },
-                        message: `Processing... ${progress}%`
-                    });
-
-                    if (progress >= 100) {
-                        clearInterval(interval);
-                        setTimeout(() => {
-                            window.toastPro.update(toast.id, {
-                                message: 'Complete!',
-                                level: 'success',
-                                progress: undefined
-                            });
-                        }, 500);
-                    }
-                }, 200);
-            };
-
-            // Custom render
-            window.showCustomToast = () => {
-                window.toastPro && window.toastPro.show({
-                    render: () => {
-                        const div = document.createElement('div');
-                        div.innerHTML = `
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span style="font-size: 20px;">🎨</span>
-                                <div>
-                                    <strong>Custom Toast</strong>
-                                    <br>
-                                    <small>Rendered with custom function</small>
-                                </div>
-                            </div>
-                        `;
-                        return div;
-                    },
-                    level: 'custom'
-                });
-            };
-
-            // Grouped toasts
-            window.showGroupedToast = () => {
-                if (!window.toastPro) return;
-                window.toastPro.group('upload-group', { message: 'Upload 1 of 3 complete', level: 'success' });
-
-                setTimeout(() => {
-                    window.toastPro.group('upload-group', { message: 'Upload 2 of 3 complete', level: 'success' });
-                }, 1000);
-
-                setTimeout(() => {
-                    window.toastPro.group('upload-group', { message: 'All uploads complete!', level: 'success' });
-                }, 2000);
-            };
-
-            // Promise toasts
-            window.showPromiseToast = (type) => {
-                if (!window.toastPro) return;
-                const promise = new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                        if (type === 'success') {
-                            resolve('Data loaded');
-                        } else {
-                            reject(new Error('Network error'));
-                        }
-                    }, 2000);
-                });
-
-                window.toastPro.promise(promise, {
-                    loading: 'Loading data...',
-                    success: (data) => `Success: ${data}`,
-                    error: (error) => `Error: ${error.message}`
-                }).catch(() => {});
-            };
-
-            // File upload simulation
-            window.showFileUpload = () => {
-                if (!window.toastPro) return;
-                const uploadPromise = new Promise((resolve, reject) => {
-                    let progress = 0;
-                    const interval = setInterval(() => {
-                        progress += 20;
-                        if (progress >= 100) {
-                            clearInterval(interval);
-                            resolve('File uploaded');
-                        }
-                    }, 300);
-
-                    setTimeout(() => {
-                        if (Math.random() > 0.7) {
-                            clearInterval(interval);
-                            reject(new Error('Upload failed'));
-                        }
-                    }, 1000);
-                });
-
-                window.toastPro.promise(uploadPromise, { loading: 'Uploading file...', success: 'File uploaded successfully!', error: 'Upload failed. Please try again.' }).catch(() => {});
-            };
-
-            // Update toast
-            window.showUpdateToast = () => {
-                if (!window.toastPro) return;
-                const loadingToast = window.toastPro.loading('Saving document...');
-                setTimeout(() => {
-                    window.toastPro.update(loadingToast.id, { message: 'Document saved successfully!', level: 'success' });
-                }, 2000);
-            };
-
-            // Progress updates
-            window.showProgressUpdate = () => {
-                if (!window.toastPro) return;
-                const toast = window.toastPro.show({ message: 'Downloading...', level: 'loading', progress: { value: 0 } });
-
-                let progress = 0;
-                const interval = setInterval(() => {
-                    progress += 5;
-                    window.toastPro.update(toast.id, { progress: { value: progress } });
-
-                    if (progress >= 100) {
-                        clearInterval(interval);
-                        window.toastPro.update(toast.id, { message: 'Download complete!', level: 'success', progress: undefined });
-                    }
-                }, 100);
-            };
-
-            // Positioned toasts
-            window.showPositionedToast = (position) => { window.toastPro && window.toastPro.show({ message: `Toast at ${position}`, level: 'info', position: position }); };
-
-            // Configuration
-            window.configureToast = (type) => {
-                if (!window.toastPro) return;
-                switch (type) {
-                    case 'fast':
-                        window.toastPro.configure({ duration: 2000 });
-                        window.toast.info('Fast duration set (2s)', { theme: 'light', position: 'top-right' });
-                        break;
-                    case 'slow':
-                        window.toastPro.configure({ duration: 10000 });
-                        window.toast.info('Slow duration set (10s)', { theme: 'light', position: 'top-right' });
-                        break;
-                    case 'max':
-                        window.toastPro.configure({ maxVisible: 2 });
-                        window.toast.info('Max visible set to 2', { theme: 'light', position: 'top-right' });
-                        break;
-                    case 'reset':
-                        window.toastPro.configure({ duration: 4000, maxVisible: 5, position: 'bottom-right' });
-                        window.toast.info('Configuration reset', { theme: 'light', position: 'top-right' });
-                        break;
-                }
-            };
-
-            // Plugin demo
-            let analyticsInstalled = false;
-            window.installAnalyticsPlugin = () => {
-                if (analyticsInstalled) {
-                    window.toast.info('Analytics plugin already installed', { theme: 'light', position: 'top-right' });
-                    return;
-                }
-
-                const analyticsPlugin = { name: 'analytics', install(manager) { manager.on('afterShow', (toast) => { console.log('📊 Toast shown:', { level: toast.level, message: toast.message, timestamp: new Date().toISOString() }); }); } };
-
-                window.toastPro.use(analyticsPlugin);
-                analyticsInstalled = true;
-                window.toast.success('Analytics plugin installed! Check console.');
-            };
-
-            window.showToastWithPlugin = () => { window.toastPro && window.toastPro.info('This toast will be tracked by analytics plugin'); };
-
-            // Theme switching
-            window.setTheme = (themeName) => {
-                if (!window.toastPro) return;
-                window.toastPro.configure({ theme: themeName });
-                const el = document.getElementById('currentThemeDisplay'); if (el) el.textContent = themeName; window.toastPro.clear();
-                setTimeout(() => { window.toastPro.success(`🎨 ${themeName} theme - Success!`, { theme: themeName }); }, 100);
-                setTimeout(() => { window.toastPro.info(`🎨 ${themeName} theme - Info message`, { theme: themeName }); }, 600);
-                setTimeout(() => { window.toastPro.warning(`🎨 ${themeName} theme - Warning!`, { theme: themeName }); }, 1100);
-                setTimeout(() => { window.toastPro.error(`🎨 ${themeName} theme - Error occurred`, { theme: themeName }); }, 1600);
-            };
-
-            // RTL Support
-            window.showRTLToast = () => { window.toastPro && window.toastPro.show({ message: 'هذا اختبار للنص من اليمين إلى اليسار - RTL Support', level: 'info', rtl: true, duration: 5000 }); };
-            window.showLTRToast = () => { window.toastPro && window.toastPro.show({ message: 'This is a left-to-right text test - LTR Support', level: 'success', rtl: false, duration: 5000 }); };
-
-            // Swipe Direction Control
-            window.showSwipeToast = (direction) => { if (!window.toastPro) return; const directionText = { left: 'left', right: 'right', up: 'up', down: 'down', horizontal: 'horizontally (left/right)', vertical: 'vertically (up/down)' }; window.toastPro.show({ message: `Swipe ${directionText[direction]} to dismiss this toast`, level: 'warning', swipeDismiss: true, swipeDirection: direction, duration: 10000 }); };
-
-            // Window Focus Pausing
-            window.enableWindowFocusPause = () => { window.toastPro && window.toastPro.configure({ pauseOnWindowBlur: true }); window.toastPro && window.toastPro.show({ message: 'Window focus pausing enabled! Switch tabs to test.', level: 'success', duration: 3000 }); };
-            window.disableWindowFocusPause = () => { window.toastPro && window.toastPro.configure({ pauseOnWindowBlur: false }); window.toastPro && window.toastPro.show({ message: 'Window focus pausing disabled.', level: 'info', duration: 3000 }); };
-            window.testWindowFocusPause = () => { window.toastPro && window.toastPro.configure({ pauseOnWindowBlur: true }); window.toastPro && window.toastPro.show({ message: 'This toast will pause when you switch tabs/windows. Try it now!', level: 'info', duration: 15000 }); };
-
-            // Initialize with some defaults
-            window.toastPro && window.toastPro.configure({ position: 'bottom-right', theme: 'light', enableAccessibility: true, swipeDismiss: true });
-        };
-
-        // If the UMD already initialized, run immediately; otherwise wait for event
-        if (window.toast && window.toastPro) {
-            initToastDemo();
-        } else {
-            window.addEventListener('toastReady', initToastDemo);
+          form.querySelector('[data-skip]')?.addEventListener('click', () => feedbackToast?.dismiss?.());
+          return form;
         }
-    </script>
+      });
+    };
+
+    window.showGrouped = () => {
+      if (!t.group) return;
+      ['Design assets', 'Code review', 'Documentation'].forEach((msg, i) => {
+        setTimeout(() => t.group('batch-upload', { message: `${msg} uploaded`, level: 'success' }), i * 600);
+      });
+    };
+
+    window.showRTL = () => t.show && t.show({ message: 'تم الحفظ بنجاح — النص العربي من اليمين إلى اليسار', level: 'success', rtl: true, duration: 6000 });
+
+    window.showSwipe = (dir) => t.show && t.show({ message: `Swipe ${dir} to dismiss`, level: 'warning', swipeDismiss: true, swipeDirection: dir, duration: 8000 });
+
+    window.clearAll = () => t.clear && t.clear();
+
+    // ── Config ────────────────────────────────────────────────
+    window.cfg = (type) => {
+      const map = { fast: { duration: 2000 }, slow: { duration: 10000 }, limit2: { maxVisible: 2 }, reset: { duration: 4000, maxVisible: 5, position: 'bottom-right' } };
+      t.configure && t.configure(map[type]);
+      t.info && t.info({ fast: 'Duration: 2s', slow: 'Duration: 10s', limit2: 'Max 2 toasts', reset: 'Defaults restored' }[type]);
+    };
+
+    // ── Copy install ──────────────────────────────────────────
+    window.copyInstall = (btn) => {
+      navigator.clipboard && navigator.clipboard.writeText('npm install @editora/toast');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 1500);
+    };
+  };
+
+  if (window.toastPro || window.toast) {
+    initDemo();
+  } else {
+    window.addEventListener('toastReady', initDemo);
+  }
+</script>
 </body>
 </html>

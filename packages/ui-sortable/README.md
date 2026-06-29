@@ -1,5 +1,10 @@
 # @editora/ui-sortable
 
+[![Version](https://img.shields.io/npm/v/@editora/ui-sortable)](https://www.npmjs.com/package/@editora/ui-sortable)
+[![License](https://img.shields.io/npm/l/@editora/ui-sortable)](https://github.com/ajaykr089/Editora/blob/main/LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Size](https://img.shields.io/bundlephobia/minzip/@editora/ui-sortable)](https://bundlephobia.com/package/@editora/ui-sortable)
+
 > [!IMPORTANT]
 > **Broader docs and examples:** https://editora-ecosystem.netlify.app/docs/ui-react/interactive/sortable
 
