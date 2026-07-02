@@ -1,17 +1,50 @@
 <svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0C1712"/>
-      <stop offset="1" stop-color="#1E3A2C"/>
+      <stop stop-color="#09090B"/>
+      <stop offset="1" stop-color="#18181B"/>
     </linearGradient>
-    <linearGradient id="chip" x1="130" y1="190" x2="980" y2="500" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1A8A57" stop-opacity="0.26"/>
-      <stop offset="1" stop-color="#EAB308" stop-opacity="0.22"/>
+    <linearGradient id="blueFold" x1="18" y1="62" x2="67" y2="17" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#255CFF"/><stop offset="1" stop-color="#12A8FF"/>
+    </linearGradient>
+    <linearGradient id="blueTop" x1="54" y1="18" x2="174" y2="46" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1B7DFF"/><stop offset="1" stop-color="#0878EA"/>
+    </linearGradient>
+    <linearGradient id="blueSpine" x1="16" y1="61" x2="57" y2="146" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1557F4"/><stop offset="1" stop-color="#4C44F2"/>
+    </linearGradient>
+    <linearGradient id="blueInner" x1="57" y1="118" x2="101" y2="84" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3E5EF7"/><stop offset="1" stop-color="#36B9F8"/>
+    </linearGradient>
+    <linearGradient id="purpleMid" x1="59" y1="86" x2="151" y2="114" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6273F2"/><stop offset="1" stop-color="#765DE8"/>
+    </linearGradient>
+    <linearGradient id="purpleFold" x1="18" y1="157" x2="86" y2="156" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5F4AF3"/><stop offset="0.55" stop-color="#6E55EF"/><stop offset="1" stop-color="#7A43D6"/>
+    </linearGradient>
+    <linearGradient id="purpleFoldShade" x1="34" y1="183" x2="59" y2="119" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4F39D6" stop-opacity="0.28"/><stop offset="1" stop-color="#ffffff" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="greenBottom" x1="57" y1="154" x2="174" y2="183" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#37A8CA"/><stop offset="0.35" stop-color="#14B9A8"/><stop offset="1" stop-color="#2EC38D"/>
     </linearGradient>
   </defs>
+
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <rect x="90" y="140" width="1020" height="350" rx="28" fill="url(#chip)" stroke="#3C6F58"/>
-  <text x="140" y="275" fill="#F4FFF8" font-size="78" font-family="Georgia, serif" font-weight="700">Editora Documentation</text>
-  <text x="140" y="345" fill="#D6E7DE" font-size="34" font-family="Segoe UI, sans-serif">Build complete editing experiences, not just text boxes.</text>
-  <text x="140" y="410" fill="#BFD5C9" font-size="28" font-family="Segoe UI, sans-serif">Core • React • Plugins • Themes • UI • Icons</text>
+
+  <!-- ribbon mark, scaled and positioned top-left -->
+  <g transform="translate(110, 115) scale(1.45)">
+    <path d="M17 61 L62 18 H103 L57 62 H17 Z" fill="url(#blueFold)"/>
+    <path d="M62 18 H174 L145 46 H64 C60.2 46 57 49.2 57 53 V62 L103 18 Z" fill="url(#blueTop)"/>
+    <path d="M17 61 H57 V118 L17 145 Z" fill="url(#blueSpine)"/>
+    <path d="M57 85 H103 L74 114 H57 Z" fill="url(#blueInner)" opacity="0.92"/>
+    <path d="M84 85 H151 L122 114 H58 Z" fill="url(#purpleMid)"/>
+    <path d="M17 156 L57 118 L57 154 L86 154 L56 183 L37 183 Z" fill="url(#purpleFold)"/>
+    <path d="M17 156 L57 118 L57 154 L37 183 Z" fill="url(#purpleFoldShade)" opacity="0.45"/>
+    <path d="M57 154 H174 L145 183 H37 L66 154 Z" fill="url(#greenBottom)"/>
+  </g>
+
+  <text x="110" y="430" fill="#FAFAFA" font-size="64" font-family="Inter, -apple-system, sans-serif" font-weight="700" letter-spacing="-1.5">Editora Documentation</text>
+  <text x="110" y="478" fill="#A1A1AA" font-size="28" font-family="Inter, -apple-system, sans-serif">A rich-text editor you can actually read the source of.</text>
+  <text x="110" y="525" fill="#D97757" font-size="22" font-family="JetBrains Mono, monospace" font-weight="600" letter-spacing="1">CORE · REACT · PLUGINS · THEMES · UI · ICONS</text>
 </svg>
