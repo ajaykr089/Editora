@@ -1,7 +1,48 @@
-<svg width="200" height="80" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-  <rect width="200" height="80" fill="#111"/>
-  <rect x="10" y="15" width="30" height="8" fill="#818cf8"/>
-  <rect x="10" y="32" width="20" height="8" fill="#818cf8"/>
-  <rect x="10" y="49" width="30" height="8" fill="#818cf8"/>
-  <text x="45" y="50" font-size="28" font-family="Arial" fill="white">Editora</text>
+<svg role="img" aria-labelledby="title-dark desc-dark"
+     width="512" height="512" viewBox="0 0 196 206"
+     fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title id="title-dark">Editora logo — dark surface</title>
+  <desc id="desc-dark">Folded ribbon E mark with brightened gradients for dark backgrounds.</desc>
+  <defs>
+    <!-- Slightly brightened stops so the mark pops on near-black backgrounds -->
+    <linearGradient id="d-blueFold" x1="18" y1="62" x2="67" y2="17" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3D74FF"/><stop offset="1" stop-color="#3DBFFF"/>
+    </linearGradient>
+    <linearGradient id="d-blueTop" x1="54" y1="18" x2="174" y2="46" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3391FF"/><stop offset="1" stop-color="#2090F5"/>
+    </linearGradient>
+    <linearGradient id="d-blueSpine" x1="16" y1="61" x2="57" y2="146" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2B6BFF"/><stop offset="1" stop-color="#6A60FF"/>
+    </linearGradient>
+    <linearGradient id="d-blueInner" x1="57" y1="118" x2="101" y2="84" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5573FF"/><stop offset="1" stop-color="#4DCAFF"/>
+    </linearGradient>
+    <linearGradient id="d-purpleMid" x1="59" y1="86" x2="151" y2="114" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7A8CFF"/><stop offset="1" stop-color="#9075F5"/>
+    </linearGradient>
+    <linearGradient id="d-purpleFold" x1="18" y1="157" x2="86" y2="156" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7A60FF"/><stop offset="0.55" stop-color="#8B6EFF"/><stop offset="1" stop-color="#9857E8"/>
+    </linearGradient>
+    <linearGradient id="d-purpleFoldShade" x1="34" y1="183" x2="59" y2="119" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6A50F0" stop-opacity="0.32"/><stop offset="1" stop-color="#ffffff" stop-opacity="0.12"/>
+    </linearGradient>
+    <linearGradient id="d-greenBottom" x1="57" y1="154" x2="174" y2="183" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#47BCD8"/><stop offset="0.35" stop-color="#22CEBC"/><stop offset="1" stop-color="#3FD4A0"/>
+    </linearGradient>
+    <!-- Subtle white shimmer that reads well on dark -->
+    <linearGradient id="d-softOverlay" x1="35" y1="28" x2="150" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="white" stop-opacity="0.18"/><stop offset="0.45" stop-color="white" stop-opacity="0.05"/><stop offset="1" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <path d="M17 61 L62 18 H103 L57 62 H17 Z"                    fill="url(#d-blueFold)"/>
+  <path d="M62 18 H174 L145 46 H64 C60.2 46 57 49.2 57 53 V62 L103 18 Z" fill="url(#d-blueTop)"/>
+  <path d="M17 61 H57 V118 L17 145 Z"                          fill="url(#d-blueSpine)"/>
+  <path d="M57 85 H103 L74 114 H57 Z"                          fill="url(#d-blueInner)"   opacity="0.95"/>
+  <path d="M84 85 H151 L122 114 H58 Z"                         fill="url(#d-purpleMid)"/>
+  <path d="M17 156 L57 118 L57 154 L86 154 L56 183 L37 183 Z" fill="url(#d-purpleFold)"/>
+  <path d="M17 156 L57 118 L57 154 L37 183 Z"                  fill="url(#d-purpleFoldShade)" opacity="0.5"/>
+  <path d="M57 154 H174 L145 183 H37 L66 154 Z"                fill="url(#d-greenBottom)"/>
+  <path d="M17 61 L62 18 H174 L145 46 H64 C60.2 46 57 49.2 57 53 V85 H151 L122 114 H58 L57 118 L17 156 L37 183 H145 L174 154 H57 L17 145 Z"
+        fill="url(#d-softOverlay)" opacity="0.5"/>
 </svg>

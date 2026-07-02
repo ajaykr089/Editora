@@ -1,7 +1,55 @@
-<svg width="200" height="80" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-  <rect width="200" height="80" fill="white"/>
-  <rect x="10" y="15" width="30" height="8" fill="#4f46e5"/>
-  <rect x="10" y="32" width="20" height="8" fill="#4f46e5"/>
-  <rect x="10" y="49" width="30" height="8" fill="#4f46e5"/>
-  <text x="45" y="50" font-size="28" font-family="Arial" fill="#111">Editora</text>
+<svg role="img" aria-labelledby="title desc" width="512" height="512" viewBox="0 0 196 206" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title id="title">Editora logo</title>
+  <desc id="desc">Folded ribbon E mark with blue, purple, and green gradients.</desc>
+  <defs>
+    <linearGradient id="blueFold" x1="18" y1="62" x2="67" y2="17" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#255CFF"/><stop offset="1" stop-color="#12A8FF"/>
+    </linearGradient>
+    <linearGradient id="blueTop" x1="54" y1="18" x2="174" y2="46" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1B7DFF"/><stop offset="1" stop-color="#0878EA"/>
+    </linearGradient>
+    <linearGradient id="blueSpine" x1="16" y1="61" x2="57" y2="146" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1557F4"/><stop offset="1" stop-color="#4C44F2"/>
+    </linearGradient>
+    <linearGradient id="blueInner" x1="57" y1="118" x2="101" y2="84" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3E5EF7"/><stop offset="1" stop-color="#36B9F8"/>
+    </linearGradient>
+    <linearGradient id="purpleMid" x1="59" y1="86" x2="151" y2="114" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6273F2"/><stop offset="1" stop-color="#765DE8"/>
+    </linearGradient>
+    <linearGradient id="purpleFold" x1="18" y1="157" x2="86" y2="156" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5F4AF3"/><stop offset="0.55" stop-color="#6E55EF"/><stop offset="1" stop-color="#7A43D6"/>
+    </linearGradient>
+    <linearGradient id="purpleFoldShade" x1="34" y1="183" x2="59" y2="119" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4F39D6" stop-opacity="0.28"/><stop offset="1" stop-color="#ffffff" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="greenBottom" x1="57" y1="154" x2="174" y2="183" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#37A8CA"/><stop offset="0.35" stop-color="#14B9A8"/><stop offset="1" stop-color="#2EC38D"/>
+    </linearGradient>
+    <linearGradient id="softOverlay" x1="35" y1="28" x2="150" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="white" stop-opacity="0.20"/><stop offset="0.45" stop-color="white" stop-opacity="0.06"/><stop offset="1" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 1. top-left folded blue triangle -->
+  <path id="blueFoldShape" d="M17 61 L62 18 H103 L57 62 H17 Z" fill="url(#blueFold)"/>
+  <!-- 2. top horizontal blue ribbon -->
+  <path id="blueTopShape" d="M62 18 H174 L145 46 H64 C60.2 46 57 49.2 57 53 V62 L103 18 Z" fill="url(#blueTop)"/>
+  <!-- 3. left vertical blue ribbon: widened to H57 -->
+  <path d="M17 61 H57 V118 L17 145 Z" fill="url(#blueSpine)"/>
+  <!-- 4. inner blue diagonal transition aligned to the new x=57 spine edge -->
+  <path d="M57 85 H103 L74 114 H57 Z" fill="url(#blueInner)" opacity="0.92"/>
+  <!-- 5. middle purple ribbon aligned with the shifted transition edge -->
+  <path d="M84 85 H151 L122 114 H58 Z" fill="url(#purpleMid)"/>
+  <!-- 6. lower-left white diagonal gap is the negative space between spine and fold -->
+
+  <!-- 7. bottom-left purple fold aligned to x=57 vertical joint -->
+  <path d="M17 156 L57 118 L57 154 L86 154 L56 183 L37 183 Z" fill="url(#purpleFold)"/>
+  <path d="M17 156 L57 118 L57 154 L37 183 Z" fill="url(#purpleFoldShade)" opacity="0.45"/>
+
+  <!-- 8. bottom green ribbon -->
+  <path d="M57 154 H174 L145 183 H37 L66 154 Z" fill="url(#greenBottom)"/>
+
+  <!-- 9. subtle gradient overlays aligned to H57 geometry -->
+  <path d="M17 61 L62 18 H174 L145 46 H64 C60.2 46 57 49.2 57 53 V85 H151 L122 114 H58 L57 118 L17 156 L37 183 H145 L174 154 H57 L17 145 Z" fill="url(#softOverlay)" opacity="0.52"/>
 </svg>

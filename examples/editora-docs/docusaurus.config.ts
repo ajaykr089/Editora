@@ -39,7 +39,7 @@ const siteStructuredData = [
     "@type": "Organization",
     name: siteTitle,
     url: siteUrl,
-    logo: `${siteUrl}/img/editora-mark.svg`,
+    logo: `${siteUrl}/img/brand/editora_logo_blocks.svg`,
     sameAs: [
       "https://github.com/ajaykr089/Editora",
       storybookUrl,
@@ -50,7 +50,7 @@ const siteStructuredData = [
 const config: Config = {
   title: siteTitle,
   tagline: "Enterprise-grade documentation for the Editora ecosystem",
-  favicon: "img/editora-mark.svg",
+  favicon: "img/favicon-32.png",
 
   future: {
     v4: true,
@@ -77,6 +77,14 @@ const config: Config = {
         rel: "sitemap",
         type: "application/xml",
         href: `${siteUrl}/sitemap.xml`,
+      },
+    },
+    {
+      tagName: "link",
+      attributes: {
+        rel: "apple-touch-icon",
+        sizes: "180x180",
+        href: "/img/favicon-180.png",
       },
     },
     ...siteStructuredData.map((item) => ({
@@ -148,7 +156,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: "img/editora-social-card.svg",
+    image: "img/editora-social-card.png",
     metadata: [
       {
         name: "description",
@@ -180,7 +188,7 @@ const config: Config = {
       },
       {
         property: "og:image",
-        content: `${siteUrl}/img/editora-social-card.svg`,
+        content: `${siteUrl}/img/editora-social-card.png`,
       },
       { property: "og:url", content: siteUrl },
       { name: "twitter:card", content: "summary_large_image" },
@@ -188,7 +196,7 @@ const config: Config = {
       { name: "twitter:description", content: siteDescription },
       {
         name: "twitter:image",
-        content: `${siteUrl}/img/editora-social-card.svg`,
+        content: `${siteUrl}/img/editora-social-card.png`,
       },
       ...(twitterHandle ? [{ name: "twitter:site", content: twitterHandle }] : []),
       ...(googleSiteVerification
@@ -202,7 +210,9 @@ const config: Config = {
       title: "Editora",
       logo: {
         alt: "Editora logo",
-        src: "img/editora-mark.svg",
+        src: "img/brand/editora_logo_blocks.svg",
+        width: 28,
+        height: 28,
       },
       items: [
         { to: "/docs/intro", label: "Docs", position: "left" },
