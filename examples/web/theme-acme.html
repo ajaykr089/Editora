@@ -1,87 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Editora Acme Theme Demo</title>
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="../../packages/themes/src/themes/acme.css">
-  <style>
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(260px, 1fr));
-      gap: 16px;
-      margin-top: 16px;
-    }
-    .panel {
-      border: 1px solid #d9e2ef;
-      border-radius: 10px;
-      padding: 12px;
-      background: #fff;
-    }
-    .panel h3 {
-      margin: 0 0 10px;
-      font-size: 16px;
-    }
-    .panel[data-theme="dark"] {
-      background: #0b1220;
-      border-color: #243045;
-      color: #e5edf8;
-    }
-    .panel[data-theme="acme"] {
-      background: #eef4fb;
-      border-color: #c6d7ea;
-    }
-  </style>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Editora Acme Theme Demo</title>
+ <link rel="stylesheet" href="assets/css/style.css">
+ <link rel="stylesheet" href="../../packages/themes/src/themes/acme.css">
+ <style>
+ .grid {
+ display: grid;
+ grid-template-columns: repeat(3, minmax(260px, 1fr));
+ gap: 16px;
+ margin-top: 16px;
+ }
+ .panel {
+ border: 1px solid #d9e2ef;
+ border-radius: 10px;
+ padding: 12px;
+ background: #fff;
+ }
+ .panel h3 {
+ margin: 0 0 10px;
+ font-size: 16px;
+ }
+ .panel[data-theme="dark"] {
+ background: #0b1220;
+ border-color: #243045;
+ color: #e5edf8;
+ }
+ .panel[data-theme="acme"] {
+ background: #eef4fb;
+ border-color: #c6d7ea;
+ }
+ </style>
 </head>
 <body>
-  <div class="container" style="padding: 24px 0;">
-    <h1>Acme Theme Verification</h1>
-    <p>Compare default, dark, and acme themes side-by-side on web components.</p>
+ <div class="container" style="padding: 24px 0;">
+ <h1>Acme Theme Verification</h1>
+ <p>Compare default, dark, and acme themes side-by-side on web components.</p>
 
-    <div class="grid">
-      <div class="panel" data-theme="default">
-        <h3>Default</h3>
-        <editora-editor
-          theme="light"
-          statusbar="true"
-          plugins="bold italic underline history"
-          toolbar-items="undo redo | bold italic underline"
-          height="260"
-        >
-          <p>Default theme editor content.</p>
-        </editora-editor>
-      </div>
+ <div class="grid">
+ <div class="panel" data-theme="default">
+ <h3>Default</h3>
+ <editora-editor
+ theme="light"
+ statusbar="true"
+ plugins="bold italic underline history"
+ toolbar-items="undo redo | bold italic underline"
+ height="260"
+ >
+ <p>Default theme editor content.</p>
+ </editora-editor>
+ </div>
 
-      <div class="panel" data-theme="dark">
-        <h3>Dark</h3>
-        <editora-editor
-          theme="dark"
-          statusbar="true"
-          plugins="bold italic underline history"
-          toolbar-items="undo redo | bold italic underline"
-          height="260"
-        >
-          <p>Dark theme editor content.</p>
-        </editora-editor>
-      </div>
+ <div class="panel" data-theme="dark">
+ <h3>Dark</h3>
+ <editora-editor
+ theme="dark"
+ statusbar="true"
+ plugins="bold italic underline history"
+ toolbar-items="undo redo | bold italic underline"
+ height="260"
+ >
+ <p>Dark theme editor content.</p>
+ </editora-editor>
+ </div>
 
-      <div class="panel" data-theme="acme">
-        <h3>Acme</h3>
-        <editora-editor
-          theme="acme"
-          statusbar="true"
-          plugins="bold italic underline history"
-          toolbar-items="undo redo | bold italic underline"
-          height="260"
-        >
-          <p>Acme theme editor content.</p>
-        </editora-editor>
-      </div>
-    </div>
-  </div>
+ <div class="panel" data-theme="acme">
+ <h3>Acme</h3>
+ <editora-editor
+ theme="acme"
+ statusbar="true"
+ plugins="bold italic underline history"
+ toolbar-items="undo redo | bold italic underline"
+ height="260"
+ >
+ <p>Acme theme editor content.</p>
+ </editora-editor>
+ </div>
+ </div>
+ </div>
 
-  <script type="module" src="../../packages/core/dist/webcomponent.js"></script>
-  <link rel="stylesheet" href="../../packages/core/dist/webcomponent.min.css">
+ <script type="module" src="../../packages/core/dist/webcomponent.js"></script>
+ <link rel="stylesheet" href="../../packages/core/dist/webcomponent.min.css">
 </body>
 </html>

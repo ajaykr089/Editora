@@ -1,471 +1,470 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Meta Tags for SEO -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Editora Api - Example and demonstration of Editora rich text editor features.">
-    <meta name="keywords" content="api, Editora editor, example, demonstration">
-    <meta name="author" content="Editora Contributors">
-    <meta name="robots" content="index, follow">
-    <meta property="og:title" content="Editora - Api">
-    <meta property="og:description" content="Editora Api - Example and demonstration of Editora rich text editor features.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://editora-free.netlify.app/">
-    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="Editora - Api">
-    <meta property="twitter:description" content="Editora Api - Example and demonstration of Editora rich text editor features">
-    <meta name="theme-color" content="#007bff">
-   <link rel="stylesheet" href="../assets/css/style.css">
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
-    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
-    <title>Editora - Api</title>
+ <!-- Meta Tags for SEO -->
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <meta name="description" content="Editora Api - Example and demonstration of Editora rich text editor features.">
+ <meta name="keywords" content="api, Editora editor, example, demonstration">
+ <meta name="author" content="Editora Contributors">
+ <meta name="robots" content="index, follow">
+ <meta property="og:title" content="Editora - Api">
+ <meta property="og:description" content="Editora Api - Example and demonstration of Editora rich text editor features.">
+ <meta property="og:type" content="website">
+ <meta property="og:url" content="https://editora-free.netlify.app/">
+ <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+ <meta property="twitter:card" content="summary_large_image">
+ <meta property="twitter:title" content="Editora - Api">
+ <meta property="twitter:description" content="Editora Api - Example and demonstration of Editora rich text editor features">
+ <meta name="theme-color" content="#12131A">
+ <link rel="stylesheet" href="../assets/css/style.css">
+ <!-- Favicon -->
+ <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+ <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+ <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+ <title>Editora - Api</title>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container">
-            <nav>
-                <a href="../index.html" class="logo">
-                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
-                </a>
-                <button class="menu-toggle">☰</button>
-                <ul class="nav-links">
-                    <li><a href="../index.html">Home</a></li>
-                    <li><a href="installation.html" class="active">Docs</a></li>
-                    <li><a href="features.html">Features</a></li>
-                    <li><a href="../plugins/index.html">Plugins</a></li>
-                    <li><a href="api.html">API</a></li>
-                    <li><a href="../toast-demo.html">Toast Demo</a></li>
-                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+ <!-- Header -->
+ <header>
+ <div class="container">
+ <nav>
+ <a href="../index.html" class="logo">
+ <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" >
+ </a>
+ <button class="menu-toggle">☰</button>
+ <ul class="nav-links">
+ <li><a href="../index.html">Home</a></li>
+ <li><a href="installation.html" class="active">Docs</a></li>
+ <li><a href="features.html">Features</a></li>
+ <li><a href="../plugins/index.html">Plugins</a></li>
+ <li><a href="api.html">API</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+ </ul>
+ </nav>
+ </div>
+ </header>
 
-    <!-- Hero -->
-    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
-        <div class="container">
-            <h1 style="color: white; margin-bottom: 0.5rem;">📚 API Reference</h1>
-            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Complete API documentation for Editora</p>
-        </div>
-    </section>
+ <!-- Hero -->
+ <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+ <div class="container">
+ <h1 style="color: white; margin-bottom: 0.5rem;">API Reference</h1>
+ <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Complete API documentation for Editora</p>
+ </div>
+ </section>
 
-    <!-- Content -->
-    <section>
-        <div class="container">
-            <div class="docs-wrapper">
-                <!-- Sidebar -->
-                <aside class="docs-sidebar">
-                    <h3>Documentation</h3>
-                    <ul>
-                        <a href="installation.html">Installation</a>
-                        <a href="features.html">Features</a>
-                        <a href="api.html" class="active">API Reference</a>
-                        <a href="keyboard-shortcuts.html">Keyboard Shortcuts</a>
-                        <a href="examples.html">Examples</a>
-                        <a href="custom-plugins.html">Custom Plugins</a>
-                        <a href="icons.html">@editora/icons</a>
-                        <a href="react-icons.html">@editora/react-icons</a>
-                        <a href="ui-core.html">@editora/ui-core</a>
-                        <a href="ui-react.html">@editora/ui-react</a>
-                        <a href="../light-code-editor-demo.html">@editora/light-code-editor</a>
-                        <a href="about.html">About</a>
-                    </ul>
+ <!-- Content -->
+ <section>
+ <div class="container">
+ <div class="docs-wrapper">
+ <!-- Sidebar -->
+ <aside class="docs-sidebar">
+ <h3>Documentation</h3>
+ <ul>
+ <a href="installation.html">Installation</a>
+ <a href="features.html">Features</a>
+ <a href="api.html" class="active">API Reference</a>
+ <a href="keyboard-shortcuts.html">Keyboard Shortcuts</a>
+ <a href="examples.html">Examples</a>
+ <a href="custom-plugins.html">Custom Plugins</a>
+ <a href="icons.html">@editora/icons</a>
+ <a href="react-icons.html">@editora/react-icons</a>
+ <a href="ui-core.html">@editora/ui-core</a>
+ <a href="ui-react.html">@editora/ui-react</a>
+ <a href="../light-code-editor-demo.html">@editora/light-code-editor</a>
+ <a href="about.html">About</a>
+ </ul>
 
-                    <h3>Quick Links</h3>
-                    <ul>
-                         <a href="../playground.html">Live Playground
-                        <a href="../toast-demo.html">Toast Demo</a>
-                        <a href="../plugins/index.html">All Plugins</a>
-                        <a href="https://github.com/ajaykr089/Editora" target="_blank">GitHub</a>
-                    </ul>
-                </aside>
+ <h3>Quick Links</h3>
+ <ul>
+ <a href="../playground.html">Live Playground
+ <a href="../toast-demo.html">Toast Demo</a>
+ <a href="../plugins/index.html">All Plugins</a>
+ <a href="https://github.com/ajaykr089/Editora" target="_blank">GitHub</a>
+ </ul>
+ </aside>
 
-                <!-- Main Content -->
-                <main class="docs-content">
-                    <h2>Editor Constructor</h2>
-                    <pre><code class="language-javascript">const editor = createEditor(options)</code></pre>
+ <!-- Main Content -->
+ <main class="docs-content">
+ <h2>Editor Constructor</h2>
+ <pre><code class="language-javascript">const editor = createEditor(options)</code></pre>
 
-                    <h3>Constructor Options</h3>
-                    <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
-                        <thead>
-                            <tr style="background: var(--gray-200);">
-                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Option</th>
-                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Type</th>
-                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>element</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">HTMLElement | string</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Target DOM element or CSS selector</td>
-                            </tr>
-                            <tr style="background: var(--gray-50);">
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>content</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">string</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Initial HTML content</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>shortcuts</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">boolean</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Enable keyboard shortcuts (default: true)</td>
-                            </tr>
-                            <tr style="background: var(--gray-50);">
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>plugins</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Plugin[]</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Array of plugins to load</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>toolbar</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">boolean | string[]</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Show toolbar or custom buttons</td>
-                            </tr>
-                            <tr style="background: var(--gray-50);">
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>accessibility</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">object</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">ARIA labels, keyboard navigation shortcuts, and optional accessibility checker integration</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>performance</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">object</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Debounced change events and viewport-only scan optimizations for multi-instance pages</td>
-                            </tr>
-                        </tbody>
-                    </table>
+ <h3>Constructor Options</h3>
+ <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+ <thead>
+ <tr style="background: var(--gray-200);">
+ <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Option</th>
+ <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Type</th>
+ <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Description</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>element</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">HTMLElement | string</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Target DOM element or CSS selector</td>
+ </tr>
+ <tr style="background: var(--gray-50);">
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>content</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">string</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Initial HTML content</td>
+ </tr>
+ <tr>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>shortcuts</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">boolean</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Enable keyboard shortcuts (default: true)</td>
+ </tr>
+ <tr style="background: var(--gray-50);">
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>plugins</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Plugin[]</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Array of plugins to load</td>
+ </tr>
+ <tr>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>toolbar</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">boolean | string[]</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Show toolbar or custom buttons</td>
+ </tr>
+ <tr style="background: var(--gray-50);">
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>accessibility</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">object</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">ARIA labels, keyboard navigation shortcuts, and optional accessibility checker integration</td>
+ </tr>
+ <tr>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>performance</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">object</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Debounced change events and viewport-only scan optimizations for multi-instance pages</td>
+ </tr>
+ </tbody>
+ </table>
 
-                    <h2 style="margin-top: 2rem;">Web Component Dependencies</h2>
-                    <ul>
-                        <li><code>@editora/core</code> (required) - editor engine and web component bundle</li>
-                        <li><code>@editora/themes</code> (recommended) - dark/acme/custom theme CSS packs</li>
-                        <li><code>@editora/plugins</code> (framework wrappers) - explicit plugin factories for React/Vue integrations</li>
-                    </ul>
+ <h2 style="margin-top: 2rem;">Web Component Dependencies</h2>
+ <ul>
+ <li><code>@editora/core</code> (required) - editor engine and web component bundle</li>
+ <li><code>@editora/themes</code> (recommended) - dark/acme/custom theme CSS packs</li>
+ <li><code>@editora/plugins</code> (framework wrappers) - explicit plugin factories for React/Vue integrations</li>
+ </ul>
 
-                    <h2 style="margin-top: 2rem;">Plugin Import Surfaces (NPM)</h2>
-                    <ul>
-                        <li><code>@editora/plugins</code> - full plugin catalog</li>
-                        <li><code>@editora/plugins/lite</code> - common/core subset</li>
-                        <li><code>@editora/plugins/enterprise</code> - advanced/specialized subset</li>
-                        <li><code>@editora/plugins/&lt;plugin-name&gt;</code> - granular per-plugin imports</li>
-                    </ul>
-                    <p><strong>Enterprise preset includes:</strong> Mention, Track Changes, Version Diff, Conditional Content, Data Binding, Content Rules, Citations, Approval Workflow, PII Redaction, Smart Paste, Blocks Library, Document Schema, Translation Workflow, Slash Commands, Spell Check, A11y Checker, Comments, Merge Tag, Template, Media Manager, and Document Manager.</p>
-                    <p class="alert alert-success">All plugin entry paths (full/lite/enterprise) are completely free and customizable.</p>
+ <h2 style="margin-top: 2rem;">Plugin Import Surfaces (NPM)</h2>
+ <ul>
+ <li><code>@editora/plugins</code> - full plugin catalog</li>
+ <li><code>@editora/plugins/lite</code> - common/core subset</li>
+ <li><code>@editora/plugins/enterprise</code> - advanced/specialized subset</li>
+ <li><code>@editora/plugins/&lt;plugin-name&gt;</code> - granular per-plugin imports</li>
+ </ul>
+ <p><strong>Enterprise preset includes:</strong> Mention, Track Changes, Version Diff, Conditional Content, Data Binding, Content Rules, Citations, Approval Workflow, PII Redaction, Smart Paste, Blocks Library, Document Schema, Translation Workflow, Slash Commands, Spell Check, A11y Checker, Comments, Merge Tag, Template, Media Manager, and Document Manager.</p>
+ <p class="alert alert-success">All plugin entry paths (full/lite/enterprise) are completely free and customizable.</p>
 
-                    <h2 style="margin-top: 2rem;">Web Component Runtime Config</h2>
-                    <p>Configure declaratively (attributes) or imperatively via <code>editor.setConfig(...)</code>.</p>
-                    <pre><code class="language-html">&lt;editora-editor
-  theme="dark"
-  toolbar-items="undo redo | bold italic underline"
-  toolbar-floating="true"
-  toolbar-sticky="true"
-  autosave='{"enabled":true,"intervalMs":3000,"storageKey":"doc-1"}'
-  security='{"sanitizeOnPaste":true,"sanitizeOnInput":true}'
-  accessibility='{"enableARIA":true,"keyboardNavigation":true,"checker":false}'
-  performance='{"debounceInputMs":120,"viewportOnlyScan":true}'
+ <h2 style="margin-top: 2rem;">Web Component Runtime Config</h2>
+ <p>Configure declaratively (attributes) or imperatively via <code>editor.setConfig(...)</code>.</p>
+ <pre><code class="language-html">&lt;editora-editor
+ theme="dark"
+ toolbar-items="undo redo | bold italic underline"
+ toolbar-floating="true"
+ toolbar-sticky="true"
+ autosave='{"enabled":true,"intervalMs":3000,"storageKey":"doc-1"}'
+ security='{"sanitizeOnPaste":true,"sanitizeOnInput":true}'
+ accessibility='{"enableARIA":true,"keyboardNavigation":true,"checker":false}'
+ performance='{"debounceInputMs":120,"viewportOnlyScan":true}'
 &gt;&lt;/editora-editor&gt;</code></pre>
 
-                    <pre><code class="language-javascript">const editor = document.querySelector('editora-editor');
+ <pre><code class="language-javascript">const editor = document.querySelector('editora-editor');
 await editor.setConfig({
-  theme: 'acme',
-  toolbar: { items: 'undo redo | bold italic', floating: true, sticky: true },
-  autosave: { enabled: true, intervalMs: 5000, storageKey: 'doc-2', provider: 'localStorage' },
-  security: { sanitizeOnPaste: true, sanitizeOnInput: true },
-  accessibility: { enableARIA: true, keyboardNavigation: true, checker: true },
-  performance: { debounceInputMs: 100, viewportOnlyScan: true }
+ theme: 'acme',
+ toolbar: { items: 'undo redo | bold italic', floating: true, sticky: true },
+ autosave: { enabled: true, intervalMs: 5000, storageKey: 'doc-2', provider: 'localStorage' },
+ security: { sanitizeOnPaste: true, sanitizeOnInput: true },
+ accessibility: { enableARIA: true, keyboardNavigation: true, checker: true },
+ performance: { debounceInputMs: 100, viewportOnlyScan: true }
 });</code></pre>
 
-                    <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
-                        <thead>
-                            <tr style="background: var(--gray-200);">
-                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Config Group</th>
-                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Key Options</th>
-                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Attribute Mapping</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>theme</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>light</code>, <code>dark</code>, <code>acme</code>, custom</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>theme="dark"</code></td>
-                            </tr>
-                            <tr style="background: var(--gray-50);">
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>toolbar</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>items</code>, <code>floating</code>, <code>sticky</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>toolbar-items</code>, <code>toolbar-floating</code>, <code>toolbar-sticky</code></td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>autosave</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>enabled</code>, <code>intervalMs</code>, <code>storageKey</code>, <code>provider</code>, <code>apiUrl</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>autosave-*</code> attributes or JSON in <code>autosave</code></td>
-                            </tr>
-                            <tr style="background: var(--gray-50);">
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>security</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>sanitizeOnPaste</code>, <code>sanitizeOnInput</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>security-sanitize-on-paste</code>, <code>security-sanitize-on-input</code></td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>accessibility</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>enableARIA</code>, <code>keyboardNavigation</code>, <code>checker</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>accessibility-*</code> attributes or JSON in <code>accessibility</code></td>
-                            </tr>
-                            <tr style="background: var(--gray-50);">
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>performance</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>debounceInputMs</code>, <code>viewportOnlyScan</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>performance-*</code> attributes or JSON in <code>performance</code></td>
-                            </tr>
-                        </tbody>
-                    </table>
+ <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+ <thead>
+ <tr style="background: var(--gray-200);">
+ <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Config Group</th>
+ <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Key Options</th>
+ <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Attribute Mapping</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>theme</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>light</code>, <code>dark</code>, <code>acme</code>, custom</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>theme="dark"</code></td>
+ </tr>
+ <tr style="background: var(--gray-50);">
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>toolbar</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>items</code>, <code>floating</code>, <code>sticky</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>toolbar-items</code>, <code>toolbar-floating</code>, <code>toolbar-sticky</code></td>
+ </tr>
+ <tr>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>autosave</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>enabled</code>, <code>intervalMs</code>, <code>storageKey</code>, <code>provider</code>, <code>apiUrl</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>autosave-*</code> attributes or JSON in <code>autosave</code></td>
+ </tr>
+ <tr style="background: var(--gray-50);">
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>security</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>sanitizeOnPaste</code>, <code>sanitizeOnInput</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>security-sanitize-on-paste</code>, <code>security-sanitize-on-input</code></td>
+ </tr>
+ <tr>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>accessibility</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>enableARIA</code>, <code>keyboardNavigation</code>, <code>checker</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>accessibility-*</code> attributes or JSON in <code>accessibility</code></td>
+ </tr>
+ <tr style="background: var(--gray-50);">
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>performance</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>debounceInputMs</code>, <code>viewportOnlyScan</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>performance-*</code> attributes or JSON in <code>performance</code></td>
+ </tr>
+ </tbody>
+ </table>
 
-                    <h2 style="margin-top: 2rem;">Methods</h2>
+ <h2 style="margin-top: 2rem;">Methods</h2>
 
-                    <h3>getContent()</h3>
-                    <p>Get the current editor content as HTML</p>
-                    <pre><code class="language-javascript">const html = editor.getContent();
+ <h3>getContent()</h3>
+ <p>Get the current editor content as HTML</p>
+ <pre><code class="language-javascript">const html = editor.getContent();
 console.log(html); // &lt;p&gt;Your content&lt;/p&gt;</code></pre>
 
-                    <h3>setContent(html)</h3>
-                    <p>Set editor content</p>
-                    <pre><code class="language-javascript">editor.setContent('&lt;h1&gt;New Title&lt;/h1&gt;&lt;p&gt;Content&lt;/p&gt;');</code></pre>
+ <h3>setContent(html)</h3>
+ <p>Set editor content</p>
+ <pre><code class="language-javascript">editor.setContent('&lt;h1&gt;New Title&lt;/h1&gt;&lt;p&gt;Content&lt;/p&gt;');</code></pre>
 
-                    <h3>execCommand(command, args)</h3>
-                    <p>Execute an editor command</p>
-                    <pre><code class="language-javascript">editor.execCommand('bold');
+ <h3>execCommand(command, args)</h3>
+ <p>Execute an editor command</p>
+ <pre><code class="language-javascript">editor.execCommand('bold');
 editor.execCommand('heading', { level: 1 });
 editor.execCommand('insertLink', { url: 'https://example.com', text: 'Link' });</code></pre>
 
-                    <h3>undo()</h3>
-                    <p>Undo the last action</p>
-                    <pre><code class="language-javascript">editor.undo();</code></pre>
+ <h3>undo()</h3>
+ <p>Undo the last action</p>
+ <pre><code class="language-javascript">editor.undo();</code></pre>
 
-                    <h3>redo()</h3>
-                    <p>Redo the last undone action</p>
-                    <pre><code class="language-javascript">editor.redo();</code></pre>
+ <h3>redo()</h3>
+ <p>Redo the last undone action</p>
+ <pre><code class="language-javascript">editor.redo();</code></pre>
 
-                    <h3>focus()</h3>
-                    <p>Focus the editor</p>
-                    <pre><code class="language-javascript">editor.focus();</code></pre>
+ <h3>focus()</h3>
+ <p>Focus the editor</p>
+ <pre><code class="language-javascript">editor.focus();</code></pre>
 
-                    <h3>blur()</h3>
-                    <p>Blur the editor</p>
-                    <pre><code class="language-javascript">editor.blur();</code></pre>
+ <h3>blur()</h3>
+ <p>Blur the editor</p>
+ <pre><code class="language-javascript">editor.blur();</code></pre>
 
-                    <h3>destroy()</h3>
-                    <p>Destroy the editor and clean up</p>
-                    <pre><code class="language-javascript">editor.destroy();</code></pre>
+ <h3>destroy()</h3>
+ <p>Destroy the editor and clean up</p>
+ <pre><code class="language-javascript">editor.destroy();</code></pre>
 
-                    <h2 style="margin-top: 2rem;">Events</h2>
+ <h2 style="margin-top: 2rem;">Events</h2>
 
-                    <h3>change</h3>
-                    <p>Fired when content changes</p>
-                    <pre><code class="language-javascript">editor.on('change', (content) => {
-  console.log('Content changed:', content);
+ <h3>change</h3>
+ <p>Fired when content changes</p>
+ <pre><code class="language-javascript">editor.on('change', (content) => {
+ console.log('Content changed:', content);
 });</code></pre>
 
-                    <h3>selectionChange</h3>
-                    <p>Fired when selection changes</p>
-                    <pre><code class="language-javascript">editor.on('selectionChange', (selection) => {
-  console.log('Selection:', selection);
+ <h3>selectionChange</h3>
+ <p>Fired when selection changes</p>
+ <pre><code class="language-javascript">editor.on('selectionChange', (selection) => {
+ console.log('Selection:', selection);
 });</code></pre>
 
-                    <h3>focus</h3>
-                    <p>Fired when editor is focused</p>
-                    <pre><code class="language-javascript">editor.on('focus', () => {
-  console.log('Editor focused');
+ <h3>focus</h3>
+ <p>Fired when editor is focused</p>
+ <pre><code class="language-javascript">editor.on('focus', () => {
+ console.log('Editor focused');
 });</code></pre>
 
-                    <h3>blur</h3>
-                    <p>Fired when editor loses focus</p>
-                    <pre><code class="language-javascript">editor.on('blur', () => {
-  console.log('Editor blurred');
+ <h3>blur</h3>
+ <p>Fired when editor loses focus</p>
+ <pre><code class="language-javascript">editor.on('blur', () => {
+ console.log('Editor blurred');
 });</code></pre>
 
-                    <h2 style="margin-top: 2rem;">Commands Reference</h2>
+ <h2 style="margin-top: 2rem;">Commands Reference</h2>
 
-                    <h3>Text Formatting Commands</h3>
-                    <ul>
-                        <li><code>bold</code> - Make text bold</li>
-                        <li><code>italic</code> - Make text italic</li>
-                        <li><code>underline</code> - Underline text</li>
-                        <li><code>strikethrough</code> - Strike through text</li>
-                        <li><code>superscript</code> - Superscript text</li>
-                        <li><code>subscript</code> - Subscript text</li>
-                    </ul>
+ <h3>Text Formatting Commands</h3>
+ <ul>
+ <li><code>bold</code> - Make text bold</li>
+ <li><code>italic</code> - Make text italic</li>
+ <li><code>underline</code> - Underline text</li>
+ <li><code>strikethrough</code> - Strike through text</li>
+ <li><code>superscript</code> - Superscript text</li>
+ <li><code>subscript</code> - Subscript text</li>
+ </ul>
 
-                    <h3>Heading Commands</h3>
-                    <pre><code class="language-javascript">editor.execCommand('heading', { level: 1 }); // H1
+ <h3>Heading Commands</h3>
+ <pre><code class="language-javascript">editor.execCommand('heading', { level: 1 }); // H1
 editor.execCommand('heading', { level: 2 }); // H2
 // ... up to level 6
 editor.execCommand('paragraph'); // Back to paragraph</code></pre>
 
-                    <h3>List Commands</h3>
-                    <pre><code class="language-javascript">editor.execCommand('bulletList');
+ <h3>List Commands</h3>
+ <pre><code class="language-javascript">editor.execCommand('bulletList');
 editor.execCommand('orderedList');
 editor.execCommand('indent');
 editor.execCommand('outdent');</code></pre>
 
-                    <h3>Alignment Commands</h3>
-                    <pre><code class="language-javascript">editor.execCommand('alignLeft');
+ <h3>Alignment Commands</h3>
+ <pre><code class="language-javascript">editor.execCommand('alignLeft');
 editor.execCommand('alignCenter');
 editor.execCommand('alignRight');
 editor.execCommand('justify');</code></pre>
 
-                    <h3>Link Commands</h3>
-                    <pre><code class="language-javascript">editor.execCommand('insertLink', {
-  url: 'https://example.com',
-  text: 'Example',
-  target: '_blank'
+ <h3>Link Commands</h3>
+ <pre><code class="language-javascript">editor.execCommand('insertLink', {
+ url: 'https://example.com',
+ text: 'Example',
+ target: '_blank'
 });
 editor.execCommand('removeLink');</code></pre>
 
-                    <h3>Color Commands</h3>
-                    <pre><code class="language-javascript">editor.execCommand('textColor', { color: '#ff0000' });
+ <h3>Color Commands</h3>
+ <pre><code class="language-javascript">editor.execCommand('textColor', { color: '#ff0000' });
 editor.execCommand('backgroundColor', { color: '#ffff00' });</code></pre>
 
-                    <h3>History Commands</h3>
-                    <pre><code class="language-javascript">editor.execCommand('undo');
+ <h3>History Commands</h3>
+ <pre><code class="language-javascript">editor.execCommand('undo');
 editor.execCommand('redo');
 editor.execCommand('clearHistory');</code></pre>
 
-                    <h2 style="margin-top: 2rem;">React Component Props</h2>
-                    <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
-                        <thead>
-                            <tr style="background: var(--gray-200);">
-                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Prop</th>
-                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Type</th>
-                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>defaultValue</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">string</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Initial content</td>
-                            </tr>
-                            <tr style="background: var(--gray-50);">
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>onChange</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">function</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Content change callback</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>onFocus</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">function</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Focus event handler</td>
-                            </tr>
-                            <tr style="background: var(--gray-50);">
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>onBlur</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">function</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Blur event handler</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>plugins</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Plugin[]</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Array of plugins</td>
-                            </tr>
-                        </tbody>
-                    </table>
+ <h2 style="margin-top: 2rem;">React Component Props</h2>
+ <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+ <thead>
+ <tr style="background: var(--gray-200);">
+ <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Prop</th>
+ <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Type</th>
+ <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Description</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>defaultValue</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">string</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Initial content</td>
+ </tr>
+ <tr style="background: var(--gray-50);">
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>onChange</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">function</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Content change callback</td>
+ </tr>
+ <tr>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>onFocus</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">function</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Focus event handler</td>
+ </tr>
+ <tr style="background: var(--gray-50);">
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>onBlur</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">function</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Blur event handler</td>
+ </tr>
+ <tr>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>plugins</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Plugin[]</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Array of plugins</td>
+ </tr>
+ </tbody>
+ </table>
 
-                    <h2 style="margin-top: 2rem;">Examples</h2>
+ <h2 style="margin-top: 2rem;">Examples</h2>
 
-                    <h3>Basic Usage</h3>
-                    <pre><code class="language-javascript">import { createEditor } from '@editora/core';
+ <h3>Basic Usage</h3>
+ <pre><code class="language-javascript">import { createEditor } from '@editora/core';
 
 const editor = createEditor({
-  content: '&lt;p&gt;Hello World&lt;/p&gt;'
+ content: '&lt;p&gt;Hello World&lt;/p&gt;'
 });
 editor.mount(document.getElementById('editor'));
 
 editor.on('change', (content) => {
-  console.log('New content:', content);
+ console.log('New content:', content);
 });</code></pre>
 
-                    <h3>React Usage</h3>
-                    <pre><code class="language-jsx">import { EditoraEditor } from '@editora/react';
+ <h3>React Usage</h3>
+ <pre><code class="language-jsx">import { EditoraEditor } from '@editora/react';
 import "@editora/themes/themes/default.css";
 
 export default function Document() {
-  const handleChange = (content) => {
-    console.log('Content:', content);
-  };
+ const handleChange = (content) => {
+ console.log('Content:', content);
+ };
 
-  return (
-    &lt;EditoraEditor
-      defaultValue="&lt;p&gt;Start typing...&lt;/p&gt;"
-      onChange={handleChange}
-    /&gt;
-  );
+ return (
+ &lt;EditoraEditor
+ defaultValue="&lt;p&gt;Start typing...&lt;/p&gt;"
+ onChange={handleChange}
+ /&gt;
+ );
 }</code></pre>
 
-                    <h3>With Plugins</h3>
-                    <pre><code class="language-javascript">import { createEditor } from '@editora/core';
+ <h3>With Plugins</h3>
+ <pre><code class="language-javascript">import { createEditor } from '@editora/core';
 import { MediaManagerPlugin } from '@editora/plugins';
 
 const editor = createEditor({
-  plugins: [
-    MediaManagerPlugin({
-      uploadUrl: '/api/upload'
-    })
-  ]
+ plugins: [
+ MediaManagerPlugin({
+ uploadUrl: '/api/upload'
+ })
+ ]
 });
 editor.mount(document.getElementById('editor'));</code></pre>
 
-                    <div style="margin-top: 3rem; padding: 2rem; background: var(--gray-50); border-radius: var(--border-radius);">
-                        <p>For more examples and advanced usage, visit the <a href="examples.html">Examples page</a>.</p>
-                    </div>
-                </main>
-            </div>
-        </div>
-    </section>
+ <div style="margin-top: 3rem; padding: 2rem; background: var(--gray-50); border-radius: var(--border-radius);">
+ <p>For more examples and advanced usage, visit the <a href="examples.html">Examples page</a>.</p>
+ </div>
+ </main>
+ </div>
+ </div>
+ </section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-links">
-                <div class="footer-section">
-                    <h5>📚 Documentation</h5>
-                    <ul>
-                        <li><a href="installation.html">Installation</a></li>
-                        <li><a href="features.html">Features</a></li>
-                        <li><a href="api.html">API Reference</a></li>
-                        <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h5>🔌 Plugins</h5>
-                    <ul>
-                        <li><a href="../plugins/index.html">All Plugins</a></li>
-                        <li><a href="../plugins/media-manager.html">Media Manager</a></li>
-                        <li><a href="../plugins/table.html">Tables</a></li>
-                        <li><a href="../plugins/code-sample.html">Code Samples</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h5>🔗 Links</h5>
-                    <ul>
-                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h5>ℹ️ About</h5>
-                    <ul>
-                        <li><a href="about.html">About Editora</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p style="color:white">&copy; 2024-2026 Editora.Built with <span style="color: red;">&hearts;</span> by Editora Team. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
-            </div>
-        </div>
-    </footer>
+ <!-- Footer -->
+ <footer>
+ <div class="container">
+ <div class="footer-links">
+ <div class="footer-section">
+ <h5>Documentation</h5>
+ <ul>
+ <li><a href="installation.html">Installation</a></li>
+ <li><a href="features.html">Features</a></li>
+ <li><a href="api.html">API Reference</a></li>
+ <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h5>Plugins</h5>
+ <ul>
+ <li><a href="../plugins/index.html">All Plugins</a></li>
+ <li><a href="../plugins/media-manager.html">Media Manager</a></li>
+ <li><a href="../plugins/table.html">Tables</a></li>
+ <li><a href="../plugins/code-sample.html">Code Samples</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h5>Links</h5>
+ <ul>
+ <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+ <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h5>About</h5>
+ <ul>
+ <li><a href="about.html">About Editora</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+ </ul>
+ </div>
+ </div>
+ <div class="footer-bottom">
+ <p style="color:white">&copy; 2024-2026 Editora.Built with <span style="color: var(--accent);">&hearts;</span> by Editora Team. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+ </div>
+ </div>
+ </footer>
 
-    <script src="../assets/js/main.js"></script>
+ <script src="../assets/js/main.js"></script>
 </body>
 </html>

@@ -1,299 +1,300 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Editora Webcomponent Performance + Accessibility Lab</title>
-  <style>
-    :root {
-      --bg: #eef3fb;
-      --panel: #ffffff;
-      --line: #d4deef;
-      --text: #0f172a;
-      --muted: #475569;
-    }
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <title>Editora Webcomponent Performance + Accessibility Lab</title>
+ <link rel="stylesheet" href="assets/css/style.css">
+<style>
+ :root {
+ --bg: #eef3fb;
+ --panel: #ffffff;
+ --line: #d4deef;
+ --text: #0f172a;
+ --muted: #475569;
+ }
 
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: linear-gradient(180deg, #e9f0ff 0%, #f8fbff 100%);
-      color: var(--text);
-      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
+ * { box-sizing: border-box; }
+ body {
+ margin: 0;
+ background: linear-gradient(180deg, #e9f0ff 0%, #f8fbff 100%);
+ color: var(--text);
+ font-family: var(--font-body);
+ }
 
-    .shell {
-      max-width: 1360px;
-      margin: 0 auto;
-      padding: 18px;
-      display: grid;
-      gap: 14px;
-    }
+ .shell {
+ max-width: 1360px;
+ margin: 0 auto;
+ padding: 18px;
+ display: grid;
+ gap: 14px;
+ }
 
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 14px;
-    }
+ .card {
+ background: var(--panel);
+ border: 1px solid var(--line);
+ border-radius: 12px;
+ padding: 14px;
+ }
 
-    h1, h2, h3, p { margin: 0; }
-    h1 { font-size: 24px; }
-    h2 {
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: #334155;
-      margin-bottom: 10px;
-    }
-    .sub {
-      margin-top: 6px;
-      color: var(--muted);
-      font-size: 13px;
-    }
+ h1, h2, h3, p { margin: 0; }
+ h1 { font-size: 24px; }
+ h2 {
+ font-size: 13px;
+ text-transform: uppercase;
+ letter-spacing: 0.6px;
+ color: #334155;
+ margin-bottom: 10px;
+ }
+ .sub {
+ margin-top: 6px;
+ color: var(--muted);
+ font-size: 13px;
+ }
 
-    .layout {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 14px;
-      align-items: start;
-    }
+ .layout {
+ display: grid;
+ grid-template-columns: 320px 1fr;
+ gap: 14px;
+ align-items: start;
+ }
 
-    .field {
-      display: grid;
-      gap: 6px;
-      margin-bottom: 10px;
-    }
+ .field {
+ display: grid;
+ gap: 6px;
+ margin-bottom: 10px;
+ }
 
-    label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #334155;
-    }
+ label {
+ font-size: 12px;
+ font-weight: 600;
+ color: #334155;
+ }
 
-    select,
-    input[type="number"] {
-      width: 100%;
-      border: 1px solid #c6d2e7;
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 13px;
-      background: #fff;
-      color: #0f172a;
-    }
+ select,
+ input[type="number"] {
+ width: 100%;
+ border: 1px solid #c6d2e7;
+ border-radius: 8px;
+ padding: 8px 10px;
+ font-size: 13px;
+ background: #fff;
+ color: #0f172a;
+ }
 
-    .check {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-      font-size: 13px;
-    }
+ .check {
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ margin-bottom: 8px;
+ font-size: 13px;
+ }
 
-    .btn-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 8px;
-    }
+ .btn-row {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ gap: 8px;
+ margin-top: 8px;
+ }
 
-    button {
-      border: 1px solid #b7c5da;
-      border-radius: 8px;
-      background: #f7fbff;
-      color: #0f172a;
-      padding: 8px 10px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 13px;
-    }
+ button {
+ border: 1px solid #b7c5da;
+ border-radius: 8px;
+ background: #f7fbff;
+ color: #0f172a;
+ padding: 8px 10px;
+ cursor: pointer;
+ font-weight: 600;
+ font-size: 13px;
+ }
 
-    button:hover { background: #ecf5ff; }
-    button.primary {
-      background: #0284c7;
-      border-color: #0284c7;
-      color: #fff;
-    }
+ button:hover { background: #ecf5ff; }
+ button.primary {
+ background: #0284c7;
+ border-color: #0284c7;
+ color: #fff;
+ }
 
-    .editors {
-      display: grid;
-      gap: 14px;
-    }
+ .editors {
+ display: grid;
+ gap: 14px;
+ }
 
-    .editor-wrap {
-      display: grid;
-      gap: 8px;
-    }
+ .editor-wrap {
+ display: grid;
+ gap: 8px;
+ }
 
-    .meta {
-      color: #64748b;
-      font-size: 12px;
-    }
+ .meta {
+ color: #64748b;
+ font-size: 12px;
+ }
 
-    .spacer {
-      height: 540px;
-      border: 1px dashed #c2d2e7;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.45);
-      display: grid;
-      place-items: center;
-      color: #64748b;
-      font-size: 12px;
-    }
+ .spacer {
+ height: 540px;
+ border: 1px dashed #c2d2e7;
+ border-radius: 8px;
+ background: rgba(255, 255, 255, 0.45);
+ display: grid;
+ place-items: center;
+ color: #64748b;
+ font-size: 12px;
+ }
 
-    .log {
-      white-space: pre-wrap;
-      max-height: 180px;
-      overflow: auto;
-      border: 1px solid #d4deef;
-      border-radius: 8px;
-      padding: 10px;
-      background: #f8fbff;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 12px;
-      line-height: 1.42;
-    }
+ .log {
+ white-space: pre-wrap;
+ max-height: 180px;
+ overflow: auto;
+ border: 1px solid #d4deef;
+ border-radius: 8px;
+ padding: 10px;
+ background: #f8fbff;
+ font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+ font-size: 12px;
+ line-height: 1.42;
+ }
 
-    @media (max-width: 1080px) {
-      .layout { grid-template-columns: 1fr; }
-    }
-  </style>
+ @media (max-width: 1080px) {
+ .layout { grid-template-columns: 1fr; }
+ }
+ </style>
 </head>
 <body>
-  <div class="shell">
-    <section class="card">
-      <h1>Webcomponent Performance + Accessibility Lab</h1>
-      <p class="sub">Validates <code>performance</code> + <code>accessibility</code> config across multiple instances.</p>
-    </section>
+ <div class="shell">
+ <section class="card">
+ <h1>Webcomponent Performance + Accessibility Lab</h1>
+ <p class="sub">Validates <code>performance</code> + <code>accessibility</code> config across multiple instances.</p>
+ </section>
 
-    <section class="layout">
-      <aside class="card">
-        <h2>Runtime Controls</h2>
-        <div class="field">
-          <label for="target">Target Editor</label>
-          <select id="target">
-            <option value="editorA">Editor A</option>
-            <option value="editorB">Editor B</option>
-          </select>
-        </div>
+ <section class="layout">
+ <aside class="card">
+ <h2>Runtime Controls</h2>
+ <div class="field">
+ <label for="target">Target Editor</label>
+ <select id="target">
+ <option value="editorA">Editor A</option>
+ <option value="editorB">Editor B</option>
+ </select>
+ </div>
 
-        <div class="field">
-          <label for="debounceInputMs">performance.debounceInputMs</label>
-          <input id="debounceInputMs" type="number" min="0" step="10" value="100" />
-        </div>
+ <div class="field">
+ <label for="debounceInputMs">performance.debounceInputMs</label>
+ <input id="debounceInputMs" type="number" min="0" step="10" value="100" />
+ </div>
 
-        <div class="check"><input id="viewportOnlyScan" type="checkbox" checked /> <label for="viewportOnlyScan">performance.viewportOnlyScan</label></div>
-        <div class="check"><input id="enableARIA" type="checkbox" checked /> <label for="enableARIA">accessibility.enableARIA</label></div>
-        <div class="check"><input id="keyboardNavigation" type="checkbox" checked /> <label for="keyboardNavigation">accessibility.keyboardNavigation</label></div>
-        <div class="check"><input id="checker" type="checkbox" /> <label for="checker">accessibility.checker</label></div>
+ <div class="check"><input id="viewportOnlyScan" type="checkbox" checked /> <label for="viewportOnlyScan">performance.viewportOnlyScan</label></div>
+ <div class="check"><input id="enableARIA" type="checkbox" checked /> <label for="enableARIA">accessibility.enableARIA</label></div>
+ <div class="check"><input id="keyboardNavigation" type="checkbox" checked /> <label for="keyboardNavigation">accessibility.keyboardNavigation</label></div>
+ <div class="check"><input id="checker" type="checkbox" /> <label for="checker">accessibility.checker</label></div>
 
-        <div class="btn-row">
-          <button id="apply" class="primary">Apply Config</button>
-          <button id="read">Read Config</button>
-        </div>
-      </aside>
+ <div class="btn-row">
+ <button id="apply" class="primary">Apply Config</button>
+ <button id="read">Read Config</button>
+ </div>
+ </aside>
 
-      <div class="editors">
-        <section class="card editor-wrap">
-          <h3>Editor A</h3>
-          <p class="meta">With <code>checker=true</code>, a11y checker plugin is auto-added if missing from explicit plugin list.</p>
-          <editora-editor
-            id="editorA"
-            height="380"
-            plugins="bold italic underline strikethrough history"
-            toolbar-items="undo redo | bold italic underline strikethrough | a11yChecker"
-            statusbar="true"
-            placeholder="Editor A: select text, type quickly, and test shortcuts."
-            data-initial-content="<p><strong>Editor A</strong> - test debounced <code>content-change</code> events and ARIA settings.</p>"
-          ></editora-editor>
-        </section>
+ <div class="editors">
+ <section class="card editor-wrap">
+ <h3>Editor A</h3>
+ <p class="meta">With <code>checker=true</code>, a11y checker plugin is auto-added if missing from explicit plugin list.</p>
+ <editora-editor
+ id="editorA"
+ height="380"
+ plugins="bold italic underline strikethrough history"
+ toolbar-items="undo redo | bold italic underline strikethrough | a11yChecker"
+ statusbar="true"
+ placeholder="Editor A: select text, type quickly, and test shortcuts."
+ data-initial-content="<p><strong>Editor A</strong> - test debounced <code>content-change</code> events and ARIA settings.</p>"
+ ></editora-editor>
+ </section>
 
-        <section class="spacer">Scroll down to bring Editor B in/out of viewport for viewportOnlyScan behavior.</section>
+ <section class="spacer">Scroll down to bring Editor B in/out of viewport for viewportOnlyScan behavior.</section>
 
-        <section class="card editor-wrap">
-          <h3>Editor B</h3>
-          <p class="meta">Use this instance to test offscreen scan skipping and independent keyboard/accessibility toggles.</p>
-          <editora-editor
-            id="editorB"
-            height="380"
-            plugins="bold italic underline strikethrough history"
-            toolbar-items="undo redo | bold italic underline strikethrough | a11yChecker"
-            statusbar="true"
-            placeholder="Editor B: offscreen/onscreen scan behavior."
-            data-initial-content="<p><strong>Editor B</strong> - scroll this editor out of view and verify status/floating scans are skipped.</p>"
-          ></editora-editor>
-        </section>
+ <section class="card editor-wrap">
+ <h3>Editor B</h3>
+ <p class="meta">Use this instance to test offscreen scan skipping and independent keyboard/accessibility toggles.</p>
+ <editora-editor
+ id="editorB"
+ height="380"
+ plugins="bold italic underline strikethrough history"
+ toolbar-items="undo redo | bold italic underline strikethrough | a11yChecker"
+ statusbar="true"
+ placeholder="Editor B: offscreen/onscreen scan behavior."
+ data-initial-content="<p><strong>Editor B</strong> - scroll this editor out of view and verify status/floating scans are skipped.</p>"
+ ></editora-editor>
+ </section>
 
-        <section class="card">
-          <h2>Event Log</h2>
-          <div id="log" class="log">Booting...</div>
-        </section>
-      </div>
-    </section>
-  </div>
+ <section class="card">
+ <h2>Event Log</h2>
+ <div id="log" class="log">Booting...</div>
+ </section>
+ </div>
+ </section>
+ </div>
 
-  <script type="module">
-    const logEl = document.getElementById('log');
-    const append = (msg) => {
-      const timestamp = new Date().toLocaleTimeString();
-      logEl.textContent = `[${timestamp}] ${msg}\n` + logEl.textContent;
-    };
+ <script type="module">
+ const logEl = document.getElementById('log');
+ const append = (msg) => {
+ const timestamp = new Date().toLocaleTimeString();
+ logEl.textContent = `[${timestamp}] ${msg}\n` + logEl.textContent;
+ };
 
-    const loadBundle = async () => {
-      try {
-        await import('../../packages/core/dist/webcomponent.js');
-        append('Loaded local bundle: ../../packages/core/dist/webcomponent.js');
-      } catch (localError) {
-        append(`Local bundle failed: ${localError}`);
-        await import('https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js');
-        append('Loaded CDN bundle fallback');
-      }
-    };
+ const loadBundle = async () => {
+ try {
+ await import('../../packages/core/dist/webcomponent.js');
+ append('Loaded local bundle: ../../packages/core/dist/webcomponent.js');
+ } catch (localError) {
+ append(`Local bundle failed: ${localError}`);
+ await import('https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js');
+ append('Loaded CDN bundle fallback');
+ }
+ };
 
-    const readControls = () => ({
-      performance: {
-        debounceInputMs: Number(document.getElementById('debounceInputMs').value || 0),
-        viewportOnlyScan: document.getElementById('viewportOnlyScan').checked,
-      },
-      accessibility: {
-        enableARIA: document.getElementById('enableARIA').checked,
-        keyboardNavigation: document.getElementById('keyboardNavigation').checked,
-        checker: document.getElementById('checker').checked,
-      },
-    });
+ const readControls = () => ({
+ performance: {
+ debounceInputMs: Number(document.getElementById('debounceInputMs').value || 0),
+ viewportOnlyScan: document.getElementById('viewportOnlyScan').checked,
+ },
+ accessibility: {
+ enableARIA: document.getElementById('enableARIA').checked,
+ keyboardNavigation: document.getElementById('keyboardNavigation').checked,
+ checker: document.getElementById('checker').checked,
+ },
+ });
 
-    const getTarget = () => document.getElementById(document.getElementById('target').value);
+ const getTarget = () => document.getElementById(document.getElementById('target').value);
 
-    const wireEditorEvents = (editor) => {
-      editor.addEventListener('editor-ready', () => append(`${editor.id}: editor-ready`));
-      editor.addEventListener('content-change', () => append(`${editor.id}: content-change`));
-      editor.addEventListener('editor-focus', () => append(`${editor.id}: editor-focus`));
-      editor.addEventListener('editor-blur', () => append(`${editor.id}: editor-blur`));
-    };
+ const wireEditorEvents = (editor) => {
+ editor.addEventListener('editor-ready', () => append(`${editor.id}: editor-ready`));
+ editor.addEventListener('content-change', () => append(`${editor.id}: content-change`));
+ editor.addEventListener('editor-focus', () => append(`${editor.id}: editor-focus`));
+ editor.addEventListener('editor-blur', () => append(`${editor.id}: editor-blur`));
+ };
 
-    await loadBundle();
+ await loadBundle();
 
-    const editorA = document.getElementById('editorA');
-    const editorB = document.getElementById('editorB');
-    wireEditorEvents(editorA);
-    wireEditorEvents(editorB);
+ const editorA = document.getElementById('editorA');
+ const editorB = document.getElementById('editorB');
+ wireEditorEvents(editorA);
+ wireEditorEvents(editorB);
 
-    document.getElementById('apply').addEventListener('click', async () => {
-      const target = getTarget();
-      const nextConfig = readControls();
-      await target.setConfig({
-        ...target.getAPI().getConfig(),
-        ...nextConfig,
-      });
-      append(`${target.id}: setConfig applied (${JSON.stringify(nextConfig)})`);
-    });
+ document.getElementById('apply').addEventListener('click', async () => {
+ const target = getTarget();
+ const nextConfig = readControls();
+ await target.setConfig({
+ ...target.getAPI().getConfig(),
+ ...nextConfig,
+ });
+ append(`${target.id}: setConfig applied (${JSON.stringify(nextConfig)})`);
+ });
 
-    document.getElementById('read').addEventListener('click', () => {
-      const target = getTarget();
-      const cfg = target.getAPI().getConfig();
-      append(`${target.id}: performance=${JSON.stringify(cfg.performance)} accessibility=${JSON.stringify(cfg.accessibility)}`);
-    });
+ document.getElementById('read').addEventListener('click', () => {
+ const target = getTarget();
+ const cfg = target.getAPI().getConfig();
+ append(`${target.id}: performance=${JSON.stringify(cfg.performance)} accessibility=${JSON.stringify(cfg.accessibility)}`);
+ });
 
-    append('Ready. Use Apply Config, then test keyboard shortcuts, ARIA attributes, and viewport behavior.');
-  </script>
+ append('Ready. Use Apply Config, then test keyboard shortcuts, ARIA attributes, and viewport behavior.');
+ </script>
 </body>
 </html>

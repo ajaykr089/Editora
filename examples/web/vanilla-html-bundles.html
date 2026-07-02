@@ -1,125 +1,125 @@
 <!DOCTYPE html>
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="Editora bundle comparison: Core vs Full bundles for vanilla HTML usage." />
-    <title>Editora — Bundle Comparison</title>
-    <link rel="icon" href="assets/img/favicon_32.png" sizes="32x32" />
-    <link rel="stylesheet" href="assets/css/style.css" />
-  </head>
-  <body>
-    <header>
-      <div class="container">
-        <nav>
-          <a href="index.html" class="logo">
-            <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height:54px; width:auto; margin-right:8px;" />
-          </a>
-          <button class="menu-toggle">☰</button>
-          <ul class="nav-links">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="docs/installation.html">Docs</a></li>
-            <li><a href="docs/features.html">Features</a></li>
-            <li><a href="plugins/index.html">Plugins</a></li>
-            <li><a href="docs/api.html">API</a></li>
-            <li><a href="toast-demo.html">Toast</a></li>
-            <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-          </ul>
-        </nav>
-      </div>
-    </header>
+ <head>
+ <meta charset="utf-8" />
+ <meta name="viewport" content="width=device-width,initial-scale=1" />
+ <meta name="description" content="Editora bundle comparison: Core vs Full bundles for vanilla HTML usage." />
+ <title>Editora — Bundle Comparison</title>
+ <link rel="icon" href="assets/img/favicon_32.png" sizes="32x32" />
+ <link rel="stylesheet" href="assets/css/style.css" />
+ </head>
+ <body>
+ <header>
+ <div class="container">
+ <nav>
+ <a href="index.html" class="logo">
+ <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height:54px; width:auto; margin-right:8px;" />
+ </a>
+ <button class="menu-toggle">☰</button>
+ <ul class="nav-links">
+ <li><a href="index.html">Home</a></li>
+ <li><a href="docs/installation.html">Docs</a></li>
+ <li><a href="docs/features.html">Features</a></li>
+ <li><a href="plugins/index.html">Plugins</a></li>
+ <li><a href="docs/api.html">API</a></li>
+ <li><a href="toast-demo.html">Toast</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+ </ul>
+ </nav>
+ </div>
+ </header>
 
-    <main class="container">
-      <h1>Editora — Core vs Full Bundles</h1>
-      <p class="subtitle">A quick comparison for vanilla HTML usage (CDN or local bundles).</p>
+ <main class="container">
+ <h1>Editora — Core vs Full Bundles</h1>
+ <p class="subtitle">A quick comparison for vanilla HTML usage (CDN or local bundles).</p>
 
-      <div class="bundle-comparison">
-        <section class="bundle-card">
-          <div class="bundle-header">
-            <h3>Core Bundle <span class="bundle-size core">~96 KB</span></h3>
-          </div>
-          <div class="bundle-features">
-            <h4>What it includes</h4>
-            <ul>
-              <li>Essential editing features (formatting, lists, history)</li>
-              <li>Small footprint for fast initial load</li>
-              <li>Ideal for lightweight integrations</li>
-            </ul>
-          </div>
-          <div class="editor-container">
-            <div class="editor-content" id="core-editor" contenteditable="true">Try the lightweight core editor.</div>
-          </div>
-        </section>
+ <div class="bundle-comparison">
+ <section class="bundle-card">
+ <div class="bundle-header">
+ <h3>Core Bundle <span class="bundle-size core">~96 KB</span></h3>
+ </div>
+ <div class="bundle-features">
+ <h4>What it includes</h4>
+ <ul>
+ <li>Essential editing features (formatting, lists, history)</li>
+ <li>Small footprint for fast initial load</li>
+ <li>Ideal for lightweight integrations</li>
+ </ul>
+ </div>
+ <div class="editor-container">
+ <div class="editor-content" id="core-editor" contenteditable="true">Try the lightweight core editor.</div>
+ </div>
+ </section>
 
-        <section class="bundle-card">
-          <div class="bundle-header">
-            <h3>Full Bundle <span class="bundle-size full">~1.9 MB</span></h3>
-          </div>
-          <div class="bundle-features">
-            <h4>What it includes</h4>
-            <ul>
-              <li>All plugins (tables, images, math, export, media manager)</li>
-              <li>Feature-rich UI and dialogs</li>
-              <li>Best for applications that need full functionality</li>
-            </ul>
-          </div>
-          <div class="editor-container">
-            <div class="editor-content" id="full-editor" contenteditable="true">Try the full-featured editor.</div>
-          </div>
-        </section>
-      </div>
+ <section class="bundle-card">
+ <div class="bundle-header">
+ <h3>Full Bundle <span class="bundle-size full">~1.9 MB</span></h3>
+ </div>
+ <div class="bundle-features">
+ <h4>What it includes</h4>
+ <ul>
+ <li>All plugins (tables, images, math, export, media manager)</li>
+ <li>Feature-rich UI and dialogs</li>
+ <li>Best for applications that need full functionality</li>
+ </ul>
+ </div>
+ <div class="editor-container">
+ <div class="editor-content" id="full-editor" contenteditable="true">Try the full-featured editor.</div>
+ </div>
+ </section>
+ </div>
 
-      <div class="info">
-        <h3>Quick CDN Usage</h3>
-        <p>Include either the Core or Full bundle via CDN. Core should be loaded before Full if you want to compare side-by-side.</p>
-        <pre class="code-block"><code>&lt;!-- Core bundle (smaller) --&gt;
+ <div class="info">
+ <h3>Quick CDN Usage</h3>
+ <p>Include either the Core or Full bundle via CDN. Core should be loaded before Full if you want to compare side-by-side.</p>
+ <pre class="code-block"><code>&lt;!-- Core bundle (smaller) --&gt;
 &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.js"&gt;&lt;/script&gt;
 &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.css"&gt;
 
 &lt;!-- Full bundle (all plugins) --&gt;
 &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"&gt;&lt;/script&gt;
 &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;</code></pre>
-      </div>
-    </main>
+ </div>
+ </main>
 
-    <footer>
-      <div class="footer-links">
-        <div class="footer-section">
-          <h5>📚 Documentation</h5>
-          <ul>
-            <li><a href="docs/installation.html">Installation</a></li>
-            <li><a href="docs/features.html">Features</a></li>
-            <li><a href="docs/api.html">API Reference</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h5>🔌 Plugins</h5>
-          <ul>
-            <li><a href="plugins/index.html">All Plugins</a></li>
-            <li><a href="plugins/media-manager.html">Media Manager</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>&copy; 2024-2026 Editora. Built with ❤️ by Ajay Kumar. All rights reserved.</p>
-      </div>
-    </footer>
+ <footer>
+ <div class="footer-links">
+ <div class="footer-section">
+ <h5>Documentation</h5>
+ <ul>
+ <li><a href="docs/installation.html">Installation</a></li>
+ <li><a href="docs/features.html">Features</a></li>
+ <li><a href="docs/api.html">API Reference</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h5>Plugins</h5>
+ <ul>
+ <li><a href="plugins/index.html">All Plugins</a></li>
+ <li><a href="plugins/media-manager.html">Media Manager</a></li>
+ </ul>
+ </div>
+ </div>
+ <div class="footer-bottom">
+ <p>&copy; 2024-2026 Editora. Built with ❤️ by Ajay Kumar. All rights reserved.</p>
+ </div>
+ </footer>
 
-    <!-- Load core and full bundles for local demos (use CDN in production) -->
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.css">
+ <!-- Load core and full bundles for local demos (use CDN in production) -->
+ <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.js"></script>
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.css">
 
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css">
+ <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"></script>
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css">
 
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const core = document.getElementById('core-editor');
-        const full = document.getElementById('full-editor');
-        if (core) core.addEventListener('input', () => console.log('Core editor input'));
-        if (full) full.addEventListener('input', () => console.log('Full editor input'));
-      });
-    </script>
-  </body>
+ <script>
+ document.addEventListener('DOMContentLoaded', () => {
+ const core = document.getElementById('core-editor');
+ const full = document.getElementById('full-editor');
+ if (core) core.addEventListener('input', () => console.log('Core editor input'));
+ if (full) full.addEventListener('input', () => console.log('Full editor input'));
+ });
+ </script>
+ </body>
 </html>

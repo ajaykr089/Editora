@@ -1,722 +1,721 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
-    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
-    <meta name="description" content="Editora Playground - Try the editor live with a working sample.">
-    <meta name="keywords" content="playground, live demo, editor, editora">
-    <title>Editora Playground</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <style>
-        .playground-wrapper {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-        .playground-controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-        }
-        .playground-controls .btn {
-            padding: 10px 16px;
-            border-radius: 6px;
-            border: 1px solid var(--primary);
-            background: var(--primary);
-            color: #fff;
-            cursor: pointer;
-        }
-        .playground-controls .btn.secondary {
-            background: #fff;
-            color: var(--primary);
-        }
-        #editor {
-            min-height: 320px;
-            border: 1px solid var(--gray-300);
-            border-radius: var(--border-radius);
-            padding: 16px;
-            background: #fff;
-        }
-        .output-panel {
-            background: var(--gray-50);
-            border: 1px solid var(--gray-200);
-            border-radius: var(--border-radius);
-            padding: 16px;
-        }
-        .output-panel textarea {
-            width: 100%;
-            min-height: 180px;
-            resize: vertical;
-            border: 1px solid var(--gray-300);
-            border-radius: 6px;
-            padding: 12px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-        }
-        .editora-content {
-            line-height: 1.6;
-        }
-        .editora-content:focus {
-            outline: 2px solid var(--primary);
-            outline-offset: -1px;
-            border-radius: 4px;
-        }
-        .editora-content h1, 
-        .editora-content h2, 
-        .editora-content h3 {
-            margin-top: 1.5em;
-            margin-bottom: 0.5em;
-            font-weight: 600;
-        }
-        .editora-content p, 
-        .editora-content ul, 
-        .editora-content ol {
-            margin-bottom: 1em;
-        }
-        .editora-content ul, 
-        .editora-content ol {
-            margin-left: 2em;
-        }
-        .editora-content a {
-            color: var(--primary);
-            text-decoration: underline;
-        }
-        .editora-content strong {
-            font-weight: 600;
-        }
-        .editora-content em {
-            font-style: italic;
-        }
-         .test-section {
-      background: white;
-      padding: 30px;
-      margin: 20px 0;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <!-- Favicon -->
+ <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+ <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+ <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+ <meta name="description" content="Editora Playground - Try the editor live with a working sample.">
+ <meta name="keywords" content="playground, live demo, editor, editora">
+ <title>Editora Playground</title>
+ <link rel="stylesheet" href="assets/css/style.css">
+ <style>
+ .playground-wrapper {
+ display: grid;
+ grid-template-columns: 1fr;
+ gap: 20px;
+ }
+ .playground-controls {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 10px;
+ align-items: center;
+ }
+ .playground-controls .btn {
+ padding: 10px 16px;
+ border-radius: 6px;
+ border: 1px solid var(--primary);
+ background: var(--primary);
+ color: #fff;
+ cursor: pointer;
+ }
+ .playground-controls .btn.secondary {
+ background: #fff;
+ color: var(--primary);
+ }
+ #editor {
+ min-height: 320px;
+ border: 1px solid var(--gray-300);
+ border-radius: var(--border-radius);
+ padding: 16px;
+ background: #fff;
+ }
+ .output-panel {
+ background: var(--gray-50);
+ border: 1px solid var(--gray-200);
+ border-radius: var(--border-radius);
+ padding: 16px;
+ }
+ .output-panel textarea {
+ width: 100%;
+ min-height: 180px;
+ resize: vertical;
+ border: 1px solid var(--gray-300);
+ border-radius: 6px;
+ padding: 12px;
+ font-family: 'Courier New', monospace;
+ font-size: 13px;
+ }
+ .editora-content {
+ line-height: 1.6;
+ }
+ .editora-content:focus {
+ outline: 2px solid var(--primary);
+ outline-offset: -1px;
+ border-radius: 4px;
+ }
+ .editora-content h1, 
+ .editora-content h2, 
+ .editora-content h3 {
+ margin-top: 1.5em;
+ margin-bottom: 0.5em;
+ font-weight: 600;
+ }
+ .editora-content p, 
+ .editora-content ul, 
+ .editora-content ol {
+ margin-bottom: 1em;
+ }
+ .editora-content ul, 
+ .editora-content ol {
+ margin-left: 2em;
+ }
+ .editora-content a {
+ color: var(--primary);
+ text-decoration: underline;
+ }
+ .editora-content strong {
+ font-weight: 600;
+ }
+ .editora-content em {
+ font-style: italic;
+ }
+ .test-section {
+ background: white;
+ padding: 30px;
+ margin: 20px 0;
+ border-radius: 12px;
+ box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+ }
 
-    .test-section h2 {
-      color: #667eea;
-      margin: 0 0 20px 0;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #667eea;
-    }
+ .test-section h2 {
+ color: var(--primary);
+ margin: 0 0 20px 0;
+ padding-bottom: 10px;
+ border-bottom: 2px solid var(--primary);
+ }
 
-    .test-info {
-      background: #f0f4ff;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      border-left: 4px solid #667eea;
-    }
+ .test-info {
+ background: #f0f4ff;
+ padding: 15px;
+ border-radius: 8px;
+ margin-bottom: 20px;
+ border-left: 4px solid var(--primary);
+ }
 
-    .test-info code {
-      background: #e0e7ff;
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-family: 'Monaco', monospace;
-      font-size: 13px;
-    }
+ .test-info code {
+ background: #e0e7ff;
+ padding: 2px 6px;
+ border-radius: 3px;
+ font-family: 'Monaco', monospace;
+ font-size: 13px;
+ }
 
-    editora-editor {
-      display: block;
-      margin: 20px 0;
-    }
+ editora-editor {
+ display: block;
+ margin: 20px 0;
+ }
 
-    .status {
-      margin-top: 20px;
-      padding: 15px;
-      background: #f8f9fa;
-      border-radius: 6px;
-      font-family: 'Monaco', monospace;
-      font-size: 13px;
-    }
+ .status {
+ margin-top: 20px;
+ padding: 15px;
+ background: #f8f9fa;
+ border-radius: 6px;
+ font-family: 'Monaco', monospace;
+ font-size: 13px;
+ }
 
-    .status.success {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-    }
+ .status.success {
+ background: #d4edda;
+ color: #155724;
+ border: 1px solid #c3e6cb;
+ }
 
-    .status.error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
+ .status.error {
+ background: #f8d7da;
+ color: #721c24;
+ border: 1px solid #f5c6cb;
+ }
 
-    .test-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
-    }
+ .test-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+ gap: 16px;
+ }
 
-    .theme-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 12px 0;
-    }
+ .theme-controls {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 10px;
+ margin: 12px 0;
+ }
 
-    .theme-controls button {
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: 1px solid #667eea;
-      background: #667eea;
-      color: #fff;
-      cursor: pointer;
-    }
-    </style>
+ .theme-controls button {
+ padding: 8px 12px;
+ border-radius: 6px;
+ border: 1px solid var(--primary);
+ background: var(--primary);
+ color: #fff;
+ cursor: pointer;
+ }
+ </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container">
-            <nav>
-                <a href="index.html" class="logo">
-                    <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
-                </a>
-                <button class="menu-toggle">☰</button>
-                <ul class="nav-links">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="docs/installation.html">Docs</a></li>
-                    <li><a href="docs/features.html">Features</a></li>
-                    <li><a href="plugins/index.html">Plugins</a></li>
-                    <li><a href="docs/api.html">API</a></li>
-                    <li><a href="toast-demo.html">Toast Demo</a></li>
-                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+ <!-- Header -->
+ <header>
+ <div class="container">
+ <nav>
+ <a href="index.html" class="logo">
+ <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" >
+ </a>
+ <button class="menu-toggle">☰</button>
+ <ul class="nav-links">
+ <li><a href="index.html">Home</a></li>
+ <li><a href="docs/installation.html">Docs</a></li>
+ <li><a href="docs/features.html">Features</a></li>
+ <li><a href="plugins/index.html">Plugins</a></li>
+ <li><a href="docs/api.html">API</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+ </ul>
+ </nav>
+ </div>
+ </header>
 
-    <!-- Hero -->
-    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
-        <div class="container">
-            <h1 style="color: white; margin-bottom: 0.5rem;">🎮 Playground</h1>
-            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Try Editora with a live, working editor sample</p>
-        </div>
-    </section>
+ <!-- Hero -->
+ <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+ <div class="container">
+ <h1 style="color: white; margin-bottom: 0.5rem;">Playground</h1>
+ <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Try Editora with a live, working editor sample</p>
+ </div>
+ </section>
 
-    <!-- Content -->
-    <section>
-        <!-- Test 1: Using toolbar-items attribute -->
-         <div class="container">
-  <div class="test-section">
-    <h2>Test 1: toolbar-items Attribute</h2>
-    <div class="test-info">
-      Using <code>toolbar-items="undo redo | bold italic underline"</code>
-    </div>
-    <editora-editor
-      id="test1-editor"
-      height="300"
-      plugins="bold italic underline history"
-      toolbar-items="undo redo | bold italic underline"
-      statusbar="true"
-    >
-      <p><strong>Expected:</strong> Toolbar should show: Undo, Redo | Bold, Italic, Underline</p>
-    </editora-editor>
-    <div id="test1-status" class="status"></div>
-  </div>
+ <!-- Content -->
+ <section>
+ <!-- Test 1: Using toolbar-items attribute -->
+ <div class="container">
+ <div class="test-section">
+ <h2>Test 1: toolbar-items Attribute</h2>
+ <div class="test-info">
+ Using <code>toolbar-items="undo redo | bold italic underline"</code>
+ </div>
+ <editora-editor
+ id="test1-editor"
+ height="300"
+ plugins="bold italic underline history"
+ toolbar-items="undo redo | bold italic underline"
+ statusbar="true"
+ >
+ <p><strong>Expected:</strong> Toolbar should show: Undo, Redo | Bold, Italic, Underline</p>
+ </editora-editor>
+ <div id="test1-status" class="status"></div>
+ </div>
 
-  <!-- Test 2: Using all native + enterprise plugins -->
-  <div class="test-section">
-    <h2>Test 2: Full Toolbar (All Native + Enterprise Plugins)</h2>
-    <div class="test-info">
-      Using <code>toolbar-items</code> with multiple groups, all native plugins, and all enterprise workflow plugins
-      <br>
-      Enterprise set included here: <code>mentions trackChanges version-diff conditional-content data-binding content-rules citations approval-workflow pii-redaction smart-paste blocks-library doc-schema translation-workflow slash-commands spellCheck a11yChecker comments mergeTag template image document-manager</code>
-      <br>
-      <small>Note: <code>image</code> is the Media Manager plugin id in Web Components.</small>
-    </div>
-    <editora-editor
-      id="test2-editor"
-      statusbar="true"
-      height="400"
-      plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis mentions trackChanges version-diff conditional-content data-binding content-rules citations approval-workflow pii-redaction smart-paste blocks-library doc-schema translation-workflow slash-commands a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template"
-      toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | insertMention openSlashCommands | trackChanges openVersionDiff | conditionalContent dataBinding | contentRules citations | approvalWorkflow piiRedaction | smartPaste blocksLibrary | docSchema translationWorkflow | importWord exportWord exportPdf | fullscreen preview print | a11yChecker toggleSpellCheck | addComment toggleComments footnote insertMergeTag pageBreak insertTemplate | clearFormatting"
-    >
-      <h2>Full Feature Test</h2>
-      <p>This editor should have a complete toolbar with all groups visible.</p>
-      <ul>
-        <li>Undo/Redo buttons</li>
-        <li>Text formatting (Bold, Italic, Underline, Strikethrough)</li>
-        <li>Colors (Text Color, Background Color)</li>
-        <li>Typography (Font Size, Font Family)</li>
-        <li>Block types (Heading)</li>
-        <li>Alignment</li>
-        <li>Lists</li>
-        <li>Insert (Link, Image, Table)</li>
-        <li>Code and Blockquote</li>
-        <li>Clear Formatting</li>
-      </ul>
-    </editora-editor>
-    <div id="test2-status" class="status"></div>
-  </div>
+ <!-- Test 2: Using all native + enterprise plugins -->
+ <div class="test-section">
+ <h2>Test 2: Full Toolbar (All Native + Enterprise Plugins)</h2>
+ <div class="test-info">
+ Using <code>toolbar-items</code> with multiple groups, all native plugins, and all enterprise workflow plugins
+ <br>
+ Enterprise set included here: <code>mentions trackChanges version-diff conditional-content data-binding content-rules citations approval-workflow pii-redaction smart-paste blocks-library doc-schema translation-workflow slash-commands spellCheck a11yChecker comments mergeTag template image document-manager</code>
+ <br>
+ <small>Note: <code>image</code> is the Media Manager plugin id in Web Components.</small>
+ </div>
+ <editora-editor
+ id="test2-editor"
+ statusbar="true"
+ height="400"
+ plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis mentions trackChanges version-diff conditional-content data-binding content-rules citations approval-workflow pii-redaction smart-paste blocks-library doc-schema translation-workflow slash-commands a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template"
+ toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | insertMention openSlashCommands | trackChanges openVersionDiff | conditionalContent dataBinding | contentRules citations | approvalWorkflow piiRedaction | smartPaste blocksLibrary | docSchema translationWorkflow | importWord exportWord exportPdf | fullscreen preview print | a11yChecker toggleSpellCheck | addComment toggleComments footnote insertMergeTag pageBreak insertTemplate | clearFormatting"
+ >
+ <h2>Full Feature Test</h2>
+ <p>This editor should have a complete toolbar with all groups visible.</p>
+ <ul>
+ <li>Undo/Redo buttons</li>
+ <li>Text formatting (Bold, Italic, Underline, Strikethrough)</li>
+ <li>Colors (Text Color, Background Color)</li>
+ <li>Typography (Font Size, Font Family)</li>
+ <li>Block types (Heading)</li>
+ <li>Alignment</li>
+ <li>Lists</li>
+ <li>Insert (Link, Image, Table)</li>
+ <li>Code and Blockquote</li>
+ <li>Clear Formatting</li>
+ </ul>
+ </editora-editor>
+ <div id="test2-status" class="status"></div>
+ </div>
 
-  <div class="test-section">
-    <h2>Test 2B: Full Toolbar (All Native + Enterprise Plugins, Dark Mode)</h2>
-    <div class="test-info">
-      Same feature coverage as Test 2, rendered in <code>theme="dark"</code>.
-      <br>
-      Enterprise set included here: <code>mentions trackChanges version-diff conditional-content data-binding content-rules citations approval-workflow pii-redaction smart-paste blocks-library doc-schema translation-workflow slash-commands spellCheck a11yChecker comments mergeTag template image document-manager</code>
-    </div>
-    <editora-editor
-      id="test2-dark-editor"
-      statusbar="true"
-      height="400"
-      theme="dark"
-      plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis mentions trackChanges version-diff conditional-content data-binding content-rules citations approval-workflow pii-redaction smart-paste blocks-library doc-schema translation-workflow slash-commands a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template"
-      toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | insertMention openSlashCommands | trackChanges openVersionDiff | conditionalContent dataBinding | contentRules citations | approvalWorkflow piiRedaction | smartPaste blocksLibrary | docSchema translationWorkflow | importWord exportWord exportPdf | fullscreen preview print | a11yChecker toggleSpellCheck | addComment toggleComments footnote insertMergeTag pageBreak insertTemplate | clearFormatting"
-    >
-      <h2>Dark Mode Full Feature Test</h2>
-      <p>This editor should show the same toolbar groups as Test 2 with dark-mode visuals.</p>
-      <ul>
-        <li>All core formatting and insertion controls</li>
-        <li>All enterprise workflow toolbar commands</li>
-        <li>Dark-theme styling for toolbar, dialogs, and panels</li>
-      </ul>
-    </editora-editor>
-    <div id="test2-dark-status" class="status"></div>
-  </div>
+ <div class="test-section">
+ <h2>Test 2B: Full Toolbar (All Native + Enterprise Plugins, Dark Mode)</h2>
+ <div class="test-info">
+ Same feature coverage as Test 2, rendered in <code>theme="dark"</code>.
+ <br>
+ Enterprise set included here: <code>mentions trackChanges version-diff conditional-content data-binding content-rules citations approval-workflow pii-redaction smart-paste blocks-library doc-schema translation-workflow slash-commands spellCheck a11yChecker comments mergeTag template image document-manager</code>
+ </div>
+ <editora-editor
+ id="test2-dark-editor"
+ statusbar="true"
+ height="400"
+ theme="dark"
+ plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis mentions trackChanges version-diff conditional-content data-binding content-rules citations approval-workflow pii-redaction smart-paste blocks-library doc-schema translation-workflow slash-commands a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template"
+ toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | insertMention openSlashCommands | trackChanges openVersionDiff | conditionalContent dataBinding | contentRules citations | approvalWorkflow piiRedaction | smartPaste blocksLibrary | docSchema translationWorkflow | importWord exportWord exportPdf | fullscreen preview print | a11yChecker toggleSpellCheck | addComment toggleComments footnote insertMergeTag pageBreak insertTemplate | clearFormatting"
+ >
+ <h2>Dark Mode Full Feature Test</h2>
+ <p>This editor should show the same toolbar groups as Test 2 with dark-mode visuals.</p>
+ <ul>
+ <li>All core formatting and insertion controls</li>
+ <li>All enterprise workflow toolbar commands</li>
+ <li>Dark-theme styling for toolbar, dialogs, and panels</li>
+ </ul>
+ </editora-editor>
+ <div id="test2-dark-status" class="status"></div>
+ </div>
 
-  <!-- Test 3: No toolbar-items (should use all registered plugins) -->
-  <div class="test-section">
-    <h2>Test 3: Auto Toolbar (No toolbar-items specified)</h2>
-    <div class="test-info">
-      No <code>toolbar-items</code> attribute - should automatically create toolbar from registered plugins
-    </div>
-    <editora-editor
-      id="test3-editor"
-      height="300"
-      plugins="bold italic underline link"
-      statusbar="true"
-    >
-      <p><strong>Expected:</strong> Toolbar should auto-generate from the 4 specified plugins</p>
-    </editora-editor>
-    <div id="test3-status" class="status"></div>
-  </div>
+ <!-- Test 3: No toolbar-items (should use all registered plugins) -->
+ <div class="test-section">
+ <h2>Test 3: Auto Toolbar (No toolbar-items specified)</h2>
+ <div class="test-info">
+ No <code>toolbar-items</code> attribute - should automatically create toolbar from registered plugins
+ </div>
+ <editora-editor
+ id="test3-editor"
+ height="300"
+ plugins="bold italic underline link"
+ statusbar="true"
+ >
+ <p><strong>Expected:</strong> Toolbar should auto-generate from the 4 specified plugins</p>
+ </editora-editor>
+ <div id="test3-status" class="status"></div>
+ </div>
 
 
-  <!-- Test 5: Readonly Toggle -->
-  <div class="test-section">
-    <h2>Test 5: Readonly Toggle</h2>
-    <div class="test-info">
-      Toggle the editor between editable and readonly states using the button below.
-    </div>
-    <editora-editor
-      id="readonly-editor"
-      height="150"
-      plugins="bold italic"
-      toolbar-items="bold italic"
-      statusbar="true"
-    >
-      <p>This editor can be toggled readonly.</p>
-    </editora-editor>
-    <button id="toggle-readonly-btn">Toggle Readonly</button>
-    <div id="readonly-status" class="status"></div>
-  </div>
+ <!-- Test 5: Readonly Toggle -->
+ <div class="test-section">
+ <h2>Test 5: Readonly Toggle</h2>
+ <div class="test-info">
+ Toggle the editor between editable and readonly states using the button below.
+ </div>
+ <editora-editor
+ id="readonly-editor"
+ height="150"
+ plugins="bold italic"
+ toolbar-items="bold italic"
+ statusbar="true"
+ >
+ <p>This editor can be toggled readonly.</p>
+ </editora-editor>
+ <button id="toggle-readonly-btn">Toggle Readonly</button>
+ <div id="readonly-status" class="status"></div>
+ </div>
 
-  <!-- Test 6: Placeholder Example -->
-  <div class="test-section">
-    <h2>Test 6: Placeholder</h2>
-    <div class="test-info">
-      Multiple placeholder examples: short text, long helper copy, and prefilled content fallback behavior.
-    </div>
-    <div class="test-grid">
-      <div>
-        <h4>Simple Placeholder</h4>
-        <editora-editor
-          id="placeholder-editor-basic"
-          height="120"
-          plugins="bold italic"
-          toolbar-items="bold italic"
-          placeholder="Type something here..."
-          statusbar="true"
-        ></editora-editor>
-      </div>
-      <div>
-        <h4>Long Instruction Placeholder</h4>
-        <editora-editor
-          id="placeholder-editor-long"
-          height="120"
-          plugins="bold italic underline"
-          toolbar-items="bold italic underline"
-          placeholder="Draft your release notes: summary, impact, migration steps, and rollback notes."
-          statusbar="true"
-        ></editora-editor>
-      </div>
-      <div>
-        <h4>Prefilled Then Clear</h4>
-        <editora-editor
-          id="placeholder-editor-prefilled"
-          height="120"
-          plugins="bold italic"
-          toolbar-items="bold italic"
-          placeholder="Placeholder appears when this content is removed."
-          statusbar="true"
-        >
-          <p>This editor starts with content. Delete all text to reveal placeholder.</p>
-        </editora-editor>
-      </div>
-    </div>
-  </div>
+ <!-- Test 6: Placeholder Example -->
+ <div class="test-section">
+ <h2>Test 6: Placeholder</h2>
+ <div class="test-info">
+ Multiple placeholder examples: short text, long helper copy, and prefilled content fallback behavior.
+ </div>
+ <div class="test-grid">
+ <div>
+ <h4>Simple Placeholder</h4>
+ <editora-editor
+ id="placeholder-editor-basic"
+ height="120"
+ plugins="bold italic"
+ toolbar-items="bold italic"
+ placeholder="Type something here..."
+ statusbar="true"
+ ></editora-editor>
+ </div>
+ <div>
+ <h4>Long Instruction Placeholder</h4>
+ <editora-editor
+ id="placeholder-editor-long"
+ height="120"
+ plugins="bold italic underline"
+ toolbar-items="bold italic underline"
+ placeholder="Draft your release notes: summary, impact, migration steps, and rollback notes."
+ statusbar="true"
+ ></editora-editor>
+ </div>
+ <div>
+ <h4>Prefilled Then Clear</h4>
+ <editora-editor
+ id="placeholder-editor-prefilled"
+ height="120"
+ plugins="bold italic"
+ toolbar-items="bold italic"
+ placeholder="Placeholder appears when this content is removed."
+ statusbar="true"
+ >
+ <p>This editor starts with content. Delete all text to reveal placeholder.</p>
+ </editora-editor>
+ </div>
+ </div>
+ </div>
 
-  <!-- Test 7: Theme Switcher (Editor Only) -->
-  <div class="test-section">
-    <h2>Test 7: Theme Switcher (Editor Only)</h2>
-    <div class="test-info">
-      Toggle theme attributes on editors only. This does not change page styles.
-    </div>
-    <div class="theme-controls">
-      <button id="toggle-theme-a-btn">Toggle Editor A Theme</button>
-      <button id="toggle-theme-b-btn">Toggle Editor B Theme</button>
-      <button id="set-theme-dark-btn">Set Both Dark</button>
-      <button id="set-theme-default-btn">Set Both Default</button>
-    </div>
-    <div class="test-grid">
-      <div>
-        <h4>Theme Editor A</h4>
-        <editora-editor
-          id="theme-editor-a"
-          height="150"
-          plugins="bold italic underline"
-          toolbar-items="bold italic underline"
-          theme="default"
-          statusbar="true"
-        >
-          <p>Editor A starts in default theme.</p>
-        </editora-editor>
-      </div>
-      <div>
-        <h4>Theme Editor B</h4>
-        <editora-editor
-          id="theme-editor-b"
-          height="150"
-          plugins="bold italic underline"
-          toolbar-items="bold italic underline"
-          theme="dark"
-          statusbar="true"
-        >
-          <p>Editor B starts in dark theme.</p>
-        </editora-editor>
-      </div>
-    </div>
-    <div id="theme-status" class="status"></div>
-  </div>
+ <!-- Test 7: Theme Switcher (Editor Only) -->
+ <div class="test-section">
+ <h2>Test 7: Theme Switcher (Editor Only)</h2>
+ <div class="test-info">
+ Toggle theme attributes on editors only. This does not change page styles.
+ </div>
+ <div class="theme-controls">
+ <button id="toggle-theme-a-btn">Toggle Editor A Theme</button>
+ <button id="toggle-theme-b-btn">Toggle Editor B Theme</button>
+ <button id="set-theme-dark-btn">Set Both Dark</button>
+ <button id="set-theme-default-btn">Set Both Default</button>
+ </div>
+ <div class="test-grid">
+ <div>
+ <h4>Theme Editor A</h4>
+ <editora-editor
+ id="theme-editor-a"
+ height="150"
+ plugins="bold italic underline"
+ toolbar-items="bold italic underline"
+ theme="default"
+ statusbar="true"
+ >
+ <p>Editor A starts in default theme.</p>
+ </editora-editor>
+ </div>
+ <div>
+ <h4>Theme Editor B</h4>
+ <editora-editor
+ id="theme-editor-b"
+ height="150"
+ plugins="bold italic underline"
+ toolbar-items="bold italic underline"
+ theme="dark"
+ statusbar="true"
+ >
+ <p>Editor B starts in dark theme.</p>
+ </editora-editor>
+ </div>
+ </div>
+ <div id="theme-status" class="status"></div>
+ </div>
 
-  <!-- Test 8: Custom Event Handling -->
-  <div class="test-section">
-    <h2>Test 8: Custom Event Handling</h2>
-    <div class="test-info">
-      Listen for <code>editor-focus</code> and <code>editor-blur</code> events and display status.
-    </div>
-    <editora-editor
-      id="event-editor"
-      height="120"
-      plugins="bold italic"
-      toolbar-items="bold italic"
-      statusbar="true"
-    >
-      <p>Focus and blur this editor to see events.</p>
-    </editora-editor>
-    <div id="event-status" class="status"></div>
-  </div>
-  <div class="test-section">
-    <h2>Test 4: Dynamic API & Events</h2>
-    <div class="test-info">
-      Demonstrates <code>onchange</code> event, <code>getContent()</code>, <code>setContent()</code>, and dynamic behaviors.<br>
-      <strong>Try editing, clicking the buttons, and observe the output below.</strong>
-    </div>
-    <editora-editor
-      id="dynamic-editor"
-      height="200"
-      plugins="bold italic underline"
-      toolbar-items="bold italic underline"
-      statusbar="true"
-    >
-      <p>Edit this text. Changes will be shown below.</p>
-    </editora-editor>
-    <div style="margin: 10px 0;">
-      <button id="get-content-btn">Get Content</button>
-      <button id="set-content-btn">Set Content</button>
-      <button id="focus-btn">Focus</button>
-      <button id="blur-btn">Blur</button>
-    </div>
-    <div id="dynamic-status" class="status"></div>
-  </div>
-  </div>
-    </section>
+ <!-- Test 8: Custom Event Handling -->
+ <div class="test-section">
+ <h2>Test 8: Custom Event Handling</h2>
+ <div class="test-info">
+ Listen for <code>editor-focus</code> and <code>editor-blur</code> events and display status.
+ </div>
+ <editora-editor
+ id="event-editor"
+ height="120"
+ plugins="bold italic"
+ toolbar-items="bold italic"
+ statusbar="true"
+ >
+ <p>Focus and blur this editor to see events.</p>
+ </editora-editor>
+ <div id="event-status" class="status"></div>
+ </div>
+ <div class="test-section">
+ <h2>Test 4: Dynamic API & Events</h2>
+ <div class="test-info">
+ Demonstrates <code>onchange</code> event, <code>getContent()</code>, <code>setContent()</code>, and dynamic behaviors.<br>
+ <strong>Try editing, clicking the buttons, and observe the output below.</strong>
+ </div>
+ <editora-editor
+ id="dynamic-editor"
+ height="200"
+ plugins="bold italic underline"
+ toolbar-items="bold italic underline"
+ statusbar="true"
+ >
+ <p>Edit this text. Changes will be shown below.</p>
+ </editora-editor>
+ <div style="margin: 10px 0;">
+ <button id="get-content-btn">Get Content</button>
+ <button id="set-content-btn">Set Content</button>
+ <button id="focus-btn">Focus</button>
+ <button id="blur-btn">Blur</button>
+ </div>
+ <div id="dynamic-status" class="status"></div>
+ </div>
+ </div>
+ </section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-links">
-                <div class="footer-section">
-                    <h5>📚 Documentation</h5>
-                    <ul>
-                        <li><a href="docs/installation.html">Installation</a></li>
-                        <li><a href="docs/features.html">Features</a></li>
-                        <li><a href="docs/api.html">API Reference</a></li>
-                        <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h5>🔌 Plugins</h5>
-                    <ul>
-                        <li><a href="plugins/index.html">All Plugins</a></li>
-                        <li><a href="plugins/media-manager.html">Media Manager</a></li>
-                        <li><a href="plugins/table.html">Tables</a></li>
-                        <li><a href="plugins/code-sample.html">Code Samples</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h5>🔗 Links</h5>
-                    <ul>
-                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h5>ℹ️ About</h5>
-                    <ul>
-                        <li><a href="docs/about.html">About Editora</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024-2026 Editora. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+ <!-- Footer -->
+ <footer>
+ <div class="container">
+ <div class="footer-links">
+ <div class="footer-section">
+ <h5>Documentation</h5>
+ <ul>
+ <li><a href="docs/installation.html">Installation</a></li>
+ <li><a href="docs/features.html">Features</a></li>
+ <li><a href="docs/api.html">API Reference</a></li>
+ <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h5>Plugins</h5>
+ <ul>
+ <li><a href="plugins/index.html">All Plugins</a></li>
+ <li><a href="plugins/media-manager.html">Media Manager</a></li>
+ <li><a href="plugins/table.html">Tables</a></li>
+ <li><a href="plugins/code-sample.html">Code Samples</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h5>Links</h5>
+ <ul>
+ <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+ <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h5>About</h5>
+ <ul>
+ <li><a href="docs/about.html">About Editora</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+ </ul>
+ </div>
+ </div>
+ <div class="footer-bottom">
+ <p>&copy; 2024-2026 Editora. All rights reserved.</p>
+ </div>
+ </div>
+ </footer>
 
-    <!-- Local bundle for file:// testing (non-module avoids module CORS restrictions on file origin) -->
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css">
-    <script src="assets/js/main.js"></script>
-   <script>
-    // Wait for custom element to be defined
-    customElements.whenDefined('editora-editor').then(() => {
-      console.log('✅ Custom element registered');
-      runTests();
-    });
+ <!-- Local bundle for file:// testing (non-module avoids module CORS restrictions on file origin) -->
+ <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"></script>
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css">
+ <script src="assets/js/main.js"></script>
+ <script>
+ // Wait for custom element to be defined
+ customElements.whenDefined('editora-editor').then(() => {
+ console.log('✅ Custom element registered');
+ runTests();
+ });
 
-    function runTests() {
-      // Test 5: Readonly Toggle
-      const readonlyEditor = document.getElementById('readonly-editor');
-      const readonlyBtn = document.getElementById('toggle-readonly-btn');
-      const readonlyStatus = document.getElementById('readonly-status');
-      let isReadonly = false;
-      readonlyBtn.onclick = () => {
-        isReadonly = !isReadonly;
-        readonlyEditor.setAttribute('readonly', isReadonly ? 'true' : 'false');
-        readonlyStatus.textContent = isReadonly ? 'Editor is now readonly.' : 'Editor is editable.';
-        readonlyStatus.className = 'status success';
-      };
+ function runTests() {
+ // Test 5: Readonly Toggle
+ const readonlyEditor = document.getElementById('readonly-editor');
+ const readonlyBtn = document.getElementById('toggle-readonly-btn');
+ const readonlyStatus = document.getElementById('readonly-status');
+ let isReadonly = false;
+ readonlyBtn.onclick = () => {
+ isReadonly = !isReadonly;
+ readonlyEditor.setAttribute('readonly', isReadonly ? 'true' : 'false');
+ readonlyStatus.textContent = isReadonly ? 'Editor is now readonly.' : 'Editor is editable.';
+ readonlyStatus.className = 'status success';
+ };
 
-      // Test 7: Theme Switcher (Editor Only)
-      const themeEditorA = document.getElementById('theme-editor-a');
-      const themeEditorB = document.getElementById('theme-editor-b');
-      const toggleThemeABtn = document.getElementById('toggle-theme-a-btn');
-      const toggleThemeBBtn = document.getElementById('toggle-theme-b-btn');
-      const setThemeDarkBtn = document.getElementById('set-theme-dark-btn');
-      const setThemeDefaultBtn = document.getElementById('set-theme-default-btn');
-      const themeStatus = document.getElementById('theme-status');
+ // Test 7: Theme Switcher (Editor Only)
+ const themeEditorA = document.getElementById('theme-editor-a');
+ const themeEditorB = document.getElementById('theme-editor-b');
+ const toggleThemeABtn = document.getElementById('toggle-theme-a-btn');
+ const toggleThemeBBtn = document.getElementById('toggle-theme-b-btn');
+ const setThemeDarkBtn = document.getElementById('set-theme-dark-btn');
+ const setThemeDefaultBtn = document.getElementById('set-theme-default-btn');
+ const themeStatus = document.getElementById('theme-status');
 
-      const getCurrentTheme = (editor) =>
-        editor?.getAttribute('theme') === 'dark' ? 'dark' : 'default';
+ const getCurrentTheme = (editor) =>
+ editor?.getAttribute('theme') === 'dark' ? 'dark' : 'default';
 
-      const updateThemeStatus = () => {
-        const themeA = getCurrentTheme(themeEditorA);
-        const themeB = getCurrentTheme(themeEditorB);
-        themeStatus.textContent = `Editor A: ${themeA} | Editor B: ${themeB}`;
-        themeStatus.className = 'status success';
-      };
+ const updateThemeStatus = () => {
+ const themeA = getCurrentTheme(themeEditorA);
+ const themeB = getCurrentTheme(themeEditorB);
+ themeStatus.textContent = `Editor A: ${themeA} | Editor B: ${themeB}`;
+ themeStatus.className = 'status success';
+ };
 
-      const toggleTheme = (editor) => {
-        const nextTheme = getCurrentTheme(editor) === 'dark' ? 'default' : 'dark';
-        editor.setAttribute('theme', nextTheme);
-      };
+ const toggleTheme = (editor) => {
+ const nextTheme = getCurrentTheme(editor) === 'dark' ? 'default' : 'dark';
+ editor.setAttribute('theme', nextTheme);
+ };
 
-      toggleThemeABtn.onclick = () => {
-        toggleTheme(themeEditorA);
-        updateThemeStatus();
-      };
+ toggleThemeABtn.onclick = () => {
+ toggleTheme(themeEditorA);
+ updateThemeStatus();
+ };
 
-      toggleThemeBBtn.onclick = () => {
-        toggleTheme(themeEditorB);
-        updateThemeStatus();
-      };
+ toggleThemeBBtn.onclick = () => {
+ toggleTheme(themeEditorB);
+ updateThemeStatus();
+ };
 
-      setThemeDarkBtn.onclick = () => {
-        themeEditorA.setAttribute('theme', 'dark');
-        themeEditorB.setAttribute('theme', 'dark');
-        updateThemeStatus();
-      };
+ setThemeDarkBtn.onclick = () => {
+ themeEditorA.setAttribute('theme', 'dark');
+ themeEditorB.setAttribute('theme', 'dark');
+ updateThemeStatus();
+ };
 
-      setThemeDefaultBtn.onclick = () => {
-        themeEditorA.setAttribute('theme', 'default');
-        themeEditorB.setAttribute('theme', 'default');
-        updateThemeStatus();
-      };
+ setThemeDefaultBtn.onclick = () => {
+ themeEditorA.setAttribute('theme', 'default');
+ themeEditorB.setAttribute('theme', 'default');
+ updateThemeStatus();
+ };
 
-      updateThemeStatus();
+ updateThemeStatus();
 
-      // Test 8: Custom Event Handling
-      const eventEditor = document.getElementById('event-editor');
-      const eventStatus = document.getElementById('event-status');
-      eventEditor.addEventListener('editor-focus', () => {
-        eventStatus.textContent = 'Editor focused!';
-        eventStatus.className = 'status success';
-      });
-      eventEditor.addEventListener('editor-blur', () => {
-        eventStatus.textContent = 'Editor blurred!';
-        eventStatus.className = 'status error';
-      });
-      const dynamicEditor = document.getElementById('dynamic-editor');
-      const status = document.getElementById('dynamic-status');
-      const getBtn = document.getElementById('get-content-btn');
-      const setBtn = document.getElementById('set-content-btn');
-      const focusBtn = document.getElementById('focus-btn');
-      const blurBtn = document.getElementById('blur-btn');
+ // Test 8: Custom Event Handling
+ const eventEditor = document.getElementById('event-editor');
+ const eventStatus = document.getElementById('event-status');
+ eventEditor.addEventListener('editor-focus', () => {
+ eventStatus.textContent = 'Editor focused!';
+ eventStatus.className = 'status success';
+ });
+ eventEditor.addEventListener('editor-blur', () => {
+ eventStatus.textContent = 'Editor blurred!';
+ eventStatus.className = 'status error';
+ });
+ const dynamicEditor = document.getElementById('dynamic-editor');
+ const status = document.getElementById('dynamic-status');
+ const getBtn = document.getElementById('get-content-btn');
+ const setBtn = document.getElementById('set-content-btn');
+ const focusBtn = document.getElementById('focus-btn');
+ const blurBtn = document.getElementById('blur-btn');
 
-      // Listen for content-change event
-      dynamicEditor.addEventListener('content-change', (e) => {
-        status.textContent = 'Content changed! Current HTML: ' + dynamicEditor.getContent();
-        status.className = 'status success';
-      });
+ // Listen for content-change event
+ dynamicEditor.addEventListener('content-change', (e) => {
+ status.textContent = 'Content changed! Current HTML: ' + dynamicEditor.getContent();
+ status.className = 'status success';
+ });
 
-      // Get content button
-      getBtn.onclick = () => {
-        status.textContent = 'Current HTML: ' + dynamicEditor.getContent();
-        status.className = 'status success';
-      };
+ // Get content button
+ getBtn.onclick = () => {
+ status.textContent = 'Current HTML: ' + dynamicEditor.getContent();
+ status.className = 'status success';
+ };
 
-      // Set content button
-      setBtn.onclick = () => {
-        const html = '<p><b>Set by API:</b> <i>This content was set dynamically!</i></p>';
-        dynamicEditor.setContent(html);
-        status.textContent = 'Content set via setContent().';
-        status.className = 'status success';
-      };
+ // Set content button
+ setBtn.onclick = () => {
+ const html = '<p><b>Set by API:</b> <i>This content was set dynamically!</i></p>';
+ dynamicEditor.setContent(html);
+ status.textContent = 'Content set via setContent().';
+ status.className = 'status success';
+ };
 
-      // Focus button
-      focusBtn.onclick = () => {
-        dynamicEditor.focus();
-        status.textContent = 'Editor focused.';
-        status.className = 'status success';
-      };
+ // Focus button
+ focusBtn.onclick = () => {
+ dynamicEditor.focus();
+ status.textContent = 'Editor focused.';
+ status.className = 'status success';
+ };
 
-      // Blur button
-      blurBtn.onclick = () => {
-        dynamicEditor.blur();
-        status.textContent = 'Editor blurred.';
-        status.className = 'status success';
-      };
-      // Test 1: Check toolbar buttons
-      setTimeout(() => {
-        const test1 = document.getElementById('test1-editor');
-        const toolbar1 = test1.querySelector('.editora-toolbar');
-        const buttons1 = toolbar1?.querySelectorAll('.editora-toolbar-button');
-        
-        const status1 = document.getElementById('test1-status');
-        if (buttons1 && buttons1.length > 0) {
-          status1.textContent = `✅ PASS: Found ${buttons1.length} toolbar buttons`;
-          status1.className = 'status success';
-         
-        } else {
-          status1.textContent = `❌ FAIL: No toolbar buttons found`;
-          status1.className = 'status error';
-        }
+ // Blur button
+ blurBtn.onclick = () => {
+ dynamicEditor.blur();
+ status.textContent = 'Editor blurred.';
+ status.className = 'status success';
+ };
+ // Test 1: Check toolbar buttons
+ setTimeout(() => {
+ const test1 = document.getElementById('test1-editor');
+ const toolbar1 = test1.querySelector('.editora-toolbar');
+ const buttons1 = toolbar1?.querySelectorAll('.editora-toolbar-button');
+ 
+ const status1 = document.getElementById('test1-status');
+ if (buttons1 && buttons1.length > 0) {
+ status1.textContent = `✅ PASS: Found ${buttons1.length} toolbar buttons`;
+ status1.className = 'status success';
+ 
+ } else {
+ status1.textContent = `❌ FAIL: No toolbar buttons found`;
+ status1.className = 'status error';
+ }
 
-        // Test 2: Check full toolbar
-        const test2 = document.getElementById('test2-editor');
-        const toolbar2 = test2.querySelector('.editora-toolbar');
-        const buttons2 = toolbar2?.querySelectorAll('.editora-toolbar-button');
-        
-        const status2 = document.getElementById('test2-status');
-        if (buttons2 && buttons2.length >= 20) {
-          status2.textContent = `✅ PASS: Found ${buttons2.length} toolbar buttons (expected 20+)`;
-          status2.className = 'status success';
-          
-        } else {
-          status2.textContent = `❌ FAIL: Expected 20+ buttons, found ${buttons2?.length || 0}`;
-          status2.className = 'status error';
-        }
+ // Test 2: Check full toolbar
+ const test2 = document.getElementById('test2-editor');
+ const toolbar2 = test2.querySelector('.editora-toolbar');
+ const buttons2 = toolbar2?.querySelectorAll('.editora-toolbar-button');
+ 
+ const status2 = document.getElementById('test2-status');
+ if (buttons2 && buttons2.length >= 20) {
+ status2.textContent = `✅ PASS: Found ${buttons2.length} toolbar buttons (expected 20+)`;
+ status2.className = 'status success';
+ 
+ } else {
+ status2.textContent = `❌ FAIL: Expected 20+ buttons, found ${buttons2?.length || 0}`;
+ status2.className = 'status error';
+ }
 
-        // Test 2B: Check full toolbar dark mode
-        const test2Dark = document.getElementById('test2-dark-editor');
-        const toolbar2Dark = test2Dark.querySelector('.editora-toolbar');
-        const buttons2Dark = toolbar2Dark?.querySelectorAll('.editora-toolbar-button');
-        
-        const status2Dark = document.getElementById('test2-dark-status');
-        if (buttons2Dark && buttons2Dark.length >= 20) {
-          status2Dark.textContent = `✅ PASS: Found ${buttons2Dark.length} toolbar buttons in dark mode (expected 20+)`;
-          status2Dark.className = 'status success';
-        } else {
-          status2Dark.textContent = `❌ FAIL: Dark mode expected 20+ buttons, found ${buttons2Dark?.length || 0}`;
-          status2Dark.className = 'status error';
-        }
+ // Test 2B: Check full toolbar dark mode
+ const test2Dark = document.getElementById('test2-dark-editor');
+ const toolbar2Dark = test2Dark.querySelector('.editora-toolbar');
+ const buttons2Dark = toolbar2Dark?.querySelectorAll('.editora-toolbar-button');
+ 
+ const status2Dark = document.getElementById('test2-dark-status');
+ if (buttons2Dark && buttons2Dark.length >= 20) {
+ status2Dark.textContent = `✅ PASS: Found ${buttons2Dark.length} toolbar buttons in dark mode (expected 20+)`;
+ status2Dark.className = 'status success';
+ } else {
+ status2Dark.textContent = `❌ FAIL: Dark mode expected 20+ buttons, found ${buttons2Dark?.length || 0}`;
+ status2Dark.className = 'status error';
+ }
 
-        // Test 3: Check auto toolbar
-        const test3 = document.getElementById('test3-editor');
-        const toolbar3 = test3.querySelector('.editora-toolbar');
-        const buttons3 = toolbar3?.querySelectorAll('.editora-toolbar-button');
-        
-        const status3 = document.getElementById('test3-status');
-        if (buttons3 && buttons3.length > 0) {
-          status3.textContent = `✅ PASS: Auto-generated ${buttons3.length} toolbar buttons`;
-          status3.className = 'status success';
-         
-        } else {
-          status3.textContent = `❌ FAIL: No auto-generated buttons`;
-          status3.className = 'status error';
-        }
+ // Test 3: Check auto toolbar
+ const test3 = document.getElementById('test3-editor');
+ const toolbar3 = test3.querySelector('.editora-toolbar');
+ const buttons3 = toolbar3?.querySelectorAll('.editora-toolbar-button');
+ 
+ const status3 = document.getElementById('test3-status');
+ if (buttons3 && buttons3.length > 0) {
+ status3.textContent = `✅ PASS: Auto-generated ${buttons3.length} toolbar buttons`;
+ status3.className = 'status success';
+ 
+ } else {
+ status3.textContent = `❌ FAIL: No auto-generated buttons`;
+ status3.className = 'status error';
+ }
 
-        // Overall summary
-      }, 500);
-    }
-  </script>
+ // Overall summary
+ }, 500);
+ }
+ </script>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const dynamicEditor = document.getElementById('dynamic-editor');
+ <script>
+ document.addEventListener('DOMContentLoaded', () => {
+ const dynamicEditor = document.getElementById('dynamic-editor');
 
-      if (dynamicEditor) {
-        console.log('Dynamic Editor Content:', dynamicEditor.innerHTML);
-      } else {
-        console.error('Dynamic Editor not found');
-      }
-    });
-  </script>
+ if (dynamicEditor) {
+ console.log('Dynamic Editor Content:', dynamicEditor.innerHTML);
+ } else {
+ console.error('Dynamic Editor not found');
+ }
+ });
+ </script>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const editor = document.querySelector('editora-editor');
-      if (editor) {
-        if (typeof editor.getAPI !== 'function') {
-          console.error('Editora web component is not upgraded yet. If using file://, use webcomponent.min.js or serve via http://localhost.');
-          return;
-        }
-        const api = editor.getAPI();
-        if (api && typeof api.getContent === 'function') {
-          console.log('Editor Content:', api.getContent());
-        } else {
-          console.error('getContent method not found on editor API');
-        }
-      } else {
-        console.error('EditoraEditor component not found');
-      }
-    });
-  </script>
+ <script>
+ document.addEventListener('DOMContentLoaded', () => {
+ const editor = document.querySelector('editora-editor');
+ if (editor) {
+ if (typeof editor.getAPI !== 'function') {
+ console.error('Editora web component is not upgraded yet. If using file://, use webcomponent.min.js or serve via http://localhost.');
+ return;
+ }
+ const api = editor.getAPI();
+ if (api && typeof api.getContent === 'function') {
+ console.log('Editor Content:', api.getContent());
+ } else {
+ console.error('getContent method not found on editor API');
+ }
+ } else {
+ console.error('EditoraEditor component not found');
+ }
+ });
+ </script>
 </body>
 </html>

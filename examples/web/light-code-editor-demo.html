@@ -1,276 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Editora Light Code Editor — Demo</title>
-    <meta name="description" content="Light-weight syntax-highlighted code editor component for the web. Fast, extensible, and plugin-friendly — use via npm or CDN.">
-    <meta name="keywords" content="light code editor, code editor, syntax highlighting, javascript editor, typescript editor, code playground, embeddable editor, web editor">
-    <meta property="og:title" content="Editora Light Code Editor — Demo">
-    <meta property="og:description" content="Light-weight syntax-highlighted code editor component for the web. Fast, extensible, and plugin-friendly — use via npm or CDN.">
-    <meta property="og:type" content="website">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <!-- Styles: load published package stylesheet from CDN -->
-    <link rel="stylesheet" href="https://unpkg.com/@editora/light-code-editor@1.0.3/dist/light-code-editor.css">
-    <style>
-        .editor-demo {
-            max-width: 980px;
-            margin: 36px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.06);
-        }
-        .editor-toolbar { display:flex; gap:8px; margin-bottom:12px; }
-        .editor-area { border: 1px solid #e6e9ef; border-radius:8px; overflow:hidden; }
-        pre.sample { margin: 0; padding: 16px; background:#0b1220; color:#e6eef6; font-family: 'JetBrains Mono', monospace; }
-    </style>
+ <meta charset="utf-8" />
+ <meta name="viewport" content="width=device-width,initial-scale=1" />
+ <title>Editora Light Code Editor — Demo</title>
+ <meta name="description" content="Light-weight syntax-highlighted code editor component for the web. Fast, extensible, and plugin-friendly — use via npm or CDN.">
+ <meta name="keywords" content="light code editor, code editor, syntax highlighting, javascript editor, typescript editor, code playground, embeddable editor, web editor">
+ <meta property="og:title" content="Editora Light Code Editor — Demo">
+ <meta property="og:description" content="Light-weight syntax-highlighted code editor component for the web. Fast, extensible, and plugin-friendly — use via npm or CDN.">
+ <meta property="og:type" content="website">
+ <link rel="stylesheet" href="assets/css/style.css">
+ <!-- Styles: load published package stylesheet from CDN -->
+ <link rel="stylesheet" href="https://unpkg.com/@editora/light-code-editor@1.0.3/dist/light-code-editor.css">
+ <style>
+ .editor-demo {
+ max-width: 980px;
+ margin: 36px auto;
+ padding: 20px;
+ background: white;
+ border-radius: 12px;
+ box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+ }
+ .editor-toolbar { display:flex; gap:8px; margin-bottom:12px; }
+ .editor-area { border: 1px solid #e6e9ef; border-radius:8px; overflow:hidden; }
+ pre.sample { margin: 0; padding: 16px; background:#0b1220; color:#e6eef6; font-family: 'JetBrains Mono', monospace; }
+ </style>
 </head>
 <body>
-    <!-- Header Navigation -->
-    <header>
-        <div class="container">
-            <nav>
-                <a href="index.html" class="logo">
-                    <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
-                </a>
-                <button class="menu-toggle">☰</button>
-                <ul class="nav-links">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="docs/installation.html">Docs</a></li>
-                    <li><a href="docs/features.html">Features</a></li>
-                    <li><a href="plugins/index.html">Plugins</a></li>
-                    <li><a href="docs/api.html">API</a></li>
-                    <li><a href="toast-demo.html">Toast Demo</a></li>
-                    <li><a href="light-code-editor-demo.html" class="active">Light Code Editor</a></li>
-                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+ <!-- Header Navigation -->
+ <header>
+ <div class="container">
+ <nav>
+ <a href="index.html" class="logo">
+ <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" >
+ </a>
+ <button class="menu-toggle">☰</button>
+ <ul class="nav-links">
+ <li><a href="index.html">Home</a></li>
+ <li><a href="docs/installation.html">Docs</a></li>
+ <li><a href="docs/features.html">Features</a></li>
+ <li><a href="plugins/index.html">Plugins</a></li>
+ <li><a href="docs/api.html">API</a></li>
+ <li><a href="light-code-editor-demo.html" class="active">Light Code Editor</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+ </ul>
+ </nav>
+ </div>
+ </header>
 
-    <main class="container">
-        <section class="editor-demo">
-            <h2>Quick Start</h2>
-            <p>Installable via npm or load the UMD build. Example usage:</p>
-            <pre class="sample"><code>// Import (ESM)
+ <main class="container">
+ <section class="editor-demo">
+ <h2>Quick Start</h2>
+ <p>Installable via npm or load the UMD build. Example usage:</p>
+ <pre class="sample"><code>// Import (ESM)
 import { LightCodeEditor, SyntaxHighlightingExtension } from '@editora/light-code-editor';
 
 const editor = new LightCodeEditor(document.getElementById('editor-root'), {
-  language: 'javascript',
-  value: "console.log('Hello world');",
-  readOnly: false
+ language: 'javascript',
+ value: "console.log('Hello world');",
+ readOnly: false
 });
 
 editor.use(new SyntaxHighlightingExtension());</code></pre>
 
-            <h3 style="margin-top:18px">CDN / UMD</h3>
-            <p>Load the UMD bundle and instantiate from the global API (UMD names vary by build):</p>
-            <pre class="sample"><code>&lt;script src="https://unpkg.com/@editora/light-code-editor@1.0.3/dist/index.umd.js"&gt;&lt;/script&gt;
+ <h3 style="margin-top:18px">CDN / UMD</h3>
+ <p>Load the UMD bundle and instantiate from the global API (UMD names vary by build):</p>
+ <pre class="sample"><code>&lt;script src="https://unpkg.com/@editora/light-code-editor@1.0.3/dist/index.umd.js"&gt;&lt;/script&gt;
 &lt;script&gt;
-  // Example: window.LightCodeEditor or global exports may be available
-  // const editor = new window.LightCodeEditor(...)
+ // Example: window.LightCodeEditor or global exports may be available
+ // const editor = new window.LightCodeEditor(...)
 &lt;/script&gt;</code></pre>
 
-            <h2 style="margin-top:18px">Playground</h2>
-            <div class="editor-toolbar">
-                <button class="btn" id="btn-format">Format (pretend)</button>
-                <button class="btn" id="btn-copy">Copy content</button>
-                <button class="btn" id="btn-highlight">Highlight (demo)</button>
-            </div>
-                <h3 style="margin-top:18px">Styles</h3>
-                <p>The editor ships a small stylesheet in <code>dist/light-code-editor.css</code>. You can include it in three common ways:</p>
-                <ol>
-                    <li><strong>Bundler (recommended):</strong> import the CSS from the package in your application entry.
-                        <pre class="sample"><code>import '@editora/light-code-editor/dist/light-code-editor.css';</code></pre>
-                    </li>
-                    <li><strong>Node modules (dev/test):</strong> add a plain link that points to <code>node_modules</code> when serving locally:
-                        <pre class="sample"><code>&lt;link rel="stylesheet" href="/node_modules/@editora/light-code-editor/dist/light-code-editor.css"&gt;</code></pre>
-                    </li>
-                    <li><strong>CDN (no build):</strong> point to a CDN host such as <code>unpkg</code> or <code>jsdelivr</code>:
-                        <pre class="sample"><code>&lt;link rel="stylesheet" href="https://unpkg.com/@editora/light-code-editor@1.0.2/dist/light-code-editor.css"&gt;</code></pre>
-                    </li>
-                </ol>
-                <p>Note: the package's <code>package.json</code> currently exposes the JS entrypoints but does not list the CSS under <code>exports</code>. The CSS file exists in <code>dist/light-code-editor.css</code>, so CDN or direct subpath imports will work, but some Node resolver configurations may restrict non-exported subpath imports. If you need guaranteed subpath exports, add an appropriate entry to <code>exports</code> or a top-level <code>style</code> field in <code>package.json</code>.</p>
+ <h2 style="margin-top:18px">Playground</h2>
+ <div class="editor-toolbar">
+ <button class="btn" id="btn-format">Format (pretend)</button>
+ <button class="btn" id="btn-copy">Copy content</button>
+ <button class="btn" id="btn-highlight">Highlight (demo)</button>
+ </div>
+ <h3 style="margin-top:18px">Styles</h3>
+ <p>The editor ships a small stylesheet in <code>dist/light-code-editor.css</code>. You can include it in three common ways:</p>
+ <ol>
+ <li><strong>Bundler (recommended):</strong> import the CSS from the package in your application entry.
+ <pre class="sample"><code>import '@editora/light-code-editor/dist/light-code-editor.css';</code></pre>
+ </li>
+ <li><strong>Node modules (dev/test):</strong> add a plain link that points to <code>node_modules</code> when serving locally:
+ <pre class="sample"><code>&lt;link rel="stylesheet" href="/node_modules/@editora/light-code-editor/dist/light-code-editor.css"&gt;</code></pre>
+ </li>
+ <li><strong>CDN (no build):</strong> point to a CDN host such as <code>unpkg</code> or <code>jsdelivr</code>:
+ <pre class="sample"><code>&lt;link rel="stylesheet" href="https://unpkg.com/@editora/light-code-editor@1.0.2/dist/light-code-editor.css"&gt;</code></pre>
+ </li>
+ </ol>
+ <p>Note: the package's <code>package.json</code> currently exposes the JS entrypoints but does not list the CSS under <code>exports</code>. The CSS file exists in <code>dist/light-code-editor.css</code>, so CDN or direct subpath imports will work, but some Node resolver configurations may restrict non-exported subpath imports. If you need guaranteed subpath exports, add an appropriate entry to <code>exports</code> or a top-level <code>style</code> field in <code>package.json</code>.</p>
 
-            <div id="editor-root" class="editor-area" style="min-height:200px; display:flex;">
-                <textarea id="editor-textarea" style="width:100%; height:100%; padding:16px; border:0; font-family: 'JetBrains Mono', monospace; font-size:13px;">// Try editing this code
+ <div id="editor-root" class="editor-area" style="min-height:200px; display:flex;">
+ <textarea id="editor-textarea" style="width:100%; height:100%; padding:16px; border:0; font-family: 'JetBrains Mono', monospace; font-size:13px;">// Try editing this code
 function greet(name) {
-  return `Hello ${name}`;
+ return `Hello ${name}`;
 }
 
 console.log(greet('Developer'));
 </textarea>
-            </div>
-        </section>
+ </div>
+ </section>
 
-        <section class="editor-demo" style="margin-top:28px;">
-            <h2>API Examples</h2>
-            <pre class="sample"><code>// Highlighting extension usage
+ <section class="editor-demo" style="margin-top:28px;">
+ <h2>API Examples</h2>
+ <pre class="sample"><code>// Highlighting extension usage
 import { SyntaxHighlightingExtension } from '@editora/light-code-editor';
 
 const ext = new SyntaxHighlightingExtension({ theme: 'dark' });
 editor.use(ext);</code></pre>
 
-            <h3 style="margin-top:18px">Advanced Find / Replace</h3>
-            <p>The search extension includes robust find/replace controls with case-sensitive, whole-word, and regex matching.</p>
-            <pre class="sample"><code>import { createEditor, SearchExtension } from '@editora/light-code-editor';
+ <h3 style="margin-top:18px">Advanced Find / Replace</h3>
+ <p>The search extension includes robust find/replace controls with case-sensitive, whole-word, and regex matching.</p>
+ <pre class="sample"><code>import { createEditor, SearchExtension } from '@editora/light-code-editor';
 
 const editor = createEditor(container, {
-  value: initialCode,
-  extensions: [
-    new SearchExtension({
-      // default: true
-      // when enabled, Enter in Replace mode moves to the next match.
-      replaceAndFindNext: true
-    })
-  ]
+ value: initialCode,
+ extensions: [
+ new SearchExtension({
+ // default: true
+ // when enabled, Enter in Replace mode moves to the next match.
+ replaceAndFindNext: true
+ })
+ ]
 });
 
 // Open find UI
 editor.executeCommand('find');
 // Open replace UI
 editor.executeCommand('replace');</code></pre>
-            <p>In the search panel:</p>
-            <ul>
-                <li><strong>Aa</strong>: case-sensitive matching</li>
-                <li><strong>Whole</strong>: whole-word-only matching</li>
-                <li><strong>.*</strong>: regex matching (invalid regex is validated and reported)</li>
-            </ul>
-        </section>
-    </main>
+ <p>In the search panel:</p>
+ <ul>
+ <li><strong>Aa</strong>: case-sensitive matching</li>
+ <li><strong>Whole</strong>: whole-word-only matching</li>
+ <li><strong>.*</strong>: regex matching (invalid regex is validated and reported)</li>
+ </ul>
+ </section>
+ </main>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-links">
-                <div class="footer-section">
-                    <h5>📚 Documentation</h5>
-                    <ul>
-                        <li><a href="docs/installation.html">Installation</a></li>
-                        <li><a href="docs/features.html">Features</a></li>
-                        <li><a href="docs/api.html">API Reference</a></li>
-                        <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
-                        <li><a href="docs/custom-plugins.html">Custom Plugins</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h5>🔌 Plugins</h5>
-                    <ul>
-                        <li><a href="plugins/index.html">All Plugins</a></li>
-                        <li><a href="plugins/media-manager.html">Media Manager</a></li>
-                        <li><a href="plugins/table.html">Tables</a></li>
-                        <li><a href="plugins/code-sample.html">Code Samples</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h5>🔗 Links</h5>
-                    <ul>
-                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h5>ℹ️ About</h5>
-                    <ul>
-                        <li><a href="docs/about.html">About Editora</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p style="color:white">&copy; 2024-2026 Editora. Built with ❤️ by Editora Team. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
-            </div>
-        </div>
-    </footer>
+ <!-- Footer -->
+ <footer>
+ <div class="container">
+ <div class="footer-links">
+ <div class="footer-section">
+ <h5>Documentation</h5>
+ <ul>
+ <li><a href="docs/installation.html">Installation</a></li>
+ <li><a href="docs/features.html">Features</a></li>
+ <li><a href="docs/api.html">API Reference</a></li>
+ <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+ <li><a href="docs/custom-plugins.html">Custom Plugins</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h5>Plugins</h5>
+ <ul>
+ <li><a href="plugins/index.html">All Plugins</a></li>
+ <li><a href="plugins/media-manager.html">Media Manager</a></li>
+ <li><a href="plugins/table.html">Tables</a></li>
+ <li><a href="plugins/code-sample.html">Code Samples</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h5>Links</h5>
+ <ul>
+ <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+ <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h5>About</h5>
+ <ul>
+ <li><a href="docs/about.html">About Editora</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+ </ul>
+ </div>
+ </div>
+ <div class="footer-bottom">
+ <p style="color:white">&copy; 2024-2026 Editora. Built with ❤️ by Editora Team. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+ </div>
+ </div>
+ </footer>
 
-    <!-- Include main site JS to add copy buttons on pre/code blocks -->
-    <script src="assets/js/main.js"></script>
+ <!-- Include main site JS to add copy buttons on pre/code blocks -->
+ <script src="assets/js/main.js"></script>
 
-    <!-- Load published UMD bundle from CDN (provides global `LightCodeEditor`) -->
-    <script src="https://unpkg.com/@editora/light-code-editor@1.0.3/dist/index.umd.js"></script>
+ <!-- Load published UMD bundle from CDN (provides global `LightCodeEditor`) -->
+ <script src="https://unpkg.com/@editora/light-code-editor@1.0.3/dist/index.umd.js"></script>
 
-    <script>
-        // Playground behavior: prefer the bundled editor API when available (UMD -> window.LightCodeEditor).
-        (function(){
-            const textarea = document.getElementById('editor-textarea');
-            const root = document.getElementById('editor-root');
-            let editor = null;
+ <script>
+ // Playground behavior: prefer the bundled editor API when available (UMD -> window.LightCodeEditor).
+ (function(){
+ const textarea = document.getElementById('editor-textarea');
+ const root = document.getElementById('editor-root');
+ let editor = null;
 
-            function initWithUMD() {
-                const L = window.LightCodeEditor;
-                if (!L || !L.createEditor) return false;
+ function initWithUMD() {
+ const L = window.LightCodeEditor;
+ if (!L || !L.createEditor) return false;
 
-                // Create editor using the factory; copy initial value from textarea.
-                const initial = textarea ? textarea.value : '';
-                editor = L.createEditor(root, { language: 'javascript', value: initial });
+ // Create editor using the factory; copy initial value from textarea.
+ const initial = textarea ? textarea.value : '';
+ editor = L.createEditor(root, { language: 'javascript', value: initial });
 
-                // Attach syntax highlighting extension if available.
-                if (L.SyntaxHighlightingExtension) {
-                    try {
-                        editor.addExtension(new L.SyntaxHighlightingExtension());
-                    } catch (e) {
-                        console.warn('Could not add SyntaxHighlightingExtension:', e);
-                    }
-                }
+ // Attach syntax highlighting extension if available.
+ if (L.SyntaxHighlightingExtension) {
+ try {
+ editor.addExtension(new L.SyntaxHighlightingExtension());
+ } catch (e) {
+ console.warn('Could not add SyntaxHighlightingExtension:', e);
+ }
+ }
 
-                // Hide the fallback textarea when the rich editor is active.
-                if (textarea) textarea.style.display = 'none';
+ // Hide the fallback textarea when the rich editor is active.
+ if (textarea) textarea.style.display = 'none';
 
-                return true;
-            }
+ return true;
+ }
 
-            function ensureEditorReady() {
-                if (initWithUMD()) return;
-                // Poll briefly for UMD to load (useful when including UMD after this script)
-                const start = Date.now();
-                const iv = setInterval(() => {
-                    if (initWithUMD() || Date.now() - start > 5000) clearInterval(iv);
-                }, 150);
-            }
+ function ensureEditorReady() {
+ if (initWithUMD()) return;
+ // Poll briefly for UMD to load (useful when including UMD after this script)
+ const start = Date.now();
+ const iv = setInterval(() => {
+ if (initWithUMD() || Date.now() - start > 5000) clearInterval(iv);
+ }, 150);
+ }
 
-            document.getElementById('btn-copy').addEventListener('click', () => {
-                const txt = editor ? editor.getValue() : (textarea ? textarea.value : '');
-                if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(txt);
-                } else {
-                    const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-                }
-            });
+ document.getElementById('btn-copy').addEventListener('click', () => {
+ const txt = editor ? editor.getValue() : (textarea ? textarea.value : '');
+ if (navigator.clipboard && window.isSecureContext) {
+ navigator.clipboard.writeText(txt);
+ } else {
+ const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+ }
+ });
 
-            document.getElementById('btn-highlight').addEventListener('click', () => {
-                if (editor) {
-                    // Toggle or re-run highlight by re-adding or using extension if available.
-                    const ext = editor.getConfig().extensions?.find(e => e.name === 'syntax-highlighting');
-                    if (ext && typeof ext.setTheme === 'function') {
-                        // toggle theme as a visible effect
-                        const next = (editor.getConfig().theme || 'dark') === 'dark' ? 'light' : 'dark';
-                        editor.setTheme(next);
-                    } else if (window.LightCodeEditor && window.LightCodeEditor.SyntaxHighlightingExtension) {
-                        try { editor.addExtension(new window.LightCodeEditor.SyntaxHighlightingExtension()); } catch (e) { console.warn(e); }
-                    } else {
-                        alert('Highlighter not available — load the package UMD to demo full highlighting.');
-                    }
-                } else if (textarea) {
-                    alert('UMD bundle not loaded. Include the UMD script to enable the rich editor.');
-                }
-            });
+ document.getElementById('btn-highlight').addEventListener('click', () => {
+ if (editor) {
+ // Toggle or re-run highlight by re-adding or using extension if available.
+ const ext = editor.getConfig().extensions?.find(e => e.name === 'syntax-highlighting');
+ if (ext && typeof ext.setTheme === 'function') {
+ // toggle theme as a visible effect
+ const next = (editor.getConfig().theme || 'dark') === 'dark' ? 'light' : 'dark';
+ editor.setTheme(next);
+ } else if (window.LightCodeEditor && window.LightCodeEditor.SyntaxHighlightingExtension) {
+ try { editor.addExtension(new window.LightCodeEditor.SyntaxHighlightingExtension()); } catch (e) { console.warn(e); }
+ } else {
+ alert('Highlighter not available — load the package UMD to demo full highlighting.');
+ }
+ } else if (textarea) {
+ alert('UMD bundle not loaded. Include the UMD script to enable the rich editor.');
+ }
+ });
 
-            document.getElementById('btn-format').addEventListener('click', () => {
-                if (editor) {
-                    // Placeholder: editor.format() is not implemented; show UX feedback
-                    alert('Format is a demo action. Integrate a formatter (Prettier) for real formatting.');
-                } else alert('UMD bundle not loaded — using textarea fallback.');
-            });
+ document.getElementById('btn-format').addEventListener('click', () => {
+ if (editor) {
+ // Placeholder: editor.format() is not implemented; show UX feedback
+ alert('Format is a demo action. Integrate a formatter (Prettier) for real formatting.');
+ } else alert('UMD bundle not loaded — using textarea fallback.');
+ });
 
-            // Initialize when DOM is ready
-            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensureEditorReady);
-            else ensureEditorReady();
-        })();
-    </script>
+ // Initialize when DOM is ready
+ if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ensureEditorReady);
+ else ensureEditorReady();
+ })();
+ </script>
 </body>
 </html>

@@ -1,156 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Meta Tags for SEO -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Editora Installation - Set up the Editora content authoring ecosystem across core, plugins, themes, and framework adapters.">
-    <meta name="keywords" content="installation, Editora ecosystem, @editora/core, @editora/react, plugins, themes, framework adapters">
-    <meta name="author" content="Editora Contributors">
-    <meta name="robots" content="index, follow">
-    <meta property="og:title" content="Editora - Installation">
-    <meta property="og:description" content="Set up the Editora ecosystem: core engine, plugins, themes, and framework integrations.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://editora-free.netlify.app/">
-    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="Editora - Installation">
-    <meta property="twitter:description" content="Install and configure the Editora ecosystem for web components and framework apps.">
-    <meta name="theme-color" content="#007bff">
+ <!-- Meta Tags for SEO -->
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <meta name="description" content="Editora Installation - Set up the Editora content authoring ecosystem across core, plugins, themes, and framework adapters.">
+ <meta name="keywords" content="installation, Editora ecosystem, @editora/core, @editora/react, plugins, themes, framework adapters">
+ <meta name="author" content="Editora Contributors">
+ <meta name="robots" content="index, follow">
+ <meta property="og:title" content="Editora - Installation">
+ <meta property="og:description" content="Set up the Editora ecosystem: core engine, plugins, themes, and framework integrations.">
+ <meta property="og:type" content="website">
+ <meta property="og:url" content="https://editora-free.netlify.app/">
+ <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+ <meta property="twitter:card" content="summary_large_image">
+ <meta property="twitter:title" content="Editora - Installation">
+ <meta property="twitter:description" content="Install and configure the Editora ecosystem for web components and framework apps.">
+ <meta name="theme-color" content="#12131A">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
-    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
-    <title>Editora - Installation</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    </head>
-    
+ <!-- Favicon -->
+ <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+ <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+ <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+ <title>Editora - Installation</title>
+ <link rel="stylesheet" href="../assets/css/style.css">
+ </head>
+ 
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container">
-            <nav>
-               <!-- <a href="../index.html" class="logo">
-                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
-                </a>-->
-                <a href="../index.html" class="logo d-flex flex-center">
-                     <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo">
-                         <span>Editora</span>
-                    </a>
-                <!--<button class="menu-toggle">☰</button>-->
-                <button class="menu-toggle" aria-label="Toggle Menu">☰</button>
-                <ul class="nav-links">
-                    <li><a href="../index.html">Home</a></li>
-                    <li><a href="installation.html" class="active">Docs</a></li>
-                    <li><a href="features.html">Features</a></li>
-                    <li><a href="../plugins/index.html">Plugins</a></li>
-                    <li><a href="api.html">API</a></li>
-                    <li><a href="../toast-demo.html">Toast Demo</a></li>
-                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+ <!-- Header -->
+ <header>
+ <div class="container">
+ <nav>
+ <!-- <a href="../index.html" class="logo">
+ <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" >
+ </a>-->
+ <a href="../index.html" class="logo d-flex flex-center">
+ <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo">
+ <span>Editora</span>
+ </a>
+ <!--<button class="menu-toggle">☰</button>-->
+ <button class="menu-toggle" aria-label="Toggle Menu">☰</button>
+ <ul class="nav-links">
+ <li><a href="../index.html">Home</a></li>
+ <li><a href="installation.html" class="active">Docs</a></li>
+ <li><a href="features.html">Features</a></li>
+ <li><a href="../plugins/index.html">Plugins</a></li>
+ <li><a href="api.html">API</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+ </ul>
+ </nav>
+ </div>
+ </header>
 
-    <!-- Hero -->
-    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
-        <div class="container">
-            <h1 style="color: white; margin-bottom: 0.5rem;">📥 Installations Guide</h1>
-            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Set up the Editora content authoring ecosystem in your project</p>
-        </div>
-    </section>
+ <!-- Hero -->
+ <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+ <div class="container">
+ <h1 style="color: white; margin-bottom: 0.5rem;">Installations Guide</h1>
+ <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">Set up the Editora content authoring ecosystem in your project</p>
+ </div>
+ </section>
 
-    <!-- Content -->
-    <section>
-        <div class="container">
-            <div class="docs-wrapper">
-                <!-- Sidebar Navigation -->
-                <aside class="docs-sidebar">
-                    <h3>Documentation</h3>
-                    <ul class="plu1">
-                        <li><a href="installation.html" class="active">Installation</a></li>
-                        <li><a href="features.html">Features</a></li>
-                        <li><a href="api.html">API Reference</a></li>
-                        <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
-                        <li><a href="examples.html">Examples</a></li>
-                        <li><a href="custom-plugins.html">Custom Plugins</a></li>
-                        <li><a href="icons.html">@editora/icons</a></li>
-                        <li><a href="react-icons.html">@editora/react-icons</a></li>
-                        <li><a href="ui-core.html">@editora/ui-core</a></li>
-                        <li><a href="ui-react.html">@editora/ui-react</a></li>
-                        <li><a href="../light-code-editor-demo.html">@editora/light-code-editor</a></li>
-                        <li><a href="about.html">About</a></li>
-                    </ul>
+ <!-- Content -->
+ <section>
+ <div class="container">
+ <div class="docs-wrapper">
+ <!-- Sidebar Navigation -->
+ <aside class="docs-sidebar">
+ <h3>Documentation</h3>
+ <ul class="plu1">
+ <li><a href="installation.html" class="active">Installation</a></li>
+ <li><a href="features.html">Features</a></li>
+ <li><a href="api.html">API Reference</a></li>
+ <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+ <li><a href="examples.html">Examples</a></li>
+ <li><a href="custom-plugins.html">Custom Plugins</a></li>
+ <li><a href="icons.html">@editora/icons</a></li>
+ <li><a href="react-icons.html">@editora/react-icons</a></li>
+ <li><a href="ui-core.html">@editora/ui-core</a></li>
+ <li><a href="ui-react.html">@editora/ui-react</a></li>
+ <li><a href="../light-code-editor-demo.html">@editora/light-code-editor</a></li>
+ <li><a href="about.html">About</a></li>
+ </ul>
 
-                    <h3>Quick Links</h3>
-                    <ul class="plu1">
-                        <li><a href="../playground.html">Live Playground</a></li>
-                        <li><a href="../toast-demo.html">Toast Demo</a></li>
-                        <li><a href="../plugins/index.html">All Plugins</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank">GitHub</a></li>
-                    </ul>
-                </aside>
+ <h3>Quick Links</h3>
+ <ul class="plu1">
+ <li><a href="../playground.html">Live Playground</a></li>
+ <li><a href="../plugins/index.html">All Plugins</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora" target="_blank">GitHub</a></li>
+ </ul>
+ </aside>
 
-                <!-- Main Content -->
-                <main class="docs-content">
-                    <h2>Installation</h2>
-                    <p>Editora is a modular ecosystem, not just a single editor package. Start with <code>@editora/core</code>, then add <code>@editora/plugins</code>, <code>@editora/themes</code>, and framework-specific wrappers as needed.</p>
-                    <p>This guide shows minimal and full-featured setups for web components and React so you can scale from quick integration to production-ready authoring workflows.</p>
+ <!-- Main Content -->
+ <main class="docs-content">
+ <h2>Installation</h2>
+ <p>Editora is a modular ecosystem, not just a single editor package. Start with <code>@editora/core</code>, then add <code>@editora/plugins</code>, <code>@editora/themes</code>, and framework-specific wrappers as needed.</p>
+ <p>This guide shows minimal and full-featured setups for web components and React so you can scale from quick integration to production-ready authoring workflows.</p>
 
-                    <!-- Tabs -->
-                    <div class="tabs-container" style="margin: 2rem 0;">
-                        <div class="tabs">
-                            <div class="tab-buttons">
-                                <button class="tab-btn active" data-tab="tab-npm">npm</button>
-                                <button class="tab-btn" data-tab="tab-yarn">Yarn</button>
-                                <button class="tab-btn" data-tab="tab-cdn">CDN</button>
-                                <button class="tab-btn" data-tab="tab-source">From Source</button>
-                            </div>
-                        </div>
+ <!-- Tabs -->
+ <div class="tabs-container" style="margin: 2rem 0;">
+ <div class="tabs">
+ <div class="tab-buttons">
+ <button class="tab-btn active" data-tab="tab-npm">npm</button>
+ <button class="tab-btn" data-tab="tab-yarn">Yarn</button>
+ <button class="tab-btn" data-tab="tab-cdn">CDN</button>
+ <button class="tab-btn" data-tab="tab-source">From Source</button>
+ </div>
+ </div>
 
-                        <!-- npm Tab -->
-                        <div id="tab-npm" class="tab-content active">
-                            <h3>📦 Using npm</h3>
-                            <p>Install packages based on your integration type:</p>
-                            <pre><code># Web component (minimal)
+ <!-- npm Tab -->
+ <div id="tab-npm" class="tab-content active">
+ <h3>Using npm</h3>
+ <p>Install packages based on your integration type:</p>
+ <pre><code># Web component (minimal)
 npm install @editora/core
 
 # Web component with theme package (recommended for dark/acme/custom theme overrides)
 npm install @editora/core @editora/themes</code></pre>
 
-                            <h4>For React Projects</h4>
-                            <p>Install the React wrapper with peer dependencies:</p>
-                            <pre><code># Minimal runtime
+ <h4>For React Projects</h4>
+ <p>Install the React wrapper with peer dependencies:</p>
+ <pre><code># Minimal runtime
 npm install @editora/react @editora/core react react-dom
 
 # Full-featured setup (recommended)
 npm install @editora/react @editora/core @editora/plugins @editora/themes react react-dom</code></pre>
 
-                            <h4>Plugin Entry Paths (React)</h4>
-                            <p>Choose the plugin import surface based on bundle and feature needs:</p>
-                            <ul>
-                                <li><code>@editora/plugins</code> → full plugin catalog</li>
-                                <li><code>@editora/plugins/lite</code> → common/core subset</li>
-                                <li><code>@editora/plugins/enterprise</code> → advanced/specialized subset</li>
-                                <li><code>@editora/plugins/&lt;plugin-name&gt;</code> → per-plugin imports</li>
-                            </ul>
-                            <p class="alert alert-success">
-                                <strong>Licensing:</strong> Full, lite, and enterprise entry paths are all completely free and customizable.
-                            </p>
-                            <p><strong>Enterprise preset includes:</strong> Mention, Track Changes, Version Diff, Conditional Content, Data Binding, Content Rules, Citations, Approval Workflow, PII Redaction, Smart Paste, Blocks Library, Document Schema, Translation Workflow, Slash Commands, Spell Check, A11y Checker, Comments, Merge Tag, Template, Media Manager, and Document Manager plugins.</p>
+ <h4>Plugin Entry Paths (React)</h4>
+ <p>Choose the plugin import surface based on bundle and feature needs:</p>
+ <ul>
+ <li><code>@editora/plugins</code> → full plugin catalog</li>
+ <li><code>@editora/plugins/lite</code> → common/core subset</li>
+ <li><code>@editora/plugins/enterprise</code> → advanced/specialized subset</li>
+ <li><code>@editora/plugins/&lt;plugin-name&gt;</code> → per-plugin imports</li>
+ </ul>
+ <p class="alert alert-success">
+ <strong>Licensing:</strong> Full, lite, and enterprise entry paths are all completely free and customizable.
+ </p>
+ <p><strong>Enterprise preset includes:</strong> Mention, Track Changes, Version Diff, Conditional Content, Data Binding, Content Rules, Citations, Approval Workflow, PII Redaction, Smart Paste, Blocks Library, Document Schema, Translation Workflow, Slash Commands, Spell Check, A11y Checker, Comments, Merge Tag, Template, Media Manager, and Document Manager plugins.</p>
 
-                            <h4>Quick Start</h4>
-                            <pre><code class="language-javascript">import { createEditor } from '@editora/core';
+ <h4>Quick Start</h4>
+ <pre><code class="language-javascript">import { createEditor } from '@editora/core';
 
 const editor = createEditor({
-  content: '&lt;p&gt;Hello, World!&lt;/p&gt;'
+ content: '&lt;p&gt;Hello, World!&lt;/p&gt;'
 });
 
 editor.mount(document.getElementById('editor'));</code></pre>
 
-                            <h4>With React</h4>
-                            <pre><code class="language-jsx">
+ <h4>With React</h4>
+ <pre><code class="language-jsx">
 import { useState } from "react";
 import { EditoraEditor } from '@editora/react';
 
@@ -159,272 +157,272 @@ import "@editora/themes/themes/default.css";
 import "@editora/themes/themes/dark.css";
 import "@editora/themes/themes/acme.css";
 import {
-  BoldPlugin,
-  ItalicPlugin,
-  HeadingPlugin,
-  HistoryPlugin
+ BoldPlugin,
+ ItalicPlugin,
+ HeadingPlugin,
+ HistoryPlugin
 } from '@editora/plugins';
 
 function App() {
-  const [content, setContent] = useState('&lt;p&gt;Hello from React!&lt;/p&gt;');
+ const [content, setContent] = useState('&lt;p&gt;Hello from React!&lt;/p&gt;');
 
-  return (
-    &lt;div data-theme="acme"&gt;
-      &lt;EditoraEditor
-        value={content}
-        onChange={setContent}
-        plugins={[
-          BoldPlugin(),
-          ItalicPlugin(),
-          HeadingPlugin(),
-          HistoryPlugin()
-        ]}
-      /&gt;
-    &lt;/div&gt;
-  );
+ return (
+ &lt;div data-theme="acme"&gt;
+ &lt;EditoraEditor
+ value={content}
+ onChange={setContent}
+ plugins={[
+ BoldPlugin(),
+ ItalicPlugin(),
+ HeadingPlugin(),
+ HistoryPlugin()
+ ]}
+ /&gt;
+ &lt;/div&gt;
+ );
 }</code></pre>
 
-                            <p class="alert alert-info">
-                                CRA compatibility note: when using <code>@editora/plugins</code>, import <code>@editora/plugins/styles.css</code>.
-                                Keep <code>default.css</code> as the base layer and load <code>dark.css</code>/<code>acme.css</code> as overrides.
-                            </p>
+ <p class="alert alert-info">
+ CRA compatibility note: when using <code>@editora/plugins</code>, import <code>@editora/plugins/styles.css</code>.
+ Keep <code>default.css</code> as the base layer and load <code>dark.css</code>/<code>acme.css</code> as overrides.
+ </p>
 
-                            <h4>Theme Scoping</h4>
-                            <pre><code class="language-jsx">&lt;div data-theme="light"&gt;...&lt;/div&gt;
+ <h4>Theme Scoping</h4>
+ <pre><code class="language-jsx">&lt;div data-theme="light"&gt;...&lt;/div&gt;
 &lt;div data-theme="dark"&gt;...&lt;/div&gt;
 &lt;div data-theme="acme"&gt;...&lt;/div&gt;</code></pre>
-                        </div>
+ </div>
 
-                        <!-- Yarn Tab -->
-                        <div id="tab-yarn" class="tab-content">
-                            <h3>🧶 Using Yarn</h3>
-                            <p>Install Editora using Yarn package manager:</p>
-                            <pre><code># Web component (minimal)
+ <!-- Yarn Tab -->
+ <div id="tab-yarn" class="tab-content">
+ <h3>Using Yarn</h3>
+ <p>Install Editora using Yarn package manager:</p>
+ <pre><code># Web component (minimal)
 yarn add @editora/core
 
 # Web component with themes
 yarn add @editora/core @editora/themes</code></pre>
 
-                            <h4>For React Projects</h4>
-                            <pre><code># Minimal runtime
+ <h4>For React Projects</h4>
+ <pre><code># Minimal runtime
 yarn add @editora/react @editora/core react react-dom
 
 # Full-featured setup
 yarn add @editora/react @editora/core @editora/plugins @editora/themes react react-dom</code></pre>
 
-                            <p class="alert alert-info">
-                                💡 Yarn usage is identical to npm. All other examples in this guide use npm but work the same with Yarn.
-                            </p>
-                        </div>
+ <p class="alert alert-info">
+ Yarn usage is identical to npm. All other examples in this guide use npm but work the same with Yarn.
+ </p>
+ </div>
 
-                        <!-- CDN Tab -->
-                        <div id="tab-cdn" class="tab-content">
-                            <h3>🌐 Using CDN</h3>
-                            <p>For HTML websites without build tools, use the browser-ready build via CDN:</p>
+ <!-- CDN Tab -->
+ <div id="tab-cdn" class="tab-content">
+ <h3>Using CDN</h3>
+ <p>For HTML websites without build tools, use the browser-ready build via CDN:</p>
 
-                            <h4>unpkg CDN</h4>
-                            <pre><code class="language-html">
+ <h4>unpkg CDN</h4>
+ <pre><code class="language-html">
 &lt;script type="module" src="https://unpkg.com/@editora/core/dist/webcomponent.js"&gt;&lt;/script&gt;
 &lt;link rel="stylesheet" href="https://unpkg.com/@editora/core/dist/webcomponent.min.css"&gt;
-                            </code></pre>
+ </code></pre>
 
-                            <h4>jsDelivr CDN</h4>
-                            <pre><code class="language-html">
+ <h4>jsDelivr CDN</h4>
+ <pre><code class="language-html">
 &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"&gt;&lt;/script&gt;
 &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
-                            </code></pre>
+ </code></pre>
 
-                            <h4>Basic HTML Setup</h4>
-                            <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+ <h4>Basic HTML Setup</h4>
+ <pre><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
-  &lt;title&gt;Editora Web Component&lt;/title&gt;
-  &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"&gt;&lt;/script&gt;
-  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
-  &lt;!-- Optional theme packs --&gt;
-  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/themes/themes/dark.css"&gt;
-  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/themes/themes/acme.css"&gt;
+ &lt;title&gt;Editora Web Component&lt;/title&gt;
+ &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"&gt;&lt;/script&gt;
+ &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
+ &lt;!-- Optional theme packs --&gt;
+ &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/themes/themes/dark.css"&gt;
+ &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/themes/themes/acme.css"&gt;
 &lt;/head&gt;
 &lt;body&gt;
-  &lt;editora-editor
-    plugins="bold italic underline history"
-    toolbar-items="bold italic underline | undo redo"
-    height="300"
-    theme="dark"
-    autosave='{"enabled":true,"intervalMs":3000,"storageKey":"doc-1"}'
-    security='{"sanitizeOnPaste":true,"sanitizeOnInput":true}'
-    accessibility='{"enableARIA":true,"keyboardNavigation":true}'
-    performance='{"debounceInputMs":120,"viewportOnlyScan":true}'
-  &gt;
-    &lt;p&gt;Start typing...&lt;/p&gt;
-  &lt;/editora-editor&gt;
+ &lt;editora-editor
+ plugins="bold italic underline history"
+ toolbar-items="bold italic underline | undo redo"
+ height="300"
+ theme="dark"
+ autosave='{"enabled":true,"intervalMs":3000,"storageKey":"doc-1"}'
+ security='{"sanitizeOnPaste":true,"sanitizeOnInput":true}'
+ accessibility='{"enableARIA":true,"keyboardNavigation":true}'
+ performance='{"debounceInputMs":120,"viewportOnlyScan":true}'
+ &gt;
+ &lt;p&gt;Start typing...&lt;/p&gt;
+ &lt;/editora-editor&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
 
-                            <div class="alert alert-success">
-                                ✅ Ready to use! No build process needed. Works in all modern browsers.
-                            </div>
+ <div class="alert alert-success">
+ ✅ Ready to use! No build process needed. Works in all modern browsers.
+ </div>
 
-                            <div class="alert alert-info">
-                                ℹ️ Web component dependencies: <code>@editora/core</code> is required. Use <code>@editora/themes</code> when you need dark/acme/custom theme CSS packs from npm/CDN.
-                            </div>
-                        </div>
+ <div class="alert alert-info">
+ Web component dependencies: <code>@editora/core</code> is required. Use <code>@editora/themes</code> when you need dark/acme/custom theme CSS packs from npm/CDN.
+ </div>
+ </div>
 
-                        <!-- From Source Tab -->
-                        <div id="tab-source" class="tab-content">
-                            <h3>🔨 Building from Source</h3>
-                            <p>Clone the repository and build it locally:</p>
+ <!-- From Source Tab -->
+ <div id="tab-source" class="tab-content">
+ <h3>Building from Source</h3>
+ <p>Clone the repository and build it locally:</p>
 
-                            <h4>1. Clone Repository</h4>
-                            <pre><code>git clone https://github.com/ajaykr089/Editora.git
+ <h4>1. Clone Repository</h4>
+ <pre><code>git clone https://github.com/ajaykr089/Editora.git
 cd Editora</code></pre>
 
-                            <h4>2. Install Dependencies</h4>
-                            <pre><code>npm install</code></pre>
+ <h4>2. Install Dependencies</h4>
+ <pre><code>npm install</code></pre>
 
-                            <h4>3. Build All Packages</h4>
-                            <pre><code>npm run build</code></pre>
+ <h4>3. Build All Packages</h4>
+ <pre><code>npm run build</code></pre>
 
-                            <h4>4. Link for Local Development</h4>
-                            <pre><code>cd packages/core
+ <h4>4. Link for Local Development</h4>
+ <pre><code>cd packages/core
 npm link
 
 # In your project
 npm link @editora/core</code></pre>
 
-                            <h4>5. Development Mode</h4>
-                            <pre><code>cd packages/core
-npm run dev  # Watch mode build</code></pre>
-                        </div>
-                    </div>
+ <h4>5. Development Mode</h4>
+ <pre><code>cd packages/core
+npm run dev # Watch mode build</code></pre>
+ </div>
+ </div>
 
-                    <!-- System Requirements -->
-                    <h2 style="margin-top: 3rem;">🖥️ System Requirements</h2>
-                    <div class="alert alert-info">
-                        <strong>Node.js:</strong> 16.x or higher<br>
-                        <strong>npm:</strong> 7.x or higher<br>
-                        <strong>Browser:</strong> Any modern browser (Chrome, Firefox, Safari, Edge)
-                    </div>
+ <!-- System Requirements -->
+ <h2 style="margin-top: 3rem;">System Requirements</h2>
+ <div class="alert alert-info">
+ <strong>Node.js:</strong> 16.x or higher<br>
+ <strong>npm:</strong> 7.x or higher<br>
+ <strong>Browser:</strong> Any modern browser (Chrome, Firefox, Safari, Edge)
+ </div>
 
-                    <h2>📋 Version Requirements by Framework</h2>
-                    <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
-                        <thead>
-                            <tr style="background: var(--gray-200);">
-                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Framework</th>
-                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Min Version</th>
-                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Package</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">React</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">16.8.0</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">@editora/react</td>
-                            </tr>
-                            <tr style="background: var(--gray-50);">
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Vue</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">3.0.0</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">@editora/core</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Angular</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">13.0.0</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">@editora/core</td>
-                            </tr>
-                            <tr style="background: var(--gray-50);">
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Vanilla JS</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">ES2015+</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">@editora/core</td>
-                            </tr>
-                        </tbody>
-                    </table>
+ <h2>Version Requirements by Framework</h2>
+ <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+ <thead>
+ <tr style="background: var(--gray-200);">
+ <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Framework</th>
+ <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Min Version</th>
+ <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Package</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">React</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">16.8.0</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">@editora/react</td>
+ </tr>
+ <tr style="background: var(--gray-50);">
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Vue</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">3.0.0</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">@editora/core</td>
+ </tr>
+ <tr>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Angular</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">13.0.0</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">@editora/core</td>
+ </tr>
+ <tr style="background: var(--gray-50);">
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Vanilla JS</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">ES2015+</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">@editora/core</td>
+ </tr>
+ </tbody>
+ </table>
 
-                    <h2>✅ Verify Installation</h2>
-                    <p>Test if the installation was successful:</p>
-                    <pre><code class="language-javascript">import { createEditor } from '@editora/core';
+ <h2>✅ Verify Installation</h2>
+ <p>Test if the installation was successful:</p>
+ <pre><code class="language-javascript">import { createEditor } from '@editora/core';
 console.log(typeof createEditor); // Should print "function"</code></pre>
 
-                    <h2>❓ Troubleshooting</h2>
-                    <div class="alert alert-warning">
-                        <strong>Q: Module not found error?</strong><br>
-                        A: Make sure you've run <code>npm install</code> and the package is listed in your <code>node_modules</code> folder.
-                    </div>
+ <h2>Troubleshooting</h2>
+ <div class="alert alert-warning">
+ <strong>Q: Module not found error?</strong><br>
+ A: Make sure you've run <code>npm install</code> and the package is listed in your <code>node_modules</code> folder.
+ </div>
 
-                    <div class="alert alert-warning">
-                        <strong>Q: Version conflicts with React?</strong><br>
-                        A: Editora supports React 16.8+. If you're using an older version, upgrade React first.
-                    </div>
+ <div class="alert alert-warning">
+ <strong>Q: Version conflicts with React?</strong><br>
+ A: Editora supports React 16.8+. If you're using an older version, upgrade React first.
+ </div>
 
-                    <div class="alert alert-warning">
-                        <strong>Q: CDN script not loading?</strong><br>
-                        A: Check your internet connection and make sure the CDN URL is correct. Try using a different CDN provider.
-                    </div>
+ <div class="alert alert-warning">
+ <strong>Q: CDN script not loading?</strong><br>
+ A: Check your internet connection and make sure the CDN URL is correct. Try using a different CDN provider.
+ </div>
 
-                    <h2 style="margin-top: 2rem;">📚 Next Steps</h2>
-                    <p>Now that you have Editora installed:</p>
-                    <ol>
-                        <li><a href="features.html">Explore Features</a> - Learn about all available features</li>
-                        <li><a href="api.html">Read API Documentation</a> - Understand the API</li>
-                        <li><a href="keyboard-shortcuts.html">Learn Keyboard Shortcuts</a> - Boost productivity</li>
-                        <li><a href="examples.html">Check Examples</a> - See working examples</li>
-                        <li><a href="../plugins/index.html">Install Plugins</a> - Add more functionality</li>
-                    </ol>
+ <h2 style="margin-top: 2rem;">Next Steps</h2>
+ <p>Now that you have Editora installed:</p>
+ <ol>
+ <li><a href="features.html">Explore Features</a> - Learn about all available features</li>
+ <li><a href="api.html">Read API Documentation</a> - Understand the API</li>
+ <li><a href="keyboard-shortcuts.html">Learn Keyboard Shortcuts</a> - Boost productivity</li>
+ <li><a href="examples.html">Check Examples</a> - See working examples</li>
+ <li><a href="../plugins/index.html">Install Plugins</a> - Add more functionality</li>
+ </ol>
 
-                    <div style="margin-top: 3rem; padding: 2rem; background: var(--gray-50); border-radius: var(--border-radius); text-align: center;">
-                        <p>Have questions? <a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Join our discussions</a> or <a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">report an issue</a>.</p>
-                    </div>
-                </main>
-            </div>
-        </div>
-    </section>
+ <div style="margin-top: 3rem; padding: 2rem; background: var(--gray-50); border-radius: var(--border-radius); text-align: center;">
+ <p>Have questions? <a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Join our discussions</a> or <a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">report an issue</a>.</p>
+ </div>
+ </main>
+ </div>
+ </div>
+ </section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-links">
-                <div class="footer-section">
-                    <h5>📚 Documentation</h5>
-                    <ul>
-                        <li><a href="installation.html">Installation</a></li>
-                        <li><a href="features.html">Features</a></li>
-                        <li><a href="api.html">API Reference</a></li>
-                        <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h5>🔌 Plugins</h5>
-                    <ul>
-                        <li><a href="../plugins/index.html">All Plugins</a></li>
-                        <li><a href="../plugins/media-manager.html">Media Manager</a></li>
-                        <li><a href="../plugins/table.html">Tables</a></li>
-                        <li><a href="../plugins/code-sample.html">Code Samples</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h5>🔗 Links</h5>
-                    <ul>
-                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h5>ℹ️ About</h5>
-                    <ul>
-                        <li><a href="about.html">About Editora</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
-                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p style="color:white">&copy; 2024-2026 Editora.Built with <span style="color: red;">&hearts;</span> by Editora Team. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
-            </div>
-        </div>
-    </footer>
+ <!-- Footer -->
+ <footer>
+ <div class="container">
+ <div class="footer-links">
+ <div class="footer-section">
+ <h5>Documentation</h5>
+ <ul>
+ <li><a href="installation.html">Installation</a></li>
+ <li><a href="features.html">Features</a></li>
+ <li><a href="api.html">API Reference</a></li>
+ <li><a href="keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h5>Plugins</h5>
+ <ul>
+ <li><a href="../plugins/index.html">All Plugins</a></li>
+ <li><a href="../plugins/media-manager.html">Media Manager</a></li>
+ <li><a href="../plugins/table.html">Tables</a></li>
+ <li><a href="../plugins/code-sample.html">Code Samples</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h5>Links</h5>
+ <ul>
+ <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+ <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h5>About</h5>
+ <ul>
+ <li><a href="about.html">About Editora</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+ </ul>
+ </div>
+ </div>
+ <div class="footer-bottom">
+ <p style="color:white">&copy; 2024-2026 Editora.Built with <span style="color: var(--accent);">&hearts;</span> by Editora Team. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+ </div>
+ </div>
+ </footer>
 
-    <script src="../assets/js/main.js"></script>
+ <script src="../assets/js/main.js"></script>
 </body>
 </html>

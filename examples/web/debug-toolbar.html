@@ -1,242 +1,241 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Meta Tags for SEO -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Editora Debug Toolbar - Example and demonstration of Editora rich text editor features.">
-    <meta name="keywords" content="debug toolbar, Editora editor, example, demonstration">
-    <meta name="author" content="Editora Contributors">
-    <meta name="robots" content="index, follow">
-    <meta property="og:title" content="Editora - Debug Toolbar">
-    <meta property="og:description" content="Editora Debug Toolbar - Example and demonstration of Editora rich text editor features.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://editora-free.netlify.app/">
-    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="Editora - Debug Toolbar">
-    <meta property="twitter:description" content="Editora Debug Toolbar - Example and demonstration of Editora rich text editor features">
-    <meta name="theme-color" content="#007bff">
+ <!-- Meta Tags for SEO -->
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <meta name="description" content="Editora Debug Toolbar - Example and demonstration of Editora rich text editor features.">
+ <meta name="keywords" content="debug toolbar, Editora editor, example, demonstration">
+ <meta name="author" content="Editora Contributors">
+ <meta name="robots" content="index, follow">
+ <meta property="og:title" content="Editora - Debug Toolbar">
+ <meta property="og:description" content="Editora Debug Toolbar - Example and demonstration of Editora rich text editor features.">
+ <meta property="og:type" content="website">
+ <meta property="og:url" content="https://editora-free.netlify.app/">
+ <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+ <meta property="twitter:card" content="summary_large_image">
+ <meta property="twitter:title" content="Editora - Debug Toolbar">
+ <meta property="twitter:description" content="Editora Debug Toolbar - Example and demonstration of Editora rich text editor features">
+ <meta name="theme-color" content="#12131A">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
-    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
-    <title>Editora - Debug Toolbar</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <style>
-    body {
-      font-family: monospace;
-      padding: 20px;
-      background: #1e1e1e;
-      color: #d4d4d4;
-    }
-    .log {
-      background: #252526;
-      padding: 10px;
-      margin: 10px 0;
-      border-left: 3px solid #007acc;
-      border-radius: 3px;
-    }
-    .error {
-      border-left-color: #f48771;
-    }
-    .success {
-      border-left-color: #89d185;
-    }
-    pre {
-      margin: 5px 0;
-      white-space: pre-wrap;
-    }
-  </style>
-    </head>
-  <body>
-    <!-- Header Navigation -->
-    <header>
-      <div class="container">
-        <nav>
-          <a href="index.html" class="logo">
-            <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
-          </a>
-          <button class="menu-toggle">☰</button>
-          <ul class="nav-links">
-            <li><a href="index.html">Home</a></li>
-            <li><a href="docs/installation.html">Docs</a></li>
-            <li><a href="docs/features.html">Features</a></li>
-            <li><a href="plugins/index.html">Plugins</a></li>
-            <li><a href="docs/api.html">API</a></li>
-            <li><a href="toast-demo.html">Toast Demo</a></li>
-            <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-          </ul>
-        </nav>
-      </div>
-    </header>
+ <!-- Favicon -->
+ <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+ <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+ <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+ <title>Editora - Debug Toolbar</title>
+ <link rel="stylesheet" href="assets/css/style.css">
+ <style>
+ body {
+ font-family: monospace;
+ padding: 20px;
+ background: #1e1e1e;
+ color: #d4d4d4;
+ }
+ .log {
+ background: #252526;
+ padding: 10px;
+ margin: 10px 0;
+ border-left: 3px solid #007acc;
+ border-radius: 3px;
+ }
+ .error {
+ border-left-color: #f48771;
+ }
+ .success {
+ border-left-color: #89d185;
+ }
+ pre {
+ margin: 5px 0;
+ white-space: pre-wrap;
+ }
+ </style>
+ </head>
+ <body>
+ <!-- Header Navigation -->
+ <header>
+ <div class="container">
+ <nav>
+ <a href="index.html" class="logo">
+ <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" >
+ </a>
+ <button class="menu-toggle">☰</button>
+ <ul class="nav-links">
+ <li><a href="index.html">Home</a></li>
+ <li><a href="docs/installation.html">Docs</a></li>
+ <li><a href="docs/features.html">Features</a></li>
+ <li><a href="plugins/index.html">Plugins</a></li>
+ <li><a href="docs/api.html">API</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+ </ul>
+ </nav>
+ </div>
+ </header>
 
-    <main class="container">
-  <h1>🔍 Toolbar Debug Console</h1>
-  <div id="logs"></div>
+ <main class="container">
+ <h1>Toolbar Debug Console</h1>
+ <div id="logs"></div>
 
-  <!-- Import Web Component (Core Bundle - Optimized) -->
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css">
+ <!-- Import Web Component (Core Bundle - Optimized) -->
+ <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.js"></script>
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css">
 
-  <script>
-    const logs = document.getElementById('logs');
-    
-    function log(message, type = 'log') {
-      const div = document.createElement('div');
-      div.className = `log ${type}`;
-      div.innerHTML = `<pre>${message}</pre>`;
-      logs.appendChild(div);
-      console.log(message);
-    }
+ <script>
+ const logs = document.getElementById('logs');
+ 
+ function log(message, type = 'log') {
+ const div = document.createElement('div');
+ div.className = `log ${type}`;
+ div.innerHTML = `<pre>${message}</pre>`;
+ logs.appendChild(div);
+ console.log(message);
+ }
 
-    // Check if script loaded
-    log('✅ Script loaded', 'success');
+ // Check if script loaded
+ log('✅ Script loaded', 'success');
 
-    // Check global Editora object
-    if (window.Editora) {
-      log('✅ window.Editora exists:\n' + JSON.stringify({
-        version: window.Editora.version,
-        pluginCount: window.Editora.plugins?.length,
-        plugins: window.Editora.plugins
-      }, null, 2), 'success');
-    } else {
-      log('❌ window.Editora NOT FOUND', 'error');
-    }
+ // Check global Editora object
+ if (window.Editora) {
+ log('✅ window.Editora exists:\n' + JSON.stringify({
+ version: window.Editora.version,
+ pluginCount: window.Editora.plugins?.length,
+ plugins: window.Editora.plugins
+ }, null, 2), 'success');
+ } else {
+ log('❌ window.Editora NOT FOUND', 'error');
+ }
 
-    // Check RichTextEditorElement
-    const RTE = customElements.get('rich-text-editor');
-    if (RTE) {
-      log('✅ Custom element registered: ' + RTE.name, 'success');
-      
-      // Check __globalPluginLoader
-      if (RTE.__globalPluginLoader) {
-        log('✅ RTE.__globalPluginLoader exists', 'success');
-        log('Registered plugins: ' + RTE.__globalPluginLoader.getRegisteredPluginNames().join(', '));
-      } else {
-        log('❌ RTE.__globalPluginLoader NOT FOUND', 'error');
-      }
+ // Check RichTextEditorElement
+ const RTE = customElements.get('rich-text-editor');
+ if (RTE) {
+ log('✅ Custom element registered: ' + RTE.name, 'success');
+ 
+ // Check __globalPluginLoader
+ if (RTE.__globalPluginLoader) {
+ log('✅ RTE.__globalPluginLoader exists', 'success');
+ log('Registered plugins: ' + RTE.__globalPluginLoader.getRegisteredPluginNames().join(', '));
+ } else {
+ log('❌ RTE.__globalPluginLoader NOT FOUND', 'error');
+ }
 
-      // Check __globalPlugins
-      if (RTE.__globalPlugins) {
-        log('✅ RTE.__globalPlugins exists (length: ' + RTE.__globalPlugins.length + ')', 'success');
-      } else {
-        log('❌ RTE.__globalPlugins NOT FOUND', 'error');
-      }
-    } else {
-      log('❌ Custom element NOT registered', 'error');
-    }
+ // Check __globalPlugins
+ if (RTE.__globalPlugins) {
+ log('✅ RTE.__globalPlugins exists (length: ' + RTE.__globalPlugins.length + ')', 'success');
+ } else {
+ log('❌ RTE.__globalPlugins NOT FOUND', 'error');
+ }
+ } else {
+ log('❌ Custom element NOT registered', 'error');
+ }
 
-    // Create test editor
-    customElements.whenDefined('rich-text-editor').then(() => {
-      log('\n📝 Creating test editor...', 'log');
-      
-      const editor = document.createElement('rich-text-editor');
-      editor.setAttribute('height', '300');
-      editor.setAttribute('toolbar-items', 'bold italic underline');
-      editor.setAttribute('plugins', 'bold italic underline');
-      editor.innerHTML = '<p>Test content</p>';
-      
-      document.body.appendChild(editor);
-      
-      // Wait for initialization
-      setTimeout(() => {
-        log('\n🔍 Inspecting created editor...', 'log');
-        
-        // Check if editor is initialized
-        log('Editor isInitialized: ' + editor.isInitialized);
-        
-        // Check config
-        log('Editor config:\n' + JSON.stringify(editor.config, null, 2));
-        
-        // Check pluginLoader
-        if (editor.pluginLoader) {
-          log('✅ Editor has pluginLoader', 'success');
-          log('PluginLoader registered plugins: ' + editor.pluginLoader.getRegisteredPluginNames().join(', '));
-          log('PluginLoader loaded plugins: ' + editor.pluginLoader.getLoadedPluginNames().join(', '));
-        } else {
-          log('❌ Editor has NO pluginLoader', 'error');
-        }
-        
-        // Check toolbar element
-        const toolbar = editor.querySelector('.editora-toolbar');
-        if (toolbar) {
-          log('✅ Toolbar element found', 'success');
-          log('Toolbar HTML:\n' + toolbar.innerHTML.substring(0, 500));
-          
-          const buttons = toolbar.querySelectorAll('.editora-toolbar-button');
-          log(`Toolbar buttons found: ${buttons.length}`, buttons.length > 0 ? 'success' : 'error');
-          
-          if (buttons.length > 0) {
-            log('Button commands: ' + Array.from(buttons).map(b => b.getAttribute('data-command')).join(', '));
-          }
-        } else {
-          log('❌ Toolbar element NOT found', 'error');
-          log('Editor innerHTML:\n' + editor.innerHTML.substring(0, 500));
-        }
-        
-        // Check shadow DOM
-        if (editor.shadowRoot) {
-          log('Editor uses Shadow DOM', 'log');
-          const shadowToolbar = editor.shadowRoot.querySelector('.editora-toolbar');
-          if (shadowToolbar) {
-            log('✅ Toolbar in Shadow DOM', 'success');
-          }
-        }
-        
-      }, 1000);
-    });
-  </script>
+ // Create test editor
+ customElements.whenDefined('rich-text-editor').then(() => {
+ log('\nCreating test editor...', 'log');
+ 
+ const editor = document.createElement('rich-text-editor');
+ editor.setAttribute('height', '300');
+ editor.setAttribute('toolbar-items', 'bold italic underline');
+ editor.setAttribute('plugins', 'bold italic underline');
+ editor.innerHTML = '<p>Test content</p>';
+ 
+ document.body.appendChild(editor);
+ 
+ // Wait for initialization
+ setTimeout(() => {
+ log('\nInspecting created editor...', 'log');
+ 
+ // Check if editor is initialized
+ log('Editor isInitialized: ' + editor.isInitialized);
+ 
+ // Check config
+ log('Editor config:\n' + JSON.stringify(editor.config, null, 2));
+ 
+ // Check pluginLoader
+ if (editor.pluginLoader) {
+ log('✅ Editor has pluginLoader', 'success');
+ log('PluginLoader registered plugins: ' + editor.pluginLoader.getRegisteredPluginNames().join(', '));
+ log('PluginLoader loaded plugins: ' + editor.pluginLoader.getLoadedPluginNames().join(', '));
+ } else {
+ log('❌ Editor has NO pluginLoader', 'error');
+ }
+ 
+ // Check toolbar element
+ const toolbar = editor.querySelector('.editora-toolbar');
+ if (toolbar) {
+ log('✅ Toolbar element found', 'success');
+ log('Toolbar HTML:\n' + toolbar.innerHTML.substring(0, 500));
+ 
+ const buttons = toolbar.querySelectorAll('.editora-toolbar-button');
+ log(`Toolbar buttons found: ${buttons.length}`, buttons.length > 0 ? 'success' : 'error');
+ 
+ if (buttons.length > 0) {
+ log('Button commands: ' + Array.from(buttons).map(b => b.getAttribute('data-command')).join(', '));
+ }
+ } else {
+ log('❌ Toolbar element NOT found', 'error');
+ log('Editor innerHTML:\n' + editor.innerHTML.substring(0, 500));
+ }
+ 
+ // Check shadow DOM
+ if (editor.shadowRoot) {
+ log('Editor uses Shadow DOM', 'log');
+ const shadowToolbar = editor.shadowRoot.querySelector('.editora-toolbar');
+ if (shadowToolbar) {
+ log('✅ Toolbar in Shadow DOM', 'success');
+ }
+ }
+ 
+ }, 1000);
+ });
+ </script>
 
-  </main>
+ </main>
 
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      <div class="footer-links">
-        <div class="footer-section">
-          <h5>📚 Documentation</h5>
-          <ul>
-            <li><a href="docs/installation.html">Installation</a></li>
-            <li><a href="docs/features.html">Features</a></li>
-            <li><a href="docs/api.html">API Reference</a></li>
-            <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
-            <li><a href="docs/custom-plugins.html">Custom Plugins</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h5>🔌 Plugins</h5>
-          <ul>
-            <li><a href="plugins/index.html">All Plugins</a></li>
-            <li><a href="plugins/media-manager.html">Media Manager</a></li>
-            <li><a href="plugins/table.html">Tables</a></li>
-            <li><a href="plugins/code-sample.html">Code Samples</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h5>🔗 Links</h5>
-          <ul>
-            <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-            <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
-            <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
-            <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h5>ℹ️ About</h5>
-          <ul>
-            <li><a href="docs/about.html">About Editora</a></li>
-            <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
-            <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
-            <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>&copy; 2024-2026 Editora. Built with ❤️ by Ajay Kumar. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
-      </div>
-    </div>
-  </footer>
+ <!-- Footer -->
+ <footer>
+ <div class="container">
+ <div class="footer-links">
+ <div class="footer-section">
+ <h5>Documentation</h5>
+ <ul>
+ <li><a href="docs/installation.html">Installation</a></li>
+ <li><a href="docs/features.html">Features</a></li>
+ <li><a href="docs/api.html">API Reference</a></li>
+ <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+ <li><a href="docs/custom-plugins.html">Custom Plugins</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h5>Plugins</h5>
+ <ul>
+ <li><a href="plugins/index.html">All Plugins</a></li>
+ <li><a href="plugins/media-manager.html">Media Manager</a></li>
+ <li><a href="plugins/table.html">Tables</a></li>
+ <li><a href="plugins/code-sample.html">Code Samples</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h5>Links</h5>
+ <ul>
+ <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+ <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h5>About</h5>
+ <ul>
+ <li><a href="docs/about.html">About Editora</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+ </ul>
+ </div>
+ </div>
+ <div class="footer-bottom">
+ <p>&copy; 2024-2026 Editora. Built with ❤️ by Ajay Kumar. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+ </div>
+ </div>
+ </footer>
 </body>
 </html>

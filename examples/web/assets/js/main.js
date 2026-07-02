@@ -95,20 +95,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function createCopyButton(codeEl) {
     var button = document.createElement("button");
-    // Use a visible emoji fallback instead of depending on an external sprite path
-    button.innerHTML = '📋 Copy code';
+    var copyIcon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+    var checkIcon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    button.innerHTML = copyIcon + '<span>Copy</span>';
     button.setAttribute("aria-label", "Copy code");
+    button.className = "copy-code-btn";
 
     button.style.position = "absolute";
-    button.style.top = "8px";
-    button.style.right = "8px";
-    button.style.padding = "4px 8px";
-    button.style.fontSize = "14px";
-    button.style.cursor = "pointer";
-    button.style.border = "none";
-    button.style.borderRadius = "4px";
-    button.style.background = "rgba(0,0,0,0.6)";
-    button.style.color = "#fff";
+    button.style.top = "10px";
+    button.style.right = "10px";
     button.style.zIndex = "10";
 
     button.addEventListener("click", function () {
@@ -116,9 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       copyTextToClipboard(text)
         .then(function () {
-          button.innerHTML = "✓";
+          button.innerHTML = checkIcon + '<span>Copied</span>';
           setTimeout(function () {
-            button.innerHTML = "📋 Copy code";
+            button.innerHTML = copyIcon + '<span>Copy</span>';
           }, 1500);
         })
         .catch(function () {
