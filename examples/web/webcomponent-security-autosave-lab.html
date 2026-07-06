@@ -1,664 +1,668 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Editora Webcomponent Security + Autosave Lab</title>
-  <style>
-    :root {
-      --bg: #eef4fb;
-      --panel: #ffffff;
-      --line: #d6e0ef;
-      --text: #0f172a;
-      --muted: #475569;
-      --accent: #0ea5e9;
-    }
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <title>Editora Webcomponent Security + Autosave Lab</title>
+ <link rel="stylesheet" href="assets/css/style.css">
+<style>
+ :root {
+ --bg: #eef4fb;
+ --panel: #ffffff;
+ --line: #d6e0ef;
+ --text: #0f172a;
+ --muted: #475569;
+ --accent: var(--primary);
+ }
 
-    * { box-sizing: border-box; }
+ * { box-sizing: border-box; }
 
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      color: var(--text);
-      background: linear-gradient(180deg, #eaf1ff 0%, #f8fbff 100%);
-    }
+ body {
+ margin: 0;
+ font-family: var(--font-body);
+ color: var(--text);
+ background: linear-gradient(180deg, #eaf1ff 0%, #f8fbff 100%);
+ }
 
-    .shell {
-      max-width: 1500px;
-      margin: 0 auto;
-      padding: 20px;
-      display: grid;
-      gap: 14px;
-    }
+ .shell {
+ max-width: 1500px;
+ margin: 0 auto;
+ padding: 20px;
+ display: grid;
+ gap: 14px;
+ }
 
-    .topbar {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 14px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
+ .topbar {
+ background: var(--panel);
+ border: 1px solid var(--line);
+ border-radius: 10px;
+ padding: 14px 16px;
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ gap: 12px;
+ flex-wrap: wrap;
+ }
 
-    .title {
-      margin: 0;
-      font-size: 22px;
-      font-weight: 700;
-    }
+ .title {
+ margin: 0;
+ font-size: 22px;
+ font-weight: 700;
+ }
 
-    .sub {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
+ .sub {
+ margin: 4px 0 0;
+ color: var(--muted);
+ font-size: 13px;
+ }
 
-    .status-pill {
-      font-size: 12px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 6px 10px;
-      background: #f8fbff;
-      color: #0c4a6e;
-      white-space: nowrap;
-    }
+ .status-pill {
+ font-size: 12px;
+ border: 1px solid var(--line);
+ border-radius: 999px;
+ padding: 6px 10px;
+ background: #f8fbff;
+ color: #0c4a6e;
+ white-space: nowrap;
+ }
 
-    .layout {
-      display: grid;
-      grid-template-columns: 360px 1fr;
-      gap: 14px;
-      align-items: start;
-    }
+ .layout {
+ display: grid;
+ grid-template-columns: 360px 1fr;
+ gap: 14px;
+ align-items: start;
+ }
 
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 14px;
-    }
+ .panel {
+ background: var(--panel);
+ border: 1px solid var(--line);
+ border-radius: 10px;
+ padding: 14px;
+ }
 
-    .panel h2 {
-      margin: 0 0 10px;
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: #334155;
-    }
+ .panel h2 {
+ margin: 0 0 10px;
+ font-size: 13px;
+ text-transform: uppercase;
+ letter-spacing: 0.6px;
+ color: #334155;
+ }
 
-    .section {
-      margin-bottom: 12px;
-      display: grid;
-      gap: 8px;
-    }
+ .section {
+ margin-bottom: 12px;
+ display: grid;
+ gap: 8px;
+ }
 
-    .field {
-      display: grid;
-      gap: 6px;
-    }
+ .field {
+ display: grid;
+ gap: 6px;
+ }
 
-    label {
-      font-size: 12px;
-      color: #334155;
-      font-weight: 600;
-    }
+ label {
+ font-size: 12px;
+ color: #334155;
+ font-weight: 600;
+ }
 
-    input[type="text"],
-    input[type="number"],
-    select,
-    textarea {
-      width: 100%;
-      border: 1px solid #c7d2e3;
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 13px;
-      color: #0f172a;
-      background: #fff;
-    }
+ input[type="text"],
+ input[type="number"],
+ select,
+ textarea {
+ width: 100%;
+ border: 1px solid #c7d2e3;
+ border-radius: 8px;
+ padding: 8px 10px;
+ font-size: 13px;
+ color: #0f172a;
+ background: #fff;
+ }
 
-    textarea {
-      min-height: 90px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      resize: vertical;
-    }
+ textarea {
+ min-height: 90px;
+ font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+ resize: vertical;
+ }
 
-    .check {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: #1e293b;
-    }
+ .check {
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ font-size: 13px;
+ color: #1e293b;
+ }
 
-    .btn-row {
-      display: grid;
-      gap: 8px;
-      grid-template-columns: 1fr 1fr;
-    }
+ .btn-row {
+ display: grid;
+ gap: 8px;
+ grid-template-columns: 1fr 1fr;
+ }
 
-    button {
-      border: 1px solid #b6c4da;
-      background: #f7fbff;
-      color: #0f172a;
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-    }
+ button {
+ border: 1px solid #b6c4da;
+ background: #f7fbff;
+ color: #0f172a;
+ border-radius: 8px;
+ padding: 8px 10px;
+ font-size: 13px;
+ font-weight: 600;
+ cursor: pointer;
+ }
 
-    button:hover { background: #eef6ff; }
-    button.primary {
-      border-color: #0284c7;
-      background: #0ea5e9;
-      color: #fff;
-    }
-    button.primary:hover { background: #0284c7; }
+ button:hover { background: #eef6ff; }
+ button.primary {
+ border-color: #0284c7;
+ background: var(--primary);
+ color: #fff;
+ }
+ button.primary:hover { background: #0284c7; }
 
-    .hint {
-      margin: 0;
-      font-size: 12px;
-      color: #64748b;
-      line-height: 1.4;
-    }
+ .hint {
+ margin: 0;
+ font-size: 12px;
+ color: #64748b;
+ line-height: 1.4;
+ }
 
-    .editors {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
+ .editors {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ gap: 14px;
+ }
 
-    .editor-card {
-      min-height: 560px;
-      display: grid;
-      grid-template-rows: auto 1fr;
-      gap: 10px;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 10px;
-    }
+ .editor-card {
+ min-height: 560px;
+ display: grid;
+ grid-template-rows: auto 1fr;
+ gap: 10px;
+ background: var(--panel);
+ border: 1px solid var(--line);
+ border-radius: 10px;
+ padding: 10px;
+ }
 
-    .editor-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+ .editor-head {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ gap: 10px;
+ flex-wrap: wrap;
+ }
 
-    .editor-head h3 {
-      margin: 0;
-      font-size: 16px;
-    }
+ .editor-head h3 {
+ margin: 0;
+ font-size: 16px;
+ }
 
-    .meta {
-      font-size: 12px;
-      color: #64748b;
-    }
+ .meta {
+ font-size: 12px;
+ color: #64748b;
+ }
 
-    .console {
-      white-space: pre-wrap;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 12px;
-      line-height: 1.42;
-      background: #f8fbff;
-      border: 1px solid #d6e0ef;
-      border-radius: 8px;
-      padding: 10px;
-      max-height: 210px;
-      overflow: auto;
-      color: #0f172a;
-    }
+ .console {
+ white-space: pre-wrap;
+ font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+ font-size: 12px;
+ line-height: 1.42;
+ background: #f8fbff;
+ border: 1px solid #d6e0ef;
+ border-radius: 8px;
+ padding: 10px;
+ max-height: 210px;
+ overflow: auto;
+ color: #0f172a;
+ }
 
-    @media (max-width: 1280px) {
-      .layout { grid-template-columns: 1fr; }
-      .editors { grid-template-columns: 1fr; }
-    }
-  </style>
+ @media (max-width: 1280px) {
+ .layout { grid-template-columns: 1fr; }
+ .editors { grid-template-columns: 1fr; }
+ }
+ </style>
 </head>
 <body>
-  <div class="shell">
-    <section class="topbar">
-      <div>
-        <h1 class="title">Webcomponent Security + Autosave Lab</h1>
-        <p class="sub">Two editor instances with runtime config toggles. Serve over HTTP, not file://.</p>
-      </div>
-      <div id="bundleStatus" class="status-pill">Loading bundle...</div>
-    </section>
+    <a href="#main-content" class="skip-link">Skip to content</a>
+ <div class="shell">
+ <section class="topbar">
+ <div>
+ <h1 class="title">Webcomponent Security + Autosave Lab</h1>
+ <p class="sub">Two editor instances with runtime config toggles. Serve over HTTP, not file://.</p>
+ </div>
+ <div id="bundleStatus" class="status-pill">Loading bundle...</div>
+ </section>
 
-    <section class="layout">
-      <aside class="panel">
-        <h2>Runtime Controls</h2>
+ <section class="layout">
+ <aside class="panel">
+ <h2>Runtime Controls</h2>
 
-        <div class="section">
-          <div class="field">
-            <label for="targetEditor">Target Editor</label>
-            <select id="targetEditor">
-              <option value="editorA">Editor A</option>
-              <option value="editorB">Editor B</option>
-            </select>
-          </div>
-        </div>
+ <div class="section">
+ <div class="field">
+ <label for="targetEditor">Target Editor</label>
+ <select id="targetEditor">
+ <option value="editorA">Editor A</option>
+ <option value="editorB">Editor B</option>
+ </select>
+ </div>
+ </div>
 
-        <div class="section">
-          <div class="check"><input id="autosaveEnabled" type="checkbox" /> <label for="autosaveEnabled">Autosave Enabled</label></div>
-          <div class="field">
-            <label for="autosaveInterval">Autosave Interval (ms)</label>
-            <input id="autosaveInterval" type="number" min="500" step="100" />
-          </div>
-          <div class="field">
-            <label for="autosaveStorageKey">Autosave Storage Key</label>
-            <input id="autosaveStorageKey" type="text" />
-          </div>
-          <div class="field">
-            <label for="autosaveProvider">Autosave Provider</label>
-            <select id="autosaveProvider">
-              <option value="localStorage">localStorage</option>
-              <option value="api">api</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="autosaveApiUrl">Autosave API URL (for provider=api)</label>
-            <input id="autosaveApiUrl" type="text" placeholder="/api/autosave" />
-          </div>
-        </div>
+ <div class="section">
+ <div class="check"><input id="autosaveEnabled" type="checkbox" /> <label for="autosaveEnabled">Autosave Enabled</label></div>
+ <div class="field">
+ <label for="autosaveInterval">Autosave Interval (ms)</label>
+ <input id="autosaveInterval" type="number" min="500" step="100" />
+ </div>
+ <div class="field">
+ <label for="autosaveStorageKey">Autosave Storage Key</label>
+ <input id="autosaveStorageKey" type="text" />
+ </div>
+ <div class="field">
+ <label for="autosaveProvider">Autosave Provider</label>
+ <select id="autosaveProvider">
+ <option value="localStorage">localStorage</option>
+ <option value="api">api</option>
+ </select>
+ </div>
+ <div class="field">
+ <label for="autosaveApiUrl">Autosave API URL (for provider=api)</label>
+ <input id="autosaveApiUrl" type="text" placeholder="/api/autosave" />
+ </div>
+ </div>
 
-        <div class="section">
-          <div class="check"><input id="sanitizeOnInput" type="checkbox" /> <label for="sanitizeOnInput">Security: sanitizeOnInput</label></div>
-          <div class="check"><input id="sanitizeOnPaste" type="checkbox" /> <label for="sanitizeOnPaste">Security: sanitizeOnPaste</label></div>
-        </div>
+ <div class="section">
+ <div class="check"><input id="sanitizeOnInput" type="checkbox" /> <label for="sanitizeOnInput">Security: sanitizeOnInput</label></div>
+ <div class="check"><input id="sanitizeOnPaste" type="checkbox" /> <label for="sanitizeOnPaste">Security: sanitizeOnPaste</label></div>
+ </div>
 
-        <div class="section">
-          <div class="btn-row">
-            <button id="applyConfig" class="primary">Apply Config</button>
-            <button id="syncFromEditor">Load From Editor</button>
-          </div>
-          <div class="btn-row">
-            <button id="simulateUnsafeInput">Simulate Unsafe Input</button>
-            <button id="simulateUnsafePaste">Simulate Unsafe Paste</button>
-          </div>
-          <div class="btn-row">
-            <button id="saveSnapshot">Save Snapshot</button>
-            <button id="restoreSnapshot">Restore Snapshot</button>
-          </div>
-          <div class="btn-row">
-            <button id="recreateEditor">Recreate Editor</button>
-            <button id="clearAutosave">Clear Autosave</button>
-          </div>
-          <button id="clearLogs">Clear Logs</button>
-        </div>
+ <div class="section">
+ <div class="btn-row">
+ <button id="applyConfig" class="primary">Apply Config</button>
+ <button id="syncFromEditor">Load From Editor</button>
+ </div>
+ <div class="btn-row">
+ <button id="simulateUnsafeInput">Simulate Unsafe Input</button>
+ <button id="simulateUnsafePaste">Simulate Unsafe Paste</button>
+ </div>
+ <div class="btn-row">
+ <button id="saveSnapshot">Save Snapshot</button>
+ <button id="restoreSnapshot">Restore Snapshot</button>
+ </div>
+ <div class="btn-row">
+ <button id="recreateEditor">Recreate Editor</button>
+ <button id="clearAutosave">Clear Autosave</button>
+ </div>
+ <button id="clearLogs">Clear Logs</button>
+ </div>
 
-        <div class="section">
-          <label for="unsafeHtml">Unsafe HTML Payload</label>
-          <textarea id="unsafeHtml"><img src=x onerror=alert(1)><a href="javascript:alert('xss')">javascript link</a><p style="color:red" onclick="alert(1)">styled text</p></textarea>
-          <p class="hint">
-            `Simulate Unsafe Input` dispatches an `input` event after injecting HTML.
-            `Simulate Unsafe Paste` dispatches a synthetic paste event (with fallback).
-          </p>
-        </div>
-      </aside>
+ <div class="section">
+ <label for="unsafeHtml">Unsafe HTML Payload</label>
+ <textarea id="unsafeHtml"><img src=x onerror=alert(1)><a href="javascript:alert('xss')">javascript link</a><p style="color:red" onclick="alert(1)">styled text</p></textarea>
+ <p class="hint">
+ `Simulate Unsafe Input` dispatches an `input` event after injecting HTML.
+ `Simulate Unsafe Paste` dispatches a synthetic paste event (with fallback).
+ </p>
+ </div>
+ </aside>
 
-      <div class="editors">
-        <article class="editor-card">
-          <header class="editor-head">
-            <h3>Editor A (Light)</h3>
-            <div id="metaA" class="meta">Waiting...</div>
-          </header>
-          <editora-editor
-            id="editorA"
-            height="500"
-            statusbar="true"
-            theme="light"
-            plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction checklist spellCheck"
-            toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link table | code blockquote | spellCheck | clearFormatting"
-            autosave='{"enabled":true,"intervalMs":2500,"storageKey":"editora-lab-a","provider":"localStorage"}'
-            security='{"sanitizeOnPaste":true,"sanitizeOnInput":true}'
-            placeholder="Editor A: autosave + security validation"
-          >
-            <h3>Editor A sample</h3>
-            <p>Type and wait for autosave. Use controls to toggle security and inject payloads.</p>
-          </editora-editor>
-        </article>
+ <div class="editors">
+ <article class="editor-card">
+ <header class="editor-head">
+ <h3>Editor A (Light)</h3>
+ <div id="metaA" class="meta">Waiting...</div>
+ </header>
+ <editora-editor
+ id="editorA"
+ height="500"
+ statusbar="true"
+ theme="light"
+ plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction checklist spellCheck"
+ toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link table | code blockquote | spellCheck | clearFormatting"
+ autosave='{"enabled":true,"intervalMs":2500,"storageKey":"editora-lab-a","provider":"localStorage"}'
+ security='{"sanitizeOnPaste":true,"sanitizeOnInput":true}'
+ placeholder="Editor A: autosave + security validation"
+ >
+ <h3>Editor A sample</h3>
+ <p>Type and wait for autosave. Use controls to toggle security and inject payloads.</p>
+ </editora-editor>
+ </article>
 
-        <article class="editor-card">
-          <header class="editor-head">
-            <h3>Editor B (Dark)</h3>
-            <div id="metaB" class="meta">Waiting...</div>
-          </header>
-          <editora-editor
-            id="editorB"
-            height="500"
-            statusbar="true"
-            theme="dark"
-            plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction checklist spellCheck"
-            toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link table | code blockquote | spellCheck | clearFormatting"
-            autosave='{"enabled":true,"intervalMs":3000,"storageKey":"editora-lab-b","provider":"localStorage"}'
-            security='{"sanitizeOnPaste":true,"sanitizeOnInput":true}'
-            placeholder="Editor B: independent instance"
-          >
-            <h3>Editor B sample</h3>
-            <p>This editor uses a separate autosave key and should remain independent.</p>
-          </editora-editor>
-        </article>
-      </div>
-    </section>
+ <article class="editor-card">
+ <header class="editor-head">
+ <h3>Editor B (Dark)</h3>
+ <div id="metaB" class="meta">Waiting...</div>
+ </header>
+ <editora-editor
+ id="editorB"
+ height="500"
+ statusbar="true"
+ theme="dark"
+ plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction checklist spellCheck"
+ toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link table | code blockquote | spellCheck | clearFormatting"
+ autosave='{"enabled":true,"intervalMs":3000,"storageKey":"editora-lab-b","provider":"localStorage"}'
+ security='{"sanitizeOnPaste":true,"sanitizeOnInput":true}'
+ placeholder="Editor B: independent instance"
+ >
+ <h3>Editor B sample</h3>
+ <p>This editor uses a separate autosave key and should remain independent.</p>
+ </editora-editor>
+ </article>
+ </div>
+ </section>
 
-    <section class="panel">
-      <h2>Event Log</h2>
-      <div id="eventLog" class="console">Initializing...</div>
-    </section>
+ <section class="panel">
+ <h2>Event Log</h2>
+ <div id="eventLog" class="console">Initializing...</div>
+ </section>
 
-    <section class="panel">
-      <h2>Storage Snapshot</h2>
-      <div id="storageView" class="console">No snapshot yet.</div>
-    </section>
-  </div>
+ <section class="panel">
+ <h2>Storage Snapshot</h2>
+ <div id="storageView" class="console">No snapshot yet.</div>
+ </section>
+ </div>
 
-  <script type="module">
-    const bundleStatus = document.getElementById('bundleStatus');
-    const logEl = document.getElementById('eventLog');
-    const storageView = document.getElementById('storageView');
+ <script type="module">
+ const bundleStatus = document.getElementById('bundleStatus');
+ const logEl = document.getElementById('eventLog');
+ const storageView = document.getElementById('storageView');
 
-    const targetEditorSelect = document.getElementById('targetEditor');
-    const autosaveEnabled = document.getElementById('autosaveEnabled');
-    const autosaveInterval = document.getElementById('autosaveInterval');
-    const autosaveStorageKey = document.getElementById('autosaveStorageKey');
-    const autosaveProvider = document.getElementById('autosaveProvider');
-    const autosaveApiUrl = document.getElementById('autosaveApiUrl');
-    const sanitizeOnInput = document.getElementById('sanitizeOnInput');
-    const sanitizeOnPaste = document.getElementById('sanitizeOnPaste');
-    const unsafeHtml = document.getElementById('unsafeHtml');
+ const targetEditorSelect = document.getElementById('targetEditor');
+ const autosaveEnabled = document.getElementById('autosaveEnabled');
+ const autosaveInterval = document.getElementById('autosaveInterval');
+ const autosaveStorageKey = document.getElementById('autosaveStorageKey');
+ const autosaveProvider = document.getElementById('autosaveProvider');
+ const autosaveApiUrl = document.getElementById('autosaveApiUrl');
+ const sanitizeOnInput = document.getElementById('sanitizeOnInput');
+ const sanitizeOnPaste = document.getElementById('sanitizeOnPaste');
+ const unsafeHtml = document.getElementById('unsafeHtml');
 
-    const snapshots = new Map();
+ const snapshots = new Map();
 
-    const appendLog = (line) => {
-      const now = new Date().toLocaleTimeString();
-      if (logEl.textContent === 'Initializing...') {
-        logEl.textContent = '';
-      }
-      logEl.textContent += `\n[${now}] ${line}`;
-      logEl.scrollTop = logEl.scrollHeight;
-    };
+ const appendLog = (line) => {
+ const now = new Date().toLocaleTimeString();
+ if (logEl.textContent === 'Initializing...') {
+ logEl.textContent = '';
+ }
+ logEl.textContent += `\n[${now}] ${line}`;
+ logEl.scrollTop = logEl.scrollHeight;
+ };
 
-    const setBundleStatus = (text) => {
-      bundleStatus.textContent = text;
-    };
+ const setBundleStatus = (text) => {
+ bundleStatus.textContent = text;
+ };
 
-    function injectCss(href) {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = href;
-      document.head.appendChild(link);
-    }
+ function injectCss(href) {
+ const link = document.createElement('link');
+ link.rel = 'stylesheet';
+ link.href = href;
+ document.head.appendChild(link);
+ }
 
-    async function loadBundle() {
-      try {
-        injectCss('../../packages/core/dist/webcomponent.min.css');
-        await import('../../packages/core/dist/webcomponent.js');
-        setBundleStatus('Bundle: local dist');
-        appendLog('Loaded local bundle.');
-      } catch (error) {
-        appendLog(`Local bundle failed, using CDN fallback. Reason: ${String(error)}`);
-        injectCss('https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css');
-        await import('https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js');
-        setBundleStatus('Bundle: CDN fallback');
-        appendLog('Loaded CDN bundle.');
-      }
-    }
+ async function loadBundle() {
+ try {
+ injectCss('../../packages/core/dist/webcomponent.min.css');
+ await import('../../packages/core/dist/webcomponent.js');
+ setBundleStatus('Bundle: local dist');
+ appendLog('Loaded local bundle.');
+ } catch (error) {
+ appendLog(`Local bundle failed, using CDN fallback. Reason: ${String(error)}`);
+ injectCss('https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css');
+ await import('https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js');
+ setBundleStatus('Bundle: CDN fallback');
+ appendLog('Loaded CDN bundle.');
+ }
+ }
 
-    function editorLabel(editor) {
-      return editor.id === 'editorA' ? 'Editor A' : 'Editor B';
-    }
+ function editorLabel(editor) {
+ return editor.id === 'editorA' ? 'Editor A' : 'Editor B';
+ }
 
-    function getEditor(id) {
-      return document.getElementById(id);
-    }
+ function getEditor(id) {
+ return document.getElementById(id);
+ }
 
-    function getTargetEditor() {
-      return getEditor(targetEditorSelect.value);
-    }
+ function getTargetEditor() {
+ return getEditor(targetEditorSelect.value);
+ }
 
-    function getEditorConfig(editor) {
-      if (!editor) return {};
-      if (typeof editor.getConfig === 'function') return editor.getConfig();
-      if (typeof editor.getAPI === 'function') {
-        const api = editor.getAPI();
-        if (api && typeof api.getConfig === 'function') return api.getConfig();
-      }
-      return {};
-    }
+ function getEditorConfig(editor) {
+ if (!editor) return {};
+ if (typeof editor.getConfig === 'function') return editor.getConfig();
+ if (typeof editor.getAPI === 'function') {
+ const api = editor.getAPI();
+ if (api && typeof api.getConfig === 'function') return api.getConfig();
+ }
+ return {};
+ }
 
-    function getContentElement(editor) {
-      return editor?.querySelector('.editora-content');
-    }
+ function getContentElement(editor) {
+ return editor?.querySelector('.editora-content');
+ }
 
-    function bindEditorEvents(editor) {
-      editor.addEventListener('editor-ready', () => {
-        appendLog(`${editorLabel(editor)} ready`);
-        updateMeta();
-        if (editor.id === targetEditorSelect.value) {
-          syncControlsFromEditor();
-        }
-      });
-      editor.addEventListener('editor-focus', () => appendLog(`${editorLabel(editor)} focus`));
-      editor.addEventListener('editor-blur', () => appendLog(`${editorLabel(editor)} blur`));
-      editor.addEventListener('content-change', () => {
-        appendLog(`${editorLabel(editor)} content-change`);
-        updateStorageView();
-      });
-    }
+ function bindEditorEvents(editor) {
+ editor.addEventListener('editor-ready', () => {
+ appendLog(`${editorLabel(editor)} ready`);
+ updateMeta();
+ if (editor.id === targetEditorSelect.value) {
+ syncControlsFromEditor();
+ }
+ });
+ editor.addEventListener('editor-focus', () => appendLog(`${editorLabel(editor)} focus`));
+ editor.addEventListener('editor-blur', () => appendLog(`${editorLabel(editor)} blur`));
+ editor.addEventListener('content-change', () => {
+ appendLog(`${editorLabel(editor)} content-change`);
+ updateStorageView();
+ });
+ }
 
-    function updateMeta() {
-      const editorA = getEditor('editorA');
-      const editorB = getEditor('editorB');
-      const metaA = document.getElementById('metaA');
-      const metaB = document.getElementById('metaB');
+ function updateMeta() {
+ const editorA = getEditor('editorA');
+ const editorB = getEditor('editorB');
+ const metaA = document.getElementById('metaA');
+ const metaB = document.getElementById('metaB');
 
-      const render = (editor) => {
-        const c = getEditorConfig(editor);
-        const autosave = c.autosave || {};
-        const security = c.security || {};
-        const theme = editor?.getAttribute('theme') || 'light';
-        return `theme=${theme} | autosave=${autosave.enabled ? 'on' : 'off'} | sanitizeIn=${security.sanitizeOnInput !== false} | sanitizePaste=${security.sanitizeOnPaste !== false}`;
-      };
+ const render = (editor) => {
+ const c = getEditorConfig(editor);
+ const autosave = c.autosave || {};
+ const security = c.security || {};
+ const theme = editor?.getAttribute('theme') || 'light';
+ return `theme=${theme} | autosave=${autosave.enabled ? 'on' : 'off'} | sanitizeIn=${security.sanitizeOnInput !== false} | sanitizePaste=${security.sanitizeOnPaste !== false}`;
+ };
 
-      if (metaA && editorA) metaA.textContent = render(editorA);
-      if (metaB && editorB) metaB.textContent = render(editorB);
-    }
+ if (metaA && editorA) metaA.textContent = render(editorA);
+ if (metaB && editorB) metaB.textContent = render(editorB);
+ }
 
-    function syncControlsFromEditor() {
-      const editor = getTargetEditor();
-      if (!editor) return;
-      const c = getEditorConfig(editor);
-      const autosave = c.autosave || {};
-      const security = c.security || {};
+ function syncControlsFromEditor() {
+ const editor = getTargetEditor();
+ if (!editor) return;
+ const c = getEditorConfig(editor);
+ const autosave = c.autosave || {};
+ const security = c.security || {};
 
-      autosaveEnabled.checked = !!autosave.enabled;
-      autosaveInterval.value = String(autosave.intervalMs || 30000);
-      autosaveStorageKey.value = autosave.storageKey || `editora-lab-${editor.id === 'editorA' ? 'a' : 'b'}`;
-      autosaveProvider.value = autosave.provider || 'localStorage';
-      autosaveApiUrl.value = autosave.apiUrl || '';
-      sanitizeOnInput.checked = security.sanitizeOnInput !== false;
-      sanitizeOnPaste.checked = security.sanitizeOnPaste !== false;
-    }
+ autosaveEnabled.checked = !!autosave.enabled;
+ autosaveInterval.value = String(autosave.intervalMs || 30000);
+ autosaveStorageKey.value = autosave.storageKey || `editora-lab-${editor.id === 'editorA' ? 'a' : 'b'}`;
+ autosaveProvider.value = autosave.provider || 'localStorage';
+ autosaveApiUrl.value = autosave.apiUrl || '';
+ sanitizeOnInput.checked = security.sanitizeOnInput !== false;
+ sanitizeOnPaste.checked = security.sanitizeOnPaste !== false;
+ }
 
-    async function applyConfig() {
-      const editor = getTargetEditor();
-      if (!editor || typeof editor.setConfig !== 'function') return;
+ async function applyConfig() {
+ const editor = getTargetEditor();
+ if (!editor || typeof editor.setConfig !== 'function') return;
 
-      const prev = getEditorConfig(editor);
-      const nextConfig = {
-        ...prev,
-        autosave: {
-          ...(prev.autosave || {}),
-          enabled: autosaveEnabled.checked,
-          intervalMs: Number(autosaveInterval.value) || 30000,
-          storageKey: autosaveStorageKey.value || `editora-lab-${editor.id === 'editorA' ? 'a' : 'b'}`,
-          provider: autosaveProvider.value || 'localStorage',
-          apiUrl: autosaveApiUrl.value || '',
-        },
-        security: {
-          ...(prev.security || {}),
-          sanitizeOnInput: sanitizeOnInput.checked,
-          sanitizeOnPaste: sanitizeOnPaste.checked,
-        },
-      };
+ const prev = getEditorConfig(editor);
+ const nextConfig = {
+ ...prev,
+ autosave: {
+ ...(prev.autosave || {}),
+ enabled: autosaveEnabled.checked,
+ intervalMs: Number(autosaveInterval.value) || 30000,
+ storageKey: autosaveStorageKey.value || `editora-lab-${editor.id === 'editorA' ? 'a' : 'b'}`,
+ provider: autosaveProvider.value || 'localStorage',
+ apiUrl: autosaveApiUrl.value || '',
+ },
+ security: {
+ ...(prev.security || {}),
+ sanitizeOnInput: sanitizeOnInput.checked,
+ sanitizeOnPaste: sanitizeOnPaste.checked,
+ },
+ };
 
-      await editor.setConfig(nextConfig);
-      appendLog(`${editorLabel(editor)} setConfig applied`);
-      updateMeta();
-      updateStorageView();
-    }
+ await editor.setConfig(nextConfig);
+ appendLog(`${editorLabel(editor)} setConfig applied`);
+ updateMeta();
+ updateStorageView();
+ }
 
-    function simulateUnsafeInput() {
-      const editor = getTargetEditor();
-      const contentEl = getContentElement(editor);
-      if (!editor || !contentEl) return;
+ function simulateUnsafeInput() {
+ const editor = getTargetEditor();
+ const contentEl = getContentElement(editor);
+ if (!editor || !contentEl) return;
 
-      contentEl.innerHTML = unsafeHtml.value;
-      contentEl.dispatchEvent(new Event('input', { bubbles: true }));
-      appendLog(`${editorLabel(editor)} unsafe input simulation fired`);
-    }
+ contentEl.innerHTML = unsafeHtml.value;
+ contentEl.dispatchEvent(new Event('input', { bubbles: true }));
+ appendLog(`${editorLabel(editor)} unsafe input simulation fired`);
+ }
 
-    function simulateUnsafePaste() {
-      const editor = getTargetEditor();
-      const contentEl = getContentElement(editor);
-      if (!editor || !contentEl) return;
+ function simulateUnsafePaste() {
+ const editor = getTargetEditor();
+ const contentEl = getContentElement(editor);
+ if (!editor || !contentEl) return;
 
-      const html = unsafeHtml.value;
-      const text = html.replace(/<[^>]*>/g, ' ');
-      let syntheticPasteWorked = false;
+ const html = unsafeHtml.value;
+ const text = html.replace(/<[^>]*>/g, ' ');
+ let syntheticPasteWorked = false;
 
-      try {
-        const dt = new DataTransfer();
-        dt.setData('text/html', html);
-        dt.setData('text/plain', text);
-        const pasteEvent = new ClipboardEvent('paste', {
-          bubbles: true,
-          cancelable: true,
-          clipboardData: dt,
-        });
-        syntheticPasteWorked = contentEl.dispatchEvent(pasteEvent);
-      } catch (error) {
-        syntheticPasteWorked = false;
-      }
+ try {
+ const dt = new DataTransfer();
+ dt.setData('text/html', html);
+ dt.setData('text/plain', text);
+ const pasteEvent = new ClipboardEvent('paste', {
+ bubbles: true,
+ cancelable: true,
+ clipboardData: dt,
+ });
+ syntheticPasteWorked = contentEl.dispatchEvent(pasteEvent);
+ } catch (error) {
+ syntheticPasteWorked = false;
+ }
 
-      if (!syntheticPasteWorked) {
-        contentEl.focus();
-        document.execCommand('insertHTML', false, html);
-        contentEl.dispatchEvent(new Event('input', { bubbles: true }));
-        appendLog(`${editorLabel(editor)} paste simulation fallback used (insertHTML + input)`);
-        return;
-      }
+ if (!syntheticPasteWorked) {
+ contentEl.focus();
+ document.execCommand('insertHTML', false, html);
+ contentEl.dispatchEvent(new Event('input', { bubbles: true }));
+ appendLog(`${editorLabel(editor)} paste simulation fallback used (insertHTML + input)`);
+ return;
+ }
 
-      appendLog(`${editorLabel(editor)} unsafe paste simulation fired`);
-    }
+ appendLog(`${editorLabel(editor)} unsafe paste simulation fired`);
+ }
 
-    function saveSnapshot() {
-      const editor = getTargetEditor();
-      if (!editor || typeof editor.getContent !== 'function') return;
-      snapshots.set(editor.id, editor.getContent());
-      appendLog(`${editorLabel(editor)} snapshot saved`);
-    }
+ function saveSnapshot() {
+ const editor = getTargetEditor();
+ if (!editor || typeof editor.getContent !== 'function') return;
+ snapshots.set(editor.id, editor.getContent());
+ appendLog(`${editorLabel(editor)} snapshot saved`);
+ }
 
-    function restoreSnapshot() {
-      const editor = getTargetEditor();
-      if (!editor || typeof editor.setContent !== 'function') return;
-      const html = snapshots.get(editor.id);
-      if (!html) {
-        appendLog(`${editorLabel(editor)} no snapshot available`);
-        return;
-      }
-      editor.setContent(html);
-      appendLog(`${editorLabel(editor)} snapshot restored`);
-    }
+ function restoreSnapshot() {
+ const editor = getTargetEditor();
+ if (!editor || typeof editor.setContent !== 'function') return;
+ const html = snapshots.get(editor.id);
+ if (!html) {
+ appendLog(`${editorLabel(editor)} no snapshot available`);
+ return;
+ }
+ editor.setContent(html);
+ appendLog(`${editorLabel(editor)} snapshot restored`);
+ }
 
-    function clearAutosaveForTarget() {
-      const editor = getTargetEditor();
-      const c = getEditorConfig(editor);
-      const key = c?.autosave?.storageKey;
-      if (!key) {
-        appendLog(`${editorLabel(editor)} autosave key missing`);
-        return;
-      }
-      localStorage.removeItem(key);
-      localStorage.removeItem(`${key}-timestamp`);
-      appendLog(`${editorLabel(editor)} autosave cleared for key "${key}"`);
-      updateStorageView();
-    }
+ function clearAutosaveForTarget() {
+ const editor = getTargetEditor();
+ const c = getEditorConfig(editor);
+ const key = c?.autosave?.storageKey;
+ if (!key) {
+ appendLog(`${editorLabel(editor)} autosave key missing`);
+ return;
+ }
+ localStorage.removeItem(key);
+ localStorage.removeItem(`${key}-timestamp`);
+ appendLog(`${editorLabel(editor)} autosave cleared for key "${key}"`);
+ updateStorageView();
+ }
 
-    async function recreateTargetEditor() {
-      const oldEditor = getTargetEditor();
-      if (!oldEditor || !oldEditor.parentElement) return;
-      const id = oldEditor.id;
-      const wrapper = oldEditor.parentElement;
+ async function recreateTargetEditor() {
+ const oldEditor = getTargetEditor();
+ if (!oldEditor || !oldEditor.parentElement) return;
+ const id = oldEditor.id;
+ const wrapper = oldEditor.parentElement;
 
-      const fresh = document.createElement('editora-editor');
-      for (const attr of Array.from(oldEditor.attributes)) {
-        fresh.setAttribute(attr.name, attr.value);
-      }
-      fresh.id = id;
-      fresh.innerHTML = '';
+ const fresh = document.createElement('editora-editor');
+ for (const attr of Array.from(oldEditor.attributes)) {
+ fresh.setAttribute(attr.name, attr.value);
+ }
+ fresh.id = id;
+ fresh.innerHTML = '';
 
-      wrapper.replaceChild(fresh, oldEditor);
-      bindEditorEvents(fresh);
-      appendLog(`${id} recreated. If autosave exists, content should restore on init.`);
+ wrapper.replaceChild(fresh, oldEditor);
+ bindEditorEvents(fresh);
+ appendLog(`${id} recreated. If autosave exists, content should restore on init.`);
 
-      await customElements.whenDefined('editora-editor');
-      setTimeout(() => {
-        updateMeta();
-        if (id === targetEditorSelect.value) syncControlsFromEditor();
-      }, 50);
-    }
+ await customElements.whenDefined('editora-editor');
+ setTimeout(() => {
+ updateMeta();
+ if (id === targetEditorSelect.value) syncControlsFromEditor();
+ }, 50);
+ }
 
-    function updateStorageView() {
-      const entries = [];
-      ['editorA', 'editorB'].forEach((id) => {
-        const editor = getEditor(id);
-        const c = getEditorConfig(editor);
-        const key = c?.autosave?.storageKey;
-        if (!key) return;
-        const value = localStorage.getItem(key);
-        const ts = localStorage.getItem(`${key}-timestamp`);
-        entries.push({
-          editor: id,
-          key,
-          hasContent: !!value,
-          contentLength: value ? value.length : 0,
-          timestamp: ts ? new Date(Number(ts)).toLocaleString() : 'n/a',
-        });
-      });
+ function updateStorageView() {
+ const entries = [];
+ ['editorA', 'editorB'].forEach((id) => {
+ const editor = getEditor(id);
+ const c = getEditorConfig(editor);
+ const key = c?.autosave?.storageKey;
+ if (!key) return;
+ const value = localStorage.getItem(key);
+ const ts = localStorage.getItem(`${key}-timestamp`);
+ entries.push({
+ editor: id,
+ key,
+ hasContent: !!value,
+ contentLength: value ? value.length : 0,
+ timestamp: ts ? new Date(Number(ts)).toLocaleString() : 'n/a',
+ });
+ });
 
-      storageView.textContent = entries.length
-        ? JSON.stringify(entries, null, 2)
-        : 'No autosave entries found.';
-    }
+ storageView.textContent = entries.length
+ ? JSON.stringify(entries, null, 2)
+ : 'No autosave entries found.';
+ }
 
-    document.getElementById('applyConfig').addEventListener('click', applyConfig);
-    document.getElementById('syncFromEditor').addEventListener('click', syncControlsFromEditor);
-    document.getElementById('simulateUnsafeInput').addEventListener('click', simulateUnsafeInput);
-    document.getElementById('simulateUnsafePaste').addEventListener('click', simulateUnsafePaste);
-    document.getElementById('saveSnapshot').addEventListener('click', saveSnapshot);
-    document.getElementById('restoreSnapshot').addEventListener('click', restoreSnapshot);
-    document.getElementById('clearAutosave').addEventListener('click', clearAutosaveForTarget);
-    document.getElementById('recreateEditor').addEventListener('click', recreateTargetEditor);
-    document.getElementById('clearLogs').addEventListener('click', () => {
-      logEl.textContent = 'Logs cleared.';
-    });
-    targetEditorSelect.addEventListener('change', syncControlsFromEditor);
+ document.getElementById('applyConfig').addEventListener('click', applyConfig);
+ document.getElementById('syncFromEditor').addEventListener('click', syncControlsFromEditor);
+ document.getElementById('simulateUnsafeInput').addEventListener('click', simulateUnsafeInput);
+ document.getElementById('simulateUnsafePaste').addEventListener('click', simulateUnsafePaste);
+ document.getElementById('saveSnapshot').addEventListener('click', saveSnapshot);
+ document.getElementById('restoreSnapshot').addEventListener('click', restoreSnapshot);
+ document.getElementById('clearAutosave').addEventListener('click', clearAutosaveForTarget);
+ document.getElementById('recreateEditor').addEventListener('click', recreateTargetEditor);
+ document.getElementById('clearLogs').addEventListener('click', () => {
+ logEl.textContent = 'Logs cleared.';
+ });
+ targetEditorSelect.addEventListener('change', syncControlsFromEditor);
 
-    await loadBundle();
-    await customElements.whenDefined('editora-editor');
+ await loadBundle();
+ await customElements.whenDefined('editora-editor');
 
-    bindEditorEvents(getEditor('editorA'));
-    bindEditorEvents(getEditor('editorB'));
+ bindEditorEvents(getEditor('editorA'));
+ bindEditorEvents(getEditor('editorB'));
 
-    syncControlsFromEditor();
-    updateMeta();
-    updateStorageView();
-    appendLog('Security + autosave lab initialized.');
-  </script>
+ syncControlsFromEditor();
+ updateMeta();
+ updateStorageView();
+ appendLog('Security + autosave lab initialized.');
+ </script>
+    <script src="assets/js/search-index.js"></script>
+    <script src="assets/js/site-enhancements.js"></script>
 </body>
 </html>

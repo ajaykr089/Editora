@@ -1,329 +1,347 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Meta Tags for SEO -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Editora PDF Export Test - Testing PDF export functionality and document generation.">
-    <meta name="keywords" content="PDF export, document generation, testing, Editora editor">
-    <meta name="author" content="Editora Contributors">
-    <meta name="robots" content="index, follow">
-    <meta property="og:title" content="Editora - Test Pdf Export">
-    <meta property="og:description" content="Editora PDF Export Test - Testing PDF export functionality and document generation.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://editora-free.netlify.app/">
-    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="Editora - Test Pdf Export">
-    <meta property="twitter:description" content="Editora PDF Export Test - Testing PDF export functionality and document generation">
-    <meta name="theme-color" content="#007bff">
+ <!-- Meta Tags for SEO -->
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <meta name="description" content="Editora PDF Export Test - Testing PDF export functionality and document generation.">
+ <meta name="keywords" content="PDF export, document generation, testing, Editora editor">
+ <meta name="author" content="Editora Contributors">
+ <meta name="robots" content="index, follow">
+ <meta property="og:title" content="Editora - Test Pdf Export">
+ <meta property="og:description" content="Editora PDF Export Test - Testing PDF export functionality and document generation.">
+ <meta property="og:type" content="website">
+ <meta property="og:url" content="https://editora-free.netlify.app/">
+ <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+ <meta property="twitter:card" content="summary_large_image">
+ <meta property="twitter:title" content="Editora - Test Pdf Export">
+ <meta property="twitter:description" content="Editora PDF Export Test - Testing PDF export functionality and document generation">
+ <meta name="theme-color" content="#12131A">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
-    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
-    <title>Editora - Test Pdf Export</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-       </head>
-       <body>
-         <!-- Header Navigation -->
-         <header>
-           <div class="container">
-             <nav>
-               <a href="index.html" class="logo">
-                 <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
-               </a>
-               <button class="menu-toggle">☰</button>
-               <ul class="nav-links">
-                 <li><a href="index.html">Home</a></li>
-                 <li><a href="docs/installation.html">Docs</a></li>
-                 <li><a href="docs/features.html">Features</a></li>
-                 <li><a href="plugins/index.html">Plugins</a></li>
-                 <li><a href="docs/api.html">API</a></li>
-                 <li><a href="toast-demo.html">Toast Demo</a></li>
-                 <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-               </ul>
-             </nav>
-           </div>
-         </header>
+ <!-- Favicon -->
+ <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+ <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+ <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+ <title>Editora - Test Pdf Export</title>
+ <link rel="stylesheet" href="assets/css/style.css">
+ </head>
+ <body>
+    <a href="#main-content" class="skip-link">Skip to content</a>
+ <!-- Header Navigation -->
+ <header>
+ <div class="container">
+ <nav>
+ <a href="index.html" class="logo">
+ <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" >
+ </a>
+ <div class="nav-actions">
+<button class="icon-btn search-trigger" id="searchTrigger" aria-label="Search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg><span class="search-label">Search</span><kbd>&#8984;K</kbd></button>
+<button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode"></button>
+</div>
+                    <button class="menu-toggle">☰</button>
+ <ul class="nav-links">
+ <li><a href="index.html">Home</a></li>
+ <li><a href="docs/installation.html">Docs</a></li>
+ <li><a href="docs/features.html">Features</a></li>
+ <li><a href="plugins/index.html">Plugins</a></li>
+ <li><a href="docs/api.html">API</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+ </ul>
+ </nav>
+ </div>
+ </header>
+    <a id="main-content" tabindex="-1"></a>
 
-         <main class="container">
-      <div class="container">
-    <h1>📄 Editora - PDF Export Test</h1>
-    <p class="subtitle">Testing document export and printing features</p>
+ <main class="container">
+ <div class="container">
+ <h1>Editora - PDF Export Test</h1>
+ <p class="subtitle">Testing document export and printing features</p>
 
-    <div class="info">
-      <strong>Export Functionality</strong><br>
-      This editor demonstrates PDF export, Word document export, and print functionality
-      using the full webcomponent with export plugins.
-    </div>
+ <div class="info">
+ <strong>Export Functionality</strong><br>
+ This editor demonstrates PDF export, Word document export, and print functionality
+ using the full webcomponent with export plugins.
+ </div>
 
-    <div class="features-list">
-      <h3>📋 Export Features</h3>
-      <ul>
-        <li><strong>PDF Export:</strong> Export content to PDF with formatting preservation</li>
-        <li><strong>Word Export:</strong> Export to Word document (.docx) format</li>
-        <li><strong>Print Preview:</strong> Preview document before printing</li>
-        <li><strong>Page Breaks:</strong> Insert page breaks for multi-page documents</li>
-        <li><strong>Print Styles:</strong> Optimized styling for print media</li>
-        <li><strong>Document Formatting:</strong> Maintains headers, lists, and tables</li>
-      </ul>
-    </div>
+ <div class="features-list">
+ <h3>Export Features</h3>
+ <ul>
+ <li><strong>PDF Export:</strong> Export content to PDF with formatting preservation</li>
+ <li><strong>Word Export:</strong> Export to Word document (.docx) format</li>
+ <li><strong>Print Preview:</strong> Preview document before printing</li>
+ <li><strong>Page Breaks:</strong> Insert page breaks for multi-page documents</li>
+ <li><strong>Print Styles:</strong> Optimized styling for print media</li>
+ <li><strong>Document Formatting:</strong> Maintains headers, lists, and tables</li>
+ </ul>
+ </div>
 
-    <div class="export-guide">
-      <h3>🖨️ How to Test Export Features</h3>
-      <ul>
-        <li>Add content with various formatting (headers, lists, tables)</li>
-        <li>Click <strong>Export PDF</strong> to download as PDF</li>
-        <li>Try <strong>Export Word</strong> for Word document</li>
-        <li>Use <strong>Print Preview</strong> to see print layout</li>
-        <li>Insert <strong>Page Breaks</strong> for multi-page documents</li>
-        <li>Test the <strong>Print</strong> button for browser printing</li>
-      </ul>
-    </div>
+ <div class="export-guide">
+ <h3>🖨️ How to Test Export Features</h3>
+ <ul>
+ <li>Add content with various formatting (headers, lists, tables)</li>
+ <li>Click <strong>Export PDF</strong> to download as PDF</li>
+ <li>Try <strong>Export Word</strong> for Word document</li>
+ <li>Use <strong>Print Preview</strong> to see print layout</li>
+ <li>Insert <strong>Page Breaks</strong> for multi-page documents</li>
+ <li>Test the <strong>Print</strong> button for browser printing</li>
+ </ul>
+ </div>
 
-    <editora-editor
-      id="export-editor"
-      height="600"
-      statusbar="true"
-      plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template exportPdf exportWord"
-      toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | pageBreak | importWord exportWord exportPdf | fullscreen preview print | a11yChecker spellCheck | comments footnote insertMergeTag template | clearFormatting"
-    >
-      <h1>Sample Document for Export Testing</h1>
+ <editora-editor
+ id="export-editor"
+ height="600"
+ statusbar="true"
+ plugins="bold italic underline strikethrough link table list history clearFormatting heading blockquote code codeSample indent textAlignment textColor backgroundColor fontSize fontFamily lineHeight direction capitalization checklist anchor embedIframe math specialCharacters emojis a11yChecker comments document-manager footnote fullscreen image mergeTag pageBreak preview print spellCheck template exportPdf exportWord"
+ toolbar-items="undo redo | bold italic underline strikethrough | textColor backgroundColor | fontSize fontFamily lineHeight | heading paragraph | textAlignment direction | bullist numlist checklist | indent outdent | link insertImage insertVideo table anchor | code blockquote codeBlock | math specialCharacters emojis | capitalization | embedIframe | pageBreak | importWord exportWord exportPdf | fullscreen preview print | a11yChecker spellCheck | comments footnote insertMergeTag template | clearFormatting"
+ >
+ <h1>Sample Document for Export Testing</h1>
 
-      <h2>Introduction</h2>
-      <p>This is a sample document designed to test the export functionality of Editora. It contains various types of content that should be properly formatted in PDF and Word exports.</p>
+ <h2>Introduction</h2>
+ <p>This is a sample document designed to test the export functionality of Editora. It contains various types of content that should be properly formatted in PDF and Word exports.</p>
 
-      <h2>Text Formatting</h2>
-      <p>You can format text in various ways:</p>
-      <ul>
-        <li><strong>Bold text</strong> for emphasis</li>
-        <li><em>Italic text</em> for stress</li>
-        <li><u>Underlined text</u> for highlighting</li>
-        <li><s>Strikethrough text</s> for deletions</li>
-      </ul>
+ <h2>Text Formatting</h2>
+ <p>You can format text in various ways:</p>
+ <ul>
+ <li><strong>Bold text</strong> for emphasis</li>
+ <li><em>Italic text</em> for stress</li>
+ <li><u>Underlined text</u> for highlighting</li>
+ <li><s>Strikethrough text</s> for deletions</li>
+ </ul>
 
-      <h2>Colors and Typography</h2>
-      <p>Text can have different <span style="color: #e74c3c;">colors</span> and <span style="background-color: #f1c40f;">background colors</span>.</p>
-      <p>You can also change font sizes and families to create visual hierarchy.</p>
+ <h2>Colors and Typography</h2>
+ <p>Text can have different <span style="color: #e74c3c;">colors</span> and <span style="background-color: #f1c40f;">background colors</span>.</p>
+ <p>You can also change font sizes and families to create visual hierarchy.</p>
 
-      <h2>Lists and Structure</h2>
-      <h3>Bullet Lists</h3>
-      <ul>
-        <li>First level item</li>
-        <li>Second level item
-          <ul>
-            <li>Nested item 1</li>
-            <li>Nested item 2</li>
-          </ul>
-        </li>
-        <li>Third level item</li>
-      </ul>
+ <h2>Lists and Structure</h2>
+ <h3>Bullet Lists</h3>
+ <ul>
+ <li>First level item</li>
+ <li>Second level item
+ <ul>
+ <li>Nested item 1</li>
+ <li>Nested item 2</li>
+ </ul>
+ </li>
+ <li>Third level item</li>
+ </ul>
 
-      <h3>Numbered Lists</h3>
-      <ol>
-        <li>First numbered item</li>
-        <li>Second numbered item</li>
-        <li>Third numbered item</li>
-      </ol>
+ <h3>Numbered Lists</h3>
+ <ol>
+ <li>First numbered item</li>
+ <li>Second numbered item</li>
+ <li>Third numbered item</li>
+ </ol>
 
-      <h2>Tables</h2>
-      <table border="1" style="border-collapse: collapse; width: 100%;">
-        <thead>
-          <tr>
-            <th style="padding: 8px; background-color: #f8f9fa;">Feature</th>
-            <th style="padding: 8px; background-color: #f8f9fa;">Description</th>
-            <th style="padding: 8px; background-color: #f8f9fa;">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style="padding: 8px;">PDF Export</td>
-            <td style="padding: 8px;">Export content to PDF format</td>
-            <td style="padding: 8px;">✅ Working</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px;">Word Export</td>
-            <td style="padding: 8px;">Export to Word document</td>
-            <td style="padding: 8px;">✅ Working</td>
-          </tr>
-          <tr>
-            <td style="padding: 8px;">Print Preview</td>
-            <td style="padding: 8px;">Preview before printing</td>
-            <td style="padding: 8px;">✅ Working</td>
-          </tr>
-        </tbody>
-      </table>
+ <h2>Tables</h2>
+ <table border="1" style="border-collapse: collapse; width: 100%;">
+ <thead>
+ <tr>
+ <th style="padding: 8px; background-color: #f8f9fa;">Feature</th>
+ <th style="padding: 8px; background-color: #f8f9fa;">Description</th>
+ <th style="padding: 8px; background-color: #f8f9fa;">Status</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td style="padding: 8px;">PDF Export</td>
+ <td style="padding: 8px;">Export content to PDF format</td>
+ <td style="padding: 8px;">✅ Working</td>
+ </tr>
+ <tr>
+ <td style="padding: 8px;">Word Export</td>
+ <td style="padding: 8px;">Export to Word document</td>
+ <td style="padding: 8px;">✅ Working</td>
+ </tr>
+ <tr>
+ <td style="padding: 8px;">Print Preview</td>
+ <td style="padding: 8px;">Preview before printing</td>
+ <td style="padding: 8px;">✅ Working</td>
+ </tr>
+ </tbody>
+ </table>
 
-      <h2>Code and Quotes</h2>
-      <blockquote>
-        <p>This is a blockquote that demonstrates how block quotes appear in exported documents. They are typically indented and may have special formatting.</p>
-      </blockquote>
+ <h2>Code and Quotes</h2>
+ <blockquote>
+ <p>This is a blockquote that demonstrates how block quotes appear in exported documents. They are typically indented and may have special formatting.</p>
+ </blockquote>
 
-      <pre><code>// This is a code block
+ <pre><code>// This is a code block
 function helloWorld() {
-  console.log("Hello, World!");
-  return true;
+ console.log("Hello, World!");
+ return true;
 }</code></pre>
 
-      <h2>Links and Media</h2>
-      <p>You can include <a href="https://example.com">hyperlinks</a> to external websites.</p>
-      <p>Images and other media can also be embedded in documents.</p>
+ <h2>Links and Media</h2>
+ <p>You can include <a href="https://example.com">hyperlinks</a> to external websites.</p>
+ <p>Images and other media can also be embedded in documents.</p>
 
-      <h2>Page Breaks</h2>
-      <p>You can insert page breaks to control where pages begin in exported documents. This is especially useful for PDF exports where you want to start new sections on new pages.</p>
+ <h2>Page Breaks</h2>
+ <p>You can insert page breaks to control where pages begin in exported documents. This is especially useful for PDF exports where you want to start new sections on new pages.</p>
 
-      <!-- Page break would go here in actual usage -->
+ <!-- Page break would go here in actual usage -->
 
-      <h2>Conclusion</h2>
-      <p>This concludes our sample document for testing export functionality. Try exporting this content to PDF or Word to see how all the formatting is preserved.</p>
-    </editora-editor>
+ <h2>Conclusion</h2>
+ <p>This concludes our sample document for testing export functionality. Try exporting this content to PDF or Word to see how all the formatting is preserved.</p>
+ </editora-editor>
 
-    <div class="export-section">
-      <h3>🚀 Export Options</h3>
-      <p>Use the toolbar buttons above or these quick export options:</p>
-      <button onclick="exportPDF()">📄 Export PDF</button>
-      <button onclick="exportWord()">📝 Export Word</button>
-      <button onclick="printPreview()">👁️ Print Preview</button>
-      <button onclick="printDocument()">🖨️ Print</button>
+ <div class="export-section">
+ <h3>Export Options</h3>
+ <p>Use the toolbar buttons above or these quick export options:</p>
+ <button onclick="exportPDF()">Export PDF</button>
+ <button onclick="exportWord()">Export Word</button>
+ <button onclick="printPreview()">👁️ Print Preview</button>
+ <button onclick="printDocument()">🖨️ Print</button>
+ </div>
+
+ <div class="plugin-status">
+ <h3>WebComponent Status</h3>
+ <div id="component-status">Loading webcomponent...</div>
+ </div>
+ </div>
+
+ <!-- Import Web Component -->
+ <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"></script>
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css">
+
+ <script>
+ // Wait for custom element to be defined
+ customElements.whenDefined('editora-editor').then(() => {
+ console.log('✅ Editora webcomponent loaded successfully');
+
+ const statusDiv = document.getElementById('component-status');
+ const editor = document.getElementById('export-editor');
+
+ statusDiv.innerHTML = `
+ <div style="color: green;">✅ WebComponent loaded successfully</div>
+ <div style="margin-top: 10px;">
+ <strong>Export Plugins Loaded:</strong><br>
+ • PDF Export functionality<br>
+ • Word Document export<br>
+ • Print preview and optimization<br>
+ • Page break insertion<br>
+ • Print media styles
+ </div>
+ <div style="margin-top: 10px;">
+ <strong>Test Instructions:</strong><br>
+ • Add content with various formatting<br>
+ • Use toolbar export buttons (PDF/Word)<br>
+ • Try the quick export buttons below<br>
+ • Test print preview functionality
+ </div>
+ `;
+
+ // Add event listeners for demonstration
+ editor.addEventListener('content-change', () => {
+ console.log('Export editor content changed');
+ });
+
+ editor.addEventListener('editor-focus', () => {
+ console.log('Export editor focused');
+ });
+
+ }).catch((error) => {
+ console.error('❌ Failed to load webcomponent:', error);
+ document.getElementById('component-status').innerHTML = `
+ <div style="color: red;">❌ Failed to load webcomponent: ${error.message}</div>
+ `;
+ });
+
+ // Export functions
+ function exportPDF() {
+ const editor = document.getElementById('export-editor');
+ if (editor && editor.exportPDF) {
+ editor.exportPDF();
+ } else {
+ alert('PDF export not available. Use the toolbar button instead.');
+ }
+ }
+
+ function exportWord() {
+ const editor = document.getElementById('export-editor');
+ if (editor && editor.exportWord) {
+ editor.exportWord();
+ } else {
+ alert('Word export not available. Use the toolbar button instead.');
+ }
+ }
+
+ function printPreview() {
+ const editor = document.getElementById('export-editor');
+ if (editor && editor.printPreview) {
+ editor.printPreview();
+ } else {
+ alert('Print preview not available. Use the toolbar button instead.');
+ }
+ }
+
+ function printDocument() {
+ window.print();
+ }
+
+ console.log('✓ Editora PDF Export Test loaded');
+ </script>
+    <!-- Search Modal -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-panel">
+            <div class="search-input-row">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                <input type="text" class="search-input" placeholder="Search docs, plugins, examples..." aria-label="Search">
+            </div>
+            <div class="search-results"></div>
+        </div>
     </div>
 
-    <div class="plugin-status">
-      <h3>🔌 WebComponent Status</h3>
-      <div id="component-status">Loading webcomponent...</div>
-    </div>
-  </div>
+ <script src="assets/js/main.js"></script>
+    <script src="assets/js/search-index.js"></script>
+    <script src="assets/js/site-enhancements.js"></script>
+ </main>
 
-  <!-- Import Web Component -->
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css">
-
-  <script>
-    // Wait for custom element to be defined
-    customElements.whenDefined('editora-editor').then(() => {
-      console.log('✅ Editora webcomponent loaded successfully');
-
-      const statusDiv = document.getElementById('component-status');
-      const editor = document.getElementById('export-editor');
-
-      statusDiv.innerHTML = `
-        <div style="color: green;">✅ WebComponent loaded successfully</div>
-        <div style="margin-top: 10px;">
-          <strong>Export Plugins Loaded:</strong><br>
-          • PDF Export functionality<br>
-          • Word Document export<br>
-          • Print preview and optimization<br>
-          • Page break insertion<br>
-          • Print media styles
+ <!-- Footer -->
+ <footer>
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>Documentation</h5>
+                    <ul>
+                        <li><a href="docs/installation.html">Installation</a></li>
+                        <li><a href="docs/features.html">Features</a></li>
+                        <li><a href="docs/api.html">API Reference</a></li>
+                        <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                        <li><a href="docs/custom-plugins.html">Custom Plugins</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>Plugins</h5>
+                    <ul>
+                        <li><a href="plugins/index.html">All Plugins</a></li>
+                        <li><a href="plugins/media-manager.html">Media Manager</a></li>
+                        <li><a href="plugins/table.html">Tables</a></li>
+                        <li><a href="plugins/code-sample.html">Code Samples</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>About</h5>
+                    <ul>
+                        <li><a href="docs/about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p style="color:white">&copy; 2024-2026 Editora. Built with <span style="color: var(--accent);">&hearts;</span> by Editora Team. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+            </div>
         </div>
-        <div style="margin-top: 10px;">
-          <strong>Test Instructions:</strong><br>
-          • Add content with various formatting<br>
-          • Use toolbar export buttons (PDF/Word)<br>
-          • Try the quick export buttons below<br>
-          • Test print preview functionality
-        </div>
-      `;
-
-      // Add event listeners for demonstration
-      editor.addEventListener('content-change', () => {
-        console.log('Export editor content changed');
-      });
-
-      editor.addEventListener('editor-focus', () => {
-        console.log('Export editor focused');
-      });
-
-    }).catch((error) => {
-      console.error('❌ Failed to load webcomponent:', error);
-      document.getElementById('component-status').innerHTML = `
-        <div style="color: red;">❌ Failed to load webcomponent: ${error.message}</div>
-      `;
-    });
-
-    // Export functions
-    function exportPDF() {
-      const editor = document.getElementById('export-editor');
-      if (editor && editor.exportPDF) {
-        editor.exportPDF();
-      } else {
-        alert('PDF export not available. Use the toolbar button instead.');
-      }
-    }
-
-    function exportWord() {
-      const editor = document.getElementById('export-editor');
-      if (editor && editor.exportWord) {
-        editor.exportWord();
-      } else {
-        alert('Word export not available. Use the toolbar button instead.');
-      }
-    }
-
-    function printPreview() {
-      const editor = document.getElementById('export-editor');
-      if (editor && editor.printPreview) {
-        editor.printPreview();
-      } else {
-        alert('Print preview not available. Use the toolbar button instead.');
-      }
-    }
-
-    function printDocument() {
-      window.print();
-    }
-
-    console.log('✓ Editora PDF Export Test loaded');
-  </script>
-  <script src="assets/js/main.js"></script>
-  </main>
-
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      <div class="footer-links">
-        <div class="footer-section">
-          <h5>📚 Documentation</h5>
-          <ul>
-            <li><a href="docs/installation.html">Installation</a></li>
-            <li><a href="docs/features.html">Features</a></li>
-            <li><a href="docs/api.html">API Reference</a></li>
-            <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
-            <li><a href="docs/custom-plugins.html">Custom Plugins</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h5>🔌 Plugins</h5>
-          <ul>
-            <li><a href="plugins/index.html">All Plugins</a></li>
-            <li><a href="plugins/media-manager.html">Media Manager</a></li>
-            <li><a href="plugins/table.html">Tables</a></li>
-            <li><a href="plugins/code-sample.html">Code Samples</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h5>🔗 Links</h5>
-          <ul>
-            <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-            <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
-            <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
-            <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h5>ℹ️ About</h5>
-          <ul>
-            <li><a href="docs/about.html">About Editora</a></li>
-            <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
-            <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
-            <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>&copy; 2024-2026 Editora. Built with ❤️ by Ajay Kumar. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
-      </div>
-    </div>
-  </footer>
+    </footer>
 </body>
 </html>

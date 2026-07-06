@@ -1,354 +1,361 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Editora UI React documentation - React wrappers, providers, and hooks for ui-core components.">
-    <meta name="keywords" content="ui-react, react wrappers, web components react, theme provider, form hooks">
-    <meta name="author" content="Editora Contributors">
-    <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="#007bff">
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <meta name="description" content="Editora UI React documentation - React wrappers, providers, and hooks for ui-core components.">
+ <meta name="keywords" content="ui-react, react wrappers, web components react, theme provider, form hooks">
+ <meta name="author" content="Editora Contributors">
+ <meta name="robots" content="index, follow">
+ <meta name="theme-color" content="#12131A">
 
-    <link rel="icon" type="image/png" sizes="16x16" href="../assets/img/favicon_16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon_32.png">
-    <link rel="icon" type="image/png" sizes="64x64" href="../assets/img/favicon_64.png">
+ <link rel="icon" type="image/png" sizes="16x16" href="../assets/img/favicon_16.png">
+ <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon_32.png">
+ <link rel="icon" type="image/png" sizes="64x64" href="../assets/img/favicon_64.png">
 
-    <title>Editora - @editora/ui-react</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
+ <title>Editora - @editora/ui-react</title>
+ <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
-    <header>
-        <div class="container">
-            <nav>
-                <a href="../index.html" class="logo">
-                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
-                </a>
-                <button class="menu-toggle">☰</button>
-                <ul class="nav-links">
-                    <li><a href="../index.html">Home</a></li>
-                    <li><a href="installation.html" class="active">Docs</a></li>
-                    <li><a href="features.html">Features</a></li>
-                    <li><a href="../plugins/index.html">Plugins</a></li>
-                    <li><a href="api.html">API</a></li>
-                    <li><a href="../toast-demo.html">Toast Demo</a></li>
-                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+    <a href="#main-content" class="skip-link">Skip to content</a>
+ <header>
+ <div class="container">
+ <nav>
+ <a href="../index.html" class="logo">
+ <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" >
+ </a>
+ <div class="nav-actions">
+<button class="icon-btn search-trigger" id="searchTrigger" aria-label="Search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg><span class="search-label">Search</span><kbd>&#8984;K</kbd></button>
+<button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode"></button>
+</div>
+                    <button class="menu-toggle">☰</button>
+ <ul class="nav-links">
+ <li><a href="../index.html">Home</a></li>
+ <li><a href="installation.html" class="active">Docs</a></li>
+ <li><a href="features.html">Features</a></li>
+ <li><a href="../plugins/index.html">Plugins</a></li>
+ <li><a href="api.html">API</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+ </ul>
+ </nav>
+ </div>
+ </header>
+    <a id="main-content" tabindex="-1"></a>
+    <nav class="breadcrumbs" id="breadcrumbs" aria-label="Breadcrumb"></nav>
 
-    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
-        <div class="container">
-            <h1 style="color: white; margin-bottom: 0.5rem;">@editora/ui-react</h1>
-            <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">React wrappers, providers, and hooks for <code style="color: black;">@editora/ui-core</code> Web Components.</p>
-        </div>
-    </section>
+ <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+ <div class="container">
+ <h1 style="color: white; margin-bottom: 0.5rem;">@editora/ui-react</h1>
+ <p style="color: rgba(255, 255, 255, 0.95); font-size: 1.1rem;">React wrappers, providers, and hooks for <code style="color: black;">@editora/ui-core</code> Web Components.</p>
+ </div>
+ </section>
 
-    <section>
-        <div class="container">
-            <div class="docs-wrapper">
-                <aside class="docs-sidebar">
-                    <h3>Documentation</h3>
-                    <ul>
-                        <a href="installation.html">Installation</a>
-                        <a href="features.html">Features</a>
-                        <a href="api.html">API Reference</a>
-                        <a href="keyboard-shortcuts.html">Keyboard Shortcuts</a>
-                        <a href="examples.html">Examples</a>
-                        <a href="custom-plugins.html">Custom Plugins</a>
-                        <a href="icons.html">@editora/icons</a>
-                        <a href="react-icons.html">@editora/react-icons</a>
-                        <a href="ui-core.html">@editora/ui-core</a>
-                        <a href="ui-react.html" class="active">@editora/ui-react</a>
-                        <a href="../light-code-editor-demo.html">@editora/light-code-editor</a>
-                        <a href="about.html">About</a>
-                    </ul>
+ <section>
+ <div class="container">
+ <div class="docs-wrapper">
+ <aside class="docs-sidebar">
+ <h3>Documentation</h3>
+ <ul>
+ <a href="installation.html">Installation</a>
+ <a href="features.html">Features</a>
+ <a href="api.html">API Reference</a>
+ <a href="keyboard-shortcuts.html">Keyboard Shortcuts</a>
+ <a href="examples.html">Examples</a>
+ <a href="custom-plugins.html">Custom Plugins</a>
+ <a href="icons.html">@editora/icons</a>
+ <a href="react-icons.html">@editora/react-icons</a>
+ <a href="ui-core.html">@editora/ui-core</a>
+ <a href="ui-react.html" class="active">@editora/ui-react</a>
+ <a href="../light-code-editor-demo.html">@editora/light-code-editor</a>
+ <a href="about.html">About</a>
+ </ul>
 
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <a href="../playground.html">Live Playground</a>
-                        <a href="../toast-demo.html">Toast Demo</a>
-                        <a href="../plugins/index.html">All Plugins</a>
-                        <a href="https://www.npmjs.com/package/@editora/ui-react" target="_blank" rel="noopener">npm: @editora/ui-react</a></li>
-                    </ul>
-                </aside>
+ <h3>Quick Links</h3>
+ <ul>
+ <a href="../playground.html">Live Playground</a>
+ <a href="../toast-demo.html">Toast Demo</a>
+ <a href="../plugins/index.html">All Plugins</a>
+ <a href="https://www.npmjs.com/package/@editora/ui-react" target="_blank" rel="noopener">npm: @editora/ui-react</a></li>
+ </ul>
+ </aside>
 
-                <main class="docs-content">
-                    <h2>Overview</h2>
-                    <p><code>@editora/ui-react</code> provides React-native ergonomics on top of Web Components from <code>@editora/ui-core</code>. It includes typed wrappers, hooks for common workflows, and providers for dialogs and theme state.</p>
+ <main class="docs-content">
+ <h2>Overview</h2>
+ <p><code>@editora/ui-react</code> provides React-native ergonomics on top of Web Components from <code>@editora/ui-core</code>. It includes typed wrappers, hooks for common workflows, and providers for dialogs and theme state.</p>
 
-                    <h2>Installation</h2>
-                    <pre><code class="language-bash">npm install @editora/ui-react @editora/ui-core</code></pre>
-                    <p>Peer dependencies: <code>react</code>, <code>react-dom</code>.</p>
+ <h2>Installation</h2>
+ <pre><code class="language-bash">npm install @editora/ui-react @editora/ui-core</code></pre>
+ <p>Peer dependencies: <code>react</code>, <code>react-dom</code>.</p>
 
-                    <h2>Quick Start</h2>
-                    <pre><code class="language-tsx">import { Button, Input, ThemeProvider } from '@editora/ui-react';
+ <h2>Quick Start</h2>
+ <pre><code class="language-tsx">import { Button, Input, ThemeProvider } from '@editora/ui-react';
 
 export function App() {
-  return (
-    &lt;ThemeProvider&gt;
-      &lt;div style={{ display: 'grid', gap: 12, maxWidth: 360 }}&gt;
-        &lt;Input name="title" label="Title" placeholder="Untitled" clearable /&gt;
-        &lt;Button variant="primary"&gt;Save&lt;/Button&gt;
-      &lt;/div&gt;
-    &lt;/ThemeProvider&gt;
-  );
+ return (
+ &lt;ThemeProvider&gt;
+ &lt;div style={{ display: 'grid', gap: 12, maxWidth: 360 }}&gt;
+ &lt;Input name="title" label="Title" placeholder="Untitled" clearable /&gt;
+ &lt;Button variant="primary"&gt;Save&lt;/Button&gt;
+ &lt;/div&gt;
+ &lt;/ThemeProvider&gt;
+ );
 }</code></pre>
 
-                    <h2>Import Rule</h2>
-                    <div class="alert alert-warning" style="margin: 1rem 0;">
-                        Prefer package-root imports from <code>@editora/ui-react</code>. If you deep-import wrappers directly, ensure <code>@editora/ui-core</code> is imported first so custom elements are registered.
-                    </div>
+ <h2>Import Rule</h2>
+ <div class="alert alert-warning" style="margin: 1rem 0;">
+ Prefer package-root imports from <code>@editora/ui-react</code>. If you deep-import wrappers directly, ensure <code>@editora/ui-core</code> is imported first so custom elements are registered.
+ </div>
 
-                    <h2>Providers and Hooks</h2>
-                    <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
-                        <thead>
-                            <tr style="background: var(--gray-200);">
-                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">API</th>
-                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Type</th>
-                                <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Use Case</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>ThemeProvider</code>, <code>useTheme</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Provider + hook</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Token-based theming and persisted theme state.</td>
-                            </tr>
-                            <tr style="background: var(--gray-50);">
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>DialogProvider</code>, <code>useDialog</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Provider + hook</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Promise-based confirm/prompt dialog workflows.</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>AlertDialogProvider</code>, <code>useAlertDialog</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Provider + hook</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Destructive/alert flow confirmations with accessibility defaults.</td>
-                            </tr>
-                            <tr style="background: var(--gray-50);">
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>useForm</code></td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Hook</td>
-                                <td style="padding: 1rem; border: 1px solid var(--gray-300);">Validation, submit, dirty-state, reset, and value extraction from wrapped forms.</td>
-                            </tr>
-                        </tbody>
-                    </table>
+ <h2>Providers and Hooks</h2>
+ <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+ <thead>
+ <tr style="background: var(--gray-200);">
+ <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">API</th>
+ <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Type</th>
+ <th style="padding: 1rem; text-align: left; border: 1px solid var(--gray-300);">Use Case</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>ThemeProvider</code>, <code>useTheme</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Provider + hook</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Token-based theming and persisted theme state.</td>
+ </tr>
+ <tr style="background: var(--gray-50);">
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>DialogProvider</code>, <code>useDialog</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Provider + hook</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Promise-based confirm/prompt dialog workflows.</td>
+ </tr>
+ <tr>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>AlertDialogProvider</code>, <code>useAlertDialog</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Provider + hook</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Destructive/alert flow confirmations with accessibility defaults.</td>
+ </tr>
+ <tr style="background: var(--gray-50);">
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);"><code>useForm</code></td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Hook</td>
+ <td style="padding: 1rem; border: 1px solid var(--gray-300);">Validation, submit, dirty-state, reset, and value extraction from wrapped forms.</td>
+ </tr>
+ </tbody>
+ </table>
 
-                    <h2>Common Patterns</h2>
-                    <h3>1. Form + useForm</h3>
-                    <pre><code class="language-tsx">import { Form, Field, Input, Button, useForm } from '@editora/ui-react';
+ <h2>Common Patterns</h2>
+ <h3>1. Form + useForm</h3>
+ <pre><code class="language-tsx">import { Form, Field, Input, Button, useForm } from '@editora/ui-react';
 
 export function ProfileForm() {
-  const { ref, submit, validate, getValues, reset, isDirty } = useForm();
+ const { ref, submit, validate, getValues, reset, isDirty } = useForm();
 
-  return (
-    &lt;Form
-      ref={ref}
-      autosave
-      guardUnsaved
-      onSubmit={(values) =&gt; console.log('submit', values)}
-      onInvalid={(errors) =&gt; console.log('invalid', errors)}
-    &gt;
-      &lt;Field label="Full name" required&gt;
-        &lt;Input name="fullName" required /&gt;
-      &lt;/Field&gt;
+ return (
+ &lt;Form
+ ref={ref}
+ autosave
+ guardUnsaved
+ onSubmit={(values) =&gt; console.log('submit', values)}
+ onInvalid={(errors) =&gt; console.log('invalid', errors)}
+ &gt;
+ &lt;Field label="Full name" required&gt;
+ &lt;Input name="fullName" required /&gt;
+ &lt;/Field&gt;
 
-      &lt;Field label="Email" required&gt;
-        &lt;Input name="email" type="email" required /&gt;
-      &lt;/Field&gt;
+ &lt;Field label="Email" required&gt;
+ &lt;Input name="email" type="email" required /&gt;
+ &lt;/Field&gt;
 
-      &lt;Button onClick={() =&gt; submit()} disabled={!isDirty()}&gt;Submit&lt;/Button&gt;
-      &lt;Button variant="secondary" onClick={() =&gt; reset()}&gt;Reset&lt;/Button&gt;
-      &lt;Button variant="secondary" onClick={() =&gt; console.log(getValues())}&gt;Values&lt;/Button&gt;
-    &lt;/Form&gt;
-  );
+ &lt;Button onClick={() =&gt; submit()} disabled={!isDirty()}&gt;Submit&lt;/Button&gt;
+ &lt;Button variant="secondary" onClick={() =&gt; reset()}&gt;Reset&lt;/Button&gt;
+ &lt;Button variant="secondary" onClick={() =&gt; console.log(getValues())}&gt;Values&lt;/Button&gt;
+ &lt;/Form&gt;
+ );
 }</code></pre>
 
-                    <h3>2. Dialog providers</h3>
-                    <pre><code class="language-tsx">import { DialogProvider, useDialog, AlertDialogProvider, useAlertDialog, Button } from '@editora/ui-react';
+ <h3>2. Dialog providers</h3>
+ <pre><code class="language-tsx">import { DialogProvider, useDialog, AlertDialogProvider, useAlertDialog, Button } from '@editora/ui-react';
 
 function Actions() {
-  const dialog = useDialog();
-  const alerts = useAlertDialog();
+ const dialog = useDialog();
+ const alerts = useAlertDialog();
 
-  return (
-    &lt;div style={{ display: 'flex', gap: 8 }}&gt;
-      &lt;Button onClick={async () =&gt; {
-        const res = await dialog.confirm({ title: 'Archive project?' });
-        console.log(res);
-      }}&gt;Confirm&lt;/Button&gt;
+ return (
+ &lt;div style={{ display: 'flex', gap: 8 }}&gt;
+ &lt;Button onClick={async () =&gt; {
+ const res = await dialog.confirm({ title: 'Archive project?' });
+ console.log(res);
+ }}&gt;Confirm&lt;/Button&gt;
 
-      &lt;Button variant="secondary" onClick={async () =&gt; {
-        const res = await alerts.prompt({ title: 'Rename' });
-        console.log(res);
-      }}&gt;Prompt&lt;/Button&gt;
-    &lt;/div&gt;
-  );
+ &lt;Button variant="secondary" onClick={async () =&gt; {
+ const res = await alerts.prompt({ title: 'Rename' });
+ console.log(res);
+ }}&gt;Prompt&lt;/Button&gt;
+ &lt;/div&gt;
+ );
 }
 
 export function DialogExample() {
-  return (
-    &lt;DialogProvider&gt;
-      &lt;AlertDialogProvider&gt;
-        &lt;Actions /&gt;
-      &lt;/AlertDialogProvider&gt;
-    &lt;/DialogProvider&gt;
-  );
+ return (
+ &lt;DialogProvider&gt;
+ &lt;AlertDialogProvider&gt;
+ &lt;Actions /&gt;
+ &lt;/AlertDialogProvider&gt;
+ &lt;/DialogProvider&gt;
+ );
 }</code></pre>
 
-                    <h3>3. Data table workflows</h3>
-                    <pre><code class="language-tsx">import { DataTable, Pagination } from '@editora/ui-react';
+ <h3>3. Data table workflows</h3>
+ <pre><code class="language-tsx">import { DataTable, Pagination } from '@editora/ui-react';
 import { useState } from 'react';
 
 export function UsersTable() {
-  const [page, setPage] = useState(1);
+ const [page, setPage] = useState(1);
 
-  return (
-    &lt;div style={{ display: 'grid', gap: 10 }}&gt;
-      &lt;DataTable
-        sortable
-        selectable
-        page={page}
-        pageSize={10}
-        paginationId="users-pager"
-        onPageChange={(d) =&gt; setPage(d.page)}
-        onSortChange={(d) =&gt; console.log('sort', d)}
-        onRowSelect={(d) =&gt; console.log('rows', d.indices)}
-      &gt;
-        {/* table markup */}
-      &lt;/DataTable&gt;
+ return (
+ &lt;div style={{ display: 'grid', gap: 10 }}&gt;
+ &lt;DataTable
+ sortable
+ selectable
+ page={page}
+ pageSize={10}
+ paginationId="users-pager"
+ onPageChange={(d) =&gt; setPage(d.page)}
+ onSortChange={(d) =&gt; console.log('sort', d)}
+ onRowSelect={(d) =&gt; console.log('rows', d.indices)}
+ &gt;
+ {/* table markup */}
+ &lt;/DataTable&gt;
 
-      &lt;Pagination id="users-pager" page={String(page)} /&gt;
-    &lt;/div&gt;
-  );
+ &lt;Pagination id="users-pager" page={String(page)} /&gt;
+ &lt;/div&gt;
+ );
 }</code></pre>
 
-                    <h3>4. Gantt planning workspace</h3>
-                    <p><code>Gantt</code> provides an interactive project timeline for release plans, delivery roadmaps, and dependency-heavy schedules. It supports task, summary, and milestone rows; baselines; critical tasks; split segments; dependency links; drag/resize editing; keyboard selection; and virtualized rendering for large plans.</p>
-                    <pre><code class="language-tsx">import { Gantt, type GanttLink, type GanttTask } from '@editora/ui-react';
+ <h3>4. Gantt planning workspace</h3>
+ <p><code>Gantt</code> provides an interactive project timeline for release plans, delivery roadmaps, and dependency-heavy schedules. It supports task, summary, and milestone rows; baselines; critical tasks; split segments; dependency links; drag/resize editing; keyboard selection; and virtualized rendering for large plans.</p>
+ <pre><code class="language-tsx">import { Gantt, type GanttLink, type GanttTask } from '@editora/ui-react';
 import { useState } from 'react';
 
 const initialTasks: GanttTask[] = [
-  {
-    id: 'foundation',
-    label: 'Foundation build',
-    start: '2026-02-01',
-    end: '2026-02-18',
-    progress: 68,
-    baselineStart: '2026-01-29',
-    baselineEnd: '2026-02-14',
-    critical: true
-  },
-  {
-    id: 'launch',
-    label: 'Launch milestone',
-    start: '2026-02-28',
-    type: 'milestone',
-    tone: 'success'
-  }
+ {
+ id: 'foundation',
+ label: 'Foundation build',
+ start: '2026-02-01',
+ end: '2026-02-18',
+ progress: 68,
+ baselineStart: '2026-01-29',
+ baselineEnd: '2026-02-14',
+ critical: true
+ },
+ {
+ id: 'launch',
+ label: 'Launch milestone',
+ start: '2026-02-28',
+ type: 'milestone',
+ tone: 'success'
+ }
 ];
 
 const links: GanttLink[] = [
-  { id: 'foundation-launch', source: 'foundation', target: 'launch', type: 'e2s' }
+ { id: 'foundation-launch', source: 'foundation', target: 'launch', type: 'e2s' }
 ];
 
 export function ReleasePlan() {
-  const [tasks, setTasks] = useState(initialTasks);
+ const [tasks, setTasks] = useState(initialTasks);
 
-  return (
-    &lt;Gantt
-      tasks={tasks}
-      links={links}
-      zoom="week"
-      sort="start"
-      barVariant="soft"
-      onTaskChange={({ id, start, end }) =&gt; {
-        setTasks((items) =&gt; items.map((task) =&gt; (
-          task.id === id ? { ...task, start: start ?? task.start, end: end ?? task.end } : task
-        )));
-      }}
-      onTaskDelete={({ id }) =&gt; setTasks((items) =&gt; items.filter((task) =&gt; task.id !== id))}
-      onLinkSelect={(detail) =&gt; console.log('dependency selected', detail)}
-    /&gt;
-  );
+ return (
+ &lt;Gantt
+ tasks={tasks}
+ links={links}
+ zoom="week"
+ sort="start"
+ barVariant="soft"
+ onTaskChange={({ id, start, end }) =&gt; {
+ setTasks((items) =&gt; items.map((task) =&gt; (
+ task.id === id ? { ...task, start: start ?? task.start, end: end ?? task.end } : task
+ )));
+ }}
+ onTaskDelete={({ id }) =&gt; setTasks((items) =&gt; items.filter((task) =&gt; task.id !== id))}
+ onLinkSelect={(detail) =&gt; console.log('dependency selected', detail)}
+ /&gt;
+ );
 }</code></pre>
-                    <ul>
-                        <li>Dependency types: <code>e2s</code>, <code>s2s</code>, <code>e2e</code>, and <code>s2e</code>.</li>
-                        <li>Bar variants: <code>solid</code>, <code>soft</code>, <code>striped</code>, <code>outline</code>, and <code>glass</code>.</li>
-                        <li>Scale support: automatic row virtualization for large schedules, including the 10,000-task Storybook example.</li>
-                    </ul>
+ <ul>
+ <li>Dependency types: <code>e2s</code>, <code>s2s</code>, <code>e2e</code>, and <code>s2e</code>.</li>
+ <li>Bar variants: <code>solid</code>, <code>soft</code>, <code>striped</code>, <code>outline</code>, and <code>glass</code>.</li>
+ <li>Scale support: automatic row virtualization for large schedules, including the 10,000-task Storybook example.</li>
+ </ul>
 
-                    <h2>Component Groups</h2>
-                    <ul>
-                        <li><strong>Forms:</strong> <code>Form</code>, <code>Field</code>, <code>Input</code>, <code>Textarea</code>, <code>Select</code>, <code>Combobox</code>, <code>Switch</code>, <code>Checkbox</code>, <code>DatePicker</code>, <code>ColorPicker</code></li>
-                        <li><strong>Data:</strong> <code>DataTable</code>, <code>Pagination</code>, <code>Table</code>, <code>Calendar</code>, <code>Chart</code>, <code>Timeline</code>, <code>Gantt</code>, <code>Progress</code></li>
-                        <li><strong>Overlay:</strong> <code>Dialog</code>, <code>AlertDialog</code>, <code>Popover</code>, <code>Tooltip</code>, <code>Dropdown</code>, <code>Drawer</code></li>
-                        <li><strong>Layout:</strong> <code>Layout</code>, <code>Sidebar</code>, <code>Tabs</code>, <code>Grid</code>, <code>Flex</code>, <code>Container</code>, <code>Section</code></li>
-                    </ul>
+ <h2>Component Groups</h2>
+ <ul>
+ <li><strong>Forms:</strong> <code>Form</code>, <code>Field</code>, <code>Input</code>, <code>Textarea</code>, <code>Select</code>, <code>Combobox</code>, <code>Switch</code>, <code>Checkbox</code>, <code>DatePicker</code>, <code>ColorPicker</code></li>
+ <li><strong>Data:</strong> <code>DataTable</code>, <code>Pagination</code>, <code>Table</code>, <code>Calendar</code>, <code>Chart</code>, <code>Timeline</code>, <code>Gantt</code>, <code>Progress</code></li>
+ <li><strong>Overlay:</strong> <code>Dialog</code>, <code>AlertDialog</code>, <code>Popover</code>, <code>Tooltip</code>, <code>Dropdown</code>, <code>Drawer</code></li>
+ <li><strong>Layout:</strong> <code>Layout</code>, <code>Sidebar</code>, <code>Tabs</code>, <code>Grid</code>, <code>Flex</code>, <code>Container</code>, <code>Section</code></li>
+ </ul>
 
-                    <h2>Theming</h2>
-                    <pre><code class="language-tsx">import { ThemeProvider } from '@editora/ui-react';
+ <h2>Theming</h2>
+ <pre><code class="language-tsx">import { ThemeProvider } from '@editora/ui-react';
 
 &lt;ThemeProvider
-  tokens={{
-    colors: { primary: '#0f766e', text: '#0f172a', background: '#ffffff' },
-    radius: '10px'
-  }}
-  storageKey="my-app.theme"
+ tokens={{
+ colors: { primary: '#0f766e', text: '#0f172a', background: '#ffffff' },
+ radius: '10px'
+ }}
+ storageKey="my-app.theme"
 &gt;
-  {/** app */}
+ {/** app */}
 &lt;/ThemeProvider&gt;</code></pre>
 
-                    <h2>SSR and StrictMode Notes</h2>
-                    <ul>
-                        <li>Providers are SSR-safe and create host nodes on client mount.</li>
-                        <li>Promise dialog providers are StrictMode-safe and clean up on unmount.</li>
-                        <li>Avoid calling custom element imperative methods until component mount is complete.</li>
-                    </ul>
+ <h2>SSR and StrictMode Notes</h2>
+ <ul>
+ <li>Providers are SSR-safe and create host nodes on client mount.</li>
+ <li>Promise dialog providers are StrictMode-safe and clean up on unmount.</li>
+ <li>Avoid calling custom element imperative methods until component mount is complete.</li>
+ </ul>
 
-                    <h2>Production Guidance</h2>
-                    <ul>
-                        <li>Keep root imports from <code>@editora/ui-react</code> to avoid registration drift.</li>
-                        <li>Batch expensive state updates around large table operations.</li>
-                        <li>Prefer declarative props over direct DOM mutation of wrapped components.</li>
-                    </ul>
+ <h2>Production Guidance</h2>
+ <ul>
+ <li>Keep root imports from <code>@editora/ui-react</code> to avoid registration drift.</li>
+ <li>Batch expensive state updates around large table operations.</li>
+ <li>Prefer declarative props over direct DOM mutation of wrapped components.</li>
+ </ul>
 
-                    <div style="margin-top: 3rem; padding: 2rem; background: var(--gray-50); border-radius: var(--border-radius);">
-                        <h3>Related Docs</h3>
-                        <ul>
-                            <li><a href="ui-core.html">@editora/ui-core</a> for underlying custom elements and low-level APIs</li>
-                            <li><a href="react-icons.html">@editora/react-icons</a> for React icon provider and components</li>
-                        </ul>
-                    </div>
-                </main>
+ <div style="margin-top: 3rem; padding: 2rem; background: var(--gray-50); border-radius: var(--border-radius);">
+ <h3>Related Docs</h3>
+ <ul>
+ <li><a href="ui-core.html">@editora/ui-core</a> for underlying custom elements and low-level APIs</li>
+ <li><a href="react-icons.html">@editora/react-icons</a> for React icon provider and components</li>
+ </ul>
+ </div>
+ </main>
+                    <aside class="docs-toc" id="docsToc"></aside>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!--footer-->
-       <footer>
+ <!--footer-->
+ <footer>
         <div class="container">
             <div class="footer-links">
                 <div class="footer-section">
-                    <h5>📚 Documentation</h5>
+                    <h5>Documentation</h5>
                     <ul>
-                        <li><a href="docs/installation.html">Installation</a></li>
-                        <li><a href="docs/features.html">Features</a></li>
-                        <li><a href="docs/api.html">API Reference</a></li>
-                        <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
-                        <li><a href="docs/custom-plugins.html">Custom Plugins</a></li>
+                        <li><a href="../docs/installation.html">Installation</a></li>
+                        <li><a href="../docs/features.html">Features</a></li>
+                        <li><a href="../docs/api.html">API Reference</a></li>
+                        <li><a href="../docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                        <li><a href="../docs/custom-plugins.html">Custom Plugins</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h5>🔌 Plugins</h5>
+                    <h5>Plugins</h5>
                     <ul>
-                        <li><a href="plugins/index.html">All Plugins</a></li>
-                        <li><a href="plugins/media-manager.html">Media Manager</a></li>
-                        <li><a href="plugins/table.html">Tables</a></li>
-                        <li><a href="plugins/code-sample.html">Code Samples</a></li>
+                        <li><a href="../plugins/index.html">All Plugins</a></li>
+                        <li><a href="../plugins/media-manager.html">Media Manager</a></li>
+                        <li><a href="../plugins/table.html">Tables</a></li>
+                        <li><a href="../plugins/code-sample.html">Code Samples</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h5>🔗 Links</h5>
+                    <h5>Links</h5>
                     <ul>
                         <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
                         <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
@@ -357,9 +364,9 @@ export function ReleasePlan() {
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h5>ℹ️ About</h5>
+                    <h5>About</h5>
                     <ul>
-                        <li><a href="docs/about.html">About Editora</a></li>
+                        <li><a href="../docs/about.html">About Editora</a></li>
                         <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
                         <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
                         <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
@@ -367,11 +374,24 @@ export function ReleasePlan() {
                 </div>
             </div>
             <div class="footer-bottom">
-                <p style="color:white">&copy; 2024-2026 Editora.Built with <span style="color: red;">&hearts;</span> by Editora Team. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+                <p style="color:white">&copy; 2024-2026 Editora. Built with <span style="color: var(--accent);">&hearts;</span> by Editora Team. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
             </div>
         </div>
     </footer>
+    <!-- Search Modal -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-panel">
+            <div class="search-input-row">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                <input type="text" class="search-input" placeholder="Search docs, plugins, examples..." aria-label="Search">
+            </div>
+            <div class="search-results"></div>
+        </div>
+    </div>
 
-    <script src="../assets/js/main.js"></script>
+
+ <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/search-index.js"></script>
+    <script src="../assets/js/site-enhancements.js"></script>
 </body>
 </html>

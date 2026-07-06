@@ -1,215 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Meta Tags for SEO -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Editora Examples - Example and demonstration of Editora rich text editor features.">
-    <meta name="keywords" content="examples, Editora editor, example, demonstration">
-    <meta name="author" content="Editora Contributors">
-    <meta name="robots" content="index, follow">
-    <meta property="og:title" content="Editora - Examples">
-    <meta property="og:description" content="Editora Examples - Example and demonstration of Editora rich text editor features.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://editora-free.netlify.app/">
-    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="Editora - Examples">
-    <meta property="twitter:description" content="Editora Examples - Example and demonstration of Editora rich text editor features">
-    <meta name="theme-color" content="#007bff">
+ <!-- Meta Tags for SEO -->
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <meta name="description" content="Editora Examples - Example and demonstration of Editora rich text editor features.">
+ <meta name="keywords" content="examples, Editora editor, example, demonstration">
+ <meta name="author" content="Editora Contributors">
+ <meta name="robots" content="index, follow">
+ <meta property="og:title" content="Editora - Examples">
+ <meta property="og:description" content="Editora Examples - Example and demonstration of Editora rich text editor features.">
+ <meta property="og:type" content="website">
+ <meta property="og:url" content="https://editora-free.netlify.app/">
+ <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+ <meta property="twitter:card" content="summary_large_image">
+ <meta property="twitter:title" content="Editora - Examples">
+ <meta property="twitter:description" content="Editora Examples - Example and demonstration of Editora rich text editor features">
+ <meta name="theme-color" content="#12131A">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
-    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
-    <title>Editora - Examples</title>
-    <link rel="stylesheet" href="../assets/css/style.css">
-    </head>
+ <!-- Favicon -->
+ <link rel="icon" type="image/png" sizes="16x16" href="../assets/img/favicon_16.png">
+ <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon_32.png">
+ <link rel="icon" type="image/png" sizes="64x64" href="../assets/img/favicon_64.png">
+ <title>Editora - Examples</title>
+ <link rel="stylesheet" href="../assets/css/style.css">
+ </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container">
-            <nav>
-                <a href="../index.html" class="logo">
-                    <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
-                </a>
-                <button class="menu-toggle">☰</button>
-                <ul class="nav-links">
-                    <li><a href="../index.html">Home</a></li>
-                    <li><a href="installation.html" class="active">Docs</a></li>
-                    <li><a href="features.html">Features</a></li>
-                    <li><a href="../plugins/index.html">Plugins</a></li>
-                    <li><a href="api.html">API</a></li>
-                    <li><a href="../toast-demo.html">Toast Demo</a></li>
-                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+    <a href="#main-content" class="skip-link">Skip to content</a>
+ <!-- Header -->
+ <header>
+ <div class="container">
+ <nav>
+ <a href="../index.html" class="logo">
+ <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" >
+ </a>
+ <div class="nav-actions">
+<button class="icon-btn search-trigger" id="searchTrigger" aria-label="Search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg><span class="search-label">Search</span><kbd>&#8984;K</kbd></button>
+<button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode"></button>
+</div>
+                    <button class="menu-toggle">☰</button>
+ <ul class="nav-links">
+ <li><a href="../index.html">Home</a></li>
+ <li><a href="installation.html" class="active">Docs</a></li>
+ <li><a href="features.html">Features</a></li>
+ <li><a href="../plugins/index.html">Plugins</a></li>
+ <li><a href="api.html">API</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+ </ul>
+ </nav>
+ </div>
+ </header>
+    <a id="main-content" tabindex="-1"></a>
+    <nav class="breadcrumbs" id="breadcrumbs" aria-label="Breadcrumb"></nav>
 
-    <!-- Hero -->
-    <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
-        <div class="container">
-            <h1 style="color: white;">📚 Examples & Tutorials</h1>
-            <p style="color: rgba(255, 255, 255, 0.95);">Learn through practical code examples</p>
-        </div>
-    </section>
+ <!-- Hero -->
+ <section style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 3rem 0;">
+ <div class="container">
+ <h1 style="color: white;">Examples & Tutorials</h1>
+ <p style="color: rgba(255, 255, 255, 0.95);">Learn through practical code examples</p>
+ </div>
+ </section>
 
-    <!-- Content -->
-    <section>
-        <div class="container">
-            <div class="docs-wrapper">
-                <aside class="docs-sidebar">
-                    <h3>Documentation</h3>
-                    <ul>
-                        <a href="installation.html">Installation</a>
-                        <a href="features.html">Features</a>
-                        <a href="api.html">API Reference</a>
-                        <a href="keyboard-shortcuts.html">Keyboard Shortcuts</a>
-                        <a href="examples.html" class="active">Examples</a>
-                        <a href="custom-plugins.html">Custom Plugins</a>
-                        <a href="icons.html">@editora/icons</a>
-                        <a href="react-icons.html">@editora/react-icons</a>
-                        <a href="ui-core.html">@editora/ui-core</a>
-                        <a href="ui-react.html">@editora/ui-react</a>
-                        <a href="../light-code-editor-demo.html">@editora/light-code-editor</a>
-                        <a href="about.html">About</a>
-                    </ul>
+ <!-- Content -->
+ <section>
+ <div class="container">
+ <div class="docs-wrapper">
+ <aside class="docs-sidebar">
+ <h3>Documentation</h3>
+ <ul>
+ <a href="installation.html">Installation</a>
+ <a href="features.html">Features</a>
+ <a href="api.html">API Reference</a>
+ <a href="keyboard-shortcuts.html">Keyboard Shortcuts</a>
+ <a href="examples.html" class="active">Examples</a>
+ <a href="custom-plugins.html">Custom Plugins</a>
+ <a href="icons.html">@editora/icons</a>
+ <a href="react-icons.html">@editora/react-icons</a>
+ <a href="ui-core.html">@editora/ui-core</a>
+ <a href="ui-react.html">@editora/ui-react</a>
+ <a href="../light-code-editor-demo.html">@editora/light-code-editor</a>
+ <a href="about.html">About</a>
+ </ul>
 
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <a href="../playground.html">Live Playground</a>
-                        <a href="../toast-demo.html">Toast Demo</a>
-                        <a href="../plugins/index.html">All Plugins</a>
-                        <a href="https://github.com/ajaykr089/Editora" target="_blank">GitHub</a>
-                    </ul>
-                </aside>
+ <h3>Quick Links</h3>
+ <ul>
+ <a href="../playground.html">Live Playground</a>
+ <a href="../toast-demo.html">Toast Demo</a>
+ <a href="../plugins/index.html">All Plugins</a>
+ <a href="https://github.com/ajaykr089/Editora" target="_blank">GitHub</a>
+ </ul>
+ </aside>
 
-                <main class="docs-content">
-                  <div class="alert alert-info" style="margin-bottom: 1.5rem;">
-                    <strong>Live Playground:</strong> Try Editora in your browser with a working sample.
-                    <a href="../playground.html" style="margin-left: 8px;">Open Playground →</a>
-                  </div>
-                  <div class="alert alert-warning" style="margin-bottom: 1.5rem;">
-                    <strong>Regression Test:</strong> Run the automated DOM-shape check for formatting sequence regressions.
-                    <a href="../formatting-dom-regression-test.html" style="margin-left: 8px;">Open Regression Test →</a>
-                  </div>
-                  <div class="alert alert-success" style="margin-bottom: 1.5rem;">
-                    <strong>Theme Verification:</strong> Compare default, dark, and the new acme theme.
-                    <a href="../theme-acme.html" style="margin-left: 8px;">Open Acme Theme Demo →</a>
-                  </div>
-                  <div class="alert alert-info" style="margin-bottom: 1.5rem;">
-                    <strong>Config Labs:</strong> Validate runtime config updates for autosave/security/performance/accessibility.
-                    <a href="../webcomponent-security-autosave-lab.html" style="margin-left: 8px;">Open Security + Autosave Lab →</a>
-                    <a href="../webcomponent-performance-accessibility-lab.html" style="margin-left: 8px;">Open Performance + A11y Lab →</a>
-                  </div>
-                  <div class="alert alert-info" style="margin-bottom: 1.5rem;">
-                    <strong>Advanced Find/Replace:</strong> Light Code Editor now supports case-sensitive, whole-word, and regex search with configurable replace navigation.
-                    <a href="../light-code-editor-demo.html" style="margin-left: 8px;">Open Light Code Editor Demo →</a>
-                  </div>
+ <main class="docs-content">
+ <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+ <strong>Live Playground:</strong> Try Editora in your browser with a working sample.
+ <a href="../playground.html" style="margin-left: 8px;">Open Playground →</a>
+ </div>
+ <div class="alert alert-warning" style="margin-bottom: 1.5rem;">
+ <strong>Regression Test:</strong> Run the automated DOM-shape check for formatting sequence regressions.
+ <a href="../formatting-dom-regression-test.html" style="margin-left: 8px;">Open Regression Test →</a>
+ </div>
+ <div class="alert alert-success" style="margin-bottom: 1.5rem;">
+ <strong>Theme Verification:</strong> Compare default, dark, and the new acme theme.
+ <a href="../theme-acme.html" style="margin-left: 8px;">Open Acme Theme Demo →</a>
+ </div>
+ <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+ <strong>Config Labs:</strong> Validate runtime config updates for autosave/security/performance/accessibility.
+ <a href="../webcomponent-security-autosave-lab.html" style="margin-left: 8px;">Open Security + Autosave Lab →</a>
+ <a href="../webcomponent-performance-accessibility-lab.html" style="margin-left: 8px;">Open Performance + A11y Lab →</a>
+ </div>
+ <div class="alert alert-info" style="margin-bottom: 1.5rem;">
+ <strong>Advanced Find/Replace:</strong> Light Code Editor now supports case-sensitive, whole-word, and regex search with configurable replace navigation.
+ <a href="../light-code-editor-demo.html" style="margin-left: 8px;">Open Light Code Editor Demo →</a>
+ </div>
 
-                  <h2>Bundle Options</h2>
-                  <p>Editora offers two bundle sizes to fit your needs:</p>
-                  <ul>
-                    <li><strong>Core Bundle:</strong> Essential plugins only (bold, italic, underline, history)</li>
-                    <li><strong>Full Bundle:</strong> All plugins including advanced ones (embedIframe, math, specialCharacters, table, image, link, heading, list, blockquote, code, fontSize, textAlignment, fontFamily, lineHeight, textColor, backgroundColor, capitalization, indent, direction, checklist, emojis, preview, fullscreen, print, pageBreak, footnote, codeSample, anchor, mergeTag, template, comments, spellCheck, a11yChecker, strikethrough, clearFormatting, image, documentManager)</li>
-                  </ul>
+ <h2>Bundle Options</h2>
+ <p>Editora offers two bundle sizes to fit your needs:</p>
+ <ul>
+ <li><strong>Core Bundle:</strong> Essential plugins only (bold, italic, underline, history)</li>
+ <li><strong>Full Bundle:</strong> All plugins including advanced ones (embedIframe, math, specialCharacters, table, image, link, heading, list, blockquote, code, fontSize, textAlignment, fontFamily, lineHeight, textColor, backgroundColor, capitalization, indent, direction, checklist, emojis, preview, fullscreen, print, pageBreak, footnote, codeSample, anchor, mergeTag, template, comments, spellCheck, a11yChecker, strikethrough, clearFormatting, image, documentManager)</li>
+ </ul>
 
-                  <h3>React Plugin Presets (NPM)</h3>
-                  <p>When integrating with <code>@editora/react</code>, you can choose plugin presets:</p>
-                  <ul>
-                    <li><strong><code>@editora/plugins</code></strong>: full plugin catalog</li>
-                    <li><strong><code>@editora/plugins/lite</code></strong>: common/core plugins for lean bundles</li>
-                    <li><strong><code>@editora/plugins/enterprise</code></strong>: advanced/specialized workflow plugins</li>
-                  </ul>
-                  <p><strong>Enterprise preset includes:</strong> Mention, Track Changes, Version Diff, Conditional Content, Data Binding, Content Rules, Citations, Approval Workflow, PII Redaction, Smart Paste, Blocks Library, Document Schema, Translation Workflow, Slash Commands, Spell Check, A11y Checker, Comments, Merge Tag, Template, Media Manager, and Document Manager.</p>
-                  <p class="alert alert-success">All plugin entry paths (full/lite/enterprise) are completely free and customizable.</p>
+ <h3>React Plugin Presets (NPM)</h3>
+ <p>When integrating with <code>@editora/react</code>, you can choose plugin presets:</p>
+ <ul>
+ <li><strong><code>@editora/plugins</code></strong>: full plugin catalog</li>
+ <li><strong><code>@editora/plugins/lite</code></strong>: common/core plugins for lean bundles</li>
+ <li><strong><code>@editora/plugins/enterprise</code></strong>: advanced/specialized workflow plugins</li>
+ </ul>
+ <p><strong>Enterprise preset includes:</strong> Mention, Track Changes, Version Diff, Conditional Content, Data Binding, Content Rules, Citations, Approval Workflow, PII Redaction, Smart Paste, Blocks Library, Document Schema, Translation Workflow, Slash Commands, Spell Check, A11y Checker, Comments, Merge Tag, Template, Media Manager, and Document Manager.</p>
+ <p class="alert alert-success">All plugin entry paths (full/lite/enterprise) are completely free and customizable.</p>
 
-                  <h3>Core Bundle Usage</h3>
-                  <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+ <h3>Core Bundle Usage</h3>
+ <pre><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
-  &lt;title&gt;Editora Core Bundle&lt;/title&gt;
-  &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.js"&gt;&lt;/script&gt;
-  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.css"&gt;
+ &lt;title&gt;Editora Core Bundle&lt;/title&gt;
+ &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.js"&gt;&lt;/script&gt;
+ &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.min.css"&gt;
 &lt;/head&gt;
 &lt;body&gt;
-  &lt;editora-editor
-    plugins="bold italic underline history"
-    toolbar-items="bold italic underline | undo redo"
-    height="300"
-  &gt;
-    &lt;p&gt;Start editing with core plugins...&lt;/p&gt;
-  &lt;/editora-editor&gt;
+ &lt;editora-editor
+ plugins="bold italic underline history"
+ toolbar-items="bold italic underline | undo redo"
+ height="300"
+ &gt;
+ &lt;p&gt;Start editing with core plugins...&lt;/p&gt;
+ &lt;/editora-editor&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
 
-                  <h3>Full Bundle Usage</h3>
-                  <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+ <h3>Full Bundle Usage</h3>
+ <pre><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
-  &lt;title&gt;Editora Full Bundle&lt;/title&gt;
-  &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"&gt;&lt;/script&gt;
-  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
+ &lt;title&gt;Editora Full Bundle&lt;/title&gt;
+ &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"&gt;&lt;/script&gt;
+ &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
 &lt;/head&gt;
 &lt;body&gt;
-  &lt;editora-editor
-    plugins="bold italic underline table codeSample embedIframe math specialCharacters history"
-    toolbar-items="bold italic underline | table | codeSample | embedIframe | math | specialCharacters | undo redo"
-    height="400"
-  &gt;
-    &lt;p&gt;Start editing with all plugins...&lt;/p&gt;
-  &lt;/editora-editor&gt;
+ &lt;editora-editor
+ plugins="bold italic underline table codeSample embedIframe math specialCharacters history"
+ toolbar-items="bold italic underline | table | codeSample | embedIframe | math | specialCharacters | undo redo"
+ height="400"
+ &gt;
+ &lt;p&gt;Start editing with all plugins...&lt;/p&gt;
+ &lt;/editora-editor&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
 
-                    <h2>Basic HTML Example</h2>
-                    <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+ <h2>Basic HTML Example</h2>
+ <pre><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
-  &lt;title&gt;Editora Web Component&lt;/title&gt;
-  &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"&gt;&lt;/script&gt;
-  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
-  &lt;!-- Optional theme packs (npm: @editora/themes) --&gt;
-  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/themes/themes/dark.css"&gt;
-  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/themes/themes/acme.css"&gt;
+ &lt;title&gt;Editora Web Component&lt;/title&gt;
+ &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"&gt;&lt;/script&gt;
+ &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
+ &lt;!-- Optional theme packs (npm: @editora/themes) --&gt;
+ &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/themes/themes/dark.css"&gt;
+ &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/themes/themes/acme.css"&gt;
 &lt;/head&gt;
 &lt;body&gt;
-  &lt;editora-editor
-    plugins="bold italic underline history"
-    toolbar-items="bold italic underline | undo redo"
-    height="300"
-    theme="dark"
-    autosave='{"enabled":true,"intervalMs":3000,"storageKey":"example-doc"}'
-    security='{"sanitizeOnPaste":true,"sanitizeOnInput":true}'
-    accessibility='{"enableARIA":true,"keyboardNavigation":true}'
-    performance='{"debounceInputMs":120,"viewportOnlyScan":true}'
-  &gt;
-    &lt;p&gt;Start editing your content here...&lt;/p&gt;
-  &lt;/editora-editor&gt;
+ &lt;editora-editor
+ plugins="bold italic underline history"
+ toolbar-items="bold italic underline | undo redo"
+ height="300"
+ theme="dark"
+ autosave='{"enabled":true,"intervalMs":3000,"storageKey":"example-doc"}'
+ security='{"sanitizeOnPaste":true,"sanitizeOnInput":true}'
+ accessibility='{"enableARIA":true,"keyboardNavigation":true}'
+ performance='{"debounceInputMs":120,"viewportOnlyScan":true}'
+ &gt;
+ &lt;p&gt;Start editing your content here...&lt;/p&gt;
+ &lt;/editora-editor&gt;
 
-  &lt;script&gt;
-    // Access the editor programmatically
-    const editor = document.querySelector('editora-editor');
-    
-    // Get content
-    const content = editor.getContent();
-    
-    // Set content
-    editor.setContent('&lt;p&gt;New content&lt;/p&gt;');
-    
-    // Get API for advanced operations
-    const api = editor.getAPI();
-    if (api) {
-      console.log('Editor content:', api.getContent());
-      console.log('Runtime config:', api.getConfig());
-    }
-  &lt;/script&gt;
+ &lt;script&gt;
+ // Access the editor programmatically
+ const editor = document.querySelector('editora-editor');
+ 
+ // Get content
+ const content = editor.getContent();
+ 
+ // Set content
+ editor.setContent('&lt;p&gt;New content&lt;/p&gt;');
+ 
+ // Get API for advanced operations
+ const api = editor.getAPI();
+ if (api) {
+ console.log('Editor content:', api.getContent());
+ console.log('Runtime config:', api.getConfig());
+ }
+ &lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
 
-                    <h2>React Example</h2>
-                    <pre><code class="language-jsx">
+ <h2>React Example</h2>
+ <pre><code class="language-jsx">
 import { useState } from "react";
 import { EditoraEditor } from '@editora/react';
 
@@ -218,534 +224,535 @@ import "@editora/themes/themes/default.css";
 import "@editora/themes/themes/acme.css";
 
 import {
-  BoldPlugin,
-  ItalicPlugin,
-  HeadingPlugin,
-  HistoryPlugin
+ BoldPlugin,
+ ItalicPlugin,
+ HeadingPlugin,
+ HistoryPlugin
 } from '@editora/plugins';
 
 function MyEditor() {
-  const [content, setContent] = useState('&lt;p&gt;Start writing...&lt;/p&gt;');
+ const [content, setContent] = useState('&lt;p&gt;Start writing...&lt;/p&gt;');
 
-  return (
-    &lt;div data-theme="acme"&gt;
-      &lt;EditoraEditor
-        value={content}
-        onChange={setContent}
-        plugins={[
-          BoldPlugin(),
-          ItalicPlugin(),
-          HeadingPlugin(),
-          HistoryPlugin()
-        ]}
-      /&gt;
-    &lt;/div&gt;
-  );
+ return (
+ &lt;div data-theme="acme"&gt;
+ &lt;EditoraEditor
+ value={content}
+ onChange={setContent}
+ plugins={[
+ BoldPlugin(),
+ ItalicPlugin(),
+ HeadingPlugin(),
+ HistoryPlugin()
+ ]}
+ /&gt;
+ &lt;/div&gt;
+ );
 }</code></pre>
 
-                    <p class="alert alert-info">
-                        For CRA and other bundlers: plugin UI (table toolbar, color pickers, dialogs) requires
-                        <code>@editora/plugins/styles.css</code>. Import <code>default.css</code> first, then optional theme overrides.
-                    </p>
+ <p class="alert alert-info">
+ For CRA and other bundlers: plugin UI (table toolbar, color pickers, dialogs) requires
+ <code>@editora/plugins/styles.css</code>. Import <code>default.css</code> first, then optional theme overrides.
+ </p>
 
-                    <h2>Merge Tag Functional Customization</h2>
-                    <p>Use runtime options to define custom categories, labels, dialog text, and token output.</p>
-                    <pre><code class="language-ts">import { MergeTagPlugin } from "@editora/plugins";
+ <h2>Merge Tag Functional Customization</h2>
+ <p>Use runtime options to define custom categories, labels, dialog text, and token output.</p>
+ <pre><code class="language-ts">import { MergeTagPlugin } from "@editora/plugins";
 
 const mergeTag = MergeTagPlugin({
-  categories: [
-    {
-      id: "CUSTOMER",
-      name: "Customer",
-      tags: [
-        { key: "first_name", label: "First Name", value: "{{customer.first_name}}", preview: "John" },
-        { key: "email", label: "Email", value: "{{customer.email}}", preview: "john@acme.com" }
-      ]
-    },
-    {
-      id: "ORDER",
-      name: "Order",
-      tags: [
-        { key: "id", label: "Order ID", value: "{{order.id}}", preview: "#A-1024" }
-      ]
-    }
-  ],
-  defaultCategory: "CUSTOMER",
-  dialog: {
-    title: "Insert Variable",
-    searchPlaceholder: "Search variables...",
-    emptyStateText: "No variables found",
-    cancelText: "Close",
-    insertText: "Insert",
-    showPreview: true
-  },
-  tokenTemplate: "{value}" // supports {key} {label} {category} {value}
+ categories: [
+ {
+ id: "CUSTOMER",
+ name: "Customer",
+ tags: [
+ { key: "first_name", label: "First Name", value: "{{customer.first_name}}", preview: "John" },
+ { key: "email", label: "Email", value: "{{customer.email}}", preview: "john@acme.com" }
+ ]
+ },
+ {
+ id: "ORDER",
+ name: "Order",
+ tags: [
+ { key: "id", label: "Order ID", value: "{{order.id}}", preview: "#A-1024" }
+ ]
+ }
+ ],
+ defaultCategory: "CUSTOMER",
+ dialog: {
+ title: "Insert Variable",
+ searchPlaceholder: "Search variables...",
+ emptyStateText: "No variables found",
+ cancelText: "Close",
+ insertText: "Insert",
+ showPreview: true
+ },
+ tokenTemplate: "{value}" // supports {key} {label} {category} {value}
 });</code></pre>
 
-                    <h2>Template Plugin: Add Custom Templates</h2>
-                    <p>Register templates before initializing the editor plugin list.</p>
-                    <pre><code class="language-ts">import { TemplatePlugin, addCustomTemplate } from "@editora/plugins";
+ <h2>Template Plugin: Add Custom Templates</h2>
+ <p>Register templates before initializing the editor plugin list.</p>
+ <pre><code class="language-ts">import { TemplatePlugin, addCustomTemplate } from "@editora/plugins";
 
 addCustomTemplate({
-  id: "invoice-basic",
-  name: "Invoice (Basic)",
-  category: "Billing",
-  description: "Simple invoice template",
-  html: `
-    &lt;h1&gt;Invoice&lt;/h1&gt;
-    &lt;p&gt;&lt;strong&gt;Customer:&lt;/strong&gt; {{customer.name}}&lt;/p&gt;
-    &lt;p&gt;&lt;strong&gt;Date:&lt;/strong&gt; {{today}}&lt;/p&gt;
-    &lt;p&gt;&lt;strong&gt;Total:&lt;/strong&gt; {{invoice.total}}&lt;/p&gt;
-  `,
-  tags: ["invoice", "billing"]
+ id: "invoice-basic",
+ name: "Invoice (Basic)",
+ category: "Billing",
+ description: "Simple invoice template",
+ html: `
+ &lt;h1&gt;Invoice&lt;/h1&gt;
+ &lt;p&gt;&lt;strong&gt;Customer:&lt;/strong&gt; {{customer.name}}&lt;/p&gt;
+ &lt;p&gt;&lt;strong&gt;Date:&lt;/strong&gt; {{today}}&lt;/p&gt;
+ &lt;p&gt;&lt;strong&gt;Total:&lt;/strong&gt; {{invoice.total}}&lt;/p&gt;
+ `,
+ tags: ["invoice", "billing"]
 });
 
 const plugins = [TemplatePlugin()];</code></pre>
 
-                    <h2>Vue 3 Example</h2>
-                    <pre><code class="language-html">&lt;template&gt;
-  &lt;div class="editor-wrapper"&gt;
-    &lt;editora-editor
-      plugins="bold italic underline history"
-      toolbar-items="bold italic underline | undo redo"
-      height="300"
-    &gt;
-      &lt;p&gt;Hello from Vue 3!&lt;/p&gt;
-    &lt;/editora-editor&gt;
-  &lt;/div&gt;
+ <h2>Vue 3 Example</h2>
+ <pre><code class="language-html">&lt;template&gt;
+ &lt;div class="editor-wrapper"&gt;
+ &lt;editora-editor
+ plugins="bold italic underline history"
+ toolbar-items="bold italic underline | undo redo"
+ height="300"
+ &gt;
+ &lt;p&gt;Hello from Vue 3!&lt;/p&gt;
+ &lt;/editora-editor&gt;
+ &lt;/div&gt;
 &lt;/template&gt;
 
 &lt;script setup&gt;
 import { onMounted } from 'vue';
 
 onMounted(() =&gt; {
-  // Access the editor programmatically if needed
-  const editor = document.querySelector('editora-editor');
-  if (editor) {
-    const api = editor.getAPI();
-    // Use API for advanced operations
-  }
+ // Access the editor programmatically if needed
+ const editor = document.querySelector('editora-editor');
+ if (editor) {
+ const api = editor.getAPI();
+ // Use API for advanced operations
+ }
 });
 &lt;/script&gt;</code></pre>
 
-                    <h2>Vue 3 + Plugins Example</h2>
-                    <pre><code class="language-html">&lt;template&gt;
-  &lt;div class="editor-wrapper"&gt;
-    &lt;editora-editor
-      plugins="bold italic underline table codeSample history"
-      toolbar-items="bold italic underline | table | codeSample | undo redo"
-      height="400"
-    &gt;
-      &lt;p&gt;Hello from Vue with plugins!&lt;/p&gt;
-    &lt;/editora-editor&gt;
-  &lt;/div&gt;
+ <h2>Vue 3 + Plugins Example</h2>
+ <pre><code class="language-html">&lt;template&gt;
+ &lt;div class="editor-wrapper"&gt;
+ &lt;editora-editor
+ plugins="bold italic underline table codeSample history"
+ toolbar-items="bold italic underline | table | codeSample | undo redo"
+ height="400"
+ &gt;
+ &lt;p&gt;Hello from Vue with plugins!&lt;/p&gt;
+ &lt;/editora-editor&gt;
+ &lt;/div&gt;
 &lt;/template&gt;
 
 &lt;script setup&gt;
 import { onMounted } from 'vue';
 
 onMounted(() =&gt; {
-  const editor = document.querySelector('editora-editor');
-  if (editor) {
-    const api = editor.getAPI();
-    // Use API for advanced operations
-  }
+ const editor = document.querySelector('editora-editor');
+ if (editor) {
+ const api = editor.getAPI();
+ // Use API for advanced operations
+ }
 });
 &lt;/script&gt;</code></pre>
 
-                    <h2>Angular Example</h2>
-                    <pre><code class="language-typescript">// app.component.ts
+ <h2>Angular Example</h2>
+ <pre><code class="language-typescript">// app.component.ts
 import { Component, AfterViewInit } from '@angular/core';
 
 @Component({
-  selector: 'app-root',
-  template: `
-    &lt;editora-editor
-      plugins="bold italic underline history"
-      toolbar-items="bold italic underline | undo redo"
-      height="300"
-    &gt;
-      &lt;p&gt;Hello from Angular!&lt;/p&gt;
-    &lt;/editora-editor&gt;
-  `
+ selector: 'app-root',
+ template: `
+ &lt;editora-editor
+ plugins="bold italic underline history"
+ toolbar-items="bold italic underline | undo redo"
+ height="300"
+ &gt;
+ &lt;p&gt;Hello from Angular!&lt;/p&gt;
+ &lt;/editora-editor&gt;
+ `
 })
 export class AppComponent implements AfterViewInit {
-  ngAfterViewInit() {
-    const editor = document.querySelector('editora-editor');
-    if (editor) {
-      const api = editor.getAPI();
-      // Use API for advanced operations
-    }
-  }
+ ngAfterViewInit() {
+ const editor = document.querySelector('editora-editor');
+ if (editor) {
+ const api = editor.getAPI();
+ // Use API for advanced operations
+ }
+ }
 }</code></pre>
 
-                    <h2>Svelte Example</h2>
-                    <pre><code class="language-html">&lt;script&gt;
-  import { onMount } from 'svelte';
+ <h2>Svelte Example</h2>
+ <pre><code class="language-html">&lt;script&gt;
+ import { onMount } from 'svelte';
 
-  onMount(() =&gt; {
-    const editor = document.querySelector('editora-editor');
-    if (editor) {
-      const api = editor.getAPI();
-      // Use API for advanced operations
-    }
-  });
+ onMount(() =&gt; {
+ const editor = document.querySelector('editora-editor');
+ if (editor) {
+ const api = editor.getAPI();
+ // Use API for advanced operations
+ }
+ });
 &lt;/script&gt;
 
 &lt;editora-editor
-  plugins="bold italic underline history"
-  toolbar-items="bold italic underline | undo redo"
-  height="300"
+ plugins="bold italic underline history"
+ toolbar-items="bold italic underline | undo redo"
+ height="300"
 &gt;
-  &lt;p&gt;Hello from Svelte!&lt;/p&gt;
+ &lt;p&gt;Hello from Svelte!&lt;/p&gt;
 &lt;/editora-editor&gt;</code></pre>
 
-                    <h2>With Plugins Example</h2>
-                    <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+ <h2>With Plugins Example</h2>
+ <pre><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
-  &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"&gt;&lt;/script&gt;
-  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
+ &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"&gt;&lt;/script&gt;
+ &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
 &lt;/head&gt;
 &lt;body&gt;
-  &lt;editora-editor
-    plugins="bold italic underline image table codeSample history"
-    toolbar-items="bold italic underline | insertImage insertVideo | table | codeSample | undo redo"
-    height="400"
-  &gt;
-    &lt;p&gt;Start editing...&lt;/p&gt;
-  &lt;/editora-editor&gt;
+ &lt;editora-editor
+ plugins="bold italic underline image table codeSample history"
+ toolbar-items="bold italic underline | insertImage insertVideo | table | codeSample | undo redo"
+ height="400"
+ &gt;
+ &lt;p&gt;Start editing...&lt;/p&gt;
+ &lt;/editora-editor&gt;
 
-  &lt;button id="save"&gt;Save&lt;/button&gt;
+ &lt;button id="save"&gt;Save&lt;/button&gt;
 
-  &lt;script&gt;
-    document.getElementById('save').addEventListener('click', () => {
-      const editor = document.querySelector('editora-editor');
-      const html = editor.innerHTML;
-      // Send to server
-      fetch('/api/save', {
-        method: 'POST',
-        body: JSON.stringify({ content: html })
-      });
-    });
-  &lt;/script&gt;
+ &lt;script&gt;
+ document.getElementById('save').addEventListener('click', () => {
+ const editor = document.querySelector('editora-editor');
+ const html = editor.innerHTML;
+ // Send to server
+ fetch('/api/save', {
+ method: 'POST',
+ body: JSON.stringify({ content: html })
+ });
+ });
+ &lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
 
-                    <h2>Runtime Config Example (setConfig)</h2>
-                    <pre><code class="language-javascript">const editor = document.querySelector('editora-editor');
+ <h2>Runtime Config Example (setConfig)</h2>
+ <pre><code class="language-javascript">const editor = document.querySelector('editora-editor');
 
 await editor.setConfig({
-  theme: 'acme',
-  toolbar: {
-    items: 'undo redo | bold italic underline',
-    floating: true,
-    sticky: true
-  },
-  autosave: {
-    enabled: true,
-    intervalMs: 4000,
-    storageKey: 'runtime-doc',
-    provider: 'localStorage'
-  },
-  security: {
-    sanitizeOnPaste: true,
-    sanitizeOnInput: true
-  },
-  accessibility: {
-    enableARIA: true,
-    keyboardNavigation: true,
-    checker: true
-  },
-  performance: {
-    debounceInputMs: 120,
-    viewportOnlyScan: true
-  }
+ theme: 'acme',
+ toolbar: {
+ items: 'undo redo | bold italic underline',
+ floating: true,
+ sticky: true
+ },
+ autosave: {
+ enabled: true,
+ intervalMs: 4000,
+ storageKey: 'runtime-doc',
+ provider: 'localStorage'
+ },
+ security: {
+ sanitizeOnPaste: true,
+ sanitizeOnInput: true
+ },
+ accessibility: {
+ enableARIA: true,
+ keyboardNavigation: true,
+ checker: true
+ },
+ performance: {
+ debounceInputMs: 120,
+ viewportOnlyScan: true
+ }
 });</code></pre>
 
-                    <h2>Auto-Save Example</h2>
-                    <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+ <h2>Auto-Save Example</h2>
+ <pre><code class="language-html">&lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
-  &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"&gt;&lt;/script&gt;
-  &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
+ &lt;script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"&gt;&lt;/script&gt;
+ &lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css"&gt;
 &lt;/head&gt;
 &lt;body&gt;
-  &lt;editora-editor
-    plugins="bold italic underline history"
-    height="300"
-    autosave='{"enabled":true,"intervalMs":30000,"storageKey":"draft-doc","provider":"localStorage"}'
-  &gt;
-    &lt;p&gt;Start typing...&lt;/p&gt;
-  &lt;/editora-editor&gt;
+ &lt;editora-editor
+ plugins="bold italic underline history"
+ height="300"
+ autosave='{"enabled":true,"intervalMs":30000,"storageKey":"draft-doc","provider":"localStorage"}'
+ &gt;
+ &lt;p&gt;Start typing...&lt;/p&gt;
+ &lt;/editora-editor&gt;
 
-  &lt;script&gt;
-    // Built-in autosave stores content using the configured storageKey.
-    // You can still read latest content manually when needed:
-    const editor = document.querySelector('editora-editor');
-    editor.addEventListener('content-change', () => {
-      console.log('Current content:', editor.getContent());
-    });
-  &lt;/script&gt;
+ &lt;script&gt;
+ // Built-in autosave stores content using the configured storageKey.
+ // You can still read latest content manually when needed:
+ const editor = document.querySelector('editora-editor');
+ editor.addEventListener('content-change', () => {
+ console.log('Current content:', editor.getContent());
+ });
+ &lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
 
-                    <h2>Custom Toolbar Example</h2>
-                    <pre><code class="language-html">&lt;editora-editor
-  plugins="bold italic underline heading list link image history"
-  toolbar-items="bold italic underline | heading1 heading2 | bullist numlist | link insertImage | undo redo"
-  height="300"
+ <h2>Custom Toolbar Example</h2>
+ <pre><code class="language-html">&lt;editora-editor
+ plugins="bold italic underline heading list link image history"
+ toolbar-items="bold italic underline | heading1 heading2 | bullist numlist | link insertImage | undo redo"
+ height="300"
 &gt;
-  &lt;p&gt;Custom toolbar with specific buttons&lt;/p&gt;
+ &lt;p&gt;Custom toolbar with specific buttons&lt;/p&gt;
 &lt;/editora-editor&gt;</code></pre>
 
-                    <h2>Event Handling Example</h2>
-                    <pre><code class="language-html">&lt;editora-editor
-  plugins="bold italic underline history"
-  height="300"
+ <h2>Event Handling Example</h2>
+ <pre><code class="language-html">&lt;editora-editor
+ plugins="bold italic underline history"
+ height="300"
 &gt;
-  &lt;p&gt;Try editing this content...&lt;/p&gt;
+ &lt;p&gt;Try editing this content...&lt;/p&gt;
 &lt;/editora-editor&gt;
 
 &lt;div id="preview"&gt;&lt;/div&gt;
 &lt;div id="status"&gt;Ready&lt;/div&gt;
 
 &lt;script&gt;
-  const editor = document.querySelector('editora-editor');
-  const preview = document.getElementById('preview');
-  const status = document.getElementById('status');
+ const editor = document.querySelector('editora-editor');
+ const preview = document.getElementById('preview');
+ const status = document.getElementById('status');
 
-  // Listen for content changes
-  editor.addEventListener('input', () => {
-    preview.innerHTML = editor.innerHTML;
-  });
+ // Listen for content changes
+ editor.addEventListener('input', () => {
+ preview.innerHTML = editor.innerHTML;
+ });
 
-  // Focus/blur events
-  editor.addEventListener('focus', () => {
-    status.textContent = 'Editing...';
-  });
+ // Focus/blur events
+ editor.addEventListener('focus', () => {
+ status.textContent = 'Editing...';
+ });
 
-  editor.addEventListener('blur', () => {
-    status.textContent = 'Ready';
-  });
+ editor.addEventListener('blur', () => {
+ status.textContent = 'Ready';
+ });
 &lt;/script&gt;</code></pre>
 
-                    <h2>Data Binding Example</h2>
-                    <pre><code class="language-html">&lt;form id="form"&gt;
-  &lt;input type="hidden" id="content" name="content"&gt;
-  &lt;editora-editor
-    plugins="bold italic underline history"
-    height="300"
-  &gt;
-    &lt;p&gt;Start writing...&lt;/p&gt;
-  &lt;/editora-editor&gt;
-  &lt;button type="submit"&gt;Save&lt;/button&gt;
+ <h2>Data Binding Example</h2>
+ <pre><code class="language-html">&lt;form id="form"&gt;
+ &lt;input type="hidden" id="content" name="content"&gt;
+ &lt;editora-editor
+ plugins="bold italic underline history"
+ height="300"
+ &gt;
+ &lt;p&gt;Start writing...&lt;/p&gt;
+ &lt;/editora-editor&gt;
+ &lt;button type="submit"&gt;Save&lt;/button&gt;
 &lt;/form&gt;
 
 &lt;script&gt;
-  const form = document.getElementById('form');
-  const contentInput = document.getElementById('content');
-  const editor = document.querySelector('editora-editor');
+ const form = document.getElementById('form');
+ const contentInput = document.getElementById('content');
+ const editor = document.querySelector('editora-editor');
 
-  // Set initial content
-  editor.innerHTML = contentInput.value || '&lt;p&gt;Start writing...&lt;/p&gt;';
+ // Set initial content
+ editor.innerHTML = contentInput.value || '&lt;p&gt;Start writing...&lt;/p&gt;';
 
-  // Update input on change
-  editor.addEventListener('input', () => {
-    contentInput.value = editor.innerHTML;
-  });
+ // Update input on change
+ editor.addEventListener('input', () => {
+ contentInput.value = editor.innerHTML;
+ });
 
-  // Submit form
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    // Form is ready with content in contentInput
-    console.log('Content to save:', contentInput.value);
-    // form.submit();
-  });
+ // Submit form
+ form.addEventListener('submit', (e) => {
+ e.preventDefault();
+ // Form is ready with content in contentInput
+ console.log('Content to save:', contentInput.value);
+ // form.submit();
+ });
 &lt;/script&gt;</code></pre>
 
-                    <h2>Formatting Example</h2>
-                    <pre><code class="language-html">&lt;editora-editor
-  plugins="bold italic underline heading link history"
-  toolbar-items="bold italic underline | heading1 heading2 heading3 | link | clearFormatting"
-  height="300"
+ <h2>Formatting Example</h2>
+ <pre><code class="language-html">&lt;editora-editor
+ plugins="bold italic underline heading link history"
+ toolbar-items="bold italic underline | heading1 heading2 heading3 | link | clearFormatting"
+ height="300"
 &gt;
-  &lt;p&gt;Select text and use the toolbar buttons to format it.&lt;/p&gt;
+ &lt;p&gt;Select text and use the toolbar buttons to format it.&lt;/p&gt;
 &lt;/editora-editor&gt;
 
 &lt;!-- Custom buttons for programmatic formatting --&gt;
 &lt;div style="margin-top: 10px;"&gt;
-  &lt;button onclick="makeBold()"&gt;Make Bold&lt;/button&gt;
-  &lt;button onclick="insertHeading(1)"&gt;H1&lt;/button&gt;
-  &lt;button onclick="insertLink()"&gt;Insert Link&lt;/button&gt;
+ &lt;button onclick="makeBold()"&gt;Make Bold&lt;/button&gt;
+ &lt;button onclick="insertHeading(1)"&gt;H1&lt;/button&gt;
+ &lt;button onclick="insertLink()"&gt;Insert Link&lt;/button&gt;
 &lt;/div&gt;
 
 &lt;script&gt;
-  const editor = document.querySelector('editora-editor');
-  const api = editor.getAPI();
+ const editor = document.querySelector('editora-editor');
+ const api = editor.getAPI();
 
-  function makeBold() {
-    if (api) {
-      // Use API to execute commands programmatically
-      api.execCommand('bold');
-    }
-  }
+ function makeBold() {
+ if (api) {
+ // Use API to execute commands programmatically
+ api.execCommand('bold');
+ }
+ }
 
-  function insertHeading(level = 1) {
-    if (api) {
-      api.execCommand('heading', { level });
-    }
-  }
+ function insertHeading(level = 1) {
+ if (api) {
+ api.execCommand('heading', { level });
+ }
+ }
 
-  function insertLink() {
-    const url = prompt('Enter URL:');
-    if (url && api) {
-      api.execCommand('insertLink', { url });
-    }
-  }
+ function insertLink() {
+ const url = prompt('Enter URL:');
+ if (url && api) {
+ api.execCommand('insertLink', { url });
+ }
+ }
 &lt;/script&gt;</code></pre>
 
-                    <h2>Validation Example</h2>
-                    <pre><code class="language-html">&lt;editora-editor
-  plugins="bold italic underline history"
-  height="300"
+ <h2>Validation Example</h2>
+ <pre><code class="language-html">&lt;editora-editor
+ plugins="bold italic underline history"
+ height="300"
 &gt;
-  &lt;p&gt;Write some content here...&lt;/p&gt;
+ &lt;p&gt;Write some content here...&lt;/p&gt;
 &lt;/editora-editor&gt;
 
 &lt;button id="submit"&gt;Submit Content&lt;/button&gt;
 
 &lt;script&gt;
-  const editor = document.querySelector('editora-editor');
-  const submitBtn = document.getElementById('submit');
+ const editor = document.querySelector('editora-editor');
+ const submitBtn = document.getElementById('submit');
 
-  function validateContent() {
-    const content = editor.innerHTML;
-    
-    // Check if empty
-    if (content === '&lt;p&gt;&lt;/p&gt;' || content.trim() === '') {
-      alert('Content cannot be empty');
-      return false;
-    }
-    
-    // Check minimum length
-    const text = new DOMParser().parseFromString(content, 'text/html').body.textContent;
-    if (text.length &lt; 10) {
-      alert('Content must be at least 10 characters');
-      return false;
-    }
-    
-    return true;
-  }
+ function validateContent() {
+ const content = editor.innerHTML;
+ 
+ // Check if empty
+ if (content === '&lt;p&gt;&lt;/p&gt;' || content.trim() === '') {
+ alert('Content cannot be empty');
+ return false;
+ }
+ 
+ // Check minimum length
+ const text = new DOMParser().parseFromString(content, 'text/html').body.textContent;
+ if (text.length &lt; 10) {
+ alert('Content must be at least 10 characters');
+ return false;
+ }
+ 
+ return true;
+ }
 
-  submitBtn.addEventListener('click', () => {
-    if (validateContent()) {
-      // Save content
-      saveContent(editor.innerHTML);
-    }
-  });
+ submitBtn.addEventListener('click', () => {
+ if (validateContent()) {
+ // Save content
+ saveContent(editor.innerHTML);
+ }
+ });
 
-  function saveContent(content) {
-    console.log('Saving content:', content);
-    // Send to server...
-  }
+ function saveContent(content) {
+ console.log('Saving content:', content);
+ // Send to server...
+ }
 &lt;/script&gt;</code></pre>
 
-                    <div style="margin-top: 3rem; padding: 2rem; background: var(--gray-50); border-radius: var(--border-radius);">
-                        <h3>💡 Additional Example Files</h3>
-                        <p>Explore these additional working example files:</p>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
-                            <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--gray-200);">
-                                <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">🔗 Core Examples</h4>
-                                <ul style="margin: 0; padding-left: 1rem;">
-                                    <li><a href="../quick-test.html">Quick Test</a> - Fast testing example</li>
-                                    <li><a href="../webcomponent-demo.html">Web Component Demo</a> - Component showcase</li>
-                                    <li><a href="../complete-test.html">Complete Test</a> - Full feature test</li>
-                                </ul>
-                            </div>
-                            <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--gray-200);">
-                                <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">🎨 UI & Toolbar</h4>
-                                <ul style="margin: 0; padding-left: 1rem;">
-                                    <li><a href="../test-toolbar-fix.html">Toolbar Test</a> - Toolbar debugging</li>
-                                    <li><a href="../debug-toolbar.html">Debug Toolbar</a> - Toolbar inspection</li>
-                                    <li><a href="../test-single-css.html">Single CSS Test</a> - Minimal styling</li>
-                                </ul>
-                            </div>
-                            <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--gray-200);">
-                                <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">📷 Media & Plugins</h4>
-                                <ul style="margin: 0; padding-left: 1rem;">
-                                    <li><a href="../test-media-manager.html">Media Manager</a> - File upload handling</li>
-                                    <li><a href="../test-media-manager-webcomponent.html">Media Manager WC</a> - Web component version</li>
-                                    <li><a href="../test-anchor-plugin.html">Anchor Plugin</a> - Link anchors</li>
-                                </ul>
-                            </div>
-                            <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--gray-200);">
-                                <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">🔧 Advanced Features</h4>
-                                <ul style="margin: 0; padding-left: 1rem;">
-                                    <li><a href="../test-multi-instance-embed-iframe.html">Multi Instance</a> - Multiple editors</li>
-                                    <li><a href="../test-pdf-export.html">PDF Export</a> - Document export</li>
-                                    <li><a href="../test-native-plugins.html">Native Plugins</a> - Plugin verification</li>
-                                    <li><a href="../verify-native-plugins.html">Plugin Verification</a> - Plugin testing</li>
-                                    <li><a href="../100-percent-connected.html">100% Connected</a> - Full integration</li>
-                                </ul>
-                            </div>
-                            <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--gray-200);">
-                                <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">🍞 Toast Notifications</h4>
-                                <ul style="margin: 0; padding-left: 1rem;">
-                                    <li><a href="../toast-demo.html">Toast Demo</a> - Advanced toast notification system</li>
-                                </ul>
-                            </div>
-                            <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--gray-200);">
-                                <h4 style="margin: 0 0 0.5rem 0; color: var(--primary);">⚛️ Framework Examples</h4>
-                                <ul style="margin: 0; padding-left: 1rem;">
-                                    <li><a href="../vanilla-html-bundles.html">Bundle Comparison</a> - Core vs Full bundle demo</li>
-                                    <li><a href="../vanilla-html-plugins.html">Separate Plugins</a> - Individual plugin loading</li>
-                                    <li><a href="../webcomponent-basic.html">Web Component Basic</a> - Simple web component</li>
-                                    <li><a href="../webcomponent-advanced.html">Web Component Advanced</a> - Advanced features</li>
-                                    <li><a href="../webcomponent-all-plugins.html">All Plugins</a> - Complete plugin showcase</li>
-                                    <li><a href="../webcomponent-toolbar-test.html">Toolbar Test</a> - Toolbar configurations</li>
-                                    <li><a href="../webcomponent-performance-accessibility-lab.html">Performance + A11y Lab</a> - Runtime config verification</li>
-                                    <li><a href="../webcomponent-security-autosave-lab.html">Security + Autosave Lab</a> - Sanitization and persistence config</li>
-                                    <li><a href="../theme-acme.html">Acme Theme Demo</a> - Theme scoping verification</li>
-                                    <li><a href="../statusbar-demo.html">Status Bar Demo</a> - Status bar features</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--gray-600);">
-                            All example files use CDN URLs and can be opened directly in your browser.
-                            Check the <a href="https://github.com/ajaykr089/Editora/tree/main/examples" target="_blank" rel="noopener">GitHub examples directory</a> for the complete collection.
-                        </p>
-                    </div>
-                </main>
+ <div class="section-header" style="text-align:left; margin: 3rem 0 2rem;">
+<h2 style="text-align:left; font-size:1.6rem;">More example files</h2>
+<p style="margin:0;">Working examples covering every part of the editor, grouped by what they demonstrate.</p>
+</div>
+<div class="plugin-grid">
+<div class="plugin-card">
+<h4>Core Examples</h4>
+<ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.6rem;">
+<li><a href="../quick-test.html" class="plugin-link">Quick Test</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Fast testing example</div></li>
+<li><a href="../webcomponent-demo.html" class="plugin-link">Web Component Demo</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Component showcase</div></li>
+<li><a href="../complete-test.html" class="plugin-link">Complete Test</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Full feature test</div></li>
+</ul>
+</div>
+<div class="plugin-card">
+<h4>UI & Toolbar</h4>
+<ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.6rem;">
+<li><a href="../test-toolbar-fix.html" class="plugin-link">Toolbar Test</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Toolbar debugging</div></li>
+<li><a href="../debug-toolbar.html" class="plugin-link">Debug Toolbar</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Toolbar inspection</div></li>
+<li><a href="../test-single-css.html" class="plugin-link">Single CSS Test</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Minimal styling</div></li>
+</ul>
+</div>
+<div class="plugin-card">
+<h4>Media & Plugins</h4>
+<ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.6rem;">
+<li><a href="../test-media-manager.html" class="plugin-link">Media Manager</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">File upload handling</div></li>
+<li><a href="../test-media-manager-webcomponent.html" class="plugin-link">Media Manager WC</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Web component version</div></li>
+<li><a href="../test-anchor-plugin.html" class="plugin-link">Anchor Plugin</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Link anchors</div></li>
+</ul>
+</div>
+<div class="plugin-card">
+<h4>Advanced Features</h4>
+<ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.6rem;">
+<li><a href="../test-multi-instance-embed-iframe.html" class="plugin-link">Multi Instance</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Multiple editors</div></li>
+<li><a href="../test-pdf-export.html" class="plugin-link">PDF Export</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Document export</div></li>
+<li><a href="../test-native-plugins.html" class="plugin-link">Native Plugins</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Plugin verification</div></li>
+<li><a href="../verify-native-plugins.html" class="plugin-link">Plugin Verification</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Plugin testing</div></li>
+<li><a href="../100-percent-connected.html" class="plugin-link">100% Connected</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Full integration</div></li>
+</ul>
+</div>
+<div class="plugin-card">
+<h4>Toast Notifications</h4>
+<ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.6rem;">
+<li><a href="../toast-demo.html" class="plugin-link">Toast Demo</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Advanced toast notification system</div></li>
+</ul>
+</div>
+<div class="plugin-card">
+<h4>Framework Examples</h4>
+<ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.6rem;">
+<li><a href="../vanilla-html-bundles.html" class="plugin-link">Bundle Comparison</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Core vs Full bundle demo</div></li>
+<li><a href="../vanilla-html-plugins.html" class="plugin-link">Separate Plugins</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Individual plugin loading</div></li>
+<li><a href="../webcomponent-basic.html" class="plugin-link">Web Component Basic</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Simple web component</div></li>
+<li><a href="../webcomponent-advanced.html" class="plugin-link">Web Component Advanced</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Advanced features</div></li>
+<li><a href="../webcomponent-all-plugins.html" class="plugin-link">All Plugins</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Complete plugin showcase</div></li>
+<li><a href="../webcomponent-toolbar-test.html" class="plugin-link">Toolbar Test</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Toolbar configurations</div></li>
+<li><a href="../webcomponent-performance-accessibility-lab.html" class="plugin-link">Performance + A11y Lab</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Runtime config verification</div></li>
+<li><a href="../webcomponent-security-autosave-lab.html" class="plugin-link">Security + Autosave Lab</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Sanitization and persistence config</div></li>
+<li><a href="../theme-acme.html" class="plugin-link">Acme Theme Demo</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Theme scoping verification</div></li>
+<li><a href="../statusbar-demo.html" class="plugin-link">Status Bar Demo</a><div style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Status bar features</div></li>
+</ul>
+</div>
+</div>
+<p style="margin-top: 2rem; font-size: 0.9rem; color: var(--text-muted);">
+All example files use CDN URLs and can be opened directly in your browser.
+Check the <a href="https://github.com/ajaykr089/Editora/tree/main/examples" target="_blank" rel="noopener">GitHub examples directory</a> for the complete collection.
+</p>
+</main>
+                    <aside class="docs-toc" id="docsToc"></aside>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Footer -->
-    <footer>
+ <!-- Footer -->
+ <footer>
         <div class="container">
             <div class="footer-links">
                 <div class="footer-section">
-                    <h5>📚 Documentation</h5>
+                    <h5>Documentation</h5>
                     <ul>
-                        <li><a href="docs/installation.html">Installation</a></li>
-                        <li><a href="docs/features.html">Features</a></li>
-                        <li><a href="docs/api.html">API Reference</a></li>
-                        <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
-                        <li><a href="docs/custom-plugins.html">Custom Plugins</a></li>
+                        <li><a href="../docs/installation.html">Installation</a></li>
+                        <li><a href="../docs/features.html">Features</a></li>
+                        <li><a href="../docs/api.html">API Reference</a></li>
+                        <li><a href="../docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                        <li><a href="../docs/custom-plugins.html">Custom Plugins</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h5>🔌 Plugins</h5>
+                    <h5>Plugins</h5>
                     <ul>
-                        <li><a href="plugins/index.html">All Plugins</a></li>
-                        <li><a href="plugins/media-manager.html">Media Manager</a></li>
-                        <li><a href="plugins/table.html">Tables</a></li>
-                        <li><a href="plugins/code-sample.html">Code Samples</a></li>
+                        <li><a href="../plugins/index.html">All Plugins</a></li>
+                        <li><a href="../plugins/media-manager.html">Media Manager</a></li>
+                        <li><a href="../plugins/table.html">Tables</a></li>
+                        <li><a href="../plugins/code-sample.html">Code Samples</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h5>🔗 Links</h5>
+                    <h5>Links</h5>
                     <ul>
                         <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
                         <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
@@ -754,9 +761,9 @@ await editor.setConfig({
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h5>ℹ️ About</h5>
+                    <h5>About</h5>
                     <ul>
-                        <li><a href="docs/about.html">About Editora</a></li>
+                        <li><a href="../docs/about.html">About Editora</a></li>
                         <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
                         <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
                         <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
@@ -764,11 +771,24 @@ await editor.setConfig({
                 </div>
             </div>
             <div class="footer-bottom">
-                <p style="color:white">&copy; 2024-2026 Editora.Built with <span style="color: red;">&hearts;</span> by Editora Team. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+                <p style="color:white">&copy; 2024-2026 Editora. Built with <span style="color: var(--accent);">&hearts;</span> by Editora Team. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
             </div>
         </div>
     </footer>
+    <!-- Search Modal -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-panel">
+            <div class="search-input-row">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                <input type="text" class="search-input" placeholder="Search docs, plugins, examples..." aria-label="Search">
+            </div>
+            <div class="search-results"></div>
+        </div>
+    </div>
 
-    <script src="../assets/js/main.js"></script>
+
+ <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/search-index.js"></script>
+    <script src="../assets/js/site-enhancements.js"></script>
 </body>
 </html>

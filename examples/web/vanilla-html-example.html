@@ -1,175 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Meta Tags for SEO -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Editora Vanilla Html Example - Example and demonstration of Editora rich text editor features.">
-    <meta name="keywords" content="vanilla html example, Editora editor, example, demonstration">
-    <meta name="author" content="Editora Contributors">
-    <meta name="robots" content="index, follow">
-    <meta property="og:title" content="Editora - Vanilla Html Example">
-    <meta property="og:description" content="Editora Vanilla Html Example - Example and demonstration of Editora rich text editor features.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://editora-free.netlify.app/">
-    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="Editora - Vanilla Html Example">
-    <meta property="twitter:description" content="Editora Vanilla Html Example - Example and demonstration of Editora rich text editor features">
-    <meta name="theme-color" content="#007bff">
+ <!-- Meta Tags for SEO -->
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <meta name="description" content="Editora Vanilla Html Example - Example and demonstration of Editora rich text editor features.">
+ <meta name="keywords" content="vanilla html example, Editora editor, example, demonstration">
+ <meta name="author" content="Editora Contributors">
+ <meta name="robots" content="index, follow">
+ <meta property="og:title" content="Editora - Vanilla Html Example">
+ <meta property="og:description" content="Editora Vanilla Html Example - Example and demonstration of Editora rich text editor features.">
+ <meta property="og:type" content="website">
+ <meta property="og:url" content="https://editora-free.netlify.app/">
+ <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+ <meta property="twitter:card" content="summary_large_image">
+ <meta property="twitter:title" content="Editora - Vanilla Html Example">
+ <meta property="twitter:description" content="Editora Vanilla Html Example - Example and demonstration of Editora rich text editor features">
+ <meta name="theme-color" content="#12131A">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
-    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
-    <title>Editora - Vanilla Html Example</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+ <!-- Favicon -->
+ <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+ <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+ <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+ <title>Editora - Vanilla Html Example</title>
+ <link rel="stylesheet" href="assets/css/style.css">
 <body>
-    <h1>Editora Rich Text Editor</h1>
-    <p class="subtitle">Vanilla HTML/JavaScript Example - No Build Tools Required</p>
+    <a href="#main-content" class="skip-link">Skip to content</a>
+ <h1>Editora Rich Text Editor</h1>
+ <p class="subtitle">Vanilla HTML/JavaScript Example - No Build Tools Required</p>
 
-    <div class="editor-container">
-        <div class="toolbar">
-            <button onclick="editor.execCommand('bold')" title="Bold (Ctrl+B)">
-                <strong>B</strong>
-            </button>
-            <button onclick="editor.execCommand('italic')" title="Italic (Ctrl+I)">
-                <em>I</em>
-            </button>
-            <button onclick="editor.execCommand('underline')" title="Underline (Ctrl+U)">
-                <u>U</u>
-            </button>
-            <button onclick="editor.execCommand('strikethrough')" title="Strikethrough">
-                <s>S</s>
-            </button>
-            <button onclick="editor.execCommand('heading', { level: 1 })" title="Heading 1">
-                H1
-            </button>
-            <button onclick="editor.execCommand('heading', { level: 2 })" title="Heading 2">
-                H2
-            </button>
-            <button onclick="editor.execCommand('heading', { level: 3 })" title="Heading 3">
-                H3
-            </button>
-            <button onclick="editor.execCommand('bulletList')" title="Bullet List">
-                • List
-            </button>
-            <button onclick="editor.execCommand('orderedList')" title="Numbered List">
-                1. List
-            </button>
-            <button onclick="editor.execCommand('undo')" title="Undo (Ctrl+Z)">
-                ↶ Undo
-            </button>
-            <button onclick="editor.execCommand('redo')" title="Redo (Ctrl+Y)">
-                ↷ Redo
-            </button>
-        </div>
-        <div id="editor" class="editor-content" contenteditable="true"></div>
-    </div>
+ <div class="editor-container">
+ <div class="toolbar">
+ <button onclick="editor.execCommand('bold')" title="Bold (Ctrl+B)">
+ <strong>B</strong>
+ </button>
+ <button onclick="editor.execCommand('italic')" title="Italic (Ctrl+I)">
+ <em>I</em>
+ </button>
+ <button onclick="editor.execCommand('underline')" title="Underline (Ctrl+U)">
+ <u>U</u>
+ </button>
+ <button onclick="editor.execCommand('strikethrough')" title="Strikethrough">
+ <s>S</s>
+ </button>
+ <button onclick="editor.execCommand('heading', { level: 1 })" title="Heading 1">
+ H1
+ </button>
+ <button onclick="editor.execCommand('heading', { level: 2 })" title="Heading 2">
+ H2
+ </button>
+ <button onclick="editor.execCommand('heading', { level: 3 })" title="Heading 3">
+ H3
+ </button>
+ <button onclick="editor.execCommand('bulletList')" title="Bullet List">
+ • List
+ </button>
+ <button onclick="editor.execCommand('orderedList')" title="Numbered List">
+ 1. List
+ </button>
+ <button onclick="editor.execCommand('undo')" title="Undo (Ctrl+Z)">
+ ↶ Undo
+ </button>
+ <button onclick="editor.execCommand('redo')" title="Redo (Ctrl+Y)">
+ ↷ Redo
+ </button>
+ </div>
+ <div id="editor" class="editor-content" contenteditable="true"></div>
+ </div>
 
-    <div class="info">
-        <h3>📝 Keyboard Shortcuts</h3>
-        <ul>
-            <li><code>Ctrl+B</code> (Mac: <code>⌘+B</code>) - Bold</li>
-            <li><code>Ctrl+I</code> (Mac: <code>⌘+I</code>) - Italic</li>
-            <li><code>Ctrl+U</code> (Mac: <code>⌘+U</code>) - Underline</li>
-            <li><code>Ctrl+Z</code> - Undo</li>
-            <li><code>Ctrl+Y</code> - Redo</li>
-            <li><code>Ctrl+K</code> - Insert Link</li>
-            <li>And 30+ more shortcuts!</li>
-        </ul>
-    </div>
+ <div class="info">
+ <h3>Keyboard Shortcuts</h3>
+ <ul>
+ <li><code>Ctrl+B</code> (Mac: <code>⌘+B</code>) - Bold</li>
+ <li><code>Ctrl+I</code> (Mac: <code>⌘+I</code>) - Italic</li>
+ <li><code>Ctrl+U</code> (Mac: <code>⌘+U</code>) - Underline</li>
+ <li><code>Ctrl+Z</code> - Undo</li>
+ <li><code>Ctrl+Y</code> - Redo</li>
+ <li><code>Ctrl+K</code> - Insert Link</li>
+ <li>And 30+ more shortcuts!</li>
+ </ul>
+ </div>
 
-    <!-- Option 1: Local Build (after npm run build) -->
-    <!-- <script src="../../packages/core/dist/editora.min.js"></script> -->
+ <!-- Option 1: Local Build (after npm run build) -->
+ <!-- <script src="../../packages/core/dist/editora.min.js"></script> -->
 
-    <!-- Option 2: CDN (once published to npm) -->
-    <!-- <script src="https://unpkg.com/@editora/core@latest/dist/editora.min.js"></script> -->
+ <!-- Option 2: CDN (once published to npm) -->
+ <!-- <script src="https://unpkg.com/@editora/core@latest/dist/editora.min.js"></script> -->
 
-    <!-- Option 3: JSDelivr CDN (once published) -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/@editora/core@latest/dist/editora.min.js"></script> -->
+ <!-- Option 3: JSDelivr CDN (once published) -->
+ <!-- <script src="https://cdn.jsdelivr.net/npm/@editora/core@latest/dist/editora.min.js"></script> -->
 
-    <!-- For now, using local build -->
-    <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/editora.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css">
+ <!-- For now, using local build -->
+ <script src="https://cdn.jsdelivr.net/npm/@editora/core/dist/editora.min.js"></script>
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css">
 
-    <script>
-        // Initialize the editor
-        const editor = new Editora.Editor({
-            element: document.getElementById('editor'),
-            content: '<p>Welcome to Editora! Start editing this text...</p>',
-            // Enable keyboard shortcuts
-            shortcuts: true,
-            // Add plugins as needed
-            plugins: [
-                // Will be available after build
-            ]
-        });
+ <script>
+ // Initialize the editor
+ const editor = new Editora.Editor({
+ element: document.getElementById('editor'),
+ content: '<p>Welcome to Editora! Start editing this text...</p>',
+ // Enable keyboard shortcuts
+ shortcuts: true,
+ // Add plugins as needed
+ plugins: [
+ // Will be available after build
+ ]
+ });
 
-        // Listen to content changes
-        editor.on('change', (content) => {
-            console.log('Content updated:', content);
-        });
+ // Listen to content changes
+ editor.on('change', (content) => {
+ console.log('Content updated:', content);
+ });
 
-        // Optional: Get/Set content programmatically
-        window.getContent = () => {
-            console.log('Current content:', editor.getContent());
-            alert('Check console for content');
-        };
+ // Optional: Get/Set content programmatically
+ window.getContent = () => {
+ console.log('Current content:', editor.getContent());
+ alert('Check console for content');
+ };
 
-        window.setContent = (html) => {
-            editor.setContent(html);
-        };
+ window.setContent = (html) => {
+ editor.setContent(html);
+ };
 
-        // Example: Set content after 3 seconds
-        // setTimeout(() => {
-        //     editor.setContent('<h2>Content Updated!</h2><p>The editor content has been changed programmatically.</p>');
-        // }, 3000);
-    </script>
+ // Example: Set content after 3 seconds
+ // setTimeout(() => {
+ // editor.setContent('<h2>Content Updated!</h2><p>The editor content has been changed programmatically.</p>');
+ // }, 3000);
+ </script>
 
-    <!-- Footer -->
-    <footer class="site-footer">
-        <div class="footer-container">
-            <div class="footer-section">
-                <h3>Documentation</h3>
-                <ul>
-                    <li><a href="https://editora-free.netlify.app/">Home</a></li>
-                    <li><a href="https://editora-free.netlify.app/docs/">Docs</a></li>
-                    <li><a href="https://editora-free.netlify.app/api/">API Reference</a></li>
-                    <li><a href="https://editora-free.netlify.app/examples/">Examples</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>Plugins</h3>
-                <ul>
-                    <li><a href="https://editora-free.netlify.app/plugins/">Available Plugins</a></li>
-                    <li><a href="https://editora-free.netlify.app/plugins/custom/">Custom Plugins</a></li>
-                    <li><a href="https://editora-free.netlify.app/plugins/native/">Native Plugins</a></li>
-                    <li><a href="https://editora-free.netlify.app/plugins/themes/">Themes</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>Links</h3>
-                <ul>
-                    <li><a href="https://github.com/editora-org/editora">GitHub</a></li>
-                    <li><a href="https://www.npmjs.com/package/@editora/core">NPM</a></li>
-                    <li><a href="https://editora-free.netlify.app/blog/">Blog</a></li>
-                    <li><a href="https://editora-free.netlify.app/community/">Community</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>About</h3>
-                <ul>
-                    <li><a href="https://editora-free.netlify.app/about/">About Editora</a></li>
-                    <li><a href="https://editora-free.netlify.app/license/">License</a></li>
-                    <li><a href="https://editora-free.netlify.app/contributing/">Contributing</a></li>
-                    <li><a href="https://editora-free.netlify.app/contact/">Contact</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2024 Editora. Built with ❤️ by the Editora team.</p>
-        </div>
-    </footer>
+ <!-- Footer -->
+ <footer class="site-footer">
+ <div class="footer-container">
+ <div class="footer-section">
+ <h3>Documentation</h3>
+ <ul>
+ <li><a href="https://editora-free.netlify.app/">Home</a></li>
+ <li><a href="https://editora-free.netlify.app/docs/">Docs</a></li>
+ <li><a href="https://editora-free.netlify.app/api/">API Reference</a></li>
+ <li><a href="https://editora-free.netlify.app/examples/">Examples</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h3>Plugins</h3>
+ <ul>
+ <li><a href="https://editora-free.netlify.app/plugins/">Available Plugins</a></li>
+ <li><a href="https://editora-free.netlify.app/plugins/custom/">Custom Plugins</a></li>
+ <li><a href="https://editora-free.netlify.app/plugins/native/">Native Plugins</a></li>
+ <li><a href="https://editora-free.netlify.app/plugins/themes/">Themes</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h3>Links</h3>
+ <ul>
+ <li><a href="https://github.com/editora-org/editora">GitHub</a></li>
+ <li><a href="https://www.npmjs.com/package/@editora/core">NPM</a></li>
+ <li><a href="https://editora-free.netlify.app/blog/">Blog</a></li>
+ <li><a href="https://editora-free.netlify.app/community/">Community</a></li>
+ </ul>
+ </div>
+ <div class="footer-section">
+ <h3>About</h3>
+ <ul>
+ <li><a href="https://editora-free.netlify.app/about/">About Editora</a></li>
+ <li><a href="https://editora-free.netlify.app/license/">License</a></li>
+ <li><a href="https://editora-free.netlify.app/contributing/">Contributing</a></li>
+ <li><a href="https://editora-free.netlify.app/contact/">Contact</a></li>
+ </ul>
+ </div>
+ </div>
+ <div class="footer-bottom">
+ <p>&copy; 2024 Editora. Built with ❤️ by the Editora team.</p>
+ </div>
+ </footer>
+    <script src="assets/js/search-index.js"></script>
+    <script src="assets/js/site-enhancements.js"></script>
 </body>
 </html>

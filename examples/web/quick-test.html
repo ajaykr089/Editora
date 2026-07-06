@@ -1,225 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Meta Tags for SEO -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Editora Quick Test - Example and demonstration of Editora rich text editor features.">
-    <meta name="keywords" content="quick test, Editora editor, example, demonstration">
-    <meta name="author" content="Editora Contributors">
-    <meta name="robots" content="index, follow">
-    <meta property="og:title" content="Editora - Quick Test">
-    <meta property="og:description" content="Editora Quick Test - Example and demonstration of Editora rich text editor features.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://editora-free.netlify.app/">
-    <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="Editora - Quick Test">
-    <meta property="twitter:description" content="Editora Quick Test - Example and demonstration of Editora rich text editor features">
-    <meta name="theme-color" content="#007bff">
+ <!-- Meta Tags for SEO -->
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <meta name="description" content="Editora Quick Test - Example and demonstration of Editora rich text editor features.">
+ <meta name="keywords" content="quick test, Editora editor, example, demonstration">
+ <meta name="author" content="Editora Contributors">
+ <meta name="robots" content="index, follow">
+ <meta property="og:title" content="Editora - Quick Test">
+ <meta property="og:description" content="Editora Quick Test - Example and demonstration of Editora rich text editor features.">
+ <meta property="og:type" content="website">
+ <meta property="og:url" content="https://editora-free.netlify.app/">
+ <meta property="og:image" content="https://editora-free.netlify.app/og-image.png">
+ <meta property="twitter:card" content="summary_large_image">
+ <meta property="twitter:title" content="Editora - Quick Test">
+ <meta property="twitter:description" content="Editora Quick Test - Example and demonstration of Editora rich text editor features">
+ <meta name="theme-color" content="#12131A">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
-    <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
-    <title>Editora - Quick Test</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+ <!-- Favicon -->
+ <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
+ <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
+ <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+ <title>Editora - Quick Test</title>
+ <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-    <!-- Header Navigation -->
-    <header>
+    <a href="#main-content" class="skip-link">Skip to content</a>
+ <!-- Header Navigation -->
+ <header>
+ <div class="container">
+ <nav>
+ <a href="index.html" class="logo">
+ <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" >
+ </a>
+ <div class="nav-actions">
+<button class="icon-btn search-trigger" id="searchTrigger" aria-label="Search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg><span class="search-label">Search</span><kbd>&#8984;K</kbd></button>
+<button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode"></button>
+</div>
+                    <button class="menu-toggle">☰</button>
+ <ul class="nav-links">
+ <li><a href="index.html">Home</a></li>
+ <li><a href="docs/installation.html">Docs</a></li>
+ <li><a href="docs/features.html">Features</a></li>
+ <li><a href="plugins/index.html">Plugins</a></li>
+ <li><a href="docs/api.html">API</a></li>
+ <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+ </ul>
+ </nav>
+ </div>
+ </header>
+    <a id="main-content" tabindex="-1"></a>
+
+ <main class="container">
+ <h1>Editora Web Component Test</h1>
+ 
+ <div id="status" class="status">Loading...</div>
+ 
+ <h2>Editor Instance:</h2>
+ <editora-editor id="test-editor" height="300">
+ <h2>Test Editor</h2>
+ <p>If you can see this and the toolbar above, <strong>everything works!</strong></p>
+ <p>Try editing this text.</p>
+ </editora-editor>
+ 
+ <h2>API Test:</h2>
+ <div id="api-result" class="status">Click button to test API...</div>
+ <button onclick="testAPI()" style="padding: 10px 20px; margin: 10px 0;">Test API</button>
+ 
+ <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.js"></script>
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css">
+ <script>
+ window.addEventListener('load', () => {
+ const status = document.getElementById('status');
+ let results = [];
+ 
+ // Test 1: Check if Editora global exists
+ if (typeof window.Editora !== 'undefined') {
+ results.push('✅ Global Editora object exists');
+ } else {
+ results.push('❌ Global Editora object missing');
+ }
+ 
+ // Test 2: Check version
+ if (window.Editora && window.Editora.version) {
+ results.push(`✅ Version: ${window.Editora.version}`);
+ } else {
+ results.push('❌ Version missing');
+ }
+ 
+ // Test 3: Check plugins
+ if (window.Editora && window.Editora.plugins) {
+ results.push(`✅ Plugins loaded: ${window.Editora.plugins.length}`);
+ } else {
+ results.push('❌ Plugins missing');
+ }
+ 
+ // Test 4: Check custom element
+ if (customElements.get('rich-text-editor')) {
+ results.push('✅ Custom element registered');
+ } else {
+ results.push('❌ Custom element not registered');
+ }
+ 
+ // Test 5: Check editor instance
+ const editor = document.getElementById('test-editor');
+ if (editor && typeof editor.getContent === 'function') {
+ results.push('✅ Editor instance functional');
+ } else {
+ results.push('❌ Editor instance broken');
+ }
+ 
+ // Display results
+ const allPassed = results.every(r => r.startsWith('✅'));
+ status.innerHTML = results.join('<br>');
+ status.className = allPassed ? 'status success' : 'status error';
+ 
+ // Wait for editor to be ready
+ editor.addEventListener('editor-ready', () => {
+ console.log('✅ Editor ready event fired');
+ });
+ });
+ 
+ function testAPI() {
+ const editor = document.getElementById('test-editor');
+ const result = document.getElementById('api-result');
+ const api = editor.getAPI();
+ 
+ let tests = [];
+ 
+ // Test getContent
+ try {
+ const content = api.getContent();
+ tests.push(`✅ getContent(): ${content.length} chars`);
+ } catch (e) {
+ tests.push(`❌ getContent() failed: ${e.message}`);
+ }
+ 
+ // Test setContent
+ try {
+ const timestamp = new Date().toLocaleTimeString();
+ api.setContent(`<p>API test at ${timestamp}</p>`);
+ tests.push(`✅ setContent(): Success`);
+ } catch (e) {
+ tests.push(`❌ setContent() failed: ${e.message}`);
+ }
+ 
+ // Test execCommand
+ try {
+ api.execCommand('toggleBold');
+ tests.push(`✅ execCommand(): Success`);
+ } catch (e) {
+ tests.push(`❌ execCommand() failed: ${e.message}`);
+ }
+ 
+ // Test focus
+ try {
+ api.focus();
+ tests.push(`✅ focus(): Success`);
+ } catch (e) {
+ tests.push(`❌ focus() failed: ${e.message}`);
+ }
+ 
+ // Test getConfig
+ try {
+ const config = api.getConfig();
+ tests.push(`✅ getConfig(): ${Object.keys(config).length} keys`);
+ } catch (e) {
+ tests.push(`❌ getConfig() failed: ${e.message}`);
+ }
+ 
+ // Display results
+ const allPassed = tests.every(t => t.startsWith('✅'));
+ result.innerHTML = tests.join('<br>');
+ result.className = allPassed ? 'status success' : 'status error';
+ }
+ </script>
+
+ </main>
+
+ <!-- Footer -->
+ <footer>
         <div class="container">
-            <nav>
-                <a href="index.html" class="logo">
-                    <img src="assets/img/editora_logo_blocks.svg" alt="Editora Logo" style="height: 54px; width: auto; margin-right: 8px;">
-                </a>
-                <button class="menu-toggle">☰</button>
-                <ul class="nav-links">
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="docs/installation.html">Docs</a></li>
-                    <li><a href="docs/features.html">Features</a></li>
-                    <li><a href="plugins/index.html">Plugins</a></li>
-                    <li><a href="docs/api.html">API</a></li>
-                    <li><a href="toast-demo.html">Toast Demo</a></li>
-                    <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-                </ul>
-            </nav>
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>Documentation</h5>
+                    <ul>
+                        <li><a href="docs/installation.html">Installation</a></li>
+                        <li><a href="docs/features.html">Features</a></li>
+                        <li><a href="docs/api.html">API Reference</a></li>
+                        <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                        <li><a href="docs/custom-plugins.html">Custom Plugins</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>Plugins</h5>
+                    <ul>
+                        <li><a href="plugins/index.html">All Plugins</a></li>
+                        <li><a href="plugins/media-manager.html">Media Manager</a></li>
+                        <li><a href="plugins/table.html">Tables</a></li>
+                        <li><a href="plugins/code-sample.html">Code Samples</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>About</h5>
+                    <ul>
+                        <li><a href="docs/about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p style="color:white">&copy; 2024-2026 Editora. Built with <span style="color: var(--accent);">&hearts;</span> by Editora Team. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+            </div>
         </div>
-    </header>
-
-    <main class="container">
-      <h1>🧪 Editora Web Component Test</h1>
-  
-  <div id="status" class="status">Loading...</div>
-  
-  <h2>Editor Instance:</h2>
-  <editora-editor id="test-editor" height="300">
-    <h2>Test Editor</h2>
-    <p>If you can see this and the toolbar above, <strong>everything works!</strong></p>
-    <p>Try editing this text.</p>
-  </editora-editor>
-  
-  <h2>API Test:</h2>
-  <div id="api-result" class="status">Click button to test API...</div>
-  <button onclick="testAPI()" style="padding: 10px 20px; margin: 10px 0;">Test API</button>
-  
-  <script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent-core.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css">
-  <script>
-    window.addEventListener('load', () => {
-      const status = document.getElementById('status');
-      let results = [];
-      
-      // Test 1: Check if Editora global exists
-      if (typeof window.Editora !== 'undefined') {
-        results.push('✅ Global Editora object exists');
-      } else {
-        results.push('❌ Global Editora object missing');
-      }
-      
-      // Test 2: Check version
-      if (window.Editora && window.Editora.version) {
-        results.push(`✅ Version: ${window.Editora.version}`);
-      } else {
-        results.push('❌ Version missing');
-      }
-      
-      // Test 3: Check plugins
-      if (window.Editora && window.Editora.plugins) {
-        results.push(`✅ Plugins loaded: ${window.Editora.plugins.length}`);
-      } else {
-        results.push('❌ Plugins missing');
-      }
-      
-      // Test 4: Check custom element
-      if (customElements.get('rich-text-editor')) {
-        results.push('✅ Custom element registered');
-      } else {
-        results.push('❌ Custom element not registered');
-      }
-      
-      // Test 5: Check editor instance
-      const editor = document.getElementById('test-editor');
-      if (editor && typeof editor.getContent === 'function') {
-        results.push('✅ Editor instance functional');
-      } else {
-        results.push('❌ Editor instance broken');
-      }
-      
-      // Display results
-      const allPassed = results.every(r => r.startsWith('✅'));
-      status.innerHTML = results.join('<br>');
-      status.className = allPassed ? 'status success' : 'status error';
-      
-      // Wait for editor to be ready
-      editor.addEventListener('editor-ready', () => {
-        console.log('✅ Editor ready event fired');
-      });
-    });
-    
-    function testAPI() {
-      const editor = document.getElementById('test-editor');
-      const result = document.getElementById('api-result');
-      const api = editor.getAPI();
-      
-      let tests = [];
-      
-      // Test getContent
-      try {
-        const content = api.getContent();
-        tests.push(`✅ getContent(): ${content.length} chars`);
-      } catch (e) {
-        tests.push(`❌ getContent() failed: ${e.message}`);
-      }
-      
-      // Test setContent
-      try {
-        const timestamp = new Date().toLocaleTimeString();
-        api.setContent(`<p>API test at ${timestamp}</p>`);
-        tests.push(`✅ setContent(): Success`);
-      } catch (e) {
-        tests.push(`❌ setContent() failed: ${e.message}`);
-      }
-      
-      // Test execCommand
-      try {
-        api.execCommand('toggleBold');
-        tests.push(`✅ execCommand(): Success`);
-      } catch (e) {
-        tests.push(`❌ execCommand() failed: ${e.message}`);
-      }
-      
-      // Test focus
-      try {
-        api.focus();
-        tests.push(`✅ focus(): Success`);
-      } catch (e) {
-        tests.push(`❌ focus() failed: ${e.message}`);
-      }
-      
-      // Test getConfig
-      try {
-        const config = api.getConfig();
-        tests.push(`✅ getConfig(): ${Object.keys(config).length} keys`);
-      } catch (e) {
-        tests.push(`❌ getConfig() failed: ${e.message}`);
-      }
-      
-      // Display results
-      const allPassed = tests.every(t => t.startsWith('✅'));
-      result.innerHTML = tests.join('<br>');
-      result.className = allPassed ? 'status success' : 'status error';
-    }
-    </script>
-
-    </main>
-
-    <!-- Footer -->
-    <footer>
-      <div class="container">
-        <div class="footer-links">
-          <div class="footer-section">
-            <h5>📚 Documentation</h5>
-            <ul>
-              <li><a href="docs/installation.html">Installation</a></li>
-              <li><a href="docs/features.html">Features</a></li>
-              <li><a href="docs/api.html">API Reference</a></li>
-              <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
-              <li><a href="docs/custom-plugins.html">Custom Plugins</a></li>
-            </ul>
-          </div>
-          <div class="footer-section">
-            <h5>🔌 Plugins</h5>
-            <ul>
-              <li><a href="plugins/index.html">All Plugins</a></li>
-              <li><a href="plugins/media-manager.html">Media Manager</a></li>
-              <li><a href="plugins/table.html">Tables</a></li>
-              <li><a href="plugins/code-sample.html">Code Samples</a></li>
-            </ul>
-          </div>
-          <div class="footer-section">
-            <h5>🔗 Links</h5>
-            <ul>
-              <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
-              <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
-              <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
-              <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
-            </ul>
-          </div>
-          <div class="footer-section">
-            <h5>ℹ️ About</h5>
-            <ul>
-              <li><a href="docs/about.html">About Editora</a></li>
-              <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
-              <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
-              <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
-            </ul>
-          </div>
-        </div>
-        <div class="footer-bottom">
-          <p>&copy; 2024-2026 Editora. Built with ❤️ by Ajay Kumar. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
-        </div>
-      </div>
     </footer>
-  </body>
-  </html>
+ 
+    <!-- Search Modal -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-panel">
+            <div class="search-input-row">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                <input type="text" class="search-input" placeholder="Search docs, plugins, examples..." aria-label="Search">
+            </div>
+            <div class="search-results"></div>
+        </div>
+    </div>
+    <script src="assets/js/search-index.js"></script>
+    <script src="assets/js/site-enhancements.js"></script>
+</body>
+ </html>
