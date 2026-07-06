@@ -27,8 +27,8 @@ const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
 const connectedWebEditors = new Set<RichTextEditorElement>();
 let lastActiveWebEditor: RichTextEditorElement | null = null;
 let commandBridgeInstalled = false;
-let previousExecuteEditorCommand: ((command: string, value?: any) => any) | null = null;
-let previousExecEditorCommand: ((command: string, value?: any) => any) | null = null;
+let previousExecuteEditorCommand: ((command: string, ...args: any[]) => any) | null = null;
+let previousExecEditorCommand: ((command: string, ...args: any[]) => any) | null = null;
 
 function isWebComponentEditorElement(value: unknown): value is RichTextEditorElement {
   if (!(value instanceof HTMLElement)) return false;
@@ -114,18 +114,18 @@ function installGlobalCommandBridge(): void {
   previousExecEditorCommand =
     typeof (window as any).execEditorCommand === 'function' ? (window as any).execEditorCommand.bind(window) : null;
 
-  const bridge = (command: string, value?: any): any => {
+  const bridge = (command: string, ...args: any[]): any => {
     const targetEditor = resolveWebComponentEditorFromContext();
     if (targetEditor) {
-      return targetEditor.execCommand(command, value);
+      return targetEditor.execCommand(command, ...args);
     }
 
     if (previousExecuteEditorCommand) {
-      return previousExecuteEditorCommand(command, value);
+      return previousExecuteEditorCommand(command, ...args);
     }
 
     if (previousExecEditorCommand) {
-      return previousExecEditorCommand(command, value);
+      return previousExecEditorCommand(command, ...args);
     }
 
     return false;
@@ -695,7 +695,7 @@ export class RichTextEditorElement extends HTMLElement {
     this.contentElement.setAttribute('spellcheck', browserSpellcheckEnabled ? 'true' : 'false');
   }
 
-  private executeCommand(command: string, value?: any): boolean {
+  private executeCommand(command: string, ...args: any[]): boolean {
     if (typeof window !== 'undefined') {
       (window as any).__editoraCommandEditorRoot = this;
     }
@@ -712,7 +712,7 @@ export class RichTextEditorElement extends HTMLElement {
           if (command === 'toggleFullscreen') {
             commandFn(this as any, commandContext);
           } else {
-            commandFn(value, commandContext);
+            commandFn(...args, commandContext);
           }
           return true;
         } catch (error) {
@@ -722,7 +722,7 @@ export class RichTextEditorElement extends HTMLElement {
       }
     }
 
-    return this.engine?.execCommand(command, value) || false;
+    return this.engine?.execCommand(command, ...args) || false;
   }
 
   private getPluginLoadConfig(pluginName: string): Record<string, any> | undefined {
@@ -1573,8 +1573,8 @@ export class RichTextEditorElement extends HTMLElement {
     }
   }
 
-  public execCommand(name: string, value?: any): boolean {
-    return this.executeCommand(name, value);
+  public execCommand(name: string, ...args: any[]): boolean {
+    return this.executeCommand(name, ...args);
   }
 
   public focus(): void {

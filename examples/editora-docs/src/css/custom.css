@@ -376,3 +376,416 @@ html[data-theme="dark"]:not(#\#):not(#\#) {
     width: 100%;
   }
 }
+
+/* ════════════════════════════════════════════════════════════
+   AUDIT FIX 1 — Doc-page H1: 48px → 28px
+   Homepage hero stays large; doc article headings are compact.
+   ════════════════════════════════════════════════════════════ */
+.theme-doc-markdown h1:first-child,
+article h1 {
+  font-size: 1.75rem !important;   /* 28px — matches shadcn/Radix/Vercel doc H1 */
+  letter-spacing: -0.025em;
+  margin-bottom: 0.5rem;
+}
+
+/* ════════════════════════════════════════════════════════════
+   AUDIT FIX 2 — Breadcrumb: shrink to 12px, mute color
+   ════════════════════════════════════════════════════════════ */
+.breadcrumbs {
+  font-size: 0.76rem !important;
+  --ifm-breadcrumb-item-background-active: transparent;
+}
+
+.breadcrumbs__item {
+  font-size: 0.76rem;
+}
+
+.breadcrumbs__link {
+  color: var(--et-gray-500) !important;
+  font-weight: 400;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.breadcrumbs__link:hover {
+  color: var(--ifm-font-color-base) !important;
+  background: var(--et-gray-100);
+}
+
+.breadcrumbs__item--active .breadcrumbs__link {
+  color: var(--ifm-font-color-base) !important;
+  font-weight: 500;
+}
+
+/* ════════════════════════════════════════════════════════════
+   AUDIT FIX 3 — Sidebar active link: filled pill highlight
+   ════════════════════════════════════════════════════════════ */
+.menu__link--active:not(.menu__link--sublist) {
+  background: color-mix(in oklab, var(--ifm-color-primary) 10%, transparent) !important;
+  color: var(--ifm-color-primary) !important;
+  font-weight: 600;
+}
+
+html[data-theme="dark"] .menu__link--active:not(.menu__link--sublist) {
+  background: color-mix(in oklab, var(--ifm-color-primary) 14%, transparent) !important;
+}
+
+/* ════════════════════════════════════════════════════════════
+   AUDIT FIX 4 — Code block background matches our gray scale
+   ════════════════════════════════════════════════════════════ */
+.prism-code,
+div[class*="codeBlockContainer"],
+pre.prism-code {
+  background: var(--et-gray-100) !important;
+}
+
+html[data-theme="dark"] .prism-code,
+html[data-theme="dark"] div[class*="codeBlockContainer"],
+html[data-theme="dark"] pre.prism-code {
+  background: #0D0D10 !important;
+}
+
+/* Code block header/title bar */
+div[class*="codeBlockTitle"] {
+  background: var(--et-gray-200) !important;
+  border-bottom: 1px solid var(--et-border) !important;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--et-gray-600) !important;
+}
+
+html[data-theme="dark"] div[class*="codeBlockTitle"] {
+  background: #18181B !important;
+  color: var(--et-gray-500) !important;
+}
+
+/* Copy button */
+button[class*="copyButton"] {
+  color: var(--et-gray-500) !important;
+}
+button[class*="copyButton"]:hover {
+  color: var(--ifm-font-color-base) !important;
+}
+
+/* Inline code */
+.markdown code,
+article code {
+  background: var(--et-gray-100) !important;
+  border: 1px solid var(--et-border) !important;
+  color: var(--ifm-color-primary) !important;
+  font-size: 0.83em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+html[data-theme="dark"] .markdown code,
+html[data-theme="dark"] article code {
+  background: rgba(255,255,255,.06) !important;
+  border-color: var(--et-border) !important;
+  color: #E08A3F !important;
+}
+
+/* ════════════════════════════════════════════════════════════
+   AUDIT FIX 5 — Admonitions: styled to match neutral system
+   ════════════════════════════════════════════════════════════ */
+.alert {
+  border-radius: 7px !important;
+  border: 1px solid var(--et-border) !important;
+  border-left-width: 3px !important;
+  background: var(--ifm-background-surface-color) !important;
+  box-shadow: none !important;
+  padding: 0.85rem 1rem !important;
+}
+
+.alert--info    { border-left-color: #3B82F6 !important; }
+.alert--success { border-left-color: #22C55E !important; }
+.alert--warning { border-left-color: #F59E0B !important; }
+.alert--danger  { border-left-color: #EF4444 !important; }
+
+/* Admonition icon + title row */
+.alert .admonitionHeading_Gvgb,
+.alert [class*="admonitionHeading"] {
+  font-family: var(--ifm-font-family-monospace) !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 0.35rem !important;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.alert--info    [class*="admonitionHeading"] { color: #3B82F6 !important; }
+.alert--success [class*="admonitionHeading"] { color: #22C55E !important; }
+.alert--warning [class*="admonitionHeading"] { color: #F59E0B !important; }
+.alert--danger  [class*="admonitionHeading"] { color: #EF4444 !important; }
+
+.alert [class*="admonitionContent"] {
+  font-size: 0.88rem !important;
+  color: var(--ifm-font-color-base) !important;
+}
+
+/* Dark mode admonition backgrounds */
+html[data-theme="dark"] .alert {
+  background: rgba(255,255,255,.03) !important;
+}
+
+/* ════════════════════════════════════════════════════════════
+   AUDIT FIX 6 — Version badge: match ochre identity
+   ════════════════════════════════════════════════════════════ */
+.badge--secondary,
+[class*="docVersionBadge"],
+.theme-doc-version-badge {
+  background: color-mix(in oklab, var(--ifm-color-primary) 10%, transparent) !important;
+  border: 1px solid color-mix(in oklab, var(--ifm-color-primary) 30%, transparent) !important;
+  color: var(--ifm-color-primary) !important;
+  font-family: var(--ifm-font-family-monospace) !important;
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  border-radius: 4px !important;
+  padding: 0.15rem 0.45rem !important;
+}
+
+/* Navbar version dropdown */
+.navbar__item.dropdown .navbar__link::after {
+  opacity: 0.5;
+}
+
+/* ════════════════════════════════════════════════════════════
+   AUDIT FIX 7 — TOC: muted links, accent only on active
+   ════════════════════════════════════════════════════════════ */
+.table-of-contents {
+  border-left: 1px solid var(--et-border) !important;
+  padding-left: 0.85rem !important;
+}
+
+.table-of-contents__link {
+  color: var(--et-gray-500) !important;
+  font-size: 0.78rem !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  padding: 0.15rem 0 !important;
+  transition: color 120ms ease !important;
+  display: block;
+}
+
+.table-of-contents__link:hover {
+  color: var(--ifm-font-color-base) !important;
+  text-decoration: none !important;
+}
+
+/* Active TOC item (set by scrollspy) */
+.table-of-contents__link--active,
+.table-of-contents__link.table-of-contents__link--active {
+  color: var(--ifm-color-primary) !important;
+  font-weight: 600 !important;
+}
+
+.table-of-contents li {
+  margin: 0.1rem 0 !important;
+}
+
+/* ════════════════════════════════════════════════════════════
+   AUDIT FIX 8 — Pagination: filled surface, not just border
+   ════════════════════════════════════════════════════════════ */
+.pagination-nav {
+  margin-top: 2.5rem;
+  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.pagination-nav__link {
+  background: var(--ifm-background-surface-color) !important;
+  border: 1px solid var(--et-border) !important;
+  border-radius: 8px !important;
+  padding: 1rem 1.1rem !important;
+  transition: border-color 140ms ease, box-shadow 140ms ease !important;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pagination-nav__link:hover {
+  border-color: var(--ifm-color-primary) !important;
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ifm-color-primary) 12%, transparent) !important;
+  text-decoration: none !important;
+}
+
+.pagination-nav__label {
+  font-weight: 600 !important;
+  font-size: 0.88rem !important;
+  color: var(--ifm-font-color-base) !important;
+}
+
+/* ════════════════════════════════════════════════════════════
+   AUDIT FIX 9 — Search modal polish
+   ════════════════════════════════════════════════════════════ */
+/* Local search plugin */
+[class*="searchResultItem"],
+.search-result-match {
+  font-size: 0.88rem;
+}
+
+/* DocSearch (algolia) */
+.DocSearch-Modal {
+  border-radius: 10px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.06) !important;
+}
+
+.DocSearch-SearchBar {
+  border-bottom: 1px solid var(--et-border) !important;
+}
+
+.DocSearch-Input {
+  font-family: var(--ifm-font-family-base) !important;
+  font-size: 1rem !important;
+}
+
+/* ════════════════════════════════════════════════════════════
+   AUDIT FIX 10 — Footer copyright: small + muted
+   ════════════════════════════════════════════════════════════ */
+.footer__copyright {
+  font-size: 0.78rem !important;
+  color: var(--et-gray-600) !important;
+  margin-top: 1.5rem !important;
+  padding-top: 1.5rem !important;
+  border-top: 1px solid var(--et-gray-200) !important;
+}
+
+.footer__links {
+  margin-bottom: 1rem !important;
+}
+
+/* ════════════════════════════════════════════════════════════
+   AUDIT FIX 11 — Mobile nav overlay polish
+   ════════════════════════════════════════════════════════════ */
+.navbar-sidebar {
+  background: var(--ifm-background-surface-color) !important;
+  border-right: 1px solid var(--et-border) !important;
+}
+
+.navbar-sidebar__brand {
+  border-bottom: 1px solid var(--et-border) !important;
+  padding: 0.75rem 1rem !important;
+}
+
+.navbar-sidebar__close {
+  color: var(--et-gray-500) !important;
+}
+
+/* ════════════════════════════════════════════════════════════
+   AUDIT FIX 12 — Misc doc page polish
+   ════════════════════════════════════════════════════════════ */
+
+/* Last-updated line */
+.theme-last-updated {
+  font-size: 0.76rem !important;
+  color: var(--et-gray-500) !important;
+  border-top: 1px solid var(--et-border);
+  padding-top: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+/* Edit this page link */
+.theme-edit-this-page {
+  font-size: 0.82rem !important;
+  color: var(--et-gray-500) !important;
+  font-weight: 500 !important;
+}
+
+.theme-edit-this-page:hover {
+  color: var(--ifm-color-primary) !important;
+}
+
+/* Doc tag pills */
+.docTagsListInline .tag_zVej,
+[class*="docTagItem"] .tag_zVej {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  border: 1px solid var(--et-border);
+  background: var(--et-gray-100);
+  color: var(--et-gray-600);
+  padding: 0.15rem 0.45rem;
+}
+
+/* Table improvements */
+.markdown table th,
+article table th {
+  background: var(--et-gray-50) !important;
+  border-bottom: 2px solid var(--et-border-strong) !important;
+}
+
+html[data-theme="dark"] .markdown table th,
+html[data-theme="dark"] article table th {
+  background: rgba(255,255,255,.04) !important;
+}
+
+.markdown table td,
+article table td {
+  border-color: var(--et-border) !important;
+  font-size: 0.88rem !important;
+  vertical-align: top;
+}
+
+/* Horizontal rule */
+.markdown hr {
+  border: none !important;
+  border-top: 1px solid var(--et-border) !important;
+  margin: 2rem 0 !important;
+}
+
+/* ════════════════════════════════════════════════════════════
+   AUDIT FIX 13 — Doc sidebar: section headers more visible
+   ════════════════════════════════════════════════════════════ */
+
+/* Category label separator line */
+.menu__list > .menu__list-item + .menu__list-item > .menu__list-item-collapsible > .menu__link {
+  margin-top: 0.5rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--et-border);
+}
+
+/* Nested item indentation */
+.menu__list .menu__list {
+  padding-left: 0.75rem !important;
+  border-left: 1px solid var(--et-border);
+  margin-left: 0.6rem;
+}
+
+/* ════════════════════════════════════════════════════════════
+   AUDIT FIX 14 — Smooth scroll + focus styles
+   ════════════════════════════════════════════════════════════ */
+html {
+  scroll-behavior: smooth;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ifm-color-primary) !important;
+  outline-offset: 2px !important;
+  border-radius: 3px !important;
+}
+
+/* Anchor heading links */
+.hash-link {
+  color: var(--et-gray-400) !important;
+  font-weight: 400 !important;
+  opacity: 0 !important;
+  transition: opacity 150ms ease !important;
+}
+
+.markdown h2:hover .hash-link,
+.markdown h3:hover .hash-link,
+.markdown h4:hover .hash-link {
+  opacity: 1 !important;
+}

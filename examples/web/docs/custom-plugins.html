@@ -19,9 +19,9 @@
  <meta name="theme-color" content="#12131A">
 
  <!-- Favicon -->
- <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon_16.png">
- <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon_32.png">
- <link rel="icon" type="image/png" sizes="64x64" href="assets/img/favicon_64.png">
+ <link rel="icon" type="image/png" sizes="16x16" href="../assets/img/favicon_16.png">
+ <link rel="icon" type="image/png" sizes="32x32" href="../assets/img/favicon_32.png">
+ <link rel="icon" type="image/png" sizes="64x64" href="../assets/img/favicon_64.png">
  <title>Editora - Custom Plugins</title>
  <link rel="stylesheet" href="../assets/css/style.css">
  <style>
@@ -40,8 +40,8 @@
 
  .tutorial-nav a {
  padding: 8px 16px;
- background: #f0f0f0;
- color: #333;
+ background: var(--surface-2);
+ color: var(--text);
  text-decoration: none;
  border-radius: 4px;
  font-size: 14px;
@@ -55,11 +55,12 @@
  }
 
  .tutorial-section {
- background: white;
+ background: var(--paper);
  padding: 30px;
  margin-bottom: 30px;
  border-radius: 8px;
- box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+ border: 1px solid var(--border);
+ box-shadow: var(--shadow-sm);
  }
 
  .tutorial-section h2 {
@@ -70,7 +71,7 @@
  }
 
  .tutorial-section h3 {
- color: #333;
+ color: var(--ink);
  margin-top: 25px;
  }
 
@@ -103,32 +104,36 @@
  .tag { color: #7ab8ff; }
 
  .info-box {
- background: #e3f2fd;
- border-left: 4px solid var(--primary);
+ background: var(--info-bg);
+ color: var(--info-text);
+ border-left: 4px solid var(--info);
  padding: 15px;
  margin: 20px 0;
  border-radius: 4px;
  }
 
  .warning-box {
- background: #fff3e0;
- border-left: 4px solid #ff9800;
+ background: var(--warning-bg);
+ color: var(--warning-text);
+ border-left: 4px solid var(--warning);
  padding: 15px;
  margin: 20px 0;
  border-radius: 4px;
  }
 
  .warning-box code {
- color: white;
+ color: inherit;
+ background: rgba(0,0,0,0.08);
  }
 
  .warning-code {
- color: white;
+ color: inherit;
  }
 
  .success-box {
- background: #e8f5e9;
- border-left: 4px solid #4caf50;
+ background: var(--success-bg);
+ color: var(--success-text);
+ border-left: 4px solid var(--success);
  padding: 15px;
  margin: 20px 0;
  border-radius: 4px;
@@ -149,7 +154,7 @@
  content: "✓";
  position: absolute;
  left: 0;
- color: #4caf50;
+ color: var(--success);
  font-weight: bold;
  }
 
@@ -167,7 +172,7 @@
  }
 
  .file-structure {
- background: #f5f5f5;
+ background: var(--surface-2);
  padding: 15px;
  border-radius: 4px;
  font-family: 'Courier New', monospace;
@@ -178,13 +183,11 @@
  .file-structure code {
  display: block;
  padding: 3px 0;
- color: #333;
- background: #e0e0e0;
+ color: var(--ink);
+ background: var(--surface);
+ border: none;
  }
 
- code {
- background: #000;
- }
 
  .code-section {
  margin: 20px 0;
@@ -192,10 +195,10 @@
 
  .example-title {
  font-weight: bold;
- color: #333;
+ color: var(--ink);
  margin-bottom: 10px;
  padding: 10px;
- background: #f9f9f9;
+ background: var(--surface);
  border-left: 3px solid var(--primary);
  }
 
@@ -209,22 +212,22 @@
  table td {
  padding: 12px;
  text-align: left;
- border-bottom: 1px solid #ddd;
+ border-bottom: 1px solid var(--border);
  }
 
  table th {
- background: #f5f5f5;
+ background: var(--surface);
  font-weight: bold;
- color: #333;
+ color: var(--ink);
  }
 
  table tr:hover {
- background: #f9f9f9;
+ background: var(--surface);
  }
 
  .toc {
- background: #f9f9f9;
- border: 1px solid #ddd;
+ background: var(--surface);
+ border: 1px solid var(--border);
  padding: 20px;
  border-radius: 6px;
  margin-bottom: 30px;
@@ -252,22 +255,7 @@
  text-decoration: underline;
  }
 
- .breadcrumb {
- font-size: 14px;
- color: #666;
- margin-bottom: 20px;
- }
-
- .breadcrumb a {
- color: var(--primary);
- text-decoration: none;
- }
-
- .breadcrumb a:hover {
- text-decoration: underline;
- }
-
- .comparison-table {
+  .comparison-table {
  margin: 20px 0;
  }
 
@@ -278,22 +266,22 @@
  .comparison-table .label {
  font-weight: bold;
  width: 150px;
- background: #f5f5f5;
+ background: var(--surface);
  }
 
  .command-patterns code {
- background: #e0e0e0;
- color: #333;
+ background: var(--surface-2);
+ color: var(--ink);
  }
 
  .plugin-anatomy code {
- background: #e0e0e0;
- color: #333;
+ background: var(--surface-2);
+ color: var(--ink);
  }
 
  .api-reference {
- background: #f9f9f9;
- border: 1px solid #ddd;
+ background: var(--surface);
+ border: 1px solid var(--border);
  padding: 15px;
  border-radius: 4px;
  margin: 15px 0;
@@ -313,7 +301,7 @@
 
  .api-reference .param-name {
  font-family: 'Courier New', monospace;
- color: #333;
+ color: var(--ink);
  font-weight: bold;
  }
 
@@ -349,20 +337,26 @@
  }
 
  .highlight {
- background: #fffacd;
+ background: rgba(255, 201, 51, 0.35);
+ color: var(--ink);
  padding: 2px 6px;
  border-radius: 3px;
  }
  </style>
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to content</a>
  <header>
  <div class="container">
  <nav>
  <a href="../index.html" class="logo">
  <img src="../assets/img/editora_logo_blocks.svg" alt="Editora Logo" >
  </a>
- <button class="menu-toggle">☰</button>
+ <div class="nav-actions">
+<button class="icon-btn search-trigger" id="searchTrigger" aria-label="Search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg><span class="search-label">Search</span><kbd>&#8984;K</kbd></button>
+<button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode"></button>
+</div>
+                    <button class="menu-toggle">☰</button>
  <ul class="nav-links">
  <li><a href="../index.html">Home</a></li>
  <li><a href="installation.html" class="active">Docs</a></li>
@@ -374,12 +368,11 @@
  </nav>
  </div>
  </header>
+    <a id="main-content" tabindex="-1"></a>
+    <nav class="breadcrumbs" id="breadcrumbs" aria-label="Breadcrumb"></nav>
 
  <main class="tutorial-container">
  <div class="container">
- <div class="breadcrumb">
- <a href="../index.html">Home</a> > <a href="installation.html">Docs</a> > <span>Custom Plugins Tutorial</span>
- </div>
 
  <div class="tutorial-section">
  <h1>Create Custom Plugins for Editora</h1>
@@ -1124,52 +1117,65 @@ npm publish --access public</code></pre>
 
  <!-- Footer -->
  <footer>
- <div class="container">
- <div class="footer-links">
- <div class="footer-section">
- <h5>Documentation</h5>
- <ul>
- <li><a href="docs/installation.html">Installation</a></li>
- <li><a href="docs/features.html">Features</a></li>
- <li><a href="docs/api.html">API Reference</a></li>
- <li><a href="docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
- <li><a href="docs/custom-plugins.html">Custom Plugins</a></li>
- </ul>
- </div>
- <div class="footer-section">
- <h5>Plugins</h5>
- <ul>
- <li><a href="plugins/index.html">All Plugins</a></li>
- <li><a href="plugins/media-manager.html">Media Manager</a></li>
- <li><a href="plugins/table.html">Tables</a></li>
- <li><a href="plugins/code-sample.html">Code Samples</a></li>
- </ul>
- </div>
- <div class="footer-section">
- <h5>Links</h5>
- <ul>
- <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
- <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
- <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
- <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
- </ul>
- </div>
- <div class="footer-section">
- <h5>About</h5>
- <ul>
- <li><a href="docs/about.html">About Editora</a></li>
- <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
- <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
- <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
- </ul>
- </div>
- </div>
- <div class="footer-bottom">
- <p style="color:white">&copy; 2024-2026 Editora.Built with <span style="color: var(--accent);">&hearts;</span> by Editora Team. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
- </div>
- </div>
- </footer>
+        <div class="container">
+            <div class="footer-links">
+                <div class="footer-section">
+                    <h5>Documentation</h5>
+                    <ul>
+                        <li><a href="../docs/installation.html">Installation</a></li>
+                        <li><a href="../docs/features.html">Features</a></li>
+                        <li><a href="../docs/api.html">API Reference</a></li>
+                        <li><a href="../docs/keyboard-shortcuts.html">Keyboard Shortcuts</a></li>
+                        <li><a href="../docs/custom-plugins.html">Custom Plugins</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>Plugins</h5>
+                    <ul>
+                        <li><a href="../plugins/index.html">All Plugins</a></li>
+                        <li><a href="../plugins/media-manager.html">Media Manager</a></li>
+                        <li><a href="../plugins/table.html">Tables</a></li>
+                        <li><a href="../plugins/code-sample.html">Code Samples</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>Links</h5>
+                    <ul>
+                        <li><a href="https://github.com/ajaykr089/Editora" target="_blank" rel="noopener">GitHub</a></li>
+                        <li><a href="https://www.npmjs.com/package/@editora/core" target="_blank" rel="noopener">npm Package</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/issues" target="_blank" rel="noopener">Report Issues</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/discussions" target="_blank" rel="noopener">Discussions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>About</h5>
+                    <ul>
+                        <li><a href="../docs/about.html">About Editora</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT)</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contributing</a></li>
+                        <li><a href="https://github.com/ajaykr089/Editora/releases" target="_blank" rel="noopener">Changelog</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p style="color:white">&copy; 2024-2026 Editora. Built with <span style="color: var(--accent);">&hearts;</span> by Editora Team. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+            </div>
+        </div>
+    </footer>
+    <!-- Search Modal -->
+    <div class="search-modal" id="searchModal">
+        <div class="search-panel">
+            <div class="search-input-row">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+                <input type="text" class="search-input" placeholder="Search docs, plugins, examples..." aria-label="Search">
+            </div>
+            <div class="search-results"></div>
+        </div>
+    </div>
+
 
  <script src="../assets/js/main.js"></script>
+    <script src="../assets/js/search-index.js"></script>
+    <script src="../assets/js/site-enhancements.js"></script>
 </body>
 </html>

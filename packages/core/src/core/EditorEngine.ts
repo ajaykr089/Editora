@@ -46,7 +46,7 @@ export class EditorEngine {
   /**
    * Execute a command
    */
-  execCommand(name: string, value?: any): boolean {
+  execCommand(name: string, ...args: any[]): boolean {
     if (this.isReadonly) {
       console.warn('Cannot execute commands in readonly mode');
       return false;
@@ -65,10 +65,12 @@ export class EditorEngine {
     
     let commandResult: EditorState | null | boolean | void | Promise<EditorState | null | boolean | void>;
     
-    if (value !== undefined) {
-      commandResult = (command as any)(this.state, value);
-    } else {
+    if (args.length === 0) {
       commandResult = command(this.state);
+    } else if (args.length === 1) {
+      commandResult = (command as any)(this.state, args[0]);
+    } else {
+      commandResult = (command as any)(this.state, ...args);
     }
     
     if (commandResult instanceof Promise) {
