@@ -643,6 +643,11 @@ section[class^="rte-"], section[class*=" rte-"]{
     gap: 2.5rem;
 }
 
+.docs-wrapper:has(.docs-toc),
+.docs-wrapper.has-toc {
+    grid-template-columns: 250px 1fr 220px;
+}
+
 .docs-sidebar {
     background: var(--surface);
     padding: 1.5rem;
@@ -1244,11 +1249,15 @@ html[data-theme="dark"] .alert-danger { color: #FCA5A5; }
 }
 
 @media (max-width: 1150px) {
-    .docs-wrapper { grid-template-columns: 240px 1fr; }
+    .docs-wrapper,
+    .docs-wrapper.has-toc,
+    .docs-wrapper:has(.docs-toc) { grid-template-columns: 240px 1fr; }
     .docs-toc { display: none; }
 }
 @media (max-width: 768px) {
-    .docs-wrapper { grid-template-columns: 1fr; }
+    .docs-wrapper,
+    .docs-wrapper.has-toc,
+    .docs-wrapper:has(.docs-toc) { grid-template-columns: 1fr; }
 }
 
 /* ============================================
