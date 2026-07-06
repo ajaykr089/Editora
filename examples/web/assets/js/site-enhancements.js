@@ -108,6 +108,9 @@
     var headings = content.querySelectorAll("h2, h3");
     if (!headings.length) { toc.style.display = "none"; return; }
 
+    var wrapper = document.querySelector(".docs-wrapper");
+    if (wrapper) wrapper.classList.add("has-toc");
+
     var list = document.createElement("ul");
     headings.forEach(function (h, i) {
       if (!h.id) h.id = slugify(h.textContent) + "-" + i;
