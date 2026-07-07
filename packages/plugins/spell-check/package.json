@@ -1,6 +1,6 @@
 {
   "name": "@editora/spell-check",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Spell Check plugin for Rich Text Editor - Non-blocking spell checking with suggestions",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -20,13 +20,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/ajaykr089/Editora.git"
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/plugins/spell-check"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@editora/core": "^1.0.9",
-    "@editora/toast": "^2.0.5"
+    "@editora/core": "^1.0.14",
+    "@editora/toast": "^2.0.7"
   },
   "devDependencies": {
     "react": "^18.2.0",
@@ -39,5 +40,9 @@
       "require": "./dist/index.cjs.js",
       "default": "./dist/index.esm.js"
     }
+  },
+  "homepage": "https://editora-ecosystem.netlify.app/",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
   }
 }

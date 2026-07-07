@@ -1,7 +1,18 @@
 {
   "name": "@editora/ui-editor",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Editor-focused UI extensions for Editora (floating toolbar, command palette, context menus)",
+  "author": "Ajay Kumar <ajaykr089@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/ui-editor"
+  },
+  "homepage": "https://editora-ecosystem.netlify.app/docs/ui-react",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
+  },
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
@@ -15,16 +26,15 @@
     "prepare": "npm run build"
   },
   "peerDependencies": {
-    "@editora/ui-core": "^0.1.4"
+    "@editora/ui-core": "^0.1.17"
   },
   "dependencies": {
-    "@editora/ui-core": "^0.1.4"
+    "@editora/ui-core": "^0.1.17"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
     "vite": "^4.5.14"
   },
-  "license": "MIT",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

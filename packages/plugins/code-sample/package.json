@@ -1,6 +1,6 @@
 {
   "name": "@editora/code-sample",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Code Sample plugin for Rich Text Editor - Insert immutable code blocks with optional Prism.js syntax highlighting",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -21,12 +21,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/ajaykr089/Editora.git"
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/plugins/code-sample"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@editora/core": "^1.0.9"
+    "@editora/core": "^1.0.14"
   },
   "optionalDependencies": {
     "prismjs": "^1.29.0"
@@ -50,5 +51,9 @@
       "require": "./dist/index.cjs.js",
       "default": "./dist/index.esm.js"
     }
+  },
+  "homepage": "https://editora-ecosystem.netlify.app/",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
   }
 }

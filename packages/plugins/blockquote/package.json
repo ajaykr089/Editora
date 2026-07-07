@@ -1,7 +1,18 @@
 {
   "name": "@editora/plugin-blockquote",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Blockquote plugin for Rich Text Editor",
+  "author": "Ajay Kumar <ajaykr089@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/plugins/blockquote"
+  },
+  "homepage": "https://editora-ecosystem.netlify.app/",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
+  },
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
   ],
@@ -18,7 +29,7 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.9"
+    "@editora/core": "^1.0.14"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

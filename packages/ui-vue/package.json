@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-vue",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Vue 3 adapters for @editora UI web components",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -33,5 +33,14 @@
       "default": "./dist/index.esm.js"
     }
   },
-  "gitHead": "7883627e823aa99dd5ecb66a5201116df972f88b"
+  "gitHead": "7883627e823aa99dd5ecb66a5201116df972f88b",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/ui-vue"
+  },
+  "homepage": "https://editora-ecosystem.netlify.app/",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
+  }
 }

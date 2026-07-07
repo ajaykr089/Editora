@@ -1,6 +1,6 @@
 {
   "name": "@editora/document-manager",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Document import/export plugin for Rich Text Editor",
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
@@ -28,7 +28,7 @@
     "typescript": "^5.0.0"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.9"
+    "@editora/core": "^1.0.14"
   },
   "exports": {
     ".": {
@@ -37,5 +37,15 @@
       "require": "./dist/index.cjs.js",
       "default": "./dist/index.esm.js"
     }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/plugins/document-manager"
+  },
+  "homepage": "https://editora-ecosystem.netlify.app/",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
   }
 }
