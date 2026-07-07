@@ -1,6 +1,6 @@
 {
   "name": "@editora/performance",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Performance optimization utilities for Editora Rich Text Editor",
   "homepage": "https://editora-free.netlify.app/",
   "bugs": {
