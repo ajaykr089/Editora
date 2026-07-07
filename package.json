@@ -88,5 +88,13 @@
   "engines": {
     "node": ">=16.0.0",
     "npm": ">=8.0.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
   }
 }

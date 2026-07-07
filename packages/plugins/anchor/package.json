@@ -1,6 +1,6 @@
 {
   "name": "@editora/anchor",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Anchor plugin for Rich Text Editor - Create named navigation targets",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -18,20 +18,25 @@
     "link",
     "navigation"
   ],
+  "homepage": "https://editora-ecosystem.netlify.app/",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ajaykr089/Editora.git"
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/plugins/anchor"
   },
   "author": "",
   "license": "MIT",
   "peerDependenciesMeta": {
-    "editora-toast": {
+    "@editora/toast": {
       "optional": true
     }
   },
   "dependencies": {
-    "@editora/core": "^1.0.9",
-    "@editora/toast": "^2.0.5"
+    "@editora/core": "^1.0.14",
+    "@editora/toast": "^2.0.7"
   },
   "devDependencies": {
     "react": "^18.2.0",

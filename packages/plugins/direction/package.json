@@ -1,6 +1,6 @@
 {
   "name": "@editora/direction",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Direction plugin for Rich Text Editor",
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
@@ -17,7 +17,7 @@
     "clean": "rm -rf dist"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.9"
+    "@editora/core": "^1.0.14"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",
@@ -41,5 +41,14 @@
       "require": "./dist/index.cjs.js",
       "default": "./dist/index.esm.js"
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/plugins/direction"
+  },
+  "homepage": "https://editora-ecosystem.netlify.app/",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
   }
 }

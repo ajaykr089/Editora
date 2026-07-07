@@ -1,6 +1,6 @@
 {
   "name": "@editora/slash-commands",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Slash commands plugin for Editora Rich Text Editor",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -20,11 +20,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/ajaykr089/Editora.git"
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/plugins/slash-commands"
   },
   "license": "MIT",
   "dependencies": {
-    "@editora/core": "^1.0.9"
+    "@editora/core": "^1.0.14"
   },
   "devDependencies": {
     "react": "^18.2.0",
@@ -37,5 +38,9 @@
       "require": "./dist/index.cjs.js",
       "default": "./dist/index.esm.js"
     }
+  },
+  "homepage": "https://editora-ecosystem.netlify.app/",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
   }
 }
