@@ -1,4 +1,5 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
+import '@editora/ui-core/toast';
 import { toastAdvanced } from '@editora/toast';
 import '@editora/toast/toast.css';
 import type { ToastConfig, ToastInstance, ToastOptionsAdvanced, ToastPosition, ToastTheme } from '@editora/toast';

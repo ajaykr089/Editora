@@ -1,5 +1,6 @@
 import React from 'react';
 
+import '@editora/ui-core/field';
 export type FieldProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
   label?: string;

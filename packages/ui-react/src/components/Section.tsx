@@ -1,5 +1,6 @@
 import React from 'react';
 
+import '@editora/ui-core/section';
 type SectionProps = React.HTMLAttributes<HTMLElement> & {
   size?: 'small' | 'medium' | 'large';
   variant?: 'default' | 'surface' | 'muted' | 'outline' | 'elevated' | 'contrast' | 'gradient';

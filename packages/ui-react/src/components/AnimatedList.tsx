@@ -1,4 +1,5 @@
 import React from 'react';
+import '@editora/ui-core/animated-list';
 import { warnIfElementNotRegistered } from './_internals';
 
 export type AnimatedListEffect =

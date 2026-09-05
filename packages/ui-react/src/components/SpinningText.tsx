@@ -1,4 +1,5 @@
 import React from 'react';
+import '@editora/ui-core/spinning-text';
 import { warnIfElementNotRegistered } from './_internals';
 
 export type SpinningTextDirection = 'clockwise' | 'counterclockwise';

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import '@editora/ui-core/masonry-grid';
 import { warnIfElementNotRegistered } from './_internals';
 
 type BreakpointKey = 'initial' | 'sm' | 'md' | 'lg' | 'xl';

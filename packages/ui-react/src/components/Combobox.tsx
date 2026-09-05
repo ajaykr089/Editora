@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
+import '@editora/ui-core/combobox';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput' | 'onSelect' | 'onOpen' | 'onClose'> & {

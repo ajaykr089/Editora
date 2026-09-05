@@ -6,6 +6,7 @@ import React, {
   useLayoutEffect,
   useRef
 } from 'react';
+import '@editora/ui-core/sidebar';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;

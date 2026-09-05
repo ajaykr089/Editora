@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import '@editora/ui-core/aspect-ratio';
 export interface AspectRatioProps extends React.HTMLAttributes<HTMLElement> {
   ratio?: number | string;
   fit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';

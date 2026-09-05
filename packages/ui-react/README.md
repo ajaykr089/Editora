@@ -62,16 +62,21 @@ export function App() {
 
 ## Important Import Rule
 
-Recommended:
+Importing from the package root is the simplest option, but it registers every
+component's custom element (100+), which the bundler cannot tree-shake away
+even if you only use a couple of them:
 
 ```ts
 import { Button, DataTable } from '@editora/ui-react';
 ```
 
-If you deep-import wrappers directly (not recommended), ensure custom elements are registered:
+If bundle size matters, deep-import only the components you actually use.
+Each deep-import path registers just its own custom element - no extra
+`@editora/ui-core` import needed:
 
 ```ts
-import '@editora/ui-core';
+import Button from '@editora/ui-react/Button';
+import DataTable from '@editora/ui-react/DataTable';
 ```
 
 ## Common Usage Examples
@@ -420,6 +425,6 @@ Examples live under `packages/ui-react/examples`.
 ## Troubleshooting
 
 - Warning: `tagName is not registered`
-  - Import wrappers from package root (`@editora/ui-react`), or import `@editora/ui-core` manually before rendering wrappers.
+  - Import the wrapper from package root (`@editora/ui-react`) or its own deep-import path (`@editora/ui-react/Button`) - both register the custom element automatically.
 - Event callback not firing as expected
   - For wrapper callbacks like `onChange`, use the typed `detail` payload from wrapper props (not raw DOM event parsing).

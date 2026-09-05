@@ -1,4 +1,5 @@
 import React from 'react';
+import '@editora/ui-core/orbiter';
 import { warnIfElementNotRegistered } from './_internals';
 
 export type OrbiterDirection = 'clockwise' | 'counterclockwise' | 'alternate';

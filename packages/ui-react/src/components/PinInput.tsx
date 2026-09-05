@@ -1,4 +1,5 @@
 import React from 'react';
+import '@editora/ui-core/pin-input';
 import {
   getCustomEventDetail,
   syncBooleanAttribute,

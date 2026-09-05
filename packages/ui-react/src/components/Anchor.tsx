@@ -1,5 +1,6 @@
 import React from 'react';
 
+import '@editora/ui-core/anchor';
 export type AnchorProps = React.AnchorHTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
 };

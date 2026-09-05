@@ -1,4 +1,5 @@
 import React from 'react';
+import '@editora/ui-core/icon-cloud';
 import { warnIfElementNotRegistered } from './_internals';
 
 export type IconCloudDirection = 'clockwise' | 'counterclockwise';

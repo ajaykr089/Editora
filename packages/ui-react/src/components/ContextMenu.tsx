@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import '@editora/ui-core/context-menu';
 import { createPortal } from 'react-dom';
 
 type UIContextMenuElement = HTMLElement & {

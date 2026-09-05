@@ -1,4 +1,5 @@
 import React from 'react';
+import '@editora/ui-core/card';
 import { warnIfElementNotRegistered } from './_internals';
 
 const CARD_RUNTIME_STYLE_ID = 'editora-ui-react-card-runtime-styles';

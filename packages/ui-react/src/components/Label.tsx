@@ -1,5 +1,6 @@
 import React from 'react';
 
+import '@editora/ui-core/label';
 export type LabelTextProps = React.HTMLAttributes<HTMLElement>;
 export type LabelDescriptionProps = React.HTMLAttributes<HTMLElement>;
 

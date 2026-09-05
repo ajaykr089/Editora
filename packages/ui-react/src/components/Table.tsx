@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
+import '@editora/ui-core/table';
 export type TableSortDirection = 'asc' | 'desc';
 
 export type TableSortChangeDetail = {

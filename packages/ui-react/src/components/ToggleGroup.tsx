@@ -1,4 +1,5 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
+import '@editora/ui-core/toggle-group';
 import { Toggle, type ToggleProps } from './Toggle';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;

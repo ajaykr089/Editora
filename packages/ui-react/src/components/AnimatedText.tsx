@@ -1,4 +1,5 @@
 import React from 'react';
+import '@editora/ui-core/animated-text';
 import { warnIfElementNotRegistered } from './_internals';
 
 export type BuiltinAnimatedTextEffect =

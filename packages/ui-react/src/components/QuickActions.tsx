@@ -1,4 +1,5 @@
 import React from 'react';
+import '@editora/ui-core/quick-actions';
 import {
   getCustomEventDetail,
   syncBooleanAttribute,

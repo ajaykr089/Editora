@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useImperativeHandle } from 'react';
 
+import '@editora/ui-core/floating-toolbar';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 import { warnIfElementNotRegistered } from './_internals';
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import '@editora/ui-core/number-ticker';
 import { warnIfElementNotRegistered } from './_internals';
 
 export type NumberTickerTone = 'brand' | 'neutral' | 'info' | 'success' | 'warning' | 'danger';

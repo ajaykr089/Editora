@@ -1,5 +1,6 @@
 import React from 'react';
 
+import '@editora/ui-core/grid';
 type BreakpointKey = 'initial' | 'sm' | 'md' | 'lg' | 'xl';
 type Responsive<T> = T | Partial<Record<BreakpointKey, T>>;
 type CssValue = string | number;

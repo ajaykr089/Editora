@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import '@editora/ui-core/avatar';
 import {
   getCustomEventDetail,
   syncBooleanAttribute,
