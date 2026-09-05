@@ -830,7 +830,7 @@
   ],
   "scripts": {
     "build:tsc": "npm --prefix ../ui-core run build:tsc && tsc -p . --emitDeclarationOnly --noEmit false --outDir dist",
-    "build": "npm --prefix ../ui-core run build:tsc && vite build && npm run build:tsc",
+    "build": "npm --prefix ../ui-core run build:tsc && npm --prefix ../editora-toast run build && vite build && npm run build:tsc",
     "dev": "vite build --watch",
     "dev:examples": "vite --config examples/vite.config.ts",
     "build:examples": "vite build --config examples/vite.config.ts",
