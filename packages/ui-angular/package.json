@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-angular",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Angular adapters / guidelines for @editora UI web components",
   "files": [
     "src"
@@ -9,8 +9,8 @@
     "@angular/core": "^12.0.0"
   },
   "scripts": {
-    "build": "echo 'ui-angular is guidance-only \u2014 no build required'",
-    "dev": "echo 'ui-angular is guidance-only \u2014 no dev server'",
+    "build": "echo 'ui-angular is guidance-only — no build required'",
+    "dev": "echo 'ui-angular is guidance-only — no dev server'",
     "prepare": "echo 'no prepare step for ui-angular'"
   },
   "devDependencies": {

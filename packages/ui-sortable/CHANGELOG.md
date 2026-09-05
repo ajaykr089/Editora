@@ -3,10 +3,6 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## 1.0.5 (2026-09-05)
+## 0.1.4 (2026-09-05)
 
-**Note:** Version bump only for package @editora/cli
-
-## 1.0.1 (2026-03-08)
-
-**Note:** Version bump only for package editora
+**Note:** Version bump only for package @editora/ui-sortable
