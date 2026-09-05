@@ -70,6 +70,7 @@ export default defineConfig({
       '@editora/plugins': path.resolve(__dirname, '../plugins/src'),
       '@editora/toast': path.resolve(__dirname, '../editora-toast/src'),
       '@editora/themes': path.resolve(__dirname, '../themes/src'),
+      '@editora/light-code-editor': path.resolve(__dirname, '../light-code-editor/src'),
     },
   },
 });

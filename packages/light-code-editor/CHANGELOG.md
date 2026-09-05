@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.14](https://github.com/ajaykr089/Editora/compare/@editora/light-code-editor@1.0.8...@editora/light-code-editor@1.0.14) (2026-09-05)
+
+**Note:** Version bump only for package @editora/light-code-editor
+
 ## 1.0.8 (2026-03-08)
 
 **Note:** Version bump only for package @editora/light-code-editor

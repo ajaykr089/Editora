@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-react",
-  "version": "0.1.17",
+  "version": "0.1.19",
   "description": "Enterprise React component library with SaaS UI components, modern design system patterns, and wrappers for Editora UI Core.",
   "homepage": "https://editora-ecosystem.netlify.app/docs/ui-react",
   "bugs": {
@@ -830,7 +830,7 @@
   ],
   "scripts": {
     "build:tsc": "npm --prefix ../ui-core run build:tsc && tsc -p . --emitDeclarationOnly --noEmit false --outDir dist",
-    "build": "npm --prefix ../ui-core run build:tsc && vite build && npm run build:tsc",
+    "build": "npm --prefix ../ui-core run build:tsc && npm --prefix ../editora-toast run build && vite build && npm run build:tsc",
     "dev": "vite build --watch",
     "dev:examples": "vite --config examples/vite.config.ts",
     "build:examples": "vite build --config examples/vite.config.ts",
@@ -853,8 +853,8 @@
     "react-dom": ">=16.8 <21"
   },
   "dependencies": {
-    "@editora/toast": "^2.0.7",
-    "@editora/ui-core": "^0.1.17"
+    "@editora/toast": "^2.0.8",
+    "@editora/ui-core": "^0.1.18"
   },
   "keywords": [
     "editora",

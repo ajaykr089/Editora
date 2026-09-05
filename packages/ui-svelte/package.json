@@ -1,6 +1,6 @@
 {
   "name": "@editora/ui-svelte",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Svelte adapters for @editora UI web components",
   "files": [
     "src"

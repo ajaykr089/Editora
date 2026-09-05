@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.20](https://github.com/ajaykr089/Editora/compare/@editora/react@1.0.11...@editora/react@1.0.20) (2026-09-05)
+
+**Note:** Version bump only for package @editora/react
+
 ## 1.0.11 (2026-03-08)
 
 **Note:** Version bump only for package @editora/react
