@@ -17,6 +17,24 @@ bump for each, and a short summary. This writes a markdown file into
 
 You can add as many changesets as you like before a release; they accumulate.
 
+### Not-yet-published packages
+
+`@editora/ui-angular`, `@editora/ui-vue`, and `@editora/ui-svelte` are excluded
+via the `ignore` list in [`config.json`](./config.json) — they aren't
+build-ready yet, so `changeset add` won't offer them and `changeset
+version`/`changeset publish` will never touch them. Once one is ready to
+ship, remove it from that list.
+
+### Tooling-only changes
+
+If a change affects the release process itself (like the `ignore` list above)
+rather than any package's published code, add an *empty* changeset instead —
+it records the change without bumping any version:
+
+```bash
+npx changeset add --empty -m "Description of what changed and why"
+```
+
 ## Releasing
 
 When you're ready to cut a release, trigger the "Publish to npm" GitHub Actions
