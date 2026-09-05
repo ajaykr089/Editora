@@ -359,6 +359,25 @@ const style = `
 `;
 
 const overlayStyle = `
+  .ui-date-range-picker-overlay-host {
+    --ui-dp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    --ui-dp-surface: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent),
+      color-mix(in srgb, var(--ui-color-surface, #ffffff) 92%, var(--ui-color-surface-alt, #f8fafc))
+    );
+    --ui-dp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
+    --ui-dp-text: var(--ui-color-text, #0f172a);
+    --ui-dp-muted: var(--ui-color-muted, #64748b);
+    --ui-dp-accent: var(--ui-color-primary, #2563eb);
+    --ui-dp-success: var(--ui-color-success, #15803d);
+    --ui-dp-radius: 12px;
+    --ui-dp-panel-radius: calc(var(--ui-dp-radius) + 2px);
+    --ui-dp-field-error: var(--ui-color-danger, #dc2626);
+    --ui-dp-focus-ring: color-mix(in srgb, var(--ui-dp-accent) 26%, transparent);
+    --ui-dp-duration: 160ms;
+    --ui-dp-ease: cubic-bezier(0.2, 0.9, 0.24, 1);
+  }
   .overlay { position: fixed; z-index: var(--ui-dp-z, 1600); pointer-events: none; }
   .panel {
     pointer-events: auto;
