@@ -52,10 +52,15 @@ jobs:
       - name: Verify release artifacts
         run: npm run verify:release
       
-      - name: Version packages
-        run: |
-          lerna version ${{ github.event.inputs.version }} --conventional-commits --yes
-      
+      # Temporarily skipped: versions for this release were already bumped and
+      # tagged in a prior run (commit 71959e2) whose publish step failed on an
+      # invalid NPM_TOKEN. Re-running `lerna version` here would bump past
+      # those already-tagged versions without ever publishing them. Restore
+      # this step once `lerna publish from-git` below succeeds.
+      # - name: Version packages
+      #   run: |
+      #     lerna version ${{ github.event.inputs.version }} --conventional-commits --yes
+
       - name: Publish to npm
         run: lerna publish from-git --yes
         env:
