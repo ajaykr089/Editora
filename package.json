@@ -47,17 +47,13 @@
     "dev": "lerna run dev",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "publish:all": "lerna publish",
-    "publish:from-package": "lerna publish from-package --yes",
-    "publish:from-package:canary": "lerna publish from-package --canary --yes",
-    "publish:canary": "lerna publish --canary",
     "prerelease": "npm run clean && npm run build && npm run test && npm run test:ui",
-    "release": "lerna publish --conventional-commits",
-    "release:patch": "lerna version patch --conventional-commits",
-    "release:minor": "lerna version minor --conventional-commits",
-    "release:major": "lerna version major --conventional-commits"
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^3.0.2",
     "@storybook/addon-essentials": "^7.6.0",
     "@storybook/addon-links": "^7.6.0",
     "@storybook/react": "^7.6.0",
