@@ -77,7 +77,7 @@ export default defineConfig({
       fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'esm' : 'cjs'}.js`
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime', '@editora/core', '@editora/toast', 'prismjs', 'prismjs/themes/prism.css'],
+      external: ['react', 'react-dom', 'react/jsx-runtime', '@editora/core', '@editora/toast', '@editora/light-code-editor', 'prismjs', 'prismjs/themes/prism.css'],
       output: {
         exports: 'named',
         interop: 'auto',
