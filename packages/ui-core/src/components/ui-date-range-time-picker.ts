@@ -1,5 +1,6 @@
 import { ElementBase } from '../ElementBase';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
+import './ui-calendar';
 import { resolveDateTimeTranslations } from './date-time-i18n';
 import {
   combineDateTime,
@@ -315,6 +316,22 @@ const style = `
 `;
 
 const overlayStyle = `
+  .ui-date-range-time-picker-overlay-host {
+    --ui-drtp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    --ui-drtp-surface: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent),
+      color-mix(in srgb, var(--ui-color-surface, #ffffff) 90%, var(--ui-color-surface-alt, #f8fafc))
+    );
+    --ui-drtp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
+    --ui-dp-text: var(--ui-color-text, #0f172a);
+    --ui-dp-muted: var(--ui-color-muted, #64748b);
+    --ui-drtp-accent: var(--ui-color-primary, #2563eb);
+    --ui-drtp-panel-radius: 14px;
+    --ui-drtp-shadow: none;
+    --ui-drtp-duration: 160ms;
+    --ui-drtp-ease: cubic-bezier(0.2, 0.9, 0.24, 1);
+  }
   .overlay { position: fixed; z-index: var(--ui-drtp-z, 1600); pointer-events: none; }
   .panel {
     pointer-events: auto;
@@ -961,6 +978,7 @@ export class UIDateRangeTimePicker extends ElementBase {
   private _ensureOverlay(): void {
     if (this._overlay || typeof document === 'undefined') return;
     const el = document.createElement('div');
+    el.className = 'ui-date-range-time-picker-overlay-host';
     el.style.position = 'fixed';
     el.style.left = '0';
     el.style.top = '0';

@@ -169,6 +169,14 @@ const style = `
 `;
 
 const overlayStyle = `
+  .ui-time-picker-overlay-host {
+    --ui-dp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    --ui-dp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
+    --ui-dp-text: var(--ui-color-text, #0f172a);
+    --ui-dp-muted: var(--ui-color-muted, #64748b);
+    --ui-dp-accent: var(--ui-color-primary, #2563eb);
+    --ui-dp-radius: 12px;
+  }
   .overlay { position: fixed; z-index: var(--ui-dp-z, 1600); pointer-events: none; }
   .panel {
     pointer-events: auto;
@@ -591,6 +599,7 @@ export class UITimePicker extends ElementBase {
   private _ensureOverlay(): void {
     if (this._overlay || typeof document === 'undefined') return;
     const el = document.createElement('div');
+    el.className = 'ui-time-picker-overlay-host';
     el.style.position = 'fixed';
     el.style.left = '0';
     el.style.top = '0';
