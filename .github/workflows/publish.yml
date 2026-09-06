@@ -63,15 +63,9 @@ jobs:
           git push origin HEAD:${{ github.ref_name }}
 
       - name: Publish to npm
-        if: steps.check.outputs.has_changesets == 'true'
         run: npm run release
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
       - name: Push release tags
-        if: steps.check.outputs.has_changesets == 'true'
         run: git push origin --tags
-
-      - name: No pending changesets
-        if: steps.check.outputs.has_changesets == 'false'
-        run: echo "No .changeset/*.md files found - nothing to version or publish."

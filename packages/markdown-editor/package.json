@@ -41,6 +41,7 @@
     "react-dom": ">=16.8 <21"
   },
   "dependencies": {
+    "@editora/react": "^1.0.20",
     "marked": "^15.0.0"
   },
   "devDependencies": {
