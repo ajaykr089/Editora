@@ -47,6 +47,9 @@ jobs:
       - name: Run UI package tests
         run: npm run test:ui
 
+      - name: Run core package tests
+        run: npm run test:core:unit
+
   react-19-compat:
     runs-on: ubuntu-latest
 

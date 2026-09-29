@@ -1,7 +1,26 @@
 /**
  * HTML Sanitization Utility
- * Provides safe HTML cleaning based on allowed tags and attributes
+ *
+ * Wraps DOMPurify rather than hand-rolling tag/attribute filtering. The
+ * previous implementation (a from-scratch allowlist walker) had several real
+ * gaps found during a security audit: it allowed <iframe> by default with an
+ * unrestricted src, allowed the `style` attribute globally with zero content
+ * validation, and validated href/src schemes with a naive
+ * `value.startsWith('javascript:')` check - vulnerable to the well-known
+ * embedded-whitespace bypass (`href="jav&#9;ascript:alert(1)"`), since
+ * browsers strip embedded tab/newline characters from a URL's scheme before
+ * evaluating it, but that check never did. DOMPurify's own URI-scheme
+ * validation (ALLOWED_URI_REGEXP) is specifically hardened against this
+ * class of bypass, and its tag/attribute filtering has years of adversarial
+ * testing behind it that a bespoke implementation in an editor library
+ * can't realistically match.
+ *
+ * Public API (function signatures and config shape) is unchanged from the
+ * previous implementation, so callers - webcomponent/RichTextEditor.ts, and
+ * any consuming app passing its own contentConfig/security options - don't
+ * need to change.
  */
+import DOMPurify from 'dompurify';
 
 export interface SanitizationConfig {
   allowedTags?: string[];
@@ -18,12 +37,19 @@ const DEFAULT_ALLOWED_TAGS = [
   'p', 'br', 'strong', 'em', 'u', 's', 'strike', 'del', 'b', 'i',
   'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
   'ul', 'ol', 'li',
-  'a', 'img', 'video', 'audio', 'iframe',
+  'a', 'img', 'video', 'audio',
   'table', 'thead', 'tbody', 'tr', 'th', 'td',
   'blockquote', 'pre', 'code',
   'span', 'div', 'section',
   'sup', 'sub',
   'hr'
+  // 'iframe' is deliberately not in the default allowlist. Arbitrary pasted
+  // or typed content should not be able to silently embed an iframe - that's
+  // a real vector (e.g. pasting from a compromised page). The editor's
+  // embed-iframe plugin inserts iframes through its own explicit,
+  // user-initiated dialog, a different trust boundary that never calls
+  // through this sanitizer. A consumer that genuinely wants iframes in
+  // pasted/typed content can still opt in via a custom allowedTags list.
 ];
 
 const DEFAULT_ALLOWED_ATTRIBUTES: Record<string, string[]> = {
@@ -32,7 +58,6 @@ const DEFAULT_ALLOWED_ATTRIBUTES: Record<string, string[]> = {
   img: ['src', 'alt', 'width', 'height', 'loading'],
   video: ['src', 'controls', 'width', 'height', 'autoplay', 'loop', 'muted'],
   audio: ['src', 'controls', 'autoplay', 'loop', 'muted'],
-  iframe: ['src', 'width', 'height', 'name', 'title', 'longdesc', 'allow', 'allowfullscreen', 'frameborder', 'scrolling', 'loading', 'referrerpolicy'],
   table: ['border', 'cellpadding', 'cellspacing'],
   td: ['colspan', 'rowspan', 'align', 'valign'],
   th: ['colspan', 'rowspan', 'align', 'valign'],
@@ -58,101 +83,33 @@ export function sanitizeHTML(
     ? (contentConfig!.allowedAttributes as Record<string, string[]>)
     : DEFAULT_ALLOWED_ATTRIBUTES;
 
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = html;
-
-  sanitizeNode(tempDiv, allowedTags, allowedAttributes);
-  return tempDiv.innerHTML;
-}
-
-function sanitizeNode(
-  node: Node,
-  allowedTags: string[],
-  allowedAttributes: Record<string, string[]>,
-): void {
-  const children = Array.from(node.childNodes);
-
-  for (const child of children) {
-    if (child.nodeType === Node.ELEMENT_NODE) {
-      const element = child as Element;
-      const tagName = element.tagName.toLowerCase();
-
-      if (!allowedTags.includes(tagName)) {
-        while (element.firstChild) {
-          node.insertBefore(element.firstChild, element);
-        }
-        node.removeChild(element);
-        continue;
-      }
-
-      sanitizeAttributes(element, allowedAttributes);
-      sanitizeNode(element, allowedTags, allowedAttributes);
-    } else if (child.nodeType !== Node.TEXT_NODE) {
-      node.removeChild(child);
-    }
-  }
-}
-
-function sanitizeAttributes(
-  element: Element,
-  allowedAttributes: Record<string, string[]>,
-): void {
-  const tagName = element.tagName.toLowerCase();
-  const attributes = Array.from(element.attributes);
-
-  const tagAllowedAttrs = allowedAttributes[tagName] || [];
-  const globalAllowedAttrs = allowedAttributes['*'] || [];
-  const combined = [...tagAllowedAttrs, ...globalAllowedAttrs];
-
-  for (const attr of attributes) {
-    const attrName = attr.name.toLowerCase();
-    let isAllowed = false;
-
-    if (combined.includes(attrName)) {
-      isAllowed = true;
-    }
-
-    for (const pattern of combined) {
-      if (pattern.endsWith('*')) {
-        const prefix = pattern.slice(0, -1);
-        if (attrName.startsWith(prefix)) {
-          isAllowed = true;
-          break;
-        }
-      }
-    }
-
-    if (
-      attrName.startsWith('on') ||
-      attrName === 'javascript:' ||
-      (attrName === 'href' && attr.value.trim().toLowerCase().startsWith('javascript:')) ||
-      (attrName === 'src' && attr.value.trim().toLowerCase().startsWith('javascript:'))
-    ) {
-      isAllowed = false;
-    }
-
-    if (attrName === 'dir' && !['ltr', 'rtl', 'auto'].includes(attr.value.trim().toLowerCase())) {
-      isAllowed = false;
-    }
-
-    if (!isAllowed) {
-      element.removeAttribute(attr.name);
-    }
+  // DOMPurify's ALLOWED_ATTR is a single flat list applied across every
+  // allowed tag - it has no native "this attribute only on that tag"
+  // concept, unlike the config shape this function accepts. Union
+  // everything into the flat list DOMPurify needs. This is a minor semantic
+  // relaxation versus the old per-tag restriction (e.g. `colspan` becomes
+  // technically permitted on <a> too, not just <td>/<th>) but not a security
+  // regression: the attributes that actually matter for exploitation - on*
+  // event handlers, href/src/etc URI schemes - are validated by DOMPurify
+  // itself regardless of which tag they appear on, which is the protection
+  // that was actually missing before.
+  const flatAttrs = new Set<string>();
+  for (const attrs of Object.values(allowedAttributes)) {
+    for (const attr of attrs) flatAttrs.add(attr);
   }
 
-  if (element.hasAttribute('href')) {
-    const href = element.getAttribute('href') || '';
-    if (href.trim().toLowerCase().startsWith('javascript:')) {
-      element.removeAttribute('href');
-    }
-  }
-
-  if (element.hasAttribute('src')) {
-    const src = element.getAttribute('src') || '';
-    if (src.trim().toLowerCase().startsWith('javascript:')) {
-      element.removeAttribute('src');
-    }
-  }
+  // Note: DOMPurify's handling of the `style` attribute's CSS content is
+  // best-effort (it strips obviously dangerous constructs but isn't a full
+  // CSS validator) - this is a known, documented DOMPurify limitation, not
+  // something specific to this wrapper. It is still materially safer than
+  // the previous implementation, which did not inspect style content at
+  // all. A consumer with a high-security requirement around inline styles
+  // (e.g. preventing data exfiltration via `background: url(...)`) should
+  // exclude 'style' from its own allowedAttributes config.
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: allowedTags,
+    ALLOWED_ATTR: Array.from(flatAttrs),
+  });
 }
 
 export function sanitizePastedHTML(
