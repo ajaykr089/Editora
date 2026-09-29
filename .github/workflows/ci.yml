@@ -49,6 +49,43 @@ jobs:
       - name: Run UI package tests
         run: npm run test:ui
 
+  react-19-compat:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # @editora/ui-react's peerDependencies claim "react": ">=16.8 <21" -
+      # a range that includes React 19 - but nothing anywhere actually
+      # builds or tests against it; the whole repo's own tooling (this
+      # workflow's matrix included) only ever installs React 18. That gap
+      # is exactly what let a real React 19 incompatibility (ui-react's
+      # Sidebar bundle crashing on load - unrelated to any code a consumer
+      # writes) ship undetected until an external integration hit it. This
+      # job overrides the hoisted React install for this runner only - it
+      # does not touch package.json or the committed lockfile - then
+      # rebuilds and retests the React-facing packages against it.
+      - name: Install React 19 (override, not persisted)
+        run: npm install react@19 react-dom@19 --no-save --legacy-peer-deps
+
+      - name: Build ui-core
+        run: npm run build -w @editora/ui-core
+
+      - name: Build ui-react
+        run: npm run build -w @editora/ui-react
+
+      - name: Test ui-react against React 19
+        run: npm test --prefix packages/ui-react
+
   publish:
     needs: test
     if: github.event_name == 'release'
