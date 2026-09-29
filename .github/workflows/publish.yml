@@ -33,6 +33,9 @@ jobs:
       - name: Verify component registry is up to date
         run: npm run check:components
 
+      - name: Verify custom element registrations are complete
+        run: npm run check:element-registrations
+
       - name: Run tests
         run: npm test
 
