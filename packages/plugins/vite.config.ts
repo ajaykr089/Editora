@@ -16,6 +16,7 @@ const pluginEntryNames = [
   'clear-formatting',
   'code',
   'code-sample',
+  'collaboration',
   'comments',
   'content-rules',
   'data-binding',

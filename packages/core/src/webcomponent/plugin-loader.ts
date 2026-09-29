@@ -75,6 +75,7 @@ const advancedPluginRegistry: Record<string, () => Promise<any>> = {
   'emojis': () => import("../../../plugins/emojis/src/EmojisPlugin.native").then(m => m.EmojisPlugin()),
   'a11yChecker': () => import("../../../plugins/a11y-checker/src/A11yCheckerPlugin.native").then(m => m.A11yCheckerPlugin()),
   'comments': () => import("../../../plugins/comments/src/CommentsPlugin.native").then(m => m.CommentsPlugin()),
+  'collaboration': () => import("../../../plugins/collaboration/src/CollaborationPlugin.native").then(m => m.CollaborationPlugin()),
   'document-manager': () => import("../../../plugins/document-manager/src/DocumentManagerPlugin.native").then(m => m.DocumentManagerPlugin()),
   'fullscreen': () => import("../../../plugins/fullscreen/src/FullscreenPlugin.native").then(m => m.FullscreenPlugin()),
   'template': () => import("../../../plugins/template/src/TemplatePlugin.native").then(m => m.TemplatePlugin()),

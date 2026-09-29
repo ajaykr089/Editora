@@ -153,3 +153,8 @@ export {
   getDocumentManagerConfig,
   type DocumentManagerConfig,
 } from '../document-manager/src/index';
+export {
+  CollaborationPlugin,
+  type CollaborationPluginOptions,
+  type CollaborationUser,
+} from '../collaboration/src/index';

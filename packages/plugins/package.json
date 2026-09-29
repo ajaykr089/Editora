@@ -192,6 +192,12 @@
       "require": "./dist/code-sample.cjs.js",
       "default": "./dist/code-sample.esm.js"
     },
+    "./collaboration": {
+      "types": "./index.d.ts",
+      "import": "./dist/collaboration.esm.js",
+      "require": "./dist/collaboration.cjs.js",
+      "default": "./dist/collaboration.esm.js"
+    },
     "./comments": {
       "types": "./index.d.ts",
       "import": "./dist/comments.esm.js",

@@ -1,0 +1,53 @@
+{
+  "name": "@editora/collaboration",
+  "version": "0.1.0",
+  "description": "Real-time collaborative editing for Editora, backed by Yjs CRDT sync and awareness-based presence.",
+  "authors": [
+    "Ajay Kumar <ajaykr089@gmail.com>"
+  ],
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "clean": "rm -rf dist",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "yjs": "^13.6.18",
+    "y-websocket": "^2.0.4",
+    "y-protocols": "^1.0.6"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0",
+    "jsdom": "^22.1.0"
+  },
+  "peerDependencies": {
+    "@editora/core": "^1.0.15"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js",
+      "default": "./dist/index.esm.js"
+    }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ajaykr089/Editora.git",
+    "directory": "packages/plugins/collaboration"
+  },
+  "homepage": "https://editora-ecosystem.netlify.app/",
+  "bugs": {
+    "url": "https://github.com/ajaykr089/Editora/issues"
+  }
+}
