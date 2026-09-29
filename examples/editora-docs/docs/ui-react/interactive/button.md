@@ -6,20 +6,29 @@ sidebar_label: Button
 
 # Button
 
-```tsx
-import { Button } from '@editora/ui-react';
-
-<Button
-  variant="primary"
-  recipe="solid"
-  scale="2"
-  radius={4}
-  startIcon={<span aria-hidden="true">+</span>}
-  loadingLabel="Saving"
-  onClick={() => console.log('clicked')}
->
-  Save changes
-</Button>;
+```tsx live
+function ButtonDemo() {
+  const [saving, setSaving] = React.useState(false);
+  return (
+    <ThemeProvider>
+      <Button
+        variant="primary"
+        recipe="solid"
+        scale="2"
+        radius={4}
+        startIcon={<span aria-hidden="true">+</span>}
+        loading={saving}
+        loadingLabel="Saving"
+        onClick={() => {
+          setSaving(true);
+          setTimeout(() => setSaving(false), 1200);
+        }}
+      >
+        Save changes
+      </Button>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

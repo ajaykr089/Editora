@@ -6,20 +6,26 @@ sidebar_label: Chart
 
 # Chart
 
-```tsx
-import { Chart } from '@editora/ui-react';
-
-<Chart
-  type="bar"
-  title="Weekly signups"
-  data={[
-    { label: 'Mon', value: 12 },
-    { label: 'Tue', value: 18 },
-    { label: 'Wed', value: 9 }
-  ]}
-  showLegend
-  onPointSelect={(detail) => console.log(detail.label, detail.value)}
-/>;
+```tsx live
+function ChartDemo() {
+  const [selected, setSelected] = React.useState(null);
+  return (
+    <ThemeProvider>
+      <Chart
+        type="bar"
+        title="Weekly signups"
+        data={[
+          { label: 'Mon', value: 12 },
+          { label: 'Tue', value: 18 },
+          { label: 'Wed', value: 9 },
+        ]}
+        showLegend
+        onPointSelect={setSelected}
+      />
+      {selected && <p>Selected: {selected.label} - {selected.value}</p>}
+    </ThemeProvider>
+  );
+}
 ```
 
 Compound usage:
