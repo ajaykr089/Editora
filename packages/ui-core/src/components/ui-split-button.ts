@@ -7,6 +7,43 @@ import type { UIListbox } from './ui-listbox';
 
 const MENU_TRANSITION_MS = 160;
 
+// The dropdown menu is portaled to document.body (see createPortalContainer
+// in ../portal) so it can render above other content and escape any
+// ancestor's overflow/clipping - but that also moves it out of this
+// element's shadow root, so the --ui-split-button-menu-* custom properties
+// defined in :host{} above are invisible to it (a light-DOM sibling can't
+// see another shadow root's :host-scoped variables). Rather than
+// re-deriving each token's formula a second time on a portal-side selector
+// (which then has to be kept in sync by hand), read the already-resolved
+// computed values off the host element - which IS in the normal document
+// flow and correctly inherits/resolves theme tokens - and copy them onto
+// the portaled menu as inline styles. Matches the pattern already used by
+// ui-menu.ts/ui-menubar.ts/ui-context-menu.ts for the same reason.
+const SPLIT_BUTTON_MENU_TOKEN_NAMES = [
+  '--ui-split-button-menu-bg',
+  '--ui-split-button-menu-color',
+  '--ui-split-button-menu-border',
+  '--ui-split-button-menu-radius',
+  '--ui-split-button-menu-shadow',
+  '--ui-split-button-menu-accent',
+  '--ui-split-button-menu-accent-strong',
+  '--ui-split-button-menu-shortcut',
+  '--ui-split-button-menu-separator',
+  '--ui-split-button-menu-muted',
+  '--ui-split-button-menu-danger',
+  '--ui-split-button-menu-option-border',
+  '--ui-split-button-menu-option-border-strong',
+  '--ui-split-button-menu-option-shadow',
+  '--ui-split-button-menu-affordance-bg',
+  '--ui-split-button-menu-affordance-border',
+  '--ui-split-button-menu-affordance-size',
+  '--ui-split-button-menu-list-gap',
+  '--ui-split-button-menu-list-padding-top',
+  '--ui-split-button-menu-item-min-height',
+  '--ui-split-button-menu-item-radius',
+  '--ui-split-button-menu-item-padding',
+] as const;
+
 const style = `
   :host {
     --ui-split-button-radius: 12px;
@@ -625,6 +662,15 @@ export class UISplitButton extends ElementBase {
     }
   }
 
+  private _applyPortalTokens(menu: HTMLElement): void {
+    const computed = window.getComputedStyle(this);
+    SPLIT_BUTTON_MENU_TOKEN_NAMES.forEach((name) => {
+      const value = computed.getPropertyValue(name).trim();
+      if (value) menu.style.setProperty(name, value);
+      else menu.style.removeProperty(name);
+    });
+  }
+
   private _mountMenu(): void {
     if (this._portalEl) return;
     const portalRoot = createPortalContainer();
@@ -679,6 +725,7 @@ export class UISplitButton extends ElementBase {
     menu.append(styleEl);
     if (header) menu.appendChild(header);
     menu.appendChild(listbox);
+    this._applyPortalTokens(menu);
     this._portalRoot.appendChild(menu);
     this._portalEl = menu;
 
