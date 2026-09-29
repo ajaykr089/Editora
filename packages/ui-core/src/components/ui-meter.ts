@@ -281,7 +281,7 @@ export class UIMeter extends ElementBase {
   private _lastChangeKey = '';
 
   get metrics(): MeterMetrics {
-    let min = parseNumber(this.getAttribute('min'), 0);
+    const min = parseNumber(this.getAttribute('min'), 0);
     let max = parseNumber(this.getAttribute('max'), 1);
     if (max <= min) max = min + 1;
 
