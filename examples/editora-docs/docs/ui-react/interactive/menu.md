@@ -10,26 +10,30 @@ Import the main `Menu` component and use its sub-components as properties. The `
 
 ## Basic Usage
 
-```tsx
-import { Button, Menu } from '@editora/ui-react';
-
-<Menu
-  placement="bottom"
-  variant="soft"
-  size="md"
-  radius={12}
-  closeOnSelect
-  typeahead
-  onSelectDetail={(detail) => console.log(detail)}
->
-  <Button slot="trigger">Open menu</Button>
-  <div slot="content">
-    <Menu.Item shortcut="R">Rename</Menu.Item>
-    <Menu.Item shortcut="D">Duplicate</Menu.Item>
-    <Menu.Separator />
-    <Menu.Item tone="danger" shortcut="⌘⌫">Delete permanently</Menu.Item>
-  </div>
-</Menu>;
+```tsx live
+function MenuDemo() {
+  return (
+    <ThemeProvider>
+      <Menu
+        placement="bottom"
+        variant="soft"
+        size="md"
+        radius={12}
+        closeOnSelect
+        typeahead
+        onSelectDetail={(detail) => console.log(detail)}
+      >
+        <Button slot="trigger">Open menu</Button>
+        <div slot="content">
+          <Menu.Item shortcut="R">Rename</Menu.Item>
+          <Menu.Item shortcut="D">Duplicate</Menu.Item>
+          <Menu.Separator />
+          <Menu.Item tone="danger" shortcut="⌘⌫">Delete permanently</Menu.Item>
+        </div>
+      </Menu>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Composed Sub-Components

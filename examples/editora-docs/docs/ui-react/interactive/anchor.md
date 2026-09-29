@@ -6,15 +6,19 @@ sidebar_label: Anchor
 
 # Anchor
 
-```tsx
-import { Anchor, Positioner } from '@editora/ui-react';
-
-<>
-  <Anchor id="filters-anchor" />
-  <Positioner anchor="filters-anchor" placement="bottom">
-    <div>Anchored content</div>
-  </Positioner>
-</>;
+```tsx live
+function AnchorDemo() {
+  return (
+    <ThemeProvider>
+      <>
+        <Anchor id="filters-anchor" />
+        <Positioner anchor="filters-anchor" placement="bottom">
+          <div>Anchored content</div>
+        </Positioner>
+      </>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

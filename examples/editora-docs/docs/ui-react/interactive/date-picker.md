@@ -10,19 +10,19 @@ The `DatePicker` component provides comprehensive date selection functionality w
 
 ## Basic Usage
 
-```tsx
-import { DatePicker } from '@editora/ui-react';
-
+```tsx live
 function BasicDatePicker() {
   const [selectedDate, setSelectedDate] = useState('');
 
   return (
-    <DatePicker 
-      value={selectedDate}
-      onChange={(detail) => setSelectedDate(detail.value)}
-      placeholder="Select a date"
-      label="Appointment Date"
-    />
+    <ThemeProvider>
+      <DatePicker 
+        value={selectedDate}
+        onChange={(detail) => setSelectedDate(detail.value)}
+        placeholder="Select a date"
+        label="Appointment Date"
+      />
+    </ThemeProvider>
   );
 }
 ```

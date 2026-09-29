@@ -6,20 +6,24 @@ sidebar_label: Date Time Picker
 
 # Date Time Picker
 
-```tsx
-import { DateTimePicker } from '@editora/ui-react';
-
-<DateTimePicker
-  label="Publish at"
-  value="2026-03-15T10:30"
-  min="2026-03-01T08:00"
-  max="2026-03-31T18:00"
-  format="12h"
-  step={15}
-  clearable
-  allowInput
-  onValueChange={(value) => console.log(value)}
-/>;
+```tsx live
+function DateTimePickerDemo() {
+  return (
+    <ThemeProvider>
+      <DateTimePicker
+        label="Publish at"
+        value="2026-03-15T10:30"
+        min="2026-03-01T08:00"
+        max="2026-03-31T18:00"
+        format="12h"
+        step={15}
+        clearable
+        allowInput
+        onValueChange={(value) => console.log(value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

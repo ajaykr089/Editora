@@ -10,10 +10,12 @@ The `SelectionPopup` component anchors formatting actions to active selections.
 
 ## Basic Usage
 
-```tsx
-import { SelectionPopup } from '@editora/ui-react';
-
-export function Example() {
-  return <SelectionPopup />;
+```tsx live
+function Example() {
+  return (
+    <ThemeProvider>
+      <SelectionPopup />
+    </ThemeProvider>
+  );
 }
 ```

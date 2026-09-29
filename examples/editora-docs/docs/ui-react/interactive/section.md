@@ -10,10 +10,12 @@ The `Section` component helps organize page regions with predictable layout spac
 
 ## Basic Usage
 
-```tsx
-import { Section } from '@editora/ui-react';
-
-export function Example() {
-  return <Section>Content block</Section>;
+```tsx live
+function Example() {
+  return (
+    <ThemeProvider>
+      <Section>Content block</Section>
+    </ThemeProvider>
+  );
 }
 ```

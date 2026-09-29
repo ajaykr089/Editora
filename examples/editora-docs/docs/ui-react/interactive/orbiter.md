@@ -25,22 +25,28 @@ import { Orbiter } from '@editora/ui-react/Orbiter';
 
 ## Basic Usage
 
-```tsx
-<Orbiter variant="glass" tone="brand" rings={2} path pauseOnHover>
-  <Orbiter.Center>
-    <div>Core</div>
-  </Orbiter.Center>
+```tsx live
+function OrbiterDemo() {
+  return (
+    <ThemeProvider>
+      <Orbiter variant="glass" tone="brand" rings={2} path pauseOnHover>
+        <Orbiter.Center>
+          <div>Core</div>
+        </Orbiter.Center>
 
-  <Orbiter.Item aria-label="Search">
-    <SearchIcon />
-  </Orbiter.Item>
-  <Orbiter.Item aria-label="Alerts">
-    <BellIcon />
-  </Orbiter.Item>
-  <Orbiter.Item aria-label="Assets">
-    <FolderIcon />
-  </Orbiter.Item>
-</Orbiter>
+        <Orbiter.Item aria-label="Search">
+          <SearchIcon />
+        </Orbiter.Item>
+        <Orbiter.Item aria-label="Alerts">
+          <BellIcon />
+        </Orbiter.Item>
+        <Orbiter.Item aria-label="Assets">
+          <FolderIcon />
+        </Orbiter.Item>
+      </Orbiter>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Control-Center Pattern

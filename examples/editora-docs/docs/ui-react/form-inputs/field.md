@@ -6,12 +6,16 @@ sidebar_label: Field
 
 # Field
 
-```tsx
-import { Field, Input } from '@editora/ui-react';
-
-<Field label="Workspace name" description="Visible to your team." htmlFor="workspace-name" required>
-  <Input id="workspace-name" />
-</Field>
+```tsx live
+function FieldDemo() {
+  return (
+    <ThemeProvider>
+      <Field label="Workspace name" description="Visible to your team." htmlFor="workspace-name" required>
+        <Input id="workspace-name" />
+      </Field>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Props

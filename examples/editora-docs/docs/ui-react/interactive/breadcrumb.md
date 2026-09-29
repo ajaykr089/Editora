@@ -10,24 +10,24 @@ Import the main `Breadcrumb` component and use its sub-components as properties.
 
 ## Basic Usage
 
-```tsx
-import { Breadcrumb } from '@editora/ui-react';
-
+```tsx live
 function Example() {
   return (
-    <Breadcrumb
-      ariaLabel="Release navigation"
-      maxItems={5}
-      currentIndex={3}
-      variant="soft"
-      tone="info"
-      radius={12}
-    >
-      <Breadcrumb.Item label="Workspace" index={0}>Workspace</Breadcrumb.Item>
-      <Breadcrumb.Item label="Programs" index={1}>Programs</Breadcrumb.Item>
-      <Breadcrumb.Item label="Spring release" index={2}>Spring release</Breadcrumb.Item>
-      <Breadcrumb.Item label="Audit logs" index={3}>Audit logs</Breadcrumb.Item>
-    </Breadcrumb>
+    <ThemeProvider>
+      <Breadcrumb
+        ariaLabel="Release navigation"
+        maxItems={5}
+        currentIndex={3}
+        variant="soft"
+        tone="info"
+        radius={12}
+      >
+        <Breadcrumb.Item label="Workspace" index={0}>Workspace</Breadcrumb.Item>
+        <Breadcrumb.Item label="Programs" index={1}>Programs</Breadcrumb.Item>
+        <Breadcrumb.Item label="Spring release" index={2}>Spring release</Breadcrumb.Item>
+        <Breadcrumb.Item label="Audit logs" index={3}>Audit logs</Breadcrumb.Item>
+      </Breadcrumb>
+    </ThemeProvider>
   );
 }
 ```

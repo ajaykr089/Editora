@@ -6,20 +6,24 @@ sidebar_label: Split Button
 
 # Split Button
 
-```tsx
-import { SplitButton } from '@editora/ui-react';
-
-<SplitButton
-  label="Publish"
-  menuLabel="More publishing actions"
-  variant="primary"
-  items={[
-    { value: 'schedule', label: 'Schedule publish', shortcut: '⌘K' },
-    { value: 'archive', label: 'Archive draft', tone: 'danger' }
-  ]}
-  onPrimaryAction={() => console.log('primary')}
-  onSelect={(detail) => console.log(detail.value)}
-/>;
+```tsx live
+function SplitButtonDemo() {
+  return (
+    <ThemeProvider>
+      <SplitButton
+        label="Publish"
+        menuLabel="More publishing actions"
+        variant="primary"
+        items={[
+          { value: 'schedule', label: 'Schedule publish', shortcut: '⌘K' },
+          { value: 'archive', label: 'Archive draft', tone: 'danger' }
+        ]}
+        onPrimaryAction={() => console.log('primary')}
+        onSelect={(detail) => console.log(detail.value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

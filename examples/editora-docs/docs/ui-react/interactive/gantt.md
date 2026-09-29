@@ -10,10 +10,7 @@ The `Gantt` component visualizes scheduled work across a timeline and provides a
 
 ## Basic Usage
 
-```tsx
-import { Gantt, type GanttLink, type GanttTask } from '@editora/ui-react';
-import { useState } from 'react';
-
+```tsx live noInline
 const initialTasks: GanttTask[] = [
   {
     id: 'foundation',
@@ -50,26 +47,30 @@ const links: GanttLink[] = [
   { id: 'docs-launch', source: 'docs', target: 'launch', type: 'e2s' }
 ];
 
-export function Example() {
+function Example() {
   const [tasks, setTasks] = useState(initialTasks);
 
   return (
-    <Gantt
-      tasks={tasks}
-      links={links}
-      zoom="week"
-      sort="start"
-      barVariant="soft"
-      onTaskChange={({ id, start, end }) => {
-        setTasks((items) => items.map((task) => (
-          task.id === id ? { ...task, start: start ?? task.start, end: end ?? task.end } : task
-        )));
-      }}
-      onTaskDelete={({ id }) => setTasks((items) => items.filter((task) => task.id !== id))}
-      onLinkSelect={(detail) => console.log('dependency selected', detail)}
-    />
+    <ThemeProvider>
+      <Gantt
+        tasks={tasks}
+        links={links}
+        zoom="week"
+        sort="start"
+        barVariant="soft"
+        onTaskChange={({ id, start, end }) => {
+          setTasks((items) => items.map((task) => (
+            task.id === id ? { ...task, start: start ?? task.start, end: end ?? task.end } : task
+          )));
+        }}
+        onTaskDelete={({ id }) => setTasks((items) => items.filter((task) => task.id !== id))}
+        onLinkSelect={(detail) => console.log('dependency selected', detail)}
+      />
+    </ThemeProvider>
   );
 }
+
+render(<Example />);
 ```
 
 ## What It Supports

@@ -10,17 +10,17 @@ The `EmptyState` component provides a visually appealing way to display empty st
 
 ## Basic Usage
 
-```tsx
-import { EmptyState } from '@editora/ui-react';
-
+```tsx live
 function BasicEmptyState() {
   return (
-    <EmptyState
-      title="No items found"
-      description="Try adjusting your search or filter to find what you're looking for."
-      actionLabel="Clear filters"
-      onAction={() => console.log('Action clicked')}
-    />
+    <ThemeProvider>
+      <EmptyState
+        title="No items found"
+        description="Try adjusting your search or filter to find what you're looking for."
+        actionLabel="Clear filters"
+        onAction={() => console.log('Action clicked')}
+      />
+    </ThemeProvider>
   );
 }
 ```

@@ -6,22 +6,26 @@ sidebar_label: Multi Select
 
 # Multi Select
 
-```tsx
-import { MultiSelect } from '@editora/ui-react';
-
-<MultiSelect
-  label="Notify teams"
-  placeholder="Choose recipients"
-  clearable
-  selectionIndicator="check"
-  variant="soft"
-  radius={12}
-  options={[
-    { label: 'Core', options: [{ value: 'ops', label: 'Operations' }, { value: 'eng', label: 'Engineering' }] },
-    { value: 'support', label: 'Support' }
-  ]}
-  onValueChange={(value) => console.log(value)}
-/>;
+```tsx live
+function MultiSelectDemo() {
+  return (
+    <ThemeProvider>
+      <MultiSelect
+        label="Notify teams"
+        placeholder="Choose recipients"
+        clearable
+        selectionIndicator="check"
+        variant="soft"
+        radius={12}
+        options={[
+          { label: 'Core', options: [{ value: 'ops', label: 'Operations' }, { value: 'eng', label: 'Engineering' }] },
+          { value: 'support', label: 'Support' }
+        ]}
+        onValueChange={(value) => console.log(value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

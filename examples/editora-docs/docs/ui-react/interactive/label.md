@@ -18,11 +18,17 @@ import { Label } from '@editora/ui-react/Label';
 
 ## Basic Usage
 
-```tsx
-<Label htmlFor="name">
-  <Label.Text>Name</Label.Text>
-</Label>
-<Input id="name" />
+```tsx live
+function LabelDemo() {
+  return (
+    <ThemeProvider>
+      <Label htmlFor="name">
+        <Label.Text>Name</Label.Text>
+      </Label>
+      <Input id="name" />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Required Field

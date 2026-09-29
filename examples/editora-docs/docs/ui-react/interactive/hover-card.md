@@ -6,13 +6,17 @@ sidebar_label: Hover Card
 
 # Hover Card
 
-```tsx
-import { HoverCard } from '@editora/ui-react';
-
-<HoverCard delay={150} closeDelay={120} placement="bottom" onChange={(open) => console.log(open)}>
-  <button slot="trigger">Hover user</button>
-  <div>Contextual profile preview</div>
-</HoverCard>;
+```tsx live
+function HoverCardDemo() {
+  return (
+    <ThemeProvider>
+      <HoverCard delay={150} closeDelay={120} placement="bottom" onChange={(open) => console.log(open)}>
+        <button slot="trigger">Hover user</button>
+        <div>Contextual profile preview</div>
+      </HoverCard>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

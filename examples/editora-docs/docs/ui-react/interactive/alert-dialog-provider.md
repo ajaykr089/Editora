@@ -10,21 +10,21 @@ Wrap your app with `AlertDialogProvider` to trigger alert dialogs from anywhere 
 
 ## Basic Usage
 
-```tsx
-import { AlertDialogProvider, useAlertDialog } from '@editora/ui-react';
-
+```tsx live noInline
 function App() {
   return (
-    <AlertDialogProvider
-      defaults={{
-        variant: 'soft',
-        radius: 12,
-        elevation: 'high',
-        closeOnBackdrop: false
-      }}
-    >
-      <WorkspaceActions />
-    </AlertDialogProvider>
+    <ThemeProvider>
+      <AlertDialogProvider
+        defaults={{
+          variant: 'soft',
+          radius: 12,
+          elevation: 'high',
+          closeOnBackdrop: false
+        }}
+      >
+        <WorkspaceActions />
+      </AlertDialogProvider>
+    </ThemeProvider>
   );
 }
 
@@ -47,6 +47,8 @@ function WorkspaceActions() {
 
   return <button onClick={handleDelete}>Delete</button>;
 }
+
+render(<App />);
 ```
 
 ## Provider Props

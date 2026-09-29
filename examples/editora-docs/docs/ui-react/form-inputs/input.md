@@ -14,22 +14,28 @@ import { Input } from '@editora/ui-react';
 
 `Input` follows a composition pattern. Use `Input.Prefix`, `Input.Suffix`, and `Input.Error` as named sub-components to compose the field layout declaratively:
 
-```tsx
-<Input
-  label="Email"
-  type="email"
-  placeholder="name@company.com"
-  required
-  clearable
-  validation="error"
-  onChange={(value) => console.log(value)}
->
-  <Input.Prefix>✉️</Input.Prefix>
-  <Input.Suffix>
-    <button type="button">Verify</button>
-  </Input.Suffix>
-  <Input.Error>Enter a valid email address</Input.Error>
-</Input>
+```tsx live
+function InputDemo() {
+  return (
+    <ThemeProvider>
+      <Input
+        label="Email"
+        type="email"
+        placeholder="name@company.com"
+        required
+        clearable
+        validation="error"
+        onChange={(value) => console.log(value)}
+      >
+        <Input.Prefix>✉️</Input.Prefix>
+        <Input.Suffix>
+          <button type="button">Verify</button>
+        </Input.Suffix>
+        <Input.Error>Enter a valid email address</Input.Error>
+      </Input>
+    </ThemeProvider>
+  );
+}
 ```
 
 ### Sub-components

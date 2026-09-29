@@ -8,23 +8,23 @@ sidebar_label: Combobox
 
 Use `Combobox` to provide a searchable alternative to traditional select dropdowns. Supports filtering, custom values, debounced inputs, and comprehensive state feedback.
 
-```tsx
-import { Combobox } from '@editora/ui-react';
-
+```tsx live
 function Example() {
   const [value, setValue] = React.useState('');
 
   return (
-    <Combobox
-      value={value}
-      onChange={setValue}
-      placeholder="Choose an option..."
-      clearable
-    >
-      <Combobox.Option value="opt-1">Option 1</Combobox.Option>
-      <Combobox.Option value="opt-2">Option 2</Combobox.Option>
-      <Combobox.Option value="opt-3">Option 3</Combobox.Option>
-    </Combobox>
+    <ThemeProvider>
+      <Combobox
+        value={value}
+        onChange={setValue}
+        placeholder="Choose an option..."
+        clearable
+      >
+        <Combobox.Option value="opt-1">Option 1</Combobox.Option>
+        <Combobox.Option value="opt-2">Option 2</Combobox.Option>
+        <Combobox.Option value="opt-3">Option 3</Combobox.Option>
+      </Combobox>
+    </ThemeProvider>
   );
 }
 ```

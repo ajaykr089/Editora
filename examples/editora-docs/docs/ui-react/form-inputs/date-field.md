@@ -6,17 +6,21 @@ sidebar_label: Date Field
 
 # Date Field
 
-```tsx
-import { DateField } from '@editora/ui-react';
-
-<DateField
-  label="Due date"
-  value="2026-03-18"
-  min="2026-01-01"
-  max="2026-12-31"
-  locale="en-IN"
-  onValueChange={(value) => console.log(value)}
-/>;
+```tsx live
+function DateFieldDemo() {
+  return (
+    <ThemeProvider>
+      <DateField
+        label="Due date"
+        value="2026-03-18"
+        min="2026-01-01"
+        max="2026-12-31"
+        locale="en-IN"
+        onValueChange={(value) => console.log(value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

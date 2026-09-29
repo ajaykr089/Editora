@@ -6,23 +6,27 @@ sidebar_label: Form
 
 # Form
 
-```tsx
-import { Form, Input, Select } from '@editora/ui-react';
-
-<Form
-  heading="Profile"
-  description="Save account preferences."
-  autosave
-  autosaveDelay={1200}
-  onSubmit={(values) => console.log(values)}
-  onInvalid={(errors) => console.log(errors)}
->
-  <Input name="email" label="Email" required />
-  <Select name="role" label="Role">
-    <option value="editor">Editor</option>
-    <option value="reviewer">Reviewer</option>
-  </Select>
-</Form>;
+```tsx live
+function FormDemo() {
+  return (
+    <ThemeProvider>
+      <Form
+        heading="Profile"
+        description="Save account preferences."
+        autosave
+        autosaveDelay={1200}
+        onSubmit={(values) => console.log(values)}
+        onInvalid={(errors) => console.log(errors)}
+      >
+        <Input name="email" label="Email" required />
+        <Select name="role" label="Role">
+          <option value="editor">Editor</option>
+          <option value="reviewer">Reviewer</option>
+        </Select>
+      </Form>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

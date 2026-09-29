@@ -10,10 +10,12 @@ The `PluginPanel` component is used for plugin-side controls in editor layouts.
 
 ## Basic Usage
 
-```tsx
-import { PluginPanel } from '@editora/ui-react';
-
-export function Example() {
-  return <PluginPanel>Plugin settings</PluginPanel>;
+```tsx live
+function Example() {
+  return (
+    <ThemeProvider>
+      <PluginPanel>Plugin settings</PluginPanel>
+    </ThemeProvider>
+  );
 }
 ```

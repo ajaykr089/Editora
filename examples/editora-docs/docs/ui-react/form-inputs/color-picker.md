@@ -6,18 +6,22 @@ sidebar_label: Color Picker
 
 # Color Picker
 
-```tsx
-import { ColorPicker } from '@editora/ui-react';
-
-<ColorPicker
-  value="#2563eb"
-  mode="popover"
-  alpha
-  presets={['#2563eb', '#16a34a', '#dc2626']}
-  recent
-  maxRecent={6}
-  onValueChange={(value) => console.log(value)}
-/>;
+```tsx live
+function ColorPickerDemo() {
+  return (
+    <ThemeProvider>
+      <ColorPicker
+        value="#2563eb"
+        mode="popover"
+        alpha
+        presets={['#2563eb', '#16a34a', '#dc2626']}
+        recent
+        maxRecent={6}
+        onValueChange={(value) => console.log(value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

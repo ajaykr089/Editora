@@ -6,21 +6,25 @@ sidebar_label: Wizard
 
 # Wizard
 
-```tsx
-import { Wizard } from '@editora/ui-react';
-
-<Wizard
-  value="details"
-  linear
-  showStepper
-  showProgress
-  nextLabel="Continue"
-  finishLabel="Deploy"
-  onComplete={(detail) => console.log(detail.value)}
->
-  <section value="details" title="Details">Details step</section>
-  <section value="review" title="Review">Review step</section>
-</Wizard>;
+```tsx live
+function WizardDemo() {
+  return (
+    <ThemeProvider>
+      <Wizard
+        value="details"
+        linear
+        showStepper
+        showProgress
+        nextLabel="Continue"
+        finishLabel="Deploy"
+        onComplete={(detail) => console.log(detail.value)}
+      >
+        <section value="details" title="Details">Details step</section>
+        <section value="review" title="Review">Review step</section>
+      </Wizard>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

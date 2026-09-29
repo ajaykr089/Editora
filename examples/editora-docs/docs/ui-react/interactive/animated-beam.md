@@ -25,34 +25,40 @@ import { AnimatedBeam } from '@editora/ui-react/AnimatedBeam';
 
 ## Basic Usage
 
-```tsx
-<AnimatedBeam
-  variant="minimal"
-  tone="brand"
-  columns={3}
-  rows={5}
-  path
-  glow
->
-  <AnimatedBeam.Node nodeId="user" column={1} row={3}>
-    <UserIcon />
-  </AnimatedBeam.Node>
+```tsx live
+function AnimatedBeamDemo() {
+  return (
+    <ThemeProvider>
+      <AnimatedBeam
+        variant="minimal"
+        tone="brand"
+        columns={3}
+        rows={5}
+        path
+        glow
+      >
+        <AnimatedBeam.Node nodeId="user" column={1} row={3}>
+          <UserIcon />
+        </AnimatedBeam.Node>
 
-  <AnimatedBeam.Hub nodeId="hub" column={2} row={3}>
-    <SparklesIcon />
-  </AnimatedBeam.Hub>
+        <AnimatedBeam.Hub nodeId="hub" column={2} row={3}>
+          <SparklesIcon />
+        </AnimatedBeam.Hub>
 
-  <AnimatedBeam.Node nodeId="drive" column={3} row={1}>
-    <FolderIcon />
-  </AnimatedBeam.Node>
-  <AnimatedBeam.Node nodeId="docs" column={3} row={2}>
-    <FileIcon />
-  </AnimatedBeam.Node>
+        <AnimatedBeam.Node nodeId="drive" column={3} row={1}>
+          <FolderIcon />
+        </AnimatedBeam.Node>
+        <AnimatedBeam.Node nodeId="docs" column={3} row={2}>
+          <FileIcon />
+        </AnimatedBeam.Node>
 
-  <AnimatedBeam.Connection from="user" to="hub" curve="straight" />
-  <AnimatedBeam.Connection from="hub" to="drive" curve="arc" />
-  <AnimatedBeam.Connection from="hub" to="docs" curve="soft" />
-</AnimatedBeam>
+        <AnimatedBeam.Connection from="user" to="hub" curve="straight" />
+        <AnimatedBeam.Connection from="hub" to="drive" curve="arc" />
+        <AnimatedBeam.Connection from="hub" to="docs" curve="soft" />
+      </AnimatedBeam>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Composition Model

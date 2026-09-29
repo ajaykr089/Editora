@@ -10,19 +10,18 @@ sidebar_label: MetricCard
 
 ## Basic usage
 
-```tsx
-import { MetricCard } from '@editora/ui-react';
-import { Icon } from '@editora/react-icons';
-
+```tsx live
 function RevenueCard() {
   return (
-    <MetricCard
-      label="Revenue"
-      value="$42,300"
-      meta="Monthly recurring"
-      trend="+12%"
-      icon={<Icon name="chart-bar" size={16} aria-hidden="true" />}
-    />
+    <ThemeProvider>
+      <MetricCard
+        label="Revenue"
+        value="$42,300"
+        meta="Monthly recurring"
+        trend="+12%"
+        icon={<Icon name="chart-bar" size={16} aria-hidden="true" />}
+      />
+    </ThemeProvider>
   );
 }
 ```

@@ -11,23 +11,23 @@ Autocomplete in `ui-react` is documented through the `Combobox` component surfac
 
 ## Use Combobox
 
-```tsx
-import { Combobox } from '@editora/ui-react';
-
+```tsx live
 function AutocompleteField() {
   return (
-    <Combobox
-      label="Assignee"
-      placeholder="Search people"
-      clearable
-      emptyText="No matching people"
-      onInput={(query) => console.log('query', query)}
-      onSelect={(value, label) => console.log(value, label)}
-    >
-      <option value="ava">Ava Johnson</option>
-      <option value="liam">Liam Carter</option>
-      <option value="mia">Mia Chen</option>
-    </Combobox>
+    <ThemeProvider>
+      <Combobox
+        label="Assignee"
+        placeholder="Search people"
+        clearable
+        emptyText="No matching people"
+        onInput={(query) => console.log('query', query)}
+        onSelect={(value, label) => console.log(value, label)}
+      >
+        <option value="ava">Ava Johnson</option>
+        <option value="liam">Liam Carter</option>
+        <option value="mia">Mia Chen</option>
+      </Combobox>
+    </ThemeProvider>
   );
 }
 ```

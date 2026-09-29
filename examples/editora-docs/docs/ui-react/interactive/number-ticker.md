@@ -18,15 +18,21 @@ import { NumberTicker } from '@editora/ui-react/NumberTicker';
 
 ## Basic Usage
 
-```tsx
-<NumberTicker
-  value={128420}
-  from={120000}
-  duration={1400}
-  formatStyle="currency"
-  currency="USD"
-  size="xl"
-/>
+```tsx live
+function NumberTickerDemo() {
+  return (
+    <ThemeProvider>
+      <NumberTicker
+        value={128420}
+        from={120000}
+        duration={1400}
+        formatStyle="currency"
+        currency="USD"
+        size="xl"
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## KPI Card

@@ -18,12 +18,18 @@ import { Marquee } from '@editora/ui-react/Marquee';
 
 ## Basic Usage
 
-```tsx
-<Marquee speed={72} gap={20} pauseOnHover fade>
-  <Marquee.Item>Realtime collaboration synced</Marquee.Item>
-  <Marquee.Item>Release train ready for sign-off</Marquee.Item>
-  <Marquee.Item>ICU occupancy crossed 85%</Marquee.Item>
-</Marquee>
+```tsx live
+function MarqueeDemo() {
+  return (
+    <ThemeProvider>
+      <Marquee speed={72} gap={20} pauseOnHover fade>
+        <Marquee.Item>Realtime collaboration synced</Marquee.Item>
+        <Marquee.Item>Release train ready for sign-off</Marquee.Item>
+        <Marquee.Item>ICU occupancy crossed 85%</Marquee.Item>
+      </Marquee>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Mixed Content

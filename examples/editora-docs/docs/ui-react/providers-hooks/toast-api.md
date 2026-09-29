@@ -10,25 +10,27 @@ sidebar_label: ToastAPI
 
 ## Basic Usage
 
-```tsx
-import { ToastProvider, toast } from '@editora/ui-react';
-
+```tsx live noInline
 function SaveButton() {
   return (
-    <button
-      type="button"
-      onClick={() => toast.success('Saved successfully')}
-    >
-      Save
-    </button>
+    <ThemeProvider>
+      <button
+        type="button"
+        onClick={() => toast.success('Saved successfully')}
+      >
+        Save
+      </button>
+    </ThemeProvider>
   );
 }
 
-export function Example() {
+function Example() {
   return (
     <ToastProvider>
       <SaveButton />
     </ToastProvider>
   );
 }
+
+render(<Example />);
 ```

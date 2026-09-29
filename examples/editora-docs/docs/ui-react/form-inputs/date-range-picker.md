@@ -6,19 +6,23 @@ sidebar_label: Date Range Picker
 
 # Date Range Picker
 
-```tsx
-import { DateRangePicker } from '@editora/ui-react';
-
-<DateRangePicker
-  label="Coverage window"
-  value='{"start":"2026-03-10","end":"2026-03-18"}'
-  min="2026-01-01"
-  max="2026-12-31"
-  rangeVariant="two-fields"
-  clearable
-  allowSameDay
-  onValueChange={(value) => console.log(value)}
-/>;
+```tsx live
+function DateRangePickerDemo() {
+  return (
+    <ThemeProvider>
+      <DateRangePicker
+        label="Coverage window"
+        value='{"start":"2026-03-10","end":"2026-03-18"}'
+        min="2026-01-01"
+        max="2026-12-31"
+        rangeVariant="two-fields"
+        clearable
+        allowSameDay
+        onValueChange={(value) => console.log(value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

@@ -10,10 +10,12 @@ The `Skeleton` component provides loading states that reduce layout shift.
 
 ## Basic Usage
 
-```tsx
-import { Skeleton } from '@editora/ui-react';
-
-export function Example() {
-  return <Skeleton style={{ width: 240, height: 16 }} />;
+```tsx live
+function Example() {
+  return (
+    <ThemeProvider>
+      <Skeleton style={{ width: 240, height: 16 }} />
+    </ThemeProvider>
+  );
 }
 ```

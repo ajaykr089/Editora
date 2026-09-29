@@ -18,13 +18,19 @@ import { IconCloud } from '@editora/ui-react/IconCloud';
 
 ## Basic Usage
 
-```tsx
-<IconCloud radius={124} perspective={940} speed={1} interactive autoFit pauseOnHover>
-  <IconCloud.Center>Core</IconCloud.Center>
-  <IconCloud.Item clickable aria-label="Search">S</IconCloud.Item>
-  <IconCloud.Item clickable aria-label="Trust">T</IconCloud.Item>
-  <IconCloud.Item clickable aria-label="Metrics">M</IconCloud.Item>
-</IconCloud>
+```tsx live
+function IconCloudDemo() {
+  return (
+    <ThemeProvider>
+      <IconCloud radius={124} perspective={940} speed={1} interactive autoFit pauseOnHover>
+        <IconCloud.Center>Core</IconCloud.Center>
+        <IconCloud.Item clickable aria-label="Search">S</IconCloud.Item>
+        <IconCloud.Item clickable aria-label="Trust">T</IconCloud.Item>
+        <IconCloud.Item clickable aria-label="Metrics">M</IconCloud.Item>
+      </IconCloud>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Integration Cloud

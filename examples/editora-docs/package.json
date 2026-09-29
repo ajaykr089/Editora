@@ -27,7 +27,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "@editora/ui-react": "^0.1.20",
-    "@editora/ui-core": "^0.1.19"
+    "@editora/ui-core": "^0.1.19",
+    "@editora/react-icons": "^0.1.10"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "latest",

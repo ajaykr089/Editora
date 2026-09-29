@@ -6,21 +6,25 @@ sidebar_label: Number Field
 
 # Number Field
 
-```tsx
-import { NumberField } from '@editora/ui-react';
-
-<NumberField
-  label="Seats"
-  value={25}
-  min={1}
-  max={500}
-  step={1}
-  precision={0}
-  locale="en-US"
-  format="grouped"
-  showSteppers
-  onValueChange={(detail) => console.log(detail.value)}
-/>;
+```tsx live
+function NumberFieldDemo() {
+  return (
+    <ThemeProvider>
+      <NumberField
+        label="Seats"
+        value={25}
+        min={1}
+        max={500}
+        step={1}
+        precision={0}
+        locale="en-US"
+        format="grouped"
+        showSteppers
+        onValueChange={(detail) => console.log(detail.value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

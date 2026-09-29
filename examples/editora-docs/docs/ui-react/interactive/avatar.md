@@ -10,19 +10,19 @@ sidebar_label: Avatar
 
 ## Basic usage
 
-```tsx
-import { Avatar } from '@editora/ui-react';
-
+```tsx live
 function UserAvatar() {
   return (
-    <Avatar
-      src="https://example.com/avatar.png"
-      alt="Asha Patel"
-      status="online"
-      badge="2"
-      variant="surface"
-      radius="full"
-    />
+    <ThemeProvider>
+      <Avatar
+        src="https://example.com/avatar.png"
+        alt="Asha Patel"
+        status="online"
+        badge="2"
+        variant="surface"
+        radius="full"
+      />
+    </ThemeProvider>
   );
 }
 ```

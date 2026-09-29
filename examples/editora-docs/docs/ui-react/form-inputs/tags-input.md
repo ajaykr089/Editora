@@ -6,17 +6,21 @@ sidebar_label: Tags Input
 
 # Tags Input
 
-```tsx
-import { TagsInput } from '@editora/ui-react';
-
-<TagsInput
-  label="Topics"
-  placeholder="Add a topic"
-  maxTags={6}
-  addOnBlur
-  onChange={(value) => console.log(value)}
-  onTagAdd={(detail) => console.log(detail.tag)}
-/>;
+```tsx live
+function TagsInputDemo() {
+  return (
+    <ThemeProvider>
+      <TagsInput
+        label="Topics"
+        placeholder="Add a topic"
+        maxTags={6}
+        addOnBlur
+        onChange={(value) => console.log(value)}
+        onTagAdd={(detail) => console.log(detail.tag)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

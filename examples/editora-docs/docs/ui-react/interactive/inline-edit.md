@@ -6,15 +6,19 @@ sidebar_label: Inline Edit
 
 # Inline Edit
 
-```tsx
-import { InlineEdit } from '@editora/ui-react';
-
-<InlineEdit
-  value="Quarterly release notes"
-  placeholder="Add a title"
-  onSave={(detail) => console.log(detail.value)}
-  onCancel={(value) => console.log(value)}
-/>;
+```tsx live
+function InlineEditDemo() {
+  return (
+    <ThemeProvider>
+      <InlineEdit
+        value="Quarterly release notes"
+        placeholder="Add a title"
+        onSave={(detail) => console.log(detail.value)}
+        onCancel={(value) => console.log(value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

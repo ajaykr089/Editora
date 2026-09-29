@@ -6,20 +6,24 @@ sidebar_label: Meter
 
 # Meter
 
-```tsx
-import { Meter } from '@editora/ui-react';
-
-<Meter
-  label="Storage usage"
-  value={72}
-  min={0}
-  max={100}
-  low={40}
-  high={85}
-  optimum={55}
-  showLabel
-  format="percent"
-/>;
+```tsx live
+function MeterDemo() {
+  return (
+    <ThemeProvider>
+      <Meter
+        label="Storage usage"
+        value={72}
+        min={0}
+        max={100}
+        low={40}
+        high={85}
+        optimum={55}
+        showLabel
+        format="percent"
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

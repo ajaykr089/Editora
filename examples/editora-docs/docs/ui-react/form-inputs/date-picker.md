@@ -6,20 +6,24 @@ sidebar_label: Date Picker
 
 # Date Picker
 
-```tsx
-import { DatePicker } from '@editora/ui-react';
-
-<DatePicker
-  label="Launch date"
-  value="2026-03-15"
-  min="2026-01-01"
-  max="2026-12-31"
-  clearable
-  allowInput
-  closeOnSelect
-  events={[{ date: '2026-03-15', title: 'Release', tone: 'info' }]}
-  onValueChange={(value) => console.log(value)}
-/>;
+```tsx live
+function DatePickerDemo() {
+  return (
+    <ThemeProvider>
+      <DatePicker
+        label="Launch date"
+        value="2026-03-15"
+        min="2026-01-01"
+        max="2026-12-31"
+        clearable
+        allowInput
+        closeOnSelect
+        events={[{ date: '2026-03-15', title: 'Release', tone: 'info' }]}
+        onValueChange={(value) => console.log(value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

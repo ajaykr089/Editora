@@ -6,19 +6,23 @@ sidebar_label: AnimatedNumber
 
 # AnimatedNumber
 
-```tsx
-import { AnimatedNumber } from '@editora/ui-react';
-
-<AnimatedNumber
-  value={12845.42}
-  variant="inline"
-  format="currency"
-  currency="USD"
-  locale="en-US"
-  fractionDigits={2}
-  animate
-  animateOnMount
-/>;
+```tsx live
+function AnimatedNumberDemo() {
+  return (
+    <ThemeProvider>
+      <AnimatedNumber
+        value={12845.42}
+        variant="inline"
+        format="currency"
+        currency="USD"
+        locale="en-US"
+        fractionDigits={2}
+        animate
+        animateOnMount
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 Variant examples:

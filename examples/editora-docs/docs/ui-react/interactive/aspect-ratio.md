@@ -10,14 +10,14 @@ sidebar_label: Aspect Ratio
 
 ## Basic usage
 
-```tsx
-import { AspectRatio } from '@editora/ui-react';
-
+```tsx live
 function Preview() {
   return (
-    <AspectRatio ratio="16/9" fit="cover" radius={12}>
-      <img alt="Preview" src="https://picsum.photos/1200/675" />
-    </AspectRatio>
+    <ThemeProvider>
+      <AspectRatio ratio="16/9" fit="cover" radius={12}>
+        <img alt="Preview" src="https://picsum.photos/1200/675" />
+      </AspectRatio>
+    </ThemeProvider>
   );
 }
 ```

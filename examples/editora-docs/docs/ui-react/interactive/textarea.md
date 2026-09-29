@@ -18,18 +18,24 @@ import { Textarea } from '@editora/ui-react/Textarea';
 
 ## Quick Example
 
-```tsx
-<Textarea
-  autosize
-  maxRows={8}
-  showCount
-  maxlength={280}
-  variant="soft"
-  onInput={(value) => console.log(value)}
->
-  <Textarea.Label>Notes</Textarea.Label>
-  <Textarea.Description>Grows up to 8 rows automatically.</Textarea.Description>
-</Textarea>
+```tsx live
+function TextareaDemo() {
+  return (
+    <ThemeProvider>
+      <Textarea
+        autosize
+        maxRows={8}
+        showCount
+        maxlength={280}
+        variant="soft"
+        onInput={(value) => console.log(value)}
+      >
+        <Textarea.Label>Notes</Textarea.Label>
+        <Textarea.Description>Grows up to 8 rows automatically.</Textarea.Description>
+      </Textarea>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Composition

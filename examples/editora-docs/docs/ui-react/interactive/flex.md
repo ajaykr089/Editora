@@ -6,13 +6,17 @@ sidebar_label: Flex
 
 # Flex
 
-```tsx
-import { Flex } from '@editora/ui-react';
-
-<Flex direction={{ initial: 'column', md: 'row' }} gap="1rem" align="center">
-  <div>One</div>
-  <div>Two</div>
-</Flex>;
+```tsx live
+function FlexDemo() {
+  return (
+    <ThemeProvider>
+      <Flex direction={{ initial: 'column', md: 'row' }} gap="1rem" align="center">
+        <div>One</div>
+        <div>Two</div>
+      </Flex>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

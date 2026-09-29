@@ -8,34 +8,34 @@ sidebar_label: Form
 
 A form component that provides validation, autosave, and dirty state tracking with composed sub-components for structuring form content. Built with the composed component pattern for flexible form layouts.
 
-```tsx
-import { Form, Button, Field, Input } from '@editora/ui-react';
-
+```tsx live
 function ContactForm() {
   const [values, setValues] = React.useState({});
 
   return (
-    <Form
-      heading="Contact Information"
-      variant="surface"
-      onSubmit={(vals) => setValues(vals)}
-    >
-      <Field label="Name" htmlFor="name" required>
-        <Input id="name" name="name" required />
-      </Field>
+    <ThemeProvider>
+      <Form
+        heading="Contact Information"
+        variant="surface"
+        onSubmit={(vals) => setValues(vals)}
+      >
+        <Field label="Name" htmlFor="name" required>
+          <Input id="name" name="name" required />
+        </Field>
 
-      <Field label="Email" htmlFor="email" required>
-        <Input id="email" name="email" type="email" required />
-      </Field>
+        <Field label="Email" htmlFor="email" required>
+          <Input id="email" name="email" type="email" required />
+        </Field>
 
-      <Form.Actions>
-        <Button type="submit">Send</Button>
-      </Form.Actions>
+        <Form.Actions>
+          <Button type="submit">Send</Button>
+        </Form.Actions>
 
-      <Form.Status>
-        Submitted: {JSON.stringify(values)}
-      </Form.Status>
-    </Form>
+        <Form.Status>
+          Submitted: {JSON.stringify(values)}
+        </Form.Status>
+      </Form>
+    </ThemeProvider>
   );
 }
 ```

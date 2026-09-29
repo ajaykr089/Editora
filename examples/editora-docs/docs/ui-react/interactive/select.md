@@ -16,12 +16,18 @@ import { Select } from '@editora/ui-react/Select';
 
 `Select` uses a composition pattern. Use `Select.Option`, `Select.OptGroup`, and slot sub-components to compose the full field:
 
-```tsx
-<Select label="Status" variant="soft" tone="warning" validation="warning">
-  <Select.Option value="draft">Draft</Select.Option>
-  <Select.Option value="review">In review</Select.Option>
-  <Select.Option value="published">Published</Select.Option>
-</Select>
+```tsx live
+function SelectDemo() {
+  return (
+    <ThemeProvider>
+      <Select label="Status" variant="soft" tone="warning" validation="warning">
+        <Select.Option value="draft">Draft</Select.Option>
+        <Select.Option value="review">In review</Select.Option>
+        <Select.Option value="published">Published</Select.Option>
+      </Select>
+    </ThemeProvider>
+  );
+}
 ```
 
 ### Sub-components

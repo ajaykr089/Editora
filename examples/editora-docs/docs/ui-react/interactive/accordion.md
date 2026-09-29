@@ -10,26 +10,26 @@ Import the main `Accordion` component and use its sub-components as properties.
 
 ## Basic Usage
 
-```tsx
-import { Accordion } from '@editora/ui-react';
-
+```tsx live
 function BasicAccordion() {
   return (
-    <Accordion collapsible variant="outline" radius={12} size="md">
-      <Accordion.Item description="What the product does" badge="Overview">
-        <Accordion.Trigger>What is Editora?</Accordion.Trigger>
-        <Accordion.Panel>
-          Editora is a rich text editing system with a web-component core and React wrappers.
-        </Accordion.Panel>
-      </Accordion.Item>
+    <ThemeProvider>
+      <Accordion collapsible variant="outline" radius={12} size="md">
+        <Accordion.Item description="What the product does" badge="Overview">
+          <Accordion.Trigger>What is Editora?</Accordion.Trigger>
+          <Accordion.Panel>
+            Editora is a rich text editing system with a web-component core and React wrappers.
+          </Accordion.Panel>
+        </Accordion.Item>
 
-      <Accordion.Item description="Architecture summary">
-        <Accordion.Trigger>How does it work?</Accordion.Trigger>
-        <Accordion.Panel>
-          It composes `ui-core` custom elements behind `ui-react` wrappers.
-        </Accordion.Panel>
-      </Accordion.Item>
-    </Accordion>
+        <Accordion.Item description="Architecture summary">
+          <Accordion.Trigger>How does it work?</Accordion.Trigger>
+          <Accordion.Panel>
+            It composes `ui-core` custom elements behind `ui-react` wrappers.
+          </Accordion.Panel>
+        </Accordion.Item>
+      </Accordion>
+    </ThemeProvider>
   );
 }
 ```

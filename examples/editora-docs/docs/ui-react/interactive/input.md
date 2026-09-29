@@ -6,16 +6,20 @@ sidebar_label: Input
 
 # Input
 
-```tsx
-import { Input } from '@editora/ui-react';
-
-<Input
-  label="Workspace name"
-  description="Visible to your team."
-  variant="surface"
-  tone="brand"
-  counter
-/>
+```tsx live
+function InputDemo() {
+  return (
+    <ThemeProvider>
+      <Input
+        label="Workspace name"
+        description="Visible to your team."
+        variant="surface"
+        tone="brand"
+        counter
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Supported Props

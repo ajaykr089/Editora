@@ -8,26 +8,26 @@ sidebar_label: Context Menu
 
 Use `ContextMenu` for contextual actions attached to a point, anchor element, or anchor id.
 
-```tsx
-import { ContextMenu } from '@editora/ui-react';
-
+```tsx live
 function Example() {
   return (
-    <ContextMenu
-      open
-      anchorPoint={{ x: 240, y: 180 }}
-      variant="soft"
-      size="md"
-      radius={12}
-      elevation="low"
-      items={[
-        { label: 'Edit', shortcut: '⌘ E' },
-        { label: 'Duplicate', shortcut: '⌘ D' },
-        { separator: true },
-        { label: 'Delete', tone: 'danger' },
-      ]}
-      onSelect={(detail) => console.log(detail.label)}
-    />
+    <ThemeProvider>
+      <ContextMenu
+        open
+        anchorPoint={{ x: 240, y: 180 }}
+        variant="soft"
+        size="md"
+        radius={12}
+        elevation="low"
+        items={[
+          { label: 'Edit', shortcut: '⌘ E' },
+          { label: 'Duplicate', shortcut: '⌘ D' },
+          { separator: true },
+          { label: 'Delete', tone: 'danger' },
+        ]}
+        onSelect={(detail) => console.log(detail.label)}
+      />
+    </ThemeProvider>
   );
 }
 ```

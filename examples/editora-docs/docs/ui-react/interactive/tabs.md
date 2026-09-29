@@ -18,14 +18,20 @@ import { Tabs } from '@editora/ui-react/Tabs';
 
 ## Basic Usage
 
-```tsx
-<Tabs selected={0} variant="soft" onChange={(index) => console.log(index)}>
-  <Tabs.Tab value="overview">Overview</Tabs.Tab>
-  <Tabs.Panel>Overview content here.</Tabs.Panel>
+```tsx live
+function TabsDemo() {
+  return (
+    <ThemeProvider>
+      <Tabs selected={0} variant="soft" onChange={(index) => console.log(index)}>
+        <Tabs.Tab value="overview">Overview</Tabs.Tab>
+        <Tabs.Panel>Overview content here.</Tabs.Panel>
 
-  <Tabs.Tab value="activity">Activity</Tabs.Tab>
-  <Tabs.Panel>Activity content here.</Tabs.Panel>
-</Tabs>
+        <Tabs.Tab value="activity">Activity</Tabs.Tab>
+        <Tabs.Panel>Activity content here.</Tabs.Panel>
+      </Tabs>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## With Icons

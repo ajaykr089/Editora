@@ -10,61 +10,49 @@ sidebar_label: Sidebar
 
 ## Basic Usage
 
-```tsx
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarHeader,
-  SidebarItem,
-  SidebarPromo,
-  SidebarSearchInput
-} from '@editora/ui-react';
-import {
-  BookIcon,
-  DashboardIcon,
-  FolderOpenIcon,
-  HelpCircleIcon,
-  SettingsIcon
-} from '@editora/react-icons';
+```tsx live
+function SidebarDemo() {
+  return (
+    <ThemeProvider>
+      <Sidebar
+        value="dashboard"
+        collapsible
+        resizable
+        onSelect={(detail) => console.log(detail.value)}
+      >
+        <Sidebar.Header>
+          <strong>Publify</strong>
+        </Sidebar.Header>
 
-<Sidebar
-  value="dashboard"
-  collapsible
-  resizable
-  onSelect={(detail) => console.log(detail.value)}
->
-  <SidebarHeader>
-    <strong>Publify</strong>
-  </SidebarHeader>
+        <Sidebar.SearchInput placeholder="Search library" />
 
-  <SidebarSearchInput placeholder="Search library" />
+        <Sidebar.Content>
+          <Sidebar.Group title="Library">
+            <Sidebar.Item value="dashboard" label="Dashboard" icon={<DashboardIcon />} />
+            <Sidebar.Item value="library" label="My Library" icon={<FolderOpenIcon />} />
+            <Sidebar.Item value="books" label="Books" icon={<BookIcon />} />
+            <Sidebar.Item value="settings" label="Settings" icon={<SettingsIcon />}>
+              <Sidebar.Item value="preferences" label="Preferences" />
+              <Sidebar.Item value="devices" label="Devices" />
+            </Sidebar.Item>
+          </Sidebar.Group>
 
-  <SidebarContent>
-    <SidebarGroup title="Library">
-      <SidebarItem value="dashboard" label="Dashboard" icon={<DashboardIcon />} />
-      <SidebarItem value="library" label="My Library" icon={<FolderOpenIcon />} />
-      <SidebarItem value="books" label="Books" icon={<BookIcon />} />
-      <SidebarItem value="settings" label="Settings" icon={<SettingsIcon />}>
-        <SidebarItem value="preferences" label="Preferences" />
-        <SidebarItem value="devices" label="Devices" />
-      </SidebarItem>
-    </SidebarGroup>
+          <Sidebar.Group title="Support">
+            <Sidebar.Item value="help" label="Help & Support" icon={<HelpCircleIcon />} />
+          </Sidebar.Group>
+        </Sidebar.Content>
 
-    <SidebarGroup title="Support">
-      <SidebarItem value="help" label="Help & Support" icon={<HelpCircleIcon />} />
-    </SidebarGroup>
-  </SidebarContent>
+        <Sidebar.Promo>
+          <div>Upgrade to premium</div>
+        </Sidebar.Promo>
 
-  <SidebarPromo>
-    <div>Upgrade to premium</div>
-  </SidebarPromo>
-
-  <SidebarFooter>
-    <div>Signed in as premium@publify.app</div>
-  </SidebarFooter>
-</Sidebar>;
+        <Sidebar.Footer>
+          <div>Signed in as premium@publify.app</div>
+        </Sidebar.Footer>
+      </Sidebar>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Compound Structure
@@ -73,42 +61,42 @@ The recommended React structure is:
 
 ```tsx
 <Sidebar>
-  <SidebarHeader />
-  <SidebarSearchInput />
-  <SidebarContent>
-    <SidebarGroup>
-      <SidebarItem />
-      <SidebarItem />
-    </SidebarGroup>
-  </SidebarContent>
-  <SidebarPromo />
-  <SidebarFooter />
+  <Sidebar.Header />
+  <Sidebar.SearchInput />
+  <Sidebar.Content>
+    <Sidebar.Group>
+      <Sidebar.Item />
+      <Sidebar.Item />
+    </Sidebar.Group>
+  </Sidebar.Content>
+  <Sidebar.Promo />
+  <Sidebar.Footer />
 </Sidebar>
 ```
 
 Available compound exports:
 
-- `SidebarHeader`
-- `SidebarSearch`
-- `SidebarSearchInput`
-- `SidebarContent`
-- `SidebarGroup`
-- `SidebarItem`
-- `SidebarPromo`
-- `SidebarFooter`
+- `Sidebar.Header`
+- `Sidebar.Search`
+- `Sidebar.SearchInput`
+- `Sidebar.Content`
+- `Sidebar.Group`
+- `Sidebar.Item`
+- `Sidebar.Promo`
+- `Sidebar.Footer`
 
 ## Navigation Links
 
 Leaf items can navigate to another route or page by using `href`.
 
 ```tsx
-<SidebarItem
+<Sidebar.Item
   value="guides"
   label="Guides"
   href="/guides"
 />
 
-<SidebarItem
+<Sidebar.Item
   value="docs"
   label="Documentation"
   href="https://example.com/docs"
@@ -121,32 +109,32 @@ Link items still participate in sidebar selection and styling, but render as anc
 
 ## Custom Item Content
 
-`SidebarItem` can render custom row content instead of only `label` and `description`.
+`Sidebar.Item` can render custom row content instead of only `label` and `description`.
 
 ```tsx
-<SidebarItem value="collections" href="#collections">
+<Sidebar.Item value="collections" href="#collections">
   <BookIcon />
   <span>Collections</span>
   <span>Curated reading lists</span>
-</SidebarItem>
+</Sidebar.Item>
 ```
 
 Behavior:
 
 - the first non-text child can act as the leading icon
 - remaining content is serialized into the row copy area
-- nested `SidebarItem` children still become submenu items
+- nested `Sidebar.Item` children still become submenu items
 
 ## Nested Submenus
 
-Submenus are created by nesting `SidebarItem` components.
+Submenus are created by nesting `Sidebar.Item` components.
 
 ```tsx
-<SidebarItem value="settings" label="Settings" icon={<SettingsIcon />}>
-  <SidebarItem value="preferences" label="Preferences" />
-  <SidebarItem value="devices" label="Devices" />
-  <SidebarItem value="security" label="Security" />
-</SidebarItem>
+<Sidebar.Item value="settings" label="Settings" icon={<SettingsIcon />}>
+  <Sidebar.Item value="preferences" label="Preferences" />
+  <Sidebar.Item value="devices" label="Devices" />
+  <Sidebar.Item value="security" label="Security" />
+</Sidebar.Item>
 ```
 
 Submenus:
@@ -157,13 +145,13 @@ Submenus:
 
 ## Search
 
-Use `SidebarSearchInput` for a ready-made search field, or `SidebarSearch` if you want to supply custom search UI.
+Use `Sidebar.SearchInput` for a ready-made search field, or `Sidebar.Search` if you want to supply custom search UI.
 
 ```tsx
 <Sidebar
   onSearchChange={(query) => console.log(query)}
 >
-  <SidebarSearchInput placeholder="Search…" />
+  <Sidebar.SearchInput placeholder="Search…" />
 </Sidebar>
 ```
 
@@ -268,7 +256,7 @@ You can override the sidebar globally through `ThemeProvider`.
 
 ## Notes
 
-- `SidebarContent` renders compound items into the underlying web component item model.
-- `SidebarPromo` and `SidebarFooter` are optional.
+- `Sidebar.Content` renders compound items into the underlying web component item model.
+- `Sidebar.Promo` and `Sidebar.Footer` are optional.
 - Section labels default to no text transformation.
 - Collapsed mode hides copy, meta, promo, and footer content while keeping icon-first navigation accessible.

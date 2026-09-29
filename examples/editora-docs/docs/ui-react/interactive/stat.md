@@ -10,18 +10,18 @@ sidebar_label: Stat
 
 ## Basic usage
 
-```tsx
-import { Stat } from '@editora/ui-react';
-
+```tsx live
 function QueueStat() {
   return (
-    <Stat
-      label="Queued jobs"
-      value="128"
-      meta="Updated 2m ago"
-      trend="+9%"
-      tone="info"
-    />
+    <ThemeProvider>
+      <Stat
+        label="Queued jobs"
+        value="128"
+        meta="Updated 2m ago"
+        trend="+9%"
+        tone="info"
+      />
+    </ThemeProvider>
   );
 }
 ```

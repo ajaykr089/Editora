@@ -112,10 +112,7 @@ import { Sortable } from '@editora/ui-sortable/react';
 
 ## Basic Usage
 
-```tsx
-import * as React from 'react';
-import { Sortable, type SortableItem, type SortableList } from '@editora/ui-react';
-
+```tsx live noInline
 const lists: SortableList[] = [
   { id: 'templates', label: 'Templates', cloneOnDrag: true },
   { id: 'backlog', label: 'Backlog' },
@@ -130,25 +127,29 @@ const initialItems: SortableItem[] = [
   { id: 'review', label: 'Design review', listId: 'active' }
 ];
 
-export function ReleaseBoard() {
+function ReleaseBoard() {
   const [items, setItems] = React.useState(initialItems);
   const [selection, setSelection] = React.useState<string[]>(['epic']);
 
   return (
-    <Sortable
-      lists={lists}
-      items={items}
-      selection={selection}
-      persistKey="release-board"
-      onItemsChange={setItems}
-      onSelectionChange={(detail) => setSelection(detail.selection)}
-      onPersistRequest={(detail) => {
-        // Save detail.persistence.records to your API
-        console.log(detail.persistence.records);
-      }}
-    />
+    <ThemeProvider>
+      <Sortable
+        lists={lists}
+        items={items}
+        selection={selection}
+        persistKey="release-board"
+        onItemsChange={setItems}
+        onSelectionChange={(detail) => setSelection(detail.selection)}
+        onPersistRequest={(detail) => {
+          // Save detail.persistence.records to your API
+          console.log(detail.persistence.records);
+        }}
+      />
+    </ThemeProvider>
   );
 }
+
+render(<ReleaseBoard />);
 ```
 
 ## Example Variations

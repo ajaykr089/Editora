@@ -10,14 +10,14 @@ Use `Tooltip` when a form control needs extra guidance without permanently occup
 
 ## Basic Usage
 
-```tsx
-import { Tooltip } from '@editora/ui-react';
-
+```tsx live
 function PasswordHint() {
   return (
-    <Tooltip text="Use at least 12 characters with uppercase, lowercase, numbers, and symbols.">
-      <button type="button">Password requirements</button>
-    </Tooltip>
+    <ThemeProvider>
+      <Tooltip text="Use at least 12 characters with uppercase, lowercase, numbers, and symbols.">
+        <button type="button">Password requirements</button>
+      </Tooltip>
+    </ThemeProvider>
   );
 }
 ```

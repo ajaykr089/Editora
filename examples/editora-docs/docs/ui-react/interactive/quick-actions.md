@@ -16,12 +16,18 @@ import { QuickActions } from '@editora/ui-react/QuickActions';
 
 `QuickActions` uses a composition pattern. Use `QuickActions.Action` to declare each action item — it renders a native `<button slot="action">` so keyboard navigation and accessibility are handled automatically:
 
-```tsx
-<QuickActions mode="bar" collapsible label="Document actions" onSelect={(detail) => console.log(detail.label)}>
-  <QuickActions.Action>Publish</QuickActions.Action>
-  <QuickActions.Action>Preview</QuickActions.Action>
-  <QuickActions.Action>Delete</QuickActions.Action>
-</QuickActions>
+```tsx live
+function QuickActionsDemo() {
+  return (
+    <ThemeProvider>
+      <QuickActions mode="bar" collapsible label="Document actions" onSelect={(detail) => console.log(detail.label)}>
+        <QuickActions.Action>Publish</QuickActions.Action>
+        <QuickActions.Action>Preview</QuickActions.Action>
+        <QuickActions.Action>Delete</QuickActions.Action>
+      </QuickActions>
+    </ThemeProvider>
+  );
+}
 ```
 
 ### Sub-components

@@ -10,25 +10,25 @@ sidebar_label: PageToolbar
 
 ## Basic usage
 
-```tsx
-import { Input, PageToolbar, Select } from '@editora/ui-react';
-
+```tsx live
 function ReportsToolbar() {
   return (
-    <PageToolbar
-      title="Reports"
-      subtitle="Date and department-driven reporting"
-      toolbar={(
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10 }}>
-          <Input type="date" label="From" />
-          <Input type="date" label="To" />
-          <Select label="Department">
-            <option>All departments</option>
-          </Select>
-        </div>
-      )}
-      footer={<span>Reporting window: last 30 days</span>}
-    />
+    <ThemeProvider>
+      <PageToolbar
+        title="Reports"
+        subtitle="Date and department-driven reporting"
+        toolbar={(
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 10 }}>
+            <Input type="date" label="From" />
+            <Input type="date" label="To" />
+            <Select label="Department">
+              <option>All departments</option>
+            </Select>
+          </div>
+        )}
+        footer={<span>Reporting window: last 30 days</span>}
+      />
+    </ThemeProvider>
   );
 }
 ```

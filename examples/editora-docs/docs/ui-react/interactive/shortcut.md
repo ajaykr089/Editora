@@ -10,15 +10,15 @@ sidebar_label: Shortcut
 
 ## Basic usage
 
-```tsx
-import { Shortcut } from '@editora/ui-react';
-
+```tsx live
 function PaletteHint() {
   return (
-    <Shortcut>
-      <span>Cmd</span>
-      <span>K</span>
-    </Shortcut>
+    <ThemeProvider>
+      <Shortcut>
+        <span>Cmd</span>
+        <span>K</span>
+      </Shortcut>
+    </ThemeProvider>
   );
 }
 ```

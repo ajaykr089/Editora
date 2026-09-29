@@ -6,12 +6,16 @@ sidebar_label: Toggle
 
 # Toggle
 
-```tsx
-import { Toggle } from '@editora/ui-react';
-
-<Toggle pressed value="bold" iconOn="format_bold" onChange={(detail) => console.log(detail.pressed)}>
-  Bold
-</Toggle>
+```tsx live
+function ToggleDemo() {
+  return (
+    <ThemeProvider>
+      <Toggle pressed value="bold" iconOn="format_bold" onChange={(detail) => console.log(detail.pressed)}>
+        Bold
+      </Toggle>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Props

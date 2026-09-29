@@ -16,24 +16,30 @@ import { Popover } from '@editora/ui-react/Popover';
 
 `Popover` uses a composition pattern. Use `Popover.Trigger` and `Popover.Content` as named sub-components to declare the trigger and panel body. It now follows the same surface-token pattern as newer components like `Card`, `Dialog`, and `TransferList`, so you can theme the floating panel directly from the root:
 
-```tsx
-<Popover
-  placement="bottom"
-  offset={8}
-  closeOnOutside
-  closeOnEscape
-  variant="soft"
-  tone="brand"
-  size="md"
-  elevation="low"
->
-  <Popover.Trigger>
-    <Button>Open</Button>
-  </Popover.Trigger>
-  <Popover.Content style={{ minWidth: 220 }}>
-    Popover content with <strong>HTML</strong>.
-  </Popover.Content>
-</Popover>
+```tsx live
+function PopoverDemo() {
+  return (
+    <ThemeProvider>
+      <Popover
+        placement="bottom"
+        offset={8}
+        closeOnOutside
+        closeOnEscape
+        variant="soft"
+        tone="brand"
+        size="md"
+        elevation="low"
+      >
+        <Popover.Trigger>
+          <Button>Open</Button>
+        </Popover.Trigger>
+        <Popover.Content style={{ minWidth: 220 }}>
+          Popover content with <strong>HTML</strong>.
+        </Popover.Content>
+      </Popover>
+    </ThemeProvider>
+  );
+}
 ```
 
 ### Sub-components

@@ -18,10 +18,16 @@ import { Radio } from '@editora/ui-react/Radio';
 
 ## Quick Example
 
-```tsx
-<Radio checked tone="success" onCheckedChange={(checked) => console.log(checked)}>
-  Publish to subscribers
-</Radio>
+```tsx live
+function RadioDemo() {
+  return (
+    <ThemeProvider>
+      <Radio checked tone="success" onCheckedChange={(checked) => console.log(checked)}>
+        Publish to subscribers
+      </Radio>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Same-Name Grouping

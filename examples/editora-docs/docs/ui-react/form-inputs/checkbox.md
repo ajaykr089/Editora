@@ -6,12 +6,16 @@ sidebar_label: Checkbox
 
 # Checkbox
 
-```tsx
-import { Checkbox } from '@editora/ui-react';
-
-<Checkbox checked onCheckedChange={(checked) => console.log(checked)}>
-  Email me product updates
-</Checkbox>
+```tsx live
+function CheckboxDemo() {
+  return (
+    <ThemeProvider>
+      <Checkbox checked onCheckedChange={(checked) => console.log(checked)}>
+        Email me product updates
+      </Checkbox>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Props

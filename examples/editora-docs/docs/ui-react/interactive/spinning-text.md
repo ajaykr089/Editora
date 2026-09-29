@@ -18,16 +18,22 @@ import { SpinningText } from '@editora/ui-react/SpinningText';
 
 ## Basic Usage
 
-```tsx
-<SpinningText
-  text="Editora launch systems editorial motion"
-  repeat={2}
-  separator=" • "
-  speed={4}
-  pauseOnHover
->
-  <SpinningText.Center>ET</SpinningText.Center>
-</SpinningText>
+```tsx live
+function SpinningTextDemo() {
+  return (
+    <ThemeProvider>
+      <SpinningText
+        text="Editora launch systems editorial motion"
+        repeat={2}
+        separator=" • "
+        speed={4}
+        pauseOnHover
+      >
+        <SpinningText.Center>ET</SpinningText.Center>
+      </SpinningText>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Hero Seal

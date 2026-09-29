@@ -10,25 +10,25 @@ sidebar_label: Carousel
 
 ## Basic usage
 
-```tsx
-import { Carousel, Badge } from '@editora/ui-react';
-
+```tsx live
 function ReleaseCarousel() {
   return (
-    <Carousel label="Release highlights">
-      <Carousel.Item label="Overview">
-        <div>
-          <Badge tone="info">Overview</Badge>
-          <h3>Introduce the launch in one frame</h3>
-        </div>
-      </Carousel.Item>
-      <Carousel.Item label="Proof">
-        <div>
-          <Badge tone="success">Proof</Badge>
-          <h3>Show one key metric or testimonial</h3>
-        </div>
-      </Carousel.Item>
-    </Carousel>
+    <ThemeProvider>
+      <Carousel label="Release highlights">
+        <Carousel.Item label="Overview">
+          <div>
+            <Badge tone="info">Overview</Badge>
+            <h3>Introduce the launch in one frame</h3>
+          </div>
+        </Carousel.Item>
+        <Carousel.Item label="Proof">
+          <div>
+            <Badge tone="success">Proof</Badge>
+            <h3>Show one key metric or testimonial</h3>
+          </div>
+        </Carousel.Item>
+      </Carousel>
+    </ThemeProvider>
   );
 }
 ```

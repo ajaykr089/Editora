@@ -10,11 +10,13 @@ sidebar_label: Kbd
 
 ## Basic usage
 
-```tsx
-import { Kbd } from '@editora/ui-react';
-
+```tsx live
 function SaveHint() {
-  return <Kbd keys={['Cmd', 'S']} />;
+  return (
+    <ThemeProvider>
+      <Kbd keys={['Cmd', 'S']} />
+    </ThemeProvider>
+  );
 }
 ```
 

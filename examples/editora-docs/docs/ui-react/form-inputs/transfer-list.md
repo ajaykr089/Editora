@@ -6,23 +6,27 @@ sidebar_label: Transfer List
 
 # Transfer List
 
-```tsx
-import { TransferList } from '@editora/ui-react';
-
-<TransferList
-  label="Assigned repositories"
-  description="Grant access by moving repositories into the selected column."
-  variant="soft"
-  tone="brand"
-  size="md"
-  options={[
-    { value: 'editora', label: 'Editora' },
-    { value: 'docs', label: 'Docs Portal' },
-    { value: 'design', label: 'Design System' }
-  ]}
-  value={['editora']}
-  onValueChange={(value) => console.log(value)}
-/>;
+```tsx live
+function TransferListDemo() {
+  return (
+    <ThemeProvider>
+      <TransferList
+        label="Assigned repositories"
+        description="Grant access by moving repositories into the selected column."
+        variant="soft"
+        tone="brand"
+        size="md"
+        options={[
+          { value: 'editora', label: 'Editora' },
+          { value: 'docs', label: 'Docs Portal' },
+          { value: 'design', label: 'Design System' }
+        ]}
+        value={['editora']}
+        onValueChange={(value) => console.log(value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 `TransferList` now follows the same design-system surface model as the stronger `ui-react` components. That means the shell, panels, selectable rows, and action controls all respond to shared props like `variant`, `tone`, `size`, `radius`, and `elevation`.

@@ -10,35 +10,35 @@ sidebar_label: DataViewToolbar
 
 ## Basic usage
 
-```tsx
-import { Button, DataViewToolbar } from '@editora/ui-react';
-
+```tsx live
 function PatientsToolbar() {
   const [search, setSearch] = React.useState('');
   const [status, setStatus] = React.useState('all');
 
   return (
-    <DataViewToolbar
-      title="Patients"
-      description="Search and segment active patient records"
-      itemLabel="patient"
-      selectedCount={2}
-      totalCount={48}
-      search={search}
-      status={status}
-      statusOptions={[
-        { value: 'all', label: 'All status' },
-        { value: 'active', label: 'Active' },
-        { value: 'discharged', label: 'Discharged' },
-      ]}
-      actions={<Button size="sm">Export</Button>}
-      onSearchChange={setSearch}
-      onStatusChange={setStatus}
-      onClear={() => {
-        setSearch('');
-        setStatus('all');
-      }}
-    />
+    <ThemeProvider>
+      <DataViewToolbar
+        title="Patients"
+        description="Search and segment active patient records"
+        itemLabel="patient"
+        selectedCount={2}
+        totalCount={48}
+        search={search}
+        status={status}
+        statusOptions={[
+          { value: 'all', label: 'All status' },
+          { value: 'active', label: 'Active' },
+          { value: 'discharged', label: 'Discharged' },
+        ]}
+        actions={<Button size="sm">Export</Button>}
+        onSearchChange={setSearch}
+        onStatusChange={setStatus}
+        onClear={() => {
+          setSearch('');
+          setStatus('all');
+        }}
+      />
+    </ThemeProvider>
   );
 }
 ```

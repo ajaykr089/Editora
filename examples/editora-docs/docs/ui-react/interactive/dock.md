@@ -25,18 +25,24 @@ import { Dock } from '@editora/ui-react/Dock';
 
 ## Basic Usage
 
-```tsx
-<Dock variant="glass" tone="brand" magnification={2} distance={150}>
-  <Dock.Item value="home" label="Home" active>
-    <HomeIcon />
-  </Dock.Item>
-  <Dock.Item value="search" label="Search">
-    <SearchIcon />
-  </Dock.Item>
-  <Dock.Item value="library" label="Library" badge="12">
-    <FolderIcon />
-  </Dock.Item>
-</Dock>
+```tsx live
+function DockDemo() {
+  return (
+    <ThemeProvider>
+      <Dock variant="glass" tone="brand" magnification={2} distance={150}>
+        <Dock.Item value="home" label="Home" active>
+          <HomeIcon />
+        </Dock.Item>
+        <Dock.Item value="search" label="Search">
+          <SearchIcon />
+        </Dock.Item>
+        <Dock.Item value="library" label="Library" badge="12">
+          <FolderIcon />
+        </Dock.Item>
+      </Dock>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Launcher Pattern

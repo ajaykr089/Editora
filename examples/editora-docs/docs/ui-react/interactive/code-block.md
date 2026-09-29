@@ -10,17 +10,17 @@ sidebar_label: CodeBlock
 
 ## Basic usage
 
-```tsx
-import { CodeBlock } from '@editora/ui-react';
-
+```tsx live
 function InstallBlock() {
   return (
-    <CodeBlock
-      title="Install packages"
-      language="bash"
-      description="Core UI packages"
-      code={"npm install @editora/ui-react @editora/ui-core\nnpm run build"}
-    />
+    <ThemeProvider>
+      <CodeBlock
+        title="Install packages"
+        language="bash"
+        description="Core UI packages"
+        code={"npm install @editora/ui-react @editora/ui-core\nnpm run build"}
+      />
+    </ThemeProvider>
   );
 }
 ```
