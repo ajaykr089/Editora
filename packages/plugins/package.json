@@ -439,7 +439,7 @@
     "@editora/core": "^1.0.15",
     "@types/katex": "^0.16.8",
     "typescript": "^5.0.0",
-    "vite": "^4.5.14"
+    "vite": "^7.3.1"
   },
   "publishConfig": {
     "access": "public"
