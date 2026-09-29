@@ -288,6 +288,15 @@ function pad2(value: number): string {
   return String(value).padStart(2, '0');
 }
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function formatCanonical(hours: number, minutes: number, seconds: number, withSeconds: boolean): string {
   const hh = pad2(hours);
   const mm = pad2(minutes);
@@ -722,11 +731,11 @@ export class UITimePicker extends ElementBase {
 
     const pickerContent = `
       <div class="pickers" data-seconds="${withSeconds ? 'true' : 'false'}" data-ampm="${format12 ? 'true' : 'false'}">
-        <div class="picker"><label>${t.hour}</label><select data-segment="hours">${hourOptions}</select></div>
-        <div class="picker"><label>${t.minute}</label><select data-segment="minutes">${minuteOptions}</select></div>
-        ${withSeconds ? `<div class="picker"><label>${t.second}</label><select data-segment="seconds">${secondOptions}</select></div>` : ''}
+        <div class="picker"><label>${escapeHtml(t.hour)}</label><select data-segment="hours">${hourOptions}</select></div>
+        <div class="picker"><label>${escapeHtml(t.minute)}</label><select data-segment="minutes">${minuteOptions}</select></div>
+        ${withSeconds ? `<div class="picker"><label>${escapeHtml(t.second)}</label><select data-segment="seconds">${secondOptions}</select></div>` : ''}
         ${format12
-          ? `<div class="picker"><label>${t.meridiem}</label><select data-segment="meridiem"><option value="am" ${parts.meridiem === 'am' ? 'selected' : ''}>${t.am}</option><option value="pm" ${parts.meridiem === 'pm' ? 'selected' : ''}>${t.pm}</option></select></div>`
+          ? `<div class="picker"><label>${escapeHtml(t.meridiem)}</label><select data-segment="meridiem"><option value="am" ${parts.meridiem === 'am' ? 'selected' : ''}>${escapeHtml(t.am)}</option><option value="pm" ${parts.meridiem === 'pm' ? 'selected' : ''}>${escapeHtml(t.pm)}</option></select></div>`
           : ''}
       </div>
     `;
@@ -737,10 +746,10 @@ export class UITimePicker extends ElementBase {
       <section class="${sheet ? 'sheet' : 'panel'}" part="${sheet ? 'sheet' : 'popover'}">
         ${pickerContent}
         <footer class="footer" part="footer">
-          <button type="button" class="action" data-action="now">${t.now}</button>
-          <button type="button" class="action" data-action="clear" part="clear">${t.clear}</button>
-          <button type="button" class="action" data-action="cancel" part="cancel">${t.cancel}</button>
-          <button type="button" class="action" data-action="apply" data-tone="primary" part="apply">${t.apply}</button>
+          <button type="button" class="action" data-action="now">${escapeHtml(t.now)}</button>
+          <button type="button" class="action" data-action="clear" part="clear">${escapeHtml(t.clear)}</button>
+          <button type="button" class="action" data-action="cancel" part="cancel">${escapeHtml(t.cancel)}</button>
+          <button type="button" class="action" data-action="apply" data-tone="primary" part="apply">${escapeHtml(t.apply)}</button>
         </footer>
       </section>
     `;

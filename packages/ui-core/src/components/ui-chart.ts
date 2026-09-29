@@ -1341,7 +1341,7 @@ export class UIChart extends ElementBase {
               const heightValue = Math.max(1, Math.abs(baselineY - yValue));
               const active = activeIndex === index;
               const opacity = activeIndex == null || active ? entry.opacity ?? 1 : 0.72;
-              return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${Math.max(2, groupWidth - 1).toFixed(2)}" height="${heightValue.toFixed(2)}" rx="1.4" fill="${seriesTone}" opacity="${opacity}" />`;
+              return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${Math.max(2, groupWidth - 1).toFixed(2)}" height="${heightValue.toFixed(2)}" rx="1.4" fill="${escapeHtml(seriesTone)}" opacity="${opacity}" />`;
             })
             .join('');
         })
@@ -1409,7 +1409,7 @@ export class UIChart extends ElementBase {
           : segments
               .map((segment) => {
                 const path = pathForSegment(segment);
-                return `<path d="${path}" fill="none" stroke="${seriesTone}" stroke-width="${(entry.strokeWidth || (seriesIndex === 0 ? 1.9 : 1.55)).toFixed(2)}" stroke-linecap="round" stroke-linejoin="round" ${entry.dash ? `stroke-dasharray="${escapeHtml(entry.dash)}"` : ''} opacity="${entry.opacity ?? 1}" />`;
+                return `<path d="${path}" fill="none" stroke="${escapeHtml(seriesTone)}" stroke-width="${(entry.strokeWidth || (seriesIndex === 0 ? 1.9 : 1.55)).toFixed(2)}" stroke-linecap="round" stroke-linejoin="round" ${entry.dash ? `stroke-dasharray="${escapeHtml(entry.dash)}"` : ''} opacity="${entry.opacity ?? 1}" />`;
               })
               .join('');
 
@@ -1419,7 +1419,7 @@ export class UIChart extends ElementBase {
             const active = activeIndex === item.index;
             const radius = active ? 2.35 : 1.6;
             const opacity = activeIndex == null || active ? entry.opacity ?? 1 : 0.72;
-            return `<circle cx="${item.x.toFixed(2)}" cy="${item.y.toFixed(2)}" r="${radius.toFixed(2)}" fill="${this._pointTone(item.point, item.index, seriesTone)}" opacity="${opacity}" />`;
+            return `<circle cx="${item.x.toFixed(2)}" cy="${item.y.toFixed(2)}" r="${radius.toFixed(2)}" fill="${escapeHtml(this._pointTone(item.point, item.index, seriesTone))}" opacity="${opacity}" />`;
           })
           .join('');
 
@@ -1476,7 +1476,7 @@ export class UIChart extends ElementBase {
       .map((item) => {
         const tone = this._pointTone(item.point, item.index);
         const active = activeIndex === item.index;
-        return `<circle cx="${item.x.toFixed(2)}" cy="${item.y.toFixed(2)}" r="${active ? '2.35' : '1.85'}" fill="${tone}" opacity="${activeIndex == null || active ? '1' : '0.74'}" />`;
+        return `<circle cx="${item.x.toFixed(2)}" cy="${item.y.toFixed(2)}" r="${active ? '2.35' : '1.85'}" fill="${escapeHtml(tone)}" opacity="${activeIndex == null || active ? '1' : '0.74'}" />`;
       })
       .join('');
 
@@ -1535,7 +1535,7 @@ export class UIChart extends ElementBase {
             cy="${centerY}"
             r="${radius}"
             fill="none"
-            stroke="${tone}"
+            stroke="${escapeHtml(tone)}"
             stroke-width="${active ? stroke + 0.8 : stroke}"
             stroke-dasharray="${length.toFixed(3)} ${(circumference - length).toFixed(3)}"
             stroke-dashoffset="${(-offset).toFixed(3)}"
@@ -1640,7 +1640,7 @@ export class UIChart extends ElementBase {
             .map(
               (entry) => `
                 <div class="tooltip-row">
-                  <span class="tooltip-dot" style="--dot:${entry.tone || 'var(--ui-chart-accent)'};"></span>
+                  <span class="tooltip-dot" style="--dot:${escapeHtml(entry.tone || 'var(--ui-chart-accent)')};"></span>
                   <span class="tooltip-series">${escapeHtml(entry.series)}</span>
                   <span class="tooltip-value">${escapeHtml(this._formatValue(entry.value || 0))}</span>
                 </div>
@@ -1732,7 +1732,7 @@ export class UIChart extends ElementBase {
           .map(
             (entry, index) => `
               <div class="legend-item" aria-label="${escapeHtml(entry.name)}">
-                <span class="legend-dot" style="--dot:${this._seriesTone(entry, index)};"></span>
+                <span class="legend-dot" style="--dot:${escapeHtml(this._seriesTone(entry, index))};"></span>
                 <span>${escapeHtml(entry.name)}</span>
               </div>
             `
@@ -1753,7 +1753,7 @@ export class UIChart extends ElementBase {
                 aria-label="${escapeHtml(label)}"
                 ${interactive ? '' : 'disabled'}
               >
-                <span class="legend-dot" style="--dot:${tone};"></span>
+                <span class="legend-dot" style="--dot:${escapeHtml(tone)};"></span>
                 <span>${escapeHtml(point.label)}</span>
               </button>
             `;
