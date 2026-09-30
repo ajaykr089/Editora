@@ -24,17 +24,80 @@ function randomUser(): CollaborationUser {
   };
 }
 
-function waitForContentElement(editorElement: HTMLElement, onReady: (contentElement: HTMLElement) => void, attemptsLeft = 120): void {
-  const contentElement = editorElement.querySelector<HTMLElement>('[contenteditable]');
-  if (contentElement) {
-    onReady(contentElement);
-    return;
+// @editora/core's web component calls a plugin's init() hook with a real
+// { editorElement }. @editora/react's RichTextEditor does not take that
+// path at all - its PluginManager.register(p) calls plugin.init(pluginConfig)
+// with no element, only whatever config object was attached (undefined
+// here) - so an implementation that bootstraps from init()'s argument
+// silently never activates in React. Fixing that per-framework would mean
+// two divergent code paths that can drift out of sync, so instead every
+// CollaborationPlugin(options) call enqueues itself as a "claim" the
+// instant it's constructed (matching track-changes' precedent of doing
+// setup work before returning the plugin object), and a single
+// document-wide scanner - shared across every collaboration plugin
+// instance on the page - matches each unclaimed editor root
+// (.rte-content/.editora-content, the same selector every other native
+// plugin here uses to find "the" contentEditable) to the oldest unclaimed
+// construction-order entry in that queue via a MutationObserver, which
+// reliably fires once the element mounts regardless of which framework (or
+// timing) put it there. init()'s argument is therefore never read - it's
+// only used as a signal that this instance exists and should enqueue.
+interface PendingClaim {
+  id: number;
+  options: CollaborationPluginOptions;
+  claimed: boolean;
+}
+
+let nextClaimId = 1;
+const pendingClaims: PendingClaim[] = [];
+const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content, [contenteditable]';
+let scannerObserver: MutationObserver | null = null;
+
+function isEditorContentElement(node: Element): boolean {
+  return node.matches(EDITOR_CONTENT_SELECTOR);
+}
+
+function findUnboundEditorRoots(root: ParentNode): HTMLElement[] {
+  const found: HTMLElement[] = [];
+  if (root instanceof HTMLElement && isEditorContentElement(root) && !stateByContent.has(root) && !pendingContentElements.has(root)) {
+    found.push(root);
   }
-  if (attemptsLeft <= 0) {
-    console.warn('[CollaborationPlugin] Timed out waiting for a contentEditable element to mount.');
-    return;
+  root.querySelectorAll(EDITOR_CONTENT_SELECTOR).forEach((el) => {
+    if (el instanceof HTMLElement && !stateByContent.has(el) && !pendingContentElements.has(el)) {
+      found.push(el);
+    }
+  });
+  return found;
+}
+
+function processClaimQueue(): void {
+  if (pendingClaims.length === 0 || typeof document === 'undefined') return;
+  const roots = findUnboundEditorRoots(document.body);
+  for (const root of roots) {
+    const claim = pendingClaims.find((c) => !c.claimed);
+    if (!claim) break;
+    claim.claimed = true;
+    setupCollaboration(root, claim.options);
   }
-  requestAnimationFrame(() => waitForContentElement(editorElement, onReady, attemptsLeft - 1));
+  // Drop satisfied claims so a later, unrelated mutation batch doesn't
+  // rescan an already-fully-processed queue on every DOM change.
+  while (pendingClaims.length && pendingClaims[0].claimed) pendingClaims.shift();
+}
+
+function ensureScanner(): void {
+  if (scannerObserver || typeof document === 'undefined' || typeof MutationObserver === 'undefined') return;
+  scannerObserver = new MutationObserver(() => processClaimQueue());
+  scannerObserver.observe(document.body, { childList: true, subtree: true });
+}
+
+function enqueueClaim(options: CollaborationPluginOptions): PendingClaim {
+  const claim: PendingClaim = { id: nextClaimId++, options, claimed: false };
+  pendingClaims.push(claim);
+  ensureScanner();
+  // The editor may already be in the DOM by the time this plugin instance
+  // is constructed (e.g. React already rendered it before this effect ran).
+  processClaimQueue();
+  return claim;
 }
 
 function ensurePresenceStyles(): void {
@@ -237,27 +300,27 @@ function teardownCollaboration(contentElement: HTMLElement): void {
 }
 
 export const CollaborationPlugin = (options: CollaborationPluginOptions = {}): Plugin => {
+  // PluginLoader.load() (the web component's declarative plugins: ['collaboration']
+  // path) always calls this factory with zero arguments, then stashes any
+  // pluginConfig.collaboration config onto the returned instance as
+  // __pluginConfig rather than re-invoking the factory with it - read that
+  // here (merged over the direct-construction `options`, since it reflects
+  // the consumer's actual declarative config) before enqueueing the claim.
+  //
+  // @editora/core also calls a plugin's init() hook twice for a single
+  // web-component mount, from two separate, independent registration paths
+  // (RichTextEditorElement's own loop, and EditorEngine's parallel
+  // PluginManager.register()) - guard so this instance only ever enqueues
+  // one claim, or a stray second claim would sit in the queue and
+  // incorrectly grab a later, unrelated editor's slot.
+  let hasEnqueued = false;
   const plugin: Plugin & { __pluginConfig?: CollaborationPluginOptions } = {
     name: 'collaboration',
 
-    // PluginLoader.load() always calls the registry factory with zero
-    // arguments, then stashes any declarative `pluginConfig.collaboration`
-    // config onto the returned instance as `__pluginConfig` rather than
-    // re-invoking the factory with it - so options passed directly to
-    // CollaborationPlugin({...}) (the documented direct-construction path)
-    // are only the fallback; __pluginConfig, read here at init time, wins.
-    //
-    // init() is also called a second time, with no useful context at all,
-    // by PluginManager.register() (EditorEngine's separate, parallel plugin
-    // registration path - `plugin.init(pluginConfig)`, no editorElement).
-    // Only the RichTextEditorElement-driven call passes a real
-    // editorElement; the other is a no-op here.
-    init: (context?: { editorElement?: HTMLElement }) => {
-      if (!context?.editorElement) return;
-      const resolvedOptions = { ...options, ...(plugin.__pluginConfig ?? {}) };
-      waitForContentElement(context.editorElement, (contentElement) => {
-        setupCollaboration(contentElement, resolvedOptions);
-      });
+    init: () => {
+      if (hasEnqueued) return;
+      hasEnqueued = true;
+      enqueueClaim({ ...options, ...(plugin.__pluginConfig ?? {}) });
     },
 
     commands: {},

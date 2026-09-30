@@ -18,16 +18,22 @@ export class YjsDomBinding {
     private readonly doc: Y.Doc,
     private readonly fragment: Y.XmlFragment
   ) {
+    this.observer = new MutationObserver(() => this.scheduleLocalSync());
+
     if (this.fragment.length === 0 && this.root.childNodes.length > 0) {
       // First client to open this room - seed the shared doc from local content.
       this.doc.transact(() => reconcileYFromDom(this.fragment, this.root), this);
     } else {
       // Joining a room that already has content - adopt it, discarding
-      // whatever placeholder content the editor mounted with.
-      reconcileDomFromY(this.root, this.fragment, this.root.ownerDocument);
+      // whatever placeholder content the editor mounted with. Goes through
+      // applyRemoteToDom (not a direct reconcileDomFromY call) so this also
+      // fires the 'input' event the host framework's onChange/controlled
+      // value is wired to - otherwise a client that joins an existing room
+      // renders the adopted content but the host never learns its initial
+      // value changed.
+      this.applyRemoteToDom();
     }
 
-    this.observer = new MutationObserver(() => this.scheduleLocalSync());
     this.observer.observe(this.root, { childList: true, characterData: true, subtree: true, attributes: true });
 
     this.fragment.observeDeep((_events, transaction) => {
@@ -50,6 +56,14 @@ export class YjsDomBinding {
     this.observer.disconnect();
     try {
       reconcileDomFromY(this.root, this.fragment, this.root.ownerDocument);
+      // A DOM mutation made by script (as this one is) never fires a native
+      // 'input' event, only real user interaction does - but that's exactly
+      // the event @editora/core's own content-change tracking and
+      // @editora/react's controlled onChange are wired to. Without this,
+      // content that arrives from a remote peer updates the screen but
+      // never reaches the host's onChange/autosave/state - it looks synced
+      // but any consumer relying on that callback silently falls behind.
+      this.root.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
     } finally {
       this.observer.observe(this.root, { childList: true, characterData: true, subtree: true, attributes: true });
     }
