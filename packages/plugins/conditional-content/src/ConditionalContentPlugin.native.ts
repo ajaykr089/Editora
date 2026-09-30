@@ -669,6 +669,13 @@ function ensureStylesInjected(): void {
       border-color: #bae6fd;
     }
 
+    ${DARK_THEME_SELECTOR} .rte-conditional-preview-on ${BLOCK_SELECTOR} .rte-conditional-header,
+    ${LOCAL_DARK_THEME_SCOPE} .rte-conditional-preview-on ${BLOCK_SELECTOR} .rte-conditional-header,
+    .${DIALOG_OVERLAY_CLASS}.rte-conditional-theme-dark .rte-conditional-preview-on ${BLOCK_SELECTOR} .rte-conditional-header {
+      background: #0c2b36;
+      border-color: #155e75;
+    }
+
     ${DARK_THEME_SELECTOR} .rte-conditional-block,
     ${LOCAL_DARK_THEME_SCOPE} .rte-conditional-block,
     .${DIALOG_OVERLAY_CLASS}.rte-conditional-theme-dark .rte-conditional-block {
