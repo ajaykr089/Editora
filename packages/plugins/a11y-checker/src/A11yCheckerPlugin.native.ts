@@ -59,7 +59,10 @@ registerA11yRule({
     const img = node as HTMLImageElement;
     if (img.hasAttribute('role') && img.getAttribute('role') === 'presentation') return null;
     if (img.hasAttribute('data-a11y-ignore') && img.getAttribute('data-a11y-ignore') === 'image-alt-text') return null;
-    if (!img.hasAttribute('alt') || img.getAttribute('alt')?.trim() === '') {
+    // An empty alt="" is the correct WCAG pattern for a decorative image (matches the
+    // role="presentation" exemption above) - only a genuinely missing attribute is an error.
+    // Don't flag it, or the "Add empty alt" fix below would never actually resolve the issue.
+    if (!img.hasAttribute('alt')) {
       return {
         id: `img-alt-${ctx.cache.get('imgIdx')}`,
         rule: 'image-alt-text',
