@@ -8,6 +8,7 @@ import type {
 } from './SlashCommands.types';
 
 const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
+const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark, .rte-theme-dark';
 
 interface SlashState {
   editor: HTMLElement;
@@ -189,6 +190,7 @@ function positionPanel(state: SlashState, range: Range): void {
   const caretRect = getCaretRect(state.editor, range);
   const panel = state.panel;
 
+  panel.classList.toggle('rte-slash-theme-dark', Boolean(state.editor.closest(DARK_THEME_SELECTOR)));
   panel.style.display = 'block';
   panel.classList.add('show');
   panel.style.left = '0px';

@@ -74,24 +74,30 @@ export function ensureStylesInjected(): void {
       padding: 12px;
     }
 
-    ${DARK_THEME_SELECTOR} .rte-slash-panel {
+    ${DARK_THEME_SELECTOR} .rte-slash-panel,
+    .rte-slash-panel.rte-slash-theme-dark {
       border-color: #364152;
       background: #1f2937;
       box-shadow: 0 22px 44px rgba(0, 0, 0, 0.48);
     }
 
-    ${DARK_THEME_SELECTOR} .rte-slash-item {
+    ${DARK_THEME_SELECTOR} .rte-slash-item,
+    .rte-slash-panel.rte-slash-theme-dark .rte-slash-item {
       color: #e5e7eb;
     }
 
     ${DARK_THEME_SELECTOR} .rte-slash-item:hover,
-    ${DARK_THEME_SELECTOR} .rte-slash-item.active {
+    ${DARK_THEME_SELECTOR} .rte-slash-item.active,
+    .rte-slash-panel.rte-slash-theme-dark .rte-slash-item:hover,
+    .rte-slash-panel.rte-slash-theme-dark .rte-slash-item.active {
       background: #334155;
       color: #bfdbfe;
     }
 
     ${DARK_THEME_SELECTOR} .rte-slash-item-description,
-    ${DARK_THEME_SELECTOR} .rte-slash-empty {
+    ${DARK_THEME_SELECTOR} .rte-slash-empty,
+    .rte-slash-panel.rte-slash-theme-dark .rte-slash-item-description,
+    .rte-slash-panel.rte-slash-theme-dark .rte-slash-empty {
       color: #9ca3af;
     }
   `;
