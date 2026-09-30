@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "examples/editora-docs", "run", "start", "--", "--port", "3010"],
       "port": 3010
+    },
+    {
+      "name": "sandbox",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "sandbox", "run", "dev", "--", "--port", "5173"],
+      "port": 5173
     }
   ]
 }

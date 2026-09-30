@@ -211,6 +211,30 @@
   height: 20px;
   display: block;
   color: currentColor;
+}
+
+/* Deliberately no blanket `fill: currentColor` above - many icons are
+ * authored as outlines (root <svg fill="none">, child shapes carrying their
+ * own stroke="currentColor" and no fill of their own). Forcing fill on the
+ * root overrides that fill="none" and, since fill inherits, turns every
+ * fill-less outline shape solid.
+ * Solid-glyph icons (e.g. Bold/Italic) declare no fill at all and default to
+ * SVG's initial black - convert those via the root, but skip any root that
+ * explicitly opts out with fill="none". Elements with their OWN explicit
+ * hardcoded fill (root or descendant) are also converted directly, since an
+ * attribute on the element itself doesn't inherit away. */
+.rte-toolbar-button svg:not([fill="none" i]),
+.editora-toolbar-button svg:not([fill="none" i]),
+.editora-toolbar-icon svg:not([fill="none" i]),
+.rte-toolbar-button svg [fill="#000" i],
+.rte-toolbar-button svg [fill="#000000" i],
+.rte-toolbar-button svg [fill="black" i],
+.editora-toolbar-button svg [fill="#000" i],
+.editora-toolbar-button svg [fill="#000000" i],
+.editora-toolbar-button svg [fill="black" i],
+.editora-toolbar-icon svg [fill="#000" i],
+.editora-toolbar-icon svg [fill="#000000" i],
+.editora-toolbar-icon svg [fill="black" i] {
   fill: currentColor;
 }
 
@@ -235,10 +259,24 @@
 }
 
 .rte-toolbar-button.active svg,
-.rte-toolbar-button[data-active="true"] svg,
-.rte-toolbar-button.active svg *,
-.rte-toolbar-button[data-active="true"] svg * {
+.rte-toolbar-button[data-active="true"] svg {
   color: currentColor;
+}
+
+/* Outline icons (fill="none" root, stroke="currentColor" children) already
+ * pick up the active state's inverse text color automatically through
+ * normal `currentColor` -> `color` inheritance - no extra rule needed.
+ * Solid-glyph icons with no fill attribute default to black and need the
+ * root converted explicitly; elements with their own hardcoded fill need
+ * converting directly, same as the base rule above. */
+.rte-toolbar-button.active svg:not([fill="none" i]),
+.rte-toolbar-button[data-active="true"] svg:not([fill="none" i]),
+.rte-toolbar-button.active svg [fill="#000" i],
+.rte-toolbar-button.active svg [fill="#000000" i],
+.rte-toolbar-button.active svg [fill="black" i],
+.rte-toolbar-button[data-active="true"] svg [fill="#000" i],
+.rte-toolbar-button[data-active="true"] svg [fill="#000000" i],
+.rte-toolbar-button[data-active="true"] svg [fill="black" i] {
   fill: currentColor;
 }
 

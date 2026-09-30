@@ -58,63 +58,26 @@
   :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
   svg {
   color: currentColor;
+}
+
+/* No blanket `fill: currentColor` above targeting every svg descendant -
+ * many icons (direction, anchor, spell-check, fullscreen among them) are
+ * authored as outlines (root <svg fill="none">, child shapes carrying their
+ * own stroke="currentColor" and no fill of their own). Forcing fill on
+ * every descendant overrode that fill="none" and turned every fill-less
+ * outline shape solid - which is what the old per-command
+ * `fill: none !important` workarounds used to patch one icon at a time,
+ * now removed as redundant.
+ * Solid-glyph icons with no fill attribute at all (e.g. Bold/Italic)
+ * default to SVG's initial black, which is invisible on a dark background -
+ * convert those via the root, skipping roots that explicitly opt out with
+ * fill="none". Elements with their own hardcoded fill (root or descendant)
+ * are converted directly by the attribute-selector rules below, since an
+ * attribute on the element itself doesn't inherit away. */
+:is([data-theme="dark"], .dark, .editora-theme-dark)
+  :is(.rte-toolbar-button, .editora-toolbar-button, .editora-toolbar-icon)
+  svg:not([fill="none" i]) {
   fill: currentColor;
-}
-
-/* Direction plugin icons are stroke-driven; keep fills disabled in dark mode */
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(
-    .rte-toolbar-button[data-command="setDirectionLTR"],
-    .rte-toolbar-button[data-command="setDirectionRTL"],
-    .editora-toolbar-button[data-command="setDirectionLTR"],
-    .editora-toolbar-button[data-command="setDirectionRTL"]
-  )
-  svg,
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(
-    .rte-toolbar-button[data-command="setDirectionLTR"],
-    .rte-toolbar-button[data-command="setDirectionRTL"],
-    .editora-toolbar-button[data-command="setDirectionLTR"],
-    .editora-toolbar-button[data-command="setDirectionRTL"]
-  )
-  svg * {
-  fill: none !important;
-}
-
-/* Anchor and Spell Check icons are stroke-driven; keep fills disabled in dark mode */
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(
-    .rte-toolbar-button[data-command="insertAnchor"],
-    .rte-toolbar-button[data-command="toggleSpellCheck"],
-    .editora-toolbar-button[data-command="insertAnchor"],
-    .editora-toolbar-button[data-command="toggleSpellCheck"]
-  )
-  svg,
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(
-    .rte-toolbar-button[data-command="insertAnchor"],
-    .rte-toolbar-button[data-command="toggleSpellCheck"],
-    .editora-toolbar-button[data-command="insertAnchor"],
-    .editora-toolbar-button[data-command="toggleSpellCheck"]
-  )
-  svg * {
-  fill: none !important;
-}
-
-/* Fullscreen icon is stroke-driven; keep fills disabled in dark mode */
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(
-    .rte-toolbar-button[data-command="toggleFullscreen"],
-    .editora-toolbar-button[data-command="toggleFullscreen"]
-  )
-  svg,
-:is([data-theme="dark"], .dark, .editora-theme-dark)
-  :is(
-    .rte-toolbar-button[data-command="toggleFullscreen"],
-    .editora-toolbar-button[data-command="toggleFullscreen"]
-  )
-  svg * {
-  fill: none !important;
 }
 
 /* Normalize plugin-provided inline SVGs with hardcoded black stroke values only */
@@ -227,10 +190,17 @@
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button.active svg,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button[data-active="true"] svg,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button.active svg *,
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button[data-active="true"] svg * {
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button[data-active="true"] svg {
   color: currentColor;
+}
+
+/* Outline icons already pick up the active state's color via normal
+ * currentColor -> color inheritance. Solid-glyph icons with no fill
+ * attribute (e.g. Bold/Italic) default to black and need the root converted
+ * explicitly; hardcoded-black-fill icons are handled by the
+ * attribute-selector rules above. */
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button.active svg:not([fill="none" i]),
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-toolbar-button[data-active="true"] svg:not([fill="none" i]) {
   fill: currentColor;
 }
 

@@ -98,10 +98,24 @@
 }
 
 .rte-toolbar-button.active svg,
-.rte-toolbar-button[data-active="true"] svg,
-.rte-toolbar-button.active svg *,
-.rte-toolbar-button[data-active="true"] svg * {
+.rte-toolbar-button[data-active="true"] svg {
   color: currentColor;
+}
+
+/* Outline icons (fill="none" root, stroke="currentColor" children) already
+ * pick up the active state's inverse text color automatically through
+ * normal `currentColor` -> `color` inheritance - no extra rule needed.
+ * Solid-glyph icons with no fill attribute (e.g. Bold/Italic) default to
+ * black and need the root converted explicitly; elements with their own
+ * hardcoded fill need converting directly since it doesn't inherit away. */
+.rte-toolbar-button.active svg:not([fill="none" i]),
+.rte-toolbar-button[data-active="true"] svg:not([fill="none" i]),
+.rte-toolbar-button.active svg [fill="#000" i],
+.rte-toolbar-button.active svg [fill="#000000" i],
+.rte-toolbar-button.active svg [fill="black" i],
+.rte-toolbar-button[data-active="true"] svg [fill="#000" i],
+.rte-toolbar-button[data-active="true"] svg [fill="#000000" i],
+.rte-toolbar-button[data-active="true"] svg [fill="black" i] {
   fill: currentColor;
 }
 

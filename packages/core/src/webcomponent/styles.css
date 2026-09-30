@@ -241,22 +241,30 @@
   line-height: 1;
 }
 
-/* Toolbar icon SVG styling. Deliberately does NOT set `fill` here: plenty
- * of icons are authored as outlines - root <svg fill="none">, with child
- * shapes carrying their own `stroke="currentColor"` and no fill of their
- * own. Forcing fill:currentColor on the root overrides that `fill="none"`,
- * and since CSS fill is inherited, every fill-less child then inherits
- * currentColor too - turning a hollow outline shape into a solid, mostly
- * unrecognizable blob. Icons that DO want a solid currentColor fill already
- * author it themselves (either on the root or per-path); nothing here needs
- * to force it. `color` is still set for any icon that references the
- * currentColor keyword itself. */
+/* Toolbar icon SVG styling. Deliberately does NOT blanket-set `fill` on
+ * every svg here: plenty of icons are authored as outlines - root
+ * <svg fill="none">, with child shapes carrying their own
+ * `stroke="currentColor"` and no fill of their own. Forcing fill:currentColor
+ * on the root overrides that `fill="none"`, and since CSS fill is inherited,
+ * every fill-less child then inherits currentColor too - turning a hollow
+ * outline shape into a solid, mostly unrecognizable blob. `color` is still
+ * set for any icon that references the currentColor keyword itself. */
 .editora-toolbar-button svg,
 .editora-toolbar-icon svg {
   width: 20px;
   height: 20px;
   display: block;
   color: currentColor;
+}
+
+/* Solid-glyph icons (e.g. Bold/Italic) declare no fill attribute at all and
+ * default to SVG's initial black - harmless on the light toolbar but
+ * invisible against the dark theme's toolbar background. Convert the root
+ * to currentColor, skipping any root that explicitly opts out with
+ * fill="none" (outline icons keep relying on their own stroke). */
+.editora-theme-dark .editora-toolbar-button svg:not([fill="none" i]),
+.editora-theme-dark .editora-toolbar-icon svg:not([fill="none" i]) {
+  fill: currentColor;
 }
 
 .editora-theme-dark .editora-toolbar-icon,
