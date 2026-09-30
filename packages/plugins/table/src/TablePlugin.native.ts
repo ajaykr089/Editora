@@ -176,11 +176,17 @@ export const addRowBelowCommand = () => {
 
   // Insert row after current position
   if (rowIndex >= table.rows.length - 1) {
-    table.appendChild(newRow);
+    const lastRow = table.rows[table.rows.length - 1];
+    if (lastRow && lastRow.parentElement) {
+      lastRow.parentElement.appendChild(newRow);
+    } else {
+      table.appendChild(newRow);
+    }
   } else {
-    table.insertBefore(newRow, table.rows[rowIndex + 1]);
+    const nextRow = table.rows[rowIndex + 1];
+    nextRow.parentElement?.insertBefore(newRow, nextRow);
   }
-  
+
   updateTableInfo();
 };
 
