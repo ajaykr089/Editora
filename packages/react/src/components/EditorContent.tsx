@@ -1,7 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import { Editor, KeyboardShortcutManager } from '@editora/core';
+import { Editor, KeyboardShortcutManager, sanitizePastedHTML, sanitizeInputHTML } from '@editora/core';
 import { useAutosave } from '../hooks/useAutosave';
-import { sanitizePastedHTML, sanitizeInputHTML } from '../utils/sanitizeHTML';
 
 const isStructurallyEmpty = (el: HTMLElement): boolean => {
   const text = (el.textContent || '').replace(/\u200B/g, '').trim();

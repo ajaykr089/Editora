@@ -353,3 +353,30 @@ export function getSelectionInfo(
   selectedChars: number;
   selectedWords: number;
 };
+
+export interface SanitizationConfig {
+  allowedTags?: string[];
+  allowedAttributes?: Record<string, string[]>;
+  sanitize?: boolean;
+}
+
+export interface SecurityConfig {
+  sanitizeOnPaste?: boolean;
+  sanitizeOnInput?: boolean;
+}
+
+export function sanitizeHTML(
+  html: string,
+  contentConfig?: SanitizationConfig,
+  securityConfig?: SecurityConfig,
+): string;
+export function sanitizePastedHTML(
+  html: string,
+  contentConfig?: SanitizationConfig,
+  securityConfig?: SecurityConfig,
+): string;
+export function sanitizeInputHTML(
+  html: string,
+  contentConfig?: SanitizationConfig,
+  securityConfig?: SecurityConfig,
+): string;
