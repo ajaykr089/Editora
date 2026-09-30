@@ -426,7 +426,8 @@
 }
 
 
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-inline-menu {
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-inline-menu,
+.rte-inline-menu.rte-inline-menu-theme-dark {
   position: fixed;
   z-index: 1000;
   background: #1b2430;
@@ -437,7 +438,8 @@
   max-width: 200px;
   pointer-events: auto;
 }
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-inline-menu-item {
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-inline-menu-item,
+.rte-inline-menu.rte-inline-menu-theme-dark .rte-inline-menu-item {
   padding: 8px 12px;
   cursor: pointer;
   /* border-bottom: 1px solid #4f5b70; */
@@ -446,9 +448,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   background-color: transparent;
-  
+  color: #e5e7eb;
 }
-:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-inline-menu-item:hover {
+:is([data-theme="dark"], .dark, .editora-theme-dark) .rte-inline-menu-item:hover,
+.rte-inline-menu.rte-inline-menu-theme-dark .rte-inline-menu-item:hover {
     background-color: #2f3946;
 }
 

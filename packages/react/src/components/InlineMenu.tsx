@@ -24,9 +24,14 @@ export const InlineMenu: React.FC<InlineMenuProps> = ({
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
 
   const calculatePosition = () => {
     if (!isOpen || !anchorRef.current) return;
+
+    setIsDarkTheme(
+      Boolean(anchorRef.current.closest('[data-theme="dark"], .dark, .editora-theme-dark, .rte-theme-dark'))
+    );
 
     const anchorRect = anchorRef.current.getBoundingClientRect();
     const menuRect = menuRef.current?.getBoundingClientRect();
@@ -118,7 +123,7 @@ export const InlineMenu: React.FC<InlineMenuProps> = ({
   return (
     <div
       ref={menuRef}
-      className={`rte-inline-menu ${className}`}
+      className={`rte-inline-menu ${isDarkTheme ? 'rte-inline-menu-theme-dark' : ''} ${className}`}
       style={{
         top: position?.top ?? -9999,
         left: position?.left ?? -9999,
