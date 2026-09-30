@@ -1230,10 +1230,15 @@ function readCitationFromPanel(panel: HTMLElement): CitationInput {
   };
 }
 
-function setPanelStatus(panel: HTMLElement, message: string): void {
+function setPanelStatus(panel: HTMLElement, message: string, isError = false): void {
   const live = panel.querySelector<HTMLElement>('.rte-citations-live');
   if (live) {
     live.textContent = message;
+  }
+  const visible = panel.querySelector<HTMLElement>('.rte-citations-status');
+  if (visible) {
+    visible.textContent = message;
+    visible.classList.toggle('rte-citations-status-error', isError);
   }
 }
 
@@ -1328,6 +1333,7 @@ function ensurePanel(editor: HTMLElement): HTMLElement {
         <ul class="rte-citations-recent-list" role="list"></ul>
       </section>
 
+      <p class="rte-citations-status" aria-hidden="true"></p>
       <p class="rte-citations-shortcut">Shortcut: Ctrl/Cmd + Alt + Shift + C</p>
       <span class="rte-citations-live" aria-live="polite"></span>
     </div>
@@ -1354,13 +1360,13 @@ function ensurePanel(editor: HTMLElement): HTMLElement {
 
       const value = readCitationFromPanel(panel);
       if (!resolvedOptions.normalizeText(value.author) || !resolvedOptions.normalizeText(value.title)) {
-        setPanelStatus(panel, resolvedOptions.labels.invalidMessage);
+        setPanelStatus(panel, resolvedOptions.labels.invalidMessage, true);
         return;
       }
 
       const inserted = insertCitation(editor, value, resolvedOptions);
       if (!inserted) {
-        setPanelStatus(panel, resolvedOptions.labels.invalidMessage);
+        setPanelStatus(panel, resolvedOptions.labels.invalidMessage, true);
         return;
       }
 
@@ -2015,6 +2021,30 @@ function ensureStylesInjected(): void {
 
     .${PANEL_CLASS}.rte-citations-theme-dark .rte-citations-shortcut {
       color: #94a3b8;
+    }
+
+    .rte-citations-status {
+      margin: 0;
+      min-height: 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #166534;
+    }
+
+    .rte-citations-status:empty {
+      display: none;
+    }
+
+    .rte-citations-status.rte-citations-status-error {
+      color: #b91c1c;
+    }
+
+    .${PANEL_CLASS}.rte-citations-theme-dark .rte-citations-status {
+      color: #86efac;
+    }
+
+    .${PANEL_CLASS}.rte-citations-theme-dark .rte-citations-status.rte-citations-status-error {
+      color: #fca5a5;
     }
 
     .rte-citations-live {
