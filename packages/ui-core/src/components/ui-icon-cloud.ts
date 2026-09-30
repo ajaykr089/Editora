@@ -426,8 +426,8 @@ const style = `
     position: absolute !important;
     inset-inline-start: 50%;
     inset-block-start: 50%;
-    inline-size: var(--ui-icon-cloud-center-size);
-    block-size: var(--ui-icon-cloud-center-size);
+    inline-size: var(--ui-icon-cloud-center-size) !important;
+    block-size: var(--ui-icon-cloud-center-size) !important;
     transform:
       translate(-50%, -50%)
       translateZ(52px)
@@ -451,8 +451,8 @@ const style = `
     position: absolute !important;
     inset-inline-start: 50%;
     inset-block-start: 50%;
-    inline-size: var(--ui-icon-cloud-item-size);
-    block-size: var(--ui-icon-cloud-item-size);
+    inline-size: var(--ui-icon-cloud-item-size) !important;
+    block-size: var(--ui-icon-cloud-item-size) !important;
     border-radius: var(--ui-icon-cloud-item-radius);
     border: var(--ui-icon-cloud-item-border);
     background: var(--ui-icon-cloud-item-bg);
