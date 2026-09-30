@@ -518,6 +518,8 @@ export const CodePlugin = (): Plugin => ({
 
       // Create source editor dialog
       const createSourceDialog = () => {
+        document.querySelectorAll(".rte-source-editor-overlay").forEach((el) => el.remove());
+
         const originalHtml = currentHtml;
         const formattedOriginalHtml = formatHTML(originalHtml);
         let editorInstance: EditorCore | null = null;

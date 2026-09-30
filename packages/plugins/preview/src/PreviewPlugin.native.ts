@@ -13,6 +13,7 @@ import { Plugin } from '@editora/core';
 
 // Module-level flag to prevent multiple dialogs
 let isPreviewDialogOpen = false;
+let closeActivePreviewDialog: (() => void) | null = null;
 
 /**
  * Inject preview dialog styles into document head
@@ -410,8 +411,10 @@ const showPreviewDialog = (): void => {
       overlay.parentNode.removeChild(overlay);
     }
     isPreviewDialogOpen = false;
+    closeActivePreviewDialog = null;
     document.removeEventListener('keydown', handleEscape);
   };
+  closeActivePreviewDialog = closeDialog;
 
   // Handle escape key
   const handleEscape = (e: KeyboardEvent) => {
@@ -459,7 +462,11 @@ export const PreviewPlugin = (): Plugin => ({
   
   commands: {
     togglePreview: () => {
-      showPreviewDialog();
+      if (isPreviewDialogOpen) {
+        closeActivePreviewDialog?.();
+      } else {
+        showPreviewDialog();
+      }
       return true;
     }
   },
