@@ -1012,7 +1012,15 @@ export const CommentsPlugin = (): Plugin => ({
       label: 'Add Comment',
       command: 'addComment',
       type: 'button',
-      icon: '<svg fill="#000000" width="24px" height="24px" viewBox="0 0 32 32" id="icon" xmlns="http://www.w3.org/2000/svg"><defs><style>.cls-1{fill:none;}</style></defs><title>add-comment</title><path d="M17.74,30,16,29l4-7h6a2,2,0,0,0,2-2V8a2,2,0,0,0-2-2H6A2,2,0,0,0,4,8V20a2,2,0,0,0,2,2h9v2H6a4,4,0,0,1-4-4V8A4,4,0,0,1,6,4H26a4,4,0,0,1,4,4V20a4,4,0,0,1-4,4H21.16Z"></path><polygon points="17 9 15 9 15 13 11 13 11 15 15 15 15 19 17 19 17 15 21 15 21 13 17 13 17 9"></polygon><rect class="cls-1" width="32" height="32"></rect></svg>',
+      // The upstream SVGRepo export used a class-based <style> block for the
+      // transparent bounding rect (`.cls-1{fill:none}`). That's fine when an
+      // icon is scoped (shadow DOM, or one icon per page) but this markup is
+      // inserted via raw innerHTML into plain light-DOM content alongside
+      // every other plugin's icons, so the <style> tag applies document-wide
+      // - any other icon reusing the same auto-generated class name would
+      // collide with it. Inlined the one declaration it held (fill="none")
+      // directly on the rect instead, so there's nothing to leak.
+      icon: '<svg fill="#000000" width="24px" height="24px" viewBox="0 0 32 32" id="icon" xmlns="http://www.w3.org/2000/svg"><title>add-comment</title><path d="M17.74,30,16,29l4-7h6a2,2,0,0,0,2-2V8a2,2,0,0,0-2-2H6A2,2,0,0,0,4,8V20a2,2,0,0,0,2,2h9v2H6a4,4,0,0,1-4-4V8A4,4,0,0,1,6,4H26a4,4,0,0,1,4,4V20a4,4,0,0,1-4,4H21.16Z"></path><polygon points="17 9 15 9 15 13 11 13 11 15 15 15 15 19 17 19 17 15 21 15 21 13 17 13 17 9"></polygon><rect fill="none" width="32" height="32"></rect></svg>',
     },
     {
       label: 'Show / Hide Comments',

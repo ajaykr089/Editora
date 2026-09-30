@@ -623,7 +623,188 @@ function updateToolbarButtonStates(canDeleteRow: boolean, canDeleteColumn: boole
   if (deleteColBtn) deleteColBtn.disabled = !canDeleteColumn;
 }
 
+let tableStylesInjected = false;
+
+// The table plugin ships `table.css` as a static import, expecting the
+// consuming app's bundler to pick it up and land it in the final CSS
+// output - unlike every sibling plugin with custom UI (comments,
+// citations, preview, track-changes), which self-injects a <style> tag at
+// runtime instead of relying on that. A consumer using the web component
+// build (which doesn't process arbitrary plugin CSS imports through a
+// bundler the way a React app's Vite/webpack config does) never gets this
+// CSS at all, so the toolbar renders as unstyled default <button>
+// elements. Match the established sibling-plugin pattern so this toolbar
+// is self-sufficient regardless of how the plugin got loaded.
+function ensureTableToolbarStylesInjected(): void {
+  if (tableStylesInjected || typeof document === 'undefined') return;
+  if (document.getElementById('rte-table-toolbar-styles')) {
+    tableStylesInjected = true;
+    return;
+  }
+  tableStylesInjected = true;
+
+  const style = document.createElement('style');
+  style.id = 'rte-table-toolbar-styles';
+  style.textContent = `
+    .table-toolbar {
+      background: white;
+      border: 1px solid #d0d0d0;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      min-width: max-content;
+    }
+    .toolbar-section {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .toolbar-divider {
+      width: 1px;
+      height: 20px;
+      background: #e0e0e0;
+      margin: 0 4px;
+    }
+    .toolbar-icon-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      color: #333;
+      border-radius: 3px;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+      font-size: 14px;
+      line-height: 1;
+    }
+    .toolbar-icon-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    .toolbar-icon-btn:hover:not(:disabled) {
+      background: #f0f0f0;
+      border-color: #d0d0d0;
+      color: #0066cc;
+    }
+    .toolbar-icon-btn:active:not(:disabled) {
+      background: #e8f0ff;
+      border-color: #0066cc;
+      transform: scale(0.95);
+    }
+    .toolbar-icon-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      color: #ccc;
+    }
+    .toolbar-icon-btn-danger {
+      color: #d32f2f;
+    }
+    .toolbar-icon-btn-danger:hover:not(:disabled) {
+      background: #fff3f3;
+      border-color: #ffcccc;
+      color: #d32f2f;
+    }
+    .toolbar-icon-btn-danger:active:not(:disabled) {
+      background: #ffebee;
+    }
+    .toolbar-icon-btn-delete {
+      color: #d32f2f;
+    }
+    .toolbar-icon-btn-delete:hover:not(:disabled) {
+      background: #fff3f3;
+      border-color: #ffcccc;
+      color: #d32f2f;
+    }
+    .toolbar-icon-btn-delete:active:not(:disabled) {
+      background: #ffebee;
+    }
+    :is([data-theme="dark"], .dark, .editora-theme-dark) .table-toolbar,
+    .table-toolbar.rte-theme-dark {
+      background: linear-gradient(180deg, #2f3844 0%, #2a323c 100%);
+      border-color: #4d596b;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+    }
+    :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-divider,
+    .table-toolbar.rte-theme-dark .toolbar-divider {
+      background: #4d596b;
+    }
+    :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn,
+    .table-toolbar.rte-theme-dark .toolbar-icon-btn {
+      color: #d7deea;
+      border-color: transparent;
+    }
+    :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn svg,
+    .table-toolbar.rte-theme-dark .toolbar-icon-btn svg {
+      color: currentColor;
+      fill: currentColor;
+    }
+    :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn svg [stroke="#000" i],
+    :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn svg [stroke="#000000" i],
+    :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn svg [stroke="black" i],
+    .table-toolbar.rte-theme-dark .toolbar-icon-btn svg [stroke="#000" i],
+    .table-toolbar.rte-theme-dark .toolbar-icon-btn svg [stroke="#000000" i],
+    .table-toolbar.rte-theme-dark .toolbar-icon-btn svg [stroke="black" i] {
+      stroke: currentColor !important;
+    }
+    :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn svg [fill="#000" i],
+    :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn svg [fill="#000000" i],
+    :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn svg [fill="black" i],
+    .table-toolbar.rte-theme-dark .toolbar-icon-btn svg [fill="#000" i],
+    .table-toolbar.rte-theme-dark .toolbar-icon-btn svg [fill="#000000" i],
+    .table-toolbar.rte-theme-dark .toolbar-icon-btn svg [fill="black" i] {
+      fill: currentColor !important;
+    }
+    :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn:hover:not(:disabled),
+    .table-toolbar.rte-theme-dark .toolbar-icon-btn:hover:not(:disabled) {
+      background: #3a4554;
+      border-color: #607088;
+      color: #f3f8ff;
+    }
+    :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn:active:not(:disabled),
+    .table-toolbar.rte-theme-dark .toolbar-icon-btn:active:not(:disabled) {
+      background: #4a95de;
+      border-color: #67adf4;
+      color: #0f1b2a;
+    }
+    :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn:disabled,
+    .table-toolbar.rte-theme-dark .toolbar-icon-btn:disabled {
+      color: #7f8ca1;
+    }
+    @media (max-width: 768px) {
+      .table-toolbar {
+        padding: 3px;
+        gap: 0;
+        max-width: 90vw;
+        overflow-x: auto;
+      }
+      .toolbar-icon-btn {
+        width: 26px;
+        height: 26px;
+      }
+      .toolbar-divider {
+        height: 18px;
+      }
+    }
+    @media print {
+      .table-toolbar {
+        display: none;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 function createTableToolbar(): HTMLDivElement {
+  ensureTableToolbarStylesInjected();
   const toolbar = document.createElement('div');
   toolbar.className = 'table-toolbar';
   toolbar.style.cssText = `
