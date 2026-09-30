@@ -23,6 +23,9 @@ interface SlashState {
   isOpen: boolean;
   instanceId: number;
   anchorRange: Range | null;
+  /** Trigger position the user last dismissed with Escape, so an unrelated `input` event (e.g. from another plugin's programmatic edit) doesn't resurrect the panel at the same spot. */
+  dismissedNode: Node | null;
+  dismissedOffset: number;
 }
 
 interface SlashHandlers {
@@ -660,6 +663,12 @@ function handleEditorInput(state: SlashState, options: Required<SlashCommandsPlu
     return;
   }
 
+  if (state.dismissedNode === context.node && state.dismissedOffset === detected.startOffset) {
+    return;
+  }
+  state.dismissedNode = null;
+  state.dismissedOffset = -1;
+
   const replaceRange = range.cloneRange();
   replaceRange.setStart(context.node, detected.startOffset);
   replaceRange.setEnd(context.node, context.caretOffset);
@@ -710,6 +719,8 @@ function createState(editor: HTMLElement, options: Required<SlashCommandsPluginO
     isOpen: false,
     instanceId: ++slashStateSequence,
     anchorRange: null,
+    dismissedNode: null,
+    dismissedOffset: -1,
   };
 }
 
@@ -783,6 +794,10 @@ function attachEditorHandlers(editor: HTMLElement, state: SlashState, options: R
 
         if (event.key === 'Escape') {
           event.preventDefault();
+          if (state.replaceRange) {
+            state.dismissedNode = state.replaceRange.startContainer;
+            state.dismissedOffset = state.replaceRange.startOffset;
+          }
           closePanel(state);
           return;
         }

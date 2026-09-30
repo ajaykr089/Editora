@@ -77,6 +77,9 @@ interface MentionState {
   requestId: number;
   debounceHandle: number | null;
   abortController: AbortController | null;
+  /** Trigger position the user last dismissed with Escape, so an unrelated `input` event (e.g. from another plugin's programmatic edit) doesn't resurrect the panel at the same spot. */
+  dismissedNode: Node | null;
+  dismissedOffset: number;
 }
 
 interface MentionHandlers {
@@ -915,6 +918,12 @@ function handleEditorInput(state: MentionState, options: NormalizedMentionPlugin
     return;
   }
 
+  if (state.dismissedNode === context.node && state.dismissedOffset === detected.startOffset) {
+    return;
+  }
+  state.dismissedNode = null;
+  state.dismissedOffset = -1;
+
   const replaceRange = range.cloneRange();
   replaceRange.setStart(context.node, detected.startOffset);
   replaceRange.setEnd(context.node, context.caretOffset);
@@ -949,6 +958,8 @@ function createMentionState(editor: HTMLElement): MentionState {
     requestId: 0,
     debounceHandle: null,
     abortController: null,
+    dismissedNode: null,
+    dismissedOffset: -1,
   };
 }
 
@@ -1019,6 +1030,10 @@ function attachEditorHandlers(editor: HTMLElement, state: MentionState, options:
 
         if (event.key === 'Escape') {
           event.preventDefault();
+          if (state.replaceRange) {
+            state.dismissedNode = state.replaceRange.startContainer;
+            state.dismissedOffset = state.replaceRange.startOffset;
+          }
           closeMentionPanel(state);
           return;
         }
