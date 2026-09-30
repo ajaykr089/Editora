@@ -241,14 +241,22 @@
   line-height: 1;
 }
 
-/* Toolbar icon SVG styling */
+/* Toolbar icon SVG styling. Deliberately does NOT set `fill` here: plenty
+ * of icons are authored as outlines - root <svg fill="none">, with child
+ * shapes carrying their own `stroke="currentColor"` and no fill of their
+ * own. Forcing fill:currentColor on the root overrides that `fill="none"`,
+ * and since CSS fill is inherited, every fill-less child then inherits
+ * currentColor too - turning a hollow outline shape into a solid, mostly
+ * unrecognizable blob. Icons that DO want a solid currentColor fill already
+ * author it themselves (either on the root or per-path); nothing here needs
+ * to force it. `color` is still set for any icon that references the
+ * currentColor keyword itself. */
 .editora-toolbar-button svg,
 .editora-toolbar-icon svg {
   width: 20px;
   height: 20px;
   display: block;
   color: currentColor;
-  fill: currentColor;
 }
 
 .editora-theme-dark .editora-toolbar-icon,

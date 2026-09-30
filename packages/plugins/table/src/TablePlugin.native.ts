@@ -745,7 +745,6 @@ function ensureTableToolbarStylesInjected(): void {
     :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn svg,
     .table-toolbar.rte-theme-dark .toolbar-icon-btn svg {
       color: currentColor;
-      fill: currentColor;
     }
     :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn svg [stroke="#000" i],
     :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn svg [stroke="#000000" i],
