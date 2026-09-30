@@ -1,0 +1,5 @@
+---
+"@editora/document-manager": patch
+---
+
+Fix "Export PDF" (and "Export Word") giving zero feedback while working, making a slow-but-working export look completely broken. `exportPdf` renders the editor content via html2canvas before building the PDF, and html2canvas's document-clone step alone can take 20-30+ seconds (it clones the whole host document, not just the target element, so cost scales with total page complexity) - during which the button did nothing: no spinner, no disabled state, not even a cursor change. A user has no way to tell a 25-second wait from a hung/broken button, especially since the command was already silent on genuine failure paths too. Found via live testing: clicking Export PDF produced no visible change for 20+ seconds before a PDF actually downloaded. Fixed by disabling the clicked toolbar button and showing an inline spinner (via the existing `__editoraLastCommandButton` toolbar-trigger tracking, so no framework-specific wiring is needed) for the duration of `exportPdf`/`exportWord`, clearing it again on completion or error.
