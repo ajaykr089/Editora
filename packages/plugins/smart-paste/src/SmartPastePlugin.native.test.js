@@ -776,6 +776,14 @@ describe('SmartPastePlugin', () => {
       '<script>alert(1)</script>',
       '<p onclick="evil()" style="background-image:url(javascript:alert(1)); color: red">safe text</p>',
       '<img src="javascript:alert(2)" alt="x">',
+      // A <template>'s content is inert for rendering and script execution,
+      // but not for resource-loading event handlers - assigning this
+      // straight to template.innerHTML during parsing can fire onerror
+      // before any attribute-stripping walk runs (verified live in a real
+      // browser; this fake-DOM test only asserts the structural fix - see
+      // stripEventHandlerAttributes, which runs on the raw string before
+      // any DOM parse happens at all).
+      '<img src="x" onerror="window.__pasteXssProbe=true">',
     ].join('');
 
     const event = {
@@ -800,6 +808,8 @@ describe('SmartPastePlugin', () => {
     expect(snapshot.lastReport.removedElements).toBeGreaterThanOrEqual(2);
     expect(snapshot.lastReport.removedAttributes).toBeGreaterThanOrEqual(1);
     expect(snapshot.lastReport.normalizedStyles).toBeGreaterThanOrEqual(1);
+    expect(editorA.innerHTML).not.toContain('onerror');
+    expect(editorA.innerHTML).not.toContain('__pasteXssProbe');
   });
 
   it('does not re-handle an already prevented paste event', () => {
