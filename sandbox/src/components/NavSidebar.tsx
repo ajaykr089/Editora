@@ -63,7 +63,7 @@ export function NavSidebar() {
     setCollapsed((prev) => ({ ...prev, [label]: !prev[label] }));
 
   return (
-    <nav style={sidebarStyle}>
+    <nav style={sidebarStyle} data-sandbox-sidebar>
       <div style={logoStyle}>
         <img src={editoraLogoUrl} alt="Editora" style={logoImageStyle} />
         <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>Component Demos</div>
