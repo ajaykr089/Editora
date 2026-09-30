@@ -178,6 +178,8 @@ function isDarkThemeContext(savedRange?: Range): boolean {
  * Create Anchor Dialog
  */
 function createAnchorDialog(mode: 'add' | 'edit', currentId?: string, onSave?: (id: string) => void, savedRange?: Range) {
+  document.querySelectorAll('.rte-anchor-dialog-overlay').forEach((el) => el.remove());
+
   // Sync registry before showing dialog
   syncAnchorRegistry();
   const isDarkTheme = isDarkThemeContext(savedRange);

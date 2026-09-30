@@ -433,6 +433,8 @@ export const EmbedIframePlugin = (): Plugin => {
 };
 
 function createEmbedDialog(editorElement?: HTMLElement): void {
+  document.querySelectorAll('.rte-embed-iframe-overlay').forEach((el) => el.remove());
+
   // If no editor element provided, find the currently focused one
   if (!editorElement) {
     const focusedElement = document.activeElement;

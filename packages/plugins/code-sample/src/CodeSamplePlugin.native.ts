@@ -106,6 +106,10 @@ function createCodeSampleDialog(
   editingCode?: string,
   editingLanguage?: string
 ): HTMLElement {
+  if (activeDialog) {
+    activeDialog.remove();
+    activeDialog = null;
+  }
   const isEditing = !!editingCodeId;
   const initialLanguage = editingLanguage || 'javascript';
   const initialCode = editingCode || '';

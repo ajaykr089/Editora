@@ -269,6 +269,8 @@ const showMathDialog = async (
   initialData?: { formula: string; format: 'latex' | 'mathml'; inline: boolean },
   preferredEditorContent?: HTMLElement | null,
 ) => {
+  document.querySelectorAll('.math-dialog-overlay').forEach((el) => el.remove());
+
   const editorContent =
     preferredEditorContent ||
     (editingMathElement?.closest('.rte-content, .editora-content') as HTMLElement | null) ||

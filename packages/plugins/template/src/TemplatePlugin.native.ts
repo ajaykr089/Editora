@@ -238,6 +238,10 @@ export const validateTemplate = (template: Template): boolean => {
  * Create the template dialog (context-aware, matches emoji/special char plugins)
  */
 function createTemplateDialog(editorContent?: HTMLElement | null): void {
+  if (overlayElement) {
+    closeDialog();
+  }
+
   overlayElement = document.createElement('div');
   overlayElement.className = 'rte-dialog-overlay';
   if (isDarkThemeContext(editorContent)) {

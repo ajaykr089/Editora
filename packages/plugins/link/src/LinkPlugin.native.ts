@@ -218,6 +218,8 @@ const showLinkDialog = (
   initialData: Partial<LinkData> & { isEditing?: boolean },
   isDarkTheme: boolean
 ): void => {
+  document.querySelectorAll('.link-dialog-overlay').forEach((el) => el.remove());
+
   injectLinkDialogStyles();
 
   // Create overlay
