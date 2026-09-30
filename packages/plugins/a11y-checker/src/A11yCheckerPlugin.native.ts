@@ -499,6 +499,8 @@ export const unsuppressRule = (ruleId: string) => { suppressedRules.delete(ruleI
 
 // --- UI Dialog Implementation ---
 const createA11yDialog = () => {
+  document.querySelectorAll('.a11y-dialog-overlay').forEach((el) => el.remove());
+
   const issues = runA11yAudit();
   const score = getA11yScore(issues); // Pass issues to avoid duplicate audit
   const isDarkTheme = isDarkThemeContext();

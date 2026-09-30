@@ -529,6 +529,8 @@ const createDialogShell = (compact = false): HTMLDivElement => {
 };
 
 const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement | null) => {
+  document.querySelectorAll('.rte-media-overlay').forEach((el) => el.remove());
+
   const selection = window.getSelection();
   if (selection && selection.rangeCount > 0) {
     savedSelection = selection.getRangeAt(0).cloneRange();
