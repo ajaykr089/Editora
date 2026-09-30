@@ -249,10 +249,12 @@ interface EditorContentProps {
     enabled?: boolean;
     provider?: 'browser' | 'local' | 'api';
   };
+  /** False when a bottom toolbar or status bar follows the content, so its bottom edge should stay flush instead of closing off as its own rounded box. */
+  roundBottomCorners?: boolean;
 }
 
-export const EditorContent: React.FC<EditorContentProps> = ({ 
-  editor, 
+export const EditorContent: React.FC<EditorContentProps> = ({
+  editor,
   defaultValue,
   value,
   readonly = false,
@@ -266,6 +268,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
   autosaveConfig,
   contextMenuConfig,
   spellcheckConfig,
+  roundBottomCorners = true,
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const isControlled = value !== undefined;
@@ -634,7 +637,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
         padding: "16px",
         outline: "none",
         border: "1px solid #ddd",
-        borderRadius: "0px 0px 4px 4px",
+        borderRadius: roundBottomCorners ? "0px 0px 4px 4px" : "0px",
         fontSize: "14px",
         lineHeight: "1.5",
         overflow: autoHeightEnabled ? (maxEditorHeight > 0 ? "auto" : "hidden") : "auto",
@@ -642,7 +645,6 @@ export const EditorContent: React.FC<EditorContentProps> = ({
         boxSizing: "border-box",
         wordWrap: "break-word",
         overflowWrap: "break-word",
-        marginBottom: "16px",
       }}
     />
   );
