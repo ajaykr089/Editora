@@ -1,5 +1,9 @@
 /* Table Styles for Rich Text Editor */
 
+.rte-table-wrapper {
+  position: relative;
+}
+
 .rte-table,
 table {
   border-collapse: collapse;

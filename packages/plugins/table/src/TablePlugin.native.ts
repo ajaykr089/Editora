@@ -46,6 +46,51 @@ declare global {
   }
 }
 
+const BLOCK_TAGS = new Set([
+  'DIV', 'P', 'BLOCKQUOTE', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'TD', 'TH',
+]);
+
+// A <table> is not valid content inside a <p> (or any other inline/phrasing
+// context) - inserting it at the raw cursor position nests it inside whatever
+// block the cursor happens to be in. The browser renders that fine live, but
+// re-parsing that HTML (undo/redo snapshots, copy-paste, any sanitizer that
+// round-trips through innerHTML) auto-closes the enclosing block at the table
+// boundary, splitting it and silently relocating anything that doesn't belong
+// inside <table> either. This walks up to the nearest real block ancestor so
+// the table can be inserted as its sibling instead.
+function getContainingBlock(node: Node, editorContent: HTMLElement): HTMLElement | null {
+  let current: Node | null = node;
+
+  while (current && current !== editorContent) {
+    if (current.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has((current as HTMLElement).tagName)) {
+      return current as HTMLElement;
+    }
+    current = current.parentNode;
+  }
+
+  return null;
+}
+
+// <table> can only contain caption/colgroup/thead/tbody/tfoot/tr - the
+// table-level resize handle below was appended directly as a child of
+// <table>, which is just as invalid and gets foster-parented to before the
+// table on any reparse, breaking its position: absolute anchor entirely.
+// Wrapping the table keeps resize-handle positioning correct across saves,
+// undo/redo, and copy-paste. Self-healing so tables from before this fix (or
+// pasted in without a wrapper) get one added the first time they're touched.
+function ensureTableWrapper(table: HTMLTableElement): HTMLElement {
+  const parent = table.parentElement;
+  if (parent && parent.classList.contains('rte-table-wrapper')) {
+    return parent;
+  }
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'rte-table-wrapper';
+  parent?.insertBefore(wrapper, table);
+  wrapper.appendChild(table);
+  return wrapper;
+}
+
 // ============================================
 // TABLE INSERTION - Direct (NO DIALOG)
 // ============================================
@@ -105,9 +150,19 @@ export const insertTableCommand = () => {
   table.appendChild(thead);
   table.appendChild(tbody);
 
-  // Insert table
-  range.deleteContents();
-  range.insertNode(table);
+  const wrapper = ensureTableWrapper(table);
+
+  // Insert the table's wrapper as a sibling of the containing block instead of
+  // at the raw cursor position - see getContainingBlock/ensureTableWrapper.
+  const block = getContainingBlock(range.endContainer, contentEl)
+    || getContainingBlock(range.startContainer, contentEl);
+
+  if (block && block.parentNode) {
+    block.parentNode.insertBefore(wrapper, block.nextSibling);
+  } else {
+    range.deleteContents();
+    range.insertNode(wrapper);
+  }
 
   // Move cursor to first header cell paragraph
   const firstParagraph = table.querySelector('th p');
@@ -325,7 +380,15 @@ export const deleteTableCommand = () => {
   if (!tableInfo) return;
 
   const table = tableInfo.table;
-  table.remove();
+  const parent = table.parentElement;
+  // Remove the whole wrapper (table + its resize handle), not just the table
+  // itself, or the wrapper and handle are left behind as an empty, orphaned
+  // element since the handle no longer lives inside the table.
+  if (parent && parent.classList.contains('rte-table-wrapper')) {
+    parent.remove();
+  } else {
+    table.remove();
+  }
 
   // Trigger toolbar hide event
   document.dispatchEvent(new CustomEvent('tableDeleted'));
@@ -609,8 +672,11 @@ function hideTableToolbar(): void {
   if (currentTable) {
     const handles = currentTable.querySelectorAll('.resize-handle');
     handles.forEach(handle => handle.remove());
-    
-    const tableResizeHandle = currentTable.querySelector('.table-resize-handle');
+
+    const wrapper = currentTable.parentElement;
+    const tableResizeHandle = wrapper?.classList.contains('rte-table-wrapper')
+      ? wrapper.querySelector('.table-resize-handle')
+      : currentTable.querySelector('.table-resize-handle');
     if (tableResizeHandle) {
       tableResizeHandle.remove();
     }
@@ -978,11 +1044,13 @@ function executeTableCommand(action: string): void {
 // ============================================
 
 function attachResizeHandles(table: HTMLTableElement): void {
+  const wrapper = ensureTableWrapper(table);
+
   // Remove existing handles first
   const existingHandles = table.querySelectorAll('.resize-handle');
   existingHandles.forEach(handle => handle.remove());
-  
-  const existingTableHandle = table.querySelector('.table-resize-handle');
+
+  const existingTableHandle = wrapper.querySelector('.table-resize-handle');
   if (existingTableHandle) existingTableHandle.remove();
 
   const headerRow = table.querySelector('thead tr, tbody tr:first-child') as HTMLTableRowElement;
@@ -1038,7 +1106,7 @@ function attachResizeHandles(table: HTMLTableElement): void {
     e.stopPropagation();
     startTableResize(e as MouseEvent);
   });
-  table.appendChild(tableResizeHandle);
+  wrapper.appendChild(tableResizeHandle);
 }
 
 function startColumnResize(e: MouseEvent, columnIndex: number): void {
