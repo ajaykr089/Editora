@@ -1,3 +1,4 @@
+import { initDialogOverlay } from '../../shared/dialogHelpers';
 import { Plugin } from '@editora/core';
 import DOMPurify from 'dompurify';
 
@@ -243,6 +244,7 @@ function createTemplateDialog(editorContent?: HTMLElement | null): void {
   }
 
   overlayElement = document.createElement('div');
+  initDialogOverlay(overlayElement);
   overlayElement.className = 'rte-dialog-overlay';
   if (isDarkThemeContext(editorContent)) {
     overlayElement.classList.add('rte-ui-theme-dark');

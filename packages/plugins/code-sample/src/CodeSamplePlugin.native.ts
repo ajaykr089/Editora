@@ -1,4 +1,4 @@
-import { guardBackdropDrag } from '../../shared/dialogHelpers';
+import { initDialogOverlay } from '../../shared/dialogHelpers';
 import { recordDomHistory } from '../../shared/historyHelpers';
 import { Plugin } from '@editora/core';
 
@@ -166,7 +166,7 @@ function createCodeSampleDialog(
     };
 
   const overlay = document.createElement('div');
-  guardBackdropDrag(overlay);
+  initDialogOverlay(overlay);
   overlay.className = 'rte-code-sample-overlay';
   if (isDarkTheme) overlay.classList.add('rte-theme-dark');
   overlay.style.cssText = `

@@ -1,4 +1,4 @@
-import { guardBackdropDrag } from '../../shared/dialogHelpers';
+import { initDialogOverlay } from '../../shared/dialogHelpers';
 import type { Plugin } from '@editora/core';
 
 /**
@@ -796,7 +796,7 @@ function showMergeTagDialog(editorContent: HTMLElement, runtimeConfig: MergeTagR
   };
 
   const overlay = document.createElement('div');
-  guardBackdropDrag(overlay);
+  initDialogOverlay(overlay);
   overlay.className = 'rte-merge-tag-overlay';
   overlay.setAttribute('role', 'dialog');
   overlay.setAttribute('aria-modal', 'true');

@@ -1,4 +1,4 @@
-import { guardBackdropDrag } from '../../shared/dialogHelpers';
+import { initDialogOverlay } from '../../shared/dialogHelpers';
 import type { Plugin } from '@editora/core';
 
 /**
@@ -480,7 +480,7 @@ function createEmbedDialog(editorElement?: HTMLElement): void {
 
   // Create dialog overlay
   const overlay = document.createElement('div');
-  guardBackdropDrag(overlay);
+  initDialogOverlay(overlay);
   overlay.className = 'rte-dialog-overlay rte-embed-iframe-overlay';
   if (isDarkThemeContext(editorElement)) {
     overlay.classList.add('rte-theme-dark');

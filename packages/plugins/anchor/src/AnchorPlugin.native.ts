@@ -1,4 +1,4 @@
-import { guardBackdropDrag } from '../../shared/dialogHelpers';
+import { initDialogOverlay } from '../../shared/dialogHelpers';
 import type { Plugin } from '@editora/core';
 import { findEditorContainerFromSelection, getContentElement } from '../../shared/editorContainerHelpers';
 
@@ -210,7 +210,7 @@ function createAnchorDialog(mode: 'add' | 'edit', currentId?: string, onSave?: (
   
   // Create overlay
   const overlay = document.createElement('div');
-  guardBackdropDrag(overlay);
+  initDialogOverlay(overlay);
   overlay.className = 'rte-anchor-dialog-overlay';
   overlay.style.cssText = `
     position: fixed;

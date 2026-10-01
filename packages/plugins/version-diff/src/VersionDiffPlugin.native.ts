@@ -1,4 +1,4 @@
-import { guardBackdropDrag } from '../../shared/dialogHelpers';
+import { initDialogOverlay } from '../../shared/dialogHelpers';
 import type { Plugin } from '@editora/core';
 
 const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
@@ -850,7 +850,7 @@ function renderDialog(
   optionsByEditor.set(editor, options);
 
   const overlay = document.createElement('div');
-  guardBackdropDrag(overlay);
+  initDialogOverlay(overlay);
   overlay.className = OVERLAY_CLASS;
   if (shouldUseDarkTheme(editor)) {
     overlay.classList.add('rte-version-diff-theme-dark');

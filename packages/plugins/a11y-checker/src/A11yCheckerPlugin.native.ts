@@ -1,4 +1,4 @@
-import { guardBackdropDrag } from '../../shared/dialogHelpers';
+import { initDialogOverlay } from '../../shared/dialogHelpers';
 import type { Plugin } from '@editora/core';
 
 /**
@@ -544,7 +544,7 @@ const createA11yDialog = () => {
   
   // Create dialog overlay
   const overlay = document.createElement('div');
-  guardBackdropDrag(overlay);
+  initDialogOverlay(overlay);
   overlay.className = 'a11y-dialog-overlay';
   overlay.style.cssText = `
     position: fixed;
