@@ -1,3 +1,4 @@
+import { guardBackdropDrag } from '../../shared/dialogHelpers';
 import { Plugin } from '@editora/core';
 
 /**
@@ -513,6 +514,7 @@ const isDarkThemeContext = (contextElement?: HTMLElement | null): boolean => {
 const createDialogOverlay = (contextElement?: HTMLElement | null): HTMLDivElement => {
   injectMediaDialogStyles();
   const overlay = document.createElement('div');
+  guardBackdropDrag(overlay);
   overlay.className = 'rte-media-overlay';
   if (isDarkThemeContext(contextElement)) {
     overlay.classList.add('rte-ui-theme-dark');

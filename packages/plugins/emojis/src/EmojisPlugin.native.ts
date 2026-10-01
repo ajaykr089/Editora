@@ -1,3 +1,4 @@
+import { guardBackdropDrag } from '../../shared/dialogHelpers';
 import type { Plugin } from '@editora/core';
 import { emojisSets, descriptions, type EmojiCategory } from './Constants';
 
@@ -91,6 +92,7 @@ function createEmojiDialog(editorContent: HTMLElement): void {
   }
 
   const overlay = document.createElement('div');
+  guardBackdropDrag(overlay);
   overlay.className = 'emojis-overlay';
   if (isDarkThemeContext(editorContent)) {
     overlay.classList.add('rte-ui-theme-dark');

@@ -1,3 +1,4 @@
+import { guardBackdropDrag } from '../../shared/dialogHelpers';
 import { Plugin } from '@editora/core';
 
 /**
@@ -224,6 +225,7 @@ const showLinkDialog = (
 
   // Create overlay
   const overlay = document.createElement('div');
+  guardBackdropDrag(overlay);
   overlay.className = 'link-dialog-overlay';
   if (isDarkTheme) overlay.classList.add('rte-theme-dark');
   overlay.style.cssText = `

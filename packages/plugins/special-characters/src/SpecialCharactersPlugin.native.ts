@@ -1,3 +1,4 @@
+import { guardBackdropDrag } from '../../shared/dialogHelpers';
 import type { Plugin } from '@editora/core';
 
 /**
@@ -475,6 +476,7 @@ const showSpecialCharactersDialog = (editorContent?: HTMLElement | null): void =
 
   // Create overlay
   const overlay = document.createElement('div');
+  guardBackdropDrag(overlay);
   overlay.className = 'special-characters-overlay';
   if (isDarkThemeContext(editorContent)) {
     overlay.classList.add('rte-ui-theme-dark');

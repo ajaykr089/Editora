@@ -1,3 +1,4 @@
+import { guardBackdropDrag } from '../../shared/dialogHelpers';
 import type { Plugin } from '@editora/core';
 
 /**
@@ -335,6 +336,7 @@ const showMathDialog = async (
     };
 
   const overlay = document.createElement('div');
+  guardBackdropDrag(overlay);
   overlay.className = 'math-dialog-overlay';
   overlay.style.cssText = `position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: ${palette.overlay}; display: flex; align-items: center; justify-content: center; z-index: 99999;`;
 

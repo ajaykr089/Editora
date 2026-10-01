@@ -1,3 +1,4 @@
+import { guardBackdropDrag } from '../../shared/dialogHelpers';
 import type { Plugin } from '@editora/core';
 
 const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
@@ -1693,6 +1694,7 @@ function openConditionalDialog(
   const savedRange = mode === 'insert' ? getSelectionRangeInEditor(editor) : null;
 
   const overlay = document.createElement('div');
+  guardBackdropDrag(overlay);
   overlay.className = DIALOG_OVERLAY_CLASS;
   applyThemeClass(overlay, editor);
 
