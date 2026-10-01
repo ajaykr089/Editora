@@ -93,8 +93,11 @@ export class KeymapExtension implements EditorExtension {
     this.addBinding(keymap, 'y', { metaKey: true }, 'redo');
     this.addBinding(keymap, 'z', { ctrlKey: true, shiftKey: true }, 'redo');
     this.addBinding(keymap, 'z', { metaKey: true, shiftKey: true }, 'redo');
-    // Tab insertion
-    this.addBinding(keymap, 'tab', {}, 'insertTab');
+    // Tab / Shift+Tab. Unspecified modifiers are "don't care" when matching, so the outdent
+    // binding must come first and the plain one must spell out that nothing else is held -
+    // otherwise Shift+Tab was caught by the insertTab binding.
+    this.addBinding(keymap, 'tab', { shiftKey: true }, 'outdent');
+    this.addBinding(keymap, 'tab', { shiftKey: false, ctrlKey: false, altKey: false, metaKey: false }, 'insertTab');
 
     // Theme switching
     this.addBinding(keymap, 't', { ctrlKey: !this.isMac, metaKey: this.isMac, shiftKey: true }, 'toggleTheme');

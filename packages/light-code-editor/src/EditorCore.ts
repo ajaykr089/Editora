@@ -131,6 +131,9 @@ export class EditorCore implements EditorAPI {
     this.registerCommand('undo', () => this.undo());
     this.registerCommand('redo', () => this.redo());
     this.registerCommand('insertTab', () => this.insertTab());
+    this.registerCommand('outdent', () => {
+      this.shiftSelectedLines(true);
+    });
     // Provide a default 'save' command so consumers can call it even if not wired.
     // Default 'save' command: emit a 'save' event so consumers can listen via `on('save', ...)`.
     this.registerCommand('save', () => {
@@ -323,7 +326,13 @@ export class EditorCore implements EditorAPI {
 
       // Handle Tab key directly to ensure consistent insertion
       if (e.key === 'Tab' && !this.config.readOnly) {
-        this.insertTab();
+        // Over a multi-line selection Tab indents the lines (and Shift+Tab outdents) instead of
+        // replacing the selected text with spaces, which destroyed it.
+        if (e.shiftKey) {
+          this.shiftSelectedLines(true);
+        } else {
+          this.insertTab();
+        }
         e.preventDefault();
         e.stopPropagation();
         return;
@@ -1096,8 +1105,68 @@ export class EditorCore implements EditorAPI {
   // Insert a tab character or spaces at current cursor
   private insertTab(): void {
     if (this.config.readOnly) return;
+    // Over a multi-line selection Tab indents the lines rather than replacing the selection.
+    if (this.shiftSelectedLines(false)) return;
     const tabText = ' '.repeat(this.config.tabSize || 2);
     this.replaceSelectionWithText(tabText);
+  }
+
+  /**
+   * Tab / Shift+Tab over whole lines. Tab only applies when the selection spans lines (a caret
+   * or single-line selection keeps the plain "insert a tab" behaviour); Shift+Tab always
+   * outdents the line(s) it touches. Returns false when the caller should fall back to inserting.
+   * The edit is one replace, so it is one undo step, and the selection is kept on the same text.
+   */
+  private shiftSelectedLines(outdent: boolean): boolean {
+    if (this.config.readOnly) return false;
+
+    const text = this.textModel.getText();
+    const { startOffset, endOffset } = this.getActiveSelectionOffsets(text);
+    const from = Math.min(startOffset, endOffset);
+    const to = Math.max(startOffset, endOffset);
+    if (!outdent && !text.slice(from, to).includes('\n')) return false;
+
+    const indentUnit = ' '.repeat(this.config.tabSize || 2);
+    const blockStart = text.lastIndexOf('\n', from - 1) + 1;
+    // A selection that ends at the very start of a line does not include that line.
+    const effectiveTo = to > from && text[to - 1] === '\n' ? to - 1 : to;
+    const nextBreak = text.indexOf('\n', effectiveTo);
+    const blockEnd = nextBreak === -1 ? text.length : nextBreak;
+
+    const lines = text.slice(blockStart, blockEnd).split('\n');
+    let firstDelta = 0;
+    let totalDelta = 0;
+    const shifted = lines.map((line, index) => {
+      let next = line;
+      if (!outdent) {
+        next = line.length === 0 ? line : indentUnit + line;
+      } else if (line.startsWith('\t')) {
+        next = line.slice(1);
+      } else {
+        const leading = /^ */.exec(line)![0].length;
+        next = line.slice(Math.min(leading, indentUnit.length));
+      }
+      const delta = next.length - line.length;
+      if (index === 0) firstDelta = delta;
+      totalDelta += delta;
+      return next;
+    });
+
+    if (totalDelta === 0) return true; // nothing to shift (e.g. already at column 0)
+
+    this.replaceOffsetsWithText(blockStart, blockEnd, shifted.join('\n'));
+
+    const newFrom = Math.max(blockStart, from + firstDelta);
+    const newTo = Math.max(newFrom, to + totalDelta);
+    if (from === to) {
+      this.setCursor(this.textModel.offsetToPosition(newFrom));
+    } else {
+      this.setSelection({
+        start: this.textModel.offsetToPosition(newFrom),
+        end: this.textModel.offsetToPosition(newTo),
+      });
+    }
+    return true;
   }
 
   // Insert a newline at current cursor position
