@@ -80,6 +80,39 @@ function normalizeListMarkup(root: HTMLElement): void {
   });
 }
 
+const BLOCK_TAGS = new Set([
+  'P', 'DIV', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
+  'TABLE', 'PRE', 'FIGURE', 'SECTION', 'ARTICLE', 'HEADER', 'FOOTER',
+]);
+
+// The browser's native insertUnorderedList/insertOrderedList toggles off by
+// unwrapping the <li> back into bare inline content (a <span>, text, <br>)
+// sitting directly under the editable root instead of a <p> - unlike every
+// other block toggle in this codebase, which restores a clean paragraph.
+// Left alone, that orphaned inline content breaks anything that assumes
+// block-level children (styling, further block commands, screen readers).
+function wrapOrphanedInlineContent(root: HTMLElement): void {
+  let wrapper: HTMLParagraphElement | null = null;
+
+  Array.from(root.childNodes).forEach((child) => {
+    const isBlock = child.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has((child as HTMLElement).tagName);
+    if (isBlock) {
+      wrapper = null;
+      return;
+    }
+
+    if (child.nodeType === Node.TEXT_NODE && !(child.textContent || '').trim()) {
+      return;
+    }
+
+    if (!wrapper) {
+      wrapper = document.createElement('p');
+      root.insertBefore(wrapper, child);
+    }
+    wrapper.appendChild(child);
+  });
+}
+
 function applyListCommand(command: 'insertUnorderedList' | 'insertOrderedList'): boolean {
   const content = getActiveContentElement();
   if (!content) return false;
@@ -94,6 +127,7 @@ function applyListCommand(command: 'insertUnorderedList' | 'insertOrderedList'):
   const executed = document.execCommand(command, false);
 
   normalizeListMarkup(content);
+  wrapOrphanedInlineContent(content);
   content.dispatchEvent(new Event('input', { bubbles: true }));
   return executed !== false;
 }
