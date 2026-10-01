@@ -485,7 +485,44 @@ describe('TranslationWorkflowPlugin', () => {
       plugin.commands.toggleTranslationSegmentLock({ segmentId: firstSegmentId, locked: false }, { contentElement: editor }),
     ).toBe(true);
     expect(firstSegment.getAttribute('data-translation-locked')).toBe(null);
-    expect(firstSegment.getAttribute('contenteditable')).toBe('true');
+    // Unlocking restores what the segment had before (nothing), so it inherits
+    // the editor's editability instead of being forced editable.
+    expect(firstSegment.getAttribute('contenteditable')).toBe(null);
+  });
+
+  it('refuses to lock or unlock segments in a read-only editor', () => {
+    const { fakeDocument } = setupRuntime();
+    const { TranslationWorkflowPlugin } = require('./TranslationWorkflowPlugin.native.ts');
+
+    const plugin = TranslationWorkflowPlugin({ enableRealtime: false });
+    const { host, editor } = createEditorHost(fakeDocument);
+    setParagraphs(fakeDocument, editor, ['Segment A', 'Segment B']);
+    plugin.init.call({}, { editorElement: host });
+
+    plugin.commands.runTranslationLocaleValidation(undefined, { contentElement: editor });
+
+    const firstSegment = editor.children[0];
+    const firstSegmentId = firstSegment.getAttribute('data-translation-segment-id');
+
+    expect(
+      plugin.commands.toggleTranslationSegmentLock({ segmentId: firstSegmentId, locked: true }, { contentElement: editor }),
+    ).toBe(true);
+
+    editor.setAttribute('contenteditable', 'false');
+
+    // Unlocking must not flip the segment back to editable inside a read-only editor.
+    expect(
+      plugin.commands.toggleTranslationSegmentLock({ segmentId: firstSegmentId, locked: false }, { contentElement: editor }),
+    ).toBe(false);
+    expect(firstSegment.getAttribute('data-translation-locked')).toBe('true');
+    expect(firstSegment.getAttribute('contenteditable')).toBe('false');
+
+    // ...and locking another segment is refused as well.
+    const secondSegmentId = editor.children[1].getAttribute('data-translation-segment-id');
+    expect(
+      plugin.commands.toggleTranslationSegmentLock({ segmentId: secondSegmentId, locked: true }, { contentElement: editor }),
+    ).toBe(false);
+    expect(editor.children[1].getAttribute('data-translation-locked')).toBe(null);
   });
 
   it('does not execute panel shortcut from external focused input with stale selection', () => {

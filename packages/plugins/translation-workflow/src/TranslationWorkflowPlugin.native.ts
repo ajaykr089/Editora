@@ -709,16 +709,15 @@ function applySegmentLockDom(segmentElement: HTMLElement, locked: boolean): void
   segmentElement.removeAttribute('aria-readonly');
   segmentElement.classList.remove('rte-translation-segment-locked');
 
-  if (segmentElement.hasAttribute('data-translation-prev-contenteditable')) {
-    const previous = segmentElement.getAttribute('data-translation-prev-contenteditable') || '';
-    if (previous === 'inherit') {
-      segmentElement.setAttribute('contenteditable', 'true');
-    } else {
-      segmentElement.setAttribute('contenteditable', previous);
-    }
-    segmentElement.removeAttribute('data-translation-prev-contenteditable');
+  // Restore what the segment had before it was locked. Defaulting to
+  // contenteditable="true" would make an unlocked segment editable even inside a
+  // read-only editor (or after teardown), so "no explicit value" means inherit.
+  const previous = segmentElement.getAttribute('data-translation-prev-contenteditable');
+  segmentElement.removeAttribute('data-translation-prev-contenteditable');
+  if (previous === null || previous === 'inherit' || previous === '') {
+    segmentElement.removeAttribute('contenteditable');
   } else {
-    segmentElement.setAttribute('contenteditable', 'true');
+    segmentElement.setAttribute('contenteditable', previous);
   }
 }
 
@@ -1331,6 +1330,7 @@ function captureSourceSnapshot(editor: HTMLElement): boolean {
 }
 
 function setSegmentLock(editor: HTMLElement, segmentId?: string, explicit?: boolean): boolean {
+  if (isEditorReadonly(editor)) return false;
   const options = optionsByEditor.get(editor) || fallbackOptions;
   if (!options) return false;
 
