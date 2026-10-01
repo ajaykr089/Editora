@@ -52,13 +52,7 @@
   "exclude": [
     "node_modules",
     "**/dist/**",
-    "packages/core/src/commands/**",
-    "packages/core/src/model/**",
-    "packages/core/src/plugins/PluginManager.ts",
-    "packages/core/src/schema/Schema.ts",
     "packages/plugins/document-manager/src/**",
-    "packages/plugins/media-manager/src/**",
-    "packages/react/src/components/ToolbarContainer.tsx",
-    "packages/react/src/hooks/useEditor.ts"
+    "packages/plugins/media-manager/src/**"
   ]
 }
