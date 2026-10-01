@@ -88,11 +88,11 @@ function validateId(id: string): { valid: boolean; error: string } {
     return { valid: false, error: 'Anchor ID must be less than 256 characters' };
   }
 
-  if (!/^[a-z_]/.test(id)) {
+  if (!/^[A-Za-z_]/.test(id)) {
     return { valid: false, error: 'Anchor ID must start with a letter or underscore' };
   }
 
-  if (!/^[a-z0-9\-_]+$/.test(id)) {
+  if (!/^[A-Za-z0-9\-_]+$/.test(id)) {
     return { valid: false, error: 'Anchor ID can only contain letters, numbers, hyphens, and underscores' };
   }
 
