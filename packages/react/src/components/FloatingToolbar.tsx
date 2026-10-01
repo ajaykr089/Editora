@@ -305,10 +305,42 @@ export const FloatingToolbar: React.FC<FloatingToolbarProps> = ({
       },
       toggleCode: () => {
         const selection = window.getSelection();
-        if (selection && selection.rangeCount > 0) {
-          const range = selection.getRangeAt(0);
+        if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
+        const range = selection.getRangeAt(0);
+
+        // If the whole selection already sits inside one <code> element, unwrap
+        // it instead of wrapping again - otherwise clicking twice nested a second
+        // <code> inside the first rather than toggling the formatting off.
+        const startEl = (
+          range.startContainer.nodeType === Node.TEXT_NODE ? range.startContainer.parentElement : range.startContainer
+        ) as HTMLElement | null;
+        const endEl = (
+          range.endContainer.nodeType === Node.TEXT_NODE ? range.endContainer.parentElement : range.endContainer
+        ) as HTMLElement | null;
+        const startCode = startEl?.closest('code') || null;
+        const endCode = endEl?.closest('code') || null;
+
+        if (startCode && startCode === endCode && (contentEl?.contains(startCode) ?? true)) {
+          const parent = startCode.parentNode;
+          if (parent) {
+            while (startCode.firstChild) parent.insertBefore(startCode.firstChild, startCode);
+            parent.removeChild(startCode);
+          }
+          return;
+        }
+
+        // Range.surroundContents() throws if the selection starts or ends in the
+        // middle of another element (e.g. partway into a <b> run) instead of at
+        // a clean element boundary - extracting into a fragment first and
+        // wrapping that works regardless of how many elements the selection
+        // crosses.
+        try {
           const code = document.createElement('code');
-          range.surroundContents(code);
+          const fragment = range.extractContents();
+          code.appendChild(fragment);
+          range.insertNode(code);
+        } catch {
+          // Selection couldn't be wrapped; leave content untouched.
         }
       },
       setBlockType: () => {
