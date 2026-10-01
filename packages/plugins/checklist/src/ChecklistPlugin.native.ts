@@ -389,6 +389,69 @@ const getChecklistConvertibleBlocks = (range: Range, editor: HTMLElement): HTMLE
   return leafBlocks.length > 0 ? leafBlocks : blocks;
 };
 
+const ROOT_BLOCK_TAGS = new Set([
+  'P', 'DIV', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
+  'TABLE', 'PRE', 'FIGURE', 'SECTION', 'ARTICLE', 'HEADER', 'FOOTER', 'HR',
+]);
+
+/**
+ * Content that sits directly under the editor root (plain text from a `value="..."`
+ * prop, a setContent('text') call, or what some browsers leave after select-all +
+ * delete) has no block to convert. The fall-through branch used to run
+ * range.deleteContents() on it, so converting such a selection to a checklist
+ * silently deleted the text. Wrap each run of loose inline content in a <p> first,
+ * then keep the selection pointing at the same text.
+ */
+const wrapLooseRootContent = (editor: HTMLElement, range: Range): void => {
+  const startContainer = range.startContainer;
+  const startOffset = range.startOffset;
+  const endContainer = range.endContainer;
+  const endOffset = range.endOffset;
+
+  let wrapper: HTMLParagraphElement | null = null;
+  let changed = false;
+
+  Array.from(editor.childNodes).forEach((child) => {
+    if (child.nodeType === Node.ELEMENT_NODE && ROOT_BLOCK_TAGS.has((child as HTMLElement).tagName)) {
+      wrapper = null;
+      return;
+    }
+    if (child.nodeType === Node.TEXT_NODE && !(child.textContent || '').trim()) return;
+    if (child.nodeType !== Node.TEXT_NODE && child.nodeType !== Node.ELEMENT_NODE) return;
+
+    if (!wrapper) {
+      wrapper = document.createElement('p');
+      editor.insertBefore(wrapper, child);
+    }
+    wrapper.appendChild(child);
+    changed = true;
+  });
+
+  if (!changed) return;
+
+  // Moving a node resets any range boundary inside it, so point it back.
+  try {
+    if (startContainer === editor) {
+      range.setStart(editor, 0);
+    } else if (startContainer.isConnected) {
+      range.setStart(startContainer, startOffset);
+    }
+    if (endContainer === editor) {
+      range.setEnd(editor, editor.childNodes.length);
+    } else if (endContainer.isConnected) {
+      range.setEnd(endContainer, endOffset);
+    }
+  } catch {
+    // Offsets no longer valid; leave the range as the DOM adjusted it.
+  }
+
+  const selection = window.getSelection();
+  if (selection) {
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+};
+
 const extractChecklistItemParagraphs = (item: HTMLLIElement): HTMLParagraphElement[] => {
   const paragraphs: HTMLParagraphElement[] = [];
   const inlineBuffer = document.createElement('div');
@@ -584,6 +647,8 @@ export const ChecklistPlugin = (): Plugin => {
 
           const range = getSelectionRangeInEditor(editorElement);
           if (!range) return false;
+
+          wrapLooseRootContent(editorElement, range);
 
           const container = getElementFromNode(range.startContainer);
           if (!container) return false;
