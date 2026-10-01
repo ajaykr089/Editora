@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { recordDomHistory } from '../../shared/historyHelpers';
 
 interface CommentReply {
   id: string;
@@ -147,9 +148,55 @@ function cloneActiveSelection(root: HTMLElement): Range | null {
   return range.cloneRange();
 }
 
+function getContentElement(state: CommentsEditorState): HTMLElement | null {
+  return (
+    (state.root.querySelector('.rte-content') as HTMLElement | null) ||
+    (state.root.querySelector('[contenteditable]') as HTMLElement | null)
+  );
+}
+
+function findAnchor(state: CommentsEditorState, comment: Comment): HTMLElement | null {
+  if (!comment.anchorId) return null;
+  return state.root.querySelector(`[id="${comment.anchorId}"]`) as HTMLElement | null;
+}
+
+/**
+ * Anchors live in the document (and so in undo history) while comment data lives in
+ * memory. Treat the document as the source of truth for anchored comments: one whose
+ * anchor is gone (deleted, or undone) is hidden - its data is kept, so redo/undo
+ * bringing the anchor back brings the thread back - and its resolved state follows
+ * the anchor's class so undoing a Resolve flips the thread too.
+ */
+function syncAnchoredComments(state: CommentsEditorState): Comment[] {
+  const visible: Comment[] = [];
+  state.comments.forEach((comment) => {
+    if (comment.anchorId) {
+      const anchor = findAnchor(state, comment);
+      if (!anchor) return;
+      comment.resolved = anchor.classList.contains('rte-comment-anchor-resolved');
+    }
+    visible.push(comment);
+  });
+  return visible;
+}
+
+/**
+ * Run a comment operation that edits the document (adding/removing an anchor, toggling
+ * its resolved class) as one undoable step and tell the host the content changed.
+ */
+function withDocumentEdit<T>(state: CommentsEditorState, edit: () => T): T {
+  const content = getContentElement(state);
+  const beforeHTML = content ? content.innerHTML : '';
+  const result = edit();
+  if (content && content.innerHTML !== beforeHTML) {
+    recordDomHistory(content, beforeHTML);
+    content.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  return result;
+}
+
 function updateAnchorVisualState(state: CommentsEditorState, comment: Comment): void {
-  if (!comment.anchorId) return;
-  const anchor = state.root.querySelector(`#${comment.anchorId}`) as HTMLElement | null;
+  const anchor = findAnchor(state, comment);
   if (!anchor) return;
 
   anchor.classList.toggle('rte-comment-anchor-resolved', comment.resolved);
@@ -157,26 +204,11 @@ function updateAnchorVisualState(state: CommentsEditorState, comment: Comment): 
 
 function highlightAnchor(state: CommentsEditorState, commentId: string, highlight: boolean): void {
   const comment = state.comments.get(commentId);
-  if (!comment || !comment.anchorId) return;
+  if (!comment) return;
 
-  const anchor = state.root.querySelector(`#${comment.anchorId}`) as HTMLElement | null;
+  const anchor = findAnchor(state, comment);
   if (!anchor) return;
   anchor.classList.toggle('highlighted', highlight);
-}
-
-function bindAnchorInteraction(
-  state: CommentsEditorState,
-  anchor: HTMLElement,
-  commentId: string,
-): void {
-  anchor.onclick = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    activeEditorRoot = state.root;
-    state.expandedComments.add(commentId);
-    setPanelVisibility(state, true);
-    refreshCommentsPanel(state);
-  };
 }
 
 function unwrapNode(node: HTMLElement): void {
@@ -250,9 +282,7 @@ function stopSelectionTracking(state: CommentsEditorState): void {
 }
 
 function getCommentsInDisplayOrder(state: CommentsEditorState): Comment[] {
-  return Array.from(state.comments.values()).sort((a, b) =>
-    b.createdAt.localeCompare(a.createdAt),
-  );
+  return syncAnchoredComments(state).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 function formatDate(isoDate: string): string {
@@ -267,7 +297,7 @@ function createCommentCard(state: CommentsEditorState, comment: Comment): HTMLEl
   card.innerHTML = `
     <header class="rte-comment-header">
       <div class="rte-comment-meta">
-        <strong class="rte-comment-author">${comment.author}</strong>
+        <strong class="rte-comment-author"></strong>
         <time class="rte-comment-date">${formatDate(comment.createdAt)}</time>
       </div>
       <button class="rte-comment-expand" type="button" aria-label="Toggle details">
@@ -275,16 +305,19 @@ function createCommentCard(state: CommentsEditorState, comment: Comment): HTMLEl
       </button>
     </header>
     <div class="rte-comment-text"></div>
-    ${
-      comment.selectedText
-        ? `<blockquote class="rte-comment-selection">${comment.selectedText}</blockquote>`
-        : ''
-    }
+    ${comment.selectedText ? '<blockquote class="rte-comment-selection"></blockquote>' : ''}
     <section class="rte-comment-expanded${isExpanded ? ' show' : ''}"></section>
   `;
 
+  // Author, text and the quoted selection come from the user / the document. The
+  // selection in particular is document *text* that may read like markup
+  // ("<img src=x onerror=...>"), so none of it may go through innerHTML.
+  const authorEl = card.querySelector('.rte-comment-author');
+  if (authorEl) authorEl.textContent = comment.author;
   const textEl = card.querySelector('.rte-comment-text');
   if (textEl) textEl.textContent = comment.text;
+  const selectionEl = card.querySelector('.rte-comment-selection');
+  if (selectionEl) selectionEl.textContent = comment.selectedText;
 
   const expandBtn = card.querySelector('.rte-comment-expand') as HTMLButtonElement | null;
   expandBtn?.addEventListener('click', () => {
@@ -307,11 +340,13 @@ function createCommentCard(state: CommentsEditorState, comment: Comment): HTMLEl
         replyEl.className = 'rte-comment-reply';
         replyEl.innerHTML = `
           <div class="rte-comment-reply-header">
-            <strong>${reply.author}</strong>
+            <strong class="rte-comment-reply-author"></strong>
             <time>${formatDate(reply.createdAt)}</time>
           </div>
           <div class="rte-comment-reply-text"></div>
         `;
+        const replyAuthorEl = replyEl.querySelector('.rte-comment-reply-author');
+        if (replyAuthorEl) replyAuthorEl.textContent = reply.author;
         const replyTextEl = replyEl.querySelector('.rte-comment-reply-text');
         if (replyTextEl) replyTextEl.textContent = reply.text;
         replies.appendChild(replyEl);
@@ -368,7 +403,7 @@ function createCommentCard(state: CommentsEditorState, comment: Comment): HTMLEl
       jumpBtn.className = 'rte-comment-btn ghost';
       jumpBtn.textContent = 'Jump to text';
       jumpBtn.onclick = () => {
-        const anchor = state.root.querySelector(`#${comment.anchorId}`) as HTMLElement | null;
+        const anchor = findAnchor(state, comment);
         if (!anchor) return;
         anchor.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
         highlightAnchor(state, comment.id, true);
@@ -488,6 +523,20 @@ function refreshCommentsPanel(state?: CommentsEditorState): void {
   }
 }
 
+const pendingRefresh = new WeakMap<CommentsEditorState, number>();
+
+/** Coalesce refreshes triggered by typing so a busy panel isn't rebuilt per keystroke. */
+function scheduleCommentsRefresh(state: CommentsEditorState): void {
+  if (pendingRefresh.has(state)) return;
+  pendingRefresh.set(
+    state,
+    window.setTimeout(() => {
+      pendingRefresh.delete(state);
+      if (state.panelVisible) refreshCommentsPanel(state);
+    }, 120),
+  );
+}
+
 function ensureGlobalTracking(): void {
   if (globalTrackingInitialized) return;
   globalTrackingInitialized = true;
@@ -495,6 +544,36 @@ function ensureGlobalTracking(): void {
   document.addEventListener('focusin', (event) => {
     const root = getEditorRootFromNode(event.target as Node);
     if (root) activeEditorRoot = root;
+  });
+
+  // Anchors are plain spans in the document, so they are rebuilt by undo/redo and
+  // by loading saved HTML; a handler bound per element would die with them. Delegate.
+  document.addEventListener('click', (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const anchor = target?.closest('.rte-comment-anchor') as HTMLElement | null;
+    if (!anchor) return;
+
+    const root = getEditorRootFromNode(anchor);
+    const state = root ? stateByEditor.get(root) : null;
+    const commentId = anchor.getAttribute('data-comment-id');
+    if (!state || !commentId || !state.comments.has(commentId)) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    activeEditorRoot = state.root;
+    state.expandedComments.add(commentId);
+    setPanelVisibility(state, true);
+    refreshCommentsPanel(state);
+  });
+
+  // Undo/redo and edits change which anchors exist; keep an open panel in step.
+  document.addEventListener('input', (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    if (!target || target.closest('.rte-comments-panel')) return;
+
+    const root = getEditorRootFromNode(target);
+    const state = root ? stateByEditor.get(root) : null;
+    if (state?.panelVisible) scheduleCommentsRefresh(state);
   });
 
   document.addEventListener('selectionchange', () => {
@@ -575,17 +654,19 @@ export function addCommentCommand(author: string, text: string, general = false)
   anchor.setAttribute('data-comment-id', commentId);
   anchor.setAttribute('title', 'Commented text');
 
-  try {
-    const editableRange = range.cloneRange();
-    const fragment = editableRange.extractContents();
-    if (!fragment.textContent?.trim()) return '';
-    anchor.appendChild(fragment);
-    editableRange.insertNode(anchor);
-  } catch {
-    return '';
-  }
-
-  bindAnchorInteraction(state, anchor, commentId);
+  const inserted = withDocumentEdit(state, () => {
+    try {
+      const editableRange = range.cloneRange();
+      const fragment = editableRange.extractContents();
+      if (!fragment.textContent?.trim()) return false;
+      anchor.appendChild(fragment);
+      editableRange.insertNode(anchor);
+      return true;
+    } catch {
+      return false;
+    }
+  });
+  if (!inserted) return '';
 
   state.comments.set(commentId, {
     id: commentId,
@@ -616,7 +697,7 @@ export function resolveComment(commentId: string, author: string): void {
   comment.resolved = true;
   comment.resolvedBy = author;
   comment.resolvedAt = new Date().toISOString();
-  updateAnchorVisualState(state, comment);
+  withDocumentEdit(state, () => updateAnchorVisualState(state, comment));
   refreshCommentsPanel(state);
 }
 
@@ -630,7 +711,7 @@ export function reopenComment(commentId: string): void {
   comment.resolved = false;
   comment.resolvedBy = undefined;
   comment.resolvedAt = undefined;
-  updateAnchorVisualState(state, comment);
+  withDocumentEdit(state, () => updateAnchorVisualState(state, comment));
   refreshCommentsPanel(state);
 }
 
@@ -642,13 +723,15 @@ export function deleteComment(commentId: string): void {
   if (!comment) return;
 
   if (comment.anchorId) {
-    const anchor = state.root.querySelector(`#${comment.anchorId}`) as HTMLElement | null;
-    if (anchor) unwrapNode(anchor);
+    // Keep the data (it is hidden once the anchor is gone) so Undo, which brings the
+    // anchor back, brings the thread back with it.
+    const anchor = findAnchor(state, comment);
+    if (anchor) withDocumentEdit(state, () => unwrapNode(anchor));
+  } else {
+    state.comments.delete(commentId);
+    state.expandedComments.delete(commentId);
+    delete state.replyTexts[commentId];
   }
-
-  state.comments.delete(commentId);
-  state.expandedComments.delete(commentId);
-  delete state.replyTexts[commentId];
   refreshCommentsPanel(state);
 }
 
