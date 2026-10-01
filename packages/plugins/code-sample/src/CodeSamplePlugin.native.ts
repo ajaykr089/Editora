@@ -12,6 +12,30 @@ import { Plugin } from '@editora/core';
  * - 24+ supported languages
  */
 
+const BLOCK_TAGS = new Set([
+  'DIV', 'P', 'BLOCKQUOTE', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'TD', 'TH',
+]);
+
+// A <pre> code block is not valid content inside a <p> - inserting it at the
+// raw cursor position (range.insertNode) nests it inside whatever block the
+// cursor happens to be in. That renders fine live, but reparsing the HTML
+// (undo/redo snapshots, copy-paste, any sanitizer round-tripping through
+// innerHTML) auto-closes the paragraph at the <pre> boundary, corrupting it.
+// Walking up to the nearest real block ancestor lets the code block be
+// inserted as its sibling instead, matching the page-break plugin's pattern.
+function getContainingBlock(node: Node, editorContent: HTMLElement): HTMLElement | null {
+  let current: Node | null = node;
+
+  while (current && current !== editorContent) {
+    if (current.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has((current as HTMLElement).tagName)) {
+      return current as HTMLElement;
+    }
+    current = current.parentNode;
+  }
+
+  return null;
+}
+
 // ===== Multi-Instance Helper =====
 const findActiveEditor = (): HTMLElement | null => {
   const selection = window.getSelection();
@@ -536,8 +560,16 @@ function insertCodeBlock() {
       code
     });
 
-    // Insert at cursor
-    range.insertNode(pre);
+    // Insert as a sibling of the containing block instead of at the raw
+    // cursor position - see getContainingBlock above.
+    const block = getContainingBlock(range.endContainer, editorEl)
+      || getContainingBlock(range.startContainer, editorEl);
+
+    if (block && block.parentNode) {
+      block.parentNode.insertBefore(pre, block.nextSibling);
+    } else {
+      range.insertNode(pre);
+    }
 
     // Move cursor after code block
     const newRange = document.createRange();

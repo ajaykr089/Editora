@@ -1204,6 +1204,54 @@ function hasMeaningfulFragmentContent(fragment: DocumentFragment): boolean {
   return fragment.querySelector('img, video, table, iframe, hr, pre, blockquote, ul, ol') !== null;
 }
 
+const BLOCK_TAGS = new Set([
+  'P', 'DIV', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
+  'TABLE', 'PRE', 'FIGURE', 'SECTION', 'ARTICLE', 'HEADER', 'FOOTER',
+]);
+
+// A <section> conditional block is not valid content inside a <p> -
+// inserting it at the raw cursor position (range.insertNode) nests it
+// inside whatever block the cursor happens to be in, the same way it
+// nested a <table> or <pre> in those plugins. Walking up to the nearest
+// real block ancestor lets the block be inserted as its sibling instead.
+function getContainingBlock(node: Node, editorContent: HTMLElement): HTMLElement | null {
+  let current: Node | null = node;
+
+  while (current && current !== editorContent) {
+    if (current.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has((current as HTMLElement).tagName)) {
+      return current as HTMLElement;
+    }
+    current = current.parentNode;
+  }
+
+  return null;
+}
+
+// Defensive fallback for the rare case no containing block is found (e.g.
+// bare text directly under the editable root): wrap any inline content left
+// over directly under the root in a <p> so it isn't left structurally invalid.
+function wrapOrphanedInlineContent(root: HTMLElement): void {
+  let wrapper: HTMLParagraphElement | null = null;
+
+  Array.from(root.childNodes).forEach((child) => {
+    const isBlock = child.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has((child as HTMLElement).tagName);
+    if (isBlock) {
+      wrapper = null;
+      return;
+    }
+
+    if (child.nodeType === Node.TEXT_NODE && !(child.textContent || '').trim()) {
+      return;
+    }
+
+    if (!wrapper) {
+      wrapper = document.createElement('p');
+      root.insertBefore(wrapper, child);
+    }
+    wrapper.appendChild(child);
+  });
+}
+
 function insertBlockAtSelection(editor: HTMLElement, block: HTMLElement, baseRange?: Range | null): void {
   let range: Range | null = null;
   if (baseRange) {
@@ -1232,13 +1280,22 @@ function insertBlockAtSelection(editor: HTMLElement, block: HTMLElement, baseRan
     extracted = range.extractContents();
   }
 
-  range.insertNode(block);
+  const containingBlock = getContainingBlock(range.endContainer, editor)
+    || getContainingBlock(range.startContainer, editor);
+
+  if (containingBlock && containingBlock.parentNode) {
+    containingBlock.parentNode.insertBefore(block, containingBlock.nextSibling);
+  } else {
+    range.insertNode(block);
+  }
 
   const ifBody = block.querySelector<HTMLElement>('.rte-conditional-body[data-slot="if"]');
   if (ifBody && extracted && hasMeaningfulFragmentContent(extracted)) {
     ifBody.innerHTML = '';
     ifBody.appendChild(extracted);
   }
+
+  wrapOrphanedInlineContent(editor);
 
   if (ifBody) {
     placeCaretAtEnd(editor, ifBody);
