@@ -69,11 +69,31 @@ const DEFAULT_ALLOWED_ATTRIBUTES: Record<string, string[]> = {
   iframe: ['src', 'width', 'height', 'name', 'title', 'frameborder', 'scrolling', 'allowfullscreen', 'longdesc', 'allow'],
 };
 
-export function sanitizeHTML(
+/**
+ * Attribute the embed-iframe plugin puts on the iframes it inserts. On the *input* path only
+ * (see sanitizeInputHTML), an iframe carrying it - and an http(s) src - survives sanitising.
+ *
+ * Without this the default allowlist (which deliberately excludes <iframe>) deleted an embed on
+ * the next edit: the one-shot `detail.allowedTags` hand-off only protected the single `input`
+ * event fired by the dialog, so applying Bold or inserting a table afterwards removed it.
+ */
+export const TRUSTED_EMBED_ATTRIBUTE = 'data-editora-embed';
+
+function isSafeEmbedSource(src: string | null): boolean {
+  if (!src || /\s/.test(src.trim())) return false;
+  try {
+    const url = new URL(src.trim());
+    return (url.protocol === 'https:' || url.protocol === 'http:') && url.hostname.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+function sanitizeInternal(
   html: string,
-  contentConfig?: SanitizationConfig,
-  _securityConfig?: SecurityConfig,
-  additionalAllowedTags?: string[],
+  contentConfig: SanitizationConfig | undefined,
+  additionalAllowedTags: string[] | undefined,
+  keepTrustedEmbeds: boolean,
 ): string {
   if (contentConfig?.sanitize === false) {
     return html;
@@ -116,10 +136,40 @@ export function sanitizeHTML(
   // all. A consumer with a high-security requirement around inline styles
   // (e.g. preventing data exfiltration via `background: url(...)`) should
   // exclude 'style' from its own allowedAttributes config.
-  return DOMPurify.sanitize(html, {
+  const purifyConfig = {
     ALLOWED_TAGS: allowedTags,
     ALLOWED_ATTR: Array.from(flatAttrs),
+  };
+
+  if (!keepTrustedEmbeds) {
+    return DOMPurify.sanitize(html, purifyConfig);
+  }
+
+  // Scoped to this one call (and removed in finally) so the exemption can never leak into the
+  // paste path, which shares this DOMPurify instance.
+  DOMPurify.addHook('uponSanitizeElement', (node, data) => {
+    if (
+      data.tagName === 'iframe' &&
+      (node as Element).getAttribute?.(TRUSTED_EMBED_ATTRIBUTE) === 'true' &&
+      isSafeEmbedSource((node as Element).getAttribute('src'))
+    ) {
+      data.allowedTags.iframe = true;
+    }
   });
+  try {
+    return DOMPurify.sanitize(html, purifyConfig);
+  } finally {
+    DOMPurify.removeHook('uponSanitizeElement');
+  }
+}
+
+export function sanitizeHTML(
+  html: string,
+  contentConfig?: SanitizationConfig,
+  _securityConfig?: SecurityConfig,
+  additionalAllowedTags?: string[],
+): string {
+  return sanitizeInternal(html, contentConfig, additionalAllowedTags, false);
 }
 
 export function sanitizePastedHTML(
@@ -149,5 +199,7 @@ export function sanitizeInputHTML(
     return html;
   }
 
-  return sanitizeHTML(html, contentConfig, securityConfig, additionalAllowedTags);
+  // Only this (typed / programmatic input) path keeps the embed plugin's own iframes;
+  // paste still goes through sanitizeHTML, which never does.
+  return sanitizeInternal(html, contentConfig, additionalAllowedTags, true);
 }

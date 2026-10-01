@@ -94,3 +94,44 @@ describe('sanitizeInputHTML', () => {
     expect(result).toBe(html);
   });
 });
+
+describe('trusted embed iframes (input path only)', () => {
+  const marked = '<iframe data-editora-embed="true" src="https://example.com/embed" width="100%" height="400"></iframe>';
+
+  it('keeps an iframe the embed plugin marked, so a later edit does not delete it', () => {
+    const result = sanitizeInputHTML(`<p>text</p>${marked}`);
+    expect(result).toContain('<iframe');
+    expect(result).toContain('src="https://example.com/embed"');
+  });
+
+  it('still removes an unmarked iframe on the input path', () => {
+    const result = sanitizeInputHTML('<p>text</p><iframe src="https://example.com/embed"></iframe>');
+    expect(result).not.toContain('<iframe');
+  });
+
+  it('never keeps a marked iframe on the paste path', () => {
+    expect(sanitizePastedHTML(marked)).not.toContain('<iframe');
+    expect(sanitizeHTML(marked)).not.toContain('<iframe');
+  });
+
+  it('does not let the exemption leak into a later paste sanitize', () => {
+    sanitizeInputHTML(marked);
+    expect(sanitizePastedHTML(marked)).not.toContain('<iframe');
+  });
+
+  it('removes a marked iframe whose src is not a plain http(s) URL', () => {
+    for (const src of ['javascript:alert(1)', 'data:text/html,<b>x</b>', 'ftp://example.com', 'https://', 'http://a b']) {
+      const result = sanitizeInputHTML(`<iframe data-editora-embed="true" src="${src}"></iframe>`);
+      expect(result).not.toContain('<iframe');
+    }
+  });
+
+  it('strips srcdoc and event handlers from a kept iframe', () => {
+    const result = sanitizeInputHTML(
+      '<iframe data-editora-embed="true" src="https://example.com/embed" srcdoc="<script>alert(1)</script>" onload="alert(2)"></iframe>',
+    );
+    expect(result).toContain('<iframe');
+    expect(result).not.toContain('srcdoc');
+    expect(result).not.toContain('onload');
+  });
+});

@@ -1072,9 +1072,14 @@ export class RichTextEditorElement extends HTMLElement {
     });
     
     // Content change
-    this.contentElement.addEventListener('input', () => {
+    this.contentElement.addEventListener('input', (event: Event) => {
       if (!this.contentElement) return;
       let html = this.contentElement.innerHTML;
+      // A plugin that has just made its own explicit, user-initiated insertion (the embed-iframe
+      // dialog) marks its input event with detail.allowedTags so that one mutation survives
+      // sanitizeOnInput without reopening those tags to arbitrary content. The React layer
+      // honours this; without it here the web component deleted the iframe right after insertion.
+      const trustedAllowedTags = (event as CustomEvent | undefined)?.detail?.allowedTags as string[] | undefined;
       const performanceConfig = this.getPerformanceConfig();
       const contentConfig = this.getContentSanitizeConfig();
       const securityConfig = this.getSecurityConfig();
@@ -1087,7 +1092,7 @@ export class RichTextEditorElement extends HTMLElement {
         !inputType;
 
       if (shouldSanitizeOnInput) {
-        const sanitized = sanitizeInputHTML(html, contentConfig, securityConfig);
+        const sanitized = sanitizeInputHTML(html, contentConfig, securityConfig, trustedAllowedTags);
         if (sanitized !== html) {
           const selection = window.getSelection();
           const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;

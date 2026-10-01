@@ -822,6 +822,10 @@ function insertIframe(editorElement: HTMLElement, data: {
   iframe.setAttribute('frameborder', data.showBorder ? '1' : '0');
   iframe.setAttribute('scrolling', data.enableScrollbar ? 'auto' : 'no');
   iframe.setAttribute('data-aspect-ratio', data.aspectRatio);
+  // Tells the editor's input sanitiser this iframe came from the embed dialog (and so, with an
+  // http(s) src, may stay) - otherwise the next edit deletes it. Mirrors TRUSTED_EMBED_ATTRIBUTE
+  // in @editora/core's sanitizeHTML.
+  iframe.setAttribute('data-editora-embed', 'true');
 
   if (data.aspectRatio !== 'inline') {
     iframe.classList.add(`rte-iframe-${data.aspectRatio}`);
