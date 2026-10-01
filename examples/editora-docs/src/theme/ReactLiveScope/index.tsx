@@ -1,6 +1,5 @@
 import React from 'react';
-import * as EditoraUIReact from '@editora/ui-react';
-import * as EditoraReactIcons from '@editora/react-icons';
+import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
 
 // Docusaurus's @docusaurus/theme-live-codeblock looks for this exact module
 // (src/theme/ReactLiveScope) to build the scope available inside ```jsx live
@@ -20,11 +19,23 @@ import * as EditoraReactIcons from '@editora/react-icons';
 // component doc's demo actually expects. The individual react-icons exports
 // used by demos (AlertTriangleIcon, UserIcon, etc.) are unaffected either
 // way since ui-react has no components by those names.
+//
+// The @editora barrels are only loaded in the browser. @editora/ui-core defines
+// its custom elements at import time (`class X extends HTMLElement`), which
+// throws under Node, so a top-level `import` here failed every static page
+// during `docusaurus build` ("HTMLElement is not defined"). The live preview
+// itself already renders inside BrowserOnly, so the server never needs these.
+const editoraScope = ExecutionEnvironment.canUseDOM
+  ? {
+      ...require('@editora/react-icons'),
+      ...require('@editora/ui-react'),
+    }
+  : {};
+
 const ReactLiveScope = {
   React,
   ...React,
-  ...EditoraReactIcons,
-  ...EditoraUIReact,
+  ...editoraScope,
 };
 
 export default ReactLiveScope;
