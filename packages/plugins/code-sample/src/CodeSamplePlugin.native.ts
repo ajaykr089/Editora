@@ -647,7 +647,7 @@ export const CodeSamplePlugin = (): Plugin => ({
   ],
 
   commands: {
-    insertCodeBlock: (...args: any[]) => {
+    insertCodeBlock: () => {
       insertCodeBlock();
       return true;
     },

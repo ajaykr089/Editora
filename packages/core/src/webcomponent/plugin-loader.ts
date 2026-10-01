@@ -3,8 +3,6 @@
  * Allows loading additional plugins after the core bundle is loaded
  */
 
-import { PluginLoader } from '../config/PluginLoader';
-
 /**
  * Advanced plugin registry - loaded on demand
  */

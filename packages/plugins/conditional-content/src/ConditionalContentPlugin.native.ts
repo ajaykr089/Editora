@@ -1001,11 +1001,6 @@ function getElementFromNode(node: Node | null): HTMLElement | null {
   return node.nodeType === Node.ELEMENT_NODE ? (node as HTMLElement) : node.parentElement;
 }
 
-function isNodeInsideConditionalBody(node: Node | null): boolean {
-  const element = getElementFromNode(node);
-  return Boolean(element?.closest('.rte-conditional-body'));
-}
-
 function enforceBlockEditability(block: HTMLElement, previewEnabled: boolean): void {
   block.setAttribute('contenteditable', 'false');
   block.setAttribute('spellcheck', 'false');

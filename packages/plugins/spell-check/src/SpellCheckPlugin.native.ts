@@ -1278,12 +1278,11 @@ function updateSidePanel(precomputedIssues?: SpellCheckIssue[]): void {
   // Suggestion buttons
   sidePanelElement.querySelectorAll('.suggestion-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const suggestion = btn.getAttribute('data-suggestion')!;
+      const suggestion = btn.getAttribute('data-suggestion');
       const item = btn.closest('.rte-spellcheck-item');
-      const word = item?.getAttribute('data-word')!;
-      const issueIndex = parseInt(item?.getAttribute('data-index') || '0');
+      const issueIndex = parseInt(item?.getAttribute('data-index') || '0', 10);
       
-      if (issues[issueIndex]) {
+      if (suggestion !== null && issues[issueIndex]) {
         replaceWord(issues[issueIndex], suggestion);
         highlightMisspelledWords();
       }
@@ -1293,18 +1292,16 @@ function updateSidePanel(precomputedIssues?: SpellCheckIssue[]): void {
   // Ignore buttons
   sidePanelElement.querySelectorAll('.ignore-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const item = btn.closest('.rte-spellcheck-item');
-      const word = item?.getAttribute('data-word')!;
-      ignoreWord(word);
+      const word = btn.closest('.rte-spellcheck-item')?.getAttribute('data-word');
+      if (word) ignoreWord(word);
     });
   });
   
   // Add to dictionary buttons
   sidePanelElement.querySelectorAll('.add-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const item = btn.closest('.rte-spellcheck-item');
-      const word = item?.getAttribute('data-word')!;
-      addToDictionary(word);
+      const word = btn.closest('.rte-spellcheck-item')?.getAttribute('data-word');
+      if (word) addToDictionary(word);
     });
   });
 }

@@ -169,33 +169,6 @@ const recordDomHistoryTransaction = (editor: HTMLElement, beforeHTML: string): v
 };
 
 /**
- * Get current line height value
- */
-const getCurrentLineHeight = (): string => {
-  const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) return '1.5';
-
-  const range = selection.getRangeAt(0);
-  const element = findBlockElement(range.commonAncestorContainer);
-
-  if (element) {
-    const lineHeight = window.getComputedStyle(element).lineHeight;
-    if (lineHeight && lineHeight !== 'normal') {
-      // Convert px to numeric if needed
-      const fontSize = window.getComputedStyle(element).fontSize;
-      if (fontSize && lineHeight.endsWith('px')) {
-        const lh = parseFloat(lineHeight);
-        const fs = parseFloat(fontSize);
-        return (lh / fs).toFixed(2);
-      }
-      return lineHeight;
-    }
-  }
-
-  return '1.5';
-};
-
-/**
  * Set line height on selected block element
  */
 export const setLineHeight = (height?: string): boolean => {

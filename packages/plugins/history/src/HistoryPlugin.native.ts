@@ -147,11 +147,6 @@ function dispatchEditorInput(editor: HTMLElement | null): void {
   editor.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-function getEditorContentSnapshot(editor: HTMLElement | null): string {
-  if (!editor) return '';
-  return editor.innerHTML;
-}
-
 function pushDomHistoryEntry(editor: HTMLElement | null, entry: DomHistoryEntry): void {
   if (!editor) return;
 
@@ -282,31 +277,6 @@ function initializeCommandSystem(): void {
   registerCommand('recordDomTransaction', recordDomTransaction);
   registerCommand('undoDom', undoDom);
   registerCommand('redoDom', redoDom);
-}
-
-function executeNativeHistoryCommand(
-  command: 'undo' | 'redo',
-  editor?: HTMLElement | null,
-): { executed: boolean; changed: boolean } {
-  const resolvedEditor = editor || resolveActiveEditor();
-  const beforeSnapshot = getEditorContentSnapshot(resolvedEditor);
-  resolvedEditor?.focus({ preventScroll: true });
-
-  let executed = false;
-  try {
-    executed = !!document.execCommand(command, false);
-  } catch {
-    executed = false;
-  }
-
-  const afterSnapshot = getEditorContentSnapshot(resolvedEditor);
-  const changed = beforeSnapshot !== afterSnapshot;
-
-  if (changed) {
-    dispatchEditorInput(resolvedEditor);
-  }
-
-  return { executed, changed };
 }
 
 export const undo = (): boolean => {

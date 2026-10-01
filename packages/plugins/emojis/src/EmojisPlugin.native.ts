@@ -233,7 +233,7 @@ function renderEmojiGrid(category: EmojiCategory, search: string): string {
     return `<div class="emojis-no-results">No emojis found for "${search}"</div>`;
   }
 
-  return emojis.map((emoji, index) => `
+  return emojis.map((emoji) => `
     <button 
       class="emojis-item" 
       title="Insert ${emoji}"

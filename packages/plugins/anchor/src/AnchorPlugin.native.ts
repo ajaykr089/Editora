@@ -76,36 +76,6 @@ function initializeAnchorObserver() {
 }
 
 /**
- * Generate unique anchor ID
- */
-function generateUniqueId(): string {
-  let id: string;
-  let counter = 0;
-
-  do {
-    const timestamp = Date.now();
-    const random = Math.random().toString(36).substr(2, 9);
-    id = `anchor-${timestamp}-${random}`;
-    counter++;
-    if (counter > 100) return '';
-  } while (anchorRegistry.has(id));
-
-  return id;
-}
-
-/**
- * Sanitize and validate anchor ID
- */
-function sanitizeId(id: string): string {
-  return id
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\-_]/g, '-')
-    .replace(/^[^a-z_]/, `a-${Math.random().toString(36).substr(2, 5)}`)
-    .substring(0, 256);
-}
-
-/**
  * Validate anchor ID
  */
 function validateId(id: string): { valid: boolean; error: string } {
@@ -285,7 +255,6 @@ function createAnchorDialog(mode: 'add' | 'edit', currentId?: string, onSave?: (
   }
   
   let errorMessage = '';
-  let touched = false;
   
   // Header
   const header = document.createElement('div');
@@ -450,7 +419,6 @@ function createAnchorDialog(mode: 'add' | 'edit', currentId?: string, onSave?: (
   
   // Validation on input
   input.oninput = () => {
-    touched = true;
     const value = input.value;
     updateSaveButton();
     

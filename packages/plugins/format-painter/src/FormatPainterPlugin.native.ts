@@ -824,7 +824,7 @@ function removeConflictingInlineAncestorsForTextNode(
   textNode: Text,
   snapshot: FormatPainterSnapshot,
 ): Text {
-  let current: Text = textNode;
+  const current: Text = textNode;
   let parent = current.parentElement;
 
   while (
@@ -956,28 +956,6 @@ function shouldRemoveInlineElement(element: HTMLElement, snapshot: FormatPainter
   if (element.matches('u')) return !isFormatIgnored(snapshot.ignoredFormats, 'underline');
   if (element.matches('s,strike')) return !isFormatIgnored(snapshot.ignoredFormats, 'strikethrough');
   return true;
-}
-
-function wrapTextNodesInFragment(fragment: DocumentFragment, inline: InlineFormatSnapshot): void {
-  const textNodes: Text[] = [];
-  const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_TEXT, {
-    acceptNode: (node) => {
-      if (!node.textContent || !node.textContent.trim()) return NodeFilter.FILTER_REJECT;
-      if (isStructuralListWhitespace(node)) return NodeFilter.FILTER_REJECT;
-      return NodeFilter.FILTER_ACCEPT;
-    },
-  });
-
-  let node = walker.nextNode();
-  while (node) {
-    textNodes.push(node as Text);
-    node = walker.nextNode();
-  }
-
-  textNodes.forEach((textNode) => {
-    const wrapper = wrapContentsWithInlineSnapshot(document.createTextNode(textNode.data), inline);
-    textNode.parentNode?.replaceChild(wrapper, textNode);
-  });
 }
 
 function isStructuralListWhitespace(node: Node): boolean {
