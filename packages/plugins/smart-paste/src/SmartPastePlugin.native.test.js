@@ -341,6 +341,12 @@ function createTemplateContent(rawHTML) {
       if (selector !== '*') return [];
       return nodes.filter((node) => node.isConnected);
     },
+    // Mirrors the real DocumentFragment.contains() the plugin now checks:
+    // true for a node still in this fragment, false once remove()/replaceWith()
+    // has taken it out (tracked here via the node's own isConnected flag).
+    contains(node) {
+      return nodes.includes(node) && node.isConnected;
+    },
     get textContent() {
       return rawHTML.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
     },

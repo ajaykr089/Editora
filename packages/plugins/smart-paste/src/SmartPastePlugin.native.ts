@@ -839,9 +839,15 @@ function sanitizeHTML(
     }
   }
 
+  // `element.isConnected` is always false here: these nodes live in a detached
+  // <template>'s content fragment, whose root is a DocumentFragment, not a
+  // Document. Checking it made this entire loop a no-op - no element was ever
+  // sanitized. `template.content.contains(element)` is what the guard actually
+  // needs: it's true for untouched elements and false once an earlier removal
+  // (BLOCKED_TAGS, table/img handling) has taken an element out of the tree.
   const elements = Array.from(template.content.querySelectorAll('*')) as HTMLElement[];
   elements.forEach((element) => {
-    if (!element.isConnected) return;
+    if (!template.content.contains(element)) return;
     sanitizeHTMLElement(element, profileOptions, source, counters);
   });
 
