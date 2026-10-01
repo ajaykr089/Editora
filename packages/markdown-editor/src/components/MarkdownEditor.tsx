@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { marked } from 'marked';
+import { sanitizeHTML } from '@editora/core';
 import { RichTextEditor } from '@editora/react';
 
 export interface MarkdownEditorProps {
@@ -14,11 +15,15 @@ export interface MarkdownEditorProps {
   onChange?: (value: string) => void;
 }
 
+// Also escapes quotes: the code-fence language ends up inside a class="..." attribute, and an
+// info string such as  x"onmouseover="alert(1)  would otherwise break out of it.
 const escapeHtml = (value: string): string =>
   value
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 
 const highlightCode = (code: string, language?: string): string => {
   let html = escapeHtml(code);
@@ -106,8 +111,22 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   const [internalValue, setInternalValue] = useState(defaultValue);
   const [activeMode, setActiveMode] = useState<'edit' | 'preview' | 'split'>(mode);
   const currentValue = isControlled ? value ?? '' : internalValue;
-  const previewHtml = useMemo(() => renderMarkdown(currentValue), [currentValue]);
-  const editorHtml = useMemo(() => markdownToHtml(currentValue), [currentValue]);
+  // marked passes raw HTML in the markdown straight through (<img onerror>, <script>, ...), and
+  // both results are injected into the DOM, so they must be sanitised first.
+  const previewHtml = useMemo(() => sanitizeHTML(renderMarkdown(currentValue)), [currentValue]);
+  const editorHtml = useMemo(() => sanitizeHTML(markdownToHtml(currentValue)), [currentValue]);
+
+  // The rich editor is remounted to load markdown that changed from outside (a toolbar button,
+  // or the `value` prop). It used to be keyed on the markdown itself, so every keystroke - which
+  // round-trips through onChange - remounted it and dropped focus after each character. Now it only
+  // remounts when the value differs from what the editor itself last reported.
+  const lastEditorValue = useRef(currentValue);
+  const [editorKey, setEditorKey] = useState(0);
+  useEffect(() => {
+    if (currentValue === lastEditorValue.current) return;
+    lastEditorValue.current = currentValue;
+    setEditorKey((key) => key + 1);
+  }, [currentValue]);
 
   useEffect(() => {
     setActiveMode(mode);
@@ -121,16 +140,25 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   };
 
   const handleEditorChange = (html: string) => {
-    updateValue(htmlToMarkdown(html));
+    const markdown = htmlToMarkdown(html);
+    lastEditorValue.current = markdown;
+    updateValue(markdown);
+  };
+
+  // These snippets were appended with `\\n` inside a template literal, i.e. a literal
+  // backslash + "n" in the user's markdown rather than a line break.
+  const appendSnippet = (snippet: string) => {
+    const separator = currentValue && !currentValue.endsWith('\n') ? '\n' : '';
+    updateValue(`${currentValue}${separator}${snippet}`);
   };
 
   const toolbarButtons = [
-    { label: 'Bold', icon: 'B', action: () => updateValue(`${currentValue}\\n**bold text**`) },
-    { label: 'Italic', icon: 'I', action: () => updateValue(`${currentValue}\\n*italic text*`) },
-    { label: 'Heading', icon: 'H', action: () => updateValue(`${currentValue}\\n# Heading`) },
-    { label: 'List', icon: '•', action: () => updateValue(`${currentValue}\\n- list item`) },
-    { label: 'Quote', icon: '❝', action: () => updateValue(`${currentValue}\\n> quote`) },
-    { label: 'Code', icon: '</>', action: () => updateValue(`${currentValue}\\n\`code\``) },
+    { label: 'Bold', icon: 'B', action: () => appendSnippet('**bold text**') },
+    { label: 'Italic', icon: 'I', action: () => appendSnippet('*italic text*') },
+    { label: 'Heading', icon: 'H', action: () => appendSnippet('# Heading') },
+    { label: 'List', icon: '•', action: () => appendSnippet('- list item') },
+    { label: 'Quote', icon: '❝', action: () => appendSnippet('> quote') },
+    { label: 'Code', icon: '</>', action: () => appendSnippet('`code`') },
   ];
 
   return (
@@ -280,7 +308,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
           {(activeMode === 'edit' || activeMode === 'split') && (
             <div className="md-editor-pane">
               <RichTextEditor
-                key={currentValue}
+                key={editorKey}
                 defaultValue={editorHtml}
                 readonly={readOnly}
                 placeholder={placeholder}
