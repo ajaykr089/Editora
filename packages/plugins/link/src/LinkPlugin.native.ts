@@ -1,5 +1,6 @@
 import { guardBackdropDrag } from '../../shared/dialogHelpers';
 import { Plugin } from '@editora/core';
+import { recordDomHistory } from '../../shared/historyHelpers';
 
 /**
  * Link Plugin - Native Implementation
@@ -21,9 +22,64 @@ interface LinkData {
 }
 
 let selectionRange: Range | null = null;
+let selectionText = '';
 let isEditingLink = false;
 let editingLinkElement: HTMLAnchorElement | null = null;
 const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
+
+const ALLOWED_LINK_PROTOCOLS = new Set(['http:', 'https:', 'mailto:', 'tel:', 'sms:', 'ftp:']);
+const LINK_URL_HINT = 'Enter a valid URL, e.g. https://example.com, /page, #section or mailto:name@example.com';
+
+/**
+ * Validate and normalise what the user typed into the URL field.
+ *
+ * The field used to be type="url", which makes the browser reject anything that
+ * isn't an absolute URL - so in-page links (#anchor, the whole point of the Anchor
+ * plugin), site-relative paths and mailto: links couldn't be entered at all - while
+ * the plugin itself never checked the scheme. This accepts those forms, upgrades a
+ * bare domain / email address, and refuses scripting schemes such as javascript:.
+ */
+const normalizeLinkUrl = (raw: string): { url: string } | { error: string } => {
+  const value = raw.trim();
+  if (!value) return { error: 'Please enter a URL.' };
+  if (/\s/.test(value)) return { error: 'The URL cannot contain spaces.' };
+
+  // In-page, site-relative and relative links.
+  if (/^(#|\/(?!\/)|\?|\.{1,2}\/)/.test(value)) return { url: value };
+
+  // host:port (and localhost) look like a scheme to the check below.
+  if (/^localhost(:\d+)?([/?#]|$)/i.test(value) || /^[^\s/:@]+:\d+([/?#]|$)/.test(value)) {
+    return { url: `https://${value}` };
+  }
+
+  const scheme = value.match(/^([a-z][a-z0-9+.-]*):/i);
+  if (scheme) {
+    const protocol = `${scheme[1].toLowerCase()}:`;
+    if (!ALLOWED_LINK_PROTOCOLS.has(protocol)) {
+      return { error: 'Links must use http, https, mailto or tel.' };
+    }
+    if (protocol === 'http:' || protocol === 'https:' || protocol === 'ftp:') {
+      try {
+        if (!new URL(value).hostname) return { error: LINK_URL_HINT };
+      } catch {
+        return { error: LINK_URL_HINT };
+      }
+    }
+    return { url: value };
+  }
+
+  // Protocol-relative //host/path
+  if (value.startsWith('//')) return { url: `https:${value}` };
+
+  if (/^[^\s@/]+@[^\s@/]+\.[^\s@/]+$/.test(value)) return { url: `mailto:${value}` };
+  if (/^[^\s/]+\.[^\s/]+/.test(value)) return { url: `https://${value}` };
+
+  return { error: LINK_URL_HINT };
+};
+
+const dispatchContentInput = (contentEl: HTMLElement | null): void => {
+  contentEl?.dispatchEvent(new Event('input', { bubbles: true }));
+};
 
 /**
  * Find editor content element
@@ -148,10 +204,17 @@ const handleInsertLink = (linkData: LinkData): void => {
   const contentEl = findContentElement(element);
   if (!contentEl) return;
 
+  // Link edits are direct DOM changes the history plugin never sees.
+  const beforeHTML = contentEl.innerHTML;
+
   if (isEditingLink && editingLinkElement) {
     // Edit existing link
-    editingLinkElement.href = linkData.url;
-    editingLinkElement.textContent = linkData.text;
+    editingLinkElement.setAttribute('href', linkData.url);
+    // Leave the content alone when only the URL/title changed, so formatting inside
+    // the link (bold, italic, ...) isn't flattened to plain text.
+    if (editingLinkElement.textContent !== linkData.text) {
+      editingLinkElement.textContent = linkData.text;
+    }
     editingLinkElement.target = linkData.target;
     
     if (linkData.target === '_blank') {
@@ -177,7 +240,7 @@ const handleInsertLink = (linkData: LinkData): void => {
   } else {
     // Create new link
     const linkElement = document.createElement('a');
-    linkElement.href = linkData.url;
+    linkElement.setAttribute('href', linkData.url);
     linkElement.textContent = linkData.text;
     linkElement.target = linkData.target;
     
@@ -189,8 +252,20 @@ const handleInsertLink = (linkData: LinkData): void => {
       linkElement.title = linkData.title;
     }
 
-    // Insert the link
-    selectionRange.deleteContents();
+    // Insert the link. When the text wasn't changed in the dialog, wrap the selected
+    // content instead of replacing it with plain text, so bold/italic inside it
+    // survives. Only done for single-block selections: wrapping across blocks
+    // would nest block elements inside the <a>.
+    const keepsSelectedContent =
+      !selectionRange.collapsed &&
+      linkData.text === selectionText &&
+      !selectionRange.cloneContents().querySelector('p, div, ul, ol, li, table, blockquote, pre, h1, h2, h3, h4, h5, h6');
+    if (keepsSelectedContent) {
+      linkElement.textContent = '';
+      linkElement.appendChild(selectionRange.extractContents());
+    } else {
+      selectionRange.deleteContents();
+    }
     selectionRange.insertNode(linkElement);
 
     // Move cursor after the link
@@ -206,8 +281,12 @@ const handleInsertLink = (linkData: LinkData): void => {
   // Focus back to editor
   contentEl.focus();
 
+  recordDomHistory(contentEl, beforeHTML);
+  dispatchContentInput(contentEl);
+
   // Reset state
   selectionRange = null;
+  selectionText = '';
   isEditingLink = false;
   editingLinkElement = null;
 };
@@ -244,8 +323,13 @@ const showLinkDialog = (
   // Create dialog
   const dialog = document.createElement('div');
   dialog.className = 'link-dialog';
+  dialog.setAttribute('role', 'dialog');
+  dialog.setAttribute('aria-modal', 'true');
+  dialog.setAttribute('aria-labelledby', 'link-dialog-title');
   dialog.style.cssText = `
     background: white;
+    color: #1f2937;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     border-radius: 8px;
     width: 500px;
     max-width: 90%;
@@ -255,17 +339,16 @@ const showLinkDialog = (
   // Dialog HTML
   dialog.innerHTML = `
     <div class="link-dialog-header" style="padding: 16px 20px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
-      <h3 style="margin: 0; font-size: 18px;">${initialData.isEditing ? 'Edit Link' : 'Insert Link'}</h3>
-      <button class="link-dialog-close" style="background: none; border: none; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px;">×</button>
+      <h3 id="link-dialog-title" style="margin: 0; font-size: 18px;">${initialData.isEditing ? 'Edit Link' : 'Insert Link'}</h3>
+      <button type="button" class="link-dialog-close" aria-label="Close" style="background: none; border: none; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px;">×</button>
     </div>
-    <form id="link-form">
+    <form id="link-form" novalidate>
       <div class="link-dialog-body" style="padding: 20px;">
         <div class="form-group" style="margin-bottom: 16px;">
           <label for="link-text" style="display: block; margin-bottom: 6px; font-weight: 500;">Link Text:</label>
           <input
             id="link-text"
             type="text"
-            value="${initialData.text || ''}"
             placeholder="Enter link text"
             style="width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; line-height: 1.45; box-sizing: border-box;"
           />
@@ -274,19 +357,21 @@ const showLinkDialog = (
           <label for="link-url" style="display: block; margin-bottom: 6px; font-weight: 500;">URL:</label>
           <input
             id="link-url"
-            type="url"
-            value="${initialData.url || ''}"
+            type="text"
+            inputmode="url"
+            autocapitalize="off"
+            spellcheck="false"
             placeholder="https://example.com"
-            required
+            aria-describedby="link-url-error"
             style="width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; line-height: 1.45; box-sizing: border-box;"
           />
+          <div id="link-url-error" role="alert" hidden style="margin-top: 4px; font-size: 12px; color: #c62828;"></div>
         </div>
         <div class="form-group" style="margin-bottom: 16px;">
           <label for="link-title" style="display: block; margin-bottom: 6px; font-weight: 500;">Title (optional):</label>
           <input
             id="link-title"
             type="text"
-            value="${initialData.title || ''}"
             placeholder="Link tooltip text"
             style="width: 100%; padding: 10px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; line-height: 1.45; box-sizing: border-box;"
           />
@@ -325,6 +410,19 @@ const showLinkDialog = (
   const closeBtn = dialog.querySelector('.link-dialog-close') as HTMLButtonElement;
   const cancelBtn = dialog.querySelector('.btn-cancel') as HTMLButtonElement;
   const removeBtn = dialog.querySelector('.btn-remove') as HTMLButtonElement | null;
+  const urlError = dialog.querySelector('#link-url-error') as HTMLElement;
+
+  // Link text/URL/title come from the document, so assign them as properties instead
+  // of interpolating into the markup above (a quote in a title used to break out of
+  // its attribute).
+  textInput.value = initialData.text || '';
+  urlInput.value = initialData.url || '';
+  titleInput.value = initialData.title || '';
+
+  urlInput.addEventListener('input', () => {
+    urlError.hidden = true;
+    urlInput.removeAttribute('aria-invalid');
+  });
 
   // Close dialog function
   const handleEscape = (event: KeyboardEvent) => {
@@ -347,6 +445,8 @@ const showLinkDialog = (
     // against the live selection - focus has moved into the dialog's own inputs by now, so the
     // selection no longer reliably points at the link being edited.
     if (editingLinkElement) {
+      const contentEl = findContentElement(editingLinkElement);
+      const beforeHTML = contentEl ? contentEl.innerHTML : '';
       const parent = editingLinkElement.parentNode;
       if (parent) {
         while (editingLinkElement.firstChild) {
@@ -354,8 +454,13 @@ const showLinkDialog = (
         }
         parent.removeChild(editingLinkElement);
       }
+      if (contentEl) {
+        recordDomHistory(contentEl, beforeHTML);
+        dispatchContentInput(contentEl);
+      }
     }
     selectionRange = null;
+    selectionText = '';
     isEditingLink = false;
     editingLinkElement = null;
     closeDialog();
@@ -367,16 +472,24 @@ const showLinkDialog = (
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    const url = urlInput.value.trim();
-    if (url) {
-      handleInsertLink({
-        text: textInput.value.trim() || url,
-        url,
-        target: targetCheckbox.checked ? '_blank' : '_self',
-        title: titleInput.value.trim() || undefined
-      });
-      closeDialog();
+    const normalized = normalizeLinkUrl(urlInput.value);
+    if ('error' in normalized) {
+      urlError.textContent = normalized.error;
+      urlError.hidden = false;
+      urlInput.setAttribute('aria-invalid', 'true');
+      urlInput.focus();
+      return;
     }
+
+    const url = normalized.url;
+    urlInput.value = url;
+    handleInsertLink({
+      text: textInput.value.trim() || url,
+      url,
+      target: targetCheckbox.checked ? '_blank' : '_self',
+      title: titleInput.value.trim() || undefined
+    });
+    closeDialog();
   });
 
   // Focus first input
@@ -395,6 +508,7 @@ export const openLinkDialog = (): boolean => {
   const isDarkTheme = isDarkThemeFromRange(range);
 
   const selectedText = selection.toString() || '';
+  selectionText = selectedText;
 
   // Check if selection is within a link
   const startContainer = range.startContainer;
@@ -410,7 +524,9 @@ export const openLinkDialog = (): boolean => {
     editingLinkElement = linkElement;
     showLinkDialog({
       text: linkElement.textContent || '',
-      url: linkElement.href,
+      // The attribute, not the resolved .href - otherwise editing a relative or
+      // in-page link silently rewrites it to an absolute URL.
+      url: linkElement.getAttribute('href') || '',
       target: (linkElement.target as '_blank' | '_self') || '_self',
       title: linkElement.title || '',
       isEditing: true
@@ -434,7 +550,18 @@ export const openLinkDialog = (): boolean => {
  * Remove link from selection
  */
 export const removeLink = (): boolean => {
+  const selection = window.getSelection();
+  const anchorNode = selection && selection.rangeCount > 0 ? selection.getRangeAt(0).startContainer : null;
+  const anchorElement = anchorNode && anchorNode.nodeType === Node.TEXT_NODE ? anchorNode.parentElement : (anchorNode as HTMLElement | null);
+  const contentEl = findContentElement(anchorElement);
+  const beforeHTML = contentEl ? contentEl.innerHTML : '';
+
   document.execCommand('unlink', false);
+
+  if (contentEl) {
+    recordDomHistory(contentEl, beforeHTML);
+    dispatchContentInput(contentEl);
+  }
   return true;
 };
 
@@ -454,7 +581,22 @@ const initializeCommands = (): void => {
   registerCommand('openLinkDialog', openLinkDialog);
   registerCommand('removeLink', removeLink);
   registerCommand('createLink', (url?: string) => {
-    if (url) document.execCommand('createLink', false, url);
+    if (!url) return;
+    const normalized = normalizeLinkUrl(url);
+    if ('error' in normalized) return;
+
+    const selection = window.getSelection();
+    const anchorNode = selection && selection.rangeCount > 0 ? selection.getRangeAt(0).startContainer : null;
+    const anchorElement = anchorNode && anchorNode.nodeType === Node.TEXT_NODE ? anchorNode.parentElement : (anchorNode as HTMLElement | null);
+    const contentEl = findContentElement(anchorElement);
+    const beforeHTML = contentEl ? contentEl.innerHTML : '';
+
+    document.execCommand('createLink', false, normalized.url);
+
+    if (contentEl) {
+      recordDomHistory(contentEl, beforeHTML);
+      dispatchContentInput(contentEl);
+    }
   });
 };
 
