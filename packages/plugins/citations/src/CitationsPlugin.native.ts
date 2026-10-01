@@ -295,40 +295,38 @@ function formatInlineCitation(record: CitationRecord, style: CitationStyle): str
   return `(${author}, ${year})`;
 }
 
+// Appends a period only if `value` doesn't already end in sentence-terminal
+// punctuation - APA/Chicago author fields are conventionally entered as
+// "Last, F." (already period-terminated for the initial), and blindly
+// appending "." on top produced "Last, F.." in every bibliography entry.
+function withTrailingPeriod(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed || /[.!?]$/.test(trimmed)) return trimmed;
+  return `${trimmed}.`;
+}
+
 function formatBibliographyEntry(record: CitationRecord, style: CitationStyle): string {
-  const author = record.author || 'Unknown';
+  const author = withTrailingPeriod(record.author || 'Unknown');
   const year = record.year || 'n.d.';
   const title = record.title || 'Untitled';
-  const source = record.source || '';
+  const rawSource = (record.source || '').trim();
   const url = record.url || '';
 
   if (style === 'mla') {
     return coalesceText([
-      `${author}.`,
-      `"${title}."`,
-      source ? `${source},` : '',
+      author,
+      `"${withTrailingPeriod(title)}"`,
+      rawSource ? `${rawSource.replace(/[.,]$/, '')},` : '',
       `${year}.`,
       url,
     ]);
   }
 
   if (style === 'chicago') {
-    return coalesceText([
-      `${author}.`,
-      `${title}.`,
-      source ? `${source}.` : '',
-      `(${year}).`,
-      url,
-    ]);
+    return coalesceText([author, withTrailingPeriod(title), withTrailingPeriod(rawSource), `(${year}).`, url]);
   }
 
-  return coalesceText([
-    `${author}.`,
-    `(${year}).`,
-    `${title}.`,
-    source ? `${source}.` : '',
-    url,
-  ]);
+  return coalesceText([author, `(${year}).`, withTrailingPeriod(title), withTrailingPeriod(rawSource), url]);
 }
 
 function getEditorReferences(editor: HTMLElement): HTMLElement[] {
