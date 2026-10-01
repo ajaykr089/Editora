@@ -400,6 +400,9 @@ const injectStyles = (): void => {
         border-bottom: 1px solid var(--rte-sc-border);
         flex-direction: row;
         overflow-x: auto;
+        /* As a column-flex child with overflow set it would shrink below its
+           content height when the dialog is short, clipping the tab labels. */
+        flex-shrink: 0;
       }
 
       .special-characters-tab {
