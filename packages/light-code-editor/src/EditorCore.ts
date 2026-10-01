@@ -737,15 +737,27 @@ export class EditorCore implements EditorAPI {
 
   replaceAll(query: string, replacement: string, options: Partial<SearchOptions> = {}): number {
     const results = this.search(query, options);
-    let replacements = 0;
+    if (results.length === 0) return 0;
 
-    // Process in reverse order to maintain positions
-    for (let i = results.length - 1; i >= 0; i--) {
-      this.replace(results[i].range, replacement);
-      replacements++;
+    // One Replace All is one user action: a single undo snapshot, a single render and a
+    // single change event. Calling replace() per match pushed N snapshots (N Undo presses to
+    // revert) and re-highlighted the whole document N times.
+    if (!this.suppressHistory) {
+      this.pushUndoSnapshot(this.captureHistorySnapshot(this.getValue()));
     }
 
-    return replacements;
+    const changes: ReturnType<TextModel['replaceRange']>[] = [];
+    // Process in reverse order to maintain positions
+    for (let i = results.length - 1; i >= 0; i--) {
+      changes.push(this.textModel.replaceRange(results[i].range, replacement));
+    }
+
+    this.expectingProgrammaticCursor = true;
+    this.renderTextWithHighlight(this.getValue(), false);
+    this.expectingProgrammaticCursor = false;
+    this.emit('change', changes);
+
+    return results.length;
   }
 
   // Folding (basic implementation)
