@@ -417,26 +417,35 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       };
     };
 
-    const handleInput = () => {
+    const handleInput = (event?: Event) => {
       if (!contentRef.current) return;
       if (readonly) return;
 
       if (placeholder && isStructurallyEmpty(contentRef.current)) {
         contentRef.current.innerHTML = '';
       }
-      
+
       let html = contentRef.current.innerHTML;
-      
+
+      // A plugin that just made its own trusted, explicit insertion (e.g.
+      // embed-iframe's dialog) can mark the 'input' event it dispatches with
+      // detail.allowedTags so that specific mutation survives sanitizeOnInput
+      // without reopening those tags to arbitrary typed/pasted content -
+      // sanitizePastedHTML never reads this, so paste stays unaffected.
+      const trustedAllowedTags = (event as CustomEvent | undefined)?.detail?.allowedTags as
+        | string[]
+        | undefined;
+
       // Sanitize input if enabled
       if (securityConfig?.sanitizeOnInput !== false && contentConfig?.sanitize !== false) {
-        const sanitizedHtml = sanitizeInputHTML(html, contentConfig, securityConfig);
-        
+        const sanitizedHtml = sanitizeInputHTML(html, contentConfig, securityConfig, trustedAllowedTags);
+
         // Update content if sanitization changed it
         if (sanitizedHtml !== contentRef.current.innerHTML) {
           // Keep caret/selection stable when sanitization rewrites DOM.
           const snapshot = insertSelectionMarkers(contentRef.current);
           const htmlWithMarkers = contentRef.current.innerHTML;
-          const sanitizedWithMarkers = sanitizeInputHTML(htmlWithMarkers, contentConfig, securityConfig);
+          const sanitizedWithMarkers = sanitizeInputHTML(htmlWithMarkers, contentConfig, securityConfig, trustedAllowedTags);
 
           contentRef.current.innerHTML = sanitizedWithMarkers;
 

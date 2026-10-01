@@ -61,20 +61,30 @@ const DEFAULT_ALLOWED_ATTRIBUTES: Record<string, string[]> = {
   table: ['border', 'cellpadding', 'cellspacing'],
   td: ['colspan', 'rowspan', 'align', 'valign'],
   th: ['colspan', 'rowspan', 'align', 'valign'],
+  // 'iframe' itself is still excluded from DEFAULT_ALLOWED_TAGS above, so this
+  // entry is inert for ordinary input/paste - it only takes effect for the
+  // embed-iframe plugin's trust-marked insertions (see sanitizeInputHTML's
+  // additionalAllowedTags), restoring the attributes that make an inserted
+  // iframe actually usable (src, sizing, fullscreen, scrolling/border).
+  iframe: ['src', 'width', 'height', 'name', 'title', 'frameborder', 'scrolling', 'allowfullscreen', 'longdesc', 'allow'],
 };
 
 export function sanitizeHTML(
   html: string,
   contentConfig?: SanitizationConfig,
   _securityConfig?: SecurityConfig,
+  additionalAllowedTags?: string[],
 ): string {
   if (contentConfig?.sanitize === false) {
     return html;
   }
 
-  const allowedTags = contentConfig?.allowedTags && contentConfig.allowedTags.length > 0
+  const baseAllowedTags = contentConfig?.allowedTags && contentConfig.allowedTags.length > 0
     ? contentConfig.allowedTags
     : DEFAULT_ALLOWED_TAGS;
+  const allowedTags = additionalAllowedTags?.length
+    ? Array.from(new Set([...baseAllowedTags, ...additionalAllowedTags]))
+    : baseAllowedTags;
 
   const hasCustomAllowedAttributes =
     !!contentConfig?.allowedAttributes &&
@@ -128,10 +138,16 @@ export function sanitizeInputHTML(
   html: string,
   contentConfig?: SanitizationConfig,
   securityConfig?: SecurityConfig,
+  // Lets a specific, already-in-the-trusted-DOM mutation (e.g. the
+  // embed-iframe plugin's own explicit, user-initiated dialog) keep a tag
+  // this editor's default allowlist otherwise excludes, without reopening
+  // that tag to arbitrary pasted content - sanitizePastedHTML never accepts
+  // this parameter, so paste stays on the strict, config-only allowlist.
+  additionalAllowedTags?: string[],
 ): string {
   if (securityConfig?.sanitizeOnInput === false) {
     return html;
   }
 
-  return sanitizeHTML(html, contentConfig, securityConfig);
+  return sanitizeHTML(html, contentConfig, securityConfig, additionalAllowedTags);
 }

@@ -701,10 +701,10 @@ function toggleConstrainProportions(dialog: HTMLElement, editorElement: HTMLElem
 
 function handleSave(dialog: HTMLElement, editorElement: HTMLElement): void {
   const state = getEditorState(editorElement);
-  
+
   // Get values from form
   const src = (dialog.querySelector('#iframe-src') as HTMLInputElement)?.value.trim();
-  
+
   if (!src) {
     alert('Please enter a source URL');
     return;
@@ -813,7 +813,13 @@ function insertIframe(editorElement: HTMLElement, data: {
   state.savedRange = null;
   const afterHTML = contentEl.innerHTML;
   recordDomHistoryTransaction(contentEl, beforeHTML, afterHTML);
-  contentEl.dispatchEvent(new window.Event('input', { bubbles: true }));
+  // 'iframe' is deliberately excluded from the editor's default sanitizeOnInput
+  // allowlist (arbitrary pasted/typed content shouldn't silently embed one) -
+  // a plain Event here would otherwise have the sanitizer strip the iframe
+  // right back out moments after this explicit, user-initiated insertion.
+  // detail.allowedTags marks this specific mutation as trusted without
+  // reopening 'iframe' to anything else; sanitizePastedHTML never reads it.
+  contentEl.dispatchEvent(new CustomEvent('input', { bubbles: true, detail: { allowedTags: ['iframe'] } }));
 }
 
 function closeDialog(editorElement: HTMLElement): void {
