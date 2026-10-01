@@ -302,6 +302,7 @@ const showLinkDialog = (
         </div>
       </div>
       <div class="link-dialog-footer" style="padding: 12px 20px; border-top: 1px solid #ddd; display: flex; justify-content: flex-end; gap: 10px;">
+        ${initialData.isEditing ? '<button type="button" class="btn-remove" style="padding: 8px 16px; border: 1px solid #dc3545; background: white; color: #dc3545; border-radius: 4px; cursor: pointer; margin-right: auto;">Remove Link</button>' : ''}
         <button type="button" class="btn-cancel" style="padding: 8px 16px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer;">Cancel</button>
         <button type="submit" class="btn-submit" style="padding: 8px 16px; border: none; background: #007bff; color: white; border-radius: 4px; cursor: pointer;">
           ${initialData.isEditing ? 'Update Link' : 'Insert Link'}
@@ -321,6 +322,7 @@ const showLinkDialog = (
   const targetCheckbox = dialog.querySelector('#link-target') as HTMLInputElement;
   const closeBtn = dialog.querySelector('.link-dialog-close') as HTMLButtonElement;
   const cancelBtn = dialog.querySelector('.btn-cancel') as HTMLButtonElement;
+  const removeBtn = dialog.querySelector('.btn-remove') as HTMLButtonElement | null;
 
   // Close dialog function
   const handleEscape = (event: KeyboardEvent) => {
@@ -338,6 +340,24 @@ const showLinkDialog = (
   // Event listeners
   closeBtn.addEventListener('click', closeDialog);
   cancelBtn.addEventListener('click', closeDialog);
+  removeBtn?.addEventListener('click', () => {
+    // Unwrap editingLinkElement directly rather than relying on document.execCommand('unlink')
+    // against the live selection - focus has moved into the dialog's own inputs by now, so the
+    // selection no longer reliably points at the link being edited.
+    if (editingLinkElement) {
+      const parent = editingLinkElement.parentNode;
+      if (parent) {
+        while (editingLinkElement.firstChild) {
+          parent.insertBefore(editingLinkElement.firstChild, editingLinkElement);
+        }
+        parent.removeChild(editingLinkElement);
+      }
+    }
+    selectionRange = null;
+    isEditingLink = false;
+    editingLinkElement = null;
+    closeDialog();
+  });
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeDialog();
   });
