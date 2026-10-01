@@ -205,7 +205,7 @@ export class MathDialog {
 
     // Simple LaTeX to Unicode conversion for preview
     // In production, you'd use MathJax or KaTeX here
-    let preview = latex
+    const preview = latex
       .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
       .replace(/\^\{([^}]+)\}/g, '^$1')
       .replace(/\_\{([^}]+)\}/g, '_$1')

@@ -408,8 +408,8 @@ export const runA11yAudit = (): A11yIssue[] => {
   const walker = ctx.doc.createTreeWalker(editor, NodeFilter.SHOW_ELEMENT, null);
   
   let node: Node | null = walker.currentNode;
-  let idxMap: Record<string, number> = {};
-  let pathMap: Record<string, string> = {};
+  const idxMap: Record<string, number> = {};
+  const pathMap: Record<string, string> = {};
   let nodeIdx = 0;
   
   while (node && nodeIdx < 5000) {
@@ -489,7 +489,7 @@ export const getA11yScore = (issues?: A11yIssue[]): number => {
   }
   const errors = issues.filter(i => i.severity === 'error').length;
   const warnings = issues.filter(i => i.severity === 'warning').length;
-  let score = 100 - (errors * 20) - (warnings * 5);
+  const score = 100 - (errors * 20) - (warnings * 5);
   return Math.max(0, score);
 };
 

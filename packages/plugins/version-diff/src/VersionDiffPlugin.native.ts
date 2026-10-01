@@ -322,7 +322,7 @@ function computeDiff(
 
   const { prefix, suffix, aMiddle, bMiddle } = diffPrefixSuffix(baseline, current);
 
-  let ops: Array<{ type: SegmentType; token: string }> = [];
+  const ops: Array<{ type: SegmentType; token: string }> = [];
   prefix.forEach((token) => ops.push({ type: 'equal', token }));
 
   const matrixSize = aMiddle.length * bMiddle.length;

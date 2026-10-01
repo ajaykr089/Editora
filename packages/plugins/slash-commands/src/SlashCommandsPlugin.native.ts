@@ -203,7 +203,7 @@ function positionPanel(state: SlashState, range: Range): void {
   const viewportW = window.innerWidth;
   const viewportH = window.innerHeight;
 
-  let left = Math.max(8, Math.min(caretRect.left, viewportW - panelRect.width - 8));
+  const left = Math.max(8, Math.min(caretRect.left, viewportW - panelRect.width - 8));
   let top = caretRect.bottom + 8;
 
   if (top + panelRect.height > viewportH - 8) {

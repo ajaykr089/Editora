@@ -153,7 +153,7 @@ export const PREDEFINED_TEMPLATES: Template[] = [
 /**
  * Template cache
  */
-let templateCache: Template[] = [...PREDEFINED_TEMPLATES];
+const templateCache: Template[] = [...PREDEFINED_TEMPLATES];
 
 // ============================================================================
 // Template Functions

@@ -27,6 +27,14 @@ module.exports = {
     '**/*.d.ts',
     'storybook-static/**',
   ],
+  overrides: [
+    {
+      // These entry points reference custom-elements.d.ts on purpose so consumers of the
+      // published package pick up the custom element typings; an import would not carry them.
+      files: ['packages/ui-react/src/{client,index,server}.{ts,tsx}'],
+      rules: { '@typescript-eslint/triple-slash-reference': 'off' },
+    },
+  ],
   rules: {
     'react/react-in-jsx-scope': 'off',
     'react/prop-types': 'off',

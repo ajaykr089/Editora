@@ -16,7 +16,7 @@ import { Plugin } from '@editora/core';
 let savedSelection: Range | null = null;
 let selectedMedia: HTMLImageElement | HTMLVideoElement | null = null;
 let floatingToolbar: HTMLDivElement | null = null;
-let resizeHandles: HTMLDivElement[] = [];
+const resizeHandles: HTMLDivElement[] = [];
 let isResizing = false;
 let currentHandle: string | null = null;
 let startX = 0;

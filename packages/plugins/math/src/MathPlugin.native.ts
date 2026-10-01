@@ -345,7 +345,7 @@ const showMathDialog = async (
 
   let currentFormat: 'latex' | 'mathml' = initialData?.format || 'latex';
   let currentFormula = initialData?.formula || '';
-  let currentInline = initialData?.inline !== false;
+  const currentInline = initialData?.inline !== false;
   let previewRaf: number | null = null;
   let lastPreviewSignature = '';
 
