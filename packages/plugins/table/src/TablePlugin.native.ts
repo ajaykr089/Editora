@@ -43,6 +43,8 @@ let tableStartHeight = 0;
 declare global {
   interface Window {
     __tablePluginInitialized?: boolean;
+    execEditorCommand?: (command: string, ...args: any[]) => any;
+    executeEditorCommand?: (command: string, ...args: any[]) => any;
   }
 }
 
@@ -297,9 +299,10 @@ export const deleteRowCommand = () => {
   const tableInfo = getTableInfoFromDOM();
   if (!tableInfo || tableInfo.rowCount <= 1) return;
 
-  const { table, rowIndex } = tableInfo;
+  const { table, rowIndex, colIndex } = tableInfo;
   table.deleteRow(rowIndex);
-  
+
+  restoreCaretInTable(table, rowIndex, colIndex);
   updateTableInfo();
 };
 
@@ -307,7 +310,7 @@ export const deleteColumnCommand = () => {
   const tableInfo = getTableInfoFromDOM();
   if (!tableInfo || tableInfo.cellCount <= 1) return;
 
-  const { table, colIndex } = tableInfo;
+  const { table, rowIndex: caretRow, colIndex } = tableInfo;
 
   // Delete cell from each row at specified column index
   for (let rowIndex = 0; rowIndex < table.rows.length; rowIndex++) {
@@ -316,7 +319,8 @@ export const deleteColumnCommand = () => {
       row.deleteCell(colIndex);
     }
   }
-  
+
+  restoreCaretInTable(table, caretRow, colIndex);
   updateTableInfo();
 };
 
@@ -327,28 +331,53 @@ export const toggleHeaderRowCommand = () => {
   const { table, rowIndex } = tableInfo;
   const targetRow = table.rows[rowIndex];
 
+  if (!targetRow) return;
+
   const isCurrentlyHeader = targetRow.parentElement?.tagName.toLowerCase() === 'thead';
+  const existingThead = table.querySelector('thead');
 
   if (isCurrentlyHeader) {
-    const tbody = table.querySelector('tbody') || table.appendChild(document.createElement('tbody'));
-    const thead = table.querySelector('thead');
-    if (thead) {
+    const thead = targetRow.parentElement as HTMLTableSectionElement;
+    // Only the last <thead> row can move down into <tbody> without jumping
+    // over another header row; otherwise just demote its cells in place.
+    if (targetRow === thead.rows[thead.rows.length - 1]) {
+      const tbody = table.querySelector('tbody') || table.appendChild(document.createElement('tbody'));
       tbody.insertBefore(targetRow, tbody.firstChild);
       if (thead.rows.length === 0) {
         thead.remove();
       }
+    } else {
+      retagRowCells(targetRow, 'td');
     }
-  } else {
-    let thead = table.querySelector('thead');
+  } else if (!existingThead || targetRow === table.tBodies[0]?.rows[0]) {
+    // Promoting the first body row keeps document order intact.
+    let thead = existingThead;
     if (!thead) {
       thead = document.createElement('thead');
       table.insertBefore(thead, table.firstChild);
     }
     thead.appendChild(targetRow);
+  } else {
+    // A row in the middle of the body must not be hoisted to the top of the
+    // table (that silently reorders content) - make its cells header cells.
+    retagRowCells(targetRow, 'th');
   }
   
   updateTableInfo();
 };
+
+function retagRowCells(row: HTMLTableRowElement, tag: 'td' | 'th'): void {
+  Array.from(row.cells).forEach((cell) => {
+    if (cell.tagName.toLowerCase() === tag) return;
+    const replacement = document.createElement(tag);
+    replacement.innerHTML = cell.innerHTML;
+    for (let i = 0; i < cell.attributes.length; i++) {
+      const attr = cell.attributes[i];
+      replacement.setAttribute(attr.name, attr.value);
+    }
+    cell.parentNode?.replaceChild(replacement, cell);
+  });
+}
 
 export const toggleHeaderColumnCommand = () => {
   const tableInfo = getTableInfoFromDOM();
@@ -394,6 +423,87 @@ export const deleteTableCommand = () => {
   document.dispatchEvent(new CustomEvent('tableDeleted'));
 };
 
+/**
+ * closest() that tolerates non-Element nodes (text, comment, document) —
+ * selectionchange / mousedown fire page-wide and can anchor on any of them.
+ */
+function closestFromNode(node: Node | EventTarget | null, selector: string): Element | null {
+  if (!node || !(node instanceof Node)) return null;
+  const element = node.nodeType === Node.ELEMENT_NODE ? (node as Element) : node.parentElement;
+  return element ? element.closest(selector) : null;
+}
+
+// The floating toolbar and keyboard shortcuts are page-wide, so they must not
+// act on a table the user can't edit (read-only editor, locked block).
+function isTableEditable(table: HTMLElement | null): boolean {
+  if (!table) return false;
+  const host = table.closest('[contenteditable]');
+  if (!host) return false;
+  if (host.getAttribute('contenteditable') === 'false') return false;
+  return !host.closest('[data-readonly="true"]');
+}
+
+function getActiveContentElement(): HTMLElement | null {
+  const selection = window.getSelection();
+  const anchor = selection && selection.rangeCount > 0 ? selection.getRangeAt(0).startContainer : null;
+  return (
+    (closestFromNode(anchor, '.rte-content') as HTMLElement | null) ||
+    (currentTable ? (currentTable.closest('.rte-content') as HTMLElement | null) : null)
+  );
+}
+
+function recordDomHistory(contentEl: HTMLElement, beforeHTML: string, afterHTML: string): void {
+  const executor = window.execEditorCommand || window.executeEditorCommand;
+  if (typeof executor !== 'function') return;
+
+  try {
+    executor('recordDomTransaction', contentEl, beforeHTML, afterHTML);
+  } catch {
+    // History plugin may be unavailable.
+  }
+}
+
+/**
+ * Run a table mutation as a single undoable step and tell the host the content
+ * changed. Table edits are direct DOM operations, so without this they never
+ * reach the undo stack and never fire `input` (host onChange stays stale).
+ */
+function runTableMutation(mutate: () => void): void {
+  const contentEl = getActiveContentElement();
+  if (contentEl && !isTableEditable(contentEl)) return;
+
+  const beforeHTML = contentEl ? contentEl.innerHTML : '';
+  mutate();
+  if (!contentEl) return;
+
+  const afterHTML = contentEl.innerHTML;
+  if (afterHTML === beforeHTML) return;
+
+  recordDomHistory(contentEl, beforeHTML, afterHTML);
+  contentEl.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+/**
+ * After a row/column is removed the caret sat inside a detached node; put it
+ * back into the nearest surviving cell so typing and the toolbar keep working.
+ */
+function restoreCaretInTable(table: HTMLTableElement, rowIndex: number, colIndex: number): void {
+  if (!table.isConnected || table.rows.length === 0) return;
+
+  const row = table.rows[Math.min(rowIndex, table.rows.length - 1)];
+  const cell = row.cells[Math.min(colIndex, row.cells.length - 1)];
+  if (!cell) return;
+
+  const range = document.createRange();
+  const target = cell.querySelector('p, div, li') || cell;
+  range.selectNodeContents(target);
+  range.collapse(true);
+
+  const selection = window.getSelection();
+  selection?.removeAllRanges();
+  selection?.addRange(range);
+}
+
 export const mergeCellsCommand = () => {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return;
@@ -401,20 +511,9 @@ export const mergeCellsCommand = () => {
   const range = selection.getRangeAt(0);
   const startContainer = range.startContainer;
 
-  let tableElement = startContainer.nodeType === Node.TEXT_NODE
-    ? startContainer.parentElement?.closest('table')
-    : (startContainer as Element).closest('table');
+  if (!closestFromNode(startContainer, 'table')) return;
 
-  if (!tableElement) return;
-
-  const table = tableElement as HTMLTableElement;
-
-  let firstCell: HTMLTableCellElement | null = null;
-  if (startContainer.nodeType === Node.TEXT_NODE) {
-    firstCell = startContainer.parentElement?.closest('td, th') as HTMLTableCellElement;
-  } else if (startContainer.nodeType === Node.ELEMENT_NODE) {
-    firstCell = (startContainer as Element).closest('td, th') as HTMLTableCellElement;
-  }
+  const firstCell = closestFromNode(startContainer, 'td, th') as HTMLTableCellElement | null;
 
   if (!firstCell) return;
 
@@ -434,9 +533,15 @@ export const mergeCellsCommand = () => {
   const secondCell = firstRow.cells[cellIndex + 1];
   if (!secondCell) return;
 
-  const colspan1 = parseInt(firstCell.getAttribute('colspan') || '1');
-  const colspan2 = parseInt(secondCell.getAttribute('colspan') || '1');
-  firstCell.setAttribute('colspan', String(colspan1 + colspan2));
+  // Cells that span a different number of rows can't be joined horizontally
+  // without tearing the grid.
+  const spanOf = (cell: HTMLTableCellElement, attr: 'colspan' | 'rowspan') => {
+    const parsed = parseInt(cell.getAttribute(attr) || '1', 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+  };
+  if (spanOf(firstCell, 'rowspan') !== spanOf(secondCell, 'rowspan')) return;
+
+  firstCell.setAttribute('colspan', String(spanOf(firstCell, 'colspan') + spanOf(secondCell, 'colspan')));
 
   const secondCellContent = Array.from(secondCell.childNodes);
   secondCellContent.forEach(node => {
@@ -467,23 +572,17 @@ function getTableInfoFromDOM(): TableDOMInfo | null {
   const range = selection.getRangeAt(0);
   const startContainer = range.startContainer;
 
-  let tableElement = startContainer.nodeType === Node.TEXT_NODE
-    ? startContainer.parentElement?.closest('table')
-    : (startContainer as Element).closest('table');
+  const table = closestFromNode(startContainer, 'table') as HTMLTableElement | null;
 
-  if (!tableElement) return null;
-
-  const table = tableElement as HTMLTableElement;
+  if (!table) return null;
 
   let rowIndex = 0;
   let colIndex = 0;
 
-  const cellElement = startContainer.nodeType === Node.TEXT_NODE
-    ? startContainer.parentElement?.closest('td, th')
-    : (startContainer as Element).closest('td, th');
+  const cellElement = closestFromNode(startContainer, 'td, th');
 
   if (cellElement) {
-    let currentRow = cellElement.parentElement as HTMLTableRowElement;
+    const currentRow = cellElement.parentElement as HTMLTableRowElement;
     while (currentRow && currentRow !== table.rows[rowIndex]) {
       rowIndex++;
       if (rowIndex >= table.rows.length) break;
@@ -528,7 +627,7 @@ function updateTableInfo(): void {
 function initTableToolbar(): void {
   selectionChangeHandler = () => {
     const tableInfo = getTableInfoFromDOM();
-    if (tableInfo) {
+    if (tableInfo && isTableEditable(tableInfo.table)) {
       showTableToolbar(tableInfo.table);
     } else {
       hideTableToolbar();
@@ -536,9 +635,8 @@ function initTableToolbar(): void {
   };
 
   mouseDownHandler = (e: MouseEvent) => {
-    const target = e.target as Element;
-    const isInsideTable = target.closest('table');
-    const isInsideToolbar = target.closest('.table-toolbar');
+    const isInsideTable = closestFromNode(e.target, 'table');
+    const isInsideToolbar = closestFromNode(e.target, '.table-toolbar');
 
     if (!isInsideTable && !isInsideToolbar) {
       hideTableToolbar();
@@ -566,26 +664,6 @@ function initTableToolbar(): void {
   document.addEventListener('tableDeleted', tableDeletedHandler as EventListener);
   window.addEventListener('scroll', scrollHandler, true); // Use capture to catch all scroll events
   window.addEventListener('resize', resizeHandler);
-}
-
-function cleanupTableToolbar(): void {
-  if (selectionChangeHandler) {
-    document.removeEventListener('selectionchange', selectionChangeHandler);
-  }
-  if (mouseDownHandler) {
-    document.removeEventListener('mousedown', mouseDownHandler);
-  }
-  if (tableDeletedHandler) {
-    document.removeEventListener('tableDeleted', tableDeletedHandler as EventListener);
-  }
-  if (scrollHandler) {
-    window.removeEventListener('scroll', scrollHandler, true);
-  }
-  if (resizeHandler) {
-    window.removeEventListener('resize', resizeHandler);
-  }
-  
-  hideTableToolbar();
 }
 
 function updateToolbarPosition(table: HTMLTableElement): void {
@@ -1011,10 +1089,10 @@ function createTableToolbar(): HTMLDivElement {
     if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
       if (e.key === 'r' || e.key === 'R') {
         e.preventDefault();
-        addRowBelowCommand();
+        executeTableCommand('addRowBelow');
       } else if (e.key === 'c' || e.key === 'C') {
         e.preventDefault();
-        addColumnRightCommand();
+        executeTableCommand('addColumnRight');
       }
     }
   };
@@ -1025,18 +1103,20 @@ function createTableToolbar(): HTMLDivElement {
 }
 
 function executeTableCommand(action: string): void {
-  switch (action) {
-    case 'addRowAbove': addRowAboveCommand(); break;
-    case 'addRowBelow': addRowBelowCommand(); break;
-    case 'addColumnLeft': addColumnLeftCommand(); break;
-    case 'addColumnRight': addColumnRightCommand(); break;
-    case 'deleteRow': deleteRowCommand(); break;
-    case 'deleteColumn': deleteColumnCommand(); break;
-    case 'toggleHeaderRow': toggleHeaderRowCommand(); break;
-    case 'toggleHeaderColumn': toggleHeaderColumnCommand(); break;
-    case 'deleteTable': deleteTableCommand(); break;
-    case 'mergeCells': mergeCellsCommand(); break;
-  }
+  runTableMutation(() => {
+    switch (action) {
+      case 'addRowAbove': addRowAboveCommand(); break;
+      case 'addRowBelow': addRowBelowCommand(); break;
+      case 'addColumnLeft': addColumnLeftCommand(); break;
+      case 'addColumnRight': addColumnRightCommand(); break;
+      case 'deleteRow': deleteRowCommand(); break;
+      case 'deleteColumn': deleteColumnCommand(); break;
+      case 'toggleHeaderRow': toggleHeaderRowCommand(); break;
+      case 'toggleHeaderColumn': toggleHeaderColumnCommand(); break;
+      case 'deleteTable': deleteTableCommand(); break;
+      case 'mergeCells': mergeCellsCommand(); break;
+    }
+  });
 }
 
 // ============================================
@@ -1289,18 +1369,20 @@ export const TablePlugin = (): Plugin => ({
 
   commands: {
     insertTable: () => {
-      insertTableCommand();
+      runTableMutation(() => {
+        insertTableCommand();
+      });
       return true;
     },
   },
 
   keymap: {
     "Mod-Shift-r": () => {
-      addRowBelowCommand();
+      executeTableCommand('addRowBelow');
       return true;
     },
     "Mod-Shift-c": () => {
-      addColumnRightCommand();
+      executeTableCommand('addColumnRight');
       return true;
     },
   },
