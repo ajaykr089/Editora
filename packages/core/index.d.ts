@@ -379,4 +379,9 @@ export function sanitizeInputHTML(
   html: string,
   contentConfig?: SanitizationConfig,
   securityConfig?: SecurityConfig,
+  /**
+   * Tags a specific, already-trusted mutation (e.g. the embed-iframe dialog) may keep
+   * even though the default allowlist excludes them. Never applied to pasted content.
+   */
+  additionalAllowedTags?: string[],
 ): string;
