@@ -1,4 +1,5 @@
 import { guardBackdropDrag } from '../../shared/dialogHelpers';
+import { recordDomHistory } from '../../shared/historyHelpers';
 import type { Plugin } from '@editora/core';
 import { emojisSets, descriptions, type EmojiCategory } from './Constants';
 
@@ -52,7 +53,7 @@ export const EmojisPlugin = (): Plugin => {
       openEmojiDialog: (_args, context) => {
         // Try to get the correct editor content element from context
         const editorContent = context?.contentElement || getActiveEditorContent();
-        if (editorContent) {
+        if (editorContent && !isEditorReadonly(editorContent)) {
           createEmojiDialog(editorContent);
           return true;
         }
@@ -62,7 +63,7 @@ export const EmojisPlugin = (): Plugin => {
       insertEmoji: (emoji?: string, context?) => {
         if (!emoji) return false;
         const editorContent = context?.contentElement || getActiveEditorContent();
-        if (!editorContent) return false;
+        if (!editorContent || isEditorReadonly(editorContent)) return false;
         try {
           insertEmoji(emoji, editorContent);
           return true;
@@ -262,7 +263,17 @@ function closeDialog(): void {
 }
 
 // Helper function to insert emoji at cursor
+function isEditorReadonly(editorContent: HTMLElement): boolean {
+  return (
+    editorContent.getAttribute('contenteditable') === 'false' ||
+    editorContent.getAttribute('data-readonly') === 'true'
+  );
+}
+
 function insertEmoji(emoji: string, editorContent: HTMLElement): void {
+  if (isEditorReadonly(editorContent)) return;
+
+  const beforeHTML = editorContent.innerHTML;
   editorContent.focus();
   let selection = window.getSelection();
   // Restore the saved selection range if available
@@ -282,6 +293,10 @@ function insertEmoji(emoji: string, editorContent: HTMLElement): void {
     selection.removeAllRanges();
     selection.addRange(range);
   }
+
+  // Direct DOM insertion: make it undoable and tell the host the content changed.
+  recordDomHistory(editorContent, beforeHTML);
+  editorContent.dispatchEvent(new Event('input', { bubbles: true }));
 }
 // Helper to get the currently focused editor content element (fallback)
 function getActiveEditorContent(): HTMLElement | null {
