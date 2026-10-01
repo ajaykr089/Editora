@@ -484,11 +484,36 @@ export class ConfigResolver {
     
     for (const [key, value] of Object.entries(attributes)) {
       const camelKey = this.kebabToCamel(key);
-      config[camelKey] = this.parseAttributeValue(value);
+      // HTML boolean attributes are on by mere presence (`<editora-editor readonly>`)
+      config[camelKey] =
+        this.BOOLEAN_ATTRIBUTES.has(key) && (value === '' || value === key)
+          ? true
+          : this.parseAttributeValue(value);
     }
     
     return config;
   }
+
+  private static readonly BOOLEAN_ATTRIBUTES = new Set([
+    'readonly',
+    'disabled',
+    'autofocus',
+    'statusbar',
+    'toolbar-floating',
+    'toolbar-sticky',
+    'autosave-enabled',
+    'accessibility-enable-aria',
+    'accessibility-keyboard-navigation',
+    'accessibility-checker',
+    'performance-viewport-only-scan',
+    'spellcheck-enabled',
+    'context-menu-enabled',
+    'paste-clean',
+    'paste-keep-formatting',
+    'paste-convert-word',
+    'security-sanitize-on-paste',
+    'security-sanitize-on-input',
+  ]);
 
   /**
    * Parse attribute value to appropriate type

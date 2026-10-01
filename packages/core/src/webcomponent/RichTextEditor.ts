@@ -392,6 +392,15 @@ export class RichTextEditorElement extends HTMLElement {
       }
     });
     
+    // Elements created from script get their children after the constructor ran, so
+    // pick up light-DOM content here too (before it is replaced by the editor chrome).
+    if (!this.hasAttribute('data-initial-content') && !this.contentElement) {
+      const lightDomContent = this.innerHTML.trim();
+      if (lightDomContent) {
+        this.setAttribute('data-initial-content', lightDomContent);
+      }
+    }
+
     // Get initial content before clearing innerHTML
     const initialContent =
       this.restoreAutosavedContent() ??
@@ -1281,7 +1290,7 @@ export class RichTextEditorElement extends HTMLElement {
       this.config.readonly ||
       this.contentElement.contentEditable === 'false' ||
       this.contentElement.getAttribute('data-readonly') === 'true' ||
-      this.getAttribute('readonly') === 'true' ||
+      this.isReadonlyAttribute(this.getAttribute('readonly')) ||
       this.getAttribute('data-readonly') === 'true';
     if (runtimeReadonly) {
       this.floatingToolbar.hide();
@@ -1365,17 +1374,25 @@ export class RichTextEditorElement extends HTMLElement {
   }
 
   /**
+   * `<editora-editor readonly>` and `readonly="true"` both lock the editor; only
+   * removing the attribute or `readonly="false"` unlocks it.
+   */
+  private isReadonlyAttribute(value: string | null): boolean {
+    return value !== null && value !== 'false';
+  }
+
+  /**
    * Handle attribute changes
    */
   private handleAttributeChange(name: string, value: string): void {
     switch (name) {
       case 'readonly':
         if (this.contentElement) {
-          this.contentElement.contentEditable = value === 'true' ? 'false' : 'true';
+          this.contentElement.contentEditable = this.isReadonlyAttribute(value) ? 'false' : 'true';
           this.applyAccessibilitySettings();
         }
         if (this.engine) {
-          this.engine.setReadonly(value === 'true');
+          this.engine.setReadonly(this.isReadonlyAttribute(value));
         }
         break;
         
