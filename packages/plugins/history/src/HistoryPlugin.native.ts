@@ -5,6 +5,9 @@ type CommandHandler = (...args: any[]) => any;
 interface DomHistoryEntry {
   undo: () => void;
   redo: () => void;
+  /** Set on whole-content transactions so an identical duplicate can be ignored. */
+  beforeHTML?: string;
+  afterHTML?: string;
 }
 
 interface EditorHistoryState {
@@ -374,7 +377,17 @@ export const recordDomTransaction = (
   const finalAfter = typeof afterHTML === 'string' ? afterHTML : editor.innerHTML;
   if (beforeHTML === finalAfter) return false;
 
+  // A plugin that records explicitly and the host's native-input recorder can
+  // both log the same change (browsers that fire beforeinput for execCommand).
+  // Ignore the repeat so one action never needs two Undo clicks.
+  const topEntry = getEditorHistoryState(editor).undoStack.slice(-1)[0];
+  if (topEntry && topEntry.beforeHTML === beforeHTML && topEntry.afterHTML === finalAfter) {
+    return false;
+  }
+
   pushDomHistoryEntry(editor, {
+    beforeHTML,
+    afterHTML: finalAfter,
     undo: () => {
       if (!editor.isConnected) return;
       editor.innerHTML = beforeHTML;

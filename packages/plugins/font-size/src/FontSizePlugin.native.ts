@@ -1,3 +1,4 @@
+import { recordDomHistory } from '../../shared/historyHelpers';
 import type { Plugin } from "@editora/core";
 
 /**
@@ -377,6 +378,20 @@ function getCurrentFontSizeFromSelection(): { value: number; unit: string } {
  * Helper function to apply font size to the current selection
  */
 function applyFontSizeToSelection(size: number, unit: string = "px") {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
+
+  // Font-size edits are manual DOM/execCommand changes the history plugin never
+  // sees, so record them as one undoable step.
+  const editorContent = getEditableContentFromNode(selection.getRangeAt(0).commonAncestorContainer);
+  const beforeHTML = editorContent ? editorContent.innerHTML : null;
+  applyFontSizeToSelectionUnrecorded(size, unit);
+  if (editorContent && beforeHTML !== null) {
+    recordDomHistory(editorContent, beforeHTML);
+  }
+}
+
+function applyFontSizeToSelectionUnrecorded(size: number, unit: string = "px") {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return;
 

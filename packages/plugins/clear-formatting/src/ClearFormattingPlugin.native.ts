@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { recordDomHistory } from '../../shared/historyHelpers';
 
 /**
  * Clear Formatting Plugin - Framework Agnostic
@@ -35,11 +36,14 @@ export const ClearFormattingPlugin = (): Plugin => ({
       if (!content.contains(range.commonAncestorContainer)) return false;
 
       const originalRange = range.cloneRange();
+      const beforeHTML = content.innerHTML;
       content.focus({ preventScroll: true });
 
       normalizeInlineFormatting(content, originalRange);
       normalizeBlockFormatting(content, originalRange);
 
+      // Direct DOM edits are invisible to the history plugin; record one undo step.
+      recordDomHistory(content, beforeHTML);
       content.dispatchEvent(new Event("input", { bubbles: true }));
       return true;
     },

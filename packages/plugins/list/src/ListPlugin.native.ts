@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { recordDomHistory } from '../../shared/historyHelpers';
 
 /**
  * List Plugin - Native Implementation
@@ -123,11 +124,14 @@ function applyListCommand(command: 'insertUnorderedList' | 'insertOrderedList'):
   const range = selection.getRangeAt(0);
   if (!content.contains(range.commonAncestorContainer)) return false;
 
+  const beforeHTML = content.innerHTML;
   content.focus({ preventScroll: true });
   const executed = document.execCommand(command, false);
 
   normalizeListMarkup(content);
   wrapOrphanedInlineContent(content);
+  // execCommand edits aren't visible to the history plugin, so Undo would skip them.
+  recordDomHistory(content, beforeHTML);
   content.dispatchEvent(new Event('input', { bubbles: true }));
   return executed !== false;
 }

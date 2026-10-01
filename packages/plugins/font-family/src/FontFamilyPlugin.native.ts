@@ -1,3 +1,4 @@
+import { recordDomHistory } from '../../shared/historyHelpers';
 import type { Plugin } from '@editora/core';
 
 /**
@@ -180,6 +181,20 @@ function applyInlineFontFamilyFallback(
  * Uses DOM manipulation for reliable font family application
  */
 function applyFontFamilyToSelection(fontFamily: string) {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
+
+  // Font-family edits are manual DOM/execCommand changes the history plugin never
+  // sees, so record them as one undoable step.
+  const editorContent = getEditableContentFromNode(selection.getRangeAt(0).commonAncestorContainer);
+  const beforeHTML = editorContent ? editorContent.innerHTML : null;
+  applyFontFamilyToSelectionUnrecorded(fontFamily);
+  if (editorContent && beforeHTML !== null) {
+    recordDomHistory(editorContent, beforeHTML);
+  }
+}
+
+function applyFontFamilyToSelectionUnrecorded(fontFamily: string) {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return;
 

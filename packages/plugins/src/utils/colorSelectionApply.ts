@@ -1,3 +1,5 @@
+import { recordDomHistory } from '../../shared/historyHelpers';
+
 export type ActiveEditorResolver = () => HTMLElement | null;
 
 const BLOCK_SELECTOR =
@@ -69,6 +71,22 @@ export interface ApplyColorSelectionOptions {
 }
 
 export function applyColorToSelection(options: ApplyColorSelectionOptions): boolean {
+  // Colour edits are direct DOM/execCommand changes the history plugin never sees,
+  // so record the whole thing as one undoable step.
+  const selection = window.getSelection();
+  const anchor = options.savedRange?.commonAncestorContainer
+    ?? (selection && selection.rangeCount > 0 ? selection.getRangeAt(0).commonAncestorContainer : null);
+  const editorContent = getEditorContentForNode(anchor, options.getActiveEditorRoot);
+  const beforeHTML = editorContent ? editorContent.innerHTML : null;
+
+  const applied = applyColorToSelectionUnrecorded(options);
+  if (applied && editorContent && beforeHTML !== null) {
+    recordDomHistory(editorContent, beforeHTML);
+  }
+  return applied;
+}
+
+function applyColorToSelectionUnrecorded(options: ApplyColorSelectionOptions): boolean {
   try {
     if (options.savedRange) {
       const selection = window.getSelection();
