@@ -156,13 +156,24 @@ export const insertTableCommand = () => {
 
   // Insert the table's wrapper as a sibling of the containing block instead of
   // at the raw cursor position - see getContainingBlock/ensureTableWrapper.
-  const block = getContainingBlock(range.endContainer, contentEl)
-    || getContainingBlock(range.startContainer, contentEl);
+  // When the range boundary is the editor itself (e.g. after Select All) there is no
+  // containing block; use the child that boundary points at instead.
+  const boundaryNode = (container: Node, offset: number, before: boolean): Node | null => {
+    if (container !== contentEl) return container;
+    const index = before ? offset - 1 : offset;
+    return contentEl.childNodes[Math.min(Math.max(index, 0), contentEl.childNodes.length - 1)] || null;
+  };
+  const endNode = boundaryNode(range.endContainer, range.endOffset, true);
+  const startNode = boundaryNode(range.startContainer, range.startOffset, false);
+  const block = (endNode && getContainingBlock(endNode, contentEl))
+    || (startNode && getContainingBlock(startNode, contentEl));
 
   if (block && block.parentNode) {
     block.parentNode.insertBefore(wrapper, block.nextSibling);
   } else {
-    range.deleteContents();
+    // Never delete the selection: inserting a table used to wipe the whole document
+    // when everything was selected and no block could be found.
+    range.collapse(false);
     range.insertNode(wrapper);
   }
 
