@@ -147,15 +147,18 @@ function sanitizeInternal(
 
   // Scoped to this one call (and removed in finally) so the exemption can never leak into the
   // paste path, which shares this DOMPurify instance.
-  DOMPurify.addHook('uponSanitizeElement', (node, data) => {
-    if (
-      data.tagName === 'iframe' &&
-      (node as Element).getAttribute?.(TRUSTED_EMBED_ATTRIBUTE) === 'true' &&
-      isSafeEmbedSource((node as Element).getAttribute('src'))
-    ) {
-      data.allowedTags.iframe = true;
-    }
-  });
+  DOMPurify.addHook(
+    'uponSanitizeElement',
+    (node: Node, data: { tagName: string; allowedTags: Record<string, boolean> }) => {
+      if (
+        data.tagName === 'iframe' &&
+        (node as Element).getAttribute?.(TRUSTED_EMBED_ATTRIBUTE) === 'true' &&
+        isSafeEmbedSource((node as Element).getAttribute('src'))
+      ) {
+        data.allowedTags.iframe = true;
+      }
+    },
+  );
   try {
     return DOMPurify.sanitize(html, purifyConfig);
   } finally {
