@@ -77,6 +77,12 @@ const normalizeLinkUrl = (raw: string): { url: string } | { error: string } => {
   return { error: LINK_URL_HINT };
 };
 
+const BLOCK_CONTENT_SELECTOR = 'p, div, ul, ol, li, table, blockquote, pre, h1, h2, h3, h4, h5, h6';
+
+/** The text field is single-line, so multi-block selection text loses its line breaks there. */
+const sameLinkText = (a: string, b: string): boolean =>
+  a.replace(/[\r\n]+/g, '') === b.replace(/[\r\n]+/g, '');
+
 const dispatchContentInput = (contentEl: HTMLElement | null): void => {
   contentEl?.dispatchEvent(new Event('input', { bubbles: true }));
 };
@@ -252,14 +258,51 @@ const handleInsertLink = (linkData: LinkData): void => {
       linkElement.title = linkData.title;
     }
 
+    const spansBlocks =
+      !selectionRange.collapsed &&
+      !!selectionRange.cloneContents().querySelector(BLOCK_CONTENT_SELECTOR);
+
+    if (spansBlocks && sameLinkText(linkData.text, selectionText)) {
+      // A selection across several blocks can't live in one <a> (it would nest block
+      // elements, and replacing it with the dialog's single-line text flattened the
+      // whole selection - headings and paragraphs included - into one plain-text link).
+      // Let the browser link each block's text separately, then style those anchors.
+      const existing = new Set(Array.from(contentEl.querySelectorAll('a')));
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(selectionRange);
+      }
+      contentEl.focus();
+      document.execCommand('createLink', false, linkData.url);
+
+      contentEl.querySelectorAll('a').forEach((created) => {
+        if (existing.has(created)) return;
+        created.setAttribute('target', linkData.target);
+        if (linkData.target === '_blank') {
+          created.setAttribute('rel', 'noopener noreferrer');
+        }
+        if (linkData.title) {
+          created.setAttribute('title', linkData.title);
+        }
+      });
+
+      recordDomHistory(contentEl, beforeHTML);
+      dispatchContentInput(contentEl);
+      selectionRange = null;
+      selectionText = '';
+      isEditingLink = false;
+      editingLinkElement = null;
+      return;
+    }
+
     // Insert the link. When the text wasn't changed in the dialog, wrap the selected
     // content instead of replacing it with plain text, so bold/italic inside it
-    // survives. Only done for single-block selections: wrapping across blocks
-    // would nest block elements inside the <a>.
+    // survives. (Multi-block selections are handled above.)
     const keepsSelectedContent =
       !selectionRange.collapsed &&
       linkData.text === selectionText &&
-      !selectionRange.cloneContents().querySelector('p, div, ul, ol, li, table, blockquote, pre, h1, h2, h3, h4, h5, h6');
+      !spansBlocks;
     if (keepsSelectedContent) {
       linkElement.textContent = '';
       linkElement.appendChild(selectionRange.extractContents());
