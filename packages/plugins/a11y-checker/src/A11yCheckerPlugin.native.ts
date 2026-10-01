@@ -1,3 +1,4 @@
+import { escapeHtml } from '../../shared/escapeHtml';
 import { initDialogOverlay } from '../../shared/dialogHelpers';
 import type { Plugin } from '@editora/core';
 
@@ -718,12 +719,12 @@ const createA11yDialog = () => {
             text-transform: uppercase;
           ">${issue.severity}</span>
           <div style="flex: 1;">
-            <div style="font-weight: 600; margin-bottom: 4px;">${issue.message}</div>
-            <div style="font-size: 12px; color: ${palette.muted};">WCAG ${issue.wcag} · ${issue.rule}</div>
+            <div style="font-weight: 600; margin-bottom: 4px;">${escapeHtml(issue.message)}</div>
+            <div style="font-size: 12px; color: ${palette.muted};">WCAG ${escapeHtml(issue.wcag)} · ${escapeHtml(issue.rule)}</div>
           </div>
         </div>
         <div style="font-size: 14px; color: ${palette.text}; margin-bottom: 8px; padding-left: 68px;">
-          ${issue.suggestion || ''}
+          ${escapeHtml(issue.suggestion || '')}
         </div>
       `;
       

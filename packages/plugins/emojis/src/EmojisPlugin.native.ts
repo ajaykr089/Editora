@@ -1,3 +1,4 @@
+import { escapeHtml } from '../../shared/escapeHtml';
 import { initDialogOverlay } from '../../shared/dialogHelpers';
 import { recordDomHistory } from '../../shared/historyHelpers';
 import type { Plugin } from '@editora/core';
@@ -233,7 +234,7 @@ function renderEmojiGrid(category: EmojiCategory, search: string): string {
   }
 
   if (emojis.length === 0 && search.trim()) {
-    return `<div class="emojis-no-results">No emojis found for "${search}"</div>`;
+    return `<div class="emojis-no-results">No emojis found for "${escapeHtml(search)}"</div>`;
   }
 
   return emojis.map((emoji) => `

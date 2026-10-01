@@ -1,3 +1,4 @@
+import { escapeHtml } from '../../shared/escapeHtml';
 import { initDialogOverlay } from '../../shared/dialogHelpers';
 import { Plugin } from '@editora/core';
 import DOMPurify from 'dompurify';
@@ -336,7 +337,7 @@ function renderDialogContent(): void {
       <input
         type="text"
         placeholder="Search templates..."
-        value="${searchTerm}"
+        value="${escapeHtml(searchTerm)}"
         class="rte-input rte-template-search"
         aria-label="Search templates"
       />

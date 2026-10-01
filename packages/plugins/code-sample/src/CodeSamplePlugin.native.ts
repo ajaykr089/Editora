@@ -1,3 +1,4 @@
+import { escapeHtml } from '../../shared/escapeHtml';
 import { initDialogOverlay } from '../../shared/dialogHelpers';
 import { recordDomHistory } from '../../shared/historyHelpers';
 import { Plugin } from '@editora/core';
@@ -265,7 +266,7 @@ function createCodeSampleDialog(
       background-color: ${palette.fieldBg};
       color: ${palette.text};
       box-sizing: border-box;
-    ">${initialCode}</textarea>
+    ">${escapeHtml(initialCode)}</textarea>
     <div class="rte-code-error" style="color: #dc2626; font-size: 12px; margin-top: 6px; display: none;"></div>
   `;
 

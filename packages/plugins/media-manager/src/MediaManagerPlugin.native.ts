@@ -1,3 +1,4 @@
+import { escapeHtml } from '../../shared/escapeHtml';
 import { initDialogOverlay } from '../../shared/dialogHelpers';
 import { Plugin } from '@editora/core';
 
@@ -843,7 +844,7 @@ const showAltTextDialog = (img: HTMLImageElement) => {
     </div>
     <div class="rte-media-body">
       <label class="rte-media-label">Alternative Text (for accessibility)</label>
-      <textarea id="alt-text-input" class="rte-media-textarea" placeholder="Describe the image for screen readers...">${img.alt || ''}</textarea>
+      <textarea id="alt-text-input" class="rte-media-textarea" placeholder="Describe the image for screen readers...">${escapeHtml(img.alt || '')}</textarea>
       <p class="rte-media-helper">Good alt text is descriptive and concise. It helps users with visual impairments understand your content.</p>
     </div>
     <div class="rte-media-footer">
@@ -898,11 +899,11 @@ const showLinkDialogForMedia = (media: HTMLImageElement | HTMLVideoElement) => {
     <div class="rte-media-body">
       <div class="rte-media-field">
         <label class="rte-media-label">URL</label>
-        <input id="link-url" type="url" class="rte-media-input" value="${currentHref}" placeholder="https://example.com" />
+        <input id="link-url" type="url" class="rte-media-input" value="${escapeHtml(currentHref)}" placeholder="https://example.com" />
       </div>
       <div class="rte-media-field">
         <label class="rte-media-label">Title (tooltip)</label>
-        <input id="link-title" type="text" class="rte-media-input" value="${currentTitle}" placeholder="Optional tooltip text" />
+        <input id="link-title" type="text" class="rte-media-input" value="${escapeHtml(currentTitle)}" placeholder="Optional tooltip text" />
       </div>
       <label class="rte-media-checkbox-label">
         <input id="link-target" type="checkbox" ${currentTarget === '_blank' ? 'checked' : ''} />
