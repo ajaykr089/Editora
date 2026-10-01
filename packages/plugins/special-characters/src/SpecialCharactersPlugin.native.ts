@@ -70,7 +70,7 @@ const characterSets: Record<
 
 const descriptions: Record<string, string> = {
   "€": "euro", "£": "pound", "¥": "yen", "¢": "cent", "₹": "rupee", "₽": "ruble", "₩": "won", "₿": "bitcoin",
-  '"': "quote", "'": "apostrophe", "«": "left angle quote", "»": "right angle quote", "„": "low quote",
+  '"': "quote", "'": "apostrophe", "«": "left angle quote", "»": "right angle quote",
   "©": "copyright", "®": "registered", "™": "trademark", "°": "degree", "§": "section", "¶": "paragraph",
   "†": "dagger", "‡": "double dagger", "•": "bullet", "‰": "per mille", "′": "prime", "″": "double prime",
   "+": "plus", "-": "minus", "×": "multiplication", "÷": "division", "=": "equals", "≠": "not equal",
