@@ -6,14 +6,18 @@ sidebar_label: Grid
 
 # Grid
 
-```tsx
-import { Grid } from '@editora/ui-react';
-
-<Grid columns={{ initial: '1fr', md: 'repeat(3, 1fr)' }} gap="1rem">
-  <div>A</div>
-  <div>B</div>
-  <div>C</div>
-</Grid>;
+```tsx live
+function GridDemo() {
+  return (
+    <ThemeProvider>
+      <Grid columns={{ initial: '1fr', md: 'repeat(3, 1fr)' }} gap="1rem">
+        <div>A</div>
+        <div>B</div>
+        <div>C</div>
+      </Grid>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

@@ -25,10 +25,16 @@ import { AnimatedText } from '@editora/ui-react/AnimatedText';
 
 ## Basic Usage
 
-```tsx
-<AnimatedText effect="fade-up" split="words" variant="gradient" size="lg">
-  Editorial automation that feels alive
-</AnimatedText>
+```tsx live
+function AnimatedTextDemo() {
+  return (
+    <ThemeProvider>
+      <AnimatedText effect="fade-up" split="words" variant="gradient" size="lg">
+        Editorial automation that feels alive
+      </AnimatedText>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Choosing an Effect

@@ -10,10 +10,12 @@ Use `DirectionProvider` to control text and layout direction for multilingual in
 
 ## Basic Usage
 
-```tsx
-import { DirectionProvider } from '@editora/ui-react';
-
-export function Example() {
-  return <DirectionProvider dir="rtl">Arabic content</DirectionProvider>;
+```tsx live
+function Example() {
+  return (
+    <ThemeProvider>
+      <DirectionProvider dir="rtl">Arabic content</DirectionProvider>
+    </ThemeProvider>
+  );
 }
 ```

@@ -192,6 +192,12 @@
       "require": "./dist/code-sample.cjs.js",
       "default": "./dist/code-sample.esm.js"
     },
+    "./collaboration": {
+      "types": "./index.d.ts",
+      "import": "./dist/collaboration.esm.js",
+      "require": "./dist/collaboration.cjs.js",
+      "default": "./dist/collaboration.esm.js"
+    },
     "./comments": {
       "types": "./index.d.ts",
       "import": "./dist/comments.esm.js",
@@ -439,7 +445,7 @@
     "@editora/core": "^1.0.15",
     "@types/katex": "^0.16.8",
     "typescript": "^5.0.0",
-    "vite": "^4.5.14"
+    "vite": "^7.3.1"
   },
   "publishConfig": {
     "access": "public"

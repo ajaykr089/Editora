@@ -6,45 +6,40 @@ sidebar_label: Alert Dialog
 
 # Alert Dialog
 
-```tsx
-import {
-  AlertDialog,
-  AlertDialogActions,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogIcon,
-  AlertDialogTitle,
-  Button
-} from '@editora/ui-react';
-import { AlertTriangleIcon } from '@editora/react-icons';
-
-<AlertDialog
-  open
-  tone="danger"
-  variant="soft"
-  size="lg"
-  radius={12}
-  elevation="high"
-  dismissible
-  closeOnEsc
-  closeOnBackdrop={false}
-  onConfirm={(detail) => console.log(detail)}
->
-  <AlertDialogIcon>
-    <AlertTriangleIcon size={16} />
-  </AlertDialogIcon>
-  <AlertDialogTitle>Delete environment</AlertDialogTitle>
-  <AlertDialogDescription>
-    This action permanently removes the selected environment and cannot be undone.
-  </AlertDialogDescription>
-  <AlertDialogContent>
-    Review the impact before continuing. Audit metadata will be retained.
-  </AlertDialogContent>
-  <AlertDialogActions>
-    <Button variant="secondary">Cancel</Button>
-    <Button>Delete environment</Button>
-  </AlertDialogActions>
-</AlertDialog>;
+```tsx live
+function AlertDialogDemo() {
+  return (
+    <ThemeProvider>
+      <AlertDialog
+        open
+        tone="danger"
+        variant="soft"
+        size="lg"
+        radius={12}
+        elevation="high"
+        dismissible
+        closeOnEsc
+        closeOnBackdrop={false}
+        onConfirm={(detail) => console.log(detail)}
+      >
+        <AlertDialogIcon>
+          <AlertTriangleIcon size={16} />
+        </AlertDialogIcon>
+        <AlertDialogTitle>Delete environment</AlertDialogTitle>
+        <AlertDialogDescription>
+          This action permanently removes the selected environment and cannot be undone.
+        </AlertDialogDescription>
+        <AlertDialogContent>
+          Review the impact before continuing. Audit metadata will be retained.
+        </AlertDialogContent>
+        <AlertDialogActions>
+          <Button variant="secondary">Cancel</Button>
+          <Button>Delete environment</Button>
+        </AlertDialogActions>
+      </AlertDialog>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

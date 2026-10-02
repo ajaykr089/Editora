@@ -10,11 +10,13 @@ sidebar_label: CopyButton
 
 ## Basic usage
 
-```tsx
-import { CopyButton } from '@editora/ui-react';
-
+```tsx live
 function CopyInstallCommand() {
-  return <CopyButton value="npm install @editora/ui-react @editora/ui-core" />;
+  return (
+    <ThemeProvider>
+      <CopyButton value="npm install @editora/ui-react @editora/ui-core" />
+    </ThemeProvider>
+  );
 }
 ```
 

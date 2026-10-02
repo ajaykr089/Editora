@@ -6,10 +6,14 @@ sidebar_label: Container
 
 # Container
 
-```tsx
-import { Container } from '@editora/ui-react';
-
-<Container size="lg">Page content</Container>;
+```tsx live
+function ContainerDemo() {
+  return (
+    <ThemeProvider>
+      <Container size="lg">Page content</Container>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

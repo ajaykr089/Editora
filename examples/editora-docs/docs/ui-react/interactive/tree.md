@@ -27,27 +27,27 @@ import { Tree } from '@editora/ui-react';
 
 ## Basic Usage
 
-```tsx
-import { Tree } from '@editora/ui-react/Tree';
-
+```tsx live
 function FileExplorer() {
   const [value, setValue] = React.useState('button');
 
   return (
-    <Tree
-      value={value}
-      onSelect={(detail) => setValue(detail.value)}
-    >
-      <Tree.Item value="src" label="src" expanded>
-        <Tree.Item value="components" label="components" expanded>
-          <Tree.Item value="button" label="button.tsx" />
-          <Tree.Item value="dialog" label="dialog.tsx" />
+    <ThemeProvider>
+      <Tree
+        value={value}
+        onSelect={(detail) => setValue(detail.value)}
+      >
+        <Tree.Item value="src" label="src" expanded>
+          <Tree.Item value="components" label="components" expanded>
+            <Tree.Item value="button" label="button.tsx" />
+            <Tree.Item value="dialog" label="dialog.tsx" />
+          </Tree.Item>
         </Tree.Item>
-      </Tree.Item>
-      <Tree.Item value="docs" label="docs" expanded>
-        <Tree.Item value="changelog" label="changelog.md" />
-      </Tree.Item>
-    </Tree>
+        <Tree.Item value="docs" label="docs" expanded>
+          <Tree.Item value="changelog" label="changelog.md" />
+        </Tree.Item>
+      </Tree>
+    </ThemeProvider>
   );
 }
 ```

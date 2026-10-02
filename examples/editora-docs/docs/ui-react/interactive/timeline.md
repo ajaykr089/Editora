@@ -6,15 +6,19 @@ sidebar_label: Timeline
 
 # Timeline
 
-```tsx
-import { Timeline } from '@editora/ui-react';
-
-<Timeline
-  items={[
-    { title: 'Incident opened', time: '09:10', tone: 'warning' },
-    { title: 'Mitigation deployed', time: '09:26', tone: 'success', active: true }
-  ]}
-/>;
+```tsx live
+function TimelineDemo() {
+  return (
+    <ThemeProvider>
+      <Timeline
+        items={[
+          { title: 'Incident opened', time: '09:10', tone: 'warning' },
+          { title: 'Mitigation deployed', time: '09:26', tone: 'success', active: true }
+        ]}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

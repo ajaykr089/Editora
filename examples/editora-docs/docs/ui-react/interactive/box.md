@@ -10,14 +10,14 @@ sidebar_label: Box
 
 ## Basic usage
 
-```tsx
-import { Box } from '@editora/ui-react';
-
+```tsx live
 function SurfaceBox() {
   return (
-    <Box p={{ initial: '12px', md: '16px' }} variant="surface" radius={12}>
-      Surface content
-    </Box>
+    <ThemeProvider>
+      <Box p={{ initial: '12px', md: '16px' }} variant="surface" radius={12}>
+        Surface content
+      </Box>
+    </ThemeProvider>
   );
 }
 ```

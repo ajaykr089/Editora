@@ -18,12 +18,18 @@ import { Textarea } from '@editora/ui-react/Textarea';
 
 ## Basic Usage
 
-```tsx
-<Textarea
-  placeholder="Write a release summary..."
-  rows={4}
-  onChange={(value) => console.log(value)}
-/>
+```tsx live
+function TextareaDemo() {
+  return (
+    <ThemeProvider>
+      <Textarea
+        placeholder="Write a release summary..."
+        rows={4}
+        onChange={(value) => console.log(value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## With Label and Description

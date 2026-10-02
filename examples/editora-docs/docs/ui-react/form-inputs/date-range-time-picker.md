@@ -6,17 +6,21 @@ sidebar_label: Date Range Time Picker
 
 # Date Range Time Picker
 
-```tsx
-import { DateRangeTimePicker } from '@editora/ui-react';
-
-<DateRangeTimePicker
-  label="Maintenance window"
-  value='{"start":"2026-03-15T09:00","end":"2026-03-15T12:00"}'
-  step={15}
-  clearable
-  allowPartial
-  onValueChange={(value) => console.log(value)}
-/>;
+```tsx live
+function DateRangeTimePickerDemo() {
+  return (
+    <ThemeProvider>
+      <DateRangeTimePicker
+        label="Maintenance window"
+        value='{"start":"2026-03-15T09:00","end":"2026-03-15T12:00"}'
+        step={15}
+        clearable
+        allowPartial
+        onValueChange={(value) => console.log(value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

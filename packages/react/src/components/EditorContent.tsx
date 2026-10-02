@@ -1,7 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import { Editor, KeyboardShortcutManager } from '@editora/core';
+import { Editor, KeyboardShortcutManager, sanitizePastedHTML, sanitizeInputHTML } from '@editora/core';
 import { useAutosave } from '../hooks/useAutosave';
-import { sanitizePastedHTML, sanitizeInputHTML } from '../utils/sanitizeHTML';
 
 const isStructurallyEmpty = (el: HTMLElement): boolean => {
   const text = (el.textContent || '').replace(/\u200B/g, '').trim();
@@ -250,10 +249,12 @@ interface EditorContentProps {
     enabled?: boolean;
     provider?: 'browser' | 'local' | 'api';
   };
+  /** False when a bottom toolbar or status bar follows the content, so its bottom edge should stay flush instead of closing off as its own rounded box. */
+  roundBottomCorners?: boolean;
 }
 
-export const EditorContent: React.FC<EditorContentProps> = ({ 
-  editor, 
+export const EditorContent: React.FC<EditorContentProps> = ({
+  editor,
   defaultValue,
   value,
   readonly = false,
@@ -267,6 +268,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
   autosaveConfig,
   contextMenuConfig,
   spellcheckConfig,
+  roundBottomCorners = true,
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const isControlled = value !== undefined;
@@ -415,26 +417,35 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       };
     };
 
-    const handleInput = () => {
+    const handleInput = (event?: Event) => {
       if (!contentRef.current) return;
       if (readonly) return;
 
       if (placeholder && isStructurallyEmpty(contentRef.current)) {
         contentRef.current.innerHTML = '';
       }
-      
+
       let html = contentRef.current.innerHTML;
-      
+
+      // A plugin that just made its own trusted, explicit insertion (e.g.
+      // embed-iframe's dialog) can mark the 'input' event it dispatches with
+      // detail.allowedTags so that specific mutation survives sanitizeOnInput
+      // without reopening those tags to arbitrary typed/pasted content -
+      // sanitizePastedHTML never reads this, so paste stays unaffected.
+      const trustedAllowedTags = (event as CustomEvent | undefined)?.detail?.allowedTags as
+        | string[]
+        | undefined;
+
       // Sanitize input if enabled
       if (securityConfig?.sanitizeOnInput !== false && contentConfig?.sanitize !== false) {
-        const sanitizedHtml = sanitizeInputHTML(html, contentConfig, securityConfig);
-        
+        const sanitizedHtml = sanitizeInputHTML(html, contentConfig, securityConfig, trustedAllowedTags);
+
         // Update content if sanitization changed it
         if (sanitizedHtml !== contentRef.current.innerHTML) {
           // Keep caret/selection stable when sanitization rewrites DOM.
           const snapshot = insertSelectionMarkers(contentRef.current);
           const htmlWithMarkers = contentRef.current.innerHTML;
-          const sanitizedWithMarkers = sanitizeInputHTML(htmlWithMarkers, contentConfig, securityConfig);
+          const sanitizedWithMarkers = sanitizeInputHTML(htmlWithMarkers, contentConfig, securityConfig, trustedAllowedTags);
 
           contentRef.current.innerHTML = sanitizedWithMarkers;
 
@@ -635,7 +646,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
         padding: "16px",
         outline: "none",
         border: "1px solid #ddd",
-        borderRadius: "0px 0px 4px 4px",
+        borderRadius: roundBottomCorners ? "0px 0px 4px 4px" : "0px",
         fontSize: "14px",
         lineHeight: "1.5",
         overflow: autoHeightEnabled ? (maxEditorHeight > 0 ? "auto" : "hidden") : "auto",
@@ -643,7 +654,6 @@ export const EditorContent: React.FC<EditorContentProps> = ({
         boxSizing: "border-box",
         wordWrap: "break-word",
         overflowWrap: "break-word",
-        marginBottom: "16px",
       }}
     />
   );

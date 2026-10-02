@@ -6,10 +6,14 @@ sidebar_label: Progress
 
 # Progress
 
-```tsx
-import { Progress } from '@editora/ui-react';
-
-<Progress value={48} max={100} showLabel label="Upload progress" />
+```tsx live
+function ProgressDemo() {
+  return (
+    <ThemeProvider>
+      <Progress value={48} max={100} showLabel label="Upload progress" />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Props

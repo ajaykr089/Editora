@@ -10,19 +10,19 @@ sidebar_label: Stepper
 
 ## Basic Usage
 
-```tsx
-import { Stepper } from '@editora/ui-react';
-
+```tsx live
 function SignupStepper() {
   return (
-    <Stepper
-      value="profile"
-      steps={[
-        { value: 'account', label: 'Account', state: 'complete' },
-        { value: 'profile', label: 'Profile' },
-        { value: 'billing', label: 'Billing' }
-      ]}
-    />
+    <ThemeProvider>
+      <Stepper
+        value="profile"
+        steps={[
+          { value: 'account', label: 'Account', state: 'complete' },
+          { value: 'profile', label: 'Profile' },
+          { value: 'billing', label: 'Billing' }
+        ]}
+      />
+    </ThemeProvider>
   );
 }
 ```

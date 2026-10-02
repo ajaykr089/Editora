@@ -6,21 +6,25 @@ sidebar_label: Radio Group
 
 # Radio Group
 
-```tsx
-import { RadioGroup } from '@editora/ui-react';
-
-<RadioGroup
-  name="priority"
-  value="high"
-  orientation="vertical"
-  variant="card"
-  options={[
-    { value: 'low', label: 'Low' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'high', label: 'High', description: 'Escalate immediately' }
-  ]}
-  onValueChange={(detail) => console.log(detail.value)}
-/>;
+```tsx live
+function RadioGroupDemo() {
+  return (
+    <ThemeProvider>
+      <RadioGroup
+        name="priority"
+        value="high"
+        orientation="vertical"
+        variant="card"
+        options={[
+          { value: 'low', label: 'Low' },
+          { value: 'medium', label: 'Medium' },
+          { value: 'high', label: 'High', description: 'Escalate immediately' }
+        ]}
+        onValueChange={(detail) => console.log(detail.value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

@@ -1,3 +1,5 @@
+import { escapeHtml } from '../../shared/escapeHtml';
+import { initDialogOverlay } from '../../shared/dialogHelpers';
 import type { Plugin } from '@editora/core';
 
 /**
@@ -40,6 +42,53 @@ let selectedMathElement: HTMLElement | null = null;
 const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
 
 // Global flag to ensure listener is added only once across all instances
+const MATHML_ELEMENTS = new Set([
+  'math', 'mrow', 'mi', 'mn', 'mo', 'ms', 'mtext', 'mspace', 'msup', 'msub', 'msubsup', 'mfrac', 'msqrt',
+  'mroot', 'mfenced', 'mstyle', 'mpadded', 'mphantom', 'menclose', 'mtable', 'mtr', 'mtd', 'mlabeledtr',
+  'munder', 'mover', 'munderover', 'mmultiscripts', 'mprescripts', 'none', 'semantics', 'annotation',
+]);
+
+const MATHML_ATTRIBUTES = new Set([
+  'display', 'displaystyle', 'mathvariant', 'mathsize', 'mathcolor', 'mathbackground', 'scriptlevel',
+  'fence', 'separator', 'stretchy', 'symmetric', 'lspace', 'rspace', 'largeop', 'movablelimits',
+  'accent', 'accentunder', 'open', 'close', 'separators', 'linethickness', 'columnalign', 'rowalign',
+  'columnspacing', 'rowspacing', 'columnlines', 'rowlines', 'frame', 'notation', 'width', 'height',
+  'depth', 'voffset', 'minsize', 'maxsize', 'form', 'encoding', 'xmlns', 'dir', 'class', 'id',
+]);
+
+/**
+ * Reduce user-entered or document-stored MathML to a whitelist of MathML elements and
+ * attributes before it is assigned to innerHTML. The formula in the dialog's preview (and in
+ * Edit mode) can come from the document, and a bare `<img onerror>` or `<script>` inside
+ * "MathML" would otherwise run. Parsing happens in an inert DOMParser document so nothing
+ * executes while it is being inspected.
+ */
+const sanitizeMathMl = (markup: string): string => {
+  const doc = new DOMParser().parseFromString(`<body>${markup}</body>`, 'text/html');
+
+  const clean = (node: Node): void => {
+    Array.from(node.childNodes).forEach((child) => {
+      if (child.nodeType === Node.ELEMENT_NODE) {
+        const element = child as Element;
+        if (!MATHML_ELEMENTS.has(element.localName.toLowerCase())) {
+          // Drop the element entirely, including anything nested inside it.
+          element.remove();
+          return;
+        }
+        Array.from(element.attributes).forEach((attr) => {
+          if (!MATHML_ATTRIBUTES.has(attr.name.toLowerCase())) element.removeAttribute(attr.name);
+        });
+        clean(element);
+      } else if (child.nodeType !== Node.TEXT_NODE) {
+        child.parentNode?.removeChild(child);
+      }
+    });
+  };
+  clean(doc.body);
+
+  return doc.body.innerHTML;
+};
+
 declare global {
   interface Window {
     __mathPluginDoubleClickInitialized?: boolean;
@@ -269,6 +318,8 @@ const showMathDialog = async (
   initialData?: { formula: string; format: 'latex' | 'mathml'; inline: boolean },
   preferredEditorContent?: HTMLElement | null,
 ) => {
+  document.querySelectorAll('.math-dialog-overlay').forEach((el) => el.remove());
+
   const editorContent =
     preferredEditorContent ||
     (editingMathElement?.closest('.rte-content, .editora-content') as HTMLElement | null) ||
@@ -333,6 +384,7 @@ const showMathDialog = async (
     };
 
   const overlay = document.createElement('div');
+  initDialogOverlay(overlay);
   overlay.className = 'math-dialog-overlay';
   overlay.style.cssText = `position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: ${palette.overlay}; display: flex; align-items: center; justify-content: center; z-index: 99999;`;
 
@@ -341,7 +393,7 @@ const showMathDialog = async (
 
   let currentFormat: 'latex' | 'mathml' = initialData?.format || 'latex';
   let currentFormula = initialData?.formula || '';
-  let currentInline = initialData?.inline !== false;
+  const currentInline = initialData?.inline !== false;
   let previewRaf: number | null = null;
   let lastPreviewSignature = '';
 
@@ -371,7 +423,7 @@ const showMathDialog = async (
 
       <div style="margin-bottom: 20px;">
         <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: ${palette.text};">Formula:</label>
-        <textarea id="formula-input" rows="4" style="width: 100%; min-height: 112px; padding: 10px 12px; border: 1px solid ${palette.fieldBorder}; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.45; background: ${palette.fieldBg}; color: ${palette.text}; box-sizing: border-box; overflow-x: hidden; overflow-y: auto; resize: vertical;">${currentFormula}</textarea>
+        <textarea id="formula-input" rows="4" style="width: 100%; min-height: 112px; padding: 10px 12px; border: 1px solid ${palette.fieldBorder}; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.45; background: ${palette.fieldBg}; color: ${palette.text}; box-sizing: border-box; overflow-x: hidden; overflow-y: auto; resize: vertical;">${escapeHtml(currentFormula)}</textarea>
       </div>
 
       <div style="margin-bottom: 20px;">
@@ -438,10 +490,10 @@ const showMathDialog = async (
       } else {
         // For MathML, check if it starts with <math>, if not, wrap it
         if (formula.trim().startsWith('<math')) {
-          previewArea.innerHTML = formula;
+          previewArea.innerHTML = sanitizeMathMl(formula);
         } else {
           // Wrap in <math> tag and render
-          previewArea.innerHTML = `<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">${formula}</math>`;
+          previewArea.innerHTML = sanitizeMathMl(`<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline">${formula}</math>`);
         }
       }
     } catch {
@@ -550,11 +602,11 @@ const showMathDialog = async (
     } else {
       // For MathML, wrap in <math> tag if not already wrapped
       if (formula.trim().startsWith('<math')) {
-        mathEl.innerHTML = formula;
+        mathEl.innerHTML = sanitizeMathMl(formula);
       } else {
         // Create proper MathML with namespace
         const mathContent = `<math xmlns="http://www.w3.org/1998/Math/MathML" display="${mathData.inline ? 'inline' : 'block'}">${formula}</math>`;
-        mathEl.innerHTML = mathContent;
+        mathEl.innerHTML = sanitizeMathMl(mathContent);
       }
     }
 

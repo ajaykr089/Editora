@@ -564,7 +564,8 @@ Built with modern web technologies:
 - **TypeScript 5** - Type safety
 - **Rollup** - Module bundling
 - **Jest** - Testing framework
-- **Lerna** - Monorepo management
+- **Lerna** - Monorepo task running
+- **Changesets** - Versioning and publishing
 
 Inspired by modern editor architecture and best practices.
 

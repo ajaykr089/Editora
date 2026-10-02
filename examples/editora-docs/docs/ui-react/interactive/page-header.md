@@ -10,21 +10,21 @@ sidebar_label: PageHeader
 
 ## Basic usage
 
-```tsx
-import { PageHeader } from '@editora/ui-react';
-
+```tsx live
 function ReportsHeader() {
   return (
-    <PageHeader
-      eyebrow="Operations"
-      title="Reports"
-      subtitle="Track performance across locations and departments"
-      statusChip={{ label: 'live', tone: 'success' }}
-      actions={[
-        { label: 'Share' },
-        { label: 'Export', variant: 'primary' },
-      ]}
-    />
+    <ThemeProvider>
+      <PageHeader
+        eyebrow="Operations"
+        title="Reports"
+        subtitle="Track performance across locations and departments"
+        statusChip={{ label: 'live', tone: 'success' }}
+        actions={[
+          { label: 'Share' },
+          { label: 'Export', variant: 'primary' },
+        ]}
+      />
+    </ThemeProvider>
   );
 }
 ```

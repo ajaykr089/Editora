@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import '@editora/ui-core/alert-dialog';
 import {
   UIAlertDialogCancelDetail,
   UIAlertDialogCloseDetail,

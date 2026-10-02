@@ -33,6 +33,8 @@ interface HistorySnapshot {
 
 let EDITOR_INSTANCE_COUNTER = 0;
 
+type DeletionUnit = 'char' | 'word' | 'line';
+
 export class EditorCore implements EditorAPI {
   private static readonly CURSOR_SENTINEL = '\uE000';
   private textModel: TextModel;
@@ -129,6 +131,9 @@ export class EditorCore implements EditorAPI {
     this.registerCommand('undo', () => this.undo());
     this.registerCommand('redo', () => this.redo());
     this.registerCommand('insertTab', () => this.insertTab());
+    this.registerCommand('outdent', () => {
+      this.shiftSelectedLines(true);
+    });
     // Provide a default 'save' command so consumers can call it even if not wired.
     // Default 'save' command: emit a 'save' event so consumers can listen via `on('save', ...)`.
     this.registerCommand('save', () => {
@@ -188,24 +193,24 @@ export class EditorCore implements EditorAPI {
         return;
       }
 
-      if (
-        event.inputType === 'deleteContentBackward' ||
-        event.inputType === 'deleteWordBackward'
-      ) {
-        event.preventDefault();
-        this.pendingInputSnapshot = undefined;
-        this.deleteBackward();
-        return;
-      }
+      // While an IME composition is active, Backspace/Delete edit the composition itself;
+      // taking them over would delete document text underneath it.
+      if (!event.isComposing) {
+        const backwardUnit = EditorCore.deletionUnit(event.inputType, 'Backward');
+        if (backwardUnit) {
+          event.preventDefault();
+          this.pendingInputSnapshot = undefined;
+          this.deleteBackward(backwardUnit);
+          return;
+        }
 
-      if (
-        event.inputType === 'deleteContentForward' ||
-        event.inputType === 'deleteWordForward'
-      ) {
-        event.preventDefault();
-        this.pendingInputSnapshot = undefined;
-        this.deleteForward();
-        return;
+        const forwardUnit = EditorCore.deletionUnit(event.inputType, 'Forward');
+        if (forwardUnit) {
+          event.preventDefault();
+          this.pendingInputSnapshot = undefined;
+          this.deleteForward(forwardUnit);
+          return;
+        }
       }
 
       if (event.inputType === 'deleteByCut') {
@@ -321,20 +326,33 @@ export class EditorCore implements EditorAPI {
 
       // Handle Tab key directly to ensure consistent insertion
       if (e.key === 'Tab' && !this.config.readOnly) {
-        this.insertTab();
+        // Over a multi-line selection Tab indents the lines (and Shift+Tab outdents) instead of
+        // replacing the selected text with spaces, which destroyed it.
+        if (e.shiftKey) {
+          this.shiftSelectedLines(true);
+        } else {
+          this.insertTab();
+        }
         e.preventDefault();
         e.stopPropagation();
         return;
       }
 
-      if (e.key === 'Backspace' && !this.config.readOnly) {
+      // Plain Backspace/Delete are handled here for consistency. A modified one (Alt/Ctrl:
+      // delete word, Cmd: delete to line edge) or one during IME composition is left to the
+      // browser, whose beforeinput event (deleteWordBackward, deleteSoftLineBackward, ...) is
+      // handled above - this used to delete a single character for all of them.
+      const isModifiedDelete = e.altKey || e.ctrlKey || e.metaKey;
+      const isComposingKey = e.isComposing || e.keyCode === 229;
+
+      if (e.key === 'Backspace' && !this.config.readOnly && !isModifiedDelete && !isComposingKey) {
         this.deleteBackward();
         e.preventDefault();
         e.stopPropagation();
         return;
       }
 
-      if (e.key === 'Delete' && !this.config.readOnly) {
+      if (e.key === 'Delete' && !this.config.readOnly && !isModifiedDelete && !isComposingKey) {
         this.deleteForward();
         e.preventDefault();
         e.stopPropagation();
@@ -737,15 +755,27 @@ export class EditorCore implements EditorAPI {
 
   replaceAll(query: string, replacement: string, options: Partial<SearchOptions> = {}): number {
     const results = this.search(query, options);
-    let replacements = 0;
+    if (results.length === 0) return 0;
 
-    // Process in reverse order to maintain positions
-    for (let i = results.length - 1; i >= 0; i--) {
-      this.replace(results[i].range, replacement);
-      replacements++;
+    // One Replace All is one user action: a single undo snapshot, a single render and a
+    // single change event. Calling replace() per match pushed N snapshots (N Undo presses to
+    // revert) and re-highlighted the whole document N times.
+    if (!this.suppressHistory) {
+      this.pushUndoSnapshot(this.captureHistorySnapshot(this.getValue()));
     }
 
-    return replacements;
+    const changes: ReturnType<TextModel['replaceRange']>[] = [];
+    // Process in reverse order to maintain positions
+    for (let i = results.length - 1; i >= 0; i--) {
+      changes.push(this.textModel.replaceRange(results[i].range, replacement));
+    }
+
+    this.expectingProgrammaticCursor = true;
+    this.renderTextWithHighlight(this.getValue(), false);
+    this.expectingProgrammaticCursor = false;
+    this.emit('change', changes);
+
+    return results.length;
   }
 
   // Folding (basic implementation)
@@ -1075,8 +1105,68 @@ export class EditorCore implements EditorAPI {
   // Insert a tab character or spaces at current cursor
   private insertTab(): void {
     if (this.config.readOnly) return;
+    // Over a multi-line selection Tab indents the lines rather than replacing the selection.
+    if (this.shiftSelectedLines(false)) return;
     const tabText = ' '.repeat(this.config.tabSize || 2);
     this.replaceSelectionWithText(tabText);
+  }
+
+  /**
+   * Tab / Shift+Tab over whole lines. Tab only applies when the selection spans lines (a caret
+   * or single-line selection keeps the plain "insert a tab" behaviour); Shift+Tab always
+   * outdents the line(s) it touches. Returns false when the caller should fall back to inserting.
+   * The edit is one replace, so it is one undo step, and the selection is kept on the same text.
+   */
+  private shiftSelectedLines(outdent: boolean): boolean {
+    if (this.config.readOnly) return false;
+
+    const text = this.textModel.getText();
+    const { startOffset, endOffset } = this.getActiveSelectionOffsets(text);
+    const from = Math.min(startOffset, endOffset);
+    const to = Math.max(startOffset, endOffset);
+    if (!outdent && !text.slice(from, to).includes('\n')) return false;
+
+    const indentUnit = ' '.repeat(this.config.tabSize || 2);
+    const blockStart = text.lastIndexOf('\n', from - 1) + 1;
+    // A selection that ends at the very start of a line does not include that line.
+    const effectiveTo = to > from && text[to - 1] === '\n' ? to - 1 : to;
+    const nextBreak = text.indexOf('\n', effectiveTo);
+    const blockEnd = nextBreak === -1 ? text.length : nextBreak;
+
+    const lines = text.slice(blockStart, blockEnd).split('\n');
+    let firstDelta = 0;
+    let totalDelta = 0;
+    const shifted = lines.map((line, index) => {
+      let next = line;
+      if (!outdent) {
+        next = line.length === 0 ? line : indentUnit + line;
+      } else if (line.startsWith('\t')) {
+        next = line.slice(1);
+      } else {
+        const leading = /^ */.exec(line)![0].length;
+        next = line.slice(Math.min(leading, indentUnit.length));
+      }
+      const delta = next.length - line.length;
+      if (index === 0) firstDelta = delta;
+      totalDelta += delta;
+      return next;
+    });
+
+    if (totalDelta === 0) return true; // nothing to shift (e.g. already at column 0)
+
+    this.replaceOffsetsWithText(blockStart, blockEnd, shifted.join('\n'));
+
+    const newFrom = Math.max(blockStart, from + firstDelta);
+    const newTo = Math.max(newFrom, to + totalDelta);
+    if (from === to) {
+      this.setCursor(this.textModel.offsetToPosition(newFrom));
+    } else {
+      this.setSelection({
+        start: this.textModel.offsetToPosition(newFrom),
+        end: this.textModel.offsetToPosition(newTo),
+      });
+    }
+    return true;
   }
 
   // Insert a newline at current cursor position
@@ -1085,14 +1175,22 @@ export class EditorCore implements EditorAPI {
     this.replaceSelectionWithText('\n');
   }
 
-  private deleteBackward(): void {
+  private deleteBackward(unit: DeletionUnit = 'char'): void {
     if (this.config.readOnly) return;
-    this.deleteUsingDirection('backward');
+    this.deleteUsingDirection('backward', unit);
   }
 
-  private deleteForward(): void {
+  private deleteForward(unit: DeletionUnit = 'char'): void {
     if (this.config.readOnly) return;
-    this.deleteUsingDirection('forward');
+    this.deleteUsingDirection('forward', unit);
+  }
+
+  /** Map an InputEvent.inputType to the unit it deletes, or null when it isn't a delete in that direction. */
+  private static deletionUnit(inputType: string, direction: 'Backward' | 'Forward'): DeletionUnit | null {
+    if (inputType === `deleteContent${direction}`) return 'char';
+    if (inputType === `deleteWord${direction}`) return 'word';
+    if (inputType === `deleteSoftLine${direction}` || inputType === `deleteHardLine${direction}`) return 'line';
+    return null;
   }
 
   private deleteSelection(): void {
@@ -1391,7 +1489,7 @@ export class EditorCore implements EditorAPI {
     };
   }
 
-  private deleteUsingDirection(direction: 'backward' | 'forward'): void {
+  private deleteUsingDirection(direction: 'backward' | 'forward', unit: DeletionUnit = 'char'): void {
     const currentText = this.textModel.getText();
     const { startOffset, endOffset } = this.getActiveSelectionOffsets(currentText);
     const fromOffset = Math.min(startOffset, endOffset);
@@ -1406,14 +1504,104 @@ export class EditorCore implements EditorAPI {
       if (fromOffset === 0) {
         return;
       }
-      this.replaceOffsetsWithText(fromOffset - 1, fromOffset, '');
+      const start = EditorCore.deletionBoundary(currentText, fromOffset, 'backward', unit);
+      this.replaceOffsetsWithText(start, fromOffset, '');
       return;
     }
 
     if (toOffset >= currentText.length) {
       return;
     }
-    this.replaceOffsetsWithText(toOffset, toOffset + 1, '');
+    const end = EditorCore.deletionBoundary(currentText, toOffset, 'forward', unit);
+    this.replaceOffsetsWithText(toOffset, end, '');
+  }
+
+  private static graphemeSegmenter: { segment(input: string): Iterable<{ segment: string }> } | null | undefined;
+
+  private static getGraphemeSegmenter() {
+    if (EditorCore.graphemeSegmenter === undefined) {
+      const Segmenter = (Intl as unknown as {
+        Segmenter?: new (locale?: string, options?: { granularity: 'grapheme' }) => {
+          segment(input: string): Iterable<{ segment: string }>;
+        };
+      }).Segmenter;
+      EditorCore.graphemeSegmenter = Segmenter ? new Segmenter(undefined, { granularity: 'grapheme' }) : null;
+    }
+    return EditorCore.graphemeSegmenter;
+  }
+
+  /**
+   * Where a deletion of `unit` starting at `offset` ends. Characters are whole grapheme
+   * clusters (an emoji is two UTF-16 units, a flag or ZWJ sequence several), so Backspace
+   * never leaves half a surrogate pair behind - that used to turn "a😀b" into "a\uD83Db",
+   * which is invalid text once saved.
+   */
+  private static deletionBoundary(
+    text: string,
+    offset: number,
+    direction: 'backward' | 'forward',
+    unit: DeletionUnit,
+  ): number {
+    const isWordChar = (ch: string) => /[A-Za-z0-9_]/.test(ch);
+    const isSpace = (ch: string) => ch === ' ' || ch === '\t';
+
+    if (unit === 'line') {
+      if (direction === 'backward') {
+        const lineStart = text.lastIndexOf('\n', offset - 1) + 1;
+        // At the start of a line, deleting "to the line start" removes the line break.
+        return lineStart === offset ? offset - 1 : lineStart;
+      }
+      const nl = text.indexOf('\n', offset);
+      const lineEnd = nl === -1 ? text.length : nl;
+      return lineEnd === offset ? Math.min(text.length, offset + 1) : lineEnd;
+    }
+
+    if (unit === 'word') {
+      let i = offset;
+      if (direction === 'backward') {
+        if (text[i - 1] === '\n') return i - 1;
+        while (i > 0 && isSpace(text[i - 1])) i--;
+        if (i > 0 && text[i - 1] !== '\n') {
+          const wordy = isWordChar(text[i - 1]);
+          while (i > 0 && text[i - 1] !== '\n' && !isSpace(text[i - 1]) && isWordChar(text[i - 1]) === wordy) i--;
+        }
+        return i;
+      }
+      if (text[i] === '\n') return i + 1;
+      while (i < text.length && isSpace(text[i])) i++;
+      if (i < text.length && text[i] !== '\n') {
+        const wordy = isWordChar(text[i]);
+        while (i < text.length && text[i] !== '\n' && !isSpace(text[i]) && isWordChar(text[i]) === wordy) i++;
+      }
+      return i;
+    }
+
+    // Single character: the whole grapheme cluster next to the caret.
+    if (direction === 'backward') {
+      const lineStart = text.lastIndexOf('\n', offset - 1) + 1;
+      if (lineStart === offset) return offset - 1; // the line break
+      const segmenter = EditorCore.getGraphemeSegmenter();
+      if (segmenter) {
+        let last = 1;
+        for (const { segment } of segmenter.segment(text.slice(lineStart, offset))) last = segment.length;
+        return offset - last;
+      }
+      const code = text.charCodeAt(offset - 1);
+      const prev = offset >= 2 ? text.charCodeAt(offset - 2) : 0;
+      return code >= 0xdc00 && code <= 0xdfff && prev >= 0xd800 && prev <= 0xdbff ? offset - 2 : offset - 1;
+    }
+
+    if (text[offset] === '\n') return offset + 1;
+    const nl = text.indexOf('\n', offset);
+    const lineEnd = nl === -1 ? text.length : nl;
+    const segmenter = EditorCore.getGraphemeSegmenter();
+    if (segmenter) {
+      for (const { segment } of segmenter.segment(text.slice(offset, lineEnd))) return offset + segment.length;
+      return offset + 1;
+    }
+    const code = text.charCodeAt(offset);
+    const next = offset + 1 < text.length ? text.charCodeAt(offset + 1) : 0;
+    return code >= 0xd800 && code <= 0xdbff && next >= 0xdc00 && next <= 0xdfff ? offset + 2 : offset + 1;
   }
 
   private replaceOffsetsWithText(

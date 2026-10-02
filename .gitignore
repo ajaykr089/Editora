@@ -51,3 +51,5 @@ api/media/uploads/
 ai-docs/
 e2e-local/
 package-lock.json
+
+lerna-debug.log*

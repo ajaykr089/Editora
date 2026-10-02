@@ -10,17 +10,17 @@ sidebar_label: BlockControls
 
 ## Basic usage
 
-```tsx
-import { BlockControls, Button } from '@editora/ui-react';
-
+```tsx live
 function FormattingToolbar() {
   return (
-    <BlockControls ariaLabel="Formatting controls" variant="surface" tone="info" radius={12}>
-      <Button size="sm">B</Button>
-      <Button size="sm">I</Button>
-      <span data-separator aria-hidden="true" />
-      <Button size="sm">H1</Button>
-    </BlockControls>
+    <ThemeProvider>
+      <BlockControls ariaLabel="Formatting controls" variant="surface" tone="info" radius={12}>
+        <Button size="sm">B</Button>
+        <Button size="sm">I</Button>
+        <span data-separator aria-hidden="true" />
+        <Button size="sm">H1</Button>
+      </BlockControls>
+    </ThemeProvider>
   );
 }
 ```

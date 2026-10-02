@@ -6,17 +6,21 @@ sidebar_label: Scroll Area
 
 # Scroll Area
 
-```tsx
-import { ScrollArea } from '@editora/ui-react';
-
-<ScrollArea
-  orientation="vertical"
-  size="md"
-  shadows
-  onScrollChange={(detail) => console.log(detail.progressY)}
->
-  <div style={{ height: 480 }}>Scrollable content</div>
-</ScrollArea>;
+```tsx live
+function ScrollAreaDemo() {
+  return (
+    <ThemeProvider>
+      <ScrollArea
+        orientation="vertical"
+        size="md"
+        shadows
+        onScrollChange={(detail) => console.log(detail.progressY)}
+      >
+        <div style={{ height: 480 }}>Scrollable content</div>
+      </ScrollArea>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

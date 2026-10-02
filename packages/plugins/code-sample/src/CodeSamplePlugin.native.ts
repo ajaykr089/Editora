@@ -1,3 +1,6 @@
+import { escapeHtml } from '../../shared/escapeHtml';
+import { initDialogOverlay } from '../../shared/dialogHelpers';
+import { recordDomHistory } from '../../shared/historyHelpers';
 import { Plugin } from '@editora/core';
 
 /**
@@ -11,6 +14,30 @@ import { Plugin } from '@editora/core';
  * - Edit/Delete capabilities
  * - 24+ supported languages
  */
+
+const BLOCK_TAGS = new Set([
+  'DIV', 'P', 'BLOCKQUOTE', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'TD', 'TH',
+]);
+
+// A <pre> code block is not valid content inside a <p> - inserting it at the
+// raw cursor position (range.insertNode) nests it inside whatever block the
+// cursor happens to be in. That renders fine live, but reparsing the HTML
+// (undo/redo snapshots, copy-paste, any sanitizer round-tripping through
+// innerHTML) auto-closes the paragraph at the <pre> boundary, corrupting it.
+// Walking up to the nearest real block ancestor lets the code block be
+// inserted as its sibling instead, matching the page-break plugin's pattern.
+function getContainingBlock(node: Node, editorContent: HTMLElement): HTMLElement | null {
+  let current: Node | null = node;
+
+  while (current && current !== editorContent) {
+    if (current.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has((current as HTMLElement).tagName)) {
+      return current as HTMLElement;
+    }
+    current = current.parentNode;
+  }
+
+  return null;
+}
 
 // ===== Multi-Instance Helper =====
 const findActiveEditor = (): HTMLElement | null => {
@@ -88,15 +115,6 @@ const SUPPORTED_LANGUAGES = [
   { value: 'plaintext', label: 'Plain Text' }
 ];
 
-// ===== Code Block Registry =====
-interface CodeBlockData {
-  id: string;
-  language: string;
-  code: string;
-}
-
-const codeBlockRegistry = new Map<string, CodeBlockData>();
-
 // ===== Dialog Creation =====
 let activeDialog: HTMLElement | null = null;
 
@@ -106,6 +124,10 @@ function createCodeSampleDialog(
   editingCode?: string,
   editingLanguage?: string
 ): HTMLElement {
+  if (activeDialog) {
+    activeDialog.remove();
+    activeDialog = null;
+  }
   const isEditing = !!editingCodeId;
   const initialLanguage = editingLanguage || 'javascript';
   const initialCode = editingCode || '';
@@ -145,6 +167,7 @@ function createCodeSampleDialog(
     };
 
   const overlay = document.createElement('div');
+  initDialogOverlay(overlay);
   overlay.className = 'rte-code-sample-overlay';
   if (isDarkTheme) overlay.classList.add('rte-theme-dark');
   overlay.style.cssText = `
@@ -243,7 +266,7 @@ function createCodeSampleDialog(
       background-color: ${palette.fieldBg};
       color: ${palette.text};
       box-sizing: border-box;
-    ">${initialCode}</textarea>
+    ">${escapeHtml(initialCode)}</textarea>
     <div class="rte-code-error" style="color: #dc2626; font-size: 12px; margin-top: 6px; display: none;"></div>
   `;
 
@@ -330,8 +353,10 @@ function createCodeSampleDialog(
   };
 
   const handleSave = () => {
-    const code = textarea.value.trim();
-    if (!code) {
+    // Only drop leading blank lines and trailing whitespace: a full trim() would also
+    // strip the first line's indentation, which matters in code.
+    const code = textarea.value.replace(/^(?:[ \t]*\r?\n)+/, '').replace(/\s+$/, '');
+    if (!code.trim()) {
       errorDiv.textContent = '⚠ Code cannot be empty';
       errorDiv.style.display = 'block';
       return;
@@ -393,78 +418,23 @@ function createCodeSampleDialog(
   return overlay;
 }
 
-// ===== Insert Code Block =====
-function insertCodeBlock() {
-  const editor = findActiveEditor();
-  if (!editor) return;
+// ===== Code Block Rendering =====
+const CODE_BLOCK_SELECTOR = 'pre.rte-code-block, pre[data-type="code-block"]';
 
-  // Save the current selection range before opening the dialog
-  let savedRange: Range | null = null;
-  const selection = window.getSelection();
-  if (selection && selection.rangeCount > 0) {
-    savedRange = selection.getRangeAt(0).cloneRange();
-  }
+// The block is deliberately just <pre><code>: anything else (a Copy <button>, a
+// language badge <span>) is stripped or flattened to stray text by the editor's
+// input sanitizer on the next keystroke, and per-element handlers are lost whenever
+// the DOM is rebuilt (undo/redo, loading saved HTML). The badge is drawn from
+// data-lang by CSS and the Copy / edit actions are delegated from the document, so
+// they work for every block however it was created.
+function injectCodeBlockStyles(): void {
+  if (document.getElementById('rte-code-sample-block-styles')) return;
 
-  createCodeSampleDialog((code, language) => {
-    // Restore the selection before inserting
-    const selection = window.getSelection();
-    if (savedRange) {
-      selection?.removeAllRanges();
-      selection?.addRange(savedRange);
-    }
-    if (!selection || selection.rangeCount === 0) return;
-
-    // Ensure selection is inside the correct editor instance
-    const editorEl = findActiveEditor();
-    if (!editorEl) return;
-    const anchorNode = selection.anchorNode;
-    if (!anchorNode || !editorEl.contains(anchorNode)) return;
-
-    const range = selection.getRangeAt(0);
-    const codeBlockId = `code-block-${Date.now()}`;
-
-    // Create code block container
-    const pre = document.createElement('pre');
-    pre.className = 'rte-code-block';
-    pre.id = codeBlockId;
-    pre.setAttribute('data-type', 'code-block');
-    pre.setAttribute('data-lang', language);
-    pre.setAttribute('data-code-id', codeBlockId);
-    pre.setAttribute('contenteditable', 'false');
-    pre.style.cssText = `
-      display: block;
-      position: relative;
-      background: #f5f5f5;
-      border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      padding: 12px;
-      margin: 12px 0;
-      overflow-x: auto;
-      font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
-      font-size: 13px;
-      line-height: 1.5;
-      color: #333;
-      user-select: text;
-      cursor: default;
-    `;
-
-    // Create code element
-    const codeEl = document.createElement('code');
-    codeEl.className = `language-${language}`;
-    codeEl.style.cssText = `
-      font-family: inherit;
-      font-size: inherit;
-      line-height: inherit;
-      color: inherit;
-      white-space: pre;
-      word-break: normal;
-      display: block;
-    `;
-    codeEl.textContent = code;
-
-    // Language badge
-    const badge = document.createElement('span');
-    badge.style.cssText = `
+  const style = document.createElement('style');
+  style.id = 'rte-code-sample-block-styles';
+  style.textContent = `
+    pre.rte-code-block[data-lang]::after {
+      content: attr(data-lang);
       position: absolute;
       top: 0;
       right: 0;
@@ -477,123 +447,339 @@ function insertCodeBlock() {
       text-transform: uppercase;
       letter-spacing: 0.5px;
       pointer-events: none;
-    `;
-    badge.textContent = language;
+    }
 
-    // Copy button
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'rte-code-copy';
-    copyBtn.textContent = 'Copy';
-    copyBtn.style.cssText = `
-      position: absolute;
-      top: 8px;
-      left: 8px;
+    pre.rte-code-block:focus-visible {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+    }
+
+    .rte-code-copy-floating {
+      position: fixed;
+      z-index: 9999;
+      display: none;
       background: #fff;
+      color: #333;
       border: 1px solid #d0d0d0;
       border-radius: 3px;
       padding: 4px 8px;
-      font-size: 11px;
+      font: 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       cursor: pointer;
-      opacity: 0;
-      transition: opacity 0.2s ease;
-    `;
+    }
 
-    copyBtn.onclick = (e) => {
-      e.stopPropagation();
-      navigator.clipboard.writeText(code).then(() => {
-        copyBtn.textContent = '✓ Copied!';
-        setTimeout(() => {
-          copyBtn.textContent = 'Copy';
-        }, 2000);
-      });
-    };
+    .rte-code-copy-floating:hover {
+      background: #f3f4f6;
+    }
 
-    pre.appendChild(badge);
-    pre.appendChild(copyBtn);
-    pre.appendChild(codeEl);
+    @media print {
+      .rte-code-copy-floating {
+        display: none !important;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+}
 
-    // Show copy button on hover
-    pre.addEventListener('mouseenter', () => {
-      copyBtn.style.opacity = '1';
-    });
-    pre.addEventListener('mouseleave', () => {
-      copyBtn.style.opacity = '0';
-    });
+function getCodeText(pre: HTMLElement): string {
+  return pre.querySelector('code')?.textContent ?? '';
+}
 
-    // Double-click to edit
-    pre.addEventListener('dblclick', () => {
-      editCodeBlock(codeBlockId);
-    });
+function getCodeLanguage(pre: HTMLElement): string {
+  return pre.getAttribute('data-lang') || 'plaintext';
+}
 
-    // Register code block
-    codeBlockRegistry.set(codeBlockId, {
-      id: codeBlockId,
-      language,
-      code
-    });
+function buildCodeBlock(code: string, language: string): HTMLPreElement {
+  const pre = document.createElement('pre');
+  pre.className = 'rte-code-block';
+  pre.setAttribute('data-type', 'code-block');
+  pre.setAttribute('data-lang', language);
+  pre.setAttribute('contenteditable', 'false');
+  pre.setAttribute('tabindex', '0');
+  pre.setAttribute('role', 'group');
+  pre.setAttribute('aria-label', `Code sample (${language}). Press Enter to edit.`);
+  pre.style.cssText = `
+    display: block;
+    position: relative;
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 30px 12px 12px;
+    margin: 12px 0;
+    overflow-x: auto;
+    font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #333;
+    user-select: text;
+    cursor: default;
+  `;
 
-    // Insert at cursor
-    range.insertNode(pre);
+  const codeEl = document.createElement('code');
+  codeEl.className = `language-${language}`;
+  codeEl.style.cssText = `
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+    white-space: pre;
+    word-break: normal;
+    display: block;
+  `;
+  codeEl.textContent = code;
+  pre.appendChild(codeEl);
+  return pre;
+}
+
+/** Rewrite a block in place, also upgrading older blocks that carried a badge/Copy button. */
+function updateCodeBlock(pre: HTMLElement, code: string, language: string): void {
+  let codeEl = pre.querySelector('code') as HTMLElement | null;
+  if (!codeEl) {
+    codeEl = document.createElement('code');
+  }
+  codeEl.textContent = code;
+  codeEl.className = `language-${language}`;
+
+  // Drop the legacy badge span / Copy button / stray "Copy" text.
+  Array.from(pre.childNodes).forEach((child) => {
+    if (child !== codeEl) pre.removeChild(child);
+  });
+  pre.appendChild(codeEl);
+
+  pre.setAttribute('data-lang', language);
+  pre.setAttribute('aria-label', `Code sample (${language}). Press Enter to edit.`);
+  // Older blocks had no header strip, so the badge/Copy button sat on top of the first line.
+  pre.style.paddingTop = '30px';
+}
+
+// ===== Floating Copy Button =====
+let copyButton: HTMLButtonElement | null = null;
+let copyTarget: HTMLElement | null = null;
+let copyHideTimer: number | null = null;
+let copyResetTimer: number | null = null;
+
+function cancelCopyHide(): void {
+  if (copyHideTimer !== null) {
+    window.clearTimeout(copyHideTimer);
+    copyHideTimer = null;
+  }
+}
+
+function hideCopyButton(): void {
+  cancelCopyHide();
+  if (copyButton) copyButton.style.display = 'none';
+  copyTarget = null;
+}
+
+function scheduleCopyHide(): void {
+  cancelCopyHide();
+  copyHideTimer = window.setTimeout(hideCopyButton, 120);
+}
+
+async function copyToClipboard(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // Fall through to the legacy path.
+  }
+
+  // navigator.clipboard is undefined on insecure (plain http) origins.
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.cssText = 'position: fixed; top: 0; left: 0; opacity: 0; pointer-events: none;';
+  document.body.appendChild(textarea);
+
+  const selection = window.getSelection();
+  const savedRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0).cloneRange() : null;
+  textarea.select();
+
+  let ok = false;
+  try {
+    ok = document.execCommand('copy');
+  } catch {
+    ok = false;
+  }
+
+  textarea.remove();
+  if (savedRange && selection) {
+    selection.removeAllRanges();
+    selection.addRange(savedRange);
+  }
+  return ok;
+}
+
+function ensureCopyButton(): HTMLButtonElement {
+  if (copyButton && copyButton.isConnected) return copyButton;
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'rte-code-copy-floating';
+  button.textContent = 'Copy';
+  button.setAttribute('aria-label', 'Copy code');
+
+  // Keep the editor selection while clicking the button.
+  button.addEventListener('mousedown', (event) => event.preventDefault());
+  button.addEventListener('mouseenter', cancelCopyHide);
+  button.addEventListener('mouseleave', scheduleCopyHide);
+  button.addEventListener('click', async (event) => {
+    event.stopPropagation();
+    const target = copyTarget;
+    if (!target) return;
+
+    const ok = await copyToClipboard(getCodeText(target));
+    button.textContent = ok ? '✓ Copied!' : 'Copy failed';
+    if (copyResetTimer !== null) window.clearTimeout(copyResetTimer);
+    copyResetTimer = window.setTimeout(() => {
+      button.textContent = 'Copy';
+      copyResetTimer = null;
+    }, 2000);
+  });
+
+  document.body.appendChild(button);
+  copyButton = button;
+  return button;
+}
+
+function showCopyButton(pre: HTMLElement): void {
+  injectCodeBlockStyles();
+  const button = ensureCopyButton();
+  cancelCopyHide();
+  copyTarget = pre;
+
+  const rect = pre.getBoundingClientRect();
+  button.style.left = `${Math.max(0, rect.left + 8)}px`;
+  button.style.top = `${Math.max(0, rect.top + 5)}px`;
+  button.style.display = 'block';
+}
+
+// ===== Delegated Interaction =====
+function isEditableCodeBlock(pre: HTMLElement): boolean {
+  // The block itself is contenteditable="false", so look at what contains it.
+  return !!pre.parentElement?.closest('[contenteditable="true"]');
+}
+
+function initCodeBlockInteractions(): void {
+  if (typeof document === 'undefined' || (window as any).__codeSampleInteractionsReady) return;
+  (window as any).__codeSampleInteractionsReady = true;
+
+  const blockFrom = (target: EventTarget | null): HTMLElement | null => {
+    const element = target instanceof Element ? target : (target instanceof Node ? target.parentElement : null);
+    return (element?.closest(CODE_BLOCK_SELECTOR) as HTMLElement | null) ?? null;
+  };
+
+  document.addEventListener('mouseover', (event) => {
+    const pre = blockFrom(event.target);
+    if (pre) showCopyButton(pre);
+  });
+
+  document.addEventListener('mouseout', (event) => {
+    if (blockFrom(event.target) && !(event.relatedTarget instanceof Node && copyButton?.contains(event.relatedTarget))) {
+      scheduleCopyHide();
+    }
+  });
+
+  document.addEventListener('scroll', hideCopyButton, true);
+  window.addEventListener('resize', hideCopyButton);
+
+  document.addEventListener('dblclick', (event) => {
+    const pre = blockFrom(event.target);
+    if (pre && isEditableCodeBlock(pre)) editCodeBlock(pre);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' || event.target !== document.activeElement) return;
+    const pre = event.target instanceof HTMLElement && event.target.matches(CODE_BLOCK_SELECTOR) ? event.target : null;
+    if (pre && isEditableCodeBlock(pre)) {
+      event.preventDefault();
+      editCodeBlock(pre);
+    }
+  });
+}
+
+if (typeof window !== 'undefined') {
+  initCodeBlockInteractions();
+}
+
+// ===== Insert Code Block =====
+function insertCodeBlock() {
+  const editor = findActiveEditor();
+  if (!editor || editor.getAttribute('contenteditable') !== 'true') return;
+
+  // Save the current selection range before opening the dialog
+  let savedRange: Range | null = null;
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount > 0 && editor.contains(selection.getRangeAt(0).commonAncestorContainer)) {
+    savedRange = selection.getRangeAt(0).cloneRange();
+  }
+
+  createCodeSampleDialog((code, language) => {
+    if (!editor.isConnected) return;
+
+    injectCodeBlockStyles();
+    const beforeHTML = editor.innerHTML;
+    const pre = buildCodeBlock(code, language);
+
+    // Restore the saved caret; if there wasn't one inside this editor, append to the end
+    // (previously the Insert button silently did nothing in that case).
+    const range = savedRange ? savedRange.cloneRange() : document.createRange();
+    if (!savedRange) {
+      range.selectNodeContents(editor);
+      range.collapse(false);
+    }
+
+    // Insert as a sibling of the containing block instead of at the raw
+    // cursor position - see getContainingBlock above.
+    const block = getContainingBlock(range.endContainer, editor)
+      || getContainingBlock(range.startContainer, editor);
+
+    if (block && block.parentNode) {
+      block.parentNode.insertBefore(pre, block.nextSibling);
+    } else if (savedRange) {
+      range.insertNode(pre);
+    } else {
+      editor.appendChild(pre);
+    }
+
+    // Keep an editable line after the block so the caret has somewhere to go.
+    if (!pre.nextSibling) {
+      const trailing = document.createElement('p');
+      trailing.appendChild(document.createElement('br'));
+      pre.after(trailing);
+    }
 
     // Move cursor after code block
     const newRange = document.createRange();
     newRange.setStartAfter(pre);
     newRange.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(newRange);
+    const liveSelection = window.getSelection();
+    liveSelection?.removeAllRanges();
+    liveSelection?.addRange(newRange);
+
+    recordDomHistory(editor, beforeHTML);
+    editor.dispatchEvent(new Event('input', { bubbles: true }));
   });
 }
 
 // ===== Edit Code Block =====
-function editCodeBlock(codeBlockId: string) {
-  const editor = findActiveEditor();
+function editCodeBlock(codeBlock: HTMLElement) {
+  const editor = codeBlock.closest('[contenteditable="true"]') as HTMLElement | null;
   if (!editor) return;
-
-  const codeBlock = editor.querySelector(`#${codeBlockId}`) as HTMLPreElement;
-  if (!codeBlock) return;
-
-  const blockData = codeBlockRegistry.get(codeBlockId);
-  if (!blockData) return;
 
   createCodeSampleDialog(
     (code, language) => {
-      // Update code block
-      const codeEl = codeBlock.querySelector('code');
-      if (codeEl) {
-        codeEl.textContent = code;
-        codeEl.className = `language-${language}`;
-      }
+      if (!codeBlock.isConnected) return;
 
-      // Update badge
-      const badge = codeBlock.querySelector('span');
-      if (badge) {
-        badge.textContent = language;
-      }
-
-      // Update attributes
-      codeBlock.setAttribute('data-lang', language);
-
-      // Update registry
-      blockData.language = language;
-      blockData.code = code;
-
-      // Update copy button
-      const copyBtn = codeBlock.querySelector('.rte-code-copy') as HTMLButtonElement;
-      if (copyBtn) {
-        copyBtn.onclick = (e) => {
-          e.stopPropagation();
-          navigator.clipboard.writeText(code).then(() => {
-            copyBtn.textContent = '✓ Copied!';
-            setTimeout(() => {
-              copyBtn.textContent = 'Copy';
-            }, 2000);
-          });
-        };
-      }
+      const beforeHTML = editor.innerHTML;
+      updateCodeBlock(codeBlock, code, language);
+      recordDomHistory(editor, beforeHTML);
+      editor.dispatchEvent(new Event('input', { bubbles: true }));
     },
-    codeBlockId,
-    blockData.code,
-    blockData.language
+    'editing',
+    getCodeText(codeBlock),
+    getCodeLanguage(codeBlock)
   );
 }
 
@@ -611,7 +797,7 @@ export const CodeSamplePlugin = (): Plugin => ({
   ],
 
   commands: {
-    insertCodeBlock: (...args: any[]) => {
+    insertCodeBlock: () => {
       insertCodeBlock();
       return true;
     },

@@ -1,5 +1,6 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
+import '@editora/ui-core/form';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 type FormElement = HTMLElement & {

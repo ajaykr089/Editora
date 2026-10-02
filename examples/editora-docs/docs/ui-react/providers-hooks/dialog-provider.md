@@ -10,9 +10,7 @@ sidebar_label: DialogProvider
 
 ## Basic Usage
 
-```tsx
-import { DialogProvider, useDialog } from '@editora/ui-react';
-
+```tsx live noInline
 function DeleteButton() {
   const dialog = useDialog();
 
@@ -29,11 +27,15 @@ function DeleteButton() {
   return <button onClick={onDelete}>Delete</button>;
 }
 
-export function Example() {
+function Example() {
   return (
-    <DialogProvider>
-      <DeleteButton />
-    </DialogProvider>
+    <ThemeProvider>
+      <DialogProvider>
+        <DeleteButton />
+      </DialogProvider>
+    </ThemeProvider>
   );
 }
+
+render(<Example />);
 ```

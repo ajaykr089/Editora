@@ -6,20 +6,24 @@ sidebar_label: Radio Group
 
 # Radio Group
 
-```tsx
-import { RadioGroup } from '@editora/ui-react';
-
-<RadioGroup
-  value="review"
-  variant="segmented"
-  orientation="horizontal"
-  options={[
-    { value: 'draft', label: 'Draft' },
-    { value: 'review', label: 'In review' },
-    { value: 'live', label: 'Live' }
-  ]}
-  onValueChange={(detail) => console.log(detail.value)}
-/>;
+```tsx live
+function RadioGroupDemo() {
+  return (
+    <ThemeProvider>
+      <RadioGroup
+        value="review"
+        variant="segmented"
+        orientation="horizontal"
+        options={[
+          { value: 'draft', label: 'Draft' },
+          { value: 'review', label: 'In review' },
+          { value: 'live', label: 'Live' }
+        ]}
+        onValueChange={(detail) => console.log(detail.value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

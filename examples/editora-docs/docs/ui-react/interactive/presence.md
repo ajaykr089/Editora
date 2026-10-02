@@ -10,10 +10,12 @@ The `Presence` component manages conditional rendering with transition-aware beh
 
 ## Basic Usage
 
-```tsx
-import { Presence } from '@editora/ui-react';
-
-export function Example({ open }: { open: boolean }) {
-  return <Presence present={open}><div>Animated content</div></Presence>;
+```tsx live
+function Example({ open }: { open: boolean }) {
+  return (
+    <ThemeProvider>
+      <Presence present={open}><div>Animated content</div></Presence>
+    </ThemeProvider>
+  );
 }
 ```

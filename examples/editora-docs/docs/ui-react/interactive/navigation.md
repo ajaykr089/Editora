@@ -11,36 +11,36 @@ Import the main `NavigationMenu` component and use its sub-components as propert
 
 ## Basic Usage
 
-```tsx
-import { NavigationMenu } from '@editora/ui-react';
-
+```tsx live
 function PrimaryNavigation() {
   return (
-    <NavigationMenu.Root
-      selected={0}
-      orientation="horizontal"
-      variant="soft"
-      size="md"
-      radius={12}
-      elevation="low"
-    >
-      <NavigationMenu.List>
-        <NavigationMenu.Item>
-          <NavigationMenu.Trigger>Overview</NavigationMenu.Trigger>
-          <NavigationMenu.Content>Overview content</NavigationMenu.Content>
-        </NavigationMenu.Item>
-        <NavigationMenu.Item>
-          <NavigationMenu.Trigger>Analytics</NavigationMenu.Trigger>
-          <NavigationMenu.Content>Analytics content</NavigationMenu.Content>
-        </NavigationMenu.Item>
-        <NavigationMenu.Item>
-          <NavigationMenu.Trigger>Reports</NavigationMenu.Trigger>
-          <NavigationMenu.Content>Reports content</NavigationMenu.Content>
-        </NavigationMenu.Item>
-      </NavigationMenu.List>
-      <NavigationMenu.Indicator />
-      <NavigationMenu.Viewport />
-    </NavigationMenu.Root>
+    <ThemeProvider>
+      <NavigationMenu.Root
+        selected={0}
+        orientation="horizontal"
+        variant="soft"
+        size="md"
+        radius={12}
+        elevation="low"
+      >
+        <NavigationMenu.List>
+          <NavigationMenu.Item>
+            <NavigationMenu.Trigger>Overview</NavigationMenu.Trigger>
+            <NavigationMenu.Content>Overview content</NavigationMenu.Content>
+          </NavigationMenu.Item>
+          <NavigationMenu.Item>
+            <NavigationMenu.Trigger>Analytics</NavigationMenu.Trigger>
+            <NavigationMenu.Content>Analytics content</NavigationMenu.Content>
+          </NavigationMenu.Item>
+          <NavigationMenu.Item>
+            <NavigationMenu.Trigger>Reports</NavigationMenu.Trigger>
+            <NavigationMenu.Content>Reports content</NavigationMenu.Content>
+          </NavigationMenu.Item>
+        </NavigationMenu.List>
+        <NavigationMenu.Indicator />
+        <NavigationMenu.Viewport />
+      </NavigationMenu.Root>
+    </ThemeProvider>
   );
 }
 ```

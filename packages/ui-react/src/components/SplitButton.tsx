@@ -1,4 +1,5 @@
 import React from 'react';
+import '@editora/ui-core/split-button';
 import { createPortal } from 'react-dom';
 
 const STYLE_ID = 'editora-split-button-styles';

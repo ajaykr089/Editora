@@ -25,12 +25,18 @@ import { MasonryGrid } from '@editora/ui-react/MasonryGrid';
 
 ## Basic Usage
 
-```tsx
-<MasonryGrid columns={{ initial: 1, md: 2, lg: 3 }} gap="lg">
-  <article>Short card</article>
-  <article>Taller card with more content</article>
-  <article>Medium card</article>
-</MasonryGrid>
+```tsx live
+function MasonryGridDemo() {
+  return (
+    <ThemeProvider>
+      <MasonryGrid columns={{ initial: 1, md: 2, lg: 3 }} gap="lg">
+        <article>Short card</article>
+        <article>Taller card with more content</article>
+        <article>Medium card</article>
+      </MasonryGrid>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Uneven-Height Cards

@@ -15,11 +15,13 @@ If you need this pattern today:
 
 ## Editable Alternative
 
-```tsx
-import { Slider } from '@editora/ui-react';
-
+```tsx live
 function ScoreInput() {
-  return <Slider min={0} max={5} step={1} value={4} showValue format="value" label="Rating" />;
+  return (
+    <ThemeProvider>
+      <Slider min={0} max={5} step={1} value={4} showValue format="value" label="Rating" />
+    </ThemeProvider>
+  );
 }
 ```
 

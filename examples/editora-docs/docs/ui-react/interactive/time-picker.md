@@ -6,19 +6,23 @@ sidebar_label: Time Picker
 
 # Time Picker
 
-```tsx
-import { TimePicker } from '@editora/ui-react';
-
-<TimePicker
-  open
-  label="Escalation time"
-  value="13:30"
-  format="24h"
-  step={30}
-  clearable
-  allowInput
-  onChange={(detail) => console.log(detail.value)}
-/>;
+```tsx live
+function TimePickerDemo() {
+  return (
+    <ThemeProvider>
+      <TimePicker
+        open
+        label="Escalation time"
+        value="13:30"
+        format="24h"
+        step={30}
+        clearable
+        allowInput
+        onChange={(detail) => console.log(detail.value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

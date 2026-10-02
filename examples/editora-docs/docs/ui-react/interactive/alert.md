@@ -10,14 +10,14 @@ Import the main `Alert` component and use its sub-components as properties. The 
 
 ## Basic Usage
 
-```tsx
-import { Alert, Button } from '@editora/ui-react';
-
+```tsx live
 function BasicAlert() {
   return (
-    <Alert tone="info" variant="surface" radius={12} title="Welcome to Editora">
-      This is an informational alert message.
-    </Alert>
+    <ThemeProvider>
+      <Alert tone="info" variant="surface" radius={12} title="Welcome to Editora">
+        This is an informational alert message.
+      </Alert>
+    </ThemeProvider>
   );
 }
 ```

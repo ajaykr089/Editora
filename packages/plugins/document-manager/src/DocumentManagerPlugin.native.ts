@@ -1,5 +1,71 @@
 import type { Plugin } from '@editora/core';
 
+const DOCUMENT_MANAGER_BUSY_STYLE_ID = 'rte-document-manager-styles';
+const DOCUMENT_MANAGER_CSS = `
+.rte-toolbar-button[data-busy="true"],
+.rte-docmgr-toolbar-button[data-busy="true"] {
+  position: relative;
+  pointer-events: none;
+  cursor: wait;
+}
+.rte-toolbar-button[data-busy="true"] > *,
+.rte-docmgr-toolbar-button[data-busy="true"] > * {
+  visibility: hidden;
+}
+.rte-toolbar-button[data-busy="true"]::after,
+.rte-docmgr-toolbar-button[data-busy="true"]::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  opacity: 0.7;
+  animation: rte-docmgr-spin 0.7s linear infinite;
+}
+@keyframes rte-docmgr-spin {
+  to { transform: rotate(360deg); }
+}
+`;
+
+function ensureDocumentManagerStyles(): void {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById(DOCUMENT_MANAGER_BUSY_STYLE_ID)) return;
+  const style = document.createElement('style');
+  style.id = DOCUMENT_MANAGER_BUSY_STYLE_ID;
+  style.textContent = DOCUMENT_MANAGER_CSS;
+  document.head.appendChild(style);
+}
+
+/**
+ * Marks the button that triggered the command as busy (disabled + spinner) for the
+ * duration of an async operation, so slow exports don't look like the click did nothing.
+ */
+async function withBusyButton<T>(run: () => Promise<T>): Promise<T> {
+  ensureDocumentManagerStyles();
+  const button = (typeof window !== 'undefined' ? (window as any).__editoraLastCommandButton : null) as
+    | HTMLButtonElement
+    | null;
+  if (button) {
+    button.disabled = true;
+    button.setAttribute('data-busy', 'true');
+    button.setAttribute('aria-busy', 'true');
+  }
+  try {
+    return await run();
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.removeAttribute('data-busy');
+      button.removeAttribute('aria-busy');
+    }
+  }
+}
+
 /**
  * DocumentManagerPlugin - Native implementation for document import/export
  * 
@@ -122,19 +188,21 @@ export const DocumentManagerPlugin = (): Plugin => {
           return (editor as HTMLElement) || document.querySelector('[contenteditable="true"]');
         };
         
-        try {
-          const editorElement = findActiveEditor();
-          if (editorElement) {
-            const htmlContent = editorElement.innerHTML;
-            const { exportToWord } = await import('./documentManager');
-            await exportToWord(htmlContent, 'document.docx');
+        return withBusyButton(async () => {
+          try {
+            const editorElement = findActiveEditor();
+            if (editorElement) {
+              const htmlContent = editorElement.innerHTML;
+              const { exportToWord } = await import('./documentManager');
+              await exportToWord(htmlContent, 'document.docx');
+            }
+            return true;
+          } catch (error) {
+            console.error('Export failed:', error);
+            alert('Failed to export to Word. Please check the console for details.');
+            return false;
           }
-          return true;
-        } catch (error) {
-          console.error('Export failed:', error);
-          alert('Failed to export to Word. Please check the console for details.');
-          return false;
-        }
+        });
       },
       
       exportPdf: async () => {
@@ -155,22 +223,24 @@ export const DocumentManagerPlugin = (): Plugin => {
           return (editor as HTMLElement) || document.querySelector('[contenteditable="true"]');
         };
         
-        try {
-          const editorElement = findActiveEditor();
-          if (editorElement) {
-            const htmlContent = editorElement.innerHTML;
-            const { exportToPdf } = await import('./documentManager');
-            await exportToPdf(htmlContent, 'document.pdf', editorElement);
-          } else {
-            console.error('PDF Export: No editor element found');
-            alert('No active editor found. Please click in the editor area first.');
+        return withBusyButton(async () => {
+          try {
+            const editorElement = findActiveEditor();
+            if (editorElement) {
+              const htmlContent = editorElement.innerHTML;
+              const { exportToPdf } = await import('./documentManager');
+              await exportToPdf(htmlContent, 'document.pdf', editorElement);
+            } else {
+              console.error('PDF Export: No editor element found');
+              alert('No active editor found. Please click in the editor area first.');
+            }
+            return true;
+          } catch (error) {
+            console.error('PDF Export: Export failed:', error);
+            alert('Failed to export to PDF. Please check the console for details.');
+            return false;
           }
-          return true;
-        } catch (error) {
-          console.error('PDF Export: Export failed:', error);
-          alert('Failed to export to PDF. Please check the console for details.');
-          return false;
-        }
+        });
       }
     },
     

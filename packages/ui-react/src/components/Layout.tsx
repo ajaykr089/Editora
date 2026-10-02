@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
+import '@editora/ui-core/layout';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type LayoutMode = 'dashboard' | 'split' | 'stack';

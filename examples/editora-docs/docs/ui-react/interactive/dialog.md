@@ -10,30 +10,30 @@ sidebar_label: Dialog
 
 ## Basic Usage
 
-```tsx
-import { Box, Button, Dialog } from '@editora/ui-react';
-
+```tsx live
 function PublishDialog() {
   const [open, setOpen] = React.useState(false);
 
   return (
-    <>
-      <Button onClick={() => setOpen(true)}>Open dialog</Button>
+    <ThemeProvider>
+      <>
+        <Button onClick={() => setOpen(true)}>Open dialog</Button>
 
-      <Dialog
-        open={open}
-        title="Publish changes"
-        description="Review details before publishing."
-        dismissible
-        closeOnOverlay
-        closeOnEsc
-        submitText="Publish"
-        cancelText="Cancel"
-        onDialogClose={() => setOpen(false)}
-      >
-        <Box slot="content">This release will be visible to all collaborators.</Box>
-      </Dialog>
-    </>
+        <Dialog
+          open={open}
+          title="Publish changes"
+          description="Review details before publishing."
+          dismissible
+          closeOnOverlay
+          closeOnEsc
+          submitText="Publish"
+          cancelText="Cancel"
+          onDialogClose={() => setOpen(false)}
+        >
+          <Box slot="content">This release will be visible to all collaborators.</Box>
+        </Dialog>
+      </>
+    </ThemeProvider>
   );
 }
 ```

@@ -1,4 +1,5 @@
 import React from 'react';
+import '@editora/ui-core/animated-beam';
 import { warnIfElementNotRegistered } from './_internals';
 
 export type AnimatedBeamVariant = 'surface' | 'soft' | 'solid' | 'glass' | 'contrast' | 'minimal';

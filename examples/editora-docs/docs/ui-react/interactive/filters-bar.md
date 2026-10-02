@@ -10,30 +10,30 @@ sidebar_label: FiltersBar
 
 ## Basic usage
 
-```tsx
-import { Button, FiltersBar } from '@editora/ui-react';
-
+```tsx live
 function PatientsFilters() {
   const [search, setSearch] = React.useState('');
   const [status, setStatus] = React.useState('all');
 
   return (
-    <FiltersBar
-      search={search}
-      status={status}
-      statusOptions={[
-        { value: 'all', label: 'All status' },
-        { value: 'active', label: 'Active' },
-        { value: 'discharged', label: 'Discharged' },
-      ]}
-      extra={<Button size="sm" variant="secondary">Export</Button>}
-      onSearchChange={setSearch}
-      onStatusChange={setStatus}
-      onClear={() => {
-        setSearch('');
-        setStatus('all');
-      }}
-    />
+    <ThemeProvider>
+      <FiltersBar
+        search={search}
+        status={status}
+        statusOptions={[
+          { value: 'all', label: 'All status' },
+          { value: 'active', label: 'Active' },
+          { value: 'discharged', label: 'Discharged' },
+        ]}
+        extra={<Button size="sm" variant="secondary">Export</Button>}
+        onSearchChange={setSearch}
+        onStatusChange={setStatus}
+        onClear={() => {
+          setSearch('');
+          setStatus('all');
+        }}
+      />
+    </ThemeProvider>
   );
 }
 ```

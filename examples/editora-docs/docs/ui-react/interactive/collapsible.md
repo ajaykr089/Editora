@@ -8,23 +8,23 @@ sidebar_label: Collapsible
 
 Use `Collapsible` to create expandable panels with customizable headers, captions, meta information, and content areas. Perfect for grouping related information while keeping the interface clean.
 
-```tsx
-import { Collapsible, Badge } from '@editora/ui-react';
-
+```tsx live
 function Example() {
   return (
-    <Collapsible open>
-      <Collapsible.Header>Compliance Configuration</Collapsible.Header>
-      <Collapsible.Caption>Security, auditing, and release governance</Collapsible.Caption>
-      <Collapsible.Meta>
-        <Badge tone="brand">Enterprise</Badge>
-      </Collapsible.Meta>
-      <Collapsible.Content>
-        <div>1. Require reviewer approval for enterprise policy changes.</div>
-        <div>2. Enforce audit trail retention for 365 days.</div>
-        <div>3. Limit export scope for restricted patient records.</div>
-      </Collapsible.Content>
-    </Collapsible>
+    <ThemeProvider>
+      <Collapsible open>
+        <Collapsible.Header>Compliance Configuration</Collapsible.Header>
+        <Collapsible.Caption>Security, auditing, and release governance</Collapsible.Caption>
+        <Collapsible.Meta>
+          <Badge tone="brand">Enterprise</Badge>
+        </Collapsible.Meta>
+        <Collapsible.Content>
+          <div>1. Require reviewer approval for enterprise policy changes.</div>
+          <div>2. Enforce audit trail retention for 365 days.</div>
+          <div>3. Limit export scope for restricted patient records.</div>
+        </Collapsible.Content>
+      </Collapsible>
+    </ThemeProvider>
   );
 }
 ```

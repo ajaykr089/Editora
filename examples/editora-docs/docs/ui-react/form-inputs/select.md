@@ -16,28 +16,34 @@ import { Select } from '@editora/ui-react/Select';
 
 `Select` uses a composition pattern. All options, groups, and slot content are declared as named sub-components:
 
-```tsx
-<Select
-  value={value}
-  onChange={setValue}
-  variant="soft"
-  size="md"
-  validation="error"
-  required
->
-  <Select.Label>Workflow status <span style={{ color: '#dc2626' }}>*</span></Select.Label>
-  <Select.Description>Controls publish automation triggers.</Select.Description>
-  <Select.Option value="">Choose a status</Select.Option>
-  <Select.OptGroup label="Active">
-    <Select.Option value="draft">Draft</Select.Option>
-    <Select.Option value="review">In review</Select.Option>
-  </Select.OptGroup>
-  <Select.OptGroup label="Final">
-    <Select.Option value="approved">Approved</Select.Option>
-    <Select.Option value="published">Published</Select.Option>
-  </Select.OptGroup>
-  <Select.Error>Please select a status to continue.</Select.Error>
-</Select>
+```tsx live
+function SelectDemo() {
+  return (
+    <ThemeProvider>
+      <Select
+        value={value}
+        onChange={setValue}
+        variant="soft"
+        size="md"
+        validation="error"
+        required
+      >
+        <Select.Label>Workflow status <span style={{ color: '#dc2626' }}>*</span></Select.Label>
+        <Select.Description>Controls publish automation triggers.</Select.Description>
+        <Select.Option value="">Choose a status</Select.Option>
+        <Select.OptGroup label="Active">
+          <Select.Option value="draft">Draft</Select.Option>
+          <Select.Option value="review">In review</Select.Option>
+        </Select.OptGroup>
+        <Select.OptGroup label="Final">
+          <Select.Option value="approved">Approved</Select.Option>
+          <Select.Option value="published">Published</Select.Option>
+        </Select.OptGroup>
+        <Select.Error>Please select a status to continue.</Select.Error>
+      </Select>
+    </ThemeProvider>
+  );
+}
 ```
 
 ### Sub-components

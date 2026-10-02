@@ -10,11 +10,13 @@ sidebar_label: CodeSnippet
 
 ## Basic usage
 
-```tsx
-import { CodeSnippet } from '@editora/ui-react';
-
+```tsx live
 function ImportHint() {
-  return <CodeSnippet code="@editora/ui-react/server" tone="brand" />;
+  return (
+    <ThemeProvider>
+      <CodeSnippet code="@editora/ui-react/server" tone="brand" />
+    </ThemeProvider>
+  );
 }
 ```
 

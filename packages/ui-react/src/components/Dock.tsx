@@ -1,4 +1,5 @@
 import React from 'react';
+import '@editora/ui-core/dock';
 import { warnIfElementNotRegistered } from './_internals';
 
 export type DockOrientation = 'horizontal' | 'vertical';

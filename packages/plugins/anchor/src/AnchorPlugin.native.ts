@@ -1,3 +1,4 @@
+import { initDialogOverlay } from '../../shared/dialogHelpers';
 import type { Plugin } from '@editora/core';
 import { findEditorContainerFromSelection, getContentElement } from '../../shared/editorContainerHelpers';
 
@@ -76,36 +77,6 @@ function initializeAnchorObserver() {
 }
 
 /**
- * Generate unique anchor ID
- */
-function generateUniqueId(): string {
-  let id: string;
-  let counter = 0;
-
-  do {
-    const timestamp = Date.now();
-    const random = Math.random().toString(36).substr(2, 9);
-    id = `anchor-${timestamp}-${random}`;
-    counter++;
-    if (counter > 100) return '';
-  } while (anchorRegistry.has(id));
-
-  return id;
-}
-
-/**
- * Sanitize and validate anchor ID
- */
-function sanitizeId(id: string): string {
-  return id
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\-_]/g, '-')
-    .replace(/^[^a-z_]/, `a-${Math.random().toString(36).substr(2, 5)}`)
-    .substring(0, 256);
-}
-
-/**
  * Validate anchor ID
  */
 function validateId(id: string): { valid: boolean; error: string } {
@@ -117,11 +88,11 @@ function validateId(id: string): { valid: boolean; error: string } {
     return { valid: false, error: 'Anchor ID must be less than 256 characters' };
   }
 
-  if (!/^[a-z_]/.test(id)) {
+  if (!/^[A-Za-z_]/.test(id)) {
     return { valid: false, error: 'Anchor ID must start with a letter or underscore' };
   }
 
-  if (!/^[a-z0-9\-_]+$/.test(id)) {
+  if (!/^[A-Za-z0-9\-_]+$/.test(id)) {
     return { valid: false, error: 'Anchor ID can only contain letters, numbers, hyphens, and underscores' };
   }
 
@@ -178,6 +149,8 @@ function isDarkThemeContext(savedRange?: Range): boolean {
  * Create Anchor Dialog
  */
 function createAnchorDialog(mode: 'add' | 'edit', currentId?: string, onSave?: (id: string) => void, savedRange?: Range) {
+  document.querySelectorAll('.rte-anchor-dialog-overlay').forEach((el) => el.remove());
+
   // Sync registry before showing dialog
   syncAnchorRegistry();
   const isDarkTheme = isDarkThemeContext(savedRange);
@@ -237,6 +210,7 @@ function createAnchorDialog(mode: 'add' | 'edit', currentId?: string, onSave?: (
   
   // Create overlay
   const overlay = document.createElement('div');
+  initDialogOverlay(overlay);
   overlay.className = 'rte-anchor-dialog-overlay';
   overlay.style.cssText = `
     position: fixed;
@@ -283,7 +257,6 @@ function createAnchorDialog(mode: 'add' | 'edit', currentId?: string, onSave?: (
   }
   
   let errorMessage = '';
-  let touched = false;
   
   // Header
   const header = document.createElement('div');
@@ -448,7 +421,6 @@ function createAnchorDialog(mode: 'add' | 'edit', currentId?: string, onSave?: (
   
   // Validation on input
   input.oninput = () => {
-    touched = true;
     const value = input.value;
     updateSaveButton();
     

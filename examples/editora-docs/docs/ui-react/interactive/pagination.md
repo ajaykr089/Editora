@@ -6,10 +6,14 @@ sidebar_label: Pagination
 
 # Pagination
 
-```tsx
-import { Pagination } from '@editora/ui-react';
-
-<Pagination />;
+```tsx live
+function PaginationDemo() {
+  return (
+    <ThemeProvider>
+      <Pagination />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

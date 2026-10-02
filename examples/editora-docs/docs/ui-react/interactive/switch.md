@@ -18,11 +18,17 @@ import { Switch } from '@editora/ui-react/Switch';
 
 ## Quick Example
 
-```tsx
-<Switch checked tone="success" variant="soft" onChange={(detail) => console.log(detail.checked)}>
-  Auto deploy
-  <Switch.Description>Deploys on every push to main.</Switch.Description>
-</Switch>
+```tsx live
+function SwitchDemo() {
+  return (
+    <ThemeProvider>
+      <Switch checked tone="success" variant="soft" onChange={(detail) => console.log(detail.checked)}>
+        Auto deploy
+        <Switch.Description>Deploys on every push to main.</Switch.Description>
+      </Switch>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Composition

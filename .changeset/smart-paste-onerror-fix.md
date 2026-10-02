@@ -1,0 +1,5 @@
+---
+"@editora/smart-paste": patch
+---
+
+Fix pasted HTML able to momentarily execute an inline event handler (e.g. `<img src=x onerror="...">`) during sanitization, even though the final, stored content was already correctly stripped of it. The sanitizer parsed untrusted clipboard HTML via `document.createElement('template'); template.innerHTML = html`, assuming `<template>` content is fully inert - it is, for rendering and script execution, but not for resource-loading event handlers: the element is still part of the active document, just unrendered, and an `<img>`'s `onerror` can fire the instant it's parsed, before the plugin's own attribute-stripping walk ever runs. Found via live-browser paste testing (a hand-rolled-fake-DOM unit test can't reproduce this - the fake DOM doesn't simulate real resource loading). Fixed with a defense-in-depth pre-pass that strips `on*="..."` handler attributes from the raw string before any DOM parsing happens at all, so nothing capable of executing ever reaches a parse in the first place.

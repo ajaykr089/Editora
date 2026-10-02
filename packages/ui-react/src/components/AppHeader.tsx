@@ -1,5 +1,6 @@
 import React from 'react';
 
+import '@editora/ui-core/app-header';
 export type AppHeaderProps = Omit<React.HTMLAttributes<HTMLElement>, 'onToggle'> & {
   sticky?: boolean;
   bordered?: boolean;

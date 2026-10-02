@@ -6,18 +6,22 @@ sidebar_label: Password Field
 
 # Password Field
 
-```tsx
-import { PasswordField } from '@editora/ui-react';
-
-<PasswordField
-  label="Password"
-  placeholder="Create a password"
-  clearable
-  revealable
-  showStrength
-  minlength={12}
-  onChange={(value) => console.log(value)}
-/>;
+```tsx live
+function PasswordFieldDemo() {
+  return (
+    <ThemeProvider>
+      <PasswordField
+        label="Password"
+        placeholder="Create a password"
+        clearable
+        revealable
+        showStrength
+        minlength={12}
+        onChange={(value) => console.log(value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

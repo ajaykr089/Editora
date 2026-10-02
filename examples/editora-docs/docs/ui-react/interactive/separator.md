@@ -10,16 +10,16 @@ The `Separator` component separates related groups with semantic and visual clar
 
 ## Basic Usage
 
-```tsx
-import { Separator } from '@editora/ui-react';
-
-export function Example() {
+```tsx live
+function Example() {
   return (
-    <>
-      <div>Primary actions</div>
-      <Separator />
-      <div>Secondary actions</div>
-    </>
+    <ThemeProvider>
+      <>
+        <div>Primary actions</div>
+        <Separator />
+        <div>Secondary actions</div>
+      </>
+    </ThemeProvider>
   );
 }
 ```

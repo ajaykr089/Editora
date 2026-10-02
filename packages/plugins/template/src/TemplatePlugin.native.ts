@@ -1,3 +1,5 @@
+import { escapeHtml } from '../../shared/escapeHtml';
+import { initDialogOverlay } from '../../shared/dialogHelpers';
 import { Plugin } from '@editora/core';
 import DOMPurify from 'dompurify';
 
@@ -152,7 +154,7 @@ export const PREDEFINED_TEMPLATES: Template[] = [
 /**
  * Template cache
  */
-let templateCache: Template[] = [...PREDEFINED_TEMPLATES];
+const templateCache: Template[] = [...PREDEFINED_TEMPLATES];
 
 // ============================================================================
 // Template Functions
@@ -238,7 +240,12 @@ export const validateTemplate = (template: Template): boolean => {
  * Create the template dialog (context-aware, matches emoji/special char plugins)
  */
 function createTemplateDialog(editorContent?: HTMLElement | null): void {
+  if (overlayElement) {
+    closeDialog();
+  }
+
   overlayElement = document.createElement('div');
+  initDialogOverlay(overlayElement);
   overlayElement.className = 'rte-dialog-overlay';
   if (isDarkThemeContext(editorContent)) {
     overlayElement.classList.add('rte-ui-theme-dark');
@@ -330,7 +337,7 @@ function renderDialogContent(): void {
       <input
         type="text"
         placeholder="Search templates..."
-        value="${searchTerm}"
+        value="${escapeHtml(searchTerm)}"
         class="rte-input rte-template-search"
         aria-label="Search templates"
       />
@@ -576,6 +583,23 @@ function handleConfirmReplace(): void {
 /**
  * Insert template at cursor position
  */
+const BLOCK_TAGS = new Set([
+  'DIV', 'P', 'BLOCKQUOTE', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'TD', 'TH',
+]);
+
+function getContainingBlock(node: Node, editorContent: HTMLElement): HTMLElement | null {
+  let current: Node | null = node;
+
+  while (current && current !== editorContent) {
+    if (current.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has((current as HTMLElement).tagName)) {
+      return current as HTMLElement;
+    }
+    current = current.parentNode;
+  }
+
+  return null;
+}
+
 function insertTemplateAtCursor(template: Template): void {
   const selection = window.getSelection();
   if (!selection) return;
@@ -602,11 +626,30 @@ function insertTemplateAtCursor(template: Template): void {
   const fragment = document.createRange().createContextualFragment(sanitizeTemplate(template.html));
 
   range.deleteContents();
-  range.insertNode(fragment);
+
+  // Templates are multi-element HTML (headings, paragraphs, etc.) -
+  // range.insertNode() at the raw cursor position splits whatever paragraph
+  // the cursor is in and inserts the fragment inside it, which can leave the
+  // text after the cursor as bare, unwrapped content instead of back inside
+  // a paragraph. Inserting after the containing block instead (same pattern
+  // as the table/code-sample/blocks-library plugins) avoids that split.
+  const lastNode = fragment.lastChild;
+  const containingBlock = getContainingBlock(range.endContainer, editor)
+    || getContainingBlock(range.startContainer, editor);
+
+  if (containingBlock && containingBlock.parentNode) {
+    containingBlock.parentNode.insertBefore(fragment, containingBlock.nextSibling);
+  } else {
+    range.insertNode(fragment);
+  }
 
   // Move cursor after inserted template
   const newRange = document.createRange();
-  newRange.setStartAfter(range.endContainer);
+  if (lastNode) {
+    newRange.setStartAfter(lastNode);
+  } else {
+    newRange.setStartAfter(range.endContainer);
+  }
   newRange.collapse(true);
   selection.removeAllRanges();
   selection.addRange(newRange);

@@ -10,22 +10,22 @@ Import the main `AppHeader` component and use its sub-components as properties. 
 
 ## Basic usage
 
-```tsx
-import { AppHeader, Button } from '@editora/ui-react';
-
+```tsx live
 function WorkspaceHeader() {
   return (
-    <AppHeader bordered showMenuButton variant="surface" radius={12}>
-      <AppHeader.Start>Acme Health</AppHeader.Start>
-      <AppHeader.Center>Live monitoring</AppHeader.Center>
-      <AppHeader.Title>Clinical Command Center</AppHeader.Title>
-      <AppHeader.Subtitle>North campus · Shift A</AppHeader.Subtitle>
-      <AppHeader.End>
-        <Button size="sm" recipe="soft" variant="secondary">
-          Search
-        </Button>
-      </AppHeader.End>
-    </AppHeader>
+    <ThemeProvider>
+      <AppHeader bordered showMenuButton variant="surface" radius={12}>
+        <AppHeader.Start>Acme Health</AppHeader.Start>
+        <AppHeader.Center>Live monitoring</AppHeader.Center>
+        <AppHeader.Title>Clinical Command Center</AppHeader.Title>
+        <AppHeader.Subtitle>North campus · Shift A</AppHeader.Subtitle>
+        <AppHeader.End>
+          <Button size="sm" recipe="soft" variant="secondary">
+            Search
+          </Button>
+        </AppHeader.End>
+      </AppHeader>
+    </ThemeProvider>
   );
 }
 ```

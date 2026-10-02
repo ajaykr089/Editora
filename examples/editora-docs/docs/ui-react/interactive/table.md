@@ -10,34 +10,34 @@ sidebar_label: Table
 
 ## Basic Usage
 
-```tsx
-import { Table } from '@editora/ui-react';
-
+```tsx live
 function TeamTable() {
   return (
-    <Table striped hover>
-      <table>
-        <thead>
-          <tr>
-            <th data-key="name">Name</th>
-            <th data-key="role">Role</th>
-            <th data-key="status">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Ava Johnson</td>
-            <td>Designer</td>
-            <td>Active</td>
-          </tr>
-          <tr>
-            <td>Liam Carter</td>
-            <td>Engineer</td>
-            <td>Review</td>
-          </tr>
-        </tbody>
-      </table>
-    </Table>
+    <ThemeProvider>
+      <Table striped hover>
+        <table>
+          <thead>
+            <tr>
+              <th data-key="name">Name</th>
+              <th data-key="role">Role</th>
+              <th data-key="status">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Ava Johnson</td>
+              <td>Designer</td>
+              <td>Active</td>
+            </tr>
+            <tr>
+              <td>Liam Carter</td>
+              <td>Engineer</td>
+              <td>Review</td>
+            </tr>
+          </tbody>
+        </table>
+      </Table>
+    </ThemeProvider>
   );
 }
 ```

@@ -8,17 +8,21 @@ sidebar_label: Command Palette
 
 A full-screen command palette overlay that provides fast access to commands with search functionality. Built as a composed component with a root container and command items.
 
-```tsx
-import { CommandPalette } from '@editora/ui-react';
-
-<CommandPalette open onSelect={(detail) => console.log(detail.value)}>
-  <CommandPalette.Item value="new-doc" label="New document">
-    New document
-  </CommandPalette.Item>
-  <CommandPalette.Item value="open-settings" label="Open settings">
-    Open settings
-  </CommandPalette.Item>
-</CommandPalette>;
+```tsx live
+function CommandPaletteDemo() {
+  return (
+    <ThemeProvider>
+      <CommandPalette open onSelect={(detail) => console.log(detail.value)}>
+        <CommandPalette.Item value="new-doc" label="New document">
+          New document
+        </CommandPalette.Item>
+        <CommandPalette.Item value="open-settings" label="Open settings">
+          Open settings
+        </CommandPalette.Item>
+      </CommandPalette>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Sub-components

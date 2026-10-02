@@ -15,13 +15,8 @@
   "exclude": [
     "dist",
     "**/*.test.ts",
-    "src/commands/**",
-    "src/model/**",
-    "src/plugins/PluginManager.ts",
-    "src/schema/Schema.ts",
     "src/webcomponent/plugin-loader.ts",
     "src/webcomponent/standalone.core.ts",
-    "src/webcomponent/standalone.native.ts",
-    "src/webcomponent/standalone.ts"
+    "src/webcomponent/standalone.native.ts"
   ]
 }

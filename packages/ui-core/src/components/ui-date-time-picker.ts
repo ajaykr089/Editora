@@ -1,5 +1,6 @@
 import { ElementBase } from '../ElementBase';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
+import './ui-calendar';
 import { resolveDateTimeTranslations } from './date-time-i18n';
 import {
   clampDateIso,
@@ -327,6 +328,22 @@ const style = `
 `;
 
 const overlayStyle = `
+  .ui-date-time-picker-overlay-host {
+    --ui-dtp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
+    --ui-dtp-surface: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent),
+      color-mix(in srgb, var(--ui-color-surface, #ffffff) 90%, var(--ui-color-surface-alt, #f8fafc))
+    );
+    --ui-dtp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
+    --ui-dp-text: var(--ui-color-text, #0f172a);
+    --ui-dp-muted: var(--ui-color-muted, #64748b);
+    --ui-dtp-accent: var(--ui-color-primary, #2563eb);
+    --ui-dtp-panel-radius: 14px;
+    --ui-dtp-shadow: none;
+    --ui-dtp-duration: 160ms;
+    --ui-dtp-ease: cubic-bezier(0.2, 0.9, 0.24, 1);
+  }
   .overlay { position: fixed; z-index: var(--ui-dtp-z, 1600); pointer-events: none; }
   .panel {
     pointer-events: auto;
@@ -897,6 +914,7 @@ export class UIDateTimePicker extends ElementBase {
   private _ensureOverlay(): void {
     if (this._overlay || typeof document === 'undefined') return;
     const el = document.createElement('div');
+    el.className = 'ui-date-time-picker-overlay-host';
     el.style.position = 'fixed';
     el.style.left = '0';
     el.style.top = '0';

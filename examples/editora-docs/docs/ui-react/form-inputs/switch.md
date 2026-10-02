@@ -18,10 +18,16 @@ import { Switch } from '@editora/ui-react/Switch';
 
 ## Basic Usage
 
-```tsx
-<Switch onChange={(detail) => console.log(detail.checked)}>
-  Enable alerts
-</Switch>
+```tsx live
+function SwitchDemo() {
+  return (
+    <ThemeProvider>
+      <Switch onChange={(detail) => console.log(detail.checked)}>
+        Enable alerts
+      </Switch>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## With Description

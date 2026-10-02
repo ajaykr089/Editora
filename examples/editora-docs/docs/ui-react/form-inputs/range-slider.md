@@ -11,21 +11,21 @@ Range slider in `ui-react` is documented through the `Slider` component with `ra
 
 ## Basic Usage
 
-```tsx
-import { Slider } from '@editora/ui-react';
-
+```tsx live
 function BudgetRange() {
   return (
-    <Slider
-      range
-      min={0}
-      max={1000}
-      step={25}
-      valueStart={150}
-      valueEnd={650}
-      format="range"
-      label="Budget range"
-    />
+    <ThemeProvider>
+      <Slider
+        range
+        min={0}
+        max={1000}
+        step={25}
+        valueStart={150}
+        valueEnd={650}
+        format="range"
+        label="Budget range"
+      />
+    </ThemeProvider>
   );
 }
 ```

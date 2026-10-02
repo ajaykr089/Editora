@@ -1,5 +1,16 @@
 import { ElementBase } from '../ElementBase';
 
+function sanitizeCssValue(raw: string): string {
+  const value = raw.trim();
+  if (!value) return '';
+  // Reject anything that could break out of the CSS declaration or the
+  // surrounding style="..." attribute - not just tag-opening characters,
+  // but quotes too, since those alone can inject a new attribute (e.g.
+  // onmouseover=...) on the same element without ever needing `<`/`>`.
+  if (/[;{}<>"']/.test(value)) return '';
+  return value;
+}
+
 const style = `
   :host {
     display: block;
@@ -247,9 +258,15 @@ export class UISkeleton extends ElementBase {
     const animation = this._animationMode();
 
     const lines = Array.from({ length: count }, (_, index) => {
-      const lineWidth = this._lineWidth(index, variant, width);
+      const lineWidth = sanitizeCssValue(this._lineWidth(index, variant, width));
       return `<div class="line" style="--ui-line-width:${lineWidth};"></div>`;
     }).join('');
+
+    const safeHeight = height ? sanitizeCssValue(height) : '';
+    const safeWidth = width ? sanitizeCssValue(width) : '';
+    const safeRadius = radius ? sanitizeCssValue(radius) : '';
+    const safeGap = gap ? sanitizeCssValue(gap) : '';
+    const safeDuration = duration ? sanitizeCssValue(duration) : '';
 
     this.setContent(`
       <style>${style}</style>
@@ -257,11 +274,11 @@ export class UISkeleton extends ElementBase {
         class="stack"
         data-animation="${animation}"
         style="
-          ${height ? `--ui-skeleton-height:${height};` : ''}
-          ${width ? `--ui-skeleton-width:${width};` : ''}
-          ${radius ? `--ui-skeleton-radius:${radius};` : ''}
-          ${gap ? `--ui-skeleton-gap:${gap};` : ''}
-          ${duration ? `--ui-skeleton-duration:${duration};` : ''}
+          ${safeHeight ? `--ui-skeleton-height:${safeHeight};` : ''}
+          ${safeWidth ? `--ui-skeleton-width:${safeWidth};` : ''}
+          ${safeRadius ? `--ui-skeleton-radius:${safeRadius};` : ''}
+          ${safeGap ? `--ui-skeleton-gap:${safeGap};` : ''}
+          ${safeDuration ? `--ui-skeleton-duration:${safeDuration};` : ''}
         "
         role="status"
         aria-live="polite"

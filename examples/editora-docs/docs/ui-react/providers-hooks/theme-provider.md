@@ -204,7 +204,11 @@ Disable theme persistence by setting storageKey to null.
 ### Theme Switching
 Implement theme switching with multiple predefined themes.
 
-```tsx
+```tsx live noInline
+function YourApplication() {
+  return <div>Your app content</div>;
+}
+
 function ThemeSwitcher() {
   const [currentTheme, setCurrentTheme] = useState('light');
 
@@ -248,6 +252,8 @@ function ThemeSwitcher() {
     </ThemeProvider>
   );
 }
+
+render(<ThemeSwitcher />);
 ```
 
 ### Dynamic Theme Updates

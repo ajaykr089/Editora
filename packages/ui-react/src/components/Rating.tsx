@@ -5,6 +5,7 @@ import React, {
   useRef,
 } from "react";
 
+import '@editora/ui-core/rating';
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 

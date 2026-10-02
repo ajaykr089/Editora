@@ -48,7 +48,21 @@ const contentStyle: React.CSSProperties = {
 export default function App() {
   return (
     <AlertDialogProvider defaults={{ variant: 'soft', tone: 'warning', radius: 12, elevation: 'high', closeOnBackdrop: false }}>
-      <div style={layoutStyle}>
+      <style>{`
+        @media (max-width: 768px) {
+          [data-sandbox-shell] { flex-direction: column; }
+          [data-sandbox-sidebar] {
+            width: 100% !important;
+            min-width: 0 !important;
+            height: auto !important;
+            max-height: 45vh !important;
+            position: static !important;
+            border-right: none !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+          }
+        }
+      `}</style>
+      <div style={layoutStyle} data-sandbox-shell>
         <NavSidebar />
         <main style={contentStyle}>
           <Routes>

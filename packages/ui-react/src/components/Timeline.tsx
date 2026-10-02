@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
+import '@editora/ui-core/timeline';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type TimelineItem = {

@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import '@editora/ui-core/block-controls';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 import { warnIfElementNotRegistered } from './_internals';
 

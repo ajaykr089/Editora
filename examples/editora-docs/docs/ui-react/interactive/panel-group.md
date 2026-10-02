@@ -6,14 +6,18 @@ sidebar_label: Panel Group
 
 # Panel Group
 
-```tsx
-import { Panel, PanelGroup, Splitter } from '@editora/ui-react';
-
-<PanelGroup orientation="horizontal" onLayoutChange={(detail) => console.log(detail.sizes)}>
-  <Panel size={30} minSize={20}>Navigation</Panel>
-  <Splitter ariaLabel="Resize navigation" />
-  <Panel size={70}>Workspace</Panel>
-</PanelGroup>;
+```tsx live
+function PanelGroupDemo() {
+  return (
+    <ThemeProvider>
+      <PanelGroup orientation="horizontal" onLayoutChange={(detail) => console.log(detail.sizes)}>
+        <Panel size={30} minSize={20}>Navigation</Panel>
+        <Splitter ariaLabel="Resize navigation" />
+        <Panel size={70}>Workspace</Panel>
+      </PanelGroup>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

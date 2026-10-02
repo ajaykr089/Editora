@@ -1,3 +1,4 @@
+import { initDialogOverlay } from '../../shared/dialogHelpers';
 import { Plugin } from '@editora/core';
 import {
   createEditor,
@@ -518,6 +519,8 @@ export const CodePlugin = (): Plugin => ({
 
       // Create source editor dialog
       const createSourceDialog = () => {
+        document.querySelectorAll(".rte-source-editor-overlay").forEach((el) => el.remove());
+
         const originalHtml = currentHtml;
         const formattedOriginalHtml = formatHTML(originalHtml);
         let editorInstance: EditorCore | null = null;
@@ -531,6 +534,7 @@ export const CodePlugin = (): Plugin => ({
           document.body.matches(DARK_THEME_SELECTOR) ||
           document.documentElement.matches(DARK_THEME_SELECTOR);
         const overlay = document.createElement("div");
+        initDialogOverlay(overlay);
         overlay.className = "rte-source-editor-overlay";
         if (isDarkTheme) {
           overlay.classList.add("rte-theme-dark");

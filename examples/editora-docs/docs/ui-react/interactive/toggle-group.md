@@ -27,24 +27,24 @@ import { ToggleGroup } from '@editora/ui-react';
 
 ## Basic Usage
 
-```tsx
-import { ToggleGroup } from '@editora/ui-react/ToggleGroup';
-
+```tsx live
 function AlignmentPicker() {
   const [value, setValue] = React.useState('left');
 
   return (
-    <ToggleGroup
-      value={value}
-      variant="soft"
-      onValueChange={(detail) => {
-        if (typeof detail.value === 'string') setValue(detail.value);
-      }}
-    >
-      <ToggleGroup.Item value="left">Left</ToggleGroup.Item>
-      <ToggleGroup.Item value="center">Center</ToggleGroup.Item>
-      <ToggleGroup.Item value="right">Right</ToggleGroup.Item>
-    </ToggleGroup>
+    <ThemeProvider>
+      <ToggleGroup
+        value={value}
+        variant="soft"
+        onValueChange={(detail) => {
+          if (typeof detail.value === 'string') setValue(detail.value);
+        }}
+      >
+        <ToggleGroup.Item value="left">Left</ToggleGroup.Item>
+        <ToggleGroup.Item value="center">Center</ToggleGroup.Item>
+        <ToggleGroup.Item value="right">Right</ToggleGroup.Item>
+      </ToggleGroup>
+    </ThemeProvider>
   );
 }
 ```

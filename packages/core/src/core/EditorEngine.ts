@@ -5,7 +5,6 @@
 
 import { EditorState } from '../EditorState';
 import { PluginManager } from '../plugins/Plugin';
-import { Schema } from '../schema/Node';
 import { CommandRegistry } from './CommandRegistry';
 
 export interface EditorEngineConfig {

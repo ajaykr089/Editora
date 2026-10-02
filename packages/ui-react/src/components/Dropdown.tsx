@@ -1,5 +1,6 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
+import '@editora/ui-core/dropdown';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect' | 'onOpen' | 'onClose'> & {

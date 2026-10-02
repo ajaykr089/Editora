@@ -8,31 +8,31 @@ sidebar_label: Floating Toolbar
 
 A floating toolbar component that anchors to DOM elements and provides contextual actions through a composed toolbar sub-component. Built with the composed component pattern for flexible toolbar content.
 
-```tsx
-import { FloatingToolbar, Button } from '@editora/ui-react';
-
+```tsx live
 function EditorToolbar() {
   const [open, setOpen] = React.useState(false);
 
   return (
-    <>
-      <div id="editor-anchor" contentEditable onSelect={() => setOpen(true)}>
-        Select text to reveal toolbar
-      </div>
+    <ThemeProvider>
+      <>
+        <div id="editor-anchor" contentEditable onSelect={() => setOpen(true)}>
+          Select text to reveal toolbar
+        </div>
 
-      <FloatingToolbar
-        anchorId="editor-anchor"
-        open={open}
-        placement="top"
-        onOpenChange={setOpen}
-      >
-        <FloatingToolbar.Toolbar style={{ display: 'flex', gap: 6 }}>
-          <Button size="sm">Bold</Button>
-          <Button size="sm">Italic</Button>
-          <Button size="sm">Underline</Button>
-        </FloatingToolbar.Toolbar>
-      </FloatingToolbar>
-    </>
+        <FloatingToolbar
+          anchorId="editor-anchor"
+          open={open}
+          placement="top"
+          onOpenChange={setOpen}
+        >
+          <FloatingToolbar.Toolbar style={{ display: 'flex', gap: 6 }}>
+            <Button size="sm">Bold</Button>
+            <Button size="sm">Italic</Button>
+            <Button size="sm">Underline</Button>
+          </FloatingToolbar.Toolbar>
+        </FloatingToolbar>
+      </>
+    </ThemeProvider>
   );
 }
 ```

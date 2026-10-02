@@ -10,14 +10,14 @@ sidebar_label: Badge
 
 ## Basic usage
 
-```tsx
-import { Badge } from '@editora/ui-react';
-
+```tsx live
 function DeploymentBadge() {
   return (
-    <Badge tone="info" variant="surface" radius="full">
-      Release candidate
-    </Badge>
+    <ThemeProvider>
+      <Badge tone="info" variant="surface" radius="full">
+        Release candidate
+      </Badge>
+    </ThemeProvider>
   );
 }
 ```

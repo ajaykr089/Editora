@@ -1,3 +1,5 @@
+import { escapeHtml } from '../../shared/escapeHtml';
+import { initDialogOverlay } from '../../shared/dialogHelpers';
 import type { Plugin } from '@editora/core';
 
 /**
@@ -59,7 +61,10 @@ registerA11yRule({
     const img = node as HTMLImageElement;
     if (img.hasAttribute('role') && img.getAttribute('role') === 'presentation') return null;
     if (img.hasAttribute('data-a11y-ignore') && img.getAttribute('data-a11y-ignore') === 'image-alt-text') return null;
-    if (!img.hasAttribute('alt') || img.getAttribute('alt')?.trim() === '') {
+    // An empty alt="" is the correct WCAG pattern for a decorative image (matches the
+    // role="presentation" exemption above) - only a genuinely missing attribute is an error.
+    // Don't flag it, or the "Add empty alt" fix below would never actually resolve the issue.
+    if (!img.hasAttribute('alt')) {
       return {
         id: `img-alt-${ctx.cache.get('imgIdx')}`,
         rule: 'image-alt-text',
@@ -404,8 +409,8 @@ export const runA11yAudit = (): A11yIssue[] => {
   const walker = ctx.doc.createTreeWalker(editor, NodeFilter.SHOW_ELEMENT, null);
   
   let node: Node | null = walker.currentNode;
-  let idxMap: Record<string, number> = {};
-  let pathMap: Record<string, string> = {};
+  const idxMap: Record<string, number> = {};
+  const pathMap: Record<string, string> = {};
   let nodeIdx = 0;
   
   while (node && nodeIdx < 5000) {
@@ -485,7 +490,7 @@ export const getA11yScore = (issues?: A11yIssue[]): number => {
   }
   const errors = issues.filter(i => i.severity === 'error').length;
   const warnings = issues.filter(i => i.severity === 'warning').length;
-  let score = 100 - (errors * 20) - (warnings * 5);
+  const score = 100 - (errors * 20) - (warnings * 5);
   return Math.max(0, score);
 };
 
@@ -499,6 +504,8 @@ export const unsuppressRule = (ruleId: string) => { suppressedRules.delete(ruleI
 
 // --- UI Dialog Implementation ---
 const createA11yDialog = () => {
+  document.querySelectorAll('.a11y-dialog-overlay').forEach((el) => el.remove());
+
   const issues = runA11yAudit();
   const score = getA11yScore(issues); // Pass issues to avoid duplicate audit
   const isDarkTheme = isDarkThemeContext();
@@ -538,6 +545,7 @@ const createA11yDialog = () => {
   
   // Create dialog overlay
   const overlay = document.createElement('div');
+  initDialogOverlay(overlay);
   overlay.className = 'a11y-dialog-overlay';
   overlay.style.cssText = `
     position: fixed;
@@ -711,12 +719,12 @@ const createA11yDialog = () => {
             text-transform: uppercase;
           ">${issue.severity}</span>
           <div style="flex: 1;">
-            <div style="font-weight: 600; margin-bottom: 4px;">${issue.message}</div>
-            <div style="font-size: 12px; color: ${palette.muted};">WCAG ${issue.wcag} · ${issue.rule}</div>
+            <div style="font-weight: 600; margin-bottom: 4px;">${escapeHtml(issue.message)}</div>
+            <div style="font-size: 12px; color: ${palette.muted};">WCAG ${escapeHtml(issue.wcag)} · ${escapeHtml(issue.rule)}</div>
           </div>
         </div>
         <div style="font-size: 14px; color: ${palette.text}; margin-bottom: 8px; padding-left: 68px;">
-          ${issue.suggestion || ''}
+          ${escapeHtml(issue.suggestion || '')}
         </div>
       `;
       

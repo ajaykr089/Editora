@@ -10,24 +10,24 @@ Import the main `Layout` component and use its sub-components as properties. The
 
 ## Basic Usage
 
-```tsx
-import { Box, Button, Flex, Layout } from '@editora/ui-react';
-
+```tsx live
 function BasicLayout() {
   return (
-    <Layout mode="dashboard" maxWidth="xl" sidebarWidth="280px" asideWidth="320px">
-      <Layout.Header>
-        <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <strong>Workspace</strong>
-          <Button>Primary action</Button>
-        </Flex>
-      </Layout.Header>
+    <ThemeProvider>
+      <Layout mode="dashboard" maxWidth="xl" sidebarWidth="280px" asideWidth="320px">
+        <Layout.Header>
+          <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <strong>Workspace</strong>
+            <Button>Primary action</Button>
+          </Flex>
+        </Layout.Header>
 
-      <Layout.Sidebar>Navigation</Layout.Sidebar>
-      <Layout.Content>Main content</Layout.Content>
-      <Layout.Aside>Context rail</Layout.Aside>
-      <Layout.Footer>Footer actions</Layout.Footer>
-    </Layout>
+        <Layout.Sidebar>Navigation</Layout.Sidebar>
+        <Layout.Content>Main content</Layout.Content>
+        <Layout.Aside>Context rail</Layout.Aside>
+        <Layout.Footer>Footer actions</Layout.Footer>
+      </Layout>
+    </ThemeProvider>
   );
 }
 ```

@@ -8,22 +8,26 @@ sidebar_label: Command
 
 A command palette component that provides search-first selection from a list of items. Built as a composed component with a root container and searchable items.
 
-```tsx
-import { Command } from '@editora/ui-react';
-
-<Command
-  placeholder="Search commands"
-  emptyText="No matching commands"
-  onQueryChange={(value) => console.log(value)}
-  onSelect={(detail) => console.log(detail.value)}
->
-  <Command.Item value="publish" label="Publish update">
-    Publish update
-  </Command.Item>
-  <Command.Item value="archive" label="Archive draft">
-    Archive draft
-  </Command.Item>
-</Command>;
+```tsx live
+function CommandDemo() {
+  return (
+    <ThemeProvider>
+      <Command
+        placeholder="Search commands"
+        emptyText="No matching commands"
+        onQueryChange={(value) => console.log(value)}
+        onSelect={(detail) => console.log(detail.value)}
+      >
+        <Command.Item value="publish" label="Publish update">
+          Publish update
+        </Command.Item>
+        <Command.Item value="archive" label="Archive draft">
+          Archive draft
+        </Command.Item>
+      </Command>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Sub-components

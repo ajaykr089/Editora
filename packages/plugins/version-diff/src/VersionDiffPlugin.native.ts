@@ -1,3 +1,4 @@
+import { initDialogOverlay } from '../../shared/dialogHelpers';
 import type { Plugin } from '@editora/core';
 
 const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
@@ -321,7 +322,7 @@ function computeDiff(
 
   const { prefix, suffix, aMiddle, bMiddle } = diffPrefixSuffix(baseline, current);
 
-  let ops: Array<{ type: SegmentType; token: string }> = [];
+  const ops: Array<{ type: SegmentType; token: string }> = [];
   prefix.forEach((token) => ops.push({ type: 'equal', token }));
 
   const matrixSize = aMiddle.length * bMiddle.length;
@@ -849,6 +850,7 @@ function renderDialog(
   optionsByEditor.set(editor, options);
 
   const overlay = document.createElement('div');
+  initDialogOverlay(overlay);
   overlay.className = OVERLAY_CLASS;
   if (shouldUseDarkTheme(editor)) {
     overlay.classList.add('rte-version-diff-theme-dark');

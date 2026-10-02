@@ -1,4 +1,5 @@
 import React from 'react';
+import '@editora/ui-core/marquee';
 import { warnIfElementNotRegistered } from './_internals';
 
 export type MarqueeDirection = 'left' | 'right' | 'up' | 'down';

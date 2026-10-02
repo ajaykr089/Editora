@@ -6,17 +6,21 @@ sidebar_label: Pin Input
 
 # Pin Input
 
-```tsx
-import { PinInput } from '@editora/ui-react';
-
-<PinInput
-  length={6}
-  label="Verification code"
-  mode="numeric"
-  placeholderChar="•"
-  onChange={(value) => console.log(value)}
-  onComplete={(value) => console.log('complete', value)}
-/>;
+```tsx live
+function PinInputDemo() {
+  return (
+    <ThemeProvider>
+      <PinInput
+        length={6}
+        label="Verification code"
+        mode="numeric"
+        placeholderChar="•"
+        onChange={(value) => console.log(value)}
+        onComplete={(value) => console.log('complete', value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

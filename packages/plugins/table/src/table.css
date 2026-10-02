@@ -1,5 +1,9 @@
 /* Table Styles for Rich Text Editor */
 
+.rte-table-wrapper {
+  position: relative;
+}
+
 .rte-table,
 table {
   border-collapse: collapse;
@@ -290,14 +294,18 @@ table:hover .table-resize-handle::after {
   border-color: transparent;
 }
 
+/* Deliberately no blanket `fill: currentColor` here - several icons are
+ * authored as outlines (root <svg fill="none">, child shapes carrying their
+ * own stroke="currentColor" and no fill of their own). Forcing fill on the
+ * root overrides that fill="none" and, since fill inherits, turns every
+ * fill-less outline shape solid. The attribute-selector rules below already
+ * handle the icons that DO need their hardcoded black adapted for dark mode. */
 :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn svg {
   color: currentColor;
-  fill: currentColor;
 }
 
 .table-toolbar.rte-theme-dark .toolbar-icon-btn svg {
   color: currentColor;
-  fill: currentColor;
 }
 
 :is([data-theme="dark"], .dark, .editora-theme-dark) .toolbar-icon-btn svg [stroke="#000" i],

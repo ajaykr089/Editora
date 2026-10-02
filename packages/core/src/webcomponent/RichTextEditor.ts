@@ -392,6 +392,15 @@ export class RichTextEditorElement extends HTMLElement {
       }
     });
     
+    // Elements created from script get their children after the constructor ran, so
+    // pick up light-DOM content here too (before it is replaced by the editor chrome).
+    if (!this.hasAttribute('data-initial-content') && !this.contentElement) {
+      const lightDomContent = this.innerHTML.trim();
+      if (lightDomContent) {
+        this.setAttribute('data-initial-content', lightDomContent);
+      }
+    }
+
     // Get initial content before clearing innerHTML
     const initialContent =
       this.restoreAutosavedContent() ??
@@ -1072,9 +1081,14 @@ export class RichTextEditorElement extends HTMLElement {
     });
     
     // Content change
-    this.contentElement.addEventListener('input', () => {
+    this.contentElement.addEventListener('input', (event: Event) => {
       if (!this.contentElement) return;
       let html = this.contentElement.innerHTML;
+      // A plugin that has just made its own explicit, user-initiated insertion (the embed-iframe
+      // dialog) marks its input event with detail.allowedTags so that one mutation survives
+      // sanitizeOnInput without reopening those tags to arbitrary content. The React layer
+      // honours this; without it here the web component deleted the iframe right after insertion.
+      const trustedAllowedTags = (event as CustomEvent | undefined)?.detail?.allowedTags as string[] | undefined;
       const performanceConfig = this.getPerformanceConfig();
       const contentConfig = this.getContentSanitizeConfig();
       const securityConfig = this.getSecurityConfig();
@@ -1087,7 +1101,7 @@ export class RichTextEditorElement extends HTMLElement {
         !inputType;
 
       if (shouldSanitizeOnInput) {
-        const sanitized = sanitizeInputHTML(html, contentConfig, securityConfig);
+        const sanitized = sanitizeInputHTML(html, contentConfig, securityConfig, trustedAllowedTags);
         if (sanitized !== html) {
           const selection = window.getSelection();
           const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
@@ -1276,7 +1290,7 @@ export class RichTextEditorElement extends HTMLElement {
       this.config.readonly ||
       this.contentElement.contentEditable === 'false' ||
       this.contentElement.getAttribute('data-readonly') === 'true' ||
-      this.getAttribute('readonly') === 'true' ||
+      this.isReadonlyAttribute(this.getAttribute('readonly')) ||
       this.getAttribute('data-readonly') === 'true';
     if (runtimeReadonly) {
       this.floatingToolbar.hide();
@@ -1360,17 +1374,25 @@ export class RichTextEditorElement extends HTMLElement {
   }
 
   /**
+   * `<editora-editor readonly>` and `readonly="true"` both lock the editor; only
+   * removing the attribute or `readonly="false"` unlocks it.
+   */
+  private isReadonlyAttribute(value: string | null): boolean {
+    return value !== null && value !== 'false';
+  }
+
+  /**
    * Handle attribute changes
    */
   private handleAttributeChange(name: string, value: string): void {
     switch (name) {
       case 'readonly':
         if (this.contentElement) {
-          this.contentElement.contentEditable = value === 'true' ? 'false' : 'true';
+          this.contentElement.contentEditable = this.isReadonlyAttribute(value) ? 'false' : 'true';
           this.applyAccessibilitySettings();
         }
         if (this.engine) {
-          this.engine.setReadonly(value === 'true');
+          this.engine.setReadonly(this.isReadonlyAttribute(value));
         }
         break;
         

@@ -5,8 +5,6 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
-  release:
-    types: [published]
 
 jobs:
   test:
@@ -14,7 +12,7 @@ jobs:
     
     strategy:
       matrix:
-        node-version: [16.x, 18.x, 20.x, 22.x]
+        node-version: [20.x, 22.x]
     
     steps:
       - uses: actions/checkout@v3
@@ -30,7 +28,10 @@ jobs:
 
       - name: Verify component registry is up to date
         run: npm run check:components
-      
+
+      - name: Verify custom element registrations are complete
+        run: npm run check:element-registrations
+
       - name: Run linter
         run: npm run lint
       
@@ -46,40 +47,42 @@ jobs:
       - name: Run UI package tests
         run: npm run test:ui
 
-  publish:
-    needs: test
-    if: github.event_name == 'release'
+      - name: Run core package tests
+        run: npm run test:core:unit
+
+  react-19-compat:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      
-      - name: Setup Node.js
+
+      - name: Use Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: '22.x'
           cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
-      
+
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify component registry is up to date
-        run: npm run check:components
-      
-      - name: Build packages
-        run: npm run build
-      
-      - name: Publish to npm
-        run: lerna publish from-git --yes
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-      
-      - name: Create GitHub Release Notes
-        uses: softprops/action-gh-release@v1
-        with:
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      # @editora/ui-react's peerDependencies claim "react": ">=16.8 <21" -
+      # a range that includes React 19 - but nothing anywhere actually
+      # builds or tests against it; the whole repo's own tooling (this
+      # workflow's matrix included) only ever installs React 18. That gap
+      # is exactly what let a real React 19 incompatibility (ui-react's
+      # Sidebar bundle crashing on load - unrelated to any code a consumer
+      # writes) ship undetected until an external integration hit it. This
+      # job overrides the hoisted React install for this runner only - it
+      # does not touch package.json or the committed lockfile - then
+      # rebuilds and retests the React-facing packages against it.
+      - name: Install React 19 (override, not persisted)
+        run: npm install react@19 react-dom@19 --no-save --legacy-peer-deps
+
+      - name: Build ui-core
+        run: npm run build -w @editora/ui-core
+
+      - name: Build ui-react
+        run: npm run build -w @editora/ui-react
+
+      - name: Test ui-react against React 19
+        run: npm test --prefix packages/ui-react

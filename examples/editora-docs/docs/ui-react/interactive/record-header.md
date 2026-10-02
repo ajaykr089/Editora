@@ -10,21 +10,21 @@ sidebar_label: RecordHeader
 
 ## Basic usage
 
-```tsx
-import { RecordHeader } from '@editora/ui-react';
-
+```tsx live
 function PatientHeader() {
   return (
-    <RecordHeader
-      title="Ava Stone"
-      subtitle="Clinical profile and recent activity"
-      statusChip={{ label: 'critical', tone: 'warning' }}
-      details={[
-        { label: 'MRN', value: 'PT-1042' },
-        { label: 'Owner', value: 'Dr. Maya Chen' },
-        { label: 'Updated', value: 'Apr 9, 2026' },
-      ]}
-    />
+    <ThemeProvider>
+      <RecordHeader
+        title="Ava Stone"
+        subtitle="Clinical profile and recent activity"
+        statusChip={{ label: 'critical', tone: 'warning' }}
+        details={[
+          { label: 'MRN', value: 'PT-1042' },
+          { label: 'Owner', value: 'Dr. Maya Chen' },
+          { label: 'Updated', value: 'Apr 9, 2026' },
+        ]}
+      />
+    </ThemeProvider>
   );
 }
 ```

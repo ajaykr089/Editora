@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import '@editora/ui-core/pagination';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
 export type PaginationChangeDetail = {

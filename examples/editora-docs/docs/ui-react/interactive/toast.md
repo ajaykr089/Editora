@@ -10,9 +10,7 @@ The `Toast` component provides toast notification management with support for cu
 
 ## Basic Usage
 
-```tsx
-import { Toast } from '@editora/ui-react';
-
+```tsx live
 function BasicToast() {
   const toastRef = useRef(null);
 
@@ -23,11 +21,13 @@ function BasicToast() {
   };
 
   return (
-    <>
-      <button onClick={showToast}>Show Toast</button>
-      
-      <Toast ref={toastRef} />
-    </>
+    <ThemeProvider>
+      <>
+        <button onClick={showToast}>Show Toast</button>
+
+        <Toast ref={toastRef} />
+      </>
+    </ThemeProvider>
   );
 }
 ```

@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import './ui-icon';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'warning';
 type ButtonSize = 'sm' | 'md' | 'lg';

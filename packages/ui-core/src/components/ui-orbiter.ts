@@ -585,7 +585,17 @@ function normalizeLength(value: string | null, fallback: string): string {
   if (!trimmed) return fallback;
   const parts = trimmed.split(/\s+/).filter(Boolean);
   if (!parts.length) return fallback;
-  return parts.map((part) => (/^-?\d+(\.\d+)?$/.test(part) ? `${part}px` : part)).join(' ');
+  // Non-numeric parts (e.g. "4rem", "50%") are passed through as-is rather
+  // than having "px" appended - but they still land directly in a
+  // style="..." attribute, so anything that isn't a plausible CSS length
+  // token is rejected wholesale rather than risking an attribute/tag
+  // breakout via ;{}<>"' characters.
+  const safeParts = parts.map((part) => {
+    if (/^-?\d+(\.\d+)?$/.test(part)) return `${part}px`;
+    return /^-?\d*\.?\d+(px|rem|em|%|vh|vw|ch|ex|vmin|vmax)$/.test(part) ? part : null;
+  });
+  if (safeParts.some((part) => part === null)) return fallback;
+  return safeParts.join(' ');
 }
 
 function normalizeTime(value: string | null, fallback: string): string {

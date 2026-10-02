@@ -1,3 +1,4 @@
+import { initDialogOverlay } from '../../shared/dialogHelpers';
 import type { Plugin } from '@editora/core';
 
 const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
@@ -984,6 +985,7 @@ function openDataBindingDialog(
   const seed = targetToken ? extractTokenConfig(targetToken, options) : normalizeTokenConfig(initialArgs || {}, options);
 
   const overlay = document.createElement('div');
+  initDialogOverlay(overlay);
   overlay.className = DIALOG_OVERLAY_CLASS;
   if (shouldUseDarkTheme(editor)) {
     overlay.classList.add('rte-data-binding-theme-dark');

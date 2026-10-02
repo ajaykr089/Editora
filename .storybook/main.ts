@@ -27,6 +27,7 @@ const config: StorybookConfig = {
         alias: [
           { find: '@editora/core', replacement: path.resolve(__dirname, '../packages/core/src') },
           { find: '@editora/react', replacement: path.resolve(__dirname, '../packages/react/src') },
+          { find: '@editora/markdown-editor', replacement: path.resolve(__dirname, '../packages/markdown-editor/src/index.ts') },
           { find: '@editora/plugins', replacement: path.resolve(__dirname, '../packages/plugins/src') },
           { find: '@editora/themes', replacement: path.resolve(__dirname, '../packages/themes/src') },
           { find: '@editora/toast', replacement: path.resolve(__dirname, '../packages/editora-toast/src') },

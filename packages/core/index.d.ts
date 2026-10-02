@@ -353,3 +353,35 @@ export function getSelectionInfo(
   selectedChars: number;
   selectedWords: number;
 };
+
+export interface SanitizationConfig {
+  allowedTags?: string[];
+  allowedAttributes?: Record<string, string[]>;
+  sanitize?: boolean;
+}
+
+export interface SecurityConfig {
+  sanitizeOnPaste?: boolean;
+  sanitizeOnInput?: boolean;
+}
+
+export function sanitizeHTML(
+  html: string,
+  contentConfig?: SanitizationConfig,
+  securityConfig?: SecurityConfig,
+): string;
+export function sanitizePastedHTML(
+  html: string,
+  contentConfig?: SanitizationConfig,
+  securityConfig?: SecurityConfig,
+): string;
+export function sanitizeInputHTML(
+  html: string,
+  contentConfig?: SanitizationConfig,
+  securityConfig?: SecurityConfig,
+  /**
+   * Tags a specific, already-trusted mutation (e.g. the embed-iframe dialog) may keep
+   * even though the default allowlist excludes them. Never applied to pasted content.
+   */
+  additionalAllowedTags?: string[],
+): string;

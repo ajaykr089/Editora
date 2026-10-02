@@ -787,6 +787,22 @@ function sanitizeHTMLElement(
   }
 }
 
+// A <template> element's content is inert for rendering and script
+// execution, but that guarantee does not extend to resource-loading event
+// handlers: assigning untrusted HTML straight to template.innerHTML still
+// lets the browser fire an <img onerror=...> (or onload, etc.) the instant
+// it's parsed, before this function's own attribute-stripping walk ever
+// runs - the template is still part of the active document, just unrendered,
+// and that's a different guarantee than the fully separate, inactive
+// document DOMPurify itself parses into. Strip on*="..." handler attributes
+// from the raw string first, so nothing capable of executing ever reaches a
+// DOM parse in the first place; the walk below still does the real,
+// structural cleanup (tags, non-handler attributes, styles, protocols).
+const EVENT_HANDLER_ATTR_PATTERN = /\son\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)/gi;
+function stripEventHandlerAttributes(html: string): string {
+  return html.replace(EVENT_HANDLER_ATTR_PATTERN, '');
+}
+
 function sanitizeHTML(
   html: string,
   profileOptions: ResolvedSmartPasteProfileOptions,
@@ -795,7 +811,7 @@ function sanitizeHTML(
   profile: SmartPasteProfile,
 ): { html: string; textLength: number; counters: SanitizeCounters } {
   const template = document.createElement('template');
-  template.innerHTML = html;
+  template.innerHTML = stripEventHandlerAttributes(html);
 
   const counters: SanitizeCounters = {
     removedElements: 0,
@@ -823,9 +839,15 @@ function sanitizeHTML(
     }
   }
 
+  // `element.isConnected` is always false here: these nodes live in a detached
+  // <template>'s content fragment, whose root is a DocumentFragment, not a
+  // Document. Checking it made this entire loop a no-op - no element was ever
+  // sanitized. `template.content.contains(element)` is what the guard actually
+  // needs: it's true for untouched elements and false once an earlier removal
+  // (BLOCKED_TAGS, table/img handling) has taken an element out of the tree.
   const elements = Array.from(template.content.querySelectorAll('*')) as HTMLElement[];
   elements.forEach((element) => {
-    if (!element.isConnected) return;
+    if (!template.content.contains(element)) return;
     sanitizeHTMLElement(element, profileOptions, source, counters);
   });
 

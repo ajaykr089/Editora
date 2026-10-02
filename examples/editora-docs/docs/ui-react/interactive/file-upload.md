@@ -6,21 +6,25 @@ sidebar_label: File Upload
 
 # File Upload
 
-```tsx
-import { Dropzone } from '@editora/ui-react';
-
-<Dropzone
-  label="Drop assets"
-  dropLabel="Drop files here"
-  accept="image/*"
-  multiple
-  showPreviews
-  onChange={(files) => console.log(files)}
-  onUploadRequest={async ({ file, setProgress }) => {
-    setProgress(100);
-    return { name: file.name };
-  }}
-/>;
+```tsx live
+function FileUploadDemo() {
+  return (
+    <ThemeProvider>
+      <Dropzone
+        label="Drop assets"
+        dropLabel="Drop files here"
+        accept="image/*"
+        multiple
+        showPreviews
+        onChange={(files) => console.log(files)}
+        onUploadRequest={async ({ file, setProgress }) => {
+          setProgress(100);
+          return { name: file.name };
+        }}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

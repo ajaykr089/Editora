@@ -1112,6 +1112,30 @@ function setSelectionRange(editor: HTMLElement, range: Range): void {
   selection.addRange(range);
 }
 
+const BLOCK_TAGS = new Set([
+  'DIV', 'P', 'BLOCKQUOTE', 'PRE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'TD', 'TH',
+]);
+
+// Library blocks are multi-element HTML (headings, paragraphs, lists) -
+// range.insertNode() at the raw cursor position splits whatever paragraph
+// the cursor is in and inserts the fragment inside it, which can leave the
+// text after the cursor as bare, unwrapped content next to block-level
+// elements like <h3> instead of back inside a paragraph. Inserting after
+// the containing block instead (same pattern as the table/code-sample/
+// page-break plugins) avoids splitting the paragraph at all.
+function getContainingBlock(node: Node, editorContent: HTMLElement): HTMLElement | null {
+  let current: Node | null = node;
+
+  while (current && current !== editorContent) {
+    if (current.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has((current as HTMLElement).tagName)) {
+      return current as HTMLElement;
+    }
+    current = current.parentNode;
+  }
+
+  return null;
+}
+
 function insertHTMLAtRange(editor: HTMLElement, range: Range, html: string): boolean {
   const workingRange = range.cloneRange();
   if (!editor.contains(workingRange.commonAncestorContainer)) return false;
@@ -1123,7 +1147,14 @@ function insertHTMLAtRange(editor: HTMLElement, range: Range, html: string): boo
   if (!fragment) return false;
 
   const lastNode = fragment.lastChild;
-  workingRange.insertNode(fragment);
+  const block = getContainingBlock(workingRange.endContainer, editor)
+    || getContainingBlock(workingRange.startContainer, editor);
+
+  if (block && block.parentNode) {
+    block.parentNode.insertBefore(fragment, block.nextSibling);
+  } else {
+    workingRange.insertNode(fragment);
+  }
 
   if (lastNode) {
     const next = document.createRange();

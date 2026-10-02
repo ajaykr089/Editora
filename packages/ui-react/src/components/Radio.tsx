@@ -1,4 +1,5 @@
 import * as React from 'react';
+import '@editora/ui-core/radio';
 import {
   getCustomEventDetail,
   syncBooleanAttribute,

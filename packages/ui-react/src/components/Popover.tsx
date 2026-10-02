@@ -1,4 +1,5 @@
 import * as React from 'react';
+import '@editora/ui-core/popover';
 import { warnIfElementNotRegistered } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;

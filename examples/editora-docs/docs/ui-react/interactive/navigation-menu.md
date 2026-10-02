@@ -10,36 +10,40 @@ Import the main `NavigationMenu` component and use its sub-components as propert
 
 ## Basic Usage
 
-```tsx
-import { NavigationMenu } from '@editora/ui-react';
+```tsx live
+function NavigationMenuDemo() {
+  return (
+    <ThemeProvider>
+      <NavigationMenu.Root
+        selected={0}
+        variant="soft"
+        size="md"
+        radius={12}
+        onSelect={(selected) => console.log(selected)}
+      >
+        <NavigationMenu.List>
+          <NavigationMenu.Item>
+            <NavigationMenu.Trigger>Overview</NavigationMenu.Trigger>
+            <NavigationMenu.Content>Overview content</NavigationMenu.Content>
+          </NavigationMenu.Item>
 
-<NavigationMenu.Root
-  selected={0}
-  variant="soft"
-  size="md"
-  radius={12}
-  onSelect={(selected) => console.log(selected)}
->
-  <NavigationMenu.List>
-    <NavigationMenu.Item>
-      <NavigationMenu.Trigger>Overview</NavigationMenu.Trigger>
-      <NavigationMenu.Content>Overview content</NavigationMenu.Content>
-    </NavigationMenu.Item>
+          <NavigationMenu.Item>
+            <NavigationMenu.Trigger>Releases</NavigationMenu.Trigger>
+            <NavigationMenu.Content>Releases content</NavigationMenu.Content>
+          </NavigationMenu.Item>
 
-    <NavigationMenu.Item>
-      <NavigationMenu.Trigger>Releases</NavigationMenu.Trigger>
-      <NavigationMenu.Content>Releases content</NavigationMenu.Content>
-    </NavigationMenu.Item>
+          <NavigationMenu.Item>
+            <NavigationMenu.Link href="/analytics">Analytics</NavigationMenu.Link>
+            <NavigationMenu.Content>Analytics content</NavigationMenu.Content>
+          </NavigationMenu.Item>
+        </NavigationMenu.List>
 
-    <NavigationMenu.Item>
-      <NavigationMenu.Link href="/analytics">Analytics</NavigationMenu.Link>
-      <NavigationMenu.Content>Analytics content</NavigationMenu.Content>
-    </NavigationMenu.Item>
-  </NavigationMenu.List>
-
-  <NavigationMenu.Indicator />
-  <NavigationMenu.Viewport />
-</NavigationMenu.Root>;
+        <NavigationMenu.Indicator />
+        <NavigationMenu.Viewport />
+      </NavigationMenu.Root>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Composed Sub-Components

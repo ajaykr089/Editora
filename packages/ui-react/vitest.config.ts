@@ -11,6 +11,7 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: '@editora/ui-core/runtime', replacement: resolve(__dirname, '../ui-core/src/runtime.ts') },
+      { find: /^@editora\/ui-core\/(.+)$/, replacement: resolve(__dirname, '../ui-core/src/standalone') + '/$1.ts' },
       { find: '@editora/ui-core', replacement: resolve(__dirname, '../ui-core/src/index.ts') },
       { find: '@editora/ui-react', replacement: resolve(__dirname, 'src/index.tsx') },
     ]

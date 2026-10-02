@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import '@editora/ui-core/separator';
 export type SeparatorProps = React.HTMLAttributes<HTMLElement> & {
   orientation?: 'horizontal' | 'vertical';
   variant?: 'solid' | 'dashed' | 'dotted' | 'gradient' | 'glow';

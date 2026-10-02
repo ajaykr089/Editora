@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import '@editora/ui-core/odometer';
 import {
   syncBooleanAttribute,
   syncNumberAttribute,

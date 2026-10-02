@@ -6,20 +6,24 @@ sidebar_label: Time Picker
 
 # Time Picker
 
-```tsx
-import { TimePicker } from '@editora/ui-react';
-
-<TimePicker
-  label="Start time"
-  value="09:30"
-  format="12h"
-  step={15}
-  min="08:00"
-  max="18:00"
-  clearable
-  allowInput
-  onValueChange={(value) => console.log(value)}
-/>;
+```tsx live
+function TimePickerDemo() {
+  return (
+    <ThemeProvider>
+      <TimePicker
+        label="Start time"
+        value="09:30"
+        format="12h"
+        step={15}
+        min="08:00"
+        max="18:00"
+        clearable
+        allowInput
+        onValueChange={(value) => console.log(value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

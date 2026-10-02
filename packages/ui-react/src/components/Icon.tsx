@@ -1,5 +1,6 @@
 import React from 'react';
 
+import '@editora/ui-core/icon';
 export type IconProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
   name?: string;

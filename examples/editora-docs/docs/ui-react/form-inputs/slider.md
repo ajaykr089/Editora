@@ -6,10 +6,14 @@ sidebar_label: Slider
 
 # Slider
 
-```tsx
-import { Slider } from '@editora/ui-react';
-
-<Slider min={0} max={100} value={40} showValue label="Volume" onChange={(value) => console.log(value)} />
+```tsx live
+function SliderDemo() {
+  return (
+    <ThemeProvider>
+      <Slider min={0} max={100} value={40} showValue label="Volume" onChange={(value) => console.log(value)} />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Props

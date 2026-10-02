@@ -10,29 +10,29 @@ sidebar_label: DataTable
 
 ## Basic Usage
 
-```tsx
-import { Badge, DataTable } from '@editora/ui-react';
-
+```tsx live
 function UsersTable() {
   return (
-    <DataTable sortable striped hover page={1} pageSize={6}>
-      <table>
-        <thead>
-          <tr>
-            <th data-key="name">Name</th>
-            <th data-key="email">Email</th>
-            <th data-key="status">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Ava Johnson</td>
-            <td>ava@acme.com</td>
-            <td><Badge tone="success" variant="soft">Active</Badge></td>
-          </tr>
-        </tbody>
-      </table>
-    </DataTable>
+    <ThemeProvider>
+      <DataTable sortable striped hover page={1} pageSize={6}>
+        <table>
+          <thead>
+            <tr>
+              <th data-key="name">Name</th>
+              <th data-key="email">Email</th>
+              <th data-key="status">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Ava Johnson</td>
+              <td>ava@acme.com</td>
+              <td><Badge tone="success" variant="soft">Active</Badge></td>
+            </tr>
+          </tbody>
+        </table>
+      </DataTable>
+    </ThemeProvider>
   );
 }
 ```

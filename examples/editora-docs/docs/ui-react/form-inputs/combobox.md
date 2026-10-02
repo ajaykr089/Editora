@@ -6,21 +6,25 @@ sidebar_label: Combobox
 
 # Combobox
 
-```tsx
-import { Combobox } from '@editora/ui-react';
-
-<Combobox
-  label="Assignee"
-  placeholder="Search people"
-  clearable
-  debounce={200}
-  emptyText="No matches"
-  onInput={(query) => console.log(query)}
-  onSelect={(value, label) => console.log(value, label)}
->
-  <button value="asha">Asha Patel</button>
-  <button value="dylan">Dylan Kim</button>
-</Combobox>;
+```tsx live
+function ComboboxDemo() {
+  return (
+    <ThemeProvider>
+      <Combobox
+        label="Assignee"
+        placeholder="Search people"
+        clearable
+        debounce={200}
+        emptyText="No matches"
+        onInput={(query) => console.log(query)}
+        onSelect={(value, label) => console.log(value, label)}
+      >
+        <button value="asha">Asha Patel</button>
+        <button value="dylan">Dylan Kim</button>
+      </Combobox>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

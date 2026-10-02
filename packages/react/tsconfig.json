@@ -19,8 +19,6 @@
   "include": ["src/**/*"],
   "exclude": [
     "dist",
-    "**/*.test.ts",
-    "src/components/ToolbarContainer.tsx",
-    "src/hooks/useEditor.ts"
+    "**/*.test.ts"
   ]
 }

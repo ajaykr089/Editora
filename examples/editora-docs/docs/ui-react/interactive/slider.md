@@ -6,18 +6,22 @@ sidebar_label: Slider
 
 # Slider
 
-```tsx
-import { Slider } from '@editora/ui-react';
-
-<Slider
-  range
-  valueStart={20}
-  valueEnd={80}
-  marks={[0, 25, 50, 75, 100]}
-  format="range"
-  variant="soft"
-  tone="success"
-/>
+```tsx live
+function SliderDemo() {
+  return (
+    <ThemeProvider>
+      <Slider
+        range
+        valueStart={20}
+        valueEnd={80}
+        marks={[0, 25, 50, 75, 100]}
+        format="range"
+        variant="soft"
+        tone="success"
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Supported Props

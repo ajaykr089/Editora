@@ -12,25 +12,25 @@ It supports controlled open state, placement, visual variants, and selection cal
 
 ## Basic Usage
 
-```tsx
-import { Dropdown } from '@editora/ui-react';
-
-export function Example() {
+```tsx live
+function Example() {
   return (
-    <Dropdown
-      placement="bottom"
-      variant="surface"
-      size="md"
-      radius="md"
-      closeOnSelect
-      onSelect={(detail) => console.log(detail.value)}
-    >
-      <Dropdown.Trigger>Open actions</Dropdown.Trigger>
-      <Dropdown.Content>
-        <Dropdown.Item value="duplicate">Duplicate</Dropdown.Item>
-        <Dropdown.Item value="archive">Archive</Dropdown.Item>
-      </Dropdown.Content>
-    </Dropdown>
+    <ThemeProvider>
+      <Dropdown
+        placement="bottom"
+        variant="surface"
+        size="md"
+        radius="md"
+        closeOnSelect
+        onSelect={(detail) => console.log(detail.value)}
+      >
+        <Dropdown.Trigger>Open actions</Dropdown.Trigger>
+        <Dropdown.Content>
+          <Dropdown.Item value="duplicate">Duplicate</Dropdown.Item>
+          <Dropdown.Item value="archive">Archive</Dropdown.Item>
+        </Dropdown.Content>
+      </Dropdown>
+    </ThemeProvider>
   );
 }
 ```

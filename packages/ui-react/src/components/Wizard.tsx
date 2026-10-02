@@ -9,6 +9,7 @@ import React, {
   useState,
 } from "react";
 
+import '@editora/ui-core/wizard';
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 

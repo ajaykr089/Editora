@@ -241,13 +241,29 @@
   line-height: 1;
 }
 
-/* Toolbar icon SVG styling */
+/* Toolbar icon SVG styling. Deliberately does NOT blanket-set `fill` on
+ * every svg here: plenty of icons are authored as outlines - root
+ * <svg fill="none">, with child shapes carrying their own
+ * `stroke="currentColor"` and no fill of their own. Forcing fill:currentColor
+ * on the root overrides that `fill="none"`, and since CSS fill is inherited,
+ * every fill-less child then inherits currentColor too - turning a hollow
+ * outline shape into a solid, mostly unrecognizable blob. `color` is still
+ * set for any icon that references the currentColor keyword itself. */
 .editora-toolbar-button svg,
 .editora-toolbar-icon svg {
   width: 20px;
   height: 20px;
   display: block;
   color: currentColor;
+}
+
+/* Solid-glyph icons (e.g. Bold/Italic) declare no fill attribute at all and
+ * default to SVG's initial black - harmless on the light toolbar but
+ * invisible against the dark theme's toolbar background. Convert the root
+ * to currentColor, skipping any root that explicitly opts out with
+ * fill="none" (outline icons keep relying on their own stroke). */
+.editora-theme-dark .editora-toolbar-button svg:not([fill="none" i]),
+.editora-theme-dark .editora-toolbar-icon svg:not([fill="none" i]) {
   fill: currentColor;
 }
 
@@ -303,6 +319,76 @@
 
 .editora-theme-dark .editora-toolbar-separator {
   background: #4d596b;
+}
+
+/* Toolbar overflow ("more options") */
+.editora-toolbar-items-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.editora-toolbar-more-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 16px;
+}
+
+.editora-toolbar-more-button:hover {
+  background: #e0e0e0;
+}
+
+.editora-toolbar-more-button.active {
+  background: #d0d0d0;
+  border-color: #999;
+}
+
+.editora-theme-dark .editora-toolbar-more-button {
+  background: var(--editora-dark-content);
+  border-color: var(--editora-dark-border);
+  color: var(--editora-dark-text);
+}
+
+.editora-theme-dark .editora-toolbar-more-button:hover,
+.editora-theme-dark .editora-toolbar-more-button.active {
+  background: #3a4554;
+  border-color: #607088;
+}
+
+.editora-toolbar-expanded-row {
+  display: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 8px;
+  border-top: 1px solid #ddd;
+  background: #f5f5f5;
+}
+
+.editora-toolbar-expanded-row.show {
+  display: flex;
+}
+
+.editora-theme-dark .editora-toolbar-expanded-row {
+  border-top-color: var(--editora-dark-border);
+  background: linear-gradient(
+    180deg,
+    var(--editora-dark-toolbar-bg-start) 0%,
+    var(--editora-dark-toolbar-bg-end) 100%
+  );
 }
 
 /* Dropdown */

@@ -8,14 +8,14 @@ sidebar_label: Checkbox
 
 Use `Checkbox` for binary selection. The React wrapper maps directly to `ui-checkbox`.
 
-```tsx
-import { Checkbox } from '@editora/ui-react';
-
+```tsx live
 function Preferences() {
   return (
-    <Checkbox indeterminate preset="admin" onCheckedChange={(checked) => console.log(checked)}>
-      Review required
-    </Checkbox>
+    <ThemeProvider>
+      <Checkbox indeterminate preset="admin" onCheckedChange={(checked) => console.log(checked)}>
+        Review required
+      </Checkbox>
+    </ThemeProvider>
   );
 }
 ```

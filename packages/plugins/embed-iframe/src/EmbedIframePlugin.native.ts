@@ -1,3 +1,4 @@
+import { initDialogOverlay } from '../../shared/dialogHelpers';
 import type { Plugin } from '@editora/core';
 
 /**
@@ -396,9 +397,12 @@ function convertToEmbedUrl(rawUrl: string): string {
 }
 
 function isValidEmbedUrl(value: string): boolean {
+  // Modern URL parsers percent-encode whitespace in the host instead of
+  // throwing, so "http://not a url" would otherwise parse as valid.
+  if (/\s/.test(value)) return false;
   try {
     const url = new URL(value);
-    return url.protocol === 'https:' || url.protocol === 'http:';
+    return (url.protocol === 'https:' || url.protocol === 'http:') && url.hostname.length > 0;
   } catch {
     return false;
   }
@@ -433,6 +437,8 @@ export const EmbedIframePlugin = (): Plugin => {
 };
 
 function createEmbedDialog(editorElement?: HTMLElement): void {
+  document.querySelectorAll('.rte-embed-iframe-overlay').forEach((el) => el.remove());
+
   // If no editor element provided, find the currently focused one
   if (!editorElement) {
     const focusedElement = document.activeElement;
@@ -474,6 +480,7 @@ function createEmbedDialog(editorElement?: HTMLElement): void {
 
   // Create dialog overlay
   const overlay = document.createElement('div');
+  initDialogOverlay(overlay);
   overlay.className = 'rte-dialog-overlay rte-embed-iframe-overlay';
   if (isDarkThemeContext(editorElement)) {
     overlay.classList.add('rte-theme-dark');
@@ -483,12 +490,15 @@ function createEmbedDialog(editorElement?: HTMLElement): void {
   // Create dialog content
   const dialog = document.createElement('div');
   dialog.className = 'rte-dialog-content embed-iframe-dialog';
+  dialog.setAttribute('role', 'dialog');
+  dialog.setAttribute('aria-modal', 'true');
+  dialog.setAttribute('aria-labelledby', 'embed-iframe-dialog-title');
   dialog.onclick = (e) => e.stopPropagation();
 
   dialog.innerHTML = `
     <div class="rte-dialog-header">
-      <h3>Embed Iframe</h3>
-      <button class="rte-dialog-close">×</button>
+      <h3 id="embed-iframe-dialog-title">Embed Iframe</h3>
+      <button type="button" class="rte-dialog-close" aria-label="Close">×</button>
     </div>
     <div class="rte-dialog-body">
       <div class="rte-vertical-tabs">
@@ -499,22 +509,23 @@ function createEmbedDialog(editorElement?: HTMLElement): void {
         <div class="rte-tab-content">
           <div class="rte-tab-panel" data-panel="general" style="display: block;">
             <div class="rte-form-group">
-              <label class="rte-form-label">Source</label>
-              <input type="url" class="rte-form-input" id="iframe-src" placeholder="https://example.com" required />
+              <label class="rte-form-label" for="iframe-src">Source</label>
+              <input type="url" class="rte-form-input" id="iframe-src" placeholder="https://example.com" required aria-describedby="iframe-src-error" />
+              <div class="rte-form-error" id="iframe-src-error" role="alert" hidden></div>
             </div>
             <div class="rte-form-group">
-              <label class="rte-form-label">Size</label>
+              <label class="rte-form-label" for="iframe-size">Size</label>
               <select class="rte-form-select" id="iframe-size">
                 ${SIZE_OPTIONS.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join('')}
               </select>
             </div>
             <div class="rte-form-row" id="dimensions-row">
               <div class="rte-form-group">
-                <label class="rte-form-label">Width</label>
+                <label class="rte-form-label" for="iframe-width">Width</label>
                 <input type="text" class="rte-form-input" id="iframe-width" placeholder="100%" value="100%" />
               </div>
               <div class="rte-form-group">
-                <label class="rte-form-label">Height</label>
+                <label class="rte-form-label" for="iframe-height">Height</label>
                 <input type="text" class="rte-form-input" id="iframe-height" placeholder="400px" value="400px" />
               </div>
               <div class="rte-form-group constrain-group">
@@ -524,20 +535,21 @@ function createEmbedDialog(editorElement?: HTMLElement): void {
           </div>
           <div class="rte-tab-panel" data-panel="advanced" style="display: none;">
             <div class="rte-form-group">
-              <label class="rte-form-label">Name</label>
+              <label class="rte-form-label" for="iframe-name">Name</label>
               <input type="text" class="rte-form-input" id="iframe-name" placeholder="Iframe name" />
             </div>
             <div class="rte-form-group">
-              <label class="rte-form-label">Title</label>
+              <label class="rte-form-label" for="iframe-title">Title</label>
               <input type="text" class="rte-form-input" id="iframe-title" placeholder="Iframe title" />
             </div>
             <div class="rte-form-group">
-              <label class="rte-form-label">Long Description</label>
+              <label class="rte-form-label" for="iframe-longdesc">Long Description</label>
               <textarea class="rte-form-textarea" id="iframe-longdesc" placeholder="Detailed description of the iframe content" rows="3"></textarea>
             </div>
             <div class="rte-form-group">
-              <label class="rte-form-label">Description URL</label>
-              <input type="url" class="rte-form-input" id="iframe-desc-url" placeholder="https://example.com/description" />
+              <label class="rte-form-label" for="iframe-desc-url">Description URL</label>
+              <input type="url" class="rte-form-input" id="iframe-desc-url" placeholder="https://example.com/description" aria-describedby="iframe-desc-url-error" />
+              <div class="rte-form-error" id="iframe-desc-url-error" role="alert" hidden></div>
             </div>
             <div class="rte-form-group">
               <label class="rte-checkbox-label">
@@ -585,8 +597,6 @@ function createEmbedDialog(editorElement?: HTMLElement): void {
 }
 
 function setupDialogEventListeners(dialog: HTMLElement, editorElement: HTMLElement): void {
-  const state = getEditorState(editorElement);
-
   // Close button
   dialog.querySelector('.rte-dialog-close')?.addEventListener('click', () => closeDialog(editorElement));
 
@@ -699,18 +709,57 @@ function toggleConstrainProportions(dialog: HTMLElement, editorElement: HTMLElem
 
 function handleSave(dialog: HTMLElement, editorElement: HTMLElement): void {
   const state = getEditorState(editorElement);
-  
+
   // Get values from form
-  const src = (dialog.querySelector('#iframe-src') as HTMLInputElement)?.value.trim();
-  
+  const srcInput = dialog.querySelector('#iframe-src') as HTMLInputElement | null;
+  const descUrlInput = dialog.querySelector('#iframe-desc-url') as HTMLInputElement | null;
+  let src = srcInput?.value.trim() || '';
+  // A pasted "www.example.com" has no scheme; assume https rather than reject
+  // it. Anything that already carries a scheme (javascript:, data:, ftp:, ...)
+  // is left alone and fails validation below.
+  if (src && !/^[a-z][a-z0-9+.-]*:/i.test(src) && /^[^\s/]+\.[^\s/]+/.test(src)) {
+    src = `https://${src}`;
+    if (srcInput) srcInput.value = src;
+  }
+
+  const showFieldError = (input: HTMLInputElement | null, errorId: string, message: string, tab: 'general' | 'advanced') => {
+    switchTab(dialog, tab, editorElement);
+    const errorEl = dialog.querySelector(`#${errorId}`) as HTMLElement | null;
+    if (errorEl) {
+      errorEl.textContent = message;
+      errorEl.hidden = false;
+    }
+    if (input) {
+      input.setAttribute('aria-invalid', 'true');
+      input.focus();
+    }
+  };
+  const clearFieldError = (input: HTMLInputElement | null, errorId: string) => {
+    const errorEl = dialog.querySelector(`#${errorId}`) as HTMLElement | null;
+    if (errorEl) {
+      errorEl.textContent = '';
+      errorEl.hidden = true;
+    }
+    input?.removeAttribute('aria-invalid');
+  };
+  clearFieldError(srcInput, 'iframe-src-error');
+  clearFieldError(descUrlInput, 'iframe-desc-url-error');
+
   if (!src) {
-    alert('Please enter a source URL');
+    showFieldError(srcInput, 'iframe-src-error', 'Please enter a source URL.', 'general');
     return;
   }
 
-  // Validate HTTPS
-  if (!src.startsWith('https://') && !src.startsWith('http://')) {
-    alert('Please enter a valid URL starting with https:// or http://');
+  // Must parse as a real http(s) URL with a host - a bare "https://" prefix
+  // check lets "https://" and "http://not a url" through.
+  if (!isValidEmbedUrl(src)) {
+    showFieldError(srcInput, 'iframe-src-error', 'Enter a valid URL starting with https:// or http://.', 'general');
+    return;
+  }
+
+  const descriptionUrlValue = descUrlInput?.value.trim() || '';
+  if (descriptionUrlValue && !isValidEmbedUrl(descriptionUrlValue)) {
+    showFieldError(descUrlInput, 'iframe-desc-url-error', 'Enter a valid URL starting with https:// or http://.', 'advanced');
     return;
   }
 
@@ -718,7 +767,7 @@ function handleSave(dialog: HTMLElement, editorElement: HTMLElement): void {
   const name = (dialog.querySelector('#iframe-name') as HTMLInputElement)?.value.trim();
   const title = (dialog.querySelector('#iframe-title') as HTMLInputElement)?.value.trim();
   const longDescription = (dialog.querySelector('#iframe-longdesc') as HTMLTextAreaElement)?.value.trim();
-  const descriptionUrl = (dialog.querySelector('#iframe-desc-url') as HTMLInputElement)?.value.trim();
+  const descriptionUrl = descriptionUrlValue;
   const showBorder = (dialog.querySelector('#iframe-border') as HTMLInputElement)?.checked ?? true;
   const enableScrollbar = (dialog.querySelector('#iframe-scrollbar') as HTMLInputElement)?.checked ?? true;
 
@@ -773,6 +822,10 @@ function insertIframe(editorElement: HTMLElement, data: {
   iframe.setAttribute('frameborder', data.showBorder ? '1' : '0');
   iframe.setAttribute('scrolling', data.enableScrollbar ? 'auto' : 'no');
   iframe.setAttribute('data-aspect-ratio', data.aspectRatio);
+  // Tells the editor's input sanitiser this iframe came from the embed dialog (and so, with an
+  // http(s) src, may stay) - otherwise the next edit deletes it. Mirrors TRUSTED_EMBED_ATTRIBUTE
+  // in @editora/core's sanitizeHTML.
+  iframe.setAttribute('data-editora-embed', 'true');
 
   if (data.aspectRatio !== 'inline') {
     iframe.classList.add(`rte-iframe-${data.aspectRatio}`);
@@ -811,7 +864,13 @@ function insertIframe(editorElement: HTMLElement, data: {
   state.savedRange = null;
   const afterHTML = contentEl.innerHTML;
   recordDomHistoryTransaction(contentEl, beforeHTML, afterHTML);
-  contentEl.dispatchEvent(new window.Event('input', { bubbles: true }));
+  // 'iframe' is deliberately excluded from the editor's default sanitizeOnInput
+  // allowlist (arbitrary pasted/typed content shouldn't silently embed one) -
+  // a plain Event here would otherwise have the sanitizer strip the iframe
+  // right back out moments after this explicit, user-initiated insertion.
+  // detail.allowedTags marks this specific mutation as trusted without
+  // reopening 'iframe' to anything else; sanitizePastedHTML never reads it.
+  contentEl.dispatchEvent(new CustomEvent('input', { bubbles: true, detail: { allowedTags: ['iframe'] } }));
 }
 
 function closeDialog(editorElement: HTMLElement): void {
@@ -900,6 +959,24 @@ function injectEmbedDialogStyles(): void {
     }
 
     .rte-form-textarea,
+    .rte-form-error {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #c62828;
+    }
+
+    .rte-form-error[hidden] {
+      display: none;
+    }
+
+    .rte-form-input[aria-invalid="true"] {
+      border-color: #c62828;
+    }
+
+    .rte-embed-iframe-overlay.rte-theme-dark .rte-form-error {
+      color: #ff8a80;
+    }
+
     .rte-form-input,
     .rte-form-select {
       width: 100%;

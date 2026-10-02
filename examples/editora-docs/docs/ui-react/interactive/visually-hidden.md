@@ -10,15 +10,15 @@ The `VisuallyHidden` component improves accessibility for icon-only or compact U
 
 ## Basic Usage
 
-```tsx
-import { VisuallyHidden } from '@editora/ui-react';
-
-export function Example() {
+```tsx live
+function Example() {
   return (
-    <button type="button">
-      <span aria-hidden="true">?</span>
-      <VisuallyHidden>Open help</VisuallyHidden>
-    </button>
+    <ThemeProvider>
+      <button type="button">
+        <span aria-hidden="true">?</span>
+        <VisuallyHidden>Open help</VisuallyHidden>
+      </button>
+    </ThemeProvider>
   );
 }
 ```

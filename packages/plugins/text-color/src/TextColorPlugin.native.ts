@@ -22,7 +22,6 @@ import {
 // Module-Level State
 // ============================================================================
 let colorPickerElement: HTMLDivElement | null = null;
-let currentButton: HTMLElement | null = null;
 let popoverHandle: AnchoredPopoverHandle | null = null;
 let savedRange: Range | null = null;
 let selectedColor: string = '#000000';
@@ -273,7 +272,6 @@ function createColorPicker(button: HTMLElement): void {
   `;
 
   document.body.appendChild(colorPickerElement);
-  currentButton = button;
 
   if (popoverHandle) {
     popoverHandle.destroy();
@@ -389,14 +387,6 @@ function updateSelectedSwatch(color: string): void {
   });
 }
 
-/**
- * Update custom inputs
- */
-function updateCustomInputs(color: string): void {
-  updateNativeInput(color);
-  updateTextInput(color);
-}
-
 function updateNativeInput(color: string): void {
   if (!colorPickerElement) return;
   const nativeInput = colorPickerElement.querySelector('.rte-color-input-native') as HTMLInputElement;
@@ -421,7 +411,6 @@ function closeColorPicker(): void {
     colorPickerElement.remove();
     colorPickerElement = null;
   }
-  currentButton = null;
   savedRange = null;
 }
 

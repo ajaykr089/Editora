@@ -1,5 +1,6 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
+import '@editora/ui-core/inline-edit';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type InlineEditProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onCancel'> & {

@@ -3,11 +3,9 @@
  * Allows existing React usage to work unchanged
  */
 
-import { Editor, EditorOptions } from '../Editor';
-import { PluginManager, Plugin } from '../plugins/Plugin';
+import { Plugin } from '../plugins/Plugin';
 import { EditorEngine } from '../core/EditorEngine';
 import { ToolbarRenderer } from '../ui/ToolbarRenderer';
-import { EditorConfigDefaults, ConfigResolver } from '../config/ConfigResolver';
 
 export interface ReactAdapterOptions {
   plugins?: Plugin[];

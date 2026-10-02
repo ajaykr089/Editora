@@ -399,17 +399,24 @@ function getStatusText(status: ApprovalStatus, options: ResolvedApprovalWorkflow
 }
 
 function updateEditorStatusAttributes(editor: HTMLElement, state: ApprovalRuntimeState, options: ResolvedApprovalWorkflowOptions): void {
+  // Computed up front so the attribute/class below reflect the state this call
+  // is transitioning TO, not the stale state.locked from before it - otherwise
+  // the exact moment a document becomes approved+locked renders as unlocked,
+  // and only catches up on some later, unrelated state change.
+  const wasLocked = state.locked;
+  const willLock = state.status === 'approved' && options.lockOnApproval;
+
   editor.setAttribute('data-approval-status', state.status);
-  editor.setAttribute('data-approval-locked', state.locked ? 'true' : 'false');
-  editor.classList.toggle('rte-approval-locked-editor', state.locked);
+  editor.setAttribute('data-approval-locked', willLock ? 'true' : 'false');
+  editor.classList.toggle('rte-approval-locked-editor', willLock);
 
   setCommandButtonActiveState(editor, 'toggleApprovalWorkflowPanel', isPanelVisible(editor));
   setCommandButtonActiveState(editor, 'requestApprovalReview', state.status === 'review');
   setCommandButtonActiveState(editor, 'approveDocument', state.status === 'approved');
   setCommandButtonActiveState(editor, 'reopenDraft', state.status === 'draft');
 
-  if (state.status === 'approved' && options.lockOnApproval) {
-    if (!state.locked) {
+  if (willLock) {
+    if (!wasLocked) {
       state.preApprovalContentEditable = editor.getAttribute('contenteditable');
       state.preApprovalReadonly = editor.getAttribute('data-readonly');
     }

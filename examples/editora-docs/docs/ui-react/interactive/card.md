@@ -6,19 +6,23 @@ sidebar_label: Card
 
 # Card
 
-```tsx
-import { Card } from '@editora/ui-react';
+```tsx live
+function CardDemo() {
+  return (
+    <ThemeProvider>
+      <Card variant="surface" size="md" radius={8}>
+        <Card.Header>
+          <Card.Title>Quick start</Card.Title>
+          <Card.Description>Start building your next project in minutes.</Card.Description>
+        </Card.Header>
 
-<Card variant="surface" size="md" radius={8}>
-  <Card.Header>
-    <Card.Title>Quick start</Card.Title>
-    <Card.Description>Start building your next project in minutes.</Card.Description>
-  </Card.Header>
+        <p>Use cards to group related content and actions inside a single surface.</p>
 
-  <p>Use cards to group related content and actions inside a single surface.</p>
-
-  <Card.Footer>Updated 2m ago</Card.Footer>
-</Card>;
+        <Card.Footer>Updated 2m ago</Card.Footer>
+      </Card>
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

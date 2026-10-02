@@ -8,6 +8,7 @@ import type {
 } from './SlashCommands.types';
 
 const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
+const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark, .rte-theme-dark';
 
 interface SlashState {
   editor: HTMLElement;
@@ -22,6 +23,9 @@ interface SlashState {
   isOpen: boolean;
   instanceId: number;
   anchorRange: Range | null;
+  /** Trigger position the user last dismissed with Escape, so an unrelated `input` event (e.g. from another plugin's programmatic edit) doesn't resurrect the panel at the same spot. */
+  dismissedNode: Node | null;
+  dismissedOffset: number;
 }
 
 interface SlashHandlers {
@@ -189,6 +193,7 @@ function positionPanel(state: SlashState, range: Range): void {
   const caretRect = getCaretRect(state.editor, range);
   const panel = state.panel;
 
+  panel.classList.toggle('rte-slash-theme-dark', Boolean(state.editor.closest(DARK_THEME_SELECTOR)));
   panel.style.display = 'block';
   panel.classList.add('show');
   panel.style.left = '0px';
@@ -198,7 +203,7 @@ function positionPanel(state: SlashState, range: Range): void {
   const viewportW = window.innerWidth;
   const viewportH = window.innerHeight;
 
-  let left = Math.max(8, Math.min(caretRect.left, viewportW - panelRect.width - 8));
+  const left = Math.max(8, Math.min(caretRect.left, viewportW - panelRect.width - 8));
   let top = caretRect.bottom + 8;
 
   if (top + panelRect.height > viewportH - 8) {
@@ -658,6 +663,12 @@ function handleEditorInput(state: SlashState, options: Required<SlashCommandsPlu
     return;
   }
 
+  if (state.dismissedNode === context.node && state.dismissedOffset === detected.startOffset) {
+    return;
+  }
+  state.dismissedNode = null;
+  state.dismissedOffset = -1;
+
   const replaceRange = range.cloneRange();
   replaceRange.setStart(context.node, detected.startOffset);
   replaceRange.setEnd(context.node, context.caretOffset);
@@ -708,6 +719,8 @@ function createState(editor: HTMLElement, options: Required<SlashCommandsPluginO
     isOpen: false,
     instanceId: ++slashStateSequence,
     anchorRange: null,
+    dismissedNode: null,
+    dismissedOffset: -1,
   };
 }
 
@@ -781,6 +794,10 @@ function attachEditorHandlers(editor: HTMLElement, state: SlashState, options: R
 
         if (event.key === 'Escape') {
           event.preventDefault();
+          if (state.replaceRange) {
+            state.dismissedNode = state.replaceRange.startContainer;
+            state.dismissedOffset = state.replaceRange.startOffset;
+          }
           closePanel(state);
           return;
         }

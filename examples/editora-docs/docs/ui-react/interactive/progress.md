@@ -6,10 +6,14 @@ sidebar_label: Progress
 
 # Progress
 
-```tsx
-import { Progress } from '@editora/ui-react';
-
-<Progress value={72} buffer={86} striped animated variant="soft" tone="success" />
+```tsx live
+function ProgressDemo() {
+  return (
+    <ThemeProvider>
+      <Progress value={72} buffer={86} striped animated variant="soft" tone="success" />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Supported Props

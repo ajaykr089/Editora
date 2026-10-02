@@ -179,6 +179,7 @@ export {
   type Template,
 } from '../template/src/index';
 export { CommentsPlugin } from '../comments/src/index';
+export { CollaborationPlugin, type CollaborationPluginOptions, type CollaborationUser } from '../collaboration/src/index';
 export { SpellCheckPlugin } from '../spell-check/src/index';
 export { A11yCheckerPlugin } from '../a11y-checker/src/index';
 

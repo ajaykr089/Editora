@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
+import '@editora/ui-core/menu';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 type Props = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect' | 'onOpen' | 'onClose'> & {

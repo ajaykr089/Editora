@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
+import '@editora/ui-core/navigation-menu';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type NavigationMenuChangeDetail = {

@@ -1,4 +1,5 @@
 import React from 'react';
+import '@editora/ui-core/date-range-picker';
 import {
   getCustomEventDetail,
   serializeTranslations,

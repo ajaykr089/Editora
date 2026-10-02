@@ -1,5 +1,6 @@
 import React from 'react';
 
+import '@editora/ui-core/container';
 type Props = React.HTMLAttributes<HTMLElement> & { size?: 'sm'|'md'|'lg'|'xl' };
 
 export function Container(props: Props) {

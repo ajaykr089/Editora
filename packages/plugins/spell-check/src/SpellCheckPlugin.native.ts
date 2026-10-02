@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { COMMON_ENGLISH_WORDS } from './englishDictionary';
 
 /**
  * Spell Check Plugin - Native Implementation
@@ -27,20 +28,11 @@ interface SpellCheckIssue {
   ignored?: boolean;
 }
 
-// English dictionary with common words
+// English dictionary: the 10,000 most common words, plus a handful of terms
+// (placeholder-text Latin, rare pronouns) not covered by that frequency list.
 const ENGLISH_DICTIONARY = new Set([
-  'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-  'of', 'with', 'by', 'from', 'is', 'are', 'be', 'was', 'were', 'have',
-  'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should',
-  'may', 'might', 'must', 'can', 'this', 'that', 'these', 'those', 'what',
-  'which', 'who', 'whom', 'where', 'when', 'why', 'how', 'all', 'each',
-  'every', 'both', 'few', 'more', 'most', 'other', 'same', 'such', 'no',
-  'nor', 'not', 'only', 'own', 'so', 'than', 'too', 'very', 'just', 'as',
-  'if', 'because', 'while', 'although', 'though', 'it', 'its', 'their',
-  'them', 'they', 'you', 'he', 'she', 'we', 'me', 'him', 'her', 'us', 'our',
-  'i', 'my', 'your', 'his', 'hers', 'ours', 'yours', 'theirs', 'editor',
-  'document', 'text', 'word', 'paragraph', 'line', 'page', 'content',
-  'hello', 'world', 'test', 'example', 'sample', 'demo', 'lorem', 'ipsum'
+  ...COMMON_ENGLISH_WORDS,
+  'hers', 'theirs', 'lorem', 'ipsum',
 ]);
 
 const customDictionary = new Set<string>();
@@ -913,8 +905,15 @@ function highlightMisspelledWords(issues?: SpellCheckIssue[]): void {
       }
     });
 
-    // Add new highlights
-    issues!.forEach(issue => {
+    // Add new highlights. Wrapping a range with surroundContents() splits the
+    // text node it's in, which shifts the offsets of every other issue that
+    // still points into that same original node - looping in document order
+    // left every issue after the first one per node pointing past the now-
+    // truncated node and silently dropped by the bounds check below. Applying
+    // highlights from the highest offset down avoids that: each split only
+    // carves off the tail of the node, which has already been processed.
+    const sortedForHighlight = [...issues!].sort((a, b) => b.startOffset - a.startOffset);
+    sortedForHighlight.forEach(issue => {
       if (ignoredWords.has(issue.word.toLowerCase())) return;
 
       // Defensive check: ensure offsets are within bounds
@@ -1279,12 +1278,11 @@ function updateSidePanel(precomputedIssues?: SpellCheckIssue[]): void {
   // Suggestion buttons
   sidePanelElement.querySelectorAll('.suggestion-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const suggestion = btn.getAttribute('data-suggestion')!;
+      const suggestion = btn.getAttribute('data-suggestion');
       const item = btn.closest('.rte-spellcheck-item');
-      const word = item?.getAttribute('data-word')!;
-      const issueIndex = parseInt(item?.getAttribute('data-index') || '0');
+      const issueIndex = parseInt(item?.getAttribute('data-index') || '0', 10);
       
-      if (issues[issueIndex]) {
+      if (suggestion !== null && issues[issueIndex]) {
         replaceWord(issues[issueIndex], suggestion);
         highlightMisspelledWords();
       }
@@ -1294,18 +1292,16 @@ function updateSidePanel(precomputedIssues?: SpellCheckIssue[]): void {
   // Ignore buttons
   sidePanelElement.querySelectorAll('.ignore-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const item = btn.closest('.rte-spellcheck-item');
-      const word = item?.getAttribute('data-word')!;
-      ignoreWord(word);
+      const word = btn.closest('.rte-spellcheck-item')?.getAttribute('data-word');
+      if (word) ignoreWord(word);
     });
   });
   
   // Add to dictionary buttons
   sidePanelElement.querySelectorAll('.add-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const item = btn.closest('.rte-spellcheck-item');
-      const word = item?.getAttribute('data-word')!;
-      addToDictionary(word);
+      const word = btn.closest('.rte-spellcheck-item')?.getAttribute('data-word');
+      if (word) addToDictionary(word);
     });
   });
 }

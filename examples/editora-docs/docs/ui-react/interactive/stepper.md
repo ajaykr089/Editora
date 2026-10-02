@@ -10,9 +10,7 @@ The `Stepper` component displays progress through a sequence of logical and numb
 
 ## Basic Usage
 
-```tsx
-import { Stepper } from '@editora/ui-react';
-
+```tsx live
 function BasicStepper() {
   const steps = [
     { label: 'Select campaign settings', description: 'Choose your campaign parameters' },
@@ -21,7 +19,9 @@ function BasicStepper() {
   ];
 
   return (
-    <Stepper steps={steps} value="step-1" />
+    <ThemeProvider>
+      <Stepper steps={steps} value="step-1" />
+    </ThemeProvider>
   );
 }
 ```

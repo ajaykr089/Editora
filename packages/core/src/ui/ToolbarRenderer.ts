@@ -31,6 +31,31 @@ export class ToolbarRenderer {
   private commandHandler?: (command: string, value?: any) => void;
   private pluginLoader?: any; // PluginLoader instance to get all registered plugins
 
+  // Overflow ("more options") state. @editora/react's Toolbar.tsx has had
+  // this for a while (ResizeObserver-driven visibleCount + a "more" button
+  // that reveals the rest in an expanded row); the web component toolbar
+  // had no counterpart at all - items that didn't fit just wrapped or got
+  // silently clipped with no way to reach them. This ports the same
+  // algorithm (measure each top-level item, accumulate widths until the
+  // available space runs out) onto plain DOM: hidden items are *moved*
+  // (not cloned) into the expanded row, which keeps their existing click
+  // handlers intact rather than needing to re-bind a duplicate.
+  private itemsContainer?: HTMLElement;
+  private overflowUnits: HTMLElement[] = [];
+  /** Each unit's original `|`-section group div, so un-hiding restores it there (not just anywhere in itemsContainer) and compound type:"group" wrappers don't end up visually split across two rows. */
+  private overflowUnitHomes = new WeakMap<HTMLElement, HTMLElement>();
+  private moreButton?: HTMLButtonElement;
+  private expandedRow?: HTMLElement;
+  private resizeObserver?: ResizeObserver;
+  private overflowRafId?: number;
+  private expandedOpen = false;
+  private readonly onDocumentPointerDownForOverflow = (event: MouseEvent) => {
+    if (!this.expandedOpen) return;
+    const target = event.target as Node | null;
+    if (target && (this.moreButton?.contains(target) || this.expandedRow?.contains(target))) return;
+    this.setExpandedOpen(false);
+  };
+
   private setLastCommandTrigger(el: HTMLElement | null, command?: string): void {
     if (typeof window === 'undefined' || !el) return;
     const resolvedCommand = command || el.getAttribute('data-command') || undefined;
@@ -243,6 +268,21 @@ export class ToolbarRenderer {
       container.classList.add(`editora-toolbar-${this.config.position}`);
     }
 
+    const itemsContainer = document.createElement("div");
+    itemsContainer.className = "editora-toolbar-items-container";
+    this.itemsContainer = itemsContainer;
+    // Overflow moves individual buttons, not whole `|`-delimited group divs
+    // - the default (no explicit config.items string) toolbar puts every
+    // plugin's button in one single group with no separators at all, so
+    // treating each *group div* as the atomic hide/show unit (as a first
+    // attempt at this did) meant there was only ever one giant unit to
+    // measure, and it neither fit nor had anywhere to go - it just
+    // overflowed the container's `overflow: hidden` and silently clipped,
+    // the exact bug this was supposed to fix. Each button (or compound
+    // type:"group" control, kept intact as one unit) is tracked here as
+    // it's created, regardless of which `|`-section div it lives in.
+    this.overflowUnits = [];
+
     const toolbarString = this.config.items || this.getDefaultToolbarString();
     const buttonGroups = this.parseToolbarString(toolbarString);
     buttonGroups.forEach((group, groupIndex) => {
@@ -250,15 +290,109 @@ export class ToolbarRenderer {
       groupEl.className = "editora-toolbar-group";
       group.forEach((button) => {
         this.appendToolbarButton(groupEl, button);
+        const unit = groupEl.lastElementChild;
+        if (unit instanceof HTMLElement) {
+          this.overflowUnits.push(unit);
+          this.overflowUnitHomes.set(unit, groupEl);
+        }
       });
-      container.appendChild(groupEl);
+      itemsContainer.appendChild(groupEl);
       // Add separator between groups (except last)
       if (groupIndex < buttonGroups.length - 1) {
         const separator = document.createElement("div");
         separator.className = "editora-toolbar-separator";
-        container.appendChild(separator);
+        itemsContainer.appendChild(separator);
       }
     });
+
+    container.appendChild(itemsContainer);
+    this.setupOverflow(container);
+  }
+
+  /** Measures top-level items in `itemsContainer` and moves whatever doesn't
+   * fit into a collapsible "more options" row, re-measuring on resize. */
+  private setupOverflow(container: HTMLElement): void {
+    const itemsContainer = this.itemsContainer;
+    if (!itemsContainer || typeof ResizeObserver === "undefined") return;
+
+    const moreButton = document.createElement("button");
+    moreButton.type = "button";
+    moreButton.className = "editora-toolbar-more-button";
+    moreButton.title = "Show more options";
+    moreButton.setAttribute("aria-label", "More toolbar options");
+    moreButton.textContent = "☰"; // ☰
+    moreButton.style.display = "none";
+    moreButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      this.setExpandedOpen(!this.expandedOpen);
+    });
+    this.moreButton = moreButton;
+    container.appendChild(moreButton);
+
+    const expandedRow = document.createElement("div");
+    expandedRow.className = "editora-toolbar-expanded-row";
+    this.expandedRow = expandedRow;
+    container.appendChild(expandedRow);
+
+    document.addEventListener("mousedown", this.onDocumentPointerDownForOverflow, true);
+
+    const recalculate = () => {
+      const units = this.overflowUnits;
+      if (units.length === 0) return;
+
+      // Every hidden unit currently lives in expandedRow - restore each to
+      // its original `|`-section home first (in original order, so shared
+      // homes with multiple units end up correctly ordered again), or
+      // measuring a still-moved node would give a wrong/zero width.
+      units.forEach((unit) => {
+        if (unit.parentElement === expandedRow) {
+          this.overflowUnitHomes.get(unit)?.appendChild(unit);
+        }
+      });
+
+      const toolbarWidth = container.clientWidth;
+      const padding = 16;
+      const moreButtonWidth = 40;
+      const gap = 4;
+      const availableWidth = Math.max(0, toolbarWidth - padding - moreButtonWidth - gap);
+
+      let accumulated = 0;
+      let visibleCount = 0;
+      for (const unit of units) {
+        const width = unit.getBoundingClientRect().width + gap;
+        if (accumulated + width <= availableWidth) {
+          accumulated += width;
+          visibleCount++;
+        } else {
+          break;
+        }
+      }
+      visibleCount = Math.max(1, Math.min(visibleCount, units.length));
+
+      const hasOverflow = visibleCount < units.length;
+      moreButton.style.display = hasOverflow ? "" : "none";
+      moreButton.classList.toggle("active", hasOverflow && this.expandedOpen);
+      if (!hasOverflow && this.expandedOpen) this.setExpandedOpen(false);
+
+      units.forEach((unit, index) => {
+        if (index >= visibleCount) expandedRow.appendChild(unit);
+      });
+    };
+
+    const scheduleRecalculate = () => {
+      if (this.overflowRafId !== undefined) cancelAnimationFrame(this.overflowRafId);
+      this.overflowRafId = requestAnimationFrame(recalculate);
+    };
+
+    this.resizeObserver = new ResizeObserver(() => scheduleRecalculate());
+    this.resizeObserver.observe(container);
+    scheduleRecalculate();
+  }
+
+  private setExpandedOpen(open: boolean): void {
+    this.expandedOpen = open;
+    this.expandedRow?.classList.toggle("show", open);
+    this.moreButton?.classList.toggle("active", open);
   }
 
   /**
@@ -618,6 +752,13 @@ export class ToolbarRenderer {
       });
       this.container.innerHTML = "";
     }
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = undefined;
+    if (this.overflowRafId !== undefined) cancelAnimationFrame(this.overflowRafId);
+    document.removeEventListener("mousedown", this.onDocumentPointerDownForOverflow, true);
+    this.itemsContainer = undefined;
+    this.moreButton = undefined;
+    this.expandedRow = undefined;
     this.commandHandler = undefined;
   }
 }

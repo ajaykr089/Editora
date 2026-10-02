@@ -6,18 +6,22 @@ sidebar_label: Calendar
 
 # Calendar
 
-```tsx
-import { Calendar } from '@editora/ui-react';
-
-<Calendar
-  year={2026}
-  month={2}
-  selection="single"
-  value="2026-03-15"
-  events={[{ date: '2026-03-15', title: 'Launch', tone: 'info' }]}
-  showToday
-  onSelect={(detail) => console.log(detail.value)}
-/>;
+```tsx live
+function CalendarDemo() {
+  return (
+    <ThemeProvider>
+      <Calendar
+        year={2026}
+        month={2}
+        selection="single"
+        value="2026-03-15"
+        events={[{ date: '2026-03-15', title: 'Launch', tone: 'info' }]}
+        showToday
+        onSelect={(detail) => console.log(detail.value)}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

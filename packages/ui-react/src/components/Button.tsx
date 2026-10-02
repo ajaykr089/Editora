@@ -1,4 +1,5 @@
 import React, { useEffect, useImperativeHandle, useRef } from 'react';
+import '@editora/ui-core/button';
 import { warnIfElementNotRegistered } from './_internals';
 
 export type ButtonProps = Omit<React.HTMLAttributes<HTMLElement>, 'children'> & {

@@ -10,14 +10,14 @@ sidebar_label: Tooltip
 
 ## Basic Usage
 
-```tsx
-import { Tooltip } from '@editora/ui-react';
-
+```tsx live
 function BasicTooltip() {
   return (
-    <Tooltip text="This is helpful information">
-      <button>Hover me</button>
-    </Tooltip>
+    <ThemeProvider>
+      <Tooltip text="This is helpful information">
+        <button>Hover me</button>
+      </Tooltip>
+    </ThemeProvider>
   );
 }
 ```

@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { recordDomHistory } from '../../shared/historyHelpers';
 
 /**
  * List Plugin - Native Implementation
@@ -80,6 +81,39 @@ function normalizeListMarkup(root: HTMLElement): void {
   });
 }
 
+const BLOCK_TAGS = new Set([
+  'P', 'DIV', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
+  'TABLE', 'PRE', 'FIGURE', 'SECTION', 'ARTICLE', 'HEADER', 'FOOTER',
+]);
+
+// The browser's native insertUnorderedList/insertOrderedList toggles off by
+// unwrapping the <li> back into bare inline content (a <span>, text, <br>)
+// sitting directly under the editable root instead of a <p> - unlike every
+// other block toggle in this codebase, which restores a clean paragraph.
+// Left alone, that orphaned inline content breaks anything that assumes
+// block-level children (styling, further block commands, screen readers).
+function wrapOrphanedInlineContent(root: HTMLElement): void {
+  let wrapper: HTMLParagraphElement | null = null;
+
+  Array.from(root.childNodes).forEach((child) => {
+    const isBlock = child.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has((child as HTMLElement).tagName);
+    if (isBlock) {
+      wrapper = null;
+      return;
+    }
+
+    if (child.nodeType === Node.TEXT_NODE && !(child.textContent || '').trim()) {
+      return;
+    }
+
+    if (!wrapper) {
+      wrapper = document.createElement('p');
+      root.insertBefore(wrapper, child);
+    }
+    wrapper.appendChild(child);
+  });
+}
+
 function applyListCommand(command: 'insertUnorderedList' | 'insertOrderedList'): boolean {
   const content = getActiveContentElement();
   if (!content) return false;
@@ -90,10 +124,14 @@ function applyListCommand(command: 'insertUnorderedList' | 'insertOrderedList'):
   const range = selection.getRangeAt(0);
   if (!content.contains(range.commonAncestorContainer)) return false;
 
+  const beforeHTML = content.innerHTML;
   content.focus({ preventScroll: true });
   const executed = document.execCommand(command, false);
 
   normalizeListMarkup(content);
+  wrapOrphanedInlineContent(content);
+  // execCommand edits aren't visible to the history plugin, so Undo would skip them.
+  recordDomHistory(content, beforeHTML);
   content.dispatchEvent(new Event('input', { bubbles: true }));
   return executed !== false;
 }

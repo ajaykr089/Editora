@@ -6,25 +6,29 @@ sidebar_label: File Upload
 
 # File Upload
 
-```tsx
-import { FileUpload } from '@editora/ui-react';
-
-<FileUpload
-  label="Attachments"
-  description="PDF or image files up to 5 MB."
-  accept=".pdf,image/*"
-  multiple
-  maxFiles={5}
-  maxSize={5_000_000}
-  showPreviews
-  uploadOnSelect
-  onChange={(files) => console.log(files)}
-  onUploadRequest={async ({ file, setProgress }) => {
-    setProgress(25);
-    setProgress(100);
-    return { id: file.name };
-  }}
-/>;
+```tsx live
+function FileUploadDemo() {
+  return (
+    <ThemeProvider>
+      <FileUpload
+        label="Attachments"
+        description="PDF or image files up to 5 MB."
+        accept=".pdf,image/*"
+        multiple
+        maxFiles={5}
+        maxSize={5_000_000}
+        showPreviews
+        uploadOnSelect
+        onChange={(files) => console.log(files)}
+        onUploadRequest={async ({ file, setProgress }) => {
+          setProgress(25);
+          setProgress(100);
+          return { id: file.name };
+        }}
+      />
+    </ThemeProvider>
+  );
+}
 ```
 
 ## Key Props

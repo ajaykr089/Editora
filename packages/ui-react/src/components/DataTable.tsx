@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
+import '@editora/ui-core/data-table';
 export type DataTableSortDirection = 'asc' | 'desc';
 export type DataTableState = 'idle' | 'loading' | 'error' | 'success';
 

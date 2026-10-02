@@ -350,6 +350,7 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
           autosaveConfig={config.autosave}
           contextMenuConfig={config.contextMenu}
           spellcheckConfig={config.spellcheck}
+          roundBottomCorners={toolbarPosition !== 'bottom' && !config.statusbar.enabled}
         />
         {toolbarPosition === 'bottom' && (
           <Toolbar 
