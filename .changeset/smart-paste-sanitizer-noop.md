@@ -1,7 +1,0 @@
----
-"@editora/smart-paste": patch
----
-
-Fix Smart Paste's HTML sanitizer being a complete no-op for both the "Fidelity" and "Balanced" profiles. `sanitizeHTML` parses pasted markup into a detached `<template>`'s content fragment, then walks every element and skips it unless `element.isConnected` - but a `<template>`'s content is a `DocumentFragment`, not a `Document`, so `isConnected` is always `false` there. Every element was silently skipped, meaning none of the blocked-tag removal, `class`/`style` stripping (including Word's `MsoNormal` noise), `href`/`src` protocol checks, or table handling ever ran - pasted HTML went through untouched except for comment removal and `on*=` handler stripping, which use separate, unaffected code paths. Found via live testing: pasting a `<div>` wrapping Word markup and a `javascript:` link kept every style, class, and the dangerous link completely intact regardless of which paste profile was active.
-
-Fixed by checking `template.content.contains(element)` instead, which correctly reflects membership in that fragment (true until an earlier removal - a blocked tag, or table/img handling - takes an element out of the tree). Verified live across all paste profiles: a pasted `<script>` is now removed, a `javascript:` link is stripped and unwrapped, `MsoNormal` classes and disallowed styles are gone under "Balanced", and "Fidelity" now correctly keeps only the safe CSS properties it always claimed to.

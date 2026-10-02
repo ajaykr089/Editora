@@ -1,5 +1,0 @@
----
-"@editora/ui-core": patch
----
-
-Fix SplitButton's dropdown menu rendering with hardcoded light-mode colors under a dark ThemeProvider. Its menu is portaled to `document.body` to escape ancestor clipping/overflow, which moves it out of the component's own shadow root - so the `--ui-split-button-menu-*` custom properties defined in its `:host {}` block were invisible to it, same root cause as the DateRangePicker/DatePicker/TimePicker overlay-theming bugs fixed earlier. Found via a systematic audit of every ui-core component that portals content to `document.body`, cross-checking each against the two patterns already proven correct elsewhere (ui-menu/ui-menubar/ui-context-menu's read-computed-values-and-copy-as-inline-styles approach; ui-popover/DateRangePicker's re-derive-on-a-class-selector approach). Fixed with the former: read the already-resolved computed `--ui-split-button-menu-*` values off the host element and copy them onto the portaled menu as inline styles, matching ui-menu.ts's existing pattern rather than hand-duplicating each token's derivation formula a second time.

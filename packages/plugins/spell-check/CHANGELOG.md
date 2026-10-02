@@ -1,0 +1,19 @@
+# @editora/spell-check
+
+## 1.0.4
+
+### Patch Changes
+
+- cdd091a: Fix two spell-check bugs found via live testing. First, the dictionary used to decide whether a word is misspelled only had ~105 words (mostly function words), so ordinary prose came back as low as 54.5% "accuracy" with words like "rich", "framework", "native", and "runtime" flagged as misspelled. Replaced it with the 10,000 most common English words (MIT-licensed `most-common-words-by-language` package, Google word-frequency corpus), baked into a generated `englishDictionary.ts` with no new runtime dependency.
+
+  Second, upgrading the dictionary exposed a pre-existing bug: `highlightMisspelledWords` wrapped each misspelled word in a `<span>` via `Range.surroundContents`, looping through issues in document order. Wrapping a range splits the text node it's in, which shifted the offsets of every other issue still pointing at that same original node - so only the first misspelled word in a given text node ever got visually highlighted, while the side panel's count (computed from a fresh scan) correctly showed all of them. With the old sparse dictionary this rarely triggered since sentences rarely had two flagged words in the same node; with the real dictionary it showed up on nearly every sentence with multiple errors. Fixed by applying highlights from the highest offset down per text node, so each split only affects the already-processed tail. Verified live: a 5-misspelling sentence now gets all 5 words highlighted with correct suggestions, "Ignore" and toggle on/off still work cleanly, and the original false-positive words no longer appear.
+
+- Updated dependencies [202a5eb]
+- Updated dependencies [a1640aa]
+- Updated dependencies [bb57fc7]
+- Updated dependencies [c26b303]
+- Updated dependencies [c913780]
+- Updated dependencies [b9b30aa]
+- Updated dependencies [bb57fc7]
+- Updated dependencies [e74d395]
+  - @editora/core@1.0.16

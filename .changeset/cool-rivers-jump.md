@@ -1,5 +1,0 @@
----
-"@editora/core": patch
----
-
-Replace the hand-rolled HTML sanitizer with DOMPurify. A security audit found real gaps in the previous from-scratch allowlist walker: `<iframe>` was allowed by default with an unrestricted `src`, the `style` attribute was allowed globally with zero content validation, and href/src URL-scheme checks used a naive `value.startsWith('javascript:')` comparison vulnerable to the well-known embedded-whitespace bypass (`href="jav&#9;ascript:alert(1)"`), since browsers strip embedded tab/newline characters from a URL's scheme before evaluating it. DOMPurify's `ALLOWED_URI_REGEXP` is hardened against that bypass class, and `<iframe>` is now excluded from the default allowlist (the embed-iframe plugin inserts iframes through its own explicit, user-initiated dialog and never calls through this sanitizer, so this doesn't affect that feature). `sanitizeHTML`, `sanitizePastedHTML`, and `sanitizeInputHTML` keep their existing signatures and config shape, so no consumer changes are required. Also removed an unused, dead-code duplicate sanitizer (`security/Sanitizer.ts`) that had zero real callers anywhere in the codebase.

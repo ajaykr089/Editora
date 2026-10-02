@@ -1,6 +1,6 @@
 {
   "name": "@editora/embed-iframe",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Embed iframe plugin for Editora",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
@@ -32,7 +32,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@editora/core": "^1.0.14"
+    "@editora/core": "^1.0.16"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

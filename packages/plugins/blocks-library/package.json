@@ -1,6 +1,6 @@
 {
   "name": "@editora/blocks-library",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Native blocks library plugin for Editora with searchable reusable snippets",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -26,7 +26,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@editora/core": "^1.0.14"
+    "@editora/core": "^1.0.16"
   },
   "exports": {
     ".": {

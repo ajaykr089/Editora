@@ -1,6 +1,6 @@
 {
   "name": "@editora/checklist",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Checklist plugin for Rich Text Editor",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
@@ -32,7 +32,7 @@
     "dev": "vite build --watch"
   },
   "dependencies": {
-    "@editora/core": "^1.0.14"
+    "@editora/core": "^1.0.16"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",

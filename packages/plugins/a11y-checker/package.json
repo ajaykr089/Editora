@@ -1,6 +1,6 @@
 {
   "name": "@editora/a11y-checker",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Accessibility Checker plugin for Rich Text Editor - WCAG compliance audit panel",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -27,7 +27,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@editora/core": "^1.0.14",
+    "@editora/core": "^1.0.16",
     "@editora/toast": "^2.0.7"
   },
   "devDependencies": {

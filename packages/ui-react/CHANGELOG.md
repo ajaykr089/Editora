@@ -1,5 +1,15 @@
 # Change Log
 
+## 0.1.21
+
+### Patch Changes
+
+- e2208ec: Fix AnimatedNumber deep-import registration gap. It wraps the <ui-odometer> custom element rather than a same-named one, so the mechanical name-based fix applied to the rest of ui-react's components earlier this week missed it - it never imported @editora/ui-core/odometer. Found by the new custom-element registration checker, which traces actual template/warnIfElementNotRegistered tag usage rather than assuming component and tag names match.
+- Updated dependencies [5f909c8]
+- Updated dependencies [750ebf4]
+- Updated dependencies [e0b29a3]
+  - @editora/ui-core@0.1.20
+
 ## 0.1.20
 
 ### Patch Changes
