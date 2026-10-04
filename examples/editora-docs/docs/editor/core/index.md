@@ -48,7 +48,7 @@ Use `@editora/core` as the runtime foundation for command execution, plugin regi
 | `PluginManager` | Class export | Plugin registration/execution manager |
 | `PluginRuntime` / `createPluginRuntime` | Runtime API | Plugin execution context helpers |
 | `KeyboardShortcutManager` | Class export | Shortcut registration and dispatch |
-| `SpellcheckPlugin` / `MediaPlugin` | Enterprise exports | Optional enterprise plugin bridge |
+| `SpellcheckPlugin` / `MediaPlugin` | Deprecated exports | Non-functional scaffolds; use `@editora/spell-check` / `@editora/media-manager` |
 | `export * from './core'` | Module re-export | Core architecture layer |
 | `export * from './ui'` | Module re-export | UI primitives used by core/editor |
 | `export * from './config'` | Module re-export | Runtime configuration layer |
