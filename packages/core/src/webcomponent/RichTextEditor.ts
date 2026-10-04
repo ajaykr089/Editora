@@ -401,10 +401,13 @@ export class RichTextEditorElement extends HTMLElement {
       }
     }
 
-    // Get initial content before clearing innerHTML
-    const initialContent =
+    // Get initial content before clearing innerHTML. It comes from markup, an attribute or
+    // localStorage - none of it trusted - so sanitise it before it is ever parsed into the live
+    // DOM (an <img onerror> would otherwise run on load, long before the first input event).
+    const initialContent = this.sanitizeLoadedContent(
       this.restoreAutosavedContent() ??
-      (this.getAttribute('data-initial-content') || '');
+      (this.getAttribute('data-initial-content') || '')
+    );
     
     // Create editor engine
     this.engine = new EditorEngine({
@@ -799,6 +802,15 @@ export class RichTextEditorElement extends HTMLElement {
       return security as any;
     }
     return { sanitizeOnPaste: true, sanitizeOnInput: true };
+  }
+
+  /**
+   * HTML handed to the editor from outside (initial markup, restored autosave, setContent).
+   * Same allowlist and opt-outs as typed input, applied before the markup is parsed into the
+   * editable DOM: sanitizing only after the first edit leaves the page exposed until then.
+   */
+  private sanitizeLoadedContent(html: string): string {
+    return sanitizeInputHTML(html, this.getContentSanitizeConfig(), this.getSecurityConfig());
   }
 
   private getAutosaveConfig(): {
@@ -1510,7 +1522,7 @@ export class RichTextEditorElement extends HTMLElement {
       
       setContent: (html: string) => {
         if (this.contentElement) {
-          this.contentElement.innerHTML = html;
+          this.contentElement.innerHTML = this.sanitizeLoadedContent(html);
         }
       },
       
@@ -1591,7 +1603,7 @@ export class RichTextEditorElement extends HTMLElement {
 
   public setContent(html: string): void {
     if (this.contentElement) {
-      this.contentElement.innerHTML = html;
+      this.contentElement.innerHTML = this.sanitizeLoadedContent(html);
     }
   }
 

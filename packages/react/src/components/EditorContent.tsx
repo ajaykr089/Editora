@@ -304,7 +304,14 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     
     // Try to restore autosaved content first
     const restoredContent = restore();
-    const initialContent = restoredContent ?? value ?? defaultValue ?? '';
+    // value / defaultValue / the autosave are caller- or storage-supplied HTML. Sanitise it before
+    // it is parsed into the live DOM: doing it only on the first input event leaves an
+    // <img onerror> in stored content free to run on load.
+    const initialContent = sanitizeInputHTML(
+      restoredContent ?? value ?? defaultValue ?? '',
+      contentConfig,
+      securityConfig
+    );
     const trimmedInitialContent = initialContent.trim();
 
     if (trimmedInitialContent) {
@@ -322,8 +329,8 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     syncAutoHeight(contentRef.current);
 
     if (restoredContent && onChange) {
-      // Notify parent of restored content
-      onChange(restoredContent);
+      // Notify parent of restored content (as sanitised, i.e. what the editor now holds)
+      onChange(initialContent);
     }
   }, []); // Only run on mount
 
@@ -332,7 +339,12 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     if (!contentRef.current || !isControlled) return;
     
     if (value !== contentRef.current.innerHTML) {
-      contentRef.current.innerHTML = value;
+      const safeValue = sanitizeInputHTML(value, contentConfig, securityConfig);
+      // Skip the write when sanitising already matches the DOM, so a normalised round trip
+      // does not reset the caret.
+      if (safeValue !== contentRef.current.innerHTML) {
+        contentRef.current.innerHTML = safeValue;
+      }
     }
     setPlaceholderVisualState(contentRef.current, placeholder);
     syncAutoHeight(contentRef.current);
