@@ -5,7 +5,11 @@
 
 import { Plugin, ToolbarItem } from '../Plugin';
 import { PluginRuntimeContext } from '../PluginRuntime';
+import { warnDeprecatedScaffold } from './deprecation';
 
+/**
+ * @deprecated Configuration for a non-functional scaffold. Use `@editora/spell-check`.
+ */
 export interface SpellcheckConfig {
   enabled?: boolean;
   provider?: 'browser' | 'local' | 'api';
@@ -20,8 +24,13 @@ export interface SpellcheckConfig {
 /**
  * Spellcheck plugin
  * Non-functional scaffold - demonstrates enterprise plugin structure
+ *
+ * @deprecated Does nothing (commands only log). It will be removed in a future major release;
+ * use `SpellCheckPlugin` from `@editora/spell-check` instead.
  */
 export function SpellcheckPlugin(config: SpellcheckConfig = {}): Plugin {
+  warnDeprecatedScaffold('SpellcheckPlugin', '`SpellCheckPlugin` from @editora/spell-check');
+
   const {
     enabled = false,
     provider = 'browser',

@@ -5,7 +5,11 @@
 
 import { Plugin, ToolbarItem } from '../Plugin';
 import { PluginRuntimeContext } from '../PluginRuntime';
+import { warnDeprecatedScaffold } from './deprecation';
 
+/**
+ * @deprecated Configuration for a non-functional scaffold. Use `@editora/media-manager`.
+ */
 export interface MediaConfig {
   uploadUrl?: string;
   libraryUrl?: string;
@@ -23,8 +27,13 @@ export interface MediaConfig {
 /**
  * Media upload plugin
  * Non-functional scaffold - demonstrates enterprise media handling
+ *
+ * @deprecated Does nothing (commands only log and never upload or insert anything). It will be
+ * removed in a future major release; use `MediaManagerPlugin` from `@editora/media-manager`.
  */
 export function MediaPlugin(config: MediaConfig = {}): Plugin {
+  warnDeprecatedScaffold('MediaPlugin', '`MediaManagerPlugin` from @editora/media-manager');
+
   const {
     uploadUrl = '',
     libraryUrl = '',

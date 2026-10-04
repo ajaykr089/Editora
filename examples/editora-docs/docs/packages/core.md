@@ -51,8 +51,8 @@ const editor = createEditor({
 | `PluginRuntimeContext` | Type export | Runtime context typing |
 | `KeyboardShortcutManager` | Class export | Keyboard shortcut orchestration |
 | `KeyboardShortcut`, `KeyboardShortcutConfig` | Type exports | Shortcut contracts |
-| `SpellcheckPlugin`, `MediaPlugin` | Enterprise exports | Enterprise plugin bridges |
-| `SpellcheckConfig`, `MediaConfig` | Type exports | Enterprise config types |
+| `SpellcheckPlugin`, `MediaPlugin` | Deprecated exports | Non-functional scaffolds (commands only log). Use [`@editora/spell-check`](../plugins/spell-check.md) and [`@editora/media-manager`](../plugins/media-manager.md) instead; removal planned for a future major release |
+| `SpellcheckConfig`, `MediaConfig` | Deprecated type exports | Config types for the scaffolds above |
 | `export * from './core'` | Module re-export | Core architecture layer |
 | `export * from './ui'` | Module re-export | UI layer exports used by editor |
 | `export * from './utils/statusBarUtils'` | Module re-export | Status bar utility exports |
