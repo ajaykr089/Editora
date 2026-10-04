@@ -13,7 +13,7 @@ export type { PluginRuntimeContext } from './plugins/PluginRuntime';
 export { KeyboardShortcutManager } from './KeyboardShortcuts';
 export type { KeyboardShortcut, KeyboardShortcutConfig } from './KeyboardShortcuts';
 
-// Enterprise plugins
+// Enterprise plugin scaffolds - deprecated, non-functional (see plugins/enterprise/index.ts)
 export { SpellcheckPlugin, MediaPlugin } from './plugins/enterprise';
 export type { SpellcheckConfig, MediaConfig } from './plugins/enterprise';
 
