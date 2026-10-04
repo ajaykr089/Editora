@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useRef } from 'react';
-import { Editor, PluginManager, Plugin } from '@editora/core';
+import { Editor, PluginManager, Plugin, sanitizeInputHTML } from '@editora/core';
 import { StatusBar } from '@editora/core';
 import { Toolbar } from './Toolbar';
 import { EditorContent } from './EditorContent';
@@ -135,7 +135,7 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
       setHTML: (html: string) => {
         const contentEl = editorContainerRef.current?.querySelector('.rte-content') as HTMLElement;
         if (contentEl) {
-          contentEl.innerHTML = html;
+          contentEl.innerHTML = sanitizeInputHTML(html, config.content, config.security);
         }
       },
       execCommand: (name: string, value?: any) => {

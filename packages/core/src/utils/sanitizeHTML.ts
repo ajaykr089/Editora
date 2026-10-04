@@ -147,16 +147,20 @@ function sanitizeInternal(
 
   // Scoped to this one call (and removed in finally) so the exemption can never leak into the
   // paste path, which shares this DOMPurify instance.
+  //
+  // `data.allowedTags` is DOMPurify's own ALLOWED_TAGS object for the whole call, not a per-node
+  // copy: setting `iframe = true` for one trusted embed would leave every later <iframe> in the
+  // same document allowed too (an unmarked or javascript: one included). So the decision is
+  // written for every iframe node, falling back to what the configured allowlist says.
+  const allowlistHasIframe = allowedTags.includes('iframe');
   DOMPurify.addHook(
     'uponSanitizeElement',
     (node: Node, data: { tagName: string; allowedTags: Record<string, boolean> }) => {
-      if (
-        data.tagName === 'iframe' &&
-        (node as Element).getAttribute?.(TRUSTED_EMBED_ATTRIBUTE) === 'true' &&
-        isSafeEmbedSource((node as Element).getAttribute('src'))
-      ) {
-        data.allowedTags.iframe = true;
-      }
+      if (data.tagName !== 'iframe') return;
+      const el = node as Element;
+      data.allowedTags.iframe =
+        allowlistHasIframe ||
+        (el.getAttribute?.(TRUSTED_EMBED_ATTRIBUTE) === 'true' && isSafeEmbedSource(el.getAttribute('src')));
     },
   );
   try {

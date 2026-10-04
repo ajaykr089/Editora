@@ -135,3 +135,39 @@ describe('trusted embed iframes (input path only)', () => {
     expect(result).not.toContain('onload');
   });
 });
+
+describe('trusted embed iframes mixed with other iframes in one document', () => {
+  const marked = '<iframe data-editora-embed="true" src="https://example.com/embed"></iframe>';
+  const unmarked = '<iframe src="https://evil.example/frame"></iframe>';
+  const unsafeMarked = '<iframe data-editora-embed="true" src="javascript:alert(1)"></iframe>';
+  const count = (html: string) => (html.match(/<iframe/g) || []).length;
+
+  it('does not let one trusted embed unlock the unmarked iframes after it', () => {
+    const result = sanitizeInputHTML(`${marked}${unmarked}`);
+    expect(count(result)).toBe(1);
+    expect(result).toContain('example.com/embed');
+    expect(result).not.toContain('evil.example');
+  });
+
+  it('drops an unmarked iframe regardless of the order', () => {
+    const result = sanitizeInputHTML(`${unmarked}${marked}${unmarked}`);
+    expect(count(result)).toBe(1);
+    expect(result).not.toContain('evil.example');
+  });
+
+  it('drops a marked iframe with an unsafe src instead of leaving a src-less frame', () => {
+    const result = sanitizeInputHTML(`${marked}${unsafeMarked}`);
+    expect(count(result)).toBe(1);
+    expect(result).not.toContain('javascript');
+  });
+
+  it('keeps several genuinely trusted embeds', () => {
+    const second = '<iframe data-editora-embed="true" src="https://example.org/two"></iframe>';
+    expect(count(sanitizeInputHTML(`${marked}<p>x</p>${second}`))).toBe(2);
+  });
+
+  it('still honours an allowlist that explicitly includes iframe', () => {
+    const result = sanitizeInputHTML(`${marked}${unmarked}`, { allowedTags: ['p', 'iframe'] });
+    expect(count(result)).toBe(2);
+  });
+});
