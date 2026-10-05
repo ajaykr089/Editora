@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { safeQuerySelector } from '../primitives/selector';
 
 type PortalStrategy = 'append' | 'prepend';
 
@@ -121,7 +122,7 @@ export class UIPortal extends ElementBase {
   private _resolveTarget(): HTMLElement {
     const selector = this.getAttribute('target');
     if (selector) {
-      const resolved = document.querySelector(selector);
+      const resolved = safeQuerySelector(document, selector);
       if (resolved instanceof HTMLElement) return resolved;
       this.dispatchEvent(
         new CustomEvent('target-missing', {
