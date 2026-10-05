@@ -10,6 +10,7 @@ import { StatusBar } from '../ui/StatusBar';
 import { getCursorPosition, countLines, calculateTextStats, getSelectionInfo } from '../utils/statusBarUtils';
 import { KeyboardShortcutManager } from '../KeyboardShortcuts';
 import { sanitizeInputHTML, sanitizePastedHTML } from '../utils/sanitizeHTML';
+import { getCleanEditorHTML, stripEditorUiArtifacts } from '../utils/editorOutput';
 import { ConfigResolver, EditorConfigDefaults } from '../config/ConfigResolver';
 import { PluginLoader } from '../config/PluginLoader';
 import { Plugin } from '../plugins/Plugin';
@@ -194,6 +195,9 @@ export class RichTextEditorElement extends HTMLElement {
   private contentChangeDebounceTimer?: ReturnType<typeof setTimeout>;
   private keyboardShortcutManager = new KeyboardShortcutManager();
   private lastAutosavedContent = '';
+  // Live content captured by destroy() so the next initialize() (the element being moved in the
+  // DOM, or setConfig()) resumes from it instead of from the original data-initial-content.
+  private preservedContent: string | null = null;
   private loadedPlugins: Plugin[] = [];
   private lastBeforeInputType: string | null = null;
 
@@ -404,7 +408,10 @@ export class RichTextEditorElement extends HTMLElement {
     // Get initial content before clearing innerHTML. It comes from markup, an attribute or
     // localStorage - none of it trusted - so sanitise it before it is ever parsed into the live
     // DOM (an <img onerror> would otherwise run on load, long before the first input event).
+    const resumed = this.preservedContent;
+    this.preservedContent = null;
     const initialContent = this.sanitizeLoadedContent(
+      resumed ??
       this.restoreAutosavedContent() ??
       (this.getAttribute('data-initial-content') || '')
     );
@@ -907,7 +914,7 @@ export class RichTextEditorElement extends HTMLElement {
     if (!autosave.enabled || !this.contentElement) return;
 
     this.autosaveTimer = setInterval(() => {
-      this.persistAutosave(this.contentElement?.innerHTML || '');
+      this.persistAutosave(getCleanEditorHTML(this.contentElement));
     }, autosave.intervalMs);
   }
 
@@ -1136,7 +1143,7 @@ export class RichTextEditorElement extends HTMLElement {
 
       const emitChange = () => {
         this.dispatchEvent(new CustomEvent('content-change', {
-          detail: { html },
+          detail: { html: stripEditorUiArtifacts(html) },
           bubbles: true,
         }));
       };
@@ -1214,7 +1221,7 @@ export class RichTextEditorElement extends HTMLElement {
       }
       if (this.contentElement) {
         this.dispatchEvent(new CustomEvent('content-change', {
-          detail: { html: this.contentElement.innerHTML },
+          detail: { html: getCleanEditorHTML(this.contentElement) },
           bubbles: true,
         }));
       }
@@ -1517,7 +1524,7 @@ export class RichTextEditorElement extends HTMLElement {
   getAPI(): EditorAPI {
     return {
       getContent: () => {
-        return this.contentElement?.innerHTML || '';
+        return getCleanEditorHTML(this.contentElement);
       },
       
       setContent: (html: string) => {
@@ -1567,7 +1574,8 @@ export class RichTextEditorElement extends HTMLElement {
     }
 
     if (this.contentElement) {
-      this.persistAutosave(this.contentElement.innerHTML || '');
+      this.preservedContent = getCleanEditorHTML(this.contentElement);
+      this.persistAutosave(this.preservedContent);
     }
     this.stopAutosave();
 
@@ -1598,7 +1606,7 @@ export class RichTextEditorElement extends HTMLElement {
   // Public API methods
   
   public getContent(): string {
-    return this.contentElement?.innerHTML || '';
+    return getCleanEditorHTML(this.contentElement);
   }
 
   public setContent(html: string): void {

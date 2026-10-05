@@ -24,6 +24,7 @@
   ],
   "scripts": {
     "build": "lerna run build",
+    "build:types": "node scripts/generate-plugin-typings.js",
     "build:watch": "lerna run dev",
     "clean": "lerna run clean",
     "test": "npm run verify:citations",
@@ -52,7 +53,7 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "verify:packages": "node scripts/verify-package-contents.js",
-    "release": "npm run verify:packages && changeset publish"
+    "release": "npm run build:types && npm run verify:packages && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.2",

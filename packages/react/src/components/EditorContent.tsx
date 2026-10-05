@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Editor, KeyboardShortcutManager, sanitizePastedHTML, sanitizeInputHTML } from '@editora/core';
+import { Editor, KeyboardShortcutManager, sanitizePastedHTML, sanitizeInputHTML, getCleanEditorHTML, stripEditorUiArtifacts } from '@editora/core';
 import { useAutosave } from '../hooks/useAutosave';
 
 const isStructurallyEmpty = (el: HTMLElement): boolean => {
@@ -294,7 +294,7 @@ export const EditorContent: React.FC<EditorContentProps> = ({
 
   // Autosave setup
   const { restore } = useAutosave(
-    () => contentRef.current?.innerHTML || '',
+    () => getCleanEditorHTML(contentRef.current),
     autosaveConfig
   );
 
@@ -338,11 +338,15 @@ export const EditorContent: React.FC<EditorContentProps> = ({
   useEffect(() => {
     if (!contentRef.current || !isControlled) return;
     
-    if (value !== contentRef.current.innerHTML) {
+    // Compare against the DOM as onChange reports it (minus editing-only handles), otherwise a
+    // value we just emitted while the caret is in a table never matches and would be written
+    // back, wiping the handles and the caret on every keystroke.
+    const currentHtml = getCleanEditorHTML(contentRef.current);
+    if (value !== currentHtml) {
       const safeValue = sanitizeInputHTML(value, contentConfig, securityConfig);
       // Skip the write when sanitising already matches the DOM, so a normalised round trip
       // does not reset the caret.
-      if (safeValue !== contentRef.current.innerHTML) {
+      if (safeValue !== currentHtml) {
         contentRef.current.innerHTML = safeValue;
       }
     }
@@ -478,6 +482,10 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       recordNativeInputHistory(contentRef.current, html);
 
       if (!onChange) return;
+
+      // History above keeps the live DOM; what we report must not carry editing-only chrome
+      // (e.g. the table plugin's resize handles).
+      const outputHtml = stripEditorUiArtifacts(html);
       
       // Debounce onChange if performance config specified
       if (performanceConfig?.debounceInputMs) {
@@ -485,10 +493,10 @@ export const EditorContent: React.FC<EditorContentProps> = ({
           clearTimeout(debounceTimerRef.current);
         }
         debounceTimerRef.current = setTimeout(() => {
-          onChange(html);
+          onChange(outputHtml);
         }, performanceConfig.debounceInputMs);
       } else {
-        onChange(html);
+        onChange(outputHtml);
       }
     };
 
@@ -587,11 +595,6 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     el.addEventListener('focus', handleFocusOrBlur);
     el.addEventListener('blur', handleFocusOrBlur);
 
-    // Set focus to editor
-    if (!readonly) {
-      el.focus();
-    }
-
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
@@ -605,6 +608,14 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       el.removeEventListener('blur', handleFocusOrBlur);
     };
   }, [editor, onChange, pasteConfig, contentConfig, securityConfig, performanceConfig, placeholder, contextMenuConfig, readonly]);
+
+  // Focus the editor when it mounts and when it becomes editable. This used to sit inside the effect
+  // above, which re-runs whenever `onChange` or any config prop changes identity (an inline arrow
+  // function is a new one on every parent render), so the editor stole focus back from any other field
+  // on the page after each keystroke that re-rendered the parent.
+  useEffect(() => {
+    if (!readonly) contentRef.current?.focus();
+  }, [readonly]);
 
   const nativeSpellcheckEnabled =
     (spellcheckConfig?.enabled ?? false) &&

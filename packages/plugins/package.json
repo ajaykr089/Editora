@@ -445,6 +445,7 @@
   "devDependencies": {
     "@editora/core": "^1.0.16",
     "@types/katex": "^0.16.8",
+    "dompurify": "^3.4.16",
     "typescript": "^5.0.0",
     "vite": "^7.3.1"
   },

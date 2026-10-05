@@ -1,0 +1,51 @@
+---
+"@editora/a11y-checker": patch
+"@editora/anchor": patch
+"@editora/approval-workflow": patch
+"@editora/background-color": patch
+"@editora/blocks-library": patch
+"@editora/capitalization": patch
+"@editora/checklist": patch
+"@editora/citations": patch
+"@editora/clear-formatting": patch
+"@editora/code": patch
+"@editora/code-sample": patch
+"@editora/collaboration": patch
+"@editora/comments": patch
+"@editora/conditional-content": patch
+"@editora/content-rules": patch
+"@editora/data-binding": patch
+"@editora/direction": patch
+"@editora/doc-schema": patch
+"@editora/document-manager": patch
+"@editora/embed-iframe": patch
+"@editora/emojis": patch
+"@editora/font-family": patch
+"@editora/font-size": patch
+"@editora/footnote": patch
+"@editora/format-painter": patch
+"@editora/indent": patch
+"@editora/line-height": patch
+"@editora/math": patch
+"@editora/media-manager": patch
+"@editora/mentions": patch
+"@editora/merge-tag": patch
+"@editora/page-break": patch
+"@editora/pii-redaction": patch
+"@editora/preview": patch
+"@editora/print": patch
+"@editora/slash-commands": patch
+"@editora/smart-paste": patch
+"@editora/special-characters": patch
+"@editora/spell-check": patch
+"@editora/strikethrough": patch
+"@editora/template": patch
+"@editora/text-alignment": patch
+"@editora/text-color": patch
+"@editora/track-changes": patch
+"@editora/translation-workflow": patch
+"@editora/ui-editor": patch
+"@editora/version-diff": patch
+---
+
+Ship TypeScript declarations. These packages declare `"types": "dist/index.d.ts"` in their `package.json`, but their build only produced JavaScript, so that file never existed in any published version and TypeScript users got no typings from them (TS7016, or an implicit `any`). Each package now includes a generated `dist/index.d.ts` (plus the declaration files it re-exports under `dist/_types/`), and the release workflow refuses to publish a package whose declared typings are missing.

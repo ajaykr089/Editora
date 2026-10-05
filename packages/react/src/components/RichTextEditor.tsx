@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useRef } from 'react';
-import { Editor, PluginManager, Plugin, sanitizeInputHTML } from '@editora/core';
+import { Editor, PluginManager, Plugin, sanitizeInputHTML, getCleanEditorHTML } from '@editora/core';
 import { StatusBar } from '@editora/core';
 import { Toolbar } from './Toolbar';
 import { EditorContent } from './EditorContent';
@@ -130,7 +130,7 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
     const api: EditorAPI = {
       getHTML: () => {
         const contentEl = editorContainerRef.current?.querySelector('.rte-content') as HTMLElement;
-        return contentEl?.innerHTML || '';
+        return getCleanEditorHTML(contentEl);
       },
       setHTML: (html: string) => {
         const contentEl = editorContainerRef.current?.querySelector('.rte-content') as HTMLElement;

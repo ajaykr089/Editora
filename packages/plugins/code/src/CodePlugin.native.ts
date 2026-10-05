@@ -11,6 +11,7 @@ import {
   CodeFoldingExtension,
   SyntaxHighlightingExtension
 } from '@editora/light-code-editor';
+import { sanitizeHtml } from '../../shared/sanitizeHtml';
 
 const DARK_THEME_SELECTOR = '[data-theme="dark"], .dark, .editora-theme-dark';
 
@@ -771,14 +772,9 @@ export const CodePlugin = (): Plugin => ({
           try {
             const htmlContent = editorInstance?.getValue() || "";
 
-            const tempDiv = document.createElement("div");
-            tempDiv.innerHTML = htmlContent;
-            const dangerous = tempDiv.querySelectorAll(
-              'script, iframe[src^="javascript:"], object, embed',
-            );
-            dangerous.forEach((el) => el.remove());
-
-            contentElement.innerHTML = tempDiv.innerHTML;
+            // Not a detached <div>: assigning to its innerHTML already runs <img onerror>, and a
+            // blacklist misses plenty. sanitizeHtml parses inertly and drops scripts/handlers/js: URLs.
+            contentElement.innerHTML = sanitizeHtml(htmlContent);
             try {
               contentElement.dispatchEvent(
                 new InputEvent("input", {

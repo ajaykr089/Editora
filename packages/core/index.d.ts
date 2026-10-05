@@ -385,3 +385,12 @@ export function sanitizeInputHTML(
    */
   additionalAllowedTags?: string[],
 ): string;
+
+/**
+ * Removes editing-only elements plugins place inside the editable element (the table plugin's
+ * resize handles, plus the `position: relative` anchor style they add to cells) from editor HTML.
+ * Applied automatically to onChange / content-change / getContent / autosave output.
+ */
+export function stripEditorUiArtifacts(html: string): string;
+/** `el.innerHTML` without editing-only artifacts. */
+export function getCleanEditorHTML(el: Element | null | undefined): string;
