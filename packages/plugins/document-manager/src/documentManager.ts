@@ -1,5 +1,6 @@
 import { Document, Packer, Paragraph, TextRun, Table, TableCell, TableRow } from 'docx';
 import { getApiUrl, getApiHeaders, getDocumentManagerConfig } from './constants';
+import { parseHtmlInert } from '../../shared/sanitizeHtml';
 
 /**
  * Standalone Document Manager utilities for import/export operations
@@ -262,8 +263,8 @@ export async function exportToPdf(
  * Exported for advanced use cases where direct Document object manipulation is needed
  */
 export function htmlToDocx(htmlContent: string): Document {
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = htmlContent;
+  // Inert parse: a detached <div> would still start image loads and fire <img onerror> on export.
+  const tempDiv = parseHtmlInert(htmlContent);
 
   const children: (Paragraph | Table)[] = [];
 
@@ -779,9 +780,7 @@ function createListFromElement(listElement: Element, isOrdered: boolean = false)
  * Convert HTML to plain text for PDF fallback
  */
 function htmlToPlainText(htmlContent: string): string {
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = htmlContent;
-  return tempDiv.textContent || tempDiv.innerText || '';
+  return parseHtmlInert(htmlContent).textContent || '';
 }
 
 /**

@@ -1,4 +1,5 @@
 import type { Plugin } from '@editora/core';
+import { sanitizeHtml } from '../../shared/sanitizeHtml';
 
 const DOCUMENT_MANAGER_BUSY_STYLE_ID = 'rte-document-manager-styles';
 const DOCUMENT_MANAGER_CSS = `
@@ -156,7 +157,8 @@ export const DocumentManagerPlugin = (): Plugin => {
               if (editorElement) {
                 const { importFromWord } = await import('./documentManager');
                 const htmlContent = await importFromWord(file);
-                editorElement.innerHTML = htmlContent;
+                // Mammoth documents that its output is not sanitised; a .docx is untrusted input.
+                editorElement.innerHTML = sanitizeHtml(htmlContent);
                 editorElement.dispatchEvent(new Event('input', { bubbles: true }));
               }
             } catch (error) {

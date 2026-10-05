@@ -1,5 +1,6 @@
 import { initDialogOverlay } from '../../shared/dialogHelpers';
 import { Plugin } from '@editora/core';
+import { sanitizeHtml } from '../../shared/sanitizeHtml';
 
 /**
  * Preview Plugin - Native Implementation
@@ -312,40 +313,21 @@ const serializeEditorContent = (): string => {
 };
 
 /**
- * Sanitize HTML to prevent XSS attacks
+ * Sanitize HTML to prevent XSS attacks, and make the preview read-only.
+ *
+ * The previous version parsed into a live detached <div> (so <img onerror> ran during the "cleanup")
+ * and relied on a blacklist plus `startsWith('javascript:')` (bypassed by whitespace or mixed case).
  */
 const sanitizeHTML = (html: string): string => {
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = html;
+  const template = document.createElement('template'); // inert: no scripts, no loads
+  template.innerHTML = sanitizeHtml(html);
 
-  // Remove dangerous elements
-  const dangerousElements = tempDiv.querySelectorAll(
-    'script, iframe[src^="javascript:"], object, embed, form[action^="javascript:"]'
-  );
-  dangerousElements.forEach(el => el.remove());
-
-  // Remove dangerous attributes
-  const allElements = tempDiv.querySelectorAll('*');
-  allElements.forEach(el => {
-    // Remove event handlers (onclick, onload, etc.)
-    Array.from(el.attributes).forEach(attr => {
-      if (attr.name.startsWith('on')) {
-        el.removeAttribute(attr.name);
-      }
-      // Remove javascript: URLs
-      if ((attr.name === 'href' || attr.name === 'src') && 
-          attr.value.startsWith('javascript:')) {
-        el.removeAttribute(attr.name);
-      }
-      // Preview must be fully read-only: strip nested editability.
-      if (attr.name.toLowerCase() === 'contenteditable') {
-        el.removeAttribute(attr.name);
-      }
-    });
-    (el as HTMLElement).setAttribute('contenteditable', 'false');
+  // Preview must be fully read-only: strip nested editability.
+  template.content.querySelectorAll('*').forEach((el) => {
+    el.setAttribute('contenteditable', 'false');
   });
 
-  return tempDiv.innerHTML;
+  return template.innerHTML;
 };
 
 /**
