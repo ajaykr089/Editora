@@ -6,6 +6,8 @@ import React, {
 } from "react";
 
 import '@editora/ui-core/rating';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
@@ -172,7 +174,7 @@ const RatingRoot = React.forwardRef<HTMLElement, RatingProps>(
       showValue,
     ]);
 
-    return React.createElement("ui-rating", { ref, ...rest }, children);
+    return createUIElement("ui-rating", { ref, ...rest }, children);
   },
 );
 

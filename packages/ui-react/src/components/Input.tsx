@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/input';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncNumberAttribute,
@@ -196,7 +197,7 @@ const InputRoot = React.forwardRef<HTMLElement, InputProps>(function Input(props
     description
   ]);
 
-  return React.createElement('ui-input', { ref, value: value ?? undefined, ...rest }, children);
+  return createUIElement('ui-input', { ref, value: value ?? undefined, ...rest }, children);
 });
 
 InputRoot.displayName = 'Input';

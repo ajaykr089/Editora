@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/empty-state';
 import {
+  createUIElement,
   syncBooleanAttribute,
   syncStringAttribute,
   useElementAttributes,
@@ -48,7 +49,7 @@ export function EmptyState(props: EmptyStateProps) {
     syncBooleanAttribute(el, 'headless', headless);
   }, [title, description, actionLabel, tone, compact, headless]);
 
-  return React.createElement('ui-empty-state', { ref, ...rest }, children);
+  return createUIElement('ui-empty-state', { ref, ...rest }, children);
 }
 
 export default EmptyState;

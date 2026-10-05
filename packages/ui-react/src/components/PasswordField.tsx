@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/password-field';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncNumberAttribute,
@@ -205,7 +206,7 @@ export const PasswordField = React.forwardRef<HTMLElement, PasswordFieldProps>(f
     variant
   ]);
 
-  return React.createElement('ui-password-field', { ref, ...rest }, children);
+  return createUIElement('ui-password-field', { ref, ...rest }, children);
 });
 
 PasswordField.displayName = 'PasswordField';

@@ -1,6 +1,8 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/collection';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type CollectionChangeDetail = Record<string, never>;
@@ -44,7 +46,7 @@ export const Collection = React.forwardRef<HTMLElement, CollectionProps>(functio
     el.items = items ?? null;
   }, [container, directItemSelector, itemRole, itemSelector, items]);
 
-  return React.createElement('ui-collection', { ref, ...rest }, children);
+  return createUIElement('ui-collection', { ref, ...rest }, children);
 });
 
 Collection.displayName = 'Collection';

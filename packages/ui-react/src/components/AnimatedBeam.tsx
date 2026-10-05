@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/animated-beam';
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 export type AnimatedBeamVariant = 'surface' | 'soft' | 'solid' | 'glass' | 'contrast' | 'minimal';
 export type AnimatedBeamTone = 'brand' | 'neutral' | 'info' | 'success' | 'warning' | 'danger';
@@ -242,7 +242,7 @@ const AnimatedBeamRoot = React.forwardRef<AnimatedBeamElement, AnimatedBeamProps
     curve,
   ]);
 
-  return React.createElement('ui-animated-beam', { ref, ...rest }, children);
+  return createUIElement('ui-animated-beam', { ref, ...rest }, children);
 });
 
 AnimatedBeamRoot.displayName = 'AnimatedBeam';

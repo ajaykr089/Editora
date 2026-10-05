@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncJsonAttribute,
@@ -536,7 +537,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
 
   return (
     <>
-      {React.createElement('ui-sortable', hostProps, children)}
+      {createUIElement('ui-sortable', hostProps, children)}
       {portalVersion >= 0 ? itemPortals : null}
       {portalVersion >= 0 ? headerPortals : null}
       {portalVersion >= 0 ? emptyStatePortals : null}

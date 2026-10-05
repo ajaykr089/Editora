@@ -1,6 +1,8 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 import '@editora/ui-core/navigation-menu';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type NavigationMenuChangeDetail = {
@@ -119,7 +121,7 @@ function NavigationMenuRoot(props: NavigationMenuProps) {
     else el.removeAttribute('headless');
   }, [selected, orientation, activation, variant, size, radius, elevation, tone, loop, collapsible, headless]);
 
-  return React.createElement('ui-navigation-menu', { ref, ...rest }, children);
+  return createUIElement('ui-navigation-menu', { ref, ...rest }, children);
 }
 
 function NavigationMenuList({ children }: NavigationMenuListProps) {

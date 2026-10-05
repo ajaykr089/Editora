@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/dock';
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 export type DockOrientation = 'horizontal' | 'vertical';
 export type DockVariant = 'surface' | 'soft' | 'solid' | 'glass' | 'contrast' | 'minimal';
@@ -151,7 +151,7 @@ const DockRoot = React.forwardRef<DockElement, DockProps>(function Dock(
     elevation,
   ]);
 
-  return React.createElement('ui-dock', { ref, ...rest }, children);
+  return createUIElement('ui-dock', { ref, ...rest }, children);
 });
 
 DockRoot.displayName = 'Dock';

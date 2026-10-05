@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import '@editora/ui-core/odometer';
 import {
+  createUIElement,
   syncBooleanAttribute,
   syncNumberAttribute,
   syncStringAttribute,
@@ -154,7 +155,7 @@ export const AnimatedNumber = React.forwardRef<HTMLElement, AnimatedNumberProps>
     resolvedMaximumFractionDigits,
   ]);
 
-  return React.createElement('ui-odometer', { ref, class: className, ...rest });
+  return createUIElement('ui-odometer', { ref, class: className, ...rest });
 });
 
 AnimatedNumber.displayName = 'AnimatedNumber';

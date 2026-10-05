@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/time-picker';
 import {
+  createUIElement,
   getCustomEventDetail,
   serializeTranslations,
   syncBooleanAttribute,
@@ -169,7 +170,7 @@ export const TimePicker = React.forwardRef<HTMLElement, TimePickerProps>(functio
     variant
   ]);
 
-  return React.createElement('ui-time-picker', { ref, ...rest }, children);
+  return createUIElement('ui-time-picker', { ref, ...rest }, children);
 });
 
 TimePicker.displayName = 'TimePicker';

@@ -1,6 +1,8 @@
 import React from 'react';
 
 import '@editora/ui-core/label';
+import { createUIElement } from './_internals';
+
 export type LabelTextProps = React.HTMLAttributes<HTMLElement>;
 export type LabelDescriptionProps = React.HTMLAttributes<HTMLElement>;
 
@@ -53,7 +55,7 @@ const LabelRoot = React.forwardRef<HTMLElement, LabelProps>(function Label(
     headless: headless ? '' : undefined,
   };
 
-  return React.createElement('ui-label', hostProps, children);
+  return createUIElement('ui-label', hostProps, children);
 });
 
 LabelRoot.displayName = 'Label';

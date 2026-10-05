@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/hover-card';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncNumberAttribute,
@@ -92,7 +93,7 @@ const HoverCardRoot = React.forwardRef<HTMLElement, HoverCardProps>(function Hov
     syncBooleanAttribute(el, 'headless', headless);
   }, [open, delay, closeDelay, placement, offset, variant, tone, density, shape, elevation, headless]);
 
-  return React.createElement('ui-hover-card', { ref, ...rest }, children);
+  return createUIElement('ui-hover-card', { ref, ...rest }, children);
 });
 
 HoverCardRoot.displayName = 'HoverCard';

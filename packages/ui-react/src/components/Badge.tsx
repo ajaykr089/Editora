@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/badge';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncStringAttribute,
@@ -85,7 +86,7 @@ export function Badge(props: BadgeProps) {
     syncBooleanAttribute(el, 'disabled', disabled);
   }, [text, tone, variant, size, radius, elevation, state, pill, dot, interactive, truncate, maxWidth, removable, autoRemove, iconOnly, disabled]);
 
-  return React.createElement('ui-badge', { ref, ...rest }, children);
+  return createUIElement('ui-badge', { ref, ...rest }, children);
 }
 
 export default Badge;

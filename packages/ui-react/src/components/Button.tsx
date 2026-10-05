@@ -1,6 +1,6 @@
 import React, { useEffect, useImperativeHandle, useRef } from 'react';
 import '@editora/ui-core/button';
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 export type ButtonProps = Omit<React.HTMLAttributes<HTMLElement>, 'children'> & {
   children?: React.ReactNode;
@@ -150,7 +150,7 @@ export const Button = React.forwardRef<HTMLElement, ButtonProps>(function Button
   const prefix = startIcon == null ? null : React.createElement('span', { slot: 'prefix', 'aria-hidden': 'true' }, startIcon);
   const suffix = endIcon == null ? null : React.createElement('span', { slot: 'suffix', 'aria-hidden': 'true' }, endIcon);
 
-  return React.createElement('ui-button', hostProps, prefix, children, suffix);
+  return createUIElement('ui-button', hostProps, prefix, children, suffix);
 });
 
 Button.displayName = 'Button';

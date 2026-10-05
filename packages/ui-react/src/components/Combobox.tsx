@@ -1,6 +1,8 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/combobox';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onInput' | 'onSelect' | 'onOpen' | 'onClose'> & {
@@ -217,7 +219,7 @@ const ComboboxRoot = React.forwardRef<HTMLElement, ComboboxProps>(function Combo
     allowCustom
   ]);
 
-  return React.createElement('ui-combobox', { ref, ...rest }, children);
+  return createUIElement('ui-combobox', { ref, ...rest }, children);
 });
 
 ComboboxRoot.displayName = 'Combobox';

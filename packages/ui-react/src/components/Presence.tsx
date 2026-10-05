@@ -1,6 +1,8 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/presence';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 type PresenceState = 'hidden' | 'entering' | 'present' | 'exiting';
@@ -109,7 +111,7 @@ export const Presence = React.forwardRef<HTMLElement, PresenceProps>(function Pr
     else el.removeAttribute('delay');
   }, [present, headless, mode, size, variant, keepMounted, lazy, enterDuration, exitDuration, delay]);
 
-  return React.createElement('ui-presence', { ref, ...rest }, children);
+  return createUIElement('ui-presence', { ref, ...rest }, children);
 });
 
 Presence.displayName = 'Presence';

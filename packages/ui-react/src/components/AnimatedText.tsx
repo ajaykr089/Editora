@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/animated-text';
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 export type BuiltinAnimatedTextEffect =
   | 'fade-up'
@@ -186,7 +186,7 @@ const AnimatedTextRoot = React.forwardRef<AnimatedTextElement, AnimatedTextProps
     align,
   ]);
 
-  return React.createElement('ui-animated-text', { ref, ...rest }, text == null ? children : null);
+  return createUIElement('ui-animated-text', { ref, ...rest }, text == null ? children : null);
 });
 
 AnimatedTextRoot.displayName = 'AnimatedText';

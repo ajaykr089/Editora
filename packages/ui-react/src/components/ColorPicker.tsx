@@ -9,6 +9,7 @@ import {
   useElementEventListeners,
   useForwardedHostRef,
 } from './_internals'
+import { createUIElement } from './_internals';
 
 export type ColorPickerColor = {
   r: number
@@ -217,7 +218,7 @@ export const ColorPicker = React.forwardRef<ColorPickerElement, ColorPickerProps
     }
   }
 
-  return React.createElement('ui-color-picker', initialAttrs, children)
+  return createUIElement('ui-color-picker', initialAttrs, children)
 })
 
 ColorPicker.displayName = 'ColorPicker'

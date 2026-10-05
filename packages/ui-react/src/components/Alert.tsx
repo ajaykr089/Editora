@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/alert';
 import {
+  createUIElement,
   syncBooleanAttribute,
   syncStringAttribute,
   useElementAttributes,
@@ -71,7 +72,7 @@ function Alert(props: AlertProps) {
     syncBooleanAttribute(el, 'hidden', typeof open === 'boolean' ? !open : undefined);
   }, [title, description, tone, variant, layout, size, radius, elevation, indicator, dismissible, open, headless]);
 
-  return React.createElement('ui-alert', { ref, ...rest }, children);
+  return createUIElement('ui-alert', { ref, ...rest }, children);
 }
 
 function createAlertSection(

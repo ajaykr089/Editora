@@ -1,6 +1,8 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/file-upload';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type FileUploadRejectedFile = {
@@ -183,7 +185,7 @@ export const FileUpload = React.forwardRef<HTMLElement, BaseFileUploadProps>(fun
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
   useFileUploadBridge(ref, { onChange, onReject, ...rest });
   useFileUploadAttrs(ref, rest);
-  return React.createElement('ui-file-upload', { ref, ...rest }, children);
+  return createUIElement('ui-file-upload', { ref, ...rest }, children);
 });
 
 export const Dropzone = React.forwardRef<HTMLElement, BaseFileUploadProps>(function Dropzone(
@@ -194,7 +196,7 @@ export const Dropzone = React.forwardRef<HTMLElement, BaseFileUploadProps>(funct
   useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
   useFileUploadBridge(ref, { onChange, onReject, ...rest });
   useFileUploadAttrs(ref, rest);
-  return React.createElement('ui-dropzone', { ref, ...rest }, children);
+  return createUIElement('ui-dropzone', { ref, ...rest }, children);
 });
 
 FileUpload.displayName = 'FileUpload';

@@ -1,6 +1,8 @@
 import React from 'react';
 
 import '@editora/ui-core/field';
+import { createUIElement } from './_internals';
+
 export type FieldProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
   label?: string;
@@ -57,7 +59,7 @@ export function Field(props: FieldProps) {
     headless: headless ? '' : undefined,
   };
 
-  return React.createElement('ui-field', hostProps, children);
+  return createUIElement('ui-field', hostProps, children);
 }
 
 export default Field;

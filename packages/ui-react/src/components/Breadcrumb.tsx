@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/breadcrumb';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncNumberAttribute,
@@ -106,7 +107,7 @@ const BreadcrumbRoot = React.forwardRef<HTMLElement, BreadcrumbProps>(function B
     syncStringAttribute(el, 'aria-label', ariaLabel || null);
   }, [separator, maxItems, currentIndex, size, variant, radius, elevation, tone, state, disabled, ariaLabel]);
 
-  return React.createElement('ui-breadcrumb', { ref, ...rest }, children);
+  return createUIElement('ui-breadcrumb', { ref, ...rest }, children);
 });
 
 BreadcrumbRoot.displayName = 'Breadcrumb';

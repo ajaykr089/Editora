@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 
 import '@editora/ui-core/data-table';
+import { createUIElement } from './_internals';
+
 export type DataTableSortDirection = 'asc' | 'desc';
 export type DataTableState = 'idle' | 'loading' | 'error' | 'success';
 
@@ -272,7 +274,7 @@ export function DataTable(props: DataTableProps) {
           })()
         : undefined;
 
-  return React.createElement(
+  return createUIElement(
     'ui-data-table',
     {
       ref,

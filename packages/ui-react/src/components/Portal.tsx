@@ -1,6 +1,8 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/portal';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 type PortalEventDetail = { count: number };
@@ -61,7 +63,7 @@ export const Portal = React.forwardRef<HTMLElement, PortalProps>(function Portal
     else el.removeAttribute('disabled');
   }, [target, strategy, headless, disabled]);
 
-  return React.createElement('ui-portal', { ref, ...rest }, children);
+  return createUIElement('ui-portal', { ref, ...rest }, children);
 });
 
 Portal.displayName = 'Portal';

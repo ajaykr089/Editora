@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/skeleton';
 import {
+  createUIElement,
   syncBooleanAttribute,
   syncNumberAttribute,
   syncStringAttribute,
@@ -56,7 +57,7 @@ export function Skeleton(props: SkeletonProps) {
     syncBooleanAttribute(el, 'headless', headless);
   }, [count, width, height, radius, gap, duration, variant, animation, density, tone, animated, headless]);
 
-  return React.createElement('ui-skeleton', { ref, ...rest });
+  return createUIElement('ui-skeleton', { ref, ...rest });
 }
 
 export default Skeleton;

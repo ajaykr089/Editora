@@ -1,6 +1,7 @@
 import * as React from 'react';
 import '@editora/ui-core/radio';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncStringAttribute,
@@ -108,7 +109,7 @@ export const Radio = React.forwardRef<HTMLElement, RadioProps>(function Radio(
     tone: tone && tone !== 'brand' ? tone : undefined,
   };
 
-  return React.createElement('ui-radio', hostProps, children);
+  return createUIElement('ui-radio', hostProps, children);
 });
 
 Radio.displayName = 'Radio';

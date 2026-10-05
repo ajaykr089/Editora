@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/slider';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncJsonAttribute,
@@ -157,7 +158,7 @@ export const Slider = React.forwardRef<HTMLElement, SliderProps>(function Slider
     nameEnd
   ]);
 
-  return React.createElement('ui-slider', { ref, ...rest }, children);
+  return createUIElement('ui-slider', { ref, ...rest }, children);
 });
 
 Slider.displayName = 'Slider';

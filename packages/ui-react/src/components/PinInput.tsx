@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/pin-input';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncNumberAttribute,
@@ -95,7 +96,7 @@ export const PinInput = React.forwardRef<HTMLElement, PinInputProps>(function Pi
     syncBooleanAttribute(el, 'invalid', invalid);
   }, [value, length, name, label, description, error, mode, mask, required, disabled, readOnly, placeholderChar, size, density, shape, invalid]);
 
-  return React.createElement('ui-pin-input', { ref, ...rest }, children);
+  return createUIElement('ui-pin-input', { ref, ...rest }, children);
 });
 
 PinInput.displayName = 'PinInput';

@@ -1,6 +1,8 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/layout';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type LayoutMode = 'dashboard' | 'split' | 'stack';
@@ -83,7 +85,7 @@ const Layout = React.forwardRef<HTMLElement, LayoutProps>(function Layout(
     else el.removeAttribute('aside-width');
   }, [mode, variant, density, maxWidth, sidebarSide, collapsed, headless, sidebarWidth, asideWidth]);
 
-  return React.createElement('ui-layout', { ref, ...rest }, children);
+  return createUIElement('ui-layout', { ref, ...rest }, children);
 });
 
 Layout.displayName = 'Layout';

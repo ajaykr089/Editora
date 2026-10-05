@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/tags-input';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncNumberAttribute,
@@ -98,7 +99,7 @@ export const TagsInput = React.forwardRef<HTMLElement, TagsInputProps>(function 
     syncNumberAttribute(el, 'max-tags', maxTags);
   }, [value, name, label, description, placeholder, required, disabled, readOnly, counter, allowDuplicates, addOnBlur, maxTags]);
 
-  return React.createElement('ui-tags-input', { ref, ...rest }, children);
+  return createUIElement('ui-tags-input', { ref, ...rest }, children);
 });
 
 TagsInput.displayName = 'TagsInput';

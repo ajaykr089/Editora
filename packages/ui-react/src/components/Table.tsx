@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 
 import '@editora/ui-core/table';
+import { createUIElement } from './_internals';
+
 export type TableSortDirection = 'asc' | 'desc';
 
 export type TableSortChangeDetail = {
@@ -76,7 +78,7 @@ export function Table(props: TableProps) {
     };
   }, [onSortChange, onRowSelect]);
 
-  return React.createElement(
+  return createUIElement(
     'ui-table',
     {
       ref,

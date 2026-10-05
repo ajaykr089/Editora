@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/radio-group';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncJsonAttribute,
@@ -78,7 +79,7 @@ export const RadioGroup = React.forwardRef<HTMLElement, RadioGroupProps>(functio
     syncJsonAttribute(el, 'options', options?.length ? options : null);
   }, [value, disabled, required, name, orientation, variant, size, tone, options]);
 
-  return React.createElement('ui-radio-group', { ref, ...rest }, children);
+  return createUIElement('ui-radio-group', { ref, ...rest }, children);
 });
 
 RadioGroup.displayName = 'RadioGroup';

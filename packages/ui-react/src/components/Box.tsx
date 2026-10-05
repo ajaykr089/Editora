@@ -1,6 +1,8 @@
 import React from 'react';
 
 import '@editora/ui-core/box';
+import { createUIElement } from './_internals';
+
 type BreakpointKey = 'initial' | 'sm' | 'md' | 'lg' | 'xl';
 type Responsive<T> = T | Partial<Record<BreakpointKey, T>>;
 type CssValue = string | number;
@@ -135,7 +137,7 @@ export const Box = React.forwardRef<HTMLElement, BoxProps>(function Box(props, f
     headless: headless ? '' : undefined
   };
 
-  return React.createElement('ui-box', hostProps, children);
+  return createUIElement('ui-box', hostProps, children);
 });
 
 Box.displayName = 'Box';

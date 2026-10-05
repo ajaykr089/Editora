@@ -1,6 +1,8 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/dismissable-layer';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type DismissableLayerDetail = {
@@ -85,7 +87,7 @@ export const DismissableLayer = React.forwardRef<HTMLElement, DismissableLayerPr
     else el.removeAttribute('headless');
   }, [closeOnEscape, closeOnFocusOutside, closeOnPointerOutside, disableOutsidePointerEvents, headless, modal, open]);
 
-  return React.createElement('ui-dismissable-layer', { ref, ...rest }, children);
+  return createUIElement('ui-dismissable-layer', { ref, ...rest }, children);
 });
 
 DismissableLayer.displayName = 'DismissableLayer';

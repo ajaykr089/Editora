@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import '@editora/ui-core/placement-grid';
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 type BreakpointKey = 'initial' | 'sm' | 'md' | 'lg' | 'xl';
 type Responsive<T> = T | Partial<Record<BreakpointKey, T>>;
@@ -116,7 +116,7 @@ const PlacementGridRoot = React.forwardRef<PlacementGridElement, PlacementGridPr
     headless: headless ? '' : undefined
   };
 
-  return React.createElement('ui-placement-grid', hostProps, children);
+  return createUIElement('ui-placement-grid', hostProps, children);
 });
 
 PlacementGridRoot.displayName = 'PlacementGrid';

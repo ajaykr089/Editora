@@ -1,6 +1,8 @@
 import React from 'react';
 
 import '@editora/ui-core/icon';
+import { createUIElement } from './_internals';
+
 export type IconProps = React.HTMLAttributes<HTMLElement> & {
   children?: React.ReactNode;
   name?: string;
@@ -80,7 +82,7 @@ export const Icon = React.forwardRef<HTMLElement, IconProps>(function Icon(
     rtl: rtl ? '' : undefined,
   };
 
-  return React.createElement('ui-icon', hostProps, children);
+  return createUIElement('ui-icon', hostProps, children);
 });
 
 Icon.displayName = 'Icon';

@@ -1,6 +1,8 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
 import '@editora/ui-core/tabs';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 type TabsDetail = {
@@ -136,7 +138,7 @@ const TabsRoot = React.forwardRef<HTMLElement, TabsProps>(function Tabs(
     syncBool('headless', headless);
   }, [selected, value, orientation, activation, variant, size, density, tone, stretched, shape, elevation, loop, bare, headless]);
 
-  return React.createElement('ui-tabs', { ref, ...rest }, children);
+  return createUIElement('ui-tabs', { ref, ...rest }, children);
 });
 
 TabsRoot.displayName = 'Tabs';

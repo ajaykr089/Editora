@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import '@editora/ui-core/masonry-grid';
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 type BreakpointKey = 'initial' | 'sm' | 'md' | 'lg' | 'xl';
 type Responsive<T> = T | Partial<Record<BreakpointKey, T>>;
@@ -62,7 +62,7 @@ export const MasonryGrid = React.forwardRef<HTMLElement, Props>(function Masonry
     headless: headless ? '' : undefined
   };
 
-  return React.createElement('ui-masonry-grid', hostProps, children);
+  return createUIElement('ui-masonry-grid', hostProps, children);
 });
 
 MasonryGrid.displayName = 'MasonryGrid';

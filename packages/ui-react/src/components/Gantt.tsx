@@ -1,6 +1,8 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/gantt';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type GanttTaskType = 'task' | 'summary' | 'milestone';
@@ -189,7 +191,7 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
     };
   }, [onTaskChange, onTaskSelect, onTaskDelete, onLinkSelect, onZoomChange, onFilterChange, onSortChange]);
 
-  return React.createElement('ui-gantt', { ref, ...rest }, children);
+  return createUIElement('ui-gantt', { ref, ...rest }, children);
 });
 
 Gantt.displayName = 'Gantt';

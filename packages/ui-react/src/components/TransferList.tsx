@@ -1,6 +1,6 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 import '@editora/ui-core/transfer-list';
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -162,7 +162,7 @@ export const TransferList = React.forwardRef<TransferListElement, TransferListPr
     selectedEmptyLabel
   ]);
 
-  return React.createElement('ui-transfer-list', { ref, ...rest }, children);
+  return createUIElement('ui-transfer-list', { ref, ...rest }, children);
 });
 
 TransferList.displayName = 'TransferList';

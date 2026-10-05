@@ -1,6 +1,8 @@
 import * as React from 'react';
 
 import '@editora/ui-core/aspect-ratio';
+import { createUIElement } from './_internals';
+
 export interface AspectRatioProps extends React.HTMLAttributes<HTMLElement> {
   ratio?: number | string;
   fit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
@@ -44,7 +46,7 @@ export const AspectRatio = React.forwardRef<HTMLElement, AspectRatioProps>(funct
     headless: headless ? '' : undefined,
   };
 
-  return React.createElement('ui-aspect-ratio', hostProps, children);
+  return createUIElement('ui-aspect-ratio', hostProps, children);
 });
 
 AspectRatio.displayName = 'AspectRatio';

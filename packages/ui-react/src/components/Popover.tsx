@@ -1,6 +1,6 @@
 import * as React from 'react';
 import '@editora/ui-core/popover';
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
@@ -133,7 +133,7 @@ const PopoverRoot = React.forwardRef<PopoverElement, PopoverProps>(function Popo
     syncAttr('elevation', elevation && elevation !== 'low' ? elevation : null, elevation !== undefined);
   }, [open, placement, offset, shift, flip, closeOnEscape, closeOnOutside, variant, tone, size, radius, elevation]);
 
-  return React.createElement('ui-popover', { ref, ...rest }, children);
+  return createUIElement('ui-popover', { ref, ...rest }, children);
 });
 
 PopoverRoot.displayName = 'Popover';

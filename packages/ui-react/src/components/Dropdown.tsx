@@ -1,6 +1,8 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/dropdown';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect' | 'onOpen' | 'onClose'> & {
@@ -179,7 +181,7 @@ const DropdownRoot = React.forwardRef<HTMLElement, DropdownProps>(function Dropd
     syncBooleanish('typeahead', typeahead, 'value');
   }, [open, placement, variant, size, density, radius, shape, elevation, tone, closeOnSelect, typeahead]);
 
-  return React.createElement('ui-dropdown', { ref, ...rest }, children);
+  return createUIElement('ui-dropdown', { ref, ...rest }, children);
 });
 
 DropdownRoot.displayName = 'Dropdown';
