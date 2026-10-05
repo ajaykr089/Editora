@@ -51,8 +51,6 @@
   ],
   "exclude": [
     "node_modules",
-    "**/dist/**",
-    "packages/plugins/document-manager/src/**",
-    "packages/plugins/media-manager/src/**"
+    "**/dist/**"
   ]
 }
