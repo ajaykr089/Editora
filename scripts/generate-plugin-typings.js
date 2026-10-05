@@ -83,17 +83,60 @@ function reachable(entryDts) {
   return [...seen];
 }
 
+/**
+ * Non-plugin packages that declare `dist/index.d.ts` but only run `vite build` (today: @editora/ui-editor).
+ * They are compiled with their own tsconfig, here rather than in their `build` script: those packages run
+ * `build` from `prepare` during `npm ci`, when the workspaces they import types from are not built yet.
+ */
+function ownConfigTargets() {
+  const out = [];
+  const packagesRoot = path.join(root, 'packages');
+  for (const name of fs.readdirSync(packagesRoot)) {
+    const dir = path.join(packagesRoot, name);
+    const pj = path.join(dir, 'package.json');
+    if (name === 'plugins' || !fs.existsSync(pj) || !fs.existsSync(path.join(dir, 'tsconfig.json'))) continue;
+    const pkg = JSON.parse(fs.readFileSync(pj, 'utf8'));
+    const declared = (pkg.types || pkg.typings || '').replace(/^\.\//, '');
+    if (pkg.private || ignored.has(pkg.name) || declared !== 'dist/index.d.ts') continue;
+    if (!fs.existsSync(path.join(dir, 'src', 'index.ts'))) continue;
+    if (fs.existsSync(path.join(dir, 'dist', 'index.d.ts'))) continue; // its own build already emitted them
+    out.push({ name: pkg.name, dir });
+  }
+  return out;
+}
+
+function compileOwnConfig(dir) {
+  const configPath = path.join(dir, 'tsconfig.json');
+  const read = ts.readConfigFile(configPath, ts.sys.readFile);
+  const parsed = ts.parseJsonConfigFileContent(read.config, ts.sys, dir);
+  const program = ts.createProgram(parsed.fileNames, {
+    ...parsed.options,
+    declaration: true,
+    emitDeclarationOnly: true,
+    noEmit: false,
+    skipLibCheck: true,
+  });
+  program.emit(undefined, undefined, undefined, true);
+}
+
 const list = targets();
-if (!list.length) {
-  console.log('no plugin packages need typings');
+const own = ownConfigTargets();
+if (!list.length && !own.length) {
+  console.log('no packages need typings');
   process.exit(0);
 }
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'editora-dts-'));
 try {
-  compile(list.map((t) => t.entry), tmp);
-
   const failures = [];
+
+  for (const t of own) {
+    compileOwnConfig(t.dir);
+    if (!fs.existsSync(path.join(t.dir, 'dist', 'index.d.ts'))) failures.push(`${t.name}: no dist/index.d.ts emitted`);
+  }
+
+  if (list.length) compile(list.map((t) => t.entry), tmp);
+
   for (const t of list) {
     const entryDts = path.join(tmp, t.dirName, 'src', 'index.d.ts');
     if (!fs.existsSync(entryDts)) {
@@ -120,7 +163,7 @@ try {
     console.error(`\n${failures.length} package(s) got no typings:\n  ${failures.join('\n  ')}`);
     process.exit(1);
   }
-  console.log(`✓ wrote dist/index.d.ts for ${list.length} plugin packages`);
+  console.log(`✓ wrote typings for ${list.length} plugin packages and ${own.length} other package(s)`);
 } finally {
   fs.rmSync(tmp, { recursive: true, force: true });
 }
