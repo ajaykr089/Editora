@@ -123,3 +123,59 @@ describe('<editora-editor> output omits editing-only chrome', () => {
     for (const html of seen) expect(html).not.toContain('resize-handle');
   });
 });
+
+describe('<editora-editor> lifecycle', () => {
+  beforeAll(() => {
+    (document as any).execCommand ??= () => false;
+    (RichTextEditorElement as any).__globalPluginLoader ??= new PluginLoader();
+    if (!customElements.get('editora-editor')) customElements.define('editora-editor', RichTextEditorElement);
+  });
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  const settle = async (el: HTMLElement) => {
+    for (let i = 0; i < 40 && !el.querySelector('.editora-content'); i++) await new Promise((r) => setTimeout(r, 25));
+    return el.querySelector('.editora-content') as HTMLElement;
+  };
+
+  it('keeps edited content when the element is moved in the DOM', async () => {
+    const { el, content } = await mount({ 'data-initial-content': '<p>original</p>' });
+    el.setContent('<p>edited by the user</p>');
+    expect(content.textContent).toContain('edited by the user');
+
+    const newParent = document.createElement('section');
+    document.body.appendChild(newParent);
+    newParent.appendChild(el); // disconnect + connect
+
+    const moved = await settle(el);
+    expect(moved.textContent).toContain('edited by the user');
+    expect(moved.textContent).not.toContain('original');
+  });
+
+  it('survives being moved more than once, still holding the latest edit', async () => {
+    const { el } = await mount({ 'data-initial-content': '<p>original</p>' });
+    el.setContent('<p>first</p>');
+    const a = document.createElement('div'); const b = document.createElement('div');
+    document.body.append(a, b);
+    a.appendChild(el);
+    let c = await settle(el);
+    expect(c.textContent).toContain('first');
+    el.setContent('<p>second</p>');
+    b.appendChild(el);
+    c = await settle(el);
+    expect(c.textContent).toContain('second');
+  });
+
+  it('does not carry resize handles through the move', async () => {
+    const { el, content } = await mount({ 'data-initial-content': '<p>x</p>' });
+    content.innerHTML = '<table><tbody><tr><td style="position: relative;">a<div class="resize-handle"></div></td></tr></tbody></table>';
+    const target = document.createElement('div');
+    document.body.appendChild(target);
+    target.appendChild(el);
+    const moved = await settle(el);
+    expect(moved.querySelector('.resize-handle')).toBeNull();
+    expect(moved.querySelector('td')?.textContent).toBe('a');
+  });
+});

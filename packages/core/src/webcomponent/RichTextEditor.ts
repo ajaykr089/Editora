@@ -195,6 +195,9 @@ export class RichTextEditorElement extends HTMLElement {
   private contentChangeDebounceTimer?: ReturnType<typeof setTimeout>;
   private keyboardShortcutManager = new KeyboardShortcutManager();
   private lastAutosavedContent = '';
+  // Live content captured by destroy() so the next initialize() (the element being moved in the
+  // DOM, or setConfig()) resumes from it instead of from the original data-initial-content.
+  private preservedContent: string | null = null;
   private loadedPlugins: Plugin[] = [];
   private lastBeforeInputType: string | null = null;
 
@@ -405,7 +408,10 @@ export class RichTextEditorElement extends HTMLElement {
     // Get initial content before clearing innerHTML. It comes from markup, an attribute or
     // localStorage - none of it trusted - so sanitise it before it is ever parsed into the live
     // DOM (an <img onerror> would otherwise run on load, long before the first input event).
+    const resumed = this.preservedContent;
+    this.preservedContent = null;
     const initialContent = this.sanitizeLoadedContent(
+      resumed ??
       this.restoreAutosavedContent() ??
       (this.getAttribute('data-initial-content') || '')
     );
@@ -1568,7 +1574,8 @@ export class RichTextEditorElement extends HTMLElement {
     }
 
     if (this.contentElement) {
-      this.persistAutosave(getCleanEditorHTML(this.contentElement));
+      this.preservedContent = getCleanEditorHTML(this.contentElement);
+      this.persistAutosave(this.preservedContent);
     }
     this.stopAutosave();
 
