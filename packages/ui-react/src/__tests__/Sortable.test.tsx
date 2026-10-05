@@ -17,6 +17,19 @@ const items = [
 ];
 
 describe('Sortable wrapper', () => {
+  it('renders an empty board instead of crashing while lists/items are still undefined', () => {
+    // Data usually arrives asynchronously, so the first render often has neither.
+    const props = {} as unknown as React.ComponentProps<typeof Sortable>;
+    const { container, rerender } = render(<Sortable {...props} />);
+    expect(container.querySelector('ui-sortable')).toBeTruthy();
+
+    rerender(<Sortable {...({ lists } as unknown as React.ComponentProps<typeof Sortable>)} />);
+    expect(container.querySelector('ui-sortable')).toBeTruthy();
+
+    rerender(<Sortable lists={lists} items={items} />);
+    expect(container.querySelector('ui-sortable')?.getAttribute('items')).toContain('alpha');
+  });
+
   it('forwards item changes and persistence events', async () => {
     let latestItems: typeof items = [];
     let latestOperation = '';

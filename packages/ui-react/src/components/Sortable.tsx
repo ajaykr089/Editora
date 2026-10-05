@@ -197,10 +197,15 @@ function resolveSpaceValue(value: SortableSpace | undefined): string | null {
   }
 }
 
+// Stable fallbacks: data usually arrives asynchronously, and a fresh [] each render would
+// retrigger every effect that depends on lists/items.
+const NO_LISTS: SortableList[] = [];
+const NO_ITEMS: SortableItem[] = [];
+
 export const Sortable = React.forwardRef<SortableElement, SortableProps>(function Sortable(
   {
-    lists,
-    items,
+    lists: listsProp,
+    items: itemsProp,
     selection,
     filterQuery,
     sort,
@@ -230,6 +235,8 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
   },
   forwardedRef
 ) {
+  const lists = listsProp ?? NO_LISTS;
+  const items = itemsProp ?? NO_ITEMS;
   const ref = useForwardedHostRef<SortableElement>(forwardedRef);
   const [portalVersion, setPortalVersion] = React.useState(0);
   const hasCustomRendering = !!(renderItem || renderListHeader || renderEmptyState);
