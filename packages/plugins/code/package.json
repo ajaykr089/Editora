@@ -17,6 +17,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@editora/light-code-editor": "^1.0.15",
     "codejar": "^3.6.1",
     "highlight.js": "^11.9.0"
   },
