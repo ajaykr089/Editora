@@ -595,11 +595,6 @@ export const EditorContent: React.FC<EditorContentProps> = ({
     el.addEventListener('focus', handleFocusOrBlur);
     el.addEventListener('blur', handleFocusOrBlur);
 
-    // Set focus to editor
-    if (!readonly) {
-      el.focus();
-    }
-
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
@@ -613,6 +608,14 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       el.removeEventListener('blur', handleFocusOrBlur);
     };
   }, [editor, onChange, pasteConfig, contentConfig, securityConfig, performanceConfig, placeholder, contextMenuConfig, readonly]);
+
+  // Focus the editor when it mounts and when it becomes editable. This used to sit inside the effect
+  // above, which re-runs whenever `onChange` or any config prop changes identity (an inline arrow
+  // function is a new one on every parent render), so the editor stole focus back from any other field
+  // on the page after each keystroke that re-rendered the parent.
+  useEffect(() => {
+    if (!readonly) contentRef.current?.focus();
+  }, [readonly]);
 
   const nativeSpellcheckEnabled =
     (spellcheckConfig?.enabled ?? false) &&
