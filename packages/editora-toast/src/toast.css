@@ -401,6 +401,14 @@
   transform: scale(1);
 }
 
+/* Touch devices have no hover, so the close button (revealed on hover above) would stay invisible there. */
+@media (hover: none) {
+  .editora-toast-close {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .editora-toast-close:hover {
   background: var(--et-border);
   border-color: var(--et-border-strong);

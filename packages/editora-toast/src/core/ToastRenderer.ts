@@ -1,5 +1,6 @@
 // ToastRenderer - Handles DOM creation, rendering, and animations
 import { ToastInstance, ToastPosition, ToastConfig, AnimationConfig } from './types';
+import { setSafeHtml } from './safeHtml';
 import { animationManager } from './AnimationUtils';
 
 export class ToastRenderer {
@@ -116,12 +117,7 @@ export class ToastRenderer {
 
     // Close button
     if (options.closable || options.closeButton) {
-      const close = document.createElement('button');
-      close.className = 'editora-toast-close';
-      close.setAttribute('aria-label', 'Close notification');
-      close.textContent = '×';
-      close.onclick = () => toast.dismiss();
-      element.appendChild(close);
+      element.appendChild(this.createCloseButton(toast));
     }
 
     // Interactive features
@@ -237,6 +233,16 @@ export class ToastRenderer {
       contentElement?.replaceWith(nextContent);
     }
 
+    // Add or remove the close button when it is toggled. `closeButton` is the alias and wins, as in show().
+    const nextClosable = updates.closeButton ?? updates.closable;
+    if (nextClosable !== undefined) {
+      toast.options.closable = nextClosable;
+      toast.options.closeButton = nextClosable;
+      const existing = toast.element.querySelector('.editora-toast-close');
+      if (nextClosable && !existing) toast.element.appendChild(this.createCloseButton(toast));
+      else if (!nextClosable && existing) existing.remove();
+    }
+
     // Update progress bar
     if (updates.progress !== undefined) {
       let progressElement = toast.element.querySelector('.editora-toast-progress-track');
@@ -349,7 +355,7 @@ export class ToastRenderer {
         const message = document.createElement('div');
         message.className = 'editora-toast-message';
         if (options.html) {
-          message.innerHTML = this.sanitizeHTML(options.message);
+          setSafeHtml(message, options.message);
         } else {
           message.textContent = options.message;
         }
@@ -366,6 +372,16 @@ export class ToastRenderer {
 
     content.appendChild(body);
     return content;
+  }
+
+  private createCloseButton(toast: ToastInstance): HTMLButtonElement {
+    const close = document.createElement('button');
+    close.className = 'editora-toast-close';
+    close.setAttribute('type', 'button');
+    close.setAttribute('aria-label', 'Close notification');
+    close.textContent = '×';
+    close.onclick = () => toast.dismiss();
+    return close;
   }
 
   private createActionButton(action: NonNullable<ToastInstance['options']['actions']>[number], toast: ToastInstance): HTMLButtonElement {
@@ -630,15 +646,10 @@ export class ToastRenderer {
     document.body.appendChild(announcement);
 
     setTimeout(() => {
-      document.body.removeChild(announcement);
+      // remove() instead of body.removeChild(): an app that already replaced the body (SPA teardown, tests)
+      // made removeChild throw "node to be removed is not a child" from this timer.
+      announcement.remove();
     }, 1000);
-  }
-
-  // Security: Basic HTML sanitization
-  private sanitizeHTML(html: string): string {
-    const temp = document.createElement('div');
-    temp.textContent = html;
-    return temp.innerHTML;
   }
 
   // Inject CSS

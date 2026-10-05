@@ -39,6 +39,10 @@ export class ToastManager implements IToastManager {
   private config: ToastConfig;
   private idCounter = 0;
   private pausedToasts = new Set<string>();
+  // show() registers a toast asynchronously (lifecycle hooks run first). Until then update()/dismiss() cannot
+  // find it, so they used to return false and drop the change: a promise that settled quickly left its toast on
+  // "loading" forever, and `const t = toast.info('x'); t.dismiss();` dismissed nothing.
+  private pendingShows = new Map<string, Promise<void>>();
   private subscribers = new Set<ToastSubscriber>();
   private windowFocusHandler?: () => void;
   private windowBlurHandler?: () => void;
@@ -61,13 +65,13 @@ export class ToastManager implements IToastManager {
     const id = options.id || `toast-${++this.idCounter}`;
     const toast: ToastInstance = {
       id,
-      options: this.normalizeToastOptions({ ...this.config, ...options }),
+      options: this.normalizeToastOptions({ ...this.config, ...options }, options),
       createdAt: Date.now(),
       dismiss: () => this.dismiss(id),
       update: (updates) => this.update(id, updates)
     };
 
-    this.lifecycle.beforeShow(toast).then(async () => {
+    const ready = this.lifecycle.beforeShow(toast).then(async () => {
       const changes = this.queue.enqueue(toast);
       if (changes.rejected) return;
 
@@ -76,17 +80,28 @@ export class ToastManager implements IToastManager {
       await this.showToasts(changes.show);
       this.notify();
     });
+    this.pendingShows.set(id, ready);
+    const settle = () => {
+      if (this.pendingShows.get(id) === ready) this.pendingShows.delete(id);
+    };
+    ready.then(settle, settle);
 
     return toast;
   }
 
   update(id: string, options: Partial<ToastOptions>): boolean {
+    const showing = this.pendingShows.get(id);
+    if (showing) {
+      showing.then(() => this.update(id, options), () => {});
+      return true;
+    }
+
     const toast = this.store.getToast(id);
     if (!toast) return false;
 
     // Lifecycle: beforeUpdate
     this.lifecycle.beforeUpdate(toast, options).then(async () => {
-      const normalizedUpdates = this.normalizeToastOptions({ ...toast.options, ...options });
+      const normalizedUpdates = this.normalizeToastOptions({ ...toast.options, ...options }, options);
       this.store.updateToast(id, { options: normalizedUpdates });
 
       if (this.queue.isVisible(id)) {
@@ -101,6 +116,12 @@ export class ToastManager implements IToastManager {
   }
 
   dismiss(id: string): boolean {
+    const showing = this.pendingShows.get(id);
+    if (showing) {
+      showing.then(() => this.dismiss(id), () => {});
+      return true;
+    }
+
     const toast = this.store.getToast(id);
     if (!toast) return false;
 
@@ -178,7 +199,12 @@ export class ToastManager implements IToastManager {
   // Configuration
   configure(config: Partial<ToastConfig>): void {
     const hadPauseOnWindowBlur = this.config.pauseOnWindowBlur;
-    this.config = this.normalizeConfig({ ...this.config, ...config });
+    const merged = { ...this.config, ...config };
+    // normalizeConfig stores the resolved limit under both names, and prefers `visibleToasts`. Without this the
+    // stored alias (the old limit) always beat a newly passed `maxVisible`, so the documented option could never
+    // be changed after construction.
+    if (config.maxVisible !== undefined && config.visibleToasts === undefined) delete merged.visibleToasts;
+    this.config = this.normalizeConfig(merged);
     this.store.updateConfig(this.config);
     this.renderer.updateConfig(this.config);
     const changes = this.queue.updateConfig(this.config);
@@ -258,8 +284,13 @@ export class ToastManager implements IToastManager {
     };
   }
 
-  private normalizeToastOptions(options: ToastOptions): ToastOptions {
-    const closable = options.closeButton ?? options.closable ?? this.config.closeButton;
+  // `options` is the caller's options already merged over the config (or over the toast's current options when
+  // updating); `explicit` is just what the caller passed. The close button has to be decided from what the
+  // caller passed first: the merged object always carries the config's `closeButton: false`, so reading it
+  // first made an explicit `closable: true` lose and the documented option silently did nothing.
+  private normalizeToastOptions(options: ToastOptions, explicit: Partial<ToastOptions> = options): ToastOptions {
+    const closable =
+      explicit.closeButton ?? explicit.closable ?? options.closable ?? options.closeButton ?? this.config.closeButton;
     const action = options.action ? { ...options.action, primary: options.action.primary ?? true } : undefined;
     const actions = [
       ...(action ? [action] : []),
@@ -270,6 +301,9 @@ export class ToastManager implements IToastManager {
     return {
       ...options,
       closable,
+      // Keep the alias in step: the renderer shows the button if either flag is set, and the merged config
+      // value would otherwise re-enable a button the caller explicitly turned off.
+      closeButton: closable,
       actions: actions.length > 0 ? actions : undefined,
       ariaLive: options.ariaLive || (options.level === 'error' || options.important ? 'assertive' : 'polite'),
       role: options.role || (options.level === 'error' || options.important ? 'alert' : 'status'),
