@@ -45,6 +45,14 @@ jobs:
       - name: Run icons, react-icons and toast tests
         run: npm run test:libs
 
+      # ui-core, ui-react, ui-sortable and collaboration each have a vitest suite that nothing ran
+      # here (test:ui only type-checks the declarations), so regressions in them went unnoticed.
+      - name: Run ui-core and ui-react unit tests
+        run: npm run test:ui:unit
+
+      - name: Run ui-sortable and collaboration tests
+        run: npm run test:packages
+
       # `changeset publish` packs whatever is on disk and dist/ is not committed, so every
       # workspace has to be built here or it is published empty (36 plugin packages were in the
       # 2026-10-02 release). verify:release below only builds a subset.
