@@ -286,3 +286,101 @@ describe('update() and dismiss() right after show()', () => {
     expect(manager.dismiss('never-shown')).toBe(false);
   });
 });
+
+describe('swipe / drag to dismiss', () => {
+  const touch = (el: Element, type: string, x: number, y: number, ended = false) => {
+    const point = { identifier: 1, target: el, clientX: x, clientY: y } as unknown as Touch;
+    const event = new Event(type, { bubbles: true, cancelable: true }) as Event & { touches: Touch[]; changedTouches: Touch[] };
+    event.touches = ended ? [] : [point];
+    event.changedTouches = [point];
+    el.dispatchEvent(event);
+    return event;
+  };
+  const mouse = (el: Element, type: string, x: number, y: number) => {
+    const event = new MouseEvent(type, { bubbles: true, cancelable: true, clientX: x, clientY: y });
+    el.dispatchEvent(event);
+    return event;
+  };
+  const swipeOf = async (extra: Record<string, unknown> = {}) => {
+    manager.show({
+      message: 'Archived',
+      duration: 0,
+      closable: true,
+      swipeDismiss: true,
+      actions: [{ label: 'Undo', onClick: () => undefined, dismissOnClick: false }],
+      ...extra,
+    });
+    await waitForToasts(1);
+    const el = toasts()[0];
+    return { el, action: el.querySelector('.editora-toast-action, .editora-toast-actions button') as HTMLElement, close: el.querySelector('.editora-toast-close') as HTMLElement };
+  };
+
+  it('still dismisses on a swipe that starts on the toast body', async () => {
+    const { el } = await swipeOf();
+    touch(el, 'touchstart', 20, 20);
+    touch(el, 'touchmove', 90, 20);
+    touch(el, 'touchmove', 160, 20);
+    touch(el, 'touchend', 160, 20, true);
+    await vi.waitFor(() => expect(toasts().length).toBe(0), { timeout: 3000 });
+  });
+
+  it('does not swallow the tap on an action or close button (touchstart must stay un-cancelled)', async () => {
+    // Cancelling touchstart suppresses the browser's synthesized click, so on a touch screen the
+    // buttons did nothing at all.
+    const { el, action, close } = await swipeOf();
+    expect(action).not.toBeNull();
+    for (const control of [action, close]) {
+      const start = touch(control, 'touchstart', 20, 20);
+      const end = touch(control, 'touchend', 20, 20, true);
+      expect(start.defaultPrevented).toBe(false);
+      expect(end.defaultPrevented).toBe(false);
+      expect(el.style.transition).not.toBe('none');
+    }
+  });
+
+  it('does not start a drag from a button, so sliding off it cannot dismiss the toast', async () => {
+    const { el, action } = await swipeOf();
+    touch(action, 'touchstart', 20, 20);
+    touch(action, 'touchmove', 160, 20);
+    expect(el.style.transform).not.toContain('translate');
+    touch(action, 'touchend', 160, 20, true);
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    expect(toasts().length).toBe(1);
+  });
+
+  it('does not cancel a mouse press, so buttons keep focus and text stays selectable', async () => {
+    const { el, action } = await swipeOf();
+    expect(mouse(action, 'mousedown', 20, 20).defaultPrevented).toBe(false);
+    mouse(action, 'mouseup', 20, 20);
+    expect(mouse(el.querySelector('.editora-toast-message')!, 'mousedown', 20, 20).defaultPrevented).toBe(false);
+    mouse(el, 'mouseup', 20, 20);
+  });
+
+  it('drops the drag state when the browser cancels the gesture', async () => {
+    const { el } = await swipeOf();
+    touch(el, 'touchstart', 20, 20);
+    touch(el, 'touchmove', 120, 20);
+    expect(el.style.transform).toContain('translate');
+    expect(el.style.transition).toBe('none');
+
+    touch(el, 'touchcancel', 120, 20, true);
+
+    expect(el.style.transform).not.toContain('translate');
+    expect(el.style.transition).not.toBe('none');
+    expect(el.style.cursor).not.toBe('grabbing');
+    expect(toasts().length).toBe(1);
+
+    // A stray move after the cancel must not resume a drag nobody started.
+    touch(el, 'touchmove', 300, 300);
+    expect(el.style.transform).not.toContain('translate');
+  });
+
+  it('still dismisses on a mouse drag', async () => {
+    const { el } = await swipeOf();
+    mouse(el, 'mousedown', 20, 20);
+    mouse(el, 'mousemove', 100, 20);
+    mouse(el, 'mousemove', 180, 20);
+    mouse(el, 'mouseup', 180, 20);
+    await vi.waitFor(() => expect(toasts().length).toBe(0), { timeout: 3000 });
+  });
+});
