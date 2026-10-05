@@ -38,6 +38,7 @@ export interface EditorCollaborationState {
   doc: Y.Doc;
   provider: WebsocketProvider;
   ownsProvider: boolean;
+  ownsDoc: boolean;
   binding: import('./YjsDomBinding').YjsDomBinding;
   undoManager: Y.UndoManager;
   cursorCleanup: () => void;

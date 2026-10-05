@@ -2,11 +2,12 @@ import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import type { Plugin } from '@editora/core';
 import { YjsDomBinding } from './YjsDomBinding';
-import { CollaborationAwareness } from './awareness';
+import { CollaborationAwareness, readUser } from './awareness';
 import type { CollaborationPluginOptions, CollaborationUser, EditorCollaborationState } from './types';
 
 const FRAGMENT_NAME = 'editora-content';
 const DEFAULT_WEBSOCKET_URL = 'wss://demos.yjs.dev';
+const DEFAULT_ROOM_NAME = 'editora-default-room';
 const PRESENCE_COLORS = ['#f97316', '#0ea5e9', '#22c55e', '#a855f7', '#ec4899', '#eab308', '#14b8a6', '#ef4444'];
 
 const stateByContent = new WeakMap<HTMLElement, EditorCollaborationState>();
@@ -15,6 +16,22 @@ const trackedContentElements = new Set<HTMLElement>();
 // the teardown to run if destroy() is called during that window.
 const pendingContentElements = new Set<HTMLElement>();
 const pendingCleanup = new Map<HTMLElement, () => void>();
+
+let warnedAboutPublicServer = false;
+
+// With no `websocketUrl` the plugin syncs through the public Yjs demo server, where anyone who
+// knows (or guesses) the room name can read and write the document. Fine for a demo, a data leak
+// in production - so say so once instead of doing it silently.
+function warnAboutPublicServer(room: string): void {
+  if (warnedAboutPublicServer) return;
+  warnedAboutPublicServer = true;
+  // eslint-disable-next-line no-console
+  console.warn(
+    `[@editora/collaboration] No websocketUrl was provided, so room "${room}" is syncing through the public demo server ` +
+      `(${DEFAULT_WEBSOCKET_URL}); anyone who knows the room name can read and edit this document. ` +
+      `Pass your own y-websocket server via the websocketUrl option (or a provider) for real use.`
+  );
+}
 
 function randomUser(): CollaborationUser {
   const id = Math.floor(Math.random() * 10000);
@@ -165,14 +182,17 @@ function updatePresenceIndicator(bar: HTMLElement, status: string, awareness: We
   const avatars = bar.querySelector<HTMLElement>('.editora-collab-presence__avatars');
   if (!avatars) return;
   avatars.innerHTML = '';
-  const states = awareness.getStates() as Map<number, { user?: CollaborationUser }>;
+  const states = awareness.getStates() as Map<number, { user?: unknown } | null>;
   states.forEach((state, clientId) => {
-    if (clientId === awareness.clientID || !state.user) return;
+    if (clientId === awareness.clientID) return;
+    // Peer-supplied: a malformed name/colour must not throw out of the awareness handler.
+    const user = readUser(state?.user);
+    if (!user) return;
     const avatar = document.createElement('span');
     avatar.className = 'editora-collab-presence__avatar';
-    avatar.style.backgroundColor = state.user.color;
-    avatar.title = state.user.name;
-    avatar.textContent = state.user.name.charAt(0).toUpperCase();
+    avatar.style.backgroundColor = user.color;
+    avatar.title = user.name;
+    avatar.textContent = Array.from(user.name)[0].toUpperCase();
     avatars.appendChild(avatar);
   });
 }
@@ -181,12 +201,17 @@ function setupCollaboration(contentElement: HTMLElement, options: CollaborationP
   if (stateByContent.has(contentElement) || pendingContentElements.has(contentElement)) return;
   pendingContentElements.add(contentElement);
 
-  const doc = options.doc ?? new Y.Doc();
+  // A supplied provider already owns a doc; binding a fresh, unrelated one would never sync.
+  const doc = options.doc ?? options.provider?.doc ?? new Y.Doc();
+  const ownsDoc = !options.doc && !options.provider;
+  // `||`, not `??`: an element without an id has id === '' (never null/undefined), which would
+  // otherwise become an empty room name shared by every id-less editor on the server.
   const room = typeof options.roomName === 'function'
     ? options.roomName(contentElement)
-    : options.roomName ?? contentElement.id ?? 'editora-default-room';
+    : options.roomName || contentElement.id || DEFAULT_ROOM_NAME;
 
   const ownsProvider = !options.provider;
+  if (ownsProvider && !options.websocketUrl) warnAboutPublicServer(room);
   const provider = options.provider ?? new WebsocketProvider(options.websocketUrl ?? DEFAULT_WEBSOCKET_URL, room, doc);
 
   const user: CollaborationUser = {
@@ -214,17 +239,15 @@ function setupCollaboration(contentElement: HTMLElement, options: CollaborationP
     if (!isSynced) return;
     provider.off('sync', onceSynced);
     pendingCleanup.delete(contentElement);
-    completeCollaborationSetup(contentElement, doc, provider, ownsProvider, user, presenceBar, onStatus, onAwarenessChange);
+    completeCollaborationSetup(contentElement, doc, provider, ownsProvider, ownsDoc, user, presenceBar, onStatus, onAwarenessChange);
   };
   pendingCleanup.set(contentElement, () => {
     provider.off('sync', onceSynced);
     provider.off('status', onStatus);
     provider.awareness.off('change', onAwarenessChange);
     presenceBar.remove();
-    if (ownsProvider) {
-      provider.destroy();
-      doc.destroy();
-    }
+    if (ownsProvider) provider.destroy();
+    if (ownsDoc) doc.destroy();
   });
   if (provider.synced) {
     onceSynced(true);
@@ -238,6 +261,7 @@ function completeCollaborationSetup(
   doc: Y.Doc,
   provider: WebsocketProvider,
   ownsProvider: boolean,
+  ownsDoc: boolean,
   user: CollaborationUser,
   presenceBar: HTMLElement,
   onStatus: (e: { status: string }) => void,
@@ -275,7 +299,7 @@ function completeCollaborationSetup(
     cursors.destroy();
   };
 
-  stateByContent.set(contentElement, { doc, provider, ownsProvider, binding, undoManager, cursorCleanup, connectionIndicator: presenceBar });
+  stateByContent.set(contentElement, { doc, provider, ownsProvider, ownsDoc, binding, undoManager, cursorCleanup, connectionIndicator: presenceBar });
   trackedContentElements.add(contentElement);
 }
 
@@ -291,10 +315,11 @@ function teardownCollaboration(contentElement: HTMLElement): void {
   if (!state) return;
   state.cursorCleanup();
   state.binding.destroy();
-  if (state.ownsProvider) {
-    state.provider.destroy();
-    state.doc.destroy();
-  }
+  // Detach from the fragment: with a caller-supplied doc it outlives this editor.
+  state.undoManager.destroy();
+  if (state.ownsProvider) state.provider.destroy();
+  // A doc the caller handed in is theirs: destroying it would break whatever else uses it.
+  if (state.ownsDoc) state.doc.destroy();
   stateByContent.delete(contentElement);
   trackedContentElements.delete(contentElement);
 }
