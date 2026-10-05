@@ -1,6 +1,6 @@
 {
   "name": "@editora/data-binding",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Data binding plugin for Editora rich text editor with key-path tokens, preview rendering, and API/static data sources",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",

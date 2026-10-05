@@ -1,6 +1,6 @@
 {
   "name": "@editora/conditional-content",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Conditional content plugin for Editora Rich Text Editor with if/else blocks, audience/locale targeting, and preview mode",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",

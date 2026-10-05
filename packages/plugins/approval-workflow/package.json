@@ -1,6 +1,6 @@
 {
   "name": "@editora/approval-workflow",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Native approval workflow plugin for Editora with draft/review/approved states and sign-off controls",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
