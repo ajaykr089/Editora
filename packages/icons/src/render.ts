@@ -33,23 +33,34 @@ function parseViewBoxSize(viewBox: string): { width: number; height: number } {
   return { width: 24, height: 24 };
 }
 
-function normalizeSize(size: IconRenderOptions['size']): string {
-  if (size == null || size === '') return String(DEFAULT_SIZE);
-  if (typeof size === 'number') return String(size);
-  const trimmed = size.trim();
-  if (!trimmed) return String(DEFAULT_SIZE);
-  if (/^\d+(\.\d+)?$/.test(trimmed)) return trimmed;
-  return trimmed;
+// A positive number, optionally with a CSS length unit. Anything else (0, negatives, NaN, "abc") used to be
+// written straight into width/height, where an invalid value makes the browser size the <svg> at 300x150.
+const CSS_LENGTH = /^(?:\d+\.?\d*|\.\d+)(?:px|em|rem|%|vw|vh|vmin|vmax|ch|ex|pt|pc|cm|mm|in)?$/;
+
+/** Resolve an icon `size` to a string safe to use as a width/height attribute, falling back to the default. */
+export function normalizeIconSize(size: unknown, fallback: number = DEFAULT_SIZE): string {
+  if (typeof size === 'number') return Number.isFinite(size) && size > 0 ? String(size) : String(fallback);
+  if (typeof size === 'string') {
+    const trimmed = size.trim();
+    if (trimmed && CSS_LENGTH.test(trimmed) && parseFloat(trimmed) > 0) return trimmed;
+  }
+  return String(fallback);
+}
+
+function isValidStrokeWidth(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0;
 }
 
 function resolveStrokeWidth(options: IconRenderOptions, viewBox: string): number {
   const raw =
-    options.strokeWidth ??
+    (isValidStrokeWidth(options.strokeWidth) ? options.strokeWidth : undefined) ??
     (options.iconWeight ? STROKE_WIDTH_BY_WEIGHT[options.iconWeight] : DEFAULT_STROKE_WIDTH);
   if (!options.absoluteStrokeWidth) return raw;
 
-  const size = Number(options.size ?? DEFAULT_SIZE);
-  if (!Number.isFinite(size) || size <= 0) return raw;
+  // Only a unitless or px size can be compared with the viewBox.
+  const normalized = normalizeIconSize(options.size);
+  if (!/^[\d.]+(px)?$/.test(normalized)) return raw;
+  const size = parseFloat(normalized);
   const { width } = parseViewBoxSize(viewBox);
   if (!Number.isFinite(width) || width <= 0) return raw;
   return (raw * width) / size;
@@ -74,8 +85,16 @@ function computeTransform(options: IconRenderOptions, viewBox: string): string |
   return transforms.join(' ');
 }
 
+// Attribute names are written into markup unescaped, so only plain names are allowed; event handlers are
+// never allowed (a name such as `x" onload="...` used to inject attributes through `options.attrs`).
+const SAFE_ATTR_NAME = /^[A-Za-z_][A-Za-z0-9_.:-]*$/;
+
+function isSafeAttrName(key: string): boolean {
+  return SAFE_ATTR_NAME.test(key) && !/^on/i.test(key);
+}
+
 function attrToString(key: string, value: IconAttrValue): string {
-  if (value == null) return '';
+  if (value == null || !isSafeAttrName(key)) return '';
   if (typeof value === 'boolean') return value ? ` ${toKebabCase(key)}` : '';
   return ` ${toKebabCase(key)}="${escapeText(String(value))}"`;
 }
@@ -135,7 +154,7 @@ export function renderIconSvg(name: string, options: IconRenderOptions = {}): st
   const title = options.title ? `<title>${escapeText(options.title)}</title>` : '';
   const ariaLabel = options.ariaLabel || options.title || resolved.definition.name;
 
-  const size = normalizeSize(options.size);
+  const size = normalizeIconSize(options.size);
   const color = options.color || 'currentColor';
   const secondaryColor = options.secondaryColor || color;
   const strokeWidth = resolveStrokeWidth(options, resolved.viewBox);
