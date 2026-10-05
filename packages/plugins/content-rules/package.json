@@ -1,6 +1,6 @@
 {
   "name": "@editora/content-rules",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Native content rules plugin for Editora with realtime linting, required sections, and readability checks",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -26,7 +26,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@editora/core": "^1.0.14"
+    "@editora/core": "^1.0.19"
   },
   "exports": {
     ".": {

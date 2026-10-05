@@ -1,6 +1,6 @@
 {
   "name": "@editora/footnote",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Footnote plugin for Rich Text Editor - Manage inline references and footnote content",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -26,7 +26,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@editora/core": "^1.0.14"
+    "@editora/core": "^1.0.19"
   },
   "devDependencies": {
     "react": "^18.2.0",

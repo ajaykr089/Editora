@@ -1,6 +1,6 @@
 {
   "name": "@editora/pii-redaction",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Native PII detection and redaction plugin for Editora",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -26,7 +26,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@editora/core": "^1.0.14"
+    "@editora/core": "^1.0.19"
   },
   "exports": {
     ".": {

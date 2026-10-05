@@ -1,6 +1,6 @@
 {
   "name": "@editora/comments",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Comments plugin for Rich Text Editor - Inline threaded comments with side panel",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -26,7 +26,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@editora/core": "^1.0.16",
+    "@editora/core": "^1.0.19",
     "@editora/toast": "^2.0.7"
   },
   "devDependencies": {

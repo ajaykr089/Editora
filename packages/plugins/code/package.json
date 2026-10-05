@@ -1,6 +1,6 @@
 {
   "name": "@editora/code",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Source Code Editor plugin for Rich Text Editor",
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"
@@ -22,7 +22,7 @@
     "highlight.js": "^11.9.0"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.16"
+    "@editora/core": "^1.0.19"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",

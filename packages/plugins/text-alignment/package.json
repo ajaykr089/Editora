@@ -1,6 +1,6 @@
 {
   "name": "@editora/text-alignment",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Text alignment plugin for Editora",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
@@ -32,7 +32,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@editora/core": "^1.0.14"
+    "@editora/core": "^1.0.19"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

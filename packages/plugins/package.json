@@ -1,6 +1,6 @@
 {
   "name": "@editora/plugins",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "Enterprise plugin suite for Editora rich text editor in React and web apps, including tables, media, workflow, and compliance tooling.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
@@ -435,7 +435,7 @@
     "verify:citations": "npm run typecheck:build && npm run test:citations && npm run test:content-rules && npm run test:approval-workflow && npm run test:pii-redaction && npm run test:smart-paste && npm run test:blocks-library && npm run test:doc-schema && npm run test:translation-workflow && npm run test:format-painter && npm run build"
   },
   "peerDependencies": {
-    "@editora/core": "^1.0.16"
+    "@editora/core": "^1.0.19"
   },
   "dependencies": {
     "@editora/light-code-editor": "^1.0.15",
@@ -443,7 +443,7 @@
     "mathjax": "^3.2.2"
   },
   "devDependencies": {
-    "@editora/core": "^1.0.16",
+    "@editora/core": "^1.0.19",
     "@types/katex": "^0.16.8",
     "dompurify": "^3.4.16",
     "typescript": "^5.0.0",

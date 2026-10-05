@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.0.12
+
+### Patch Changes
+
+- f1326f5: Export what the typings declare. `index.d.ts` promised `LazyLoader`, `lazyLoader`, `debounce`, `getGlobalMemoryManager` and `getGlobalPerformanceMonitor`; all of them existed in the source but `src/index.ts` never exported them (`LazyLoader` was left in a "placeholder" comment), so TypeScript users compiled fine and got `undefined` at runtime.
+- Updated dependencies [f1326f5]
+  - @editora/core@1.0.19
+
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 

@@ -1,6 +1,6 @@
 {
   "name": "@editora/print",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Print plugin for Rich Text Editor - Clone content to print-safe DOM",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -26,7 +26,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@editora/core": "^1.0.14"
+    "@editora/core": "^1.0.19"
   },
   "devDependencies": {
     "react": "^18.2.0",
