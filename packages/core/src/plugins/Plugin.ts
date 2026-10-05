@@ -221,3 +221,11 @@ export class PluginManager {
     this.pluginConfigs.clear();
   }
 }
+
+/**
+ * Create an empty PluginManager. Declared in index.d.ts but never implemented, so calling it
+ * threw "createPluginManager is not a function".
+ */
+export function createPluginManager(): PluginManager {
+  return new PluginManager();
+}
