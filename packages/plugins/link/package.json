@@ -1,6 +1,6 @@
 {
   "name": "@editora/plugin-link",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Link plugin for Rich Text Editor",
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"

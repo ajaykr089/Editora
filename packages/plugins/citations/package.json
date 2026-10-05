@@ -1,6 +1,6 @@
 {
   "name": "@editora/citations",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Native citation and bibliography plugin for Editora with APA/MLA/Chicago support",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",

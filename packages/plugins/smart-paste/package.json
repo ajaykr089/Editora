@@ -1,6 +1,6 @@
 {
   "name": "@editora/smart-paste",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Native smart paste plugin for Editora with Word/Google Docs cleanup profiles",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",

@@ -1,6 +1,6 @@
 {
   "name": "@editora/translation-workflow",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Native translation workflow plugin for Editora with segment locking, source-target view, and locale-aware validation",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",

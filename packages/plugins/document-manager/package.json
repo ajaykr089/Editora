@@ -1,6 +1,6 @@
 {
   "name": "@editora/document-manager",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Document import/export plugin for Rich Text Editor",
   "authors": [
     "Ajay Kumar <ajaykr089@gmail.com>"

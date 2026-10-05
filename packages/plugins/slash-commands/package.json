@@ -1,6 +1,6 @@
 {
   "name": "@editora/slash-commands",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Slash commands plugin for Editora Rich Text Editor",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
