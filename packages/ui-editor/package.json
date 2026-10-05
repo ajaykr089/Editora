@@ -21,7 +21,7 @@
     "src"
   ],
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && node ../../scripts/generate-plugin-typings.js --own-only",
     "dev": "vite build --watch",
     "prepare": "npm run build"
   },

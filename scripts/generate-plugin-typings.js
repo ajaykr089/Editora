@@ -119,7 +119,11 @@ function compileOwnConfig(dir) {
   program.emit(undefined, undefined, undefined, true);
 }
 
-const list = targets();
+// `--own-only`: just the packages that compile with their own tsconfig. Used from those packages' `build`
+// script, because `npm publish` re-runs `prepare` (-> build, which empties dist/) after the pre-publish
+// checks, so typings generated earlier would be deleted before the tarball is made.
+const ownOnly = process.argv.includes('--own-only');
+const list = ownOnly ? [] : targets();
 const own = ownConfigTargets();
 if (!list.length && !own.length) {
   console.log('no packages need typings');
