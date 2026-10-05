@@ -21,7 +21,7 @@
     "src"
   ],
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && tsc -p . --noEmit false",
     "dev": "vite build --watch",
     "prepare": "npm run build"
   },
