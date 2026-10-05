@@ -42,6 +42,15 @@ jobs:
       - name: Run UI package tests
         run: npm run test:ui
 
+      # `changeset publish` packs whatever is on disk and dist/ is not committed, so every
+      # workspace has to be built here or it is published empty (36 plugin packages were in the
+      # 2026-10-02 release). verify:release below only builds a subset.
+      - name: Build all packages
+        run: npm run build
+
+      - name: Verify package contents
+        run: npm run verify:packages
+
       - name: Verify release artifacts
         run: npm run verify:release
 

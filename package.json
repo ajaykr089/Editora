@@ -51,7 +51,8 @@
     "build-storybook": "storybook build",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "changeset publish"
+    "verify:packages": "node scripts/verify-package-contents.js",
+    "release": "npm run verify:packages && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.2",
