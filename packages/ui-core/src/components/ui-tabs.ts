@@ -504,6 +504,9 @@ const style = `
   }
 `;
 
+// Marks an aria-label this element wrote on a panel (as opposed to one the author supplied).
+const AUTO_PANEL_LABEL_ATTR = 'data-ui-tabs-auto-label';
+
 function escapeHtml(value: string): string {
   return String(value)
     .replace(/&/g, '&amp;')
@@ -873,7 +876,17 @@ export class UITabs extends ElementBase {
         panel.setAttribute('aria-hidden', active ? 'false' : 'true');
 
         if (tab) {
-          panel.setAttribute('aria-labelledby', tab.tabId);
+          // The tabs live in this element's shadow root and the panels in the light DOM, so an
+          // aria-labelledby pointing at the tab's id can never resolve (IDREFs do not cross
+          // shadow boundaries) and the panel was exposed unnamed. Name it with the tab's text
+          // instead, unless the author labelled the panel themselves.
+          if (panel.getAttribute('aria-labelledby') === tab.tabId) panel.removeAttribute('aria-labelledby');
+          const authorLabelled = panel.hasAttribute('aria-labelledby') ||
+            (panel.hasAttribute('aria-label') && !panel.hasAttribute(AUTO_PANEL_LABEL_ATTR));
+          if (!authorLabelled) {
+            panel.setAttribute('aria-label', tab.label);
+            panel.setAttribute(AUTO_PANEL_LABEL_ATTR, '');
+          }
         }
 
         if (active) panel.removeAttribute('hidden');

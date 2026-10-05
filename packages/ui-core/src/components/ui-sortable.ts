@@ -1556,7 +1556,7 @@ export class UISortable extends ElementBase {
                     ${helperText ? `<div class="list-helper">${escapeHtml(helperText)}</div>` : ''}
                   </div>
                 </header>
-                <div class="items" role="listbox" aria-multiselectable="true">
+                <div class="items" role="listbox" aria-multiselectable="true" aria-label="${escapeHtml(list.label)}">
                   ${content || `<div class="list-custom-empty" part="list-custom-empty" data-list-empty-target="${escapeHtml(list.id)}"></div><div class="empty">${escapeHtml(list.emptyLabel)}</div>${this._renderDropzone({
                     listId: list.id,
                     parentId: null,

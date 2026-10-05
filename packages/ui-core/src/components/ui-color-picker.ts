@@ -1136,7 +1136,7 @@ export class UIColorPicker extends ElementBase {
           <div class="group" data-format-group="hex">
             <div class="field">
               <span>Value</span>
-              <input class="input" data-input="hex" part="input" spellcheck="false" autocomplete="off" />
+              <input class="input" data-input="hex" part="input" spellcheck="false" autocomplete="off" aria-label="Hex color value" />
             </div>
           </div>
 
