@@ -17,6 +17,7 @@
  * types are ignored on the DOM->Y direction and never produced by Y->DOM.
  */
 import * as Y from 'yjs';
+import { createBlockedPlaceholder, isAllowedAttribute, isBlockedElement, isBlockedPlaceholder } from './sanitize';
 
 type YChild = Y.XmlText | Y.XmlElement;
 type YParent = Y.XmlFragment | Y.XmlElement;
@@ -73,10 +74,18 @@ function domChildrenToY(nodes: NodeListOf<ChildNode> | ChildNode[]): YChild[] {
   return result;
 }
 
+function isBlockedYElement(yEl: Y.XmlElement): boolean {
+  return isBlockedElement(yEl.nodeName, yEl.getAttributes() as Record<string, string>);
+}
+
 function yElementToDom(yEl: Y.XmlElement, document: Document): HTMLElement {
+  // Remote content is untrusted - see sanitize.ts. A blocked element is rendered as an inert
+  // placeholder so child indexes stay aligned with the shared fragment.
+  if (isBlockedYElement(yEl)) return createBlockedPlaceholder(document, yEl.nodeName);
+
   const el = document.createElement(yEl.nodeName);
   for (const [name, value] of Object.entries(yEl.getAttributes())) {
-    el.setAttribute(name, value as string);
+    if (isAllowedAttribute(name, value as string)) el.setAttribute(name, value as string);
   }
   for (const child of yChildrenOf(yEl)) {
     el.appendChild(yChildToDom(child, document));
@@ -92,7 +101,9 @@ function yChildToDom(child: YChild, document: Document): ChildNode {
 }
 
 function isSameTag(domEl: Element, yEl: Y.XmlElement): boolean {
-  return domEl.tagName.toLowerCase() === yEl.nodeName.toLowerCase();
+  // A blocked remote element is only ever represented by its placeholder, and vice versa.
+  if (isBlockedYElement(yEl)) return isBlockedPlaceholder(domEl);
+  return !isBlockedPlaceholder(domEl) && domEl.tagName.toLowerCase() === yEl.nodeName.toLowerCase();
 }
 
 /** Makes `yParent`'s children match `domParent`'s children. Call inside a Y.Doc transaction. */
@@ -122,6 +133,9 @@ export function reconcileYFromDom(yParent: YParent, domParent: Node): void {
 
     // domNode is an Element
     if (yNode instanceof Y.XmlElement && isSameTag(domNode as Element, yNode)) {
+      // The placeholder stands in for a remote element we refuse to render; leave the original
+      // node in the shared doc untouched rather than overwriting it with the placeholder's shape.
+      if (isBlockedPlaceholder(domNode)) continue;
       reconcileAttributes(yNode, domNode as Element);
       reconcileYFromDom(yNode, domNode);
       continue;
@@ -175,6 +189,7 @@ export function reconcileDomFromY(domParent: Node, yParent: YParent, document: D
     }
 
     if (domNode.nodeType === Node.ELEMENT_NODE && isSameTag(domNode as Element, yNode)) {
+      if (isBlockedPlaceholder(domNode)) continue;
       applyAttributesToDom(domNode as Element, yNode);
       reconcileDomFromY(domNode, yNode, document);
       continue;
@@ -199,6 +214,11 @@ function applyAttributesToDom(domEl: Element, yEl: Y.XmlElement): void {
     if (!(name in yAttrs)) domEl.removeAttribute(name);
   }
   for (const [name, value] of Object.entries(yAttrs)) {
+    if (!isAllowedAttribute(name, value as string)) {
+      // Refused remote attribute: make sure a previously applied value does not linger.
+      domEl.removeAttribute(name);
+      continue;
+    }
     if (domEl.getAttribute(name) !== value) domEl.setAttribute(name, value as string);
   }
 }

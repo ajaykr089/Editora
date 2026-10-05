@@ -38,6 +38,43 @@ function ensureStylesInjected(): void {
   document.head.appendChild(style);
 }
 
+type RemoteCursor = Omit<CursorState, 'user' | 'clientId'>;
+
+const SAFE_COLOR = /^(?:#[0-9a-f]{3,8}|[a-z]{3,20}|(?:rgb|hsl)a?\([\d\s.,%/-]+\))$/i;
+const FALLBACK_COLOR = '#64748b';
+
+/**
+ * Awareness state is written by other clients, so none of its shape can be trusted: a peer (or a
+ * buggy build of this plugin) can publish a numeric name, a non-array path or an object where a
+ * colour belongs, and the render code would throw from inside the awareness 'change' handler.
+ */
+export function readUser(value: unknown): CollaborationUser | null {
+  if (!value || typeof value !== 'object') return null;
+  const { name, color } = value as Record<string, unknown>;
+  if (typeof name !== 'string' || name.length === 0) return null;
+  return {
+    name: name.slice(0, 64),
+    color: typeof color === 'string' && SAFE_COLOR.test(color.trim()) ? color.trim() : FALLBACK_COLOR
+  };
+}
+
+function isPath(value: unknown): value is number[] {
+  return Array.isArray(value) && value.length <= 256 && value.every((index) => Number.isInteger(index) && index >= 0);
+}
+
+function readCursor(value: unknown): RemoteCursor | null {
+  if (!value || typeof value !== 'object') return null;
+  const cursor = value as Record<string, unknown>;
+  if (!isPath(cursor.anchorPath)) return null;
+  const offset = (raw: unknown) => (typeof raw === 'number' && Number.isFinite(raw) && raw >= 0 ? Math.floor(raw) : 0);
+  return {
+    anchorPath: cursor.anchorPath,
+    anchorOffset: offset(cursor.anchorOffset),
+    focusPath: isPath(cursor.focusPath) ? cursor.focusPath : undefined,
+    focusOffset: offset(cursor.focusOffset)
+  };
+}
+
 /** Path -> DOM node resolution mirroring YjsDomBinding's path capture format. */
 function resolvePath(root: HTMLElement, path: number[]): Node | null {
   let node: Node = root;
@@ -116,17 +153,19 @@ export class CollaborationAwareness {
   }
 
   private renderRemoteCursors(): void {
-    const states = this.awareness.getStates() as Map<number, { user?: CollaborationUser; cursor?: Omit<CursorState, 'user' | 'clientId'> | null }>;
+    const states = this.awareness.getStates() as Map<number, { user?: unknown; cursor?: unknown } | null>;
     const seen = new Set<number>();
 
     states.forEach((state, clientId) => {
       if (clientId === this.awareness.clientID) return;
-      if (!state.cursor || !state.user) {
+      const user = readUser(state?.user);
+      const cursor = readCursor(state?.cursor);
+      if (!user || !cursor) {
         this.removeCursor(clientId);
         return;
       }
       seen.add(clientId);
-      this.renderCursor(clientId, state.user, state.cursor);
+      this.renderCursor(clientId, user, cursor);
     });
 
     for (const clientId of Array.from(this.caretElements.keys())) {
@@ -134,7 +173,7 @@ export class CollaborationAwareness {
     }
   }
 
-  private renderCursor(clientId: number, user: CollaborationUser, cursor: Omit<CursorState, 'user' | 'clientId'>): void {
+  private renderCursor(clientId: number, user: CollaborationUser, cursor: RemoteCursor): void {
     const anchorNode = resolvePath(this.root, cursor.anchorPath);
     if (!anchorNode) {
       this.removeCursor(clientId);
