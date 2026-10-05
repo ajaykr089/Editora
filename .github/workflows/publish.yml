@@ -84,3 +84,11 @@ jobs:
 
       - name: Push release tags
         run: git push origin --tags
+
+      # Checks the artifacts npm actually serves, not the working tree: `npm publish` re-runs lifecycle
+      # hooks (prepare / prepublishOnly) after the pre-publish check, which is how
+      # @editora/ui-editor@0.1.6 shipped without its typings. Runs after the tags are pushed so a
+      # failure here flags the run without leaving a published-but-untagged release. The versions are
+      # already on npm by now; a red step names the ones to fix and deprecate.
+      - name: Verify published packages
+        run: npm run verify:published
