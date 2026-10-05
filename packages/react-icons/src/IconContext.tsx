@@ -12,7 +12,13 @@ const defaultIconContext: IconContextValue = {
   strokeLinejoin: 'round'
 };
 
-const IconContext = React.createContext<IconContextValue>(defaultIconContext);
+// The context's own default must not pre-fill `strokeWidth` or `iconWeight`. Icon resolves the stroke as
+// prop width > prop weight > context width > context weight > built-in, and a pre-filled value here would
+// always beat one the provider never set: iconWeight always resolved to 'regular', so a provider's
+// `strokeWidth` was silently ignored. `defaultIconContext` stays exported unchanged for anyone reading it.
+const { strokeWidth: _defaultStrokeWidth, iconWeight: _defaultIconWeight, ...baseContext } = defaultIconContext;
+
+const IconContext = React.createContext<IconContextValue>(baseContext);
 
 export type IconProviderProps = {
   value?: IconContextValue;
