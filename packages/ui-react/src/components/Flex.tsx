@@ -31,7 +31,7 @@ function serializeResponsive(value: unknown): string | undefined {
   return String(value);
 }
 
-export function Flex(props: Props) {
+export const Flex = React.forwardRef<HTMLElement, Props>(function Flex(props, forwardedRef) {
   const {
     children,
     className,
@@ -48,6 +48,7 @@ export function Flex(props: Props) {
   } = props;
 
   const hostProps: Record<string, unknown> = {
+    ref: forwardedRef,
     className,
     ...rest,
     direction: serializeResponsive(direction),
@@ -62,6 +63,8 @@ export function Flex(props: Props) {
   };
 
   return createUIElement('ui-flex', hostProps, children);
-}
+});
+
+Flex.displayName = 'Flex';
 
 export default Flex;

@@ -38,7 +38,7 @@ function serializeResponsive(value: unknown): string | undefined {
   return String(value);
 }
 
-export function Grid(props: Props) {
+export const Grid = React.forwardRef<HTMLElement, Props>(function Grid(props, forwardedRef) {
   const {
     children,
     className,
@@ -62,6 +62,7 @@ export function Grid(props: Props) {
   } = props;
 
   const hostProps: Record<string, unknown> = {
+    ref: forwardedRef,
     className,
     ...rest,
     columns: serializeResponsive(columns),
@@ -83,6 +84,8 @@ export function Grid(props: Props) {
   };
 
   return createUIElement('ui-grid', hostProps, children);
-}
+});
+
+Grid.displayName = 'Grid';
 
 export default Grid;

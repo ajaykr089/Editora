@@ -21,7 +21,7 @@ export type FieldProps = React.HTMLAttributes<HTMLElement> & {
   headless?: boolean;
 };
 
-export function Field(props: FieldProps) {
+export const Field = React.forwardRef<HTMLElement, FieldProps>(function Field(props, forwardedRef) {
   const {
     children,
     label,
@@ -42,6 +42,7 @@ export function Field(props: FieldProps) {
   } = props;
 
   const hostProps: Record<string, unknown> = {
+    ref: forwardedRef,
     ...rest,
     label: label != null && label !== '' ? label : undefined,
     description: description != null && description !== '' ? description : undefined,
@@ -60,6 +61,8 @@ export function Field(props: FieldProps) {
   };
 
   return createUIElement('ui-field', hostProps, children);
-}
+});
+
+Field.displayName = 'Field';
 
 export default Field;

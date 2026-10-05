@@ -6,6 +6,7 @@ import {
   syncStringAttribute,
   useElementAttributes,
   useElementEventListeners,
+  useForwardedHostRef,
 } from './_internals';
 
 export type AlertProps = Omit<React.HTMLAttributes<HTMLElement>, 'onClose'> & {
@@ -30,7 +31,7 @@ export interface AlertSectionProps extends React.HTMLAttributes<HTMLElement> {
   children?: React.ReactNode;
 }
 
-function Alert(props: AlertProps) {
+const Alert = React.forwardRef<HTMLElement, AlertProps>(function Alert(props, forwardedRef) {
   const {
     title,
     description,
@@ -49,7 +50,7 @@ function Alert(props: AlertProps) {
     ...rest
   } = props;
 
-  const ref = React.useRef<HTMLElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
   const onCloseHandler = React.useCallback(() => {
     onClose?.();
@@ -73,7 +74,9 @@ function Alert(props: AlertProps) {
   }, [title, description, tone, variant, layout, size, radius, elevation, indicator, dismissible, open, headless]);
 
   return createUIElement('ui-alert', { ref, ...rest }, children);
-}
+});
+
+Alert.displayName = 'Alert';
 
 function createAlertSection(
   defaultTag: keyof JSX.IntrinsicElements,

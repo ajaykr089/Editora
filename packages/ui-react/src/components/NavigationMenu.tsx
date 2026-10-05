@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 import '@editora/ui-core/navigation-menu';
-import { createUIElement } from './_internals';
+import { createUIElement, useForwardedHostRef } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -47,7 +47,7 @@ type NavigationMenuItemContextValue = {
 
 const NavigationMenuItemContext = React.createContext<NavigationMenuItemContextValue | null>(null);
 
-function NavigationMenuRoot(props: NavigationMenuProps) {
+const NavigationMenuRoot = React.forwardRef<HTMLElement, NavigationMenuProps>(function NavigationMenuRoot(props, forwardedRef) {
   const {
     selected,
     orientation,
@@ -66,7 +66,7 @@ function NavigationMenuRoot(props: NavigationMenuProps) {
     ...rest
   } = props;
 
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
   useEffect(() => {
     const el = ref.current;
@@ -122,7 +122,9 @@ function NavigationMenuRoot(props: NavigationMenuProps) {
   }, [selected, orientation, activation, variant, size, radius, elevation, tone, loop, collapsible, headless]);
 
   return createUIElement('ui-navigation-menu', { ref, ...rest }, children);
-}
+});
+
+NavigationMenuRoot.displayName = 'NavigationMenu';
 
 function NavigationMenuList({ children }: NavigationMenuListProps) {
   return <>{children}</>;
@@ -147,9 +149,12 @@ function NavigationMenuItem({ children }: NavigationMenuItemProps) {
   );
 }
 
-function NavigationMenuTrigger({ children, ...rest }: NavigationMenuTriggerProps) {
+const NavigationMenuTrigger = React.forwardRef<HTMLButtonElement, NavigationMenuTriggerProps>(function NavigationMenuTrigger(
+  { children, ...rest },
+  forwardedRef
+) {
   const itemContext = React.useContext(NavigationMenuItemContext);
-  const ref = useRef<HTMLButtonElement | null>(null);
+  const ref = useForwardedHostRef<HTMLButtonElement>(forwardedRef);
   const caretRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
@@ -203,26 +208,38 @@ function NavigationMenuTrigger({ children, ...rest }: NavigationMenuTriggerProps
       ) : null}
     </button>
   );
-}
+});
 
-function NavigationMenuLink({ children, ...rest }: NavigationMenuLinkProps) {
+NavigationMenuTrigger.displayName = 'NavigationMenuTrigger';
+
+const NavigationMenuLink = React.forwardRef<HTMLAnchorElement, NavigationMenuLinkProps>(function NavigationMenuLink(
+  { children, ...rest },
+  forwardedRef
+) {
   const itemContext = React.useContext(NavigationMenuItemContext);
   return (
-    <a slot="item" data-nav-key={itemContext?.itemKey ?? undefined} {...rest}>
+    <a ref={forwardedRef} slot="item" data-nav-key={itemContext?.itemKey ?? undefined} {...rest}>
       {children}
     </a>
   );
-}
+});
 
-function NavigationMenuContent({ children, ...rest }: NavigationMenuContentProps) {
+NavigationMenuLink.displayName = 'NavigationMenuLink';
+
+const NavigationMenuContent = React.forwardRef<HTMLElement, NavigationMenuContentProps>(function NavigationMenuContent(
+  { children, ...rest },
+  forwardedRef
+) {
   const itemContext = React.useContext(NavigationMenuItemContext);
 
   return (
-    <section slot="panel" data-nav-panel-for={itemContext?.itemKey ?? undefined} {...rest}>
+    <section ref={forwardedRef} slot="panel" data-nav-panel-for={itemContext?.itemKey ?? undefined} {...rest}>
       {children}
     </section>
   );
-}
+});
+
+NavigationMenuContent.displayName = 'NavigationMenuContent';
 
 function NavigationMenuIndicator() {
   return null;

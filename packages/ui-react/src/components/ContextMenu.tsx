@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import '@editora/ui-core/context-menu';
 import { createPortal } from 'react-dom';
-import { createUIElement } from './_internals';
+import { createUIElement, useForwardedHostRef } from './_internals';
 
 type UIContextMenuElement = HTMLElement & {
   open: boolean;
@@ -57,7 +57,7 @@ export type ContextMenuProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange
   onSelect?: (detail: { index: number; value?: string; label?: string; checked?: boolean; item?: HTMLElement }) => void;
 };
 
-export function ContextMenu(props: ContextMenuProps) {
+export const ContextMenu = React.forwardRef<UIContextMenuElement, ContextMenuProps>(function ContextMenu(props, forwardedRef) {
 
   const {
     items,
@@ -87,7 +87,7 @@ export function ContextMenu(props: ContextMenuProps) {
     onSelect,
     ...rest
   } = props;
-  const ref = useRef<UIContextMenuElement | null>(null);
+  const ref = useForwardedHostRef<UIContextMenuElement>(forwardedRef);
   const lastImperativeOpenRef = useRef<string>('');
   const [portalHost, setPortalHost] = useState<HTMLElement | null>(null);
 
@@ -293,6 +293,8 @@ export function ContextMenu(props: ContextMenuProps) {
         : null}
     </>
   );
-}
+});
+
+ContextMenu.displayName = 'ContextMenu';
 
 export default ContextMenu;

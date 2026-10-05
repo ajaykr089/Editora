@@ -7,6 +7,7 @@ import {
   syncStringAttribute,
   useElementAttributes,
   useElementEventListeners,
+  useForwardedHostRef,
 } from './_internals';
 
 export type BadgeRemoveDetail = {
@@ -35,7 +36,7 @@ export type BadgeProps = React.HTMLAttributes<HTMLElement> & {
   onRemove?: (detail: BadgeRemoveDetail) => void;
 };
 
-export function Badge(props: BadgeProps) {
+export const Badge = React.forwardRef<HTMLElement, BadgeProps>(function Badge(props, forwardedRef) {
   const {
     text,
     tone,
@@ -58,7 +59,7 @@ export function Badge(props: BadgeProps) {
     ...rest
   } = props;
 
-  const ref = React.useRef<HTMLElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
   const onRemoveHandler = React.useCallback((event: Event) => {
     const detail = getCustomEventDetail<BadgeRemoveDetail>(event);
@@ -87,6 +88,8 @@ export function Badge(props: BadgeProps) {
   }, [text, tone, variant, size, radius, elevation, state, pill, dot, interactive, truncate, maxWidth, removable, autoRemove, iconOnly, disabled]);
 
   return createUIElement('ui-badge', { ref, ...rest }, children);
-}
+});
+
+Badge.displayName = 'Badge';
 
 export default Badge;

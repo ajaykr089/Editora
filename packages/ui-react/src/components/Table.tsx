@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 
 import '@editora/ui-core/table';
-import { createUIElement } from './_internals';
+import { createUIElement, useForwardedHostRef } from './_internals';
 
 export type TableSortDirection = 'asc' | 'desc';
 
@@ -35,7 +35,7 @@ export type TableProps = React.HTMLAttributes<HTMLElement> & {
   onRowSelect?: (detail: TableRowSelectDetail) => void;
 };
 
-export function Table(props: TableProps) {
+export const Table = React.forwardRef<HTMLElement, TableProps>(function Table(props, forwardedRef) {
   const {
     sortable,
     selectable,
@@ -54,7 +54,7 @@ export function Table(props: TableProps) {
     ...rest
   } = props;
 
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
   useEffect(() => {
     const el = ref.current;
@@ -97,6 +97,8 @@ export function Table(props: TableProps) {
     },
     children
   );
-}
+});
+
+Table.displayName = 'Table';
 
 export default Table;
