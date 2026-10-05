@@ -752,6 +752,21 @@ function showTableToolbar(table: HTMLTableElement): void {
   attachResizeHandles(table);
 }
 
+// Header cells that were given an inline `position: relative` only to anchor a column handle.
+// Remembered so the style is taken back off when the handles go, instead of lingering in the
+// document HTML after the caret has left the table.
+const handleAnchorCells = new Set<HTMLElement>();
+
+function releaseHandleAnchors(): void {
+  handleAnchorCells.forEach((cell) => {
+    if (cell.style.position === 'relative') {
+      cell.style.removeProperty('position');
+      if (!cell.getAttribute('style')?.trim()) cell.removeAttribute('style');
+    }
+  });
+  handleAnchorCells.clear();
+}
+
 function hideTableToolbar(): void {
   if (toolbarElement) {
     toolbarElement.style.display = 'none';
@@ -770,6 +785,7 @@ function hideTableToolbar(): void {
       tableResizeHandle.remove();
     }
   }
+  releaseHandleAnchors();
   
   currentTable = null;
 }
@@ -1143,6 +1159,7 @@ function attachResizeHandles(table: HTMLTableElement): void {
 
   const existingTableHandle = wrapper.querySelector('.table-resize-handle');
   if (existingTableHandle) existingTableHandle.remove();
+  releaseHandleAnchors();
 
   const headerRow = table.querySelector('thead tr, tbody tr:first-child') as HTMLTableRowElement;
   if (!headerRow) return;
@@ -1185,7 +1202,11 @@ function attachResizeHandles(table: HTMLTableElement): void {
       startColumnResize(e as MouseEvent, index);
     });
 
-    (cell as HTMLElement).style.position = 'relative';
+    const anchor = cell as HTMLElement;
+    if (!anchor.style.position) {
+      anchor.style.position = 'relative';
+      handleAnchorCells.add(anchor);
+    }
     cell.appendChild(handle);
   });
 

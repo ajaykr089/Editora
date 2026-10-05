@@ -10,6 +10,7 @@ import { StatusBar } from '../ui/StatusBar';
 import { getCursorPosition, countLines, calculateTextStats, getSelectionInfo } from '../utils/statusBarUtils';
 import { KeyboardShortcutManager } from '../KeyboardShortcuts';
 import { sanitizeInputHTML, sanitizePastedHTML } from '../utils/sanitizeHTML';
+import { getCleanEditorHTML, stripEditorUiArtifacts } from '../utils/editorOutput';
 import { ConfigResolver, EditorConfigDefaults } from '../config/ConfigResolver';
 import { PluginLoader } from '../config/PluginLoader';
 import { Plugin } from '../plugins/Plugin';
@@ -907,7 +908,7 @@ export class RichTextEditorElement extends HTMLElement {
     if (!autosave.enabled || !this.contentElement) return;
 
     this.autosaveTimer = setInterval(() => {
-      this.persistAutosave(this.contentElement?.innerHTML || '');
+      this.persistAutosave(getCleanEditorHTML(this.contentElement));
     }, autosave.intervalMs);
   }
 
@@ -1136,7 +1137,7 @@ export class RichTextEditorElement extends HTMLElement {
 
       const emitChange = () => {
         this.dispatchEvent(new CustomEvent('content-change', {
-          detail: { html },
+          detail: { html: stripEditorUiArtifacts(html) },
           bubbles: true,
         }));
       };
@@ -1214,7 +1215,7 @@ export class RichTextEditorElement extends HTMLElement {
       }
       if (this.contentElement) {
         this.dispatchEvent(new CustomEvent('content-change', {
-          detail: { html: this.contentElement.innerHTML },
+          detail: { html: getCleanEditorHTML(this.contentElement) },
           bubbles: true,
         }));
       }
@@ -1517,7 +1518,7 @@ export class RichTextEditorElement extends HTMLElement {
   getAPI(): EditorAPI {
     return {
       getContent: () => {
-        return this.contentElement?.innerHTML || '';
+        return getCleanEditorHTML(this.contentElement);
       },
       
       setContent: (html: string) => {
@@ -1567,7 +1568,7 @@ export class RichTextEditorElement extends HTMLElement {
     }
 
     if (this.contentElement) {
-      this.persistAutosave(this.contentElement.innerHTML || '');
+      this.persistAutosave(getCleanEditorHTML(this.contentElement));
     }
     this.stopAutosave();
 
@@ -1598,7 +1599,7 @@ export class RichTextEditorElement extends HTMLElement {
   // Public API methods
   
   public getContent(): string {
-    return this.contentElement?.innerHTML || '';
+    return getCleanEditorHTML(this.contentElement);
   }
 
   public setContent(html: string): void {

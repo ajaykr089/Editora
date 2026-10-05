@@ -27,6 +27,7 @@ export * from './ui';
 // Utils
 export * from './utils/statusBarUtils';
 export { sanitizeHTML, sanitizePastedHTML, sanitizeInputHTML } from './utils/sanitizeHTML';
+export { stripEditorUiArtifacts, getCleanEditorHTML } from './utils/editorOutput';
 export type { SanitizationConfig, SecurityConfig } from './utils/sanitizeHTML';
 
 // Config layer

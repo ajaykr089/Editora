@@ -87,3 +87,39 @@ describe('<editora-editor> load-time sanitising', () => {
     expect(content.querySelector('mark')).toBeTruthy();
   });
 });
+
+describe('<editora-editor> output omits editing-only chrome', () => {
+  const handle = '<div class="resize-handle" style="position: absolute;"></div>';
+  const table = `<table><tbody><tr><td style="position: relative;">a${handle}</td></tr></tbody></table>`;
+
+  beforeAll(() => {
+    (document as any).execCommand ??= () => false;
+    (RichTextEditorElement as any).__globalPluginLoader ??= new PluginLoader();
+    if (!customElements.get('editora-editor')) customElements.define('editora-editor', RichTextEditorElement);
+  });
+
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  it('getContent() and getAPI().getContent() do not include resize handles', async () => {
+    const { el, content } = await mount({ 'data-initial-content': '<p>x</p>' });
+    content.innerHTML = table; // as if the table plugin had attached its handles
+    expect(content.querySelector('.resize-handle')).toBeTruthy();
+    expect(el.getContent()).not.toContain('resize-handle');
+    expect(el.getContent()).not.toContain('position');
+    expect(el.getAPI().getContent()).not.toContain('resize-handle');
+  });
+
+  it('content-change events (input and blur) do not include resize handles', async () => {
+    const { el, content } = await mount({ 'data-initial-content': '<p>x</p>' });
+    const seen: string[] = [];
+    el.addEventListener('content-change', (e: Event) => seen.push((e as CustomEvent).detail.html));
+    content.innerHTML = table;
+    content.dispatchEvent(new Event('input', { bubbles: true }));
+    content.dispatchEvent(new Event('blur'));
+    await new Promise((r) => setTimeout(r, 250));
+    expect(seen.length).toBeGreaterThan(0);
+    for (const html of seen) expect(html).not.toContain('resize-handle');
+  });
+});
