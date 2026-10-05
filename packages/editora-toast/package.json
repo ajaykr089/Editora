@@ -63,8 +63,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "vite build && vite build --config vite.umd.config.ts && tsc --emitDeclarationOnly --outDir dist",
-    "postbuild": "cp src/toast.css dist/",
+    "build": "vite build && vite build --config vite.umd.config.ts && tsc --emitDeclarationOnly --outDir dist && cp src/toast.css dist/",
     "dev": "vite build --watch",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run clean && npm run build"
