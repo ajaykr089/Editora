@@ -21,7 +21,7 @@ An accessibility and layout pass over the UI components, measured with axe-core 
 
 **Contrast**
 
-- Muted text, status colours (success, warning, info, error) and tone accents are darker where they sat below 4.5:1, including the translucent mixes in the sidebar, menus and listbox, the solid variants of tabs, alert dialog and app header, the pressed `ui-toggle` fills and `Stat` tones. The `contrast` variants of the form controls, meter and transfer list are for dark surfaces, as before.
+- Muted text, status colours (success, warning, info, error) and tone accents are darker where they sat below 4.5:1, including the translucent mixes in the sidebar, menus and listbox, the solid variants of tabs, alert dialog and app header, the pressed `ui-toggle` fills, the `ui-animated-text` info tone and `Stat` tones. The `contrast` variants of the form controls, meter and transfer list are for dark surfaces, as before.
 
 **Themes and layout**
 

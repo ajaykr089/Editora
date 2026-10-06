@@ -132,7 +132,7 @@ const style = `
   }
 
   :host([tone="info"]) {
-    --ui-animated-text-accent: #0ea5e9;
+    --ui-animated-text-accent: var(--ui-color-info, #0e7490);
   }
 
   :host([tone="success"]) {
