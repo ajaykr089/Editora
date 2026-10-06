@@ -632,6 +632,9 @@ export class UINumberField extends ElementBase {
     if (!this._input) return;
     this._input.placeholder = this.getAttribute('placeholder') || '';
     this._input.disabled = readBooleanHostAttribute(this, 'disabled');
+    // The shell holds the prefix, suffix and steppers too: they are as inactive as the input.
+    if (this._input.disabled) this.root.querySelector('.shell')?.setAttribute('aria-disabled', 'true');
+    else this.root.querySelector('.shell')?.removeAttribute('aria-disabled');
     this._input.readOnly = this.hasAttribute('readonly');
     this._input.required = this.hasAttribute('required');
     this._input.name = this.getAttribute('name') || '';

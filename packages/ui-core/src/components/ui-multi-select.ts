@@ -1094,6 +1094,9 @@ export class UIMultiSelect extends ElementBase {
       this._shellEl.setAttribute('data-open', this.open ? 'true' : 'false');
       this._shellEl.setAttribute('data-invalid', error ? 'true' : 'false');
       this._shellEl.setAttribute('data-readonly', readonly ? 'true' : 'false');
+      // The chips and buttons in the shell are as inactive as the input.
+      if (disabled) this._shellEl.setAttribute('aria-disabled', 'true');
+      else this._shellEl.removeAttribute('aria-disabled');
       toggle.setAttribute('data-open', this.open ? 'true' : 'false');
       toggle.disabled = disabled || readonly;
       clear.hidden = !clearable || this._selected.length === 0;
