@@ -1568,6 +1568,7 @@ const LightCodeEditorDemo = ({
         <div>
           <label style={{ marginRight: "10px", fontWeight: "bold" }}>Load Sample:</label>
           <select
+            aria-label="Load sample"
             onChange={(e) => loadSampleContent(e.target.value)}
             style={{
               padding: "5px 10px",

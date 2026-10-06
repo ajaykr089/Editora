@@ -139,7 +139,7 @@ export const EnterpriseEditorOps: Story = {
         </Grid>
 
         <Box variant="surface" p="12px" radius="md" style={{ border: '1px solid #e2e8f0' }}>
-          <Tabs selected={activeTab} variant="soft" onChange={setActiveTab}>
+          <Tabs selected={activeTab} variant="soft" onChange={setActiveTab} aria-label="Workspace sections">
             <div slot="tab" data-value="draft">Draft</div>
             <div slot="panel">
               <EditoraEditor

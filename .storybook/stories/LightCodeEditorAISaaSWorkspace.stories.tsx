@@ -131,7 +131,7 @@ export const DeveloperCodeWorkspace: Story = {
         </Grid>
 
         <Box variant="surface" p="12px" radius="md" style={{ border: '1px solid #e2e8f0' }}>
-          <Tabs selected={tab} variant="soft" onChange={setTab}>
+          <Tabs selected={tab} variant="soft" onChange={setTab} aria-label="Workspace sections">
             <div slot="tab" data-value="editor">Editor</div>
             <div slot="panel">
               <div

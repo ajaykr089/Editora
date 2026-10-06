@@ -491,7 +491,7 @@ export const InteractiveDemo = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
         <div>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold' }}>Max Value</label>
-          <input 
+          <input aria-label="Max Value" 
             type="range" 
             min="1" 
             max="10" 
@@ -504,7 +504,7 @@ export const InteractiveDemo = () => {
         
         <div>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold' }}>Current Value</label>
-          <input 
+          <input aria-label="Current Value" 
             type="range" 
             min="0" 
             max={max} 
@@ -517,7 +517,7 @@ export const InteractiveDemo = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold' }}>Variant</label>
-          <select value={variant} onChange={(e) => setVariant(e.target.value as typeof variant)} style={{ width: '100%', padding: '5px' }}>
+          <select aria-label="Variant" value={variant} onChange={(e) => setVariant(e.target.value as typeof variant)} style={{ width: '100%', padding: '5px' }}>
             <option value="default">Default</option>
             <option value="soft">Soft</option>
             <option value="glass">Glass</option>
@@ -528,7 +528,7 @@ export const InteractiveDemo = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold' }}>Size</label>
-          <select value={size} onChange={(e) => setSize(e.target.value as typeof size)} style={{ width: '100%', padding: '5px' }}>
+          <select aria-label="Size" value={size} onChange={(e) => setSize(e.target.value as typeof size)} style={{ width: '100%', padding: '5px' }}>
             <option value="sm">Small</option>
             <option value="md">Medium</option>
             <option value="lg">Large</option>
@@ -537,7 +537,7 @@ export const InteractiveDemo = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold' }}>Tone</label>
-          <select value={tone} onChange={(e) => setTone(e.target.value as typeof tone)} style={{ width: '100%', padding: '5px' }}>
+          <select aria-label="Tone" value={tone} onChange={(e) => setTone(e.target.value as typeof tone)} style={{ width: '100%', padding: '5px' }}>
             <option value="neutral">Neutral</option>
             <option value="info">Info</option>
             <option value="success">Success</option>
@@ -548,7 +548,7 @@ export const InteractiveDemo = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold' }}>Animation</label>
-          <select value={animation} onChange={(e) => setAnimation(e.target.value as typeof animation)} style={{ width: '100%', padding: '5px' }}>
+          <select aria-label="Animation" value={animation} onChange={(e) => setAnimation(e.target.value as typeof animation)} style={{ width: '100%', padding: '5px' }}>
             <option value="scale">Scale</option>
             <option value="pulse">Pulse</option>
             <option value="none">None</option>
@@ -557,7 +557,7 @@ export const InteractiveDemo = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold' }}>Shape</label>
-          <select value={shape} onChange={(e) => setShape(e.target.value as typeof shape)} style={{ width: '100%', padding: '5px' }}>
+          <select aria-label="Shape" value={shape} onChange={(e) => setShape(e.target.value as typeof shape)} style={{ width: '100%', padding: '5px' }}>
             <option value="rounded">Rounded</option>
             <option value="square">Square</option>
             <option value="pill">Pill</option>

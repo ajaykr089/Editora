@@ -35,11 +35,11 @@ export const GroupedControls = () => (
     style={{ maxWidth: 640 }}
   >
     <ControlGroup label="Channels" orientation="horizontal" variant="soft">
-      <Checkbox checked />
+      <Checkbox checked aria-label="Email" />
       <span>Email</span>
-      <Checkbox />
+      <Checkbox aria-label="SMS" />
       <span>SMS</span>
-      <Checkbox checked />
+      <Checkbox checked aria-label="Slack" />
       <span>Slack</span>
     </ControlGroup>
   </Fieldset>
@@ -56,11 +56,11 @@ export const PolicyReview = () => (
     style={{ maxWidth: 720 }}
   >
     <ControlGroup label="Release controls" orientation="horizontal" variant="surface">
-      <Switch checked />
+      <Switch checked aria-label="Require approval" />
       <span>Require approval</span>
-      <Switch />
+      <Switch aria-label="Auto-publish changelog" />
       <span>Auto-publish changelog</span>
-      <Switch checked />
+      <Switch checked aria-label="Notify account owners" />
       <span>Notify account owners</span>
     </ControlGroup>
     <div slot="actions">

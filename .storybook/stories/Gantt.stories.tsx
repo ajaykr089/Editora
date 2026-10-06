@@ -316,12 +316,12 @@ export const FullPageWorkspace = () => {
               <span style={{ color: '#64748b', fontSize: 12, fontWeight: 700 }}>{lastChange}</span>
             </div>
             <div style={{ padding: 12, display: 'grid', gridTemplateColumns: '1fr 150px 150px', gap: 8, borderBottom: '1px solid #dbe4ef' }}>
-              <input style={fieldStyle} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Filter by task or owner" />
-              <select style={fieldStyle} value={ownerFilter} onChange={(event) => setOwnerFilter(event.target.value)}>
+              <input aria-label="Filter by task or owner" style={fieldStyle} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Filter by task or owner" />
+              <select aria-label="Filter by owner" style={fieldStyle} value={ownerFilter} onChange={(event) => setOwnerFilter(event.target.value)}>
                 <option value="all">All owners</option>
                 {owners.map((owner) => <option key={owner} value={owner}>{owner}</option>)}
               </select>
-              <select style={fieldStyle} value={toneFilter} onChange={(event) => setToneFilter(event.target.value)}>
+              <select aria-label="Filter by status" style={fieldStyle} value={toneFilter} onChange={(event) => setToneFilter(event.target.value)}>
                 <option value="all">All statuses</option>
                 <option value="success">Success</option>
                 <option value="default">Default</option>
@@ -353,8 +353,8 @@ export const FullPageWorkspace = () => {
           <aside style={{ display: 'grid', gap: 12 }}>
             <section style={{ ...panelStyle, padding: 14 }}>
               <div style={{ color: '#64748b', fontSize: 12, fontWeight: 750, textTransform: 'uppercase', letterSpacing: 0 }}>Selected task</div>
-              <input style={{ ...fieldStyle, width: '100%', marginTop: 8, fontWeight: 700 }} value={selected.label} onChange={(event) => updateSelected({ label: event.target.value })} />
-              <input style={{ ...fieldStyle, width: '100%', marginTop: 8 }} value={selected.assignee || ''} onChange={(event) => updateSelected({ assignee: event.target.value })} placeholder="Owner" />
+              <input aria-label="Task name" style={{ ...fieldStyle, width: '100%', marginTop: 8, fontWeight: 700 }} value={selected.label} onChange={(event) => updateSelected({ label: event.target.value })} />
+              <input aria-label="Assignee" style={{ ...fieldStyle, width: '100%', marginTop: 8 }} value={selected.assignee || ''} onChange={(event) => updateSelected({ assignee: event.target.value })} placeholder="Owner" />
               <div style={{ display: 'grid', gap: 8, marginTop: 16 }}>
                 <label style={{ display: 'grid', gap: 4, fontSize: 12, color: '#64748b' }}>Start<input style={fieldStyle} type="date" value={selected.start} onChange={(event) => updateSelected({ start: event.target.value })} /></label>
                 <label style={{ display: 'grid', gap: 4, fontSize: 12, color: '#64748b' }}>End<input style={fieldStyle} type="date" value={selected.end} onChange={(event) => updateSelected({ end: event.target.value })} /></label>
@@ -370,9 +370,9 @@ export const FullPageWorkspace = () => {
             <section style={{ ...panelStyle, padding: 14 }}>
               <strong style={{ fontSize: 14 }}>Dependencies</strong>
               <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
-                <select style={fieldStyle} value={linkDraft.source} onChange={(event) => setLinkDraft((draft) => ({ ...draft, source: event.target.value }))}>{items.map((task) => <option key={task.id} value={task.id}>{task.label}</option>)}</select>
-                <select style={fieldStyle} value={linkDraft.target} onChange={(event) => setLinkDraft((draft) => ({ ...draft, target: event.target.value }))}>{items.map((task) => <option key={task.id} value={task.id}>{task.label}</option>)}</select>
-                <select style={fieldStyle} value={linkDraft.type} onChange={(event) => setLinkDraft((draft) => ({ ...draft, type: event.target.value as typeof linkTypes[number] }))}>
+                <select aria-label="Link source task" style={fieldStyle} value={linkDraft.source} onChange={(event) => setLinkDraft((draft) => ({ ...draft, source: event.target.value }))}>{items.map((task) => <option key={task.id} value={task.id}>{task.label}</option>)}</select>
+                <select aria-label="Link target task" style={fieldStyle} value={linkDraft.target} onChange={(event) => setLinkDraft((draft) => ({ ...draft, target: event.target.value }))}>{items.map((task) => <option key={task.id} value={task.id}>{task.label}</option>)}</select>
+                <select aria-label="Link type" style={fieldStyle} value={linkDraft.type} onChange={(event) => setLinkDraft((draft) => ({ ...draft, type: event.target.value as typeof linkTypes[number] }))}>
                   <option value="e2s">Finish to start</option>
                   <option value="s2s">Start to start</option>
                   <option value="e2e">Finish to finish</option>

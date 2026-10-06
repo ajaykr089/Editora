@@ -87,7 +87,7 @@ export const NotificationCommandCenter: Story = {
         </Grid>
 
         <Box variant="surface" p="12px" radius="md" style={{ border: '1px solid #e2e8f0' }}>
-          <Tabs selected={tab} variant="soft" onChange={setTab}>
+          <Tabs selected={tab} variant="soft" onChange={setTab} aria-label="Toast center sections">
             <Tabs.Tab value="signal">Signal</Tabs.Tab>
             <Tabs.Panel>
               <Flex gap="8px" wrap="wrap">

@@ -429,7 +429,7 @@ function ThemeMatrixStory() {
               </button>
             ))}
           </div>
-          <div role="tabpanel">{activePanel}</div>
+          <div role="tabpanel" aria-label="Button matrix">{activePanel}</div>
         </div>
       </ShowcaseSection>
     </ShowcasePage>

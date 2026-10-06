@@ -17,6 +17,7 @@ export function SidebarList() {
 
   return (
     <Tree
+      aria-label="Workspace navigation"
       value={value}
       indentSize="14px"
       onSelect={(detail) => setValue(detail.value)}

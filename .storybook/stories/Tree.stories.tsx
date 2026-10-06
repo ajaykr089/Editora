@@ -13,6 +13,7 @@ export const Explorer = () => {
   return (
     <Grid columns="320px 1fr" gap="16px" style={{ minHeight: 420 }}>
       <Tree
+        aria-label="Project files"
         value={value}
         indentSize="14px"
         onSelect={(detail) => setValue(detail.value)}
