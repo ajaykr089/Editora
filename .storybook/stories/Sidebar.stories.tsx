@@ -125,7 +125,7 @@ function PremiumPromoCard() {
         padding: 22,
         borderRadius: 20,
         background: 'linear-gradient(140deg, rgba(16, 96, 226, 0.96), rgba(98, 154, 255, 0.42))',
-        color: 'var(--ui-color-foreground-on-primary, #ffffff)',
+        color: 'var(--ui-color-text, #ffffff)',
         display: 'grid',
         gap: 18,
         boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18)'
@@ -133,7 +133,7 @@ function PremiumPromoCard() {
     >
       <div style={{ display: 'grid', gap: 10 }}>
         <div style={{ fontSize: 'var(--ui-font-size-lg, 18px)', lineHeight: '1.25', fontWeight: 800 }}>Upgrade to Premium</div>
-        <div style={{ fontSize: 'var(--ui-font-size-md, 14px)', lineHeight: '1.55', color: 'color-mix(in srgb, var(--ui-color-foreground-on-primary, #ffffff) 82%, transparent)' }}>
+        <div style={{ fontSize: 'var(--ui-font-size-md, 14px)', lineHeight: '1.55', color: 'color-mix(in srgb, var(--ui-color-text, #ffffff) 82%, transparent)' }}>
           Unlock unlimited reading and offline access across your whole library.
         </div>
       </div>
@@ -148,7 +148,7 @@ function PremiumSidebarStructure({ value }: { value: string }) {
   return (
     <>
       <Sidebar.Header>
-        <Flex align="center" gap="12px" style={{ color: 'var(--ui-color-foreground-on-primary, #ffffff)', fontWeight: 900, fontSize: 'var(--ui-font-size-xl, 20px)' }}>
+        <Flex align="center" gap="12px" style={{ color: 'var(--ui-color-text, #ffffff)', fontWeight: 900, fontSize: 'var(--ui-font-size-xl, 20px)' }}>
           <span
             style={{
               display: 'inline-grid',
@@ -197,7 +197,7 @@ function PremiumSidebarStructure({ value }: { value: string }) {
         <PremiumPromoCard />
       </Sidebar.Promo>
       <Sidebar.Footer>
-        <div style={{ color: 'color-mix(in srgb, var(--ui-color-foreground-on-primary, #ffffff) 72%, transparent)' }}>Signed in as premium@publify.app</div>
+        <div style={{ color: 'color-mix(in srgb, var(--ui-color-text, #ffffff) 72%, transparent)' }}>Signed in as premium@publify.app</div>
       </Sidebar.Footer>
     </>
   );
@@ -235,11 +235,11 @@ export const PremiumReadingShell = (args: any) => {
               background: 'linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03))',
               boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
               padding: 26,
-              color: 'color-mix(in srgb, var(--ui-color-foreground-on-primary, #ffffff) 92%, var(--ui-color-text, #0f172a))',
+              color: 'color-mix(in srgb, var(--ui-color-text, #ffffff) 92%, var(--ui-color-text, #0f172a))',
             }}
           >
             <div style={{ display: 'grid', gap: 12, maxWidth: 720 }}>
-              <div style={{ fontSize: 'var(--ui-font-size-sm, 12px)', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'color-mix(in srgb, var(--ui-color-foreground-on-primary, #ffffff) 54%, transparent)' }}>
+              <div style={{ fontSize: 'var(--ui-font-size-sm, 12px)', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'color-mix(in srgb, var(--ui-color-text, #ffffff) 54%, transparent)' }}>
                 Reading dashboard
               </div>
               <div style={{ fontSize: 40, lineHeight: 1.05, fontWeight: 900 }}>
@@ -301,7 +301,7 @@ export const OperationsWorkspace = () => {
               borderRadius: 18,
               padding: 18,
               background: 'linear-gradient(140deg, color-mix(in srgb, var(--ui-color-primary) 92%, #1d4ed8 8%), color-mix(in srgb, var(--ui-color-primary) 22%, #ffffff 78%))',
-              color: 'var(--ui-color-foreground-on-primary, #ffffff)',
+              color: 'var(--ui-color-text, #ffffff)',
               display: 'grid',
               gap: 12
             }}

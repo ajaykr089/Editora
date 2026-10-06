@@ -2,7 +2,7 @@ import React from 'react';
 import type { Meta } from '@storybook/react';
 import { Button } from '@editora/ui-react';
 import type { ThemeTokens } from '@editora/ui-core';
-import { createThemeTokens } from '@editora/ui-core';
+import { createThemeTokens, readableForeground } from '@editora/ui-core';
 import { ArrowRightIcon } from '@editora/react-icons';
 import { ShowcasePage, ShowcaseSection, showcasePanelStyle } from './storybook-showcase';
 
@@ -64,7 +64,7 @@ function makeStoryPalette(label: string, light: string, dark: string, solidText 
     colors: {
       primary: light,
       primaryHover: dark,
-      foregroundOnPrimary: solidText,
+      foregroundOnPrimary: readableForeground(light, solidText),
       focusRing: light
     }
   });

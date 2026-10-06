@@ -125,12 +125,15 @@ export const KeyboardAndEdgeCases = () => (
         </Switch>
         <Switch>
           Incident digest
-          <Switch.Description>
-            <a href="#" data-ui-switch-no-toggle onClick={(e) => e.preventDefault()}>
-              Open policy (does not toggle)
-            </a>
-          </Switch.Description>
+          <Switch.Description>Links and buttons belong beside a switch, not inside it.</Switch.Description>
         </Switch>
+        <a
+          href="#"
+          style={{ display: 'inline-flex', alignItems: 'center', minHeight: 24, width: 'fit-content' }}
+          onClick={(e) => e.preventDefault()}
+        >
+          Open policy
+        </a>
       </Grid>
     </Box>
   </Grid>

@@ -107,9 +107,9 @@ function paletteTokens(name: StoryPaletteName) {
     return createThemeTokens(
       {
         colors: {
-          primary: '#8b5cf6',
+          primary: '#7c3aed',
           primaryHover: '#7c3aed',
-          focusRing: '#8b5cf6',
+          focusRing: '#7c3aed',
         },
         palette: {
           accent: {
@@ -121,7 +121,7 @@ function paletteTokens(name: StoryPaletteName) {
             '6': '#cdb0ff',
             '7': '#b693ff',
             '8': '#9b70ff',
-            '9': '#8b5cf6',
+            '9': '#7c3aed',
             '10': '#7c3aed',
             '11': '#6d28d9',
             '12': '#2e1065',
@@ -142,8 +142,8 @@ function paletteTokens(name: StoryPaletteName) {
           },
           accentContrast: '#ffffff',
           accentSurface: '#f5f0ffcc',
-          accentIndicator: '#8b5cf6',
-          accentTrack: '#8b5cf6',
+          accentIndicator: '#7c3aed',
+          accentTrack: '#7c3aed',
         },
       } satisfies Partial<ThemeTokens>,
       { accentPalette: 'blue', mode: 'light' }
