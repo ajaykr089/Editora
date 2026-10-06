@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlName } from '../primitives/control-name';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import { compareISO } from './ui-calendar';
 import { resolveDateTimeTranslations } from './date-time-i18n';
@@ -506,6 +507,7 @@ function parseSingleRangeDraft(raw: string, locale: string): RangeValue {
 export class UIDateRangePicker extends ElementBase {
   static get observedAttributes() {
     return [
+      'aria-label',
       'open',
       'default-open',
       'value',
@@ -1249,8 +1251,7 @@ export class UIDateRangePicker extends ElementBase {
       single.setAttribute('aria-controls', this._panelId);
       single.setAttribute('aria-expanded', isInline ? 'false' : String(this._open));
       single.setAttribute('aria-invalid', error ? 'true' : 'false');
-      if (label) single.setAttribute('aria-labelledby', this._labelId);
-      else single.removeAttribute('aria-labelledby');
+      syncControlName(single, this, label ? this._labelId : null, t.startEnd);
     }
     if (start) {
       if (start.value !== this._draftStart) start.value = this._draftStart;
@@ -1266,8 +1267,7 @@ export class UIDateRangePicker extends ElementBase {
       start.setAttribute('aria-controls', this._panelId);
       start.setAttribute('aria-expanded', isInline ? 'false' : String(this._open));
       start.setAttribute('aria-invalid', error ? 'true' : 'false');
-      if (label) start.setAttribute('aria-labelledby', this._labelId);
-      else start.removeAttribute('aria-labelledby');
+      syncControlName(start, this, label ? this._labelId : null, t.startDate);
     }
     if (end) {
       if (end.value !== this._draftEnd) end.value = this._draftEnd;
@@ -1283,8 +1283,7 @@ export class UIDateRangePicker extends ElementBase {
       end.setAttribute('aria-controls', this._panelId);
       end.setAttribute('aria-expanded', isInline ? 'false' : String(this._open));
       end.setAttribute('aria-invalid', error ? 'true' : 'false');
-      if (label) end.setAttribute('aria-labelledby', this._labelId);
-      else end.removeAttribute('aria-labelledby');
+      syncControlName(end, this, label ? this._labelId : null, t.endDate);
     }
     if (sep) sep.hidden = variant === 'single-field';
     if (clearBtn) {

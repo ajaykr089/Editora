@@ -421,6 +421,7 @@ function createStarSVG(className?: string): string {
 }
 
 export class UIRating extends ElementBase {
+  private _autoAriaLabel = false;
   static get observedAttributes() {
     return [
       'value',
@@ -815,7 +816,8 @@ export class UIRating extends ElementBase {
     const shape = toShape(readHostString(this, 'shape'));
     const radius = toRadius(readHostString(this, 'radius'));
     const precision = toPrecision(readHostString(this, 'precision'));
-    const ariaLabel = readHostString(this, 'aria-label');
+    // A name this element added itself is not an author-supplied aria-label.
+    const ariaLabel = this._autoAriaLabel ? null : readHostString(this, 'aria-label');
     const ariaLabelledBy = readHostString(this, 'aria-labelledby');
     const ariaDescribedBy = readHostString(this, 'aria-describedby');
     const label = readHostString(this, 'label');
@@ -905,8 +907,15 @@ export class UIRating extends ElementBase {
       this._syncStars();
     });
 
+    // The host is the role="slider", so it needs a name: the author's aria-label or
+    // aria-labelledby, else the visible `label`, else a generic one rather than an unnamed slider.
+    this._autoAriaLabel = false;
     if (ariaLabel) this.setAttribute('aria-label', ariaLabel);
-    else this.removeAttribute('aria-label');
+    else if (ariaLabelledBy) this.removeAttribute('aria-label');
+    else {
+      this.setAttribute('aria-label', (label || '').trim() || 'Rating');
+      this._autoAriaLabel = true;
+    }
 
     if (ariaLabelledBy) this.setAttribute('aria-labelledby', ariaLabelledBy);
     else this.removeAttribute('aria-labelledby');

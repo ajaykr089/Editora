@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlName } from '../primitives/control-name';
 
 const CLEAR_ICON = `
   <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
@@ -552,6 +553,7 @@ export class UIInput extends ElementBase {
       'color',
       'radius',
       'label',
+      'aria-label',
       'description',
       'data-error'
     ];
@@ -710,7 +712,8 @@ export class UIInput extends ElementBase {
       'density',
       'shape',
       'color',
-      'radius'
+      'radius',
+      'aria-label'
     ]);
 
     if (liveAttrs.has(name)) {
@@ -917,8 +920,7 @@ export class UIInput extends ElementBase {
     }
 
     if (this._input) {
-      if (hasLabel) this._input.setAttribute('aria-labelledby', `${this._uid}-label`);
-      else this._input.removeAttribute('aria-labelledby');
+      syncControlName(this._input, this, hasLabel ? `${this._uid}-label` : null);
 
       const describedBy: string[] = [];
       if (hasDescription) describedBy.push(`${this._uid}-description`);

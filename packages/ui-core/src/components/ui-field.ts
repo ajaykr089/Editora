@@ -417,6 +417,9 @@ function uniqueIds(existing: string[]): string[] {
   return Array.from(new Set(existing.filter(Boolean)));
 }
 
+// Marks an aria-label this element wrote on the control (as opposed to one the author supplied).
+const AUTO_LABEL_ATTR = 'data-ui-field-label';
+
 const CONTROL_SELECTOR =
   'ui-input, ui-textarea, ui-select, ui-combobox, input, textarea, select, button, [tabindex]:not([tabindex="-1"])';
 
@@ -614,10 +617,13 @@ export class UIField extends ElementBase {
       else errorEl.setAttribute('hidden', '');
     }
 
-    this._syncControlA11y(labelVisible, descVisible, errorVisible);
+    const slottedLabel = labelSlot
+      ? labelSlot.assignedNodes({ flatten: true }).map((node) => node.textContent || '').join(' ')
+      : '';
+    this._syncControlA11y(labelVisible, descVisible, errorVisible, (labelText || slottedLabel).replace(/\s+/g, ' ').trim());
   }
 
-  private _syncControlA11y(labelVisible: boolean, descVisible: boolean, errorVisible: boolean): void {
+  private _syncControlA11y(labelVisible: boolean, descVisible: boolean, errorVisible: boolean, labelPlainText = ''): void {
     const control = this._resolveControlElement();
     if (!control) return;
 
@@ -629,11 +635,34 @@ export class UIField extends ElementBase {
       .split(/\s+/)
       .filter((id) => id && id !== labelId);
 
-    if (!control.hasAttribute('aria-label') && labelVisible) existingLabelledBy.push(labelId);
+    // What the author wired up themselves, before this element adds its own (unresolvable) id.
+    // A reference only counts when it resolves where the control lives: ui-checkbox, for example,
+    // points aria-labelledby at its own label inside its shadow root, which names nothing.
+    const scope = control.getRootNode() as Document | ShadowRoot;
+    const authorLabelledBy = existingLabelledBy.some((id) => !!scope.getElementById?.(id));
 
     const labelledBy = uniqueIds(existingLabelledBy);
     if (labelledBy.length) control.setAttribute('aria-labelledby', labelledBy.join(' '));
     else control.removeAttribute('aria-labelledby');
+
+    // The label lives in this element's shadow root and the control is slotted light DOM (or sits
+    // in another shadow root), so an aria-labelledby pointing at the label can never resolve and
+    // the control was exposed unnamed. Give it the label's text as an aria-label too, unless the
+    // author already named it some other way.
+    const authorAriaLabel = control.hasAttribute('aria-label') && !control.hasAttribute(AUTO_LABEL_ATTR);
+    const nativeLabels = (control as HTMLInputElement).labels;
+    const ownLabelAttr = (control.getAttribute('label') || '').trim().length > 0;
+    // Text inside the control (a checkbox's own caption) already names it, and an aria-label would
+    // hide that text from assistive technology.
+    const ownText = (control.textContent || '').trim().length > 0;
+    const alreadyNamed = authorLabelledBy || authorAriaLabel || ownLabelAttr || ownText || !!(nativeLabels && nativeLabels.length > 0);
+    if (labelVisible && labelPlainText && !alreadyNamed) {
+      control.setAttribute('aria-label', labelPlainText);
+      control.setAttribute(AUTO_LABEL_ATTR, '');
+    } else if (control.hasAttribute(AUTO_LABEL_ATTR)) {
+      control.removeAttribute('aria-label');
+      control.removeAttribute(AUTO_LABEL_ATTR);
+    }
 
     const existing = (control.getAttribute('aria-describedby') || '')
       .split(/\s+/)

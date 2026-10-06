@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlName } from '../primitives/control-name';
 
 const style = `
   :host {
@@ -428,6 +429,7 @@ export class UINumberField extends ElementBase {
       'autocomplete',
       'inputmode',
       'label',
+      'aria-label',
       'description',
       'data-error',
       'size',
@@ -506,7 +508,8 @@ export class UINumberField extends ElementBase {
       name === 'inputmode' ||
       name === 'size' ||
       name === 'variant' ||
-      name === 'invalid'
+      name === 'invalid' ||
+      name === 'aria-label'
     ) {
       this._syncControlAttrs();
       this._syncDisplayValue();
@@ -660,8 +663,7 @@ export class UINumberField extends ElementBase {
     const hasDescription = Boolean((this.getAttribute('description') || '').trim()) || hasMeaningfulNodes(descriptionSlot);
     const hasError = Boolean((this.getAttribute('data-error') || '').trim()) || hasMeaningfulNodes(errorSlot);
 
-    if (hasLabel) this._input.setAttribute('aria-labelledby', `${this._uid}-label`);
-    else this._input.removeAttribute('aria-labelledby');
+    syncControlName(this._input, this, hasLabel ? `${this._uid}-label` : null);
 
     const describedBy: string[] = [];
     if (hasDescription) describedBy.push(`${this._uid}-description`);

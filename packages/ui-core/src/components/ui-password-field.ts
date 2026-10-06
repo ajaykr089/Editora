@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlName, syncSlotFallbackText } from '../primitives/control-name';
 
 const CLEAR_ICON = `
   <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
@@ -703,7 +704,7 @@ function computeStrength(value: string): StrengthState {
 
 export class UIPasswordField extends ElementBase {
   static get observedAttributes() {
-    return [...FORWARDED_ATTRS, 'show-strength', 'revealable'];
+    return [...FORWARDED_ATTRS, 'aria-label', 'show-strength', 'revealable'];
   }
 
   private _input: HTMLInputElement | null = null;
@@ -1098,6 +1099,13 @@ export class UIPasswordField extends ElementBase {
     const errorEl = this.root.querySelector('.error') as HTMLElement | null;
     const counterEl = this.root.querySelector('.counter') as HTMLElement | null;
 
+    // The label/description/error text is slot fallback content. It used to be written only by the
+    // first render, so when a framework sets the attribute afterwards (React does) the label,
+    // description and error stayed blank.
+    syncSlotFallbackText(labelSlot, labelAttr);
+    syncSlotFallbackText(descriptionSlot, descAttr);
+    syncSlotFallbackText(errorSlot, errorAttr);
+
     if (labelEl) labelEl.toggleAttribute('hidden', !hasLabel);
     if (descEl) descEl.toggleAttribute('hidden', !hasDescription);
     if (prefixEl) prefixEl.toggleAttribute('hidden', !hasPrefix);
@@ -1111,8 +1119,7 @@ export class UIPasswordField extends ElementBase {
 
     if (!this._input) return;
 
-    if (hasLabel) this._input.setAttribute('aria-labelledby', `${this._uid}-label`);
-    else this._input.removeAttribute('aria-labelledby');
+    syncControlName(this._input, this, hasLabel ? `${this._uid}-label` : null);
 
     const describedBy: string[] = [];
     if (hasDescription) describedBy.push(`${this._uid}-description`);

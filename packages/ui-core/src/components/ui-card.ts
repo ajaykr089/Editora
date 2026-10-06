@@ -296,6 +296,9 @@ function normalizeRadius(value: string | null): string {
   return value;
 }
 
+// Marks an aria-label this element wrote on its own host (as opposed to one the author supplied).
+const AUTO_LABEL_ATTR = 'data-ui-card-auto-label';
+
 export class UICard extends ElementBase {
   static get observedAttributes() {
     return ['variant', 'size', 'radius', 'tone', 'elevation', 'interactive', 'disabled', 'tabindex', 'role'];
@@ -365,6 +368,7 @@ export class UICard extends ElementBase {
     const interactive = this.hasAttribute('interactive');
     const disabled = this.hasAttribute('disabled');
     if (!interactive) {
+      this._clearAutoLabel();
       if (this.getAttribute('role') === 'button') this.removeAttribute('role');
       this.removeAttribute('aria-disabled');
       if (this.getAttribute('tabindex') === '0' || this.getAttribute('tabindex') === '-1') {
@@ -375,12 +379,41 @@ export class UICard extends ElementBase {
 
     if (!this.hasAttribute('role')) this.setAttribute('role', 'button');
     this.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+    this._syncAutoLabel();
 
     if (!this.hasAttribute('tabindex')) {
       this.setAttribute('tabindex', disabled ? '-1' : '0');
     } else if (disabled && this.getAttribute('tabindex') !== '-1') {
       this.setAttribute('tabindex', '-1');
     }
+  }
+
+  // Chromium derives no name from this card's slotted content, so an interactive card (role
+  // "button") was exposed unnamed. Name it after its title (or, failing that, its text) unless the
+  // author gave it a name.
+  private _clearAutoLabel(): void {
+    if (!this.hasAttribute(AUTO_LABEL_ATTR)) return;
+    this.removeAttribute('aria-label');
+    this.removeAttribute(AUTO_LABEL_ATTR);
+  }
+
+  private _syncAutoLabel(): void {
+    const authorLabelled =
+      this.hasAttribute('aria-labelledby') || (this.hasAttribute('aria-label') && !this.hasAttribute(AUTO_LABEL_ATTR));
+    if (authorLabelled || this.getAttribute('role') !== 'button') {
+      this._clearAutoLabel();
+      return;
+    }
+
+    const heading = this.querySelector('[data-ui-card-title], [slot="header"] :is(h1, h2, h3, h4, h5, h6)');
+    const source = heading?.textContent || this.querySelector('[slot="header"]')?.textContent || this.textContent || '';
+    const name = source.replace(/\s+/g, ' ').trim().slice(0, 120);
+    if (!name) {
+      this._clearAutoLabel();
+      return;
+    }
+    if (this.getAttribute('aria-label') !== name) this.setAttribute('aria-label', name);
+    this.setAttribute(AUTO_LABEL_ATTR, '');
   }
 
   private _cleanupSlotListeners(): void {
@@ -403,6 +436,8 @@ export class UICard extends ElementBase {
     this._toggleSection('inset');
     this._toggleSection('header');
     this._toggleSection('footer');
+    // The title may arrive after the card connected (React renders children into it later).
+    if (this.hasAttribute('interactive')) this._syncAutoLabel();
   }
 
   private _toggleSection(name: 'media' | 'inset' | 'header' | 'footer'): void {

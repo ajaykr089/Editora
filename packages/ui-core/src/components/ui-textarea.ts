@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlName } from '../primitives/control-name';
 
 const CLEAR_ICON = `
   <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
@@ -361,6 +362,7 @@ export class UITextarea extends ElementBase {
       'color',
       'radius',
       'label',
+      'aria-label',
       'description',
       'autosize',
       'max-rows',
@@ -446,7 +448,8 @@ export class UITextarea extends ElementBase {
       'headless',
       'color',
       'radius',
-      'autofocus'
+      'autofocus',
+      'aria-label'
     ]);
 
     if (liveAttrs.has(name)) {
@@ -579,11 +582,7 @@ export class UITextarea extends ElementBase {
     if (this.hasAttribute('show-count') || parseLength(this.getAttribute('maxlength')) !== null) describedBy.push(`${this._uid}-count`);
 
     const hasLabel = !!(this.getAttribute('label') || this.querySelector('[slot="label"]'));
-    if (hasLabel) {
-      this._textarea.setAttribute('aria-labelledby', `${this._uid}-label`);
-    } else {
-      this._textarea.removeAttribute('aria-labelledby');
-    }
+    syncControlName(this._textarea, this, hasLabel ? `${this._uid}-label` : null);
 
     if (describedBy.length) {
       this._textarea.setAttribute('aria-describedby', describedBy.join(' '));

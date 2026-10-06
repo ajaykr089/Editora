@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlName } from '../primitives/control-name';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import { compareISO } from './ui-calendar';
 import { resolveDateTimeTranslations } from './date-time-i18n';
@@ -609,6 +610,7 @@ function escapeHtml(value: string): string {
 export class UIDatePicker extends ElementBase {
   static get observedAttributes() {
     return [
+      'aria-label',
       'open',
       'default-open',
       'value',
@@ -1577,8 +1579,7 @@ export class UIDatePicker extends ElementBase {
       inputEl.setAttribute('aria-expanded', isInline ? 'false' : String(this._open));
       inputEl.setAttribute('aria-controls', this._panelId);
       inputEl.setAttribute('aria-invalid', error ? 'true' : 'false');
-      if (label) inputEl.setAttribute('aria-labelledby', this._labelId);
-      else inputEl.removeAttribute('aria-labelledby');
+      syncControlName(inputEl, this, label ? this._labelId : null, placeholder);
     }
     if (clearBtn) {
       clearBtn.hidden = !(this._clearable() && hasValue);

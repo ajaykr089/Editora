@@ -33,7 +33,7 @@ describe('ui-field shell + accessibility behavior', () => {
     expect(description?.hasAttribute('hidden')).toBe(true);
   });
 
-  it('only links aria-labelledby when label exists', async () => {
+  it('only names the control when a label exists', async () => {
     const el = document.createElement('ui-field');
     el.innerHTML = '<input id="field-input-a11y" />';
     document.body.appendChild(el);
@@ -41,13 +41,15 @@ describe('ui-field shell + accessibility behavior', () => {
 
     const input = el.querySelector('input') as HTMLInputElement | null;
     expect(input).toBeTruthy();
-    expect(input?.hasAttribute('aria-labelledby')).toBe(false);
+    expect(input?.hasAttribute('aria-label')).toBe(false);
 
     el.setAttribute('label', 'Patient name');
     await flushMicrotask();
     await flushMicrotask();
 
-    const labelledBy = input?.getAttribute('aria-labelledby') || '';
-    expect(labelledBy).toContain('-label');
+    // The label sits in this element's shadow root, so aria-labelledby could never resolve from the
+    // slotted control: the name is copied onto it instead.
+    expect(input?.getAttribute('aria-label')).toBe('Patient name');
+    expect(input?.hasAttribute('aria-labelledby')).toBe(false);
   });
 });

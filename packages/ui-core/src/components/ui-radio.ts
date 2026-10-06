@@ -445,7 +445,10 @@ export class UIRadio extends ElementBase {
     this.setAttribute('aria-required', this.required ? 'true' : 'false');
     if (this.invalid) this.setAttribute('aria-invalid', 'true');
     else this.removeAttribute('aria-invalid');
-    this.setAttribute('aria-labelledby', labelId);
+    // The label lives in this element's shadow root, so an aria-labelledby pointing at it could never
+    // resolve from the host (and overwrote any aria-labelledby the author set). The accessible name
+    // comes from the element's content, which includes the label text.
+    if (this.getAttribute('aria-labelledby') === labelId) this.removeAttribute('aria-labelledby');
     this.setAttribute('tabindex', tabIndex);
   }
 

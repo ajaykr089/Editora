@@ -515,6 +515,7 @@ function isTruthyDisabledValue(raw: string | null): boolean {
 export class UICombobox extends ElementBase {
   static get observedAttributes() {
     return [
+      'aria-label',
       'value',
       'placeholder',
       'disabled',
@@ -1190,6 +1191,7 @@ export class UICombobox extends ElementBase {
     const errorText = currentError || (state === 'error' ? this._stateText() || 'Unable to load options.' : '');
     const hasValidationError = this.getAttribute('validation') === 'error' || state === 'error' || Boolean(errorText);
     const hasLabel = Boolean(label || this.querySelector('[slot="label"]'));
+    const hostAriaLabel = (this.getAttribute('aria-label') || '').trim();
     const hasDescription = Boolean(description || this.querySelector('[slot="description"]'));
     const errorId = `${this._uid}-error`;
     const describedBy = [hasDescription ? `${this._uid}-description` : '', hasValidationError ? errorId : '']
@@ -1222,7 +1224,7 @@ export class UICombobox extends ElementBase {
             aria-autocomplete="list"
             aria-expanded="${this.open ? 'true' : 'false'}"
             aria-controls="${this._uid}-listbox"
-            ${hasLabel ? `aria-labelledby="${this._uid}-label"` : ''}
+            ${hasLabel ? `aria-labelledby="${this._uid}-label"` : hostAriaLabel ? `aria-label="${escapeHtml(hostAriaLabel)}"` : ''}
             ${describedBy ? `aria-describedby="${describedBy}"` : ''}
             ${hasValidationError ? 'aria-invalid="true"' : ''}
             aria-busy="${loading ? 'true' : 'false'}"

@@ -663,6 +663,9 @@ function cancelDeferredFrame(handle: number): void {
   window.clearTimeout(handle);
 }
 
+// Marks an aria-label this element wrote on its own host (as opposed to one the author supplied).
+const AUTO_NAME_ATTR = 'data-ui-auto-name';
+
 export class UIAlertDialog extends ElementBase {
   static get observedAttributes() {
     return [
@@ -1347,8 +1350,31 @@ export class UIAlertDialog extends ElementBase {
     this._handleTab(event);
   }
 
+  // The host carries role="alertdialog" (that attribute is also how the role is configured), so it
+  // is exposed as a dialog of its own. Closed, it was an empty, unnamed alert dialog sitting in the
+  // page; open, it needs the same name as the dialog inside its shadow root.
+  private _syncHostSemantics(open: boolean, name = '', hasExplicitName = false): void {
+    if (!open) {
+      if (this.getAttribute('aria-hidden') !== 'true') this.setAttribute('aria-hidden', 'true');
+      if (this.hasAttribute(AUTO_NAME_ATTR)) {
+        this.removeAttribute('aria-label');
+        this.removeAttribute(AUTO_NAME_ATTR);
+      }
+      return;
+    }
+
+    if (this.hasAttribute('aria-hidden')) this.removeAttribute('aria-hidden');
+    if (hasExplicitName) {
+      if (this.hasAttribute(AUTO_NAME_ATTR)) this.removeAttribute(AUTO_NAME_ATTR);
+      return;
+    }
+    if (this.getAttribute('aria-label') !== name) this.setAttribute('aria-label', name);
+    if (!this.hasAttribute(AUTO_NAME_ATTR)) this.setAttribute(AUTO_NAME_ATTR, '');
+  }
+
   protected render() {
     if (!this.open) {
+      this._syncHostSemantics(false);
       this.setContent('');
       return;
     }
@@ -1387,12 +1413,19 @@ export class UIAlertDialog extends ElementBase {
     const showClose = this._config.showClose ?? this.dismissible;
     const tone = this.tone;
 
-    const explicitAriaLabel = this.getAttribute('aria-label') || '';
+    // An aria-label this element wrote itself is not an author-supplied name.
+    const explicitAriaLabel = this.hasAttribute(AUTO_NAME_ATTR) ? '' : this.getAttribute('aria-label') || '';
     const explicitLabelledBy = this.getAttribute('aria-labelledby') || '';
     const explicitDescribedBy = this.getAttribute('aria-describedby') || '';
 
     const labelledBy = explicitLabelledBy || (hasTitle ? titleId : '');
     const ariaLabel = explicitAriaLabel || (!labelledBy ? titleFallback || descriptionFallback || 'Dialog' : '');
+    const slottedTitle = (this.querySelector('[slot="title"]')?.textContent || '').replace(/\s+/g, ' ').trim();
+    this._syncHostSemantics(
+      true,
+      explicitAriaLabel || slottedTitle || titleFallback || descriptionFallback || 'Dialog',
+      !!explicitAriaLabel || !!explicitLabelledBy
+    );
 
     const describedByIds: string[] = [];
     if (explicitDescribedBy) {

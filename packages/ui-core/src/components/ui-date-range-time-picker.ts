@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlName } from '../primitives/control-name';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import './ui-calendar';
 import { resolveDateTimeTranslations } from './date-time-i18n';
@@ -620,6 +621,7 @@ function defaultPending(value: RangeDateTimeValue): PendingState {
 export class UIDateRangeTimePicker extends ElementBase {
   static get observedAttributes() {
     return [
+      'aria-label',
       'open',
       'default-open',
       'value',
@@ -1549,8 +1551,7 @@ export class UIDateRangeTimePicker extends ElementBase {
       inputEl.setAttribute('aria-expanded', isInline ? 'false' : String(this._open));
       inputEl.setAttribute('aria-controls', this._panelId);
       inputEl.setAttribute('aria-invalid', error ? 'true' : 'false');
-      if (label) inputEl.setAttribute('aria-labelledby', this._labelId);
-      else inputEl.removeAttribute('aria-labelledby');
+      syncControlName(inputEl, this, label ? this._labelId : null, inputEl.placeholder);
     }
     if (clearBtn) {
       clearBtn.hidden = !(this._clearable() && hasValue);

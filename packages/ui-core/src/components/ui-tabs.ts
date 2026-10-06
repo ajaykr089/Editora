@@ -523,6 +523,8 @@ function isTruthy(raw: string | null): boolean {
 }
 
 const RENDER_ATTRS = new Set([
+  'aria-label',
+  'aria-labelledby',
   'orientation',
   'activation',
   'headless',
@@ -552,7 +554,9 @@ export class UITabs extends ElementBase {
       'shape',
       'elevation',
       'loop',
-      'bare'
+      'bare',
+      'aria-label',
+      'aria-labelledby'
     ];
   }
 
@@ -1037,6 +1041,12 @@ export class UITabs extends ElementBase {
     this._syncSelectedAttributes(model, selectedIndex);
 
     const orientation = this.getAttribute('orientation') === 'vertical' ? 'vertical' : 'horizontal';
+    // aria-label on the host cannot reach the role="tablist" element inside the shadow root.
+    const hostLabel = (this.getAttribute('aria-label') || '').trim();
+    const hostLabelledBy = (this.getAttribute('aria-labelledby') || '').trim();
+    const tablistNameAttrs =
+      (hostLabel ? ` aria-label="${escapeHtml(hostLabel)}"` : '') +
+      (hostLabelledBy ? ` aria-labelledby="${escapeHtml(hostLabelledBy)}"` : '');
     const nav = model
       .map((tab) => {
         const selectedState = tab.index === selectedIndex;
@@ -1065,7 +1075,7 @@ export class UITabs extends ElementBase {
     this.setContent(`
       <style>${style}</style>
       <section class="shell" part="shell">
-        <div class="nav" role="tablist" aria-orientation="${orientation}" part="nav">
+        <div class="nav" role="tablist" aria-orientation="${orientation}"${tablistNameAttrs} part="nav">
           <span class="indicator" part="indicator" aria-hidden="true"></span>
           ${nav}
         </div>
