@@ -151,13 +151,15 @@ const style = `
     color: var(--ui-number-field-placeholder);
   }
 
+  /* Side by side, not stacked: stacked, each button was about 20px tall (under the 24px target size of
+     WCAG 2.5.8). Each one is now at least 24px wide and as tall as the field. */
   .steppers {
     flex: 0 0 auto;
     display: grid;
-    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     align-self: stretch;
     align-items: stretch;
-    inline-size: 28px;
+    inline-size: 56px;
     min-block-size: calc(var(--ui-number-field-min-height) - 6px);
     margin-inline-start: auto;
     border-inline-start: 1px solid color-mix(in srgb, var(--ui-number-field-border-color) 82%, transparent);
@@ -224,10 +226,6 @@ const style = `
     display: block;
   }
 
-  .stepper-slot:last-child .stepper-icon {
-    transform: translateY(0.5px);
-  }
-
   .footer {
     min-inline-size: 0;
     display: flex;
@@ -266,7 +264,7 @@ const style = `
   }
 
   :host([size="sm"]) .steppers {
-    inline-size: 24px;
+    inline-size: 48px;
   }
 
   :host([size="sm"]) .stepper-icon {
@@ -281,7 +279,7 @@ const style = `
   }
 
   :host([size="lg"]) .steppers {
-    inline-size: 32px;
+    inline-size: 64px;
   }
 
   :host([size="lg"]) .stepper-icon {

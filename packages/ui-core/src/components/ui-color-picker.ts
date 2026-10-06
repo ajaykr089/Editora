@@ -426,9 +426,13 @@ const style = `
   }
 
   .sv:focus-visible,
-  .slider:focus-visible {
+  .slider:focus-visible::after {
     outline: 2px solid color-mix(in srgb, var(--ui-cp-accent) 64%, transparent);
     outline-offset: 1px;
+  }
+
+  .slider:focus-visible {
+    outline: none;
   }
 
   .thumb {
@@ -445,19 +449,35 @@ const style = `
     transform: translate3d(0, 0, 0);
   }
 
+  /* The track is 12px, but the element is 24px tall (WCAG 2.5.8): the padding is the extra hit area,
+     the track is painted in the content box and the ring is drawn by ::after over just the track. */
   .slider {
     position: relative;
+    box-sizing: content-box;
     block-size: 12px;
+    padding-block: 6px;
     border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--ui-cp-border) 82%, transparent);
+    background-clip: content-box;
+    background-origin: content-box;
     cursor: pointer;
     touch-action: none;
     overflow: visible;
+  }
+
+  .slider::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    inset-block: 6px;
+    box-sizing: border-box;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--ui-cp-border) 82%, transparent);
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-cp-border) 40%, transparent);
+    pointer-events: none;
   }
 
   .slider.hue {
-    background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+    background-image: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
   }
 
   .slider.alpha {

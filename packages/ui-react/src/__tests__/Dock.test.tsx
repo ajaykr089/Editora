@@ -69,6 +69,8 @@ describe('Dock wrapper', () => {
     expect(item?.querySelector('[data-ui-dock-icon]')?.textContent).toBe('I');
     expect(item?.querySelector('[data-ui-dock-label]')?.textContent).toBe('Inbox');
     expect(item?.querySelector('[data-ui-dock-badge]')?.textContent).toBe('9');
+    // The label and the badge are separate words in the item's text.
+    expect(item?.textContent).toBe('IInbox 9');
   });
 
   it('exposes the custom element imperative API through the React ref', async () => {
