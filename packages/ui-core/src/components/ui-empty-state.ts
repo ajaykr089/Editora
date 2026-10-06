@@ -8,8 +8,8 @@ const style = `
     --ui-empty-radius: 16px;
     --ui-empty-padding: 28px;
     --ui-empty-title: var(--ui-color-text, #0f172a);
-    --ui-empty-description: var(--ui-color-muted, #64748b);
-    --ui-empty-icon-bg: color-mix(in srgb, var(--ui-color-muted, #64748b) 18%, transparent);
+    --ui-empty-description: var(--ui-color-muted, #526175);
+    --ui-empty-icon-bg: color-mix(in srgb, var(--ui-color-muted, #526175) 18%, transparent);
     --ui-empty-icon-color: color-mix(in srgb, var(--ui-color-text, #334155) 82%, transparent);
     --ui-empty-shadow: none;
     --ui-empty-action-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 14%, transparent);
@@ -102,7 +102,7 @@ const style = `
 
   :host([tone="success"]) {
     --ui-empty-icon-color: var(--ui-color-success, #166534);
-    --ui-empty-icon-bg: color-mix(in srgb, var(--ui-color-success, #16a34a) 20%, transparent);
+    --ui-empty-icon-bg: color-mix(in srgb, var(--ui-color-success, #15803d) 20%, transparent);
   }
 
   :host([tone="warning"]) {

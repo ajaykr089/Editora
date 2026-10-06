@@ -72,11 +72,11 @@ const style = `
     --ui-chart-surface: color-mix(in srgb, var(--ui-color-surface, #ffffff) 97%, #ffffff 3%);
     --ui-chart-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
     --ui-chart-text: var(--ui-color-text, #0f172a);
-    --ui-chart-muted: var(--ui-color-muted, #64748b);
+    --ui-chart-muted: var(--ui-color-muted, #526175);
     --ui-chart-grid: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 45%, transparent);
     --ui-chart-accent: var(--ui-color-primary, #2563eb);
-    --ui-chart-success: var(--ui-color-success, #16a34a);
-    --ui-chart-warning: var(--ui-color-warning, #d97706);
+    --ui-chart-success: var(--ui-color-success, #15803d);
+    --ui-chart-warning: var(--ui-color-warning, #b45309);
     --ui-chart-danger: var(--ui-color-danger, #dc2626);
     --ui-chart-radius: 16px;
     --ui-chart-shadow: none;
@@ -685,10 +685,10 @@ const style = `
 
 const palette = [
   'var(--ui-color-primary, #2563eb)',
-  'var(--ui-color-success, #16a34a)',
-  'var(--ui-color-warning, #d97706)',
+  'var(--ui-color-success, #15803d)',
+  'var(--ui-color-warning, #b45309)',
   'var(--ui-color-danger, #dc2626)',
-  'var(--ui-color-info, #0891b2)',
+  'var(--ui-color-info, #0e7490)',
   'var(--ui-color-accent, #7c3aed)'
 ];
 

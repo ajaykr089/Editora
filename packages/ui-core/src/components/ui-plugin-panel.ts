@@ -175,7 +175,7 @@ export class UIPluginPanel extends ElementBase {
           <header class="header" part="header" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px 0;">
             <div style="min-width:0;display:grid;gap:4px;flex:1 1 auto;">
               ${title ? `<strong part="title" style="font-size:14px;line-height:1.3;">${title}</strong>` : ''}
-              ${description ? `<p part="description" style="margin:0;font-size:12px;line-height:1.4;color:var(--ui-color-muted, #64748b);">${description}</p>` : ''}
+              ${description ? `<p part="description" style="margin:0;font-size:12px;line-height:1.4;color:var(--ui-color-muted, #526175);">${description}</p>` : ''}
             </div>
             ${dismissible ? '<button type="button" class="dismiss" part="dismiss-button" aria-label="Close panel" style="border:none;background:transparent;color:inherit;cursor:pointer;font:inherit;padding:4px 6px;">Close</button>' : ''}
           </header>

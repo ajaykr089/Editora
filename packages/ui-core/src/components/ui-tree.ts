@@ -10,7 +10,7 @@ const style = `
     --ui-tree-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent);
     --ui-tree-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-tree-text: var(--ui-color-text, #0f172a);
-    --ui-tree-muted: var(--ui-color-muted, #64748b);
+    --ui-tree-muted: var(--ui-color-muted, #526175);
     display: block;
     min-inline-size: 0;
     color-scheme: light dark;

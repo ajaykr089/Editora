@@ -59,7 +59,7 @@ const LISTBOX_BASE_STYLE = `
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: color-mix(in srgb, currentColor 58%, transparent);
+    color: color-mix(in srgb, currentColor 70%, transparent);
     font-size: 0.92em;
     line-height: 1.35;
     letter-spacing: inherit;

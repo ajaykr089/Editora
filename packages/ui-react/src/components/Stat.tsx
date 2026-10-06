@@ -3,10 +3,10 @@ import React from 'react';
 const TONE_ACCENTS = {
   neutral: '#475569',
   brand: '#2563eb',
-  info: '#0891b2',
-  success: '#16a34a',
-  warning: '#d97706',
-  danger: '#dc2626',
+  info: '#0e7490',
+  success: '#15803d',
+  warning: '#b45309',
+  danger: '#c81e1e',
 } as const;
 
 const SIZE_STYLES = {
@@ -69,7 +69,7 @@ export const Stat = React.forwardRef<HTMLElement, StatProps>(function Stat(
       ...rest,
     },
     <div style={{ alignItems: 'center', display: 'flex', gap: 10, justifyContent: 'space-between', minWidth: 0 }}>
-      <div style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: sizing.label, lineHeight: 1.35, minWidth: 0 }}>
+      <div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: sizing.label, lineHeight: 1.35, minWidth: 0 }}>
         {label}
       </div>
       {icon ? (
@@ -95,14 +95,14 @@ export const Stat = React.forwardRef<HTMLElement, StatProps>(function Stat(
       {value}
     </div>,
     description ? (
-      <div style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: sizing.meta, lineHeight: 1.45 }}>
+      <div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: sizing.meta, lineHeight: 1.45 }}>
         {description}
       </div>
     ) : null,
     meta || trend ? (
       <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {meta ? (
-          <div style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: sizing.meta, lineHeight: 1.35 }}>
+          <div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: sizing.meta, lineHeight: 1.35 }}>
             {meta}
           </div>
         ) : null}

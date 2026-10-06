@@ -72,7 +72,7 @@ export const Kbd = React.forwardRef<HTMLElement, KbdProps>(function Kbd(
             style={{
               alignItems: 'center',
               alignSelf: 'center',
-              color: 'var(--ui-color-muted, #64748b)',
+              color: 'var(--ui-color-muted, #526175)',
               display: 'inline-flex',
               fontSize: sizing.fontSize,
               lineHeight: 1,

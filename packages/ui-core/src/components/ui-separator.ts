@@ -7,7 +7,7 @@ const style = `
     --ui-separator-gap: 10px;
     --ui-separator-margin-block: 12px;
     --ui-separator-margin-inline: 0px;
-    --ui-separator-label-color: var(--ui-color-muted, #64748b);
+    --ui-separator-label-color: var(--ui-color-muted, #526175);
     --ui-separator-glow: 0 0 0 transparent;
     color-scheme: light dark;
     display: block;
@@ -113,22 +113,22 @@ const style = `
 
   :host([tone="brand"]) {
     --ui-separator-color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 38%, transparent);
-    --ui-separator-label-color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 68%, var(--ui-color-muted, #64748b));
+    --ui-separator-label-color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 68%, var(--ui-color-muted, #526175));
   }
 
   :host([tone="success"]) {
-    --ui-separator-color: color-mix(in srgb, var(--ui-color-success, #16a34a) 40%, transparent);
-    --ui-separator-label-color: color-mix(in srgb, var(--ui-color-success, #16a34a) 70%, var(--ui-color-muted, #64748b));
+    --ui-separator-color: color-mix(in srgb, var(--ui-color-success, #15803d) 40%, transparent);
+    --ui-separator-label-color: color-mix(in srgb, var(--ui-color-success, #15803d) 70%, var(--ui-color-muted, #526175));
   }
 
   :host([tone="warning"]) {
-    --ui-separator-color: color-mix(in srgb, var(--ui-color-warning, #d97706) 40%, transparent);
-    --ui-separator-label-color: color-mix(in srgb, var(--ui-color-warning, #d97706) 70%, var(--ui-color-muted, #64748b));
+    --ui-separator-color: color-mix(in srgb, var(--ui-color-warning, #b45309) 40%, transparent);
+    --ui-separator-label-color: color-mix(in srgb, var(--ui-color-warning, #b45309) 70%, var(--ui-color-muted, #526175));
   }
 
   :host([tone="danger"]) {
     --ui-separator-color: color-mix(in srgb, var(--ui-color-danger, #dc2626) 40%, transparent);
-    --ui-separator-label-color: color-mix(in srgb, var(--ui-color-danger, #dc2626) 70%, var(--ui-color-muted, #64748b));
+    --ui-separator-label-color: color-mix(in srgb, var(--ui-color-danger, #dc2626) 70%, var(--ui-color-muted, #526175));
   }
 
   :host([variant="dashed"]) .line {

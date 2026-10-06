@@ -38,7 +38,7 @@ const style = `
     --ui-radio-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-radio-border-selected: var(--ui-color-primary, #2563eb);
     --ui-radio-text: var(--ui-color-text, #0f172a);
-    --ui-radio-muted: #64748b;
+    --ui-radio-muted: #526175;
     --ui-radio-shadow: none;
     --ui-radio-ring: color-mix(in srgb, var(--ui-color-primary, #2563eb) 34%, transparent);
   }

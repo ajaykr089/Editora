@@ -299,7 +299,7 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-nav-ring: color-mix(in srgb, var(--ui-color-muted, #64748b) 60%, var(--ui-color-text, #0f172a));
+    --ui-nav-ring: color-mix(in srgb, var(--ui-color-muted, #526175) 60%, var(--ui-color-text, #0f172a));
   }
 
   :host([tone="info"]) {

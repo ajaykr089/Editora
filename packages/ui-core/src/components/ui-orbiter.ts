@@ -212,7 +212,7 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-orbiter-accent: #64748b;
+    --ui-orbiter-accent: #526175;
   }
 
   :host([tone="info"]) {
@@ -220,11 +220,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-orbiter-accent: var(--ui-color-success, #16a34a);
+    --ui-orbiter-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-orbiter-accent: var(--ui-color-warning, #d97706);
+    --ui-orbiter-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {

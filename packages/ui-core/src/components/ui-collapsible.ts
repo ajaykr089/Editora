@@ -19,7 +19,7 @@ const style = `
     --ui-collapsible-surface: color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, #ffffff 2%);
     --ui-collapsible-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
     --ui-collapsible-text: var(--ui-color-text, #0f172a);
-    --ui-collapsible-muted: var(--ui-color-muted, #64748b);
+    --ui-collapsible-muted: var(--ui-color-muted, #526175);
     --ui-collapsible-accent: var(--ui-color-primary, #2563eb);
     --ui-collapsible-radius: 14px;
     --ui-collapsible-shadow: none;
@@ -50,7 +50,7 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-collapsible-accent: color-mix(in srgb, var(--ui-color-muted, #64748b) 82%, var(--ui-color-text, #0f172a) 18%);
+    --ui-collapsible-accent: color-mix(in srgb, var(--ui-color-muted, #526175) 82%, var(--ui-color-text, #0f172a) 18%);
   }
 
   :host([tone="info"]) {
@@ -58,11 +58,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-collapsible-accent: var(--ui-color-success, #16a34a);
+    --ui-collapsible-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-collapsible-accent: var(--ui-color-warning, #d97706);
+    --ui-collapsible-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
@@ -74,7 +74,7 @@ const style = `
   }
 
   :host([state="success"]) {
-    --ui-collapsible-accent: var(--ui-color-success, #16a34a);
+    --ui-collapsible-accent: var(--ui-color-success, #15803d);
   }
 
   .shell {
@@ -274,7 +274,7 @@ const style = `
   }
 
   :host([state="loading"]) .state-note {
-    color: var(--ui-color-warning, #d97706);
+    color: var(--ui-color-warning, #b45309);
   }
 
   :host([state="error"]) .state-note {
@@ -282,7 +282,7 @@ const style = `
   }
 
   :host([state="success"]) .state-note {
-    color: var(--ui-color-success, #16a34a);
+    color: var(--ui-color-success, #15803d);
   }
 
   :host([headless]) .shell {

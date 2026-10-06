@@ -13,7 +13,7 @@ const style = `
   :host {
     --ui-transfer-accent: var(--ui-color-primary, #2563eb);
     --ui-transfer-text: var(--ui-color-text, #0f172a);
-    --ui-transfer-muted: var(--ui-color-muted, #64748b);
+    --ui-transfer-muted: var(--ui-color-muted, #526175);
     --ui-transfer-shell-bg: transparent;
     --ui-transfer-shell-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 84%, transparent);
     --ui-transfer-shell-border: 1px solid var(--ui-transfer-shell-border-color);
@@ -204,11 +204,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-transfer-accent: var(--ui-color-success, #16a34a);
+    --ui-transfer-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-transfer-accent: var(--ui-color-warning, #d97706);
+    --ui-transfer-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {

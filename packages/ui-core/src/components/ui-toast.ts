@@ -40,7 +40,7 @@ const style = `
     --ui-toast-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-toast-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 92%, var(--ui-color-text, #0f172a) 8%);
     --ui-toast-color: var(--ui-color-text, #0f172a);
-    --ui-toast-muted: var(--ui-color-muted, #64748b);
+    --ui-toast-muted: var(--ui-color-muted, #526175);
     --ui-toast-shadow:
       none;
     --ui-toast-focus-ring: var(--ui-color-focus-ring, #2563eb);
@@ -117,13 +117,13 @@ const style = `
   }
 
   .toast[data-tone="success"] {
-    --ui-toast-border-color: color-mix(in srgb, var(--ui-color-success, #16a34a) 38%, var(--ui-color-border, #cbd5e1));
-    --ui-toast-bg: color-mix(in srgb, var(--ui-color-success, #16a34a) 10%, var(--ui-color-surface, #ffffff));
+    --ui-toast-border-color: color-mix(in srgb, var(--ui-color-success, #15803d) 38%, var(--ui-color-border, #cbd5e1));
+    --ui-toast-bg: color-mix(in srgb, var(--ui-color-success, #15803d) 10%, var(--ui-color-surface, #ffffff));
   }
 
   .toast[data-tone="warning"] {
-    --ui-toast-border-color: color-mix(in srgb, var(--ui-color-warning, #d97706) 38%, var(--ui-color-border, #cbd5e1));
-    --ui-toast-bg: color-mix(in srgb, var(--ui-color-warning, #d97706) 10%, var(--ui-color-surface, #ffffff));
+    --ui-toast-border-color: color-mix(in srgb, var(--ui-color-warning, #b45309) 38%, var(--ui-color-border, #cbd5e1));
+    --ui-toast-bg: color-mix(in srgb, var(--ui-color-warning, #b45309) 10%, var(--ui-color-surface, #ffffff));
   }
 
   .toast[data-tone="error"] {

@@ -9,7 +9,7 @@ const style = `
     --ui-aspect-bg-base: var(--base-aspect-ratio-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-aspect-bg: var(--ui-aspect-bg-base);
     --ui-aspect-color: var(--ui-color-text, #0f172a);
-    --ui-aspect-muted: var(--ui-color-muted, #64748b);
+    --ui-aspect-muted: var(--ui-color-muted, #526175);
     --ui-aspect-accent: var(--ui-color-primary, #2563eb);
     --ui-aspect-empty-bg: var(--base-aspect-ratio-empty-bg, color-mix(in srgb, var(--ui-aspect-accent) 9%, transparent));
     --ui-aspect-shadow: var(--base-aspect-ratio-shadow, none);
@@ -77,11 +77,11 @@ const style = `
   }
 
   :host([tone='success']) {
-    --ui-aspect-accent: var(--ui-color-success, #16a34a);
+    --ui-aspect-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone='warning']) {
-    --ui-aspect-accent: var(--ui-color-warning, #d97706);
+    --ui-aspect-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone='danger']) {

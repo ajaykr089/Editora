@@ -70,11 +70,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-odometer-color: var(--ui-color-success, #16a34a);
+    --ui-odometer-color: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-odometer-color: var(--ui-color-warning, #d97706);
+    --ui-odometer-color: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {

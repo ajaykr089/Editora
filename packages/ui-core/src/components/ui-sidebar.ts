@@ -76,7 +76,7 @@ const template = (body: string) => `
     :host {
       --ui-sidebar-bg: var(--base-sidebar-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
       --ui-sidebar-color: var(--ui-color-text, var(--ui-text, #202020));
-      --ui-sidebar-muted: color-mix(in srgb, var(--ui-sidebar-color) 56%, transparent);
+      --ui-sidebar-muted: color-mix(in srgb, var(--ui-sidebar-color) 72%, transparent);
       --ui-sidebar-border: var(--base-sidebar-border, 1px solid color-mix(in srgb, var(--gray-a5, rgba(15, 23, 42, 0.16)) 82%, transparent));
       --ui-sidebar-radius: var(--base-sidebar-radius, var(--ui-radius, 4px));
       --ui-sidebar-shadow: var(--base-sidebar-shadow, var(--shadow-5, none));
@@ -230,11 +230,11 @@ const template = (body: string) => `
     }
 
     :host([tone="success"]) {
-      --ui-sidebar-accent: var(--ui-color-success, #16a34a);
+      --ui-sidebar-accent: var(--ui-color-success, #15803d);
     }
 
     :host([tone="warning"]) {
-      --ui-sidebar-accent: var(--ui-color-warning, #d97706);
+      --ui-sidebar-accent: var(--ui-color-warning, #b45309);
     }
 
     :host([tone="danger"]) {
@@ -453,7 +453,7 @@ const template = (body: string) => `
 
     .item-button[data-tone="danger"] .item-label,
     .item-button[data-tone="danger"] .meta {
-      color: var(--ui-color-danger, #dc2626);
+      color: color-mix(in srgb, var(--ui-color-danger, #dc2626) 84%, var(--ui-color-text, #0f172a));
     }
 
     .icon-wrap,
@@ -527,7 +527,7 @@ const template = (body: string) => `
       font-size: calc(var(--ui-sidebar-item-font-size) - 2px);
       line-height: calc(var(--ui-sidebar-item-line-height) - 2px);
       font-weight: 500;
-      color: color-mix(in srgb, currentColor 54%, transparent);
+      color: color-mix(in srgb, currentColor 70%, transparent);
     }
 
     .item-label,
@@ -551,7 +551,7 @@ const template = (body: string) => `
       font-size: calc(var(--ui-sidebar-item-font-size) - 2px);
       line-height: calc(var(--ui-sidebar-item-line-height) - 2px);
       font-weight: 500;
-      color: color-mix(in srgb, currentColor 54%, transparent);
+      color: color-mix(in srgb, currentColor 70%, transparent);
     }
 
     .meta {

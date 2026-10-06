@@ -16,7 +16,7 @@ const style = `
         var(--ui-meter-fill, #2563eb)
       );
     --ui-meter-text: var(--ui-color-text, #0f172a);
-    --ui-meter-muted: var(--ui-color-muted, #64748b);
+    --ui-meter-muted: var(--ui-color-muted, #526175);
     --ui-meter-height: 12px;
     --ui-meter-radius: 999px;
     --ui-meter-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);

@@ -108,7 +108,7 @@ export const PageHeader = React.forwardRef<HTMLElement, PageHeaderProps>(functio
         {eyebrow ? (
           <div
             style={{
-              color: 'var(--ui-color-muted, #64748b)',
+              color: 'var(--ui-color-muted, #526175)',
               fontSize: 12,
               fontWeight: 600,
               letterSpacing: '0.08em',
@@ -137,7 +137,7 @@ export const PageHeader = React.forwardRef<HTMLElement, PageHeaderProps>(functio
         </div>
 
         {subtitle ? (
-          <div style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 14, lineHeight: 1.45, minWidth: 0 }}>
+          <div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 14, lineHeight: 1.45, minWidth: 0 }}>
             {subtitle}
           </div>
         ) : null}

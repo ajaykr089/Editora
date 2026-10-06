@@ -18,7 +18,7 @@ function ensureCardRuntimeStyles() {
     ui-card [data-ui-card-footer] {
       font-size: var(--ui-card-footer-size, 13px);
       line-height: var(--ui-card-footer-line-height, 18px);
-      color: var(--ui-color-muted, #64748b);
+      color: var(--ui-color-muted, #526175);
     }
 
     ui-card [data-ui-card-media] {
@@ -40,7 +40,7 @@ function ensureCardRuntimeStyles() {
       margin: 0;
       font-size: var(--ui-card-description-size, 14px);
       line-height: var(--ui-card-description-line-height, 20px);
-      color: var(--ui-color-muted, #64748b);
+      color: var(--ui-color-muted, #526175);
     }
   `;
   document.head.appendChild(style);

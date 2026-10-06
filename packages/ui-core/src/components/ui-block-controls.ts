@@ -25,7 +25,7 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-block-controls-accent: color-mix(in srgb, var(--ui-color-muted, #64748b) 72%, var(--ui-color-text, #0f172a) 28%);
+    --ui-block-controls-accent: color-mix(in srgb, var(--ui-color-muted, #526175) 72%, var(--ui-color-text, #0f172a) 28%);
   }
 
   :host([tone="info"]) {
@@ -33,11 +33,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-block-controls-accent: var(--ui-color-success, #16a34a);
+    --ui-block-controls-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-block-controls-accent: var(--ui-color-warning, #d97706);
+    --ui-block-controls-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
@@ -229,7 +229,7 @@ const style = `
   }
 
   :host([state="success"]) {
-    --ui-block-controls-accent: var(--ui-color-success, #16a34a);
+    --ui-block-controls-accent: var(--ui-color-success, #15803d);
     --ui-block-controls-border: 1px solid color-mix(in srgb, var(--ui-block-controls-accent) 44%, var(--ui-color-border, rgba(15, 23, 42, 0.16)));
   }
 

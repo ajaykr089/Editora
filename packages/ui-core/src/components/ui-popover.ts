@@ -13,7 +13,7 @@ const style = `
         color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 24%, var(--ui-color-surface, #ffffff)) 100%
       );
     --ui-popover-text: var(--ui-color-text, #0f172a);
-    --ui-popover-muted: var(--ui-color-muted, #64748b);
+    --ui-popover-muted: var(--ui-color-muted, #526175);
     --ui-popover-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
     --ui-popover-border: 1px solid var(--ui-popover-border-color);
     --ui-popover-shadow:
@@ -50,7 +50,7 @@ const style = `
   }
 
   .popover-shell[data-tone="neutral"] {
-    --ui-popover-accent: var(--ui-color-muted, #64748b);
+    --ui-popover-accent: var(--ui-color-muted, #526175);
   }
 
   .popover-shell[data-tone="brand"],
@@ -59,11 +59,11 @@ const style = `
   }
 
   .popover-shell[data-tone="success"] {
-    --ui-popover-accent: var(--ui-color-success, #16a34a);
+    --ui-popover-accent: var(--ui-color-success, #15803d);
   }
 
   .popover-shell[data-tone="warning"] {
-    --ui-popover-accent: var(--ui-color-warning, #d97706);
+    --ui-popover-accent: var(--ui-color-warning, #b45309);
   }
 
   .popover-shell[data-tone="danger"] {

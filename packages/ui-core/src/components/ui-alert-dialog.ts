@@ -10,7 +10,7 @@ const style = `
     --ui-alert-bg: var(--ui-alert-bg-base);
     --ui-alert-text: var(--ui-color-text, var(--ui-text, #202020));
     --ui-alert-muted: color-mix(in srgb, var(--ui-alert-text) 62%, var(--ui-color-muted, var(--ui-muted, #646464)) 38%);
-    --ui-alert-accent: var(--ui-color-muted, #64748b);
+    --ui-alert-accent: var(--ui-color-muted, #526175);
     --ui-alert-border-color: color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 82%, transparent);
     --ui-alert-border: var(--base-alert-dialog-border, 1px solid var(--ui-alert-border-color));
     --ui-alert-shadow: var(--base-alert-dialog-shadow, var(--shadow-4, none));
@@ -47,11 +47,11 @@ const style = `
   }
 
   :host([tone='success']) {
-    --ui-alert-accent: var(--ui-color-success, #16a34a);
+    --ui-alert-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone='warning']) {
-    --ui-alert-accent: var(--ui-color-warning, #d97706);
+    --ui-alert-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone='danger']) {
@@ -107,11 +107,11 @@ const style = `
     --ui-alert-bg: var(--ui-alert-accent);
     --ui-alert-border: 1px solid color-mix(in srgb, #000000 16%, transparent);
     --ui-alert-text: #ffffff;
-    --ui-alert-muted: color-mix(in srgb, #ffffff 78%, transparent);
-    --ui-alert-btn-bg: color-mix(in srgb, #ffffff 16%, transparent);
-    --ui-alert-btn-border: color-mix(in srgb, #ffffff 22%, transparent);
-    --ui-alert-btn-hover: color-mix(in srgb, #ffffff 24%, transparent);
-    --ui-alert-confirm-bg: color-mix(in srgb, #000000 22%, transparent);
+    --ui-alert-muted: color-mix(in srgb, #ffffff 98%, transparent);
+    --ui-alert-btn-bg: color-mix(in srgb, #000000 14%, transparent);
+    --ui-alert-btn-border: color-mix(in srgb, #ffffff 30%, transparent);
+    --ui-alert-btn-hover: color-mix(in srgb, #000000 22%, transparent);
+    --ui-alert-confirm-bg: color-mix(in srgb, #000000 30%, transparent);
     --ui-alert-confirm-color: #ffffff;
     --ui-alert-icon-bg: color-mix(in srgb, #ffffff 18%, transparent);
     --ui-alert-icon-color: #ffffff;

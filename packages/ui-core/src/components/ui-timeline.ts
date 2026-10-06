@@ -13,7 +13,7 @@ const style = `
     --ui-timeline-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 95%, transparent);
     --ui-timeline-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
     --ui-timeline-text: var(--ui-color-text, #0f172a);
-    --ui-timeline-muted: var(--ui-color-muted, #64748b);
+    --ui-timeline-muted: var(--ui-color-muted, #526175);
     --ui-timeline-accent: var(--ui-color-primary, #2563eb);
     --ui-timeline-indicator-duration: 1.8s;
 
@@ -195,9 +195,9 @@ const style = `
 
 const toneMap: Record<string, string> = {
   default: 'var(--ui-color-primary, #2563eb)',
-  info: 'var(--ui-color-info, #0891b2)',
-  success: 'var(--ui-color-success, #16a34a)',
-  warning: 'var(--ui-color-warning, #d97706)',
+  info: 'var(--ui-color-info, #0e7490)',
+  success: 'var(--ui-color-success, #15803d)',
+  warning: 'var(--ui-color-warning, #b45309)',
   danger: 'var(--ui-color-danger, #dc2626)'
 };
 

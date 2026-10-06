@@ -136,7 +136,7 @@ const style = `
     --ui-box-shadow: 0 2px 10px rgba(2, 6, 23, 0.22), 0 18px 42px rgba(2, 6, 23, 0.34);
   }
 
-  :host([tone="neutral"]) { --ui-box-accent: color-mix(in srgb, var(--ui-color-muted, #64748b) 72%, var(--ui-color-text, #0f172a) 28%); }
+  :host([tone="neutral"]) { --ui-box-accent: color-mix(in srgb, var(--ui-color-muted, #526175) 72%, var(--ui-color-text, #0f172a) 28%); }
   :host([tone="brand"]) { --ui-box-accent: var(--ui-color-primary, var(--ui-primary, #2563eb)); }
   :host([tone="info"]) { --ui-box-accent: var(--ui-color-primary, #2563eb); }
   :host([tone="success"]) { --ui-box-accent: #16a34a; }
@@ -205,7 +205,7 @@ const style = `
   }
 
   :host([state="success"]) {
-    --ui-box-accent: var(--ui-color-success, #16a34a);
+    --ui-box-accent: var(--ui-color-success, #15803d);
     --ui-box-border-color: color-mix(in srgb, var(--ui-box-accent) 42%, var(--ui-color-border, #cbd5e1));
     --ui-box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-box-accent) 16%, transparent), var(--ui-box-shadow);
   }
