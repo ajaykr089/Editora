@@ -83,7 +83,7 @@ const showcaseHeadingStyle: React.CSSProperties = {
   fontSize: 12,
   textTransform: 'uppercase',
   letterSpacing: '0.08em',
-  color: 'var(--ui-color-muted, #64748b)',
+  color: 'var(--ui-color-muted, #526175)',
   marginBottom: 10,
 };
 
@@ -225,7 +225,7 @@ export function FAQPattern() {
     <Grid style={{ gap: 16, maxInlineSize: 860 }}>
       <Box style={{ ...showcaseFrameStyle, padding: 24 }}>
         <Box style={{ fontWeight: 700, fontSize: 28, lineHeight: 1.15, marginBottom: 8 }}>Frequently asked questions</Box>
-        <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 15, lineHeight: 1.6, marginBottom: 18 }}>
+        <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 15, lineHeight: 1.6, marginBottom: 18 }}>
           A cleaner, customer-facing disclosure pattern with low-noise borders and generous reading rhythm.
         </Box>
         <Accordion collapsible variant="outline" radius={12} size="lg" tone="neutral" elevation="none">
@@ -310,7 +310,7 @@ export function ControlledSingleOpen() {
         <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap', marginBottom: 16 }}>
           <Box>
             <Box style={{ fontWeight: 700, fontSize: 20 }}>Controlled operations review</Box>
-            <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
+            <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13, marginTop: 4 }}>
               Single-open mode managed by React state.
             </Box>
           </Box>
@@ -406,11 +406,11 @@ function EnterpriseClinicalAccordion() {
         <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
           <Box>
             <Box style={{ fontWeight: 700, fontSize: 18 }}>Inpatient Care Workflow</Box>
-            <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
+            <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13, marginTop: 4 }}>
               Enterprise accordion built on `ui-core` and wrapped by `ui-react`.
             </Box>
           </Box>
-          <Flex align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>
+          <Flex align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #526175)', fontSize: 12 }}>
             <ClockIcon size={14} />
             Live operation summary
           </Flex>
@@ -429,7 +429,7 @@ function EnterpriseClinicalAccordion() {
       >
         {sections.map((section) => (
           <Accordion.Item key={section.title} description={section.subtitle} badge={section.badge}>
-            <Accordion.Trigger aria-label={`Toggle ${section.title}`}>
+            <Accordion.Trigger>
               <TriggerContent section={section} />
             </Accordion.Trigger>
             <Accordion.Panel>

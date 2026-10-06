@@ -134,7 +134,7 @@ export const Playground: Story = {
                 </Box>
                 <Box style={{ display: 'grid', gap: 4 }}>
                   <Box style={{ fontWeight: 700 }}>{item.title}</Box>
-                  <Box style={{ fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #64748b)' }}>
+                  <Box style={{ fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #526175)' }}>
                     {item.description}
                   </Box>
                 </Box>
@@ -147,7 +147,7 @@ export const Playground: Story = {
         ))}
       </AnimatedList>
 
-      <Box style={{ maxInlineSize: 760, fontSize: 14, lineHeight: '22px', color: '#64748b' }}>
+      <Box style={{ maxInlineSize: 760, fontSize: 14, lineHeight: '22px', color: '#526175' }}>
         Use the controls to test effect direction, motion profile, sequential spacing, surface variants, and looping behavior.
         The component is designed for landing-page activity feeds, notification stacks, and launch storytelling where each item
         should enter with a controlled delay instead of all at once.
@@ -191,7 +191,7 @@ export const NotificationStack = () => (
                   </Box>
                   <Box style={{ display: 'grid', gap: 4 }}>
                     <Box style={{ fontWeight: 700 }}>{item.title}</Box>
-                    <Box style={{ fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #64748b)' }}>
+                    <Box style={{ fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #526175)' }}>
                       {item.description}
                     </Box>
                   </Box>
@@ -246,13 +246,13 @@ export const VariantGallery = () => (
             >
               <AnimatedList.Item>
                 <Box style={{ fontWeight: 700 }}>New event</Box>
-                <Box style={{ fontSize: 12, lineHeight: '16px', color: 'var(--ui-color-muted, #64748b)' }}>
+                <Box style={{ fontSize: 12, lineHeight: '16px', color: 'var(--ui-color-muted, #526175)' }}>
                   Activity lands in a sequenced stack.
                 </Box>
               </AnimatedList.Item>
               <AnimatedList.Item>
                 <Box style={{ fontWeight: 700 }}>Follow-up</Box>
-                <Box style={{ fontSize: 12, lineHeight: '16px', color: 'var(--ui-color-muted, #64748b)' }}>
+                <Box style={{ fontSize: 12, lineHeight: '16px', color: 'var(--ui-color-muted, #526175)' }}>
                   Same API, different surface tone.
                 </Box>
               </AnimatedList.Item>
@@ -311,11 +311,11 @@ export const VariantGallery = () => (
             >
               <AnimatedList.Item>
                 <Box style={{ fontWeight: 700 }}>Motion preset</Box>
-                <Box style={{ fontSize: 12, lineHeight: '16px', color: 'var(--ui-color-muted, #64748b)' }}>{entry.copy}</Box>
+                <Box style={{ fontSize: 12, lineHeight: '16px', color: 'var(--ui-color-muted, #526175)' }}>{entry.copy}</Box>
               </AnimatedList.Item>
               <AnimatedList.Item>
                 <Box style={{ fontWeight: 700 }}>Effect pairing</Box>
-                <Box style={{ fontSize: 12, lineHeight: '16px', color: 'var(--ui-color-muted, #64748b)' }}>
+                <Box style={{ fontSize: 12, lineHeight: '16px', color: 'var(--ui-color-muted, #526175)' }}>
                   {entry.effect}
                 </Box>
               </AnimatedList.Item>
@@ -363,19 +363,19 @@ export const MotionGallery = () => (
           >
             <AnimatedList.Item>
               <Box style={{ fontWeight: 700 }}>{entry.label}</Box>
-              <Box style={{ fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #64748b)' }}>
+              <Box style={{ fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #526175)' }}>
                 Product updates arrive with a noticeably different motion signature.
               </Box>
             </AnimatedList.Item>
             <AnimatedList.Item>
               <Box style={{ fontWeight: 700 }}>Campaign release synced</Box>
-              <Box style={{ fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #64748b)' }}>
+              <Box style={{ fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #526175)' }}>
                 Perfect for comparing how the same content feels across motion presets.
               </Box>
             </AnimatedList.Item>
             <AnimatedList.Item>
               <Box style={{ fontWeight: 700 }}>Accessibility note</Box>
-              <Box style={{ fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #64748b)' }}>
+              <Box style={{ fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #526175)' }}>
                 Reduced-motion users still get the final state immediately.
               </Box>
             </AnimatedList.Item>
@@ -432,19 +432,19 @@ export const ManualPlayback = () => {
           >
             <AnimatedList.Item>
               <Box style={{ fontWeight: 700 }}>Editorial launch sequence</Box>
-              <Box style={{ fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #64748b)' }}>
+              <Box style={{ fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #526175)' }}>
                 Let the section stay stable until the reveal is triggered.
               </Box>
             </AnimatedList.Item>
             <AnimatedList.Item>
               <Box style={{ fontWeight: 700 }}>Motion stays deliberate</Box>
-              <Box style={{ fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #64748b)' }}>
+              <Box style={{ fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #526175)' }}>
                 Ideal for demos, intros, and timed storytelling.
               </Box>
             </AnimatedList.Item>
             <AnimatedList.Item>
               <Box style={{ fontWeight: 700 }}>Replay on demand</Box>
-              <Box style={{ fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #64748b)' }}>
+              <Box style={{ fontSize: 13, lineHeight: '18px', color: 'var(--ui-color-muted, #526175)' }}>
                 Useful for product tours and interactive showcases.
               </Box>
             </AnimatedList.Item>
@@ -528,7 +528,7 @@ export const LandingPageStats = () => (
                     {item.icon}
                   </Box>
                   <Box style={{ display: 'grid', gap: 4 }}>
-                    <Box style={{ fontSize: 12, lineHeight: '16px', color: 'var(--ui-color-muted, #64748b)' }}>{item.label}</Box>
+                    <Box style={{ fontSize: 12, lineHeight: '16px', color: 'var(--ui-color-muted, #526175)' }}>{item.label}</Box>
                     <Box style={{ fontSize: 22, lineHeight: '26px', fontWeight: 800 }}>{item.value}</Box>
                   </Box>
                 </Flex>

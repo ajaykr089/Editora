@@ -95,7 +95,7 @@ export const Playground = (args: any) => {
         <ToolbarActions />
       </FloatingToolbar>
 
-      <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>Last close reason: {lastClose}</Box>
+      <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>Last close reason: {lastClose}</Box>
     </Grid>
   );
 };
@@ -124,7 +124,7 @@ export const EnterpriseDocumentEditor = () => {
       <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
           <h3 style={{ margin: 0, fontSize: 24, lineHeight: 1.2, color: 'var(--ui-color-text, #0f172a)' }}>Clinical Policy Editor</h3>
-          <p style={{ margin: '6px 0 0', fontSize: 14, color: 'var(--ui-color-muted, #64748b)' }}>Inline authoring toolbar with anchored contextual controls.</p>
+          <p style={{ margin: '6px 0 0', fontSize: 14, color: 'var(--ui-color-muted, #526175)' }}>Inline authoring toolbar with anchored contextual controls.</p>
         </Box>
         <Button size="sm" variant="secondary" onClick={() => setOpen((v) => !v)}>
           {open ? 'Hide Toolbar' : 'Show Toolbar'}
@@ -228,7 +228,7 @@ export const ThemeProviderVerification = () => {
             surface: '#ffffff',
             surfaceAlt: '#f8fafc',
             text: '#0f172a',
-            muted: '#64748b',
+            muted: '#526175',
             border: 'rgba(15, 23, 42, 0.16)',
             focusRing: '#0f766e'
           }

@@ -98,7 +98,7 @@ export const Playground: Story = {
         <Badge variant="soft" tone="neutral">Bounded-frame safe</Badge>
         <Badge variant="soft" tone="warning">Custom keyframes supported</Badge>
       </Flex>
-      <div style={{ maxInlineSize: 760, fontSize: 14, lineHeight: '22px', color: '#64748b' }}>
+      <div style={{ maxInlineSize: 760, fontSize: 14, lineHeight: '22px', color: '#526175' }}>
         Use the controls to test reveal style, split strategy, looping, and surface treatment. The bounded frame above is
         intentional: it gives us a quick regression check for right-edge and baseline clipping in tighter containers. The
         component is text-first, so it intentionally flattens slotted content into animated text rather than preserving nested markup.
@@ -355,7 +355,7 @@ export const TightFrameRegression = () => (
     >
       <Grid style={{ gap: 18, gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
         <Card variant="surface" radius={24} style={{ overflow: 'hidden', padding: 18, display: 'grid', gap: 12 }}>
-          <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+          <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
             Gradient hero
           </div>
           <div style={{ ...boundedFrameStyle, padding: 14 }}>
@@ -385,7 +385,7 @@ export const TightFrameRegression = () => (
         </Card>
 
         <Card variant="soft" tone="success" radius={24} style={{ overflow: 'hidden', padding: 18, display: 'grid', gap: 12 }}>
-          <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+          <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
             Supporting copy
           </div>
           <div style={{ ...boundedFrameStyle, padding: 12 }}>

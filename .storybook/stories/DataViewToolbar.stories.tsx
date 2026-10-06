@@ -54,7 +54,7 @@ export const WithFooterSummary = () => (
         { value: 'active', label: 'Active' },
       ]}
       actions={<Button size="sm">Export slice</Button>}
-      footer={<div style={{ fontSize: 12, color: '#64748b' }}>Last synced 3 minutes ago.</div>}
+      footer={<div style={{ fontSize: 12, color: '#526175' }}>Last synced 3 minutes ago.</div>}
       onSearchChange={() => {}}
       onStatusChange={() => {}}
     />

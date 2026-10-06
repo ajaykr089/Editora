@@ -3,12 +3,12 @@ import { Box, Flex, QuickActions } from '@editora/ui-react';
 
 const metaTextStyle: React.CSSProperties = {
   fontSize: 'var(--ui-font-size-sm, 12px)',
-  color: 'var(--ui-color-muted, #64748b)'
+  color: 'var(--ui-color-muted, #526175)'
 };
 
 const subtleTextStyle: React.CSSProperties = {
   fontSize: 'var(--ui-font-size-xs, 11px)',
-  color: 'color-mix(in srgb, var(--ui-color-muted, #64748b) 82%, transparent)'
+  color: 'var(--ui-color-muted, #526175)'
 };
 
 export default {

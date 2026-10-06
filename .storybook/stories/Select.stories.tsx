@@ -91,7 +91,7 @@ function TabButton(props: { active: boolean; onClick: () => void; children: Reac
         border: 'none',
         borderBottom: props.active ? '3px solid var(--ui-color-primary, #2563eb)' : '3px solid transparent',
         background: 'transparent',
-        color: props.active ? 'var(--ui-color-text, #0f172a)' : 'var(--ui-color-muted, #64748b)',
+        color: props.active ? 'var(--ui-color-text, #0f172a)' : 'var(--ui-color-muted, #526175)',
         padding: '14px 4px 12px',
         font: '600 15px/1.4 inherit',
         cursor: 'pointer',
@@ -204,7 +204,7 @@ function SelectPreview(props: {
           </Select>
         </Box>
       </Box>
-      {props.caption ? <div style={{ fontSize: 13, color: '#64748b', textAlign: 'center' }}>{props.caption}</div> : null}
+      {props.caption ? <div style={{ fontSize: 13, color: '#526175', textAlign: 'center' }}>{props.caption}</div> : null}
     </Grid>
   );
 
@@ -381,7 +381,7 @@ export const CompositionSlots: Story = {
       <Grid style={{ gap: 20, maxInlineSize: 480 }}>
         {/* Option + OptGroup */}
         <Box style={{ display: 'grid', gap: 6 }}>
-          <Box style={{ fontSize: 12, color: '#94a3b8' }}>Option + OptGroup</Box>
+          <Box style={{ fontSize: 12, color: '#526175' }}>Option + OptGroup</Box>
           <Select label="Workflow status" value={value} onChange={setValue} variant="surface">
             <Select.Option value="">Choose a status</Select.Option>
             <Select.OptGroup label="Active">
@@ -397,7 +397,7 @@ export const CompositionSlots: Story = {
 
         {/* Label + Description slots */}
         <Box style={{ display: 'grid', gap: 6 }}>
-          <Box style={{ fontSize: 12, color: '#94a3b8' }}>Label + Description slots</Box>
+          <Box style={{ fontSize: 12, color: '#526175' }}>Label + Description slots</Box>
           <Select value={value} onChange={setValue} variant="soft">
             <Select.Label>
               Workflow status <span style={{ color: '#dc2626' }}>*</span>
@@ -411,7 +411,7 @@ export const CompositionSlots: Story = {
 
         {/* Leading + Trailing slots */}
         <Box style={{ display: 'grid', gap: 6 }}>
-          <Box style={{ fontSize: 12, color: '#94a3b8' }}>Leading + Trailing slots</Box>
+          <Box style={{ fontSize: 12, color: '#526175' }}>Leading + Trailing slots</Box>
           <Select label="Assignee" value={value} onChange={setValue} variant="outline">
             <Select.Leading>👤</Select.Leading>
             <Select.Trailing>▾</Select.Trailing>
@@ -423,7 +423,7 @@ export const CompositionSlots: Story = {
 
         {/* Error slot */}
         <Box style={{ display: 'grid', gap: 6 }}>
-          <Box style={{ fontSize: 12, color: '#94a3b8' }}>Error slot</Box>
+          <Box style={{ fontSize: 12, color: '#526175' }}>Error slot</Box>
           <Select label="Status" value="" onChange={setValue} variant="surface" validation="error" required>
             <Select.Option value="">Choose a status</Select.Option>
             <Select.Option value="draft">Draft</Select.Option>

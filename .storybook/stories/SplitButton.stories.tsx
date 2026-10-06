@@ -18,7 +18,7 @@ export default {
 function ActionEcho({ value }: { value: string }) {
   return (
     <div style={{ ...showcasePanelStyle, gap: 8 }}>
-      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+      <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
         Last action
       </div>
       <div style={{ fontSize: 15, color: '#0f172a' }}>

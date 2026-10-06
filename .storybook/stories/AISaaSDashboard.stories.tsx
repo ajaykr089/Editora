@@ -18,7 +18,7 @@ const Card = ({ title, value, delta, tone = 'neutral' }: CardProps) => (
       background: '#ffffff'
     }}
   >
-    <div style={{ fontSize: 12, color: '#64748b', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+    <div style={{ fontSize: 12, color: '#526175', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
       {title}
     </div>
     <div style={{ fontSize: 28, fontWeight: 700, color: '#0f172a', lineHeight: 1.1 }}>{value}</div>
@@ -89,7 +89,7 @@ export const EnterpriseOps = () => {
       <Flex justify="between" align="center" wrap="wrap" gap="10px">
         <Box>
           <h2 style={{ margin: 0, fontSize: 28, color: '#0f172a' }}>SaaS Operations Dashboard</h2>
-          <p style={{ margin: '6px 0 0 0', color: '#64748b' }}>Monitor subscriptions, incident risk, and deployment health.</p>
+          <p style={{ margin: '6px 0 0 0', color: '#526175' }}>Monitor subscriptions, incident risk, and deployment health.</p>
         </Box>
         <Flex gap="8px">
           <Button onClick={handleSync}>{isSyncing ? 'Syncing...' : 'Sync Data'}</Button>

@@ -71,9 +71,9 @@ const btn: React.CSSProperties = {
 };
 const btnPrimary: React.CSSProperties = { ...btn, background: "#1c1917", color: "#fafaf9", border: "1px solid #1c1917" };
 const btnBlue:    React.CSSProperties = { ...btn, color: "#2563eb", borderColor: "rgba(37,99,235,.3)" };
-const btnGreen:   React.CSSProperties = { ...btn, color: "#16a34a", borderColor: "rgba(22,163,74,.3)" };
+const btnGreen:   React.CSSProperties = { ...btn, color: "#15803d", borderColor: "rgba(22,163,74,.3)" };
 const btnRed:     React.CSSProperties = { ...btn, color: "#dc2626", borderColor: "rgba(220,38,38,.3)" };
-const btnAmber:   React.CSSProperties = { ...btn, color: "#d97706", borderColor: "rgba(217,119,6,.3)" };
+const btnAmber:   React.CSSProperties = { ...btn, color: "#b45309", borderColor: "rgba(217,119,6,.3)" };
 
 // ─── Meta ─────────────────────────────────────────────────────────────────────
 

@@ -68,7 +68,7 @@ function TabButton(props: { active: boolean; onClick: () => void; children: Reac
         border: 'none',
         borderBottom: props.active ? '3px solid var(--ui-color-primary, #2563eb)' : '3px solid transparent',
         background: 'transparent',
-        color: props.active ? 'var(--ui-color-text, #0f172a)' : 'var(--ui-color-muted, #64748b)',
+        color: props.active ? 'var(--ui-color-text, #0f172a)' : 'var(--ui-color-muted, #526175)',
         padding: '14px 4px 12px',
         font: '600 15px/1.4 inherit',
         cursor: 'pointer',
@@ -295,7 +295,7 @@ export const Playground: Story = {
                   <ShieldIcon size={16} />
                   <span style={{ fontWeight: 700 }}>Critical Escalation Workspace</span>
                 </Flex>
-                <div style={{ maxInlineSize: 560, color: '#64748b', fontSize: 14, lineHeight: 1.6 }}>
+                <div style={{ maxInlineSize: 560, color: '#526175', fontSize: 14, lineHeight: 1.6 }}>
                   Right-click anywhere in this surface to open the context menu. The component is portaled, typeahead-aware, submenu-capable, and theme-token driven.
                 </div>
                 <Badge tone="info">Right-click here</Badge>

@@ -63,7 +63,7 @@ export const Playground = (args: any) => (
       <Flex align="center" justify="space-between" style={{ gap: 8, flexWrap: 'wrap' }}>
         <div>
           <div style={{ fontWeight: 700, fontSize: 18 }}>Enterprise Assignment Combobox</div>
-          <div style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
+          <div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13, marginTop: 4 }}>
             Test keyboard filtering, async states, and validation feedback.
           </div>
         </div>
@@ -208,7 +208,7 @@ export const EnterpriseTriageWorkflow = () => {
           </Button>
         </Flex>
 
-        <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>
+        <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>
           value: <code>{value || '(none)'}</code> | query: <code>{query || '(empty)'}</code>
         </Box>
       </Grid>
@@ -247,7 +247,7 @@ export const EdgeCases = () => {
               Handover
             </Combobox.Option>
           </Combobox>
-          <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>
+          <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>
             Current tag: <code>{value || '(none)'}</code>
           </Box>
         </Grid>

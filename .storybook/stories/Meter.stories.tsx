@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Flex, Grid, Meter } from '@editora/ui-react';
+import { DarkSurface } from './storybook-showcase';
 
 export default {
   title: 'UI/Meter',
@@ -62,7 +63,7 @@ export const CapacityBands = () => (
       }}
     >
       <strong>Why meter instead of progress</strong>
-      <Box style={{ marginTop: 8, color: 'var(--ui-color-muted, #64748b)' }}>
+      <Box style={{ marginTop: 8, color: 'var(--ui-color-muted, #526175)' }}>
         Use meter when the value is a measurement or score, not a task moving toward completion. Health, quality, capacity, and quota are meter semantics.
       </Box>
     </Box>
@@ -73,6 +74,8 @@ export const CircularScores = () => (
   <Flex style={{ display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'center' }}>
     <Meter mode="circle" value={0.82} max={1} low={0.45} high={0.72} optimum={0.9} format="percent" precision={0} label="Reliability" showLabel />
     <Meter mode="circle" value={0.63} max={1} low={0.45} high={0.72} optimum={0.9} format="percent" precision={0} label="Coverage" showLabel variant="soft" />
-    <Meter mode="circle" value={0.37} max={1} low={0.45} high={0.72} optimum={0.9} format="percent" precision={0} label="Risk" showLabel variant="contrast" />
+    <DarkSurface>
+      <Meter mode="circle" value={0.37} max={1} low={0.45} high={0.72} optimum={0.9} format="percent" precision={0} label="Risk" showLabel variant="contrast" />
+    </DarkSurface>
   </Flex>
 );

@@ -134,7 +134,7 @@ export const Playground: Story = {
               ['Policy drift', '2 alerts']
             ].map(([label, value]) => (
               <div key={label} style={appTileStyle}>
-                <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b', fontWeight: 700 }}>
+                <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175', fontWeight: 700 }}>
                   {label}
                 </div>
                 <div style={{ fontSize: 26, lineHeight: 1.1, color: '#0f172a', fontWeight: 750 }}>{value}</div>
@@ -189,7 +189,7 @@ export const ApplicationLauncher = () => {
               <div style={{ fontSize: 30, lineHeight: 1.08, fontWeight: 760, color: '#0f172a' }}>
                 {active === 'library' ? 'Editorial library synced and ready.' : `Focused on ${active}.`}
               </div>
-              <div style={{ fontSize: 14, lineHeight: '22px', color: '#64748b', maxInlineSize: 640 }}>
+              <div style={{ fontSize: 14, lineHeight: '22px', color: '#526175', maxInlineSize: 640 }}>
                 Use dock items for high-frequency destinations that should feel tactile and immediate. Labels stay out of the
                 way until motion or focus brings them forward.
               </div>
@@ -197,13 +197,13 @@ export const ApplicationLauncher = () => {
 
             <div style={{ display: 'grid', gap: 12 }}>
               <div style={appTileStyle}>
-                <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b', fontWeight: 700 }}>
+                <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175', fontWeight: 700 }}>
                   Active destination
                 </div>
                 <div style={{ fontSize: 20, lineHeight: 1.1, color: '#0f172a', fontWeight: 720 }}>{active}</div>
               </div>
               <div style={appTileStyle}>
-                <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b', fontWeight: 700 }}>
+                <div style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175', fontWeight: 700 }}>
                   Activity
                 </div>
                 <Flex align="center" gap="8px" style={{ color: '#475569', fontSize: 14 }}>
@@ -291,7 +291,7 @@ export const ScaleGallery = () => (
           { size: 'xl', label: 'XL' }
         ].map((entry) => (
           <div key={entry.size} style={{ display: 'grid', gap: 10 }}>
-            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
               {entry.label}
             </div>
             <Dock size={entry.size as any} variant="glass" tone="brand" labelMode="always" labelPlacement="bottom">
@@ -330,7 +330,7 @@ export const MotionGallery = () => (
           { animation: 'bouncy', tone: 'warning', label: 'Bouncy' }
         ].map((entry) => (
           <div key={entry.animation} style={{ display: 'grid', gap: 10 }}>
-            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
               {entry.label}
             </div>
             <Dock
@@ -381,7 +381,7 @@ export const VariantGallery = () => (
           { variant: 'minimal', tone: 'danger', label: 'Minimal' }
         ].map((entry) => (
           <div key={entry.label} style={{ display: 'grid', gap: 10 }}>
-            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
               {entry.label}
             </div>
             <Dock
@@ -423,7 +423,7 @@ export const VariantGallery = () => (
           { size: 'xl', label: 'XL' }
         ].map((entry) => (
           <div key={entry.size} style={{ display: 'grid', gap: 10 }}>
-            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
               {entry.label}
             </div>
             <Dock
@@ -461,7 +461,7 @@ export const VariantGallery = () => (
           { animation: 'bouncy', tone: 'warning', label: 'Bouncy' }
         ].map((entry) => (
           <div key={entry.animation} style={{ display: 'grid', gap: 10 }}>
-            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+            <div style={{ fontSize: 12, lineHeight: '16px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
               {entry.label}
             </div>
             <Dock

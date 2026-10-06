@@ -33,7 +33,7 @@ export const Controlled = (args: any) => {
         clickable={args.clickable}
         onChange={(detail) => setValue(detail.value)}
       />
-      <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>Active step: <strong>{value}</strong></Box>
+      <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #526175)' }}>Active step: <strong>{value}</strong></Box>
     </Box>
   );
 };
@@ -75,7 +75,7 @@ export const AnimatedCurrentStep = () => (
         { value: 'review', label: 'Review', description: 'Final confirmation' }
       ]}
     />
-    <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>
+    <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #526175)' }}>
       Current step shows animated indicator and connector flow.
     </Box>
   </Box>

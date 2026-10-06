@@ -103,7 +103,7 @@ function InteractiveHeaderShell(props: React.ComponentProps<typeof AppHeader>) {
       >
         <Flex direction="column" style={{ gap: 8 }}>
           <Box style={{ fontWeight: 600 }}>Navigation</Box>
-          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
             Dashboard, Patients, Staffing, and Billing are available from the app shell.
           </Box>
         </Flex>
@@ -140,7 +140,7 @@ export const VariantGallery: Story = {
         { label: 'Solid', variant: 'solid', tone: 'info' },
       ].map((entry) => (
         <Grid key={entry.label} style={{ gap: 8 }}>
-          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #526175)' }}>{entry.label}</Box>
           <HeaderChrome
             bordered
             showMenuButton
@@ -163,7 +163,7 @@ export const SizeGallery: Story = {
         { label: 'Large', size: 'lg' },
       ].map((entry) => (
         <Grid key={entry.label} style={{ gap: 8 }}>
-          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #526175)' }}>{entry.label}</Box>
           <HeaderChrome
             bordered
             showMenuButton
@@ -215,7 +215,7 @@ export const ProductShellPattern: Story = {
           padding: 16,
           borderRadius: 16,
           border: '1px dashed color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent)',
-          color: 'var(--ui-color-muted, #64748b)',
+          color: 'var(--ui-color-muted, #526175)',
         }}
       >
         Scrollable workspace content begins here. The header remains visually stable and can switch between surface,
@@ -251,7 +251,7 @@ export const SignalBar: Story = {
       <AppHeader.Title>Release 2026.03.12.4 is now active</AppHeader.Title>
       <AppHeader.Subtitle>Observability checks are healthy across all regions</AppHeader.Subtitle>
       <AppHeader.End>
-        <Button size="sm" recipe="surface" variant="secondary">
+        <Button size="sm" recipe="solid" variant="secondary">
           View changes
         </Button>
       </AppHeader.End>

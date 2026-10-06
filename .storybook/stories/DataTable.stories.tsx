@@ -56,7 +56,7 @@ const panelSubtitleStyle: React.CSSProperties = {
   margin: 'var(--ui-space-xs, 4px) 0 0',
   fontSize: 'var(--ui-font-size-md, 14px)',
   lineHeight: 1.45,
-  color: 'var(--ui-color-muted, #64748b)'
+  color: 'var(--ui-color-muted, #526175)'
 };
 
 const metricGridStyle: React.CSSProperties = {
@@ -74,7 +74,7 @@ const metricCardStyle: React.CSSProperties = {
 
 const metricLabelStyle: React.CSSProperties = {
   fontSize: 'var(--ui-font-size-sm, 12px)',
-  color: 'var(--ui-color-muted, #64748b)',
+  color: 'var(--ui-color-muted, #526175)',
   textTransform: 'uppercase',
   letterSpacing: '0.06em'
 };
@@ -228,7 +228,7 @@ export const UsersTable = (args: any) => {
       </DataTable>
 
       <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--ui-space-sm, 8px)', flexWrap: 'wrap' }}>
-        <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>
+        <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #526175)' }}>
           Selected users: {selected.length ? selected.length : 'none'}
         </Box>
         <Pagination id="users-pagination" page={page} />
@@ -464,7 +464,7 @@ export const FilterResizeReorder = () => {
         <Button size="sm" variant="secondary" onClick={() => setOrder('status,name,role,email,signups')}>
           Status-first
         </Button>
-        <Box style={{ fontSize: 'var(--ui-font-size-sm, 12px)', color: 'var(--ui-color-muted, #64748b)' }}>
+        <Box style={{ fontSize: 'var(--ui-font-size-sm, 12px)', color: 'var(--ui-color-muted, #526175)' }}>
           Drag table headers to reorder columns
         </Box>
       </Flex>
@@ -515,10 +515,10 @@ export const FilterResizeReorder = () => {
       </DataTable>
 
       <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>
+        <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #526175)' }}>
           Matched {stats.filtered} of {stats.total} users
         </Box>
-        <Box style={{ fontSize: 'var(--ui-font-size-sm, 12px)', color: 'var(--ui-color-muted, #64748b)' }}>
+        <Box style={{ fontSize: 'var(--ui-font-size-sm, 12px)', color: 'var(--ui-color-muted, #526175)' }}>
           Order: <code>{order}</code>
         </Box>
         <Pagination id="filter-pagination" page={page} />
@@ -545,7 +545,7 @@ export const VirtualizedLargeDataset = () => {
           placeholder="Filter large dataset..."
           style={{ minWidth: 240 }}
         />
-        <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>
+        <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #526175)' }}>
           Window: {range.start + 1}-{Math.max(range.start + 1, range.end + 1)} / {range.total} (visible {range.visible})
         </Box>
       </Flex>
@@ -863,7 +863,7 @@ export const PinnedFilterBuilderBulkActions = () => {
       </DataTable>
 
       <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>
+        <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #526175)' }}>
           Selected rows: <strong>{selected.length}</strong> {message ? `• ${message}` : ''}
         </Box>
         <Pagination id="pinned-pagination" page={page} />

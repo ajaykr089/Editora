@@ -108,7 +108,7 @@ export const VariantGallery: Story = {
         { label: 'Ghost', variant: 'ghost', tone: 'danger' },
       ].map((entry) => (
         <Grid key={entry.label} style={{ gap: 8 }}>
-          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #526175)' }}>{entry.label}</Box>
           <DemoToolbar variant={entry.variant as any} tone={entry.tone as any} size="md" radius={12} elevation="low" wrap />
         </Grid>
       ))}
@@ -125,7 +125,7 @@ export const SizeGallery: Story = {
         { label: 'Large', size: 'lg', radius: 16 },
       ].map((entry) => (
         <Grid key={entry.label} style={{ gap: 8 }}>
-          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #526175)' }}>{entry.label}</Box>
           <DemoToolbar variant="surface" tone="info" size={entry.size as any} radius={entry.radius} elevation="low" wrap />
         </Grid>
       ))}
@@ -221,7 +221,7 @@ export const EditorialWorkflow: Story = {
                 padding: 12,
                 background: 'var(--ui-color-surface, #fff)',
                 fontSize: 13,
-                color: 'var(--ui-color-muted, #64748b)',
+                color: 'var(--ui-color-muted, #526175)',
               }}
             >
               Block: <strong>{block}</strong> | Alignment: <strong>{align}</strong> | State: <strong>{state}</strong>

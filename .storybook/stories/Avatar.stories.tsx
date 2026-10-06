@@ -77,7 +77,7 @@ export const Playground: Story = {
             />
             <Flex direction="column" style={{ gap: 2 }}>
               <Box style={{ fontWeight: 600 }}>Dr. Ava Singh</Box>
-              <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>ICU Lead</Box>
+              <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>ICU Lead</Box>
             </Flex>
           </Flex>
         </Box>
@@ -96,7 +96,7 @@ export const VariantGallery: Story = {
         { label: 'Solid', variant: 'solid', tone: 'success' },
       ].map((entry) => (
         <Grid key={entry.label} style={{ gap: 8 }}>
-          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #526175)' }}>{entry.label}</Box>
           <Flex align="center" style={{ gap: 12 }}>
             <Avatar
               alt={`${entry.label} avatar`}
@@ -130,7 +130,7 @@ export const SizeGallery: Story = {
         { label: 'Large', size: 'lg' },
       ].map((entry) => (
         <Grid key={entry.label} style={{ gap: 8 }}>
-          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #526175)' }}>{entry.label}</Box>
           <Flex align="center" style={{ gap: 12 }}>
             <Avatar size={entry.size as 'sm' | 'md' | 'lg'} initials="AV" tone="info" />
             <Avatar
@@ -180,11 +180,11 @@ export const ClinicalRosterWorkflow: Story = {
           <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
             <Box>
               <Box style={{ fontWeight: 700, fontSize: 18 }}>Clinical presence roster</Box>
-              <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
+              <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13, marginTop: 4 }}>
                 Presence, fallback, queue badges, and quick escalation actions for live operations.
               </Box>
             </Box>
-            <Flex align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>
+            <Flex align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #526175)', fontSize: 12 }}>
               <ClockIcon size={14} />
               Shift status: Live
             </Flex>
@@ -225,7 +225,7 @@ export const ClinicalRosterWorkflow: Story = {
                     />
                     <Box style={{ minWidth: 0 }}>
                       <Box style={{ fontWeight: 650, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis' }}>{member.name}</Box>
-                      <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)', marginTop: 2 }}>{member.role}</Box>
+                      <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)', marginTop: 2 }}>{member.role}</Box>
                     </Box>
                   </Flex>
                   <Flex align="center" style={{ gap: 5, fontSize: 11, color: isActive ? 'var(--ui-color-primary, #2563eb)' : 'var(--ui-color-muted, #64748b)' }}>

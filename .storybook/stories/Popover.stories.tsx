@@ -42,7 +42,7 @@ export const Playground = (args: any) => (
       </Popover.Trigger>
       <Popover.Content style={{ minWidth: 220 }}>
         <Box style={{ fontWeight: 700 }}>Popover content</Box>
-        <Box style={{ fontSize: '0.92em', color: 'var(--ui-color-muted, #64748b)' }}>
+        <Box style={{ fontSize: '0.92em', color: 'var(--ui-color-muted, #526175)' }}>
           Floating panel with the same theme and size tokens as newer surface components.
         </Box>
       </Popover.Content>
@@ -83,7 +83,7 @@ export const CompositionSlots = () => (
       </Popover.Trigger>
       <Popover.Content style={{ minWidth: 240 }}>
         <Box style={{ fontWeight: 600, marginBottom: 6 }}>Workspace settings</Box>
-        <Box style={{ fontSize: 13, color: '#64748b' }}>
+        <Box style={{ fontSize: 13, color: '#526175' }}>
           Manage members, billing, and integrations from this panel.
         </Box>
       </Popover.Content>
@@ -105,7 +105,7 @@ export const CompositionSlots = () => (
 
 export const VariantGallery = () => (
   <Box style={{ padding: 32 }}>
-    <Box style={{ marginBottom: 18, fontSize: 13, color: '#64748b' }}>
+    <Box style={{ marginBottom: 18, fontSize: 13, color: '#526175' }}>
       Surface variants, tones, and sizes now use the same token pattern as the newer overlay and card components.
     </Box>
     <Box
@@ -144,7 +144,7 @@ export const VariantGallery = () => (
               left: 14,
               fontSize: 12,
               lineHeight: 1.4,
-              color: '#64748b',
+              color: '#526175',
               fontWeight: 600,
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
@@ -166,7 +166,7 @@ export const VariantGallery = () => (
             </Popover.Trigger>
             <Popover.Content style={{ minWidth: 210 }}>
               <Box style={{ fontWeight: 700 }}>{entry.label}</Box>
-              <Box style={{ fontSize: '0.92em', color: 'var(--ui-color-muted, #64748b)' }}>
+              <Box style={{ fontSize: '0.92em', color: 'var(--ui-color-muted, #526175)' }}>
                 Popover panels inherit their surface tokens directly from the root component.
               </Box>
             </Popover.Content>
@@ -179,7 +179,7 @@ export const VariantGallery = () => (
 
 export const PlacementMatrix = () => (
   <Box style={{ padding: 32 }}>
-    <Box style={{ marginBottom: 16, fontSize: 13, color: '#64748b' }}>
+    <Box style={{ marginBottom: 16, fontSize: 13, color: '#526175' }}>
       Each tile disables <code>flip</code> and <code>shift</code> so the requested placement stays fixed for review.
     </Box>
     <Box
@@ -226,7 +226,7 @@ export const PlacementMatrix = () => (
               left: 14,
               fontSize: 12,
               lineHeight: 1.4,
-              color: '#64748b',
+              color: '#526175',
               fontWeight: 600,
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
@@ -282,7 +282,7 @@ export const Controlled = () => {
         </Popover.Trigger>
         <Popover.Content style={{ minWidth: 200 }}>
           <Box style={{ fontWeight: 600, marginBottom: 4 }}>Controlled popover</Box>
-          <Box style={{ fontSize: 13, color: '#64748b' }}>Open state: <strong>{String(open)}</strong></Box>
+          <Box style={{ fontSize: 13, color: '#526175' }}>Open state: <strong>{String(open)}</strong></Box>
         </Popover.Content>
       </Popover>
     </Box>

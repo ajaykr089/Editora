@@ -50,7 +50,7 @@ export const AllPluginsShowcase: Story = {
           <h2>Basic Formatting</h2>
           <p><strong>Bold</strong>, <em>Italic</em>, <u>Underline</u>, <s>Strikethrough</s></p>
           <h2>Typography</h2>
-          <p style="color: #e91e63;">Text Color</p>
+          <p style="color: #c2185b;">Text Color</p>
           <p style="background-color: #ffeb3b;">Background Color</p>
           <p style="font-size: 18px;">Font Size: 18px</p>
           <p style="font-family: 'Courier New';">Font Family: Courier New</p>
@@ -188,7 +188,7 @@ export const EventHandling: Story = {
         />
 
         <Box style={{ marginTop: '20px', padding: '15px', background: '#e8f5e9', borderRadius: '4px' }}>
-          <h4 style={{ margin: '0 0 10px 0' }}>Statistics</h4>
+          <h3 style={{ margin: '0 0 10px 0' }}>Statistics</h3>
           <p style={{ margin: '5px 0' }}>Words: <strong>{wordCount}</strong></p>
           <p style={{ margin: '5px 0' }}>Characters: <strong>{charCount}</strong></p>
           <details style={{ marginTop: '10px' }}>

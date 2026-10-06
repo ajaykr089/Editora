@@ -110,7 +110,7 @@ function TabButton(props: { active: boolean; onClick: () => void; children: Reac
         border: 'none',
         borderBottom: props.active ? '3px solid var(--ui-color-primary, #2563eb)' : '3px solid transparent',
         background: 'transparent',
-        color: props.active ? 'var(--ui-color-text, #0f172a)' : 'var(--ui-color-muted, #64748b)',
+        color: props.active ? 'var(--ui-color-text, #0f172a)' : 'var(--ui-color-muted, #526175)',
         padding: '14px 4px 12px',
         font: '600 15px/1.4 inherit',
         cursor: 'pointer',
@@ -273,7 +273,7 @@ function DropdownPreview(props: {
         </Box>
       </Box>
       <Flex justify="space-between" align="center" style={{ gap: 10, flexWrap: 'wrap' }}>
-        {props.caption ? <div style={{ fontSize: 13, color: '#64748b' }}>{props.caption}</div> : <span />}
+        {props.caption ? <div style={{ fontSize: 13, color: '#526175' }}>{props.caption}</div> : <span />}
         <Badge tone="neutral">last action: {lastAction}</Badge>
       </Flex>
     </Grid>

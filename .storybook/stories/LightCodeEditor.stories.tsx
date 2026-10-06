@@ -1545,7 +1545,7 @@ const LightCodeEditorDemo = ({
           onClick={toggleFullscreen}
           style={{
             padding: "8px 16px",
-            backgroundColor: theme === "dark" ? "#007acc" : "#007bff",
+            backgroundColor: theme === "dark" ? "#007acc" : "#0062cc",
             color: "white",
             border: "none",
             borderRadius: "4px",
@@ -1607,7 +1607,7 @@ const LightCodeEditorDemo = ({
               onClick={handleSearch}
               style={{
                 padding: "5px 10px",
-                backgroundColor: theme === "dark" ? "#28a745" : "#28a745",
+                backgroundColor: theme === "dark" ? "#1e7e34" : "#1e7e34",
                 color: "white",
                 border: "none",
                 borderRadius: "4px",
@@ -1639,9 +1639,9 @@ const LightCodeEditorDemo = ({
               onClick={() => setLineDecorationsEnabled((prev) => !prev)}
               style={{
                 padding: "5px 10px",
-                backgroundColor: lineDecorationsEnabled ? "#0ea5e9" : "transparent",
+                backgroundColor: lineDecorationsEnabled ? "#0369a1" : "transparent",
                 color: lineDecorationsEnabled ? "white" : theme === "dark" ? "#f8f9fa" : "#333",
-                border: `1px solid ${lineDecorationsEnabled ? "#0ea5e9" : theme === "dark" ? "#404040" : "#ddd"}`,
+                border: `1px solid ${lineDecorationsEnabled ? "#0369a1" : theme === "dark" ? "#404040" : "#ddd"}`,
                 borderRadius: "999px",
                 cursor: "pointer"
               }}
@@ -1652,9 +1652,9 @@ const LightCodeEditorDemo = ({
               onClick={() => setGutterDecorationsEnabled((prev) => !prev)}
               style={{
                 padding: "5px 10px",
-                backgroundColor: gutterDecorationsEnabled ? "#f97316" : "transparent",
+                backgroundColor: gutterDecorationsEnabled ? "#c2410c" : "transparent",
                 color: gutterDecorationsEnabled ? "white" : theme === "dark" ? "#f8f9fa" : "#333",
-                border: `1px solid ${gutterDecorationsEnabled ? "#f97316" : theme === "dark" ? "#404040" : "#ddd"}`,
+                border: `1px solid ${gutterDecorationsEnabled ? "#c2410c" : theme === "dark" ? "#404040" : "#ddd"}`,
                 borderRadius: "999px",
                 cursor: "pointer"
               }}
@@ -1665,9 +1665,9 @@ const LightCodeEditorDemo = ({
               onClick={() => setInlineDecorationsEnabled((prev) => !prev)}
               style={{
                 padding: "5px 10px",
-                backgroundColor: inlineDecorationsEnabled ? "#ef4444" : "transparent",
+                backgroundColor: inlineDecorationsEnabled ? "#dc2626" : "transparent",
                 color: inlineDecorationsEnabled ? "white" : theme === "dark" ? "#f8f9fa" : "#333",
-                border: `1px solid ${inlineDecorationsEnabled ? "#ef4444" : theme === "dark" ? "#404040" : "#ddd"}`,
+                border: `1px solid ${inlineDecorationsEnabled ? "#dc2626" : theme === "dark" ? "#404040" : "#ddd"}`,
                 borderRadius: "999px",
                 cursor: "pointer"
               }}
@@ -1697,7 +1697,7 @@ const LightCodeEditorDemo = ({
               onClick={() => editorInstanceRef.current?.executeCommand?.("nextDiagnostic")}
               style={{
                 padding: "5px 10px",
-                backgroundColor: theme === "dark" ? "#7c3aed" : "#8b5cf6",
+                backgroundColor: theme === "dark" ? "#7c3aed" : "#7c3aed",
                 color: "white",
                 border: "none",
                 borderRadius: "999px",
@@ -1710,7 +1710,7 @@ const LightCodeEditorDemo = ({
               onClick={() => diagnosticsExtensionRef.current?.setDiagnostics(buildDiagnosticsDemo(currentContent))}
               style={{
                 padding: "5px 10px",
-                backgroundColor: theme === "dark" ? "#0f766e" : "#0d9488",
+                backgroundColor: theme === "dark" ? "#0f766e" : "#0f766e",
                 color: "white",
                 border: "none",
                 borderRadius: "999px",
@@ -1742,7 +1742,7 @@ const LightCodeEditorDemo = ({
               onClick={() => editorInstanceRef.current?.executeCommand?.("showCompletions")}
               style={{
                 padding: "5px 10px",
-                backgroundColor: theme === "dark" ? "#0f766e" : "#0ea5e9",
+                backgroundColor: theme === "dark" ? "#0f766e" : "#0369a1",
                 color: "white",
                 border: "none",
                 borderRadius: "999px",
@@ -1764,7 +1764,7 @@ const LightCodeEditorDemo = ({
               onClick={() => editorInstanceRef.current?.executeCommand?.("formatDocument")}
               style={{
                 padding: "5px 10px",
-                backgroundColor: theme === "dark" ? "#0369a1" : "#0284c7",
+                backgroundColor: theme === "dark" ? "#0369a1" : "#0369a1",
                 color: "white",
                 border: "none",
                 borderRadius: "999px",
@@ -1847,7 +1847,7 @@ const LightCodeEditorDemo = ({
               onClick={() => editorInstanceRef.current?.executeCommand?.("toggleBlockComment")}
               style={{
                 padding: "5px 10px",
-                backgroundColor: theme === "dark" ? "#b45309" : "#d97706",
+                backgroundColor: theme === "dark" ? "#b45309" : "#b45309",
                 color: "white",
                 border: "none",
                 borderRadius: "999px",
@@ -1860,7 +1860,7 @@ const LightCodeEditorDemo = ({
               onClick={() => editorInstanceRef.current?.executeCommand?.("duplicateLine")}
               style={{
                 padding: "5px 10px",
-                backgroundColor: theme === "dark" ? "#0f766e" : "#0d9488",
+                backgroundColor: theme === "dark" ? "#0f766e" : "#0f766e",
                 color: "white",
                 border: "none",
                 borderRadius: "999px",
@@ -1930,7 +1930,7 @@ const LightCodeEditorDemo = ({
               onClick={() => editorInstanceRef.current?.executeCommand?.("refreshLanguageDiagnostics")}
               style={{
                 padding: "5px 10px",
-                backgroundColor: theme === "dark" ? "#0f766e" : "#0d9488",
+                backgroundColor: theme === "dark" ? "#0f766e" : "#0f766e",
                 color: "white",
                 border: "none",
                 borderRadius: "999px",
@@ -1969,7 +1969,7 @@ const LightCodeEditorDemo = ({
               onClick={() => editorInstanceRef.current?.executeCommand?.("showCodeActions")}
               style={{
                 padding: "5px 10px",
-                backgroundColor: theme === "dark" ? "#b45309" : "#d97706",
+                backgroundColor: theme === "dark" ? "#b45309" : "#b45309",
                 color: "white",
                 border: "none",
                 borderRadius: "999px",

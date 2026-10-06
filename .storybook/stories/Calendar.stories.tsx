@@ -63,11 +63,11 @@ function EnterpriseClinicalCalendar() {
         <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
           <div>
             <div style={{ fontWeight: 700, fontSize: 18 }}>Clinical Scheduling Calendar</div>
-            <div style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
+            <div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13, marginTop: 4 }}>
               Enterprise-grade calendar for capacity planning, compliance checks, and daily operation routing.
             </div>
           </div>
-          <Flex align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>
+          <Flex align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #526175)', fontSize: 12 }}>
             <ShieldIcon size={14} />
             HIPAA-aware Workflow
           </Flex>
@@ -298,7 +298,7 @@ export const BareFlat: Story = {
     <Grid style={{ gap: 12, maxInlineSize: 760 }}>
       <Box variant="elevated" p="14px" radius="xl" style={{ display: 'grid', gap: 8 }}>
         <Badge tone="info">Bare calendar surface</Badge>
-        <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+        <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
           `bare` removes calendar panel chrome (border/shadow/background) for flat UI surfaces.
         </Box>
         <Calendar
@@ -355,7 +355,7 @@ export const Localization: Story = {
     <Grid style={{ gap: 12, maxInlineSize: 980 }}>
       <Box variant="elevated" p="14px" radius="xl" style={{ display: 'grid', gap: 10 }}>
         <Badge tone="brand">Calendar localization</Badge>
-        <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+        <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
           Switch locale and week start to validate month labels, weekdays, and action text.
         </Box>
         <Flex align="center" style={{ gap: 8, flexWrap: 'wrap' }}>

@@ -125,13 +125,13 @@ export const VariantGallery = () => (
 export const SizeGallery = () => (
   <Grid style={{ display: 'grid', gridTemplateColumns: '160px repeat(3, minmax(240px, 1fr))', gap: 18, padding: 20, alignItems: 'start' }}>
     <div />
-    <div style={{ textAlign: 'center', color: '#64748b' }}>Surface</div>
-    <div style={{ textAlign: 'center', color: '#64748b' }}>Soft</div>
-    <div style={{ textAlign: 'center', color: '#64748b' }}>Solid</div>
+    <div style={{ textAlign: 'center', color: '#526175' }}>Surface</div>
+    <div style={{ textAlign: 'center', color: '#526175' }}>Soft</div>
+    <div style={{ textAlign: 'center', color: '#526175' }}>Solid</div>
 
     {(['sm', 'md', 'lg'] as const).map((size) => (
       <React.Fragment key={size}>
-        <div style={{ fontSize: 18, color: '#64748b', alignSelf: 'center' }}>{size.toUpperCase()}</div>
+        <div style={{ fontSize: 18, color: '#526175', alignSelf: 'center' }}>{size.toUpperCase()}</div>
         <PreviewMenu label="Open menu" menuProps={{ size, variant: 'surface' }} />
         <PreviewMenu label="Open menu" menuProps={{ size, variant: 'soft' }} />
         <PreviewMenu label="Open menu" menuProps={{ size, variant: 'solid' }} />

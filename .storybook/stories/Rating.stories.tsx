@@ -36,7 +36,7 @@ export const BasicRating = (args: any) => {
           setValue(e.value);
         }}
       />
-      <p style={{ marginTop: "10px", fontSize: "14px", color: "#64748b" }}>
+      <p style={{ marginTop: "10px", fontSize: "14px", color: "#526175" }}>
         Current value: {value} / {args.max || 5}
       </p>
     </div>
@@ -73,7 +73,7 @@ export const ProductRating = () => {
         animation="scale"
         onChange={(e) => setValue(e.value)}
       />
-      <p style={{ marginTop: '10px', fontSize: '14px', color: '#64748b' }}>
+      <p style={{ marginTop: '10px', fontSize: '14px', color: '#526175' }}>
         {value} out of 5 stars
       </p>
     </div>
@@ -97,7 +97,7 @@ export const CustomerFeedback = () => {
         showValue={true}
         onChange={(e) => setValue(e.value)}
       />
-      <p style={{ marginTop: '10px', fontSize: '14px', color: '#64748b' }}>
+      <p style={{ marginTop: '10px', fontSize: '14px', color: '#526175' }}>
         Please rate your experience from 1 to 10
       </p>
     </div>
@@ -120,7 +120,7 @@ export const ServiceRating = () => {
         label="Service Quality"
         onChange={(e) => setValue(e.value)}
       />
-      <p style={{ marginTop: '10px', fontSize: '12px', color: '#64748b' }}>
+      <p style={{ marginTop: '10px', fontSize: '12px', color: '#526175' }}>
         Rate the service quality
       </p>
     </div>
@@ -141,7 +141,7 @@ export const ReadonlyRating = () => {
         label="Average Rating"
         showValue={true}
       />
-      <p style={{ marginTop: '10px', fontSize: '14px', color: '#64748b' }}>
+      <p style={{ marginTop: '10px', fontSize: '14px', color: '#526175' }}>
         This rating is readonly and shows an average score
       </p>
     </div>
@@ -163,7 +163,7 @@ export const DisabledRating = () => {
         label="Temporarily Unavailable"
         showValue={true}
       />
-      <p style={{ marginTop: '10px', fontSize: '14px', color: '#64748b' }}>
+      <p style={{ marginTop: '10px', fontSize: '14px', color: '#526175' }}>
         This rating is disabled and cannot be interacted with
       </p>
     </div>
@@ -186,7 +186,7 @@ export const CustomShapeRating = () => {
         shape="square"
         onChange={(e) => setValue(e.value)}
       />
-      <p style={{ marginTop: '10px', fontSize: '14px', color: '#64748b' }}>
+      <p style={{ marginTop: '10px', fontSize: '14px', color: '#526175' }}>
         Square-shaped rating with pulse animation
       </p>
     </div>
@@ -209,7 +209,7 @@ export const PillShapeRating = () => {
         shape="pill"
         onChange={(e) => setValue(e.value)}
       />
-      <p style={{ marginTop: '10px', fontSize: '14px', color: '#64748b' }}>
+      <p style={{ marginTop: '10px', fontSize: '14px', color: '#526175' }}>
         Pill-shaped rating with scale animation
       </p>
     </div>
@@ -483,7 +483,7 @@ export const InteractiveDemo = () => {
           showValue={showValue}
           onChange={(e) => setValue(e.value)}
         />
-        <p style={{ marginTop: '10px', fontSize: '14px', color: '#64748b' }}>
+        <p style={{ marginTop: '10px', fontSize: '14px', color: '#526175' }}>
           Value: {value} / {max} | Variant: {variant} | Size: {size} | Tone: {tone} | Animation: {animation} | Shape: {shape}
         </p>
       </div>
@@ -499,7 +499,7 @@ export const InteractiveDemo = () => {
             onChange={(e) => setMax(parseInt(e.target.value))}
             style={{ width: '100%' }}
           />
-          <span style={{ fontSize: '12px', color: '#64748b' }}>{max}</span>
+          <span style={{ fontSize: '12px', color: '#526175' }}>{max}</span>
         </div>
         
         <div>
@@ -512,7 +512,7 @@ export const InteractiveDemo = () => {
             onChange={(e) => setValue(parseInt(e.target.value))}
             style={{ width: '100%' }}
           />
-          <span style={{ fontSize: '12px', color: '#64748b' }}>{value}</span>
+          <span style={{ fontSize: '12px', color: '#526175' }}>{value}</span>
         </div>
 
         <div>

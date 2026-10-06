@@ -45,8 +45,8 @@ export const Explorer = () => {
         }}
       >
         <strong>Selected node</strong>
-        <Box style={{ marginTop: 8, color: 'var(--ui-color-muted, #64748b)' }}>{value}</Box>
-        <Box style={{ marginTop: 12, color: 'var(--ui-color-muted, #64748b)' }}>
+        <Box style={{ marginTop: 8, color: 'var(--ui-color-muted, #526175)' }}>{value}</Box>
+        <Box style={{ marginTop: 12, color: 'var(--ui-color-muted, #526175)' }}>
           Production-style explorer navigation with nested groups, roving focus, expand/collapse arrows, and typeahead.
         </Box>
       </Box>

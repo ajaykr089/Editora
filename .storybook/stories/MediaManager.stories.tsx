@@ -226,7 +226,7 @@ export const MigrationGuide: Story = {
   },
   render: (args) => (
     <Box style={{ position: 'relative', minHeight: '600px', border: '1px solid #ddd' }}>
-      <Box style={{ padding: '20px', maxHeight: '400px', overflow: 'auto' }}>
+      <Box role="region" aria-label="Migration guide" tabIndex={0} style={{ padding: '20px', maxHeight: '400px', overflow: 'auto' }}>
         <h3>📚 Migration Guide: API-First → Offline-First</h3>
         
         <Box style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#fff3cd', borderRadius: '4px' }}>
@@ -331,7 +331,7 @@ export const ToastNotificationsDemo: Story = {
               borderLeft: '4px solid #f44336',
               borderRadius: '4px'
             }}>
-              <strong style={{ color: '#f44336', fontSize: '12px' }}>⚠️ Error</strong>
+              <strong style={{ color: '#c62828', fontSize: '12px' }}>⚠️ Error</strong>
               <p style={{ fontSize: '11px', marginTop: '5px', color: '#666' }}>
                 Shows when upload fails
               </p>

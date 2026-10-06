@@ -59,7 +59,7 @@ export const Playground = (args: any) => {
       <Box style={{ fontSize: 13, color: '#475569' }}>
         value: {value} / {max} | buffer: {buffer}
       </Box>
-      <Box style={{ fontSize: 12, color: '#64748b' }}>
+      <Box style={{ fontSize: 12, color: '#526175' }}>
         {events.length ? events.join(' | ') : 'No events yet'}
       </Box>
     </Grid>

@@ -192,13 +192,13 @@ export const IdealDemo: Story = {
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.78), 0 18px 38px rgba(15,23,42,0.12)'
                 }}
               >
-                <Box style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#64748b', fontWeight: 800 }}>
+                <Box style={{ fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#526175', fontWeight: 800 }}>
                   Orbit Core
                 </Box>
                 <Box style={{ fontSize: 26, lineHeight: 1, fontWeight: 820, color: '#0f172a' }}>
                   Editora
                 </Box>
-                <Box style={{ fontSize: 12, lineHeight: '16px', color: '#64748b' }}>
+                <Box style={{ fontSize: 12, lineHeight: '16px', color: '#526175' }}>
                   8 synchronized systems
                 </Box>
               </Box>
@@ -358,7 +358,7 @@ export const IntegrationSphere = () => (
             <div style={{ fontSize: 30, lineHeight: 1.06, fontWeight: 760, color: '#0f172a' }}>
               Bring brand systems, search, analytics, trust, and assets into one orbiting cloud.
             </div>
-            <div style={{ fontSize: 14, lineHeight: '22px', color: '#64748b', maxInlineSize: 620 }}>
+            <div style={{ fontSize: 14, lineHeight: '22px', color: '#526175', maxInlineSize: 620 }}>
               Use it when you want a launch surface or dashboard section to feel dimensional and connected, but still
               maintain clear, clickable affordances.
             </div>
@@ -366,7 +366,7 @@ export const IntegrationSphere = () => (
 
           <div style={{ display: 'grid', gap: 12 }}>
             <div style={{ padding: 14, borderRadius: 18, background: 'rgba(255,255,255,0.74)', border: '1px solid rgba(148,163,184,0.22)' }}>
-              <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#64748b', fontWeight: 700 }}>
+              <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#526175', fontWeight: 700 }}>
                 Active nodes
               </div>
               <div style={{ fontSize: 24, lineHeight: 1.1, fontWeight: 760, color: '#0f172a' }}>
@@ -374,7 +374,7 @@ export const IntegrationSphere = () => (
               </div>
             </div>
             <div style={{ padding: 14, borderRadius: 18, background: 'rgba(255,255,255,0.74)', border: '1px solid rgba(148,163,184,0.22)' }}>
-              <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#64748b', fontWeight: 700 }}>
+              <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#526175', fontWeight: 700 }}>
                 Status
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 16, color: '#0f172a', fontWeight: 700 }}>
@@ -402,13 +402,13 @@ export const IntegrationSphere = () => (
           >
             <IconCloud.Center>
               <Box style={{ display: 'grid', gap: 4, textAlign: 'center' }}>
-                <Box style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#64748b', fontWeight: 700 }}>
+                <Box style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#526175', fontWeight: 700 }}>
                   Release Core
                 </Box>
                 <Box style={{ fontSize: 30, lineHeight: 1.02, fontWeight: 780 }}>
                   24
                 </Box>
-                <Box style={{ fontSize: 12, lineHeight: '16px', color: '#64748b' }}>
+                <Box style={{ fontSize: 12, lineHeight: '16px', color: '#526175' }}>
                   Systems connected
                 </Box>
               </Box>
@@ -470,7 +470,7 @@ export const VariantGallery = () => (
                 </IconCloud.Item>
               ))}
             </IconCloud>
-            <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
               {entry.label}
             </div>
           </Card>

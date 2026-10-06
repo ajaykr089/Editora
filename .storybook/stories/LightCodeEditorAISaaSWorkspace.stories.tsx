@@ -89,7 +89,7 @@ export const DeveloperCodeWorkspace: Story = {
         <Flex justify="between" align="center" wrap="wrap" gap="10px">
           <Box>
             <h2 style={{ margin: 0, fontSize: 28, color: '#0f172a' }}>Light Code Editor Workspace</h2>
-            <p style={{ margin: '6px 0 0 0', color: '#64748b' }}>SaaS developer workspace for source review and policy-safe publishing.</p>
+            <p style={{ margin: '6px 0 0 0', color: '#526175' }}>SaaS developer workspace for source review and policy-safe publishing.</p>
           </Box>
           <Flex gap="8px">
             <Button
@@ -117,15 +117,15 @@ export const DeveloperCodeWorkspace: Story = {
 
         <Grid columns={{ initial: '1fr', md: '1fr 1fr 1fr' }} gap="10px">
           <Box variant="surface" p="12px" radius="md" style={{ border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: 12, color: '#64748b' }}>Characters</div>
+            <div style={{ fontSize: 12, color: '#526175' }}>Characters</div>
             <div style={{ marginTop: 6, fontSize: 24, fontWeight: 700 }}>{chars}</div>
           </Box>
           <Box variant="surface" p="12px" radius="md" style={{ border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: 12, color: '#64748b' }}>Theme</div>
+            <div style={{ fontSize: 12, color: '#526175' }}>Theme</div>
             <div style={{ marginTop: 6, fontSize: 24, fontWeight: 700 }}>Dark</div>
           </Box>
           <Box variant="surface" p="12px" radius="md" style={{ border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: 12, color: '#64748b' }}>Mode</div>
+            <div style={{ fontSize: 12, color: '#526175' }}>Mode</div>
             <div style={{ marginTop: 6, fontSize: 24, fontWeight: 700 }}>{readonly ? 'Readonly' : 'Editable'}</div>
           </Box>
         </Grid>

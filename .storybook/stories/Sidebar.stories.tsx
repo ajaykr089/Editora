@@ -19,14 +19,14 @@ import { Box, Button, Flex, Grid, Sidebar, ThemeProvider, type SidebarItemInput 
 
 const sidebarMetaTextStyle: React.CSSProperties = {
   fontSize: 'var(--ui-font-size-sm, 12px)',
-  color: 'var(--ui-color-muted, #64748b)'
+  color: 'var(--ui-color-muted, #526175)'
 };
 
 const sidebarKickerStyle: React.CSSProperties = {
   fontSize: 'var(--ui-font-size-sm, 12px)',
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
-  color: 'var(--ui-color-muted, #64748b)'
+  color: 'var(--ui-color-muted, #526175)'
 };
 
 export default {
@@ -321,7 +321,7 @@ export const OperationsWorkspace = () => {
             Selected module
           </div>
           <div style={{ fontSize: 34, lineHeight: 1.08, fontWeight: 900 }}>{value}</div>
-          <div style={{ fontSize: 16, lineHeight: 1.7, color: 'var(--ui-color-muted, #64748b)' }}>
+          <div style={{ fontSize: 16, lineHeight: 1.7, color: 'var(--ui-color-muted, #526175)' }}>
             Light theme application shell with nested operations routes, inline promo card, and search/header/footer regions.
           </div>
         </div>
@@ -405,7 +405,7 @@ export const NavigationLinksAndCustomContent = () => {
           </Sidebar.Group>
         </Sidebar.Content>
         <Sidebar.Footer>
-          <div style={{ color: 'var(--ui-color-muted, #64748b)' }}>Links use real anchor navigation and still emit sidebar selection.</div>
+          <div style={{ color: 'var(--ui-color-muted, #526175)' }}>Links use real anchor navigation and still emit sidebar selection.</div>
         </Sidebar.Footer>
       </Sidebar>
 
@@ -414,7 +414,7 @@ export const NavigationLinksAndCustomContent = () => {
           Current selection
         </div>
         <div style={{ fontSize: 34, lineHeight: 1.05, fontWeight: 900 }}>{value}</div>
-        <div style={{ maxWidth: 720, fontSize: 16, lineHeight: 1.7, color: 'var(--ui-color-muted, #64748b)' }}>
+        <div style={{ maxWidth: 720, fontSize: 16, lineHeight: 1.7, color: 'var(--ui-color-muted, #526175)' }}>
           This story demonstrates two new sidebar capabilities: leaf items can be real links through <code>href</code>, and display content can be authored directly inside <code>Sidebar.Item</code> instead of relying only on <code>label</code> and <code>description</code>.
         </div>
         <Box
@@ -445,7 +445,7 @@ export const NavigationLinksAndCustomContent = () => {
           }}
         >
           <div style={{ fontWeight: 800 }}>What this demo covers</div>
-          <div style={{ color: 'var(--ui-color-muted, #64748b)', lineHeight: 1.65 }}>
+          <div style={{ color: 'var(--ui-color-muted, #526175)', lineHeight: 1.65 }}>
             Link rows keep anchor navigation semantics, custom leading icons can be authored directly in the item body, and nested submenu sections animate open and closed instead of snapping.
           </div>
         </Box>
@@ -548,7 +548,7 @@ export const SubmenuMotionAndCustomIcons = () => {
           Demo focus
         </div>
         <div style={{ fontSize: 34, lineHeight: 1.05, fontWeight: 900 }}>Animated submenus and icon-as-child rows</div>
-        <div style={{ maxWidth: 720, fontSize: 16, lineHeight: 1.7, color: 'var(--ui-color-muted, #64748b)' }}>
+        <div style={{ maxWidth: 720, fontSize: 16, lineHeight: 1.7, color: 'var(--ui-color-muted, #526175)' }}>
           This example is tuned for visual review. Open the "Patterns" group to inspect the submenu transition, and check that icon spacing remains correct even when icons are authored directly as children inside each <code>Sidebar.Item</code>.
         </div>
       </Box>

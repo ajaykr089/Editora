@@ -139,7 +139,7 @@ export const EnterpriseOnboarding = (args: any) => {
             <Box
               style={{
                 fontSize: "var(--ui-font-size-md, 14px)",
-                color: "var(--ui-color-muted, #64748b)",
+                color: "var(--ui-color-muted, #526175)",
               }}
             >
               Review all fields and click Finish to publish this admin
@@ -181,7 +181,7 @@ export const EnterpriseOnboarding = (args: any) => {
         <Box
           style={{
             fontSize: "var(--ui-font-size-md, 14px)",
-            color: "var(--ui-color-muted, #64748b)",
+            color: "var(--ui-color-muted, #526175)",
           }}
         >
           Current value: <strong>{value}</strong> • Event:{" "}
@@ -376,7 +376,7 @@ export const KeepMountedPanels = () => {
           <Box
             style={{
               fontSize: "14px",
-              color: "var(--ui-color-muted, #64748b)",
+              color: "var(--ui-color-muted, #526175)",
             }}
           >
             Current draft note:
@@ -544,7 +544,7 @@ export const EnterpriseValidatedLazyMount = () => {
       </Wizard>
 
       <Box
-        style={{ fontSize: "14px", color: "var(--ui-color-muted, #64748b)" }}
+        style={{ fontSize: "14px", color: "var(--ui-color-muted, #526175)" }}
       >
         Event: <strong>{eventLabel}</strong>
       </Box>

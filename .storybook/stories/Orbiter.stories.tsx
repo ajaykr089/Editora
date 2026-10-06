@@ -147,11 +147,11 @@ export const Playground: Story = {
             <Orbiter {...args}>
               <Orbiter.Center>
                 <Box style={{ display: 'grid', gap: 4, textAlign: 'center' }}>
-                  <Box style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b', fontWeight: 700 }}>
+                  <Box style={{ fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175', fontWeight: 700 }}>
                     Mission Control
                   </Box>
                   <Box style={{ fontSize: 26, lineHeight: 1.02, fontWeight: 780 }}>24</Box>
-                  <Box style={{ fontSize: 12, lineHeight: '16px', color: '#64748b' }}>{selected} selected</Box>
+                  <Box style={{ fontSize: 12, lineHeight: '16px', color: '#526175' }}>{selected} selected</Box>
                 </Box>
               </Orbiter.Center>
 
@@ -220,7 +220,7 @@ export const HeroControlCenter = () => (
               style={{
                 fontSize: 14,
                 lineHeight: "22px",
-                color: "#64748b",
+                color: "#526175",
                 maxInlineSize: 620,
               }}
             >
@@ -244,7 +244,7 @@ export const HeroControlCenter = () => (
                   fontSize: 12,
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
-                  color: "#64748b",
+                  color: "#526175",
                   fontWeight: 700,
                 }}
               >
@@ -274,7 +274,7 @@ export const HeroControlCenter = () => (
                   fontSize: 12,
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
-                  color: "#64748b",
+                  color: "#526175",
                   fontWeight: 700,
                 }}
               >
@@ -319,7 +319,7 @@ export const HeroControlCenter = () => (
                     fontSize: 11,
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
-                    color: "#64748b",
+                    color: "#526175",
                     fontWeight: 700,
                   }}
                 >
@@ -331,7 +331,7 @@ export const HeroControlCenter = () => (
                   Ready
                 </Box>
                 <Box
-                  style={{ fontSize: 12, lineHeight: "16px", color: "#64748b" }}
+                  style={{ fontSize: 12, lineHeight: "16px", color: "#526175" }}
                 >
                   16 services coordinated
                 </Box>
@@ -615,7 +615,7 @@ export const NetworkMap = () => {
             >
               <Orbiter.Center>
                 <Box style={{ display: 'grid', gap: 4, textAlign: 'center' }}>
-                  <Box style={{ fontSize: 12, lineHeight: '16px', color: '#64748b' }}>Network</Box>
+                  <Box style={{ fontSize: 12, lineHeight: '16px', color: '#526175' }}>Network</Box>
                   <Box style={{ fontSize: 26, lineHeight: 1.02, fontWeight: 780 }}>Synced</Box>
                 </Box>
               </Orbiter.Center>
@@ -708,7 +708,7 @@ export const InteractionModes = () => {
               <Orbiter variant="soft" tone="brand" rings={1} radius={88} iconSize={44} path pauseOnItemHover>
                 <Orbiter.Center>
                   <Box style={{ display: 'grid', gap: 4, textAlign: 'center' }}>
-                    <Box style={{ fontSize: 11, lineHeight: '16px', color: '#64748b' }}>Selected</Box>
+                    <Box style={{ fontSize: 11, lineHeight: '16px', color: '#526175' }}>Selected</Box>
                     <Box style={{ fontSize: 22, lineHeight: 1.04, fontWeight: 760 }}>{selected}</Box>
                   </Box>
                 </Orbiter.Center>
@@ -772,7 +772,7 @@ export const InteractiveOrbit = () => {
             >
               <Orbiter.Center>
                 <Box style={{ display: 'grid', gap: 4, textAlign: 'center' }}>
-                  <Box style={{ fontSize: 12, lineHeight: '16px', color: '#64748b' }}>Selected</Box>
+                  <Box style={{ fontSize: 12, lineHeight: '16px', color: '#526175' }}>Selected</Box>
                   <Box style={{ fontSize: 24, lineHeight: 1.04, fontWeight: 760 }}>{selected}</Box>
                 </Box>
               </Orbiter.Center>

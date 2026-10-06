@@ -73,11 +73,11 @@ function EnterpriseClinicalActions() {
         <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
           <div>
             <div style={{ fontWeight: 700, fontSize: 18 }}>Clinical Action Controls</div>
-            <div style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
+            <div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13, marginTop: 4 }}>
               High-trust button system for save, verify, publish, and escalation flows.
             </div>
           </div>
-          <Flex align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>
+          <Flex align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #526175)', fontSize: 12 }}>
             <ShieldIcon size={14} />
             Audit-Safe Operations
           </Flex>

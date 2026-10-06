@@ -63,7 +63,7 @@ export const WorkspaceShell = () => {
             <Panel size={26} minSize={18} maxSize={40}>
               <Box style={panelShell}>
                 <strong>Signal queue</strong>
-                <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+                <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
                   Triage board, alert filters, and incident routing live in this narrow rail.
                 </Box>
                 <Box style={{ display: 'grid', gap: 8 }}>
@@ -77,7 +77,7 @@ export const WorkspaceShell = () => {
             <Panel size={46} minSize={28}>
               <Box style={panelShell}>
                 <strong>Active workspace</strong>
-                <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+                <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
                   Primary editing surface with enough width to show why panel persistence matters.
                 </Box>
                 <Box style={{ padding: 14, borderRadius: 12, background: 'color-mix(in srgb, #0f172a 4%, transparent)', minBlockSize: 220 }}>
@@ -89,7 +89,7 @@ export const WorkspaceShell = () => {
             <Panel size={28} minSize={18} collapsedSize={8}>
               <Box style={panelShell}>
                 <strong>Inspector</strong>
-                <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+                <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
                   Metadata, ownership, audit trail, and task assignment.
                 </Box>
                 <Box style={{ display: 'grid', gap: 8 }}>
@@ -118,7 +118,7 @@ export const CollapsibleConsole = () => {
         <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
           <Box>
             <strong>Analysis shell</strong>
-            <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>
+            <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 12 }}>
               Vertical panel layouts work for console-and-output stacks as well.
             </Box>
           </Box>
@@ -134,7 +134,7 @@ export const CollapsibleConsole = () => {
           <Panel size={68} minSize={42}>
             <Box style={panelShell}>
               <strong>Query composer</strong>
-              <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+              <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
                 Main editor surface with stacked tool output below it.
               </Box>
               <Box style={{ minBlockSize: 180, borderRadius: 12, background: 'color-mix(in srgb, #0f172a 4%, transparent)' }} />
@@ -144,10 +144,10 @@ export const CollapsibleConsole = () => {
           <Panel size={32} minSize={18} collapsed={collapsed} collapsedSize={8}>
             <Box style={panelShell}>
               <strong>Execution console</strong>
-              <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+              <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
                 Persisted logs, validation results, and post-run diagnostics.
               </Box>
-              <Box style={{ fontFamily: 'IBM Plex Mono, monospace', fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>
+              <Box style={{ fontFamily: 'IBM Plex Mono, monospace', fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>
                 09:42 validate schema
                 <br />
                 09:43 compile assets

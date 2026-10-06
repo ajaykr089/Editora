@@ -50,7 +50,7 @@ export const WithExtraActions = () => (
       onSearchChange={() => {}}
       onStatusChange={() => {}}
     >
-      <Box style={{ display: 'flex', alignItems: 'center', fontSize: 12, color: '#64748b' }}>
+      <Box style={{ display: 'flex', alignItems: 'center', fontSize: 12, color: '#526175' }}>
         24 results
       </Box>
     </FiltersBar>

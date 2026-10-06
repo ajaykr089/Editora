@@ -58,7 +58,7 @@ export const Playground = (args: any) => {
         </Box>
       </Presence>
 
-      <Box style={{ fontSize: 12, color: '#64748b' }}>{events.length ? events.join(' | ') : 'No motion events yet.'}</Box>
+      <Box style={{ fontSize: 12, color: '#526175' }}>{events.length ? events.join(' | ') : 'No motion events yet.'}</Box>
     </Grid>
   );
 };

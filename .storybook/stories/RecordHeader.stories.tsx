@@ -47,6 +47,6 @@ export const WithFooter = () => (
       { label: 'Owner', value: 'Ava Stone' },
       { label: 'ARR', value: '$184k' },
     ]}
-    footer={<Box style={{ color: '#64748b', fontSize: 12 }}>Audit trail ready for stakeholder review.</Box>}
+    footer={<Box style={{ color: '#526175', fontSize: 12 }}>Audit trail ready for stakeholder review.</Box>}
   />
 );

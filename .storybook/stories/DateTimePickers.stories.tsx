@@ -79,7 +79,7 @@ export const DatePickerEnterpriseStates = () => {
       <Box variant="elevated" p="16px" radius="xl">
         <Grid gap="8px">
           <Badge tone="purple">Enterprise date picker states</Badge>
-          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: '14px' }}>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: '14px' }}>
             Includes loading/success visuals, square + soft shape variants, and reversed min/max safety.
           </Box>
         </Grid>
@@ -138,7 +138,7 @@ export const DatePickerEnterpriseStates = () => {
             defaultValue="2026-06-15"
             clearable
           />
-          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: '12px' }}>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: '12px' }}>
             Last invalid reason: {invalidReason || 'none'}
           </Box>
         </Grid>
@@ -181,7 +181,7 @@ export const DateRangeEnterpriseStates = () => {
       <Box variant="elevated" p="16px" radius="xl">
         <Grid gap="8px">
           <Badge tone="purple">Enterprise date range states</Badge>
-          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: '14px' }}>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: '14px' }}>
             Covers loading/success states, single-field parsing, and reversed min/max normalization.
           </Box>
         </Grid>
@@ -243,7 +243,7 @@ export const DateRangeEnterpriseStates = () => {
             allowSameDay={false}
             clearable
           />
-          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: '12px' }}>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: '12px' }}>
             Last invalid reason: {invalidReason || 'none'}
           </Box>
         </Grid>
@@ -341,7 +341,7 @@ export const BareAndFooterVariants = () => {
       <Box variant="elevated" p="16px" radius="xl">
         <Grid gap="8px">
           <Badge tone="purple">`bare` + `showFooter` configuration</Badge>
-          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: '14px' }}>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: '14px' }}>
             Use <code>bare</code> for flat/no-panel chrome and <code>showFooter</code> to control actions.
             Calendar-only inline layouts use <code>showFooter=&#123;false&#125;</code>.
           </Box>
@@ -442,7 +442,7 @@ export const Localization = () => {
       <Box variant="elevated" p="16px" radius="xl">
         <Grid gap="10px">
           <Badge tone="purple">Localization demo</Badge>
-          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: '14px' }}>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: '14px' }}>
             Built-in localization supports English, Chinese, and French. Switch locale and inspect calendar labels,
             time labels, and action text.
           </Box>

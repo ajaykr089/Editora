@@ -203,7 +203,7 @@ function renderPlayground(args: React.ComponentProps<typeof MasonryGrid>) {
                 <Flex direction="column" gap="12px" style={{ padding: '2px 6px 6px' }}>
                   <Flex align="center" justify="space-between" gap="12px">
                     <Badge variant="soft" tone={card.tone}>{card.stat}</Badge>
-                    <Box style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+                    <Box style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
                       Live module
                     </Box>
                   </Flex>

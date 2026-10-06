@@ -84,7 +84,7 @@ function HubGlyph() {
           lineHeight: 1.2,
           letterSpacing: '0.08em',
           textTransform: 'uppercase',
-          color: '#64748b',
+          color: '#526175',
           fontWeight: 700,
           inlineSize: '100%'
         }}
@@ -422,7 +422,7 @@ export const ColorwayGallery = () => (
           <Card key={entry.label} variant="surface" radius={24} style={{ padding: 18, display: 'grid', gap: 16 }}>
             <Card.Header>
               <Card.Description as="div" style={{ display: 'grid', gap: 6 }}>
-                <span style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+                <span style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
                   {entry.label}
                 </span>
                 <span style={{ fontSize: 14, color: '#0f172a' }}>
@@ -532,7 +532,7 @@ export const MotionGallery = () => (
           <Card key={entry.label} variant="surface" radius={24} style={{ padding: 18, display: 'grid', gap: 16 }}>
             <Card.Header>
               <Card.Description as="div" style={{ display: 'grid', gap: 6 }}>
-                <span style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+                <span style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
                   {entry.label}
                 </span>
                 <span style={{ fontSize: 14, color: '#0f172a' }}>
@@ -677,7 +677,7 @@ export const SizeGallery = () => (
                     fontSize: 12,
                     letterSpacing: "0.08em",
                     textTransform: "uppercase",
-                    color: "#64748b",
+                    color: "#526175",
                   }}
                 >
                   {entry.label}
@@ -787,7 +787,7 @@ export const NodeEffectGallery = () => (
           <Card key={entry.effect} variant="surface" radius={24} style={{ padding: 18, display: 'grid', gap: 16 }}>
             <Card.Header>
               <Card.Description as="div" style={{ display: 'grid', gap: 6 }}>
-                <span style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+                <span style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
                   {entry.label}
                 </span>
                 <span style={{ fontSize: 14, color: '#0f172a', fontWeight: 700 }}>
@@ -941,7 +941,7 @@ export const ReverseDirection = () => (
           <Card key={entry.label} variant="surface" radius={24} style={{ padding: 18, display: 'grid', gap: 16 }}>
             <Card.Header>
               <Card.Description as="div" style={{ display: 'grid', gap: 6 }}>
-                <span style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+                <span style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
                   {entry.label}
                 </span>
                 <span style={{ fontSize: 14, color: '#0f172a' }}>

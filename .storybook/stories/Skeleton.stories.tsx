@@ -45,27 +45,27 @@ export const VariantGallery = () => (
   <Grid style={{ display: 'grid', gap: 16, maxWidth: 980 }}>
     <Flex style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
       <Box style={{ minWidth: 200 }}>
-        <div style={{ fontSize: 12, marginBottom: 6, color: '#64748b' }}>Text</div>
+        <div style={{ fontSize: 12, marginBottom: 6, color: '#526175' }}>Text</div>
         <Skeleton variant="text" count={3} animation="shimmer" />
       </Box>
       <Box>
-        <div style={{ fontSize: 12, marginBottom: 6, color: '#64748b' }}>Circle</div>
+        <div style={{ fontSize: 12, marginBottom: 6, color: '#526175' }}>Circle</div>
         <Skeleton variant="circle" animation="wave" height="40px" width="40px" />
       </Box>
       <Box>
-        <div style={{ fontSize: 12, marginBottom: 6, color: '#64748b' }}>Avatar</div>
+        <div style={{ fontSize: 12, marginBottom: 6, color: '#526175' }}>Avatar</div>
         <Skeleton variant="avatar" animation="pulse" />
       </Box>
       <Box>
-        <div style={{ fontSize: 12, marginBottom: 6, color: '#64748b' }}>Badge</div>
+        <div style={{ fontSize: 12, marginBottom: 6, color: '#526175' }}>Badge</div>
         <Skeleton variant="badge" animation="shimmer" />
       </Box>
       <Box>
-        <div style={{ fontSize: 12, marginBottom: 6, color: '#64748b' }}>Button</div>
+        <div style={{ fontSize: 12, marginBottom: 6, color: '#526175' }}>Button</div>
         <Skeleton variant="button" animation="wave" />
       </Box>
       <Box style={{ minWidth: 180 }}>
-        <div style={{ fontSize: 12, marginBottom: 6, color: '#64748b' }}>Pill</div>
+        <div style={{ fontSize: 12, marginBottom: 6, color: '#526175' }}>Pill</div>
         <Skeleton variant="pill" count={2} animation="pulse" />
       </Box>
     </Flex>
@@ -148,7 +148,7 @@ export const AnimationAndToneMatrix = () => (
   <Grid style={{ display: 'grid', gap: 12, maxWidth: 920 }}>
     {(['shimmer', 'pulse', 'wave', 'none'] as const).map((animation) => (
       <Flex key={animation} style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-        <Box style={{ width: 80, fontSize: 12, color: '#64748b', textTransform: 'capitalize' }}>{animation}</Box>
+        <Box style={{ width: 80, fontSize: 12, color: '#526175', textTransform: 'capitalize' }}>{animation}</Box>
         <Skeleton variant="text" count={1} width="140px" animation={animation} tone="default" />
         <Skeleton variant="text" count={1} width="140px" animation={animation} tone="brand" />
         <Skeleton variant="text" count={1} width="140px" animation={animation} tone="success" />

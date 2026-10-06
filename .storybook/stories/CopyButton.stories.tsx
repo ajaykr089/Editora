@@ -54,7 +54,7 @@ export const InCodePanel = () => {
         code={command}
         actions={<CopyButton value={command} />}
       />
-      <Box style={{ color: '#64748b', fontSize: 13 }}>
+      <Box style={{ color: '#526175', fontSize: 13 }}>
         CopyButton is useful on its own or composed into CodeBlock headers.
       </Box>
     </Grid>
@@ -79,7 +79,7 @@ export const IconOnly = () => (
         failedIcon={<AlertTriangleIcon size={14} />}
       />
     </Box>
-    <Box style={{ color: '#64748b', fontSize: 13 }}>
+    <Box style={{ color: '#526175', fontSize: 13 }}>
       The icon variant ships with built-in copy, success, and failure glyphs, and you can still override them with custom icons when you need a brand-specific look.
     </Box>
   </Grid>

@@ -18,7 +18,7 @@ export default {
 
 export const StandaloneAssociations = () => (
   <Box style={{ display: 'grid', gap: 10, maxWidth: 520 }}>
-    <Input id="story-email" placeholder="ops@workspace.dev" />
+    <Input id="story-email" aria-label="Email address" placeholder="ops@workspace.dev" />
     <Description htmlFor="story-email">Used for incident digests and weekly delivery reports.</Description>
     <FieldError htmlFor="story-email" active>
       Email domain must be allow-listed before rollout.

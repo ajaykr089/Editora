@@ -241,7 +241,7 @@ export const ControlledWorkflow = () => {
         </Collapsible.Content>
       </Collapsible>
 
-      <Box style={{ marginTop: 10, fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>Open: {String(open)}</Box>
+      <Box style={{ marginTop: 10, fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>Open: {String(open)}</Box>
     </Box>
   );
 };
@@ -257,7 +257,7 @@ export const RadiusGallery = () => (
       { label: 'Custom (12px)', radius: 12 },
     ].map((entry) => (
       <Grid key={entry.label} style={{ gap: 8 }}>
-        <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+        <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #526175)' }}>{entry.label}</Box>
         <Box style={{ ...shellStyle, padding: 0 }}>
           <Collapsible open variant="subtle" tone="info" radius={entry.radius as any}>
             <Collapsible.Header>Section with radius: {entry.label}</Collapsible.Header>

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { Box, TransferList, type TransferListProps } from '@editora/ui-react';
+import { DarkSurface } from './storybook-showcase';
 
 const options = [
   { value: 'read', label: 'Read access', description: 'View workspaces, dashboards, and audit summaries.' },
@@ -74,19 +75,22 @@ export const VariantGallery: Story = {
 
     return (
       <Box style={{ display: 'grid', gap: 24 }}>
-        {variants.map((variant) => (
-          <StatefulTransferList
-            key={variant}
-            label={`${variant?.charAt(0).toUpperCase()}${variant?.slice(1)} transfer list`}
-            description="The same transfer workflow shown with each supported surface treatment."
-            variant={variant}
-            tone={variant === 'contrast' ? 'info' : 'brand'}
-            options={options}
-            value={['read', 'export']}
-            availableLabel="Available"
-            selectedLabel="Selected"
-          />
-        ))}
+        {variants.map((variant) => {
+          const list = (
+            <StatefulTransferList
+              key={variant}
+              label={`${variant?.charAt(0).toUpperCase()}${variant?.slice(1)} transfer list`}
+              description="The same transfer workflow shown with each supported surface treatment."
+              variant={variant}
+              tone={variant === 'contrast' ? 'info' : 'brand'}
+              options={options}
+              value={['read', 'export']}
+              availableLabel="Available"
+              selectedLabel="Selected"
+            />
+          );
+          return variant === 'contrast' ? <DarkSurface key={variant}>{list}</DarkSurface> : list;
+        })}
       </Box>
     );
   }
