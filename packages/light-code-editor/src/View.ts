@@ -17,12 +17,14 @@ export class View {
   private gutterDecorationsElement!: HTMLElement;
   private lineDecorationsElement!: HTMLElement;
   private gutterWidth = 50;
-  private readonly gutterFoldColumnWidth = 20;
+  // 24px: a fold button is a pointer target, and WCAG 2.5.8 wants at least 24x24 CSS px for those.
+  private readonly gutterFoldColumnWidth = 24;
   private readonly gutterFoldColumnGap = 4;
   private readonly gutterLineNumberPaddingLeft = 8;
   private readonly gutterLineNumberPaddingRight = 4;
   private readonly gutterDigitWidth = 9;
-  private lineHeight = 21;
+  // 24px lines (not 21) so that fold buttons on consecutive lines are 24px tall without overlapping.
+  private lineHeight = 24;
   private _rafId?: number;
   private readonly trailingNewlineMarkerAttr = 'data-lce-trailing-newline-marker';
   private readonly foldPlaceholderAttr = 'data-lce-fold-placeholder';
