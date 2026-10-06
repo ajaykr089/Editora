@@ -49,6 +49,7 @@ export {
   baselineLightTokens,
   baselineDarkTokens,
   createThemeTokens,
+  deriveThemeSurfaces,
   withAccentPalette,
   registerThemeHost,
 } from './theme';

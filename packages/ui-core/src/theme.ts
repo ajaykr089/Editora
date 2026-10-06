@@ -1351,6 +1351,26 @@ function mergeScale(base?: ThemeScale | null, patch?: ThemeScale | null): ThemeS
   return { ...(base || {}), ...(patch || {}) };
 }
 
+// A theme that changes `colors.background` / `colors.surface` (a dark theme, say) but not `surfaces`
+// would otherwise keep the baseline's light panels, so cards, menus and sidebars stayed white under
+// light text. Surfaces the author did not set follow the colours they did.
+export function deriveThemeSurfaces(overrides?: Partial<ThemeTokens>): NonNullable<ThemeTokens['surfaces']> {
+  const colors = overrides?.colors;
+  const explicit = overrides?.surfaces || {};
+  const derived: NonNullable<ThemeTokens['surfaces']> = {};
+  if (!colors) return derived;
+
+  if (colors.background && !explicit.background) derived.background = colors.background;
+  if (colors.surface) {
+    const translucent = `color-mix(in srgb, ${colors.surface} 80%, transparent)`;
+    if (!explicit.surface) derived.surface = colors.surface;
+    if (!explicit.panelSolid) derived.panelSolid = colors.surface;
+    if (!explicit.panel) derived.panel = translucent;
+    if (!explicit.panelTranslucent) derived.panelTranslucent = translucent;
+  }
+  return derived;
+}
+
 export function createThemeTokens(overrides?: Partial<ThemeTokens>, options?: { accentPalette?: AccentPaletteName; mode?: ThemeMode }): ThemeTokens {
   const mode = options?.mode || 'light';
   const base = mode === 'dark' ? baselineDarkTokens : baselineLightTokens;
@@ -1393,6 +1413,7 @@ export function createThemeTokens(overrides?: Partial<ThemeTokens>, options?: { 
     },
     surfaces: {
       ...(base.surfaces || {}),
+      ...deriveThemeSurfaces(overrides),
       ...(overrides?.surfaces || {})
     },
     shadows: {

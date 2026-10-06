@@ -3,12 +3,15 @@ import { ElementBase } from '../ElementBase';
 const style = `
   :host {
     display: block;
+    /* A wide table scrolls inside its own frame. Without this a grid or flex parent grows to the table's width. */
+    min-inline-size: 0;
+    max-inline-size: 100%;
     color-scheme: light dark;
     --ui-table-radius: 14px;
     --ui-table-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
     --ui-table-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 95%, transparent);
     --ui-table-text: var(--ui-color-text, #0f172a);
-    --ui-table-muted: var(--ui-color-muted, #64748b);
+    --ui-table-muted: var(--ui-color-muted, #526175);
     --ui-table-accent: var(--ui-color-primary, #2563eb);
     --ui-table-shadow: none;
     --ui-table-empty-color: var(--ui-table-muted);
@@ -87,7 +90,7 @@ const lightDomStyle = `
   ui-table:not([headless]) > table thead th {
     text-align: left;
     padding: 12px 14px;
-    color: var(--ui-table-muted, var(--ui-color-muted, #64748b));
+    color: var(--ui-table-muted, var(--ui-color-muted, #526175));
     font-weight: 600;
     letter-spacing: 0.01em;
     background: linear-gradient(
@@ -156,7 +159,7 @@ const lightDomStyle = `
     font-size: 12px;
     line-height: 1;
     font-weight: 700;
-    color: color-mix(in srgb, var(--ui-table-muted, var(--ui-color-muted, #64748b)) 76%, transparent);
+    color: color-mix(in srgb, var(--ui-table-muted, var(--ui-color-muted, #526175)) 76%, transparent);
     letter-spacing: 0;
   }
 
@@ -181,7 +184,7 @@ const lightDomStyle = `
   }
 
   ui-table[loading]:not([headless]) > table tbody {
-    opacity: 0.55;
+    opacity: 0.65;
     pointer-events: none;
   }
 

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { applyTheme, defaultTokens, type ThemeTokens } from '@editora/ui-core/runtime';
+import { applyTheme, defaultTokens, deriveThemeSurfaces, type ThemeTokens } from '@editora/ui-core/runtime';
 
 export type ThemeUpdater = ThemeTokens | Partial<ThemeTokens> | ((prev: ThemeTokens) => ThemeTokens | Partial<ThemeTokens>);
 
@@ -38,7 +38,8 @@ function mergeThemeTokens(base: ThemeTokens, patch?: Partial<ThemeTokens> | null
       accent: { ...(base.palette?.accent || {}), ...(patch.palette?.accent || {}) },
       accentAlpha: { ...(base.palette?.accentAlpha || {}), ...(patch.palette?.accentAlpha || {}) }
     },
-    surfaces: { ...(base.surfaces || {}), ...(patch.surfaces || {}) },
+    // Panels follow a patch's surface colours unless the patch sets the surfaces itself.
+    surfaces: { ...(base.surfaces || {}), ...deriveThemeSurfaces(patch), ...(patch.surfaces || {}) },
     shadows: { ...(base.shadows || {}), ...(patch.shadows || {}) },
     spacing: { ...(base.spacing || {}), ...(patch.spacing || {}) },
     spaceScale: { ...(base.spaceScale || {}), ...(patch.spaceScale || {}) },

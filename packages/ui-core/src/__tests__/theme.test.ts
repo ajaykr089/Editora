@@ -67,4 +67,31 @@ describe('theme.applyTheme', () => {
     expect(greenDarkTokens.colors.primary).toBe('#30a46c');
     expect(greenDarkTokens.palette?.accentSurface).toBe('#13281e80');
   });
+
+  it('makes panels follow the surface colour a theme overrides instead of staying light', () => {
+    const dark = createThemeTokens({ colors: { ...defaultTokens.colors, background: '#020617', surface: '#0f172a' } });
+
+    expect(dark.surfaces?.background).toBe('#020617');
+    expect(dark.surfaces?.surface).toBe('#0f172a');
+    expect(dark.surfaces?.panelSolid).toBe('#0f172a');
+    expect(dark.surfaces?.panel).toContain('#0f172a');
+
+    const host = document.createElement('div');
+    applyTheme(dark, host);
+    expect(host.style.getPropertyValue('--color-panel-solid')).toBe('#0f172a');
+  });
+
+  it('keeps a surface the theme set explicitly', () => {
+    const tokens = createThemeTokens({
+      colors: { ...defaultTokens.colors, surface: '#0f172a' },
+      surfaces: { panelSolid: '#111111' }
+    });
+
+    expect(tokens.surfaces?.panelSolid).toBe('#111111');
+    expect(tokens.surfaces?.surface).toBe('#0f172a');
+  });
+
+  it('leaves the baseline surfaces alone when no colours are overridden', () => {
+    expect(createThemeTokens({}).surfaces?.panelSolid).toBe('#ffffff');
+  });
 });

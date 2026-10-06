@@ -544,10 +544,10 @@ export class CodeFoldingExtension implements EditorExtension {
     indicator.type = 'button';
     indicator.style.cssText = `
       position: absolute;
-      left: 0;
-      top: ${displayLine * this.lineHeight}px;
-      width: 20px;
-      height: ${this.lineHeight}px;
+      left: -4px;
+      top: ${displayLine * this.lineHeight - (24 - this.lineHeight) / 2}px;
+      width: 24px;
+      height: 24px;
       display: flex;
       align-items: center;
       justify-content: center;

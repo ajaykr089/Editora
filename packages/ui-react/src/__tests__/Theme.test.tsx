@@ -48,4 +48,18 @@ describe('ThemeProvider (React)', () => {
     expect(getByTestId('primary').textContent).toBe('#654321');
     expect(getByTestId('text').textContent).toBe(defaultTokens.colors.text);
   });
+  it('sets the panel surfaces from a dark theme instead of leaving them light', () => {
+    render(
+      <ThemeProvider
+        storageKey={null}
+        tokens={{ colors: { ...defaultTokens.colors, background: '#020617', surface: '#0f172a', text: '#e2e8f0' } }}
+      >
+        <Consumer />
+      </ThemeProvider>
+    );
+
+    const root = getComputedStyle(document.documentElement);
+    expect(root.getPropertyValue('--color-panel-solid').trim()).toBe('#0f172a');
+    expect(root.getPropertyValue('--color-background').trim()).toBe('#020617');
+  });
 });

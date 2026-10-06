@@ -3,12 +3,15 @@ import { ElementBase } from '../ElementBase';
 const style = `
   :host {
     display: block;
+    /* A wide table scrolls inside its own frame. Without this a grid or flex parent grows to the table's width. */
+    min-inline-size: 0;
+    max-inline-size: 100%;
     --ui-data-table-radius: 16px;
     --ui-data-table-border-color: var(--ui-color-border, rgba(15, 23, 42, 0.14));
     --ui-data-table-border: 1px solid var(--ui-data-table-border-color);
     --ui-data-table-bg: var(--ui-color-surface, rgba(255, 255, 255, 0.96));
     --ui-data-table-shadow: none;
-    --ui-data-table-empty-color: var(--ui-color-muted, #64748b);
+    --ui-data-table-empty-color: var(--ui-color-muted, #526175);
     --ui-data-table-summary-color: var(--ui-color-muted, #475569);
     --ui-data-table-text: var(--ui-color-text, #0f172a);
     --ui-data-table-header-text: var(--ui-color-text, #1e293b);
