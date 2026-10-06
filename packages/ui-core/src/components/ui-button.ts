@@ -98,8 +98,8 @@ const style = `
   }
 
   :host([recipe="soft"]) {
-    --ui-btn-surface: color-mix(in srgb, var(--ui-btn-accent) 10%, white);
-    --ui-btn-surface-alt: color-mix(in srgb, var(--ui-btn-accent) 14%, white);
+    --ui-btn-surface: color-mix(in srgb, var(--ui-btn-accent) 10%, var(--ui-color-surface, #ffffff));
+    --ui-btn-surface-alt: color-mix(in srgb, var(--ui-btn-accent) 14%, var(--ui-color-surface, #ffffff));
   }
 
   :host([recipe="soft"]) .btn--secondary {
@@ -242,7 +242,8 @@ const style = `
 
   .btn--primary {
     background: var(--ui-btn-accent);
-    color: #ffffff;
+    /* The theme's text colour for a primary fill: the default theme's amber needs dark text. */
+    color: var(--ui-color-foreground-on-primary, #ffffff);
     border-color: color-mix(in srgb, var(--ui-btn-accent) 74%, #0f172a 26%);
     box-shadow: 0 1px 2px rgba(2, 6, 23, 0.12), 0 8px 18px color-mix(in srgb, var(--ui-btn-accent) 22%, transparent);
   }
@@ -253,7 +254,7 @@ const style = `
 
   .btn--secondary {
     background: var(--ui-btn-surface);
-    color: color-mix(in srgb, var(--ui-btn-accent) 78%, var(--ui-btn-text) 22%);
+    color: color-mix(in srgb, var(--ui-btn-accent) 50%, var(--ui-btn-text) 50%);
     border-color: color-mix(in srgb, var(--ui-btn-accent) 22%, var(--ui-btn-muted));
     box-shadow: 0 1px 2px rgba(2, 6, 23, 0.06);
   }
@@ -264,7 +265,7 @@ const style = `
 
   .btn--ghost {
     background: transparent;
-    color: color-mix(in srgb, var(--ui-btn-accent) 80%, var(--ui-btn-text) 20%);
+    color: color-mix(in srgb, var(--ui-btn-accent) 50%, var(--ui-btn-text) 50%);
     border-color: transparent;
     box-shadow: none;
   }

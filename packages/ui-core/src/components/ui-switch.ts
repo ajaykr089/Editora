@@ -16,7 +16,7 @@ const style = `
     --ui-switch-description: var(--ui-color-muted, #526175);
     --ui-switch-accent: var(--ui-switch-checked-bg, var(--ui-color-primary, #2563eb));
     --ui-switch-accent-hover: color-mix(in srgb, var(--ui-switch-accent) 86%, #0f172a);
-    --ui-switch-accent-contrast: var(--ui-color-primary-foreground, #ffffff);
+    --ui-switch-accent-contrast: var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff));
     --ui-switch-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-switch-shadow: none;
     --ui-switch-thumb-shadow: none;

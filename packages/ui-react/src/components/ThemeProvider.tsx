@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { applyTheme, defaultTokens, deriveThemeSurfaces, type ThemeTokens } from '@editora/ui-core/runtime';
+import {
+  applyTheme,
+  defaultTokens,
+  deriveForegroundOnPrimary,
+  deriveThemeSurfaces,
+  type ThemeTokens
+} from '@editora/ui-core/runtime';
 
 export type ThemeUpdater = ThemeTokens | Partial<ThemeTokens> | ((prev: ThemeTokens) => ThemeTokens | Partial<ThemeTokens>);
 
@@ -27,7 +33,8 @@ function mergeThemeTokens(base: ThemeTokens, patch?: Partial<ThemeTokens> | null
   return {
     ...base,
     ...patch,
-    colors: { ...base.colors, ...(patch.colors || {}) },
+    // A patch that changes the primary colour gets a text colour that reads on it, not the old one.
+    colors: { ...base.colors, ...(patch.colors || {}), ...deriveForegroundOnPrimary(patch, base) },
     palette: {
       ...(base.palette || {}),
       ...(patch.palette || {}),

@@ -1087,11 +1087,67 @@ const baselineDarkComponentTokens: NonNullable<ThemeTokens['components']> = {
   }
 };
 
+function relativeLuminance(color: string): number | null {
+  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.exec(color.trim())?.[1];
+  if (!hex) return null;
+  const full = hex.length === 3 ? hex.replace(/./g, (c) => c + c) : hex.slice(0, 6);
+  const channel = (offset: number) => {
+    const value = parseInt(full.slice(offset, offset + 2), 16) / 255;
+    return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  };
+  return 0.2126 * channel(0) + 0.7152 * channel(2) + 0.0722 * channel(4);
+}
+
+function contrastRatio(a: string, b: string): number | null {
+  const la = relativeLuminance(a);
+  const lb = relativeLuminance(b);
+  if (la === null || lb === null) return null;
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+/**
+ * The text colour for a solid fill: the preferred one when it reads at 4.5:1 (WCAG AA), otherwise
+ * whichever of white and near-black reads better. Radix's own "contrast" colour for the bright steps
+ * (blue #0090ff, gray #8d8d8d) is white, which is only about 3.3:1 on them.
+ */
+/**
+ * The text colour on a solid fill follows the fill. A theme that sets `colors.primary` but not
+ * `colors.foregroundOnPrimary` would otherwise keep the baseline's dark amber text colour, which is
+ * unreadable on most other fills. With `base` (merging a patch into the current tokens) a primary that
+ * changes while the foreground is left as it was (or is just spread along from the old tokens) gets a
+ * foreground that reads on the new primary, keeping the old one when it still does. A foreground the
+ * patch changes on purpose is left alone.
+ */
+export function deriveForegroundOnPrimary(
+  patch?: Partial<ThemeTokens>,
+  base?: Partial<ThemeTokens>
+): { foregroundOnPrimary?: string } {
+  const colors = patch?.colors;
+  if (!colors?.primary) return {};
+  const explicit = colors.foregroundOnPrimary;
+
+  if (!base) {
+    return explicit ? {} : { foregroundOnPrimary: readableForeground(colors.primary, '#ffffff') };
+  }
+
+  if (colors.primary === base.colors?.primary) return {};
+  if (explicit && explicit !== base.colors?.foregroundOnPrimary) return {};
+  return { foregroundOnPrimary: readableForeground(colors.primary, base.colors?.foregroundOnPrimary || '#ffffff') };
+}
+
+export function readableForeground(background: string, preferred: string): string {
+  const current = contrastRatio(preferred, background);
+  if (current === null || current >= 4.5) return preferred;
+  const white = contrastRatio('#ffffff', background) ?? 0;
+  const dark = contrastRatio('#111111', background) ?? 0;
+  return dark > white ? '#111111' : '#ffffff';
+}
+
 function createAccentColorTokens(palette: AccentPaletteTokens) {
   return {
     primary: palette.scale['9'],
     primaryHover: palette.scale['10'] || palette.scale['9'],
-    foregroundOnPrimary: palette.contrast,
+    foregroundOnPrimary: readableForeground(palette.scale['9'], palette.contrast),
     focusRing: palette.scale['8'] || palette.scale['9'],
     warning: palette.scale['9']
   };
@@ -1398,7 +1454,8 @@ export function createThemeTokens(overrides?: Partial<ThemeTokens>, options?: { 
     colors: {
       ...base.colors,
       ...(accentPatch?.colors || {}),
-      ...(overrides?.colors || {})
+      ...(overrides?.colors || {}),
+      ...deriveForegroundOnPrimary(overrides)
     },
     palette: {
       ...(base.palette || {}),

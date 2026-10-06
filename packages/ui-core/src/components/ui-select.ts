@@ -432,7 +432,7 @@ const style = `
     opacity: 1;
     background: color-mix(in srgb, var(--ui-select-accent) 84%, #ffffff);
     border-color: color-mix(in srgb, var(--ui-select-accent) 75%, transparent);
-    color: var(--ui-color-primary-foreground, #ffffff);
+    color: var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff));
   }
 
   .menu-empty {
@@ -593,14 +593,14 @@ const style = `
 
   :host([variant="solid"]) {
     --ui-select-bg: var(--ui-select-accent);
-    --ui-select-text: var(--ui-color-primary-foreground, #ffffff);
-    --ui-select-label: var(--ui-color-primary-foreground, #ffffff);
-    --ui-select-description: color-mix(in srgb, var(--ui-color-primary-foreground, #ffffff) 72%, transparent);
+    --ui-select-text: var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff));
+    --ui-select-label: var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff));
+    --ui-select-description: color-mix(in srgb, var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff)) 72%, transparent);
     --ui-select-border-color: color-mix(in srgb, var(--ui-select-accent) 76%, #0f172a 24%);
     --ui-select-focus: color-mix(in srgb, #ffffff 72%, var(--ui-select-accent));
     --ui-select-indicator-color: color-mix(in srgb, #ffffff 88%, transparent);
     --ui-select-menu-bg: color-mix(in srgb, var(--ui-select-accent) 20%, #08111f 80%);
-    --ui-select-menu-color: var(--ui-color-primary-foreground, #ffffff);
+    --ui-select-menu-color: var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff));
   }
 
   :host([variant="glass"]) {

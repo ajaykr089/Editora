@@ -7,7 +7,7 @@ const style = `
     --ui-toggle-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-toggle-color: var(--ui-color-text, #0f172a);
     --ui-toggle-active-bg: var(--ui-color-primary, #2563eb);
-    --ui-toggle-active-color: var(--ui-color-primary-foreground, #ffffff);
+    --ui-toggle-active-color: var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff));
     --ui-toggle-active-border: color-mix(in srgb, var(--ui-toggle-active-bg) 72%, #0f172a 28%);
     --ui-toggle-muted: var(--ui-color-muted, #526175);
     --ui-toggle-focus: var(--ui-color-focus-ring, #2563eb);

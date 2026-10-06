@@ -199,7 +199,7 @@ const template = (body: string) => `
       --ui-sidebar-muted: color-mix(in srgb, #f8fbff 72%, transparent);
       --ui-sidebar-border: 1px solid color-mix(in srgb, #9ec5ff 14%, transparent);
       --ui-sidebar-item-hover: color-mix(in srgb, #ffffff 8%, transparent);
-      --ui-sidebar-item-active-bg: color-mix(in srgb, var(--ui-sidebar-accent) 82%, #0b4cb4 18%);
+      --ui-sidebar-item-active-bg: color-mix(in srgb, var(--ui-sidebar-accent) 50%, #0b4cb4 50%);
       --ui-sidebar-item-active-color: #ffffff;
       --ui-sidebar-control-bg: color-mix(in srgb, #ffffff 7%, transparent);
       --ui-sidebar-control-hover: color-mix(in srgb, #ffffff 12%, transparent);

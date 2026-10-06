@@ -317,18 +317,18 @@ const style = `
     --ui-tabs-nav-bg: var(--ui-tabs-accent);
     --ui-tabs-panel-bg: var(--ui-color-surface, #ffffff);
     --ui-tabs-border: color-mix(in srgb, var(--ui-tabs-accent) 76%, #0f172a 24%);
-    --ui-tabs-muted: color-mix(in srgb, var(--ui-color-primary-foreground, #ffffff) 94%, transparent);
+    --ui-tabs-muted: color-mix(in srgb, var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff)) 94%, transparent);
     --ui-tabs-active-text: color-mix(in srgb, var(--ui-tabs-accent) 78%, #0f172a 22%);
-    --ui-tabs-focus: color-mix(in srgb, var(--ui-color-primary-foreground, #ffffff) 72%, var(--ui-tabs-accent));
+    --ui-tabs-focus: color-mix(in srgb, var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff)) 72%, var(--ui-tabs-accent));
   }
 
   :host([variant="solid"]) .tab:hover {
-    background: color-mix(in srgb, var(--ui-color-primary-foreground, #ffffff) 14%, transparent);
-    color: var(--ui-color-primary-foreground, #ffffff);
+    background: color-mix(in srgb, var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff)) 14%, transparent);
+    color: var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff));
   }
 
   :host([variant="solid"]) .tab[aria-selected="true"] {
-    background: var(--ui-color-primary-foreground, #ffffff);
+    background: var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff));
     border-color: color-mix(in srgb, var(--ui-tabs-accent) 44%, var(--ui-tabs-border));
     color: var(--ui-tabs-active-text);
   }
