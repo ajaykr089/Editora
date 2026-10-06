@@ -463,6 +463,8 @@ export class ToolbarRenderer {
     el.className = `editora-toolbar-input ${button.label.toLowerCase().replace(/\s+/g, "-")}`;
     el.type = "text";
     el.title = button.label;
+    // A title alone is not a reliable accessible name (it is only a fallback).
+    el.setAttribute("aria-label", button.label);
     el.placeholder = button.placeholder || "";
     if (button.command) {
       el.setAttribute("data-command", button.command);

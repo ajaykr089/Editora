@@ -8,12 +8,12 @@ const style = `
     --ui-switch-radius: 999px;
     --ui-switch-gap: 12px;
     --ui-switch-track-bg: var(--ui-color-surface-alt, #e2e8f0);
-    --ui-switch-track-hover: color-mix(in srgb, var(--ui-switch-track-bg) 84%, var(--ui-color-muted, #64748b));
+    --ui-switch-track-hover: color-mix(in srgb, var(--ui-switch-track-bg) 84%, var(--ui-color-muted, #526175));
     --ui-switch-track-border: var(--ui-color-border, #cbd5e1);
     --ui-switch-thumb-bg: var(--ui-color-surface, #ffffff);
-    --ui-switch-thumb-color: var(--ui-color-muted, #64748b);
+    --ui-switch-thumb-color: var(--ui-color-muted, #526175);
     --ui-switch-label: var(--ui-color-text, #0f172a);
-    --ui-switch-description: var(--ui-color-muted, #64748b);
+    --ui-switch-description: var(--ui-color-muted, #526175);
     --ui-switch-accent: var(--ui-switch-checked-bg, var(--ui-color-primary, #2563eb));
     --ui-switch-accent-hover: color-mix(in srgb, var(--ui-switch-accent) 86%, #0f172a);
     --ui-switch-accent-contrast: var(--ui-color-primary-foreground, #ffffff);
@@ -308,11 +308,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-switch-accent: var(--ui-color-success, #16a34a);
+    --ui-switch-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-switch-accent: var(--ui-color-warning, #d97706);
+    --ui-switch-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
@@ -429,7 +429,7 @@ export class UISwitch extends ElementBase {
     ];
   }
 
-  private _control: HTMLButtonElement | null = null;
+  private _control: HTMLElement | null = null;
 
   constructor() {
     super();
@@ -535,7 +535,7 @@ export class UISwitch extends ElementBase {
     }
 
     if (this._control) {
-      this._control.disabled = disabled;
+      this._control.toggleAttribute('data-disabled', disabled);
     }
   }
 
@@ -619,20 +619,18 @@ export class UISwitch extends ElementBase {
     this.setContent(`
       <style>${style}</style>
       <span class="shell" part="shell">
-        <button
-          type="button"
+        <span
           class="control"
           part="control"
           aria-hidden="true"
-          tabindex="-1"
-          ${disabled ? 'disabled' : ''}
+          ${disabled ? 'data-disabled' : ''}
         >
           <span class="thumb" part="thumb">
             <span class="spinner" aria-hidden="true"></span>
             <span class="thumb-icon icon-on" aria-hidden="true">✓</span>
             <span class="thumb-icon icon-off" aria-hidden="true">•</span>
           </span>
-        </button>
+        </span>
         <span class="label-wrap" part="label-wrap" ${showLabelWrap ? '' : 'hidden'}>
           <span class="label" part="label" ${showLabel ? '' : 'hidden'}><slot>${escapeHtml(label)}</slot></span>
           <span class="description" part="description" ${showDescription ? '' : 'hidden'}><slot name="description">${escapeHtml(description)}</slot></span>
@@ -640,7 +638,7 @@ export class UISwitch extends ElementBase {
       </span>
     `);
 
-    this._control = this.root.querySelector('.control') as HTMLButtonElement | null;
+    this._control = this.root.querySelector('.control') as HTMLElement | null;
     this._syncAria();
 
     // Keep checked state reflected in initial paint for forced-colors/high-contrast AT combinations.

@@ -74,7 +74,7 @@ const style = `
     --ui-calendar-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 95%, transparent);
     --ui-calendar-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
     --ui-calendar-text: var(--ui-color-text, #0f172a);
-    --ui-calendar-muted: var(--ui-color-muted, #64748b);
+    --ui-calendar-muted: var(--ui-color-muted, #526175);
     --ui-calendar-accent: var(--ui-color-primary, #2563eb);
 
     --ui-calendar-radius: 14px;
@@ -107,7 +107,7 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-calendar-accent: color-mix(in srgb, var(--ui-color-muted, #64748b) 76%, var(--ui-color-text, #0f172a) 24%);
+    --ui-calendar-accent: color-mix(in srgb, var(--ui-color-muted, #526175) 76%, var(--ui-color-text, #0f172a) 24%);
   }
 
   :host([tone="info"]) {
@@ -115,11 +115,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-calendar-accent: var(--ui-color-success, #16a34a);
+    --ui-calendar-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-calendar-accent: var(--ui-color-warning, #d97706);
+    --ui-calendar-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
@@ -131,7 +131,7 @@ const style = `
   }
 
   :host([state="success"]) {
-    --ui-calendar-accent: var(--ui-color-success, #16a34a);
+    --ui-calendar-accent: var(--ui-color-success, #15803d);
   }
 
   :host([size="sm"]) {
@@ -593,7 +593,7 @@ const style = `
   }
 
   :host([state="success"]) .frame {
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-color-success, #16a34a) 28%, transparent), var(--ui-calendar-shadow);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-color-success, #15803d) 28%, transparent), var(--ui-calendar-shadow);
   }
 
   @media (max-width: 420px) {
@@ -715,9 +715,9 @@ const style = `
 
 const EVENT_TONES: Record<CalendarEventTone, string> = {
   default: 'var(--ui-color-primary, #2563eb)',
-  info: 'var(--ui-color-info, #0891b2)',
-  success: 'var(--ui-color-success, #16a34a)',
-  warning: 'var(--ui-color-warning, #d97706)',
+  info: 'var(--ui-color-info, #0e7490)',
+  success: 'var(--ui-color-success, #15803d)',
+  warning: 'var(--ui-color-warning, #b45309)',
   danger: 'var(--ui-color-danger, #dc2626)'
 };
 
@@ -2089,7 +2089,7 @@ export class UICalendar extends ElementBase {
               data-action="toggle-monthyear"
               ${interactionDisabled ? 'disabled' : ''}
               aria-expanded="${this._pickerOpen ? 'true' : 'false'}"
-              aria-label="${escapeHtml(t.chooseMonthYear)}"
+              aria-label="${escapeHtml(`${monthLabel}, ${t.chooseMonthYear}`)}"
             >
               <span>${escapeHtml(monthLabel)}</span>
               <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false"><path d="M6.7 9.7a1 1 0 0 1 1.4 0L12 13.59l3.9-3.9a1 1 0 1 1 1.4 1.42l-4.6 4.6a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.42Z" fill="currentColor"/></svg>
@@ -2114,10 +2114,10 @@ export class UICalendar extends ElementBase {
           <span>${escapeHtml(statusLabel)}</span>
         </div>
 
-        <section class="grid-wrap" part="grid" role="grid" aria-label="${escapeHtml(calendarLabel)}">
+        <div class="grid-wrap" part="grid" role="grid" aria-label="${escapeHtml(calendarLabel)}">
           <div class="weekdays" role="row">${weekHeader}</div>
           ${rows.join('')}
-        </section>
+        </div>
       </section>
     `);
 

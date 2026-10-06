@@ -9,7 +9,7 @@ const style = `
     --ui-toggle-active-bg: var(--ui-color-primary, #2563eb);
     --ui-toggle-active-color: var(--ui-color-primary-foreground, #ffffff);
     --ui-toggle-active-border: color-mix(in srgb, var(--ui-toggle-active-bg) 72%, #0f172a 28%);
-    --ui-toggle-muted: var(--ui-color-muted, #64748b);
+    --ui-toggle-muted: var(--ui-color-muted, #526175);
     --ui-toggle-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-toggle-shadow:
       none;
@@ -68,7 +68,7 @@ const style = `
 
   :host([pressed]) .control,
   .control[aria-pressed="true"] {
-    background: color-mix(in srgb, var(--ui-toggle-active-bg) 88%, #ffffff 12%);
+    background: var(--ui-toggle-active-bg);
     border-color: var(--ui-toggle-active-border);
     color: var(--ui-toggle-active-color);
   }
@@ -162,16 +162,21 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-toggle-active-bg: var(--ui-color-success, #16a34a);
+    --ui-toggle-active-bg: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-toggle-active-bg: var(--ui-color-warning, #d97706);
+    --ui-toggle-active-bg: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
     --ui-toggle-active-bg: var(--ui-color-danger, #dc2626);
   }
+
+  /* The contrast variant draws dark text on its pressed fill, so the tones need light fills there. */
+  :host([variant="contrast"][tone="success"]) { --ui-toggle-active-bg: #86efac; }
+  :host([variant="contrast"][tone="warning"]) { --ui-toggle-active-bg: #fcd34d; }
+  :host([variant="contrast"][tone="danger"]) { --ui-toggle-active-bg: #fca5a5; }
 
   :host([disabled]) .control,
   :host([loading]) .control {
@@ -261,7 +266,7 @@ export class UIToggle extends ElementBase {
     ];
   }
 
-  private _control: HTMLButtonElement | null = null;
+  private _control: HTMLElement | null = null;
 
   constructor() {
     super();
@@ -365,13 +370,8 @@ export class UIToggle extends ElementBase {
       }
     }
 
-    if (this._control) {
-      this._control.disabled = disabled;
-      if (!inGroup) this._control.setAttribute('aria-pressed', pressed ? 'true' : 'false');
-      else this._control.removeAttribute('aria-pressed');
-      this._control.setAttribute('aria-disabled', disabled ? 'true' : 'false');
-      this._control.setAttribute('aria-busy', loading ? 'true' : 'false');
-    }
+    // The host carries the role and state; the inner element is only the visual control.
+    if (this._control) this._control.toggleAttribute('data-disabled', disabled);
   }
 
   private _onClick(event: MouseEvent): void {
@@ -398,23 +398,18 @@ export class UIToggle extends ElementBase {
 
     this.setContent(`
       <style>${style}</style>
-      <button
-        type="button"
+      <span
         class="control"
         part="control"
-        aria-label="${escapeHtml(ariaLabel)}"
-        aria-pressed="${pressed ? 'true' : 'false'}"
-        aria-disabled="${disabled ? 'true' : 'false'}"
-        tabindex="-1"
-        ${disabled ? 'disabled' : ''}
+        ${disabled ? 'data-disabled' : ''}
       >
         <span class="icon icon-off" part="icon-off" aria-hidden="true">${escapeHtml(iconOff)}</span>
         <span class="icon icon-on" part="icon-on" aria-hidden="true">${escapeHtml(iconOn)}</span>
         <span class="label" part="label"><slot></slot></span>
-      </button>
+      </span>
     `);
 
-    this._control = this.root.querySelector('.control') as HTMLButtonElement | null;
+    this._control = this.root.querySelector('.control') as HTMLElement | null;
     this._syncAria();
   }
 

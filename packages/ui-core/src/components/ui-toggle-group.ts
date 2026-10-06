@@ -503,7 +503,6 @@ export class UIToggleGroup extends ElementBase {
         part="group"
         role="${role}"
         aria-label="${escapeHtml(ariaLabel)}"
-        aria-orientation="${orientation}"
         aria-disabled="${disabled ? 'true' : 'false'}"
         aria-required="${required ? 'true' : 'false'}"
       >
@@ -524,7 +523,8 @@ export class UIToggleGroup extends ElementBase {
     const disabled = this.hasAttribute('disabled');
     if (group.getAttribute('role') !== role) group.setAttribute('role', role);
     if (group.getAttribute('aria-label') !== ariaLabel) group.setAttribute('aria-label', ariaLabel);
-    if (group.getAttribute('aria-orientation') !== orientation) group.setAttribute('aria-orientation', orientation);
+    // aria-orientation is not valid on role="group" / "radiogroup".
+    group.removeAttribute('aria-orientation');
     group.setAttribute('aria-disabled', disabled ? 'true' : 'false');
     group.setAttribute('aria-required', required ? 'true' : 'false');
   }

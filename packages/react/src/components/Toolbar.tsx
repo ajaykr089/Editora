@@ -667,6 +667,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               type="text"
               className={`rte-toolbar-input ${item.label.toLowerCase().replace(/\s+/g, "-")}`}
               placeholder={item.placeholder}
+              aria-label={item.label}
               onChange={(e) => handleCommand(itemCommand, e.target.value)}
               disabled={readonly}
               onKeyDown={(e) => {

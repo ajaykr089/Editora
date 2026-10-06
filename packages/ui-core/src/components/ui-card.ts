@@ -74,11 +74,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-card-accent: var(--ui-color-success, #16a34a);
+    --ui-card-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-card-accent: var(--ui-color-warning, #d97706);
+    --ui-card-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
@@ -336,7 +336,7 @@ export class UICard extends ElementBase {
   protected override render(): void {
     this.setContent(`
       <style>${style}</style>
-      <article class="card" part="card" role="group">
+      <div class="card" part="card" role="group">
         <div class="section media" part="media" hidden>
           <slot name="media"></slot>
         </div>
@@ -352,7 +352,7 @@ export class UICard extends ElementBase {
         <div class="section footer" part="footer" hidden>
           <slot name="footer"></slot>
         </div>
-      </article>
+      </div>
     `);
 
     this._syncHostStyles();

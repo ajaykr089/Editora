@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { resolveTriggerControl } from '../primitives/trigger';
 import { createPortalContainer } from '../portal';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import { createPositioner, type PositionerHandle } from '../primitives/positioner';
@@ -269,8 +270,8 @@ const menuStyle = `
   }
 
   .menu[data-tone="neutral"] {
-    --ui-menu-ring: color-mix(in srgb, var(--ui-color-muted, #64748b) 60%, var(--ui-color-text, #0f172a));
-    --ui-menu-item-hover-bg: color-mix(in srgb, var(--ui-color-muted, #64748b) 12%, transparent);
+    --ui-menu-ring: color-mix(in srgb, var(--ui-color-muted, #526175) 60%, var(--ui-color-text, #0f172a));
+    --ui-menu-item-hover-bg: color-mix(in srgb, var(--ui-color-muted, #526175) 12%, transparent);
     --ui-menu-item-active-color: inherit;
   }
 
@@ -503,8 +504,9 @@ export class UIMenu extends ElementBase {
   }
 
   private _syncTriggerA11y(): void {
-    const trigger = this._getTrigger();
-    if (!trigger) return;
+    const wrapper = this._getTrigger();
+    if (!wrapper) return;
+    const trigger = resolveTriggerControl(wrapper);
     trigger.setAttribute('aria-haspopup', 'menu');
     trigger.setAttribute('aria-expanded', this._isOpen ? 'true' : 'false');
     trigger.setAttribute('aria-controls', this._menuId);

@@ -98,4 +98,19 @@ describe('Orbiter wrapper', () => {
     expect(button).not.toBeNull();
     expect(button?.getAttribute('aria-label')).toBe('Open search');
   });
+
+  it('gives a labelled, non-interactive item the image role a name needs', () => {
+    const { container } = render(
+      <Orbiter>
+        <Orbiter.Item aria-label="Notion">N</Orbiter.Item>
+        <Orbiter.Item>Plain</Orbiter.Item>
+        <Orbiter.Item aria-label="Pinned" role="presentation">P</Orbiter.Item>
+      </Orbiter>
+    );
+
+    const items = container.querySelectorAll('[data-ui-orbiter-item]');
+    expect(items[0].getAttribute('role')).toBe('img');
+    expect(items[1].hasAttribute('role')).toBe(false);
+    expect(items[2].getAttribute('role')).toBe('presentation');
+  });
 });

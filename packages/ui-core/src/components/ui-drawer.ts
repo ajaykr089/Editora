@@ -75,7 +75,7 @@ const style = `
       color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 20%, var(--ui-color-surface, #ffffff)) 100%
     );
     --ui-drawer-color: var(--ui-color-text, #0f172a);
-    --ui-drawer-muted: var(--ui-color-muted, #64748b);
+    --ui-drawer-muted: var(--ui-color-muted, #526175);
     --ui-drawer-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
     --ui-drawer-border: 1px solid var(--ui-drawer-border-color);
     --ui-drawer-shadow: none;
@@ -430,13 +430,13 @@ const style = `
   }
 
   :host([tone='success']) {
-    --ui-drawer-focus-ring: var(--ui-color-success, #16a34a);
-    --ui-drawer-control-bg-hover: color-mix(in srgb, var(--ui-color-success, #16a34a) 12%, transparent);
+    --ui-drawer-focus-ring: var(--ui-color-success, #15803d);
+    --ui-drawer-control-bg-hover: color-mix(in srgb, var(--ui-color-success, #15803d) 12%, transparent);
   }
 
   :host([tone='warning']) {
-    --ui-drawer-focus-ring: var(--ui-color-warning, #d97706);
-    --ui-drawer-control-bg-hover: color-mix(in srgb, var(--ui-color-warning, #d97706) 16%, transparent);
+    --ui-drawer-focus-ring: var(--ui-color-warning, #b45309);
+    --ui-drawer-control-bg-hover: color-mix(in srgb, var(--ui-color-warning, #b45309) 16%, transparent);
   }
 
   :host([state='error']) .panel {
@@ -444,7 +444,7 @@ const style = `
   }
 
   :host([state='success']) .panel {
-    border-color: color-mix(in srgb, var(--ui-color-success, #16a34a) 40%, var(--ui-drawer-border-color));
+    border-color: color-mix(in srgb, var(--ui-color-success, #15803d) 40%, var(--ui-drawer-border-color));
   }
 
   :host([state='loading']) .body {
@@ -926,7 +926,11 @@ export class UIDrawer extends ElementBase {
     const ariaLabel = this.getAttribute('aria-label') || '';
     const explicitLabelledBy = this.getAttribute('aria-labelledby') || '';
     const explicitDescribedBy = this.getAttribute('aria-describedby') || '';
-    const labelledBy = explicitLabelledBy || (!ariaLabel && (hasHeaderSlot || Boolean(title)) ? this._titleId() : '');
+    // A <slot> cannot serve as an aria-labelledby target (it has no text of its own), so a slotted
+    // header names the dialog through its text content instead.
+    const headerText = hasHeaderSlot ? (this.querySelector('[slot="header"]')?.textContent || '').replace(/\s+/g, ' ').trim() : '';
+    const nameFromHeader = !ariaLabel && !explicitLabelledBy && !!headerText;
+    const labelledBy = explicitLabelledBy || (!ariaLabel && !nameFromHeader && (hasHeaderSlot || Boolean(title)) ? this._titleId() : '');
     const describedByIds: string[] = [];
     if (explicitDescribedBy) {
       describedByIds.push(explicitDescribedBy);
@@ -934,7 +938,7 @@ export class UIDrawer extends ElementBase {
       if (Boolean(description)) describedByIds.push(this._descriptionId());
       describedByIds.push(this._bodyId());
     }
-    const fallbackLabel = ariaLabel || (!labelledBy ? 'Drawer' : '');
+    const fallbackLabel = ariaLabel || (nameFromHeader ? headerText : !labelledBy ? 'Drawer' : '');
 
     if (fallbackLabel) panel.setAttribute('aria-label', fallbackLabel);
     else panel.removeAttribute('aria-label');
@@ -1225,7 +1229,11 @@ export class UIDrawer extends ElementBase {
     const explicitLabelledBy = this.getAttribute('aria-labelledby') || '';
     const explicitDescribedBy = this.getAttribute('aria-describedby') || '';
 
-    const labelledBy = explicitLabelledBy || (!ariaLabel && (hasHeaderSlot || Boolean(title)) ? titleId : '');
+    // A <slot> cannot serve as an aria-labelledby target (it has no text of its own), so a slotted
+    // header names the dialog through its text content instead.
+    const headerText = hasHeaderSlot ? (this.querySelector('[slot="header"]')?.textContent || '').replace(/\s+/g, ' ').trim() : '';
+    const nameFromHeader = !ariaLabel && !explicitLabelledBy && !!headerText;
+    const labelledBy = explicitLabelledBy || (!ariaLabel && !nameFromHeader && (hasHeaderSlot || Boolean(title)) ? titleId : '');
 
     const describedByIds: string[] = [];
     if (explicitDescribedBy) {
@@ -1235,13 +1243,13 @@ export class UIDrawer extends ElementBase {
       describedByIds.push(bodyId);
     }
 
-    const fallbackLabel = ariaLabel || (!labelledBy ? 'Drawer' : '');
+    const fallbackLabel = ariaLabel || (nameFromHeader ? headerText : !labelledBy ? 'Drawer' : '');
     const isLoading = this.state === 'loading';
 
     this.setContent(`
       <style>${style}</style>
       <div class="overlay" part="overlay" aria-hidden="true"></div>
-      <aside
+      <div
         class="panel side-${side}"
         part="panel"
         role="dialog"
@@ -1274,7 +1282,7 @@ export class UIDrawer extends ElementBase {
         </header>
         <div class="body" part="body" id="${bodyId}"><slot></slot></div>
         <footer class="footer ${hasFooter ? '' : 'empty'}" part="footer"><slot name="footer"></slot></footer>
-      </aside>
+      </div>
     `);
 
     this._syncLiveUi();

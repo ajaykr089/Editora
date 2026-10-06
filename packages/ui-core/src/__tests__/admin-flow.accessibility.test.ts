@@ -78,7 +78,9 @@ describe('admin flow accessibility hardening', () => {
 
     tabs.forEach((tab, index) => {
       expect(tab.getAttribute('role')).toBe('tab');
-      expect(tab.getAttribute('aria-controls')).toBe(panels[index].id);
+      // aria-controls cannot reach the light-DOM panel from the shadow root, so it is not emitted.
+      expect(tab.hasAttribute('aria-controls')).toBe(false);
+      expect(panels[index].id).toBeTruthy();
     });
 
     panels.forEach((panel, index) => {

@@ -79,7 +79,7 @@ const style = `
     --ui-gantt-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
     --ui-gantt-grid: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 56%, transparent);
     --ui-gantt-text: var(--ui-color-text, #0f172a);
-    --ui-gantt-muted: var(--ui-color-muted, #64748b);
+    --ui-gantt-muted: var(--ui-color-muted, #526175);
     --ui-gantt-accent: var(--ui-color-primary, #2563eb);
     --ui-gantt-selected: color-mix(in srgb, var(--ui-gantt-accent) 10%, transparent);
     display: block;
@@ -162,7 +162,7 @@ const style = `
   .zoom-button[aria-pressed="true"] {
     border-color: color-mix(in srgb, var(--ui-gantt-accent) 46%, var(--ui-gantt-border));
     background: color-mix(in srgb, var(--ui-gantt-accent) 10%, var(--ui-gantt-panel));
-    color: var(--ui-gantt-accent);
+    color: color-mix(in srgb, var(--ui-gantt-accent) 82%, var(--ui-gantt-text));
   }
 
   .viewport {
@@ -184,6 +184,17 @@ const style = `
     min-block-size: 62px;
     background: color-mix(in srgb, var(--ui-gantt-panel) 96%, transparent);
     border-bottom: 1px solid var(--ui-gantt-border);
+  }
+
+  /* Explicit placement: the treegrid wrapper (display: contents) now holds the grid head and body
+     next to each other in the DOM, so the four panes no longer rely on source order. */
+  .grid-head { grid-column: 1; grid-row: 1; }
+  .timeline-head { grid-column: 2; grid-row: 1; }
+  .grid-body { grid-column: 1; grid-row: 2; }
+  .timeline-body { grid-column: 2; grid-row: 2; }
+
+  .grid-semantics {
+    display: contents;
   }
 
   .grid-head {
@@ -734,9 +745,9 @@ const style = `
 
 const tones: Record<string, string> = {
   default: 'var(--ui-color-primary, #2563eb)',
-  info: 'var(--ui-color-info, #0891b2)',
-  success: 'var(--ui-color-success, #16a34a)',
-  warning: 'var(--ui-color-warning, #d97706)',
+  info: 'var(--ui-color-info, #0e7490)',
+  success: 'var(--ui-color-success, #15803d)',
+  warning: 'var(--ui-color-warning, #b45309)',
   danger: 'var(--ui-color-danger, #dc2626)'
 };
 
@@ -1090,7 +1101,7 @@ export class UIGantt extends ElementBase {
       const progress = task.progress == null ? '-' : `${Math.round(task.progress)}%`;
       const dates = kind === 'milestone' ? formatShortDate(task.startMs) : `${formatShortDate(task.startMs)} - ${formatShortDate(task.endMs)}`;
       return `
-        <article class="grid-row${selected}" part="grid-row" data-task-id="${escapeHtml(task.id)}" role="row" aria-rowindex="${rowIndex + 2}" aria-level="${task.depth + 1}" ${task.hasChildren ? `aria-expanded="${!this.collapsed.has(task.id)}"` : ''}>
+        <div class="grid-row${selected}" part="grid-row" data-task-id="${escapeHtml(task.id)}" role="row" aria-rowindex="${rowIndex + 2}" aria-level="${task.depth + 1}" ${task.hasChildren ? `aria-expanded="${!this.collapsed.has(task.id)}"` : ''}>
           <div class="grid-cell task-name" role="gridcell" style="padding-left:${10 + task.depth * 18}px">
             ${task.hasChildren ? `<button class="expander" data-action="toggle" data-task-id="${escapeHtml(task.id)}" aria-label="${this.collapsed.has(task.id) ? 'Expand' : 'Collapse'} ${escapeHtml(task.label)}">${this.collapsed.has(task.id) ? '›' : '⌄'}</button>` : '<span style="inline-size:22px"></span>'}
             <span class="name-text" title="${escapeHtml(task.label)}">${escapeHtml(task.label)}</span>
@@ -1098,7 +1109,7 @@ export class UIGantt extends ElementBase {
           <div class="grid-cell badge" role="gridcell">${escapeHtml(task.assignee || kind)}</div>
           <div class="grid-cell badge" role="gridcell">${escapeHtml(dates)}</div>
           <div class="grid-cell badge" role="gridcell">${escapeHtml(progress)}</div>
-        </article>
+        </div>
       `;
     }).join('');
 
@@ -1131,17 +1142,15 @@ export class UIGantt extends ElementBase {
         }).join('')
         : '';
       return `
-        <article class="timeline-row${selected}" part="timeline-row" data-task-id="${escapeHtml(task.id)}" role="row" aria-rowindex="${rowIndex + 2}">
+        <div class="timeline-row${selected}" part="timeline-row" data-task-id="${escapeHtml(task.id)}">
           ${task.baselineStart && task.baselineEnd ? `<span class="baseline" style="left:${xForDate(parseDate(task.baselineStart) || task.startMs).toFixed(2)}px;width:${Math.max(4, xForDate(parseDate(task.baselineEnd) || task.endMs) - xForDate(parseDate(task.baselineStart) || task.startMs)).toFixed(2)}px"></span>` : ''}
           <button
             class="bar ${kind}${task.critical ? ' critical' : ''}${splitSegments ? ' split' : ''}"
             part="bar ${kind}"
             data-task-id="${escapeHtml(task.id)}"
             data-kind="${kind}"
-            role="gridcell"
             tabindex="${focusable ? '0' : '-1'}"
-            aria-selected="${this.selectedId === task.id}"
-            aria-colindex="5"
+            ${this.selectedId === task.id ? 'aria-current="true"' : ''}
             style="left:${left.toFixed(2)}px;width:${width.toFixed(2)}px;--tone:${tone};--progress:${progress.toFixed(2)}%"
             aria-label="${escapeHtml(task.label)}"
             ${canEdit ? 'data-draggable="true"' : ''}
@@ -1153,7 +1162,7 @@ export class UIGantt extends ElementBase {
             <span class="drag-tip"></span>
             ${showHandles ? '<span class="handle end" data-mode="resize-end"></span>' : ''}
           </button>
-        </article>
+        </div>
       `;
     }).join('');
 
@@ -1195,21 +1204,23 @@ export class UIGantt extends ElementBase {
         ` : ''}
         <div class="viewport" part="viewport">
           <div class="surface" part="surface" style="--day-width:${dayWidth}px;grid-template-columns:${GRID_WIDTH}px ${timelineWidth.toFixed(2)}px;inline-size:max(100%, ${(GRID_WIDTH + timelineWidth).toFixed(2)}px)">
-            <header class="grid-head" part="grid-head" role="row">
-              <button class="head-button" data-sort="label" role="columnheader" aria-sort="${sort === 'label' ? 'ascending' : 'none'}">Task</button>
-              <span role="columnheader">Owner</span>
-              <button class="head-button" data-sort="start" role="columnheader" aria-sort="${sort === 'start' ? 'ascending' : 'none'}">Dates</button>
-              <button class="head-button" data-sort="progress" role="columnheader" aria-sort="${sort === 'progress' ? 'descending' : 'none'}">%</button>
-            </header>
-            <header class="timeline-head" part="timeline-head">
-              <div class="scale" style="width:${timelineWidth.toFixed(2)}px">${createTicks(min, max, dayWidth, zoom, this.viewportLeft, this.viewportWidth)}</div>
-            </header>
-            <div class="grid-body" part="grid-body" role="treegrid" aria-rowcount="${visible.length + 1}" aria-colcount="4">
-              ${virtualized && topSpacer ? `<div style="height:${topSpacer}px"></div>` : ''}
-              ${gridRows || '<div class="empty">No matching tasks</div>'}
-              ${virtualized && bottomSpacer ? `<div style="height:${bottomSpacer}px"></div>` : ''}
+            <div class="grid-semantics" role="treegrid" aria-label="${escapeHtml(this.getAttribute('aria-label') || 'Project schedule')}" aria-rowcount="${visible.length + 1}" aria-colcount="4">
+              <div class="grid-head" part="grid-head" role="row">
+                <div role="columnheader" aria-sort="${sort === 'label' ? 'ascending' : 'none'}" style="display:contents"><button class="head-button" data-sort="label">Task</button></div>
+                <span role="columnheader">Owner</span>
+                <div role="columnheader" aria-sort="${sort === 'start' ? 'ascending' : 'none'}" style="display:contents"><button class="head-button" data-sort="start">Dates</button></div>
+                <div role="columnheader" aria-sort="${sort === 'progress' ? 'descending' : 'none'}" style="display:contents"><button class="head-button" data-sort="progress">%</button></div>
+              </div>
+              <div class="grid-body" part="grid-body" role="rowgroup">
+                ${virtualized && topSpacer ? `<div style="height:${topSpacer}px"></div>` : ''}
+                ${gridRows || '<div class="empty">No matching tasks</div>'}
+                ${virtualized && bottomSpacer ? `<div style="height:${bottomSpacer}px"></div>` : ''}
+              </div>
             </div>
-            <div class="timeline-body" part="timeline-body" style="width:${timelineWidth.toFixed(2)}px;min-height:${rowsHeight}px">
+            <div class="timeline-head" part="timeline-head" aria-hidden="true">
+              <div class="scale" style="width:${timelineWidth.toFixed(2)}px">${createTicks(min, max, dayWidth, zoom, this.viewportLeft, this.viewportWidth)}</div>
+            </div>
+            <div class="timeline-body" part="timeline-body" role="group" aria-label="Timeline" style="width:${timelineWidth.toFixed(2)}px;min-height:${rowsHeight}px">
               <svg class="links" width="${timelineWidth.toFixed(0)}" height="${rowsHeight}" viewBox="0 0 ${timelineWidth.toFixed(0)} ${rowsHeight}" aria-hidden="true">${linkDefs}${linkPaths}</svg>
               ${todayMarkup}
               ${virtualized && topSpacer ? `<div style="height:${topSpacer}px"></div>` : ''}

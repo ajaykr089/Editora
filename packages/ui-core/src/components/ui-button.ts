@@ -30,7 +30,7 @@ const style = `
     --ui-btn-surface: var(--ui-color-surface, #ffffff);
     --ui-btn-surface-alt: var(--ui-color-surface-alt, #f8fafc);
     --ui-btn-text: var(--ui-color-text, #0f172a);
-    --ui-btn-muted: var(--ui-color-muted, #64748b);
+    --ui-btn-muted: var(--ui-color-muted, #526175);
     --ui-btn-ring: var(--ui-color-focus-ring, #2563eb);
 
     display: inline-flex;
@@ -46,7 +46,7 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-btn-accent: color-mix(in srgb, var(--ui-color-muted, #64748b) 74%, var(--ui-color-text, #0f172a) 26%);
+    --ui-btn-accent: color-mix(in srgb, var(--ui-color-muted, #526175) 74%, var(--ui-color-text, #0f172a) 26%);
   }
 
   :host([tone="info"]) {
@@ -54,11 +54,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-btn-accent: var(--ui-color-success, #16a34a);
+    --ui-btn-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-btn-accent: var(--ui-color-warning, #d97706);
+    --ui-btn-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
@@ -70,7 +70,7 @@ const style = `
   }
 
   :host([state="success"]) {
-    --ui-btn-accent: var(--ui-color-success, #16a34a);
+    --ui-btn-accent: var(--ui-color-success, #15803d);
   }
 
   :host([theme="dark"]) {
@@ -285,25 +285,25 @@ const style = `
   }
 
   .btn--success {
-    background: var(--ui-color-success, #16a34a);
+    background: var(--ui-color-success, #15803d);
     color: #ffffff;
-    border-color: color-mix(in srgb, var(--ui-color-success, #16a34a) 70%, #0f172a 30%);
-    box-shadow: 0 1px 2px rgba(2, 6, 23, 0.12), 0 8px 18px color-mix(in srgb, var(--ui-color-success, #16a34a) 20%, transparent);
+    border-color: color-mix(in srgb, var(--ui-color-success, #15803d) 70%, #0f172a 30%);
+    box-shadow: 0 1px 2px rgba(2, 6, 23, 0.12), 0 8px 18px color-mix(in srgb, var(--ui-color-success, #15803d) 20%, transparent);
   }
 
   .btn--success:hover:not([disabled]) {
-    background: color-mix(in srgb, var(--ui-color-success, #16a34a) 86%, #0f172a 14%);
+    background: color-mix(in srgb, var(--ui-color-success, #15803d) 86%, #0f172a 14%);
   }
 
   .btn--warning {
-    background: var(--ui-color-warning, #d97706);
+    background: var(--ui-color-warning, #b45309);
     color: #ffffff;
-    border-color: color-mix(in srgb, var(--ui-color-warning, #d97706) 70%, #0f172a 30%);
-    box-shadow: 0 1px 2px rgba(2, 6, 23, 0.12), 0 8px 18px color-mix(in srgb, var(--ui-color-warning, #d97706) 18%, transparent);
+    border-color: color-mix(in srgb, var(--ui-color-warning, #b45309) 70%, #0f172a 30%);
+    box-shadow: 0 1px 2px rgba(2, 6, 23, 0.12), 0 8px 18px color-mix(in srgb, var(--ui-color-warning, #b45309) 18%, transparent);
   }
 
   .btn--warning:hover:not([disabled]) {
-    background: color-mix(in srgb, var(--ui-color-warning, #d97706) 86%, #0f172a 14%);
+    background: color-mix(in srgb, var(--ui-color-warning, #b45309) 86%, #0f172a 14%);
   }
 
   :host([size="sm"]) {
@@ -331,7 +331,7 @@ const style = `
   }
 
   :host([state="success"]) .btn:not([disabled]) {
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-color-success, #16a34a) 30%, transparent), 0 8px 18px rgba(22, 163, 74, 0.14);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-color-success, #15803d) 30%, transparent), 0 8px 18px rgba(22, 163, 74, 0.14);
   }
 
   :host([data-animation]) .btn:not([disabled]):hover {
@@ -629,6 +629,8 @@ function runFormAction(host: HTMLElement, type: ButtonType) {
   form.dispatchEvent(submitEvent);
 }
 
+const FORWARDED_STATE_ATTRS = ['aria-expanded', 'aria-haspopup', 'aria-pressed'];
+
 export class UIButton extends ElementBase {
   static get observedAttributes() {
     return [
@@ -650,6 +652,9 @@ export class UIButton extends ElementBase {
       'scale',
       'loading-label',
       'aria-label',
+      'aria-expanded',
+      'aria-haspopup',
+      'aria-pressed',
     ];
   }
 
@@ -687,7 +692,25 @@ export class UIButton extends ElementBase {
       else this.removeAttribute('data-animation');
     }
 
+    // State a parent (menu, dropdown, toggle) puts on the host. It is copied straight onto the real
+    // <button> rather than through the template, so toggling it never replaces the button (which
+    // would drop focus from the trigger).
+    if (FORWARDED_STATE_ATTRS.includes(name)) {
+      this._syncForwardedState();
+      return;
+    }
+
     if (this.isConnected) this.requestRender();
+  }
+
+  private _syncForwardedState(): void {
+    const button = this.root.querySelector('button[data-ui-button="true"]');
+    if (!button) return;
+    for (const name of FORWARDED_STATE_ATTRS) {
+      const value = this.getAttribute(name);
+      if (value == null || value === '') button.removeAttribute(name);
+      else if (button.getAttribute(name) !== value) button.setAttribute(name, value);
+    }
   }
 
   private _onRootClick(event: Event) {
@@ -835,6 +858,7 @@ export class UIButton extends ElementBase {
       </button>
     `);
 
+    this._syncForwardedState();
     this._attachSlotListeners();
   }
 }

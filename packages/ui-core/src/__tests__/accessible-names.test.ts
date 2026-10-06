@@ -369,9 +369,11 @@ describe('list-like controls', () => {
     const host = await mount(
       `<ui-sortable lists='[{"id":"a","label":"Backlog"},{"id":"b","label":"Done"}]' items='[{"id":"x","label":"X","listId":"a"}]'></ui-sortable>`
     );
-    const boxes = Array.from(host.querySelector('ui-sortable')!.shadowRoot!.querySelectorAll('[role="listbox"]'));
+    const bodies = Array.from(host.querySelector('ui-sortable')!.shadowRoot!.querySelectorAll('.items'));
 
-    expect(boxes.map((box) => box.getAttribute('aria-label'))).toEqual(['Backlog', 'Done']);
+    expect(bodies.map((body) => body.getAttribute('aria-label'))).toEqual(['Backlog', 'Done']);
+    // A listbox with no options is invalid ARIA, so only the list that has items is one.
+    expect(bodies.map((body) => body.getAttribute('role'))).toEqual(['listbox', 'group']);
   });
 });
 

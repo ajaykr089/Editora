@@ -429,21 +429,18 @@ export class UIPlacementGrid extends ElementBase {
 
   private _syncHostSemantics(items: PlacementMeta[]): void {
     if (this._isInteractive()) {
+      // The items are arbitrary light-DOM content placed on a CSS grid, with no row elements, so
+      // role="grid"/"gridcell" is invalid ARIA (a grid must own rows). Expose a list of items
+      // instead; their position is still available through aria-posinset / aria-setsize.
       if (!this.hasAttribute('role')) {
-        this.setAttribute('role', 'grid');
+        this.setAttribute('role', 'list');
         this.setAttribute('data-ui-placement-role', '');
       }
-      this.setAttribute(
-        'aria-rowcount',
-        String(items.reduce((max, item) => Math.max(max, item.row + item.rowSpan - 1), 0))
-      );
-      this.setAttribute(
-        'aria-colcount',
-        String(items.reduce((max, item) => Math.max(max, item.column + item.columnSpan - 1), this._fallbackColumnCount()))
-      );
     } else if (this.hasAttribute('data-ui-placement-role')) {
       this.removeAttribute('role');
       this.removeAttribute('data-ui-placement-role');
+    }
+    if (!this._isInteractive() || this.hasAttribute('data-ui-placement-role')) {
       this.removeAttribute('aria-rowcount');
       this.removeAttribute('aria-colcount');
     }
@@ -489,23 +486,28 @@ export class UIPlacementGrid extends ElementBase {
         item.el.style.boxSizing = 'border-box';
 
         if (this._isInteractive()) {
-          if (!item.el.hasAttribute('role')) item.el.setAttribute('role', 'gridcell');
-          item.el.setAttribute('aria-rowindex', String(item.row));
-          item.el.setAttribute('aria-colindex', String(item.column));
-          if (item.columnSpan > 1) item.el.setAttribute('aria-colspan', String(item.columnSpan));
-          else item.el.removeAttribute('aria-colspan');
-          if (item.rowSpan > 1) item.el.setAttribute('aria-rowspan', String(item.rowSpan));
-          else item.el.removeAttribute('aria-rowspan');
-          if (item.selected) item.el.setAttribute('aria-selected', 'true');
-          else item.el.removeAttribute('aria-selected');
+          if (!item.el.hasAttribute('role')) {
+            item.el.setAttribute('role', 'listitem');
+            item.el.setAttribute('data-ui-placement-item-role', '');
+          }
+          const position = ordered.indexOf(item) + 1;
+          if (item.el.hasAttribute('data-ui-placement-item-role')) {
+            item.el.setAttribute('aria-posinset', String(position));
+            item.el.setAttribute('aria-setsize', String(ordered.length));
+            // aria-selected is not valid on a listitem; aria-current marks the selected item.
+            if (item.selected) item.el.setAttribute('aria-current', 'true');
+            else item.el.removeAttribute('aria-current');
+          }
           if (item.disabled) item.el.setAttribute('aria-disabled', 'true');
           else item.el.removeAttribute('aria-disabled');
         } else {
-          item.el.removeAttribute('aria-rowindex');
-          item.el.removeAttribute('aria-colindex');
-          item.el.removeAttribute('aria-rowspan');
-          item.el.removeAttribute('aria-colspan');
-          item.el.removeAttribute('aria-selected');
+          if (item.el.hasAttribute('data-ui-placement-item-role')) {
+            item.el.removeAttribute('role');
+            item.el.removeAttribute('data-ui-placement-item-role');
+          }
+          item.el.removeAttribute('aria-posinset');
+          item.el.removeAttribute('aria-setsize');
+          item.el.removeAttribute('aria-current');
           item.el.removeAttribute('aria-disabled');
         }
 

@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { resolveTriggerControl } from '../primitives/trigger';
 import { createSharedMenuItemCss } from './menu-item-styles';
 
 type DropdownPlacement = 'top' | 'bottom' | 'left' | 'right';
@@ -275,7 +276,7 @@ const style = `
   }
 
   .menu[data-tone='neutral'] {
-    --ui-dropdown-ring: color-mix(in srgb, var(--ui-color-muted, #64748b) 60%, var(--ui-dropdown-color));
+    --ui-dropdown-ring: color-mix(in srgb, var(--ui-color-muted, #526175) 60%, var(--ui-dropdown-color));
   }
 
   .menu[data-tone='danger'] {
@@ -286,17 +287,17 @@ const style = `
   }
 
   .menu[data-tone='success'] {
-    --ui-dropdown-ring: var(--ui-color-success, #16a34a);
-    --ui-dropdown-item-hover-bg: color-mix(in srgb, var(--ui-color-success, #16a34a) 12%, transparent);
-    --ui-dropdown-item-active-bg: color-mix(in srgb, var(--ui-color-success, #16a34a) 18%, transparent);
-    --ui-dropdown-item-checked-bg: color-mix(in srgb, var(--ui-color-success, #16a34a) 16%, transparent);
+    --ui-dropdown-ring: var(--ui-color-success, #15803d);
+    --ui-dropdown-item-hover-bg: color-mix(in srgb, var(--ui-color-success, #15803d) 12%, transparent);
+    --ui-dropdown-item-active-bg: color-mix(in srgb, var(--ui-color-success, #15803d) 18%, transparent);
+    --ui-dropdown-item-checked-bg: color-mix(in srgb, var(--ui-color-success, #15803d) 16%, transparent);
   }
 
   .menu[data-tone='warning'] {
-    --ui-dropdown-ring: var(--ui-color-warning, #d97706);
-    --ui-dropdown-item-hover-bg: color-mix(in srgb, var(--ui-color-warning, #d97706) 15%, transparent);
-    --ui-dropdown-item-active-bg: color-mix(in srgb, var(--ui-color-warning, #d97706) 20%, transparent);
-    --ui-dropdown-item-checked-bg: color-mix(in srgb, var(--ui-color-warning, #d97706) 17%, transparent);
+    --ui-dropdown-ring: var(--ui-color-warning, #b45309);
+    --ui-dropdown-item-hover-bg: color-mix(in srgb, var(--ui-color-warning, #b45309) 15%, transparent);
+    --ui-dropdown-item-active-bg: color-mix(in srgb, var(--ui-color-warning, #b45309) 20%, transparent);
+    --ui-dropdown-item-checked-bg: color-mix(in srgb, var(--ui-color-warning, #b45309) 17%, transparent);
   }
 
   ${createSharedMenuItemCss({
@@ -969,8 +970,9 @@ export class UIDropdown extends ElementBase {
   }
 
   private _syncTriggerA11y(): void {
-    const trigger = this._getTrigger();
-    if (!trigger) return;
+    const wrapper = this._getTrigger();
+    if (!wrapper) return;
+    const trigger = resolveTriggerControl(wrapper);
 
     if (!trigger.id) trigger.id = this._triggerId;
     trigger.setAttribute('aria-haspopup', 'menu');

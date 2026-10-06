@@ -21,6 +21,8 @@ const style = `
     --ui-rating-easing: var(--ui-motion-easing, cubic-bezier(0.2, 0.8, 0.2, 1));
     --ui-rating-radius: var(--ui-control-radius, var(--ui-radius, 4px));
     display: inline-flex;
+    flex-wrap: wrap;
+    max-inline-size: 100%;
     align-items: center;
     gap: var(--ui-rating-gap);
     color-scheme: light dark;
@@ -36,7 +38,7 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-rating-color: color-mix(in srgb, var(--ui-color-muted, #64748b) 74%, var(--ui-color-text, #0f172a) 26%);
+    --ui-rating-color: color-mix(in srgb, var(--ui-color-muted, #526175) 74%, var(--ui-color-text, #0f172a) 26%);
   }
 
   :host([tone="info"]) {
@@ -44,7 +46,7 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-rating-color: var(--ui-color-success, #16a34a);
+    --ui-rating-color: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
@@ -261,7 +263,7 @@ const style = `
 
   .label {
     font-size: var(--ui-font-size-sm, 12px);
-    color: var(--ui-color-muted, #64748b);
+    color: var(--ui-color-muted, #526175);
     white-space: nowrap;
   }
 
@@ -446,7 +448,7 @@ export class UIRating extends ElementBase {
     ];
   }
 
-  private _stars: HTMLButtonElement[] = [];
+  private _stars: HTMLElement[] = [];
   private _value = 0;
   private _max = 5;
   private _precision = 1;
@@ -602,18 +604,18 @@ export class UIRating extends ElementBase {
     this.requestRender();
   }
 
-  private _getStarFromEventTarget(target: EventTarget | null): HTMLButtonElement | null {
+  private _getStarFromEventTarget(target: EventTarget | null): HTMLElement | null {
     if (!(target instanceof Element)) return null;
-    return target.closest('.star') as HTMLButtonElement | null;
+    return target.closest('.star') as HTMLElement | null;
   }
 
-  private _getStarIndex(star: HTMLButtonElement | null): number {
+  private _getStarIndex(star: HTMLElement | null): number {
     if (!star) return -1;
     const index = Number(star.dataset.index);
     return Number.isFinite(index) ? index : -1;
   }
 
-  private _getValueFromPointer(event: MouseEvent, star: HTMLButtonElement): number {
+  private _getValueFromPointer(event: MouseEvent, star: HTMLElement): number {
     const index = this._getStarIndex(star);
     if (index === -1) return this._value;
 
@@ -773,18 +775,12 @@ export class UIRating extends ElementBase {
       const starNumber = index + 1;
       const fill = this._getFillPercent(starNumber, this._hoverValue > 0 ? this._hoverValue : this._value);
 
-      star.setAttribute('role', 'presentation');
-      star.setAttribute('tabindex', '-1');
+      // The stars are a pointer-only visual: the host is the slider. They were buttons (with
+      // tabindex -1), which is still a focusable control nested inside a slider.
       star.setAttribute('aria-hidden', 'true');
-      star.setAttribute('aria-checked', 'false');
-
-      const labelValue = this._precision === 0.5
-        ? `${index + 0.5} to ${index + 1}`
-        : `${index + 1}`;
 
       star.setAttribute('data-fill', String(fill));
       star.setAttribute('data-star-value', String(starNumber));
-      star.setAttribute('aria-label', `${labelValue}`);
     });
   }
 
@@ -860,10 +856,9 @@ export class UIRating extends ElementBase {
     this.setAttribute('precision', String(this._precision));
 
     const starsHtml = Array.from({ length: this._max }, (_, index) => `
-      <button
-        type="button"
+      <span
         class="star"
-        tabindex="-1"
+        aria-hidden="true"
         data-index="${index}"
         part="star"
         style="--fill-percent: 0%;"
@@ -876,7 +871,7 @@ export class UIRating extends ElementBase {
             </span>
           </span>
         </span>
-      </button>
+      </span>
     `).join('');
 
     const valueText = showValue ? `${this._formatValue(this._value)} / ${this._max}` : '';
@@ -903,7 +898,7 @@ export class UIRating extends ElementBase {
     `);
 
     queueMicrotask(() => {
-      this._stars = Array.from(this.root.querySelectorAll('.star')) as HTMLButtonElement[];
+      this._stars = Array.from(this.root.querySelectorAll('.star')) as HTMLElement[];
       this._syncStars();
     });
 
