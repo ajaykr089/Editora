@@ -1520,7 +1520,7 @@ const LightCodeEditorDemo = ({
   return (
     <Flex style={{
       padding: "20px",
-      height: "100vh",
+      minHeight: "100vh",
       display: "flex",
       flexDirection: "column",
       backgroundColor: theme === "dark" ? "#1e1e1e" : "#f5f5f5",

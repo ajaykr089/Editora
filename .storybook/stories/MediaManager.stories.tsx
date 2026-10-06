@@ -307,7 +307,7 @@ export const ToastNotificationsDemo: Story = {
               borderLeft: '4px solid #4CAF50',
               borderRadius: '4px'
             }}>
-              <strong style={{ color: '#4CAF50', fontSize: '12px' }}>✅ Success</strong>
+              <strong style={{ color: '#2e7d32', fontSize: '12px' }}>✅ Success</strong>
               <p style={{ fontSize: '11px', marginTop: '5px', color: '#666' }}>
                 Shows when image uploaded to server
               </p>
@@ -319,7 +319,7 @@ export const ToastNotificationsDemo: Story = {
               borderLeft: '4px solid #2196F3',
               borderRadius: '4px'
             }}>
-              <strong style={{ color: '#2196F3', fontSize: '12px' }}>📌 Info (Offline)</strong>
+              <strong style={{ color: '#1565c0', fontSize: '12px' }}>📌 Info (Offline)</strong>
               <p style={{ fontSize: '11px', marginTop: '5px', color: '#666' }}>
                 Shows when image stored as base64
               </p>
@@ -595,7 +595,7 @@ export function MyEditor() {
           
           {/* Offline Options */}
           <Box style={{ padding: '15px', backgroundColor: '#fff', borderRadius: '4px', border: '1px solid #e0e0e0' }}>
-            <h4 style={{ marginTop: '0', color: '#2196F3' }}>📱 offline Options</h4>
+            <h4 style={{ marginTop: '0', color: '#1565c0' }}>📱 offline Options</h4>
             <pre style={{
               background: '#f5f5f5',
               padding: '10px',
@@ -626,7 +626,7 @@ export function MyEditor() {
 
           {/* File Options */}
           <Box style={{ padding: '15px', backgroundColor: '#fff', borderRadius: '4px', border: '1px solid #e0e0e0' }}>
-            <h4 style={{ marginTop: '0', color: '#4CAF50' }}>📄 File Options</h4>
+            <h4 style={{ marginTop: '0', color: '#2e7d32' }}>📄 File Options</h4>
             <pre style={{
               background: '#f5f5f5',
               padding: '10px',
