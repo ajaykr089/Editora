@@ -1,4 +1,7 @@
 import { ElementBase } from '../ElementBase';
+import { syncExternalDescription } from '../primitives/control-name';
+
+let pinInputUid = 0;
 
 type PinInputSource = 'input' | 'paste' | 'keyboard' | 'api' | 'clear';
 
@@ -10,7 +13,7 @@ const style = `
     --ui-pin-radius: 14px;
     --ui-pin-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-pin-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-pin-muted: var(--ui-color-muted, var(--ui-muted, #64748b));
+    --ui-pin-muted: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-pin-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
     --ui-pin-error: var(--ui-color-danger, var(--ui-error, #dc2626));
     --ui-pin-focus: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
@@ -85,8 +88,10 @@ const style = `
   }
 
   .slot {
+    /* Full width when there is room, narrower rather than overflowing when the row is too long to fit. */
+    flex: 0 1 var(--ui-pin-slot-width);
     inline-size: var(--ui-pin-slot-width);
-    min-inline-size: var(--ui-pin-slot-width);
+    min-inline-size: 0;
     block-size: var(--ui-pin-slot-height);
     box-sizing: border-box;
     border: 1px solid var(--ui-pin-border-color);
@@ -212,8 +217,12 @@ export type UIPinInputCompleteDetail = {
 };
 
 export class UIPinInput extends ElementBase {
+  private readonly _pinUid = `ui-pin-input-${++pinInputUid}`;
+
   static get observedAttributes(): string[] {
     return [
+      'aria-description',
+      'aria-describedby',
       'value',
       'length',
       'name',
@@ -446,7 +455,10 @@ export class UIPinInput extends ElementBase {
     const labelId = label ? ensureId(this._labelEl, 'ui-pin-label') : '';
     const descId = description ? ensureId(this._descriptionEl, 'ui-pin-description') : '';
     const errorId = error ? ensureId(this._errorEl, 'ui-pin-error') : '';
-    const describedBy = [descId, errorId].filter(Boolean).join(' ');
+    // The digits share one description: the field's own text sits in the host's tree, so it is written
+    // into a hidden element here that every digit can reference.
+    const externalId = syncExternalDescription(this._inputs[0], this, this._pinUid) || '';
+    const describedBy = [descId, errorId, externalId].filter(Boolean).join(' ');
 
     this._inputs.forEach((input, index) => {
       const value = chars[index] || '';

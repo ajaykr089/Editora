@@ -8,8 +8,8 @@ const style = `
     --ui-field-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-field-color: var(--ui-color-text, var(--ui-text, #0f172a));
     --ui-field-label-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-field-description-color: var(--ui-color-muted, var(--ui-muted, #64748b));
-    --ui-field-error-color: var(--ui-color-danger, var(--ui-error, #dc2626));
+    --ui-field-description-color: var(--ui-color-muted, var(--ui-muted, #526175));
+    --ui-field-error-color: var(--ui-color-danger, var(--ui-error, #c81e1e));
     --ui-field-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-field-border: 1px solid var(--ui-field-border-color);
     --ui-field-shadow:
@@ -218,7 +218,7 @@ const style = `
 
   :host([tone="danger"]) {
     --ui-field-accent: #dc2626;
-    --ui-field-error-color: #dc2626;
+    --ui-field-error-color: #c81e1e;
   }
 
   :host([density="compact"]) {
@@ -419,6 +419,7 @@ function uniqueIds(existing: string[]): string[] {
 
 // Marks an aria-label this element wrote on the control (as opposed to one the author supplied).
 const AUTO_LABEL_ATTR = 'data-ui-field-label';
+const AUTO_DESCRIPTION_ATTR = 'data-ui-field-description';
 
 const CONTROL_SELECTOR =
   'ui-input, ui-textarea, ui-select, ui-combobox, input, textarea, select, button, [tabindex]:not([tabindex="-1"])';
@@ -620,10 +621,20 @@ export class UIField extends ElementBase {
     const slottedLabel = labelSlot
       ? labelSlot.assignedNodes({ flatten: true }).map((node) => node.textContent || '').join(' ')
       : '';
-    this._syncControlA11y(labelVisible, descVisible, errorVisible, (labelText || slottedLabel).replace(/\s+/g, ' ').trim());
+    const plain = (value: string) => value.replace(/\s+/g, ' ').trim();
+    const slottedText = (slot: HTMLSlotElement | null) =>
+      slot ? slot.assignedNodes({ flatten: true }).map((node) => node.textContent || '').join(' ') : '';
+    const description = descVisible ? plain(descText || slottedText(descSlot)) : '';
+    const error = errorVisible ? plain(errorText || slottedText(errorSlot)) : '';
+    this._syncControlA11y(
+      labelVisible,
+      plain(labelText || slottedLabel),
+      [description, error].filter(Boolean).join(' '),
+      errorVisible
+    );
   }
 
-  private _syncControlA11y(labelVisible: boolean, descVisible: boolean, errorVisible: boolean, labelPlainText = ''): void {
+  private _syncControlA11y(labelVisible: boolean, labelPlainText: string, descriptionPlainText: string, errorVisible: boolean): void {
     const control = this._resolveControlElement();
     if (!control) return;
 
@@ -664,16 +675,23 @@ export class UIField extends ElementBase {
       control.removeAttribute(AUTO_LABEL_ATTR);
     }
 
-    const existing = (control.getAttribute('aria-describedby') || '')
-      .split(/\s+/)
-      .filter((id) => id && id !== descId && id !== errorId);
-
-    if (descVisible) existing.push(descId);
-    if (errorVisible) existing.push(errorId);
-
-    const describedBy = uniqueIds(existing);
+    // The description and the error are in this element's shadow root, so an id pointing at them can
+    // never resolve from the control. Their text goes on the control as aria-description instead (the
+    // controls that wrap an inner element forward it there). Ids the author wired up are left alone.
+    const describedBy = uniqueIds(
+      (control.getAttribute('aria-describedby') || '').split(/\s+/).filter((id) => id && id !== descId && id !== errorId)
+    );
     if (describedBy.length) control.setAttribute('aria-describedby', describedBy.join(' '));
     else control.removeAttribute('aria-describedby');
+
+    const authorDescription = control.hasAttribute('aria-description') && !control.hasAttribute(AUTO_DESCRIPTION_ATTR);
+    if (descriptionPlainText && !authorDescription) {
+      control.setAttribute('aria-description', descriptionPlainText);
+      control.setAttribute(AUTO_DESCRIPTION_ATTR, '');
+    } else if (control.hasAttribute(AUTO_DESCRIPTION_ATTR)) {
+      control.removeAttribute('aria-description');
+      control.removeAttribute(AUTO_DESCRIPTION_ATTR);
+    }
 
     const invalid = this.hasAttribute('invalid') || errorVisible;
     if (invalid) control.setAttribute('aria-invalid', 'true');

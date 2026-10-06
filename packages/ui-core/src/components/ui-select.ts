@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { externalDescriptionMarkup } from '../primitives/control-name';
 import { findFirstEnabledIndex, findIndexByValue, findLastEnabledIndex } from '../primitives/collection';
 import { resolveListboxActiveIndex } from '../primitives/listbox';
 import './ui-listbox';
@@ -15,12 +16,12 @@ const style = `
     --ui-select-border: var(--base-select-border, 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent));
     --ui-select-border-color: color-mix(in srgb, var(--ui-select-border) 100%, transparent);
     --ui-select-text: var(--ui-color-text, #0f172a);
-    --ui-select-muted: var(--ui-color-muted, #64748b);
+    --ui-select-muted: var(--ui-color-muted, #526175);
     --ui-select-placeholder: color-mix(in srgb, var(--ui-select-text) 44%, transparent);
     --ui-select-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-select-accent: var(--ui-color-primary, #2563eb);
-    --ui-select-success: var(--ui-color-success, #16a34a);
-    --ui-select-warning: var(--ui-color-warning, #d97706);
+    --ui-select-success: var(--ui-color-success, #15803d);
+    --ui-select-warning: var(--ui-color-warning, #b45309);
     --ui-select-error: var(--ui-color-danger, #dc2626);
 
     --ui-select-shadow: var(--base-select-shadow, none);
@@ -630,11 +631,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-select-accent: var(--ui-color-success, #16a34a);
+    --ui-select-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-select-accent: var(--ui-color-warning, #d97706);
+    --ui-select-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
@@ -818,6 +819,8 @@ const LIVE_ATTRS = new Set([
 export class UISelect extends ElementBase {
   static get observedAttributes() {
     return [
+      'aria-description',
+      'aria-describedby',
       'value',
       'disabled',
       'loading',
@@ -1652,7 +1655,8 @@ export class UISelect extends ElementBase {
     const errorId = `${this._uid}-error`;
     const triggerId = `${this._uid}-trigger`;
     const listboxId = `${this._uid}-listbox`;
-    const describedBy = [hasDescription ? descriptionId : '', hasError ? errorId : ''].filter(Boolean).join(' ');
+    const external = externalDescriptionMarkup(this, this._uid);
+    const describedBy = [hasDescription ? descriptionId : '', hasError ? errorId : '', external.id].filter(Boolean).join(' ');
 
     this.setContent(`
       <style>${style}</style>
@@ -1706,6 +1710,7 @@ export class UISelect extends ElementBase {
         <p class="error" part="error" id="${errorId}" ${hasError ? '' : 'hidden'}>
           <slot name="error"><span class="error-text">${escapeHtml(errorAttr)}</span></slot>
         </p>
+        ${external.html}
       </div>
     `);
 

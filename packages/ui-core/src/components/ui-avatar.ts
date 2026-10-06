@@ -8,7 +8,7 @@ const style = `
     --ui-avatar-bg-base: var(--base-avatar-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-avatar-bg: var(--ui-avatar-bg-base);
     --ui-avatar-color: color-mix(in srgb, var(--ui-color-primary, #2563eb) 78%, var(--ui-color-text, #0f172a) 22%);
-    --ui-avatar-muted: var(--ui-color-muted, #64748b);
+    --ui-avatar-muted: var(--ui-color-muted, #526175);
     --ui-avatar-border: var(--base-avatar-border, 1px solid color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.14)) 82%, transparent));
     --ui-avatar-ring: var(--base-avatar-shadow, 0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 24px rgba(15, 23, 42, 0.12));
     --ui-avatar-font-size: var(--ui-default-font-size, 14px);
@@ -47,11 +47,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-avatar-accent: var(--ui-color-success, #16a34a);
+    --ui-avatar-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-avatar-accent: var(--ui-color-warning, #d97706);
+    --ui-avatar-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
@@ -197,7 +197,7 @@ const style = `
   }
 
   :host([state="success"]) {
-    --ui-avatar-accent: var(--ui-color-success, #16a34a);
+    --ui-avatar-accent: var(--ui-color-success, #15803d);
   }
 
   :host([state="success"]) .avatar {
@@ -256,7 +256,7 @@ const style = `
     height: var(--ui-avatar-status-size);
     border-radius: 50%;
     border: var(--ui-avatar-status-border);
-    background: var(--ui-avatar-status-color, var(--ui-color-success, #16a34a));
+    background: var(--ui-avatar-status-color, var(--ui-color-success, #15803d));
     box-sizing: border-box;
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--ui-avatar-status-color, #16a34a) 28%, transparent), 0 0 0 1px color-mix(in srgb, #000000 10%, transparent);
   }
@@ -432,6 +432,7 @@ export class UIAvatar extends ElementBase {
   private _imgLoaded = false;
   private _imgFailed = false;
   private _managedRole = false;
+  private _autoName = '';
   private _managedTabIndex = false;
   private _managedAriaDisabled = false;
   private _managedAriaBusy = false;
@@ -605,15 +606,21 @@ export class UIAvatar extends ElementBase {
           ? deriveInitials(fallbackSlot)
           : '?';
 
-    if (!this.hasAttribute('aria-label')) {
-      this.setAttribute('aria-label', alt.trim() || fallback);
-    }
-
     const showImage = Boolean(src) && !this._imgFailed;
     const showFallback = !showImage || !this._imgLoaded;
     const loading = toLoading(this.getAttribute('loading'));
     const showStatus = this.hasAttribute('status');
     const badgeText = (this.getAttribute('badge') || '').trim();
+
+    // Only a name this element wrote itself is kept up to date: React sets `alt`/`badge` after the element
+    // connects, so a name taken from the first render would stay as the initials for good.
+    const currentName = this.getAttribute('aria-label');
+    if (currentName === null || currentName === this._autoName) {
+      const base = alt.trim() || fallback;
+      const name = badgeText && !base.includes(badgeText) ? `${base}, ${badgeText}` : base;
+      if (name !== currentName) this.setAttribute('aria-label', name);
+      this._autoName = name;
+    }
 
     this._detachImageListeners();
     this.setContent(`

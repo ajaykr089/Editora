@@ -1,5 +1,5 @@
 import { ElementBase } from '../ElementBase';
-import { syncControlName } from '../primitives/control-name';
+import { syncControlName, syncControlDescription } from '../primitives/control-name';
 
 const style = `
   :host {
@@ -14,7 +14,7 @@ const style = `
     --ui-number-field-width: 100%;
     --ui-number-field-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-number-field-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-number-field-muted: var(--ui-color-muted, var(--ui-muted, #64748b));
+    --ui-number-field-muted: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-number-field-focus: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     --ui-number-field-danger: var(--ui-color-danger, var(--ui-error, #dc2626));
     --ui-number-field-shadow: none;
@@ -430,6 +430,8 @@ export class UINumberField extends ElementBase {
       'inputmode',
       'label',
       'aria-label',
+      'aria-description',
+      'aria-describedby',
       'description',
       'data-error',
       'size',
@@ -509,7 +511,9 @@ export class UINumberField extends ElementBase {
       name === 'size' ||
       name === 'variant' ||
       name === 'invalid' ||
-      name === 'aria-label'
+      name === 'aria-label' ||
+      name === 'aria-description' ||
+      name === 'aria-describedby'
     ) {
       this._syncControlAttrs();
       this._syncDisplayValue();
@@ -668,8 +672,7 @@ export class UINumberField extends ElementBase {
     const describedBy: string[] = [];
     if (hasDescription) describedBy.push(`${this._uid}-description`);
     if (hasError) describedBy.push(`${this._uid}-error`);
-    if (describedBy.length) this._input.setAttribute('aria-describedby', describedBy.join(' '));
-    else this._input.removeAttribute('aria-describedby');
+    syncControlDescription(this._input, this, this._uid, describedBy);
 
     if (this.hasAttribute('required')) this._input.setAttribute('aria-required', 'true');
     else this._input.removeAttribute('aria-required');

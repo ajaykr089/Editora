@@ -63,7 +63,8 @@ describe('Dock wrapper', () => {
     const item = container.querySelector('[data-ui-dock-item]') as HTMLElement | null;
     expect(item?.getAttribute('data-value')).toBe('inbox');
     expect(item?.hasAttribute('data-active')).toBe(true);
-    expect(item?.getAttribute('aria-label')).toBe('Inbox');
+    // The badge is drawn on the item and hidden from assistive technology, so its count joins the name.
+    expect(item?.getAttribute('aria-label')).toBe('Inbox, 9');
     expect(item?.getAttribute('title')).toBe('Inbox');
     expect(item?.querySelector('[data-ui-dock-icon]')?.textContent).toBe('I');
     expect(item?.querySelector('[data-ui-dock-label]')?.textContent).toBe('Inbox');

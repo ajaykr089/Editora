@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlName, syncControlDescription } from '../primitives/control-name';
 import { clampTime, formatTime, parseTimeInput } from './date-time-utils';
 
 type TimeSegment = 'hour' | 'minute' | 'second' | 'meridiem';
@@ -13,7 +14,7 @@ const style = `
     --ui-time-field-radius: var(--ui-radius, 12px);
     --ui-time-field-bg: var(--ui-color-surface, #ffffff);
     --ui-time-field-text: var(--ui-color-text, #0f172a);
-    --ui-time-field-muted: var(--ui-color-muted, #64748b);
+    --ui-time-field-muted: var(--ui-color-muted, #526175);
     --ui-time-field-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-time-field-danger: var(--ui-color-danger, #dc2626);
     display: block;
@@ -160,7 +161,7 @@ export class UITimeField extends ElementBase {
   static formAssociated = true;
 
   static get observedAttributes() {
-    return ['value', 'min', 'max', 'format', 'seconds', 'label', 'description', 'data-error', 'required', 'disabled', 'readonly', 'name', 'locale'];
+    return ['aria-label', 'aria-description', 'aria-describedby', 'value', 'min', 'max', 'format', 'seconds', 'label', 'description', 'data-error', 'required', 'disabled', 'readonly', 'name', 'locale'];
   }
 
   private _value: string | null = null;
@@ -513,15 +514,14 @@ export class UITimeField extends ElementBase {
     this._errorEl.textContent = error;
     this._shellEl.setAttribute('data-invalid', error ? 'true' : 'false');
     this._shellEl.setAttribute('role', 'group');
-    if (label) this._shellEl.setAttribute('aria-labelledby', labelId);
-    else this._shellEl.removeAttribute('aria-labelledby');
+    syncControlName(this._shellEl, this, label ? labelId : null);
     const describedBy = [description ? descriptionId : null, error ? errorId : null].filter(Boolean).join(' ');
-    if (describedBy) this._shellEl.setAttribute('aria-describedby', describedBy);
-    else this._shellEl.removeAttribute('aria-describedby');
+    syncControlDescription(this._shellEl, this, this._uid, describedBy ? describedBy.split(' ') : []);
     this._shellEl.setAttribute('aria-invalid', error ? 'true' : 'false');
     this._shellEl.setAttribute('aria-required', this.hasAttribute('required') ? 'true' : 'false');
     this._shellEl.setAttribute('aria-disabled', this.hasAttribute('disabled') ? 'true' : 'false');
-    this._shellEl.setAttribute('aria-readonly', this.hasAttribute('readonly') ? 'true' : 'false');
+    // aria-readonly is not allowed on role="group"; the inner segments carry the read-only state.
+    this._shellEl.removeAttribute('aria-readonly');
     const parts = parseStoredTime(this._value, this._showSeconds());
     const order = this._order();
     const nextChildren: Node[] = [];
@@ -542,7 +542,7 @@ export class UITimeField extends ElementBase {
       button.setAttribute('data-segment', segment);
       button.setAttribute('data-active', this._activeSegment === segment ? 'true' : 'false');
       button.setAttribute('data-empty', parts ? 'false' : 'true');
-      button.setAttribute('aria-label', segment === 'hour' ? 'Hour' : segment === 'minute' ? 'Minute' : segment === 'second' ? 'Second' : 'AM or PM');
+      const segmentLabel = segment === 'hour' ? 'Hour' : segment === 'minute' ? 'Minute' : segment === 'second' ? 'Second' : 'AM or PM';
       button.tabIndex = this._activeSegment === segment ? 0 : -1;
       button.disabled = this.hasAttribute('disabled');
       button.addEventListener('click', this._onSegmentClick);
@@ -561,6 +561,8 @@ export class UITimeField extends ElementBase {
         button.textContent = twelveParts!.meridiem;
       }
 
+      // The accessible name must contain the visible text (WCAG 2.5.3), so it carries the value.
+      button.setAttribute('aria-label', `${segmentLabel} ${button.textContent || ''}`.trim());
       this._segmentButtons.set(segment, button);
       nextChildren.push(button);
     });

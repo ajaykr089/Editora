@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlDescription } from '../primitives/control-name';
 import { normalizeCollectionText } from '../primitives/collection';
 import './ui-listbox';
 import type { UIListbox } from './ui-listbox';
@@ -22,7 +23,7 @@ const style = `
     --ui-multi-select-radius: var(--base-multi-select-radius, var(--ui-radius, 4px));
     --ui-multi-select-bg: var(--base-multi-select-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-multi-select-text: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-multi-select-muted: var(--ui-color-muted, var(--ui-muted, #64748b));
+    --ui-multi-select-muted: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-multi-select-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-multi-select-danger: var(--ui-color-danger, #dc2626);
     --ui-multi-select-accent: var(--ui-color-primary, #2563eb);
@@ -508,9 +509,9 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-multi-select-accent: color-mix(in srgb, var(--ui-color-muted, #64748b) 62%, var(--ui-color-text, #0f172a));
-    --ui-multi-select-focus: color-mix(in srgb, var(--ui-color-muted, #64748b) 62%, var(--ui-color-text, #0f172a));
-    --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-muted, #64748b) 12%, transparent);
+    --ui-multi-select-accent: color-mix(in srgb, var(--ui-color-muted, #526175) 62%, var(--ui-color-text, #0f172a));
+    --ui-multi-select-focus: color-mix(in srgb, var(--ui-color-muted, #526175) 62%, var(--ui-color-text, #0f172a));
+    --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-muted, #526175) 12%, transparent);
     --ui-multi-select-chip-text: var(--ui-multi-select-text);
   }
 
@@ -520,17 +521,17 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-multi-select-accent: var(--ui-color-success, #16a34a);
-    --ui-multi-select-focus: var(--ui-color-success, #16a34a);
-    --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-success, #16a34a) 12%, transparent);
-    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-success, #16a34a) 82%, #0f172a 18%);
+    --ui-multi-select-accent: var(--ui-color-success, #15803d);
+    --ui-multi-select-focus: var(--ui-color-success, #15803d);
+    --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-success, #15803d) 12%, transparent);
+    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-success, #15803d) 82%, #0f172a 18%);
   }
 
   :host([tone="warning"]) {
-    --ui-multi-select-accent: var(--ui-color-warning, #d97706);
-    --ui-multi-select-focus: var(--ui-color-warning, #d97706);
-    --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-warning, #d97706) 12%, transparent);
-    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-warning, #d97706) 82%, #0f172a 18%);
+    --ui-multi-select-accent: var(--ui-color-warning, #b45309);
+    --ui-multi-select-focus: var(--ui-color-warning, #b45309);
+    --ui-multi-select-chip-bg: color-mix(in srgb, var(--ui-color-warning, #b45309) 12%, transparent);
+    --ui-multi-select-chip-text: color-mix(in srgb, var(--ui-color-warning, #b45309) 82%, #0f172a 18%);
   }
 
   :host([tone="danger"]) {
@@ -620,6 +621,8 @@ export class UIMultiSelect extends ElementBase {
       'placeholder',
       'label',
       'aria-label',
+      'aria-description',
+      'aria-describedby',
       'description',
       'data-error',
       'name',
@@ -723,7 +726,7 @@ export class UIMultiSelect extends ElementBase {
       <div class="root">
         <div class="meta" hidden>
           <div class="label" hidden><span class="label-text" id="${this._uid}-label"></span><span class="required" hidden>*</span></div>
-          <div class="description" hidden></div>
+          <div class="description" id="${this._uid}-description" hidden></div>
         </div>
         <div class="shell" part="shell" data-open="false" data-invalid="false">
           <div class="value-area" part="value-area">
@@ -1080,6 +1083,13 @@ export class UIMultiSelect extends ElementBase {
       descriptionEl.textContent = description;
       errorEl.hidden = !error;
       errorEl.textContent = error;
+      errorEl.id = `${this._uid}-error`;
+      syncControlDescription(
+        this._inputEl,
+        this,
+        this._uid,
+        [description ? `${this._uid}-description` : '', error ? `${this._uid}-error` : ''].filter(Boolean)
+      );
 
       this._shellEl.setAttribute('data-open', this.open ? 'true' : 'false');
       this._shellEl.setAttribute('data-invalid', error ? 'true' : 'false');

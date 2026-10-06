@@ -274,4 +274,40 @@ describe('Carousel', () => {
     });
     vi.useRealTimers();
   });
+  it('names a text control so that it contains the words it shows', () => {
+    const { container, rerender } = render(
+      <Carousel>
+        <Carousel.Item label="One"><div>One</div></Carousel.Item>
+        <Carousel.Item label="Two"><div>Two</div></Carousel.Item>
+      </Carousel>
+    );
+    const names = () => Array.from(container.querySelectorAll('ui-button')).slice(0, 2).map((b) => b.getAttribute('aria-label'));
+
+    expect(names()).toEqual(['Previous slide', 'Next slide']);
+
+    rerender(
+      <Carousel previousLabel="Back" nextLabel="Forward">
+        <Carousel.Item label="One"><div>One</div></Carousel.Item>
+        <Carousel.Item label="Two"><div>Two</div></Carousel.Item>
+      </Carousel>
+    );
+    expect(names()).toEqual(['Back, previous slide', 'Forward, next slide']);
+  });
+
+  it('gives each indicator a target that does not overlap its neighbour (WCAG 2.5.8)', () => {
+    const { container } = render(
+      <Carousel>
+        <Carousel.Item label="One"><div>One</div></Carousel.Item>
+        <Carousel.Item label="Two"><div>Two</div></Carousel.Item>
+      </Carousel>
+    );
+    const dots = Array.from(container.querySelectorAll<HTMLButtonElement>('button[aria-label^="Go to"]'));
+
+    expect(dots).toHaveLength(2);
+    dots.forEach((dot) => {
+      expect(dot.style.margin).toMatch(/^0(px)?$/);
+      expect(parseFloat(dot.style.paddingTop) * 2 + parseFloat(dot.style.height)).toBeGreaterThanOrEqual(24);
+      expect(parseFloat(dot.style.paddingLeft) * 2 + parseFloat(dot.style.width)).toBeGreaterThanOrEqual(24);
+    });
+  });
 });

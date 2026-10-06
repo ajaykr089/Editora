@@ -1,5 +1,5 @@
 import { ElementBase } from '../ElementBase';
-import { syncControlName } from '../primitives/control-name';
+import { syncControlName, syncControlDescription } from '../primitives/control-name';
 
 const style = `
   :host {
@@ -9,7 +9,7 @@ const style = `
     --ui-tags-input-radius: var(--ui-radius, 12px);
     --ui-tags-input-bg: var(--ui-color-surface, #ffffff);
     --ui-tags-input-text: var(--ui-color-text, #0f172a);
-    --ui-tags-input-muted: var(--ui-color-muted, #64748b);
+    --ui-tags-input-muted: var(--ui-color-muted, #526175);
     --ui-tags-input-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-tags-input-danger: var(--ui-color-danger, #dc2626);
     --ui-tags-input-chip-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, transparent);
@@ -227,6 +227,8 @@ export class UITagsInput extends ElementBase {
       'value',
       'label',
       'aria-label',
+      'aria-description',
+      'aria-describedby',
       'description',
       'placeholder',
       'data-error',
@@ -330,13 +332,13 @@ export class UITagsInput extends ElementBase {
       <div class="root">
         <div class="meta" hidden>
           <div class="label" hidden><span class="label-text" id="${this._uid}-label"></span><span class="required" hidden>*</span></div>
-          <div class="description" hidden></div>
+          <div class="description" id="${this._uid}-description" hidden></div>
         </div>
         <div class="shell" part="shell" data-focused="false" data-invalid="false">
           <div class="chips" part="chips"></div>
           <input class="input" part="input" type="text" />
         </div>
-        <div class="error" part="error" hidden></div>
+        <div class="error" id="${this._uid}-error" part="error" hidden></div>
         <div class="assist" hidden>
           <div class="hint">Press Enter or comma to create a tag.</div>
           <div class="counter"></div>
@@ -511,6 +513,11 @@ export class UITagsInput extends ElementBase {
     const message = transientError || externalError;
     this._errorEl.hidden = !message;
     this._errorEl.textContent = message;
+
+    const describedBy: string[] = [];
+    if (description) describedBy.push(`${this._uid}-description`);
+    if (message) describedBy.push(`${this._uid}-error`);
+    syncControlDescription(this._inputEl, this, this._uid, describedBy);
 
     this._assistEl.hidden = !showCounter;
     this._counterEl.textContent = maxTags != null ? `${this._tags.length}/${maxTags}` : String(this._tags.length);

@@ -114,10 +114,10 @@ const style = `
     --ui-cp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-cp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
     --ui-cp-text: var(--ui-color-text, #0f172a);
-    --ui-cp-muted: var(--ui-color-muted, #64748b);
+    --ui-cp-muted: var(--ui-color-muted, #526175);
     --ui-cp-accent: var(--ui-color-primary, #2563eb);
-    --ui-cp-success: var(--ui-color-success, #16a34a);
-    --ui-cp-warning: var(--ui-color-warning, #d97706);
+    --ui-cp-success: var(--ui-color-success, #15803d);
+    --ui-cp-warning: var(--ui-color-warning, #b45309);
     --ui-cp-danger: var(--ui-color-danger, #dc2626);
     --ui-cp-radius: 14px;
     --ui-cp-shadow: none;
@@ -1716,7 +1716,7 @@ export class UIColorPicker extends ElementBase {
       trigger.dataset.state = state
       trigger.dataset.tone = tone
       trigger.setAttribute('aria-expanded', modePopover && this._open ? 'true' : 'false')
-      this._applyAria(trigger)
+      this._applyAria(trigger, triggerText)
     }
     if (triggerValue) triggerValue.textContent = triggerText
     if (triggerPreview) triggerPreview.style.background = formatRgbDisplay(this._rgba, true)
@@ -2358,19 +2358,31 @@ export class UIColorPicker extends ElementBase {
     }
   }
 
-  private _applyAria(el: HTMLElement): void {
+  private _applyAria(el: HTMLElement, visibleValue = ''): void {
     const ariaLabelledby = this.getAttribute('aria-labelledby')
     const ariaDescribedby = this.getAttribute('aria-describedby')
     const ariaLabel = this.getAttribute('aria-label')
 
-    if (ariaLabelledby) el.setAttribute('aria-labelledby', ariaLabelledby)
-    else el.removeAttribute('aria-labelledby')
+    // An id on the host cannot be reached from inside the shadow root, so a reference is resolved here
+    // and its text becomes the name (a dangling aria-labelledby would leave the control unnamed).
+    const root = this.getRootNode() as Document | ShadowRoot
+    const referenced = ariaLabelledby
+      ? ariaLabelledby
+          .split(/\s+/)
+          .map((id) => root.getElementById?.(id)?.textContent?.trim() || '')
+          .filter(Boolean)
+          .join(' ')
+      : ''
+
+    el.removeAttribute('aria-labelledby')
 
     if (ariaDescribedby) el.setAttribute('aria-describedby', ariaDescribedby)
     else el.removeAttribute('aria-describedby')
 
-    if (ariaLabel) el.setAttribute('aria-label', ariaLabel)
-    else if (!ariaLabelledby) el.setAttribute('aria-label', 'Color picker')
+    const base = referenced || ariaLabel || 'Color picker'
+    // The trigger shows the current value as its visible text; the name has to contain it.
+    const name = visibleValue && !base.includes(visibleValue) ? `${base}, ${visibleValue}` : base
+    el.setAttribute('aria-label', name)
   }
 }
 

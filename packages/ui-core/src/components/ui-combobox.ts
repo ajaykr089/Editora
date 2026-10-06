@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { externalDescriptionMarkup } from '../primitives/control-name';
 import { normalizeCollectionText } from '../primitives/collection';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import { resolveListboxActiveIndex } from '../primitives/listbox';
@@ -43,7 +44,7 @@ const style = `
     --ui-combobox-radius: var(--ui-radius, 12px);
     --ui-combobox-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-combobox-text: var(--ui-color-text, #0f172a);
-    --ui-combobox-muted: var(--ui-color-muted, #64748b);
+    --ui-combobox-muted: var(--ui-color-muted, #526175);
     --ui-combobox-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
     --ui-combobox-border: 1px solid var(--ui-combobox-border-color);
     --ui-combobox-shadow: none;
@@ -57,8 +58,8 @@ const style = `
     --ui-combobox-option-hover: color-mix(in srgb, var(--ui-color-primary, #2563eb) 11%, transparent);
     --ui-combobox-option-active: color-mix(in srgb, var(--ui-color-primary, #2563eb) 18%, transparent);
     --ui-combobox-error: var(--ui-color-danger, #dc2626);
-    --ui-combobox-success: var(--ui-color-success, #16a34a);
-    --ui-combobox-warning: var(--ui-color-warning, #d97706);
+    --ui-combobox-success: var(--ui-color-success, #15803d);
+    --ui-combobox-warning: var(--ui-color-warning, #b45309);
     --ui-combobox-duration: 150ms;
     --ui-combobox-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 
@@ -93,7 +94,8 @@ const style = `
   .root {
     position: relative;
     width: var(--ui-combobox-width);
-    min-width: var(--ui-combobox-min-width);
+    /* The host already clamps its minimum to its container; the control inside has to as well. */
+    min-width: min(100%, var(--ui-combobox-min-width));
     max-width: 100%;
   }
 
@@ -516,6 +518,8 @@ export class UICombobox extends ElementBase {
   static get observedAttributes() {
     return [
       'aria-label',
+      'aria-description',
+      'aria-describedby',
       'value',
       'placeholder',
       'disabled',
@@ -1194,7 +1198,8 @@ export class UICombobox extends ElementBase {
     const hostAriaLabel = (this.getAttribute('aria-label') || '').trim();
     const hasDescription = Boolean(description || this.querySelector('[slot="description"]'));
     const errorId = `${this._uid}-error`;
-    const describedBy = [hasDescription ? `${this._uid}-description` : '', hasValidationError ? errorId : '']
+    const external = externalDescriptionMarkup(this, this._uid);
+    const describedBy = [hasDescription ? `${this._uid}-description` : '', hasValidationError ? errorId : '', external.id]
       .filter(Boolean)
       .join(' ');
 
@@ -1242,6 +1247,7 @@ export class UICombobox extends ElementBase {
       </div>
       <slot hidden></slot>
       <div class="error" part="error" id="${errorId}" ${hasValidationError ? '' : 'hidden'}>${escapeHtml(errorText)}</div>
+      ${external.html}
     `);
 
     this._detachDomListeners();

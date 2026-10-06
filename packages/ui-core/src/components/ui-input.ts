@@ -1,5 +1,5 @@
 import { ElementBase } from '../ElementBase';
-import { syncControlName } from '../primitives/control-name';
+import { syncControlName, syncControlDescription } from '../primitives/control-name';
 
 const CLEAR_ICON = `
   <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
@@ -19,12 +19,12 @@ const style = `
     --ui-input-width: 100%;
     --ui-input-bg: var(--base-input-bg, var(--ui-color-surface, var(--ui-surface, #ffffff)));
     --ui-input-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-label-color: var(--ui-color-muted, var(--ui-muted, #64748b));
-    --ui-description-color: var(--ui-color-muted, var(--ui-muted, #64748b));
+    --ui-label-color: var(--ui-color-muted, var(--ui-muted, #526175));
+    --ui-description-color: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-input-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     --ui-input-error: var(--ui-color-danger, var(--ui-error, #dc2626));
-    --ui-input-success: var(--ui-color-success, var(--ui-success, #16a34a));
-    --ui-input-warning: var(--ui-color-warning, var(--ui-warning, #d97706));
+    --ui-input-success: var(--ui-color-success, var(--ui-success, #15803d));
+    --ui-input-warning: var(--ui-color-warning, var(--ui-warning, #b45309));
     --ui-input-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
     --ui-input-shadow: none;
     --ui-input-gap: var(--ui-default-gap, 8px);
@@ -374,7 +374,7 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-input-accent: var(--ui-color-success, var(--ui-success, #16a34a));
+    --ui-input-accent: var(--ui-color-success, var(--ui-success, #15803d));
   }
 
   :host([tone="warning"]) {
@@ -554,6 +554,8 @@ export class UIInput extends ElementBase {
       'radius',
       'label',
       'aria-label',
+      'aria-description',
+      'aria-describedby',
       'description',
       'data-error'
     ];
@@ -713,7 +715,9 @@ export class UIInput extends ElementBase {
       'shape',
       'color',
       'radius',
-      'aria-label'
+      'aria-label',
+      'aria-description',
+      'aria-describedby'
     ]);
 
     if (liveAttrs.has(name)) {
@@ -926,8 +930,7 @@ export class UIInput extends ElementBase {
       if (hasDescription) describedBy.push(`${this._uid}-description`);
       if (hasError) describedBy.push(`${this._uid}-error`);
 
-      if (describedBy.length) this._input.setAttribute('aria-describedby', describedBy.join(' '));
-      else this._input.removeAttribute('aria-describedby');
+      syncControlDescription(this._input, this, this._uid, describedBy);
 
       const invalid = this.getAttribute('validation') === 'error' || !!errorAttr;
       if (invalid) this._input.setAttribute('aria-invalid', 'true');
