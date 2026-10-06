@@ -56,6 +56,9 @@ jobs:
       - name: Run core package tests
         run: npm run test:core:unit
 
+      - name: Run icons, react-icons and toast tests
+        run: npm run test:libs
+
   react-19-compat:
     runs-on: ubuntu-latest
 

@@ -684,6 +684,26 @@ toast.group('upload-group', {
 });
 ```
 
+### Rich Text (`html: true`)
+
+Messages are plain text by default. Set `html: true` to render a **safe subset** of HTML: inline formatting
+(`b`, `strong`, `i`, `em`, `u`, `s`, `del`, `ins`, `mark`, `small`, `sub`, `sup`, `code`, `kbd`, `span`), `br`, `p`,
+lists (`ul`, `ol`, `li`) and links. Links keep only `http(s):`, `mailto:`, `tel:` and relative URLs; external links
+open in a new tab with `rel="noopener noreferrer"`. Everything else (scripts, event handlers, `style`, images,
+iframes, forms...) is removed, and unknown elements are unwrapped so their text stays.
+
+```typescript
+toast.success('Saved <b>3</b> files. <a href="/reports">View report</a>', { html: true });
+```
+
+`title`, `description`, `icon` and action labels are always plain text. For anything richer, use `render`.
+
+### Dismissing Persistent Toasts
+
+A toast with `duration: 0` (or `persistent: true`) stays until it is dismissed, so give it a way out: pass
+`closeButton: true` (alias `closable: true`), add an action, or keep the returned instance and call `dismiss()`.
+On pointer devices the close button fades in on hover or keyboard focus; on touch devices it is always visible.
+
 ### Custom Render Function
 
 ```typescript
@@ -748,14 +768,14 @@ interface ToastOptions {
   description?: string;
   level?: 'info' | 'success' | 'error' | 'warning' | 'loading' | 'progress' | 'promise' | 'custom';
   icon?: string;
-  html?: boolean;
+  html?: boolean; // render `message` as safe HTML (see "Rich Text" above)
   render?: (toast: ToastInstance) => HTMLElement;
 
   // Behavior
   duration?: number;
   pauseOnHover?: boolean;
   persistent?: boolean;
-  closeButton?: boolean;
+  closeButton?: boolean; // show a close button (alias: closable)
 
   // Positioning
   position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'center';

@@ -34,6 +34,7 @@
     "test:ui-react:unit": "npm run test --prefix packages/ui-react",
     "test:ui:unit": "npm run test:ui-core:unit && npm run test:ui-react:unit",
     "test:core:unit": "npm run test --prefix packages/core",
+    "test:libs": "npm test -w @editora/icons -w @editora/react-icons -w @editora/toast",
     "test:ui": "npm run test:ui-core && npm run test:ui-react",
     "test:e2e": "npm test --prefix e2e-local -- tests/storybook-smoke.package.spec.ts tests/ui-primitives.storybook.spec.ts tests/layout.storybook.spec.ts",
     "test:e2e:smoke": "npm run test:smoke --prefix e2e-local",

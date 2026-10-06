@@ -119,7 +119,7 @@ export interface ToastContent {
   action?: ToastAction;
   cancel?: ToastAction;
   progress?: ToastProgress;
-  html?: boolean; // if true, message is treated as HTML
+  html?: boolean; // if true, message is rendered as HTML, limited to inline formatting, lists and safe links (everything else is removed)
   render?: (toast: ToastInstance) => HTMLElement; // custom render function
 }
 

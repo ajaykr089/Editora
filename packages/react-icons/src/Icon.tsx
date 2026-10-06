@@ -1,5 +1,5 @@
 import React from 'react';
-import { resolveIcon } from '@editora/icons';
+import { normalizeIconSize, resolveIcon } from '@editora/icons';
 import type { IconNode } from '@editora/icons';
 import type { IconWeight } from '@editora/icons';
 import { useIconContext } from './IconContext';
@@ -13,9 +13,15 @@ const STROKE_WIDTH_BY_WEIGHT: Record<IconWeight, number> = {
   bold: 1.75,
 };
 
+// Same rules as renderIconSvg: a positive number, or a CSS length; anything else falls back to the default
+// instead of reaching width/height (a React "NaN for the width attribute" warning, or a 300x150 <svg>).
 function normalizeSize(size: string | number | undefined): string | number {
-  if (size == null || size === '') return DEFAULT_SIZE;
-  return size;
+  const normalized = normalizeIconSize(size, DEFAULT_SIZE);
+  return /^[\d.]+$/.test(normalized) ? Number(normalized) : normalized;
+}
+
+function isValidStrokeWidth(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0;
 }
 
 function parseViewBoxSize(viewBox: string): { width: number; height: number } {
@@ -36,15 +42,18 @@ function resolveStrokeWidth(
     strokeWidth?: number;
     defaultStrokeWidth?: number;
     iconWeight?: IconWeight;
+    defaultIconWeight?: IconWeight;
     absoluteStrokeWidth?: boolean;
     size?: number | string;
   },
   viewBox: string
 ): number {
+  // prop width > prop weight > context width > context weight > built-in
   const raw =
-    options.strokeWidth ??
+    (isValidStrokeWidth(options.strokeWidth) ? options.strokeWidth : undefined) ??
     (options.iconWeight ? STROKE_WIDTH_BY_WEIGHT[options.iconWeight] : undefined) ??
-    options.defaultStrokeWidth ??
+    (isValidStrokeWidth(options.defaultStrokeWidth) ? options.defaultStrokeWidth : undefined) ??
+    (options.defaultIconWeight ? STROKE_WIDTH_BY_WEIGHT[options.defaultIconWeight] : undefined) ??
     DEFAULT_STROKE_WIDTH;
   if (!options.absoluteStrokeWidth) return raw;
 
@@ -159,6 +168,7 @@ export const Icon = React.forwardRef<SVGSVGElement, IconProps>(function Icon(
     rtl,
     className,
     children,
+    'aria-label': ariaLabelAttr,
     ...rest
   },
   ref
@@ -166,7 +176,6 @@ export const Icon = React.forwardRef<SVGSVGElement, IconProps>(function Icon(
   const defaults = useIconContext();
 
   const finalVariant = variant ?? defaults.variant ?? 'outline';
-  const finalIconWeight = iconWeight ?? defaults.iconWeight ?? 'regular';
   const resolved = resolveIcon(name, finalVariant);
   if (!resolved) return null;
 
@@ -179,15 +188,15 @@ export const Icon = React.forwardRef<SVGSVGElement, IconProps>(function Icon(
     {
       strokeWidth,
       defaultStrokeWidth: defaults.strokeWidth,
-      iconWeight: finalIconWeight,
+      iconWeight,
+      defaultIconWeight: defaults.iconWeight,
       absoluteStrokeWidth: absoluteStrokeWidth ?? defaults.absoluteStrokeWidth,
       size: finalSize
     },
     resolved.viewBox
   );
 
-  const explicitAriaLabel =
-    ariaLabel || (typeof rest['aria-label'] === 'string' ? (rest['aria-label'] as string) : undefined);
+  const explicitAriaLabel = ariaLabel || (typeof ariaLabelAttr === 'string' ? ariaLabelAttr : undefined);
   const finalDecorative = decorative ?? defaults.decorative ?? (!title && !explicitAriaLabel);
   const mergedClassName = mergeClassName(defaults.className, className);
 

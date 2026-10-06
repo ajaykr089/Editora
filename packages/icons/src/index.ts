@@ -1,6 +1,6 @@
 import { iconDefinitions, iconNameList } from './definitions';
 import { getIcon, hasIcon, listIconAliases, listIcons, registerIcon, registerIcons, resolveIcon } from './registry';
-import { iconToDataUri, renderIconSvg } from './render';
+import { iconToDataUri, normalizeIconSize, renderIconSvg } from './render';
 
 export type {
   IconAttrValue,
@@ -25,7 +25,8 @@ export {
   registerIcons,
   resolveIcon,
   renderIconSvg,
-  iconToDataUri
+  iconToDataUri,
+  normalizeIconSize
 };
 
 /**

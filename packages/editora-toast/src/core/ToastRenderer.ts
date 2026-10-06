@@ -1,5 +1,6 @@
 // ToastRenderer - Handles DOM creation, rendering, and animations
 import { ToastInstance, ToastPosition, ToastConfig, AnimationConfig } from './types';
+import { setSafeHtml } from './safeHtml';
 import { animationManager } from './AnimationUtils';
 
 export class ToastRenderer {
@@ -116,12 +117,7 @@ export class ToastRenderer {
 
     // Close button
     if (options.closable || options.closeButton) {
-      const close = document.createElement('button');
-      close.className = 'editora-toast-close';
-      close.setAttribute('aria-label', 'Close notification');
-      close.textContent = '×';
-      close.onclick = () => toast.dismiss();
-      element.appendChild(close);
+      element.appendChild(this.createCloseButton(toast));
     }
 
     // Interactive features
@@ -237,6 +233,16 @@ export class ToastRenderer {
       contentElement?.replaceWith(nextContent);
     }
 
+    // Add or remove the close button when it is toggled. `closeButton` is the alias and wins, as in show().
+    const nextClosable = updates.closeButton ?? updates.closable;
+    if (nextClosable !== undefined) {
+      toast.options.closable = nextClosable;
+      toast.options.closeButton = nextClosable;
+      const existing = toast.element.querySelector('.editora-toast-close');
+      if (nextClosable && !existing) toast.element.appendChild(this.createCloseButton(toast));
+      else if (!nextClosable && existing) existing.remove();
+    }
+
     // Update progress bar
     if (updates.progress !== undefined) {
       let progressElement = toast.element.querySelector('.editora-toast-progress-track');
@@ -349,7 +355,7 @@ export class ToastRenderer {
         const message = document.createElement('div');
         message.className = 'editora-toast-message';
         if (options.html) {
-          message.innerHTML = this.sanitizeHTML(options.message);
+          setSafeHtml(message, options.message);
         } else {
           message.textContent = options.message;
         }
@@ -366,6 +372,16 @@ export class ToastRenderer {
 
     content.appendChild(body);
     return content;
+  }
+
+  private createCloseButton(toast: ToastInstance): HTMLButtonElement {
+    const close = document.createElement('button');
+    close.className = 'editora-toast-close';
+    close.setAttribute('type', 'button');
+    close.setAttribute('aria-label', 'Close notification');
+    close.textContent = '×';
+    close.onclick = () => toast.dismiss();
+    return close;
   }
 
   private createActionButton(action: NonNullable<ToastInstance['options']['actions']>[number], toast: ToastInstance): HTMLButtonElement {
@@ -496,29 +512,60 @@ export class ToastRenderer {
     let originalTransform = '';
     let hasMoved = false;
 
+    // Controls inside the toast own their own presses.
+    const interactiveSelector = 'button, a[href], input, select, textarea, label, summary, [role="button"], [contenteditable="true"]';
+
+    const resetDragStyles = () => {
+      element.style.transform = originalTransform;
+      element.style.transition = '';
+      element.style.cursor = '';
+      element.style.userSelect = '';
+    };
+
+    const pointOf = (e: TouchEvent | MouseEvent, ended: boolean): { x: number; y: number } | null => {
+      if ('changedTouches' in e || 'touches' in e) {
+        const list = ended ? (e as TouchEvent).changedTouches : (e as TouchEvent).touches;
+        const point = list && list[0];
+        return point ? { x: point.clientX, y: point.clientY } : null;
+      }
+      return { x: (e as MouseEvent).clientX, y: (e as MouseEvent).clientY };
+    };
+
     const handleStart = (e: TouchEvent | MouseEvent) => {
+      // Cancelling a press (or starting a drag from a button) is what made the action and close
+      // buttons dead on touch screens: the browser derives the click from the touch sequence, so
+      // preventDefault() on touchstart swallowed it. It also kept buttons from taking focus on a
+      // mouse press and made the toast text unselectable. Presses are left alone; a drag only
+      // takes over once the pointer has actually moved.
+      const target = e.target;
+      if (target instanceof Element && element.contains(target) && target.closest(interactiveSelector)) return;
+      if ('button' in e && e.button !== 0) return;
+
+      const point = pointOf(e, false);
+      if (!point) return;
       isDragging = true;
       hasMoved = false;
-      startX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-      startY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+      startX = point.x;
+      startY = point.y;
       originalTransform = element.style.transform || '';
-      element.style.transition = 'none'; // Disable transitions during drag
-      element.style.cursor = 'grabbing';
-      e.preventDefault();
     };
 
     const handleMove = (e: TouchEvent | MouseEvent) => {
       if (!isDragging) return;
 
-      const currentX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-      const currentY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-      const deltaX = currentX - startX;
-      const deltaY = currentY - startY;
+      const point = pointOf(e, false);
+      if (!point) return;
+      const deltaX = point.x - startX;
+      const deltaY = point.y - startY;
 
-      // Only apply visual feedback if we've moved more than a small threshold
+      // Only take over once we've moved more than a small threshold
       const moveThreshold = 5;
-      if (Math.abs(deltaX) > moveThreshold || Math.abs(deltaY) > moveThreshold) {
+      if (!hasMoved && (Math.abs(deltaX) > moveThreshold || Math.abs(deltaY) > moveThreshold)) {
         hasMoved = true;
+        element.style.transition = 'none'; // Disable transitions during drag
+        element.style.cursor = 'grabbing';
+        element.style.userSelect = 'none';
+        window.getSelection?.()?.removeAllRanges();
       }
 
       if (hasMoved) {
@@ -528,31 +575,23 @@ export class ToastRenderer {
         const moveX = Math.min(Math.max(deltaX * 0.2, -maxMove), maxMove);
         const moveY = Math.min(Math.max(deltaY * 0.2, -maxMove), maxMove);
         element.style.transform = `${originalTransform} translate(${moveX}px, ${moveY}px)`;
-      }
-
-      // More aggressive prevention of default behavior for vertical swipes
-      if (Math.abs(deltaY) > Math.abs(deltaX) || swipeDirection === 'vertical' || swipeDirection === 'up' || swipeDirection === 'down') {
-        e.preventDefault();
+        // The gesture is ours now: keep it from also scrolling or selecting.
+        if (e.cancelable) e.preventDefault();
       }
     };
 
     const handleEnd = (e: TouchEvent | MouseEvent) => {
       if (!isDragging) return;
+      isDragging = false;
 
-      // Reset styles
-      element.style.transform = originalTransform;
-      element.style.transition = '';
-      element.style.cursor = '';
+      const dragged = hasMoved;
+      resetDragStyles();
+      if (!dragged) return;
 
-      if (!hasMoved) {
-        isDragging = false;
-        return;
-      }
-
-      const endX = 'changedTouches' in e ? e.changedTouches[0].clientX : e.clientX;
-      const endY = 'changedTouches' in e ? e.changedTouches[0].clientY : e.clientY;
-      const deltaX = endX - startX;
-      const deltaY = endY - startY;
+      const point = pointOf(e, true);
+      if (!point) return;
+      const deltaX = point.x - startX;
+      const deltaY = point.y - startY;
 
       // Check if swipe meets direction and distance requirements
       let shouldDismiss = false;
@@ -586,17 +625,25 @@ export class ToastRenderer {
       if (shouldDismiss) {
         toast.dismiss();
       }
+    };
 
+    // The browser took the gesture over (scroll, system gesture, incoming call): forget it
+    // instead of leaving the toast stuck mid-drag and answering the next stray touchmove.
+    const handleCancel = () => {
+      if (!isDragging) return;
       isDragging = false;
+      hasMoved = false;
+      resetDragStyles();
     };
 
     // Prevent default drag behavior
     element.addEventListener('dragstart', (e) => e.preventDefault());
 
-    // Touch events
-    element.addEventListener('touchstart', handleStart, { passive: false });
+    // Touch events (touchstart no longer cancels, so it can be passive)
+    element.addEventListener('touchstart', handleStart, { passive: true });
     element.addEventListener('touchmove', handleMove, { passive: false });
-    element.addEventListener('touchend', handleEnd, { passive: false });
+    element.addEventListener('touchend', handleEnd);
+    element.addEventListener('touchcancel', handleCancel);
 
     // Mouse events
     element.addEventListener('mousedown', handleStart);
@@ -630,15 +677,10 @@ export class ToastRenderer {
     document.body.appendChild(announcement);
 
     setTimeout(() => {
-      document.body.removeChild(announcement);
+      // remove() instead of body.removeChild(): an app that already replaced the body (SPA teardown, tests)
+      // made removeChild throw "node to be removed is not a child" from this timer.
+      announcement.remove();
     }, 1000);
-  }
-
-  // Security: Basic HTML sanitization
-  private sanitizeHTML(html: string): string {
-    const temp = document.createElement('div');
-    temp.textContent = html;
-    return temp.innerHTML;
   }
 
   // Inject CSS
