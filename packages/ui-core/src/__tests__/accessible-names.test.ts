@@ -291,17 +291,27 @@ describe('ui-rating', () => {
 });
 
 describe('ui-card', () => {
-  it('names an interactive card after its title', async () => {
+  it('names an interactive card after the text it shows, unless the author named it', async () => {
     const host = await mount(`
-      <ui-card interactive><div slot="header"><h3 data-ui-card-title>Project summary</h3><p>Open to see details</p></div></ui-card>
+      <ui-card interactive><div slot="header"><h3 data-ui-card-title>Project summary</h3><p>Open to see details</p></div><div>Last edited today</div></ui-card>
       <ui-card interactive aria-label="Author name"><div slot="header"><h3>Ignored</h3></div></ui-card>
       <ui-card><div slot="header"><h3>Static</h3></div></ui-card>
     `);
-    const [titled, authored, plain] = Array.from(host.querySelectorAll('ui-card'));
+    const [shown, authored, plain] = Array.from(host.querySelectorAll('ui-card'));
 
-    expect(titled.getAttribute('aria-label')).toBe('Project summary');
+    // A button is named by its content, and the words shown have to be part of the name (WCAG 2.5.3).
+    expect(shown.getAttribute('aria-label')).toBe('Project summary Open to see details Last edited today');
     expect(authored.getAttribute('aria-label')).toBe('Author name');
     expect(plain.hasAttribute('aria-label')).toBe(false);
+  });
+
+  it('reads the text in the order the card draws it, with a space between elements', async () => {
+    // The body is written first, but the header is drawn first.
+    const host = await mount(
+      '<ui-card interactive><div>Body text</div><div slot="header"><h3>Title</h3><p>Lead</p></div><div slot="footer">Footer</div></ui-card>'
+    );
+
+    expect(host.querySelector('ui-card')!.getAttribute('aria-label')).toBe('Title Lead Body text Footer');
   });
 
   it('drops its automatic name when the card stops being interactive', async () => {

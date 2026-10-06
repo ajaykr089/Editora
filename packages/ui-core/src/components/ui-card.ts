@@ -389,8 +389,38 @@ export class UICard extends ElementBase {
   }
 
   // Chromium derives no name from this card's slotted content, so an interactive card (role
-  // "button") was exposed unnamed. Name it after its title (or, failing that, its text) unless the
-  // author gave it a name.
+  // "button") was exposed unnamed. Name it after the text it shows, unless the author gave it a name:
+  // a button is named by its content, and WCAG 2.5.3 wants the words shown to be part of the name.
+  // The text the card shows, in the order it is drawn (the shadow template's slot order, not the order
+  // of the light DOM children), with a space where one element ends and the next begins.
+  private _shownText(): string {
+    const pieces: Array<{ text: string; parent: Node | null }> = [];
+    const walk = (node: Node): void => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent || '';
+        if (text.trim()) pieces.push({ text, parent: node.parentNode });
+        return;
+      }
+      if (!(node instanceof Element)) return;
+      if (node.hasAttribute('hidden') || node.getAttribute('aria-hidden') === 'true') return;
+      if (node.tagName === 'STYLE' || node.tagName === 'SCRIPT') return;
+      if (node instanceof HTMLSlotElement) {
+        const assigned = node.assignedNodes({ flatten: true });
+        (assigned.length ? assigned : Array.from(node.childNodes)).forEach(walk);
+        return;
+      }
+      node.childNodes.forEach(walk);
+    };
+    this.root.childNodes.forEach(walk);
+
+    let out = '';
+    pieces.forEach((piece, index) => {
+      // Text split by inline markup inside one element stays one word run; a new element starts a new word.
+      out += index > 0 && pieces[index - 1].parent !== piece.parent ? ` ${piece.text}` : piece.text;
+    });
+    return out.replace(/\s+/g, ' ').trim().slice(0, 500);
+  }
+
   private _clearAutoLabel(): void {
     if (!this.hasAttribute(AUTO_LABEL_ATTR)) return;
     this.removeAttribute('aria-label');
@@ -405,9 +435,7 @@ export class UICard extends ElementBase {
       return;
     }
 
-    const heading = this.querySelector('[data-ui-card-title], [slot="header"] :is(h1, h2, h3, h4, h5, h6)');
-    const source = heading?.textContent || this.querySelector('[slot="header"]')?.textContent || this.textContent || '';
-    const name = source.replace(/\s+/g, ' ').trim().slice(0, 120);
+    const name = this._shownText();
     if (!name) {
       this._clearAutoLabel();
       return;
