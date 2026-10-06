@@ -7,7 +7,7 @@
 "@editora/light-code-editor": patch
 ---
 
-An accessibility and layout pass over the UI components, measured with axe-core over all 602 Storybook stories (292 stories had violations; 7 remain, all listed under "Known limits"). The names pass from the previous release stays at 0 unnamed controls.
+An accessibility and layout pass over the UI components, measured with axe-core over all 602 Storybook stories (292 stories had violations; none remain). The names pass from the previous release stays at 0 unnamed controls.
 
 **Descriptions and names now reach the control**
 
@@ -30,8 +30,10 @@ An accessibility and layout pass over the UI components, measured with axe-core 
 - A theme that overrides `colors.surface` / `colors.background` (a dark theme) but not `surfaces` kept the baseline's light panels, so sidebars, menus and cards stayed white under light text. Unset surfaces now follow the colours the theme sets (`createThemeTokens`, `ThemeProvider`; `deriveThemeSurfaces` is exported from `@editora/ui-core/runtime`).
 - `ui-data-table` and `ui-table` scroll inside their own frame instead of widening a grid or flex parent, `ui-pin-input` digits shrink on a narrow container, `ui-rating`'s label wraps, `ui-combobox`'s control no longer overflows a narrow cell, and the `ui-react` carousel indicators and the code-editor fold buttons have non-overlapping 24px targets (the carousel dots are now spaced by their padding, so they sit slightly further apart).
 - **`ui-number-field` steppers are side by side** (decrease, then increase) and as tall as the field instead of stacked at about 20px each, and the `ui-color-picker` hue and alpha sliders have a 24px hit area around the same 12px track. `ui-react`'s `Dock.Item` separates its label and badge with a space.
+- **`@editora/light-code-editor` lines are 24px tall (they were 21px)**, and its fold column is 24px wide, so the fold buttons are 24x24 targets that no longer overlap when two consecutive lines fold (WCAG 2.5.8). Code is about 14% airier; line numbers, decorations and folding all follow the one line-height constant.
+- **`ui-calendar`**: a day's button holds only the day number, and its event marks and tooltip are drawn beside it in the same `.day-cell` (the marks are `aria-hidden`; the events stay in the tooltip the button's `aria-describedby` points at). The text shown on the button is then part of its name. The tooltip, which was clipped by the button and never visible, now shows on hover and focus, opening inward at the edge columns. An unusable `locale` falls back to `en-US` instead of leaving the calendar empty.
+- **An interactive `ui-card` is named from all the text it shows**, in the order it is drawn (it was the title only, so the description shown on the card was not part of its name); `ui-react`'s `Card` puts a space between its sections so that text does not run together. A disabled `ui-number-field` or `ui-multi-select` marks its shell `aria-disabled`, so the suffix, chips and steppers in it are inactive like the input.
 
-**Known limits**
+**Known limit**
 
 - A link or button inside a `ui-switch` is an interactive element inside `role="switch"`, which is invalid ARIA; the docs now say to keep them beside the switch (the click guard still works for existing markup).
-- axe's label-in-name check flags `ui-calendar` day buttons that show events and an interactive `ui-card` whose description is shown beside its title: it needs the text shown to be contiguous in the name ("Thursday, March 5, 2026 5 ICU handover"), which would read worse than the date plus the events as a description. The code-editor fold buttons are 24px targets on 21px lines, so two folds on consecutive lines overlap by 3px. Text in a disabled number field's suffix and a disabled multi-select chip is below 4.5:1 (inactive controls are exempt from WCAG 1.4.3).
