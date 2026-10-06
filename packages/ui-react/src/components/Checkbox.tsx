@@ -1,6 +1,7 @@
 import * as React from 'react';
 import '@editora/ui-core/checkbox';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncStringAttribute,
@@ -98,7 +99,7 @@ export const Checkbox = React.forwardRef<HTMLElement, CheckboxProps>(function Ch
     preset: preset && preset !== 'default' ? preset : undefined,
   };
 
-  return React.createElement('ui-checkbox', hostProps, children);
+  return createUIElement('ui-checkbox', hostProps, children);
 });
 
 Checkbox.displayName = 'Checkbox';

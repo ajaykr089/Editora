@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/animated-list';
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 export type AnimatedListEffect =
   | 'fade-up'
@@ -162,7 +162,7 @@ const AnimatedListRoot = React.forwardRef<AnimatedListElement, AnimatedListProps
     gap,
   ]);
 
-  return React.createElement('ui-animated-list', { ref, ...rest }, children);
+  return createUIElement('ui-animated-list', { ref, ...rest }, children);
 });
 
 AnimatedListRoot.displayName = 'AnimatedList';

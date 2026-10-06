@@ -10,6 +10,8 @@ import React, {
 } from "react";
 
 import '@editora/ui-core/wizard';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
@@ -366,7 +368,7 @@ const WizardRoot = React.forwardRef<HTMLElement, WizardProps>(
 
     return (
       <WizardRuntimeContext.Provider value={runtimeValue}>
-        {React.createElement("ui-wizard", { ref, ...rest }, children)}
+        {createUIElement("ui-wizard", { ref, ...rest }, children)}
       </WizardRuntimeContext.Provider>
     );
   },

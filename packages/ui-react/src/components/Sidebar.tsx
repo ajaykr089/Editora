@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import '@editora/ui-core/sidebar';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { createUIElement } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 const VOID_HTML_TAGS = new Set([
@@ -654,7 +655,7 @@ const SidebarRoot = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar
     showBadges
   ]);
 
-  return React.createElement('ui-sidebar', { ref, ...rest }, children);
+  return createUIElement('ui-sidebar', { ref, ...rest }, children);
 });
 
 SidebarRoot.displayName = 'Sidebar';

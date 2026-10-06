@@ -1,6 +1,8 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/listbox';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type ListboxProps = React.HTMLAttributes<HTMLElement> & {
@@ -45,7 +47,7 @@ export const Listbox = React.forwardRef<HTMLElement, ListboxProps>(function List
     el.items = items ?? null;
   }, [activeAttribute, container, directItemSelector, itemRole, itemSelector, items]);
 
-  return React.createElement('ui-listbox', { ref, ...rest }, children);
+  return createUIElement('ui-listbox', { ref, ...rest }, children);
 });
 
 Listbox.displayName = 'Listbox';

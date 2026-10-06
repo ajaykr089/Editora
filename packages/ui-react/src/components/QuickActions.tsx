@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/quick-actions';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncStringAttribute,
@@ -91,7 +92,7 @@ const QuickActionsRoot = React.forwardRef<HTMLElement, QuickActionsProps>(functi
     syncBooleanAttribute(el, 'headless', headless);
   }, [open, mode, orientation, variant, floating, placement, collapsible, label, headless]);
 
-  return React.createElement('ui-quick-actions', { ref, ...rest }, children);
+  return createUIElement('ui-quick-actions', { ref, ...rest }, children);
 });
 
 QuickActionsRoot.displayName = 'QuickActions';

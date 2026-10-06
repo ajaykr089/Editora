@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 import '@editora/ui-core/toggle-group';
 import { Toggle, type ToggleProps } from './Toggle';
+import { createUIElement } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -135,7 +136,7 @@ const ToggleGroupRoot = React.forwardRef<HTMLElement, ToggleGroupProps>(function
     syncAttr('activation', activation && activation !== 'auto' ? activation : null);
   }, [value, multiple, disabled, headless, allowEmpty, required, orientation, variant, size, density, shape, elevation, activation]);
 
-  return React.createElement('ui-toggle-group', { ref, ...rest }, children);
+  return createUIElement('ui-toggle-group', { ref, ...rest }, children);
 });
 
 ToggleGroupRoot.displayName = 'ToggleGroup';

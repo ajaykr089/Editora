@@ -12,6 +12,11 @@ import { reconcileDomFromY, reconcileYFromDom } from './reconcile';
 export class YjsDomBinding {
   private readonly observer: MutationObserver;
   private pending = false;
+  private destroyed = false;
+  private readonly onFragmentChange = (_events: unknown, transaction: Y.Transaction): void => {
+    if (transaction.origin === this) return; // our own write, DOM already matches
+    this.applyRemoteToDom();
+  };
 
   constructor(
     private readonly root: HTMLElement,
@@ -36,10 +41,7 @@ export class YjsDomBinding {
 
     this.observer.observe(this.root, { childList: true, characterData: true, subtree: true, attributes: true });
 
-    this.fragment.observeDeep((_events, transaction) => {
-      if (transaction.origin === this) return; // our own write, DOM already matches
-      this.applyRemoteToDom();
-    });
+    this.fragment.observeDeep(this.onFragmentChange);
   }
 
   private scheduleLocalSync(): void {
@@ -47,11 +49,13 @@ export class YjsDomBinding {
     this.pending = true;
     queueMicrotask(() => {
       this.pending = false;
+      if (this.destroyed) return;
       this.doc.transact(() => reconcileYFromDom(this.fragment, this.root), this);
     });
   }
 
   private applyRemoteToDom(): void {
+    if (this.destroyed) return;
     const selection = this.captureSelection();
     this.observer.disconnect();
     try {
@@ -120,6 +124,11 @@ export class YjsDomBinding {
   }
 
   destroy(): void {
+    this.destroyed = true;
     this.observer.disconnect();
+    // The doc usually outlives the binding (a caller-supplied doc, or a remount with the same
+    // room), so the fragment observer has to go too: left in place it would keep writing remote
+    // changes into a torn-down editor and re-attach the MutationObserver it just disconnected.
+    this.fragment.unobserveDeep(this.onFragmentChange);
   }
 }

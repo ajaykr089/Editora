@@ -385,12 +385,9 @@ export const EditorContent: React.FC<EditorContentProps> = ({
       el.setAttribute('role', 'textbox');
       el.setAttribute('aria-multiline', 'true');
       el.setAttribute('aria-disabled', readonly ? 'true' : 'false');
-      const label = placeholder?.trim();
-      if (label) {
-        el.setAttribute('aria-label', label);
-      } else {
-        el.removeAttribute('aria-label');
-      }
+      // A textbox needs an accessible name: the placeholder when there is one, otherwise a
+      // generic label so the surface is never announced as unnamed.
+      el.setAttribute('aria-label', placeholder?.trim() || 'Rich text editor');
     } else {
       el.removeAttribute('role');
       el.removeAttribute('aria-multiline');

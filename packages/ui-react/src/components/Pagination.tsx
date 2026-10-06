@@ -1,6 +1,8 @@
 import * as React from 'react';
 
 import '@editora/ui-core/pagination';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
 export type PaginationChangeDetail = {
@@ -134,7 +136,7 @@ export const Pagination = React.forwardRef<PaginationElement, PaginationProps>(f
     syncBool('headless', headless);
   }, [page, count, size, variant, ariaLabel, headless]);
 
-  return React.createElement('ui-pagination', { ref, ...rest }, children);
+  return createUIElement('ui-pagination', { ref, ...rest }, children);
 });
 
 Pagination.displayName = 'Pagination';

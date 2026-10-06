@@ -848,7 +848,10 @@ export function FloatingPortal({ children, root }: { children: React.ReactNode; 
   return createPortal(children, root || document.body);
 }
 
-export function FloatingOverlay({ lockScroll = false, style, ...props }: { lockScroll?: boolean } & React.HTMLAttributes<HTMLDivElement>) {
+export const FloatingOverlay = React.forwardRef<
+  HTMLDivElement,
+  { lockScroll?: boolean } & React.HTMLAttributes<HTMLDivElement>
+>(function FloatingOverlay({ lockScroll = false, style, ...props }, forwardedRef) {
   useEffect(() => {
     if (!lockScroll) return;
     const previous = document.body.style.overflow;
@@ -857,8 +860,10 @@ export function FloatingOverlay({ lockScroll = false, style, ...props }: { lockS
       document.body.style.overflow = previous;
     };
   }, [lockScroll]);
-  return <div {...props} style={{ position: 'fixed', inset: 0, ...style }} />;
-}
+  return <div {...props} ref={forwardedRef} style={{ position: 'fixed', inset: 0, ...style }} />;
+});
+
+FloatingOverlay.displayName = 'FloatingOverlay';
 
 export function FloatingFocusManager({
   context,

@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import '@editora/ui-core/avatar';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncStringAttribute,
@@ -131,7 +132,7 @@ export const Avatar = React.forwardRef<HTMLElement, AvatarProps>(function Avatar
     syncStringAttribute(element, 'loading', toLoading(loading) ?? null);
   }, [src, alt, initials, size, bg, color, radius, fontWeight, shape, tone, variant, elevation, status, state, badge, ring, interactive, disabled, loading]);
 
-  return React.createElement('ui-avatar', { ref, ...rest }, fallback);
+  return createUIElement('ui-avatar', { ref, ...rest }, fallback);
 });
 
 Avatar.displayName = 'Avatar';

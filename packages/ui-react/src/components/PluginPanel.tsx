@@ -1,6 +1,6 @@
 import * as React from 'react';
 import '@editora/ui-core/plugin-panel';
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
@@ -83,7 +83,7 @@ export const PluginPanel = React.forwardRef<PluginPanelElement, PluginPanelProps
     if (typeof dismissible === 'boolean') syncAttr('dismissible', dismissible ? '' : null);
   }, [open, position, size, title, description, headless, dismissible]);
 
-  return React.createElement('ui-plugin-panel', { ref, ...rest }, children);
+  return createUIElement('ui-plugin-panel', { ref, ...rest }, children);
 });
 
 PluginPanel.displayName = 'PluginPanel';

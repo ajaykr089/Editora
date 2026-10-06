@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/number-field';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncNumberAttribute,
@@ -147,7 +148,7 @@ export const NumberField = React.forwardRef<HTMLElement, NumberFieldProps>(funct
     value
   ]);
 
-  return React.createElement(
+  return createUIElement(
     'ui-number-field',
     { ref, ...rest },
     prefix != null ? React.createElement('span', { slot: 'prefix' }, prefix) : null,

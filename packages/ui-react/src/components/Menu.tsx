@@ -1,6 +1,8 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/menu';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 type Props = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect' | 'onOpen' | 'onClose'> & {
@@ -225,7 +227,7 @@ const MenuRoot = React.forwardRef<HTMLElement, MenuProps>(function Menu(
     el.setAttribute('typeahead', typeahead ? 'true' : 'false');
   }, [typeahead]);
 
-  return React.createElement('ui-menu', { ref, ...rest }, children);
+  return createUIElement('ui-menu', { ref, ...rest }, children);
 });
 
 MenuRoot.displayName = 'Menu';

@@ -1,10 +1,12 @@
 import React from 'react';
 import '@editora/ui-core/skeleton';
 import {
+  createUIElement,
   syncBooleanAttribute,
   syncNumberAttribute,
   syncStringAttribute,
   useElementAttributes,
+  useForwardedHostRef,
 } from './_internals';
 
 export type SkeletonProps = React.HTMLAttributes<HTMLElement> & {
@@ -22,7 +24,7 @@ export type SkeletonProps = React.HTMLAttributes<HTMLElement> & {
   headless?: boolean;
 };
 
-export function Skeleton(props: SkeletonProps) {
+export const Skeleton = React.forwardRef<HTMLElement, SkeletonProps>(function Skeleton(props, forwardedRef) {
   const {
     count,
     width,
@@ -39,7 +41,7 @@ export function Skeleton(props: SkeletonProps) {
     ...rest
   } = props;
 
-  const ref = React.useRef<HTMLElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
   useElementAttributes(ref, (el) => {
     syncNumberAttribute(el, 'count', typeof count === 'number' && Number.isFinite(count) ? count : undefined);
@@ -56,7 +58,9 @@ export function Skeleton(props: SkeletonProps) {
     syncBooleanAttribute(el, 'headless', headless);
   }, [count, width, height, radius, gap, duration, variant, animation, density, tone, animated, headless]);
 
-  return React.createElement('ui-skeleton', { ref, ...rest });
-}
+  return createUIElement('ui-skeleton', { ref, ...rest });
+});
+
+Skeleton.displayName = 'Skeleton';
 
 export default Skeleton;

@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/selection-popup';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 type UISelectionPopupElement = HTMLElement & {
   openFor?: (anchorId: string) => void;
@@ -139,7 +139,7 @@ const SelectionPopupRoot = React.forwardRef<UISelectionPopupElement, SelectionPo
     closeOnEscape
   ]);
 
-  return React.createElement('ui-selection-popup', { ref, ...rest }, children);
+  return createUIElement('ui-selection-popup', { ref, ...rest }, children);
 });
 
 SelectionPopupRoot.displayName = 'SelectionPopup';

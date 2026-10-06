@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import '@editora/ui-core/context-menu';
 import { createPortal } from 'react-dom';
+import { createUIElement, useForwardedHostRef } from './_internals';
 
 type UIContextMenuElement = HTMLElement & {
   open: boolean;
@@ -56,7 +57,7 @@ export type ContextMenuProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange
   onSelect?: (detail: { index: number; value?: string; label?: string; checked?: boolean; item?: HTMLElement }) => void;
 };
 
-export function ContextMenu(props: ContextMenuProps) {
+export const ContextMenu = React.forwardRef<UIContextMenuElement, ContextMenuProps>(function ContextMenu(props, forwardedRef) {
 
   const {
     items,
@@ -86,7 +87,7 @@ export function ContextMenu(props: ContextMenuProps) {
     onSelect,
     ...rest
   } = props;
-  const ref = useRef<UIContextMenuElement | null>(null);
+  const ref = useForwardedHostRef<UIContextMenuElement>(forwardedRef);
   const lastImperativeOpenRef = useRef<string>('');
   const [portalHost, setPortalHost] = useState<HTMLElement | null>(null);
 
@@ -269,29 +270,31 @@ export function ContextMenu(props: ContextMenuProps) {
 
   return (
     <>
-      <ui-context-menu
-        ref={ref}
-        {...rest}
-        {...(shouldReflectOpenAttr ? { open: '' } : {})}
-        {...(variant && variant !== 'default' && variant !== 'surface' ? { variant } : {})}
-        {...(size && size !== 'md' && size !== '2' ? { size } : {})}
-        {...(radius != null && radius !== '' && radius !== 'md' ? { radius: String(radius) } : {})}
-        {...(!size && density && density !== 'default' ? { density } : {})}
-        {...(!radius && shape && shape !== 'default' ? { shape } : {})}
-        {...(elevation && elevation !== 'default' ? { elevation } : {})}
-        {...(tone && tone !== 'default' && tone !== 'brand' ? { tone } : {})}
-        {...(disabled ? { disabled: '' } : {})}
-        {...(state && state !== 'idle' ? { state } : {})}
-        {...(stateText ? { 'state-text': stateText } : {})}
-        {...(closeOnSelect == null ? {} : { 'close-on-select': closeOnSelect ? 'true' : 'false' })}
-        {...(closeOnEscape == null ? {} : { 'close-on-escape': closeOnEscape ? 'true' : 'false' })}
-        {...(typeahead == null ? {} : { typeahead: typeahead ? 'true' : 'false' })}
-      />
+      {createUIElement('ui-context-menu', {
+        ref,
+        ...rest,
+        ...(shouldReflectOpenAttr ? { open: '' } : {}),
+        ...(variant && variant !== 'default' && variant !== 'surface' ? { variant } : {}),
+        ...(size && size !== 'md' && size !== '2' ? { size } : {}),
+        ...(radius != null && radius !== '' && radius !== 'md' ? { radius: String(radius) } : {}),
+        ...(!size && density && density !== 'default' ? { density } : {}),
+        ...(!radius && shape && shape !== 'default' ? { shape } : {}),
+        ...(elevation && elevation !== 'default' ? { elevation } : {}),
+        ...(tone && tone !== 'default' && tone !== 'brand' ? { tone } : {}),
+        ...(disabled ? { disabled: '' } : {}),
+        ...(state && state !== 'idle' ? { state } : {}),
+        ...(stateText ? { 'state-text': stateText } : {}),
+        ...(closeOnSelect == null ? {} : { 'close-on-select': closeOnSelect ? 'true' : 'false' }),
+        ...(closeOnEscape == null ? {} : { 'close-on-escape': closeOnEscape ? 'true' : 'false' }),
+        ...(typeahead == null ? {} : { typeahead: typeahead ? 'true' : 'false' }),
+      })}
       {portalHost
         ? createPortal(<div slot="menu">{menuContent}</div>, portalHost)
         : null}
     </>
   );
-}
+});
+
+ContextMenu.displayName = 'ContextMenu';
 
 export default ContextMenu;

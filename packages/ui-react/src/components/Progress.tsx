@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/progress';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncNumberAttribute,
@@ -110,7 +111,7 @@ export const Progress = React.forwardRef<HTMLElement, ProgressProps>(function Pr
     syncStringAttribute(el, 'mode', mode && mode !== 'line' ? mode : null);
   }, [value, buffer, max, min, indeterminate, striped, animated, showLabel, label, format, precision, size, variant, tone, shape, mode]);
 
-  return React.createElement('ui-progress', { ref, ...rest }, children);
+  return createUIElement('ui-progress', { ref, ...rest }, children);
 });
 
 Progress.displayName = 'Progress';

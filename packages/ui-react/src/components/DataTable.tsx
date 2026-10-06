@@ -1,6 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 
 import '@editora/ui-core/data-table';
+import { createUIElement, useForwardedHostRef } from './_internals';
+
 export type DataTableSortDirection = 'asc' | 'desc';
 export type DataTableState = 'idle' | 'loading' | 'error' | 'success';
 
@@ -126,7 +128,7 @@ export type DataTableProps = React.HTMLAttributes<HTMLElement> & {
   onBulkClear?: (detail: DataTableBulkClearDetail) => void;
 };
 
-export function DataTable(props: DataTableProps) {
+export const DataTable = React.forwardRef<HTMLElement, DataTableProps>(function DataTable(props, forwardedRef) {
   const {
     sortable,
     selectable,
@@ -173,7 +175,7 @@ export function DataTable(props: DataTableProps) {
     ...rest
   } = props;
 
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
   useEffect(() => {
     const el = ref.current;
@@ -272,7 +274,7 @@ export function DataTable(props: DataTableProps) {
           })()
         : undefined;
 
-  return React.createElement(
+  return createUIElement(
     'ui-data-table',
     {
       ref,
@@ -317,6 +319,8 @@ export function DataTable(props: DataTableProps) {
     },
     children
   );
-}
+});
+
+DataTable.displayName = 'DataTable';
 
 export default DataTable;

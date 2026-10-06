@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/date-field';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncStringAttribute,
@@ -61,7 +62,7 @@ export const DateField = React.forwardRef<HTMLElement, BaseDateFieldProps>(funct
     syncBooleanAttribute(el, 'readonly', readOnly);
   }, [value, min, max, locale, label, description, error, name, required, disabled, readOnly]);
 
-  return React.createElement('ui-date-field', { ref, ...rest }, children);
+  return createUIElement('ui-date-field', { ref, ...rest }, children);
 });
 
 export const TimeField = React.forwardRef<HTMLElement, BaseDateFieldProps & { format?: '24h' | '12h'; seconds?: boolean }>(
@@ -88,7 +89,7 @@ export const TimeField = React.forwardRef<HTMLElement, BaseDateFieldProps & { fo
       syncBooleanAttribute(el, 'readonly', readOnly);
     }, [value, min, max, locale, label, description, error, name, required, disabled, readOnly, format, seconds]);
 
-    return React.createElement('ui-time-field', { ref, ...rest }, children);
+    return createUIElement('ui-time-field', { ref, ...rest }, children);
   }
 );
 

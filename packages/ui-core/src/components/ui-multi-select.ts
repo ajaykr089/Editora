@@ -619,6 +619,7 @@ export class UIMultiSelect extends ElementBase {
       'value',
       'placeholder',
       'label',
+      'aria-label',
       'description',
       'data-error',
       'name',
@@ -721,7 +722,7 @@ export class UIMultiSelect extends ElementBase {
       <style>${style}</style>
       <div class="root">
         <div class="meta" hidden>
-          <div class="label" hidden><span class="label-text"></span><span class="required" hidden>*</span></div>
+          <div class="label" hidden><span class="label-text" id="${this._uid}-label"></span><span class="required" hidden>*</span></div>
           <div class="description" hidden></div>
         </div>
         <div class="shell" part="shell" data-open="false" data-invalid="false">
@@ -1063,6 +1064,17 @@ export class UIMultiSelect extends ElementBase {
       metaEl.hidden = !label && !description;
       labelEl.hidden = !label;
       labelText.textContent = label;
+      // The combobox's accessible name: the visible label when there is one, else an aria-label
+      // on the host (which cannot reach into this shadow root by itself).
+      if (label) {
+        this._inputEl.setAttribute('aria-labelledby', `${this._uid}-label`);
+        this._inputEl.removeAttribute('aria-label');
+      } else {
+        this._inputEl.removeAttribute('aria-labelledby');
+        const hostLabel = (this.getAttribute('aria-label') || '').trim();
+        if (hostLabel) this._inputEl.setAttribute('aria-label', hostLabel);
+        else this._inputEl.removeAttribute('aria-label');
+      }
       requiredEl.hidden = !this.hasAttribute('required');
       descriptionEl.hidden = !description;
       descriptionEl.textContent = description;

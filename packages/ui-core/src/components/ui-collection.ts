@@ -1,4 +1,5 @@
 import { findIndexByValue, findTypeaheadMatch, type CollectionTypeaheadOptions } from '../primitives/collection';
+import { isValidSelector } from '../primitives/selector';
 
 export interface UICollectionQueryOptions {
   container?: ParentNode | null;
@@ -29,6 +30,9 @@ function getItemLabel(item: HTMLElement): string {
 function toArray<T extends Element>(nodes: Iterable<T>): T[] {
   return Array.from(nodes);
 }
+
+const DEFAULT_ITEM_SELECTOR =
+  '[data-collection-item], .menuitem, [role="option"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]';
 
 export class UICollection extends HTMLElement {
   static get observedAttributes(): string[] {
@@ -68,7 +72,8 @@ export class UICollection extends HTMLElement {
   }
 
   get itemSelector(): string {
-    return this.getAttribute('item-selector') || '[data-collection-item], .menuitem, [role="option"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]';
+    const custom = this.getAttribute('item-selector');
+    return custom && isValidSelector(custom) ? custom : DEFAULT_ITEM_SELECTOR;
   }
 
   set itemSelector(value: string) {
@@ -76,7 +81,8 @@ export class UICollection extends HTMLElement {
   }
 
   get directItemSelector(): string {
-    return this.getAttribute('direct-item-selector') || '';
+    const custom = this.getAttribute('direct-item-selector') || '';
+    return isValidSelector(custom) ? custom : '';
   }
 
   set directItemSelector(value: string) {

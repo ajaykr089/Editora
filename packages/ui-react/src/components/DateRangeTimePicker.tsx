@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/date-range-time-picker';
 import {
+  createUIElement,
   getCustomEventDetail,
   serializeTranslations,
   syncBooleanAttribute,
@@ -184,7 +185,7 @@ export const DateRangeTimePicker = React.forwardRef<HTMLElement, DateRangeTimePi
       error
     ]);
 
-    return React.createElement('ui-date-range-time-picker', { ref, ...rest }, children);
+    return createUIElement('ui-date-range-time-picker', { ref, ...rest }, children);
   }
 );
 

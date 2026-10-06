@@ -1,6 +1,8 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
 import '@editora/ui-core/slot';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 type SlotChangeDetail = {
@@ -100,7 +102,7 @@ export const Slot = React.forwardRef<HTMLElement, SlotProps>(function Slot(
     syncBool('headless', headless);
   }, [name, fallback, required, inline, align, size, variant, tone, headless]);
 
-  return React.createElement('ui-slot', { ref, ...rest }, children);
+  return createUIElement('ui-slot', { ref, ...rest }, children);
 });
 
 Slot.displayName = 'Slot';

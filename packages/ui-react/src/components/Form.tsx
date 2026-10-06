@@ -1,6 +1,8 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/form';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 type FormElement = HTMLElement & {
@@ -211,7 +213,7 @@ const FormRoot = React.forwardRef<HTMLElement, FormProps>(function Form(
     disabled
   ]);
 
-  return React.createElement('ui-form', { ref, ...rest }, children);
+  return createUIElement('ui-form', { ref, ...rest }, children);
 });
 
 FormRoot.displayName = 'Form';

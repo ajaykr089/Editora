@@ -1,6 +1,6 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 import '@editora/ui-core/command';
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -77,7 +77,7 @@ const CommandRoot = React.forwardRef<HTMLElement, CommandProps>(function Command
     syncAttr('empty-text', emptyText ?? null);
   }, [emptyText, placeholder]);
 
-  return React.createElement('ui-command', { ref, ...rest }, children);
+  return createUIElement('ui-command', { ref, ...rest }, children);
 });
 
 CommandRoot.displayName = 'Command';

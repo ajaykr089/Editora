@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/meter';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncNumberAttribute,
@@ -97,7 +98,7 @@ export const Meter = React.forwardRef<HTMLElement, MeterProps>(function Meter(
     syncStringAttribute(el, 'mode', mode && mode !== 'line' ? mode : null);
   }, [value, min, max, low, high, optimum, label, showLabel, format, precision, size, variant, tone, shape, mode]);
 
-  return React.createElement('ui-meter', { ref, ...rest }, children);
+  return createUIElement('ui-meter', { ref, ...rest }, children);
 });
 
 Meter.displayName = 'Meter';

@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/switch';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncStringAttribute,
@@ -98,7 +99,7 @@ const SwitchRoot = React.forwardRef<HTMLElement, SwitchProps>(function Switch(
     syncStringAttribute(el, 'elevation', elevation && elevation !== 'low' ? elevation : null);
   }, [checked, disabled, headless, loading, required, size, variant, tone, shape, elevation, label, description, name, value]);
 
-  return React.createElement('ui-switch', { ref, ...rest }, children);
+  return createUIElement('ui-switch', { ref, ...rest }, children);
 });
 
 SwitchRoot.displayName = 'Switch';

@@ -10,6 +10,7 @@ import {
   UIDialogTemplateOptions
 } from '@editora/ui-core';
 import {
+  createUIElement,
   syncBooleanAttribute,
   syncStringAttribute,
   useElementAttributes,
@@ -194,7 +195,7 @@ export const Dialog = React.forwardRef<DialogElement, DialogProps>(function Dial
     headless
   ]);
 
-  return React.createElement('ui-dialog', { ref, ...rest }, children);
+  return createUIElement('ui-dialog', { ref, ...rest }, children);
 });
 
 Dialog.displayName = 'Dialog';

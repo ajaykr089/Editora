@@ -1,6 +1,8 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
 import '@editora/ui-core/drawer';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type DrawerProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onOpen' | 'onClose'> & {
@@ -243,7 +245,7 @@ const DrawerRoot = React.forwardRef<HTMLElement, DrawerProps>(function Drawer(
     else el.removeAttribute('aria-describedby');
   }, [ariaDescribedBy]);
 
-  return React.createElement('ui-drawer', { ref, ...rest }, children);
+  return createUIElement('ui-drawer', { ref, ...rest }, children);
 });
 
 DrawerRoot.displayName = 'Drawer';

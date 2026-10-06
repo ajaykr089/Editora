@@ -1,6 +1,8 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/scroll-area';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 type ScrollAreaProps = React.HTMLAttributes<HTMLElement> & {
@@ -95,7 +97,7 @@ export const ScrollArea = React.forwardRef<HTMLElement, ScrollAreaProps>(functio
     syncBoolState('shadows', shadows);
   }, [orientation, size, variant, tone, autoHide, shadows]);
 
-  return React.createElement('ui-scroll-area', { ref, ...rest }, children);
+  return createUIElement('ui-scroll-area', { ref, ...rest }, children);
 });
 
 ScrollArea.displayName = 'ScrollArea';

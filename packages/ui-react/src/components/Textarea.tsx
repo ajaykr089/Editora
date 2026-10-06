@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/textarea';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncNumberAttribute,
@@ -182,7 +183,7 @@ const TextareaRoot = React.forwardRef<HTMLElement, TextareaProps>(function Texta
     headless
   ]);
 
-  return React.createElement('ui-textarea', { ref, ...rest }, children);
+  return createUIElement('ui-textarea', { ref, ...rest }, children);
 });
 
 TextareaRoot.displayName = 'Textarea';

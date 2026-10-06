@@ -1046,10 +1046,10 @@ export class UIDateTimePicker extends ElementBase {
         <section class="time-panel" part="time">
           <span class="icon" aria-hidden="true">${CLOCK_ICON}</span>
           <div class="time-grid" data-meridiem="${this._is12h() ? 'true' : 'false'}">
-            <div><label>${escapeHtml(t.hour)}</label><select data-segment="hours">${options.hours}</select></div>
-            <div><label>${escapeHtml(t.minute)}</label><select data-segment="minutes">${options.minutes}</select></div>
+            <div><label>${escapeHtml(t.hour)}</label><select data-segment="hours" aria-label="${escapeHtml(t.hour)}">${options.hours}</select></div>
+            <div><label>${escapeHtml(t.minute)}</label><select data-segment="minutes" aria-label="${escapeHtml(t.minute)}">${options.minutes}</select></div>
             ${this._is12h()
-              ? `<div><label>${escapeHtml(t.meridiem)}</label><select data-segment="meridiem"><option value="am" ${options.meridiem === 'am' ? 'selected' : ''}>${escapeHtml(t.am)}</option><option value="pm" ${options.meridiem === 'pm' ? 'selected' : ''}>${escapeHtml(t.pm)}</option></select></div>`
+              ? `<div><label>${escapeHtml(t.meridiem)}</label><select data-segment="meridiem" aria-label="${escapeHtml(t.meridiem)}"><option value="am" ${options.meridiem === 'am' ? 'selected' : ''}>${escapeHtml(t.am)}</option><option value="pm" ${options.meridiem === 'pm' ? 'selected' : ''}>${escapeHtml(t.pm)}</option></select></div>`
               : ''}
           </div>
         </section>

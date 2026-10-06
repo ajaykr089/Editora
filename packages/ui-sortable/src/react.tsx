@@ -20,6 +20,7 @@ import type {
   UISortableListOrientation
 } from '@editora/ui-core/sortable';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncJsonAttribute,
@@ -148,13 +149,18 @@ function resolveSpaceValue(value: SortableSpace | undefined): string | null {
   }
 }
 
+// Stable fallbacks: data usually arrives asynchronously, and a fresh [] per render would
+// retrigger every effect that depends on lists/items.
+const NO_LISTS: SortableList[] = [];
+const NO_ITEMS: SortableItem[] = [];
+
 export const Sortable = React.forwardRef<SortableElement, SortableProps>(function Sortable(
   props: SortableProps,
   forwardedRef: React.ForwardedRef<SortableElement>
 ) {
   const {
-    lists,
-    items,
+    lists: listsProp,
+    items: itemsProp,
     selection,
     filterQuery,
     sort,
@@ -182,6 +188,8 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
     children,
     ...rest
   } = props;
+  const lists = listsProp ?? NO_LISTS;
+  const items = itemsProp ?? NO_ITEMS;
   const ref = useForwardedHostRef<SortableElement>(forwardedRef);
   const [portalVersion, setPortalVersion] = React.useState(0);
   const hasCustomRendering = !!(renderItem || renderListHeader || renderEmptyState);
@@ -506,7 +514,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
 
   return (
     <>
-      {React.createElement('ui-sortable', hostProps, children)}
+      {createUIElement('ui-sortable', hostProps, children)}
       {portalVersion >= 0 ? itemPortals : null}
       {portalVersion >= 0 ? headerPortals : null}
       {portalVersion >= 0 ? emptyStatePortals : null}

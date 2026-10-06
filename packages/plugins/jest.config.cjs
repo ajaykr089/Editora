@@ -9,6 +9,7 @@ module.exports = {
     '<rootDir>/blocks-library/src/**/*.test.js',
     '<rootDir>/doc-schema/src/**/*.test.js',
     '<rootDir>/translation-workflow/src/**/*.test.js',
+    '<rootDir>/shared/**/*.test.js',
   ],
   transform: {
     '^.+\\.tsx?$': [

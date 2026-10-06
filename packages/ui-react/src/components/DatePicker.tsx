@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/date-picker';
 import {
+  createUIElement,
   getCustomEventDetail,
   serializeTranslations,
   syncBooleanAttribute,
@@ -212,7 +213,7 @@ export const DatePicker = React.forwardRef<HTMLElement, DatePickerProps>(functio
     displayFormat
   ]);
 
-  return React.createElement('ui-date-picker', { ref, ...rest }, children);
+  return createUIElement('ui-date-picker', { ref, ...rest }, children);
 });
 
 DatePicker.displayName = 'DatePicker';

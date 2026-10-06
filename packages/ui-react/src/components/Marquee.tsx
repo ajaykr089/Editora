@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/marquee';
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 export type MarqueeDirection = 'left' | 'right' | 'up' | 'down';
 export type MarqueeVariant = 'default' | 'surface' | 'soft' | 'solid' | 'glass' | 'contrast' | 'minimal';
@@ -125,7 +125,7 @@ const MarqueeRoot = React.forwardRef<MarqueeElement, MarqueeProps>(function Marq
     padding,
   ]);
 
-  return React.createElement('ui-marquee', { ref, ...rest }, children);
+  return createUIElement('ui-marquee', { ref, ...rest }, children);
 });
 
 MarqueeRoot.displayName = 'Marquee';

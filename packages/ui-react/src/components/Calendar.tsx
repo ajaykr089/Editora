@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/calendar';
 import {
+  createUIElement,
   getCustomEventDetail,
   serializeTranslations,
   syncBooleanAttribute,
@@ -200,7 +201,7 @@ export const Calendar = React.forwardRef<HTMLElement, CalendarProps>(function Ca
     ariaLabel
   ]);
 
-  return React.createElement('ui-calendar', { ref, ...rest }, children);
+  return createUIElement('ui-calendar', { ref, ...rest }, children);
 });
 
 Calendar.displayName = 'Calendar';

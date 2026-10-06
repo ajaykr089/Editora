@@ -35,8 +35,11 @@ const config: StorybookConfig = {
           { find: '@editora/icons', replacement: path.resolve(__dirname, '../packages/icons/src') },
           { find: '@editora/react-icons', replacement: path.resolve(__dirname, '../packages/react-icons/src') },
           // Resolve UI packages to local source during Storybook development.
-          { find: '@editora/ui-core/runtime', replacement: path.resolve(__dirname, '../packages/ui-core/src/runtime.ts') },
-          { find: '@editora/ui-core', replacement: path.resolve(__dirname, '../packages/ui-core/src/index.ts') },
+          // Anchored regexes: a bare string alias is a prefix match, so '@editora/ui-core' would
+          // also rewrite '@editora/ui-core/pin-input' into '.../index.ts/pin-input' and break the build.
+          { find: /^@editora\/ui-core\/runtime$/, replacement: path.resolve(__dirname, '../packages/ui-core/src/runtime.ts') },
+          { find: /^@editora\/ui-core\/(.+)$/, replacement: path.resolve(__dirname, '../packages/ui-core/src/standalone') + '/$1.ts' },
+          { find: /^@editora\/ui-core$/, replacement: path.resolve(__dirname, '../packages/ui-core/src/index.ts') },
           { find: '@editora/ui-react', replacement: path.resolve(__dirname, '../packages/ui-react/src/index.tsx') },
         ],
       }

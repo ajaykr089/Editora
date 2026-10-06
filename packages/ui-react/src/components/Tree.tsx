@@ -1,6 +1,8 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/tree';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type TreeSelectDetail = {
@@ -50,7 +52,7 @@ const TreeItemComponent = React.forwardRef<HTMLElement, TreeItemProps>(function 
     else el.removeAttribute('disabled');
   }, [value, expanded, selected, disabled]);
 
-  return React.createElement(
+  return createUIElement(
     'ui-tree-item',
     { ref, ...rest },
     prefix != null ? React.createElement('span', { slot: 'prefix' }, prefix) : null,
@@ -100,7 +102,7 @@ const TreeRoot = React.forwardRef<HTMLElement, TreeProps>(function TreeRoot(
     else el.removeAttribute('indent-size');
   }, [value, indentSize]);
 
-  return React.createElement('ui-tree', { ref, ...rest }, children);
+  return createUIElement('ui-tree', { ref, ...rest }, children);
 });
 
 TreeRoot.displayName = 'Tree';

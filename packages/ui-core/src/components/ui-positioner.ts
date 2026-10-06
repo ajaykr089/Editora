@@ -6,6 +6,7 @@ import {
   type PositionerStrategy,
   type PositionerState
 } from '../primitives/positioner';
+import { safeQuerySelector } from '../primitives/selector';
 
 const style = `
   :host {
@@ -112,9 +113,9 @@ export class UIPositioner extends ElementBase {
     const selector = this.getAttribute('anchor');
     if (selector) {
       const root = this.getRootNode();
-      const inRoot = root instanceof ShadowRoot || root instanceof Document ? root.querySelector(selector) : null;
+      const inRoot = root instanceof ShadowRoot || root instanceof Document ? safeQuerySelector(root, selector) : null;
       if (inRoot instanceof HTMLElement) return inRoot;
-      const inDocument = document.querySelector(selector);
+      const inDocument = safeQuerySelector(document, selector);
       if (inDocument instanceof HTMLElement) return inDocument;
     }
     const slotted = this.querySelector('[slot="anchor"]');

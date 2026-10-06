@@ -8,6 +8,28 @@ export type ElementEventListener = {
   listener?: EventListener | null;
 };
 
+/**
+ * Builds the `<ui-sortable>` host. React 16-18 only map `className` to `class` on built-in
+ * elements and write a literal `classname` attribute on custom elements, which silently drops the
+ * consumer's class (React 19 maps it, and `class` works on all of them).
+ */
+export function createUIElement(
+  tag: string,
+  props?: (Record<string, unknown> & { className?: unknown; class?: unknown }) | null,
+  ...children: React.ReactNode[]
+): React.ReactElement {
+  if (!props || !('className' in props) || !tag.includes('-')) {
+    return React.createElement(tag, props, ...children);
+  }
+
+  const { className, ...rest } = props;
+  const merged = [rest.class, className]
+    .filter((token): token is string => typeof token === 'string' && token !== '')
+    .join(' ');
+
+  return React.createElement(tag, merged ? { ...rest, class: merged } : rest, ...children);
+}
+
 export function useForwardedHostRef<T extends HTMLElement>(
   forwardedRef: React.ForwardedRef<T>
 ): React.MutableRefObject<T | null> {

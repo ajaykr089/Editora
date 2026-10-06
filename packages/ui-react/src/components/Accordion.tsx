@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import '@editora/ui-core/accordion';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 type OpenValue = number | number[];
 
@@ -106,7 +106,7 @@ const Accordion = React.forwardRef<HTMLElement, AccordionProps>(function Accordi
     };
   }, [onToggle, onChangeOpen]);
 
-  return React.createElement('ui-accordion', { ref, ...rest }, children);
+  return createUIElement('ui-accordion', { ref, ...rest }, children);
 });
 
 Accordion.displayName = 'Accordion';

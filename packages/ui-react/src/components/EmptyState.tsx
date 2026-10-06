@@ -1,10 +1,12 @@
 import React from 'react';
 import '@editora/ui-core/empty-state';
 import {
+  createUIElement,
   syncBooleanAttribute,
   syncStringAttribute,
   useElementAttributes,
   useElementEventListeners,
+  useForwardedHostRef,
 } from './_internals';
 
 export type EmptyStateProps = React.HTMLAttributes<HTMLElement> & {
@@ -18,7 +20,7 @@ export type EmptyStateProps = React.HTMLAttributes<HTMLElement> & {
   onAction?: () => void;
 };
 
-export function EmptyState(props: EmptyStateProps) {
+export const EmptyState = React.forwardRef<HTMLElement, EmptyStateProps>(function EmptyState(props, forwardedRef) {
   const {
     title,
     description,
@@ -31,7 +33,7 @@ export function EmptyState(props: EmptyStateProps) {
     ...rest
   } = props;
 
-  const ref = React.useRef<HTMLElement | null>(null);
+  const ref = useForwardedHostRef<HTMLElement>(forwardedRef);
 
   const handler = React.useCallback(() => {
     onAction?.();
@@ -48,7 +50,9 @@ export function EmptyState(props: EmptyStateProps) {
     syncBooleanAttribute(el, 'headless', headless);
   }, [title, description, actionLabel, tone, compact, headless]);
 
-  return React.createElement('ui-empty-state', { ref, ...rest }, children);
-}
+  return createUIElement('ui-empty-state', { ref, ...rest }, children);
+});
+
+EmptyState.displayName = 'EmptyState';
 
 export default EmptyState;

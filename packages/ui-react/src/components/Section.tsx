@@ -1,6 +1,8 @@
 import React from 'react';
 
 import '@editora/ui-core/section';
+import { createUIElement } from './_internals';
+
 type SectionProps = React.HTMLAttributes<HTMLElement> & {
   size?: 'small' | 'medium' | 'large';
   variant?: 'default' | 'surface' | 'muted' | 'outline' | 'elevated' | 'contrast' | 'gradient';
@@ -34,7 +36,7 @@ export const Section = React.forwardRef<HTMLElement, SectionProps>(function Sect
     inset: inset ? '' : undefined,
   };
 
-  return React.createElement('ui-section', hostProps, children);
+  return createUIElement('ui-section', hostProps, children);
 });
 
 Section.displayName = 'Section';

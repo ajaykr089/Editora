@@ -1,6 +1,8 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
 import '@editora/ui-core/multi-select';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 type MultiSelectOption = {
@@ -169,7 +171,7 @@ export const MultiSelect = React.forwardRef<HTMLElement, MultiSelectProps>(funct
     size
   ]);
 
-  return React.createElement('ui-multi-select', { ref, ...rest }, children);
+  return createUIElement('ui-multi-select', { ref, ...rest }, children);
 });
 
 MultiSelect.displayName = 'MultiSelect';

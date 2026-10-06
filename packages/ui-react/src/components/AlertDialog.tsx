@@ -8,6 +8,7 @@ import {
   UIAlertDialogOpenDetail,
   UIAlertDialogTemplateOptions
 } from '@editora/ui-core';
+import { createUIElement } from './_internals';
 
 type BaseProps = React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode };
 type NativeAlertDialogProps = Omit<BaseProps, 'onClose' | 'onChange' | 'onCancel' | 'onOpen'>;
@@ -183,7 +184,7 @@ export const AlertDialog = React.forwardRef<AlertDialogElement, AlertDialogProps
     config
   ]);
 
-  return React.createElement('ui-alert-dialog', { ref, ...rest }, children);
+  return createUIElement('ui-alert-dialog', { ref, ...rest }, children);
 });
 
 AlertDialog.displayName = 'AlertDialog';

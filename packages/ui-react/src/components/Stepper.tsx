@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/stepper';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncJsonAttribute,
@@ -88,7 +89,7 @@ export const Stepper = React.forwardRef<HTMLElement, StepperProps>(function Step
     syncBooleanAttribute(el, 'headless', headless);
   }, [steps, value, orientation, variant, size, clickable, linear, headless]);
 
-  return React.createElement('ui-stepper', { ref, ...rest }, children);
+  return createUIElement('ui-stepper', { ref, ...rest }, children);
 });
 
 Stepper.displayName = 'Stepper';

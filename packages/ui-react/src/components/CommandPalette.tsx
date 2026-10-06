@@ -1,6 +1,6 @@
 import * as React from 'react';
 import '@editora/ui-core/command-palette';
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
 
@@ -123,7 +123,7 @@ const CommandPaletteRoot = React.forwardRef<CommandPaletteElement, CommandPalett
     if (typeof headless === 'boolean') syncAttr('headless', headless ? '' : null);
   }, [open, placeholder, emptyText, query, headless]);
 
-  return React.createElement('ui-command-palette', { ref, ...rest }, children);
+  return createUIElement('ui-command-palette', { ref, ...rest }, children);
 });
 
 CommandPaletteRoot.displayName = 'CommandPalette';

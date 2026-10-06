@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/menubar';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncNumberAttribute,
@@ -145,7 +146,7 @@ const MenubarRoot = React.forwardRef<HTMLElement, MenubarProps>(function Menubar
     typeahead
   ]);
 
-  return React.createElement('ui-menubar', { ref, ...rest }, children);
+  return createUIElement('ui-menubar', { ref, ...rest }, children);
 });
 
 MenubarRoot.displayName = 'Menubar';

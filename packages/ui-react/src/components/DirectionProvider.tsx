@@ -1,7 +1,9 @@
 import * as React from 'react';
 
 import '@editora/ui-core/direction-provider';
-export const DirectionProvider = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>((props, ref) => (
-  <ui-direction-provider ref={ref as any} {...props} />
-));
+import { createUIElement } from './_internals';
+
+export const DirectionProvider = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>((props, ref) =>
+  createUIElement('ui-direction-provider', { ref, ...props })
+);
 DirectionProvider.displayName = 'DirectionProvider';

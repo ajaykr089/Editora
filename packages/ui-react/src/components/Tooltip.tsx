@@ -1,6 +1,8 @@
 import React, { useEffect, useLayoutEffect, useImperativeHandle, useRef } from 'react';
 
 import '@editora/ui-core/tooltip';
+import { createUIElement } from './_internals';
+
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 type TooltipChangeDetail = {
@@ -125,7 +127,7 @@ export const Tooltip = React.forwardRef<HTMLElement, TooltipProps>(function Tool
     else syncAttr('arrow', null);
   }, [text, placement, open, disabled, headless, variant, size, tone, delay, closeDelay, trigger, offset, interactive, arrow]);
 
-  return React.createElement('ui-tooltip', { ref, ...rest }, children);
+  return createUIElement('ui-tooltip', { ref, ...rest }, children);
 });
 
 Tooltip.displayName = 'Tooltip';

@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/select';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncStringAttribute,
@@ -168,7 +169,7 @@ const SelectRoot = React.forwardRef<HTMLElement, SelectProps>(function Select(
     validation
   ]);
 
-  return React.createElement('ui-select', { ref, ...rest }, children);
+  return createUIElement('ui-select', { ref, ...rest }, children);
 });
 
 SelectRoot.displayName = 'Select';

@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/icon-cloud';
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 export type IconCloudDirection = 'clockwise' | 'counterclockwise';
 export type IconCloudVariant = 'surface' | 'soft' | 'solid' | 'glass' | 'contrast' | 'minimal';
@@ -158,7 +158,7 @@ const IconCloudRoot = React.forwardRef<IconCloudElement, IconCloudProps>(functio
     pauseOnFocus,
   ]);
 
-  return React.createElement('ui-icon-cloud', { ref, ...rest }, children);
+  return createUIElement('ui-icon-cloud', { ref, ...rest }, children);
 });
 
 IconCloudRoot.displayName = 'IconCloud';

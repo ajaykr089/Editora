@@ -1,4 +1,5 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
+import { createUIElement } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -34,7 +35,7 @@ export const Description = React.forwardRef<HTMLElement, DescriptionProps>(funct
     else el.removeAttribute('hidden');
   }, [htmlFor, forProp, tone, size, variant, hidden]);
 
-  return React.createElement('ui-description', { ref, ...rest }, children);
+  return createUIElement('ui-description', { ref, ...rest }, children);
 });
 
 Description.displayName = 'Description';
@@ -71,7 +72,7 @@ export const FieldError = React.forwardRef<HTMLElement, FieldErrorProps>(functio
     else el.removeAttribute('hidden');
   }, [htmlFor, forProp, active, size, variant, hidden]);
 
-  return React.createElement('ui-field-error', { ref, ...rest }, children);
+  return createUIElement('ui-field-error', { ref, ...rest }, children);
 });
 
 FieldError.displayName = 'FieldError';
@@ -106,7 +107,7 @@ export const ControlGroup = React.forwardRef<HTMLElement, ControlGroupProps>(fun
     else el.removeAttribute('hidden');
   }, [label, orientation, variant, density, hidden]);
 
-  return React.createElement('ui-control-group', { ref, ...rest }, children);
+  return createUIElement('ui-control-group', { ref, ...rest }, children);
 });
 
 ControlGroup.displayName = 'ControlGroup';
@@ -174,7 +175,7 @@ export const Fieldset = React.forwardRef<HTMLElement, FieldsetProps>(function Fi
     else el.removeAttribute('headless');
   }, [legend, description, error, required, invalid, orientation, variant, tone, density, shape, headless]);
 
-  return React.createElement('ui-fieldset', { ref, ...rest }, children);
+  return createUIElement('ui-fieldset', { ref, ...rest }, children);
 });
 
 Fieldset.displayName = 'Fieldset';

@@ -1,6 +1,7 @@
 import React from 'react';
 import '@editora/ui-core/toggle';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncStringAttribute,
@@ -96,7 +97,7 @@ export const Toggle = React.forwardRef<HTMLElement, ToggleProps>(function Toggle
     syncStringAttribute(el, 'icon-off', iconOff || null);
   }, [pressed, disabled, loading, headless, required, size, variant, tone, shape, elevation, name, value, iconOn, iconOff]);
 
-  return React.createElement('ui-toggle', { ref, ...rest }, children);
+  return createUIElement('ui-toggle', { ref, ...rest }, children);
 });
 
 Toggle.displayName = 'Toggle';

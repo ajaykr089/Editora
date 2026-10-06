@@ -1,6 +1,8 @@
 import React from 'react';
 
 import '@editora/ui-core/app-header';
+import { createUIElement } from './_internals';
+
 export type AppHeaderProps = Omit<React.HTMLAttributes<HTMLElement>, 'onToggle'> & {
   sticky?: boolean;
   bordered?: boolean;
@@ -124,7 +126,7 @@ const AppHeader = React.forwardRef<HTMLElement, AppHeaderProps>(function AppHead
     setStringAttr(el, 'elevation', elevation && elevation !== 'low' ? elevation : null);
   }, [sticky, bordered, dense, headless, showMenuButton, variant, tone, size, radius, elevation]);
 
-  return React.createElement('ui-app-header', { ref, ...rest }, children);
+  return createUIElement('ui-app-header', { ref, ...rest }, children);
 });
 
 function createAppHeaderSection(

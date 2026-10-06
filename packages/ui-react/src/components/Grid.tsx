@@ -1,6 +1,8 @@
 import React from 'react';
 
 import '@editora/ui-core/grid';
+import { createUIElement } from './_internals';
+
 type BreakpointKey = 'initial' | 'sm' | 'md' | 'lg' | 'xl';
 type Responsive<T> = T | Partial<Record<BreakpointKey, T>>;
 type CssValue = string | number;
@@ -36,7 +38,7 @@ function serializeResponsive(value: unknown): string | undefined {
   return String(value);
 }
 
-export function Grid(props: Props) {
+export const Grid = React.forwardRef<HTMLElement, Props>(function Grid(props, forwardedRef) {
   const {
     children,
     className,
@@ -60,6 +62,7 @@ export function Grid(props: Props) {
   } = props;
 
   const hostProps: Record<string, unknown> = {
+    ref: forwardedRef,
     className,
     ...rest,
     columns: serializeResponsive(columns),
@@ -80,7 +83,9 @@ export function Grid(props: Props) {
     headless: headless ? '' : undefined
   };
 
-  return React.createElement('ui-grid', hostProps, children);
-}
+  return createUIElement('ui-grid', hostProps, children);
+});
+
+Grid.displayName = 'Grid';
 
 export default Grid;

@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/orbiter';
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 export type OrbiterDirection = 'clockwise' | 'counterclockwise' | 'alternate';
 export type OrbiterAnimation = 'calm' | 'smooth' | 'snappy' | 'bouncy';
@@ -194,7 +194,7 @@ const OrbiterRoot = React.forwardRef<OrbiterElement, OrbiterProps>(function Orbi
     paused,
   ]);
 
-  return React.createElement('ui-orbiter', { ref, ...rest }, children);
+  return createUIElement('ui-orbiter', { ref, ...rest }, children);
 });
 
 OrbiterRoot.displayName = 'Orbiter';

@@ -1,6 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/card';
-import { warnIfElementNotRegistered } from './_internals';
+import { createUIElement, warnIfElementNotRegistered } from './_internals';
 
 const CARD_RUNTIME_STYLE_ID = 'editora-ui-react-card-runtime-styles';
 
@@ -74,7 +74,7 @@ const Card = React.forwardRef<HTMLElement, CardProps>(function Card(
   if (elevation) props.elevation = elevation;
   if (interactive) props.interactive = true;
   if (disabled) props.disabled = true;
-  return React.createElement('ui-card', props, children);
+  return createUIElement('ui-card', props, children);
 });
 
 export interface CardSectionProps extends React.HTMLAttributes<HTMLElement> {

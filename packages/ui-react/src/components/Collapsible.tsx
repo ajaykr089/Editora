@@ -1,6 +1,7 @@
 import * as React from 'react';
 import '@editora/ui-core/collapsible';
 import {
+  createUIElement,
   getCustomEventDetail,
   syncBooleanAttribute,
   syncStringAttribute,
@@ -155,11 +156,7 @@ const CollapsibleRoot = React.forwardRef<HTMLElement, CollapsibleProps>(function
     [handleToggle, handleChange]
   );
 
-  return (
-    <ui-collapsible ref={ref as any} {...rest}>
-      {children}
-    </ui-collapsible>
-  );
+  return createUIElement('ui-collapsible', { ref, ...rest }, children);
 });
 
 CollapsibleRoot.displayName = 'Collapsible';

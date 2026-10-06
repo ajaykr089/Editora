@@ -897,16 +897,16 @@ export class UITransferList extends ElementBase {
               </div>
               <div class="panel-help">Choose entries to move into the selected list.</div>
             </div>
-            <div class="list" part="list available-list" data-list="available" role="listbox" aria-multiselectable="true">${availableItems}</div>
+            <div class="list" part="list available-list" data-list="available" role="listbox" aria-multiselectable="true" aria-label="${escapeHtml(availableLabel)}">${availableItems}</div>
             <div class="summary" part="summary">${available.length} available</div>
           </section>
           <div class="actions" part="actions">
-            <button class="move-btn" part="action-button action-add" data-compact="${!showActionLabels && !showActionCounts}" data-action="add" type="button"${this._selectedAvailable.size ? '' : ' disabled'}>
+            <button class="move-btn" part="action-button action-add" data-compact="${!showActionLabels && !showActionCounts}" data-action="add" type="button"${showActionLabels ? '' : ` aria-label="${escapeHtml(addActionLabel)}"`}${this._selectedAvailable.size ? '' : ' disabled'}>
               <span class="move-btn-icon" aria-hidden="true">${renderActionChevron('right')}</span>
               ${renderActionLabel(addActionLabel)}
               ${renderActionCount(this._selectedAvailable.size || 0)}
             </button>
-            <button class="move-btn" part="action-button action-remove" data-compact="${!showActionLabels && !showActionCounts}" data-action="remove" type="button"${this._selectedChosen.size ? '' : ' disabled'}>
+            <button class="move-btn" part="action-button action-remove" data-compact="${!showActionLabels && !showActionCounts}" data-action="remove" type="button"${showActionLabels ? '' : ` aria-label="${escapeHtml(removeActionLabel)}"`}${this._selectedChosen.size ? '' : ' disabled'}>
               <span class="move-btn-icon" aria-hidden="true">${renderActionChevron('left')}</span>
               ${renderActionLabel(removeActionLabel)}
               ${renderActionCount(this._selectedChosen.size || 0)}
@@ -920,7 +920,7 @@ export class UITransferList extends ElementBase {
               </div>
               <div class="panel-help">Use the remove action to send items back.</div>
             </div>
-            <div class="list" part="list selected-list" data-list="chosen" role="listbox" aria-multiselectable="true">${selectedItems}</div>
+            <div class="list" part="list selected-list" data-list="chosen" role="listbox" aria-multiselectable="true" aria-label="${escapeHtml(selectedLabel)}">${selectedItems}</div>
             <div class="summary" part="summary">${selected.length} selected</div>
           </section>
         </div>

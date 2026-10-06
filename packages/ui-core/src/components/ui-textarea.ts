@@ -328,6 +328,17 @@ function parseNumber(raw: string | null, fallback: number): number {
   return Number.isFinite(value) ? value : fallback;
 }
 
+// The native minLength/maxLength setters throw on negatives and wrap anything above 2^31 - 1
+// into one, so only values the control can really hold are forwarded.
+const MAX_TEXT_LENGTH = 2147483647;
+
+function parseLength(raw: string | null): number | null {
+  if (!raw) return null;
+  const value = Number(raw);
+  if (!Number.isFinite(value) || value < 0 || value > MAX_TEXT_LENGTH) return null;
+  return Math.trunc(value);
+}
+
 export class UITextarea extends ElementBase {
   static get observedAttributes() {
     return [
@@ -512,8 +523,8 @@ export class UITextarea extends ElementBase {
     if (!this._textarea) return;
 
     const placeholder = this.getAttribute('placeholder') || '';
-    const maxLength = this.getAttribute('maxlength');
-    const minLength = this.getAttribute('minlength');
+    const maxLength = parseLength(this.getAttribute('maxlength'));
+    const minLength = parseLength(this.getAttribute('minlength'));
     const rows = parseNumber(this.getAttribute('rows'), 4);
     const disabled = this.hasAttribute('disabled');
     const readOnly = this.hasAttribute('readonly');
@@ -532,14 +543,14 @@ export class UITextarea extends ElementBase {
     this._textarea.name = name;
     this._textarea.style.resize = resize;
 
-    if (maxLength && Number.isFinite(Number(maxLength))) {
-      this._textarea.maxLength = Number(maxLength);
+    if (maxLength !== null) {
+      this._textarea.maxLength = maxLength;
     } else {
       this._textarea.removeAttribute('maxlength');
     }
 
-    if (minLength && Number.isFinite(Number(minLength))) {
-      this._textarea.minLength = Number(minLength);
+    if (minLength !== null) {
+      this._textarea.minLength = minLength;
     } else {
       this._textarea.removeAttribute('minlength');
     }
@@ -565,7 +576,7 @@ export class UITextarea extends ElementBase {
 
     if (hasDescription) describedBy.push(`${this._uid}-description`);
     if (hasError) describedBy.push(`${this._uid}-error`);
-    if (this.hasAttribute('show-count') || this.hasAttribute('maxlength')) describedBy.push(`${this._uid}-count`);
+    if (this.hasAttribute('show-count') || parseLength(this.getAttribute('maxlength')) !== null) describedBy.push(`${this._uid}-count`);
 
     const hasLabel = !!(this.getAttribute('label') || this.querySelector('[slot="label"]'));
     if (hasLabel) {
@@ -583,7 +594,7 @@ export class UITextarea extends ElementBase {
 
   private _syncDynamicUi(): void {
     const value = this._textarea?.value || this.getAttribute('value') || '';
-    const maxLength = this.getAttribute('maxlength');
+    const maxLength = parseLength(this.getAttribute('maxlength'));
     const clearable = this.hasAttribute('clearable');
 
     if (this._clearBtn) {
@@ -595,13 +606,13 @@ export class UITextarea extends ElementBase {
     }
 
     if (this._countEl) {
-      const shouldShow = this.hasAttribute('show-count') || !!maxLength;
+      const shouldShow = this.hasAttribute('show-count') || maxLength !== null;
       if (!shouldShow) {
         this._countEl.setAttribute('hidden', '');
       } else {
         this._countEl.removeAttribute('hidden');
-        if (maxLength && Number.isFinite(Number(maxLength))) {
-          this._countEl.textContent = `${value.length} / ${Number(maxLength)}`;
+        if (maxLength !== null) {
+          this._countEl.textContent = `${value.length} / ${maxLength}`;
         } else {
           this._countEl.textContent = `${value.length}`;
         }

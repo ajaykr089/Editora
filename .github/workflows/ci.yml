@@ -59,6 +59,14 @@ jobs:
       - name: Run icons, react-icons and toast tests
         run: npm run test:libs
 
+      # ui-core, ui-react, ui-sortable and collaboration each have a vitest suite that nothing ran
+      # here (test:ui only type-checks the declarations), so regressions in them went unnoticed.
+      - name: Run ui-core and ui-react unit tests
+        run: npm run test:ui:unit
+
+      - name: Run ui-sortable and collaboration tests
+        run: npm run test:packages
+
   react-19-compat:
     runs-on: ubuntu-latest
 

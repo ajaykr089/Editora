@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { edgeScrollDelta, findScrollParent } from '../primitives/auto-scroll';
 
 export type UISortableListOrientation = 'vertical' | 'horizontal';
 export type UISortableSortMode = 'manual' | 'label';
@@ -255,6 +256,20 @@ const style = `
     flex-wrap: nowrap;
     overflow: auto hidden;
     align-items: stretch;
+  }
+
+  /* The cards live inside one root .tree wrapper, which is a vertical grid. Without this the
+     lane was a flex row holding a single column, so a "horizontal" list rendered vertically. */
+  .list[data-orientation="horizontal"] .items > .tree {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    min-inline-size: min-content;
+  }
+
+  .list[data-orientation="horizontal"] .items > .tree > .item-shell {
+    flex: 0 0 auto;
+    min-inline-size: min(220px, 70vw);
   }
 
   .list[data-disabled="true"] {
@@ -1387,6 +1402,7 @@ export class UISortable extends ElementBase {
     this.ownerDocument?.removeEventListener('pointermove', this._onPointerMove as EventListener, true);
     this.ownerDocument?.removeEventListener('pointerup', this._onPointerUp as EventListener, true);
     this.ownerDocument?.removeEventListener('pointercancel', this._onPointerCancel as EventListener, true);
+    this._stopAutoScroll();
     this._removeDragPreviewOverlay();
     this._removeDragImage();
     super.disconnectedCallback();
@@ -1556,7 +1572,7 @@ export class UISortable extends ElementBase {
                     ${helperText ? `<div class="list-helper">${escapeHtml(helperText)}</div>` : ''}
                   </div>
                 </header>
-                <div class="items" role="listbox" aria-multiselectable="true">
+                <div class="items" role="listbox" aria-multiselectable="true" aria-label="${escapeHtml(list.label)}">
                   ${content || `<div class="list-custom-empty" part="list-custom-empty" data-list-empty-target="${escapeHtml(list.id)}"></div><div class="empty">${escapeHtml(list.emptyLabel)}</div>${this._renderDropzone({
                     listId: list.id,
                     parentId: null,
@@ -2006,10 +2022,23 @@ export class UISortable extends ElementBase {
     }
     const pending = this._pendingDropTarget?.target ?? null;
     this._pendingDropTarget = null;
-    if (pending && this._canDrop(pending, this._dragState.movedRootIds)) return pending;
+    // Falling back to the last target forgives a release that lands in a gap between cards, but
+    // only while the pointer is still over that target's list. Otherwise a release over another
+    // list (or outside the board) committed a list the pointer had already left.
+    const stillOverList = (target: DropTarget) => this._pointerIsOverList(target.listId, clientX, clientY);
+    if (pending && this._canDrop(pending, this._dragState.movedRootIds) && stillOverList(pending)) return pending;
     const current = this._dragState.dropTarget ?? null;
-    if (current && this._canDrop(current, this._dragState.movedRootIds)) return current;
+    if (current && this._canDrop(current, this._dragState.movedRootIds) && stillOverList(current)) return current;
     return null;
+  }
+
+  private _pointerIsOverList(listId: string, clientX: number, clientY: number): boolean {
+    if (!Number.isFinite(clientX) || !Number.isFinite(clientY)) return true;
+    const lists = Array.from(this.root.querySelectorAll<HTMLElement>('.list[data-list-id]'));
+    const listElement = lists.find((element) => element.getAttribute('data-list-id') === listId);
+    if (!listElement) return true;
+    const rect = listElement.getBoundingClientRect();
+    return clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
   }
 
   private _pathFromPoint(clientX: number, clientY: number): HTMLElement[] {
@@ -2337,7 +2366,21 @@ export class UISortable extends ElementBase {
     this._syncSelectionVisualState();
   }
 
+  // Keys typed into a control that lives inside an item (an <input> or <button> in a custom card)
+  // belong to that control: swallowing Space/Enter/arrows there made it impossible to type a space
+  // or press the button from the keyboard. The drag handle is part of the item, not a foreign control.
+  private _isForeignControl(event: KeyboardEvent): boolean {
+    const origin = event.composedPath()[0];
+    if (!(origin instanceof HTMLElement)) return false;
+    if (origin.classList.contains('handle') || origin.classList.contains('item')) return false;
+    return (
+      origin.isContentEditable ||
+      origin.matches('input, textarea, select, button, summary, a[href], [role="button"], [role="textbox"], [role="combobox"]')
+    );
+  }
+
   private _onKeyDown(event: KeyboardEvent): void {
+    if (this._isForeignControl(event)) return;
     const visibleIds = this._visibleItemIds();
     if (!visibleIds.length) return;
 
@@ -2346,14 +2389,18 @@ export class UISortable extends ElementBase {
     const currentItem = this._items.find((item) => item.id === currentId);
     const list = currentItem ? this._lists.find((entry) => entry.id === currentItem.listId) : null;
     const isHorizontal = list?.orientation === 'horizontal';
+    // In a right-to-left lane the next item is on the left, so the arrows swap.
+    const rtl = this._isRtl();
+    const forwardKey = isHorizontal ? (rtl ? 'ArrowLeft' : 'ArrowRight') : 'ArrowDown';
+    const backwardKey = isHorizontal ? (rtl ? 'ArrowRight' : 'ArrowLeft') : 'ArrowUp';
 
     if (!this._dragState?.keyboard) {
-      if ((event.key === 'ArrowDown' && !isHorizontal) || (event.key === 'ArrowRight' && isHorizontal)) {
+      if (event.key === forwardKey) {
         event.preventDefault();
         this._moveFocusBy(visibleIds, currentIndex, 1);
         return;
       }
-      if ((event.key === 'ArrowUp' && !isHorizontal) || (event.key === 'ArrowLeft' && isHorizontal)) {
+      if (event.key === backwardKey) {
         event.preventDefault();
         this._moveFocusBy(visibleIds, currentIndex, -1);
         return;
@@ -2415,9 +2462,16 @@ export class UISortable extends ElementBase {
 
     if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
       event.preventDefault();
-      const direction = event.key === 'ArrowDown' || event.key === 'ArrowRight' ? 1 : -1;
+      const forwardArrow = rtl ? 'ArrowLeft' : 'ArrowRight';
+      const direction = event.key === 'ArrowDown' || event.key === forwardArrow ? 1 : -1;
       this._moveKeyboardDropTarget(direction);
     }
+  }
+
+  private _isRtl(): boolean {
+    const computed = this.ownerDocument?.defaultView?.getComputedStyle(this).direction;
+    if (computed) return computed === 'rtl';
+    return this.closest('[dir]')?.getAttribute('dir') === 'rtl';
   }
 
   private _moveFocusBy(visibleIds: string[], currentIndex: number, direction: 1 | -1): void {
@@ -2507,6 +2561,7 @@ export class UISortable extends ElementBase {
   private _onDragEnd(): void {
     if (!this._dragState || this._dragState.keyboard) return;
     if (!this._dragState.committed) {
+      this._setDraggingVisualState(this._draggingIds(), false);
       this._pendingDropTarget = null;
       this._setDropTargetVisualState(this._dragState.dropTarget, false);
       this._clearPointerDragPreview();
@@ -2534,7 +2589,17 @@ export class UISortable extends ElementBase {
     }
 
     const itemElement = pathLike.find((node): node is HTMLElement => node instanceof HTMLElement && node.classList.contains('item'));
-    if (!itemElement) return null;
+    if (!itemElement) {
+      // Neither a rail nor a card, but still inside a list: the empty body of an empty list, the
+      // space under the last card, or the header. A list reads as one drop area, so append to it
+      // rather than ignoring the drop (the only other hot spots are thin rails between cards).
+      const listElement = pathLike.find(
+        (node): node is HTMLElement => node instanceof HTMLElement && node.classList.contains('list') && node.hasAttribute('data-list-id')
+      );
+      const listId = listElement?.getAttribute('data-list-id');
+      if (!listId) return null;
+      return { listId, parentId: null, beforeId: null, mode: 'before' };
+    }
 
     const itemId = itemElement.getAttribute('data-id');
     if (!itemId) return null;
@@ -2548,7 +2613,10 @@ export class UISortable extends ElementBase {
     const end = isHorizontal ? rect.right : rect.bottom;
     const pointer = isHorizontal ? clientX : clientY;
     const size = Math.max(1, end - start);
-    const ratio = (pointer - start) / size;
+    const fromStart = (pointer - start) / size;
+    // In a right-to-left lane the leading edge of a card is its right edge, so "before" is the
+    // right third and "after" the left third; measuring from the left mirrored both.
+    const ratio = isHorizontal && this._isRtl() ? 1 - fromStart : fromStart;
     const allowNesting = this.getAttribute('allow-nesting') !== 'false' && !item.disabled;
 
     if (ratio <= 0.34) {
@@ -2664,6 +2732,7 @@ export class UISortable extends ElementBase {
 
     if (!this._dragState || this._dragState.keyboard) return;
     this._movePointerPreview(event.clientX, event.clientY);
+    this._updateAutoScroll(event.clientX, event.clientY);
     if (!this._dragState.committed) {
       const target = this._dropTargetFromPoint(event.clientX, event.clientY);
       if (!target || !this._canDrop(target, this._dragState.movedRootIds)) {
@@ -2673,6 +2742,49 @@ export class UISortable extends ElementBase {
       this._queueDropTarget(target, event.timeStamp);
     }
   }
+
+  private _autoScrollFrame = 0;
+  private _autoScrollPoint: { x: number; y: number } | null = null;
+
+  // Holding a dragged card near the top or bottom edge scrolls the page (or the nearest scrolling
+  // container), so lists and positions that are off screen can be reached with the pointer.
+  private _updateAutoScroll(x: number, y: number): void {
+    this._autoScrollPoint = { x, y };
+    if (!this._autoScrollFrame && typeof requestAnimationFrame === 'function') {
+      this._autoScrollFrame = requestAnimationFrame(this._autoScrollTick);
+    }
+  }
+
+  private _stopAutoScroll(): void {
+    if (this._autoScrollFrame && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(this._autoScrollFrame);
+    this._autoScrollFrame = 0;
+    this._autoScrollPoint = null;
+  }
+
+  private _autoScrollTick = (): void => {
+    this._autoScrollFrame = 0;
+    const point = this._autoScrollPoint;
+    if (!point || !this._dragState || this._dragState.keyboard) return;
+
+    const view = this.ownerDocument?.defaultView;
+    const scroller = findScrollParent(this);
+    const bounds = scroller ? scroller.getBoundingClientRect() : null;
+    const top = Math.max(0, bounds ? bounds.top : 0);
+    const bottom = Math.min(view?.innerHeight ?? 0, bounds ? bounds.bottom : Infinity);
+    const delta = edgeScrollDelta(point.y, top, bottom);
+    if (!delta) return;
+
+    if (scroller) scroller.scrollTop += delta;
+    else view?.scrollBy(0, delta);
+
+    // The content moved under a stationary pointer, so the target under it has changed.
+    if (!this._dragState.committed) {
+      const target = this._dropTargetFromPoint(point.x, point.y);
+      const usable = target && this._canDrop(target, this._dragState.movedRootIds) ? target : null;
+      this._queueDropTarget(usable, performance.now());
+    }
+    this._autoScrollFrame = requestAnimationFrame(this._autoScrollTick);
+  };
 
   private _onPointerUp(event: PointerEvent): void {
     if (!this._pointerGesture || event.pointerId !== this._pointerGesture.pointerId) return;
@@ -2685,6 +2797,7 @@ export class UISortable extends ElementBase {
 
     const gesture = this._pointerGesture;
     this._pointerGesture = null;
+    this._stopAutoScroll();
     if (!this._dragState || this._dragState.keyboard) return;
     const releaseTarget = gesture.moved ? this._releaseDropTarget(event.clientX, event.clientY) : null;
     if (gesture.moved && releaseTarget) {
@@ -2706,6 +2819,7 @@ export class UISortable extends ElementBase {
   private _onPointerCancel(event: PointerEvent): void {
     if (!this._pointerGesture || event.pointerId !== this._pointerGesture.pointerId) return;
     this._pointerGesture = null;
+    this._stopAutoScroll();
     if (!this._dragState) return;
     this._cancelDrag(true);
   }
@@ -3054,7 +3168,11 @@ export class UISortable extends ElementBase {
   }
 
   private _cancelDrag(announce: boolean): void {
+    this._stopAutoScroll();
     if (!this._dragState) return;
+    // Un-mark the cards first: the re-render below does not always replace them (the restored
+    // snapshot equals what is already on screen), which left a card faded as "being dragged".
+    this._setDraggingVisualState(this._draggingIds(), false);
     this._pendingDropTarget = null;
     this._setDropTargetVisualState(this._dragState.dropTarget, false);
     this._clearPointerDragPreview();
@@ -3127,6 +3245,7 @@ export class UISortable extends ElementBase {
     const groups = buildChildrenMap(this._items);
     const targets: KeyboardDropTarget[] = [];
 
+    const allowNesting = this.getAttribute('allow-nesting') !== 'false';
     const walk = (listId: string, parentId: string | null) => {
       const ids = groups.get(keyForGroup(listId, parentId)) || [];
       ids.forEach((id) => {
@@ -3139,7 +3258,7 @@ export class UISortable extends ElementBase {
           mode: 'before',
           label: `Before ${item.label}`,
         });
-        if (this.getAttribute('allow-nesting') !== 'false') {
+        if (allowNesting) {
           targets.push({
             listId,
             parentId: id,
@@ -3150,13 +3269,27 @@ export class UISortable extends ElementBase {
         }
         walk(listId, id);
       });
-      targets.push({
-        listId,
-        parentId,
-        beforeId: null,
-        mode: 'before',
-        label: parentId ? 'After children' : `End of ${this._lists.find((list) => list.id === listId)?.label || listId}`,
-      });
+      // The end of a list is always a destination (it is how an empty list is reached). The end of
+      // an item's children only is one when it has children and nesting is allowed: a childless
+      // item already has "Nest inside", and with nesting off it is not a position at all (it used
+      // to be offered anyway, so ArrowDown stalled on it and Enter nested the item).
+      if (!parentId) {
+        targets.push({
+          listId,
+          parentId,
+          beforeId: null,
+          mode: 'before',
+          label: `End of ${this._lists.find((list) => list.id === listId)?.label || listId}`,
+        });
+      } else if (allowNesting && ids.length > 0) {
+        targets.push({
+          listId,
+          parentId,
+          beforeId: null,
+          mode: 'before',
+          label: 'After children',
+        });
+      }
     };
 
     this._lists.forEach((list) => walk(list.id, null));

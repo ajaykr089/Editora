@@ -25,6 +25,7 @@ const COMMAND_EDITOR_CONTEXT_KEY = '__editoraCommandEditorRoot';
 const LAST_COMMAND_BUTTON_KEY = '__editoraLastCommandButton';
 const EDITOR_HOST_SELECTOR = 'editora-editor, [data-editora-editor], .rte-editor, .editora-editor';
 const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
+const DEFAULT_EDITOR_LABEL = 'Rich text editor';
 const connectedWebEditors = new Set<RichTextEditorElement>();
 let lastActiveWebEditor: RichTextEditorElement | null = null;
 let commandBridgeInstalled = false;
@@ -216,6 +217,7 @@ export class RichTextEditorElement extends HTMLElement {
       'disabled',
       'theme',
       'placeholder',
+      'aria-label',
       'autofocus',
       'autosave',
       'autosave-enabled',
@@ -658,12 +660,12 @@ export class RichTextEditorElement extends HTMLElement {
       this.contentElement.setAttribute('role', 'textbox');
       this.contentElement.setAttribute('aria-multiline', 'true');
       this.contentElement.setAttribute('aria-disabled', this.config.readonly ? 'true' : 'false');
-      const label = typeof this.config.placeholder === 'string' ? this.config.placeholder.trim() : '';
-      if (label) {
-        this.contentElement.setAttribute('aria-label', label);
-      } else {
-        this.contentElement.removeAttribute('aria-label');
-      }
+      // A textbox needs an accessible name. The host's own aria-label wins (it is meaningless on
+      // a custom element with no role, so this is the natural place to set it), then the
+      // placeholder, then a generic fallback so the surface is never announced as unnamed.
+      const hostLabel = this.getAttribute('aria-label')?.trim();
+      const placeholder = typeof this.config.placeholder === 'string' ? this.config.placeholder.trim() : '';
+      this.contentElement.setAttribute('aria-label', hostLabel || placeholder || DEFAULT_EDITOR_LABEL);
     } else {
       this.contentElement.removeAttribute('role');
       this.contentElement.removeAttribute('aria-multiline');
@@ -1435,6 +1437,7 @@ export class RichTextEditorElement extends HTMLElement {
         }
         break;
 
+      case 'aria-label':
       case 'accessibility':
       case 'accessibility-enable-aria':
       case 'accessibility-keyboard-navigation':
