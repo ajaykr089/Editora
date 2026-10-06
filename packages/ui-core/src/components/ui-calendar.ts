@@ -401,6 +401,26 @@ const style = `
     padding: 4px 2px;
   }
 
+  /* One cell per day: the button, plus the event marks and tooltip drawn over and beside it. */
+  .day-cell {
+    position: relative;
+    display: grid;
+    min-inline-size: 0;
+    --ui-calendar-events-h: 10px;
+  }
+
+  .day-cell[data-events="badges"] { --ui-calendar-events-h: 15px; }
+  .day-cell[data-events="count"] { --ui-calendar-events-h: 16px; }
+
+  .day-cell > .day {
+    grid-area: 1 / 1;
+  }
+
+  /* Room under the number for the event marks, so the number sits where it did when they were inside. */
+  .day-cell[data-events] > .day {
+    padding-block-end: calc(var(--ui-calendar-day-padding-block) + var(--ui-calendar-events-h) + 4px);
+  }
+
   .day {
     border: 1px solid color-mix(in srgb, var(--ui-calendar-border) 78%, transparent);
     border-radius: var(--ui-calendar-day-radius);
@@ -483,13 +503,16 @@ const style = `
   }
 
   .events {
-    min-block-size: 10px;
-    display: inline-flex;
+    position: absolute;
+    inset-inline: var(--ui-calendar-day-padding-inline);
+    inset-block-start: calc(50% + (var(--ui-calendar-day-font-size) + 4px - var(--ui-calendar-events-h)) / 2);
+    block-size: var(--ui-calendar-events-h);
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 4px;
-    max-inline-size: 100%;
     overflow: hidden;
+    pointer-events: none;
   }
 
   .event-dot {
@@ -543,6 +566,8 @@ const style = `
     box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
     color: var(--ui-calendar-text);
     font: 500 11px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    /* Not drawn at all until its day is hovered or focused, so a hidden tooltip near an edge cannot widen the page. */
+    display: none;
     opacity: 0;
     pointer-events: none;
     z-index: 5;
@@ -552,10 +577,22 @@ const style = `
     display: none;
   }
 
-  .day:hover .tooltip,
-  .day:focus-visible .tooltip,
-  .day:focus-within .tooltip {
+  .day:hover ~ .tooltip,
+  .day:focus-visible ~ .tooltip {
+    display: block;
     opacity: 1;
+  }
+
+  /* The outer columns open inward, so the tooltip stays inside the calendar (and the viewport). */
+  .week > .day-cell:nth-child(-n + 2) .tooltip {
+    inset-inline-start: 0;
+    transform: none;
+  }
+
+  .week > .day-cell:nth-child(n + 6) .tooltip {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+    transform: none;
   }
 
   .live-region {
@@ -1107,7 +1144,15 @@ export class UICalendar extends ElementBase {
 
   private _resolveLocale(): string {
     const locale = (this.getAttribute('locale') || '').trim();
-    return locale || (typeof navigator !== 'undefined' ? navigator.language : 'en-US');
+    const candidate = locale || (typeof navigator !== 'undefined' ? navigator.language : 'en-US');
+    // An unusable tag (a typo in the attribute, an environment that reports none) would throw in every
+    // Intl call below and leave the calendar empty; fall back instead.
+    try {
+      new Intl.DateTimeFormat(candidate);
+      return candidate;
+    } catch {
+      return 'en-US';
+    }
   }
 
   private _resolvedView(): { year: number; month: number } {
@@ -1983,7 +2028,10 @@ export class UICalendar extends ElementBase {
           const tooltipId = `ui-calendar-tip-${cell.iso}`;
           const tooltipText = dayEvents.length ? dayEvents.map((event) => escapeHtml(event.title || t.event)).join('<br/>') : '';
           const hasTooltip = tooltipText.length > 0;
-          const eventsSlot = eventsMarkup ? `<span class="events" part="events">${eventsMarkup}</span>` : '';
+          // The events and the tooltip sit beside the day button, not inside it: the button's visible text
+          // is then just the day number, which is part of its name (the full date). The events reach
+          // assistive technology through aria-describedby (the tooltip), so they are hidden here.
+          const eventsSlot = eventsMarkup ? `<span class="events" part="events" aria-hidden="true">${eventsMarkup}</span>` : '';
           const tooltipSlot = hasTooltip
             ? `<span class="tooltip" part="tooltip" id="${tooltipId}">${tooltipText}</span>`
             : '';
@@ -1992,6 +2040,7 @@ export class UICalendar extends ElementBase {
           const part = inRange || isRangeStart || isRangeEnd ? 'day range' : 'day';
 
           return `
+            <div class="day-cell" part="day-cell"${eventsMarkup ? ` data-events="${eventsDisplay}"` : ''}>
             <button
               type="button"
               class="day"
@@ -2014,9 +2063,10 @@ export class UICalendar extends ElementBase {
               tabindex="${tabIndex}"
             >
               <span class="day-number" part="day-number">${cell.parts.d}</span>
-              ${eventsSlot}
-              ${tooltipSlot}
             </button>
+            ${eventsSlot}
+            ${tooltipSlot}
+            </div>
           `;
         })
         .join('');
