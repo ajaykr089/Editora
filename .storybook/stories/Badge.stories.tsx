@@ -54,7 +54,7 @@ export const Playground: Story = {
           <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
             <Flex align="center" style={{ gap: 10, flexWrap: 'wrap' }}>
               <Badge {...args}>{args.text}</Badge>
-              <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+              <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
                 Attached to the real `ui-badge` API: tone, variant, size, radius, elevation, state, and interaction props.
               </Box>
             </Flex>
@@ -76,7 +76,7 @@ export const VariantGallery: Story = {
         { label: 'Ghost', variant: 'ghost', tone: 'danger', icon: <AlertTriangleIcon size={12} /> },
       ].map((entry) => (
         <Grid key={entry.label} style={{ gap: 8 }}>
-          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #526175)' }}>{entry.label}</Box>
           <Flex align="center" style={{ gap: 10, flexWrap: 'wrap' }}>
             <Badge variant={entry.variant as any} tone={entry.tone as any} radius="full">
               <span slot="icon">{entry.icon}</span>
@@ -106,7 +106,7 @@ export const SizeGallery: Story = {
         { label: 'Extra large', size: 'xl' },
       ].map((entry) => (
         <Grid key={entry.label} style={{ gap: 8 }}>
-          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #526175)' }}>{entry.label}</Box>
           <Flex align="center" style={{ gap: 10, flexWrap: 'wrap' }}>
             <Badge size={entry.size as any} tone="info" variant="surface">
               <span slot="icon">
@@ -182,7 +182,7 @@ export const OperationsFilterPattern: Story = {
 
           <Box slot="inset" style={{ padding: 14, display: 'grid', gap: 14 }}>
             <Grid style={{ gap: 8 }}>
-              <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #64748b)' }}>Active filters</Box>
+              <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>Active filters</Box>
               <Flex align="center" style={{ gap: 8, flexWrap: 'wrap' }}>
                 {filters.map((filter) => {
                   const active = selected === filter.id;
@@ -209,7 +209,7 @@ export const OperationsFilterPattern: Story = {
 
             <Grid style={{ gap: 8 }}>
               <Flex align="center" justify="space-between" style={{ gap: 10, flexWrap: 'wrap' }}>
-                <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #64748b)' }}>Routing chips</Box>
+                <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>Routing chips</Box>
                 <Button
                   size="sm"
                   variant="secondary"

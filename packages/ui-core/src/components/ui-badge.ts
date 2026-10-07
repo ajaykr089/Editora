@@ -29,7 +29,7 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-badge-accent: color-mix(in srgb, var(--ui-color-muted, #64748b) 74%, var(--ui-color-text, #0f172a) 26%);
+    --ui-badge-accent: color-mix(in srgb, var(--ui-color-muted, #526175) 74%, var(--ui-color-text, #0f172a) 26%);
   }
 
   :host([tone="brand"]),
@@ -38,11 +38,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-badge-accent: var(--ui-color-success, #16a34a);
+    --ui-badge-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-badge-accent: var(--ui-color-warning, #d97706);
+    --ui-badge-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
@@ -217,7 +217,7 @@ const style = `
   }
 
   :host([state="success"]) {
-    --ui-badge-accent: var(--ui-color-success, #16a34a);
+    --ui-badge-accent: var(--ui-color-success, #15803d);
     --ui-badge-border: color-mix(in srgb, var(--ui-badge-accent) 46%, var(--ui-color-border, rgba(15, 23, 42, 0.16)));
   }
 

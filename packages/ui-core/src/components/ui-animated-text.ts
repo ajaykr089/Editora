@@ -128,19 +128,19 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-animated-text-accent: #64748b;
+    --ui-animated-text-accent: #526175;
   }
 
   :host([tone="info"]) {
-    --ui-animated-text-accent: #0ea5e9;
+    --ui-animated-text-accent: var(--ui-color-info, #0e7490);
   }
 
   :host([tone="success"]) {
-    --ui-animated-text-accent: var(--ui-color-success, #16a34a);
+    --ui-animated-text-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-animated-text-accent: var(--ui-color-warning, #d97706);
+    --ui-animated-text-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {

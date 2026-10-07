@@ -17,6 +17,7 @@ export function SidebarList() {
 
   return (
     <Tree
+      aria-label="Workspace navigation"
       value={value}
       indentSize="14px"
       onSelect={(detail) => setValue(detail.value)}
@@ -42,19 +43,19 @@ export function ContentCards() {
     <Grid style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
       <Box style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 14 }}>
         <strong>Weekly revenue</strong>
-        <Box style={{ marginTop: 8, fontSize: 13, color: '#64748b' }}>+18.4% vs last week</Box>
+        <Box style={{ marginTop: 8, fontSize: 13, color: '#526175' }}>+18.4% vs last week</Box>
       </Box>
       <Box style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 14 }}>
         <strong>Active users</strong>
-        <Box style={{ marginTop: 8, fontSize: 13, color: '#64748b' }}>12,482 online</Box>
+        <Box style={{ marginTop: 8, fontSize: 13, color: '#526175' }}>12,482 online</Box>
       </Box>
       <Box style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 14 }}>
         <strong>Conversion rate</strong>
-        <Box style={{ marginTop: 8, fontSize: 13, color: '#64748b' }}>4.8% this month</Box>
+        <Box style={{ marginTop: 8, fontSize: 13, color: '#526175' }}>4.8% this month</Box>
       </Box>
       <Box style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 14 }}>
         <strong>Pending alerts</strong>
-        <Box style={{ marginTop: 8, fontSize: 13, color: '#64748b' }}>7 require review</Box>
+        <Box style={{ marginTop: 8, fontSize: 13, color: '#526175' }}>7 require review</Box>
       </Box>
     </Grid>
   );
@@ -87,11 +88,11 @@ export function LayoutPlayground(args: any) {
         <Box style={{ display: 'grid', gap: 10 }}>
           <Box style={{ border: '1px solid #e2e8f0', borderRadius: 10, padding: 12 }}>
             <strong>Sidebar section</strong>
-            <Box style={{ marginTop: 6, fontSize: 13, color: '#64748b' }}>Operational navigation and filters.</Box>
+            <Box style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>Operational navigation and filters.</Box>
           </Box>
           <Box style={{ border: '1px solid #e2e8f0', borderRadius: 10, padding: 12 }}>
             <strong>Secondary nav</strong>
-            <Box style={{ marginTop: 6, fontSize: 13, color: '#64748b' }}>Pinned views and quick actions.</Box>
+            <Box style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>Pinned views and quick actions.</Box>
           </Box>
         </Box>
       </Layout.Sidebar>
@@ -100,7 +101,7 @@ export function LayoutPlayground(args: any) {
         <Box style={{ display: 'grid', gap: 12 }}>
           <Box style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 16 }}>
             <strong>Main content</strong>
-            <Box style={{ marginTop: 8, fontSize: 13, color: '#64748b' }}>
+            <Box style={{ marginTop: 8, fontSize: 13, color: '#526175' }}>
               Lean docs shell for layout structure, slot visibility, and shell sizing behavior.
             </Box>
           </Box>
@@ -115,7 +116,7 @@ export function LayoutPlayground(args: any) {
         <Box style={{ display: 'grid', gap: 10 }}>
           <Box style={{ border: '1px solid #e2e8f0', borderRadius: 10, padding: 12 }}>
             <strong>Aside card</strong>
-            <Box style={{ marginTop: 6, fontSize: 13, color: '#64748b' }}>Context, activity, and support panels.</Box>
+            <Box style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>Context, activity, and support panels.</Box>
           </Box>
           <Box style={{ border: '1px solid #e2e8f0', borderRadius: 10, padding: 12 }}>
             Supporting information
@@ -125,7 +126,7 @@ export function LayoutPlayground(args: any) {
 
       <Layout.Footer>
         <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-          <Box style={{ fontSize: 13, color: '#64748b' }}>Footer slot</Box>
+          <Box style={{ fontSize: 13, color: '#526175' }}>Footer slot</Box>
           <Button variant="secondary">Secondary</Button>
         </Flex>
       </Layout.Footer>
@@ -165,17 +166,17 @@ export function LayoutWorkspaceExample() {
         <Grid style={{ display: 'grid', gap: 10 }}>
           <Box style={{ border: '1px solid #e2e8f0', borderRadius: 10, padding: 12 }}>
             <strong>Team notes</strong>
-            <Box style={{ marginTop: 8, fontSize: 13, color: '#64748b' }}>Sprint planning at 14:30.</Box>
+            <Box style={{ marginTop: 8, fontSize: 13, color: '#526175' }}>Sprint planning at 14:30.</Box>
           </Box>
           <Box style={{ border: '1px solid #e2e8f0', borderRadius: 10, padding: 12 }}>
             <strong>Deploy status</strong>
-            <Box style={{ marginTop: 8, fontSize: 13, color: '#64748b' }}>Production healthy.</Box>
+            <Box style={{ marginTop: 8, fontSize: 13, color: '#526175' }}>Production healthy.</Box>
           </Box>
         </Grid>
       </Layout.Aside>
 
       <Layout.Footer style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-        <Box style={{ fontSize: 13, color: '#64748b' }}>Updated 2 minutes ago</Box>
+        <Box style={{ fontSize: 13, color: '#526175' }}>Updated 2 minutes ago</Box>
         <Button variant="secondary">Export</Button>
       </Layout.Footer>
     </Layout>

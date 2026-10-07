@@ -176,6 +176,10 @@ const IconCloudItem = React.forwardRef<HTMLElement, IconCloudItemProps>(function
   };
 
   if (interactive) itemProps['data-ui-icon-cloud-clickable'] = '';
+  // aria-label is not allowed on a plain <div>: a labelled, non-interactive item is an image.
+  if (!interactive && Tag === 'div' && itemProps.role == null && (itemProps['aria-label'] || itemProps['aria-labelledby'])) {
+    itemProps.role = 'img';
+  }
   if (href) itemProps.href = href;
   if (target) itemProps.target = target;
   if (rel) itemProps.rel = rel;

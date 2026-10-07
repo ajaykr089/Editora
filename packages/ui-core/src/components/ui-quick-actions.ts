@@ -5,7 +5,7 @@ const style = `
     --ui-quick-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 95%, transparent);
     --ui-quick-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
     --ui-quick-text: var(--ui-color-text, #0f172a);
-    --ui-quick-muted: var(--ui-color-muted, #64748b);
+    --ui-quick-muted: var(--ui-color-muted, #526175);
     --ui-quick-accent: var(--ui-color-primary, #2563eb);
     --ui-quick-focus: var(--ui-color-focus-ring, #2563eb);
 
@@ -445,12 +445,12 @@ export class UIQuickActions extends ElementBase {
     const orientation = this.getAttribute('orientation') === 'vertical' || mode === 'fab' ? 'vertical' : 'horizontal';
     this.setContent(`
       <style>${style}</style>
-      <section class="root" part="root" role="toolbar" aria-label="${escapeHtml(label)}" aria-orientation="${orientation}">
+      <div class="root" part="root" role="toolbar" aria-label="${escapeHtml(label)}" aria-orientation="${orientation}">
         ${collapsible ? `<button type="button" class="toggle" part="toggle" aria-label="${escapeHtml(label)}" aria-controls="${actionsId}" aria-haspopup="true" aria-expanded="${showActions ? 'true' : 'false'}">${showActions ? '−' : '+'}</button>` : ''}
         <div id="${actionsId}" class="actions" part="actions" role="group" aria-label="${escapeHtml(label)} list" ${showActions ? '' : 'hidden'}>
           <slot name="action"></slot>
         </div>
-      </section>
+      </div>
     `);
     this._syncActionAccessibility(showActions);
   }

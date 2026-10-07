@@ -85,13 +85,13 @@ const style = `
   }
 
   .tooltip[data-tone="success"] {
-    --ui-tooltip-bg: color-mix(in srgb, var(--ui-color-success, #16a34a) 84%, #052e16 16%);
-    --ui-tooltip-border: color-mix(in srgb, var(--ui-color-success, #16a34a) 42%, transparent);
+    --ui-tooltip-bg: color-mix(in srgb, var(--ui-color-success, #15803d) 84%, #052e16 16%);
+    --ui-tooltip-border: color-mix(in srgb, var(--ui-color-success, #15803d) 42%, transparent);
   }
 
   .tooltip[data-tone="warning"] {
-    --ui-tooltip-bg: color-mix(in srgb, var(--ui-color-warning, #d97706) 84%, #451a03 16%);
-    --ui-tooltip-border: color-mix(in srgb, var(--ui-color-warning, #d97706) 42%, transparent);
+    --ui-tooltip-bg: color-mix(in srgb, var(--ui-color-warning, #b45309) 84%, #451a03 16%);
+    --ui-tooltip-border: color-mix(in srgb, var(--ui-color-warning, #b45309) 42%, transparent);
   }
 
   .tooltip[data-tone="danger"] {

@@ -20,7 +20,7 @@ const style = `
       color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 24%, var(--ui-color-surface, #ffffff)) 100%
     );
     --ui-dialog-color: var(--ui-color-text, #0f172a);
-    --ui-dialog-muted: var(--ui-color-muted, #64748b);
+    --ui-dialog-muted: var(--ui-color-muted, #526175);
     --ui-dialog-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 70%, transparent);
     --ui-dialog-border: 1px solid var(--ui-dialog-border-color);
     --ui-dialog-shadow: none;
@@ -30,7 +30,7 @@ const style = `
     --ui-dialog-width: min(560px, calc(100vw - 24px));
     --ui-dialog-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-dialog-danger: var(--ui-color-danger, #dc2626);
-    --ui-dialog-success: var(--ui-color-success, #16a34a);
+    --ui-dialog-success: var(--ui-color-success, #15803d);
     --ui-dialog-z: 1201;
     --ui-dialog-backdrop-z: 1200;
     --ui-dialog-btn-bg: color-mix(in srgb, var(--ui-color-surface-elevated, #f8fafc) 88%, transparent);

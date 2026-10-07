@@ -56,23 +56,23 @@ function DemoToolbar(props: React.ComponentProps<typeof BlockControls>) {
 
   return (
     <BlockControls {...props} ariaLabel="Formatting controls">
-      <Button variant={bold ? 'primary' : 'secondary'} onClick={() => setBold((value) => !value)}>
+      <Button variant={bold ? 'primary' : 'secondary'} onClick={() => setBold((value) => !value)} ariaLabel="Bold">
         <BoldIcon size={14} />
       </Button>
-      <Button variant={italic ? 'primary' : 'secondary'} onClick={() => setItalic((value) => !value)}>
+      <Button variant={italic ? 'primary' : 'secondary'} onClick={() => setItalic((value) => !value)} ariaLabel="Italic">
         <ItalicIcon size={14} />
       </Button>
-      <Button variant={linked ? 'primary' : 'secondary'} onClick={() => setLinked((value) => !value)}>
+      <Button variant={linked ? 'primary' : 'secondary'} onClick={() => setLinked((value) => !value)} ariaLabel="Link">
         <LinkIcon size={14} />
       </Button>
       <span data-separator aria-hidden="true" />
-      <Button variant={align === 'left' ? 'primary' : 'secondary'} onClick={() => setAlign('left')}>
+      <Button variant={align === 'left' ? 'primary' : 'secondary'} onClick={() => setAlign('left')} ariaLabel="Align left">
         <AlignLeftIcon size={14} />
       </Button>
-      <Button variant={align === 'center' ? 'primary' : 'secondary'} onClick={() => setAlign('center')}>
+      <Button variant={align === 'center' ? 'primary' : 'secondary'} onClick={() => setAlign('center')} ariaLabel="Align center">
         <AlignCenterIcon size={14} />
       </Button>
-      <Button variant={align === 'right' ? 'primary' : 'secondary'} onClick={() => setAlign('right')}>
+      <Button variant={align === 'right' ? 'primary' : 'secondary'} onClick={() => setAlign('right')} ariaLabel="Align right">
         <AlignRightIcon size={14} />
       </Button>
     </BlockControls>
@@ -108,7 +108,7 @@ export const VariantGallery: Story = {
         { label: 'Ghost', variant: 'ghost', tone: 'danger' },
       ].map((entry) => (
         <Grid key={entry.label} style={{ gap: 8 }}>
-          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #526175)' }}>{entry.label}</Box>
           <DemoToolbar variant={entry.variant as any} tone={entry.tone as any} size="md" radius={12} elevation="low" wrap />
         </Grid>
       ))}
@@ -125,7 +125,7 @@ export const SizeGallery: Story = {
         { label: 'Large', size: 'lg', radius: 16 },
       ].map((entry) => (
         <Grid key={entry.label} style={{ gap: 8 }}>
-          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #526175)' }}>{entry.label}</Box>
           <DemoToolbar variant="surface" tone="info" size={entry.size as any} radius={entry.radius} elevation="low" wrap />
         </Grid>
       ))}
@@ -169,19 +169,19 @@ export const EditorialWorkflow: Story = {
               <Button variant={block === 'quote' ? 'primary' : 'secondary'} onClick={() => setBlock('quote')}>
                 "
               </Button>
-              <Button variant={block === 'code' ? 'primary' : 'secondary'} onClick={() => setBlock('code')}>
+              <Button variant={block === 'code' ? 'primary' : 'secondary'} onClick={() => setBlock('code')} ariaLabel="Code block">
                 <CodeIcon size={14} />
               </Button>
 
               <span data-separator aria-hidden="true" />
 
-              <Button variant={align === 'left' ? 'primary' : 'secondary'} onClick={() => setAlign('left')}>
+              <Button variant={align === 'left' ? 'primary' : 'secondary'} onClick={() => setAlign('left')} ariaLabel="Align left">
                 <AlignLeftIcon size={14} />
               </Button>
-              <Button variant={align === 'center' ? 'primary' : 'secondary'} onClick={() => setAlign('center')}>
+              <Button variant={align === 'center' ? 'primary' : 'secondary'} onClick={() => setAlign('center')} ariaLabel="Align center">
                 <AlignCenterIcon size={14} />
               </Button>
-              <Button variant={align === 'right' ? 'primary' : 'secondary'} onClick={() => setAlign('right')}>
+              <Button variant={align === 'right' ? 'primary' : 'secondary'} onClick={() => setAlign('right')} ariaLabel="Align right">
                 <AlignRightIcon size={14} />
               </Button>
 
@@ -221,7 +221,7 @@ export const EditorialWorkflow: Story = {
                 padding: 12,
                 background: 'var(--ui-color-surface, #fff)',
                 fontSize: 13,
-                color: 'var(--ui-color-muted, #64748b)',
+                color: 'var(--ui-color-muted, #526175)',
               }}
             >
               Block: <strong>{block}</strong> | Alignment: <strong>{align}</strong> | State: <strong>{state}</strong>

@@ -55,7 +55,7 @@ Playground.args = {
 export const DesignModes = () => (
   <Grid style={{ display: 'grid', gap: 14, gridTemplateColumns: 'repeat(3, minmax(200px, 1fr))' }}>
     <Box style={{ display: 'grid', gap: 10, border: '1px solid #e2e8f0', borderRadius: 12, padding: 12, background: '#f8fafc' }}>
-      <Box style={{ fontSize: 12, color: '#64748b' }}>MUI-like</Box>
+      <Box style={{ fontSize: 12, color: '#526175' }}>MUI-like</Box>
       <Flex style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
         <Icon name="check" variant="surface" tone="brand" size="22" />
         <Icon name="x" variant="surface" tone="danger" size="22" />
@@ -63,7 +63,7 @@ export const DesignModes = () => (
     </Box>
 
     <Box style={{ display: 'grid', gap: 10, border: '1px solid #e2e8f0', borderRadius: 12, padding: 12, background: 'linear-gradient(145deg, #f8fafc, #eef2ff)' }}>
-      <Box style={{ fontSize: 12, color: '#64748b' }}>Chakra-like</Box>
+      <Box style={{ fontSize: 12, color: '#526175' }}>Chakra-like</Box>
       <Flex style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
         <Icon name="check" variant="soft" tone="success" shape="soft" size="22" />
         <Icon name="x" variant="soft" tone="warning" shape="soft" size="22" />

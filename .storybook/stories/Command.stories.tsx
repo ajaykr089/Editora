@@ -30,7 +30,7 @@ const commandItem: React.CSSProperties = {
 
 const commandMeta: React.CSSProperties = {
   fontSize: 11,
-  color: 'var(--ui-color-muted, #64748b)'
+  color: 'var(--ui-color-muted, #526175)'
 };
 
 export default {
@@ -114,10 +114,10 @@ export const WorkspaceActions = () => {
 
           <Box style={{ ...showcasePanelStyle, maxWidth: 680, marginInline: 'auto' }}>
             <strong style={{ color: '#0f172a' }}>Command state</strong>
-            <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+            <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
               Query: {query || 'empty'}
             </Box>
-            <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+            <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
               Last selected: {lastSelected}
             </Box>
             <p style={showcaseCaptionStyle}>The surrounding panel gives a stable place to inspect match and selection behavior during refinement.</p>

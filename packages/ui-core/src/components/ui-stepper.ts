@@ -26,7 +26,7 @@ const style = `
     --ui-stepper-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 95%, transparent);
     --ui-stepper-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
     --ui-stepper-text: var(--ui-color-text, #0f172a);
-    --ui-stepper-muted: var(--ui-color-muted, #64748b);
+    --ui-stepper-muted: var(--ui-color-muted, #526175);
     --ui-stepper-accent: var(--ui-color-primary, #2563eb);
     --ui-stepper-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-stepper-indicator-duration: 1.6s;

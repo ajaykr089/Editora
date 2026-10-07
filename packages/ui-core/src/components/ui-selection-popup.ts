@@ -143,11 +143,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-selection-popup-accent: var(--ui-color-success, #16a34a);
+    --ui-selection-popup-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-selection-popup-accent: var(--ui-color-warning, #d97706);
+    --ui-selection-popup-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {

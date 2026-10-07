@@ -394,7 +394,7 @@ const SidebarSearchInput: React.FC<SidebarSearchInputProps> = ({
       borderRadius: 16,
       border: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent)',
       background: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 4%, var(--color-panel-solid, var(--ui-color-surface, #ffffff)))',
-      color: 'var(--ui-color-muted, #64748b)',
+      color: 'var(--ui-color-muted, #526175)',
       boxSizing: 'border-box',
       ...style
     }}

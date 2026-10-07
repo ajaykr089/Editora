@@ -58,7 +58,7 @@ export const VerificationCode = (args: any) => {
             placeholderChar="•"
           />
           <div style={{ ...showcasePanelStyle, gap: 8 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
               Input state
             </div>
             <div style={{ fontSize: 14, color: '#0f172a' }}>

@@ -38,7 +38,7 @@ export const Playground: Story = {
           </Select>
         </Grid>
       )}
-      footer={<Box style={{ color: '#64748b', fontSize: 12 }}>Reporting window: last 30 days</Box>}
+      footer={<Box style={{ color: '#526175', fontSize: 12 }}>Reporting window: last 30 days</Box>}
     />
   ),
 };

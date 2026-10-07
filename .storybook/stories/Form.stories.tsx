@@ -124,7 +124,7 @@ export const ValidationFlow = () => {
 
         <Box style={{ marginTop: 12 }}>
           <Button onClick={() => submit()}>Run validation</Button>
-          <Box style={{ marginTop: 8, fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>State: {state}</Box>
+          <Box style={{ marginTop: 8, fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #526175)' }}>State: {state}</Box>
         </Box>
       </Form>
     </Box>
@@ -196,10 +196,10 @@ export const AdvancedAdminFlow = () => {
     <Box style={{ maxWidth: 760, display: 'grid', gap: 12 }}>
       <Progress value={progress} max={100} shape="round" />
       <Flex style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #64748b)' }}>
+        <Box style={{ fontSize: 'var(--ui-font-size-md, 14px)', color: 'var(--ui-color-muted, #526175)' }}>
           Step {step} of 3 • Dirty: <strong>{String(dirty)}</strong> • Autosave: <strong>{autosaveAt}</strong>
         </Box>
-        <Box style={{ fontSize: 'var(--ui-font-size-sm, 12px)', color: 'var(--ui-color-muted, #64748b)' }}>Unsaved-change guard is enabled on this story.</Box>
+        <Box style={{ fontSize: 'var(--ui-font-size-sm, 12px)', color: 'var(--ui-color-muted, #526175)' }}>Unsaved-change guard is enabled on this story.</Box>
       </Flex>
 
       <Form

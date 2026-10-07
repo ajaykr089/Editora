@@ -2,7 +2,7 @@ import { ElementBase } from '../ElementBase';
 
 const style = `
   :host {
-    --ui-description-color: var(--ui-color-muted, var(--ui-muted, #64748b));
+    --ui-description-color: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-description-size: 12px;
     --ui-description-weight: 500;
     --ui-description-line-height: 1.45;
@@ -34,8 +34,8 @@ const style = `
   }
 
   :host([tone="brand"]) { --ui-description-color: var(--ui-color-primary, #2563eb); }
-  :host([tone="success"]) { --ui-description-color: var(--ui-color-success, #16a34a); }
-  :host([tone="warning"]) { --ui-description-color: var(--ui-color-warning, #d97706); }
+  :host([tone="success"]) { --ui-description-color: var(--ui-color-success, #15803d); }
+  :host([tone="warning"]) { --ui-description-color: var(--ui-color-warning, #b45309); }
   :host([tone="danger"]) { --ui-description-color: var(--ui-color-danger, #dc2626); }
 
   :host([size="sm"]),

@@ -2,7 +2,7 @@ import React from 'react';
 import type { Meta } from '@storybook/react';
 import { Button } from '@editora/ui-react';
 import type { ThemeTokens } from '@editora/ui-core';
-import { createThemeTokens } from '@editora/ui-core';
+import { createThemeTokens, readableForeground } from '@editora/ui-core';
 import { ArrowRightIcon } from '@editora/react-icons';
 import { ShowcasePage, ShowcaseSection, showcasePanelStyle } from './storybook-showcase';
 
@@ -41,7 +41,7 @@ function buttonThemeDeclarations(tokens: ThemeTokens) {
     `--ui-color-surface: ${tokens.colors.surface || tokens.colors.background || '#ffffff'};`,
     `--ui-color-surface-alt: ${tokens.colors.surfaceAlt || tokens.colors.surface || '#f8fafc'};`,
     `--ui-color-text: ${tokens.colors.text || '#111827'};`,
-    `--ui-color-muted: ${tokens.colors.muted || '#64748b'};`,
+    `--ui-color-muted: ${tokens.colors.muted || '#526175'};`,
     `--ui-color-border: ${tokens.colors.border || 'rgba(15,23,42,0.16)'};`,
     `--ui-color-focus-ring: ${tokens.colors.focusRing || tokens.colors.primary};`,
     `--color-panel-solid: ${tokens.surfaces?.panelSolid || tokens.colors.surface || '#ffffff'};`,
@@ -64,7 +64,7 @@ function makeStoryPalette(label: string, light: string, dark: string, solidText 
     colors: {
       primary: light,
       primaryHover: dark,
-      foregroundOnPrimary: solidText,
+      foregroundOnPrimary: readableForeground(light, solidText),
       focusRing: light
     }
   });
@@ -325,7 +325,7 @@ function ThemeMatrixStory() {
           <div style={cellStyle(false)}>{renderRecipeButton(recipe, 'gray-light')}</div>
           <div style={cellStyle(true)}>{renderRecipeButton(recipe, 'gray-dark')}</div>
           <div style={cellStyle(false)}>{renderRecipeButton(recipe, 'accent-light', { disabled: true })}</div>
-          <div style={cellStyle(false)}>{renderRecipeButton(recipe, 'accent-light', { loading: true, ariaLabel: `${recipe.label} loading` })}</div>
+          <div style={cellStyle(false)}>{renderRecipeButton(recipe, 'accent-light', { loading: true, ariaLabel: `Next loading, ${recipe.label}` })}</div>
         </div>
       ))}
     </div>
@@ -372,7 +372,7 @@ function ThemeMatrixStory() {
               lineHeight: '18px',
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
-              color: '#64748b',
+              color: '#526175',
               fontWeight: 700
             }}
           >
@@ -429,7 +429,7 @@ function ThemeMatrixStory() {
               </button>
             ))}
           </div>
-          <div role="tabpanel">{activePanel}</div>
+          <div role="tabpanel" aria-label="Button matrix">{activePanel}</div>
         </div>
       </ShowcaseSection>
     </ShowcasePage>

@@ -60,7 +60,7 @@ export const VariantGallery: Story = {
         { label: 'Solid', variant: 'solid', tone: 'success' },
       ].map((entry) => (
         <Grid key={entry.label} style={{ gap: 8 }}>
-          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #526175)' }}>{entry.label}</Box>
           <AspectRatio
             ratio="16/9"
             showRatioBadge
@@ -86,7 +86,7 @@ export const SizeGallery: Story = {
         { label: 'Large', size: 'lg', radius: 16 },
       ].map((entry) => (
         <Grid key={entry.label} style={{ gap: 8 }}>
-          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #526175)' }}>{entry.label}</Box>
           <AspectRatio
             ratio="4/3"
             size={entry.size as 'sm' | 'md' | 'lg'}
@@ -114,7 +114,7 @@ export const MediaOpsWorkflow: Story = {
         <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
           <Box>
             <Box style={{ fontWeight: 700, fontSize: 18 }}>Media composition surface</Box>
-            <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
+            <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13, marginTop: 4 }}>
               Production preview frames for campaign assets, dashboard thumbnails, and review queues.
             </Box>
           </Box>

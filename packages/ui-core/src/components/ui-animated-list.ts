@@ -88,7 +88,7 @@ const style = `
       0 1px 2px rgba(15, 23, 42, 0.04),
       0 10px 18px rgba(15, 23, 42, 0.06);
     --ui-animated-list-item-color: inherit;
-    --ui-animated-list-item-muted: var(--ui-color-muted, #64748b);
+    --ui-animated-list-item-muted: var(--ui-color-muted, #526175);
     --ui-animated-list-item-backdrop: none;
 
     display: block;
@@ -174,7 +174,7 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-animated-list-accent: #64748b;
+    --ui-animated-list-accent: #526175;
   }
 
   :host([tone="info"]) {
@@ -182,11 +182,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-animated-list-accent: var(--ui-color-success, #16a34a);
+    --ui-animated-list-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-animated-list-accent: var(--ui-color-warning, #d97706);
+    --ui-animated-list-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {

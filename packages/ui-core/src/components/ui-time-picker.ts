@@ -42,7 +42,7 @@ const style = `
     --ui-dp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-dp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-dp-text: var(--ui-color-text, #0f172a);
-    --ui-dp-muted: var(--ui-color-muted, #64748b);
+    --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
     --ui-dp-radius: 12px;
     --ui-dp-field-error: var(--ui-color-danger, #dc2626);
@@ -173,7 +173,7 @@ const overlayStyle = `
     --ui-dp-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-dp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-dp-text: var(--ui-color-text, #0f172a);
-    --ui-dp-muted: var(--ui-color-muted, #64748b);
+    --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
     --ui-dp-radius: 12px;
   }
@@ -211,7 +211,7 @@ const overlayStyle = `
   .pickers[data-seconds="false"][data-ampm="false"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pickers[data-seconds="false"][data-ampm="true"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .picker { display: grid; gap: 4px; }
-  .picker label { font-size: 11px; color: var(--ui-dp-muted, #64748b); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .picker label { font-size: 11px; color: var(--ui-dp-muted, #526175); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
   .picker select {
     min-block-size: 34px;
     border: 1px solid color-mix(in srgb, var(--ui-dp-border, #cbd5e1) 84%, transparent);

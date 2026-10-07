@@ -489,9 +489,15 @@ const CarouselRoot = React.forwardRef<HTMLDivElement, CarouselProps>(function Ca
     padding: 0,
   };
 
+  // A text control shows its own words ("Back"), and the name has to contain what is shown.
+  const controlName = (shown: string, base: string) =>
+    controlsVariant === 'arrow' || base.toLowerCase().includes(shown.trim().toLowerCase())
+      ? base
+      : `${shown.trim()}, ${base.toLowerCase()}`;
+
   const previousControl = (
     <Button
-      ariaLabel="Previous slide"
+      ariaLabel={controlName(previousLabel, 'Previous slide')}
       disabled={previousDisabled}
       recipe="outline"
       size="sm"
@@ -508,7 +514,7 @@ const CarouselRoot = React.forwardRef<HTMLDivElement, CarouselProps>(function Ca
 
   const nextControl = (
     <Button
-      ariaLabel="Next slide"
+      ariaLabel={controlName(nextLabel, 'Next slide')}
       disabled={nextDisabled}
       recipe="outline"
       size="sm"
@@ -636,7 +642,7 @@ const CarouselRoot = React.forwardRef<HTMLDivElement, CarouselProps>(function Ca
             display: 'flex',
             flexDirection: direction === 'vertical' ? 'column' : 'row',
             flexWrap: direction === 'vertical' ? 'nowrap' : 'wrap',
-            gap: 8,
+            gap: 0,
             gridColumn: direction === 'vertical' ? '2 / 3' : undefined,
             justifyContent: 'center',
             justifySelf: direction === 'vertical' ? 'start' : undefined,
@@ -645,6 +651,11 @@ const CarouselRoot = React.forwardRef<HTMLDivElement, CarouselProps>(function Ca
           {slides.map((child, slideIndex) => {
             const slideLabel = resolveSlideLabel(child, slideIndex);
             const indicatorMetrics = getIndicatorMetrics(indicatorsVariant, slideIndex === activeIndex, direction);
+            // Grow the hit area to at least 24x24 CSS px (WCAG 2.5.8): padding adds the target and the
+            // background is clipped to the dot. Neighbouring targets must not overlap, so the padding is
+            // also what spaces the dots (no gap, no negative margin).
+            const padInline = Math.max(0, Math.ceil((24 - indicatorMetrics.inlineSize) / 2));
+            const padBlock = Math.max(0, Math.ceil((24 - indicatorMetrics.blockSize) / 2));
             return (
               <button
                 key={slideIndex}
@@ -654,12 +665,15 @@ const CarouselRoot = React.forwardRef<HTMLDivElement, CarouselProps>(function Ca
                 disabled={controlsDisabled}
                 style={{
                   background: slideIndex === activeIndex ? 'var(--ui-color-info, #2563eb)' : 'rgba(148, 163, 184, 0.4)',
+                  backgroundClip: 'content-box',
                   border: 'none',
                   borderRadius: indicatorMetrics.borderRadius,
+                  boxSizing: 'content-box',
                   cursor: controlsDisabled ? 'default' : 'pointer',
                   height: indicatorMetrics.blockSize,
                   inlineSize: indicatorMetrics.inlineSize,
-                  padding: 0,
+                  margin: 0,
+                  padding: `${padBlock}px ${padInline}px`,
                   transition: 'all 180ms ease',
                   width: indicatorMetrics.inlineSize,
                 }}

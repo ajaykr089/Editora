@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlName, syncControlDescription } from '../primitives/control-name';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import './ui-calendar';
 import { resolveDateTimeTranslations } from './date-time-i18n';
@@ -72,9 +73,9 @@ const style = `
     );
     --ui-drtp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
     --ui-dp-text: var(--ui-color-text, #0f172a);
-    --ui-dp-muted: var(--ui-color-muted, #64748b);
+    --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-drtp-accent: var(--ui-color-primary, #2563eb);
-    --ui-drtp-success: var(--ui-color-success, #16a34a);
+    --ui-drtp-success: var(--ui-color-success, #15803d);
     --ui-drtp-error: var(--ui-color-danger, #dc2626);
     --ui-drtp-radius: 12px;
     --ui-drtp-panel-radius: 14px;
@@ -325,7 +326,7 @@ const overlayStyle = `
     );
     --ui-drtp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
     --ui-dp-text: var(--ui-color-text, #0f172a);
-    --ui-dp-muted: var(--ui-color-muted, #64748b);
+    --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-drtp-accent: var(--ui-color-primary, #2563eb);
     --ui-drtp-panel-radius: 14px;
     --ui-drtp-shadow: none;
@@ -384,7 +385,7 @@ const overlayStyle = `
   .head-meta {
     margin: 0;
     font: 500 12px/1.3 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    color: var(--ui-dp-muted, #64748b);
+    color: var(--ui-dp-muted, #526175);
   }
   .presets {
     display: flex;
@@ -399,7 +400,7 @@ const overlayStyle = `
     padding: 0 10px;
     min-block-size: 28px;
     font: 600 11px/1 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    color: var(--ui-dp-muted, #64748b);
+    color: var(--ui-dp-muted, #526175);
     background: color-mix(in srgb, var(--ui-drtp-bg, #fff) 96%, transparent);
     cursor: pointer;
   }
@@ -437,7 +438,7 @@ const overlayStyle = `
   }
   .time-col-label {
     font-size: 10px;
-    color: var(--ui-dp-muted, #64748b);
+    color: var(--ui-dp-muted, #526175);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .06em;
@@ -620,6 +621,9 @@ function defaultPending(value: RangeDateTimeValue): PendingState {
 export class UIDateRangeTimePicker extends ElementBase {
   static get observedAttributes() {
     return [
+      'aria-label',
+      'aria-description',
+      'aria-describedby',
       'open',
       'default-open',
       'value',
@@ -1549,8 +1553,7 @@ export class UIDateRangeTimePicker extends ElementBase {
       inputEl.setAttribute('aria-expanded', isInline ? 'false' : String(this._open));
       inputEl.setAttribute('aria-controls', this._panelId);
       inputEl.setAttribute('aria-invalid', error ? 'true' : 'false');
-      if (label) inputEl.setAttribute('aria-labelledby', this._labelId);
-      else inputEl.removeAttribute('aria-labelledby');
+      syncControlName(inputEl, this, label ? this._labelId : null, inputEl.placeholder);
     }
     if (clearBtn) {
       clearBtn.hidden = !(this._clearable() && hasValue);
@@ -1578,8 +1581,7 @@ export class UIDateRangeTimePicker extends ElementBase {
       const describedBy: string[] = [];
       if (hint && hintEl && !hintEl.hidden) describedBy.push(this._hintId);
       if (error) describedBy.push(this._errorId);
-      if (describedBy.length) inputEl.setAttribute('aria-describedby', describedBy.join(' '));
-      else inputEl.removeAttribute('aria-describedby');
+      syncControlDescription(inputEl, this, this._uid, describedBy);
     }
     if (hiddenInput) {
       hiddenInput.disabled = !name;

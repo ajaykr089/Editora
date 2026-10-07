@@ -13,6 +13,7 @@ export const Explorer = () => {
   return (
     <Grid columns="320px 1fr" gap="16px" style={{ minHeight: 420 }}>
       <Tree
+        aria-label="Project files"
         value={value}
         indentSize="14px"
         onSelect={(detail) => setValue(detail.value)}
@@ -44,8 +45,8 @@ export const Explorer = () => {
         }}
       >
         <strong>Selected node</strong>
-        <Box style={{ marginTop: 8, color: 'var(--ui-color-muted, #64748b)' }}>{value}</Box>
-        <Box style={{ marginTop: 12, color: 'var(--ui-color-muted, #64748b)' }}>
+        <Box style={{ marginTop: 8, color: 'var(--ui-color-muted, #526175)' }}>{value}</Box>
+        <Box style={{ marginTop: 12, color: 'var(--ui-color-muted, #526175)' }}>
           Production-style explorer navigation with nested groups, roving focus, expand/collapse arrows, and typeahead.
         </Box>
       </Box>

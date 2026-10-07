@@ -63,7 +63,7 @@ export const HospitalOrSchoolModule = () => (
       ]}
     />
 
-    <Flex style={{ fontSize: 'var(--ui-font-size-sm, 12px)', color: 'var(--ui-color-muted, #64748b)' }}>
+    <Flex style={{ fontSize: 'var(--ui-font-size-sm, 12px)', color: 'var(--ui-color-muted, #526175)' }}>
       Reporting primitives now cover charts, timeline history, calendar planning, and Gantt-like execution tracking.
     </Flex>
   </Grid>

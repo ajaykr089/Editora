@@ -6,8 +6,8 @@ const style = `
     --ui-fieldset-radius: 16px;
     --ui-fieldset-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-fieldset-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-fieldset-muted: var(--ui-color-muted, var(--ui-muted, #64748b));
-    --ui-fieldset-error: var(--ui-color-danger, var(--ui-error, #dc2626));
+    --ui-fieldset-muted: var(--ui-color-muted, var(--ui-muted, #526175));
+    --ui-fieldset-error: var(--ui-color-danger, var(--ui-error, #c81e1e));
     --ui-fieldset-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 68%, transparent);
     --ui-fieldset-border: 1px solid var(--ui-fieldset-border-color);
     --ui-fieldset-shadow: none;
@@ -133,11 +133,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-fieldset-border-color: color-mix(in srgb, var(--ui-color-success, #16a34a) 40%, transparent);
+    --ui-fieldset-border-color: color-mix(in srgb, var(--ui-color-success, #15803d) 40%, transparent);
   }
 
   :host([tone="warning"]) {
-    --ui-fieldset-border-color: color-mix(in srgb, var(--ui-color-warning, #d97706) 40%, transparent);
+    --ui-fieldset-border-color: color-mix(in srgb, var(--ui-color-warning, #b45309) 40%, transparent);
   }
 
   :host([tone="danger"]),

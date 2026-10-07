@@ -10,7 +10,7 @@ const style = `
     --ui-slider-thumb-size: 18px;
     --ui-slider-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-slider-text: var(--ui-color-text, #0f172a);
-    --ui-slider-muted: var(--ui-color-muted, #64748b);
+    --ui-slider-muted: var(--ui-color-muted, #526175);
     --ui-slider-track: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-slider-fill: var(--ui-color-primary, #2563eb);
     --ui-slider-focus: var(--ui-color-focus-ring, #2563eb);
@@ -306,11 +306,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-slider-fill: var(--ui-color-success, #16a34a);
+    --ui-slider-fill: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-slider-fill: var(--ui-color-warning, #d97706);
+    --ui-slider-fill: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {

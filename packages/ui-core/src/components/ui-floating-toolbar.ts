@@ -35,7 +35,7 @@ const style = `
 
     --ui-floating-toolbar-bg: var(--ui-color-surface, #ffffff);
     --ui-floating-toolbar-color: var(--ui-color-text, #0f172a);
-    --ui-floating-toolbar-muted: var(--ui-color-muted, #64748b);
+    --ui-floating-toolbar-muted: var(--ui-color-muted, #526175);
     --ui-floating-toolbar-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-floating-toolbar-border: 1px solid var(--ui-floating-toolbar-border-color);
     --ui-floating-toolbar-radius: 12px;
@@ -172,11 +172,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-floating-toolbar-accent: var(--ui-color-success, #16a34a);
+    --ui-floating-toolbar-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-floating-toolbar-accent: var(--ui-color-warning, #d97706);
+    --ui-floating-toolbar-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
@@ -712,14 +712,14 @@ export class UIFloatingToolbar extends ElementBase {
   protected override render(): void {
     this.setContent(`
       <style>${style}</style>
-      <section class="panel" part="panel" role="toolbar" aria-orientation="horizontal" tabindex="-1">
+      <div class="panel" part="panel" role="toolbar" aria-orientation="horizontal" tabindex="-1">
         <div class="row row-toolbar" part="row-toolbar">
           <slot name="toolbar"></slot>
         </div>
         <div class="row row-default" part="row-default">
           <slot></slot>
         </div>
-      </section>
+      </div>
     `);
 
     this._panel = this.root.querySelector('.panel') as HTMLElement | null;

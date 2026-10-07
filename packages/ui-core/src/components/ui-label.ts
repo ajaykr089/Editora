@@ -3,7 +3,7 @@ import { ElementBase } from '../ElementBase';
 const style = `
   :host {
     --ui-label-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-label-muted: var(--ui-color-muted, var(--ui-muted, #64748b));
+    --ui-label-muted: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-label-error: var(--ui-color-danger, var(--ui-error, #dc2626));
     --ui-label-bg: transparent;
     --ui-label-border: 1px solid transparent;
@@ -125,8 +125,8 @@ const style = `
   }
 
   :host([tone="brand"]) { --ui-label-color: var(--ui-color-primary, var(--ui-primary, #2563eb)); }
-  :host([tone="success"]) { --ui-label-color: var(--ui-color-success, var(--ui-success, #16a34a)); }
-  :host([tone="warning"]) { --ui-label-color: var(--ui-color-warning, var(--ui-warning, #d97706)); }
+  :host([tone="success"]) { --ui-label-color: var(--ui-color-success, var(--ui-success, #15803d)); }
+  :host([tone="warning"]) { --ui-label-color: var(--ui-color-warning, var(--ui-warning, #b45309)); }
   :host([tone="danger"]) { --ui-label-color: var(--ui-color-danger, var(--ui-error, #dc2626)); }
 
   :host([shape="square"]) { --ui-label-radius: 4px; }

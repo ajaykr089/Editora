@@ -10,7 +10,7 @@ const style = `
     --ui-tree-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 98%, transparent);
     --ui-tree-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-tree-text: var(--ui-color-text, #0f172a);
-    --ui-tree-muted: var(--ui-color-muted, #64748b);
+    --ui-tree-muted: var(--ui-color-muted, #526175);
     display: block;
     min-inline-size: 0;
     color-scheme: light dark;
@@ -51,7 +51,7 @@ type TreeDomRecord = {
 
 export class UITree extends ElementBase {
   static get observedAttributes() {
-    return ['value', 'indent-size'];
+    return ['value', 'indent-size', 'aria-label', 'aria-labelledby'];
   }
 
   private _observer: MutationObserver | null = null;
@@ -320,13 +320,21 @@ export class UITree extends ElementBase {
   }
 
   protected override shouldRenderOnAttributeChange(name: string): boolean {
-    return name === 'indent-size';
+    return name === 'indent-size' || name === 'aria-label' || name === 'aria-labelledby';
   }
 
   protected override render(): void {
+    // aria-label on the host cannot reach the role="tree" element in the shadow root, so copy it.
+    // (aria-labelledby is copied too, for a label that sits in the same tree as the shadow root.)
+    const ariaLabel = (this.getAttribute('aria-label') || '').trim();
+    const ariaLabelledBy = (this.getAttribute('aria-labelledby') || '').trim();
+    const escapeAttr = (value: string) => value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    const treeNameAttrs =
+      (ariaLabel ? ` aria-label="${escapeAttr(ariaLabel)}"` : '') +
+      (ariaLabelledBy ? ` aria-labelledby="${escapeAttr(ariaLabelledBy)}"` : '');
     this.setContent(`
       <style>${style}</style>
-      <div class="tree" part="tree" role="tree">
+      <div class="tree" part="tree" role="tree"${treeNameAttrs}>
         <slot></slot>
       </div>
     `);

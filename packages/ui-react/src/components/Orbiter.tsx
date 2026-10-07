@@ -212,6 +212,8 @@ const OrbiterItem = React.forwardRef<HTMLElement, OrbiterItemProps>(function Orb
   };
 
   if (interactive) itemProps['data-ui-orbiter-clickable'] = '';
+  // A plain container cannot carry a name; a labelled logo or icon is an image with a text alternative.
+  else if (!itemProps.role && (itemProps['aria-label'] || itemProps['aria-labelledby'])) itemProps.role = 'img';
   if (href) itemProps.href = href;
   if (target) itemProps.target = target;
   if (rel) itemProps.rel = rel;

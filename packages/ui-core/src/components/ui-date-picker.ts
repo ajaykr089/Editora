@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlName, syncControlDescription } from '../primitives/control-name';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import { compareISO } from './ui-calendar';
 import { resolveDateTimeTranslations } from './date-time-i18n';
@@ -68,7 +69,7 @@ const style = `
     );
     --ui-dp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
     --ui-dp-text: var(--ui-color-text, #0f172a);
-    --ui-dp-muted: var(--ui-color-muted, #64748b);
+    --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
     --ui-dp-success: var(--ui-color-success, #15803d);
     --ui-dp-radius: 12px;
@@ -441,7 +442,7 @@ const overlayStyle = `
     );
     --ui-dp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
     --ui-dp-text: var(--ui-color-text, #0f172a);
-    --ui-dp-muted: var(--ui-color-muted, #64748b);
+    --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
     --ui-dp-success: var(--ui-color-success, #15803d);
     --ui-dp-radius: 12px;
@@ -609,6 +610,9 @@ function escapeHtml(value: string): string {
 export class UIDatePicker extends ElementBase {
   static get observedAttributes() {
     return [
+      'aria-label',
+      'aria-description',
+      'aria-describedby',
       'open',
       'default-open',
       'value',
@@ -1577,8 +1581,7 @@ export class UIDatePicker extends ElementBase {
       inputEl.setAttribute('aria-expanded', isInline ? 'false' : String(this._open));
       inputEl.setAttribute('aria-controls', this._panelId);
       inputEl.setAttribute('aria-invalid', error ? 'true' : 'false');
-      if (label) inputEl.setAttribute('aria-labelledby', this._labelId);
-      else inputEl.removeAttribute('aria-labelledby');
+      syncControlName(inputEl, this, label ? this._labelId : null, placeholder);
     }
     if (clearBtn) {
       clearBtn.hidden = !(this._clearable() && hasValue);
@@ -1606,8 +1609,7 @@ export class UIDatePicker extends ElementBase {
       const describedBy: string[] = [];
       if (hint && hintEl && !hintEl.hidden) describedBy.push(this._hintId);
       if (error) describedBy.push(this._errorId);
-      if (describedBy.length) inputEl.setAttribute('aria-describedby', describedBy.join(' '));
-      else inputEl.removeAttribute('aria-describedby');
+      syncControlDescription(inputEl, this, this._uid, describedBy);
     }
     if (hiddenInput) {
       hiddenInput.disabled = !name;

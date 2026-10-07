@@ -6,7 +6,7 @@ const style = `
     --ui-inline-edit-border: 1px dashed transparent;
     --ui-inline-edit-radius: 12px;
     --ui-inline-edit-text: var(--ui-color-text, #0f172a);
-    --ui-inline-edit-muted: var(--ui-color-muted, #64748b);
+    --ui-inline-edit-muted: var(--ui-color-muted, #526175);
     --ui-inline-edit-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-inline-edit-surface: var(--ui-color-surface, #ffffff);
     display: block;

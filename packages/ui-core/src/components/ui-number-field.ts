@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlName, syncControlDescription } from '../primitives/control-name';
 
 const style = `
   :host {
@@ -13,7 +14,7 @@ const style = `
     --ui-number-field-width: 100%;
     --ui-number-field-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-number-field-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-number-field-muted: var(--ui-color-muted, var(--ui-muted, #64748b));
+    --ui-number-field-muted: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-number-field-focus: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     --ui-number-field-danger: var(--ui-color-danger, var(--ui-error, #dc2626));
     --ui-number-field-shadow: none;
@@ -150,13 +151,15 @@ const style = `
     color: var(--ui-number-field-placeholder);
   }
 
+  /* Side by side, not stacked: stacked, each button was about 20px tall (under the 24px target size of
+     WCAG 2.5.8). Each one is now at least 24px wide and as tall as the field. */
   .steppers {
     flex: 0 0 auto;
     display: grid;
-    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     align-self: stretch;
     align-items: stretch;
-    inline-size: 28px;
+    inline-size: 56px;
     min-block-size: calc(var(--ui-number-field-min-height) - 6px);
     margin-inline-start: auto;
     border-inline-start: 1px solid color-mix(in srgb, var(--ui-number-field-border-color) 82%, transparent);
@@ -223,10 +226,6 @@ const style = `
     display: block;
   }
 
-  .stepper-slot:last-child .stepper-icon {
-    transform: translateY(0.5px);
-  }
-
   .footer {
     min-inline-size: 0;
     display: flex;
@@ -265,7 +264,7 @@ const style = `
   }
 
   :host([size="sm"]) .steppers {
-    inline-size: 24px;
+    inline-size: 48px;
   }
 
   :host([size="sm"]) .stepper-icon {
@@ -280,7 +279,7 @@ const style = `
   }
 
   :host([size="lg"]) .steppers {
-    inline-size: 32px;
+    inline-size: 64px;
   }
 
   :host([size="lg"]) .stepper-icon {
@@ -428,6 +427,9 @@ export class UINumberField extends ElementBase {
       'autocomplete',
       'inputmode',
       'label',
+      'aria-label',
+      'aria-description',
+      'aria-describedby',
       'description',
       'data-error',
       'size',
@@ -506,7 +508,10 @@ export class UINumberField extends ElementBase {
       name === 'inputmode' ||
       name === 'size' ||
       name === 'variant' ||
-      name === 'invalid'
+      name === 'invalid' ||
+      name === 'aria-label' ||
+      name === 'aria-description' ||
+      name === 'aria-describedby'
     ) {
       this._syncControlAttrs();
       this._syncDisplayValue();
@@ -627,6 +632,9 @@ export class UINumberField extends ElementBase {
     if (!this._input) return;
     this._input.placeholder = this.getAttribute('placeholder') || '';
     this._input.disabled = readBooleanHostAttribute(this, 'disabled');
+    // The shell holds the prefix, suffix and steppers too: they are as inactive as the input.
+    if (this._input.disabled) this.root.querySelector('.shell')?.setAttribute('aria-disabled', 'true');
+    else this.root.querySelector('.shell')?.removeAttribute('aria-disabled');
     this._input.readOnly = this.hasAttribute('readonly');
     this._input.required = this.hasAttribute('required');
     this._input.name = this.getAttribute('name') || '';
@@ -660,14 +668,12 @@ export class UINumberField extends ElementBase {
     const hasDescription = Boolean((this.getAttribute('description') || '').trim()) || hasMeaningfulNodes(descriptionSlot);
     const hasError = Boolean((this.getAttribute('data-error') || '').trim()) || hasMeaningfulNodes(errorSlot);
 
-    if (hasLabel) this._input.setAttribute('aria-labelledby', `${this._uid}-label`);
-    else this._input.removeAttribute('aria-labelledby');
+    syncControlName(this._input, this, hasLabel ? `${this._uid}-label` : null);
 
     const describedBy: string[] = [];
     if (hasDescription) describedBy.push(`${this._uid}-description`);
     if (hasError) describedBy.push(`${this._uid}-error`);
-    if (describedBy.length) this._input.setAttribute('aria-describedby', describedBy.join(' '));
-    else this._input.removeAttribute('aria-describedby');
+    syncControlDescription(this._input, this, this._uid, describedBy);
 
     if (this.hasAttribute('required')) this._input.setAttribute('aria-required', 'true');
     else this._input.removeAttribute('aria-required');

@@ -49,6 +49,9 @@ export {
   baselineLightTokens,
   baselineDarkTokens,
   createThemeTokens,
+  deriveThemeSurfaces,
+  readableForeground,
+  deriveForegroundOnPrimary,
   withAccentPalette,
   registerThemeHost,
 } from './theme';

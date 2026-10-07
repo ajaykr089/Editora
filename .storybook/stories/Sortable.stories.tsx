@@ -297,7 +297,7 @@ function StatefulSortable({
       >
         <Box style={{ display: 'grid', gap: 8 }}>
           <strong>{title}</strong>
-          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
             {description}
           </Box>
         </Box>
@@ -350,7 +350,7 @@ function StatefulSortable({
           borderRadius: 18,
           background: 'color-mix(in srgb, var(--ui-color-surface, #ffffff) 92%, #eff6ff)',
           border: '1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent)',
-          color: 'var(--ui-color-muted, #64748b)',
+          color: 'var(--ui-color-muted, #526175)',
           fontSize: 13
         }}
       >
@@ -433,15 +433,14 @@ export const HandleVariations: Story = {
               <div style={{ display: 'grid', gap: 6, minWidth: 0 }}>
                 <strong style={{ fontSize: 14 }}>{item.label}</strong>
                 {item.description && (
-                  <div style={{ fontSize: 12, lineHeight: 1.6, color: '#64748b' }}>
+                  <div style={{ fontSize: 12, lineHeight: 1.6, color: '#526175' }}>
                     {item.description}
                   </div>
                 )}
               </div>
-              <button
-                type="button"
+              <span
                 data-story-drag-grip=""
-                aria-label={`Drag ${item.label}`}
+                aria-hidden="true"
                 style={{
                   display: 'inline-grid',
                   placeItems: 'center',
@@ -456,7 +455,7 @@ export const HandleVariations: Story = {
                 }}
               >
                 ::
-              </button>
+              </span>
             </div>
           </div>
         )}
@@ -809,7 +808,7 @@ export const CustomCards: Story = {
             </span>
           </div>
           {item.description && (
-            <div style={{ fontSize: 12, lineHeight: 1.6, color: '#64748b' }}>
+            <div style={{ fontSize: 12, lineHeight: 1.6, color: '#526175' }}>
               {item.description}
             </div>
           )}
@@ -833,7 +832,7 @@ export const CustomHandleSelector: Story = {
   render: () => (
     <StatefulSortable
       title="Custom handle selector"
-      description="Pass dragHandleSelector when your custom JSX includes its own drag affordance and you want that specific element, not the full item, to start drag."
+      description="Pass dragHandleSelector when your custom JSX includes its own drag affordance and you want that specific element, not the full item, to start drag. Keep that element non-focusable (a span, not a button): the item is the keyboard stop and moves with the arrow keys."
       showFilter={false}
       lists={flatListLists}
       items={flatListItems}
@@ -853,15 +852,14 @@ export const CustomHandleSelector: Story = {
             <div style={{ display: 'grid', gap: 6, minWidth: 0 }}>
               <strong style={{ fontSize: 14 }}>{item.label}</strong>
               {item.description && (
-                <div style={{ fontSize: 12, lineHeight: 1.6, color: '#64748b' }}>
+                <div style={{ fontSize: 12, lineHeight: 1.6, color: '#526175' }}>
                   {item.description}
                 </div>
               )}
             </div>
-            <button
-              type="button"
+            <span
               data-story-drag-grip=""
-              aria-label={`Drag ${item.label}`}
+              aria-hidden="true"
               style={{
                 display: 'inline-grid',
                 placeItems: 'center',
@@ -876,7 +874,7 @@ export const CustomHandleSelector: Story = {
               }}
             >
               ::
-            </button>
+            </span>
           </div>
         </div>
       )}
@@ -920,7 +918,7 @@ export const CustomLists: Story = {
               {context.itemCount} items
             </span>
           </div>
-          <div style={{ fontSize: 12, lineHeight: 1.6, color: '#64748b' }}>
+          <div style={{ fontSize: 12, lineHeight: 1.6, color: '#526175' }}>
             {list.description}
           </div>
         </div>
@@ -934,7 +932,7 @@ export const CustomLists: Story = {
             borderRadius: 16,
             background: '#f8fafc',
             border: '1px dashed #cbd5e1',
-            color: '#64748b',
+            color: '#526175',
             fontSize: 12,
           }}
         >

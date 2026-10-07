@@ -161,7 +161,7 @@ const style = `
     --ui-sortable-surface-muted: color-mix(in srgb, var(--ui-sortable-surface) 92%, #eff6ff);
     --ui-sortable-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
     --ui-sortable-text: var(--ui-color-text, #0f172a);
-    --ui-sortable-muted: var(--ui-color-muted, #64748b);
+    --ui-sortable-muted: var(--ui-color-muted, #526175);
     --ui-sortable-shadow:
       0 1px 3px rgba(15, 23, 42, 0.06),
       0 16px 34px rgba(15, 23, 42, 0.08);
@@ -1533,7 +1533,7 @@ export class UISortable extends ElementBase {
         data-dropzone-style="${dropzoneStyle}"
       >
         <div class="toolbar" part="toolbar">
-          <div class="helper">${escapeHtml(helper)}</div>
+          <div class="helper" id="ui-sortable-helper">${escapeHtml(helper)}</div>
           <div class="helper selection-summary">
             <span class="selection-pill" part="selection-count">${selectionCount}</span>
             <span class="selection-text">${selectionCount === 1 ? 'item selected' : 'items selected'}</span>
@@ -1572,7 +1572,7 @@ export class UISortable extends ElementBase {
                     ${helperText ? `<div class="list-helper">${escapeHtml(helperText)}</div>` : ''}
                   </div>
                 </header>
-                <div class="items" role="listbox" aria-multiselectable="true" aria-label="${escapeHtml(list.label)}">
+                <div class="items" role="${records.length ? 'listbox' : 'group'}" ${records.length ? 'aria-multiselectable="true"' : ''} aria-label="${escapeHtml(list.label)}" aria-describedby="ui-sortable-helper">
                   ${content || `<div class="list-custom-empty" part="list-custom-empty" data-list-empty-target="${escapeHtml(list.id)}"></div><div class="empty">${escapeHtml(list.emptyLabel)}</div>${this._renderDropzone({
                     listId: list.id,
                     parentId: null,
@@ -1960,7 +1960,6 @@ export class UISortable extends ElementBase {
       const el = this._findItemElement(id);
       if (!el) return;
       el.setAttribute('data-dragging', active ? 'true' : 'false');
-      el.setAttribute('aria-grabbed', active ? 'true' : 'false');
       if (active) {
         // Force layout so subsequent preview measurements see the post-drag transform state.
         el.getBoundingClientRect();
@@ -2218,7 +2217,7 @@ export class UISortable extends ElementBase {
 
     return `
       <div class="item-shell" data-item-shell="${itemId}">
-        <article
+        <div
           class="item${placeholder ? ' item-placeholder' : ''}"
           part="item"
           data-id="${itemId}"
@@ -2232,7 +2231,6 @@ export class UISortable extends ElementBase {
           role="${placeholder ? 'presentation' : 'option'}"
           aria-selected="${placeholder ? 'false' : selected}"
           aria-disabled="${disabled}"
-          aria-grabbed="${placeholder ? 'false' : dragging}"
           aria-hidden="${placeholder ? 'true' : 'false'}"
           tabindex="${placeholder ? '-1' : focusedId === item.id ? '0' : '-1'}"
         >
@@ -2247,16 +2245,16 @@ export class UISortable extends ElementBase {
             : `
               ${renderBuiltInHandle
                 ? `
-                  <button
+                  <span
                     class="handle"
                     part="handle"
-                    type="button"
+                    role="presentation"
+                    aria-hidden="true"
                     data-action="handle"
                     data-drag-trigger="handle"
                     data-id="${itemId}"
                     draggable="false"
                     ${handleDisabled ? 'disabled' : ''}
-                    aria-label="Drag ${escapeHtml(item.label)}"
                   >
                     <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
                       <circle cx="5" cy="4" r="1.25"></circle>
@@ -2266,7 +2264,7 @@ export class UISortable extends ElementBase {
                       <circle cx="5" cy="12" r="1.25"></circle>
                       <circle cx="11" cy="12" r="1.25"></circle>
                     </svg>
-                  </button>
+                  </span>
                 `
                 : ''}
               <div class="item-content" data-action="select" data-id="${itemId}">
@@ -2284,7 +2282,7 @@ export class UISortable extends ElementBase {
               </div>
             `
           }
-        </article>
+        </div>
         ${allowNesting && !placeholder
           ? this._renderDropzone({
             listId: item.listId,

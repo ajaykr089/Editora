@@ -118,11 +118,11 @@ function EnterpriseChartDashboard() {
         <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
           <div>
             <div style={{ fontWeight: 700, fontSize: 18 }}>Enterprise Care Analytics</div>
-            <div style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
+            <div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13, marginTop: 4 }}>
               Throughput, margin variance, and service allocation in one operational view.
             </div>
           </div>
-          <Flex align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>
+          <Flex align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #526175)', fontSize: 12 }}>
             <ActivityIcon size={14} />
             Real-time stream
           </Flex>

@@ -67,7 +67,7 @@ const shortcut: React.CSSProperties = {
   background: 'rgba(15, 23, 42, 0.04)',
   fontSize: 12,
   fontFamily: 'IBM Plex Mono, SFMono-Regular, monospace',
-  color: '#64748b'
+  color: '#526175'
 };
 
 export const CollectionAndListbox = () => {
@@ -148,17 +148,17 @@ export const CollectionAndListbox = () => {
         <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'minmax(240px, 280px) minmax(280px, 1fr)' }}>
           <Box style={panel}>
             <strong>ui-collection</strong>
-            <Collection ref={collectionRef} itemSelector="[data-collection-item]" itemRole="option" onCollectionChange={updateCollectionInfo}>
+            <Collection ref={collectionRef} role="listbox" aria-label="Collection options" itemSelector="[data-collection-item]" itemRole="option" onCollectionChange={updateCollectionInfo}>
               <div data-collection-item data-value="schedule">Schedule publish</div>
               <div data-collection-item data-value="duplicate">Duplicate release</div>
               <div data-collection-item data-value="archive">Archive draft</div>
             </Collection>
-            <div style={{ fontSize: 13, color: '#64748b' }}>{collectionInfo}</div>
+            <div style={{ fontSize: 13, color: '#526175' }}>{collectionInfo}</div>
           </Box>
 
           <Box style={panel}>
             <strong>ui-listbox</strong>
-            <Listbox ref={listboxRef} itemSelector="[data-menu-item]" itemRole="option" activeAttribute="data-current">
+            <Listbox ref={listboxRef} role="listbox" aria-label="Release actions" itemSelector="[data-menu-item]" itemRole="option" activeAttribute="data-current">
               {[
                 ['schedule', 'Schedule publish', '⌘K'],
                 ['duplicate', 'Duplicate release', ''],
@@ -179,7 +179,7 @@ export const CollectionAndListbox = () => {
                 </button>
               ))}
             </Listbox>
-            <div style={{ fontSize: 13, color: '#64748b' }}>Active value: <code>{activeValue}</code></div>
+            <div style={{ fontSize: 13, color: '#526175' }}>Active value: <code>{activeValue}</code></div>
           </Box>
         </div>
       </ShowcaseSection>
@@ -194,7 +194,7 @@ export const RovingFocusToolbar = () => {
   return (
     <Box style={shell}>
       <div>
-        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
           Roving Focus Group
         </div>
         <div style={{ marginTop: 8, fontSize: 28, fontWeight: 700, lineHeight: 1.1, color: '#0f172a' }}>
@@ -232,7 +232,7 @@ export const RovingFocusToolbar = () => {
             ))}
           </Flex>
         </RovingFocusGroup>
-        <div style={{ fontSize: 13, color: '#64748b' }}>Active tool: <code>{active}</code></div>
+        <div style={{ fontSize: 13, color: '#526175' }}>Active tool: <code>{active}</code></div>
       </Box>
     </Box>
   );
@@ -245,7 +245,7 @@ export const LayerAndFocusScope = () => {
   return (
     <Box style={shell}>
       <div>
-        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
           Dismissable Layer + Focus Scope
         </div>
         <div style={{ marginTop: 8, fontSize: 28, fontWeight: 700, lineHeight: 1.1, color: '#0f172a' }}>
@@ -254,7 +254,7 @@ export const LayerAndFocusScope = () => {
       </div>
 
       <Button size="sm" onClick={() => setOpen(true)}>Open test layer</Button>
-      <div style={{ fontSize: 13, color: '#64748b' }}>Event log: <code>{log}</code></div>
+      <div style={{ fontSize: 13, color: '#526175' }}>Event log: <code>{log}</code></div>
 
       {open ? (
         <DismissableLayer
@@ -298,7 +298,7 @@ export const LayerAndFocusScope = () => {
               }}
             >
               <strong>Primitive test surface</strong>
-              <div style={{ fontSize: 13, color: '#64748b' }}>Use Tab and Escape here to validate focus containment and dismissal behavior.</div>
+              <div style={{ fontSize: 13, color: '#526175' }}>Use Tab and Escape here to validate focus containment and dismissal behavior.</div>
               <input placeholder="First field" style={{ minHeight: 38, padding: '0 12px', borderRadius: 10, border: '1px solid #cbd5e1' }} />
               <input placeholder="Second field" style={{ minHeight: 38, padding: '0 12px', borderRadius: 10, border: '1px solid #cbd5e1' }} />
               <Flex style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
@@ -320,7 +320,7 @@ export const PositionerAndAnchor = () => {
   return (
     <Box style={shell}>
       <div>
-        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
           Positioner + Anchor
         </div>
         <div style={{ marginTop: 8, fontSize: 28, fontWeight: 700, lineHeight: 1.1, color: '#0f172a' }}>
@@ -362,7 +362,7 @@ export const PositionerAndAnchor = () => {
             }}
           >
             <strong>Positioned surface</strong>
-            <div style={{ marginTop: 8, fontSize: 13, color: '#64748b' }}>
+            <div style={{ marginTop: 8, fontSize: 13, color: '#526175' }}>
               Current placement: <code>{placement}</code>
             </div>
           </Box>

@@ -117,13 +117,24 @@ describe('ui-calendar behavior', () => {
     const eventDay = el.shadowRoot?.querySelector('.day[data-date="2026-03-15"]') as HTMLButtonElement | null;
 
     expect(emptyDay).toBeTruthy();
-    expect(emptyDay?.querySelector('.events')).toBeNull();
-    expect(emptyDay?.querySelector('.tooltip')).toBeNull();
+    // The marks and the tooltip are beside the button, in the same day cell, not inside it.
+    const emptyCell = emptyDay?.closest('.day-cell');
+    const eventCell = eventDay?.closest('.day-cell');
+    expect(emptyCell?.querySelector('.events')).toBeNull();
+    expect(emptyCell?.querySelector('.tooltip')).toBeNull();
     expect(emptyDay?.getAttribute('aria-describedby')).toBeNull();
 
     expect(eventDay).toBeTruthy();
-    expect(eventDay?.querySelector('.events')).toBeTruthy();
-    expect(eventDay?.querySelector('.tooltip')).toBeTruthy();
-    expect(eventDay?.getAttribute('aria-describedby')).toBeTruthy();
+    expect(eventCell?.querySelector('.events')).toBeTruthy();
+    expect(eventCell?.querySelector('.events')?.getAttribute('aria-hidden')).toBe('true');
+    expect(eventCell?.querySelector('.tooltip')).toBeTruthy();
+    expect(eventDay?.querySelector('.events, .tooltip')).toBeNull();
+    expect(eventDay?.getAttribute('aria-describedby')).toBe(eventCell?.querySelector('.tooltip')?.id);
+  });
+  it('still renders when the locale is not a valid language tag', async () => {
+    const el = mountCalendar({ year: '2026', month: '3', locale: 'not a locale' });
+    await settle();
+
+    expect(el.shadowRoot?.querySelectorAll('.day').length).toBeGreaterThan(27);
   });
 });

@@ -13,7 +13,7 @@ const style = `
     --ui-pagination-active-color: #ffffff;
     --ui-pagination-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
     --ui-pagination-color: var(--ui-color-text, #0f172a);
-    --ui-pagination-muted: var(--ui-color-muted, #64748b);
+    --ui-pagination-muted: var(--ui-color-muted, #526175);
     --ui-pagination-padding: 6px 11px;
     --ui-pagination-font-size: 13px;
     --ui-pagination-shadow: none;

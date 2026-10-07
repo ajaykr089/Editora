@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlName, syncSlotFallbackText, syncControlDescription } from '../primitives/control-name';
 
 const CLEAR_ICON = `
   <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
@@ -33,12 +34,12 @@ const style = `
     --ui-input-width: 100%;
     --ui-input-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-input-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-label-color: var(--ui-color-muted, var(--ui-muted, #64748b));
-    --ui-description-color: var(--ui-color-muted, var(--ui-muted, #64748b));
+    --ui-label-color: var(--ui-color-muted, var(--ui-muted, #526175));
+    --ui-description-color: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-input-focus-ring: var(--ui-color-focus-ring, var(--ui-focus-ring, #2563eb));
     --ui-input-error: var(--ui-color-danger, var(--ui-error, #dc2626));
-    --ui-input-success: var(--ui-color-success, var(--ui-success, #16a34a));
-    --ui-input-warning: var(--ui-color-warning, var(--ui-warning, #d97706));
+    --ui-input-success: var(--ui-color-success, var(--ui-success, #15803d));
+    --ui-input-warning: var(--ui-color-warning, var(--ui-warning, #b45309));
     --ui-input-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
     --ui-input-shadow: none;
     --ui-input-gap: 8px;
@@ -48,9 +49,9 @@ const style = `
     --ui-password-field-strength-gap: 8px;
     --ui-password-field-track-bg: color-mix(in srgb, var(--ui-color-text, #0f172a) 10%, transparent);
     --ui-password-field-strength-weak: var(--ui-color-danger, #dc2626);
-    --ui-password-field-strength-fair: var(--ui-color-warning, #d97706);
+    --ui-password-field-strength-fair: var(--ui-color-warning, #b45309);
     --ui-password-field-strength-good: var(--ui-color-primary, #2563eb);
-    --ui-password-field-strength-strong: var(--ui-color-success, #16a34a);
+    --ui-password-field-strength-strong: var(--ui-color-success, #15803d);
     --ui-password-field-toggle-bg: transparent;
     --ui-password-field-toggle-hover-bg: color-mix(in srgb, var(--ui-input-color) 10%, transparent);
     --ui-password-field-toggle-active-bg: color-mix(in srgb, var(--ui-input-color) 16%, transparent);
@@ -317,7 +318,7 @@ const style = `
   }
 
   .strength-caption {
-    color: var(--ui-color-muted, #64748b);
+    color: var(--ui-color-muted, #526175);
     font-size: 11px;
     line-height: 1.35;
   }
@@ -478,7 +479,7 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-input-accent: var(--ui-color-success, var(--ui-success, #16a34a));
+    --ui-input-accent: var(--ui-color-success, var(--ui-success, #15803d));
   }
 
   :host([tone="warning"]) {
@@ -703,7 +704,7 @@ function computeStrength(value: string): StrengthState {
 
 export class UIPasswordField extends ElementBase {
   static get observedAttributes() {
-    return [...FORWARDED_ATTRS, 'show-strength', 'revealable'];
+    return [...FORWARDED_ATTRS, 'aria-label', 'aria-description', 'aria-describedby', 'show-strength', 'revealable'];
   }
 
   private _input: HTMLInputElement | null = null;
@@ -1098,6 +1099,13 @@ export class UIPasswordField extends ElementBase {
     const errorEl = this.root.querySelector('.error') as HTMLElement | null;
     const counterEl = this.root.querySelector('.counter') as HTMLElement | null;
 
+    // The label/description/error text is slot fallback content. It used to be written only by the
+    // first render, so when a framework sets the attribute afterwards (React does) the label,
+    // description and error stayed blank.
+    syncSlotFallbackText(labelSlot, labelAttr);
+    syncSlotFallbackText(descriptionSlot, descAttr);
+    syncSlotFallbackText(errorSlot, errorAttr);
+
     if (labelEl) labelEl.toggleAttribute('hidden', !hasLabel);
     if (descEl) descEl.toggleAttribute('hidden', !hasDescription);
     if (prefixEl) prefixEl.toggleAttribute('hidden', !hasPrefix);
@@ -1111,14 +1119,12 @@ export class UIPasswordField extends ElementBase {
 
     if (!this._input) return;
 
-    if (hasLabel) this._input.setAttribute('aria-labelledby', `${this._uid}-label`);
-    else this._input.removeAttribute('aria-labelledby');
+    syncControlName(this._input, this, hasLabel ? `${this._uid}-label` : null);
 
     const describedBy: string[] = [];
     if (hasDescription) describedBy.push(`${this._uid}-description`);
     if (hasError) describedBy.push(`${this._uid}-error`);
-    if (describedBy.length) this._input.setAttribute('aria-describedby', describedBy.join(' '));
-    else this._input.removeAttribute('aria-describedby');
+    syncControlDescription(this._input, this, this._uid, describedBy);
 
     const invalid = this.getAttribute('validation') === 'error' || !!errorAttr;
     if (invalid) this._input.setAttribute('aria-invalid', 'true');

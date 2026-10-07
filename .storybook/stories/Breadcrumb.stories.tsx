@@ -62,7 +62,7 @@ export const Playground: Story = {
             <Breadcrumb.Item label="Governance" index={3}>Governance</Breadcrumb.Item>
             <Breadcrumb.Item label="Audit logs" index={4}>Audit logs</Breadcrumb.Item>
           </Breadcrumb>
-          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
             Uses the real breadcrumb API: `variant`, `size`, `radius`, `elevation`, `tone`, `state`, and `onSelect`.
           </Box>
         </Box>
@@ -83,7 +83,7 @@ export const VariantGallery: Story = {
         { label: 'Minimal', variant: 'minimal', tone: 'neutral' },
       ].map((entry) => (
         <Grid key={entry.label} style={{ gap: 8 }}>
-          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #526175)' }}>{entry.label}</Box>
           <Breadcrumb
             separator="/"
             currentIndex={3}
@@ -112,7 +112,7 @@ export const SizeGallery: Story = {
         { label: 'Large', size: 'lg' },
       ].map((entry) => (
         <Grid key={entry.label} style={{ gap: 8 }}>
-          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #526175)' }}>{entry.label}</Box>
           <Breadcrumb separator="/" currentIndex={3} size={entry.size as any} variant="surface" tone="info" radius={12}>
             <Breadcrumb.Item label="Workspace" index={0}>Workspace</Breadcrumb.Item>
             <Breadcrumb.Item label="Programs" index={1}>Programs</Breadcrumb.Item>
@@ -169,7 +169,7 @@ export const WorkflowPattern: Story = {
               </Breadcrumb.Item>
             </Breadcrumb>
 
-            <Flex align="center" style={{ gap: 10, flexWrap: 'wrap', color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+            <Flex align="center" style={{ gap: 10, flexWrap: 'wrap', color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                 {state === 'success' ? <CheckCircleIcon size={14} /> : <SparklesIcon size={14} />}
                 Active step: {trail[currentIndex]}

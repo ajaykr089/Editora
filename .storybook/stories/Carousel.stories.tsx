@@ -35,7 +35,7 @@ function createDemoSlides() {
         <Grid style={{ display: 'grid', gap: 12, alignItems: 'start' }}>
           <Badge tone="info">Overview</Badge>
           <Box style={{ fontSize: 24, fontWeight: 700 }}>Frame the story in one high-signal slide</Box>
-          <Box style={{ color: '#64748b' }}>Use a carousel when each panel has a distinct narrative job.</Box>
+          <Box style={{ color: '#526175' }}>Use a carousel when each panel has a distinct narrative job.</Box>
         </Grid>
       </Carousel.Item>
     ),
@@ -44,7 +44,7 @@ function createDemoSlides() {
         <Grid style={{ display: 'grid', gap: 12, alignItems: 'start' }}>
           <Badge tone="success">Momentum</Badge>
           <Box style={{ fontSize: 24, fontWeight: 700 }}>Support the pitch with one sharp proof point</Box>
-          <Box style={{ color: '#64748b' }}>Metrics, testimonials, or visual proof all work nicely here.</Box>
+          <Box style={{ color: '#526175' }}>Metrics, testimonials, or visual proof all work nicely here.</Box>
         </Grid>
       </Carousel.Item>
     ),

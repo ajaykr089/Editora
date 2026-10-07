@@ -47,7 +47,7 @@ function InsetArtwork() {
       >
         <div style={{ borderRight: '1px solid rgba(15, 23, 42, 0.08)', paddingRight: 12 }}>
           <div style={{ fontSize: 54, lineHeight: 1, fontWeight: 700, color: '#111827' }}>A</div>
-          <div style={{ marginTop: 10, fontSize: 10, lineHeight: '14px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          <div style={{ marginTop: 10, fontSize: 10, lineHeight: '14px', color: '#526175', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             Editorial layout
           </div>
         </div>
@@ -85,7 +85,7 @@ export const Playground = {
       <div style={{ fontSize: 14, lineHeight: '20px', color: '#334155' }}>
         Track migration progress, QA handoff, and final release blockers from one place.
       </div>
-      <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, lineHeight: '18px', color: '#64748b' }}>
+      <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, lineHeight: '18px', color: '#526175' }}>
         <span>Updated 2m ago</span>
         <span>12 items</span>
       </Card.Footer>
@@ -131,7 +131,7 @@ export const VariantGallery = () => (
         ].map(([variant, title]) => (
           <Card key={variant} variant={variant as any} size="md" radius={8} style={{ minBlockSize: 132 }}>
             <Card.Header>
-              <div style={{ fontSize: 14, lineHeight: '18px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{variant}</div>
+              <div style={{ fontSize: 14, lineHeight: '18px', color: '#526175', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{variant}</div>
               <Card.Title as="div">{title}</Card.Title>
             </Card.Header>
             <Card.Description as="div">
@@ -218,7 +218,7 @@ export const StructuredComposition = () => (
         <div style={{ color: '#334155', fontSize: 14, lineHeight: '22px' }}>
           Use the convenience exports when teams want a clear authoring model without remembering slot names for every section.
         </div>
-        <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: 13, lineHeight: '18px' }}>
+        <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', color: '#526175', fontSize: 13, lineHeight: '18px' }}>
           <span>6 active workstreams</span>
           <span>Updated today</span>
         </Card.Footer>
@@ -260,7 +260,7 @@ export const InteractiveStates = () => (
             <Card.Title>Disabled state</Card.Title>
             <Card.Description>The disabled card is not focusable and exposes aria-disabled.</Card.Description>
           </Card.Header>
-          <div style={{ color: '#64748b', fontSize: 14, lineHeight: '22px' }}>
+          <div style={{ color: '#526175', fontSize: 14, lineHeight: '22px' }}>
             Use disabled when the whole card surface should be unavailable.
           </div>
         </Card>
@@ -285,7 +285,7 @@ export const ComposedComponentPattern = () => (
           <div style={{ color: '#334155', fontSize: 14, lineHeight: '22px' }}>
             This demonstrates the composed component pattern where all sub-components are accessed as properties of the main Card component.
           </div>
-          <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: 13, lineHeight: '18px' }}>
+          <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', color: '#526175', fontSize: 13, lineHeight: '18px' }}>
             <span>Updated 5m ago</span>
             <span>4 metrics</span>
           </Card.Footer>
@@ -311,7 +311,7 @@ export const ComposedComponentPattern = () => (
             <Card.Title>Content Preview</Card.Title>
             <Card.Description>Preview of the media content with structured layout.</Card.Description>
           </Card.Header>
-          <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b', fontSize: 13, lineHeight: '18px' }}>
+          <Card.Footer style={{ display: 'flex', justifyContent: 'space-between', color: '#526175', fontSize: 13, lineHeight: '18px' }}>
             <span>Preview mode</span>
             <span>Click to view</span>
           </Card.Footer>
@@ -327,7 +327,7 @@ export const ComposedComponentPattern = () => (
                 border: '1px solid rgba(15, 23, 42, 0.08)'
               }}
             >
-              <div style={{ fontSize: 12, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+              <div style={{ fontSize: 12, color: '#526175', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
                 Inset Content
               </div>
               <div style={{ fontSize: 14, color: '#334155', lineHeight: '20px' }}>

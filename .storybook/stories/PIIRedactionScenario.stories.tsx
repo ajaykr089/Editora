@@ -195,7 +195,7 @@ export const SecurityComplianceReview: Story = {
               Tracks scan/findings/redaction events from both editors.
             </p>
             {events.length === 0 ? (
-              <p style={{ margin: 0, fontSize: 13, color: "#64748b" }}>No PII events captured yet.</p>
+              <p style={{ margin: 0, fontSize: 13, color: "#526175" }}>No PII events captured yet.</p>
             ) : (
               <ol style={{ margin: 0, paddingInlineStart: 18, display: "grid", gap: 8 }}>
                 {events.map((entry, index) => (

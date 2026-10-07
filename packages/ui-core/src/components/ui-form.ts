@@ -20,7 +20,7 @@ const style = `
     --ui-form-radius: 14px;
     --ui-form-bg: var(--ui-color-surface, var(--ui-surface, #ffffff));
     --ui-form-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-form-muted: var(--ui-color-muted, var(--ui-muted, #64748b));
+    --ui-form-muted: var(--ui-color-muted, var(--ui-muted, #526175));
     --ui-form-border-color: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 66%, transparent);
     --ui-form-border: 1px solid var(--ui-form-border-color);
     --ui-form-shadow:
@@ -147,9 +147,9 @@ const style = `
   }
 
   .status[data-tone="warning"] {
-    --ui-form-status-bg: color-mix(in srgb, var(--ui-color-warning, #d97706) 12%, transparent);
-    --ui-form-status-border: color-mix(in srgb, var(--ui-color-warning, #d97706) 44%, var(--ui-form-border-color));
-    --ui-form-status-text: color-mix(in srgb, var(--ui-color-warning, #d97706) 90%, #111827 10%);
+    --ui-form-status-bg: color-mix(in srgb, var(--ui-color-warning, #b45309) 12%, transparent);
+    --ui-form-status-border: color-mix(in srgb, var(--ui-color-warning, #b45309) 44%, var(--ui-form-border-color));
+    --ui-form-status-text: color-mix(in srgb, var(--ui-color-warning, #b45309) 90%, #111827 10%);
   }
 
   .status[data-tone="error"] {
@@ -159,9 +159,9 @@ const style = `
   }
 
   .status[data-tone="success"] {
-    --ui-form-status-bg: color-mix(in srgb, var(--ui-color-success, #16a34a) 12%, transparent);
-    --ui-form-status-border: color-mix(in srgb, var(--ui-color-success, #16a34a) 44%, var(--ui-form-border-color));
-    --ui-form-status-text: color-mix(in srgb, var(--ui-color-success, #16a34a) 90%, #111827 10%);
+    --ui-form-status-bg: color-mix(in srgb, var(--ui-color-success, #15803d) 12%, transparent);
+    --ui-form-status-border: color-mix(in srgb, var(--ui-color-success, #15803d) 44%, var(--ui-form-border-color));
+    --ui-form-status-text: color-mix(in srgb, var(--ui-color-success, #15803d) 90%, #111827 10%);
   }
 
   .status[data-tone="loading"] {
@@ -230,11 +230,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-form-accent: var(--ui-color-success, #16a34a);
+    --ui-form-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-form-accent: var(--ui-color-warning, #d97706);
+    --ui-form-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
@@ -297,11 +297,11 @@ const style = `
   }
 
   :host([state="success"]) .form {
-    border-color: color-mix(in srgb, var(--ui-color-success, #16a34a) 44%, var(--ui-form-border-color));
+    border-color: color-mix(in srgb, var(--ui-color-success, #15803d) 44%, var(--ui-form-border-color));
   }
 
   :host([state="warning"]) .form {
-    border-color: color-mix(in srgb, var(--ui-color-warning, #d97706) 44%, var(--ui-form-border-color));
+    border-color: color-mix(in srgb, var(--ui-color-warning, #b45309) 44%, var(--ui-form-border-color));
   }
 
   :host([state="error"]) .form {

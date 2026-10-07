@@ -10,7 +10,7 @@ const style = `
     --ui-alert-bg: var(--ui-alert-bg-base);
     --ui-alert-text: var(--ui-color-text, var(--ui-text, #202020));
     --ui-alert-muted: color-mix(in srgb, var(--ui-alert-text) 62%, var(--ui-color-muted, var(--ui-muted, #646464)) 38%);
-    --ui-alert-accent: var(--ui-color-muted, #64748b);
+    --ui-alert-accent: var(--ui-color-muted, #526175);
     --ui-alert-border-color: color-mix(in srgb, var(--ui-color-border, rgba(15, 23, 42, 0.16)) 82%, transparent);
     --ui-alert-border: var(--base-alert-dialog-border, 1px solid var(--ui-alert-border-color));
     --ui-alert-shadow: var(--base-alert-dialog-shadow, var(--shadow-4, none));
@@ -47,11 +47,11 @@ const style = `
   }
 
   :host([tone='success']) {
-    --ui-alert-accent: var(--ui-color-success, #16a34a);
+    --ui-alert-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone='warning']) {
-    --ui-alert-accent: var(--ui-color-warning, #d97706);
+    --ui-alert-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone='danger']) {
@@ -107,11 +107,11 @@ const style = `
     --ui-alert-bg: var(--ui-alert-accent);
     --ui-alert-border: 1px solid color-mix(in srgb, #000000 16%, transparent);
     --ui-alert-text: #ffffff;
-    --ui-alert-muted: color-mix(in srgb, #ffffff 78%, transparent);
-    --ui-alert-btn-bg: color-mix(in srgb, #ffffff 16%, transparent);
-    --ui-alert-btn-border: color-mix(in srgb, #ffffff 22%, transparent);
-    --ui-alert-btn-hover: color-mix(in srgb, #ffffff 24%, transparent);
-    --ui-alert-confirm-bg: color-mix(in srgb, #000000 22%, transparent);
+    --ui-alert-muted: color-mix(in srgb, #ffffff 98%, transparent);
+    --ui-alert-btn-bg: color-mix(in srgb, #000000 14%, transparent);
+    --ui-alert-btn-border: color-mix(in srgb, #ffffff 30%, transparent);
+    --ui-alert-btn-hover: color-mix(in srgb, #000000 22%, transparent);
+    --ui-alert-confirm-bg: color-mix(in srgb, #000000 30%, transparent);
     --ui-alert-confirm-color: #ffffff;
     --ui-alert-icon-bg: color-mix(in srgb, #ffffff 18%, transparent);
     --ui-alert-icon-color: #ffffff;
@@ -662,6 +662,9 @@ function cancelDeferredFrame(handle: number): void {
   }
   window.clearTimeout(handle);
 }
+
+// Marks an aria-label this element wrote on its own host (as opposed to one the author supplied).
+const AUTO_NAME_ATTR = 'data-ui-auto-name';
 
 export class UIAlertDialog extends ElementBase {
   static get observedAttributes() {
@@ -1347,8 +1350,31 @@ export class UIAlertDialog extends ElementBase {
     this._handleTab(event);
   }
 
+  // The host carries role="alertdialog" (that attribute is also how the role is configured), so it
+  // is exposed as a dialog of its own. Closed, it was an empty, unnamed alert dialog sitting in the
+  // page; open, it needs the same name as the dialog inside its shadow root.
+  private _syncHostSemantics(open: boolean, name = '', hasExplicitName = false): void {
+    if (!open) {
+      if (this.getAttribute('aria-hidden') !== 'true') this.setAttribute('aria-hidden', 'true');
+      if (this.hasAttribute(AUTO_NAME_ATTR)) {
+        this.removeAttribute('aria-label');
+        this.removeAttribute(AUTO_NAME_ATTR);
+      }
+      return;
+    }
+
+    if (this.hasAttribute('aria-hidden')) this.removeAttribute('aria-hidden');
+    if (hasExplicitName) {
+      if (this.hasAttribute(AUTO_NAME_ATTR)) this.removeAttribute(AUTO_NAME_ATTR);
+      return;
+    }
+    if (this.getAttribute('aria-label') !== name) this.setAttribute('aria-label', name);
+    if (!this.hasAttribute(AUTO_NAME_ATTR)) this.setAttribute(AUTO_NAME_ATTR, '');
+  }
+
   protected render() {
     if (!this.open) {
+      this._syncHostSemantics(false);
       this.setContent('');
       return;
     }
@@ -1387,12 +1413,19 @@ export class UIAlertDialog extends ElementBase {
     const showClose = this._config.showClose ?? this.dismissible;
     const tone = this.tone;
 
-    const explicitAriaLabel = this.getAttribute('aria-label') || '';
+    // An aria-label this element wrote itself is not an author-supplied name.
+    const explicitAriaLabel = this.hasAttribute(AUTO_NAME_ATTR) ? '' : this.getAttribute('aria-label') || '';
     const explicitLabelledBy = this.getAttribute('aria-labelledby') || '';
     const explicitDescribedBy = this.getAttribute('aria-describedby') || '';
 
     const labelledBy = explicitLabelledBy || (hasTitle ? titleId : '');
     const ariaLabel = explicitAriaLabel || (!labelledBy ? titleFallback || descriptionFallback || 'Dialog' : '');
+    const slottedTitle = (this.querySelector('[slot="title"]')?.textContent || '').replace(/\s+/g, ' ').trim();
+    this._syncHostSemantics(
+      true,
+      explicitAriaLabel || slottedTitle || titleFallback || descriptionFallback || 'Dialog',
+      !!explicitAriaLabel || !!explicitLabelledBy
+    );
 
     const describedByIds: string[] = [];
     if (explicitDescribedBy) {

@@ -106,8 +106,11 @@ describe('ui-sortable', () => {
     document.body.appendChild(el);
     await flushMicrotask();
 
-    const handle = el.shadowRoot?.querySelector('.handle[data-id="epic"]') as HTMLButtonElement | null;
-    expect(handle?.disabled).toBe(true);
+    // The handle is a presentational pointer affordance (a focusable button inside an option is
+    // invalid nesting), so "disabled" is an attribute, not a button property.
+    const handle = el.shadowRoot?.querySelector('.handle[data-id="epic"]') as HTMLElement | null;
+    expect(handle?.hasAttribute('disabled')).toBe(true);
+    expect(handle?.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('can hide the default selected badge without changing selection state', async () => {
@@ -554,7 +557,8 @@ describe('ui-sortable', () => {
 
       // Checked synchronously: a card left faded as "being dragged" looks like it vanished.
       expect(card.getAttribute('data-dragging')).toBe('false');
-      expect(card.getAttribute('aria-grabbed')).toBe('false');
+      // (aria-grabbed is deprecated and no longer emitted.)
+      expect(card.hasAttribute('aria-grabbed')).toBe(false);
     });
   });
 

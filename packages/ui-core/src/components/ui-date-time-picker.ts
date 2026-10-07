@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlName, syncControlDescription } from '../primitives/control-name';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import './ui-calendar';
 import { resolveDateTimeTranslations } from './date-time-i18n';
@@ -69,9 +70,9 @@ const style = `
     );
     --ui-dtp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
     --ui-dp-text: var(--ui-color-text, #0f172a);
-    --ui-dp-muted: var(--ui-color-muted, #64748b);
+    --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dtp-accent: var(--ui-color-primary, #2563eb);
-    --ui-dtp-success: var(--ui-color-success, #16a34a);
+    --ui-dtp-success: var(--ui-color-success, #15803d);
     --ui-dtp-error: var(--ui-color-danger, #dc2626);
     --ui-dtp-radius: 12px;
     --ui-dtp-panel-radius: 14px;
@@ -337,7 +338,7 @@ const overlayStyle = `
     );
     --ui-dtp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
     --ui-dp-text: var(--ui-color-text, #0f172a);
-    --ui-dp-muted: var(--ui-color-muted, #64748b);
+    --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dtp-accent: var(--ui-color-primary, #2563eb);
     --ui-dtp-panel-radius: 14px;
     --ui-dtp-shadow: none;
@@ -396,7 +397,7 @@ const overlayStyle = `
   .head-meta {
     margin: 0;
     font: 500 12px/1.3 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    color: var(--ui-dp-muted, #64748b);
+    color: var(--ui-dp-muted, #526175);
   }
   .content {
     display: grid;
@@ -424,7 +425,7 @@ const overlayStyle = `
   }
   .time-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   .time-grid[data-meridiem="true"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .time-grid label { font-size: 11px; color: var(--ui-dp-muted, #64748b); font-weight: 650; text-transform: uppercase; letter-spacing: .04em; }
+  .time-grid label { font-size: 11px; color: var(--ui-dp-muted, #526175); font-weight: 650; text-transform: uppercase; letter-spacing: .04em; }
   .time-grid select {
     min-block-size: 34px;
     border: 1px solid color-mix(in srgb, var(--ui-dtp-border, #cbd5e1) 84%, transparent);
@@ -533,6 +534,9 @@ function serializeState(state: DateTimeState): string | null {
 export class UIDateTimePicker extends ElementBase {
   static get observedAttributes() {
     return [
+      'aria-label',
+      'aria-description',
+      'aria-describedby',
       'open',
       'default-open',
       'value',
@@ -1481,8 +1485,7 @@ export class UIDateTimePicker extends ElementBase {
       inputEl.setAttribute('aria-expanded', isInline ? 'false' : String(this._open));
       inputEl.setAttribute('aria-controls', this._panelId);
       inputEl.setAttribute('aria-invalid', error ? 'true' : 'false');
-      if (label) inputEl.setAttribute('aria-labelledby', this._labelId);
-      else inputEl.removeAttribute('aria-labelledby');
+      syncControlName(inputEl, this, label ? this._labelId : null, inputEl.placeholder);
     }
     if (clearBtn) {
       clearBtn.hidden = !(this._clearable() && hasValue);
@@ -1510,8 +1513,7 @@ export class UIDateTimePicker extends ElementBase {
       const describedBy: string[] = [];
       if (hint && hintEl && !hintEl.hidden) describedBy.push(this._hintId);
       if (error) describedBy.push(this._errorId);
-      if (describedBy.length) inputEl.setAttribute('aria-describedby', describedBy.join(' '));
-      else inputEl.removeAttribute('aria-describedby');
+      syncControlDescription(inputEl, this, this._uid, describedBy);
     }
     if (hiddenInput) {
       hiddenInput.disabled = !name;

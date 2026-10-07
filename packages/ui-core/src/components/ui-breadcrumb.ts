@@ -9,7 +9,7 @@ const style = `
     --ui-breadcrumb-item-padding-block: var(--base-breadcrumb-item-padding-block, 4px);
     --ui-breadcrumb-item-padding-inline: var(--base-breadcrumb-item-padding-inline, 9px);
     --ui-breadcrumb-accent: var(--ui-color-primary, #2563eb);
-    --ui-breadcrumb-color: color-mix(in srgb, var(--ui-color-muted, #64748b) 76%, var(--ui-color-text, #0f172a) 24%);
+    --ui-breadcrumb-color: color-mix(in srgb, var(--ui-color-muted, #526175) 76%, var(--ui-color-text, #0f172a) 24%);
     --ui-breadcrumb-muted: color-mix(in srgb, var(--ui-color-muted, #94a3b8) 70%, transparent);
     --ui-breadcrumb-current: var(--ui-color-text, #0f172a);
     --ui-breadcrumb-hover-bg: color-mix(in srgb, var(--ui-breadcrumb-accent) 10%, var(--ui-color-surface, #ffffff));
@@ -21,7 +21,7 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-breadcrumb-accent: color-mix(in srgb, var(--ui-color-muted, #64748b) 74%, var(--ui-color-text, #0f172a) 26%);
+    --ui-breadcrumb-accent: color-mix(in srgb, var(--ui-color-muted, #526175) 74%, var(--ui-color-text, #0f172a) 26%);
   }
 
   :host([tone="info"]) {
@@ -29,11 +29,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-breadcrumb-accent: var(--ui-color-success, #16a34a);
+    --ui-breadcrumb-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-breadcrumb-accent: var(--ui-color-warning, #d97706);
+    --ui-breadcrumb-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
@@ -228,7 +228,7 @@ const style = `
   }
 
   :host([state="success"]) {
-    --ui-breadcrumb-accent: var(--ui-color-success, #16a34a);
+    --ui-breadcrumb-accent: var(--ui-color-success, #15803d);
   }
 
   :host([disabled]) .crumb-action {

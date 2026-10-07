@@ -29,6 +29,7 @@ export const Playground = (args: any) => {
   return (
     <Grid style={{ display: 'grid', gap: 12, maxWidth: 720 }}>
       <RadioGroup
+        aria-label="Notification delivery"
         value={value}
         options={options}
         orientation={args.orientation}
@@ -61,6 +62,7 @@ export const LegacySlottedUsage = () => {
   return (
     <Grid style={{ display: 'grid', gap: 12, maxWidth: 620 }}>
       <RadioGroup
+        aria-label="Display mode"
         value={value}
         variant="segmented"
         orientation="horizontal"
@@ -83,6 +85,7 @@ export const VisualModes = () => (
     <Box style={{ border: '1px solid #e2e8f0', borderRadius: 14, padding: 12 }}>
       <strong style={{ fontSize: 13 }}>Card + Success</strong>
       <RadioGroup
+        aria-label="Backup schedule"
         variant="card"
         tone="success"
         options={[
@@ -96,6 +99,7 @@ export const VisualModes = () => (
     <Box style={{ border: '1px solid #e2e8f0', borderRadius: 14, padding: 12 }}>
       <strong style={{ fontSize: 13 }}>Segmented + Horizontal</strong>
       <RadioGroup
+        aria-label="View mode"
         variant="segmented"
         orientation="horizontal"
         size="sm"

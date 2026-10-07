@@ -225,6 +225,9 @@ const DockItem = React.forwardRef<HTMLElement, DockItemProps>(function DockItem(
           label
         )
       : null,
+    // A space between the label and the badge: the item's name reads "Inbox, 9", and the text shown has
+    // to be part of it as words, not run together as "Inbox9".
+    label != null && badge != null ? ' ' : null,
     badge != null
       ? React.createElement(
           'span',

@@ -20,7 +20,7 @@ const style = `
     --ui-skeleton-gap: 10px;
     --ui-skeleton-duration: 1.2s;
 
-    --ui-skeleton-base: color-mix(in srgb, var(--ui-color-muted, #64748b) 20%, transparent);
+    --ui-skeleton-base: color-mix(in srgb, var(--ui-color-muted, #526175) 20%, transparent);
     --ui-skeleton-glow: color-mix(in srgb, var(--ui-color-surface, #ffffff) 80%, transparent);
     --ui-skeleton-wave: color-mix(in srgb, var(--ui-color-surface, #ffffff) 68%, transparent);
     --ui-skeleton-bg: linear-gradient(
@@ -128,15 +128,15 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-skeleton-base: color-mix(in srgb, var(--ui-color-success, #16a34a) 18%, transparent);
-    --ui-skeleton-glow: color-mix(in srgb, var(--ui-color-success, #16a34a) 30%, transparent);
-    --ui-skeleton-wave: color-mix(in srgb, var(--ui-color-success, #16a34a) 36%, transparent);
+    --ui-skeleton-base: color-mix(in srgb, var(--ui-color-success, #15803d) 18%, transparent);
+    --ui-skeleton-glow: color-mix(in srgb, var(--ui-color-success, #15803d) 30%, transparent);
+    --ui-skeleton-wave: color-mix(in srgb, var(--ui-color-success, #15803d) 36%, transparent);
   }
 
   :host([tone="warning"]) {
-    --ui-skeleton-base: color-mix(in srgb, var(--ui-color-warning, #d97706) 20%, transparent);
-    --ui-skeleton-glow: color-mix(in srgb, var(--ui-color-warning, #d97706) 32%, transparent);
-    --ui-skeleton-wave: color-mix(in srgb, var(--ui-color-warning, #d97706) 38%, transparent);
+    --ui-skeleton-base: color-mix(in srgb, var(--ui-color-warning, #b45309) 20%, transparent);
+    --ui-skeleton-glow: color-mix(in srgb, var(--ui-color-warning, #b45309) 32%, transparent);
+    --ui-skeleton-wave: color-mix(in srgb, var(--ui-color-warning, #b45309) 38%, transparent);
   }
 
   :host([tone="danger"]) {

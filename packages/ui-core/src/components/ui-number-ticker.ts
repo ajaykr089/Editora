@@ -145,19 +145,19 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-number-ticker-color: #64748b;
+    --ui-number-ticker-color: #526175;
   }
 
   :host([tone="info"]) {
-    --ui-number-ticker-color: #0ea5e9;
+    --ui-number-ticker-color: var(--ui-color-info, #0e7490);
   }
 
   :host([tone="success"]) {
-    --ui-number-ticker-color: var(--ui-color-success, #16a34a);
+    --ui-number-ticker-color: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-number-ticker-color: var(--ui-color-warning, #d97706);
+    --ui-number-ticker-color: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {

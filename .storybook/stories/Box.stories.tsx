@@ -63,7 +63,7 @@ export const VariantGallery: Story = {
         { label: 'Contrast', variant: 'contrast', tone: 'default' },
       ].map((entry) => (
         <Grid key={entry.label} style={{ gap: 8 }}>
-          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #64748b)' }}>{entry.label}</Box>
+          <Box style={{ fontSize: 13, fontWeight: 600, color: 'var(--ui-color-muted, #526175)' }}>{entry.label}</Box>
           <Box
             variant={entry.variant as any}
             tone={entry.tone as any}
@@ -76,7 +76,7 @@ export const VariantGallery: Story = {
               <ShieldIcon size={15} />
               <strong>{entry.label} container</strong>
             </Flex>
-            <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+            <Box style={{ color: entry.variant === 'contrast' ? 'inherit' : 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
               Shared theme tokens control border, background, radius, shadow, and tone treatment.
             </Box>
           </Box>
@@ -107,9 +107,9 @@ export const InteractiveStates: Story = {
               <ActivityIcon size={16} />
               <strong>Realtime monitoring panel</strong>
             </Flex>
-            <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>State: {state}</Box>
+            <Box style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>State: {state}</Box>
           </Flex>
-          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
             This surface demonstrates interactive focus styling plus loading, error, and success state treatments.
           </Box>
         </Box>
@@ -144,11 +144,11 @@ export const ResponsiveLayoutPattern: Story = {
         <Flex align="center" justify="space-between" style={{ gap: 12, flexWrap: 'wrap' }}>
           <Box>
             <Box style={{ fontWeight: 700, fontSize: 18 }}>Operations dashboard shell</Box>
-            <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
+            <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13, marginTop: 4 }}>
               Responsive spacing and surface composition using `ui-box` as the layout substrate.
             </Box>
           </Box>
-          <Flex align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>
+          <Flex align="center" style={{ gap: 8, color: 'var(--ui-color-muted, #526175)', fontSize: 12 }}>
             <ShieldIcon size={14} />
             Shift B
           </Flex>
@@ -161,7 +161,7 @@ export const ResponsiveLayoutPattern: Story = {
             <ActivityIcon size={16} />
             <strong>Triage queue</strong>
           </Flex>
-          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>22 pending assessments, average wait 9 minutes.</Box>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>22 pending assessments, average wait 9 minutes.</Box>
         </Box>
 
         <Box variant="soft" tone="success" elevation="low" interactive p="16px" style={{ minHeight: 134, display: 'grid', gap: 10 }}>
@@ -169,7 +169,7 @@ export const ResponsiveLayoutPattern: Story = {
             <CheckCircleIcon size={16} />
             <strong>Bed allocation</strong>
           </Flex>
-          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>94% occupancy, 4 discharge-ready patients.</Box>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>94% occupancy, 4 discharge-ready patients.</Box>
         </Box>
 
         <Box variant="outline" tone="warning" elevation="low" interactive p="16px" style={{ minHeight: 134, display: 'grid', gap: 10 }}>
@@ -177,12 +177,12 @@ export const ResponsiveLayoutPattern: Story = {
             <AlertTriangleIcon size={16} />
             <strong>Compliance audit</strong>
           </Flex>
-          <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13 }}>2 notes require signature validation.</Box>
+          <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>2 notes require signature validation.</Box>
         </Box>
       </Grid>
 
       <Box variant="elevated" radius={16} p={{ initial: '12px', md: '16px' }} style={{ display: 'grid', gap: 10 }}>
-        <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #64748b)' }}>
+        <Box style={{ fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>
           Responsive padding here is driven by the layout props, while variant, elevation, and radius stay theme-backed.
         </Box>
       </Box>

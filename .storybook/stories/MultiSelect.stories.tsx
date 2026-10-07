@@ -6,7 +6,8 @@ import {
   showcaseCaptionStyle,
   showcaseChipRowStyle,
   showcaseChipStyle,
-  showcasePanelStyle
+  showcasePanelStyle,
+  DarkSurface
 } from './storybook-showcase';
 
 const teamOptions = [
@@ -94,7 +95,7 @@ export const Playground = (args: any) => {
           />
           <div style={showcasePanelStyle}>
             <strong style={{ color: '#0f172a' }}>Selected teams</strong>
-            <div style={{ color: '#64748b', fontSize: 13 }}>
+            <div style={{ color: '#526175', fontSize: 13 }}>
               {value.length ? value.join(', ') : 'No teams selected'}
             </div>
           </div>
@@ -215,7 +216,9 @@ export const VariantGallery = () => (
       <MultiSelect label="Soft warning" options={teamOptions} value={['security']} variant="soft" tone="warning" />
       <MultiSelect label="Solid compact" options={teamOptions} value={['platform']} variant="solid" density="compact" size="sm" />
       <MultiSelect label="Flat no indicator" options={teamOptions} value={['support']} variant="flat" selectionIndicator="none" />
-      <MultiSelect label="Contrast shell" options={teamOptions} value={['ops']} variant="contrast" radius={16} />
+      <DarkSurface>
+        <MultiSelect label="Contrast shell" options={teamOptions} value={['ops']} variant="contrast" radius={16} />
+      </DarkSurface>
       <MultiSelect label="Comfortable outline" options={teamOptions} value={['security']} density="comfortable" variant="outline" radius={0} size="lg" />
     </Grid>
   </ShowcaseSection>
@@ -243,7 +246,7 @@ export const DenseFilterBuilder = () => {
         />
         <Box style={showcasePanelStyle}>
           <strong style={{ color: '#0f172a' }}>Selected values</strong>
-          <Box style={{ color: '#64748b', fontSize: 13 }}>
+          <Box style={{ color: '#526175', fontSize: 13 }}>
             {value.length ? value.join(', ') : 'No teams selected'}
           </Box>
           <p style={showcaseCaptionStyle}>Keep the summary adjacent when the selected values change downstream rules or routing.</p>

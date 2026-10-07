@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlName, syncControlDescription } from '../primitives/control-name';
 import { parseISO } from './ui-calendar';
 import { clampDateIso, normalizeDateIso, normalizeLocale } from './date-time-utils';
 
@@ -14,7 +15,7 @@ const style = `
     --ui-date-field-radius: var(--ui-radius, 12px);
     --ui-date-field-bg: var(--ui-color-surface, #ffffff);
     --ui-date-field-text: var(--ui-color-text, #0f172a);
-    --ui-date-field-muted: var(--ui-color-muted, #64748b);
+    --ui-date-field-muted: var(--ui-color-muted, #526175);
     --ui-date-field-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-date-field-danger: var(--ui-color-danger, #dc2626);
     display: block;
@@ -213,7 +214,7 @@ export class UIDateField extends ElementBase {
   static formAssociated = true;
 
   static get observedAttributes() {
-    return ['value', 'min', 'max', 'locale', 'label', 'description', 'data-error', 'required', 'disabled', 'readonly', 'name'];
+    return ['aria-label', 'aria-description', 'aria-describedby', 'value', 'min', 'max', 'locale', 'label', 'description', 'data-error', 'required', 'disabled', 'readonly', 'name'];
   }
 
   private _value: string | null = null;
@@ -524,15 +525,14 @@ export class UIDateField extends ElementBase {
     this._errorEl.textContent = error;
     this._shellEl.setAttribute('data-invalid', error ? 'true' : 'false');
     this._shellEl.setAttribute('role', 'group');
-    if (label) this._shellEl.setAttribute('aria-labelledby', labelId);
-    else this._shellEl.removeAttribute('aria-labelledby');
+    syncControlName(this._shellEl, this, label ? labelId : null);
     const describedBy = [description ? descriptionId : null, error ? errorId : null].filter(Boolean).join(' ');
-    if (describedBy) this._shellEl.setAttribute('aria-describedby', describedBy);
-    else this._shellEl.removeAttribute('aria-describedby');
+    syncControlDescription(this._shellEl, this, this._uid, describedBy ? describedBy.split(' ') : []);
     this._shellEl.setAttribute('aria-invalid', error ? 'true' : 'false');
     this._shellEl.setAttribute('aria-required', this.hasAttribute('required') ? 'true' : 'false');
     this._shellEl.setAttribute('aria-disabled', this.hasAttribute('disabled') ? 'true' : 'false');
-    this._shellEl.setAttribute('aria-readonly', this.hasAttribute('readonly') ? 'true' : 'false');
+    // aria-readonly is not allowed on role="group"; the inner segments carry the read-only state.
+    this._shellEl.removeAttribute('aria-readonly');
     const parts = parseIsoParts(this._value);
     const layout = resolveDateLayout(normalizeLocale(this.getAttribute('locale')));
     const segmentOrder = layout
@@ -559,7 +559,7 @@ export class UIDateField extends ElementBase {
       button.setAttribute('data-segment', entry.segment);
       button.setAttribute('data-active', this._activeSegment === entry.segment ? 'true' : 'false');
       button.setAttribute('data-empty', parts ? 'false' : 'true');
-      button.setAttribute('aria-label', entry.segment === 'month' ? 'Month' : entry.segment === 'day' ? 'Day' : 'Year');
+      const segmentLabel = entry.segment === 'month' ? 'Month' : entry.segment === 'day' ? 'Day' : 'Year';
       button.tabIndex = this._activeSegment === entry.segment ? 0 : -1;
       button.disabled = this.hasAttribute('disabled');
       button.addEventListener('click', this._onSegmentClick);
@@ -575,6 +575,8 @@ export class UIDateField extends ElementBase {
         button.textContent = String(parts.day).padStart(2, '0');
       }
 
+      // The accessible name must contain the visible text (WCAG 2.5.3), so it carries the value.
+      button.setAttribute('aria-label', `${segmentLabel} ${button.textContent || ''}`.trim());
       this._segmentButtons.set(entry.segment, button);
       nextChildren.push(button);
     });

@@ -23,7 +23,7 @@ const style = `
     --ui-tabs-panel-bg: var(--ui-color-surface, #ffffff);
     --ui-tabs-border: var(--ui-color-border, #cbd5e1);
     --ui-tabs-text: var(--ui-color-text, #0f172a);
-    --ui-tabs-muted: var(--ui-color-muted, #64748b);
+    --ui-tabs-muted: var(--ui-color-muted, #526175);
     --ui-tabs-accent: var(--ui-tabs-active-bg, var(--ui-color-primary, #2563eb));
     --ui-tabs-active-text: color-mix(in srgb, var(--ui-tabs-accent) 82%, #0f172a 18%);
     --ui-tabs-focus: var(--ui-color-focus-ring, #2563eb);
@@ -317,18 +317,18 @@ const style = `
     --ui-tabs-nav-bg: var(--ui-tabs-accent);
     --ui-tabs-panel-bg: var(--ui-color-surface, #ffffff);
     --ui-tabs-border: color-mix(in srgb, var(--ui-tabs-accent) 76%, #0f172a 24%);
-    --ui-tabs-muted: color-mix(in srgb, var(--ui-color-primary-foreground, #ffffff) 80%, transparent);
+    --ui-tabs-muted: color-mix(in srgb, var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff)) 94%, transparent);
     --ui-tabs-active-text: color-mix(in srgb, var(--ui-tabs-accent) 78%, #0f172a 22%);
-    --ui-tabs-focus: color-mix(in srgb, var(--ui-color-primary-foreground, #ffffff) 72%, var(--ui-tabs-accent));
+    --ui-tabs-focus: color-mix(in srgb, var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff)) 72%, var(--ui-tabs-accent));
   }
 
   :host([variant="solid"]) .tab:hover {
-    background: color-mix(in srgb, var(--ui-color-primary-foreground, #ffffff) 14%, transparent);
-    color: var(--ui-color-primary-foreground, #ffffff);
+    background: color-mix(in srgb, var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff)) 14%, transparent);
+    color: var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff));
   }
 
   :host([variant="solid"]) .tab[aria-selected="true"] {
-    background: var(--ui-color-primary-foreground, #ffffff);
+    background: var(--ui-color-primary-foreground, var(--ui-color-foreground-on-primary, #ffffff));
     border-color: color-mix(in srgb, var(--ui-tabs-accent) 44%, var(--ui-tabs-border));
     color: var(--ui-tabs-active-text);
   }
@@ -452,11 +452,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-tabs-accent: var(--ui-color-success, #16a34a);
+    --ui-tabs-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-tabs-accent: var(--ui-color-warning, #d97706);
+    --ui-tabs-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
@@ -523,6 +523,8 @@ function isTruthy(raw: string | null): boolean {
 }
 
 const RENDER_ATTRS = new Set([
+  'aria-label',
+  'aria-labelledby',
   'orientation',
   'activation',
   'headless',
@@ -552,7 +554,9 @@ export class UITabs extends ElementBase {
       'shape',
       'elevation',
       'loop',
-      'bare'
+      'bare',
+      'aria-label',
+      'aria-labelledby'
     ];
   }
 
@@ -773,7 +777,6 @@ export class UITabs extends ElementBase {
 
       const selectedState = index === selectedIndex;
       button.setAttribute('aria-selected', selectedState ? 'true' : 'false');
-      button.setAttribute('aria-controls', tab.panelId);
       button.setAttribute('aria-disabled', tab.disabled ? 'true' : 'false');
 
       if (tab.disabled) button.setAttribute('disabled', '');
@@ -783,14 +786,10 @@ export class UITabs extends ElementBase {
 
     const selected = model[selectedIndex];
     this._syncIndicator(selectedIndex);
-    if (selected) {
-      this.setAttribute('aria-activedescendant', selected.tabId);
-      this.setAttribute('aria-controls', selected.panelId);
-      this._scrollSelectedTabIntoView(selectedIndex);
-    } else {
-      this.removeAttribute('aria-activedescendant');
-      this.removeAttribute('aria-controls');
-    }
+    // No aria-controls / aria-activedescendant: the tabs live in this element's shadow root and the
+    // panels in the light DOM, so those references can never resolve (they were invalid ARIA).
+    this._clearCrossRootReferences();
+    if (selected) this._scrollSelectedTabIntoView(selectedIndex);
 
     this._syncPanels(model, selectedIndex);
   }
@@ -853,6 +852,11 @@ export class UITabs extends ElementBase {
     nav.style.setProperty('--ui-tabs-indicator-w', `${w}px`);
     nav.style.setProperty('--ui-tabs-indicator-h', `${h}px`);
     nav.setAttribute('data-indicator-ready', 'true');
+  }
+
+  private _clearCrossRootReferences(): void {
+    this.removeAttribute('aria-activedescendant');
+    this.removeAttribute('aria-controls');
   }
 
   private _syncPanels(model: TabModel[], selectedIndex: number): void {
@@ -1037,6 +1041,12 @@ export class UITabs extends ElementBase {
     this._syncSelectedAttributes(model, selectedIndex);
 
     const orientation = this.getAttribute('orientation') === 'vertical' ? 'vertical' : 'horizontal';
+    // aria-label on the host cannot reach the role="tablist" element inside the shadow root.
+    const hostLabel = (this.getAttribute('aria-label') || '').trim();
+    const hostLabelledBy = (this.getAttribute('aria-labelledby') || '').trim();
+    const tablistNameAttrs =
+      (hostLabel ? ` aria-label="${escapeHtml(hostLabel)}"` : '') +
+      (hostLabelledBy ? ` aria-labelledby="${escapeHtml(hostLabelledBy)}"` : '');
     const nav = model
       .map((tab) => {
         const selectedState = tab.index === selectedIndex;
@@ -1050,7 +1060,6 @@ export class UITabs extends ElementBase {
             role="tab"
             data-index="${tab.index}"
             aria-selected="${selectedState ? 'true' : 'false'}"
-            aria-controls="${tab.panelId}"
             aria-disabled="${tab.disabled ? 'true' : 'false'}"
             tabindex="${tab.index === focusIndex && !tab.disabled ? '0' : '-1'}"
             ${tab.disabled ? 'disabled' : ''}
@@ -1065,7 +1074,7 @@ export class UITabs extends ElementBase {
     this.setContent(`
       <style>${style}</style>
       <section class="shell" part="shell">
-        <div class="nav" role="tablist" aria-orientation="${orientation}" part="nav">
+        <div class="nav" role="tablist" aria-orientation="${orientation}"${tablistNameAttrs} part="nav">
           <span class="indicator" part="indicator" aria-hidden="true"></span>
           ${nav}
         </div>
@@ -1076,14 +1085,7 @@ export class UITabs extends ElementBase {
       <slot class="source-tabs" name="tab"></slot>
     `);
 
-    const selected = model[selectedIndex];
-    if (selected) {
-      this.setAttribute('aria-activedescendant', selected.tabId);
-      this.setAttribute('aria-controls', selected.panelId);
-    } else {
-      this.removeAttribute('aria-activedescendant');
-      this.removeAttribute('aria-controls');
-    }
+    this._clearCrossRootReferences();
 
     this._syncIndicator(selectedIndex);
     this._syncPanels(model, selectedIndex);

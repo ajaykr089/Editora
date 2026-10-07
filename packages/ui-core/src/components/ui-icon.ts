@@ -127,8 +127,8 @@ const style = `
   }
 
   :host([tone="brand"]) { --ui-icon-color: var(--ui-color-primary, var(--ui-primary, #2563eb)); }
-  :host([tone="success"]) { --ui-icon-color: var(--ui-color-success, var(--ui-success, #16a34a)); }
-  :host([tone="warning"]) { --ui-icon-color: var(--ui-color-warning, var(--ui-warning, #d97706)); }
+  :host([tone="success"]) { --ui-icon-color: var(--ui-color-success, var(--ui-success, #15803d)); }
+  :host([tone="warning"]) { --ui-icon-color: var(--ui-color-warning, var(--ui-warning, #b45309)); }
   :host([tone="danger"]) { --ui-icon-color: var(--ui-color-danger, var(--ui-error, #dc2626)); }
 
   :host([shape="square"]) { --ui-icon-radius: 4px; }

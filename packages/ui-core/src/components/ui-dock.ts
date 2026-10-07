@@ -262,7 +262,7 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-dock-accent: #64748b;
+    --ui-dock-accent: #526175;
   }
 
   :host([tone="info"]) {
@@ -270,11 +270,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-dock-accent: var(--ui-color-success, #16a34a);
+    --ui-dock-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-dock-accent: var(--ui-color-warning, #d97706);
+    --ui-dock-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
@@ -581,6 +581,8 @@ export class UIDock extends ElementBase {
   private _frameEl: HTMLElement | null = null;
   private _slotEl: HTMLSlotElement | null = null;
   private _items: DockItemRecord[] = [];
+  // What this dock last wrote into an item's aria-label, so an author's own label is never mistaken for it.
+  private _itemNames = new WeakMap<HTMLElement, { base: string; composed: string }>();
   private _resizeObserver: ResizeObserver | null = null;
   private _mutationObserver: MutationObserver | null = null;
   private _mediaQuery: MediaQueryList | null = null;
@@ -956,13 +958,23 @@ export class UIDock extends ElementBase {
       el.style.setProperty('touch-action', 'manipulation');
 
       if (!el.hasAttribute('tabindex')) el.tabIndex = -1;
-      if (!el.hasAttribute('aria-label')) {
-        const labelText =
-          labelEl?.textContent?.trim() ||
-          el.getAttribute('data-label') ||
-          el.getAttribute('title') ||
-          undefined;
-        if (labelText) el.setAttribute('aria-label', labelText);
+      // The badge is drawn on top of the icon and hidden from assistive tech, so an unread count would
+      // vanish for screen reader users (and the visible "12" would not be part of the name). Fold it in.
+      const current = el.getAttribute('aria-label');
+      const previous = this._itemNames.get(el);
+      const base =
+        previous && previous.composed === current
+          ? previous.base
+          : current ||
+            labelEl?.textContent?.trim() ||
+            el.getAttribute('data-label') ||
+            el.getAttribute('title') ||
+            '';
+      const badgeText = badgeEl?.textContent?.trim() ?? '';
+      const composed = base && badgeText && !base.includes(badgeText) ? `${base}, ${badgeText}` : base;
+      if (composed) {
+        if (composed !== current) el.setAttribute('aria-label', composed);
+        this._itemNames.set(el, { base, composed });
       }
 
       if (sticky) {
@@ -1196,6 +1208,9 @@ export class UIDock extends ElementBase {
       if (item.labelEl) {
         const visible = item.labelVisible;
         item.labelEl.style.setProperty('opacity', visible ? '1' : '0');
+        // Not just transparent: an invisible label is not visible text (it is also aria-hidden, since the
+        // item carries its name in aria-label), so it must not count as the item's visible label.
+        item.labelEl.style.setProperty('visibility', visible ? 'visible' : 'hidden');
         item.labelEl.style.setProperty(
           'transform',
           this._labelTransform(placement, visible)

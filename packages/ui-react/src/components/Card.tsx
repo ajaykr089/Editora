@@ -18,7 +18,7 @@ function ensureCardRuntimeStyles() {
     ui-card [data-ui-card-footer] {
       font-size: var(--ui-card-footer-size, 13px);
       line-height: var(--ui-card-footer-line-height, 18px);
-      color: var(--ui-color-muted, #64748b);
+      color: var(--ui-color-muted, #526175);
     }
 
     ui-card [data-ui-card-media] {
@@ -40,7 +40,7 @@ function ensureCardRuntimeStyles() {
       margin: 0;
       font-size: var(--ui-card-description-size, 14px);
       line-height: var(--ui-card-description-line-height, 20px);
-      color: var(--ui-color-muted, #64748b);
+      color: var(--ui-color-muted, #526175);
     }
   `;
   document.head.appendChild(style);
@@ -56,6 +56,14 @@ export type CardProps = React.HTMLAttributes<HTMLElement> & {
   disabled?: boolean;
   children?: React.ReactNode;
 };
+
+// A title above a description, or a header above the body, are separate words. Without a space between
+// them their text runs together ("summaryPress Enter"), in the card's name and to any tool that reads it.
+function spaced(children: React.ReactNode): React.ReactNode {
+  const items = React.Children.toArray(children);
+  if (items.length < 2) return children;
+  return items.flatMap((item, index) => (index === 0 ? [item] : [' ', item]));
+}
 
 const Card = React.forwardRef<HTMLElement, CardProps>(function Card(
   { variant, size, radius, tone, elevation, interactive, disabled, children, ...rest },
@@ -74,7 +82,7 @@ const Card = React.forwardRef<HTMLElement, CardProps>(function Card(
   if (elevation) props.elevation = elevation;
   if (interactive) props.interactive = true;
   if (disabled) props.disabled = true;
-  return createUIElement('ui-card', props, children);
+  return createUIElement('ui-card', props, spaced(children));
 });
 
 export interface CardSectionProps extends React.HTMLAttributes<HTMLElement> {
@@ -97,7 +105,7 @@ function createCardSection(
     if (slot) props.slot = slot;
     if (dataAttr) props[dataAttr] = '';
     if (style) props.style = style;
-    return React.createElement(Tag, props, children);
+    return React.createElement(Tag, props, spaced(children));
   });
   Component.displayName = displayName;
   return Component;

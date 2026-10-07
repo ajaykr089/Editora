@@ -189,7 +189,7 @@ export const EditorialSeal = () => (
             </SpinningText>
             <div style={{ display: 'grid', gap: 6, textAlign: 'center' }}>
               <div style={{ fontSize: 18, fontWeight: 760, color: '#0f172a' }}>{entry.title}</div>
-              <div style={{ fontSize: 14, lineHeight: '22px', color: '#64748b' }}>
+              <div style={{ fontSize: 14, lineHeight: '22px', color: '#526175' }}>
                 Tuned for premium launch badges and feature introductions.
               </div>
             </div>

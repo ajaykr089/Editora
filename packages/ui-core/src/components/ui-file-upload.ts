@@ -32,10 +32,10 @@ const style = `
     --ui-file-upload-radius: var(--ui-radius, 12px);
     --ui-file-upload-bg: var(--ui-color-surface, #ffffff);
     --ui-file-upload-text: var(--ui-color-text, #0f172a);
-    --ui-file-upload-muted: var(--ui-color-muted, #64748b);
+    --ui-file-upload-muted: var(--ui-color-muted, #526175);
     --ui-file-upload-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-file-upload-danger: var(--ui-color-danger, #dc2626);
-    --ui-file-upload-success: var(--ui-color-success, #16a34a);
+    --ui-file-upload-success: var(--ui-color-success, #15803d);
     display: block;
     inline-size: 100%;
     min-inline-size: 0;
@@ -805,6 +805,9 @@ export class UIFileUpload extends ElementBase {
     const description = (this.getAttribute('description') || '').trim();
     const required = this.hasAttribute('required');
     const disabled = this._disabled();
+    // The native file input is visually hidden behind the button/surface but still in the
+    // accessibility tree, so it needs a name (the visible label, else the host aria-label).
+    this._inputEl.setAttribute('aria-label', label || (this.getAttribute('aria-label') || '').trim() || 'Choose files');
     const dropLabel = this.getAttribute('drop-label') || 'Drag files here or browse from your device';
     const buttonText = this.getAttribute('button-text') || 'Choose files';
     const uploadButtonText = this.getAttribute('upload-button-text') || 'Start upload';

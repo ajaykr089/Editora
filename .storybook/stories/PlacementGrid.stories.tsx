@@ -38,7 +38,7 @@ function Tile({
       <Flex direction="column" gap="10px">
         <Flex align="center" justify="space-between" gap="8px">
           <Badge variant="soft" tone={tone}>{stat}</Badge>
-          <Box style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748b' }}>
+          <Box style={{ fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#526175' }}>
             Grid item
           </Box>
         </Flex>

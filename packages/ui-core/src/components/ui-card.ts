@@ -74,11 +74,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-card-accent: var(--ui-color-success, #16a34a);
+    --ui-card-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-card-accent: var(--ui-color-warning, #d97706);
+    --ui-card-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
@@ -296,6 +296,9 @@ function normalizeRadius(value: string | null): string {
   return value;
 }
 
+// Marks an aria-label this element wrote on its own host (as opposed to one the author supplied).
+const AUTO_LABEL_ATTR = 'data-ui-card-auto-label';
+
 export class UICard extends ElementBase {
   static get observedAttributes() {
     return ['variant', 'size', 'radius', 'tone', 'elevation', 'interactive', 'disabled', 'tabindex', 'role'];
@@ -333,7 +336,7 @@ export class UICard extends ElementBase {
   protected override render(): void {
     this.setContent(`
       <style>${style}</style>
-      <article class="card" part="card" role="group">
+      <div class="card" part="card" role="group">
         <div class="section media" part="media" hidden>
           <slot name="media"></slot>
         </div>
@@ -349,7 +352,7 @@ export class UICard extends ElementBase {
         <div class="section footer" part="footer" hidden>
           <slot name="footer"></slot>
         </div>
-      </article>
+      </div>
     `);
 
     this._syncHostStyles();
@@ -365,6 +368,7 @@ export class UICard extends ElementBase {
     const interactive = this.hasAttribute('interactive');
     const disabled = this.hasAttribute('disabled');
     if (!interactive) {
+      this._clearAutoLabel();
       if (this.getAttribute('role') === 'button') this.removeAttribute('role');
       this.removeAttribute('aria-disabled');
       if (this.getAttribute('tabindex') === '0' || this.getAttribute('tabindex') === '-1') {
@@ -375,12 +379,69 @@ export class UICard extends ElementBase {
 
     if (!this.hasAttribute('role')) this.setAttribute('role', 'button');
     this.setAttribute('aria-disabled', disabled ? 'true' : 'false');
+    this._syncAutoLabel();
 
     if (!this.hasAttribute('tabindex')) {
       this.setAttribute('tabindex', disabled ? '-1' : '0');
     } else if (disabled && this.getAttribute('tabindex') !== '-1') {
       this.setAttribute('tabindex', '-1');
     }
+  }
+
+  // Chromium derives no name from this card's slotted content, so an interactive card (role
+  // "button") was exposed unnamed. Name it after the text it shows, unless the author gave it a name:
+  // a button is named by its content, and WCAG 2.5.3 wants the words shown to be part of the name.
+  // The text the card shows, in the order it is drawn (the shadow template's slot order, not the order
+  // of the light DOM children), with a space where one element ends and the next begins.
+  private _shownText(): string {
+    const pieces: Array<{ text: string; parent: Node | null }> = [];
+    const walk = (node: Node): void => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent || '';
+        if (text.trim()) pieces.push({ text, parent: node.parentNode });
+        return;
+      }
+      if (!(node instanceof Element)) return;
+      if (node.hasAttribute('hidden') || node.getAttribute('aria-hidden') === 'true') return;
+      if (node.tagName === 'STYLE' || node.tagName === 'SCRIPT') return;
+      if (node instanceof HTMLSlotElement) {
+        const assigned = node.assignedNodes({ flatten: true });
+        (assigned.length ? assigned : Array.from(node.childNodes)).forEach(walk);
+        return;
+      }
+      node.childNodes.forEach(walk);
+    };
+    this.root.childNodes.forEach(walk);
+
+    let out = '';
+    pieces.forEach((piece, index) => {
+      // Text split by inline markup inside one element stays one word run; a new element starts a new word.
+      out += index > 0 && pieces[index - 1].parent !== piece.parent ? ` ${piece.text}` : piece.text;
+    });
+    return out.replace(/\s+/g, ' ').trim().slice(0, 500);
+  }
+
+  private _clearAutoLabel(): void {
+    if (!this.hasAttribute(AUTO_LABEL_ATTR)) return;
+    this.removeAttribute('aria-label');
+    this.removeAttribute(AUTO_LABEL_ATTR);
+  }
+
+  private _syncAutoLabel(): void {
+    const authorLabelled =
+      this.hasAttribute('aria-labelledby') || (this.hasAttribute('aria-label') && !this.hasAttribute(AUTO_LABEL_ATTR));
+    if (authorLabelled || this.getAttribute('role') !== 'button') {
+      this._clearAutoLabel();
+      return;
+    }
+
+    const name = this._shownText();
+    if (!name) {
+      this._clearAutoLabel();
+      return;
+    }
+    if (this.getAttribute('aria-label') !== name) this.setAttribute('aria-label', name);
+    this.setAttribute(AUTO_LABEL_ATTR, '');
   }
 
   private _cleanupSlotListeners(): void {
@@ -403,6 +464,8 @@ export class UICard extends ElementBase {
     this._toggleSection('inset');
     this._toggleSection('header');
     this._toggleSection('footer');
+    // The title may arrive after the card connected (React renders children into it later).
+    if (this.hasAttribute('interactive')) this._syncAutoLabel();
   }
 
   private _toggleSection(name: 'media' | 'inset' | 'header' | 'footer'): void {

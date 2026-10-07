@@ -34,7 +34,13 @@ function Demo() {
   return (
     <Box style={{ padding: 20, background: 'var(--ui-color-background)', color: 'var(--ui-color-text)' }}>
       <h3>Theme demo</h3>
-      <p>Primary color token: <strong style={{ color: 'var(--ui-color-primary)' }}>{safeTokens.colors.primary}</strong></p>
+      <p>
+        Primary color token: <strong>{safeTokens.colors.primary}</strong>
+        <span
+          aria-hidden="true"
+          style={{ display: 'inline-block', width: 12, height: 12, marginInlineStart: 8, borderRadius: 3, background: 'var(--ui-color-primary)' }}
+        />
+      </p>
       <Button onClick={toggle}>Toggle theme</Button>
     </Box>
   );

@@ -226,7 +226,7 @@ export const LiveHtmlOutput: Story = {
           </div>
 
           <div style={{ minWidth: 0 }}>
-            <h4 style={{ margin: '0 0 8px 0' }}>HTML</h4>
+            <h3 style={{ margin: '0 0 8px 0' }}>HTML</h3>
             <pre
               aria-label="Live HTML output"
               style={{

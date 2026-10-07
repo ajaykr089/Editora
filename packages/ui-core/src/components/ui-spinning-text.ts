@@ -169,7 +169,7 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-spinning-text-accent: #64748b;
+    --ui-spinning-text-accent: #526175;
   }
 
   :host([tone="info"]) {
@@ -177,11 +177,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-spinning-text-accent: var(--ui-color-success, #16a34a);
+    --ui-spinning-text-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-spinning-text-accent: var(--ui-color-warning, #d97706);
+    --ui-spinning-text-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {

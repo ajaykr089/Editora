@@ -73,11 +73,11 @@ const LIGHT_DOM_STYLE = `
   }
 
   ui-accordion[data-ui-accordion-root="true"][tone="success"] {
-    --ui-accordion-accent: var(--ui-color-success, #16a34a);
+    --ui-accordion-accent: var(--ui-color-success, #15803d);
   }
 
   ui-accordion[data-ui-accordion-root="true"][tone="warning"] {
-    --ui-accordion-accent: var(--ui-color-warning, #d97706);
+    --ui-accordion-accent: var(--ui-color-warning, #b45309);
   }
 
   ui-accordion[data-ui-accordion-root="true"][tone="danger"] {
@@ -251,7 +251,7 @@ const LIGHT_DOM_STYLE = `
     text-transform: uppercase;
     line-height: 1.2;
     background: color-mix(in srgb, var(--ui-accordion-accent) 14%, transparent);
-    color: color-mix(in srgb, var(--ui-accordion-accent) 84%, var(--ui-accordion-text) 16%);
+    color: color-mix(in srgb, var(--ui-accordion-accent) 68%, var(--ui-accordion-text) 32%);
   }
 
   ui-accordion[data-ui-accordion-root="true"] [data-ui-accordion-chevron] {

@@ -20,7 +20,7 @@ const style = `
     --ui-checkbox-disabled-bg: color-mix(in srgb, var(--ui-color-surface-alt, #f1f5f9) 88%, #ffffff 12%);
     --ui-checkbox-disabled-border: 1.5px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 78%, transparent);
     --ui-checkbox-label-color: var(--ui-color-text, var(--ui-text, #0f172a));
-    --ui-checkbox-muted: var(--ui-color-muted, #64748b);
+    --ui-checkbox-muted: var(--ui-color-muted, #526175);
     --ui-checkbox-duration: 170ms;
     --ui-checkbox-easing: cubic-bezier(0.2, 0.8, 0.2, 1);
 
@@ -472,7 +472,10 @@ export class UICheckbox extends ElementBase {
     this.setAttribute('aria-busy', this.loading ? 'true' : 'false');
     if (this.invalid) this.setAttribute('aria-invalid', 'true');
     else this.removeAttribute('aria-invalid');
-    this.setAttribute('aria-labelledby', labelId);
+    // The label lives in this element's shadow root, so an aria-labelledby pointing at it could never
+    // resolve from the host (and overwrote any aria-labelledby the author set). The accessible name
+    // comes from the element's content, which includes the label text.
+    if (this.getAttribute('aria-labelledby') === labelId) this.removeAttribute('aria-labelledby');
     this.setAttribute('tabindex', tabIndex);
   }
 

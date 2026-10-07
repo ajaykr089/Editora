@@ -3,7 +3,7 @@ import React from 'react';
 const COLORS = {
   ink: '#0f172a',
   inkMuted: '#475569',
-  inkSoft: '#64748b',
+  inkSoft: '#526175',
   border: 'color-mix(in srgb, var(--ui-color-border, #cbd5e1) 82%, transparent)',
   borderStrong: 'color-mix(in srgb, var(--ui-color-border, #cbd5e1) 94%, #94a3b8 6%)',
   surface: 'var(--ui-color-surface, #ffffff)',
@@ -234,3 +234,11 @@ export function ShowcaseSection({ eyebrow, title, description, children }: Showc
   );
 }
 
+
+// The `contrast` variants draw light text for a dark surface, including labels that sit above the
+// field. Show them on one, the way they are meant to be used.
+export function DarkSurface({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return (
+    <div style={{ background: '#0f172a', borderRadius: 12, padding: 16, display: 'grid', gap: 10, ...style }}>{children}</div>
+  );
+}

@@ -10,7 +10,7 @@ const style = `
     --ui-slot-padding: 0;
     --ui-slot-gap: 6px;
     --ui-slot-accent: var(--ui-color-primary, #2563eb);
-    --ui-slot-muted: var(--ui-color-muted, #64748b);
+    --ui-slot-muted: var(--ui-color-muted, #526175);
     color-scheme: light dark;
     display: inline-flex;
     min-inline-size: 0;
@@ -114,11 +114,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-slot-accent: var(--ui-color-success, #16a34a);
+    --ui-slot-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-slot-accent: var(--ui-color-warning, #d97706);
+    --ui-slot-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {

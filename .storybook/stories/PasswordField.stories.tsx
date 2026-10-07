@@ -6,7 +6,8 @@ import {
   showcaseCaptionStyle,
   showcaseChipRowStyle,
   showcaseChipStyle,
-  showcasePanelStyle
+  showcasePanelStyle,
+  DarkSurface
 } from './storybook-showcase';
 
 export default {
@@ -67,10 +68,10 @@ export const Playground = (args: any) => {
           </Box>
           <Box style={showcasePanelStyle}>
             <strong style={{ color: '#0f172a' }}>Live state</strong>
-            <Box style={{ color: '#64748b', fontSize: 13 }}>
+            <Box style={{ color: '#526175', fontSize: 13 }}>
               Visibility: {revealed ? 'visible' : 'hidden'}
             </Box>
-            <Box style={{ color: '#64748b', fontSize: 13 }}>
+            <Box style={{ color: '#526175', fontSize: 13 }}>
               Characters: {length}
             </Box>
             <p style={showcaseCaptionStyle}>Use `showStrength` for signup, recovery, or admin-reset flows where quality feedback is part of the product contract.</p>
@@ -138,15 +139,17 @@ export const SecurityConsole = () => (
         shape="square"
         autoComplete="current-password"
       />
-      <PasswordField
-        label="Recovery key"
-        description="Reveal is disabled when shoulder-surfing risk is higher."
-        variant="contrast"
-        tone="warning"
-        density="compact"
-        revealable={false}
-        autoComplete="one-time-code"
-      />
+      <DarkSurface>
+        <PasswordField
+          label="Recovery key"
+          description="Reveal is disabled when shoulder-surfing risk is higher."
+          variant="contrast"
+          tone="warning"
+          density="compact"
+          revealable={false}
+          autoComplete="one-time-code"
+        />
+      </DarkSurface>
     </Grid>
   </ShowcaseSection>
 );
@@ -182,7 +185,7 @@ export const EnterprisePolicy = () => {
         />
         <Box style={showcasePanelStyle}>
           <strong style={{ color: '#0f172a' }}>Current strength label</strong>
-          <Box style={{ color: '#64748b', fontSize: 13 }}>{label}</Box>
+          <Box style={{ color: '#526175', fontSize: 13 }}>{label}</Box>
           <p style={showcaseCaptionStyle}>This is the integration path for products with their own password policy language or compliance requirements.</p>
         </Box>
       </Grid>
@@ -213,14 +216,19 @@ export const VariantGallery = () => {
         {variants.map(([variant, title]) => (
           <Box key={variant} style={{ display: 'grid', gap: 10 }}>
             <strong style={{ color: '#0f172a', fontSize: 13 }}>{title}</strong>
-            <PasswordField
-              label={`${title} password`}
-              description="Reveal stays ghosted by default so it reads as a field affordance, not a pill button."
-              placeholder="Enter password"
-              variant={variant}
-              showStrength
-              clearable
-            />
+            {(() => {
+              const field = (
+                <PasswordField
+                  label={`${title} password`}
+                  description="Reveal stays ghosted by default so it reads as a field affordance, not a pill button."
+                  placeholder="Enter password"
+                  variant={variant}
+                  showStrength
+                  clearable
+                />
+              );
+              return variant === 'contrast' ? <DarkSurface>{field}</DarkSurface> : field;
+            })()}
           </Box>
         ))}
       </Grid>
@@ -261,15 +269,17 @@ export const StateMatrix = () => (
         tone="success"
         variant="soft"
       />
-      <PasswordField
-        label="No reveal"
-        description="For sensitive support-console flows where reveal is intentionally suppressed."
-        placeholder="Enter recovery secret"
-        revealable={false}
-        autoComplete="off"
-        variant="contrast"
-        tone="warning"
-      />
+      <DarkSurface>
+        <PasswordField
+          label="No reveal"
+          description="For sensitive support-console flows where reveal is intentionally suppressed."
+          placeholder="Enter recovery secret"
+          revealable={false}
+          autoComplete="off"
+          variant="contrast"
+          tone="warning"
+        />
+      </DarkSurface>
       <PasswordField
         label="Disabled field"
         description="Communicates locked state cleanly without showing stray toggle chrome."

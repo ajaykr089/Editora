@@ -19,7 +19,7 @@ const style = `
     --ui-alert-surface-base: var(--base-alert-bg, var(--color-panel-solid, var(--ui-color-surface, #ffffff)));
     --ui-alert-bg: color-mix(in srgb, var(--ui-color-primary, #2563eb) 6%, var(--ui-alert-surface-base));
     --ui-alert-color: var(--ui-color-text, var(--ui-text, #202020));
-    --ui-alert-muted: color-mix(in srgb, var(--ui-alert-color) 62%, var(--ui-color-muted, var(--ui-muted, #64748b)) 38%);
+    --ui-alert-muted: color-mix(in srgb, var(--ui-alert-color) 62%, var(--ui-color-muted, var(--ui-muted, #526175)) 38%);
     --ui-alert-accent: var(--ui-color-primary, var(--ui-primary, #2563eb));
     --ui-alert-shadow: var(--base-alert-shadow, var(--shadow-2, none));
     --ui-alert-icon-bg: color-mix(in srgb, var(--ui-alert-accent) 14%, transparent);
@@ -249,16 +249,16 @@ const style = `
     --ui-alert-border: 1px solid color-mix(in srgb, var(--ui-color-primary, #2563eb) 28%, var(--ui-color-border, rgba(15, 23, 42, 0.2)));
   }
   :host([tone="success"]) .alert {
-    --ui-alert-accent: var(--ui-color-success, #16a34a);
+    --ui-alert-accent: var(--ui-color-success, #15803d);
     --ui-alert-bg: linear-gradient(
       180deg,
-      color-mix(in srgb, var(--ui-color-success, #16a34a) 14%, var(--ui-color-surface, #ffffff)) 0%,
-      color-mix(in srgb, var(--ui-color-success, #16a34a) 10%, var(--ui-color-surface, #ffffff)) 100%
+      color-mix(in srgb, var(--ui-color-success, #15803d) 14%, var(--ui-color-surface, #ffffff)) 0%,
+      color-mix(in srgb, var(--ui-color-success, #15803d) 10%, var(--ui-color-surface, #ffffff)) 100%
     );
-    --ui-alert-border: 1px solid color-mix(in srgb, var(--ui-color-success, #16a34a) 30%, var(--ui-color-border, rgba(15, 23, 42, 0.2)));
+    --ui-alert-border: 1px solid color-mix(in srgb, var(--ui-color-success, #15803d) 30%, var(--ui-color-border, rgba(15, 23, 42, 0.2)));
   }
   :host([tone="warning"]) .alert {
-    --ui-alert-accent: var(--ui-color-warning, #d97706);
+    --ui-alert-accent: var(--ui-color-warning, #b45309);
     --ui-alert-bg: linear-gradient(
       180deg,
       color-mix(in srgb, var(--ui-color-warning, #f59e0b) 16%, var(--ui-color-surface, #ffffff)) 0%,

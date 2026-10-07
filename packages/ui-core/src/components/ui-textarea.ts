@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlName, syncControlDescription } from '../primitives/control-name';
 
 const CLEAR_ICON = `
   <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
@@ -10,12 +11,12 @@ const style = `
   :host {
     --ui-textarea-bg: var(--ui-color-surface, #ffffff);
     --ui-textarea-text: var(--ui-color-text, #0f172a);
-    --ui-textarea-muted: var(--ui-color-muted, #64748b);
+    --ui-textarea-muted: var(--ui-color-muted, #526175);
     --ui-textarea-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 74%, transparent);
     --ui-textarea-focus: var(--ui-color-focus-ring, #2563eb);
     --ui-textarea-accent: var(--ui-color-primary, #2563eb);
     --ui-textarea-danger: var(--ui-color-danger, #dc2626);
-    --ui-textarea-success: var(--ui-color-success, #16a34a);
+    --ui-textarea-success: var(--ui-color-success, #15803d);
     --ui-textarea-radius: 12px;
     --ui-textarea-padding-x: 12px;
     --ui-textarea-padding-y: 10px;
@@ -233,11 +234,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-textarea-accent: var(--ui-color-success, #16a34a);
+    --ui-textarea-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-textarea-accent: var(--ui-color-warning, #d97706);
+    --ui-textarea-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {
@@ -361,6 +362,9 @@ export class UITextarea extends ElementBase {
       'color',
       'radius',
       'label',
+      'aria-label',
+      'aria-description',
+      'aria-describedby',
       'description',
       'autosize',
       'max-rows',
@@ -446,7 +450,10 @@ export class UITextarea extends ElementBase {
       'headless',
       'color',
       'radius',
-      'autofocus'
+      'autofocus',
+      'aria-label',
+      'aria-description',
+      'aria-describedby'
     ]);
 
     if (liveAttrs.has(name)) {
@@ -579,17 +586,9 @@ export class UITextarea extends ElementBase {
     if (this.hasAttribute('show-count') || parseLength(this.getAttribute('maxlength')) !== null) describedBy.push(`${this._uid}-count`);
 
     const hasLabel = !!(this.getAttribute('label') || this.querySelector('[slot="label"]'));
-    if (hasLabel) {
-      this._textarea.setAttribute('aria-labelledby', `${this._uid}-label`);
-    } else {
-      this._textarea.removeAttribute('aria-labelledby');
-    }
+    syncControlName(this._textarea, this, hasLabel ? `${this._uid}-label` : null);
 
-    if (describedBy.length) {
-      this._textarea.setAttribute('aria-describedby', describedBy.join(' '));
-    } else {
-      this._textarea.removeAttribute('aria-describedby');
-    }
+    syncControlDescription(this._textarea, this, this._uid, describedBy);
   }
 
   private _syncDynamicUi(): void {

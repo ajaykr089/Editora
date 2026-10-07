@@ -128,7 +128,7 @@ export const DataViewToolbar = React.forwardRef<HTMLDivElement, DataViewToolbarP
             ) : null}
 
             {description ? (
-              <div style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 14, lineHeight: 1.45 }}>
+              <div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 14, lineHeight: 1.45 }}>
                 {description}
               </div>
             ) : null}

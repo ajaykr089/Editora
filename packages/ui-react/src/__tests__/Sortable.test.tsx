@@ -103,6 +103,32 @@ describe('Sortable wrapper', () => {
     expect(el?.shadowRoot?.textContent).toContain('Alpha');
   });
 
+  it('takes a custom drag handle out of the tab order but keeps a focus stop an author set', async () => {
+    const { container } = render(
+      <Sortable
+        lists={lists}
+        items={items}
+        dragHandleSelector="[data-grip]"
+        renderItem={(item) => (
+          <div>
+            <button type="button" data-grip="" data-testid={`grip-${item.id}`}>::</button>
+            <button type="button" data-grip="" tabIndex={0} data-testid={`pinned-${item.id}`}>::</button>
+          </div>
+        )}
+      />
+    );
+
+    const el = container.querySelector('ui-sortable') as HTMLElement | null;
+    await waitFor(() => expect(el?.shadowRoot?.querySelector('[data-sortable-custom-handle]')).toBeTruthy());
+    const root = el!.shadowRoot!;
+
+    // The item is the keyboard stop; a focusable child inside an option is invalid ARIA.
+    const grip = root.querySelector('[data-testid="grip-alpha"]')!;
+    expect(grip.getAttribute('tabindex')).toBe('-1');
+    expect(grip.getAttribute('data-drag-trigger')).toBe('custom');
+    expect(root.querySelector('[data-testid="pinned-alpha"]')!.getAttribute('tabindex')).toBe('0');
+  });
+
   it('renders custom list headers and empty states', async () => {
     const { container } = render(
       <Sortable

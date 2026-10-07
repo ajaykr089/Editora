@@ -32,7 +32,7 @@ const Card = ({
   <Box variant="surface" p="12px" radius="md" style={{ border: '1px solid #e2e8f0', background: '#fff' }}>
     <Flex justify="between" align="center">
       <div>
-        <div style={{ fontSize: 12, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{title}</div>
+        <div style={{ fontSize: 12, color: '#526175', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{title}</div>
         <div style={{ marginTop: 6, fontSize: 24, fontWeight: 700, color: tone }}>{value}</div>
       </div>
       {icon}
@@ -70,7 +70,7 @@ export const IconDrivenOperations: Story = {
           <Flex justify="between" align="center" wrap="wrap" gap="10px">
             <Box>
               <h2 style={{ margin: 0, fontSize: 28, color: '#0f172a' }}>React Icons Operations Dashboard</h2>
-              <p style={{ margin: '6px 0 0 0', color: '#64748b' }}>Icon-driven telemetry for enterprise SaaS workflows.</p>
+              <p style={{ margin: '6px 0 0 0', color: '#526175' }}>Icon-driven telemetry for enterprise SaaS workflows.</p>
             </Box>
             <Flex gap="8px">
               <Button
@@ -97,7 +97,7 @@ export const IconDrivenOperations: Story = {
           </Grid>
 
           <Box variant="surface" p="12px" radius="md" style={{ border: '1px solid #e2e8f0' }}>
-            <Tabs selected={tab} variant="soft" onChange={setTab}>
+            <Tabs selected={tab} variant="soft" onChange={setTab} aria-label="Dashboard sections">
               <div slot="tab" data-value="system">System</div>
               <div slot="panel">
                 <Flex gap="8px" wrap="wrap">

@@ -52,7 +52,7 @@ export const RecordHeader = React.forwardRef<HTMLElement, RecordHeaderProps>(fun
         >
           <div
             style={{
-              color: 'var(--ui-color-muted, #64748b)',
+              color: 'var(--ui-color-muted, #526175)',
               fontSize: 11,
               fontWeight: 700,
               letterSpacing: '0.08em',

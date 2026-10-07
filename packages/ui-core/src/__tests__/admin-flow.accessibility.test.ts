@@ -78,12 +78,17 @@ describe('admin flow accessibility hardening', () => {
 
     tabs.forEach((tab, index) => {
       expect(tab.getAttribute('role')).toBe('tab');
-      expect(tab.getAttribute('aria-controls')).toBe(panels[index].id);
+      // aria-controls cannot reach the light-DOM panel from the shadow root, so it is not emitted.
+      expect(tab.hasAttribute('aria-controls')).toBe(false);
+      expect(panels[index].id).toBeTruthy();
     });
 
     panels.forEach((panel, index) => {
       expect(panel.getAttribute('role')).toBe('tabpanel');
-      expect(panel.getAttribute('aria-labelledby')).toBe(tabs[index].id);
+      // The step tabs sit in the wizard's shadow root and the panels in the light DOM, so an
+      // aria-labelledby naming the tab can never resolve: the panel is named with the step title.
+      expect(panel.hasAttribute('aria-labelledby')).toBe(false);
+      expect(panel.getAttribute('aria-label')).toBe(['One', 'Two', 'Three'][index]);
     });
 
     tabs[0].focus();

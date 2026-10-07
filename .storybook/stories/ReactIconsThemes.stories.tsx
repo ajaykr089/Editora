@@ -105,7 +105,7 @@ function DarkThemeExamples(): React.ReactElement {
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#f8fafc' }}>Neutral icons on dark UI</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#94a3b8' }}>
+            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
               Default recommendation: give icons a light foreground color on dark panels.
             </div>
           </div>
@@ -119,7 +119,7 @@ function DarkThemeExamples(): React.ReactElement {
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#f8fafc' }}>Semantic colors still work</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#94a3b8' }}>
+            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
               Success, warning, and danger hues stay readable when saturation is balanced against the dark background.
             </div>
           </div>
@@ -133,7 +133,7 @@ function DarkThemeExamples(): React.ReactElement {
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#f8fafc' }}>Accent icons for emphasis</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#94a3b8' }}>
+            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
               Bright accent colors are fine as long as the background remains low-noise and dark enough for contrast.
             </div>
           </div>
@@ -155,7 +155,7 @@ function ColoredIconExamples(): React.ReactElement {
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>Status colors</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#64748b' }}>
+            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
               Pass `color` directly to a named component when you want semantic feedback icons.
             </div>
           </div>
@@ -169,7 +169,7 @@ function ColoredIconExamples(): React.ReactElement {
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>Brand or feature colors</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#64748b' }}>
+            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
               Logos and product icons can use explicit brand tones when your UI allows colored marks.
             </div>
           </div>
@@ -189,7 +189,7 @@ function ColoredIconExamples(): React.ReactElement {
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>Inherited color works too</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#64748b' }}>
+            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
               Icons use `currentColor`, so they can inherit from parent text color without extra props.
             </div>
           </div>
@@ -222,7 +222,7 @@ function WeightVariationExamples(): React.ReactElement {
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>Thin</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#64748b' }}>
+            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
               Best when the default outline feels too heavy in dense or refined UI surfaces.
             </div>
           </div>
@@ -238,7 +238,7 @@ function WeightVariationExamples(): React.ReactElement {
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>Regular</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#64748b' }}>
+            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
               Balanced default weight for most surfaces and matches the current library baseline.
             </div>
           </div>
@@ -254,7 +254,7 @@ function WeightVariationExamples(): React.ReactElement {
           </div>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: '#0f172a' }}>Bold</div>
-            <div style={{ marginTop: 6, fontSize: 13, color: '#64748b' }}>
+            <div style={{ marginTop: 6, fontSize: 13, color: '#526175' }}>
               Useful for stronger presence, small touch targets, or low-contrast surfaces.
             </div>
           </div>

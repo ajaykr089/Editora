@@ -137,7 +137,7 @@ export function StructuredComposition() {
               padding: '4px 10px',
               borderRadius: 999,
               background: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 10%, transparent)',
-              color: 'var(--ui-color-primary, #2563eb)',
+              color: 'color-mix(in srgb, var(--ui-color-primary, #2563eb) 82%, var(--ui-color-text, #0f172a))',
               fontSize: 12,
               fontWeight: 600
             }}
@@ -149,7 +149,7 @@ export function StructuredComposition() {
               padding: '4px 10px',
               borderRadius: 999,
               background: 'color-mix(in srgb, var(--ui-color-success, #16a34a) 12%, transparent)',
-              color: 'var(--ui-color-success, #16a34a)',
+              color: 'color-mix(in srgb, var(--ui-color-success, #15803d) 82%, var(--ui-color-text, #0f172a))',
               fontSize: 12,
               fontWeight: 600
             }}

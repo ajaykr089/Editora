@@ -183,7 +183,7 @@ export const PolicyMemoApprovalFlow: Story = {
               Captures <code>editora:approval-state-changed</code> and <code>editora:approval-state</code>.
             </p>
             {events.length === 0 ? (
-              <p style={{ margin: 0, fontSize: 13, color: "#64748b" }}>No approval events captured yet.</p>
+              <p style={{ margin: 0, fontSize: 13, color: "#526175" }}>No approval events captured yet.</p>
             ) : (
               <ol style={{ margin: 0, paddingInlineStart: 18, display: "grid", gap: 8 }}>
                 {events.map((entry, index) => (

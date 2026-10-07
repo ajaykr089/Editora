@@ -79,7 +79,7 @@ const style = `
   :host([variant='solid']) {
     --ui-app-header-bg: var(--ui-app-header-accent);
     --ui-app-header-color: #ffffff;
-    --ui-app-header-muted: color-mix(in srgb, #ffffff 76%, transparent);
+    --ui-app-header-muted: color-mix(in srgb, #ffffff 94%, transparent);
     --ui-app-header-border: 1px solid color-mix(in srgb, #000000 16%, transparent);
     --ui-app-header-control-bg: color-mix(in srgb, #ffffff 14%, transparent);
     --ui-app-header-control-bg-hover: color-mix(in srgb, #ffffff 24%, transparent);
@@ -104,11 +104,11 @@ const style = `
   }
 
   :host([tone='success']) {
-    --ui-app-header-accent: var(--ui-color-success, #16a34a);
+    --ui-app-header-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone='warning']) {
-    --ui-app-header-accent: var(--ui-color-warning, #d97706);
+    --ui-app-header-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone='danger']) {

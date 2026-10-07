@@ -90,4 +90,21 @@ describe('Card wrapper', () => {
     expect('CardMedia' in CardModule).toBe(false);
     expect('CardInset' in CardModule).toBe(false);
   });
+  it('keeps a title, a description and the body apart as words, in the card name too', async () => {
+    const { container } = render(
+      <Card interactive>
+        <Card.Header>
+          <Card.Title>Project summary</Card.Title>
+          <Card.Description>Open to see details</Card.Description>
+        </Card.Header>
+        <div>Last edited today</div>
+      </Card>
+    );
+
+    const card = container.querySelector('ui-card') as HTMLElement;
+    // The text as a text-based tool reads it: no run-together "summaryOpen".
+    expect(card.textContent).toBe('Project summary Open to see details Last edited today');
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(card.getAttribute('aria-label')).toBe('Project summary Open to see details Last edited today');
+  });
 });

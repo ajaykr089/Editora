@@ -36,7 +36,7 @@ export const BasicRating = (args: any) => {
           setValue(e.value);
         }}
       />
-      <p style={{ marginTop: "10px", fontSize: "14px", color: "#64748b" }}>
+      <p style={{ marginTop: "10px", fontSize: "14px", color: "#526175" }}>
         Current value: {value} / {args.max || 5}
       </p>
     </div>
@@ -73,7 +73,7 @@ export const ProductRating = () => {
         animation="scale"
         onChange={(e) => setValue(e.value)}
       />
-      <p style={{ marginTop: '10px', fontSize: '14px', color: '#64748b' }}>
+      <p style={{ marginTop: '10px', fontSize: '14px', color: '#526175' }}>
         {value} out of 5 stars
       </p>
     </div>
@@ -97,7 +97,7 @@ export const CustomerFeedback = () => {
         showValue={true}
         onChange={(e) => setValue(e.value)}
       />
-      <p style={{ marginTop: '10px', fontSize: '14px', color: '#64748b' }}>
+      <p style={{ marginTop: '10px', fontSize: '14px', color: '#526175' }}>
         Please rate your experience from 1 to 10
       </p>
     </div>
@@ -120,7 +120,7 @@ export const ServiceRating = () => {
         label="Service Quality"
         onChange={(e) => setValue(e.value)}
       />
-      <p style={{ marginTop: '10px', fontSize: '12px', color: '#64748b' }}>
+      <p style={{ marginTop: '10px', fontSize: '12px', color: '#526175' }}>
         Rate the service quality
       </p>
     </div>
@@ -141,7 +141,7 @@ export const ReadonlyRating = () => {
         label="Average Rating"
         showValue={true}
       />
-      <p style={{ marginTop: '10px', fontSize: '14px', color: '#64748b' }}>
+      <p style={{ marginTop: '10px', fontSize: '14px', color: '#526175' }}>
         This rating is readonly and shows an average score
       </p>
     </div>
@@ -163,7 +163,7 @@ export const DisabledRating = () => {
         label="Temporarily Unavailable"
         showValue={true}
       />
-      <p style={{ marginTop: '10px', fontSize: '14px', color: '#64748b' }}>
+      <p style={{ marginTop: '10px', fontSize: '14px', color: '#526175' }}>
         This rating is disabled and cannot be interacted with
       </p>
     </div>
@@ -186,7 +186,7 @@ export const CustomShapeRating = () => {
         shape="square"
         onChange={(e) => setValue(e.value)}
       />
-      <p style={{ marginTop: '10px', fontSize: '14px', color: '#64748b' }}>
+      <p style={{ marginTop: '10px', fontSize: '14px', color: '#526175' }}>
         Square-shaped rating with pulse animation
       </p>
     </div>
@@ -209,7 +209,7 @@ export const PillShapeRating = () => {
         shape="pill"
         onChange={(e) => setValue(e.value)}
       />
-      <p style={{ marginTop: '10px', fontSize: '14px', color: '#64748b' }}>
+      <p style={{ marginTop: '10px', fontSize: '14px', color: '#526175' }}>
         Pill-shaped rating with scale animation
       </p>
     </div>
@@ -483,7 +483,7 @@ export const InteractiveDemo = () => {
           showValue={showValue}
           onChange={(e) => setValue(e.value)}
         />
-        <p style={{ marginTop: '10px', fontSize: '14px', color: '#64748b' }}>
+        <p style={{ marginTop: '10px', fontSize: '14px', color: '#526175' }}>
           Value: {value} / {max} | Variant: {variant} | Size: {size} | Tone: {tone} | Animation: {animation} | Shape: {shape}
         </p>
       </div>
@@ -491,7 +491,7 @@ export const InteractiveDemo = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
         <div>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold' }}>Max Value</label>
-          <input 
+          <input aria-label="Max Value" 
             type="range" 
             min="1" 
             max="10" 
@@ -499,12 +499,12 @@ export const InteractiveDemo = () => {
             onChange={(e) => setMax(parseInt(e.target.value))}
             style={{ width: '100%' }}
           />
-          <span style={{ fontSize: '12px', color: '#64748b' }}>{max}</span>
+          <span style={{ fontSize: '12px', color: '#526175' }}>{max}</span>
         </div>
         
         <div>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold' }}>Current Value</label>
-          <input 
+          <input aria-label="Current Value" 
             type="range" 
             min="0" 
             max={max} 
@@ -512,12 +512,12 @@ export const InteractiveDemo = () => {
             onChange={(e) => setValue(parseInt(e.target.value))}
             style={{ width: '100%' }}
           />
-          <span style={{ fontSize: '12px', color: '#64748b' }}>{value}</span>
+          <span style={{ fontSize: '12px', color: '#526175' }}>{value}</span>
         </div>
 
         <div>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold' }}>Variant</label>
-          <select value={variant} onChange={(e) => setVariant(e.target.value as typeof variant)} style={{ width: '100%', padding: '5px' }}>
+          <select aria-label="Variant" value={variant} onChange={(e) => setVariant(e.target.value as typeof variant)} style={{ width: '100%', padding: '5px' }}>
             <option value="default">Default</option>
             <option value="soft">Soft</option>
             <option value="glass">Glass</option>
@@ -528,7 +528,7 @@ export const InteractiveDemo = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold' }}>Size</label>
-          <select value={size} onChange={(e) => setSize(e.target.value as typeof size)} style={{ width: '100%', padding: '5px' }}>
+          <select aria-label="Size" value={size} onChange={(e) => setSize(e.target.value as typeof size)} style={{ width: '100%', padding: '5px' }}>
             <option value="sm">Small</option>
             <option value="md">Medium</option>
             <option value="lg">Large</option>
@@ -537,7 +537,7 @@ export const InteractiveDemo = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold' }}>Tone</label>
-          <select value={tone} onChange={(e) => setTone(e.target.value as typeof tone)} style={{ width: '100%', padding: '5px' }}>
+          <select aria-label="Tone" value={tone} onChange={(e) => setTone(e.target.value as typeof tone)} style={{ width: '100%', padding: '5px' }}>
             <option value="neutral">Neutral</option>
             <option value="info">Info</option>
             <option value="success">Success</option>
@@ -548,7 +548,7 @@ export const InteractiveDemo = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold' }}>Animation</label>
-          <select value={animation} onChange={(e) => setAnimation(e.target.value as typeof animation)} style={{ width: '100%', padding: '5px' }}>
+          <select aria-label="Animation" value={animation} onChange={(e) => setAnimation(e.target.value as typeof animation)} style={{ width: '100%', padding: '5px' }}>
             <option value="scale">Scale</option>
             <option value="pulse">Pulse</option>
             <option value="none">None</option>
@@ -557,7 +557,7 @@ export const InteractiveDemo = () => {
 
         <div>
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '12px', fontWeight: 'bold' }}>Shape</label>
-          <select value={shape} onChange={(e) => setShape(e.target.value as typeof shape)} style={{ width: '100%', padding: '5px' }}>
+          <select aria-label="Shape" value={shape} onChange={(e) => setShape(e.target.value as typeof shape)} style={{ width: '100%', padding: '5px' }}>
             <option value="rounded">Rounded</option>
             <option value="square">Square</option>
             <option value="pill">Pill</option>

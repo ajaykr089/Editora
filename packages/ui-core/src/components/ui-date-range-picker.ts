@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { syncControlName, syncControlDescription } from '../primitives/control-name';
 import { createDismissableLayer, type DismissableLayerHandle } from '../primitives/dismissable-layer';
 import { compareISO } from './ui-calendar';
 import { resolveDateTimeTranslations } from './date-time-i18n';
@@ -60,7 +61,7 @@ const style = `
     );
     --ui-dp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
     --ui-dp-text: var(--ui-color-text, #0f172a);
-    --ui-dp-muted: var(--ui-color-muted, #64748b);
+    --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
     --ui-dp-success: var(--ui-color-success, #15803d);
     --ui-dp-radius: 12px;
@@ -368,7 +369,7 @@ const overlayStyle = `
     );
     --ui-dp-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
     --ui-dp-text: var(--ui-color-text, #0f172a);
-    --ui-dp-muted: var(--ui-color-muted, #64748b);
+    --ui-dp-muted: var(--ui-color-muted, #526175);
     --ui-dp-accent: var(--ui-color-primary, #2563eb);
     --ui-dp-success: var(--ui-color-success, #15803d);
     --ui-dp-radius: 12px;
@@ -506,6 +507,9 @@ function parseSingleRangeDraft(raw: string, locale: string): RangeValue {
 export class UIDateRangePicker extends ElementBase {
   static get observedAttributes() {
     return [
+      'aria-label',
+      'aria-description',
+      'aria-describedby',
       'open',
       'default-open',
       'value',
@@ -1249,8 +1253,7 @@ export class UIDateRangePicker extends ElementBase {
       single.setAttribute('aria-controls', this._panelId);
       single.setAttribute('aria-expanded', isInline ? 'false' : String(this._open));
       single.setAttribute('aria-invalid', error ? 'true' : 'false');
-      if (label) single.setAttribute('aria-labelledby', this._labelId);
-      else single.removeAttribute('aria-labelledby');
+      syncControlName(single, this, label ? this._labelId : null, t.startEnd);
     }
     if (start) {
       if (start.value !== this._draftStart) start.value = this._draftStart;
@@ -1266,8 +1269,7 @@ export class UIDateRangePicker extends ElementBase {
       start.setAttribute('aria-controls', this._panelId);
       start.setAttribute('aria-expanded', isInline ? 'false' : String(this._open));
       start.setAttribute('aria-invalid', error ? 'true' : 'false');
-      if (label) start.setAttribute('aria-labelledby', this._labelId);
-      else start.removeAttribute('aria-labelledby');
+      syncControlName(start, this, label ? this._labelId : null, t.startDate);
     }
     if (end) {
       if (end.value !== this._draftEnd) end.value = this._draftEnd;
@@ -1283,8 +1285,7 @@ export class UIDateRangePicker extends ElementBase {
       end.setAttribute('aria-controls', this._panelId);
       end.setAttribute('aria-expanded', isInline ? 'false' : String(this._open));
       end.setAttribute('aria-invalid', error ? 'true' : 'false');
-      if (label) end.setAttribute('aria-labelledby', this._labelId);
-      else end.removeAttribute('aria-labelledby');
+      syncControlName(end, this, label ? this._labelId : null, t.endDate);
     }
     if (sep) sep.hidden = variant === 'single-field';
     if (clearBtn) {
@@ -1312,19 +1313,9 @@ export class UIDateRangePicker extends ElementBase {
     const describedBy: string[] = [];
     if (hint && hintEl && !hintEl.hidden) describedBy.push(this._hintId);
     if (error) describedBy.push(this._errorId);
-    const describedByValue = describedBy.join(' ');
-    if (single) {
-      if (describedByValue) single.setAttribute('aria-describedby', describedByValue);
-      else single.removeAttribute('aria-describedby');
-    }
-    if (start) {
-      if (describedByValue) start.setAttribute('aria-describedby', describedByValue);
-      else start.removeAttribute('aria-describedby');
-    }
-    if (end) {
-      if (describedByValue) end.setAttribute('aria-describedby', describedByValue);
-      else end.removeAttribute('aria-describedby');
-    }
+    syncControlDescription(single, this, `${this._uid}-single`, describedBy);
+    syncControlDescription(start, this, `${this._uid}-start`, describedBy);
+    syncControlDescription(end, this, `${this._uid}-end`, describedBy);
     if (inlinePanel) {
       inlinePanel.hidden = !isInline;
       inlinePanel.id = this._panelId;

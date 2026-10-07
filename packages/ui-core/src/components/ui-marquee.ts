@@ -121,7 +121,7 @@ const style = `
   }
 
   :host([tone="neutral"]) {
-    --ui-marquee-accent: #64748b;
+    --ui-marquee-accent: #526175;
   }
 
   :host([tone="info"]) {
@@ -129,11 +129,11 @@ const style = `
   }
 
   :host([tone="success"]) {
-    --ui-marquee-accent: var(--ui-color-success, #16a34a);
+    --ui-marquee-accent: var(--ui-color-success, #15803d);
   }
 
   :host([tone="warning"]) {
-    --ui-marquee-accent: var(--ui-color-warning, #d97706);
+    --ui-marquee-accent: var(--ui-color-warning, #b45309);
   }
 
   :host([tone="danger"]) {

@@ -368,6 +368,16 @@ if (typeof document !== 'undefined' && !document.getElementById('editora-not-def
   document.head.appendChild(style);
 }
 
+if (typeof document !== 'undefined' && !document.getElementById('editora-narrow-story-layout')) {
+  const style = document.createElement('style');
+  style.id = 'editora-narrow-story-layout';
+  // The demo layouts around the components use fixed multi-column grids. On a phone-width canvas they
+  // stack, so the page scrolls only when a component itself is too wide.
+  style.textContent =
+    '@media (max-width: 640px) { #storybook-root [style*="grid-template-columns"] { grid-template-columns: minmax(0, 1fr) !important; } }';
+  document.head.appendChild(style);
+}
+
 const preview: Preview = {
   parameters: {
     docs: {

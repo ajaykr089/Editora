@@ -51,7 +51,7 @@ export const Controlled = () => {
         <Checkbox checked={checked} onCheckedChange={(next) => setChecked(next)}>
           Controlled ({checked ? 'On' : 'Off'})
         </Checkbox>
-        <Box style={{ fontSize: 12, color: '#64748b' }}>Value: {String(checked)}</Box>
+        <Box style={{ fontSize: 12, color: '#526175' }}>Value: {String(checked)}</Box>
       </Flex>
     </Box>
   );

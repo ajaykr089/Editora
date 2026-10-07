@@ -59,7 +59,7 @@ function TabButton(props: { active: boolean; onClick: () => void; children: Reac
         border: 'none',
         borderBottom: props.active ? '3px solid var(--ui-color-primary, #2563eb)' : '3px solid transparent',
         background: 'transparent',
-        color: props.active ? 'var(--ui-color-text, #0f172a)' : 'var(--ui-color-muted, #64748b)',
+        color: props.active ? 'var(--ui-color-text, #0f172a)' : 'var(--ui-color-muted, #526175)',
         padding: '14px 4px 12px',
         font: '600 15px/1.4 inherit',
         cursor: 'pointer',
@@ -212,7 +212,7 @@ function MenubarPreview(props: {
           <MenubarContent />
         </Menubar>
       </Box>
-      {props.label ? <div style={{ fontSize: 13, color: '#64748b', textAlign: 'center' }}>{props.label}</div> : null}
+      {props.label ? <div style={{ fontSize: 13, color: '#526175', textAlign: 'center' }}>{props.label}</div> : null}
     </Grid>
   );
 
@@ -382,7 +382,7 @@ export const Vertical: Story = {
         </Menubar.Content>
       </Menubar>
 
-      <Box style={{ fontSize: 13, color: '#64748b', maxInlineSize: 280 }}>
+      <Box style={{ fontSize: 13, color: '#526175', maxInlineSize: 280 }}>
         Vertical mode works for command strips, editor side rails, and compact admin tool clusters.
       </Box>
     </Flex>

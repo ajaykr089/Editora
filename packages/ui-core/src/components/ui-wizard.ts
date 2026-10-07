@@ -27,11 +27,11 @@ const style = `
     --ui-wizard-surface: color-mix(in srgb, var(--ui-color-surface, #ffffff) 99%, transparent);
     --ui-wizard-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 72%, transparent);
     --ui-wizard-text: var(--ui-color-text, #0f172a);
-    --ui-wizard-muted: var(--ui-color-muted, #64748b);
+    --ui-wizard-muted: var(--ui-color-muted, #526175);
     --ui-wizard-accent: var(--ui-color-primary, #2563eb);
     --ui-wizard-focus: var(--ui-color-focus-ring, #2563eb);
-    --ui-wizard-success: var(--ui-color-success, #16a34a);
-    --ui-wizard-warning: var(--ui-color-warning, #d97706);
+    --ui-wizard-success: var(--ui-color-success, #15803d);
+    --ui-wizard-warning: var(--ui-color-warning, #b45309);
     --ui-wizard-danger: var(--ui-color-danger, #dc2626);
 
     --ui-wizard-radius: 14px;
@@ -650,6 +650,9 @@ function isTruthy(raw: string | null): boolean {
 
 let wizardInstanceId = 0;
 
+// Marks an aria-label this element wrote on a panel (as opposed to one the author supplied).
+const AUTO_PANEL_LABEL_ATTR = "data-ui-wizard-auto-label";
+
 export class UIWizard extends ElementBase {
   static get observedAttributes() {
     return [
@@ -959,7 +962,17 @@ export class UIWizard extends ElementBase {
 
       step.node.id = panelId;
       step.node.setAttribute("role", "tabpanel");
-      step.node.setAttribute("aria-labelledby", tabId);
+      // The step tabs live in this element's shadow root and the panels in the light DOM, so an
+      // aria-labelledby pointing at the tab id can never resolve and the panel was exposed
+      // unnamed. Name it with the step title unless the author labelled the panel themselves.
+      if (step.node.getAttribute("aria-labelledby") === tabId) step.node.removeAttribute("aria-labelledby");
+      const authorLabelled =
+        step.node.hasAttribute("aria-labelledby") ||
+        (step.node.hasAttribute("aria-label") && !step.node.hasAttribute(AUTO_PANEL_LABEL_ATTR));
+      if (!authorLabelled && step.title) {
+        step.node.setAttribute("aria-label", step.title);
+        step.node.setAttribute(AUTO_PANEL_LABEL_ATTR, "");
+      }
       step.node.setAttribute("tabindex", active ? "0" : "-1");
       step.node.setAttribute("data-active", active ? "true" : "false");
       step.node.setAttribute("aria-hidden", active ? "false" : "true");
@@ -1332,7 +1345,6 @@ export class UIWizard extends ElementBase {
                       part="step"
                       id="${tabId}"
                       role="tab"
-                      aria-controls="${panelId}"
                       data-index="${index}"
                       data-active="${index === activeIndex ? "true" : "false"}"
                       data-status="${visual}"

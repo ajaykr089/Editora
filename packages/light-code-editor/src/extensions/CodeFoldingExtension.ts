@@ -28,7 +28,8 @@ type LineInfo = {
 
 export class CodeFoldingExtension implements EditorExtension {
   public readonly name = 'code-folding';
-  private readonly lineHeight = 21;
+  // Keep in step with View's line height.
+  private readonly lineHeight = 24;
   private readonly voidMarkupTags = new Set([
     'area',
     'base',
@@ -143,7 +144,7 @@ export class CodeFoldingExtension implements EditorExtension {
       right: 0;
       top: 0;
       bottom: 0;
-      width: 20px;
+      width: 24px;
       pointer-events: none;
       z-index: 3;
     `;
@@ -546,7 +547,7 @@ export class CodeFoldingExtension implements EditorExtension {
       position: absolute;
       left: 0;
       top: ${displayLine * this.lineHeight}px;
-      width: 20px;
+      width: 24px;
       height: ${this.lineHeight}px;
       display: flex;
       align-items: center;

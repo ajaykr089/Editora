@@ -187,7 +187,7 @@ export function createSharedMenuItemCss(options: SharedMenuItemStyleOptions): st
   }
 
   ${labelCaption} {
-    color: color-mix(in srgb, currentColor 58%, transparent);
+    color: color-mix(in srgb, currentColor 70%, transparent);
     font-size: calc(var(${prefix}-item-font-size, 14px) - 1px);
     line-height: 1.35;
     letter-spacing: inherit;
@@ -198,7 +198,7 @@ export function createSharedMenuItemCss(options: SharedMenuItemStyleOptions): st
     padding-left: 14px;
     flex: 0 0 auto;
     min-width: max-content;
-    color: color-mix(in srgb, currentColor 54%, transparent);
+    color: color-mix(in srgb, currentColor 70%, transparent);
     font-size: calc(var(${prefix}-item-font-size, 14px) - 1px);
     line-height: 1;
     letter-spacing: inherit;
@@ -208,7 +208,7 @@ export function createSharedMenuItemCss(options: SharedMenuItemStyleOptions): st
   ${submenuArrow} {
     margin-left: 6px;
     flex: 0 0 auto;
-    color: color-mix(in srgb, currentColor 54%, transparent);
+    color: color-mix(in srgb, currentColor 70%, transparent);
     font-size: 12px;
   }
 `;

@@ -382,6 +382,7 @@ export class UIProgress extends ElementBase {
       'animated',
       'show-label',
       'label',
+      'aria-label',
       'format',
       'precision',
       'headless'
@@ -564,6 +565,11 @@ export class UIProgress extends ElementBase {
     const mode = normalizeMode(this.getAttribute('mode'));
     const showCenterLabel = showLabel && mode === 'circle';
     const showTopLabel = showLabel && mode !== 'circle';
+
+    // A progressbar needs an accessible name: the host's aria-label, then the explicit label
+    // attribute, then a generic one so it is never announced as just "progress bar".
+    const accessibleName = (this.getAttribute('aria-label') || '').trim() || (explicitLabel || '').trim() || 'Progress';
+    for (const bar of [this._trackEl, this._radialWrapEl]) bar?.setAttribute('aria-label', accessibleName);
 
     if (this._metaEl) {
       this._metaEl.textContent = showTopLabel ? renderedLabel : '';

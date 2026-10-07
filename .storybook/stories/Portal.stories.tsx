@@ -55,7 +55,7 @@ export const TargetedPortal = (args: any) => {
         </Portal>
       )}
 
-      <Box style={{ fontSize: 12, color: '#64748b' }}>{log.length ? log.join(' | ') : 'No portal events yet.'}</Box>
+      <Box style={{ fontSize: 12, color: '#526175' }}>{log.length ? log.join(' | ') : 'No portal events yet.'}</Box>
     </Grid>
   );
 };
@@ -72,7 +72,7 @@ export const StrategyComparison = () => (
     <Box style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 12 }}>
       <strong>Append Strategy</strong>
       <Box id="portal-append-target" style={{ marginTop: 8, minHeight: 72, padding: 10, border: '1px dashed #cbd5e1', borderRadius: 8 }}>
-        <Box style={{ fontSize: 12, color: '#64748b', marginBottom: 6 }}>Existing content A</Box>
+        <Box style={{ fontSize: 12, color: '#526175', marginBottom: 6 }}>Existing content A</Box>
         <Portal target="#portal-append-target" strategy="append">
           <Box style={{ padding: 8, borderRadius: 8, background: '#e0f2fe' }}>Portaled (append)</Box>
         </Portal>
@@ -81,7 +81,7 @@ export const StrategyComparison = () => (
     <Box style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: 12 }}>
       <strong>Prepend Strategy</strong>
       <Box id="portal-prepend-target" style={{ marginTop: 8, minHeight: 72, padding: 10, border: '1px dashed #cbd5e1', borderRadius: 8 }}>
-        <Box style={{ fontSize: 12, color: '#64748b', marginBottom: 6 }}>Existing content B</Box>
+        <Box style={{ fontSize: 12, color: '#526175', marginBottom: 6 }}>Existing content B</Box>
         <Portal target="#portal-prepend-target" strategy="prepend">
           <Box style={{ padding: 8, borderRadius: 8, background: '#dcfce7' }}>Portaled (prepend)</Box>
         </Portal>

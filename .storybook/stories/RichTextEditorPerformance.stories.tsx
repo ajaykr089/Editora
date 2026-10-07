@@ -28,7 +28,7 @@ function generateLargeContent() {
   content += '<p><strong>This document contains 100 sections to stress test editor rendering and navigation.</strong></p>';
 
   for (let i = 1; i <= 100; i += 1) {
-    content += `<h3>Section ${i}</h3>`;
+    content += `<h2>Section ${i}</h2>`;
     content += `<p>This is paragraph ${i}. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>`;
     if (i % 10 === 0) {
       content += `<blockquote>Milestone: Completed ${i} sections.</blockquote>`;

@@ -245,8 +245,8 @@ function LogoCard({ Icon, name, category }: LogoItem): React.ReactElement {
       <Box style={iconFrameStyle}>
         <Icon />
       </Box>
-      <div style={{ fontSize: 11, color: '#64748b', textAlign: 'center' }}>{name}</div>
-      <div style={{ fontSize: 10, color: '#94a3b8', textTransform: 'uppercase' }}>
+      <div style={{ fontSize: 11, color: '#526175', textAlign: 'center' }}>{name}</div>
+      <div style={{ fontSize: 10, color: '#526175', textTransform: 'uppercase' }}>
         {category}
       </div>
     </Box>

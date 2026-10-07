@@ -55,7 +55,7 @@ export function BaselineStyles() {
           gap: 14,
         }}
       >
-        <Box style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ui-color-muted, #64748b)' }}>
+        <Box style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ui-color-muted, #526175)' }}>
           Variants
         </Box>
         <Grid style={{ gap: 14 }}>
@@ -77,7 +77,7 @@ export function BaselineStyles() {
             gap: 14,
           }}
         >
-          <Box style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ui-color-muted, #64748b)' }}>
+          <Box style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ui-color-muted, #526175)' }}>
             Sizes
           </Box>
           <DemoAlert size="sm" radius={8} />
@@ -95,7 +95,7 @@ export function BaselineStyles() {
             gap: 14,
           }}
         >
-          <Box style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ui-color-muted, #64748b)' }}>
+          <Box style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ui-color-muted, #526175)' }}>
             Radius and indicator
           </Box>
           <DemoAlert radius={0} variant="outline" />
@@ -129,11 +129,11 @@ function EnterpriseAlertCenter() {
         <Flex align="center" justify="space-between" style={{ gap: 10, flexWrap: 'wrap' }}>
           <Box>
             <Box style={{ fontWeight: 700, fontSize: 18 }}>Clinical Alert Center</Box>
-            <Box style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
+            <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13, marginTop: 4 }}>
               Enterprise alert patterns powered by `ui-core` and wrapped by `ui-react`.
             </Box>
           </Box>
-          <Flex align="center" style={{ gap: 6, color: 'var(--ui-color-muted, #64748b)', fontSize: 12 }}>
+          <Flex align="center" style={{ gap: 6, color: 'var(--ui-color-muted, #526175)', fontSize: 12 }}>
             <ClockIcon size={14} />
             Shift status: Active monitoring
           </Flex>

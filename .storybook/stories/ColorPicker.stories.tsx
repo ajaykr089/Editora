@@ -56,7 +56,7 @@ export const Playground = (args: any) => (
       <Flex align="center" justify="space-between" style={{ gap: 10, flexWrap: 'wrap' }}>
         <div>
           <div style={{ fontSize: 20, fontWeight: 700 }}>Enterprise Theme Color Controls</div>
-          <div style={{ color: 'var(--ui-color-muted, #64748b)', fontSize: 13, marginTop: 4 }}>
+          <div style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13, marginTop: 4 }}>
             Validate runtime palette updates for alerts, badges, and analytics highlights.
           </div>
         </div>
@@ -189,7 +189,7 @@ export const EnterpriseReleaseWorkflow = () => {
           </Button>
         </Flex>
 
-        <Box style={{ marginTop: 10, fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>
+        <Box style={{ marginTop: 10, fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>
           Value: {value} | Last close source: {lastCloseSource}
         </Box>
       </Box>

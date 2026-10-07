@@ -297,8 +297,8 @@ const shadowStyle = `
   }
 
   :host([tone="neutral"]) {
-    --ui-context-menu-ring: color-mix(in srgb, var(--ui-color-muted, #64748b) 60%, var(--ui-color-text, #0f172a));
-    --ui-context-menu-item-hover-bg: color-mix(in srgb, var(--ui-color-muted, #64748b) 12%, transparent);
+    --ui-context-menu-ring: color-mix(in srgb, var(--ui-color-muted, #526175) 60%, var(--ui-color-text, #0f172a));
+    --ui-context-menu-item-hover-bg: color-mix(in srgb, var(--ui-color-muted, #526175) 12%, transparent);
     --ui-context-menu-item-active-color: inherit;
   }
 

@@ -123,5 +123,5 @@ type SwitchDetail = {
 ## Notes
 
 - The `description` string prop and `Switch.Description` sub-component are equivalent — use whichever fits your pattern.
-- Elements inside `Switch.Description` with `data-ui-switch-no-toggle` (e.g. links) will not trigger the toggle on click.
+- Keep links and buttons beside a switch, not inside it: an interactive element inside `role="switch"` is invalid ARIA and assistive technology cannot reach it. Markup that already has one still works: elements with `data-ui-switch-no-toggle` (and links, buttons and inputs) do not trigger the toggle on click.
 - Keyboard: `Space`/`Enter` toggles, `ArrowLeft`/`ArrowRight` sets off/on, `Home`/`End` forces off/on.

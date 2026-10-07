@@ -91,7 +91,7 @@ export const WithCustomSlots = () => {
     <Grid style={{ display: 'grid', gap: 14, maxWidth: 620 }}>
       <Field required invalid error="Please provide implementation notes." htmlFor="field-notes" variant="soft" tone="warning" shell="soft">
         <span slot="label">Implementation Notes</span>
-        <span slot="actions" style={{ fontSize: 12, color: 'var(--ui-color-muted, #64748b)' }}>Markdown supported</span>
+        <span slot="actions" style={{ fontSize: 12, color: 'var(--ui-color-muted, #526175)' }}>Markdown supported</span>
         <span slot="description">Document migration and rollout details for the team.</span>
         <Textarea id="field-notes" rows={5} placeholder="Describe migration strategy..." />
       </Field>
@@ -148,7 +148,7 @@ export const ThemeProviderVerification = () => {
             surface: '#ffffff',
             surfaceAlt: '#f8fafc',
             text: '#0f172a',
-            muted: '#64748b',
+            muted: '#526175',
             border: 'rgba(15, 23, 42, 0.16)',
             focusRing: '#2563eb'
           }

@@ -11,7 +11,7 @@ const style = `
     color-scheme: light dark;
     --ui-command-bg: color-mix(in srgb, var(--ui-color-surface, #ffffff) 96%, transparent);
     --ui-command-text: var(--ui-color-text, #0f172a);
-    --ui-command-muted: var(--ui-color-muted, #64748b);
+    --ui-command-muted: var(--ui-color-muted, #526175);
     --ui-command-border: 1px solid color-mix(in srgb, var(--ui-color-border, #cbd5e1) 68%, transparent);
     --ui-command-accent: var(--ui-color-primary, #2563eb);
     --ui-command-focus: var(--ui-color-focus-ring, #2563eb);

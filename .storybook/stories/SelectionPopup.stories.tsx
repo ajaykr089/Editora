@@ -76,7 +76,7 @@ export const CompositionSlots = () => {
 
   return (
     <Grid style={{ display: 'grid', gap: 16, padding: 16 }}>
-      <Box style={{ fontSize: 12, color: '#94a3b8' }}>SelectionPopup.Content slot</Box>
+      <Box style={{ fontSize: 12, color: '#526175' }}>SelectionPopup.Content slot</Box>
 
       <Box
         id="comp-anchor"

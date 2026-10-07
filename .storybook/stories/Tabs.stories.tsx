@@ -33,7 +33,7 @@ export const EnterpriseWorkspace = (args: any) => {
 
   return (
     <Grid gap="12px" style={{ maxWidth: 860 }}>
-      <Tabs
+      <Tabs aria-label="Example tabs"
         selected={selected}
         orientation={args.orientation || 'horizontal'}
         activation={args.activation || 'auto'}
@@ -85,7 +85,7 @@ EnterpriseWorkspace.args = {
 
 export const DesignPatterns = () => (
   <Grid gap="14px" style={{ maxWidth: 980 }}>
-    <Tabs variant="segmented" selected={0}>
+    <Tabs aria-label="Segmented tabs" variant="segmented" selected={0}>
       <Tabs.Tab value="board">Board</Tabs.Tab>
       <Tabs.Panel>Segmented pattern: compact for switch-like workflows.</Tabs.Panel>
       <Tabs.Tab value="list">List</Tabs.Tab>
@@ -94,7 +94,7 @@ export const DesignPatterns = () => (
       <Tabs.Panel>Provides clear mode switching with high scanability.</Tabs.Panel>
     </Tabs>
 
-    <Tabs variant="line" selected={1}>
+    <Tabs aria-label="Line tabs" variant="line" selected={1}>
       <Tabs.Tab value="critical">Critical</Tabs.Tab>
       <Tabs.Panel>Line pattern: minimal visual noise for data-heavy layouts.</Tabs.Panel>
       <Tabs.Tab value="standard">Standard</Tabs.Tab>
@@ -103,7 +103,7 @@ export const DesignPatterns = () => (
       <Tabs.Panel>Great for settings surfaces with many small sections.</Tabs.Panel>
     </Tabs>
 
-    <Tabs variant="cards" shape="square" selected={0}>
+    <Tabs aria-label="Cards tabs" variant="cards" shape="square" selected={0}>
       <Tabs.Tab value="pending" icon="🩺">Pending</Tabs.Tab>
       <Tabs.Panel>Cards pattern: stronger surface separation for enterprise portals.</Tabs.Panel>
       <Tabs.Tab value="approved" icon="✅">Approved</Tabs.Tab>
@@ -113,7 +113,7 @@ export const DesignPatterns = () => (
     </Tabs>
 
     <Box variant="contrast" p="14px" radius="lg">
-      <Tabs variant="contrast" tone="warning" size="lg" stretched selected={2}>
+      <Tabs aria-label="Contrast tabs" variant="contrast" tone="warning" size="lg" stretched selected={2}>
         <Tabs.Tab value="alerts">Alerts</Tabs.Tab>
         <Tabs.Panel>Contrast pattern for command-center and dark operational themes.</Tabs.Panel>
         <Tabs.Tab value="runtime">Runtime</Tabs.Tab>
@@ -127,7 +127,7 @@ export const DesignPatterns = () => (
 
 export const AdditionalVariants = () => (
   <Grid gap="14px" style={{ maxWidth: 980 }}>
-    <Tabs variant="outline" selected={0}>
+    <Tabs aria-label="Outline tabs" variant="outline" selected={0}>
       <Tabs.Tab value="summary">Summary</Tabs.Tab>
       <Tabs.Panel>Outline style for admin dashboards that prefer clear strokes over fills.</Tabs.Panel>
       <Tabs.Tab value="queues">Queues</Tabs.Tab>
@@ -136,7 +136,7 @@ export const AdditionalVariants = () => (
       <Tabs.Panel>Easy to theme with token overrides.</Tabs.Panel>
     </Tabs>
 
-    <Tabs variant="solid" tone="success" selected={1}>
+    <Tabs aria-label="Solid tabs" variant="solid" tone="success" selected={1}>
       <Tabs.Tab value="healthy">Healthy</Tabs.Tab>
       <Tabs.Panel>Solid style acts like mode chips for operational UIs.</Tabs.Panel>
       <Tabs.Tab value="monitoring">Monitoring</Tabs.Tab>
@@ -145,7 +145,7 @@ export const AdditionalVariants = () => (
       <Tabs.Panel>Works with success/warning/danger tones.</Tabs.Panel>
     </Tabs>
 
-    <Tabs variant="ghost" selected={0}>
+    <Tabs aria-label="Ghost tabs" variant="ghost" selected={0}>
       <Tabs.Tab value="week">Week</Tabs.Tab>
       <Tabs.Panel>Ghost style removes container chrome for embedded views.</Tabs.Panel>
       <Tabs.Tab value="month">Month</Tabs.Tab>
@@ -154,7 +154,7 @@ export const AdditionalVariants = () => (
       <Tabs.Panel>Still keyboard/focus accessible.</Tabs.Panel>
     </Tabs>
 
-    <Tabs variant="glass" selected={2}>
+    <Tabs aria-label="Glass tabs" variant="glass" selected={2}>
       <Tabs.Tab value="north">North</Tabs.Tab>
       <Tabs.Panel>Glass style for modern high-end SaaS shells.</Tabs.Panel>
       <Tabs.Tab value="south">South</Tabs.Tab>
@@ -167,7 +167,7 @@ export const AdditionalVariants = () => (
 
 export const AnimatedIndicators = () => (
   <Grid gap="14px" style={{ maxWidth: 980 }}>
-    <Tabs variant="indicator" selected={1}>
+    <Tabs aria-label="Indicator tabs" variant="indicator" selected={1}>
       <Tabs.Tab value="triage">Triage</Tabs.Tab>
       <Tabs.Panel>Moving pill indicator for modern SaaS top navigation.</Tabs.Panel>
       <Tabs.Tab value="review">Review</Tabs.Tab>
@@ -178,7 +178,7 @@ export const AnimatedIndicators = () => (
       <Tabs.Panel>Works with overflow and reduced motion settings.</Tabs.Panel>
     </Tabs>
 
-    <Tabs variant="indicator-line" selected={0}>
+    <Tabs aria-label="Indicator line tabs" variant="indicator-line" selected={0}>
       <Tabs.Tab value="overview">Overview</Tabs.Tab>
       <Tabs.Panel>Animated underline indicator for low-noise enterprise surfaces.</Tabs.Panel>
       <Tabs.Tab value="ops">Ops</Tabs.Tab>
@@ -189,7 +189,7 @@ export const AnimatedIndicators = () => (
       <Tabs.Panel>Keyboard navigation updates the line instantly.</Tabs.Panel>
     </Tabs>
 
-    <Tabs variant="indicator-line" orientation="vertical" activation="manual" loop={false} selected={2}>
+    <Tabs aria-label="Indicator line tabs (vertical)" variant="indicator-line" orientation="vertical" activation="manual" loop={false} selected={2}>
       <Tabs.Tab value="profile">Profile</Tabs.Tab>
       <Tabs.Panel>Vertical mode uses a side indicator rail.</Tabs.Panel>
       <Tabs.Tab value="billing">Billing</Tabs.Tab>
@@ -204,7 +204,7 @@ export const AnimatedIndicators = () => (
 
 export const VerticalEdgeScenarios = () => (
   <Box style={{ maxWidth: 980 }}>
-    <Tabs orientation="vertical" activation="manual" variant="underline" loop={false} selected={1}>
+    <Tabs aria-label="Underline tabs (vertical)" orientation="vertical" activation="manual" variant="underline" loop={false} selected={1}>
       <Tabs.Tab value="profile">Profile</Tabs.Tab>
       <Tabs.Panel>Manual activation: arrow keys move focus; Enter/Space commits selection.</Tabs.Panel>
 
@@ -234,7 +234,7 @@ export const FlatBareEnterprise = () => (
         ['--ui-tabs-panel-bg' as any]: '#ffffff'
       }}
     >
-      <Tabs variant="minimal" shape="square" elevation="none" bare selected={0}>
+      <Tabs aria-label="Minimal tabs" variant="minimal" shape="square" elevation="none" bare selected={0}>
         <Tabs.Tab value="summary">Summary</Tabs.Tab>
         <Tabs.Panel>Flat tabs: no default shadow, sharp edges, token-based control retained.</Tabs.Panel>
         <Tabs.Tab value="financials">Financials</Tabs.Tab>
@@ -245,17 +245,17 @@ export const FlatBareEnterprise = () => (
     </Box>
 
     <Flex gap="10px" wrap="wrap">
-      <Tabs variant="default" size="sm" shape="square" elevation="none" selected={0}>
+      <Tabs aria-label="Default tabs" variant="default" size="sm" shape="square" elevation="none" selected={0}>
         <Tabs.Tab value="a">A</Tabs.Tab><Tabs.Panel>Small</Tabs.Panel>
         <Tabs.Tab value="b">B</Tabs.Tab><Tabs.Panel>Small</Tabs.Panel>
       </Tabs>
 
-      <Tabs variant="default" size="md" shape="rounded" elevation="low" selected={0}>
+      <Tabs aria-label="Default tabs" variant="default" size="md" shape="rounded" elevation="low" selected={0}>
         <Tabs.Tab value="a">A</Tabs.Tab><Tabs.Panel>Medium</Tabs.Panel>
         <Tabs.Tab value="b">B</Tabs.Tab><Tabs.Panel>Medium</Tabs.Panel>
       </Tabs>
 
-      <Tabs variant="default" size="lg" shape="pill" elevation="high" selected={0}>
+      <Tabs aria-label="Default tabs" variant="default" size="lg" shape="pill" elevation="high" selected={0}>
         <Tabs.Tab value="a">A</Tabs.Tab><Tabs.Panel>Large</Tabs.Panel>
         <Tabs.Tab value="b">B</Tabs.Tab><Tabs.Panel>Large</Tabs.Panel>
       </Tabs>
@@ -265,21 +265,21 @@ export const FlatBareEnterprise = () => (
 
 export const DensityModes = () => (
   <Grid gap="12px" style={{ maxWidth: 980 }}>
-    <Tabs variant="soft" density="compact" selected={0}>
+    <Tabs aria-label="Compact density tabs" variant="soft" density="compact" selected={0}>
       <Tabs.Tab value="compact-a">Compact A</Tabs.Tab>
       <Tabs.Panel>Compact density for data-heavy enterprise screens.</Tabs.Panel>
       <Tabs.Tab value="compact-b">Compact B</Tabs.Tab>
       <Tabs.Panel>Tighter spacing with preserved tap targets.</Tabs.Panel>
     </Tabs>
 
-    <Tabs variant="soft" density="default" selected={0}>
+    <Tabs aria-label="Default density tabs" variant="soft" density="default" selected={0}>
       <Tabs.Tab value="default-a">Default A</Tabs.Tab>
       <Tabs.Panel>Balanced default density for most dashboard workflows.</Tabs.Panel>
       <Tabs.Tab value="default-b">Default B</Tabs.Tab>
       <Tabs.Panel>Good middle ground for mixed content.</Tabs.Panel>
     </Tabs>
 
-    <Tabs variant="soft" density="comfortable" selected={0}>
+    <Tabs aria-label="Comfortable density tabs" variant="soft" density="comfortable" selected={0}>
       <Tabs.Tab value="comfortable-a">Comfortable A</Tabs.Tab>
       <Tabs.Panel>Comfortable density for touch-heavy and executive views.</Tabs.Panel>
       <Tabs.Tab value="comfortable-b">Comfortable B</Tabs.Tab>
@@ -289,7 +289,7 @@ export const DensityModes = () => (
 );
 
 export const OverflowWithScroll = () => (
-  <Tabs variant="soft" selected={5}>
+  <Tabs aria-label="Soft tabs" variant="soft" selected={5}>
     <Tabs.Tab value="mon">Mon</Tabs.Tab><Tabs.Panel>Mon capacity</Tabs.Panel>
     <Tabs.Tab value="tue">Tue</Tabs.Tab><Tabs.Panel>Tue capacity</Tabs.Panel>
     <Tabs.Tab value="wed">Wed</Tabs.Tab><Tabs.Panel>Wed capacity</Tabs.Panel>
