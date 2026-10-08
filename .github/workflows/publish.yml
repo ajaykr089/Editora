@@ -50,9 +50,6 @@ jobs:
       - name: Run ui-core and ui-react unit tests
         run: npm run test:ui:unit
 
-      - name: Run ui-sortable, collaboration, light-code-editor and markdown-editor tests
-        run: npm run test:packages
-
       # `changeset publish` packs whatever is on disk and dist/ is not committed, so every
       # workspace has to be built here or it is published empty (36 plugin packages were in the
       # 2026-10-02 release). verify:release below only builds a subset.
@@ -64,6 +61,12 @@ jobs:
 
       - name: Verify package contents
         run: npm run verify:packages
+
+      # After the build, not before: the markdown-editor tests import @editora/core and
+      # @editora/light-code-editor, which resolve to their built dist/ (as in ci.yml, where the build
+      # comes first). Before the build they fail with "Failed to resolve entry for package".
+      - name: Run ui-sortable, collaboration, light-code-editor and markdown-editor tests
+        run: npm run test:packages
 
       - name: Verify release artifacts
         run: npm run verify:release
