@@ -58,6 +58,8 @@ const DEFAULT_ALLOWED_ATTRIBUTES: Record<string, string[]> = {
   img: ['src', 'alt', 'width', 'height', 'loading'],
   video: ['src', 'controls', 'width', 'height', 'autoplay', 'loop', 'muted'],
   audio: ['src', 'controls', 'autoplay', 'loop', 'muted'],
+  // Without `start` an ordered list that continues from 5 silently renumbers from 1 on the next edit.
+  ol: ['start', 'reversed'],
   table: ['border', 'cellpadding', 'cellspacing'],
   td: ['colspan', 'rowspan', 'align', 'valign'],
   th: ['colspan', 'rowspan', 'align', 'valign'],
