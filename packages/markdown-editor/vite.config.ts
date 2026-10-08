@@ -8,7 +8,7 @@ export default defineConfig({
       fileName: (format) => `index.${format === 'es' ? 'esm' : 'cjs'}.js`
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime', '@editora/react', '@editora/core', '@editora/plugins', '@editora/light-code-editor'],
+      external: ['react', 'react-dom', 'react/jsx-runtime', '@editora/react', '@editora/core', '@editora/plugins', '@editora/light-code-editor', 'marked', 'marked-footnote'],
       output: {
         exports: 'named',
         interop: 'auto',
