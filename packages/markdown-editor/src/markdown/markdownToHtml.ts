@@ -3,6 +3,7 @@ import markedFootnote from 'marked-footnote';
 import { sanitizeHTML } from '@editora/core';
 import { frontMatterText, splitFrontMatter } from './frontMatter';
 import { escapeHtml, highlightCode } from './highlight';
+import { mathExtension, restoreMath, withMathRenderer, type MathRenderer } from './math';
 
 /** First word of a fence info string, reduced to characters that are safe inside a class name. */
 const languageOf = (info?: string): string =>
@@ -30,7 +31,7 @@ export const DEFAULT_PREVIEW_LABELS: PreviewLabels = {
 const newlinesIn = (text: string): number => (text.match(/\n/g) || []).length;
 
 /** Blocks that can be scrolled to: each gets the line of the markdown it starts on. */
-const ANCHORED = new Set(['heading', 'paragraph', 'code', 'blockquote', 'list', 'table', 'hr']);
+const ANCHORED = new Set(['heading', 'paragraph', 'code', 'blockquote', 'list', 'table', 'hr', 'mathBlock']);
 
 /**
  * Renders each top-level block on its own so it can carry `data-md-line`, the (0-based) line of the
@@ -52,7 +53,7 @@ const parseWithLines = (tokens: Token[], options?: MarkedOptions): string => {
   return html;
 };
 
-const createPreviewMarked = (labels: PreviewLabels) =>
+const createPreviewMarked = (labels: PreviewLabels, math: boolean) =>
   new Marked(
     {
       gfm: true,
@@ -83,15 +84,17 @@ const createPreviewMarked = (labels: PreviewLabels) =>
       },
     },
     markedFootnote({ description: labels.footnotes, backRefLabel: labels.backToReference }),
+    // Only when asked for: otherwise a dollar sign is just a dollar sign, as it always was.
+    ...(math ? [mathExtension()] : []),
   );
 
 // One instance per set of labels: an instance is cheap but not free, and there are rarely more than one.
 const previewInstances = new Map<string, Marked>();
-const previewMarkedFor = (labels: PreviewLabels): Marked => {
-  const key = JSON.stringify([labels.footnotes, labels.backToReference]);
+const previewMarkedFor = (labels: PreviewLabels, math: boolean): Marked => {
+  const key = JSON.stringify([labels.footnotes, labels.backToReference, math]);
   let instance = previewInstances.get(key);
   if (!instance) {
-    instance = createPreviewMarked(labels);
+    instance = createPreviewMarked(labels, math);
     previewInstances.set(key, instance);
   }
   return instance;
@@ -171,6 +174,8 @@ export interface PreviewOptions {
    */
   idPrefix?: string;
   labels?: Partial<PreviewLabels>;
+  /** Turns on `$x$` and `$$x$$` math, typeset by this function. See math.ts. */
+  renderMath?: MathRenderer;
 }
 
 const FOOTNOTE_ATTRIBUTE = /\b(id|href|aria-describedby)="(#?)footnote-/g;
@@ -188,7 +193,12 @@ export const markdownToPreviewHtml = (markdown: string, options: PreviewOptions 
   const { frontMatter, body } = splitFrontMatter(markdown);
   // The front matter is not rendered, but its lines are kept so every block keeps the line number it has in the source.
   const lined = '\n'.repeat(newlinesIn(frontMatter)) + body;
-  let html = sanitize(previewMarkedFor(labels).parse(lined, { async: false }) as string);
+  const marked = previewMarkedFor(labels, options.renderMath !== undefined);
+  const parse = () => marked.parse(lined, { async: false }) as string;
+  // The typeset formulas are HTML from the page's renderer, so they are sanitised too: each on its own, since
+  // they need SVG the rest of the preview does not allow (see math.ts).
+  const typeset = options.renderMath ? withMathRenderer(options.renderMath, parse) : { result: parse(), formulas: [] };
+  let html = restoreMath(sanitize(typeset.result), typeset.formulas);
   if (options.idPrefix) {
     html = html.replace(FOOTNOTE_ATTRIBUTE, (_, name: string, hash: string) => `${name}="${hash}${options.idPrefix}footnote-`);
   }

@@ -860,3 +860,27 @@ describe('MarkdownEditor ref', () => {
     expect(ref.current!.getValue()).toBe('');
   });
 });
+
+describe('MarkdownEditor math', () => {
+  const typeset = (tex: string, display: boolean) => `<span class="tex">${display ? 'D' : 'I'}:${tex}</span>`;
+
+  it('typesets math in the preview with the renderer it is given', () => {
+    mountDefault({ defaultValue: 'Area $\\pi r^2$\n\n$$\nE = mc^2\n$$', renderMath: typeset });
+    const formulas = Array.from(preview()!.querySelectorAll('.tex')).map((element) => element.textContent);
+    expect(formulas).toEqual(['I:\\pi r^2', 'D:E = mc^2']);
+  });
+
+  it('leaves dollar signs alone without one', () => {
+    mountDefault({ defaultValue: 'Area $\\pi r^2$' });
+    expect(preview()!.querySelector('.md-math')).toBeNull();
+    expect(preview()!.textContent!.trim()).toBe('Area $\\pi r^2$');
+  });
+
+  it('follows the markdown as it changes, and a renderer that changes', () => {
+    mountDefault({ defaultValue: '$a$', renderMath: typeset });
+    typeInSource('$a$ and $b$');
+    expect(Array.from(preview()!.querySelectorAll('.tex')).map((element) => element.textContent)).toEqual(['I:a', 'I:b']);
+    mountDefault({ defaultValue: '$a$', renderMath: (tex) => `<span class="tex">other:${tex}</span>` });
+    expect(Array.from(preview()!.querySelectorAll('.tex')).map((element) => element.textContent)).toEqual(['other:a', 'other:b']);
+  });
+});

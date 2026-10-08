@@ -18,6 +18,7 @@ import { escapeHtml } from '../markdown/highlight';
 import { markdownToEditorHtml, markdownToPreviewHtml } from '../markdown/markdownToHtml';
 import type { MarkdownCommand } from '../source/commands';
 import { SourceEditor, type ScrollInfo, type SourceEditorHandle } from '../source/SourceEditor';
+import type { MathRenderer } from '../markdown/math';
 import { resolveLabels, type MarkdownEditorLabelsInput } from './labels';
 import { lineForPreviewTop, previewTopForLine, type Anchor } from './scrollSync';
 import { MARKDOWN_EDITOR_CSS } from './styles';
@@ -47,6 +48,15 @@ export interface MarkdownEditorProps {
   height?: number | string;
   /** In split view, scroll the source and the preview together. Defaults to true; needs a `height`. */
   syncScroll?: boolean;
+  /**
+   * Turns on math in the preview: `$x^2$` inline, `$$x^2$$` and `$$` fences as display formulas. Typesetting
+   * needs a library the page chooses (KaTeX, MathJax), so this is the function that uses it, for example
+   * `(tex, displayMode) => katex.renderToString(tex, { displayMode, output: 'html', throwOnError: false })`.
+   * Its HTML goes through the same sanitiser as the rest of the preview, which keeps KaTeX's `output: 'html'`
+   * (not MathML or SVG). Without it, `$` is an ordinary character. Give it a stable identity (define it outside
+   * the component, or memoise it): the preview is rendered again when it changes. Not used by the rich surface.
+   */
+  renderMath?: MathRenderer;
   /** Replaces any of the text the editor shows or announces, to translate it. See `MarkdownEditorLabels`. */
   labels?: MarkdownEditorLabelsInput;
   className?: string;
@@ -157,6 +167,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorPro
     minHeight = 220,
     height,
     syncScroll = true,
+    renderMath,
     labels,
     className,
     onChange,
@@ -189,8 +200,9 @@ export const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorPro
         : markdownToPreviewHtml(currentValue, {
             idPrefix: `md${instanceId}-`,
             labels: { frontMatter: text.frontMatter, footnotes: text.footnotes, backToReference: text.backToReference },
+            renderMath,
           }),
-    [currentValue, visibleMode, instanceId, text.frontMatter, text.footnotes, text.backToReference],
+    [currentValue, visibleMode, instanceId, text.frontMatter, text.footnotes, text.backToReference, renderMath],
   );
   const editorHtml = useMemo(() => (rich ? markdownToEditorHtml(currentValue) : ''), [currentValue, rich]);
 

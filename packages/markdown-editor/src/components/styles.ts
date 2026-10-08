@@ -374,5 +374,13 @@ export const MARKDOWN_EDITOR_CSS = `
   white-space: nowrap;
   border: 0;
 }
+/* Math: the typeset formula is the page's; these only place it, and style the source shown when it cannot be typeset. */
+.md-preview .md-math-display { display: block; margin: 1em 0; overflow-x: auto; text-align: center; }
+.md-preview .md-math-source {
+  font-family: var(--rte-font-family-mono, 'SFMono-Regular', Menlo, Monaco, Consolas, monospace);
+  font-size: 0.9em;
+  color: var(--rte-color-text-secondary, #6c757d);
+}
+.md-preview pre.md-math-source { margin: 1em 0; padding: 0.5rem 0.75rem; white-space: pre-wrap; text-align: left; }
 .md-empty-state { margin: 0; color: var(--rte-color-text-muted, #868e96); font-style: italic; }
 `;
