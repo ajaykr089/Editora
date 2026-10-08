@@ -203,12 +203,18 @@ export const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorPro
     const started = clock.now();
     const html = markdownToPreviewHtml(previewSource, {
       idPrefix: `md${instanceId}-`,
-      labels: { frontMatter: text.frontMatter, footnotes: text.footnotes, backToReference: text.backToReference },
+      labels: {
+        frontMatter: text.frontMatter,
+        footnotes: text.footnotes,
+        backToReference: text.backToReference,
+        taskDone: text.taskDone,
+        taskTodo: text.taskTodo,
+      },
       renderMath,
     });
     buildMs.current = clock.now() - started;
     return html;
-  }, [previewSource, visibleMode, instanceId, text.frontMatter, text.footnotes, text.backToReference, renderMath]);
+  }, [previewSource, visibleMode, instanceId, text.frontMatter, text.footnotes, text.backToReference, text.taskDone, text.taskTodo, renderMath]);
   const editorHtml = useMemo(() => (rich ? markdownToEditorHtml(currentValue) : ''), [currentValue, rich]);
 
   // The rich editor is remounted to load markdown that changed from outside (the `value` prop). It used
@@ -286,10 +292,18 @@ export const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorPro
     };
   }, [fullscreen]);
 
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    // Escape also closes menus and the find panel; whatever handled it first has said so.
-    if (fullscreen && event.key === 'Escape' && !event.defaultPrevented) setFullscreen(false);
-  };
+  // Escape leaves fullscreen wherever the focus is. Safari does not focus a button when it is clicked, so after
+  // the fullscreen button is pressed the focus is on the page, not in the editor, and a key handler on the
+  // editor never hears the key. Escape also closes menus and the find panel; whatever handled it first has
+  // said so by preventing the default.
+  useEffect(() => {
+    if (!fullscreen) return undefined;
+    const leaveOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !event.defaultPrevented) setFullscreen(false);
+    };
+    document.addEventListener('keydown', leaveOnEscape);
+    return () => document.removeEventListener('keydown', leaveOnEscape);
+  }, [fullscreen]);
 
   // Scrolling the two panes together. Each pane's position is mapped to the other through the preview's
   // blocks (see scrollSync.ts). A pane that was just moved by this code scrolls too and tells us so; that
@@ -349,7 +363,6 @@ export const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorPro
       data-markdown-editor=""
       data-bounded={height === undefined ? undefined : ''}
       data-fullscreen={fullscreen ? '' : undefined}
-      onKeyDown={handleKeyDown}
     >
       <style>{MARKDOWN_EDITOR_CSS}</style>
 
@@ -422,12 +435,17 @@ export const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorPro
         </div>
 
         {(visibleMode === 'preview' || visibleMode === 'split') && (
-          <section className="md-editor-pane" aria-label={text.previewRegion}>
+          <div className="md-editor-pane">
             <div className="md-preview-head" aria-hidden="true">
               {text.previewHeading}
             </div>
+            {/* The preview scrolls, so it takes the focus: without that a keyboard cannot scroll it (a preview
+                with nothing to focus in it, no link, has no other way). It is the region, so it is named once. */}
             <div
               className="md-preview"
+              role="region"
+              aria-label={text.previewRegion}
+              tabIndex={0}
               ref={previewRef}
               onClick={handlePreviewClick}
               onScroll={handlePreviewScroll}
@@ -435,7 +453,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorPro
                 __html: previewHtml || `<p class="md-empty-state">${escapeHtml(text.emptyPreview)}</p>`,
               }}
             />
-          </section>
+          </div>
         )}
       </div>
     </div>

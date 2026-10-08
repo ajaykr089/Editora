@@ -23,6 +23,9 @@ import { readEditoraTheme, useEditoraTheme } from './useEditoraTheme';
 
 type CodeEditor = ReturnType<typeof createEditor>;
 
+// Each editor names its own hint, so that two on a page do not share one.
+let hintCounter = 0;
+
 export interface SourceEditorProps {
   labels: MarkdownEditorLabels;
   value: string;
@@ -178,6 +181,7 @@ export const SourceEditor = forwardRef<SourceEditorHandle, SourceEditorProps>(fu
   const onScrollRef = useRef(onScroll);
   const labelsRef = useRef(labels);
   const [empty, setEmpty] = useState(value === '');
+  const [hintId] = useState(() => `md-source-hint-${++hintCounter}`);
   const [headingLevel, setHeadingLevelState] = useState(0);
   const theme = useEditoraTheme(rootRef);
 
@@ -326,6 +330,8 @@ export const SourceEditor = forwardRef<SourceEditorHandle, SourceEditorProps>(fu
     surface.setAttribute('role', 'textbox');
     surface.setAttribute('aria-multiline', 'true');
     surface.setAttribute('aria-label', labelsRef.current.sourceTextbox);
+    // Tab indents in the editor, so a keyboard user needs to be told the way out (see the hint below).
+    surface.setAttribute('aria-describedby', hintId);
     surface.setAttribute('spellcheck', 'false');
 
     const bar = new StatusBar({ enabled: true, position: 'bottom' });
@@ -444,6 +450,9 @@ export const SourceEditor = forwardRef<SourceEditorHandle, SourceEditorProps>(fu
     <div className="md-source" ref={rootRef}>
       <SourceToolbar labels={labels} disabled={readOnly} headingLevel={headingLevel} onCommand={handleCommand} onHeading={handleHeading} />
       <div className="md-source-surface">
+        <span id={hintId} className="md-visually-hidden">
+          {labels.sourceHint}
+        </span>
         <div className="md-source-editor" ref={hostRef} />
         {empty && (
           <div className="md-source-placeholder" aria-hidden="true">

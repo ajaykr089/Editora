@@ -44,7 +44,7 @@ export const MARKDOWN_EDITOR_CSS = `
   padding-left: 0.25rem;
   font-size: var(--rte-font-size-sm, 0.875rem);
   font-weight: var(--rte-font-weight-semibold, 600);
-  color: var(--rte-color-text-secondary, #6c757d);
+  color: var(--rte-color-text-primary, #212529);
 }
 .md-editor-title svg { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
 .md-editor-controls {
@@ -81,9 +81,15 @@ export const MARKDOWN_EDITOR_CSS = `
   background: var(--rte-color-bg-hover, #f8f9fa);
   color: var(--rte-color-text-primary, #212529);
 }
+/* Small text on the primary colour: white on #007bff is 3.97:1 and 4.5:1 is the minimum, so the fill is the
+ * primary colour darkened (the dark theme's own fill already reads well and is used as it is). */
 .md-editor-mode[aria-pressed="true"] {
-  background: var(--rte-color-primary, #007bff);
+  background: #0062cc;
+  background: color-mix(in srgb, var(--rte-color-primary, #007bff) 80%, #000);
   color: var(--rte-color-text-inverse, #fff);
+}
+:is(.dark, [data-theme="dark"], .editora-theme-dark) .md-editor-mode[aria-pressed="true"] {
+  background: var(--rte-color-primary, #007bff);
 }
 .md-editor-mode:focus-visible {
   outline: 2px solid var(--rte-color-border-focus, #007bff);
@@ -179,12 +185,23 @@ export const MARKDOWN_EDITOR_CSS = `
   border: 0;
   border-radius: 0;
 }
+/* Text for assistive technology only. */
+.md-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
 .md-source-placeholder {
   position: absolute;
   top: 8px;
   left: 58px;
   right: 8px;
-  color: var(--rte-color-text-muted, #868e96);
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 14px;
   line-height: 21px;
@@ -205,7 +222,6 @@ export const MARKDOWN_EDITOR_CSS = `
   font-weight: var(--rte-font-weight-semibold, 600);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--rte-color-text-muted, #868e96);
 }
 
 /* Preview typography mirrors .rte-content so both panes read the same. */
@@ -273,6 +289,10 @@ export const MARKDOWN_EDITOR_CSS = `
 .md-token-comment { color: #94a3b8; font-style: italic; }
 .md-token-key { color: #f9a8d4; }
 
+.md-preview:focus-visible {
+  outline: 2px solid var(--rte-color-border-focus, #007bff);
+  outline-offset: -2px;
+}
 .md-preview li:has(> .md-task-box) { list-style: none; }
 .md-task-box {
   display: inline-block;
@@ -339,7 +359,6 @@ export const MARKDOWN_EDITOR_CSS = `
   font-weight: var(--rte-font-weight-semibold, 600);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--rte-color-text-muted, #868e96);
 }
 .md-front-matter pre {
   margin: 0;
@@ -384,5 +403,16 @@ export const MARKDOWN_EDITOR_CSS = `
   color: var(--rte-color-text-secondary, #6c757d);
 }
 .md-preview pre.md-math-source { margin: 1em 0; padding: 0.5rem 0.75rem; white-space: pre-wrap; text-align: left; }
-.md-empty-state { margin: 0; color: var(--rte-color-text-muted, #868e96); font-style: italic; }
+.md-empty-state { margin: 0; font-style: italic; }
+
+/* Quiet text (the preview's label, the front matter's title, the empty state, the placeholder). The theme's muted
+ * colour is 3.15:1 on the header grey and 3.4:1 on white, under the 4.5:1 that small text needs; the secondary
+ * colour darkened reads at more than 5:1. The dark theme's muted colour already reads well and is used as it is. */
+.md-source-placeholder, .md-preview-head, .md-front-matter summary, .md-empty-state {
+  color: #5c6770;
+  color: color-mix(in srgb, var(--rte-color-text-secondary, #6c757d) 82%, #000);
+}
+:is(.dark, [data-theme="dark"], .editora-theme-dark) :is(.md-source-placeholder, .md-preview-head, .md-front-matter summary, .md-empty-state) {
+  color: var(--rte-color-text-muted, #868e96);
+}
 `;

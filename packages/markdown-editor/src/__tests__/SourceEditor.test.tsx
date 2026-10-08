@@ -205,6 +205,29 @@ describe('SourceEditor', () => {
       expect(fake.instances).toHaveLength(1);
     });
 
+    it('tells a keyboard user how to leave it, since Tab indents there', () => {
+      render({ value: '# Hi' });
+      const hintId = editor().surface.getAttribute('aria-describedby')!;
+      const hint = host.querySelector(`#${hintId}`)!;
+      expect(hint.textContent).toBe('Tab indents. Press Escape, then Tab, to leave the editor.');
+      // Read by assistive technology, not drawn.
+      expect(hint.className).toBe('md-visually-hidden');
+    });
+
+    it('gives each editor its own hint', () => {
+      render({ value: 'a' });
+      const first = editor().surface.getAttribute('aria-describedby');
+      const second = document.createElement('div');
+      document.body.appendChild(second);
+      const other = createRoot(second);
+      act(() => other.render(<SourceEditor labels={DEFAULT_LABELS} value="b" onChange={() => {}} readOnly={false} placeholder="" />));
+      const ids = Array.from(document.querySelectorAll('.md-visually-hidden')).map((element) => element.id);
+      expect(new Set(ids).size).toBe(ids.length);
+      expect(ids).toContain(first);
+      act(() => other.unmount());
+      second.remove();
+    });
+
     it('is destroyed with the component, along with its status bar', () => {
       render();
       const created = editor();
@@ -661,6 +684,7 @@ describe('SourceEditor', () => {
     const es = {
       ...DEFAULT_LABELS,
       sourceTextbox: 'Fuente markdown',
+      sourceHint: 'Tab sangra. Pulsa Escape y luego Tab para salir del editor.',
       statusLanguage: 'Markdown (es)',
       toolbar: 'Formato',
       heading: 'Encabezado',
@@ -681,6 +705,20 @@ describe('SourceEditor', () => {
       expect(button('italic').getAttribute('aria-label')).toBe('Italic');
       expect(host.querySelector('[role="toolbar"]')!.getAttribute('aria-label')).toBe('Formato');
       expect(editor().surface.getAttribute('aria-label')).toBe('Fuente markdown');
+      const hintId = editor().surface.getAttribute('aria-describedby')!;
+      expect(host.querySelector(`#${hintId}`)!.textContent).toBe('Tab sangra. Pulsa Escape y luego Tab para salir del editor.');
+    });
+
+    it('keeps the visible glyph at the start of the heading button name, and hides the arrow', () => {
+      render({ value: '## Title' });
+      editor().userSelects(3);
+      act(() => editor().emit('cursor', {}));
+      const heading = button('heading');
+      expect(heading.getAttribute('aria-label')).toBe('H2 Heading level: Heading 2');
+      const arrow = heading.querySelector('span');
+      expect(arrow?.getAttribute('aria-hidden')).toBe('true');
+      expect(arrow?.textContent).toBe('▼');
+      expect(heading.textContent).toBe('H2 ▼');
     });
 
     it('names the heading menu and its levels', () => {
@@ -689,12 +727,13 @@ describe('SourceEditor', () => {
       act(() => editor().emit('cursor', {}));
       const heading = button('heading');
       expect(heading.getAttribute('title')).toBe('Encabezado');
-      expect(heading.getAttribute('aria-label')).toBe('Nivel: Encabezado 2');
+      // The glyph on the button is the start of its name, so that what can be read can be said (WCAG 2.5.3).
+      expect(heading.getAttribute('aria-label')).toBe('H2 Nivel: Encabezado 2');
       act(() => heading.click());
       const menu = host.querySelector('[role="menu"]')!;
       expect(menu.getAttribute('aria-label')).toBe('Nivel de encabezado');
       const names = Array.from(menu.querySelectorAll('[role="menuitemradio"]')).map((item) => item.getAttribute('aria-label'));
-      expect(names).toEqual(['Párrafo', 'Encabezado 1', 'Encabezado 2', 'Encabezado 3', 'Encabezado 4', 'Encabezado 5', 'Encabezado 6']);
+      expect(names).toEqual(['P Párrafo', 'H1 Encabezado 1', 'H2 Encabezado 2', 'H3 Encabezado 3', 'H4 Encabezado 4', 'H5 Encabezado 5', 'H6 Encabezado 6']);
       // The glyphs on the buttons are the same in every language.
       expect(Array.from(menu.querySelectorAll('[role="menuitemradio"]')).map((item) => item.textContent)).toEqual(['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
     });
