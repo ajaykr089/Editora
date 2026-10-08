@@ -15,7 +15,8 @@ import {
 import { joinFrontMatter, splitFrontMatter } from '../markdown/frontMatter';
 import { htmlToMarkdown } from '../markdown/htmlToMarkdown';
 import { markdownToEditorHtml, markdownToPreviewHtml } from '../markdown/markdownToHtml';
-import { SourceEditor } from '../source/SourceEditor';
+import { SourceEditor, type ScrollInfo, type SourceEditorHandle } from '../source/SourceEditor';
+import { lineForPreviewTop, previewTopForLine, type Anchor } from './scrollSync';
 import { MARKDOWN_EDITOR_CSS } from './styles';
 
 type Mode = 'edit' | 'preview' | 'split';
@@ -36,6 +37,13 @@ export interface MarkdownEditorProps {
    */
   editorType?: EditorType;
   minHeight?: number;
+  /**
+   * Fixes the height of the editor (a number is pixels, a string any CSS length). Each pane then scrolls on its
+   * own, and in split view the two scroll together. Without it the editor grows with its text.
+   */
+  height?: number | string;
+  /** In split view, scroll the source and the preview together. Defaults to true; needs a `height`. */
+  syncScroll?: boolean;
   className?: string;
   onChange?: (value: string) => void;
 }
@@ -127,6 +135,8 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   mode = 'split',
   editorType = 'source',
   minHeight = 220,
+  height,
+  syncScroll = true,
   className,
   onChange,
 }) => {
@@ -202,10 +212,59 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     target.focus({ preventScroll: true });
   };
 
-  const style = { '--md-min-height': `${minHeight}px` } as React.CSSProperties;
+  // Scrolling the two panes together. Each pane's position is mapped to the other through the preview's
+  // blocks (see scrollSync.ts). A pane that was just moved by this code scrolls too and tells us so; that
+  // echo is recognised by its position, so it is not mistaken for the user and does not bounce back.
+  const sourceRef = useRef<SourceEditorHandle>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const echoed = useRef<{ source: number | null; preview: number | null }>({ source: null, preview: null });
+  const totalLines = useMemo(() => currentValue.split('\n').length, [currentValue]);
+  const syncing = syncScroll && !rich && visibleMode === 'split';
+
+  const readAnchors = (preview: HTMLElement): Anchor[] => {
+    const origin = preview.getBoundingClientRect().top - preview.scrollTop;
+    return Array.from(preview.querySelectorAll<HTMLElement>('[data-md-line]')).map((element) => ({
+      line: Number(element.getAttribute('data-md-line')),
+      top: element.getBoundingClientRect().top - origin,
+    }));
+  };
+
+  const handleSourceScroll = ({ scrollTop, atBottom }: ScrollInfo) => {
+    const preview = previewRef.current;
+    if (!syncing || !preview) return;
+    const echo = echoed.current.source;
+    echoed.current.source = null;
+    if (echo !== null && Math.abs(scrollTop - echo) <= 1) return;
+
+    const max = Math.max(0, preview.scrollHeight - preview.clientHeight);
+    const line = sourceRef.current?.getTopLine() ?? 0;
+    const target = atBottom ? max : previewTopForLine(readAnchors(preview), line, totalLines, preview.scrollHeight);
+    preview.scrollTop = Math.max(0, Math.min(max, target));
+    echoed.current.preview = preview.scrollTop;
+  };
+
+  const handlePreviewScroll = () => {
+    const preview = previewRef.current;
+    const source = sourceRef.current;
+    if (!syncing || !preview || !source) return;
+    const echo = echoed.current.preview;
+    echoed.current.preview = null;
+    if (echo !== null && Math.abs(preview.scrollTop - echo) <= 1) return;
+
+    const atBottom = preview.scrollTop >= preview.scrollHeight - preview.clientHeight - 1;
+    const line = atBottom
+      ? Number.POSITIVE_INFINITY
+      : lineForPreviewTop(readAnchors(preview), preview.scrollTop, totalLines, preview.scrollHeight);
+    echoed.current.source = source.scrollToLine(line);
+  };
+
+  const style = {
+    '--md-min-height': `${minHeight}px`,
+    ...(height === undefined ? null : { '--md-height': typeof height === 'number' ? `${height}px` : height }),
+  } as React.CSSProperties;
 
   return (
-    <div className={`md-editor${className ? ` ${className}` : ''}`} style={style} data-markdown-editor="">
+    <div className={`md-editor${className ? ` ${className}` : ''}`} style={style} data-markdown-editor="" data-bounded={height === undefined ? undefined : ''}>
       <style>{MARKDOWN_EDITOR_CSS}</style>
 
       <div className="md-editor-header">
@@ -248,7 +307,14 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
               className="md-rich-editor"
             />
           ) : (
-            <SourceEditor value={currentValue} onChange={reportChange} readOnly={readOnly} placeholder={placeholder} />
+            <SourceEditor
+              ref={sourceRef}
+              value={currentValue}
+              onChange={reportChange}
+              readOnly={readOnly}
+              placeholder={placeholder}
+              onScroll={handleSourceScroll}
+            />
           )}
         </div>
 
@@ -259,7 +325,9 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
             </div>
             <div
               className="md-preview"
+              ref={previewRef}
               onClick={handlePreviewClick}
+              onScroll={handlePreviewScroll}
               dangerouslySetInnerHTML={{
                 __html: previewHtml || '<p class="md-empty-state">Nothing to preview yet.</p>',
               }}

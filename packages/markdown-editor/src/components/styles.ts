@@ -273,6 +273,23 @@ export const MARKDOWN_EDITOR_CSS = `
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 75% no-repeat;
 }
 
+/* A fixed height (the height prop): each pane scrolls inside the card instead of the card growing. Side by
+ * side or stacked, the panes share what is left under the header equally. */
+.md-editor[data-bounded] { height: var(--md-height); }
+.md-editor[data-bounded] .md-editor-body {
+  flex: 1 1 0;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr);
+  grid-auto-rows: minmax(0, 1fr);
+}
+.md-editor[data-bounded] .md-editor-pane { min-height: 0; overflow: hidden; }
+.md-editor[data-bounded] .md-source { min-height: 0; }
+.md-editor[data-bounded] .md-source-surface { flex: 1 1 0; min-height: 0; }
+.md-editor[data-bounded] .md-source-editor { position: absolute; inset: 0; height: auto; }
+.md-editor[data-bounded] .md-source-editor .rte-light-editor { height: 100%; min-height: 0; }
+.md-editor[data-bounded] .md-preview { flex: 1 1 0; min-height: 0; }
+.md-editor[data-bounded] .rte-editor { min-height: 0; }
+
 /* Front matter is metadata, so it is a quiet, collapsed block above the document. */
 .md-front-matter {
   margin: 0 0 1em;

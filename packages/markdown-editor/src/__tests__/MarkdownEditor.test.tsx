@@ -32,13 +32,16 @@ const source = vi.hoisted(() => ({
   renders: [] as any[],
   mounts: 0,
   unmounts: 0,
+  // What the component's ref gives it; tests replace the methods they care about.
+  handle: { focus: () => {}, insertText: () => true, runCommand: () => true, getTopLine: () => 0, scrollToLine: (_line: number) => 0 } as any,
 }));
 
 vi.mock('../source/SourceEditor', async () => {
   const react = await import('react');
   return {
-    SourceEditor: (props: any) => {
+    SourceEditor: react.forwardRef((props: any, ref: any) => {
       source.renders.push(props);
+      react.useImperativeHandle(ref, () => source.handle, []);
       react.useEffect(() => {
         source.mounts += 1;
         return () => {
@@ -46,7 +49,7 @@ vi.mock('../source/SourceEditor', async () => {
         };
       }, []);
       return react.createElement('div', { 'data-testid': 'source', 'data-readonly': String(!!props.readOnly) });
-    },
+    }),
   };
 });
 
@@ -516,5 +519,140 @@ describe('MarkdownEditor front matter and footnotes', () => {
       link.dispatchEvent(click);
     });
     expect(click.defaultPrevented).toBe(false);
+  });
+});
+
+describe('MarkdownEditor scroll sync and height', () => {
+  // jsdom has no layout, so the preview's geometry is stated: three blocks starting on lines 0, 2 and 4
+  // (tops 0, 100 and 600) in 1000px of content shown through a 200px window.
+  const DOC = '# One\n\ntwo\n\n# Three';
+  const TOPS = [0, 100, 600];
+
+  const lay = (element: HTMLElement) => {
+    let scrollTop = 0;
+    Object.defineProperty(element, 'scrollTop', {
+      configurable: true,
+      get: () => scrollTop,
+      set: (value: number) => {
+        scrollTop = Math.max(0, Math.min(800, value));
+      },
+    });
+    Object.defineProperty(element, 'scrollHeight', { configurable: true, get: () => 1000 });
+    Object.defineProperty(element, 'clientHeight', { configurable: true, get: () => 200 });
+    element.getBoundingClientRect = () => ({ top: 0 } as DOMRect);
+    Array.from(element.querySelectorAll<HTMLElement>('[data-md-line]')).forEach((block, index) => {
+      block.getBoundingClientRect = () => ({ top: TOPS[index] - scrollTop } as DOMRect);
+    });
+  };
+  const scrollPreview = (to: number) => {
+    preview()!.scrollTop = to;
+    act(() => {
+      preview()!.dispatchEvent(new Event('scroll'));
+    });
+  };
+  const scrollSource = (info: { scrollTop: number; atBottom?: boolean }) =>
+    act(() => lastSourceProps().onScroll({ atBottom: false, ...info }));
+
+  let scrollToLine: ReturnType<typeof vi.fn>;
+  let getTopLine: ReturnType<typeof vi.fn>;
+  beforeEach(() => {
+    scrollToLine = vi.fn(() => 77);
+    getTopLine = vi.fn(() => 3);
+    source.handle.scrollToLine = scrollToLine;
+    source.handle.getTopLine = getTopLine;
+  });
+
+  const mountSplit = (props: MarkdownEditorProps = {}) => {
+    mountDefault({ defaultValue: DOC, mode: 'split', height: 400, ...props });
+    if (preview()) lay(preview()!);
+  };
+
+  it('tags the preview blocks with the lines they start on', () => {
+    mountSplit();
+    expect(Array.from(preview()!.querySelectorAll('[data-md-line]')).map((block) => block.getAttribute('data-md-line'))).toEqual(['0', '2', '4']);
+  });
+
+  it('moves the preview to the place of the line at the top of the source', () => {
+    mountSplit();
+    scrollSource({ scrollTop: 50 });
+    // Line 3 is halfway between the block on line 2 (100px) and the one on line 4 (600px).
+    expect(preview()!.scrollTop).toBe(350);
+  });
+
+  it('moves the source to the line at the top of the preview', () => {
+    mountSplit();
+    scrollPreview(350);
+    expect(scrollToLine).toHaveBeenCalledWith(3);
+  });
+
+  it('does not bounce: the scroll a pane makes because of the other is not passed back', () => {
+    mountSplit();
+    scrollSource({ scrollTop: 50 });
+    // The preview was just moved to 350, and tells us so.
+    act(() => {
+      preview()!.dispatchEvent(new Event('scroll'));
+    });
+    expect(scrollToLine).not.toHaveBeenCalled();
+
+    scrollPreview(350);
+    expect(scrollToLine).toHaveBeenCalledTimes(1);
+    // The source was just moved to 77, and tells us so.
+    getTopLine.mockClear();
+    scrollSource({ scrollTop: 77 });
+    expect(getTopLine).not.toHaveBeenCalled();
+  });
+
+  it('still follows the user after an echo that moved nothing', () => {
+    mountSplit();
+    // The preview is already at 0, so moving it to 0 raises no scroll event and the echo is never seen...
+    getTopLine.mockReturnValue(0);
+    scrollSource({ scrollTop: 0 });
+    // ...and the next real scroll of the preview is not swallowed.
+    scrollPreview(300);
+    expect(scrollToLine).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows the end of the preview when the source is at its end', () => {
+    mountSplit();
+    scrollSource({ scrollTop: 900, atBottom: true });
+    expect(preview()!.scrollTop).toBe(800);
+  });
+
+  it('shows the end of the source when the preview is at its end', () => {
+    mountSplit();
+    scrollPreview(800);
+    expect(scrollToLine).toHaveBeenLastCalledWith(Number.POSITIVE_INFINITY);
+  });
+
+  it('does nothing when syncScroll is off, in a single-pane view, or for the rich editor', () => {
+    mountSplit({ syncScroll: false });
+    scrollSource({ scrollTop: 50 });
+    scrollPreview(350);
+    expect(getTopLine).not.toHaveBeenCalled();
+    expect(scrollToLine).not.toHaveBeenCalled();
+
+    mountSplit({ mode: 'edit' });
+    expect(preview()).toBeNull();
+    scrollSource({ scrollTop: 50 });
+    expect(getTopLine).not.toHaveBeenCalled();
+
+    mount({ defaultValue: DOC, mode: 'split', height: 400 });
+    lay(preview()!);
+    scrollPreview(350);
+    expect(scrollToLine).not.toHaveBeenCalled();
+  });
+
+  it('fixes the height of the card when a height is given, in pixels or any CSS length', () => {
+    mountSplit({ height: 400 });
+    const root = host.querySelector<HTMLElement>('[data-markdown-editor]')!;
+    expect(root.hasAttribute('data-bounded')).toBe(true);
+    expect(root.style.getPropertyValue('--md-height')).toBe('400px');
+
+    mountSplit({ height: '60vh' });
+    expect(root.style.getPropertyValue('--md-height')).toBe('60vh');
+
+    mountSplit({ height: undefined });
+    expect(root.hasAttribute('data-bounded')).toBe(false);
+    expect(root.style.getPropertyValue('--md-height')).toBe('');
   });
 });

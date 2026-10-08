@@ -13,6 +13,12 @@ vi.mock('@editora/light-code-editor', async () => {
 
   class FakeEditor {
     surface: HTMLElement;
+    scroller: HTMLElement;
+    scrollTopValue = 0;
+    /** Height of each line in the stand-in layout; a wrapped line is taller. */
+    lineHeights: number[] = [];
+    /** Space above the first line, as the content has padding. */
+    padding = 0;
     text: string;
     start = 0;
     end = 0;
@@ -33,10 +39,25 @@ vi.mock('@editora/light-code-editor', async () => {
       this.readOnly = !!config.readOnly;
       this.surface = document.createElement('div');
       this.surface.setAttribute('contenteditable', 'true');
-      host.appendChild(this.surface);
+      this.surface.style.lineHeight = '20px';
+      this.scroller = document.createElement('div');
+      Object.defineProperty(this.scroller, 'scrollTop', {
+        get: () => this.scrollTopValue,
+        set: (value: number) => {
+          this.scrollTopValue = value;
+        },
+      });
+      Object.defineProperty(this.scroller, 'scrollHeight', { get: () => this.lineTop(this.text.split('\n').length) });
+      this.scroller.appendChild(this.surface);
+      host.appendChild(this.scroller);
       fake.instances.push(this);
     }
 
+    lineTop(line: number) {
+      let top = this.padding;
+      for (let i = 0; i < line; i += 1) top += this.lineHeights[i] ?? 20;
+      return top;
+    }
     emit(event: string, ...args: any[]) {
       (this.handlers[event] || []).forEach((handler) => handler(...args));
     }
@@ -65,6 +86,21 @@ vi.mock('@editora/light-code-editor', async () => {
     getView() {
       return {
         getContentElement: () => this.surface,
+        getScrollElement: () => this.scroller,
+        // Where the browser would say a character is: its line's top in the stand-in layout, less the scroll.
+        createDomRangeFromOffsets: (offset: number) => {
+          const before = this.text.slice(0, offset).split('\n');
+          const line = before.length - 1;
+          const top = this.lineTop(line) - this.scrollTopValue;
+          const height = this.lineHeights[line] ?? 20;
+          const rect = { top, bottom: top + height, width: 0, height };
+          // The browser has no rectangle for a collapsed range on an empty line.
+          const empty = this.text[offset] === '\n' || offset >= this.text.length ? before[line] === '' : false;
+          return {
+            getClientRects: () => (empty ? [] : [rect]),
+            getBoundingClientRect: () => (empty ? { top: 0, bottom: 0, width: 0, height: 0 } : rect),
+          };
+        },
         getSelectionOffsets: () => ({
           isInEditor: true,
           isCollapsed: this.start === this.end,
@@ -91,7 +127,7 @@ vi.mock('@editora/light-code-editor', async () => {
     }
     destroy() {
       this.destroyed = true;
-      this.surface.remove();
+      this.scroller.remove();
     }
 
     // What the user doing something looks like to the component.
@@ -115,7 +151,7 @@ vi.mock('@editora/light-code-editor', async () => {
   };
 });
 
-import { SourceEditor, type SourceEditorProps } from '../source/SourceEditor';
+import { SourceEditor, type SourceEditorHandle, type SourceEditorProps } from '../source/SourceEditor';
 
 const act: (callback: () => void) => void = (React as any).act ?? (TestUtils as any).act;
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
@@ -124,9 +160,10 @@ let host: HTMLDivElement;
 let root: Root;
 
 const editor = () => fake.instances[fake.instances.length - 1];
+const handle = React.createRef<SourceEditorHandle>();
 const render = (props: Partial<SourceEditorProps> = {}, wrapperClass?: string) => {
   const element = (
-    <SourceEditor value="" onChange={() => {}} readOnly={false} placeholder="Write here" {...props} />
+    <SourceEditor ref={handle} value="" onChange={() => {}} readOnly={false} placeholder="Write here" {...props} />
   );
   act(() => root.render(wrapperClass ? <div className={wrapperClass}>{element}</div> : element));
 };
@@ -468,6 +505,154 @@ describe('SourceEditor', () => {
       expect(press('Enter', { metaKey: true }).defaultPrevented).toBe(false);
       expect(press('Enter', { isComposing: true }).defaultPrevented).toBe(false);
       expect(editor().replaceCalls).toHaveLength(0);
+    });
+  });
+
+  describe('scrolling and the handle', () => {
+    // A 6-line document in a stand-in layout: lines are 20px, except line 2 which wraps to 3 rows (60px).
+    const scrollable = (onScroll?: () => void) => {
+      render({ value: 'a\nb\nc\nd\ne\nf', onScroll });
+      editor().lineHeights = [20, 20, 60, 20, 20, 20];
+    };
+
+    it('reports scrolling of the text, and stops when the editor is destroyed', () => {
+      const onScroll = vi.fn();
+      render({ onScroll });
+      editor().scroller.dispatchEvent(new Event('scroll'));
+      expect(onScroll).toHaveBeenCalledTimes(1);
+      act(() => root.unmount());
+      editor().scroller.dispatchEvent(new Event('scroll'));
+      expect(onScroll).toHaveBeenCalledTimes(1);
+      root = createRoot(host);
+    });
+
+    it('uses the latest onScroll without recreating the editor', () => {
+      const first = vi.fn();
+      const second = vi.fn();
+      render({ onScroll: first });
+      render({ onScroll: second });
+      editor().scroller.dispatchEvent(new Event('scroll'));
+      expect(first).not.toHaveBeenCalled();
+      expect(second).toHaveBeenCalledTimes(1);
+      expect(fake.instances).toHaveLength(1);
+    });
+
+    it('scrolls a line to the top, a fraction of the way through a wrapped line', () => {
+      scrollable();
+      handle.current!.scrollToLine(0);
+      expect(editor().scrollTopValue).toBe(0);
+      handle.current!.scrollToLine(3);
+      expect(editor().scrollTopValue).toBe(100);
+      // Halfway through line 2, which is 60px tall and starts at 40px.
+      handle.current!.scrollToLine(2.5);
+      expect(editor().scrollTopValue).toBe(70);
+    });
+
+    it('scrolls to the end of the text for a line past the last, and never above the start', () => {
+      scrollable();
+      handle.current!.scrollToLine(99);
+      expect(editor().scrollTopValue).toBe(editor().lineTop(6));
+      handle.current!.scrollToLine(-4);
+      expect(editor().scrollTopValue).toBe(0);
+    });
+
+    it('reads the line at the top, with the fraction of a wrapped line that has scrolled by', () => {
+      scrollable();
+      for (const [scrollTop, line] of [[0, 0], [20, 1], [40, 2], [70, 2.5], [100, 3], [118, 3.9], [120, 4]] as const) {
+        editor().scrollTopValue = scrollTop;
+        expect(handle.current!.getTopLine()).toBeCloseTo(line, 6);
+      }
+    });
+
+    it('round-trips: scrolling to a line and reading it back gives the same line', () => {
+      scrollable();
+      for (const line of [0, 0.25, 1.5, 2, 2.75, 3, 4.5, 5.9]) {
+        handle.current!.scrollToLine(line);
+        expect(handle.current!.getTopLine()).toBeCloseTo(line, 6);
+      }
+    });
+
+    it('finds lines after empty ones, which the browser has no rectangle for', () => {
+      // Lines 1, 3 and 4 are empty; every line is 20px.
+      render({ value: 'a\n\nb\n\n\nc' });
+      for (const [scrollTop, line] of [[0, 0], [20, 1], [40, 2], [60, 3], [80, 4], [100, 5], [10, 0.5], [50, 2.5], [90, 4.5]] as const) {
+        editor().scrollTopValue = scrollTop;
+        expect(handle.current!.getTopLine()).toBeCloseTo(line, 6);
+      }
+      for (const line of [0, 1, 2, 3, 4, 5, 5.5]) {
+        handle.current!.scrollToLine(line);
+        expect(editor().scrollTopValue).toBe(line * 20);
+      }
+    });
+
+    it('finds the end of text that finishes with empty lines', () => {
+      render({ value: 'a\nb\n\n' });
+      handle.current!.scrollToLine(99);
+      expect(editor().scrollTopValue).toBe(80);
+      handle.current!.scrollToLine(3);
+      expect(editor().scrollTopValue).toBe(60);
+    });
+
+    it('measures from the top of the first line, so the padding above it is not a scroll offset', () => {
+      render({ value: 'a\nb\nc' });
+      editor().padding = 8;
+      handle.current!.scrollToLine(0);
+      expect(editor().scrollTopValue).toBe(0);
+      handle.current!.scrollToLine(2);
+      expect(editor().scrollTopValue).toBe(40);
+      editor().scrollTopValue = 20;
+      expect(handle.current!.getTopLine()).toBeCloseTo(1, 6);
+      editor().scrollTopValue = 0;
+      expect(handle.current!.getTopLine()).toBe(0);
+    });
+
+    it('is not fooled by a single-line document', () => {
+      render({ value: 'only' });
+      handle.current!.scrollToLine(0.5);
+      expect(Number.isFinite(handle.current!.getTopLine())).toBe(true);
+    });
+
+    it('inserts text over the selection as one undoable replace, with the caret after it', () => {
+      const onChange = vi.fn();
+      render({ value: 'one two', onChange });
+      editor().userSelects(4, 7);
+      let inserted = false;
+      act(() => {
+        inserted = handle.current!.insertText('![x](y.png)');
+      });
+      expect(inserted).toBe(true);
+      expect(editor().replaceCalls).toHaveLength(1);
+      expect(editor().getValue()).toBe('one ![x](y.png)');
+      expect(editor().start).toBe(editor().getValue().length);
+      expect(onChange).toHaveBeenLastCalledWith('one ![x](y.png)');
+    });
+
+    it('runs a toolbar command by name', () => {
+      render({ value: 'a word here' });
+      editor().userSelects(2, 6);
+      let ran = false;
+      act(() => {
+        ran = handle.current!.runCommand('bold');
+      });
+      expect(ran).toBe(true);
+      expect(editor().getValue()).toBe('a **word** here');
+    });
+
+    it('does nothing, and says so, when read-only', () => {
+      render({ value: 'text', readOnly: true });
+      editor().userSelects(0, 4);
+      let results: boolean[] = [];
+      act(() => {
+        results = [handle.current!.insertText('x'), handle.current!.runCommand('bold')];
+      });
+      expect(results).toEqual([false, false]);
+      expect(editor().getValue()).toBe('text');
+    });
+
+    it('focuses the editor', () => {
+      render();
+      handle.current!.focus();
+      expect(editor().focused).toBe(1);
     });
   });
 
