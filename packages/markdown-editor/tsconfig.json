@@ -10,5 +10,5 @@
     "jsx": "react-jsx"
   },
   "include": ["src/**/*"],
-  "exclude": ["dist", "**/*.test.ts"]
+  "exclude": ["dist", "**/__tests__/**", "**/*.test.ts", "**/*.test.tsx"]
 }

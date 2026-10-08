@@ -1,0 +1,224 @@
+/**
+ * Styles follow the Editora editor: everything is drawn from the `--rte-*` theme variables (the
+ * fallbacks are the default light theme's values), so `@editora/themes`, including its dark theme
+ * (`.dark`, `[data-theme="dark"]`, `.editora-theme-dark` on any ancestor), restyles this component
+ * with the editor it wraps.
+ */
+export const MARKDOWN_EDITOR_CSS = `
+.md-editor {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  border: 1px solid var(--rte-color-border, #dee2e6);
+  border-radius: var(--rte-radius-lg, 0.5rem);
+  background: var(--rte-color-bg-primary, #fff);
+  color: var(--rte-color-text-primary, #212529);
+  font-family: var(--rte-font-family-base, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif);
+  box-shadow: var(--rte-shadow, 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06));
+  transition: border-color var(--rte-transition-fast, 150ms ease-in-out), box-shadow var(--rte-transition-fast, 150ms ease-in-out);
+  overflow: hidden;
+  overflow: clip;
+}
+.md-editor *, .md-editor *::before, .md-editor *::after { box-sizing: border-box; }
+.md-editor:focus-within {
+  border-color: var(--rte-color-border-focus, #007bff);
+  box-shadow: var(--rte-shadow, 0 1px 3px rgba(0, 0, 0, 0.1)), 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* Header strip: the same surface as the editor toolbar. */
+.md-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--rte-space-sm, 0.5rem);
+  min-height: 2.75rem;
+  padding: 0.375rem var(--rte-space-sm, 0.5rem);
+  background: var(--rte-color-bg-secondary, #f8f9fa);
+  border-bottom: 1px solid var(--rte-color-border, #dee2e6);
+}
+.md-editor-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-left: 0.25rem;
+  font-size: var(--rte-font-size-sm, 0.875rem);
+  font-weight: var(--rte-font-weight-semibold, 600);
+  color: var(--rte-color-text-secondary, #6c757d);
+}
+.md-editor-title svg { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
+
+.md-editor-modes {
+  display: inline-flex;
+  border: 1px solid var(--rte-color-border, #dee2e6);
+  border-radius: var(--rte-radius, 0.25rem);
+  background: var(--rte-color-bg-primary, #fff);
+  overflow: hidden;
+}
+.md-editor-mode {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  height: 1.75rem;
+  padding: 0 0.75rem;
+  background: transparent;
+  color: var(--rte-color-text-secondary, #6c757d);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: var(--rte-font-weight-medium, 500);
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color var(--rte-transition-fast, 150ms ease-in-out), color var(--rte-transition-fast, 150ms ease-in-out);
+}
+.md-editor-mode + .md-editor-mode { border-left: 1px solid var(--rte-color-border, #dee2e6); }
+.md-editor-mode:hover {
+  background: var(--rte-color-bg-hover, #f8f9fa);
+  color: var(--rte-color-text-primary, #212529);
+}
+.md-editor-mode[aria-pressed="true"] {
+  background: var(--rte-color-primary, #007bff);
+  color: var(--rte-color-text-inverse, #fff);
+}
+.md-editor-mode:focus-visible {
+  outline: 2px solid var(--rte-color-border-focus, #007bff);
+  outline-offset: -2px;
+}
+
+/* Panes. The 1px gap shows the border colour between them, side by side or stacked. */
+.md-editor-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1px;
+  background: var(--rte-color-border, #dee2e6);
+}
+.md-editor-body[data-mode="split"] {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+}
+.md-editor-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--rte-color-bg-primary, #fff);
+}
+.md-editor-pane[hidden] { display: none; }
+.md-editor-pane > .rte-editor { flex: 1 1 auto; }
+
+/* The wrapped editor lives inside this card, so it drops its own frame. */
+.md-editor .rte-editor,
+.md-editor .rte-editor:focus-within {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.md-editor .rte-toolbar { border-radius: 0; }
+.md-editor .rte-content { min-height: var(--md-min-height, 220px); }
+.md-editor .rte-content li > ul,
+.md-editor .rte-content li > ol { margin: 0; }
+
+.md-preview-head {
+  display: flex;
+  align-items: center;
+  min-height: 3rem;
+  padding: 0 var(--rte-space-md, 1rem);
+  background: var(--rte-color-bg-secondary, #f8f9fa);
+  border-bottom: 1px solid var(--rte-color-border, #dee2e6);
+  font-size: var(--rte-font-size-xs, 0.75rem);
+  font-weight: var(--rte-font-weight-semibold, 600);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--rte-color-text-muted, #868e96);
+}
+
+/* Preview typography mirrors .rte-content so both panes read the same. */
+.md-preview {
+  flex: 1 1 auto;
+  min-height: var(--md-min-height, 220px);
+  padding: 16px;
+  overflow: auto;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--rte-color-text-primary, #212529);
+  overflow-wrap: anywhere;
+}
+.md-preview > :first-child { margin-top: 0; }
+.md-preview > :last-child { margin-bottom: 0; }
+.md-preview p { margin: 0 0 1em; }
+.md-preview h1 { font-size: 2em; margin: 0.67em 0; }
+.md-preview h2 { font-size: 1.5em; margin: 0.75em 0; }
+.md-preview h3 { font-size: 1.17em; margin: 0.83em 0; }
+.md-preview h4 { font-size: 1em; margin: 1em 0; }
+.md-preview h5 { font-size: 0.83em; margin: 1.17em 0; }
+.md-preview h6 { font-size: 0.67em; margin: 1.33em 0; }
+.md-preview ul, .md-preview ol { margin: 1em 0; padding-left: 2em; }
+.md-preview li > ul, .md-preview li > ol { margin: 0; }
+.md-preview blockquote {
+  margin: 1em 0;
+  padding-left: 1em;
+  border-left: 4px solid var(--rte-color-border, #ddd);
+  color: var(--rte-color-text-secondary, #666);
+}
+.md-preview a { color: var(--rte-color-primary, #0066cc); text-decoration: underline; }
+.md-preview img { max-width: 100%; height: auto; }
+.md-preview hr { border: 0; border-top: 1px solid var(--rte-color-border, #dee2e6); margin: 1.5em 0; }
+.md-preview table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 14px; line-height: 1.4; }
+.md-preview th, .md-preview td {
+  border: 1px solid var(--rte-color-border, #ddd);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+.md-preview th { background: var(--rte-color-bg-secondary, #f8f9fa); font-weight: 600; }
+.md-inline-code {
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--rte-color-bg-tertiary, #f4f4f4);
+  font-family: var(--rte-font-family-mono, 'SFMono-Regular', Menlo, Monaco, Consolas, monospace);
+  font-size: 0.9em;
+}
+.md-code-block {
+  margin: 1em 0;
+  padding: 0.9rem 1rem;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #f8fafc;
+  overflow: auto;
+  font-family: var(--rte-font-family-mono, 'SFMono-Regular', Menlo, Monaco, Consolas, monospace);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.md-code-block code { background: none; padding: 0; color: inherit; font: inherit; }
+.md-token-keyword { color: #f472b6; }
+.md-token-string { color: #86efac; }
+.md-token-number { color: #fbbf24; }
+.md-token-boolean { color: #93c5fd; }
+.md-token-comment { color: #94a3b8; font-style: italic; }
+.md-token-key { color: #f9a8d4; }
+
+.md-preview li:has(> .md-task-box) { list-style: none; }
+.md-task-box {
+  display: inline-block;
+  position: relative;
+  width: 1em;
+  height: 1em;
+  margin: 0 0.5em 0 -1.5em;
+  vertical-align: -0.15em;
+  border: 2px solid var(--rte-color-text-muted, #868e96);
+  border-radius: 3px;
+}
+.md-task-box[aria-checked="true"] {
+  background: var(--rte-color-primary, #007bff);
+  border-color: var(--rte-color-primary, #007bff);
+}
+.md-task-box[aria-checked="true"]::after {
+  content: '';
+  position: absolute;
+  left: 0.2em;
+  top: 0;
+  width: 0.28em;
+  height: 0.55em;
+  border: solid var(--rte-color-text-inverse, #fff);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.md-empty-state { margin: 0; color: var(--rte-color-text-muted, #868e96); font-style: italic; }
+`;

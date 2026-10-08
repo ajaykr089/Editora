@@ -1,7 +1,22 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { marked } from 'marked';
-import { sanitizeHTML } from '@editora/core';
 import { RichTextEditor } from '@editora/react';
+import {
+  BlockquotePlugin,
+  BoldPlugin,
+  ChecklistPlugin,
+  CodeSamplePlugin,
+  HeadingPlugin,
+  HistoryPlugin,
+  ItalicPlugin,
+  LinkPlugin,
+  ListPlugin,
+  StrikethroughPlugin,
+} from '@editora/plugins';
+import { htmlToMarkdown } from '../markdown/htmlToMarkdown';
+import { markdownToEditorHtml, markdownToPreviewHtml } from '../markdown/markdownToHtml';
+import { MARKDOWN_EDITOR_CSS } from './styles';
+
+type Mode = 'edit' | 'preview' | 'split';
 
 export interface MarkdownEditorProps {
   value?: string;
@@ -9,92 +24,56 @@ export interface MarkdownEditorProps {
   placeholder?: string;
   readOnly?: boolean;
   preview?: boolean;
-  mode?: 'edit' | 'preview' | 'split';
+  mode?: Mode;
   minHeight?: number;
   className?: string;
   onChange?: (value: string) => void;
 }
 
-// Also escapes quotes: the code-fence language ends up inside a class="..." attribute, and an
-// info string such as  x"onmouseover="alert(1)  would otherwise break out of it.
-const escapeHtml = (value: string): string =>
-  value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+const MODES: ReadonlyArray<{ mode: Mode; label: string }> = [
+  { mode: 'edit', label: 'Edit' },
+  { mode: 'split', label: 'Split' },
+  { mode: 'preview', label: 'Preview' },
+];
 
-const highlightCode = (code: string, language?: string): string => {
-  let html = escapeHtml(code);
-  const normalizedLanguage = (language || '').toLowerCase();
-
-  if (normalizedLanguage === 'json') {
-    html = html.replace(/("(?:\\.|[^"\\])*"\s*:)/g, '<span class="md-token-key">$1</span>');
-    html = html.replace(/("(?:\\.|[^"\\])*")/g, '<span class="md-token-string">$1</span>');
-    html = html.replace(/\b(true|false|null)\b/g, '<span class="md-token-boolean">$1</span>');
-  } else {
-    html = html.replace(/(\/\/.*$)/gm, '<span class="md-token-comment">$1</span>');
-    html = html.replace(/\b(const|let|var|function|return|if|else|for|while|new|class|import|export|from|async|await|try|catch|throw|true|false|null|undefined)\b/g, '<span class="md-token-keyword">$1</span>');
-    html = html.replace(/("(?:\\.|[^"\\])*")/g, '<span class="md-token-string">$1</span>');
-    html = html.replace(/\b(\d+)\b/g, '<span class="md-token-number">$1</span>');
-  }
-
-  return html;
+// These objects are props of the wrapped editor, which rebuilds itself whenever their identity changes,
+// so they are created once here instead of inline in render (the parent re-renders on every keystroke).
+const TOOLBAR = {
+  items: [
+    'undo', 'redo', '|',
+    'setBlockType', '|',
+    'bold', 'italic', 'strikethrough', '|',
+    'link', '|',
+    'bullist', 'numlist', 'checklist', '|',
+    'blockquote', 'insertCodeBlock',
+  ],
+  floating: true,
+  sticky: true,
+  showMoreOptions: false,
 };
+const STATUSBAR = { enabled: true, position: 'bottom' as const };
+const CONTENT = { sanitize: true };
 
-const markdownToHtml = (input: string): string => {
-  const parsed = marked.parse(input, {
-    gfm: true,
-    breaks: true,
-  });
+const createPlugins = () => [
+  HistoryPlugin(),
+  HeadingPlugin(),
+  BoldPlugin(),
+  ItalicPlugin(),
+  StrikethroughPlugin(),
+  LinkPlugin(),
+  ListPlugin(),
+  ChecklistPlugin(),
+  BlockquotePlugin(),
+  CodeSamplePlugin(),
+];
 
-  return typeof parsed === 'string' ? parsed : '';
-};
-
-const htmlToMarkdown = (html: string): string => {
-  const normalized = html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/(h[1-6])>/gi, '\n')
-    .replace(/<h([1-6])[^>]*>/gi, (_match, level: string) => `${'#'.repeat(Number(level))} `)
-    .replace(/<(strong|b)\b[^>]*>([\s\S]*?)<\/\1>/gi, '**$2**')
-    .replace(/<(em|i)\b[^>]*>([\s\S]*?)<\/\1>/gi, '*$2*')
-    .replace(/<blockquote\b[^>]*>([\s\S]*?)<\/blockquote>/gi, '> $1')
-    .replace(/<code\b[^>]*>([\s\S]*?)<\/code>/gi, '`$1`')
-    .replace(/<li\b[^>]*>/gi, '- ')
-    .replace(/<\/li>/gi, '\n')
-    .replace(/<\/p>/gi, '\n')
-    .replace(/<p\b[^>]*>/gi, '')
-    .replace(/<\/div>/gi, '\n')
-    .replace(/<div\b[^>]*>/gi, '')
-    .replace(/<\/(ul|ol)>/gi, '\n')
-    .replace(/<(ul|ol)>/gi, '')
-    .replace(/<[^>]+>/g, '')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-
-  return normalized;
-};
-
-const renderMarkdown = (input: string): string => {
-  const renderer = new marked.Renderer();
-  renderer.code = ({ text, lang }: any) => {
-    const language = lang ? escapeHtml(lang) : 'txt';
-    return `<pre class="md-code-block"><code class="language-${language}">${highlightCode(text, lang)}</code></pre>`;
-  };
-
-  renderer.codespan = ({ text }: any) => {
-    return `<code class="md-inline-code">${escapeHtml(text)}</code>`;
-  };
-
-  const parsed = marked.parse(input, {
-    gfm: true,
-    breaks: true,
-    renderer,
-  });
-
-  return typeof parsed === 'string' ? parsed : '';
-};
+const MarkdownGlyph: React.FC = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true" focusable="false">
+    <rect x="2.5" y="5" width="19" height="14" rx="2.5" />
+    <path d="M6 15V9l2.5 3L11 9v6" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M16 9v6m0 0-2-2m2 2 2-2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
 
 export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   value,
@@ -109,17 +88,18 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
 }) => {
   const isControlled = value !== undefined;
   const [internalValue, setInternalValue] = useState(defaultValue);
-  const [activeMode, setActiveMode] = useState<'edit' | 'preview' | 'split'>(mode);
+  const [activeMode, setActiveMode] = useState<Mode>(mode);
   const currentValue = isControlled ? value ?? '' : internalValue;
-  // marked passes raw HTML in the markdown straight through (<img onerror>, <script>, ...), and
-  // both results are injected into the DOM, so they must be sanitised first.
-  const previewHtml = useMemo(() => sanitizeHTML(renderMarkdown(currentValue)), [currentValue]);
-  const editorHtml = useMemo(() => sanitizeHTML(markdownToHtml(currentValue)), [currentValue]);
+  const visibleMode: Mode = preview ? activeMode : 'edit';
 
-  // The rich editor is remounted to load markdown that changed from outside (a toolbar button,
-  // or the `value` prop). It used to be keyed on the markdown itself, so every keystroke - which
-  // round-trips through onChange - remounted it and dropped focus after each character. Now it only
-  // remounts when the value differs from what the editor itself last reported.
+  const plugins = useMemo(createPlugins, []);
+  const previewHtml = useMemo(() => markdownToPreviewHtml(currentValue), [currentValue]);
+  const editorHtml = useMemo(() => markdownToEditorHtml(currentValue), [currentValue]);
+
+  // The rich editor is remounted to load markdown that changed from outside (the `value` prop). It
+  // used to be keyed on the markdown itself, so every keystroke - which round-trips through onChange
+  // - remounted it and dropped focus after each character. Now it only remounts when the value differs
+  // from what the editor itself last reported.
   const lastEditorValue = useRef(currentValue);
   const [editorKey, setEditorKey] = useState(0);
   useEffect(() => {
@@ -132,220 +112,71 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     setActiveMode(mode);
   }, [mode]);
 
-  const updateValue = (nextValue: string) => {
-    if (!isControlled) {
-      setInternalValue(nextValue);
-    }
-    onChange?.(nextValue);
-  };
-
   const handleEditorChange = (html: string) => {
     const markdown = htmlToMarkdown(html);
     lastEditorValue.current = markdown;
-    updateValue(markdown);
+    if (!isControlled) setInternalValue(markdown);
+    onChange?.(markdown);
   };
 
-  // These snippets were appended with `\\n` inside a template literal, i.e. a literal
-  // backslash + "n" in the user's markdown rather than a line break.
-  const appendSnippet = (snippet: string) => {
-    const separator = currentValue && !currentValue.endsWith('\n') ? '\n' : '';
-    updateValue(`${currentValue}${separator}${snippet}`);
-  };
-
-  const toolbarButtons = [
-    { label: 'Bold', icon: 'B', action: () => appendSnippet('**bold text**') },
-    { label: 'Italic', icon: 'I', action: () => appendSnippet('*italic text*') },
-    { label: 'Heading', icon: 'H', action: () => appendSnippet('# Heading') },
-    { label: 'List', icon: '•', action: () => appendSnippet('- list item') },
-    { label: 'Quote', icon: '❝', action: () => appendSnippet('> quote') },
-    { label: 'Code', icon: '</>', action: () => appendSnippet('`code`') },
-  ];
+  const style = { '--md-min-height': `${minHeight}px` } as React.CSSProperties;
 
   return (
-    <div className={className} style={{ display: 'grid', gap: '12px' }}>
-      <style>{`
-        .md-inline-code {
-          background: #e2e8f0;
-          color: #0f172a;
-          border-radius: 4px;
-          padding: 0.1rem 0.35rem;
-          font-family: ui-monospace, SFMono-Regular, monospace;
-        }
-        .md-editor-shell {
-          border: 1px solid #e2e8f0;
-          border-radius: 16px;
-          background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-          overflow: hidden;
-          font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        }
-        .md-editor-toolbar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 8px;
-          padding: 12px 14px;
-          border-bottom: 1px solid #e2e8f0;
-          background: rgba(248, 250, 252, 0.92);
-        }
-        .md-editor-toolbar-group {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-          align-items: center;
-        }
-        .md-editor-mode-btn,
-        .md-editor-action-btn {
-          border: 1px solid #cbd5e1;
-          border-radius: 999px;
-          padding: 6px 10px;
-          background: #fff;
-          color: #334155;
-          cursor: pointer;
-          font-size: 0.82rem;
-          font-weight: 600;
-          box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
-          transition: all 120ms ease;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-        }
-        .md-editor-mode-btn.active,
-        .md-editor-action-btn:hover {
-          background: #0f172a;
-          color: #fff;
-          border-color: #0f172a;
-          box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
-        }
-        .md-editor-action-row {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-          padding: 10px 14px;
-          border-bottom: 1px solid #e2e8f0;
-          background: #fff;
-        }
-        .md-editor-body {
-          display: grid;
-          gap: 12px;
-          padding: 12px;
-          background: #fff;
-        }
-        .md-editor-pane {
-          border: 1px solid #e2e8f0;
-          border-radius: 12px;
-          overflow: hidden;
-          min-height: ${minHeight}px;
-          background: #fff;
-        }
-        .md-rich-editor .rte-content {
-          min-height: ${minHeight}px;
-          padding: 12px;
-          font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-          line-height: 1.6;
-          color: #0f172a;
-        }
-        .md-code-block {
-          background: #0f172a;
-          color: #f8fafc;
-          border-radius: 8px;
-          padding: 0.9rem 1rem;
-          overflow: auto;
-          font-family: ui-monospace, SFMono-Regular, monospace;
-          font-size: 0.92rem;
-        }
-        .md-token-keyword { color: #f472b6; }
-        .md-token-string { color: #86efac; }
-        .md-token-number { color: #fbbf24; }
-        .md-token-boolean { color: #93c5fd; }
-        .md-token-comment { color: #94a3b8; font-style: italic; }
-        .md-token-key { color: #f9a8d4; }
-        .md-empty-state { color: #64748b; font-style: italic; }
-      `}</style>
+    <div className={`md-editor${className ? ` ${className}` : ''}`} style={style} data-markdown-editor="">
+      <style>{MARKDOWN_EDITOR_CSS}</style>
 
-      <div className="md-editor-shell" data-editora-editor="markdown" style={{ display: 'grid', gap: 0 }}>
-        <div className="md-editor-toolbar">
-          <div className="md-editor-toolbar-group">
-            <div style={{ width: '8px', height: '8px', borderRadius: '999px', background: '#0f172a' }} />
-            <strong style={{ fontSize: '0.95rem', color: '#0f172a' }}>Markdown Editor</strong>
-          </div>
-          <div className="md-editor-toolbar-group">
-            {preview && (
-              <>
-                {(['edit', 'split', 'preview'] as const).map((modeOption) => (
-                  <button
-                    key={modeOption}
-                    type="button"
-                    onClick={() => setActiveMode(modeOption)}
-                    className={`md-editor-mode-btn${activeMode === modeOption ? ' active' : ''}`}
-                  >
-                    {modeOption.charAt(0).toUpperCase() + modeOption.slice(1)}
-                  </button>
-                ))}
-              </>
-            )}
-          </div>
-        </div>
-
+      <div className="md-editor-header">
+        <span className="md-editor-title">
+          <MarkdownGlyph />
+          Markdown
+        </span>
         {preview && (
-          <div className="md-editor-action-row">
-            {toolbarButtons.map((button) => (
+          <div className="md-editor-modes" role="group" aria-label="Editor view">
+            {MODES.map(({ mode: option, label }) => (
               <button
-                key={button.label}
+                key={option}
                 type="button"
-                onClick={button.action}
-                className="md-editor-action-btn"
-                title={button.label}
+                className="md-editor-mode"
+                aria-pressed={activeMode === option}
+                onClick={() => setActiveMode(option)}
               >
-                <span style={{ fontSize: '0.9rem' }}>{button.icon}</span>
-                <span>{button.label}</span>
+                {label}
               </button>
             ))}
           </div>
         )}
+      </div>
 
-        <div className="md-editor-body">
-          {(activeMode === 'edit' || activeMode === 'split') && (
-            <div className="md-editor-pane">
-              <RichTextEditor
-                key={editorKey}
-                defaultValue={editorHtml}
-                readonly={readOnly}
-                placeholder={placeholder}
-                onChange={handleEditorChange}
-                toolbar={{ items: ['bold', 'italic', 'heading', 'bullist', 'numlist', 'quote', 'code'], floating: true, sticky: true, showMoreOptions: false }}
-                content={{ sanitize: true }}
-                className="md-rich-editor"
-              />
-            </div>
-          )}
-
-          {(activeMode === 'preview' || activeMode === 'split') && preview && (
-            <div
-              style={{
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                padding: '12px',
-                backgroundColor: '#f8fafc',
-                minHeight: '120px',
-                overflow: 'auto',
-                boxShadow: 'inset 0 1px 2px rgba(15, 23, 42, 0.04)',
-              }}
-            >
-              <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '8px', color: '#475569' }}>
-                Preview
-              </div>
-              <div
-                style={{
-                  lineHeight: 1.6,
-                  color: '#0f172a',
-                  fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
-                }}
-                dangerouslySetInnerHTML={{ __html: previewHtml || '<p class="md-empty-state">Nothing to preview yet.</p>' }}
-              />
-            </div>
-          )}
+      <div className="md-editor-body" data-mode={visibleMode}>
+        {/* Stays mounted (hidden) in preview mode so switching views keeps undo history and selection. */}
+        <div className="md-editor-pane" hidden={visibleMode === 'preview'}>
+          <RichTextEditor
+            key={editorKey}
+            defaultValue={editorHtml}
+            readonly={readOnly}
+            placeholder={placeholder}
+            onChange={handleEditorChange}
+            plugins={plugins}
+            toolbar={TOOLBAR}
+            statusbar={STATUSBAR}
+            content={CONTENT}
+            className="md-rich-editor"
+          />
         </div>
+
+        {(visibleMode === 'preview' || visibleMode === 'split') && (
+          <section className="md-editor-pane" aria-label="Markdown preview">
+            <div className="md-preview-head" aria-hidden="true">
+              Preview
+            </div>
+            <div
+              className="md-preview"
+              dangerouslySetInnerHTML={{
+                __html: previewHtml || '<p class="md-empty-state">Nothing to preview yet.</p>',
+              }}
+            />
+          </section>
+        )}
       </div>
     </div>
   );
