@@ -35,6 +35,18 @@ export class View {
   private highlightOverlayActive = false;
   private lastLineDecorationSnapshot = '';
   private lastGutterDecorationSnapshot = '';
+  private lineDecorations: LineDecoration[] = [];
+  private gutterDecorations: GutterDecoration[] = [];
+  // With line wrapping a line is as many rows tall as it wraps to, so the line numbers (and anything placed by
+  // line) cannot assume a fixed height per line. These are the measured heights and tops, per line; null while
+  // wrapping is off or before the first measurement, when every line is one row.
+  private lineWrapping = false;
+  private measuredHeights: number[] | null = null;
+  private measuredTops: number[] = [];
+  private measureQueued = false;
+  private measurer: HTMLElement | null = null;
+  private resizeObserver: ResizeObserver | null = null;
+  private destroyed = false;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -212,15 +224,123 @@ export class View {
   updateLineNumbers(lineCount: number): void {
     this.updateGutterWidth(lineCount);
 
+    // A line can wrap to more or fewer rows without the number of lines changing.
+    this.queueWrapMeasure();
+
     if (lineCount === this.lastLineCount) {
       return;
     }
     this.lastLineCount = lineCount;
+    this.measuredHeights = null;
+    this.measuredTops = [];
     const maxLines = Math.max(lineCount, 1);
     const lineNumbers = Array.from({ length: maxLines }, (_, i) => i + 1);
     this.lineNumbersContentElement.innerHTML = lineNumbers
       .map(num => `<div style="height: ${this.lineHeight}px; line-height: ${this.lineHeight}px;">${num}</div>`)
       .join('');
+  }
+
+  /** Where a line starts, in pixels from the top of the content. */
+  private lineTop(line: number): number {
+    return this.measuredTops[line] ?? line * this.lineHeight;
+  }
+
+  /** How tall a line is: one row, or as many as it wraps to. */
+  private lineHeightAt(line: number): number {
+    return this.measuredHeights?.[line] ?? this.lineHeight;
+  }
+
+  private queueWrapMeasure(): void {
+    if (!this.lineWrapping || this.measureQueued || this.destroyed) return;
+    this.measureQueued = true;
+    // Once per task, after the text has been updated and before anything is painted.
+    void Promise.resolve().then(() => {
+      this.measureQueued = false;
+      this.measureWrappedLines();
+    });
+  }
+
+  /**
+   * Finds out how many rows each line wraps to, by laying the same text out one block per line in a hidden copy
+   * of the content, and sizes the line numbers to match. Done in one layout pass: all blocks are built, then all
+   * heights are read.
+   */
+  private measureWrappedLines(): void {
+    if (!this.lineWrapping || this.destroyed || !this.contentElement.isConnected) return;
+
+    const sources = (this.contentElement as HTMLElement & { __lceFoldPlaceholderSources?: Map<string, string> })
+      .__lceFoldPlaceholderSources;
+    const rows = this.lineNumbersContentElement.children;
+    const lines = (this.contentElement.textContent || '').split('\n');
+    // Folded blocks make the text on screen differ from the document, so lines cannot be matched to numbers; and
+    // a hidden editor has no width to wrap to (it is measured when it is shown: see the resize observer).
+    const width = this.contentElement.clientWidth;
+    if ((sources && sources.size > 0) || rows.length !== lines.length || width === 0) {
+      this.applyMeasuredHeights(null);
+      return;
+    }
+
+    const measurer = this.ensureMeasurer(width);
+    measurer.innerHTML = lines
+      .map((line) => `<div>${line === '' ? '&#8203;' : line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`)
+      .join('');
+    const heights = Array.from(measurer.children, (child) => (child as HTMLElement).offsetHeight);
+    measurer.textContent = '';
+    this.applyMeasuredHeights(heights);
+  }
+
+  private ensureMeasurer(width: number): HTMLElement {
+    if (!this.measurer) {
+      const measurer = document.createElement('div');
+      measurer.setAttribute('aria-hidden', 'true');
+      measurer.setAttribute('data-editor-measurer', 'true');
+      this.contentSurface.appendChild(measurer);
+      this.measurer = measurer;
+    }
+    // Wraps exactly as the content does: the same font, padding, tab size and wrapping rules.
+    this.measurer.style.cssText = this.contentElement.style.cssText;
+    Object.assign(this.measurer.style, {
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      zIndex: '-1',
+      visibility: 'hidden',
+      pointerEvents: 'none',
+      width: `${width}px`,
+      minWidth: '0',
+      minHeight: '0',
+      height: 'auto',
+    });
+    return this.measurer;
+  }
+
+  private applyMeasuredHeights(heights: number[] | null): void {
+    const previous = this.measuredHeights;
+    const unchanged =
+      previous === heights ||
+      (previous !== null && heights !== null && previous.length === heights.length && previous.every((h, i) => h === heights[i]));
+    if (unchanged) return;
+
+    this.measuredHeights = heights;
+    this.measuredTops = [];
+    if (heights) {
+      let top = 0;
+      for (const height of heights) {
+        this.measuredTops.push(top);
+        top += height;
+      }
+    }
+
+    const rows = this.lineNumbersContentElement.children;
+    for (let i = 0; i < rows.length; i += 1) {
+      (rows[i] as HTMLElement).style.height = `${heights ? heights[i] : this.lineHeight}px`;
+    }
+
+    // Decorations are placed by line, so they move with the lines.
+    this.lastLineDecorationSnapshot = '';
+    this.lastGutterDecorationSnapshot = '';
+    this.renderLineDecorations(this.lineDecorations);
+    this.renderGutterDecorations(this.gutterDecorations);
   }
 
   private updateGutterWidth(lineCount: number): void {
@@ -248,6 +368,8 @@ export class View {
     lineDecorations: LineDecoration[],
     gutterDecorations: GutterDecoration[],
   ): void {
+    this.lineDecorations = lineDecorations;
+    this.gutterDecorations = gutterDecorations;
     this.renderLineDecorations(lineDecorations);
     this.renderGutterDecorations(gutterDecorations);
   }
@@ -341,6 +463,19 @@ export class View {
   }
 
   setLineWrapping(enabled: boolean): void {
+    this.lineWrapping = enabled;
+    if (enabled) {
+      // The width the text wraps to changes with the size of the editor, so look again when it does.
+      if (!this.resizeObserver && typeof ResizeObserver !== 'undefined') {
+        this.resizeObserver = new ResizeObserver(() => this.queueWrapMeasure());
+        this.resizeObserver.observe(this.contentElement);
+      }
+      this.queueWrapMeasure();
+    } else {
+      this.resizeObserver?.disconnect();
+      this.resizeObserver = null;
+      this.applyMeasuredHeights(null);
+    }
     this.contentElement.style.whiteSpace = enabled ? 'pre-wrap' : 'pre';
     this.contentElement.style.overflow = 'visible';
     this.contentElement.style.minWidth = enabled ? '100%' : 'max-content';
@@ -679,7 +814,7 @@ export class View {
   // Scroll to position
   scrollToPosition(position: Position): void {
     const safeLine = Math.max(0, Math.floor(position.line) || 0);
-    const targetTop = safeLine * this.lineHeight;
+    const targetTop = this.lineTop(safeLine);
     const centeredTop = targetTop - (this.editorContainer.clientHeight / 2) + (this.lineHeight / 2);
     this.editorContainer.scrollTop = Math.max(0, centeredTop);
   }
@@ -748,6 +883,9 @@ export class View {
 
   // Destroy the view
   destroy(): void {
+    this.destroyed = true;
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
     this.clearDecorations();
     if (this.container) {
       this.container.innerHTML = '';
@@ -1143,8 +1281,8 @@ export class View {
       element.setAttribute('data-decoration-line', String(decoration.line));
       element.style.cssText = this.joinStyleFragments([
         'position: absolute',
-        `top: ${decoration.line * this.lineHeight}px`,
-        `height: ${this.lineHeight}px`,
+        `top: ${this.lineTop(decoration.line)}px`,
+        `height: ${this.lineHeightAt(decoration.line)}px`,
         'left: 12px',
         'right: 12px',
         'border-radius: 3px',
@@ -1186,8 +1324,8 @@ export class View {
       element.setAttribute('data-decoration-line', String(decoration.line));
       element.style.cssText = this.joinStyleFragments([
         'position: absolute',
-        `top: ${decoration.line * this.lineHeight}px`,
-        `height: ${this.lineHeight}px`,
+        `top: ${this.lineTop(decoration.line)}px`,
+        `height: ${this.lineHeightAt(decoration.line)}px`,
         'left: 0',
         'right: 0',
         'display: flex',

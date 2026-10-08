@@ -50,7 +50,7 @@ jobs:
       - name: Run ui-core and ui-react unit tests
         run: npm run test:ui:unit
 
-      - name: Run ui-sortable, collaboration and markdown-editor tests
+      - name: Run ui-sortable, collaboration, light-code-editor and markdown-editor tests
         run: npm run test:packages
 
       # `changeset publish` packs whatever is on disk and dist/ is not committed, so every
