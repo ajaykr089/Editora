@@ -443,3 +443,78 @@ describe('MarkdownEditor with the source editor (the default)', () => {
     });
   });
 });
+
+describe('MarkdownEditor front matter and footnotes', () => {
+  const withFrontMatter = '---\ntitle: Post\n---\n\n# Heading\n\nText';
+
+  it('shows front matter in the preview as a collapsed block, not as a rule and a heading', () => {
+    mountDefault({ defaultValue: withFrontMatter });
+    expect(preview()!.querySelector('details.md-front-matter code')?.textContent).toBe('title: Post');
+    expect(preview()!.querySelector('hr')).toBeNull();
+    expect(preview()!.querySelectorAll('h1, h2')).toHaveLength(1);
+  });
+
+  it('keeps front matter out of the rich pane, and puts it back when the rich pane reports a change', () => {
+    const onChange = vi.fn();
+    mount({ defaultValue: withFrontMatter, onChange });
+    expect(lastEditorProps().defaultValue).not.toContain('title');
+    expect(lastEditorProps().defaultValue).toContain('<h1>Heading</h1>');
+
+    typeInEditor('<h1>Heading</h1><p>Edited</p>');
+    expect(onChange).toHaveBeenLastCalledWith('---\ntitle: Post\n---\n\n# Heading\n\nEdited');
+    // And it survives further edits, which start from what was just reported.
+    typeInEditor('<h1>Heading</h1><p>Edited again</p>');
+    expect(onChange).toHaveBeenLastCalledWith('---\ntitle: Post\n---\n\n# Heading\n\nEdited again');
+  });
+
+  it('leaves a document without front matter exactly as the rich pane reports it', () => {
+    const onChange = vi.fn();
+    mount({ defaultValue: '# Heading', onChange });
+    typeInEditor('<h1>Heading</h1><p>More</p>');
+    expect(onChange).toHaveBeenLastCalledWith('# Heading\n\nMore');
+  });
+
+  it('gives each editor its own footnote ids, so two on a page do not link into each other', () => {
+    const second = document.createElement('div');
+    document.body.appendChild(second);
+    const secondRoot = createRoot(second);
+    try {
+      mountDefault({ defaultValue: 'A[^1]\n\n[^1]: note' });
+      act(() => secondRoot.render(<MarkdownEditor defaultValue={'B[^1]\n\n[^1]: other'} />));
+      const ids = [...host.querySelectorAll('[id]'), ...second.querySelectorAll('[id]')].map((element) => element.id);
+      expect(ids.length).toBeGreaterThan(2);
+      expect(new Set(ids).size).toBe(ids.length);
+    } finally {
+      act(() => secondRoot.unmount());
+      second.remove();
+    }
+  });
+
+  it('follows a footnote link inside the preview without changing the address of the page', () => {
+    window.location.hash = '';
+    mountDefault({ defaultValue: 'A[^1]\n\n[^1]: note' });
+    const reference = preview()!.querySelector<HTMLAnchorElement>('a[data-footnote-ref]')!;
+    const note = preview()!.querySelector<HTMLElement>('.footnotes li')!;
+    const scrolled = vi.fn();
+    note.scrollIntoView = scrolled;
+
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+    act(() => {
+      reference.dispatchEvent(click);
+    });
+    expect(click.defaultPrevented).toBe(true);
+    expect(window.location.hash).toBe('');
+    expect(scrolled).toHaveBeenCalledTimes(1);
+    expect(document.activeElement).toBe(note);
+  });
+
+  it('does not intercept ordinary links', () => {
+    mountDefault({ defaultValue: '[x](https://example.com)' });
+    const link = preview()!.querySelector<HTMLAnchorElement>('a')!;
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+    act(() => {
+      link.dispatchEvent(click);
+    });
+    expect(click.defaultPrevented).toBe(false);
+  });
+});

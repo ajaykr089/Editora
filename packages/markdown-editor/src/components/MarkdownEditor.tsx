@@ -12,6 +12,7 @@ import {
   ListPlugin,
   StrikethroughPlugin,
 } from '@editora/plugins';
+import { joinFrontMatter, splitFrontMatter } from '../markdown/frontMatter';
 import { htmlToMarkdown } from '../markdown/htmlToMarkdown';
 import { markdownToEditorHtml, markdownToPreviewHtml } from '../markdown/markdownToHtml';
 import { SourceEditor } from '../source/SourceEditor';
@@ -81,6 +82,9 @@ const createPlugins = () => [
   CodeSamplePlugin(),
 ];
 
+// Gives each editor's footnote ids a prefix of its own, so two editors on a page do not share ids.
+let instanceCounter = 0;
+
 const MarkdownGlyph: React.FC = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true" focusable="false">
     <rect x="2.5" y="5" width="19" height="14" rx="2.5" />
@@ -133,13 +137,19 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   const currentValue = isControlled ? value ?? '' : internalValue;
   const visibleMode: Mode = preview ? activeMode : 'edit';
   const rich = activeType === 'rich';
+  const [instanceId] = useState(() => {
+    instanceCounter += 1;
+    return instanceCounter;
+  });
+  const valueRef = useRef(currentValue);
+  valueRef.current = currentValue;
 
   // Only what is on screen is converted: the preview HTML when a preview is shown, the rich editor's
   // HTML when the rich editor is.
   const plugins = useMemo(() => (rich ? createPlugins() : []), [rich]);
   const previewHtml = useMemo(
-    () => (visibleMode === 'edit' ? '' : markdownToPreviewHtml(currentValue)),
-    [currentValue, visibleMode],
+    () => (visibleMode === 'edit' ? '' : markdownToPreviewHtml(currentValue, { idPrefix: `md${instanceId}-` })),
+    [currentValue, visibleMode, instanceId],
   );
   const editorHtml = useMemo(() => (rich ? markdownToEditorHtml(currentValue) : ''), [currentValue, rich]);
 
@@ -172,9 +182,24 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   };
 
   const handleRichChange = (html: string) => {
-    const markdown = htmlToMarkdown(html);
+    // The rich pane does not show the front matter (see markdownToEditorHtml), so it is put back.
+    const markdown = joinFrontMatter(splitFrontMatter(valueRef.current).frontMatter, htmlToMarkdown(html));
     lastEditorValue.current = markdown;
     reportChange(markdown);
+  };
+
+  // A link to "#..." is a footnote (or a heading link) inside this preview. Left alone, the browser would
+  // change the address of the page the editor sits in and scroll that instead.
+  const handlePreviewClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    const link = (event.target as Element).closest?.('a[href^="#"]');
+    if (!link) return;
+    event.preventDefault();
+    const id = link.getAttribute('href')!.slice(1);
+    const target = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('[id]')).find((element) => element.id === id);
+    if (!target) return;
+    target.scrollIntoView?.({ block: 'nearest' });
+    target.setAttribute('tabindex', '-1');
+    target.focus({ preventScroll: true });
   };
 
   const style = { '--md-min-height': `${minHeight}px` } as React.CSSProperties;
@@ -234,6 +259,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
             </div>
             <div
               className="md-preview"
+              onClick={handlePreviewClick}
               dangerouslySetInnerHTML={{
                 __html: previewHtml || '<p class="md-empty-state">Nothing to preview yet.</p>',
               }}

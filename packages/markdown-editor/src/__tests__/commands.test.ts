@@ -320,8 +320,8 @@ describe('tables', () => {
       expect(html.match(/<table/g)).toHaveLength(1);
       expect(html.match(/<tr>/g)).toHaveLength(3);
       expect(html.match(/<th>/g)).toHaveLength(3);
-      if (marked.includes('after')) expect(html).toMatch(/<\/table>\s*<p>after<\/p>/);
-      if (marked.includes('intro')) expect(html).toMatch(/^<p>intro<\/p>\s*<table/);
+      if (marked.includes('after')) expect(html).toMatch(/<\/table>\s*<p[^>]*>after<\/p>/);
+      if (marked.includes('intro')) expect(html).toMatch(/^<p[^>]*>intro<\/p>\s*<table/);
     }
   });
 });

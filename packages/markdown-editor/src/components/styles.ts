@@ -272,5 +272,57 @@ export const MARKDOWN_EDITOR_CSS = `
   inset: -2px;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 75% no-repeat;
 }
+
+/* Front matter is metadata, so it is a quiet, collapsed block above the document. */
+.md-front-matter {
+  margin: 0 0 1em;
+  border: 1px solid var(--rte-color-border, #dee2e6);
+  border-radius: var(--rte-radius, 0.25rem);
+  background: var(--rte-color-bg-secondary, #f8f9fa);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.md-front-matter summary {
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  font-size: var(--rte-font-size-xs, 0.75rem);
+  font-weight: var(--rte-font-weight-semibold, 600);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--rte-color-text-muted, #868e96);
+}
+.md-front-matter pre {
+  margin: 0;
+  padding: 0.5rem 0.75rem 0.75rem;
+  border-top: 1px solid var(--rte-color-border, #dee2e6);
+  overflow: auto;
+  font-family: var(--rte-font-family-mono, 'SFMono-Regular', Menlo, Monaco, Consolas, monospace);
+  font-size: 0.9em;
+}
+.md-front-matter code { background: none; padding: 0; font: inherit; }
+
+/* Footnotes: a small reference number in the text, and the notes together at the end. */
+.md-preview sup > a[data-footnote-ref] { padding: 0 1px; text-decoration: none; }
+.md-preview .footnotes {
+  margin-top: 2em;
+  padding-top: 0.5em;
+  border-top: 1px solid var(--rte-color-border, #dee2e6);
+  font-size: 0.875em;
+  color: var(--rte-color-text-secondary, #6c757d);
+}
+.md-preview .footnotes ol { margin: 0.5em 0 0; }
+.md-preview .footnotes li > p { margin: 0 0 0.25em; }
+.md-preview a[data-footnote-backref] { margin-left: 0.25em; text-decoration: none; }
+.md-preview .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 .md-empty-state { margin: 0; color: var(--rte-color-text-muted, #868e96); font-style: italic; }
 `;

@@ -46,7 +46,8 @@
     "@editora/light-code-editor": "^1.0.16",
     "@editora/plugins": "^1.0.21",
     "@editora/react": "^1.0.21",
-    "marked": "^15.0.0"
+    "marked": "^15.0.0",
+    "marked-footnote": "^1.4.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
