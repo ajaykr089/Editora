@@ -47,6 +47,12 @@ export const MARKDOWN_EDITOR_CSS = `
   color: var(--rte-color-text-secondary, #6c757d);
 }
 .md-editor-title svg { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
+.md-editor-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rte-space-sm, 0.5rem);
+}
 
 .md-editor-modes {
   display: inline-flex;
@@ -114,6 +120,55 @@ export const MARKDOWN_EDITOR_CSS = `
 .md-editor .rte-content { min-height: var(--md-min-height, 220px); }
 .md-editor .rte-content li > ul,
 .md-editor .rte-content li > ol { margin: 0; }
+
+/* Source editor: the Editora toolbar, the code editor, and the Editora status bar. */
+.md-source {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.md-source-toolbar { position: sticky; top: 0; z-index: 3; }
+.md-source .rte-toolbar {
+  border: 0;
+  border-bottom: 1px solid var(--rte-color-border, #dee2e6);
+  border-radius: 0;
+}
+.md-source .rte-toolbar-dropdown-item {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.md-source .rte-toolbar-dropdown-item:focus-visible {
+  outline: 2px solid var(--rte-color-border-focus, #007bff);
+  outline-offset: -2px;
+}
+.md-source-surface { position: relative; flex: 1 1 auto; min-height: var(--md-min-height, 220px); }
+.md-source-editor { height: 100%; }
+.md-source-editor .rte-light-editor {
+  height: auto;
+  min-height: var(--md-min-height, 220px);
+  border: 0;
+  border-radius: 0;
+}
+.md-source-placeholder {
+  position: absolute;
+  top: 8px;
+  left: 58px;
+  right: 8px;
+  color: var(--rte-color-text-muted, #868e96);
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 21px;
+  pointer-events: none;
+  z-index: 6;
+}
+.md-source .editora-statusbar-container { display: flex; flex-direction: column; }
+.md-source .editora-statusbar { border-left: 0; border-right: 0; }
 
 .md-preview-head {
   display: flex;
@@ -209,16 +264,13 @@ export const MARKDOWN_EDITOR_CSS = `
   background: var(--rte-color-primary, #007bff);
   border-color: var(--rte-color-primary, #007bff);
 }
+/* An SVG over the whole box (border included) and centred in it, sized the way the editor's checklist
+ * sizes its own mark, so the two panes match and the mark does not depend on hand-tuned offsets. */
 .md-task-box[aria-checked="true"]::after {
   content: '';
   position: absolute;
-  left: 0.2em;
-  top: 0;
-  width: 0.28em;
-  height: 0.55em;
-  border: solid var(--rte-color-text-inverse, #fff);
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+  inset: -2px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 75% no-repeat;
 }
 .md-empty-state { margin: 0; color: var(--rte-color-text-muted, #868e96); font-style: italic; }
 `;
