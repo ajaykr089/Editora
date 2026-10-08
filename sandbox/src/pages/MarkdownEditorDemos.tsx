@@ -6,6 +6,12 @@ const panel: React.CSSProperties = { border: '1px solid #e2e8f0', borderRadius: 
 const h2: React.CSSProperties = { fontSize: 22, fontWeight: 700, marginBottom: 16, color: '#0f172a' };
 const note: React.CSSProperties = { fontSize: 13, color: '#64748b', marginTop: 10 };
 
+// Enough text, in paragraphs that wrap, to make the panes scroll.
+const SECTIONS = Array.from(
+  { length: 6 },
+  (_, i) => `## Section ${i + 1}\n\n${'Some text to make the document long enough to scroll. '.repeat(6)}`,
+).join('\n\n');
+
 const SAMPLE = `---
 title: Markdown editor demo
 tags: [editor, markdown]
@@ -34,7 +40,7 @@ const greeting = 'Hello from Editora';
 console.log(greeting);
 \`\`\`
 
-${Array.from({ length: 6 }, (_, i) => `## Section ${i + 1}\n\nSome text to make the document long enough to scroll. `.repeat(3)).join('\n\n')}
+${SECTIONS}
 
 [^1]: A footnote, with a link back to where it was used.
 `;
