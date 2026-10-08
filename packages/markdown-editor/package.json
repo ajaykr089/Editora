@@ -1,6 +1,6 @@
 {
   "name": "@editora/markdown-editor",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Markdown editor package for Editora with markdown input, preview, and extension-friendly architecture.",
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
@@ -42,8 +42,8 @@
     "react-dom": ">=16.8 <21"
   },
   "dependencies": {
-    "@editora/core": "^1.0.16",
-    "@editora/light-code-editor": "^1.0.16",
+    "@editora/core": "^1.0.22",
+    "@editora/light-code-editor": "^1.0.17",
     "@editora/plugins": "^1.0.21",
     "@editora/react": "^1.0.21",
     "marked": "^15.0.0",

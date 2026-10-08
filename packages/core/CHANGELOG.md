@@ -1,5 +1,15 @@
 # Change Log
 
+## 1.0.22
+
+### Patch Changes
+
+- 1c0c064: Keep the `start` and `reversed` attributes of an ordered list when sanitising. They were not on the default attribute allowlist, so a list that continues from 5 (`<ol start="5">`) came back as `1.`, `2.` after any sanitised edit, paste or load, silently renumbering the document.
+
+  Found while checking that the markdown editor's lists survive a round trip: `5. five` / `6. six` loaded into the editor as `1.` / `2.`.
+
+- 2e4b6c2: Add `language` and `custom` to the `StatusInfo` typing. `StatusBar` has always accepted and rendered both (a language label after the cursor position, and extra `name: value` items after the counts), but the hand-written `index.d.ts` did not declare them, so passing either was a type error.
+
 ## 1.0.21
 
 ### Patch Changes
