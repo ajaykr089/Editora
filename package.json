@@ -55,6 +55,8 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "verify:packages": "node scripts/verify-package-contents.js",
+    "verify:published": "node scripts/verify-published-packages.js",
+    "test:scripts": "node --test scripts/lib/packages.test.js scripts/verify-published-packages.test.js",
     "release": "npm run build:types && npm run verify:packages && changeset publish"
   },
   "devDependencies": {

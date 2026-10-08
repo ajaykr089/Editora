@@ -41,6 +41,9 @@ jobs:
       - name: Build packages
         run: npm run build
 
+      - name: Test release scripts
+        run: npm run test:scripts
+
       - name: Generate plugin typings
         run: npm run build:types
 
