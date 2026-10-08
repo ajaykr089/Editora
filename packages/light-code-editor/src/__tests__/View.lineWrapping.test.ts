@@ -6,7 +6,8 @@ import { View } from '../View';
 // `[data-editor-measurer]`, so that is where the stand-in for offsetHeight applies.
 const ROW = 24;
 const CHARS_PER_ROW = 10;
-const layout = { width: 400 };
+// `laidOut` counts the blocks the view asked the browser to lay out, which is what costs time on a long document.
+const layout = { width: 400, laidOut: 0 };
 
 let observers: Array<{ callback: () => void; observed: Element[]; disconnected: boolean }> = [];
 
@@ -32,6 +33,7 @@ const setText = async (value: string) => {
 
 beforeEach(() => {
   layout.width = 400;
+  layout.laidOut = 0;
   observers = [];
   vi.stubGlobal(
     'ResizeObserver',
@@ -54,6 +56,7 @@ beforeEach(() => {
     configurable: true,
     get(this: HTMLElement) {
       if (this.parentElement?.getAttribute('data-editor-measurer') !== 'true') return 0;
+      layout.laidOut += 1;
       const line = (this.textContent || '').replace(/\u200B/g, '');
       return Math.max(1, Math.ceil(line.length / CHARS_PER_ROW)) * ROW;
     },
@@ -211,6 +214,145 @@ describe('line numbers with wrapping', () => {
     view.destroy();
     await flush();
     expect(observers[0].disconnected).toBe(true);
+  });
+});
+
+describe('measuring only what an edit touched', () => {
+  beforeEach(() => view.setLineWrapping(true));
+
+  // Twelve lines, three of them wrapped: 24 24 48 24 24 72 24 24 24 48 24 24.
+  const lines = ['l0', 'l1', 'x'.repeat(15), 'l3', 'l4', 'y'.repeat(25), 'l6', 'l7', 'l8', 'z'.repeat(12), 'l10', 'l11'];
+  const expected = (value: string[]) => value.map(rowsOf);
+
+  /** Edits the text the way typing does: the view is told the new line count and measures in the next microtask. */
+  const edit = async (value: string[]) => {
+    layout.laidOut = 0;
+    view.setText(text(...value));
+    view.updateLineNumbers(value.length);
+    await flush();
+  };
+
+  beforeEach(async () => {
+    await setText(text(...lines));
+    expect(heights()).toEqual(expected(lines));
+  });
+
+  it('lays out only the line that was typed in', async () => {
+    const typed = [...lines];
+    typed[5] = 'y'.repeat(35);
+    await edit(typed);
+    expect(layout.laidOut).toBe(1);
+    expect(heights()).toEqual(expected(typed));
+  });
+
+  it('lays out a changed line and its neighbours as separate lines, not the whole document', async () => {
+    const typed = [...lines];
+    typed[2] = 'q';
+    typed[3] = 'r'.repeat(30);
+    await edit(typed);
+    expect(layout.laidOut).toBe(2);
+    expect(heights()).toEqual(expected(typed));
+  });
+
+  it('lays out only the new line when one is added in the middle, and shifts the rest', async () => {
+    const added = [...lines.slice(0, 4), 'n'.repeat(22), ...lines.slice(4)];
+    await edit(added);
+    expect(layout.laidOut).toBe(1);
+    expect(heights()).toEqual(expected(added));
+    expect(gutterRows().map((row) => row.textContent)).toEqual(added.map((_, i) => String(i + 1)));
+  });
+
+  it('lays out nothing when lines are removed, and shifts the rest', async () => {
+    const removed = [...lines.slice(0, 2), ...lines.slice(6)];
+    await edit(removed);
+    expect(layout.laidOut).toBe(0);
+    expect(heights()).toEqual(expected(removed));
+    expect(gutterRows().map((row) => row.textContent)).toEqual(removed.map((_, i) => String(i + 1)));
+  });
+
+  it('lays out only the lines of a paste', async () => {
+    const pasted = [...lines.slice(0, 6), 'p'.repeat(31), 'q'.repeat(9), ...lines.slice(6)];
+    await edit(pasted);
+    expect(layout.laidOut).toBe(2);
+    expect(heights()).toEqual(expected(pasted));
+  });
+
+  it('copes with lines that repeat, whichever of them was added or removed', async () => {
+    await setText(text('a', 'a', 'a'));
+    await edit(['a', 'a', 'a', 'a']);
+    expect(heights()).toEqual(['24px', '24px', '24px', '24px']);
+    await edit(['a', 'a']);
+    expect(heights()).toEqual(['24px', '24px']);
+    await edit(['a', 'a'.repeat(21), 'a']);
+    expect(heights()).toEqual(['24px', '72px', '24px']);
+    expect(layout.laidOut).toBe(1);
+    await edit(['a', 'a', 'a']);
+    expect(heights()).toEqual(['24px', '24px', '24px']);
+  });
+
+  it('lays out nothing when nothing changed, such as when the editor is only resized', async () => {
+    layout.laidOut = 0;
+    observers[0].callback();
+    await flush();
+    expect(layout.laidOut).toBe(0);
+    expect(heights()).toEqual(expected(lines));
+  });
+
+  it('lays out every line again when the width changes', async () => {
+    layout.laidOut = 0;
+    layout.width = 250;
+    observers[0].callback();
+    await flush();
+    expect(layout.laidOut).toBe(lines.length);
+  });
+
+  it('lays out every line again when the font changes', async () => {
+    layout.laidOut = 0;
+    (view as any).contentElement.style.fontSize = '20px';
+    await edit(lines);
+    expect(layout.laidOut).toBe(lines.length);
+  });
+
+  it('lays out every line again after being hidden and shown', async () => {
+    layout.width = 0;
+    observers[0].callback();
+    await flush();
+    layout.laidOut = 0;
+    layout.width = 400;
+    observers[0].callback();
+    await flush();
+    expect(layout.laidOut).toBe(lines.length);
+    expect(heights()).toEqual(expected(lines));
+  });
+
+  it('keeps the rows it has, rather than building the gutter again', async () => {
+    const before = gutterRows();
+    await edit([...lines, 'one more']);
+    const after = gutterRows();
+    expect(after).toHaveLength(lines.length + 1);
+    expect(after.slice(0, lines.length)).toEqual(before);
+    await edit(lines.slice(0, 8));
+    expect(gutterRows()).toEqual(before.slice(0, 8));
+  });
+
+  it('writes only the rows whose height changed', async () => {
+    const writes: number[] = [];
+    const rows = gutterRows();
+    rows.forEach((row, index) => {
+      let value = row.style.height;
+      Object.defineProperty(row.style, 'height', {
+        configurable: true,
+        get: () => value,
+        set: (next: string) => {
+          writes.push(index);
+          value = next;
+        },
+      });
+    });
+    const typed = [...lines];
+    typed[5] = 'y'.repeat(35);
+    await edit(typed);
+    expect(writes).toEqual([5]);
   });
 });
 
