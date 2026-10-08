@@ -1,3 +1,9 @@
+---
+title: "@editora/markdown-editor"
+description: Markdown editor for React on the Editora toolbar and theme - lossless source editing, a live sanitised preview, scroll sync, fullscreen, footnotes, front matter and optional math.
+keywords: [editora, markdown, markdown-editor, react, preview, footnotes, math, katex]
+---
+
 # @editora/markdown-editor
 
 A markdown editor for React, built on the Editora editor. You write markdown in a code editor with the Editora
