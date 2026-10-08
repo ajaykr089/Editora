@@ -35,7 +35,9 @@ export type MarkdownCommand =
   | 'orderedList'
   | 'taskList'
   | 'codeBlock'
-  | 'horizontalRule';
+  | 'horizontalRule'
+  | 'image'
+  | 'table';
 
 export const applyEdit = (text: string, edit: TextEdit): string =>
   text.slice(0, edit.from) + edit.insert + text.slice(edit.to);
@@ -79,6 +81,10 @@ export function runMarkdownCommand(command: MarkdownCommand, state: TextState): 
       return toggleCodeBlock(state);
     case 'horizontalRule':
       return insertHorizontalRule(state);
+    case 'image':
+      return insertImage(state);
+    case 'table':
+      return insertTable(state);
     default:
       return null;
   }
@@ -240,11 +246,30 @@ function insertLink({ text, start, end }: TextState): TextEdit {
   return { from: start, to: end, insert, selectionStart: urlStart, selectionEnd: urlStart + 3 };
 }
 
+const IMAGE_ALT = 'alt text';
+const IMAGE_URL = /^(?:https?:\/\/|www\.)\S+$|^\S+\.(?:png|jpe?g|gif|webp|svg|avif)(?:[?#]\S*)?$/i;
+
+function insertImage({ text, start, end }: TextState): TextEdit {
+  const selected = text.slice(start, end);
+  if (!selected) {
+    const insert = `![${IMAGE_ALT}](url)`;
+    return { from: start, to: end, insert, selectionStart: start + 2, selectionEnd: start + 2 + IMAGE_ALT.length };
+  }
+  // A selected address becomes the source; any other selection becomes the description.
+  if (IMAGE_URL.test(selected.trim())) {
+    const insert = `![${IMAGE_ALT}](${selected.trim()})`;
+    return { from: start, to: end, insert, selectionStart: start + 2, selectionEnd: start + 2 + IMAGE_ALT.length };
+  }
+  const insert = `![${selected}](url)`;
+  const urlStart = start + selected.length + 4;
+  return { from: start, to: end, insert, selectionStart: urlStart, selectionEnd: urlStart + 3 };
+}
+
 // ---------------------------------------------------------------------------------------------
 // Block formatting
 // ---------------------------------------------------------------------------------------------
 
-const QUOTE = /^(\s{0,3})>\s?/;
+const QUOTE =/^(\s{0,3})>\s?/;
 const TASK = /^(\s*)[-*+]\s+\[[ xX]\]\s+/;
 const BULLET_ONLY = /^(\s*)[-*+]\s+(?!\[[ xX]\](?:\s|$))/;
 const ORDERED = /^(\s*)\d+[.)]\s+/;
@@ -385,6 +410,39 @@ function insertHorizontalRule({ text, end }: TextState): TextEdit {
   const insert = `${previousBlank ? '' : '\n'}---\n\n`;
   const caret = lineStart + insert.length;
   return { from: lineStart, to: lineEnd, insert, selectionStart: caret, selectionEnd: caret };
+}
+
+const TABLE_COLUMNS = 3;
+const TABLE_BODY_ROWS = 2;
+
+/** A table needs a blank line on both sides (right under a paragraph it would be read as paragraph text),
+ *  so it goes after the current line, or replaces the line when that is empty. The first header is selected. */
+function insertTable({ text, end }: TextState): TextEdit {
+  const lineStart = lineStartOf(text, end);
+  const lineEnd = lineEndOf(text, end);
+  const onBlankLine = isBlank(text.slice(lineStart, lineEnd));
+
+  const row = (cell: (column: number) => string) =>
+    `| ${Array.from({ length: TABLE_COLUMNS }, (_, column) => cell(column)).join(' | ')} |`;
+  const rows = [
+    row((column) => `Header ${column + 1}`),
+    row(() => '---'),
+    ...Array.from({ length: TABLE_BODY_ROWS }, () => row(() => 'Cell')),
+  ];
+
+  const from = onBlankLine ? lineStart : lineEnd;
+  const previousStart = lineStartOf(text, Math.max(0, lineStart - 1));
+  const previousBlank = lineStart === 0 || isBlank(text.slice(previousStart, lineStart - 1));
+  const prefix = onBlankLine ? (previousBlank ? '' : '\n') : '\n\n';
+
+  // The line after the insertion point: a table directly above text would swallow it as a row.
+  const nextStart = lineEnd + 1;
+  const nextLine = nextStart <= text.length ? text.slice(nextStart, lineEndOf(text, nextStart)) : '';
+  const suffix = nextStart < text.length && !isBlank(nextLine) ? '\n' : '';
+
+  const insert = `${prefix}${rows.join('\n')}${suffix}`;
+  const firstHeader = from + prefix.length + 2;
+  return { from, to: lineEnd, insert, selectionStart: firstHeader, selectionEnd: firstHeader + 'Header 1'.length };
 }
 
 // ---------------------------------------------------------------------------------------------

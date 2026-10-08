@@ -285,6 +285,24 @@ describe('SourceEditor', () => {
       expect(editor().getValue()).toBe('- one\n> two\nthree');
     });
 
+    it('has image and table buttons that insert one undoable block and select what to type next', () => {
+      render({ value: 'intro' });
+      editor().userSelects(5);
+      act(() => button('image').click());
+      expect(editor().getValue()).toBe('intro![alt text](url)');
+      expect(editor().getValue().slice(editor().start, editor().end)).toBe('alt text');
+
+      act(() => editor().setValue('intro'));
+      editor().userSelects(5);
+      editor().replaceCalls.length = 0;
+      act(() => button('table').click());
+      expect(editor().replaceCalls).toHaveLength(1);
+      expect(editor().getValue()).toBe(
+        'intro\n\n| Header 1 | Header 2 | Header 3 |\n| --- | --- | --- |\n| Cell | Cell | Cell |\n| Cell | Cell | Cell |',
+      );
+      expect(editor().getValue().slice(editor().start, editor().end)).toBe('Header 1');
+    });
+
     it('runs undo and redo in the code editor', () => {
       render();
       act(() => button('undo').click());

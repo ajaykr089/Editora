@@ -12,7 +12,8 @@ interface ButtonSpec {
   shortcut?: string;
 }
 
-// The same order as the rich editor's toolbar: history, heading, text, link, lists, quote, code.
+// The same order as the rich editor's toolbar: history, heading, text, link and image, lists, quote, code, then
+// the blocks that are inserted (table, rule).
 const BEFORE_HEADING: ButtonSpec[] = [
   { command: 'undo', label: 'Undo', icon: 'undo', shortcut: 'Mod+Z' },
   { command: 'redo', label: 'Redo', icon: 'redo', shortcut: 'Mod+Shift+Z' },
@@ -22,12 +23,14 @@ const AFTER_HEADING: ButtonSpec[] = [
   { command: 'italic', label: 'Italic', icon: 'italic', shortcut: 'Mod+I' },
   { command: 'strikethrough', label: 'Strikethrough', icon: 'strikethrough', shortcut: 'Mod+Shift+X' },
   { command: 'link', label: 'Link', icon: 'link', shortcut: 'Mod+K' },
+  { command: 'image', label: 'Image', icon: 'image' },
   { command: 'bulletList', label: 'Bullet list', icon: 'bulletList' },
   { command: 'orderedList', label: 'Numbered list', icon: 'orderedList' },
   { command: 'taskList', label: 'Task list', icon: 'taskList' },
   { command: 'quote', label: 'Quote', icon: 'quote' },
   { command: 'inlineCode', label: 'Inline code', icon: 'inlineCode', shortcut: 'Mod+E' },
   { command: 'codeBlock', label: 'Code block', icon: 'codeBlock' },
+  { command: 'table', label: 'Table', icon: 'table' },
   { command: 'horizontalRule', label: 'Horizontal rule', icon: 'horizontalRule' },
 ];
 

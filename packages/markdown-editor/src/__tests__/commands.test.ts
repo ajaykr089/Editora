@@ -10,6 +10,7 @@ import {
   type TextEdit,
   type TextState,
 } from '../source/commands';
+import { markdownToPreviewHtml } from '../markdown/markdownToHtml';
 
 // Tests are written with the selection drawn in the text: «selected» for a range, ¦ for a caret.
 const parse = (marked: string): TextState => {
@@ -261,6 +262,67 @@ describe('horizontal rules', () => {
 
   it('adds the blank line above when the previous line is text', () => {
     expect(run('horizontalRule', 'a\n¦')).toBe('a\n\n---\n\n¦');
+  });
+});
+
+describe('images', () => {
+  it('inserts an image with the description selected when nothing is selected', () => {
+    expect(run('image', 'a ¦b')).toBe('a ![«alt text»](url)b');
+  });
+
+  it('turns the selection into the description and selects the url placeholder', () => {
+    expect(run('image', 'see «the logo» now')).toBe('see ![the logo](«url») now');
+  });
+
+  it('uses a selected address as the source', () => {
+    expect(run('image', '«https://example.com/a.png»')).toBe('![«alt text»](https://example.com/a.png)');
+    expect(run('image', '«/img/photo.JPG?v=2»')).toBe('![«alt text»](/img/photo.JPG?v=2)');
+    expect(run('image', '« www.example.com/x »')).toBe('![«alt text»](www.example.com/x)');
+  });
+
+  it('does not mistake ordinary words for an address', () => {
+    expect(run('image', '«readme.txt»')).toBe('![readme.txt](«url»)');
+  });
+});
+
+describe('tables', () => {
+  const HEAD = '| «Header 1» | Header 2 | Header 3 |';
+  const BODY = '| --- | --- | --- |\n| Cell | Cell | Cell |\n| Cell | Cell | Cell |';
+
+  it('inserts a table with the first header selected', () => {
+    expect(run('table', '¦')).toBe(`${HEAD}\n${BODY}`);
+  });
+
+  it('goes after the current line with a blank line above, so it is not read as paragraph text', () => {
+    expect(run('table', 'text¦')).toBe(`text\n\n${HEAD}\n${BODY}`);
+  });
+
+  it('replaces an empty line, adding a blank line above only when the previous line is text', () => {
+    expect(run('table', 'a\n\n¦')).toBe(`a\n\n${HEAD}\n${BODY}`);
+    expect(run('table', 'a\n¦')).toBe(`a\n\n${HEAD}\n${BODY}`);
+  });
+
+  it('leaves a blank line before the text that follows, so that text is not swallowed as a row', () => {
+    expect(run('table', 'a¦\nb')).toBe(`a\n\n${HEAD}\n${BODY}\n\nb`);
+    expect(run('table', 'a\n\n¦\nb')).toBe(`a\n\n${HEAD}\n${BODY}\n\nb`);
+    // Already separated: no extra blank line.
+    expect(run('table', 'a¦\n\nb')).toBe(`a\n\n${HEAD}\n${BODY}\n\nb`);
+  });
+
+  it('uses the line of the end of the selection', () => {
+    expect(run('table', '«one\ntwo»')).toBe(`one\ntwo\n\n${HEAD}\n${BODY}`);
+  });
+
+  it('is read as a table with its own paragraphs around it', () => {
+    for (const marked of ['intro¦\nafter', '¦', 'intro\n¦\nafter']) {
+      const state = parse(marked);
+      const html = markdownToPreviewHtml(applyEdit(state.text, runMarkdownCommand('table', state)!));
+      expect(html.match(/<table/g)).toHaveLength(1);
+      expect(html.match(/<tr>/g)).toHaveLength(3);
+      expect(html.match(/<th>/g)).toHaveLength(3);
+      if (marked.includes('after')) expect(html).toMatch(/<\/table>\s*<p>after<\/p>/);
+      if (marked.includes('intro')) expect(html).toMatch(/^<p>intro<\/p>\s*<table/);
+    }
   });
 });
 
