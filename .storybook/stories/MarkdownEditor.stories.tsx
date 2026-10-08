@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { MarkdownEditor } from '@editora/markdown-editor';
+import '@editora/themes/themes/default.css';
+import '@editora/themes/themes/dark.css';
 
 const meta: Meta<typeof MarkdownEditor> = {
   title: 'UI Components/Markdown Editor',
@@ -8,7 +10,8 @@ const meta: Meta<typeof MarkdownEditor> = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: 'A lightweight markdown editor with edit, split, and preview modes plus inline formatting actions.',
+        component:
+          'A markdown editor on the Editora toolbar and theme, with edit, split and preview views and a live sanitised preview. The value is markdown; tables, task lists, code, links and images survive editing.',
       },
     },
   },
@@ -40,12 +43,20 @@ This demo shows the **new markdown editor** experience with a live preview and f
 - Format text with toolbar actions
 - Switch between edit and preview modes
 
+- [x] Task lists
+- [ ] Tables, links and images
+
 > Use Ctrl/Cmd + B or Ctrl/Cmd + I for common shortcuts.
 
 \`\`\`ts
 const greeting = 'Hello from Editora';
 console.log(greeting);
 \`\`\`
+
+| Feature | Status |
+| --- | --- |
+| Lossless round trip | done |
+| Dark theme | done |
 `;
 
 export const Playground: Story = {
@@ -53,6 +64,23 @@ export const Playground: Story = {
     defaultValue: sampleMarkdown,
     mode: 'split',
     preview: true,
+    minHeight: 320,
+  },
+};
+
+export const EditOnly: Story = {
+  args: {
+    defaultValue: sampleMarkdown,
+    preview: false,
+    minHeight: 320,
+  },
+};
+
+export const ReadOnly: Story = {
+  args: {
+    defaultValue: sampleMarkdown,
+    readOnly: true,
+    mode: 'split',
     minHeight: 320,
   },
 };
