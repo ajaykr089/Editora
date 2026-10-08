@@ -963,3 +963,11 @@ describe('MarkdownEditor with a long document', () => {
     expect(previewHeading()).toBe('Second');
   });
 });
+
+describe('MarkdownEditor styles', () => {
+  it('keeps a footnote number from making its line taller than the others', () => {
+    mountDefault({ defaultValue: 'a[^1]\n\n[^1]: note' });
+    const css = host.querySelector('style')!.textContent!;
+    expect(css).toMatch(/\.md-preview sup[^{]*\{[^}]*line-height:\s*0\s*;/);
+  });
+});

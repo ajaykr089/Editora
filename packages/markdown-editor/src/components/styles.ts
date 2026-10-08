@@ -352,6 +352,8 @@ export const MARKDOWN_EDITOR_CSS = `
 .md-front-matter code { background: none; padding: 0; font: inherit; }
 
 /* Footnotes: a small reference number in the text, and the notes together at the end. */
+/* A raised or lowered number must not make its line taller than the lines around it. */
+.md-preview sup, .md-preview sub { line-height: 0; }
 .md-preview sup > a[data-footnote-ref] { padding: 0 1px; text-decoration: none; }
 .md-preview .footnotes {
   margin-top: 2em;
