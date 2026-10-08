@@ -67,6 +67,9 @@ export class EditorCore implements EditorAPI {
   private decorationMutationObserver: MutationObserver | null = null;
   private hasCustomDecorationHighlightSupport = false;
   private lastProgrammaticClipboardInsertAt = 0;
+  // Tab indents in the editor, so a keyboard user who tabbed in could never tab out (WCAG 2.1.2). Escape is the
+  // way out, as in other code editors: after it, the next Tab (or Shift+Tab) moves the focus on.
+  private tabReleased = false;
 
   // Public accessors for extensions
   public getTextModel(): TextModel {
@@ -312,8 +315,22 @@ export class EditorCore implements EditorAPI {
     document.addEventListener('selectionchange', this.documentSelectionChangeHandler);
 
     // Handle keyboard events
+    contentElement.addEventListener('blur', () => {
+      this.tabReleased = false;
+    });
+
     contentElement.addEventListener('keydown', (e) => {
       this.emit('keydown', e);
+
+      // After Escape, one Tab (or Shift+Tab) is left to the browser, which moves the focus. Any other key
+      // takes the Tab key back; the modifier keys on their own do not count as one.
+      if (e.key === 'Tab' && this.tabReleased && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        this.tabReleased = false;
+        return;
+      }
+      if (e.key !== 'Escape' && e.key !== 'Shift' && e.key !== 'Control' && e.key !== 'Alt' && e.key !== 'Meta') {
+        this.tabReleased = false;
+      }
 
       const extensions = Array.from(this.extensions.values()).reverse();
       for (const extension of extensions) {
@@ -322,6 +339,11 @@ export class EditorCore implements EditorAPI {
           e.stopPropagation();
           return;
         }
+      }
+
+      // An Escape that nothing handled (a menu or the find panel closing on it would have) lets go of Tab.
+      if (e.key === 'Escape' && !e.defaultPrevented) {
+        this.tabReleased = true;
       }
 
       // Handle Tab key directly to ensure consistent insertion
