@@ -22,6 +22,7 @@ export const routeGroups: RouteGroup[] = [
       { path: '/light-code-editor-formatting', label: 'Formatting' },
       { path: '/light-code-editor-readonly', label: 'Read-only Code' },
       { path: '/light-code-editor-full', label: 'Full Code Editor' },
+      { path: '/markdown-editor', label: 'Markdown Editor' },
     ],
   },
   {

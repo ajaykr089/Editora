@@ -56,6 +56,11 @@ describe('sanitizeHTML', () => {
     expect(result).toBe(html);
   });
 
+  it('keeps the start number and direction of an ordered list', () => {
+    const html = '<ol start="5"><li>five</li><li>six</li></ol><ol reversed=""><li>b</li><li>a</li></ol>';
+    expect(sanitizeHTML(html)).toBe(html);
+  });
+
   it('passes html through unmodified when sanitize is explicitly disabled', () => {
     const html = '<script>alert(1)</script>';
     const result = sanitizeHTML(html, { sanitize: false });

@@ -652,14 +652,17 @@
   border-color: #0066cc;
 }
 
+/* The check is an SVG laid over the exact box of the checkbox (1.2em plus its 2px border on each side)
+ * and centred in it. It used to be a "✓" text glyph placed by hand with left/top offsets, so where
+ * it landed depended on the font's glyph metrics and it sat low and to the right of centre. */
 .rte-content li[data-type="checklist-item"][data-checked="true"]:after {
-  content: '✓';
+  content: '';
   position: absolute;
-  left: 0.36em;
-  top: 0.12em;
-  color: white;
-  font-size: 0.9em;
-  font-weight: bold;
+  left: 0;
+  top: 0.1em;
+  width: calc(1.2em + 4px);
+  height: calc(1.2em + 4px);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 75% no-repeat;
   pointer-events: none;
 }
 

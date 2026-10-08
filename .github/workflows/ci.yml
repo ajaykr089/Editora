@@ -67,7 +67,7 @@ jobs:
       - name: Run ui-core and ui-react unit tests
         run: npm run test:ui:unit
 
-      - name: Run ui-sortable and collaboration tests
+      - name: Run ui-sortable, collaboration, light-code-editor and markdown-editor tests
         run: npm run test:packages
 
   react-19-compat:

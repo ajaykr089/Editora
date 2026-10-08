@@ -177,6 +177,10 @@ export interface StatusInfo {
   wordCount: number;
   charCount: number;
   lineCount: number;
+  /** Shown after the cursor position, e.g. "Markdown". */
+  language?: string;
+  /** Extra "name: value" items shown after the counts. */
+  custom?: Record<string, string>;
   cursorPosition?: { line: number; column: number };
   selectionInfo?: {
     startLine: number;
