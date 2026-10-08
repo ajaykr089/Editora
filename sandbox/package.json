@@ -6,6 +6,7 @@
     "@editora/core": "1.0.21",
     "@editora/icons": "0.1.11",
     "@editora/light-code-editor": "1.0.16",
+    "@editora/markdown-editor": "0.1.1",
     "@editora/plugins": "1.0.21",
     "@editora/react": "1.0.25",
     "@editora/react-icons": "0.1.11",

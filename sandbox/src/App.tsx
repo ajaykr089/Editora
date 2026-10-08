@@ -6,6 +6,7 @@ import { NavSidebar } from './components/NavSidebar';
 // Editors
 import { EditoraAllToolbarsDemo, EditoraApiDemo, EditoraControlledDemo, EditoraEditorDemo, EditoraEnterpriseDemo, EditoraPluginsDemo, EditoraReadOnlyDemo } from './pages/EditorDemos';
 import { LightCodeEditorCompletionDemo, LightCodeEditorDemo, LightCodeEditorDiagnosticsDemo, LightCodeEditorFormattingDemo, LightCodeEditorFullDemo, LightCodeEditorLanguageDemo, LightCodeEditorReadOnlyDemo, LightCodeEditorSearchDemo } from './pages/LightCodeEditorDemos';
+import { MarkdownEditorDemo } from './pages/MarkdownEditorDemos';
 // Motion
 import { AnimatedBeamDemo, AnimatedListDemo, AnimatedNumberDemo, AnimatedTextDemo, MarqueeDemo, NumberTickerDemo, OrbiterDemo, SpinningTextDemo, DockDemo } from './pages/MotionDemos';
 // Layout
@@ -84,6 +85,7 @@ export default function App() {
             <Route path="/light-code-editor-formatting" element={<LightCodeEditorFormattingDemo />} />
             <Route path="/light-code-editor-readonly" element={<LightCodeEditorReadOnlyDemo />} />
             <Route path="/light-code-editor-full" element={<LightCodeEditorFullDemo />} />
+            <Route path="/markdown-editor" element={<MarkdownEditorDemo />} />
 
             {/* Motion */}
             <Route path="/animated-beam" element={<AnimatedBeamDemo />} />
