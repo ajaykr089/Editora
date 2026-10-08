@@ -106,6 +106,14 @@ GitHub-flavoured markdown, plus:
 - **Task lists** with checkboxes, tables with alignment, highlighted code.
 - **Math** when you ask for it (below).
 
+### Long documents
+
+Building the preview of a document of thousands of lines takes a few hundred milliseconds, which is too long to wait
+after every character. While you type in the source pane, the preview of a long document (20,000 characters or more)
+whose last build was slow waits for a pause in the typing, and is never more than two seconds behind. A short document,
+or one that builds quickly, is shown as you type, exactly as before. The preview on its own, and the edit-only view,
+are not affected.
+
 ### Scroll sync
 
 With a `height`, the source and the preview scroll as one in split view. The match is exact rather than by

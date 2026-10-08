@@ -1,7 +1,33 @@
-# @editora/markdown-editor
+<h1 align="center">@editora/markdown-editor</h1>
 
-A markdown editor for React, built on the Editora editor. You write markdown in a code editor with the Editora
-toolbar and shortcuts, next to a live, sanitised preview, and the value you read and write is the markdown itself.
+<p align="center">
+  A markdown editor for React, built on the Editora editor: the markdown source with a real toolbar, next to a live,
+  sanitised preview. The value you read and write is the markdown itself.
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@editora/markdown-editor"><img src="https://img.shields.io/npm/v/@editora/markdown-editor.svg" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@editora/markdown-editor"><img src="https://img.shields.io/npm/dm/@editora/markdown-editor.svg" alt="npm downloads"></a>
+  <a href="https://github.com/ajaykr089/Editora/blob/main/packages/markdown-editor/LICENSE"><img src="https://img.shields.io/npm/l/@editora/markdown-editor.svg" alt="license"></a>
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/markdown-editor/docs/images/editor-light.png" alt="The markdown editor in split view: markdown source with a formatting toolbar and line numbers on the left, the rendered preview on the right" width="900">
+</p>
+
+## Features
+
+- **Edit the markdown itself.** The source is a code editor with markdown highlighting, line numbers, wrapping and
+  find / replace, so nothing is converted and nothing is lost, whatever the document contains.
+- **A real toolbar and shortcuts**: headings, bold, italic, strikethrough, links, images, lists, task lists, quotes,
+  code, tables and rules, each one undo step. Enter continues a list.
+- **Live preview** that is sanitised: front matter, footnotes, tables, task lists, highlighted code and, if you bring
+  KaTeX, math.
+- **Scroll sync** that is exact rather than proportional, so tall code blocks and tables do not throw the panes out
+  of step.
+- **Follows your theme**, dark mode included, and every piece of text can be translated.
+- **Fast on long documents**: typing in a document of thousands of lines is not held up by the preview.
+- Edit, split, preview and **fullscreen** views, a ref handle, and a rich-text editing surface if you prefer one.
 
 ## Install
 
@@ -18,6 +44,10 @@ import '@editora/themes/themes/dark.css'; // optional: enables `.dark`, `[data-t
 import '@editora/light-code-editor/light-code-editor.css';
 import '@editora/plugins/styles.css'; // only needed for editorType="rich"
 ```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/markdown-editor/docs/images/editor-dark.png" alt="The same editor in the dark theme" width="900">
+</p>
 
 ## Usage
 
@@ -84,11 +114,19 @@ is sanitised and not preserved. Front matter is kept untouched. Footnotes and ma
 surface (they would be rewritten as plain text), so use the source editor for documents that have them. Switching
 between the two keeps the text, and changes it only if you edit while in rich text.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/markdown-editor/docs/images/rich-text.png" alt="The rich-text editing surface: the Editora toolbar and a rendered document on the left, the preview on the right" width="900">
+</p>
+
 Views: **Edit**, **Split** and **Preview**. Switching keeps the editor mounted, so undo history and selection
 survive. The header also has a **fullscreen** button: the editor fills the window, the page behind it does not
 scroll, and Escape leaves (unless a menu or the find panel took that Escape).
 
 ## The preview
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/markdown-editor/docs/images/preview.png" alt="The preview: front matter, a heading, inline and display math, a footnote reference, a task list and the footnote at the end" width="640">
+</p>
 
 GitHub-flavoured markdown, plus:
 
@@ -99,6 +137,14 @@ GitHub-flavoured markdown, plus:
   at the end. A click on one stays inside the preview; it does not change the address of your page.
 - **Task lists** with checkboxes, tables with alignment, highlighted code.
 - **Math** when you ask for it (below).
+
+### Long documents
+
+Building the preview of a document of thousands of lines takes a few hundred milliseconds, which is too long to wait
+after every character. While you type in the source pane, the preview of a long document (20,000 characters or more)
+whose last build was slow waits for a pause in the typing, and is never more than two seconds behind. A short document,
+or one that builds quickly, is shown as you type, exactly as before. The preview on its own, and the edit-only view,
+are not affected.
 
 ### Scroll sync
 
@@ -165,6 +211,10 @@ Every piece of text the editor shows or announces can be replaced; whatever you 
   }}
 />
 ```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/markdown-editor/docs/images/translated.png" alt="The editor with its labels in Spanish: Fuente, Texto enriquecido, Editar, Dividido, Vista previa" width="900">
+</p>
 
 See `MarkdownEditorLabels` for the full list: the header, both switches, the toolbar's buttons and tooltips, the
 heading menu, the preview's heading and empty state, the front matter and footnotes text, and the names read by
