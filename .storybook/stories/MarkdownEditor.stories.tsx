@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { MarkdownEditor } from '@editora/markdown-editor';
 import '@editora/themes/themes/default.css';
 import '@editora/themes/themes/dark.css';
+import '../../packages/light-code-editor/dist/light-code-editor.css';
 
 const meta: Meta<typeof MarkdownEditor> = {
   title: 'UI Components/Markdown Editor',
@@ -11,7 +12,7 @@ const meta: Meta<typeof MarkdownEditor> = {
     docs: {
       description: {
         component:
-          'A markdown editor on the Editora toolbar and theme, with edit, split and preview views and a live sanitised preview. The value is markdown; tables, task lists, code, links and images survive editing.',
+          'A markdown editor on the Editora toolbar and theme, with edit, split and preview views and a live sanitised preview. The default editing pane is the markdown source itself, so nothing is converted or lost; editorType="rich" edits it as rich text instead.',
       },
     },
   },
@@ -19,6 +20,10 @@ const meta: Meta<typeof MarkdownEditor> = {
     mode: {
       control: { type: 'select' },
       options: ['edit', 'split', 'preview'],
+    },
+    editorType: {
+      control: { type: 'select' },
+      options: ['source', 'rich'],
     },
     preview: {
       control: { type: 'boolean' },
@@ -64,6 +69,15 @@ export const Playground: Story = {
     defaultValue: sampleMarkdown,
     mode: 'split',
     preview: true,
+    minHeight: 320,
+  },
+};
+
+export const RichText: Story = {
+  args: {
+    defaultValue: sampleMarkdown,
+    editorType: 'rich',
+    mode: 'split',
     minHeight: 320,
   },
 };
