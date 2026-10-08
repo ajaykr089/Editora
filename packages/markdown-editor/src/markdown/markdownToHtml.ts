@@ -20,12 +20,18 @@ export interface PreviewLabels {
   footnotes: string;
   /** Label of the link back from a footnote to its reference; {0} is the footnote's label. */
   backToReference: string;
+  /** Name of the checkbox of a completed task-list item (read by assistive technology only). */
+  taskDone: string;
+  /** Name of the checkbox of an open task-list item. */
+  taskTodo: string;
 }
 
 export const DEFAULT_PREVIEW_LABELS: PreviewLabels = {
   frontMatter: 'Front matter',
   footnotes: 'Footnotes',
   backToReference: 'Back to reference {0}',
+  taskDone: 'Completed task',
+  taskTodo: 'Open task',
 };
 
 const newlinesIn = (text: string): number => (text.match(/\n/g) || []).length;
@@ -72,9 +78,11 @@ const createPreviewMarked = (labels: PreviewLabels, math: boolean) =>
           return `<code class="md-inline-code">${escapeHtml(text)}</code>`;
         },
         // A real <input> would be stripped by the sanitiser, which silently turned every task item into a
-        // plain bullet. A role=checkbox span survives it and is still announced as a checkbox.
+        // plain bullet. A role=checkbox span survives it and is still announced as a checkbox, with a name:
+        // a control without one cannot be told from any other.
         checkbox({ checked }) {
-          return `<span class="md-task-box" role="checkbox" aria-checked="${checked ? 'true' : 'false'}" aria-disabled="true"></span> `;
+          const name = escapeHtml(checked ? labels.taskDone : labels.taskTodo);
+          return `<span class="md-task-box" role="checkbox" aria-checked="${checked ? 'true' : 'false'}" aria-disabled="true" aria-label="${name}"></span> `;
         },
         link({ href, title, tokens }) {
           const text = this.parser.parseInline(tokens);
@@ -91,7 +99,7 @@ const createPreviewMarked = (labels: PreviewLabels, math: boolean) =>
 // One instance per set of labels: an instance is cheap but not free, and there are rarely more than one.
 const previewInstances = new Map<string, Marked>();
 const previewMarkedFor = (labels: PreviewLabels, math: boolean): Marked => {
-  const key = JSON.stringify([labels.footnotes, labels.backToReference, math]);
+  const key = JSON.stringify([labels.footnotes, labels.backToReference, labels.taskDone, labels.taskTodo, math]);
   let instance = previewInstances.get(key);
   if (!instance) {
     instance = createPreviewMarked(labels, math);

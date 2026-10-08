@@ -156,7 +156,7 @@ export const SourceToolbar: React.FC<SourceToolbarProps> = ({ labels, disabled, 
                 data-md-command="heading"
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
-                aria-label={fillLabel(labels.headingLevel, headingName(current.level))}
+                aria-label={`${current.short} ${fillLabel(labels.headingLevel, headingName(current.level))}`}
                 title={labels.heading}
                 disabled={disabled}
                 onMouseDown={keepSelection}
@@ -176,7 +176,7 @@ export const SourceToolbar: React.FC<SourceToolbarProps> = ({ labels, disabled, 
                 }}
                 {...rovingProps(headingIndex)}
               >
-                {current.short} ▼
+                {current.short} <span aria-hidden="true">▼</span>
               </button>
               {menuOpen && (
                 <div
@@ -203,7 +203,7 @@ export const SourceToolbar: React.FC<SourceToolbarProps> = ({ labels, disabled, 
                       key={heading.level}
                       role="menuitemradio"
                       aria-checked={heading.level === headingLevel}
-                      aria-label={headingName(heading.level)}
+                      aria-label={`${heading.short} ${headingName(heading.level)}`}
                       className="rte-toolbar-dropdown-item"
                       data-active={heading.level === headingLevel ? 'true' : 'false'}
                       onMouseDown={keepSelection}

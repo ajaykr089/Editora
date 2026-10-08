@@ -44,6 +44,8 @@ export interface MarkdownEditorLabels {
   exitFullscreen: string;
   /** Name of the editing area for assistive technology. */
   sourceTextbox: string;
+  /** Read after the name of the editing area: how to leave it with the keyboard, since Tab indents there. */
+  sourceHint: string;
   /** Language shown in the status bar. */
   statusLanguage: string;
 
@@ -53,6 +55,10 @@ export interface MarkdownEditorLabels {
   footnotes: string;
   /** Link back from a footnote to its reference; {0} is the footnote's label. */
   backToReference: string;
+  /** Name of the checkbox of a completed task-list item in the preview (read by assistive technology only). */
+  taskDone: string;
+  /** Name of the checkbox of an open task-list item in the preview. */
+  taskTodo: string;
 
   toolbar: string;
   /** The heading menu: its title, its name for assistive technology, and the name of the current level ({0}). */
@@ -86,11 +92,14 @@ export const DEFAULT_LABELS: MarkdownEditorLabels = {
   enterFullscreen: 'Enter fullscreen',
   exitFullscreen: 'Exit fullscreen',
   sourceTextbox: 'Markdown source',
+  sourceHint: 'Tab indents. Press Escape, then Tab, to leave the editor.',
   statusLanguage: 'Markdown',
 
   frontMatter: 'Front matter',
   footnotes: 'Footnotes',
   backToReference: 'Back to reference {0}',
+  taskDone: 'Completed task',
+  taskTodo: 'Open task',
 
   toolbar: 'Markdown formatting',
   heading: 'Heading',

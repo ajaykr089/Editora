@@ -685,7 +685,7 @@ describe('MarkdownEditor labels', () => {
     expect(pressed('Vista')).toEqual(['Dividido']);
     expect(Array.from(host.querySelectorAll('[aria-label="Vista"] button')).map((b) => b.textContent)).toEqual(['Editar', 'Dividido', 'Vista previa']);
     expect(Array.from(host.querySelectorAll('[aria-label="Tipo de editor"] button')).map((b) => b.textContent)).toEqual(['Fuente', 'Texto enriquecido']);
-    expect(host.querySelector('section')!.getAttribute('aria-label')).toBe('Vista previa de markdown');
+    expect(preview()!.getAttribute('aria-label')).toBe('Vista previa de markdown');
     expect(host.querySelector('.md-preview-head')!.textContent).toBe('VISTA PREVIA');
     expect(preview()!.textContent).toBe('Nada que mostrar.');
     expect(host.querySelector('.md-editor-icon-button')!.getAttribute('aria-label')).toBe('Pantalla completa');
@@ -788,6 +788,35 @@ describe('MarkdownEditor fullscreen', () => {
     press(inner, 'Escape');
     expect(card().hasAttribute('data-fullscreen')).toBe(false);
     expect(document.body.style.overflow).toBe('auto');
+  });
+
+  it('leaves on Escape wherever the focus is, as in Safari where a clicked button is not focused', () => {
+    mountDefault({ defaultValue: 'text' });
+    act(() => toggle().click());
+    // Nothing in the editor has the focus: the key goes to the page.
+    (document.activeElement as HTMLElement | null)?.blur();
+    press(document.body, 'Escape');
+    expect(card().hasAttribute('data-fullscreen')).toBe(false);
+    expect(document.body.style.overflow).toBe('auto');
+  });
+
+  it('stops listening for Escape once it has left, and when it is removed', () => {
+    const add = vi.spyOn(document, 'addEventListener');
+    const remove = vi.spyOn(document, 'removeEventListener');
+    mountDefault({ defaultValue: 'text' });
+    act(() => toggle().click());
+    const added = add.mock.calls.filter(([type]) => type === 'keydown');
+    expect(added).toHaveLength(1);
+    act(() => toggle().click());
+    expect(remove.mock.calls.filter(([type, listener]) => type === 'keydown' && listener === added[0][1])).toHaveLength(1);
+
+    act(() => toggle().click());
+    const again = add.mock.calls.filter(([type]) => type === 'keydown');
+    act(() => root.unmount());
+    expect(remove.mock.calls.filter(([type, listener]) => type === 'keydown' && listener === again[again.length - 1][1])).toHaveLength(1);
+    root = createRoot(host);
+    add.mockRestore();
+    remove.mockRestore();
   });
 
   it('does not react to Escape when it is not fullscreen', () => {
@@ -969,5 +998,46 @@ describe('MarkdownEditor styles', () => {
     mountDefault({ defaultValue: 'a[^1]\n\n[^1]: note' });
     const css = host.querySelector('style')!.textContent!;
     expect(css).toMatch(/\.md-preview sup[^{]*\{[^}]*line-height:\s*0\s*;/);
+  });
+});
+
+describe('MarkdownEditor accessibility', () => {
+  it('makes the preview one named region that the keyboard can reach, so it can be scrolled', () => {
+    mountDefault({ defaultValue: '# Title\n\nNo links, nothing else to focus.' });
+    const region = preview()!;
+    expect(region.getAttribute('role')).toBe('region');
+    expect(region.getAttribute('aria-label')).toBe('Markdown preview');
+    expect(region.getAttribute('tabindex')).toBe('0');
+    // Named once: a second landmark with the same name is noise to a screen reader.
+    expect(host.querySelectorAll('[aria-label="Markdown preview"]')).toHaveLength(1);
+    expect(host.querySelector('section')).toBeNull();
+  });
+
+  it('names the checkboxes of task items, in the language of the labels', () => {
+    mountDefault({ defaultValue: '- [x] done\n- [ ] open' });
+    expect(Array.from(preview()!.querySelectorAll('.md-task-box')).map((box) => box.getAttribute('aria-label'))).toEqual([
+      'Completed task',
+      'Open task',
+    ]);
+    mountDefault({ defaultValue: '- [x] hecho\n- [ ] abierto', labels: { taskDone: 'Tarea hecha', taskTodo: 'Tarea abierta' } });
+    expect(Array.from(preview()!.querySelectorAll('.md-task-box')).map((box) => box.getAttribute('aria-label'))).toEqual([
+      'Tarea hecha',
+      'Tarea abierta',
+    ]);
+  });
+
+  it('draws the selected view button on a fill that white text reads on, and the title in the primary text colour', () => {
+    mountDefault({ defaultValue: 'a' });
+    const css = host.querySelector('style')!.textContent!;
+    // Not the theme's primary colour as it is (3.97:1 under white text): darkened, with a fixed fallback.
+    expect(css).toMatch(/\.md-editor-mode\[aria-pressed="true"\]\s*\{[^}]*background:\s*#0062cc;[^}]*background:\s*color-mix\(/);
+    // ...except in the dark theme, whose own fill is the one that reads.
+    expect(css).toMatch(/\.dark, \[data-theme="dark"\], \.editora-theme-dark\) \.md-editor-mode\[aria-pressed="true"\]\s*\{\s*background:\s*var\(--rte-color-primary/);
+    expect(css).toMatch(/\.md-editor-title\s*\{[^}]*color:\s*var\(--rte-color-text-primary/);
+    // Quiet text is darkened the same way, and the dark theme keeps its own.
+    expect(css).toMatch(/\.md-source-placeholder, \.md-preview-head, \.md-front-matter summary, \.md-empty-state\s*\{\s*color:\s*#5c6770;\s*color:\s*color-mix\(/);
+    expect(css).toMatch(/\.editora-theme-dark\) :is\(\.md-source-placeholder, \.md-preview-head, \.md-front-matter summary, \.md-empty-state\)\s*\{\s*color:\s*var\(--rte-color-text-muted/);
+    // A scrollable region that takes the focus shows it.
+    expect(css).toMatch(/\.md-preview:focus-visible\s*\{[^}]*outline:/);
   });
 });

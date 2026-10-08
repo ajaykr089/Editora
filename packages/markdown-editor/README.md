@@ -99,6 +99,9 @@ lost, whatever it contains (HTML blocks, footnotes, front matter, odd spacing...
   description) and Table inserts a 3x2 table with the first header selected, with the blank lines around it that
   markdown needs.
 - **Shortcuts**: Cmd/Ctrl+B bold, +I italic, +Shift+X strikethrough, +E inline code, +K link.
+- **Tab** indents (Shift+Tab outdents). So that the keyboard is never stuck in the editor, **Escape** lets go of Tab:
+  press Escape, then Tab (or Shift+Tab), and the focus moves on. The text area is described by this hint (the
+  `sourceHint` label), so assistive technology can announce it.
 - **Enter** in a list or quote carries the marker to the next line (numbers count up, task boxes start unchecked),
   splits an item when pressed in the middle of it, and ends the list on an empty item.
 - A status bar with line and column, selection size, and word, character and line counts.
@@ -226,6 +229,16 @@ rich-text surface, which belongs to `@editora/react`.
 The editor reads the `--rte-*` variables of `@editora/themes`. `--md-fullscreen-z-index` (default `9999`) sets the
 layer of the fullscreen editor, and the `md-` classes (`md-editor`, `md-preview`, `md-front-matter`, ...) are there
 to restyle.
+
+## Accessibility
+
+The editor is checked with axe-core against WCAG 2.2 AA (light and dark themes, every view, the heading menu open,
+fullscreen), and by keyboard and touch in Chromium, Firefox and WebKit. It has not been tested with a screen reader or
+with an IME outside Chromium. The toolbar is one tab stop
+(arrow keys move along it), the heading menu is a keyboard-operable menu, every control has a name that contains its
+visible text, the preview is a named region that can be focused and scrolled with the keys, task-list checkboxes in
+the preview are named, and nothing is a keyboard trap (see **Tab** above). Escape also leaves fullscreen, wherever the
+focus is.
 
 ## Security
 
