@@ -69,7 +69,7 @@ vi.mock('@editora/plugins', () => {
   };
 });
 
-import { MarkdownEditor, type MarkdownEditorProps } from '../components/MarkdownEditor';
+import { MarkdownEditor, type MarkdownEditorHandle, type MarkdownEditorProps } from '../components/MarkdownEditor';
 
 const act: (callback: () => void) => void = (React as any).act ?? (TestUtils as any).act;
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
@@ -654,5 +654,209 @@ describe('MarkdownEditor scroll sync and height', () => {
     mountSplit({ height: undefined });
     expect(root.hasAttribute('data-bounded')).toBe(false);
     expect(root.style.getPropertyValue('--md-height')).toBe('');
+  });
+});
+
+describe('MarkdownEditor labels', () => {
+  const es = {
+    title: 'Markdown (es)',
+    editorTypeGroup: 'Tipo de editor',
+    viewGroup: 'Vista',
+    source: 'Fuente',
+    richText: 'Texto enriquecido',
+    edit: 'Editar',
+    split: 'Dividido',
+    preview: 'Vista previa',
+    previewHeading: 'VISTA PREVIA',
+    previewRegion: 'Vista previa de markdown',
+    emptyPreview: 'Nada que mostrar.',
+    enterFullscreen: 'Pantalla completa',
+    exitFullscreen: 'Salir de pantalla completa',
+    frontMatter: 'Metadatos',
+    footnotes: 'Notas',
+    backToReference: 'Volver a {0}',
+  };
+
+  it('translates the header, both switches, the fullscreen button and the preview', () => {
+    mountDefault({ defaultValue: '', labels: es });
+    expect(host.querySelector('.md-editor-title')!.textContent).toBe('Markdown (es)');
+    expect(pressed('Tipo de editor')).toEqual(['Fuente']);
+    expect(pressed('Vista')).toEqual(['Dividido']);
+    expect(Array.from(host.querySelectorAll('[aria-label="Vista"] button')).map((b) => b.textContent)).toEqual(['Editar', 'Dividido', 'Vista previa']);
+    expect(Array.from(host.querySelectorAll('[aria-label="Tipo de editor"] button')).map((b) => b.textContent)).toEqual(['Fuente', 'Texto enriquecido']);
+    expect(host.querySelector('section')!.getAttribute('aria-label')).toBe('Vista previa de markdown');
+    expect(host.querySelector('.md-preview-head')!.textContent).toBe('VISTA PREVIA');
+    expect(preview()!.textContent).toBe('Nada que mostrar.');
+    expect(host.querySelector('.md-editor-icon-button')!.getAttribute('aria-label')).toBe('Pantalla completa');
+  });
+
+  it('keeps English for what is not given', () => {
+    mountDefault({ defaultValue: '', labels: { title: 'Notas' } });
+    expect(host.querySelector('.md-editor-title')!.textContent).toBe('Notas');
+    expect(pressed('Editor view')).toEqual(['Split']);
+    expect(preview()!.textContent).toBe('Nothing to preview yet.');
+  });
+
+  it('shows a label as text, not as markup, since the empty state is injected as HTML', () => {
+    mountDefault({ defaultValue: '', labels: { emptyPreview: '<img src=x onerror=alert(1)> & more' } });
+    expect(preview()!.querySelector('img')).toBeNull();
+    expect(preview()!.textContent).toBe('<img src=x onerror=alert(1)> & more');
+  });
+
+  it('hands the labels to the source editor', () => {
+    mountDefault({ labels: { sourceTextbox: 'Fuente', commands: { bold: 'Negrita' } } });
+    expect(lastSourceProps().labels.sourceTextbox).toBe('Fuente');
+    expect(lastSourceProps().labels.commands.bold).toBe('Negrita');
+    expect(lastSourceProps().labels.commands.italic).toBe('Italic');
+  });
+
+  it('translates what the preview itself says', () => {
+    mountDefault({ defaultValue: '---\na: 1\n---\n\nText[^1]\n\n[^1]: note', labels: es });
+    expect(preview()!.querySelector('summary')!.textContent).toBe('Metadatos');
+    expect(preview()!.querySelector('.footnotes h2')!.textContent).toBe('Notas');
+    expect(preview()!.querySelector('[data-footnote-backref]')!.getAttribute('aria-label')).toBe('Volver a 1');
+  });
+
+  it('follows labels that change', () => {
+    mountDefault({ defaultValue: '' });
+    expect(host.querySelector('.md-editor-title')!.textContent).toBe('Markdown');
+    mountDefault({ defaultValue: '', labels: es });
+    expect(host.querySelector('.md-editor-title')!.textContent).toBe('Markdown (es)');
+  });
+});
+
+describe('MarkdownEditor fullscreen', () => {
+  const card = () => host.querySelector<HTMLElement>('[data-markdown-editor]')!;
+  const toggle = () => host.querySelector<HTMLButtonElement>('.md-editor-icon-button')!;
+  const press = (target: Element, key: string) => {
+    const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+    act(() => {
+      target.dispatchEvent(event);
+    });
+    return event;
+  };
+
+  beforeEach(() => {
+    document.body.style.overflow = 'auto';
+  });
+  afterEach(() => {
+    document.body.style.overflow = '';
+  });
+
+  it('fills the window, names its button for what it does next, and locks the page behind it', () => {
+    mountDefault({ defaultValue: 'text' });
+    expect(card().hasAttribute('data-fullscreen')).toBe(false);
+    expect(toggle().getAttribute('aria-label')).toBe('Enter fullscreen');
+
+    act(() => toggle().click());
+    expect(card().hasAttribute('data-fullscreen')).toBe(true);
+    expect(toggle().getAttribute('aria-label')).toBe('Exit fullscreen');
+    expect(document.body.style.overflow).toBe('hidden');
+
+    act(() => toggle().click());
+    expect(card().hasAttribute('data-fullscreen')).toBe(false);
+    expect(toggle().getAttribute('aria-label')).toBe('Enter fullscreen');
+    // The page goes back to what it was, not just to the default.
+    expect(document.body.style.overflow).toBe('auto');
+  });
+
+  it('keeps the editors mounted, so nothing is lost by going fullscreen', () => {
+    mountDefault({ defaultValue: 'text' });
+    const mounts = source.mounts;
+    act(() => toggle().click());
+    act(() => toggle().click());
+    expect(source.mounts).toBe(mounts);
+    expect(source.unmounts).toBe(0);
+  });
+
+  it('leaves on Escape, unless something inside handled it first', () => {
+    mountDefault({ defaultValue: 'text' });
+    act(() => toggle().click());
+
+    press(host.querySelector('[data-testid="source"]')!, 'a');
+    expect(card().hasAttribute('data-fullscreen')).toBe(true);
+
+    // A menu or the find panel closing on Escape says so by preventing the default.
+    const inner = host.querySelector('[data-testid="source"]')!;
+    const handler = (event: Event) => event.preventDefault();
+    inner.addEventListener('keydown', handler);
+    press(inner, 'Escape');
+    expect(card().hasAttribute('data-fullscreen')).toBe(true);
+    inner.removeEventListener('keydown', handler);
+
+    press(inner, 'Escape');
+    expect(card().hasAttribute('data-fullscreen')).toBe(false);
+    expect(document.body.style.overflow).toBe('auto');
+  });
+
+  it('does not react to Escape when it is not fullscreen', () => {
+    mountDefault({ defaultValue: 'text' });
+    const event = press(host.querySelector('[data-testid="source"]')!, 'Escape');
+    expect(event.defaultPrevented).toBe(false);
+    expect(card().hasAttribute('data-fullscreen')).toBe(false);
+  });
+
+  it('gives the page back when the editor is removed while fullscreen', () => {
+    mountDefault({ defaultValue: 'text' });
+    act(() => toggle().click());
+    expect(document.body.style.overflow).toBe('hidden');
+    act(() => root.unmount());
+    expect(document.body.style.overflow).toBe('auto');
+    root = createRoot(host);
+  });
+});
+
+describe('MarkdownEditor ref', () => {
+  const ref = React.createRef<MarkdownEditorHandle>();
+  const mountWithRef = (props: MarkdownEditorProps = {}) => {
+    act(() => root.render(<MarkdownEditor ref={ref} {...props} />));
+  };
+
+  beforeEach(() => {
+    source.handle.focus = vi.fn();
+    source.handle.insertText = vi.fn(() => true);
+    source.handle.runCommand = vi.fn(() => true);
+  });
+
+  it('gives the markdown as it is now, as the user types, and from outside', () => {
+    mountWithRef({ defaultValue: 'start' });
+    expect(ref.current!.getValue()).toBe('start');
+    typeInSource('typed');
+    expect(ref.current!.getValue()).toBe('typed');
+    mountWithRef({ value: 'controlled' });
+    expect(ref.current!.getValue()).toBe('controlled');
+  });
+
+  it('focuses, inserts text and runs commands in the source editor', () => {
+    mountWithRef();
+    ref.current!.focus();
+    expect(source.handle.focus).toHaveBeenCalledTimes(1);
+    expect(ref.current!.insertText('![a](b)')).toBe(true);
+    expect(source.handle.insertText).toHaveBeenCalledWith('![a](b)');
+    expect(ref.current!.runCommand('bold')).toBe(true);
+    expect(source.handle.runCommand).toHaveBeenCalledWith('bold');
+  });
+
+  it('says so when the source editor refuses (read-only)', () => {
+    source.handle.insertText = vi.fn(() => false);
+    source.handle.runCommand = vi.fn(() => false);
+    mountWithRef({ readOnly: true });
+    expect(ref.current!.insertText('x')).toBe(false);
+    expect(ref.current!.runCommand('bold')).toBe(false);
+  });
+
+  it('cannot insert or run commands in the rich surface, and focuses its editable area', () => {
+    mountWithRef({ editorType: 'rich' });
+    expect(ref.current!.insertText('x')).toBe(false);
+    expect(ref.current!.runCommand('bold')).toBe(false);
+    expect(source.handle.insertText).not.toHaveBeenCalled();
+
+    const editable = document.createElement('div');
+    editable.setAttribute('contenteditable', 'true');
+    editable.tabIndex = 0;
+    host.querySelector('[data-testid="rte"]')!.appendChild(editable);
+    ref.current!.focus();
+    expect(document.activeElement).toBe(editable);
+    expect(ref.current!.getValue()).toBe('');
   });
 });

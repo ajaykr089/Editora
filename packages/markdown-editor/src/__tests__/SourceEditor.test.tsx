@@ -151,6 +151,7 @@ vi.mock('@editora/light-code-editor', async () => {
   };
 });
 
+import { DEFAULT_LABELS } from '../components/labels';
 import { SourceEditor, type SourceEditorHandle, type SourceEditorProps } from '../source/SourceEditor';
 
 const act: (callback: () => void) => void = (React as any).act ?? (TestUtils as any).act;
@@ -163,7 +164,7 @@ const editor = () => fake.instances[fake.instances.length - 1];
 const handle = React.createRef<SourceEditorHandle>();
 const render = (props: Partial<SourceEditorProps> = {}, wrapperClass?: string) => {
   const element = (
-    <SourceEditor ref={handle} value="" onChange={() => {}} readOnly={false} placeholder="Write here" {...props} />
+    <SourceEditor ref={handle} labels={DEFAULT_LABELS} value="" onChange={() => {}} readOnly={false} placeholder="Write here" {...props} />
   );
   act(() => root.render(wrapperClass ? <div className={wrapperClass}>{element}</div> : element));
 };
@@ -653,6 +654,64 @@ describe('SourceEditor', () => {
       render();
       handle.current!.focus();
       expect(editor().focused).toBe(1);
+    });
+  });
+
+  describe('labels', () => {
+    const es = {
+      ...DEFAULT_LABELS,
+      sourceTextbox: 'Fuente markdown',
+      statusLanguage: 'Markdown (es)',
+      toolbar: 'Formato',
+      heading: 'Encabezado',
+      headingMenu: 'Nivel de encabezado',
+      headingLevel: 'Nivel: {0}',
+      paragraph: 'Párrafo',
+      headingN: 'Encabezado {0}',
+      commands: { ...DEFAULT_LABELS.commands, bold: 'Negrita', table: 'Tabla', undo: 'Deshacer' },
+    };
+
+    it('names the buttons, with their shortcut in the tooltip, the toolbar and the text area', () => {
+      render({ labels: es });
+      expect(button('bold').getAttribute('aria-label')).toBe('Negrita');
+      expect(button('bold').getAttribute('title')).toMatch(/^Negrita \(.*B\)$/);
+      expect(button('table').getAttribute('title')).toBe('Tabla');
+      expect(button('undo').getAttribute('aria-label')).toBe('Deshacer');
+      // What is not translated stays English.
+      expect(button('italic').getAttribute('aria-label')).toBe('Italic');
+      expect(host.querySelector('[role="toolbar"]')!.getAttribute('aria-label')).toBe('Formato');
+      expect(editor().surface.getAttribute('aria-label')).toBe('Fuente markdown');
+    });
+
+    it('names the heading menu and its levels', () => {
+      render({ labels: es, value: '## Title' });
+      editor().userSelects(3);
+      act(() => editor().emit('cursor', {}));
+      const heading = button('heading');
+      expect(heading.getAttribute('title')).toBe('Encabezado');
+      expect(heading.getAttribute('aria-label')).toBe('Nivel: Encabezado 2');
+      act(() => heading.click());
+      const menu = host.querySelector('[role="menu"]')!;
+      expect(menu.getAttribute('aria-label')).toBe('Nivel de encabezado');
+      const names = Array.from(menu.querySelectorAll('[role="menuitemradio"]')).map((item) => item.getAttribute('aria-label'));
+      expect(names).toEqual(['Párrafo', 'Encabezado 1', 'Encabezado 2', 'Encabezado 3', 'Encabezado 4', 'Encabezado 5', 'Encabezado 6']);
+      // The glyphs on the buttons are the same in every language.
+      expect(Array.from(menu.querySelectorAll('[role="menuitemradio"]')).map((item) => item.textContent)).toEqual(['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
+    });
+
+    it('shows the language in the status bar', () => {
+      render({ labels: es, value: 'text' });
+      expect(host.querySelector('.editora-statusbar')!.textContent).toContain('Markdown (es)');
+    });
+
+    it('follows labels that change, without recreating the editor', () => {
+      render({ value: 'text' });
+      expect(editor().surface.getAttribute('aria-label')).toBe('Markdown source');
+      render({ value: 'text', labels: es });
+      expect(editor().surface.getAttribute('aria-label')).toBe('Fuente markdown');
+      expect(button('bold').getAttribute('aria-label')).toBe('Negrita');
+      expect(host.querySelector('.editora-statusbar')!.textContent).toContain('Markdown (es)');
+      expect(fake.instances).toHaveLength(1);
     });
   });
 

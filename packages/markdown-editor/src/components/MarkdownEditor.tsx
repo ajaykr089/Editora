@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { RichTextEditor } from '@editora/react';
 import {
   BlockquotePlugin,
@@ -14,8 +14,11 @@ import {
 } from '@editora/plugins';
 import { joinFrontMatter, splitFrontMatter } from '../markdown/frontMatter';
 import { htmlToMarkdown } from '../markdown/htmlToMarkdown';
+import { escapeHtml } from '../markdown/highlight';
 import { markdownToEditorHtml, markdownToPreviewHtml } from '../markdown/markdownToHtml';
+import type { MarkdownCommand } from '../source/commands';
 import { SourceEditor, type ScrollInfo, type SourceEditorHandle } from '../source/SourceEditor';
+import { resolveLabels, type MarkdownEditorLabelsInput } from './labels';
 import { lineForPreviewTop, previewTopForLine, type Anchor } from './scrollSync';
 import { MARKDOWN_EDITOR_CSS } from './styles';
 
@@ -44,20 +47,26 @@ export interface MarkdownEditorProps {
   height?: number | string;
   /** In split view, scroll the source and the preview together. Defaults to true; needs a `height`. */
   syncScroll?: boolean;
+  /** Replaces any of the text the editor shows or announces, to translate it. See `MarkdownEditorLabels`. */
+  labels?: MarkdownEditorLabelsInput;
   className?: string;
   onChange?: (value: string) => void;
 }
 
-const MODES: ReadonlyArray<{ mode: Mode; label: string }> = [
-  { mode: 'edit', label: 'Edit' },
-  { mode: 'split', label: 'Split' },
-  { mode: 'preview', label: 'Preview' },
-];
-
-const EDITOR_TYPES: ReadonlyArray<{ type: EditorType; label: string }> = [
-  { type: 'source', label: 'Source' },
-  { type: 'rich', label: 'Rich text' },
-];
+/** What a ref to the editor gives you. */
+export interface MarkdownEditorHandle {
+  /** Puts the cursor in the editing surface. */
+  focus(): void;
+  /** The markdown as it is now. */
+  getValue(): string;
+  /**
+   * Replaces the selection with text, with the cursor after it, as one undo step. Returns false when the
+   * editor is read-only or its surface is the rich-text one (`editorType="rich"`).
+   */
+  insertText(text: string): boolean;
+  /** Runs a formatting command (what the toolbar buttons do) on the selection. Same limits as `insertText`. */
+  runCommand(command: MarkdownCommand): boolean;
+}
 
 // These objects are props of the wrapped rich editor, which rebuilds itself whenever their identity changes,
 // so they are created once here instead of inline in render (the parent re-renders on every keystroke).
@@ -101,6 +110,16 @@ const MarkdownGlyph: React.FC = () => (
   </svg>
 );
 
+const FullscreenGlyph: React.FC<{ exit: boolean }> = ({ exit }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+    {exit ? (
+      <path d="M9 3v4a2 2 0 0 1-2 2H3m18 0h-4a2 2 0 0 1-2-2V3m0 18v-4a2 2 0 0 1 2-2h4M3 15h4a2 2 0 0 1 2 2v4" />
+    ) : (
+      <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+    )}
+  </svg>
+);
+
 interface SegmentedProps<T extends string> {
   label: string;
   options: ReadonlyArray<{ value: T; label: string }>;
@@ -126,20 +145,24 @@ function Segmented<T extends string>({ label, options, value, onChange }: Segmen
   );
 }
 
-export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
-  value,
-  defaultValue = '',
-  placeholder = 'Write markdown here...',
-  readOnly = false,
-  preview = true,
-  mode = 'split',
-  editorType = 'source',
-  minHeight = 220,
-  height,
-  syncScroll = true,
-  className,
-  onChange,
-}) => {
+export const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorProps>(function MarkdownEditor(
+  {
+    value,
+    defaultValue = '',
+    placeholder = 'Write markdown here...',
+    readOnly = false,
+    preview = true,
+    mode = 'split',
+    editorType = 'source',
+    minHeight = 220,
+    height,
+    syncScroll = true,
+    labels,
+    className,
+    onChange,
+  },
+  ref,
+) {
   const isControlled = value !== undefined;
   const [internalValue, setInternalValue] = useState(defaultValue);
   const [activeMode, setActiveMode] = useState<Mode>(mode);
@@ -153,13 +176,21 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   });
   const valueRef = useRef(currentValue);
   valueRef.current = currentValue;
+  const text = useMemo(() => resolveLabels(labels), [labels]);
+  const [fullscreen, setFullscreen] = useState(false);
 
   // Only what is on screen is converted: the preview HTML when a preview is shown, the rich editor's
   // HTML when the rich editor is.
   const plugins = useMemo(() => (rich ? createPlugins() : []), [rich]);
   const previewHtml = useMemo(
-    () => (visibleMode === 'edit' ? '' : markdownToPreviewHtml(currentValue, { idPrefix: `md${instanceId}-` })),
-    [currentValue, visibleMode, instanceId],
+    () =>
+      visibleMode === 'edit'
+        ? ''
+        : markdownToPreviewHtml(currentValue, {
+            idPrefix: `md${instanceId}-`,
+            labels: { frontMatter: text.frontMatter, footnotes: text.footnotes, backToReference: text.backToReference },
+          }),
+    [currentValue, visibleMode, instanceId, text.frontMatter, text.footnotes, text.backToReference],
   );
   const editorHtml = useMemo(() => (rich ? markdownToEditorHtml(currentValue) : ''), [currentValue, rich]);
 
@@ -212,10 +243,40 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     target.focus({ preventScroll: true });
   };
 
+  const rootRef = useRef<HTMLDivElement>(null);
+  const sourceRef = useRef<SourceEditorHandle>(null);
+  useImperativeHandle(
+    ref,
+    () => ({
+      focus: () => {
+        if (sourceRef.current) sourceRef.current.focus();
+        else rootRef.current?.querySelector<HTMLElement>('[contenteditable="true"]')?.focus();
+      },
+      getValue: () => valueRef.current,
+      insertText: (inserted) => sourceRef.current?.insertText(inserted) ?? false,
+      runCommand: (command) => sourceRef.current?.runCommand(command) ?? false,
+    }),
+    [],
+  );
+
+  // Fullscreen covers the page, so the page behind it must not scroll.
+  useEffect(() => {
+    if (!fullscreen) return undefined;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [fullscreen]);
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    // Escape also closes menus and the find panel; whatever handled it first has said so.
+    if (fullscreen && event.key === 'Escape' && !event.defaultPrevented) setFullscreen(false);
+  };
+
   // Scrolling the two panes together. Each pane's position is mapped to the other through the preview's
   // blocks (see scrollSync.ts). A pane that was just moved by this code scrolls too and tells us so; that
   // echo is recognised by its position, so it is not mistaken for the user and does not bounce back.
-  const sourceRef = useRef<SourceEditorHandle>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const echoed = useRef<{ source: number | null; preview: number | null }>({ source: null, preview: null });
   const totalLines = useMemo(() => currentValue.split('\n').length, [currentValue]);
@@ -264,29 +325,53 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   } as React.CSSProperties;
 
   return (
-    <div className={`md-editor${className ? ` ${className}` : ''}`} style={style} data-markdown-editor="" data-bounded={height === undefined ? undefined : ''}>
+    <div
+      className={`md-editor${className ? ` ${className}` : ''}`}
+      style={style}
+      ref={rootRef}
+      data-markdown-editor=""
+      data-bounded={height === undefined ? undefined : ''}
+      data-fullscreen={fullscreen ? '' : undefined}
+      onKeyDown={handleKeyDown}
+    >
       <style>{MARKDOWN_EDITOR_CSS}</style>
 
       <div className="md-editor-header">
         <span className="md-editor-title">
           <MarkdownGlyph />
-          Markdown
+          {text.title}
         </span>
         <div className="md-editor-controls">
           <Segmented
-            label="Editor type"
-            options={EDITOR_TYPES.map(({ type, label }) => ({ value: type, label }))}
+            label={text.editorTypeGroup}
+            options={[
+              { value: 'source' as EditorType, label: text.source },
+              { value: 'rich' as EditorType, label: text.richText },
+            ]}
             value={activeType}
             onChange={setActiveType}
           />
           {preview && (
             <Segmented
-              label="Editor view"
-              options={MODES.map(({ mode: option, label }) => ({ value: option, label }))}
+              label={text.viewGroup}
+              options={[
+                { value: 'edit' as Mode, label: text.edit },
+                { value: 'split' as Mode, label: text.split },
+                { value: 'preview' as Mode, label: text.preview },
+              ]}
               value={activeMode}
               onChange={setActiveMode}
             />
           )}
+          <button
+            type="button"
+            className="md-editor-icon-button"
+            aria-label={fullscreen ? text.exitFullscreen : text.enterFullscreen}
+            title={fullscreen ? text.exitFullscreen : text.enterFullscreen}
+            onClick={() => setFullscreen((on) => !on)}
+          >
+            <FullscreenGlyph exit={fullscreen} />
+          </button>
         </div>
       </div>
 
@@ -309,6 +394,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
           ) : (
             <SourceEditor
               ref={sourceRef}
+              labels={text}
               value={currentValue}
               onChange={reportChange}
               readOnly={readOnly}
@@ -319,9 +405,9 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         </div>
 
         {(visibleMode === 'preview' || visibleMode === 'split') && (
-          <section className="md-editor-pane" aria-label="Markdown preview">
+          <section className="md-editor-pane" aria-label={text.previewRegion}>
             <div className="md-preview-head" aria-hidden="true">
-              Preview
+              {text.previewHeading}
             </div>
             <div
               className="md-preview"
@@ -329,7 +415,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
               onClick={handlePreviewClick}
               onScroll={handlePreviewScroll}
               dangerouslySetInnerHTML={{
-                __html: previewHtml || '<p class="md-empty-state">Nothing to preview yet.</p>',
+                __html: previewHtml || `<p class="md-empty-state">${escapeHtml(text.emptyPreview)}</p>`,
               }}
             />
           </section>
@@ -337,4 +423,4 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       </div>
     </div>
   );
-};
+});

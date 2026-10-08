@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ICONS, type IconName } from './icons';
+import { fillLabel, type MarkdownEditorLabels } from '../components/labels';
 import type { MarkdownCommand } from './commands';
 
 export type ToolbarCommand = MarkdownCommand | 'undo' | 'redo';
 
 interface ButtonSpec {
   command: ToolbarCommand;
-  label: string;
   icon: IconName;
   /** Key combination, with `Mod` standing for Cmd on macOS and Ctrl elsewhere. */
   shortcut?: string;
@@ -15,33 +15,34 @@ interface ButtonSpec {
 // The same order as the rich editor's toolbar: history, heading, text, link and image, lists, quote, code, then
 // the blocks that are inserted (table, rule).
 const BEFORE_HEADING: ButtonSpec[] = [
-  { command: 'undo', label: 'Undo', icon: 'undo', shortcut: 'Mod+Z' },
-  { command: 'redo', label: 'Redo', icon: 'redo', shortcut: 'Mod+Shift+Z' },
+  { command: 'undo', icon: 'undo', shortcut: 'Mod+Z' },
+  { command: 'redo', icon: 'redo', shortcut: 'Mod+Shift+Z' },
 ];
 const AFTER_HEADING: ButtonSpec[] = [
-  { command: 'bold', label: 'Bold', icon: 'bold', shortcut: 'Mod+B' },
-  { command: 'italic', label: 'Italic', icon: 'italic', shortcut: 'Mod+I' },
-  { command: 'strikethrough', label: 'Strikethrough', icon: 'strikethrough', shortcut: 'Mod+Shift+X' },
-  { command: 'link', label: 'Link', icon: 'link', shortcut: 'Mod+K' },
-  { command: 'image', label: 'Image', icon: 'image' },
-  { command: 'bulletList', label: 'Bullet list', icon: 'bulletList' },
-  { command: 'orderedList', label: 'Numbered list', icon: 'orderedList' },
-  { command: 'taskList', label: 'Task list', icon: 'taskList' },
-  { command: 'quote', label: 'Quote', icon: 'quote' },
-  { command: 'inlineCode', label: 'Inline code', icon: 'inlineCode', shortcut: 'Mod+E' },
-  { command: 'codeBlock', label: 'Code block', icon: 'codeBlock' },
-  { command: 'table', label: 'Table', icon: 'table' },
-  { command: 'horizontalRule', label: 'Horizontal rule', icon: 'horizontalRule' },
+  { command: 'bold', icon: 'bold', shortcut: 'Mod+B' },
+  { command: 'italic', icon: 'italic', shortcut: 'Mod+I' },
+  { command: 'strikethrough', icon: 'strikethrough', shortcut: 'Mod+Shift+X' },
+  { command: 'link', icon: 'link', shortcut: 'Mod+K' },
+  { command: 'image', icon: 'image' },
+  { command: 'bulletList', icon: 'bulletList' },
+  { command: 'orderedList', icon: 'orderedList' },
+  { command: 'taskList', icon: 'taskList' },
+  { command: 'quote', icon: 'quote' },
+  { command: 'inlineCode', icon: 'inlineCode', shortcut: 'Mod+E' },
+  { command: 'codeBlock', icon: 'codeBlock' },
+  { command: 'table', icon: 'table' },
+  { command: 'horizontalRule', icon: 'horizontalRule' },
 ];
 
+// The short forms are the glyphs on the button; the long forms are in the labels.
 const HEADINGS = [
-  { level: 0, short: 'P', label: 'Paragraph' },
-  { level: 1, short: 'H1', label: 'Heading 1' },
-  { level: 2, short: 'H2', label: 'Heading 2' },
-  { level: 3, short: 'H3', label: 'Heading 3' },
-  { level: 4, short: 'H4', label: 'Heading 4' },
-  { level: 5, short: 'H5', label: 'Heading 5' },
-  { level: 6, short: 'H6', label: 'Heading 6' },
+  { level: 0, short: 'P' },
+  { level: 1, short: 'H1' },
+  { level: 2, short: 'H2' },
+  { level: 3, short: 'H3' },
+  { level: 4, short: 'H4' },
+  { level: 5, short: 'H5' },
+  { level: 6, short: 'H6' },
 ];
 
 const isMac = (): boolean => typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || '');
@@ -50,6 +51,7 @@ const describeShortcut = (shortcut: string): string =>
   shortcut.replace('Mod', isMac() ? '⌘' : 'Ctrl').replace(/\+/g, isMac() ? '' : '+');
 
 export interface SourceToolbarProps {
+  labels: MarkdownEditorLabels;
   disabled: boolean;
   /** Heading level of the line the caret is on, 0 for none. */
   headingLevel: number;
@@ -57,7 +59,7 @@ export interface SourceToolbarProps {
   onHeading: (level: number) => void;
 }
 
-export const SourceToolbar: React.FC<SourceToolbarProps> = ({ disabled, headingLevel, onCommand, onHeading }) => {
+export const SourceToolbar: React.FC<SourceToolbarProps> = ({ labels, disabled, headingLevel, onCommand, onHeading }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const headingButtonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -114,15 +116,16 @@ export const SourceToolbar: React.FC<SourceToolbarProps> = ({ disabled, headingL
 
   const renderButton = (spec: ButtonSpec, index: number) => {
     const shortcut = spec.shortcut ? describeShortcut(spec.shortcut) : '';
+    const label = labels.commands[spec.command];
     return (
       <div className="rte-toolbar-item" key={spec.command}>
         <button
           type="button"
           className="rte-toolbar-button"
           data-md-command={spec.command}
-          aria-label={spec.label}
+          aria-label={label}
           aria-keyshortcuts={spec.shortcut?.replace('Mod', 'Control')}
-          title={shortcut ? `${spec.label} (${shortcut})` : spec.label}
+          title={shortcut ? `${label} (${shortcut})` : label}
           disabled={disabled}
           onMouseDown={keepSelection}
           onClick={() => onCommand(spec.command)}
@@ -135,11 +138,12 @@ export const SourceToolbar: React.FC<SourceToolbarProps> = ({ disabled, headingL
   };
 
   const headingIndex = BEFORE_HEADING.length;
+  const headingName = (level: number): string => (level === 0 ? labels.paragraph : fillLabel(labels.headingN, level));
   const current = HEADINGS.find((heading) => heading.level === headingLevel) ?? HEADINGS[0];
 
   return (
     <div className="rte-toolbar-wrapper md-source-toolbar">
-      <div className="rte-toolbar" role="toolbar" aria-label="Markdown formatting" ref={containerRef} onKeyDown={handleKeyDown}>
+      <div className="rte-toolbar" role="toolbar" aria-label={labels.toolbar} ref={containerRef} onKeyDown={handleKeyDown}>
         <div className="rte-toolbar-items-container" style={{ flexWrap: 'wrap' }}>
           {BEFORE_HEADING.map((spec, i) => renderButton(spec, i))}
 
@@ -152,8 +156,8 @@ export const SourceToolbar: React.FC<SourceToolbarProps> = ({ disabled, headingL
                 data-md-command="heading"
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
-                aria-label={`Heading level: ${current.label}`}
-                title="Heading"
+                aria-label={fillLabel(labels.headingLevel, headingName(current.level))}
+                title={labels.heading}
                 disabled={disabled}
                 onMouseDown={keepSelection}
                 onClick={(event) => {
@@ -179,7 +183,7 @@ export const SourceToolbar: React.FC<SourceToolbarProps> = ({ disabled, headingL
                   className="rte-toolbar-dropdown-menu"
                   ref={menuRef}
                   role="menu"
-                  aria-label="Heading level"
+                  aria-label={labels.headingMenu}
                   onKeyDown={(event) => {
                     const items = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('[role="menuitemradio"]'));
                     const at = items.indexOf(document.activeElement as HTMLElement);
@@ -199,7 +203,7 @@ export const SourceToolbar: React.FC<SourceToolbarProps> = ({ disabled, headingL
                       key={heading.level}
                       role="menuitemradio"
                       aria-checked={heading.level === headingLevel}
-                      aria-label={heading.label}
+                      aria-label={headingName(heading.level)}
                       className="rte-toolbar-dropdown-item"
                       data-active={heading.level === headingLevel ? 'true' : 'false'}
                       onMouseDown={keepSelection}

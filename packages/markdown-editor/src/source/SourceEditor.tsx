@@ -17,12 +17,14 @@ import {
   type TextEdit,
   type TextState,
 } from './commands';
+import type { MarkdownEditorLabels } from '../components/labels';
 import { SourceToolbar, type ToolbarCommand } from './SourceToolbar';
 import { readEditoraTheme, useEditoraTheme } from './useEditoraTheme';
 
 type CodeEditor = ReturnType<typeof createEditor>;
 
 export interface SourceEditorProps {
+  labels: MarkdownEditorLabels;
   value: string;
   onChange: (value: string) => void;
   readOnly: boolean;
@@ -162,7 +164,7 @@ const SHORTCUTS: Record<string, MarkdownCommand | undefined> = {
  * shortcuts edit the text, Enter continues lists and quotes, and the status bar is Editora's.
  */
 export const SourceEditor = forwardRef<SourceEditorHandle, SourceEditorProps>(function SourceEditor(
-  { value, onChange, readOnly, placeholder, onScroll },
+  { labels, value, onChange, readOnly, placeholder, onScroll },
   ref,
 ) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -174,6 +176,7 @@ export const SourceEditor = forwardRef<SourceEditorHandle, SourceEditorProps>(fu
   const onChangeRef = useRef(onChange);
   const readOnlyRef = useRef(readOnly);
   const onScrollRef = useRef(onScroll);
+  const labelsRef = useRef(labels);
   const [empty, setEmpty] = useState(value === '');
   const [headingLevel, setHeadingLevelState] = useState(0);
   const theme = useEditoraTheme(rootRef);
@@ -182,6 +185,7 @@ export const SourceEditor = forwardRef<SourceEditorHandle, SourceEditorProps>(fu
     onChangeRef.current = onChange;
     readOnlyRef.current = readOnly;
     onScrollRef.current = onScroll;
+    labelsRef.current = labels;
   });
 
   const currentState = useCallback((): TextState | null => {
@@ -211,7 +215,7 @@ export const SourceEditor = forwardRef<SourceEditorHandle, SourceEditorProps>(fu
     const to = offsetToPosition(state.text, state.end);
     const collapsed = state.start === state.end;
     bar.update({
-      language: 'Markdown',
+      language: labelsRef.current.statusLanguage,
       wordCount: words,
       charCount: chars,
       lineCount: state.text.split('\n').length,
@@ -321,7 +325,7 @@ export const SourceEditor = forwardRef<SourceEditorHandle, SourceEditorProps>(fu
     const surface = editor.getView().getContentElement();
     surface.setAttribute('role', 'textbox');
     surface.setAttribute('aria-multiline', 'true');
-    surface.setAttribute('aria-label', 'Markdown source');
+    surface.setAttribute('aria-label', labelsRef.current.sourceTextbox);
     surface.setAttribute('spellcheck', 'false');
 
     const bar = new StatusBar({ enabled: true, position: 'bottom' });
@@ -381,6 +385,12 @@ export const SourceEditor = forwardRef<SourceEditorHandle, SourceEditorProps>(fu
     refreshStatus();
   }, [value, refreshStatus]);
 
+  // The labels can change after the editor was created; the status bar picks the language up on its next refresh.
+  useEffect(() => {
+    editorRef.current?.getView().getContentElement().setAttribute('aria-label', labels.sourceTextbox);
+    refreshStatus();
+  }, [labels.sourceTextbox, labels.statusLanguage, refreshStatus]);
+
   useEffect(() => {
     editorRef.current?.setReadOnly(readOnly);
     editorRef.current?.getView().getContentElement().setAttribute('aria-readonly', readOnly ? 'true' : 'false');
@@ -432,7 +442,7 @@ export const SourceEditor = forwardRef<SourceEditorHandle, SourceEditorProps>(fu
 
   return (
     <div className="md-source" ref={rootRef}>
-      <SourceToolbar disabled={readOnly} headingLevel={headingLevel} onCommand={handleCommand} onHeading={handleHeading} />
+      <SourceToolbar labels={labels} disabled={readOnly} headingLevel={headingLevel} onCommand={handleCommand} onHeading={handleHeading} />
       <div className="md-source-surface">
         <div className="md-source-editor" ref={hostRef} />
         {empty && (
