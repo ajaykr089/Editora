@@ -16,6 +16,7 @@ import { joinFrontMatter, splitFrontMatter } from '../markdown/frontMatter';
 import { htmlToMarkdown } from '../markdown/htmlToMarkdown';
 import { escapeHtml } from '../markdown/highlight';
 import { markdownToEditorHtml, markdownToPreviewHtml } from '../markdown/markdownToHtml';
+import { clock, useDeferredSource } from './deferredSource';
 import type { MarkdownCommand } from '../source/commands';
 import { SourceEditor, type ScrollInfo, type SourceEditorHandle } from '../source/SourceEditor';
 import type { MathRenderer } from '../markdown/math';
@@ -193,17 +194,21 @@ export const MarkdownEditor = forwardRef<MarkdownEditorHandle, MarkdownEditorPro
   // Only what is on screen is converted: the preview HTML when a preview is shown, the rich editor's
   // HTML when the rich editor is.
   const plugins = useMemo(() => (rich ? createPlugins() : []), [rich]);
-  const previewHtml = useMemo(
-    () =>
-      visibleMode === 'edit'
-        ? ''
-        : markdownToPreviewHtml(currentValue, {
-            idPrefix: `md${instanceId}-`,
-            labels: { frontMatter: text.frontMatter, footnotes: text.footnotes, backToReference: text.backToReference },
-            renderMath,
-          }),
-    [currentValue, visibleMode, instanceId, text.frontMatter, text.footnotes, text.backToReference, renderMath],
-  );
+  // While the source is being typed in beside it, the preview of a long document waits for a pause (see
+  // deferredSource.ts); the time its last build took says whether it is long enough to matter.
+  const buildMs = useRef(0);
+  const previewSource = useDeferredSource(currentValue, visibleMode === 'split', buildMs);
+  const previewHtml = useMemo(() => {
+    if (visibleMode === 'edit') return '';
+    const started = clock.now();
+    const html = markdownToPreviewHtml(previewSource, {
+      idPrefix: `md${instanceId}-`,
+      labels: { frontMatter: text.frontMatter, footnotes: text.footnotes, backToReference: text.backToReference },
+      renderMath,
+    });
+    buildMs.current = clock.now() - started;
+    return html;
+  }, [previewSource, visibleMode, instanceId, text.frontMatter, text.footnotes, text.backToReference, renderMath]);
   const editorHtml = useMemo(() => (rich ? markdownToEditorHtml(currentValue) : ''), [currentValue, rich]);
 
   // The rich editor is remounted to load markdown that changed from outside (the `value` prop). It used

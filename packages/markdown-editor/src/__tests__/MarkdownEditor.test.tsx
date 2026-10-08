@@ -70,6 +70,7 @@ vi.mock('@editora/plugins', () => {
 });
 
 import { MarkdownEditor, type MarkdownEditorHandle, type MarkdownEditorProps } from '../components/MarkdownEditor';
+import { clock, DEFER_FROM } from '../components/deferredSource';
 
 const act: (callback: () => void) => void = (React as any).act ?? (TestUtils as any).act;
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
@@ -882,5 +883,83 @@ describe('MarkdownEditor math', () => {
     expect(Array.from(preview()!.querySelectorAll('.tex')).map((element) => element.textContent)).toEqual(['I:a', 'I:b']);
     mountDefault({ defaultValue: '$a$', renderMath: (tex) => `<span class="tex">other:${tex}</span>` });
     expect(Array.from(preview()!.querySelectorAll('.tex')).map((element) => element.textContent)).toEqual(['other:a', 'other:b']);
+  });
+});
+
+describe('MarkdownEditor with a long document', () => {
+  // A long document is one the preview takes long to build; the clock is set so that a build takes 100ms.
+  const longDocument = (heading: string) => `# ${heading}\n\n${'word '.repeat(DEFER_FROM / 5)}`;
+  const previewHeading = () => preview()!.querySelector('h1')!.textContent;
+  const wait = (ms: number) => act(() => void vi.advanceTimersByTime(ms));
+  let ticks = 0;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    ticks = 0;
+    vi.spyOn(clock, 'now').mockImplementation(() => (ticks += 100));
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+
+  it('shows the preview of the document it starts with, straight away', () => {
+    mountDefault({ defaultValue: longDocument('First') });
+    expect(previewHeading()).toBe('First');
+  });
+
+  it('waits for a pause in the typing before rebuilding the preview', () => {
+    mountDefault({ defaultValue: longDocument('First') });
+    typeInSource(longDocument('Second'));
+    typeInSource(longDocument('Third'));
+    expect(previewHeading()).toBe('First');
+    wait(199);
+    expect(previewHeading()).toBe('First');
+    wait(1);
+    expect(previewHeading()).toBe('Third');
+  });
+
+  it('keeps showing the text it waits on when something else makes it build the preview again', () => {
+    const labels = (frontMatter: string) => ({ frontMatter });
+    const render = (value: string, frontMatter: string) =>
+      act(() => root.render(<MarkdownEditor value={value} labels={labels(frontMatter)} />));
+    render(longDocument('First'), 'Front matter');
+    render(longDocument('Second'), 'Front matter');
+    expect(previewHeading()).toBe('First');
+    // A new label rebuilds the preview, from the text it was showing and not the one still being typed.
+    render(longDocument('Second'), 'Metadata');
+    expect(previewHeading()).toBe('First');
+    wait(200);
+    expect(previewHeading()).toBe('Second');
+  });
+
+  it('leaves what the user typed alone: the markdown is current at once, and onChange is not late', () => {
+    const onChange = vi.fn();
+    const ref = React.createRef<MarkdownEditorHandle>();
+    act(() => root.render(<MarkdownEditor ref={ref} defaultValue={longDocument('First')} onChange={onChange} />));
+    typeInSource(longDocument('Second'));
+    expect(ref.current!.getValue()).toBe(longDocument('Second'));
+    expect(lastSourceProps().value).toBe(longDocument('Second'));
+    expect(previewHeading()).toBe('First');
+  });
+
+  it('is not late for a short document', () => {
+    mountDefault({ defaultValue: '# First' });
+    typeInSource('# Second');
+    expect(previewHeading()).toBe('Second');
+  });
+
+  it('is not late when the preview is shown alone, where nothing is being typed', () => {
+    mountDefault({ defaultValue: longDocument('First'), mode: 'preview' });
+    act(() => root.render(<MarkdownEditor mode="preview" value={longDocument('Second')} />));
+    expect(previewHeading()).toBe('Second');
+  });
+
+  it('is not late when the build is quick', () => {
+    vi.mocked(clock.now).mockImplementation(() => (ticks += 1));
+    mountDefault({ defaultValue: longDocument('First') });
+    typeInSource(longDocument('Second'));
+    expect(previewHeading()).toBe('Second');
   });
 });
