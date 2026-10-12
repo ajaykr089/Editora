@@ -164,7 +164,11 @@ The editor in the picture at the top of this page is configured like this:
 ```
 
 You can also configure an editor from JavaScript with `editor.setConfig({ toolbar: 'bold italic', height: 300 })`.
+`setConfig` rebuilds the editor and keeps what the user has typed; pass `content` to replace it instead.
 To switch the theme at run time, set the attribute: `editor.setAttribute('theme', 'dark')`.
+
+`readonly` shows content that cannot be edited. `disabled` goes further, like a disabled form field: it also
+disables the toolbar buttons and takes the editor out of the tab order. Both work as attributes and in `setConfig`.
 
 ### Toolbar items
 
@@ -229,13 +233,13 @@ loaded by, is in [`@editora/plugins`](https://www.npmjs.com/package/@editora/plu
 | `setContent(html)` | Replaces the content. The HTML is sanitised first. |
 | `execCommand(name)` | Runs a command, as the toolbar does: `toggleBold`, `toggleItalic`, `toggleBulletList`, `insertTable`, `undo`, and so on. Returns `true` if the command ran. |
 | `focus()` / `blur()` | Moves the focus into or out of the editor. |
-| `setConfig(options)` | Changes options at run time, such as `toolbar` or `height`. |
+| `setConfig(options)` | Rebuilds the editor with new options, such as `toolbar`, `height`, `theme` or `disabled`. What the user typed is kept; `content` replaces it. |
 | `getAPI()` | The same methods as an object, plus `on(event, handler)`, `getConfig()` and `setReadonly(boolean)`. |
 
 | Event | `event.detail` | |
 | --- | --- | --- |
-| `editor-ready` | | The editor has been built. It fires again if the editor is rebuilt, for example after you change `plugins` or `toolbar`. |
-| `content-change` | `{ html }` | The content changed. It can fire more than once for the same HTML, so compare before you save. |
+| `editor-ready` | | The editor has been built. It fires again if the editor is rebuilt, for example after you change `plugins` or `toolbar` (once, however many attributes you change together). |
+| `content-change` | `{ html }` | The content changed. It fires once after the user pauses typing, and when the editor loses the focus with a change that has not been reported yet, so it does not repeat the same HTML. |
 | `editor-focus` / `editor-blur` | | The editor gained or lost the focus. |
 | `editor-destroy` | | The editor was torn down. |
 

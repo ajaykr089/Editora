@@ -139,7 +139,7 @@ Use `editorElement.getAPI()` to access:
 | Event | Detail | Trigger |
 | --- | --- | --- |
 | `editor-ready` | `api object` | Editor initialized |
-| `content-change` | `html payload` | Input/blur change emit |
+| `content-change` | `html payload` | Once per change: after typing pauses, or on blur if the change was not reported yet |
 | `editor-focus` | none | Content receives focus |
 | `editor-blur` | none | Content loses focus |
 | `editor-destroy` | none | Instance teardown |

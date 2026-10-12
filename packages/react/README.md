@@ -195,6 +195,7 @@ export default function DocumentEditor() {
 | `toolbar` | `{ items?, sticky?, showMoreOptions? }` | `items` is a string such as `'undo redo \| bold italic'` or an array of names (see [Toolbar items](#toolbar-items)). `sticky` keeps the toolbar in view while the page scrolls, and `showMoreOptions` folds the buttons that do not fit into a menu. |
 | `floatingToolbar` | `boolean \| { enabled? }` | A toolbar that appears next to the selected text. |
 | `statusbar` | `{ enabled?, position? }` | A status bar with the cursor position and the word and character counts. `position` is `'top'` or `'bottom'`. |
+| `contextMenu` | `{ enabled? }` | `enabled: false` stops the browser's own right-click menu from opening in the editor. The default leaves it alone; the editor draws no context menu of its own. |
 | `readonly` | `boolean` | Shows the content without letting the user edit it. |
 | `placeholder` | `string` | Text shown while the editor is empty. |
 | `ariaLabel` / `ariaLabelledBy` | `string` | The editing area's accessible name, or the id of a visible label for it. Without them screen readers hear the placeholder, which is not a label. |
@@ -212,7 +213,7 @@ export default function DocumentEditor() {
 | `onDestroy` | `() => void` | Called when the editor is removed. |
 | `id`, `className` | `string` | Passed to the editor's container. |
 
-`menubar` is accepted but nothing renders a menu bar yet.
+`menubar` is deprecated and has no effect: the editor renders no menu bar. It still compiles, and logs a warning once when it is enabled.
 
 ## Toolbar items
 
