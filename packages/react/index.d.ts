@@ -54,6 +54,11 @@ export interface RichTextEditorProps {
     enabled?: boolean;
     position?: "top" | "bottom";
   };
+  /**
+   * @deprecated Has no effect: the editor renders no menu bar, whatever this is set to. It is still
+   * accepted so existing code keeps compiling, logs a one-time warning when it is enabled, and will be
+   * removed in a future major release.
+   */
   menubar?: {
     enabled: boolean;
     items?: string[];

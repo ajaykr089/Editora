@@ -425,7 +425,6 @@ export function EditoraEnterpriseDemo() {
               defaultValue="<h2>Quarterly business review</h2><p>Add tables, comments, code samples, equations, and review helpers from the enterprise-style plugin set.</p>"
               plugins={activePlugins}
               toolbar={{ sticky: true, showMoreOptions: true }}
-              menubar={{ enabled: true, items: ['file', 'edit', 'insert', 'format', 'tools'] }}
               contextMenu={{ enabled: true }}
               paste={{ clean: true, keepFormatting: true, convertWord: true }}
               spellcheck={{ enabled: true, provider: 'browser' }}
@@ -540,7 +539,6 @@ export function EditoraAllToolbarsDemo() {
               plugins={showcasePlugins}
               statusbar={{ enabled: true }}
               toolbar={{ sticky: true, showMoreOptions: true }}
-              menubar={{ enabled: true, items: ['file', 'edit', 'insert', 'format', 'tools'] }}
               floatingToolbar={true}
               contextMenu={{ enabled: true }}
               defaultValue={allPluginsShowcaseHtml}

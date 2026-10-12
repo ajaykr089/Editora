@@ -71,7 +71,7 @@ Config resolution order:
 | `toolbar-items` | `string` | Toolbar item layout string |
 | `toolbar-floating` | `boolean` | Enable floating toolbar behavior |
 | `toolbar-sticky` | `boolean` | Sticky main toolbar |
-| `menubar` | `boolean \| object` | Menubar config |
+| `menubar` | `boolean \| object` | Deprecated: the editor renders no menu bar, so this has no effect |
 | `statusbar` | `boolean \| object` | Statusbar config |
 
 ### Runtime/operational attributes

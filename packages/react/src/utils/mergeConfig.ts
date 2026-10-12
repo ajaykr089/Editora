@@ -10,6 +10,12 @@ type PluginFactory = () => Plugin;
 
 const warnedUnresolvedPlugins = new Set<string>();
 const warnedMissingA11yChecker = new Set<string>();
+let warnedMenubar = false;
+
+// `menubar` is typed as an object but plain JavaScript callers also pass `true`.
+const requestsMenubar = (menubar: unknown): boolean =>
+  menubar === true ||
+  (!!menubar && typeof menubar === 'object' && (menubar as { enabled?: unknown }).enabled === true);
 
 const isPlugin = (value: unknown): value is Plugin => {
   return !!value && typeof value === 'object' && typeof (value as Plugin).name === 'string';
@@ -220,6 +226,14 @@ function deepMerge<T>(target: T, source: Partial<T>): T {
  * Non-breaking: supports both new and legacy props
  */
 export function mergeConfig(props: RichTextEditorProps): EditorConfig {
+  if (!warnedMenubar && requestsMenubar(props.menubar)) {
+    warnedMenubar = true;
+    console.warn(
+      '[Editora] The "menubar" prop has no effect: the editor does not render a menu bar. ' +
+        'It is still accepted so existing code keeps working, and will be removed in a future major release.'
+    );
+  }
+
   // Start with defaults
   const config = deepMerge(DEFAULT_CONFIG, {
     readonly: props.readonly,

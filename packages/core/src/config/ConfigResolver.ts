@@ -8,6 +8,10 @@ export interface EditorConfigDefaults {
   width?: number | string;
   readonly?: boolean;
   disabled?: boolean;
+  /**
+   * @deprecated Has no effect: the editor renders no menu bar, whatever this is set to. It is still
+   * accepted so existing code keeps working, and will be removed in a future major release.
+   */
   menubar?: boolean | { enabled?: boolean; items?: string[] };
   toolbar?:
     | string
@@ -85,7 +89,7 @@ export class ConfigResolver {
     width: '100%',
     readonly: false,
     disabled: false,
-    menubar: true,
+    menubar: false,
     toolbar: true,
     plugins: [],
     theme: 'light',

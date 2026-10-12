@@ -14,6 +14,7 @@ import { getCleanEditorHTML, stripEditorUiArtifacts } from '../utils/editorOutpu
 import { ConfigResolver, EditorConfigDefaults } from '../config/ConfigResolver';
 import { PluginLoader } from '../config/PluginLoader';
 import { Plugin } from '../plugins/Plugin';
+import { warnIgnoredOption } from '../config/deprecatedOptions';
 
 // Import styles
 import styles from './styles.css?inline';
@@ -441,6 +442,10 @@ export class RichTextEditorElement extends ElementBase {
     
     this.applyThemeClass(this.config.theme);
     
+    if (this.isMenubarRequested()) {
+      warnIgnoredOption('menubar', '<editora-editor> does not render a menu bar.');
+    }
+
     // Plugins load on demand, which can take a moment: say so instead of showing an empty box.
     this.setAttribute('data-loading', 'true');
     this.setAttribute('aria-busy', 'true');
@@ -1179,6 +1184,16 @@ export class RichTextEditorElement extends ElementBase {
     if (this.config.autofocus && !this.isEditorDisabled()) {
       setTimeout(() => this.contentElement?.focus(), 0);
     }
+  }
+
+  /** True only when the page asked for a menu bar (the default is not a request), through setConfig() or the attribute. */
+  private isMenubarRequested(): boolean {
+    const fromScript = this.jsConfig?.menubar;
+    if (fromScript !== undefined) {
+      return fromScript === true || (typeof fromScript === 'object' && fromScript !== null && fromScript.enabled !== false);
+    }
+    const fromMarkup = this.getAttribute('menubar');
+    return fromMarkup !== null && fromMarkup !== 'false';
   }
 
   /**
