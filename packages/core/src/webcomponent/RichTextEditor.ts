@@ -358,8 +358,36 @@ export class RichTextEditorElement extends ElementBase {
     // Reinitialize if already connected
     if (this.isConnected) {
       this.destroy();
+      this.adoptConfiguredContent(config);
       await this.waitForPluginLoader();
       await this.initialize();
+    } else {
+      this.adoptConfiguredContent(config);
+    }
+  }
+
+  /**
+   * `content` in setConfig() is a one-off replacement, not a setting: it feeds the next initialize()
+   * the same way the live content that destroy() keeps does, so a later rebuild (a `plugins`
+   * attribute change, the element being moved) resumes from what the user typed, not from this value.
+   * It outranks that kept content, autosave and the element's own markup.
+   */
+  private adoptConfiguredContent(config: EditorConfigDefaults): void {
+    if (typeof config.content === 'string') {
+      this.preservedContent = config.content;
+    }
+  }
+
+  /** Replace the `editora-theme-*` class (there is only ever one) with the one for `theme`. */
+  private applyThemeClass(theme: unknown): void {
+    // classList is live: removing while iterating it skips the entry after each removal.
+    Array.from(this.classList).forEach((cls) => {
+      if (cls.startsWith('editora-theme-')) {
+        this.classList.remove(cls);
+      }
+    });
+    if (theme) {
+      this.classList.add(`editora-theme-${theme}`);
     }
   }
 
@@ -404,9 +432,7 @@ export class RichTextEditorElement extends ElementBase {
     this.classList.add('editora-editor');
     this.classList.toggle('editora-disabled', this.isEditorDisabled());
     
-    if (this.config.theme) {
-      this.classList.add(`editora-theme-${this.config.theme}`);
-    }
+    this.applyThemeClass(this.config.theme);
     
     // Plugins load on demand, which can take a moment: say so instead of showing an empty box.
     this.setAttribute('data-loading', 'true');
@@ -1556,16 +1582,7 @@ export class RichTextEditorElement extends ElementBase {
         break;
         
       case 'theme':
-        // Remove old theme classes
-        this.classList.forEach(cls => {
-          if (cls.startsWith('editora-theme-')) {
-            this.classList.remove(cls);
-          }
-        });
-        // Add new theme class
-        if (value) {
-          this.classList.add(`editora-theme-${value}`);
-        }
+        this.applyThemeClass(value);
         break;
         
       case 'placeholder':
