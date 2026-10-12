@@ -18,10 +18,22 @@ if (!load) {
     .map((key) => key.replace('./examples/', '').replace(/\.tsx?$/, ''))
     .join(', ')}`;
 } else {
+  const root = document.getElementById('root') as HTMLElement;
+  // A plain module looks its container up by id, as the README's code does.
+  root.innerHTML = '<div id="editor"></div>';
   load().then(({ default: Example }) => {
-    const root = document.getElementById('root') as HTMLElement;
-    if (Example) return createRoot(root).render(<Example />);
-    // A plain module (it only registers the web component): give it an element to upgrade, as the README's HTML does.
-    root.innerHTML = '<editora-editor plugins="bold italic link history" toolbar="undo redo | bold italic | link"><p>Bundled</p></editora-editor>';
+    if (Example) {
+      root.innerHTML = '';
+      // StrictMode, as in most apps: effects run twice in development, so cleanup bugs show up.
+      return createRoot(root).render(
+        <React.StrictMode>
+          <Example />
+        </React.StrictMode>,
+      );
+    }
+    // This one only registers the web component: give it an element to upgrade, as the README's HTML does.
+    if (name === 'core-bundler') {
+      root.innerHTML = '<editora-editor plugins="bold italic link history" toolbar="undo redo | bold italic | link"><p>Bundled</p></editora-editor>';
+    }
   });
 }

@@ -15,6 +15,12 @@ export const readmes = {
   core: path.join(root, 'packages/core/README.md'),
   react: path.join(root, 'packages/react/README.md'),
   plugins: path.join(root, 'packages/plugins/README.md'),
+  'light-code-editor': path.join(root, 'packages/light-code-editor/README.md'),
+  themes: path.join(root, 'packages/themes/README.md'),
+  'ui-core': path.join(root, 'packages/ui-core/README.md'),
+  'ui-react': path.join(root, 'packages/ui-react/README.md'),
+  'ui-sortable': path.join(root, 'packages/ui-sortable/README.md'),
+  toast: path.join(root, 'packages/editora-toast/README.md'),
 };
 
 /** Playwright is not a dependency of the repo: use the one next to the local e2e harness when there is no other. */
@@ -33,24 +39,37 @@ export async function loadPlaywright() {
 export function listExamples() {
   return fs
     .readdirSync(examplesDir)
-    .filter((file) => /\.(tsx?|html)$/.test(file))
+    .filter((file) => /\.(tsx?|html|css)$/.test(file))
     .sort()
     .map((file) => ({
-      name: file.replace(/\.(tsx?|html)$/, ''),
+      name: file.replace(/\.(tsx?|html|css)$/, ''),
       file,
-      kind: file.endsWith('.html') ? 'html' : 'react',
+      kind: file.endsWith('.html') ? 'html' : file.endsWith('.css') ? 'css' : 'react',
       source: fs.readFileSync(path.join(examplesDir, file), 'utf8'),
     }));
 }
 
 const types = { '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.map': 'application/json' };
 
-/** Answer requests for the published CDN files with the local build of @editora/core. */
+// The directory of each package that the examples load from a CDN.
+const packageDirs = {
+  core: 'core',
+  themes: 'themes',
+  'light-code-editor': 'light-code-editor',
+  toast: 'editora-toast',
+  'ui-core': 'ui-core',
+  'ui-sortable': 'ui-sortable',
+  icons: 'icons',
+};
+
+/** Answer requests for the published CDN files with the local build of the same package. */
 export async function serveCdnFromBuild(page) {
-  await page.route('https://cdn.jsdelivr.net/npm/@editora/core/dist/**', async (route) => {
-    const rest = new URL(route.request().url()).pathname.replace('/npm/@editora/core/dist/', '');
-    const file = path.join(root, 'packages/core/dist', rest);
-    if (!fs.existsSync(file)) return route.fulfill({ status: 404, body: `not in the local build: ${rest}` });
+  await page.route('https://cdn.jsdelivr.net/npm/@editora/**', async (route) => {
+    // /npm/@editora/<package>[@version]/<path inside the package>
+    const [, name, rest] = new URL(route.request().url()).pathname.match(/^\/npm\/@editora\/([^/@]+)(?:@[^/]*)?\/(.*)$/) ?? [];
+    const dir = packageDirs[name];
+    const file = dir && path.join(root, 'packages', dir, rest);
+    if (!file || !fs.existsSync(file)) return route.fulfill({ status: 404, body: `not in the local build: ${name}/${rest}` });
     return route.fulfill({
       status: 200,
       body: fs.readFileSync(file),

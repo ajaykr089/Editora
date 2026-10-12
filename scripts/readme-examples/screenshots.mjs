@@ -122,6 +122,53 @@ const shots = [
       await page.waitForTimeout(400);
     },
   },
+
+  // ---- @editora/light-code-editor
+  { out: 'packages/light-code-editor/docs/images/editor-dark.png', example: 'lce-quick-start' },
+  { out: 'packages/light-code-editor/docs/images/editor-light.png', example: 'lce-react' },
+  { out: 'packages/light-code-editor/docs/images/diagnostics.png', example: 'lce-language-service' },
+  {
+    out: 'packages/light-code-editor/docs/images/search.png',
+    example: 'lce-quick-start',
+    async act(page) {
+      await page.click('[contenteditable]');
+      await page.keyboard.press('ControlOrMeta+f');
+      await page.waitForTimeout(300);
+      await page.keyboard.type('user');
+      await page.keyboard.press('Enter');
+      await page.waitForTimeout(400);
+    },
+  },
+  {
+    out: 'packages/light-code-editor/docs/images/completion.png',
+    example: 'lce-language-service',
+    async act(page) {
+      await page.keyboard.press('Escape');
+      await page.click('[contenteditable]');
+      await page.keyboard.press('Control+End');
+      await page.keyboard.type('di');
+      await page.keyboard.press('ControlOrMeta+Space');
+      await page.waitForTimeout(500);
+    },
+  },
+
+  // ---- @editora/themes
+  { out: 'packages/themes/docs/images/themes.png', example: 'themes-gallery' },
+  {
+    out: 'packages/themes/docs/images/custom-theme.png',
+    example: 'themes-custom',
+    async act(page) {
+      await page.evaluate(() => {
+        const strong = document.querySelector('[contenteditable] strong');
+        strong.closest('[contenteditable]').focus();
+        const range = document.createRange();
+        range.selectNodeContents(strong);
+        getSelection().removeAllRanges();
+        getSelection().addRange(range);
+      });
+      await page.waitForTimeout(400);
+    },
+  },
 ];
 
 const { chromium } = await loadPlaywright();
