@@ -224,6 +224,12 @@ export class RichTextEditorElement extends ElementBase {
   private lastBeforeInputType: string | null = null;
   /** The content a keystroke is about to change, kept until its `input` event so the history can record the change. */
   private pendingHistorySnapshot: { beforeHTML: string; inputType: string | null; data: string | null; selectionCollapsed: boolean } | null = null;
+  // False while the element is being upgraded: its attributes are replayed through
+  // attributeChangedCallback before connectedCallback, and connectedCallback builds the editor once.
+  private hasConnected = false;
+  private reinitializeQueued = false;
+  // The HTML last reported by content-change (or present at start), so blur only reports a difference.
+  private lastReportedContent: string | null = null;
 
   // Observed attributes for reactive updates
   static get observedAttributes(): string[] {
@@ -293,6 +299,7 @@ export class RichTextEditorElement extends ElementBase {
    * Called when element is added to DOM
    */
   connectedCallback(): void {
+    this.hasConnected = true;
     // Resolve configuration
     this.config = this.resolveConfig();
     
@@ -1166,6 +1173,7 @@ export class RichTextEditorElement extends ElementBase {
     }
     
     this.setToolbarControlsDisabled(this.isEditorDisabled());
+    this.lastReportedContent = getCleanEditorHTML(this.contentElement);
 
     // Auto-focus if configured
     if (this.config.autofocus && !this.isEditorDisabled()) {
@@ -1303,10 +1311,7 @@ export class RichTextEditorElement extends ElementBase {
       }
 
       const emitChange = () => {
-        this.dispatchEvent(new CustomEvent('content-change', {
-          detail: { html: stripEditorUiArtifacts(html) },
-          bubbles: true,
-        }));
+        this.emitContentChange(stripEditorUiArtifacts(html));
       };
 
       if (performanceConfig.debounceInputMs > 0) {
@@ -1381,10 +1386,12 @@ export class RichTextEditorElement extends ElementBase {
         this.contentChangeDebounceTimer = undefined;
       }
       if (this.contentElement) {
-        this.dispatchEvent(new CustomEvent('content-change', {
-          detail: { html: getCleanEditorHTML(this.contentElement) },
-          bubbles: true,
-        }));
+        // Flush an edit that was still waiting for the debounce, or one made without an input event;
+        // report nothing when the HTML is what content-change last said.
+        const html = getCleanEditorHTML(this.contentElement);
+        if (html !== this.lastReportedContent) {
+          this.emitContentChange(html);
+        }
       }
       this.dispatchEvent(new Event('editor-blur', { bubbles: true }));
       this.updateFloatingToolbar();
@@ -1424,6 +1431,14 @@ export class RichTextEditorElement extends ElementBase {
 
     this.selectionChangeHandler = updateSelectionInfo;
     document.addEventListener('selectionchange', this.selectionChangeHandler);
+  }
+
+  private emitContentChange(html: string): void {
+    this.lastReportedContent = html;
+    this.dispatchEvent(new CustomEvent('content-change', {
+      detail: { html },
+      bubbles: true,
+    }));
   }
 
   private getSelectionRangeInEditor(): Range | null {
@@ -1645,17 +1660,29 @@ export class RichTextEditorElement extends ElementBase {
       case 'toolbar-sticky':
       case 'plugins':
       case 'statusbar':
-        // These require re-initialization
-        if (this.isConnected) {
-          this.destroy();
-          this.waitForPluginLoader().then(() => {
-            this.initialize().catch(error => {
-              console.error('[RichTextEditor] Error during attribute change re-initialization:', error);
-            });
-          });
+        // These require re-initialization. While the element is being upgraded its attributes are
+        // replayed one by one before connectedCallback, which builds the editor once from all of them.
+        if (this.isConnected && this.hasConnected) {
+          this.scheduleReinitialize();
         }
         break;
     }
+  }
+
+  /** One rebuild for however many attributes are changed in the same task. */
+  private scheduleReinitialize(): void {
+    if (this.reinitializeQueued) return;
+    this.reinitializeQueued = true;
+    queueMicrotask(() => {
+      this.reinitializeQueued = false;
+      if (!this.isConnected) return;
+      this.destroy();
+      this.waitForPluginLoader().then(() => {
+        this.initialize().catch(error => {
+          console.error('[RichTextEditor] Error during attribute change re-initialization:', error);
+        });
+      });
+    });
   }
 
   /**
@@ -1755,6 +1782,7 @@ export class RichTextEditorElement extends ElementBase {
     this.toolbarElement = undefined;
     this.statusBarElement = undefined;
     this.loadedPlugins = [];
+    this.lastReportedContent = null;
     this.isInitialized = false;
     connectedWebEditors.delete(this);
     if (lastActiveWebEditor === this) {
