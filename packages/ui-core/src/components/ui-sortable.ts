@@ -1609,6 +1609,9 @@ export class UISortable extends ElementBase {
     if (itemsAttr !== this._lastItemsAttr) {
       this._lastItemsAttr = itemsAttr;
       this._items = normalizeItems(this._lists, parseJsonArray<UISortableItem>(itemsAttr));
+      // The selection is kept only for ids that exist, so a selection that was set before the items (the order of a
+      // React render, or of a script that assigns `selection` first) was emptied. Read it again against these items.
+      this._lastSelectionAttr = null;
       const persistKey = this.getAttribute('persist-key');
       if (persistKey && this._hydratedPersistKey !== persistKey) {
         this._items = this._restorePersistedItems(persistKey, this._items);
