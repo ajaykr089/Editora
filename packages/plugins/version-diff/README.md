@@ -116,6 +116,14 @@ VersionDiffPlugin({
 });
 ```
 
+When more than one baseline is available, the dialog uses the first of these:
+
+1. the `baselineHtml` passed to `openVersionDiff`,
+2. what `getBaselineHtml` returns,
+3. a baseline set at run time (`setVersionDiffBaseline`, or the "Set Current as Baseline" button),
+4. the `baselineHtml` option,
+5. the content the editor started with.
+
 ### Large document tuning
 
 ```ts
