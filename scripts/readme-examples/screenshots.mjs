@@ -200,6 +200,26 @@ const shots = [
     },
   },
 
+  // ---- @editora/ui-sortable
+  { out: 'packages/ui-sortable/docs/images/board.png', example: 'sortable-board' },
+  {
+    out: 'packages/ui-sortable/docs/images/dragging.png',
+    example: 'sortable-board',
+    async act(page) {
+      // Pick up an item and hold it over another list.
+      const from = await page.getByText('Design review', { exact: true }).first().boundingBox();
+      const to = await page.getByText('Release epic', { exact: true }).first().boundingBox();
+      await page.mouse.move(from.x - 34, from.y + from.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(from.x - 60, from.y - 20, { steps: 6 });
+      await page.mouse.move(to.x + 160, to.y + 90, { steps: 12 });
+      await page.waitForTimeout(500);
+    },
+  },
+  { out: 'packages/ui-sortable/docs/images/quick-start.png', example: 'sortable-quick-start' },
+  { out: 'packages/ui-sortable/docs/images/custom.png', example: 'sortable-custom' },
+  { out: 'packages/ui-sortable/docs/images/flat.png', example: 'sortable-flat' },
+
   // ---- @editora/themes
   { out: 'packages/themes/docs/images/themes.png', example: 'themes-gallery' },
   {

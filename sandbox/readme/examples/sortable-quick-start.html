@@ -1,0 +1,29 @@
+<script type="importmap">
+  {
+    "imports": {
+      "@editora/ui-sortable": "https://cdn.jsdelivr.net/npm/@editora/ui-sortable/dist/index.esm.js",
+      "@editora/ui-core/sortable": "https://cdn.jsdelivr.net/npm/@editora/ui-core/dist/sortable.esm.js"
+    }
+  }
+</script>
+<ui-sortable></ui-sortable>
+
+<script type="module">
+  import '@editora/ui-sortable';
+
+  const sortable = document.querySelector('ui-sortable');
+
+  sortable.lists = [
+    { id: 'backlog', label: 'Backlog' },
+    { id: 'in-progress', label: 'In Progress' },
+    { id: 'done', label: 'Done' }
+  ];
+
+  sortable.items = [
+    { id: 'story-1', label: 'Audit onboarding', listId: 'backlog' },
+    { id: 'story-2', label: 'Ship release notes', listId: 'in-progress' },
+    { id: 'story-3', label: 'Review handoff', listId: 'done' }
+  ];
+
+  sortable.addEventListener('change', (event) => console.log('order', event.detail.items));
+</script>

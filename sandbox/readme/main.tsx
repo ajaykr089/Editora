@@ -25,11 +25,9 @@ if (!load) {
     if (Example) {
       root.innerHTML = '';
       // StrictMode, as in most apps: effects run twice in development, so cleanup bugs show up.
-      return createRoot(root).render(
-        <React.StrictMode>
-          <Example />
-        </React.StrictMode>,
-      );
+      // ?strict=0 turns it off, to tell a StrictMode problem from any other.
+      const element = <Example />;
+      return createRoot(root).render(params.get('strict') === '0' ? element : <React.StrictMode>{element}</React.StrictMode>);
     }
     // This one only registers the web component: give it an element to upgrade, as the README's HTML does.
     if (name === 'core-bundler') {
