@@ -220,6 +220,64 @@ const shots = [
   { out: 'packages/ui-sortable/docs/images/custom.png', example: 'sortable-custom' },
   { out: 'packages/ui-sortable/docs/images/flat.png', example: 'sortable-flat' },
 
+  // ---- @editora/toast
+  {
+    out: 'packages/editora-toast/docs/images/levels.png',
+    example: 'toast-quick-start',
+    viewport: { width: 1008, height: 360 },
+    page: true,
+    clip: { x: 568, y: 160, width: 440, height: 200 },
+    async act(page) {
+      await page.waitForTimeout(500);
+    },
+  },
+  {
+    out: 'packages/editora-toast/docs/images/actions.png',
+    example: 'toast-advanced',
+    viewport: { width: 1008, height: 360 },
+    page: true,
+    clip: { x: 568, y: 160, width: 440, height: 200 },
+    async act(page) {
+      await page.waitForTimeout(500);
+    },
+  },
+  {
+    out: 'packages/editora-toast/docs/images/promise-loading.png',
+    example: 'toast-promise',
+    viewport: { width: 1008, height: 360 },
+    page: true,
+    clip: { x: 568, y: 220, width: 440, height: 140 },
+  },
+  {
+    out: 'packages/editora-toast/docs/images/promise-success.png',
+    example: 'toast-promise',
+    viewport: { width: 1008, height: 360 },
+    page: true,
+    clip: { x: 568, y: 220, width: 440, height: 140 },
+    async act(page) {
+      await page.waitForTimeout(1400);
+    },
+  },
+  {
+    out: 'packages/editora-toast/docs/images/themes.png',
+    example: 'toast-themes',
+    viewport: { width: 1008, height: 700 },
+    page: true,
+    clip: { x: 568, y: 0, width: 440, height: 680 },
+    async act(page) {
+      await page.waitForTimeout(600);
+    },
+  },
+  {
+    out: 'packages/editora-toast/docs/images/positions.png',
+    example: 'toast-positions',
+    viewport: { width: 1400, height: 520 },
+    page: true,
+    async act(page) {
+      await page.waitForTimeout(600);
+    },
+  },
+
   // ---- @editora/themes
   { out: 'packages/themes/docs/images/themes.png', example: 'themes-gallery' },
   {
@@ -268,7 +326,8 @@ for (const shot of shots) {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     // Dialogs are overlays on the whole page; everything else is the example itself.
     const target = shot.page ? page : page.locator(example.kind === 'html' ? 'body' : '#shot');
-    await target.screenshot({ path: file, caret: 'hide', animations: 'disabled' });
+    // `clip` is a rectangle of the viewport: toasts sit in a corner of an otherwise empty page.
+    await (shot.clip ? page : target).screenshot({ path: file, caret: 'hide', animations: 'disabled', ...(shot.clip ? { clip: shot.clip } : {}) });
     console.log(`${problems.length ? 'WARN' : 'ok  '} ${shot.out}  ${(fs.statSync(file).size / 1024).toFixed(0)} KB`);
     if (problems.length) {
       failed++;

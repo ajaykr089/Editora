@@ -1,955 +1,351 @@
-# Editora Toast
+<h1 align="center">@editora/toast</h1>
 
-> [!IMPORTANT]
-> **Live Website:** https://editora-ecosystem.netlify.app/  
-> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+<p align="center">
+  Toast notifications with no dependencies and nothing to mount: call <code>toast.success('Saved')</code> from
+  anywhere. Promise toasts, actions, progress, thirteen themes, seven positions and screen-reader announcements.
+</p>
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/@editora/toast"><img src="https://img.shields.io/npm/v/@editora/toast.svg" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@editora/toast"><img src="https://img.shields.io/npm/dm/@editora/toast.svg" alt="npm downloads"></a>
+  <a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/@editora/toast.svg" alt="license"></a>
+  <a href="https://www.npmjs.com/package/@editora/toast"><img src="https://img.shields.io/npm/types/@editora/toast.svg" alt="TypeScript types included"></a>
+</p>
 
-> Advanced toast notification system with enterprise features, backward compatibility, and rich customization options.
+<p align="center">
+  <a href="https://editora-ecosystem.netlify.app/toast-demo.html">Live demo</a> ·
+  <a href="https://editora-ecosystem-storybook.netlify.app/">Storybook</a> ·
+  <a href="https://github.com/ajaykr089/Editora">GitHub</a>
+</p>
 
-[![Version](https://img.shields.io/npm/v/@editora/toast)](https://www.npmjs.com/package/@editora/toast)
-[![License](https://img.shields.io/npm/l/@editora/toast)](https://github.com/ajaykr089/Editora/blob/main/LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Size](https://img.shields.io/bundlephobia/minzip/@editora/toast)](https://bundlephobia.com/package/@editora/toast)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/editora-toast/docs/images/themes.png" alt="Ten toasts stacked in the top-right corner, one in each of the light, colored, minimal, glass, neon, retro, ocean, forest, sunset and midnight themes" width="440">
+</p>
 
-A modern, framework-agnostic toast notification library designed for enterprise applications. Features advanced UX patterns, accessibility compliance, plugin architecture, and seamless integration with rich text editors.
+## Features
 
-## 📸 Screenshots
+- **Nothing to mount.** No provider, no container element: the first call creates what it needs. It works from React,
+  Vue, plain JavaScript, a service, or an event handler.
+- **Promise toasts.** One toast follows a promise from *loading* to *success* or *error*.
+- **Actions and progress**: buttons in the toast, and a progress bar with an optional percentage.
+- **Thirteen themes and seven positions**, a queue (three toasts show at once by default), duplicate prevention and
+  swipe-to-dismiss.
+- **Accessible.** Errors are announced as alerts, the rest politely, and a close button is labelled.
+- **Small.** 9 KB gzipped, plus 6 KB of CSS. No dependencies.
+- **Safe on the server.** The package imports in Node and the calls do nothing there, so a call in shared code does not
+  break server rendering.
+- Written in TypeScript. A script tag works too (a UMD build).
 
-### Animated Toast Demo
-![Animated Toast Demo](toast-screenshots/toast-demo.gif)
-
-### Hero Section
-![Hero Section](toast-screenshots/hero-section.png)
-
-### Basic Toast Types
-![Basic Toast Types](toast-screenshots/basic-toast-types.png)
-
-### Beautiful Themes
-![Beautiful Themes](toast-screenshots/beautiful-themes.png)
-
-### Interactive Actions
-![Interactive Actions](toast-screenshots/interactive-actions.png)
-
-### Interactive Feedback Form
-![Interactive Feedback Form](toast-screenshots/interactive-feedback-form.png)
-
-### Progress Scenarios
-![Progress Scenarios](toast-screenshots/progress-scenarios.png)
-
-### Advanced Features
-![Advanced Features](toast-screenshots/advanced-features.png)
-
-### Async Operations
-![Async Operations](toast-screenshots/async-operations.png)
-
-### Error Handling
-![Error Handling](toast-screenshots/error-handling.png)
-
-## ✨ Features
-
-### Core Features
-- 🚀 **Framework Agnostic** - Works with any JavaScript framework or vanilla JS
-- ♿ **Accessibility First** - WCAG AA compliant with screen reader support
-- 🔄 **Promise Lifecycle** - Automatic state transitions for async operations
-- 📱 **Mobile Optimized** - Touch gestures, swipe-to-dismiss, and responsive design
-- 🎨 **Advanced Theming** - 13 built-in themes with CSS variables and custom themes
-- 🔌 **Plugin Architecture** - Extensible with custom plugins and hooks
-- 📊 **Smart Queue Management** - Priority-based queuing with overflow strategies
-- 🎯 **Rich Content Support** - HTML, icons, actions, progress bars, and custom rendering
-- 🎪 **Spring Physics Animations** - Realistic animations with customizable physics parameters
-- 🏗️ **SSR Safe** - Server-side rendering compatible
-- 🪝 **Editor Integration** - Built-in hooks for rich text editors
-- 🔒 **Security** - HTML sanitization and XSS protection
-- 📦 **Zero Dependencies** - Lightweight and self-contained
-
-### Advanced Features (v2.0.0)
-- 🔄 **Toast Updates** - Modify existing toasts dynamically with smooth transitions
-- 🎯 **Toast Grouping** - Group related notifications with stacking and management
-- 🧱 **Stacked Layouts** - Sonner-style collapsed stacks with hover/focus expansion
-- 📝 **Title + Description API** - Modern content hierarchy for concise messages
-- 🎪 **Custom Animation Hooks** - User-defined animation functions for complete control
-- 📍 **Multiple Positions** - Support for all screen corners and center positioning
-- 🎨 **Animation Manager** - Centralized system supporting CSS, spring, and custom animations
-- 📱 **Gesture Support** - Swipe and drag gestures for mobile interaction
-- 🎯 **Focus Management** - Proper keyboard navigation and focus handling
-- 🔄 **Promise Integration** - Seamless integration with async operations and promises
-- 📊 **Progress Tracking** - Built-in progress bars with percentage display
-- 🎯 **Action Buttons** - Interactive buttons within toasts for user actions
-- ↩️ **Action/Cancel Shortcuts** - First-class `action` and `cancel` options for undo flows
-- 🎨 **Theme Variants** - Light, dark, system, colored, minimal, glass, neon, retro, ocean, forest, sunset, midnight themes
-- 🔧 **Global Configuration** - Comprehensive configuration system for all aspects
-- 🧩 **Headless State** - `subscribe()` and `getState()` for custom renderers and framework adapters
-
-### Performance & Architecture
-
-- ⚡ **Optimized Queue Management** - O(1) insertion with priority-based queuing
-- 🎯 **Batched DOM Updates** - Efficient rendering with minimal reflows
-- 🧠 **Memory Safe** - Automatic cleanup and leak prevention
-- 🚀 **Virtualized Rendering** - Handles large queues without performance degradation
-- 🔄 **Event-Driven Architecture** - Plugin system with comprehensive hooks
-- 📦 **Tree-Shakable** - Import only what you need for smaller bundles
-
-## 📦 Installation
+## Install
 
 ```bash
 npm install @editora/toast
 ```
 
-## 🌐 CDN Usage
+## Quick start
 
-You can also use Editora Toast directly from a CDN without installing it via npm. Include the following scripts in your HTML:
-### Examples
-``` https://editora-ecosystem.netlify.app/toast-demo.html ```
-### Basic CDN Setup
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My App</title>
-  
-  <!-- Include the CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/toast@latest/dist/toast.css">
-</head>
-<body>
-  <!-- Your content here -->
-  
-  <!-- Include the JavaScript -->
-  <script src="https://cdn.jsdelivr.net/npm/@editora/toast@latest/dist/index.umd.js"></script>
-  
-  <script>
-    // Now you can use the toast functions (legacy API supports an optional options object)
-    toast.success('Hello from CDN!', { theme: 'light', position: 'top-right' });
-    toast.error('Something went wrong!', { duration: 1000 });
-    toast.info('This is an info message', { theme: 'light', position: 'top-right' });
-    toast.warning('This is a warning', { theme: 'light', position: 'top-right' });
-    
-    // Advanced usage (toastAdvanced, toastPro)
-    // global window.toastPro.show()
-    // global window.toastAdvanced.show()
-    const notification = toastAdvanced.show({
-      message: 'File uploaded successfully!',
-      level: 'success',
-      icon: '✓',
-      actions: [
-        { label: 'View', onClick: () => console.log('View clicked') },
-        { label: 'Dismiss', onClick: () => notification.dismiss() }
-      ]
-    });
-    const notification = toastPro.show({
-      message: 'File uploaded successfully!',
-      level: 'success',
-      icon: '✓',
-      actions: [
-        { label: 'View', onClick: () => console.log('View clicked') },
-        { label: 'Dismiss', onClick: () => notification.dismiss() }
-      ]
-    });
-  </script>
-</body>
-</html>
-```
-
-### CDN URLs
-
-- **JavaScript**: `https://cdn.jsdelivr.net/npm/@editora/toast@latest/dist/index.umd.js`
-- **CSS**: `https://cdn.jsdelivr.net/npm/@editora/toast@latest/dist/toast.css`
-
-> **Note**: Replace `@latest` with a specific version number (e.g., `@2.0.0`) for production use to avoid unexpected updates.
-
-## 🚀 Quick Start
-
-### Basic Usage (Backward Compatible)
-
-```typescript
+```ts
 import { toast } from '@editora/toast';
-import "@editora/toast/toast.css";
+import '@editora/toast/toast.css';
 
-// Simple notifications (migrated to optional advanced options)
-toast.success('File saved successfully!', { theme: 'light', position: 'top-right' });
-toast.error('Failed to save file', { theme: 'light', position: 'top-right' });
-toast.info('Info message', { theme: 'light', position: 'top-right' });
-toast.warning('Warning message', { theme: 'light', position: 'top-right' });
+toast.success('Document saved');
+toast.info('A new version is available');
+toast.warning('Storage is almost full');
+toast.error('Upload failed');
 ```
 
-### Advanced Usage (v2.0.0 Features)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/editora-toast/docs/images/levels.png" alt="Three toasts in the bottom-right corner: Document saved in green, A new version is available in blue and Storage is almost full in orange" width="440">
+</p>
 
-```typescript
+Toasts appear in the bottom-right corner and go away after four seconds. Three are visible at once; the rest wait in a
+queue (a fourth toast, *Upload failed* above, appears when there is room).
+
+`toast` is the simple API: `toast.info`, `toast.success`, `toast.warning`, `toast.error` and `toast.loading`, each taking
+a message and, if you like, an options object or a duration in milliseconds. For everything else there is
+`toastAdvanced` (also exported as `toastPro`).
+
+## Titles, actions and progress
+
+```ts
 import { toastAdvanced as toast } from '@editora/toast';
-import "@editora/toast/toast.css";
-// Rich notifications with actions and progress
-const notification = toast.show({
-  message: 'Document uploaded successfully!',
+import '@editora/toast/toast.css';
+
+// A toast with a title, a description, actions and progress. duration: 0 keeps it until it is dismissed.
+const report = toast.show({
   level: 'success',
-  icon: '✓',
+  title: 'Report ready',
+  description: 'Q3-summary.pdf is 2.4 MB',
   actions: [
-    { label: 'View Document', onClick: () => console.log('View clicked') },
-    { label: 'Share', onClick: () => console.log('Share clicked') },
-    { label: 'Dismiss', onClick: () => notification.dismiss() }
+    { label: 'Open', primary: true, onClick: () => console.log('open') },
+    { label: 'Dismiss', onClick: () => report.dismiss() }
   ],
-  progress: { value: 100, showPercentage: true },
-  duration: 6000
+  duration: 0
 });
 
-// Promise-based notifications with automatic state transitions
-toast.promise(
-  uploadFile(file),
-  {
-    loading: 'Uploading file...',
-    success: (data) => `File "${data.name}" uploaded successfully!`,
-    error: (error) => `Upload failed: ${error.message}`
-  }
-);
+const upload = toast.show({
+  level: 'info',
+  message: 'Uploading photos',
+  progress: { value: 64, showPercentage: true },
+  duration: 0
+});
+```
 
-// Update existing toast dynamically
-const loadingToast = toast.loading('Saving document...');
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/editora-toast/docs/images/actions.png" alt="A toast titled Report ready with a description and Open and Dismiss buttons, under a toast that says Uploading photos" width="440">
+</p>
+
+`show()` returns the toast: `dismiss()` removes it and `update(options)` changes it. Pressing an action runs its `onClick`
+and closes the toast; give the action `dismissOnClick: false` to keep the toast open.
+
+## Promises and updates
+
+`toast.promise()` shows one toast that becomes the result of a promise, and `update()` changes any toast by id:
+
+```ts
+import { toastAdvanced as toast } from '@editora/toast';
+import '@editora/toast/toast.css';
+
+const saveDocument = new Promise<{ name: string }>((resolve) => {
+  setTimeout(() => resolve({ name: 'Q3-summary.pdf' }), 1500);
+});
+
+// One toast that moves from loading to success or error by itself.
+toast.promise(saveDocument, {
+  loading: 'Saving document...',
+  success: (file) => `Saved ${file.name}`,
+  error: (error) => `Could not save: ${error.message}`
+});
+
+// Or update a toast yourself.
+const sync = toast.loading('Syncing...');
 setTimeout(() => {
-  toast.update(loadingToast.id, {
-    message: 'Document saved successfully!',
-    level: 'success',
-    icon: '💾',
-    actions: [{ label: 'Open', onClick: () => {} }]
-  });
-}, 2000);
-
-// Group related notifications
-toast.group('file-operations', {
-  message: 'File 1 processed',
-  level: 'success'
-});
-
-toast.group('file-operations', {
-  message: 'File 2 processed',
-  level: 'success'
-});
+  toast.update(sync.id, { message: 'Everything is up to date', level: 'success' });
+}, 2500);
 ```
 
-## 🎛️ Configuration
+<table>
+  <tr>
+    <td><img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/editora-toast/docs/images/promise-loading.png" alt="Two toasts that read Saving document and Syncing"></td>
+    <td><img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/editora-toast/docs/images/promise-success.png" alt="The same toasts after the promise resolved and the update: Saved Q3-summary.pdf and Everything is up to date"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>While it works</sub></td>
+    <td align="center"><sub>After the promise resolves and the update</sub></td>
+  </tr>
+</table>
 
-```typescript
+`toast.promise()` returns the promise you gave it, so you can still `await` it. If you only need the message, `success`
+and `error` can be plain strings.
+
+## In React, and in any framework
+
+There is nothing to render. Call `toast` from a handler, an effect or a service:
+
+```tsx
 import { toastAdvanced as toast } from '@editora/toast';
-import "@editora/toast/toast.css";
-// Global configuration with all available options
-toast.configure({
-  // Positioning
-  position: 'top-right', // 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'center'
-  offset: 16,
-  mobileOffset: 16,
+import '@editora/toast/toast.css';
 
-  // Timing
-  duration: 5000, // Default duration in milliseconds
-  pauseOnHover: true, // Pause timer when hovering
-  pauseOnWindowBlur: true, // Pause timers when the tab/window is inactive
+async function saveDraft() {
+  await new Promise((resolve) => setTimeout(resolve, 800));
+  return { name: 'draft.md' };
+}
 
-  // Display
-  maxVisible: 3, // Maximum visible toasts
-  visibleToasts: 3, // Sonner-compatible alias
-  stack: false, // Set true to collapse visible toasts into a stack
-  expand: true, // Keep stacked toasts expanded by default
-  richColors: false, // Use semantic colored surfaces
-  closeButton: true, // Show close buttons globally
-  theme: 'system', // Theme: 'light' | 'dark' | 'system' | 'colored' | 'minimal' | 'glass' | 'neon' | 'retro' | 'ocean' | 'forest' | 'sunset' | 'midnight' | 'custom'
-
-  // Accessibility
-  enableAccessibility: true, // Enable screen reader support
-
-  // Interactions
-  swipeDismiss: true, // Enable swipe to dismiss on mobile
-  dragDismiss: false, // Enable drag to dismiss
-
-  // Queue Management
-  queueStrategy: 'fifo', // 'fifo' | 'lifo'
-  preventDuplicate: true,
-  dedupeScope: 'all', // 'visible' | 'queue' | 'all'
-
-  // Animations
-  animation: {
-    type: 'spring', // 'css' | 'spring' | 'custom'
-    config: {
-      stiffness: 120,
-      damping: 12,
-      mass: 1,
-      precision: 0.01
-    }
-  },
-
-  // Advanced
-  zIndex: 9999 // Base z-index for toasts
-});
-```
-
-## 🎨 Theming
-
-![Beautiful Themes](toast-screenshots/beautiful-themes.png)
-
-### Built-in Themes
-
-Editora Toast comes with 13 beautiful themes:
-
-- **`light`** - Clean white background with subtle shadows
-- **`dark`** - Dark background with high contrast text
-- **`system`** - Automatically switches between light/dark based on system preference
-- **`colored`** - Vibrant gradient backgrounds for each toast level
-- **`minimal`** - Clean design with subtle borders and minimal styling
-- **`glass`** - Frosted glass effect with backdrop blur
-- **`neon`** - Bright neon colors with glowing effects
-- **`retro`** - 80s/90s style with bold colors and gradients
-- **`ocean`** - Blue aquatic theme with calming colors
-- **`forest`** - Green natural theme with earthy tones
-- **`sunset`** - Warm orange/pink sunset colors
-- **`midnight`** - Deep blue dark theme with subtle gradients
-- **`custom`** - Fully customizable with CSS variables
-
-### Usage
-
-```typescript
-import { toastAdvanced as toast } from '@editora/toast';
-import "@editora/toast/toast.css";
-// Set global theme
-toast.configure({
-  theme: 'glass'  // or 'neon', 'retro', 'ocean', etc.
-});
-
-// Per-toast theme
-toast.show({
-  message: 'Hello World',
-  theme: 'colored'
-});
-```
-
-### CSS Variables
-
-```css
-:root {
-  --editora-toast-bg: rgba(0, 0, 0, 0.85);
-  --editora-toast-color: #fff;
-  --editora-toast-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-  --editora-toast-border-radius: 6px;
-  --editora-toast-font-family: system-ui, -apple-system, 'Segoe UI', Roboto;
-  --editora-toast-font-size: 13px;
-  --editora-toast-padding: 10px 14px;
+// There is nothing to mount: call toast from any handler or effect.
+export default function SaveButton() {
+  return (
+    <button
+      onClick={() =>
+        toast.promise(saveDraft(), {
+          loading: 'Saving...',
+          success: (file) => `Saved ${file.name}`,
+          error: 'Could not save'
+        })
+      }
+    >
+      Save
+    </button>
+  );
 }
 ```
 
-### Theme Classes
+## From a script tag
+
+The UMD build defines three globals: `toast`, `toastAdvanced` and `toastPro` (the same object as `toastAdvanced`).
+Pin a version in production, as here:
 
 ```html
-<!-- Apply theme globally -->
-<div data-theme="glass">
-  <!-- All toasts will use glass theme -->
-</div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/toast@2/dist/toast.css" />
+<script src="https://cdn.jsdelivr.net/npm/@editora/toast@2/dist/index.umd.js"></script>
 
-<!-- Or apply to specific container -->
-<div class="editora-toast-container" data-theme="neon">
-</div>
-```
+<button id="save">Save</button>
 
-## 🎯 Advanced Features
+<script>
+  document.getElementById('save').onclick = () => {
+    // The script defines three globals: toast, toastAdvanced and toastPro (the same object as toastAdvanced).
+    toast.success('Saved from a CDN');
 
-### Promise Lifecycle Toasts
-![Async Operations](toast-screenshots/async-operations.png)
-
-Automatically handle async operations with state transitions:
-
-```typescript
-import { toastAdvanced as toast } from '@editora/toast';
-
-// Promise-based notifications
-const uploadPromise = uploadFile(file);
-
-toast.promise(uploadPromise, {
-  loading: {
-    message: 'Uploading file...',
-    icon: '⏳',
-    progress: { indeterminate: true }
-  },
-  success: {
-    message: 'File uploaded successfully!',
-    icon: '✅',
-    duration: 4000,
-    actions: [{ label: 'View', onClick: () => openFile() }]
-  },
-  error: {
-    message: 'Upload failed. Please try again.',
-    icon: '❌',
-    duration: 6000,
-    actions: [
-      { label: 'Retry', onClick: () => retryUpload() },
-      { label: 'Cancel', onClick: () => {} }
-    ]
-  }
-});
-```
-
-### Interactive Actions
-![Interactive Actions](toast-screenshots/interactive-actions.png)
-
-Add interactive buttons to your toasts:
-
-```typescript
-import { toastAdvanced as toast } from '@editora/toast';
-import "@editora/toast/toast.css";
-const notification = toast.show({
-  message: 'Document saved successfully!',
-  level: 'success',
-  icon: '💾',
-  actions: [
-    {
-      label: 'Open Document',
-      onClick: () => openDocument(),
-      primary: true // Primary action styling
-    },
-    {
-      label: 'Share',
-      onClick: () => shareDocument(),
-      variant: 'secondary'
-    },
-    {
-      label: 'Dismiss',
-      onClick: () => notification.dismiss(),
-      variant: 'ghost'
-    }
-  ],
-  duration: 8000 // Longer duration for actions
-});
-```
-
-### Progress Tracking
-![Progress Scenarios](toast-screenshots/progress-scenarios.png)
-
-Built-in progress bars with customizable display:
-
-```typescript
-import { toastAdvanced as toast } from '@editora/toast';
-import "@editora/toast/toast.css";
-// Determinate progress
-const progressToast = toast.show({
-  message: 'Processing files...',
-  level: 'info',
-  progress: {
-    value: 0,
-    showPercentage: true,
-    color: '#007acc'
-  }
-});
-
-// Update progress
-let progress = 0;
-const interval = setInterval(() => {
-  progress += 10;
-  toast.update(progressToast.id, {
-    progress: { value: progress, showPercentage: true },
-    message: `Processing files... ${progress}%`
-  });
-
-  if (progress >= 100) {
-    clearInterval(interval);
-    toast.update(progressToast.id, {
-      message: 'Processing complete!',
+    const notification = toastAdvanced.show({
+      message: 'File uploaded',
       level: 'success',
-      progress: { value: 100, showPercentage: true }
+      actions: [
+        { label: 'View', onClick: () => console.log('view') },
+        { label: 'Dismiss', onClick: () => notification.dismiss() }
+      ],
+      duration: 0
     });
-  }
-}, 500);
+  };
+</script>
 ```
 
-### Toast Updates
-![Advanced Features](toast-screenshots/advanced-features.png)
+## Configure it
 
-Modify existing toasts dynamically:
+`configure()` sets the defaults for every toast from then on. A single toast can still override them:
 
-```typescript
+```ts
 import { toastAdvanced as toast } from '@editora/toast';
-import "@editora/toast/toast.css";
-// Create a loading toast
-const loadingToast = toast.loading('Connecting to server...');
+import '@editora/toast/toast.css';
 
-// Update with progress
-setTimeout(() => {
-  toast.update(loadingToast.id, {
-    message: 'Authenticating...',
-    progress: { value: 25, showPercentage: true }
-  });
-}, 1000);
-
-// Update with success
-setTimeout(() => {
-  toast.update(loadingToast.id, {
-    message: 'Connected successfully!',
-    level: 'success',
-    icon: '🔗',
-    progress: { value: 100, showPercentage: true },
-    actions: [{ label: 'Explore', onClick: () => {} }]
-  });
-}, 2000);
-```
-
-### Toast Grouping
-![Error Handling](toast-screenshots/error-handling.png)
-
-Group related notifications together:
-
-```typescript
-import { toastAdvanced as toast } from '@editora/toast';
-import "@editora/toast/toast.css";
-// Group file operations
-const files = ['document.pdf', 'image.jpg', 'data.json'];
-
-files.forEach((file, index) => {
-  setTimeout(() => {
-    toast.group('file-upload', {
-      message: `Uploaded ${file}`,
-      level: 'success',
-      icon: '📁',
-      duration: 3000
-    });
-  }, index * 500);
-});
-
-// Group error notifications
-toast.group('validation-errors', {
-  message: 'Invalid email format',
-  level: 'error',
-  icon: '⚠️'
-});
-
-toast.group('validation-errors', {
-  message: 'Password too weak',
-  level: 'error',
-  icon: '🔒'
-});
-```
-
-### Interactive Feedback Forms
-![Interactive Feedback Form](toast-screenshots/interactive-feedback-form.png)
-
-Create interactive forms within toasts:
-
-```typescript
-import { toastAdvanced as toast } from '@editora/toast';
-import "@editora/toast/toast.css";
-toast.show({
-  message: 'How was your experience?',
-  level: 'info',
-  icon: '⭐',
-  render: () => {
-    const container = document.createElement('div');
-    container.innerHTML = `
-      <div style="display: flex; gap: 8px; margin-top: 8px;">
-        <button class="feedback-btn" data-rating="1">😞</button>
-        <button class="feedback-btn" data-rating="2">😐</button>
-        <button class="feedback-btn" data-rating="3">😊</button>
-        <button class="feedback-btn" data-rating="4">😃</button>
-        <button class="feedback-btn" data-rating="5">😍</button>
-      </div>
-    `;
-
-    container.addEventListener('click', (e) => {
-      if (e.target.classList.contains('feedback-btn')) {
-        const rating = e.target.dataset.rating;
-        submitFeedback(rating);
-        toast.success('Thank you for your feedback!');
-      }
-    });
-
-    return container;
-  },
-  duration: 10000
-});
-```
-
-## 🔌 Plugins
-
-```typescript
-import { toastAdvanced as toast } from '@editora/toast';
-import "@editora/toast/toast.css";
-const myPlugin = {
-  name: 'my-plugin',
-  install(manager) {
-    // Add custom functionality
-    manager.on('beforeShow', (toast) => {
-      console.log('Toast about to show:', toast.message);
-    });
-  }
-};
-
-toast.use(myPlugin);
-```
-
-## 📱 Positions
-
-```typescript
-toast.show({
-  message: 'Hello World',
-  position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'
-});
-```
-
-## 🎪 Advanced Features
-
-### Spring Physics Animations
-
-```typescript
-import { toastAdvanced as toast } from '@editora/toast';
-import "@editora/toast/toast.css";
-// Spring animation with custom physics
-toast.show({
-  message: 'Spring animated toast!',
-  level: 'success',
-  animation: {
-    type: 'spring',
-    config: {
-      stiffness: 120,  // Spring stiffness (default: 100)
-      damping: 12,     // Spring damping (default: 10)
-      mass: 1,         // Spring mass (default: 1)
-      precision: 0.01  // Animation precision (default: 0.01)
-    }
-  }
-});
-```
-
-### Custom Animation Hooks
-
-```typescript
-import { toastAdvanced as toast } from '@editora/toast';
-import "@editora/toast/toast.css";
-// Custom animation functions
-toast.show({
-  message: 'Custom animated toast!',
-  level: 'info',
-  animation: {
-    type: 'custom',
-    show: async (element, toast) => {
-      // Custom show animation
-      element.style.opacity = '0';
-      element.style.transform = 'rotateX(90deg)';
-
-      await new Promise(resolve => {
-        element.style.transition = 'all 0.5s ease';
-        element.style.opacity = '1';
-        element.style.transform = 'rotateX(0deg)';
-        element.addEventListener('transitionend', resolve, { once: true });
-      });
-    },
-    hide: async (element, toast) => {
-      // Custom hide animation
-      element.style.transition = 'all 0.3s ease';
-      element.style.opacity = '0';
-      element.style.transform = 'scale(0.8)';
-
-      return new Promise(resolve => {
-        setTimeout(resolve, 300);
-      });
-    },
-    update: async (element, toast, updates) => {
-      // Custom update animation
-      element.style.transform = 'scale(1.05)';
-      setTimeout(() => {
-        element.style.transform = 'scale(1)';
-      }, 150);
-    }
-  }
-});
-```
-
-### Global Animation Configuration
-
-```typescript
-import { toastAdvanced as toast } from '@editora/toast';
-import "@editora/toast/toast.css";
-// Set default animation for all toasts
+// Settings for every toast from now on. A toast can still override them.
 toast.configure({
-  animation: {
-    type: 'spring',
-    config: { stiffness: 150, damping: 15 }
-  }
-});
-```
-
-### Toast Groups
-
-```typescript
-// Group related notifications
-toast.group('upload-group', {
-  message: 'Upload 1 complete',
-  level: 'success'
+  position: 'top-center',
+  duration: 6000,
+  maxVisible: 3,
+  theme: 'ocean',
+  closeButton: true,
+  preventDuplicate: true
 });
 
-toast.group('upload-group', {
-  message: 'Upload 2 complete',
-  level: 'success'
-});
+toast.info('Welcome back');
+toast.info('Welcome back'); // the duplicate is dropped
+toast.warning('Your plan renews tomorrow', { theme: 'sunset', duration: 0 });
 ```
 
-### Rich Text (`html: true`)
+| Setting | Default | |
+| --- | --- | --- |
+| `position` | `'bottom-right'` | Where toasts appear (see [Positions](#positions)). |
+| `duration` | `4000` | How long a toast stays, in milliseconds. `0` keeps it until it is dismissed. |
+| `maxVisible` | `3` | How many show at once; the others wait in the queue. (`visibleToasts` is an alias.) |
+| `queueStrategy` | `'fifo'` | `'fifo'` or `'lifo'`: which waiting toast comes next. |
+| `theme` | `'system'` | One of the [themes](#themes). |
+| `closeButton` | `false` | Show a close button on every toast. |
+| `preventDuplicate` | `false` | Drop a toast whose content is already showing. With `dedupeScope`: `'visible'`, `'queue'` or `'all'` (the default). |
+| `pauseOnHover`, `pauseOnFocus`, `pauseOnWindowBlur` | `true`, `false`, `false` | Pause the timer while the pointer is over a toast, a toast has focus, or the window is in the background. |
+| `swipeDismiss`, `swipeDirection`, `dragDismiss` | `true`, `'any'`, `false` | Dismiss by swiping, in which direction, and by dragging. |
+| `stack`, `expand`, `gap` | `false`, `true`, `8` | How several visible toasts are laid out, and the gap between them. |
+| `offset`, `mobileOffset`, `zIndex` | `16`, `16`, none | The distance from the edge of the screen, on desktop and on mobile, and the stacking order. |
+| `rtl` | `false` | Right-to-left layout. |
+| `richColors` | `false` | Richer colours for the levels. |
+| `container` | the page body | The element toasts are added to. |
 
-Messages are plain text by default. Set `html: true` to render a **safe subset** of HTML: inline formatting
-(`b`, `strong`, `i`, `em`, `u`, `s`, `del`, `ins`, `mark`, `small`, `sub`, `sup`, `code`, `kbd`, `span`), `br`, `p`,
-lists (`ul`, `ol`, `li`) and links. Links keep only `http(s):`, `mailto:`, `tel:` and relative URLs; external links
-open in a new tab with `rel="noopener noreferrer"`. Everything else (scripts, event handlers, `style`, images,
-iframes, forms...) is removed, and unknown elements are unwrapped so their text stays.
+`toast.getConfig()` returns the current settings.
 
-```typescript
-toast.success('Saved <b>3</b> files. <a href="/reports">View report</a>', { html: true });
-```
+## Themes
 
-`title`, `description`, `icon` and action labels are always plain text. For anything richer, use `render`.
+`light`, `dark`, `system`, `colored`, `minimal`, `glass`, `neon`, `retro`, `ocean`, `forest`, `sunset`, `midnight` and
+`custom`. Set one for all toasts with `configure({ theme })`, or for one toast with `{ theme }`:
 
-### Dismissing Persistent Toasts
-
-A toast with `duration: 0` (or `persistent: true`) stays until it is dismissed, so give it a way out: pass
-`closeButton: true` (alias `closable: true`), add an action, or keep the returned instance and call `dismiss()`.
-On pointer devices the close button fades in on hover or keyboard focus; on touch devices it is always visible.
-
-### Custom Render Function
-
-```typescript
-toast.show({
-  render: () => {
-    const div = document.createElement('div');
-    div.innerHTML = '<strong>Custom</strong> content';
-    return div;
-  }
-});
-```
-
-### Editor Integration
-
-```typescript
+```ts
 import { toastAdvanced as toast } from '@editora/toast';
-import "@editora/toast/toast.css";
-// Listen for editor events
-toast.onEditorEvent('spellcheck-error', (error) => {
-  toast.error(`Spelling error: ${error.word}`, { theme: 'light', position: 'top-right' });
-});
+import '@editora/toast/toast.css';
 
-// Trigger editor events
-toast.triggerEditorEvent('media-upload-progress', { progress: 50 });
-```
+toast.configure({ position: 'top-right', maxVisible: 10, gap: 8 });
 
-## 📋 API Reference
+const themes = [
+  'light', 'colored', 'minimal', 'glass', 'neon', 'retro', 'ocean', 'forest', 'sunset', 'midnight'
+] as const;
 
-### Core Methods
-
-- `toast.show(options)` - Show a toast with full options
-- `toast.update(id, options)` - Update an existing toast dynamically
-- `toast.dismiss(id?)` - Dismiss a specific toast or all toasts
-- `toast.clear()` - Clear all visible toasts
-
-### Convenience Methods
-
-- `toast.info(message, options?)` - Info level toast
-- `toast.success(message, options?)` - Success level toast
-- `toast.error(message, options?)` - Error level toast
-- `toast.warning(message, options?)` - Warning level toast
-- `toast.loading(message, options?)` - Loading state toast
-
-### Advanced Methods (v2.0.0)
-
-- `toast.promise(promise, options)` - Promise lifecycle toasts with automatic state transitions
-- `toast.group(id, options)` - Group related toasts with stacking behavior
-- `toast.configure(config)` - Update global configuration
-- `toast.use(plugin)` - Install a plugin
-- `toast.getState()` - Read visible, queued, grouped, and configured toast state
-- `toast.subscribe(listener)` - Subscribe to state changes for headless/custom renderers
-- `toast.onEditorEvent(event, handler)` - Listen for editor integration events
-- `toast.triggerEditorEvent(event, data)` - Trigger editor integration events
-
-### Toast Options Interface
-
-```typescript
-interface ToastOptions {
-  // Content
-  message?: string;
-  title?: string;
-  description?: string;
-  level?: 'info' | 'success' | 'error' | 'warning' | 'loading' | 'progress' | 'promise' | 'custom';
-  icon?: string;
-  html?: boolean; // render `message` as safe HTML (see "Rich Text" above)
-  render?: (toast: ToastInstance) => HTMLElement;
-
-  // Behavior
-  duration?: number;
-  pauseOnHover?: boolean;
-  persistent?: boolean;
-  closeButton?: boolean; // show a close button (alias: closable)
-
-  // Positioning
-  position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'center';
-
-  // Interactions
-  actions?: ToastAction[];
-  action?: ToastAction;
-  cancel?: ToastAction;
-  swipeDismiss?: boolean;
-  dragDismiss?: boolean;
-
-  // Progress
-  progress?: ToastProgress;
-
-  // Styling
-  theme?: string;
-  customClass?: string;
-
-  // Advanced
-  group?: string;
-  priority?: number;
-  important?: boolean;
-  preventDuplicate?: boolean;
-  dedupeKey?: string;
-  dedupeScope?: 'visible' | 'queue' | 'all';
-  ariaLive?: 'polite' | 'assertive' | 'off';
-  animation?: ToastAnimation;
-  onShow?: () => void;
-  onHide?: () => void;
-  onUpdate?: (updates: Partial<ToastOptions>) => void;
-}
-
-interface ToastAction {
-  label: string;
-  onClick: () => void;
-  primary?: boolean;
-  dismissOnClick?: boolean;
-  altText?: string;
-}
-
-interface ToastProgress {
-  value: number; // 0-100
-  showPercentage?: boolean;
-}
-
-interface ToastAnimation {
-  type: 'css' | 'spring' | 'custom';
-  config?: SpringConfig;
-  show?: AnimationFunction;
-  hide?: AnimationFunction;
-  update?: AnimationFunction;
+for (const theme of themes) {
+  toast.info(`The ${theme} theme`, { theme, duration: 0 });
 }
 ```
 
-## 🎮 Live Demo & Examples
+The picture at the top of this page is that code. `system` (the default) follows the operating system's light or
+dark setting. Each toast carries `data-theme` and level classes (`editora-toast-info`, ...), so you can restyle the
+themes with CSS.
 
-Try out all the features with our comprehensive demo:
+## Positions
 
-```bash
-# Clone the repository
-git clone https://github.com/ajaykr089/Editora.git
-cd Editora/packages/editora-toast
+`top-left`, `top-center`, `top-right`, `bottom-left`, `bottom-center`, `bottom-right` and `center`:
 
-# Install dependencies
-npm install
+```ts
+import { toastAdvanced as toast } from '@editora/toast';
+import '@editora/toast/toast.css';
 
-# Start the standalone CodeSandbox-ready example
-cd ../../examples/editora-toast
-npm install
-npm run dev
+toast.configure({ maxVisible: 10 });
+
+const positions = [
+  'top-left', 'top-center', 'top-right',
+  'bottom-left', 'bottom-center', 'bottom-right',
+  'center'
+] as const;
+
+for (const position of positions) {
+  toast.success(position, { position, duration: 0 });
+}
 ```
 
-The demo showcases:
-- ✅ All 13 built-in themes
-- 🎯 Interactive actions and buttons
-- 📊 Progress bars and indicators
-- 🔄 Promise lifecycle management
-- 🎪 Spring physics animations
-- 📱 Mobile gestures and touch support
-- ♿ Accessibility features
-- 🎨 Custom rendering and HTML content
-- 📱 Responsive design across devices
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/editora-toast/docs/images/positions.png" alt="Seven toasts on a page: one at each corner, one at the top centre, one at the bottom centre and one in the middle" width="900">
+</p>
 
-## 🔧 Build & Development
+## Toast options
 
-```bash
-# Install dependencies
-npm install
+Everything `show()` accepts. All of it is optional except a message (or a title):
 
-# Build
-npm run build
+| Option | |
+| --- | --- |
+| `message`, `title`, `description` | The text. |
+| `level` | `'info'`, `'success'`, `'warning'`, `'error'` or `'loading'`. |
+| `icon` | An icon, as a string. |
+| `actions`, `action`, `cancel` | Buttons: `{ label, onClick, primary?, dismissOnClick? }`. |
+| `progress` | `{ value, showPercentage? }`, with `value` from 0 to 100. |
+| `duration`, `persistent` | How long it stays (`0`, or `persistent: true`, keeps it until dismissed). |
+| `position`, `theme`, `customClass`, `rtl` | Where it appears and how it looks. |
+| `closable` / `closeButton` | Show a close button. |
+| `html` | Render `message` as HTML. Only inline formatting, lists and safe links are kept. |
+| `render` | Build the toast yourself: `(toast) => HTMLElement`. |
+| `priority`, `important` | Show higher priorities first; `important` also pushes lower-priority toasts out. |
+| `preventDuplicate`, `dedupeKey`, `dedupeScope` | Drop duplicates, by content or by your own key. |
+| `pauseOnHover`, `pauseOnFocus`, `swipeDismiss`, `swipeDirection`, `dragDismiss` | Behaviour; see the [settings](#configure-it). |
+| `role`, `ariaLive` | Override the announcement (see [Accessibility](#accessibility)). |
+| `group` | The id of a group the toast belongs to. |
+| `animation` | Animation settings (a CSS animation by default; spring and other types are available). |
+| `onShow`, `onHide`, `onUpdate` | Lifecycle callbacks. |
 
-# Development watch
-npm run dev
+## Accessibility
 
-# Clean
-npm run clean
-```
+Toasts live in a region that is announced politely. An **error** toast is a `role="alert"` with `aria-live="assertive"`,
+so a screen reader interrupts to read it; every other level is `role="status"` with `aria-live="polite"`. The close button
+is labelled "Close notification". Override the announcement of one toast with `role` and `ariaLive`. Actions are buttons,
+so a keyboard can reach them, and `pauseOnFocus` pauses the timer while a toast has focus.
 
-## 🌍 Browser Support
+## API
 
-- Chrome 60+
-- Firefox 55+
-- Safari 12+
-- Edge 79+
+`toastAdvanced` (`toastPro`):
 
-## 📄 License
+| Method | |
+| --- | --- |
+| `show(options)` | Show a toast; returns `{ id, options, dismiss(), update(options) }`. |
+| `info`, `success`, `warning`, `error`, `loading` `(message, options?)` | Shorthands for `show`. |
+| `update(id, options)` / `dismiss(id)` / `clear()` | Change, remove or remove every toast. |
+| `promise(promise, { loading, success, error })` | A toast that follows a promise; also `onSuccess` and `onError` callbacks. |
+| `group(id, options)` | Show a toast that belongs to a group. |
+| `configure(settings)` / `getConfig()` | Set and read the [settings](#configure-it). |
+| `getToasts()` / `getGroups()` / `getState()` | The toasts, the groups, or both with the queue and the settings. |
+| `subscribe(listener)` | Call `listener(state)` when the toasts change; returns an unsubscribe function. |
+| `use(plugin)` | Install a plugin: `{ name, install(manager), uninstall? }`. |
+| `onEditorEvent(event, callback)` / `triggerEditorEvent(event, toast, ...args)` | Connect toasts to your editor's events. |
+| `destroy()` | Remove every toast and the toast region. |
+
+The classes and types are exported too: `ToastManager`, and `ToastOptions`, `ToastConfig`, `ToastInstance`,
+`ToastPosition`, `ToastTheme`, `ToastPromiseOptions` and more. If you are upgrading from 1.x, see the
+[migration guide](https://github.com/ajaykr089/Editora/blob/main/packages/editora-toast/MIGRATION_GUIDE.md).
+
+## Part of Editora
+
+[`@editora/ui-react`](https://www.npmjs.com/package/@editora/ui-react) depends on this package.
+
+## License
 
 MIT © [Ajay Kumar](https://github.com/ajaykr089)
-
-## 🤝 Contributing
-
-Contributions welcome! Please see the [main repository](https://github.com/ajaykr089/Editora) for contribution guidelines.
-
-## 📚 Migration Guide
-
-### From v1.x to v2.0.0
-
-The v2.0.0 release introduces powerful new features while maintaining **full backward compatibility**. Your existing code will continue to work without changes.
-
-#### ✨ New Features in v2.0.0
-
-```typescript
-// v1.x (still works)
-import { toast } from '@editora/toast';
-import "@editora/toast/toast.css";
-toast.success('Hello World', { theme: 'light', position: 'top-right' });
-
-// v2.0.0 advanced features
-import { toastAdvanced as toast } from '@editora/toast';
-import "@editora/toast/toast.css";
-// Promise lifecycle toasts
-toast.promise(fetchData(), {
-  loading: 'Loading...',
-  success: 'Data loaded!',
-  error: 'Failed to load'
-});
-
-// Rich content with actions
-toast.show({
-  message: 'File uploaded!',
-  level: 'success',
-  icon: '✅',
-  actions: [
-    { label: 'View', onClick: () => {} },
-    { label: 'Share', onClick: () => {} }
-  ],
-  progress: { value: 100, showPercentage: true }
-});
-
-// Dynamic toast updates
-const toast = toast.loading('Saving...');
-toast.update(toast.id, { message: 'Saved!', level: 'success' });
-
-// Toast grouping
-toast.group('operations', { message: 'Task 1 complete', level: 'success' });
-toast.group('operations', { message: 'Task 2 complete', level: 'success' });
-```
-
-#### Configuration Changes
-
-```typescript
-// New configuration options in v2.0.0
-toast.configure({
-  theme: 'system', // New themes: glass, neon, retro, ocean, etc.
-  swipeDismiss: true, // Mobile gesture support
-  dragDismiss: false,
-  animation: {
-    type: 'spring', // New spring physics animations
-    config: { stiffness: 120, damping: 12 }
-  },
-  queueStrategy: 'priority', // Priority-based queuing
-  enableKeyboardNavigation: true // Enhanced accessibility
-});
-```
-
-For more detailed migration information, see the [migration guide](./MIGRATION_GUIDE.md).

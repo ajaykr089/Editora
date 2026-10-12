@@ -1,0 +1,21 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/toast@2/dist/toast.css" />
+<script src="https://cdn.jsdelivr.net/npm/@editora/toast@2/dist/index.umd.js"></script>
+
+<button id="save">Save</button>
+
+<script>
+  document.getElementById('save').onclick = () => {
+    // The script defines three globals: toast, toastAdvanced and toastPro (the same object as toastAdvanced).
+    toast.success('Saved from a CDN');
+
+    const notification = toastAdvanced.show({
+      message: 'File uploaded',
+      level: 'success',
+      actions: [
+        { label: 'View', onClick: () => console.log('view') },
+        { label: 'Dismiss', onClick: () => notification.dismiss() }
+      ],
+      duration: 0
+    });
+  };
+</script>
