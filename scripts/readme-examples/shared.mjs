@@ -23,6 +23,7 @@ export const readmes = {
   toast: path.join(root, 'packages/editora-toast/README.md'),
   cli: path.join(root, 'packages/cli/README.md'),
   icons: path.join(root, 'packages/icons/README.md'),
+  'react-icons': path.join(root, 'packages/react-icons/README.md'),
 };
 
 /** Playwright is not a dependency of the repo: use the one next to the local e2e harness when there is no other. */

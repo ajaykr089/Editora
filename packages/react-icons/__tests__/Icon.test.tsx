@@ -1,4 +1,6 @@
 import React from 'react';
+import { flushSync } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import { listIcons } from '@editora/icons';
@@ -113,5 +115,19 @@ describe('accessibility', () => {
     expect(out).toContain('class="x"');
     expect(out).toContain('style="color:red"');
     expect(out).toContain('data-testid="t"');
+  });
+});
+
+describe('refs', () => {
+  it('forwards the ref of Icon and of a named component to the <svg>', () => {
+    const generic = React.createRef<SVGSVGElement>();
+    const named = React.createRef<SVGSVGElement>();
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    flushSync(() => root.render(<><Icon ref={generic} name="check" /><CheckIcon ref={named} /></>));
+    expect(generic.current).toBeInstanceOf(SVGSVGElement);
+    expect(named.current).toBeInstanceOf(SVGSVGElement);
+    expect(named.current).toBe(container.querySelectorAll('svg')[1]);
+    flushSync(() => root.unmount());
   });
 });

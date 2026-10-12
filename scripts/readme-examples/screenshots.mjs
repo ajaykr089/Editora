@@ -286,6 +286,11 @@ const shots = [
   { out: 'packages/icons/docs/images/custom.png', example: 'icons-custom', clip: { x: 0, y: 0, width: 192, height: 80 } },
   { out: 'packages/icons/docs/images/ui-icon.png', example: 'icons-ui-core', clip: { x: 0, y: 0, width: 316, height: 76 } },
 
+  // ---- @editora/react-icons
+  { out: 'packages/react-icons/docs/images/quick-start.png', example: 'react-icons-quick-start', clip: { x: 8, y: 8, width: 340, height: 146 } },
+  { out: 'packages/react-icons/docs/images/provider.png', example: 'react-icons-provider', clip: { x: 8, y: 8, width: 392, height: 160 } },
+  { out: 'packages/react-icons/docs/images/dynamic.png', example: 'react-icons-dynamic', clip: { x: 8, y: 8, width: 230, height: 222 } },
+
   // ---- @editora/themes
   { out: 'packages/themes/docs/images/themes.png', example: 'themes-gallery' },
   {
