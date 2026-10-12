@@ -97,12 +97,19 @@ describe('createUIElement', () => {
 // className mapping, which is how ~100 wrappers shipped without working className support.
 describe('wrapper sources', () => {
   const dir = join(__dirname, '../components');
-  // _internals.ts is where the helper itself (and its explanatory comment) lives.
-  const files = readdirSync(dir).filter((file) => /\.tsx?$/.test(file) && file !== '_internals.ts');
+  // _createElement.ts is where the helper itself (and its explanatory comment) lives. server/ holds
+  // the implementations behind @editora/ui-react/server, which are wrappers like any other.
+  const files = [dir, join(dir, 'server')].flatMap((folder) =>
+    readdirSync(folder)
+      .filter((file) => /\.tsx?$/.test(file) && file !== '_createElement.ts')
+      .map((file) => join(folder, file))
+  );
 
   it('create ui-* hosts only through createUIElement', () => {
+    expect(files.length).toBeGreaterThan(130);
+
     const offenders = files.filter((file) => {
-      const source = readFileSync(join(dir, file), 'utf8');
+      const source = readFileSync(file, 'utf8');
       return /React\.createElement\(\s*['"]ui-/.test(source) || /<ui-[a-z]/.test(source);
     });
 
