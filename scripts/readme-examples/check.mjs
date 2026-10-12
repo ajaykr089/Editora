@@ -105,7 +105,7 @@ if (!sandboxUp) {
   const checkFiles = fs.readdirSync(path.join(path.dirname(fileURLOf(import.meta.url)), 'checks')).filter((file) => file.endsWith('.mjs')).sort();
   for (const file of checkFiles) {
     const { default: register } = await import(`./checks/${file}`);
-    await register({ run, commands, selectAll, page: undefined });
+    await register({ run, commands, selectAll, ok, fail });
   }
 
   const checkSources = checkFiles.map((file) => fs.readFileSync(path.join(path.dirname(fileURLOf(import.meta.url)), 'checks', file), 'utf8')).join('\n');

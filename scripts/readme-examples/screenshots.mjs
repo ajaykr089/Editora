@@ -176,6 +176,30 @@ const shots = [
     },
   },
 
+  // ---- @editora/ui-react
+  { out: 'packages/ui-react/docs/images/components.png', example: 'ui-react-gallery' },
+  {
+    out: 'packages/ui-react/docs/images/form.png',
+    example: 'ui-react-form',
+    async act(page) {
+      await page.getByRole('button', { name: 'Validate' }).click();
+      await page.waitForTimeout(500);
+    },
+  },
+  { out: 'packages/ui-react/docs/images/data-table.png', example: 'ui-react-data-table' },
+  { out: 'packages/ui-react/docs/images/pickers.png', example: 'ui-react-pickers' },
+  { out: 'packages/ui-react/docs/images/gantt.png', example: 'ui-react-gantt' },
+  {
+    out: 'packages/ui-react/docs/images/dialog.png',
+    example: 'ui-react-dialogs',
+    viewport: { width: 1008, height: 560 },
+    page: true,
+    async act(page) {
+      await page.getByRole('button', { name: 'Confirm' }).click();
+      await page.waitForTimeout(600);
+    },
+  },
+
   // ---- @editora/themes
   { out: 'packages/themes/docs/images/themes.png', example: 'themes-gallery' },
   {
