@@ -100,6 +100,11 @@ export interface RichTextEditorProps {
   };
 
   // Context menu
+  /**
+   * Whether the browser's own right-click menu may open inside the editor. `enabled: false` stops it;
+   * `true` (the default) leaves it alone. The editor does not draw a context menu of its own, so `true`
+   * adds none. A plugin that needs one, such as the spell-check suggestions, draws its own.
+   */
   contextMenu?: {
     enabled?: boolean;
   };

@@ -88,8 +88,8 @@ Config resolution order:
 | `language-locale`, `language-direction` | flattened attrs | Language bridge fields |
 | `spellcheck` | `boolean \| object` | Spellcheck provider config |
 | `spellcheck-enabled`, `spellcheck-provider`, `spellcheck-api-url` | flattened attrs | Spellcheck bridge fields |
-| `context-menu` | `boolean \| object` | Context menu behavior |
-| `context-menu-enabled` | `boolean` | Flattened bridge field |
+| `context-menu` | `boolean \| object` | `false` or `{ "enabled": false }` blocks the browser's right-click menu; the default leaves it alone (the editor draws no menu of its own) |
+| `context-menu-enabled` | `boolean` | Flattened form of `context-menu`: `false` blocks the browser's right-click menu |
 | `paste` | `object` | Paste handling config |
 | `paste-clean`, `paste-keep-formatting`, `paste-convert-word` | flattened attrs | Paste bridge fields |
 | `security` | `object` | Security sanitization config |
