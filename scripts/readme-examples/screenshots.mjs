@@ -279,6 +279,13 @@ const shots = [
     },
   },
 
+  // ---- @editora/icons
+  { out: 'packages/icons/docs/images/catalog.png', example: 'icons-catalog' },
+  { out: 'packages/icons/docs/images/toolbar.png', example: 'icons-quick-start', clip: { x: 0, y: 0, width: 294, height: 84 } },
+  { out: 'packages/icons/docs/images/options.png', example: 'icons-options' },
+  { out: 'packages/icons/docs/images/custom.png', example: 'icons-custom', clip: { x: 0, y: 0, width: 192, height: 80 } },
+  { out: 'packages/icons/docs/images/ui-icon.png', example: 'icons-ui-core', clip: { x: 0, y: 0, width: 316, height: 76 } },
+
   // ---- @editora/themes
   { out: 'packages/themes/docs/images/themes.png', example: 'themes-gallery' },
   {

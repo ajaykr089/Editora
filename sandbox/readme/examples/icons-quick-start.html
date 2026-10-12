@@ -1,0 +1,18 @@
+<style>
+  .toolbar { display: flex; gap: 6px; }
+  .toolbar button { display: grid; place-items: center; width: 36px; height: 36px; margin: 0; padding: 0; border: 1px solid #d0d7de; border-radius: 8px; background: #fff; color: #24292f; cursor: pointer; }
+  .toolbar button:hover { background: #f3f4f6; }
+</style>
+
+<div class="toolbar" id="toolbar"></div>
+
+<script type="module">
+  import { renderIconSvg } from 'https://cdn.jsdelivr.net/npm/@editora/icons/dist/index.esm.js';
+
+  const actions = { bold: 'Bold', italic: 'Italic', underline: 'Underline', link: 'Insert link', image: 'Insert image', undo: 'Undo' };
+
+  // The button is labelled, so the icon inside it is decorative (the default when it has no title).
+  document.getElementById('toolbar').innerHTML = Object.entries(actions)
+    .map(([icon, label]) => `<button type="button" aria-label="${label}">${renderIconSvg(icon, { size: 18 })}</button>`)
+    .join('');
+</script>

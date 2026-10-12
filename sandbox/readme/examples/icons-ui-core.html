@@ -1,0 +1,21 @@
+<script type="importmap">
+  {
+    "imports": {
+      "@editora/ui-core": "https://cdn.jsdelivr.net/npm/@editora/ui-core/dist/index.esm.js",
+      "@editora/icons": "https://cdn.jsdelivr.net/npm/@editora/icons/dist/index.esm.js"
+    }
+  }
+</script>
+<script type="module">
+  import '@editora/ui-core';
+</script>
+
+<!-- Every icon of @editora/icons is already known to <ui-icon>: there is nothing to register. -->
+<div style="display: flex; align-items: center; gap: 20px">
+  <ui-icon name="bell" size="28"></ui-icon>
+  <ui-icon name="bell" size="28" icon-variant="solid" color="#2563eb"></ui-icon>
+  <ui-icon name="chart-pie" size="28" icon-variant="duotone" color="#2563eb" secondary-color="#93c5fd"></ui-icon>
+  <ui-icon name="bell" size="28" icon-weight="bold"></ui-icon>
+  <ui-icon name="arrow-right" size="28" rotate="90"></ui-icon>
+  <ui-icon name="bell" size="28" label="Notifications"></ui-icon>
+</div>
