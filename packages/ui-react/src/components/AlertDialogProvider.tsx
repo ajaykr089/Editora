@@ -35,6 +35,8 @@ export function AlertDialogProvider({
   if (!managerRef.current) {
     managerRef.current = createAlertDialogManager();
   }
+  const defaultsRef = useRef(defaults);
+  defaultsRef.current = defaults;
 
   useEffect(() => {
     managerRef.current?.setDefaults(defaults || null);
@@ -54,7 +56,13 @@ export function AlertDialogProvider({
 
     const currentRefCount = Number(host.getAttribute(HOST_REFCOUNT_ATTR) || '0');
     host.setAttribute(HOST_REFCOUNT_ATTR, String(Math.max(0, currentRefCount) + 1));
-    managerRef.current?.setContainer(host);
+    // StrictMode runs this effect's cleanup and then its setup again without rendering in between. The cleanup below
+    // drops the manager, so bring it back (with its defaults): otherwise every dialog resolves at once as dismissed.
+    if (!managerRef.current) {
+      managerRef.current = createAlertDialogManager();
+      managerRef.current.setDefaults(defaultsRef.current || null);
+    }
+    managerRef.current.setContainer(host);
 
     return () => {
       managerRef.current?.destroy('unmount');

@@ -39,7 +39,10 @@ export function DialogProvider({ children, hostId = 'ui-dialog-react-host' }: Di
 
     const currentRefCount = Number(host.getAttribute(HOST_REFCOUNT_ATTR) || '0');
     host.setAttribute(HOST_REFCOUNT_ATTR, String(Math.max(0, currentRefCount) + 1));
-    managerRef.current?.setContainer(host);
+    // StrictMode runs this effect's cleanup and then its setup again without rendering in between. The cleanup below
+    // drops the manager, so bring it back: otherwise every dialog resolves at once as dismissed.
+    if (!managerRef.current) managerRef.current = createDialogManager();
+    managerRef.current.setContainer(host);
 
     return () => {
       managerRef.current?.destroy('unmount');
