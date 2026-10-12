@@ -21,6 +21,7 @@ export const readmes = {
   'ui-react': path.join(root, 'packages/ui-react/README.md'),
   'ui-sortable': path.join(root, 'packages/ui-sortable/README.md'),
   toast: path.join(root, 'packages/editora-toast/README.md'),
+  cli: path.join(root, 'packages/cli/README.md'),
 };
 
 /** Playwright is not a dependency of the repo: use the one next to the local e2e harness when there is no other. */
