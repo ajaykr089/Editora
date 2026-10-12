@@ -70,12 +70,15 @@ Or declaratively through the web component:
 </script>
 ```
 
+The plugin connects to nothing until you tell it where to: pass `websocketUrl` (your own y-websocket server) or a `provider`. Without one of them it stays off and logs a warning, so listing `collaboration` in `plugins` can never send a document anywhere by itself. See [Running Your Own Sync Server](#running-your-own-sync-server).
+
 ### Options
 
 | Option         | Type                                          | Default                              | Description                                                                 |
 | -------------- | ---------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------- |
-| `websocketUrl` | `string`                                       | `"wss://demos.yjs.dev"`               | y-websocket server URL. The default is Yjs's public demo server - fine for trying the plugin, not for real documents. |
-| `roomName`     | `string \| (el: HTMLElement) => string`        | the editor's `id`, or a shared default | Room shared by every client editing the same document.                       |
+| `websocketUrl` | `string`                                       | none                                  | y-websocket server URL of your own server. Required unless you pass a `provider` or `allowPublicDemoServer`; without one of them the plugin does not connect. |
+| `allowPublicDemoServer` | `boolean`                           | `false`                               | Set to `true` to sync through Yjs's public demo server (`wss://demos.yjs.dev`) when you give no `websocketUrl` or `provider`. Anyone who knows the room name can read and edit the document there: for demos only. The plugin logs a warning when it is used. |
+| `roomName`     | `string \| (el: HTMLElement) => string`        | the editable element's `id`, else `editora-default-room` | Room shared by every client editing the same document.                       |
 | `userName`     | `string`                                       | a random guest name                   | Shown on this client's presence avatar and remote cursor label.              |
 | `userColor`    | `string`                                       | a random palette color                | Color used for this client's cursor and avatar.                              |
 | `doc`          | `Y.Doc`                                        | created internally                    | Supply your own `Y.Doc` instead of letting the plugin create one.            |
@@ -89,7 +92,26 @@ Or declaratively through the web component:
 npx y-websocket
 ```
 
-For production, run it behind TLS and point `websocketUrl` at it. Yjs updates are CRDT operations, not the document itself - the server only relays and (optionally) persists them.
+Point `websocketUrl` at it, for example `ws://localhost:1234` while you develop. For production, run it behind TLS. Yjs updates are CRDT operations, not the document itself - the server only relays and (optionally) persists them.
+
+## Upgrading: the public demo server is now opt-in
+
+Earlier versions synced through `wss://demos.yjs.dev` whenever no `websocketUrl` was given, and `<editora-editor>` without a `plugins` attribute loaded this plugin along with every other one. A page using that basic setup sent its document to a public server, in a room named `editora-default-room` (the web component gives its editable element no `id`, so there was nothing else to name the room after). Every such page, on every site, shared that one room: anyone who knew the name could read and edit the document, and a page that joined the room replaced its own starting content with whatever the room held.
+
+Now the plugin does nothing until a server is configured, and `<editora-editor>` leaves it out of the default plugin set (name it in `plugins`, or configure it under `pluginConfig`, to use it). If you relied on the old behaviour for a demo, opt in:
+
+```html
+<editora-editor plugins="bold italic collaboration"></editora-editor>
+<script>
+  document.querySelector("editora-editor").jsConfig = {
+    pluginConfig: {
+      collaboration: { allowPublicDemoServer: true, roomName: "demo-7f3a91c2e5" },
+    },
+  };
+</script>
+```
+
+Give a demo room a long, unguessable `roomName`, and never put a document you mind strangers reading on the public server.
 
 ## Limitations
 

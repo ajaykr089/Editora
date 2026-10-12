@@ -6,7 +6,9 @@ import { CollaborationAwareness, readUser } from './awareness';
 import type { CollaborationPluginOptions, CollaborationUser, EditorCollaborationState } from './types';
 
 const FRAGMENT_NAME = 'editora-content';
-const DEFAULT_WEBSOCKET_URL = 'wss://demos.yjs.dev';
+// Opt-in only (`allowPublicDemoServer`): a public server shared by everyone, never a default.
+const PUBLIC_DEMO_WEBSOCKET_URL = 'wss://demos.yjs.dev';
+const PUBLIC_DEMO_HOSTNAME = 'demos.yjs.dev';
 const DEFAULT_ROOM_NAME = 'editora-default-room';
 const PRESENCE_COLORS = ['#f97316', '#0ea5e9', '#22c55e', '#a855f7', '#ec4899', '#eab308', '#14b8a6', '#ef4444'];
 
@@ -18,18 +20,55 @@ const pendingContentElements = new Set<HTMLElement>();
 const pendingCleanup = new Map<HTMLElement, () => void>();
 
 let warnedAboutPublicServer = false;
+let warnedAboutMissingServer = false;
 
-// With no `websocketUrl` the plugin syncs through the public Yjs demo server, where anyone who
-// knows (or guesses) the room name can read and write the document. Fine for a demo, a data leak
-// in production - so say so once instead of doing it silently.
-function warnAboutPublicServer(room: string): void {
+// The public Yjs demo server relays every room to anyone who asks for it by name, so a document
+// synced there can be read and edited by anyone who knows (or guesses) the room name. Fine for a
+// demo, a data leak in production - so it is opt-in, and it says so once when it is used.
+function warnAboutPublicServer(room: string, url: string): void {
   if (warnedAboutPublicServer) return;
   warnedAboutPublicServer = true;
   // eslint-disable-next-line no-console
   console.warn(
-    `[@editora/collaboration] No websocketUrl was provided, so room "${room}" is syncing through the public demo server ` +
-      `(${DEFAULT_WEBSOCKET_URL}); anyone who knows the room name can read and edit this document. ` +
-      `Pass your own y-websocket server via the websocketUrl option (or a provider) for real use.`
+    `[@editora/collaboration] Room "${room}" is syncing through the public demo server (${url}); ` +
+      `anyone who knows the room name can read and edit this document. ` +
+      `Use it for demos only: pass your own y-websocket server via the websocketUrl option (or a provider) for real use.`
+  );
+}
+
+function isPublicDemoServer(url: string): boolean {
+  try {
+    return new URL(url).hostname === PUBLIC_DEMO_HOSTNAME;
+  } catch {
+    return false;
+  }
+}
+
+// Config can arrive from an HTML attribute or JSON, so the URL is not necessarily a string, and an
+// empty or blank one is "not configured", not a server called "".
+function configuredServerUrl(options: CollaborationPluginOptions): string | undefined {
+  const url = typeof options.websocketUrl === 'string' ? options.websocketUrl.trim() : '';
+  return url || undefined;
+}
+
+// Collaboration sends the document to a server, so it only starts once it has been told which one.
+// Naming the plugin is not enough: that is not a choice of where the document goes.
+function hasConfiguredTransport(options: CollaborationPluginOptions): boolean {
+  if (options.provider) return true;
+  if (configuredServerUrl(options)) return true;
+  // "false" is truthy, so only a real `true` counts.
+  return options.allowPublicDemoServer === true;
+}
+
+function warnAboutMissingServer(): void {
+  if (warnedAboutMissingServer) return;
+  warnedAboutMissingServer = true;
+  // eslint-disable-next-line no-console
+  console.warn(
+    `[@editora/collaboration] Not connecting: no websocketUrl or provider was configured. This plugin used to fall back to the ` +
+      `public Yjs demo server (${PUBLIC_DEMO_WEBSOCKET_URL}), where anyone who knows the room name can read and edit the document, ` +
+      `so it now stays off until you pass your own y-websocket server via the websocketUrl option (or a provider). ` +
+      `For a throwaway demo only, set allowPublicDemoServer: true.`
   );
 }
 
@@ -211,8 +250,10 @@ function setupCollaboration(contentElement: HTMLElement, options: CollaborationP
     : options.roomName || contentElement.id || DEFAULT_ROOM_NAME;
 
   const ownsProvider = !options.provider;
-  if (ownsProvider && !options.websocketUrl) warnAboutPublicServer(room);
-  const provider = options.provider ?? new WebsocketProvider(options.websocketUrl ?? DEFAULT_WEBSOCKET_URL, room, doc);
+  // Only reachable through hasConfiguredTransport(), so the demo server is here by explicit choice.
+  const serverUrl = configuredServerUrl(options) ?? PUBLIC_DEMO_WEBSOCKET_URL;
+  if (ownsProvider && isPublicDemoServer(serverUrl)) warnAboutPublicServer(room, serverUrl);
+  const provider = options.provider ?? new WebsocketProvider(serverUrl, room, doc);
 
   const user: CollaborationUser = {
     name: options.userName ?? randomUser().name,
@@ -345,7 +386,13 @@ export const CollaborationPlugin = (options: CollaborationPluginOptions = {}): P
     init: () => {
       if (hasEnqueued) return;
       hasEnqueued = true;
-      enqueueClaim({ ...options, ...(plugin.__pluginConfig ?? {}) });
+      const resolved = { ...options, ...(plugin.__pluginConfig ?? {}) };
+      // Without a server there is nothing to connect to: no claim on an editor, no presence bar.
+      if (!hasConfiguredTransport(resolved)) {
+        warnAboutMissingServer();
+        return;
+      }
+      enqueueClaim(resolved);
     },
 
     commands: {},
