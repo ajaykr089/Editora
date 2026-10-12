@@ -152,6 +152,30 @@ const shots = [
     },
   },
 
+  // ---- @editora/ui-core
+  { out: 'packages/ui-core/docs/images/components.png', example: 'ui-core-gallery' },
+  {
+    out: 'packages/ui-core/docs/images/form.png',
+    example: 'ui-core-form',
+    async act(page) {
+      // Submit the empty form: the required fields report their errors.
+      await page.getByRole('button', { name: 'Save' }).click();
+      await page.waitForTimeout(500);
+    },
+  },
+  { out: 'packages/ui-core/docs/images/data-table.png', example: 'ui-core-data-table' },
+  { out: 'packages/ui-core/docs/images/gantt.png', example: 'ui-core-gantt' },
+  {
+    out: 'packages/ui-core/docs/images/dialog.png',
+    example: 'ui-core-dialogs',
+    viewport: { width: 1008, height: 560 },
+    page: true,
+    async act(page) {
+      await page.getByRole('button', { name: 'Delete record' }).click();
+      await page.waitForTimeout(600);
+    },
+  },
+
   // ---- @editora/themes
   { out: 'packages/themes/docs/images/themes.png', example: 'themes-gallery' },
   {

@@ -1,0 +1,35 @@
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start">
+  <div style="display: grid; gap: 16px">
+    <ui-field label="Project name" description="Shown in the sidebar">
+      <ui-input placeholder="Untitled" clearable></ui-input>
+    </ui-field>
+
+    <div style="display: flex; gap: 8px; flex-wrap: wrap">
+      <ui-button variant="primary">Save</ui-button>
+      <ui-button variant="secondary">Cancel</ui-button>
+      <ui-button variant="ghost">Skip</ui-button>
+      <ui-button variant="danger">Delete</ui-button>
+    </div>
+
+    <div style="display: flex; gap: 8px; align-items: center">
+      <ui-badge tone="success" text="Live"></ui-badge>
+      <ui-badge tone="warning" text="Review"></ui-badge>
+      <ui-badge tone="danger" text="Failed"></ui-badge>
+      <ui-avatar initials="AM" size="md"></ui-avatar>
+      <ui-avatar initials="JK" size="md"></ui-avatar>
+    </div>
+
+    <ui-alert title="Heads up" description="Your trial ends in 3 days." tone="warning"></ui-alert>
+  </div>
+
+  <div style="display: grid; gap: 16px">
+    <ui-switch checked label="Email notifications" description="A summary every Monday"></ui-switch>
+    <ui-checkbox checked>Remember me</ui-checkbox>
+    <ui-progress value="64"></ui-progress>
+    <ui-date-picker label="Start date" clearable></ui-date-picker>
+  </div>
+</div>
+
+<script type="module">
+  import '@editora/ui-core';
+</script>

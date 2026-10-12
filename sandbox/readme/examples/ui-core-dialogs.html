@@ -1,0 +1,34 @@
+<ui-button id="remove" variant="danger">Delete record</ui-button>
+<ui-button id="publish" variant="secondary">Publish</ui-button>
+<pre id="result"></pre>
+
+<script type="module">
+  import { createAlertDialogManager, createDialogManager } from '@editora/ui-core';
+
+  const dialogs = createDialogManager();
+  const alerts = createAlertDialogManager();
+  const result = document.getElementById('result');
+
+  document.getElementById('remove').onclick = async () => {
+    const answer = await dialogs.confirm({
+      title: 'Delete record',
+      description: 'This action cannot be undone.',
+      submitText: 'Delete',
+      cancelText: 'Cancel',
+      mode: 'queue'
+    });
+
+    result.textContent = answer.action === 'submit' ? 'Deleted' : 'Kept';
+  };
+
+  document.getElementById('publish').onclick = async () => {
+    const answer = await alerts.confirm({
+      title: 'Publish changes?',
+      description: 'You can still unpublish later.',
+      confirmText: 'Publish',
+      cancelText: 'Not now'
+    });
+
+    result.textContent = answer.action === 'confirm' ? 'Published' : 'Not published';
+  };
+</script>

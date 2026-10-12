@@ -1,0 +1,17 @@
+<script type="importmap">
+  {
+    "imports": {
+      "@editora/ui-core": "https://cdn.jsdelivr.net/npm/@editora/ui-core/dist/index.esm.js",
+      "@editora/icons": "https://cdn.jsdelivr.net/npm/@editora/icons/dist/index.esm.js"
+    }
+  }
+</script>
+<script type="module">
+  import '@editora/ui-core';
+</script>
+
+<ui-field label="Email" description="Work email" required>
+  <ui-input name="email" type="email" placeholder="you@company.com" clearable></ui-input>
+</ui-field>
+
+<ui-button variant="primary">Save</ui-button>

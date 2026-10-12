@@ -81,6 +81,26 @@ export async function serveCdnFromBuild(page) {
   });
 }
 
+// A page without a bundler resolves bare imports with an import map. An example that imports an @editora package and does
+// not bring its own map gets this one, so the README can show only the code that matters.
+const importMapEntries = {
+  '@editora/ui-core': 'ui-core/dist/index.esm.js',
+  '@editora/ui-core/runtime': 'ui-core/dist/runtime.esm.js',
+  '@editora/ui-core/sortable': 'ui-core/dist/sortable.esm.js',
+  '@editora/icons': 'icons/dist/index.esm.js',
+  '@editora/ui-sortable': 'ui-sortable/dist/index.esm.js',
+  '@editora/toast': 'toast/dist/index.esm.js',
+};
+
+export function importMapFor(fragment) {
+  if (/type="importmap"/.test(fragment)) return '';
+  if (!/(?:from|import)\s+['"]@editora\//.test(fragment)) return '';
+  const imports = Object.fromEntries(
+    Object.entries(importMapEntries).map(([name, file]) => [name, `https://cdn.jsdelivr.net/npm/@editora/${file}`]),
+  );
+  return `<script type="importmap">${JSON.stringify({ imports })}</script>`;
+}
+
 /** An HTML example is a fragment; give it the page a reader would put it in. */
 export function wrapFragment(fragment, { backdrop } = {}) {
   const background = backdrop === 'dark' ? '#0b1220' : '#ffffff';
@@ -89,6 +109,7 @@ export function wrapFragment(fragment, { backdrop } = {}) {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    ${importMapFor(fragment)}
     <style>
       body { margin: 0; padding: 24px; width: 960px; box-sizing: border-box; background: ${background};
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
@@ -117,6 +138,12 @@ export async function openExample(page, example, options = {}) {
   } else {
     const query = new URLSearchParams({ example: example.name, ...(options.backdrop ? { backdrop: options.backdrop } : {}) });
     await page.goto(`${sandboxUrl}/readme/index.html?${query}`, { waitUntil: 'load' });
+  }
+  if (/^(ui-|sortable-|toast-)/.test(example.name)) {
+    // The UI components are not editors: wait for the page's requests, then for the elements to upgrade.
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(700);
+    return;
   }
   await page.waitForSelector('[contenteditable="true"], [contenteditable="false"].editora-content, .rte-content', {
     timeout: 20000,

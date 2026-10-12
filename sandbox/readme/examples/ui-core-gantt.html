@@ -1,0 +1,35 @@
+<ui-gantt id="releasePlan" zoom="week" sort="start" bar-variant="soft"></ui-gantt>
+
+<script type="module">
+  import '@editora/ui-core';
+
+  const gantt = document.getElementById('releasePlan');
+
+  gantt.setAttribute('tasks', JSON.stringify([
+    {
+      id: 'api',
+      label: 'API contracts',
+      start: '2026-02-10',
+      end: '2026-02-24',
+      progress: 62,
+      baselineStart: '2026-02-07',
+      baselineEnd: '2026-02-21',
+      critical: true
+    },
+    {
+      id: 'qa',
+      label: 'QA sign-off',
+      start: '2026-02-27',
+      type: 'milestone',
+      tone: 'success'
+    }
+  ]));
+
+  gantt.setAttribute('links', JSON.stringify([
+    { id: 'api-qa', source: 'api', target: 'qa', type: 'e2s' }
+  ]));
+
+  gantt.addEventListener('taskchange', (event) => console.log('task changed', event.detail));
+  gantt.addEventListener('taskdelete', (event) => console.log('delete task', event.detail.id));
+  gantt.addEventListener('linkselect', (event) => console.log('dependency selected', event.detail));
+</script>
