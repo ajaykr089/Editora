@@ -110,8 +110,16 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
 
   const editor = useMemo(() => {
     const pluginManager = new PluginManager();
+    // This runs while rendering, which also happens on the server. A plugin's init hook builds DOM and adds
+    // listeners, so it only runs where there is a document; on the server the plugins are just listed,
+    // which is all the toolbar needs to render.
+    const canInitPlugins = typeof document !== 'undefined';
     config.plugins.forEach(p => {
-      pluginManager.register(p);
+      if (canInitPlugins) {
+        pluginManager.register(p);
+      } else {
+        pluginManager.plugins.push(p);
+      }
       
       // Register commands from native plugins in global registry for backward compatibility
       if (p.commands && typeof window !== 'undefined') {
