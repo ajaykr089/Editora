@@ -686,8 +686,8 @@
   box-shadow: 0 0 0 3px rgba(77, 184, 255, 0.1);
 }
 
-/* Disabled state */
-.editora-editor[disabled] {
+/* Disabled state (the class is set from the `disabled` attribute or `setConfig({ disabled })`) */
+.editora-editor.editora-disabled {
   opacity: 0.6;
   pointer-events: none;
 }
