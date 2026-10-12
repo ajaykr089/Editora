@@ -26,6 +26,10 @@ const LAST_COMMAND_BUTTON_KEY = '__editoraLastCommandButton';
 const EDITOR_HOST_SELECTOR = 'editora-editor, [data-editora-editor], .rte-editor, .editora-editor';
 const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
 const DEFAULT_EDITOR_LABEL = 'Rich text editor';
+// Plugins that act on their own once loaded: collaboration opens a network connection and sends the
+// document to it. The default plugin set (no `plugins` given) leaves them out; they load when they
+// are named in `plugins` or configured under `pluginConfig`.
+const OPT_IN_ONLY_PLUGINS: ReadonlySet<string> = new Set(['collaboration']);
 const connectedWebEditors = new Set<RichTextEditorElement>();
 let lastActiveWebEditor: RichTextEditorElement | null = null;
 let commandBridgeInstalled = false;
@@ -536,10 +540,12 @@ export class RichTextEditorElement extends HTMLElement {
         }
       }
     } else {
-      // No plugins specified - load all registered plugins
+      // No plugins specified - load all registered plugins, except those that need to be asked for
       const registeredNames = this.pluginLoader.getRegisteredPluginNames();
       for (const pluginName of registeredNames) {
-        const plugin = await this.pluginLoader.load(pluginName, this.getPluginLoadConfig(pluginName));
+        const loadConfig = this.getPluginLoadConfig(pluginName);
+        if (OPT_IN_ONLY_PLUGINS.has(pluginName) && !loadConfig) continue;
+        const plugin = await this.pluginLoader.load(pluginName, loadConfig);
         if (plugin) plugins.push(plugin);
       }
     }
