@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import '@editora/ui-core/sortable';
 import {
   createUIElement,
   getCustomEventDetail,

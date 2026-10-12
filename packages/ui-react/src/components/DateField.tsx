@@ -1,5 +1,6 @@
 import React from 'react';
 import '@editora/ui-core/date-field';
+import '@editora/ui-core/time-field';
 import {
   createUIElement,
   getCustomEventDetail,

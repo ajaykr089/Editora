@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import '@editora/ui-core/dialog';
-import {
+import type {
   UIDialogCancelDetail,
   UIDialogCloseDetail,
   UIDialogDismissDetail,

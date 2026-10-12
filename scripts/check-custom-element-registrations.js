@@ -25,6 +25,9 @@
  * `@editora/ui-core/<xxx>` (its standalone registration entry), the fix
  * applied across ui-react earlier this week. Without it, deep-importing
  * that one React wrapper never registers the underlying custom element.
+ *
+ * A third pass generalises that to every element a wrapper renders (not only the one it warns about,
+ * and not only when the standalone entry has the same name): see "Phase 3" below.
  */
 const fs = require('fs');
 const path = require('path');
@@ -174,7 +177,121 @@ for (const file of reactFiles) {
   }
 }
 
-if (problems.length > 0 || reactProblems.length > 0) {
+// --- Phase 3: every element a ui-react wrapper renders is registered by that wrapper's own imports ---
+//
+// Phase 2 only looks at wrappers that call warnIfElementNotRegistered. A wrapper that renders several
+// elements (TimeField next to DateField, Dropzone next to FileUpload, the four FieldSemantics parts) or
+// whose entry is not a 1:1 standalone name (Sortable -> @editora/ui-core/sortable) slipped through, and
+// used to be rescued only by a lazy import of the whole @editora/ui-core catalog when it was missing.
+// That fallback is gone: a wrapper registers what it renders through its own imports, or it does not.
+//
+// For each top-level components/*.tsx file: the tags it renders (its own, plus those of the
+// components/server/ implementation it re-exports) must be defined by a ui-core module reachable from
+// the wrapper through local imports and `@editora/ui-core[/<entry>]` imports.
+
+const uiCoreComponentsDir = path.join(srcDir, 'components');
+const reExportRe = /(?:^|\n)\s*export\s+(?:\*|\{[^}]*\})\s+from\s+['"]([^'"]+)['"]/g;
+const specifierRe = /(?:^|\n)\s*(?:import|export)\s+(?:[^'"]*?\s+from\s+)?['"]([^'"]+)['"]/g;
+const typeOnlyRe = /(?:^|\n)\s*(?:import|export)\s+type\s[^;]*?from\s*['"][^'"]+['"];?/g;
+const renderedTagRe = /(?:create(?:UI)?Element|warnIfElementNotRegistered)\(\s*['"](ui-[a-z0-9-]+)['"]|<(ui-[a-z0-9-]+)[\s/>]/g;
+
+// ui-core file -> files it evaluates (imports and re-exports)
+const coreEdges = new Map();
+for (const file of files) {
+  const content = fs.readFileSync(file, 'utf8');
+  const edges = new Set(importGraph.get(file) || []);
+  for (const m of content.matchAll(reExportRe)) {
+    const resolved = resolveImport(file, m[1]);
+    if (resolved) edges.add(resolved);
+  }
+  coreEdges.set(file, edges);
+}
+
+function coreEntryFile(specifier) {
+  if (specifier === '@editora/ui-core') return path.join(srcDir, 'index.ts');
+  const name = specifier.slice('@editora/ui-core/'.length);
+  return [path.join(srcDir, 'standalone', `${name}.ts`), path.join(srcDir, `${name}.ts`)].find((f) => fs.existsSync(f)) || null;
+}
+
+function addCoreClosure(entry, into) {
+  const stack = [entry];
+  while (stack.length) {
+    const current = stack.pop();
+    if (into.has(current)) continue;
+    into.add(current);
+    for (const dep of coreEdges.get(current) || []) stack.push(dep);
+  }
+}
+
+function reactWrapperGraph(wrapper) {
+  const visited = new Set();
+  const coreFiles = new Set();
+  const stack = [wrapper];
+  while (stack.length) {
+    const current = stack.pop();
+    if (visited.has(current)) continue;
+    visited.add(current);
+    const content = fs.readFileSync(current, 'utf8').replace(typeOnlyRe, '');
+    for (const m of content.matchAll(specifierRe)) {
+      const specifier = m[1];
+      if (specifier.startsWith('.')) {
+        const resolved = resolveImport(current, specifier);
+        if (resolved) stack.push(resolved);
+      } else if (specifier === '@editora/ui-core' || specifier.startsWith('@editora/ui-core/')) {
+        const entry = coreEntryFile(specifier);
+        if (entry) addCoreClosure(entry, coreFiles);
+      }
+    }
+  }
+  return { visited, coreFiles };
+}
+
+// tag -> the standalone entry that defines it, to suggest the import to add
+const entryForTag = new Map();
+for (const name of standaloneNames) {
+  const entry = path.join(srcDir, 'standalone', `${name}.ts`);
+  for (const dep of coreEdges.get(entry) || []) {
+    for (const tag of fileOwnTags.get(dep) || []) if (!entryForTag.has(tag)) entryForTag.set(tag, `@editora/ui-core/${name}`);
+  }
+}
+entryForTag.set('ui-sortable', '@editora/ui-core/sortable');
+
+const wrapperProblems = [];
+const serverDir = path.join(uiReactDir, 'server');
+
+for (const wrapper of reactFiles) {
+  const { visited, coreFiles } = reactWrapperGraph(wrapper);
+  const provided = new Set();
+  for (const coreFile of coreFiles) for (const tag of fileOwnTags.get(coreFile) || []) provided.add(tag);
+
+  const rendered = new Set();
+  for (const file of visited) {
+    if (file !== wrapper && path.dirname(file) !== serverDir) continue; // other wrappers answer for themselves
+    const content = fs.readFileSync(file, 'utf8');
+    for (const m of content.matchAll(renderedTagRe)) rendered.add(m[1] || m[2]);
+  }
+
+  for (const tag of rendered) {
+    if (!registry.has(tag) || provided.has(tag)) continue;
+    wrapperProblems.push({
+      file: path.relative(repoRoot, wrapper),
+      tag,
+      expectedImport: entryForTag.get(tag) || '@editora/ui-core/<name>',
+    });
+  }
+}
+
+if (problems.length > 0 || reactProblems.length > 0 || wrapperProblems.length > 0) {
+  if (wrapperProblems.length > 0) {
+    console.error(`\nFound ${wrapperProblems.length} ui-react wrapper(s) that render an element their own imports never register:\n`);
+    for (const p of wrapperProblems) {
+      console.error(`  ${p.file}\n    renders <${p.tag}> but never imports '${p.expectedImport}' (directly or through another wrapper)\n`);
+    }
+    console.error(
+      'Fix: add `import \'<the entry above>\';` to the file above.\n' +
+      'Otherwise deep-importing just this wrapper renders an element that never upgrades.\n'
+    );
+  }
   if (problems.length > 0) {
     console.error(`\nFound ${problems.length} custom-element registration gap(s) in ui-core:\n`);
     for (const p of problems) {
@@ -199,6 +316,6 @@ if (problems.length > 0 || reactProblems.length > 0) {
 } else {
   console.log(
     `✓ Checked ${files.length} ui-core files (${registry.size} registered custom elements) ` +
-    `and ${reactFiles.length} ui-react wrapper files - no registration gaps found.`
+    `and ${reactFiles.length} ui-react wrapper files (each one registers every element it renders) - no registration gaps found.`
   );
 }
