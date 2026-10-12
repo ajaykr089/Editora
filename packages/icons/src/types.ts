@@ -44,6 +44,7 @@ export type IconRenderOptions = {
   color?: string;
   secondaryColor?: string;
   strokeWidth?: number;
+  /** Strokes are always `strokeWidth` screen pixels, whatever the size, so this changes nothing. Kept so existing code compiles. */
   absoluteStrokeWidth?: boolean;
   strokeLinecap?: 'butt' | 'round' | 'square';
   strokeLinejoin?: 'miter' | 'round' | 'bevel';

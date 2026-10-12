@@ -37,33 +37,23 @@ function parseViewBoxSize(viewBox: string): { width: number; height: number } {
   return { width: 24, height: 24 };
 }
 
-function resolveStrokeWidth(
-  options: {
-    strokeWidth?: number;
-    defaultStrokeWidth?: number;
-    iconWeight?: IconWeight;
-    defaultIconWeight?: IconWeight;
-    absoluteStrokeWidth?: boolean;
-    size?: number | string;
-  },
-  viewBox: string
-): number {
+// Every stroke is drawn with vector-effect="non-scaling-stroke" (see normalizeNodeAttrs), so its width is in screen pixels at
+// any icon size. That is what `absoluteStrokeWidth` asks for, so there is nothing to compensate: it used to scale the width
+// by viewBox / size on top of that, which gave a 3px stroke at size 12 and a 0.75px one at size 48.
+function resolveStrokeWidth(options: {
+  strokeWidth?: number;
+  defaultStrokeWidth?: number;
+  iconWeight?: IconWeight;
+  defaultIconWeight?: IconWeight;
+}): number {
   // prop width > prop weight > context width > context weight > built-in
-  const raw =
+  return (
     (isValidStrokeWidth(options.strokeWidth) ? options.strokeWidth : undefined) ??
     (options.iconWeight ? STROKE_WIDTH_BY_WEIGHT[options.iconWeight] : undefined) ??
     (isValidStrokeWidth(options.defaultStrokeWidth) ? options.defaultStrokeWidth : undefined) ??
     (options.defaultIconWeight ? STROKE_WIDTH_BY_WEIGHT[options.defaultIconWeight] : undefined) ??
-    DEFAULT_STROKE_WIDTH;
-  if (!options.absoluteStrokeWidth) return raw;
-
-  const pixelSize = Number(options.size ?? DEFAULT_SIZE);
-  if (!Number.isFinite(pixelSize) || pixelSize <= 0) return raw;
-
-  const { width } = parseViewBoxSize(viewBox);
-  if (!Number.isFinite(width) || width <= 0) return raw;
-
-  return (raw * width) / pixelSize;
+    DEFAULT_STROKE_WIDTH
+  );
 }
 
 function computeTransform(options: { rotate?: number; flip?: 'horizontal' | 'vertical' | 'both'; rtl?: boolean }, viewBox: string): string | undefined {
@@ -184,17 +174,12 @@ export const Icon = React.forwardRef<SVGSVGElement, IconProps>(function Icon(
   const finalSecondaryColor = secondaryColor ?? defaults.secondaryColor ?? finalColor;
   const finalStrokeLinecap = strokeLinecap ?? defaults.strokeLinecap ?? 'round';
   const finalStrokeLinejoin = strokeLinejoin ?? defaults.strokeLinejoin ?? 'round';
-  const finalStrokeWidth = resolveStrokeWidth(
-    {
-      strokeWidth,
-      defaultStrokeWidth: defaults.strokeWidth,
-      iconWeight,
-      defaultIconWeight: defaults.iconWeight,
-      absoluteStrokeWidth: absoluteStrokeWidth ?? defaults.absoluteStrokeWidth,
-      size: finalSize
-    },
-    resolved.viewBox
-  );
+  const finalStrokeWidth = resolveStrokeWidth({
+    strokeWidth,
+    defaultStrokeWidth: defaults.strokeWidth,
+    iconWeight,
+    defaultIconWeight: defaults.iconWeight
+  });
 
   const explicitAriaLabel = ariaLabel || (typeof ariaLabelAttr === 'string' ? ariaLabelAttr : undefined);
   const finalDecorative = decorative ?? defaults.decorative ?? (!title && !explicitAriaLabel);

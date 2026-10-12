@@ -38,6 +38,17 @@ describe('stroke width resolution', () => {
     expect(strokeWidths(<IconProvider value={{ strokeWidth: 2.5, iconWeight: 'bold' }}><CheckIcon /></IconProvider>)).toEqual(['stroke-width="2.5"']);
   });
 
+  it('draws the stroke at its width in screen pixels at every size, with or without absoluteStrokeWidth', () => {
+    // Strokes are non-scaling (vector-effect), so they are already the same on screen at every size. Scaling the width by
+    // viewBox / size as well gave a 3px stroke at size 12 and a 0.75px one at size 48 (measured in Chromium).
+    for (const size of [12, 24, 48, '12px']) {
+      expect(strokeWidths(<CheckIcon size={size} absoluteStrokeWidth />), String(size)).toEqual(['stroke-width="1.5"']);
+      expect(strokeWidths(<CheckIcon size={size} absoluteStrokeWidth={false} />), String(size)).toEqual(['stroke-width="1.5"']);
+    }
+    expect(strokeWidths(<IconProvider value={{ absoluteStrokeWidth: true }}><CheckIcon size={48} /></IconProvider>)).toEqual(['stroke-width="1.5"']);
+    expect(html(<CheckIcon size={48} absoluteStrokeWidth />)).toContain('vector-effect="non-scaling-stroke"');
+  });
+
   it('ignores invalid widths', () => {
     expect(strokeWidths(<CheckIcon strokeWidth={-1} />)).toEqual(['stroke-width="1.5"']);
     expect(strokeWidths(<CheckIcon strokeWidth={NaN} />)).toEqual(['stroke-width="1.5"']);
