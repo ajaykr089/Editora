@@ -710,11 +710,13 @@ function initTextColorPlugin(): void {
   }
 }
 
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initTextColorPlugin);
-} else {
-  setTimeout(initTextColorPlugin, 100);
+// Auto-initialize when DOM is ready (the module is also imported on the server, where there is no document)
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTextColorPlugin);
+  } else {
+    setTimeout(initTextColorPlugin, 100);
+  }
 }
 
 // ============================================================================

@@ -66,6 +66,10 @@ jobs:
       - name: Run core package tests
         run: npm run test:core:unit
 
+      # After the build: also loads every built entry point in a bare Node process, as a server render does.
+      - name: Check the editor can be imported and server-rendered without a DOM
+        run: npm run test:server-import
+
       - name: Run icons, react-icons and toast tests
         run: npm run test:libs
 
