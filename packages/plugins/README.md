@@ -278,12 +278,16 @@ CollaborationPlugin({
 });
 ```
 
-> [!WARNING]
-> **Without `websocketUrl` the plugin syncs through the public Yjs demo server** (`wss://demos.yjs.dev`). The room is
-> named after `roomName`, then the editor's `id`, and otherwise `editora-default-room`, which every user of the
-> default shares. Anyone who knows the room name can read and edit the document. The plugin logs a warning once when
-> this happens. Always pass your own server. In `<editora-editor>`, also list your plugins: leaving the `plugins`
-> attribute out loads every plugin, this one included.
+> [!IMPORTANT]
+> **The plugin connects only to a server you give it:** a `websocketUrl` or a `provider`. With neither it stays off and
+> logs a warning. Earlier versions fell back to the public Yjs demo server (`wss://demos.yjs.dev`), where anyone who
+> knows the room name can read and edit the document, and `<editora-editor>` loaded the plugin by default. The room is
+> named after `roomName`, then the `id` of the editable element (the web component sets none), and otherwise
+> `editora-default-room`, which every default user shared.
+>
+> For a throwaway demo, `allowPublicDemoServer: true` syncs through that public server and logs a warning; give such a
+> demo a long, unguessable `roomName`. In `<editora-editor>` the plugin is no longer part of the default set: name it
+> in the `plugins` attribute.
 
 The other options are `userColor`, and `doc` or `provider` if you already have a Yjs document or provider.
 

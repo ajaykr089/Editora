@@ -243,7 +243,7 @@ loaded by, is in [`@editora/plugins`](https://www.npmjs.com/package/@editora/plu
 
 | File | Contains |
 | --- | --- |
-| `dist/webcomponent.js` | Every plugin. Each one is loaded only when you name it in `plugins`. |
+| `dist/webcomponent.js` | Every plugin. List the ones you want in `plugins`; leave it out and all load except `collaboration`, which needs a server. |
 | `dist/webcomponent-core.js` | Ten essentials: `bold`, `italic`, `underline`, `strikethrough`, `clearFormatting`, `heading`, `blockquote`, `code`, `list` and `history`. |
 
 Each has its own stylesheet (`webcomponent.min.css`, `webcomponent-core.min.css`).
@@ -257,10 +257,11 @@ Each has its own stylesheet (`webcomponent.min.css`, `webcomponent-core.min.css`
 </editora-editor>
 ```
 
-> [!WARNING]
-> Always list the plugins you want. If you leave `plugins` out, **every** plugin in the bundle is loaded, including ones
-> that need setup. The `collaboration` plugin, for example, syncs the document through a public Yjs demo server unless
-> you give it your own server, so never leave it loaded by accident. See
+> [!NOTE]
+> List the plugins you want. If you leave `plugins` out, every plugin in the bundle is loaded **except `collaboration`**,
+> because it sends the document to a server. It loads only when you name it in `plugins` (or configure it under
+> `pluginConfig`), and then stays off until you give it your own `websocketUrl` or a `provider`. Earlier versions loaded
+> it by default and synced through a public Yjs demo server, in a room shared by every default editor. See
 > [`@editora/plugins`](https://www.npmjs.com/package/@editora/plugins#collaboration).
 
 ## Security
