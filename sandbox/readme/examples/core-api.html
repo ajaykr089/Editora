@@ -1,0 +1,28 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css" />
+<script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"></script>
+
+<editora-editor id="editor" height="240" plugins="bold italic underline list history" toolbar="undo redo | bold italic underline | bullist numlist">
+  <p>Edit me, then use the buttons.</p>
+</editora-editor>
+
+<button id="read">Read HTML</button>
+<button id="replace">Replace</button>
+<button id="bold">Bold</button>
+<pre id="out"></pre>
+
+<script type="module">
+  const editor = document.getElementById('editor');
+  const out = document.getElementById('out');
+
+  // Fired when the toolbar and plugins are ready.
+  editor.addEventListener('editor-ready', () => console.log('ready'));
+
+  // Fired as the content changes (debounced). The HTML is in event.detail.html.
+  editor.addEventListener('content-change', (event) => {
+    out.textContent = event.detail.html;
+  });
+
+  document.getElementById('read').onclick = () => (out.textContent = editor.getContent());
+  document.getElementById('replace').onclick = () => editor.setContent('<h2>Replaced</h2><p>From outside.</p>');
+  document.getElementById('bold').onclick = () => editor.execCommand('toggleBold');
+</script>

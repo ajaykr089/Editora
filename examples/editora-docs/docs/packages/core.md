@@ -24,21 +24,31 @@ npm i @editora/core
 
 ## Typical Usage
 
-```ts
-import { createEditor } from "@editora/core";
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css" />
+<script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"></script>
 
-const editor = createEditor({
-  element: document.getElementById("editor"),
-  plugins: "bold italic link",
-  toolbar: "undo redo | bold italic | link",
-});
+<editora-editor
+  height="320"
+  plugins="heading bold italic underline list link history"
+  toolbar="undo redo | heading | bold italic underline | bullist numlist | link"
+  placeholder="Start writing..."
+>
+  <h2>Hello, Editora</h2>
+  <p>This is a <strong>web component</strong>. Select some text and use the toolbar.</p>
+</editora-editor>
 ```
+
+List the plugins you want in `plugins`: only those are loaded. Leave the attribute out and every plugin in the bundle
+is loaded, including ones that need setup (the `collaboration` plugin, for example, needs your own server).
+
+With a bundler, `import "@editora/core/webcomponent"` and `import "@editora/core/webcomponent.css"` instead of the CDN tags.
 
 ## API Surface
 
 | Surface | Type | Notes |
 | --- | --- | --- |
-| `createEditor(options)` | Function | Creates vanilla runtime adapter instance |
+| `createEditor(options)` | Function | Creates a low-level vanilla adapter. It takes plugin objects, not plugin names; prefer `<editora-editor>` |
 | `initWebComponent()` | Function | Registers `<editora-editor>` when needed |
 | `Editor` | Class export | Legacy runtime class export |
 | `EditorState` | Class export | Editor state model |

@@ -1,0 +1,23 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css" />
+<script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"></script>
+
+<editora-editor
+  height="440"
+  plugins="heading bold italic underline blockquote list textColor backgroundColor link table history"
+  toolbar="undo redo | heading | bold italic underline | textColor backgroundColor | bullist numlist | blockquote link table"
+>
+  <h2>Release notes</h2>
+  <p>
+    Editora is a <strong>web component</strong>, so it works the same in plain HTML, Vue, Angular and Svelte.
+    Select some text to try the <em>toolbar</em>.
+  </p>
+  <ul>
+    <li>Formatting, lists and links</li>
+    <li>Tables you can edit in place</li>
+  </ul>
+  <table>
+    <tr><th>Plan</th><th>Seats</th><th>Price</th></tr>
+    <tr><td>Team</td><td>10</td><td>$49</td></tr>
+    <tr><td>Business</td><td>50</td><td>$199</td></tr>
+  </table>
+</editora-editor>
