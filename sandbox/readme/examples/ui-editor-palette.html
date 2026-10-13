@@ -1,0 +1,37 @@
+<script type="importmap">
+  {
+    "imports": {
+      "@editora/ui-core": "https://cdn.jsdelivr.net/npm/@editora/ui-core/dist/index.esm.js",
+      "@editora/icons": "https://cdn.jsdelivr.net/npm/@editora/icons/dist/index.esm.js"
+    }
+  }
+</script>
+<script type="module">
+  import '@editora/ui-core';
+</script>
+
+<style>
+  /* The commands are your own buttons, so you style them. The palette marks the one the arrow keys are on. */
+  ui-command-palette button { display: block; width: 100%; margin: 0; padding: 10px 14px; border: 0; border-radius: 6px; background: transparent; color: #24292f; font: 15px system-ui, sans-serif; text-align: left; cursor: pointer; }
+  ui-command-palette button[data-active='true'] { background: #dbeafe; }
+</style>
+
+<button id="open" type="button">Open the command palette</button>
+<p id="status">Nothing run yet</p>
+
+<ui-command-palette id="palette" placeholder="Type a command...">
+  <button slot="command">Insert table</button>
+  <button slot="command">Toggle bold</button>
+  <button slot="command">Clear formatting</button>
+</ui-command-palette>
+
+<script type="module">
+  const palette = document.getElementById('palette');
+
+  document.getElementById('open').addEventListener('click', () => palette.openPalette());
+
+  // The palette filters as you type, moves with the arrow keys, runs a command on Enter and closes on Escape.
+  palette.addEventListener('select', (event) => {
+    document.getElementById('status').textContent = `Ran: ${event.detail.label}`;
+  });
+</script>

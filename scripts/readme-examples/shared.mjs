@@ -25,6 +25,7 @@ export const readmes = {
   icons: path.join(root, 'packages/icons/README.md'),
   'react-icons': path.join(root, 'packages/react-icons/README.md'),
   performance: path.join(root, 'packages/performance/README.md'),
+  'ui-editor': path.join(root, 'packages/ui-editor/README.md'),
 };
 
 /** Playwright is not a dependency of the repo: use the one next to the local e2e harness when there is no other. */
@@ -64,6 +65,7 @@ const packageDirs = {
   'ui-core': 'ui-core',
   'ui-sortable': 'ui-sortable',
   icons: 'icons',
+  'ui-editor': 'ui-editor',
 };
 
 /** Answer requests for the published CDN files with the local build of the same package. */
@@ -94,6 +96,7 @@ const importMapEntries = {
   '@editora/icons': 'icons/dist/index.esm.js',
   '@editora/ui-sortable': 'ui-sortable/dist/index.esm.js',
   '@editora/toast': 'toast/dist/index.esm.js',
+  '@editora/ui-editor': 'ui-editor/dist/index.esm.js',
 };
 
 export function importMapFor(fragment) {

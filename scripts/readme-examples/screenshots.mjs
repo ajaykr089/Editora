@@ -331,6 +331,18 @@ const shots = [
     },
   },
 
+  // ---- @editora/ui-editor
+  {
+    out: 'packages/ui-editor/docs/images/command-palette.png',
+    example: 'ui-editor-palette',
+    page: true,
+    clip: { x: 150, y: 40, width: 700, height: 300 },
+    async act(page) {
+      await page.click('#open');
+      await page.waitForTimeout(400);
+    },
+  },
+
   // ---- @editora/themes
   { out: 'packages/themes/docs/images/themes.png', example: 'themes-gallery' },
   {
