@@ -11,6 +11,7 @@
 // Playwright is not a dependency of the repo; it is found next to the local e2e harness, or in node_modules.
 import fs from 'node:fs';
 import path from 'node:path';
+import { runCommand } from './cli-check.mjs';
 import { listExamples, loadPlaywright, openExample, root } from './shared.mjs';
 
 const only = process.argv.slice(2);
@@ -278,6 +279,70 @@ const shots = [
     },
   },
 
+  // ---- @editora/icons
+  { out: 'packages/icons/docs/images/catalog.png', example: 'icons-catalog' },
+  { out: 'packages/icons/docs/images/toolbar.png', example: 'icons-quick-start', clip: { x: 0, y: 0, width: 294, height: 84 } },
+  { out: 'packages/icons/docs/images/options.png', example: 'icons-options' },
+  { out: 'packages/icons/docs/images/custom.png', example: 'icons-custom', clip: { x: 0, y: 0, width: 192, height: 80 } },
+  { out: 'packages/icons/docs/images/ui-icon.png', example: 'icons-ui-core', clip: { x: 0, y: 0, width: 316, height: 76 } },
+
+  // ---- @editora/react-icons
+  { out: 'packages/react-icons/docs/images/quick-start.png', example: 'react-icons-quick-start', clip: { x: 8, y: 8, width: 340, height: 146 } },
+  { out: 'packages/react-icons/docs/images/provider.png', example: 'react-icons-provider', clip: { x: 8, y: 8, width: 392, height: 160 } },
+  { out: 'packages/react-icons/docs/images/dynamic.png', example: 'react-icons-dynamic', clip: { x: 8, y: 8, width: 230, height: 222 } },
+
+  // ---- @editora/performance
+  {
+    out: 'packages/performance/docs/images/debounce.png',
+    example: 'performance-debounce',
+    clip: { x: 8, y: 8, width: 392, height: 124 },
+    async act(page) {
+      await page.type('#query', 'editora', { delay: 40 });
+      await page.waitForTimeout(450);
+    },
+  },
+  {
+    out: 'packages/performance/docs/images/batcher.png',
+    example: 'performance-batcher',
+    clip: { x: 8, y: 8, width: 392, height: 140 },
+    async act(page) {
+      await page.click('#add');
+      await page.waitForTimeout(350);
+    },
+  },
+  {
+    out: 'packages/performance/docs/images/memory.png',
+    example: 'performance-memory',
+    clip: { x: 8, y: 8, width: 392, height: 150 },
+    async act(page) {
+      await page.click('#ping');
+      await page.click('#ping');
+      await page.click('#ping');
+      await page.click('#destroy');
+      await page.click('#ping');
+    },
+  },
+  {
+    out: 'packages/performance/docs/images/monitor.png',
+    example: 'performance-monitor',
+    clip: { x: 8, y: 8, width: 392, height: 130 },
+    async act(page) {
+      await page.click('#run');
+    },
+  },
+
+  // ---- @editora/ui-editor
+  {
+    out: 'packages/ui-editor/docs/images/command-palette.png',
+    example: 'ui-editor-palette',
+    page: true,
+    clip: { x: 150, y: 40, width: 700, height: 300 },
+    async act(page) {
+      await page.click('#open');
+      await page.waitForTimeout(400);
+    },
+  },
+
   // ---- @editora/themes
   { out: 'packages/themes/docs/images/themes.png', example: 'themes-gallery' },
   {
@@ -336,6 +401,59 @@ for (const shot of shots) {
   } catch (error) {
     failed++;
     console.log(`FAIL ${shot.out}: ${error.message.split('\n')[0]}`);
+  } finally {
+    await context.close();
+  }
+}
+
+// ---- terminals: the real output of the commands, drawn as a terminal window (@editora/cli)
+const terminals = [
+  {
+    out: 'packages/cli/docs/images/add.png',
+    commands: ['npx @editora/cli add editor --dry-run', 'npx @editora/cli add button modal toast --dry-run'],
+  },
+  {
+    out: 'packages/cli/docs/images/package-managers.png',
+    commands: [
+      'npx @editora/cli add button --package-manager npm --dry-run | grep Installing',
+      'npx @editora/cli add button --package-manager pnpm --dry-run | grep Installing',
+      'npx @editora/cli add button --package-manager yarn --dry-run | grep Installing',
+      'npx @editora/cli add button --package-manager bun --dry-run | grep Installing',
+      'npx @editora/cli add button --package-manager deno',
+    ],
+  },
+];
+
+const escapeHtml = (text) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const terminalHtml = (blocks) => `<!doctype html><meta charset="utf-8"><body style="margin:0;padding:24px;background:transparent">
+<div id="window" style="width:760px;border-radius:12px;overflow:hidden;background:#0d1117;box-shadow:0 0 0 1px #30363d;font:14px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#c9d1d9">
+  <div style="display:flex;gap:8px;align-items:center;padding:12px 16px;background:#161b22;border-bottom:1px solid #30363d">
+    <span style="width:12px;height:12px;border-radius:50%;background:#ff5f56"></span><span style="width:12px;height:12px;border-radius:50%;background:#ffbd2e"></span><span style="width:12px;height:12px;border-radius:50%;background:#27c93f"></span>
+    <span style="margin-left:12px;color:#8b949e;font-size:12px">my-app</span>
+  </div>
+  <div style="padding:16px 20px 20px">${blocks
+    .map(({ command, output }) => `<div style="margin-bottom:14px"><div><span style="color:#7ee787">$</span> <span style="color:#f0f6fc">${escapeHtml(command)}</span></div><pre style="margin:0;font:inherit;white-space:pre-wrap">${escapeHtml(output)}</pre></div>`)
+    .join('')}</div>
+</div></body>`;
+
+for (const terminal of terminals) {
+  const name = path.basename(terminal.out, '.png');
+  if (only.length && !only.includes(name)) continue;
+  const context = await browser.newContext({ viewport: { width: 810, height: 800 }, deviceScaleFactor: 2 });
+  const page = await context.newPage();
+  try {
+    const blocks = terminal.commands.map((command) => {
+      const result = runCommand(command);
+      return { command, output: result.stdout.replace(/\s+$/, '') };
+    });
+    await page.setContent(terminalHtml(blocks));
+    const file = path.join(root, terminal.out);
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    await page.locator('#window').screenshot({ path: file, omitBackground: true });
+    console.log(`ok   ${terminal.out}  ${(fs.statSync(file).size / 1024).toFixed(0)} KB`);
+  } catch (error) {
+    failed++;
+    console.log(`FAIL ${terminal.out}: ${error.message.split('\n')[0]}`);
   } finally {
     await context.close();
   }

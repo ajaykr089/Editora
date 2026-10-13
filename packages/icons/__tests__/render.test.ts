@@ -94,10 +94,15 @@ describe('stroke width', () => {
     expect(strokeOf({ strokeWidth: Infinity, iconWeight: 'thin' })).toBe('1.25');
   });
 
-  it('absoluteStrokeWidth keeps the on-screen width constant for numeric and px sizes only', () => {
-    expect(strokeOf({ absoluteStrokeWidth: true, size: 12, strokeWidth: 1.5 })).toBe('3');
-    expect(strokeOf({ absoluteStrokeWidth: true, size: '12px', strokeWidth: 1.5 })).toBe('3');
-    expect(strokeOf({ absoluteStrokeWidth: true, size: '2rem', strokeWidth: 1.5 })).toBe('1.5');
+  it('draws the stroke at its width in screen pixels at every size, with or without absoluteStrokeWidth', () => {
+    // Strokes are non-scaling (vector-effect), so they are already the same on screen at every size. Scaling the width by
+    // viewBox / size as well gave a 3px stroke at size 12 and a 0.75px one at size 48 (measured in Chromium).
+    for (const absoluteStrokeWidth of [false, true]) {
+      for (const size of [12, 24, 48, '12px', '2rem']) {
+        expect(strokeOf({ absoluteStrokeWidth, size, strokeWidth: 1.5 })).toBe('1.5');
+      }
+    }
+    expect(parse(renderIconSvg('check', { size: 48, absoluteStrokeWidth: true })).querySelector('[vector-effect]')?.getAttribute('vector-effect')).toBe('non-scaling-stroke');
   });
 });
 

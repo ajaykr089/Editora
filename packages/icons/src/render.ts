@@ -51,19 +51,14 @@ function isValidStrokeWidth(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0;
 }
 
-function resolveStrokeWidth(options: IconRenderOptions, viewBox: string): number {
-  const raw =
+// Every stroke is drawn with vector-effect="non-scaling-stroke" (see renderNode), so its width is in screen pixels at any
+// icon size. That is what `absoluteStrokeWidth` asks for, so there is nothing to compensate: it used to scale the width by
+// viewBox / size on top of that, which gave a 3px stroke at size 12 and a 0.75px one at size 48.
+function resolveStrokeWidth(options: IconRenderOptions): number {
+  return (
     (isValidStrokeWidth(options.strokeWidth) ? options.strokeWidth : undefined) ??
-    (options.iconWeight ? STROKE_WIDTH_BY_WEIGHT[options.iconWeight] : DEFAULT_STROKE_WIDTH);
-  if (!options.absoluteStrokeWidth) return raw;
-
-  // Only a unitless or px size can be compared with the viewBox.
-  const normalized = normalizeIconSize(options.size);
-  if (!/^[\d.]+(px)?$/.test(normalized)) return raw;
-  const size = parseFloat(normalized);
-  const { width } = parseViewBoxSize(viewBox);
-  if (!Number.isFinite(width) || width <= 0) return raw;
-  return (raw * width) / size;
+    (options.iconWeight ? STROKE_WIDTH_BY_WEIGHT[options.iconWeight] : DEFAULT_STROKE_WIDTH)
+  );
 }
 
 function computeTransform(options: IconRenderOptions, viewBox: string): string | undefined {
@@ -157,7 +152,7 @@ export function renderIconSvg(name: string, options: IconRenderOptions = {}): st
   const size = normalizeIconSize(options.size);
   const color = options.color || 'currentColor';
   const secondaryColor = options.secondaryColor || color;
-  const strokeWidth = resolveStrokeWidth(options, resolved.viewBox);
+  const strokeWidth = resolveStrokeWidth(options);
   const strokeLinecap = options.strokeLinecap || 'round';
   const strokeLinejoin = options.strokeLinejoin || 'round';
 

@@ -21,6 +21,11 @@ export const readmes = {
   'ui-react': path.join(root, 'packages/ui-react/README.md'),
   'ui-sortable': path.join(root, 'packages/ui-sortable/README.md'),
   toast: path.join(root, 'packages/editora-toast/README.md'),
+  cli: path.join(root, 'packages/cli/README.md'),
+  icons: path.join(root, 'packages/icons/README.md'),
+  'react-icons': path.join(root, 'packages/react-icons/README.md'),
+  performance: path.join(root, 'packages/performance/README.md'),
+  'ui-editor': path.join(root, 'packages/ui-editor/README.md'),
 };
 
 /** Playwright is not a dependency of the repo: use the one next to the local e2e harness when there is no other. */
@@ -60,6 +65,7 @@ const packageDirs = {
   'ui-core': 'ui-core',
   'ui-sortable': 'ui-sortable',
   icons: 'icons',
+  'ui-editor': 'ui-editor',
 };
 
 /** Answer requests for the published CDN files with the local build of the same package. */
@@ -90,6 +96,7 @@ const importMapEntries = {
   '@editora/icons': 'icons/dist/index.esm.js',
   '@editora/ui-sortable': 'ui-sortable/dist/index.esm.js',
   '@editora/toast': 'toast/dist/index.esm.js',
+  '@editora/ui-editor': 'ui-editor/dist/index.esm.js',
 };
 
 export function importMapFor(fragment) {
@@ -139,7 +146,7 @@ export async function openExample(page, example, options = {}) {
     const query = new URLSearchParams({ example: example.name, ...(options.backdrop ? { backdrop: options.backdrop } : {}) });
     await page.goto(`${sandboxUrl}/readme/index.html?${query}`, { waitUntil: 'load' });
   }
-  if (/^(ui-|sortable-|toast-)/.test(example.name)) {
+  if (/^(ui-|sortable-|toast-|icons-|react-icons-|performance-)/.test(example.name)) {
     // The UI components are not editors: wait for the page's requests, then for the elements to upgrade.
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(700);

@@ -2,11 +2,9 @@
 // could be parsed. Same babel-jest setup as packages/plugins/jest.config.cjs.
 module.exports = {
   testEnvironment: 'node',
+  setupFiles: ['<rootDir>/__tests__/setup.cjs'],
   testMatch: ['<rootDir>/__tests__/**/*.test.ts'],
-  // PerformanceMonitor.test.ts predates this config and has never run: it needs `window`
-  // (jest-environment-jsdom is not installed in this repo) and may have drifted from the
-  // implementation. Left out rather than silently "fixed"; see the notes on the commit that added this.
-  testPathIgnorePatterns: ['/node_modules/', 'PerformanceMonitor\\.test\\.ts$'],
+  testPathIgnorePatterns: ['/node_modules/'],
   transform: {
     '^.+\\.tsx?$': [
       'babel-jest',

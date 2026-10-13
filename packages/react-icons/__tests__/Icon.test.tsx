@@ -1,4 +1,6 @@
 import React from 'react';
+import { flushSync } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import { listIcons } from '@editora/icons';
@@ -36,6 +38,17 @@ describe('stroke width resolution', () => {
     expect(strokeWidths(<IconProvider value={{ iconWeight: 'bold' }}><CheckIcon strokeWidth={4} /></IconProvider>)).toEqual(['stroke-width="4"']);
     // when a provider sets both, its explicit width wins over its weight
     expect(strokeWidths(<IconProvider value={{ strokeWidth: 2.5, iconWeight: 'bold' }}><CheckIcon /></IconProvider>)).toEqual(['stroke-width="2.5"']);
+  });
+
+  it('draws the stroke at its width in screen pixels at every size, with or without absoluteStrokeWidth', () => {
+    // Strokes are non-scaling (vector-effect), so they are already the same on screen at every size. Scaling the width by
+    // viewBox / size as well gave a 3px stroke at size 12 and a 0.75px one at size 48 (measured in Chromium).
+    for (const size of [12, 24, 48, '12px']) {
+      expect(strokeWidths(<CheckIcon size={size} absoluteStrokeWidth />), String(size)).toEqual(['stroke-width="1.5"']);
+      expect(strokeWidths(<CheckIcon size={size} absoluteStrokeWidth={false} />), String(size)).toEqual(['stroke-width="1.5"']);
+    }
+    expect(strokeWidths(<IconProvider value={{ absoluteStrokeWidth: true }}><CheckIcon size={48} /></IconProvider>)).toEqual(['stroke-width="1.5"']);
+    expect(html(<CheckIcon size={48} absoluteStrokeWidth />)).toContain('vector-effect="non-scaling-stroke"');
   });
 
   it('ignores invalid widths', () => {
@@ -102,5 +115,19 @@ describe('accessibility', () => {
     expect(out).toContain('class="x"');
     expect(out).toContain('style="color:red"');
     expect(out).toContain('data-testid="t"');
+  });
+});
+
+describe('refs', () => {
+  it('forwards the ref of Icon and of a named component to the <svg>', () => {
+    const generic = React.createRef<SVGSVGElement>();
+    const named = React.createRef<SVGSVGElement>();
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    flushSync(() => root.render(<><Icon ref={generic} name="check" /><CheckIcon ref={named} /></>));
+    expect(generic.current).toBeInstanceOf(SVGSVGElement);
+    expect(named.current).toBeInstanceOf(SVGSVGElement);
+    expect(named.current).toBe(container.querySelectorAll('svg')[1]);
+    flushSync(() => root.unmount());
   });
 });

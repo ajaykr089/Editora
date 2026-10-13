@@ -60,11 +60,14 @@ export class TransactionBatcher {
    * Flush all pending transactions.
    */
   flushBatch(): void {
-    if (this.batch.length > 0) {
-      this.flush([...this.batch]);
-      this.batch = [];
-      this.clearTimeout();
-    }
+    if (this.batch.length === 0) return;
+
+    // Take the batch, and stop its timer, before the callback runs: a transaction added from inside the callback
+    // belongs to the next batch (it used to be thrown away with this one, and its timer cancelled).
+    const pending = this.batch;
+    this.batch = [];
+    this.clearTimeout();
+    this.flush(pending);
   }
 
   /**

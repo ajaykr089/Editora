@@ -16,6 +16,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { checkCli } from './cli-check.mjs';
 import { listExamples, loadPlaywright, openExample, readmes, root, sandboxUrl } from './shared.mjs';
 
 const examples = listExamples();
@@ -49,6 +50,9 @@ for (const [name, text] of Object.entries(readmeText)) {
     if (!isExample) fail(`${name} README has a ${lang} block that is not one of the examples:\n         ${code.split('\n')[0]}`);
   }
 }
+
+// ---------------------------------------------------------------- the CLI README runs the real CLI, no browser
+await checkCli({ ok, fail });
 
 // ---------------------------------------------------------------- 2. type-check
 console.log('Type-check (strict)');
