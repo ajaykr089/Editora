@@ -817,4 +817,194 @@ describe('ui-sortable', () => {
     expect(placeholder).toBeTruthy();
     expect(placeholder.closest('.children')).toBeTruthy();
   });
+
+  describe('drag visuals', () => {
+    const mount = async (attrs: Record<string, string> = {}) => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(lists));
+      el.setAttribute('items', JSON.stringify(items));
+      Object.entries(attrs).forEach(([name, value]) => el.setAttribute(name, value));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      return el;
+    };
+
+    const startPointerDrag = (el: any, id: string, pointerId: number) => {
+      const handle = el.shadowRoot.querySelector(`.handle[data-id="${id}"]`) as HTMLElement;
+      el._onPointerDown({
+        pointerId,
+        pointerType: 'mouse',
+        clientX: 10,
+        clientY: 10,
+        preventDefault() {},
+        composedPath() {
+          return [handle];
+        },
+      });
+      el._onPointerMove({ pointerId, clientX: 40, clientY: 40, preventDefault() {} });
+    };
+
+    it('shows nothing about the selection until something is selected', async () => {
+      const el = await mount();
+      const summary = () => el.shadowRoot.querySelector('.selection-summary') as HTMLElement;
+      expect(summary().getAttribute('data-count')).toBe('0');
+
+      el.select(['task-a', 'task-b']);
+      await flushMicrotask();
+      expect(summary().getAttribute('data-count')).toBe('2');
+      expect(el.shadowRoot.querySelector('.selection-pill').textContent).toBe('2');
+
+      el.clearSelection();
+      await flushMicrotask();
+      expect(summary().getAttribute('data-count')).toBe('0');
+    });
+
+    it('drags a copy of the card, not a text label, and leaves nothing behind', async () => {
+      const el = await mount();
+      startPointerDrag(el, 'task-a', 31);
+
+      const ghost = el.shadowRoot.querySelector('.item-ghost') as HTMLElement;
+      expect(ghost).toBeTruthy();
+      expect(ghost.textContent).toContain('Task A');
+      expect(ghost.getAttribute('aria-hidden')).toBe('true');
+      // No id anywhere in the copy: lookups by id still find the real card only.
+      expect(ghost.querySelectorAll('[data-id], [id], [data-drag-trigger]').length).toBe(0);
+      expect(ghost.hasAttribute('data-id')).toBe(false);
+      expect(el.shadowRoot.querySelectorAll('.item[data-id="task-a"]').length).toBe(1);
+      // The real card stays as the empty slot.
+      expect(el.shadowRoot.querySelector('.item[data-id="task-a"]').getAttribute('data-dragging')).toBe('true');
+
+      el._onPointerMove({ pointerId: 31, clientX: 120, clientY: 90, preventDefault() {} });
+      expect(ghost.style.transform).toContain('translate(');
+
+      el.cancelDrag();
+      expect(el.shadowRoot.querySelector('.item-ghost')).toBeNull();
+      expect(el.shadowRoot.querySelectorAll('[data-dragging="true"]').length).toBe(0);
+    });
+
+    it('badges the ghost with the number of items moved, and leaves a copied card in place', async () => {
+      const el = await mount();
+      el.select(['task-a', 'task-b']);
+      startPointerDrag(el, 'task-a', 32);
+      const stacked = el.shadowRoot.querySelector('.item-ghost') as HTMLElement;
+      expect(stacked.getAttribute('data-count')).toBe('stack');
+      expect(stacked.querySelector('.ghost-badge')?.textContent).toBe('2');
+      el.cancelDrag();
+
+      // A clone leaves the original where it is: no hollow slot, and the ghost says "+".
+      startPointerDrag(el, 'template', 33);
+      const copy = el.shadowRoot.querySelector('.item-ghost') as HTMLElement;
+      expect(copy.querySelector('.ghost-badge')?.textContent).toBe('+');
+      expect(el.shadowRoot.querySelector('.item[data-id="template"]').getAttribute('data-dragging')).not.toBe('true');
+      el.cancelDrag();
+    });
+
+    it('narrows the ghost for drag-preview-size="compact"', async () => {
+      const el = await mount({ 'drag-preview-size': 'compact' });
+      const card = el.shadowRoot.querySelector('.item[data-id="task-a"]') as HTMLElement;
+      card.getBoundingClientRect = () => ({ left: 0, top: 0, right: 600, bottom: 50, width: 600, height: 50 }) as DOMRect;
+      startPointerDrag(el, 'task-a', 35);
+      const ghost = el.shadowRoot.querySelector('.item-ghost') as HTMLElement;
+      expect(ghost.getAttribute('data-compact')).toBe('true');
+      expect(ghost.style.inlineSize).toBe('240px');
+      el.cancelDrag();
+
+      el.removeAttribute('drag-preview-size');
+      await flushMicrotask();
+      const card2 = el.shadowRoot.querySelector('.item[data-id="task-a"]') as HTMLElement;
+      card2.getBoundingClientRect = () => ({ left: 0, top: 0, right: 600, bottom: 50, width: 600, height: 50 }) as DOMRect;
+      startPointerDrag(el, 'task-a', 36);
+      expect((el.shadowRoot.querySelector('.item-ghost') as HTMLElement).style.inlineSize).toBe('600px');
+      el.cancelDrag();
+    });
+
+    it('puts the ghost back when a render replaces the shadow content mid-drag', async () => {
+      const el = await mount();
+      startPointerDrag(el, 'task-a', 34);
+      expect(el.shadowRoot.querySelector('.item-ghost')).toBeTruthy();
+
+      el.setAttribute('filter-query', 'Task');
+      await flushMicrotask();
+      el._onPointerMove({ pointerId: 34, clientX: 70, clientY: 70, preventDefault() {} });
+      expect(el.shadowRoot.querySelectorAll('.item-ghost').length).toBe(1);
+      el.cancelDrag();
+    });
+  });
+
+  describe('board scrolling', () => {
+    const mount = async () => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(lists));
+      el.setAttribute('items', JSON.stringify(items));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      return el;
+    };
+
+    it('keeps the board and list scroll positions across a render', async () => {
+      const el = await mount();
+      const board = el.shadowRoot.querySelector('.lists') as HTMLElement;
+      const todoItems = el.shadowRoot.querySelector('.list[data-list-id="todo"] .items') as HTMLElement;
+      board.scrollLeft = 140;
+      todoItems.scrollTop = 35;
+
+      // A real change, so the render replaces the shadow content.
+      el.select(['task-a']);
+      el.moveSelection({ targetListId: 'todo', beforeId: 'epic' });
+      await flushMicrotask();
+      await flushMicrotask();
+
+      const nextBoard = el.shadowRoot.querySelector('.lists') as HTMLElement;
+      expect(nextBoard).not.toBe(board);
+      expect(nextBoard.scrollLeft).toBe(140);
+      expect((el.shadowRoot.querySelector('.list[data-list-id="todo"] .items') as HTMLElement).scrollTop).toBe(35);
+    });
+
+    it('scrolls the board sideways while a card is held at its edge', async () => {
+      const el = await mount();
+      const board = el.shadowRoot.querySelector('.lists') as HTMLElement;
+      Object.defineProperty(board, 'scrollWidth', { value: 1200, configurable: true });
+      Object.defineProperty(board, 'clientWidth', { value: 600, configurable: true });
+      board.getBoundingClientRect = () => ({ left: 0, right: 600, top: 0, bottom: 300, width: 600, height: 300 }) as DOMRect;
+      Object.defineProperty(window, 'innerWidth', { value: 600, configurable: true });
+
+      el._dragState = {
+        snapshot: [],
+        movedRootIds: ['task-a'],
+        originId: 'task-a',
+        clone: false,
+        keyboard: false,
+        dropTarget: null,
+        committed: true,
+      };
+
+      el._autoScrollPoint = { x: 596, y: 150 };
+      el._autoScrollTick();
+      expect(board.scrollLeft).toBeGreaterThan(0);
+      const afterRight = board.scrollLeft;
+
+      el._autoScrollPoint = { x: 4, y: 150 };
+      el._autoScrollTick();
+      expect(board.scrollLeft).toBeLessThan(afterRight);
+
+      el._autoScrollPoint = { x: 300, y: 150 };
+      const before = board.scrollLeft;
+      el._autoScrollTick();
+      expect(board.scrollLeft).toBe(before);
+      el._stopAutoScroll();
+    });
+
+    it('brings the dropped card into view when its list is scrolled out of sight', async () => {
+      const el = await mount();
+      const board = el.shadowRoot.querySelector('.lists') as HTMLElement;
+      Object.defineProperty(board, 'scrollWidth', { value: 1200, configurable: true });
+      Object.defineProperty(board, 'clientWidth', { value: 600, configurable: true });
+      board.getBoundingClientRect = () => ({ left: 0, right: 600, top: 0, bottom: 300, width: 600, height: 300 }) as DOMRect;
+      const done = el.shadowRoot.querySelector('.list[data-list-id="done"]') as HTMLElement;
+      done.getBoundingClientRect = () => ({ left: 700, right: 960, top: 0, bottom: 300, width: 260, height: 300 }) as DOMRect;
+
+      el._revealInBoard(done.querySelector('.dropzone') || done);
+      expect(board.scrollLeft).toBe(364);
+    });
+  });
 });

@@ -11,7 +11,7 @@ export default async function checks({ run }) {
   async function drag(page, fromLabel, toLabel, below = 40) {
     const from = await page.getByText(fromLabel, { exact: true }).first().boundingBox();
     const to = await page.getByText(toLabel, { exact: true }).first().boundingBox();
-    await page.mouse.move(from.x - 34, from.y + from.height / 2);
+    await page.mouse.move(from.x - 17, from.y + from.height / 2);
     await page.mouse.down();
     await page.mouse.move(from.x - 60, from.y - 20, { steps: 6 });
     await page.mouse.move(to.x + 60, to.y + below, { steps: 12 });

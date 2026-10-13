@@ -162,7 +162,7 @@ export default function ReleaseBoard() {
 ```
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-sortable/docs/images/dragging.png" alt="The board while an item is dragged: a dashed drop preview shows where the card will land, and a Moving item label follows the pointer" width="900">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-sortable/docs/images/dragging.png" alt="The board while an item is dragged: the card is lifted under the pointer, its place in Backlog is an empty dashed slot, and a blue line in In Progress shows where it will land" width="900">
 </p>
 
 ### A flat list
@@ -284,7 +284,7 @@ export default function CustomRendering() {
 | `allowNesting` | `allow-nesting` | Allow dropping an item inside another. |
 | `dropzoneStyle` | `dropzone-style` | `indicator` (an insertion rail, the default) or `container` (the whole list highlights). |
 | `dropIndicatorVisibility` | `drop-indicator-visibility` | `active` or `always`. |
-| `dragPreviewSize` | `drag-preview-size` | `match-item` or `compact`. |
+| `dragPreviewSize` | `drag-preview-size` | The card that follows the pointer: `match-item` (the card's own size) or `compact` (narrower, title only). |
 | `dragHandleMode` | `drag-handle-mode` | `handle` (drag by the grip) or `item` (drag anywhere on the card). |
 | `dragHandleSelector` | `drag-handle-selector` | A selector for your own drag handle. |
 | `persistKey` | `persist-key` | Keep where each item is in `localStorage` under this key, and restore it on load. |
@@ -293,6 +293,30 @@ export default function CustomRendering() {
 | `disabled` | `disabled` | Turn the whole component off. |
 
 The React wrapper also takes `itemRadius`, `handleRadius`, `listGap` and `itemSpacing` for the look.
+
+## Look and layout
+
+Lists sit side by side and the board scrolls sideways when they do not fit (each list is at least 260px wide;
+change it with `--ui-sortable-list-min-size`). Holding a card at the edge of the board scrolls it. A card you pick up is
+lifted under the pointer, its place stays as an empty slot, and a thin line shows where it will land.
+
+The colours come from `--ui-color-primary`, `--ui-color-surface`, `--ui-color-text`, `--ui-color-muted` and
+`--ui-color-border`; set them on the element or a parent to theme it, dark included. The parts `root`, `toolbar`,
+`lists`, `list`, `items`, `item`, `handle`, `dropzone` and `drag-ghost` can be styled from outside:
+
+```css
+/* Stack the lists instead of scrolling them sideways. */
+ui-sortable::part(lists) {
+  grid-auto-flow: row;
+  overflow: visible;
+}
+
+/* Give every list its own scrollbar (dragging near its edge scrolls it). */
+ui-sortable::part(items) {
+  max-block-size: 420px;
+  overflow-y: auto;
+}
+```
 
 ## Events
 

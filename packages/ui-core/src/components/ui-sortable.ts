@@ -158,25 +158,33 @@ const style = `
   :host {
     --ui-sortable-accent: var(--ui-color-primary, #2563eb);
     --ui-sortable-surface: var(--ui-color-surface, #ffffff);
-    --ui-sortable-surface-muted: color-mix(in srgb, var(--ui-sortable-surface) 92%, #eff6ff);
-    --ui-sortable-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 76%, transparent);
     --ui-sortable-text: var(--ui-color-text, #0f172a);
-    --ui-sortable-muted: var(--ui-color-muted, #526175);
-    --ui-sortable-shadow:
-      0 1px 3px rgba(15, 23, 42, 0.06),
-      0 16px 34px rgba(15, 23, 42, 0.08);
-    --ui-sortable-radius: 24px;
-    --ui-sortable-panel-radius: 18px;
-    --ui-sortable-item-radius: 16px;
-    --ui-sortable-handle-radius: 12px;
-    --ui-sortable-gap: 16px;
-    --ui-sortable-list-gap: 8px;
-    --ui-sortable-item-gap: 12px;
-    --ui-sortable-dropzone-size: 10px;
-    --ui-sortable-dropzone-inside-size: 16px;
-    --ui-sortable-dropzone-container-min-block-size: 76px;
+    --ui-sortable-muted: var(--ui-color-muted, #5b6778);
+    --ui-sortable-lane: color-mix(in srgb, var(--ui-sortable-text) 3.5%, var(--ui-sortable-surface));
+    --ui-sortable-card: var(--ui-sortable-surface);
+    --ui-sortable-surface-muted: var(--ui-sortable-lane);
+    --ui-sortable-border: color-mix(in srgb, var(--ui-color-border, #cbd5e1) 62%, transparent);
+    --ui-sortable-border-strong: color-mix(in srgb, var(--ui-sortable-text) 24%, var(--ui-sortable-surface));
+    --ui-sortable-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --ui-sortable-card-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --ui-sortable-card-shadow-hover: 0 3px 10px rgba(15, 23, 42, 0.1);
+    --ui-sortable-lift-shadow:
+      0 22px 44px -10px rgba(15, 23, 42, 0.32),
+      0 8px 16px rgba(15, 23, 42, 0.14);
+    --ui-sortable-radius: 14px;
+    --ui-sortable-panel-radius: 14px;
+    --ui-sortable-item-radius: 10px;
+    --ui-sortable-handle-radius: 6px;
+    --ui-sortable-gap: 12px;
+    --ui-sortable-list-gap: 6px;
+    --ui-sortable-item-gap: 6px;
+    --ui-sortable-list-min-size: 260px;
+    --ui-sortable-dropzone-size: 0px;
+    --ui-sortable-dropzone-hit-size: 7px;
+    --ui-sortable-dropzone-inside-size: 0px;
+    --ui-sortable-dropzone-container-min-block-size: 56px;
     --ui-sortable-dropzone-container-min-inline-size: 180px;
-    --ui-sortable-indent: 22px;
+    --ui-sortable-indent: 16px;
     display: block;
     min-inline-size: 0;
     color: var(--ui-sortable-text);
@@ -191,7 +199,7 @@ const style = `
 
   .root {
     display: grid;
-    gap: 14px;
+    gap: 10px;
     min-inline-size: 0;
   }
 
@@ -200,10 +208,10 @@ const style = `
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 10px 16px;
+    gap: 6px 16px;
     padding: 0 2px;
     color: var(--ui-sortable-muted);
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1.5;
   }
 
@@ -214,40 +222,54 @@ const style = `
     min-inline-size: 0;
   }
 
+  .selection-summary[data-count="0"] {
+    display: none;
+  }
+
   .selection-pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-inline-size: 28px;
-    min-block-size: 24px;
-    padding-inline: 8px;
+    min-inline-size: 22px;
+    min-block-size: 20px;
+    padding-inline: 7px;
     border-radius: 999px;
     background: color-mix(in srgb, var(--ui-sortable-accent) 14%, transparent);
     color: color-mix(in srgb, var(--ui-sortable-accent) 84%, var(--ui-sortable-text));
+    font-size: 11.5px;
     font-weight: 700;
   }
 
+  /* Lists sit side by side and scroll sideways when they do not fit (a board), instead of wrapping onto
+     rows. One list fills the width. The padding gives card shadows and focus rings room inside the
+     scroller; the negative margin hands that room back to the layout. */
   .lists {
     display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(min(var(--ui-sortable-list-min-size), 100%), 1fr);
     gap: var(--ui-sortable-gap);
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     min-inline-size: 0;
+    padding: 4px;
+    margin: -4px;
+    overflow: auto hidden;
+    overscroll-behavior-x: contain;
+  }
+
+  .lists,
+  .items {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--ui-sortable-text) 28%, transparent) transparent;
   }
 
   .list {
     display: grid;
     grid-template-rows: auto 1fr;
-    gap: 12px;
+    gap: 10px;
     min-inline-size: 0;
-    padding: 16px;
+    padding: 12px;
     border: 1px solid var(--ui-sortable-border);
     border-radius: var(--ui-sortable-radius);
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--ui-sortable-surface) 96%, transparent),
-        color-mix(in srgb, var(--ui-sortable-accent) 4%, var(--ui-sortable-surface))
-      );
+    background: var(--ui-sortable-lane);
     box-shadow: var(--ui-sortable-shadow);
   }
 
@@ -256,6 +278,7 @@ const style = `
     flex-wrap: nowrap;
     overflow: auto hidden;
     align-items: stretch;
+    min-block-size: 0;
   }
 
   /* The cards live inside one root .tree wrapper, which is a vertical grid. Without this the
@@ -265,20 +288,26 @@ const style = `
     flex-wrap: nowrap;
     align-items: stretch;
     min-inline-size: min-content;
+    margin-block: 0;
+    margin-inline: calc(var(--ui-sortable-list-gap) / -2);
   }
 
   .list[data-orientation="horizontal"] .items > .tree > .item-shell {
     flex: 0 0 auto;
     min-inline-size: min(220px, 70vw);
+    align-content: start;
+    padding-block: 0;
+    padding-inline: calc(var(--ui-sortable-list-gap) / 2);
   }
 
   .list[data-disabled="true"] {
-    opacity: 0.68;
+    opacity: 0.62;
   }
 
   .list-header {
     display: grid;
-    gap: 4px;
+    gap: 2px;
+    padding: 2px 4px 0;
   }
 
   .list-custom-header:empty {
@@ -301,9 +330,10 @@ const style = `
   }
 
   .list-label {
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.4;
-    font-weight: 700;
+    font-weight: 650;
+    letter-spacing: 0.005em;
     color: var(--ui-sortable-text);
   }
 
@@ -311,36 +341,63 @@ const style = `
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-inline-size: 28px;
-    min-block-size: 24px;
-    padding-inline: 8px;
+    min-inline-size: 22px;
+    min-block-size: 20px;
+    padding-inline: 7px;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--ui-sortable-accent) 10%, transparent);
+    background: color-mix(in srgb, var(--ui-sortable-text) 7%, transparent);
     color: var(--ui-sortable-muted);
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 11.5px;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
   }
 
   .list-description,
-  .list-helper,
-  .empty {
+  .list-helper {
     color: var(--ui-sortable-muted);
     font-size: 12px;
-    line-height: 1.55;
+    line-height: 1.5;
+  }
+
+  .list-helper {
+    font-size: 11.5px;
+    opacity: 0.85;
+  }
+
+  .empty {
+    display: grid;
+    place-items: center;
+    min-block-size: 64px;
+    margin-block: calc(var(--ui-sortable-list-gap) / 2);
+    padding: 14px;
+    border: 1px dashed var(--ui-sortable-border-strong);
+    border-radius: var(--ui-sortable-item-radius);
+    color: var(--ui-sortable-muted);
+    font-size: 12.5px;
+    line-height: 1.5;
+    text-align: center;
+    transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+  }
+
+  .empty:has(+ .dropzone[data-active="true"]) {
+    border-color: var(--ui-sortable-accent);
+    background: color-mix(in srgb, var(--ui-sortable-accent) 7%, transparent);
+    color: color-mix(in srgb, var(--ui-sortable-accent) 80%, var(--ui-sortable-text));
   }
 
   .items {
     display: grid;
     align-content: start;
-    gap: var(--ui-sortable-list-gap);
-    min-block-size: 140px;
+    gap: 0;
+    min-block-size: 88px;
     min-inline-size: 0;
   }
 
   .tree {
     display: grid;
-    gap: var(--ui-sortable-list-gap);
+    gap: 0;
     min-inline-size: 0;
+    margin-block: calc(var(--ui-sortable-list-gap) / -2);
   }
 
   .list-custom-empty:empty {
@@ -355,35 +412,51 @@ const style = `
     display: none;
   }
 
+  /* The cards are spaced by the shell's padding, not by a grid gap: the drop rails between them take
+     no height, so the list is as tall as its cards. */
   .item-shell {
     display: grid;
-    gap: 8px;
+    gap: 0;
     min-inline-size: 0;
+    padding-block: calc(var(--ui-sortable-list-gap) / 2);
   }
 
   .item {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    align-items: start;
+    align-items: center;
     gap: var(--ui-sortable-item-gap);
     min-inline-size: 0;
-    padding: 12px;
-    border: 1px solid color-mix(in srgb, var(--ui-sortable-border) 82%, transparent);
+    padding: 9px 12px 9px 6px;
+    border: 1px solid var(--ui-sortable-border);
     border-radius: var(--ui-sortable-item-radius);
-    background: var(--ui-sortable-surface-muted);
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-    will-change: transform, opacity, box-shadow, border-color, background;
+    background: var(--ui-sortable-card);
+    box-shadow: var(--ui-sortable-card-shadow);
     transition:
-      transform 180ms ease,
-      opacity 180ms ease,
-      box-shadow 180ms ease,
-      border-color 180ms ease,
-      background 180ms ease;
+      opacity 160ms ease,
+      box-shadow 160ms ease,
+      border-color 160ms ease,
+      background 160ms ease;
+  }
+
+  .item:hover {
+    border-color: var(--ui-sortable-border-strong);
+    box-shadow: var(--ui-sortable-card-shadow-hover);
+  }
+
+  .item:focus {
+    outline: none;
+  }
+
+  .item:focus-visible {
+    outline: 2px solid var(--ui-sortable-accent);
+    outline-offset: 2px;
   }
 
   .item[data-drag-handle-mode="item"],
   .item[data-drag-handle-mode="custom"] {
     grid-template-columns: minmax(0, 1fr);
+    padding-inline-start: 12px;
   }
 
   .item[data-drag-handle-mode="item"] {
@@ -395,129 +468,170 @@ const style = `
   }
 
   .item[data-selected="true"] {
-    border-color: color-mix(in srgb, var(--ui-sortable-accent) 32%, var(--ui-sortable-border));
-    background: color-mix(in srgb, var(--ui-sortable-accent) 11%, var(--ui-sortable-surface));
+    border-color: color-mix(in srgb, var(--ui-sortable-accent) 60%, var(--ui-sortable-border));
+    background: color-mix(in srgb, var(--ui-sortable-accent) 7%, var(--ui-sortable-card));
     box-shadow:
-      0 0 0 1px color-mix(in srgb, var(--ui-sortable-accent) 10%, transparent),
-      0 10px 24px rgba(15, 23, 42, 0.08);
-  }
-
-  .item[data-focused="true"] {
-    border-color: color-mix(in srgb, var(--ui-sortable-accent) 42%, var(--ui-sortable-border));
-    box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-sortable-accent) 12%, transparent),
-      0 10px 24px rgba(15, 23, 42, 0.08);
+      0 0 0 1px color-mix(in srgb, var(--ui-sortable-accent) 28%, transparent),
+      var(--ui-sortable-card-shadow);
   }
 
   .item[data-drop-inside-active="true"] {
-    border-color: color-mix(in srgb, var(--ui-sortable-accent) 48%, var(--ui-sortable-border));
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--ui-sortable-accent) 14%, var(--ui-sortable-surface)),
-        color-mix(in srgb, var(--ui-sortable-accent) 10%, var(--ui-sortable-surface-muted))
-      );
+    border-color: var(--ui-sortable-accent);
+    background: color-mix(in srgb, var(--ui-sortable-accent) 10%, var(--ui-sortable-card));
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--ui-sortable-accent) 12%, transparent),
-      0 14px 30px rgba(15, 23, 42, 0.1);
+      0 0 0 3px color-mix(in srgb, var(--ui-sortable-accent) 20%, transparent),
+      var(--ui-sortable-card-shadow);
   }
 
+  /* While a card is being dragged its place in the list stays as an empty slot, so the list does not
+     jump; the card itself is the ghost that follows the pointer. */
   .item[data-dragging="true"] {
-    opacity: 0.48;
-    transform: scale(0.985);
-    transition-duration: 0ms, 180ms, 180ms, 180ms, 180ms;
+    border-style: dashed;
+    border-color: color-mix(in srgb, var(--ui-sortable-accent) 45%, var(--ui-sortable-border));
+    background: color-mix(in srgb, var(--ui-sortable-accent) 5%, var(--ui-sortable-card));
+    box-shadow: none;
   }
 
+  .item[data-dragging="true"] > * {
+    visibility: hidden;
+  }
+
+  /* The keyboard drag shows the card at its destination as a quiet dashed card. */
   .item.item-placeholder {
     grid-template-columns: 1fr;
+    padding-inline-start: 12px;
     border-style: dashed;
-    border-color: color-mix(in srgb, var(--ui-sortable-accent) 50%, var(--ui-sortable-border));
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--ui-sortable-accent) 10%, var(--ui-sortable-surface)),
-        color-mix(in srgb, var(--ui-sortable-accent) 6%, var(--ui-sortable-surface-muted))
-      );
-    box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--ui-sortable-accent) 18%, transparent),
-      0 12px 26px rgba(15, 23, 42, 0.08);
+    border-color: color-mix(in srgb, var(--ui-sortable-accent) 55%, var(--ui-sortable-border));
+    background: color-mix(in srgb, var(--ui-sortable-accent) 7%, var(--ui-sortable-card));
+    box-shadow: none;
   }
 
   .placeholder-content {
     display: grid;
-    gap: 6px;
+    gap: 3px;
     min-inline-size: 0;
   }
 
   .placeholder-kicker {
-    font-size: 11px;
+    font-size: 10.5px;
     line-height: 1.4;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--ui-sortable-accent) 72%, var(--ui-sortable-text));
+    color: color-mix(in srgb, var(--ui-sortable-accent) 78%, var(--ui-sortable-text));
   }
 
   .placeholder-title {
-    font-size: 14px;
+    font-size: 13.5px;
     line-height: 1.4;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--ui-sortable-text);
   }
 
   .placeholder-description {
     color: var(--ui-sortable-muted);
     font-size: 12px;
-    line-height: 1.55;
+    line-height: 1.5;
   }
 
+  /* The card that follows the pointer: a copy of the real card, lifted. */
+  .item.item-ghost {
+    position: fixed;
+    inset: 0 auto auto 0;
+    z-index: 2147483647;
+    box-sizing: border-box;
+    max-inline-size: calc(100vw - 16px);
+    margin: 0;
+    pointer-events: none;
+    cursor: grabbing;
+    border-color: color-mix(in srgb, var(--ui-sortable-accent) 55%, var(--ui-sortable-border));
+    background: var(--ui-sortable-card);
+    box-shadow: var(--ui-sortable-lift-shadow);
+    rotate: 1.2deg;
+    scale: 1.025;
+    transition: none;
+    will-change: transform;
+    animation: ui-sortable-lift 150ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  .item.item-ghost[data-count="stack"] {
+    box-shadow:
+      5px 5px 0 -1px var(--ui-sortable-card),
+      5px 5px 0 0 var(--ui-sortable-border-strong),
+      10px 10px 0 -2px var(--ui-sortable-card),
+      10px 10px 0 -1px var(--ui-sortable-border-strong),
+      var(--ui-sortable-lift-shadow);
+  }
+
+  .item.item-ghost .handle {
+    opacity: 1;
+    color: var(--ui-sortable-accent);
+    cursor: grabbing;
+  }
+
+  .item.item-ghost[data-compact="true"] .item-description,
+  .item.item-ghost[data-compact="true"] .item-meta {
+    display: none;
+  }
+
+  .ghost-badge {
+    position: absolute;
+    inset-block-start: -9px;
+    inset-inline-end: -9px;
+    min-inline-size: 22px;
+    block-size: 22px;
+    padding-inline: 6px;
+    box-sizing: border-box;
+    border-radius: 999px;
+    background: var(--ui-sortable-accent);
+    color: var(--ui-sortable-accent-contrast, #ffffff);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 22px;
+    text-align: center;
+    box-shadow: 0 0 0 2px var(--ui-sortable-card);
+  }
+
+  /* Fallback when the dragged card cannot be copied. */
+  .drag-pill {
+    position: fixed;
+    inset: 0 auto auto 0;
+    z-index: 2147483647;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: var(--ui-sortable-text);
+    color: var(--ui-sortable-surface);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    pointer-events: none;
+    box-shadow: var(--ui-sortable-lift-shadow);
+  }
+
+  @keyframes ui-sortable-lift {
+    from {
+      rotate: 0deg;
+      scale: 1;
+    }
+  }
+
+  /* The ghost card and the insertion line already show where the card will land, so the old floating
+     "drop preview" box is not drawn. */
   .drag-preview-overlay {
     position: fixed;
-    inset: auto auto auto auto;
     top: -9999px;
     left: -9999px;
-    z-index: 2147483646;
-    box-sizing: border-box;
-    inline-size: min(320px, calc(100vw - 32px));
-    padding: 12px;
-    border: 1px dashed color-mix(in srgb, var(--ui-sortable-accent) 50%, var(--ui-sortable-border));
-    border-radius: var(--ui-sortable-item-radius);
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--ui-sortable-accent) 10%, var(--ui-sortable-surface)),
-        color-mix(in srgb, var(--ui-sortable-accent) 6%, var(--ui-sortable-surface-muted))
-      );
-    box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--ui-sortable-accent) 18%, transparent),
-      0 18px 40px rgba(15, 23, 42, 0.12);
+    display: none;
     pointer-events: none;
-    opacity: 0;
-    transition: opacity 120ms ease;
-  }
-
-  .drag-preview-overlay[data-visible="true"] {
-    opacity: 1;
-  }
-
-  .drag-preview-overlay .placeholder-description {
-    display: inline-block;
-    max-inline-size: 190px;
-    padding: 4px 8px;
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--ui-sortable-surface) 94%, white 6%);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-sortable-border) 72%, transparent);
-    color: color-mix(in srgb, var(--ui-sortable-text) 84%, var(--ui-sortable-accent));
-    font-weight: 500;
   }
 
   .item[data-disabled="true"] {
-    opacity: 0.58;
+    opacity: 0.55;
   }
 
   .item-content {
     display: grid;
-    gap: 4px;
+    gap: 2px;
     min-inline-size: 0;
   }
 
@@ -548,9 +662,9 @@ const style = `
   }
 
   .item-title {
-    font-size: 14px;
+    font-size: 13.5px;
     line-height: 1.4;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--ui-sortable-text);
     overflow-wrap: anywhere;
   }
@@ -558,35 +672,41 @@ const style = `
   .item-description {
     color: var(--ui-sortable-muted);
     font-size: 12px;
-    line-height: 1.55;
+    line-height: 1.5;
     overflow-wrap: anywhere;
   }
 
   .item-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 4px;
+  }
+
+  .item-meta:has(.item-badge:not([hidden]):not(.drop-badge)),
+  .item[data-drop-inside-active="true"] .item-meta {
+    margin-block-start: 4px;
   }
 
   .item-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 8px;
+    padding: 1px 7px;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--ui-sortable-accent) 10%, transparent);
+    background: color-mix(in srgb, var(--ui-sortable-text) 6%, transparent);
     color: var(--ui-sortable-muted);
-    font-size: 11px;
+    font-size: 10.5px;
     font-weight: 600;
+    line-height: 1.6;
+  }
+
+  .item-badge.selection-badge {
+    background: color-mix(in srgb, var(--ui-sortable-accent) 14%, transparent);
+    color: color-mix(in srgb, var(--ui-sortable-accent) 82%, var(--ui-sortable-text));
   }
 
   .item-badge[hidden] {
     display: none;
-  }
-
-  .item[data-drop-inside-active="true"] .item-badge.drop-badge {
-    background: color-mix(in srgb, var(--ui-sortable-accent) 18%, var(--ui-sortable-surface));
-    color: color-mix(in srgb, var(--ui-sortable-accent) 78%, var(--ui-sortable-text));
   }
 
   .item-badge.drop-badge {
@@ -595,159 +715,190 @@ const style = `
 
   .item[data-drop-inside-active="true"] .item-badge.drop-badge {
     display: inline-flex;
+    background: color-mix(in srgb, var(--ui-sortable-accent) 18%, var(--ui-sortable-card));
+    color: color-mix(in srgb, var(--ui-sortable-accent) 80%, var(--ui-sortable-text));
   }
 
+  /* A quiet grip: faint until the card is hovered, focused, selected or dragged. */
   .handle {
     display: inline-grid;
     place-items: center;
-    inline-size: 34px;
-    block-size: 34px;
+    inline-size: 22px;
+    block-size: 28px;
     margin: 0;
     padding: 0;
-    border: 1px solid color-mix(in srgb, var(--ui-sortable-border) 86%, transparent);
+    border: 0;
     border-radius: var(--ui-sortable-handle-radius);
-    background: color-mix(in srgb, var(--ui-sortable-surface) 92%, transparent);
+    background: transparent;
     color: var(--ui-sortable-muted);
+    opacity: 0.4;
     cursor: grab;
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
     transition:
-      transform 160ms ease,
-      color 160ms ease,
-      border-color 160ms ease,
-      background 160ms ease;
+      opacity 140ms ease,
+      color 140ms ease,
+      background 140ms ease;
+  }
+
+  .item:hover .handle,
+  .item:focus-visible .handle,
+  .item[data-selected="true"] .handle {
+    opacity: 1;
   }
 
   .handle:hover {
-    color: color-mix(in srgb, var(--ui-sortable-accent) 80%, var(--ui-sortable-text));
-    border-color: color-mix(in srgb, var(--ui-sortable-accent) 26%, var(--ui-sortable-border));
-    background: color-mix(in srgb, var(--ui-sortable-accent) 8%, var(--ui-sortable-surface));
+    color: var(--ui-sortable-text);
+    background: color-mix(in srgb, var(--ui-sortable-text) 8%, transparent);
   }
 
   .handle:active {
     cursor: grabbing;
-    transform: scale(0.96);
   }
 
   .handle[disabled] {
     cursor: not-allowed;
-    opacity: 0.48;
+    opacity: 0.25;
   }
 
   .handle svg {
-    inline-size: 16px;
-    block-size: 16px;
+    inline-size: 14px;
+    block-size: 14px;
+    fill: currentColor;
   }
 
+  /* Nested cards hang off a guide line under their parent. */
   .children {
     display: grid;
-    gap: var(--ui-sortable-list-gap);
-    padding-inline-start: var(--ui-sortable-indent);
+    gap: 0;
     min-inline-size: 0;
+    margin-inline-start: 11px;
+    padding-block-start: calc(var(--ui-sortable-list-gap) / 2);
+    padding-inline-start: var(--ui-sortable-indent);
+    border-inline-start: 1px solid var(--ui-sortable-border-strong);
   }
 
+  /* Drop rails take no height: they are the thin lines between cards, with an invisible hit area
+     around them. The line shows only on the rail the pointer is over. */
   .dropzone {
     position: relative;
     display: block;
+    block-size: var(--ui-sortable-dropzone-size);
     min-block-size: var(--ui-sortable-dropzone-size);
     min-inline-size: 0;
-    border-radius: 999px;
-    will-change: opacity, background;
-    transition: opacity 140ms ease, background 140ms ease;
   }
 
-  .root[data-dropzone-style="container"] .dropzone {
-    display: grid;
-    place-items: center;
-    min-block-size: var(--ui-sortable-dropzone-match-block-size, var(--ui-sortable-dropzone-container-min-block-size));
-    inline-size: min(100%, var(--ui-sortable-dropzone-match-inline-size, 100%));
-    max-inline-size: var(--ui-sortable-dropzone-container-max-inline-size, none);
-    padding: 12px;
-    border: 1px dashed color-mix(in srgb, var(--ui-sortable-accent) 40%, var(--ui-sortable-border));
-    border-radius: var(--ui-sortable-item-radius);
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--ui-sortable-accent) 9%, var(--ui-sortable-surface)),
-        color-mix(in srgb, var(--ui-sortable-accent) 5%, var(--ui-sortable-surface-muted))
-      );
-    box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--ui-sortable-accent) 12%, transparent),
-      0 8px 18px rgba(15, 23, 42, 0.05);
-    opacity: 0.82;
-    overflow: hidden;
+  .dropzone::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    block-size: 2px;
+    margin-block-start: -1px;
+    border-radius: 999px;
+    background: var(--ui-sortable-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-sortable-accent) 20%, transparent);
+    opacity: 0;
+    transform: scaleX(0.35);
+    transform-origin: center;
+    transition: opacity 120ms ease, transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .dropzone::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block: calc(var(--ui-sortable-dropzone-hit-size) * -1);
+  }
+
+  .dropzone[data-active="true"]::before {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  .root[data-drop-indicator-visibility="always"] .dropzone::before {
+    opacity: 1;
+    transform: scaleX(1);
+    background: color-mix(in srgb, var(--ui-sortable-accent) 22%, transparent);
+    box-shadow: none;
+  }
+
+  .root[data-drop-indicator-visibility="always"] .dropzone[data-active="true"]::before {
+    background: var(--ui-sortable-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-sortable-accent) 20%, transparent);
+  }
+
+  /* A card shows "drop inside" by highlighting itself, so its inside rail draws nothing. */
+  .root[data-dropzone-style="indicator"] .dropzone[data-mode="inside"]::before,
+  .root[data-dropzone-style="indicator"] .dropzone[data-mode="inside"]::after {
+    display: none;
   }
 
   .list[data-orientation="horizontal"] .dropzone {
-    min-block-size: auto;
-    min-inline-size: 16px;
     align-self: stretch;
+    block-size: auto;
+    min-block-size: 0;
+    inline-size: var(--ui-sortable-dropzone-size);
+    min-inline-size: var(--ui-sortable-dropzone-size);
+  }
+
+  .list[data-orientation="horizontal"] .dropzone::before {
+    inset-block: 0;
+    inset-inline: auto;
+    inset-inline-start: 0;
+    inline-size: 2px;
+    block-size: auto;
+    margin-block-start: 0;
+    margin-inline-start: -1px;
+    transform: scaleY(0.35);
+  }
+
+  .list[data-orientation="horizontal"] .dropzone::after {
+    inset-block: 0;
+    inset-inline: calc(var(--ui-sortable-dropzone-hit-size) * -1);
+  }
+
+  .list[data-orientation="horizontal"] .dropzone[data-active="true"]::before,
+  .root[data-drop-indicator-visibility="always"] .list[data-orientation="horizontal"] .dropzone::before {
+    transform: scaleY(1);
+  }
+
+  .dropzone-label {
+    display: none;
+  }
+
+  /* dropzone-style="container": the target is drawn as a whole dashed card in place. */
+  .root[data-dropzone-style="container"] .dropzone {
+    display: grid;
+    place-items: center;
+    block-size: auto;
+    min-block-size: var(--ui-sortable-dropzone-match-block-size, var(--ui-sortable-dropzone-container-min-block-size));
+    inline-size: min(100%, var(--ui-sortable-dropzone-match-inline-size, 100%));
+    max-inline-size: var(--ui-sortable-dropzone-container-max-inline-size, none);
+    padding: 10px;
+    border: 1px dashed color-mix(in srgb, var(--ui-sortable-accent) 45%, var(--ui-sortable-border));
+    border-radius: var(--ui-sortable-item-radius);
+    background: color-mix(in srgb, var(--ui-sortable-accent) 5%, var(--ui-sortable-card));
+    opacity: 0.85;
+    overflow: hidden;
   }
 
   .root[data-dropzone-style="container"] .list[data-orientation="horizontal"] .dropzone {
     min-block-size: var(--ui-sortable-dropzone-match-block-size, var(--ui-sortable-dropzone-container-min-block-size));
     min-inline-size: var(--ui-sortable-dropzone-match-inline-size, var(--ui-sortable-dropzone-container-min-inline-size));
     inline-size: auto;
-    align-self: stretch;
   }
 
-  .dropzone::before {
-    content: '';
-    position: absolute;
-    inset-block-start: 50%;
-    inset-inline: 0;
-    block-size: 2px;
-    transform: translateY(-50%) scaleX(0.42);
-    transform-origin: center;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--ui-sortable-accent) 22%, transparent);
-    transition: transform 160ms ease, background 160ms ease;
-  }
-
-  .list[data-orientation="horizontal"] .dropzone::before {
-    inset-block: 0;
-    inset-inline-start: 50%;
-    inset-inline-end: auto;
-    inline-size: 2px;
-    block-size: 100%;
-    transform: translateX(-50%) scaleY(0.24);
-  }
-
-  .dropzone[data-active="true"] {
-    opacity: 1;
+  .root[data-dropzone-style="container"] .dropzone::before,
+  .root[data-dropzone-style="container"] .dropzone::after {
+    display: none;
   }
 
   .root[data-dropzone-style="container"] .dropzone[data-active="true"] {
-    border-color: color-mix(in srgb, var(--ui-sortable-accent) 56%, var(--ui-sortable-border));
-    background:
-      linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--ui-sortable-accent) 14%, var(--ui-sortable-surface)),
-        color-mix(in srgb, var(--ui-sortable-accent) 10%, var(--ui-sortable-surface-muted))
-      );
-    box-shadow:
-      inset 0 0 0 1px color-mix(in srgb, var(--ui-sortable-accent) 16%, transparent),
-      0 12px 24px rgba(15, 23, 42, 0.08);
-  }
-
-  .list[data-orientation="horizontal"] .dropzone[data-active="true"] {
     opacity: 1;
-  }
-
-  .dropzone[data-active="true"]::before {
-    transform: translateY(-50%) scaleX(1);
-    background: color-mix(in srgb, var(--ui-sortable-accent) 86%, var(--ui-sortable-text));
-  }
-
-  .list[data-orientation="horizontal"] .dropzone[data-active="true"]::before {
-    transform: translateX(-50%) scaleY(1);
-  }
-
-  .dropzone[data-mode="inside"] {
-    min-block-size: var(--ui-sortable-dropzone-inside-size);
-    margin-block-start: -2px;
-    padding-inline-start: 6px;
+    border-color: var(--ui-sortable-accent);
+    background: color-mix(in srgb, var(--ui-sortable-accent) 10%, var(--ui-sortable-card));
   }
 
   .root[data-dropzone-style="container"] .dropzone[data-mode="inside"] {
@@ -755,103 +906,23 @@ const style = `
       calc(var(--ui-sortable-dropzone-match-block-size, var(--ui-sortable-dropzone-container-min-block-size)) * 0.78),
       var(--ui-sortable-dropzone-container-min-block-size)
     );
-    margin-block-start: 0;
-    padding-inline-start: 12px;
-  }
-
-  .dropzone[data-mode="inside"]::before {
-    inset-inline-start: 8px;
-    inset-inline-end: auto;
-    inline-size: 42px;
-  }
-
-  .dropzone-label {
-    position: absolute;
-    inset-block-start: 50%;
-    inset-inline-start: 50%;
-    inset-inline-end: auto;
-    transform: translate(-50%, -50%) scale(0.98);
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--ui-sortable-surface) 84%, transparent);
-    color: var(--ui-sortable-muted);
-    font-size: 11px;
-    opacity: 0;
-    transition: opacity 120ms ease, transform 120ms ease;
-    pointer-events: none;
-  }
-
-  .root[data-dropzone-style="container"] .dropzone::before {
-    display: none;
   }
 
   .root[data-dropzone-style="container"] .dropzone-label {
-    position: static;
-    inset: auto;
-    transform: none;
-    padding: 0;
-    border-radius: 0;
-    background: transparent;
-    color: color-mix(in srgb, var(--ui-sortable-accent) 76%, var(--ui-sortable-text));
+    display: block;
+    color: color-mix(in srgb, var(--ui-sortable-accent) 80%, var(--ui-sortable-text));
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 650;
     letter-spacing: 0.02em;
-    opacity: 1;
     white-space: nowrap;
-  }
-
-  .dropzone[data-active="true"] .dropzone-label {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-
-  .root[data-drag-preview="true"] .dropzone-label {
-    opacity: 0;
-  }
-
-  .root[data-dropzone-style="container"][data-drag-preview="true"] .dropzone-label {
-    opacity: 1;
-  }
-
-  .root[data-drop-indicator-visibility="active"] .dropzone {
-    opacity: 0;
   }
 
   .root[data-dropzone-style="container"][data-drop-indicator-visibility="active"] .dropzone {
     display: none;
-    opacity: 0;
   }
 
   .root[data-dropzone-style="container"][data-drop-indicator-visibility="active"] .dropzone[data-active="true"] {
     display: grid;
-    opacity: 1;
-  }
-
-  .root[data-drop-indicator-visibility="active"] .dropzone::before {
-    background: transparent;
-    transform: translateY(-50%) scaleX(0.16);
-  }
-
-  .root[data-drop-indicator-visibility="active"] .list[data-orientation="horizontal"] .dropzone::before {
-    transform: translateX(-50%) scaleY(0.16);
-  }
-
-  .root[data-drop-indicator-visibility="active"] .dropzone[data-active="true"] {
-    opacity: 1;
-  }
-
-  .root[data-drop-indicator-visibility="active"] .dropzone[data-active="true"]::before {
-    transform: translateY(-50%) scaleX(1);
-    background: color-mix(in srgb, var(--ui-sortable-accent) 86%, var(--ui-sortable-text));
-  }
-
-  .root[data-drop-indicator-visibility="active"] .list[data-orientation="horizontal"] .dropzone[data-active="true"]::before {
-    transform: translateX(-50%) scaleY(1);
-  }
-
-  .root[data-drop-indicator-visibility="active"] .dropzone[data-active="true"] .dropzone-label {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
   }
 
   .sr-only {
@@ -866,13 +937,25 @@ const style = `
     border: 0;
   }
 
+  /* Touch screens have no hover: keep the grip clearly visible. */
+  @media (hover: none) {
+    .handle {
+      opacity: 1;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .item,
     .handle,
-    .dropzone,
-    .dropzone::before,
-    .dropzone-label {
+    .empty,
+    .dropzone::before {
       transition: none;
+    }
+
+    .item.item-ghost {
+      animation: none;
+      rotate: 0deg;
+      scale: 1;
     }
   }
 
@@ -886,8 +969,14 @@ const style = `
       border-color: CanvasText;
     }
 
+    .item[data-selected="true"],
+    .item:focus-visible {
+      outline: 2px solid Highlight;
+    }
+
     .dropzone::before {
       background: Highlight;
+      box-shadow: none;
     }
   }
 `;
@@ -1330,6 +1419,7 @@ export class UISortable extends ElementBase {
   private _hydratedPersistKey: string | null = null;
   private _cloneSeed = 1;
   private _dragImage: HTMLElement | null = null;
+  private _dragImageOffset = { x: -14, y: -14 };
   private _dragPreviewOverlay: HTMLElement | null = null;
   private _pendingFocusId: string | null = null;
   private _pointerGesture: PointerGestureState | null = null;
@@ -1540,7 +1630,7 @@ export class UISortable extends ElementBase {
       >
         <div class="toolbar" part="toolbar">
           <div class="helper" id="ui-sortable-helper">${escapeHtml(helper)}</div>
-          <div class="helper selection-summary">
+          <div class="helper selection-summary" data-count="${selectionCount}">
             <span class="selection-pill" part="selection-count">${selectionCount}</span>
             <span class="selection-text">${selectionCount === 1 ? 'item selected' : 'items selected'}</span>
           </div>
@@ -1578,7 +1668,7 @@ export class UISortable extends ElementBase {
                     ${helperText ? `<div class="list-helper">${escapeHtml(helperText)}</div>` : ''}
                   </div>
                 </header>
-                <div class="items" role="${records.length ? 'listbox' : 'group'}" ${records.length ? 'aria-multiselectable="true"' : ''} aria-label="${escapeHtml(list.label)}" aria-describedby="ui-sortable-helper">
+                <div class="items" part="items" role="${records.length ? 'listbox' : 'group'}" ${records.length ? 'aria-multiselectable="true"' : ''} aria-label="${escapeHtml(list.label)}" aria-describedby="ui-sortable-helper">
                   ${content || `<div class="list-custom-empty" part="list-custom-empty" data-list-empty-target="${escapeHtml(list.id)}"></div><div class="empty">${escapeHtml(list.emptyLabel)}</div>${this._renderDropzone({
                     listId: list.id,
                     parentId: null,
@@ -1594,7 +1684,9 @@ export class UISortable extends ElementBase {
       </div>
     `;
 
+    const scroll = this._captureScroll();
     this.setContent(html);
+    this._restoreScroll(scroll);
     queueMicrotask(() => {
       this._restorePendingFocus();
       this._applyCurrentDropTargetVisualState();
@@ -1676,7 +1768,51 @@ export class UISortable extends ElementBase {
     if (document.activeElement !== target) {
       target.focus({ preventScroll: true });
     }
+    this._revealInBoard(target);
     this._pendingFocusId = null;
+  }
+
+  // Every render replaces the shadow content, which would send the board (and any list with its own
+  // scrollbar) back to the start.
+  private _captureScroll(): { board: number; lists: Map<string, { left: number; top: number }> } | null {
+    const board = this.root.querySelector<HTMLElement>('.lists');
+    if (!board) return null;
+    const lists = new Map<string, { left: number; top: number }>();
+    this.root.querySelectorAll<HTMLElement>('.list[data-list-id]').forEach((list) => {
+      const items = list.querySelector<HTMLElement>('.items');
+      const id = list.getAttribute('data-list-id');
+      if (items && id && (items.scrollLeft || items.scrollTop)) lists.set(id, { left: items.scrollLeft, top: items.scrollTop });
+    });
+    return { board: board.scrollLeft, lists };
+  }
+
+  private _restoreScroll(state: { board: number; lists: Map<string, { left: number; top: number }> } | null): void {
+    if (!state) return;
+    const board = this.root.querySelector<HTMLElement>('.lists');
+    if (board && state.board) board.scrollLeft = state.board;
+    if (!state.lists.size) return;
+    this.root.querySelectorAll<HTMLElement>('.list[data-list-id]').forEach((list) => {
+      const saved = state.lists.get(list.getAttribute('data-list-id') || '');
+      const items = list.querySelector<HTMLElement>('.items');
+      if (!saved || !items) return;
+      items.scrollLeft = saved.left;
+      items.scrollTop = saved.top;
+    });
+  }
+
+  // A board that scrolls sideways can hold the focused card off screen (after a drop into a far list,
+  // or when the keyboard moves into one): bring that list into view.
+  private _revealInBoard(target: HTMLElement): void {
+    const board = this.root.querySelector<HTMLElement>('.lists');
+    const list = target.closest<HTMLElement>('.list');
+    if (!board || !list || board.scrollWidth <= board.clientWidth + 1) return;
+    const boardRect = board.getBoundingClientRect();
+    const listRect = list.getBoundingClientRect();
+    if (listRect.left < boardRect.left) {
+      board.scrollLeft -= boardRect.left - listRect.left + 4;
+    } else if (listRect.right > boardRect.right) {
+      board.scrollLeft += Math.min(listRect.right - boardRect.right + 4, listRect.left - boardRect.left);
+    }
   }
 
   private _escapeSelectorValue(value: string): string {
@@ -1797,6 +1933,7 @@ export class UISortable extends ElementBase {
       }
     });
 
+    this.root.querySelector<HTMLElement>('.selection-summary')?.setAttribute('data-count', String(this._selection.length));
     const selectionPill = this.root.querySelector<HTMLElement>('.selection-pill');
     if (selectionPill) selectionPill.textContent = String(this._selection.length);
 
@@ -1965,6 +2102,8 @@ export class UISortable extends ElementBase {
   }
 
   private _setDraggingVisualState(ids: string[], active: boolean): void {
+    // A copy leaves the original where it is, so there is no empty slot to show.
+    if (active && this._dragState?.clone && !this._dragState.keyboard) return;
     ids.forEach((id) => {
       const el = this._findItemElement(id);
       if (!el) return;
@@ -2054,7 +2193,7 @@ export class UISortable extends ElementBase {
     const shadowRoot = this.root as ShadowRoot & { elementFromPoint?: (x: number, y: number) => Element | null };
     let current: Node | null = typeof shadowRoot.elementFromPoint === 'function'
       ? shadowRoot.elementFromPoint(clientX, clientY)
-      : this.ownerDocument?.elementFromPoint(clientX, clientY) ?? null;
+      : this.ownerDocument?.elementFromPoint?.(clientX, clientY) ?? null;
 
     while (current) {
       if (current instanceof HTMLElement) path.push(current);
@@ -2680,7 +2819,8 @@ export class UISortable extends ElementBase {
       clientX,
       clientY,
       this._dragState.movedRootIds.length,
-      this._dragState.clone
+      this._dragState.clone,
+      { x: this._pointerGesture.startX, y: this._pointerGesture.startY }
     );
     this._setDraggingVisualState(this._draggingIds(), true);
     this._announce(
@@ -2753,8 +2893,9 @@ export class UISortable extends ElementBase {
   private _autoScrollFrame = 0;
   private _autoScrollPoint: { x: number; y: number } | null = null;
 
-  // Holding a dragged card near the top or bottom edge scrolls the page (or the nearest scrolling
-  // container), so lists and positions that are off screen can be reached with the pointer.
+  // Holding a dragged card near an edge scrolls what is under it: the board sideways, the list under
+  // the pointer when it has its own scrollbar, and the page (or the nearest scrolling container) up
+  // and down, so lists and positions that are off screen can be reached with the pointer.
   private _updateAutoScroll(x: number, y: number): void {
     this._autoScrollPoint = { x, y };
     if (!this._autoScrollFrame && typeof requestAnimationFrame === 'function') {
@@ -2774,15 +2915,40 @@ export class UISortable extends ElementBase {
     if (!point || !this._dragState || this._dragState.keyboard) return;
 
     const view = this.ownerDocument?.defaultView;
+    let scrolled = false;
+
+    const board = this.root.querySelector<HTMLElement>('.lists');
+    if (board && board.scrollWidth > board.clientWidth + 1) {
+      const bounds = board.getBoundingClientRect();
+      const dx = edgeScrollDelta(point.x, Math.max(0, bounds.left), Math.min(view?.innerWidth ?? Infinity, bounds.right));
+      if (dx) {
+        board.scrollLeft += dx;
+        scrolled = true;
+      }
+    }
+
+    const list = this._pathFromPoint(point.x, point.y).find((node) => node.classList?.contains('items'));
+    if (list && list.scrollHeight > list.clientHeight + 1 && view?.getComputedStyle(list).overflowY !== 'visible') {
+      const bounds = list.getBoundingClientRect();
+      const dy = edgeScrollDelta(point.y, bounds.top, bounds.bottom);
+      if (dy) {
+        list.scrollTop += dy;
+        scrolled = true;
+      }
+    }
+
     const scroller = findScrollParent(this);
     const bounds = scroller ? scroller.getBoundingClientRect() : null;
     const top = Math.max(0, bounds ? bounds.top : 0);
     const bottom = Math.min(view?.innerHeight ?? 0, bounds ? bounds.bottom : Infinity);
     const delta = edgeScrollDelta(point.y, top, bottom);
-    if (!delta) return;
+    if (delta) {
+      if (scroller) scroller.scrollTop += delta;
+      else view?.scrollBy(0, delta);
+      scrolled = true;
+    }
 
-    if (scroller) scroller.scrollTop += delta;
-    else view?.scrollBy(0, delta);
+    if (!scrolled) return;
 
     // The content moved under a stationary pointer, so the target under it has changed.
     if (!this._dragState.committed) {
@@ -3220,31 +3386,83 @@ export class UISortable extends ElementBase {
     this._dragPreviewOverlay = null;
   }
 
-  private _applyPointerPreview(clientX: number, clientY: number, count: number, clone: boolean): void {
+  private _applyPointerPreview(
+    clientX: number,
+    clientY: number,
+    count: number,
+    clone: boolean,
+    grab?: { x: number; y: number }
+  ): void {
     this._removeDragImage();
-    const ghost = document.createElement('div');
-    ghost.textContent = clone
-      ? count === 1 ? 'Copying item' : `Copying ${count} items`
-      : count === 1 ? 'Moving item' : `Moving ${count} items`;
-    ghost.style.position = 'fixed';
-    ghost.style.top = '0';
-    ghost.style.left = '0';
-    ghost.style.zIndex = '2147483647';
-    ghost.style.padding = '8px 12px';
-    ghost.style.borderRadius = '999px';
-    ghost.style.background = 'rgba(15, 23, 42, 0.92)';
-    ghost.style.color = '#f8fafc';
-    ghost.style.font = '600 12px/1 Inter, sans-serif';
-    ghost.style.pointerEvents = 'none';
-    ghost.style.boxShadow = '0 12px 28px rgba(15, 23, 42, 0.22)';
-    document.body.appendChild(ghost);
-    this._dragImage = ghost;
+    const source = this._dragState ? this._findItemElement(this._dragState.originId) : null;
+    const ghost = source ? this._buildDragGhost(source, count, clone, grab) : null;
+
+    if (ghost) {
+      this.root.appendChild(ghost);
+      this._dragImage = ghost;
+    } else {
+      const pill = document.createElement('div');
+      pill.className = 'drag-pill';
+      pill.textContent = clone
+        ? count === 1 ? 'Copying item' : `Copying ${count} items`
+        : count === 1 ? 'Moving item' : `Moving ${count} items`;
+      this.root.appendChild(pill);
+      this._dragImage = pill;
+      this._dragImageOffset = { x: -14, y: -14 };
+    }
     this._movePointerPreview(clientX, clientY);
   }
 
+  // The ghost is a copy of the card being dragged, so it looks like the thing you picked up. It is
+  // inert and carries no ids, so nothing that looks cards up by id can find it.
+  private _buildDragGhost(
+    source: HTMLElement,
+    count: number,
+    clone: boolean,
+    grab?: { x: number; y: number }
+  ): HTMLElement {
+    const rect = source.getBoundingClientRect();
+    const ghost = source.cloneNode(true) as HTMLElement;
+    ghost.classList.add('item-ghost');
+    ['id', 'data-id', 'data-drag-trigger', 'tabindex', 'role', 'aria-selected', 'aria-disabled'].forEach((name) => {
+      ghost.removeAttribute(name);
+    });
+    ghost.querySelectorAll('[id], [data-id], [data-drag-trigger], [tabindex]').forEach((node) => {
+      ['id', 'data-id', 'data-drag-trigger', 'tabindex'].forEach((name) => node.removeAttribute(name));
+    });
+    ghost.setAttribute('part', 'drag-ghost');
+    ghost.setAttribute('aria-hidden', 'true');
+    ghost.setAttribute('inert', '');
+    ghost.setAttribute('data-dragging', 'false');
+    ghost.setAttribute('data-focused', 'false');
+    ghost.setAttribute('data-drop-inside-active', 'false');
+    if (count > 1) ghost.setAttribute('data-count', 'stack');
+    if (count > 1 || clone) {
+      const badge = document.createElement('span');
+      badge.className = 'ghost-badge';
+      badge.textContent = count > 1 ? String(count) : '+';
+      ghost.appendChild(badge);
+    }
+    // drag-preview-size="compact" carries a narrower card with just its title.
+    const compact = this.getAttribute('drag-preview-size') === 'compact';
+    if (compact) ghost.setAttribute('data-compact', 'true');
+    const width = compact ? Math.min(rect.width, 240) : rect.width;
+    ghost.style.inlineSize = `${Math.round(width)}px`;
+
+    const hasGrab = !!grab && Number.isFinite(grab.x) && Number.isFinite(grab.y);
+    this._dragImageOffset = {
+      x: hasGrab ? Math.min(Math.max(grab!.x - rect.left, 0), width) : width / 2,
+      y: hasGrab ? Math.min(Math.max(grab!.y - rect.top, 0), rect.height) : rect.height / 2,
+    };
+    return ghost;
+  }
+
   private _movePointerPreview(clientX: number, clientY: number): void {
-    if (!this._dragImage) return;
-    this._dragImage.style.transform = `translate(${Math.round(clientX + 14)}px, ${Math.round(clientY + 14)}px)`;
+    const image = this._dragImage;
+    if (!image) return;
+    // A render replaces the shadow content, which drops the ghost: put it back.
+    if (!image.isConnected) this.root.appendChild(image);
+    image.style.transform = `translate(${Math.round(clientX - this._dragImageOffset.x)}px, ${Math.round(clientY - this._dragImageOffset.y)}px)`;
   }
 
   private _keyboardDropTargets(): KeyboardDropTarget[] {
