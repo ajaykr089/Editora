@@ -1,4 +1,6 @@
-export abstract class ElementBase extends HTMLElement {
+import { DOMElement } from './domElement';
+
+export abstract class ElementBase extends DOMElement {
   protected root: ShadowRoot;
   private _isRendering = false;
   private _renderRequested = false;

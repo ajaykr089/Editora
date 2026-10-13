@@ -2406,6 +2406,6 @@ export class UIColorPicker extends ElementBase {
   }
 }
 
-if (!customElements.get('ui-color-picker')) {
+if (typeof customElements !== 'undefined' && !customElements.get('ui-color-picker')) {
   customElements.define('ui-color-picker', UIColorPicker)
 }

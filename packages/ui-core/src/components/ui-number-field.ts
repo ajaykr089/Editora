@@ -1093,6 +1093,6 @@ declare global {
   }
 }
 
-if (!customElements.get('ui-number-field')) {
+if (typeof customElements !== 'undefined' && !customElements.get('ui-number-field')) {
   customElements.define('ui-number-field', UINumberField);
 }
