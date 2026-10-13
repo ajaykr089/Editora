@@ -1,5 +1,42 @@
 # Change Log
 
+## 0.1.24
+
+### Patch Changes
+
+- 6d6ed5f: `<ui-sortable>`: cards can move between two sortables, lists can scroll by themselves, and there is one drag path.
+
+  New:
+  - **Between sortables**: elements with the same `group` (React `group`) take each other's cards. Hold a card over another one and it marks the place; drop and both report it, each with its own `before-change` (either can cancel it) and `change`, which carries `external: { direction: 'in' | 'out', peer }`, so each keeps its own state. A card goes with its children; a copy leaves the first board as it was and gets a fresh id. The receiving sortable's `canDrop` (`info.from` is the sender), `maxItems`, `accepts`, `allow-nesting` and lock state apply, ids must be unique across the group, and Alt nests in a card of the other one. Dragging between sortables is pointer-only; `moveSelectionTo(peer, { targetListId, beforeId?, parentId?, clone? })` does it from code and for the keyboard.
+  - **Lists with a height of their own**: `lists[].maxHeight` and `list-max-height` / `listMaxHeight` (a number of px or a plain CSS length). A list taller than that scrolls by itself, dragging at its edge scrolls it, and the keyboard keeps the focused card (and the keyboard-drag placeholder) in view. A list whose cards fit does not scroll.
+
+  Changed:
+  - **One drag path.** The native HTML5 drag (`dragstart`/`dragover`/`drop`, used only by custom drag handles marked `draggable`) is gone: measured with a real mouse in Chromium, Firefox and WebKit, custom handles already used the pointer drag. The wrappers no longer set `draggable` on them, and the browser is not allowed to start a native drag while a card is held. The hidden "drop preview" box and the two labels only the native drag image used (`draggingOne`, `draggingMany`) are removed (both were never released).
+
+- 8c417f0: `<ui-sortable>` is safer by default and much easier to use in other scenarios.
+
+  **Behaviour change: a plain drag no longer nests.** The middle 40% of every card used to mean "drop inside", so reordering a flat list by dropping on the middle of a card nested it. Now the top half of a card is "before it" and the bottom half "after it". To nest with the pointer, hold Alt (Option) or drop on the far side of the card; the card highlights before you let go (`nest-trigger` / `nestTrigger`: `gutter` is the default, `modifier` is Alt only, `area` restores the old rule). The keyboard's "Nest inside" destinations and `allow-nesting="false"` are unchanged.
+
+  New:
+  - **Touch**: a card dragged by its body (or a custom handle) is lifted by holding it for 350 ms (`touch-hold-delay` / `touchHoldDelay`, 0 for none). Before, a touch drag on such a card scrolled the page and could not be dragged at all. The built-in handle still lifts at once.
+  - **Guard rails**: `lists[].maxItems`, a `canDrop(info)` function (React `canDrop`), and a cancelable `before-change` event (React `onBeforeChange`, return `false` to cancel). A refused place never highlights, the keyboard skips it, and the lifted card turns red over it. `moveSelection()` now returns whether anything moved.
+  - **`data`** on items and lists: any JSON value, carried through moves, copies, events and callbacks (always as a copy).
+  - **`labels`** (React `labels`): replace any of the 56 texts the component shows or announces; **`hide-toolbar`** (React `hideToolbar`) hides the hint line from sight.
+  - **Plain-JS rendering**: `renderItem`, `renderListHeader` and `renderEmptyState` as properties of the element, returning a DOM node or a string of HTML.
+
+  Fixed:
+  - The component took the focus after every render, even when it was not inside it: a focus ring on the first card before anyone touched the board, and focus stolen from a search box whenever the parent re-rendered it while someone typed. The focus is now put back only when it was on a card, or when a move, a click or `focusItem()` asked for it.
+  - A highlighted drop position stayed on when the pointer stopped over a place that refuses the drop.
+
+- f5bd2ae: Fix `<ui-sortable>` hiding the dragged card during a keyboard drag over "Nest inside <card>" when that card has no children yet. The branch check matched the exact string `class="item"` and so missed the placeholder (`item item-placeholder`); the card was gone from the screen until the drop.
+- ca08a36: A new look for `<ui-sortable>`, and a few fixes that came with it.
+
+  - Flat, lightly bordered cards on a quiet surface, tight spacing (a list is about half as tall as before: the invisible drop rails no longer take up room), a faint drag grip that shows fully on hover, focus, selection and touch, and a guide line under nested cards. The first card no longer looks focused when nothing is.
+  - Dragging with the pointer now lifts the real card under the pointer (a copy, with a count badge for several items and a `+` for a copy), leaves an empty slot where it was, and marks the drop position with a thin line. The "Moving item" pill and the floating "Drop preview" box are gone. `drag-preview-size="compact"` now narrows the lifted card.
+  - Lists sit side by side and the board scrolls sideways when they do not fit (min width `--ui-sortable-list-min-size`, 260px), and it keeps its scroll position across renders and scrolls to a card dropped into a far list. Holding a card at the edge of the board, or of a list that has its own scrollbar (`::part(items)`), scrolls it.
+  - The "N items selected" line is hidden until something is selected. New parts: `items`, `drag-ghost`.
+  - The README pictures show the new look.
+
 ## 0.1.23
 
 ### Patch Changes
