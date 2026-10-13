@@ -2,6 +2,15 @@
   "name": "@editora/ui-angular",
   "version": "0.1.5",
   "description": "Deprecated: use @editora/ui-core directly in Angular. This package never contained code.",
+  "keywords": [
+    "editora",
+    "angular",
+    "web-components",
+    "ui-components",
+    "custom-elements",
+    "angular-components",
+    "design-system"
+  ],
   "files": [
     "src"
   ],

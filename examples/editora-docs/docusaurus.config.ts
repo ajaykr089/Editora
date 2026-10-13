@@ -47,9 +47,27 @@ const siteStructuredData = [
   },
 ];
 
+const softwareStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: siteTitle,
+  alternateName: "Editora rich text editor",
+  applicationCategory: "DeveloperApplication",
+  applicationSubCategory: "Rich text editor / WYSIWYG editor library",
+  operatingSystem: "Any (browser, Node.js)",
+  description: siteDescription,
+  url: siteUrl,
+  downloadUrl: "https://www.npmjs.com/package/@editora/core",
+  codeRepository: "https://github.com/ajaykr089/Editora",
+  programmingLanguage: "TypeScript",
+  license: "https://opensource.org/licenses/MIT",
+  isAccessibleForFree: true,
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+};
+
 const config: Config = {
   title: siteTitle,
-  tagline: "Enterprise-grade documentation for the Editora ecosystem",
+  tagline: "Free, open-source rich text editor for React and the web",
   favicon: "img/favicon-32.png",
 
   future: {
@@ -87,7 +105,7 @@ const config: Config = {
         href: "/img/favicon-180.png",
       },
     },
-    ...siteStructuredData.map((item) => ({
+    ...[...siteStructuredData, softwareStructuredData].map((item) => ({
       tagName: "script",
       attributes: {
         type: "application/ld+json",
@@ -117,13 +135,18 @@ const config: Config = {
             current: {
               label: "Next",
             },
+            // The frozen 1.0.0 snapshot mostly duplicates the current docs; keep
+            // it reachable from the version dropdown but out of search results.
+            "1.0.0": {
+              noIndex: true,
+            },
           },
         },
         blog: false,
         sitemap: {
           changefreq: "weekly",
           priority: 0.6,
-          ignorePatterns: ["/tags/**"],
+          ignorePatterns: ["/tags/**", "/404", "/404.html", "/search"],
           filename: "sitemap.xml",
         },
         theme: {
@@ -165,7 +188,7 @@ const config: Config = {
       {
         name: "keywords",
         content:
-          "editora, rich text editor, react editor, web components, docs, plugins, ui-core, ui-react, icons",
+          "editora, rich text editor, wysiwyg editor, react rich text editor, web components editor, open source wysiwyg, tinymce alternative, quill alternative, tiptap alternative, plugins, themes, ui-core, ui-react",
       },
       {
         name: "robots",
@@ -181,19 +204,11 @@ const config: Config = {
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Editora Docs" },
-      { property: "og:title", content: "Editora Documentation" },
-      {
-        property: "og:description",
-        content: siteDescription,
-      },
       {
         property: "og:image",
         content: `${siteUrl}/img/editora-social-card.png`,
       },
-      { property: "og:url", content: siteUrl },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Editora Documentation" },
-      { name: "twitter:description", content: siteDescription },
       {
         name: "twitter:image",
         content: `${siteUrl}/img/editora-social-card.png`,

@@ -5,6 +5,7 @@ Website: https://editora-ecosystem.netlify.app/
 Storybook: https://editora-ecosystem-storybook.netlify.app/
 Docs: https://editora-ecosystem.netlify.app/docs/intro
 AI Usage: https://editora-ecosystem.netlify.app/docs/ai-usage
+Comparison with TinyMCE, CKEditor, Tiptap, Quill, Lexical: https://editora-ecosystem.netlify.app/docs/getting-started/alternatives
 Prompt Pack: https://editora-ecosystem.netlify.app/docs/editora-prompts
 Editor AI Usage: https://editora-ecosystem.netlify.app/docs/editor/ai-usage
 Editor Prompt Pack: https://editora-ecosystem.netlify.app/docs/editor/editora-prompts

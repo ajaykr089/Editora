@@ -2,6 +2,15 @@
   "name": "@editora/ui-svelte",
   "version": "0.1.5",
   "description": "Deprecated: use @editora/ui-core directly in Svelte. This package only wrapped 2 components.",
+  "keywords": [
+    "editora",
+    "svelte",
+    "web-components",
+    "ui-components",
+    "custom-elements",
+    "svelte-components",
+    "design-system"
+  ],
   "files": [
     "src"
   ],
