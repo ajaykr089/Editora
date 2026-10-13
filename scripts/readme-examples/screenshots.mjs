@@ -202,15 +202,27 @@ const shots = [
   },
 
   // ---- @editora/ui-sortable
-  { out: 'packages/ui-sortable/docs/images/board.png', example: 'sortable-board' },
+  {
+    out: 'packages/ui-sortable/docs/images/board.png',
+    example: 'sortable-board',
+    viewport: { width: 1200, height: 700 },
+    async act(page) {
+      // Four lists of 260px do not fit the usual 960px frame: they would scroll sideways.
+      await page.addStyleTag({ content: '#shot { width: 1120px !important; }' });
+      await page.waitForTimeout(300);
+    },
+  },
   {
     out: 'packages/ui-sortable/docs/images/dragging.png',
     example: 'sortable-board',
+    viewport: { width: 1200, height: 700 },
     async act(page) {
+      await page.addStyleTag({ content: '#shot { width: 1120px !important; }' });
+      await page.waitForTimeout(300);
       // Pick up an item and hold it over another list.
       const from = await page.getByText('Design review', { exact: true }).first().boundingBox();
       const to = await page.getByText('Release epic', { exact: true }).first().boundingBox();
-      await page.mouse.move(from.x - 34, from.y + from.height / 2);
+      await page.mouse.move(from.x - 17, from.y + from.height / 2);
       await page.mouse.down();
       await page.mouse.move(from.x - 60, from.y - 20, { steps: 6 });
       await page.mouse.move(to.x + 160, to.y + 90, { steps: 12 });

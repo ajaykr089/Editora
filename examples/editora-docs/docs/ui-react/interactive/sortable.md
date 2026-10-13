@@ -347,7 +347,7 @@ type SortableItem = {
 | `allowNesting` | `boolean` | `true` | Enables dropping inside another item |
 | `dropIndicatorVisibility` | `'active' \| 'always'` | `'active'` | Keeps idle drop rails hidden by default, or shows them all the time for more explicit affordances |
 | `dropzoneStyle` | `'indicator' \| 'container'` | `'indicator'` | Uses slim rail targets by default, or expands the active drop target into an item-sized container surface |
-| `dragPreviewSize` | `'match-item' \| 'compact'` | `'match-item'` | Controls whether the floating drop preview matches the dragged item size or uses the older compact preview card |
+| `dragPreviewSize` | `'match-item' \| 'compact'` | `'match-item'` | Controls whether the card that follows the pointer matches the dragged item size or is narrower and shows only the title |
 | `dragHandleMode` | `'handle' \| 'item'` | `'handle'` | Uses the built-in handle button, or lets the whole item surface initiate drag |
 | `dragHandleSelector` | `string` | — | React wrapper only. Marks matching elements inside `renderItem` content as drag handles |
 | `itemRadius` | `'none' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| 'full' \| string \| number` | — | Overrides the default item shell radius with preset tokens or any CSS radius value |
@@ -420,7 +420,7 @@ This is designed for storage in a database as explicit ordering metadata.
 - `renderEmptyState` customizes only the empty message area; the dropzone still remains active below it
 - `dropIndicatorVisibility="active"` keeps the canvas visually clean until a drag is in progress, while `"always"` restores fully visible rails
 - `dropzoneStyle="container"` turns the active drop target into a larger card-like landing surface sized from nearby sortable content
-- `dragPreviewSize="match-item"` makes the floating drop preview mirror the dragged card dimensions, while `"compact"` restores the smaller older preview style
+- `dragPreviewSize="match-item"` makes the card that follows the pointer mirror the dragged card dimensions, while `"compact"` shows a narrower card with only the title
 - `dragHandleMode="item"` lets the entire card initiate drag while still preserving click-to-select when the pointer does not move
 - `dragHandleSelector` is useful with `renderItem` when your custom JSX already has a grip button or icon that should be the drag affordance
 - `itemRadius` and `handleRadius` accept preset tokens like `"sm"`, `"lg"`, or `"full"`, and also accept raw CSS values like `"24px"`, `"1rem"`, or `20`
