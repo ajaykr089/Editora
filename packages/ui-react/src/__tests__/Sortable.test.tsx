@@ -151,4 +151,20 @@ describe('Sortable wrapper', () => {
     await waitFor(() => expect(el?.shadowRoot?.textContent).toContain('To do 1'));
     await waitFor(() => expect(el?.shadowRoot?.textContent).toContain('Nothing in Done'));
   });
+
+
+  it('forwards labels and hideToolbar to the element, and clears them again', async () => {
+    const { container, rerender } = render(
+      <Sortable lists={lists} items={items} labels={{ hintHandle: 'Glissez la poignée.' }} hideToolbar />
+    );
+    const el = container.querySelector('ui-sortable') as HTMLElement;
+
+    await waitFor(() => expect(el.shadowRoot?.querySelector('#ui-sortable-helper')?.textContent).toBe('Glissez la poignée.'));
+    expect(JSON.parse(el.getAttribute('labels') || '{}')).toEqual({ hintHandle: 'Glissez la poignée.' });
+    expect(el.hasAttribute('hide-toolbar')).toBe(true);
+
+    rerender(<Sortable lists={lists} items={items} labels={{}} />);
+    await waitFor(() => expect(el.hasAttribute('labels')).toBe(false));
+    expect(el.hasAttribute('hide-toolbar')).toBe(false);
+  });
 });

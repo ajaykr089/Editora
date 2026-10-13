@@ -63,4 +63,22 @@ describe('@editora/ui-sortable/react', () => {
     rerender(<Sortable lists={[{ id: 'a', label: 'A' }]} items={[{ id: 'x', label: 'X', listId: 'a' }]} />);
     expect(container.querySelector('ui-sortable')?.getAttribute('items')).toContain('"x"');
   });
+
+  it('forwards labels and hideToolbar to the element, and clears them again', async () => {
+    const { Sortable } = await import('@editora/ui-sortable/react');
+    const lists = [{ id: 'a', label: 'A' }];
+    const items = [{ id: 'one', label: 'One', listId: 'a' }];
+    const { container, rerender } = render(
+      <Sortable lists={lists} items={items} labels={{ hintHandle: 'Glissez la poignée.' }} hideToolbar />
+    );
+    const element = container.querySelector('ui-sortable') as HTMLElement;
+
+    await waitFor(() => expect(element.shadowRoot?.querySelector('#ui-sortable-helper')?.textContent).toBe('Glissez la poignée.'));
+    expect(JSON.parse(element.getAttribute('labels') || '{}')).toEqual({ hintHandle: 'Glissez la poignée.' });
+    expect(element.hasAttribute('hide-toolbar')).toBe(true);
+
+    rerender(<Sortable lists={lists} items={items} labels={{}} />);
+    await waitFor(() => expect(element.hasAttribute('labels')).toBe(false));
+    expect(element.hasAttribute('hide-toolbar')).toBe(false);
+  });
 });

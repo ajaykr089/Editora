@@ -23,6 +23,59 @@ export type SortableDropIndicatorVisibility = 'active' | 'always';
 export type SortableDropzoneStyle = 'indicator' | 'container';
 export type SortableDragPreviewSize = 'match-item' | 'compact';
 export type SortableDragHandleMode = 'handle' | 'item';
+export type SortableLabelKey =
+  | 'hintHandle'
+  | 'hintItem'
+  | 'hintCustom'
+  | 'hintKeyboard'
+  | 'hintPausedSort'
+  | 'hintPausedFilter'
+  | 'hintDisabled'
+  | 'selectedOne'
+  | 'selectedMany'
+  | 'listReadOnly'
+  | 'listClone'
+  | 'listAccepts'
+  | 'emptyList'
+  | 'dropHere'
+  | 'nestHere'
+  | 'badgeSelected'
+  | 'badgeClone'
+  | 'badgePinned'
+  | 'dropPreview'
+  | 'copyPreview'
+  | 'releaseMove'
+  | 'releaseMoveMany'
+  | 'releaseCopy'
+  | 'movingOne'
+  | 'movingMany'
+  | 'copyingOne'
+  | 'copyingMany'
+  | 'draggingOne'
+  | 'draggingMany'
+  | 'announceSelectedMany'
+  | 'announceDragDisabled'
+  | 'announceDragging'
+  | 'announceDraggingMany'
+  | 'announceDraggingCopy'
+  | 'announceDraggingCopyMany'
+  | 'announceCancelled'
+  | 'announceLifted'
+  | 'announceLiftedMany'
+  | 'announceLiftedHelp'
+  | 'announceCopiedOne'
+  | 'announceCopiedMany'
+  | 'announceNestedOne'
+  | 'announceNestedMany'
+  | 'announceMovedOne'
+  | 'announceMovedMany'
+  | 'announceReorderedOne'
+  | 'announceReorderedMany'
+  | 'targetBefore'
+  | 'targetInside'
+  | 'targetEnd'
+  | 'targetAfterChildren';
+export type SortableLabels = Partial<Record<SortableLabelKey, string>>;
 export type SortableRadiusPreset = 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
 export type SortableRadius = SortableRadiusPreset | number | string;
 export type SortableSpacePreset = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -141,6 +194,8 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   listGap?: SortableSpace;
   itemSpacing?: SortableSpace;
   showSelectionBadge?: boolean;
+  labels?: SortableLabels;
+  hideToolbar?: boolean;
   disabled?: boolean;
   renderItem?: (item: SortableItem, context: SortableRenderItemContext) => React.ReactNode;
   renderListHeader?: (list: SortableList, context: SortableRenderListHeaderContext) => React.ReactNode;
@@ -223,6 +278,8 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
     listGap,
     itemSpacing,
     showSelectionBadge,
+    labels,
+    hideToolbar,
     disabled,
     renderItem,
     renderListHeader,
@@ -328,9 +385,13 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
       if (showSelectionBadge === false) element.setAttribute('show-selection-badge', 'false');
       else element.removeAttribute('show-selection-badge');
 
+      // A fresh object each render is fine: the attribute is only written when its JSON changes.
+      syncJsonAttribute(element, 'labels', labels && Object.keys(labels).length ? labels : null);
+      syncBooleanAttribute(element, 'hide-toolbar', hideToolbar);
+
       syncBooleanAttribute(element, 'disabled', disabled);
     },
-    [lists, items, selection, filterQuery, sort, persistKey, allowFilteredDrag, allowNesting, dropIndicatorVisibility, dropzoneStyle, dragPreviewSize, dragHandleMode, dragHandleSelector, itemRadius, handleRadius, listGap, itemSpacing, renderItem, showSelectionBadge, disabled]
+    [lists, items, selection, filterQuery, sort, persistKey, allowFilteredDrag, allowNesting, dropIndicatorVisibility, dropzoneStyle, dragPreviewSize, dragHandleMode, dragHandleSelector, itemRadius, handleRadius, listGap, itemSpacing, renderItem, showSelectionBadge, labels, hideToolbar, disabled]
   );
 
   useIsomorphicLayoutEffect(() => {

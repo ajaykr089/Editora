@@ -1007,4 +1007,135 @@ describe('ui-sortable', () => {
       expect(board.scrollLeft).toBe(364);
     });
   });
+
+  describe('labels', () => {
+    const mount = async (attrs: Record<string, string> = {}, data = { lists, items }) => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(data.lists));
+      el.setAttribute('items', JSON.stringify(data.items));
+      Object.entries(attrs).forEach(([name, value]) => el.setAttribute(name, value));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      return el;
+    };
+    const text = (el: any, selector: string) => el.shadowRoot.querySelector(selector)?.textContent?.trim();
+
+    it('speaks English by default', async () => {
+      const el = await mount();
+      expect(text(el, '#ui-sortable-helper')).toBe('Use the handle to drag, or press Space on a focused item to start keyboard reordering.');
+      expect(text(el, '.selection-text')).toBe('items selected');
+      expect(el.labels.badgeSelected).toBe('Selected');
+    });
+
+    it('translates the hint, the selection summary and the badges', async () => {
+      const el = await mount({
+        labels: JSON.stringify({
+          hintHandle: 'Utilisez la poignée pour déplacer.',
+          selectedOne: 'élément sélectionné',
+          selectedMany: 'éléments sélectionnés',
+          badgeSelected: 'Sélectionné',
+          badgeClone: 'Cloner',
+          badgePinned: 'Épinglé',
+        }),
+      }, {
+        lists,
+        items: [{ id: 'a', label: 'A', listId: 'todo', cloneOnDrag: true, dragDisabled: true }],
+      });
+      expect(text(el, '#ui-sortable-helper')).toBe('Utilisez la poignée pour déplacer.');
+      expect(text(el, '.selection-text')).toBe('éléments sélectionnés');
+
+      el.select(['a']);
+      await flushMicrotask();
+      expect(text(el, '.selection-text')).toBe('élément sélectionné');
+      const badges = [...el.shadowRoot.querySelectorAll('.item[data-id="a"] .item-badge')].map((b: any) => b.textContent.trim());
+      expect(badges).toContain('Sélectionné');
+      expect(badges).toContain('Cloner');
+      expect(badges).toContain('Épinglé');
+    });
+
+    it('takes labels as a property, merges them over the defaults, and ignores what is not text', async () => {
+      const el = await mount();
+      el.labels = { hintHandle: 'Drag me.', selectedMany: 42 as any, nope: 'x' } as any;
+      await flushMicrotask();
+      expect(text(el, '#ui-sortable-helper')).toBe('Drag me.');
+      expect(el.labels.selectedMany).toBe('items selected');
+      expect(el.labels.hintItem).toContain('Drag from anywhere');
+      expect('nope' in el.labels).toBe(false);
+
+      el.labels = null;
+      await flushMicrotask();
+      expect(el.hasAttribute('labels')).toBe(false);
+      expect(text(el, '#ui-sortable-helper')).toContain('Use the handle to drag');
+
+      el.setAttribute('labels', '{not json');
+      await flushMicrotask();
+      expect(text(el, '#ui-sortable-helper')).toContain('Use the handle to drag');
+    });
+
+    it('uses a list\'s own emptyLabel first, then the translated default', async () => {
+      const el = await mount(
+        { labels: JSON.stringify({ emptyList: 'Rien ici.' }) },
+        { lists: [{ id: 'a', label: 'A', emptyLabel: 'Custom empty' }, { id: 'b', label: 'B' }], items: [] }
+      );
+      const empties = [...el.shadowRoot.querySelectorAll('.empty')].map((node: any) => node.textContent.trim());
+      expect(empties).toEqual(['Custom empty', 'Rien ici.']);
+    });
+
+    it('announces moves and drag steps with the translated text', async () => {
+      const el = await mount({
+        labels: JSON.stringify({
+          announceReorderedOne: '{list} : élément déplacé.',
+          announceMovedOne: 'Déplacé vers {list}.',
+          targetBefore: 'Avant {label}',
+          announceLifted: 'Soulevé : {label}.',
+          announceLiftedHelp: 'Flèches pour choisir.',
+        }),
+      });
+      const live = () => el.shadowRoot.querySelector('.sr-only[aria-live]').textContent;
+
+      el.select(['task-a']);
+      el.moveSelection({ targetListId: 'todo', beforeId: 'epic' });
+      expect(live()).toBe('To do : élément déplacé.');
+
+      el.select(['task-a']);
+      el.moveSelection({ targetListId: 'done' });
+      expect(live()).toBe('Déplacé vers Done.');
+
+      const item = el.shadowRoot.querySelector('.item[data-id="task-b"]') as HTMLElement;
+      el.focusItem('task-b');
+      el._onKeyDown({ key: ' ', code: 'Space', preventDefault() {}, target: item, composedPath: () => [item] });
+      expect(live()).toBe('Soulevé : Task B. Flèches pour choisir.');
+      expect(el._keyboardDropTargets()[0].label).toMatch(/^Avant /);
+      el.cancelDrag();
+    });
+
+    it('labels the drop rails of the container style', async () => {
+      const el = await mount({ 'dropzone-style': 'container', labels: JSON.stringify({ dropHere: 'Déposer ici', nestHere: 'Imbriquer ici' }) });
+      const labels = new Set([...el.shadowRoot.querySelectorAll('.dropzone-label')].map((node: any) => node.textContent.trim()));
+      expect(labels.has('Déposer ici')).toBe(true);
+      expect(labels.has('Imbriquer ici')).toBe(true);
+      expect(labels.has('Drop here')).toBe(false);
+    });
+  });
+
+  describe('hide-toolbar', () => {
+    it('hides the hint and the selection count from sight but keeps the hint that describes the lists', async () => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(lists));
+      el.setAttribute('items', JSON.stringify(items));
+      el.setAttribute('hide-toolbar', '');
+      document.body.appendChild(el);
+      await flushMicrotask();
+
+      const toolbar = el.shadowRoot.querySelector('.toolbar') as HTMLElement;
+      expect(toolbar.getAttribute('data-hidden')).toBe('true');
+      const helper = el.shadowRoot.querySelector('#ui-sortable-helper');
+      expect(helper?.textContent).toContain('Use the handle');
+      expect(el.shadowRoot.querySelector('.items')?.getAttribute('aria-describedby')).toBe('ui-sortable-helper');
+
+      el.removeAttribute('hide-toolbar');
+      await flushMicrotask();
+      expect(el.shadowRoot.querySelector('.toolbar')?.hasAttribute('data-hidden')).toBe(false);
+    });
+  });
 });

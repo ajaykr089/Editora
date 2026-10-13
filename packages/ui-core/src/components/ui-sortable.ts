@@ -10,6 +10,9 @@ export type UISortableDropIndicatorVisibility = 'active' | 'always';
 export type UISortableDragHandleMode = 'handle' | 'item';
 export type UISortableDropzoneStyle = 'indicator' | 'container';
 
+/** Every piece of text the component shows or announces. Pass any of them as `labels` to translate or reword. */
+export type UISortableLabels = { [K in keyof typeof DEFAULT_LABELS]: string };
+
 export type UISortableList = {
   id: string;
   label: string;
@@ -151,6 +154,61 @@ type ProjectedMoveResult = {
 };
 
 const STORAGE_VERSION = 1;
+
+// {name} placeholders are filled in by the component (a label, a count, a list name).
+const DEFAULT_LABELS = {
+  hintHandle: 'Use the handle to drag, or press Space on a focused item to start keyboard reordering.',
+  hintItem: 'Drag from anywhere on an item, or press Space on a focused item to start keyboard reordering.',
+  hintCustom: 'Use your custom drag handle element, or press Space on a focused item to start keyboard reordering.',
+  hintKeyboard: 'Keyboard drag active. Use arrow keys to choose a drop target, Space or Enter to drop, and Escape to cancel.',
+  hintPausedSort: 'Dragging is paused while alphabetical sorting is active.',
+  hintPausedFilter: 'Dragging is paused while the list is filtered.',
+  hintDisabled: 'Dragging is currently disabled.',
+  selectedOne: 'item selected',
+  selectedMany: 'items selected',
+  listReadOnly: 'This list is read-only.',
+  listClone: 'Dragging from this list creates a copy.',
+  listAccepts: 'Accepts drops from: {lists}',
+  emptyList: 'Drop items here.',
+  dropHere: 'Drop here',
+  nestHere: 'Nest here',
+  badgeSelected: 'Selected',
+  badgeClone: 'Clone on drag',
+  badgePinned: 'Pinned',
+  dropPreview: 'Drop preview',
+  copyPreview: 'Copy preview',
+  releaseMove: 'Release to place this item here.',
+  releaseMoveMany: 'Release to place this selection here.',
+  releaseCopy: 'Release to add a copy here.',
+  movingOne: 'Moving item',
+  movingMany: 'Moving {count} items',
+  copyingOne: 'Copying item',
+  copyingMany: 'Copying {count} items',
+  draggingOne: 'Dragging item',
+  draggingMany: 'Dragging {count} items',
+  announceSelectedMany: '{count} items selected.',
+  announceDragDisabled: 'Dragging is disabled right now.',
+  announceDragging: 'Dragging {label}.',
+  announceDraggingMany: 'Dragging {count} items.',
+  announceDraggingCopy: 'Dragging {label} as a copy.',
+  announceDraggingCopyMany: 'Dragging {count} items as a copy.',
+  announceCancelled: 'Drag cancelled.',
+  announceLifted: 'Lifted {label}.',
+  announceLiftedMany: 'Lifted {count} items.',
+  announceLiftedHelp: 'Use arrow keys to choose a destination.',
+  announceCopiedOne: 'Item copied into {list}.',
+  announceCopiedMany: '{count} items copied into {list}.',
+  announceNestedOne: 'Item nested in {list}.',
+  announceNestedMany: '{count} items nested in {list}.',
+  announceMovedOne: 'Item moved to {list}.',
+  announceMovedMany: '{count} items moved to {list}.',
+  announceReorderedOne: 'Item reordered in {list}.',
+  announceReorderedMany: '{count} items reordered in {list}.',
+  targetBefore: 'Before {label}',
+  targetInside: 'Nest inside {label}',
+  targetEnd: 'End of {list}',
+  targetAfterChildren: 'After children',
+};
 const DROP_TARGET_SETTLE_MS = 44;
 const DROP_TARGET_CLEAR_SETTLE_MS = 72;
 
@@ -213,6 +271,18 @@ const style = `
     color: var(--ui-sortable-muted);
     font-size: 12px;
     line-height: 1.5;
+  }
+
+  /* hide-toolbar: the hint is still what the lists are described by, so it is hidden from sight only. */
+  .toolbar[data-hidden="true"] {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
   }
 
   .helper {
@@ -991,6 +1061,21 @@ function parseJsonArray<T>(value: string | null): T[] {
   }
 }
 
+function parseLabels(value: string | null): Partial<UISortableLabels> {
+  if (!value) return {};
+  try {
+    const parsed = JSON.parse(value);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    const labels: Partial<UISortableLabels> = {};
+    (Object.keys(DEFAULT_LABELS) as Array<keyof UISortableLabels>).forEach((key) => {
+      if (typeof parsed[key] === 'string') labels[key] = parsed[key];
+    });
+    return labels;
+  } catch {
+    return {};
+  }
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -1183,7 +1268,7 @@ function canonicalizeLists(rawLists: UISortableList[]): NormalizedList[] {
       description: typeof list?.description === 'string' ? list.description : '',
       emptyLabel: typeof list?.emptyLabel === 'string' && list.emptyLabel.trim()
         ? list.emptyLabel.trim()
-        : 'Drop items here.',
+        : '',
       orientation: list?.orientation === 'horizontal' ? 'horizontal' : 'vertical',
       disabled: !!list?.disabled,
       cloneOnDrag: !!list?.cloneOnDrag,
@@ -1199,7 +1284,7 @@ function canonicalizeLists(rawLists: UISortableList[]): NormalizedList[] {
     id: 'default',
     label: 'Items',
     description: '',
-    emptyLabel: 'Drop items here.',
+    emptyLabel: '',
     orientation: 'vertical',
     disabled: false,
     cloneOnDrag: false,
@@ -1402,6 +1487,8 @@ export class UISortable extends ElementBase {
       'drag-handle-selector',
       'custom-item-rendering',
       'show-selection-badge',
+      'labels',
+      'hide-toolbar',
       'disabled',
     ];
   }
@@ -1416,6 +1503,8 @@ export class UISortable extends ElementBase {
   private _lastListsAttr: string | null = null;
   private _lastItemsAttr: string | null = null;
   private _lastSelectionAttr: string | null = null;
+  private _lastLabelsAttr: string | null = null;
+  private _labels: Partial<UISortableLabels> = {};
   private _hydratedPersistKey: string | null = null;
   private _cloneSeed = 1;
   private _dragImage: HTMLElement | null = null;
@@ -1520,6 +1609,21 @@ export class UISortable extends ElementBase {
     this.setAttribute('items', JSON.stringify(next ?? []));
   }
 
+  /** The text the component shows, with any `labels` you set applied over the English defaults. */
+  get labels(): UISortableLabels {
+    return { ...DEFAULT_LABELS, ...this._labels };
+  }
+
+  set labels(next: Partial<UISortableLabels> | null | undefined) {
+    if (!next || !Object.keys(next).length) this.removeAttribute('labels');
+    else this.setAttribute('labels', JSON.stringify(next));
+  }
+
+  private _t(key: keyof UISortableLabels, vars?: Record<string, string | number>): string {
+    const template = this._labels[key] ?? DEFAULT_LABELS[key];
+    return template.replace(/\{(\w+)\}/g, (_match, name: string) => String(vars?.[name] ?? ''));
+  }
+
   get selection(): string[] {
     return [...this._selection];
   }
@@ -1606,17 +1710,18 @@ export class UISortable extends ElementBase {
 
     const helper = dragLocked
       ? this.sort === 'label'
-        ? 'Dragging is paused while alphabetical sorting is active.'
+        ? this._t('hintPausedSort')
         : this.filterQuery && !this.hasAttribute('allow-filtered-drag')
-          ? 'Dragging is paused while the list is filtered.'
-          : 'Dragging is currently disabled.'
+          ? this._t('hintPausedFilter')
+          : this._t('hintDisabled')
       : this._dragState?.keyboard
-        ? 'Keyboard drag active. Use arrow keys to choose a drop target, Space or Enter to drop, and Escape to cancel.'
+        ? this._t('hintKeyboard')
         : dragHandleMode === 'item'
-          ? 'Drag from anywhere on an item, or press Space on a focused item to start keyboard reordering.'
+          ? this._t('hintItem')
           : usesCustomHandleSelector
-            ? 'Use your custom drag handle element, or press Space on a focused item to start keyboard reordering.'
-            : 'Use the handle to drag, or press Space on a focused item to start keyboard reordering.';
+            ? this._t('hintCustom')
+            : this._t('hintHandle');
+    const hideToolbar = this.hasAttribute('hide-toolbar');
 
     const html = `
       <style>${style}</style>
@@ -1628,11 +1733,11 @@ export class UISortable extends ElementBase {
         data-drop-indicator-visibility="${dropIndicatorVisibility}"
         data-dropzone-style="${dropzoneStyle}"
       >
-        <div class="toolbar" part="toolbar">
+        <div class="toolbar" part="toolbar"${hideToolbar ? ' data-hidden="true"' : ''}>
           <div class="helper" id="ui-sortable-helper">${escapeHtml(helper)}</div>
           <div class="helper selection-summary" data-count="${selectionCount}">
             <span class="selection-pill" part="selection-count">${selectionCount}</span>
-            <span class="selection-text">${selectionCount === 1 ? 'item selected' : 'items selected'}</span>
+            <span class="selection-text">${escapeHtml(selectionCount === 1 ? this._t('selectedOne') : this._t('selectedMany'))}</span>
           </div>
         </div>
         <div class="lists" part="lists">
@@ -1642,11 +1747,11 @@ export class UISortable extends ElementBase {
               ? this._renderListTree(renderItems, list, focusedId, draggingIds, allowNesting, placeholderIds, showSelectionBadge)
               : '';
             const helperText = list.disabled
-              ? 'This list is read-only.'
+              ? this._t('listReadOnly')
               : list.cloneOnDrag
-                ? 'Dragging from this list creates a copy.'
+                ? this._t('listClone')
                 : list.accepts?.length
-                  ? `Accepts drops from: ${list.accepts.join(', ')}`
+                  ? this._t('listAccepts', { lists: list.accepts.join(', ') })
                   : '';
             return `
               <section
@@ -1669,12 +1774,12 @@ export class UISortable extends ElementBase {
                   </div>
                 </header>
                 <div class="items" part="items" role="${records.length ? 'listbox' : 'group'}" ${records.length ? 'aria-multiselectable="true"' : ''} aria-label="${escapeHtml(list.label)}" aria-describedby="ui-sortable-helper">
-                  ${content || `<div class="list-custom-empty" part="list-custom-empty" data-list-empty-target="${escapeHtml(list.id)}"></div><div class="empty">${escapeHtml(list.emptyLabel)}</div>${this._renderDropzone({
+                  ${content || `<div class="list-custom-empty" part="list-custom-empty" data-list-empty-target="${escapeHtml(list.id)}"></div><div class="empty">${escapeHtml(list.emptyLabel || this._t('emptyList'))}</div>${this._renderDropzone({
                     listId: list.id,
                     parentId: null,
                     beforeId: null,
                     mode: 'before',
-                  }, 'Drop here')}`}
+                  }, this._t('dropHere'))}`}
                 </div>
               </section>
             `;
@@ -1720,6 +1825,12 @@ export class UISortable extends ElementBase {
     const selectionAttr = this.getAttribute('selection');
     if (selectionAttr !== this._lastSelectionAttr) {
       this._syncSelectionFromAttribute(selectionAttr);
+    }
+
+    const labelsAttr = this.getAttribute('labels');
+    if (labelsAttr !== this._lastLabelsAttr) {
+      this._lastLabelsAttr = labelsAttr;
+      this._labels = parseLabels(labelsAttr);
     }
 
     if (!this._focusedId) {
@@ -1929,7 +2040,7 @@ export class UISortable extends ElementBase {
       if (selectionBadge) {
         const visible = selected && showSelectionBadge;
         selectionBadge.hidden = !visible;
-        selectionBadge.textContent = visible ? 'Selected' : '';
+        selectionBadge.textContent = visible ? this._t('badgeSelected') : '';
       }
     });
 
@@ -1939,7 +2050,7 @@ export class UISortable extends ElementBase {
 
     const selectionText = this.root.querySelector<HTMLElement>('.selection-text');
     if (selectionText) {
-      selectionText.textContent = this._selection.length === 1 ? 'item selected' : 'items selected';
+      selectionText.textContent = this._selection.length === 1 ? this._t('selectedOne') : this._t('selectedMany');
     }
   }
 
@@ -2012,13 +2123,15 @@ export class UISortable extends ElementBase {
     const item = this._items.find((entry) => entry.id === firstMovedId);
     if (!item) return null;
     return {
-      kicker: this._dragState.clone ? 'Copy preview' : 'Drop preview',
+      kicker: this._t(this._dragState.clone ? 'copyPreview' : 'dropPreview'),
       title: this._dragState.clone ? `${item.label} copy` : item.label,
-      description: this._dragState.clone
-        ? 'Release to add a copy here.'
-        : this._dragState.movedRootIds.length > 1
-          ? 'Release to place this selection here.'
-        : 'Release to place this item here.',
+      description: this._t(
+        this._dragState.clone
+          ? 'releaseCopy'
+          : this._dragState.movedRootIds.length > 1
+            ? 'releaseMoveMany'
+            : 'releaseMove'
+      ),
     };
   }
 
@@ -2319,7 +2432,7 @@ export class UISortable extends ElementBase {
           parentId,
           beforeId: id,
           mode: 'before',
-        }, 'Drop here');
+        }, this._t('dropHere'));
         html += descendants;
       });
       html += this._renderDropzone({
@@ -2327,7 +2440,7 @@ export class UISortable extends ElementBase {
         parentId,
         beforeId: null,
         mode: 'before',
-      }, 'Drop here');
+      }, this._t('dropHere'));
       return html;
     };
 
@@ -2352,12 +2465,14 @@ export class UISortable extends ElementBase {
     const disabled = item.disabled;
     const handleDisabled = disabled || item.dragDisabled || this._isDragLocked();
     const dropInsideActive = this._dragState?.dropTarget?.mode === 'inside' && this._dragState.dropTarget.parentId === item.id;
-    const placeholderKicker = this._dragState?.clone ? 'Copy preview' : 'Drop preview';
-    const placeholderDescription = this._dragState?.clone
-      ? 'Release to add a copy here.'
-      : this._dragState && this._dragState.movedRootIds.length > 1
-        ? 'Release to place this selection here.'
-        : 'Release to place this item here.';
+    const placeholderKicker = this._t(this._dragState?.clone ? 'copyPreview' : 'dropPreview');
+    const placeholderDescription = this._t(
+      this._dragState?.clone
+        ? 'releaseCopy'
+        : this._dragState && this._dragState.movedRootIds.length > 1
+          ? 'releaseMoveMany'
+          : 'releaseMove'
+    );
     const dragHandleMode = this._dragHandleMode();
     const usesCustomHandleSelector = this._usesCustomHandleSelector();
     const effectiveDragHandleMode = usesCustomHandleSelector ? 'custom' : dragHandleMode;
@@ -2421,10 +2536,10 @@ export class UISortable extends ElementBase {
                   <div class="item-title">${escapeHtml(item.label)}</div>
                   ${item.description ? `<div class="item-description">${escapeHtml(item.description)}</div>` : ''}
                   <div class="item-meta">
-                    <span class="item-badge selection-badge" data-selection-badge="true" ${selected && showSelectionBadge ? '' : 'hidden'}>${selected && showSelectionBadge ? 'Selected' : ''}</span>
-                    ${item.cloneOnDrag ? '<span class="item-badge">Clone on drag</span>' : ''}
-                    ${item.dragDisabled ? '<span class="item-badge">Pinned</span>' : ''}
-                    ${allowNesting ? '<span class="item-badge drop-badge">Nest here</span>' : ''}
+                    <span class="item-badge selection-badge" data-selection-badge="true" ${selected && showSelectionBadge ? '' : 'hidden'}>${selected && showSelectionBadge ? escapeHtml(this._t('badgeSelected')) : ''}</span>
+                    ${item.cloneOnDrag ? `<span class="item-badge">${escapeHtml(this._t('badgeClone'))}</span>` : ''}
+                    ${item.dragDisabled ? `<span class="item-badge">${escapeHtml(this._t('badgePinned'))}</span>` : ''}
+                    ${allowNesting ? `<span class="item-badge drop-badge">${escapeHtml(this._t('nestHere'))}</span>` : ''}
                   </div>
                 </div>
               </div>
@@ -2437,7 +2552,7 @@ export class UISortable extends ElementBase {
             parentId: item.id,
             beforeId: null,
             mode: 'inside',
-          }, 'Nest here')
+          }, this._t('nestHere'))
           : ''}
         ${hasVisibleChildren ? `<div class="children">${childrenHtml}</div>` : ''}
       </div>
@@ -2554,7 +2669,7 @@ export class UISortable extends ElementBase {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'a') {
         event.preventDefault();
         this._setSelection(visibleIds, 'keyboard');
-        this._announce(`${visibleIds.length} items selected.`);
+        this._announce(this._t('announceSelectedMany', { count: visibleIds.length }));
         return;
       }
       if (event.key === 'Enter') {
@@ -2565,7 +2680,7 @@ export class UISortable extends ElementBase {
       if (event.key === ' ' || event.code === 'Space') {
         event.preventDefault();
         if (this._isDragLocked()) {
-          this._announce('Dragging is disabled right now.');
+          this._announce(this._t('announceDragDisabled'));
           return;
         }
         const movedRootIds = this._selectedRootIds(currentId);
@@ -2580,8 +2695,10 @@ export class UISortable extends ElementBase {
           dropTarget: this._initialKeyboardDropTarget(currentId),
           committed: false,
         };
-        const label = movedRootIds.length === 1 ? `Lifted ${currentItem?.label || 'item'}.` : `Lifted ${movedRootIds.length} items.`;
-        this._announce(`${label} Use arrow keys to choose a destination.`);
+        const label = movedRootIds.length === 1
+          ? this._t('announceLifted', { label: currentItem?.label || 'item' })
+          : this._t('announceLiftedMany', { count: movedRootIds.length });
+        this._announce(`${label} ${this._t('announceLiftedHelp')}`);
         this.requestRender();
         return;
       }
@@ -2639,7 +2756,7 @@ export class UISortable extends ElementBase {
 
     if (this._isDragLocked()) {
       event.preventDefault();
-      this._announce('Dragging is disabled right now.');
+      this._announce(this._t('announceDragDisabled'));
       return;
     }
 
@@ -2669,11 +2786,7 @@ export class UISortable extends ElementBase {
       this._applyDragImage(event.dataTransfer, selectedIds.length);
     }
 
-    this._announce(
-      clone
-        ? `Dragging ${selectedIds.length === 1 ? item.label : `${selectedIds.length} items`} as a copy.`
-        : `Dragging ${selectedIds.length === 1 ? item.label : `${selectedIds.length} items`}.`
-    );
+    this._announceDragging(item.label, selectedIds.length, clone);
     this.requestRender();
   }
 
@@ -2713,7 +2826,7 @@ export class UISortable extends ElementBase {
       this._clearPointerDragPreview();
       this._dragState = null;
       this._removeDragImage();
-      this._announce('Drag cancelled.');
+      this._announce(this._t('announceCancelled'));
       this.requestRender();
     }
   }
@@ -2823,11 +2936,7 @@ export class UISortable extends ElementBase {
       { x: this._pointerGesture.startX, y: this._pointerGesture.startY }
     );
     this._setDraggingVisualState(this._draggingIds(), true);
-    this._announce(
-      this._dragState.clone
-        ? `Dragging ${this._dragState.movedRootIds.length === 1 ? item.label : `${this._dragState.movedRootIds.length} items`} as a copy.`
-        : `Dragging ${this._dragState.movedRootIds.length === 1 ? item.label : `${this._dragState.movedRootIds.length} items`}.`
-    );
+    this._announceDragging(item.label, this._dragState.movedRootIds.length, this._dragState.clone);
   }
 
   private _onPointerDown(event: PointerEvent): void {
@@ -2836,7 +2945,7 @@ export class UISortable extends ElementBase {
     if (!activator || !id) return;
     if (this._isDragLocked()) {
       event.preventDefault();
-      this._announce('Dragging is disabled right now.');
+      this._announce(this._t('announceDragDisabled'));
       return;
     }
 
@@ -3036,7 +3145,7 @@ export class UISortable extends ElementBase {
       ? this._selection.filter((entry) => entry !== id)
       : [...this._selection, id];
     this._setSelection(next, 'pointer');
-    this._announce(`${next.length} items selected.`);
+    this._announce(this._t('announceSelectedMany', { count: next.length }));
   }
 
   private _selectRangeTo(id: string): void {
@@ -3050,7 +3159,7 @@ export class UISortable extends ElementBase {
     }
     const [from, to] = startIndex <= endIndex ? [startIndex, endIndex] : [endIndex, startIndex];
     this._setSelection(visibleIds.slice(from, to + 1), 'pointer');
-    this._announce(`${to - from + 1} items selected.`);
+    this._announce(this._t('announceSelectedMany', { count: to - from + 1 }));
   }
 
   private _visibleItemIds(): string[] {
@@ -3319,10 +3428,16 @@ export class UISortable extends ElementBase {
   private _messageForMove(operation: UISortableOperation, count: number, target: DropTarget): string {
     const list = this._lists.find((entry) => entry.id === target.listId);
     const destination = list?.label || target.listId;
-    if (operation === 'clone') return `${count === 1 ? 'Item copied' : `${count} items copied`} into ${destination}.`;
-    if (operation === 'nest') return `${count === 1 ? 'Item nested' : `${count} items nested`} in ${destination}.`;
-    if (operation === 'transfer') return `${count === 1 ? 'Item moved' : `${count} items moved`} to ${destination}.`;
-    return `${count === 1 ? 'Item reordered' : `${count} items reordered`} in ${destination}.`;
+    const vars = { count, list: destination };
+    if (operation === 'clone') return this._t(count === 1 ? 'announceCopiedOne' : 'announceCopiedMany', vars);
+    if (operation === 'nest') return this._t(count === 1 ? 'announceNestedOne' : 'announceNestedMany', vars);
+    if (operation === 'transfer') return this._t(count === 1 ? 'announceMovedOne' : 'announceMovedMany', vars);
+    return this._t(count === 1 ? 'announceReorderedOne' : 'announceReorderedMany', vars);
+  }
+
+  private _announceDragging(label: string, count: number, clone: boolean): void {
+    if (count === 1) this._announce(this._t(clone ? 'announceDraggingCopy' : 'announceDragging', { label }));
+    else this._announce(this._t(clone ? 'announceDraggingCopyMany' : 'announceDraggingMany', { count }));
   }
 
   private _persistSnapshot(snapshot: UISortablePersistenceSnapshot): void {
@@ -3353,7 +3468,7 @@ export class UISortable extends ElementBase {
     this._dragState = null;
     this._pointerGesture = null;
     this._removeDragImage();
-    if (announce) this._announce('Drag cancelled.');
+    if (announce) this._announce(this._t('announceCancelled'));
     this._syncAttributesFromState();
     this.requestRender();
   }
@@ -3361,7 +3476,7 @@ export class UISortable extends ElementBase {
   private _applyDragImage(dataTransfer: DataTransfer, count: number): void {
     this._removeDragImage();
     const ghost = document.createElement('div');
-    ghost.textContent = count === 1 ? 'Dragging item' : `Dragging ${count} items`;
+    ghost.textContent = count === 1 ? this._t('draggingOne') : this._t('draggingMany', { count });
     ghost.style.position = 'fixed';
     ghost.style.top = '-999px';
     ghost.style.left = '-999px';
@@ -3404,8 +3519,8 @@ export class UISortable extends ElementBase {
       const pill = document.createElement('div');
       pill.className = 'drag-pill';
       pill.textContent = clone
-        ? count === 1 ? 'Copying item' : `Copying ${count} items`
-        : count === 1 ? 'Moving item' : `Moving ${count} items`;
+        ? count === 1 ? this._t('copyingOne') : this._t('copyingMany', { count })
+        : count === 1 ? this._t('movingOne') : this._t('movingMany', { count });
       this.root.appendChild(pill);
       this._dragImage = pill;
       this._dragImageOffset = { x: -14, y: -14 };
@@ -3481,7 +3596,7 @@ export class UISortable extends ElementBase {
           parentId,
           beforeId: id,
           mode: 'before',
-          label: `Before ${item.label}`,
+          label: this._t('targetBefore', { label: item.label }),
         });
         if (allowNesting) {
           targets.push({
@@ -3489,7 +3604,7 @@ export class UISortable extends ElementBase {
             parentId: id,
             beforeId: null,
             mode: 'inside',
-            label: `Nest inside ${item.label}`,
+            label: this._t('targetInside', { label: item.label }),
           });
         }
         walk(listId, id);
@@ -3504,7 +3619,7 @@ export class UISortable extends ElementBase {
           parentId,
           beforeId: null,
           mode: 'before',
-          label: `End of ${this._lists.find((list) => list.id === listId)?.label || listId}`,
+          label: this._t('targetEnd', { list: this._lists.find((list) => list.id === listId)?.label || listId }),
         });
       } else if (allowNesting && ids.length > 0) {
         targets.push({
@@ -3512,7 +3627,7 @@ export class UISortable extends ElementBase {
           parentId,
           beforeId: null,
           mode: 'before',
-          label: 'After children',
+          label: this._t('targetAfterChildren'),
         });
       }
     };

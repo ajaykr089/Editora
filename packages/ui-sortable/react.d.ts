@@ -15,7 +15,8 @@ import type {
   UISortableDropIndicatorVisibility,
   UISortableDropzoneStyle,
   UISortableDragHandleMode,
-  UISortableListOrientation
+  UISortableListOrientation,
+  UISortableLabels
 } from '@editora/ui-core/sortable';
 
 export type SortableListOrientation = UISortableListOrientation;
@@ -27,6 +28,7 @@ export type SortableDropIndicatorVisibility = UISortableDropIndicatorVisibility;
 export type SortableDropzoneStyle = UISortableDropzoneStyle;
 export type SortableDragPreviewSize = 'match-item' | 'compact';
 export type SortableDragHandleMode = UISortableDragHandleMode;
+export type SortableLabels = Partial<UISortableLabels>;
 export type SortableRadiusPreset = 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
 export type SortableRadius = SortableRadiusPreset | number | string;
 export type SortableSpacePreset = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -79,6 +81,8 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   listGap?: SortableSpace;
   itemSpacing?: SortableSpace;
   showSelectionBadge?: boolean;
+  labels?: SortableLabels;
+  hideToolbar?: boolean;
   disabled?: boolean;
   renderItem?: (item: SortableItem, context: SortableRenderItemContext) => React.ReactNode;
   renderListHeader?: (list: SortableList, context: SortableRenderListHeaderContext) => React.ReactNode;
