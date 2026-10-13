@@ -35,6 +35,7 @@ It covers:
 - Hold-to-drag on touch for cards dragged by their body, so the page still scrolls (`touchHoldDelay`)
 - Guard rails: `maxItems` per list, `canDrop`, and a cancelable `before-change` event (`onBeforeChange`)
 - A free `data` field on every item and list
+- Dragging cards between two sortables (`group`), and lists that scroll by themselves (`maxHeight`)
 - Every text can be replaced through `labels`, and the hint line hidden with `hideToolbar`
 - The same custom rendering without React, through properties of the element
 
@@ -320,6 +321,7 @@ type SortableList = {
   cloneOnDrag?: boolean;
   accepts?: string[];
   maxItems?: number;
+  maxHeight?: number | string;
   data?: unknown;
 };
 ```
@@ -342,7 +344,7 @@ type SortableItem = {
 };
 ```
 
-`data` is anything of yours that can be written as JSON. It travels with the item through moves and copies and comes back, as a copy, in every event and callback. `maxItems` is the most items a list can hold at every nesting level: a move or copy that would go past it is refused and the list header shows `3/5`.
+`data` is anything of yours that can be written as JSON. It travels with the item through moves and copies and comes back, as a copy, in every event and callback. `maxItems` is the most items a list can hold at every nesting level: a move or copy that would go past it is refused and the list header shows `3/5`. `maxHeight` (a number of px or a CSS length such as `"20rem"`) is the tallest the list's cards can be before the list scrolls by itself.
 
 ## Key Props
 
@@ -356,6 +358,8 @@ type SortableItem = {
 | `persistKey` | `string` | — | Stores persistence snapshots in `localStorage` |
 | `allowFilteredDrag` | `boolean` | `false` | Re-enables dragging while a filter is active |
 | `allowNesting` | `boolean` | `true` | Enables dropping inside another item |
+| `group` | `string` | — | Sortables with the same group take each other's cards: hold a card over another one and drop it. Each reports its own `change` (with `external`). Ids must be unique across the group |
+| `listMaxHeight` | `number \| string` | — | `maxHeight` for every list that does not set its own. A list taller than this scrolls by itself, and dragging at its edge scrolls it |
 | `nestTrigger` | `'gutter' \| 'modifier' \| 'area'` | `'gutter'` | What it takes to nest with the pointer. `gutter`: hold Alt, or drop on the far side of a card. `modifier`: hold Alt. `area`: the middle of any card, as before. Otherwise the top half of a card is "before it" and the bottom half "after it" |
 | `touchHoldDelay` | `number` | `350` | Milliseconds a finger must rest on a card (dragged by its body or a custom handle) before it lifts; `0` lifts at once. The built-in handle always lifts at once |
 | `labels` | `Partial<SortableLabels>` | English | Replaces any of the texts shown or announced; `{count}`, `{label}`, `{list}` and `{max}` are filled in |
@@ -427,6 +431,43 @@ export default function GuardedBoard() {
 - `canDrop` runs on every pointer move, so keep it quick; a function that throws refuses the drop
 - `before-change` fires once, before anything is applied: cancelling it leaves the items, the saved positions and the attributes untouched, puts a dragged card back, and fires no `change`
 - `moveSelection()` on the element returns `false` when a move did not happen
+
+## Two Boards
+
+```tsx
+import * as React from 'react';
+import { Sortable, type SortableItem, type SortableList } from '@editora/ui-sortable/react';
+
+const backlogLists: SortableList[] = [{ id: 'backlog', label: 'Backlog' }];
+const sprintLists: SortableList[] = [{ id: 'sprint', label: 'This sprint', maxItems: 3, maxHeight: 280 }];
+
+export default function TwoBoards() {
+  const [backlog, setBacklog] = React.useState<SortableItem[]>([
+    { id: 'audit', label: 'Audit onboarding', listId: 'backlog' },
+    { id: 'notes', label: 'Ship release notes', listId: 'backlog' },
+    { id: 'handoff', label: 'Review handoff', listId: 'backlog' }
+  ]);
+  const [sprint, setSprint] = React.useState<SortableItem[]>([
+    { id: 'login', label: 'Fix login', listId: 'sprint' },
+    { id: 'docs', label: 'Write docs', listId: 'sprint' }
+  ]);
+
+  // Sortables with the same group take each other's cards. Each one reports its own change,
+  // so each keeps its own state.
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }}>
+      <Sortable lists={backlogLists} items={backlog} group="planning" allowNesting={false} onItemsChange={setBacklog} />
+      <Sortable lists={sprintLists} items={sprint} group="planning" allowNesting={false} onItemsChange={setSprint} />
+    </div>
+  );
+}
+```
+
+- The element the card came from reports `change` with `external.direction === 'out'`, the one it reached with `'in'`; both give the other one as `external.peer`
+- `onBeforeChange` on either can cancel the move (nothing then changes anywhere), and the receiving sortable's `canDrop` (`info.from` is the sender), `maxItems`, `accepts` and `allowNesting` apply
+- A card goes with all its children; a copy (clone lists) leaves the first board as it was and gets a fresh id in the second
+- Ids must be unique across the group: a drop onto a board that already has one of the ids is refused
+- Dragging between boards is pointer-only. For the keyboard and for code the element has `moveSelectionTo(otherSortable, { targetListId, beforeId?, parentId?, clone? })`
 
 ## Nesting, Touch And Translation
 

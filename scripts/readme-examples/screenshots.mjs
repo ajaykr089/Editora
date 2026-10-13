@@ -250,6 +250,20 @@ const shots = [
     },
   },
   { out: 'packages/ui-sortable/docs/images/vanilla.png', example: 'sortable-vanilla' },
+  {
+    out: 'packages/ui-sortable/docs/images/two-boards.png',
+    example: 'sortable-two-boards',
+    async act(page) {
+      // Hold a card of the first board over the second one: it marks the place where the card would land.
+      const from = await page.getByText('Ship release notes', { exact: true }).first().boundingBox();
+      const to = await page.getByText('Write docs', { exact: true }).first().boundingBox();
+      await page.mouse.move(from.x - 17, from.y + from.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(from.x + 30, from.y - 10, { steps: 6 });
+      await page.mouse.move(to.x + 40, to.y - 6, { steps: 16 });
+      await page.waitForTimeout(500);
+    },
+  },
 
   // ---- @editora/toast
   {

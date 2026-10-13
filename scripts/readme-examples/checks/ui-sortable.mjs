@@ -139,4 +139,30 @@ export default async function checks({ run }) {
     if (result.accepted !== true) return 'a small card was refused';
     return logs.some((line) => line.startsWith('moved')) ? true : "'change' did not fire";
   });
+
+  await run('sortable-two-boards', async (page) => {
+    const boards = () =>
+      page.evaluate(() => {
+        const [backlog, sprint] = Array.from(document.querySelectorAll('ui-sortable'));
+        const ids = (element) => element.items.map((item) => item.id).join(' ');
+        return { backlog: ids(backlog), sprint: ids(sprint) };
+      });
+    const before = await boards();
+    if (before.backlog !== 'audit notes handoff' || before.sprint !== 'login docs') return `unexpected start (${JSON.stringify(before)})`;
+
+    // A card of the first board dropped on the second one: it leaves one and arrives in the other.
+    await drag(page, 'Audit onboarding', 'Write docs', 8);
+    const moved = await boards();
+    if (moved.backlog !== 'notes handoff' || !moved.sprint.split(' ').includes('audit')) return `the card did not cross (${JSON.stringify(moved)})`;
+
+    // The second board holds three: it is full now, so the next card is refused and stays where it was.
+    await drag(page, 'Ship release notes', 'Fix login', 8);
+    const refused = await boards();
+    if (refused.backlog !== moved.backlog || refused.sprint !== moved.sprint) return `a full board took a fourth card (${JSON.stringify(refused)})`;
+
+    // And a card can go back.
+    await drag(page, 'Fix login', 'Review handoff', 8);
+    const back = await boards();
+    return back.backlog.split(' ').includes('login') && !back.sprint.split(' ').includes('login') ? true : `the card did not go back (${JSON.stringify(back)})`;
+  });
 }
