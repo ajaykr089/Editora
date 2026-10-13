@@ -1845,4 +1845,193 @@ describe('ui-sortable', () => {
       expect(byId(second, 'a').data).toEqual({ price: 0, note: '', done: false, none: null });
     });
   });
+
+  describe('render functions (without React)', () => {
+    const rlists = [
+      { id: 'todo', label: 'To do', cloneOnDrag: true },
+      { id: 'done', label: 'Done' },
+    ];
+    const ritems = [
+      { id: 'a', label: 'A', listId: 'todo', data: { price: 5 } },
+      { id: 'b', label: 'B', listId: 'todo', disabled: true },
+    ];
+    const mount = async (attrs: Record<string, string> = {}) => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(rlists));
+      el.setAttribute('items', JSON.stringify(ritems));
+      Object.entries(attrs).forEach(([name, value]) => el.setAttribute(name, value));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      return el;
+    };
+    const content = (el: any, id: string) => el.shadowRoot.querySelector(`.item-custom-content[data-item-content-target="${id}"]`) as HTMLElement;
+    const settle = async () => {
+      await flushMicrotask();
+      await flushMicrotask();
+    };
+
+    it('draws a card from a returned node or a string of HTML, with the context', async () => {
+      const el = await mount();
+      const seen: any[] = [];
+      el.renderItem = (item: any, context: any) => {
+        seen.push({ item, context });
+        if (item.id === 'b') return '<em class="html">raw</em>';
+        const node = document.createElement('strong');
+        node.textContent = `${item.label} $${item.data?.price}`;
+        return node;
+      };
+      await settle();
+
+      expect(content(el, 'a').querySelector('strong')?.textContent).toBe('A $5');
+      expect(content(el, 'b').querySelector('em.html')?.textContent).toBe('raw');
+      const a = seen.find((entry) => entry.item.id === 'a');
+      expect(a.item.data).toEqual({ price: 5 });
+      expect(a.context).toMatchObject({ selected: false, disabled: false, dragDisabled: false, cloneOnDrag: true });
+      expect(a.context.list.id).toBe('todo');
+      expect(seen.find((entry) => entry.item.id === 'b').context.disabled).toBe(true);
+    });
+
+    it('keeps the built-in card when the function returns nothing, or throws', async () => {
+      const el = await mount();
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      el.renderItem = (item: any) => {
+        if (item.id === 'b') throw new Error('boom');
+        return undefined;
+      };
+      await settle();
+      expect(content(el, 'a').childNodes.length).toBe(0);
+      expect(content(el, 'b').childNodes.length).toBe(0);
+      expect(el.shadowRoot.querySelector('.item[data-id="a"] .item-title')?.textContent).toBe('A');
+      expect(error).toHaveBeenCalledTimes(1);
+      error.mockRestore();
+    });
+
+    it('draws only the cards whose selection changed, and not the rest, when something is selected', async () => {
+      const el = await mount();
+      const calls: Record<string, number> = {};
+      el.renderItem = (item: any, context: any) => {
+        calls[item.id] = (calls[item.id] || 0) + 1;
+        const node = document.createElement('span');
+        node.textContent = context.selected ? 'on' : 'off';
+        return node;
+      };
+      await settle();
+      const bNode = content(el, 'b').firstChild;
+      const before = { ...calls };
+
+      el.select(['a']);
+      await settle();
+      expect(content(el, 'a').textContent).toBe('on');
+      expect(calls.a).toBe(before.a + 1);
+      expect(calls.b).toBe(before.b);
+      expect(content(el, 'b').firstChild).toBe(bNode);
+
+      el.clearSelection();
+      await settle();
+      expect(content(el, 'a').textContent).toBe('off');
+    });
+
+    it('draws a card again when its data changes, though the data is not shown by default', async () => {
+      const el = await mount();
+      el.renderItem = (item: any) => {
+        const node = document.createElement('span');
+        node.textContent = String(item.data?.price);
+        return node;
+      };
+      await settle();
+      expect(content(el, 'a').textContent).toBe('5');
+
+      el.items = ritems.map((item) => (item.id === 'a' ? { ...item, data: { price: 9 } } : item));
+      await settle();
+      expect(content(el, 'a').textContent).toBe('9');
+    });
+
+    it('does not draw anything again on a render that changes nothing', async () => {
+      const el = await mount();
+      let calls = 0;
+      el.renderItem = () => {
+        calls += 1;
+        return document.createElement('i');
+      };
+      await settle();
+      const drawn = calls;
+      el.requestRender();
+      await settle();
+      expect(calls).toBe(drawn);
+    });
+
+    it('draws list headers and empty states, and tells them how many items the list holds', async () => {
+      const el = await mount();
+      const headers: any[] = [];
+      const empties: any[] = [];
+      el.renderListHeader = (list: any, context: any) => {
+        headers.push({ id: list.id, ...context });
+        return `<b>${list.label} (${context.itemCount})</b>`;
+      };
+      el.renderEmptyState = (list: any, context: any) => {
+        empties.push({ id: list.id, ...context });
+        const node = document.createElement('p');
+        node.textContent = `Nothing in ${list.label}`;
+        return node;
+      };
+      await settle();
+
+      const header = (id: string) => el.shadowRoot.querySelector(`.list-custom-header[data-list-header-target="${id}"]`)?.textContent;
+      expect(header('todo')).toBe('To do (2)');
+      expect(header('done')).toBe('Done (0)');
+      expect(headers.find((entry) => entry.id === 'todo')).toMatchObject({ itemCount: 2, dragLocked: false });
+      // Only the list with no items has an empty state.
+      expect(empties.map((entry) => entry.id)).toEqual(['done']);
+      expect(empties[0]).toMatchObject({ itemCount: 0, dragLocked: false, filterQuery: '' });
+      expect(el.shadowRoot.querySelector('.list-custom-empty[data-list-empty-target="done"]')?.textContent).toBe('Nothing in Done');
+    });
+
+    it('goes back to the built-in markup when a function is removed', async () => {
+      const el = await mount();
+      el.renderItem = () => document.createElement('i');
+      el.renderListHeader = () => 'custom header';
+      await settle();
+      expect(content(el, 'a').childNodes.length).toBe(1);
+
+      el.renderItem = null;
+      el.renderListHeader = null;
+      await settle();
+      expect(content(el, 'a').childNodes.length).toBe(0);
+      expect(el.shadowRoot.querySelector('.list-custom-header')?.childNodes.length).toBe(0);
+      expect(el.renderItem).toBeNull();
+    });
+
+    it('treats a drag-handle-selector match inside a drawn card as a drag handle', async () => {
+      const el = await mount({ 'drag-handle-selector': '.grip' });
+      el.renderItem = (item: any) => `<span class="grip">⠿</span> ${item.label}`;
+      await settle();
+
+      const grip = content(el, 'a').querySelector('.grip') as HTMLElement;
+      expect(grip.getAttribute('data-drag-trigger')).toBe('custom');
+      expect(grip.getAttribute('data-id')).toBe('a');
+
+      const handled = el._dragActivatorFromPath([grip]);
+      expect(handled).toMatchObject({ id: 'a', kind: 'custom' });
+      el._onPointerDown({ pointerId: 91, pointerType: 'mouse', clientX: 1, clientY: 1, preventDefault() {}, composedPath: () => [grip] });
+      el._onPointerMove({ pointerId: 91, clientX: 40, clientY: 40, preventDefault() {} });
+      expect(el._dragState?.movedRootIds).toEqual(['a']);
+      el.cancelDrag();
+    });
+
+    it('puts what a card draws into the ghost that follows the pointer', async () => {
+      const el = await mount();
+      el.renderItem = (item: any) => {
+        const node = document.createElement('span');
+        node.className = 'mine';
+        node.textContent = `custom ${item.label}`;
+        return node;
+      };
+      await settle();
+      const handle = el.shadowRoot.querySelector('.handle[data-id="a"]') as HTMLElement;
+      el._onPointerDown({ pointerId: 92, pointerType: 'mouse', clientX: 1, clientY: 1, preventDefault() {}, composedPath: () => [handle] });
+      el._onPointerMove({ pointerId: 92, clientX: 40, clientY: 40, preventDefault() {} });
+      expect(el.shadowRoot.querySelector('.item-ghost .mine')?.textContent).toBe('custom A');
+      el.cancelDrag();
+    });
+  });
 });

@@ -78,6 +78,32 @@ export type UISortableChangeDetail = {
   persistence: UISortablePersistenceSnapshot;
 };
 
+/** What a `renderItem` function is told about the card it is drawing. */
+export type UISortableRenderItemContext = {
+  selected: boolean;
+  disabled: boolean;
+  dragDisabled: boolean;
+  cloneOnDrag: boolean;
+  list?: UISortableList;
+};
+
+export type UISortableRenderListHeaderContext = {
+  itemCount: number;
+  dragLocked: boolean;
+};
+
+export type UISortableRenderEmptyStateContext = {
+  itemCount: number;
+  dragLocked: boolean;
+  filterQuery: string;
+};
+
+/**
+ * What a render function returns: a DOM node, or a string of HTML (escape anything that came from a user),
+ * or nothing to keep the built-in markup.
+ */
+export type UISortableRenderResult = Node | string | null | undefined | void;
+
 /** What `canDrop` is asked: can these items go there? */
 export type UISortableDropInfo = {
   /** The items being moved (not their children), as they are now. */
@@ -1121,6 +1147,21 @@ function parseJsonArray<T>(value: string | null): T[] {
   }
 }
 
+// A short fingerprint of an item's or list's `data`. It is written into the markup while a render function is set,
+// so a change to the data (which is not otherwise drawn) makes the card be drawn again.
+function dataRevision(data: unknown): string {
+  if (data === undefined) return '';
+  let json: string;
+  try {
+    json = JSON.stringify(data) ?? '';
+  } catch {
+    return '';
+  }
+  let hash = 5381;
+  for (let i = 0; i < json.length; i += 1) hash = ((hash << 5) + hash + json.charCodeAt(i)) | 0;
+  return (hash >>> 0).toString(36);
+}
+
 function parseLabels(value: string | null): Partial<UISortableLabels> {
   if (!value) return {};
   try {
@@ -1596,6 +1637,9 @@ export class UISortable extends ElementBase {
   private _lastSelectionAttr: string | null = null;
   private _lastLabelsAttr: string | null = null;
   private _canDropCallback: ((info: UISortableDropInfo) => boolean) | null = null;
+  private _renderItemFn: ((item: UISortableItem, context: UISortableRenderItemContext) => UISortableRenderResult) | null = null;
+  private _renderListHeaderFn: ((list: UISortableList, context: UISortableRenderListHeaderContext) => UISortableRenderResult) | null = null;
+  private _renderEmptyStateFn: ((list: UISortableList, context: UISortableRenderEmptyStateContext) => UISortableRenderResult) | null = null;
   private _labels: Partial<UISortableLabels> = {};
   private _hydratedPersistKey: string | null = null;
   private _cloneSeed = 1;
@@ -1726,6 +1770,40 @@ export class UISortable extends ElementBase {
 
   set canDrop(next: ((info: UISortableDropInfo) => boolean) | null | undefined) {
     this._canDropCallback = typeof next === 'function' ? next : null;
+  }
+
+  /**
+   * Draws the inside of a card yourself, in plain JavaScript (React has `renderItem` on the wrapper). Return a
+   * fresh DOM node, or a string of HTML; return nothing to keep the built-in card. It is called again whenever
+   * the card is drawn anew, when its `data` changes, and when it is selected or deselected.
+   */
+  get renderItem(): ((item: UISortableItem, context: UISortableRenderItemContext) => UISortableRenderResult) | null {
+    return this._renderItemFn;
+  }
+
+  set renderItem(next: ((item: UISortableItem, context: UISortableRenderItemContext) => UISortableRenderResult) | null | undefined) {
+    this._renderItemFn = typeof next === 'function' ? next : null;
+    this.requestRender();
+  }
+
+  /** Draws a list's header yourself. Return a fresh DOM node or a string of HTML; nothing keeps the built-in header. */
+  get renderListHeader(): ((list: UISortableList, context: UISortableRenderListHeaderContext) => UISortableRenderResult) | null {
+    return this._renderListHeaderFn;
+  }
+
+  set renderListHeader(next: ((list: UISortableList, context: UISortableRenderListHeaderContext) => UISortableRenderResult) | null | undefined) {
+    this._renderListHeaderFn = typeof next === 'function' ? next : null;
+    this.requestRender();
+  }
+
+  /** Draws what an empty list shows. Return a fresh DOM node or a string of HTML; nothing keeps the built-in message. */
+  get renderEmptyState(): ((list: UISortableList, context: UISortableRenderEmptyStateContext) => UISortableRenderResult) | null {
+    return this._renderEmptyStateFn;
+  }
+
+  set renderEmptyState(next: ((list: UISortableList, context: UISortableRenderEmptyStateContext) => UISortableRenderResult) | null | undefined) {
+    this._renderEmptyStateFn = typeof next === 'function' ? next : null;
+    this.requestRender();
   }
 
   /** The text the component shows, with any `labels` you set applied over the English defaults. */
@@ -1888,6 +1966,7 @@ export class UISortable extends ElementBase {
                 data-orientation="${list.orientation}"
                 data-disabled="${list.disabled}"
                 data-full="${full}"
+                ${this._renderListHeaderFn || this._renderEmptyStateFn ? `data-rev="${dataRevision(list.data)}"` : ''}
                 aria-label="${escapeHtml(list.label)}"
               >
                 <header class="list-header">
@@ -1920,6 +1999,7 @@ export class UISortable extends ElementBase {
     const scroll = this._captureScroll();
     this.setContent(html);
     this._restoreScroll(scroll);
+    this._fillCustomTargets();
     queueMicrotask(() => {
       this._restorePendingFocus();
       this._applyCurrentDropTargetVisualState();
@@ -2144,8 +2224,90 @@ export class UISortable extends ElementBase {
     return true;
   }
 
+  // Fills the places the markup leaves for custom content (the inside of a card, a list header, an empty state)
+  // from the render functions. Fresh markup has them empty; `itemIds` redraws just those cards.
+  private _fillCustomTargets(only?: { itemIds: Set<string> }): void {
+    if (!this._renderItemFn && !this._renderListHeaderFn && !this._renderEmptyStateFn) return;
+    const dragLocked = this._isDragLocked();
+    const listById = new Map(this._lists.map((list) => [list.id, list]));
+    const apply = (target: HTMLElement, make: () => UISortableRenderResult) => {
+      let result: UISortableRenderResult;
+      try {
+        result = make();
+      } catch (error) {
+        console.error('ui-sortable: a render function threw; the built-in markup is shown.', error);
+        return;
+      }
+      if (typeof result === 'string') target.innerHTML = result;
+      else if (result && typeof (result as Node).nodeType === 'number') target.replaceChildren(result as Node);
+    };
+
+    const renderItem = this._renderItemFn;
+    if (renderItem) {
+      const itemById = new Map(this._items.map((item) => [item.id, item]));
+      const selected = new Set(this._selection);
+      const handleSelector = this.getAttribute('drag-handle-selector')?.trim() || '';
+      this.root.querySelectorAll<HTMLElement>('.item-custom-content[data-item-content-target]').forEach((target) => {
+        const id = target.getAttribute('data-item-content-target') || '';
+        if (only ? !only.itemIds.has(id) : target.hasChildNodes()) return;
+        const item = itemById.get(id);
+        if (!item) return;
+        if (only) target.replaceChildren();
+        const list = listById.get(item.listId);
+        apply(target, () => renderItem(publicItem(item), {
+          selected: selected.has(id),
+          disabled: item.disabled,
+          dragDisabled: item.dragDisabled,
+          cloneOnDrag: item.cloneOnDrag || !!list?.cloneOnDrag,
+          list: list ? publicList(list) : undefined,
+        }));
+        if (handleSelector) this._markCustomHandles(target, id, handleSelector);
+      });
+    }
+
+    if (only) return;
+    const renderHeader = this._renderListHeaderFn;
+    if (renderHeader) {
+      this.root.querySelectorAll<HTMLElement>('.list-custom-header[data-list-header-target]').forEach((target) => {
+        if (target.hasChildNodes()) return;
+        const list = listById.get(target.getAttribute('data-list-header-target') || '');
+        if (!list) return;
+        const itemCount = this._items.filter((item) => item.listId === list.id).length;
+        apply(target, () => renderHeader(publicList(list), { itemCount, dragLocked }));
+      });
+    }
+
+    const renderEmpty = this._renderEmptyStateFn;
+    if (renderEmpty) {
+      this.root.querySelectorAll<HTMLElement>('.list-custom-empty[data-list-empty-target]').forEach((target) => {
+        if (target.hasChildNodes()) return;
+        const list = listById.get(target.getAttribute('data-list-empty-target') || '');
+        if (!list) return;
+        const itemCount = this._items.filter((item) => item.listId === list.id).length;
+        apply(target, () => renderEmpty(publicList(list), { itemCount, dragLocked, filterQuery: this.filterQuery }));
+      });
+    }
+  }
+
+  // The parts of a custom card that match `drag-handle-selector` start a drag, the way the built-in grip does.
+  private _markCustomHandles(card: HTMLElement, id: string, selector: string): void {
+    let handles: NodeListOf<HTMLElement>;
+    try {
+      handles = card.querySelectorAll<HTMLElement>(selector);
+    } catch {
+      return;
+    }
+    handles.forEach((handle) => {
+      handle.setAttribute('data-sortable-custom-handle', '');
+      handle.setAttribute('data-drag-trigger', 'custom');
+      handle.setAttribute('data-id', id);
+      handle.setAttribute('draggable', 'true');
+      if (!handle.hasAttribute('tabindex')) handle.setAttribute('tabindex', '-1');
+    });
+  }
+
   private _hasCustomItemRendering(): boolean {
-    return this.hasAttribute('custom-item-rendering');
+    return this.hasAttribute('custom-item-rendering') || !!this._renderItemFn;
   }
 
   private _syncSelectionFromAttribute(selectionAttr: string | null): void {
@@ -2160,10 +2322,12 @@ export class UISortable extends ElementBase {
   private _syncSelectionVisualState(): void {
     const selectedIds = new Set(this._selection);
     const showSelectionBadge = this.getAttribute('show-selection-badge') !== 'false';
+    const reselected = new Set<string>();
     this.root.querySelectorAll<HTMLElement>('.item[data-id]').forEach((itemEl) => {
       const id = itemEl.getAttribute('data-id');
       if (!id) return;
       const selected = selectedIds.has(id);
+      if (itemEl.getAttribute('data-selected') === 'true' !== selected) reselected.add(id);
       const focused = this._focusedId === id;
       itemEl.setAttribute('data-selected', selected ? 'true' : 'false');
       itemEl.setAttribute('aria-selected', selected ? 'true' : 'false');
@@ -2176,6 +2340,9 @@ export class UISortable extends ElementBase {
         selectionBadge.textContent = visible ? this._t('badgeSelected') : '';
       }
     });
+
+    // A card drawn by a render function is told whether it is selected, so it is drawn again when that changes.
+    if (reselected.size && this._renderItemFn) this._fillCustomTargets({ itemIds: reselected });
 
     this.root.querySelector<HTMLElement>('.selection-summary')?.setAttribute('data-count', String(this._selection.length));
     const selectionPill = this.root.querySelector<HTMLElement>('.selection-pill');
@@ -2624,6 +2791,7 @@ export class UISortable extends ElementBase {
           data-dragging="${dragging}"
           data-disabled="${disabled}"
           data-drop-inside-active="${dropInsideActive ? 'true' : 'false'}"
+          ${this._renderItemFn && !placeholder ? `data-rev="${dataRevision(item.data)}"` : ''}
           role="${placeholder ? 'presentation' : 'option'}"
           aria-selected="${placeholder ? 'false' : selected}"
           aria-disabled="${disabled}"

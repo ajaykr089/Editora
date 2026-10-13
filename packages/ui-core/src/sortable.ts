@@ -20,5 +20,9 @@ export type {
   UISortableLabels,
   UISortableNestTrigger,
   UISortableDropInfo,
-  UISortableBeforeChangeDetail
+  UISortableBeforeChangeDetail,
+  UISortableRenderItemContext,
+  UISortableRenderListHeaderContext,
+  UISortableRenderEmptyStateContext,
+  UISortableRenderResult
 } from './components/ui-sortable';
