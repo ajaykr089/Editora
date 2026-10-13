@@ -16,7 +16,7 @@ export interface MemoryConfig {
 export class MemoryManager {
   private config: Required<MemoryConfig>;
   private cleanupInterval: number | null = null;
-  private eventListeners: Map<string, EventListener> = new Map();
+  private eventListeners: Array<{ element: EventTarget; type: string; listener: EventListener; options?: boolean | AddEventListenerOptions }> = [];
   private timeouts: Set<number> = new Set();
   private intervals: Set<number> = new Set();
 
@@ -42,9 +42,8 @@ export class MemoryManager {
     listener: EventListener,
     options?: boolean | AddEventListenerOptions
   ): void {
-    const key = `${type}_${Math.random()}`;
     element.addEventListener(type, listener, options);
-    this.eventListeners.set(key, listener);
+    this.eventListeners.push({ element, type, listener, options });
   }
 
   /**
@@ -156,8 +155,12 @@ export class MemoryManager {
     this.stopAutoCleanup();
     this.cleanup();
 
-    // Clear event listeners map
-    this.eventListeners.clear();
+    // Remove the event listeners that were registered. cleanup() leaves them: it runs by itself when memory is high,
+    // and listeners are not something to take away from a page that is still using them.
+    for (const { element, type, listener, options } of this.eventListeners) {
+      element.removeEventListener(type, listener, options);
+    }
+    this.eventListeners = [];
   }
 }
 
