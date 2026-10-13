@@ -1,7 +1,7 @@
 {
   "name": "@editora/ui-angular",
   "version": "0.1.5",
-  "description": "Angular adapters / guidelines for @editora UI web components",
+  "description": "Deprecated: use @editora/ui-core directly in Angular. This package never contained code.",
   "keywords": [
     "editora",
     "angular",
