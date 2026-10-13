@@ -793,4 +793,28 @@ describe('ui-sortable', () => {
       withNoHitTarget(() => expect(el._releaseDropTarget(150, 200)).toEqual(target));
     });
   });
+
+  it('shows the keyboard placeholder when nesting into a card that has no children yet', async () => {
+    const el = document.createElement('ui-sortable') as any;
+    el.setAttribute('lists', JSON.stringify(lists));
+    el.setAttribute('items', JSON.stringify(items));
+    document.body.appendChild(el);
+    await flushMicrotask();
+
+    el._dragState = {
+      snapshot: el.items.map((item: any) => ({ ...item })),
+      movedRootIds: ['task-a'],
+      originId: 'task-a',
+      clone: false,
+      keyboard: true,
+      dropTarget: { listId: 'todo', parentId: 'task-b', beforeId: null, mode: 'inside' },
+      committed: false,
+    };
+    el.requestRender();
+    await flushMicrotask();
+
+    const placeholder = el.shadowRoot.querySelector('.item.item-placeholder[data-id="task-a"]');
+    expect(placeholder).toBeTruthy();
+    expect(placeholder.closest('.children')).toBeTruthy();
+  });
 });

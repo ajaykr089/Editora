@@ -1235,6 +1235,12 @@ function getPersistenceSnapshot(items: NormalizedItem[]): UISortablePersistenceS
   };
 }
 
+// True when rendered branch markup holds at least one card. The keyboard-drag placeholder is a card too
+// (class "item item-placeholder"), so a bare substring match on class="item" missed it.
+function hasItemMarkup(html: string): boolean {
+  return /class="item[\s"]/.test(html);
+}
+
 function matchesFilter(item: NormalizedItem, query: string): boolean {
   if (!query) return true;
   const text = `${item.label} ${item.description}`.toLowerCase();
@@ -2168,7 +2174,7 @@ export class UISortable extends ElementBase {
           placeholderIds,
           showSelectionBadge
         );
-        if (!matchesFilter(item, this.filterQuery) && !descendants.includes('class="item"')) return;
+        if (!matchesFilter(item, this.filterQuery) && !hasItemMarkup(descendants)) return;
         html += this._renderDropzone({
           listId: list.id,
           parentId,
@@ -2201,7 +2207,7 @@ export class UISortable extends ElementBase {
     const itemId = escapeHtml(item.id);
     const placeholder = placeholderIds.has(item.id);
     const childrenHtml = placeholder ? '' : renderChildren(item.id);
-    const hasVisibleChildren = childrenHtml.includes('class="item"');
+    const hasVisibleChildren = hasItemMarkup(childrenHtml);
     const selected = placeholder ? false : this._selection.includes(item.id);
     const dragging = placeholder ? false : draggingIds.has(item.id);
     const disabled = item.disabled;
