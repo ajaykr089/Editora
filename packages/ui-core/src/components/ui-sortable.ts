@@ -31,6 +31,8 @@ export type UISortableList = {
   accepts?: string[];
   /** The most items the list can hold, at every nesting level. A move or copy that would go past it is refused. */
   maxItems?: number;
+  /** The tallest the list's cards can be before the list scrolls on its own (a number of px, or a CSS length such as "20rem"). Overrides `list-max-height`. */
+  maxHeight?: number | string;
   /** Anything of yours that is JSON-serialisable (an id, a record, a colour). It travels with the list and comes back in every event. */
   data?: unknown;
 };
@@ -156,6 +158,7 @@ type NormalizedList = {
   cloneOnDrag: boolean;
   accepts?: string[];
   maxItems?: number;
+  maxHeight?: string;
   data?: unknown;
 };
 
@@ -537,6 +540,16 @@ const style = `
     gap: 0;
     min-block-size: 88px;
     min-inline-size: 0;
+  }
+
+  /* A list with a height of its own scrolls by itself. The padding gives card shadows and focus rings room inside
+     the scroller; the negative margin hands that room back to the layout. */
+  .items[data-scroll="true"] {
+    max-block-size: var(--ui-sortable-list-max-block-size);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 4px;
+    margin: -4px;
   }
 
   .tree {
@@ -1176,6 +1189,15 @@ function parseLabels(value: string | null): Partial<UISortableLabels> {
   }
 }
 
+// A height for a list: a number is px; a string must be a plain length (no calc, no declarations), because
+// it ends up in a style attribute.
+function normalizeLength(value: unknown): string | undefined {
+  if (typeof value === 'number') return Number.isFinite(value) && value > 0 ? `${value}px` : undefined;
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  return /^(?:\d+\.?\d*|\.\d+)(?:px|rem|em|ch|vh|svh|dvh|vw|%)$/.test(trimmed) ? trimmed : undefined;
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -1399,6 +1421,7 @@ function canonicalizeLists(rawLists: UISortableList[]): NormalizedList[] {
         ? list.accepts.filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
         : undefined,
       maxItems: Number.isFinite(list?.maxItems) && Number(list.maxItems) >= 0 ? Math.floor(Number(list.maxItems)) : undefined,
+      maxHeight: normalizeLength(list?.maxHeight),
       ...(list?.data !== undefined ? { data: list.data } : {}),
     });
   });
@@ -1510,6 +1533,7 @@ function serializeLists(lists: NormalizedList[]): string {
     cloneOnDrag: list.cloneOnDrag,
     accepts: list.accepts,
     maxItems: list.maxItems,
+    maxHeight: list.maxHeight,
     data: list.data,
   })));
 }
@@ -1618,6 +1642,7 @@ export class UISortable extends ElementBase {
       'show-selection-badge',
       'nest-trigger',
       'touch-hold-delay',
+      'list-max-height',
       'labels',
       'hide-toolbar',
       'disabled',
@@ -1649,6 +1674,7 @@ export class UISortable extends ElementBase {
   private _pendingDropTarget: DropTargetCandidate | null = null;
   private _pendingTimer: ReturnType<typeof setTimeout> | null = null;
   private _focusWasInside = false;
+  private _revealPending = false;
   // Alt held during a pointer drag: it is what asks to nest instead of reorder (see UISortableNestTrigger).
   private _nestModifier = false;
   private _lastPointer: { x: number; y: number } | null = null;
@@ -1855,6 +1881,7 @@ export class UISortable extends ElementBase {
     if (!this._items.some((item) => item.id === id)) return;
     this._focusedId = id;
     this._pendingFocusId = id;
+    this._revealPending = true;
     if (this._applyInteractiveStateInPlace({ restoreFocus: true })) return;
     this.requestRender();
   }
@@ -1939,6 +1966,7 @@ export class UISortable extends ElementBase {
             const content = records.length
               ? this._renderListTree(renderItems, list, focusedId, draggingIds, allowNesting, placeholderIds, showSelectionBadge)
               : '';
+            const maxHeight = list.orientation === 'horizontal' ? undefined : list.maxHeight ?? normalizeLength(this.getAttribute('list-max-height'));
             const total = this._items.filter((item) => item.listId === list.id).length;
             const full = list.maxItems !== undefined && total >= list.maxItems;
             const helperText = list.disabled
@@ -1972,7 +2000,7 @@ export class UISortable extends ElementBase {
                     ${helperText ? `<div class="list-helper">${escapeHtml(helperText)}</div>` : ''}
                   </div>
                 </header>
-                <div class="items" part="items" role="${records.length ? 'listbox' : 'group'}" ${records.length ? 'aria-multiselectable="true"' : ''} aria-label="${escapeHtml(list.label)}" aria-describedby="ui-sortable-helper">
+                <div class="items" part="items"${maxHeight ? ` data-scroll="true" style="--ui-sortable-list-max-block-size: ${maxHeight}"` : ''} role="${records.length ? 'listbox' : 'group'}" ${records.length ? 'aria-multiselectable="true"' : ''} aria-label="${escapeHtml(list.label)}" aria-describedby="ui-sortable-helper">
                   ${content || `<div class="list-custom-empty" part="list-custom-empty" data-list-empty-target="${escapeHtml(list.id)}"></div><div class="empty">${escapeHtml(list.emptyLabel || this._t('emptyList'))}</div>${this._renderDropzone({
                     listId: list.id,
                     parentId: null,
@@ -1997,6 +2025,10 @@ export class UISortable extends ElementBase {
     this._fillCustomTargets();
     queueMicrotask(() => {
       this._restorePendingFocus();
+      // A keyboard drag moves a placeholder card to the chosen place: keep it in sight.
+      if (this._dragState?.keyboard) {
+        this.root.querySelector<HTMLElement>('.item-placeholder')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+      }
       this._applyCurrentDropTargetVisualState();
       this._applyLiveMessage();
       this._animateItemShellReflow(previousRects);
@@ -2082,7 +2114,13 @@ export class UISortable extends ElementBase {
     if (document.activeElement !== target) {
       target.focus({ preventScroll: true });
     }
-    this._revealInBoard(target);
+    if (this._revealPending) {
+      // The keyboard moved the focus: show the card wherever it is, in its list, in the board or on the page.
+      this._revealPending = false;
+      target.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+    } else {
+      this._revealInBoard(target);
+    }
     this._pendingFocusId = null;
   }
 
@@ -2941,6 +2979,7 @@ export class UISortable extends ElementBase {
     const nextId = visibleIds[nextIndex];
     this._focusedId = nextId;
     this._pendingFocusId = nextId;
+    this._revealPending = true;
     if (this._applyInteractiveStateInPlace({ restoreFocus: true })) return;
     this.requestRender();
   }

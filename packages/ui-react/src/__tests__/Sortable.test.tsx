@@ -252,4 +252,19 @@ describe('Sortable wrapper', () => {
     expect(el.canDrop).toBeNull();
     expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
   });
+
+  it('forwards listMaxHeight (a number is px) and a list maxHeight', async () => {
+    const { container, rerender } = render(
+      <Sortable lists={[{ id: 'todo', label: 'To do', maxHeight: '12rem' }, { id: 'done', label: 'Done' }]} items={items} listMaxHeight={200} />
+    );
+    const el = container.querySelector('ui-sortable') as HTMLElement;
+    await waitFor(() => expect(el.getAttribute('list-max-height')).toBe('200px'));
+    await waitFor(() => expect(el.shadowRoot?.querySelector('.list[data-list-id="todo"] .items')?.getAttribute('style')).toContain('12rem'));
+    expect(el.shadowRoot?.querySelector('.list[data-list-id="done"] .items')?.getAttribute('style')).toContain('200px');
+
+    rerender(<Sortable lists={lists} items={items} listMaxHeight="30vh" />);
+    await waitFor(() => expect(el.getAttribute('list-max-height')).toBe('30vh'));
+    rerender(<Sortable lists={lists} items={items} />);
+    await waitFor(() => expect(el.hasAttribute('list-max-height')).toBe(false));
+  });
 });

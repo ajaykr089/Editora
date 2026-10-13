@@ -2164,4 +2164,119 @@ describe('ui-sortable', () => {
       el.cancelDrag();
     });
   });
+
+  describe('lists with a height of their own', () => {
+    const mount = async (listOverrides: Record<string, unknown> = {}, attrs: Record<string, string> = {}) => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(lists.map((list) => ({ ...list, ...(list.id === 'todo' ? listOverrides : {}) }))));
+      el.setAttribute('items', JSON.stringify(items));
+      Object.entries(attrs).forEach(([name, value]) => el.setAttribute(name, value));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      return el;
+    };
+    const itemsOf = (el: any, id: string) => el.shadowRoot.querySelector(`.list[data-list-id="${id}"] .items`) as HTMLElement;
+
+    it('scrolls a list that has a maxHeight, in px or any plain CSS length, and leaves the others alone', async () => {
+      const byNumber = await mount({ maxHeight: 240 });
+      expect(itemsOf(byNumber, 'todo').getAttribute('data-scroll')).toBe('true');
+      expect(itemsOf(byNumber, 'todo').style.getPropertyValue('--ui-sortable-list-max-block-size')).toBe('240px');
+      expect(itemsOf(byNumber, 'done').hasAttribute('data-scroll')).toBe(false);
+
+      const byLength = await mount({ maxHeight: '20rem' });
+      expect(itemsOf(byLength, 'todo').style.getPropertyValue('--ui-sortable-list-max-block-size')).toBe('20rem');
+      expect(byLength.lists.find((list: any) => list.id === 'todo').maxHeight).toBe('20rem');
+    });
+
+    it('takes list-max-height for every list, and lets a list override it', async () => {
+      const el = await mount({ maxHeight: 100 }, { 'list-max-height': '15rem' });
+      expect(itemsOf(el, 'todo').style.getPropertyValue('--ui-sortable-list-max-block-size')).toBe('100px');
+      expect(itemsOf(el, 'done').style.getPropertyValue('--ui-sortable-list-max-block-size')).toBe('15rem');
+      expect(itemsOf(el, 'ideas').getAttribute('data-scroll')).toBe('true');
+    });
+
+    it('ignores a height that is not a plain length, so nothing can be slipped into the style attribute', async () => {
+      for (const bad of ['', 'tall', '10', '-5px', 0, -3, Number.NaN, '10px; background: red', 'calc(1px + 2px)', '1px"><script>', null, {}]) {
+        const el = await mount({ maxHeight: bad });
+        expect(itemsOf(el, 'todo').hasAttribute('data-scroll')).toBe(false);
+        expect(itemsOf(el, 'todo').getAttribute('style')).toBeNull();
+        expect(el.lists.find((list: any) => list.id === 'todo').maxHeight).toBeUndefined();
+      }
+      const bad = await mount({}, { 'list-max-height': '10px; color: red' });
+      expect(itemsOf(bad, 'todo').hasAttribute('data-scroll')).toBe(false);
+    });
+
+    it('does not apply to a horizontal lane, which scrolls sideways', async () => {
+      const el = await mount({ maxHeight: 200, orientation: 'horizontal' });
+      expect(itemsOf(el, 'todo').hasAttribute('data-scroll')).toBe(false);
+    });
+
+    it('keeps the focused card in view as the keyboard moves through a list that scrolls', async () => {
+      const el = await mount({ maxHeight: 120 });
+      const shown: string[] = [];
+      const original = (HTMLElement.prototype as any).scrollIntoView;
+      (HTMLElement.prototype as any).scrollIntoView = function (options: unknown) {
+        shown.push(`${this.getAttribute('data-id')}:${JSON.stringify(options)}`);
+      };
+      try {
+        el.focusItem('task-a');
+        await flushMicrotask();
+        await flushMicrotask();
+        expect(shown.some((entry) => entry.startsWith('task-a:') && entry.includes('"nearest"'))).toBe(true);
+
+        shown.length = 0;
+        const card = el.shadowRoot.querySelector('.item[data-id="task-a"]') as HTMLElement;
+        el._onKeyDown({ key: 'ArrowDown', preventDefault() {}, target: card, composedPath: () => [card] });
+        await flushMicrotask();
+        expect(shown.some((entry) => entry.startsWith('task-b:'))).toBe(true);
+      } finally {
+        (HTMLElement.prototype as any).scrollIntoView = original;
+      }
+    });
+
+    it('does not move the page when the pointer focuses a card (only the keyboard asks for that)', async () => {
+      const el = await mount({ maxHeight: 120 });
+      let calls = 0;
+      const original = (HTMLElement.prototype as any).scrollIntoView;
+      (HTMLElement.prototype as any).scrollIntoView = () => {
+        calls += 1;
+      };
+      try {
+        el.select(['task-a']);
+        el.moveSelection({ targetListId: 'done' });
+        await flushMicrotask();
+        await flushMicrotask();
+        expect(calls).toBe(0);
+      } finally {
+        (HTMLElement.prototype as any).scrollIntoView = original;
+      }
+    });
+
+    it('brings the keyboard drag placeholder into view as the destination changes', async () => {
+      const el = await mount({ maxHeight: 120 });
+      const shown: string[] = [];
+      const original = (HTMLElement.prototype as any).scrollIntoView;
+      (HTMLElement.prototype as any).scrollIntoView = function () {
+        shown.push(this.className);
+      };
+      try {
+        el._dragState = {
+          snapshot: el.items.map((item: any) => ({ ...item })),
+          movedRootIds: ['task-a'],
+          originId: 'task-a',
+          clone: false,
+          keyboard: true,
+          dropTarget: { listId: 'done', parentId: null, beforeId: null, mode: 'before' },
+          committed: false,
+        };
+        el.requestRender();
+        await flushMicrotask();
+        await flushMicrotask();
+        expect(shown.some((name) => name.includes('item-placeholder'))).toBe(true);
+        el.cancelDrag();
+      } finally {
+        (HTMLElement.prototype as any).scrollIntoView = original;
+      }
+    });
+  });
 });

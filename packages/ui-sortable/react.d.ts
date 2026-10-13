@@ -80,6 +80,8 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   nestTrigger?: SortableNestTrigger;
   /** Milliseconds a finger must rest on a card before it lifts (touch, dragging by the card). 0 lifts at once. Default 350. */
   touchHoldDelay?: number;
+  /** The tallest the cards of a list can be before the list scrolls on its own: a number of px or a CSS length such as "20rem". A list's own `maxHeight` overrides it. */
+  listMaxHeight?: number | string;
   dropIndicatorVisibility?: SortableDropIndicatorVisibility;
   dropzoneStyle?: SortableDropzoneStyle;
   dragPreviewSize?: SortableDragPreviewSize;

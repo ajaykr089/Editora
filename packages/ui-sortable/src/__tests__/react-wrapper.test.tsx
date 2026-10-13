@@ -130,4 +130,16 @@ describe('@editora/ui-sortable/react', () => {
     expect(el.moveSelection({ targetListId: 'done' })).toBe(true);
     expect(changes).toEqual(['transfer']);
   });
+
+  it('forwards listMaxHeight and clears it', async () => {
+    const { Sortable } = await import('@editora/ui-sortable/react');
+    const lists = [{ id: 'a', label: 'A', maxHeight: 150 }];
+    const items = [{ id: 'one', label: 'One', listId: 'a' }];
+    const { container, rerender } = render(<Sortable lists={lists} items={items} listMaxHeight="20rem" />);
+    const element = container.querySelector('ui-sortable') as HTMLElement;
+    await waitFor(() => expect(element.getAttribute('list-max-height')).toBe('20rem'));
+    await waitFor(() => expect(element.shadowRoot?.querySelector('.items')?.getAttribute('style')).toContain('150px'));
+    rerender(<Sortable lists={lists} items={items} />);
+    await waitFor(() => expect(element.hasAttribute('list-max-height')).toBe(false));
+  });
 });

@@ -96,6 +96,8 @@ export type SortableList = {
   accepts?: string[];
   /** The most items the list can hold, at every nesting level. A move or copy that would go past it is refused. */
   maxItems?: number;
+  /** The tallest the list's cards can be before the list scrolls on its own (a number of px, or a CSS length such as "20rem"). Overrides `listMaxHeight`. */
+  maxHeight?: number | string;
   /** Anything of yours that is JSON-serialisable. It travels with the list and comes back in every event. */
   data?: unknown;
 };
@@ -215,6 +217,8 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   nestTrigger?: SortableNestTrigger;
   /** Milliseconds a finger must rest on a card before it lifts (touch, dragging by the card). 0 lifts at once. Default 350. */
   touchHoldDelay?: number;
+  /** The tallest the cards of a list can be before the list scrolls on its own: a number of px or a CSS length such as "20rem". A list's own `maxHeight` overrides it. */
+  listMaxHeight?: number | string;
   dropIndicatorVisibility?: SortableDropIndicatorVisibility;
   dropzoneStyle?: SortableDropzoneStyle;
   dragPreviewSize?: SortableDragPreviewSize;
@@ -308,6 +312,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
     allowNesting,
     nestTrigger,
     touchHoldDelay,
+    listMaxHeight,
     dropIndicatorVisibility,
     dropzoneStyle,
     dragPreviewSize,
@@ -405,6 +410,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
       else element.removeAttribute('allow-nesting');
 
       syncStringAttribute(element, 'nest-trigger', nestTrigger && nestTrigger !== 'gutter' ? nestTrigger : null);
+      syncStringAttribute(element, 'list-max-height', typeof listMaxHeight === 'number' ? String(listMaxHeight) + 'px' : listMaxHeight ?? null);
       syncStringAttribute(element, 'touch-hold-delay', typeof touchHoldDelay === 'number' && Number.isFinite(touchHoldDelay) ? String(touchHoldDelay) : null);
 
       if (dropIndicatorVisibility === 'always') element.setAttribute('drop-indicator-visibility', 'always');
@@ -446,7 +452,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
 
       syncBooleanAttribute(element, 'disabled', disabled);
     },
-    [lists, items, selection, filterQuery, sort, persistKey, allowFilteredDrag, allowNesting, nestTrigger, touchHoldDelay, dropIndicatorVisibility, dropzoneStyle, dragPreviewSize, dragHandleMode, dragHandleSelector, itemRadius, handleRadius, listGap, itemSpacing, renderItem, showSelectionBadge, canDrop, labels, hideToolbar, disabled]
+    [lists, items, selection, filterQuery, sort, persistKey, allowFilteredDrag, allowNesting, nestTrigger, touchHoldDelay, listMaxHeight, dropIndicatorVisibility, dropzoneStyle, dragPreviewSize, dragHandleMode, dragHandleSelector, itemRadius, handleRadius, listGap, itemSpacing, renderItem, showSelectionBadge, canDrop, labels, hideToolbar, disabled]
   );
 
   useIsomorphicLayoutEffect(() => {
