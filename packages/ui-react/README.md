@@ -42,8 +42,8 @@
 npm install @editora/ui-react
 ```
 
-`@editora/ui-core` comes with the package. It is tested with React 18 and 19 (the peer range is React 16.8 to 20). These components register custom elements, so
-they run in the browser only: see [Server rendering](#server-rendering).
+`@editora/ui-core` comes with the package. It is tested with React 18 and 19 (the peer range is React 16.8 to 20). These components render custom elements, which are
+defined in the browser only: see [Server rendering](#server-rendering).
 
 ## Quick start
 
@@ -126,15 +126,18 @@ export default function Imports() {
 }
 ```
 
-Measured with esbuild, minified, with code splitting, importing a `Button`:
+Measured with esbuild, minified, with code splitting, importing one component and leaving React out. This is everything
+the import needs:
 
-| Import | Loaded up front | Loaded later |
-| --- | --- | --- |
-| `import { Button } from '@editora/ui-react'` | 1 MB gzipped | |
-| `import Button from '@editora/ui-react/Button'` | 54 KB gzipped | 456 KB gzipped |
+| Import | Gzipped |
+| --- | --- |
+| `import { Button } from '@editora/ui-react'` | 1 MB |
+| `import Button from '@editora/ui-react/Button'` | 55 KB |
+| `import Input from '@editora/ui-react/Input'` | 8 KB |
+| `import DataTable from '@editora/ui-react/DataTable'` | 14 KB |
 
-A one-component import keeps the first load small. It still pulls in the rest of `@editora/ui-core` in the background
-(the second column), because every wrapper registers the whole catalog once, without blocking the first render.
+Each entry registers only the custom elements its component renders, so nothing else is fetched later. The package root
+registers the whole catalog on purpose, which is why it is the heavy one.
 
 ## Forms
 
@@ -496,11 +499,20 @@ More hooks: `useHover`, `useFocus`, `useRole`, `useListNavigation` and `useTypea
 
 ## Server rendering
 
-These components register custom elements when they are imported, so the package cannot be imported on the server:
-importing it in Node throws `HTMLElement is not defined`. Load them in the browser only. In Next.js that means
-importing them from client-only code, for example with `next/dynamic` and `ssr: false`, as described for
-[`@editora/react`](https://www.npmjs.com/package/@editora/react#nextjs-and-server-rendering). The dialog providers
-create their host element on the client, in an effect, and clean it up when they unmount.
+The package can be imported on the server: loading a module does not touch the DOM, and the custom elements are defined
+only in the browser. A `'use client'` file that uses these components is still rendered on the server first (Next.js
+does this), and that HTML carries the `<ui-*>` tags, which upgrade once the browser has loaded the package.
+
+In React Server Components import from `@editora/ui-react/server`. It has no hooks, so a server component can load it,
+and it holds the components that need none: `Box`, `Flex`, `Grid`, `Container`, `Section`, `Separator`, `Anchor`,
+`AspectRatio`, `Field`, `Label`, `Icon`, `Kbd`, `Shortcut`, `Stat`, `MetricCard`, `CodeBlock`, `CodeSnippet`,
+`DirectionProvider` and `VisuallyHidden`. It only renders the markup. To define the elements, import
+`@editora/ui-react/client` (or the package root) from a client component; a page made of server components alone never
+loads the definitions, so its `<ui-*>` tags are not upgraded.
+
+In development React can log a hydration warning for client components: the elements add their own inline styles and
+attributes as soon as they are defined, before React hydrates. The page works. The dialog providers create their host
+element on the client, in an effect, and clean it up when they unmount.
 
 ## Troubleshooting
 
