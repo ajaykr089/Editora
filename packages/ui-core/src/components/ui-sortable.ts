@@ -1269,37 +1269,6 @@ function sameDropTarget(left: DropTarget | null, right: DropTarget | null): bool
   return dropTargetKey(left) === dropTargetKey(right);
 }
 
-function readScaleFromTransform(transform: string): { x: number; y: number } {
-  if (!transform || transform === 'none') {
-    return { x: 1, y: 1 };
-  }
-
-  const matrix3d = transform.match(/^matrix3d\((.+)\)$/);
-  if (matrix3d) {
-    const values = matrix3d[1].split(',').map((value) => Number.parseFloat(value.trim()));
-    if (values.length === 16 && values.every((value) => Number.isFinite(value))) {
-      return {
-        x: values[0] || 1,
-        y: values[5] || 1,
-      };
-    }
-  }
-
-  const matrix = transform.match(/^matrix\((.+)\)$/);
-  if (matrix) {
-    const values = matrix[1].split(',').map((value) => Number.parseFloat(value.trim()));
-    if (values.length === 6 && values.every((value) => Number.isFinite(value))) {
-      const [a, b, c, d] = values;
-      return {
-        x: Math.sqrt((a * a) + (b * b)) || 1,
-        y: Math.sqrt((c * c) + (d * d)) || 1,
-      };
-    }
-  }
-
-  return { x: 1, y: 1 };
-}
-
 function parseDragHandleMode(value: string | null): UISortableDragHandleMode {
   return value === 'item' ? 'item' : 'handle';
 }
