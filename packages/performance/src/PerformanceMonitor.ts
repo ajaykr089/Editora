@@ -34,6 +34,8 @@ export interface PerformanceConfig {
 export class PerformanceMonitor {
   private config: Required<PerformanceConfig>;
   private metrics: PerformanceMetrics[] = [];
+  // The entries that were recorded by the sampling timer rather than by an operation: they carry no timings.
+  private samples = new WeakSet<PerformanceMetrics>();
   private isMonitoring = false;
   private sampleInterval: number | null = null;
 
@@ -155,21 +157,17 @@ export class PerformanceMonitor {
 
     if (recentMetrics.length === 0) return {};
 
-    const averages = recentMetrics.reduce(
-      (acc, metric) => ({
-        domTime: acc.domTime + metric.domTime,
-        renderTime: acc.renderTime + metric.renderTime,
-        transactionTime: acc.transactionTime + metric.transactionTime,
-        memoryUsage: acc.memoryUsage + metric.memoryUsage
-      }),
-      { domTime: 0, renderTime: 0, transactionTime: 0, memoryUsage: 0 }
-    );
+    // The timings are averaged over the operations only. A sample has none, and counting it as 0 made the average depend
+    // on the browser: it fell as samples piled up in Chromium, which exposes the heap, and was right in browsers that do not.
+    const operations = recentMetrics.filter(m => !this.samples.has(m));
+    const mean = (values: number[]) =>
+      values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : 0;
 
     return {
-      domTime: Math.round(averages.domTime / recentMetrics.length),
-      renderTime: Math.round(averages.renderTime / recentMetrics.length),
-      transactionTime: Math.round(averages.transactionTime / recentMetrics.length),
-      memoryUsage: Math.round(averages.memoryUsage / recentMetrics.length)
+      domTime: mean(operations.map(m => m.domTime)),
+      renderTime: mean(operations.map(m => m.renderTime)),
+      transactionTime: mean(operations.map(m => m.transactionTime)),
+      memoryUsage: mean(recentMetrics.map(m => m.memoryUsage))
     };
   }
 
@@ -195,6 +193,7 @@ export class PerformanceMonitor {
       timestamp: Date.now()
     };
 
+    this.samples.add(metrics);
     this.addMetrics(metrics);
   }
 

@@ -100,3 +100,48 @@ describe('PerformanceMonitor', () => {
     });
   });
 });
+describe('PerformanceMonitor averages', () => {
+  const MB = 1024 * 1024;
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    (performance as unknown as { memory: unknown }).memory = { usedJSHeapSize: 80 * MB, totalJSHeapSize: 200 * MB, jsHeapSizeLimit: 2048 * MB };
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+    delete (performance as unknown as { memory?: unknown }).memory;
+  });
+
+  it('averages the timings of operations only, not those of the periodic heap samples', () => {
+    // Where the browser exposes the heap (Chromium), the monitor also records a sample every sampleInterval. A sample has no
+    // timings, and used to be averaged in as a 0: one 30 ms render read as 15 ms after a single sample, 3 ms after nine.
+    const monitor = new PerformanceMonitor({ sampleInterval: 1000, logWarnings: false });
+
+    monitor.startOperation('render');
+    jest.advanceTimersByTime(30);
+    monitor.endOperation();
+    jest.advanceTimersByTime(3000);
+
+    expect(monitor.getMetrics()).toHaveLength(4); // the operation and three samples
+    expect(monitor.getAverageMetrics().renderTime).toBe(30);
+    expect(monitor.getAverageMetrics().transactionTime).toBe(30);
+    monitor.destroy();
+  });
+
+  it('averages the operations that are in the window, and gives zeros when there are none', () => {
+    const monitor = new PerformanceMonitor({ sampleInterval: 1000, logWarnings: false });
+    jest.advanceTimersByTime(2000); // two samples
+    expect(monitor.getAverageMetrics()).toEqual({ domTime: 0, renderTime: 0, transactionTime: 0, memoryUsage: 80 });
+
+    for (const duration of [10, 20]) {
+      monitor.startOperation('render');
+      jest.advanceTimersByTime(duration);
+      monitor.endOperation();
+    }
+    expect(monitor.getAverageMetrics().renderTime).toBe(15);
+
+    jest.advanceTimersByTime(120_000);
+    expect(monitor.getAverageMetrics(60_000).renderTime).toBe(0); // those operations are older than the window
+    monitor.destroy();
+  });
+});
