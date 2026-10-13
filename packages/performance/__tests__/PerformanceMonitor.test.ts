@@ -93,7 +93,8 @@ describe('PerformanceMonitor', () => {
       const result = monitor.endOperation();
 
       expect(consoleWarnSpy).toHaveBeenCalled();
-      expect(consoleWarnSpy.mock.calls[0][0]).toContain('Slow');
+      // console.warn('Performance warning:', 'Slow render: 100ms')
+      expect(consoleWarnSpy.mock.calls[0].join(' ')).toContain('Slow render: 100ms');
 
       performance.now = originalNow;
     });
