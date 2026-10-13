@@ -42,7 +42,8 @@ The main example in this category is `ui-sortable`, which expects array-valued p
 ### Vue
 
 - Import `ui-core` custom elements on the client.
-- If you use runtime templates, mark `ui-*` tags as custom elements.
+- Mark `ui-*` tags as custom elements so Vue does not try to resolve them as components:
+  `vue({ template: { compilerOptions: { isCustomElement: (tag) => tag.startsWith('ui-') } } })`.
 - For array/object properties, write to the underlying element reference after mount and whenever state changes.
 
 ### Svelte

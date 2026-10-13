@@ -1,7 +1,7 @@
 {
   "name": "@editora/ui-vue",
   "version": "0.1.5",
-  "description": "Vue 3 adapters for @editora UI web components",
+  "description": "Deprecated: use @editora/ui-core directly in Vue 3. This package only wrapped 8 components.",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",

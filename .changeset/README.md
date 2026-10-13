@@ -17,13 +17,13 @@ bump for each, and a short summary. This writes a markdown file into
 
 You can add as many changesets as you like before a release; they accumulate.
 
-### Not-yet-published packages
+### Deprecated packages
 
-`@editora/ui-angular`, `@editora/ui-vue`, and `@editora/ui-svelte` are excluded
-via the `ignore` list in [`config.json`](./config.json) — they aren't
-build-ready yet, so `changeset add` won't offer them and `changeset
-version`/`changeset publish` will never touch them. Once one is ready to
-ship, remove it from that list.
+`@editora/ui-angular`, `@editora/ui-vue`, and `@editora/ui-svelte` are
+deprecated stubs. They are excluded via the `ignore` list in
+[`config.json`](./config.json), so `changeset add` won't offer them and
+`changeset version`/`changeset publish` will never touch them. Use
+`@editora/ui-core` directly in those frameworks.
 
 ### Tooling-only changes
 

@@ -408,6 +408,9 @@ Working examples:
 [guide](https://github.com/ajaykr089/Editora/blob/main/packages/ui-core/docs/FRAMEWORK_DIRECT_USAGE.md). For React,
 use [`@editora/ui-react`](https://www.npmjs.com/package/@editora/ui-react).
 
+`@editora/ui-vue`, `@editora/ui-svelte` and `@editora/ui-angular` are deprecated: they never grew past a few stub
+components. Use `@editora/ui-core` directly instead.
+
 ## Good to know
 
 - Components register when their module is imported, so the package is marked `sideEffects: true`. Import it before the
