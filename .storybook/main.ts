@@ -38,6 +38,8 @@ const config: StorybookConfig = {
           // Anchored regexes: a bare string alias is a prefix match, so '@editora/ui-core' would
           // also rewrite '@editora/ui-core/pin-input' into '.../index.ts/pin-input' and break the build.
           { find: /^@editora\/ui-core\/runtime$/, replacement: path.resolve(__dirname, '../packages/ui-core/src/runtime.ts') },
+          // sortable is not generated under standalone/: its entry is src/sortable.ts.
+          { find: /^@editora\/ui-core\/sortable$/, replacement: path.resolve(__dirname, '../packages/ui-core/src/sortable.ts') },
           { find: /^@editora\/ui-core\/(.+)$/, replacement: path.resolve(__dirname, '../packages/ui-core/src/standalone') + '/$1.ts' },
           { find: /^@editora\/ui-core$/, replacement: path.resolve(__dirname, '../packages/ui-core/src/index.ts') },
           { find: '@editora/ui-react', replacement: path.resolve(__dirname, '../packages/ui-react/src/index.tsx') },
