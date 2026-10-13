@@ -112,7 +112,7 @@ export const Pagination = React.forwardRef<PaginationElement, PaginationProps>(f
     const el = ref.current;
     if (!el) return;
 
-    // Only remove an attribute this component set itself. A <ui-data-table> linked through paginationId writes
+    // Only remove an attribute this component set itself. A ui-data-table linked through paginationId writes
     // `count` (and `page`) on the pager; removing them because the prop is undefined left a one-page pager.
     const syncAttr = (name: string, next: string | null) => {
       const current = el.getAttribute(name);

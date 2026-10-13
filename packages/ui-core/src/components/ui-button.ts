@@ -615,7 +615,7 @@ function runFormAction(host: HTMLElement, type: ButtonType) {
 
   const form = host.closest('form') as HTMLFormElement | null;
   if (!form) {
-    // <ui-form> keeps its <form> in a shadow root, which closest() cannot see: use the element's own methods.
+    // ui-form keeps its <form> in a shadow root, which closest() cannot see: use the element's own methods.
     const uiForm = host.closest('ui-form') as (HTMLElement & { requestSubmit?: () => unknown; reset?: () => void }) | null;
     if (type === 'reset') uiForm?.reset?.();
     else uiForm?.requestSubmit?.();
