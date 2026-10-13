@@ -65,6 +65,12 @@
     "editor",
     "react",
     "wysiwyg",
-    "markup"
+    "markup",
+    "editora",
+    "markdown-editor",
+    "markdown-preview",
+    "live-preview",
+    "web-components",
+    "typescript"
   ]
 }
