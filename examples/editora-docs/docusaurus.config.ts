@@ -135,13 +135,18 @@ const config: Config = {
             current: {
               label: "Next",
             },
+            // The frozen 1.0.0 snapshot mostly duplicates the current docs; keep
+            // it reachable from the version dropdown but out of search results.
+            "1.0.0": {
+              noIndex: true,
+            },
           },
         },
         blog: false,
         sitemap: {
           changefreq: "weekly",
           priority: 0.6,
-          ignorePatterns: ["/tags/**"],
+          ignorePatterns: ["/tags/**", "/404", "/404.html", "/search"],
           filename: "sitemap.xml",
         },
         theme: {
