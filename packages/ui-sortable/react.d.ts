@@ -19,7 +19,8 @@ import type {
   UISortableLabels,
   UISortableNestTrigger,
   UISortableDropInfo,
-  UISortableBeforeChangeDetail
+  UISortableBeforeChangeDetail,
+  UISortableExternalMove
 } from '@editora/ui-core/sortable';
 
 export type SortableListOrientation = UISortableListOrientation;
@@ -46,6 +47,7 @@ export type SortablePersistenceSnapshot = UISortablePersistenceSnapshot;
 export type SortableChangeDetail = UISortableChangeDetail;
 export type SortableBeforeChangeDetail = UISortableBeforeChangeDetail;
 export type SortableDropInfo = UISortableDropInfo;
+export type SortableExternalMove = UISortableExternalMove;
 export type SortableMoveOptions = UISortableMoveOptions;
 export type SortableElement = UISortable;
 
@@ -78,6 +80,8 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   allowFilteredDrag?: boolean;
   allowNesting?: boolean;
   nestTrigger?: SortableNestTrigger;
+  /** Sortables with the same group can exchange items: drop a card on another one and both report it (`change`'s `external`). Ids must be unique across the group. */
+  group?: string;
   /** Milliseconds a finger must rest on a card before it lifts (touch, dragging by the card). 0 lifts at once. Default 350. */
   touchHoldDelay?: number;
   /** The tallest the cards of a list can be before the list scrolls on its own: a number of px or a CSS length such as "20rem". A list's own `maxHeight` overrides it. */

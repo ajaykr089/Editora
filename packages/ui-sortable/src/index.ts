@@ -22,5 +22,6 @@ export type {
   UISortableRenderItemContext,
   UISortableRenderListHeaderContext,
   UISortableRenderEmptyStateContext,
-  UISortableRenderResult
+  UISortableRenderResult,
+  UISortableExternalMove
 } from '@editora/ui-core/sortable';

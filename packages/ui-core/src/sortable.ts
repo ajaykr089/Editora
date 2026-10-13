@@ -24,5 +24,6 @@ export type {
   UISortableRenderItemContext,
   UISortableRenderListHeaderContext,
   UISortableRenderEmptyStateContext,
-  UISortableRenderResult
+  UISortableRenderResult,
+  UISortableExternalMove
 } from './components/ui-sortable';

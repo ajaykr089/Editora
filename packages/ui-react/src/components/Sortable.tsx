@@ -134,6 +134,13 @@ export type SortablePersistenceSnapshot = {
   records: SortablePersistenceRecord[];
 };
 
+/** Set on the `change` of both sortables when items go from one to another (see `group`). */
+export type SortableExternalMove = {
+  /** `in` on the sortable the items arrived in, `out` on the one they left. */
+  direction: 'in' | 'out';
+  peer: SortableElement;
+};
+
 export type SortableChangeDetail = {
   items: SortableItem[];
   lists: SortableList[];
@@ -143,6 +150,8 @@ export type SortableChangeDetail = {
   source: SortableChangeSource;
   operation: SortableOperation;
   persistence: SortablePersistenceSnapshot;
+  /** Only when the items crossed between two sortables. */
+  external?: SortableExternalMove;
 };
 
 export type SortableRenderItemContext = {
@@ -174,6 +183,8 @@ export type SortableDropInfo = {
   mode: SortableDropMode;
   /** True when the items are copied rather than moved. */
   clone: boolean;
+  /** The other sortable the items come from, when they are dropped across sortables (see `group`). */
+  from?: SortableElement;
 };
 
 export type SortableBeforeChangeDetail = SortableChangeDetail & {
@@ -201,6 +212,8 @@ export type SortableElement = HTMLElement & {
   cancelDrag(): void;
   focusItem(id: string): void;
   moveSelection(options: SortableMoveOptions): boolean;
+  /** Moves (or copies) the selected items into another sortable, as if they were dragged there. */
+  moveSelectionTo(peer: SortableElement, options: SortableMoveOptions): boolean;
   canDrop: ((info: SortableDropInfo) => boolean) | null;
   getPersistenceSnapshot(): SortablePersistenceSnapshot;
 };
@@ -215,6 +228,8 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   allowFilteredDrag?: boolean;
   allowNesting?: boolean;
   nestTrigger?: SortableNestTrigger;
+  /** Sortables with the same group can exchange items: drop a card on another one and both report it (`change`'s `external`). Ids must be unique across the group. */
+  group?: string;
   /** Milliseconds a finger must rest on a card before it lifts (touch, dragging by the card). 0 lifts at once. Default 350. */
   touchHoldDelay?: number;
   /** The tallest the cards of a list can be before the list scrolls on its own: a number of px or a CSS length such as "20rem". A list's own `maxHeight` overrides it. */
@@ -311,6 +326,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
     allowFilteredDrag,
     allowNesting,
     nestTrigger,
+    group,
     touchHoldDelay,
     listMaxHeight,
     dropIndicatorVisibility,
@@ -411,6 +427,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
 
       syncStringAttribute(element, 'nest-trigger', nestTrigger && nestTrigger !== 'gutter' ? nestTrigger : null);
       syncStringAttribute(element, 'list-max-height', typeof listMaxHeight === 'number' ? String(listMaxHeight) + 'px' : listMaxHeight ?? null);
+      syncStringAttribute(element, 'group', group ?? null);
       syncStringAttribute(element, 'touch-hold-delay', typeof touchHoldDelay === 'number' && Number.isFinite(touchHoldDelay) ? String(touchHoldDelay) : null);
 
       if (dropIndicatorVisibility === 'always') element.setAttribute('drop-indicator-visibility', 'always');
@@ -452,7 +469,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
 
       syncBooleanAttribute(element, 'disabled', disabled);
     },
-    [lists, items, selection, filterQuery, sort, persistKey, allowFilteredDrag, allowNesting, nestTrigger, touchHoldDelay, listMaxHeight, dropIndicatorVisibility, dropzoneStyle, dragPreviewSize, dragHandleMode, dragHandleSelector, itemRadius, handleRadius, listGap, itemSpacing, renderItem, showSelectionBadge, canDrop, labels, hideToolbar, disabled]
+    [lists, items, selection, filterQuery, sort, persistKey, allowFilteredDrag, allowNesting, nestTrigger, group, touchHoldDelay, listMaxHeight, dropIndicatorVisibility, dropzoneStyle, dragPreviewSize, dragHandleMode, dragHandleSelector, itemRadius, handleRadius, listGap, itemSpacing, renderItem, showSelectionBadge, canDrop, labels, hideToolbar, disabled]
   );
 
   useIsomorphicLayoutEffect(() => {

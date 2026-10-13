@@ -21,7 +21,8 @@ import type {
   UISortableLabels,
   UISortableNestTrigger,
   UISortableDropInfo,
-  UISortableBeforeChangeDetail
+  UISortableBeforeChangeDetail,
+  UISortableExternalMove
 } from '@editora/ui-core/sortable';
 import {
   createUIElement,
@@ -59,6 +60,7 @@ export type SortablePersistenceSnapshot = UISortablePersistenceSnapshot;
 export type SortableChangeDetail = UISortableChangeDetail;
 export type SortableBeforeChangeDetail = UISortableBeforeChangeDetail;
 export type SortableDropInfo = UISortableDropInfo;
+export type SortableExternalMove = UISortableExternalMove;
 export type SortableMoveOptions = UISortableMoveOptions;
 export type SortableElement = UISortable;
 
@@ -91,6 +93,8 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   allowFilteredDrag?: boolean;
   allowNesting?: boolean;
   nestTrigger?: SortableNestTrigger;
+  /** Sortables with the same group can exchange items: drop a card on another one and both report it (`change`'s `external`). Ids must be unique across the group. */
+  group?: string;
   /** Milliseconds a finger must rest on a card before it lifts (touch, dragging by the card). 0 lifts at once. Default 350. */
   touchHoldDelay?: number;
   /** The tallest the cards of a list can be before the list scrolls on its own: a number of px or a CSS length such as "20rem". A list's own `maxHeight` overrides it. */
@@ -190,6 +194,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
     allowFilteredDrag,
     allowNesting,
     nestTrigger,
+    group,
     touchHoldDelay,
     listMaxHeight,
     dropIndicatorVisibility,
@@ -284,6 +289,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
 
       syncStringAttribute(element, 'nest-trigger', nestTrigger && nestTrigger !== 'gutter' ? nestTrigger : null);
       syncStringAttribute(element, 'list-max-height', typeof listMaxHeight === 'number' ? String(listMaxHeight) + 'px' : listMaxHeight ?? null);
+      syncStringAttribute(element, 'group', group ?? null);
       syncStringAttribute(element, 'touch-hold-delay', typeof touchHoldDelay === 'number' && Number.isFinite(touchHoldDelay) ? String(touchHoldDelay) : null);
 
       if (dropIndicatorVisibility === 'always') element.setAttribute('drop-indicator-visibility', 'always');
@@ -334,6 +340,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
       allowFilteredDrag,
       allowNesting,
       nestTrigger,
+      group,
       touchHoldDelay,
       listMaxHeight,
       dropIndicatorVisibility,
