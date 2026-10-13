@@ -226,6 +226,8 @@ describe('ui-sortable', () => {
 
   it('infers body drops for nesting and supports escape cancelling pointer drags', async () => {
     const el = document.createElement('ui-sortable') as any;
+    // The middle of a card nests only in the "area" trigger (the old behaviour); see "nesting" below for the default.
+    el.setAttribute('nest-trigger', 'area');
     el.setAttribute('lists', JSON.stringify(lists));
     el.setAttribute('items', JSON.stringify(items));
     document.body.appendChild(el);
@@ -1022,7 +1024,10 @@ describe('ui-sortable', () => {
 
     it('speaks English by default', async () => {
       const el = await mount();
-      expect(text(el, '#ui-sortable-helper')).toBe('Use the handle to drag, or press Space on a focused item to start keyboard reordering.');
+      expect(text(el, '#ui-sortable-helper')).toBe(
+        'Use the handle to drag, or press Space on a focused item to start keyboard reordering. '
+        + 'To nest an item, hold Alt or drop it on the far side of another.'
+      );
       expect(text(el, '.selection-text')).toBe('items selected');
       expect(el.labels.badgeSelected).toBe('Selected');
     });
@@ -1041,7 +1046,7 @@ describe('ui-sortable', () => {
         lists,
         items: [{ id: 'a', label: 'A', listId: 'todo', cloneOnDrag: true, dragDisabled: true }],
       });
-      expect(text(el, '#ui-sortable-helper')).toBe('Utilisez la poignée pour déplacer.');
+      expect(text(el, '#ui-sortable-helper')).toMatch(/^Utilisez la poignée pour déplacer\./);
       expect(text(el, '.selection-text')).toBe('éléments sélectionnés');
 
       el.select(['a']);
@@ -1057,7 +1062,7 @@ describe('ui-sortable', () => {
       const el = await mount();
       el.labels = { hintHandle: 'Drag me.', selectedMany: 42 as any, nope: 'x' } as any;
       await flushMicrotask();
-      expect(text(el, '#ui-sortable-helper')).toBe('Drag me.');
+      expect(text(el, '#ui-sortable-helper')).toMatch(/^Drag me\. /);
       expect(el.labels.selectedMany).toBe('items selected');
       expect(el.labels.hintItem).toContain('Drag from anywhere');
       expect('nope' in el.labels).toBe(false);
@@ -1136,6 +1141,150 @@ describe('ui-sortable', () => {
       el.removeAttribute('hide-toolbar');
       await flushMicrotask();
       expect(el.shadowRoot.querySelector('.toolbar')?.hasAttribute('data-hidden')).toBe(false);
+    });
+  });
+
+  describe('nesting', () => {
+    const rect = (left: number, top: number, right: number, bottom: number) => () =>
+      ({ left, top, right, bottom, x: left, y: top, width: right - left, height: bottom - top, toJSON: () => ({}) }) as DOMRect;
+
+    const mount = async (attrs: Record<string, string> = {}, data = { lists, items }) => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(data.lists));
+      el.setAttribute('items', JSON.stringify(data.items));
+      Object.entries(attrs).forEach(([name, value]) => el.setAttribute(name, value));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      // A 200 x 100 card at the origin.
+      (el.shadowRoot.querySelector('.item[data-id="epic"]') as HTMLElement).getBoundingClientRect = rect(0, 0, 200, 100);
+      return el;
+    };
+    const over = (el: any, x: number, y: number) =>
+      el._dropTargetFromEvent({ composedPath: () => [el.shadowRoot.querySelector('.item[data-id="epic"]')], clientX: x, clientY: y });
+    const before = { listId: 'todo', parentId: null, beforeId: 'epic', mode: 'before' };
+    const after = { listId: 'todo', parentId: null, beforeId: 'task-a', mode: 'before' };
+    const inside = { listId: 'todo', parentId: 'epic', beforeId: null, mode: 'inside' };
+
+    it('reorders on a plain drag, however the pointer crosses the card: top half before, bottom half after', async () => {
+      const el = await mount();
+      expect(over(el, 20, 5)).toEqual(before);
+      expect(over(el, 20, 40)).toEqual(before);
+      // The middle of the card used to nest. Without Alt, and away from the far side, it does not.
+      expect(over(el, 100, 50)).toEqual(after);
+      expect(over(el, 20, 60)).toEqual(after);
+      expect(over(el, 20, 95)).toEqual(after);
+    });
+
+    it('nests with Alt held, in the middle band of the card', async () => {
+      const el = await mount();
+      el._nestModifier = true;
+      expect(over(el, 100, 50)).toEqual(inside);
+      expect(over(el, 20, 30)).toEqual(inside);
+      // The outer quarters still reorder: Alt does not make the whole card a nest target.
+      expect(over(el, 20, 10)).toEqual(before);
+      expect(over(el, 20, 90)).toEqual(after);
+    });
+
+    it('nests on the far side of a card without a keyboard (touch), and only in its middle band', async () => {
+      const el = await mount();
+      expect(over(el, 190, 50)).toEqual(inside);
+      expect(over(el, 190, 10)).toEqual(before);
+      expect(over(el, 190, 90)).toEqual(after);
+      // Not the near side.
+      expect(over(el, 10, 50)).toEqual(after);
+    });
+
+    it('puts the far side on the left in a right-to-left page', async () => {
+      const el = await mount();
+      el.setAttribute('dir', 'rtl');
+      expect(over(el, 10, 50)).toEqual(inside);
+      expect(over(el, 190, 50)).toEqual(after);
+    });
+
+    it('uses the bottom of a card in a horizontal lane as its far side', async () => {
+      const horizontal = { lists: [{ id: 'todo', label: 'To do', orientation: 'horizontal' }], items };
+      const el = await mount({}, horizontal as any);
+      // Along the lane the pointer is in the middle of the card; the far side is its bottom edge.
+      expect(over(el, 100, 95)).toEqual(inside);
+      expect(over(el, 100, 20)).toEqual(after);
+      expect(over(el, 20, 20)).toEqual(before);
+    });
+
+    it('nest-trigger="modifier" ignores the far side', async () => {
+      const el = await mount({ 'nest-trigger': 'modifier' });
+      expect(over(el, 190, 50)).toEqual(after);
+      el._nestModifier = true;
+      expect(over(el, 190, 50)).toEqual(inside);
+    });
+
+    it('nest-trigger="area" keeps the old rule: the middle of a card nests, with no key held', async () => {
+      const el = await mount({ 'nest-trigger': 'area' });
+      expect(over(el, 100, 50)).toEqual(inside);
+      expect(over(el, 20, 20)).toEqual(before);
+      expect(over(el, 20, 90)).toEqual(after);
+    });
+
+    it('never nests when allow-nesting is false, whatever the trigger or the key', async () => {
+      for (const trigger of ['gutter', 'modifier', 'area']) {
+        const el = await mount({ 'allow-nesting': 'false', 'nest-trigger': trigger });
+        el._nestModifier = true;
+        expect(over(el, 190, 50).mode).toBe('before');
+      }
+    });
+
+    it('treats an unknown nest-trigger as the default', async () => {
+      const el = await mount({ 'nest-trigger': 'sideways' });
+      expect(over(el, 100, 50)).toEqual(after);
+      expect(over(el, 190, 50)).toEqual(inside);
+    });
+
+    it('moves the drop target when Alt is pressed or released, without the pointer moving', async () => {
+      const el = await mount();
+      el._dragState = {
+        snapshot: el.items.map((item: any) => ({ ...item })),
+        movedRootIds: ['task-b'],
+        originId: 'task-b',
+        clone: false,
+        keyboard: false,
+        dropTarget: null,
+        committed: false,
+      };
+      el._lastPointer = { x: 100, y: 50 };
+      // The test has no hit testing: report the card under the pointer.
+      el._pathFromPoint = () => [el.shadowRoot.querySelector('.item[data-id="epic"]')];
+
+      el._setDropTarget(el._dropTargetFromPoint(100, 50));
+      expect(el._dragState.dropTarget).toEqual(after);
+
+      el._onDocumentKeyDown(new KeyboardEvent('keydown', { key: 'Alt' }));
+      expect(el._dragState.dropTarget).toEqual(inside);
+      expect(el.shadowRoot.querySelector('.item[data-id="epic"]').getAttribute('data-drop-inside-active')).toBe('true');
+
+      el._onDocumentKeyUp(new KeyboardEvent('keyup', { key: 'Alt' }));
+      expect(el._dragState.dropTarget).toEqual(after);
+      expect(el.shadowRoot.querySelector('.item[data-id="epic"]').getAttribute('data-drop-inside-active')).toBe('false');
+      el.cancelDrag();
+    });
+
+    it('releases onto the nest target when Alt is held at the drop', async () => {
+      const el = await mount();
+      el._pathFromPoint = () => [el.shadowRoot.querySelector('.item[data-id="epic"]')];
+      const handle = el.shadowRoot.querySelector('.handle[data-id="task-a"]') as HTMLElement;
+      el._onPointerDown({ pointerId: 41, pointerType: 'mouse', clientX: 300, clientY: 300, preventDefault() {}, composedPath: () => [handle] });
+      el._onPointerMove({ pointerId: 41, clientX: 100, clientY: 50, altKey: true, preventDefault() {} });
+      el._onPointerUp({ pointerId: 41, clientX: 100, clientY: 50, altKey: true, preventDefault() {} });
+      await flushMicrotask();
+      expect(el.items.find((item: any) => item.id === 'task-a').parentId).toBe('epic');
+    });
+
+    it('tells the user how to nest, in the hint, and says nothing when nesting is off', async () => {
+      const hint = (el: any) => el.shadowRoot.querySelector('#ui-sortable-helper').textContent;
+      expect(hint(await mount())).toContain('hold Alt or drop it on the far side');
+      expect(hint(await mount({ 'nest-trigger': 'modifier' }))).toContain('hold Alt while you drop it');
+      expect(hint(await mount({ 'nest-trigger': 'area' }))).toContain('drop it on the middle of another');
+      expect(hint(await mount({ 'allow-nesting': 'false' }))).not.toContain('nest');
+      const custom = await mount({ labels: JSON.stringify({ hintNestGutter: 'Alt pour imbriquer.' }) });
+      expect(hint(custom)).toContain('Alt pour imbriquer.');
     });
   });
 });

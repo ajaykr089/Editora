@@ -28,6 +28,9 @@ export type SortableLabelKey =
   | 'hintItem'
   | 'hintCustom'
   | 'hintKeyboard'
+  | 'hintNestGutter'
+  | 'hintNestModifier'
+  | 'hintNestArea'
   | 'hintPausedSort'
   | 'hintPausedFilter'
   | 'hintDisabled'
@@ -76,6 +79,7 @@ export type SortableLabelKey =
   | 'targetEnd'
   | 'targetAfterChildren';
 export type SortableLabels = Partial<Record<SortableLabelKey, string>>;
+export type SortableNestTrigger = 'gutter' | 'modifier' | 'area';
 export type SortableRadiusPreset = 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
 export type SortableRadius = SortableRadiusPreset | number | string;
 export type SortableSpacePreset = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -184,6 +188,7 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   persistKey?: string;
   allowFilteredDrag?: boolean;
   allowNesting?: boolean;
+  nestTrigger?: SortableNestTrigger;
   dropIndicatorVisibility?: SortableDropIndicatorVisibility;
   dropzoneStyle?: SortableDropzoneStyle;
   dragPreviewSize?: SortableDragPreviewSize;
@@ -268,6 +273,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
     persistKey,
     allowFilteredDrag,
     allowNesting,
+    nestTrigger,
     dropIndicatorVisibility,
     dropzoneStyle,
     dragPreviewSize,
@@ -353,6 +359,8 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
       if (allowNesting === false) element.setAttribute('allow-nesting', 'false');
       else element.removeAttribute('allow-nesting');
 
+      syncStringAttribute(element, 'nest-trigger', nestTrigger && nestTrigger !== 'gutter' ? nestTrigger : null);
+
       if (dropIndicatorVisibility === 'always') element.setAttribute('drop-indicator-visibility', 'always');
       else element.removeAttribute('drop-indicator-visibility');
 
@@ -391,7 +399,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
 
       syncBooleanAttribute(element, 'disabled', disabled);
     },
-    [lists, items, selection, filterQuery, sort, persistKey, allowFilteredDrag, allowNesting, dropIndicatorVisibility, dropzoneStyle, dragPreviewSize, dragHandleMode, dragHandleSelector, itemRadius, handleRadius, listGap, itemSpacing, renderItem, showSelectionBadge, labels, hideToolbar, disabled]
+    [lists, items, selection, filterQuery, sort, persistKey, allowFilteredDrag, allowNesting, nestTrigger, dropIndicatorVisibility, dropzoneStyle, dragPreviewSize, dragHandleMode, dragHandleSelector, itemRadius, handleRadius, listGap, itemSpacing, renderItem, showSelectionBadge, labels, hideToolbar, disabled]
   );
 
   useIsomorphicLayoutEffect(() => {

@@ -17,5 +17,6 @@ export type {
   UISortableDropzoneStyle,
   UISortableDragHandleMode,
   UISortableListOrientation,
-  UISortableLabels
+  UISortableLabels,
+  UISortableNestTrigger
 } from './components/ui-sortable';

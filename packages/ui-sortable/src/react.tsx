@@ -18,7 +18,8 @@ import type {
   UISortableDropzoneStyle,
   UISortableDragHandleMode,
   UISortableListOrientation,
-  UISortableLabels
+  UISortableLabels,
+  UISortableNestTrigger
 } from '@editora/ui-core/sortable';
 import {
   createUIElement,
@@ -42,6 +43,7 @@ export type SortableDropzoneStyle = UISortableDropzoneStyle;
 export type SortableDragPreviewSize = 'match-item' | 'compact';
 export type SortableDragHandleMode = UISortableDragHandleMode;
 export type SortableLabels = Partial<UISortableLabels>;
+export type SortableNestTrigger = UISortableNestTrigger;
 export type SortableRadiusPreset = 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
 export type SortableRadius = SortableRadiusPreset | number | string;
 export type SortableSpacePreset = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -84,6 +86,7 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   persistKey?: string;
   allowFilteredDrag?: boolean;
   allowNesting?: boolean;
+  nestTrigger?: SortableNestTrigger;
   dropIndicatorVisibility?: SortableDropIndicatorVisibility;
   dropzoneStyle?: SortableDropzoneStyle;
   dragPreviewSize?: SortableDragPreviewSize;
@@ -171,6 +174,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
     persistKey,
     allowFilteredDrag,
     allowNesting,
+    nestTrigger,
     dropIndicatorVisibility,
     dropzoneStyle,
     dragPreviewSize,
@@ -250,6 +254,8 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
       if (allowNesting === false) element.setAttribute('allow-nesting', 'false');
       else element.removeAttribute('allow-nesting');
 
+      syncStringAttribute(element, 'nest-trigger', nestTrigger && nestTrigger !== 'gutter' ? nestTrigger : null);
+
       if (dropIndicatorVisibility === 'always') element.setAttribute('drop-indicator-visibility', 'always');
       else element.removeAttribute('drop-indicator-visibility');
 
@@ -296,6 +302,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
       persistKey,
       allowFilteredDrag,
       allowNesting,
+      nestTrigger,
       dropIndicatorVisibility,
       dropzoneStyle,
       dragPreviewSize,

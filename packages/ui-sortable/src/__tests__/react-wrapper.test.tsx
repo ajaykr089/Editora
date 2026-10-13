@@ -73,12 +73,24 @@ describe('@editora/ui-sortable/react', () => {
     );
     const element = container.querySelector('ui-sortable') as HTMLElement;
 
-    await waitFor(() => expect(element.shadowRoot?.querySelector('#ui-sortable-helper')?.textContent).toBe('Glissez la poignée.'));
+    await waitFor(() => expect(element.shadowRoot?.querySelector('#ui-sortable-helper')?.textContent).toMatch(/^Glissez la poignée\./));
     expect(JSON.parse(element.getAttribute('labels') || '{}')).toEqual({ hintHandle: 'Glissez la poignée.' });
     expect(element.hasAttribute('hide-toolbar')).toBe(true);
 
     rerender(<Sortable lists={lists} items={items} labels={{}} />);
     await waitFor(() => expect(element.hasAttribute('labels')).toBe(false));
     expect(element.hasAttribute('hide-toolbar')).toBe(false);
+  });
+
+  it('forwards nestTrigger, and leaves the default unset', async () => {
+    const { Sortable } = await import('@editora/ui-sortable/react');
+    const lists = [{ id: 'a', label: 'A' }];
+    const items = [{ id: 'one', label: 'One', listId: 'a' }];
+    const { container, rerender } = render(<Sortable lists={lists} items={items} nestTrigger="area" />);
+    const element = container.querySelector('ui-sortable') as HTMLElement;
+    await waitFor(() => expect(element.getAttribute('nest-trigger')).toBe('area'));
+
+    rerender(<Sortable lists={lists} items={items} />);
+    await waitFor(() => expect(element.hasAttribute('nest-trigger')).toBe(false));
   });
 });

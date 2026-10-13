@@ -9,6 +9,13 @@ export type UISortableOperation = 'reorder' | 'transfer' | 'nest' | 'clone';
 export type UISortableDropIndicatorVisibility = 'active' | 'always';
 export type UISortableDragHandleMode = 'handle' | 'item';
 export type UISortableDropzoneStyle = 'indicator' | 'container';
+/**
+ * What it takes to drop a card *inside* another one (nest it) with the pointer:
+ * `gutter` (default) holding Alt, or dropping on the far side of the card; `modifier` holding Alt;
+ * `area` dropping on the middle of any card (the old behaviour, where a plain drag could nest by accident).
+ * Without that, the top half of a card is "before it" and the bottom half is "after it".
+ */
+export type UISortableNestTrigger = 'gutter' | 'modifier' | 'area';
 
 /** Every piece of text the component shows or announces. Pass any of them as `labels` to translate or reword. */
 export type UISortableLabels = { [K in keyof typeof DEFAULT_LABELS]: string };
@@ -161,6 +168,9 @@ const DEFAULT_LABELS = {
   hintItem: 'Drag from anywhere on an item, or press Space on a focused item to start keyboard reordering.',
   hintCustom: 'Use your custom drag handle element, or press Space on a focused item to start keyboard reordering.',
   hintKeyboard: 'Keyboard drag active. Use arrow keys to choose a drop target, Space or Enter to drop, and Escape to cancel.',
+  hintNestGutter: 'To nest an item, hold Alt or drop it on the far side of another.',
+  hintNestModifier: 'To nest an item, hold Alt while you drop it on another.',
+  hintNestArea: 'To nest an item, drop it on the middle of another.',
   hintPausedSort: 'Dragging is paused while alphabetical sorting is active.',
   hintPausedFilter: 'Dragging is paused while the list is filtered.',
   hintDisabled: 'Dragging is currently disabled.',
@@ -1487,6 +1497,7 @@ export class UISortable extends ElementBase {
       'drag-handle-selector',
       'custom-item-rendering',
       'show-selection-badge',
+      'nest-trigger',
       'labels',
       'hide-toolbar',
       'disabled',
@@ -1513,6 +1524,9 @@ export class UISortable extends ElementBase {
   private _pendingFocusId: string | null = null;
   private _pointerGesture: PointerGestureState | null = null;
   private _pendingDropTarget: DropTargetCandidate | null = null;
+  // Alt held during a pointer drag: it is what asks to nest instead of reorder (see UISortableNestTrigger).
+  private _nestModifier = false;
+  private _lastPointer: { x: number; y: number } | null = null;
   private _suppressAttributeRender = false;
 
   constructor() {
@@ -1529,6 +1543,7 @@ export class UISortable extends ElementBase {
     this._onPointerCancel = this._onPointerCancel.bind(this);
     this._onFocusIn = this._onFocusIn.bind(this);
     this._onDocumentKeyDown = this._onDocumentKeyDown.bind(this);
+    this._onDocumentKeyUp = this._onDocumentKeyUp.bind(this);
   }
 
   protected override shouldRenderOnAttributeChange(
@@ -1569,6 +1584,7 @@ export class UISortable extends ElementBase {
     this.root.addEventListener('pointerdown', this._onPointerDown as EventListener);
     this.root.addEventListener('focusin', this._onFocusIn);
     this.ownerDocument?.addEventListener('keydown', this._onDocumentKeyDown as EventListener, true);
+    this.ownerDocument?.addEventListener('keyup', this._onDocumentKeyUp as EventListener, true);
     this.ownerDocument?.addEventListener('pointermove', this._onPointerMove as EventListener, true);
     this.ownerDocument?.addEventListener('pointerup', this._onPointerUp as EventListener, true);
     this.ownerDocument?.addEventListener('pointercancel', this._onPointerCancel as EventListener, true);
@@ -1584,6 +1600,7 @@ export class UISortable extends ElementBase {
     this.root.removeEventListener('pointerdown', this._onPointerDown as EventListener);
     this.root.removeEventListener('focusin', this._onFocusIn);
     this.ownerDocument?.removeEventListener('keydown', this._onDocumentKeyDown as EventListener, true);
+    this.ownerDocument?.removeEventListener('keyup', this._onDocumentKeyUp as EventListener, true);
     this.ownerDocument?.removeEventListener('pointermove', this._onPointerMove as EventListener, true);
     this.ownerDocument?.removeEventListener('pointerup', this._onPointerUp as EventListener, true);
     this.ownerDocument?.removeEventListener('pointercancel', this._onPointerCancel as EventListener, true);
@@ -1722,6 +1739,9 @@ export class UISortable extends ElementBase {
             ? this._t('hintCustom')
             : this._t('hintHandle');
     const hideToolbar = this.hasAttribute('hide-toolbar');
+    const nestHint = allowNesting && !dragLocked && !this._dragState?.keyboard
+      ? this._t(this._nestTrigger() === 'area' ? 'hintNestArea' : this._nestTrigger() === 'modifier' ? 'hintNestModifier' : 'hintNestGutter')
+      : '';
 
     const html = `
       <style>${style}</style>
@@ -1734,7 +1754,7 @@ export class UISortable extends ElementBase {
         data-dropzone-style="${dropzoneStyle}"
       >
         <div class="toolbar" part="toolbar"${hideToolbar ? ' data-hidden="true"' : ''}>
-          <div class="helper" id="ui-sortable-helper">${escapeHtml(helper)}</div>
+          <div class="helper" id="ui-sortable-helper">${escapeHtml(nestHint ? `${helper} ${nestHint}` : helper)}</div>
           <div class="helper selection-summary" data-count="${selectionCount}">
             <span class="selection-pill" part="selection-count">${selectionCount}</span>
             <span class="selection-text">${escapeHtml(selectionCount === 1 ? this._t('selectedOne') : this._t('selectedMany'))}</span>
@@ -1950,6 +1970,11 @@ export class UISortable extends ElementBase {
 
   private _dragHandleMode(): UISortableDragHandleMode {
     return parseDragHandleMode(this.getAttribute('drag-handle-mode'));
+  }
+
+  private _nestTrigger(): UISortableNestTrigger {
+    const value = this.getAttribute('nest-trigger');
+    return value === 'modifier' || value === 'area' ? value : 'gutter';
   }
 
   private _dropzoneStyle(): UISortableDropzoneStyle {
@@ -2792,6 +2817,7 @@ export class UISortable extends ElementBase {
 
   private _onDragOver(event: DragEvent): void {
     if (!this._dragState || this._dragState.keyboard) return;
+    this._nestModifier = !!event.altKey;
     const target = this._dropTargetFromEvent(event);
     if (!target || !this._canDrop(target, this._dragState.movedRootIds)) {
       this._queueDropTarget(null, event.timeStamp);
@@ -2804,6 +2830,7 @@ export class UISortable extends ElementBase {
 
   private _onDrop(event: DragEvent): void {
     if (!this._dragState || this._dragState.keyboard) return;
+    this._nestModifier = !!event.altKey;
     const target = this._dropTargetFromEvent(event);
     if (!target || !this._canDrop(target, this._dragState.movedRootIds)) return;
     event.preventDefault();
@@ -2811,10 +2838,29 @@ export class UISortable extends ElementBase {
   }
 
   private _onDocumentKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Alt') {
+      this._setNestModifier(true);
+      return;
+    }
     if (event.key !== 'Escape') return;
     if (!this._dragState || this._dragState.keyboard) return;
     event.preventDefault();
     this._cancelDrag(true);
+  }
+
+  private _onDocumentKeyUp(event: KeyboardEvent): void {
+    if (event.key === 'Alt') this._setNestModifier(false);
+  }
+
+  // Pressing or releasing Alt changes where a card would land without the pointer moving, so the target is
+  // worked out again straight away.
+  private _setNestModifier(held: boolean): void {
+    if (this._nestModifier === held) return;
+    this._nestModifier = held;
+    if (!this._dragState || this._dragState.keyboard || this._dragState.committed || !this._lastPointer) return;
+    const target = this._dropTargetFromPoint(this._lastPointer.x, this._lastPointer.y);
+    const usable = target && this._canDrop(target, this._dragState.movedRootIds) ? target : null;
+    this._setDropTarget(usable);
   }
 
   private _onDragEnd(): void {
@@ -2877,22 +2923,34 @@ export class UISortable extends ElementBase {
     // right third and "after" the left third; measuring from the left mirrored both.
     const ratio = isHorizontal && this._isRtl() ? 1 - fromStart : fromStart;
     const allowNesting = this.getAttribute('allow-nesting') !== 'false' && !item.disabled;
+    const trigger = this._nestTrigger();
 
-    if (ratio <= 0.34) {
-      return {
-        listId: item.listId,
-        parentId: item.parentId,
-        beforeId: item.id,
-        mode: 'before',
-      };
-    }
+    // 'area' keeps the old rule: the middle of a card nests. Otherwise a plain drag always reorders (the
+    // top half is "before", the bottom half "after") and nesting has to be asked for.
+    const nest = allowNesting && (
+      trigger === 'area'
+        ? ratio > 0.34 && ratio <= 0.74
+        : ratio >= 0.25 && ratio <= 0.75 && (
+          this._nestModifier || (trigger === 'gutter' && this._inNestGutter(rect, clientX, clientY, isHorizontal))
+        )
+    );
+    const before = trigger === 'area' ? ratio <= 0.34 : ratio < 0.5;
 
-    if (allowNesting && ratio >= 0.34 && ratio <= 0.74) {
+    if (nest) {
       return {
         listId: item.listId,
         parentId: item.id,
         beforeId: null,
         mode: 'inside',
+      };
+    }
+
+    if (before) {
+      return {
+        listId: item.listId,
+        parentId: item.parentId,
+        beforeId: item.id,
+        mode: 'before',
       };
     }
 
@@ -2906,6 +2964,18 @@ export class UISortable extends ElementBase {
       beforeId: nextSiblingId,
       mode: 'before',
     };
+  }
+
+  // The far side of a card (its right in a left-to-right list, the bottom of a card in a horizontal lane):
+  // somewhere a pointer only goes on purpose, and the only way to nest without a keyboard.
+  private _inNestGutter(rect: DOMRect, clientX: number, clientY: number, isHorizontal: boolean): boolean {
+    if (isHorizontal) {
+      const size = rect.bottom - rect.top;
+      return clientY >= rect.bottom - Math.max(24, Math.min(70, size * 0.3));
+    }
+    const size = rect.right - rect.left;
+    const width = Math.max(48, Math.min(140, size * 0.3));
+    return this._isRtl() ? clientX <= rect.left + width : clientX >= rect.right - width;
   }
 
   private _dropTargetFromPoint(clientX: number, clientY: number): DropTarget | null {
@@ -2987,6 +3057,8 @@ export class UISortable extends ElementBase {
     }
 
     if (!this._dragState || this._dragState.keyboard) return;
+    this._nestModifier = !!event.altKey;
+    this._lastPointer = { x: event.clientX, y: event.clientY };
     this._movePointerPreview(event.clientX, event.clientY);
     this._updateAutoScroll(event.clientX, event.clientY);
     if (!this._dragState.committed) {
@@ -3081,6 +3153,7 @@ export class UISortable extends ElementBase {
     this._pointerGesture = null;
     this._stopAutoScroll();
     if (!this._dragState || this._dragState.keyboard) return;
+    this._nestModifier = !!event.altKey;
     const releaseTarget = gesture.moved ? this._releaseDropTarget(event.clientX, event.clientY) : null;
     if (gesture.moved && releaseTarget) {
       this._commitMove(releaseTarget, this._dragState.movedRootIds, this._dragState.clone, 'pointer');

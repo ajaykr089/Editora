@@ -15,5 +15,6 @@ export type {
   UISortableDropzoneStyle,
   UISortableDragHandleMode,
   UISortableListOrientation,
-  UISortableLabels
+  UISortableLabels,
+  UISortableNestTrigger
 } from '@editora/ui-core/sortable';

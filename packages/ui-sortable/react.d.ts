@@ -16,7 +16,8 @@ import type {
   UISortableDropzoneStyle,
   UISortableDragHandleMode,
   UISortableListOrientation,
-  UISortableLabels
+  UISortableLabels,
+  UISortableNestTrigger
 } from '@editora/ui-core/sortable';
 
 export type SortableListOrientation = UISortableListOrientation;
@@ -29,6 +30,7 @@ export type SortableDropzoneStyle = UISortableDropzoneStyle;
 export type SortableDragPreviewSize = 'match-item' | 'compact';
 export type SortableDragHandleMode = UISortableDragHandleMode;
 export type SortableLabels = Partial<UISortableLabels>;
+export type SortableNestTrigger = UISortableNestTrigger;
 export type SortableRadiusPreset = 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
 export type SortableRadius = SortableRadiusPreset | number | string;
 export type SortableSpacePreset = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -71,6 +73,7 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   persistKey?: string;
   allowFilteredDrag?: boolean;
   allowNesting?: boolean;
+  nestTrigger?: SortableNestTrigger;
   dropIndicatorVisibility?: SortableDropIndicatorVisibility;
   dropzoneStyle?: SortableDropzoneStyle;
   dragPreviewSize?: SortableDragPreviewSize;

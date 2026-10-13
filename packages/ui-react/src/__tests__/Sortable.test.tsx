@@ -159,12 +159,33 @@ describe('Sortable wrapper', () => {
     );
     const el = container.querySelector('ui-sortable') as HTMLElement;
 
-    await waitFor(() => expect(el.shadowRoot?.querySelector('#ui-sortable-helper')?.textContent).toBe('Glissez la poignée.'));
+    await waitFor(() => expect(el.shadowRoot?.querySelector('#ui-sortable-helper')?.textContent).toMatch(/^Glissez la poignée\./));
     expect(JSON.parse(el.getAttribute('labels') || '{}')).toEqual({ hintHandle: 'Glissez la poignée.' });
     expect(el.hasAttribute('hide-toolbar')).toBe(true);
 
     rerender(<Sortable lists={lists} items={items} labels={{}} />);
     await waitFor(() => expect(el.hasAttribute('labels')).toBe(false));
     expect(el.hasAttribute('hide-toolbar')).toBe(false);
+  });
+
+  it('forwards nestTrigger, and leaves the default unset', async () => {
+    const { container, rerender } = render(<Sortable lists={lists} items={items} nestTrigger="modifier" />);
+    const el = container.querySelector('ui-sortable') as HTMLElement;
+    await waitFor(() => expect(el.getAttribute('nest-trigger')).toBe('modifier'));
+
+    rerender(<Sortable lists={lists} items={items} nestTrigger="gutter" />);
+    await waitFor(() => expect(el.hasAttribute('nest-trigger')).toBe(false));
+  });
+
+  it('types exactly the label keys the element supports', async () => {
+    const { readFileSync } = await import('node:fs');
+    const { join } = await import('node:path');
+    const source = readFileSync(join(__dirname, '../components/Sortable.tsx'), 'utf8');
+    const union = source.split('export type SortableLabelKey =')[1].split(';')[0];
+    const typed = [...union.matchAll(/'(\w+)'/g)].map((match) => match[1]).sort();
+
+    const { container } = render(<Sortable lists={lists} items={items} />);
+    const el = container.querySelector('ui-sortable') as HTMLElement & { labels: Record<string, string> };
+    expect(Object.keys(el.labels).sort()).toEqual(typed);
   });
 });
