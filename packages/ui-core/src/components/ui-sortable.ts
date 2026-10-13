@@ -137,6 +137,10 @@ type PointerGestureState = {
   startY: number;
   moved: boolean;
   captureTarget: HTMLElement | null;
+  // A finger on a card (not on its handle) is a scroll until it has been held still: the drag starts when
+  // the hold timer fires, and a finger that moves first was scrolling.
+  hold: boolean;
+  holdTimer: ReturnType<typeof setTimeout> | null;
 };
 
 type DragActivator = {
@@ -221,6 +225,8 @@ const DEFAULT_LABELS = {
 };
 const DROP_TARGET_SETTLE_MS = 44;
 const DROP_TARGET_CLEAR_SETTLE_MS = 72;
+const TOUCH_HOLD_MS = 350;
+const TOUCH_HOLD_SLOP_PX = 10;
 
 const style = `
   :host {
@@ -541,6 +547,14 @@ const style = `
 
   .item[data-drag-handle-mode="item"] {
     cursor: grab;
+  }
+
+  /* A card that is dragged by its body is held to lift on touch: no text selection or callout while holding. */
+  .item[data-drag-handle-mode="item"],
+  .item[data-drag-handle-mode="custom"] {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
   }
 
   .item[data-drag-handle-mode="item"][data-dragging="true"] {
@@ -1498,6 +1512,7 @@ export class UISortable extends ElementBase {
       'custom-item-rendering',
       'show-selection-badge',
       'nest-trigger',
+      'touch-hold-delay',
       'labels',
       'hide-toolbar',
       'disabled',
@@ -1542,6 +1557,8 @@ export class UISortable extends ElementBase {
     this._onPointerUp = this._onPointerUp.bind(this);
     this._onPointerCancel = this._onPointerCancel.bind(this);
     this._onFocusIn = this._onFocusIn.bind(this);
+    this._onTouchMove = this._onTouchMove.bind(this);
+    this._onContextMenu = this._onContextMenu.bind(this);
     this._onDocumentKeyDown = this._onDocumentKeyDown.bind(this);
     this._onDocumentKeyUp = this._onDocumentKeyUp.bind(this);
   }
@@ -1583,6 +1600,9 @@ export class UISortable extends ElementBase {
     this.root.addEventListener('dragend', this._onDragEnd as EventListener);
     this.root.addEventListener('pointerdown', this._onPointerDown as EventListener);
     this.root.addEventListener('focusin', this._onFocusIn);
+    // Not passive: a held card has to stop the page from scrolling under the finger.
+    this.root.addEventListener('touchmove', this._onTouchMove as EventListener, { passive: false });
+    this.root.addEventListener('contextmenu', this._onContextMenu as EventListener);
     this.ownerDocument?.addEventListener('keydown', this._onDocumentKeyDown as EventListener, true);
     this.ownerDocument?.addEventListener('keyup', this._onDocumentKeyUp as EventListener, true);
     this.ownerDocument?.addEventListener('pointermove', this._onPointerMove as EventListener, true);
@@ -1599,6 +1619,9 @@ export class UISortable extends ElementBase {
     this.root.removeEventListener('dragend', this._onDragEnd as EventListener);
     this.root.removeEventListener('pointerdown', this._onPointerDown as EventListener);
     this.root.removeEventListener('focusin', this._onFocusIn);
+    this.root.removeEventListener('touchmove', this._onTouchMove as EventListener);
+    this.root.removeEventListener('contextmenu', this._onContextMenu as EventListener);
+    this._clearHoldTimer();
     this.ownerDocument?.removeEventListener('keydown', this._onDocumentKeyDown as EventListener, true);
     this.ownerDocument?.removeEventListener('keyup', this._onDocumentKeyUp as EventListener, true);
     this.ownerDocument?.removeEventListener('pointermove', this._onPointerMove as EventListener, true);
@@ -3025,13 +3048,16 @@ export class UISortable extends ElementBase {
       return;
     }
 
-    event.preventDefault();
+    // A finger on the card itself must still be able to scroll the page, so it is not claimed until held.
+    const hold = event.pointerType === 'touch' && activator.kind !== 'handle' && this._touchHoldDelay() > 0;
+    if (!hold) event.preventDefault();
     try {
       activator.element.setPointerCapture?.(event.pointerId);
     } catch {
       // Synthetic or browser-managed pointer streams may not always expose capture.
     }
 
+    this._clearHoldTimer();
     const selectedIds = this._selection.includes(id) ? this._selectedRootIds(id) : [id];
     this._pointerGesture = {
       pointerId: event.pointerId,
@@ -3043,11 +3069,63 @@ export class UISortable extends ElementBase {
       startY: event.clientY,
       moved: false,
       captureTarget: activator.element,
+      hold,
+      holdTimer: null,
     };
+
+    if (hold) {
+      const gesture = this._pointerGesture;
+      gesture.holdTimer = setTimeout(() => {
+        gesture.holdTimer = null;
+        if (this._pointerGesture !== gesture || gesture.moved) return;
+        gesture.hold = false;
+        gesture.moved = true;
+        this._beginPointerDrag(gesture.startX, gesture.startY);
+        this._lastPointer = { x: gesture.startX, y: gesture.startY };
+        // A short buzz says "lifted" where there is no hover to say it.
+        try {
+          (this.ownerDocument?.defaultView?.navigator as Navigator | undefined)?.vibrate?.(8);
+        } catch {
+          // Haptics are optional.
+        }
+      }, this._touchHoldDelay());
+    }
+  }
+
+  private _touchHoldDelay(): number {
+    const raw = this.getAttribute('touch-hold-delay');
+    if (raw === null || raw.trim() === '') return TOUCH_HOLD_MS;
+    const value = Number(raw);
+    return Number.isFinite(value) ? Math.min(2000, Math.max(0, value)) : TOUCH_HOLD_MS;
+  }
+
+  private _clearHoldTimer(): void {
+    if (this._pointerGesture?.holdTimer) clearTimeout(this._pointerGesture.holdTimer);
+    if (this._pointerGesture) this._pointerGesture.holdTimer = null;
+  }
+
+  // While a card is lifted (or about to be) the finger must drag it, not scroll the page.
+  private _onTouchMove(event: TouchEvent): void {
+    const lifted = !!this._dragState && !this._dragState.keyboard;
+    if (lifted && event.cancelable) event.preventDefault();
+  }
+
+  // A long press raises the system's context menu (copy, save image): not while a card is held.
+  private _onContextMenu(event: Event): void {
+    if (this._pointerGesture?.pointerType === 'touch' || (this._dragState && !this._dragState.keyboard)) event.preventDefault();
   }
 
   private _onPointerMove(event: PointerEvent): void {
     if (!this._pointerGesture || event.pointerId !== this._pointerGesture.pointerId) return;
+    if (this._pointerGesture.hold) {
+      // Not held long enough yet: a finger that travels now was scrolling, not dragging.
+      const travelled = Math.hypot(event.clientX - this._pointerGesture.startX, event.clientY - this._pointerGesture.startY);
+      if (travelled > TOUCH_HOLD_SLOP_PX) {
+        this._clearHoldTimer();
+        this._pointerGesture = null;
+      }
+      return;
+    }
     event.preventDefault();
     if (!this._pointerGesture.moved) {
       const distance = Math.hypot(event.clientX - this._pointerGesture.startX, event.clientY - this._pointerGesture.startY);
@@ -3150,6 +3228,7 @@ export class UISortable extends ElementBase {
     }
 
     const gesture = this._pointerGesture;
+    this._clearHoldTimer();
     this._pointerGesture = null;
     this._stopAutoScroll();
     if (!this._dragState || this._dragState.keyboard) return;
@@ -3173,6 +3252,7 @@ export class UISortable extends ElementBase {
 
   private _onPointerCancel(event: PointerEvent): void {
     if (!this._pointerGesture || event.pointerId !== this._pointerGesture.pointerId) return;
+    this._clearHoldTimer();
     this._pointerGesture = null;
     this._stopAutoScroll();
     if (!this._dragState) return;
@@ -3539,6 +3619,7 @@ export class UISortable extends ElementBase {
     this._clearPointerDragPreview();
     this._items = this._dragState.snapshot.map(cloneItem);
     this._dragState = null;
+    this._clearHoldTimer();
     this._pointerGesture = null;
     this._removeDragImage();
     if (announce) this._announce(this._t('announceCancelled'));

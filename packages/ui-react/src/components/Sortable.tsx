@@ -189,6 +189,8 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   allowFilteredDrag?: boolean;
   allowNesting?: boolean;
   nestTrigger?: SortableNestTrigger;
+  /** Milliseconds a finger must rest on a card before it lifts (touch, dragging by the card). 0 lifts at once. Default 350. */
+  touchHoldDelay?: number;
   dropIndicatorVisibility?: SortableDropIndicatorVisibility;
   dropzoneStyle?: SortableDropzoneStyle;
   dragPreviewSize?: SortableDragPreviewSize;
@@ -274,6 +276,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
     allowFilteredDrag,
     allowNesting,
     nestTrigger,
+    touchHoldDelay,
     dropIndicatorVisibility,
     dropzoneStyle,
     dragPreviewSize,
@@ -360,6 +363,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
       else element.removeAttribute('allow-nesting');
 
       syncStringAttribute(element, 'nest-trigger', nestTrigger && nestTrigger !== 'gutter' ? nestTrigger : null);
+      syncStringAttribute(element, 'touch-hold-delay', typeof touchHoldDelay === 'number' && Number.isFinite(touchHoldDelay) ? String(touchHoldDelay) : null);
 
       if (dropIndicatorVisibility === 'always') element.setAttribute('drop-indicator-visibility', 'always');
       else element.removeAttribute('drop-indicator-visibility');
@@ -399,7 +403,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
 
       syncBooleanAttribute(element, 'disabled', disabled);
     },
-    [lists, items, selection, filterQuery, sort, persistKey, allowFilteredDrag, allowNesting, nestTrigger, dropIndicatorVisibility, dropzoneStyle, dragPreviewSize, dragHandleMode, dragHandleSelector, itemRadius, handleRadius, listGap, itemSpacing, renderItem, showSelectionBadge, labels, hideToolbar, disabled]
+    [lists, items, selection, filterQuery, sort, persistKey, allowFilteredDrag, allowNesting, nestTrigger, touchHoldDelay, dropIndicatorVisibility, dropzoneStyle, dragPreviewSize, dragHandleMode, dragHandleSelector, itemRadius, handleRadius, listGap, itemSpacing, renderItem, showSelectionBadge, labels, hideToolbar, disabled]
   );
 
   useIsomorphicLayoutEffect(() => {

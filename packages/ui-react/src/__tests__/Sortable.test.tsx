@@ -188,4 +188,14 @@ describe('Sortable wrapper', () => {
     const el = container.querySelector('ui-sortable') as HTMLElement & { labels: Record<string, string> };
     expect(Object.keys(el.labels).sort()).toEqual(typed);
   });
+
+  it('forwards touchHoldDelay, including 0, and clears it', async () => {
+    const { container, rerender } = render(<Sortable lists={lists} items={items} touchHoldDelay={0} />);
+    const el = container.querySelector('ui-sortable') as HTMLElement;
+    await waitFor(() => expect(el.getAttribute('touch-hold-delay')).toBe('0'));
+    rerender(<Sortable lists={lists} items={items} touchHoldDelay={500} />);
+    await waitFor(() => expect(el.getAttribute('touch-hold-delay')).toBe('500'));
+    rerender(<Sortable lists={lists} items={items} />);
+    await waitFor(() => expect(el.hasAttribute('touch-hold-delay')).toBe(false));
+  });
 });

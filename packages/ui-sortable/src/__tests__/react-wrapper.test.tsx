@@ -93,4 +93,15 @@ describe('@editora/ui-sortable/react', () => {
     rerender(<Sortable lists={lists} items={items} />);
     await waitFor(() => expect(element.hasAttribute('nest-trigger')).toBe(false));
   });
+
+  it('forwards touchHoldDelay, including 0, and clears it', async () => {
+    const { Sortable } = await import('@editora/ui-sortable/react');
+    const lists = [{ id: 'a', label: 'A' }];
+    const items = [{ id: 'one', label: 'One', listId: 'a' }];
+    const { container, rerender } = render(<Sortable lists={lists} items={items} touchHoldDelay={0} />);
+    const element = container.querySelector('ui-sortable') as HTMLElement;
+    await waitFor(() => expect(element.getAttribute('touch-hold-delay')).toBe('0'));
+    rerender(<Sortable lists={lists} items={items} />);
+    await waitFor(() => expect(element.hasAttribute('touch-hold-delay')).toBe(false));
+  });
 });

@@ -74,6 +74,8 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   allowFilteredDrag?: boolean;
   allowNesting?: boolean;
   nestTrigger?: SortableNestTrigger;
+  /** Milliseconds a finger must rest on a card before it lifts (touch, dragging by the card). 0 lifts at once. Default 350. */
+  touchHoldDelay?: number;
   dropIndicatorVisibility?: SortableDropIndicatorVisibility;
   dropzoneStyle?: SortableDropzoneStyle;
   dragPreviewSize?: SortableDragPreviewSize;

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import '../components/ui-sortable';
 
 function flushMicrotask() {
@@ -1285,6 +1285,167 @@ describe('ui-sortable', () => {
       expect(hint(await mount({ 'allow-nesting': 'false' }))).not.toContain('nest');
       const custom = await mount({ labels: JSON.stringify({ hintNestGutter: 'Alt pour imbriquer.' }) });
       expect(hint(custom)).toContain('Alt pour imbriquer.');
+    });
+  });
+
+  describe('touch', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const mount = async (attrs: Record<string, string> = { 'drag-handle-mode': 'item' }) => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(lists));
+      el.setAttribute('items', JSON.stringify(items));
+      Object.entries(attrs).forEach(([name, value]) => el.setAttribute(name, value));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      return el;
+    };
+    const press = (el: any, target: HTMLElement, pointerType: string, pointerId: number) => {
+      const event = { pointerId, pointerType, clientX: 50, clientY: 50, preventDefault: vi.fn(), composedPath: () => [target] };
+      el._onPointerDown(event);
+      return event;
+    };
+    const card = (el: any, id: string) => el.shadowRoot.querySelector(`.item[data-id="${id}"]`) as HTMLElement;
+    const move = (el: any, pointerId: number, x: number, y: number) =>
+      el._onPointerMove({ pointerId, clientX: x, clientY: y, preventDefault() {} });
+
+    it('lifts a card dragged by its body only after the finger has been held still', async () => {
+      vi.useFakeTimers();
+      const el = await mount();
+      const down = press(el, card(el, 'task-a'), 'touch', 61);
+      // Nothing is claimed yet: the page must still be able to scroll.
+      expect(down.preventDefault).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(300);
+      expect(el._dragState).toBeNull();
+      vi.advanceTimersByTime(60);
+      expect(el._dragState).toBeTruthy();
+      expect(el.shadowRoot.querySelector('.item-ghost')).toBeTruthy();
+
+      // From then on the finger drags the card.
+      move(el, 61, 50, 90);
+      el._onPointerUp({ pointerId: 61, clientX: 50, clientY: 90, preventDefault() {} });
+      expect(el._dragState).toBeNull();
+    });
+
+    it('leaves a finger that moves before the hold to the page (it was a scroll)', async () => {
+      vi.useFakeTimers();
+      const el = await mount();
+      press(el, card(el, 'task-a'), 'touch', 62);
+      vi.advanceTimersByTime(100);
+      move(el, 62, 50, 80);
+      vi.advanceTimersByTime(1000);
+      expect(el._dragState).toBeNull();
+      expect(el._pointerGesture).toBeNull();
+    });
+
+    it('forgives a little wobble while holding', async () => {
+      vi.useFakeTimers();
+      const el = await mount();
+      press(el, card(el, 'task-a'), 'touch', 63);
+      vi.advanceTimersByTime(100);
+      move(el, 63, 54, 53);
+      vi.advanceTimersByTime(300);
+      expect(el._dragState).toBeTruthy();
+      el.cancelDrag();
+    });
+
+    it('does not start a drag on a tap, and leaves no timer behind', async () => {
+      vi.useFakeTimers();
+      const el = await mount();
+      press(el, card(el, 'task-a'), 'touch', 64);
+      vi.advanceTimersByTime(80);
+      el._onPointerUp({ pointerId: 64, clientX: 50, clientY: 50, preventDefault() {} });
+      vi.advanceTimersByTime(1000);
+      expect(el._dragState).toBeNull();
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it('drops the hold when the browser cancels the touch (it took over for scrolling)', async () => {
+      vi.useFakeTimers();
+      const el = await mount();
+      press(el, card(el, 'task-a'), 'touch', 65);
+      el._onPointerCancel({ pointerId: 65 });
+      vi.advanceTimersByTime(1000);
+      expect(el._dragState).toBeNull();
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it('does not wait for a mouse, or for the built-in handle', async () => {
+      vi.useFakeTimers();
+      const el = await mount();
+      const mouse = press(el, card(el, 'task-a'), 'mouse', 66);
+      expect(mouse.preventDefault).toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+      move(el, 66, 50, 70);
+      expect(el._dragState).toBeTruthy();
+      el.cancelDrag();
+
+      const handled = await mount({});
+      const handle = handled.shadowRoot.querySelector('.handle[data-id="task-a"]') as HTMLElement;
+      const touch = press(handled, handle, 'touch', 67);
+      expect(touch.preventDefault).toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+      move(handled, 67, 50, 70);
+      expect(handled._dragState).toBeTruthy();
+      handled.cancelDrag();
+    });
+
+    it('holds for a custom drag handle too', async () => {
+      vi.useFakeTimers();
+      const el = await mount({ 'drag-handle-selector': '.grip' });
+      const custom = card(el, 'task-a');
+      custom.setAttribute('data-drag-trigger', 'custom');
+      custom.setAttribute('data-id', 'task-a');
+      press(el, custom, 'touch', 68);
+      expect(el._dragState).toBeNull();
+      vi.advanceTimersByTime(400);
+      expect(el._dragState).toBeTruthy();
+      el.cancelDrag();
+    });
+
+    it('takes the hold time from touch-hold-delay (0 means no wait)', async () => {
+      vi.useFakeTimers();
+      const slow = await mount({ 'drag-handle-mode': 'item', 'touch-hold-delay': '700' });
+      press(slow, card(slow, 'task-a'), 'touch', 69);
+      vi.advanceTimersByTime(500);
+      expect(slow._dragState).toBeNull();
+      vi.advanceTimersByTime(250);
+      expect(slow._dragState).toBeTruthy();
+      slow.cancelDrag();
+
+      const instant = await mount({ 'drag-handle-mode': 'item', 'touch-hold-delay': '0' });
+      const down = press(instant, card(instant, 'task-a'), 'touch', 70);
+      expect(down.preventDefault).toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+
+      const garbage = await mount({ 'drag-handle-mode': 'item', 'touch-hold-delay': 'soon' });
+      expect(garbage._touchHoldDelay()).toBe(350);
+    });
+
+    it('stops the page scrolling under a lifted card, and the context menu of a long press', async () => {
+      vi.useFakeTimers();
+      const el = await mount();
+      const idle = new Event('touchmove', { cancelable: true });
+      el._onTouchMove(idle);
+      expect(idle.defaultPrevented).toBe(false);
+
+      press(el, card(el, 'task-a'), 'touch', 71);
+      const menuWhileHolding = new Event('contextmenu', { cancelable: true });
+      el._onContextMenu(menuWhileHolding);
+      expect(menuWhileHolding.defaultPrevented).toBe(true);
+
+      vi.advanceTimersByTime(400);
+      const lifted = new Event('touchmove', { cancelable: true });
+      el._onTouchMove(lifted);
+      expect(lifted.defaultPrevented).toBe(true);
+      el.cancelDrag();
+
+      const menu = new Event('contextmenu', { cancelable: true });
+      el._onContextMenu(menu);
+      expect(menu.defaultPrevented).toBe(false);
     });
   });
 });
