@@ -579,14 +579,20 @@ const style = `
     min-inline-size: 0;
   }
 
-  /* A list with a height of its own scrolls by itself. The padding gives card shadows and focus rings room inside
-     the scroller; the negative margin hands that room back to the layout. */
+  /* A list with a height of its own scrolls by itself. The padding (and the cards' own spacing) gives shadows and
+     focus rings room inside the scroller; the negative margin hands that room back to the layout. The wrapper's
+     negative margin is dropped here: inside a scroller it would count as overflow, and a list whose cards all fit
+     would still scroll by a few pixels. */
   .items[data-scroll="true"] {
     max-block-size: var(--ui-sortable-list-max-block-size);
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: 4px;
+    padding: 1px 4px;
     margin: -4px;
+  }
+
+  .items[data-scroll="true"] > .tree {
+    margin-block: 0;
   }
 
   .tree {
@@ -1015,6 +1021,12 @@ const style = `
     position: absolute;
     inset-inline: 0;
     inset-block: calc(var(--ui-sortable-dropzone-hit-size) * -1);
+  }
+
+  /* The last rail of a group only reaches up: below the last card the list body is already a drop area, and a
+     hit area hanging out of the bottom would count as overflow in a list that scrolls. */
+  .dropzone:last-child::after {
+    inset-block-end: 0;
   }
 
   .dropzone[data-active="true"]::before {
