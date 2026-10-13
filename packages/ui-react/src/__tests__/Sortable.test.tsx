@@ -198,4 +198,58 @@ describe('Sortable wrapper', () => {
     rerender(<Sortable lists={lists} items={items} />);
     await waitFor(() => expect(el.hasAttribute('touch-hold-delay')).toBe(false));
   });
+
+  it('lets canDrop refuse a place and onBeforeChange cancel a move', async () => {
+    const changes: string[] = [];
+    let refuse = true;
+    let cancel = false;
+    const { container } = render(
+      <Sortable
+        lists={lists}
+        items={items}
+        selection={['alpha']}
+        canDrop={(info) => !(refuse && info.targetListId === 'done')}
+        onBeforeChange={() => (cancel ? false : undefined)}
+        onChange={(detail) => changes.push(detail.operation)}
+      />
+    );
+    const el = container.querySelector('ui-sortable') as HTMLElement & { moveSelection(options: { targetListId: string }): boolean };
+    await waitFor(() => expect(el.shadowRoot?.querySelector('.handle[data-id="alpha"]')).toBeTruthy());
+
+    // canDrop says no.
+    expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
+    expect(changes).toEqual([]);
+
+    // canDrop says yes, onBeforeChange returns false.
+    refuse = false;
+    cancel = true;
+    expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
+    expect(changes).toEqual([]);
+
+    // Neither objects (returning nothing allows it).
+    cancel = false;
+    expect(el.moveSelection({ targetListId: 'done' })).toBe(true);
+    expect(changes).toEqual(['transfer']);
+  });
+
+  it('passes the event to onBeforeChange so it can cancel with preventDefault, and clears canDrop', async () => {
+    const { container, rerender } = render(
+      <Sortable
+        lists={lists}
+        items={items}
+        selection={['alpha']}
+        canDrop={() => false}
+        onBeforeChange={(_detail, event) => {
+          event.preventDefault();
+        }}
+      />
+    );
+    const el = container.querySelector('ui-sortable') as HTMLElement & { moveSelection(options: { targetListId: string }): boolean; canDrop: unknown };
+    await waitFor(() => expect(el.shadowRoot?.querySelector('.handle[data-id="alpha"]')).toBeTruthy());
+    expect(typeof el.canDrop).toBe('function');
+
+    rerender(<Sortable lists={lists} items={items} selection={['alpha']} onBeforeChange={(_detail, event) => { event.preventDefault(); }} />);
+    expect(el.canDrop).toBeNull();
+    expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
+  });
 });

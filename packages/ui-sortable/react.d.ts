@@ -17,7 +17,9 @@ import type {
   UISortableDragHandleMode,
   UISortableListOrientation,
   UISortableLabels,
-  UISortableNestTrigger
+  UISortableNestTrigger,
+  UISortableDropInfo,
+  UISortableBeforeChangeDetail
 } from '@editora/ui-core/sortable';
 
 export type SortableListOrientation = UISortableListOrientation;
@@ -42,6 +44,8 @@ export type SortableSelectionChangeDetail = UISortableSelectionChangeDetail;
 export type SortablePersistenceRecord = UISortablePersistenceRecord;
 export type SortablePersistenceSnapshot = UISortablePersistenceSnapshot;
 export type SortableChangeDetail = UISortableChangeDetail;
+export type SortableBeforeChangeDetail = UISortableBeforeChangeDetail;
+export type SortableDropInfo = UISortableDropInfo;
 export type SortableMoveOptions = UISortableMoveOptions;
 export type SortableElement = UISortable;
 
@@ -85,6 +89,8 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   handleRadius?: SortableRadius;
   listGap?: SortableSpace;
   itemSpacing?: SortableSpace;
+  /** Decides whether items may go somewhere; return false to refuse. Asked on every pointer move, so keep it quick. */
+  canDrop?: (info: SortableDropInfo) => boolean;
   showSelectionBadge?: boolean;
   labels?: SortableLabels;
   hideToolbar?: boolean;
@@ -92,6 +98,11 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   renderItem?: (item: SortableItem, context: SortableRenderItemContext) => React.ReactNode;
   renderListHeader?: (list: SortableList, context: SortableRenderListHeaderContext) => React.ReactNode;
   renderEmptyState?: (list: SortableList, context: SortableRenderEmptyStateContext) => React.ReactNode;
+  /**
+   * Called just before a move is applied, with the result it would have. Return `false` (or call
+   * `event.preventDefault()`) to cancel it: nothing changes and `onChange` does not fire.
+   */
+  onBeforeChange?: (detail: SortableBeforeChangeDetail, event: Event) => boolean | void;
   onChange?: (detail: SortableChangeDetail) => void;
   onItemsChange?: (items: SortableItem[]) => void;
   onSelectionChange?: (detail: SortableSelectionChangeDetail) => void;

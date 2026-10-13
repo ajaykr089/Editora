@@ -104,4 +104,30 @@ describe('@editora/ui-sortable/react', () => {
     rerender(<Sortable lists={lists} items={items} />);
     await waitFor(() => expect(element.hasAttribute('touch-hold-delay')).toBe(false));
   });
+
+  it('lets canDrop refuse a place and onBeforeChange cancel a move', async () => {
+    const { Sortable } = await import('@editora/ui-sortable/react');
+    const lists = [{ id: 'todo', label: 'To do' }, { id: 'done', label: 'Done' }];
+    const items = [{ id: 'alpha', label: 'Alpha', listId: 'todo' }];
+    const changes: string[] = [];
+    let cancel = true;
+    const { container } = render(
+      <Sortable
+        lists={lists}
+        items={items}
+        selection={['alpha']}
+        canDrop={(info) => info.targetListId !== 'nowhere'}
+        onBeforeChange={() => (cancel ? false : undefined)}
+        onChange={(detail) => changes.push(detail.operation)}
+      />
+    );
+    const el = container.querySelector('ui-sortable') as HTMLElement & { moveSelection(options: { targetListId: string }): boolean };
+    await waitFor(() => expect(el.shadowRoot?.querySelector('.handle[data-id="alpha"]')).toBeTruthy());
+
+    expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
+    expect(changes).toEqual([]);
+    cancel = false;
+    expect(el.moveSelection({ targetListId: 'done' })).toBe(true);
+    expect(changes).toEqual(['transfer']);
+  });
 });

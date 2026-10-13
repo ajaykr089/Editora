@@ -19,7 +19,9 @@ import type {
   UISortableDragHandleMode,
   UISortableListOrientation,
   UISortableLabels,
-  UISortableNestTrigger
+  UISortableNestTrigger,
+  UISortableDropInfo,
+  UISortableBeforeChangeDetail
 } from '@editora/ui-core/sortable';
 import {
   createUIElement,
@@ -55,6 +57,8 @@ export type SortableSelectionChangeDetail = UISortableSelectionChangeDetail;
 export type SortablePersistenceRecord = UISortablePersistenceRecord;
 export type SortablePersistenceSnapshot = UISortablePersistenceSnapshot;
 export type SortableChangeDetail = UISortableChangeDetail;
+export type SortableBeforeChangeDetail = UISortableBeforeChangeDetail;
+export type SortableDropInfo = UISortableDropInfo;
 export type SortableMoveOptions = UISortableMoveOptions;
 export type SortableElement = UISortable;
 
@@ -98,6 +102,8 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   handleRadius?: SortableRadius;
   listGap?: SortableSpace;
   itemSpacing?: SortableSpace;
+  /** Decides whether items may go somewhere; return false to refuse. Asked on every pointer move, so keep it quick. */
+  canDrop?: (info: SortableDropInfo) => boolean;
   showSelectionBadge?: boolean;
   labels?: SortableLabels;
   hideToolbar?: boolean;
@@ -105,6 +111,11 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   renderItem?: (item: SortableItem, context: SortableRenderItemContext) => React.ReactNode;
   renderListHeader?: (list: SortableList, context: SortableRenderListHeaderContext) => React.ReactNode;
   renderEmptyState?: (list: SortableList, context: SortableRenderEmptyStateContext) => React.ReactNode;
+  /**
+   * Called just before a move is applied, with the result it would have. Return `false` (or call
+   * `event.preventDefault()`) to cancel it: nothing changes and `onChange` does not fire.
+   */
+  onBeforeChange?: (detail: SortableBeforeChangeDetail, event: Event) => boolean | void;
   onChange?: (detail: SortableChangeDetail) => void;
   onItemsChange?: (items: SortableItem[]) => void;
   onSelectionChange?: (detail: SortableSelectionChangeDetail) => void;
@@ -187,6 +198,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
     handleRadius,
     listGap,
     itemSpacing,
+    canDrop,
     showSelectionBadge,
     labels,
     hideToolbar,
@@ -194,6 +206,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
     renderItem,
     renderListHeader,
     renderEmptyState,
+    onBeforeChange,
     onChange,
     onItemsChange,
     onSelectionChange,
@@ -210,6 +223,15 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
   useElementEventListeners(
     ref,
     [
+      {
+        type: 'before-change',
+        listener: onBeforeChange
+          ? ((event: Event) => {
+            const detail = getCustomEventDetail<SortableBeforeChangeDetail>(event);
+            if (detail && onBeforeChange(detail, event) === false) event.preventDefault();
+          }) as EventListener
+          : undefined,
+      },
       {
         type: 'change',
         listener: onChange || onItemsChange
@@ -240,7 +262,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
           : undefined,
       },
     ],
-    [onChange, onItemsChange, onSelectionChange, onPersistRequest]
+    [onBeforeChange, onChange, onItemsChange, onSelectionChange, onPersistRequest]
   );
 
   useElementAttributes(
@@ -292,6 +314,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
       if (showSelectionBadge === false) element.setAttribute('show-selection-badge', 'false');
       else element.removeAttribute('show-selection-badge');
 
+      element.canDrop = canDrop ?? null;
       syncJsonAttribute(element, 'labels', labels && Object.keys(labels).length ? labels : null);
       syncBooleanAttribute(element, 'hide-toolbar', hideToolbar);
 
@@ -319,6 +342,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
       itemSpacing,
       renderItem,
       showSelectionBadge,
+      canDrop,
       labels,
       hideToolbar,
       disabled

@@ -1448,4 +1448,298 @@ describe('ui-sortable', () => {
       expect(menu.defaultPrevented).toBe(false);
     });
   });
+
+  describe('refusing moves', () => {
+    const mount = async (data: { lists: any[]; items: any[] } = { lists, items }) => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(data.lists));
+      el.setAttribute('items', JSON.stringify(data.items));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      return el;
+    };
+    const order = (el: any) => el.items.map((item: any) => `${item.listId}:${item.id}${item.parentId ? `>${item.parentId}` : ''}`).join(' ');
+    const withMax = (id: string, maxItems: unknown) => lists.map((list) => (list.id === id ? { ...list, maxItems } : list));
+    const startDrag = (el: any, movedRootIds: string[], clone = false) => {
+      el._dragState = {
+        snapshot: el.items.map((item: any) => ({ ...item })),
+        movedRootIds,
+        originId: movedRootIds[0],
+        clone,
+        keyboard: true,
+        dropTarget: null,
+        committed: false,
+      };
+    };
+
+    describe('maxItems', () => {
+      it('refuses a move that would take a list past its limit, and says so', async () => {
+        const el = await mount({ lists: withMax('done', 1), items });
+        el.select(['task-a']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(true);
+
+        el.select(['task-b']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
+        expect(order(el)).toBe('ideas:template todo:epic todo:task-b done:task-a');
+        expect(el.lists.find((list: any) => list.id === 'done').maxItems).toBe(1);
+      });
+
+      it('still reorders inside a full list', async () => {
+        const el = await mount({ lists: withMax('todo', 3), items });
+        el.select(['task-b']);
+        expect(el.moveSelection({ targetListId: 'todo', beforeId: 'epic' })).toBe(true);
+        expect(order(el)).toBe('ideas:template todo:task-b todo:epic todo:task-a');
+      });
+
+      it('lets a list that is already over its limit be reordered and emptied, but not filled', async () => {
+        const el = await mount({ lists: withMax('todo', 1), items });
+        el.select(['task-b']);
+        expect(el.moveSelection({ targetListId: 'todo', beforeId: 'epic' })).toBe(true);
+        el.select(['task-a']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(true);
+        el.select(['template']);
+        expect(el.moveSelection({ targetListId: 'todo' })).toBe(false);
+      });
+
+      it('counts every item of a selection, a nested branch and a copy', async () => {
+        const el = await mount({ lists: withMax('done', 2), items });
+        el.select(['task-a', 'task-b', 'epic']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
+        el.select(['task-a', 'task-b']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(true);
+
+        // A copy adds its items without taking the originals out of their list.
+        const full = await mount({ lists: withMax('done', 1), items: [...items, { id: 'x', label: 'X', listId: 'done' }] });
+        full.select(['template']);
+        expect(full.moveSelection({ targetListId: 'done', clone: true })).toBe(false);
+        expect(full.items.length).toBe(5);
+
+        // An epic with a child is two items.
+        const nested = await mount({
+          lists: withMax('done', 1),
+          items: [{ id: 'epic', label: 'Epic', listId: 'todo' }, { id: 'kid', label: 'Kid', listId: 'todo', parentId: 'epic' }],
+        });
+        nested.select(['epic']);
+        expect(nested.moveSelection({ targetListId: 'done' })).toBe(false);
+      });
+
+      it('shows n/max in the header, marks a full list and says it is full', async () => {
+        const el = await mount({ lists: withMax('todo', 3), items });
+        const todo = el.shadowRoot.querySelector('.list[data-list-id="todo"]') as HTMLElement;
+        expect(todo.getAttribute('data-full')).toBe('true');
+        expect(todo.querySelector('.list-count')?.textContent).toBe('3/3');
+        expect(todo.querySelector('.list-helper')?.textContent).toBe('This list is full (3 items).');
+
+        const other = el.shadowRoot.querySelector('.list[data-list-id="done"]') as HTMLElement;
+        expect(other.getAttribute('data-full')).toBe('false');
+        expect(other.querySelector('.list-count')?.textContent).toBe('0');
+
+        const roomy = await mount({ lists: withMax('todo', 5), items });
+        const list = roomy.shadowRoot.querySelector('.list[data-list-id="todo"]') as HTMLElement;
+        expect(list.getAttribute('data-full')).toBe('false');
+        expect(list.querySelector('.list-count')?.textContent).toBe('3/5');
+        expect(list.querySelector('.list-helper')).toBeNull();
+
+        el.setAttribute('labels', JSON.stringify({ listFull: 'Complet ({max}).' }));
+        await flushMicrotask();
+        expect(el.shadowRoot.querySelector('.list[data-list-id="todo"] .list-helper')?.textContent).toBe('Complet (3).');
+      });
+
+      it('ignores a limit that is not a number, floors a fraction, and treats 0 as closed', async () => {
+        for (const bad of ['3', -1, 'many', null, Number.NaN]) {
+          const el = await mount({ lists: withMax('done', bad), items });
+          expect(el.lists.find((list: any) => list.id === 'done').maxItems).toBeUndefined();
+        }
+        const fractional = await mount({ lists: withMax('done', 2.9), items });
+        expect(fractional.lists.find((list: any) => list.id === 'done').maxItems).toBe(2);
+
+        const closed = await mount({ lists: withMax('done', 0), items });
+        closed.select(['task-a']);
+        expect(closed.moveSelection({ targetListId: 'done' })).toBe(false);
+      });
+
+      it('leaves a full list out of the keyboard destinations', async () => {
+        const el = await mount({ lists: withMax('done', 0), items });
+        startDrag(el, ['task-a']);
+        const labels = el._keyboardDropTargets().map((target: any) => `${target.listId}`);
+        expect(labels).not.toContain('done');
+        expect(labels).toContain('todo');
+        el.cancelDrag();
+      });
+    });
+
+    describe('canDrop', () => {
+      it('is asked with the items and the place, and refuses what it refuses', async () => {
+        const el = await mount();
+        const asked: any[] = [];
+        el.canDrop = (info: any) => {
+          asked.push(info);
+          return info.targetListId !== 'done';
+        };
+        el.select(['task-a']);
+
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
+        expect(asked.at(-1)).toMatchObject({
+          movedIds: ['task-a'],
+          targetListId: 'done',
+          parentId: null,
+          beforeId: null,
+          mode: 'before',
+          clone: false,
+        });
+        expect(asked.at(-1).items.map((item: any) => item.label)).toEqual(['Task A']);
+        expect(order(el)).toBe('ideas:template todo:epic todo:task-a todo:task-b');
+
+        expect(el.moveSelection({ targetListId: 'todo', beforeId: 'epic' })).toBe(true);
+        expect(asked.at(-1)).toMatchObject({ targetListId: 'todo', beforeId: 'epic' });
+      });
+
+      it('tells a copy from a move', async () => {
+        const el = await mount();
+        const clones: boolean[] = [];
+        el.canDrop = (info: any) => {
+          clones.push(info.clone);
+          return true;
+        };
+        el.select(['template']);
+        el.moveSelection({ targetListId: 'done', clone: true });
+        el.select(['task-a']);
+        el.moveSelection({ targetListId: 'done' });
+        expect(clones).toContain(true);
+        expect(clones.at(-1)).toBe(false);
+      });
+
+      it('keeps a refused place out of the pointer targets and the keyboard destinations', async () => {
+        const el = await mount();
+        el.canDrop = (info: any) => info.targetListId !== 'done';
+        startDrag(el, ['task-a']);
+        const refused = { listId: 'done', parentId: null, beforeId: null, mode: 'before' };
+        expect(el._canDrop(refused, ['task-a'])).toBe(false);
+        expect(el._keyboardDropTargets().some((target: any) => target.listId === 'done')).toBe(false);
+        expect(el._keyboardDropTargets().some((target: any) => target.listId === 'todo')).toBe(true);
+
+        el.canDrop = null;
+        expect(el._canDrop(refused, ['task-a'])).toBe(true);
+        el.cancelDrag();
+      });
+
+      it('refuses when it throws, and says why in the console', async () => {
+        const el = await mount();
+        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        el.canDrop = () => {
+          throw new Error('boom');
+        };
+        el.select(['task-a']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
+        expect(error).toHaveBeenCalled();
+        error.mockRestore();
+      });
+
+      it('ignores anything that is not a function', async () => {
+        const el = await mount();
+        el.canDrop = 'nope' as any;
+        expect(el.canDrop).toBeNull();
+        el.select(['task-a']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(true);
+      });
+
+      it('runs after the built-in rules, so it is never asked about a drop on the card itself', async () => {
+        const el = await mount();
+        const spy = vi.fn(() => true);
+        el.canDrop = spy;
+        const onSelf = { listId: 'todo', parentId: null, beforeId: 'task-a', mode: 'before' };
+        expect(el._canDrop(onSelf, ['task-a'])).toBe(false);
+        expect(spy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('before-change', () => {
+      it('fires before the change, with the proposed result, and lets the move happen when not cancelled', async () => {
+        const el = await mount();
+        const seen: string[] = [];
+        let before: any = null;
+        el.addEventListener('before-change', ((event: CustomEvent) => {
+          seen.push('before-change');
+          before = event.detail;
+          // Nothing has changed yet.
+          expect(order(el)).toBe('ideas:template todo:epic todo:task-a todo:task-b');
+        }) as EventListener);
+        el.addEventListener('change', () => seen.push('change'));
+        el.addEventListener('persist-request', () => seen.push('persist-request'));
+
+        el.select(['task-a']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(true);
+        expect(seen).toEqual(['before-change', 'change', 'persist-request']);
+        expect(before.operation).toBe('transfer');
+        expect(before.source).toBe('api');
+        expect(before.clone).toBe(false);
+        expect(before.target).toEqual({ listId: 'done', parentId: null, beforeId: null, mode: 'before' });
+        expect(before.movedIds).toEqual(['task-a']);
+        expect(before.items.find((item: any) => item.id === 'task-a').listId).toBe('done');
+        expect(before.persistence.records.find((record: any) => record.id === 'task-a').listId).toBe('done');
+        expect(before.previousSelection).toEqual(['task-a']);
+      });
+
+      it('cancels the whole move: nothing changes, nothing is reported, nothing is saved', async () => {
+        const key = 'ui-sortable-before-change';
+        window.localStorage.removeItem(key);
+        const el = document.createElement('ui-sortable') as any;
+        el.setAttribute('persist-key', key);
+        el.setAttribute('lists', JSON.stringify(lists));
+        el.setAttribute('items', JSON.stringify(items));
+        document.body.appendChild(el);
+        await flushMicrotask();
+
+        const fired: string[] = [];
+        el.addEventListener('before-change', ((event: Event) => event.preventDefault()) as EventListener);
+        el.addEventListener('change', () => fired.push('change'));
+        el.addEventListener('persist-request', () => fired.push('persist-request'));
+        const itemsAttr = el.getAttribute('items');
+
+        el.select(['task-a']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
+        await flushMicrotask();
+
+        expect(order(el)).toBe('ideas:template todo:epic todo:task-a todo:task-b');
+        expect(el.getAttribute('items')).toBe(itemsAttr);
+        expect(fired).toEqual([]);
+        expect(window.localStorage.getItem(key)).toBeNull();
+        expect(el.shadowRoot.querySelector('.sr-only[aria-live]').textContent).toBe('That move is not allowed.');
+        expect(el.selection).toEqual(['task-a']);
+      });
+
+      it('puts a dragged card back when a keyboard drop is cancelled', async () => {
+        const el = await mount();
+        el.addEventListener('before-change', ((event: Event) => event.preventDefault()) as EventListener);
+        const handle = el.shadowRoot.querySelector('.item[data-id="task-a"]') as HTMLElement;
+        el.focusItem('task-a');
+        el._onKeyDown({ key: ' ', code: 'Space', preventDefault() {}, target: handle, composedPath: () => [handle] });
+        expect(el._dragState?.keyboard).toBe(true);
+        el._dragState.dropTarget = { listId: 'done', parentId: null, beforeId: null, mode: 'before' };
+        el._onKeyDown({ key: 'Enter', preventDefault() {}, target: handle, composedPath: () => [handle] });
+        await flushMicrotask();
+
+        expect(el._dragState).toBeNull();
+        expect(order(el)).toBe('ideas:template todo:epic todo:task-a todo:task-b');
+        expect(el.shadowRoot.querySelectorAll('.item-placeholder').length).toBe(0);
+      });
+
+      it('puts a dragged card back when a pointer drop is cancelled', async () => {
+        const el = await mount();
+        el.addEventListener('before-change', ((event: Event) => event.preventDefault()) as EventListener);
+        el._pathFromPoint = () => [el.shadowRoot.querySelector('.list[data-list-id="done"]')];
+        const handle = el.shadowRoot.querySelector('.handle[data-id="task-a"]') as HTMLElement;
+        el._onPointerDown({ pointerId: 81, pointerType: 'mouse', clientX: 5, clientY: 5, preventDefault() {}, composedPath: () => [handle] });
+        el._onPointerMove({ pointerId: 81, clientX: 60, clientY: 60, preventDefault() {} });
+        expect(el._dragState).toBeTruthy();
+        el._onPointerUp({ pointerId: 81, clientX: 60, clientY: 60, preventDefault() {} });
+        await flushMicrotask();
+
+        expect(el._dragState).toBeNull();
+        expect(order(el)).toBe('ideas:template todo:epic todo:task-a todo:task-b');
+        expect(el.shadowRoot.querySelector('.item-ghost')).toBeNull();
+        expect(el.shadowRoot.querySelectorAll('[data-dragging="true"]').length).toBe(0);
+      });
+    });
+  });
 });

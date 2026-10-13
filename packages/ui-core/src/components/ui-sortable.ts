@@ -29,6 +29,8 @@ export type UISortableList = {
   disabled?: boolean;
   cloneOnDrag?: boolean;
   accepts?: string[];
+  /** The most items the list can hold, at every nesting level. A move or copy that would go past it is refused. */
+  maxItems?: number;
 };
 
 export type UISortableItem = {
@@ -72,6 +74,25 @@ export type UISortableChangeDetail = {
   persistence: UISortablePersistenceSnapshot;
 };
 
+/** What `canDrop` is asked: can these items go there? */
+export type UISortableDropInfo = {
+  /** The items being moved (not their children), as they are now. */
+  items: UISortableItem[];
+  movedIds: string[];
+  targetListId: string;
+  parentId: string | null;
+  beforeId: string | null;
+  mode: UISortableDropMode;
+  /** True when the items are copied rather than moved. */
+  clone: boolean;
+};
+
+/** The detail of `before-change`: what `change` will report, plus where the items are going. */
+export type UISortableBeforeChangeDetail = UISortableChangeDetail & {
+  target: { listId: string; parentId: string | null; beforeId: string | null; mode: UISortableDropMode };
+  clone: boolean;
+};
+
 export type UISortableMoveOptions = {
   targetListId: string;
   beforeId?: string | null;
@@ -103,6 +124,7 @@ type NormalizedList = {
   disabled: boolean;
   cloneOnDrag: boolean;
   accepts?: string[];
+  maxItems?: number;
 };
 
 type RenderRecord = {
@@ -183,6 +205,7 @@ const DEFAULT_LABELS = {
   listReadOnly: 'This list is read-only.',
   listClone: 'Dragging from this list creates a copy.',
   listAccepts: 'Accepts drops from: {lists}',
+  listFull: 'This list is full ({max} items).',
   emptyList: 'Drop items here.',
   dropHere: 'Drop here',
   nestHere: 'Nest here',
@@ -207,6 +230,7 @@ const DEFAULT_LABELS = {
   announceDraggingCopy: 'Dragging {label} as a copy.',
   announceDraggingCopyMany: 'Dragging {count} items as a copy.',
   announceCancelled: 'Drag cancelled.',
+  announceRejected: 'That move is not allowed.',
   announceLifted: 'Lifted {label}.',
   announceLiftedMany: 'Lifted {count} items.',
   announceLiftedHelp: 'Use arrow keys to choose a destination.',
@@ -436,6 +460,12 @@ const style = `
     font-size: 11.5px;
     font-weight: 650;
     font-variant-numeric: tabular-nums;
+  }
+
+  /* A list at its maxItems takes nothing more: the count turns to a warning colour. */
+  .list[data-full="true"] .list-count {
+    background: color-mix(in srgb, var(--ui-sortable-warning, #d97706) 16%, transparent);
+    color: color-mix(in srgb, var(--ui-sortable-warning, #d97706) 80%, var(--ui-sortable-text));
   }
 
   .list-description,
@@ -1299,6 +1329,7 @@ function canonicalizeLists(rawLists: UISortableList[]): NormalizedList[] {
       accepts: Array.isArray(list?.accepts)
         ? list.accepts.filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
         : undefined,
+      maxItems: Number.isFinite(list?.maxItems) && Number(list.maxItems) >= 0 ? Math.floor(Number(list.maxItems)) : undefined,
     });
   });
 
@@ -1406,6 +1437,7 @@ function serializeLists(lists: NormalizedList[]): string {
     disabled: list.disabled,
     cloneOnDrag: list.cloneOnDrag,
     accepts: list.accepts,
+    maxItems: list.maxItems,
   })));
 }
 
@@ -1530,6 +1562,7 @@ export class UISortable extends ElementBase {
   private _lastItemsAttr: string | null = null;
   private _lastSelectionAttr: string | null = null;
   private _lastLabelsAttr: string | null = null;
+  private _canDropCallback: ((info: UISortableDropInfo) => boolean) | null = null;
   private _labels: Partial<UISortableLabels> = {};
   private _hydratedPersistKey: string | null = null;
   private _cloneSeed = 1;
@@ -1649,6 +1682,19 @@ export class UISortable extends ElementBase {
     this.setAttribute('items', JSON.stringify(next ?? []));
   }
 
+  /**
+   * Decides whether items may go somewhere. It is asked wherever a place is considered: a refused place is not
+   * highlighted, the keyboard skips it, a drop on it does nothing, and `moveSelection` returns false. Return
+   * true to allow. It runs on every pointer move: keep it quick.
+   */
+  get canDrop(): ((info: UISortableDropInfo) => boolean) | null {
+    return this._canDropCallback;
+  }
+
+  set canDrop(next: ((info: UISortableDropInfo) => boolean) | null | undefined) {
+    this._canDropCallback = typeof next === 'function' ? next : null;
+  }
+
   /** The text the component shows, with any `labels` you set applied over the English defaults. */
   get labels(): UISortableLabels {
     return { ...DEFAULT_LABELS, ...this._labels };
@@ -1710,11 +1756,12 @@ export class UISortable extends ElementBase {
     this.requestRender();
   }
 
-  moveSelection(options: UISortableMoveOptions): void {
+  /** Moves (or copies) the selected items. Returns false when nothing moved: no selection, a place that is not allowed, or `before-change` cancelled. */
+  moveSelection(options: UISortableMoveOptions): boolean {
     this._syncSelectionFromAttribute(this.getAttribute('selection'));
     const movedRootIds = this._selectedRootIds();
-    if (!movedRootIds.length) return;
-    this._commitMove({
+    if (!movedRootIds.length) return false;
+    return this._commitMove({
       listId: options.targetListId,
       parentId: options.parentId ?? null,
       beforeId: options.beforeId ?? null,
@@ -1789,8 +1836,12 @@ export class UISortable extends ElementBase {
             const content = records.length
               ? this._renderListTree(renderItems, list, focusedId, draggingIds, allowNesting, placeholderIds, showSelectionBadge)
               : '';
+            const total = this._items.filter((item) => item.listId === list.id).length;
+            const full = list.maxItems !== undefined && total >= list.maxItems;
             const helperText = list.disabled
               ? this._t('listReadOnly')
+              : full
+                ? this._t('listFull', { max: list.maxItems ?? 0 })
               : list.cloneOnDrag
                 ? this._t('listClone')
                 : list.accepts?.length
@@ -1803,6 +1854,7 @@ export class UISortable extends ElementBase {
                 data-list-id="${escapeHtml(list.id)}"
                 data-orientation="${list.orientation}"
                 data-disabled="${list.disabled}"
+                data-full="${full}"
                 aria-label="${escapeHtml(list.label)}"
               >
                 <header class="list-header">
@@ -1810,7 +1862,7 @@ export class UISortable extends ElementBase {
                   <div class="list-default-header">
                     <div class="list-topline">
                       <div class="list-label">${escapeHtml(list.label)}</div>
-                      <span class="list-count">${records.length}</span>
+                      <span class="list-count">${list.maxItems !== undefined ? `${total}/${list.maxItems}` : records.length}</span>
                     </div>
                     ${list.description ? `<div class="list-description">${escapeHtml(list.description)}</div>` : ''}
                     ${helperText ? `<div class="list-helper">${escapeHtml(helperText)}</div>` : ''}
@@ -3369,7 +3421,7 @@ export class UISortable extends ElementBase {
     return false;
   }
 
-  private _canDrop(target: DropTarget, movedRootIds: string[]): boolean {
+  private _canDrop(target: DropTarget, movedRootIds: string[], clone = this._dragState?.clone ?? false): boolean {
     if (this._isDragLocked()) return false;
     const targetList = this._lists.find((list) => list.id === target.listId);
     if (!targetList || targetList.disabled) return false;
@@ -3394,6 +3446,37 @@ export class UISortable extends ElementBase {
 
     if (target.mode === 'inside' && this.getAttribute('allow-nesting') === 'false') return false;
 
+    if (targetList.maxItems !== undefined) {
+      // What the list would hold afterwards: its items now, plus what comes in from elsewhere (a copy brings all
+      // of its items). A reorder inside the list adds nothing, so a list that is already over the limit can still
+      // be reordered and emptied.
+      const inList = this._items.filter((item) => item.listId === target.listId);
+      const incoming = clone
+        ? movingSet.size
+        : Array.from(movingSet).filter((id) => itemMap.get(id)?.listId !== target.listId).length;
+      if (incoming > 0 && inList.length + incoming > targetList.maxItems) return false;
+    }
+
+    const callback = this._canDropCallback;
+    if (callback) {
+      try {
+        const allowed = callback({
+          items: movedRootIds.map((id) => itemMap.get(id)).filter((item): item is NormalizedItem => !!item).map((item) => ({ ...item })),
+          movedIds: [...movedRootIds],
+          targetListId: target.listId,
+          parentId: target.parentId,
+          beforeId: target.beforeId,
+          mode: target.mode,
+          clone,
+        });
+        if (!allowed) return false;
+      } catch (error) {
+        // A predicate that throws cannot be trusted to have said yes.
+        console.error('ui-sortable: canDrop threw; the drop is refused.', error);
+        return false;
+      }
+    }
+
     return true;
   }
 
@@ -3402,8 +3485,8 @@ export class UISortable extends ElementBase {
     movedRootIds: string[],
     clone: boolean,
     source: UISortableChangeSource
-  ): void {
-    if (!this._canDrop(target, movedRootIds)) return;
+  ): boolean {
+    if (!this._canDrop(target, movedRootIds, clone)) return false;
 
     const itemMap = buildItemMap(this._items);
     const groups = buildChildrenMap(this._items);
@@ -3493,22 +3576,6 @@ export class UISortable extends ElementBase {
       ordered.push(item);
     });
 
-    if (this._dragState) this._dragState.committed = true;
-    this._items = ordered.map(cloneItem);
-    this._clearPointerDragPreview();
-    this._dragState = null;
-    this._removeDragImage();
-
-    const nextSelection = [...rootIdsForInsert];
-    const previousSelection = [...this._selection];
-    this._selection = nextSelection;
-    this._focusedId = nextSelection[0] || null;
-    this._pendingFocusId = this._focusedId;
-    this._syncAttributesFromState();
-
-    const snapshot = getPersistenceSnapshot(this._items);
-    this._persistSnapshot(snapshot);
-
     const originalRoots = movedRootIds
       .map((id) => itemMap.get(id))
       .filter((item): item is NormalizedItem => !!item);
@@ -3519,6 +3586,49 @@ export class UISortable extends ElementBase {
         : originalRoots.some((item) => item.listId !== target.listId)
           ? 'transfer'
           : 'reorder';
+
+    const nextSelection = [...rootIdsForInsert];
+    const previousSelection = [...this._selection];
+
+    // The last word before anything changes: a listener can cancel the move.
+    const proposed = ordered.map(cloneItem);
+    const accepted = this.dispatchEvent(new CustomEvent<UISortableBeforeChangeDetail>('before-change', {
+      detail: {
+        items: proposed.map((item) => ({ ...item })),
+        lists: this.lists,
+        selection: [...nextSelection],
+        previousSelection: [...previousSelection],
+        movedIds: [...rootIdsForInsert],
+        source,
+        operation,
+        persistence: getPersistenceSnapshot(proposed),
+        target: { listId: target.listId, parentId: target.parentId, beforeId: target.beforeId, mode: target.mode },
+        clone,
+      },
+      bubbles: true,
+      composed: true,
+      cancelable: true,
+    }));
+    if (!accepted) {
+      // Put the card back where it came from and say so.
+      if (this._dragState) this._cancelDrag(false);
+      this._announce(this._t('announceRejected'));
+      return false;
+    }
+
+    if (this._dragState) this._dragState.committed = true;
+    this._items = ordered.map(cloneItem);
+    this._clearPointerDragPreview();
+    this._dragState = null;
+    this._removeDragImage();
+
+    this._selection = nextSelection;
+    this._focusedId = nextSelection[0] || null;
+    this._pendingFocusId = this._focusedId;
+    this._syncAttributesFromState();
+
+    const snapshot = getPersistenceSnapshot(this._items);
+    this._persistSnapshot(snapshot);
 
     const detail: UISortableChangeDetail = {
       items: this.items,
@@ -3544,6 +3654,7 @@ export class UISortable extends ElementBase {
     }));
     this._announce(this._messageForMove(operation, rootIdsForInsert.length, target));
     this.requestRender();
+    return true;
   }
 
   private _syncAttributesFromState(): void {
