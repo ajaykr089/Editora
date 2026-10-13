@@ -15,7 +15,11 @@ import type {
   UISortableDropIndicatorVisibility,
   UISortableDropzoneStyle,
   UISortableDragHandleMode,
-  UISortableListOrientation
+  UISortableListOrientation,
+  UISortableLabels,
+  UISortableNestTrigger,
+  UISortableDropInfo,
+  UISortableBeforeChangeDetail
 } from '@editora/ui-core/sortable';
 
 export type SortableListOrientation = UISortableListOrientation;
@@ -27,6 +31,8 @@ export type SortableDropIndicatorVisibility = UISortableDropIndicatorVisibility;
 export type SortableDropzoneStyle = UISortableDropzoneStyle;
 export type SortableDragPreviewSize = 'match-item' | 'compact';
 export type SortableDragHandleMode = UISortableDragHandleMode;
+export type SortableLabels = Partial<UISortableLabels>;
+export type SortableNestTrigger = UISortableNestTrigger;
 export type SortableRadiusPreset = 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
 export type SortableRadius = SortableRadiusPreset | number | string;
 export type SortableSpacePreset = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -38,6 +44,8 @@ export type SortableSelectionChangeDetail = UISortableSelectionChangeDetail;
 export type SortablePersistenceRecord = UISortablePersistenceRecord;
 export type SortablePersistenceSnapshot = UISortablePersistenceSnapshot;
 export type SortableChangeDetail = UISortableChangeDetail;
+export type SortableBeforeChangeDetail = UISortableBeforeChangeDetail;
+export type SortableDropInfo = UISortableDropInfo;
 export type SortableMoveOptions = UISortableMoveOptions;
 export type SortableElement = UISortable;
 
@@ -69,6 +77,9 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   persistKey?: string;
   allowFilteredDrag?: boolean;
   allowNesting?: boolean;
+  nestTrigger?: SortableNestTrigger;
+  /** Milliseconds a finger must rest on a card before it lifts (touch, dragging by the card). 0 lifts at once. Default 350. */
+  touchHoldDelay?: number;
   dropIndicatorVisibility?: SortableDropIndicatorVisibility;
   dropzoneStyle?: SortableDropzoneStyle;
   dragPreviewSize?: SortableDragPreviewSize;
@@ -78,11 +89,20 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   handleRadius?: SortableRadius;
   listGap?: SortableSpace;
   itemSpacing?: SortableSpace;
+  /** Decides whether items may go somewhere; return false to refuse. Asked on every pointer move, so keep it quick. */
+  canDrop?: (info: SortableDropInfo) => boolean;
   showSelectionBadge?: boolean;
+  labels?: SortableLabels;
+  hideToolbar?: boolean;
   disabled?: boolean;
   renderItem?: (item: SortableItem, context: SortableRenderItemContext) => React.ReactNode;
   renderListHeader?: (list: SortableList, context: SortableRenderListHeaderContext) => React.ReactNode;
   renderEmptyState?: (list: SortableList, context: SortableRenderEmptyStateContext) => React.ReactNode;
+  /**
+   * Called just before a move is applied, with the result it would have. Return `false` (or call
+   * `event.preventDefault()`) to cancel it: nothing changes and `onChange` does not fire.
+   */
+  onBeforeChange?: (detail: SortableBeforeChangeDetail, event: Event) => boolean | void;
   onChange?: (detail: SortableChangeDetail) => void;
   onItemsChange?: (items: SortableItem[]) => void;
   onSelectionChange?: (detail: SortableSelectionChangeDetail) => void;

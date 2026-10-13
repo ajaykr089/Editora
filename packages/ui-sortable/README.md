@@ -29,12 +29,18 @@
 - **Reorder, transfer, nest and clone.** Drop an item between others, into another list, inside another item, or drag
   a copy out of a template list.
 - **Multi-selection**: select several items and move them together.
+- **A drag that is always a reorder**: nesting takes a deliberate gesture (hold Alt, or drop on the far side of a card),
+  so a plain drag never nests by accident. On touch a card is lifted by holding it, so the page still scrolls.
+- **Guard rails**: `maxItems` per list, a `canDrop` function, and a cancelable `before-change` event, so your app has
+  the last word on a move.
 - **Keyboard and screen readers.** Space lifts the focused item, the arrow keys choose the place, Space drops it, and
   the move is announced.
 - **Persistence built in**: a `persist-request` event with the new positions, and a `persistKey` that keeps the positions across reloads.
 - **Small.** The component is 17 KB gzipped (19 KB with the React wrapper), against about 490 KB for the whole
   [`@editora/ui-core`](https://www.npmjs.com/package/@editora/ui-core) catalog it comes from.
-- Custom item, list-header and empty-state rendering in React.
+- **Your own markup, with or without React**: custom cards, list headers and empty states, and a free `data` field on
+  every item and list.
+- **Translatable and quiet**: every text it shows or announces can be replaced (`labels`), and the hint line can be hidden.
 
 ## Install
 
@@ -257,6 +263,119 @@ export default function CustomRendering() {
   <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-sortable/docs/images/custom.png" alt="Two lists with custom markup: a header showing the item count, cards showing Selected or Ready, and a custom message in the empty list" width="900">
 </p>
 
+### Refusing moves
+
+A list can hold a limited number of items (`maxItems`, counted at every nesting level), `canDrop` decides whether items
+may go somewhere, and `onBeforeChange` is the last word before anything changes. A place that is refused is never
+highlighted, the keyboard skips it, and the card you are holding turns red over it:
+
+```tsx
+import * as React from 'react';
+import { Sortable, type SortableItem, type SortableList } from '@editora/ui-sortable/react';
+
+type Task = { reviewed: boolean };
+
+const lists: SortableList[] = [
+  { id: 'todo', label: 'To do' },
+  { id: 'doing', label: 'Doing', maxItems: 2 },
+  { id: 'done', label: 'Done' }
+];
+
+const initialItems: SortableItem[] = [
+  { id: 'brief', label: 'Write the brief', listId: 'todo', data: { reviewed: true } },
+  { id: 'budget', label: 'Approve the budget', listId: 'todo', data: { reviewed: false } },
+  { id: 'launch', label: 'Plan the launch', listId: 'todo', data: { reviewed: true } },
+  { id: 'assets', label: 'Collect the assets', listId: 'doing', data: { reviewed: true } }
+];
+
+export default function GuardedBoard() {
+  const [items, setItems] = React.useState(initialItems);
+
+  return (
+    <Sortable
+      lists={lists}
+      items={items}
+      allowNesting={false}
+      // Only reviewed work goes to Done: over it the lifted card turns red, and a drop does nothing.
+      canDrop={(drop) =>
+        drop.targetListId !== 'done' || drop.items.every((item) => (item.data as Task).reviewed)
+      }
+      // The last word before anything changes: return false to cancel (here, at most two cards at a time).
+      onBeforeChange={(detail) => detail.movedIds.length <= 2}
+      onItemsChange={setItems}
+    />
+  );
+}
+```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-sortable/docs/images/guard.png" alt="A board where Doing shows 1/2 and a card that was not reviewed is held over Done: the lifted card is outlined in red because Done will not take it" width="900">
+</p>
+
+`before-change` is a cancelable event (`detail` is what `change` will report, plus `target` and `clone`):
+`event.preventDefault()` cancels the move, puts a dragged card back, and fires no `change`. `moveSelection()` returns
+`false` when a move did not happen.
+
+### Without React
+
+`renderItem`, `renderListHeader` and `renderEmptyState` are properties of the element too. Each returns a new DOM node, a
+string of HTML (escape anything that came from a user), or nothing to keep the built-in markup. A card is drawn again when
+its `data` changes and when it is selected or deselected:
+
+```html
+<script type="importmap">
+  {
+    "imports": {
+      "@editora/ui-sortable": "https://cdn.jsdelivr.net/npm/@editora/ui-sortable/dist/index.esm.js",
+      "@editora/ui-core/sortable": "https://cdn.jsdelivr.net/npm/@editora/ui-core/dist/sortable.esm.js"
+    }
+  }
+</script>
+<ui-sortable></ui-sortable>
+
+<script type="module">
+  import '@editora/ui-sortable';
+
+  const board = document.querySelector('ui-sortable');
+
+  board.lists = [
+    { id: 'todo', label: 'To do', maxItems: 3 },
+    { id: 'done', label: 'Done' }
+  ];
+
+  board.items = [
+    { id: 'acme', label: 'Invoice Acme', listId: 'todo', data: { amount: 1200 } },
+    { id: 'globex', label: 'Quote Globex', listId: 'todo', data: { amount: 450 } },
+    { id: 'initech', label: 'Chase Initech', listId: 'done', data: { amount: 80 } }
+  ];
+
+  // Draw each card yourself. Return a new DOM node (or a string of HTML you have escaped).
+  board.renderItem = (item, { selected }) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display: flex; justify-content: space-between; gap: 12px';
+
+    const name = document.createElement('strong');
+    name.textContent = item.label;
+
+    const amount = document.createElement('span');
+    amount.textContent = `$${item.data.amount}${selected ? ' (selected)' : ''}`;
+
+    row.append(name, amount);
+    return row;
+  };
+
+  // Say no before a move happens: nothing over $1,000 goes to Done.
+  board.canDrop = ({ targetListId, items }) =>
+    targetListId !== 'done' || items.every((item) => item.data.amount <= 1000);
+
+  board.addEventListener('change', (event) => console.log('moved', event.detail.movedIds));
+</script>
+```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-sortable/docs/images/vanilla.png" alt="Two lists whose cards were drawn by a JavaScript function, each showing a name and an amount, and a To do header counting 2/3" width="900">
+</p>
+
 ## Items and lists
 
 | Item field | |
@@ -266,6 +385,7 @@ export default function CustomRendering() {
 | `description` | A second line of text. |
 | `cloneOnDrag` | Dragging this item leaves it where it is and drops a copy. |
 | `disabled`, `dragDisabled`, `hidden` | Disable the item, stop it being dragged, or hide it. |
+| `data` | Anything of yours that can be written as JSON. It travels with the item through moves and copies and comes back in every event, so you do not need a side table. What you get back is a copy. |
 
 | List field | |
 | --- | --- |
@@ -274,6 +394,9 @@ export default function CustomRendering() {
 | `orientation` | `'vertical'` (the default) or `'horizontal'`. |
 | `cloneOnDrag` | Items dragged out of this list are copied. |
 | `disabled` | Turn the list off. |
+| `accepts` | The ids of the lists it takes items from. |
+| `maxItems` | The most items it can hold. A move or copy that would go past it is refused; the header shows `3/5`. |
+| `data` | Anything of yours that can be written as JSON, as on items. |
 
 ## Options
 
@@ -282,6 +405,11 @@ export default function CustomRendering() {
 | `lists`, `items` | `lists`, `items` | The data. In HTML, set them as properties or as JSON attributes. |
 | `selection` | `selection` | The selected item ids. |
 | `allowNesting` | `allow-nesting` | Allow dropping an item inside another. |
+| `nestTrigger` | `nest-trigger` | What it takes to nest with the pointer: `gutter` (the default: hold Alt, or drop on the far side of a card), `modifier` (hold Alt) or `area` (the middle of any card, as before). Without it the top half of a card is "before it" and the bottom half "after it". |
+| `touchHoldDelay` | `touch-hold-delay` | Milliseconds a finger must rest on a card before it lifts (for cards dragged by their body); `0` lifts at once. Default `350`. The built-in handle always lifts at once. |
+| `labels` | `labels` | Replacements for any of its texts: `{ hintHandle, selectedMany, badgeSelected, announceMovedOne, listFull, ... }`. `{count}`, `{label}`, `{list}` and `{max}` are filled in. |
+| `hideToolbar` | `hide-toolbar` | Hide the hint and the selection count from sight (screen readers still get the hint). |
+| `canDrop` | `canDrop` (property) | A function that is given `{ items, movedIds, targetListId, parentId, beforeId, mode, clone }` and returns whether they may go there. |
 | `dropzoneStyle` | `dropzone-style` | `indicator` (an insertion rail, the default) or `container` (the whole list highlights). |
 | `dropIndicatorVisibility` | `drop-indicator-visibility` | `active` or `always`. |
 | `dragPreviewSize` | `drag-preview-size` | The card that follows the pointer: `match-item` (the card's own size) or `compact` (narrower, title only). |
@@ -293,6 +421,17 @@ export default function CustomRendering() {
 | `disabled` | `disabled` | Turn the whole component off. |
 
 The React wrapper also takes `itemRadius`, `handleRadius`, `listGap` and `itemSpacing` for the look.
+
+## Nesting, touch and keyboard
+
+With nesting on (the default), the top half of a card is "before it" and the bottom half "after it", so dragging onto a
+card always reorders. To drop an item *inside* another, hold **Alt** (Option) or drop on the far side of the card (its
+right, in a left-to-right page): the card highlights before you let go. Set `nestTrigger="area"` for the old rule, where the
+middle of a card nests, or `allowNesting={false}` to turn it off. The keyboard has an explicit "Nest inside" destination, so it
+needs none of this.
+
+A card dragged by its body (`dragHandleMode="item"`, or your own handle) is lifted on touch by holding it for a third of a
+second; a finger that moves first scrolls the page, and a tap still selects. The built-in handle lifts at once.
 
 ## Look and layout
 
@@ -322,6 +461,7 @@ ui-sortable::part(items) {
 
 | Event | React prop | `detail` |
 | --- | --- | --- |
+| `before-change` | `onBeforeChange` | Cancelable. The same as `change`, before it is applied, plus `target` and `clone`. In React return `false` to cancel. |
 | `change` | `onChange` | `{ items, lists, selection, previousSelection, movedIds, source, operation, persistence }`. `source` is `pointer`, `keyboard`, `api` or `restore`; `operation` is `reorder`, `transfer`, `nest` or `clone`. |
 | | `onItemsChange` | The new `items` array. |
 | `selection-change` | `onSelectionChange` | `{ selection, previousSelection }` |
@@ -329,8 +469,9 @@ ui-sortable::part(items) {
 
 ## Methods
 
-On the element (or a ref to it): `select(ids)`, `clearSelection()`, `moveSelection({ targetListId, beforeId?, parentId?, mode?, clone? })`,
-`focusItem(id)`, `cancelDrag()` and `getPersistenceSnapshot()`.
+On the element (or a ref to it): `select(ids)`, `clearSelection()`, `moveSelection({ targetListId, beforeId?, parentId?, mode?, clone? })`
+(which returns whether anything moved), `focusItem(id)`, `cancelDrag()` and `getPersistenceSnapshot()`. The properties
+`canDrop`, `labels`, `renderItem`, `renderListHeader` and `renderEmptyState` can be set on it as well.
 
 ## Keyboard
 
@@ -340,9 +481,11 @@ explains the keys.
 
 ## Types
 
-`@editora/ui-sortable` re-exports `UISortable`, `UISortableList`, `UISortableItem`, `UISortableChangeDetail` and
-`UISortableDropzoneStyle`. `@editora/ui-sortable/react` exports `Sortable`, `SortableList`, `SortableItem`,
-`SortableChangeDetail` and `SortableDropzoneStyle`.
+`@editora/ui-sortable` re-exports `UISortable`, `UISortableList`, `UISortableItem`, `UISortableChangeDetail`,
+`UISortableBeforeChangeDetail`, `UISortableDropInfo`, `UISortableLabels`, `UISortableNestTrigger` and
+`UISortableDropzoneStyle`, among others. `@editora/ui-sortable/react` exports `Sortable`, `SortableList`, `SortableItem`,
+`SortableChangeDetail`, `SortableBeforeChangeDetail`, `SortableDropInfo`, `SortableLabels`, `SortableNestTrigger` and
+`SortableDropzoneStyle`.
 
 ## Server rendering
 

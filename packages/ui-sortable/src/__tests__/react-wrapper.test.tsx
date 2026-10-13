@@ -63,4 +63,71 @@ describe('@editora/ui-sortable/react', () => {
     rerender(<Sortable lists={[{ id: 'a', label: 'A' }]} items={[{ id: 'x', label: 'X', listId: 'a' }]} />);
     expect(container.querySelector('ui-sortable')?.getAttribute('items')).toContain('"x"');
   });
+
+  it('forwards labels and hideToolbar to the element, and clears them again', async () => {
+    const { Sortable } = await import('@editora/ui-sortable/react');
+    const lists = [{ id: 'a', label: 'A' }];
+    const items = [{ id: 'one', label: 'One', listId: 'a' }];
+    const { container, rerender } = render(
+      <Sortable lists={lists} items={items} labels={{ hintHandle: 'Glissez la poignée.' }} hideToolbar />
+    );
+    const element = container.querySelector('ui-sortable') as HTMLElement;
+
+    await waitFor(() => expect(element.shadowRoot?.querySelector('#ui-sortable-helper')?.textContent).toMatch(/^Glissez la poignée\./));
+    expect(JSON.parse(element.getAttribute('labels') || '{}')).toEqual({ hintHandle: 'Glissez la poignée.' });
+    expect(element.hasAttribute('hide-toolbar')).toBe(true);
+
+    rerender(<Sortable lists={lists} items={items} labels={{}} />);
+    await waitFor(() => expect(element.hasAttribute('labels')).toBe(false));
+    expect(element.hasAttribute('hide-toolbar')).toBe(false);
+  });
+
+  it('forwards nestTrigger, and leaves the default unset', async () => {
+    const { Sortable } = await import('@editora/ui-sortable/react');
+    const lists = [{ id: 'a', label: 'A' }];
+    const items = [{ id: 'one', label: 'One', listId: 'a' }];
+    const { container, rerender } = render(<Sortable lists={lists} items={items} nestTrigger="area" />);
+    const element = container.querySelector('ui-sortable') as HTMLElement;
+    await waitFor(() => expect(element.getAttribute('nest-trigger')).toBe('area'));
+
+    rerender(<Sortable lists={lists} items={items} />);
+    await waitFor(() => expect(element.hasAttribute('nest-trigger')).toBe(false));
+  });
+
+  it('forwards touchHoldDelay, including 0, and clears it', async () => {
+    const { Sortable } = await import('@editora/ui-sortable/react');
+    const lists = [{ id: 'a', label: 'A' }];
+    const items = [{ id: 'one', label: 'One', listId: 'a' }];
+    const { container, rerender } = render(<Sortable lists={lists} items={items} touchHoldDelay={0} />);
+    const element = container.querySelector('ui-sortable') as HTMLElement;
+    await waitFor(() => expect(element.getAttribute('touch-hold-delay')).toBe('0'));
+    rerender(<Sortable lists={lists} items={items} />);
+    await waitFor(() => expect(element.hasAttribute('touch-hold-delay')).toBe(false));
+  });
+
+  it('lets canDrop refuse a place and onBeforeChange cancel a move', async () => {
+    const { Sortable } = await import('@editora/ui-sortable/react');
+    const lists = [{ id: 'todo', label: 'To do' }, { id: 'done', label: 'Done' }];
+    const items = [{ id: 'alpha', label: 'Alpha', listId: 'todo' }];
+    const changes: string[] = [];
+    let cancel = true;
+    const { container } = render(
+      <Sortable
+        lists={lists}
+        items={items}
+        selection={['alpha']}
+        canDrop={(info) => info.targetListId !== 'nowhere'}
+        onBeforeChange={() => (cancel ? false : undefined)}
+        onChange={(detail) => changes.push(detail.operation)}
+      />
+    );
+    const el = container.querySelector('ui-sortable') as HTMLElement & { moveSelection(options: { targetListId: string }): boolean };
+    await waitFor(() => expect(el.shadowRoot?.querySelector('.handle[data-id="alpha"]')).toBeTruthy());
+
+    expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
+    expect(changes).toEqual([]);
+    cancel = false;
+    expect(el.moveSelection({ targetListId: 'done' })).toBe(true);
+    expect(changes).toEqual(['transfer']);
+  });
 });

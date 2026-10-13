@@ -9,6 +9,16 @@ export type UISortableOperation = 'reorder' | 'transfer' | 'nest' | 'clone';
 export type UISortableDropIndicatorVisibility = 'active' | 'always';
 export type UISortableDragHandleMode = 'handle' | 'item';
 export type UISortableDropzoneStyle = 'indicator' | 'container';
+/**
+ * What it takes to drop a card *inside* another one (nest it) with the pointer:
+ * `gutter` (default) holding Alt, or dropping on the far side of the card; `modifier` holding Alt;
+ * `area` dropping on the middle of any card (the old behaviour, where a plain drag could nest by accident).
+ * Without that, the top half of a card is "before it" and the bottom half is "after it".
+ */
+export type UISortableNestTrigger = 'gutter' | 'modifier' | 'area';
+
+/** Every piece of text the component shows or announces. Pass any of them as `labels` to translate or reword. */
+export type UISortableLabels = { [K in keyof typeof DEFAULT_LABELS]: string };
 
 export type UISortableList = {
   id: string;
@@ -19,6 +29,10 @@ export type UISortableList = {
   disabled?: boolean;
   cloneOnDrag?: boolean;
   accepts?: string[];
+  /** The most items the list can hold, at every nesting level. A move or copy that would go past it is refused. */
+  maxItems?: number;
+  /** Anything of yours that is JSON-serialisable (an id, a record, a colour). It travels with the list and comes back in every event. */
+  data?: unknown;
 };
 
 export type UISortableItem = {
@@ -32,6 +46,8 @@ export type UISortableItem = {
   dragDisabled?: boolean;
   cloneOnDrag?: boolean;
   hidden?: boolean;
+  /** Anything of yours that is JSON-serialisable (a record, a price, a status). It travels with the item through moves and copies, and comes back in every event. */
+  data?: unknown;
 };
 
 export type UISortableSelectionChangeDetail = {
@@ -62,6 +78,51 @@ export type UISortableChangeDetail = {
   persistence: UISortablePersistenceSnapshot;
 };
 
+/** What a `renderItem` function is told about the card it is drawing. */
+export type UISortableRenderItemContext = {
+  selected: boolean;
+  disabled: boolean;
+  dragDisabled: boolean;
+  cloneOnDrag: boolean;
+  list?: UISortableList;
+};
+
+export type UISortableRenderListHeaderContext = {
+  itemCount: number;
+  dragLocked: boolean;
+};
+
+export type UISortableRenderEmptyStateContext = {
+  itemCount: number;
+  dragLocked: boolean;
+  filterQuery: string;
+};
+
+/**
+ * What a render function returns: a DOM node, or a string of HTML (escape anything that came from a user),
+ * or nothing to keep the built-in markup.
+ */
+export type UISortableRenderResult = Node | string | null | undefined | void;
+
+/** What `canDrop` is asked: can these items go there? */
+export type UISortableDropInfo = {
+  /** The items being moved (not their children), as they are now. */
+  items: UISortableItem[];
+  movedIds: string[];
+  targetListId: string;
+  parentId: string | null;
+  beforeId: string | null;
+  mode: UISortableDropMode;
+  /** True when the items are copied rather than moved. */
+  clone: boolean;
+};
+
+/** The detail of `before-change`: what `change` will report, plus where the items are going. */
+export type UISortableBeforeChangeDetail = UISortableChangeDetail & {
+  target: { listId: string; parentId: string | null; beforeId: string | null; mode: UISortableDropMode };
+  clone: boolean;
+};
+
 export type UISortableMoveOptions = {
   targetListId: string;
   beforeId?: string | null;
@@ -82,6 +143,7 @@ type NormalizedItem = {
   dragDisabled: boolean;
   cloneOnDrag: boolean;
   hidden: boolean;
+  data?: unknown;
 };
 
 type NormalizedList = {
@@ -93,6 +155,8 @@ type NormalizedList = {
   disabled: boolean;
   cloneOnDrag: boolean;
   accepts?: string[];
+  maxItems?: number;
+  data?: unknown;
 };
 
 type RenderRecord = {
@@ -127,6 +191,10 @@ type PointerGestureState = {
   startY: number;
   moved: boolean;
   captureTarget: HTMLElement | null;
+  // A finger on a card (not on its handle) is a scroll until it has been held still: the drag starts when
+  // the hold timer fires, and a finger that moves first was scrolling.
+  hold: boolean;
+  holdTimer: ReturnType<typeof setTimeout> | null;
 };
 
 type DragActivator = {
@@ -151,8 +219,70 @@ type ProjectedMoveResult = {
 };
 
 const STORAGE_VERSION = 1;
+
+// {name} placeholders are filled in by the component (a label, a count, a list name).
+const DEFAULT_LABELS = {
+  hintHandle: 'Use the handle to drag, or press Space on a focused item to start keyboard reordering.',
+  hintItem: 'Drag from anywhere on an item, or press Space on a focused item to start keyboard reordering.',
+  hintCustom: 'Use your custom drag handle element, or press Space on a focused item to start keyboard reordering.',
+  hintKeyboard: 'Keyboard drag active. Use arrow keys to choose a drop target, Space or Enter to drop, and Escape to cancel.',
+  hintNestGutter: 'To nest an item, hold Alt or drop it on the far side of another.',
+  hintNestModifier: 'To nest an item, hold Alt while you drop it on another.',
+  hintNestArea: 'To nest an item, drop it on the middle of another.',
+  hintPausedSort: 'Dragging is paused while alphabetical sorting is active.',
+  hintPausedFilter: 'Dragging is paused while the list is filtered.',
+  hintDisabled: 'Dragging is currently disabled.',
+  selectedOne: 'item selected',
+  selectedMany: 'items selected',
+  listReadOnly: 'This list is read-only.',
+  listClone: 'Dragging from this list creates a copy.',
+  listAccepts: 'Accepts drops from: {lists}',
+  listFull: 'This list is full ({max} items).',
+  emptyList: 'Drop items here.',
+  dropHere: 'Drop here',
+  nestHere: 'Nest here',
+  badgeSelected: 'Selected',
+  badgeClone: 'Clone on drag',
+  badgePinned: 'Pinned',
+  dropPreview: 'Drop preview',
+  copyPreview: 'Copy preview',
+  releaseMove: 'Release to place this item here.',
+  releaseMoveMany: 'Release to place this selection here.',
+  releaseCopy: 'Release to add a copy here.',
+  movingOne: 'Moving item',
+  movingMany: 'Moving {count} items',
+  copyingOne: 'Copying item',
+  copyingMany: 'Copying {count} items',
+  draggingOne: 'Dragging item',
+  draggingMany: 'Dragging {count} items',
+  announceSelectedMany: '{count} items selected.',
+  announceDragDisabled: 'Dragging is disabled right now.',
+  announceDragging: 'Dragging {label}.',
+  announceDraggingMany: 'Dragging {count} items.',
+  announceDraggingCopy: 'Dragging {label} as a copy.',
+  announceDraggingCopyMany: 'Dragging {count} items as a copy.',
+  announceCancelled: 'Drag cancelled.',
+  announceRejected: 'That move is not allowed.',
+  announceLifted: 'Lifted {label}.',
+  announceLiftedMany: 'Lifted {count} items.',
+  announceLiftedHelp: 'Use arrow keys to choose a destination.',
+  announceCopiedOne: 'Item copied into {list}.',
+  announceCopiedMany: '{count} items copied into {list}.',
+  announceNestedOne: 'Item nested in {list}.',
+  announceNestedMany: '{count} items nested in {list}.',
+  announceMovedOne: 'Item moved to {list}.',
+  announceMovedMany: '{count} items moved to {list}.',
+  announceReorderedOne: 'Item reordered in {list}.',
+  announceReorderedMany: '{count} items reordered in {list}.',
+  targetBefore: 'Before {label}',
+  targetInside: 'Nest inside {label}',
+  targetEnd: 'End of {list}',
+  targetAfterChildren: 'After children',
+};
 const DROP_TARGET_SETTLE_MS = 44;
 const DROP_TARGET_CLEAR_SETTLE_MS = 72;
+const TOUCH_HOLD_MS = 350;
+const TOUCH_HOLD_SLOP_PX = 10;
 
 const style = `
   :host {
@@ -213,6 +343,18 @@ const style = `
     color: var(--ui-sortable-muted);
     font-size: 12px;
     line-height: 1.5;
+  }
+
+  /* hide-toolbar: the hint is still what the lists are described by, so it is hidden from sight only. */
+  .toolbar[data-hidden="true"] {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
   }
 
   .helper {
@@ -352,6 +494,12 @@ const style = `
     font-variant-numeric: tabular-nums;
   }
 
+  /* A list at its maxItems takes nothing more: the count turns to a warning colour. */
+  .list[data-full="true"] .list-count {
+    background: color-mix(in srgb, var(--ui-sortable-warning, #d97706) 16%, transparent);
+    color: color-mix(in srgb, var(--ui-sortable-warning, #d97706) 80%, var(--ui-sortable-text));
+  }
+
   .list-description,
   .list-helper {
     color: var(--ui-sortable-muted);
@@ -463,6 +611,14 @@ const style = `
     cursor: grab;
   }
 
+  /* A card that is dragged by its body is held to lift on touch: no text selection or callout while holding. */
+  .item[data-drag-handle-mode="item"],
+  .item[data-drag-handle-mode="custom"] {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
   .item[data-drag-handle-mode="item"][data-dragging="true"] {
     cursor: grabbing;
   }
@@ -561,6 +717,17 @@ const style = `
       10px 10px 0 -2px var(--ui-sortable-card),
       10px 10px 0 -1px var(--ui-sortable-border-strong),
       var(--ui-sortable-lift-shadow);
+  }
+
+  .item.item-ghost[data-refused] {
+    border-color: var(--ui-sortable-danger, #dc2626);
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--ui-sortable-danger, #dc2626) 22%, transparent),
+      var(--ui-sortable-lift-shadow);
+  }
+
+  .item.item-ghost[data-refused] .handle {
+    color: var(--ui-sortable-danger, #dc2626);
   }
 
   .item.item-ghost .handle {
@@ -991,6 +1158,36 @@ function parseJsonArray<T>(value: string | null): T[] {
   }
 }
 
+// A short fingerprint of an item's or list's `data`. It is written into the markup while a render function is set,
+// so a change to the data (which is not otherwise drawn) makes the card be drawn again.
+function dataRevision(data: unknown): string {
+  if (data === undefined) return '';
+  let json: string;
+  try {
+    json = JSON.stringify(data) ?? '';
+  } catch {
+    return '';
+  }
+  let hash = 5381;
+  for (let i = 0; i < json.length; i += 1) hash = ((hash << 5) + hash + json.charCodeAt(i)) | 0;
+  return (hash >>> 0).toString(36);
+}
+
+function parseLabels(value: string | null): Partial<UISortableLabels> {
+  if (!value) return {};
+  try {
+    const parsed = JSON.parse(value);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    const labels: Partial<UISortableLabels> = {};
+    (Object.keys(DEFAULT_LABELS) as Array<keyof UISortableLabels>).forEach((key) => {
+      if (typeof parsed[key] === 'string') labels[key] = parsed[key];
+    });
+    return labels;
+  } catch {
+    return {};
+  }
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -1050,6 +1247,29 @@ function parseDragHandleMode(value: string | null): UISortableDragHandleMode {
 
 function cloneItem(item: NormalizedItem): NormalizedItem {
   return { ...item };
+}
+
+// `data` is the app's own: what leaves the component (events, getters, callbacks) is a copy, so changing it
+// there cannot change what the component holds, and a copied card does not share its data with the original.
+function copyData<T>(data: T): T {
+  if (data === undefined || data === null || typeof data !== 'object') return data;
+  try {
+    return JSON.parse(JSON.stringify(data)) as T;
+  } catch {
+    return data;
+  }
+}
+
+function publicItem(item: NormalizedItem): UISortableItem {
+  const copy: UISortableItem = { ...item };
+  if (item.data !== undefined) copy.data = copyData(item.data);
+  return copy;
+}
+
+function publicList(list: NormalizedList): UISortableList {
+  const copy: UISortableList = { ...list };
+  if (list.data !== undefined) copy.data = copyData(list.data);
+  return copy;
 }
 
 function projectMoveItems(
@@ -1183,13 +1403,15 @@ function canonicalizeLists(rawLists: UISortableList[]): NormalizedList[] {
       description: typeof list?.description === 'string' ? list.description : '',
       emptyLabel: typeof list?.emptyLabel === 'string' && list.emptyLabel.trim()
         ? list.emptyLabel.trim()
-        : 'Drop items here.',
+        : '',
       orientation: list?.orientation === 'horizontal' ? 'horizontal' : 'vertical',
       disabled: !!list?.disabled,
       cloneOnDrag: !!list?.cloneOnDrag,
       accepts: Array.isArray(list?.accepts)
         ? list.accepts.filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
         : undefined,
+      maxItems: Number.isFinite(list?.maxItems) && Number(list.maxItems) >= 0 ? Math.floor(Number(list.maxItems)) : undefined,
+      ...(list?.data !== undefined ? { data: list.data } : {}),
     });
   });
 
@@ -1199,7 +1421,7 @@ function canonicalizeLists(rawLists: UISortableList[]): NormalizedList[] {
     id: 'default',
     label: 'Items',
     description: '',
-    emptyLabel: 'Drop items here.',
+    emptyLabel: '',
     orientation: 'vertical',
     disabled: false,
     cloneOnDrag: false,
@@ -1226,6 +1448,7 @@ function normalizeItems(lists: NormalizedList[], rawItems: UISortableItem[]): No
       dragDisabled: !!item?.dragDisabled,
       cloneOnDrag: !!item?.cloneOnDrag,
       hidden: !!item?.hidden,
+      ...(item?.data !== undefined ? { data: item.data } : {}),
     });
   });
 
@@ -1284,6 +1507,7 @@ function serializeItems(items: NormalizedItem[]): string {
     dragDisabled: item.dragDisabled,
     cloneOnDrag: item.cloneOnDrag,
     hidden: item.hidden,
+    data: item.data,
   })));
 }
 
@@ -1297,6 +1521,8 @@ function serializeLists(lists: NormalizedList[]): string {
     disabled: list.disabled,
     cloneOnDrag: list.cloneOnDrag,
     accepts: list.accepts,
+    maxItems: list.maxItems,
+    data: list.data,
   })));
 }
 
@@ -1402,6 +1628,10 @@ export class UISortable extends ElementBase {
       'drag-handle-selector',
       'custom-item-rendering',
       'show-selection-badge',
+      'nest-trigger',
+      'touch-hold-delay',
+      'labels',
+      'hide-toolbar',
       'disabled',
     ];
   }
@@ -1416,6 +1646,12 @@ export class UISortable extends ElementBase {
   private _lastListsAttr: string | null = null;
   private _lastItemsAttr: string | null = null;
   private _lastSelectionAttr: string | null = null;
+  private _lastLabelsAttr: string | null = null;
+  private _canDropCallback: ((info: UISortableDropInfo) => boolean) | null = null;
+  private _renderItemFn: ((item: UISortableItem, context: UISortableRenderItemContext) => UISortableRenderResult) | null = null;
+  private _renderListHeaderFn: ((list: UISortableList, context: UISortableRenderListHeaderContext) => UISortableRenderResult) | null = null;
+  private _renderEmptyStateFn: ((list: UISortableList, context: UISortableRenderEmptyStateContext) => UISortableRenderResult) | null = null;
+  private _labels: Partial<UISortableLabels> = {};
   private _hydratedPersistKey: string | null = null;
   private _cloneSeed = 1;
   private _dragImage: HTMLElement | null = null;
@@ -1424,6 +1660,11 @@ export class UISortable extends ElementBase {
   private _pendingFocusId: string | null = null;
   private _pointerGesture: PointerGestureState | null = null;
   private _pendingDropTarget: DropTargetCandidate | null = null;
+  private _pendingTimer: ReturnType<typeof setTimeout> | null = null;
+  private _focusWasInside = false;
+  // Alt held during a pointer drag: it is what asks to nest instead of reorder (see UISortableNestTrigger).
+  private _nestModifier = false;
+  private _lastPointer: { x: number; y: number } | null = null;
   private _suppressAttributeRender = false;
 
   constructor() {
@@ -1439,7 +1680,10 @@ export class UISortable extends ElementBase {
     this._onPointerUp = this._onPointerUp.bind(this);
     this._onPointerCancel = this._onPointerCancel.bind(this);
     this._onFocusIn = this._onFocusIn.bind(this);
+    this._onTouchMove = this._onTouchMove.bind(this);
+    this._onContextMenu = this._onContextMenu.bind(this);
     this._onDocumentKeyDown = this._onDocumentKeyDown.bind(this);
+    this._onDocumentKeyUp = this._onDocumentKeyUp.bind(this);
   }
 
   protected override shouldRenderOnAttributeChange(
@@ -1479,7 +1723,11 @@ export class UISortable extends ElementBase {
     this.root.addEventListener('dragend', this._onDragEnd as EventListener);
     this.root.addEventListener('pointerdown', this._onPointerDown as EventListener);
     this.root.addEventListener('focusin', this._onFocusIn);
+    // Not passive: a held card has to stop the page from scrolling under the finger.
+    this.root.addEventListener('touchmove', this._onTouchMove as EventListener, { passive: false });
+    this.root.addEventListener('contextmenu', this._onContextMenu as EventListener);
     this.ownerDocument?.addEventListener('keydown', this._onDocumentKeyDown as EventListener, true);
+    this.ownerDocument?.addEventListener('keyup', this._onDocumentKeyUp as EventListener, true);
     this.ownerDocument?.addEventListener('pointermove', this._onPointerMove as EventListener, true);
     this.ownerDocument?.addEventListener('pointerup', this._onPointerUp as EventListener, true);
     this.ownerDocument?.addEventListener('pointercancel', this._onPointerCancel as EventListener, true);
@@ -1494,18 +1742,24 @@ export class UISortable extends ElementBase {
     this.root.removeEventListener('dragend', this._onDragEnd as EventListener);
     this.root.removeEventListener('pointerdown', this._onPointerDown as EventListener);
     this.root.removeEventListener('focusin', this._onFocusIn);
+    this.root.removeEventListener('touchmove', this._onTouchMove as EventListener);
+    this.root.removeEventListener('contextmenu', this._onContextMenu as EventListener);
+    this._clearHoldTimer();
     this.ownerDocument?.removeEventListener('keydown', this._onDocumentKeyDown as EventListener, true);
+    this.ownerDocument?.removeEventListener('keyup', this._onDocumentKeyUp as EventListener, true);
     this.ownerDocument?.removeEventListener('pointermove', this._onPointerMove as EventListener, true);
     this.ownerDocument?.removeEventListener('pointerup', this._onPointerUp as EventListener, true);
     this.ownerDocument?.removeEventListener('pointercancel', this._onPointerCancel as EventListener, true);
     this._stopAutoScroll();
     this._removeDragPreviewOverlay();
     this._removeDragImage();
+    if (this._pendingTimer) clearTimeout(this._pendingTimer);
+    this._pendingTimer = null;
     super.disconnectedCallback();
   }
 
   get lists(): UISortableList[] {
-    return this._lists.map((list) => ({ ...list }));
+    return this._lists.map(publicList);
   }
 
   set lists(next: UISortableList[]) {
@@ -1513,11 +1767,73 @@ export class UISortable extends ElementBase {
   }
 
   get items(): UISortableItem[] {
-    return this._items.map((item) => ({ ...item }));
+    return this._items.map(publicItem);
   }
 
   set items(next: UISortableItem[]) {
     this.setAttribute('items', JSON.stringify(next ?? []));
+  }
+
+  /**
+   * Decides whether items may go somewhere. It is asked wherever a place is considered: a refused place is not
+   * highlighted, the keyboard skips it, a drop on it does nothing, and `moveSelection` returns false. Return
+   * true to allow. It runs on every pointer move: keep it quick.
+   */
+  get canDrop(): ((info: UISortableDropInfo) => boolean) | null {
+    return this._canDropCallback;
+  }
+
+  set canDrop(next: ((info: UISortableDropInfo) => boolean) | null | undefined) {
+    this._canDropCallback = typeof next === 'function' ? next : null;
+  }
+
+  /**
+   * Draws the inside of a card yourself, in plain JavaScript (React has `renderItem` on the wrapper). Return a
+   * fresh DOM node, or a string of HTML; return nothing to keep the built-in card. It is called again whenever
+   * the card is drawn anew, when its `data` changes, and when it is selected or deselected.
+   */
+  get renderItem(): ((item: UISortableItem, context: UISortableRenderItemContext) => UISortableRenderResult) | null {
+    return this._renderItemFn;
+  }
+
+  set renderItem(next: ((item: UISortableItem, context: UISortableRenderItemContext) => UISortableRenderResult) | null | undefined) {
+    this._renderItemFn = typeof next === 'function' ? next : null;
+    this.requestRender();
+  }
+
+  /** Draws a list's header yourself. Return a fresh DOM node or a string of HTML; nothing keeps the built-in header. */
+  get renderListHeader(): ((list: UISortableList, context: UISortableRenderListHeaderContext) => UISortableRenderResult) | null {
+    return this._renderListHeaderFn;
+  }
+
+  set renderListHeader(next: ((list: UISortableList, context: UISortableRenderListHeaderContext) => UISortableRenderResult) | null | undefined) {
+    this._renderListHeaderFn = typeof next === 'function' ? next : null;
+    this.requestRender();
+  }
+
+  /** Draws what an empty list shows. Return a fresh DOM node or a string of HTML; nothing keeps the built-in message. */
+  get renderEmptyState(): ((list: UISortableList, context: UISortableRenderEmptyStateContext) => UISortableRenderResult) | null {
+    return this._renderEmptyStateFn;
+  }
+
+  set renderEmptyState(next: ((list: UISortableList, context: UISortableRenderEmptyStateContext) => UISortableRenderResult) | null | undefined) {
+    this._renderEmptyStateFn = typeof next === 'function' ? next : null;
+    this.requestRender();
+  }
+
+  /** The text the component shows, with any `labels` you set applied over the English defaults. */
+  get labels(): UISortableLabels {
+    return { ...DEFAULT_LABELS, ...this._labels };
+  }
+
+  set labels(next: Partial<UISortableLabels> | null | undefined) {
+    if (!next || !Object.keys(next).length) this.removeAttribute('labels');
+    else this.setAttribute('labels', JSON.stringify(next));
+  }
+
+  private _t(key: keyof UISortableLabels, vars?: Record<string, string | number>): string {
+    const template = this._labels[key] ?? DEFAULT_LABELS[key];
+    return template.replace(/\{(\w+)\}/g, (_match, name: string) => String(vars?.[name] ?? ''));
   }
 
   get selection(): string[] {
@@ -1566,11 +1882,12 @@ export class UISortable extends ElementBase {
     this.requestRender();
   }
 
-  moveSelection(options: UISortableMoveOptions): void {
+  /** Moves (or copies) the selected items. Returns false when nothing moved: no selection, a place that is not allowed, or `before-change` cancelled. */
+  moveSelection(options: UISortableMoveOptions): boolean {
     this._syncSelectionFromAttribute(this.getAttribute('selection'));
     const movedRootIds = this._selectedRootIds();
-    if (!movedRootIds.length) return;
-    this._commitMove({
+    if (!movedRootIds.length) return false;
+    return this._commitMove({
       listId: options.targetListId,
       parentId: options.parentId ?? null,
       beforeId: options.beforeId ?? null,
@@ -1606,17 +1923,21 @@ export class UISortable extends ElementBase {
 
     const helper = dragLocked
       ? this.sort === 'label'
-        ? 'Dragging is paused while alphabetical sorting is active.'
+        ? this._t('hintPausedSort')
         : this.filterQuery && !this.hasAttribute('allow-filtered-drag')
-          ? 'Dragging is paused while the list is filtered.'
-          : 'Dragging is currently disabled.'
+          ? this._t('hintPausedFilter')
+          : this._t('hintDisabled')
       : this._dragState?.keyboard
-        ? 'Keyboard drag active. Use arrow keys to choose a drop target, Space or Enter to drop, and Escape to cancel.'
+        ? this._t('hintKeyboard')
         : dragHandleMode === 'item'
-          ? 'Drag from anywhere on an item, or press Space on a focused item to start keyboard reordering.'
+          ? this._t('hintItem')
           : usesCustomHandleSelector
-            ? 'Use your custom drag handle element, or press Space on a focused item to start keyboard reordering.'
-            : 'Use the handle to drag, or press Space on a focused item to start keyboard reordering.';
+            ? this._t('hintCustom')
+            : this._t('hintHandle');
+    const hideToolbar = this.hasAttribute('hide-toolbar');
+    const nestHint = allowNesting && !dragLocked && !this._dragState?.keyboard
+      ? this._t(this._nestTrigger() === 'area' ? 'hintNestArea' : this._nestTrigger() === 'modifier' ? 'hintNestModifier' : 'hintNestGutter')
+      : '';
 
     const html = `
       <style>${style}</style>
@@ -1628,11 +1949,11 @@ export class UISortable extends ElementBase {
         data-drop-indicator-visibility="${dropIndicatorVisibility}"
         data-dropzone-style="${dropzoneStyle}"
       >
-        <div class="toolbar" part="toolbar">
-          <div class="helper" id="ui-sortable-helper">${escapeHtml(helper)}</div>
+        <div class="toolbar" part="toolbar"${hideToolbar ? ' data-hidden="true"' : ''}>
+          <div class="helper" id="ui-sortable-helper">${escapeHtml(nestHint ? `${helper} ${nestHint}` : helper)}</div>
           <div class="helper selection-summary" data-count="${selectionCount}">
             <span class="selection-pill" part="selection-count">${selectionCount}</span>
-            <span class="selection-text">${selectionCount === 1 ? 'item selected' : 'items selected'}</span>
+            <span class="selection-text">${escapeHtml(selectionCount === 1 ? this._t('selectedOne') : this._t('selectedMany'))}</span>
           </div>
         </div>
         <div class="lists" part="lists">
@@ -1641,12 +1962,16 @@ export class UISortable extends ElementBase {
             const content = records.length
               ? this._renderListTree(renderItems, list, focusedId, draggingIds, allowNesting, placeholderIds, showSelectionBadge)
               : '';
+            const total = this._items.filter((item) => item.listId === list.id).length;
+            const full = list.maxItems !== undefined && total >= list.maxItems;
             const helperText = list.disabled
-              ? 'This list is read-only.'
+              ? this._t('listReadOnly')
+              : full
+                ? this._t('listFull', { max: list.maxItems ?? 0 })
               : list.cloneOnDrag
-                ? 'Dragging from this list creates a copy.'
+                ? this._t('listClone')
                 : list.accepts?.length
-                  ? `Accepts drops from: ${list.accepts.join(', ')}`
+                  ? this._t('listAccepts', { lists: list.accepts.join(', ') })
                   : '';
             return `
               <section
@@ -1655,6 +1980,8 @@ export class UISortable extends ElementBase {
                 data-list-id="${escapeHtml(list.id)}"
                 data-orientation="${list.orientation}"
                 data-disabled="${list.disabled}"
+                data-full="${full}"
+                ${this._renderListHeaderFn || this._renderEmptyStateFn ? `data-rev="${dataRevision(list.data)}"` : ''}
                 aria-label="${escapeHtml(list.label)}"
               >
                 <header class="list-header">
@@ -1662,19 +1989,19 @@ export class UISortable extends ElementBase {
                   <div class="list-default-header">
                     <div class="list-topline">
                       <div class="list-label">${escapeHtml(list.label)}</div>
-                      <span class="list-count">${records.length}</span>
+                      <span class="list-count">${list.maxItems !== undefined ? `${total}/${list.maxItems}` : records.length}</span>
                     </div>
                     ${list.description ? `<div class="list-description">${escapeHtml(list.description)}</div>` : ''}
                     ${helperText ? `<div class="list-helper">${escapeHtml(helperText)}</div>` : ''}
                   </div>
                 </header>
                 <div class="items" part="items" role="${records.length ? 'listbox' : 'group'}" ${records.length ? 'aria-multiselectable="true"' : ''} aria-label="${escapeHtml(list.label)}" aria-describedby="ui-sortable-helper">
-                  ${content || `<div class="list-custom-empty" part="list-custom-empty" data-list-empty-target="${escapeHtml(list.id)}"></div><div class="empty">${escapeHtml(list.emptyLabel)}</div>${this._renderDropzone({
+                  ${content || `<div class="list-custom-empty" part="list-custom-empty" data-list-empty-target="${escapeHtml(list.id)}"></div><div class="empty">${escapeHtml(list.emptyLabel || this._t('emptyList'))}</div>${this._renderDropzone({
                     listId: list.id,
                     parentId: null,
                     beforeId: null,
                     mode: 'before',
-                  }, 'Drop here')}`}
+                  }, this._t('dropHere'))}`}
                 </div>
               </section>
             `;
@@ -1685,8 +2012,12 @@ export class UISortable extends ElementBase {
     `;
 
     const scroll = this._captureScroll();
+    // A render replaces the cards, which drops the focus that was on one. Put it back, but only if it was ours:
+    // a board that re-renders while someone types in a search box next to it must not take their focus.
+    this._focusWasInside = !!this.root.activeElement;
     this.setContent(html);
     this._restoreScroll(scroll);
+    this._fillCustomTargets();
     queueMicrotask(() => {
       this._restorePendingFocus();
       this._applyCurrentDropTargetVisualState();
@@ -1720,6 +2051,12 @@ export class UISortable extends ElementBase {
     const selectionAttr = this.getAttribute('selection');
     if (selectionAttr !== this._lastSelectionAttr) {
       this._syncSelectionFromAttribute(selectionAttr);
+    }
+
+    const labelsAttr = this.getAttribute('labels');
+    if (labelsAttr !== this._lastLabelsAttr) {
+      this._lastLabelsAttr = labelsAttr;
+      this._labels = parseLabels(labelsAttr);
     }
 
     if (!this._focusedId) {
@@ -1758,7 +2095,8 @@ export class UISortable extends ElementBase {
   }
 
   private _restorePendingFocus(): void {
-    const id = this._pendingFocusId || this._focusedId;
+    const id = this._pendingFocusId || (this._focusWasInside ? this._focusedId : null);
+    this._focusWasInside = false;
     if (!id) return;
     const escapeSelector = typeof CSS !== 'undefined' && typeof CSS.escape === 'function'
       ? CSS.escape(id)
@@ -1841,6 +2179,11 @@ export class UISortable extends ElementBase {
     return parseDragHandleMode(this.getAttribute('drag-handle-mode'));
   }
 
+  private _nestTrigger(): UISortableNestTrigger {
+    const value = this.getAttribute('nest-trigger');
+    return value === 'modifier' || value === 'area' ? value : 'gutter';
+  }
+
   private _dropzoneStyle(): UISortableDropzoneStyle {
     return this.getAttribute('dropzone-style') === 'container' ? 'container' : 'indicator';
   }
@@ -1900,8 +2243,90 @@ export class UISortable extends ElementBase {
     return true;
   }
 
+  // Fills the places the markup leaves for custom content (the inside of a card, a list header, an empty state)
+  // from the render functions. Fresh markup has them empty; `itemIds` redraws just those cards.
+  private _fillCustomTargets(only?: { itemIds: Set<string> }): void {
+    if (!this._renderItemFn && !this._renderListHeaderFn && !this._renderEmptyStateFn) return;
+    const dragLocked = this._isDragLocked();
+    const listById = new Map(this._lists.map((list) => [list.id, list]));
+    const apply = (target: HTMLElement, make: () => UISortableRenderResult) => {
+      let result: UISortableRenderResult;
+      try {
+        result = make();
+      } catch (error) {
+        console.error('ui-sortable: a render function threw; the built-in markup is shown.', error);
+        return;
+      }
+      if (typeof result === 'string') target.innerHTML = result;
+      else if (result && typeof (result as Node).nodeType === 'number') target.replaceChildren(result as Node);
+    };
+
+    const renderItem = this._renderItemFn;
+    if (renderItem) {
+      const itemById = new Map(this._items.map((item) => [item.id, item]));
+      const selected = new Set(this._selection);
+      const handleSelector = this.getAttribute('drag-handle-selector')?.trim() || '';
+      this.root.querySelectorAll<HTMLElement>('.item-custom-content[data-item-content-target]').forEach((target) => {
+        const id = target.getAttribute('data-item-content-target') || '';
+        if (only ? !only.itemIds.has(id) : target.hasChildNodes()) return;
+        const item = itemById.get(id);
+        if (!item) return;
+        if (only) target.replaceChildren();
+        const list = listById.get(item.listId);
+        apply(target, () => renderItem(publicItem(item), {
+          selected: selected.has(id),
+          disabled: item.disabled,
+          dragDisabled: item.dragDisabled,
+          cloneOnDrag: item.cloneOnDrag || !!list?.cloneOnDrag,
+          list: list ? publicList(list) : undefined,
+        }));
+        if (handleSelector) this._markCustomHandles(target, id, handleSelector);
+      });
+    }
+
+    if (only) return;
+    const renderHeader = this._renderListHeaderFn;
+    if (renderHeader) {
+      this.root.querySelectorAll<HTMLElement>('.list-custom-header[data-list-header-target]').forEach((target) => {
+        if (target.hasChildNodes()) return;
+        const list = listById.get(target.getAttribute('data-list-header-target') || '');
+        if (!list) return;
+        const itemCount = this._items.filter((item) => item.listId === list.id).length;
+        apply(target, () => renderHeader(publicList(list), { itemCount, dragLocked }));
+      });
+    }
+
+    const renderEmpty = this._renderEmptyStateFn;
+    if (renderEmpty) {
+      this.root.querySelectorAll<HTMLElement>('.list-custom-empty[data-list-empty-target]').forEach((target) => {
+        if (target.hasChildNodes()) return;
+        const list = listById.get(target.getAttribute('data-list-empty-target') || '');
+        if (!list) return;
+        const itemCount = this._items.filter((item) => item.listId === list.id).length;
+        apply(target, () => renderEmpty(publicList(list), { itemCount, dragLocked, filterQuery: this.filterQuery }));
+      });
+    }
+  }
+
+  // The parts of a custom card that match `drag-handle-selector` start a drag, the way the built-in grip does.
+  private _markCustomHandles(card: HTMLElement, id: string, selector: string): void {
+    let handles: NodeListOf<HTMLElement>;
+    try {
+      handles = card.querySelectorAll<HTMLElement>(selector);
+    } catch {
+      return;
+    }
+    handles.forEach((handle) => {
+      handle.setAttribute('data-sortable-custom-handle', '');
+      handle.setAttribute('data-drag-trigger', 'custom');
+      handle.setAttribute('data-id', id);
+      handle.setAttribute('draggable', 'true');
+      if (!handle.hasAttribute('tabindex')) handle.setAttribute('tabindex', '-1');
+    });
+  }
+
   private _hasCustomItemRendering(): boolean {
-    return this.hasAttribute('custom-item-rendering');
+    return this.hasAttribute('custom-item-rendering') || !!this._renderItemFn;
   }
 
   private _syncSelectionFromAttribute(selectionAttr: string | null): void {
@@ -1916,10 +2341,12 @@ export class UISortable extends ElementBase {
   private _syncSelectionVisualState(): void {
     const selectedIds = new Set(this._selection);
     const showSelectionBadge = this.getAttribute('show-selection-badge') !== 'false';
+    const reselected = new Set<string>();
     this.root.querySelectorAll<HTMLElement>('.item[data-id]').forEach((itemEl) => {
       const id = itemEl.getAttribute('data-id');
       if (!id) return;
       const selected = selectedIds.has(id);
+      if (itemEl.getAttribute('data-selected') === 'true' !== selected) reselected.add(id);
       const focused = this._focusedId === id;
       itemEl.setAttribute('data-selected', selected ? 'true' : 'false');
       itemEl.setAttribute('aria-selected', selected ? 'true' : 'false');
@@ -1929,9 +2356,12 @@ export class UISortable extends ElementBase {
       if (selectionBadge) {
         const visible = selected && showSelectionBadge;
         selectionBadge.hidden = !visible;
-        selectionBadge.textContent = visible ? 'Selected' : '';
+        selectionBadge.textContent = visible ? this._t('badgeSelected') : '';
       }
     });
+
+    // A card drawn by a render function is told whether it is selected, so it is drawn again when that changes.
+    if (reselected.size && this._renderItemFn) this._fillCustomTargets({ itemIds: reselected });
 
     this.root.querySelector<HTMLElement>('.selection-summary')?.setAttribute('data-count', String(this._selection.length));
     const selectionPill = this.root.querySelector<HTMLElement>('.selection-pill');
@@ -1939,7 +2369,7 @@ export class UISortable extends ElementBase {
 
     const selectionText = this.root.querySelector<HTMLElement>('.selection-text');
     if (selectionText) {
-      selectionText.textContent = this._selection.length === 1 ? 'item selected' : 'items selected';
+      selectionText.textContent = this._selection.length === 1 ? this._t('selectedOne') : this._t('selectedMany');
     }
   }
 
@@ -2012,13 +2442,15 @@ export class UISortable extends ElementBase {
     const item = this._items.find((entry) => entry.id === firstMovedId);
     if (!item) return null;
     return {
-      kicker: this._dragState.clone ? 'Copy preview' : 'Drop preview',
+      kicker: this._t(this._dragState.clone ? 'copyPreview' : 'dropPreview'),
       title: this._dragState.clone ? `${item.label} copy` : item.label,
-      description: this._dragState.clone
-        ? 'Release to add a copy here.'
-        : this._dragState.movedRootIds.length > 1
-          ? 'Release to place this selection here.'
-        : 'Release to place this item here.',
+      description: this._t(
+        this._dragState.clone
+          ? 'releaseCopy'
+          : this._dragState.movedRootIds.length > 1
+            ? 'releaseMoveMany'
+            : 'releaseMove'
+      ),
     };
   }
 
@@ -2156,6 +2588,19 @@ export class UISortable extends ElementBase {
       startedAt: now,
       announceLabel: options?.announceLabel,
     };
+    this._schedulePendingFlush(target ? DROP_TARGET_SETTLE_MS : DROP_TARGET_CLEAR_SETTLE_MS);
+  }
+
+  // The settle delay is judged on the next pointer event, so a pointer that has stopped (over a place that
+  // refuses the drop, say) would leave the old highlight on. This applies the change once the delay is up.
+  private _schedulePendingFlush(delay: number): void {
+    if (this._pendingTimer) clearTimeout(this._pendingTimer);
+    this._pendingTimer = setTimeout(() => {
+      this._pendingTimer = null;
+      const pending = this._pendingDropTarget;
+      if (!pending || !this._dragState || this._dragState.committed || this._dragState.keyboard) return;
+      this._setDropTarget(pending.target, pending.announceLabel ? { announceLabel: pending.announceLabel } : undefined);
+    }, delay + 8);
   }
 
   private _releaseDropTarget(clientX: number, clientY: number): DropTarget | null {
@@ -2319,7 +2764,7 @@ export class UISortable extends ElementBase {
           parentId,
           beforeId: id,
           mode: 'before',
-        }, 'Drop here');
+        }, this._t('dropHere'));
         html += descendants;
       });
       html += this._renderDropzone({
@@ -2327,7 +2772,7 @@ export class UISortable extends ElementBase {
         parentId,
         beforeId: null,
         mode: 'before',
-      }, 'Drop here');
+      }, this._t('dropHere'));
       return html;
     };
 
@@ -2352,12 +2797,14 @@ export class UISortable extends ElementBase {
     const disabled = item.disabled;
     const handleDisabled = disabled || item.dragDisabled || this._isDragLocked();
     const dropInsideActive = this._dragState?.dropTarget?.mode === 'inside' && this._dragState.dropTarget.parentId === item.id;
-    const placeholderKicker = this._dragState?.clone ? 'Copy preview' : 'Drop preview';
-    const placeholderDescription = this._dragState?.clone
-      ? 'Release to add a copy here.'
-      : this._dragState && this._dragState.movedRootIds.length > 1
-        ? 'Release to place this selection here.'
-        : 'Release to place this item here.';
+    const placeholderKicker = this._t(this._dragState?.clone ? 'copyPreview' : 'dropPreview');
+    const placeholderDescription = this._t(
+      this._dragState?.clone
+        ? 'releaseCopy'
+        : this._dragState && this._dragState.movedRootIds.length > 1
+          ? 'releaseMoveMany'
+          : 'releaseMove'
+    );
     const dragHandleMode = this._dragHandleMode();
     const usesCustomHandleSelector = this._usesCustomHandleSelector();
     const effectiveDragHandleMode = usesCustomHandleSelector ? 'custom' : dragHandleMode;
@@ -2376,6 +2823,7 @@ export class UISortable extends ElementBase {
           data-dragging="${dragging}"
           data-disabled="${disabled}"
           data-drop-inside-active="${dropInsideActive ? 'true' : 'false'}"
+          ${this._renderItemFn && !placeholder ? `data-rev="${dataRevision(item.data)}"` : ''}
           role="${placeholder ? 'presentation' : 'option'}"
           aria-selected="${placeholder ? 'false' : selected}"
           aria-disabled="${disabled}"
@@ -2421,10 +2869,10 @@ export class UISortable extends ElementBase {
                   <div class="item-title">${escapeHtml(item.label)}</div>
                   ${item.description ? `<div class="item-description">${escapeHtml(item.description)}</div>` : ''}
                   <div class="item-meta">
-                    <span class="item-badge selection-badge" data-selection-badge="true" ${selected && showSelectionBadge ? '' : 'hidden'}>${selected && showSelectionBadge ? 'Selected' : ''}</span>
-                    ${item.cloneOnDrag ? '<span class="item-badge">Clone on drag</span>' : ''}
-                    ${item.dragDisabled ? '<span class="item-badge">Pinned</span>' : ''}
-                    ${allowNesting ? '<span class="item-badge drop-badge">Nest here</span>' : ''}
+                    <span class="item-badge selection-badge" data-selection-badge="true" ${selected && showSelectionBadge ? '' : 'hidden'}>${selected && showSelectionBadge ? escapeHtml(this._t('badgeSelected')) : ''}</span>
+                    ${item.cloneOnDrag ? `<span class="item-badge">${escapeHtml(this._t('badgeClone'))}</span>` : ''}
+                    ${item.dragDisabled ? `<span class="item-badge">${escapeHtml(this._t('badgePinned'))}</span>` : ''}
+                    ${allowNesting ? `<span class="item-badge drop-badge">${escapeHtml(this._t('nestHere'))}</span>` : ''}
                   </div>
                 </div>
               </div>
@@ -2437,7 +2885,7 @@ export class UISortable extends ElementBase {
             parentId: item.id,
             beforeId: null,
             mode: 'inside',
-          }, 'Nest here')
+          }, this._t('nestHere'))
           : ''}
         ${hasVisibleChildren ? `<div class="children">${childrenHtml}</div>` : ''}
       </div>
@@ -2554,7 +3002,7 @@ export class UISortable extends ElementBase {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'a') {
         event.preventDefault();
         this._setSelection(visibleIds, 'keyboard');
-        this._announce(`${visibleIds.length} items selected.`);
+        this._announce(this._t('announceSelectedMany', { count: visibleIds.length }));
         return;
       }
       if (event.key === 'Enter') {
@@ -2565,7 +3013,7 @@ export class UISortable extends ElementBase {
       if (event.key === ' ' || event.code === 'Space') {
         event.preventDefault();
         if (this._isDragLocked()) {
-          this._announce('Dragging is disabled right now.');
+          this._announce(this._t('announceDragDisabled'));
           return;
         }
         const movedRootIds = this._selectedRootIds(currentId);
@@ -2580,8 +3028,10 @@ export class UISortable extends ElementBase {
           dropTarget: this._initialKeyboardDropTarget(currentId),
           committed: false,
         };
-        const label = movedRootIds.length === 1 ? `Lifted ${currentItem?.label || 'item'}.` : `Lifted ${movedRootIds.length} items.`;
-        this._announce(`${label} Use arrow keys to choose a destination.`);
+        const label = movedRootIds.length === 1
+          ? this._t('announceLifted', { label: currentItem?.label || 'item' })
+          : this._t('announceLiftedMany', { count: movedRootIds.length });
+        this._announce(`${label} ${this._t('announceLiftedHelp')}`);
         this.requestRender();
         return;
       }
@@ -2639,7 +3089,7 @@ export class UISortable extends ElementBase {
 
     if (this._isDragLocked()) {
       event.preventDefault();
-      this._announce('Dragging is disabled right now.');
+      this._announce(this._t('announceDragDisabled'));
       return;
     }
 
@@ -2669,16 +3119,13 @@ export class UISortable extends ElementBase {
       this._applyDragImage(event.dataTransfer, selectedIds.length);
     }
 
-    this._announce(
-      clone
-        ? `Dragging ${selectedIds.length === 1 ? item.label : `${selectedIds.length} items`} as a copy.`
-        : `Dragging ${selectedIds.length === 1 ? item.label : `${selectedIds.length} items`}.`
-    );
+    this._announceDragging(item.label, selectedIds.length, clone);
     this.requestRender();
   }
 
   private _onDragOver(event: DragEvent): void {
     if (!this._dragState || this._dragState.keyboard) return;
+    this._nestModifier = !!event.altKey;
     const target = this._dropTargetFromEvent(event);
     if (!target || !this._canDrop(target, this._dragState.movedRootIds)) {
       this._queueDropTarget(null, event.timeStamp);
@@ -2691,6 +3138,7 @@ export class UISortable extends ElementBase {
 
   private _onDrop(event: DragEvent): void {
     if (!this._dragState || this._dragState.keyboard) return;
+    this._nestModifier = !!event.altKey;
     const target = this._dropTargetFromEvent(event);
     if (!target || !this._canDrop(target, this._dragState.movedRootIds)) return;
     event.preventDefault();
@@ -2698,10 +3146,36 @@ export class UISortable extends ElementBase {
   }
 
   private _onDocumentKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Alt') {
+      this._setNestModifier(true);
+      return;
+    }
     if (event.key !== 'Escape') return;
     if (!this._dragState || this._dragState.keyboard) return;
     event.preventDefault();
     this._cancelDrag(true);
+  }
+
+  private _onDocumentKeyUp(event: KeyboardEvent): void {
+    if (event.key === 'Alt') this._setNestModifier(false);
+  }
+
+  // Pressing or releasing Alt changes where a card would land without the pointer moving, so the target is
+  // worked out again straight away.
+  private _setNestModifier(held: boolean): void {
+    if (this._nestModifier === held) return;
+    this._nestModifier = held;
+    if (!this._dragState || this._dragState.keyboard || this._dragState.committed || !this._lastPointer) return;
+    const target = this._dropTargetFromPoint(this._lastPointer.x, this._lastPointer.y);
+    const usable = target && this._canDrop(target, this._dragState.movedRootIds) ? target : null;
+    this._noteRefusal(!!target && !usable);
+    this._setDropTarget(usable);
+  }
+
+  // Over a place that exists but will not take the drop (a full list, a read-only one, canDrop said no) the
+  // lifted card says so.
+  private _noteRefusal(refused: boolean): void {
+    if (this._dragImage?.toggleAttribute) this._dragImage.toggleAttribute('data-refused', refused);
   }
 
   private _onDragEnd(): void {
@@ -2713,7 +3187,7 @@ export class UISortable extends ElementBase {
       this._clearPointerDragPreview();
       this._dragState = null;
       this._removeDragImage();
-      this._announce('Drag cancelled.');
+      this._announce(this._t('announceCancelled'));
       this.requestRender();
     }
   }
@@ -2764,22 +3238,34 @@ export class UISortable extends ElementBase {
     // right third and "after" the left third; measuring from the left mirrored both.
     const ratio = isHorizontal && this._isRtl() ? 1 - fromStart : fromStart;
     const allowNesting = this.getAttribute('allow-nesting') !== 'false' && !item.disabled;
+    const trigger = this._nestTrigger();
 
-    if (ratio <= 0.34) {
-      return {
-        listId: item.listId,
-        parentId: item.parentId,
-        beforeId: item.id,
-        mode: 'before',
-      };
-    }
+    // 'area' keeps the old rule: the middle of a card nests. Otherwise a plain drag always reorders (the
+    // top half is "before", the bottom half "after") and nesting has to be asked for.
+    const nest = allowNesting && (
+      trigger === 'area'
+        ? ratio > 0.34 && ratio <= 0.74
+        : ratio >= 0.25 && ratio <= 0.75 && (
+          this._nestModifier || (trigger === 'gutter' && this._inNestGutter(rect, clientX, clientY, isHorizontal))
+        )
+    );
+    const before = trigger === 'area' ? ratio <= 0.34 : ratio < 0.5;
 
-    if (allowNesting && ratio >= 0.34 && ratio <= 0.74) {
+    if (nest) {
       return {
         listId: item.listId,
         parentId: item.id,
         beforeId: null,
         mode: 'inside',
+      };
+    }
+
+    if (before) {
+      return {
+        listId: item.listId,
+        parentId: item.parentId,
+        beforeId: item.id,
+        mode: 'before',
       };
     }
 
@@ -2793,6 +3279,18 @@ export class UISortable extends ElementBase {
       beforeId: nextSiblingId,
       mode: 'before',
     };
+  }
+
+  // The far side of a card (its right in a left-to-right list, the bottom of a card in a horizontal lane):
+  // somewhere a pointer only goes on purpose, and the only way to nest without a keyboard.
+  private _inNestGutter(rect: DOMRect, clientX: number, clientY: number, isHorizontal: boolean): boolean {
+    if (isHorizontal) {
+      const size = rect.bottom - rect.top;
+      return clientY >= rect.bottom - Math.max(24, Math.min(70, size * 0.3));
+    }
+    const size = rect.right - rect.left;
+    const width = Math.max(48, Math.min(140, size * 0.3));
+    return this._isRtl() ? clientX <= rect.left + width : clientX >= rect.right - width;
   }
 
   private _dropTargetFromPoint(clientX: number, clientY: number): DropTarget | null {
@@ -2823,11 +3321,7 @@ export class UISortable extends ElementBase {
       { x: this._pointerGesture.startX, y: this._pointerGesture.startY }
     );
     this._setDraggingVisualState(this._draggingIds(), true);
-    this._announce(
-      this._dragState.clone
-        ? `Dragging ${this._dragState.movedRootIds.length === 1 ? item.label : `${this._dragState.movedRootIds.length} items`} as a copy.`
-        : `Dragging ${this._dragState.movedRootIds.length === 1 ? item.label : `${this._dragState.movedRootIds.length} items`}.`
-    );
+    this._announceDragging(item.label, this._dragState.movedRootIds.length, this._dragState.clone);
   }
 
   private _onPointerDown(event: PointerEvent): void {
@@ -2836,7 +3330,7 @@ export class UISortable extends ElementBase {
     if (!activator || !id) return;
     if (this._isDragLocked()) {
       event.preventDefault();
-      this._announce('Dragging is disabled right now.');
+      this._announce(this._t('announceDragDisabled'));
       return;
     }
 
@@ -2846,13 +3340,16 @@ export class UISortable extends ElementBase {
       return;
     }
 
-    event.preventDefault();
+    // A finger on the card itself must still be able to scroll the page, so it is not claimed until held.
+    const hold = event.pointerType === 'touch' && activator.kind !== 'handle' && this._touchHoldDelay() > 0;
+    if (!hold) event.preventDefault();
     try {
       activator.element.setPointerCapture?.(event.pointerId);
     } catch {
       // Synthetic or browser-managed pointer streams may not always expose capture.
     }
 
+    this._clearHoldTimer();
     const selectedIds = this._selection.includes(id) ? this._selectedRootIds(id) : [id];
     this._pointerGesture = {
       pointerId: event.pointerId,
@@ -2864,11 +3361,63 @@ export class UISortable extends ElementBase {
       startY: event.clientY,
       moved: false,
       captureTarget: activator.element,
+      hold,
+      holdTimer: null,
     };
+
+    if (hold) {
+      const gesture = this._pointerGesture;
+      gesture.holdTimer = setTimeout(() => {
+        gesture.holdTimer = null;
+        if (this._pointerGesture !== gesture || gesture.moved) return;
+        gesture.hold = false;
+        gesture.moved = true;
+        this._beginPointerDrag(gesture.startX, gesture.startY);
+        this._lastPointer = { x: gesture.startX, y: gesture.startY };
+        // A short buzz says "lifted" where there is no hover to say it.
+        try {
+          (this.ownerDocument?.defaultView?.navigator as Navigator | undefined)?.vibrate?.(8);
+        } catch {
+          // Haptics are optional.
+        }
+      }, this._touchHoldDelay());
+    }
+  }
+
+  private _touchHoldDelay(): number {
+    const raw = this.getAttribute('touch-hold-delay');
+    if (raw === null || raw.trim() === '') return TOUCH_HOLD_MS;
+    const value = Number(raw);
+    return Number.isFinite(value) ? Math.min(2000, Math.max(0, value)) : TOUCH_HOLD_MS;
+  }
+
+  private _clearHoldTimer(): void {
+    if (this._pointerGesture?.holdTimer) clearTimeout(this._pointerGesture.holdTimer);
+    if (this._pointerGesture) this._pointerGesture.holdTimer = null;
+  }
+
+  // While a card is lifted (or about to be) the finger must drag it, not scroll the page.
+  private _onTouchMove(event: TouchEvent): void {
+    const lifted = !!this._dragState && !this._dragState.keyboard;
+    if (lifted && event.cancelable) event.preventDefault();
+  }
+
+  // A long press raises the system's context menu (copy, save image): not while a card is held.
+  private _onContextMenu(event: Event): void {
+    if (this._pointerGesture?.pointerType === 'touch' || (this._dragState && !this._dragState.keyboard)) event.preventDefault();
   }
 
   private _onPointerMove(event: PointerEvent): void {
     if (!this._pointerGesture || event.pointerId !== this._pointerGesture.pointerId) return;
+    if (this._pointerGesture.hold) {
+      // Not held long enough yet: a finger that travels now was scrolling, not dragging.
+      const travelled = Math.hypot(event.clientX - this._pointerGesture.startX, event.clientY - this._pointerGesture.startY);
+      if (travelled > TOUCH_HOLD_SLOP_PX) {
+        this._clearHoldTimer();
+        this._pointerGesture = null;
+      }
+      return;
+    }
     event.preventDefault();
     if (!this._pointerGesture.moved) {
       const distance = Math.hypot(event.clientX - this._pointerGesture.startX, event.clientY - this._pointerGesture.startY);
@@ -2878,14 +3427,18 @@ export class UISortable extends ElementBase {
     }
 
     if (!this._dragState || this._dragState.keyboard) return;
+    this._nestModifier = !!event.altKey;
+    this._lastPointer = { x: event.clientX, y: event.clientY };
     this._movePointerPreview(event.clientX, event.clientY);
     this._updateAutoScroll(event.clientX, event.clientY);
     if (!this._dragState.committed) {
       const target = this._dropTargetFromPoint(event.clientX, event.clientY);
       if (!target || !this._canDrop(target, this._dragState.movedRootIds)) {
+        this._noteRefusal(!!target);
         this._queueDropTarget(null, event.timeStamp);
         return;
       }
+      this._noteRefusal(false);
       this._queueDropTarget(target, event.timeStamp);
     }
   }
@@ -2954,6 +3507,7 @@ export class UISortable extends ElementBase {
     if (!this._dragState.committed) {
       const target = this._dropTargetFromPoint(point.x, point.y);
       const usable = target && this._canDrop(target, this._dragState.movedRootIds) ? target : null;
+      this._noteRefusal(!!target && !usable);
       this._queueDropTarget(usable, performance.now());
     }
     this._autoScrollFrame = requestAnimationFrame(this._autoScrollTick);
@@ -2969,9 +3523,11 @@ export class UISortable extends ElementBase {
     }
 
     const gesture = this._pointerGesture;
+    this._clearHoldTimer();
     this._pointerGesture = null;
     this._stopAutoScroll();
     if (!this._dragState || this._dragState.keyboard) return;
+    this._nestModifier = !!event.altKey;
     const releaseTarget = gesture.moved ? this._releaseDropTarget(event.clientX, event.clientY) : null;
     if (gesture.moved && releaseTarget) {
       this._commitMove(releaseTarget, this._dragState.movedRootIds, this._dragState.clone, 'pointer');
@@ -2991,6 +3547,7 @@ export class UISortable extends ElementBase {
 
   private _onPointerCancel(event: PointerEvent): void {
     if (!this._pointerGesture || event.pointerId !== this._pointerGesture.pointerId) return;
+    this._clearHoldTimer();
     this._pointerGesture = null;
     this._stopAutoScroll();
     if (!this._dragState) return;
@@ -3036,7 +3593,7 @@ export class UISortable extends ElementBase {
       ? this._selection.filter((entry) => entry !== id)
       : [...this._selection, id];
     this._setSelection(next, 'pointer');
-    this._announce(`${next.length} items selected.`);
+    this._announce(this._t('announceSelectedMany', { count: next.length }));
   }
 
   private _selectRangeTo(id: string): void {
@@ -3050,7 +3607,7 @@ export class UISortable extends ElementBase {
     }
     const [from, to] = startIndex <= endIndex ? [startIndex, endIndex] : [endIndex, startIndex];
     this._setSelection(visibleIds.slice(from, to + 1), 'pointer');
-    this._announce(`${to - from + 1} items selected.`);
+    this._announce(this._t('announceSelectedMany', { count: to - from + 1 }));
   }
 
   private _visibleItemIds(): string[] {
@@ -3107,7 +3664,7 @@ export class UISortable extends ElementBase {
     return false;
   }
 
-  private _canDrop(target: DropTarget, movedRootIds: string[]): boolean {
+  private _canDrop(target: DropTarget, movedRootIds: string[], clone = this._dragState?.clone ?? false): boolean {
     if (this._isDragLocked()) return false;
     const targetList = this._lists.find((list) => list.id === target.listId);
     if (!targetList || targetList.disabled) return false;
@@ -3132,6 +3689,37 @@ export class UISortable extends ElementBase {
 
     if (target.mode === 'inside' && this.getAttribute('allow-nesting') === 'false') return false;
 
+    if (targetList.maxItems !== undefined) {
+      // What the list would hold afterwards: its items now, plus what comes in from elsewhere (a copy brings all
+      // of its items). A reorder inside the list adds nothing, so a list that is already over the limit can still
+      // be reordered and emptied.
+      const inList = this._items.filter((item) => item.listId === target.listId);
+      const incoming = clone
+        ? movingSet.size
+        : Array.from(movingSet).filter((id) => itemMap.get(id)?.listId !== target.listId).length;
+      if (incoming > 0 && inList.length + incoming > targetList.maxItems) return false;
+    }
+
+    const callback = this._canDropCallback;
+    if (callback) {
+      try {
+        const allowed = callback({
+          items: movedRootIds.map((id) => itemMap.get(id)).filter((item): item is NormalizedItem => !!item).map(publicItem),
+          movedIds: [...movedRootIds],
+          targetListId: target.listId,
+          parentId: target.parentId,
+          beforeId: target.beforeId,
+          mode: target.mode,
+          clone,
+        });
+        if (!allowed) return false;
+      } catch (error) {
+        // A predicate that throws cannot be trusted to have said yes.
+        console.error('ui-sortable: canDrop threw; the drop is refused.', error);
+        return false;
+      }
+    }
+
     return true;
   }
 
@@ -3140,8 +3728,8 @@ export class UISortable extends ElementBase {
     movedRootIds: string[],
     clone: boolean,
     source: UISortableChangeSource
-  ): void {
-    if (!this._canDrop(target, movedRootIds)) return;
+  ): boolean {
+    if (!this._canDrop(target, movedRootIds, clone)) return false;
 
     const itemMap = buildItemMap(this._items);
     const groups = buildChildrenMap(this._items);
@@ -3231,22 +3819,6 @@ export class UISortable extends ElementBase {
       ordered.push(item);
     });
 
-    if (this._dragState) this._dragState.committed = true;
-    this._items = ordered.map(cloneItem);
-    this._clearPointerDragPreview();
-    this._dragState = null;
-    this._removeDragImage();
-
-    const nextSelection = [...rootIdsForInsert];
-    const previousSelection = [...this._selection];
-    this._selection = nextSelection;
-    this._focusedId = nextSelection[0] || null;
-    this._pendingFocusId = this._focusedId;
-    this._syncAttributesFromState();
-
-    const snapshot = getPersistenceSnapshot(this._items);
-    this._persistSnapshot(snapshot);
-
     const originalRoots = movedRootIds
       .map((id) => itemMap.get(id))
       .filter((item): item is NormalizedItem => !!item);
@@ -3257,6 +3829,49 @@ export class UISortable extends ElementBase {
         : originalRoots.some((item) => item.listId !== target.listId)
           ? 'transfer'
           : 'reorder';
+
+    const nextSelection = [...rootIdsForInsert];
+    const previousSelection = [...this._selection];
+
+    // The last word before anything changes: a listener can cancel the move.
+    const proposed = ordered.map(cloneItem);
+    const accepted = this.dispatchEvent(new CustomEvent<UISortableBeforeChangeDetail>('before-change', {
+      detail: {
+        items: proposed.map(publicItem),
+        lists: this.lists,
+        selection: [...nextSelection],
+        previousSelection: [...previousSelection],
+        movedIds: [...rootIdsForInsert],
+        source,
+        operation,
+        persistence: getPersistenceSnapshot(proposed),
+        target: { listId: target.listId, parentId: target.parentId, beforeId: target.beforeId, mode: target.mode },
+        clone,
+      },
+      bubbles: true,
+      composed: true,
+      cancelable: true,
+    }));
+    if (!accepted) {
+      // Put the card back where it came from and say so.
+      if (this._dragState) this._cancelDrag(false);
+      this._announce(this._t('announceRejected'));
+      return false;
+    }
+
+    if (this._dragState) this._dragState.committed = true;
+    this._items = ordered.map(cloneItem);
+    this._clearPointerDragPreview();
+    this._dragState = null;
+    this._removeDragImage();
+
+    this._selection = nextSelection;
+    this._focusedId = nextSelection[0] || null;
+    this._pendingFocusId = this._focusedId;
+    this._syncAttributesFromState();
+
+    const snapshot = getPersistenceSnapshot(this._items);
+    this._persistSnapshot(snapshot);
 
     const detail: UISortableChangeDetail = {
       items: this.items,
@@ -3282,6 +3897,7 @@ export class UISortable extends ElementBase {
     }));
     this._announce(this._messageForMove(operation, rootIdsForInsert.length, target));
     this.requestRender();
+    return true;
   }
 
   private _syncAttributesFromState(): void {
@@ -3313,16 +3929,23 @@ export class UISortable extends ElementBase {
       ...item,
       id: clonedId,
       label: orderedMovingIds[0] === item.id ? `${item.label} copy` : item.label,
+      data: copyData(item.data),
     };
   }
 
   private _messageForMove(operation: UISortableOperation, count: number, target: DropTarget): string {
     const list = this._lists.find((entry) => entry.id === target.listId);
     const destination = list?.label || target.listId;
-    if (operation === 'clone') return `${count === 1 ? 'Item copied' : `${count} items copied`} into ${destination}.`;
-    if (operation === 'nest') return `${count === 1 ? 'Item nested' : `${count} items nested`} in ${destination}.`;
-    if (operation === 'transfer') return `${count === 1 ? 'Item moved' : `${count} items moved`} to ${destination}.`;
-    return `${count === 1 ? 'Item reordered' : `${count} items reordered`} in ${destination}.`;
+    const vars = { count, list: destination };
+    if (operation === 'clone') return this._t(count === 1 ? 'announceCopiedOne' : 'announceCopiedMany', vars);
+    if (operation === 'nest') return this._t(count === 1 ? 'announceNestedOne' : 'announceNestedMany', vars);
+    if (operation === 'transfer') return this._t(count === 1 ? 'announceMovedOne' : 'announceMovedMany', vars);
+    return this._t(count === 1 ? 'announceReorderedOne' : 'announceReorderedMany', vars);
+  }
+
+  private _announceDragging(label: string, count: number, clone: boolean): void {
+    if (count === 1) this._announce(this._t(clone ? 'announceDraggingCopy' : 'announceDragging', { label }));
+    else this._announce(this._t(clone ? 'announceDraggingCopyMany' : 'announceDraggingMany', { count }));
   }
 
   private _persistSnapshot(snapshot: UISortablePersistenceSnapshot): void {
@@ -3351,9 +3974,10 @@ export class UISortable extends ElementBase {
     this._clearPointerDragPreview();
     this._items = this._dragState.snapshot.map(cloneItem);
     this._dragState = null;
+    this._clearHoldTimer();
     this._pointerGesture = null;
     this._removeDragImage();
-    if (announce) this._announce('Drag cancelled.');
+    if (announce) this._announce(this._t('announceCancelled'));
     this._syncAttributesFromState();
     this.requestRender();
   }
@@ -3361,7 +3985,7 @@ export class UISortable extends ElementBase {
   private _applyDragImage(dataTransfer: DataTransfer, count: number): void {
     this._removeDragImage();
     const ghost = document.createElement('div');
-    ghost.textContent = count === 1 ? 'Dragging item' : `Dragging ${count} items`;
+    ghost.textContent = count === 1 ? this._t('draggingOne') : this._t('draggingMany', { count });
     ghost.style.position = 'fixed';
     ghost.style.top = '-999px';
     ghost.style.left = '-999px';
@@ -3404,8 +4028,8 @@ export class UISortable extends ElementBase {
       const pill = document.createElement('div');
       pill.className = 'drag-pill';
       pill.textContent = clone
-        ? count === 1 ? 'Copying item' : `Copying ${count} items`
-        : count === 1 ? 'Moving item' : `Moving ${count} items`;
+        ? count === 1 ? this._t('copyingOne') : this._t('copyingMany', { count })
+        : count === 1 ? this._t('movingOne') : this._t('movingMany', { count });
       this.root.appendChild(pill);
       this._dragImage = pill;
       this._dragImageOffset = { x: -14, y: -14 };
@@ -3481,7 +4105,7 @@ export class UISortable extends ElementBase {
           parentId,
           beforeId: id,
           mode: 'before',
-          label: `Before ${item.label}`,
+          label: this._t('targetBefore', { label: item.label }),
         });
         if (allowNesting) {
           targets.push({
@@ -3489,7 +4113,7 @@ export class UISortable extends ElementBase {
             parentId: id,
             beforeId: null,
             mode: 'inside',
-            label: `Nest inside ${item.label}`,
+            label: this._t('targetInside', { label: item.label }),
           });
         }
         walk(listId, id);
@@ -3504,7 +4128,7 @@ export class UISortable extends ElementBase {
           parentId,
           beforeId: null,
           mode: 'before',
-          label: `End of ${this._lists.find((list) => list.id === listId)?.label || listId}`,
+          label: this._t('targetEnd', { list: this._lists.find((list) => list.id === listId)?.label || listId }),
         });
       } else if (allowNesting && ids.length > 0) {
         targets.push({
@@ -3512,7 +4136,7 @@ export class UISortable extends ElementBase {
           parentId,
           beforeId: null,
           mode: 'before',
-          label: 'After children',
+          label: this._t('targetAfterChildren'),
         });
       }
     };

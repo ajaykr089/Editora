@@ -23,6 +23,65 @@ export type SortableDropIndicatorVisibility = 'active' | 'always';
 export type SortableDropzoneStyle = 'indicator' | 'container';
 export type SortableDragPreviewSize = 'match-item' | 'compact';
 export type SortableDragHandleMode = 'handle' | 'item';
+export type SortableLabelKey =
+  | 'hintHandle'
+  | 'hintItem'
+  | 'hintCustom'
+  | 'hintKeyboard'
+  | 'hintNestGutter'
+  | 'hintNestModifier'
+  | 'hintNestArea'
+  | 'hintPausedSort'
+  | 'hintPausedFilter'
+  | 'hintDisabled'
+  | 'selectedOne'
+  | 'selectedMany'
+  | 'listReadOnly'
+  | 'listClone'
+  | 'listAccepts'
+  | 'listFull'
+  | 'emptyList'
+  | 'dropHere'
+  | 'nestHere'
+  | 'badgeSelected'
+  | 'badgeClone'
+  | 'badgePinned'
+  | 'dropPreview'
+  | 'copyPreview'
+  | 'releaseMove'
+  | 'releaseMoveMany'
+  | 'releaseCopy'
+  | 'movingOne'
+  | 'movingMany'
+  | 'copyingOne'
+  | 'copyingMany'
+  | 'draggingOne'
+  | 'draggingMany'
+  | 'announceSelectedMany'
+  | 'announceDragDisabled'
+  | 'announceDragging'
+  | 'announceDraggingMany'
+  | 'announceDraggingCopy'
+  | 'announceDraggingCopyMany'
+  | 'announceCancelled'
+  | 'announceRejected'
+  | 'announceLifted'
+  | 'announceLiftedMany'
+  | 'announceLiftedHelp'
+  | 'announceCopiedOne'
+  | 'announceCopiedMany'
+  | 'announceNestedOne'
+  | 'announceNestedMany'
+  | 'announceMovedOne'
+  | 'announceMovedMany'
+  | 'announceReorderedOne'
+  | 'announceReorderedMany'
+  | 'targetBefore'
+  | 'targetInside'
+  | 'targetEnd'
+  | 'targetAfterChildren';
+export type SortableLabels = Partial<Record<SortableLabelKey, string>>;
+export type SortableNestTrigger = 'gutter' | 'modifier' | 'area';
 export type SortableRadiusPreset = 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
 export type SortableRadius = SortableRadiusPreset | number | string;
 export type SortableSpacePreset = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -37,6 +96,10 @@ export type SortableList = {
   disabled?: boolean;
   cloneOnDrag?: boolean;
   accepts?: string[];
+  /** The most items the list can hold, at every nesting level. A move or copy that would go past it is refused. */
+  maxItems?: number;
+  /** Anything of yours that is JSON-serialisable. It travels with the list and comes back in every event. */
+  data?: unknown;
 };
 
 export type SortableItem = {
@@ -50,6 +113,8 @@ export type SortableItem = {
   dragDisabled?: boolean;
   cloneOnDrag?: boolean;
   hidden?: boolean;
+  /** Anything of yours that is JSON-serialisable (a record, a price, a status). It travels with the item through moves and copies, and comes back in every event. */
+  data?: unknown;
 };
 
 export type SortableSelectionChangeDetail = {
@@ -99,6 +164,23 @@ export type SortableRenderEmptyStateContext = {
   filterQuery: string;
 };
 
+export type SortableDropInfo = {
+  /** The items being moved (not their children), as they are now. */
+  items: SortableItem[];
+  movedIds: string[];
+  targetListId: string;
+  parentId: string | null;
+  beforeId: string | null;
+  mode: SortableDropMode;
+  /** True when the items are copied rather than moved. */
+  clone: boolean;
+};
+
+export type SortableBeforeChangeDetail = SortableChangeDetail & {
+  target: { listId: string; parentId: string | null; beforeId: string | null; mode: SortableDropMode };
+  clone: boolean;
+};
+
 export type SortableMoveOptions = {
   targetListId: string;
   beforeId?: string | null;
@@ -118,7 +200,8 @@ export type SortableElement = HTMLElement & {
   clearSelection(): void;
   cancelDrag(): void;
   focusItem(id: string): void;
-  moveSelection(options: SortableMoveOptions): void;
+  moveSelection(options: SortableMoveOptions): boolean;
+  canDrop: ((info: SortableDropInfo) => boolean) | null;
   getPersistenceSnapshot(): SortablePersistenceSnapshot;
 };
 
@@ -131,6 +214,9 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   persistKey?: string;
   allowFilteredDrag?: boolean;
   allowNesting?: boolean;
+  nestTrigger?: SortableNestTrigger;
+  /** Milliseconds a finger must rest on a card before it lifts (touch, dragging by the card). 0 lifts at once. Default 350. */
+  touchHoldDelay?: number;
   dropIndicatorVisibility?: SortableDropIndicatorVisibility;
   dropzoneStyle?: SortableDropzoneStyle;
   dragPreviewSize?: SortableDragPreviewSize;
@@ -140,11 +226,20 @@ export type SortableProps = Omit<React.HTMLAttributes<SortableElement>, 'onChang
   handleRadius?: SortableRadius;
   listGap?: SortableSpace;
   itemSpacing?: SortableSpace;
+  /** Decides whether items may go somewhere; return false to refuse. Asked on every pointer move, so keep it quick. */
+  canDrop?: (info: SortableDropInfo) => boolean;
   showSelectionBadge?: boolean;
+  labels?: SortableLabels;
+  hideToolbar?: boolean;
   disabled?: boolean;
   renderItem?: (item: SortableItem, context: SortableRenderItemContext) => React.ReactNode;
   renderListHeader?: (list: SortableList, context: SortableRenderListHeaderContext) => React.ReactNode;
   renderEmptyState?: (list: SortableList, context: SortableRenderEmptyStateContext) => React.ReactNode;
+  /**
+   * Called just before a move is applied, with the result it would have. Return `false` (or call
+   * `event.preventDefault()`) to cancel it: nothing changes and `onChange` does not fire.
+   */
+  onBeforeChange?: (detail: SortableBeforeChangeDetail, event: Event) => boolean | void;
   onChange?: (detail: SortableChangeDetail) => void;
   onItemsChange?: (items: SortableItem[]) => void;
   onSelectionChange?: (detail: SortableSelectionChangeDetail) => void;
@@ -213,6 +308,8 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
     persistKey,
     allowFilteredDrag,
     allowNesting,
+    nestTrigger,
+    touchHoldDelay,
     dropIndicatorVisibility,
     dropzoneStyle,
     dragPreviewSize,
@@ -222,11 +319,15 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
     handleRadius,
     listGap,
     itemSpacing,
+    canDrop,
     showSelectionBadge,
+    labels,
+    hideToolbar,
     disabled,
     renderItem,
     renderListHeader,
     renderEmptyState,
+    onBeforeChange,
     onChange,
     onItemsChange,
     onSelectionChange,
@@ -249,6 +350,15 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
   useElementEventListeners(
     ref,
     [
+      {
+        type: 'before-change',
+        listener: onBeforeChange
+          ? ((event: Event) => {
+            const detail = getCustomEventDetail<SortableBeforeChangeDetail>(event);
+            if (detail && onBeforeChange(detail, event) === false) event.preventDefault();
+          }) as EventListener
+          : undefined,
+      },
       {
         type: 'change',
         listener: onChange || onItemsChange
@@ -279,7 +389,7 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
           : undefined,
       },
     ],
-    [onChange, onItemsChange, onSelectionChange, onPersistRequest]
+    [onBeforeChange, onChange, onItemsChange, onSelectionChange, onPersistRequest]
   );
 
   useElementAttributes(
@@ -295,6 +405,9 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
 
       if (allowNesting === false) element.setAttribute('allow-nesting', 'false');
       else element.removeAttribute('allow-nesting');
+
+      syncStringAttribute(element, 'nest-trigger', nestTrigger && nestTrigger !== 'gutter' ? nestTrigger : null);
+      syncStringAttribute(element, 'touch-hold-delay', typeof touchHoldDelay === 'number' && Number.isFinite(touchHoldDelay) ? String(touchHoldDelay) : null);
 
       if (dropIndicatorVisibility === 'always') element.setAttribute('drop-indicator-visibility', 'always');
       else element.removeAttribute('drop-indicator-visibility');
@@ -328,9 +441,14 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
       if (showSelectionBadge === false) element.setAttribute('show-selection-badge', 'false');
       else element.removeAttribute('show-selection-badge');
 
+      // A fresh object each render is fine: the attribute is only written when its JSON changes.
+      element.canDrop = canDrop ?? null;
+      syncJsonAttribute(element, 'labels', labels && Object.keys(labels).length ? labels : null);
+      syncBooleanAttribute(element, 'hide-toolbar', hideToolbar);
+
       syncBooleanAttribute(element, 'disabled', disabled);
     },
-    [lists, items, selection, filterQuery, sort, persistKey, allowFilteredDrag, allowNesting, dropIndicatorVisibility, dropzoneStyle, dragPreviewSize, dragHandleMode, dragHandleSelector, itemRadius, handleRadius, listGap, itemSpacing, renderItem, showSelectionBadge, disabled]
+    [lists, items, selection, filterQuery, sort, persistKey, allowFilteredDrag, allowNesting, nestTrigger, touchHoldDelay, dropIndicatorVisibility, dropzoneStyle, dragPreviewSize, dragHandleMode, dragHandleSelector, itemRadius, handleRadius, listGap, itemSpacing, renderItem, showSelectionBadge, canDrop, labels, hideToolbar, disabled]
   );
 
   useIsomorphicLayoutEffect(() => {

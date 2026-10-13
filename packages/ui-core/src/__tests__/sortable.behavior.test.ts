@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import '../components/ui-sortable';
 
 function flushMicrotask() {
@@ -226,6 +226,8 @@ describe('ui-sortable', () => {
 
   it('infers body drops for nesting and supports escape cancelling pointer drags', async () => {
     const el = document.createElement('ui-sortable') as any;
+    // The middle of a card nests only in the "area" trigger (the old behaviour); see "nesting" below for the default.
+    el.setAttribute('nest-trigger', 'area');
     el.setAttribute('lists', JSON.stringify(lists));
     el.setAttribute('items', JSON.stringify(items));
     document.body.appendChild(el);
@@ -1005,6 +1007,1137 @@ describe('ui-sortable', () => {
 
       el._revealInBoard(done.querySelector('.dropzone') || done);
       expect(board.scrollLeft).toBe(364);
+    });
+  });
+
+  describe('labels', () => {
+    const mount = async (attrs: Record<string, string> = {}, data = { lists, items }) => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(data.lists));
+      el.setAttribute('items', JSON.stringify(data.items));
+      Object.entries(attrs).forEach(([name, value]) => el.setAttribute(name, value));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      return el;
+    };
+    const text = (el: any, selector: string) => el.shadowRoot.querySelector(selector)?.textContent?.trim();
+
+    it('speaks English by default', async () => {
+      const el = await mount();
+      expect(text(el, '#ui-sortable-helper')).toBe(
+        'Use the handle to drag, or press Space on a focused item to start keyboard reordering. '
+        + 'To nest an item, hold Alt or drop it on the far side of another.'
+      );
+      expect(text(el, '.selection-text')).toBe('items selected');
+      expect(el.labels.badgeSelected).toBe('Selected');
+    });
+
+    it('translates the hint, the selection summary and the badges', async () => {
+      const el = await mount({
+        labels: JSON.stringify({
+          hintHandle: 'Utilisez la poignée pour déplacer.',
+          selectedOne: 'élément sélectionné',
+          selectedMany: 'éléments sélectionnés',
+          badgeSelected: 'Sélectionné',
+          badgeClone: 'Cloner',
+          badgePinned: 'Épinglé',
+        }),
+      }, {
+        lists,
+        items: [{ id: 'a', label: 'A', listId: 'todo', cloneOnDrag: true, dragDisabled: true }],
+      });
+      expect(text(el, '#ui-sortable-helper')).toMatch(/^Utilisez la poignée pour déplacer\./);
+      expect(text(el, '.selection-text')).toBe('éléments sélectionnés');
+
+      el.select(['a']);
+      await flushMicrotask();
+      expect(text(el, '.selection-text')).toBe('élément sélectionné');
+      const badges = [...el.shadowRoot.querySelectorAll('.item[data-id="a"] .item-badge')].map((b: any) => b.textContent.trim());
+      expect(badges).toContain('Sélectionné');
+      expect(badges).toContain('Cloner');
+      expect(badges).toContain('Épinglé');
+    });
+
+    it('takes labels as a property, merges them over the defaults, and ignores what is not text', async () => {
+      const el = await mount();
+      el.labels = { hintHandle: 'Drag me.', selectedMany: 42 as any, nope: 'x' } as any;
+      await flushMicrotask();
+      expect(text(el, '#ui-sortable-helper')).toMatch(/^Drag me\. /);
+      expect(el.labels.selectedMany).toBe('items selected');
+      expect(el.labels.hintItem).toContain('Drag from anywhere');
+      expect('nope' in el.labels).toBe(false);
+
+      el.labels = null;
+      await flushMicrotask();
+      expect(el.hasAttribute('labels')).toBe(false);
+      expect(text(el, '#ui-sortable-helper')).toContain('Use the handle to drag');
+
+      el.setAttribute('labels', '{not json');
+      await flushMicrotask();
+      expect(text(el, '#ui-sortable-helper')).toContain('Use the handle to drag');
+    });
+
+    it('uses a list\'s own emptyLabel first, then the translated default', async () => {
+      const el = await mount(
+        { labels: JSON.stringify({ emptyList: 'Rien ici.' }) },
+        { lists: [{ id: 'a', label: 'A', emptyLabel: 'Custom empty' }, { id: 'b', label: 'B' }], items: [] }
+      );
+      const empties = [...el.shadowRoot.querySelectorAll('.empty')].map((node: any) => node.textContent.trim());
+      expect(empties).toEqual(['Custom empty', 'Rien ici.']);
+    });
+
+    it('announces moves and drag steps with the translated text', async () => {
+      const el = await mount({
+        labels: JSON.stringify({
+          announceReorderedOne: '{list} : élément déplacé.',
+          announceMovedOne: 'Déplacé vers {list}.',
+          targetBefore: 'Avant {label}',
+          announceLifted: 'Soulevé : {label}.',
+          announceLiftedHelp: 'Flèches pour choisir.',
+        }),
+      });
+      const live = () => el.shadowRoot.querySelector('.sr-only[aria-live]').textContent;
+
+      el.select(['task-a']);
+      el.moveSelection({ targetListId: 'todo', beforeId: 'epic' });
+      expect(live()).toBe('To do : élément déplacé.');
+
+      el.select(['task-a']);
+      el.moveSelection({ targetListId: 'done' });
+      expect(live()).toBe('Déplacé vers Done.');
+
+      const item = el.shadowRoot.querySelector('.item[data-id="task-b"]') as HTMLElement;
+      el.focusItem('task-b');
+      el._onKeyDown({ key: ' ', code: 'Space', preventDefault() {}, target: item, composedPath: () => [item] });
+      expect(live()).toBe('Soulevé : Task B. Flèches pour choisir.');
+      expect(el._keyboardDropTargets()[0].label).toMatch(/^Avant /);
+      el.cancelDrag();
+    });
+
+    it('labels the drop rails of the container style', async () => {
+      const el = await mount({ 'dropzone-style': 'container', labels: JSON.stringify({ dropHere: 'Déposer ici', nestHere: 'Imbriquer ici' }) });
+      const labels = new Set([...el.shadowRoot.querySelectorAll('.dropzone-label')].map((node: any) => node.textContent.trim()));
+      expect(labels.has('Déposer ici')).toBe(true);
+      expect(labels.has('Imbriquer ici')).toBe(true);
+      expect(labels.has('Drop here')).toBe(false);
+    });
+  });
+
+  describe('hide-toolbar', () => {
+    it('hides the hint and the selection count from sight but keeps the hint that describes the lists', async () => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(lists));
+      el.setAttribute('items', JSON.stringify(items));
+      el.setAttribute('hide-toolbar', '');
+      document.body.appendChild(el);
+      await flushMicrotask();
+
+      const toolbar = el.shadowRoot.querySelector('.toolbar') as HTMLElement;
+      expect(toolbar.getAttribute('data-hidden')).toBe('true');
+      const helper = el.shadowRoot.querySelector('#ui-sortable-helper');
+      expect(helper?.textContent).toContain('Use the handle');
+      expect(el.shadowRoot.querySelector('.items')?.getAttribute('aria-describedby')).toBe('ui-sortable-helper');
+
+      el.removeAttribute('hide-toolbar');
+      await flushMicrotask();
+      expect(el.shadowRoot.querySelector('.toolbar')?.hasAttribute('data-hidden')).toBe(false);
+    });
+  });
+
+  describe('nesting', () => {
+    const rect = (left: number, top: number, right: number, bottom: number) => () =>
+      ({ left, top, right, bottom, x: left, y: top, width: right - left, height: bottom - top, toJSON: () => ({}) }) as DOMRect;
+
+    const mount = async (attrs: Record<string, string> = {}, data = { lists, items }) => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(data.lists));
+      el.setAttribute('items', JSON.stringify(data.items));
+      Object.entries(attrs).forEach(([name, value]) => el.setAttribute(name, value));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      // A 200 x 100 card at the origin.
+      (el.shadowRoot.querySelector('.item[data-id="epic"]') as HTMLElement).getBoundingClientRect = rect(0, 0, 200, 100);
+      return el;
+    };
+    const over = (el: any, x: number, y: number) =>
+      el._dropTargetFromEvent({ composedPath: () => [el.shadowRoot.querySelector('.item[data-id="epic"]')], clientX: x, clientY: y });
+    const before = { listId: 'todo', parentId: null, beforeId: 'epic', mode: 'before' };
+    const after = { listId: 'todo', parentId: null, beforeId: 'task-a', mode: 'before' };
+    const inside = { listId: 'todo', parentId: 'epic', beforeId: null, mode: 'inside' };
+
+    it('reorders on a plain drag, however the pointer crosses the card: top half before, bottom half after', async () => {
+      const el = await mount();
+      expect(over(el, 20, 5)).toEqual(before);
+      expect(over(el, 20, 40)).toEqual(before);
+      // The middle of the card used to nest. Without Alt, and away from the far side, it does not.
+      expect(over(el, 100, 50)).toEqual(after);
+      expect(over(el, 20, 60)).toEqual(after);
+      expect(over(el, 20, 95)).toEqual(after);
+    });
+
+    it('nests with Alt held, in the middle band of the card', async () => {
+      const el = await mount();
+      el._nestModifier = true;
+      expect(over(el, 100, 50)).toEqual(inside);
+      expect(over(el, 20, 30)).toEqual(inside);
+      // The outer quarters still reorder: Alt does not make the whole card a nest target.
+      expect(over(el, 20, 10)).toEqual(before);
+      expect(over(el, 20, 90)).toEqual(after);
+    });
+
+    it('nests on the far side of a card without a keyboard (touch), and only in its middle band', async () => {
+      const el = await mount();
+      expect(over(el, 190, 50)).toEqual(inside);
+      expect(over(el, 190, 10)).toEqual(before);
+      expect(over(el, 190, 90)).toEqual(after);
+      // Not the near side.
+      expect(over(el, 10, 50)).toEqual(after);
+    });
+
+    it('puts the far side on the left in a right-to-left page', async () => {
+      const el = await mount();
+      el.setAttribute('dir', 'rtl');
+      expect(over(el, 10, 50)).toEqual(inside);
+      expect(over(el, 190, 50)).toEqual(after);
+    });
+
+    it('uses the bottom of a card in a horizontal lane as its far side', async () => {
+      const horizontal = { lists: [{ id: 'todo', label: 'To do', orientation: 'horizontal' }], items };
+      const el = await mount({}, horizontal as any);
+      // Along the lane the pointer is in the middle of the card; the far side is its bottom edge.
+      expect(over(el, 100, 95)).toEqual(inside);
+      expect(over(el, 100, 20)).toEqual(after);
+      expect(over(el, 20, 20)).toEqual(before);
+    });
+
+    it('nest-trigger="modifier" ignores the far side', async () => {
+      const el = await mount({ 'nest-trigger': 'modifier' });
+      expect(over(el, 190, 50)).toEqual(after);
+      el._nestModifier = true;
+      expect(over(el, 190, 50)).toEqual(inside);
+    });
+
+    it('nest-trigger="area" keeps the old rule: the middle of a card nests, with no key held', async () => {
+      const el = await mount({ 'nest-trigger': 'area' });
+      expect(over(el, 100, 50)).toEqual(inside);
+      expect(over(el, 20, 20)).toEqual(before);
+      expect(over(el, 20, 90)).toEqual(after);
+    });
+
+    it('never nests when allow-nesting is false, whatever the trigger or the key', async () => {
+      for (const trigger of ['gutter', 'modifier', 'area']) {
+        const el = await mount({ 'allow-nesting': 'false', 'nest-trigger': trigger });
+        el._nestModifier = true;
+        expect(over(el, 190, 50).mode).toBe('before');
+      }
+    });
+
+    it('treats an unknown nest-trigger as the default', async () => {
+      const el = await mount({ 'nest-trigger': 'sideways' });
+      expect(over(el, 100, 50)).toEqual(after);
+      expect(over(el, 190, 50)).toEqual(inside);
+    });
+
+    it('moves the drop target when Alt is pressed or released, without the pointer moving', async () => {
+      const el = await mount();
+      el._dragState = {
+        snapshot: el.items.map((item: any) => ({ ...item })),
+        movedRootIds: ['task-b'],
+        originId: 'task-b',
+        clone: false,
+        keyboard: false,
+        dropTarget: null,
+        committed: false,
+      };
+      el._lastPointer = { x: 100, y: 50 };
+      // The test has no hit testing: report the card under the pointer.
+      el._pathFromPoint = () => [el.shadowRoot.querySelector('.item[data-id="epic"]')];
+
+      el._setDropTarget(el._dropTargetFromPoint(100, 50));
+      expect(el._dragState.dropTarget).toEqual(after);
+
+      el._onDocumentKeyDown(new KeyboardEvent('keydown', { key: 'Alt' }));
+      expect(el._dragState.dropTarget).toEqual(inside);
+      expect(el.shadowRoot.querySelector('.item[data-id="epic"]').getAttribute('data-drop-inside-active')).toBe('true');
+
+      el._onDocumentKeyUp(new KeyboardEvent('keyup', { key: 'Alt' }));
+      expect(el._dragState.dropTarget).toEqual(after);
+      expect(el.shadowRoot.querySelector('.item[data-id="epic"]').getAttribute('data-drop-inside-active')).toBe('false');
+      el.cancelDrag();
+    });
+
+    it('releases onto the nest target when Alt is held at the drop', async () => {
+      const el = await mount();
+      el._pathFromPoint = () => [el.shadowRoot.querySelector('.item[data-id="epic"]')];
+      const handle = el.shadowRoot.querySelector('.handle[data-id="task-a"]') as HTMLElement;
+      el._onPointerDown({ pointerId: 41, pointerType: 'mouse', clientX: 300, clientY: 300, preventDefault() {}, composedPath: () => [handle] });
+      el._onPointerMove({ pointerId: 41, clientX: 100, clientY: 50, altKey: true, preventDefault() {} });
+      el._onPointerUp({ pointerId: 41, clientX: 100, clientY: 50, altKey: true, preventDefault() {} });
+      await flushMicrotask();
+      expect(el.items.find((item: any) => item.id === 'task-a').parentId).toBe('epic');
+    });
+
+    it('tells the user how to nest, in the hint, and says nothing when nesting is off', async () => {
+      const hint = (el: any) => el.shadowRoot.querySelector('#ui-sortable-helper').textContent;
+      expect(hint(await mount())).toContain('hold Alt or drop it on the far side');
+      expect(hint(await mount({ 'nest-trigger': 'modifier' }))).toContain('hold Alt while you drop it');
+      expect(hint(await mount({ 'nest-trigger': 'area' }))).toContain('drop it on the middle of another');
+      expect(hint(await mount({ 'allow-nesting': 'false' }))).not.toContain('nest');
+      const custom = await mount({ labels: JSON.stringify({ hintNestGutter: 'Alt pour imbriquer.' }) });
+      expect(hint(custom)).toContain('Alt pour imbriquer.');
+    });
+  });
+
+  describe('touch', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const mount = async (attrs: Record<string, string> = { 'drag-handle-mode': 'item' }) => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(lists));
+      el.setAttribute('items', JSON.stringify(items));
+      Object.entries(attrs).forEach(([name, value]) => el.setAttribute(name, value));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      return el;
+    };
+    const press = (el: any, target: HTMLElement, pointerType: string, pointerId: number) => {
+      const event = { pointerId, pointerType, clientX: 50, clientY: 50, preventDefault: vi.fn(), composedPath: () => [target] };
+      el._onPointerDown(event);
+      return event;
+    };
+    const card = (el: any, id: string) => el.shadowRoot.querySelector(`.item[data-id="${id}"]`) as HTMLElement;
+    const move = (el: any, pointerId: number, x: number, y: number) =>
+      el._onPointerMove({ pointerId, clientX: x, clientY: y, preventDefault() {} });
+
+    it('lifts a card dragged by its body only after the finger has been held still', async () => {
+      vi.useFakeTimers();
+      const el = await mount();
+      const down = press(el, card(el, 'task-a'), 'touch', 61);
+      // Nothing is claimed yet: the page must still be able to scroll.
+      expect(down.preventDefault).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(300);
+      expect(el._dragState).toBeNull();
+      vi.advanceTimersByTime(60);
+      expect(el._dragState).toBeTruthy();
+      expect(el.shadowRoot.querySelector('.item-ghost')).toBeTruthy();
+
+      // From then on the finger drags the card.
+      move(el, 61, 50, 90);
+      el._onPointerUp({ pointerId: 61, clientX: 50, clientY: 90, preventDefault() {} });
+      expect(el._dragState).toBeNull();
+    });
+
+    it('leaves a finger that moves before the hold to the page (it was a scroll)', async () => {
+      vi.useFakeTimers();
+      const el = await mount();
+      press(el, card(el, 'task-a'), 'touch', 62);
+      vi.advanceTimersByTime(100);
+      move(el, 62, 50, 80);
+      vi.advanceTimersByTime(1000);
+      expect(el._dragState).toBeNull();
+      expect(el._pointerGesture).toBeNull();
+    });
+
+    it('forgives a little wobble while holding', async () => {
+      vi.useFakeTimers();
+      const el = await mount();
+      press(el, card(el, 'task-a'), 'touch', 63);
+      vi.advanceTimersByTime(100);
+      move(el, 63, 54, 53);
+      vi.advanceTimersByTime(300);
+      expect(el._dragState).toBeTruthy();
+      el.cancelDrag();
+    });
+
+    it('does not start a drag on a tap, and leaves no timer behind', async () => {
+      vi.useFakeTimers();
+      const el = await mount();
+      press(el, card(el, 'task-a'), 'touch', 64);
+      vi.advanceTimersByTime(80);
+      el._onPointerUp({ pointerId: 64, clientX: 50, clientY: 50, preventDefault() {} });
+      vi.advanceTimersByTime(1000);
+      expect(el._dragState).toBeNull();
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it('drops the hold when the browser cancels the touch (it took over for scrolling)', async () => {
+      vi.useFakeTimers();
+      const el = await mount();
+      press(el, card(el, 'task-a'), 'touch', 65);
+      el._onPointerCancel({ pointerId: 65 });
+      vi.advanceTimersByTime(1000);
+      expect(el._dragState).toBeNull();
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it('does not wait for a mouse, or for the built-in handle', async () => {
+      vi.useFakeTimers();
+      const el = await mount();
+      const mouse = press(el, card(el, 'task-a'), 'mouse', 66);
+      expect(mouse.preventDefault).toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+      move(el, 66, 50, 70);
+      expect(el._dragState).toBeTruthy();
+      el.cancelDrag();
+
+      const handled = await mount({});
+      const handle = handled.shadowRoot.querySelector('.handle[data-id="task-a"]') as HTMLElement;
+      const touch = press(handled, handle, 'touch', 67);
+      expect(touch.preventDefault).toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+      move(handled, 67, 50, 70);
+      expect(handled._dragState).toBeTruthy();
+      handled.cancelDrag();
+    });
+
+    it('holds for a custom drag handle too', async () => {
+      vi.useFakeTimers();
+      const el = await mount({ 'drag-handle-selector': '.grip' });
+      const custom = card(el, 'task-a');
+      custom.setAttribute('data-drag-trigger', 'custom');
+      custom.setAttribute('data-id', 'task-a');
+      press(el, custom, 'touch', 68);
+      expect(el._dragState).toBeNull();
+      vi.advanceTimersByTime(400);
+      expect(el._dragState).toBeTruthy();
+      el.cancelDrag();
+    });
+
+    it('takes the hold time from touch-hold-delay (0 means no wait)', async () => {
+      vi.useFakeTimers();
+      const slow = await mount({ 'drag-handle-mode': 'item', 'touch-hold-delay': '700' });
+      press(slow, card(slow, 'task-a'), 'touch', 69);
+      vi.advanceTimersByTime(500);
+      expect(slow._dragState).toBeNull();
+      vi.advanceTimersByTime(250);
+      expect(slow._dragState).toBeTruthy();
+      slow.cancelDrag();
+
+      const instant = await mount({ 'drag-handle-mode': 'item', 'touch-hold-delay': '0' });
+      const down = press(instant, card(instant, 'task-a'), 'touch', 70);
+      expect(down.preventDefault).toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+
+      const garbage = await mount({ 'drag-handle-mode': 'item', 'touch-hold-delay': 'soon' });
+      expect(garbage._touchHoldDelay()).toBe(350);
+    });
+
+    it('stops the page scrolling under a lifted card, and the context menu of a long press', async () => {
+      vi.useFakeTimers();
+      const el = await mount();
+      const idle = new Event('touchmove', { cancelable: true });
+      el._onTouchMove(idle);
+      expect(idle.defaultPrevented).toBe(false);
+
+      press(el, card(el, 'task-a'), 'touch', 71);
+      const menuWhileHolding = new Event('contextmenu', { cancelable: true });
+      el._onContextMenu(menuWhileHolding);
+      expect(menuWhileHolding.defaultPrevented).toBe(true);
+
+      vi.advanceTimersByTime(400);
+      const lifted = new Event('touchmove', { cancelable: true });
+      el._onTouchMove(lifted);
+      expect(lifted.defaultPrevented).toBe(true);
+      el.cancelDrag();
+
+      const menu = new Event('contextmenu', { cancelable: true });
+      el._onContextMenu(menu);
+      expect(menu.defaultPrevented).toBe(false);
+    });
+  });
+
+  describe('refusing moves', () => {
+    const mount = async (data: { lists: any[]; items: any[] } = { lists, items }) => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(data.lists));
+      el.setAttribute('items', JSON.stringify(data.items));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      return el;
+    };
+    const order = (el: any) => el.items.map((item: any) => `${item.listId}:${item.id}${item.parentId ? `>${item.parentId}` : ''}`).join(' ');
+    const withMax = (id: string, maxItems: unknown) => lists.map((list) => (list.id === id ? { ...list, maxItems } : list));
+    const startDrag = (el: any, movedRootIds: string[], clone = false) => {
+      el._dragState = {
+        snapshot: el.items.map((item: any) => ({ ...item })),
+        movedRootIds,
+        originId: movedRootIds[0],
+        clone,
+        keyboard: true,
+        dropTarget: null,
+        committed: false,
+      };
+    };
+
+    describe('maxItems', () => {
+      it('refuses a move that would take a list past its limit, and says so', async () => {
+        const el = await mount({ lists: withMax('done', 1), items });
+        el.select(['task-a']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(true);
+
+        el.select(['task-b']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
+        expect(order(el)).toBe('ideas:template todo:epic todo:task-b done:task-a');
+        expect(el.lists.find((list: any) => list.id === 'done').maxItems).toBe(1);
+      });
+
+      it('still reorders inside a full list', async () => {
+        const el = await mount({ lists: withMax('todo', 3), items });
+        el.select(['task-b']);
+        expect(el.moveSelection({ targetListId: 'todo', beforeId: 'epic' })).toBe(true);
+        expect(order(el)).toBe('ideas:template todo:task-b todo:epic todo:task-a');
+      });
+
+      it('lets a list that is already over its limit be reordered and emptied, but not filled', async () => {
+        const el = await mount({ lists: withMax('todo', 1), items });
+        el.select(['task-b']);
+        expect(el.moveSelection({ targetListId: 'todo', beforeId: 'epic' })).toBe(true);
+        el.select(['task-a']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(true);
+        el.select(['template']);
+        expect(el.moveSelection({ targetListId: 'todo' })).toBe(false);
+      });
+
+      it('counts every item of a selection, a nested branch and a copy', async () => {
+        const el = await mount({ lists: withMax('done', 2), items });
+        el.select(['task-a', 'task-b', 'epic']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
+        el.select(['task-a', 'task-b']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(true);
+
+        // A copy adds its items without taking the originals out of their list.
+        const full = await mount({ lists: withMax('done', 1), items: [...items, { id: 'x', label: 'X', listId: 'done' }] });
+        full.select(['template']);
+        expect(full.moveSelection({ targetListId: 'done', clone: true })).toBe(false);
+        expect(full.items.length).toBe(5);
+
+        // An epic with a child is two items.
+        const nested = await mount({
+          lists: withMax('done', 1),
+          items: [{ id: 'epic', label: 'Epic', listId: 'todo' }, { id: 'kid', label: 'Kid', listId: 'todo', parentId: 'epic' }],
+        });
+        nested.select(['epic']);
+        expect(nested.moveSelection({ targetListId: 'done' })).toBe(false);
+      });
+
+      it('shows n/max in the header, marks a full list and says it is full', async () => {
+        const el = await mount({ lists: withMax('todo', 3), items });
+        const todo = el.shadowRoot.querySelector('.list[data-list-id="todo"]') as HTMLElement;
+        expect(todo.getAttribute('data-full')).toBe('true');
+        expect(todo.querySelector('.list-count')?.textContent).toBe('3/3');
+        expect(todo.querySelector('.list-helper')?.textContent).toBe('This list is full (3 items).');
+
+        const other = el.shadowRoot.querySelector('.list[data-list-id="done"]') as HTMLElement;
+        expect(other.getAttribute('data-full')).toBe('false');
+        expect(other.querySelector('.list-count')?.textContent).toBe('0');
+
+        const roomy = await mount({ lists: withMax('todo', 5), items });
+        const list = roomy.shadowRoot.querySelector('.list[data-list-id="todo"]') as HTMLElement;
+        expect(list.getAttribute('data-full')).toBe('false');
+        expect(list.querySelector('.list-count')?.textContent).toBe('3/5');
+        expect(list.querySelector('.list-helper')).toBeNull();
+
+        el.setAttribute('labels', JSON.stringify({ listFull: 'Complet ({max}).' }));
+        await flushMicrotask();
+        expect(el.shadowRoot.querySelector('.list[data-list-id="todo"] .list-helper')?.textContent).toBe('Complet (3).');
+      });
+
+      it('ignores a limit that is not a number, floors a fraction, and treats 0 as closed', async () => {
+        for (const bad of ['3', -1, 'many', null, Number.NaN]) {
+          const el = await mount({ lists: withMax('done', bad), items });
+          expect(el.lists.find((list: any) => list.id === 'done').maxItems).toBeUndefined();
+        }
+        const fractional = await mount({ lists: withMax('done', 2.9), items });
+        expect(fractional.lists.find((list: any) => list.id === 'done').maxItems).toBe(2);
+
+        const closed = await mount({ lists: withMax('done', 0), items });
+        closed.select(['task-a']);
+        expect(closed.moveSelection({ targetListId: 'done' })).toBe(false);
+      });
+
+      it('leaves a full list out of the keyboard destinations', async () => {
+        const el = await mount({ lists: withMax('done', 0), items });
+        startDrag(el, ['task-a']);
+        const labels = el._keyboardDropTargets().map((target: any) => `${target.listId}`);
+        expect(labels).not.toContain('done');
+        expect(labels).toContain('todo');
+        el.cancelDrag();
+      });
+    });
+
+    describe('canDrop', () => {
+      it('is asked with the items and the place, and refuses what it refuses', async () => {
+        const el = await mount();
+        const asked: any[] = [];
+        el.canDrop = (info: any) => {
+          asked.push(info);
+          return info.targetListId !== 'done';
+        };
+        el.select(['task-a']);
+
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
+        expect(asked.at(-1)).toMatchObject({
+          movedIds: ['task-a'],
+          targetListId: 'done',
+          parentId: null,
+          beforeId: null,
+          mode: 'before',
+          clone: false,
+        });
+        expect(asked.at(-1).items.map((item: any) => item.label)).toEqual(['Task A']);
+        expect(order(el)).toBe('ideas:template todo:epic todo:task-a todo:task-b');
+
+        expect(el.moveSelection({ targetListId: 'todo', beforeId: 'epic' })).toBe(true);
+        expect(asked.at(-1)).toMatchObject({ targetListId: 'todo', beforeId: 'epic' });
+      });
+
+      it('tells a copy from a move', async () => {
+        const el = await mount();
+        const clones: boolean[] = [];
+        el.canDrop = (info: any) => {
+          clones.push(info.clone);
+          return true;
+        };
+        el.select(['template']);
+        el.moveSelection({ targetListId: 'done', clone: true });
+        el.select(['task-a']);
+        el.moveSelection({ targetListId: 'done' });
+        expect(clones).toContain(true);
+        expect(clones.at(-1)).toBe(false);
+      });
+
+      it('keeps a refused place out of the pointer targets and the keyboard destinations', async () => {
+        const el = await mount();
+        el.canDrop = (info: any) => info.targetListId !== 'done';
+        startDrag(el, ['task-a']);
+        const refused = { listId: 'done', parentId: null, beforeId: null, mode: 'before' };
+        expect(el._canDrop(refused, ['task-a'])).toBe(false);
+        expect(el._keyboardDropTargets().some((target: any) => target.listId === 'done')).toBe(false);
+        expect(el._keyboardDropTargets().some((target: any) => target.listId === 'todo')).toBe(true);
+
+        el.canDrop = null;
+        expect(el._canDrop(refused, ['task-a'])).toBe(true);
+        el.cancelDrag();
+      });
+
+      it('refuses when it throws, and says why in the console', async () => {
+        const el = await mount();
+        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        el.canDrop = () => {
+          throw new Error('boom');
+        };
+        el.select(['task-a']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
+        expect(error).toHaveBeenCalled();
+        error.mockRestore();
+      });
+
+      it('ignores anything that is not a function', async () => {
+        const el = await mount();
+        el.canDrop = 'nope' as any;
+        expect(el.canDrop).toBeNull();
+        el.select(['task-a']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(true);
+      });
+
+      it('runs after the built-in rules, so it is never asked about a drop on the card itself', async () => {
+        const el = await mount();
+        const spy = vi.fn(() => true);
+        el.canDrop = spy;
+        const onSelf = { listId: 'todo', parentId: null, beforeId: 'task-a', mode: 'before' };
+        expect(el._canDrop(onSelf, ['task-a'])).toBe(false);
+        expect(spy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('before-change', () => {
+      it('fires before the change, with the proposed result, and lets the move happen when not cancelled', async () => {
+        const el = await mount();
+        const seen: string[] = [];
+        let before: any = null;
+        el.addEventListener('before-change', ((event: CustomEvent) => {
+          seen.push('before-change');
+          before = event.detail;
+          // Nothing has changed yet.
+          expect(order(el)).toBe('ideas:template todo:epic todo:task-a todo:task-b');
+        }) as EventListener);
+        el.addEventListener('change', () => seen.push('change'));
+        el.addEventListener('persist-request', () => seen.push('persist-request'));
+
+        el.select(['task-a']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(true);
+        expect(seen).toEqual(['before-change', 'change', 'persist-request']);
+        expect(before.operation).toBe('transfer');
+        expect(before.source).toBe('api');
+        expect(before.clone).toBe(false);
+        expect(before.target).toEqual({ listId: 'done', parentId: null, beforeId: null, mode: 'before' });
+        expect(before.movedIds).toEqual(['task-a']);
+        expect(before.items.find((item: any) => item.id === 'task-a').listId).toBe('done');
+        expect(before.persistence.records.find((record: any) => record.id === 'task-a').listId).toBe('done');
+        expect(before.previousSelection).toEqual(['task-a']);
+      });
+
+      it('cancels the whole move: nothing changes, nothing is reported, nothing is saved', async () => {
+        const key = 'ui-sortable-before-change';
+        window.localStorage.removeItem(key);
+        const el = document.createElement('ui-sortable') as any;
+        el.setAttribute('persist-key', key);
+        el.setAttribute('lists', JSON.stringify(lists));
+        el.setAttribute('items', JSON.stringify(items));
+        document.body.appendChild(el);
+        await flushMicrotask();
+
+        const fired: string[] = [];
+        el.addEventListener('before-change', ((event: Event) => event.preventDefault()) as EventListener);
+        el.addEventListener('change', () => fired.push('change'));
+        el.addEventListener('persist-request', () => fired.push('persist-request'));
+        const itemsAttr = el.getAttribute('items');
+
+        el.select(['task-a']);
+        expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
+        await flushMicrotask();
+
+        expect(order(el)).toBe('ideas:template todo:epic todo:task-a todo:task-b');
+        expect(el.getAttribute('items')).toBe(itemsAttr);
+        expect(fired).toEqual([]);
+        expect(window.localStorage.getItem(key)).toBeNull();
+        expect(el.shadowRoot.querySelector('.sr-only[aria-live]').textContent).toBe('That move is not allowed.');
+        expect(el.selection).toEqual(['task-a']);
+      });
+
+      it('puts a dragged card back when a keyboard drop is cancelled', async () => {
+        const el = await mount();
+        el.addEventListener('before-change', ((event: Event) => event.preventDefault()) as EventListener);
+        const handle = el.shadowRoot.querySelector('.item[data-id="task-a"]') as HTMLElement;
+        el.focusItem('task-a');
+        el._onKeyDown({ key: ' ', code: 'Space', preventDefault() {}, target: handle, composedPath: () => [handle] });
+        expect(el._dragState?.keyboard).toBe(true);
+        el._dragState.dropTarget = { listId: 'done', parentId: null, beforeId: null, mode: 'before' };
+        el._onKeyDown({ key: 'Enter', preventDefault() {}, target: handle, composedPath: () => [handle] });
+        await flushMicrotask();
+
+        expect(el._dragState).toBeNull();
+        expect(order(el)).toBe('ideas:template todo:epic todo:task-a todo:task-b');
+        expect(el.shadowRoot.querySelectorAll('.item-placeholder').length).toBe(0);
+      });
+
+      it('puts a dragged card back when a pointer drop is cancelled', async () => {
+        const el = await mount();
+        el.addEventListener('before-change', ((event: Event) => event.preventDefault()) as EventListener);
+        el._pathFromPoint = () => [el.shadowRoot.querySelector('.list[data-list-id="done"]')];
+        const handle = el.shadowRoot.querySelector('.handle[data-id="task-a"]') as HTMLElement;
+        el._onPointerDown({ pointerId: 81, pointerType: 'mouse', clientX: 5, clientY: 5, preventDefault() {}, composedPath: () => [handle] });
+        el._onPointerMove({ pointerId: 81, clientX: 60, clientY: 60, preventDefault() {} });
+        expect(el._dragState).toBeTruthy();
+        el._onPointerUp({ pointerId: 81, clientX: 60, clientY: 60, preventDefault() {} });
+        await flushMicrotask();
+
+        expect(el._dragState).toBeNull();
+        expect(order(el)).toBe('ideas:template todo:epic todo:task-a todo:task-b');
+        expect(el.shadowRoot.querySelector('.item-ghost')).toBeNull();
+        expect(el.shadowRoot.querySelectorAll('[data-dragging="true"]').length).toBe(0);
+      });
+    });
+  });
+
+  describe('data', () => {
+    const dataLists = [
+      { id: 'ideas', label: 'Ideas', cloneOnDrag: true, data: { color: 'amber' } },
+      { id: 'todo', label: 'To do' },
+      { id: 'done', label: 'Done' },
+    ];
+    const dataItems = [
+      { id: 'template', label: 'Template', listId: 'ideas', data: { sku: 'T-1', tags: ['a', 'b'] } },
+      { id: 'a', label: 'A', listId: 'todo', data: { price: 0, note: '', done: false, none: null } },
+      { id: 'b', label: 'B', listId: 'todo' },
+    ];
+    const mount = async () => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(dataLists));
+      el.setAttribute('items', JSON.stringify(dataItems));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      return el;
+    };
+    const byId = (el: any, id: string) => el.items.find((item: any) => item.id === id);
+
+    it('is kept on items and lists, including falsy values, and left off when not given', async () => {
+      const el = await mount();
+      expect(byId(el, 'template').data).toEqual({ sku: 'T-1', tags: ['a', 'b'] });
+      expect(byId(el, 'a').data).toEqual({ price: 0, note: '', done: false, none: null });
+      expect('data' in byId(el, 'b')).toBe(false);
+      expect('data' in el.lists.find((list: any) => list.id === 'todo')).toBe(false);
+      expect(el.lists.find((list: any) => list.id === 'ideas').data).toEqual({ color: 'amber' });
+
+      // And it is still there after the component wrote the attributes back itself.
+      el.select(['a']);
+      el.moveSelection({ targetListId: 'done' });
+      expect(JSON.parse(el.getAttribute('items')).find((item: any) => item.id === 'a').data).toEqual({ price: 0, note: '', done: false, none: null });
+      expect(JSON.parse(el.getAttribute('lists')).find((list: any) => list.id === 'ideas').data).toEqual({ color: 'amber' });
+    });
+
+    it('comes back with the moved items in change, before-change and canDrop', async () => {
+      const el = await mount();
+      let change: any;
+      let before: any;
+      let asked: any;
+      el.addEventListener('change', ((event: CustomEvent) => (change = event.detail)) as EventListener);
+      el.addEventListener('before-change', ((event: CustomEvent) => (before = event.detail)) as EventListener);
+      el.canDrop = (info: any) => {
+        asked = info;
+        return true;
+      };
+      el.select(['a']);
+      el.moveSelection({ targetListId: 'done' });
+
+      expect(asked.items[0].data).toEqual({ price: 0, note: '', done: false, none: null });
+      expect(before.items.find((item: any) => item.id === 'a').data.price).toBe(0);
+      expect(change.items.find((item: any) => item.id === 'a').data.note).toBe('');
+      expect(change.items.find((item: any) => item.id === 'template').data.sku).toBe('T-1');
+      expect(change.lists.find((list: any) => list.id === 'ideas').data.color).toBe('amber');
+    });
+
+    it('gives a copied card its own data', async () => {
+      const el = await mount();
+      el.select(['template']);
+      el.moveSelection({ targetListId: 'done', clone: true });
+      const copy = el.items.find((item: any) => item.id.includes('--copy-'));
+      expect(copy.data).toEqual({ sku: 'T-1', tags: ['a', 'b'] });
+
+      copy.data.tags.push('changed');
+      expect(el.items.find((item: any) => item.id === copy.id).data.tags).toEqual(['a', 'b']);
+      expect(byId(el, 'template').data.tags).toEqual(['a', 'b']);
+    });
+
+    it('hands out copies, so changing what an event or getter gave you does not change the board', async () => {
+      const el = await mount();
+      const first = byId(el, 'template');
+      first.data.sku = 'HACKED';
+      expect(byId(el, 'template').data.sku).toBe('T-1');
+
+      const lists = el.lists;
+      lists[0].data.color = 'red';
+      expect(el.lists[0].data.color).toBe('amber');
+    });
+
+    it('survives a restore from persistKey', async () => {
+      const key = 'ui-sortable-data-restore';
+      window.localStorage.removeItem(key);
+      const first = document.createElement('ui-sortable') as any;
+      first.setAttribute('persist-key', key);
+      first.setAttribute('lists', JSON.stringify(dataLists));
+      first.setAttribute('items', JSON.stringify(dataItems));
+      document.body.appendChild(first);
+      await flushMicrotask();
+      first.select(['a']);
+      first.moveSelection({ targetListId: 'done' });
+
+      const second = document.createElement('ui-sortable') as any;
+      second.setAttribute('persist-key', key);
+      second.setAttribute('lists', JSON.stringify(dataLists));
+      second.setAttribute('items', JSON.stringify(dataItems));
+      document.body.appendChild(second);
+      await flushMicrotask();
+      expect(byId(second, 'a').listId).toBe('done');
+      expect(byId(second, 'a').data).toEqual({ price: 0, note: '', done: false, none: null });
+    });
+  });
+
+  describe('render functions (without React)', () => {
+    const rlists = [
+      { id: 'todo', label: 'To do', cloneOnDrag: true },
+      { id: 'done', label: 'Done' },
+    ];
+    const ritems = [
+      { id: 'a', label: 'A', listId: 'todo', data: { price: 5 } },
+      { id: 'b', label: 'B', listId: 'todo', disabled: true },
+    ];
+    const mount = async (attrs: Record<string, string> = {}) => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(rlists));
+      el.setAttribute('items', JSON.stringify(ritems));
+      Object.entries(attrs).forEach(([name, value]) => el.setAttribute(name, value));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      return el;
+    };
+    const content = (el: any, id: string) => el.shadowRoot.querySelector(`.item-custom-content[data-item-content-target="${id}"]`) as HTMLElement;
+    const settle = async () => {
+      await flushMicrotask();
+      await flushMicrotask();
+    };
+
+    it('draws a card from a returned node or a string of HTML, with the context', async () => {
+      const el = await mount();
+      const seen: any[] = [];
+      el.renderItem = (item: any, context: any) => {
+        seen.push({ item, context });
+        if (item.id === 'b') return '<em class="html">raw</em>';
+        const node = document.createElement('strong');
+        node.textContent = `${item.label} $${item.data?.price}`;
+        return node;
+      };
+      await settle();
+
+      expect(content(el, 'a').querySelector('strong')?.textContent).toBe('A $5');
+      expect(content(el, 'b').querySelector('em.html')?.textContent).toBe('raw');
+      const a = seen.find((entry) => entry.item.id === 'a');
+      expect(a.item.data).toEqual({ price: 5 });
+      expect(a.context).toMatchObject({ selected: false, disabled: false, dragDisabled: false, cloneOnDrag: true });
+      expect(a.context.list.id).toBe('todo');
+      expect(seen.find((entry) => entry.item.id === 'b').context.disabled).toBe(true);
+    });
+
+    it('keeps the built-in card when the function returns nothing, or throws', async () => {
+      const el = await mount();
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      el.renderItem = (item: any) => {
+        if (item.id === 'b') throw new Error('boom');
+        return undefined;
+      };
+      await settle();
+      expect(content(el, 'a').childNodes.length).toBe(0);
+      expect(content(el, 'b').childNodes.length).toBe(0);
+      expect(el.shadowRoot.querySelector('.item[data-id="a"] .item-title')?.textContent).toBe('A');
+      expect(error).toHaveBeenCalledTimes(1);
+      error.mockRestore();
+    });
+
+    it('draws only the cards whose selection changed, and not the rest, when something is selected', async () => {
+      const el = await mount();
+      const calls: Record<string, number> = {};
+      el.renderItem = (item: any, context: any) => {
+        calls[item.id] = (calls[item.id] || 0) + 1;
+        const node = document.createElement('span');
+        node.textContent = context.selected ? 'on' : 'off';
+        return node;
+      };
+      await settle();
+      const bNode = content(el, 'b').firstChild;
+      const before = { ...calls };
+
+      el.select(['a']);
+      await settle();
+      expect(content(el, 'a').textContent).toBe('on');
+      expect(calls.a).toBe(before.a + 1);
+      expect(calls.b).toBe(before.b);
+      expect(content(el, 'b').firstChild).toBe(bNode);
+
+      el.clearSelection();
+      await settle();
+      expect(content(el, 'a').textContent).toBe('off');
+    });
+
+    it('draws a card again when its data changes, though the data is not shown by default', async () => {
+      const el = await mount();
+      el.renderItem = (item: any) => {
+        const node = document.createElement('span');
+        node.textContent = String(item.data?.price);
+        return node;
+      };
+      await settle();
+      expect(content(el, 'a').textContent).toBe('5');
+
+      el.items = ritems.map((item) => (item.id === 'a' ? { ...item, data: { price: 9 } } : item));
+      await settle();
+      expect(content(el, 'a').textContent).toBe('9');
+    });
+
+    it('does not draw anything again on a render that changes nothing', async () => {
+      const el = await mount();
+      let calls = 0;
+      el.renderItem = () => {
+        calls += 1;
+        return document.createElement('i');
+      };
+      await settle();
+      const drawn = calls;
+      el.requestRender();
+      await settle();
+      expect(calls).toBe(drawn);
+    });
+
+    it('draws list headers and empty states, and tells them how many items the list holds', async () => {
+      const el = await mount();
+      const headers: any[] = [];
+      const empties: any[] = [];
+      el.renderListHeader = (list: any, context: any) => {
+        headers.push({ id: list.id, ...context });
+        return `<b>${list.label} (${context.itemCount})</b>`;
+      };
+      el.renderEmptyState = (list: any, context: any) => {
+        empties.push({ id: list.id, ...context });
+        const node = document.createElement('p');
+        node.textContent = `Nothing in ${list.label}`;
+        return node;
+      };
+      await settle();
+
+      const header = (id: string) => el.shadowRoot.querySelector(`.list-custom-header[data-list-header-target="${id}"]`)?.textContent;
+      expect(header('todo')).toBe('To do (2)');
+      expect(header('done')).toBe('Done (0)');
+      expect(headers.find((entry) => entry.id === 'todo')).toMatchObject({ itemCount: 2, dragLocked: false });
+      // Only the list with no items has an empty state.
+      expect(empties.map((entry) => entry.id)).toEqual(['done']);
+      expect(empties[0]).toMatchObject({ itemCount: 0, dragLocked: false, filterQuery: '' });
+      expect(el.shadowRoot.querySelector('.list-custom-empty[data-list-empty-target="done"]')?.textContent).toBe('Nothing in Done');
+    });
+
+    it('goes back to the built-in markup when a function is removed', async () => {
+      const el = await mount();
+      el.renderItem = () => document.createElement('i');
+      el.renderListHeader = () => 'custom header';
+      await settle();
+      expect(content(el, 'a').childNodes.length).toBe(1);
+
+      el.renderItem = null;
+      el.renderListHeader = null;
+      await settle();
+      expect(content(el, 'a').childNodes.length).toBe(0);
+      expect(el.shadowRoot.querySelector('.list-custom-header')?.childNodes.length).toBe(0);
+      expect(el.renderItem).toBeNull();
+    });
+
+    it('treats a drag-handle-selector match inside a drawn card as a drag handle', async () => {
+      const el = await mount({ 'drag-handle-selector': '.grip' });
+      el.renderItem = (item: any) => `<span class="grip">⠿</span> ${item.label}`;
+      await settle();
+
+      const grip = content(el, 'a').querySelector('.grip') as HTMLElement;
+      expect(grip.getAttribute('data-drag-trigger')).toBe('custom');
+      expect(grip.getAttribute('data-id')).toBe('a');
+
+      const handled = el._dragActivatorFromPath([grip]);
+      expect(handled).toMatchObject({ id: 'a', kind: 'custom' });
+      el._onPointerDown({ pointerId: 91, pointerType: 'mouse', clientX: 1, clientY: 1, preventDefault() {}, composedPath: () => [grip] });
+      el._onPointerMove({ pointerId: 91, clientX: 40, clientY: 40, preventDefault() {} });
+      expect(el._dragState?.movedRootIds).toEqual(['a']);
+      el.cancelDrag();
+    });
+
+    it('puts what a card draws into the ghost that follows the pointer', async () => {
+      const el = await mount();
+      el.renderItem = (item: any) => {
+        const node = document.createElement('span');
+        node.className = 'mine';
+        node.textContent = `custom ${item.label}`;
+        return node;
+      };
+      await settle();
+      const handle = el.shadowRoot.querySelector('.handle[data-id="a"]') as HTMLElement;
+      el._onPointerDown({ pointerId: 92, pointerType: 'mouse', clientX: 1, clientY: 1, preventDefault() {}, composedPath: () => [handle] });
+      el._onPointerMove({ pointerId: 92, clientX: 40, clientY: 40, preventDefault() {} });
+      expect(el.shadowRoot.querySelector('.item-ghost .mine')?.textContent).toBe('custom A');
+      el.cancelDrag();
+    });
+  });
+
+  describe('focus and feedback while dragging', () => {
+    const mount = async () => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(lists));
+      el.setAttribute('items', JSON.stringify(items));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      await flushMicrotask();
+      return el;
+    };
+    const settle = async () => {
+      await flushMicrotask();
+      await flushMicrotask();
+    };
+
+    it('does not take the focus when it first draws, or when it redraws while someone is typing elsewhere', async () => {
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+      input.focus();
+
+      const el = await mount();
+      expect(el.shadowRoot.activeElement).toBeNull();
+      expect(document.activeElement).toBe(input);
+
+      el.setAttribute('filter-query', 'Task');
+      await settle();
+      el.setAttribute('filter-query', '');
+      await settle();
+      el.items = [...items, { id: 'late', label: 'Late', listId: 'done' }];
+      await settle();
+      expect(document.activeElement).toBe(input);
+      input.remove();
+    });
+
+    it('still puts the focus back on its card when a render replaced the card that had it', async () => {
+      const el = await mount();
+      el.focusItem('task-b');
+      await settle();
+      expect(el.shadowRoot.activeElement?.getAttribute('data-id')).toBe('task-b');
+
+      el.items = [...items, { id: 'late', label: 'Late', listId: 'done' }];
+      await settle();
+      expect(el.shadowRoot.activeElement?.getAttribute('data-id')).toBe('task-b');
+    });
+
+    it('focuses the dropped card, because that was asked for', async () => {
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+      input.focus();
+      const el = await mount();
+      el.select(['task-a']);
+      el.moveSelection({ targetListId: 'done' });
+      await settle();
+      expect(el.shadowRoot.activeElement?.getAttribute('data-id')).toBe('task-a');
+      input.remove();
+    });
+
+    it('lets go of a highlight a moment after the pointer has stopped over a place that does not take the drop', async () => {
+      vi.useFakeTimers();
+      try {
+        const el = await mount();
+        el._dragState = {
+          snapshot: el.items.map((item: any) => ({ ...item })),
+          movedRootIds: ['task-a'],
+          originId: 'task-a',
+          clone: false,
+          keyboard: false,
+          dropTarget: { listId: 'todo', parentId: null, beforeId: 'task-b', mode: 'before' },
+          committed: false,
+        };
+        el._queueDropTarget(null, performance.now());
+        // No more pointer events: the old target is still there until the delay is up...
+        expect(el._dragState.dropTarget).not.toBeNull();
+        vi.advanceTimersByTime(200);
+        // ...and then it is let go.
+        expect(el._dragState.dropTarget).toBeNull();
+        el.cancelDrag();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('shows on the lifted card when the pointer is over a place that refuses it, and clears it again', async () => {
+      const el = await mount();
+      el.canDrop = (info: any) => info.targetListId !== 'done';
+      const handle = el.shadowRoot.querySelector('.handle[data-id="task-a"]') as HTMLElement;
+      el._onPointerDown({ pointerId: 95, pointerType: 'mouse', clientX: 1, clientY: 1, preventDefault() {}, composedPath: () => [handle] });
+      el._onPointerMove({ pointerId: 95, clientX: 30, clientY: 30, preventDefault() {} });
+      const ghost = () => el.shadowRoot.querySelector('.item-ghost') as HTMLElement;
+
+      el._pathFromPoint = () => [el.shadowRoot.querySelector('.list[data-list-id="done"]')];
+      el._onPointerMove({ pointerId: 95, clientX: 60, clientY: 60, preventDefault() {} });
+      expect(ghost().hasAttribute('data-refused')).toBe(true);
+
+      el._pathFromPoint = () => [el.shadowRoot.querySelector('.list[data-list-id="todo"]')];
+      el._onPointerMove({ pointerId: 95, clientX: 70, clientY: 70, preventDefault() {} });
+      expect(ghost().hasAttribute('data-refused')).toBe(false);
+
+      // Over nothing at all there is nothing to refuse.
+      el._pathFromPoint = () => [];
+      el._onPointerMove({ pointerId: 95, clientX: 900, clientY: 900, preventDefault() {} });
+      expect(ghost().hasAttribute('data-refused')).toBe(false);
+      el.cancelDrag();
     });
   });
 });
