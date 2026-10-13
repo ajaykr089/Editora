@@ -519,6 +519,8 @@ export class UIForm extends ElementBase {
       window.addEventListener('beforeunload', this._onBeforeUnload as EventListener);
     }
 
+    this._adoptControls();
+
     queueMicrotask(() => {
       if (!this.isConnected || this._baselineReady) return;
       this._setBaseline(this.getValues(), false);
@@ -573,6 +575,17 @@ export class UIForm extends ElementBase {
     event.stopPropagation();
     if (this.hasAttribute('disabled')) return;
     void this.submit();
+  }
+
+  // Markup that is on the page before the script that defines the elements is upgraded in the order the elements were
+  // defined, not in document order. A control defined before <ui-form> (ui-input, say) is upgraded first, finds no
+  // registerField() on the form yet, and skips registration for good: the form then has no values and validates
+  // nothing. Now that the form is upgraded, ask the controls inside it to register again.
+  private _adoptControls(): void {
+    this.querySelectorAll('[name]').forEach((node) => {
+      const register = (node as { _registerWithForm?: () => void })._registerWithForm;
+      if (typeof register === 'function' && node.closest('ui-form') === this) register.call(node);
+    });
   }
 
   registerField(name: string, field: any) {

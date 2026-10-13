@@ -1,0 +1,10 @@
+@import "@editora/themes/themes/default.css";
+@import "@editora/themes/themes/dark.css";
+
+:is([data-theme="dark"], .editora-theme-dark) {
+  --rte-color-border: #22d3ee;
+}
+
+:is([data-theme="dark"], .editora-theme-dark) .rte-toolbar-button {
+  border-radius: 8px;
+}

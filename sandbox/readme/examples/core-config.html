@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css" />
+<script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"></script>
+
+<!-- A short toolbar, the dark theme and a shorter editor -->
+<editora-editor
+  height="220"
+  theme="dark"
+  plugins="bold italic underline list link history"
+  toolbar="undo redo | bold italic underline | bullist numlist | link"
+  placeholder="Write a note..."
+>
+  <p>A compact editor for comments and notes.</p>
+</editora-editor>
+
+<!-- Read-only: formatted content that cannot be edited -->
+<editora-editor height="140" readonly="true" plugins="bold italic" toolbar="false">
+  <p>This content is <strong>read-only</strong>.</p>
+</editora-editor>

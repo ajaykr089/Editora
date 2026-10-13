@@ -102,6 +102,16 @@ export { TimePicker } from './components/TimePicker';
 export { DateTimePicker } from './components/DateTimePicker';
 export { DateRangeTimePicker } from './components/DateRangeTimePicker';
 export { Gantt } from './components/Gantt';
+export type {
+  GanttBarVariant,
+  GanttLink,
+  GanttLinkSelectDetail,
+  GanttSort,
+  GanttTask,
+  GanttTaskChangeDetail,
+  GanttTaskType,
+  GanttZoom,
+} from './components/Gantt';
 export { Stepper } from './components/Stepper';
 export { Wizard } from './components/Wizard';
 export { Rating } from './components/Rating';

@@ -1,564 +1,368 @@
-# @editora/react
+<h1 align="center">@editora/react</h1>
 
-[![Version](https://img.shields.io/npm/v/@editora/react)](https://www.npmjs.com/package/@editora/react)
-[![License](https://img.shields.io/npm/l/@editora/react)](https://github.com/ajaykr089/Editora/blob/main/LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Size](https://img.shields.io/bundlephobia/minzip/@editora/react)](https://bundlephobia.com/package/@editora/react)
+<p align="center">
+  A rich text editor for React: one component, a toolbar that comes from the plugins you choose, controlled or
+  uncontrolled, with light and dark themes.
+</p>
 
-> [!IMPORTANT]
-> **Live Website:** https://editora-ecosystem.netlify.app/  
-> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+<p align="center">
+  <a href="https://www.npmjs.com/package/@editora/react"><img src="https://img.shields.io/npm/v/@editora/react.svg" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@editora/react"><img src="https://img.shields.io/npm/dm/@editora/react.svg" alt="npm downloads"></a>
+  <a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/@editora/react.svg" alt="license"></a>
+  <a href="https://www.npmjs.com/package/@editora/react"><img src="https://img.shields.io/npm/types/@editora/react.svg" alt="TypeScript types included"></a>
+</p>
 
+<p align="center">
+  <a href="https://editora-ecosystem.netlify.app/">Website</a> ·
+  <a href="https://editora-ecosystem-storybook.netlify.app/">Storybook</a> ·
+  <a href="https://github.com/ajaykr089/Editora">GitHub</a>
+</p>
 
-<div align="center">
-  <img src="../../images/editora_logo_blocks.svg" alt="Editora Logo" width="200" height="auto">
-</div>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/react/docs/images/document-editor.png" alt="The editor in a React page: a toolbar above a heading, a paragraph and an editable table, with a status bar showing the word count" width="900">
+</p>
 
-<div align="center">
-  <img src="../../images/features-overview-2.png" alt="Editora React - Advanced Tables" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-  <p><em>React components for Editora Rich Text Editor with hooks-based API</em></p>
-</div>
+## Features
 
-React components for Editora Rich Text Editor - A modern, extensible WYSIWYG editor.
+- **One component.** `<EditoraEditor />` gives you the editing area, the toolbar and an optional status bar.
+- **Choose your plugins.** The toolbar is built from the plugins you pass in, so you ship only what you use. There are
+  more than fifty in [`@editora/plugins`](https://www.npmjs.com/package/@editora/plugins): tables, lists, colours,
+  code, math, comments, track changes and more.
+- **Controlled or uncontrolled**, with `value` and `onChange`, or `defaultValue`. The value is HTML.
+- **Themes.** Light, dark and acme, applied to everything inside an element with `data-theme`.
+- **An imperative API** for the cases where state is not enough: read and replace the HTML, run commands.
+- **Typed.** The props and the editor API are typed; the typings ship with the package.
+- Tested with React 18 and 19 (the peer range is React 16.8 to 20). Server rendering needs one extra step; see [Next.js and server rendering](#nextjs-and-server-rendering).
 
-## 📦 Installation
+## Install
 
 ```bash
 npm install @editora/react @editora/core @editora/plugins @editora/themes
 ```
 
-### Runtime Dependency Matrix
+`@editora/core` is required. `@editora/plugins` (the toolbar items) and `@editora/themes` (the styles) are optional
+peer dependencies, but you will want both.
 
-- Required: `@editora/react`, `@editora/core`, `react`, `react-dom`
-- Optional but recommended: `@editora/plugins` (toolbar/plugin features), `@editora/themes` (default/dark/acme CSS)
-- When using `@editora/plugins`, also import `@editora/plugins/styles.css` for plugin UI surfaces (table toolbar, dialogs, pickers).
-- For plugin imports: use `@editora/plugins` (full), `@editora/plugins/lite` (common), `@editora/plugins/enterprise` (advanced), or per-plugin subpaths like `@editora/plugins/bold`.
-- All plugin entry paths are free and fully customizable.
-
-Minimal install:
-
-```bash
-npm install @editora/react @editora/core react react-dom
-```
-
-Full-featured install:
-
-```bash
-npm install @editora/react @editora/core @editora/plugins @editora/themes react react-dom
-```
-
-## 🎯 Overview
-
-The React package provides ready-to-use React components for building rich text editing experiences. It includes hooks, components, and utilities specifically designed for React applications.
-
-## ✨ Features
-
-- **React Hooks**: Modern hooks-based API (`useEditor`, `useEditorState`)
-- **TypeScript**: Full type safety and IntelliSense support
-- **SSR Compatible**: Works with Next.js and server-side rendering
-- **Tree Shakeable**: Optimized bundle sizes
-- **Accessible**: WCAG 2.1 compliant
-- **Multi-Instance**: Support for multiple editors on one page
-
-## 🚀 Quick Start
-
-### Basic Editor
+## Quick start
 
 ```tsx
+import { useState } from 'react';
 import { EditoraEditor } from '@editora/react';
-import { BoldPlugin, ItalicPlugin } from '@editora/plugins';
+import {
+  BoldPlugin,
+  HeadingPlugin,
+  HistoryPlugin,
+  ItalicPlugin,
+  LinkPlugin,
+  ListPlugin,
+  UnderlinePlugin,
+} from '@editora/plugins/lite';
 
-import "@editora/plugins/styles.css";
-import "@editora/themes/themes/default.css";
+import '@editora/themes/themes/default.css';
+import '@editora/plugins/styles.css';
 
-function App() {
-  const [content, setContent] = useState('<p>Start writing...</p>');
+// Create the plugins once, outside the component (or with useMemo), so the editor is not rebuilt on every render.
+const plugins = [
+  HeadingPlugin(),
+  BoldPlugin(),
+  ItalicPlugin(),
+  UnderlinePlugin(),
+  ListPlugin(),
+  LinkPlugin(),
+  HistoryPlugin(),
+];
+
+const toolbar = {
+  items: ['undo', 'redo', 'heading', 'bold', 'italic', 'underline', 'link', 'bullist', 'numlist'],
+};
+
+export default function App() {
+  const [html, setHtml] = useState('<h2>Launch briefing</h2><p>Start writing, or paste something in.</p>');
 
   return (
     <EditoraEditor
-      value={content}
-      onChange={setContent}
-      plugins={[
-        BoldPlugin(),
-        ItalicPlugin()
-      ]}
-      placeholder="Type something..."
+      value={html}
+      onChange={setHtml}
+      plugins={plugins}
+      toolbar={toolbar}
+      placeholder="Start writing..."
     />
   );
 }
 ```
 
-### Full-Featured Editor
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/react/docs/images/quick-start.png" alt="The quick-start editor: undo, redo, a heading menu, bold, italic, underline, a link and two list buttons, above a heading and a paragraph" width="900">
+</p>
+
+Import plugins from `@editora/plugins/lite`, not from `@editora/plugins`: the root entry bundles every plugin, so one
+`BoldPlugin` from it costs about 125 KB gzipped, against about 24 KB from `lite` (see
+[`@editora/plugins`](https://www.npmjs.com/package/@editora/plugins#choose-an-entry-point)).
+
+## A full document editor
+
+Add more plugins and the toolbar grows with them; it folds the buttons that do not fit into a menu. The options below
+turn on the status bar, clean pasting, spell check, the accessibility checker and input sanitising.
 
 ```tsx
 import { EditoraEditor } from '@editora/react';
 import {
+  BackgroundColorPlugin,
+  BlockquotePlugin,
   BoldPlugin,
-  ItalicPlugin,
-  UnderlinePlugin,
+  ChecklistPlugin,
+  ClearFormattingPlugin,
   HeadingPlugin,
-  ParagraphPlugin,
-  ListPlugin,
+  HistoryPlugin,
+  ItalicPlugin,
   LinkPlugin,
-  MediaManagerPlugin,
+  ListPlugin,
+  StrikethroughPlugin,
   TablePlugin,
-  CodeSamplePlugin,
-  HistoryPlugin
-} from '@editora/plugins';
-
-import "@editora/plugins/styles.css";
-import "@editora/themes/themes/default.css";
-
-function FullEditor() {
-  const [content, setContent] = useState('');
-
-  const plugins = [
-    BoldPlugin(),
-    ItalicPlugin(),
-    UnderlinePlugin(),
-    HeadingPlugin(),
-    ListPlugin(),
-    MediaManagerPlugin()
-  ];
-
-  return (
-    <div className="editor-container">
-      <EditoraEditor
-        value={content}
-        onChange={setContent}
-        plugins={plugins}
-        placeholder="Start writing your document..."
-        autofocus
-      />
-    </div>
-  );
-}
-```
-
-### Performance + Accessibility Config
-
-```tsx
-<EditoraEditor
-  plugins={[BoldPlugin(), ItalicPlugin()]}
-  accessibility={{
-    enableARIA: true,
-    keyboardNavigation: true,
-    checker: true, // auto-enables a11y checker if factory/plugin is available
-  }}
-  performance={{
-    debounceInputMs: 120,
-    viewportOnlyScan: true,
-  }}
-/>
-```
-
-### Content Sizing (Scrollable vs Auto Height)
-
-```tsx
-// Default: fixed layout + scrollable content area
-<EditoraEditor plugins={[BoldPlugin()]} />
-
-// Optional: grow editor content height with content
-<EditoraEditor
-  plugins={[BoldPlugin()]}
-  content={{
-    autoHeight: true,
-    minHeight: 220,
-    maxHeight: 700, // optional cap; keeps scrolling after cap
-  }}
-/>
-```
-
-### With Custom Toolbar
-
-```tsx
-import { EditoraEditor, Toolbar, ToolbarButton } from '@editora/react';
-import { useEditor } from '@editora/react/hooks';
-
-function EditorWithCustomToolbar() {
-  const { editor, html, setHtml } = useEditor({
-    plugins: [/* your plugins */],
-    content: '<p>Hello</p>'
-  });
-
-  return (
-    <div>
-      <Toolbar editor={editor}>
-        <ToolbarButton command="bold" icon="bold" />
-        <ToolbarButton command="italic" icon="italic" />
-        <ToolbarButton command="underline" icon="underline" />
-        <div className="separator" />
-        <ToolbarButton command="heading" level={1} icon="h1" />
-        <ToolbarButton command="heading" level={2} icon="h2" />
-      </Toolbar>
-      
-      <div 
-        ref={(el) => el && editor.mount(el)}
-        className="editor-content"
-      />
-    </div>
-  );
-}
-```
-
-## 📖 API Reference
-
-### Components
-
-#### `<EditoraEditor />`
-
-Main editor component with built-in toolbar.
-
-**Props:**
-
-```typescript
-interface EditoraEditorProps {
-  // Content
-  value?: string;
-  defaultValue?: string;
-  onChange?: (html: string) => void;
-  
-  // Plugins
-  plugins?: Plugin[];
-  
-  // Configuration
-  placeholder?: string;
-  readonly?: boolean;
-  autofocus?: boolean;
-  maxLength?: number;
-  
-  // Styling
-  className?: string;
-  style?: React.CSSProperties;
-  
-  // Toolbar
-  showToolbar?: boolean;
-  toolbarItems?: ToolbarItem[];
-  toolbarPosition?: 'top' | 'bottom' | 'floating';
-  
-  // Events
-  onFocus?: () => void;
-  onBlur?: () => void;
-  onReady?: (editor: Editor) => void;
-}
-```
-
-#### `<Toolbar />`
-
-Customizable toolbar component.
-
-**Props:**
-
-```typescript
-interface ToolbarProps {
-  editor: Editor;
-  items?: ToolbarItem[];
-  position?: 'top' | 'bottom' | 'floating';
-  className?: string;
-}
-```
-
-#### `<ToolbarButton />`
-
-Individual toolbar button.
-
-**Props:**
-
-```typescript
-interface ToolbarButtonProps {
-  command: string;
-  icon?: React.ReactNode;
-  label?: string;
-  active?: boolean;
-  disabled?: boolean;
-  onClick?: () => void;
-}
-```
-
-### Hooks
-
-#### `useEditor(config)`
-
-Main hook for editor management.
-
-```typescript
-const { editor, html, json, setHtml, setJson } = useEditor({
-  plugins: [...],
-  content: '<p>Initial content</p>',
-  onChange: (html) => console.log(html)
-});
-```
-
-**Returns:**
-- `editor`: Editor instance
-- `html`: Current HTML content
-- `json`: Current JSON content
-- `setHtml`: Function to set HTML content
-- `setJson`: Function to set JSON content
-
-#### `useEditorState(editor)`
-
-Hook for accessing editor state.
-
-```typescript
-const { 
-  isFocused, 
-  isEmpty, 
-  canUndo, 
-  canRedo 
-} = useEditorState(editor);
-```
-
-#### `useEditorCommands(editor)`
-
-Hook for editor commands.
-
-```typescript
-const { 
-  bold, 
-  italic, 
-  undo, 
-  redo,
-  insertText,
-  insertImage
-} = useEditorCommands(editor);
-```
-
-## 🎨 Theming
-
-### Using Built-in Themes
-
-```tsx
-
-import "@editora/themes/themes/default.css";
-import "@editora/themes/themes/dark.css";
-import "@editora/themes/themes/acme.css";
-
-<div data-theme="dark">
-  <EditoraEditor />
-</div>
-```
-
-### Custom Theme
-
-```css
-:is([data-theme="custom-brand"], .editora-theme-custom-brand) {
-  --rte-color-primary: #2563eb;
-  --rte-color-primary-hover: #1d4ed8;
-  --rte-color-text-primary: #0f172a;
-  --rte-color-bg-primary: #ffffff;
-  --rte-color-border: #cbd5e1;
-}
-
-[data-theme="dark"] {
-  --rte-color-primary: #58a6ff;
-}
-```
-
-Apply it in React with a wrapper:
-
-```tsx
-<div data-theme="custom-brand">
-  <EditoraEditor />
-</div>
-```
-
-## 🔌 Plugin Configuration
-
-### Bold Plugin
-
-```tsx
-import { BoldPlugin } from '@editora/plugins';
-
-const boldPlugin = BoldPlugin({
-  keyboard: 'Mod-b',
-  icon: <BoldIcon />
-});
-```
-
-### Image Plugin with Upload
-
-```tsx
-import { MediaManagerPlugin } from '@editora/plugins';
-
-const imagePlugin = MediaManagerPlugin({
-  upload: async (file) => {
-    const url = await uploadToServer(file);
-    return url;
-  },
-  validate: (file) => {
-    return file.size < 5 * 1024 * 1024; // 5MB limit
-  },
-  resize: true,
-  maxWidth: 1200
-});
-```
-
-### Link Plugin
-
-```tsx
-import { LinkPlugin } from '@editora/plugins';
-
-const linkPlugin = LinkPlugin({
-  openOnClick: false,
-  validate: (url) => {
-    return url.startsWith('http') || url.startsWith('https');
-  },
-  onLinkClick: (url) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
-  }
-});
-```
-
-## 💡 Examples
-
-### Form Integration
-
-```tsx
-function BlogPostForm() {
-  const [formData, setFormData] = useState({
-    title: '',
-    content: ''
-  });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    await fetch('/api/posts', {
-      method: 'POST',
-      body: JSON.stringify(formData)
-    });
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        value={formData.title}
-        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-        placeholder="Post title"
-      />
-      
-      <EditoraEditor
-        value={formData.content}
-        onChange={(content) => setFormData({ ...formData, content })}
-        plugins={[/* ... */]}
-      />
-      
-      <button type="submit">Publish</button>
-    </form>
-  );
-}
-```
-
-### Controlled Editor with Save
-
-```tsx
-function DocumentEditor() {
-  const [content, setContent] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      await fetch('/api/save', {
-        method: 'POST',
-        body: JSON.stringify({ content })
-      });
-      alert('Saved successfully!');
-    } catch (error) {
-      alert('Failed to save');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  return (
-    <div>
-      <div className="toolbar-actions">
-        <button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? 'Saving...' : 'Save'}
-        </button>
-      </div>
-      
-      <EditoraEditor
-        value={content}
-        onChange={setContent}
-        plugins={[/* ... */]}
-      />
-    </div>
-  );
-}
-```
-
-### Read-Only Mode
-
-```tsx
-function ArticlePreview({ html }) {
+  TextAlignmentPlugin,
+  TextColorPlugin,
+  UnderlinePlugin,
+} from '@editora/plugins/lite';
+import { A11yCheckerPlugin, CommentsPlugin } from '@editora/plugins/enterprise';
+import { CodeSamplePlugin } from '@editora/plugins/code-sample';
+import { EmojisPlugin } from '@editora/plugins/emojis';
+import { MathPlugin } from '@editora/plugins/math';
+
+import '@editora/themes/themes/default.css';
+import '@editora/plugins/styles.css';
+
+const plugins = [
+  HeadingPlugin(),
+  BoldPlugin(),
+  ItalicPlugin(),
+  UnderlinePlugin(),
+  StrikethroughPlugin(),
+  ListPlugin(),
+  ChecklistPlugin(),
+  LinkPlugin(),
+  BlockquotePlugin(),
+  HistoryPlugin(),
+  ClearFormattingPlugin(),
+  TextAlignmentPlugin(),
+  TextColorPlugin(),
+  BackgroundColorPlugin(),
+  TablePlugin(),
+  CodeSamplePlugin(),
+  MathPlugin(),
+  EmojisPlugin(),
+  CommentsPlugin(),
+  A11yCheckerPlugin(),
+];
+
+const initialHtml = `
+  <h2>Quarterly business review</h2>
+  <p>Revenue grew <strong>18%</strong> year on year. The numbers below feed the board summary.</p>
+  <table>
+    <tr><th>Region</th><th>Q1</th><th>Q2</th></tr>
+    <tr><td>Europe</td><td>1.2M</td><td>1.4M</td></tr>
+    <tr><td>Americas</td><td>2.1M</td><td>2.5M</td></tr>
+  </table>
+  <p>Next steps: confirm the forecast, then publish the report.</p>
+`;
+
+export default function DocumentEditor() {
   return (
     <EditoraEditor
-      value={html}
-      readonly
-      showToolbar={false}
-      className="article-preview"
+      defaultValue={initialHtml}
+      plugins={plugins}
+      toolbar={{ sticky: true, showMoreOptions: true }}
+      statusbar={{ enabled: true }}
+      paste={{ clean: true, keepFormatting: true, convertWord: true }}
+      spellcheck={{ enabled: true, provider: 'browser' }}
+      accessibility={{ enableARIA: true, keyboardNavigation: true, checker: true }}
+      security={{ sanitizeOnInput: true, sanitizeOnPaste: true }}
+      content={{ minHeight: 260 }}
     />
   );
 }
 ```
 
-## 🔧 TypeScript Support
+## Props
 
-The package is written in TypeScript and includes comprehensive type definitions.
+| Prop | Type | |
+| --- | --- | --- |
+| `value` | `string` | The HTML, for a controlled editor. Use it with `onChange`. |
+| `defaultValue` | `string` | The starting HTML, for an uncontrolled editor. |
+| `onChange` | `(html: string) => void` | Called with the HTML after every edit. |
+| `plugins` | `Plugin[]` | The plugins to use. They decide what the toolbar offers. Create them once. |
+| `pluginConfig` | `Record<string, unknown>` | Settings passed to plugins by name. |
+| `toolbar` | `{ items?, sticky?, showMoreOptions? }` | `items` is a string such as `'undo redo \| bold italic'` or an array of names (see [Toolbar items](#toolbar-items)). `sticky` keeps the toolbar in view while the page scrolls, and `showMoreOptions` folds the buttons that do not fit into a menu. |
+| `floatingToolbar` | `boolean \| { enabled? }` | A toolbar that appears next to the selected text. |
+| `statusbar` | `{ enabled?, position? }` | A status bar with the cursor position and the word and character counts. `position` is `'top'` or `'bottom'`. |
+| `readonly` | `boolean` | Shows the content without letting the user edit it. |
+| `placeholder` | `string` | Text shown while the editor is empty. |
+| `content` | `{ minHeight?, maxHeight?, autoHeight?, sanitize?, allowedTags?, allowedAttributes? }` | The size of the editing area, in pixels, and what HTML it keeps. With `autoHeight` the area grows with the content, up to `maxHeight`. |
+| `paste` | `{ clean?, keepFormatting?, convertWord? }` | How pasted content is handled. |
+| `security` | `{ sanitizeOnPaste?, sanitizeOnInput? }` | Sanitising of pasted and typed content. |
+| `history` | `{ maxSteps?, debounceMs? }` | The undo history. |
+| `language` | `{ locale?, direction? }` | The language, and `'ltr'` or `'rtl'` text. |
+| `spellcheck` | `{ enabled?, provider?, apiUrl?, apiHeaders? }` | `provider` is `'browser'`, `'local'` or `'api'`. |
+| `autosave` | `{ enabled?, intervalMs?, storageKey?, provider?, apiUrl? }` | Saves the content to `localStorage` or an API. |
+| `accessibility` | `{ enableARIA?, keyboardNavigation?, checker? }` | ARIA attributes, keyboard navigation and the accessibility checker. |
+| `performance` | `{ debounceInputMs?, viewportOnlyScan? }` | Input debouncing, and skipping work for editors that are off screen. |
+| `media` / `mediaConfig` | `{ uploadUrl?, libraryUrl?, maxFileSize?, allowedTypes?, ... }` | Where images and video are uploaded and listed. |
+| `onInit` | `(editor: EditorAPI) => void` | Called with the [editor API](#the-editor-api) once the editor is ready. |
+| `onDestroy` | `() => void` | Called when the editor is removed. |
+| `id`, `className` | `string` | Passed to the editor's container. |
 
-```typescript
-import type { 
-  Editor, 
-  Plugin, 
-  ToolbarItem,
-  EditorConfig 
-} from '@editora/react';
+`menubar` is accepted but nothing renders a menu bar yet.
 
-const config: EditorConfig = {
-  plugins: [],
-  onChange: (html: string) => {
-    // TypeScript knows html is a string
-  }
-};
-```
+## Toolbar items
 
-## 📱 Responsive Design
+`toolbar.items` picks and orders the buttons. A string separates groups with `|`; an array lists the names. A name
+matches a plugin's button, so a plugin you did not pass in adds nothing. If none of the names match, the toolbar falls back to every button the plugins provide. These names work:
 
-The editor automatically adapts to different screen sizes:
+| Name | Plugin |
+| --- | --- |
+| `undo`, `redo` | `HistoryPlugin` |
+| `bold`, `italic`, `underline`, `strikethrough` | the plugin of the same name |
+| `heading` | `HeadingPlugin`: a menu for paragraph and the heading levels |
+| `bullist`, `numlist`, `checklist` | `ListPlugin`, `ChecklistPlugin` |
+| `link`, `anchor` | `LinkPlugin`, `AnchorPlugin` |
+| `image`, `video` | `MediaManagerPlugin` |
+| `table`, `blockquote`, `math`, `footnote` | the plugin of the same name |
+| `codeblock`, `sourceview` | `CodeSamplePlugin`, `CodePlugin` |
+| `textcolor`, `backgroundcolor` | `TextColorPlugin`, `BackgroundColorPlugin` |
+| `fontsize`, `fontfamily`, `lineheight` | the plugin of the same name |
+| `textalignment`, `indent`, `outdent`, `direction`, `capitalization` | the matching plugin |
+| `clearformatting`, `formatpainter` | the matching plugin |
+| `specialcharacters`, `pagebreak`, `fullscreen`, `preview`, `print` | the matching plugin |
+| `comments`, `trackchanges`, `spellcheck`, `a11ychecker` | the matching plugin |
+| `mergetag`, `mention`, `template`, `slashcommands`, `embediframe` | the matching plugin |
+
+The same names work in the [plugin catalog](https://www.npmjs.com/package/@editora/plugins#plugin-catalog), which lists
+the one for every plugin. A plugin's own command name also works: `openEmojiDialog` is the button of `EmojisPlugin`.
+
+## The editor API
+
+`onInit` hands you an `EditorAPI`. Keep it in a ref to read or change the content from outside React state:
 
 ```tsx
-<EditoraEditor
-  // Toolbar collapses to hamburger menu on mobile
-  toolbarBreakpoint={768}
-  
-  // Custom mobile configuration
-  mobileConfig={{
-    toolbarPosition: 'bottom',
-    compactMode: true
-  }}
-/>
+import { useRef, useState } from 'react';
+import { EditoraEditor, type EditorAPI } from '@editora/react';
+import { BoldPlugin, HistoryPlugin, ItalicPlugin } from '@editora/plugins/lite';
+
+import '@editora/themes/themes/default.css';
+import '@editora/plugins/styles.css';
+
+const plugins = [BoldPlugin(), ItalicPlugin(), HistoryPlugin()];
+
+export default function WithEditorApi() {
+  const editor = useRef<EditorAPI | null>(null);
+  const [saved, setSaved] = useState('');
+
+  return (
+    <>
+      <EditoraEditor
+        defaultValue="<p>Select some text, then use the buttons below.</p>"
+        plugins={plugins}
+        onInit={(api) => {
+          editor.current = api;
+        }}
+      />
+
+      <button onClick={() => editor.current?.execCommand('toggleBold')}>Bold</button>
+      <button onClick={() => editor.current?.setHTML('<p>Replaced from outside.</p>')}>Replace</button>
+      <button onClick={() => setSaved(editor.current?.getHTML() ?? '')}>Read HTML</button>
+
+      <pre>{saved}</pre>
+    </>
+  );
+}
 ```
 
-## ♿ Accessibility
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/react/docs/images/editor-api.png" alt="An editor with bold text selected, three buttons under it, and the resulting HTML printed below" width="900">
+</p>
 
-The editor is fully accessible and follows WCAG 2.1 guidelines:
+| Method | |
+| --- | --- |
+| `getHTML()` / `setHTML(html)` | Read or replace the content. |
+| `execCommand(name, value?)` | Run a command, as the toolbar does: `toggleBold`, `toggleItalic`, `toggleBulletList`, `insertTable`, `undo`, and so on. |
+| `registerCommand(name, fn)` | Add your own command. |
+| `onChange(fn)` | Subscribe to changes; returns an unsubscribe function. |
+| `getState()` | The editor's state. |
+| `focus()` / `blur()` / `destroy()` | Focus, blur, or tear the editor down. |
 
-- Keyboard navigation support
-- Screen reader announcements
-- ARIA attributes
-- Focus management
-- High contrast mode support
+## Themes
 
-## 📄 License
+Import the theme stylesheets you need, then put `data-theme` on any element around the editor:
+
+```tsx
+import { EditoraEditor } from '@editora/react';
+import { BoldPlugin, HistoryPlugin, ItalicPlugin, LinkPlugin, UnderlinePlugin } from '@editora/plugins/lite';
+
+import '@editora/themes/themes/default.css';
+import '@editora/themes/themes/dark.css';
+import '@editora/themes/themes/acme.css';
+import '@editora/plugins/styles.css';
+
+const plugins = [BoldPlugin(), ItalicPlugin(), UnderlinePlugin(), LinkPlugin(), HistoryPlugin()];
+
+// A theme applies to everything inside an element that carries data-theme.
+export default function Themes() {
+  return (
+    <>
+      <div data-theme="dark">
+        <EditoraEditor defaultValue="<p>This editor follows the <strong>dark</strong> theme.</p>" plugins={plugins} />
+      </div>
+
+      <div data-theme="acme">
+        <EditoraEditor defaultValue="<p>This one follows the <strong>acme</strong> theme.</p>" plugins={plugins} />
+      </div>
+    </>
+  );
+}
+```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/react/docs/images/themes.png" alt="Two editors: one in the dark theme, one in the acme theme with a pale blue toolbar" width="900">
+</p>
+
+## Next.js and server rendering
+
+The editor needs the browser's DOM when its code is loaded, so it cannot be imported on the server. In Next.js a
+`'use client'` file is still rendered on the server first, which fails with `HTMLElement is not defined`. Load the
+editor on the client only, with `next/dynamic`:
+
+```tsx
+'use client';
+
+import dynamic from 'next/dynamic';
+
+// Editor.tsx is a client component that renders <EditoraEditor />, as in the quick start.
+const Editor = dynamic(() => import('./Editor'), {
+  ssr: false,
+  loading: () => <p>Loading editor...</p>,
+});
+
+export default function Page() {
+  return <Editor />;
+}
+```
+
+This is checked with Next.js 15 and React 19. In other frameworks, do the same: import the editor only in code that
+runs in the browser.
+
+## Lower-level exports
+
+For custom layouts the package also exports `Toolbar`, `EditorContent`, `InlineMenu`, `useKeyboardShortcuts` and
+`mergeConfig`; see the typings. `EditoraEditor` is also exported as `RichTextEditor`.
+
+## The rest of the family
+
+| Package | |
+| --- | --- |
+| [`@editora/plugins`](https://www.npmjs.com/package/@editora/plugins) | More than fifty plugins for the toolbar. |
+| [`@editora/themes`](https://www.npmjs.com/package/@editora/themes) | Light, dark and acme themes. |
+| [`@editora/core`](https://www.npmjs.com/package/@editora/core) | The editor engine, and the `<editora-editor>` web component for any other framework. |
+| [`@editora/markdown-editor`](https://www.npmjs.com/package/@editora/markdown-editor) | A markdown editor with a live preview. |
+
+## License
 
 MIT © [Ajay Kumar](https://github.com/ajaykr089)
-
-## 🔗 Links
-
-- [Documentation](https://editora-ecosystem.netlify.app/)
-- [GitHub Repository](https://github.com/ajaykr089/Editora)
-- [Issue Tracker](https://github.com/ajaykr089/Editora/issues)
-- [npm Package](https://www.npmjs.com/package/@editora/react)

@@ -58,6 +58,7 @@ export const Pagination = React.forwardRef<PaginationElement, PaginationProps>(f
   forwardedRef
 ) {
   const ref = React.useRef<PaginationElement | null>(null);
+  const setByProps = React.useRef(new Set<string>());
 
   React.useImperativeHandle(forwardedRef, () => ref.current as PaginationElement);
 
@@ -111,12 +112,15 @@ export const Pagination = React.forwardRef<PaginationElement, PaginationProps>(f
     const el = ref.current;
     if (!el) return;
 
+    // Only remove an attribute this component set itself. A ui-data-table linked through paginationId writes
+    // `count` (and `page`) on the pager; removing them because the prop is undefined left a one-page pager.
     const syncAttr = (name: string, next: string | null) => {
       const current = el.getAttribute(name);
       if (next == null) {
-        if (current != null) el.removeAttribute(name);
+        if (setByProps.current.delete(name) && current != null) el.removeAttribute(name);
         return;
       }
+      setByProps.current.add(name);
       if (current !== next) el.setAttribute(name, next);
     };
 

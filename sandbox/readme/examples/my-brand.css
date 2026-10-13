@@ -1,0 +1,42 @@
+/* The scope: React uses data-theme, the web component adds a class named after its theme attribute. */
+:is([data-theme="my-brand"], .editora-theme-my-brand) {
+  --rte-color-primary: #4f46e5;
+  --rte-color-text-primary: #1e1b4b;
+  --rte-color-text-secondary: #3730a3;
+  --rte-color-border: #c7d2fe;
+  --rte-color-border-focus: #4f46e5;
+}
+
+/* Tokens set the text and the borders. Backgrounds are set by the rules below. */
+:is([data-theme="my-brand"], .editora-theme-my-brand) :is(.rte-editor, .editora-editor) {
+  background: #fafaff;
+  border-color: var(--rte-color-border);
+  color: var(--rte-color-text-primary);
+}
+
+:is([data-theme="my-brand"], .editora-theme-my-brand) :is(.rte-toolbar, .editora-toolbar) {
+  background: #eef2ff;
+  border-color: var(--rte-color-border);
+}
+
+:is([data-theme="my-brand"], .editora-theme-my-brand) :is(.rte-toolbar-button, .editora-toolbar-button) {
+  background: #ffffff;
+  border-color: var(--rte-color-border);
+  color: var(--rte-color-text-secondary);
+}
+
+:is([data-theme="my-brand"], .editora-theme-my-brand) :is(.rte-toolbar-button, .editora-toolbar-button):hover {
+  background: #e0e7ff;
+}
+
+:is([data-theme="my-brand"], .editora-theme-my-brand)
+  :is(.rte-toolbar-button, .editora-toolbar-button):is(:active, [data-active="true"], .active) {
+  background: var(--rte-color-primary);
+  border-color: var(--rte-color-primary);
+  color: #ffffff;
+}
+
+:is([data-theme="my-brand"], .editora-theme-my-brand) :is(.rte-content, .editora-content) {
+  background: #ffffff;
+  color: var(--rte-color-text-primary);
+}

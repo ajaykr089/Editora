@@ -1,0 +1,18 @@
+<ui-form id="profileForm" autosave guard-unsaved>
+  <ui-field label="Full name" required>
+    <ui-input name="fullName" required></ui-input>
+  </ui-field>
+  <ui-field label="Email" required>
+    <ui-input name="email" type="email" required></ui-input>
+  </ui-field>
+  <ui-button variant="primary" type="submit">Save</ui-button>
+</ui-form>
+
+<script type="module">
+  import '@editora/ui-core';
+  const form = document.getElementById('profileForm');
+
+  form.addEventListener('submit', (e) => console.log('values', e.detail.values));
+  form.addEventListener('invalid', (e) => console.log('errors', e.detail.errors));
+  form.addEventListener('dirty-change', (e) => console.log('dirty?', e.detail.dirty));
+</script>

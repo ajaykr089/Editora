@@ -113,6 +113,19 @@ describe('ui-sortable', () => {
     expect(handle?.getAttribute('aria-hidden')).toBe('true');
   });
 
+  it('keeps a selection that was set before the items', async () => {
+    const el = document.createElement('ui-sortable') as HTMLElement & { selection: string[] };
+
+    el.setAttribute('selection', JSON.stringify(['epic', 'missing']));
+    document.body.appendChild(el);
+    await flushMicrotask();
+    el.setAttribute('lists', JSON.stringify(lists));
+    el.setAttribute('items', JSON.stringify(items));
+    await flushMicrotask();
+
+    expect(el.selection).toEqual(['epic']);
+  });
+
   it('can hide the default selected badge without changing selection state', async () => {
     const el = document.createElement('ui-sortable') as any;
     el.setAttribute('lists', JSON.stringify(lists));

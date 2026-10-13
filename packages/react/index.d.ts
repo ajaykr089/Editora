@@ -45,7 +45,7 @@ export interface RichTextEditorProps {
   plugins?: Plugin[] | string[];
   pluginConfig?: Record<string, unknown>;
   toolbar?: {
-    items?: string[] | ToolbarItem[];
+    items?: string | string[] | ToolbarItem[];
     floating?: boolean;
     sticky?: boolean;
     showMoreOptions?: boolean;
@@ -108,6 +108,9 @@ export interface RichTextEditorProps {
     allowedTags?: string[];
     allowedAttributes?: Record<string, string[]>;
     sanitize?: boolean;
+    autoHeight?: boolean;
+    minHeight?: number;
+    maxHeight?: number;
   };
   security?: {
     sanitizeOnPaste?: boolean;
@@ -115,10 +118,17 @@ export interface RichTextEditorProps {
   };
   floatingToolbar?: boolean | { enabled?: boolean };
   mediaConfig?: {
-    uploadUrl: string;
-    libraryUrl: string;
-    maxFileSize: number;
-    allowedTypes: string[];
+    uploadUrl?: string;
+    libraryUrl?: string;
+    maxFileSize?: number;
+    allowedTypes?: string[];
+    offline?: {
+      enabled?: boolean;
+      useBase64Permanently?: boolean;
+      fallbackToBase64?: boolean;
+      customUploadUrl?: string;
+      customUploadHeaders?: Record<string, string>;
+    };
   };
 }
 
@@ -153,7 +163,7 @@ export interface ToolbarProps {
   floating?: boolean;
   readonly?: boolean;
   showMoreOptions?: boolean;
-  itemsOverride?: string[] | ToolbarItem[];
+  itemsOverride?: string | string[] | ToolbarItem[];
 }
 
 export interface EditorContentProps {

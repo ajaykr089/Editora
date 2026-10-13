@@ -57,6 +57,8 @@
     "verify:packages": "node scripts/verify-package-contents.js",
     "verify:published": "node scripts/verify-published-packages.js",
     "test:scripts": "node --test scripts/lib/packages.test.js scripts/verify-published-packages.test.js",
+    "check:readme-examples": "node scripts/readme-examples/check.mjs",
+    "readme:screenshots": "node scripts/readme-examples/screenshots.mjs",
     "release": "npm run build:types && npm run verify:packages && changeset publish"
   },
   "devDependencies": {

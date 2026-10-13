@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import '../components/ui-button';
+import '../components/ui-form';
 
 function settle() {
   return new Promise<void>((resolve) => setTimeout(resolve, 0));
@@ -112,6 +113,29 @@ describe('UIButton behavior', () => {
     btn?.click();
     await settle();
 
+    expect(resetSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('submits and resets a surrounding <ui-form>, whose <form> is in a shadow root', async () => {
+    const uiForm = document.createElement('ui-form') as HTMLElement & { requestSubmit: () => unknown; reset: () => void };
+    const submit = document.createElement('ui-button') as HTMLElement;
+    submit.setAttribute('type', 'submit');
+    const reset = document.createElement('ui-button') as HTMLElement;
+    reset.setAttribute('type', 'reset');
+    uiForm.append(submit, reset);
+    document.body.appendChild(uiForm);
+    await settle();
+
+    const submitSpy = vi.spyOn(uiForm, 'requestSubmit').mockResolvedValue(true);
+    const resetSpy = vi.spyOn(uiForm, 'reset').mockImplementation(() => undefined);
+
+    (submit.shadowRoot?.querySelector('button') as HTMLButtonElement).click();
+    await settle();
+    expect(submitSpy).toHaveBeenCalledTimes(1);
+    expect(resetSpy).toHaveBeenCalledTimes(0);
+
+    (reset.shadowRoot?.querySelector('button') as HTMLButtonElement).click();
+    await settle();
     expect(resetSpy).toHaveBeenCalledTimes(1);
   });
 

@@ -1,54 +1,56 @@
-# @editora/ui-react
+<h1 align="center">@editora/ui-react</h1>
 
-[![Version](https://img.shields.io/npm/v/@editora/ui-react)](https://www.npmjs.com/package/@editora/ui-react)
-[![License](https://img.shields.io/npm/l/@editora/ui-react)](https://github.com/ajaykr089/Editora/blob/main/LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Size](https://img.shields.io/bundlephobia/minzip/@editora/ui-react)](https://bundlephobia.com/package/@editora/ui-react)
+<p align="center">
+  React components for building application UIs: forms, data tables, dialogs, pickers, charts and a Gantt planner. Typed
+  props, typed event details, and hooks for forms, dialogs, themes and floating layers. Built on
+  <a href="https://www.npmjs.com/package/@editora/ui-core"><code>@editora/ui-core</code></a>.
+</p>
 
-![Editora UI Components](../../images/editora-ui-components-linkedin-graphic.png)
+<p align="center">
+  <a href="https://www.npmjs.com/package/@editora/ui-react"><img src="https://img.shields.io/npm/v/@editora/ui-react.svg" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@editora/ui-react"><img src="https://img.shields.io/npm/dm/@editora/ui-react.svg" alt="npm downloads"></a>
+  <a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/@editora/ui-react.svg" alt="license"></a>
+  <a href="https://www.npmjs.com/package/@editora/ui-react"><img src="https://img.shields.io/npm/types/@editora/ui-react.svg" alt="TypeScript types included"></a>
+</p>
 
-## Demos
+<p align="center">
+  <a href="https://editora-ecosystem.netlify.app/">Component catalog</a> ·
+  <a href="https://editora-ecosystem-storybook.netlify.app/">Storybook</a> ·
+  <a href="https://codesandbox.io/p/github/ajaykr089/editora-codesandbox/main">CodeSandbox</a> ·
+  <a href="https://github.com/ajaykr089/Editora">GitHub</a>
+</p>
 
-- **CodeSandbox:** https://codesandbox.io/p/github/ajaykr089/editora-codesandbox/main
-- **CodeSandboxUI Components:** https://qjr47y-5173.csb.app/button
-- **UI Component Catalog:** https://editora-ecosystem.netlify.app/
-- **Web Demo:** https://editora-free.netlify.app/
-- **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-react/docs/images/components.png" alt="A set of React components: a labelled text field, buttons, badges and avatars, a warning alert, a switch, a checkbox, a progress bar and a date picker" width="900">
+</p>
 
-React wrappers for `@editora/ui-core` Web Components.
+## Features
 
-This package gives React-friendly props, typed callback details, and hooks/providers for form and dialog workflows.
+- **A broad catalog**: inputs and forms, pickers, tables, tabs, menus, dialogs, drawers, charts, a calendar and a Gantt
+  planner. [The full list](#components).
+- **Typed props and events.** Callbacks receive a typed `detail`, not a raw DOM event.
+- **Forms that validate**: `<Form>` collects the values of the controls inside it, and `useForm()` drives it.
+- **Promise dialogs**: `await dialog.confirm({...})`, with providers that work in React `StrictMode`.
+- **Theming** with design tokens, persisted if you want.
+- **Floating layers**: hooks for popovers, menus and tooltips with flip, shift and focus management.
+- Wrappers for [`@editora/ui-core`](https://www.npmjs.com/package/@editora/ui-core), so the components are standard
+  custom elements underneath.
 
-## Installation
+## Install
 
 ```bash
-npm install @editora/ui-react @editora/ui-core
+npm install @editora/ui-react
 ```
 
-If you only need sortable as a standalone package, use:
+`@editora/ui-core` comes with the package. It is tested with React 18 and 19 (the peer range is React 16.8 to 20). These components render custom elements, which are
+defined in the browser only: see [Server rendering](#server-rendering).
 
-```bash
-npm install @editora/ui-sortable
-```
-
-And for the standalone React wrapper only:
-
-```tsx
-import { Sortable } from '@editora/ui-sortable/react';
-```
-
-Peer dependencies:
-- `react`
-- `react-dom`
-
-## Quick Start
-
-Import from package root. This also registers all custom elements (`import '@editora/ui-core'`) internally.
+## Quick start
 
 ```tsx
 import { Button, Input, ThemeProvider } from '@editora/ui-react';
 
-export function App() {
+export default function App() {
   return (
     <ThemeProvider>
       <div style={{ display: 'grid', gap: 12, maxWidth: 360 }}>
@@ -60,34 +62,95 @@ export function App() {
 }
 ```
 
-## Important Import Rule
-
-Importing from the package root is the simplest option, but it registers every
-component's custom element (100+), which the bundler cannot tree-shake away
-even if you only use a couple of them:
-
-```ts
-import { Button, DataTable } from '@editora/ui-react';
-```
-
-If bundle size matters, deep-import only the components you actually use.
-Each deep-import path registers just its own custom element - no extra
-`@editora/ui-core` import needed:
-
-```ts
-import Button from '@editora/ui-react/Button';
-import DataTable from '@editora/ui-react/DataTable';
-```
-
-## Common Usage Examples
-
-### 1. Form + `useForm`
+The picture at the top of this page is made of these components:
 
 ```tsx
+import { Alert, Avatar, Badge, Button, Checkbox, DatePicker, Input, Progress, Switch } from '@editora/ui-react';
+
+export default function Gallery() {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gap: 16 }}>
+        <Input label="Project name" description="Shown in the sidebar" placeholder="Untitled" clearable />
+
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <Button variant="primary">Save</Button>
+          <Button variant="secondary">Cancel</Button>
+          <Button variant="ghost">Skip</Button>
+          <Button variant="danger">Delete</Button>
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <Badge tone="success" text="Live" />
+          <Badge tone="warning" text="Review" />
+          <Badge tone="danger" text="Failed" />
+          <Avatar initials="AM" />
+          <Avatar initials="JK" />
+        </div>
+
+        <Alert title="Heads up" description="Your trial ends in 3 days." tone="warning" />
+      </div>
+
+      <div style={{ display: 'grid', gap: 16 }}>
+        <Switch checked label="Email notifications" description="A summary every Monday" />
+        <Checkbox checked>Remember me</Checkbox>
+        <Progress value={64} />
+        <DatePicker label="Start date" clearable />
+      </div>
+    </div>
+  );
+}
+```
+
+## Import from the package or from one component
+
+Importing from the package root is the simplest, and it is the heaviest: every wrapper and every component's custom
+element is in the bundle, and the bundler cannot drop the ones you do not use. Each component also has its own entry:
+
+```tsx
+// Everything from the package root: the simplest, and the heaviest.
+import { Button, Input } from '@editora/ui-react';
+// One component per entry: a lighter first load.
+import ButtonOnly from '@editora/ui-react/Button';
+import InputOnly from '@editora/ui-react/Input';
+
+export default function Imports() {
+  return (
+    <div style={{ display: 'grid', gap: 12, maxWidth: 360 }}>
+      <Input label="From the root" />
+      <InputOnly label="From its own entry" />
+      <Button>Root</Button>
+      <ButtonOnly>Own entry</ButtonOnly>
+    </div>
+  );
+}
+```
+
+Measured with esbuild, minified, with code splitting, importing one component and leaving React out. This is everything
+the import needs:
+
+| Import | Gzipped |
+| --- | --- |
+| `import { Button } from '@editora/ui-react'` | 1 MB |
+| `import Button from '@editora/ui-react/Button'` | 55 KB |
+| `import Input from '@editora/ui-react/Input'` | 8 KB |
+| `import DataTable from '@editora/ui-react/DataTable'` | 14 KB |
+
+Each entry registers only the custom elements its component renders, so nothing else is fetched later. The package root
+registers the whole catalog on purpose, which is why it is the heavy one.
+
+## Forms
+
+`<Form>` finds the `name`d controls inside it. `useForm()` gives you its methods; `onDirtyChange` tells you when the
+values differ from the starting ones:
+
+```tsx
+import { useState } from 'react';
 import { Form, Field, Input, Button, useForm } from '@editora/ui-react';
 
-export function ProfileForm() {
-  const { ref, submit, validate, getValues, reset, isDirty } = useForm();
+export default function ProfileForm() {
+  const { ref, submit, validate, getValues, reset } = useForm();
+  const [dirty, setDirty] = useState(false);
 
   return (
     <Form
@@ -96,6 +159,7 @@ export function ProfileForm() {
       guardUnsaved
       onSubmit={(values) => console.log('submit', values)}
       onInvalid={(errors) => console.log('invalid', errors)}
+      onDirtyChange={(isDirty) => setDirty(isDirty)}
       style={{ display: 'grid', gap: 12, maxWidth: 520 }}
     >
       <Field label="Full name" required>
@@ -110,14 +174,24 @@ export function ProfileForm() {
         <Button variant="secondary" onClick={() => validate()}>Validate</Button>
         <Button variant="secondary" onClick={() => console.log(getValues())}>Values</Button>
         <Button variant="secondary" onClick={() => reset()}>Reset</Button>
-        <Button onClick={() => submit()} disabled={!isDirty()}>Submit</Button>
+        <Button onClick={() => submit()} disabled={!dirty}>Submit</Button>
       </div>
     </Form>
   );
 }
 ```
 
-### 2. Promise dialogs with provider hooks
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-react/docs/images/form.png" alt="The form after pressing Validate with both required fields empty: each field shows the message Please fill out this field." width="900">
+</p>
+
+`useForm()` returns `ref`, `submit()`, `validate()`, `getValues()`, `reset(values?)`, `isDirty()` and `markClean()`.
+`autosave` reports the values through `onAutosave` after they stop changing, and `guardUnsaved` warns before the page is
+left with unsaved changes.
+
+## Promise dialogs
+
+Wrap your app in the providers, then `await` the answer from anywhere inside:
 
 ```tsx
 import { DialogProvider, useDialog, AlertDialogProvider, useAlertDialog, Button } from '@editora/ui-react';
@@ -157,7 +231,7 @@ function Actions() {
   );
 }
 
-export function DialogExample() {
+export default function DialogExample() {
   return (
     <DialogProvider>
       <AlertDialogProvider>
@@ -168,13 +242,23 @@ export function DialogExample() {
 }
 ```
 
-### 3. Data table (sorting, selection, paging, filters)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-react/docs/images/dialog.png" alt="A confirm dialog titled Archive project? with the text You can restore it later, and Cancel and Archive buttons, over a dimmed page" width="700">
+</p>
+
+`useDialog()` has `open()` and `confirm()`. `useAlertDialog()` is for confirmations and prompts that need an answer.
+Both resolve with an object whose `action` says what the user did. The providers work in `StrictMode`.
+
+## Data tables
+
+`DataTable` gives a table sorting, selection, column resizing and paging. Link a `Pagination` to it with
+`paginationId`:
 
 ```tsx
 import { DataTable, Pagination } from '@editora/ui-react';
 import { useState } from 'react';
 
-export function UsersTable() {
+export default function UsersTable() {
   const [page, setPage] = useState(1);
 
   return (
@@ -185,7 +269,7 @@ export function UsersTable() {
         resizableColumns
         draggableColumns
         page={page}
-        pageSize={10}
+        pageSize={2}
         paginationId="users-pager"
         onPageChange={(d) => setPage(d.page)}
         onSortChange={(d) => console.log('sort', d)}
@@ -202,22 +286,28 @@ export function UsersTable() {
           <tbody>
             <tr><td>1</td><td>Asha</td><td>Admin</td></tr>
             <tr><td>2</td><td>Marco</td><td>Editor</td></tr>
+            <tr><td>3</td><td>Lena</td><td>Viewer</td></tr>
+            <tr><td>4</td><td>Tariq</td><td>Editor</td></tr>
           </tbody>
         </table>
       </DataTable>
 
-      <Pagination id="users-pager" page={String(page)} />
+      <Pagination id="users-pager" page={page} />
     </div>
   );
 }
 ```
 
-### 4. Date/time and color pickers
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-react/docs/images/data-table.png" alt="A table with sortable ID, Name and Role columns showing two rows, and a pager with two pages that reads Showing 1-2 of 4" width="900">
+</p>
+
+## Pickers
 
 ```tsx
 import { DatePicker, DateRangePicker, DateTimePicker, ColorPicker } from '@editora/ui-react';
 
-export function PickersDemo() {
+export default function PickersDemo() {
   return (
     <div style={{ display: 'grid', gap: 12, maxWidth: 420 }}>
       <DatePicker label="Start date" clearable onValueChange={(v) => console.log(v)} />
@@ -229,27 +319,37 @@ export function PickersDemo() {
 }
 ```
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-react/docs/images/pickers.png" alt="A date picker, a date range picker, a date and time picker and a colour picker" width="900">
+</p>
+
 ## Theming
 
-`ThemeProvider` applies `@editora/ui-core` token variables and supports persistence.
+`ThemeProvider` applies the design tokens of `@editora/ui-core` as CSS variables. With `storageKey` it remembers the
+theme in `localStorage`:
 
 ```tsx
-import { ThemeProvider } from '@editora/ui-react';
+import { Button, ThemeProvider } from '@editora/ui-react';
 
-<ThemeProvider
-  tokens={{
-    colors: { primary: '#0f766e', text: '#0f172a', background: '#ffffff' },
-    radius: '10px'
-  }}
-  storageKey="my-app.theme"
->
-  {/** app */}
-</ThemeProvider>
+export default function Themed() {
+  return (
+    <ThemeProvider
+      tokens={{
+        colors: { primary: '#0f766e', text: '#0f172a', background: '#ffffff' },
+        radius: '10px'
+      }}
+      storageKey="my-app.theme"
+    >
+      <Button variant="primary">Save</Button>
+    </ThemeProvider>
+  );
+}
 ```
 
-## Gantt Planning Workspace
+## Gantt planner
 
-`Gantt` is the React wrapper for the production planning timeline in `@editora/ui-core`. It supports task, summary, and milestone rows; dependency routing; drag/resize editing; keyboard selection; baselines; critical path highlighting; split task segments; and virtualized rendering for large schedules.
+`Gantt` is a planning timeline: tasks, summary rows and milestones, dependencies, baselines, critical tasks, drag and
+resize, keyboard selection and a toolbar for zoom, filter and sort.
 
 ```tsx
 import { Gantt, type GanttLink, type GanttTask } from '@editora/ui-react';
@@ -279,7 +379,7 @@ const links: GanttLink[] = [
   { id: 'foundation-handoff', source: 'foundation', target: 'handoff', type: 'e2s' }
 ];
 
-export function PlanningDemo() {
+export default function PlanningDemo() {
   const [tasks, setTasks] = useState(initialTasks);
 
   return (
@@ -299,48 +399,19 @@ export function PlanningDemo() {
 }
 ```
 
-Highlights:
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-react/docs/images/gantt.png" alt="A Gantt chart with a task bar for Foundation, a baseline under it, and an arrow to the Handoff milestone" width="900">
+</p>
 
-- Dependency types: `e2s`, `s2s`, `e2e`, and `s2e`, with selectable SVG links and arrowheads.
-- Bar designs: `solid`, `soft`, `striped`, `outline`, and `glass`.
-- Planning data: baselines, critical tasks, milestones, parent/child summaries, assignees, progress, and split segments.
-- Interaction: drag, resize, keyboard task selection, delete events, toolbar zoom/filter/sort, and readonly mode.
-- Scale: row virtualization turns on automatically for large task sets; pass `virtualized={false}` only for small custom layouts.
+- Dependency types: `e2s`, `s2s`, `e2e` and `s2e`. Bar designs: `solid`, `soft`, `striped`, `outline` and `glass`.
+- Also in the data: baselines, critical tasks, milestones, parent and child summaries, assignees, progress and split
+  segments. Row virtualization turns on for large task sets; pass `virtualized={false}` for small custom layouts.
+- The types `GanttTask`, `GanttLink`, `GanttTaskChangeDetail` and `GanttLinkSelectDetail` are exported.
 
-## Component Catalog
+## Floating layers
 
-### Form and inputs
-- `Form`, `Field`, `Label`, `Input`, `Textarea`, `Select`, `Combobox`
-- `Checkbox`, `Radio`, `RadioGroup`, `Switch`, `Slider`
-- `DatePicker`, `DateRangePicker`, `TimePicker`, `DateTimePicker`, `DateRangeTimePicker`
-- `ColorPicker`
-
-### Data and display
-- `Table`, `DataTable`, `Pagination`
-- `Calendar`, `Chart`, `Timeline`, `Gantt`
-- `Badge`, `Alert`, `Skeleton`, `EmptyState`, `Progress`, `Avatar`, `AspectRatio`
-
-### Overlay and interaction
-- `Tooltip`, `HoverCard`, `Popover`, `Dropdown`, `Menu`, `Menubar`, `ContextMenu`
-- `Dialog`, `AlertDialog`, `Drawer`, `Portal`, `Presence`
-- `CommandPalette`, `QuickActions`, `Toolbar`, `FloatingToolbar`, `BlockControls`, `SelectionPopup`, `PluginPanel`
-
-### Navigation and layout
-- `Layout`, `Sidebar`, `AppHeader`, `Breadcrumb`, `NavigationMenu`, `Tabs`
-- `Box`, `Flex`, `Grid`, `Section`, `Container`, `Separator`, `Slot`, `VisuallyHidden`
-- `Accordion`, `Collapsible`, `Stepper`, `Wizard`, `DirectionProvider`
-
-### APIs and hooks
-- `DialogProvider`, `useDialog`
-- `AlertDialogProvider`, `useAlertDialog`
-- `ThemeProvider`, `useTheme`
-- `useForm`, `useFloating`
-
-## Floating Positioning
-
-`@editora/ui-react` exposes a first-party floating layer built on `@editora/ui-core`.
-
-Use `useFloating()` for shared positioning, then compose interaction hooks as needed:
+`useFloating()` positions a layer next to its anchor; `useInteractions()` combines the interaction hooks. This is the
+layer the menus, popovers and tooltips are built on:
 
 ```tsx
 import {
@@ -353,13 +424,14 @@ import {
   useInteractions
 } from '@editora/ui-react';
 
-function Example() {
+export default function Example() {
   const floating = useFloating({
     placement: 'bottom-start',
     offset: 10,
     flip: true,
     shift: true,
-    fitViewport: true
+    fitViewport: true,
+    strategy: 'fixed'
   });
 
   const interactions = useInteractions([
@@ -380,7 +452,7 @@ function Example() {
               ref={floating.floatingRef}
               {...interactions.getFloatingProps({
                 style: {
-                  position: floating.strategy,
+                  position: 'fixed',
                   top: floating.coords.top,
                   left: floating.coords.left
                 }
@@ -397,34 +469,67 @@ function Example() {
 }
 ```
 
-Common React floating exports:
+More hooks: `useHover`, `useFocus`, `useRole`, `useListNavigation` and `useTypeahead`. More helpers: `FloatingOverlay`,
+`FloatingTree`, `FloatingList` and `FloatingDelayGroup`. For the same engine without React, see `createPositioner` in
+[`@editora/ui-core`](https://www.npmjs.com/package/@editora/ui-core#floating-positioning).
 
-- hooks: `useFloating`, `useInteractions`, `useClick`, `useHover`, `useFocus`, `useDismiss`, `useRole`, `useListNavigation`, `useTypeahead`, `useClientPoint`, `useTransition`
-- helpers: `FloatingArrow`, `FloatingPortal`, `FloatingOverlay`, `FloatingFocusManager`, `FloatingTree`, `FloatingList`, `FloatingDelayGroup`, `Composite`
+## Components
 
-For the full core + React guide and the Floating UI concept map, see:
+**Forms and inputs:**
+`Form`, `Field`, `Label`, `Input`, `Textarea`, `Select`, `Combobox`,
+`Checkbox`, `Radio`, `RadioGroup`, `Switch`, `Slider`,
+`DatePicker`, `DateRangePicker`, `TimePicker`, `DateTimePicker`, `DateRangeTimePicker`, `ColorPicker`
 
-- `../ui-core/docs/FLOATING_USAGE.md`
+**Data and display:**
+`Table`, `DataTable`, `Pagination`, `Calendar`, `Chart`, `Timeline`, `Gantt`,
+`Badge`, `Alert`, `Skeleton`, `EmptyState`, `Progress`, `Avatar`, `AspectRatio`
 
-## SSR and StrictMode Notes
+**Overlays and interaction:**
+`Tooltip`, `HoverCard`, `Popover`, `Dropdown`, `Menu`, `Menubar`, `ContextMenu`,
+`Dialog`, `AlertDialog`, `Drawer`, `Portal`, `Presence`,
+`CommandPalette`, `QuickActions`, `Toolbar`, `FloatingToolbar`, `BlockControls`, `SelectionPopup`, `PluginPanel`
 
-- Providers are SSR-safe (they create hosts in `useEffect` on client).
-- Promise dialog providers are StrictMode-safe and handle unmount cleanup.
-- For server render, avoid accessing custom element methods until mounted.
+**Navigation and layout:**
+`Layout`, `Sidebar`, `AppHeader`, `Breadcrumb`, `NavigationMenu`, `Tabs`,
+`Box`, `Flex`, `Grid`, `Section`, `Container`, `Separator`, `Slot`, `VisuallyHidden`,
+`Accordion`, `Collapsible`, `Stepper`, `Wizard`, `DirectionProvider`
 
-## Development
+**Providers and hooks:**
+`DialogProvider`, `useDialog`, `AlertDialogProvider`, `useAlertDialog`, `ThemeProvider`, `useTheme`, `useForm`, `useFloating`
 
-```bash
-cd packages/ui-react
-npm run build
-npm run dev:examples
-```
+## Server rendering
 
-Examples live under `packages/ui-react/examples`.
+The package can be imported on the server: loading a module does not touch the DOM, and the custom elements are defined
+only in the browser. A `'use client'` file that uses these components is still rendered on the server first (Next.js
+does this), and that HTML carries the `<ui-*>` tags, which upgrade once the browser has loaded the package.
+
+In React Server Components import from `@editora/ui-react/server`. It has no hooks, so a server component can load it,
+and it holds the components that need none: `Box`, `Flex`, `Grid`, `Container`, `Section`, `Separator`, `Anchor`,
+`AspectRatio`, `Field`, `Label`, `Icon`, `Kbd`, `Shortcut`, `Stat`, `MetricCard`, `CodeBlock`, `CodeSnippet`,
+`DirectionProvider` and `VisuallyHidden`. It only renders the markup. To define the elements, import
+`@editora/ui-react/client` (or the package root) from a client component; a page made of server components alone never
+loads the definitions, so its `<ui-*>` tags are not upgraded.
+
+In development React can log a hydration warning for client components: the elements add their own inline styles and
+attributes as soon as they are defined, before React hydrates. The page works. The dialog providers create their host
+element on the client, in an effect, and clean it up when they unmount.
 
 ## Troubleshooting
 
-- Warning: `tagName is not registered`
-  - Import the wrapper from package root (`@editora/ui-react`) or its own deep-import path (`@editora/ui-react/Button`) - both register the custom element automatically.
-- Event callback not firing as expected
-  - For wrapper callbacks like `onChange`, use the typed `detail` payload from wrapper props (not raw DOM event parsing).
+- **A component renders as an empty tag, or React warns that a tag is not registered.** Import the wrapper from the
+  package root or from its own entry (`@editora/ui-react/Button`); both register the element.
+- **A callback does not fire as expected.** Use the typed `detail` that wrapper callbacks receive, such as
+  `onPageChange={(d) => d.page}`, instead of parsing the DOM event.
+
+## The rest of the family
+
+| Package | |
+| --- | --- |
+| [`@editora/ui-core`](https://www.npmjs.com/package/@editora/ui-core) | The web components these wrap, for any framework. |
+| [`@editora/ui-sortable`](https://www.npmjs.com/package/@editora/ui-sortable) | Sortable lists and boards, with a React wrapper. |
+| [`@editora/toast`](https://www.npmjs.com/package/@editora/toast) | Toast notifications. |
+| [`@editora/react`](https://www.npmjs.com/package/@editora/react) | The Editora rich text editor for React. |
+
+## License
+
+MIT © [Ajay Kumar](https://github.com/ajaykr089)

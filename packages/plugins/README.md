@@ -1,706 +1,320 @@
-# @editora/plugins
+<h1 align="center">@editora/plugins</h1>
 
-[![Version](https://img.shields.io/npm/v/@editora/plugins)](https://www.npmjs.com/package/@editora/plugins)
-[![License](https://img.shields.io/npm/l/@editora/plugins)](https://github.com/ajaykr089/Editora/blob/main/LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Size](https://img.shields.io/bundlephobia/minzip/@editora/plugins)](https://bundlephobia.com/package/@editora/plugins)
+<p align="center">
+  Fifty-six plugins for the Editora editor: formatting, tables, math, comments, track changes, document import and
+  export, and more. Pick the ones you need and the toolbar is built from them.
+</p>
 
-> [!IMPORTANT]
-> **Live Website:** https://editora-ecosystem.netlify.app/  
-> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+<p align="center">
+  <a href="https://www.npmjs.com/package/@editora/plugins"><img src="https://img.shields.io/npm/v/@editora/plugins.svg" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@editora/plugins"><img src="https://img.shields.io/npm/dm/@editora/plugins.svg" alt="npm downloads"></a>
+  <a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/@editora/plugins.svg" alt="license"></a>
+  <a href="https://www.npmjs.com/package/@editora/plugins"><img src="https://img.shields.io/npm/types/@editora/plugins.svg" alt="TypeScript types included"></a>
+</p>
 
+<p align="center">
+  <a href="https://editora-ecosystem.netlify.app/">Website</a> ·
+  <a href="https://editora-ecosystem-storybook.netlify.app/">Storybook</a> ·
+  <a href="https://github.com/ajaykr089/Editora">GitHub</a>
+</p>
 
-<div align="center">
-  <img src="../../images/editora_logo_blocks.svg" alt="Editora Logo" width="200" height="auto">
-</div>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/plugins/docs/images/table.png" alt="An editor with a freshly inserted table and the floating table toolbar above it, for adding and removing rows and columns" width="900">
+</p>
 
-<div align="center">
-  <img src="../../images/features-overview-7.png" alt="Editora Plugins - Plugin Architecture" width="600" style="border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-  <p><em>Comprehensive plugin collection with 40+ plugins for rich text editing</em></p>
-</div>
+## What you get
 
-Comprehensive plugin collection for Editora Rich Text Editor with 40+ plugins for text formatting, media management, accessibility, and more.
+- **A plugin per feature.** Bold, headings, lists, links and tables; fonts and colours; code blocks and math; comments,
+  track changes and approval workflows; Word and PDF export. [The full catalog](#plugin-catalog) lists all 56.
+- **The toolbar follows your plugins.** Each plugin adds its own buttons, dialogs and shortcuts.
+- **Three ways to import**, from the whole catalog down to a single plugin, so you can keep your bundle small
+  ([measured below](#choose-an-entry-point)).
+- **For React and for the web component.** The same plugins run in
+  [`@editora/react`](https://www.npmjs.com/package/@editora/react) and in the `<editora-editor>` element of
+  [`@editora/core`](https://www.npmjs.com/package/@editora/core).
+- MIT licensed and typed; the typings ship with the package.
 
-## 📦 Installation
+## Install
 
 ```bash
-npm install @editora/plugins @editora/core @editora/themes
+npm install @editora/plugins @editora/core @editora/react @editora/themes
 ```
 
-When using plugin UI features (table toolbar, pickers, dialogs), also import:
+Import the plugin styles once, next to a theme. They style the dialogs, pickers and the table toolbar:
 
 ```ts
-import "@editora/plugins/styles.css";
+import '@editora/themes/themes/default.css';
+import '@editora/plugins/styles.css';
 ```
 
-## 🎯 Overview
+## Quick start
 
-This package provides a complete set of plugins for building feature-rich text editors. Each plugin is modular, tree-shakeable, and can be used independently.
+A plugin is a function. Call it, put the result in the `plugins` array of the editor, and name the buttons you want in
+`toolbar.items`:
 
-## ✨ Plugin Categories
+```tsx
+import { EditoraEditor } from '@editora/react';
 
-### Text Formatting (12 plugins)
-- Bold, Italic, Underline, Strikethrough
-- Font Family, Font Size, Text Color, Background Color
-- Subscript, Superscript, Code Inline
-- Clear Formatting
+// 1. The common plugins, in one small entry point.
+import { BoldPlugin, HeadingPlugin, HistoryPlugin, LinkPlugin, TablePlugin } from '@editora/plugins/lite';
+// 2. Advanced plugins: review, workflow and structured authoring.
+import { TrackChangesPlugin } from '@editora/plugins/enterprise';
+// 3. A single plugin, and nothing else.
+import { MathPlugin } from '@editora/plugins/math';
 
-### Block Elements (8 plugins)
-- Headings (H1-H6)
-- Paragraphs
-- Blockquotes
-- Code Blocks with syntax highlighting
-- Horizontal Rules
-- Page Breaks
-- Preformatted Text
-- Footnotes
-
-### Lists & Structure (5 plugins)
-- Bullet Lists
-- Numbered Lists
-- Checklists
-- Indent/Outdent
-- Text Alignment (Left, Center, Right, Justify)
-
-### Media & Embeds (6 plugins)
-- Images with upload
-- Videos
-- Audio
-- Embed IFrames
-- Media Manager
-- Special Characters & Emojis
-
-### Advanced Features (10 plugins)
-- Tables (full editing capabilities)
-- Math Equations (LaTeX support)
-- Merge Tags / Templates
-- Comments & Annotations
-- Document Manager (import/export)
-- Spell Checker
-- Accessibility Checker
-- Link Management
-- Anchor Links
-- Print Preview
-
-### Utilities (4 plugins)
-- History (Undo/Redo)
-- Fullscreen Mode
-- Line Height
-- Text Direction (LTR/RTL)
-- Capitalization (uppercase, lowercase, title case)
-
-## 🚀 Quick Start
-
-### Entry Paths (All Free + Customizable)
-
-Every plugin entry path is MIT-licensed, free to use, and customizable:
-
-- `@editora/plugins`: full plugin catalog
-- `@editora/plugins/lite`: common/core plugin subset for lean bundles
-- `@editora/plugins/enterprise`: advanced/specialized workflow plugins
-- `@editora/plugins/<plugin-name>`: targeted per-plugin imports
-
-### Recommended Imports For Smaller Bundles
-
-For best bundle size, avoid importing everything from `@editora/plugins` in large apps.
-
-Use one of these patterns:
-
-```ts
-// Lightweight preset entry
-import { BoldPlugin, ItalicPlugin, HistoryPlugin } from '@editora/plugins/lite';
-
-// Enterprise preset entry (advanced/specialized plugins)
-import { MentionPlugin, TrackChangesPlugin, SmartPastePlugin } from '@editora/plugins/enterprise';
-
-// Per-plugin subpath entry (most explicit)
-import { BoldPlugin } from '@editora/plugins/bold';
-import { ItalicPlugin } from '@editora/plugins/italic';
-import { SpellCheckPlugin } from '@editora/plugins/spell-check';
-```
-
-Lazy-load heavy plugins only when needed:
-
-```ts
-const { DocumentManagerPlugin } = await import('@editora/plugins/document-manager');
-const { MediaManagerPlugin } = await import('@editora/plugins/media-manager');
-const { SpellCheckPlugin } = await import('@editora/plugins/spell-check');
-```
-
-### Enterprise Preset Details
-
-`@editora/plugins/enterprise` includes advanced plugins for governance, compliance, workflow, and QA:
-
-- Collaboration/workflow: `TrackChangesPlugin`, `VersionDiffPlugin`, `CommentsPlugin`, `ApprovalWorkflowPlugin`
-- Validation/compliance: `ContentRulesPlugin`, `DocSchemaPlugin`, `A11yCheckerPlugin`, `SpellCheckPlugin`, `PIIRedactionPlugin`
-- Structured/dynamic authoring: `ConditionalContentPlugin`, `DataBindingPlugin`, `MergeTagPlugin`, `TemplatePlugin`, `CitationsPlugin`
-- Productivity/runtime intelligence: `SmartPastePlugin`, `SlashCommandsPlugin`, `MentionPlugin`, `BlocksLibraryPlugin`, `TranslationWorkflowPlugin`
-- Manager-backed advanced plugins: `MediaManagerPlugin`, `DocumentManagerPlugin`
-
-### Basic Formatting
-
-```typescript
-import {
-  BoldPlugin,
-  ItalicPlugin,
-  UnderlinePlugin,
-  StrikethroughPlugin
-} from '@editora/plugins';
-
-import "@editora/plugins/styles.css";
-import "@editora/themes/themes/default.css";
-const plugins = [
-  BoldPlugin(),
-  ItalicPlugin(),
-  UnderlinePlugin(),
-  StrikethroughPlugin()
-];
-```
-
-### Complete Editor Setup
-
-```typescript
-import {
-  // Text formatting
-  BoldPlugin,
-  ItalicPlugin,
-  UnderlinePlugin,
-  FontFamilyPlugin,
-  FontSizePlugin,
-  TextColorPlugin,
-  BackgroundColorPlugin,
-
-  // Block elements
-  HeadingPlugin,
-  BlockquotePlugin,
-  CodeSamplePlugin,
-
-  // Lists
-  ListPlugin,
-  ChecklistPlugin,
-  IndentPlugin,
-  TextAlignmentPlugin,
-
-  // Media
-  LinkPlugin,
-  TablePlugin,
-  MediaManagerPlugin,
-
-  // Advanced
-  MathPlugin,
-  CommentsPlugin,
-  HistoryPlugin,
-  FullscreenPlugin,
-  DocumentManagerPlugin
-} from '@editora/plugins';
+import '@editora/themes/themes/default.css';
+import '@editora/plugins/styles.css';
 
 const plugins = [
-  // Text formatting
-  BoldPlugin(),
-  ItalicPlugin(),
-  UnderlinePlugin(),
-  FontFamilyPlugin(),
-  FontSizePlugin(),
-  TextColorPlugin(),
-  BackgroundColorPlugin(),
-
-  // Block elements
   HeadingPlugin(),
-  BlockquotePlugin(),
-  CodeSamplePlugin(),
-
-  // Lists
-  ListPlugin(),
-  ChecklistPlugin(),
-  IndentPlugin(),
-  TextAlignmentPlugin(),
-
-  // Media
+  BoldPlugin(),
   LinkPlugin(),
   TablePlugin(),
-  MediaManagerPlugin(),
-
-  // Advanced
   MathPlugin(),
-  CommentsPlugin(),
+  TrackChangesPlugin({ author: 'Ava Miller' }),
   HistoryPlugin(),
-  FullscreenPlugin(),
-  DocumentManagerPlugin()
 ];
+
+export default function EntryPoints() {
+  return (
+    <EditoraEditor
+      defaultValue="<p>Import from the smallest entry point that has what you need.</p>"
+      plugins={plugins}
+      toolbar={{ items: 'undo redo | heading bold link | table math | trackchanges' }}
+    />
+  );
+}
 ```
 
-## 📖 Plugin API Reference
+Create the plugins once, outside the component or with `useMemo`, so the editor is not rebuilt on every render.
 
-### Text Formatting Plugins
+## Choose an entry point
 
-#### Bold Plugin
-```typescript
-BoldPlugin(options?: {
-  keyboard?: string; // Default: 'Mod-b'
-  icon?: ReactNode;
-  className?: string;
-})
-```
+| Import from | You get | Cost of importing one plugin from it |
+| --- | --- | --- |
+| `@editora/plugins/<subpath>` | One plugin, such as `@editora/plugins/bold`. | `BoldPlugin`: 3 KB (1 KB gzipped)<br>`TrackChangesPlugin`: 20 KB (5 KB gzipped) |
+| `@editora/plugins/lite` | The 27 common plugins: formatting, lists, links, tables, colours, fonts, history. | `BoldPlugin`: 83 KB (24 KB gzipped) |
+| `@editora/plugins/enterprise` | The 22 advanced plugins: review, workflow, structured authoring, import and export. | `TrackChangesPlugin`: 256 KB (77 KB gzipped) |
+| `@editora/plugins` | All 56 plugins. | `BoldPlugin`: 447 KB (125 KB gzipped)<br>`TrackChangesPlugin`: 467 KB (129 KB gzipped) |
 
-#### Font Family Plugin
-```typescript
-FontFamilyPlugin(options?: {
-  fonts?: Array<{
-    name: string;
-    value: string;
-    fallback?: string;
-  }>;
-  defaultFont?: string;
-})
+The last column is measured with esbuild, as minified ES modules, importing that one plugin and nothing else; a
+bundler of your own may differ a little. The point is that **the entry points do not tree-shake**: importing one plugin
+from `@editora/plugins`, `lite` or `enterprise` bundles everything that entry exports. Six common plugins (bold, italic,
+headings, lists, links, history) cost 127 KB gzipped from the root and 27 KB from `lite`. Import from `lite` for the
+common ones, and from a subpath for anything else.
 
-// Example
-const fontFamilyPlugin = FontFamilyPlugin({
-  fonts: [
-    { name: 'Arial', value: 'Arial, sans-serif' },
-    { name: 'Times New Roman', value: 'Times New Roman, serif' },
-    { name: 'Courier New', value: 'Courier New, monospace' }
-  ]
-});
-```
+## Plugin catalog
 
-#### Font Size Plugin
-```typescript
-FontSizePlugin(options?: {
-  sizes?: string[]; // Default: ['8pt', '10pt', '12pt', '14pt', '18pt', '24pt', '36pt']
-  defaultSize?: string;
-})
-```
+Every plugin is a function with the same name, available from the root entry and from its own subpath. **Entry** says
+which entry point also has it. **Toolbar item** is the name to use in `toolbar.items` of the React editor. **Name** is
+what you write in the `plugins` attribute of `<editora-editor>`.
 
-#### Text Color Plugin
-```typescript
-TextColorPlugin(options?: {
-  colors?: string[];
-  customColors?: boolean;
-  recentColors?: boolean;
-})
-```
+| Plugin | What it adds | Toolbar item | Entry | Subpath | Name |
+| --- | --- | --- | --- | --- | --- |
+| `A11yCheckerPlugin` | Accessibility checker panel | `a11ychecker` | `enterprise` | `a11y-checker` | `a11yChecker` |
+| `AnchorPlugin` | Named anchors to link to | `anchor` | `lite` | `anchor` | `anchor` |
+| `ApprovalWorkflowPlugin` | Approval workflow: request a review and track it | `approvalworkflow` | `enterprise` | `approval-workflow` | `approvalWorkflow` |
+| `BackgroundColorPlugin` | Background (highlight) colour | `backgroundcolor` | `lite` | `background-color` | `backgroundColor` |
+| `BlockquotePlugin` | Block quotes | `blockquote` | `lite` | `blockquote` | `blockquote` |
+| `BlocksLibraryPlugin` | A library of reusable content blocks | `blockslibrary` | `enterprise` | `blocks-library` | `blocksLibrary` |
+| `BoldPlugin` | Bold | `bold` | `lite` | `bold` | `bold` |
+| `CapitalizationPlugin` | Change the case of the selected text | `capitalization` | `lite` | `capitalization` | `capitalization` |
+| `ChecklistPlugin` | Checklists (task lists) | `checklist` | `lite` | `checklist` | `checklist` |
+| `CitationsPlugin` | Citations panel | `citations` | `enterprise` | `citations` | `citations` |
+| `ClearFormattingPlugin` | Clear formatting | `clearformatting` | `lite` | `clear-formatting` | `clearFormatting` |
+| `CodePlugin` | Source (HTML) view | `sourceview` |  | `code` | `code` |
+| `CodeSamplePlugin` | Code blocks | `codeblock` |  | `code-sample` | `codeSample` |
+| `CollaborationPlugin` | Real-time collaboration through a y-websocket server (Yjs); see [Collaboration](#collaboration) |  | `enterprise` | `collaboration` | `collaboration` |
+| `CommentsPlugin` | Comments on selected text | `comments` | `enterprise` | `comments` | `comments` |
+| `ConditionalContentPlugin` | Content shown only for certain audiences or locales | `conditionalcontent` | `enterprise` | `conditional-content` | `conditionalContent` |
+| `ContentRulesPlugin` | Content rules: banned words, required headings, readability | `contentrules` | `enterprise` | `content-rules` | `contentRules` |
+| `DataBindingPlugin` | Fields bound to your data by key, such as `user.firstName` | `databinding` | `enterprise` | `data-binding` | `dataBinding` |
+| `DirectionPlugin` | Left-to-right and right-to-left text | `direction` | `lite` | `direction` | `direction` |
+| `DocSchemaPlugin` | Validate a document against a structure | `docschema` | `enterprise` | `doc-schema` | `docSchema` |
+| `DocumentManagerPlugin` | Import Word documents; export Word and PDF | `importword` `exportword` `exportpdf` | `enterprise` | `document-manager` | `document-manager` |
+| `EmbedIframePlugin` | Embed an iframe | `embediframe` |  | `embed-iframe` | `embedIframe` |
+| `EmojisPlugin` | Emoji picker | `openEmojiDialog` |  | `emojis` | `emojis` |
+| `FontFamilyPlugin` | Font family | `fontfamily` | `lite` | `font-family` | `fontFamily` |
+| `FontSizePlugin` | Font size | `fontsize` | `lite` | `font-size` | `fontSize` |
+| `FootnotePlugin` | Footnotes | `footnote` | `lite` | `footnote` | `footnote` |
+| `FormatPainterPlugin` | Copy formatting from one place to another | `formatpainter` |  | `format-painter` | `formatPainter` |
+| `FullscreenPlugin` | Fullscreen | `fullscreen` | `lite` | `fullscreen` | `fullscreen` |
+| `HeadingPlugin` | Paragraph and heading levels | `heading` | `lite` | `heading` | `heading` |
+| `HistoryPlugin` | Undo and redo | `undo` `redo` | `lite` | `history` | `history` |
+| `IndentPlugin` | Indent and outdent | `indent` `outdent` | `lite` | `indent` | `indent` |
+| `ItalicPlugin` | Italic | `italic` | `lite` | `italic` | `italic` |
+| `LineHeightPlugin` | Line spacing | `lineheight` | `lite` | `line-height` | `lineHeight` |
+| `LinkPlugin` | Links | `link` | `lite` | `link` | `link` |
+| `ListPlugin` | Bulleted and numbered lists | `bullist` `numlist` | `lite` | `list` | `list` |
+| `MathPlugin` | Math formulas (LaTeX or MathML) | `math` |  | `math` | `math` |
+| `MediaManagerPlugin` | Insert images and video | `image` `video` | `enterprise` | `media-manager` | `image` |
+| `MentionPlugin` | @mentions from a list you provide | `mention` | `enterprise` | `mentions` | `mentions` |
+| `MergeTagPlugin` | Merge tags such as `{{ First name }}` | `mergetag` | `enterprise` | `merge-tag` | `mergeTag` |
+| `PIIRedactionPlugin` | Scan for personal data | `piiredaction` | `enterprise` | `pii-redaction` | `piiRedaction` |
+| `PageBreakPlugin` | Page breaks | `pagebreak` | `lite` | `page-break` | `pageBreak` |
+| `PreviewPlugin` | Preview | `preview` | `lite` | `preview` | `preview` |
+| `PrintPlugin` | Print | `print` | `lite` | `print` | `print` |
+| `SlashCommandsPlugin` | A `/` command menu | `slashcommands` | `enterprise` | `slash-commands` | `slashCommands` |
+| `SmartPastePlugin` | Smart paste profiles | `smartpaste` | `enterprise` | `smart-paste` | `smartPaste` |
+| `SpecialCharactersPlugin` | Special characters | `specialcharacters` |  | `special-characters` | `specialCharacters` |
+| `SpellCheckPlugin` | Spell check | `spellcheck` | `enterprise` | `spell-check` | `spellCheck` |
+| `StrikethroughPlugin` | Strikethrough | `strikethrough` | `lite` | `strikethrough` | `strikethrough` |
+| `TablePlugin` | Tables, with a toolbar for editing rows and columns | `table` | `lite` | `table` | `table` |
+| `TemplatePlugin` | Insert content templates | `template` | `enterprise` | `template` | `template` |
+| `TextAlignmentPlugin` | Text alignment | `textalignment` | `lite` | `text-alignment` | `textAlignment` |
+| `TextColorPlugin` | Text colour | `textcolor` | `lite` | `text-color` | `textColor` |
+| `TrackChangesPlugin` | Suggested edits, attributed to an author, that can be accepted or rejected | `trackchanges` | `enterprise` | `track-changes` | `trackChanges` |
+| `TranslationWorkflowPlugin` | Translation workflow: locale validation and segment locking | `translationworkflow` | `enterprise` | `translation-workflow` | `translationWorkflow` |
+| `UnderlinePlugin` | Underline | `underline` | `lite` | `underline` | `underline` |
+| `VersionDiffPlugin` | Compare the document with a baseline | `versiondiff` | `enterprise` | `version-diff` | `versionDiff` |
 
-### Block Element Plugins
+Plugins with no entry are imported from their subpath (or the root). A plugin's own command name also works as a
+toolbar item in React, for example `openEmojiDialog`.
 
-#### Heading Plugin
-```typescript
-HeadingPlugin(options?: {
-  levels?: number[]; // Default: [1, 2, 3, 4, 5, 6]
-  defaultLevel?: number;
-  keyboard?: Record<number, string>;
-})
+## Configure a plugin
 
-// Example
-const headingPlugin = HeadingPlugin({
-  levels: [1, 2, 3],
-  keyboard: {
-    1: 'Mod-Alt-1',
-    2: 'Mod-Alt-2',
-    3: 'Mod-Alt-3'
-  }
-});
-```
+Most plugins work without options. Some take an options object:
 
-#### Code Sample Plugin
-```typescript
-CodeSamplePlugin(options?: {
-  languages?: Array<{
-    name: string;
-    value: string;
-  }>;
-  theme?: 'light' | 'dark' | 'github' | 'monokai';
-  lineNumbers?: boolean;
-  highlightActiveLine?: boolean;
-})
+```tsx
+import { EditoraEditor } from '@editora/react';
+import { BoldPlugin, HeadingPlugin, HistoryPlugin } from '@editora/plugins/lite';
+import { DataBindingPlugin, MergeTagPlugin, TrackChangesPlugin } from '@editora/plugins/enterprise';
 
-// Example
-const codeSamplePlugin = CodeSamplePlugin({
-  languages: [
-    { name: 'JavaScript', value: 'javascript' },
-    { name: 'TypeScript', value: 'typescript' },
-    { name: 'Python', value: 'python' },
-    { name: 'HTML', value: 'html' },
-    { name: 'CSS', value: 'css' }
-  ],
-  theme: 'github',
-  lineNumbers: true
-});
-```
-
-### List Plugins
-
-#### List Plugin
-```typescript
-ListPlugin(options?: {
-  bulletList?: boolean;
-  orderedList?: boolean;
-  keyboard?: {
-    bullet?: string; // Default: 'Mod-Shift-8'
-    ordered?: string; // Default: 'Mod-Shift-7'
-  };
-})
-```
-
-#### Checklist Plugin
-```typescript
-ChecklistPlugin(options?: {
-  nested?: boolean;
-  keyboard?: string;
-})
-```
-
-### Media Plugins
-
-#### Image Plugin
-```typescript
-MediaManagerPlugin(options: {
-  upload: (file: File) => Promise<string>;
-  validate?: (file: File) => boolean;
-  maxSize?: number; // bytes
-  allowedTypes?: string[];
-  resize?: boolean;
-  maxWidth?: number;
-  maxHeight?: number;
-  quality?: number; // 0-1
-})
-
-// Example
-const imagePlugin = MediaManagerPlugin({
-  upload: async (file) => {
-    const formData = new FormData();
-    formData.append('image', file);
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData
-    });
-    const data = await response.json();
-    return data.url;
-  },
-  maxSize: 5 * 1024 * 1024, // 5MB
-  allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-  resize: true,
-  maxWidth: 1200,
-  quality: 0.9
-});
-```
-
-#### Link Plugin
-```typescript
-LinkPlugin(options?: {
-  openOnClick?: boolean;
-  validate?: (url: string) => boolean;
-  onLinkClick?: (url: string) => void;
-  targetBlank?: boolean;
-  nofollow?: boolean;
-})
-
-// Example
-const linkPlugin = LinkPlugin({
-  openOnClick: false,
-  validate: (url) => {
-    return url.startsWith('http://') || url.startsWith('https://');
-  },
-  onLinkClick: (url) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
-  },
-  targetBlank: true
-});
-```
-
-### Advanced Plugins
-
-#### Table Plugin
-```typescript
-TablePlugin(options?: {
-  allowResize?: boolean;
-  defaultRows?: number;
-  defaultCols?: number;
-  maxRows?: number;
-  maxCols?: number;
-  cellSelection?: boolean;
-  headerRow?: boolean;
-})
-
-// Example
-const tablePlugin = TablePlugin({
-  allowResize: true,
-  defaultRows: 3,
-  defaultCols: 3,
-  maxRows: 20,
-  maxCols: 10,
-  cellSelection: true,
-  headerRow: true
-});
-```
-
-#### Math Plugin
-```typescript
-MathPlugin(options?: {
-  engine?: 'katex' | 'mathjax';
-  inline?: boolean;
-  display?: boolean;
-  macros?: Record<string, string>;
-})
-
-// Example
-const mathPlugin = MathPlugin({
-  engine: 'katex',
-  inline: true,
-  display: true,
-  macros: {
-    '\\R': '\\mathbb{R}',
-    '\\N': '\\mathbb{N}'
-  }
-});
-```
-
-#### Comments Plugin
-```typescript
-CommentsPlugin(options?: {
-  onCommentAdd?: (comment: Comment) => void;
-  onCommentEdit?: (comment: Comment) => void;
-  onCommentDelete?: (commentId: string) => void;
-  onCommentResolve?: (commentId: string) => void;
-  showResolved?: boolean;
-})
-```
-
-#### Document Manager Plugin
-```typescript
-DocumentManagerPlugin(options?: {
-  export?: {
-    word?: boolean;
-    pdf?: boolean;
-    html?: boolean;
-    markdown?: boolean;
-  };
-  import?: {
-    word?: boolean;
-    html?: boolean;
-    markdown?: boolean;
-  };
-  fileName?: string;
-})
-
-// Example
-const documentManagerPlugin = DocumentManagerPlugin({
-  export: {
-    word: true,
-    pdf: true,
-    html: true
-  },
-  fileName: 'document'
-});
-```
-
-#### Spell Check Plugin
-```typescript
-SpellCheckPlugin(options?: {
-  language?: string; // Default: 'en-US'
-  customDictionary?: string[];
-  ignoreUppercase?: boolean;
-  ignoreNumbers?: boolean;
-})
-```
-
-#### Accessibility Checker Plugin
-```typescript
-A11yCheckerPlugin(options?: {
-  rules?: string[];
-  autoCheck?: boolean;
-  severity?: 'error' | 'warning' | 'info';
-})
-```
-
-### Utility Plugins
-
-#### History Plugin
-```typescript
-HistoryPlugin(options?: {
-  depth?: number; // Default: 100
-  keyboard?: {
-    undo?: string; // Default: 'Mod-z'
-    redo?: string; // Default: 'Mod-Shift-z'
-  };
-})
-```
-
-#### Fullscreen Plugin
-```typescript
-FullscreenPlugin(options?: {
-  keyboard?: string; // Default: 'F11'
-  onEnter?: () => void;
-  onExit?: () => void;
-})
-```
-
-## 💡 Usage Examples
-
-### Blog Editor
-
-```typescript
-import {
-  BoldPlugin,
-  ItalicPlugin,
-  HeadingPlugin,
-  ParagraphPlugin,
-  LinkPlugin,
-  MediaManagerPlugin,
-  ListPlugin,
-  BlockquotePlugin,
-  HistoryPlugin
-} from '@editora/plugins';
-
-const blogPlugins = [
-  BoldPlugin(),
-  ItalicPlugin(),
-  HeadingPlugin({ levels: [1, 2, 3] }),
-  LinkPlugin({ targetBlank: true }),
-  MediaManagerPlugin({ 
-    upload: uploadImage,
-    maxSize: 2 * 1024 * 1024 
-  }),
-  ListPlugin(),
-  BlockquotePlugin(),
-  HistoryPlugin()
-];
-```
-
-### Technical Documentation Editor
-
-```typescript
-import {
-  BoldPlugin,
-  ItalicPlugin,
-  CodePlugin,
-  CodeSamplePlugin,
-  HeadingPlugin,
-  TablePlugin,
-  LinkPlugin,
-  AnchorPlugin,
-  MathPlugin,
-  HistoryPlugin
-} from '@editora/plugins';
-
-const docsPlugins = [
-  BoldPlugin(),
-  ItalicPlugin(),
-  CodePlugin(),
-  CodeSamplePlugin({
-    languages: [
-      { name: 'JavaScript', value: 'javascript' },
-      { name: 'TypeScript', value: 'typescript' },
-      { name: 'Python', value: 'python' }
-    ],
-    lineNumbers: true
-  }),
-  HeadingPlugin(),
-  TablePlugin({ headerRow: true }),
-  LinkPlugin(),
-  AnchorPlugin(),
-  MathPlugin({ engine: 'katex' }),
-  HistoryPlugin()
-];
-```
-
-### Collaborative Editor
-
-```typescript
-import {
-  BoldPlugin,
-  ItalicPlugin,
-  CommentsPlugin,
-  HistoryPlugin,
-  MergeTagPlugin
-} from '@editora/plugins';
-
-const collaborativePlugins = [
-  BoldPlugin(),
-  ItalicPlugin(),
-  CommentsPlugin({
-    onCommentAdd: async (comment) => {
-      await saveComment(comment);
-    },
-    onCommentResolve: async (commentId) => {
-      await resolveComment(commentId);
-    }
-  }),
-  MergeTagPlugin({
-    tags: [
-      { label: 'First Name', value: '{{firstName}}', category: 'User' },
-      { label: 'Last Name', value: '{{lastName}}', category: 'User' },
-      { label: 'Email', value: '{{email}}', category: 'User' }
-    ],
-    defaultCategory: 'User',
-    dialog: {
-      title: 'Insert Variable',
-      searchPlaceholder: 'Search variables...',
-      showPreview: true
-    },
-    tokenTemplate: '{value}'
-  }),
-  HistoryPlugin()
-];
-```
-
-`MergeTagPlugin` supports functional customization:
-
-- `tags`: flat list of tags (auto-grouped by `category`)
-- `categories`: explicit grouped categories with custom order
-- `defaultCategory`: initial tab
-- `dialog`: labels/placeholders/preview toggle
-- `tokenTemplate`: string template (`{key}`, `{label}`, `{category}`, `{value}`) or formatter function
-
-### Custom Templates
-
-You can register your own templates before initializing the editor:
-
-```typescript
-import { TemplatePlugin, addCustomTemplate } from '@editora/plugins';
-
-addCustomTemplate({
-  id: 'invoice-basic',
-  name: 'Invoice (Basic)',
-  category: 'Billing',
-  description: 'Simple invoice template',
-  html: `
-    <h1>Invoice</h1>
-    <p><strong>Customer:</strong> {{customer.name}}</p>
-    <p><strong>Date:</strong> {{today}}</p>
-    <p><strong>Total:</strong> {{invoice.total}}</p>
-  `,
-  tags: ['invoice', 'billing']
-});
+import '@editora/themes/themes/default.css';
+import '@editora/plugins/styles.css';
 
 const plugins = [
-  TemplatePlugin()
+  HeadingPlugin(),
+  BoldPlugin(),
+  HistoryPlugin(),
+
+  // Tags the author can insert, grouped by category, with a preview value.
+  MergeTagPlugin({
+    tags: [
+      { key: 'first_name', label: 'First name', category: 'Contact', preview: 'Ava' },
+      { key: 'company', label: 'Company', category: 'Account', preview: 'Editora Labs' },
+    ],
+  }),
+
+  // Record edits as suggestions that can be accepted or rejected, attributed to this author.
+  TrackChangesPlugin({ author: 'Ava Miller', enabledByDefault: false }),
+
+  // Values that data-bound fields in the document are resolved against.
+  DataBindingPlugin({ data: { user: { firstName: 'Ava' }, account: { name: 'Editora Labs' } } }),
 ];
+
+export default function PluginOptions() {
+  return (
+    <EditoraEditor
+      defaultValue="<h2>Welcome</h2><p>Insert a merge tag, or turn on track changes and edit this sentence.</p>"
+      plugins={plugins}
+      toolbar={{ items: 'undo redo | heading bold | mergetag | trackchanges databinding' }}
+    />
+  );
+}
 ```
 
-Notes:
-- `id` must be unique.
-- HTML is sanitized on insertion.
-- Use `validateTemplate(template)` if you want to pre-check templates before registering.
+<table>
+  <tr>
+    <td width="50%"><img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/plugins/docs/images/merge-tags.png" alt="The Insert Merge Tag dialog, with a search box, the Contact and Account categories and a preview of the tag"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/plugins/docs/images/track-changes.png" alt="A sentence with a tracked insertion highlighted in green"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Merge tags, from the <code>tags</code> option</sub></td>
+    <td align="center"><sub>Track changes, with the edit marked</sub></td>
+  </tr>
+</table>
 
-## 🔧 TypeScript Support
+The option types are in the typings of each plugin. Others that take options include `MentionPlugin`,
+`SlashCommandsPlugin`, `VersionDiffPlugin`, `ContentRulesPlugin`, `CitationsPlugin` and `SmartPastePlugin`.
 
-All plugins include full TypeScript definitions:
+## Math
 
-```typescript
-import type { Plugin, PluginConfig } from '@editora/plugins';
+`MathPlugin` opens a dialog with quick templates and a LaTeX or MathML field:
 
-const customConfig: PluginConfig = {
-  // Full type safety
-};
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/plugins/docs/images/math.png" alt="The Insert Math Formula dialog with LaTeX and MathML, quick templates such as fraction and square root, and a formula field" width="700">
+</p>
+
+## Load a heavy plugin on demand
+
+Plugins are ordinary modules, so you can load one when it is needed and keep it out of your main bundle:
+
+```tsx
+import { useEffect, useState } from 'react';
+import type { Plugin } from '@editora/core';
+import { EditoraEditor } from '@editora/react';
+import { BoldPlugin, HistoryPlugin, ItalicPlugin } from '@editora/plugins/lite';
+
+import '@editora/themes/themes/default.css';
+import '@editora/plugins/styles.css';
+
+const basePlugins: Plugin[] = [BoldPlugin(), ItalicPlugin(), HistoryPlugin()];
+
+// Load a heavy plugin only when the editor is shown, so it stays out of your main bundle.
+export default function LazyPlugins() {
+  const [plugins, setPlugins] = useState<Plugin[]>(basePlugins);
+
+  useEffect(() => {
+    import('@editora/plugins/spell-check').then(({ SpellCheckPlugin }) => {
+      setPlugins([...basePlugins, SpellCheckPlugin()]);
+    });
+  }, []);
+
+  return <EditoraEditor defaultValue="<p>Spell check arrives after the first render.</p>" plugins={plugins} />;
+}
 ```
 
-## 📄 License
+## Collaboration
+
+`CollaborationPlugin` edits one document together through a [y-websocket](https://github.com/yjs/y-websocket) server.
+Give it your own server:
+
+```ts
+CollaborationPlugin({
+  websocketUrl: 'wss://collab.example.com', // your own y-websocket server
+  roomName: 'proposal-42',
+  userName: 'Ava Miller',
+});
+```
+
+> [!WARNING]
+> **Without `websocketUrl` the plugin syncs through the public Yjs demo server** (`wss://demos.yjs.dev`). The room is
+> named after `roomName`, then the editor's `id`, and otherwise `editora-default-room`, which every user of the
+> default shares. Anyone who knows the room name can read and edit the document. The plugin logs a warning once when
+> this happens. Always pass your own server. In `<editora-editor>`, also list your plugins: leaving the `plugins`
+> attribute out loads every plugin, this one included.
+
+The other options are `userColor`, and `doc` or `provider` if you already have a Yjs document or provider.
+
+## With the web component
+
+The plugins also run in `<editora-editor>`. Name them in the `plugins` attribute, using the **Name** column above:
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.min.css" />
+<script type="module" src="https://cdn.jsdelivr.net/npm/@editora/core/dist/webcomponent.js"></script>
+
+<editora-editor plugins="history heading bold table mergeTag" toolbar="undo redo | heading bold | table | mergeTags"></editora-editor>
+```
+
+Toolbar names in the element are camelCase and case-sensitive (`textColor`, `trackChanges`, `mergeTags`), unlike the
+lowercase names in the table. See [`@editora/core`](https://www.npmjs.com/package/@editora/core#toolbar-items) for the
+list and for the element's other options. Plugin options such as `tags` are set through the factory functions, in React.
+
+## TypeScript
+
+The typings ship with the package, for the root entry and for every subpath. A plugin is typed as `Plugin` from
+`@editora/core`.
+
+## The rest of the family
+
+| Package | |
+| --- | --- |
+| [`@editora/react`](https://www.npmjs.com/package/@editora/react) | The editor as a React component. |
+| [`@editora/core`](https://www.npmjs.com/package/@editora/core) | The editor engine and the `<editora-editor>` web component. |
+| [`@editora/themes`](https://www.npmjs.com/package/@editora/themes) | Light, dark and acme themes. |
+
+## License
 
 MIT © [Ajay Kumar](https://github.com/ajaykr089)
-
-## 🔗 Links
-
-- [Documentation](https://editora-ecosystem.netlify.app/)
-- [GitHub Repository](https://github.com/ajaykr089/Editora)
-- [Issue Tracker](https://github.com/ajaykr089/Editora/issues)
-- [npm Package](https://www.npmjs.com/package/@editora/plugins)

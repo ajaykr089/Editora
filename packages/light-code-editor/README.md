@@ -1,60 +1,64 @@
-# Light Code Editor
+<h1 align="center">@editora/light-code-editor</h1>
 
-[![Version](https://img.shields.io/npm/v/@editora/light-code-editor)](https://www.npmjs.com/package/@editora/light-code-editor)
-[![License](https://img.shields.io/npm/l/@editora/light-code-editor)](https://github.com/ajaykr089/Editora/blob/main/LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Size](https://img.shields.io/bundlephobia/minzip/@editora/light-code-editor)](https://bundlephobia.com/package/@editora/light-code-editor)
+<p align="center">
+  A small code editor for the browser. Syntax highlighting for more than twenty languages, search and replace,
+  diagnostics, completions and formatting, built as extensions you add one by one. No dependencies, any framework.
+</p>
 
-> [!IMPORTANT]
-> **Live Website:** https://editora-ecosystem.netlify.app/  
-> **Storybook:** https://editora-ecosystem-storybook.netlify.app/
+<p align="center">
+  <a href="https://www.npmjs.com/package/@editora/light-code-editor"><img src="https://img.shields.io/npm/v/@editora/light-code-editor.svg" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@editora/light-code-editor"><img src="https://img.shields.io/npm/dm/@editora/light-code-editor.svg" alt="npm downloads"></a>
+  <a href="https://github.com/ajaykr089/Editora/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/@editora/light-code-editor.svg" alt="license"></a>
+  <a href="https://www.npmjs.com/package/@editora/light-code-editor"><img src="https://img.shields.io/npm/types/@editora/light-code-editor.svg" alt="TypeScript types included"></a>
+</p>
 
+<p align="center">
+  <a href="https://editora-ecosystem.netlify.app/">Website</a> ·
+  <a href="https://editora-ecosystem-storybook.netlify.app/">Storybook</a> ·
+  <a href="https://github.com/ajaykr089/Editora">GitHub</a>
+</p>
 
-A lightweight, modular code editor library inspired by CodeMirror, optimized for embedding inside rich text editors.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/light-code-editor/docs/images/editor-dark.png" alt="The editor in the dark theme: TypeScript with syntax colours, line numbers, fold arrows, indent guides, a highlighted current line and a diagnostics status box" width="900">
+</p>
 
 ## Features
 
-✅ **Self-Contained Library** - Everything needed (including CSS) is bundled within the library
-✅ **Modular Architecture** - Extension-based system for maximum flexibility
-✅ **Syntax Highlighting** - Built-in highlighting for HTML, CSS, JavaScript/JSX, TypeScript/TSX, JSON, Markdown, Bash/Shell, Python, Go, C/C++, Java, C#, Rust, Ruby, SQL, YAML, XML/SVG, Vue, EJS, Dockerfile, and PHP
-✅ **Themes** - Light and dark theme support
-✅ **Line Numbers** - Optional line number gutter
-✅ **Search** - Find and highlight functionality
-✅ **Diagnostics** - Gutter markers, inline issue highlights, and issue navigation
-✅ **Completions** - Provider-based autocomplete popup with keyboard navigation
-✅ **Formatting** - Pluggable document and selection formatting with async safety
-✅ **Context Menus** - Right-click actions for search, replace, formatting, and navigation
-✅ **Editing Commands** - Toggle comments, duplicate/move lines, join lines, and go to line
-✅ **Active Line & Indent Guides** - Caret-aware line highlighting with low-overhead indentation guides
-✅ **Language Service Adapter** - Compose syntax, diagnostics, completions, formatting, hover tooltips, and code actions from one shared service contract
-✅ **Bracket Matching** - Automatic bracket pair highlighting
-✅ **Code Folding** - Collapse/expand code sections
-✅ **Read-Only Mode** - Prevent text modifications
-✅ **TypeScript Support** - Full TypeScript definitions
-✅ **Zero Dependencies** - Pure JavaScript implementation
+- **Extensions, not a monolith.** Line numbers, highlighting, search, diagnostics, completions, formatting, folding and
+  the rest are extensions you add, so you ship only what you use.
+- **Syntax highlighting** for [more than twenty languages](#languages), switched at run time.
+- **Search and replace** with case, whole-word and regular-expression modes.
+- **Diagnostics, completions and code actions** that you feed from your own language service, including async ones
+  that are cancelled when they go stale.
+- **Formatting, comments and line commands**: format the document or the selection, toggle comments, duplicate and
+  move lines, go to a line.
+- **Folding, bracket matching, indent guides** and an active-line highlight.
+- **Decorations**: tint lines, put badges in the gutter and mark ranges of text, without rewriting the text DOM.
+- **Light and dark themes**, a read-only mode, and a keymap you can change.
+- Written in TypeScript, **no dependencies**. Checked in current Chromium, Firefox and WebKit.
 
-## Installation
+## Install
 
 ```bash
 npm install @editora/light-code-editor
 ```
 
-## Quick Start
+## Quick start
 
 ```ts
 import {
+  ActiveLineAndIndentGuidesExtension,
   BracketMatchingExtension,
   CodeFoldingExtension,
   CompletionExtension,
   ContextMenuExtension,
   DiagnosticsExtension,
-  ActiveLineAndIndentGuidesExtension,
   EditingCommandsExtension,
   FormattingExtension,
   LineNumbersExtension,
   SearchExtension,
   SyntaxHighlightingExtension,
-  createEditor
+  createEditor,
 } from '@editora/light-code-editor';
 import '@editora/light-code-editor/light-code-editor.css';
 
@@ -65,11 +69,24 @@ if (!container) {
 }
 
 const editor = createEditor(container, {
-  value: '<div class="hello">Hello World</div>\n',
+  value: `interface User {
+  id: number;
+  name: string;
+}
+
+function greet(user: User): string {
+  if (!user.name) {
+    return 'Hello, stranger';
+  }
+
+  return \`Hello, \${user.name}\`;
+}
+
+console.log(greet({ id: 1, name: 'Ada' }));
+`,
   theme: 'dark',
   tabSize: 2,
   lineNumbers: true,
-  lineWrapping: false,
   extensions: [
     new LineNumbersExtension(),
     new SyntaxHighlightingExtension(),
@@ -81,445 +98,227 @@ const editor = createEditor(container, {
     new EditingCommandsExtension(),
     new ActiveLineAndIndentGuidesExtension(),
     new BracketMatchingExtension(),
-    new CodeFoldingExtension()
-  ]
+    new CodeFoldingExtension(),
+  ],
 });
+
+editor.executeCommand('setSyntaxLanguage', 'typescript');
 
 editor.on('change', (changes) => {
   console.log('Content changed:', changes);
 });
-
-editor.executeCommand('find');
-
-const cleanup = () => {
-  editor.destroy();
-};
 ```
 
-## API
+The editor is at least 400 px tall; give the container a height, as in the React example below, to size it, and the
+editor scrolls inside it. Import the stylesheet once; it styles the gutter, the
+popups, the panels and the decorations. Call `editor.destroy()` when you are done with the editor.
 
-### `createEditor(container, config)`
+## Use it in React
 
-Factory function to create a new editor instance.
+There is no React wrapper to learn: create the editor in an effect and destroy it in the cleanup.
 
-#### Parameters
+```tsx
+import { useEffect, useRef, useState } from 'react';
+import {
+  LineNumbersExtension,
+  SearchExtension,
+  SyntaxHighlightingExtension,
+  createEditor,
+  type EditorAPI,
+} from '@editora/light-code-editor';
+import '@editora/light-code-editor/light-code-editor.css';
 
-- `container`: HTMLElement - The DOM element to attach the editor to
-- `config`: EditorConfig - Configuration options
+type CodeEditorProps = { value: string; onChange: (value: string) => void; language?: string };
 
-#### EditorConfig
+export function CodeEditor({ value, onChange, language = 'json' }: CodeEditorProps) {
+  const container = useRef<HTMLDivElement>(null);
+  const editor = useRef<EditorAPI | null>(null);
+  const latestOnChange = useRef(onChange);
+  latestOnChange.current = onChange;
 
-```typescript
-interface EditorConfig {
-  value?: string;
-  theme?: string;
-  readOnly?: boolean;
-  tabSize?: number;
-  lineWrapping?: boolean;
-  lineNumbers?: boolean;
-  extensions?: EditorExtension[];
-  keymap?: Keymap;
+  // Create the editor once, and destroy it when the component goes away.
+  useEffect(() => {
+    const instance = createEditor(container.current as HTMLElement, {
+      value,
+      lineNumbers: true,
+      extensions: [new LineNumbersExtension(), new SyntaxHighlightingExtension(), new SearchExtension()],
+    });
+    instance.executeCommand('setSyntaxLanguage', language);
+    instance.on('change', () => latestOnChange.current(instance.getValue()));
+    editor.current = instance;
+    return () => instance.destroy();
+  }, []);
+
+  // Copy a value that changed outside the editor into it, but not the editor's own edits.
+  useEffect(() => {
+    if (editor.current && editor.current.getValue() !== value) editor.current.setValue(value);
+  }, [value]);
+
+  return <div ref={container} style={{ height: 180 }} />;
+}
+
+export default function App() {
+  const [config, setConfig] = useState('{\n  "name": "my-app",\n  "private": true\n}\n');
+
+  return (
+    <>
+      <CodeEditor value={config} onChange={setConfig} />
+      <p>{config.length} characters</p>
+      <button onClick={() => setConfig('{}\n')}>Reset</button>
+    </>
+  );
 }
 ```
 
-Common config flags:
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/light-code-editor/docs/images/editor-light.png" alt="The editor in the light theme inside a React page: a JSON document with line numbers, a character count and a Reset button below" width="900">
+</p>
 
-- `tabSize`: applies CSS tab rendering width in the editable surface
-- `lineWrapping`: toggles `pre` vs `pre-wrap` rendering
-- `lineNumbers`: controls the gutter at startup and at runtime through the line-numbers extension
-- `keymap`: custom shortcut bindings used by the default `KeymapExtension`
+This works in React's `StrictMode`, which runs effects twice in development.
 
-### Editor Methods
+## Languages
 
-```typescript
-interface EditorAPI {
-  getValue(): string;
-  setValue(value: string): void;
-  getState(): EditorState;
+Set the language with `editor.executeCommand('setSyntaxLanguage', id)`, or `syntax.registerMode(id, mode)` to add your
+own. The default is `html`.
 
-  getCursor(): Cursor;
-  setCursor(position: Position): void;
-  getSelection(): Range | undefined;
-  setSelection(range: Range): void;
+| Language | Ids |
+| --- | --- |
+| HTML, CSS, XML | `html`, `css`, `xml`, `svg` |
+| JavaScript, TypeScript | `javascript` `js`, `jsx`, `typescript` `ts`, `tsx` |
+| JSON, YAML, Markdown | `json`, `yaml` `yml`, `markdown` `md` |
+| Shell | `bash` `shell` `sh` `zsh` |
+| Python, Ruby, PHP | `python` `py`, `ruby` `rb`, `php` |
+| Go, Rust, C, C++ | `go` `golang`, `rust` `rs`, `c`, `cpp` `c++` `cc` `cxx` |
+| Java, C# | `java`, `csharp` `cs` |
+| SQL, Dockerfile | `sql`, `dockerfile` `docker` |
+| Templates | `vue`, `ejs` |
 
-  setTheme(theme: string): void;
-  setReadOnly(readOnly: boolean): void;
+## Options
 
-  addExtension(extension: EditorExtension): void;
-  removeExtension(name: string): void;
-  executeCommand(name: string, ...args: any[]): void;
-  setDecorations(layer: string, decorations: EditorDecoration[]): void;
-  clearDecorations(layer?: string): void;
-  getDecorations(layer?: string): EditorDecoration[];
-  registerCommand(name: string, handler: Function): void;
-
-  search(query: string, options?: Partial<SearchOptions>): SearchResult[];
-  replace(range: Range, text: string): void;
-  replaceAll(query: string, replacement: string, options?: Partial<SearchOptions>): number;
-
-  fold(range: Range): void;
-  unfold(range: Range): void;
-  getFolds(): FoldRange[];
-
-  focus(): void;
-  blur(): void;
-  destroy(): void;
-  on(event: string, handler: Function): void;
-  off(event: string, handler: Function): void;
-}
+```ts
+createEditor(container, {
+  value: '',             // the starting text
+  theme: 'light',        // 'light' or 'dark'; change it later with setTheme()
+  readOnly: false,
+  tabSize: 2,            // how wide a tab is drawn
+  lineWrapping: false,   // wrap long lines instead of scrolling sideways
+  lineNumbers: true,     // the gutter; toggle it later with the toggleLineNumbers command
+  extensions: [],        // see Extensions below
+  keymap: {},            // your own shortcuts, for the default keymap
+});
 ```
 
-For extension authors, the editor also exposes `getView()` and `getConfig()` so custom extensions can coordinate with the rendered surface and startup config.
+## The editor API
 
-### Decorations API
+`createEditor` returns an editor with these methods:
 
-The editor now exposes a lightweight decorations surface for features like diagnostics, active-line styling, inline markers, and gutter badges.
+| Method | |
+| --- | --- |
+| `getValue()` / `setValue(text)` | Read or replace the text. |
+| `getCursor()` / `setCursor(position)` | The caret; a position is `{ line, column }`, both starting at 0. |
+| `getSelection()` / `setSelection(range)` | The selected range, `{ start, end }`, or `undefined`. |
+| `setTheme(name)` / `setReadOnly(boolean)` | Change the theme or the read-only mode. |
+| `executeCommand(name, ...args)` | Run a command (see [Extensions](#extensions)). |
+| `registerCommand(name, handler)` | Add a command. |
+| `addExtension(ext)` / `removeExtension(name)` | Add or remove an extension later. |
+| `search(query, options?)` / `replace(range, text)` / `replaceAll(query, text, options?)` | Search and edit by code. |
+| `fold(range)` / `unfold(range)` / `getFolds()` | Folding. |
+| `setDecorations(layer, list)` / `clearDecorations(layer?)` / `getDecorations(layer?)` | [Decorations](#decorations). |
+| `focus()` / `blur()` / `destroy()` | Focus, blur, and tear the editor down. |
+| `on(event, handler)` / `off(event, handler)` | Events. |
 
-```typescript
-import type { EditorDecoration } from '@editora/light-code-editor';
-
-const decorations: EditorDecoration[] = [
-  {
-    id: 'active-line',
-    type: 'line',
-    line: 3,
-    className: 'lce-decoration-line--active'
-  },
-  {
-    id: 'error-gutter',
-    type: 'gutter',
-    line: 3,
-    label: '●',
-    title: 'Syntax error',
-    className: 'lce-decoration-gutter--error'
-  },
-  {
-    id: 'error-inline',
-    type: 'inline',
-    range: {
-      start: { line: 3, column: 10 },
-      end: { line: 3, column: 18 }
-    },
-    style: {
-      backgroundColor: 'rgba(255, 107, 107, 0.18)',
-      textDecoration: 'underline wavy rgba(255, 107, 107, 0.95)'
-    }
-  }
-];
-
-editor.setDecorations('diagnostics', decorations);
-```
-
-Notes:
-
-- `line` and `gutter` decorations render in dedicated overlay layers without replacing the editable DOM.
-- `inline` decorations use the browser `CSS Highlight API` when available, which keeps range rendering fast and selection-safe.
-- Decoration layers are replace-by-layer. Call `setDecorations('diagnostics', nextDecorations)` with the full next set for that layer.
-- `clearDecorations('diagnostics')` removes one layer, while `clearDecorations()` clears all layers.
-- Inline decoration styling is best suited for backgrounds and underlines. When syntax highlighting is active, text color changes are less reliable than highlight backgrounds.
+| Event | Handler receives |
+| --- | --- |
+| `change` | The list of text changes. |
+| `cursor` | The cursor. |
+| `selection` | The selected range, or `undefined`. |
+| `focus`, `blur` | Nothing. |
+| `keydown`, `mousedown`, `contextmenu` | The DOM event. |
+| `save` | Nothing: Cmd/Ctrl+S was pressed. |
 
 ## Extensions
 
-### Core Extensions
-
-#### `LineNumbersExtension`
-Adds line numbers to the left gutter.
-
-```typescript
-import { LineNumbersExtension } from '@editora/light-code-editor';
-
-const editor = createEditor(container, {
-  extensions: [new LineNumbersExtension()]
-});
-```
-
-#### `SyntaxHighlightingExtension`
-Provides built-in syntax highlighting for `html`, `css`, `javascript` / `js`, `jsx`, `typescript` / `ts`, `tsx`, `json`, `markdown` / `md`, `bash` / `shell` / `sh` / `zsh`, `python` / `py`, `go` / `golang`, `c`, `cpp` / `c++`, `java`, `csharp` / `cs`, `rust` / `rs`, `ruby` / `rb`, `sql`, `yaml` / `yml`, `xml` / `svg`, `vue`, `ejs`, `dockerfile` / `docker`, and `php`.
-
-```typescript
-import { SyntaxHighlightingExtension } from '@editora/light-code-editor';
-
-const syntax = new SyntaxHighlightingExtension();
-
-const editor = createEditor(container, {
-  extensions: [syntax]
-});
-
-editor.executeCommand('setSyntaxLanguage', 'json');
-```
-
-Notes:
-
-- The default language is `html`.
-- Use `setSyntaxLanguage` to switch the active built-in mode at runtime.
-- Use `syntax.registerMode(languageId, mode)` to add custom modes.
-
-#### `ThemeExtension`
-Enables theme switching.
-
-```typescript
-import { ThemeExtension } from '@editora/light-code-editor';
-
-const editor = createEditor(container, {
-  extensions: [new ThemeExtension()]
-});
-```
-
-#### `ReadOnlyExtension`
-Adds read-only mode functionality.
-
-```typescript
-import { ReadOnlyExtension } from '@editora/light-code-editor';
-
-const editor = createEditor(container, {
-  extensions: [new ReadOnlyExtension()]
-});
-```
-
-#### `SearchExtension`
-Provides search and replace functionality.
-
-```typescript
-import { SearchExtension } from '@editora/light-code-editor';
-
-const editor = createEditor(container, {
-  extensions: [
-    new SearchExtension({
-      // Replace mode defaults to true and advances to the next match
-      // after each Enter press in the replace field.
-      replaceAndFindNext: true
-    })
-  ]
-});
-```
-
-Advanced find/replace UI supports:
-
-- `Aa` for case-sensitive search
-- `Whole` for whole-word-only matching
-- `.*` for regular-expression search
-
-If regex input is invalid, the status shows `Invalid regular expression` and matching is skipped until the pattern is fixed.
-
-#### `DiagnosticsExtension`
-Provides diagnostics rendering, issue navigation, and a lightweight status summary.
-
-```typescript
-import {
-  DiagnosticsExtension,
-  type EditorDiagnostic,
-} from '@editora/light-code-editor';
-
-const diagnostics = new DiagnosticsExtension();
-
-const editor = createEditor(container, {
-  extensions: [diagnostics]
-});
-
-diagnostics.setDiagnostics([
-  {
-    severity: 'error',
-    message: 'Unexpected token',
-    source: 'demo',
-    code: 'TS1005',
-    range: {
-      start: { line: 2, column: 8 },
-      end: { line: 2, column: 19 }
-    }
-  }
-]);
-```
-
-Notes:
-
-- Diagnostics render through the decorations pipeline, so gutter markers and inline highlights do not rewrite editor text DOM.
-- `nextDiagnostic` and `prevDiagnostic` move focus through the current issue set.
-- Set `clearOnChange: true` when you want diagnostics cleared after edits instead of waiting for a provider refresh.
-
-#### `CompletionExtension`
-Provides provider-based autocomplete suggestions with async-safe refresh, popup navigation, and insertion commands.
-
-```typescript
-import {
-  CompletionExtension,
-  type CompletionContext,
-} from '@editora/light-code-editor';
-
-const completion = new CompletionExtension({
-  providers: [
-    (context: CompletionContext) => {
-      if (context.prefix.startsWith('di')) {
-        return [
-          { label: 'div', kind: 'tag', detail: '<div>' },
-          { label: 'dialog', kind: 'tag', detail: '<dialog>' }
-        ];
-      }
-
-      return [];
-    }
-  ]
-});
-
-const editor = createEditor(container, {
-  extensions: [completion]
-});
-
-editor.executeCommand('showCompletions');
-```
-
-Notes:
-
-- `Ctrl/Cmd + Space` opens completions manually.
-- `ArrowUp`, `ArrowDown`, `Enter`, `Tab`, and `Escape` work while the popup is open.
-- Providers can return arrays or `{ items, from }` objects when they need to override the replacement range.
-- Stale async results are ignored automatically, and in-flight requests are aborted when a newer request replaces them.
-
-#### `FormattingExtension`
-Provides pluggable document and selection formatting with timeout handling, cancellation, and selection preservation.
-
-```typescript
-import {
-  FormattingExtension,
-  createLightweightFormatter,
-} from '@editora/light-code-editor';
-
-const formatting = new FormattingExtension({
-  formatter: createLightweightFormatter(),
-  timeoutMs: 3000,
-});
-
-const editor = createEditor(container, {
-  extensions: [formatting]
-});
-
-editor.executeCommand('formatDocument');
-editor.executeCommand('formatSelection');
-```
-
-Notes:
-
-- `Shift + Alt + F` runs `formatDocument` through the default keymap.
-- Formatters receive the full document, the target input segment, the active range, cursor/selection state, and an `AbortSignal`.
-- Returning a plain string replaces the requested range. Returning `{ text, range, selection, cursor }` gives the formatter explicit control over the applied edit and final editor state.
-- Timeouts and newer formatting runs cancel stale async work so old results do not overwrite newer edits.
-- `createLightweightFormatter()` provides dependency-free formatting for common snippets. It is conservative and safe for HTML, CSS, PHP, Python, Bash, Go, C/C++, Java, C#, Rust, Vue, JSX/TSX, EJS, Dockerfile, and plain text, but it is not a replacement for dedicated formatters like Prettier, Black, gofmt, or php-cs-fixer.
-
-#### `ContextMenuExtension`
-Provides a right-click menu that can expose editor commands like find, replace, formatting, undo/redo, and diagnostics navigation.
-
-```typescript
-import {
-  ContextMenuExtension,
-  type ContextMenuItem,
-} from '@editora/light-code-editor';
-
-const items: ContextMenuItem[] = [
-  { label: 'Find', command: 'find', shortcut: 'Ctrl/Cmd+F' },
-  { label: 'Find & Replace', command: 'replace', shortcut: 'Ctrl/Cmd+H' },
-  { type: 'separator' },
-  { label: 'Format Document', command: 'formatDocument', shortcut: 'Shift+Alt+F' },
-];
-
-const contextMenu = new ContextMenuExtension({ items });
-
-const editor = createEditor(container, {
-  extensions: [contextMenu]
-});
-```
-
-Notes:
-
-- Right-click inside the editor opens the menu.
-- Use `openContextMenu` and `closeContextMenu` commands when you want to trigger the menu programmatically.
-- Menu items can call registered commands or run custom actions.
-- Item visibility and enabled state can be computed from the current editor state and selection.
-
-#### `EditingCommandsExtension`
-Provides lightweight authoring commands for comments and line editing without requiring a full language service.
-
-```typescript
-import { EditingCommandsExtension } from '@editora/light-code-editor';
-
-const editingCommands = new EditingCommandsExtension({
-  lineCommentToken: '//',
-  blockCommentTokens: {
-    open: '/* ',
-    close: ' */',
-  },
-});
-
-const editor = createEditor(container, {
-  extensions: [editingCommands]
-});
-
-editor.executeCommand('toggleLineComment');
-editor.executeCommand('duplicateLine');
-editor.executeCommand('goToLine', 12);
-```
-
-Notes:
-
-- Registers `toggleLineComment`, `toggleBlockComment`, `duplicateLine`, `moveLineUp`, `moveLineDown`, `joinLines`, and `goToLine`.
-- `goToLine(12)` jumps immediately. Calling `goToLine()` with no argument opens an inline go-to-line panel inside the editor, similar to find.
-- Default key bindings include `Ctrl/Cmd + /`, `Alt + Shift + A`, `Ctrl/Cmd + Shift + D`, `Alt + Up/Down`, `Ctrl/Cmd + J`, and `Ctrl/Cmd + L` for go to line.
-- Use custom comment tokens for non-JavaScript content such as HTML comments.
-
-#### `ActiveLineAndIndentGuidesExtension`
-Highlights the active line and renders indentation guides through the existing line-decoration pipeline.
-
-```typescript
-import { ActiveLineAndIndentGuidesExtension } from '@editora/light-code-editor';
-
-const guides = new ActiveLineAndIndentGuidesExtension({
-  activeLine: true,
-  indentGuides: true,
-});
-
-const editor = createEditor(container, {
-  extensions: [guides]
-});
-```
-
-Notes:
-
-- Designed to avoid per-character DOM work by reusing line decorations.
-- Indent guides automatically use the configured `tabSize` unless you override `guideStepColumns`.
-- `maxGuideDepth` and `maxGuideLines` keep guide rendering bounded on deeply nested or very large documents.
-
-#### `createLanguageServiceExtensions`
-Builds a coordinated extension bundle so one adapter config can drive syntax highlighting, diagnostics, completions, formatting, hover tooltips, and code actions together.
-
-```typescript
-import {
-  createLanguageServiceExtensions,
-  type CompletionContext,
-} from '@editora/light-code-editor';
+Pass extensions in `extensions`. Each one adds commands, which you run with `editor.executeCommand(name)`. The common
+ones are also bound to keys.
+
+| Extension | What it does | Options | Commands |
+| --- | --- | --- | --- |
+| `LineNumbersExtension` | The line-number gutter. | | `toggleLineNumbers` |
+| `SyntaxHighlightingExtension` | Syntax colours; the active language. | | `setSyntaxLanguage` |
+| `ThemeExtension` | Switch theme at run time. | | `setTheme`, `toggleTheme` |
+| `ReadOnlyExtension` | A read-only mode. | | `setReadOnly`, `toggleReadOnly` |
+| `SearchExtension` | Find and replace, with case, whole-word and regular-expression modes. | `replaceAndFindNext` | `find`, `findNext`, `findPrev`, `replace`, `replaceAll` |
+| `DiagnosticsExtension` | Gutter markers, inline highlights, issue navigation and a status box. | `diagnostics`, `maxDiagnostics`, `clearOnChange`, `showInlineHighlights`, `showGutterMarkers`, `showActiveLine`, `showStatusBar`, `layerName` | `setDiagnostics`, `clearDiagnostics`, `nextDiagnostic`, `prevDiagnostic` |
+| `CompletionExtension` | An autocomplete popup fed by providers. | `providers`, `debounceMs`, `maxItems`, `maxVisibleItems`, `minPrefixLength`, `autoTrigger`, `triggerCharacters`, `acceptOnEnter`, `acceptOnTab`, `closeOnBlur` | `showCompletions`, `closeCompletions`, `nextCompletion`, `prevCompletion`, `acceptCompletion` |
+| `FormattingExtension` | Format the document or the selection, with a timeout and cancellation. | `formatter`, `timeoutMs`, `showStatusBar`, `successDurationMs`, `errorDurationMs` | `formatDocument`, `formatSelection` |
+| `ContextMenuExtension` | A right-click menu of commands. | `items`, `closeOnBlur`, `closeOnScroll` | `openContextMenu`, `closeContextMenu` |
+| `EditingCommandsExtension` | Comments and line editing. | `lineCommentToken`, `blockCommentTokens`, `addSpaceAfterLineComment`, `registerKeybindings` | `toggleLineComment`, `toggleBlockComment`, `duplicateLine`, `moveLineUp`, `moveLineDown`, `joinLines`, `goToLine`, `openGoToLine`, `closeGoToLine` |
+| `ActiveLineAndIndentGuidesExtension` | Highlights the current line and draws indent guides. | `activeLine`, `indentGuides`, `guideStepColumns`, `maxGuideDepth`, `maxGuideLines` | |
+| `BracketMatchingExtension` | Highlights the matching bracket. | | |
+| `CodeFoldingExtension` | Fold bracketed blocks and markup tags. | | `fold`, `unfold`, `foldAll`, `unfoldAll` |
+| `HoverTooltipAndCodeActionsExtension` | Hover tooltips and a code-action menu. | `hoverProvider`, `codeActionsProvider`, `hoverDelayMs`, `maxCodeActions`, ... | `showCodeActions`, `hideHoverTooltip` |
+| `createLanguageServiceExtensions(config)` | One config that drives highlighting, diagnostics, completions, formatting, hover and code actions together; see [below](#connect-a-language-service). | | `refreshLanguageDiagnostics` |
+
+The editor itself always has `undo`, `redo`, `insertTab` and `save`.
+
+Default shortcuts:
+
+| Shortcut | Command |
+| --- | --- |
+| Cmd/Ctrl+F, Cmd/Ctrl+H | `find`, `replace` |
+| F3, Shift+F3, Cmd/Ctrl+G | `findNext`, `findPrev`, `findNext` |
+| Cmd/Ctrl+Z, Cmd/Ctrl+Y or Shift+Z | `undo`, `redo` |
+| Tab, Shift+Tab | `insertTab`, outdent |
+| Cmd/Ctrl+Shift+[ and ] | `fold`, `unfold` |
+| Cmd/Ctrl+Space | `showCompletions` |
+| Shift+Alt+F | `formatDocument` |
+| Cmd/Ctrl+/ , Alt+Shift+A | `toggleLineComment`, `toggleBlockComment` |
+| Cmd/Ctrl+Shift+D | `duplicateLine` |
+| Alt+Up, Alt+Down | `moveLineUp`, `moveLineDown` |
+| Cmd/Ctrl+J, Cmd/Ctrl+L | `joinLines`, `openGoToLine` |
+| Cmd/Ctrl+. | `showCodeActions` |
+| Cmd/Ctrl+Shift+T | `toggleTheme` (with `ThemeExtension`) |
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/light-code-editor/docs/images/search.png" alt="The search panel open over the editor, with the word user highlighted in five places and the match count shown" width="900">
+</p>
+
+## Connect a language service
+
+`createLanguageServiceExtensions` takes one config and returns the extensions that use it. Give it a function for each
+thing you can provide; all of them are optional, and the async ones receive an `AbortSignal` that fires when a newer
+request replaces them:
+
+```ts
+import { createEditor, createLanguageServiceExtensions, type CompletionContext } from '@editora/light-code-editor';
+import '@editora/light-code-editor/light-code-editor.css';
+
+const container = document.getElementById('editor') as HTMLElement;
 
 const languageService = createLanguageServiceExtensions({
   languageId: 'html',
-  highlight: ({ text }) =>
-    text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'),
+  highlight: ({ text }) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'),
   diagnostics: async ({ text, abortSignal }) => {
     if (abortSignal?.aborted) {
       return [];
     }
 
     return text.includes('onclick=')
-      ? [{
-          severity: 'warning',
-          message: 'Inline handlers need review',
-          range: {
-            start: { line: 0, column: 0 },
-            end: { line: 0, column: 7 },
+      ? [
+          {
+            severity: 'warning',
+            message: 'Inline handlers need review',
+            range: {
+              start: { line: 0, column: 8 },
+              end: { line: 0, column: 15 },
+            },
           },
-        }]
+        ]
       : [];
   },
   completionProviders: [
     (context: CompletionContext) =>
-      context.prefix.startsWith('di')
-        ? [{ label: 'div', kind: 'tag', insertText: 'div' }]
-        : [],
+      context.prefix.startsWith('di') ? [{ label: 'div', kind: 'tag', insertText: 'div' }] : [],
   ],
   hover: ({ diagnostics }) =>
     diagnostics[0]
@@ -531,23 +330,26 @@ const languageService = createLanguageServiceExtensions({
       : null,
   codeActions: ({ lineText, position }) =>
     lineText.includes('onclick=')
-      ? [{
-          label: 'Remove inline onclick handler',
-          run: (editor) => {
-            const start = lineText.indexOf('onclick=');
-            editor.replace(
-              {
-                start: { line: position.line, column: Math.max(0, start - 1) },
-                end: { line: position.line, column: start + 'onclick=""'.length },
-              },
-              '',
-            );
+      ? [
+          {
+            label: 'Remove inline onclick handler',
+            run: (editor) => {
+              const start = lineText.indexOf('onclick=');
+              editor.replace(
+                {
+                  start: { line: position.line, column: Math.max(0, start - 1) },
+                  end: { line: position.line, column: start + 'onclick="save()"'.length },
+                },
+                '',
+              );
+            },
           },
-        }]
+        ]
       : [],
 });
 
 const editor = createEditor(container, {
+  value: '<button onclick="save()">Save</button>\n<div class="note">Hello</div>\n',
   extensions: languageService.extensions,
 });
 
@@ -555,155 +357,122 @@ editor.executeCommand('refreshLanguageDiagnostics');
 editor.executeCommand('showCodeActions');
 ```
 
-Notes:
+<table>
+  <tr>
+    <td width="50%"><img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/light-code-editor/docs/images/diagnostics.png" alt="A warning on an inline onclick handler: a dot in the gutter, a wavy underline, and a Code Actions menu offering to remove the handler"></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/light-code-editor/docs/images/completion.png" alt="The completion popup after typing di, offering the tag div"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Diagnostics and a code action</sub></td>
+    <td align="center"><sub>Completions from a provider</sub></td>
+  </tr>
+</table>
 
-- Returns `{ extensions, languageServiceExtension, syntaxHighlightingExtension, diagnosticsExtension, completionExtension, formattingExtension, hoverCodeActionsExtension }`.
-- Diagnostics refresh is debounced and stale async requests are aborted automatically.
-- Use `refreshLanguageDiagnostics` when you want an explicit provider refresh in addition to change-triggered updates.
-- Use `showCodeActions` or `Ctrl/Cmd + .` to open code actions at the current cursor location.
-- Hover and code-action providers receive the shared language-service snapshot, current line text, matching diagnostics, and an `AbortSignal`.
-- Completion and formatting continue using the existing `CompletionExtension` and `FormattingExtension` config surfaces.
+Diagnostics are `{ severity, message, range, source?, code? }`, with `severity` one of `error`, `warning`, `info` or
+`hint`. Completion items are `{ label, kind, detail?, insertText? }`. The result is
+`{ extensions, languageServiceExtension, syntaxHighlightingExtension, diagnosticsExtension, completionExtension,
+formattingExtension, hoverCodeActionsExtension }`, so you can keep a handle on any of them.
 
-#### `BracketMatchingExtension`
-Highlights matching brackets.
+`FormattingExtension` takes a `formatter(context)` that returns the new text, or
+`{ text, range, selection, cursor }` when it needs to control the edit. `createLightweightFormatter()` is a small,
+dependency-free formatter for common snippets. It is conservative and no replacement for Prettier, Black or gofmt.
 
-```typescript
-import { BracketMatchingExtension } from '@editora/light-code-editor';
+## Decorations
 
-const editor = createEditor(container, {
-  extensions: [new BracketMatchingExtension()]
+Decorations tint lines, add gutter badges and mark ranges of text. They are drawn in overlay layers, so the editable
+text is not touched. Lines and columns start at 0.
+
+```ts
+import { createEditor, type EditorDecoration } from '@editora/light-code-editor';
+import '@editora/light-code-editor/light-code-editor.css';
+
+const editor = createEditor(document.getElementById('editor') as HTMLElement, {
+  value: `const total = items.reduce((sum, item) => sum + item.price, 0);
+const tax = total * 0.2;
+console.log(totl + tax);
+`,
+  lineNumbers: true,
 });
+
+const decorations: EditorDecoration[] = [
+  // Tint a whole line.
+  { id: 'review-line', type: 'line', line: 2, className: 'lce-decoration-line--active' },
+  // Put a badge in the gutter.
+  { id: 'review-gutter', type: 'gutter', line: 2, label: '●', title: 'Unknown name', className: 'lce-decoration-gutter--error' },
+  // Mark a range of text.
+  {
+    id: 'review-inline',
+    type: 'inline',
+    range: { start: { line: 2, column: 12 }, end: { line: 2, column: 16 } },
+    style: {
+      backgroundColor: 'rgba(255, 107, 107, 0.18)',
+      textDecoration: 'underline wavy rgba(255, 107, 107, 0.95)',
+    },
+  },
+];
+
+// A layer is replaced as a whole: call setDecorations again with the full next set.
+editor.setDecorations('review', decorations);
 ```
 
-#### `CodeFoldingExtension`
-Enables code folding for multi-line bracketed blocks and markup tag regions.
+- `clearDecorations('review')` removes one layer; `clearDecorations()` removes them all.
+- Inline decorations use the browser's CSS Highlight API, which keeps them fast and selection-safe. Backgrounds and
+  underlines work best; text colour is less reliable while syntax highlighting is on.
 
-```typescript
-import { CodeFoldingExtension } from '@editora/light-code-editor';
+## Write your own extension
 
-const editor = createEditor(container, {
-  extensions: [new CodeFoldingExtension()]
-});
-```
+An extension has a `name`, a `setup(editor)` and a `destroy()`:
 
-### Custom Extensions
+```ts
+import { createEditor, type EditorAPI, type EditorExtension } from '@editora/light-code-editor';
+import '@editora/light-code-editor/light-code-editor.css';
 
-Create your own extensions by implementing the `EditorExtension` interface:
-
-```typescript
-import { EditorExtension, EditorAPI } from '@editora/light-code-editor';
-
-class MyExtension implements EditorExtension {
-  public readonly name = 'my-extension';
+// An extension has a name, a setup() that receives the editor, and a destroy().
+class TimestampExtension implements EditorExtension {
+  public readonly name = 'timestamp';
 
   setup(editor: EditorAPI): void {
-    // Initialize your extension
-    editor.registerCommand('my-command', () => {
-      console.log('My command executed!');
+    // Commands can be run with editor.executeCommand(), a keymap or a menu.
+    editor.registerCommand('insertTimestamp', () => {
+      const cursor = editor.getCursor();
+      const text = `// ${new Date().toISOString()}\n`;
+      editor.replace({ start: cursor.position, end: cursor.position }, text);
     });
   }
 
   destroy(): void {
-    // Cleanup
+    // Release anything you created in setup().
   }
 }
+
+const editor = createEditor(document.getElementById('editor') as HTMLElement, {
+  value: 'const answer = 42;\n',
+  extensions: [new TimestampExtension()],
+});
+
+editor.executeCommand('insertTimestamp');
 ```
 
-## Built-In Commands
-
-The core editor always registers:
-
-- `undo`
-- `redo`
-- `insertTab`
-- `save`
-
-Extensions add commands on top:
-
-- `SyntaxHighlightingExtension`: `setSyntaxLanguage`
-- `SearchExtension`: `find`, `findNext`, `findPrev`, `replace`, `replaceAll`
-- `DiagnosticsExtension`: `setDiagnostics`, `clearDiagnostics`, `nextDiagnostic`, `prevDiagnostic`
-- `CompletionExtension`: `showCompletions`, `closeCompletions`, `nextCompletion`, `prevCompletion`, `acceptCompletion`
-- `FormattingExtension`: `formatDocument`, `formatSelection`
-- `HoverTooltipAndCodeActionsExtension`: `showCodeActions`, `hideHoverTooltip`
-- `ContextMenuExtension`: `openContextMenu`, `closeContextMenu`
-- `EditingCommandsExtension`: `toggleLineComment`, `toggleBlockComment`, `duplicateLine`, `moveLineUp`, `moveLineDown`, `joinLines`, `goToLine`, `openGoToLine`, `closeGoToLine`
-- `LanguageServiceExtension`: `refreshLanguageDiagnostics`
-- `ThemeExtension`: `setTheme`, `toggleTheme`
-- `ReadOnlyExtension`: `setReadOnly`, `toggleReadOnly`
-- `LineNumbersExtension`: `toggleLineNumbers`
-- `CodeFoldingExtension`: `fold`, `unfold`, `foldAll`, `unfoldAll`
+Extensions can also use `editor.getView()` and `editor.getConfig()` to work with the rendered surface and the startup
+options.
 
 ## Styling
 
-Import the stylesheet once in your app entry or component bundle:
+Import `@editora/light-code-editor/light-code-editor.css` once. The editor is themed with CSS custom properties, so
+prefer these to the internal selectors: `--editor-background`, `--editor-foreground`, `--editor-cursor`,
+`--editor-gutter-background`, `--editor-gutter-foreground` and `--editor-gutter-border`.
 
-```ts
-import '@editora/light-code-editor/light-code-editor.css';
-```
+The stable hooks for styling decorations are `.lce-decoration-line`, `.lce-decoration-gutter`,
+`.lce-decoration-line--active` and `.lce-decoration-gutter--error`. The rendered parts carry data attributes:
+`[data-lce-editor-container]` (the outer box), `[data-editora-editor]` (the scroll wrapper), `[data-editor-gutter]`
+(the line numbers) and the two decoration overlays, `[data-editor-line-decorations]` and
+`[data-editor-gutter-decorations]`.
 
-The package also keeps `@editora/light-code-editor/dist/light-code-editor.css` available for compatibility, but the shorter exported path above is the preferred import for consumers.
+## Part of Editora
 
-### Runtime Styling Surface
-
-The current renderer attaches data attributes instead of public class names:
-
-- `[data-lce-editor-container="true"]` - outer editor container
-- `[data-editora-editor="true"]` - shared scroll wrapper
-- `[data-editor-gutter="true"]` - line-number gutter
-- `[data-editor-line-decorations="true"]` - line decoration overlay
-- `[data-editor-gutter-decorations="true"]` - gutter decoration overlay
-
-For theming, prefer CSS custom properties such as `--editor-background`, `--editor-foreground`, `--editor-gutter-background`, and `--editor-gutter-foreground` instead of relying on internal selectors.
-
-Stable decoration hook classes:
-
-- `.lce-decoration-line`
-- `.lce-decoration-gutter`
-- `.lce-decoration-line--active`
-- `.lce-decoration-gutter--error`
-
-## Architecture
-
-The editor follows a modular, extension-first architecture:
-
-```
-EditorCore
-├── TextModel (content management)
-├── View (DOM rendering)
-├── Extension Registry
-├── Command System
-└── Event System
-```
-
-### Design Principles
-
-1. **Self-Contained** - Everything needed is included
-2. **Extension-First** - All features are extensions
-3. **Zero Dependencies** - Pure JavaScript
-4. **Type-Safe** - Full TypeScript support
-5. **Performant** - Optimized for large documents
-
-## Browser Support
-
-- Chrome 60+
-- Firefox 60+
-- Safari 12+
-- Edge 79+
-
-## Contributing
-
-This library follows the CodeMirror architecture principles and is designed to be maintainable and extensible. When adding features:
-
-1. Implement as extensions, not core modifications
-2. Maintain TypeScript types
-3. Include comprehensive tests
-4. Update documentation
+This is the code editor behind the source view of [`@editora/markdown-editor`](https://www.npmjs.com/package/@editora/markdown-editor)
+and the code plugins of [`@editora/plugins`](https://www.npmjs.com/package/@editora/plugins).
 
 ## License
 
-MIT License - see LICENSE file for details.
-
-## Author
-
-Ajay Kumar <ajaykr089@gmail.com>
+MIT © [Ajay Kumar](https://github.com/ajaykr089)
