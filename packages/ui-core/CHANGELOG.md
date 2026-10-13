@@ -1,5 +1,26 @@
 # Change Log
 
+## 0.1.23
+
+### Patch Changes
+
+- 16ae8ee: Rewrite the READMEs of `@editora/light-code-editor`, `@editora/themes`, `@editora/ui-core`, `@editora/ui-react`, `@editora/ui-sortable` and `@editora/toast`, which are the npm pages of these packages, with screenshots and examples.
+
+  Their images and links were relative paths that npm cannot show, and several examples did not run. Every example is now a file that is type-checked in strict mode and run in Chromium (React ones under `StrictMode`, drag and drop with the pointer and the keyboard), and the README quotes it word for word (`npm run check:readme-examples`). The screenshots are taken from the same examples (`npm run readme:screenshots`).
+
+  Things the READMEs now get right that they did not: the `@editora/themes` tokens only set text, border and shadow colours (backgrounds are set by rules), the helpers it exports are documented; `@editora/ui-core` and `@editora/ui-react` list measured bundle sizes (a Button imported from the `@editora/ui-react` root is 1 MB gzipped up front, from its own entry 54 KB up front plus the rest of `ui-core` loaded later); `@editora/toast` documents its defaults (bottom right, four seconds, three visible, theme `system`) and that it is safe to import on the server.
+
+- 8a37a0c: Fix two ways `<ui-form>` did nothing in plain HTML, found while testing the README example.
+
+  - A `<ui-button type="submit">` (or `type="reset"`) inside a `<ui-form>` did nothing. The button looked for an ancestor `<form>`, but `<ui-form>` keeps its `<form>` in a shadow root, which `closest()` cannot see. It now calls the form's `requestSubmit()` and `reset()`.
+  - A form whose markup is on the page before the script that registers the elements had no values and validated nothing. Elements are upgraded in the order they were defined, so a control such as `<ui-input>` could be upgraded before `<ui-form>`, find no `registerField()` on it, and never register. The form now asks the controls inside it to register again once it is upgraded. (React and other code that creates the elements after the import was not affected.)
+
+- 3bfac80: Let `@editora/ui-core` be imported in a process without a DOM. Importing the package, any `@editora/ui-core/<name>` entry, or `@editora/ui-react` on a server threw `HTMLElement is not defined` (or `customElements is not defined`), so a Next.js page that server-renders a `'use client'` component using `@editora/ui-react/client` answered with HTTP 500. The element classes now extend a placeholder when there is no `HTMLElement`, and three registrations (`ui-sidebar`, `ui-color-picker`, `ui-number-field`) check for `customElements` like the other elements do. Nothing changes in a browser; the elements are still defined only there.
+- b2dc737: Fix `<ui-sortable>` dropping a selection that is set before its items. The selection is kept only for ids that exist, so a `selection` that arrived before `items` (the order of a React render, or of a script that assigns `selection` first) was emptied and never read again once the items were there: a controlled `selection={['epic']}` showed "0 items selected". The selection is now read again whenever the items change.
+- Updated dependencies [59c675b]
+- Updated dependencies [59c675b]
+  - @editora/icons@0.1.12
+
 ## 0.1.22
 
 ### Patch Changes

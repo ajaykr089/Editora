@@ -1,5 +1,30 @@
 # Change Log
 
+## 0.1.24
+
+### Patch Changes
+
+- 16ae8ee: Rewrite the READMEs of `@editora/light-code-editor`, `@editora/themes`, `@editora/ui-core`, `@editora/ui-react`, `@editora/ui-sortable` and `@editora/toast`, which are the npm pages of these packages, with screenshots and examples.
+
+  Their images and links were relative paths that npm cannot show, and several examples did not run. Every example is now a file that is type-checked in strict mode and run in Chromium (React ones under `StrictMode`, drag and drop with the pointer and the keyboard), and the README quotes it word for word (`npm run check:readme-examples`). The screenshots are taken from the same examples (`npm run readme:screenshots`).
+
+  Things the READMEs now get right that they did not: the `@editora/themes` tokens only set text, border and shadow colours (backgrounds are set by rules), the helpers it exports are documented; `@editora/ui-core` and `@editora/ui-react` list measured bundle sizes (a Button imported from the `@editora/ui-react` root is 1 MB gzipped up front, from its own entry 54 KB up front plus the rest of `ui-core` loaded later); `@editora/toast` documents its defaults (bottom right, four seconds, three visible, theme `system`) and that it is safe to import on the server.
+
+- bf92375: Make every wrapper register the elements it renders itself, and stop shipping the whole `@editora/ui-core` catalog as a lazy chunk. Each wrapper already imported its own element, but a missing element fell back to a dynamic `import('@editora/ui-core')`, so every build that deep-imported one component (`@editora/ui-react/Button`) also emitted a 450-500 KB gzipped chunk (never fetched by `Button`, but always built and deployed, and inlined by bundlers that do not split). That fallback is removed. It was also hiding that some wrappers registered nothing: deep-importing `TimeField` (from `DateField`), `Dropzone` (from `FileUpload`) or the `Description`, `FieldError`, `ControlGroup` and `Fieldset` parts of `FieldSemantics` rendered elements that never upgraded, and `Sortable` only worked because of the fallback (about 2.4 MB unminified, fetched at run time). They now import their own entries. A wrapper whose element is still missing logs a warning that names the `@editora/ui-core/<name>` import to add.
+- d835f6b: Fix `@editora/ui-react/server` failing in React Server Components. The entry is meant for server components, but its components shared a chunk with the hooks of the client wrappers (`useRef`, `useEffect`, ...) and imported `@editora/ui-core`, which needs `HTMLElement` when it is loaded, so Next.js answered every page that used it with HTTP 500 ("You're importing a component that needs `useRef`"). The entry now loads only React: the markup comes from a hook-free `createUIElement`, and the elements are no longer registered by the server graph. Define them in the browser by importing `@editora/ui-react/client` (or `@editora/ui-core`) from a client component. A deep import such as `@editora/ui-react/Box` still registers its element and is now a client module.
+- 4594dc4: Fix three problems found while running the README examples in a browser.
+
+  - `DialogProvider` and `AlertDialogProvider` did not work under React `StrictMode`, which Vite, Create React App and Next.js turn on in development: every `confirm()` or `prompt()` resolved at once as `dismiss` and no dialog appeared. StrictMode runs an effect's cleanup and setup again without rendering in between, and the cleanup had dropped the manager. The setup now brings the manager back, with the alert dialog's defaults.
+  - `<Pagination>` removed the `count` that a linked `<DataTable paginationId="...">` had written on it, because its own `count` prop was undefined, so the pager showed one page whatever the table held. It now only removes attributes it set itself.
+  - The Gantt types (`GanttTask`, `GanttLink`, `GanttTaskChangeDetail`, `GanttLinkSelectDetail`, `GanttTaskType`, `GanttZoom`, `GanttSort`, `GanttBarVariant`) were not exported from the package root, although the `Gantt` component needs them. They are now.
+
+- Updated dependencies [16ae8ee]
+- Updated dependencies [8a37a0c]
+- Updated dependencies [3bfac80]
+- Updated dependencies [b2dc737]
+  - @editora/ui-core@0.1.23
+  - @editora/toast@2.0.10
+
 ## 0.1.23
 
 ### Patch Changes

@@ -1,5 +1,31 @@
 # Change Log
 
+## 1.0.26
+
+### Patch Changes
+
+- 74e8688: Fix two ways the React editor did not match its own documentation.
+
+  - `toolbar={{ items: [...] }}` with `'heading'` (or `'paragraph'`) silently dropped the heading menu: the name was mapped to a `setHeading` command that the heading plugin no longer has (it is `setBlockType`), so nothing matched. The name now resolves to the heading menu, as it does in `@editora/core`.
+  - The published typings were out of step with the component. `toolbar.items` also takes a string such as `'undo redo | bold italic'`, `content` also takes `minHeight`, `maxHeight` and `autoHeight`, and every field of `mediaConfig` is optional (it also takes `offline`). TypeScript users who followed the documentation got compile errors for all of these.
+
+- e0c6fb4: Rewrite the READMEs of `@editora/core`, `@editora/react` and `@editora/plugins`, which are the npm pages of the three packages.
+
+  The old READMEs documented APIs that do not exist (`createEditor({ content, onChange })` with `mount()` and `getJSON()` in core; `useEditor`, `useEditorState`, `ToolbarButton` and `ParagraphPlugin` in react; a catalog with subscript, superscript, audio and horizontal-rule plugins in plugins), and their images used relative paths that npm cannot show. The new ones describe what the packages do, with screenshots and examples:
+
+  - every example is a file that is type-checked in strict mode and run in Chromium, and the README quotes it word for word (`npm run check:readme-examples`);
+  - the screenshots are taken from the same examples (`npm run readme:screenshots`);
+  - core: the `<editora-editor>` element, its attributes, methods and events, the two bundles, and the sanitising rules;
+  - react: the props, the toolbar item names, the editor API, themes, and how to use the editor with Next.js (it cannot be imported on the server, so load it with `next/dynamic` and `ssr: false`);
+  - plugins: all 56 plugins with their toolbar item, entry point and import path, plus measured bundle sizes: importing one plugin from the root entry bundles the whole catalog (125 KB gzipped), `lite` costs 24 KB and a subpath import 1 KB.
+
+- Updated dependencies [e0c6fb4]
+- Updated dependencies [16ae8ee]
+  - @editora/core@1.0.23
+  - @editora/plugins@1.0.22
+  - @editora/light-code-editor@1.0.18
+  - @editora/themes@1.0.18
+
 ## 1.0.25
 
 ### Patch Changes
