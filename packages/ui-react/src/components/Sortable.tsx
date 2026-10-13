@@ -55,8 +55,6 @@ export type SortableLabelKey =
   | 'movingMany'
   | 'copyingOne'
   | 'copyingMany'
-  | 'draggingOne'
-  | 'draggingMany'
   | 'announceSelectedMany'
   | 'announceDragDisabled'
   | 'announceDragging'
@@ -583,7 +581,6 @@ export const Sortable = React.forwardRef<SortableElement, SortableProps>(functio
         handle.setAttribute('data-sortable-custom-handle', '');
         handle.setAttribute('data-drag-trigger', 'custom');
         handle.setAttribute('data-id', id);
-        handle.setAttribute('draggable', 'true');
         // The handle starts a pointer drag. The item is the keyboard stop (it already moves with the
         // arrow keys), and a focusable child inside an option is invalid ARIA.
         if (!handle.hasAttribute('tabindex')) {

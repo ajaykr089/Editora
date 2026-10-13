@@ -253,8 +253,6 @@ const DEFAULT_LABELS = {
   movingMany: 'Moving {count} items',
   copyingOne: 'Copying item',
   copyingMany: 'Copying {count} items',
-  draggingOne: 'Dragging item',
-  draggingMany: 'Dragging {count} items',
   announceSelectedMany: '{count} items selected.',
   announceDragDisabled: 'Dragging is disabled right now.',
   announceDragging: 'Dragging {label}.',
@@ -780,16 +778,6 @@ const style = `
       rotate: 0deg;
       scale: 1;
     }
-  }
-
-  /* The ghost card and the insertion line already show where the card will land, so the old floating
-     "drop preview" box is not drawn. */
-  .drag-preview-overlay {
-    position: fixed;
-    top: -9999px;
-    left: -9999px;
-    display: none;
-    pointer-events: none;
   }
 
   .item[data-disabled="true"] {
@@ -1656,7 +1644,6 @@ export class UISortable extends ElementBase {
   private _cloneSeed = 1;
   private _dragImage: HTMLElement | null = null;
   private _dragImageOffset = { x: -14, y: -14 };
-  private _dragPreviewOverlay: HTMLElement | null = null;
   private _pendingFocusId: string | null = null;
   private _pointerGesture: PointerGestureState | null = null;
   private _pendingDropTarget: DropTargetCandidate | null = null;
@@ -1672,9 +1659,6 @@ export class UISortable extends ElementBase {
     this._onClick = this._onClick.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onDragStart = this._onDragStart.bind(this);
-    this._onDragOver = this._onDragOver.bind(this);
-    this._onDrop = this._onDrop.bind(this);
-    this._onDragEnd = this._onDragEnd.bind(this);
     this._onPointerDown = this._onPointerDown.bind(this);
     this._onPointerMove = this._onPointerMove.bind(this);
     this._onPointerUp = this._onPointerUp.bind(this);
@@ -1718,9 +1702,6 @@ export class UISortable extends ElementBase {
     this.root.addEventListener('click', this._onClick);
     this.root.addEventListener('keydown', this._onKeyDown as EventListener);
     this.root.addEventListener('dragstart', this._onDragStart as EventListener);
-    this.root.addEventListener('dragover', this._onDragOver as EventListener);
-    this.root.addEventListener('drop', this._onDrop as EventListener);
-    this.root.addEventListener('dragend', this._onDragEnd as EventListener);
     this.root.addEventListener('pointerdown', this._onPointerDown as EventListener);
     this.root.addEventListener('focusin', this._onFocusIn);
     // Not passive: a held card has to stop the page from scrolling under the finger.
@@ -1737,9 +1718,6 @@ export class UISortable extends ElementBase {
     this.root.removeEventListener('click', this._onClick);
     this.root.removeEventListener('keydown', this._onKeyDown as EventListener);
     this.root.removeEventListener('dragstart', this._onDragStart as EventListener);
-    this.root.removeEventListener('dragover', this._onDragOver as EventListener);
-    this.root.removeEventListener('drop', this._onDrop as EventListener);
-    this.root.removeEventListener('dragend', this._onDragEnd as EventListener);
     this.root.removeEventListener('pointerdown', this._onPointerDown as EventListener);
     this.root.removeEventListener('focusin', this._onFocusIn);
     this.root.removeEventListener('touchmove', this._onTouchMove as EventListener);
@@ -1751,7 +1729,6 @@ export class UISortable extends ElementBase {
     this.ownerDocument?.removeEventListener('pointerup', this._onPointerUp as EventListener, true);
     this.ownerDocument?.removeEventListener('pointercancel', this._onPointerCancel as EventListener, true);
     this._stopAutoScroll();
-    this._removeDragPreviewOverlay();
     this._removeDragImage();
     if (this._pendingTimer) clearTimeout(this._pendingTimer);
     this._pendingTimer = null;
@@ -2022,7 +1999,6 @@ export class UISortable extends ElementBase {
       this._restorePendingFocus();
       this._applyCurrentDropTargetVisualState();
       this._applyLiveMessage();
-      this._updatePointerDragPreview();
       this._animateItemShellReflow(previousRects);
     });
   }
@@ -2320,7 +2296,6 @@ export class UISortable extends ElementBase {
       handle.setAttribute('data-sortable-custom-handle', '');
       handle.setAttribute('data-drag-trigger', 'custom');
       handle.setAttribute('data-id', id);
-      handle.setAttribute('draggable', 'true');
       if (!handle.hasAttribute('tabindex')) handle.setAttribute('tabindex', '-1');
     });
   }
@@ -2416,121 +2391,11 @@ export class UISortable extends ElementBase {
     zone.style.setProperty('--ui-sortable-dropzone-match-inline-size', `${Math.max(180, Math.round(rect.width))}px`);
   }
 
-  private _ensureDragPreviewOverlay(): HTMLElement {
-    if (this._dragPreviewOverlay && this._dragPreviewOverlay.isConnected) return this._dragPreviewOverlay;
-    const overlay = document.createElement('div');
-    overlay.className = 'drag-preview-overlay';
-    overlay.setAttribute('data-visible', 'false');
-    this.root.appendChild(overlay);
-    this._dragPreviewOverlay = overlay;
-    return overlay;
-  }
-
   private _clearPointerDragPreview(): void {
-    this._dragPreviewOverlay?.setAttribute('data-visible', 'false');
-    this._dragPreviewOverlay?.style.setProperty('left', '-9999px');
-    this._dragPreviewOverlay?.style.setProperty('top', '-9999px');
     const rootEl = this.root.querySelector<HTMLElement>('.root');
     if (rootEl && !this._dragState?.keyboard) {
       rootEl.setAttribute('data-drag-preview', 'false');
     }
-  }
-
-  private _pointerPreviewContent(): { kicker: string; title: string; description: string } | null {
-    if (!this._dragState || this._dragState.keyboard) return null;
-    const firstMovedId = this._dragState.movedRootIds[0];
-    const item = this._items.find((entry) => entry.id === firstMovedId);
-    if (!item) return null;
-    return {
-      kicker: this._t(this._dragState.clone ? 'copyPreview' : 'dropPreview'),
-      title: this._dragState.clone ? `${item.label} copy` : item.label,
-      description: this._t(
-        this._dragState.clone
-          ? 'releaseCopy'
-          : this._dragState.movedRootIds.length > 1
-            ? 'releaseMoveMany'
-            : 'releaseMove'
-      ),
-    };
-  }
-
-  private _pointerPreviewSize(): { width: number; height: number } | null {
-    if (this.getAttribute('drag-preview-size') === 'compact') return null;
-    if (!this._dragState || this._dragState.keyboard) return null;
-    const firstMovedId = this._dragState.movedRootIds[0];
-    const itemEl = firstMovedId ? this._findItemElement(firstMovedId) : null;
-    if (!itemEl) return null;
-    const computedStyle = window.getComputedStyle(itemEl);
-    const scale = readScaleFromTransform(computedStyle.transform);
-    return {
-      width: itemEl.offsetWidth * scale.x,
-      height: itemEl.offsetHeight * scale.y,
-    };
-  }
-
-  private _updatePointerDragPreview(): void {
-    if (!this._dragState || this._dragState.keyboard) {
-      this._clearPointerDragPreview();
-      return;
-    }
-
-    const preview = this._pointerPreviewContent();
-    if (!preview) {
-      this._clearPointerDragPreview();
-      return;
-    }
-
-    const rootEl = this.root.querySelector<HTMLElement>('.root');
-    const overlay = this._dragPreviewOverlay;
-    const overlayVisible = overlay?.getAttribute('data-visible') === 'true';
-    const previewSize = this._pointerPreviewSize();
-
-    if (!this._dragState.dropTarget) {
-      if (overlayVisible && rootEl) rootEl.setAttribute('data-drag-preview', 'true');
-      return;
-    }
-
-    const targetEl = this._findDropzone(this._dragState.dropTarget);
-    if (!targetEl) {
-      if (overlayVisible && rootEl) rootEl.setAttribute('data-drag-preview', 'true');
-      return;
-    }
-
-    const nextOverlay = this._ensureDragPreviewOverlay();
-    nextOverlay.innerHTML = `
-      <div class="placeholder-content">
-        <div class="placeholder-kicker">${escapeHtml(preview.kicker)}</div>
-        <div class="placeholder-title">${escapeHtml(preview.title)}</div>
-        <div class="placeholder-description">${escapeHtml(preview.description)}</div>
-      </div>
-    `;
-
-    const targetRect = targetEl.getBoundingClientRect();
-    if (rootEl) rootEl.setAttribute('data-drag-preview', 'true');
-
-    nextOverlay.style.setProperty('left', '-9999px');
-    nextOverlay.style.setProperty('top', '-9999px');
-    if (previewSize) {
-      nextOverlay.style.setProperty('inline-size', `${previewSize.width}px`);
-      nextOverlay.style.setProperty('block-size', `${previewSize.height}px`);
-    } else {
-      nextOverlay.style.removeProperty('inline-size');
-      nextOverlay.style.removeProperty('block-size');
-    }
-    nextOverlay.setAttribute('data-visible', 'true');
-    const overlayRect = nextOverlay.getBoundingClientRect();
-    const overlayWidth = previewSize?.width ?? overlayRect.width;
-    const overlayHeight = previewSize?.height ?? overlayRect.height;
-    const left = Math.max(16, Math.min(targetRect.left, window.innerWidth - overlayWidth - 16));
-    const top = Math.max(
-      16,
-      Math.min(
-        targetRect.top + (targetRect.height - overlayHeight) / 2,
-        window.innerHeight - overlayHeight - 16
-      )
-    );
-    nextOverlay.style.setProperty('left', `${Math.round(left)}px`);
-    nextOverlay.style.setProperty('top', `${Math.round(top)}px`);
   }
 
   private _setDraggingVisualState(ids: string[], active: boolean): void {
@@ -2558,7 +2423,8 @@ export class UISortable extends ElementBase {
       this.requestRender();
       return;
     }
-    this._updatePointerDragPreview();
+    // `data-drag-preview` is a styling hook: true while a pointer drag has a place to land.
+    this.root.querySelector<HTMLElement>('.root')?.setAttribute('data-drag-preview', target ? 'true' : 'false');
   }
 
   private _queueDropTarget(target: DropTarget | null, timestamp?: number, options?: { announceLabel?: string }): void {
@@ -3079,70 +2945,10 @@ export class UISortable extends ElementBase {
     this.requestRender();
   }
 
+  // The browser must not start a native drag while a card is being dragged with the pointer (an image or a
+  // link inside a card would): the pointer drag is the only drag.
   private _onDragStart(event: DragEvent): void {
-    const activator = this._dragActivatorFromPath(event.composedPath());
-    const id = activator?.id;
-    if (!activator || !id) {
-      event.preventDefault();
-      return;
-    }
-
-    if (this._isDragLocked()) {
-      event.preventDefault();
-      this._announce(this._t('announceDragDisabled'));
-      return;
-    }
-
-    const item = this._items.find((entry) => entry.id === id);
-    if (!item || item.disabled || item.dragDisabled) {
-      event.preventDefault();
-      return;
-    }
-
-    const selectedIds = this._selection.includes(id) ? this._selectedRootIds(id) : [id];
-    if (!this._selection.includes(id)) this._setSelection([id], 'pointer');
-
-    const clone = this._itemClonesOnDrag(id);
-    this._dragState = {
-      snapshot: this._items.map(cloneItem),
-      movedRootIds: selectedIds,
-      originId: id,
-      clone,
-      keyboard: false,
-      dropTarget: null,
-      committed: false,
-    };
-
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = clone ? 'copyMove' : 'move';
-      event.dataTransfer.setData('text/plain', selectedIds.join(','));
-      this._applyDragImage(event.dataTransfer, selectedIds.length);
-    }
-
-    this._announceDragging(item.label, selectedIds.length, clone);
-    this.requestRender();
-  }
-
-  private _onDragOver(event: DragEvent): void {
-    if (!this._dragState || this._dragState.keyboard) return;
-    this._nestModifier = !!event.altKey;
-    const target = this._dropTargetFromEvent(event);
-    if (!target || !this._canDrop(target, this._dragState.movedRootIds)) {
-      this._queueDropTarget(null, event.timeStamp);
-      return;
-    }
-    event.preventDefault();
-    this._queueDropTarget(target, event.timeStamp);
-    if (event.dataTransfer) event.dataTransfer.dropEffect = this._dragState.clone ? 'copy' : 'move';
-  }
-
-  private _onDrop(event: DragEvent): void {
-    if (!this._dragState || this._dragState.keyboard) return;
-    this._nestModifier = !!event.altKey;
-    const target = this._dropTargetFromEvent(event);
-    if (!target || !this._canDrop(target, this._dragState.movedRootIds)) return;
-    event.preventDefault();
-    this._commitMove(target, this._dragState.movedRootIds, this._dragState.clone, 'pointer');
+    if (this._pointerGesture || (this._dragState && !this._dragState.keyboard)) event.preventDefault();
   }
 
   private _onDocumentKeyDown(event: KeyboardEvent): void {
@@ -3176,24 +2982,6 @@ export class UISortable extends ElementBase {
   // lifted card says so.
   private _noteRefusal(refused: boolean): void {
     if (this._dragImage?.toggleAttribute) this._dragImage.toggleAttribute('data-refused', refused);
-  }
-
-  private _onDragEnd(): void {
-    if (!this._dragState || this._dragState.keyboard) return;
-    if (!this._dragState.committed) {
-      this._setDraggingVisualState(this._draggingIds(), false);
-      this._pendingDropTarget = null;
-      this._setDropTargetVisualState(this._dragState.dropTarget, false);
-      this._clearPointerDragPreview();
-      this._dragState = null;
-      this._removeDragImage();
-      this._announce(this._t('announceCancelled'));
-      this.requestRender();
-    }
-  }
-
-  private _dropTargetFromEvent(event: DragEvent): DropTarget | null {
-    return this._dropTargetFromPath(event.composedPath(), event.clientX, event.clientY);
   }
 
   private _dropTargetFromPath(pathLike: EventTarget[], clientX: number, clientY: number): DropTarget | null {
@@ -3982,32 +3770,9 @@ export class UISortable extends ElementBase {
     this.requestRender();
   }
 
-  private _applyDragImage(dataTransfer: DataTransfer, count: number): void {
-    this._removeDragImage();
-    const ghost = document.createElement('div');
-    ghost.textContent = count === 1 ? this._t('draggingOne') : this._t('draggingMany', { count });
-    ghost.style.position = 'fixed';
-    ghost.style.top = '-999px';
-    ghost.style.left = '-999px';
-    ghost.style.padding = '8px 12px';
-    ghost.style.borderRadius = '999px';
-    ghost.style.background = 'rgba(15, 23, 42, 0.92)';
-    ghost.style.color = '#f8fafc';
-    ghost.style.font = '600 12px/1 Inter, sans-serif';
-    ghost.style.pointerEvents = 'none';
-    document.body.appendChild(ghost);
-    dataTransfer.setDragImage(ghost, 12, 12);
-    this._dragImage = ghost;
-  }
-
   private _removeDragImage(): void {
     this._dragImage?.remove();
     this._dragImage = null;
-  }
-
-  private _removeDragPreviewOverlay(): void {
-    this._dragPreviewOverlay?.remove();
-    this._dragPreviewOverlay = null;
   }
 
   private _applyPointerPreview(

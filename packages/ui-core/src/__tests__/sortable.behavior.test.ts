@@ -250,11 +250,7 @@ describe('ui-sortable', () => {
       }
     });
 
-    const insideTarget = el._dropTargetFromEvent({
-      composedPath: () => [epic],
-      clientX: 100,
-      clientY: 52,
-    });
+    const insideTarget = el._dropTargetFromPath([epic], 100, 52);
     expect(insideTarget).toEqual({
       listId: 'todo',
       parentId: 'epic',
@@ -363,51 +359,6 @@ describe('ui-sortable', () => {
     expect(el.shadowRoot?.querySelectorAll('.item[data-id="task-a"]').length).toBe(1);
     expect(el.shadowRoot?.querySelector('.root')?.getAttribute('data-drag-preview')).toBe('true');
     expect(el.shadowRoot?.textContent?.includes('Insert here')).toBe(false);
-  });
-
-  it('keeps the pointer drag preview visible across brief target gaps', async () => {
-    const el = document.createElement('ui-sortable') as any;
-    el.setAttribute('lists', JSON.stringify(lists));
-    el.setAttribute('items', JSON.stringify(items));
-    document.body.appendChild(el);
-    await flushMicrotask();
-
-    el._dragState = {
-      snapshot: el.items.map((item: any) => ({
-        ...item,
-        parentId: item.parentId ?? null,
-        description: item.description ?? '',
-        order: item.order ?? 0,
-        disabled: !!item.disabled,
-        dragDisabled: !!item.dragDisabled,
-        cloneOnDrag: !!item.cloneOnDrag,
-        hidden: !!item.hidden,
-      })),
-      movedRootIds: ['task-a'],
-      originId: 'task-a',
-      clone: false,
-      keyboard: false,
-      dropTarget: {
-        listId: 'done',
-        parentId: null,
-        beforeId: null,
-        mode: 'before',
-      },
-      committed: false,
-    };
-
-    el._updatePointerDragPreview();
-    const overlay = el.shadowRoot?.querySelector('.drag-preview-overlay') as HTMLElement | null;
-    expect(overlay?.getAttribute('data-visible')).toBe('true');
-    const previousLeft = overlay?.style.left;
-    const previousTop = overlay?.style.top;
-
-    el._dragState.dropTarget = null;
-    el._updatePointerDragPreview();
-
-    expect(overlay?.getAttribute('data-visible')).toBe('true');
-    expect(overlay?.style.left).toBe(previousLeft);
-    expect(overlay?.style.top).toBe(previousTop);
   });
 
   it('stabilizes pointer target updates before switching the active drop target', async () => {
@@ -1160,7 +1111,7 @@ describe('ui-sortable', () => {
       return el;
     };
     const over = (el: any, x: number, y: number) =>
-      el._dropTargetFromEvent({ composedPath: () => [el.shadowRoot.querySelector('.item[data-id="epic"]')], clientX: x, clientY: y });
+      el._dropTargetFromPath([el.shadowRoot.querySelector('.item[data-id="epic"]')], x, y);
     const before = { listId: 'todo', parentId: null, beforeId: 'epic', mode: 'before' };
     const after = { listId: 'todo', parentId: null, beforeId: 'task-a', mode: 'before' };
     const inside = { listId: 'todo', parentId: 'epic', beforeId: null, mode: 'inside' };
@@ -2137,6 +2088,79 @@ describe('ui-sortable', () => {
       el._pathFromPoint = () => [];
       el._onPointerMove({ pointerId: 95, clientX: 900, clientY: 900, preventDefault() {} });
       expect(ghost().hasAttribute('data-refused')).toBe(false);
+      el.cancelDrag();
+    });
+  });
+
+  describe('one drag path', () => {
+    const mount = async (attrs: Record<string, string> = {}) => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(lists));
+      el.setAttribute('items', JSON.stringify(items));
+      Object.entries(attrs).forEach(([name, value]) => el.setAttribute(name, value));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      return el;
+    };
+
+    it('has no floating preview box and no native drag handlers', async () => {
+      const el = await mount();
+      const handle = el.shadowRoot.querySelector('.handle[data-id="task-a"]') as HTMLElement;
+      el._onPointerDown({ pointerId: 1, pointerType: 'mouse', clientX: 1, clientY: 1, preventDefault() {}, composedPath: () => [handle] });
+      el._onPointerMove({ pointerId: 1, clientX: 40, clientY: 40, preventDefault() {} });
+      expect(el.shadowRoot.querySelector('.drag-preview-overlay')).toBeNull();
+      expect(el._onDragOver).toBeUndefined();
+      expect(el._onDrop).toBeUndefined();
+      expect(el._applyDragImage).toBeUndefined();
+      el.cancelDrag();
+    });
+
+    it('does not let the browser start a native drag while a card is being dragged, or held', async () => {
+      const el = await mount();
+      const idle = new Event('dragstart', { cancelable: true });
+      el._onDragStart(idle);
+      // Nothing of ours is going on: an image a page wants to drag natively is left alone.
+      expect(idle.defaultPrevented).toBe(false);
+
+      const handle = el.shadowRoot.querySelector('.handle[data-id="task-a"]') as HTMLElement;
+      el._onPointerDown({ pointerId: 2, pointerType: 'mouse', clientX: 1, clientY: 1, preventDefault() {}, composedPath: () => [handle] });
+      const pressed = new Event('dragstart', { cancelable: true });
+      el._onDragStart(pressed);
+      expect(pressed.defaultPrevented).toBe(true);
+
+      el._onPointerMove({ pointerId: 2, clientX: 40, clientY: 40, preventDefault() {} });
+      const dragging = new Event('dragstart', { cancelable: true });
+      el._onDragStart(dragging);
+      expect(dragging.defaultPrevented).toBe(true);
+      el.cancelDrag();
+    });
+
+    it('does not mark the parts of a drawn card that start a drag as natively draggable', async () => {
+      const el = await mount({ 'drag-handle-selector': '.grip' });
+      el.renderItem = (item: any) => `<span class="grip">⠿</span> ${item.label}`;
+      await flushMicrotask();
+      await flushMicrotask();
+      const grip = el.shadowRoot.querySelector('.item-custom-content .grip') as HTMLElement;
+      expect(grip.getAttribute('data-drag-trigger')).toBe('custom');
+      expect(grip.hasAttribute('draggable')).toBe(false);
+    });
+
+    it('keeps the data-drag-preview hook: true while a pointer drag has a place to land', async () => {
+      const el = await mount();
+      const flag = () => el.shadowRoot.querySelector('.root').getAttribute('data-drag-preview');
+      el._dragState = {
+        snapshot: el.items.map((item: any) => ({ ...item })),
+        movedRootIds: ['task-a'],
+        originId: 'task-a',
+        clone: false,
+        keyboard: false,
+        dropTarget: null,
+        committed: false,
+      };
+      el._setDropTarget({ listId: 'done', parentId: null, beforeId: null, mode: 'before' });
+      expect(flag()).toBe('true');
+      el._setDropTarget(null);
+      expect(flag()).toBe('false');
       el.cancelDrag();
     });
   });
