@@ -69,6 +69,13 @@ export type UISortablePersistenceSnapshot = {
   records: UISortablePersistenceRecord[];
 };
 
+/** Set on the `change` of both elements when items go from one `<ui-sortable>` to another: which way, and the other one. */
+export type UISortableExternalMove = {
+  /** `in` on the element the items arrived in, `out` on the one they left. */
+  direction: 'in' | 'out';
+  peer: UISortable;
+};
+
 export type UISortableChangeDetail = {
   items: UISortableItem[];
   lists: UISortableList[];
@@ -78,6 +85,8 @@ export type UISortableChangeDetail = {
   source: UISortableChangeSource;
   operation: UISortableOperation;
   persistence: UISortablePersistenceSnapshot;
+  /** Only when the items crossed between two elements (see `group`). */
+  external?: UISortableExternalMove;
 };
 
 /** What a `renderItem` function is told about the card it is drawing. */
@@ -214,6 +223,20 @@ type DropTargetCandidate = {
 
 type KeyboardDropTarget = DropTarget & {
   label: string;
+};
+
+// A move worked out but not yet applied: what the items will be, and enough to describe it.
+type MovePlan = {
+  items: NormalizedItem[];
+  movedIds: string[];
+  nextSelection: string[];
+  operation: UISortableOperation;
+  target: DropTarget;
+  clone: boolean;
+  source: UISortableChangeSource;
+  external?: UISortableExternalMove;
+  // The name of the list the items went to, when it is not one of this element's own.
+  destination?: string;
 };
 
 type ProjectedMoveResult = {
@@ -3559,92 +3582,14 @@ export class UISortable extends ElementBase {
     if (!this._canDrop(target, movedRootIds, clone)) return false;
 
     const itemMap = buildItemMap(this._items);
-    const groups = buildChildrenMap(this._items);
-    const movingSet = new Set<string>();
-    const orderedMovingIds: string[] = [];
-
-    const collect = (id: string) => {
-      const item = itemMap.get(id);
-      if (!item || movingSet.has(id)) return;
-      movingSet.add(id);
-      orderedMovingIds.push(id);
-      (groups.get(keyForGroup(item.listId, id)) || []).forEach(collect);
-    };
-    movedRootIds.forEach(collect);
-
-    const orderedItems = this._items.map(cloneItem);
-    const movingItems = orderedItems.filter((item) => movingSet.has(item.id));
-    const remainingItems = clone
-      ? orderedItems.map(cloneItem)
-      : orderedItems.filter((item) => !movingSet.has(item.id));
-    const nextItems = clone ? movingItems.map((item) => this._cloneSubtreeItem(item, orderedMovingIds)) : movingItems.map(cloneItem);
-    const idMap = new Map<string, string>();
-    const cloneSourceById = new Map<string, string>();
-
-    if (clone) {
-      movingItems.forEach((item, index) => {
-        idMap.set(item.id, nextItems[index].id);
-        cloneSourceById.set(nextItems[index].id, item.id);
-      });
-    }
-
-    nextItems.forEach((item) => {
-      const originalId = clone ? cloneSourceById.get(item.id) : item.id;
-      const original = originalId ? itemMap.get(originalId) : null;
-      if (!original) return;
-      if (clone) {
-        item.parentId = original.parentId && idMap.has(original.parentId) ? idMap.get(original.parentId) || null : null;
-      }
-      item.listId = target.listId;
-    });
-
-    const rootIdsForInsert = movedRootIds.map((id) => idMap.get(id) || id);
-    const combinedItems = [...remainingItems, ...nextItems];
-    const groupOrders = buildChildrenMap(remainingItems);
-    const insertedGroupKey = keyForGroup(target.listId, target.parentId);
-    const targetGroup = [...(groupOrders.get(insertedGroupKey) || [])];
-    const insertionIndex = target.beforeId ? targetGroup.indexOf(target.beforeId) : targetGroup.length;
-    const safeIndex = insertionIndex >= 0 ? insertionIndex : targetGroup.length;
-    targetGroup.splice(safeIndex, 0, ...rootIdsForInsert);
-    groupOrders.set(insertedGroupKey, targetGroup);
-
-    const movingGroups = buildChildrenMap(nextItems);
-    movingGroups.forEach((ids, key) => {
-      const [, parentToken] = key.split('::');
-      if ((parentToken || '') === '__root__') return;
-      groupOrders.set(key, [...ids]);
-    });
-
-    const combinedMap = buildItemMap(combinedItems);
-    rootIdsForInsert.forEach((rootId) => {
-      const rootItem = combinedMap.get(rootId);
-      if (!rootItem) return;
-      rootItem.parentId = target.parentId;
-      rootItem.listId = target.listId;
-    });
-
-    const ordered: NormalizedItem[] = [];
-    const visited = new Set<string>();
-    const walk = (listId: string, parentId: string | null) => {
-      const ids = groupOrders.get(keyForGroup(listId, parentId)) || [];
-      ids.forEach((id, index) => {
-        const item = combinedMap.get(id);
-        if (!item || visited.has(id)) return;
-        visited.add(id);
-        item.listId = listId;
-        item.parentId = parentId;
-        item.order = index;
-        ordered.push(item);
-        walk(listId, id);
-      });
-    };
-
-    this._lists.forEach((list) => walk(list.id, null));
-    combinedItems.forEach((item) => {
-      if (visited.has(item.id)) return;
-      item.parentId = null;
-      ordered.push(item);
-    });
+    const projected = projectMoveItems(
+      this._items,
+      this._lists,
+      target,
+      movedRootIds,
+      clone,
+      (item, orderedMovingIds) => this._cloneSubtreeItem(item, orderedMovingIds)
+    );
 
     const originalRoots = movedRootIds
       .map((id) => itemMap.get(id))
@@ -3657,43 +3602,59 @@ export class UISortable extends ElementBase {
           ? 'transfer'
           : 'reorder';
 
-    const nextSelection = [...rootIdsForInsert];
-    const previousSelection = [...this._selection];
-
-    // The last word before anything changes: a listener can cancel the move.
-    const proposed = ordered.map(cloneItem);
-    const accepted = this.dispatchEvent(new CustomEvent<UISortableBeforeChangeDetail>('before-change', {
-      detail: {
-        items: proposed.map(publicItem),
-        lists: this.lists,
-        selection: [...nextSelection],
-        previousSelection: [...previousSelection],
-        movedIds: [...rootIdsForInsert],
-        source,
-        operation,
-        persistence: getPersistenceSnapshot(proposed),
-        target: { listId: target.listId, parentId: target.parentId, beforeId: target.beforeId, mode: target.mode },
-        clone,
-      },
-      bubbles: true,
-      composed: true,
-      cancelable: true,
-    }));
-    if (!accepted) {
+    const plan: MovePlan = {
+      items: projected.items,
+      movedIds: projected.insertedRootIds,
+      nextSelection: [...projected.insertedRootIds],
+      operation,
+      target,
+      clone,
+      source,
+    };
+    if (!this._askBeforeChange(plan)) {
       // Put the card back where it came from and say so.
       if (this._dragState) this._cancelDrag(false);
       this._announce(this._t('announceRejected'));
       return false;
     }
+    this._applyPlan(plan);
+    return true;
+  }
 
+  // The last word before anything changes: a listener of `before-change` can cancel the move.
+  private _askBeforeChange(plan: MovePlan): boolean {
+    return this.dispatchEvent(new CustomEvent<UISortableBeforeChangeDetail>('before-change', {
+      detail: {
+        items: plan.items.map(publicItem),
+        lists: this.lists,
+        selection: [...plan.nextSelection],
+        previousSelection: [...this._selection],
+        movedIds: [...plan.movedIds],
+        source: plan.source,
+        operation: plan.operation,
+        persistence: getPersistenceSnapshot(plan.items),
+        target: { listId: plan.target.listId, parentId: plan.target.parentId, beforeId: plan.target.beforeId, mode: plan.target.mode },
+        clone: plan.clone,
+        ...(plan.external ? { external: plan.external } : {}),
+      },
+      bubbles: true,
+      composed: true,
+      cancelable: true,
+    }));
+  }
+
+  // Makes a move that was accepted real: the items, the selection, the attributes, the saved positions, the
+  // events and the announcement.
+  private _applyPlan(plan: MovePlan): void {
+    const previousSelection = [...this._selection];
     if (this._dragState) this._dragState.committed = true;
-    this._items = ordered.map(cloneItem);
+    this._items = plan.items.map(cloneItem);
     this._clearPointerDragPreview();
     this._dragState = null;
     this._removeDragImage();
 
-    this._selection = nextSelection;
-    this._focusedId = nextSelection[0] || null;
+    this._selection = [...plan.nextSelection];
+    this._focusedId = plan.nextSelection[0] || null;
     this._pendingFocusId = this._focusedId;
     this._syncAttributesFromState();
 
@@ -3703,12 +3664,13 @@ export class UISortable extends ElementBase {
     const detail: UISortableChangeDetail = {
       items: this.items,
       lists: this.lists,
-      selection: [...nextSelection],
+      selection: [...plan.nextSelection],
       previousSelection,
-      movedIds: [...rootIdsForInsert],
-      source,
-      operation,
+      movedIds: [...plan.movedIds],
+      source: plan.source,
+      operation: plan.operation,
       persistence: snapshot,
+      ...(plan.external ? { external: plan.external } : {}),
     };
 
     this.dispatchEvent(new CustomEvent<UISortableChangeDetail>('change', {
@@ -3722,9 +3684,8 @@ export class UISortable extends ElementBase {
       bubbles: true,
       composed: true,
     }));
-    this._announce(this._messageForMove(operation, rootIdsForInsert.length, target));
+    this._announce(this._messageForMove(plan.operation, plan.movedIds.length, plan.target, plan.destination));
     this.requestRender();
-    return true;
   }
 
   private _syncAttributesFromState(): void {
@@ -3760,9 +3721,9 @@ export class UISortable extends ElementBase {
     };
   }
 
-  private _messageForMove(operation: UISortableOperation, count: number, target: DropTarget): string {
+  private _messageForMove(operation: UISortableOperation, count: number, target: DropTarget, named?: string): string {
     const list = this._lists.find((entry) => entry.id === target.listId);
-    const destination = list?.label || target.listId;
+    const destination = named || list?.label || target.listId;
     const vars = { count, list: destination };
     if (operation === 'clone') return this._t(count === 1 ? 'announceCopiedOne' : 'announceCopiedMany', vars);
     if (operation === 'nest') return this._t(count === 1 ? 'announceNestedOne' : 'announceNestedMany', vars);
