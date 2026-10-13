@@ -2,6 +2,15 @@
   "name": "@editora/ui-editor",
   "version": "0.1.8",
   "description": "Editor-focused UI extensions for Editora (floating toolbar, command palette, context menus)",
+  "keywords": [
+    "editora",
+    "rich-text-editor",
+    "floating-toolbar",
+    "command-palette",
+    "context-menu",
+    "wysiwyg",
+    "web-components"
+  ],
   "author": "Ajay Kumar <ajaykr089@gmail.com>",
   "license": "MIT",
   "repository": {

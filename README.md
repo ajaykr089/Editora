@@ -4,6 +4,14 @@
 </div>
 
 
+<p align="center">
+  <a href="https://www.npmjs.com/package/@editora/core"><img alt="npm version" src="https://img.shields.io/npm/v/@editora/core?label=%40editora%2Fcore&color=cb3837"></a>
+  <a href="https://github.com/ajaykr089/Editora/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/ajaykr089/Editora/ci.yml?branch=main&label=CI"></a>
+  <a href="./LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-blue"></a>
+  <img alt="Written in TypeScript" src="https://img.shields.io/badge/TypeScript-ready-3178c6">
+  <a href="https://github.com/ajaykr089/Editora/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/ajaykr089/Editora?style=flat"></a>
+</p>
+
 ![Editora Ecosystem](./images/editora-linkedin-graphic.png)
 
 - **CodeSandbox:** https://codesandbox.io/p/github/ajaykr089/editora-codesandbox/main
@@ -16,7 +24,7 @@ The **best free rich text editor** with enterprise-grade features. A comprehensi
 
 **🌐 [Try it Live](https://editora-ecosystem.netlify.app/)** | **🔗 [GitHub](https://github.com/ajaykr089/Editora)** | **📦 [NPM](https://www.npmjs.com/org/editora)**
 
-**Free alternative to TinyMCE, Quill, Draft.js, and Slate.**
+**Free alternative to TinyMCE, Quill, Draft.js, and Slate.** See an [honest comparison, including when not to use Editora](https://editora-ecosystem.netlify.app/docs/getting-started/alternatives).
 
 ## 🤖 AI-Ready Metadata
 

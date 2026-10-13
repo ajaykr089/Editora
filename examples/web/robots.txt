@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# internal test and debug pages
+Disallow: /100-percent-connected.html
+Disallow: /complete-test.html
+Disallow: /debug-toolbar.html
+Disallow: /formatting-dom-regression-test.html
+Disallow: /quick-test.html
+Disallow: /test-anchor-plugin.html
+Disallow: /test-code-sample.html
+Disallow: /test-media-manager-webcomponent.html
+Disallow: /test-media-manager.html
+Disallow: /test-multi-instance-embed-iframe.html
+Disallow: /test-native-plugins.html
+Disallow: /test-pdf-export.html
+Disallow: /test-single-css.html
+Disallow: /test-table-editor.html
+Disallow: /test-toolbar-fix.html
+Disallow: /verify-native-plugins.html
+Disallow: /webcomponent-toolbar-test.html
+
+Sitemap: https://editora-free.netlify.app/sitemap.xml

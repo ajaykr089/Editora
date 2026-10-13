@@ -2,6 +2,15 @@
   "name": "@editora/ui-angular",
   "version": "0.1.5",
   "description": "Angular adapters / guidelines for @editora UI web components",
+  "keywords": [
+    "editora",
+    "angular",
+    "web-components",
+    "ui-components",
+    "custom-elements",
+    "angular-components",
+    "design-system"
+  ],
   "files": [
     "src"
   ],

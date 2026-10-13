@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://editora-free.netlify.app/</loc></url>
+  <url><loc>https://editora-free.netlify.app/docs/about.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/docs/api.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/docs/custom-plugins.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/docs/enterprise-plugins.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/docs/examples.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/docs/features.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/docs/icons.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/docs/installation.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/docs/keyboard-shortcuts.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/docs/react-icons.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/docs/ui-core.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/docs/ui-react.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/checklist.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/code-sample.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/comments.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/document-manager.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/emojis.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/history.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/image.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/index.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/link.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/math.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/media-manager.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/preview.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/print.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/special-characters.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/spell-check.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/table.html</loc></url>
+  <url><loc>https://editora-free.netlify.app/plugins/template.html</loc></url>
+</urlset>

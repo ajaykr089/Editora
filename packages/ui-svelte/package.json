@@ -2,6 +2,15 @@
   "name": "@editora/ui-svelte",
   "version": "0.1.5",
   "description": "Svelte adapters for @editora UI web components",
+  "keywords": [
+    "editora",
+    "svelte",
+    "web-components",
+    "ui-components",
+    "custom-elements",
+    "svelte-components",
+    "design-system"
+  ],
   "files": [
     "src"
   ],
