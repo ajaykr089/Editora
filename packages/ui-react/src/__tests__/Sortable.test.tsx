@@ -252,4 +252,64 @@ describe('Sortable wrapper', () => {
     expect(el.canDrop).toBeNull();
     expect(el.moveSelection({ targetListId: 'done' })).toBe(false);
   });
+
+  it('forwards listMaxHeight (a number is px) and a list maxHeight', async () => {
+    const { container, rerender } = render(
+      <Sortable lists={[{ id: 'todo', label: 'To do', maxHeight: '12rem' }, { id: 'done', label: 'Done' }]} items={items} listMaxHeight={200} />
+    );
+    const el = container.querySelector('ui-sortable') as HTMLElement;
+    await waitFor(() => expect(el.getAttribute('list-max-height')).toBe('200px'));
+    await waitFor(() => expect(el.shadowRoot?.querySelector('.list[data-list-id="todo"] .items')?.getAttribute('style')).toContain('12rem'));
+    expect(el.shadowRoot?.querySelector('.list[data-list-id="done"] .items')?.getAttribute('style')).toContain('200px');
+
+    rerender(<Sortable lists={lists} items={items} listMaxHeight="30vh" />);
+    await waitFor(() => expect(el.getAttribute('list-max-height')).toBe('30vh'));
+    rerender(<Sortable lists={lists} items={items} />);
+    await waitFor(() => expect(el.hasAttribute('list-max-height')).toBe(false));
+  });
+
+  it('forwards group, and two boards of a group each keep their own state when a card crosses', async () => {
+    function TwoBoards({ onEvents }: { onEvents: (events: string[]) => void }) {
+      const [left, setLeft] = React.useState([{ id: 'l1', label: 'L1', listId: 'left' }]);
+      const [right, setRight] = React.useState([{ id: 'r1', label: 'R1', listId: 'right' }]);
+      const [events, setEvents] = React.useState<string[]>([]);
+      React.useEffect(() => onEvents(events), [events, onEvents]);
+      return (
+        <>
+          <Sortable
+            lists={[{ id: 'left', label: 'Left' }]}
+            items={left}
+            group="shared"
+            selection={['l1']}
+            onItemsChange={setLeft}
+            onChange={(detail) => setEvents((all) => [...all, `left:${detail.external?.direction}`])}
+          />
+          <Sortable
+            lists={[{ id: 'right', label: 'Right' }]}
+            items={right}
+            group="shared"
+            onItemsChange={setRight}
+            onChange={(detail) => setEvents((all) => [...all, `right:${detail.external?.direction}`])}
+          />
+        </>
+      );
+    }
+
+    let seen: string[] = [];
+    const { container } = render(<TwoBoards onEvents={(events) => { seen = events; }} />);
+    const [leftEl, rightEl] = Array.from(container.querySelectorAll('ui-sortable')) as Array<HTMLElement & {
+      moveSelectionTo(peer: HTMLElement, options: { targetListId: string }): boolean;
+      items: Array<{ id: string }>;
+    }>;
+    expect(leftEl.getAttribute('group')).toBe('shared');
+    expect(rightEl.getAttribute('group')).toBe('shared');
+    await waitFor(() => expect(leftEl.shadowRoot?.querySelector('.handle[data-id="l1"]')).toBeTruthy());
+
+    expect(leftEl.moveSelectionTo(rightEl, { targetListId: 'right' })).toBe(true);
+    await waitFor(() => expect(rightEl.shadowRoot?.querySelector('.handle[data-id="l1"]')).toBeTruthy());
+    await waitFor(() => expect(leftEl.shadowRoot?.querySelector('.handle[data-id="l1"]')).toBeNull());
+    expect(rightEl.items.map((item) => item.id)).toEqual(['r1', 'l1']);
+    expect(leftEl.items).toEqual([]);
+    expect(seen.sort()).toEqual(['left:out', 'right:in']);
+  });
 });

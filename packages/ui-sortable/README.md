@@ -38,6 +38,8 @@
 - **Persistence built in**: a `persist-request` event with the new positions, and a `persistKey` that keeps the positions across reloads.
 - **Small.** The component is 17 KB gzipped (19 KB with the React wrapper), against about 490 KB for the whole
   [`@editora/ui-core`](https://www.npmjs.com/package/@editora/ui-core) catalog it comes from.
+- **More than one board**: sortables with the same `group` take each other's cards, and a list can have a height of its
+  own and scroll by itself.
 - **Your own markup, with or without React**: custom cards, list headers and empty states, and a free `data` field on
   every item and list.
 - **Translatable and quiet**: every text it shows or announces can be replaced (`labels`), and the hint line can be hidden.
@@ -376,6 +378,49 @@ its `data` changes and when it is selected or deselected:
   <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-sortable/docs/images/vanilla.png" alt="Two lists whose cards were drawn by a JavaScript function, each showing a name and an amount, and a To do header counting 2/3" width="900">
 </p>
 
+### Two boards
+
+Give two sortables the same `group` and a card held over one of them can be dropped in the other. Each one reports its own
+`change` (the one it left with `external.direction === 'out'`, the one it reached with `'in'`), so each keeps its own state;
+`onBeforeChange` on either can cancel the move, and the other one's `canDrop` and `maxItems` apply:
+
+```tsx
+import * as React from 'react';
+import { Sortable, type SortableItem, type SortableList } from '@editora/ui-sortable/react';
+
+const backlogLists: SortableList[] = [{ id: 'backlog', label: 'Backlog' }];
+const sprintLists: SortableList[] = [{ id: 'sprint', label: 'This sprint', maxItems: 3, maxHeight: 280 }];
+
+export default function TwoBoards() {
+  const [backlog, setBacklog] = React.useState<SortableItem[]>([
+    { id: 'audit', label: 'Audit onboarding', listId: 'backlog' },
+    { id: 'notes', label: 'Ship release notes', listId: 'backlog' },
+    { id: 'handoff', label: 'Review handoff', listId: 'backlog' }
+  ]);
+  const [sprint, setSprint] = React.useState<SortableItem[]>([
+    { id: 'login', label: 'Fix login', listId: 'sprint' },
+    { id: 'docs', label: 'Write docs', listId: 'sprint' }
+  ]);
+
+  // Sortables with the same group take each other's cards. Each one reports its own change,
+  // so each keeps its own state.
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }}>
+      <Sortable lists={backlogLists} items={backlog} group="planning" allowNesting={false} onItemsChange={setBacklog} />
+      <Sortable lists={sprintLists} items={sprint} group="planning" allowNesting={false} onItemsChange={setSprint} />
+    </div>
+  );
+}
+```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-sortable/docs/images/two-boards.png" alt="Two sortables side by side: a card of the Backlog is held over This sprint, which marks with a blue line the place between its cards where it would land" width="900">
+</p>
+
+Ids must be unique across the group (a drop onto a board that already has one of the ids is refused; a copy gets a fresh
+id there). Dragging between boards is for the pointer: for the keyboard and for code there is
+`moveSelectionTo(otherSortable, { targetListId, beforeId?, parentId?, clone? })`.
+
 ## Items and lists
 
 | Item field | |
@@ -394,7 +439,8 @@ its `data` changes and when it is selected or deselected:
 | `orientation` | `'vertical'` (the default) or `'horizontal'`. |
 | `cloneOnDrag` | Items dragged out of this list are copied. |
 | `disabled` | Turn the list off. |
-| `accepts` | The ids of the lists it takes items from. |
+| `accepts` | The ids of the lists it takes items from (the lists of another sortable count too). |
+| `maxHeight` | The tallest its cards can be before the list scrolls by itself: a number of px or a CSS length such as `"20rem"`. Holding a card at its edge scrolls it, and the keyboard keeps the focused card in view. |
 | `maxItems` | The most items it can hold. A move or copy that would go past it is refused; the header shows `3/5`. |
 | `data` | Anything of yours that can be written as JSON, as on items. |
 
@@ -405,11 +451,13 @@ its `data` changes and when it is selected or deselected:
 | `lists`, `items` | `lists`, `items` | The data. In HTML, set them as properties or as JSON attributes. |
 | `selection` | `selection` | The selected item ids. |
 | `allowNesting` | `allow-nesting` | Allow dropping an item inside another. |
+| `group` | `group` | Sortables with the same group take each other's cards (see Two boards). |
+| `listMaxHeight` | `list-max-height` | `maxHeight` for every list that does not set its own. |
 | `nestTrigger` | `nest-trigger` | What it takes to nest with the pointer: `gutter` (the default: hold Alt, or drop on the far side of a card), `modifier` (hold Alt) or `area` (the middle of any card, as before). Without it the top half of a card is "before it" and the bottom half "after it". |
 | `touchHoldDelay` | `touch-hold-delay` | Milliseconds a finger must rest on a card before it lifts (for cards dragged by their body); `0` lifts at once. Default `350`. The built-in handle always lifts at once. |
 | `labels` | `labels` | Replacements for any of its texts: `{ hintHandle, selectedMany, badgeSelected, announceMovedOne, listFull, ... }`. `{count}`, `{label}`, `{list}` and `{max}` are filled in. |
 | `hideToolbar` | `hide-toolbar` | Hide the hint and the selection count from sight (screen readers still get the hint). |
-| `canDrop` | `canDrop` (property) | A function that is given `{ items, movedIds, targetListId, parentId, beforeId, mode, clone }` and returns whether they may go there. |
+| `canDrop` | `canDrop` (property) | A function that is given `{ items, movedIds, targetListId, parentId, beforeId, mode, clone, from? }` (`from` is the other sortable, for a card that comes from one) and returns whether they may go there. |
 | `dropzoneStyle` | `dropzone-style` | `indicator` (an insertion rail, the default) or `container` (the whole list highlights). |
 | `dropIndicatorVisibility` | `drop-indicator-visibility` | `active` or `always`. |
 | `dragPreviewSize` | `drag-preview-size` | The card that follows the pointer: `match-item` (the card's own size) or `compact` (narrower, title only). |
@@ -449,20 +497,16 @@ ui-sortable::part(lists) {
   grid-auto-flow: row;
   overflow: visible;
 }
-
-/* Give every list its own scrollbar (dragging near its edge scrolls it). */
-ui-sortable::part(items) {
-  max-block-size: 420px;
-  overflow-y: auto;
-}
 ```
+
+A list can scroll by itself instead: `maxHeight` on a list, or `listMaxHeight` for all of them.
 
 ## Events
 
 | Event | React prop | `detail` |
 | --- | --- | --- |
 | `before-change` | `onBeforeChange` | Cancelable. The same as `change`, before it is applied, plus `target` and `clone`. In React return `false` to cancel. |
-| `change` | `onChange` | `{ items, lists, selection, previousSelection, movedIds, source, operation, persistence }`. `source` is `pointer`, `keyboard`, `api` or `restore`; `operation` is `reorder`, `transfer`, `nest` or `clone`. |
+| `change` | `onChange` | `{ items, lists, selection, previousSelection, movedIds, source, operation, persistence, external? }`. `external` (`{ direction, peer }`, where `direction` is `'in'` or `'out'`) is only there when the items crossed between two sortables. `source` is `pointer`, `keyboard`, `api` or `restore`; `operation` is `reorder`, `transfer`, `nest` or `clone`. |
 | | `onItemsChange` | The new `items` array. |
 | `selection-change` | `onSelectionChange` | `{ selection, previousSelection }` |
 | `persist-request` | `onPersistRequest` | The same detail as `change`: `persistence.records` is `[{ id, listId, parentId, index }]`, ready to save. |
@@ -470,7 +514,7 @@ ui-sortable::part(items) {
 ## Methods
 
 On the element (or a ref to it): `select(ids)`, `clearSelection()`, `moveSelection({ targetListId, beforeId?, parentId?, mode?, clone? })`
-(which returns whether anything moved), `focusItem(id)`, `cancelDrag()` and `getPersistenceSnapshot()`. The properties
+(which returns whether anything moved), `moveSelectionTo(otherSortable, options)` (the same into another sortable), `focusItem(id)`, `cancelDrag()` and `getPersistenceSnapshot()`. The properties
 `canDrop`, `labels`, `renderItem`, `renderListHeader` and `renderEmptyState` can be set on it as well.
 
 ## Keyboard

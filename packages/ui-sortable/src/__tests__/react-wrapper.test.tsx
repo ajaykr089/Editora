@@ -130,4 +130,42 @@ describe('@editora/ui-sortable/react', () => {
     expect(el.moveSelection({ targetListId: 'done' })).toBe(true);
     expect(changes).toEqual(['transfer']);
   });
+
+  it('forwards listMaxHeight and clears it', async () => {
+    const { Sortable } = await import('@editora/ui-sortable/react');
+    const lists = [{ id: 'a', label: 'A', maxHeight: 150 }];
+    const items = [{ id: 'one', label: 'One', listId: 'a' }];
+    const { container, rerender } = render(<Sortable lists={lists} items={items} listMaxHeight="20rem" />);
+    const element = container.querySelector('ui-sortable') as HTMLElement;
+    await waitFor(() => expect(element.getAttribute('list-max-height')).toBe('20rem'));
+    await waitFor(() => expect(element.shadowRoot?.querySelector('.items')?.getAttribute('style')).toContain('150px'));
+    rerender(<Sortable lists={lists} items={items} />);
+    await waitFor(() => expect(element.hasAttribute('list-max-height')).toBe(false));
+  });
+
+  it('forwards group, and two boards of a group each keep their own state when a card crosses', async () => {
+    const { Sortable } = await import('@editora/ui-sortable/react');
+    function TwoBoards() {
+      const [left, setLeft] = React.useState([{ id: 'l1', label: 'L1', listId: 'left' }]);
+      const [right, setRight] = React.useState([{ id: 'r1', label: 'R1', listId: 'right' }]);
+      return (
+        <>
+          <Sortable lists={[{ id: 'left', label: 'Left' }]} items={left} group="shared" selection={['l1']} onItemsChange={setLeft} />
+          <Sortable lists={[{ id: 'right', label: 'Right' }]} items={right} group="shared" onItemsChange={setRight} />
+        </>
+      );
+    }
+    const { container } = render(<TwoBoards />);
+    const [leftEl, rightEl] = Array.from(container.querySelectorAll('ui-sortable')) as Array<HTMLElement & {
+      moveSelectionTo(peer: HTMLElement, options: { targetListId: string }): boolean;
+      items: Array<{ id: string }>;
+    }>;
+    expect(leftEl.getAttribute('group')).toBe('shared');
+    await waitFor(() => expect(leftEl.shadowRoot?.querySelector('.handle[data-id="l1"]')).toBeTruthy());
+
+    expect(leftEl.moveSelectionTo(rightEl, { targetListId: 'right' })).toBe(true);
+    await waitFor(() => expect(rightEl.shadowRoot?.querySelector('.handle[data-id="l1"]')).toBeTruthy());
+    await waitFor(() => expect(leftEl.shadowRoot?.querySelector('.handle[data-id="l1"]')).toBeNull());
+    expect(rightEl.items.map((item) => item.id)).toEqual(['r1', 'l1']);
+  });
 });

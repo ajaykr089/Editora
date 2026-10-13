@@ -1035,3 +1035,77 @@ function VanillaRenderingDemo() {
 export const WithoutReactWrapper: Story = {
   render: () => <VanillaRenderingDemo />
 };
+
+function TwoBoardsDemo() {
+  const [backlog, setBacklog] = React.useState<SortableItem[]>([
+    { id: 'audit', label: 'Audit onboarding', listId: 'backlog' },
+    { id: 'notes', label: 'Ship release notes', listId: 'backlog' },
+    { id: 'handoff', label: 'Review handoff', listId: 'backlog' },
+    { id: 'template', label: 'Sprint checklist', description: 'A template: dragging it copies it', listId: 'backlog', cloneOnDrag: true }
+  ]);
+  const [sprint, setSprint] = React.useState<SortableItem[]>([
+    { id: 'login', label: 'Fix login', listId: 'sprint' },
+    { id: 'docs', label: 'Write docs', listId: 'sprint' }
+  ]);
+  const [log, setLog] = React.useState('Drag a card from one board onto the other.');
+
+  const report = (board: string) => (detail: SortableChangeDetail) => {
+    setLog(`${board}: ${detail.operation}${detail.external ? ` (${detail.external.direction})` : ''} ${detail.movedIds.join(', ')}`);
+  };
+
+  return (
+    <Box style={{ display: 'grid', gap: 16 }}>
+      <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
+        Two sortables with the same group take each other's cards. The sprint holds three cards (maxItems), so a fourth is refused. Each board keeps its own state.
+      </Box>
+      <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 24, alignItems: 'start' }}>
+        <Sortable
+          lists={[{ id: 'backlog', label: 'Backlog' }]}
+          items={backlog}
+          group="planning"
+          allowNesting={false}
+          onItemsChange={setBacklog}
+          onChange={report('Backlog')}
+        />
+        <Sortable
+          lists={[{ id: 'sprint', label: 'This sprint', maxItems: 3 }]}
+          items={sprint}
+          group="planning"
+          allowNesting={false}
+          onItemsChange={setSprint}
+          onChange={report('Sprint')}
+        />
+      </Box>
+      <Box data-testid="two-boards-log" style={{ fontSize: 13, color: 'var(--ui-color-muted, #526175)' }}>{log}</Box>
+    </Box>
+  );
+}
+
+export const TwoBoards: Story = {
+  render: () => <TwoBoardsDemo />
+};
+
+const longLists: SortableList[] = [
+  { id: 'inbox', label: 'Inbox', description: 'Scrolls at 260px.', maxHeight: 260 },
+  { id: 'later', label: 'Later', description: 'Scrolls at 260px too.', maxHeight: 260 }
+];
+
+const longItems: SortableItem[] = [
+  ...Array.from({ length: 24 }, (_, index) => ({ id: `inbox-${index + 1}`, label: `Message ${index + 1}`, listId: 'inbox' })),
+  ...Array.from({ length: 6 }, (_, index) => ({ id: `later-${index + 1}`, label: `Reminder ${index + 1}`, listId: 'later' }))
+];
+
+export const ScrollingLists: Story = {
+  render: () => (
+    <StatefulSortable
+      title="Lists that scroll by themselves"
+      description="maxHeight gives a list a height of its own. Hold a dragged card at the top or bottom edge of a list to scroll it, and arrow through the cards: the focused one stays in view."
+      showFilter={false}
+      showSortControls={false}
+      lists={longLists}
+      items={longItems}
+      allowNesting={false}
+    />
+  )
+};
+

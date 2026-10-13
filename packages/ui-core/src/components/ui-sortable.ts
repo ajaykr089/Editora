@@ -31,6 +31,8 @@ export type UISortableList = {
   accepts?: string[];
   /** The most items the list can hold, at every nesting level. A move or copy that would go past it is refused. */
   maxItems?: number;
+  /** The tallest the list's cards can be before the list scrolls on its own (a number of px, or a CSS length such as "20rem"). Overrides `list-max-height`. */
+  maxHeight?: number | string;
   /** Anything of yours that is JSON-serialisable (an id, a record, a colour). It travels with the list and comes back in every event. */
   data?: unknown;
 };
@@ -67,6 +69,13 @@ export type UISortablePersistenceSnapshot = {
   records: UISortablePersistenceRecord[];
 };
 
+/** Set on the `change` of both elements when items go from one `<ui-sortable>` to another: which way, and the other one. */
+export type UISortableExternalMove = {
+  /** `in` on the element the items arrived in, `out` on the one they left. */
+  direction: 'in' | 'out';
+  peer: UISortable;
+};
+
 export type UISortableChangeDetail = {
   items: UISortableItem[];
   lists: UISortableList[];
@@ -76,6 +85,8 @@ export type UISortableChangeDetail = {
   source: UISortableChangeSource;
   operation: UISortableOperation;
   persistence: UISortablePersistenceSnapshot;
+  /** Only when the items crossed between two elements (see `group`). */
+  external?: UISortableExternalMove;
 };
 
 /** What a `renderItem` function is told about the card it is drawing. */
@@ -115,6 +126,8 @@ export type UISortableDropInfo = {
   mode: UISortableDropMode;
   /** True when the items are copied rather than moved. */
   clone: boolean;
+  /** The other `<ui-sortable>` the items come from, when they are dropped across elements (see `group`). */
+  from?: UISortable;
 };
 
 /** The detail of `before-change`: what `change` will report, plus where the items are going. */
@@ -156,6 +169,7 @@ type NormalizedList = {
   cloneOnDrag: boolean;
   accepts?: string[];
   maxItems?: number;
+  maxHeight?: string;
   data?: unknown;
 };
 
@@ -179,6 +193,18 @@ type DragState = {
   keyboard: boolean;
   dropTarget: DropTarget | null;
   committed: boolean;
+  // Another `<ui-sortable>` of the same group the held card is over, and the place in it.
+  external?: { peer: UISortable; target: DropTarget } | null;
+  session?: ExternalSession;
+};
+
+// What leaves one element when its items are dropped into another: the held items with all their children.
+type ExternalSession = {
+  source: UISortable;
+  rootIds: string[];
+  items: NormalizedItem[];
+  clone: boolean;
+  sourceListIds: string[];
 };
 
 type PointerGestureState = {
@@ -211,6 +237,20 @@ type DropTargetCandidate = {
 
 type KeyboardDropTarget = DropTarget & {
   label: string;
+};
+
+// A move worked out but not yet applied: what the items will be, and enough to describe it.
+type MovePlan = {
+  items: NormalizedItem[];
+  movedIds: string[];
+  nextSelection: string[];
+  operation: UISortableOperation;
+  target: DropTarget;
+  clone: boolean;
+  source: UISortableChangeSource;
+  external?: UISortableExternalMove;
+  // The name of the list the items went to, when it is not one of this element's own.
+  destination?: string;
 };
 
 type ProjectedMoveResult = {
@@ -253,8 +293,6 @@ const DEFAULT_LABELS = {
   movingMany: 'Moving {count} items',
   copyingOne: 'Copying item',
   copyingMany: 'Copying {count} items',
-  draggingOne: 'Dragging item',
-  draggingMany: 'Dragging {count} items',
   announceSelectedMany: '{count} items selected.',
   announceDragDisabled: 'Dragging is disabled right now.',
   announceDragging: 'Dragging {label}.',
@@ -541,6 +579,22 @@ const style = `
     min-inline-size: 0;
   }
 
+  /* A list with a height of its own scrolls by itself. The padding (and the cards' own spacing) gives shadows and
+     focus rings room inside the scroller; the negative margin hands that room back to the layout. The wrapper's
+     negative margin is dropped here: inside a scroller it would count as overflow, and a list whose cards all fit
+     would still scroll by a few pixels. */
+  .items[data-scroll="true"] {
+    max-block-size: var(--ui-sortable-list-max-block-size);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 1px 4px;
+    margin: -4px;
+  }
+
+  .items[data-scroll="true"] > .tree {
+    margin-block: 0;
+  }
+
   .tree {
     display: grid;
     gap: 0;
@@ -782,16 +836,6 @@ const style = `
     }
   }
 
-  /* The ghost card and the insertion line already show where the card will land, so the old floating
-     "drop preview" box is not drawn. */
-  .drag-preview-overlay {
-    position: fixed;
-    top: -9999px;
-    left: -9999px;
-    display: none;
-    pointer-events: none;
-  }
-
   .item[data-disabled="true"] {
     opacity: 0.55;
   }
@@ -977,6 +1021,12 @@ const style = `
     position: absolute;
     inset-inline: 0;
     inset-block: calc(var(--ui-sortable-dropzone-hit-size) * -1);
+  }
+
+  /* The last rail of a group only reaches up: below the last card the list body is already a drop area, and a
+     hit area hanging out of the bottom would count as overflow in a list that scrolls. */
+  .dropzone:last-child::after {
+    inset-block-end: 0;
   }
 
   .dropzone[data-active="true"]::before {
@@ -1188,6 +1238,15 @@ function parseLabels(value: string | null): Partial<UISortableLabels> {
   }
 }
 
+// A height for a list: a number is px; a string must be a plain length (no calc, no declarations), because
+// it ends up in a style attribute.
+function normalizeLength(value: unknown): string | undefined {
+  if (typeof value === 'number') return Number.isFinite(value) && value > 0 ? `${value}px` : undefined;
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  return /^(?:\d+\.?\d*|\.\d+)(?:px|rem|em|ch|vh|svh|dvh|vw|%)$/.test(trimmed) ? trimmed : undefined;
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -1208,37 +1267,6 @@ function dropTargetKey(target: DropTarget | null): string {
 
 function sameDropTarget(left: DropTarget | null, right: DropTarget | null): boolean {
   return dropTargetKey(left) === dropTargetKey(right);
-}
-
-function readScaleFromTransform(transform: string): { x: number; y: number } {
-  if (!transform || transform === 'none') {
-    return { x: 1, y: 1 };
-  }
-
-  const matrix3d = transform.match(/^matrix3d\((.+)\)$/);
-  if (matrix3d) {
-    const values = matrix3d[1].split(',').map((value) => Number.parseFloat(value.trim()));
-    if (values.length === 16 && values.every((value) => Number.isFinite(value))) {
-      return {
-        x: values[0] || 1,
-        y: values[5] || 1,
-      };
-    }
-  }
-
-  const matrix = transform.match(/^matrix\((.+)\)$/);
-  if (matrix) {
-    const values = matrix[1].split(',').map((value) => Number.parseFloat(value.trim()));
-    if (values.length === 6 && values.every((value) => Number.isFinite(value))) {
-      const [a, b, c, d] = values;
-      return {
-        x: Math.sqrt((a * a) + (b * b)) || 1,
-        y: Math.sqrt((c * c) + (d * d)) || 1,
-      };
-    }
-  }
-
-  return { x: 1, y: 1 };
 }
 
 function parseDragHandleMode(value: string | null): UISortableDragHandleMode {
@@ -1411,6 +1439,7 @@ function canonicalizeLists(rawLists: UISortableList[]): NormalizedList[] {
         ? list.accepts.filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
         : undefined,
       maxItems: Number.isFinite(list?.maxItems) && Number(list.maxItems) >= 0 ? Math.floor(Number(list.maxItems)) : undefined,
+      maxHeight: normalizeLength(list?.maxHeight),
       ...(list?.data !== undefined ? { data: list.data } : {}),
     });
   });
@@ -1522,6 +1551,7 @@ function serializeLists(lists: NormalizedList[]): string {
     cloneOnDrag: list.cloneOnDrag,
     accepts: list.accepts,
     maxItems: list.maxItems,
+    maxHeight: list.maxHeight,
     data: list.data,
   })));
 }
@@ -1630,6 +1660,8 @@ export class UISortable extends ElementBase {
       'show-selection-badge',
       'nest-trigger',
       'touch-hold-delay',
+      'list-max-height',
+      'group',
       'labels',
       'hide-toolbar',
       'disabled',
@@ -1656,12 +1688,15 @@ export class UISortable extends ElementBase {
   private _cloneSeed = 1;
   private _dragImage: HTMLElement | null = null;
   private _dragImageOffset = { x: -14, y: -14 };
-  private _dragPreviewOverlay: HTMLElement | null = null;
   private _pendingFocusId: string | null = null;
   private _pointerGesture: PointerGestureState | null = null;
   private _pendingDropTarget: DropTargetCandidate | null = null;
   private _pendingTimer: ReturnType<typeof setTimeout> | null = null;
   private _focusWasInside = false;
+  private _revealPending = false;
+  // The place in this element that a card held over it from another element (same group) would land.
+  private _externalTarget: DropTarget | null = null;
+  private static _instances = new Set<UISortable>();
   // Alt held during a pointer drag: it is what asks to nest instead of reorder (see UISortableNestTrigger).
   private _nestModifier = false;
   private _lastPointer: { x: number; y: number } | null = null;
@@ -1672,9 +1707,6 @@ export class UISortable extends ElementBase {
     this._onClick = this._onClick.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onDragStart = this._onDragStart.bind(this);
-    this._onDragOver = this._onDragOver.bind(this);
-    this._onDrop = this._onDrop.bind(this);
-    this._onDragEnd = this._onDragEnd.bind(this);
     this._onPointerDown = this._onPointerDown.bind(this);
     this._onPointerMove = this._onPointerMove.bind(this);
     this._onPointerUp = this._onPointerUp.bind(this);
@@ -1715,12 +1747,10 @@ export class UISortable extends ElementBase {
 
   override connectedCallback(): void {
     super.connectedCallback();
+    UISortable._instances.add(this);
     this.root.addEventListener('click', this._onClick);
     this.root.addEventListener('keydown', this._onKeyDown as EventListener);
     this.root.addEventListener('dragstart', this._onDragStart as EventListener);
-    this.root.addEventListener('dragover', this._onDragOver as EventListener);
-    this.root.addEventListener('drop', this._onDrop as EventListener);
-    this.root.addEventListener('dragend', this._onDragEnd as EventListener);
     this.root.addEventListener('pointerdown', this._onPointerDown as EventListener);
     this.root.addEventListener('focusin', this._onFocusIn);
     // Not passive: a held card has to stop the page from scrolling under the finger.
@@ -1737,9 +1767,6 @@ export class UISortable extends ElementBase {
     this.root.removeEventListener('click', this._onClick);
     this.root.removeEventListener('keydown', this._onKeyDown as EventListener);
     this.root.removeEventListener('dragstart', this._onDragStart as EventListener);
-    this.root.removeEventListener('dragover', this._onDragOver as EventListener);
-    this.root.removeEventListener('drop', this._onDrop as EventListener);
-    this.root.removeEventListener('dragend', this._onDragEnd as EventListener);
     this.root.removeEventListener('pointerdown', this._onPointerDown as EventListener);
     this.root.removeEventListener('focusin', this._onFocusIn);
     this.root.removeEventListener('touchmove', this._onTouchMove as EventListener);
@@ -1751,10 +1778,12 @@ export class UISortable extends ElementBase {
     this.ownerDocument?.removeEventListener('pointerup', this._onPointerUp as EventListener, true);
     this.ownerDocument?.removeEventListener('pointercancel', this._onPointerCancel as EventListener, true);
     this._stopAutoScroll();
-    this._removeDragPreviewOverlay();
     this._removeDragImage();
     if (this._pendingTimer) clearTimeout(this._pendingTimer);
     this._pendingTimer = null;
+    UISortable._instances.delete(this);
+    this._setExternal(null);
+    this._showExternalTarget(null);
     super.disconnectedCallback();
   }
 
@@ -1821,6 +1850,23 @@ export class UISortable extends ElementBase {
     this.requestRender();
   }
 
+  /**
+   * Elements with the same non-empty `group` can exchange items: a card held over another of them can be
+   * dropped there, and both report it (`change`, with `external`). Ids must be unique across the group.
+   */
+  get group(): string {
+    return this._group();
+  }
+
+  set group(next: string | null | undefined) {
+    if (!next) this.removeAttribute('group');
+    else this.setAttribute('group', next);
+  }
+
+  private _group(): string {
+    return this.getAttribute('group')?.trim() || '';
+  }
+
   /** The text the component shows, with any `labels` you set applied over the English defaults. */
   get labels(): UISortableLabels {
     return { ...DEFAULT_LABELS, ...this._labels };
@@ -1878,6 +1924,7 @@ export class UISortable extends ElementBase {
     if (!this._items.some((item) => item.id === id)) return;
     this._focusedId = id;
     this._pendingFocusId = id;
+    this._revealPending = true;
     if (this._applyInteractiveStateInPlace({ restoreFocus: true })) return;
     this.requestRender();
   }
@@ -1893,6 +1940,24 @@ export class UISortable extends ElementBase {
       beforeId: options.beforeId ?? null,
       mode: options.mode ?? (options.parentId ? 'inside' : 'before'),
     }, movedRootIds, !!options.clone, options.source ?? 'api');
+  }
+
+  /**
+   * Moves (or, with `clone`, copies) the selected items into another `<ui-sortable>`: the same as dragging them
+   * there, for code and for keyboard users. `options` is the place in `peer`. Returns false when nothing moved.
+   */
+  moveSelectionTo(peer: UISortable, options: UISortableMoveOptions): boolean {
+    if (!peer || !(peer instanceof UISortable)) return false;
+    if (peer === this) return this.moveSelection(options);
+    this._syncSelectionFromAttribute(this.getAttribute('selection'));
+    const rootIds = this._selectedRootIds();
+    if (!rootIds.length) return false;
+    return this._transferTo(peer, {
+      listId: options.targetListId,
+      parentId: options.parentId ?? null,
+      beforeId: options.beforeId ?? null,
+      mode: options.mode ?? (options.parentId ? 'inside' : 'before'),
+    }, rootIds, !!options.clone, options.source ?? 'api');
   }
 
   getPersistenceSnapshot(): UISortablePersistenceSnapshot {
@@ -1962,6 +2027,7 @@ export class UISortable extends ElementBase {
             const content = records.length
               ? this._renderListTree(renderItems, list, focusedId, draggingIds, allowNesting, placeholderIds, showSelectionBadge)
               : '';
+            const maxHeight = list.orientation === 'horizontal' ? undefined : list.maxHeight ?? normalizeLength(this.getAttribute('list-max-height'));
             const total = this._items.filter((item) => item.listId === list.id).length;
             const full = list.maxItems !== undefined && total >= list.maxItems;
             const helperText = list.disabled
@@ -1995,7 +2061,7 @@ export class UISortable extends ElementBase {
                     ${helperText ? `<div class="list-helper">${escapeHtml(helperText)}</div>` : ''}
                   </div>
                 </header>
-                <div class="items" part="items" role="${records.length ? 'listbox' : 'group'}" ${records.length ? 'aria-multiselectable="true"' : ''} aria-label="${escapeHtml(list.label)}" aria-describedby="ui-sortable-helper">
+                <div class="items" part="items"${maxHeight ? ` data-scroll="true" style="--ui-sortable-list-max-block-size: ${maxHeight}"` : ''} role="${records.length ? 'listbox' : 'group'}" ${records.length ? 'aria-multiselectable="true"' : ''} aria-label="${escapeHtml(list.label)}" aria-describedby="ui-sortable-helper">
                   ${content || `<div class="list-custom-empty" part="list-custom-empty" data-list-empty-target="${escapeHtml(list.id)}"></div><div class="empty">${escapeHtml(list.emptyLabel || this._t('emptyList'))}</div>${this._renderDropzone({
                     listId: list.id,
                     parentId: null,
@@ -2020,9 +2086,12 @@ export class UISortable extends ElementBase {
     this._fillCustomTargets();
     queueMicrotask(() => {
       this._restorePendingFocus();
+      // A keyboard drag moves a placeholder card to the chosen place: keep it in sight.
+      if (this._dragState?.keyboard) {
+        this.root.querySelector<HTMLElement>('.item-placeholder')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+      }
       this._applyCurrentDropTargetVisualState();
       this._applyLiveMessage();
-      this._updatePointerDragPreview();
       this._animateItemShellReflow(previousRects);
     });
   }
@@ -2106,7 +2175,13 @@ export class UISortable extends ElementBase {
     if (document.activeElement !== target) {
       target.focus({ preventScroll: true });
     }
-    this._revealInBoard(target);
+    if (this._revealPending) {
+      // The keyboard moved the focus: show the card wherever it is, in its list, in the board or on the page.
+      this._revealPending = false;
+      target.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+    } else {
+      this._revealInBoard(target);
+    }
     this._pendingFocusId = null;
   }
 
@@ -2320,7 +2395,6 @@ export class UISortable extends ElementBase {
       handle.setAttribute('data-sortable-custom-handle', '');
       handle.setAttribute('data-drag-trigger', 'custom');
       handle.setAttribute('data-id', id);
-      handle.setAttribute('draggable', 'true');
       if (!handle.hasAttribute('tabindex')) handle.setAttribute('tabindex', '-1');
     });
   }
@@ -2416,121 +2490,11 @@ export class UISortable extends ElementBase {
     zone.style.setProperty('--ui-sortable-dropzone-match-inline-size', `${Math.max(180, Math.round(rect.width))}px`);
   }
 
-  private _ensureDragPreviewOverlay(): HTMLElement {
-    if (this._dragPreviewOverlay && this._dragPreviewOverlay.isConnected) return this._dragPreviewOverlay;
-    const overlay = document.createElement('div');
-    overlay.className = 'drag-preview-overlay';
-    overlay.setAttribute('data-visible', 'false');
-    this.root.appendChild(overlay);
-    this._dragPreviewOverlay = overlay;
-    return overlay;
-  }
-
   private _clearPointerDragPreview(): void {
-    this._dragPreviewOverlay?.setAttribute('data-visible', 'false');
-    this._dragPreviewOverlay?.style.setProperty('left', '-9999px');
-    this._dragPreviewOverlay?.style.setProperty('top', '-9999px');
     const rootEl = this.root.querySelector<HTMLElement>('.root');
     if (rootEl && !this._dragState?.keyboard) {
       rootEl.setAttribute('data-drag-preview', 'false');
     }
-  }
-
-  private _pointerPreviewContent(): { kicker: string; title: string; description: string } | null {
-    if (!this._dragState || this._dragState.keyboard) return null;
-    const firstMovedId = this._dragState.movedRootIds[0];
-    const item = this._items.find((entry) => entry.id === firstMovedId);
-    if (!item) return null;
-    return {
-      kicker: this._t(this._dragState.clone ? 'copyPreview' : 'dropPreview'),
-      title: this._dragState.clone ? `${item.label} copy` : item.label,
-      description: this._t(
-        this._dragState.clone
-          ? 'releaseCopy'
-          : this._dragState.movedRootIds.length > 1
-            ? 'releaseMoveMany'
-            : 'releaseMove'
-      ),
-    };
-  }
-
-  private _pointerPreviewSize(): { width: number; height: number } | null {
-    if (this.getAttribute('drag-preview-size') === 'compact') return null;
-    if (!this._dragState || this._dragState.keyboard) return null;
-    const firstMovedId = this._dragState.movedRootIds[0];
-    const itemEl = firstMovedId ? this._findItemElement(firstMovedId) : null;
-    if (!itemEl) return null;
-    const computedStyle = window.getComputedStyle(itemEl);
-    const scale = readScaleFromTransform(computedStyle.transform);
-    return {
-      width: itemEl.offsetWidth * scale.x,
-      height: itemEl.offsetHeight * scale.y,
-    };
-  }
-
-  private _updatePointerDragPreview(): void {
-    if (!this._dragState || this._dragState.keyboard) {
-      this._clearPointerDragPreview();
-      return;
-    }
-
-    const preview = this._pointerPreviewContent();
-    if (!preview) {
-      this._clearPointerDragPreview();
-      return;
-    }
-
-    const rootEl = this.root.querySelector<HTMLElement>('.root');
-    const overlay = this._dragPreviewOverlay;
-    const overlayVisible = overlay?.getAttribute('data-visible') === 'true';
-    const previewSize = this._pointerPreviewSize();
-
-    if (!this._dragState.dropTarget) {
-      if (overlayVisible && rootEl) rootEl.setAttribute('data-drag-preview', 'true');
-      return;
-    }
-
-    const targetEl = this._findDropzone(this._dragState.dropTarget);
-    if (!targetEl) {
-      if (overlayVisible && rootEl) rootEl.setAttribute('data-drag-preview', 'true');
-      return;
-    }
-
-    const nextOverlay = this._ensureDragPreviewOverlay();
-    nextOverlay.innerHTML = `
-      <div class="placeholder-content">
-        <div class="placeholder-kicker">${escapeHtml(preview.kicker)}</div>
-        <div class="placeholder-title">${escapeHtml(preview.title)}</div>
-        <div class="placeholder-description">${escapeHtml(preview.description)}</div>
-      </div>
-    `;
-
-    const targetRect = targetEl.getBoundingClientRect();
-    if (rootEl) rootEl.setAttribute('data-drag-preview', 'true');
-
-    nextOverlay.style.setProperty('left', '-9999px');
-    nextOverlay.style.setProperty('top', '-9999px');
-    if (previewSize) {
-      nextOverlay.style.setProperty('inline-size', `${previewSize.width}px`);
-      nextOverlay.style.setProperty('block-size', `${previewSize.height}px`);
-    } else {
-      nextOverlay.style.removeProperty('inline-size');
-      nextOverlay.style.removeProperty('block-size');
-    }
-    nextOverlay.setAttribute('data-visible', 'true');
-    const overlayRect = nextOverlay.getBoundingClientRect();
-    const overlayWidth = previewSize?.width ?? overlayRect.width;
-    const overlayHeight = previewSize?.height ?? overlayRect.height;
-    const left = Math.max(16, Math.min(targetRect.left, window.innerWidth - overlayWidth - 16));
-    const top = Math.max(
-      16,
-      Math.min(
-        targetRect.top + (targetRect.height - overlayHeight) / 2,
-        window.innerHeight - overlayHeight - 16
-      )
-    );
-    nextOverlay.style.setProperty('left', `${Math.round(left)}px`);
-    nextOverlay.style.setProperty('top', `${Math.round(top)}px`);
   }
 
   private _setDraggingVisualState(ids: string[], active: boolean): void {
@@ -2558,7 +2522,8 @@ export class UISortable extends ElementBase {
       this.requestRender();
       return;
     }
-    this._updatePointerDragPreview();
+    // `data-drag-preview` is a styling hook: true while a pointer drag has a place to land.
+    this.root.querySelector<HTMLElement>('.root')?.setAttribute('data-drag-preview', target ? 'true' : 'false');
   }
 
   private _queueDropTarget(target: DropTarget | null, timestamp?: number, options?: { announceLabel?: string }): void {
@@ -2893,11 +2858,12 @@ export class UISortable extends ElementBase {
   }
 
   private _renderDropzone(target: DropTarget, label: string): string {
-    const active = this._dragState?.dropTarget
-      && this._dragState.dropTarget.listId === target.listId
-      && this._dragState.dropTarget.parentId === target.parentId
-      && this._dragState.dropTarget.beforeId === target.beforeId
-      && this._dragState.dropTarget.mode === target.mode;
+    const current = this._dragState?.dropTarget ?? this._externalTarget;
+    const active = current
+      && current.listId === target.listId
+      && current.parentId === target.parentId
+      && current.beforeId === target.beforeId
+      && current.mode === target.mode;
 
     return `
       <div
@@ -3075,74 +3041,15 @@ export class UISortable extends ElementBase {
     const nextId = visibleIds[nextIndex];
     this._focusedId = nextId;
     this._pendingFocusId = nextId;
+    this._revealPending = true;
     if (this._applyInteractiveStateInPlace({ restoreFocus: true })) return;
     this.requestRender();
   }
 
+  // The browser must not start a native drag while a card is being dragged with the pointer (an image or a
+  // link inside a card would): the pointer drag is the only drag.
   private _onDragStart(event: DragEvent): void {
-    const activator = this._dragActivatorFromPath(event.composedPath());
-    const id = activator?.id;
-    if (!activator || !id) {
-      event.preventDefault();
-      return;
-    }
-
-    if (this._isDragLocked()) {
-      event.preventDefault();
-      this._announce(this._t('announceDragDisabled'));
-      return;
-    }
-
-    const item = this._items.find((entry) => entry.id === id);
-    if (!item || item.disabled || item.dragDisabled) {
-      event.preventDefault();
-      return;
-    }
-
-    const selectedIds = this._selection.includes(id) ? this._selectedRootIds(id) : [id];
-    if (!this._selection.includes(id)) this._setSelection([id], 'pointer');
-
-    const clone = this._itemClonesOnDrag(id);
-    this._dragState = {
-      snapshot: this._items.map(cloneItem),
-      movedRootIds: selectedIds,
-      originId: id,
-      clone,
-      keyboard: false,
-      dropTarget: null,
-      committed: false,
-    };
-
-    if (event.dataTransfer) {
-      event.dataTransfer.effectAllowed = clone ? 'copyMove' : 'move';
-      event.dataTransfer.setData('text/plain', selectedIds.join(','));
-      this._applyDragImage(event.dataTransfer, selectedIds.length);
-    }
-
-    this._announceDragging(item.label, selectedIds.length, clone);
-    this.requestRender();
-  }
-
-  private _onDragOver(event: DragEvent): void {
-    if (!this._dragState || this._dragState.keyboard) return;
-    this._nestModifier = !!event.altKey;
-    const target = this._dropTargetFromEvent(event);
-    if (!target || !this._canDrop(target, this._dragState.movedRootIds)) {
-      this._queueDropTarget(null, event.timeStamp);
-      return;
-    }
-    event.preventDefault();
-    this._queueDropTarget(target, event.timeStamp);
-    if (event.dataTransfer) event.dataTransfer.dropEffect = this._dragState.clone ? 'copy' : 'move';
-  }
-
-  private _onDrop(event: DragEvent): void {
-    if (!this._dragState || this._dragState.keyboard) return;
-    this._nestModifier = !!event.altKey;
-    const target = this._dropTargetFromEvent(event);
-    if (!target || !this._canDrop(target, this._dragState.movedRootIds)) return;
-    event.preventDefault();
-    this._commitMove(target, this._dragState.movedRootIds, this._dragState.clone, 'pointer');
+    if (this._pointerGesture || (this._dragState && !this._dragState.keyboard)) event.preventDefault();
   }
 
   private _onDocumentKeyDown(event: KeyboardEvent): void {
@@ -3166,34 +3073,215 @@ export class UISortable extends ElementBase {
     if (this._nestModifier === held) return;
     this._nestModifier = held;
     if (!this._dragState || this._dragState.keyboard || this._dragState.committed || !this._lastPointer) return;
-    const target = this._dropTargetFromPoint(this._lastPointer.x, this._lastPointer.y);
-    const usable = target && this._canDrop(target, this._dragState.movedRootIds) ? target : null;
+    this._retarget(this._lastPointer.x, this._lastPointer.y, { immediate: true });
+  }
+
+  // Works out where the held card would land at (x, y): in this element, or, when it is over another element of the
+  // same group, in that one. `immediate` skips the short delay that stops the highlight flickering.
+  private _retarget(x: number, y: number, how: { immediate?: boolean; timestamp?: number }): void {
+    const drag = this._dragState;
+    if (!drag || drag.keyboard || drag.committed) return;
+
+    const over = this._externalAt(x, y);
+    if (over) {
+      // Over another element this one has no place of its own.
+      if (drag.dropTarget) this._setDropTarget(null);
+      this._pendingDropTarget = null;
+      this._noteRefusal(!!over.target && !over.usable);
+      this._setExternal(over.usable && over.target ? { peer: over.peer, target: over.target } : null);
+      return;
+    }
+    this._setExternal(null);
+
+    const target = this._dropTargetFromPoint(x, y);
+    const usable = target && this._canDrop(target, drag.movedRootIds) ? target : null;
     this._noteRefusal(!!target && !usable);
-    this._setDropTarget(usable);
+    if (how.immediate) this._setDropTarget(usable);
+    else this._queueDropTarget(usable, how.timestamp ?? performance.now());
+  }
+
+  // The other element of the same group under the pointer (this one wins where they overlap), and whether it
+  // takes the held items at the place it found.
+  private _peerUnder(x: number, y: number): UISortable | null {
+    const group = this._group();
+    if (!group) return null;
+    const inside = (el: UISortable) => {
+      const rect = el.getBoundingClientRect();
+      return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom && rect.width > 0 && rect.height > 0;
+    };
+    if (inside(this)) return null;
+    for (const peer of UISortable._instances) {
+      if (peer === this || peer._group() !== group || !peer.isConnected || peer.ownerDocument !== this.ownerDocument) continue;
+      if (inside(peer)) return peer;
+    }
+    return null;
+  }
+
+  private _externalAt(x: number, y: number): { peer: UISortable; target: DropTarget | null; usable: boolean } | null {
+    if (!this._dragState || this._dragState.keyboard) return null;
+    const peer = this._peerUnder(x, y);
+    if (!peer) return null;
+    const session = this._sessionFor(this._dragState.movedRootIds, this._dragState.clone);
+    peer._nestModifier = this._nestModifier;
+    const target = peer._dropTargetFromPoint(x, y);
+    const usable = !!target && peer._canDrop(target, session.rootIds, session.clone, session);
+    return { peer, target, usable };
+  }
+
+  private _setExternal(next: { peer: UISortable; target: DropTarget } | null): void {
+    const drag = this._dragState;
+    if (!drag) return;
+    const previous = drag.external ?? null;
+    if (previous && next && previous.peer === next.peer && sameDropTarget(previous.target, next.target)) return;
+    if (!previous && !next) {
+      drag.external = null;
+      return;
+    }
+    previous?.peer._showExternalTarget(null);
+    drag.external = next;
+    next?.peer._showExternalTarget(next.target);
+  }
+
+  // Marks the place in this element where a card held over it from another element would land.
+  private _showExternalTarget(target: DropTarget | null): void {
+    if (sameDropTarget(this._externalTarget, target)) return;
+    this._setDropTargetVisualState(this._externalTarget, false);
+    this._externalTarget = target;
+    this._setDropTargetVisualState(target, true);
+  }
+
+  // The held items, with all their children, as they leave this element.
+  private _sessionFor(rootIds: string[], clone: boolean): ExternalSession {
+    const cached = this._dragState?.session;
+    if (cached && cached.clone === clone && cached.rootIds.join() === rootIds.join()) return cached;
+    const itemMap = buildItemMap(this._items);
+    const groups = buildChildrenMap(this._items);
+    const seen = new Set<string>();
+    const items: NormalizedItem[] = [];
+    const collect = (id: string) => {
+      const item = itemMap.get(id);
+      if (!item || seen.has(id)) return;
+      seen.add(id);
+      items.push(cloneItem(item));
+      (groups.get(keyForGroup(item.listId, id)) || []).forEach(collect);
+    };
+    rootIds.forEach(collect);
+    const session: ExternalSession = {
+      source: this,
+      rootIds: [...rootIds],
+      items,
+      clone,
+      sourceListIds: Array.from(new Set(rootIds.map((id) => itemMap.get(id)?.listId).filter((id): id is string => !!id))),
+    };
+    if (this._dragState) this._dragState.session = session;
+    return session;
+  }
+
+  // Moves (or copies) items into another element: both report it, and either can cancel it first.
+  private _transferTo(
+    peer: UISortable,
+    target: DropTarget,
+    rootIds: string[],
+    clone: boolean,
+    source: UISortableChangeSource
+  ): boolean {
+    const reject = () => {
+      if (this._dragState) this._cancelDrag(false);
+      this._announce(this._t('announceRejected'));
+      return false;
+    };
+    const session = this._sessionFor(rootIds, clone);
+    if (!peer._canDrop(target, session.rootIds, session.clone, session)) return reject();
+
+    // What arrives: the items themselves, or copies with ids that are free there.
+    const taken = new Set(peer._items.map((item) => item.id));
+    const idMap = new Map<string, string>();
+    session.items.forEach((item) => {
+      if (!clone) {
+        idMap.set(item.id, item.id);
+        return;
+      }
+      const base = item.id.includes('--copy-') ? item.id.split('--copy-')[0] : item.id;
+      let candidate = '';
+      do candidate = `${base}--copy-${this._cloneSeed++}`;
+      while (taken.has(candidate));
+      taken.add(candidate);
+      idMap.set(item.id, candidate);
+    });
+    const incoming = session.items.map((item) => {
+      const rootIndex = session.rootIds.indexOf(item.id);
+      return {
+        ...cloneItem(item),
+        id: idMap.get(item.id) || item.id,
+        parentId: item.parentId && idMap.has(item.parentId) ? idMap.get(item.parentId) || null : null,
+        listId: target.listId,
+        label: clone && rootIndex === 0 ? `${item.label} copy` : item.label,
+        ...(item.data !== undefined ? { data: copyData(item.data) } : {}),
+      };
+    });
+    const incomingRootIds = session.rootIds.map((id) => idMap.get(id) || id);
+    const projected = projectMoveItems(
+      [...peer._items, ...incoming],
+      peer._lists,
+      target,
+      incomingRootIds,
+      false,
+      (item) => item
+    );
+
+    const peerList = peer._lists.find((list) => list.id === target.listId);
+    const peerPlan: MovePlan = {
+      items: projected.items,
+      movedIds: incomingRootIds,
+      nextSelection: [...incomingRootIds],
+      operation: clone ? 'clone' : target.mode === 'inside' ? 'nest' : 'transfer',
+      target,
+      clone,
+      source,
+      external: { direction: 'in', peer: this },
+    };
+
+    // This element only changes when the items leave it.
+    let ownPlan: MovePlan | null = null;
+    if (!clone) {
+      const moving = new Set(session.items.map((item) => item.id));
+      ownPlan = {
+        items: normalizeItems(this._lists, this._items.filter((item) => !moving.has(item.id)).map(cloneItem)),
+        movedIds: [...session.rootIds],
+        nextSelection: this._selection.filter((id) => !moving.has(id)),
+        operation: 'transfer',
+        target,
+        clone: false,
+        source,
+        external: { direction: 'out', peer },
+        destination: peerList?.label || target.listId,
+      };
+    }
+
+    if (!peer._askBeforeChange(peerPlan)) return reject();
+    if (ownPlan && !this._askBeforeChange(ownPlan)) return reject();
+
+    this._setExternal(null);
+    peer._showExternalTarget(null);
+    if (ownPlan) {
+      this._applyPlan(ownPlan);
+    } else {
+      // A copy leaves this element as it was: the held card just lets go.
+      if (this._dragState) this._dragState.committed = true;
+      this._stopAutoScroll();
+      this._clearPointerDragPreview();
+      this._dragState = null;
+      this._removeDragImage();
+      this.requestRender();
+    }
+    peer._applyPlan(peerPlan);
+    return true;
   }
 
   // Over a place that exists but will not take the drop (a full list, a read-only one, canDrop said no) the
   // lifted card says so.
   private _noteRefusal(refused: boolean): void {
     if (this._dragImage?.toggleAttribute) this._dragImage.toggleAttribute('data-refused', refused);
-  }
-
-  private _onDragEnd(): void {
-    if (!this._dragState || this._dragState.keyboard) return;
-    if (!this._dragState.committed) {
-      this._setDraggingVisualState(this._draggingIds(), false);
-      this._pendingDropTarget = null;
-      this._setDropTargetVisualState(this._dragState.dropTarget, false);
-      this._clearPointerDragPreview();
-      this._dragState = null;
-      this._removeDragImage();
-      this._announce(this._t('announceCancelled'));
-      this.requestRender();
-    }
-  }
-
-  private _dropTargetFromEvent(event: DragEvent): DropTarget | null {
-    return this._dropTargetFromPath(event.composedPath(), event.clientX, event.clientY);
   }
 
   private _dropTargetFromPath(pathLike: EventTarget[], clientX: number, clientY: number): DropTarget | null {
@@ -3431,16 +3519,7 @@ export class UISortable extends ElementBase {
     this._lastPointer = { x: event.clientX, y: event.clientY };
     this._movePointerPreview(event.clientX, event.clientY);
     this._updateAutoScroll(event.clientX, event.clientY);
-    if (!this._dragState.committed) {
-      const target = this._dropTargetFromPoint(event.clientX, event.clientY);
-      if (!target || !this._canDrop(target, this._dragState.movedRootIds)) {
-        this._noteRefusal(!!target);
-        this._queueDropTarget(null, event.timeStamp);
-        return;
-      }
-      this._noteRefusal(false);
-      this._queueDropTarget(target, event.timeStamp);
-    }
+    this._retarget(event.clientX, event.clientY, { timestamp: event.timeStamp });
   }
 
   private _autoScrollFrame = 0;
@@ -3468,27 +3547,10 @@ export class UISortable extends ElementBase {
     if (!point || !this._dragState || this._dragState.keyboard) return;
 
     const view = this.ownerDocument?.defaultView;
-    let scrolled = false;
-
-    const board = this.root.querySelector<HTMLElement>('.lists');
-    if (board && board.scrollWidth > board.clientWidth + 1) {
-      const bounds = board.getBoundingClientRect();
-      const dx = edgeScrollDelta(point.x, Math.max(0, bounds.left), Math.min(view?.innerWidth ?? Infinity, bounds.right));
-      if (dx) {
-        board.scrollLeft += dx;
-        scrolled = true;
-      }
-    }
-
-    const list = this._pathFromPoint(point.x, point.y).find((node) => node.classList?.contains('items'));
-    if (list && list.scrollHeight > list.clientHeight + 1 && view?.getComputedStyle(list).overflowY !== 'visible') {
-      const bounds = list.getBoundingClientRect();
-      const dy = edgeScrollDelta(point.y, bounds.top, bounds.bottom);
-      if (dy) {
-        list.scrollTop += dy;
-        scrolled = true;
-      }
-    }
+    let scrolled = this._scrollOwn(point.x, point.y);
+    // A board of another element under the pointer scrolls as well.
+    const peer = this._peerUnder(point.x, point.y);
+    if (peer && peer._scrollOwn(point.x, point.y)) scrolled = true;
 
     const scroller = findScrollParent(this);
     const bounds = scroller ? scroller.getBoundingClientRect() : null;
@@ -3504,14 +3566,37 @@ export class UISortable extends ElementBase {
     if (!scrolled) return;
 
     // The content moved under a stationary pointer, so the target under it has changed.
-    if (!this._dragState.committed) {
-      const target = this._dropTargetFromPoint(point.x, point.y);
-      const usable = target && this._canDrop(target, this._dragState.movedRootIds) ? target : null;
-      this._noteRefusal(!!target && !usable);
-      this._queueDropTarget(usable, performance.now());
-    }
+    this._retarget(point.x, point.y, { timestamp: performance.now() });
     this._autoScrollFrame = requestAnimationFrame(this._autoScrollTick);
   };
+
+  // Scrolls this element's own board sideways, and the list under (x, y) when it has a scrollbar of its own, if the
+  // pointer is at their edge. True when something moved.
+  private _scrollOwn(x: number, y: number): boolean {
+    const view = this.ownerDocument?.defaultView;
+    let scrolled = false;
+
+    const board = this.root.querySelector<HTMLElement>('.lists');
+    if (board && board.scrollWidth > board.clientWidth + 1) {
+      const bounds = board.getBoundingClientRect();
+      const dx = edgeScrollDelta(x, Math.max(0, bounds.left), Math.min(view?.innerWidth ?? Infinity, bounds.right));
+      if (dx) {
+        board.scrollLeft += dx;
+        scrolled = true;
+      }
+    }
+
+    const list = this._pathFromPoint(x, y).find((node) => node.classList?.contains('items'));
+    if (list && list.scrollHeight > list.clientHeight + 1 && view?.getComputedStyle(list).overflowY !== 'visible') {
+      const bounds = list.getBoundingClientRect();
+      const dy = edgeScrollDelta(y, bounds.top, bounds.bottom);
+      if (dy) {
+        list.scrollTop += dy;
+        scrolled = true;
+      }
+    }
+    return scrolled;
+  }
 
   private _onPointerUp(event: PointerEvent): void {
     if (!this._pointerGesture || event.pointerId !== this._pointerGesture.pointerId) return;
@@ -3528,6 +3613,18 @@ export class UISortable extends ElementBase {
     this._stopAutoScroll();
     if (!this._dragState || this._dragState.keyboard) return;
     this._nestModifier = !!event.altKey;
+
+    // Released over another element of the group: the items go there, or, if it will not take them, nowhere.
+    const over = gesture.moved ? this._externalAt(event.clientX, event.clientY) : null;
+    if (over) {
+      if (over.usable && over.target) {
+        this._transferTo(over.peer, over.target, this._dragState.movedRootIds, this._dragState.clone, 'pointer');
+      } else {
+        this._cancelDrag(true);
+      }
+      return;
+    }
+
     const releaseTarget = gesture.moved ? this._releaseDropTarget(event.clientX, event.clientY) : null;
     if (gesture.moved && releaseTarget) {
       this._commitMove(releaseTarget, this._dragState.movedRootIds, this._dragState.clone, 'pointer');
@@ -3664,7 +3761,15 @@ export class UISortable extends ElementBase {
     return false;
   }
 
-  private _canDrop(target: DropTarget, movedRootIds: string[], clone = this._dragState?.clone ?? false): boolean {
+  // `incoming` is set when the items come from another element: they are not in this one yet, so the checks
+  // that refer to them (they cannot be dropped inside themselves) are replaced by the ones that matter for
+  // newcomers (their ids must be free here).
+  private _canDrop(
+    target: DropTarget,
+    movedRootIds: string[],
+    clone = this._dragState?.clone ?? false,
+    incoming?: ExternalSession
+  ): boolean {
     if (this._isDragLocked()) return false;
     const targetList = this._lists.find((list) => list.id === target.listId);
     if (!targetList || targetList.disabled) return false;
@@ -3673,18 +3778,27 @@ export class UISortable extends ElementBase {
     const movingSet = new Set<string>();
     const groups = buildChildrenMap(this._items);
 
-    const collect = (id: string) => {
-      movingSet.add(id);
-      const item = itemMap.get(id);
-      if (!item) return;
-      (groups.get(keyForGroup(item.listId, id)) || []).forEach(collect);
-    };
-    movedRootIds.forEach(collect);
+    if (incoming) {
+      incoming.items.forEach((item) => movingSet.add(item.id));
+    } else {
+      const collect = (id: string) => {
+        movingSet.add(id);
+        const item = itemMap.get(id);
+        if (!item) return;
+        (groups.get(keyForGroup(item.listId, id)) || []).forEach(collect);
+      };
+      movedRootIds.forEach(collect);
 
-    if (target.parentId && movingSet.has(target.parentId)) return false;
-    if (target.beforeId && movingSet.has(target.beforeId)) return false;
+      if (target.parentId && movingSet.has(target.parentId)) return false;
+      if (target.beforeId && movingSet.has(target.beforeId)) return false;
+    }
 
-    const sourceLists = Array.from(new Set(movedRootIds.map((id) => itemMap.get(id)?.listId).filter(Boolean))) as string[];
+    // A copy gets fresh ids; a move keeps its own, so they must not clash with what is already here.
+    if (incoming && !incoming.clone && incoming.items.some((item) => itemMap.has(item.id))) return false;
+
+    const sourceLists = incoming
+      ? incoming.sourceListIds
+      : Array.from(new Set(movedRootIds.map((id) => itemMap.get(id)?.listId).filter(Boolean))) as string[];
     if (targetList.accepts?.length && sourceLists.some((listId) => !targetList.accepts?.includes(listId))) return false;
 
     if (target.mode === 'inside' && this.getAttribute('allow-nesting') === 'false') return false;
@@ -3694,23 +3808,29 @@ export class UISortable extends ElementBase {
       // of its items). A reorder inside the list adds nothing, so a list that is already over the limit can still
       // be reordered and emptied.
       const inList = this._items.filter((item) => item.listId === target.listId);
-      const incoming = clone
-        ? movingSet.size
-        : Array.from(movingSet).filter((id) => itemMap.get(id)?.listId !== target.listId).length;
-      if (incoming > 0 && inList.length + incoming > targetList.maxItems) return false;
+      const brought = incoming
+        ? incoming.items.length
+        : clone
+          ? movingSet.size
+          : Array.from(movingSet).filter((id) => itemMap.get(id)?.listId !== target.listId).length;
+      if (brought > 0 && inList.length + brought > targetList.maxItems) return false;
     }
 
     const callback = this._canDropCallback;
     if (callback) {
       try {
+        const roots = incoming
+          ? incoming.items.filter((item) => incoming.rootIds.includes(item.id))
+          : movedRootIds.map((id) => itemMap.get(id)).filter((item): item is NormalizedItem => !!item);
         const allowed = callback({
-          items: movedRootIds.map((id) => itemMap.get(id)).filter((item): item is NormalizedItem => !!item).map(publicItem),
+          items: roots.map(publicItem),
           movedIds: [...movedRootIds],
           targetListId: target.listId,
           parentId: target.parentId,
           beforeId: target.beforeId,
           mode: target.mode,
           clone,
+          ...(incoming ? { from: incoming.source } : {}),
         });
         if (!allowed) return false;
       } catch (error) {
@@ -3732,92 +3852,14 @@ export class UISortable extends ElementBase {
     if (!this._canDrop(target, movedRootIds, clone)) return false;
 
     const itemMap = buildItemMap(this._items);
-    const groups = buildChildrenMap(this._items);
-    const movingSet = new Set<string>();
-    const orderedMovingIds: string[] = [];
-
-    const collect = (id: string) => {
-      const item = itemMap.get(id);
-      if (!item || movingSet.has(id)) return;
-      movingSet.add(id);
-      orderedMovingIds.push(id);
-      (groups.get(keyForGroup(item.listId, id)) || []).forEach(collect);
-    };
-    movedRootIds.forEach(collect);
-
-    const orderedItems = this._items.map(cloneItem);
-    const movingItems = orderedItems.filter((item) => movingSet.has(item.id));
-    const remainingItems = clone
-      ? orderedItems.map(cloneItem)
-      : orderedItems.filter((item) => !movingSet.has(item.id));
-    const nextItems = clone ? movingItems.map((item) => this._cloneSubtreeItem(item, orderedMovingIds)) : movingItems.map(cloneItem);
-    const idMap = new Map<string, string>();
-    const cloneSourceById = new Map<string, string>();
-
-    if (clone) {
-      movingItems.forEach((item, index) => {
-        idMap.set(item.id, nextItems[index].id);
-        cloneSourceById.set(nextItems[index].id, item.id);
-      });
-    }
-
-    nextItems.forEach((item) => {
-      const originalId = clone ? cloneSourceById.get(item.id) : item.id;
-      const original = originalId ? itemMap.get(originalId) : null;
-      if (!original) return;
-      if (clone) {
-        item.parentId = original.parentId && idMap.has(original.parentId) ? idMap.get(original.parentId) || null : null;
-      }
-      item.listId = target.listId;
-    });
-
-    const rootIdsForInsert = movedRootIds.map((id) => idMap.get(id) || id);
-    const combinedItems = [...remainingItems, ...nextItems];
-    const groupOrders = buildChildrenMap(remainingItems);
-    const insertedGroupKey = keyForGroup(target.listId, target.parentId);
-    const targetGroup = [...(groupOrders.get(insertedGroupKey) || [])];
-    const insertionIndex = target.beforeId ? targetGroup.indexOf(target.beforeId) : targetGroup.length;
-    const safeIndex = insertionIndex >= 0 ? insertionIndex : targetGroup.length;
-    targetGroup.splice(safeIndex, 0, ...rootIdsForInsert);
-    groupOrders.set(insertedGroupKey, targetGroup);
-
-    const movingGroups = buildChildrenMap(nextItems);
-    movingGroups.forEach((ids, key) => {
-      const [, parentToken] = key.split('::');
-      if ((parentToken || '') === '__root__') return;
-      groupOrders.set(key, [...ids]);
-    });
-
-    const combinedMap = buildItemMap(combinedItems);
-    rootIdsForInsert.forEach((rootId) => {
-      const rootItem = combinedMap.get(rootId);
-      if (!rootItem) return;
-      rootItem.parentId = target.parentId;
-      rootItem.listId = target.listId;
-    });
-
-    const ordered: NormalizedItem[] = [];
-    const visited = new Set<string>();
-    const walk = (listId: string, parentId: string | null) => {
-      const ids = groupOrders.get(keyForGroup(listId, parentId)) || [];
-      ids.forEach((id, index) => {
-        const item = combinedMap.get(id);
-        if (!item || visited.has(id)) return;
-        visited.add(id);
-        item.listId = listId;
-        item.parentId = parentId;
-        item.order = index;
-        ordered.push(item);
-        walk(listId, id);
-      });
-    };
-
-    this._lists.forEach((list) => walk(list.id, null));
-    combinedItems.forEach((item) => {
-      if (visited.has(item.id)) return;
-      item.parentId = null;
-      ordered.push(item);
-    });
+    const projected = projectMoveItems(
+      this._items,
+      this._lists,
+      target,
+      movedRootIds,
+      clone,
+      (item, orderedMovingIds) => this._cloneSubtreeItem(item, orderedMovingIds)
+    );
 
     const originalRoots = movedRootIds
       .map((id) => itemMap.get(id))
@@ -3830,43 +3872,59 @@ export class UISortable extends ElementBase {
           ? 'transfer'
           : 'reorder';
 
-    const nextSelection = [...rootIdsForInsert];
-    const previousSelection = [...this._selection];
-
-    // The last word before anything changes: a listener can cancel the move.
-    const proposed = ordered.map(cloneItem);
-    const accepted = this.dispatchEvent(new CustomEvent<UISortableBeforeChangeDetail>('before-change', {
-      detail: {
-        items: proposed.map(publicItem),
-        lists: this.lists,
-        selection: [...nextSelection],
-        previousSelection: [...previousSelection],
-        movedIds: [...rootIdsForInsert],
-        source,
-        operation,
-        persistence: getPersistenceSnapshot(proposed),
-        target: { listId: target.listId, parentId: target.parentId, beforeId: target.beforeId, mode: target.mode },
-        clone,
-      },
-      bubbles: true,
-      composed: true,
-      cancelable: true,
-    }));
-    if (!accepted) {
+    const plan: MovePlan = {
+      items: projected.items,
+      movedIds: projected.insertedRootIds,
+      nextSelection: [...projected.insertedRootIds],
+      operation,
+      target,
+      clone,
+      source,
+    };
+    if (!this._askBeforeChange(plan)) {
       // Put the card back where it came from and say so.
       if (this._dragState) this._cancelDrag(false);
       this._announce(this._t('announceRejected'));
       return false;
     }
+    this._applyPlan(plan);
+    return true;
+  }
 
+  // The last word before anything changes: a listener of `before-change` can cancel the move.
+  private _askBeforeChange(plan: MovePlan): boolean {
+    return this.dispatchEvent(new CustomEvent<UISortableBeforeChangeDetail>('before-change', {
+      detail: {
+        items: plan.items.map(publicItem),
+        lists: this.lists,
+        selection: [...plan.nextSelection],
+        previousSelection: [...this._selection],
+        movedIds: [...plan.movedIds],
+        source: plan.source,
+        operation: plan.operation,
+        persistence: getPersistenceSnapshot(plan.items),
+        target: { listId: plan.target.listId, parentId: plan.target.parentId, beforeId: plan.target.beforeId, mode: plan.target.mode },
+        clone: plan.clone,
+        ...(plan.external ? { external: plan.external } : {}),
+      },
+      bubbles: true,
+      composed: true,
+      cancelable: true,
+    }));
+  }
+
+  // Makes a move that was accepted real: the items, the selection, the attributes, the saved positions, the
+  // events and the announcement.
+  private _applyPlan(plan: MovePlan): void {
+    const previousSelection = [...this._selection];
     if (this._dragState) this._dragState.committed = true;
-    this._items = ordered.map(cloneItem);
+    this._items = plan.items.map(cloneItem);
     this._clearPointerDragPreview();
     this._dragState = null;
     this._removeDragImage();
 
-    this._selection = nextSelection;
-    this._focusedId = nextSelection[0] || null;
+    this._selection = [...plan.nextSelection];
+    this._focusedId = plan.nextSelection[0] || null;
     this._pendingFocusId = this._focusedId;
     this._syncAttributesFromState();
 
@@ -3876,12 +3934,13 @@ export class UISortable extends ElementBase {
     const detail: UISortableChangeDetail = {
       items: this.items,
       lists: this.lists,
-      selection: [...nextSelection],
+      selection: [...plan.nextSelection],
       previousSelection,
-      movedIds: [...rootIdsForInsert],
-      source,
-      operation,
+      movedIds: [...plan.movedIds],
+      source: plan.source,
+      operation: plan.operation,
       persistence: snapshot,
+      ...(plan.external ? { external: plan.external } : {}),
     };
 
     this.dispatchEvent(new CustomEvent<UISortableChangeDetail>('change', {
@@ -3895,9 +3954,8 @@ export class UISortable extends ElementBase {
       bubbles: true,
       composed: true,
     }));
-    this._announce(this._messageForMove(operation, rootIdsForInsert.length, target));
+    this._announce(this._messageForMove(plan.operation, plan.movedIds.length, plan.target, plan.destination));
     this.requestRender();
-    return true;
   }
 
   private _syncAttributesFromState(): void {
@@ -3933,9 +3991,9 @@ export class UISortable extends ElementBase {
     };
   }
 
-  private _messageForMove(operation: UISortableOperation, count: number, target: DropTarget): string {
+  private _messageForMove(operation: UISortableOperation, count: number, target: DropTarget, named?: string): string {
     const list = this._lists.find((entry) => entry.id === target.listId);
-    const destination = list?.label || target.listId;
+    const destination = named || list?.label || target.listId;
     const vars = { count, list: destination };
     if (operation === 'clone') return this._t(count === 1 ? 'announceCopiedOne' : 'announceCopiedMany', vars);
     if (operation === 'nest') return this._t(count === 1 ? 'announceNestedOne' : 'announceNestedMany', vars);
@@ -3970,6 +4028,7 @@ export class UISortable extends ElementBase {
     // snapshot equals what is already on screen), which left a card faded as "being dragged".
     this._setDraggingVisualState(this._draggingIds(), false);
     this._pendingDropTarget = null;
+    this._setExternal(null);
     this._setDropTargetVisualState(this._dragState.dropTarget, false);
     this._clearPointerDragPreview();
     this._items = this._dragState.snapshot.map(cloneItem);
@@ -3982,32 +4041,9 @@ export class UISortable extends ElementBase {
     this.requestRender();
   }
 
-  private _applyDragImage(dataTransfer: DataTransfer, count: number): void {
-    this._removeDragImage();
-    const ghost = document.createElement('div');
-    ghost.textContent = count === 1 ? this._t('draggingOne') : this._t('draggingMany', { count });
-    ghost.style.position = 'fixed';
-    ghost.style.top = '-999px';
-    ghost.style.left = '-999px';
-    ghost.style.padding = '8px 12px';
-    ghost.style.borderRadius = '999px';
-    ghost.style.background = 'rgba(15, 23, 42, 0.92)';
-    ghost.style.color = '#f8fafc';
-    ghost.style.font = '600 12px/1 Inter, sans-serif';
-    ghost.style.pointerEvents = 'none';
-    document.body.appendChild(ghost);
-    dataTransfer.setDragImage(ghost, 12, 12);
-    this._dragImage = ghost;
-  }
-
   private _removeDragImage(): void {
     this._dragImage?.remove();
     this._dragImage = null;
-  }
-
-  private _removeDragPreviewOverlay(): void {
-    this._dragPreviewOverlay?.remove();
-    this._dragPreviewOverlay = null;
   }
 
   private _applyPointerPreview(

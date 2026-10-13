@@ -250,11 +250,7 @@ describe('ui-sortable', () => {
       }
     });
 
-    const insideTarget = el._dropTargetFromEvent({
-      composedPath: () => [epic],
-      clientX: 100,
-      clientY: 52,
-    });
+    const insideTarget = el._dropTargetFromPath([epic], 100, 52);
     expect(insideTarget).toEqual({
       listId: 'todo',
       parentId: 'epic',
@@ -363,51 +359,6 @@ describe('ui-sortable', () => {
     expect(el.shadowRoot?.querySelectorAll('.item[data-id="task-a"]').length).toBe(1);
     expect(el.shadowRoot?.querySelector('.root')?.getAttribute('data-drag-preview')).toBe('true');
     expect(el.shadowRoot?.textContent?.includes('Insert here')).toBe(false);
-  });
-
-  it('keeps the pointer drag preview visible across brief target gaps', async () => {
-    const el = document.createElement('ui-sortable') as any;
-    el.setAttribute('lists', JSON.stringify(lists));
-    el.setAttribute('items', JSON.stringify(items));
-    document.body.appendChild(el);
-    await flushMicrotask();
-
-    el._dragState = {
-      snapshot: el.items.map((item: any) => ({
-        ...item,
-        parentId: item.parentId ?? null,
-        description: item.description ?? '',
-        order: item.order ?? 0,
-        disabled: !!item.disabled,
-        dragDisabled: !!item.dragDisabled,
-        cloneOnDrag: !!item.cloneOnDrag,
-        hidden: !!item.hidden,
-      })),
-      movedRootIds: ['task-a'],
-      originId: 'task-a',
-      clone: false,
-      keyboard: false,
-      dropTarget: {
-        listId: 'done',
-        parentId: null,
-        beforeId: null,
-        mode: 'before',
-      },
-      committed: false,
-    };
-
-    el._updatePointerDragPreview();
-    const overlay = el.shadowRoot?.querySelector('.drag-preview-overlay') as HTMLElement | null;
-    expect(overlay?.getAttribute('data-visible')).toBe('true');
-    const previousLeft = overlay?.style.left;
-    const previousTop = overlay?.style.top;
-
-    el._dragState.dropTarget = null;
-    el._updatePointerDragPreview();
-
-    expect(overlay?.getAttribute('data-visible')).toBe('true');
-    expect(overlay?.style.left).toBe(previousLeft);
-    expect(overlay?.style.top).toBe(previousTop);
   });
 
   it('stabilizes pointer target updates before switching the active drop target', async () => {
@@ -1160,7 +1111,7 @@ describe('ui-sortable', () => {
       return el;
     };
     const over = (el: any, x: number, y: number) =>
-      el._dropTargetFromEvent({ composedPath: () => [el.shadowRoot.querySelector('.item[data-id="epic"]')], clientX: x, clientY: y });
+      el._dropTargetFromPath([el.shadowRoot.querySelector('.item[data-id="epic"]')], x, y);
     const before = { listId: 'todo', parentId: null, beforeId: 'epic', mode: 'before' };
     const after = { listId: 'todo', parentId: null, beforeId: 'task-a', mode: 'before' };
     const inside = { listId: 'todo', parentId: 'epic', beforeId: null, mode: 'inside' };
@@ -2138,6 +2089,520 @@ describe('ui-sortable', () => {
       el._onPointerMove({ pointerId: 95, clientX: 900, clientY: 900, preventDefault() {} });
       expect(ghost().hasAttribute('data-refused')).toBe(false);
       el.cancelDrag();
+    });
+  });
+
+  describe('one drag path', () => {
+    const mount = async (attrs: Record<string, string> = {}) => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(lists));
+      el.setAttribute('items', JSON.stringify(items));
+      Object.entries(attrs).forEach(([name, value]) => el.setAttribute(name, value));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      return el;
+    };
+
+    it('has no floating preview box and no native drag handlers', async () => {
+      const el = await mount();
+      const handle = el.shadowRoot.querySelector('.handle[data-id="task-a"]') as HTMLElement;
+      el._onPointerDown({ pointerId: 1, pointerType: 'mouse', clientX: 1, clientY: 1, preventDefault() {}, composedPath: () => [handle] });
+      el._onPointerMove({ pointerId: 1, clientX: 40, clientY: 40, preventDefault() {} });
+      expect(el.shadowRoot.querySelector('.drag-preview-overlay')).toBeNull();
+      expect(el._onDragOver).toBeUndefined();
+      expect(el._onDrop).toBeUndefined();
+      expect(el._applyDragImage).toBeUndefined();
+      el.cancelDrag();
+    });
+
+    it('does not let the browser start a native drag while a card is being dragged, or held', async () => {
+      const el = await mount();
+      const idle = new Event('dragstart', { cancelable: true });
+      el._onDragStart(idle);
+      // Nothing of ours is going on: an image a page wants to drag natively is left alone.
+      expect(idle.defaultPrevented).toBe(false);
+
+      const handle = el.shadowRoot.querySelector('.handle[data-id="task-a"]') as HTMLElement;
+      el._onPointerDown({ pointerId: 2, pointerType: 'mouse', clientX: 1, clientY: 1, preventDefault() {}, composedPath: () => [handle] });
+      const pressed = new Event('dragstart', { cancelable: true });
+      el._onDragStart(pressed);
+      expect(pressed.defaultPrevented).toBe(true);
+
+      el._onPointerMove({ pointerId: 2, clientX: 40, clientY: 40, preventDefault() {} });
+      const dragging = new Event('dragstart', { cancelable: true });
+      el._onDragStart(dragging);
+      expect(dragging.defaultPrevented).toBe(true);
+      el.cancelDrag();
+    });
+
+    it('does not mark the parts of a drawn card that start a drag as natively draggable', async () => {
+      const el = await mount({ 'drag-handle-selector': '.grip' });
+      el.renderItem = (item: any) => `<span class="grip">⠿</span> ${item.label}`;
+      await flushMicrotask();
+      await flushMicrotask();
+      const grip = el.shadowRoot.querySelector('.item-custom-content .grip') as HTMLElement;
+      expect(grip.getAttribute('data-drag-trigger')).toBe('custom');
+      expect(grip.hasAttribute('draggable')).toBe(false);
+    });
+
+    it('keeps the data-drag-preview hook: true while a pointer drag has a place to land', async () => {
+      const el = await mount();
+      const flag = () => el.shadowRoot.querySelector('.root').getAttribute('data-drag-preview');
+      el._dragState = {
+        snapshot: el.items.map((item: any) => ({ ...item })),
+        movedRootIds: ['task-a'],
+        originId: 'task-a',
+        clone: false,
+        keyboard: false,
+        dropTarget: null,
+        committed: false,
+      };
+      el._setDropTarget({ listId: 'done', parentId: null, beforeId: null, mode: 'before' });
+      expect(flag()).toBe('true');
+      el._setDropTarget(null);
+      expect(flag()).toBe('false');
+      el.cancelDrag();
+    });
+  });
+
+  describe('lists with a height of their own', () => {
+    const mount = async (listOverrides: Record<string, unknown> = {}, attrs: Record<string, string> = {}) => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(lists.map((list) => ({ ...list, ...(list.id === 'todo' ? listOverrides : {}) }))));
+      el.setAttribute('items', JSON.stringify(items));
+      Object.entries(attrs).forEach(([name, value]) => el.setAttribute(name, value));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      return el;
+    };
+    const itemsOf = (el: any, id: string) => el.shadowRoot.querySelector(`.list[data-list-id="${id}"] .items`) as HTMLElement;
+
+    it('scrolls a list that has a maxHeight, in px or any plain CSS length, and leaves the others alone', async () => {
+      const byNumber = await mount({ maxHeight: 240 });
+      expect(itemsOf(byNumber, 'todo').getAttribute('data-scroll')).toBe('true');
+      expect(itemsOf(byNumber, 'todo').style.getPropertyValue('--ui-sortable-list-max-block-size')).toBe('240px');
+      expect(itemsOf(byNumber, 'done').hasAttribute('data-scroll')).toBe(false);
+
+      const byLength = await mount({ maxHeight: '20rem' });
+      expect(itemsOf(byLength, 'todo').style.getPropertyValue('--ui-sortable-list-max-block-size')).toBe('20rem');
+      expect(byLength.lists.find((list: any) => list.id === 'todo').maxHeight).toBe('20rem');
+    });
+
+    it('takes list-max-height for every list, and lets a list override it', async () => {
+      const el = await mount({ maxHeight: 100 }, { 'list-max-height': '15rem' });
+      expect(itemsOf(el, 'todo').style.getPropertyValue('--ui-sortable-list-max-block-size')).toBe('100px');
+      expect(itemsOf(el, 'done').style.getPropertyValue('--ui-sortable-list-max-block-size')).toBe('15rem');
+      expect(itemsOf(el, 'ideas').getAttribute('data-scroll')).toBe('true');
+    });
+
+    it('ignores a height that is not a plain length, so nothing can be slipped into the style attribute', async () => {
+      for (const bad of ['', 'tall', '10', '-5px', 0, -3, Number.NaN, '10px; background: red', 'calc(1px + 2px)', '1px"><script>', null, {}]) {
+        const el = await mount({ maxHeight: bad });
+        expect(itemsOf(el, 'todo').hasAttribute('data-scroll')).toBe(false);
+        expect(itemsOf(el, 'todo').getAttribute('style')).toBeNull();
+        expect(el.lists.find((list: any) => list.id === 'todo').maxHeight).toBeUndefined();
+      }
+      const bad = await mount({}, { 'list-max-height': '10px; color: red' });
+      expect(itemsOf(bad, 'todo').hasAttribute('data-scroll')).toBe(false);
+    });
+
+    it('does not apply to a horizontal lane, which scrolls sideways', async () => {
+      const el = await mount({ maxHeight: 200, orientation: 'horizontal' });
+      expect(itemsOf(el, 'todo').hasAttribute('data-scroll')).toBe(false);
+    });
+
+    it('keeps the focused card in view as the keyboard moves through a list that scrolls', async () => {
+      const el = await mount({ maxHeight: 120 });
+      const shown: string[] = [];
+      const original = (HTMLElement.prototype as any).scrollIntoView;
+      (HTMLElement.prototype as any).scrollIntoView = function (options: unknown) {
+        shown.push(`${this.getAttribute('data-id')}:${JSON.stringify(options)}`);
+      };
+      try {
+        el.focusItem('task-a');
+        await flushMicrotask();
+        await flushMicrotask();
+        expect(shown.some((entry) => entry.startsWith('task-a:') && entry.includes('"nearest"'))).toBe(true);
+
+        shown.length = 0;
+        const card = el.shadowRoot.querySelector('.item[data-id="task-a"]') as HTMLElement;
+        el._onKeyDown({ key: 'ArrowDown', preventDefault() {}, target: card, composedPath: () => [card] });
+        await flushMicrotask();
+        expect(shown.some((entry) => entry.startsWith('task-b:'))).toBe(true);
+      } finally {
+        (HTMLElement.prototype as any).scrollIntoView = original;
+      }
+    });
+
+    it('does not move the page when the pointer focuses a card (only the keyboard asks for that)', async () => {
+      const el = await mount({ maxHeight: 120 });
+      let calls = 0;
+      const original = (HTMLElement.prototype as any).scrollIntoView;
+      (HTMLElement.prototype as any).scrollIntoView = () => {
+        calls += 1;
+      };
+      try {
+        el.select(['task-a']);
+        el.moveSelection({ targetListId: 'done' });
+        await flushMicrotask();
+        await flushMicrotask();
+        expect(calls).toBe(0);
+      } finally {
+        (HTMLElement.prototype as any).scrollIntoView = original;
+      }
+    });
+
+    it('brings the keyboard drag placeholder into view as the destination changes', async () => {
+      const el = await mount({ maxHeight: 120 });
+      const shown: string[] = [];
+      const original = (HTMLElement.prototype as any).scrollIntoView;
+      (HTMLElement.prototype as any).scrollIntoView = function () {
+        shown.push(this.className);
+      };
+      try {
+        el._dragState = {
+          snapshot: el.items.map((item: any) => ({ ...item })),
+          movedRootIds: ['task-a'],
+          originId: 'task-a',
+          clone: false,
+          keyboard: true,
+          dropTarget: { listId: 'done', parentId: null, beforeId: null, mode: 'before' },
+          committed: false,
+        };
+        el.requestRender();
+        await flushMicrotask();
+        await flushMicrotask();
+        expect(shown.some((name) => name.includes('item-placeholder'))).toBe(true);
+        el.cancelDrag();
+      } finally {
+        (HTMLElement.prototype as any).scrollIntoView = original;
+      }
+    });
+  });
+
+  describe('between two elements (group)', () => {
+    // Elements of earlier tests stay in the document; the ones of the same group would take the pointer.
+    afterEach(() => {
+      document.querySelectorAll('ui-sortable').forEach((element) => element.remove());
+    });
+
+    const rect = (left: number, top: number, right: number, bottom: number) => () =>
+      ({ left, top, right, bottom, x: left, y: top, width: right - left, height: bottom - top, toJSON: () => ({}) }) as DOMRect;
+
+    const aLists = [{ id: 'a-todo', label: 'A to do' }, { id: 'a-done', label: 'A done' }];
+    const aItems = [
+      { id: 'one', label: 'One', listId: 'a-todo', data: { n: 1 } },
+      { id: 'two', label: 'Two', listId: 'a-todo' },
+      { id: 'kid', label: 'Kid', listId: 'a-todo', parentId: 'two' },
+      { id: 'three', label: 'Three', listId: 'a-done' },
+    ];
+    const bLists = [{ id: 'b-todo', label: 'B to do' }];
+    const bItems = [
+      { id: 'x', label: 'X', listId: 'b-todo' },
+      { id: 'y', label: 'Y', listId: 'b-todo' },
+    ];
+
+    const board = async (lists_: any[], items_: any[], attrs: Record<string, string>, box: [number, number, number, number]) => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(lists_));
+      el.setAttribute('items', JSON.stringify(items_));
+      Object.entries(attrs).forEach(([name, value]) => el.setAttribute(name, value));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      el.getBoundingClientRect = rect(...box);
+      return el;
+    };
+    const pair = async (aAttrs: Record<string, string> = { group: 'g' }, bAttrs: Record<string, string> = { group: 'g' }, bData = { lists: bLists, items: bItems }) => {
+      const a = await board(aLists, aItems, aAttrs, [0, 0, 300, 400]);
+      const b = await board(bData.lists, bData.items, bAttrs, [400, 0, 700, 400]);
+      // Hit testing: over B the pointer is on its list, or on its card "X" in the top half.
+      b._pathFromPoint = () => [b.shadowRoot.querySelector('.list[data-list-id="b-todo"]')];
+      return { a, b };
+    };
+    const grab = (a: any, id: string, pointerId = 70) => {
+      const handle = a.shadowRoot.querySelector(`.handle[data-id="${id}"]`) as HTMLElement;
+      a._onPointerDown({ pointerId, pointerType: 'mouse', clientX: 10, clientY: 10, preventDefault() {}, composedPath: () => [handle] });
+      a._onPointerMove({ pointerId, clientX: 40, clientY: 40, preventDefault() {} });
+    };
+    const moveTo = (a: any, x: number, y: number, pointerId = 70, altKey = false) =>
+      a._onPointerMove({ pointerId, clientX: x, clientY: y, altKey, preventDefault() {} });
+    const release = (a: any, x: number, y: number, pointerId = 70, altKey = false) =>
+      a._onPointerUp({ pointerId, clientX: x, clientY: y, altKey, preventDefault() {} });
+    const ids = (el: any) => el.items.map((item: any) => `${item.listId}:${item.id}${item.parentId ? `>${item.parentId}` : ''}`).join(' ');
+    const events = (el: any) => {
+      const log: any[] = [];
+      for (const type of ['before-change', 'change', 'persist-request']) {
+        el.addEventListener(type, ((event: CustomEvent) => log.push({ type, detail: event.detail })) as EventListener);
+      }
+      return log;
+    };
+
+    it('marks the place in the other element while a card is held over it, and lets go when the pointer leaves', async () => {
+      const { a, b } = await pair();
+      grab(a, 'one');
+      moveTo(a, 500, 100);
+      expect(a._dragState.external.peer).toBe(b);
+      expect(b._externalTarget).toEqual({ listId: 'b-todo', parentId: null, beforeId: null, mode: 'before' });
+      expect(b.shadowRoot.querySelector('.dropzone[data-list-id="b-todo"][data-before-id=""][data-mode="before"]').getAttribute('data-active')).toBe('true');
+      // Held over B, A has no place of its own.
+      expect(a._dragState.dropTarget).toBeNull();
+
+      a._pathFromPoint = () => [a.shadowRoot.querySelector('.list[data-list-id="a-done"]')];
+      moveTo(a, 100, 100);
+      expect(a._dragState.external).toBeNull();
+      expect(b._externalTarget).toBeNull();
+      expect(b.shadowRoot.querySelector('.dropzone[data-active="true"]')).toBeNull();
+      a.cancelDrag();
+    });
+
+    it('moves the card across: both elements report it, with the direction and the other element', async () => {
+      const { a, b } = await pair();
+      const aLog = events(a);
+      const bLog = events(b);
+      grab(a, 'one');
+      moveTo(a, 500, 100);
+      release(a, 500, 100);
+      await flushMicrotask();
+
+      expect(ids(a)).toBe('a-todo:two a-todo:kid>two a-done:three');
+      expect(ids(b)).toBe('b-todo:x b-todo:y b-todo:one');
+      expect(b.items.find((item: any) => item.id === 'one').data).toEqual({ n: 1 });
+
+      const aChange = aLog.find((entry) => entry.type === 'change').detail;
+      const bChange = bLog.find((entry) => entry.type === 'change').detail;
+      expect(aChange.external).toEqual({ direction: 'out', peer: b });
+      expect(bChange.external).toEqual({ direction: 'in', peer: a });
+      expect(aChange.operation).toBe('transfer');
+      expect(bChange.operation).toBe('transfer');
+      expect(bChange.movedIds).toEqual(['one']);
+      expect(bChange.source).toBe('pointer');
+      expect(bChange.selection).toEqual(['one']);
+      expect(aChange.items.some((item: any) => item.id === 'one')).toBe(false);
+      expect(bLog.map((entry) => entry.type)).toEqual(['before-change', 'change', 'persist-request']);
+      expect(aLog.map((entry) => entry.type)).toEqual(['before-change', 'change', 'persist-request']);
+
+      // Their attributes were written back, the held card is gone, and nothing is left highlighted.
+      expect(JSON.parse(b.getAttribute('items')).some((item: any) => item.id === 'one')).toBe(true);
+      expect(JSON.parse(a.getAttribute('items')).some((item: any) => item.id === 'one')).toBe(false);
+      expect(a._dragState).toBeNull();
+      expect(a.shadowRoot.querySelector('.item-ghost')).toBeNull();
+      expect(b._externalTarget).toBeNull();
+    });
+
+    it('drops between two cards of the other element, in the half of the card the pointer is over', async () => {
+      const { a, b } = await pair();
+      const yCard = b.shadowRoot.querySelector('.item[data-id="y"]') as HTMLElement;
+      yCard.getBoundingClientRect = rect(410, 100, 690, 150);
+      b._pathFromPoint = () => [yCard];
+      grab(a, 'one');
+      moveTo(a, 450, 110);
+      release(a, 450, 110);
+      expect(ids(b)).toBe('b-todo:x b-todo:one b-todo:y');
+    });
+
+    it('takes a card with its children, and keeps them nested', async () => {
+      const { a, b } = await pair();
+      grab(a, 'two');
+      moveTo(a, 500, 100);
+      release(a, 500, 100);
+      expect(ids(b)).toBe('b-todo:x b-todo:y b-todo:two b-todo:kid>two');
+      expect(ids(a)).toBe('a-todo:one a-done:three');
+      expect(b.selection).toEqual(['two']);
+    });
+
+    it('copies with fresh ids, leaving the original where it was, and copies its data apart', async () => {
+      const { a, b } = await pair();
+      const aLog = events(a);
+      const bLog = events(b);
+      a.select(['one']);
+      grab(a, 'one');
+      a._dragState.clone = true;
+      moveTo(a, 500, 100);
+      release(a, 500, 100);
+
+      expect(ids(a)).toBe('a-todo:one a-todo:two a-todo:kid>two a-done:three');
+      const copy = b.items.find((item: any) => item.id.includes('--copy-'));
+      expect(copy.id).toMatch(/^one--copy-\d+$/);
+      expect(copy.label).toBe('One copy');
+      expect(copy.listId).toBe('b-todo');
+      expect(copy.data).toEqual({ n: 1 });
+      copy.data.n = 99;
+      expect(b.items.find((item: any) => item.id === copy.id).data.n).toBe(1);
+      expect(bLog.find((entry) => entry.type === 'change').detail.operation).toBe('clone');
+      // Nothing changed in A, so A reports nothing, and its held card let go.
+      expect(aLog.filter((entry) => entry.type === 'change')).toEqual([]);
+      expect(a._dragState).toBeNull();
+    });
+
+    it('does not take a card whose id the other element already has, or one it has no room for, or one it does not accept', async () => {
+      const clash = await pair({ group: 'g' }, { group: 'g' }, { lists: bLists, items: [{ id: 'one', label: 'Same id', listId: 'b-todo' }] });
+      grab(clash.a, 'one');
+      moveTo(clash.a, 500, 100);
+      expect(clash.a._dragState.external).toBeNull();
+      release(clash.a, 500, 100);
+      expect(ids(clash.a)).toContain('a-todo:one');
+      expect(ids(clash.b)).toBe('b-todo:one');
+
+      const full = await pair({ group: 'g' }, { group: 'g' }, { lists: [{ id: 'b-todo', label: 'B', maxItems: 2 }], items: bItems });
+      grab(full.a, 'one', 71);
+      moveTo(full.a, 500, 100, 71);
+      expect(full.a._dragState.external).toBeNull();
+      release(full.a, 500, 100, 71);
+      expect(ids(full.b)).toBe('b-todo:x b-todo:y');
+
+      const picky = await pair({ group: 'g' }, { group: 'g' }, { lists: [{ id: 'b-todo', label: 'B', accepts: ['a-done'] }], items: bItems });
+      grab(picky.a, 'one', 72);
+      moveTo(picky.a, 500, 100, 72);
+      expect(picky.a._dragState.external).toBeNull();
+      release(picky.a, 500, 100, 72);
+      expect(ids(picky.b)).toBe('b-todo:x b-todo:y');
+      picky.a.cancelDrag();
+    });
+
+    it('asks the other element\'s canDrop, telling it where the items come from', async () => {
+      const { a, b } = await pair();
+      const asked: any[] = [];
+      b.canDrop = (info: any) => {
+        asked.push(info);
+        return info.items[0].id !== 'two';
+      };
+      grab(a, 'one', 73);
+      moveTo(a, 500, 100, 73);
+      expect(asked.at(-1).from).toBe(a);
+      expect(asked.at(-1).items[0].data).toEqual({ n: 1 });
+      expect(asked.at(-1).targetListId).toBe('b-todo');
+      expect(a._dragState.external).not.toBeNull();
+      a.cancelDrag();
+
+      grab(a, 'two', 74);
+      moveTo(a, 500, 100, 74);
+      expect(a._dragState.external).toBeNull();
+      // Refused: the lifted card says so, and letting go there cancels the drag.
+      expect(a.shadowRoot.querySelector('.item-ghost').hasAttribute('data-refused')).toBe(true);
+      release(a, 500, 100, 74);
+      expect(a._dragState).toBeNull();
+      expect(ids(b)).toBe('b-todo:x b-todo:y');
+      expect(ids(a)).toContain('a-todo:two');
+    });
+
+    it('leaves elements of another group, and elements with no group, alone', async () => {
+      for (const bAttrs of [{ group: 'other' }, {}]) {
+        const { a, b } = await pair({ group: 'g' }, bAttrs);
+        grab(a, 'one');
+        moveTo(a, 500, 100);
+        expect(a._dragState.external).toBeNull();
+        expect(b._externalTarget).toBeNull();
+        release(a, 500, 100);
+        expect(ids(b)).toBe('b-todo:x b-todo:y');
+        a.cancelDrag();
+      }
+      const none = await pair({}, {});
+      grab(none.a, 'one');
+      moveTo(none.a, 500, 100);
+      expect(none.a._dragState.external).toBeNull();
+      none.a.cancelDrag();
+    });
+
+    it('does not drop into an element that is locked (disabled, filtered, sorted)', async () => {
+      for (const lock of [{ disabled: '' }, { 'filter-query': 'zzz' }, { sort: 'label' }]) {
+        const { a, b } = await pair({ group: 'g' }, { group: 'g', ...lock });
+        grab(a, 'one');
+        moveTo(a, 500, 100);
+        expect(a._dragState.external).toBeNull();
+        release(a, 500, 100);
+        expect(ids(b)).toBe('b-todo:x b-todo:y');
+        expect(ids(a)).toContain('a-todo:one');
+      }
+    });
+
+    it('nests inside a card of the other element with Alt held', async () => {
+      const { a, b } = await pair();
+      const xCard = b.shadowRoot.querySelector('.item[data-id="x"]') as HTMLElement;
+      xCard.getBoundingClientRect = rect(410, 100, 690, 160);
+      b._pathFromPoint = () => [xCard];
+      grab(a, 'one');
+      moveTo(a, 450, 130, 70, true);
+      expect(b._externalTarget).toEqual({ listId: 'b-todo', parentId: 'x', beforeId: null, mode: 'inside' });
+      release(a, 450, 130, 70, true);
+      expect(b.items.find((item: any) => item.id === 'one').parentId).toBe('x');
+      expect(b.items.find((item: any) => item.id === 'one').listId).toBe('b-todo');
+    });
+
+    it('lets either element cancel the move with before-change, and then nothing changes anywhere', async () => {
+      for (const canceller of ['peer', 'source']) {
+        const { a, b } = await pair();
+        (canceller === 'peer' ? b : a).addEventListener('before-change', ((event: Event) => event.preventDefault()) as EventListener);
+        const aLog = events(a);
+        const bLog = events(b);
+        grab(a, 'one');
+        moveTo(a, 500, 100);
+        release(a, 500, 100);
+        await flushMicrotask();
+
+        expect(ids(b)).toBe('b-todo:x b-todo:y');
+        expect(ids(a)).toBe('a-todo:one a-todo:two a-todo:kid>two a-done:three');
+        expect(aLog.filter((entry) => entry.type === 'change')).toEqual([]);
+        expect(bLog.filter((entry) => entry.type === 'change')).toEqual([]);
+        expect(a._dragState).toBeNull();
+        expect(b._externalTarget).toBeNull();
+        expect(a.shadowRoot.querySelector('.item-ghost')).toBeNull();
+        expect(a.shadowRoot.querySelectorAll('[data-dragging="true"]').length).toBe(0);
+      }
+    });
+
+    it('moves the selection into another element from code, for keyboard users, with or without a group', async () => {
+      const { a, b } = await pair({}, {});
+      a.select(['one']);
+      expect(a.moveSelectionTo(b, { targetListId: 'b-todo', beforeId: 'y' })).toBe(true);
+      expect(ids(b)).toBe('b-todo:x b-todo:one b-todo:y');
+      expect(ids(a)).not.toContain('a-todo:one');
+
+      expect(a.moveSelectionTo(b, { targetListId: 'b-todo' })).toBe(false); // nothing selected now
+      a.select(['two']);
+      expect(a.moveSelectionTo(b, { targetListId: 'nowhere' })).toBe(false);
+      expect(a.moveSelectionTo(null as any, { targetListId: 'b-todo' })).toBe(false);
+      expect(a.moveSelectionTo({} as any, { targetListId: 'b-todo' })).toBe(false);
+      expect(a.moveSelectionTo(b, { targetListId: 'b-todo', clone: true })).toBe(true);
+      expect(ids(a)).toContain('a-todo:two');
+      expect(ids(b)).toMatch(/two--copy-\d+/);
+
+      // To itself it is a plain move.
+      a.select(['three']);
+      expect(a.moveSelectionTo(a, { targetListId: 'a-todo' })).toBe(true);
+      expect(a.items.find((item: any) => item.id === 'three').listId).toBe('a-todo');
+    });
+
+    it('announces where the items went, naming the other element\'s list', async () => {
+      const { a, b } = await pair({}, {});
+      a.select(['one']);
+      a.moveSelectionTo(b, { targetListId: 'b-todo' });
+      expect(a.shadowRoot.querySelector('.sr-only[aria-live]').textContent).toBe('Item moved to B to do.');
+      expect(b.shadowRoot.querySelector('.sr-only[aria-live]').textContent).toBe('Item moved to B to do.');
+    });
+
+    it('lets go of the other element when this one is removed mid-drag', async () => {
+      const { a, b } = await pair();
+      grab(a, 'one');
+      moveTo(a, 500, 100);
+      expect(b._externalTarget).not.toBeNull();
+      a.remove();
+      expect(b._externalTarget).toBeNull();
+      expect(b.shadowRoot.querySelector('.dropzone[data-active="true"]')).toBeNull();
+    });
+
+    it('scrolls a board of the other element when the pointer is at its edge', async () => {
+      const { a, b } = await pair();
+      const boardEl = b.shadowRoot.querySelector('.lists') as HTMLElement;
+      Object.defineProperty(boardEl, 'scrollWidth', { value: 900, configurable: true });
+      Object.defineProperty(boardEl, 'clientWidth', { value: 300, configurable: true });
+      boardEl.getBoundingClientRect = rect(400, 0, 700, 400);
+      Object.defineProperty(window, 'innerWidth', { value: 1000, configurable: true });
+      grab(a, 'one');
+      a._autoScrollPoint = { x: 696, y: 100 };
+      a._autoScrollTick();
+      expect(boardEl.scrollLeft).toBeGreaterThan(0);
+      a._stopAutoScroll();
+      a.cancelDrag();
     });
   });
 });
