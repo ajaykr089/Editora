@@ -1,5 +1,6 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
 
+import '@editora/ui-core/dropzone';
 import '@editora/ui-core/file-upload';
 import { createUIElement } from './_internals';
 

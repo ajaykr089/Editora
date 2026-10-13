@@ -1,3 +1,4 @@
+import { DOMElement } from '../domElement';
 import {
   focusRovingItem,
   getRovingFocusBoundaryIndex,
@@ -25,7 +26,7 @@ function isDisabledItem(item: HTMLElement): boolean {
   return item.hasAttribute('disabled') || ariaDisabled === 'true' || (item as { disabled?: boolean }).disabled === true;
 }
 
-export class UIRovingFocusGroup extends HTMLElement {
+export class UIRovingFocusGroup extends DOMElement {
   static get observedAttributes(): string[] {
     return ['item-selector', 'direct-item-selector', 'active-attribute', 'loop'];
   }

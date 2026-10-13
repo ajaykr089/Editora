@@ -1539,6 +1539,6 @@ export class UISidebar extends ElementBase {
   }
 }
 
-if (!customElements.get('ui-sidebar')) {
+if (typeof customElements !== 'undefined' && !customElements.get('ui-sidebar')) {
   customElements.define('ui-sidebar', UISidebar);
 }

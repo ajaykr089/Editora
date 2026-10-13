@@ -1,3 +1,4 @@
+import { DOMElement } from '../domElement';
 import { findIndexByValue, findTypeaheadMatch, type CollectionTypeaheadOptions } from '../primitives/collection';
 import { isValidSelector } from '../primitives/selector';
 
@@ -34,7 +35,7 @@ function toArray<T extends Element>(nodes: Iterable<T>): T[] {
 const DEFAULT_ITEM_SELECTOR =
   '[data-collection-item], .menuitem, [role="option"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"]';
 
-export class UICollection extends HTMLElement {
+export class UICollection extends DOMElement {
   static get observedAttributes(): string[] {
     return ['item-selector', 'direct-item-selector', 'item-role'];
   }

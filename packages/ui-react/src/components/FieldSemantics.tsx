@@ -1,4 +1,8 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
+import '@editora/ui-core/control-group';
+import '@editora/ui-core/description';
+import '@editora/ui-core/field-error';
+import '@editora/ui-core/fieldset';
 import { createUIElement } from './_internals';
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;

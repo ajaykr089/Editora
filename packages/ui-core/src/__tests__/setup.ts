@@ -4,12 +4,12 @@ class ResizeObserverStub {
   disconnect() {}
 }
 
-class PointerEventStub extends MouseEvent {}
-
 if (typeof globalThis.ResizeObserver === 'undefined') {
   globalThis.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver;
 }
 
-if (typeof globalThis.PointerEvent === 'undefined') {
+// MouseEvent only exists in a DOM environment; node-import.test.ts runs without one.
+if (typeof globalThis.PointerEvent === 'undefined' && typeof MouseEvent !== 'undefined') {
+  class PointerEventStub extends MouseEvent {}
   globalThis.PointerEvent = PointerEventStub as unknown as typeof PointerEvent;
 }

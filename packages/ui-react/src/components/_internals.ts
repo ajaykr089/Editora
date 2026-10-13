@@ -1,5 +1,8 @@
 import React, { useEffect, useImperativeHandle, useLayoutEffect, useRef } from 'react';
-import { ensureUICoreRegistration } from '../core-registration';
+
+// Re-exported so existing wrappers keep one import site; defined in its own hook-free module so the
+// server entry can use it without loading this file (see _createElement.ts).
+export { createUIElement } from './_createElement';
 
 export const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
@@ -7,30 +10,6 @@ export type ElementEventListener = {
   type: string;
   listener?: EventListener | null;
 };
-
-/**
- * Builds a `<ui-*>` host element. Every wrapper must create its host through this instead of
- * `React.createElement('ui-…')`: React 16-18 only map `className` to `class` on built-in elements
- * and write a literal `classname` attribute on custom elements, so a consumer's `className` would
- * otherwise be silently dropped (React 19 maps it, and `class` works on all of them).
- */
-export function createUIElement(
-  tag: string,
-  props?: (Record<string, unknown> & { className?: unknown; class?: unknown }) | null,
-  ...children: React.ReactNode[]
-): React.ReactElement {
-  if (!props || !('className' in props) || !tag.includes('-')) {
-    return React.createElement(tag, props, ...children);
-  }
-
-  const { className, ...rest } = props;
-  const merged = [rest.class, className]
-    .filter((token): token is string => typeof token === 'string' && token !== '')
-    .join(' ');
-  const hostProps = merged ? { ...rest, class: merged } : rest;
-
-  return React.createElement(tag, hostProps, ...children);
-}
 
 export function useForwardedHostRef<T extends HTMLElement>(
   forwardedRef: React.ForwardedRef<T>
@@ -125,33 +104,13 @@ export function syncJsonAttribute(el: HTMLElement, name: string, next: unknown):
   }
 }
 
+/**
+ * Warns, once per tag, when a wrapper renders an element nothing has defined. Every wrapper imports
+ * the `@editora/ui-core/<name>` entries of the elements it renders, so this only fires for a wrapper
+ * that forgot one (scripts/check-custom-element-registrations.js catches that in CI) or when the
+ * consumer's bundler dropped a side-effect import.
+ */
 export function warnIfElementNotRegistered(tagName: string, componentName: string) {
-  if (typeof window === 'undefined' || typeof customElements === 'undefined') return;
-  if (customElements.get(tagName)) return;
-
-  const registrationPromise = ensureUICoreRegistration();
-  const globalObj = window as unknown as Record<string, boolean | Promise<void>>;
-
-  if (registrationPromise) {
-    const pendingKey = `__editora_warn_pending_${tagName}`;
-    if (!globalObj[pendingKey]) {
-      globalObj[pendingKey] = true;
-      void registrationPromise
-        .catch(() => undefined)
-        .finally(() => {
-          delete globalObj[pendingKey];
-          if (!customElements.get(tagName)) {
-            warnIfElementNotRegisteredNow(tagName, componentName);
-          }
-        });
-    }
-    return;
-  }
-
-  warnIfElementNotRegisteredNow(tagName, componentName);
-}
-
-function warnIfElementNotRegisteredNow(tagName: string, componentName: string) {
   if (typeof window === 'undefined' || typeof customElements === 'undefined') return;
   if (customElements.get(tagName)) return;
 
@@ -160,11 +119,10 @@ function warnIfElementNotRegisteredNow(tagName: string, componentName: string) {
   if (globalObj[key]) return;
   globalObj[key] = true;
 
-  // Keep warning concise and actionable for wrapper consumers.
   // eslint-disable-next-line no-console
   console.warn(
     `[ui-react/${componentName}] ${tagName} is not registered. ` +
-      `Import/register the matching web component before using this wrapper.`
+      `Import "@editora/ui-core/${tagName.replace(/^ui-/, '')}" (or "@editora/ui-core") to register it.`
   );
 }
 

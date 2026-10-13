@@ -18,27 +18,17 @@ const nestedComponentEntries = Object.fromEntries(
   components.map((component) => [`components/${component}`, path.resolve(componentsDir, `${component}.tsx`)])
 );
 
-const serverSafeComponents = new Set([
-  'Anchor',
-  'AspectRatio',
-  'CodeBlock',
-  'CodeSnippet',
-  'Box',
-  'Container',
-  'DirectionProvider',
-  'Field',
-  'Flex',
-  'Grid',
-  'Icon',
-  'Kbd',
-  'Label',
-  'MetricCard',
-  'Section',
-  'Separator',
-  'Shortcut',
-  'Stat',
-  'VisuallyHidden',
-]);
+// src/components/server holds the hook-free implementation of every component the server entry
+// exports; the public module next to it re-exports it and, for a custom element, also registers
+// it. A deep entry is only safe to load in a Server Component when it does not register anything
+// (ui-core's modules need HTMLElement when they are evaluated), so the others become client
+// modules like the rest.
+const serverSafeComponents = new Set(
+  fs.readdirSync(path.resolve(componentsDir, 'server'))
+    .filter((file) => file.endsWith('.tsx'))
+    .map((file) => path.basename(file, '.tsx'))
+    .filter((component) => !/@editora\/ui-core/.test(fs.readFileSync(path.resolve(componentsDir, `${component}.tsx`), 'utf8')))
+);
 
 function isServerSafeEntryFile(fileName: string): boolean {
   if (fileName === 'server.esm.js' || fileName === 'server.cjs.js') return true;

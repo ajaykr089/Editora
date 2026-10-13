@@ -1,3 +1,4 @@
+import { DOMElement } from '../domElement';
 const style = `
   :host {
     display: inline-flex;
@@ -24,7 +25,7 @@ const style = `
   }
 `;
 
-export class UIAnchor extends HTMLElement {
+export class UIAnchor extends DOMElement {
   static get observedAttributes(): string[] {
     return ['href', 'target', 'rel', 'download', 'hreflang', 'referrerpolicy', 'ping', 'type', 'aria-label', 'title'];
   }
