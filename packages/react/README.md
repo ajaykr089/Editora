@@ -33,7 +33,7 @@
 - **Themes.** Light, dark and acme, applied to everything inside an element with `data-theme`.
 - **An imperative API** for the cases where state is not enough: read and replace the HTML, run commands.
 - **Typed.** The props and the editor API are typed; the typings ship with the package.
-- Tested with React 18 and 19 (the peer range is React 16.8 to 20). Server rendering needs one extra step; see [Next.js and server rendering](#nextjs-and-server-rendering).
+- Tested with React 18 and 19 (the peer range is React 16.8 to 20). Can be server rendered (Next.js); see [Next.js and server rendering](#nextjs-and-server-rendering).
 
 ## Install
 
@@ -329,9 +329,17 @@ export default function Themes() {
 
 ## Next.js and server rendering
 
-The editor needs the browser's DOM when its code is loaded, so it cannot be imported on the server. In Next.js a
-`'use client'` file is still rendered on the server first, which fails with `HTMLElement is not defined`. Load the
-editor on the client only, with `next/dynamic`:
+`@editora/react`, `@editora/core` and `@editora/plugins` can be imported where there is no DOM, so a `'use client'`
+file (which Next.js also renders on the server first) can import and render `<EditoraEditor />` directly, as in the
+quick start. The server sends the editor's shell: the toolbar and an empty content area. The content appears when the
+page hydrates, and the plugins' `init` hooks run then, not on the server.
+
+This is checked with Next.js 15 and React 19, in `next dev` and in a production build: HTTP 200, no hydration
+messages, and the editor works.
+
+Releases up to `@editora/core` 1.0.22 and `@editora/react` 1.0.25 cannot be imported on the server: the page fails
+with `HTMLElement is not defined` (a 500 in Next.js). With those versions, or to skip the server-rendered shell, load
+the editor on the client only, with `next/dynamic`:
 
 ```tsx
 'use client';
@@ -349,8 +357,7 @@ export default function Page() {
 }
 ```
 
-This is checked with Next.js 15 and React 19. In other frameworks, do the same: import the editor only in code that
-runs in the browser.
+In other frameworks, older versions need the same: import the editor only in code that runs in the browser.
 
 ## Lower-level exports
 
