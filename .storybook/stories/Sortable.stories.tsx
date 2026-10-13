@@ -251,7 +251,7 @@ type DemoSurfaceProps = SortableProps & {
 
 function StatefulSortable({
   title = 'Production-ready sortable workflow',
-  description = 'Drag from the handle, drop directly on an item body to nest, use Cmd/Ctrl-click or Shift-click for multi-select, and press Space then arrows for keyboard moves. Use the controls to switch preview sizing and drag activator modes.',
+  description = 'Drag from the handle (hold Alt, or drop on the far side of a card, to nest), use Cmd/Ctrl-click or Shift-click for multi-select, and press Space then arrows for keyboard moves. Use the controls to switch preview sizing and drag activator modes.',
   showFilter = true,
   showSortControls = true,
   ...args
@@ -942,4 +942,96 @@ export const CustomLists: Story = {
       )}
     />
   )
+};
+
+const guardLists: SortableList[] = [
+  { id: 'todo', label: 'To do' },
+  { id: 'doing', label: 'Doing', description: 'Holds two cards at most.', maxItems: 2 },
+  { id: 'done', label: 'Done', description: 'Only reviewed work goes here.' }
+];
+
+const guardItems: SortableItem[] = [
+  { id: 'brief', label: 'Write the brief', listId: 'todo', data: { reviewed: true } },
+  { id: 'budget', label: 'Approve the budget', description: 'Not reviewed yet', listId: 'todo', data: { reviewed: false } },
+  { id: 'launch', label: 'Plan the launch', listId: 'todo', data: { reviewed: true } },
+  { id: 'assets', label: 'Collect the assets', listId: 'doing', data: { reviewed: true } }
+];
+
+export const GuardRails: Story = {
+  render: () => (
+    <StatefulSortable
+      title="Guard rails"
+      description="Doing takes two cards (maxItems). Done refuses a card that was not reviewed (canDrop): the lifted card turns red over it. onBeforeChange cancels a move of more than two cards at once."
+      showFilter={false}
+      showSortControls={false}
+      lists={guardLists}
+      items={guardItems}
+      allowNesting={false}
+      canDrop={(drop) => drop.targetListId !== 'done' || drop.items.every((item) => (item.data as { reviewed: boolean }).reviewed)}
+      onBeforeChange={(detail) => detail.movedIds.length <= 2}
+    />
+  )
+};
+
+export const TranslatedLabels: Story = {
+  render: () => (
+    <StatefulSortable
+      title="Translated text"
+      description="Every text the component shows or announces can be replaced through labels. The hint line is hidden from sight with hideToolbar (screen readers still get it)."
+      showFilter={false}
+      showSortControls={false}
+      lists={flatListLists}
+      items={flatListItems}
+      selection={['legal']}
+      allowNesting={false}
+      hideToolbar
+      labels={{
+        hintHandle: 'Utilisez la poignée pour déplacer une carte, ou Espace pour la soulever au clavier.',
+        selectedOne: 'carte sélectionnée',
+        selectedMany: 'cartes sélectionnées',
+        badgeSelected: 'Sélectionnée',
+        announceReorderedOne: 'Carte déplacée dans {list}.'
+      }}
+    />
+  )
+};
+
+function VanillaRenderingDemo() {
+  const ref = React.useRef<HTMLElement | null>(null);
+
+  React.useEffect(() => {
+    const board = ref.current as (HTMLElement & Record<string, unknown>) | null;
+    if (!board) return;
+    board.lists = [{ id: 'todo', label: 'To do', maxItems: 3 }, { id: 'done', label: 'Done' }];
+    board.items = [
+      { id: 'acme', label: 'Invoice Acme', listId: 'todo', data: { amount: 1200 } },
+      { id: 'globex', label: 'Quote Globex', listId: 'todo', data: { amount: 450 } },
+      { id: 'initech', label: 'Chase Initech', listId: 'done', data: { amount: 80 } }
+    ];
+    board.renderItem = (item: { label: string; data: { amount: number } }, context: { selected: boolean }) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display: flex; justify-content: space-between; gap: 12px';
+      const name = document.createElement('strong');
+      name.textContent = item.label;
+      const amount = document.createElement('span');
+      amount.textContent = `$${item.data.amount}${context.selected ? ' (selected)' : ''}`;
+      row.append(name, amount);
+      return row;
+    };
+    board.canDrop = ({ targetListId, items }: { targetListId: string; items: Array<{ data: { amount: number } }> }) =>
+      targetListId !== 'done' || items.every((item) => item.data.amount <= 1000);
+  }, []);
+
+  return (
+    <Box style={{ display: 'grid', gap: 12 }}>
+      <Box style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13 }}>
+        The element used on its own, with no React wrapper: cards drawn by renderItem, and canDrop refusing anything over $1,000 for Done.
+      </Box>
+      {React.createElement('ui-sortable', { ref })}
+    </Box>
+  );
+}
+
+export const WithoutReactWrapper: Story = {
+  render: () => <VanillaRenderingDemo />
 };
