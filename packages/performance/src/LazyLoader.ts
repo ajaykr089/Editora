@@ -1,14 +1,19 @@
 export class LazyLoader {
-  private loadedModules = new Map<string, any>();
+  // The promise is stored, not the module: a second caller that arrives while the first is still loading gets the same
+  // promise, instead of running the loader again.
+  private loadedModules = new Map<string, Promise<any>>();
 
-  async load<T>(moduleId: string, loader: () => Promise<T>): Promise<T> {
-    if (this.loadedModules.has(moduleId)) {
-      return this.loadedModules.get(moduleId);
-    }
+  load<T>(moduleId: string, loader: () => Promise<T>): Promise<T> {
+    const existing = this.loadedModules.get(moduleId);
+    if (existing) return existing;
 
-    const module = await loader();
-    this.loadedModules.set(moduleId, module);
-    return module;
+    const loading: Promise<T> = new Promise<T>((resolve) => resolve(loader())).catch((error) => {
+      // A failed load is not remembered, so the next call tries again.
+      if (this.loadedModules.get(moduleId) === loading) this.loadedModules.delete(moduleId);
+      throw error;
+    });
+    this.loadedModules.set(moduleId, loading);
+    return loading;
   }
 
   unload(moduleId: string): void {
