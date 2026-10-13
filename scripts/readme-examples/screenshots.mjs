@@ -291,6 +291,46 @@ const shots = [
   { out: 'packages/react-icons/docs/images/provider.png', example: 'react-icons-provider', clip: { x: 8, y: 8, width: 392, height: 160 } },
   { out: 'packages/react-icons/docs/images/dynamic.png', example: 'react-icons-dynamic', clip: { x: 8, y: 8, width: 230, height: 222 } },
 
+  // ---- @editora/performance
+  {
+    out: 'packages/performance/docs/images/debounce.png',
+    example: 'performance-debounce',
+    clip: { x: 8, y: 8, width: 392, height: 124 },
+    async act(page) {
+      await page.type('#query', 'editora', { delay: 40 });
+      await page.waitForTimeout(450);
+    },
+  },
+  {
+    out: 'packages/performance/docs/images/batcher.png',
+    example: 'performance-batcher',
+    clip: { x: 8, y: 8, width: 392, height: 140 },
+    async act(page) {
+      await page.click('#add');
+      await page.waitForTimeout(350);
+    },
+  },
+  {
+    out: 'packages/performance/docs/images/memory.png',
+    example: 'performance-memory',
+    clip: { x: 8, y: 8, width: 392, height: 150 },
+    async act(page) {
+      await page.click('#ping');
+      await page.click('#ping');
+      await page.click('#ping');
+      await page.click('#destroy');
+      await page.click('#ping');
+    },
+  },
+  {
+    out: 'packages/performance/docs/images/monitor.png',
+    example: 'performance-monitor',
+    clip: { x: 8, y: 8, width: 392, height: 130 },
+    async act(page) {
+      await page.click('#run');
+    },
+  },
+
   // ---- @editora/themes
   { out: 'packages/themes/docs/images/themes.png', example: 'themes-gallery' },
   {
