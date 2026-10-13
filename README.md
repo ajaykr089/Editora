@@ -24,7 +24,7 @@ The **best free rich text editor** with enterprise-grade features. A comprehensi
 
 **🌐 [Try it Live](https://editora-ecosystem.netlify.app/)** | **🔗 [GitHub](https://github.com/ajaykr089/Editora)** | **📦 [NPM](https://www.npmjs.com/org/editora)**
 
-**Free alternative to TinyMCE, Quill, Draft.js, and Slate.**
+**Free alternative to TinyMCE, Quill, Draft.js, and Slate.** See an [honest comparison, including when not to use Editora](https://editora-ecosystem.netlify.app/docs/getting-started/alternatives).
 
 ## 🤖 AI-Ready Metadata
 
