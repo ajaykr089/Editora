@@ -1742,4 +1742,107 @@ describe('ui-sortable', () => {
       });
     });
   });
+
+  describe('data', () => {
+    const dataLists = [
+      { id: 'ideas', label: 'Ideas', cloneOnDrag: true, data: { color: 'amber' } },
+      { id: 'todo', label: 'To do' },
+      { id: 'done', label: 'Done' },
+    ];
+    const dataItems = [
+      { id: 'template', label: 'Template', listId: 'ideas', data: { sku: 'T-1', tags: ['a', 'b'] } },
+      { id: 'a', label: 'A', listId: 'todo', data: { price: 0, note: '', done: false, none: null } },
+      { id: 'b', label: 'B', listId: 'todo' },
+    ];
+    const mount = async () => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(dataLists));
+      el.setAttribute('items', JSON.stringify(dataItems));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      return el;
+    };
+    const byId = (el: any, id: string) => el.items.find((item: any) => item.id === id);
+
+    it('is kept on items and lists, including falsy values, and left off when not given', async () => {
+      const el = await mount();
+      expect(byId(el, 'template').data).toEqual({ sku: 'T-1', tags: ['a', 'b'] });
+      expect(byId(el, 'a').data).toEqual({ price: 0, note: '', done: false, none: null });
+      expect('data' in byId(el, 'b')).toBe(false);
+      expect('data' in el.lists.find((list: any) => list.id === 'todo')).toBe(false);
+      expect(el.lists.find((list: any) => list.id === 'ideas').data).toEqual({ color: 'amber' });
+
+      // And it is still there after the component wrote the attributes back itself.
+      el.select(['a']);
+      el.moveSelection({ targetListId: 'done' });
+      expect(JSON.parse(el.getAttribute('items')).find((item: any) => item.id === 'a').data).toEqual({ price: 0, note: '', done: false, none: null });
+      expect(JSON.parse(el.getAttribute('lists')).find((list: any) => list.id === 'ideas').data).toEqual({ color: 'amber' });
+    });
+
+    it('comes back with the moved items in change, before-change and canDrop', async () => {
+      const el = await mount();
+      let change: any;
+      let before: any;
+      let asked: any;
+      el.addEventListener('change', ((event: CustomEvent) => (change = event.detail)) as EventListener);
+      el.addEventListener('before-change', ((event: CustomEvent) => (before = event.detail)) as EventListener);
+      el.canDrop = (info: any) => {
+        asked = info;
+        return true;
+      };
+      el.select(['a']);
+      el.moveSelection({ targetListId: 'done' });
+
+      expect(asked.items[0].data).toEqual({ price: 0, note: '', done: false, none: null });
+      expect(before.items.find((item: any) => item.id === 'a').data.price).toBe(0);
+      expect(change.items.find((item: any) => item.id === 'a').data.note).toBe('');
+      expect(change.items.find((item: any) => item.id === 'template').data.sku).toBe('T-1');
+      expect(change.lists.find((list: any) => list.id === 'ideas').data.color).toBe('amber');
+    });
+
+    it('gives a copied card its own data', async () => {
+      const el = await mount();
+      el.select(['template']);
+      el.moveSelection({ targetListId: 'done', clone: true });
+      const copy = el.items.find((item: any) => item.id.includes('--copy-'));
+      expect(copy.data).toEqual({ sku: 'T-1', tags: ['a', 'b'] });
+
+      copy.data.tags.push('changed');
+      expect(el.items.find((item: any) => item.id === copy.id).data.tags).toEqual(['a', 'b']);
+      expect(byId(el, 'template').data.tags).toEqual(['a', 'b']);
+    });
+
+    it('hands out copies, so changing what an event or getter gave you does not change the board', async () => {
+      const el = await mount();
+      const first = byId(el, 'template');
+      first.data.sku = 'HACKED';
+      expect(byId(el, 'template').data.sku).toBe('T-1');
+
+      const lists = el.lists;
+      lists[0].data.color = 'red';
+      expect(el.lists[0].data.color).toBe('amber');
+    });
+
+    it('survives a restore from persistKey', async () => {
+      const key = 'ui-sortable-data-restore';
+      window.localStorage.removeItem(key);
+      const first = document.createElement('ui-sortable') as any;
+      first.setAttribute('persist-key', key);
+      first.setAttribute('lists', JSON.stringify(dataLists));
+      first.setAttribute('items', JSON.stringify(dataItems));
+      document.body.appendChild(first);
+      await flushMicrotask();
+      first.select(['a']);
+      first.moveSelection({ targetListId: 'done' });
+
+      const second = document.createElement('ui-sortable') as any;
+      second.setAttribute('persist-key', key);
+      second.setAttribute('lists', JSON.stringify(dataLists));
+      second.setAttribute('items', JSON.stringify(dataItems));
+      document.body.appendChild(second);
+      await flushMicrotask();
+      expect(byId(second, 'a').listId).toBe('done');
+      expect(byId(second, 'a').data).toEqual({ price: 0, note: '', done: false, none: null });
+    });
+  });
 });

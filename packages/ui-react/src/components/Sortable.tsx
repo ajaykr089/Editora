@@ -98,6 +98,8 @@ export type SortableList = {
   accepts?: string[];
   /** The most items the list can hold, at every nesting level. A move or copy that would go past it is refused. */
   maxItems?: number;
+  /** Anything of yours that is JSON-serialisable. It travels with the list and comes back in every event. */
+  data?: unknown;
 };
 
 export type SortableItem = {
@@ -111,6 +113,8 @@ export type SortableItem = {
   dragDisabled?: boolean;
   cloneOnDrag?: boolean;
   hidden?: boolean;
+  /** Anything of yours that is JSON-serialisable (a record, a price, a status). It travels with the item through moves and copies, and comes back in every event. */
+  data?: unknown;
 };
 
 export type SortableSelectionChangeDetail = {

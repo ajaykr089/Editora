@@ -31,6 +31,8 @@ export type UISortableList = {
   accepts?: string[];
   /** The most items the list can hold, at every nesting level. A move or copy that would go past it is refused. */
   maxItems?: number;
+  /** Anything of yours that is JSON-serialisable (an id, a record, a colour). It travels with the list and comes back in every event. */
+  data?: unknown;
 };
 
 export type UISortableItem = {
@@ -44,6 +46,8 @@ export type UISortableItem = {
   dragDisabled?: boolean;
   cloneOnDrag?: boolean;
   hidden?: boolean;
+  /** Anything of yours that is JSON-serialisable (a record, a price, a status). It travels with the item through moves and copies, and comes back in every event. */
+  data?: unknown;
 };
 
 export type UISortableSelectionChangeDetail = {
@@ -113,6 +117,7 @@ type NormalizedItem = {
   dragDisabled: boolean;
   cloneOnDrag: boolean;
   hidden: boolean;
+  data?: unknown;
 };
 
 type NormalizedList = {
@@ -125,6 +130,7 @@ type NormalizedList = {
   cloneOnDrag: boolean;
   accepts?: string[];
   maxItems?: number;
+  data?: unknown;
 };
 
 type RenderRecord = {
@@ -1191,6 +1197,29 @@ function cloneItem(item: NormalizedItem): NormalizedItem {
   return { ...item };
 }
 
+// `data` is the app's own: what leaves the component (events, getters, callbacks) is a copy, so changing it
+// there cannot change what the component holds, and a copied card does not share its data with the original.
+function copyData<T>(data: T): T {
+  if (data === undefined || data === null || typeof data !== 'object') return data;
+  try {
+    return JSON.parse(JSON.stringify(data)) as T;
+  } catch {
+    return data;
+  }
+}
+
+function publicItem(item: NormalizedItem): UISortableItem {
+  const copy: UISortableItem = { ...item };
+  if (item.data !== undefined) copy.data = copyData(item.data);
+  return copy;
+}
+
+function publicList(list: NormalizedList): UISortableList {
+  const copy: UISortableList = { ...list };
+  if (list.data !== undefined) copy.data = copyData(list.data);
+  return copy;
+}
+
 function projectMoveItems(
   items: NormalizedItem[],
   lists: NormalizedList[],
@@ -1330,6 +1359,7 @@ function canonicalizeLists(rawLists: UISortableList[]): NormalizedList[] {
         ? list.accepts.filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
         : undefined,
       maxItems: Number.isFinite(list?.maxItems) && Number(list.maxItems) >= 0 ? Math.floor(Number(list.maxItems)) : undefined,
+      ...(list?.data !== undefined ? { data: list.data } : {}),
     });
   });
 
@@ -1366,6 +1396,7 @@ function normalizeItems(lists: NormalizedList[], rawItems: UISortableItem[]): No
       dragDisabled: !!item?.dragDisabled,
       cloneOnDrag: !!item?.cloneOnDrag,
       hidden: !!item?.hidden,
+      ...(item?.data !== undefined ? { data: item.data } : {}),
     });
   });
 
@@ -1424,6 +1455,7 @@ function serializeItems(items: NormalizedItem[]): string {
     dragDisabled: item.dragDisabled,
     cloneOnDrag: item.cloneOnDrag,
     hidden: item.hidden,
+    data: item.data,
   })));
 }
 
@@ -1438,6 +1470,7 @@ function serializeLists(lists: NormalizedList[]): string {
     cloneOnDrag: list.cloneOnDrag,
     accepts: list.accepts,
     maxItems: list.maxItems,
+    data: list.data,
   })));
 }
 
@@ -1667,7 +1700,7 @@ export class UISortable extends ElementBase {
   }
 
   get lists(): UISortableList[] {
-    return this._lists.map((list) => ({ ...list }));
+    return this._lists.map(publicList);
   }
 
   set lists(next: UISortableList[]) {
@@ -1675,7 +1708,7 @@ export class UISortable extends ElementBase {
   }
 
   get items(): UISortableItem[] {
-    return this._items.map((item) => ({ ...item }));
+    return this._items.map(publicItem);
   }
 
   set items(next: UISortableItem[]) {
@@ -3461,7 +3494,7 @@ export class UISortable extends ElementBase {
     if (callback) {
       try {
         const allowed = callback({
-          items: movedRootIds.map((id) => itemMap.get(id)).filter((item): item is NormalizedItem => !!item).map((item) => ({ ...item })),
+          items: movedRootIds.map((id) => itemMap.get(id)).filter((item): item is NormalizedItem => !!item).map(publicItem),
           movedIds: [...movedRootIds],
           targetListId: target.listId,
           parentId: target.parentId,
@@ -3594,7 +3627,7 @@ export class UISortable extends ElementBase {
     const proposed = ordered.map(cloneItem);
     const accepted = this.dispatchEvent(new CustomEvent<UISortableBeforeChangeDetail>('before-change', {
       detail: {
-        items: proposed.map((item) => ({ ...item })),
+        items: proposed.map(publicItem),
         lists: this.lists,
         selection: [...nextSelection],
         previousSelection: [...previousSelection],
@@ -3686,6 +3719,7 @@ export class UISortable extends ElementBase {
       ...item,
       id: clonedId,
       label: orderedMovingIds[0] === item.id ? `${item.label} copy` : item.label,
+      data: copyData(item.data),
     };
   }
 
