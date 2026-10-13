@@ -2034,4 +2034,110 @@ describe('ui-sortable', () => {
       el.cancelDrag();
     });
   });
+
+  describe('focus and feedback while dragging', () => {
+    const mount = async () => {
+      const el = document.createElement('ui-sortable') as any;
+      el.setAttribute('lists', JSON.stringify(lists));
+      el.setAttribute('items', JSON.stringify(items));
+      document.body.appendChild(el);
+      await flushMicrotask();
+      await flushMicrotask();
+      return el;
+    };
+    const settle = async () => {
+      await flushMicrotask();
+      await flushMicrotask();
+    };
+
+    it('does not take the focus when it first draws, or when it redraws while someone is typing elsewhere', async () => {
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+      input.focus();
+
+      const el = await mount();
+      expect(el.shadowRoot.activeElement).toBeNull();
+      expect(document.activeElement).toBe(input);
+
+      el.setAttribute('filter-query', 'Task');
+      await settle();
+      el.setAttribute('filter-query', '');
+      await settle();
+      el.items = [...items, { id: 'late', label: 'Late', listId: 'done' }];
+      await settle();
+      expect(document.activeElement).toBe(input);
+      input.remove();
+    });
+
+    it('still puts the focus back on its card when a render replaced the card that had it', async () => {
+      const el = await mount();
+      el.focusItem('task-b');
+      await settle();
+      expect(el.shadowRoot.activeElement?.getAttribute('data-id')).toBe('task-b');
+
+      el.items = [...items, { id: 'late', label: 'Late', listId: 'done' }];
+      await settle();
+      expect(el.shadowRoot.activeElement?.getAttribute('data-id')).toBe('task-b');
+    });
+
+    it('focuses the dropped card, because that was asked for', async () => {
+      const input = document.createElement('input');
+      document.body.appendChild(input);
+      input.focus();
+      const el = await mount();
+      el.select(['task-a']);
+      el.moveSelection({ targetListId: 'done' });
+      await settle();
+      expect(el.shadowRoot.activeElement?.getAttribute('data-id')).toBe('task-a');
+      input.remove();
+    });
+
+    it('lets go of a highlight a moment after the pointer has stopped over a place that does not take the drop', async () => {
+      vi.useFakeTimers();
+      try {
+        const el = await mount();
+        el._dragState = {
+          snapshot: el.items.map((item: any) => ({ ...item })),
+          movedRootIds: ['task-a'],
+          originId: 'task-a',
+          clone: false,
+          keyboard: false,
+          dropTarget: { listId: 'todo', parentId: null, beforeId: 'task-b', mode: 'before' },
+          committed: false,
+        };
+        el._queueDropTarget(null, performance.now());
+        // No more pointer events: the old target is still there until the delay is up...
+        expect(el._dragState.dropTarget).not.toBeNull();
+        vi.advanceTimersByTime(200);
+        // ...and then it is let go.
+        expect(el._dragState.dropTarget).toBeNull();
+        el.cancelDrag();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('shows on the lifted card when the pointer is over a place that refuses it, and clears it again', async () => {
+      const el = await mount();
+      el.canDrop = (info: any) => info.targetListId !== 'done';
+      const handle = el.shadowRoot.querySelector('.handle[data-id="task-a"]') as HTMLElement;
+      el._onPointerDown({ pointerId: 95, pointerType: 'mouse', clientX: 1, clientY: 1, preventDefault() {}, composedPath: () => [handle] });
+      el._onPointerMove({ pointerId: 95, clientX: 30, clientY: 30, preventDefault() {} });
+      const ghost = () => el.shadowRoot.querySelector('.item-ghost') as HTMLElement;
+
+      el._pathFromPoint = () => [el.shadowRoot.querySelector('.list[data-list-id="done"]')];
+      el._onPointerMove({ pointerId: 95, clientX: 60, clientY: 60, preventDefault() {} });
+      expect(ghost().hasAttribute('data-refused')).toBe(true);
+
+      el._pathFromPoint = () => [el.shadowRoot.querySelector('.list[data-list-id="todo"]')];
+      el._onPointerMove({ pointerId: 95, clientX: 70, clientY: 70, preventDefault() {} });
+      expect(ghost().hasAttribute('data-refused')).toBe(false);
+
+      // Over nothing at all there is nothing to refuse.
+      el._pathFromPoint = () => [];
+      el._onPointerMove({ pointerId: 95, clientX: 900, clientY: 900, preventDefault() {} });
+      expect(ghost().hasAttribute('data-refused')).toBe(false);
+      el.cancelDrag();
+    });
+  });
 });

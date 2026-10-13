@@ -719,6 +719,17 @@ const style = `
       var(--ui-sortable-lift-shadow);
   }
 
+  .item.item-ghost[data-refused] {
+    border-color: var(--ui-sortable-danger, #dc2626);
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--ui-sortable-danger, #dc2626) 22%, transparent),
+      var(--ui-sortable-lift-shadow);
+  }
+
+  .item.item-ghost[data-refused] .handle {
+    color: var(--ui-sortable-danger, #dc2626);
+  }
+
   .item.item-ghost .handle {
     opacity: 1;
     color: var(--ui-sortable-accent);
@@ -1649,6 +1660,8 @@ export class UISortable extends ElementBase {
   private _pendingFocusId: string | null = null;
   private _pointerGesture: PointerGestureState | null = null;
   private _pendingDropTarget: DropTargetCandidate | null = null;
+  private _pendingTimer: ReturnType<typeof setTimeout> | null = null;
+  private _focusWasInside = false;
   // Alt held during a pointer drag: it is what asks to nest instead of reorder (see UISortableNestTrigger).
   private _nestModifier = false;
   private _lastPointer: { x: number; y: number } | null = null;
@@ -1740,6 +1753,8 @@ export class UISortable extends ElementBase {
     this._stopAutoScroll();
     this._removeDragPreviewOverlay();
     this._removeDragImage();
+    if (this._pendingTimer) clearTimeout(this._pendingTimer);
+    this._pendingTimer = null;
     super.disconnectedCallback();
   }
 
@@ -1997,6 +2012,9 @@ export class UISortable extends ElementBase {
     `;
 
     const scroll = this._captureScroll();
+    // A render replaces the cards, which drops the focus that was on one. Put it back, but only if it was ours:
+    // a board that re-renders while someone types in a search box next to it must not take their focus.
+    this._focusWasInside = !!this.root.activeElement;
     this.setContent(html);
     this._restoreScroll(scroll);
     this._fillCustomTargets();
@@ -2077,7 +2095,8 @@ export class UISortable extends ElementBase {
   }
 
   private _restorePendingFocus(): void {
-    const id = this._pendingFocusId || this._focusedId;
+    const id = this._pendingFocusId || (this._focusWasInside ? this._focusedId : null);
+    this._focusWasInside = false;
     if (!id) return;
     const escapeSelector = typeof CSS !== 'undefined' && typeof CSS.escape === 'function'
       ? CSS.escape(id)
@@ -2569,6 +2588,19 @@ export class UISortable extends ElementBase {
       startedAt: now,
       announceLabel: options?.announceLabel,
     };
+    this._schedulePendingFlush(target ? DROP_TARGET_SETTLE_MS : DROP_TARGET_CLEAR_SETTLE_MS);
+  }
+
+  // The settle delay is judged on the next pointer event, so a pointer that has stopped (over a place that
+  // refuses the drop, say) would leave the old highlight on. This applies the change once the delay is up.
+  private _schedulePendingFlush(delay: number): void {
+    if (this._pendingTimer) clearTimeout(this._pendingTimer);
+    this._pendingTimer = setTimeout(() => {
+      this._pendingTimer = null;
+      const pending = this._pendingDropTarget;
+      if (!pending || !this._dragState || this._dragState.committed || this._dragState.keyboard) return;
+      this._setDropTarget(pending.target, pending.announceLabel ? { announceLabel: pending.announceLabel } : undefined);
+    }, delay + 8);
   }
 
   private _releaseDropTarget(clientX: number, clientY: number): DropTarget | null {
@@ -3136,7 +3168,14 @@ export class UISortable extends ElementBase {
     if (!this._dragState || this._dragState.keyboard || this._dragState.committed || !this._lastPointer) return;
     const target = this._dropTargetFromPoint(this._lastPointer.x, this._lastPointer.y);
     const usable = target && this._canDrop(target, this._dragState.movedRootIds) ? target : null;
+    this._noteRefusal(!!target && !usable);
     this._setDropTarget(usable);
+  }
+
+  // Over a place that exists but will not take the drop (a full list, a read-only one, canDrop said no) the
+  // lifted card says so.
+  private _noteRefusal(refused: boolean): void {
+    if (this._dragImage?.toggleAttribute) this._dragImage.toggleAttribute('data-refused', refused);
   }
 
   private _onDragEnd(): void {
@@ -3395,9 +3434,11 @@ export class UISortable extends ElementBase {
     if (!this._dragState.committed) {
       const target = this._dropTargetFromPoint(event.clientX, event.clientY);
       if (!target || !this._canDrop(target, this._dragState.movedRootIds)) {
+        this._noteRefusal(!!target);
         this._queueDropTarget(null, event.timeStamp);
         return;
       }
+      this._noteRefusal(false);
       this._queueDropTarget(target, event.timeStamp);
     }
   }
@@ -3466,6 +3507,7 @@ export class UISortable extends ElementBase {
     if (!this._dragState.committed) {
       const target = this._dropTargetFromPoint(point.x, point.y);
       const usable = target && this._canDrop(target, this._dragState.movedRootIds) ? target : null;
+      this._noteRefusal(!!target && !usable);
       this._queueDropTarget(usable, performance.now());
     }
     this._autoScrollFrame = requestAnimationFrame(this._autoScrollTick);
