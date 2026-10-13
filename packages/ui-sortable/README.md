@@ -322,10 +322,11 @@ explains the keys.
 
 ## Server rendering
 
-The component registers a custom element when it is imported, so neither entry can be imported on the server: in Node
-it throws `HTMLElement is not defined`. In Next.js and other server-rendering frameworks, import it from client-only
-code (a `'use client'` file that is rendered only in the browser, for example with `next/dynamic` and `ssr: false`; see
-[`@editora/react`](https://www.npmjs.com/package/@editora/react#nextjs-and-server-rendering)).
+Both entries can be imported on the server: loading them does not touch the DOM, and the custom element is defined only
+in the browser. On the server `Sortable` from `@editora/ui-sortable/react` renders an empty `<ui-sortable>` tag; the lists
+and items are applied in the browser, once the element is defined and the component has mounted. A `'use client'` file
+that renders it is still rendered on the server first (Next.js does this); that render produces the empty tag and does
+not fail.
 
 ## Part of Editora
 
