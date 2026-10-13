@@ -81,4 +81,62 @@ export default async function checks({ run }) {
     }
     return true;
   });
+
+  await run('sortable-guard', async (page) => {
+    const before = await items(page);
+    // "Doing" holds two cards at most: one more fits, the next is refused.
+    await drag(page, 'Plan the launch', 'Collect the assets');
+    const first = await items(page);
+    if (!first.some((entry) => entry === 'launch@doing')) return `a card should fit in Doing (${first.join(' ')})`;
+    await drag(page, 'Write the brief', 'Collect the assets');
+    const second = await items(page);
+    if (second.join() !== first.join()) return `Doing is full, but a third card went in (${second.join(' ')})`;
+
+    // canDrop: a card that was not reviewed does not go to Done, a reviewed one does.
+    const done = await page.evaluate(() => {
+      const element = document.querySelector('ui-sortable');
+      element.select(['budget']);
+      const refused = element.moveSelection({ targetListId: 'done' });
+      element.select(['brief']);
+      const accepted = element.moveSelection({ targetListId: 'done' });
+      return { refused, accepted };
+    });
+    if (done.refused !== false) return 'an unreviewed card was allowed into Done';
+    if (done.accepted !== true) return 'a reviewed card was refused';
+
+    // onBeforeChange: three cards at once is cancelled, and nothing changes.
+    const three = await page.evaluate(() => {
+      const element = document.querySelector('ui-sortable');
+      const snapshot = element.items.map((item) => `${item.id}@${item.listId}`).join();
+      element.select(['brief', 'budget', 'launch']);
+      const moved = element.moveSelection({ targetListId: 'todo' });
+      return { moved, same: element.items.map((item) => `${item.id}@${item.listId}`).join() === snapshot };
+    });
+    if (three.moved !== false || !three.same) return 'onBeforeChange(false) should have cancelled the move of three cards';
+    return before.length === (await items(page)).length ? true : 'cards were lost';
+  });
+
+  await run('sortable-vanilla', async (page, { logs }) => {
+    // The cards are the ones the function drew, with the data of each item.
+    for (const expected of ['Invoice Acme', '$1200', 'Quote Globex', '$450', 'Chase Initech', '$80']) {
+      if (!(await page.locator(`text=${expected}`).count())) return `the card is missing "${expected}"`;
+    }
+    // Selecting a card draws it again.
+    await page.getByText('Quote Globex', { exact: true }).first().click();
+    await page.waitForTimeout(300);
+    if (!(await page.locator('text=$450 (selected)').count())) return 'the selected card was not drawn again as selected';
+    // The list with a limit shows its count, and canDrop refuses the big one.
+    if (!(await page.locator('text=2/3').count())) return 'the list header does not show 2/3';
+    const result = await page.evaluate(() => {
+      const board = document.querySelector('ui-sortable');
+      board.select(['acme']);
+      const refused = board.moveSelection({ targetListId: 'done' });
+      board.select(['globex']);
+      const accepted = board.moveSelection({ targetListId: 'done' });
+      return { refused, accepted };
+    });
+    if (result.refused !== false) return 'a card over $1,000 was allowed into Done';
+    if (result.accepted !== true) return 'a small card was refused';
+    return logs.some((line) => line.startsWith('moved')) ? true : "'change' did not fire";
+  });
 }

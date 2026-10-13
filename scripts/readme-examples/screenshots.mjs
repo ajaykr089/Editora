@@ -232,6 +232,24 @@ const shots = [
   { out: 'packages/ui-sortable/docs/images/quick-start.png', example: 'sortable-quick-start' },
   { out: 'packages/ui-sortable/docs/images/custom.png', example: 'sortable-custom' },
   { out: 'packages/ui-sortable/docs/images/flat.png', example: 'sortable-flat' },
+  {
+    out: 'packages/ui-sortable/docs/images/guard.png',
+    example: 'sortable-guard',
+    async act(page) {
+      // Hold a card that was not reviewed over Done, which refuses it: the lifted card turns red.
+      const from = await page.getByText('Approve the budget', { exact: true }).first().boundingBox();
+      const to = await page.locator('ui-sortable').evaluate((element) => {
+        const rect = element.shadowRoot.querySelector('.list[data-list-id="done"] .items').getBoundingClientRect();
+        return { x: rect.left + rect.width * 0.3, y: rect.top + 40 };
+      });
+      await page.mouse.move(from.x - 17, from.y + from.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(from.x - 40, from.y - 10, { steps: 6 });
+      await page.mouse.move(to.x, to.y, { steps: 14 });
+      await page.waitForTimeout(500);
+    },
+  },
+  { out: 'packages/ui-sortable/docs/images/vanilla.png', example: 'sortable-vanilla' },
 
   // ---- @editora/toast
   {

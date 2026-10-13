@@ -1,0 +1,47 @@
+<script type="importmap">
+  {
+    "imports": {
+      "@editora/ui-sortable": "https://cdn.jsdelivr.net/npm/@editora/ui-sortable/dist/index.esm.js",
+      "@editora/ui-core/sortable": "https://cdn.jsdelivr.net/npm/@editora/ui-core/dist/sortable.esm.js"
+    }
+  }
+</script>
+<ui-sortable></ui-sortable>
+
+<script type="module">
+  import '@editora/ui-sortable';
+
+  const board = document.querySelector('ui-sortable');
+
+  board.lists = [
+    { id: 'todo', label: 'To do', maxItems: 3 },
+    { id: 'done', label: 'Done' }
+  ];
+
+  board.items = [
+    { id: 'acme', label: 'Invoice Acme', listId: 'todo', data: { amount: 1200 } },
+    { id: 'globex', label: 'Quote Globex', listId: 'todo', data: { amount: 450 } },
+    { id: 'initech', label: 'Chase Initech', listId: 'done', data: { amount: 80 } }
+  ];
+
+  // Draw each card yourself. Return a new DOM node (or a string of HTML you have escaped).
+  board.renderItem = (item, { selected }) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display: flex; justify-content: space-between; gap: 12px';
+
+    const name = document.createElement('strong');
+    name.textContent = item.label;
+
+    const amount = document.createElement('span');
+    amount.textContent = `$${item.data.amount}${selected ? ' (selected)' : ''}`;
+
+    row.append(name, amount);
+    return row;
+  };
+
+  // Say no before a move happens: nothing over $1,000 goes to Done.
+  board.canDrop = ({ targetListId, items }) =>
+    targetListId !== 'done' || items.every((item) => item.data.amount <= 1000);
+
+  board.addEventListener('change', (event) => console.log('moved', event.detail.movedIds));
+</script>

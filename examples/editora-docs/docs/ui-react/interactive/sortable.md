@@ -31,6 +31,12 @@ It covers:
 - Persistence payloads for local or server-side ordering
 - Custom JSX item rendering through `renderItem`
 - Custom list headers and empty states through `renderListHeader` and `renderEmptyState`
+- A plain drag always reorders; nesting takes Alt or the far side of a card (`nestTrigger`)
+- Hold-to-drag on touch for cards dragged by their body, so the page still scrolls (`touchHoldDelay`)
+- Guard rails: `maxItems` per list, `canDrop`, and a cancelable `before-change` event (`onBeforeChange`)
+- A free `data` field on every item and list
+- Every text can be replaced through `labels`, and the hint line hidden with `hideToolbar`
+- The same custom rendering without React, through properties of the element
 
 ## Import
 
@@ -313,6 +319,8 @@ type SortableList = {
   disabled?: boolean;
   cloneOnDrag?: boolean;
   accepts?: string[];
+  maxItems?: number;
+  data?: unknown;
 };
 ```
 
@@ -330,8 +338,11 @@ type SortableItem = {
   dragDisabled?: boolean;
   cloneOnDrag?: boolean;
   hidden?: boolean;
+  data?: unknown;
 };
 ```
+
+`data` is anything of yours that can be written as JSON. It travels with the item through moves and copies and comes back, as a copy, in every event and callback. `maxItems` is the most items a list can hold at every nesting level: a move or copy that would go past it is refused and the list header shows `3/5`.
 
 ## Key Props
 
@@ -345,6 +356,11 @@ type SortableItem = {
 | `persistKey` | `string` | — | Stores persistence snapshots in `localStorage` |
 | `allowFilteredDrag` | `boolean` | `false` | Re-enables dragging while a filter is active |
 | `allowNesting` | `boolean` | `true` | Enables dropping inside another item |
+| `nestTrigger` | `'gutter' \| 'modifier' \| 'area'` | `'gutter'` | What it takes to nest with the pointer. `gutter`: hold Alt, or drop on the far side of a card. `modifier`: hold Alt. `area`: the middle of any card, as before. Otherwise the top half of a card is "before it" and the bottom half "after it" |
+| `touchHoldDelay` | `number` | `350` | Milliseconds a finger must rest on a card (dragged by its body or a custom handle) before it lifts; `0` lifts at once. The built-in handle always lifts at once |
+| `labels` | `Partial<SortableLabels>` | English | Replaces any of the texts shown or announced; `{count}`, `{label}`, `{list}` and `{max}` are filled in |
+| `hideToolbar` | `boolean` | `false` | Hides the hint and the selection count from sight; screen readers still get the hint |
+| `canDrop` | `(info: SortableDropInfo) => boolean` | — | Decides whether the moved items may go to a place. A refused place is not highlighted, the keyboard skips it, and the lifted card turns red over it |
 | `dropIndicatorVisibility` | `'active' \| 'always'` | `'active'` | Keeps idle drop rails hidden by default, or shows them all the time for more explicit affordances |
 | `dropzoneStyle` | `'indicator' \| 'container'` | `'indicator'` | Uses slim rail targets by default, or expands the active drop target into an item-sized container surface |
 | `dragPreviewSize` | `'match-item' \| 'compact'` | `'match-item'` | Controls whether the card that follows the pointer matches the dragged item size or is narrower and shows only the title |
@@ -359,10 +375,64 @@ type SortableItem = {
 | `renderItem` | `(item, context) => ReactNode` | — | Replaces the default item body with custom JSX in the React wrapper |
 | `renderListHeader` | `(list, context) => ReactNode` | — | Replaces the default list header UI in the React wrapper |
 | `renderEmptyState` | `(list, context) => ReactNode` | — | Replaces the default empty-state content when a list has no visible items |
+| `onBeforeChange` | `(detail: SortableBeforeChangeDetail, event: Event) => boolean \| void` | — | Called just before a move is applied, with the result it would have plus `target` and `clone`. Return `false` (or call `event.preventDefault()`) to cancel it |
 | `onChange` | `(detail: SortableChangeDetail) => void` | — | Full change event with operation and persistence snapshot |
 | `onItemsChange` | `(items: SortableItem[]) => void` | — | Controlled item updates |
 | `onSelectionChange` | `(detail: SortableSelectionChangeDetail) => void` | — | Selection changes for multi-select workflows |
 | `onPersistRequest` | `(detail: SortableChangeDetail) => void` | — | Hook for saving the new order to a backend |
+
+## Guard Rails
+
+```tsx
+import * as React from 'react';
+import { Sortable, type SortableItem, type SortableList } from '@editora/ui-sortable/react';
+
+type Task = { reviewed: boolean };
+
+const lists: SortableList[] = [
+  { id: 'todo', label: 'To do' },
+  { id: 'doing', label: 'Doing', maxItems: 2 },
+  { id: 'done', label: 'Done' }
+];
+
+const initialItems: SortableItem[] = [
+  { id: 'brief', label: 'Write the brief', listId: 'todo', data: { reviewed: true } },
+  { id: 'budget', label: 'Approve the budget', listId: 'todo', data: { reviewed: false } },
+  { id: 'launch', label: 'Plan the launch', listId: 'todo', data: { reviewed: true } },
+  { id: 'assets', label: 'Collect the assets', listId: 'doing', data: { reviewed: true } }
+];
+
+export default function GuardedBoard() {
+  const [items, setItems] = React.useState(initialItems);
+
+  return (
+    <Sortable
+      lists={lists}
+      items={items}
+      allowNesting={false}
+      // Only reviewed work goes to Done: over it the lifted card turns red, and a drop does nothing.
+      canDrop={(drop) =>
+        drop.targetListId !== 'done' || drop.items.every((item) => (item.data as Task).reviewed)
+      }
+      // The last word before anything changes: return false to cancel (here, at most two cards at a time).
+      onBeforeChange={(detail) => detail.movedIds.length <= 2}
+      onItemsChange={setItems}
+    />
+  );
+}
+```
+
+- `maxItems` counts every item in the list, at every nesting level; a copy counts all its items and a branch counts its children
+- A list that is already over its limit can still be reordered and emptied, just not filled
+- `canDrop` runs on every pointer move, so keep it quick; a function that throws refuses the drop
+- `before-change` fires once, before anything is applied: cancelling it leaves the items, the saved positions and the attributes untouched, puts a dragged card back, and fires no `change`
+- `moveSelection()` on the element returns `false` when a move did not happen
+
+## Nesting, Touch And Translation
+
+- With nesting on, dragging onto a card reorders. Hold `Alt` (Option), or drop on the far side of the card, to nest; the card highlights before you let go. `nestTrigger="area"` restores the old rule, where the middle of a card nests
+- On touch a card dragged by its body is lifted by holding it for `touchHoldDelay` milliseconds; a finger that moves first scrolls the page and a tap still selects
+- `labels` takes any of the keys listed in the `SortableLabels` type, for example `labels={{ hintHandle: 'Utilisez la poignée…', selectedMany: 'éléments sélectionnés', announceMovedOne: 'Déplacé vers {list}.' }}`
 
 ## Persistence Payload
 
@@ -426,7 +496,7 @@ This is designed for storage in a database as explicit ordering metadata.
 - `itemRadius` and `handleRadius` accept preset tokens like `"sm"`, `"lg"`, or `"full"`, and also accept raw CSS values like `"24px"`, `"1rem"`, or `20`
 - `listGap` maps directly to the `--ui-sortable-list-gap` CSS variable and takes precedence over `itemSpacing` when both are provided
 - `itemSpacing` accepts preset tokens like `"xs"` or `"lg"`, and also accepts raw CSS values like `"6px"`, `"0.75rem"`, or `12`
-- This custom rendering path is available in the React wrapper
+- In the React wrapper these are props; on the element they are properties (`renderItem`, `renderListHeader`, `renderEmptyState`) that return a new DOM node, a string of HTML (escape anything that came from a user), or nothing to keep the built-in markup. A card is drawn again when its `data` changes and when it is selected or deselected
 - Keep item content focus-friendly and avoid placing a second drag affordance inside the custom JSX unless you intend it to be purely visual
 
 ## Production Notes
