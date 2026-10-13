@@ -147,7 +147,7 @@ export const Icon = React.forwardRef<SVGSVGElement, IconProps>(function Icon(
     color,
     secondaryColor,
     strokeWidth,
-    absoluteStrokeWidth,
+    absoluteStrokeWidth: _absoluteStrokeWidth, // accepted, but strokes are always absolute: see resolveStrokeWidth
     strokeLinecap,
     strokeLinejoin,
     decorative,
