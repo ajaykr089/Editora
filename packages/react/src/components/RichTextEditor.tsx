@@ -7,6 +7,8 @@ import { FloatingToolbar } from './FloatingToolbar';
 import { DynamicProviderWrapper } from './DynamicProviderWrapper';
 import { RichTextEditorProps, EditorAPI } from '../types';
 import { mergeConfig } from '../utils/mergeConfig';
+import { runPluginInitHooks } from '../utils/runPluginInitHooks';
+import { useIsPastHydration } from '../hooks/useIsPastHydration';
 import { getCursorPosition, countLines, calculateTextStats, getSelectionInfo } from '@editora/core';
 
 // Plugin Providers - These are now handled by DynamicProviderWrapper
@@ -108,17 +110,23 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
     });
   };
 
+  // This runs while rendering, which also happens on the server and, for server-rendered HTML, while
+  // React hydrates it. A plugin's init hook builds DOM and adds listeners (collaboration even takes hold of
+  // the editor that is already in the page), so it must not run on the server or against HTML that React has
+  // not hydrated yet: there the plugins are only listed, which is all the toolbar needs to render, and their
+  // init hooks run in the effect below once hydration is over. A client-only render inits them right here.
+  const pastHydration = useIsPastHydration();
+  const listedOnlyRef = useRef<Plugin[]>([]);
+
   const editor = useMemo(() => {
     const pluginManager = new PluginManager();
-    // This runs while rendering, which also happens on the server. A plugin's init hook builds DOM and adds
-    // listeners, so it only runs where there is a document; on the server the plugins are just listed,
-    // which is all the toolbar needs to render.
-    const canInitPlugins = typeof document !== 'undefined';
+    const listedOnly: Plugin[] = [];
     config.plugins.forEach(p => {
-      if (canInitPlugins) {
+      if (pastHydration) {
         pluginManager.register(p);
       } else {
         pluginManager.plugins.push(p);
+        listedOnly.push(p);
       }
       
       // Register commands from native plugins in global registry for backward compatibility
@@ -128,10 +136,22 @@ const EditorCore: React.FC<RichTextEditorProps> = (props) => {
         });
       }
     });
+    listedOnlyRef.current = listedOnly;
     const editorInstance = new Editor(pluginManager);
     editorRef.current = editorInstance;
     return editorInstance;
+    // pastHydration is not a dependency: the editor must stay the same instance when hydration ends.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.plugins]);
+
+  // Declared before the effects below so the init hooks still run before onInit.
+  useEffect(() => {
+    if (!pastHydration) return;
+    const pending = listedOnlyRef.current;
+    if (pending.length === 0) return;
+    listedOnlyRef.current = [];
+    pending.forEach(runPluginInitHooks);
+  }, [pastHydration, editor]);
 
   // Build EditorAPI - only run once on mount
   useEffect(() => {
