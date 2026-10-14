@@ -948,6 +948,27 @@ function createTicks(min: number, max: number, dayWidth: number, zoom: GanttZoom
   return parts.join('');
 }
 
+function taskIds(raw: string | null): Set<string> {
+  const ids = new Set<string>();
+  if (!raw) return ids;
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      parsed.forEach((entry, index) => {
+        if (entry && typeof entry === 'object') ids.add(String((entry as { id?: unknown }).id || `task-${index + 1}`));
+      });
+    }
+  } catch {
+    // a malformed value has no ids
+  }
+  return ids;
+}
+
+function sharesAnId(a: Set<string>, b: Set<string>): boolean {
+  for (const id of a) if (b.has(id)) return true;
+  return false;
+}
+
 /** `CSS.escape` where it exists (it does not in jsdom); otherwise escape what would end a quoted attribute value. */
 function cssEscape(value: string): string {
   if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') return CSS.escape(value);
@@ -1109,6 +1130,8 @@ export class UIGantt extends ElementBase {
     const virtualized = this.getAttribute('virtualized') !== 'false' && visible.length > 240;
     const viewportRows = Math.max(20, Math.ceil(Math.max(420, this.viewportHeight - HEADER_HEIGHT) / ROW_HEIGHT));
     const overscan = 160;
+    // Fewer rows than before (a filter, new data): do not window against a scroll offset past the end.
+    this.viewportTop = Math.min(this.viewportTop, Math.max(0, rowsHeight + HEADER_HEIGHT - this.viewportHeight));
     const rowScrollTop = Math.max(0, this.viewportTop - HEADER_HEIGHT);
     const firstVisibleRow = Math.max(0, Math.floor(rowScrollTop / ROW_HEIGHT));
     const windowStride = Math.max(180, viewportRows * 4);
@@ -1629,12 +1652,19 @@ export class UIGantt extends ElementBase {
     this.visibleCacheKey = '';
   }
 
-  protected override shouldRenderOnAttributeChange(name: string, _oldValue: string | null, _newValue: string | null): boolean {
+  protected override shouldRenderOnAttributeChange(name: string, oldValue: string | null, newValue: string | null): boolean {
     if (name === 'tasks') {
       this.overrides.clear();
       this.bumpOverrides();
-      this.viewportTop = 0;
-      this.viewportLeft = 0;
+      const nextIds = taskIds(newValue);
+      // A host that keeps `tasks` in state writes the attribute after every edit. That is the same chart
+      // with new dates, so it must not jump back to the top-left; only a different set of tasks resets it.
+      if (!sharesAnId(taskIds(oldValue), nextIds)) {
+        this.viewportTop = 0;
+        this.viewportLeft = 0;
+      }
+      // A selection on a task that is gone would leave no bar in the tab order.
+      if (this.selectedId != null && !nextIds.has(this.selectedId)) this.selectedId = null;
     }
     if (name === 'links') this.linkCacheRaw = null;
     return true;

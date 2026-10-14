@@ -184,3 +184,61 @@ describe('ui-gantt keyboard navigation reaches every bar', () => {
     expect(root(gantt).activeElement).toBe(bar(gantt, 'c'));
   });
 });
+
+describe('ui-gantt when the host rewrites `tasks`', () => {
+  const scrollTo = async (gantt: HTMLElement, left: number, top: number) => {
+    const viewport = root(gantt).querySelector<HTMLElement>('.viewport')!;
+    viewport.scrollLeft = left;
+    viewport.scrollTop = top;
+    viewport.dispatchEvent(new Event('scroll'));
+    await flush();
+  };
+  const viewport = (gantt: HTMLElement) => root(gantt).querySelector<HTMLElement>('.viewport')!;
+
+  it('keeps the scroll position when an edit comes back as the same tasks with new dates', async () => {
+    const gantt = await mount({ zoom: 'day' });
+    await scrollTo(gantt, 500, 0);
+    expect(viewport(gantt).scrollLeft).toBe(500);
+
+    const edited = TASKS.map((task) => (task.id === 'a' ? { ...task, start: '2026-03-03', end: '2026-03-07' } : task));
+    gantt.setAttribute('tasks', JSON.stringify(edited));
+    await flush();
+
+    expect(viewport(gantt).scrollLeft).toBe(500);
+  });
+
+  it('starts from the top-left again when the tasks are a different set', async () => {
+    const gantt = await mount({ zoom: 'day' });
+    await scrollTo(gantt, 500, 0);
+
+    gantt.setAttribute('tasks', JSON.stringify([{ id: 'z1', label: 'Other project', start: '2026-05-04', end: '2026-05-08' }]));
+    await flush();
+
+    expect(viewport(gantt).scrollLeft).toBe(0);
+  });
+
+  it('drops a selection whose task is gone, so a bar stays in the tab order', async () => {
+    const gantt = await mount();
+    bar(gantt, 'c').click();
+    await flush();
+    expect(bar(gantt, 'c').tabIndex).toBe(0);
+
+    gantt.setAttribute('tasks', JSON.stringify(TASKS.filter((task) => task.id !== 'c')));
+    await flush();
+
+    const stops = [...root(gantt).querySelectorAll<HTMLElement>('.bar')].filter((el) => el.tabIndex === 0);
+    expect(stops.length).toBe(1);
+  });
+
+  it('keeps the selection when the selected task is still there', async () => {
+    const gantt = await mount();
+    bar(gantt, 'b').click();
+    await flush();
+
+    gantt.setAttribute('tasks', JSON.stringify(TASKS.map((task) => (task.id === 'a' ? { ...task, progress: 50 } : task))));
+    await flush();
+
+    expect(bar(gantt, 'b').tabIndex).toBe(0);
+    expect(root(gantt).querySelector('.grid-row.selected')?.getAttribute('data-task-id')).toBe('b');
+  });
+});
