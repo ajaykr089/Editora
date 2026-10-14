@@ -1077,6 +1077,8 @@ export class UIGantt extends ElementBase {
 
   private focusRequest: FocusSnapshot | null = null;
   private collapsed = new Set<string>();
+  /** Task ids already seen, so `open: false` collapses a branch once and never fights the user's toggle. */
+  private seededIds = new Set<string>();
   private overrides = new Map<string, Partial<GanttTask>>();
   private drag: DragState | null = null;
   private selectedId: string | null = null;
@@ -1625,8 +1627,17 @@ export class UIGantt extends ElementBase {
     this.taskCacheRaw = raw;
     this.taskCacheVersion = this.overridesVersion;
     this.taskCache = parseTasks(raw, this.overrides);
+    this.seedCollapsed(this.taskCache);
     this.visibleCacheKey = '';
     return this.taskCache;
+  }
+
+  private seedCollapsed(tasks: GanttTask[]): void {
+    for (const task of tasks) {
+      if (this.seededIds.has(task.id)) continue;
+      this.seededIds.add(task.id);
+      if (task.open === false) this.collapsed.add(task.id);
+    }
   }
 
   private getLinks(): GanttLink[] {
@@ -1662,6 +1673,8 @@ export class UIGantt extends ElementBase {
       if (!sharesAnId(taskIds(oldValue), nextIds)) {
         this.viewportTop = 0;
         this.viewportLeft = 0;
+        this.collapsed.clear();
+        this.seededIds.clear();
       }
       // A selection on a task that is gone would leave no bar in the tab order.
       if (this.selectedId != null && !nextIds.has(this.selectedId)) this.selectedId = null;

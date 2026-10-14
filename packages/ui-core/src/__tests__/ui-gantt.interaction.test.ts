@@ -242,3 +242,39 @@ describe('ui-gantt when the host rewrites `tasks`', () => {
     expect(root(gantt).querySelector('.grid-row.selected')?.getAttribute('data-task-id')).toBe('b');
   });
 });
+
+describe('ui-gantt task `open: false`', () => {
+  const folded = TASKS.map((task) => (task.id === 'p1' ? { ...task, open: false } : task));
+  const rows = (gantt: HTMLElement) =>
+    [...root(gantt).querySelectorAll<HTMLElement>('.grid-row')].map((row) => row.dataset.taskId);
+
+  it('starts a branch collapsed', async () => {
+    const gantt = await mount({}, folded);
+
+    expect(rows(gantt)).toEqual(['p1', 'c']);
+    expect(root(gantt).querySelector('.grid-row[data-task-id="p1"]')!.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('lets the user expand it, and keeps it expanded when the host writes the same tasks back', async () => {
+    const gantt = await mount({}, folded);
+
+    root(gantt).querySelector<HTMLButtonElement>('.expander[data-task-id="p1"]')!.click();
+    await flush();
+    expect(rows(gantt)).toEqual(['p1', 'a', 'b', 'c']);
+
+    gantt.setAttribute('tasks', JSON.stringify(folded.map((task) => (task.id === 'a' ? { ...task, progress: 40 } : task))));
+    await flush();
+    expect(rows(gantt)).toEqual(['p1', 'a', 'b', 'c']);
+  });
+
+  it('applies it again when a different set of tasks is loaded', async () => {
+    const gantt = await mount({}, folded);
+    root(gantt).querySelector<HTMLButtonElement>('.expander[data-task-id="p1"]')!.click();
+    await flush();
+
+    gantt.setAttribute('tasks', JSON.stringify(folded.map((task) => ({ ...task, id: `n-${task.id}`, parent: task.parent ? `n-${task.parent}` : undefined }))));
+    await flush();
+
+    expect(rows(gantt)).toEqual(['n-p1', 'n-c']);
+  });
+});
