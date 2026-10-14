@@ -289,15 +289,74 @@ const style = `
     min-block-size: 62px;
   }
 
+  .band {
+    position: absolute;
+    inset-inline: 0;
+  }
+
+  .band.top {
+    inset-block-start: 0;
+    block-size: 26px;
+    border-bottom: 1px solid var(--ui-gantt-grid);
+  }
+
+  .band.bottom {
+    inset-block-start: 26px;
+    block-size: 36px;
+  }
+
+  .scale[data-zoom="year"] .band.bottom {
+    inset-block-start: 0;
+    block-size: 62px;
+  }
+
+  .band-cell,
   .tick {
     position: absolute;
     inset-block: 0;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
     border-left: 1px solid var(--ui-gantt-grid);
-    padding: 9px 8px;
+    padding: 0 8px;
     color: var(--ui-gantt-muted);
     font-size: 11px;
     font-weight: 650;
     white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .band-cell {
+    color: var(--ui-gantt-text);
+    font-weight: 700;
+  }
+
+  .scale[data-zoom="year"] .tick {
+    align-items: flex-start;
+    padding-block-start: 9px;
+  }
+
+  .tick.day {
+    flex-direction: column;
+    justify-content: center;
+    gap: 1px;
+    padding: 0;
+    line-height: 1.15;
+  }
+
+  .tick .dow {
+    font-size: 9px;
+    font-weight: 600;
+    opacity: 0.8;
+  }
+
+  .tick .num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tick.today-cell {
+    color: var(--ui-gantt-accent);
+    background: color-mix(in srgb, var(--ui-gantt-accent) 9%, transparent);
   }
 
   .grid-body {
@@ -313,6 +372,20 @@ const style = `
     background:
       linear-gradient(to right, var(--ui-gantt-grid) 1px, transparent 1px) 0 0 / var(--day-width) 100%,
       color-mix(in srgb, var(--ui-gantt-panel) 98%, transparent);
+  }
+
+  .timeline-body[data-zoom="month"],
+  .timeline-body[data-zoom="quarter"],
+  .timeline-body[data-zoom="year"] {
+    background: color-mix(in srgb, var(--ui-gantt-panel) 98%, transparent);
+  }
+
+  .unit-line {
+    position: absolute;
+    inset-block: 0;
+    inline-size: 1px;
+    background: color-mix(in srgb, var(--ui-gantt-border) 90%, transparent);
+    pointer-events: none;
   }
 
   .grid-row,
@@ -956,21 +1029,133 @@ function flattenTasks(tasks: GanttTask[], collapsed: Set<string>, filterText: st
   return rows;
 }
 
-function createTicks(min: number, max: number, dayWidth: number, zoom: GanttZoom, viewportLeft = 0, viewportWidth = Number.POSITIVE_INFINITY): string {
-  const days = Math.max(1, Math.ceil((max - min) / DAY));
-  const step = zoom === 'day' ? 1 : zoom === 'week' ? 7 : zoom === 'month' ? 30 : zoom === 'quarter' ? 91 : 365;
-  const firstDay = Math.max(0, Math.floor(Math.max(0, viewportLeft - 480) / dayWidth / step) * step);
-  const lastDay = Math.min(days, Math.ceil((viewportLeft + viewportWidth + 960) / dayWidth / step) * step);
-  const parts: string[] = [];
-  for (let day = firstDay; day <= lastDay; day += step) {
-    const x = day * dayWidth;
-    const date = addDays(min, day);
-    const label = zoom === 'day'
-      ? formatShortDate(date)
-      : new Intl.DateTimeFormat(undefined, { month: 'short', year: zoom === 'week' || zoom === 'month' ? undefined : 'numeric' }).format(new Date(date));
-    parts.push(`<span class="tick" style="left:${x.toFixed(2)}px">${escapeHtml(label)}</span>`);
+type HeaderUnit = 'day' | 'week' | 'month' | 'quarter' | 'year';
+
+/** The first day of the week as `Date#getDay` numbers it (0 is Sunday), from the user's locale; Monday if unknown. */
+function localeWeekStart(): number {
+  try {
+    const tag = new Intl.DateTimeFormat().resolvedOptions().locale;
+    const locale = new Intl.Locale(tag) as Intl.Locale & {
+      weekInfo?: { firstDay: number };
+      getWeekInfo?: () => { firstDay: number };
+    };
+    const info = typeof locale.getWeekInfo === 'function' ? locale.getWeekInfo() : locale.weekInfo;
+    if (info && Number.isInteger(info.firstDay)) return info.firstDay % 7; // 1..7 with 7 = Sunday
+  } catch {
+    // no Intl.Locale week data
   }
-  return parts.join('');
+  return 1;
+}
+
+function normalizeWeekStart(value: string | null): number {
+  const parsed = value == null || value === '' ? NaN : Number(value);
+  return Number.isInteger(parsed) && parsed >= 0 && parsed <= 6 ? parsed : localeWeekStart();
+}
+
+/** The calendar boundary at or before `ms` for a header unit (a Monday, a 1st of the month, a Jan 1...). */
+function unitStart(ms: number, unit: HeaderUnit, weekStart: number): number {
+  const date = new Date(ms);
+  date.setHours(0, 0, 0, 0);
+  if (unit === 'week') date.setDate(date.getDate() - ((date.getDay() - weekStart + 7) % 7));
+  else if (unit === 'month') date.setDate(1);
+  else if (unit === 'quarter') date.setMonth(Math.floor(date.getMonth() / 3) * 3, 1);
+  else if (unit === 'year') date.setMonth(0, 1);
+  return date.getTime();
+}
+
+/** The next boundary after a boundary from `unitStart`. Uses calendar arithmetic, so months and DST stay exact. */
+function nextUnit(ms: number, unit: HeaderUnit): number {
+  const date = new Date(ms);
+  if (unit === 'day') date.setDate(date.getDate() + 1);
+  else if (unit === 'week') date.setDate(date.getDate() + 7);
+  else if (unit === 'month') date.setMonth(date.getMonth() + 1);
+  else if (unit === 'quarter') date.setMonth(date.getMonth() + 3);
+  else date.setFullYear(date.getFullYear() + 1);
+  return date.getTime();
+}
+
+type HeaderCell = { left: number; width: number; start: number; label: string };
+
+/**
+ * The cells of one header row: every `unit` between `min` and `endMs`, clipped to that range, positioned in
+ * pixels. Only cells near the visible part of the scroll area are built, so a ten-year day scale stays cheap.
+ */
+function headerCells(
+  unit: HeaderUnit,
+  weekStart: number,
+  min: number,
+  endMs: number,
+  dayWidth: number,
+  viewportLeft: number,
+  viewportWidth: number
+): HeaderCell[] {
+  const cells: HeaderCell[] = [];
+  const visibleFrom = min + (Math.max(0, viewportLeft - 480) / dayWidth) * DAY;
+  const visibleTo = viewportLeft + viewportWidth + 960;
+  let cursor = unitStart(Math.max(min, visibleFrom), unit, weekStart);
+  while (cursor < endMs) {
+    const next = nextUnit(cursor, unit);
+    const from = Math.max(cursor, min);
+    const to = Math.min(next, endMs);
+    const left = ((from - min) / DAY) * dayWidth;
+    if (left > visibleTo) break;
+    if (to > from) cells.push({ left, width: ((to - from) / DAY) * dayWidth, start: cursor, label: '' });
+    cursor = next;
+  }
+  return cells;
+}
+
+/** Below this many pixels a clipped first or last cell has no room for its label. */
+const MIN_LABEL_WIDTH = 36;
+
+/**
+ * The time header: a top band (month and year, or year) over a bottom row (day, week start, month, quarter),
+ * so every column says exactly which period it is. At the year scale there is one row of years.
+ */
+function createTimeHeader(
+  min: number,
+  endMs: number,
+  dayWidth: number,
+  zoom: GanttZoom,
+  weekStart: number,
+  viewportLeft = 0,
+  viewportWidth = Number.POSITIVE_INFINITY
+): string {
+  const today = startOfDay(Date.now());
+  const monthYear = new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' });
+  const monthOnly = new Intl.DateTimeFormat(undefined, { month: 'short' });
+  const weekday = new Intl.DateTimeFormat(undefined, { weekday: 'narrow' });
+  const cell = (cls: string, item: HeaderCell, inner: string, title = '') =>
+    `<span class="${cls}" style="left:${item.left.toFixed(2)}px;width:${item.width.toFixed(2)}px"${title ? ` title="${escapeHtml(title)}"` : ''}>${inner}</span>`;
+
+  const bottomUnit: HeaderUnit = zoom;
+  const bottom = headerCells(bottomUnit, weekStart, min, endMs, dayWidth, viewportLeft, viewportWidth).map((item) => {
+    const date = new Date(item.start);
+    const fits = item.width >= MIN_LABEL_WIDTH;
+    if (zoom === 'day') {
+      const isToday = item.start === today;
+      return cell(
+        `tick day${isToday ? ' today-cell' : ''}`,
+        item,
+        `<span class="dow">${escapeHtml(weekday.format(date))}</span><span class="num">${date.getDate()}</span>`
+      );
+    }
+    if (zoom === 'week') return cell('tick', item, fits ? `<span class="num">${date.getDate()}</span>` : '', formatShortDate(item.start));
+    if (zoom === 'month') return cell('tick', item, fits ? escapeHtml(monthOnly.format(date)) : '', monthYear.format(date));
+    if (zoom === 'quarter') return cell('tick', item, fits ? `Q${Math.floor(date.getMonth() / 3) + 1}` : '', `Q${Math.floor(date.getMonth() / 3) + 1} ${date.getFullYear()}`);
+    return cell('tick', item, fits ? String(date.getFullYear()) : '');
+  }).join('');
+
+  if (zoom === 'year') return `<div class="band bottom">${bottom}</div>`;
+
+  const topUnit: HeaderUnit = zoom === 'day' || zoom === 'week' ? 'month' : 'year';
+  const top = headerCells(topUnit, weekStart, min, endMs, dayWidth, viewportLeft, viewportWidth).map((item) => {
+    const date = new Date(item.start);
+    const full = topUnit === 'month' ? monthYear.format(date) : String(date.getFullYear());
+    const label = item.width < MIN_LABEL_WIDTH ? '' : topUnit === 'month' && item.width < 120 ? monthOnly.format(date) : full;
+    return cell('band-cell', item, escapeHtml(label), full);
+  }).join('');
+  return `<div class="band top">${top}</div><div class="band bottom">${bottom}</div>`;
 }
 
 function taskIds(raw: string | null): Set<string> {
@@ -992,6 +1177,27 @@ function taskIds(raw: string | null): Set<string> {
 function sharesAnId(a: Set<string>, b: Set<string>): boolean {
   for (const id of a) if (b.has(id)) return true;
   return false;
+}
+
+/**
+ * Vertical lines on the header's unit boundaries, so the body lines up with the columns above it. The day
+ * scale keeps its per-day lines from the stylesheet; the month scale and wider would otherwise be a solid
+ * wash of lines a few pixels apart.
+ */
+function createUnitLines(
+  min: number,
+  endMs: number,
+  dayWidth: number,
+  zoom: GanttZoom,
+  weekStart: number,
+  viewportLeft: number,
+  viewportWidth: number
+): string {
+  if (zoom === 'day') return '';
+  return headerCells(zoom, weekStart, min, endMs, dayWidth, viewportLeft, viewportWidth)
+    .filter((cell) => cell.start >= min)
+    .map((cell) => `<span class="unit-line" style="left:${cell.left.toFixed(2)}px"></span>`)
+    .join('');
 }
 
 /** `CSS.escape` where it exists (it does not in jsdom); otherwise escape what would end a quoted attribute value. */
@@ -1097,7 +1303,7 @@ function routeDependencyPath(
 
 export class UIGantt extends ElementBase {
   static get observedAttributes() {
-    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless'];
+    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start'];
   }
 
   private focusRequest: FocusSnapshot | null = null;
@@ -1256,6 +1462,8 @@ export class UIGantt extends ElementBase {
     }).join('');
     const linkDefs = linkPaths ? '<defs><marker id="ui-gantt-arrow" markerWidth="9" markerHeight="9" refX="8.5" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0.5 0.75 L 8.5 4.5 L 0.5 8.25 z" /></marker></defs>' : '';
 
+    const weekStart = normalizeWeekStart(this.getAttribute('week-start'));
+    const rangeEnd = min + (timelineWidth / dayWidth) * DAY;
     const today = startOfDay(Date.now());
     const todayX = xForDate(today);
     const todayMarkup = showToday && today >= min && today <= max ? `<div class="today" part="today" style="left:${todayX.toFixed(2)}px"></div>` : '';
@@ -1299,9 +1507,10 @@ export class UIGantt extends ElementBase {
               </div>
             </div>
             <div class="timeline-head" part="timeline-head" aria-hidden="true">
-              <div class="scale" style="width:${timelineWidth.toFixed(2)}px">${createTicks(min, max, dayWidth, zoom, this.viewportLeft, this.viewportWidth)}</div>
+              <div class="scale" data-zoom="${zoom}" style="width:${timelineWidth.toFixed(2)}px">${createTimeHeader(min, rangeEnd, dayWidth, zoom, weekStart, this.viewportLeft, this.viewportWidth)}</div>
             </div>
-            <div class="timeline-body" part="timeline-body" role="group" aria-label="Timeline" style="width:${timelineWidth.toFixed(2)}px;min-height:${rowsHeight}px">
+            <div class="timeline-body" part="timeline-body" role="group" aria-label="Timeline" data-zoom="${zoom}" style="width:${timelineWidth.toFixed(2)}px;min-height:${rowsHeight}px">
+              ${createUnitLines(min, rangeEnd, dayWidth, zoom, weekStart, this.viewportLeft, this.viewportWidth)}
               <svg class="links" width="${timelineWidth.toFixed(0)}" height="${rowsHeight}" viewBox="0 0 ${timelineWidth.toFixed(0)} ${rowsHeight}" aria-hidden="true">${linkDefs}${linkPaths}</svg>
               ${todayMarkup}
               ${virtualized && topSpacer ? `<div style="height:${topSpacer}px"></div>` : ''}

@@ -63,6 +63,8 @@ export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   filterText?: string;
   virtualized?: boolean;
   headless?: boolean;
+  /** First day of the week in the time header, as `Date#getDay` numbers it (0 is Sunday). Defaults to the locale's. */
+  weekStart?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   onTaskChange?: (detail: GanttTaskChangeDetail, event: CustomEvent<GanttTaskChangeDetail>) => void;
   onTaskSelect?: (detail: { id: string }, event: CustomEvent<{ id: string }>) => void;
   onTaskDelete?: (detail: { id: string }, event: CustomEvent<{ id: string }>) => void;
@@ -112,6 +114,7 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
     filterText,
     virtualized,
     headless,
+    weekStart,
     children,
     onTaskChange,
     onTaskSelect,
@@ -165,7 +168,8 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
     if (virtualized === false) syncAttr('virtualized', 'false');
     else syncAttr('virtualized', null);
     syncBool('headless', headless);
-  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless]);
+    syncAttr('week-start', weekStart == null ? null : String(weekStart));
+  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart]);
 
   useEffect(() => {
     const el = ref.current;
