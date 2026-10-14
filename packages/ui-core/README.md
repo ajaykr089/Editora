@@ -259,6 +259,9 @@ and resize, and a toolbar for zoom, filter and sort. Give it `tasks` and `links`
 - `bar-variant`: `solid`, `soft`, `striped`, `outline` or `glass`.
 - Choose the task list's columns with `columns` (`["label", "start", "end", "duration", "progress"]`, or objects with a `label` and a
   `width`) and size it with `grid-width`; a splitter on its edge resizes it (mouse, touch, or the arrow keys) and fires `gridresize`.
+- Keyboard: Tab enters the task list once (a row) and once more for the bars. On a row, Up/Down, Home/End and PageUp/PageDown move between rows, Right
+  opens a branch or steps into it, Left closes it or climbs to the parent, Enter or Space selects. On a bar the same keys move between rows, and
+  Left/Right move the bar a day (Shift: extend the end), Delete asks to remove it, and Escape closes the tooltip.
 - Dragging: a bar can be dragged, resized from its ends, or moved with the arrow keys (Shift extends the end). The chart scrolls when a drag is held
   near the left or right edge, Escape cancels it, and `snap="week"` or `snap="month"` snaps it to whole weeks or months. `beforetaskchange`
   (cancelable) fires before the dates change, so a host can refuse the change with `event.preventDefault()`; `taskchange` fires after.

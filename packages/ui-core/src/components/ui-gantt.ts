@@ -74,6 +74,8 @@ type FocusSnapshot = {
   selector: string;
   /** Scroll the control into view when it takes focus (keyboard navigation to a row that may be off screen). */
   reveal?: boolean;
+  /** How many renders may pass while the control is not in the rendered window yet (a row far down a long chart). */
+  retries?: number;
   selection?: [number | null, number | null, 'forward' | 'backward' | 'none' | null];
 };
 
@@ -504,6 +506,15 @@ const style = `
     grid-template-columns: var(--gantt-cols);
     color: var(--ui-gantt-text);
     font-size: 12px;
+  }
+
+  .grid-row {
+    outline: 0;
+  }
+
+  .grid-row:focus-visible {
+    outline: 2px solid var(--ui-gantt-accent);
+    outline-offset: -2px;
   }
 
   .grid-row.selected,
@@ -1457,6 +1468,10 @@ function cssEscape(value: string): string {
   return value.replace(/["\\]/g, '\\$&');
 }
 
+function rowSelector(taskId: string): string {
+  return `.grid-row[data-task-id="${cssEscape(taskId)}"]`;
+}
+
 function barSelector(taskId: string): string {
   return `.bar[data-task-id="${cssEscape(taskId)}"]`;
 }
@@ -1470,6 +1485,7 @@ function focusSelectorFor(el: HTMLElement): string | null {
   if (el.classList.contains('head-button') && el.dataset.sort) return `.head-button[data-sort="${cssEscape(el.dataset.sort)}"]`;
   if (el.classList.contains('splitter') && el.getAttribute('role') === 'separator') return '.splitter[role="separator"]';
   if (el.classList.contains('bar') && el.dataset.taskId) return barSelector(el.dataset.taskId);
+  if (el.classList.contains('grid-row') && el.dataset.taskId) return rowSelector(el.dataset.taskId);
   if (el.classList.contains('expander') && el.dataset.taskId) return `.expander[data-task-id="${cssEscape(el.dataset.taskId)}"]`;
   return null;
 }
@@ -1984,6 +2000,8 @@ export class UIGantt extends ElementBase {
     const descriptions = new Map<string, TaskDescription>();
     const visibleById = new Map(visible.map((task, index) => [task.id, { task, index }]));
     const renderedIds = new Set(rendered.map((task) => task.id));
+    // The one row and bar in the tab order: the selected task, or the first one on screen when it is not rendered.
+    const tabStopId = this.selectedId != null && renderedIds.has(this.selectedId) ? this.selectedId : rendered[0]?.id;
     const xForDate = (value: number) => ((value - min) / DAY) * dayWidth;
     const gridRows = rendered.map((task, offset) => {
       const rowIndex = firstRow + offset;
@@ -2011,7 +2029,7 @@ export class UIGantt extends ElementBase {
         }
       };
       return `
-        <div class="grid-row${selected}" part="grid-row" data-task-id="${escapeHtml(task.id)}" role="row" aria-rowindex="${rowIndex + 2}" aria-level="${task.depth + 1}" ${task.hasChildren ? `aria-expanded="${!this.collapsed.has(task.id)}"` : ''}>
+        <div class="grid-row${selected}" part="grid-row" data-task-id="${escapeHtml(task.id)}" role="row" tabindex="${task.id === tabStopId ? 0 : -1}" aria-rowindex="${rowIndex + 2}" aria-level="${task.depth + 1}" ${selected ? 'aria-selected="true"' : ''} ${task.hasChildren ? `aria-expanded="${!this.collapsed.has(task.id)}"` : ''}>
           ${columns.map(cell).join('')}
         </div>
       `;
@@ -2023,7 +2041,7 @@ export class UIGantt extends ElementBase {
       const description = describeTask(task, kind, mediumDate, text);
       descriptions.set(task.id, description);
       const selected = this.selectedId === task.id ? ' selected' : '';
-      const focusable = this.selectedId === task.id || (!this.selectedId && rowIndex === 0);
+      const focusable = task.id === tabStopId;
       const tone = tones[task.tone || (kind === 'summary' ? 'info' : 'default')] || tones.default;
       const left = kind === 'milestone' ? xForDate(task.startMs) - MILESTONE_SIZE / 2 : xForDate(task.startMs);
       const right = xForDate(kind === 'milestone' ? task.startMs : task.endMs);
@@ -2203,6 +2221,11 @@ export class UIGantt extends ElementBase {
   private restoreFocus(snapshot: FocusSnapshot | null): void {
     if (!snapshot) return;
     const next = this.root.querySelector<HTMLElement>(snapshot.selector);
+    if (!next && snapshot.reveal && (snapshot.retries ?? 0) < 5) {
+      // The row is outside the rendered window: the scroll that is on its way renders the window it is in.
+      this.focusRequest = { ...snapshot, retries: (snapshot.retries ?? 0) + 1 };
+      return;
+    }
     if (!next || this.root.activeElement === next) return;
     next.focus({ preventScroll: !snapshot.reveal });
     if (snapshot.selection && next instanceof HTMLInputElement) {
@@ -2315,6 +2338,7 @@ export class UIGantt extends ElementBase {
     });
     this.bindTooltips();
     this.bindSplitters();
+    this.bindRows();
 
     if (this.hasAttribute('readonly')) return;
     this.root.querySelectorAll<HTMLElement>('.bar[data-draggable="true"]').forEach((bar) => {
@@ -2547,9 +2571,9 @@ export class UIGantt extends ElementBase {
       this.selectTask(taskId);
       return;
     }
-    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+    if (['ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(event.key)) {
       event.preventDefault();
-      this.selectAdjacentTask(taskId, event.key === 'ArrowDown' ? 1 : -1);
+      this.navigate(taskId, event.key, 'bar');
       return;
     }
     if (!editable) return;
@@ -2613,6 +2637,24 @@ export class UIGantt extends ElementBase {
       this.tipTimer = null;
     }
     this.root.querySelector<HTMLElement>('.bar-tip')?.removeAttribute('data-open');
+  }
+
+  /** The task list is a treegrid: a row takes focus and the arrow keys move around it. */
+  private bindRows(): void {
+    this.root.querySelectorAll<HTMLElement>('.grid-row').forEach((row) => {
+      row.addEventListener('keydown', (event) => {
+        // keys that land on a button or a field inside the row belong to it
+        if (event.target !== row) return;
+        const id = row.dataset.taskId;
+        if (!id) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          this.selectTask(id);
+          return;
+        }
+        if (this.navigate(id, event.key, 'row')) event.preventDefault();
+      });
+    });
   }
 
   /** Drag the splitter (or use the arrow keys on it) to resize the task list; it is kept in `grid-width`. */
@@ -2718,8 +2760,15 @@ export class UIGantt extends ElementBase {
   private scrollViewport(position: { left?: number; top?: number }, behavior?: ScrollBehavior): void {
     const viewport = this.root.querySelector<HTMLElement>('.viewport');
     if (!viewport) return;
+    const resolved = this.resolveBehavior(behavior);
+    if (resolved !== 'smooth') {
+      // A render can follow at once (focusing a row does) and it puts the scroll back from these, before any
+      // scroll event has told it where the chart went.
+      if (position.left != null) this.viewportLeft = position.left;
+      if (position.top != null) this.viewportTop = position.top;
+    }
     if (typeof viewport.scrollTo === 'function') {
-      viewport.scrollTo({ ...position, behavior: this.resolveBehavior(behavior) });
+      viewport.scrollTo({ ...position, behavior: resolved });
       return;
     }
     if (position.left != null) viewport.scrollLeft = position.left;
@@ -2833,19 +2882,68 @@ export class UIGantt extends ElementBase {
     this.requestRender();
   }
 
-  private selectAdjacentTask(id: string, direction: 1 | -1): void {
-    const visible = this.getVisibleTasks(
-      this.getTasks(),
-      this.getAttribute('filter') ?? this.internalFilter,
-      normalizeSort(this.getAttribute('sort'))
-    );
-    const index = visible.findIndex((task) => task.id === id);
-    const next = visible[Math.max(0, Math.min(visible.length - 1, index + direction))];
-    if (!next || next.id === id) return;
-    this.selectedId = next.id;
-    this.focusRequest = { selector: barSelector(next.id), reveal: true };
-    this.dispatchEvent(new CustomEvent('taskselect', { detail: { id: next.id }, bubbles: true, composed: true }));
+  /** Select a task and give focus to its row or its bar, scrolling it into view first. */
+  private focusTask(id: string, zone: 'row' | 'bar'): void {
+    if (this.selectedId !== id) {
+      this.selectedId = id;
+      this.dispatchEvent(new CustomEvent('taskselect', { detail: { id }, bubbles: true, composed: true }));
+    }
+    this.focusRequest = { selector: zone === 'row' ? rowSelector(id) : barSelector(id), reveal: true, retries: 0 };
+    this.reveal(id, 'auto');
     this.requestRender();
+  }
+
+  /**
+   * Keyboard movement between rows, the same from a row and from a bar: Up and Down, Home and End, PageUp and PageDown. From a row,
+   * Right and Left also open, close and climb the tree. Returns whether the key was one of these.
+   */
+  private navigate(fromId: string, key: string, zone: 'row' | 'bar'): boolean {
+    const ids = this.visibleIds;
+    const index = ids.indexOf(fromId);
+    if (index < 0) return false;
+    let target: string | undefined;
+    switch (key) {
+      case 'ArrowUp':
+        target = ids[index - 1];
+        break;
+      case 'ArrowDown':
+        target = ids[index + 1];
+        break;
+      case 'Home':
+        target = ids[0];
+        break;
+      case 'End':
+        target = ids[ids.length - 1];
+        break;
+      case 'PageUp':
+        target = ids[Math.max(0, index - 10)];
+        break;
+      case 'PageDown':
+        target = ids[Math.min(ids.length - 1, index + 10)];
+        break;
+      case 'ArrowRight':
+      case 'ArrowLeft': {
+        if (zone !== 'row') return false;
+        const tasks = this.getTasks();
+        const parents = new Set(tasks.map((task) => task.parent).filter((id): id is string => !!id));
+        const isParent = parents.has(fromId);
+        if (key === 'ArrowRight') {
+          if (!isParent) return true;
+          if (this.collapsed.has(fromId)) this.toggleTask(fromId, true);
+          else target = ids[index + 1];
+        } else if (isParent && !this.collapsed.has(fromId)) {
+          this.toggleTask(fromId, false);
+        } else {
+          const parent = tasks.find((task) => task.id === fromId)?.parent;
+          if (parent && ids.includes(parent)) target = parent;
+        }
+        break;
+      }
+      default:
+        return false;
+    }
+    if (target && target !== fromId) this.focusTask(target, zone);
+    return true;
   }
 
   private captureViewport(): void {
