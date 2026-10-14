@@ -28,7 +28,7 @@ Visible quality, no new concepts. Most of it is in `createTicks` and the bar CSS
 | --- | --- | --- | --- |
 | A1 | ~~Two-level time header~~ **done** | Top band (month/year) over a bottom row (day number and weekday letter, week start, month, quarter), cells on real calendar boundaries, today highlighted, a `week-start` attribute. Also lines the body grid up with the header columns (no more grey wash at month and wider). | M |
 | A2 | ~~Day-zoom label collisions~~ **done** | Solved by the same header: the day row only needs a number and a weekday letter. | S |
-| A3 | Visible progress | `.progress` is a 22%-black fade at 0.3 opacity, which is nearly invisible, and it is hidden on split bars. Draw a solid darker fill with a crisp edge; honour `segments[].progress` (already in the type). | S |
+| A3 | ~~Visible progress~~ **done** | A solid darker fill with a light edge on every bar (soft, outline and glass tuned, summary bars included), per-part fills on split bars (a part's own `progress`, else the task's shared in order), split bars follow the bar variant, `data-progress` and a `complete` class. | S |
 | A4 | Zoom range | `month`, `quarter` and `year` give the same width for any project under a few months (the `max(680, …)` clamp). Derive the clamp from the container, and add a `fit` zoom that fits the whole range. | M |
 | A5 | Timeline fills the frame | Grid lines stop at the end of the data, leaving a blank strip on wide hosts. Extend the range to at least the container width. | S |
 | A6 | Today label | It overlaps summary bars. Move it to a pill in the header and keep only the line in the body. | S |
@@ -70,7 +70,7 @@ can build undo from `taskchange`).
 
 ## Order and totals
 
-A1 and A2 are done; next A3-A5 (they change how every chart looks), then A6-A11, B1-B2, B4, B3, B7, B5, B6, B8, and phase C last.
+A1-A3 are done; next A4-A5 (they change how every chart looks), then A6-A11, B1-B2, B4, B3, B7, B5, B6, B8, and phase C last.
 That is roughly five to six weeks in total, and each item above is its own commit. The estimate is a
 guess from reading the code, not a measurement: C2 and C3 are the ones most likely to run over.
 
