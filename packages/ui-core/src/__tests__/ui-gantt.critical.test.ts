@@ -34,6 +34,12 @@ afterEach(() => {
 });
 
 describe('ui-gantt critical-path', () => {
+  it('draws a critical bar in the danger tone whatever tone the task has', async () => {
+    const { root } = await mount({}, [{ id: 'a', label: 'Design', start: '2026-03-02', end: '2026-03-06', tone: 'success', critical: true }], []);
+    // The inline `--tone` of a bar would otherwise beat the `.bar.critical` rule and keep the bar blue or green.
+    expect(root.querySelector('.bar[data-task-id="a"]')?.getAttribute('style')).toContain('--tone:var(--ui-color-danger');
+  });
+
   it('marks nothing on its own', async () => {
     expect(critical((await mount()).root)).toEqual([]);
   });

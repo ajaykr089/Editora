@@ -2365,7 +2365,8 @@ export class UIGantt extends ElementBase {
       descriptions.set(task.id, description);
       const selected = this.selectedId === task.id ? ' selected' : '';
       const focusable = task.id === tabStopId;
-      const tone = tones[task.tone || (kind === 'summary' ? 'info' : 'default')] || tones.default;
+      // The tone is set inline, which beats `.bar.critical`: a critical bar has to ask for the danger tone itself.
+      const tone = task.critical ? tones.danger : tones[task.tone || (kind === 'summary' ? 'info' : 'default')] || tones.default;
       const left = kind === 'milestone' ? xForDate(task.startMs) - MILESTONE_SIZE / 2 : xForDate(task.startMs);
       const right = xForDate(kind === 'milestone' ? task.startMs : task.endMs);
       const width = kind === 'milestone' ? MILESTONE_SIZE : Math.max(12, right - left);
