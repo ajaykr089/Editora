@@ -51,6 +51,11 @@ export type GanttLinkSelectDetail = {
   type: GanttLink['type'];
 };
 
+export type GanttColumnKey = 'label' | 'assignee' | 'owner' | 'dates' | 'start' | 'end' | 'duration' | 'progress';
+
+/** A grid column: a key, or an object that also sets the header text and the width in px. */
+export type GanttColumn = GanttColumnKey | { key: GanttColumnKey; label?: string; width?: number };
+
 /** Every word the chart shows or announces. `tasksCount` takes `{shown}` and `{total}`. */
 export type GanttLabels = {
   title: string;
@@ -74,6 +79,10 @@ export type GanttLabels = {
   columnOwner: string;
   columnDates: string;
   columnProgress: string;
+  columnStart: string;
+  columnEnd: string;
+  columnDuration: string;
+  splitter: string;
   empty: string;
   noMatches: string;
   expand: string;
@@ -103,10 +112,15 @@ export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   headless?: boolean;
   /** First day of the week in the time header, as `Date#getDay` numbers it (0 is Sunday). Defaults to the locale's. */
   weekStart?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  /** The task list's columns, in order. The name column is always first. Default: name, owner, dates, progress. */
+  columns?: GanttColumn[];
+  /** Width of the task list in px. The user can also drag the splitter; see `onGridResize`. */
+  gridWidth?: number;
   /** Translations: any subset of the labels. */
   labels?: Partial<GanttLabels>;
   /** BCP 47 locale for dates (month names, date formats, the week's first day). Defaults to the browser's. */
   locale?: string;
+  onGridResize?: (detail: { width: number }, event: CustomEvent<{ width: number }>) => void;
   onTaskChange?: (detail: GanttTaskChangeDetail, event: CustomEvent<GanttTaskChangeDetail>) => void;
   onTaskSelect?: (detail: { id: string }, event: CustomEvent<{ id: string }>) => void;
   onTaskDelete?: (detail: { id: string }, event: CustomEvent<{ id: string }>) => void;
@@ -159,6 +173,8 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
     weekStart,
     labels,
     locale,
+    columns,
+    gridWidth,
     children,
     onTaskChange,
     onTaskSelect,
@@ -167,6 +183,7 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
     onZoomChange,
     onFilterChange,
     onSortChange,
+    onGridResize,
     ...rest
   },
   forwardedRef
@@ -215,7 +232,9 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
     syncAttr('week-start', weekStart == null ? null : String(weekStart));
     syncAttr('labels', labels ? JSON.stringify(labels) : null);
     syncAttr('locale', locale || null);
-  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale]);
+    syncAttr('columns', columns?.length ? JSON.stringify(columns) : null);
+    syncAttr('grid-width', gridWidth != null && gridWidth > 0 ? String(gridWidth) : null);
+  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth]);
 
   useEffect(() => {
     const el = ref.current;
@@ -235,8 +254,12 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
     el.addEventListener('linkselect', handleLinkSelect);
     el.addEventListener('zoomchange', handleZoomChange);
     el.addEventListener('filterchange', handleFilterChange);
+    const handleGridResize = (event: Event) => onGridResize?.((event as CustomEvent<{ width: number }>).detail, event as CustomEvent<{ width: number }>);
+
     el.addEventListener('sortchange', handleSortChange);
+    el.addEventListener('gridresize', handleGridResize);
     return () => {
+      el.removeEventListener('gridresize', handleGridResize);
       el.removeEventListener('taskchange', handleTaskChange);
       el.removeEventListener('taskselect', handleTaskSelect);
       el.removeEventListener('taskdelete', handleTaskDelete);
@@ -245,7 +268,7 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
       el.removeEventListener('filterchange', handleFilterChange);
       el.removeEventListener('sortchange', handleSortChange);
     };
-  }, [onTaskChange, onTaskSelect, onTaskDelete, onLinkSelect, onZoomChange, onFilterChange, onSortChange]);
+  }, [onTaskChange, onTaskSelect, onTaskDelete, onLinkSelect, onZoomChange, onFilterChange, onSortChange, onGridResize]);
 
   return createUIElement('ui-gantt', { ref, ...rest }, children);
 });

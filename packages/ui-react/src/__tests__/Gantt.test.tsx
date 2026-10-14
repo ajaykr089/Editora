@@ -92,4 +92,23 @@ describe('Gantt wrapper', () => {
     expect(el.hasAttribute('locale')).toBe(false);
     expect(el.shadowRoot!.querySelector('.title')!.textContent).toContain('Project schedule');
   });
+
+  it('passes columns and gridWidth through, and reports a resize of the list', async () => {
+    const onGridResize = vi.fn();
+    const { container, rerender } = render(<Gantt tasks={tasks} columns={['label', { key: 'dates', label: 'When' }, 'progress']} gridWidth={420} onGridResize={onGridResize} />);
+    await Promise.resolve();
+    const el = container.querySelector('ui-gantt') as HTMLElement;
+    expect(JSON.parse(el.getAttribute('columns')!)).toEqual(['label', { key: 'dates', label: 'When' }, 'progress']);
+    expect(el.getAttribute('grid-width')).toBe('420');
+    expect([...el.shadowRoot!.querySelectorAll('[role="columnheader"]')].map((h) => h.textContent!.trim())).toEqual(['Task', 'When', '%']);
+
+    const splitter = el.shadowRoot!.querySelector('.splitter[role="separator"]') as HTMLElement;
+    splitter.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
+    expect(onGridResize).toHaveBeenCalledWith({ width: 436 }, expect.anything());
+
+    rerender(<Gantt tasks={tasks} />);
+    await Promise.resolve();
+    expect(el.hasAttribute('columns')).toBe(false);
+    expect(el.hasAttribute('grid-width')).toBe(false);
+  });
 });

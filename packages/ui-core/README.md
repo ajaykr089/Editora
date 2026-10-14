@@ -257,6 +257,8 @@ and resize, and a toolbar for zoom, filter and sort. Give it `tasks` and `links`
 - The time header has two rows (month over days or weeks, year over months or quarters). `week-start` (`0` is Sunday)
   sets the first day of the week; it defaults to the locale's.
 - `bar-variant`: `solid`, `soft`, `striped`, `outline` or `glass`.
+- Choose the task list's columns with `columns` (`["label", "start", "end", "duration", "progress"]`, or objects with a `label` and a
+  `width`) and size it with `grid-width`; a splitter on its edge resizes it (mouse, touch, or the arrow keys) and fires `gridresize`.
 - Translate every word with `labels` (a JSON object with any subset of the label keys, e.g. `{"title": "Planning", "zoomWeek": "semaine"}`) and
   set `locale` (`fr-FR`) for month names, date formats and the first day of the week.
 - Dates are calendar days (`YYYY-MM-DD`). A time or offset after the day (`2026-03-02T23:30:00Z`) is ignored, so a task never moves a

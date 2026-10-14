@@ -69,6 +69,8 @@ const DAY = 24 * 60 * 60 * 1000;
 const ROW_HEIGHT = 42;
 const HEADER_HEIGHT = 62;
 const GRID_WIDTH = 376;
+/** The grid template of the default columns (name, owner, dates, progress): 170 + 82 + 80 + 44 = 376px. */
+const DEFAULT_TEMPLATE = 'minmax(170px, 1fr) 82px 80px 44px';
 /** Mirrors the container query in the stylesheet: at this host width or less the grid shrinks to COMPACT_GRID_WIDTH. */
 const COMPACT_MAX_WIDTH = 640;
 const COMPACT_GRID_WIDTH = 148;
@@ -186,6 +188,7 @@ const style = `
 
   .surface {
     --gantt-grid-w: ${GRID_WIDTH}px;
+    --gantt-cols: ${DEFAULT_TEMPLATE};
     display: grid;
     grid-template-columns: var(--gantt-grid-w) minmax(640px, 1fr);
     min-inline-size: 100%;
@@ -196,12 +199,11 @@ const style = `
   @container ui-gantt (max-width: 640px) {
     .surface {
       --gantt-grid-w: 148px;
+      --gantt-cols: minmax(0, 1fr);
     }
 
-    /* .surface in front: the base .grid-head / .grid-row rules come later in the sheet and would win. */
-    .surface .grid-head,
-    .surface .grid-row {
-      grid-template-columns: minmax(0, 1fr);
+    .splitter-rail {
+      display: none;
     }
 
     /* !important: the sortable header wrappers carry an inline display: contents. */
@@ -241,7 +243,7 @@ const style = `
     left: 0;
     z-index: 5;
     display: grid;
-    grid-template-columns: minmax(170px, 1fr) 82px 80px 44px;
+    grid-template-columns: var(--gantt-cols);
     border-right: 1px solid var(--ui-gantt-border);
   }
 
@@ -389,6 +391,53 @@ const style = `
       color-mix(in srgb, var(--ui-gantt-panel) 98%, transparent);
   }
 
+  /* The task list can be resized: a handle on its right edge, in the header and down the body. They are grid items
+     of their own, in the cells of the header and the body, so the sticky grid underneath stays a plain treegrid. */
+  .splitter-rail {
+    position: sticky;
+    left: 0;
+    grid-column: 1;
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  .splitter-rail.head {
+    grid-row: 1;
+    top: 0;
+    z-index: 6;
+  }
+
+  .splitter-rail.body {
+    grid-row: 2;
+  }
+
+  .splitter {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: -4px;
+    inline-size: 8px;
+    cursor: col-resize;
+    pointer-events: auto;
+    touch-action: none;
+    outline: 0;
+  }
+
+  .splitter::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 3px;
+    inline-size: 2px;
+    background: transparent;
+    transition: background 120ms ease;
+  }
+
+  .splitter:hover::after,
+  .splitter.dragging::after,
+  .splitter:focus-visible::after {
+    background: var(--ui-gantt-accent);
+  }
+
   .timeline-body[data-zoom="month"],
   .timeline-body[data-zoom="quarter"],
   .timeline-body[data-zoom="year"] {
@@ -411,7 +460,7 @@ const style = `
 
   .grid-row {
     display: grid;
-    grid-template-columns: minmax(170px, 1fr) 82px 80px 44px;
+    grid-template-columns: var(--gantt-cols);
     color: var(--ui-gantt-text);
     font-size: 12px;
   }
@@ -1376,6 +1425,7 @@ function focusSelectorFor(el: HTMLElement): string | null {
   if (el.classList.contains('select')) return '.select';
   if (el.classList.contains('zoom-button') && el.dataset.zoom) return `.zoom-button[data-zoom="${cssEscape(el.dataset.zoom)}"]`;
   if (el.classList.contains('head-button') && el.dataset.sort) return `.head-button[data-sort="${cssEscape(el.dataset.sort)}"]`;
+  if (el.classList.contains('splitter') && el.getAttribute('role') === 'separator') return '.splitter[role="separator"]';
   if (el.classList.contains('bar') && el.dataset.taskId) return barSelector(el.dataset.taskId);
   if (el.classList.contains('expander') && el.dataset.taskId) return `.expander[data-task-id="${cssEscape(el.dataset.taskId)}"]`;
   return null;
@@ -1404,6 +1454,10 @@ export type GanttLabels = {
   columnOwner: string;
   columnDates: string;
   columnProgress: string;
+  columnStart: string;
+  columnEnd: string;
+  columnDuration: string;
+  splitter: string;
   empty: string;
   noMatches: string;
   expand: string;
@@ -1440,6 +1494,10 @@ const DEFAULT_LABELS: GanttLabels = {
   columnOwner: 'Owner',
   columnDates: 'Dates',
   columnProgress: '%',
+  columnStart: 'Start',
+  columnEnd: 'End',
+  columnDuration: 'Days',
+  splitter: 'Resize the task list',
   empty: 'No tasks in this range',
   noMatches: 'No matching tasks',
   expand: 'Expand',
@@ -1453,6 +1511,82 @@ const DEFAULT_LABELS: GanttLabels = {
   assigned: 'assigned to',
   critical: 'critical'
 };
+
+type ColumnKey = 'label' | 'assignee' | 'dates' | 'start' | 'end' | 'duration' | 'progress';
+
+type ColumnDef = {
+  key: ColumnKey;
+  title: keyof GanttLabels;
+  /** A header label that replaces the translated one. */
+  custom?: string;
+  sort?: GanttSort;
+  /** Width in px. For the name column it is the minimum: that column takes the room the others leave. */
+  width: number;
+};
+
+const COLUMN_DEFS: Record<ColumnKey, { title: keyof GanttLabels; sort?: GanttSort; width: number }> = {
+  label: { title: 'columnTask', sort: 'label', width: 170 },
+  assignee: { title: 'columnOwner', width: 82 },
+  dates: { title: 'columnDates', sort: 'start', width: 80 },
+  start: { title: 'columnStart', sort: 'start', width: 74 },
+  end: { title: 'columnEnd', sort: 'end', width: 74 },
+  duration: { title: 'columnDuration', width: 56 },
+  progress: { title: 'columnProgress', sort: 'progress', width: 44 }
+};
+const DEFAULT_COLUMNS: ColumnKey[] = ['label', 'assignee', 'dates', 'progress'];
+/** The least the name column keeps when the user drags the grid narrower than its natural width. */
+const LABEL_MIN_USER = 96;
+
+/**
+ * The `columns` attribute: a JSON array of keys (`"assignee"`) or objects (`{"key": "dates", "label": "When", "width": 120}`).
+ * The name column is always first; unknown and repeated keys are dropped.
+ */
+function parseColumns(raw: string | null): ColumnDef[] {
+  let entries: unknown[] = DEFAULT_COLUMNS;
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length) entries = parsed;
+    } catch {
+      // malformed JSON: the default columns
+    }
+  }
+  const columns: ColumnDef[] = [];
+  const seen = new Set<string>();
+  for (const entry of entries) {
+    const object = entry && typeof entry === 'object' ? (entry as Record<string, unknown>) : null;
+    let key = typeof entry === 'string' ? entry : object ? object.key : null;
+    if (key === 'owner') key = 'assignee';
+    if (typeof key !== 'string' || !(key in COLUMN_DEFS) || seen.has(key)) continue;
+    seen.add(key);
+    const def = COLUMN_DEFS[key as ColumnKey];
+    const width = object ? Number(object.width) : NaN;
+    columns.push({
+      key: key as ColumnKey,
+      title: def.title,
+      custom: object && typeof object.label === 'string' && object.label ? object.label : undefined,
+      sort: def.sort,
+      width: Number.isFinite(width) && width >= 36 ? Math.min(Math.round(width), 400) : def.width
+    });
+  }
+  const at = columns.findIndex((column) => column.key === 'label');
+  if (at > 0) columns.unshift(columns.splice(at, 1)[0]);
+  if (at < 0) columns.unshift({ key: 'label', title: 'columnTask', sort: 'label', width: COLUMN_DEFS.label.width });
+  return columns;
+}
+
+/** The grid's width and its column template, for the columns and a width the user may have set. */
+function columnLayout(columns: ColumnDef[], userWidth: number | null) {
+  const others = columns.slice(1).reduce((sum, column) => sum + column.width, 0);
+  const labelMin = userWidth != null ? LABEL_MIN_USER : columns[0].width;
+  const min = others + LABEL_MIN_USER;
+  return {
+    width: userWidth != null ? Math.max(Math.round(userWidth), min) : others + columns[0].width,
+    min,
+    template: columns.map((column, i) => (i === 0 ? `minmax(${labelMin}px, 1fr)` : `${column.width}px`)).join(' ')
+  };
+}
+
 
 /**
  * The locale for dates, set from the `locale` attribute at the start of each render. A render is synchronous, so a
@@ -1499,6 +1633,11 @@ function describeTask(task: VisibleTask, kind: GanttTaskType, format: Intl.DateT
 
 function zoomLabel(zoom: GanttZoom, text: GanttLabels): string {
   return { day: text.zoomDay, week: text.zoomWeek, month: text.zoomMonth, quarter: text.zoomQuarter, year: text.zoomYear, fit: text.zoomFit }[zoom];
+}
+
+function parseUserGrid(raw: string | null): number | null {
+  const value = raw == null || raw === '' ? NaN : Number(raw);
+  return Number.isFinite(value) && value > 0 ? value : null;
 }
 
 function taskKind(task: VisibleTask): GanttTaskType {
@@ -1583,7 +1722,7 @@ function routeDependencyPath(
 
 export class UIGantt extends ElementBase {
   static get observedAttributes() {
-    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale'];
+    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width'];
   }
 
   private focusRequest: FocusSnapshot | null = null;
@@ -1598,6 +1737,7 @@ export class UIGantt extends ElementBase {
   private viewportLeft = 0;
   private viewportWidth = 1800;
   private hostWidth = 0;
+  private gridBounds = { min: 0, max: 0, width: GRID_WIDTH };
   private descriptions = new Map<string, TaskDescription>();
   private tipTimer: number | null = null;
   private pointerFocus = false;
@@ -1699,7 +1839,11 @@ export class UIGantt extends ElementBase {
     // The host's width decides the compact layout, how far a wide host is filled (A5) and, for `fit`, the scale.
     this.hostWidth = this.clientWidth || this.hostWidth;
     const frameWidth = this.hostWidth - FRAME_BORDER;
-    const gridWidth = frameWidth <= COMPACT_MAX_WIDTH ? COMPACT_GRID_WIDTH : GRID_WIDTH;
+    const compact = this.hostWidth > 0 && frameWidth <= COMPACT_MAX_WIDTH;
+    const columns = parseColumns(this.getAttribute('columns'));
+    const layout = columnLayout(columns, parseUserGrid(this.getAttribute('grid-width')));
+    const gridWidth = compact ? COMPACT_GRID_WIDTH : layout.width;
+    this.gridBounds = { min: layout.min, max: Math.max(layout.min, this.hostWidth > 0 ? frameWidth - 240 : 1200), width: layout.width };
     const fitting = zoom === 'fit';
     const fitAvailable = this.hostWidth > 0 ? frameWidth - gridWidth - this.scrollbarWidth : FIT_FALLBACK_WIDTH;
     const dayWidth = fitting
@@ -1734,17 +1878,30 @@ export class UIGantt extends ElementBase {
       const rowIndex = firstRow + offset;
       const selected = this.selectedId === task.id ? ' selected' : '';
       const kind = taskKind(task);
-      const progress = task.progress == null ? '-' : `${Math.round(task.progress)}%`;
-      const dates = kind === 'milestone' ? formatShortDate(task.startMs) : `${formatShortDate(task.startMs)} - ${formatShortDate(task.endMs)}`;
-      return `
-        <div class="grid-row${selected}" part="grid-row" data-task-id="${escapeHtml(task.id)}" role="row" aria-rowindex="${rowIndex + 2}" aria-level="${task.depth + 1}" ${task.hasChildren ? `aria-expanded="${!this.collapsed.has(task.id)}"` : ''}>
-          <div class="grid-cell task-name" role="gridcell" style="padding-left:${10 + task.depth * 18}px">
+      const cell = (column: ColumnDef): string => {
+        switch (column.key) {
+          case 'label':
+            return `<div class="grid-cell task-name" role="gridcell" style="padding-left:${10 + task.depth * 18}px">
             ${task.hasChildren ? `<button class="expander" data-action="toggle" data-task-id="${escapeHtml(task.id)}" aria-label="${escapeHtml(this.collapsed.has(task.id) ? text.expand : text.collapse)} ${escapeHtml(task.label)}">${this.collapsed.has(task.id) ? '›' : '⌄'}</button>` : '<span style="inline-size:22px"></span>'}
             <span class="name-text" title="${escapeHtml(task.label)}">${escapeHtml(task.label)}</span>
-          </div>
-          <div class="grid-cell badge" role="gridcell">${escapeHtml(task.assignee || kind)}</div>
-          <div class="grid-cell badge" role="gridcell">${escapeHtml(dates)}</div>
-          <div class="grid-cell badge" role="gridcell">${escapeHtml(progress)}</div>
+          </div>`;
+          case 'assignee':
+            return `<div class="grid-cell badge" role="gridcell">${escapeHtml(task.assignee || kind)}</div>`;
+          case 'dates':
+            return `<div class="grid-cell badge" role="gridcell">${escapeHtml(kind === 'milestone' ? formatShortDate(task.startMs) : `${formatShortDate(task.startMs)} - ${formatShortDate(task.endMs)}`)}</div>`;
+          case 'start':
+            return `<div class="grid-cell badge" role="gridcell">${escapeHtml(formatShortDate(task.startMs))}</div>`;
+          case 'end':
+            return `<div class="grid-cell badge" role="gridcell">${escapeHtml(kind === 'milestone' ? '-' : formatShortDate(task.endMs))}</div>`;
+          case 'duration':
+            return `<div class="grid-cell badge" role="gridcell">${kind === 'milestone' ? '-' : Math.max(0, Math.round((task.endMs - task.startMs) / DAY))}</div>`;
+          default:
+            return `<div class="grid-cell badge" role="gridcell">${task.progress == null ? '-' : `${Math.round(task.progress)}%`}</div>`;
+        }
+      };
+      return `
+        <div class="grid-row${selected}" part="grid-row" data-task-id="${escapeHtml(task.id)}" role="row" aria-rowindex="${rowIndex + 2}" aria-level="${task.depth + 1}" ${task.hasChildren ? `aria-expanded="${!this.collapsed.has(task.id)}"` : ''}>
+          ${columns.map(cell).join('')}
         </div>
       `;
     }).join('');
@@ -1825,6 +1982,7 @@ export class UIGantt extends ElementBase {
     const previousFrame = this.root.querySelector('.frame');
     this.setContent(`
       <style>${style}</style>
+      ${layout.width !== GRID_WIDTH || layout.template !== DEFAULT_TEMPLATE ? `<style>@container ui-gantt (min-width: 641px) { .surface { --gantt-grid-w: ${layout.width}px; --gantt-cols: ${layout.template}; } }</style>` : ''}
       <section class="frame" part="frame" data-bar-variant="${barVariant}">
         ${showToolbar ? `
           <header class="toolbar" part="toolbar">
@@ -1846,12 +2004,15 @@ export class UIGantt extends ElementBase {
         ` : ''}
         <div class="viewport" part="viewport">
           <div class="surface" part="surface" style="--day-width:${dayWidth}px;grid-template-columns:var(--gantt-grid-w) minmax(${timelineWidth.toFixed(2)}px, 1fr);inline-size:max(100%, calc(var(--gantt-grid-w) + ${timelineWidth.toFixed(2)}px))">
-            <div class="grid-semantics" role="treegrid" aria-label="${escapeHtml(this.getAttribute('aria-label') || text.title)}" aria-rowcount="${visible.length + 1}" aria-colcount="4">
+            <div class="grid-semantics" role="treegrid" aria-label="${escapeHtml(this.getAttribute('aria-label') || text.title)}" aria-rowcount="${visible.length + 1}" aria-colcount="${compact ? 1 : columns.length}">
               <div class="grid-head" part="grid-head" role="row">
-                <div role="columnheader" aria-sort="${sort === 'label' ? 'ascending' : 'none'}" style="display:contents"><button class="head-button" data-sort="label">${escapeHtml(text.columnTask)}</button></div>
-                <span role="columnheader">${escapeHtml(text.columnOwner)}</span>
-                <div role="columnheader" aria-sort="${sort === 'start' ? 'ascending' : 'none'}" style="display:contents"><button class="head-button" data-sort="start">${escapeHtml(text.columnDates)}</button></div>
-                <div role="columnheader" aria-sort="${sort === 'progress' ? 'descending' : 'none'}" style="display:contents"><button class="head-button" data-sort="progress">${escapeHtml(text.columnProgress)}</button></div>
+                ${columns.map((column) => {
+                  const title = escapeHtml(column.custom ?? text[column.title]);
+                  if (!column.sort) return `<span role="columnheader">${title}</span>`;
+                  const active = sort === column.sort;
+                  const direction = column.sort === 'progress' ? 'descending' : 'ascending';
+                  return `<div role="columnheader" aria-sort="${active ? direction : 'none'}" style="display:contents"><button class="head-button" data-sort="${column.sort}">${title}</button></div>`;
+                }).join('')}
               </div>
               <div class="grid-body" part="grid-body" role="rowgroup">
                 ${virtualized && topSpacer ? `<div style="height:${topSpacer}px"></div>` : ''}
@@ -1859,6 +2020,8 @@ export class UIGantt extends ElementBase {
                 ${virtualized && bottomSpacer ? `<div style="height:${bottomSpacer}px"></div>` : ''}
               </div>
             </div>
+            <div class="splitter-rail head"><div class="splitter" role="separator" aria-orientation="vertical" aria-label="${escapeHtml(text.splitter)}" aria-valuemin="${layout.min}" aria-valuemax="${this.gridBounds.max}" aria-valuenow="${layout.width}" tabindex="0"></div></div>
+            <div class="splitter-rail body"><div class="splitter" aria-hidden="true"></div></div>
             <div class="timeline-head" part="timeline-head" aria-hidden="true">
               <div class="scale" data-zoom="${unit}" style="min-width:${timelineWidth.toFixed(2)}px">${createTimeHeader(min, rangeEnd, dayWidth, unit, weekStart, this.viewportLeft, this.viewportWidth)}${todayPill}</div>
             </div>
@@ -2022,6 +2185,7 @@ export class UIGantt extends ElementBase {
       bar.addEventListener('keydown', (event) => this.handleBarKeydown(bar, event as KeyboardEvent));
     });
     this.bindTooltips();
+    this.bindSplitters();
 
     if (this.hasAttribute('readonly')) return;
     this.root.querySelectorAll<HTMLElement>('.bar[data-draggable="true"]').forEach((bar) => {
@@ -2221,6 +2385,57 @@ export class UIGantt extends ElementBase {
       this.tipTimer = null;
     }
     this.root.querySelector<HTMLElement>('.bar-tip')?.removeAttribute('data-open');
+  }
+
+  /** Drag the splitter (or use the arrow keys on it) to resize the task list; it is kept in `grid-width`. */
+  private bindSplitters(): void {
+    const surface = this.root.querySelector<HTMLElement>('.surface');
+    const handles = this.root.querySelectorAll<HTMLElement>('.splitter');
+    const commit = (width: number) => {
+      const next = Math.round(Math.max(this.gridBounds.min, Math.min(this.gridBounds.max, width)));
+      if (next === this.gridBounds.width) return;
+      this.setAttribute('grid-width', String(next));
+      this.dispatchEvent(new CustomEvent('gridresize', { detail: { width: next }, bubbles: true, composed: true }));
+    };
+    handles.forEach((handle) => {
+      handle.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0 || !surface) return;
+        event.preventDefault();
+        const startX = event.clientX;
+        const { min, max, width: startWidth } = this.gridBounds;
+        let width = startWidth;
+        handle.setPointerCapture(event.pointerId);
+        handles.forEach((item) => item.classList.add('dragging'));
+        const move = (moveEvent: PointerEvent) => {
+          width = Math.max(min, Math.min(max, startWidth + moveEvent.clientX - startX));
+          surface.style.setProperty('--gantt-grid-w', `${width}px`);
+        };
+        const end = (endEvent: PointerEvent) => {
+          handle.removeEventListener('pointermove', move);
+          handle.removeEventListener('pointerup', end);
+          handle.removeEventListener('pointercancel', end);
+          handles.forEach((item) => item.classList.remove('dragging'));
+          if (endEvent.type === 'pointercancel') {
+            surface.style.removeProperty('--gantt-grid-w');
+            return;
+          }
+          commit(width);
+        };
+        handle.addEventListener('pointermove', move);
+        handle.addEventListener('pointerup', end);
+        handle.addEventListener('pointercancel', end);
+      });
+      handle.addEventListener('keydown', (event) => {
+        if (handle.getAttribute('role') !== 'separator') return;
+        const step = event.shiftKey ? 64 : 16;
+        const { min, max, width } = this.gridBounds;
+        const next =
+          event.key === 'ArrowLeft' ? width - step : event.key === 'ArrowRight' ? width + step : event.key === 'Home' ? min : event.key === 'End' ? max : null;
+        if (next == null) return;
+        event.preventDefault();
+        commit(next);
+      });
+    });
   }
 
   private bindTooltips(): void {

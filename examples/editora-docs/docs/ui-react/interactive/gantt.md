@@ -90,6 +90,8 @@ render(<Example />);
 | `links` | `GanttLink[]` | Dependency links with `source`, `target`, and optional `type`. |
 | `zoom` | `'day' \| 'week' \| 'month' \| 'quarter' \| 'year' \| 'fit'` | Timeline scale. `fit` scales the whole project to the width of the chart (between 0.2 and 48px a day) and picks the header unit from the result; it follows the chart when it is resized. |
 | `weekStart` | `0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6` | First day of the week in the time header (0 is Sunday). Defaults to the locale's. |
+| `columns` | `GanttColumn[]` | The task list's columns, in order: `'label'` (always first), `'assignee'`, `'dates'`, `'start'`, `'end'`, `'duration'`, `'progress'`. Use `{ key, label, width }` to set a header text and a width in px. Unknown keys are dropped; the default is name, owner, dates, progress. At phone width only the name column is shown. |
+| `gridWidth` | `number` | Width of the task list in px (at least the other columns plus 96px for the name). A splitter on its edge resizes it with the mouse, touch or the arrow keys (Shift for bigger steps, Home and End for the extremes). |
 | `labels` | `Partial<GanttLabels>` | Translations: any subset of the words the chart shows or announces (title, toolbar, column headers, zoom names, empty states, "expand", "assigned to"...). `tasksCount` takes `{shown}` and `{total}`. |
 | `locale` | `string` | BCP 47 locale for dates: month names, date formats and the first day of the week. Defaults to the browser's. |
 | `sort` | `'none' \| 'start' \| 'end' \| 'label' \| 'progress'` | Sort mode used by the task grid. |
@@ -106,6 +108,7 @@ render(<Example />);
 - `onTaskDelete(detail)`: fired from keyboard delete/backspace on the selected task.
 - `onLinkSelect(detail)`: fired when a dependency connector is selected.
 - `onZoomChange`, `onFilterChange`, `onSortChange`: fired from built-in toolbar controls.
+- `onGridResize({ width })`: fired when the task list is resized with its splitter.
 
 ## Live Examples
 
