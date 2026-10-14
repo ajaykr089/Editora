@@ -247,4 +247,23 @@ describe('Gantt wrapper', () => {
     await Promise.resolve();
     expect(el.shadowRoot!.querySelectorAll('.bar.critical').length).toBe(0);
   });
+
+  it('passes nonWorkingDays and holidays through (a weekend keyword, Dates and labels)', async () => {
+    const { container, rerender } = render(
+      <Gantt tasks={tasks} zoom="week" nonWorkingDays="weekend" holidays={[new Date(2030, 0, 1), { date: '2030-02-02', label: 'Break' }]} />
+    );
+    await Promise.resolve();
+    const el = container.querySelector('ui-gantt') as HTMLElement;
+    expect(el.getAttribute('non-working-days')).toBe('');
+    expect(JSON.parse(el.getAttribute('holidays')!)).toEqual(['2030-01-01', { date: '2030-02-02', label: 'Break' }]);
+
+    rerender(<Gantt tasks={tasks} zoom="week" nonWorkingDays={[0]} />);
+    await Promise.resolve();
+    expect(el.getAttribute('non-working-days')).toBe('[0]');
+    expect(el.hasAttribute('holidays')).toBe(false);
+
+    rerender(<Gantt tasks={tasks} zoom="week" />);
+    await Promise.resolve();
+    expect(el.hasAttribute('non-working-days')).toBe(false);
+  });
 });

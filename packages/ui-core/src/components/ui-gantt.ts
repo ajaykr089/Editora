@@ -494,6 +494,22 @@ const style = `
     background: color-mix(in srgb, var(--ui-gantt-panel) 98%, transparent);
   }
 
+  /* Non-working days: a tint behind the rows, a warmer one for a holiday. */
+  .off-day {
+    position: absolute;
+    inset-block: 0;
+    background: color-mix(in srgb, var(--ui-gantt-muted) 11%, transparent);
+    pointer-events: none;
+  }
+
+  .off-day.holiday {
+    background: color-mix(in srgb, var(--ui-color-warning, #d97706) 15%, transparent);
+  }
+
+  .tick.off {
+    background: color-mix(in srgb, var(--ui-gantt-muted) 9%, transparent);
+  }
+
   .unit-line {
     position: absolute;
     inset-block: 0;
@@ -1358,6 +1374,90 @@ function headerCells(
   return cells;
 }
 
+/** Which days are not working days: a weekday list and a set of dates, each date with an optional label. */
+type NonWorking = { weekdays: Set<number>; holidays: Map<number, string> };
+
+const NO_NON_WORKING: NonWorking = { weekdays: new Set(), holidays: new Map() };
+
+/**
+ * `non-working-days`: weekday numbers (0 is Sunday) as `0,6` or `[0, 6]`; the attribute with no value means the weekend.
+ * `holidays`: a JSON array of dates (`YYYY-MM-DD`) or `{ "date": ..., "label": ... }` objects.
+ */
+function parseNonWorking(daysRaw: string | null, holidaysRaw: string | null): NonWorking {
+  const weekdays = new Set<number>();
+  if (daysRaw != null) {
+    const text = daysRaw.trim();
+    if (text === '') {
+      weekdays.add(0);
+      weekdays.add(6);
+    } else {
+      let items: unknown[] = text.split(',');
+      try {
+        const parsed = JSON.parse(text);
+        if (Array.isArray(parsed)) items = parsed;
+        else if (typeof parsed === 'number') items = [parsed];
+      } catch {
+        // a plain comma list
+      }
+      for (const item of items) {
+        const day = Number(typeof item === 'string' ? item.trim() : item);
+        if (Number.isInteger(day) && day >= 0 && day <= 6) weekdays.add(day);
+      }
+    }
+  }
+  const holidays = new Map<number, string>();
+  if (holidaysRaw) {
+    try {
+      const parsed = JSON.parse(holidaysRaw);
+      if (Array.isArray(parsed)) {
+        for (const entry of parsed) {
+          const object = entry && typeof entry === 'object' ? (entry as Record<string, unknown>) : null;
+          const ms = parseDate(object ? object.date : entry);
+          if (ms != null) holidays.set(ms, object && typeof object.label === 'string' ? object.label : '');
+        }
+      }
+    } catch {
+      // malformed JSON: no holidays
+    }
+  }
+  return { weekdays, holidays };
+}
+
+function isNonWorking(ms: number, off: NonWorking): boolean {
+  return off.holidays.has(ms) || off.weekdays.has(new Date(ms).getDay());
+}
+
+/** Below this many px a day the shading would be stripes, so it is left out (month scales and wider). */
+const MIN_SHADE_DAY_WIDTH = 8;
+
+/**
+ * The shaded stretches of non-working days near the visible part of the scroll area, as absolutely positioned spans:
+ * runs of the same kind of day are one span, and a holiday is drawn apart from an ordinary non-working day.
+ */
+function createNonWorkingShading(min: number, endMs: number, dayWidth: number, off: NonWorking, viewportLeft: number, viewportWidth: number): string {
+  if (dayWidth < MIN_SHADE_DAY_WIDTH || (!off.weekdays.size && !off.holidays.size)) return '';
+  const first = Math.max(0, Math.floor(Math.max(0, viewportLeft - 480) / dayWidth));
+  const last = Math.min(Math.ceil((endMs - min) / DAY), Math.ceil((viewportLeft + viewportWidth + 960) / dayWidth));
+  const spans: string[] = [];
+  let runStart = -1;
+  let runKind = '';
+  const close = (end: number) => {
+    if (runStart >= 0) spans.push(`<span class="off-day${runKind}" style="left:${(runStart * dayWidth).toFixed(2)}px;width:${((end - runStart) * dayWidth).toFixed(2)}px"></span>`);
+    runStart = -1;
+  };
+  for (let i = first; i < last; i += 1) {
+    const day = shiftDays(min, i);
+    const kind = off.holidays.has(day) ? ' holiday' : off.weekdays.has(new Date(day).getDay()) ? '' : null;
+    if (kind === null || (runStart >= 0 && kind !== runKind)) close(i);
+    if (kind !== null && runStart < 0) {
+      runStart = i;
+      runKind = kind;
+    }
+  }
+  close(last);
+  return spans.join('');
+}
+
 /** Below this many pixels a clipped first or last cell has no room for its label. */
 const MIN_LABEL_WIDTH = 36;
 
@@ -1372,7 +1472,8 @@ function createTimeHeader(
   zoom: GanttUnit,
   weekStart: number,
   viewportLeft = 0,
-  viewportWidth = Number.POSITIVE_INFINITY
+  viewportWidth = Number.POSITIVE_INFINITY,
+  off: NonWorking = NO_NON_WORKING
 ): string {
   const today = startOfDay(Date.now());
   const monthYear = dateFormat({ month: 'long', year: 'numeric' });
@@ -1387,10 +1488,12 @@ function createTimeHeader(
     const fits = item.width >= MIN_LABEL_WIDTH;
     if (zoom === 'day') {
       const isToday = item.start === today;
+      const holiday = off.holidays.get(item.start);
       return cell(
-        `tick day${isToday ? ' today-cell' : ''}`,
+        `tick day${isToday ? ' today-cell' : ''}${isNonWorking(item.start, off) ? ' off' : ''}`,
         item,
-        `<span class="dow">${escapeHtml(weekday.format(date))}</span><span class="num">${date.getDate()}</span>`
+        `<span class="dow">${escapeHtml(weekday.format(date))}</span><span class="num">${date.getDate()}</span>`,
+        holiday || ''
       );
     }
     if (zoom === 'week') return cell('tick', item, fits ? `<span class="num">${date.getDate()}</span>` : '', formatShortDate(item.start));
@@ -1903,7 +2006,7 @@ function routeDependencyPath(
 
 export class UIGantt extends ElementBase {
   static get observedAttributes() {
-    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width', 'fill', 'max-height', 'snap', 'creatable', 'auto-summary', 'cascade', 'schedule', 'critical-path'];
+    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width', 'fill', 'max-height', 'snap', 'creatable', 'auto-summary', 'cascade', 'schedule', 'critical-path', 'non-working-days', 'holidays'];
   }
 
   private focusRequest: FocusSnapshot | null = null;
@@ -2188,6 +2291,7 @@ export class UIGantt extends ElementBase {
     const linkDefs = linkPaths ? `<defs>${arrowHead('ui-gantt-arrow')}${arrowHead('ui-gantt-arrow-bad')}</defs>` : '';
 
     const weekStart = normalizeWeekStart(this.getAttribute('week-start'));
+    const nonWorking = parseNonWorking(this.getAttribute('non-working-days'), this.getAttribute('holidays'));
     // A host wider than the data fills the frame: the timeline track grows (1fr) and the header cells and
     // grid lines are drawn out to its edge, so there is no blank strip after the last task.
     const fillWidth = Math.max(timelineWidth, frameWidth - gridWidth);
@@ -2254,9 +2358,10 @@ export class UIGantt extends ElementBase {
             <div class="splitter-rail head"><div class="splitter" role="separator" aria-orientation="vertical" aria-label="${escapeHtml(text.splitter)}" aria-valuemin="${layout.min}" aria-valuemax="${this.gridBounds.max}" aria-valuenow="${layout.width}" tabindex="0"></div></div>
             <div class="splitter-rail body"><div class="splitter" aria-hidden="true"></div></div>
             <div class="timeline-head" part="timeline-head" aria-hidden="true">
-              <div class="scale" data-zoom="${unit}" style="min-width:${timelineWidth.toFixed(2)}px">${createTimeHeader(min, rangeEnd, dayWidth, unit, weekStart, this.viewportLeft, this.viewportWidth)}${todayPill}</div>
+              <div class="scale" data-zoom="${unit}" style="min-width:${timelineWidth.toFixed(2)}px">${createTimeHeader(min, rangeEnd, dayWidth, unit, weekStart, this.viewportLeft, this.viewportWidth, nonWorking)}${todayPill}</div>
             </div>
             <div class="timeline-body" part="timeline-body" role="group" aria-label="${escapeHtml(text.timeline)}" data-zoom="${unit}" style="min-width:${timelineWidth.toFixed(2)}px;min-height:${rowsHeight}px">
+              ${createNonWorkingShading(min, rangeEnd, dayWidth, nonWorking, this.viewportLeft, this.viewportWidth)}
               ${createUnitLines(min, rangeEnd, dayWidth, unit, weekStart, this.viewportLeft, this.viewportWidth)}
               <svg class="links" width="${timelineWidth.toFixed(0)}" height="${rowsHeight}" viewBox="0 0 ${timelineWidth.toFixed(0)} ${rowsHeight}" aria-hidden="true">${linkDefs}${linkPaths}</svg>
               ${todayMarkup}

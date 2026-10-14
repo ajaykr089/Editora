@@ -153,6 +153,10 @@ export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   schedule?: 'warn' | 'auto' | 'off';
   /** Mark the critical path from the links: the tasks with no slack on a tight chain of links (a task you flag `critical` stays). */
   criticalPath?: boolean;
+  /** Weekdays that are not working days (0 is Sunday), or `'weekend'` for Saturday and Sunday. Shaded behind the rows where a day is wide enough to read. */
+  nonWorkingDays?: number[] | 'weekend';
+  /** Dates that are not working days: `'YYYY-MM-DD'` strings, `Date`s, or `{ date, label }`. Shaded apart from `nonWorkingDays`, and the label names them in the day header. */
+  holidays?: Array<string | Date | { date: string | Date; label?: string }>;
   /** A parent's dates follow its children (the earliest start to the latest end), and so does its progress when it has none of its own. */
   autoSummary?: boolean;
   /** Moving a parent moves everything under it by the same days (a read-only task stays put). Makes parent bars draggable. */
@@ -244,6 +248,8 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     cascade,
     schedule,
     criticalPath,
+    nonWorkingDays,
+    holidays,
     children,
     onTaskChange,
     onTaskSelect,
@@ -312,11 +318,13 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     syncBool('auto-summary', autoSummary);
     syncBool('cascade', cascade);
     syncBool('critical-path', criticalPath);
+    syncAttr('non-working-days', nonWorkingDays == null ? null : nonWorkingDays === 'weekend' ? '' : JSON.stringify(nonWorkingDays));
+    syncAttr('holidays', holidays?.length ? JSON.stringify(holidays.map((item) => (item instanceof Date ? serializeDate(item) : item && typeof item === 'object' && !(item instanceof Date) ? { ...item, date: serializeDate(item.date) } : item))) : null);
     syncAttr('schedule', schedule && schedule !== 'warn' ? schedule : null);
     syncAttr('snap', snap && snap !== 'day' ? snap : null);
     syncAttr('initial-scroll', initialScroll && initialScroll !== 'today' ? initialScroll : null);
     syncAttr('max-height', maxHeight == null || maxHeight === '' ? null : typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight);
-  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight, initialScroll, snap, creatable, autoSummary, cascade, schedule, criticalPath]);
+  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight, initialScroll, snap, creatable, autoSummary, cascade, schedule, criticalPath, nonWorkingDays, holidays]);
 
   useEffect(() => {
     const el = ref.current;
