@@ -89,6 +89,44 @@ describe('ui-gantt auto-summary', () => {
   });
 });
 
+describe('ui-gantt auto-summary with parents that have no dates', () => {
+  const UNDATED = [
+    { id: 'p', label: 'Phase', type: 'summary' },
+    { id: 'q', label: 'Sub phase', type: 'summary', parent: 'p' },
+    { id: 'a', label: 'Design', start: '2026-03-04', end: '2026-03-09', parent: 'q' },
+    { id: 'b', label: 'Build', start: '2026-03-10', end: '2026-03-20', parent: 'p' },
+    { id: 'empty', label: 'Empty phase', type: 'summary' },
+  ];
+
+  it('takes the dates of a parent from its children, through a parent of parents', async () => {
+    const { root } = await mount({ 'auto-summary': '' }, UNDATED);
+
+    expect(dates(root, 'p')).toBe(`${short(3, 4)} - ${short(3, 20)}`);
+    expect(dates(root, 'q')).toBe(`${short(3, 4)} - ${short(3, 9)}`);
+  });
+
+  it('leaves out a parent that has no dates and no children to take them from', async () => {
+    const { root } = await mount({ 'auto-summary': '' }, UNDATED);
+
+    expect(root.querySelector('.grid-row[data-task-id="empty"]')).toBeNull();
+    expect(root.querySelectorAll('.grid-row').length).toBe(4);
+  });
+
+  it('still needs dates without the attribute', async () => {
+    const { root } = await mount({}, UNDATED);
+
+    expect(root.querySelector('.grid-row[data-task-id="p"]')).toBeNull();
+    expect(root.querySelector('.grid-row[data-task-id="a"]')).not.toBeNull();
+  });
+
+  it('keeps the chart from reaching back to 1970 for a placeholder', async () => {
+    const { root } = await mount({ 'auto-summary': '' }, UNDATED);
+
+    expect(parseFloat(root.querySelector<HTMLElement>('.timeline-body')!.style.minWidth)).toBeLessThan(2000);
+    expect(root.querySelector('.band.top .band-cell')!.textContent).not.toContain('1970');
+  });
+});
+
 describe('ui-gantt cascade', () => {
   it('keeps parents fixed without it, and makes them movable with it (no resize handles)', async () => {
     const plain = await mount();

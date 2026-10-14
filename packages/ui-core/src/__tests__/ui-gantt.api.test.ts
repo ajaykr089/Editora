@@ -294,6 +294,22 @@ describe('ui-gantt tree API', () => {
   });
 });
 
+describe('ui-gantt scrollToTask for a task that was just added', () => {
+  it('reveals it once it has been rendered, instead of failing because its row is not there yet', async () => {
+    const many = Array.from({ length: 60 }, (_, i) => ({ id: `t${i}`, label: `Task ${i}`, start: iso(i % 20), end: iso((i % 20) + 5) }));
+    const { gantt, root } = await mount(many, { 'initial-scroll': 'start' });
+    const api = gantt as Api;
+
+    api.tasks = [...many, { id: 'fresh', label: 'Just added', start: iso(0), end: iso(5) }];
+    expect(api.scrollToTask('fresh')).toBe(true); // asked in the same tick as the change
+    await flush();
+
+    expect(root.querySelector('.grid-row[data-task-id="fresh"]')).not.toBeNull();
+    // row 60 centred in a 400px area under the 62px header
+    expect(viewport(root).scrollTop).toBeCloseTo(60 * 42 + 21 - (400 - 62) / 2, 0);
+  });
+});
+
 describe('ui-gantt tasks and links properties', () => {
   it('writes the attribute from an array, turning Dates into plain days', async () => {
     const { gantt, root } = await mount([]);
@@ -315,6 +331,17 @@ describe('ui-gantt tasks and links properties', () => {
     api.tasks = null;
     expect(gantt.hasAttribute('tasks')).toBe(false);
     expect(api.tasks).toEqual([]);
+  });
+
+  it('writes holidays from dates, labels and Dates, and reads them back', async () => {
+    const { gantt } = await mount([]);
+    const api = gantt as Api & { holidays: unknown };
+    api.holidays = [new Date(2026, 11, 25), '2026-12-26', { date: new Date(2027, 0, 1), label: 'New year' }];
+
+    expect(JSON.parse(gantt.getAttribute('holidays')!)).toEqual(['2026-12-25', '2026-12-26', { date: '2027-01-01', label: 'New year' }]);
+    expect(api.holidays).toEqual(['2026-12-25', '2026-12-26', { date: '2027-01-01', label: 'New year' }]);
+    api.holidays = null;
+    expect(gantt.hasAttribute('holidays')).toBe(false);
   });
 
   it('handles links the same way', async () => {

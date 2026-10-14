@@ -14,7 +14,8 @@ export type GanttBarVariant = 'solid' | 'soft' | 'striped' | 'outline' | 'glass'
 export type GanttTask = {
   id?: string;
   label: string;
-  start: string | Date;
+  /** Required, except for a `type: 'summary'` parent while `autoSummary` is on: it takes its dates from its children. */
+  start?: string | Date;
   end?: string | Date;
   duration?: number;
   progress?: number;

@@ -25,6 +25,8 @@ type GanttTask = {
   baselineStart?: string;
   baselineEnd?: string;
   critical?: boolean;
+  /** Internal: a parent given no dates, waiting for `auto-summary` to take them from its children. */
+  undated?: boolean;
   segments?: Array<{ start: string; end: string; progress?: number }>;
 };
 
@@ -1294,7 +1296,10 @@ function normalizeBarVariant(value: string | null): GanttBarVariant {
   return value === 'soft' || value === 'striped' || value === 'outline' || value === 'glass' ? value : 'solid';
 }
 
-function parseTasks(raw: string | null, overrides: Map<string, Partial<GanttTask>>): GanttTask[] {
+/** A parent with no dates of its own, while `auto-summary` is on, is given this one until its children decide (see applyRollUp). */
+const UNDATED = new Date(1970, 0, 1).getTime();
+
+function parseTasks(raw: string | null, overrides: Map<string, Partial<GanttTask>>, allowUndatedParents = false): GanttTask[] {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
@@ -1304,10 +1309,15 @@ function parseTasks(raw: string | null, overrides: Map<string, Partial<GanttTask
         if (!entry || typeof entry !== 'object') return null;
         const item = entry as Record<string, unknown>;
         const label = String(item.label || item.text || '').trim();
-        const startMs = parseDate(item.start);
+        let startMs = parseDate(item.start);
         const duration = Number(item.duration);
         let endMs = parseDate(item.end);
         if (endMs == null && startMs != null && Number.isFinite(duration)) endMs = addDays(startMs, Math.max(0, duration));
+        const undated = allowUndatedParents && startMs == null && item.type === 'summary';
+        if (undated) {
+          startMs = UNDATED;
+          endMs = addDays(UNDATED, 1);
+        }
         if (!label || startMs == null) return null;
         const type = item.type === 'summary' || item.type === 'milestone' ? item.type : 'task';
         const safeEnd = type === 'milestone' ? startMs : Math.max(endMs ?? addDays(startMs, 1), addDays(startMs, 1));
@@ -1328,6 +1338,7 @@ function parseTasks(raw: string | null, overrides: Map<string, Partial<GanttTask
           baselineStart: item.baselineStart != null ? String(item.baselineStart) : undefined,
           baselineEnd: item.baselineEnd != null ? String(item.baselineEnd) : undefined,
           critical: item.critical === true,
+          undated,
           segments: Array.isArray(item.segments) ? item.segments as GanttTask['segments'] : undefined
         };
       })
@@ -1977,11 +1988,14 @@ function toSched(task: GanttTask): SchedTask | null {
 /** `auto-summary`: a parent's dates (and its progress, when it has none of its own) follow its children. */
 function applyRollUp(tasks: GanttTask[]): GanttTask[] {
   const rolled = rollUp(tasks.map(toSched).filter((task): task is SchedTask => task != null));
-  return tasks.map((task) => {
-    const value = rolled.get(task.id);
-    if (!value) return task;
-    return { ...task, start: formatIso(value.start), end: formatIso(value.end), progress: task.progress ?? value.progress };
-  });
+  return tasks
+    .map((task) => {
+      const value = rolled.get(task.id);
+      if (!value) return task;
+      return { ...task, undated: false, start: formatIso(value.start), end: formatIso(value.end), progress: task.progress ?? value.progress };
+    })
+    // a parent with no dates and no children has nothing to take them from
+    .filter((task) => !task.undated);
 }
 
 /** `critical-path`: mark the tasks with no slack on a tight chain of links as critical (a `critical: true` you set stays). */
@@ -1990,7 +2004,7 @@ function applyCriticalPath(tasks: GanttTask[], links: GanttLink[]): GanttTask[] 
   return ids.size ? tasks.map((task) => (ids.has(task.id) && !task.critical ? { ...task, critical: true } : task)) : tasks;
 }
 
-function readJsonArray(raw: string | null): Array<Record<string, unknown>> {
+function readJsonArray(raw: string | null): Array<any> {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
@@ -2166,7 +2180,7 @@ export class UIGantt extends ElementBase {
 
   override connectedCallback(): void {
     // A property set before the element was defined sits on the instance and would hide the accessor.
-    for (const name of ['tasks', 'links'] as const) {
+    for (const name of ['tasks', 'links', 'holidays'] as const) {
       if (Object.prototype.hasOwnProperty.call(this, name)) {
         const value = (this as unknown as Record<string, unknown>)[name];
         delete (this as unknown as Record<string, unknown>)[name];
@@ -3304,6 +3318,26 @@ export class UIGantt extends ElementBase {
     writeJsonArray(this, 'tasks', value, true);
   }
 
+  /** The holidays as an array of `YYYY-MM-DD` strings or `{ date, label }` objects. Setting it writes the attribute (a `Date` becomes its local day). */
+  get holidays(): Array<unknown> {
+    return readJsonArray(this.getAttribute('holidays'));
+  }
+
+  set holidays(value: Array<unknown> | null | undefined) {
+    if (!Array.isArray(value)) {
+      this.removeAttribute('holidays');
+      return;
+    }
+    try {
+      this.setAttribute(
+        'holidays',
+        JSON.stringify(value.map((item) => (item && typeof item === 'object' && !(item instanceof Date) ? { ...(item as Record<string, unknown>), date: toAttrDate((item as { date?: unknown }).date) } : toAttrDate(item))))
+      );
+    } catch {
+      // not serialisable: leave the attribute as it is
+    }
+  }
+
   /** The links as an array. Setting it writes the `links` attribute. */
   get links(): Array<Record<string, unknown>> {
     return readJsonArray(this.getAttribute('links'));
@@ -3373,7 +3407,11 @@ export class UIGantt extends ElementBase {
       }
       parent = byId.get(parent)?.parent;
     }
-    if (opened) {
+    const filter = this.getAttribute('filter') ?? this.internalFilter;
+    const shown = this.getVisibleTasks(tasks, filter, normalizeSort(this.getAttribute('sort'))).some((item) => item.id === id);
+    if (!shown) return false;
+    // A task that was just added (or a branch that was just opened) is not in the rendered rows yet: reveal it once it is.
+    if (opened || !this.visibleIds.includes(id)) {
       this.pendingReveal = { id, behavior: options.behavior ?? 'auto' };
       this.requestRender();
       return true;
@@ -3662,7 +3700,7 @@ export class UIGantt extends ElementBase {
     this.taskCacheVersion = this.overridesVersion;
     this.taskCacheAuto = auto;
     this.taskCacheCritical = critical;
-    this.taskCache = parseTasks(raw, this.overrides);
+    this.taskCache = parseTasks(raw, this.overrides, auto);
     if (auto) this.taskCache = applyRollUp(this.taskCache);
     if (critical !== null) this.taskCache = applyCriticalPath(this.taskCache, parseLinks(critical));
     this.seedCollapsed(this.taskCache);
