@@ -16,6 +16,7 @@ about a week.
 | `open: false` was parsed and ignored | a branch starts collapsed the first time it is seen |
 | React `showToolbar={false}` / `showToday={false}` did nothing | the wrapper writes `"false"` |
 | No bar was reachable at phone width (the sticky 376px grid covered the viewport) | a container query shrinks the grid to the task name column |
+| Every handler ran twice after a render that changed nothing (one arrow press moved a task two days; found in the live browser pane, whose width is fractional) | listeners are bound only when the tree was replaced; the resize observer ignores sub-pixel differences |
 
 Each is one commit with regression tests in `src/__tests__/ui-gantt.interaction.test.ts` (and
 `ui-react/src/__tests__/Gantt.test.tsx`).
@@ -33,23 +34,23 @@ Visible quality, no new concepts. Most of it is in `createTicks` and the bar CSS
 | A5 | ~~Timeline fills the frame~~ **done** | The timeline track is `minmax(data width, 1fr)`, the header cells and unit lines are drawn out to the host's edge, and a `ResizeObserver` keeps up with width changes. Grid lines that overshoot a scrollbar are clipped (`overflow-x: clip`). | S |
 | A6 | ~~Today label~~ **done** | The "Today" label is a pill at the bottom of the sticky header, centred on the line and clamped inside the track; the body keeps only the line. No pill at the day scale, where today's column is already highlighted and a pill would cover its date. The line now also shows in the stretch added to fill a wide host. | S |
 | A7 | ~~Bar names and tooltips~~ **done** | A bar's accessible name is now "label, kind, dates, progress, assigned to, critical". One shared tooltip (outside the bars, which clip) opens on hover after 150ms and at once on keyboard focus, repeats those facts, is dismissed with Escape, never opens on touch, and flips below the bar under the sticky header. While a bar is dragged it shows the dates the bar would take: the old `.drag-tip` was inside the bar and clipped, so the dates were never visible. The words ("to", "complete", "assigned to"...) are in one `TEXT` object, ready for B8. | S |
-| A8 | Touch targets | Resize handles are 14x18px. Keep the look, grow the hit area to 24px with padding on a pseudo-element. | S |
-| A9 | Date semantics | An ISO datetime such as `2026-03-02T23:30:00Z` shifts a day in some time zones. Define tasks as local dates: read the date part and ignore the time, and document it. | S |
-| A10 | `aria-colcount` in compact mode | The compact layout hides three cells per row; keep `aria-colcount` equal to the columns that exist. | S |
-| A11 | Scroll to today | Open at today (or at the start if today is outside the range) and add a "Today" toolbar button plus `scrollToDate()`. See B2. | S |
+| A8 | ~~Touch targets~~ **done** | On coarse pointers (`@media (pointer: coarse)`) task bars grow from 18 to 24px tall, centred on the same line so links and baselines still meet them, and the resize handles from 14 to 24px wide (at most 35% of a very short bar, so it keeps a middle to grab) and always show their grip, since a touch screen has no hover. Mouse layouts are unchanged. | S |
+| A9 | ~~Date semantics~~ **done** | A task date is a calendar day: a time, `T` part or offset after `YYYY-MM-DD` is ignored, so `2026-03-02T23:30:00Z` is March 2 in every time zone instead of the viewer's local day (March 3 east of Greenwich). Events still report plain `YYYY-MM-DD`. Other date strings (`March 2, 2026`) and `Date` objects are still read as local days. | S |
+| A10 | ~~`aria-colcount` in compact mode~~ **done** | `aria-colcount` is the number of columns shown: the configured ones, or 1 when the host is narrow enough for the compact layout (width unknown: all of them). | S |
+| A11 | ~~Scroll to today~~ **done** | The chart opens on today when it is off the first screen (`initial-scroll="start"` keeps the start; not in `fit`), a Today toolbar button scrolls back smoothly (honouring reduced motion; disabled when today is off the timeline), and `scrollToDate()` does it for any date. | S |
 
 ## Phase B: interaction (about two weeks)
 
 | # | Item | What and why | Size |
 | --- | --- | --- | --- |
-| B1 | Cancelable changes | `taskchange` fires after the component has already moved the bar, so a host cannot reject a drag. Add a cancelable `beforetaskchange`; when it is prevented, drop the override and re-render. Keep `taskchange` as it is. | S |
-| B2 | Imperative API | `scrollToDate(date \| 'today')`, `scrollToTask(id)`, `expandAll()`, `collapseAll()`, plus a `taskToggle` event so a host can persist expand state. Accept `tasks` and `links` as properties (arrays), not only JSON attributes. | M |
-| B3 | Grid keyboard (treegrid) | Row-level roving focus in the grid, ArrowLeft/Right to collapse and expand, Home/End to jump. Today only bars are focusable. | M |
-| B4 | Drag niceties | Auto-scroll when dragging near the edge; optional snapping (`snap="week"` at coarse zoom); Escape cancels a drag. | M |
-| B5 | Inline create and rename | Double-click a grid cell to rename (`taskrename`), a "+" row or double-click an empty timeline row to add (`taskcreate`). The component stays uncontrolled-friendly: it emits, the host owns the data. | M |
-| B6 | Columns and splitter | `columns` attribute (which fields, widths), a draggable splitter between grid and timeline, and a user-set grid width that wins over the compact breakpoint. | M |
-| B7 | `height` and sizing | `height="100%"` on the host does not constrain it (only `--ui-gantt-max-height` does). Make the host height drive the viewport and document both. | S |
-| B8 | i18n | Hard-coded English: "Project schedule", "Filter tasks", sort labels, headers, "No tasks in this range", the expand/collapse labels. Add a `labels` JSON attribute (same shape as `translations` elsewhere in the library) and a `locale` for dates. | M |
+| B1 | ~~Cancelable changes~~ **done** | A cancelable `beforetaskchange` {id, start, end, previousStart, previousEnd, source, affected} fires before every change from a drag, a resize or a key; refusing it puts the bar back and fires nothing else. `taskchange` is unchanged. Drag, resize and keyboard share one path, so scheduling can add the tasks it moves to `affected`. | S |
+| B2 | ~~Imperative API~~ **done** | `scrollToDate`, `scrollToTask` (opens the branches above, scrolls the row and bar into view), `toggleTask`, `expandAll`, `collapseAll`, a `tasktoggle` event, and `tasks` / `links` as array properties (Dates become plain days; a property set before the element upgrades is kept). React: a typed `GanttElement` ref, `onTaskToggle`, `initialScroll`. | M |
+| B3 | ~~Grid keyboard (treegrid)~~ **done** | Task rows are focusable (one roving tab stop, `aria-selected` on the selected row): Up/Down, Home/End, PageUp/PageDown between rows (from a bar too), Right opens a branch or steps into it, Left closes it or climbs to the parent, Enter/Space selects; keys on the expand button stay its own. The tab stop moves to a rendered row when the selected task is outside the window, focus waits for a row that is not rendered yet, and an instant scroll is recorded at once so the render that follows does not undo it. | M |
+| B4 | ~~Drag niceties~~ **done** | The chart scrolls while a drag is held near the left or right edge (faster nearer it, counted as movement), `snap="week"` / `"month"` snap the dragged edge to the nearest boundary, Escape cancels a drag, and a cancelled pointer is no longer a drop (it used to commit). A drop where the bar started reports nothing. Scroll re-renders are held back during a drag so the bar is not replaced under the pointer. | M |
+| B5 | ~~Inline create and rename~~ **done** | Rename in place: double-click a name or F2 on a row or bar gives a text field (Enter or blur keeps it, Escape drops it; empty or unchanged says nothing) and a cancelable `taskrename`; the chart keeps the new name as a local override until the host writes `tasks`. `creatable` adds a **+ Add task** button and a double-click on empty timeline space; both fire `taskcreate` {start, end (a week later), parent, after} and the host owns the data. Read-only charts and tasks cannot be renamed. | M |
+| B6 | ~~Columns and splitter~~ **done** | `columns` (keys or `{key, label, width}`: name, assignee, dates, start, end, duration, progress; the name column is always first), `grid-width`, and a splitter on the list's edge (mouse, touch, arrow keys, Home/End) that fires `gridresize`. The grid template is one CSS variable, so the narrow-host rule still wins. `aria-colcount` now counts the columns actually shown (A10). | M |
+| B7 | ~~Height and sizing~~ **done** | `fill` makes the chart fill its container's height (flex column: the toolbar keeps its height, the rows scroll in the rest) and `max-height` sets the cap for the auto-height case; the host's height changes re-render only when `fill` is on or the rows are windowed by it. React: `fill`, `maxHeight`. | S |
+| B8 | ~~i18n~~ **done** | `labels` (a JSON object with any subset of 33 keys: title, count template, toolbar, sort options, zoom names, column headers, empty states, expand/collapse, today, and the words in bar names and tooltips) and `locale` (month names, date formats, the week's first day). React: `labels`, `locale`, `GanttLabels`. | M |
 
 ## Phase C: scheduling (two to three weeks)
 
@@ -58,21 +59,26 @@ attributes so existing charts behave as today.
 
 | # | Item | What and why | Size |
 | --- | --- | --- | --- |
-| C1 | Summary roll-up and cascade | `auto-summary`: a summary's dates follow its children. `cascade`: moving a summary moves its children by the same offset. | M |
-| C2 | Dependency scheduling | `schedule="auto"`: moving a task pushes its successors so every link holds, with `lag` (days) on a link. Without it, mark violated links (successor starts before the constraint allows) in the danger tone. | L |
-| C3 | Draw links by dragging | A connector dot on bar hover, a `linkcreate` event, and `linkdelete` on the selected link (Delete key). A selected link is highlighted. Today a link can only be clicked. | L |
-| C4 | Critical path | Compute it from the links instead of trusting `critical: true`, and keep the flag as an override. | M |
-| C5 | Non-working time | Shade weekends, `non-working-days` (e.g. `0,6`) and a `holidays` list; optionally skip them when C2 schedules. | M |
-| C6 | Print and export | A print stylesheet and an `exportSvg()` of the timeline. Low priority. | M |
+| C1 | ~~Summary roll-up and cascade~~ **done** | `auto-summary`: a parent's dates and, when it has none, its progress (children's, weighted by length) follow its children, up through parents of parents. `cascade`: a parent can be moved (drag or keys, no resize) and takes everything under it by the same days; a read-only task stays put; the extra tasks are in `beforetaskchange`'s `affected` and each fires `taskchange`. Pure logic in `components/gantt-schedule.ts`. | M |
+| C2 | ~~Dependency scheduling~~ **done** | Links take a `lag` (days, may be negative). A link whose target starts or ends earlier than its type and lag allow is drawn dashed in the danger colour (own arrowhead, "dependency not met" in its name); `schedule="off"` turns that off. `schedule="auto"` pushes the tasks that follow a task that moves, later only, keeping their length and a read-only task alone, down the whole chain (and the children of a pushed parent with `cascade`), as one `beforetaskchange` whose `affected` lists them. Logic in `gantt-schedule.ts`. | L |
+| C3 | ~~Draw links by dragging~~ **done** | `linkable` puts a dot beside each bar's start and end (hover or focus on a row; always on touch). Dragging one draws a line, highlights the bar (or dot) under it with the end it would take, and a drop fires `linkcreate` {source, target, type} (the type comes from the two ends; the same task, empty space and an existing link say nothing; Escape or a cancelled pointer cancels). A clicked link stays selected and focused, Delete/Backspace on it fires `linkdelete`, and the host owns the data. Link creation is pointer only. | L |
+| C4 | ~~Critical path~~ **done** | `critical-path` computes it from the links: a backward pass (every link type and lag) gives each task its slack, and a task is critical when it has none, has links, and either nothing precedes it or something that does is tight against it. Parents are left out, cycles are skipped, and a `critical: true` you set stays. | M |
+| C5 | ~~Non-working time~~ **done** | `non-working-days` (the attribute alone: the weekend; or `0,6`, `[1,2]`) and `holidays` (dates, or `{date, label}`) shade those days behind the rows (runs merge into one span, holidays have their own tint, only the days near the visible part are built, nothing under 8px a day) and mute them in the day header (a holiday's label is its title). Not scheduled around: lengths stay calendar days, so skipping them in `schedule="auto"` is not done. | M |
+| C6 | ~~Print and export~~ **done** | A print stylesheet (the whole chart, no scroll area or sticky headers, no controls or handles, colours kept, rows not split) and `exportSvg()`: the whole chart as a standalone SVG string (header at the scale on screen, names, bars with progress, parts, baselines, milestones, links, today, non-working days; filter, sort and open branches followed; labels and locale applied). A wide timeline still needs `zoom="fit"` to print on one page. | M |
 
 Not planned for now: sub-day (hour) granularity, resource/workload views, multi-select and undo/redo (a host
 can build undo from `taskchange`).
 
-## Order and totals
+## Status
 
-A1-A7 are done; next A8-A11, then B1-B2, B4, B3, B7, B5, B6, B8, and phase C last.
-That is roughly five to six weeks in total, and each item above is its own commit. The estimate is a
-guess from reading the code, not a measurement: C2 and C3 are the ones most likely to run over.
+Every item in phases A, B and C above is done, each as its own commit with tests (see the rows). Still not done,
+on purpose or for lack of a design:
+
+- Skipping non-working days when `schedule="auto"` pushes tasks (shading and holidays are shown only; lengths are calendar days).
+- Creating a link from the keyboard (the dots are a pointer feature; deleting a selected link works from the keyboard).
+- Hour-level granularity, resource and workload views, multi-select, and undo/redo (a host can build undo from
+  `beforetaskchange` / `taskchange`, which carry the previous dates).
+- Sticky month and year labels while scrolling the header (a label scrolls away with its band).
 
 ## How to verify each item
 

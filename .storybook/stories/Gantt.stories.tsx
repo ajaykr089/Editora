@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Gantt } from '@editora/ui-react';
+import { Box, Gantt, type GanttElement, type GanttLink, type GanttTask } from '@editora/ui-react';
 
 export default {
   title: 'UI/Gantt',
@@ -207,6 +207,56 @@ export const InteractivePlanning = () => {
         }}
       />
       <p style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13, margin: '10px 0 0' }}>{lastChange}</p>
+    </Box>
+  );
+};
+
+/** Every planner feature on one chart; the story owns the data and the chart only reports what the user does. */
+export const FullPlanner = () => {
+  const ref = React.useRef<GanttElement>(null);
+  const [items, setItems] = React.useState<GanttTask[]>(tasks);
+  const [dependencies, setDependencies] = React.useState<GanttLink[]>(links);
+  const [log, setLog] = React.useState('Drag a bar (the successors follow), double-click a name to rename it, drag a dot onto another bar to link');
+
+  return (
+    <Box style={{ maxWidth: 1180 }}>
+      <Gantt
+        ref={ref}
+        tasks={items}
+        links={dependencies}
+        zoom="week"
+        weekStart={1}
+        barVariant="soft"
+        columns={['label', 'assignee', 'start', 'end', 'progress']}
+        nonWorkingDays="weekend"
+        holidays={[{ date: '2026-02-16', label: 'Presidents day' }]}
+        autoSummary
+        cascade
+        schedule="auto"
+        criticalPath
+        linkable
+        creatable
+        onBeforeTaskChange={(detail, event) => {
+          // Keep the partner handoff where it is: refuse anything that would push it.
+          if (detail.affected.some((change) => change.id === '5')) event.preventDefault();
+        }}
+        onTaskChange={(detail) => {
+          setLog(`moved ${detail.id}: ${detail.start} to ${detail.end}`);
+          setItems((current) => current.map((task) => (task.id === detail.id ? { ...task, start: detail.start, end: detail.end } : task)));
+        }}
+        onTaskRename={(detail) => setItems((current) => current.map((task) => (task.id === detail.id ? { ...task, label: detail.label } : task)))}
+        onTaskCreate={(detail) => {
+          const id = `new-${items.length}`;
+          setItems((current) => [...current, { id, label: 'New task', start: detail.start, end: detail.end, parent: detail.parent }]);
+          requestAnimationFrame(() => ref.current?.scrollToTask(id));
+        }}
+        onLinkCreate={(detail) => {
+          setLog(`linked ${detail.source} to ${detail.target} (${detail.type})`);
+          setDependencies((current) => [...current, { id: `link-${current.length + 1}`, ...detail }]);
+        }}
+        onLinkDelete={(detail) => setDependencies((current) => current.filter((link) => link.id !== detail.id))}
+      />
+      <p style={{ color: 'var(--ui-color-muted, #526175)', fontSize: 13, margin: '10px 0 0' }}>{log}</p>
     </Box>
   );
 };

@@ -104,11 +104,19 @@ export { DateRangeTimePicker } from './components/DateRangeTimePicker';
 export { Gantt } from './components/Gantt';
 export type {
   GanttBarVariant,
+  GanttBeforeTaskChangeDetail,
+  GanttColumn,
+  GanttColumnKey,
+  GanttElement,
+  GanttLabels,
   GanttLink,
+  GanttLinkCreateDetail,
   GanttLinkSelectDetail,
   GanttSort,
   GanttTask,
   GanttTaskChangeDetail,
+  GanttTaskCreateDetail,
+  GanttTaskRenameDetail,
   GanttTaskType,
   GanttZoom,
 } from './components/Gantt';

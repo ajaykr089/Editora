@@ -406,7 +406,16 @@ export default function PlanningDemo() {
 - Dependency types: `e2s`, `s2s`, `e2e` and `s2e`. Bar designs: `solid`, `soft`, `striped`, `outline` and `glass`.
 - Also in the data: baselines, critical tasks, milestones, parent and child summaries, assignees, progress and split
   segments. Row virtualization turns on for large task sets; pass `virtualized={false}` for small custom layouts.
-- The types `GanttTask`, `GanttLink`, `GanttTaskChangeDetail` and `GanttLinkSelectDetail` are exported.
+- Planner features are props: `zoom` (including `fit`), `weekStart`, `locale`, `labels`, `columns`, `gridWidth`, `fill`, `maxHeight`, `snap`,
+  `nonWorkingDays`, `holidays`, `autoSummary`, `cascade`, `schedule="auto"`, `criticalPath`, `linkable`, `creatable` and `initialScroll`.
+  The chart reports what the user does (`onBeforeTaskChange`, which can refuse a change with `preventDefault()`, `onTaskChange`,
+  `onTaskRename`, `onTaskCreate`, `onLinkCreate`, `onLinkDelete`, `onTaskToggle`, `onGridResize`) and your state stays the source of truth.
+- A ref gives the element's methods: `scrollToDate`, `scrollToTask`, `toggleTask`, `expandAll`, `collapseAll` and `exportSvg`
+  (the whole chart as an SVG string). The chart also prints as a whole.
+- The attribute-by-attribute guide, with a full planner example and screenshot, is in the
+  [`@editora/ui-core` README](https://github.com/ajaykr089/Editora/tree/main/packages/ui-core#gantt-chart); the props above are the same options.
+- The types `GanttTask`, `GanttLink`, `GanttTaskChangeDetail`, `GanttLinkSelectDetail`, `GanttLabels`, `GanttColumn`,
+  `GanttBeforeTaskChangeDetail`, `GanttTaskRenameDetail`, `GanttTaskCreateDetail`, `GanttLinkCreateDetail` and `GanttElement` are exported.
 
 ## Floating layers
 

@@ -306,9 +306,10 @@ describe('ui-gantt grid at tablet widths', () => {
 
     expect(css).not.toMatch(/@media \(max-width: 760px\)/);
     expect(css).not.toMatch(/minmax\(150px, 1fr\) 64px 56px/);
-    expect(css).toMatch(/grid-template-columns: minmax\(170px, 1fr\) 82px 80px 44px/);
-    // the narrow-host rule must outrank the base rule above, which comes later in the sheet
-    expect(css).toMatch(/\.surface \.grid-head,\s*\.surface \.grid-row \{\s*grid-template-columns: minmax\(0, 1fr\);/);
+    // the grid template is one variable: the default four columns, and a single column in a narrow host
+    expect(css).toMatch(/--gantt-cols: minmax\(170px, 1fr\) 82px 80px 44px;/);
+    expect(css).toMatch(/\.grid-row \{[^}]*grid-template-columns: var\(--gantt-cols\);/);
+    expect(css).toMatch(/@container ui-gantt \(max-width: 640px\) \{\s*\.surface \{\s*--gantt-grid-w: 148px;\s*--gantt-cols: minmax\(0, 1fr\);/);
   });
 });
 

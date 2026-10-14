@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { criticalPath, daysBetween, descendantsOf, pushSuccessors, rollUp, shiftDays, violatedLinks, type SchedLink, type SchedTask } from './gantt-schedule';
 
 type GanttTone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 type GanttTaskType = 'task' | 'summary' | 'milestone';
@@ -24,6 +25,8 @@ type GanttTask = {
   baselineStart?: string;
   baselineEnd?: string;
   critical?: boolean;
+  /** Internal: a parent given no dates, waiting for `auto-summary` to take them from its children. */
+  undated?: boolean;
   segments?: Array<{ start: string; end: string; progress?: number }>;
 };
 
@@ -32,6 +35,8 @@ type GanttLink = {
   source: string;
   target: string;
   type?: LinkType;
+  /** Days the target must wait after what it follows (negative: it may overlap). */
+  lag?: number;
 };
 
 type VisibleTask = GanttTask & {
@@ -45,6 +50,9 @@ type DragState = {
   taskId: string;
   mode: 'move' | 'resize-start' | 'resize-end';
   startX: number;
+  /** The scroll position at the start, so a drag that scrolls the chart keeps counting from where it began. */
+  startScroll: number;
+  lastClientX: number;
   originalStart: number;
   originalEnd: number;
   kind: GanttTaskType;
@@ -53,15 +61,39 @@ type DragState = {
   latestStart: number;
   latestEnd: number;
   frame: number | null;
+  scrollFrame: number | null;
   bar: HTMLElement;
+  /** The bar's inline position before the drag, to put it back when the drag is cancelled. */
+  originalLeft: string;
+  originalWidth: string;
   moved: boolean;
   selectedChanged: boolean;
+  onKey: (event: KeyboardEvent) => void;
 };
+
+type ChangeSource = 'drag' | 'resize' | 'keyboard';
+
+type LinkDrag = {
+  sourceId: string;
+  side: 'start' | 'end';
+  fromX: number;
+  fromY: number;
+  draft: SVGPathElement;
+  targetId: string | null;
+  targetSide: 'start' | 'end' | null;
+  onKey: (event: KeyboardEvent) => void;
+};
+
+type TaskChange = { id: string; start: number; end: number; previousStart: number; previousEnd: number };
 
 type FocusSnapshot = {
   selector: string;
   /** Scroll the control into view when it takes focus (keyboard navigation to a row that may be off screen). */
   reveal?: boolean;
+  /** How many renders may pass while the control is not in the rendered window yet (a row far down a long chart). */
+  retries?: number;
+  /** Select the whole text of an input that takes focus (the rename field). */
+  selectAll?: boolean;
   selection?: [number | null, number | null, 'forward' | 'backward' | 'none' | null];
 };
 
@@ -69,6 +101,8 @@ const DAY = 24 * 60 * 60 * 1000;
 const ROW_HEIGHT = 42;
 const HEADER_HEIGHT = 62;
 const GRID_WIDTH = 376;
+/** The grid template of the default columns (name, owner, dates, progress): 170 + 82 + 80 + 44 = 376px. */
+const DEFAULT_TEMPLATE = 'minmax(170px, 1fr) 82px 80px 44px';
 /** Mirrors the container query in the stylesheet: at this host width or less the grid shrinks to COMPACT_GRID_WIDTH. */
 const COMPACT_MAX_WIDTH = 640;
 const COMPACT_GRID_WIDTH = 148;
@@ -148,7 +182,9 @@ const style = `
 
   .control,
   .select,
-  .zoom-button {
+  .zoom-button,
+  .today-button,
+  .add-button {
     border: 1px solid var(--ui-gantt-border);
     background: var(--ui-gantt-panel);
     color: var(--ui-gantt-text);
@@ -168,9 +204,16 @@ const style = `
     min-inline-size: 118px;
   }
 
-  .zoom-button {
+  .zoom-button,
+  .today-button,
+  .add-button {
     padding: 0 9px;
     cursor: pointer;
+  }
+
+  .today-button:disabled {
+    opacity: 0.45;
+    cursor: default;
   }
 
   .zoom-button[aria-pressed="true"] {
@@ -184,8 +227,31 @@ const style = `
     max-block-size: var(--ui-gantt-max-height, 620px);
   }
 
+  /* fill: the chart takes the height of its container (which needs one): the toolbar keeps its height and the
+     scroll area takes the rest, however tall. */
+  :host([fill]) {
+    block-size: 100%;
+  }
+
+  :host([fill]) .frame {
+    display: flex;
+    flex-direction: column;
+    block-size: 100%;
+  }
+
+  :host([fill]) .toolbar {
+    flex: none;
+  }
+
+  :host([fill]) .viewport {
+    flex: 1 1 0;
+    min-block-size: 0;
+    max-block-size: none;
+  }
+
   .surface {
     --gantt-grid-w: ${GRID_WIDTH}px;
+    --gantt-cols: ${DEFAULT_TEMPLATE};
     display: grid;
     grid-template-columns: var(--gantt-grid-w) minmax(640px, 1fr);
     min-inline-size: 100%;
@@ -196,12 +262,11 @@ const style = `
   @container ui-gantt (max-width: 640px) {
     .surface {
       --gantt-grid-w: 148px;
+      --gantt-cols: minmax(0, 1fr);
     }
 
-    /* .surface in front: the base .grid-head / .grid-row rules come later in the sheet and would win. */
-    .surface .grid-head,
-    .surface .grid-row {
-      grid-template-columns: minmax(0, 1fr);
+    .splitter-rail {
+      display: none;
     }
 
     /* !important: the sortable header wrappers carry an inline display: contents. */
@@ -241,7 +306,7 @@ const style = `
     left: 0;
     z-index: 5;
     display: grid;
-    grid-template-columns: minmax(170px, 1fr) 82px 80px 44px;
+    grid-template-columns: var(--gantt-cols);
     border-right: 1px solid var(--ui-gantt-border);
   }
 
@@ -389,10 +454,126 @@ const style = `
       color-mix(in srgb, var(--ui-gantt-panel) 98%, transparent);
   }
 
+  /* The task list can be resized: a handle on its right edge, in the header and down the body. They are grid items
+     of their own, in the cells of the header and the body, so the sticky grid underneath stays a plain treegrid. */
+  .splitter-rail {
+    position: sticky;
+    left: 0;
+    grid-column: 1;
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  .splitter-rail.head {
+    grid-row: 1;
+    top: 0;
+    z-index: 6;
+  }
+
+  .splitter-rail.body {
+    grid-row: 2;
+  }
+
+  .splitter {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: -4px;
+    inline-size: 8px;
+    cursor: col-resize;
+    pointer-events: auto;
+    touch-action: none;
+    outline: 0;
+  }
+
+  .splitter::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 3px;
+    inline-size: 2px;
+    background: transparent;
+    transition: background 120ms ease;
+  }
+
+  .splitter:hover::after,
+  .splitter.dragging::after,
+  .splitter:focus-visible::after {
+    background: var(--ui-gantt-accent);
+  }
+
   .timeline-body[data-zoom="month"],
   .timeline-body[data-zoom="quarter"],
   .timeline-body[data-zoom="year"] {
     background: color-mix(in srgb, var(--ui-gantt-panel) 98%, transparent);
+  }
+
+  /* Non-working days: a tint behind the rows, a warmer one for a holiday. */
+  .off-day {
+    position: absolute;
+    inset-block: 0;
+    background: color-mix(in srgb, var(--ui-gantt-muted) 11%, transparent);
+    pointer-events: none;
+  }
+
+  .off-day.holiday {
+    background: color-mix(in srgb, var(--ui-color-warning, #d97706) 15%, transparent);
+  }
+
+  .tick.off {
+    background: color-mix(in srgb, var(--ui-gantt-muted) 9%, transparent);
+  }
+
+  /* The dots beside a bar that start a link (the linkable attribute), shown with the row's hover or focus. */
+  .connector {
+    position: absolute;
+    top: 15px;
+    inline-size: 12px;
+    block-size: 12px;
+    border: 2px solid var(--ui-gantt-accent);
+    border-radius: 50%;
+    background: var(--ui-gantt-panel);
+    cursor: crosshair;
+    opacity: 0;
+    z-index: 3;
+    touch-action: none;
+    transition: opacity 120ms ease;
+  }
+
+  .timeline-row:hover .connector,
+  .timeline-row:focus-within .connector,
+  .frame[data-linking] .connector {
+    opacity: 1;
+  }
+
+  .link-draft {
+    fill: none;
+    stroke: var(--ui-gantt-accent);
+    stroke-width: 2;
+    stroke-dasharray: 5 3;
+    stroke-linecap: round;
+    pointer-events: none;
+  }
+
+  .bar.link-target {
+    outline: 2px solid var(--ui-gantt-accent);
+    outline-offset: 2px;
+  }
+
+  .bar.link-target[data-link-side="start"] {
+    box-shadow: inset 7px 0 0 var(--ui-gantt-accent);
+  }
+
+  .bar.link-target[data-link-side="end"] {
+    box-shadow: inset -7px 0 0 var(--ui-gantt-accent);
+  }
+
+  .links path.selected:not(.link-hit) {
+    stroke: var(--ui-gantt-accent);
+    stroke-width: 2.4;
+  }
+
+  .links path.link-hit {
+    outline: 0;
   }
 
   .unit-line {
@@ -411,9 +592,18 @@ const style = `
 
   .grid-row {
     display: grid;
-    grid-template-columns: minmax(170px, 1fr) 82px 80px 44px;
+    grid-template-columns: var(--gantt-cols);
     color: var(--ui-gantt-text);
     font-size: 12px;
+  }
+
+  .grid-row {
+    outline: 0;
+  }
+
+  .grid-row:focus-visible {
+    outline: 2px solid var(--ui-gantt-accent);
+    outline-offset: -2px;
   }
 
   .grid-row.selected,
@@ -443,6 +633,20 @@ const style = `
   .expander:hover {
     background: color-mix(in srgb, var(--ui-gantt-accent) 9%, transparent);
     color: var(--ui-gantt-accent);
+  }
+
+  .rename {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    block-size: 26px;
+    padding: 0 6px;
+    border: 1px solid var(--ui-gantt-accent);
+    border-radius: 6px;
+    background: var(--ui-gantt-panel);
+    color: var(--ui-gantt-text);
+    font: inherit;
+    font-weight: 650;
+    outline: 0;
   }
 
   .name-text {
@@ -668,6 +872,37 @@ const style = `
     opacity: 1;
   }
 
+  /* A finger needs the 24px minimum target size, and a touch screen has no hover to reveal the handles:
+     task bars grow from 18 to 24px tall (centred on the same line, so links and baselines still meet them),
+     the resize handles from 14 to 24px wide and always show their grip. A very short bar keeps a middle to
+     grab by giving each handle at most 35% of it. */
+  @media (pointer: coarse) {
+    .bar.task {
+      block-size: 24px;
+      top: 9px;
+    }
+
+    .handle {
+      inline-size: min(24px, 35%);
+      opacity: 1;
+    }
+
+    .handle.start::after {
+      inset-inline-start: 8px;
+    }
+
+    .handle.end::after {
+      inset-inline-end: 8px;
+    }
+
+    .connector {
+      opacity: 1;
+      inline-size: 20px;
+      block-size: 20px;
+      top: 11px;
+    }
+  }
+
   /* One tooltip for the whole chart, outside the bars (which clip their children), placed by script. It
      repeats the bar's accessible name, so it is hidden from assistive technology. */
   .bar-tip {
@@ -846,6 +1081,18 @@ const style = `
     pointer-events: none;
   }
 
+  /* A dependency whose target starts or ends earlier than the link allows. */
+  .links path.violated:not(.link-hit) {
+    stroke: var(--ui-color-danger, #dc2626);
+    stroke-width: 1.8;
+    stroke-dasharray: 5 3;
+    marker-end: url(#ui-gantt-arrow-bad);
+  }
+
+  .links marker#ui-gantt-arrow-bad path {
+    fill: var(--ui-color-danger, #dc2626);
+  }
+
   .links marker path {
     fill: color-mix(in srgb, var(--ui-gantt-muted) 82%, transparent);
     stroke: none;
@@ -883,6 +1130,42 @@ const style = `
     }
   }
 
+  /* Print: the whole chart, not a scroll area. Controls and handles are for the screen; the sticky headers stay put on the
+     page; colours print as they are. A wide timeline is cut at the page edge, so print with the fit zoom or use exportSvg(). */
+  @media print {
+    .frame {
+      box-shadow: none;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .controls,
+    .splitter-rail,
+    .connector,
+    .bar-tip,
+    .handle {
+      display: none !important;
+    }
+
+    .viewport,
+    :host([fill]) .viewport {
+      overflow: visible;
+      max-block-size: none;
+    }
+
+    .grid-head,
+    .timeline-head,
+    .grid-body,
+    .splitter-rail.head {
+      position: static;
+    }
+
+    .grid-row,
+    .timeline-row {
+      break-inside: avoid;
+    }
+  }
+
   @media (forced-colors: active) {
     :host {
       --ui-gantt-bg: Canvas;
@@ -902,7 +1185,9 @@ const style = `
     .bar,
     .select,
     .control,
-    .zoom-button {
+    .zoom-button,
+    .today-button,
+    .add-button {
       forced-color-adjust: none;
       box-shadow: none;
     }
@@ -940,7 +1225,9 @@ function parseDate(value: unknown): number | null {
     return Number.isFinite(time) ? startOfDay(time) : null;
   }
   const input = String(value || '').trim();
-  const isoDay = /^(\d{4})-(\d{2})-(\d{2})$/.exec(input);
+  // A task date is a calendar day. Anything after the day ("T23:30:00Z", " 08:00", an offset) is ignored, so
+  // a task never moves a day because of the viewer's time zone.
+  const isoDay = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s].*)?$/.exec(input);
   if (isoDay) {
     const year = Number(isoDay[1]);
     const month = Number(isoDay[2]);
@@ -973,7 +1260,7 @@ function formatIso(value: number): string {
 }
 
 function formatShortDate(value: number): string {
-  return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(new Date(value));
+  return dateFormat({ month: 'short', day: 'numeric' }).format(new Date(value));
 }
 
 function normalizeZoom(value: string | null): GanttZoom {
@@ -986,6 +1273,8 @@ const FIT_MAX_DAY_WIDTH = 48;
 /** Used for `fit` before the chart has a measured width (not laid out yet, or a test). */
 const FIT_FALLBACK_WIDTH = 680;
 const FIT_MIN_TRACK = 160;
+/** The length of a task made by the Add button or a double-click on the timeline. */
+const NEW_TASK_DAYS = 7;
 
 /**
  * The header unit that reads best at a given scale: the finest whose cells are still wide enough
@@ -1007,7 +1296,10 @@ function normalizeBarVariant(value: string | null): GanttBarVariant {
   return value === 'soft' || value === 'striped' || value === 'outline' || value === 'glass' ? value : 'solid';
 }
 
-function parseTasks(raw: string | null, overrides: Map<string, Partial<GanttTask>>): GanttTask[] {
+/** A parent with no dates of its own, while `auto-summary` is on, is given this one until its children decide (see applyRollUp). */
+const UNDATED = new Date(1970, 0, 1).getTime();
+
+function parseTasks(raw: string | null, overrides: Map<string, Partial<GanttTask>>, allowUndatedParents = false): GanttTask[] {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
@@ -1017,10 +1309,15 @@ function parseTasks(raw: string | null, overrides: Map<string, Partial<GanttTask
         if (!entry || typeof entry !== 'object') return null;
         const item = entry as Record<string, unknown>;
         const label = String(item.label || item.text || '').trim();
-        const startMs = parseDate(item.start);
+        let startMs = parseDate(item.start);
         const duration = Number(item.duration);
         let endMs = parseDate(item.end);
         if (endMs == null && startMs != null && Number.isFinite(duration)) endMs = addDays(startMs, Math.max(0, duration));
+        const undated = allowUndatedParents && startMs == null && item.type === 'summary';
+        if (undated) {
+          startMs = UNDATED;
+          endMs = addDays(UNDATED, 1);
+        }
         if (!label || startMs == null) return null;
         const type = item.type === 'summary' || item.type === 'milestone' ? item.type : 'task';
         const safeEnd = type === 'milestone' ? startMs : Math.max(endMs ?? addDays(startMs, 1), addDays(startMs, 1));
@@ -1028,7 +1325,7 @@ function parseTasks(raw: string | null, overrides: Map<string, Partial<GanttTask
         const override = overrides.get(id) || {};
         return {
           id,
-          label,
+          label: override.label || label,
           start: override.start || formatIso(startMs),
           end: override.end || formatIso(safeEnd),
           progress: Number.isFinite(Number(item.progress)) ? Math.max(0, Math.min(100, Number(item.progress))) : undefined,
@@ -1041,6 +1338,7 @@ function parseTasks(raw: string | null, overrides: Map<string, Partial<GanttTask
           baselineStart: item.baselineStart != null ? String(item.baselineStart) : undefined,
           baselineEnd: item.baselineEnd != null ? String(item.baselineEnd) : undefined,
           critical: item.critical === true,
+          undated,
           segments: Array.isArray(item.segments) ? item.segments as GanttTask['segments'] : undefined
         };
       })
@@ -1063,7 +1361,8 @@ function parseLinks(raw: string | null): GanttLink[] {
         const target = String(item.target || '').trim();
         if (!source || !target) return null;
         const type = item.type === 's2s' || item.type === 'e2e' || item.type === 's2e' ? item.type : 'e2s';
-        return { id: String(item.id || `link-${index + 1}`), source, target, type };
+        const lag = Math.round(Number(item.lag));
+        return { id: String(item.id || `link-${index + 1}`), source, target, type, lag: Number.isFinite(lag) ? lag : 0 };
       })
       .filter(Boolean) as GanttLink[];
   } catch {
@@ -1122,7 +1421,7 @@ type HeaderUnit = GanttUnit;
 /** The first day of the week as `Date#getDay` numbers it (0 is Sunday), from the user's locale; Monday if unknown. */
 function localeWeekStart(): number {
   try {
-    const tag = new Intl.DateTimeFormat().resolvedOptions().locale;
+    const tag = dateFormat({}).resolvedOptions().locale;
     const locale = new Intl.Locale(tag) as Intl.Locale & {
       weekInfo?: { firstDay: number };
       getWeekInfo?: () => { firstDay: number };
@@ -1193,6 +1492,90 @@ function headerCells(
   return cells;
 }
 
+/** Which days are not working days: a weekday list and a set of dates, each date with an optional label. */
+type NonWorking = { weekdays: Set<number>; holidays: Map<number, string> };
+
+const NO_NON_WORKING: NonWorking = { weekdays: new Set(), holidays: new Map() };
+
+/**
+ * `non-working-days`: weekday numbers (0 is Sunday) as `0,6` or `[0, 6]`; the attribute with no value means the weekend.
+ * `holidays`: a JSON array of dates (`YYYY-MM-DD`) or `{ "date": ..., "label": ... }` objects.
+ */
+function parseNonWorking(daysRaw: string | null, holidaysRaw: string | null): NonWorking {
+  const weekdays = new Set<number>();
+  if (daysRaw != null) {
+    const text = daysRaw.trim();
+    if (text === '') {
+      weekdays.add(0);
+      weekdays.add(6);
+    } else {
+      let items: unknown[] = text.split(',');
+      try {
+        const parsed = JSON.parse(text);
+        if (Array.isArray(parsed)) items = parsed;
+        else if (typeof parsed === 'number') items = [parsed];
+      } catch {
+        // a plain comma list
+      }
+      for (const item of items) {
+        const day = Number(typeof item === 'string' ? item.trim() : item);
+        if (Number.isInteger(day) && day >= 0 && day <= 6) weekdays.add(day);
+      }
+    }
+  }
+  const holidays = new Map<number, string>();
+  if (holidaysRaw) {
+    try {
+      const parsed = JSON.parse(holidaysRaw);
+      if (Array.isArray(parsed)) {
+        for (const entry of parsed) {
+          const object = entry && typeof entry === 'object' ? (entry as Record<string, unknown>) : null;
+          const ms = parseDate(object ? object.date : entry);
+          if (ms != null) holidays.set(ms, object && typeof object.label === 'string' ? object.label : '');
+        }
+      }
+    } catch {
+      // malformed JSON: no holidays
+    }
+  }
+  return { weekdays, holidays };
+}
+
+function isNonWorking(ms: number, off: NonWorking): boolean {
+  return off.holidays.has(ms) || off.weekdays.has(new Date(ms).getDay());
+}
+
+/** Below this many px a day the shading would be stripes, so it is left out (month scales and wider). */
+const MIN_SHADE_DAY_WIDTH = 8;
+
+/**
+ * The shaded stretches of non-working days near the visible part of the scroll area, as absolutely positioned spans:
+ * runs of the same kind of day are one span, and a holiday is drawn apart from an ordinary non-working day.
+ */
+function createNonWorkingShading(min: number, endMs: number, dayWidth: number, off: NonWorking, viewportLeft: number, viewportWidth: number): string {
+  if (dayWidth < MIN_SHADE_DAY_WIDTH || (!off.weekdays.size && !off.holidays.size)) return '';
+  const first = Math.max(0, Math.floor(Math.max(0, viewportLeft - 480) / dayWidth));
+  const last = Math.min(Math.ceil((endMs - min) / DAY), Math.ceil((viewportLeft + viewportWidth + 960) / dayWidth));
+  const spans: string[] = [];
+  let runStart = -1;
+  let runKind = '';
+  const close = (end: number) => {
+    if (runStart >= 0) spans.push(`<span class="off-day${runKind}" style="left:${(runStart * dayWidth).toFixed(2)}px;width:${((end - runStart) * dayWidth).toFixed(2)}px"></span>`);
+    runStart = -1;
+  };
+  for (let i = first; i < last; i += 1) {
+    const day = shiftDays(min, i);
+    const kind = off.holidays.has(day) ? ' holiday' : off.weekdays.has(new Date(day).getDay()) ? '' : null;
+    if (kind === null || (runStart >= 0 && kind !== runKind)) close(i);
+    if (kind !== null && runStart < 0) {
+      runStart = i;
+      runKind = kind;
+    }
+  }
+  close(last);
+  return spans.join('');
+}
+
 /** Below this many pixels a clipped first or last cell has no room for its label. */
 const MIN_LABEL_WIDTH = 36;
 
@@ -1207,12 +1590,13 @@ function createTimeHeader(
   zoom: GanttUnit,
   weekStart: number,
   viewportLeft = 0,
-  viewportWidth = Number.POSITIVE_INFINITY
+  viewportWidth = Number.POSITIVE_INFINITY,
+  off: NonWorking = NO_NON_WORKING
 ): string {
   const today = startOfDay(Date.now());
-  const monthYear = new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' });
-  const monthOnly = new Intl.DateTimeFormat(undefined, { month: 'short' });
-  const weekday = new Intl.DateTimeFormat(undefined, { weekday: 'narrow' });
+  const monthYear = dateFormat({ month: 'long', year: 'numeric' });
+  const monthOnly = dateFormat({ month: 'short' });
+  const weekday = dateFormat({ weekday: 'narrow' });
   const cell = (cls: string, item: HeaderCell, inner: string, title = '') =>
     `<span class="${cls}" style="left:${item.left.toFixed(2)}px;width:${item.width.toFixed(2)}px"${title ? ` title="${escapeHtml(title)}"` : ''}>${inner}</span>`;
 
@@ -1222,10 +1606,12 @@ function createTimeHeader(
     const fits = item.width >= MIN_LABEL_WIDTH;
     if (zoom === 'day') {
       const isToday = item.start === today;
+      const holiday = off.holidays.get(item.start);
       return cell(
-        `tick day${isToday ? ' today-cell' : ''}`,
+        `tick day${isToday ? ' today-cell' : ''}${isNonWorking(item.start, off) ? ' off' : ''}`,
         item,
-        `<span class="dow">${escapeHtml(weekday.format(date))}</span><span class="num">${date.getDate()}</span>`
+        `<span class="dow">${escapeHtml(weekday.format(date))}</span><span class="num">${date.getDate()}</span>`,
+        holiday || ''
       );
     }
     if (zoom === 'week') return cell('tick', item, fits ? `<span class="num">${date.getDate()}</span>` : '', formatShortDate(item.start));
@@ -1340,6 +1726,10 @@ function cssEscape(value: string): string {
   return value.replace(/["\\]/g, '\\$&');
 }
 
+function rowSelector(taskId: string): string {
+  return `.grid-row[data-task-id="${cssEscape(taskId)}"]`;
+}
+
 function barSelector(taskId: string): string {
   return `.bar[data-task-id="${cssEscape(taskId)}"]`;
 }
@@ -1349,14 +1739,99 @@ function focusSelectorFor(el: HTMLElement): string | null {
   if (el.classList.contains('control')) return '.control';
   if (el.classList.contains('select')) return '.select';
   if (el.classList.contains('zoom-button') && el.dataset.zoom) return `.zoom-button[data-zoom="${cssEscape(el.dataset.zoom)}"]`;
+  if (el.classList.contains('today-button')) return '.today-button';
+  if (el.classList.contains('add-button')) return '.add-button';
+  if (el.classList.contains('rename')) return '.rename';
   if (el.classList.contains('head-button') && el.dataset.sort) return `.head-button[data-sort="${cssEscape(el.dataset.sort)}"]`;
+  if (el.classList.contains('splitter') && el.getAttribute('role') === 'separator') return '.splitter[role="separator"]';
+  if (el.classList.contains('link-hit') && el.dataset.linkId) return `.link-hit[data-link-id="${cssEscape(el.dataset.linkId)}"]`;
   if (el.classList.contains('bar') && el.dataset.taskId) return barSelector(el.dataset.taskId);
+  if (el.classList.contains('grid-row') && el.dataset.taskId) return rowSelector(el.dataset.taskId);
   if (el.classList.contains('expander') && el.dataset.taskId) return `.expander[data-task-id="${cssEscape(el.dataset.taskId)}"]`;
   return null;
 }
 
-/** Words the component puts in a task's accessible name and tooltip. Kept together so they can be translated. */
-const TEXT = {
+/** Every word the component shows or announces, so a host can translate it. `tasksCount` takes {shown} and {total}. */
+export type GanttLabels = {
+  title: string;
+  tasksCount: string;
+  filterPlaceholder: string;
+  filterLabel: string;
+  sortLabel: string;
+  sortManual: string;
+  sortStart: string;
+  sortEnd: string;
+  sortName: string;
+  sortProgress: string;
+  zoomDay: string;
+  zoomWeek: string;
+  zoomMonth: string;
+  zoomQuarter: string;
+  zoomYear: string;
+  zoomFit: string;
+  zoomFitTitle: string;
+  columnTask: string;
+  columnOwner: string;
+  columnDates: string;
+  columnProgress: string;
+  columnStart: string;
+  columnEnd: string;
+  columnDuration: string;
+  splitter: string;
+  scrollToToday: string;
+  addTask: string;
+  rename: string;
+  linkViolated: string;
+  empty: string;
+  noMatches: string;
+  expand: string;
+  collapse: string;
+  timeline: string;
+  today: string;
+  summary: string;
+  milestone: string;
+  to: string;
+  complete: string;
+  assigned: string;
+  critical: string;
+};
+
+const DEFAULT_LABELS: GanttLabels = {
+  title: 'Project schedule',
+  tasksCount: '{shown}/{total} tasks',
+  filterPlaceholder: 'Filter tasks',
+  filterLabel: 'Filter tasks',
+  sortLabel: 'Sort tasks',
+  sortManual: 'Manual',
+  sortStart: 'Start date',
+  sortEnd: 'End date',
+  sortName: 'Name',
+  sortProgress: 'Progress',
+  zoomDay: 'day',
+  zoomWeek: 'week',
+  zoomMonth: 'month',
+  zoomQuarter: 'quarter',
+  zoomYear: 'year',
+  zoomFit: 'fit',
+  zoomFitTitle: 'Fit the whole project to the width',
+  columnTask: 'Task',
+  columnOwner: 'Owner',
+  columnDates: 'Dates',
+  columnProgress: '%',
+  columnStart: 'Start',
+  columnEnd: 'End',
+  columnDuration: 'Days',
+  splitter: 'Resize the task list',
+  scrollToToday: 'Scroll to today',
+  addTask: 'Add task',
+  rename: 'Rename task',
+  linkViolated: 'dependency not met',
+  empty: 'No tasks in this range',
+  noMatches: 'No matching tasks',
+  expand: 'Expand',
+  collapse: 'Collapse',
+  timeline: 'Timeline',
+  today: 'Today',
   summary: 'summary',
   milestone: 'milestone',
   to: 'to',
@@ -1364,6 +1839,96 @@ const TEXT = {
   assigned: 'assigned to',
   critical: 'critical'
 };
+
+type ColumnKey = 'label' | 'assignee' | 'dates' | 'start' | 'end' | 'duration' | 'progress';
+
+type ColumnDef = {
+  key: ColumnKey;
+  title: keyof GanttLabels;
+  /** A header label that replaces the translated one. */
+  custom?: string;
+  sort?: GanttSort;
+  /** Width in px. For the name column it is the minimum: that column takes the room the others leave. */
+  width: number;
+};
+
+const COLUMN_DEFS: Record<ColumnKey, { title: keyof GanttLabels; sort?: GanttSort; width: number }> = {
+  label: { title: 'columnTask', sort: 'label', width: 170 },
+  assignee: { title: 'columnOwner', width: 82 },
+  dates: { title: 'columnDates', sort: 'start', width: 80 },
+  start: { title: 'columnStart', sort: 'start', width: 74 },
+  end: { title: 'columnEnd', sort: 'end', width: 74 },
+  duration: { title: 'columnDuration', width: 56 },
+  progress: { title: 'columnProgress', sort: 'progress', width: 44 }
+};
+const DEFAULT_COLUMNS: ColumnKey[] = ['label', 'assignee', 'dates', 'progress'];
+/** The least the name column keeps when the user drags the grid narrower than its natural width. */
+const LABEL_MIN_USER = 96;
+
+/**
+ * The `columns` attribute: a JSON array of keys (`"assignee"`) or objects (`{"key": "dates", "label": "When", "width": 120}`).
+ * The name column is always first; unknown and repeated keys are dropped.
+ */
+function parseColumns(raw: string | null): ColumnDef[] {
+  let entries: unknown[] = DEFAULT_COLUMNS;
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length) entries = parsed;
+    } catch {
+      // malformed JSON: the default columns
+    }
+  }
+  const columns: ColumnDef[] = [];
+  const seen = new Set<string>();
+  for (const entry of entries) {
+    const object = entry && typeof entry === 'object' ? (entry as Record<string, unknown>) : null;
+    let key = typeof entry === 'string' ? entry : object ? object.key : null;
+    if (key === 'owner') key = 'assignee';
+    if (typeof key !== 'string' || !(key in COLUMN_DEFS) || seen.has(key)) continue;
+    seen.add(key);
+    const def = COLUMN_DEFS[key as ColumnKey];
+    const width = object ? Number(object.width) : NaN;
+    columns.push({
+      key: key as ColumnKey,
+      title: def.title,
+      custom: object && typeof object.label === 'string' && object.label ? object.label : undefined,
+      sort: def.sort,
+      width: Number.isFinite(width) && width >= 36 ? Math.min(Math.round(width), 400) : def.width
+    });
+  }
+  const at = columns.findIndex((column) => column.key === 'label');
+  if (at > 0) columns.unshift(columns.splice(at, 1)[0]);
+  if (at < 0) columns.unshift({ key: 'label', title: 'columnTask', sort: 'label', width: COLUMN_DEFS.label.width });
+  return columns;
+}
+
+/** The grid's width and its column template, for the columns and a width the user may have set. */
+function columnLayout(columns: ColumnDef[], userWidth: number | null) {
+  const others = columns.slice(1).reduce((sum, column) => sum + column.width, 0);
+  const labelMin = userWidth != null ? LABEL_MIN_USER : columns[0].width;
+  const min = others + LABEL_MIN_USER;
+  return {
+    width: userWidth != null ? Math.max(Math.round(userWidth), min) : others + columns[0].width,
+    min,
+    template: columns.map((column, i) => (i === 0 ? `minmax(${labelMin}px, 1fr)` : `${column.width}px`)).join(' ')
+  };
+}
+
+
+/**
+ * The locale for dates, set from the `locale` attribute at the start of each render. A render is synchronous, so a
+ * module variable is enough to reach the formatters without threading it through every helper.
+ */
+let activeLocale: string | undefined;
+
+function dateFormat(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  try {
+    return new Intl.DateTimeFormat(activeLocale, options);
+  } catch {
+    return new Intl.DateTimeFormat(undefined, options);
+  }
+}
 
 type TaskDescription = {
   /** The accessible name of the bar: label, kind, dates, progress, assignee, critical. */
@@ -1377,14 +1942,14 @@ type TaskDescription = {
   more: string;
 };
 
-function describeTask(task: VisibleTask, kind: GanttTaskType, format: Intl.DateTimeFormat): TaskDescription {
+function describeTask(task: VisibleTask, kind: GanttTaskType, format: Intl.DateTimeFormat, text: GanttLabels): TaskDescription {
   const start = format.format(new Date(task.startMs));
-  const dates = kind === 'milestone' ? start : `${start} ${TEXT.to} ${format.format(new Date(task.endMs))}`;
-  const kindWord = kind === 'summary' || kind === 'milestone' ? TEXT[kind] : '';
+  const dates = kind === 'milestone' ? start : `${start} ${text.to} ${format.format(new Date(task.endMs))}`;
+  const kindWord = kind === 'summary' || kind === 'milestone' ? text[kind] : '';
   const extras: string[] = [];
-  if (task.progress != null && kind !== 'milestone') extras.push(`${Math.round(task.progress)}% ${TEXT.complete}`);
-  if (task.assignee) extras.push(`${TEXT.assigned} ${task.assignee}`);
-  if (task.critical) extras.push(TEXT.critical);
+  if (task.progress != null && kind !== 'milestone') extras.push(`${Math.round(task.progress)}% ${text.complete}`);
+  if (task.assignee) extras.push(`${text.assigned} ${task.assignee}`);
+  if (task.critical) extras.push(text.critical);
   return {
     name: [task.label, kindWord, dates, ...extras].filter(Boolean).join(', '),
     title: task.label,
@@ -1392,6 +1957,93 @@ function describeTask(task: VisibleTask, kind: GanttTaskType, format: Intl.DateT
     when: [kindWord, dates].filter(Boolean).join(' · '),
     more: extras.join(' · ')
   };
+}
+
+function zoomLabel(zoom: GanttZoom, text: GanttLabels): string {
+  return { day: text.zoomDay, week: text.zoomWeek, month: text.zoomMonth, quarter: text.zoomQuarter, year: text.zoomYear, fit: text.zoomFit }[zoom];
+}
+
+/** A CSS length for the `max-height` attribute (or `none`), or null for anything else, so it cannot carry other CSS. */
+function parseCssLength(raw: string | null): string | null {
+  const value = (raw || '').trim();
+  return value === 'none' || /^\d*\.?\d+(px|em|rem|vh|dvh|svh|lvh|vw|%|ch)$/.test(value) ? value : null;
+}
+
+function toSchedLink(link: GanttLink): SchedLink {
+  return { id: link.id, source: link.source, target: link.target, type: link.type || 'e2s', lag: link.lag ?? 0 };
+}
+
+/** `schedule`: "warn" (the default) draws a link whose target is too early in the danger colour; "auto" also pushes the tasks that follow a task that moved; "off" does neither. */
+function normalizeSchedule(value: string | null): 'warn' | 'auto' | 'off' {
+  return value === 'auto' || value === 'off' ? value : 'warn';
+}
+
+function toSched(task: GanttTask): SchedTask | null {
+  const start = parseDate(task.start);
+  const end = parseDate(task.end);
+  if (start == null || end == null) return null;
+  return { id: task.id, start, end, parent: task.parent, type: task.type, readonly: task.readonly, progress: task.progress };
+}
+
+/** `auto-summary`: a parent's dates (and its progress, when it has none of its own) follow its children. */
+function applyRollUp(tasks: GanttTask[]): GanttTask[] {
+  const rolled = rollUp(tasks.map(toSched).filter((task): task is SchedTask => task != null));
+  return tasks
+    .map((task) => {
+      const value = rolled.get(task.id);
+      if (!value) return task;
+      return { ...task, undated: false, start: formatIso(value.start), end: formatIso(value.end), progress: task.progress ?? value.progress };
+    })
+    // a parent with no dates and no children has nothing to take them from
+    .filter((task) => !task.undated);
+}
+
+/** `critical-path`: mark the tasks with no slack on a tight chain of links as critical (a `critical: true` you set stays). */
+function applyCriticalPath(tasks: GanttTask[], links: GanttLink[]): GanttTask[] {
+  const ids = criticalPath(tasks.map(toSched).filter((task): task is SchedTask => task != null), links.map(toSchedLink));
+  return ids.size ? tasks.map((task) => (ids.has(task.id) && !task.critical ? { ...task, critical: true } : task)) : tasks;
+}
+
+function readJsonArray(raw: string | null): Array<any> {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+/** A `Date` becomes the calendar day it is locally, like the React wrapper writes it. */
+function toAttrDate(value: unknown): unknown {
+  return value instanceof Date ? (Number.isFinite(value.getTime()) ? formatIso(value.getTime()) : undefined) : value;
+}
+
+function writeJsonArray(el: HTMLElement, name: string, value: Array<Record<string, unknown>> | null | undefined, dates: boolean): void {
+  if (!Array.isArray(value)) {
+    el.removeAttribute(name);
+    return;
+  }
+  const prepared = dates
+    ? value.map((item) => {
+        const next: Record<string, unknown> = { ...item };
+        for (const key of ['start', 'end', 'baselineStart', 'baselineEnd']) if (key in next) next[key] = toAttrDate(next[key]);
+        if (Array.isArray(next.segments)) {
+          next.segments = (next.segments as Array<Record<string, unknown>>).map((segment) => ({ ...segment, start: toAttrDate(segment.start), end: toAttrDate(segment.end) }));
+        }
+        return next;
+      })
+    : value;
+  try {
+    el.setAttribute(name, JSON.stringify(prepared));
+  } catch {
+    // not serialisable (a cycle): leave the attribute as it is
+  }
+}
+
+function parseUserGrid(raw: string | null): number | null {
+  const value = raw == null || raw === '' ? NaN : Number(raw);
+  return Number.isFinite(value) && value > 0 ? value : null;
 }
 
 function taskKind(task: VisibleTask): GanttTaskType {
@@ -1476,7 +2128,7 @@ function routeDependencyPath(
 
 export class UIGantt extends ElementBase {
   static get observedAttributes() {
-    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start'];
+    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width', 'fill', 'max-height', 'snap', 'creatable', 'auto-summary', 'cascade', 'schedule', 'critical-path', 'non-working-days', 'holidays', 'linkable'];
   }
 
   private focusRequest: FocusSnapshot | null = null;
@@ -1491,6 +2143,22 @@ export class UIGantt extends ElementBase {
   private viewportLeft = 0;
   private viewportWidth = 1800;
   private hostWidth = 0;
+  /** Where the scroll area was when the header cells and shading were last built: they cover a window around it. */
+  private renderedLeft = 0;
+  /** A smooth scroll in progress, so a render that replaces the scroll area can carry on with it. */
+  private smoothTarget: { left?: number; top?: number } | null = null;
+  private selectedLinkId: string | null = null;
+  private linking: LinkDrag | null = null;
+  private editingId: string | null = null;
+  private editingValue = '';
+  private suppressBlur = false;
+  private layoutInfo = { min: 0, dayWidth: 13, gridWidth: GRID_WIDTH, rangeEnd: 0 };
+  private visibleIds: string[] = [];
+  private initialScrollPending = true;
+  private pendingReveal: { id: string; behavior: ScrollBehavior } | null = null;
+  private hostHeight = 0;
+  private virtualizedNow = false;
+  private gridBounds = { min: 0, max: 0, width: GRID_WIDTH };
   private descriptions = new Map<string, TaskDescription>();
   private tipTimer: number | null = null;
   private pointerFocus = false;
@@ -1506,6 +2174,8 @@ export class UIGantt extends ElementBase {
   private overridesVersion = 0;
   private taskCacheRaw: string | null = null;
   private taskCacheVersion = -1;
+  private taskCacheAuto = false;
+  private taskCacheCritical: string | null = null;
   private taskCache: GanttTask[] = [];
   private linkCacheRaw: string | null = null;
   private linkCache: GanttLink[] = [];
@@ -1513,12 +2183,27 @@ export class UIGantt extends ElementBase {
   private visibleCache: VisibleTask[] = [];
 
   override connectedCallback(): void {
+    // A property set before the element was defined sits on the instance and would hide the accessor.
+    for (const name of ['tasks', 'links', 'holidays'] as const) {
+      if (Object.prototype.hasOwnProperty.call(this, name)) {
+        const value = (this as unknown as Record<string, unknown>)[name];
+        delete (this as unknown as Record<string, unknown>)[name];
+        (this as unknown as Record<string, unknown>)[name] = value;
+      }
+    }
     super.connectedCallback();
     if (typeof ResizeObserver === 'undefined' || this.resizeObserver) return;
     this.resizeObserver = new ResizeObserver((entries) => {
-      const width = Math.round(entries[entries.length - 1]?.contentRect.width ?? 0);
-      if (width === this.hostWidth) return;
-      this.hostWidth = width;
+      const box = entries[entries.length - 1]?.contentRect;
+      const width = box?.width ?? 0;
+      const height = box?.height ?? 0;
+      // clientWidth is a whole number and the observer's width is not: a host 540.4px wide must not look resized.
+      const widthChanged = Math.abs(width - this.hostWidth) >= 1;
+      // A change of height only matters when the height is set from outside or the rows are windowed by it.
+      const heightChanged = Math.abs(height - this.hostHeight) >= 1 && (this.hasAttribute('fill') || this.virtualizedNow);
+      this.hostHeight = height;
+      if (!widthChanged && !heightChanged) return;
+      if (widthChanged) this.hostWidth = Math.round(width);
       this.captureViewport();
       this.requestRender();
     });
@@ -1533,7 +2218,40 @@ export class UIGantt extends ElementBase {
     super.disconnectedCallback();
   }
 
+  private labelsRaw: string | null = null;
+  private labelsCache: GanttLabels = DEFAULT_LABELS;
+
+  /** The labels: the defaults with whatever the `labels` attribute (a JSON object) overrides. */
+  private labelSet(): GanttLabels {
+    const raw = this.getAttribute('labels');
+    if (raw === this.labelsRaw) return this.labelsCache;
+    this.labelsRaw = raw;
+    this.labelsCache = DEFAULT_LABELS;
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          const merged: Record<string, string> = { ...DEFAULT_LABELS };
+          for (const [key, value] of Object.entries(parsed)) {
+            if (key in DEFAULT_LABELS && typeof value === 'string') merged[key] = value;
+          }
+          this.labelsCache = merged as GanttLabels;
+        }
+      } catch {
+        // malformed JSON: keep the defaults
+      }
+    }
+    return this.labelsCache;
+  }
+
   protected override render(): void {
+    // Replacing the tree may blur the rename field; that is not the user leaving it.
+    this.suppressBlur = true;
+    queueMicrotask(() => {
+      this.suppressBlur = false;
+    });
+    activeLocale = this.getAttribute('locale') || undefined;
+    const text = this.labelSet();
     const tasks = this.getTasks();
     const links = this.getLinks();
     const zoom = normalizeZoom(this.getAttribute('zoom'));
@@ -1542,6 +2260,9 @@ export class UIGantt extends ElementBase {
     const filterText = this.getAttribute('filter') ?? this.internalFilter;
     const visible = this.getVisibleTasks(tasks, filterText, sort);
     const readonly = this.hasAttribute('readonly');
+    const creatable = this.hasAttribute('creatable') && !readonly;
+    const cascade = this.hasAttribute('cascade');
+    const linkable = this.hasAttribute('linkable') && !readonly;
     const showToolbar = this.getAttribute('show-toolbar') !== 'false';
     const showToday = this.getAttribute('show-today') !== 'false';
 
@@ -1549,7 +2270,7 @@ export class UIGantt extends ElementBase {
       this.setContent(`
         <style>${style}</style>
         <section class="frame" part="frame">
-          <div class="empty" part="empty">No tasks in this range</div>
+          <div class="empty" part="empty">${escapeHtml(text.empty)}</div>
         </section>
       `);
       return;
@@ -1563,7 +2284,13 @@ export class UIGantt extends ElementBase {
     // The host's width decides the compact layout, how far a wide host is filled (A5) and, for `fit`, the scale.
     this.hostWidth = this.clientWidth || this.hostWidth;
     const frameWidth = this.hostWidth - FRAME_BORDER;
-    const gridWidth = frameWidth <= COMPACT_MAX_WIDTH ? COMPACT_GRID_WIDTH : GRID_WIDTH;
+    this.hostHeight = this.clientHeight || this.hostHeight;
+    const maxHeight = parseCssLength(this.getAttribute('max-height'));
+    const compact = this.hostWidth > 0 && frameWidth <= COMPACT_MAX_WIDTH;
+    const columns = parseColumns(this.getAttribute('columns'));
+    const layout = columnLayout(columns, parseUserGrid(this.getAttribute('grid-width')));
+    const gridWidth = compact ? COMPACT_GRID_WIDTH : layout.width;
+    this.gridBounds = { min: layout.min, max: Math.max(layout.min, this.hostWidth > 0 ? frameWidth - 240 : 1200), width: layout.width };
     const fitting = zoom === 'fit';
     const fitAvailable = this.hostWidth > 0 ? frameWidth - gridWidth - this.scrollbarWidth : FIT_FALLBACK_WIDTH;
     const dayWidth = fitting
@@ -1574,6 +2301,7 @@ export class UIGantt extends ElementBase {
     const timelineWidth = Math.max(fitting ? FIT_MIN_TRACK : 680, totalDays * dayWidth);
     const rowsHeight = Math.max(visible.length * ROW_HEIGHT, ROW_HEIGHT);
     const virtualized = this.getAttribute('virtualized') !== 'false' && visible.length > 240;
+    this.virtualizedNow = virtualized;
     const viewportRows = Math.max(20, Math.ceil(Math.max(420, this.viewportHeight - HEADER_HEIGHT) / ROW_HEIGHT));
     const overscan = 160;
     // Fewer rows than before (a filter, new data): do not window against a scroll offset past the end.
@@ -1589,26 +2317,43 @@ export class UIGantt extends ElementBase {
     this.renderedFirstRow = firstRow;
     this.renderedLastRow = lastRow;
 
-    const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
+    const mediumDate = dateFormat({ dateStyle: 'medium' });
     const descriptions = new Map<string, TaskDescription>();
     const visibleById = new Map(visible.map((task, index) => [task.id, { task, index }]));
     const renderedIds = new Set(rendered.map((task) => task.id));
+    // The one row and bar in the tab order: the selected task, or the first one on screen when it is not rendered.
+    const tabStopId = this.selectedId != null && renderedIds.has(this.selectedId) ? this.selectedId : rendered[0]?.id;
     const xForDate = (value: number) => ((value - min) / DAY) * dayWidth;
     const gridRows = rendered.map((task, offset) => {
       const rowIndex = firstRow + offset;
       const selected = this.selectedId === task.id ? ' selected' : '';
       const kind = taskKind(task);
-      const progress = task.progress == null ? '-' : `${Math.round(task.progress)}%`;
-      const dates = kind === 'milestone' ? formatShortDate(task.startMs) : `${formatShortDate(task.startMs)} - ${formatShortDate(task.endMs)}`;
+      const cell = (column: ColumnDef): string => {
+        switch (column.key) {
+          case 'label':
+            return `<div class="grid-cell task-name" role="gridcell" style="padding-left:${10 + task.depth * 18}px">
+            ${task.hasChildren ? `<button class="expander" data-action="toggle" data-task-id="${escapeHtml(task.id)}" aria-label="${escapeHtml(this.collapsed.has(task.id) ? text.expand : text.collapse)} ${escapeHtml(task.label)}">${this.collapsed.has(task.id) ? '›' : '⌄'}</button>` : '<span style="inline-size:22px"></span>'}
+            ${this.editingId === task.id
+              ? `<input class="rename" value="${escapeHtml(this.editingValue)}" aria-label="${escapeHtml(text.rename)}" />`
+              : `<span class="name-text" title="${escapeHtml(task.label)}">${escapeHtml(task.label)}</span>`}
+          </div>`;
+          case 'assignee':
+            return `<div class="grid-cell badge" role="gridcell">${escapeHtml(task.assignee || kind)}</div>`;
+          case 'dates':
+            return `<div class="grid-cell badge" role="gridcell">${escapeHtml(kind === 'milestone' ? formatShortDate(task.startMs) : `${formatShortDate(task.startMs)} - ${formatShortDate(task.endMs)}`)}</div>`;
+          case 'start':
+            return `<div class="grid-cell badge" role="gridcell">${escapeHtml(formatShortDate(task.startMs))}</div>`;
+          case 'end':
+            return `<div class="grid-cell badge" role="gridcell">${escapeHtml(kind === 'milestone' ? '-' : formatShortDate(task.endMs))}</div>`;
+          case 'duration':
+            return `<div class="grid-cell badge" role="gridcell">${kind === 'milestone' ? '-' : Math.max(0, Math.round((task.endMs - task.startMs) / DAY))}</div>`;
+          default:
+            return `<div class="grid-cell badge" role="gridcell">${task.progress == null ? '-' : `${Math.round(task.progress)}%`}</div>`;
+        }
+      };
       return `
-        <div class="grid-row${selected}" part="grid-row" data-task-id="${escapeHtml(task.id)}" role="row" aria-rowindex="${rowIndex + 2}" aria-level="${task.depth + 1}" ${task.hasChildren ? `aria-expanded="${!this.collapsed.has(task.id)}"` : ''}>
-          <div class="grid-cell task-name" role="gridcell" style="padding-left:${10 + task.depth * 18}px">
-            ${task.hasChildren ? `<button class="expander" data-action="toggle" data-task-id="${escapeHtml(task.id)}" aria-label="${this.collapsed.has(task.id) ? 'Expand' : 'Collapse'} ${escapeHtml(task.label)}">${this.collapsed.has(task.id) ? '›' : '⌄'}</button>` : '<span style="inline-size:22px"></span>'}
-            <span class="name-text" title="${escapeHtml(task.label)}">${escapeHtml(task.label)}</span>
-          </div>
-          <div class="grid-cell badge" role="gridcell">${escapeHtml(task.assignee || kind)}</div>
-          <div class="grid-cell badge" role="gridcell">${escapeHtml(dates)}</div>
-          <div class="grid-cell badge" role="gridcell">${escapeHtml(progress)}</div>
+        <div class="grid-row${selected}" part="grid-row" data-task-id="${escapeHtml(task.id)}" role="row" tabindex="${task.id === tabStopId ? 0 : -1}" aria-rowindex="${rowIndex + 2}" aria-level="${task.depth + 1}" ${selected ? 'aria-selected="true"' : ''} ${task.hasChildren ? `aria-expanded="${!this.collapsed.has(task.id)}"` : ''}>
+          ${columns.map(cell).join('')}
         </div>
       `;
     }).join('');
@@ -1616,16 +2361,17 @@ export class UIGantt extends ElementBase {
     const timelineRows = rendered.map((task, offset) => {
       const rowIndex = firstRow + offset;
       const kind = taskKind(task);
-      const description = describeTask(task, kind, dateFormat);
+      const description = describeTask(task, kind, mediumDate, text);
       descriptions.set(task.id, description);
       const selected = this.selectedId === task.id ? ' selected' : '';
-      const focusable = this.selectedId === task.id || (!this.selectedId && rowIndex === 0);
-      const tone = tones[task.tone || (kind === 'summary' ? 'info' : 'default')] || tones.default;
+      const focusable = task.id === tabStopId;
+      // The tone is set inline, which beats `.bar.critical`: a critical bar has to ask for the danger tone itself.
+      const tone = task.critical ? tones.danger : tones[task.tone || (kind === 'summary' ? 'info' : 'default')] || tones.default;
       const left = kind === 'milestone' ? xForDate(task.startMs) - MILESTONE_SIZE / 2 : xForDate(task.startMs);
       const right = xForDate(kind === 'milestone' ? task.startMs : task.endMs);
       const width = kind === 'milestone' ? MILESTONE_SIZE : Math.max(12, right - left);
       const progress = Math.max(0, Math.min(100, Number(task.progress ?? 0)));
-      const canEdit = !readonly && !task.readonly && kind !== 'summary';
+      const canEdit = !readonly && !task.readonly && (kind !== 'summary' || cascade);
       const showHandles = canEdit && kind === 'task';
       const splitSegments = kind === 'task' && task.segments?.length
         ? renderSegments(task, progress)
@@ -1651,79 +2397,105 @@ export class UIGantt extends ElementBase {
             ${kind === 'milestone' ? '<span class="milestone-shape"></span>' : ''}
             ${showHandles ? '<span class="handle end" data-mode="resize-end"></span>' : ''}
           </button>
+          ${linkable ? `<span class="connector" data-task-id="${escapeHtml(task.id)}" data-side="start" style="left:${(left - 18).toFixed(2)}px"></span><span class="connector" data-task-id="${escapeHtml(task.id)}" data-side="end" style="left:${(left + width + 6).toFixed(2)}px"></span>` : ''}
         </div>
       `;
     }).join('');
 
     this.descriptions = descriptions;
 
+    if (this.selectedLinkId && !links.some((link) => link.id === this.selectedLinkId)) this.selectedLinkId = null;
+    const violated =
+      normalizeSchedule(this.getAttribute('schedule')) === 'off'
+        ? new Set<string>()
+        : violatedLinks(tasks.map(toSched).filter((task): task is SchedTask => task != null), links.map(toSchedLink));
     const linkPaths = links.map((link) => {
       const source = visibleById.get(link.source);
       const target = visibleById.get(link.target);
       if (!source || !target) return '';
       if (virtualized && !renderedIds.has(link.source) && !renderedIds.has(link.target)) return '';
       const routed = routeDependencyPath(source.task, source.index, target.task, target.index, link.type, xForDate);
-      const label = `${source.task.label} dependency to ${target.task.label}`;
-      return `<path class="link-hit" d="${routed}" data-link-id="${escapeHtml(link.id)}" data-source-id="${escapeHtml(link.source)}" data-target-id="${escapeHtml(link.target)}" data-link-type="${escapeHtml(link.type || 'e2s')}" aria-label="${escapeHtml(label)}" /><path d="${routed}" />`;
+      const bad = violated.has(link.id);
+      const chosen = this.selectedLinkId === link.id;
+      const label = `${source.task.label} dependency to ${target.task.label}${bad ? `, ${text.linkViolated}` : ''}`;
+      return `<path class="link-hit${bad ? ' violated' : ''}${chosen ? ' selected' : ''}" tabindex="-1" d="${routed}" data-link-id="${escapeHtml(link.id)}" data-source-id="${escapeHtml(link.source)}" data-target-id="${escapeHtml(link.target)}" data-link-type="${escapeHtml(link.type || 'e2s')}"${bad ? ' data-violated="true"' : ''} aria-label="${escapeHtml(label)}" /><path class="${[bad ? 'violated' : '', chosen ? 'selected' : ''].filter(Boolean).join(' ')}" d="${routed}" />`;
     }).join('');
-    const linkDefs = linkPaths ? '<defs><marker id="ui-gantt-arrow" markerWidth="9" markerHeight="9" refX="8.5" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0.5 0.75 L 8.5 4.5 L 0.5 8.25 z" /></marker></defs>' : '';
+    const arrowHead = (id: string) => `<marker id="${id}" markerWidth="9" markerHeight="9" refX="8.5" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0.5 0.75 L 8.5 4.5 L 0.5 8.25 z" /></marker>`;
+    const linkDefs = linkPaths ? `<defs>${arrowHead('ui-gantt-arrow')}${arrowHead('ui-gantt-arrow-bad')}</defs>` : '';
 
     const weekStart = normalizeWeekStart(this.getAttribute('week-start'));
+    const nonWorking = parseNonWorking(this.getAttribute('non-working-days'), this.getAttribute('holidays'));
     // A host wider than the data fills the frame: the timeline track grows (1fr) and the header cells and
     // grid lines are drawn out to its edge, so there is no blank strip after the last task.
     const fillWidth = Math.max(timelineWidth, frameWidth - gridWidth);
     const rangeEnd = min + (fillWidth / dayWidth) * DAY;
+    this.layoutInfo = { min, dayWidth, gridWidth, rangeEnd };
+    this.renderedLeft = this.viewportLeft;
+    this.visibleIds = visible.map((task) => task.id);
     const today = startOfDay(Date.now());
     const todayX = xForDate(today);
     // Today is drawn while it falls anywhere on the timeline, including the stretch added to fill a wide host.
-    const showTodayMarker = showToday && today >= min && today <= rangeEnd;
+    const todayInRange = today >= min && today <= rangeEnd;
+    const showTodayMarker = showToday && todayInRange;
     const todayMarkup = showTodayMarker ? `<div class="today" part="today" style="left:${todayX.toFixed(2)}px"></div>` : '';
     // The label lives in the header, which stays put while the rows scroll, not on the line where it covered bars.
     // The day scale already highlights today's own column, and a pill there would cover its date.
-    const todayPill = showTodayMarker && unit !== 'day' ? `<span class="today-pill" part="today-pill" style="left:clamp(22px, ${todayX.toFixed(2)}px, calc(100% - 22px))">Today</span>` : '';
+    const todayPill = showTodayMarker && unit !== 'day' ? `<span class="today-pill" part="today-pill" style="left:clamp(22px, ${todayX.toFixed(2)}px, calc(100% - 22px))">${escapeHtml(text.today)}</span>` : '';
 
     const focusSnapshot = this.focusRequest ?? this.captureFocus();
     this.focusRequest = null;
+    // setContent leaves the tree alone when the markup is identical, and then the listeners from the last render
+    // are still on it: binding them again would run every handler twice.
+    const previousFrame = this.root.querySelector('.frame');
     this.setContent(`
       <style>${style}</style>
-      <section class="frame" part="frame" data-bar-variant="${barVariant}">
+      ${layout.width !== GRID_WIDTH || layout.template !== DEFAULT_TEMPLATE ? `<style>@container ui-gantt (min-width: 641px) { .surface { --gantt-grid-w: ${layout.width}px; --gantt-cols: ${layout.template}; } }</style>` : ''}
+      <section class="frame" part="frame" data-bar-variant="${barVariant}"${maxHeight ? ` style="--ui-gantt-max-height:${maxHeight}"` : ''}>
         ${showToolbar ? `
           <header class="toolbar" part="toolbar">
-            <div class="title">Project schedule <span class="meta">${visible.length}/${tasks.length} tasks</span></div>
+            <div class="title">${escapeHtml(text.title)} <span class="meta">${escapeHtml(text.tasksCount.replace('{shown}', String(visible.length)).replace('{total}', String(tasks.length)))}</span></div>
             <div class="controls">
-              <input class="control" value="${escapeHtml(filterText)}" placeholder="Filter tasks" aria-label="Filter tasks" />
-              <select class="select" aria-label="Sort tasks">
+              <input class="control" value="${escapeHtml(filterText)}" placeholder="${escapeHtml(text.filterPlaceholder)}" aria-label="${escapeHtml(text.filterLabel)}" />
+              <select class="select" aria-label="${escapeHtml(text.sortLabel)}">
                 ${[
-                  ['none', 'Manual'],
-                  ['start', 'Start date'],
-                  ['end', 'End date'],
-                  ['label', 'Name'],
-                  ['progress', 'Progress']
-                ].map(([value, label]) => `<option value="${value}" ${sort === value ? 'selected' : ''}>${label}</option>`).join('')}
+                  ['none', text.sortManual],
+                  ['start', text.sortStart],
+                  ['end', text.sortEnd],
+                  ['label', text.sortName],
+                  ['progress', text.sortProgress]
+                ].map(([value, label]) => `<option value="${value}" ${sort === value ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('')}
               </select>
-              ${(['day', 'week', 'month', 'quarter', 'year', 'fit'] as GanttZoom[]).map((item) => `<button class="zoom-button" data-zoom="${item}" aria-pressed="${zoom === item}"${item === 'fit' ? ' title="Fit the whole project to the width"' : ''}>${item}</button>`).join('')}
+              ${creatable ? `<button class="add-button" data-action="add"><span aria-hidden="true">+</span> ${escapeHtml(text.addTask)}</button>` : ''}
+              ${showToday ? `<button class="today-button" data-action="today" title="${escapeHtml(text.scrollToToday)}" aria-label="${escapeHtml(text.scrollToToday)}"${todayInRange ? '' : ' disabled'}>${escapeHtml(text.today)}</button>` : ''}
+              ${(['day', 'week', 'month', 'quarter', 'year', 'fit'] as GanttZoom[]).map((item) => `<button class="zoom-button" data-zoom="${item}" aria-pressed="${zoom === item}"${item === 'fit' ? ` title="${escapeHtml(text.zoomFitTitle)}"` : ''}>${escapeHtml(zoomLabel(item, text))}</button>`).join('')}
             </div>
           </header>
         ` : ''}
         <div class="viewport" part="viewport">
           <div class="surface" part="surface" style="--day-width:${dayWidth}px;grid-template-columns:var(--gantt-grid-w) minmax(${timelineWidth.toFixed(2)}px, 1fr);inline-size:max(100%, calc(var(--gantt-grid-w) + ${timelineWidth.toFixed(2)}px))">
-            <div class="grid-semantics" role="treegrid" aria-label="${escapeHtml(this.getAttribute('aria-label') || 'Project schedule')}" aria-rowcount="${visible.length + 1}" aria-colcount="4">
+            <div class="grid-semantics" role="treegrid" aria-label="${escapeHtml(this.getAttribute('aria-label') || text.title)}" aria-rowcount="${visible.length + 1}" aria-colcount="${compact ? 1 : columns.length}">
               <div class="grid-head" part="grid-head" role="row">
-                <div role="columnheader" aria-sort="${sort === 'label' ? 'ascending' : 'none'}" style="display:contents"><button class="head-button" data-sort="label">Task</button></div>
-                <span role="columnheader">Owner</span>
-                <div role="columnheader" aria-sort="${sort === 'start' ? 'ascending' : 'none'}" style="display:contents"><button class="head-button" data-sort="start">Dates</button></div>
-                <div role="columnheader" aria-sort="${sort === 'progress' ? 'descending' : 'none'}" style="display:contents"><button class="head-button" data-sort="progress">%</button></div>
+                ${columns.map((column) => {
+                  const title = escapeHtml(column.custom ?? text[column.title]);
+                  if (!column.sort) return `<span role="columnheader">${title}</span>`;
+                  const active = sort === column.sort;
+                  const direction = column.sort === 'progress' ? 'descending' : 'ascending';
+                  return `<div role="columnheader" aria-sort="${active ? direction : 'none'}" style="display:contents"><button class="head-button" data-sort="${column.sort}">${title}</button></div>`;
+                }).join('')}
               </div>
               <div class="grid-body" part="grid-body" role="rowgroup">
                 ${virtualized && topSpacer ? `<div style="height:${topSpacer}px"></div>` : ''}
-                ${gridRows || '<div class="empty">No matching tasks</div>'}
+                ${gridRows || `<div class="empty">${escapeHtml(text.noMatches)}</div>`}
                 ${virtualized && bottomSpacer ? `<div style="height:${bottomSpacer}px"></div>` : ''}
               </div>
             </div>
+            <div class="splitter-rail head"><div class="splitter" role="separator" aria-orientation="vertical" aria-label="${escapeHtml(text.splitter)}" aria-valuemin="${layout.min}" aria-valuemax="${this.gridBounds.max}" aria-valuenow="${layout.width}" tabindex="0"></div></div>
+            <div class="splitter-rail body"><div class="splitter" aria-hidden="true"></div></div>
             <div class="timeline-head" part="timeline-head" aria-hidden="true">
-              <div class="scale" data-zoom="${unit}" style="min-width:${timelineWidth.toFixed(2)}px">${createTimeHeader(min, rangeEnd, dayWidth, unit, weekStart, this.viewportLeft, this.viewportWidth)}${todayPill}</div>
+              <div class="scale" data-zoom="${unit}" style="min-width:${timelineWidth.toFixed(2)}px">${createTimeHeader(min, rangeEnd, dayWidth, unit, weekStart, this.viewportLeft, this.viewportWidth, nonWorking)}${todayPill}</div>
             </div>
-            <div class="timeline-body" part="timeline-body" role="group" aria-label="Timeline" data-zoom="${unit}" style="min-width:${timelineWidth.toFixed(2)}px;min-height:${rowsHeight}px">
+            <div class="timeline-body" part="timeline-body" role="group" aria-label="${escapeHtml(text.timeline)}" data-zoom="${unit}" style="min-width:${timelineWidth.toFixed(2)}px;min-height:${rowsHeight}px">
+              ${createNonWorkingShading(min, rangeEnd, dayWidth, nonWorking, this.viewportLeft, this.viewportWidth)}
               ${createUnitLines(min, rangeEnd, dayWidth, unit, weekStart, this.viewportLeft, this.viewportWidth)}
               <svg class="links" width="${timelineWidth.toFixed(0)}" height="${rowsHeight}" viewBox="0 0 ${timelineWidth.toFixed(0)} ${rowsHeight}" aria-hidden="true">${linkDefs}${linkPaths}</svg>
               ${todayMarkup}
@@ -1739,8 +2511,13 @@ export class UIGantt extends ElementBase {
 
     const viewport = this.root.querySelector<HTMLElement>('.viewport');
     if (viewport) {
-      viewport.scrollTop = this.viewportTop;
-      viewport.scrollLeft = this.viewportLeft;
+      // Only a new scroll area needs its position put back. Assigning it to the one that is already there would cancel a
+      // smooth scroll that is under way.
+      if (this.root.querySelector('.frame') !== previousFrame) {
+        viewport.scrollTop = this.viewportTop;
+        viewport.scrollLeft = this.viewportLeft;
+        if (this.smoothTarget && typeof viewport.scrollTo === 'function') viewport.scrollTo({ ...this.smoothTarget, behavior: 'smooth' });
+      }
       this.viewportWidth = viewport.clientWidth || this.viewportWidth;
       this.viewportHeight = viewport.clientHeight || this.viewportHeight;
       // `fit` sizes the days to the width left after the scrollbar; the scrollbar is only known once laid out.
@@ -1750,8 +2527,20 @@ export class UIGantt extends ElementBase {
         if (fitting) this.requestRender();
       }
     }
-    this.bindEvents();
+    if (this.root.querySelector('.frame') !== previousFrame) this.bindEvents();
     this.restoreFocus(focusSnapshot);
+    if (viewport && viewport.clientWidth > 0 && this.initialScrollPending) {
+      this.initialScrollPending = false;
+      // Open on today when it is not on the first screen; `initial-scroll="start"` opens at the start instead.
+      if (this.getAttribute('initial-scroll') !== 'start' && !fitting && showToday && todayInRange && todayX > viewport.clientWidth - gridWidth - 48) {
+        this.scrollToDate('today', { behavior: 'auto' });
+      }
+    }
+    if (this.pendingReveal) {
+      const reveal = this.pendingReveal;
+      this.pendingReveal = null;
+      this.reveal(reveal.id, reveal.behavior);
+    }
   }
 
   /**
@@ -1774,8 +2563,14 @@ export class UIGantt extends ElementBase {
   private restoreFocus(snapshot: FocusSnapshot | null): void {
     if (!snapshot) return;
     const next = this.root.querySelector<HTMLElement>(snapshot.selector);
+    if (!next && snapshot.reveal && (snapshot.retries ?? 0) < 5) {
+      // The row is outside the rendered window: the scroll that is on its way renders the window it is in.
+      this.focusRequest = { ...snapshot, retries: (snapshot.retries ?? 0) + 1 };
+      return;
+    }
     if (!next || this.root.activeElement === next) return;
     next.focus({ preventScroll: !snapshot.reveal });
+    if (snapshot.selectAll && next instanceof HTMLInputElement) next.select();
     if (snapshot.selection && next instanceof HTMLInputElement) {
       try {
         next.setSelectionRange(snapshot.selection[0], snapshot.selection[1], snapshot.selection[2] ?? undefined);
@@ -1808,11 +2603,12 @@ export class UIGantt extends ElementBase {
       button.addEventListener('click', (event) => {
         event.stopPropagation();
         const id = button.dataset.taskId;
-        if (!id) return;
-        if (this.collapsed.has(id)) this.collapsed.delete(id);
-        else this.collapsed.add(id);
-        this.requestRender();
+        if (id) this.toggleTask(id);
       });
+    });
+
+    this.root.querySelector<HTMLButtonElement>('.today-button')?.addEventListener('click', () => {
+      this.scrollToDate('today', { behavior: 'smooth', align: 'center' });
     });
 
     this.root.querySelectorAll<HTMLButtonElement>('.zoom-button[data-zoom]').forEach((button) => {
@@ -1832,17 +2628,27 @@ export class UIGantt extends ElementBase {
       });
     });
 
+    for (const type of ['wheel', 'pointerdown', 'touchstart', 'keydown']) {
+      this.root.querySelector<HTMLElement>('.viewport')?.addEventListener(type, () => {
+        this.smoothTarget = null; // the user took over the scroll
+      }, { passive: true });
+    }
     this.root.querySelector<HTMLElement>('.viewport')?.addEventListener('scroll', (event) => {
       const viewport = event.currentTarget as HTMLElement;
       const top = viewport.scrollTop;
       const left = viewport.scrollLeft;
       const viewportRows = Math.max(20, Math.ceil(Math.max(420, this.viewportHeight - HEADER_HEIGHT) / ROW_HEIGHT));
       const rowTop = Math.max(0, Math.floor(Math.max(0, top - HEADER_HEIGHT) / ROW_HEIGHT));
-      const shouldRenderRows = rowTop < this.renderedFirstRow + 64 || rowTop + viewportRows > this.renderedLastRow - 64;
-      const shouldRenderX = Math.abs(left - this.viewportLeft) >= Math.max(480, this.viewportWidth * 0.6);
+      // Rows only need a new window when they are windowed at all, and the header cells when the visible part has moved a good
+      // way from where they were built (compared with that place, not with the previous scroll event).
+      const shouldRenderRows = this.virtualizedNow && (rowTop < this.renderedFirstRow + 64 || rowTop + viewportRows > this.renderedLastRow - 64);
+      const shouldRenderX = Math.abs(left - this.renderedLeft) >= 400;
       this.viewportTop = top;
       this.viewportLeft = left;
-      if (!shouldRenderRows && !shouldRenderX) return;
+      const target = this.smoothTarget;
+      if (target && (target.left == null || Math.abs(left - target.left) < 2) && (target.top == null || Math.abs(top - target.top) < 2)) this.smoothTarget = null;
+      // A render would replace the bar that is being dragged, so it waits for the drop.
+      if (this.drag || this.linking || (!shouldRenderRows && !shouldRenderX)) return;
       if (this.scrollFrame != null) return;
       this.scrollFrame = window.setTimeout(() => {
         this.scrollFrame = null;
@@ -1863,134 +2669,266 @@ export class UIGantt extends ElementBase {
       this.dispatchEvent(new CustomEvent('sortchange', { detail: { sort }, bubbles: true, composed: true }));
     });
 
-    this.root.querySelectorAll<SVGPathElement>('.link-hit').forEach((path) => {
-      path.addEventListener('click', (event) => {
-        event.stopPropagation();
-        this.dispatchEvent(new CustomEvent('linkselect', {
-          detail: {
-            id: path.dataset.linkId || '',
-            source: path.dataset.sourceId || '',
-            target: path.dataset.targetId || '',
-            type: path.dataset.linkType || 'e2s'
-          },
-          bubbles: true,
-          composed: true
-        }));
-      });
-    });
+    this.bindLinks();
 
     this.root.querySelectorAll<HTMLElement>('.bar').forEach((bar) => {
       bar.addEventListener('keydown', (event) => this.handleBarKeydown(bar, event as KeyboardEvent));
     });
     this.bindTooltips();
+    this.bindSplitters();
+    this.bindRows();
+    this.bindEditing();
 
     if (this.hasAttribute('readonly')) return;
     this.root.querySelectorAll<HTMLElement>('.bar[data-draggable="true"]').forEach((bar) => {
-      bar.addEventListener('pointerdown', (event) => {
-        if (event.button !== 0) return;
-        const taskId = bar.dataset.taskId;
-        if (!taskId) return;
-        const tasks = this.getTasks();
-        const task = tasks.find((item) => item.id === taskId);
-        const originalStart = parseDate(task?.start);
-        const originalEnd = parseDate(task?.end);
-        if (!task || originalStart == null || originalEnd == null) return;
-        event.preventDefault();
-        const kind = (bar.dataset.kind as GanttTaskType) || 'task';
-        const requestedMode = ((event.target as HTMLElement).dataset.mode as DragState['mode']) || 'move';
-        const mode = kind === 'milestone' ? 'move' : requestedMode;
-        const selectedChanged = this.selectedId !== taskId;
-        this.selectedId = taskId;
-        this.dispatchEvent(new CustomEvent('taskselect', { detail: { id: taskId }, bubbles: true, composed: true }));
-        this.drag = {
-          taskId,
-          mode,
-          startX: event.clientX,
-          originalStart,
-          originalEnd,
-          kind,
-          rangeMin: this.rangeMin(),
-          dayWidth: this.dayWidthNow,
-          latestStart: originalStart,
-          latestEnd: originalEnd,
-          frame: null,
-          bar,
-          moved: false,
-          selectedChanged
-        };
-        bar.classList.add('dragging');
-        bar.setPointerCapture(event.pointerId);
-      });
-
+      bar.addEventListener('pointerdown', (event) => this.startDrag(bar, event));
       bar.addEventListener('pointermove', (event) => {
-        if (!this.drag || this.drag.taskId !== bar.dataset.taskId) return;
+        if (!this.drag || this.drag.bar !== bar) return;
         event.preventDefault();
-        const dx = event.clientX - this.drag.startX;
-        if (Math.abs(dx) > 2) this.drag.moved = true;
-        let start = this.drag.originalStart;
-        let end = this.drag.originalEnd;
-        if (this.drag.mode === 'move') {
-          const deltaDays = Math.round(dx / this.drag.dayWidth);
-          start = addDays(this.drag.originalStart, deltaDays);
-          end = this.drag.kind === 'milestone' ? start : addDays(this.drag.originalEnd, deltaDays);
-        } else if (this.drag.mode === 'resize-start') {
-          const deltaDays = Math.round(dx / this.drag.dayWidth);
-          start = Math.min(addDays(this.drag.originalStart, deltaDays), addDays(end, -1));
-        } else {
-          const deltaDays = Math.round(dx / this.drag.dayWidth);
-          end = Math.max(addDays(this.drag.originalEnd, deltaDays), addDays(start, 1));
-        }
-        this.drag.latestStart = start;
-        this.drag.latestEnd = end;
-        if (this.drag.frame == null) {
-          this.drag.frame = requestAnimationFrame(() => {
-            if (!this.drag) return;
-            this.drag.frame = null;
-            const left = ((this.drag.latestStart - this.drag.rangeMin) / DAY) * this.drag.dayWidth - (this.drag.kind === 'milestone' ? MILESTONE_SIZE / 2 : 0);
-            const width = this.drag.kind === 'milestone' ? MILESTONE_SIZE : Math.max(12, ((this.drag.latestEnd - this.drag.latestStart) / DAY) * this.drag.dayWidth);
-            this.drag.bar.style.left = `${left.toFixed(2)}px`;
-            this.drag.bar.style.width = `${width.toFixed(2)}px`;
-            // The dates move with the bar, in the shared tooltip: a tip inside the bar would be clipped by it.
-            const format = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
-            this.showTip(
-              this.drag.bar,
-              this.drag.kind === 'milestone'
-                ? format.format(new Date(this.drag.latestStart))
-                : `${format.format(new Date(this.drag.latestStart))} ${TEXT.to} ${format.format(new Date(this.drag.latestEnd))}`
-            );
-          });
-        }
+        this.drag.lastClientX = event.clientX;
+        this.updateDrag();
       });
-
-      const finishDrag = () => {
-        if (!this.drag) return;
-        if (this.drag.frame != null) cancelAnimationFrame(this.drag.frame);
-        const drag = this.drag;
-        drag.bar.classList.remove('dragging');
-        this.drag = null;
-        this.hideTip();
-        if (!drag.moved) {
-          if (drag.selectedChanged) this.requestRender();
-          return;
-        }
-        const detail = {
-          id: drag.taskId,
-          start: formatIso(drag.latestStart),
-          end: formatIso(drag.latestEnd)
-        };
-        this.overrides.set(drag.taskId, { start: detail.start, end: detail.end });
-        this.bumpOverrides();
-        this.dispatchEvent(new CustomEvent('taskchange', {
-          detail,
-          bubbles: true,
-          composed: true
-        }));
-        this.requestRender();
-      };
-
-      bar.addEventListener('pointerup', finishDrag);
-      bar.addEventListener('pointercancel', finishDrag);
+      bar.addEventListener('pointerup', () => this.endDrag(true));
+      // A cancelled pointer (a touch taken over by scrolling, say) is not a drop: nothing changes.
+      bar.addEventListener('pointercancel', () => this.endDrag(false));
     });
+  }
+
+  private snapUnit(): 'day' | 'week' | 'month' {
+    const value = this.getAttribute('snap');
+    return value === 'week' || value === 'month' ? value : 'day';
+  }
+
+  /** The nearest boundary of the snap unit (a week start, a 1st of the month), or the day itself. */
+  private snapDate(ms: number): number {
+    const unit = this.snapUnit();
+    if (unit === 'day') return ms;
+    const weekStart = normalizeWeekStart(this.getAttribute('week-start'));
+    const before = unitStart(ms, unit, weekStart);
+    const after = nextUnit(before, unit);
+    return ms - before < after - ms ? before : after;
+  }
+
+  private startDrag(bar: HTMLElement, event: PointerEvent): void {
+    if (event.button !== 0) return;
+    const taskId = bar.dataset.taskId;
+    if (!taskId) return;
+    const task = this.getTasks().find((item) => item.id === taskId);
+    const originalStart = parseDate(task?.start);
+    const originalEnd = parseDate(task?.end);
+    if (!task || originalStart == null || originalEnd == null) return;
+    event.preventDefault();
+    const kind = (bar.dataset.kind as GanttTaskType) || 'task';
+    const requestedMode = ((event.target as HTMLElement).dataset.mode as DragState['mode']) || 'move';
+    const mode = kind === 'milestone' ? 'move' : requestedMode;
+    const selectedChanged = this.selectedId !== taskId;
+    this.selectedId = taskId;
+    this.dispatchEvent(new CustomEvent('taskselect', { detail: { id: taskId }, bubbles: true, composed: true }));
+    const onKey = (keyEvent: KeyboardEvent) => {
+      if (keyEvent.key !== 'Escape') return;
+      keyEvent.preventDefault();
+      keyEvent.stopPropagation();
+      this.endDrag(false);
+    };
+    this.drag = {
+      taskId,
+      mode,
+      startX: event.clientX,
+      startScroll: this.root.querySelector<HTMLElement>('.viewport')?.scrollLeft ?? 0,
+      lastClientX: event.clientX,
+      originalStart,
+      originalEnd,
+      kind,
+      rangeMin: this.rangeMin(),
+      dayWidth: this.dayWidthNow,
+      latestStart: originalStart,
+      latestEnd: originalEnd,
+      frame: null,
+      scrollFrame: null,
+      bar,
+      originalLeft: bar.style.left,
+      originalWidth: bar.style.width,
+      moved: false,
+      selectedChanged,
+      onKey
+    };
+    window.addEventListener('keydown', onKey, true);
+    bar.classList.add('dragging');
+    bar.setPointerCapture(event.pointerId);
+    this.autoScrollLoop();
+  }
+
+  /** The dates the bar would take for the pointer's position, snapped, and a repaint of the bar and the tooltip. */
+  private updateDrag(): void {
+    const drag = this.drag;
+    if (!drag) return;
+    const viewport = this.root.querySelector<HTMLElement>('.viewport');
+    const dx = drag.lastClientX - drag.startX + (viewport ? viewport.scrollLeft - drag.startScroll : 0);
+    if (Math.abs(dx) > 2) drag.moved = true;
+    const deltaDays = Math.round(dx / drag.dayWidth);
+    let start = drag.originalStart;
+    let end = drag.originalEnd;
+    if (drag.mode === 'move') {
+      const shift = Math.round((this.snapDate(addDays(drag.originalStart, deltaDays)) - drag.originalStart) / DAY);
+      start = addDays(drag.originalStart, shift);
+      end = drag.kind === 'milestone' ? start : addDays(drag.originalEnd, shift);
+    } else if (drag.mode === 'resize-start') {
+      start = Math.min(this.snapDate(addDays(drag.originalStart, deltaDays)), addDays(end, -1));
+    } else {
+      end = Math.max(this.snapDate(addDays(drag.originalEnd, deltaDays)), addDays(start, 1));
+    }
+    drag.latestStart = start;
+    drag.latestEnd = end;
+    if (drag.frame != null) return;
+    drag.frame = requestAnimationFrame(() => {
+      const current = this.drag;
+      if (!current) return;
+      current.frame = null;
+      const left = ((current.latestStart - current.rangeMin) / DAY) * current.dayWidth - (current.kind === 'milestone' ? MILESTONE_SIZE / 2 : 0);
+      const width = current.kind === 'milestone' ? MILESTONE_SIZE : Math.max(12, ((current.latestEnd - current.latestStart) / DAY) * current.dayWidth);
+      current.bar.style.left = `${left.toFixed(2)}px`;
+      current.bar.style.width = `${width.toFixed(2)}px`;
+      // The dates move with the bar, in the shared tooltip: a tip inside the bar would be clipped by it.
+      activeLocale = this.getAttribute('locale') || undefined;
+      const format = dateFormat({ dateStyle: 'medium' });
+      const text = this.labelSet();
+      this.showTip(
+        current.bar,
+        current.kind === 'milestone'
+          ? format.format(new Date(current.latestStart))
+          : `${format.format(new Date(current.latestStart))} ${text.to} ${format.format(new Date(current.latestEnd))}`
+      );
+    });
+  }
+
+  /** While a drag is held near the left or right edge of the timeline the chart scrolls, faster the nearer the edge. */
+  private autoScrollLoop(): void {
+    const drag = this.drag;
+    if (!drag) return;
+    drag.scrollFrame = requestAnimationFrame(() => {
+      const current = this.drag;
+      if (!current) return;
+      const viewport = this.root.querySelector<HTMLElement>('.viewport');
+      if (viewport && viewport.clientWidth > 0 && current.moved) {
+        const box = viewport.getBoundingClientRect();
+        const zone = 56;
+        const left = Math.max(box.left, this.root.querySelector('.grid-body')?.getBoundingClientRect().right ?? box.left);
+        let speed = 0;
+        if (current.lastClientX > box.right - zone) speed = (current.lastClientX - (box.right - zone)) / zone;
+        else if (current.lastClientX < left + zone && viewport.scrollLeft > 0) speed = -(left + zone - current.lastClientX) / zone;
+        if (speed) {
+          viewport.scrollLeft += Math.max(-1.5, Math.min(1.5, speed)) * 16;
+          this.updateDrag();
+        }
+      }
+      this.autoScrollLoop();
+    });
+  }
+
+  /** Finish a drag: drop it (commit the new dates), or cancel it (the bar goes back where it was). */
+  private endDrag(commit: boolean): void {
+    const drag = this.drag;
+    if (!drag) return;
+    if (drag.frame != null) cancelAnimationFrame(drag.frame);
+    if (drag.scrollFrame != null) cancelAnimationFrame(drag.scrollFrame);
+    window.removeEventListener('keydown', drag.onKey, true);
+    drag.bar.classList.remove('dragging');
+    this.drag = null;
+    this.hideTip();
+    const putBack = () => {
+      drag.bar.style.left = drag.originalLeft;
+      drag.bar.style.width = drag.originalWidth;
+    };
+    if (!drag.moved) {
+      if (drag.selectedChanged) this.requestRender();
+      return;
+    }
+    if (!commit) {
+      putBack();
+      this.requestRender(); // the scroll renders that were held back during the drag
+      return;
+    }
+    if (drag.latestStart === drag.originalStart && drag.latestEnd === drag.originalEnd) {
+      putBack(); // dropped where it was picked up (or snapped back there)
+      return;
+    }
+    const changed = this.applyChanges(
+      this.plan({ id: drag.taskId, start: drag.latestStart, end: drag.latestEnd, previousStart: drag.originalStart, previousEnd: drag.originalEnd }),
+      drag.mode === 'move' ? 'drag' : 'resize'
+    );
+    if (!changed) putBack();
+  }
+
+  /**
+   * With `cascade`, moving a parent moves everything under it by the same number of days (a read-only task stays
+   * put). Anything else is the one change.
+   */
+  private plan(change: TaskChange): TaskChange[] {
+    const changes = this.withCascade(change);
+    if (normalizeSchedule(this.getAttribute('schedule')) !== 'auto') return changes;
+    const links = this.getLinks();
+    if (!links.length) return changes;
+    const tasks = this.getTasks().map(toSched).filter((task): task is SchedTask => task != null);
+    const byId = new Map(tasks.map((task) => [task.id, task]));
+    const moved = new Map(changes.map((item) => [item.id, { start: item.start, end: item.end }]));
+    const planned = [...changes];
+    for (const push of pushSuccessors(tasks, links.map(toSchedLink), moved, this.hasAttribute('cascade'))) {
+      const at = planned.findIndex((item) => item.id === push.id);
+      if (at >= 0) {
+        planned[at] = { ...planned[at], start: push.start, end: push.end };
+      } else {
+        const before = byId.get(push.id);
+        if (before) planned.push({ id: push.id, start: push.start, end: push.end, previousStart: before.start, previousEnd: before.end });
+      }
+    }
+    return planned;
+  }
+
+  private withCascade(change: TaskChange): TaskChange[] {
+    if (!this.hasAttribute('cascade')) return [change];
+    const delta = daysBetween(change.previousStart, change.start);
+    if (delta === 0 || change.end - change.start !== change.previousEnd - change.previousStart) return [change];
+    const tasks = this.getTasks();
+    const below = descendantsOf(tasks.map(toSched).filter((task): task is SchedTask => task != null), change.id);
+    if (!below.length) return [change];
+    const moved = below
+      .filter((task) => !task.readonly)
+      .map((task) => ({ id: task.id, start: shiftDays(task.start, delta), end: shiftDays(task.end, delta), previousStart: task.start, previousEnd: task.end }));
+    return [change, ...moved];
+  }
+
+  /**
+   * Apply a change to dates. First a cancelable `beforetaskchange` (a host that rejects the change calls
+   * preventDefault and nothing moves), then the new dates are kept and `taskchange` fires for each task.
+   */
+  private applyChanges(changes: TaskChange[], source: ChangeSource): boolean {
+    const [primary, ...others] = changes;
+    const describe = (change: TaskChange) => ({
+      id: change.id,
+      start: formatIso(change.start),
+      end: formatIso(change.end),
+      previousStart: formatIso(change.previousStart),
+      previousEnd: formatIso(change.previousEnd)
+    });
+    const accepted = this.dispatchEvent(
+      new CustomEvent('beforetaskchange', {
+        detail: { ...describe(primary), source, affected: others.map(describe) },
+        bubbles: true,
+        composed: true,
+        cancelable: true
+      })
+    );
+    if (!accepted) {
+      this.requestRender();
+      return false;
+    }
+    for (const change of changes) this.overrides.set(change.id, { ...this.overrides.get(change.id), start: formatIso(change.start), end: formatIso(change.end) });
+    this.bumpOverrides();
+    for (const change of changes) {
+      this.dispatchEvent(new CustomEvent('taskchange', { detail: { id: change.id, start: formatIso(change.start), end: formatIso(change.end) }, bubbles: true, composed: true }));
+    }
+    this.requestRender();
+    return true;
   }
 
   /**
@@ -2005,14 +2943,19 @@ export class UIGantt extends ElementBase {
       this.hideTip();
       return;
     }
+    if (event.key === 'F2') {
+      event.preventDefault();
+      this.startRename(taskId);
+      return;
+    }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       this.selectTask(taskId);
       return;
     }
-    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+    if (['ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(event.key)) {
       event.preventDefault();
-      this.selectAdjacentTask(taskId, event.key === 'ArrowDown' ? 1 : -1);
+      this.navigate(taskId, event.key, 'bar');
       return;
     }
     if (!editable) return;
@@ -2029,17 +2972,14 @@ export class UIGantt extends ElementBase {
     event.preventDefault();
     const direction = event.key === 'ArrowLeft' ? -1 : 1;
     const isMilestone = bar.dataset.kind === 'milestone';
-    const nextStart = event.shiftKey && !isMilestone ? start : addDays(start, direction);
+    const resizes = event.shiftKey && !isMilestone && bar.dataset.kind !== 'summary';
+    const nextStart = resizes ? start : addDays(start, direction);
     const nextEnd = isMilestone
       ? nextStart
-      : event.shiftKey
+      : resizes
         ? Math.max(addDays(end, direction), addDays(start, 1))
         : addDays(end, direction);
-    const detail = { id: taskId, start: formatIso(nextStart), end: formatIso(nextEnd) };
-    this.overrides.set(taskId, { start: detail.start, end: detail.end });
-    this.bumpOverrides();
-    this.dispatchEvent(new CustomEvent('taskchange', { detail, bubbles: true, composed: true }));
-    this.requestRender();
+    this.applyChanges(this.plan({ id: taskId, start: nextStart, end: nextEnd, previousStart: start, previousEnd: end }), 'keyboard');
   }
 
   /**
@@ -2082,6 +3022,287 @@ export class UIGantt extends ElementBase {
     this.root.querySelector<HTMLElement>('.bar-tip')?.removeAttribute('data-open');
   }
 
+  /** Links: select one by clicking it (then Delete asks to remove it), and with `linkable` draw new ones from the dots beside a bar. */
+  private bindLinks(): void {
+    const details = (path: SVGElement) => ({
+      id: path.dataset.linkId || '',
+      source: path.dataset.sourceId || '',
+      target: path.dataset.targetId || '',
+      type: path.dataset.linkType || 'e2s'
+    });
+    this.root.querySelectorAll<SVGPathElement>('.link-hit').forEach((path) => {
+      path.addEventListener('click', (event) => {
+        event.stopPropagation();
+        this.selectedLinkId = path.dataset.linkId || null;
+        this.focusRequest = { selector: `.link-hit[data-link-id="${cssEscape(path.dataset.linkId || '')}"]` };
+        this.dispatchEvent(new CustomEvent('linkselect', { detail: details(path), bubbles: true, composed: true }));
+        this.requestRender();
+      });
+      path.addEventListener('keydown', (event) => {
+        if (event.key === 'Delete' || event.key === 'Backspace') {
+          if (this.hasAttribute('readonly')) return;
+          event.preventDefault();
+          this.dispatchEvent(new CustomEvent('linkdelete', { detail: details(path), bubbles: true, composed: true }));
+        } else if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          this.dispatchEvent(new CustomEvent('linkselect', { detail: details(path), bubbles: true, composed: true }));
+        } else if (event.key === 'Escape') {
+          this.selectedLinkId = null;
+          this.requestRender();
+        }
+      });
+    });
+    this.root.querySelectorAll<HTMLElement>('.connector').forEach((connector) => {
+      connector.addEventListener('pointerdown', (event) => this.startLink(connector, event));
+      connector.addEventListener('pointermove', (event) => this.updateLink(event));
+      connector.addEventListener('pointerup', () => this.endLink(true));
+      connector.addEventListener('pointercancel', () => this.endLink(false));
+    });
+  }
+
+  private startLink(connector: HTMLElement, event: PointerEvent): void {
+    if (event.button !== 0) return;
+    const sourceId = connector.dataset.taskId;
+    const side = connector.dataset.side === 'start' ? 'start' : 'end';
+    const body = this.root.querySelector<HTMLElement>('.timeline-body');
+    const svg = this.root.querySelector<SVGSVGElement>('svg.links');
+    const bar = sourceId ? this.root.querySelector<HTMLElement>(barSelector(sourceId)) : null;
+    if (!sourceId || !body || !svg || !bar) return;
+    event.preventDefault();
+    const bodyBox = body.getBoundingClientRect();
+    const barBox = bar.getBoundingClientRect();
+    const draft = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    draft.setAttribute('class', 'link-draft');
+    svg.appendChild(draft);
+    const onKey = (keyEvent: KeyboardEvent) => {
+      if (keyEvent.key !== 'Escape') return;
+      keyEvent.preventDefault();
+      keyEvent.stopPropagation();
+      this.endLink(false);
+    };
+    this.linking = {
+      sourceId,
+      side,
+      fromX: (side === 'start' ? barBox.left : barBox.right) - bodyBox.left,
+      fromY: barBox.top + barBox.height / 2 - bodyBox.top,
+      draft,
+      targetId: null,
+      targetSide: null,
+      onKey
+    };
+    window.addEventListener('keydown', onKey, true);
+    this.root.querySelector('.frame')?.setAttribute('data-linking', '');
+    connector.setPointerCapture(event.pointerId);
+    this.updateLink(event);
+  }
+
+  /** The rubber-band line follows the pointer; the bar (or dot) under it, and which end of it, is the target. */
+  private updateLink(event: PointerEvent): void {
+    const link = this.linking;
+    const body = this.root.querySelector<HTMLElement>('.timeline-body');
+    if (!link || !body) return;
+    const bodyBox = body.getBoundingClientRect();
+    link.draft.setAttribute('d', `M ${link.fromX.toFixed(1)} ${link.fromY.toFixed(1)} L ${(event.clientX - bodyBox.left).toFixed(1)} ${(event.clientY - bodyBox.top).toFixed(1)}`);
+    this.root.querySelectorAll('.bar.link-target').forEach((el) => {
+      el.classList.remove('link-target');
+      el.removeAttribute('data-link-side');
+    });
+    link.targetId = null;
+    link.targetSide = null;
+    const under = this.root.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null;
+    const dot = under?.closest?.('.connector') as HTMLElement | null | undefined;
+    const bar = (dot ? this.root.querySelector<HTMLElement>(barSelector(dot.dataset.taskId || '')) : under?.closest?.('.bar')) as HTMLElement | null | undefined;
+    const targetId = bar?.dataset.taskId;
+    if (!bar || !targetId || targetId === link.sourceId) return;
+    const box = bar.getBoundingClientRect();
+    link.targetId = targetId;
+    link.targetSide = dot ? (dot.dataset.side === 'start' ? 'start' : 'end') : event.clientX < box.left + box.width / 2 ? 'start' : 'end';
+    bar.classList.add('link-target');
+    bar.setAttribute('data-link-side', link.targetSide);
+  }
+
+  /** Let go: a drop on another task asks the host for a link (`linkcreate`), anywhere else nothing happens. */
+  private endLink(commit: boolean): void {
+    const link = this.linking;
+    if (!link) return;
+    window.removeEventListener('keydown', link.onKey, true);
+    this.linking = null;
+    link.draft.remove();
+    this.root.querySelector('.frame')?.removeAttribute('data-linking');
+    this.root.querySelectorAll('.bar.link-target').forEach((el) => {
+      el.classList.remove('link-target');
+      el.removeAttribute('data-link-side');
+    });
+    if (!commit || !link.targetId || !link.targetSide) return;
+    const type = `${link.side === 'start' ? 's' : 'e'}2${link.targetSide === 'start' ? 's' : 'e'}`;
+    if (this.getLinks().some((existing) => existing.source === link.sourceId && existing.target === link.targetId && (existing.type || 'e2s') === type)) return;
+    this.dispatchEvent(new CustomEvent('linkcreate', { detail: { source: link.sourceId, target: link.targetId, type }, bubbles: true, composed: true }));
+  }
+
+  /** Rename a task in place: the name becomes a text field. Does nothing in a read-only chart or for a read-only task. */
+  private startRename(id: string): void {
+    if (this.hasAttribute('readonly')) return;
+    const task = this.getTasks().find((item) => item.id === id);
+    if (!task || task.readonly) return;
+    this.editingId = id;
+    this.editingValue = task.label;
+    this.focusRequest = { selector: '.rename', reveal: true, retries: 0, selectAll: true };
+    this.reveal(id, 'auto');
+    this.requestRender();
+  }
+
+  /** Leave the rename field: keep the new name (when `save` and it is not empty or unchanged and nobody refuses it) or drop it. */
+  private finishRename(save: boolean): void {
+    const id = this.editingId;
+    if (!id) return;
+    const label = this.editingValue.trim();
+    const previous = this.getTasks().find((item) => item.id === id)?.label;
+    this.editingId = null;
+    if (save && label && previous != null && label !== previous) {
+      const accepted = this.dispatchEvent(
+        new CustomEvent('taskrename', { detail: { id, label, previousLabel: previous }, bubbles: true, composed: true, cancelable: true })
+      );
+      if (accepted) {
+        this.overrides.set(id, { ...this.overrides.get(id), label });
+        this.bumpOverrides();
+      }
+    }
+    this.focusRequest = { selector: rowSelector(id) };
+    this.requestRender();
+  }
+
+  /** Create a task: the host is told where (`taskcreate`) and adds it; nothing is added here. */
+  private requestCreate(startMs: number, anchorId?: string): void {
+    const anchor = anchorId ? this.getTasks().find((item) => item.id === anchorId) : undefined;
+    this.dispatchEvent(
+      new CustomEvent('taskcreate', {
+        detail: { start: formatIso(startMs), end: formatIso(addDays(startMs, NEW_TASK_DAYS)), parent: anchor?.parent, after: anchor?.id },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+
+  private bindEditing(): void {
+    this.root.querySelectorAll<HTMLElement>('.grid-row .task-name').forEach((cell) => {
+      cell.addEventListener('dblclick', (event) => {
+        if ((event.target as HTMLElement).closest('.expander, .rename')) return;
+        const id = (cell.closest('.grid-row') as HTMLElement | null)?.dataset.taskId;
+        if (id) this.startRename(id);
+      });
+    });
+    const input = this.root.querySelector<HTMLInputElement>('.rename');
+    if (input) {
+      input.addEventListener('input', () => {
+        this.editingValue = input.value;
+      });
+      input.addEventListener('keydown', (event) => {
+        event.stopPropagation();
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          this.finishRename(true);
+        } else if (event.key === 'Escape') {
+          event.preventDefault();
+          this.finishRename(false);
+        }
+      });
+      input.addEventListener('blur', () => {
+        if (!this.suppressBlur) this.finishRename(true);
+      });
+    }
+    this.root.querySelector<HTMLButtonElement>('.add-button')?.addEventListener('click', () => {
+      const { min, rangeEnd } = this.layoutInfo;
+      const today = startOfDay(Date.now());
+      this.requestCreate(today >= min && today <= rangeEnd ? today : min, this.selectedId ?? undefined);
+    });
+    if (this.hasAttribute('creatable') && !this.hasAttribute('readonly')) {
+      this.root.querySelectorAll<HTMLElement>('.timeline-row').forEach((rowElement) => {
+        rowElement.addEventListener('dblclick', (event) => {
+          if (event.target !== rowElement) return; // a bar, a link or a baseline has its own meaning
+          const body = this.root.querySelector<HTMLElement>('.timeline-body');
+          if (!body) return;
+          const { min, dayWidth } = this.layoutInfo;
+          const days = Math.floor((event.clientX - body.getBoundingClientRect().left) / dayWidth);
+          this.requestCreate(addDays(min, days), rowElement.dataset.taskId);
+        });
+      });
+    }
+  }
+
+  /** The task list is a treegrid: a row takes focus and the arrow keys move around it. */
+  private bindRows(): void {
+    this.root.querySelectorAll<HTMLElement>('.grid-row').forEach((row) => {
+      row.addEventListener('keydown', (event) => {
+        // keys that land on a button or a field inside the row belong to it
+        if (event.target !== row) return;
+        const id = row.dataset.taskId;
+        if (!id) return;
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          this.selectTask(id);
+          return;
+        }
+        if (event.key === 'F2') {
+          event.preventDefault();
+          this.startRename(id);
+          return;
+        }
+        if (this.navigate(id, event.key, 'row')) event.preventDefault();
+      });
+    });
+  }
+
+  /** Drag the splitter (or use the arrow keys on it) to resize the task list; it is kept in `grid-width`. */
+  private bindSplitters(): void {
+    const surface = this.root.querySelector<HTMLElement>('.surface');
+    const handles = this.root.querySelectorAll<HTMLElement>('.splitter');
+    const commit = (width: number) => {
+      const next = Math.round(Math.max(this.gridBounds.min, Math.min(this.gridBounds.max, width)));
+      if (next === this.gridBounds.width) return;
+      this.setAttribute('grid-width', String(next));
+      this.dispatchEvent(new CustomEvent('gridresize', { detail: { width: next }, bubbles: true, composed: true }));
+    };
+    handles.forEach((handle) => {
+      handle.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0 || !surface) return;
+        event.preventDefault();
+        const startX = event.clientX;
+        const { min, max, width: startWidth } = this.gridBounds;
+        let width = startWidth;
+        handle.setPointerCapture(event.pointerId);
+        handles.forEach((item) => item.classList.add('dragging'));
+        const move = (moveEvent: PointerEvent) => {
+          width = Math.max(min, Math.min(max, startWidth + moveEvent.clientX - startX));
+          surface.style.setProperty('--gantt-grid-w', `${width}px`);
+        };
+        const end = (endEvent: PointerEvent) => {
+          handle.removeEventListener('pointermove', move);
+          handle.removeEventListener('pointerup', end);
+          handle.removeEventListener('pointercancel', end);
+          handles.forEach((item) => item.classList.remove('dragging'));
+          if (endEvent.type === 'pointercancel') {
+            surface.style.removeProperty('--gantt-grid-w');
+            return;
+          }
+          commit(width);
+        };
+        handle.addEventListener('pointermove', move);
+        handle.addEventListener('pointerup', end);
+        handle.addEventListener('pointercancel', end);
+      });
+      handle.addEventListener('keydown', (event) => {
+        if (handle.getAttribute('role') !== 'separator') return;
+        const step = event.shiftKey ? 64 : 16;
+        const { min, max, width } = this.gridBounds;
+        const next =
+          event.key === 'ArrowLeft' ? width - step : event.key === 'ArrowRight' ? width + step : event.key === 'Home' ? min : event.key === 'End' ? max : null;
+        if (next == null) return;
+        event.preventDefault();
+        commit(next);
+      });
+    });
+  }
+
   private bindTooltips(): void {
     this.root.querySelectorAll<HTMLElement>('.bar').forEach((bar) => {
       bar.addEventListener('pointerenter', (event) => {
@@ -2108,6 +3329,303 @@ export class UIGantt extends ElementBase {
     });
   }
 
+  /** The tasks as an array. Setting it writes the `tasks` attribute (dates may be `Date`s: they become `YYYY-MM-DD`). */
+  get tasks(): Array<Record<string, unknown>> {
+    return readJsonArray(this.getAttribute('tasks'));
+  }
+
+  set tasks(value: Array<Record<string, unknown>> | null | undefined) {
+    writeJsonArray(this, 'tasks', value, true);
+  }
+
+  /** The holidays as an array of `YYYY-MM-DD` strings or `{ date, label }` objects. Setting it writes the attribute (a `Date` becomes its local day). */
+  get holidays(): Array<unknown> {
+    return readJsonArray(this.getAttribute('holidays'));
+  }
+
+  set holidays(value: Array<unknown> | null | undefined) {
+    if (!Array.isArray(value)) {
+      this.removeAttribute('holidays');
+      return;
+    }
+    try {
+      this.setAttribute(
+        'holidays',
+        JSON.stringify(value.map((item) => (item && typeof item === 'object' && !(item instanceof Date) ? { ...(item as Record<string, unknown>), date: toAttrDate((item as { date?: unknown }).date) } : toAttrDate(item))))
+      );
+    } catch {
+      // not serialisable: leave the attribute as it is
+    }
+  }
+
+  /** The links as an array. Setting it writes the `links` attribute. */
+  get links(): Array<Record<string, unknown>> {
+    return readJsonArray(this.getAttribute('links'));
+  }
+
+  set links(value: Array<Record<string, unknown>> | null | undefined) {
+    writeJsonArray(this, 'links', value, false);
+  }
+
+  private resolveBehavior(behavior?: ScrollBehavior): ScrollBehavior {
+    if (behavior === 'smooth' && typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches) return 'auto';
+    return behavior ?? 'auto';
+  }
+
+  private scrollViewport(position: { left?: number; top?: number }, behavior?: ScrollBehavior): void {
+    const viewport = this.root.querySelector<HTMLElement>('.viewport');
+    if (!viewport) return;
+    const resolved = this.resolveBehavior(behavior);
+    this.smoothTarget = resolved === 'smooth' ? position : null;
+    if (this.smoothTarget) {
+      const started = this.smoothTarget;
+      window.setTimeout(() => {
+        if (this.smoothTarget === started) this.smoothTarget = null; // it stopped short (the user took over): do not resume it later
+      }, 2000);
+    }
+    if (resolved !== 'smooth') {
+      // A render can follow at once (focusing a row does) and it puts the scroll back from these, before any
+      // scroll event has told it where the chart went.
+      if (position.left != null) this.viewportLeft = position.left;
+      if (position.top != null) this.viewportTop = position.top;
+    }
+    if (typeof viewport.scrollTo === 'function') {
+      viewport.scrollTo({ ...position, behavior: resolved });
+      return;
+    }
+    if (position.left != null) viewport.scrollLeft = position.left;
+    if (position.top != null) viewport.scrollTop = position.top;
+  }
+
+  /**
+   * Scroll the timeline to a date: a `YYYY-MM-DD` string, a `Date`, a timestamp, or `"today"`. `align` is `center`
+   * (the default) or `start`, which leaves a little room before the date. Does nothing for a date that is not valid.
+   */
+  scrollToDate(date: string | number | Date, options: { behavior?: ScrollBehavior; align?: 'center' | 'start' } = {}): void {
+    const ms = date === 'today' ? startOfDay(Date.now()) : typeof date === 'number' ? (Number.isFinite(date) ? startOfDay(date) : null) : parseDate(date);
+    const viewport = this.root.querySelector<HTMLElement>('.viewport');
+    if (ms == null || !viewport) return;
+    this.scrollViewport({ left: this.leftFor(viewport, ms, options.align ?? 'center') }, options.behavior);
+  }
+
+  private leftFor(viewport: HTMLElement, ms: number, align: 'center' | 'start'): number {
+    const { min, dayWidth, gridWidth } = this.layoutInfo;
+    const x = ((ms - min) / DAY) * dayWidth;
+    const target = align === 'start' ? x - 24 : x - Math.max(0, viewport.clientWidth - gridWidth) / 2;
+    return Math.max(0, Math.min(target, Math.max(0, viewport.scrollWidth - viewport.clientWidth)));
+  }
+
+  /**
+   * Bring a task into view: open the branches above it, then scroll its row (and its bar) on screen when they are
+   * not. Returns false for an id that is not there or is filtered out.
+   */
+  scrollToTask(id: string, options: { behavior?: ScrollBehavior } = {}): boolean {
+    const tasks = this.getTasks();
+    const byId = new Map(tasks.map((task) => [task.id, task]));
+    const task = byId.get(id);
+    if (!task) return false;
+    let opened = false;
+    let parent = task.parent;
+    for (let steps = 0; parent && steps < 1000; steps += 1) {
+      if (this.collapsed.has(parent)) {
+        this.collapsed.delete(parent);
+        this.dispatchEvent(new CustomEvent('tasktoggle', { detail: { id: parent, open: true }, bubbles: true, composed: true }));
+        opened = true;
+      }
+      parent = byId.get(parent)?.parent;
+    }
+    const filter = this.getAttribute('filter') ?? this.internalFilter;
+    const shown = this.getVisibleTasks(tasks, filter, normalizeSort(this.getAttribute('sort'))).some((item) => item.id === id);
+    if (!shown) return false;
+    // A task that was just added (or a branch that was just opened) is not in the rendered rows yet: reveal it once it is.
+    if (opened || !this.visibleIds.includes(id)) {
+      this.pendingReveal = { id, behavior: options.behavior ?? 'auto' };
+      this.requestRender();
+      return true;
+    }
+    return this.reveal(id, options.behavior ?? 'auto');
+  }
+
+  private reveal(id: string, behavior: ScrollBehavior): boolean {
+    const index = this.visibleIds.indexOf(id);
+    const viewport = this.root.querySelector<HTMLElement>('.viewport');
+    const task = this.getTasks().find((item) => item.id === id);
+    if (index < 0 || !viewport || !task) return false;
+    const position: { left?: number; top?: number } = {};
+    const rowY = HEADER_HEIGHT + index * ROW_HEIGHT;
+    const rowsVisible = rowY >= viewport.scrollTop + HEADER_HEIGHT && rowY + ROW_HEIGHT <= viewport.scrollTop + viewport.clientHeight;
+    if (!rowsVisible) {
+      const top = index * ROW_HEIGHT + ROW_HEIGHT / 2 - (viewport.clientHeight - HEADER_HEIGHT) / 2;
+      position.top = Math.max(0, Math.min(top, Math.max(0, viewport.scrollHeight - viewport.clientHeight)));
+    }
+    const start = parseDate(task.start);
+    const end = parseDate(task.end);
+    if (start != null) {
+      const { min, dayWidth, gridWidth } = this.layoutInfo;
+      const from = ((start - min) / DAY) * dayWidth;
+      const to = ((end ?? start) - min) / DAY * dayWidth;
+      const left = viewport.scrollLeft;
+      if (from < left || to > left + viewport.clientWidth - gridWidth) position.left = this.leftFor(viewport, start, 'start');
+    }
+    if (position.left != null || position.top != null) this.scrollViewport(position, behavior);
+    return true;
+  }
+
+  /** Open or close a branch (`open` omitted toggles it) and fire `tasktoggle`. */
+  toggleTask(id: string, open?: boolean): void {
+    const isOpen = !this.collapsed.has(id);
+    const next = open ?? !isOpen;
+    if (next === isOpen) return;
+    if (next) this.collapsed.delete(id);
+    else this.collapsed.add(id);
+    this.dispatchEvent(new CustomEvent('tasktoggle', { detail: { id, open: next }, bubbles: true, composed: true }));
+    this.requestRender();
+  }
+
+  expandAll(): void {
+    for (const id of [...this.collapsed]) this.toggleTask(id, true);
+  }
+
+  collapseAll(): void {
+    const parents = new Set(this.getTasks().map((task) => task.parent).filter((id): id is string => !!id));
+    for (const id of parents) this.toggleTask(id, false);
+  }
+
+  /**
+   * The whole chart as a standalone SVG string (not just the part on screen): the time header, the task names, the bars with
+   * their progress, baselines, parts, milestones and links, the today line and any non-working days. Rows follow the current
+   * filter, sort and collapsed branches; the scale is the one on screen. Colours are the theme's resolved at this moment.
+   * Returns an empty string when there is nothing to draw.
+   */
+  exportSvg(): string {
+    activeLocale = this.getAttribute('locale') || undefined;
+    const text = this.labelSet();
+    const tasks = this.getTasks();
+    const { min, dayWidth } = this.layoutInfo;
+    if (!tasks.length || min === 0) return '';
+    const visible = this.getVisibleTasks(tasks, this.getAttribute('filter') ?? this.internalFilter, normalizeSort(this.getAttribute('sort')));
+    if (!visible.length) return '';
+    const style = getComputedStyle(this);
+    const colour = (token: string): string => {
+      const match = /^var\((--[\w-]+),\s*([^)]+)\)$/.exec(token);
+      return match ? style.getPropertyValue(match[1]).trim() || match[2].trim() : token;
+    };
+    const ink = colour('var(--ui-color-text, #0f172a)');
+    const muted = colour('var(--ui-color-muted, #526175)');
+    const line = colour('var(--ui-color-border, #cbd5e1)');
+    const panel = colour('var(--ui-color-surface, #ffffff)');
+    const accent = colour('var(--ui-color-primary, #2563eb)');
+    const danger = colour('var(--ui-color-danger, #dc2626)');
+    const unit = (this.root.querySelector('.scale')?.getAttribute('data-zoom') as GanttUnit | null) || 'week';
+    const weekStart = normalizeWeekStart(this.getAttribute('week-start'));
+    const off = parseNonWorking(this.getAttribute('non-working-days'), this.getAttribute('holidays'));
+    const maxEnd = addDays(Math.max(...tasks.map((task) => parseDate(task.end) ?? 0)), 3);
+    const timelineWidth = Math.max(320, ((maxEnd - min) / DAY) * dayWidth);
+    const rangeEnd = min + (timelineWidth / dayWidth) * DAY;
+    const nameWidth = 260;
+    const width = nameWidth + timelineWidth;
+    const height = HEADER_HEIGHT + visible.length * ROW_HEIGHT;
+    const x = (ms: number) => ((ms - min) / DAY) * dayWidth;
+    const medium = dateFormat({ dateStyle: 'medium' });
+    const monthYear = dateFormat({ month: 'long', year: 'numeric' });
+    const monthOnly = dateFormat({ month: 'short' });
+    const label = (ms: number, u: GanttUnit): string => {
+      const date = new Date(ms);
+      return u === 'day' || u === 'week' ? String(date.getDate()) : u === 'month' ? monthOnly.format(date) : u === 'quarter' ? `Q${Math.floor(date.getMonth() / 3) + 1}` : String(date.getFullYear());
+    };
+    const parts: string[] = [];
+    const rect = (px: number, py: number, w: number, h: number, extra: string) => `<rect x="${px.toFixed(1)}" y="${py.toFixed(1)}" width="${Math.max(0, w).toFixed(1)}" height="${h}" ${extra}/>`;
+
+    parts.push(rect(0, 0, width, height, `fill="${panel}"`));
+    // header: the bands, then the labels
+    const topUnit: GanttUnit | null = unit === 'year' ? null : unit === 'day' || unit === 'week' ? 'month' : 'year';
+    if (topUnit) {
+      for (const cell of headerCells(topUnit, weekStart, min, rangeEnd, dayWidth, 0, Number.POSITIVE_INFINITY)) {
+        const full = topUnit === 'month' ? monthYear.format(new Date(cell.start)) : String(new Date(cell.start).getFullYear());
+        parts.push(`<line x1="${(nameWidth + cell.left).toFixed(1)}" y1="0" x2="${(nameWidth + cell.left).toFixed(1)}" y2="26" stroke="${line}"/>`);
+        if (cell.width >= MIN_LABEL_WIDTH) parts.push(`<text x="${(nameWidth + cell.left + 8).toFixed(1)}" y="17" font-size="11" font-weight="700" fill="${ink}">${escapeHtml(full)}</text>`);
+      }
+    }
+    const bottomY = topUnit ? 26 : 0;
+    for (const cell of headerCells(unit, weekStart, min, rangeEnd, dayWidth, 0, Number.POSITIVE_INFINITY)) {
+      parts.push(`<line x1="${(nameWidth + cell.left).toFixed(1)}" y1="${bottomY}" x2="${(nameWidth + cell.left).toFixed(1)}" y2="${height}" stroke="${line}" stroke-opacity=".45"/>`);
+      if (cell.width >= MIN_LABEL_WIDTH || unit === 'day') parts.push(`<text x="${(nameWidth + cell.left + 8).toFixed(1)}" y="${bottomY + 18}" font-size="11" font-weight="650" fill="${muted}">${escapeHtml(label(cell.start, unit))}</text>`);
+    }
+    parts.push(`<line x1="0" y1="${HEADER_HEIGHT}" x2="${width}" y2="${HEADER_HEIGHT}" stroke="${line}"/>`);
+    parts.push(`<text x="10" y="${HEADER_HEIGHT / 2 + 4}" font-size="11" font-weight="700" fill="${muted}">${escapeHtml(text.columnTask.toUpperCase())}</text>`);
+    // non-working days, then the rows
+    if (dayWidth >= MIN_SHADE_DAY_WIDTH && (off.weekdays.size || off.holidays.size)) {
+      for (let day = min; day < rangeEnd; day = addDays(day, 1)) {
+        if (!isNonWorking(day, off)) continue;
+        parts.push(rect(nameWidth + x(day), HEADER_HEIGHT, dayWidth, visible.length * ROW_HEIGHT, `fill="${off.holidays.has(day) ? '#d97706' : muted}" fill-opacity="${off.holidays.has(day) ? '.15' : '.1'}"`));
+      }
+    }
+    visible.forEach((task, index) => {
+      const top = HEADER_HEIGHT + index * ROW_HEIGHT;
+      parts.push(`<line x1="0" y1="${top + ROW_HEIGHT}" x2="${width}" y2="${top + ROW_HEIGHT}" stroke="${line}" stroke-opacity=".5"/>`);
+      parts.push(`<text x="${10 + task.depth * 18}" y="${top + ROW_HEIGHT / 2 + 4}" font-size="12" font-weight="650" fill="${ink}">${escapeHtml(task.label.length > 34 - task.depth * 2 ? `${task.label.slice(0, 33 - task.depth * 2)}…` : task.label)}</text>`);
+    });
+    parts.push(`<line x1="${nameWidth}" y1="0" x2="${nameWidth}" y2="${height}" stroke="${line}"/>`);
+
+    const body: string[] = [];
+    const byId = new Map(visible.map((task, index) => [task.id, { task, index }]));
+    for (const link of this.getLinks()) {
+      const source = byId.get(link.source);
+      const target = byId.get(link.target);
+      if (!source || !target) continue;
+      body.push(`<path d="${routeDependencyPath(source.task, source.index, target.task, target.index, link.type, x)}" fill="none" stroke="${muted}" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>`);
+    }
+    visible.forEach((task, index) => {
+      const top = index * ROW_HEIGHT;
+      const kind = taskKind(task);
+      const tone = task.critical ? danger : colour(tones[task.tone || (kind === 'summary' ? 'info' : 'default')] || tones.default);
+      const left = x(task.startMs);
+      const length = Math.max(12, x(task.endMs) - left);
+      if (task.baselineStart && task.baselineEnd) {
+        const from = parseDate(task.baselineStart) ?? task.startMs;
+        const to = parseDate(task.baselineEnd) ?? task.endMs;
+        body.push(rect(x(from), top + 33, Math.max(4, x(to) - x(from)), 4, `rx="2" fill="${muted}" fill-opacity=".5"`));
+      }
+      if (kind === 'milestone') {
+        const cx = left;
+        const cy = top + 21;
+        body.push(`<polygon points="${cx},${cy - 10} ${cx + 10},${cy} ${cx},${cy + 10} ${cx - 10},${cy}" fill="${tone}"/>`);
+        return;
+      }
+      const barTop = kind === 'summary' ? top + 17 : top + 12;
+      const barHeight = kind === 'summary' ? 9 : 18;
+      const progress = Math.max(0, Math.min(100, Number(task.progress ?? 0)));
+      const drawPart = (px: number, w: number, done: number) => {
+        body.push(rect(px, barTop, w, barHeight, `rx="4" fill="${tone}"`));
+        if (kind === 'summary') body.push(rect(px, barTop, w, barHeight, `rx="3" fill="#000" fill-opacity=".2"`));
+        if (done > 0) body.push(rect(px, barTop, (w * done) / 100, barHeight, `rx="4" fill="#000" fill-opacity=".28"`));
+      };
+      if (kind === 'task' && task.segments?.length) {
+        for (const segment of task.segments) {
+          const from = parseDate(segment.start);
+          const to = parseDate(segment.end);
+          if (from == null || to == null || to <= from) continue;
+          drawPart(x(Math.max(task.startMs, from)), x(Math.min(task.endMs, to)) - x(Math.max(task.startMs, from)), segment.progress ?? progress);
+        }
+      } else {
+        drawPart(left, length, progress);
+      }
+    });
+    const today = startOfDay(Date.now());
+    if (this.getAttribute('show-today') !== 'false' && today >= min && today <= rangeEnd) {
+      body.push(`<line x1="${x(today).toFixed(1)}" y1="0" x2="${x(today).toFixed(1)}" y2="${visible.length * ROW_HEIGHT}" stroke="${danger}" stroke-width="2"/>`);
+      parts.push(`<text x="${(nameWidth + x(today)).toFixed(1)}" y="${HEADER_HEIGHT - 6}" font-size="10" font-weight="700" text-anchor="middle" fill="${danger}">${escapeHtml(text.today)}</text>`);
+    }
+    parts.push(`<g transform="translate(${nameWidth} ${HEADER_HEIGHT})">${body.join('')}</g>`);
+    parts.push(`<title>${escapeHtml(this.getAttribute('aria-label') || text.title)} (${escapeHtml(medium.format(new Date(min)))} – ${escapeHtml(medium.format(new Date(maxEnd)))})</title>`);
+    return (
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${Math.round(width)}" height="${height}" viewBox="0 0 ${Math.round(width)} ${height}" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">` +
+      `<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8.5" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0.5 0.75 L 8.5 4.5 L 0.5 8.25 z" fill="${muted}"/></marker></defs>` +
+      parts.join('') +
+      `</svg>`
+    );
+  }
+
   private rangeMin(): number {
     const tasks = this.getTasks();
     const starts = tasks.map((task) => parseDate(task.start)).filter((value): value is number => value != null);
@@ -2116,6 +3634,7 @@ export class UIGantt extends ElementBase {
 
   private selectTask(id: string): void {
     this.captureViewport();
+    this.selectedLinkId = null;
     if (this.selectedId === id) {
       this.dispatchEvent(new CustomEvent('taskselect', { detail: { id }, bubbles: true, composed: true }));
       return;
@@ -2125,19 +3644,68 @@ export class UIGantt extends ElementBase {
     this.requestRender();
   }
 
-  private selectAdjacentTask(id: string, direction: 1 | -1): void {
-    const visible = this.getVisibleTasks(
-      this.getTasks(),
-      this.getAttribute('filter') ?? this.internalFilter,
-      normalizeSort(this.getAttribute('sort'))
-    );
-    const index = visible.findIndex((task) => task.id === id);
-    const next = visible[Math.max(0, Math.min(visible.length - 1, index + direction))];
-    if (!next || next.id === id) return;
-    this.selectedId = next.id;
-    this.focusRequest = { selector: barSelector(next.id), reveal: true };
-    this.dispatchEvent(new CustomEvent('taskselect', { detail: { id: next.id }, bubbles: true, composed: true }));
+  /** Select a task and give focus to its row or its bar, scrolling it into view first. */
+  private focusTask(id: string, zone: 'row' | 'bar'): void {
+    if (this.selectedId !== id) {
+      this.selectedId = id;
+      this.dispatchEvent(new CustomEvent('taskselect', { detail: { id }, bubbles: true, composed: true }));
+    }
+    this.focusRequest = { selector: zone === 'row' ? rowSelector(id) : barSelector(id), reveal: true, retries: 0 };
+    this.reveal(id, 'auto');
     this.requestRender();
+  }
+
+  /**
+   * Keyboard movement between rows, the same from a row and from a bar: Up and Down, Home and End, PageUp and PageDown. From a row,
+   * Right and Left also open, close and climb the tree. Returns whether the key was one of these.
+   */
+  private navigate(fromId: string, key: string, zone: 'row' | 'bar'): boolean {
+    const ids = this.visibleIds;
+    const index = ids.indexOf(fromId);
+    if (index < 0) return false;
+    let target: string | undefined;
+    switch (key) {
+      case 'ArrowUp':
+        target = ids[index - 1];
+        break;
+      case 'ArrowDown':
+        target = ids[index + 1];
+        break;
+      case 'Home':
+        target = ids[0];
+        break;
+      case 'End':
+        target = ids[ids.length - 1];
+        break;
+      case 'PageUp':
+        target = ids[Math.max(0, index - 10)];
+        break;
+      case 'PageDown':
+        target = ids[Math.min(ids.length - 1, index + 10)];
+        break;
+      case 'ArrowRight':
+      case 'ArrowLeft': {
+        if (zone !== 'row') return false;
+        const tasks = this.getTasks();
+        const parents = new Set(tasks.map((task) => task.parent).filter((id): id is string => !!id));
+        const isParent = parents.has(fromId);
+        if (key === 'ArrowRight') {
+          if (!isParent) return true;
+          if (this.collapsed.has(fromId)) this.toggleTask(fromId, true);
+          else target = ids[index + 1];
+        } else if (isParent && !this.collapsed.has(fromId)) {
+          this.toggleTask(fromId, false);
+        } else {
+          const parent = tasks.find((task) => task.id === fromId)?.parent;
+          if (parent && ids.includes(parent)) target = parent;
+        }
+        break;
+      }
+      default:
+        return false;
+    }
+    if (target && target !== fromId) this.focusTask(target, zone);
+    return true;
   }
 
   private captureViewport(): void {
@@ -2151,10 +3719,17 @@ export class UIGantt extends ElementBase {
 
   private getTasks(): GanttTask[] {
     const raw = this.getAttribute('tasks');
-    if (raw === this.taskCacheRaw && this.taskCacheVersion === this.overridesVersion) return this.taskCache;
+    const auto = this.hasAttribute('auto-summary');
+    // with critical-path the links are an input too, so their text is part of what the cache stands for
+    const critical = this.hasAttribute('critical-path') ? this.getAttribute('links') ?? '' : null;
+    if (raw === this.taskCacheRaw && this.taskCacheVersion === this.overridesVersion && auto === this.taskCacheAuto && critical === this.taskCacheCritical) return this.taskCache;
     this.taskCacheRaw = raw;
     this.taskCacheVersion = this.overridesVersion;
-    this.taskCache = parseTasks(raw, this.overrides);
+    this.taskCacheAuto = auto;
+    this.taskCacheCritical = critical;
+    this.taskCache = parseTasks(raw, this.overrides, auto);
+    if (auto) this.taskCache = applyRollUp(this.taskCache);
+    if (critical !== null) this.taskCache = applyCriticalPath(this.taskCache, parseLinks(critical));
     this.seedCollapsed(this.taskCache);
     this.visibleCacheKey = '';
     return this.taskCache;
@@ -2201,6 +3776,7 @@ export class UIGantt extends ElementBase {
       if (!sharesAnId(taskIds(oldValue), nextIds)) {
         this.viewportTop = 0;
         this.viewportLeft = 0;
+        this.initialScrollPending = true;
         this.collapsed.clear();
         this.seededIds.clear();
       }
@@ -2208,6 +3784,7 @@ export class UIGantt extends ElementBase {
       if (this.selectedId != null && !nextIds.has(this.selectedId)) this.selectedId = null;
     }
     if (name === 'links') this.linkCacheRaw = null;
+    if (name === 'auto-summary' || name === 'cascade') this.bumpOverrides();
     return true;
   }
 }
