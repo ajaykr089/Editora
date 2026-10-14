@@ -135,6 +135,11 @@ Pass a `ref` to get the element (typed `GanttElement`) and move around the chart
 - `scrollToDate(date, { behavior, align })`: a `'YYYY-MM-DD'` string, a `Date`, a timestamp or `'today'`; `align` is `'center'` (the default) or `'start'`.
 - `scrollToTask(id, { behavior })`: opens the branches above the task and scrolls its row and bar into view. Returns `false` for an unknown or filtered-out task.
 - `toggleTask(id, open?)`, `expandAll()`, `collapseAll()`.
+- `exportSvg()`: the whole chart (not just the part on screen) as a standalone SVG string: the time header, the task names, bars with their progress, parts, baselines, milestones, links, today and non-working days. Rows follow the current filter, sort and open branches and the scale is the one on screen; colours are the theme's at that moment. Save it, embed it, or convert it to PNG or PDF.
+
+### Printing
+
+The chart prints as a whole: no scroll area, no sticky headers, no toolbar controls or handles, and colours as they are. A timeline wider than the page is cut at its edge, so print with `zoom="fit"` (the whole project scaled to the width) or export it with `exportSvg()`.
 
 The toolbar has a **Today** button that does `scrollToDate('today')` with a smooth scroll (it is off when today is not on the timeline or `showToday` is `false`).
 

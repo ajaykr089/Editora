@@ -132,6 +132,8 @@ export interface GanttElement extends HTMLElement {
   toggleTask(id: string, open?: boolean): void;
   expandAll(): void;
   collapseAll(): void;
+  /** The whole chart as a standalone SVG string (rows follow the filter, sort and open branches; the scale is the one on screen). Empty when there is nothing to draw. */
+  exportSvg(): string;
 }
 
 export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect'> & {

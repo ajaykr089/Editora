@@ -1128,6 +1128,42 @@ const style = `
     }
   }
 
+  /* Print: the whole chart, not a scroll area. Controls and handles are for the screen; the sticky headers stay put on the
+     page; colours print as they are. A wide timeline is cut at the page edge, so print with the fit zoom or use exportSvg(). */
+  @media print {
+    .frame {
+      box-shadow: none;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .controls,
+    .splitter-rail,
+    .connector,
+    .bar-tip,
+    .handle {
+      display: none !important;
+    }
+
+    .viewport,
+    :host([fill]) .viewport {
+      overflow: visible;
+      max-block-size: none;
+    }
+
+    .grid-head,
+    .timeline-head,
+    .grid-body,
+    .splitter-rail.head {
+      position: static;
+    }
+
+    .grid-row,
+    .timeline-row {
+      break-inside: avoid;
+    }
+  }
+
   @media (forced-colors: active) {
     :host {
       --ui-gantt-bg: Canvas;
@@ -3388,6 +3424,141 @@ export class UIGantt extends ElementBase {
   collapseAll(): void {
     const parents = new Set(this.getTasks().map((task) => task.parent).filter((id): id is string => !!id));
     for (const id of parents) this.toggleTask(id, false);
+  }
+
+  /**
+   * The whole chart as a standalone SVG string (not just the part on screen): the time header, the task names, the bars with
+   * their progress, baselines, parts, milestones and links, the today line and any non-working days. Rows follow the current
+   * filter, sort and collapsed branches; the scale is the one on screen. Colours are the theme's resolved at this moment.
+   * Returns an empty string when there is nothing to draw.
+   */
+  exportSvg(): string {
+    activeLocale = this.getAttribute('locale') || undefined;
+    const text = this.labelSet();
+    const tasks = this.getTasks();
+    const { min, dayWidth } = this.layoutInfo;
+    if (!tasks.length || min === 0) return '';
+    const visible = this.getVisibleTasks(tasks, this.getAttribute('filter') ?? this.internalFilter, normalizeSort(this.getAttribute('sort')));
+    if (!visible.length) return '';
+    const style = getComputedStyle(this);
+    const colour = (token: string): string => {
+      const match = /^var\((--[\w-]+),\s*([^)]+)\)$/.exec(token);
+      return match ? style.getPropertyValue(match[1]).trim() || match[2].trim() : token;
+    };
+    const ink = colour('var(--ui-color-text, #0f172a)');
+    const muted = colour('var(--ui-color-muted, #526175)');
+    const line = colour('var(--ui-color-border, #cbd5e1)');
+    const panel = colour('var(--ui-color-surface, #ffffff)');
+    const accent = colour('var(--ui-color-primary, #2563eb)');
+    const danger = colour('var(--ui-color-danger, #dc2626)');
+    const unit = (this.root.querySelector('.scale')?.getAttribute('data-zoom') as GanttUnit | null) || 'week';
+    const weekStart = normalizeWeekStart(this.getAttribute('week-start'));
+    const off = parseNonWorking(this.getAttribute('non-working-days'), this.getAttribute('holidays'));
+    const maxEnd = addDays(Math.max(...tasks.map((task) => parseDate(task.end) ?? 0)), 3);
+    const timelineWidth = Math.max(320, ((maxEnd - min) / DAY) * dayWidth);
+    const rangeEnd = min + (timelineWidth / dayWidth) * DAY;
+    const nameWidth = 260;
+    const width = nameWidth + timelineWidth;
+    const height = HEADER_HEIGHT + visible.length * ROW_HEIGHT;
+    const x = (ms: number) => ((ms - min) / DAY) * dayWidth;
+    const medium = dateFormat({ dateStyle: 'medium' });
+    const monthYear = dateFormat({ month: 'long', year: 'numeric' });
+    const monthOnly = dateFormat({ month: 'short' });
+    const label = (ms: number, u: GanttUnit): string => {
+      const date = new Date(ms);
+      return u === 'day' || u === 'week' ? String(date.getDate()) : u === 'month' ? monthOnly.format(date) : u === 'quarter' ? `Q${Math.floor(date.getMonth() / 3) + 1}` : String(date.getFullYear());
+    };
+    const parts: string[] = [];
+    const rect = (px: number, py: number, w: number, h: number, extra: string) => `<rect x="${px.toFixed(1)}" y="${py.toFixed(1)}" width="${Math.max(0, w).toFixed(1)}" height="${h}" ${extra}/>`;
+
+    parts.push(rect(0, 0, width, height, `fill="${panel}"`));
+    // header: the bands, then the labels
+    const topUnit: GanttUnit | null = unit === 'year' ? null : unit === 'day' || unit === 'week' ? 'month' : 'year';
+    if (topUnit) {
+      for (const cell of headerCells(topUnit, weekStart, min, rangeEnd, dayWidth, 0, Number.POSITIVE_INFINITY)) {
+        const full = topUnit === 'month' ? monthYear.format(new Date(cell.start)) : String(new Date(cell.start).getFullYear());
+        parts.push(`<line x1="${(nameWidth + cell.left).toFixed(1)}" y1="0" x2="${(nameWidth + cell.left).toFixed(1)}" y2="26" stroke="${line}"/>`);
+        if (cell.width >= MIN_LABEL_WIDTH) parts.push(`<text x="${(nameWidth + cell.left + 8).toFixed(1)}" y="17" font-size="11" font-weight="700" fill="${ink}">${escapeHtml(full)}</text>`);
+      }
+    }
+    const bottomY = topUnit ? 26 : 0;
+    for (const cell of headerCells(unit, weekStart, min, rangeEnd, dayWidth, 0, Number.POSITIVE_INFINITY)) {
+      parts.push(`<line x1="${(nameWidth + cell.left).toFixed(1)}" y1="${bottomY}" x2="${(nameWidth + cell.left).toFixed(1)}" y2="${height}" stroke="${line}" stroke-opacity=".45"/>`);
+      if (cell.width >= MIN_LABEL_WIDTH || unit === 'day') parts.push(`<text x="${(nameWidth + cell.left + 8).toFixed(1)}" y="${bottomY + 18}" font-size="11" font-weight="650" fill="${muted}">${escapeHtml(label(cell.start, unit))}</text>`);
+    }
+    parts.push(`<line x1="0" y1="${HEADER_HEIGHT}" x2="${width}" y2="${HEADER_HEIGHT}" stroke="${line}"/>`);
+    parts.push(`<text x="10" y="${HEADER_HEIGHT / 2 + 4}" font-size="11" font-weight="700" fill="${muted}">${escapeHtml(text.columnTask.toUpperCase())}</text>`);
+    // non-working days, then the rows
+    if (dayWidth >= MIN_SHADE_DAY_WIDTH && (off.weekdays.size || off.holidays.size)) {
+      for (let day = min; day < rangeEnd; day = addDays(day, 1)) {
+        if (!isNonWorking(day, off)) continue;
+        parts.push(rect(nameWidth + x(day), HEADER_HEIGHT, dayWidth, visible.length * ROW_HEIGHT, `fill="${off.holidays.has(day) ? '#d97706' : muted}" fill-opacity="${off.holidays.has(day) ? '.15' : '.1'}"`));
+      }
+    }
+    visible.forEach((task, index) => {
+      const top = HEADER_HEIGHT + index * ROW_HEIGHT;
+      parts.push(`<line x1="0" y1="${top + ROW_HEIGHT}" x2="${width}" y2="${top + ROW_HEIGHT}" stroke="${line}" stroke-opacity=".5"/>`);
+      parts.push(`<text x="${10 + task.depth * 18}" y="${top + ROW_HEIGHT / 2 + 4}" font-size="12" font-weight="650" fill="${ink}">${escapeHtml(task.label.length > 34 - task.depth * 2 ? `${task.label.slice(0, 33 - task.depth * 2)}…` : task.label)}</text>`);
+    });
+    parts.push(`<line x1="${nameWidth}" y1="0" x2="${nameWidth}" y2="${height}" stroke="${line}"/>`);
+
+    const body: string[] = [];
+    const byId = new Map(visible.map((task, index) => [task.id, { task, index }]));
+    for (const link of this.getLinks()) {
+      const source = byId.get(link.source);
+      const target = byId.get(link.target);
+      if (!source || !target) continue;
+      body.push(`<path d="${routeDependencyPath(source.task, source.index, target.task, target.index, link.type, x)}" fill="none" stroke="${muted}" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#arrow)"/>`);
+    }
+    visible.forEach((task, index) => {
+      const top = index * ROW_HEIGHT;
+      const kind = taskKind(task);
+      const tone = task.critical ? danger : colour(tones[task.tone || (kind === 'summary' ? 'info' : 'default')] || tones.default);
+      const left = x(task.startMs);
+      const length = Math.max(12, x(task.endMs) - left);
+      if (task.baselineStart && task.baselineEnd) {
+        const from = parseDate(task.baselineStart) ?? task.startMs;
+        const to = parseDate(task.baselineEnd) ?? task.endMs;
+        body.push(rect(x(from), top + 33, Math.max(4, x(to) - x(from)), 4, `rx="2" fill="${muted}" fill-opacity=".5"`));
+      }
+      if (kind === 'milestone') {
+        const cx = left;
+        const cy = top + 21;
+        body.push(`<polygon points="${cx},${cy - 10} ${cx + 10},${cy} ${cx},${cy + 10} ${cx - 10},${cy}" fill="${tone}"/>`);
+        return;
+      }
+      const barTop = kind === 'summary' ? top + 17 : top + 12;
+      const barHeight = kind === 'summary' ? 9 : 18;
+      const progress = Math.max(0, Math.min(100, Number(task.progress ?? 0)));
+      const drawPart = (px: number, w: number, done: number) => {
+        body.push(rect(px, barTop, w, barHeight, `rx="4" fill="${tone}"`));
+        if (kind === 'summary') body.push(rect(px, barTop, w, barHeight, `rx="3" fill="#000" fill-opacity=".2"`));
+        if (done > 0) body.push(rect(px, barTop, (w * done) / 100, barHeight, `rx="4" fill="#000" fill-opacity=".28"`));
+      };
+      if (kind === 'task' && task.segments?.length) {
+        for (const segment of task.segments) {
+          const from = parseDate(segment.start);
+          const to = parseDate(segment.end);
+          if (from == null || to == null || to <= from) continue;
+          drawPart(x(Math.max(task.startMs, from)), x(Math.min(task.endMs, to)) - x(Math.max(task.startMs, from)), segment.progress ?? progress);
+        }
+      } else {
+        drawPart(left, length, progress);
+      }
+    });
+    const today = startOfDay(Date.now());
+    if (this.getAttribute('show-today') !== 'false' && today >= min && today <= rangeEnd) {
+      body.push(`<line x1="${x(today).toFixed(1)}" y1="0" x2="${x(today).toFixed(1)}" y2="${visible.length * ROW_HEIGHT}" stroke="${danger}" stroke-width="2"/>`);
+      parts.push(`<text x="${(nameWidth + x(today)).toFixed(1)}" y="${HEADER_HEIGHT - 6}" font-size="10" font-weight="700" text-anchor="middle" fill="${danger}">${escapeHtml(text.today)}</text>`);
+    }
+    parts.push(`<g transform="translate(${nameWidth} ${HEADER_HEIGHT})">${body.join('')}</g>`);
+    parts.push(`<title>${escapeHtml(this.getAttribute('aria-label') || text.title)} (${escapeHtml(medium.format(new Date(min)))} – ${escapeHtml(medium.format(new Date(maxEnd)))})</title>`);
+    return (
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${Math.round(width)}" height="${height}" viewBox="0 0 ${Math.round(width)} ${height}" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">` +
+      `<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8.5" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0.5 0.75 L 8.5 4.5 L 0.5 8.25 z" fill="${muted}"/></marker></defs>` +
+      parts.join('') +
+      `</svg>`
+    );
   }
 
   private rangeMin(): number {

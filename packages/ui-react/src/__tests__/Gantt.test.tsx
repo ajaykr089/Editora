@@ -291,4 +291,14 @@ describe('Gantt wrapper', () => {
     await Promise.resolve();
     expect(el.hasAttribute('linkable')).toBe(false);
   });
+
+  it('exports the chart as an SVG through the ref', async () => {
+    const ref = React.createRef<GanttElement>();
+    render(<Gantt ref={ref} tasks={tasks} />);
+    await Promise.resolve();
+
+    const svg = ref.current!.exportSvg();
+    expect(svg.startsWith('<svg')).toBe(true);
+    expect(svg).toContain('Design');
+  });
 });

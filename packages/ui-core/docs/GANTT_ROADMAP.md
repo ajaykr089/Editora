@@ -64,16 +64,21 @@ attributes so existing charts behave as today.
 | C3 | ~~Draw links by dragging~~ **done** | `linkable` puts a dot beside each bar's start and end (hover or focus on a row; always on touch). Dragging one draws a line, highlights the bar (or dot) under it with the end it would take, and a drop fires `linkcreate` {source, target, type} (the type comes from the two ends; the same task, empty space and an existing link say nothing; Escape or a cancelled pointer cancels). A clicked link stays selected and focused, Delete/Backspace on it fires `linkdelete`, and the host owns the data. Link creation is pointer only. | L |
 | C4 | ~~Critical path~~ **done** | `critical-path` computes it from the links: a backward pass (every link type and lag) gives each task its slack, and a task is critical when it has none, has links, and either nothing precedes it or something that does is tight against it. Parents are left out, cycles are skipped, and a `critical: true` you set stays. | M |
 | C5 | ~~Non-working time~~ **done** | `non-working-days` (the attribute alone: the weekend; or `0,6`, `[1,2]`) and `holidays` (dates, or `{date, label}`) shade those days behind the rows (runs merge into one span, holidays have their own tint, only the days near the visible part are built, nothing under 8px a day) and mute them in the day header (a holiday's label is its title). Not scheduled around: lengths stay calendar days, so skipping them in `schedule="auto"` is not done. | M |
-| C6 | Print and export | A print stylesheet and an `exportSvg()` of the timeline. Low priority. | M |
+| C6 | ~~Print and export~~ **done** | A print stylesheet (the whole chart, no scroll area or sticky headers, no controls or handles, colours kept, rows not split) and `exportSvg()`: the whole chart as a standalone SVG string (header at the scale on screen, names, bars with progress, parts, baselines, milestones, links, today, non-working days; filter, sort and open branches followed; labels and locale applied). A wide timeline still needs `zoom="fit"` to print on one page. | M |
 
 Not planned for now: sub-day (hour) granularity, resource/workload views, multi-select and undo/redo (a host
 can build undo from `taskchange`).
 
-## Order and totals
+## Status
 
-A1-A9 are done; next A10-A11, then B1-B2, B4, B3, B7, B5, B6, B8, and phase C last.
-That is roughly five to six weeks in total, and each item above is its own commit. The estimate is a
-guess from reading the code, not a measurement: C2 and C3 are the ones most likely to run over.
+Every item in phases A, B and C above is done, each as its own commit with tests (see the rows). Still not done,
+on purpose or for lack of a design:
+
+- Skipping non-working days when `schedule="auto"` pushes tasks (shading and holidays are shown only; lengths are calendar days).
+- Creating a link from the keyboard (the dots are a pointer feature; deleting a selected link works from the keyboard).
+- Hour-level granularity, resource and workload views, multi-select, and undo/redo (a host can build undo from
+  `beforetaskchange` / `taskchange`, which carry the previous dates).
+- Sticky month and year labels while scrolling the header (a label scrolls away with its band).
 
 ## How to verify each item
 

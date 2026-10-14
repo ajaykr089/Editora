@@ -267,6 +267,8 @@ and resize, and a toolbar for zoom, filter and sort. Give it `tasks` and `links`
   around: task lengths are calendar days.
 - `linkable` shows dots beside each bar: drag one onto another bar and the chart fires `linkcreate` with the source, the target and the type the two ends
   give (`e2s`, `s2s`, `e2e`, `s2e`); click a link to select it and press Delete to get `linkdelete`. As with tasks, your code owns the data.
+- Export and print: `exportSvg()` returns the whole chart (not just the part on screen) as a standalone SVG string, and the chart prints as a whole (no scroll
+  area, no sticky headers, no controls; use `zoom="fit"` for a wide project).
 - `critical-path` computes the critical path from the links (no slack on a chain that is tight all the way) and draws those bars as critical, on top of any
   task you flag `critical`.
 - Parents: `auto-summary` makes a parent span its children and take their progress (weighted by length) when it has none; `cascade` lets you move a parent
