@@ -1,0 +1,50 @@
+import React from 'react';
+import { render } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+import '../../../ui-core/src/components/ui-gantt';
+
+import { Gantt } from '../components/Gantt';
+
+const dayOffset = (offset: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() + offset);
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
+
+// The chart spans today, so the today marker is drawn unless it is switched off.
+const tasks = [
+  { id: 'a', label: 'Design', start: dayOffset(-3), end: dayOffset(4) },
+  { id: 'b', label: 'Build', start: dayOffset(2), end: dayOffset(12) },
+];
+
+const shadowOf = (container: HTMLElement) => (container.querySelector('ui-gantt') as HTMLElement).shadowRoot!;
+
+describe('Gantt wrapper', () => {
+  it('shows the toolbar and the today marker by default', async () => {
+    const { container } = render(<Gantt tasks={tasks} />);
+    await Promise.resolve();
+
+    expect(shadowOf(container).querySelector('.toolbar')).not.toBeNull();
+    expect(shadowOf(container).querySelector('.today')).not.toBeNull();
+  });
+
+  it('hides the toolbar and the today marker when they are set to false', async () => {
+    const { container } = render(<Gantt tasks={tasks} showToolbar={false} showToday={false} />);
+    await Promise.resolve();
+
+    expect(shadowOf(container).querySelector('.toolbar')).toBeNull();
+    expect(shadowOf(container).querySelector('.today')).toBeNull();
+  });
+
+  it('brings them back when the props go from false to true or undefined', async () => {
+    const { container, rerender } = render(<Gantt tasks={tasks} showToolbar={false} showToday={false} />);
+    await Promise.resolve();
+
+    rerender(<Gantt tasks={tasks} showToolbar showToday={undefined} />);
+    await Promise.resolve();
+
+    expect(shadowOf(container).querySelector('.toolbar')).not.toBeNull();
+    expect(shadowOf(container).querySelector('.today')).not.toBeNull();
+  });
+});

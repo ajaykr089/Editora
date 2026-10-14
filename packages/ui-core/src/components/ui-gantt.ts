@@ -56,6 +56,13 @@ type DragState = {
   selectedChanged: boolean;
 };
 
+type FocusSnapshot = {
+  selector: string;
+  /** Scroll the control into view when it takes focus (keyboard navigation to a row that may be off screen). */
+  reveal?: boolean;
+  selection?: [number | null, number | null, 'forward' | 'backward' | 'none' | null];
+};
+
 const DAY = 24 * 60 * 60 * 1000;
 const ROW_HEIGHT = 42;
 const HEADER_HEIGHT = 62;
@@ -95,6 +102,7 @@ const style = `
   }
 
   .frame {
+    container: ui-gantt / inline-size;
     border: 1px solid var(--ui-gantt-border);
     border-radius: 12px;
     background: var(--ui-gantt-bg);
@@ -171,9 +179,33 @@ const style = `
   }
 
   .surface {
+    --gantt-grid-w: ${GRID_WIDTH}px;
     display: grid;
-    grid-template-columns: ${GRID_WIDTH}px minmax(640px, 1fr);
+    grid-template-columns: var(--gantt-grid-w) minmax(640px, 1fr);
     min-inline-size: 100%;
+  }
+
+  /* The task grid is sticky, so at 376px it covers a phone-sized chart completely and no bar can be
+     reached. In a narrow host keep only the task name column and give the timeline the room. */
+  @container ui-gantt (max-width: 640px) {
+    .surface {
+      --gantt-grid-w: 148px;
+    }
+
+    .grid-head,
+    .grid-row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* !important: the sortable header wrappers carry an inline display: contents. */
+    .grid-head > :nth-child(n + 2),
+    .grid-cell:nth-child(n + 2) {
+      display: none !important;
+    }
+
+    .grid-cell.task-name {
+      padding-inline-end: 6px;
+    }
   }
 
   .grid-head,
@@ -941,6 +973,48 @@ function createTicks(min: number, max: number, dayWidth: number, zoom: GanttZoom
   return parts.join('');
 }
 
+function taskIds(raw: string | null): Set<string> {
+  const ids = new Set<string>();
+  if (!raw) return ids;
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      parsed.forEach((entry, index) => {
+        if (entry && typeof entry === 'object') ids.add(String((entry as { id?: unknown }).id || `task-${index + 1}`));
+      });
+    }
+  } catch {
+    // a malformed value has no ids
+  }
+  return ids;
+}
+
+function sharesAnId(a: Set<string>, b: Set<string>): boolean {
+  for (const id of a) if (b.has(id)) return true;
+  return false;
+}
+
+/** `CSS.escape` where it exists (it does not in jsdom); otherwise escape what would end a quoted attribute value. */
+function cssEscape(value: string): string {
+  if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') return CSS.escape(value);
+  return value.replace(/["\\]/g, '\\$&');
+}
+
+function barSelector(taskId: string): string {
+  return `.bar[data-task-id="${cssEscape(taskId)}"]`;
+}
+
+/** A selector that finds the same control again after a re-render, or null for anything not worth restoring. */
+function focusSelectorFor(el: HTMLElement): string | null {
+  if (el.classList.contains('control')) return '.control';
+  if (el.classList.contains('select')) return '.select';
+  if (el.classList.contains('zoom-button') && el.dataset.zoom) return `.zoom-button[data-zoom="${cssEscape(el.dataset.zoom)}"]`;
+  if (el.classList.contains('head-button') && el.dataset.sort) return `.head-button[data-sort="${cssEscape(el.dataset.sort)}"]`;
+  if (el.classList.contains('bar') && el.dataset.taskId) return barSelector(el.dataset.taskId);
+  if (el.classList.contains('expander') && el.dataset.taskId) return `.expander[data-task-id="${cssEscape(el.dataset.taskId)}"]`;
+  return null;
+}
+
 function taskKind(task: VisibleTask): GanttTaskType {
   if (task.type === 'summary' || task.hasChildren) return 'summary';
   if (task.type === 'milestone' || task.startMs === task.endMs) return 'milestone';
@@ -1026,7 +1100,10 @@ export class UIGantt extends ElementBase {
     return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless'];
   }
 
+  private focusRequest: FocusSnapshot | null = null;
   private collapsed = new Set<string>();
+  /** Task ids already seen, so `open: false` collapses a branch once and never fights the user's toggle. */
+  private seededIds = new Set<string>();
   private overrides = new Map<string, Partial<GanttTask>>();
   private drag: DragState | null = null;
   private selectedId: string | null = null;
@@ -1080,6 +1157,8 @@ export class UIGantt extends ElementBase {
     const virtualized = this.getAttribute('virtualized') !== 'false' && visible.length > 240;
     const viewportRows = Math.max(20, Math.ceil(Math.max(420, this.viewportHeight - HEADER_HEIGHT) / ROW_HEIGHT));
     const overscan = 160;
+    // Fewer rows than before (a filter, new data): do not window against a scroll offset past the end.
+    this.viewportTop = Math.min(this.viewportTop, Math.max(0, rowsHeight + HEADER_HEIGHT - this.viewportHeight));
     const rowScrollTop = Math.max(0, this.viewportTop - HEADER_HEIGHT);
     const firstVisibleRow = Math.max(0, Math.floor(rowScrollTop / ROW_HEIGHT));
     const windowStride = Math.max(180, viewportRows * 4);
@@ -1181,6 +1260,8 @@ export class UIGantt extends ElementBase {
     const todayX = xForDate(today);
     const todayMarkup = showToday && today >= min && today <= max ? `<div class="today" part="today" style="left:${todayX.toFixed(2)}px"></div>` : '';
 
+    const focusSnapshot = this.focusRequest ?? this.captureFocus();
+    this.focusRequest = null;
     this.setContent(`
       <style>${style}</style>
       <section class="frame" part="frame" data-bar-variant="${barVariant}">
@@ -1203,7 +1284,7 @@ export class UIGantt extends ElementBase {
           </header>
         ` : ''}
         <div class="viewport" part="viewport">
-          <div class="surface" part="surface" style="--day-width:${dayWidth}px;grid-template-columns:${GRID_WIDTH}px ${timelineWidth.toFixed(2)}px;inline-size:max(100%, ${(GRID_WIDTH + timelineWidth).toFixed(2)}px)">
+          <div class="surface" part="surface" style="--day-width:${dayWidth}px;grid-template-columns:var(--gantt-grid-w) ${timelineWidth.toFixed(2)}px;inline-size:max(100%, calc(var(--gantt-grid-w) + ${timelineWidth.toFixed(2)}px))">
             <div class="grid-semantics" role="treegrid" aria-label="${escapeHtml(this.getAttribute('aria-label') || 'Project schedule')}" aria-rowcount="${visible.length + 1}" aria-colcount="4">
               <div class="grid-head" part="grid-head" role="row">
                 <div role="columnheader" aria-sort="${sort === 'label' ? 'ascending' : 'none'}" style="display:contents"><button class="head-button" data-sort="label">Task</button></div>
@@ -1240,6 +1321,38 @@ export class UIGantt extends ElementBase {
       this.viewportHeight = viewport.clientHeight || this.viewportHeight;
     }
     this.bindEvents();
+    this.restoreFocus(focusSnapshot);
+  }
+
+  /**
+   * Every render replaces the whole shadow tree, which drops focus. Remember which control had it so
+   * the replacement can take it back (and the caret, for the filter box); without this the filter
+   * accepts one character per click.
+   */
+  private captureFocus(): FocusSnapshot | null {
+    const active = this.root.activeElement as HTMLElement | null;
+    if (!active) return null;
+    const selector = focusSelectorFor(active);
+    if (!selector) return null;
+    const snapshot: FocusSnapshot = { selector };
+    if (active instanceof HTMLInputElement) {
+      snapshot.selection = [active.selectionStart, active.selectionEnd, active.selectionDirection];
+    }
+    return snapshot;
+  }
+
+  private restoreFocus(snapshot: FocusSnapshot | null): void {
+    if (!snapshot) return;
+    const next = this.root.querySelector<HTMLElement>(snapshot.selector);
+    if (!next || this.root.activeElement === next) return;
+    next.focus({ preventScroll: !snapshot.reveal });
+    if (snapshot.selection && next instanceof HTMLInputElement) {
+      try {
+        next.setSelectionRange(snapshot.selection[0], snapshot.selection[1], snapshot.selection[2] ?? undefined);
+      } catch {
+        // an input type without a selection range
+      }
+    }
   }
 
   private bindEvents(): void {
@@ -1334,6 +1447,10 @@ export class UIGantt extends ElementBase {
           composed: true
         }));
       });
+    });
+
+    this.root.querySelectorAll<HTMLElement>('.bar').forEach((bar) => {
+      bar.addEventListener('keydown', (event) => this.handleBarKeydown(bar, event as KeyboardEvent));
     });
 
     if (this.hasAttribute('readonly')) return;
@@ -1440,46 +1557,52 @@ export class UIGantt extends ElementBase {
 
       bar.addEventListener('pointerup', finishDrag);
       bar.addEventListener('pointercancel', finishDrag);
-      bar.addEventListener('keydown', (event) => {
-        const taskId = bar.dataset.taskId;
-        if (!taskId) return;
-        if (event.key === 'Delete' || event.key === 'Backspace') {
-          event.preventDefault();
-          this.dispatchEvent(new CustomEvent('taskdelete', { detail: { id: taskId }, bubbles: true, composed: true }));
-          return;
-        }
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          this.selectTask(taskId);
-          return;
-        }
-        if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-          event.preventDefault();
-          this.selectAdjacentTask(taskId, event.key === 'ArrowDown' ? 1 : -1);
-          return;
-        }
-        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
-        const tasks = this.getTasks();
-        const task = tasks.find((item) => item.id === taskId);
-        const start = parseDate(task?.start);
-        const end = parseDate(task?.end);
-        if (!task || start == null || end == null) return;
-        event.preventDefault();
-        const direction = event.key === 'ArrowLeft' ? -1 : 1;
-        const isMilestone = bar.dataset.kind === 'milestone';
-        const nextStart = event.shiftKey && !isMilestone ? start : addDays(start, direction);
-        const nextEnd = isMilestone
-          ? nextStart
-          : event.shiftKey
-            ? Math.max(addDays(end, direction), addDays(start, 1))
-            : addDays(end, direction);
-        const detail = { id: taskId, start: formatIso(nextStart), end: formatIso(nextEnd) };
-        this.overrides.set(taskId, { start: detail.start, end: detail.end });
-        this.bumpOverrides();
-        this.dispatchEvent(new CustomEvent('taskchange', { detail, bubbles: true, composed: true }));
-        this.requestRender();
-      });
     });
+  }
+
+  /**
+   * Keyboard on a bar. Moving between rows (and selecting) works on every bar, summaries and read-only
+   * charts included; only the keys that change dates or delete need an editable bar.
+   */
+  private handleBarKeydown(bar: HTMLElement, event: KeyboardEvent): void {
+    const taskId = bar.dataset.taskId;
+    if (!taskId) return;
+    const editable = bar.dataset.draggable === 'true' && !this.hasAttribute('readonly');
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.selectTask(taskId);
+      return;
+    }
+    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.selectAdjacentTask(taskId, event.key === 'ArrowDown' ? 1 : -1);
+      return;
+    }
+    if (!editable) return;
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+      event.preventDefault();
+      this.dispatchEvent(new CustomEvent('taskdelete', { detail: { id: taskId }, bubbles: true, composed: true }));
+      return;
+    }
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    const task = this.getTasks().find((item) => item.id === taskId);
+    const start = parseDate(task?.start);
+    const end = parseDate(task?.end);
+    if (!task || start == null || end == null) return;
+    event.preventDefault();
+    const direction = event.key === 'ArrowLeft' ? -1 : 1;
+    const isMilestone = bar.dataset.kind === 'milestone';
+    const nextStart = event.shiftKey && !isMilestone ? start : addDays(start, direction);
+    const nextEnd = isMilestone
+      ? nextStart
+      : event.shiftKey
+        ? Math.max(addDays(end, direction), addDays(start, 1))
+        : addDays(end, direction);
+    const detail = { id: taskId, start: formatIso(nextStart), end: formatIso(nextEnd) };
+    this.overrides.set(taskId, { start: detail.start, end: detail.end });
+    this.bumpOverrides();
+    this.dispatchEvent(new CustomEvent('taskchange', { detail, bubbles: true, composed: true }));
+    this.requestRender();
   }
 
   private rangeMin(): number {
@@ -1509,11 +1632,9 @@ export class UIGantt extends ElementBase {
     const next = visible[Math.max(0, Math.min(visible.length - 1, index + direction))];
     if (!next || next.id === id) return;
     this.selectedId = next.id;
+    this.focusRequest = { selector: barSelector(next.id), reveal: true };
     this.dispatchEvent(new CustomEvent('taskselect', { detail: { id: next.id }, bubbles: true, composed: true }));
     this.requestRender();
-    window.requestAnimationFrame(() => {
-      this.root.querySelector<HTMLElement>(`.bar[data-task-id="${CSS.escape(next.id)}"]`)?.focus();
-    });
   }
 
   private captureViewport(): void {
@@ -1531,8 +1652,17 @@ export class UIGantt extends ElementBase {
     this.taskCacheRaw = raw;
     this.taskCacheVersion = this.overridesVersion;
     this.taskCache = parseTasks(raw, this.overrides);
+    this.seedCollapsed(this.taskCache);
     this.visibleCacheKey = '';
     return this.taskCache;
+  }
+
+  private seedCollapsed(tasks: GanttTask[]): void {
+    for (const task of tasks) {
+      if (this.seededIds.has(task.id)) continue;
+      this.seededIds.add(task.id);
+      if (task.open === false) this.collapsed.add(task.id);
+    }
   }
 
   private getLinks(): GanttLink[] {
@@ -1558,12 +1688,21 @@ export class UIGantt extends ElementBase {
     this.visibleCacheKey = '';
   }
 
-  protected override shouldRenderOnAttributeChange(name: string, _oldValue: string | null, _newValue: string | null): boolean {
+  protected override shouldRenderOnAttributeChange(name: string, oldValue: string | null, newValue: string | null): boolean {
     if (name === 'tasks') {
       this.overrides.clear();
       this.bumpOverrides();
-      this.viewportTop = 0;
-      this.viewportLeft = 0;
+      const nextIds = taskIds(newValue);
+      // A host that keeps `tasks` in state writes the attribute after every edit. That is the same chart
+      // with new dates, so it must not jump back to the top-left; only a different set of tasks resets it.
+      if (!sharesAnId(taskIds(oldValue), nextIds)) {
+        this.viewportTop = 0;
+        this.viewportLeft = 0;
+        this.collapsed.clear();
+        this.seededIds.clear();
+      }
+      // A selection on a task that is gone would leave no bar in the tab order.
+      if (this.selectedId != null && !nextIds.has(this.selectedId)) this.selectedId = null;
     }
     if (name === 'links') this.linkCacheRaw = null;
     return true;
