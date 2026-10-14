@@ -94,3 +94,14 @@ describe('ui-gantt today marker', () => {
     expect(wide.querySelector('.today-pill')).not.toBeNull();
   });
 });
+
+describe('ui-gantt sticky header', () => {
+  it('is opaque, so rows scrolling underneath do not show through it', async () => {
+    const root = await mount(around(-5, 10));
+    const css = root.querySelector('style')!.textContent!;
+    const rule = /\.grid-head,\s*\.timeline-head \{([^}]*position: sticky[^}]*)\}/.exec(css)![1];
+
+    expect(rule).toMatch(/background: var\(--ui-gantt-panel\);/);
+    expect(rule).not.toMatch(/transparent/);
+  });
+});

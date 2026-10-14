@@ -219,7 +219,8 @@ const style = `
     top: 0;
     z-index: 4;
     min-block-size: 62px;
-    background: color-mix(in srgb, var(--ui-gantt-panel) 96%, transparent);
+    /* Opaque: the rows scroll underneath, and at 96% they showed through as a ghost of the text. */
+    background: var(--ui-gantt-panel);
     border-bottom: 1px solid var(--ui-gantt-border);
   }
 
