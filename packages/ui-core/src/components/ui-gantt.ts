@@ -964,7 +964,9 @@ function parseDate(value: unknown): number | null {
     return Number.isFinite(time) ? startOfDay(time) : null;
   }
   const input = String(value || '').trim();
-  const isoDay = /^(\d{4})-(\d{2})-(\d{2})$/.exec(input);
+  // A task date is a calendar day. Anything after the day ("T23:30:00Z", " 08:00", an offset) is ignored, so
+  // a task never moves a day because of the viewer's time zone.
+  const isoDay = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s].*)?$/.exec(input);
   if (isoDay) {
     const year = Number(isoDay[1]);
     const month = Number(isoDay[2]);

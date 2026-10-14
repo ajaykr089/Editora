@@ -257,6 +257,8 @@ and resize, and a toolbar for zoom, filter and sort. Give it `tasks` and `links`
 - The time header has two rows (month over days or weeks, year over months or quarters). `week-start` (`0` is Sunday)
   sets the first day of the week; it defaults to the locale's.
 - `bar-variant`: `solid`, `soft`, `striped`, `outline` or `glass`.
+- Dates are calendar days (`YYYY-MM-DD`). A time or offset after the day (`2026-03-02T23:30:00Z`) is ignored, so a task never moves a
+  day with the viewer's time zone; `taskchange` reports plain `YYYY-MM-DD`.
 - Dependency types: `e2s`, `s2s`, `e2e` and `s2e`.
 - Each bar is named for assistive technology with its dates, progress, owner and critical flag, and shows the same facts in a tooltip on
   hover or keyboard focus (Escape dismisses it). While you drag a bar, the tooltip shows the dates it would take.

@@ -86,7 +86,7 @@ render(<Example />);
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `tasks` | `GanttTask[]` | Timeline rows. Supports `start`, `end`, `progress`, `baselineStart`, `baselineEnd`, `critical`, `segments` (each part may carry its own `progress`), `type`, `parent`, `assignee`, and `readonly`. |
+| `tasks` | `GanttTask[]` | Timeline rows. Supports `start`, `end`, `progress`, `baselineStart`, `baselineEnd`, `critical`, `segments` (each part may carry its own `progress`), `type`, `parent`, `assignee`, and `readonly`. Dates are calendar days: `2026-03-02T23:30:00Z` is March 2 in every time zone (the time and offset are ignored), and a `Date` object is read as a local day. |
 | `links` | `GanttLink[]` | Dependency links with `source`, `target`, and optional `type`. |
 | `zoom` | `'day' \| 'week' \| 'month' \| 'quarter' \| 'year' \| 'fit'` | Timeline scale. `fit` scales the whole project to the width of the chart (between 0.2 and 48px a day) and picks the header unit from the result; it follows the chart when it is resized. |
 | `weekStart` | `0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6` | First day of the week in the time header (0 is Sunday). Defaults to the locale's. |

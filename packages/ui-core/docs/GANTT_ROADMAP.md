@@ -34,7 +34,7 @@ Visible quality, no new concepts. Most of it is in `createTicks` and the bar CSS
 | A6 | ~~Today label~~ **done** | The "Today" label is a pill at the bottom of the sticky header, centred on the line and clamped inside the track; the body keeps only the line. No pill at the day scale, where today's column is already highlighted and a pill would cover its date. The line now also shows in the stretch added to fill a wide host. | S |
 | A7 | ~~Bar names and tooltips~~ **done** | A bar's accessible name is now "label, kind, dates, progress, assigned to, critical". One shared tooltip (outside the bars, which clip) opens on hover after 150ms and at once on keyboard focus, repeats those facts, is dismissed with Escape, never opens on touch, and flips below the bar under the sticky header. While a bar is dragged it shows the dates the bar would take: the old `.drag-tip` was inside the bar and clipped, so the dates were never visible. The words ("to", "complete", "assigned to"...) are in one `TEXT` object, ready for B8. | S |
 | A8 | ~~Touch targets~~ **done** | On coarse pointers (`@media (pointer: coarse)`) task bars grow from 18 to 24px tall, centred on the same line so links and baselines still meet them, and the resize handles from 14 to 24px wide (at most 35% of a very short bar, so it keeps a middle to grab) and always show their grip, since a touch screen has no hover. Mouse layouts are unchanged. | S |
-| A9 | Date semantics | An ISO datetime such as `2026-03-02T23:30:00Z` shifts a day in some time zones. Define tasks as local dates: read the date part and ignore the time, and document it. | S |
+| A9 | ~~Date semantics~~ **done** | A task date is a calendar day: a time, `T` part or offset after `YYYY-MM-DD` is ignored, so `2026-03-02T23:30:00Z` is March 2 in every time zone instead of the viewer's local day (March 3 east of Greenwich). Events still report plain `YYYY-MM-DD`. Other date strings (`March 2, 2026`) and `Date` objects are still read as local days. | S |
 | A10 | `aria-colcount` in compact mode | The compact layout hides three cells per row; keep `aria-colcount` equal to the columns that exist. | S |
 | A11 | Scroll to today | Open at today (or at the start if today is outside the range) and add a "Today" toolbar button plus `scrollToDate()`. See B2. | S |
 
@@ -70,7 +70,7 @@ can build undo from `taskchange`).
 
 ## Order and totals
 
-A1-A7 are done; next A8-A11, then B1-B2, B4, B3, B7, B5, B6, B8, and phase C last.
+A1-A9 are done; next A10-A11, then B1-B2, B4, B3, B7, B5, B6, B8, and phase C last.
 That is roughly five to six weeks in total, and each item above is its own commit. The estimate is a
 guess from reading the code, not a measurement: C2 and C3 are the ones most likely to run over.
 
