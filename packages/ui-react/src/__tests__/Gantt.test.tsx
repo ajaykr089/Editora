@@ -3,7 +3,7 @@ import { render } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import '../../../ui-core/src/components/ui-gantt';
 
-import { Gantt } from '../components/Gantt';
+import { Gantt, type GanttElement } from '../components/Gantt';
 
 const dayOffset = (offset: number) => {
   const date = new Date();
@@ -128,5 +128,24 @@ describe('Gantt wrapper', () => {
     rerender(<Gantt tasks={tasks} />);
     await Promise.resolve();
     expect(el.hasAttribute('max-height')).toBe(false);
+  });
+
+  it('gives the ref the element with its methods, and reports tasktoggle', async () => {
+    const onTaskToggle = vi.fn();
+    const ref = React.createRef<GanttElement>();
+    const nested = [
+      { id: 'p', label: 'Phase', start: dayOffset(0), end: dayOffset(20), type: 'summary' as const },
+      { id: 'a', label: 'Child', start: dayOffset(1), end: dayOffset(5), parent: 'p' },
+    ];
+    const { container } = render(<Gantt ref={ref} tasks={nested} initialScroll="start" onTaskToggle={onTaskToggle} />);
+    await Promise.resolve();
+
+    expect(ref.current).toBe(container.querySelector('ui-gantt'));
+    expect(container.querySelector('ui-gantt')!.getAttribute('initial-scroll')).toBe('start');
+    ref.current!.toggleTask('p', false);
+    expect(onTaskToggle).toHaveBeenCalledWith({ id: 'p', open: false }, expect.anything());
+    expect(ref.current!.scrollToTask('missing')).toBe(false);
+    ref.current!.expandAll();
+    expect(onTaskToggle).toHaveBeenLastCalledWith({ id: 'p', open: true }, expect.anything());
   });
 });

@@ -150,7 +150,8 @@ const style = `
 
   .control,
   .select,
-  .zoom-button {
+  .zoom-button,
+  .today-button {
     border: 1px solid var(--ui-gantt-border);
     background: var(--ui-gantt-panel);
     color: var(--ui-gantt-text);
@@ -170,9 +171,15 @@ const style = `
     min-inline-size: 118px;
   }
 
-  .zoom-button {
+  .zoom-button,
+  .today-button {
     padding: 0 9px;
     cursor: pointer;
+  }
+
+  .today-button:disabled {
+    opacity: 0.45;
+    cursor: default;
   }
 
   .zoom-button[aria-pressed="true"] {
@@ -997,7 +1004,8 @@ const style = `
     .bar,
     .select,
     .control,
-    .zoom-button {
+    .zoom-button,
+    .today-button {
       forced-color-adjust: none;
       box-shadow: none;
     }
@@ -1446,6 +1454,7 @@ function focusSelectorFor(el: HTMLElement): string | null {
   if (el.classList.contains('control')) return '.control';
   if (el.classList.contains('select')) return '.select';
   if (el.classList.contains('zoom-button') && el.dataset.zoom) return `.zoom-button[data-zoom="${cssEscape(el.dataset.zoom)}"]`;
+  if (el.classList.contains('today-button')) return '.today-button';
   if (el.classList.contains('head-button') && el.dataset.sort) return `.head-button[data-sort="${cssEscape(el.dataset.sort)}"]`;
   if (el.classList.contains('splitter') && el.getAttribute('role') === 'separator') return '.splitter[role="separator"]';
   if (el.classList.contains('bar') && el.dataset.taskId) return barSelector(el.dataset.taskId);
@@ -1480,6 +1489,7 @@ export type GanttLabels = {
   columnEnd: string;
   columnDuration: string;
   splitter: string;
+  scrollToToday: string;
   empty: string;
   noMatches: string;
   expand: string;
@@ -1520,6 +1530,7 @@ const DEFAULT_LABELS: GanttLabels = {
   columnEnd: 'End',
   columnDuration: 'Days',
   splitter: 'Resize the task list',
+  scrollToToday: 'Scroll to today',
   empty: 'No tasks in this range',
   noMatches: 'No matching tasks',
   expand: 'Expand',
@@ -1663,6 +1674,43 @@ function parseCssLength(raw: string | null): string | null {
   return value === 'none' || /^\d*\.?\d+(px|em|rem|vh|dvh|svh|lvh|vw|%|ch)$/.test(value) ? value : null;
 }
 
+function readJsonArray(raw: string | null): Array<Record<string, unknown>> {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+/** A `Date` becomes the calendar day it is locally, like the React wrapper writes it. */
+function toAttrDate(value: unknown): unknown {
+  return value instanceof Date ? (Number.isFinite(value.getTime()) ? formatIso(value.getTime()) : undefined) : value;
+}
+
+function writeJsonArray(el: HTMLElement, name: string, value: Array<Record<string, unknown>> | null | undefined, dates: boolean): void {
+  if (!Array.isArray(value)) {
+    el.removeAttribute(name);
+    return;
+  }
+  const prepared = dates
+    ? value.map((item) => {
+        const next: Record<string, unknown> = { ...item };
+        for (const key of ['start', 'end', 'baselineStart', 'baselineEnd']) if (key in next) next[key] = toAttrDate(next[key]);
+        if (Array.isArray(next.segments)) {
+          next.segments = (next.segments as Array<Record<string, unknown>>).map((segment) => ({ ...segment, start: toAttrDate(segment.start), end: toAttrDate(segment.end) }));
+        }
+        return next;
+      })
+    : value;
+  try {
+    el.setAttribute(name, JSON.stringify(prepared));
+  } catch {
+    // not serialisable (a cycle): leave the attribute as it is
+  }
+}
+
 function parseUserGrid(raw: string | null): number | null {
   const value = raw == null || raw === '' ? NaN : Number(raw);
   return Number.isFinite(value) && value > 0 ? value : null;
@@ -1765,6 +1813,10 @@ export class UIGantt extends ElementBase {
   private viewportLeft = 0;
   private viewportWidth = 1800;
   private hostWidth = 0;
+  private layoutInfo = { min: 0, dayWidth: 13, gridWidth: GRID_WIDTH, rangeEnd: 0 };
+  private visibleIds: string[] = [];
+  private initialScrollPending = true;
+  private pendingReveal: { id: string; behavior: ScrollBehavior } | null = null;
   private hostHeight = 0;
   private virtualizedNow = false;
   private gridBounds = { min: 0, max: 0, width: GRID_WIDTH };
@@ -1790,6 +1842,14 @@ export class UIGantt extends ElementBase {
   private visibleCache: VisibleTask[] = [];
 
   override connectedCallback(): void {
+    // A property set before the element was defined sits on the instance and would hide the accessor.
+    for (const name of ['tasks', 'links'] as const) {
+      if (Object.prototype.hasOwnProperty.call(this, name)) {
+        const value = (this as unknown as Record<string, unknown>)[name];
+        delete (this as unknown as Record<string, unknown>)[name];
+        (this as unknown as Record<string, unknown>)[name] = value;
+      }
+    }
     super.connectedCallback();
     if (typeof ResizeObserver === 'undefined' || this.resizeObserver) return;
     this.resizeObserver = new ResizeObserver((entries) => {
@@ -2005,10 +2065,13 @@ export class UIGantt extends ElementBase {
     // grid lines are drawn out to its edge, so there is no blank strip after the last task.
     const fillWidth = Math.max(timelineWidth, frameWidth - gridWidth);
     const rangeEnd = min + (fillWidth / dayWidth) * DAY;
+    this.layoutInfo = { min, dayWidth, gridWidth, rangeEnd };
+    this.visibleIds = visible.map((task) => task.id);
     const today = startOfDay(Date.now());
     const todayX = xForDate(today);
     // Today is drawn while it falls anywhere on the timeline, including the stretch added to fill a wide host.
-    const showTodayMarker = showToday && today >= min && today <= rangeEnd;
+    const todayInRange = today >= min && today <= rangeEnd;
+    const showTodayMarker = showToday && todayInRange;
     const todayMarkup = showTodayMarker ? `<div class="today" part="today" style="left:${todayX.toFixed(2)}px"></div>` : '';
     // The label lives in the header, which stays put while the rows scroll, not on the line where it covered bars.
     // The day scale already highlights today's own column, and a pill there would cover its date.
@@ -2037,6 +2100,7 @@ export class UIGantt extends ElementBase {
                   ['progress', text.sortProgress]
                 ].map(([value, label]) => `<option value="${value}" ${sort === value ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('')}
               </select>
+              ${showToday ? `<button class="today-button" data-action="today" title="${escapeHtml(text.scrollToToday)}" aria-label="${escapeHtml(text.scrollToToday)}"${todayInRange ? '' : ' disabled'}>${escapeHtml(text.today)}</button>` : ''}
               ${(['day', 'week', 'month', 'quarter', 'year', 'fit'] as GanttZoom[]).map((item) => `<button class="zoom-button" data-zoom="${item}" aria-pressed="${zoom === item}"${item === 'fit' ? ` title="${escapeHtml(text.zoomFitTitle)}"` : ''}>${escapeHtml(zoomLabel(item, text))}</button>`).join('')}
             </div>
           </header>
@@ -2093,6 +2157,18 @@ export class UIGantt extends ElementBase {
     }
     if (this.root.querySelector('.frame') !== previousFrame) this.bindEvents();
     this.restoreFocus(focusSnapshot);
+    if (viewport && viewport.clientWidth > 0 && this.initialScrollPending) {
+      this.initialScrollPending = false;
+      // Open on today when it is not on the first screen; `initial-scroll="start"` opens at the start instead.
+      if (this.getAttribute('initial-scroll') !== 'start' && !fitting && showToday && todayInRange && todayX > viewport.clientWidth - gridWidth - 48) {
+        this.scrollToDate('today', { behavior: 'auto' });
+      }
+    }
+    if (this.pendingReveal) {
+      const reveal = this.pendingReveal;
+      this.pendingReveal = null;
+      this.reveal(reveal.id, reveal.behavior);
+    }
   }
 
   /**
@@ -2149,11 +2225,12 @@ export class UIGantt extends ElementBase {
       button.addEventListener('click', (event) => {
         event.stopPropagation();
         const id = button.dataset.taskId;
-        if (!id) return;
-        if (this.collapsed.has(id)) this.collapsed.delete(id);
-        else this.collapsed.add(id);
-        this.requestRender();
+        if (id) this.toggleTask(id);
       });
+    });
+
+    this.root.querySelector<HTMLButtonElement>('.today-button')?.addEventListener('click', () => {
+      this.scrollToDate('today', { behavior: 'smooth', align: 'center' });
     });
 
     this.root.querySelectorAll<HTMLButtonElement>('.zoom-button[data-zoom]').forEach((button) => {
@@ -2503,6 +2580,130 @@ export class UIGantt extends ElementBase {
     });
   }
 
+  /** The tasks as an array. Setting it writes the `tasks` attribute (dates may be `Date`s: they become `YYYY-MM-DD`). */
+  get tasks(): Array<Record<string, unknown>> {
+    return readJsonArray(this.getAttribute('tasks'));
+  }
+
+  set tasks(value: Array<Record<string, unknown>> | null | undefined) {
+    writeJsonArray(this, 'tasks', value, true);
+  }
+
+  /** The links as an array. Setting it writes the `links` attribute. */
+  get links(): Array<Record<string, unknown>> {
+    return readJsonArray(this.getAttribute('links'));
+  }
+
+  set links(value: Array<Record<string, unknown>> | null | undefined) {
+    writeJsonArray(this, 'links', value, false);
+  }
+
+  private resolveBehavior(behavior?: ScrollBehavior): ScrollBehavior {
+    if (behavior === 'smooth' && typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches) return 'auto';
+    return behavior ?? 'auto';
+  }
+
+  private scrollViewport(position: { left?: number; top?: number }, behavior?: ScrollBehavior): void {
+    const viewport = this.root.querySelector<HTMLElement>('.viewport');
+    if (!viewport) return;
+    if (typeof viewport.scrollTo === 'function') {
+      viewport.scrollTo({ ...position, behavior: this.resolveBehavior(behavior) });
+      return;
+    }
+    if (position.left != null) viewport.scrollLeft = position.left;
+    if (position.top != null) viewport.scrollTop = position.top;
+  }
+
+  /**
+   * Scroll the timeline to a date: a `YYYY-MM-DD` string, a `Date`, a timestamp, or `"today"`. `align` is `center`
+   * (the default) or `start`, which leaves a little room before the date. Does nothing for a date that is not valid.
+   */
+  scrollToDate(date: string | number | Date, options: { behavior?: ScrollBehavior; align?: 'center' | 'start' } = {}): void {
+    const ms = date === 'today' ? startOfDay(Date.now()) : typeof date === 'number' ? (Number.isFinite(date) ? startOfDay(date) : null) : parseDate(date);
+    const viewport = this.root.querySelector<HTMLElement>('.viewport');
+    if (ms == null || !viewport) return;
+    this.scrollViewport({ left: this.leftFor(viewport, ms, options.align ?? 'center') }, options.behavior);
+  }
+
+  private leftFor(viewport: HTMLElement, ms: number, align: 'center' | 'start'): number {
+    const { min, dayWidth, gridWidth } = this.layoutInfo;
+    const x = ((ms - min) / DAY) * dayWidth;
+    const target = align === 'start' ? x - 24 : x - Math.max(0, viewport.clientWidth - gridWidth) / 2;
+    return Math.max(0, Math.min(target, Math.max(0, viewport.scrollWidth - viewport.clientWidth)));
+  }
+
+  /**
+   * Bring a task into view: open the branches above it, then scroll its row (and its bar) on screen when they are
+   * not. Returns false for an id that is not there or is filtered out.
+   */
+  scrollToTask(id: string, options: { behavior?: ScrollBehavior } = {}): boolean {
+    const tasks = this.getTasks();
+    const byId = new Map(tasks.map((task) => [task.id, task]));
+    const task = byId.get(id);
+    if (!task) return false;
+    let opened = false;
+    let parent = task.parent;
+    for (let steps = 0; parent && steps < 1000; steps += 1) {
+      if (this.collapsed.has(parent)) {
+        this.collapsed.delete(parent);
+        this.dispatchEvent(new CustomEvent('tasktoggle', { detail: { id: parent, open: true }, bubbles: true, composed: true }));
+        opened = true;
+      }
+      parent = byId.get(parent)?.parent;
+    }
+    if (opened) {
+      this.pendingReveal = { id, behavior: options.behavior ?? 'auto' };
+      this.requestRender();
+      return true;
+    }
+    return this.reveal(id, options.behavior ?? 'auto');
+  }
+
+  private reveal(id: string, behavior: ScrollBehavior): boolean {
+    const index = this.visibleIds.indexOf(id);
+    const viewport = this.root.querySelector<HTMLElement>('.viewport');
+    const task = this.getTasks().find((item) => item.id === id);
+    if (index < 0 || !viewport || !task) return false;
+    const position: { left?: number; top?: number } = {};
+    const rowY = HEADER_HEIGHT + index * ROW_HEIGHT;
+    const rowsVisible = rowY >= viewport.scrollTop + HEADER_HEIGHT && rowY + ROW_HEIGHT <= viewport.scrollTop + viewport.clientHeight;
+    if (!rowsVisible) {
+      const top = index * ROW_HEIGHT + ROW_HEIGHT / 2 - (viewport.clientHeight - HEADER_HEIGHT) / 2;
+      position.top = Math.max(0, Math.min(top, Math.max(0, viewport.scrollHeight - viewport.clientHeight)));
+    }
+    const start = parseDate(task.start);
+    const end = parseDate(task.end);
+    if (start != null) {
+      const { min, dayWidth, gridWidth } = this.layoutInfo;
+      const from = ((start - min) / DAY) * dayWidth;
+      const to = ((end ?? start) - min) / DAY * dayWidth;
+      const left = viewport.scrollLeft;
+      if (from < left || to > left + viewport.clientWidth - gridWidth) position.left = this.leftFor(viewport, start, 'start');
+    }
+    if (position.left != null || position.top != null) this.scrollViewport(position, behavior);
+    return true;
+  }
+
+  /** Open or close a branch (`open` omitted toggles it) and fire `tasktoggle`. */
+  toggleTask(id: string, open?: boolean): void {
+    const isOpen = !this.collapsed.has(id);
+    const next = open ?? !isOpen;
+    if (next === isOpen) return;
+    if (next) this.collapsed.delete(id);
+    else this.collapsed.add(id);
+    this.dispatchEvent(new CustomEvent('tasktoggle', { detail: { id, open: next }, bubbles: true, composed: true }));
+    this.requestRender();
+  }
+
+  expandAll(): void {
+    for (const id of [...this.collapsed]) this.toggleTask(id, true);
+  }
+
+  collapseAll(): void {
+    const parents = new Set(this.getTasks().map((task) => task.parent).filter((id): id is string => !!id));
+    for (const id of parents) this.toggleTask(id, false);
+  }
+
   private rangeMin(): number {
     const tasks = this.getTasks();
     const starts = tasks.map((task) => parseDate(task.start)).filter((value): value is number => value != null);
@@ -2596,6 +2797,7 @@ export class UIGantt extends ElementBase {
       if (!sharesAnId(taskIds(oldValue), nextIds)) {
         this.viewportTop = 0;
         this.viewportLeft = 0;
+        this.initialScrollPending = true;
         this.collapsed.clear();
         this.seededIds.clear();
       }

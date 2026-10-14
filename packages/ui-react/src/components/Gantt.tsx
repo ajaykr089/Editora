@@ -83,6 +83,7 @@ export type GanttLabels = {
   columnEnd: string;
   columnDuration: string;
   splitter: string;
+  scrollToToday: string;
   empty: string;
   noMatches: string;
   expand: string;
@@ -96,6 +97,18 @@ export type GanttLabels = {
   assigned: string;
   critical: string;
 };
+
+/** What `ref` gives you: the element, with the methods to move around the chart. */
+export interface GanttElement extends HTMLElement {
+  /** Scroll the timeline to a date (`'YYYY-MM-DD'`, a `Date`, a timestamp or `'today'`). */
+  scrollToDate(date: string | number | Date, options?: { behavior?: ScrollBehavior; align?: 'center' | 'start' }): void;
+  /** Open the branches above a task and bring its row and bar on screen. False when the task is not there or is filtered out. */
+  scrollToTask(id: string, options?: { behavior?: ScrollBehavior }): boolean;
+  /** Open or close a branch (toggles when `open` is left out). */
+  toggleTask(id: string, open?: boolean): void;
+  expandAll(): void;
+  collapseAll(): void;
+}
 
 export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect'> & {
   tasks?: GanttTask[];
@@ -114,6 +127,8 @@ export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   weekStart?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   /** The task list's columns, in order. The name column is always first. Default: name, owner, dates, progress. */
   columns?: GanttColumn[];
+  /** Where the chart opens: on `'today'` (the default, when today is not on the first screen) or at the `'start'`. */
+  initialScroll?: 'today' | 'start';
   /** Fill the height of the container (which must have one): the toolbar keeps its height and the chart scrolls inside the rest. */
   fill?: boolean;
   /** Cap on the chart's height when it is not `fill`: a number (px) or a plain CSS length (`'60vh'`, `'none'`). Default 620px. */
@@ -124,6 +139,7 @@ export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   labels?: Partial<GanttLabels>;
   /** BCP 47 locale for dates (month names, date formats, the week's first day). Defaults to the browser's. */
   locale?: string;
+  onTaskToggle?: (detail: { id: string; open: boolean }, event: CustomEvent<{ id: string; open: boolean }>) => void;
   onGridResize?: (detail: { width: number }, event: CustomEvent<{ width: number }>) => void;
   onTaskChange?: (detail: GanttTaskChangeDetail, event: CustomEvent<GanttTaskChangeDetail>) => void;
   onTaskSelect?: (detail: { id: string }, event: CustomEvent<{ id: string }>) => void;
@@ -160,7 +176,7 @@ function serializeTasks(tasks: GanttTask[] | undefined): string | null {
   })));
 }
 
-export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
+export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
   {
     tasks,
     links,
@@ -181,6 +197,7 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
     gridWidth,
     fill,
     maxHeight,
+    initialScroll,
     children,
     onTaskChange,
     onTaskSelect,
@@ -190,13 +207,14 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
     onFilterChange,
     onSortChange,
     onGridResize,
+    onTaskToggle,
     ...rest
   },
   forwardedRef
 ) {
   const ref = useRef<HTMLElement | null>(null);
 
-  useImperativeHandle(forwardedRef, () => ref.current as HTMLElement);
+  useImperativeHandle(forwardedRef, () => ref.current as GanttElement);
 
   useIsomorphicLayoutEffect(() => {
     const el = ref.current;
@@ -241,8 +259,9 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
     syncAttr('columns', columns?.length ? JSON.stringify(columns) : null);
     syncAttr('grid-width', gridWidth != null && gridWidth > 0 ? String(gridWidth) : null);
     syncBool('fill', fill);
+    syncAttr('initial-scroll', initialScroll && initialScroll !== 'today' ? initialScroll : null);
     syncAttr('max-height', maxHeight == null || maxHeight === '' ? null : typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight);
-  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight]);
+  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight, initialScroll]);
 
   useEffect(() => {
     const el = ref.current;
@@ -265,8 +284,11 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
     const handleGridResize = (event: Event) => onGridResize?.((event as CustomEvent<{ width: number }>).detail, event as CustomEvent<{ width: number }>);
 
     el.addEventListener('sortchange', handleSortChange);
+    const handleTaskToggle = (event: Event) => onTaskToggle?.((event as CustomEvent<{ id: string; open: boolean }>).detail, event as CustomEvent<{ id: string; open: boolean }>);
     el.addEventListener('gridresize', handleGridResize);
+    el.addEventListener('tasktoggle', handleTaskToggle);
     return () => {
+      el.removeEventListener('tasktoggle', handleTaskToggle);
       el.removeEventListener('gridresize', handleGridResize);
       el.removeEventListener('taskchange', handleTaskChange);
       el.removeEventListener('taskselect', handleTaskSelect);
@@ -276,7 +298,7 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
       el.removeEventListener('filterchange', handleFilterChange);
       el.removeEventListener('sortchange', handleSortChange);
     };
-  }, [onTaskChange, onTaskSelect, onTaskDelete, onLinkSelect, onZoomChange, onFilterChange, onSortChange, onGridResize]);
+  }, [onTaskChange, onTaskSelect, onTaskDelete, onLinkSelect, onZoomChange, onFilterChange, onSortChange, onGridResize, onTaskToggle]);
 
   return createUIElement('ui-gantt', { ref, ...rest }, children);
 });

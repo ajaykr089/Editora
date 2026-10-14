@@ -37,14 +37,14 @@ Visible quality, no new concepts. Most of it is in `createTicks` and the bar CSS
 | A8 | ~~Touch targets~~ **done** | On coarse pointers (`@media (pointer: coarse)`) task bars grow from 18 to 24px tall, centred on the same line so links and baselines still meet them, and the resize handles from 14 to 24px wide (at most 35% of a very short bar, so it keeps a middle to grab) and always show their grip, since a touch screen has no hover. Mouse layouts are unchanged. | S |
 | A9 | ~~Date semantics~~ **done** | A task date is a calendar day: a time, `T` part or offset after `YYYY-MM-DD` is ignored, so `2026-03-02T23:30:00Z` is March 2 in every time zone instead of the viewer's local day (March 3 east of Greenwich). Events still report plain `YYYY-MM-DD`. Other date strings (`March 2, 2026`) and `Date` objects are still read as local days. | S |
 | A10 | ~~`aria-colcount` in compact mode~~ **done** | `aria-colcount` is the number of columns shown: the configured ones, or 1 when the host is narrow enough for the compact layout (width unknown: all of them). | S |
-| A11 | Scroll to today | Open at today (or at the start if today is outside the range) and add a "Today" toolbar button plus `scrollToDate()`. See B2. | S |
+| A11 | ~~Scroll to today~~ **done** | The chart opens on today when it is off the first screen (`initial-scroll="start"` keeps the start; not in `fit`), a Today toolbar button scrolls back smoothly (honouring reduced motion; disabled when today is off the timeline), and `scrollToDate()` does it for any date. | S |
 
 ## Phase B: interaction (about two weeks)
 
 | # | Item | What and why | Size |
 | --- | --- | --- | --- |
 | B1 | Cancelable changes | `taskchange` fires after the component has already moved the bar, so a host cannot reject a drag. Add a cancelable `beforetaskchange`; when it is prevented, drop the override and re-render. Keep `taskchange` as it is. | S |
-| B2 | Imperative API | `scrollToDate(date \| 'today')`, `scrollToTask(id)`, `expandAll()`, `collapseAll()`, plus a `taskToggle` event so a host can persist expand state. Accept `tasks` and `links` as properties (arrays), not only JSON attributes. | M |
+| B2 | ~~Imperative API~~ **done** | `scrollToDate`, `scrollToTask` (opens the branches above, scrolls the row and bar into view), `toggleTask`, `expandAll`, `collapseAll`, a `tasktoggle` event, and `tasks` / `links` as array properties (Dates become plain days; a property set before the element upgrades is kept). React: a typed `GanttElement` ref, `onTaskToggle`, `initialScroll`. | M |
 | B3 | Grid keyboard (treegrid) | Row-level roving focus in the grid, ArrowLeft/Right to collapse and expand, Home/End to jump. Today only bars are focusable. | M |
 | B4 | Drag niceties | Auto-scroll when dragging near the edge; optional snapping (`snap="week"` at coarse zoom); Escape cancels a drag. | M |
 | B5 | Inline create and rename | Double-click a grid cell to rename (`taskrename`), a "+" row or double-click an empty timeline row to add (`taskcreate`). The component stays uncontrolled-friendly: it emits, the host owns the data. | M |
