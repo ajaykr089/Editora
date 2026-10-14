@@ -114,6 +114,10 @@ export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   weekStart?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   /** The task list's columns, in order. The name column is always first. Default: name, owner, dates, progress. */
   columns?: GanttColumn[];
+  /** Fill the height of the container (which must have one): the toolbar keeps its height and the chart scrolls inside the rest. */
+  fill?: boolean;
+  /** Cap on the chart's height when it is not `fill`: a number (px) or a plain CSS length (`'60vh'`, `'none'`). Default 620px. */
+  maxHeight?: number | string;
   /** Width of the task list in px. The user can also drag the splitter; see `onGridResize`. */
   gridWidth?: number;
   /** Translations: any subset of the labels. */
@@ -175,6 +179,8 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
     locale,
     columns,
     gridWidth,
+    fill,
+    maxHeight,
     children,
     onTaskChange,
     onTaskSelect,
@@ -234,7 +240,9 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
     syncAttr('locale', locale || null);
     syncAttr('columns', columns?.length ? JSON.stringify(columns) : null);
     syncAttr('grid-width', gridWidth != null && gridWidth > 0 ? String(gridWidth) : null);
-  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth]);
+    syncBool('fill', fill);
+    syncAttr('max-height', maxHeight == null || maxHeight === '' ? null : typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight);
+  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight]);
 
   useEffect(() => {
     const el = ref.current;

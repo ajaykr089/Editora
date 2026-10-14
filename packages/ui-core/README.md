@@ -259,6 +259,8 @@ and resize, and a toolbar for zoom, filter and sort. Give it `tasks` and `links`
 - `bar-variant`: `solid`, `soft`, `striped`, `outline` or `glass`.
 - Choose the task list's columns with `columns` (`["label", "start", "end", "duration", "progress"]`, or objects with a `label` and a
   `width`) and size it with `grid-width`; a splitter on its edge resizes it (mouse, touch, or the arrow keys) and fires `gridresize`.
+- Size: by default the chart grows with its rows up to 620px (`max-height="60vh"` or the `--ui-gantt-max-height` variable change that); add
+  `fill` and give the element a height (or a flex/grid cell) and it fills it, with the rows scrolling inside.
 - Translate every word with `labels` (a JSON object with any subset of the label keys, e.g. `{"title": "Planning", "zoomWeek": "semaine"}`) and
   set `locale` (`fr-FR`) for month names, date formats and the first day of the week.
 - Dates are calendar days (`YYYY-MM-DD`). A time or offset after the day (`2026-03-02T23:30:00Z`) is ignored, so a task never moves a

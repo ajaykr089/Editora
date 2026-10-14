@@ -186,6 +186,28 @@ const style = `
     max-block-size: var(--ui-gantt-max-height, 620px);
   }
 
+  /* fill: the chart takes the height of its container (which needs one): the toolbar keeps its height and the
+     scroll area takes the rest, however tall. */
+  :host([fill]) {
+    block-size: 100%;
+  }
+
+  :host([fill]) .frame {
+    display: flex;
+    flex-direction: column;
+    block-size: 100%;
+  }
+
+  :host([fill]) .toolbar {
+    flex: none;
+  }
+
+  :host([fill]) .viewport {
+    flex: 1 1 0;
+    min-block-size: 0;
+    max-block-size: none;
+  }
+
   .surface {
     --gantt-grid-w: ${GRID_WIDTH}px;
     --gantt-cols: ${DEFAULT_TEMPLATE};
@@ -1635,6 +1657,12 @@ function zoomLabel(zoom: GanttZoom, text: GanttLabels): string {
   return { day: text.zoomDay, week: text.zoomWeek, month: text.zoomMonth, quarter: text.zoomQuarter, year: text.zoomYear, fit: text.zoomFit }[zoom];
 }
 
+/** A CSS length for the `max-height` attribute (or `none`), or null for anything else, so it cannot carry other CSS. */
+function parseCssLength(raw: string | null): string | null {
+  const value = (raw || '').trim();
+  return value === 'none' || /^\d*\.?\d+(px|em|rem|vh|dvh|svh|lvh|vw|%|ch)$/.test(value) ? value : null;
+}
+
 function parseUserGrid(raw: string | null): number | null {
   const value = raw == null || raw === '' ? NaN : Number(raw);
   return Number.isFinite(value) && value > 0 ? value : null;
@@ -1722,7 +1750,7 @@ function routeDependencyPath(
 
 export class UIGantt extends ElementBase {
   static get observedAttributes() {
-    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width'];
+    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width', 'fill', 'max-height'];
   }
 
   private focusRequest: FocusSnapshot | null = null;
@@ -1737,6 +1765,8 @@ export class UIGantt extends ElementBase {
   private viewportLeft = 0;
   private viewportWidth = 1800;
   private hostWidth = 0;
+  private hostHeight = 0;
+  private virtualizedNow = false;
   private gridBounds = { min: 0, max: 0, width: GRID_WIDTH };
   private descriptions = new Map<string, TaskDescription>();
   private tipTimer: number | null = null;
@@ -1763,10 +1793,16 @@ export class UIGantt extends ElementBase {
     super.connectedCallback();
     if (typeof ResizeObserver === 'undefined' || this.resizeObserver) return;
     this.resizeObserver = new ResizeObserver((entries) => {
-      const width = entries[entries.length - 1]?.contentRect.width ?? 0;
+      const box = entries[entries.length - 1]?.contentRect;
+      const width = box?.width ?? 0;
+      const height = box?.height ?? 0;
       // clientWidth is a whole number and the observer's width is not: a host 540.4px wide must not look resized.
-      if (Math.abs(width - this.hostWidth) < 1) return;
-      this.hostWidth = Math.round(width);
+      const widthChanged = Math.abs(width - this.hostWidth) >= 1;
+      // A change of height only matters when the height is set from outside or the rows are windowed by it.
+      const heightChanged = Math.abs(height - this.hostHeight) >= 1 && (this.hasAttribute('fill') || this.virtualizedNow);
+      this.hostHeight = height;
+      if (!widthChanged && !heightChanged) return;
+      if (widthChanged) this.hostWidth = Math.round(width);
       this.captureViewport();
       this.requestRender();
     });
@@ -1839,6 +1875,8 @@ export class UIGantt extends ElementBase {
     // The host's width decides the compact layout, how far a wide host is filled (A5) and, for `fit`, the scale.
     this.hostWidth = this.clientWidth || this.hostWidth;
     const frameWidth = this.hostWidth - FRAME_BORDER;
+    this.hostHeight = this.clientHeight || this.hostHeight;
+    const maxHeight = parseCssLength(this.getAttribute('max-height'));
     const compact = this.hostWidth > 0 && frameWidth <= COMPACT_MAX_WIDTH;
     const columns = parseColumns(this.getAttribute('columns'));
     const layout = columnLayout(columns, parseUserGrid(this.getAttribute('grid-width')));
@@ -1854,6 +1892,7 @@ export class UIGantt extends ElementBase {
     const timelineWidth = Math.max(fitting ? FIT_MIN_TRACK : 680, totalDays * dayWidth);
     const rowsHeight = Math.max(visible.length * ROW_HEIGHT, ROW_HEIGHT);
     const virtualized = this.getAttribute('virtualized') !== 'false' && visible.length > 240;
+    this.virtualizedNow = virtualized;
     const viewportRows = Math.max(20, Math.ceil(Math.max(420, this.viewportHeight - HEADER_HEIGHT) / ROW_HEIGHT));
     const overscan = 160;
     // Fewer rows than before (a filter, new data): do not window against a scroll offset past the end.
@@ -1983,7 +2022,7 @@ export class UIGantt extends ElementBase {
     this.setContent(`
       <style>${style}</style>
       ${layout.width !== GRID_WIDTH || layout.template !== DEFAULT_TEMPLATE ? `<style>@container ui-gantt (min-width: 641px) { .surface { --gantt-grid-w: ${layout.width}px; --gantt-cols: ${layout.template}; } }</style>` : ''}
-      <section class="frame" part="frame" data-bar-variant="${barVariant}">
+      <section class="frame" part="frame" data-bar-variant="${barVariant}"${maxHeight ? ` style="--ui-gantt-max-height:${maxHeight}"` : ''}>
         ${showToolbar ? `
           <header class="toolbar" part="toolbar">
             <div class="title">${escapeHtml(text.title)} <span class="meta">${escapeHtml(text.tasksCount.replace('{shown}', String(visible.length)).replace('{total}', String(tasks.length)))}</span></div>

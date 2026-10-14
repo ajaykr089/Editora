@@ -92,6 +92,8 @@ render(<Example />);
 | `weekStart` | `0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6` | First day of the week in the time header (0 is Sunday). Defaults to the locale's. |
 | `columns` | `GanttColumn[]` | The task list's columns, in order: `'label'` (always first), `'assignee'`, `'dates'`, `'start'`, `'end'`, `'duration'`, `'progress'`. Use `{ key, label, width }` to set a header text and a width in px. Unknown keys are dropped; the default is name, owner, dates, progress. At phone width only the name column is shown. |
 | `gridWidth` | `number` | Width of the task list in px (at least the other columns plus 96px for the name). A splitter on its edge resizes it with the mouse, touch or the arrow keys (Shift for bigger steps, Home and End for the extremes). |
+| `fill` | `boolean` | The chart fills the height of its container, which needs a height of its own (a fixed height, a flex or grid cell): the toolbar keeps its height and the rows scroll in the rest. |
+| `maxHeight` | `number \| string` | Cap on the chart's height when it is not `fill`: a number is px, or a plain CSS length (`'60vh'`, `'30rem'`, `'none'`). Default 620px. |
 | `labels` | `Partial<GanttLabels>` | Translations: any subset of the words the chart shows or announces (title, toolbar, column headers, zoom names, empty states, "expand", "assigned to"...). `tasksCount` takes `{shown}` and `{total}`. |
 | `locale` | `string` | BCP 47 locale for dates: month names, date formats and the first day of the week. Defaults to the browser's. |
 | `sort` | `'none' \| 'start' \| 'end' \| 'label' \| 'progress'` | Sort mode used by the task grid. |

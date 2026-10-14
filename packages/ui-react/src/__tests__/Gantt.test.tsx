@@ -111,4 +111,22 @@ describe('Gantt wrapper', () => {
     expect(el.hasAttribute('columns')).toBe(false);
     expect(el.hasAttribute('grid-width')).toBe(false);
   });
+
+  it('passes fill and maxHeight through (a number is px)', async () => {
+    const { container, rerender } = render(<Gantt tasks={tasks} fill maxHeight={480} />);
+    await Promise.resolve();
+    const el = container.querySelector('ui-gantt') as HTMLElement;
+    expect(el.hasAttribute('fill')).toBe(true);
+    expect(el.getAttribute('max-height')).toBe('480px');
+    expect(el.shadowRoot!.querySelector<HTMLElement>('.frame')!.getAttribute('style')).toBe('--ui-gantt-max-height:480px');
+
+    rerender(<Gantt tasks={tasks} maxHeight="60vh" />);
+    await Promise.resolve();
+    expect(el.hasAttribute('fill')).toBe(false);
+    expect(el.getAttribute('max-height')).toBe('60vh');
+
+    rerender(<Gantt tasks={tasks} />);
+    await Promise.resolve();
+    expect(el.hasAttribute('max-height')).toBe(false);
+  });
 });
