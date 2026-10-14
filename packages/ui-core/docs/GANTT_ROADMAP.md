@@ -16,6 +16,7 @@ about a week.
 | `open: false` was parsed and ignored | a branch starts collapsed the first time it is seen |
 | React `showToolbar={false}` / `showToday={false}` did nothing | the wrapper writes `"false"` |
 | No bar was reachable at phone width (the sticky 376px grid covered the viewport) | a container query shrinks the grid to the task name column |
+| Every handler ran twice after a render that changed nothing (one arrow press moved a task two days; found in the live browser pane, whose width is fractional) | listeners are bound only when the tree was replaced; the resize observer ignores sub-pixel differences |
 
 Each is one commit with regression tests in `src/__tests__/ui-gantt.interaction.test.ts` (and
 `ui-react/src/__tests__/Gantt.test.tsx`).
