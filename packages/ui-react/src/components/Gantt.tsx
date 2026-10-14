@@ -151,6 +151,8 @@ export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   columns?: GanttColumn[];
   /** How dependencies are enforced: `'warn'` (the default) draws a link whose target is too early in the danger style, `'auto'` also pushes the tasks that follow a task that moves (later only, keeping their length), `'off'` does neither. */
   schedule?: 'warn' | 'auto' | 'off';
+  /** Mark the critical path from the links: the tasks with no slack on a tight chain of links (a task you flag `critical` stays). */
+  criticalPath?: boolean;
   /** A parent's dates follow its children (the earliest start to the latest end), and so does its progress when it has none of its own. */
   autoSummary?: boolean;
   /** Moving a parent moves everything under it by the same days (a read-only task stays put). Makes parent bars draggable. */
@@ -241,6 +243,7 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     autoSummary,
     cascade,
     schedule,
+    criticalPath,
     children,
     onTaskChange,
     onTaskSelect,
@@ -308,11 +311,12 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     syncBool('creatable', creatable);
     syncBool('auto-summary', autoSummary);
     syncBool('cascade', cascade);
+    syncBool('critical-path', criticalPath);
     syncAttr('schedule', schedule && schedule !== 'warn' ? schedule : null);
     syncAttr('snap', snap && snap !== 'day' ? snap : null);
     syncAttr('initial-scroll', initialScroll && initialScroll !== 'today' ? initialScroll : null);
     syncAttr('max-height', maxHeight == null || maxHeight === '' ? null : typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight);
-  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight, initialScroll, snap, creatable, autoSummary, cascade, schedule]);
+  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight, initialScroll, snap, creatable, autoSummary, cascade, schedule, criticalPath]);
 
   useEffect(() => {
     const el = ref.current;

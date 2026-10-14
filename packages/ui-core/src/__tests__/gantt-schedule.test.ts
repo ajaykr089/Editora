@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { constraintBound, daysBetween, descendantsOf, linkSatisfied, pushSuccessors, rollUp, shiftDays, violatedLinks, type LinkType, type SchedLink, type SchedTask } from '../components/gantt-schedule';
+import { constraintBound, criticalPath, daysBetween, descendantsOf, linkSatisfied, pushSuccessors, rollUp, shiftDays, violatedLinks, type LinkType, type SchedLink, type SchedTask } from '../components/gantt-schedule';
 
 const day = (m: number, d: number) => new Date(2026, m - 1, d).getTime();
 const task = (id: string, start: [number, number], end: [number, number], extra: Partial<SchedTask> = {}): SchedTask => ({ id, start: day(...start), end: day(...end), ...extra });
@@ -215,5 +215,75 @@ describe('pushSuccessors', () => {
     const tasks = [task('a', [3, 2], [3, 6])];
 
     expect(pushSuccessors(tasks, [link('x', 'a', 'ghost'), link('y', 'ghost', 'a')], new Map([['a', { start: day(3, 8), end: day(3, 12) }]]))).toEqual([]);
+  });
+});
+
+describe('criticalPath', () => {
+  const ids = (set: Set<string>) => [...set].sort();
+
+  it('marks the longest chain of tight links, and not a shorter one beside it', () => {
+    const tasks = [
+      task('a', [3, 2], [3, 6]),
+      task('b', [3, 6], [3, 10]),
+      task('c', [3, 10], [3, 16]), // the project ends on the 16th
+      task('x', [3, 2], [3, 5]),
+      task('y', [3, 5], [3, 8]), // a short chain: 8 days of slack
+    ];
+    const links = [link('ab', 'a', 'b'), link('bc', 'b', 'c'), link('xy', 'x', 'y')];
+
+    expect(ids(criticalPath(tasks, links))).toEqual(['a', 'b', 'c']);
+  });
+
+  it('is not critical when a gap in the chain gives it room', () => {
+    // b starts three days after a ends: a could end three days later, and b is not tight against anything
+    const tasks = [task('a', [3, 2], [3, 6]), task('b', [3, 9], [3, 14]), task('z', [3, 2], [3, 14])];
+
+    expect(ids(criticalPath(tasks, [link('ab', 'a', 'b')]))).toEqual([]);
+  });
+
+  it('counts a lag as part of the chain', () => {
+    const tasks = [task('a', [3, 2], [3, 6]), task('b', [3, 8], [3, 12])];
+
+    expect(ids(criticalPath(tasks, [link('ab', 'a', 'b', 'e2s', 2)]))).toEqual(['a', 'b']);
+    expect(ids(criticalPath(tasks, [link('ab', 'a', 'b', 'e2s', 1)]))).toEqual([]); // one day of room
+  });
+
+  it('handles every type of link', () => {
+    const tasks = [task('a', [3, 2], [3, 6]), task('b', [3, 2], [3, 9])];
+
+    // b starts exactly when a starts and ends the project: a cannot start any later without moving b, so both have no slack
+    expect(ids(criticalPath(tasks, [link('l', 'a', 'b', 's2s')]))).toEqual(['a', 'b']);
+    // ...but with a day of room on the start it is no longer tight
+    expect(ids(criticalPath(tasks, [link('l', 'a', 'b', 's2s', -1)]))).toEqual([]);
+    const tight = [task('p', [3, 2], [3, 6]), task('q', [3, 4], [3, 9])];
+    expect(ids(criticalPath(tight, [link('l', 'p', 'q', 'e2e', 3)]))).toEqual(['p', 'q']); // q ends 3 days after p ends
+    expect(ids(criticalPath([task('p', [3, 2], [3, 6]), task('q', [3, 4], [3, 8])], [link('l', 'p', 'q', 's2e', 6)]))).toEqual(['p', 'q']); // q ends 6 days after p starts
+  });
+
+  it('never marks a task without links, even one that ends last', () => {
+    const tasks = [task('a', [3, 2], [3, 6]), task('b', [3, 6], [3, 9]), task('lone', [3, 2], [3, 20])];
+
+    expect(ids(criticalPath(tasks, [link('ab', 'a', 'b')]))).toEqual([]); // b ends on the 9th, the project on the 20th
+  });
+
+  it('counts a milestone at the end of a tight chain', () => {
+    const tasks = [task('a', [3, 2], [3, 6]), task('m', [3, 6], [3, 6], { type: 'milestone' })];
+
+    expect(ids(criticalPath(tasks, [link('am', 'a', 'm')]))).toEqual(['a', 'm']);
+  });
+
+  it('leaves parents out and ignores links that touch them', () => {
+    const tasks = [task('p', [3, 2], [3, 12]), task('a', [3, 2], [3, 6], { parent: 'p' }), task('b', [3, 6], [3, 12], { parent: 'p' })];
+
+    expect(ids(criticalPath(tasks, [link('ab', 'a', 'b'), link('pa', 'p', 'a')]))).toEqual(['a', 'b']);
+  });
+
+  it('has none without usable links, and does not loop on a cycle', () => {
+    const tasks = [task('a', [3, 2], [3, 6]), task('b', [3, 6], [3, 9])];
+
+    expect(criticalPath(tasks, []).size).toBe(0);
+    expect(criticalPath(tasks, [link('x', 'a', 'ghost')]).size).toBe(0);
+    expect(() => criticalPath(tasks, [link('ab', 'a', 'b'), link('ba', 'b', 'a')])).not.toThrow();
+    expect(criticalPath(tasks, [link('ab', 'a', 'b'), link('ba', 'b', 'a')]).size).toBe(0);
   });
 });

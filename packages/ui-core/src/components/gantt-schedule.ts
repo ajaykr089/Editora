@@ -186,3 +186,74 @@ export function pushSuccessors(tasks: SchedTask[], links: SchedLink[], moved: Ma
   }
   return moves;
 }
+
+/**
+ * The critical path of the schedule as it stands: the tasks with no slack on a chain of links that is tight all the way.
+ * Slack is how far a task could finish later without a link pushing something past the end of the project, found with a
+ * backward pass over the links (every type and lag). Only tasks without children count (a parent is its children), a
+ * task without links is never critical, and neither is one whose own incoming links all have room: a task is critical
+ * when it has no slack and either nothing precedes it or something that does is tight against it. Tasks caught in a
+ * cycle of links are left out.
+ */
+export function criticalPath(tasks: SchedTask[], links: SchedLink[]): Set<string> {
+  const parents = new Set(tasks.map((task) => task.parent).filter((id): id is string => !!id));
+  const nodes = new Map(tasks.filter((task) => !parents.has(task.id)).map((task) => [task.id, task]));
+  const usable = links.filter((link) => nodes.has(link.source) && nodes.has(link.target) && link.source !== link.target);
+  if (!usable.length) return new Set();
+
+  const length = (task: SchedTask) => daysBetween(task.start, task.end);
+  const projectEnd = Math.max(...[...nodes.values()].map((task) => task.end));
+  const outgoing = new Map<string, SchedLink[]>();
+  const incoming = new Map<string, SchedLink[]>();
+  for (const link of usable) {
+    outgoing.set(link.source, [...(outgoing.get(link.source) || []), link]);
+    incoming.set(link.target, [...(incoming.get(link.target) || []), link]);
+  }
+
+  // Latest finish, from the successors back (Kahn's algorithm on the reversed graph; a cycle never reaches zero).
+  const latestFinish = new Map<string, number>([...nodes.keys()].map((id) => [id, projectEnd]));
+  const remaining = new Map<string, number>([...nodes.keys()].map((id) => [id, (outgoing.get(id) || []).length]));
+  const ready = [...nodes.keys()].filter((id) => remaining.get(id) === 0);
+  const settled = new Set<string>();
+  while (ready.length) {
+    const id = ready.shift() as string;
+    settled.add(id);
+    const target = nodes.get(id) as SchedTask;
+    const finish = latestFinish.get(id) as number;
+    const latestStart = shiftDays(finish, -length(target));
+    for (const link of incoming.get(id) || []) {
+      const source = nodes.get(link.source) as SchedTask;
+      const lag = -link.lag;
+      // the latest finish of the source that still lets this link hold
+      const bound =
+        link.type === 'e2s'
+          ? shiftDays(latestStart, lag)
+          : link.type === 's2s'
+            ? shiftDays(shiftDays(latestStart, lag), length(source))
+            : link.type === 'e2e'
+              ? shiftDays(finish, lag)
+              : shiftDays(shiftDays(finish, lag), length(source));
+      latestFinish.set(link.source, Math.min(latestFinish.get(link.source) as number, bound));
+      const left = (remaining.get(link.source) as number) - 1;
+      remaining.set(link.source, left);
+      if (left === 0) ready.push(link.source);
+    }
+  }
+
+  const tightIn = new Set<string>();
+  for (const link of usable) {
+    const source = nodes.get(link.source) as SchedTask;
+    const target = nodes.get(link.target) as SchedTask;
+    const bound = constraintBound(link, source);
+    if ((bound.side === 'start' ? target.start : target.end) === bound.min) tightIn.add(link.target);
+  }
+
+  const critical = new Set<string>();
+  for (const id of settled) {
+    const task = nodes.get(id) as SchedTask;
+    const linked = (outgoing.get(id) || []).length + (incoming.get(id) || []).length > 0;
+    const slack = daysBetween(task.end, latestFinish.get(id) as number);
+    if (linked && slack <= 0 && (!(incoming.get(id) || []).length || tightIn.has(id))) critical.add(id);
+  }
+  return critical;
+}

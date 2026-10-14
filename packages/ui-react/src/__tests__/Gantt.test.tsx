@@ -231,4 +231,20 @@ describe('Gantt wrapper', () => {
     expect(el.hasAttribute('schedule')).toBe(false);
     expect(el.shadowRoot!.querySelectorAll('.link-hit.violated').length).toBe(1);
   });
+
+  it('passes criticalPath through', async () => {
+    const chain = [
+      { id: 'a', label: 'A', start: '2026-03-02', end: '2026-03-06' },
+      { id: 'b', label: 'B', start: '2026-03-06', end: '2026-03-10' },
+    ];
+    const { container, rerender } = render(<Gantt tasks={chain} links={[{ source: 'a', target: 'b' }]} criticalPath />);
+    await Promise.resolve();
+    const el = container.querySelector('ui-gantt') as HTMLElement;
+    expect(el.hasAttribute('critical-path')).toBe(true);
+    expect(el.shadowRoot!.querySelectorAll('.bar.critical').length).toBe(2);
+
+    rerender(<Gantt tasks={chain} links={[{ source: 'a', target: 'b' }]} />);
+    await Promise.resolve();
+    expect(el.shadowRoot!.querySelectorAll('.bar.critical').length).toBe(0);
+  });
 });

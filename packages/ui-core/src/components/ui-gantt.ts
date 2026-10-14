@@ -1,5 +1,5 @@
 import { ElementBase } from '../ElementBase';
-import { daysBetween, descendantsOf, pushSuccessors, rollUp, shiftDays, violatedLinks, type SchedLink, type SchedTask } from './gantt-schedule';
+import { criticalPath, daysBetween, descendantsOf, pushSuccessors, rollUp, shiftDays, violatedLinks, type SchedLink, type SchedTask } from './gantt-schedule';
 
 type GanttTone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 type GanttTaskType = 'task' | 'summary' | 'milestone';
@@ -1773,6 +1773,12 @@ function applyRollUp(tasks: GanttTask[]): GanttTask[] {
   });
 }
 
+/** `critical-path`: mark the tasks with no slack on a tight chain of links as critical (a `critical: true` you set stays). */
+function applyCriticalPath(tasks: GanttTask[], links: GanttLink[]): GanttTask[] {
+  const ids = criticalPath(tasks.map(toSched).filter((task): task is SchedTask => task != null), links.map(toSchedLink));
+  return ids.size ? tasks.map((task) => (ids.has(task.id) && !task.critical ? { ...task, critical: true } : task)) : tasks;
+}
+
 function readJsonArray(raw: string | null): Array<Record<string, unknown>> {
   if (!raw) return [];
   try {
@@ -1897,7 +1903,7 @@ function routeDependencyPath(
 
 export class UIGantt extends ElementBase {
   static get observedAttributes() {
-    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width', 'fill', 'max-height', 'snap', 'creatable', 'auto-summary', 'cascade', 'schedule'];
+    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width', 'fill', 'max-height', 'snap', 'creatable', 'auto-summary', 'cascade', 'schedule', 'critical-path'];
   }
 
   private focusRequest: FocusSnapshot | null = null;
@@ -1938,6 +1944,7 @@ export class UIGantt extends ElementBase {
   private taskCacheRaw: string | null = null;
   private taskCacheVersion = -1;
   private taskCacheAuto = false;
+  private taskCacheCritical: string | null = null;
   private taskCache: GanttTask[] = [];
   private linkCacheRaw: string | null = null;
   private linkCache: GanttLink[] = [];
@@ -3190,12 +3197,16 @@ export class UIGantt extends ElementBase {
   private getTasks(): GanttTask[] {
     const raw = this.getAttribute('tasks');
     const auto = this.hasAttribute('auto-summary');
-    if (raw === this.taskCacheRaw && this.taskCacheVersion === this.overridesVersion && auto === this.taskCacheAuto) return this.taskCache;
+    // with critical-path the links are an input too, so their text is part of what the cache stands for
+    const critical = this.hasAttribute('critical-path') ? this.getAttribute('links') ?? '' : null;
+    if (raw === this.taskCacheRaw && this.taskCacheVersion === this.overridesVersion && auto === this.taskCacheAuto && critical === this.taskCacheCritical) return this.taskCache;
     this.taskCacheRaw = raw;
     this.taskCacheVersion = this.overridesVersion;
     this.taskCacheAuto = auto;
+    this.taskCacheCritical = critical;
     this.taskCache = parseTasks(raw, this.overrides);
     if (auto) this.taskCache = applyRollUp(this.taskCache);
+    if (critical !== null) this.taskCache = applyCriticalPath(this.taskCache, parseLinks(critical));
     this.seedCollapsed(this.taskCache);
     this.visibleCacheKey = '';
     return this.taskCache;

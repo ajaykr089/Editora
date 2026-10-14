@@ -262,6 +262,8 @@ and resize, and a toolbar for zoom, filter and sort. Give it `tasks` and `links`
 - Dependencies: a link may carry a `lag` (days) and its `type` says what it ties (`e2s`, `s2s`, `e2e`, `s2e`). A link whose target is too early is drawn red and
   dashed; `schedule="auto"` also pushes the tasks that follow a task you move (later only, keeping their length, down the chain, as one change you can
   refuse in `beforetaskchange`); `schedule="off"` turns both off.
+- `critical-path` computes the critical path from the links (no slack on a chain that is tight all the way) and draws those bars as critical, on top of any
+  task you flag `critical`.
 - Parents: `auto-summary` makes a parent span its children and take their progress (weighted by length) when it has none; `cascade` lets you move a parent
   and everything under it together (`beforetaskchange` lists the tasks it moves in `affected`, `taskchange` fires for each).
 - Editing in place: double-click a task's name (or press F2 on a row or a bar) to rename it; Enter or leaving the field keeps it and fires `taskrename`
