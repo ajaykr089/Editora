@@ -56,6 +56,11 @@ type DragState = {
   selectedChanged: boolean;
 };
 
+type FocusSnapshot = {
+  selector: string;
+  selection?: [number | null, number | null, 'forward' | 'backward' | 'none' | null];
+};
+
 const DAY = 24 * 60 * 60 * 1000;
 const ROW_HEIGHT = 42;
 const HEADER_HEIGHT = 62;
@@ -941,6 +946,21 @@ function createTicks(min: number, max: number, dayWidth: number, zoom: GanttZoom
   return parts.join('');
 }
 
+/** `CSS.escape` where it exists (it does not in jsdom); otherwise escape what would end a quoted attribute value. */
+function cssEscape(value: string): string {
+  if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') return CSS.escape(value);
+  return value.replace(/["\\]/g, '\\$&');
+}
+
+/** A selector that finds the same control again after a re-render, or null for anything not worth restoring. */
+function focusSelectorFor(el: HTMLElement): string | null {
+  if (el.classList.contains('control')) return '.control';
+  if (el.classList.contains('select')) return '.select';
+  if (el.classList.contains('zoom-button') && el.dataset.zoom) return `.zoom-button[data-zoom="${cssEscape(el.dataset.zoom)}"]`;
+  if (el.classList.contains('head-button') && el.dataset.sort) return `.head-button[data-sort="${cssEscape(el.dataset.sort)}"]`;
+  return null;
+}
+
 function taskKind(task: VisibleTask): GanttTaskType {
   if (task.type === 'summary' || task.hasChildren) return 'summary';
   if (task.type === 'milestone' || task.startMs === task.endMs) return 'milestone';
@@ -1181,6 +1201,7 @@ export class UIGantt extends ElementBase {
     const todayX = xForDate(today);
     const todayMarkup = showToday && today >= min && today <= max ? `<div class="today" part="today" style="left:${todayX.toFixed(2)}px"></div>` : '';
 
+    const focusSnapshot = this.captureFocus();
     this.setContent(`
       <style>${style}</style>
       <section class="frame" part="frame" data-bar-variant="${barVariant}">
@@ -1240,6 +1261,38 @@ export class UIGantt extends ElementBase {
       this.viewportHeight = viewport.clientHeight || this.viewportHeight;
     }
     this.bindEvents();
+    this.restoreFocus(focusSnapshot);
+  }
+
+  /**
+   * Every render replaces the whole shadow tree, which drops focus. Remember which control had it so
+   * the replacement can take it back (and the caret, for the filter box); without this the filter
+   * accepts one character per click.
+   */
+  private captureFocus(): FocusSnapshot | null {
+    const active = this.root.activeElement as HTMLElement | null;
+    if (!active) return null;
+    const selector = focusSelectorFor(active);
+    if (!selector) return null;
+    const snapshot: FocusSnapshot = { selector };
+    if (active instanceof HTMLInputElement) {
+      snapshot.selection = [active.selectionStart, active.selectionEnd, active.selectionDirection];
+    }
+    return snapshot;
+  }
+
+  private restoreFocus(snapshot: FocusSnapshot | null): void {
+    if (!snapshot) return;
+    const next = this.root.querySelector<HTMLElement>(snapshot.selector);
+    if (!next || this.root.activeElement === next) return;
+    next.focus({ preventScroll: true });
+    if (snapshot.selection && next instanceof HTMLInputElement) {
+      try {
+        next.setSelectionRange(snapshot.selection[0], snapshot.selection[1], snapshot.selection[2] ?? undefined);
+      } catch {
+        // an input type without a selection range
+      }
+    }
   }
 
   private bindEvents(): void {
