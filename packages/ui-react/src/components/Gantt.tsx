@@ -146,6 +146,10 @@ export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   weekStart?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   /** The task list's columns, in order. The name column is always first. Default: name, owner, dates, progress. */
   columns?: GanttColumn[];
+  /** A parent's dates follow its children (the earliest start to the latest end), and so does its progress when it has none of its own. */
+  autoSummary?: boolean;
+  /** Moving a parent moves everything under it by the same days (a read-only task stays put). Makes parent bars draggable. */
+  cascade?: boolean;
   /** Show a "+ Add task" button and let a double-click on empty timeline space ask for a task (`onTaskCreate`). Off in a `readonly` chart. */
   creatable?: boolean;
   /** How far a drag snaps: to whole `'day'`s (the default), `'week'`s or `'month'`s. Arrow keys still move a day at a time. */
@@ -229,6 +233,8 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     initialScroll,
     snap,
     creatable,
+    autoSummary,
+    cascade,
     children,
     onTaskChange,
     onTaskSelect,
@@ -294,10 +300,12 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     syncAttr('grid-width', gridWidth != null && gridWidth > 0 ? String(gridWidth) : null);
     syncBool('fill', fill);
     syncBool('creatable', creatable);
+    syncBool('auto-summary', autoSummary);
+    syncBool('cascade', cascade);
     syncAttr('snap', snap && snap !== 'day' ? snap : null);
     syncAttr('initial-scroll', initialScroll && initialScroll !== 'today' ? initialScroll : null);
     syncAttr('max-height', maxHeight == null || maxHeight === '' ? null : typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight);
-  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight, initialScroll, snap, creatable]);
+  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight, initialScroll, snap, creatable, autoSummary, cascade]);
 
   useEffect(() => {
     const el = ref.current;

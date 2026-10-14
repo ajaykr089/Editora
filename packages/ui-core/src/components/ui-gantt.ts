@@ -1,4 +1,5 @@
 import { ElementBase } from '../ElementBase';
+import { daysBetween, descendantsOf, rollUp, shiftDays, type SchedTask } from './gantt-schedule';
 
 type GanttTone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 type GanttTaskType = 'task' | 'summary' | 'milestone';
@@ -1729,6 +1730,23 @@ function parseCssLength(raw: string | null): string | null {
   return value === 'none' || /^\d*\.?\d+(px|em|rem|vh|dvh|svh|lvh|vw|%|ch)$/.test(value) ? value : null;
 }
 
+function toSched(task: GanttTask): SchedTask | null {
+  const start = parseDate(task.start);
+  const end = parseDate(task.end);
+  if (start == null || end == null) return null;
+  return { id: task.id, start, end, parent: task.parent, type: task.type, readonly: task.readonly, progress: task.progress };
+}
+
+/** `auto-summary`: a parent's dates (and its progress, when it has none of its own) follow its children. */
+function applyRollUp(tasks: GanttTask[]): GanttTask[] {
+  const rolled = rollUp(tasks.map(toSched).filter((task): task is SchedTask => task != null));
+  return tasks.map((task) => {
+    const value = rolled.get(task.id);
+    if (!value) return task;
+    return { ...task, start: formatIso(value.start), end: formatIso(value.end), progress: task.progress ?? value.progress };
+  });
+}
+
 function readJsonArray(raw: string | null): Array<Record<string, unknown>> {
   if (!raw) return [];
   try {
@@ -1853,7 +1871,7 @@ function routeDependencyPath(
 
 export class UIGantt extends ElementBase {
   static get observedAttributes() {
-    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width', 'fill', 'max-height', 'snap', 'creatable'];
+    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width', 'fill', 'max-height', 'snap', 'creatable', 'auto-summary', 'cascade'];
   }
 
   private focusRequest: FocusSnapshot | null = null;
@@ -1893,6 +1911,7 @@ export class UIGantt extends ElementBase {
   private overridesVersion = 0;
   private taskCacheRaw: string | null = null;
   private taskCacheVersion = -1;
+  private taskCacheAuto = false;
   private taskCache: GanttTask[] = [];
   private linkCacheRaw: string | null = null;
   private linkCache: GanttLink[] = [];
@@ -1978,6 +1997,7 @@ export class UIGantt extends ElementBase {
     const visible = this.getVisibleTasks(tasks, filterText, sort);
     const readonly = this.hasAttribute('readonly');
     const creatable = this.hasAttribute('creatable') && !readonly;
+    const cascade = this.hasAttribute('cascade');
     const showToolbar = this.getAttribute('show-toolbar') !== 'false';
     const showToday = this.getAttribute('show-today') !== 'false';
 
@@ -2085,7 +2105,7 @@ export class UIGantt extends ElementBase {
       const right = xForDate(kind === 'milestone' ? task.startMs : task.endMs);
       const width = kind === 'milestone' ? MILESTONE_SIZE : Math.max(12, right - left);
       const progress = Math.max(0, Math.min(100, Number(task.progress ?? 0)));
-      const canEdit = !readonly && !task.readonly && kind !== 'summary';
+      const canEdit = !readonly && !task.readonly && (kind !== 'summary' || cascade);
       const showHandles = canEdit && kind === 'task';
       const splitSegments = kind === 'task' && task.segments?.length
         ? renderSegments(task, progress)
@@ -2555,10 +2575,27 @@ export class UIGantt extends ElementBase {
       return;
     }
     const changed = this.applyChanges(
-      [{ id: drag.taskId, start: drag.latestStart, end: drag.latestEnd, previousStart: drag.originalStart, previousEnd: drag.originalEnd }],
+      this.withCascade({ id: drag.taskId, start: drag.latestStart, end: drag.latestEnd, previousStart: drag.originalStart, previousEnd: drag.originalEnd }),
       drag.mode === 'move' ? 'drag' : 'resize'
     );
     if (!changed) putBack();
+  }
+
+  /**
+   * With `cascade`, moving a parent moves everything under it by the same number of days (a read-only task stays
+   * put). Anything else is the one change.
+   */
+  private withCascade(change: TaskChange): TaskChange[] {
+    if (!this.hasAttribute('cascade')) return [change];
+    const delta = daysBetween(change.previousStart, change.start);
+    if (delta === 0 || change.end - change.start !== change.previousEnd - change.previousStart) return [change];
+    const tasks = this.getTasks();
+    const below = descendantsOf(tasks.map(toSched).filter((task): task is SchedTask => task != null), change.id);
+    if (!below.length) return [change];
+    const moved = below
+      .filter((task) => !task.readonly)
+      .map((task) => ({ id: task.id, start: shiftDays(task.start, delta), end: shiftDays(task.end, delta), previousStart: task.start, previousEnd: task.end }));
+    return [change, ...moved];
   }
 
   /**
@@ -2636,13 +2673,14 @@ export class UIGantt extends ElementBase {
     event.preventDefault();
     const direction = event.key === 'ArrowLeft' ? -1 : 1;
     const isMilestone = bar.dataset.kind === 'milestone';
-    const nextStart = event.shiftKey && !isMilestone ? start : addDays(start, direction);
+    const resizes = event.shiftKey && !isMilestone && bar.dataset.kind !== 'summary';
+    const nextStart = resizes ? start : addDays(start, direction);
     const nextEnd = isMilestone
       ? nextStart
-      : event.shiftKey
+      : resizes
         ? Math.max(addDays(end, direction), addDays(start, 1))
         : addDays(end, direction);
-    this.applyChanges([{ id: taskId, start: nextStart, end: nextEnd, previousStart: start, previousEnd: end }], 'keyboard');
+    this.applyChanges(this.withCascade({ id: taskId, start: nextStart, end: nextEnd, previousStart: start, previousEnd: end }), 'keyboard');
   }
 
   /**
@@ -3098,10 +3136,13 @@ export class UIGantt extends ElementBase {
 
   private getTasks(): GanttTask[] {
     const raw = this.getAttribute('tasks');
-    if (raw === this.taskCacheRaw && this.taskCacheVersion === this.overridesVersion) return this.taskCache;
+    const auto = this.hasAttribute('auto-summary');
+    if (raw === this.taskCacheRaw && this.taskCacheVersion === this.overridesVersion && auto === this.taskCacheAuto) return this.taskCache;
     this.taskCacheRaw = raw;
     this.taskCacheVersion = this.overridesVersion;
+    this.taskCacheAuto = auto;
     this.taskCache = parseTasks(raw, this.overrides);
+    if (auto) this.taskCache = applyRollUp(this.taskCache);
     this.seedCollapsed(this.taskCache);
     this.visibleCacheKey = '';
     return this.taskCache;
@@ -3156,6 +3197,7 @@ export class UIGantt extends ElementBase {
       if (this.selectedId != null && !nextIds.has(this.selectedId)) this.selectedId = null;
     }
     if (name === 'links') this.linkCacheRaw = null;
+    if (name === 'auto-summary' || name === 'cascade') this.bumpOverrides();
     return true;
   }
 }

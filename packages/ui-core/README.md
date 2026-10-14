@@ -259,6 +259,8 @@ and resize, and a toolbar for zoom, filter and sort. Give it `tasks` and `links`
 - `bar-variant`: `solid`, `soft`, `striped`, `outline` or `glass`.
 - Choose the task list's columns with `columns` (`["label", "start", "end", "duration", "progress"]`, or objects with a `label` and a
   `width`) and size it with `grid-width`; a splitter on its edge resizes it (mouse, touch, or the arrow keys) and fires `gridresize`.
+- Parents: `auto-summary` makes a parent span its children and take their progress (weighted by length) when it has none; `cascade` lets you move a parent
+  and everything under it together (`beforetaskchange` lists the tasks it moves in `affected`, `taskchange` fires for each).
 - Editing in place: double-click a task's name (or press F2 on a row or a bar) to rename it; Enter or leaving the field keeps it and fires `taskrename`
   (cancelable), Escape drops it. With `creatable` there is a **+ Add task** button, and a double-click on empty timeline space does the same for that
   day: the chart fires `taskcreate` with the dates and the neighbour and your code adds the task. Nothing is written to your data by the chart.

@@ -196,4 +196,17 @@ describe('Gantt wrapper', () => {
     await Promise.resolve();
     expect(el.hasAttribute('creatable')).toBe(false);
   });
+
+  it('passes autoSummary and cascade through', async () => {
+    const { container, rerender } = render(<Gantt tasks={tasks} autoSummary cascade />);
+    await Promise.resolve();
+    const el = container.querySelector('ui-gantt') as HTMLElement;
+    expect(el.hasAttribute('auto-summary')).toBe(true);
+    expect(el.hasAttribute('cascade')).toBe(true);
+
+    rerender(<Gantt tasks={tasks} />);
+    await Promise.resolve();
+    expect(el.hasAttribute('auto-summary')).toBe(false);
+    expect(el.hasAttribute('cascade')).toBe(false);
+  });
 });
