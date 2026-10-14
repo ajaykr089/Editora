@@ -1542,9 +1542,10 @@ export class UIGantt extends ElementBase {
     super.connectedCallback();
     if (typeof ResizeObserver === 'undefined' || this.resizeObserver) return;
     this.resizeObserver = new ResizeObserver((entries) => {
-      const width = Math.round(entries[entries.length - 1]?.contentRect.width ?? 0);
-      if (width === this.hostWidth) return;
-      this.hostWidth = width;
+      const width = entries[entries.length - 1]?.contentRect.width ?? 0;
+      // clientWidth is a whole number and the observer's width is not: a host 540.4px wide must not look resized.
+      if (Math.abs(width - this.hostWidth) < 1) return;
+      this.hostWidth = Math.round(width);
       this.captureViewport();
       this.requestRender();
     });
@@ -1710,6 +1711,9 @@ export class UIGantt extends ElementBase {
 
     const focusSnapshot = this.focusRequest ?? this.captureFocus();
     this.focusRequest = null;
+    // setContent leaves the tree alone when the markup is identical, and then the listeners from the last render
+    // are still on it: binding them again would run every handler twice.
+    const previousFrame = this.root.querySelector('.frame');
     this.setContent(`
       <style>${style}</style>
       <section class="frame" part="frame" data-bar-variant="${barVariant}">
@@ -1776,7 +1780,7 @@ export class UIGantt extends ElementBase {
         if (fitting) this.requestRender();
       }
     }
-    this.bindEvents();
+    if (this.root.querySelector('.frame') !== previousFrame) this.bindEvents();
     this.restoreFocus(focusSnapshot);
   }
 
