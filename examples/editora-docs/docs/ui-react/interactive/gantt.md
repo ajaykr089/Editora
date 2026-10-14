@@ -92,6 +92,7 @@ render(<Example />);
 | `weekStart` | `0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6` | First day of the week in the time header (0 is Sunday). Defaults to the locale's. |
 | `columns` | `GanttColumn[]` | The task list's columns, in order: `'label'` (always first), `'assignee'`, `'dates'`, `'start'`, `'end'`, `'duration'`, `'progress'`. Use `{ key, label, width }` to set a header text and a width in px. Unknown keys are dropped; the default is name, owner, dates, progress. At phone width only the name column is shown. |
 | `gridWidth` | `number` | Width of the task list in px (at least the other columns plus 96px for the name). A splitter on its edge resizes it with the mouse, touch or the arrow keys (Shift for bigger steps, Home and End for the extremes). |
+| `snap` | `'day' \| 'week' \| 'month'` | How far a drag snaps: to whole days (the default), to the nearest week start (see `weekStart`) or to the nearest 1st of a month. Arrow keys always move a day. |
 | `initialScroll` | `'today' \| 'start'` | Where the chart opens. `'today'` (the default) scrolls today to the middle when it is not on the first screen; `'start'` leaves it at the start. |
 | `fill` | `boolean` | The chart fills the height of its container, which needs a height of its own (a fixed height, a flex or grid cell): the toolbar keeps its height and the rows scroll in the rest. |
 | `maxHeight` | `number \| string` | Cap on the chart's height when it is not `fill`: a number is px, or a plain CSS length (`'60vh'`, `'30rem'`, `'none'`). Default 620px. |
@@ -106,7 +107,8 @@ render(<Example />);
 
 ## Events
 
-- `onTaskChange(detail)`: fired after drag or resize with the changed task id and new dates.
+- `onBeforeTaskChange(detail, event)`: fired before a drag, resize or key changes dates, with the new and previous dates and the `source` (`'drag'`, `'resize'`, `'keyboard'`). Call `event.preventDefault()` to refuse it: the bar goes back and `onTaskChange` does not fire.
+- `onTaskChange(detail)`: fired after drag or resize with the changed task id and new dates. While a bar is dragged near the left or right edge of the timeline the chart scrolls; Escape cancels the drag.
 - `onTaskSelect(detail)`: fired when a task row or bar is selected.
 - `onTaskDelete(detail)`: fired from keyboard delete/backspace on the selected task.
 - `onLinkSelect(detail)`: fired when a dependency connector is selected.

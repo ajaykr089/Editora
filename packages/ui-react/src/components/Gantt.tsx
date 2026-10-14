@@ -44,6 +44,18 @@ export type GanttTaskChangeDetail = {
   end?: string;
 };
 
+export type GanttBeforeTaskChangeDetail = {
+  id: string;
+  start: string;
+  end: string;
+  previousStart: string;
+  previousEnd: string;
+  /** What moved it: a drag of the bar, a resize from a handle, or the keyboard. */
+  source: 'drag' | 'resize' | 'keyboard';
+  /** Other tasks the same change moves (empty unless cascade or scheduling is on). */
+  affected: Array<{ id: string; start: string; end: string; previousStart: string; previousEnd: string }>;
+};
+
 export type GanttLinkSelectDetail = {
   id: string;
   source: string;
@@ -127,6 +139,8 @@ export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   weekStart?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   /** The task list's columns, in order. The name column is always first. Default: name, owner, dates, progress. */
   columns?: GanttColumn[];
+  /** How far a drag snaps: to whole `'day'`s (the default), `'week'`s or `'month'`s. Arrow keys still move a day at a time. */
+  snap?: 'day' | 'week' | 'month';
   /** Where the chart opens: on `'today'` (the default, when today is not on the first screen) or at the `'start'`. */
   initialScroll?: 'today' | 'start';
   /** Fill the height of the container (which must have one): the toolbar keeps its height and the chart scrolls inside the rest. */
@@ -139,6 +153,8 @@ export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   labels?: Partial<GanttLabels>;
   /** BCP 47 locale for dates (month names, date formats, the week's first day). Defaults to the browser's. */
   locale?: string;
+  /** Fired before a drag, resize or key changes dates. Call `event.preventDefault()` to refuse the change: nothing moves and `onTaskChange` does not fire. */
+  onBeforeTaskChange?: (detail: GanttBeforeTaskChangeDetail, event: CustomEvent<GanttBeforeTaskChangeDetail>) => void;
   onTaskToggle?: (detail: { id: string; open: boolean }, event: CustomEvent<{ id: string; open: boolean }>) => void;
   onGridResize?: (detail: { width: number }, event: CustomEvent<{ width: number }>) => void;
   onTaskChange?: (detail: GanttTaskChangeDetail, event: CustomEvent<GanttTaskChangeDetail>) => void;
@@ -198,6 +214,7 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     fill,
     maxHeight,
     initialScroll,
+    snap,
     children,
     onTaskChange,
     onTaskSelect,
@@ -208,6 +225,7 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     onSortChange,
     onGridResize,
     onTaskToggle,
+    onBeforeTaskChange,
     ...rest
   },
   forwardedRef
@@ -259,9 +277,10 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     syncAttr('columns', columns?.length ? JSON.stringify(columns) : null);
     syncAttr('grid-width', gridWidth != null && gridWidth > 0 ? String(gridWidth) : null);
     syncBool('fill', fill);
+    syncAttr('snap', snap && snap !== 'day' ? snap : null);
     syncAttr('initial-scroll', initialScroll && initialScroll !== 'today' ? initialScroll : null);
     syncAttr('max-height', maxHeight == null || maxHeight === '' ? null : typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight);
-  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight, initialScroll]);
+  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight, initialScroll, snap]);
 
   useEffect(() => {
     const el = ref.current;
@@ -286,8 +305,11 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     el.addEventListener('sortchange', handleSortChange);
     const handleTaskToggle = (event: Event) => onTaskToggle?.((event as CustomEvent<{ id: string; open: boolean }>).detail, event as CustomEvent<{ id: string; open: boolean }>);
     el.addEventListener('gridresize', handleGridResize);
+    const handleBeforeTaskChange = (event: Event) => onBeforeTaskChange?.((event as CustomEvent<GanttBeforeTaskChangeDetail>).detail, event as CustomEvent<GanttBeforeTaskChangeDetail>);
     el.addEventListener('tasktoggle', handleTaskToggle);
+    el.addEventListener('beforetaskchange', handleBeforeTaskChange);
     return () => {
+      el.removeEventListener('beforetaskchange', handleBeforeTaskChange);
       el.removeEventListener('tasktoggle', handleTaskToggle);
       el.removeEventListener('gridresize', handleGridResize);
       el.removeEventListener('taskchange', handleTaskChange);
@@ -298,7 +320,7 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
       el.removeEventListener('filterchange', handleFilterChange);
       el.removeEventListener('sortchange', handleSortChange);
     };
-  }, [onTaskChange, onTaskSelect, onTaskDelete, onLinkSelect, onZoomChange, onFilterChange, onSortChange, onGridResize, onTaskToggle]);
+  }, [onTaskChange, onTaskSelect, onTaskDelete, onLinkSelect, onZoomChange, onFilterChange, onSortChange, onGridResize, onTaskToggle, onBeforeTaskChange]);
 
   return createUIElement('ui-gantt', { ref, ...rest }, children);
 });

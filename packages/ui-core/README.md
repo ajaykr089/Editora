@@ -259,6 +259,9 @@ and resize, and a toolbar for zoom, filter and sort. Give it `tasks` and `links`
 - `bar-variant`: `solid`, `soft`, `striped`, `outline` or `glass`.
 - Choose the task list's columns with `columns` (`["label", "start", "end", "duration", "progress"]`, or objects with a `label` and a
   `width`) and size it with `grid-width`; a splitter on its edge resizes it (mouse, touch, or the arrow keys) and fires `gridresize`.
+- Dragging: a bar can be dragged, resized from its ends, or moved with the arrow keys (Shift extends the end). The chart scrolls when a drag is held
+  near the left or right edge, Escape cancels it, and `snap="week"` or `snap="month"` snaps it to whole weeks or months. `beforetaskchange`
+  (cancelable) fires before the dates change, so a host can refuse the change with `event.preventDefault()`; `taskchange` fires after.
 - The chart opens on today when it is off the first screen (`initial-scroll="start"` keeps the start), the toolbar has a Today button, and the
   element has methods: `scrollToDate(date)`, `scrollToTask(id)`, `toggleTask(id, open?)`, `expandAll()` and `collapseAll()`. `tasks` and `links` are also
   properties that take arrays (with `Date`s if you like), and opening or closing a branch fires `tasktoggle`.

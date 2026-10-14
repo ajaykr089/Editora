@@ -45,6 +45,9 @@ type DragState = {
   taskId: string;
   mode: 'move' | 'resize-start' | 'resize-end';
   startX: number;
+  /** The scroll position at the start, so a drag that scrolls the chart keeps counting from where it began. */
+  startScroll: number;
+  lastClientX: number;
   originalStart: number;
   originalEnd: number;
   kind: GanttTaskType;
@@ -53,10 +56,19 @@ type DragState = {
   latestStart: number;
   latestEnd: number;
   frame: number | null;
+  scrollFrame: number | null;
   bar: HTMLElement;
+  /** The bar's inline position before the drag, to put it back when the drag is cancelled. */
+  originalLeft: string;
+  originalWidth: string;
   moved: boolean;
   selectedChanged: boolean;
+  onKey: (event: KeyboardEvent) => void;
 };
+
+type ChangeSource = 'drag' | 'resize' | 'keyboard';
+
+type TaskChange = { id: string; start: number; end: number; previousStart: number; previousEnd: number };
 
 type FocusSnapshot = {
   selector: string;
@@ -1798,7 +1810,7 @@ function routeDependencyPath(
 
 export class UIGantt extends ElementBase {
   static get observedAttributes() {
-    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width', 'fill', 'max-height'];
+    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width', 'fill', 'max-height', 'snap'];
   }
 
   private focusRequest: FocusSnapshot | null = null;
@@ -2260,7 +2272,8 @@ export class UIGantt extends ElementBase {
       const shouldRenderX = Math.abs(left - this.viewportLeft) >= Math.max(480, this.viewportWidth * 0.6);
       this.viewportTop = top;
       this.viewportLeft = left;
-      if (!shouldRenderRows && !shouldRenderX) return;
+      // A render would replace the bar that is being dragged, so it waits for the drop.
+      if (this.drag || (!shouldRenderRows && !shouldRenderX)) return;
       if (this.scrollFrame != null) return;
       this.scrollFrame = window.setTimeout(() => {
         this.scrollFrame = null;
@@ -2305,113 +2318,216 @@ export class UIGantt extends ElementBase {
 
     if (this.hasAttribute('readonly')) return;
     this.root.querySelectorAll<HTMLElement>('.bar[data-draggable="true"]').forEach((bar) => {
-      bar.addEventListener('pointerdown', (event) => {
-        if (event.button !== 0) return;
-        const taskId = bar.dataset.taskId;
-        if (!taskId) return;
-        const tasks = this.getTasks();
-        const task = tasks.find((item) => item.id === taskId);
-        const originalStart = parseDate(task?.start);
-        const originalEnd = parseDate(task?.end);
-        if (!task || originalStart == null || originalEnd == null) return;
-        event.preventDefault();
-        const kind = (bar.dataset.kind as GanttTaskType) || 'task';
-        const requestedMode = ((event.target as HTMLElement).dataset.mode as DragState['mode']) || 'move';
-        const mode = kind === 'milestone' ? 'move' : requestedMode;
-        const selectedChanged = this.selectedId !== taskId;
-        this.selectedId = taskId;
-        this.dispatchEvent(new CustomEvent('taskselect', { detail: { id: taskId }, bubbles: true, composed: true }));
-        this.drag = {
-          taskId,
-          mode,
-          startX: event.clientX,
-          originalStart,
-          originalEnd,
-          kind,
-          rangeMin: this.rangeMin(),
-          dayWidth: this.dayWidthNow,
-          latestStart: originalStart,
-          latestEnd: originalEnd,
-          frame: null,
-          bar,
-          moved: false,
-          selectedChanged
-        };
-        bar.classList.add('dragging');
-        bar.setPointerCapture(event.pointerId);
-      });
-
+      bar.addEventListener('pointerdown', (event) => this.startDrag(bar, event));
       bar.addEventListener('pointermove', (event) => {
-        if (!this.drag || this.drag.taskId !== bar.dataset.taskId) return;
+        if (!this.drag || this.drag.bar !== bar) return;
         event.preventDefault();
-        const dx = event.clientX - this.drag.startX;
-        if (Math.abs(dx) > 2) this.drag.moved = true;
-        let start = this.drag.originalStart;
-        let end = this.drag.originalEnd;
-        if (this.drag.mode === 'move') {
-          const deltaDays = Math.round(dx / this.drag.dayWidth);
-          start = addDays(this.drag.originalStart, deltaDays);
-          end = this.drag.kind === 'milestone' ? start : addDays(this.drag.originalEnd, deltaDays);
-        } else if (this.drag.mode === 'resize-start') {
-          const deltaDays = Math.round(dx / this.drag.dayWidth);
-          start = Math.min(addDays(this.drag.originalStart, deltaDays), addDays(end, -1));
-        } else {
-          const deltaDays = Math.round(dx / this.drag.dayWidth);
-          end = Math.max(addDays(this.drag.originalEnd, deltaDays), addDays(start, 1));
-        }
-        this.drag.latestStart = start;
-        this.drag.latestEnd = end;
-        if (this.drag.frame == null) {
-          this.drag.frame = requestAnimationFrame(() => {
-            if (!this.drag) return;
-            this.drag.frame = null;
-            const left = ((this.drag.latestStart - this.drag.rangeMin) / DAY) * this.drag.dayWidth - (this.drag.kind === 'milestone' ? MILESTONE_SIZE / 2 : 0);
-            const width = this.drag.kind === 'milestone' ? MILESTONE_SIZE : Math.max(12, ((this.drag.latestEnd - this.drag.latestStart) / DAY) * this.drag.dayWidth);
-            this.drag.bar.style.left = `${left.toFixed(2)}px`;
-            this.drag.bar.style.width = `${width.toFixed(2)}px`;
-            // The dates move with the bar, in the shared tooltip: a tip inside the bar would be clipped by it.
-            activeLocale = this.getAttribute('locale') || undefined;
-            const format = dateFormat({ dateStyle: 'medium' });
-            const text = this.labelSet();
-            this.showTip(
-              this.drag.bar,
-              this.drag.kind === 'milestone'
-                ? format.format(new Date(this.drag.latestStart))
-                : `${format.format(new Date(this.drag.latestStart))} ${text.to} ${format.format(new Date(this.drag.latestEnd))}`
-            );
-          });
-        }
+        this.drag.lastClientX = event.clientX;
+        this.updateDrag();
       });
-
-      const finishDrag = () => {
-        if (!this.drag) return;
-        if (this.drag.frame != null) cancelAnimationFrame(this.drag.frame);
-        const drag = this.drag;
-        drag.bar.classList.remove('dragging');
-        this.drag = null;
-        this.hideTip();
-        if (!drag.moved) {
-          if (drag.selectedChanged) this.requestRender();
-          return;
-        }
-        const detail = {
-          id: drag.taskId,
-          start: formatIso(drag.latestStart),
-          end: formatIso(drag.latestEnd)
-        };
-        this.overrides.set(drag.taskId, { start: detail.start, end: detail.end });
-        this.bumpOverrides();
-        this.dispatchEvent(new CustomEvent('taskchange', {
-          detail,
-          bubbles: true,
-          composed: true
-        }));
-        this.requestRender();
-      };
-
-      bar.addEventListener('pointerup', finishDrag);
-      bar.addEventListener('pointercancel', finishDrag);
+      bar.addEventListener('pointerup', () => this.endDrag(true));
+      // A cancelled pointer (a touch taken over by scrolling, say) is not a drop: nothing changes.
+      bar.addEventListener('pointercancel', () => this.endDrag(false));
     });
+  }
+
+  private snapUnit(): 'day' | 'week' | 'month' {
+    const value = this.getAttribute('snap');
+    return value === 'week' || value === 'month' ? value : 'day';
+  }
+
+  /** The nearest boundary of the snap unit (a week start, a 1st of the month), or the day itself. */
+  private snapDate(ms: number): number {
+    const unit = this.snapUnit();
+    if (unit === 'day') return ms;
+    const weekStart = normalizeWeekStart(this.getAttribute('week-start'));
+    const before = unitStart(ms, unit, weekStart);
+    const after = nextUnit(before, unit);
+    return ms - before < after - ms ? before : after;
+  }
+
+  private startDrag(bar: HTMLElement, event: PointerEvent): void {
+    if (event.button !== 0) return;
+    const taskId = bar.dataset.taskId;
+    if (!taskId) return;
+    const task = this.getTasks().find((item) => item.id === taskId);
+    const originalStart = parseDate(task?.start);
+    const originalEnd = parseDate(task?.end);
+    if (!task || originalStart == null || originalEnd == null) return;
+    event.preventDefault();
+    const kind = (bar.dataset.kind as GanttTaskType) || 'task';
+    const requestedMode = ((event.target as HTMLElement).dataset.mode as DragState['mode']) || 'move';
+    const mode = kind === 'milestone' ? 'move' : requestedMode;
+    const selectedChanged = this.selectedId !== taskId;
+    this.selectedId = taskId;
+    this.dispatchEvent(new CustomEvent('taskselect', { detail: { id: taskId }, bubbles: true, composed: true }));
+    const onKey = (keyEvent: KeyboardEvent) => {
+      if (keyEvent.key !== 'Escape') return;
+      keyEvent.preventDefault();
+      keyEvent.stopPropagation();
+      this.endDrag(false);
+    };
+    this.drag = {
+      taskId,
+      mode,
+      startX: event.clientX,
+      startScroll: this.root.querySelector<HTMLElement>('.viewport')?.scrollLeft ?? 0,
+      lastClientX: event.clientX,
+      originalStart,
+      originalEnd,
+      kind,
+      rangeMin: this.rangeMin(),
+      dayWidth: this.dayWidthNow,
+      latestStart: originalStart,
+      latestEnd: originalEnd,
+      frame: null,
+      scrollFrame: null,
+      bar,
+      originalLeft: bar.style.left,
+      originalWidth: bar.style.width,
+      moved: false,
+      selectedChanged,
+      onKey
+    };
+    window.addEventListener('keydown', onKey, true);
+    bar.classList.add('dragging');
+    bar.setPointerCapture(event.pointerId);
+    this.autoScrollLoop();
+  }
+
+  /** The dates the bar would take for the pointer's position, snapped, and a repaint of the bar and the tooltip. */
+  private updateDrag(): void {
+    const drag = this.drag;
+    if (!drag) return;
+    const viewport = this.root.querySelector<HTMLElement>('.viewport');
+    const dx = drag.lastClientX - drag.startX + (viewport ? viewport.scrollLeft - drag.startScroll : 0);
+    if (Math.abs(dx) > 2) drag.moved = true;
+    const deltaDays = Math.round(dx / drag.dayWidth);
+    let start = drag.originalStart;
+    let end = drag.originalEnd;
+    if (drag.mode === 'move') {
+      const shift = Math.round((this.snapDate(addDays(drag.originalStart, deltaDays)) - drag.originalStart) / DAY);
+      start = addDays(drag.originalStart, shift);
+      end = drag.kind === 'milestone' ? start : addDays(drag.originalEnd, shift);
+    } else if (drag.mode === 'resize-start') {
+      start = Math.min(this.snapDate(addDays(drag.originalStart, deltaDays)), addDays(end, -1));
+    } else {
+      end = Math.max(this.snapDate(addDays(drag.originalEnd, deltaDays)), addDays(start, 1));
+    }
+    drag.latestStart = start;
+    drag.latestEnd = end;
+    if (drag.frame != null) return;
+    drag.frame = requestAnimationFrame(() => {
+      const current = this.drag;
+      if (!current) return;
+      current.frame = null;
+      const left = ((current.latestStart - current.rangeMin) / DAY) * current.dayWidth - (current.kind === 'milestone' ? MILESTONE_SIZE / 2 : 0);
+      const width = current.kind === 'milestone' ? MILESTONE_SIZE : Math.max(12, ((current.latestEnd - current.latestStart) / DAY) * current.dayWidth);
+      current.bar.style.left = `${left.toFixed(2)}px`;
+      current.bar.style.width = `${width.toFixed(2)}px`;
+      // The dates move with the bar, in the shared tooltip: a tip inside the bar would be clipped by it.
+      activeLocale = this.getAttribute('locale') || undefined;
+      const format = dateFormat({ dateStyle: 'medium' });
+      const text = this.labelSet();
+      this.showTip(
+        current.bar,
+        current.kind === 'milestone'
+          ? format.format(new Date(current.latestStart))
+          : `${format.format(new Date(current.latestStart))} ${text.to} ${format.format(new Date(current.latestEnd))}`
+      );
+    });
+  }
+
+  /** While a drag is held near the left or right edge of the timeline the chart scrolls, faster the nearer the edge. */
+  private autoScrollLoop(): void {
+    const drag = this.drag;
+    if (!drag) return;
+    drag.scrollFrame = requestAnimationFrame(() => {
+      const current = this.drag;
+      if (!current) return;
+      const viewport = this.root.querySelector<HTMLElement>('.viewport');
+      if (viewport && viewport.clientWidth > 0 && current.moved) {
+        const box = viewport.getBoundingClientRect();
+        const zone = 56;
+        const left = Math.max(box.left, this.root.querySelector('.grid-body')?.getBoundingClientRect().right ?? box.left);
+        let speed = 0;
+        if (current.lastClientX > box.right - zone) speed = (current.lastClientX - (box.right - zone)) / zone;
+        else if (current.lastClientX < left + zone && viewport.scrollLeft > 0) speed = -(left + zone - current.lastClientX) / zone;
+        if (speed) {
+          viewport.scrollLeft += Math.max(-1.5, Math.min(1.5, speed)) * 16;
+          this.updateDrag();
+        }
+      }
+      this.autoScrollLoop();
+    });
+  }
+
+  /** Finish a drag: drop it (commit the new dates), or cancel it (the bar goes back where it was). */
+  private endDrag(commit: boolean): void {
+    const drag = this.drag;
+    if (!drag) return;
+    if (drag.frame != null) cancelAnimationFrame(drag.frame);
+    if (drag.scrollFrame != null) cancelAnimationFrame(drag.scrollFrame);
+    window.removeEventListener('keydown', drag.onKey, true);
+    drag.bar.classList.remove('dragging');
+    this.drag = null;
+    this.hideTip();
+    const putBack = () => {
+      drag.bar.style.left = drag.originalLeft;
+      drag.bar.style.width = drag.originalWidth;
+    };
+    if (!drag.moved) {
+      if (drag.selectedChanged) this.requestRender();
+      return;
+    }
+    if (!commit) {
+      putBack();
+      this.requestRender(); // the scroll renders that were held back during the drag
+      return;
+    }
+    if (drag.latestStart === drag.originalStart && drag.latestEnd === drag.originalEnd) {
+      putBack(); // dropped where it was picked up (or snapped back there)
+      return;
+    }
+    const changed = this.applyChanges(
+      [{ id: drag.taskId, start: drag.latestStart, end: drag.latestEnd, previousStart: drag.originalStart, previousEnd: drag.originalEnd }],
+      drag.mode === 'move' ? 'drag' : 'resize'
+    );
+    if (!changed) putBack();
+  }
+
+  /**
+   * Apply a change to dates. First a cancelable `beforetaskchange` (a host that rejects the change calls
+   * preventDefault and nothing moves), then the new dates are kept and `taskchange` fires for each task.
+   */
+  private applyChanges(changes: TaskChange[], source: ChangeSource): boolean {
+    const [primary, ...others] = changes;
+    const describe = (change: TaskChange) => ({
+      id: change.id,
+      start: formatIso(change.start),
+      end: formatIso(change.end),
+      previousStart: formatIso(change.previousStart),
+      previousEnd: formatIso(change.previousEnd)
+    });
+    const accepted = this.dispatchEvent(
+      new CustomEvent('beforetaskchange', {
+        detail: { ...describe(primary), source, affected: others.map(describe) },
+        bubbles: true,
+        composed: true,
+        cancelable: true
+      })
+    );
+    if (!accepted) {
+      this.requestRender();
+      return false;
+    }
+    for (const change of changes) this.overrides.set(change.id, { start: formatIso(change.start), end: formatIso(change.end) });
+    this.bumpOverrides();
+    for (const change of changes) {
+      this.dispatchEvent(new CustomEvent('taskchange', { detail: { id: change.id, start: formatIso(change.start), end: formatIso(change.end) }, bubbles: true, composed: true }));
+    }
+    this.requestRender();
+    return true;
   }
 
   /**
@@ -2456,11 +2572,7 @@ export class UIGantt extends ElementBase {
       : event.shiftKey
         ? Math.max(addDays(end, direction), addDays(start, 1))
         : addDays(end, direction);
-    const detail = { id: taskId, start: formatIso(nextStart), end: formatIso(nextEnd) };
-    this.overrides.set(taskId, { start: detail.start, end: detail.end });
-    this.bumpOverrides();
-    this.dispatchEvent(new CustomEvent('taskchange', { detail, bubbles: true, composed: true }));
-    this.requestRender();
+    this.applyChanges([{ id: taskId, start: nextStart, end: nextEnd, previousStart: start, previousEnd: end }], 'keyboard');
   }
 
   /**

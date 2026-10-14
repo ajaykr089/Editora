@@ -148,4 +148,24 @@ describe('Gantt wrapper', () => {
     ref.current!.expandAll();
     expect(onTaskToggle).toHaveBeenLastCalledWith({ id: 'p', open: true }, expect.anything());
   });
+
+  it('lets onBeforeTaskChange refuse a change, and passes snap through', async () => {
+    const onBeforeTaskChange = vi.fn((_: unknown, event: Event) => event.preventDefault());
+    const onTaskChange = vi.fn();
+    const { container, rerender } = render(<Gantt tasks={tasks} snap="week" onBeforeTaskChange={onBeforeTaskChange} onTaskChange={onTaskChange} />);
+    await Promise.resolve();
+    const el = container.querySelector('ui-gantt') as HTMLElement;
+    expect(el.getAttribute('snap')).toBe('week');
+
+    const bar = el.shadowRoot!.querySelector('.bar') as HTMLElement;
+    bar.focus();
+    bar.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }));
+    expect(onBeforeTaskChange).toHaveBeenCalledTimes(1);
+    expect(onBeforeTaskChange.mock.calls[0][0]).toMatchObject({ id: 'a', source: 'keyboard', affected: [] });
+    expect(onTaskChange).not.toHaveBeenCalled();
+
+    rerender(<Gantt tasks={tasks} onTaskChange={onTaskChange} />);
+    await Promise.resolve();
+    expect(el.hasAttribute('snap')).toBe(false);
+  });
 });
