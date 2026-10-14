@@ -265,6 +265,8 @@ and resize, and a toolbar for zoom, filter and sort. Give it `tasks` and `links`
 - Non-working time: `non-working-days` (the attribute alone means the weekend, or `0,6` / `[1,2]`) and `holidays` (`["2026-12-25", {"date": "2026-12-26", "label": "Boxing Day"}]`)
   shade those days behind the rows (not at month scales and wider, where a day is a few pixels) and mute them in the day header. They are shown, not scheduled
   around: task lengths are calendar days.
+- `linkable` shows dots beside each bar: drag one onto another bar and the chart fires `linkcreate` with the source, the target and the type the two ends
+  give (`e2s`, `s2s`, `e2e`, `s2e`); click a link to select it and press Delete to get `linkdelete`. As with tasks, your code owns the data.
 - `critical-path` computes the critical path from the links (no slack on a chain that is tight all the way) and draws those bars as critical, on top of any
   task you flag `critical`.
 - Parents: `auto-summary` makes a parent span its children and take their progress (weighted by length) when it has none; `cascade` lets you move a parent

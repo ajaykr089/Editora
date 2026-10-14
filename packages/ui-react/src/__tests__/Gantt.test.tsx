@@ -266,4 +266,29 @@ describe('Gantt wrapper', () => {
     await Promise.resolve();
     expect(el.hasAttribute('non-working-days')).toBe(false);
   });
+
+  it('passes linkable through and reports linkcreate and linkdelete', async () => {
+    const linked = [
+      { id: 'a', label: 'A', start: '2026-03-02', end: '2026-03-06' },
+      { id: 'b', label: 'B', start: '2026-03-09', end: '2026-03-13' },
+    ];
+    const onLinkCreate = vi.fn();
+    const onLinkDelete = vi.fn();
+    const { container, rerender } = render(<Gantt tasks={linked} links={[{ id: 'ab', source: 'a', target: 'b' }]} linkable onLinkCreate={onLinkCreate} onLinkDelete={onLinkDelete} />);
+    await Promise.resolve();
+    const el = container.querySelector('ui-gantt') as HTMLElement;
+    expect(el.hasAttribute('linkable')).toBe(true);
+    expect(el.shadowRoot!.querySelectorAll('.connector').length).toBe(4);
+
+    el.dispatchEvent(new CustomEvent('linkcreate', { detail: { source: 'b', target: 'a', type: 's2s' } }));
+    expect(onLinkCreate).toHaveBeenCalledWith({ source: 'b', target: 'a', type: 's2s' }, expect.anything());
+
+    const path = el.shadowRoot!.querySelector('.link-hit') as SVGElement;
+    path.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete', bubbles: true, cancelable: true }));
+    expect(onLinkDelete).toHaveBeenCalledWith({ id: 'ab', source: 'a', target: 'b', type: 'e2s' }, expect.anything());
+
+    rerender(<Gantt tasks={linked} links={[{ id: 'ab', source: 'a', target: 'b' }]} />);
+    await Promise.resolve();
+    expect(el.hasAttribute('linkable')).toBe(false);
+  });
 });

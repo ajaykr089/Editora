@@ -63,6 +63,8 @@ export type GanttTaskRenameDetail = { id: string; label: string; previousLabel: 
 /** Where the user asked for a task: its dates (a week long) and the neighbour it was asked next to. */
 export type GanttTaskCreateDetail = { start: string; end: string; parent?: string; after?: string };
 
+export type GanttLinkCreateDetail = { source: string; target: string; type: 'e2s' | 's2s' | 'e2e' | 's2e' };
+
 export type GanttLinkSelectDetail = {
   id: string;
   source: string;
@@ -151,6 +153,8 @@ export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   columns?: GanttColumn[];
   /** How dependencies are enforced: `'warn'` (the default) draws a link whose target is too early in the danger style, `'auto'` also pushes the tasks that follow a task that moves (later only, keeping their length), `'off'` does neither. */
   schedule?: 'warn' | 'auto' | 'off';
+  /** Show a dot beside each bar that you can drag onto another bar to ask for a dependency (`onLinkCreate`). Off in a `readonly` chart. */
+  linkable?: boolean;
   /** Mark the critical path from the links: the tasks with no slack on a tight chain of links (a task you flag `critical` stays). */
   criticalPath?: boolean;
   /** Weekdays that are not working days (0 is Sunday), or `'weekend'` for Saturday and Sunday. Shaded behind the rows where a day is wide enough to read. */
@@ -183,6 +187,10 @@ export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   onTaskRename?: (detail: GanttTaskRenameDetail, event: CustomEvent<GanttTaskRenameDetail>) => void;
   /** Fired when the user asks for a new task (the Add button, or a double-click on empty timeline space). The host adds it. */
   onTaskCreate?: (detail: GanttTaskCreateDetail, event: CustomEvent<GanttTaskCreateDetail>) => void;
+  /** Fired when a link is dropped on another task: the dot it started from (the source's start or end) and the half of the target it landed on give the type. The host adds the link. */
+  onLinkCreate?: (detail: GanttLinkCreateDetail, event: CustomEvent<GanttLinkCreateDetail>) => void;
+  /** Fired when Delete or Backspace is pressed on a selected link (click a link to select it). The host removes it. */
+  onLinkDelete?: (detail: GanttLinkSelectDetail, event: CustomEvent<GanttLinkSelectDetail>) => void;
   onTaskToggle?: (detail: { id: string; open: boolean }, event: CustomEvent<{ id: string; open: boolean }>) => void;
   onGridResize?: (detail: { width: number }, event: CustomEvent<{ width: number }>) => void;
   onTaskChange?: (detail: GanttTaskChangeDetail, event: CustomEvent<GanttTaskChangeDetail>) => void;
@@ -248,6 +256,7 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     cascade,
     schedule,
     criticalPath,
+    linkable,
     nonWorkingDays,
     holidays,
     children,
@@ -263,6 +272,8 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     onBeforeTaskChange,
     onTaskRename,
     onTaskCreate,
+    onLinkCreate,
+    onLinkDelete,
     ...rest
   },
   forwardedRef
@@ -318,13 +329,14 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     syncBool('auto-summary', autoSummary);
     syncBool('cascade', cascade);
     syncBool('critical-path', criticalPath);
+    syncBool('linkable', linkable);
     syncAttr('non-working-days', nonWorkingDays == null ? null : nonWorkingDays === 'weekend' ? '' : JSON.stringify(nonWorkingDays));
     syncAttr('holidays', holidays?.length ? JSON.stringify(holidays.map((item) => (item instanceof Date ? serializeDate(item) : item && typeof item === 'object' && !(item instanceof Date) ? { ...item, date: serializeDate(item.date) } : item))) : null);
     syncAttr('schedule', schedule && schedule !== 'warn' ? schedule : null);
     syncAttr('snap', snap && snap !== 'day' ? snap : null);
     syncAttr('initial-scroll', initialScroll && initialScroll !== 'today' ? initialScroll : null);
     syncAttr('max-height', maxHeight == null || maxHeight === '' ? null : typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight);
-  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight, initialScroll, snap, creatable, autoSummary, cascade, schedule, criticalPath, nonWorkingDays, holidays]);
+  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight, initialScroll, snap, creatable, autoSummary, cascade, schedule, criticalPath, linkable, nonWorkingDays, holidays]);
 
   useEffect(() => {
     const el = ref.current;
@@ -355,8 +367,14 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     const handleTaskCreate = (event: Event) => onTaskCreate?.((event as CustomEvent<GanttTaskCreateDetail>).detail, event as CustomEvent<GanttTaskCreateDetail>);
     el.addEventListener('beforetaskchange', handleBeforeTaskChange);
     el.addEventListener('taskrename', handleTaskRename);
+    const handleLinkCreate = (event: Event) => onLinkCreate?.((event as CustomEvent<GanttLinkCreateDetail>).detail, event as CustomEvent<GanttLinkCreateDetail>);
+    const handleLinkDelete = (event: Event) => onLinkDelete?.((event as CustomEvent<GanttLinkSelectDetail>).detail, event as CustomEvent<GanttLinkSelectDetail>);
     el.addEventListener('taskcreate', handleTaskCreate);
+    el.addEventListener('linkcreate', handleLinkCreate);
+    el.addEventListener('linkdelete', handleLinkDelete);
     return () => {
+      el.removeEventListener('linkcreate', handleLinkCreate);
+      el.removeEventListener('linkdelete', handleLinkDelete);
       el.removeEventListener('taskrename', handleTaskRename);
       el.removeEventListener('taskcreate', handleTaskCreate);
       el.removeEventListener('beforetaskchange', handleBeforeTaskChange);
@@ -370,7 +388,7 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
       el.removeEventListener('filterchange', handleFilterChange);
       el.removeEventListener('sortchange', handleSortChange);
     };
-  }, [onTaskChange, onTaskSelect, onTaskDelete, onLinkSelect, onZoomChange, onFilterChange, onSortChange, onGridResize, onTaskToggle, onBeforeTaskChange, onTaskRename, onTaskCreate]);
+  }, [onTaskChange, onTaskSelect, onTaskDelete, onLinkSelect, onZoomChange, onFilterChange, onSortChange, onGridResize, onTaskToggle, onBeforeTaskChange, onTaskRename, onTaskCreate, onLinkCreate, onLinkDelete]);
 
   return createUIElement('ui-gantt', { ref, ...rest }, children);
 });

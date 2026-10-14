@@ -71,6 +71,17 @@ type DragState = {
 
 type ChangeSource = 'drag' | 'resize' | 'keyboard';
 
+type LinkDrag = {
+  sourceId: string;
+  side: 'start' | 'end';
+  fromX: number;
+  fromY: number;
+  draft: SVGPathElement;
+  targetId: string | null;
+  targetSide: 'start' | 'end' | null;
+  onKey: (event: KeyboardEvent) => void;
+};
+
 type TaskChange = { id: string; start: number; end: number; previousStart: number; previousEnd: number };
 
 type FocusSnapshot = {
@@ -510,6 +521,59 @@ const style = `
     background: color-mix(in srgb, var(--ui-gantt-muted) 9%, transparent);
   }
 
+  /* The dots beside a bar that start a link (the linkable attribute), shown with the row's hover or focus. */
+  .connector {
+    position: absolute;
+    top: 15px;
+    inline-size: 12px;
+    block-size: 12px;
+    border: 2px solid var(--ui-gantt-accent);
+    border-radius: 50%;
+    background: var(--ui-gantt-panel);
+    cursor: crosshair;
+    opacity: 0;
+    z-index: 3;
+    touch-action: none;
+    transition: opacity 120ms ease;
+  }
+
+  .timeline-row:hover .connector,
+  .timeline-row:focus-within .connector,
+  .frame[data-linking] .connector {
+    opacity: 1;
+  }
+
+  .link-draft {
+    fill: none;
+    stroke: var(--ui-gantt-accent);
+    stroke-width: 2;
+    stroke-dasharray: 5 3;
+    stroke-linecap: round;
+    pointer-events: none;
+  }
+
+  .bar.link-target {
+    outline: 2px solid var(--ui-gantt-accent);
+    outline-offset: 2px;
+  }
+
+  .bar.link-target[data-link-side="start"] {
+    box-shadow: inset 7px 0 0 var(--ui-gantt-accent);
+  }
+
+  .bar.link-target[data-link-side="end"] {
+    box-shadow: inset -7px 0 0 var(--ui-gantt-accent);
+  }
+
+  .links path.selected:not(.link-hit) {
+    stroke: var(--ui-gantt-accent);
+    stroke-width: 2.4;
+  }
+
+  .links path.link-hit {
+    outline: 0;
+  }
+
   .unit-line {
     position: absolute;
     inset-block: 0;
@@ -827,6 +891,13 @@ const style = `
 
     .handle.end::after {
       inset-inline-end: 8px;
+    }
+
+    .connector {
+      opacity: 1;
+      inline-size: 20px;
+      block-size: 20px;
+      top: 11px;
     }
   }
 
@@ -1626,6 +1697,7 @@ function focusSelectorFor(el: HTMLElement): string | null {
   if (el.classList.contains('rename')) return '.rename';
   if (el.classList.contains('head-button') && el.dataset.sort) return `.head-button[data-sort="${cssEscape(el.dataset.sort)}"]`;
   if (el.classList.contains('splitter') && el.getAttribute('role') === 'separator') return '.splitter[role="separator"]';
+  if (el.classList.contains('link-hit') && el.dataset.linkId) return `.link-hit[data-link-id="${cssEscape(el.dataset.linkId)}"]`;
   if (el.classList.contains('bar') && el.dataset.taskId) return barSelector(el.dataset.taskId);
   if (el.classList.contains('grid-row') && el.dataset.taskId) return rowSelector(el.dataset.taskId);
   if (el.classList.contains('expander') && el.dataset.taskId) return `.expander[data-task-id="${cssEscape(el.dataset.taskId)}"]`;
@@ -2006,7 +2078,7 @@ function routeDependencyPath(
 
 export class UIGantt extends ElementBase {
   static get observedAttributes() {
-    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width', 'fill', 'max-height', 'snap', 'creatable', 'auto-summary', 'cascade', 'schedule', 'critical-path', 'non-working-days', 'holidays'];
+    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width', 'fill', 'max-height', 'snap', 'creatable', 'auto-summary', 'cascade', 'schedule', 'critical-path', 'non-working-days', 'holidays', 'linkable'];
   }
 
   private focusRequest: FocusSnapshot | null = null;
@@ -2021,6 +2093,8 @@ export class UIGantt extends ElementBase {
   private viewportLeft = 0;
   private viewportWidth = 1800;
   private hostWidth = 0;
+  private selectedLinkId: string | null = null;
+  private linking: LinkDrag | null = null;
   private editingId: string | null = null;
   private editingValue = '';
   private suppressBlur = false;
@@ -2134,6 +2208,7 @@ export class UIGantt extends ElementBase {
     const readonly = this.hasAttribute('readonly');
     const creatable = this.hasAttribute('creatable') && !readonly;
     const cascade = this.hasAttribute('cascade');
+    const linkable = this.hasAttribute('linkable') && !readonly;
     const showToolbar = this.getAttribute('show-toolbar') !== 'false';
     const showToday = this.getAttribute('show-today') !== 'false';
 
@@ -2267,12 +2342,14 @@ export class UIGantt extends ElementBase {
             ${kind === 'milestone' ? '<span class="milestone-shape"></span>' : ''}
             ${showHandles ? '<span class="handle end" data-mode="resize-end"></span>' : ''}
           </button>
+          ${linkable ? `<span class="connector" data-task-id="${escapeHtml(task.id)}" data-side="start" style="left:${(left - 18).toFixed(2)}px"></span><span class="connector" data-task-id="${escapeHtml(task.id)}" data-side="end" style="left:${(left + width + 6).toFixed(2)}px"></span>` : ''}
         </div>
       `;
     }).join('');
 
     this.descriptions = descriptions;
 
+    if (this.selectedLinkId && !links.some((link) => link.id === this.selectedLinkId)) this.selectedLinkId = null;
     const violated =
       normalizeSchedule(this.getAttribute('schedule')) === 'off'
         ? new Set<string>()
@@ -2284,8 +2361,9 @@ export class UIGantt extends ElementBase {
       if (virtualized && !renderedIds.has(link.source) && !renderedIds.has(link.target)) return '';
       const routed = routeDependencyPath(source.task, source.index, target.task, target.index, link.type, xForDate);
       const bad = violated.has(link.id);
+      const chosen = this.selectedLinkId === link.id;
       const label = `${source.task.label} dependency to ${target.task.label}${bad ? `, ${text.linkViolated}` : ''}`;
-      return `<path class="link-hit${bad ? ' violated' : ''}" d="${routed}" data-link-id="${escapeHtml(link.id)}" data-source-id="${escapeHtml(link.source)}" data-target-id="${escapeHtml(link.target)}" data-link-type="${escapeHtml(link.type || 'e2s')}"${bad ? ' data-violated="true"' : ''} aria-label="${escapeHtml(label)}" /><path${bad ? ' class="violated"' : ''} d="${routed}" />`;
+      return `<path class="link-hit${bad ? ' violated' : ''}${chosen ? ' selected' : ''}" tabindex="-1" d="${routed}" data-link-id="${escapeHtml(link.id)}" data-source-id="${escapeHtml(link.source)}" data-target-id="${escapeHtml(link.target)}" data-link-type="${escapeHtml(link.type || 'e2s')}"${bad ? ' data-violated="true"' : ''} aria-label="${escapeHtml(label)}" /><path class="${[bad ? 'violated' : '', chosen ? 'selected' : ''].filter(Boolean).join(' ')}" d="${routed}" />`;
     }).join('');
     const arrowHead = (id: string) => `<marker id="${id}" markerWidth="9" markerHeight="9" refX="8.5" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0.5 0.75 L 8.5 4.5 L 0.5 8.25 z" /></marker>`;
     const linkDefs = linkPaths ? `<defs>${arrowHead('ui-gantt-arrow')}${arrowHead('ui-gantt-arrow-bad')}</defs>` : '';
@@ -2500,7 +2578,7 @@ export class UIGantt extends ElementBase {
       this.viewportTop = top;
       this.viewportLeft = left;
       // A render would replace the bar that is being dragged, so it waits for the drop.
-      if (this.drag || (!shouldRenderRows && !shouldRenderX)) return;
+      if (this.drag || this.linking || (!shouldRenderRows && !shouldRenderX)) return;
       if (this.scrollFrame != null) return;
       this.scrollFrame = window.setTimeout(() => {
         this.scrollFrame = null;
@@ -2521,21 +2599,7 @@ export class UIGantt extends ElementBase {
       this.dispatchEvent(new CustomEvent('sortchange', { detail: { sort }, bubbles: true, composed: true }));
     });
 
-    this.root.querySelectorAll<SVGPathElement>('.link-hit').forEach((path) => {
-      path.addEventListener('click', (event) => {
-        event.stopPropagation();
-        this.dispatchEvent(new CustomEvent('linkselect', {
-          detail: {
-            id: path.dataset.linkId || '',
-            source: path.dataset.sourceId || '',
-            target: path.dataset.targetId || '',
-            type: path.dataset.linkType || 'e2s'
-          },
-          bubbles: true,
-          composed: true
-        }));
-      });
-    });
+    this.bindLinks();
 
     this.root.querySelectorAll<HTMLElement>('.bar').forEach((bar) => {
       bar.addEventListener('keydown', (event) => this.handleBarKeydown(bar, event as KeyboardEvent));
@@ -2888,6 +2952,123 @@ export class UIGantt extends ElementBase {
     this.root.querySelector<HTMLElement>('.bar-tip')?.removeAttribute('data-open');
   }
 
+  /** Links: select one by clicking it (then Delete asks to remove it), and with `linkable` draw new ones from the dots beside a bar. */
+  private bindLinks(): void {
+    const details = (path: SVGElement) => ({
+      id: path.dataset.linkId || '',
+      source: path.dataset.sourceId || '',
+      target: path.dataset.targetId || '',
+      type: path.dataset.linkType || 'e2s'
+    });
+    this.root.querySelectorAll<SVGPathElement>('.link-hit').forEach((path) => {
+      path.addEventListener('click', (event) => {
+        event.stopPropagation();
+        this.selectedLinkId = path.dataset.linkId || null;
+        this.focusRequest = { selector: `.link-hit[data-link-id="${cssEscape(path.dataset.linkId || '')}"]` };
+        this.dispatchEvent(new CustomEvent('linkselect', { detail: details(path), bubbles: true, composed: true }));
+        this.requestRender();
+      });
+      path.addEventListener('keydown', (event) => {
+        if (event.key === 'Delete' || event.key === 'Backspace') {
+          if (this.hasAttribute('readonly')) return;
+          event.preventDefault();
+          this.dispatchEvent(new CustomEvent('linkdelete', { detail: details(path), bubbles: true, composed: true }));
+        } else if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          this.dispatchEvent(new CustomEvent('linkselect', { detail: details(path), bubbles: true, composed: true }));
+        } else if (event.key === 'Escape') {
+          this.selectedLinkId = null;
+          this.requestRender();
+        }
+      });
+    });
+    this.root.querySelectorAll<HTMLElement>('.connector').forEach((connector) => {
+      connector.addEventListener('pointerdown', (event) => this.startLink(connector, event));
+      connector.addEventListener('pointermove', (event) => this.updateLink(event));
+      connector.addEventListener('pointerup', () => this.endLink(true));
+      connector.addEventListener('pointercancel', () => this.endLink(false));
+    });
+  }
+
+  private startLink(connector: HTMLElement, event: PointerEvent): void {
+    if (event.button !== 0) return;
+    const sourceId = connector.dataset.taskId;
+    const side = connector.dataset.side === 'start' ? 'start' : 'end';
+    const body = this.root.querySelector<HTMLElement>('.timeline-body');
+    const svg = this.root.querySelector<SVGSVGElement>('svg.links');
+    const bar = sourceId ? this.root.querySelector<HTMLElement>(barSelector(sourceId)) : null;
+    if (!sourceId || !body || !svg || !bar) return;
+    event.preventDefault();
+    const bodyBox = body.getBoundingClientRect();
+    const barBox = bar.getBoundingClientRect();
+    const draft = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    draft.setAttribute('class', 'link-draft');
+    svg.appendChild(draft);
+    const onKey = (keyEvent: KeyboardEvent) => {
+      if (keyEvent.key !== 'Escape') return;
+      keyEvent.preventDefault();
+      keyEvent.stopPropagation();
+      this.endLink(false);
+    };
+    this.linking = {
+      sourceId,
+      side,
+      fromX: (side === 'start' ? barBox.left : barBox.right) - bodyBox.left,
+      fromY: barBox.top + barBox.height / 2 - bodyBox.top,
+      draft,
+      targetId: null,
+      targetSide: null,
+      onKey
+    };
+    window.addEventListener('keydown', onKey, true);
+    this.root.querySelector('.frame')?.setAttribute('data-linking', '');
+    connector.setPointerCapture(event.pointerId);
+    this.updateLink(event);
+  }
+
+  /** The rubber-band line follows the pointer; the bar (or dot) under it, and which end of it, is the target. */
+  private updateLink(event: PointerEvent): void {
+    const link = this.linking;
+    const body = this.root.querySelector<HTMLElement>('.timeline-body');
+    if (!link || !body) return;
+    const bodyBox = body.getBoundingClientRect();
+    link.draft.setAttribute('d', `M ${link.fromX.toFixed(1)} ${link.fromY.toFixed(1)} L ${(event.clientX - bodyBox.left).toFixed(1)} ${(event.clientY - bodyBox.top).toFixed(1)}`);
+    this.root.querySelectorAll('.bar.link-target').forEach((el) => {
+      el.classList.remove('link-target');
+      el.removeAttribute('data-link-side');
+    });
+    link.targetId = null;
+    link.targetSide = null;
+    const under = this.root.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null;
+    const dot = under?.closest?.('.connector') as HTMLElement | null | undefined;
+    const bar = (dot ? this.root.querySelector<HTMLElement>(barSelector(dot.dataset.taskId || '')) : under?.closest?.('.bar')) as HTMLElement | null | undefined;
+    const targetId = bar?.dataset.taskId;
+    if (!bar || !targetId || targetId === link.sourceId) return;
+    const box = bar.getBoundingClientRect();
+    link.targetId = targetId;
+    link.targetSide = dot ? (dot.dataset.side === 'start' ? 'start' : 'end') : event.clientX < box.left + box.width / 2 ? 'start' : 'end';
+    bar.classList.add('link-target');
+    bar.setAttribute('data-link-side', link.targetSide);
+  }
+
+  /** Let go: a drop on another task asks the host for a link (`linkcreate`), anywhere else nothing happens. */
+  private endLink(commit: boolean): void {
+    const link = this.linking;
+    if (!link) return;
+    window.removeEventListener('keydown', link.onKey, true);
+    this.linking = null;
+    link.draft.remove();
+    this.root.querySelector('.frame')?.removeAttribute('data-linking');
+    this.root.querySelectorAll('.bar.link-target').forEach((el) => {
+      el.classList.remove('link-target');
+      el.removeAttribute('data-link-side');
+    });
+    if (!commit || !link.targetId || !link.targetSide) return;
+    const type = `${link.side === 'start' ? 's' : 'e'}2${link.targetSide === 'start' ? 's' : 'e'}`;
+    if (this.getLinks().some((existing) => existing.source === link.sourceId && existing.target === link.targetId && (existing.type || 'e2s') === type)) return;
+    this.dispatchEvent(new CustomEvent('linkcreate', { detail: { source: link.sourceId, target: link.targetId, type }, bubbles: true, composed: true }));
+  }
+
   /** Rename a task in place: the name becomes a text field. Does nothing in a read-only chart or for a read-only task. */
   private startRename(id: string): void {
     if (this.hasAttribute('readonly')) return;
@@ -3217,6 +3398,7 @@ export class UIGantt extends ElementBase {
 
   private selectTask(id: string): void {
     this.captureViewport();
+    this.selectedLinkId = null;
     if (this.selectedId === id) {
       this.dispatchEvent(new CustomEvent('taskselect', { detail: { id }, bubbles: true, composed: true }));
       return;
