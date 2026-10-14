@@ -64,3 +64,62 @@ describe('ui-gantt toolbar focus', () => {
     expect(root(gantt).activeElement).toBe(root(gantt).querySelector('.head-button[data-sort="label"]'));
   });
 });
+
+const press = (target: Element, key: string, init: KeyboardEventInit = {}) =>
+  target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init }));
+
+const bar = (gantt: HTMLElement, id: string) => root(gantt).querySelector<HTMLElement>(`.bar[data-task-id="${id}"]`)!;
+
+describe('ui-gantt keyboard editing', () => {
+  it('keeps focus on the bar so arrow keys can be pressed more than once', async () => {
+    const gantt = await mount();
+    const changes: Array<{ id: string; start: string; end: string }> = [];
+    gantt.addEventListener('taskchange', (event) => changes.push((event as CustomEvent).detail));
+
+    bar(gantt, 'a').focus();
+    press(bar(gantt, 'a'), 'ArrowRight');
+    await flush();
+    expect(root(gantt).activeElement).toBe(bar(gantt, 'a'));
+
+    press(bar(gantt, 'a'), 'ArrowRight');
+    await flush();
+    press(bar(gantt, 'a'), 'ArrowRight', { shiftKey: true });
+    await flush();
+
+    expect(changes).toEqual([
+      { id: 'a', start: '2026-03-03', end: '2026-03-07' },
+      { id: 'a', start: '2026-03-04', end: '2026-03-08' },
+      { id: 'a', start: '2026-03-04', end: '2026-03-09' },
+    ]);
+    expect(root(gantt).activeElement).toBe(bar(gantt, 'a'));
+  });
+
+  it('moves focus to the next row with the arrow keys and keeps it there', async () => {
+    const gantt = await mount();
+
+    bar(gantt, 'a').focus();
+    press(bar(gantt, 'a'), 'ArrowDown');
+    await flush();
+    expect(root(gantt).activeElement).toBe(bar(gantt, 'b'));
+
+    press(bar(gantt, 'b'), 'ArrowDown');
+    await flush();
+    expect(root(gantt).activeElement).toBe(bar(gantt, 'c'));
+
+    press(bar(gantt, 'c'), 'ArrowUp');
+    await flush();
+    expect(root(gantt).activeElement).toBe(bar(gantt, 'b'));
+  });
+
+  it('keeps focus on the expand button after it collapses a branch', async () => {
+    const gantt = await mount();
+    const toggle = root(gantt).querySelector<HTMLButtonElement>('.expander[data-task-id="p1"]')!;
+
+    toggle.focus();
+    toggle.click();
+    await flush();
+
+    expect(root(gantt).querySelectorAll('.grid-row').length).toBe(2);
+    expect(root(gantt).activeElement).toBe(root(gantt).querySelector('.expander[data-task-id="p1"]'));
+  });
+});
