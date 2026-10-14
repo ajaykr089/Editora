@@ -668,25 +668,40 @@ const style = `
     opacity: 1;
   }
 
-  .drag-tip {
+  /* One tooltip for the whole chart, outside the bars (which clip their children), placed by script. It
+     repeats the bar's accessible name, so it is hidden from assistive technology. */
+  .bar-tip {
     position: absolute;
-    z-index: 6;
-    inset-block-start: -28px;
-    inset-inline-start: 50%;
-    transform: translateX(-50%);
-    padding: 4px 7px;
-    border-radius: 6px;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    z-index: 7;
+    max-inline-size: 280px;
+    padding: 6px 9px;
+    border-radius: 8px;
     background: #0f172a;
     color: #f8fafc;
     font-size: 11px;
-    font-weight: 700;
-    white-space: nowrap;
+    line-height: 1.4;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.28);
     pointer-events: none;
     opacity: 0;
+    visibility: hidden;
+    transition: opacity 90ms ease;
   }
 
-  .bar.dragging .drag-tip {
+  .bar-tip[data-open] {
     opacity: 1;
+    visibility: visible;
+  }
+
+  .bar-tip strong {
+    display: block;
+    font-weight: 750;
+  }
+
+  .bar-tip span {
+    display: block;
+    opacity: 0.88;
   }
 
   :host([bar-variant="soft"]) .bar.task,
@@ -889,6 +904,14 @@ const style = `
     .control,
     .zoom-button {
       forced-color-adjust: none;
+      box-shadow: none;
+    }
+
+    .bar-tip {
+      forced-color-adjust: none;
+      background: Canvas;
+      color: CanvasText;
+      border: 1px solid CanvasText;
       box-shadow: none;
     }
   }
@@ -1332,6 +1355,45 @@ function focusSelectorFor(el: HTMLElement): string | null {
   return null;
 }
 
+/** Words the component puts in a task's accessible name and tooltip. Kept together so they can be translated. */
+const TEXT = {
+  summary: 'summary',
+  milestone: 'milestone',
+  to: 'to',
+  complete: 'complete',
+  assigned: 'assigned to',
+  critical: 'critical'
+};
+
+type TaskDescription = {
+  /** The accessible name of the bar: label, kind, dates, progress, assignee, critical. */
+  name: string;
+  title: string;
+  /** The word for a summary or a milestone, or empty. */
+  kindWord: string;
+  /** Dates, with the kind in front of a summary or a milestone. */
+  when: string;
+  /** Progress, assignee and the critical flag, or empty. */
+  more: string;
+};
+
+function describeTask(task: VisibleTask, kind: GanttTaskType, format: Intl.DateTimeFormat): TaskDescription {
+  const start = format.format(new Date(task.startMs));
+  const dates = kind === 'milestone' ? start : `${start} ${TEXT.to} ${format.format(new Date(task.endMs))}`;
+  const kindWord = kind === 'summary' || kind === 'milestone' ? TEXT[kind] : '';
+  const extras: string[] = [];
+  if (task.progress != null && kind !== 'milestone') extras.push(`${Math.round(task.progress)}% ${TEXT.complete}`);
+  if (task.assignee) extras.push(`${TEXT.assigned} ${task.assignee}`);
+  if (task.critical) extras.push(TEXT.critical);
+  return {
+    name: [task.label, kindWord, dates, ...extras].filter(Boolean).join(', '),
+    title: task.label,
+    kindWord,
+    when: [kindWord, dates].filter(Boolean).join(' · '),
+    more: extras.join(' · ')
+  };
+}
+
 function taskKind(task: VisibleTask): GanttTaskType {
   if (task.type === 'summary' || task.hasChildren) return 'summary';
   if (task.type === 'milestone' || task.startMs === task.endMs) return 'milestone';
@@ -1429,6 +1491,9 @@ export class UIGantt extends ElementBase {
   private viewportLeft = 0;
   private viewportWidth = 1800;
   private hostWidth = 0;
+  private descriptions = new Map<string, TaskDescription>();
+  private tipTimer: number | null = null;
+  private pointerFocus = false;
   /** Width of the scroll area's vertical scrollbar, measured after a render; `fit` leaves room for it. */
   private scrollbarWidth = 0;
   /** The pixels per day the last render used, for dragging. */
@@ -1463,6 +1528,8 @@ export class UIGantt extends ElementBase {
   override disconnectedCallback(): void {
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
+    if (this.tipTimer != null) window.clearTimeout(this.tipTimer);
+    this.tipTimer = null;
     super.disconnectedCallback();
   }
 
@@ -1522,6 +1589,8 @@ export class UIGantt extends ElementBase {
     this.renderedFirstRow = firstRow;
     this.renderedLastRow = lastRow;
 
+    const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
+    const descriptions = new Map<string, TaskDescription>();
     const visibleById = new Map(visible.map((task, index) => [task.id, { task, index }]));
     const renderedIds = new Set(rendered.map((task) => task.id));
     const xForDate = (value: number) => ((value - min) / DAY) * dayWidth;
@@ -1547,6 +1616,8 @@ export class UIGantt extends ElementBase {
     const timelineRows = rendered.map((task, offset) => {
       const rowIndex = firstRow + offset;
       const kind = taskKind(task);
+      const description = describeTask(task, kind, dateFormat);
+      descriptions.set(task.id, description);
       const selected = this.selectedId === task.id ? ' selected' : '';
       const focusable = this.selectedId === task.id || (!this.selectedId && rowIndex === 0);
       const tone = tones[task.tone || (kind === 'summary' ? 'info' : 'default')] || tones.default;
@@ -1571,19 +1642,20 @@ export class UIGantt extends ElementBase {
             tabindex="${focusable ? '0' : '-1'}"
             ${this.selectedId === task.id ? 'aria-current="true"' : ''}
             style="left:${left.toFixed(2)}px;width:${width.toFixed(2)}px;--tone:${tone};--progress:${progress.toFixed(2)}%"
-            aria-label="${escapeHtml(task.label)}"
+            aria-label="${escapeHtml(description.name)}"
             ${canEdit ? 'data-draggable="true"' : ''}
           >
             ${showHandles ? '<span class="handle start" data-mode="resize-start"></span>' : ''}
             <span class="progress"></span>
             ${splitSegments}
             ${kind === 'milestone' ? '<span class="milestone-shape"></span>' : ''}
-            <span class="drag-tip"></span>
             ${showHandles ? '<span class="handle end" data-mode="resize-end"></span>' : ''}
           </button>
         </div>
       `;
     }).join('');
+
+    this.descriptions = descriptions;
 
     const linkPaths = links.map((link) => {
       const source = visibleById.get(link.source);
@@ -1658,6 +1730,7 @@ export class UIGantt extends ElementBase {
               ${virtualized && topSpacer ? `<div style="height:${topSpacer}px"></div>` : ''}
               ${timelineRows}
               ${virtualized && bottomSpacer ? `<div style="height:${bottomSpacer}px"></div>` : ''}
+              <div class="bar-tip" part="tip" aria-hidden="true"></div>
             </div>
           </div>
         </div>
@@ -1809,6 +1882,7 @@ export class UIGantt extends ElementBase {
     this.root.querySelectorAll<HTMLElement>('.bar').forEach((bar) => {
       bar.addEventListener('keydown', (event) => this.handleBarKeydown(bar, event as KeyboardEvent));
     });
+    this.bindTooltips();
 
     if (this.hasAttribute('readonly')) return;
     this.root.querySelectorAll<HTMLElement>('.bar[data-draggable="true"]').forEach((bar) => {
@@ -1876,12 +1950,14 @@ export class UIGantt extends ElementBase {
             const width = this.drag.kind === 'milestone' ? MILESTONE_SIZE : Math.max(12, ((this.drag.latestEnd - this.drag.latestStart) / DAY) * this.drag.dayWidth);
             this.drag.bar.style.left = `${left.toFixed(2)}px`;
             this.drag.bar.style.width = `${width.toFixed(2)}px`;
-            const tip = this.drag.bar.querySelector<HTMLElement>('.drag-tip');
-            if (tip) {
-              tip.textContent = this.drag.kind === 'milestone'
-                ? formatIso(this.drag.latestStart)
-                : `${formatIso(this.drag.latestStart)} - ${formatIso(this.drag.latestEnd)}`;
-            }
+            // The dates move with the bar, in the shared tooltip: a tip inside the bar would be clipped by it.
+            const format = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
+            this.showTip(
+              this.drag.bar,
+              this.drag.kind === 'milestone'
+                ? format.format(new Date(this.drag.latestStart))
+                : `${format.format(new Date(this.drag.latestStart))} ${TEXT.to} ${format.format(new Date(this.drag.latestEnd))}`
+            );
           });
         }
       });
@@ -1892,6 +1968,7 @@ export class UIGantt extends ElementBase {
         const drag = this.drag;
         drag.bar.classList.remove('dragging');
         this.drag = null;
+        this.hideTip();
         if (!drag.moved) {
           if (drag.selectedChanged) this.requestRender();
           return;
@@ -1924,6 +2001,10 @@ export class UIGantt extends ElementBase {
     const taskId = bar.dataset.taskId;
     if (!taskId) return;
     const editable = bar.dataset.draggable === 'true' && !this.hasAttribute('readonly');
+    if (event.key === 'Escape') {
+      this.hideTip();
+      return;
+    }
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       this.selectTask(taskId);
@@ -1959,6 +2040,72 @@ export class UIGantt extends ElementBase {
     this.bumpOverrides();
     this.dispatchEvent(new CustomEvent('taskchange', { detail, bubbles: true, composed: true }));
     this.requestRender();
+  }
+
+  /**
+   * Show the tooltip for a bar: above its visible part, centred, kept inside the scroll area; below the bar when
+   * there is no room under the sticky header.
+   */
+  private showTip(bar: HTMLElement, dates?: string): void {
+    const tip = this.root.querySelector<HTMLElement>('.bar-tip');
+    const body = this.root.querySelector<HTMLElement>('.timeline-body');
+    const viewport = this.root.querySelector<HTMLElement>('.viewport');
+    const gridBody = this.root.querySelector<HTMLElement>('.grid-body');
+    const description = this.descriptions.get(bar.dataset.taskId || '');
+    if (!tip || !body || !viewport || !description) return;
+    tip.innerHTML =
+      `<strong>${escapeHtml(description.title)}</strong>` +
+      `<span>${escapeHtml(dates ? [description.kindWord, dates].filter(Boolean).join(' · ') : description.when)}</span>` +
+      (description.more ? `<span>${escapeHtml(description.more)}</span>` : '');
+    tip.setAttribute('data-open', '');
+
+    const bodyBox = body.getBoundingClientRect();
+    const barBox = bar.getBoundingClientRect();
+    const viewBox = viewport.getBoundingClientRect();
+    const leftEdge = Math.max(viewBox.left, gridBody ? gridBody.getBoundingClientRect().right : viewBox.left) + 4;
+    const rightEdge = viewBox.right - 4;
+    const tipWidth = tip.offsetWidth;
+    const tipHeight = tip.offsetHeight;
+    const visibleCentre = (Math.max(barBox.left, leftEdge) + Math.min(barBox.right, rightEdge)) / 2;
+    const left = Math.max(leftEdge, Math.min(visibleCentre - tipWidth / 2, rightEdge - tipWidth));
+    const roomAbove = barBox.top - (viewBox.top + HEADER_HEIGHT) >= tipHeight + 8;
+    const top = roomAbove ? barBox.top - tipHeight - 6 : barBox.bottom + 6;
+    tip.style.left = `${(left - bodyBox.left).toFixed(1)}px`;
+    tip.style.top = `${(top - bodyBox.top).toFixed(1)}px`;
+  }
+
+  private hideTip(): void {
+    if (this.tipTimer != null) {
+      window.clearTimeout(this.tipTimer);
+      this.tipTimer = null;
+    }
+    this.root.querySelector<HTMLElement>('.bar-tip')?.removeAttribute('data-open');
+  }
+
+  private bindTooltips(): void {
+    this.root.querySelectorAll<HTMLElement>('.bar').forEach((bar) => {
+      bar.addEventListener('pointerenter', (event) => {
+        if ((event as PointerEvent).pointerType === 'touch') return;
+        this.hideTip();
+        this.tipTimer = window.setTimeout(() => {
+          this.tipTimer = null;
+          this.showTip(bar);
+        }, 150);
+      });
+      bar.addEventListener('pointerleave', () => this.hideTip());
+      bar.addEventListener('pointerdown', () => {
+        // A press focuses the bar a moment later; that focus is not the keyboard's and gets no tooltip.
+        this.pointerFocus = true;
+        window.setTimeout(() => {
+          this.pointerFocus = false;
+        }, 0);
+        this.hideTip();
+      });
+      bar.addEventListener('blur', () => this.hideTip());
+      bar.addEventListener('focus', () => {
+        if (!this.pointerFocus) this.showTip(bar);
+      });
+    });
   }
 
   private rangeMin(): number {
