@@ -90,6 +90,8 @@ render(<Example />);
 | `links` | `GanttLink[]` | Dependency links with `source`, `target`, and optional `type`. |
 | `zoom` | `'day' \| 'week' \| 'month' \| 'quarter' \| 'year' \| 'fit'` | Timeline scale. `fit` scales the whole project to the width of the chart (between 0.2 and 48px a day) and picks the header unit from the result; it follows the chart when it is resized. |
 | `weekStart` | `0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6` | First day of the week in the time header (0 is Sunday). Defaults to the locale's. |
+| `labels` | `Partial<GanttLabels>` | Translations: any subset of the words the chart shows or announces (title, toolbar, column headers, zoom names, empty states, "expand", "assigned to"...). `tasksCount` takes `{shown}` and `{total}`. |
+| `locale` | `string` | BCP 47 locale for dates: month names, date formats and the first day of the week. Defaults to the browser's. |
 | `sort` | `'none' \| 'start' \| 'end' \| 'label' \| 'progress'` | Sort mode used by the task grid. |
 | `barVariant` | `'solid' \| 'soft' \| 'striped' \| 'outline' \| 'glass'` | Visual treatment for task bars. |
 | `readonly` | `boolean` | Disables task drag and resize editing. |

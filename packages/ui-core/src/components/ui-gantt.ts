@@ -999,7 +999,7 @@ function formatIso(value: number): string {
 }
 
 function formatShortDate(value: number): string {
-  return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(new Date(value));
+  return dateFormat({ month: 'short', day: 'numeric' }).format(new Date(value));
 }
 
 function normalizeZoom(value: string | null): GanttZoom {
@@ -1148,7 +1148,7 @@ type HeaderUnit = GanttUnit;
 /** The first day of the week as `Date#getDay` numbers it (0 is Sunday), from the user's locale; Monday if unknown. */
 function localeWeekStart(): number {
   try {
-    const tag = new Intl.DateTimeFormat().resolvedOptions().locale;
+    const tag = dateFormat({}).resolvedOptions().locale;
     const locale = new Intl.Locale(tag) as Intl.Locale & {
       weekInfo?: { firstDay: number };
       getWeekInfo?: () => { firstDay: number };
@@ -1236,9 +1236,9 @@ function createTimeHeader(
   viewportWidth = Number.POSITIVE_INFINITY
 ): string {
   const today = startOfDay(Date.now());
-  const monthYear = new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' });
-  const monthOnly = new Intl.DateTimeFormat(undefined, { month: 'short' });
-  const weekday = new Intl.DateTimeFormat(undefined, { weekday: 'narrow' });
+  const monthYear = dateFormat({ month: 'long', year: 'numeric' });
+  const monthOnly = dateFormat({ month: 'short' });
+  const weekday = dateFormat({ weekday: 'narrow' });
   const cell = (cls: string, item: HeaderCell, inner: string, title = '') =>
     `<span class="${cls}" style="left:${item.left.toFixed(2)}px;width:${item.width.toFixed(2)}px"${title ? ` title="${escapeHtml(title)}"` : ''}>${inner}</span>`;
 
@@ -1381,8 +1381,71 @@ function focusSelectorFor(el: HTMLElement): string | null {
   return null;
 }
 
-/** Words the component puts in a task's accessible name and tooltip. Kept together so they can be translated. */
-const TEXT = {
+/** Every word the component shows or announces, so a host can translate it. `tasksCount` takes {shown} and {total}. */
+export type GanttLabels = {
+  title: string;
+  tasksCount: string;
+  filterPlaceholder: string;
+  filterLabel: string;
+  sortLabel: string;
+  sortManual: string;
+  sortStart: string;
+  sortEnd: string;
+  sortName: string;
+  sortProgress: string;
+  zoomDay: string;
+  zoomWeek: string;
+  zoomMonth: string;
+  zoomQuarter: string;
+  zoomYear: string;
+  zoomFit: string;
+  zoomFitTitle: string;
+  columnTask: string;
+  columnOwner: string;
+  columnDates: string;
+  columnProgress: string;
+  empty: string;
+  noMatches: string;
+  expand: string;
+  collapse: string;
+  timeline: string;
+  today: string;
+  summary: string;
+  milestone: string;
+  to: string;
+  complete: string;
+  assigned: string;
+  critical: string;
+};
+
+const DEFAULT_LABELS: GanttLabels = {
+  title: 'Project schedule',
+  tasksCount: '{shown}/{total} tasks',
+  filterPlaceholder: 'Filter tasks',
+  filterLabel: 'Filter tasks',
+  sortLabel: 'Sort tasks',
+  sortManual: 'Manual',
+  sortStart: 'Start date',
+  sortEnd: 'End date',
+  sortName: 'Name',
+  sortProgress: 'Progress',
+  zoomDay: 'day',
+  zoomWeek: 'week',
+  zoomMonth: 'month',
+  zoomQuarter: 'quarter',
+  zoomYear: 'year',
+  zoomFit: 'fit',
+  zoomFitTitle: 'Fit the whole project to the width',
+  columnTask: 'Task',
+  columnOwner: 'Owner',
+  columnDates: 'Dates',
+  columnProgress: '%',
+  empty: 'No tasks in this range',
+  noMatches: 'No matching tasks',
+  expand: 'Expand',
+  collapse: 'Collapse',
+  timeline: 'Timeline',
+  today: 'Today',
   summary: 'summary',
   milestone: 'milestone',
   to: 'to',
@@ -1390,6 +1453,20 @@ const TEXT = {
   assigned: 'assigned to',
   critical: 'critical'
 };
+
+/**
+ * The locale for dates, set from the `locale` attribute at the start of each render. A render is synchronous, so a
+ * module variable is enough to reach the formatters without threading it through every helper.
+ */
+let activeLocale: string | undefined;
+
+function dateFormat(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  try {
+    return new Intl.DateTimeFormat(activeLocale, options);
+  } catch {
+    return new Intl.DateTimeFormat(undefined, options);
+  }
+}
 
 type TaskDescription = {
   /** The accessible name of the bar: label, kind, dates, progress, assignee, critical. */
@@ -1403,14 +1480,14 @@ type TaskDescription = {
   more: string;
 };
 
-function describeTask(task: VisibleTask, kind: GanttTaskType, format: Intl.DateTimeFormat): TaskDescription {
+function describeTask(task: VisibleTask, kind: GanttTaskType, format: Intl.DateTimeFormat, text: GanttLabels): TaskDescription {
   const start = format.format(new Date(task.startMs));
-  const dates = kind === 'milestone' ? start : `${start} ${TEXT.to} ${format.format(new Date(task.endMs))}`;
-  const kindWord = kind === 'summary' || kind === 'milestone' ? TEXT[kind] : '';
+  const dates = kind === 'milestone' ? start : `${start} ${text.to} ${format.format(new Date(task.endMs))}`;
+  const kindWord = kind === 'summary' || kind === 'milestone' ? text[kind] : '';
   const extras: string[] = [];
-  if (task.progress != null && kind !== 'milestone') extras.push(`${Math.round(task.progress)}% ${TEXT.complete}`);
-  if (task.assignee) extras.push(`${TEXT.assigned} ${task.assignee}`);
-  if (task.critical) extras.push(TEXT.critical);
+  if (task.progress != null && kind !== 'milestone') extras.push(`${Math.round(task.progress)}% ${text.complete}`);
+  if (task.assignee) extras.push(`${text.assigned} ${task.assignee}`);
+  if (task.critical) extras.push(text.critical);
   return {
     name: [task.label, kindWord, dates, ...extras].filter(Boolean).join(', '),
     title: task.label,
@@ -1418,6 +1495,10 @@ function describeTask(task: VisibleTask, kind: GanttTaskType, format: Intl.DateT
     when: [kindWord, dates].filter(Boolean).join(' · '),
     more: extras.join(' · ')
   };
+}
+
+function zoomLabel(zoom: GanttZoom, text: GanttLabels): string {
+  return { day: text.zoomDay, week: text.zoomWeek, month: text.zoomMonth, quarter: text.zoomQuarter, year: text.zoomYear, fit: text.zoomFit }[zoom];
 }
 
 function taskKind(task: VisibleTask): GanttTaskType {
@@ -1502,7 +1583,7 @@ function routeDependencyPath(
 
 export class UIGantt extends ElementBase {
   static get observedAttributes() {
-    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start'];
+    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale'];
   }
 
   private focusRequest: FocusSnapshot | null = null;
@@ -1560,7 +1641,35 @@ export class UIGantt extends ElementBase {
     super.disconnectedCallback();
   }
 
+  private labelsRaw: string | null = null;
+  private labelsCache: GanttLabels = DEFAULT_LABELS;
+
+  /** The labels: the defaults with whatever the `labels` attribute (a JSON object) overrides. */
+  private labelSet(): GanttLabels {
+    const raw = this.getAttribute('labels');
+    if (raw === this.labelsRaw) return this.labelsCache;
+    this.labelsRaw = raw;
+    this.labelsCache = DEFAULT_LABELS;
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          const merged: Record<string, string> = { ...DEFAULT_LABELS };
+          for (const [key, value] of Object.entries(parsed)) {
+            if (key in DEFAULT_LABELS && typeof value === 'string') merged[key] = value;
+          }
+          this.labelsCache = merged as GanttLabels;
+        }
+      } catch {
+        // malformed JSON: keep the defaults
+      }
+    }
+    return this.labelsCache;
+  }
+
   protected override render(): void {
+    activeLocale = this.getAttribute('locale') || undefined;
+    const text = this.labelSet();
     const tasks = this.getTasks();
     const links = this.getLinks();
     const zoom = normalizeZoom(this.getAttribute('zoom'));
@@ -1576,7 +1685,7 @@ export class UIGantt extends ElementBase {
       this.setContent(`
         <style>${style}</style>
         <section class="frame" part="frame">
-          <div class="empty" part="empty">No tasks in this range</div>
+          <div class="empty" part="empty">${escapeHtml(text.empty)}</div>
         </section>
       `);
       return;
@@ -1616,7 +1725,7 @@ export class UIGantt extends ElementBase {
     this.renderedFirstRow = firstRow;
     this.renderedLastRow = lastRow;
 
-    const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
+    const mediumDate = dateFormat({ dateStyle: 'medium' });
     const descriptions = new Map<string, TaskDescription>();
     const visibleById = new Map(visible.map((task, index) => [task.id, { task, index }]));
     const renderedIds = new Set(rendered.map((task) => task.id));
@@ -1630,7 +1739,7 @@ export class UIGantt extends ElementBase {
       return `
         <div class="grid-row${selected}" part="grid-row" data-task-id="${escapeHtml(task.id)}" role="row" aria-rowindex="${rowIndex + 2}" aria-level="${task.depth + 1}" ${task.hasChildren ? `aria-expanded="${!this.collapsed.has(task.id)}"` : ''}>
           <div class="grid-cell task-name" role="gridcell" style="padding-left:${10 + task.depth * 18}px">
-            ${task.hasChildren ? `<button class="expander" data-action="toggle" data-task-id="${escapeHtml(task.id)}" aria-label="${this.collapsed.has(task.id) ? 'Expand' : 'Collapse'} ${escapeHtml(task.label)}">${this.collapsed.has(task.id) ? '›' : '⌄'}</button>` : '<span style="inline-size:22px"></span>'}
+            ${task.hasChildren ? `<button class="expander" data-action="toggle" data-task-id="${escapeHtml(task.id)}" aria-label="${escapeHtml(this.collapsed.has(task.id) ? text.expand : text.collapse)} ${escapeHtml(task.label)}">${this.collapsed.has(task.id) ? '›' : '⌄'}</button>` : '<span style="inline-size:22px"></span>'}
             <span class="name-text" title="${escapeHtml(task.label)}">${escapeHtml(task.label)}</span>
           </div>
           <div class="grid-cell badge" role="gridcell">${escapeHtml(task.assignee || kind)}</div>
@@ -1643,7 +1752,7 @@ export class UIGantt extends ElementBase {
     const timelineRows = rendered.map((task, offset) => {
       const rowIndex = firstRow + offset;
       const kind = taskKind(task);
-      const description = describeTask(task, kind, dateFormat);
+      const description = describeTask(task, kind, mediumDate, text);
       descriptions.set(task.id, description);
       const selected = this.selectedId === task.id ? ' selected' : '';
       const focusable = this.selectedId === task.id || (!this.selectedId && rowIndex === 0);
@@ -1707,7 +1816,7 @@ export class UIGantt extends ElementBase {
     const todayMarkup = showTodayMarker ? `<div class="today" part="today" style="left:${todayX.toFixed(2)}px"></div>` : '';
     // The label lives in the header, which stays put while the rows scroll, not on the line where it covered bars.
     // The day scale already highlights today's own column, and a pill there would cover its date.
-    const todayPill = showTodayMarker && unit !== 'day' ? `<span class="today-pill" part="today-pill" style="left:clamp(22px, ${todayX.toFixed(2)}px, calc(100% - 22px))">Today</span>` : '';
+    const todayPill = showTodayMarker && unit !== 'day' ? `<span class="today-pill" part="today-pill" style="left:clamp(22px, ${todayX.toFixed(2)}px, calc(100% - 22px))">${escapeHtml(text.today)}</span>` : '';
 
     const focusSnapshot = this.focusRequest ?? this.captureFocus();
     this.focusRequest = null;
@@ -1719,41 +1828,41 @@ export class UIGantt extends ElementBase {
       <section class="frame" part="frame" data-bar-variant="${barVariant}">
         ${showToolbar ? `
           <header class="toolbar" part="toolbar">
-            <div class="title">Project schedule <span class="meta">${visible.length}/${tasks.length} tasks</span></div>
+            <div class="title">${escapeHtml(text.title)} <span class="meta">${escapeHtml(text.tasksCount.replace('{shown}', String(visible.length)).replace('{total}', String(tasks.length)))}</span></div>
             <div class="controls">
-              <input class="control" value="${escapeHtml(filterText)}" placeholder="Filter tasks" aria-label="Filter tasks" />
-              <select class="select" aria-label="Sort tasks">
+              <input class="control" value="${escapeHtml(filterText)}" placeholder="${escapeHtml(text.filterPlaceholder)}" aria-label="${escapeHtml(text.filterLabel)}" />
+              <select class="select" aria-label="${escapeHtml(text.sortLabel)}">
                 ${[
-                  ['none', 'Manual'],
-                  ['start', 'Start date'],
-                  ['end', 'End date'],
-                  ['label', 'Name'],
-                  ['progress', 'Progress']
-                ].map(([value, label]) => `<option value="${value}" ${sort === value ? 'selected' : ''}>${label}</option>`).join('')}
+                  ['none', text.sortManual],
+                  ['start', text.sortStart],
+                  ['end', text.sortEnd],
+                  ['label', text.sortName],
+                  ['progress', text.sortProgress]
+                ].map(([value, label]) => `<option value="${value}" ${sort === value ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('')}
               </select>
-              ${(['day', 'week', 'month', 'quarter', 'year', 'fit'] as GanttZoom[]).map((item) => `<button class="zoom-button" data-zoom="${item}" aria-pressed="${zoom === item}"${item === 'fit' ? ' title="Fit the whole project to the width"' : ''}>${item}</button>`).join('')}
+              ${(['day', 'week', 'month', 'quarter', 'year', 'fit'] as GanttZoom[]).map((item) => `<button class="zoom-button" data-zoom="${item}" aria-pressed="${zoom === item}"${item === 'fit' ? ` title="${escapeHtml(text.zoomFitTitle)}"` : ''}>${escapeHtml(zoomLabel(item, text))}</button>`).join('')}
             </div>
           </header>
         ` : ''}
         <div class="viewport" part="viewport">
           <div class="surface" part="surface" style="--day-width:${dayWidth}px;grid-template-columns:var(--gantt-grid-w) minmax(${timelineWidth.toFixed(2)}px, 1fr);inline-size:max(100%, calc(var(--gantt-grid-w) + ${timelineWidth.toFixed(2)}px))">
-            <div class="grid-semantics" role="treegrid" aria-label="${escapeHtml(this.getAttribute('aria-label') || 'Project schedule')}" aria-rowcount="${visible.length + 1}" aria-colcount="4">
+            <div class="grid-semantics" role="treegrid" aria-label="${escapeHtml(this.getAttribute('aria-label') || text.title)}" aria-rowcount="${visible.length + 1}" aria-colcount="4">
               <div class="grid-head" part="grid-head" role="row">
-                <div role="columnheader" aria-sort="${sort === 'label' ? 'ascending' : 'none'}" style="display:contents"><button class="head-button" data-sort="label">Task</button></div>
-                <span role="columnheader">Owner</span>
-                <div role="columnheader" aria-sort="${sort === 'start' ? 'ascending' : 'none'}" style="display:contents"><button class="head-button" data-sort="start">Dates</button></div>
-                <div role="columnheader" aria-sort="${sort === 'progress' ? 'descending' : 'none'}" style="display:contents"><button class="head-button" data-sort="progress">%</button></div>
+                <div role="columnheader" aria-sort="${sort === 'label' ? 'ascending' : 'none'}" style="display:contents"><button class="head-button" data-sort="label">${escapeHtml(text.columnTask)}</button></div>
+                <span role="columnheader">${escapeHtml(text.columnOwner)}</span>
+                <div role="columnheader" aria-sort="${sort === 'start' ? 'ascending' : 'none'}" style="display:contents"><button class="head-button" data-sort="start">${escapeHtml(text.columnDates)}</button></div>
+                <div role="columnheader" aria-sort="${sort === 'progress' ? 'descending' : 'none'}" style="display:contents"><button class="head-button" data-sort="progress">${escapeHtml(text.columnProgress)}</button></div>
               </div>
               <div class="grid-body" part="grid-body" role="rowgroup">
                 ${virtualized && topSpacer ? `<div style="height:${topSpacer}px"></div>` : ''}
-                ${gridRows || '<div class="empty">No matching tasks</div>'}
+                ${gridRows || `<div class="empty">${escapeHtml(text.noMatches)}</div>`}
                 ${virtualized && bottomSpacer ? `<div style="height:${bottomSpacer}px"></div>` : ''}
               </div>
             </div>
             <div class="timeline-head" part="timeline-head" aria-hidden="true">
               <div class="scale" data-zoom="${unit}" style="min-width:${timelineWidth.toFixed(2)}px">${createTimeHeader(min, rangeEnd, dayWidth, unit, weekStart, this.viewportLeft, this.viewportWidth)}${todayPill}</div>
             </div>
-            <div class="timeline-body" part="timeline-body" role="group" aria-label="Timeline" data-zoom="${unit}" style="min-width:${timelineWidth.toFixed(2)}px;min-height:${rowsHeight}px">
+            <div class="timeline-body" part="timeline-body" role="group" aria-label="${escapeHtml(text.timeline)}" data-zoom="${unit}" style="min-width:${timelineWidth.toFixed(2)}px;min-height:${rowsHeight}px">
               ${createUnitLines(min, rangeEnd, dayWidth, unit, weekStart, this.viewportLeft, this.viewportWidth)}
               <svg class="links" width="${timelineWidth.toFixed(0)}" height="${rowsHeight}" viewBox="0 0 ${timelineWidth.toFixed(0)} ${rowsHeight}" aria-hidden="true">${linkDefs}${linkPaths}</svg>
               ${todayMarkup}
@@ -1981,12 +2090,14 @@ export class UIGantt extends ElementBase {
             this.drag.bar.style.left = `${left.toFixed(2)}px`;
             this.drag.bar.style.width = `${width.toFixed(2)}px`;
             // The dates move with the bar, in the shared tooltip: a tip inside the bar would be clipped by it.
-            const format = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
+            activeLocale = this.getAttribute('locale') || undefined;
+            const format = dateFormat({ dateStyle: 'medium' });
+            const text = this.labelSet();
             this.showTip(
               this.drag.bar,
               this.drag.kind === 'milestone'
                 ? format.format(new Date(this.drag.latestStart))
-                : `${format.format(new Date(this.drag.latestStart))} ${TEXT.to} ${format.format(new Date(this.drag.latestEnd))}`
+                : `${format.format(new Date(this.drag.latestStart))} ${text.to} ${format.format(new Date(this.drag.latestEnd))}`
             );
           });
         }

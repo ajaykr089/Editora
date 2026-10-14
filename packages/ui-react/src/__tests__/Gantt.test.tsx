@@ -77,4 +77,19 @@ describe('Gantt wrapper', () => {
     await Promise.resolve();
     expect(el.getAttribute('zoom')).toBe('week');
   });
+
+  it('passes labels and locale through', async () => {
+    const { container, rerender } = render(<Gantt tasks={tasks} labels={{ title: 'Planning', zoomWeek: 'semaine' }} locale="fr-FR" />);
+    await Promise.resolve();
+    const el = container.querySelector('ui-gantt') as HTMLElement;
+    expect(el.getAttribute('locale')).toBe('fr-FR');
+    expect(el.shadowRoot!.querySelector('.title')!.textContent).toContain('Planning');
+    expect([...el.shadowRoot!.querySelectorAll('.zoom-button')].map((b) => b.textContent)).toContain('semaine');
+
+    rerender(<Gantt tasks={tasks} />);
+    await Promise.resolve();
+    expect(el.hasAttribute('labels')).toBe(false);
+    expect(el.hasAttribute('locale')).toBe(false);
+    expect(el.shadowRoot!.querySelector('.title')!.textContent).toContain('Project schedule');
+  });
 });

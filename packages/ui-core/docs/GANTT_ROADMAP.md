@@ -50,7 +50,7 @@ Visible quality, no new concepts. Most of it is in `createTicks` and the bar CSS
 | B5 | Inline create and rename | Double-click a grid cell to rename (`taskrename`), a "+" row or double-click an empty timeline row to add (`taskcreate`). The component stays uncontrolled-friendly: it emits, the host owns the data. | M |
 | B6 | Columns and splitter | `columns` attribute (which fields, widths), a draggable splitter between grid and timeline, and a user-set grid width that wins over the compact breakpoint. | M |
 | B7 | `height` and sizing | `height="100%"` on the host does not constrain it (only `--ui-gantt-max-height` does). Make the host height drive the viewport and document both. | S |
-| B8 | i18n | Hard-coded English: "Project schedule", "Filter tasks", sort labels, headers, "No tasks in this range", the expand/collapse labels. Add a `labels` JSON attribute (same shape as `translations` elsewhere in the library) and a `locale` for dates. | M |
+| B8 | ~~i18n~~ **done** | `labels` (a JSON object with any subset of 33 keys: title, count template, toolbar, sort options, zoom names, column headers, empty states, expand/collapse, today, and the words in bar names and tooltips) and `locale` (month names, date formats, the week's first day). React: `labels`, `locale`, `GanttLabels`. | M |
 
 ## Phase C: scheduling (two to three weeks)
 

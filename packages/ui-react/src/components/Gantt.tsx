@@ -51,6 +51,43 @@ export type GanttLinkSelectDetail = {
   type: GanttLink['type'];
 };
 
+/** Every word the chart shows or announces. `tasksCount` takes `{shown}` and `{total}`. */
+export type GanttLabels = {
+  title: string;
+  tasksCount: string;
+  filterPlaceholder: string;
+  filterLabel: string;
+  sortLabel: string;
+  sortManual: string;
+  sortStart: string;
+  sortEnd: string;
+  sortName: string;
+  sortProgress: string;
+  zoomDay: string;
+  zoomWeek: string;
+  zoomMonth: string;
+  zoomQuarter: string;
+  zoomYear: string;
+  zoomFit: string;
+  zoomFitTitle: string;
+  columnTask: string;
+  columnOwner: string;
+  columnDates: string;
+  columnProgress: string;
+  empty: string;
+  noMatches: string;
+  expand: string;
+  collapse: string;
+  timeline: string;
+  today: string;
+  summary: string;
+  milestone: string;
+  to: string;
+  complete: string;
+  assigned: string;
+  critical: string;
+};
+
 export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'onSelect'> & {
   tasks?: GanttTask[];
   links?: GanttLink[];
@@ -66,6 +103,10 @@ export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   headless?: boolean;
   /** First day of the week in the time header, as `Date#getDay` numbers it (0 is Sunday). Defaults to the locale's. */
   weekStart?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  /** Translations: any subset of the labels. */
+  labels?: Partial<GanttLabels>;
+  /** BCP 47 locale for dates (month names, date formats, the week's first day). Defaults to the browser's. */
+  locale?: string;
   onTaskChange?: (detail: GanttTaskChangeDetail, event: CustomEvent<GanttTaskChangeDetail>) => void;
   onTaskSelect?: (detail: { id: string }, event: CustomEvent<{ id: string }>) => void;
   onTaskDelete?: (detail: { id: string }, event: CustomEvent<{ id: string }>) => void;
@@ -116,6 +157,8 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
     virtualized,
     headless,
     weekStart,
+    labels,
+    locale,
     children,
     onTaskChange,
     onTaskSelect,
@@ -170,7 +213,9 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
     else syncAttr('virtualized', null);
     syncBool('headless', headless);
     syncAttr('week-start', weekStart == null ? null : String(weekStart));
-  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart]);
+    syncAttr('labels', labels ? JSON.stringify(labels) : null);
+    syncAttr('locale', locale || null);
+  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale]);
 
   useEffect(() => {
     const el = ref.current;
