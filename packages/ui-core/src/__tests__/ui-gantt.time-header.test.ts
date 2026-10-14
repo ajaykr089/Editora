@@ -116,3 +116,39 @@ describe('ui-gantt time header', () => {
     expect(root.querySelector('.timeline-head')!.getAttribute('aria-hidden')).toBe('true');
   });
 });
+
+describe('ui-gantt body grid lines', () => {
+  const unitLines = (root: ParentNode) => lefts(root, '.timeline-body .unit-line');
+  const headerEdges = (root: ParentNode) => lefts(root, '.band.bottom .tick');
+
+  it('draws one line per month at the month scale, on the same edges as the header', async () => {
+    const root = await mount({ zoom: 'month' });
+    const lines = unitLines(root);
+
+    expect(lines.length).toBeGreaterThan(3);
+    // header cells start at the clipped first cell (x = 0); every later cell edge has a line
+    expect(lines).toEqual(headerEdges(root).filter((left) => left > 0));
+    expect(root.querySelector('.timeline-body')!.getAttribute('data-zoom')).toBe('month');
+  });
+
+  it('draws a line on every week start at the week scale', async () => {
+    const root = await mount({ zoom: 'week', 'week-start': '1' });
+
+    expect(unitLines(root)).toEqual(headerEdges(root).filter((left) => left > 0));
+    expect(unitLines(root)[0]).toBeCloseTo(2 * 13, 1); // Monday Mar 2 is two days after the chart starts
+  });
+
+  it('leaves the day scale to its per-day stylesheet lines', async () => {
+    const root = await mount({ zoom: 'day' });
+
+    expect(unitLines(root)).toEqual([]);
+  });
+
+  it('does not let the year scale turn into a wash of day lines', async () => {
+    const root = await mount({ zoom: 'year' });
+    const css = root.querySelector('style')!.textContent!;
+
+    expect(css).toMatch(/\.timeline-body\[data-zoom="year"\]/);
+    expect(unitLines(root).length).toBeGreaterThanOrEqual(1);
+  });
+});

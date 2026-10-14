@@ -374,6 +374,20 @@ const style = `
       color-mix(in srgb, var(--ui-gantt-panel) 98%, transparent);
   }
 
+  .timeline-body[data-zoom="month"],
+  .timeline-body[data-zoom="quarter"],
+  .timeline-body[data-zoom="year"] {
+    background: color-mix(in srgb, var(--ui-gantt-panel) 98%, transparent);
+  }
+
+  .unit-line {
+    position: absolute;
+    inset-block: 0;
+    inline-size: 1px;
+    background: color-mix(in srgb, var(--ui-gantt-border) 90%, transparent);
+    pointer-events: none;
+  }
+
   .grid-row,
   .timeline-row {
     block-size: ${ROW_HEIGHT}px;
@@ -1165,6 +1179,27 @@ function sharesAnId(a: Set<string>, b: Set<string>): boolean {
   return false;
 }
 
+/**
+ * Vertical lines on the header's unit boundaries, so the body lines up with the columns above it. The day
+ * scale keeps its per-day lines from the stylesheet; the month scale and wider would otherwise be a solid
+ * wash of lines a few pixels apart.
+ */
+function createUnitLines(
+  min: number,
+  endMs: number,
+  dayWidth: number,
+  zoom: GanttZoom,
+  weekStart: number,
+  viewportLeft: number,
+  viewportWidth: number
+): string {
+  if (zoom === 'day') return '';
+  return headerCells(zoom, weekStart, min, endMs, dayWidth, viewportLeft, viewportWidth)
+    .filter((cell) => cell.start >= min)
+    .map((cell) => `<span class="unit-line" style="left:${cell.left.toFixed(2)}px"></span>`)
+    .join('');
+}
+
 /** `CSS.escape` where it exists (it does not in jsdom); otherwise escape what would end a quoted attribute value. */
 function cssEscape(value: string): string {
   if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') return CSS.escape(value);
@@ -1427,6 +1462,8 @@ export class UIGantt extends ElementBase {
     }).join('');
     const linkDefs = linkPaths ? '<defs><marker id="ui-gantt-arrow" markerWidth="9" markerHeight="9" refX="8.5" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0.5 0.75 L 8.5 4.5 L 0.5 8.25 z" /></marker></defs>' : '';
 
+    const weekStart = normalizeWeekStart(this.getAttribute('week-start'));
+    const rangeEnd = min + (timelineWidth / dayWidth) * DAY;
     const today = startOfDay(Date.now());
     const todayX = xForDate(today);
     const todayMarkup = showToday && today >= min && today <= max ? `<div class="today" part="today" style="left:${todayX.toFixed(2)}px"></div>` : '';
@@ -1470,9 +1507,10 @@ export class UIGantt extends ElementBase {
               </div>
             </div>
             <div class="timeline-head" part="timeline-head" aria-hidden="true">
-              <div class="scale" data-zoom="${zoom}" style="width:${timelineWidth.toFixed(2)}px">${createTimeHeader(min, min + (timelineWidth / dayWidth) * DAY, dayWidth, zoom, normalizeWeekStart(this.getAttribute('week-start')), this.viewportLeft, this.viewportWidth)}</div>
+              <div class="scale" data-zoom="${zoom}" style="width:${timelineWidth.toFixed(2)}px">${createTimeHeader(min, rangeEnd, dayWidth, zoom, weekStart, this.viewportLeft, this.viewportWidth)}</div>
             </div>
-            <div class="timeline-body" part="timeline-body" role="group" aria-label="Timeline" style="width:${timelineWidth.toFixed(2)}px;min-height:${rowsHeight}px">
+            <div class="timeline-body" part="timeline-body" role="group" aria-label="Timeline" data-zoom="${zoom}" style="width:${timelineWidth.toFixed(2)}px;min-height:${rowsHeight}px">
+              ${createUnitLines(min, rangeEnd, dayWidth, zoom, weekStart, this.viewportLeft, this.viewportWidth)}
               <svg class="links" width="${timelineWidth.toFixed(0)}" height="${rowsHeight}" viewBox="0 0 ${timelineWidth.toFixed(0)} ${rowsHeight}" aria-hidden="true">${linkDefs}${linkPaths}</svg>
               ${todayMarkup}
               ${virtualized && topSpacer ? `<div style="height:${topSpacer}px"></div>` : ''}
