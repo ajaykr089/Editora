@@ -668,6 +668,30 @@ const style = `
     opacity: 1;
   }
 
+  /* A finger needs the 24px minimum target size, and a touch screen has no hover to reveal the handles:
+     task bars grow from 18 to 24px tall (centred on the same line, so links and baselines still meet them),
+     the resize handles from 14 to 24px wide and always show their grip. A very short bar keeps a middle to
+     grab by giving each handle at most 35% of it. */
+  @media (pointer: coarse) {
+    .bar.task {
+      block-size: 24px;
+      top: 9px;
+    }
+
+    .handle {
+      inline-size: min(24px, 35%);
+      opacity: 1;
+    }
+
+    .handle.start::after {
+      inset-inline-start: 8px;
+    }
+
+    .handle.end::after {
+      inset-inline-end: 8px;
+    }
+  }
+
   /* One tooltip for the whole chart, outside the bars (which clip their children), placed by script. It
      repeats the bar's accessible name, so it is hidden from assistive technology. */
   .bar-tip {
