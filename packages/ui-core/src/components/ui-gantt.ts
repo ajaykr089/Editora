@@ -1704,7 +1704,7 @@ export class UIGantt extends ElementBase {
       });
     });
 
-    this.root.querySelectorAll<HTMLButtonElement>('[data-zoom]').forEach((button) => {
+    this.root.querySelectorAll<HTMLButtonElement>('.zoom-button[data-zoom]').forEach((button) => {
       button.addEventListener('click', () => {
         const zoom = button.dataset.zoom || 'week';
         this.setAttribute('zoom', zoom);
