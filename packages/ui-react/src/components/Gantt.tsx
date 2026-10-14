@@ -146,6 +146,12 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
       else syncAttr(name, null);
     };
 
+    // These two default to shown, so "off" has to be written as an attribute: removing it shows them.
+    const syncShown = (name: string, shown: boolean | undefined) => {
+      if (shown === false) syncAttr(name, 'false');
+      else syncBool(name, shown);
+    };
+
     syncAttr('tasks', serializeTasks(tasks));
     syncAttr('links', links?.length ? JSON.stringify(links) : null);
     syncAttr('zoom', zoom || null);
@@ -154,8 +160,8 @@ export const Gantt = React.forwardRef<HTMLElement, GanttProps>(function Gantt(
     syncAttr('variant', variant && variant !== 'default' ? variant : null);
     syncAttr('filter', filterText || null);
     syncBool('readonly', readonly);
-    syncBool('show-toolbar', showToolbar);
-    syncBool('show-today', showToday);
+    syncShown('show-toolbar', showToolbar);
+    syncShown('show-today', showToday);
     if (virtualized === false) syncAttr('virtualized', 'false');
     else syncAttr('virtualized', null);
     syncBool('headless', headless);
