@@ -67,6 +67,10 @@ const DAY = 24 * 60 * 60 * 1000;
 const ROW_HEIGHT = 42;
 const HEADER_HEIGHT = 62;
 const GRID_WIDTH = 376;
+/** Mirrors the container query in the stylesheet: at this host width or less the grid shrinks to COMPACT_GRID_WIDTH. */
+const COMPACT_MAX_WIDTH = 640;
+const COMPACT_GRID_WIDTH = 148;
+const FRAME_BORDER = 2;
 const MILESTONE_SIZE = 28;
 const MILESTONE_SHAPE_SIZE = 15;
 const MILESTONE_DIAMOND_HALF = (MILESTONE_SHAPE_SIZE * Math.SQRT2) / 2;
@@ -370,6 +374,8 @@ const style = `
 
   .timeline-body {
     position: relative;
+    /* grid lines can run a scrollbar's width past the track; clip them, and keep y visible for drag tips */
+    overflow-x: clip;
     background:
       linear-gradient(to right, var(--ui-gantt-grid) 1px, transparent 1px) 0 0 / var(--day-width) 100%,
       color-mix(in srgb, var(--ui-gantt-panel) 98%, transparent);
@@ -1387,6 +1393,8 @@ export class UIGantt extends ElementBase {
   private viewportTop = 0;
   private viewportLeft = 0;
   private viewportWidth = 1800;
+  private hostWidth = 0;
+  private resizeObserver: ResizeObserver | null = null;
   private viewportHeight = 620;
   private renderedFirstRow = 0;
   private renderedLastRow = 0;
@@ -1399,6 +1407,25 @@ export class UIGantt extends ElementBase {
   private linkCache: GanttLink[] = [];
   private visibleCacheKey = '';
   private visibleCache: VisibleTask[] = [];
+
+  override connectedCallback(): void {
+    super.connectedCallback();
+    if (typeof ResizeObserver === 'undefined' || this.resizeObserver) return;
+    this.resizeObserver = new ResizeObserver((entries) => {
+      const width = Math.round(entries[entries.length - 1]?.contentRect.width ?? 0);
+      if (width === this.hostWidth) return;
+      this.hostWidth = width;
+      this.captureViewport();
+      this.requestRender();
+    });
+    this.resizeObserver.observe(this);
+  }
+
+  override disconnectedCallback(): void {
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
+    super.disconnectedCallback();
+  }
 
   protected override render(): void {
     const tasks = this.getTasks();
@@ -1521,7 +1548,13 @@ export class UIGantt extends ElementBase {
     const linkDefs = linkPaths ? '<defs><marker id="ui-gantt-arrow" markerWidth="9" markerHeight="9" refX="8.5" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0.5 0.75 L 8.5 4.5 L 0.5 8.25 z" /></marker></defs>' : '';
 
     const weekStart = normalizeWeekStart(this.getAttribute('week-start'));
-    const rangeEnd = min + (timelineWidth / dayWidth) * DAY;
+    // A host wider than the data fills the frame: the timeline track grows (1fr) and the header cells and
+    // grid lines are drawn out to its edge, so there is no blank strip after the last task.
+    this.hostWidth = this.clientWidth || this.hostWidth;
+    const frameWidth = this.hostWidth - FRAME_BORDER;
+    const gridWidth = frameWidth <= COMPACT_MAX_WIDTH ? COMPACT_GRID_WIDTH : GRID_WIDTH;
+    const fillWidth = Math.max(timelineWidth, frameWidth - gridWidth);
+    const rangeEnd = min + (fillWidth / dayWidth) * DAY;
     const today = startOfDay(Date.now());
     const todayX = xForDate(today);
     const todayMarkup = showToday && today >= min && today <= max ? `<div class="today" part="today" style="left:${todayX.toFixed(2)}px"></div>` : '';
@@ -1550,7 +1583,7 @@ export class UIGantt extends ElementBase {
           </header>
         ` : ''}
         <div class="viewport" part="viewport">
-          <div class="surface" part="surface" style="--day-width:${dayWidth}px;grid-template-columns:var(--gantt-grid-w) ${timelineWidth.toFixed(2)}px;inline-size:max(100%, calc(var(--gantt-grid-w) + ${timelineWidth.toFixed(2)}px))">
+          <div class="surface" part="surface" style="--day-width:${dayWidth}px;grid-template-columns:var(--gantt-grid-w) minmax(${timelineWidth.toFixed(2)}px, 1fr);inline-size:max(100%, calc(var(--gantt-grid-w) + ${timelineWidth.toFixed(2)}px))">
             <div class="grid-semantics" role="treegrid" aria-label="${escapeHtml(this.getAttribute('aria-label') || 'Project schedule')}" aria-rowcount="${visible.length + 1}" aria-colcount="4">
               <div class="grid-head" part="grid-head" role="row">
                 <div role="columnheader" aria-sort="${sort === 'label' ? 'ascending' : 'none'}" style="display:contents"><button class="head-button" data-sort="label">Task</button></div>
@@ -1565,9 +1598,9 @@ export class UIGantt extends ElementBase {
               </div>
             </div>
             <div class="timeline-head" part="timeline-head" aria-hidden="true">
-              <div class="scale" data-zoom="${zoom}" style="width:${timelineWidth.toFixed(2)}px">${createTimeHeader(min, rangeEnd, dayWidth, zoom, weekStart, this.viewportLeft, this.viewportWidth)}</div>
+              <div class="scale" data-zoom="${zoom}" style="min-width:${timelineWidth.toFixed(2)}px">${createTimeHeader(min, rangeEnd, dayWidth, zoom, weekStart, this.viewportLeft, this.viewportWidth)}</div>
             </div>
-            <div class="timeline-body" part="timeline-body" role="group" aria-label="Timeline" data-zoom="${zoom}" style="width:${timelineWidth.toFixed(2)}px;min-height:${rowsHeight}px">
+            <div class="timeline-body" part="timeline-body" role="group" aria-label="Timeline" data-zoom="${zoom}" style="min-width:${timelineWidth.toFixed(2)}px;min-height:${rowsHeight}px">
               ${createUnitLines(min, rangeEnd, dayWidth, zoom, weekStart, this.viewportLeft, this.viewportWidth)}
               <svg class="links" width="${timelineWidth.toFixed(0)}" height="${rowsHeight}" viewBox="0 0 ${timelineWidth.toFixed(0)} ${rowsHeight}" aria-hidden="true">${linkDefs}${linkPaths}</svg>
               ${todayMarkup}
