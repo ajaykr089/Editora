@@ -31,7 +31,7 @@ Visible quality, no new concepts. Most of it is in `createTicks` and the bar CSS
 | A3 | ~~Visible progress~~ **done** | A solid darker fill with a light edge on every bar (soft, outline and glass tuned, summary bars included), per-part fills on split bars (a part's own `progress`, else the task's shared in order), split bars follow the bar variant, `data-progress` and a `complete` class. | S |
 | A4 | Zoom range | `month`, `quarter` and `year` give the same width for any project under a few months (the `max(680, …)` clamp). Derive the clamp from the container, and add a `fit` zoom that fits the whole range. | M |
 | A5 | ~~Timeline fills the frame~~ **done** | The timeline track is `minmax(data width, 1fr)`, the header cells and unit lines are drawn out to the host's edge, and a `ResizeObserver` keeps up with width changes. Grid lines that overshoot a scrollbar are clipped (`overflow-x: clip`). | S |
-| A6 | Today label | It overlaps summary bars. Move it to a pill in the header and keep only the line in the body. | S |
+| A6 | ~~Today label~~ **done** | The "Today" label is a pill at the bottom of the sticky header, centred on the line and clamped inside the track; the body keeps only the line. No pill at the day scale, where today's column is already highlighted and a pill would cover its date. The line now also shows in the stretch added to fill a wide host. | S |
 | A7 | Bar names and tooltips | A bar's accessible name is the label only. Add dates and progress to the `aria-label`, and a hover/focus tooltip with the same text. | S |
 | A8 | Touch targets | Resize handles are 14x18px. Keep the look, grow the hit area to 24px with padding on a pseudo-element. | S |
 | A9 | Date semantics | An ISO datetime such as `2026-03-02T23:30:00Z` shifts a day in some time zones. Define tasks as local dates: read the date part and ignore the time, and document it. | S |
@@ -70,7 +70,7 @@ can build undo from `taskchange`).
 
 ## Order and totals
 
-A1, A2, A3 and A5 are done; next A4 (they change how every chart looks), then A6-A11, B1-B2, B4, B3, B7, B5, B6, B8, and phase C last.
+A1, A2, A3, A5 and A6 are done; next A4 (they change how every chart looks), then A6-A11, B1-B2, B4, B3, B7, B5, B6, B8, and phase C last.
 That is roughly five to six weeks in total, and each item above is its own commit. The estimate is a
 guess from reading the code, not a measurement: C2 and C3 are the ones most likely to run over.
 

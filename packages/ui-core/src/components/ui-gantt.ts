@@ -219,7 +219,8 @@ const style = `
     top: 0;
     z-index: 4;
     min-block-size: 62px;
-    background: color-mix(in srgb, var(--ui-gantt-panel) 96%, transparent);
+    /* Opaque: the rows scroll underneath, and at 96% they showed through as a ghost of the text. */
+    background: var(--ui-gantt-panel);
     border-bottom: 1px solid var(--ui-gantt-border);
   }
 
@@ -336,16 +337,21 @@ const style = `
     font-weight: 700;
   }
 
-  .scale[data-zoom="year"] .tick {
+  /* Labels sit at the top of their row so the today pill has the bottom of it to itself. */
+  .band.bottom .tick {
     align-items: flex-start;
+    padding-block-start: 6px;
+  }
+
+  .scale[data-zoom="year"] .tick {
     padding-block-start: 9px;
   }
 
   .tick.day {
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 1px;
-    padding: 0;
+    padding: 3px 0 0;
     line-height: 1.15;
   }
 
@@ -775,14 +781,22 @@ const style = `
     pointer-events: none;
   }
 
-  .today::before {
-    content: "Today";
+  /* In the header, under the unit labels (which sit at the top of their row), centred on the today line
+     and kept inside the track at either end. */
+  .today-pill {
     position: absolute;
-    inset-block-start: 4px;
-    inset-inline-start: 6px;
-    color: var(--ui-color-danger, #dc2626);
-    font-size: 11px;
+    inset-block-end: 3px;
+    z-index: 3;
+    transform: translateX(-50%);
+    padding: 0 6px;
+    block-size: 14px;
+    border-radius: 7px;
+    background: var(--ui-color-danger, #dc2626);
+    color: #ffffff;
+    font-size: 10px;
     font-weight: 750;
+    line-height: 14px;
+    pointer-events: none;
   }
 
   .links {
@@ -1557,7 +1571,12 @@ export class UIGantt extends ElementBase {
     const rangeEnd = min + (fillWidth / dayWidth) * DAY;
     const today = startOfDay(Date.now());
     const todayX = xForDate(today);
-    const todayMarkup = showToday && today >= min && today <= max ? `<div class="today" part="today" style="left:${todayX.toFixed(2)}px"></div>` : '';
+    // Today is drawn while it falls anywhere on the timeline, including the stretch added to fill a wide host.
+    const showTodayMarker = showToday && today >= min && today <= rangeEnd;
+    const todayMarkup = showTodayMarker ? `<div class="today" part="today" style="left:${todayX.toFixed(2)}px"></div>` : '';
+    // The label lives in the header, which stays put while the rows scroll, not on the line where it covered bars.
+    // The day scale already highlights today's own column, and a pill there would cover its date.
+    const todayPill = showTodayMarker && zoom !== 'day' ? `<span class="today-pill" part="today-pill" style="left:clamp(22px, ${todayX.toFixed(2)}px, calc(100% - 22px))">Today</span>` : '';
 
     const focusSnapshot = this.focusRequest ?? this.captureFocus();
     this.focusRequest = null;
@@ -1598,7 +1617,7 @@ export class UIGantt extends ElementBase {
               </div>
             </div>
             <div class="timeline-head" part="timeline-head" aria-hidden="true">
-              <div class="scale" data-zoom="${zoom}" style="min-width:${timelineWidth.toFixed(2)}px">${createTimeHeader(min, rangeEnd, dayWidth, zoom, weekStart, this.viewportLeft, this.viewportWidth)}</div>
+              <div class="scale" data-zoom="${zoom}" style="min-width:${timelineWidth.toFixed(2)}px">${createTimeHeader(min, rangeEnd, dayWidth, zoom, weekStart, this.viewportLeft, this.viewportWidth)}${todayPill}</div>
             </div>
             <div class="timeline-body" part="timeline-body" role="group" aria-label="Timeline" data-zoom="${zoom}" style="min-width:${timelineWidth.toFixed(2)}px;min-height:${rowsHeight}px">
               ${createUnitLines(min, rangeEnd, dayWidth, zoom, weekStart, this.viewportLeft, this.viewportWidth)}
