@@ -123,3 +123,64 @@ describe('ui-gantt keyboard editing', () => {
     expect(root(gantt).activeElement).toBe(root(gantt).querySelector('.expander[data-task-id="p1"]'));
   });
 });
+
+describe('ui-gantt keyboard navigation reaches every bar', () => {
+  it('moves off a summary bar, which is the first and only Tab stop', async () => {
+    const gantt = await mount();
+    const stops = [...root(gantt).querySelectorAll<HTMLElement>('.bar')].filter((el) => el.tabIndex === 0);
+    expect(stops.map((el) => el.dataset.taskId)).toEqual(['p1']);
+
+    bar(gantt, 'p1').focus();
+    press(bar(gantt, 'p1'), 'ArrowDown');
+    await flush();
+    expect(root(gantt).activeElement).toBe(bar(gantt, 'a'));
+
+    bar(gantt, 'c').focus();
+    press(bar(gantt, 'c'), 'ArrowUp');
+    await flush();
+    press(bar(gantt, 'b'), 'ArrowUp');
+    await flush();
+    press(bar(gantt, 'a'), 'ArrowUp');
+    await flush();
+    expect(root(gantt).activeElement).toBe(bar(gantt, 'p1'));
+  });
+
+  it('still navigates and selects in a read-only chart, without editing anything', async () => {
+    const gantt = await mount({ readonly: '' });
+    const events: string[] = [];
+    for (const name of ['taskchange', 'taskdelete', 'taskselect']) {
+      gantt.addEventListener(name, (event) => events.push(`${name}:${(event as CustomEvent).detail.id}`));
+    }
+
+    bar(gantt, 'a').focus();
+    press(bar(gantt, 'a'), 'ArrowDown');
+    await flush();
+    expect(root(gantt).activeElement).toBe(bar(gantt, 'b'));
+
+    press(bar(gantt, 'b'), 'ArrowRight');
+    press(bar(gantt, 'b'), 'Delete');
+    await flush();
+    expect(events).toEqual(['taskselect:b']);
+  });
+
+  it('navigates through a read-only task but never moves or deletes it', async () => {
+    const tasks = TASKS.map((task) => (task.id === 'b' ? { ...task, readonly: true } : task));
+    const gantt = await mount({}, tasks);
+    const events: string[] = [];
+    for (const name of ['taskchange', 'taskdelete']) {
+      gantt.addEventListener(name, (event) => events.push(name));
+    }
+
+    bar(gantt, 'a').focus();
+    press(bar(gantt, 'a'), 'ArrowDown');
+    await flush();
+    expect(root(gantt).activeElement).toBe(bar(gantt, 'b'));
+
+    press(bar(gantt, 'b'), 'ArrowRight');
+    press(bar(gantt, 'b'), 'Delete');
+    press(bar(gantt, 'b'), 'ArrowDown');
+    await flush();
+    expect(events).toEqual([]);
+    expect(root(gantt).activeElement).toBe(bar(gantt, 'c'));
+  });
+});

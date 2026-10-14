@@ -1399,6 +1399,10 @@ export class UIGantt extends ElementBase {
       });
     });
 
+    this.root.querySelectorAll<HTMLElement>('.bar').forEach((bar) => {
+      bar.addEventListener('keydown', (event) => this.handleBarKeydown(bar, event as KeyboardEvent));
+    });
+
     if (this.hasAttribute('readonly')) return;
     this.root.querySelectorAll<HTMLElement>('.bar[data-draggable="true"]').forEach((bar) => {
       bar.addEventListener('pointerdown', (event) => {
@@ -1503,46 +1507,52 @@ export class UIGantt extends ElementBase {
 
       bar.addEventListener('pointerup', finishDrag);
       bar.addEventListener('pointercancel', finishDrag);
-      bar.addEventListener('keydown', (event) => {
-        const taskId = bar.dataset.taskId;
-        if (!taskId) return;
-        if (event.key === 'Delete' || event.key === 'Backspace') {
-          event.preventDefault();
-          this.dispatchEvent(new CustomEvent('taskdelete', { detail: { id: taskId }, bubbles: true, composed: true }));
-          return;
-        }
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          this.selectTask(taskId);
-          return;
-        }
-        if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-          event.preventDefault();
-          this.selectAdjacentTask(taskId, event.key === 'ArrowDown' ? 1 : -1);
-          return;
-        }
-        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
-        const tasks = this.getTasks();
-        const task = tasks.find((item) => item.id === taskId);
-        const start = parseDate(task?.start);
-        const end = parseDate(task?.end);
-        if (!task || start == null || end == null) return;
-        event.preventDefault();
-        const direction = event.key === 'ArrowLeft' ? -1 : 1;
-        const isMilestone = bar.dataset.kind === 'milestone';
-        const nextStart = event.shiftKey && !isMilestone ? start : addDays(start, direction);
-        const nextEnd = isMilestone
-          ? nextStart
-          : event.shiftKey
-            ? Math.max(addDays(end, direction), addDays(start, 1))
-            : addDays(end, direction);
-        const detail = { id: taskId, start: formatIso(nextStart), end: formatIso(nextEnd) };
-        this.overrides.set(taskId, { start: detail.start, end: detail.end });
-        this.bumpOverrides();
-        this.dispatchEvent(new CustomEvent('taskchange', { detail, bubbles: true, composed: true }));
-        this.requestRender();
-      });
     });
+  }
+
+  /**
+   * Keyboard on a bar. Moving between rows (and selecting) works on every bar, summaries and read-only
+   * charts included; only the keys that change dates or delete need an editable bar.
+   */
+  private handleBarKeydown(bar: HTMLElement, event: KeyboardEvent): void {
+    const taskId = bar.dataset.taskId;
+    if (!taskId) return;
+    const editable = bar.dataset.draggable === 'true' && !this.hasAttribute('readonly');
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.selectTask(taskId);
+      return;
+    }
+    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.selectAdjacentTask(taskId, event.key === 'ArrowDown' ? 1 : -1);
+      return;
+    }
+    if (!editable) return;
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+      event.preventDefault();
+      this.dispatchEvent(new CustomEvent('taskdelete', { detail: { id: taskId }, bubbles: true, composed: true }));
+      return;
+    }
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    const task = this.getTasks().find((item) => item.id === taskId);
+    const start = parseDate(task?.start);
+    const end = parseDate(task?.end);
+    if (!task || start == null || end == null) return;
+    event.preventDefault();
+    const direction = event.key === 'ArrowLeft' ? -1 : 1;
+    const isMilestone = bar.dataset.kind === 'milestone';
+    const nextStart = event.shiftKey && !isMilestone ? start : addDays(start, direction);
+    const nextEnd = isMilestone
+      ? nextStart
+      : event.shiftKey
+        ? Math.max(addDays(end, direction), addDays(start, 1))
+        : addDays(end, direction);
+    const detail = { id: taskId, start: formatIso(nextStart), end: formatIso(nextEnd) };
+    this.overrides.set(taskId, { start: detail.start, end: detail.end });
+    this.bumpOverrides();
+    this.dispatchEvent(new CustomEvent('taskchange', { detail, bubbles: true, composed: true }));
+    this.requestRender();
   }
 
   private rangeMin(): number {
