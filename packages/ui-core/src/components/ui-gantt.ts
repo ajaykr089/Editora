@@ -500,13 +500,15 @@ const style = `
     overflow: visible;
   }
 
-  .bar.split .progress {
+  /* A split bar shows the progress of each part, inside the part, and not one fill across the gaps. */
+  .bar.split > .progress {
     display: none;
   }
 
   .split-segment {
     position: absolute;
     inset-block: 0;
+    overflow: hidden;
     border-radius: 4px;
     background:
       linear-gradient(180deg, color-mix(in srgb, #ffffff 22%, transparent), transparent 42%),
@@ -580,13 +582,33 @@ const style = `
     display: none;
   }
 
+  /* The done part of a bar: a solid, darker shade of the bar's tone with a light edge where it stops, so
+     the amount is readable from the bar itself and not only from the % column. */
   .progress {
     position: absolute;
     inset-block: 0;
     inset-inline-start: 0;
-    background: linear-gradient(90deg, color-mix(in srgb, #000 22%, transparent), transparent);
-    opacity: 0.3;
     inline-size: var(--progress, 0%);
+    background:
+      linear-gradient(180deg, color-mix(in srgb, #ffffff 16%, transparent), transparent 46%),
+      color-mix(in srgb, var(--tone, var(--ui-gantt-accent)) 58%, #0b1220);
+    box-shadow: inset -2px 0 0 color-mix(in srgb, #ffffff 62%, transparent);
+  }
+
+  .bar.complete .progress,
+  .progress.full {
+    box-shadow: none;
+  }
+
+  .bar.summary .progress {
+    background: color-mix(in srgb, #0b1220 58%, transparent);
+  }
+
+  :host([bar-variant="soft"]) .bar.task .progress {
+    background:
+      linear-gradient(180deg, color-mix(in srgb, #ffffff 24%, transparent), transparent 46%),
+      color-mix(in srgb, var(--tone, var(--ui-gantt-accent)) 62%, var(--ui-gantt-panel));
+    box-shadow: inset -2px 0 0 color-mix(in srgb, var(--tone, var(--ui-gantt-accent)) 85%, transparent);
   }
 
   .handle {
@@ -652,7 +674,8 @@ const style = `
     opacity: 1;
   }
 
-  :host([bar-variant="soft"]) .bar.task {
+  :host([bar-variant="soft"]) .bar.task,
+  :host([bar-variant="soft"]) .split-segment {
     background:
       linear-gradient(180deg, color-mix(in srgb, #ffffff 38%, transparent), transparent 46%),
       color-mix(in srgb, var(--tone, var(--ui-gantt-accent)) 22%, var(--ui-gantt-panel));
@@ -671,7 +694,8 @@ const style = `
       0 7px 16px color-mix(in srgb, var(--tone, var(--ui-gantt-accent)) 16%, transparent);
   }
 
-  :host([bar-variant="striped"]) .bar.task {
+  :host([bar-variant="striped"]) .bar.task,
+  :host([bar-variant="striped"]) .split-segment {
     background:
       repeating-linear-gradient(135deg, color-mix(in srgb, #ffffff 24%, transparent) 0 7px, transparent 7px 14px),
       var(--tone, var(--ui-gantt-accent));
@@ -683,7 +707,8 @@ const style = `
       var(--tone, var(--ui-gantt-accent));
   }
 
-  :host([bar-variant="outline"]) .bar.task {
+  :host([bar-variant="outline"]) .bar.task,
+  :host([bar-variant="outline"]) .split-segment {
     background: color-mix(in srgb, var(--tone, var(--ui-gantt-accent)) 8%, var(--ui-gantt-panel));
     box-shadow:
       inset 0 0 0 1.5px color-mix(in srgb, var(--tone, var(--ui-gantt-accent)) 72%, transparent),
@@ -691,8 +716,8 @@ const style = `
   }
 
   :host([bar-variant="outline"]) .bar.task .progress {
-    background: color-mix(in srgb, var(--tone, var(--ui-gantt-accent)) 28%, transparent);
-    opacity: 1;
+    background: color-mix(in srgb, var(--tone, var(--ui-gantt-accent)) 42%, transparent);
+    box-shadow: inset -2px 0 0 color-mix(in srgb, var(--tone, var(--ui-gantt-accent)) 85%, transparent);
   }
 
   :host([bar-variant="outline"]) .milestone-shape {
@@ -702,7 +727,8 @@ const style = `
       0 7px 16px color-mix(in srgb, var(--tone, var(--ui-gantt-accent)) 10%, transparent);
   }
 
-  :host([bar-variant="glass"]) .bar.task {
+  :host([bar-variant="glass"]) .bar.task,
+  :host([bar-variant="glass"]) .split-segment {
     background:
       linear-gradient(180deg, color-mix(in srgb, #ffffff 50%, transparent), color-mix(in srgb, #ffffff 10%, transparent)),
       color-mix(in srgb, var(--tone, var(--ui-gantt-accent)) 72%, transparent);
@@ -718,6 +744,19 @@ const style = `
       linear-gradient(135deg, color-mix(in srgb, #ffffff 52%, transparent), color-mix(in srgb, #ffffff 8%, transparent)),
       color-mix(in srgb, var(--tone, var(--ui-gantt-accent)) 74%, transparent);
     backdrop-filter: blur(8px);
+  }
+
+  /* The parts of a split bar carry the variant skin; the bar around them stays empty so the gaps are gaps. */
+  :host([bar-variant]) .bar.split {
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  /* After the variant skins, which draw their own edge: a finished bar or part has no edge to show. */
+  :host([bar-variant]) .bar.complete .progress,
+  :host([bar-variant]) .bar .progress.full {
+    box-shadow: none;
   }
 
   .today {
@@ -1200,6 +1239,52 @@ function createUnitLines(
     .join('');
 }
 
+/**
+ * How much of each part of a split task is done, as percentages. A part with its own `progress` uses it; the
+ * others share the task's overall progress in order, earliest first, weighted by their length.
+ */
+function segmentFills(parts: Array<{ duration: number; progress?: number }>, overall: number): number[] {
+  const clamp = (value: number) => Math.max(0, Math.min(100, value));
+  let remaining = parts.reduce((sum, part) => (part.progress == null ? sum + part.duration : sum), 0) * (clamp(overall) / 100);
+  return parts.map((part) => {
+    if (part.progress != null) return clamp(part.progress);
+    const taken = Math.min(part.duration, remaining);
+    remaining -= taken;
+    return part.duration > 0 ? (taken / part.duration) * 100 : 0;
+  });
+}
+
+/** The parts of a split task, each with its own progress fill. Parts outside the task's dates are clipped away. */
+function renderSegments(task: VisibleTask, overall: number): string {
+  const range = Math.max(DAY, task.endMs - task.startMs);
+  const parts: Array<{ left: number; width: number; duration: number; progress?: number }> = [];
+  for (const segment of task.segments || []) {
+    const segmentStart = parseDate(segment.start);
+    const segmentEnd = parseDate(segment.end);
+    if (segmentStart == null || segmentEnd == null) continue;
+    const clippedStart = Math.max(task.startMs, segmentStart);
+    const clippedEnd = Math.min(task.endMs, segmentEnd);
+    if (clippedEnd <= clippedStart) continue;
+    const left = Math.max(0, Math.min(100, ((clippedStart - task.startMs) / range) * 100));
+    const width = Math.min(100 - left, Math.max(1, ((clippedEnd - clippedStart) / range) * 100));
+    if (width <= 0) continue;
+    const own = Number(segment.progress);
+    parts.push({
+      left,
+      width,
+      duration: clippedEnd - clippedStart,
+      progress: segment.progress != null && Number.isFinite(own) ? own : undefined
+    });
+  }
+  const fills = segmentFills(parts, overall);
+  return parts
+    .map((part, index) =>
+      `<span class="split-segment" style="left:${part.left.toFixed(2)}%;width:${part.width.toFixed(2)}%">` +
+      `<span class="progress${fills[index] >= 100 ? ' full' : ''}" style="--progress:${fills[index].toFixed(2)}%"></span></span>`
+    )
+    .join('');
+}
+
 /** `CSS.escape` where it exists (it does not in jsdom); otherwise escape what would end a quoted attribute value. */
 function cssEscape(value: string): string {
   if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') return CSS.escape(value);
@@ -1411,29 +1496,17 @@ export class UIGantt extends ElementBase {
       const canEdit = !readonly && !task.readonly && kind !== 'summary';
       const showHandles = canEdit && kind === 'task';
       const splitSegments = kind === 'task' && task.segments?.length
-        ? task.segments.map((segment) => {
-          const segmentStart = parseDate(segment.start);
-          const segmentEnd = parseDate(segment.end);
-          if (segmentStart == null || segmentEnd == null) return '';
-          const range = Math.max(DAY, task.endMs - task.startMs);
-          const clippedStart = Math.max(task.startMs, segmentStart);
-          const clippedEnd = Math.min(task.endMs, segmentEnd);
-          if (clippedEnd <= clippedStart) return '';
-          const segmentLeft = Math.max(0, Math.min(100, ((clippedStart - task.startMs) / range) * 100));
-          const rawWidth = ((clippedEnd - clippedStart) / range) * 100;
-          const segmentWidth = Math.min(100 - segmentLeft, Math.max(1, rawWidth));
-          if (segmentWidth <= 0) return '';
-          return `<span class="split-segment" style="left:${segmentLeft.toFixed(2)}%;width:${segmentWidth.toFixed(2)}%"></span>`;
-        }).join('')
+        ? renderSegments(task, progress)
         : '';
       return `
         <div class="timeline-row${selected}" part="timeline-row" data-task-id="${escapeHtml(task.id)}">
           ${task.baselineStart && task.baselineEnd ? `<span class="baseline" style="left:${xForDate(parseDate(task.baselineStart) || task.startMs).toFixed(2)}px;width:${Math.max(4, xForDate(parseDate(task.baselineEnd) || task.endMs) - xForDate(parseDate(task.baselineStart) || task.startMs)).toFixed(2)}px"></span>` : ''}
           <button
-            class="bar ${kind}${task.critical ? ' critical' : ''}${splitSegments ? ' split' : ''}"
+            class="bar ${kind}${task.critical ? ' critical' : ''}${splitSegments ? ' split' : ''}${progress >= 100 ? ' complete' : ''}"
             part="bar ${kind}"
             data-task-id="${escapeHtml(task.id)}"
             data-kind="${kind}"
+            ${task.progress != null ? `data-progress="${Math.round(progress)}"` : ''}
             tabindex="${focusable ? '0' : '-1'}"
             ${this.selectedId === task.id ? 'aria-current="true"' : ''}
             style="left:${left.toFixed(2)}px;width:${width.toFixed(2)}px;--tone:${tone};--progress:${progress.toFixed(2)}%"
