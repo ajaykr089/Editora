@@ -36,6 +36,8 @@ export type GanttLink = {
   source: string;
   target: string;
   type?: 'e2s' | 's2s' | 'e2e' | 's2e';
+  /** Days the target must wait after what it follows; negative lets it overlap. Default 0. */
+  lag?: number;
 };
 
 export type GanttTaskChangeDetail = {
@@ -103,6 +105,7 @@ export type GanttLabels = {
   scrollToToday: string;
   addTask: string;
   rename: string;
+  linkViolated: string;
   empty: string;
   noMatches: string;
   expand: string;
@@ -146,6 +149,8 @@ export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   weekStart?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   /** The task list's columns, in order. The name column is always first. Default: name, owner, dates, progress. */
   columns?: GanttColumn[];
+  /** How dependencies are enforced: `'warn'` (the default) draws a link whose target is too early in the danger style, `'auto'` also pushes the tasks that follow a task that moves (later only, keeping their length), `'off'` does neither. */
+  schedule?: 'warn' | 'auto' | 'off';
   /** A parent's dates follow its children (the earliest start to the latest end), and so does its progress when it has none of its own. */
   autoSummary?: boolean;
   /** Moving a parent moves everything under it by the same days (a read-only task stays put). Makes parent bars draggable. */
@@ -235,6 +240,7 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     creatable,
     autoSummary,
     cascade,
+    schedule,
     children,
     onTaskChange,
     onTaskSelect,
@@ -302,10 +308,11 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     syncBool('creatable', creatable);
     syncBool('auto-summary', autoSummary);
     syncBool('cascade', cascade);
+    syncAttr('schedule', schedule && schedule !== 'warn' ? schedule : null);
     syncAttr('snap', snap && snap !== 'day' ? snap : null);
     syncAttr('initial-scroll', initialScroll && initialScroll !== 'today' ? initialScroll : null);
     syncAttr('max-height', maxHeight == null || maxHeight === '' ? null : typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight);
-  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight, initialScroll, snap, creatable, autoSummary, cascade]);
+  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight, initialScroll, snap, creatable, autoSummary, cascade, schedule]);
 
   useEffect(() => {
     const el = ref.current;

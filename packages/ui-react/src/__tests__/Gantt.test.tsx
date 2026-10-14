@@ -209,4 +209,26 @@ describe('Gantt wrapper', () => {
     expect(el.hasAttribute('auto-summary')).toBe(false);
     expect(el.hasAttribute('cascade')).toBe(false);
   });
+
+  it('passes schedule and a link lag through', async () => {
+    const linked = [
+      { id: 'a', label: 'A', start: '2026-03-02', end: '2026-03-06' },
+      { id: 'b', label: 'B', start: '2026-03-06', end: '2026-03-09' },
+    ];
+    const { container, rerender } = render(<Gantt tasks={linked} links={[{ source: 'a', target: 'b', lag: 2 }]} schedule="auto" />);
+    await Promise.resolve();
+    const el = container.querySelector('ui-gantt') as HTMLElement;
+    expect(el.getAttribute('schedule')).toBe('auto');
+    expect(JSON.parse(el.getAttribute('links')!)).toEqual([{ source: 'a', target: 'b', lag: 2 }]);
+    expect(el.shadowRoot!.querySelectorAll('.link-hit.violated').length).toBe(1); // b may not start before the 8th
+
+    rerender(<Gantt tasks={linked} links={[{ source: 'a', target: 'b', lag: 2 }]} schedule="off" />);
+    await Promise.resolve();
+    expect(el.shadowRoot!.querySelectorAll('.link-hit.violated').length).toBe(0);
+
+    rerender(<Gantt tasks={linked} links={[{ source: 'a', target: 'b', lag: 2 }]} />);
+    await Promise.resolve();
+    expect(el.hasAttribute('schedule')).toBe(false);
+    expect(el.shadowRoot!.querySelectorAll('.link-hit.violated').length).toBe(1);
+  });
 });

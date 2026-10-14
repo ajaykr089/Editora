@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { daysBetween, descendantsOf, rollUp, shiftDays, type SchedTask } from '../components/gantt-schedule';
+import { constraintBound, daysBetween, descendantsOf, linkSatisfied, pushSuccessors, rollUp, shiftDays, violatedLinks, type LinkType, type SchedLink, type SchedTask } from '../components/gantt-schedule';
 
 const day = (m: number, d: number) => new Date(2026, m - 1, d).getTime();
 const task = (id: string, start: [number, number], end: [number, number], extra: Partial<SchedTask> = {}): SchedTask => ({ id, start: day(...start), end: day(...end), ...extra });
@@ -106,5 +106,114 @@ describe('rollUp', () => {
     const loop = [task('x', [3, 2], [3, 5], { parent: 'y' }), task('y', [3, 4], [3, 9], { parent: 'x' })];
 
     expect(() => rollUp(loop)).not.toThrow();
+  });
+});
+
+const link = (id: string, source: string, target: string, type: LinkType = 'e2s', lag = 0): SchedLink => ({ id, source, target, type, lag });
+
+describe('constraintBound and linkSatisfied', () => {
+  const a = { start: day(3, 2), end: day(3, 6) };
+
+  it('says how early the target may start or end for each type of link', () => {
+    expect(constraintBound(link('l', 'a', 'b', 'e2s'), a)).toEqual({ side: 'start', min: day(3, 6) });
+    expect(constraintBound(link('l', 'a', 'b', 's2s'), a)).toEqual({ side: 'start', min: day(3, 2) });
+    expect(constraintBound(link('l', 'a', 'b', 'e2e'), a)).toEqual({ side: 'end', min: day(3, 6) });
+    expect(constraintBound(link('l', 'a', 'b', 's2e'), a)).toEqual({ side: 'end', min: day(3, 2) });
+  });
+
+  it('adds the lag, which may be negative', () => {
+    expect(constraintBound(link('l', 'a', 'b', 'e2s', 3), a).min).toBe(day(3, 9));
+    expect(constraintBound(link('l', 'a', 'b', 'e2s', -2), a).min).toBe(day(3, 4));
+  });
+
+  it('is satisfied from the bound on, and not before it', () => {
+    const l = link('l', 'a', 'b', 'e2s');
+    expect(linkSatisfied(l, a, { start: day(3, 6), end: day(3, 9) })).toBe(true);
+    expect(linkSatisfied(l, a, { start: day(3, 9), end: day(3, 12) })).toBe(true);
+    expect(linkSatisfied(l, a, { start: day(3, 5), end: day(3, 9) })).toBe(false);
+    expect(linkSatisfied(link('l', 'a', 'b', 'e2e'), a, { start: day(3, 1), end: day(3, 6) })).toBe(true);
+    expect(linkSatisfied(link('l', 'a', 'b', 'e2e'), a, { start: day(3, 1), end: day(3, 5) })).toBe(false);
+  });
+});
+
+describe('violatedLinks', () => {
+  const tasks = [task('a', [3, 2], [3, 6]), task('b', [3, 4], [3, 8]), task('c', [3, 9], [3, 12])];
+
+  it('lists the links whose target is too early, and skips links to tasks that are not there', () => {
+    const links = [link('ab', 'a', 'b'), link('bc', 'b', 'c'), link('ax', 'a', 'ghost'), link('xa', 'ghost', 'a')];
+
+    expect([...violatedLinks(tasks, links)]).toEqual(['ab']);
+  });
+});
+
+describe('pushSuccessors', () => {
+  const moves = (list: ReturnType<typeof pushSuccessors>) => list.map((m) => `${m.id}:${new Date(m.start).getDate()}-${new Date(m.end).getDate()}`).sort();
+
+  it('pushes a successor later, keeping its length, and its successor after it', () => {
+    const tasks = [task('a', [3, 2], [3, 6]), task('b', [3, 6], [3, 9]), task('c', [3, 9], [3, 12])];
+    const links = [link('ab', 'a', 'b'), link('bc', 'b', 'c')];
+
+    // a moves three days later: b must start on the 9th, so c on the 12th
+    const result = pushSuccessors(tasks, links, new Map([['a', { start: day(3, 5), end: day(3, 9) }]]));
+
+    expect(moves(result)).toEqual(['b:9-12', 'c:12-15']);
+  });
+
+  it('never pulls a task earlier', () => {
+    const tasks = [task('a', [3, 2], [3, 6]), task('b', [3, 20], [3, 24])];
+
+    expect(pushSuccessors(tasks, [link('ab', 'a', 'b')], new Map([['a', { start: day(3, 1), end: day(3, 5) }]]))).toEqual([]);
+  });
+
+  it('does nothing when the move still satisfies every link', () => {
+    const tasks = [task('a', [3, 2], [3, 6]), task('b', [3, 10], [3, 12])];
+
+    expect(pushSuccessors(tasks, [link('ab', 'a', 'b')], new Map([['a', { start: day(3, 3), end: day(3, 7) }]]))).toEqual([]);
+  });
+
+  it('honours every type of link and the lag', () => {
+    const tasks = [task('a', [3, 2], [3, 6]), task('s', [3, 2], [3, 5]), task('e', [3, 2], [3, 5]), task('x', [3, 2], [3, 5]), task('g', [3, 6], [3, 8])];
+    const links = [link('l1', 'a', 's', 's2s'), link('l2', 'a', 'e', 'e2e'), link('l3', 'a', 'x', 's2e'), link('l4', 'a', 'g', 'e2s', 2)];
+    const result = pushSuccessors(tasks, links, new Map([['a', { start: day(3, 10), end: day(3, 14) }]]));
+
+    expect(moves(result)).toEqual(['e:11-14', 'g:16-18', 's:10-13', 'x:7-10'].sort());
+  });
+
+  it('leaves a read-only task alone (its link stays violated) and keeps pushing past it', () => {
+    const tasks = [task('a', [3, 2], [3, 6]), task('r', [3, 6], [3, 9], { readonly: true }), task('c', [3, 9], [3, 12])];
+    const links = [link('ar', 'a', 'r'), link('rc', 'r', 'c'), link('ac', 'a', 'c')];
+    const result = pushSuccessors(tasks, links, new Map([['a', { start: day(3, 8), end: day(3, 12) }]]));
+
+    expect(moves(result)).toEqual(['c:12-15']); // c is pushed by a's own link; r stays
+  });
+
+  it('takes the children of a pushed parent with it, only with cascade', () => {
+    const tasks = [task('a', [3, 2], [3, 6]), task('p', [3, 6], [3, 12], { type: 'summary' }), task('k', [3, 6], [3, 9], { parent: 'p' }), task('m', [3, 9], [3, 12], { parent: 'p' })];
+    const links = [link('ap', 'a', 'p')];
+    const moved = new Map([['a', { start: day(3, 4), end: day(3, 8) }]]);
+
+    expect(moves(pushSuccessors(tasks, links, moved, false))).toEqual(['p:8-14']);
+    expect(moves(pushSuccessors(tasks, links, moved, true))).toEqual(['k:8-11', 'm:11-14', 'p:8-14']);
+  });
+
+  it('pushes a task that already moved, when a link needs it further', () => {
+    const tasks = [task('a', [3, 2], [3, 6]), task('b', [3, 6], [3, 9])];
+    // b was moved a day later by a cascade, but a's move needs it three days later
+    const result = pushSuccessors(tasks, [link('ab', 'a', 'b')], new Map([['a', { start: day(3, 5), end: day(3, 9) }], ['b', { start: day(3, 7), end: day(3, 10) }]]));
+
+    expect(moves(result)).toEqual(['b:9-12']);
+  });
+
+  it('stops on a cycle of links', () => {
+    const tasks = [task('a', [3, 2], [3, 6]), task('b', [3, 6], [3, 9])];
+    const links = [link('ab', 'a', 'b'), link('ba', 'b', 'a')];
+
+    expect(() => pushSuccessors(tasks, links, new Map([['a', { start: day(3, 5), end: day(3, 9) }]]))).not.toThrow();
+  });
+
+  it('ignores links to or from tasks that are not there', () => {
+    const tasks = [task('a', [3, 2], [3, 6])];
+
+    expect(pushSuccessors(tasks, [link('x', 'a', 'ghost'), link('y', 'ghost', 'a')], new Map([['a', { start: day(3, 8), end: day(3, 12) }]]))).toEqual([]);
   });
 });

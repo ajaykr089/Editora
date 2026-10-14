@@ -1,5 +1,5 @@
 import { ElementBase } from '../ElementBase';
-import { daysBetween, descendantsOf, rollUp, shiftDays, type SchedTask } from './gantt-schedule';
+import { daysBetween, descendantsOf, pushSuccessors, rollUp, shiftDays, violatedLinks, type SchedLink, type SchedTask } from './gantt-schedule';
 
 type GanttTone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 type GanttTaskType = 'task' | 'summary' | 'milestone';
@@ -33,6 +33,8 @@ type GanttLink = {
   source: string;
   target: string;
   type?: LinkType;
+  /** Days the target must wait after what it follows (negative: it may overlap). */
+  lag?: number;
 };
 
 type VisibleTask = GanttTask & {
@@ -990,6 +992,18 @@ const style = `
     pointer-events: none;
   }
 
+  /* A dependency whose target starts or ends earlier than the link allows. */
+  .links path.violated:not(.link-hit) {
+    stroke: var(--ui-color-danger, #dc2626);
+    stroke-width: 1.8;
+    stroke-dasharray: 5 3;
+    marker-end: url(#ui-gantt-arrow-bad);
+  }
+
+  .links marker#ui-gantt-arrow-bad path {
+    fill: var(--ui-color-danger, #dc2626);
+  }
+
   .links marker path {
     fill: color-mix(in srgb, var(--ui-gantt-muted) 82%, transparent);
     stroke: none;
@@ -1213,7 +1227,8 @@ function parseLinks(raw: string | null): GanttLink[] {
         const target = String(item.target || '').trim();
         if (!source || !target) return null;
         const type = item.type === 's2s' || item.type === 'e2e' || item.type === 's2e' ? item.type : 'e2s';
-        return { id: String(item.id || `link-${index + 1}`), source, target, type };
+        const lag = Math.round(Number(item.lag));
+        return { id: String(item.id || `link-${index + 1}`), source, target, type, lag: Number.isFinite(lag) ? lag : 0 };
       })
       .filter(Boolean) as GanttLink[];
   } catch {
@@ -1544,6 +1559,7 @@ export type GanttLabels = {
   scrollToToday: string;
   addTask: string;
   rename: string;
+  linkViolated: string;
   empty: string;
   noMatches: string;
   expand: string;
@@ -1587,6 +1603,7 @@ const DEFAULT_LABELS: GanttLabels = {
   scrollToToday: 'Scroll to today',
   addTask: 'Add task',
   rename: 'Rename task',
+  linkViolated: 'dependency not met',
   empty: 'No tasks in this range',
   noMatches: 'No matching tasks',
   expand: 'Expand',
@@ -1730,6 +1747,15 @@ function parseCssLength(raw: string | null): string | null {
   return value === 'none' || /^\d*\.?\d+(px|em|rem|vh|dvh|svh|lvh|vw|%|ch)$/.test(value) ? value : null;
 }
 
+function toSchedLink(link: GanttLink): SchedLink {
+  return { id: link.id, source: link.source, target: link.target, type: link.type || 'e2s', lag: link.lag ?? 0 };
+}
+
+/** `schedule`: "warn" (the default) draws a link whose target is too early in the danger colour; "auto" also pushes the tasks that follow a task that moved; "off" does neither. */
+function normalizeSchedule(value: string | null): 'warn' | 'auto' | 'off' {
+  return value === 'auto' || value === 'off' ? value : 'warn';
+}
+
 function toSched(task: GanttTask): SchedTask | null {
   const start = parseDate(task.start);
   const end = parseDate(task.end);
@@ -1871,7 +1897,7 @@ function routeDependencyPath(
 
 export class UIGantt extends ElementBase {
   static get observedAttributes() {
-    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width', 'fill', 'max-height', 'snap', 'creatable', 'auto-summary', 'cascade'];
+    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width', 'fill', 'max-height', 'snap', 'creatable', 'auto-summary', 'cascade', 'schedule'];
   }
 
   private focusRequest: FocusSnapshot | null = null;
@@ -2137,16 +2163,22 @@ export class UIGantt extends ElementBase {
 
     this.descriptions = descriptions;
 
+    const violated =
+      normalizeSchedule(this.getAttribute('schedule')) === 'off'
+        ? new Set<string>()
+        : violatedLinks(tasks.map(toSched).filter((task): task is SchedTask => task != null), links.map(toSchedLink));
     const linkPaths = links.map((link) => {
       const source = visibleById.get(link.source);
       const target = visibleById.get(link.target);
       if (!source || !target) return '';
       if (virtualized && !renderedIds.has(link.source) && !renderedIds.has(link.target)) return '';
       const routed = routeDependencyPath(source.task, source.index, target.task, target.index, link.type, xForDate);
-      const label = `${source.task.label} dependency to ${target.task.label}`;
-      return `<path class="link-hit" d="${routed}" data-link-id="${escapeHtml(link.id)}" data-source-id="${escapeHtml(link.source)}" data-target-id="${escapeHtml(link.target)}" data-link-type="${escapeHtml(link.type || 'e2s')}" aria-label="${escapeHtml(label)}" /><path d="${routed}" />`;
+      const bad = violated.has(link.id);
+      const label = `${source.task.label} dependency to ${target.task.label}${bad ? `, ${text.linkViolated}` : ''}`;
+      return `<path class="link-hit${bad ? ' violated' : ''}" d="${routed}" data-link-id="${escapeHtml(link.id)}" data-source-id="${escapeHtml(link.source)}" data-target-id="${escapeHtml(link.target)}" data-link-type="${escapeHtml(link.type || 'e2s')}"${bad ? ' data-violated="true"' : ''} aria-label="${escapeHtml(label)}" /><path${bad ? ' class="violated"' : ''} d="${routed}" />`;
     }).join('');
-    const linkDefs = linkPaths ? '<defs><marker id="ui-gantt-arrow" markerWidth="9" markerHeight="9" refX="8.5" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0.5 0.75 L 8.5 4.5 L 0.5 8.25 z" /></marker></defs>' : '';
+    const arrowHead = (id: string) => `<marker id="${id}" markerWidth="9" markerHeight="9" refX="8.5" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><path d="M 0.5 0.75 L 8.5 4.5 L 0.5 8.25 z" /></marker>`;
+    const linkDefs = linkPaths ? `<defs>${arrowHead('ui-gantt-arrow')}${arrowHead('ui-gantt-arrow-bad')}</defs>` : '';
 
     const weekStart = normalizeWeekStart(this.getAttribute('week-start'));
     // A host wider than the data fills the frame: the timeline track grows (1fr) and the header cells and
@@ -2575,7 +2607,7 @@ export class UIGantt extends ElementBase {
       return;
     }
     const changed = this.applyChanges(
-      this.withCascade({ id: drag.taskId, start: drag.latestStart, end: drag.latestEnd, previousStart: drag.originalStart, previousEnd: drag.originalEnd }),
+      this.plan({ id: drag.taskId, start: drag.latestStart, end: drag.latestEnd, previousStart: drag.originalStart, previousEnd: drag.originalEnd }),
       drag.mode === 'move' ? 'drag' : 'resize'
     );
     if (!changed) putBack();
@@ -2585,6 +2617,27 @@ export class UIGantt extends ElementBase {
    * With `cascade`, moving a parent moves everything under it by the same number of days (a read-only task stays
    * put). Anything else is the one change.
    */
+  private plan(change: TaskChange): TaskChange[] {
+    const changes = this.withCascade(change);
+    if (normalizeSchedule(this.getAttribute('schedule')) !== 'auto') return changes;
+    const links = this.getLinks();
+    if (!links.length) return changes;
+    const tasks = this.getTasks().map(toSched).filter((task): task is SchedTask => task != null);
+    const byId = new Map(tasks.map((task) => [task.id, task]));
+    const moved = new Map(changes.map((item) => [item.id, { start: item.start, end: item.end }]));
+    const planned = [...changes];
+    for (const push of pushSuccessors(tasks, links.map(toSchedLink), moved, this.hasAttribute('cascade'))) {
+      const at = planned.findIndex((item) => item.id === push.id);
+      if (at >= 0) {
+        planned[at] = { ...planned[at], start: push.start, end: push.end };
+      } else {
+        const before = byId.get(push.id);
+        if (before) planned.push({ id: push.id, start: push.start, end: push.end, previousStart: before.start, previousEnd: before.end });
+      }
+    }
+    return planned;
+  }
+
   private withCascade(change: TaskChange): TaskChange[] {
     if (!this.hasAttribute('cascade')) return [change];
     const delta = daysBetween(change.previousStart, change.start);
@@ -2680,7 +2733,7 @@ export class UIGantt extends ElementBase {
       : resizes
         ? Math.max(addDays(end, direction), addDays(start, 1))
         : addDays(end, direction);
-    this.applyChanges(this.withCascade({ id: taskId, start: nextStart, end: nextEnd, previousStart: start, previousEnd: end }), 'keyboard');
+    this.applyChanges(this.plan({ id: taskId, start: nextStart, end: nextEnd, previousStart: start, previousEnd: end }), 'keyboard');
   }
 
   /**
