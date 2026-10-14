@@ -311,3 +311,22 @@ describe('ui-gantt grid at tablet widths', () => {
     expect(css).toMatch(/\.surface \.grid-head,\s*\.surface \.grid-row \{\s*grid-template-columns: minmax\(0, 1fr\);/);
   });
 });
+
+describe('ui-gantt zoom buttons', () => {
+  it('only the toolbar buttons change the zoom, not a click on the timeline itself', async () => {
+    const gantt = await mount({ zoom: 'month' });
+    const zooms: string[] = [];
+    gantt.addEventListener('zoomchange', (event) => zooms.push((event as CustomEvent).detail.zoom));
+
+    root(gantt).querySelector<HTMLElement>('.timeline-body')!.click();
+    root(gantt).querySelector<HTMLElement>('.scale')!.click();
+    await flush();
+    expect(zooms).toEqual([]);
+    expect(gantt.getAttribute('zoom')).toBe('month');
+
+    root(gantt).querySelector<HTMLButtonElement>('.zoom-button[data-zoom="day"]')!.click();
+    await flush();
+    expect(zooms).toEqual(['day']);
+    expect(gantt.getAttribute('zoom')).toBe('day');
+  });
+});

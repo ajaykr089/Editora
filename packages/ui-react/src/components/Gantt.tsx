@@ -6,7 +6,8 @@ import { createUIElement } from './_internals';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export type GanttTaskType = 'task' | 'summary' | 'milestone';
-export type GanttZoom = 'day' | 'week' | 'month' | 'quarter' | 'year';
+/** `fit` scales the whole project to the width of the chart; the others are fixed pixels-per-day scales. */
+export type GanttZoom = 'day' | 'week' | 'month' | 'quarter' | 'year' | 'fit';
 export type GanttSort = 'none' | 'start' | 'end' | 'label' | 'progress';
 export type GanttBarVariant = 'solid' | 'soft' | 'striped' | 'outline' | 'glass';
 

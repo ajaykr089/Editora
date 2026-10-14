@@ -252,7 +252,8 @@ and resize, and a toolbar for zoom, filter and sort. Give it `tasks` and `links`
   <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-core/docs/images/gantt.png" alt="A Gantt chart with a task bar for API contracts, a baseline under it, and an arrow to the QA sign-off milestone" width="900">
 </p>
 
-- `zoom`: `day`, `week`, `month`, `quarter` or `year`. `sort`: `none`, `start`, `end`, `label` or `progress`.
+- `zoom`: `day`, `week`, `month`, `quarter`, `year` or `fit` (the whole project scaled to the chart's width, re-fitted when it is
+  resized). `sort`: `none`, `start`, `end`, `label` or `progress`.
 - The time header has two rows (month over days or weeks, year over months or quarters). `week-start` (`0` is Sunday)
   sets the first day of the week; it defaults to the locale's.
 - `bar-variant`: `solid`, `soft`, `striped`, `outline` or `glass`.

@@ -184,6 +184,12 @@ export const Default = () => (
   </Box>
 );
 
+export const FitToWidth = () => (
+  <Box style={{ maxWidth: 1180 }}>
+    <Gantt tasks={portfolioTasks} links={portfolioLinks} zoom="fit" sort="start" />
+  </Box>
+);
+
 export const InteractivePlanning = () => {
   const [items, setItems] = React.useState(tasks);
   const [lastChange, setLastChange] = React.useState('Drag or resize a task bar');

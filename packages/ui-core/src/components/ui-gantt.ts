@@ -2,7 +2,9 @@ import { ElementBase } from '../ElementBase';
 
 type GanttTone = 'default' | 'success' | 'warning' | 'danger' | 'info';
 type GanttTaskType = 'task' | 'summary' | 'milestone';
-type GanttZoom = 'day' | 'week' | 'month' | 'quarter' | 'year';
+type GanttUnit = 'day' | 'week' | 'month' | 'quarter' | 'year';
+/** `fit` scales the whole project to the width of the chart; the others are a fixed pixels-per-day scale. */
+type GanttZoom = GanttUnit | 'fit';
 type GanttSort = 'none' | 'start' | 'end' | 'label' | 'progress';
 type GanttBarVariant = 'solid' | 'soft' | 'striped' | 'outline' | 'glass';
 type LinkType = 'e2s' | 's2s' | 'e2e' | 's2e';
@@ -75,7 +77,7 @@ const MILESTONE_SIZE = 28;
 const MILESTONE_SHAPE_SIZE = 15;
 const MILESTONE_DIAMOND_HALF = (MILESTONE_SHAPE_SIZE * Math.SQRT2) / 2;
 
-const zoomPixels: Record<GanttZoom, number> = {
+const zoomPixels: Record<GanttUnit, number> = {
   day: 36,
   week: 13,
   month: 4.4,
@@ -952,7 +954,26 @@ function formatShortDate(value: number): string {
 }
 
 function normalizeZoom(value: string | null): GanttZoom {
-  return value === 'day' || value === 'month' || value === 'quarter' || value === 'year' ? value : 'week';
+  return value === 'day' || value === 'month' || value === 'quarter' || value === 'year' || value === 'fit' ? value : 'week';
+}
+
+/** The `fit` scale stays between "a year is a speck" and "a day is wider than a screen". */
+const FIT_MIN_DAY_WIDTH = 0.2;
+const FIT_MAX_DAY_WIDTH = 48;
+/** Used for `fit` before the chart has a measured width (not laid out yet, or a test). */
+const FIT_FALLBACK_WIDTH = 680;
+const FIT_MIN_TRACK = 160;
+
+/**
+ * The header unit that reads best at a given scale: the finest whose cells are still wide enough
+ * (about 44px) to carry their label.
+ */
+function unitForDayWidth(dayWidth: number): GanttUnit {
+  if (dayWidth >= 22) return 'day';
+  if (dayWidth * 7 >= 44) return 'week';
+  if (dayWidth * 30 >= 44) return 'month';
+  if (dayWidth * 91 >= 44) return 'quarter';
+  return 'year';
 }
 
 function normalizeSort(value: string | null): GanttSort {
@@ -1073,7 +1094,7 @@ function flattenTasks(tasks: GanttTask[], collapsed: Set<string>, filterText: st
   return rows;
 }
 
-type HeaderUnit = 'day' | 'week' | 'month' | 'quarter' | 'year';
+type HeaderUnit = GanttUnit;
 
 /** The first day of the week as `Date#getDay` numbers it (0 is Sunday), from the user's locale; Monday if unknown. */
 function localeWeekStart(): number {
@@ -1160,7 +1181,7 @@ function createTimeHeader(
   min: number,
   endMs: number,
   dayWidth: number,
-  zoom: GanttZoom,
+  zoom: GanttUnit,
   weekStart: number,
   viewportLeft = 0,
   viewportWidth = Number.POSITIVE_INFINITY
@@ -1232,7 +1253,7 @@ function createUnitLines(
   min: number,
   endMs: number,
   dayWidth: number,
-  zoom: GanttZoom,
+  zoom: GanttUnit,
   weekStart: number,
   viewportLeft: number,
   viewportWidth: number
@@ -1408,6 +1429,10 @@ export class UIGantt extends ElementBase {
   private viewportLeft = 0;
   private viewportWidth = 1800;
   private hostWidth = 0;
+  /** Width of the scroll area's vertical scrollbar, measured after a render; `fit` leaves room for it. */
+  private scrollbarWidth = 0;
+  /** The pixels per day the last render used, for dragging. */
+  private dayWidthNow = zoomPixels.week;
   private resizeObserver: ResizeObserver | null = null;
   private viewportHeight = 620;
   private renderedFirstRow = 0;
@@ -1468,8 +1493,18 @@ export class UIGantt extends ElementBase {
     const min = addDays(Math.min(...allStarts), -2);
     const max = addDays(Math.max(...allEnds), 3);
     const totalDays = Math.max(7, Math.ceil((max - min) / DAY));
-    const dayWidth = zoomPixels[zoom];
-    const timelineWidth = Math.max(680, totalDays * dayWidth);
+    // The host's width decides the compact layout, how far a wide host is filled (A5) and, for `fit`, the scale.
+    this.hostWidth = this.clientWidth || this.hostWidth;
+    const frameWidth = this.hostWidth - FRAME_BORDER;
+    const gridWidth = frameWidth <= COMPACT_MAX_WIDTH ? COMPACT_GRID_WIDTH : GRID_WIDTH;
+    const fitting = zoom === 'fit';
+    const fitAvailable = this.hostWidth > 0 ? frameWidth - gridWidth - this.scrollbarWidth : FIT_FALLBACK_WIDTH;
+    const dayWidth = fitting
+      ? Math.max(FIT_MIN_DAY_WIDTH, Math.min(FIT_MAX_DAY_WIDTH, fitAvailable / totalDays))
+      : zoomPixels[zoom];
+    const unit: GanttUnit = fitting ? unitForDayWidth(dayWidth) : zoom;
+    this.dayWidthNow = dayWidth;
+    const timelineWidth = Math.max(fitting ? FIT_MIN_TRACK : 680, totalDays * dayWidth);
     const rowsHeight = Math.max(visible.length * ROW_HEIGHT, ROW_HEIGHT);
     const virtualized = this.getAttribute('virtualized') !== 'false' && visible.length > 240;
     const viewportRows = Math.max(20, Math.ceil(Math.max(420, this.viewportHeight - HEADER_HEIGHT) / ROW_HEIGHT));
@@ -1564,9 +1599,6 @@ export class UIGantt extends ElementBase {
     const weekStart = normalizeWeekStart(this.getAttribute('week-start'));
     // A host wider than the data fills the frame: the timeline track grows (1fr) and the header cells and
     // grid lines are drawn out to its edge, so there is no blank strip after the last task.
-    this.hostWidth = this.clientWidth || this.hostWidth;
-    const frameWidth = this.hostWidth - FRAME_BORDER;
-    const gridWidth = frameWidth <= COMPACT_MAX_WIDTH ? COMPACT_GRID_WIDTH : GRID_WIDTH;
     const fillWidth = Math.max(timelineWidth, frameWidth - gridWidth);
     const rangeEnd = min + (fillWidth / dayWidth) * DAY;
     const today = startOfDay(Date.now());
@@ -1576,7 +1608,7 @@ export class UIGantt extends ElementBase {
     const todayMarkup = showTodayMarker ? `<div class="today" part="today" style="left:${todayX.toFixed(2)}px"></div>` : '';
     // The label lives in the header, which stays put while the rows scroll, not on the line where it covered bars.
     // The day scale already highlights today's own column, and a pill there would cover its date.
-    const todayPill = showTodayMarker && zoom !== 'day' ? `<span class="today-pill" part="today-pill" style="left:clamp(22px, ${todayX.toFixed(2)}px, calc(100% - 22px))">Today</span>` : '';
+    const todayPill = showTodayMarker && unit !== 'day' ? `<span class="today-pill" part="today-pill" style="left:clamp(22px, ${todayX.toFixed(2)}px, calc(100% - 22px))">Today</span>` : '';
 
     const focusSnapshot = this.focusRequest ?? this.captureFocus();
     this.focusRequest = null;
@@ -1597,7 +1629,7 @@ export class UIGantt extends ElementBase {
                   ['progress', 'Progress']
                 ].map(([value, label]) => `<option value="${value}" ${sort === value ? 'selected' : ''}>${label}</option>`).join('')}
               </select>
-              ${(['day', 'week', 'month', 'quarter', 'year'] as GanttZoom[]).map((item) => `<button class="zoom-button" data-zoom="${item}" aria-pressed="${zoom === item}">${item}</button>`).join('')}
+              ${(['day', 'week', 'month', 'quarter', 'year', 'fit'] as GanttZoom[]).map((item) => `<button class="zoom-button" data-zoom="${item}" aria-pressed="${zoom === item}"${item === 'fit' ? ' title="Fit the whole project to the width"' : ''}>${item}</button>`).join('')}
             </div>
           </header>
         ` : ''}
@@ -1617,10 +1649,10 @@ export class UIGantt extends ElementBase {
               </div>
             </div>
             <div class="timeline-head" part="timeline-head" aria-hidden="true">
-              <div class="scale" data-zoom="${zoom}" style="min-width:${timelineWidth.toFixed(2)}px">${createTimeHeader(min, rangeEnd, dayWidth, zoom, weekStart, this.viewportLeft, this.viewportWidth)}${todayPill}</div>
+              <div class="scale" data-zoom="${unit}" style="min-width:${timelineWidth.toFixed(2)}px">${createTimeHeader(min, rangeEnd, dayWidth, unit, weekStart, this.viewportLeft, this.viewportWidth)}${todayPill}</div>
             </div>
-            <div class="timeline-body" part="timeline-body" role="group" aria-label="Timeline" data-zoom="${zoom}" style="min-width:${timelineWidth.toFixed(2)}px;min-height:${rowsHeight}px">
-              ${createUnitLines(min, rangeEnd, dayWidth, zoom, weekStart, this.viewportLeft, this.viewportWidth)}
+            <div class="timeline-body" part="timeline-body" role="group" aria-label="Timeline" data-zoom="${unit}" style="min-width:${timelineWidth.toFixed(2)}px;min-height:${rowsHeight}px">
+              ${createUnitLines(min, rangeEnd, dayWidth, unit, weekStart, this.viewportLeft, this.viewportWidth)}
               <svg class="links" width="${timelineWidth.toFixed(0)}" height="${rowsHeight}" viewBox="0 0 ${timelineWidth.toFixed(0)} ${rowsHeight}" aria-hidden="true">${linkDefs}${linkPaths}</svg>
               ${todayMarkup}
               ${virtualized && topSpacer ? `<div style="height:${topSpacer}px"></div>` : ''}
@@ -1638,6 +1670,12 @@ export class UIGantt extends ElementBase {
       viewport.scrollLeft = this.viewportLeft;
       this.viewportWidth = viewport.clientWidth || this.viewportWidth;
       this.viewportHeight = viewport.clientHeight || this.viewportHeight;
+      // `fit` sizes the days to the width left after the scrollbar; the scrollbar is only known once laid out.
+      const scrollbar = Math.max(0, viewport.offsetWidth - viewport.clientWidth);
+      if (scrollbar !== this.scrollbarWidth) {
+        this.scrollbarWidth = scrollbar;
+        if (fitting) this.requestRender();
+      }
     }
     this.bindEvents();
     this.restoreFocus(focusSnapshot);
@@ -1704,7 +1742,7 @@ export class UIGantt extends ElementBase {
       });
     });
 
-    this.root.querySelectorAll<HTMLButtonElement>('[data-zoom]').forEach((button) => {
+    this.root.querySelectorAll<HTMLButtonElement>('.zoom-button[data-zoom]').forEach((button) => {
       button.addEventListener('click', () => {
         const zoom = button.dataset.zoom || 'week';
         this.setAttribute('zoom', zoom);
@@ -1787,7 +1825,6 @@ export class UIGantt extends ElementBase {
         const kind = (bar.dataset.kind as GanttTaskType) || 'task';
         const requestedMode = ((event.target as HTMLElement).dataset.mode as DragState['mode']) || 'move';
         const mode = kind === 'milestone' ? 'move' : requestedMode;
-        const zoom = normalizeZoom(this.getAttribute('zoom'));
         const selectedChanged = this.selectedId !== taskId;
         this.selectedId = taskId;
         this.dispatchEvent(new CustomEvent('taskselect', { detail: { id: taskId }, bubbles: true, composed: true }));
@@ -1799,7 +1836,7 @@ export class UIGantt extends ElementBase {
           originalEnd,
           kind,
           rangeMin: this.rangeMin(),
-          dayWidth: zoomPixels[zoom],
+          dayWidth: this.dayWidthNow,
           latestStart: originalStart,
           latestEnd: originalEnd,
           frame: null,

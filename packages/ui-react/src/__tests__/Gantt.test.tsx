@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import '../../../ui-core/src/components/ui-gantt';
 
 import { Gantt } from '../components/Gantt';
@@ -60,5 +60,21 @@ describe('Gantt wrapper', () => {
     rerender(<Gantt tasks={tasks} />);
     await Promise.resolve();
     expect(container.querySelector('ui-gantt')!.hasAttribute('week-start')).toBe(false);
+  });
+
+  it('passes zoom through, including fit, and reports it from the toolbar', async () => {
+    const onZoomChange = vi.fn();
+    const { container, rerender } = render(<Gantt tasks={tasks} zoom="fit" onZoomChange={onZoomChange} />);
+    await Promise.resolve();
+    const el = container.querySelector('ui-gantt') as HTMLElement;
+    expect(el.getAttribute('zoom')).toBe('fit');
+    expect(el.shadowRoot!.querySelector('.zoom-button[data-zoom="fit"]')!.getAttribute('aria-pressed')).toBe('true');
+
+    (el.shadowRoot!.querySelector('.zoom-button[data-zoom="month"]') as HTMLButtonElement).click();
+    expect(onZoomChange).toHaveBeenCalledWith({ zoom: 'month' }, expect.anything());
+
+    rerender(<Gantt tasks={tasks} zoom="week" onZoomChange={onZoomChange} />);
+    await Promise.resolve();
+    expect(el.getAttribute('zoom')).toBe('week');
   });
 });
