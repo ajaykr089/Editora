@@ -2143,6 +2143,10 @@ export class UIGantt extends ElementBase {
   private viewportLeft = 0;
   private viewportWidth = 1800;
   private hostWidth = 0;
+  /** Where the scroll area was when the header cells and shading were last built: they cover a window around it. */
+  private renderedLeft = 0;
+  /** A smooth scroll in progress, so a render that replaces the scroll area can carry on with it. */
+  private smoothTarget: { left?: number; top?: number } | null = null;
   private selectedLinkId: string | null = null;
   private linking: LinkDrag | null = null;
   private editingId: string | null = null;
@@ -2425,6 +2429,7 @@ export class UIGantt extends ElementBase {
     const fillWidth = Math.max(timelineWidth, frameWidth - gridWidth);
     const rangeEnd = min + (fillWidth / dayWidth) * DAY;
     this.layoutInfo = { min, dayWidth, gridWidth, rangeEnd };
+    this.renderedLeft = this.viewportLeft;
     this.visibleIds = visible.map((task) => task.id);
     const today = startOfDay(Date.now());
     const todayX = xForDate(today);
@@ -2505,8 +2510,13 @@ export class UIGantt extends ElementBase {
 
     const viewport = this.root.querySelector<HTMLElement>('.viewport');
     if (viewport) {
-      viewport.scrollTop = this.viewportTop;
-      viewport.scrollLeft = this.viewportLeft;
+      // Only a new scroll area needs its position put back. Assigning it to the one that is already there would cancel a
+      // smooth scroll that is under way.
+      if (this.root.querySelector('.frame') !== previousFrame) {
+        viewport.scrollTop = this.viewportTop;
+        viewport.scrollLeft = this.viewportLeft;
+        if (this.smoothTarget && typeof viewport.scrollTo === 'function') viewport.scrollTo({ ...this.smoothTarget, behavior: 'smooth' });
+      }
       this.viewportWidth = viewport.clientWidth || this.viewportWidth;
       this.viewportHeight = viewport.clientHeight || this.viewportHeight;
       // `fit` sizes the days to the width left after the scrollbar; the scrollbar is only known once laid out.
@@ -2617,16 +2627,25 @@ export class UIGantt extends ElementBase {
       });
     });
 
+    for (const type of ['wheel', 'pointerdown', 'touchstart', 'keydown']) {
+      this.root.querySelector<HTMLElement>('.viewport')?.addEventListener(type, () => {
+        this.smoothTarget = null; // the user took over the scroll
+      }, { passive: true });
+    }
     this.root.querySelector<HTMLElement>('.viewport')?.addEventListener('scroll', (event) => {
       const viewport = event.currentTarget as HTMLElement;
       const top = viewport.scrollTop;
       const left = viewport.scrollLeft;
       const viewportRows = Math.max(20, Math.ceil(Math.max(420, this.viewportHeight - HEADER_HEIGHT) / ROW_HEIGHT));
       const rowTop = Math.max(0, Math.floor(Math.max(0, top - HEADER_HEIGHT) / ROW_HEIGHT));
-      const shouldRenderRows = rowTop < this.renderedFirstRow + 64 || rowTop + viewportRows > this.renderedLastRow - 64;
-      const shouldRenderX = Math.abs(left - this.viewportLeft) >= Math.max(480, this.viewportWidth * 0.6);
+      // Rows only need a new window when they are windowed at all, and the header cells when the visible part has moved a good
+      // way from where they were built (compared with that place, not with the previous scroll event).
+      const shouldRenderRows = this.virtualizedNow && (rowTop < this.renderedFirstRow + 64 || rowTop + viewportRows > this.renderedLastRow - 64);
+      const shouldRenderX = Math.abs(left - this.renderedLeft) >= 400;
       this.viewportTop = top;
       this.viewportLeft = left;
+      const target = this.smoothTarget;
+      if (target && (target.left == null || Math.abs(left - target.left) < 2) && (target.top == null || Math.abs(top - target.top) < 2)) this.smoothTarget = null;
       // A render would replace the bar that is being dragged, so it waits for the drop.
       if (this.drag || this.linking || (!shouldRenderRows && !shouldRenderX)) return;
       if (this.scrollFrame != null) return;
@@ -3356,6 +3375,13 @@ export class UIGantt extends ElementBase {
     const viewport = this.root.querySelector<HTMLElement>('.viewport');
     if (!viewport) return;
     const resolved = this.resolveBehavior(behavior);
+    this.smoothTarget = resolved === 'smooth' ? position : null;
+    if (this.smoothTarget) {
+      const started = this.smoothTarget;
+      window.setTimeout(() => {
+        if (this.smoothTarget === started) this.smoothTarget = null; // it stopped short (the user took over): do not resume it later
+      }, 2000);
+    }
     if (resolved !== 'smooth') {
       // A render can follow at once (focusing a row does) and it puts the scroll back from these, before any
       // scroll event has told it where the chart went.
