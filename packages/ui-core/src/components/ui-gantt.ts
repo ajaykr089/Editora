@@ -192,8 +192,9 @@ const style = `
       --gantt-grid-w: 148px;
     }
 
-    .grid-head,
-    .grid-row {
+    /* .surface in front: the base .grid-head / .grid-row rules come later in the sheet and would win. */
+    .surface .grid-head,
+    .surface .grid-row {
       grid-template-columns: minmax(0, 1fr);
     }
 
@@ -836,22 +837,6 @@ const style = `
 
   :host([headless]) .frame {
     display: none;
-  }
-
-  @media (max-width: 760px) {
-    .surface {
-      grid-template-columns: 270px minmax(560px, 1fr);
-    }
-
-    .grid-head,
-    .grid-row {
-      grid-template-columns: minmax(150px, 1fr) 64px 56px;
-    }
-
-    .grid-head span:nth-child(3),
-    .grid-cell:nth-child(3) {
-      display: none;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {

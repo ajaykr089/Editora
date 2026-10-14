@@ -295,3 +295,19 @@ describe('ui-gantt in a narrow host', () => {
     expect(root(gantt).querySelector('.frame')).not.toBeNull();
   });
 });
+
+describe('ui-gantt grid at tablet widths', () => {
+  // A viewport media query used to re-template the grid to three columns (270px) while the surface is
+  // 376px wide with four, so at 700px the "%" header wrapped onto a second line and the column vanished
+  // from the rows. The container query is the only narrow-layout rule.
+  it('has no viewport media query that re-templates the task grid', async () => {
+    const gantt = await mount();
+    const css = root(gantt).querySelector('style')!.textContent!;
+
+    expect(css).not.toMatch(/@media \(max-width: 760px\)/);
+    expect(css).not.toMatch(/minmax\(150px, 1fr\) 64px 56px/);
+    expect(css).toMatch(/grid-template-columns: minmax\(170px, 1fr\) 82px 80px 44px/);
+    // the narrow-host rule must outrank the base rule above, which comes later in the sheet
+    expect(css).toMatch(/\.surface \.grid-head,\s*\.surface \.grid-row \{\s*grid-template-columns: minmax\(0, 1fr\);/);
+  });
+});
