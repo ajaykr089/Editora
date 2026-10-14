@@ -76,6 +76,8 @@ type FocusSnapshot = {
   reveal?: boolean;
   /** How many renders may pass while the control is not in the rendered window yet (a row far down a long chart). */
   retries?: number;
+  /** Select the whole text of an input that takes focus (the rename field). */
+  selectAll?: boolean;
   selection?: [number | null, number | null, 'forward' | 'backward' | 'none' | null];
 };
 
@@ -165,7 +167,8 @@ const style = `
   .control,
   .select,
   .zoom-button,
-  .today-button {
+  .today-button,
+  .add-button {
     border: 1px solid var(--ui-gantt-border);
     background: var(--ui-gantt-panel);
     color: var(--ui-gantt-text);
@@ -186,7 +189,8 @@ const style = `
   }
 
   .zoom-button,
-  .today-button {
+  .today-button,
+  .add-button {
     padding: 0 9px;
     cursor: pointer;
   }
@@ -544,6 +548,20 @@ const style = `
   .expander:hover {
     background: color-mix(in srgb, var(--ui-gantt-accent) 9%, transparent);
     color: var(--ui-gantt-accent);
+  }
+
+  .rename {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    block-size: 26px;
+    padding: 0 6px;
+    border: 1px solid var(--ui-gantt-accent);
+    border-radius: 6px;
+    background: var(--ui-gantt-panel);
+    color: var(--ui-gantt-text);
+    font: inherit;
+    font-weight: 650;
+    outline: 0;
   }
 
   .name-text {
@@ -1028,7 +1046,8 @@ const style = `
     .select,
     .control,
     .zoom-button,
-    .today-button {
+    .today-button,
+    .add-button {
       forced-color-adjust: none;
       box-shadow: none;
     }
@@ -1114,6 +1133,8 @@ const FIT_MAX_DAY_WIDTH = 48;
 /** Used for `fit` before the chart has a measured width (not laid out yet, or a test). */
 const FIT_FALLBACK_WIDTH = 680;
 const FIT_MIN_TRACK = 160;
+/** The length of a task made by the Add button or a double-click on the timeline. */
+const NEW_TASK_DAYS = 7;
 
 /**
  * The header unit that reads best at a given scale: the finest whose cells are still wide enough
@@ -1156,7 +1177,7 @@ function parseTasks(raw: string | null, overrides: Map<string, Partial<GanttTask
         const override = overrides.get(id) || {};
         return {
           id,
-          label,
+          label: override.label || label,
           start: override.start || formatIso(startMs),
           end: override.end || formatIso(safeEnd),
           progress: Number.isFinite(Number(item.progress)) ? Math.max(0, Math.min(100, Number(item.progress))) : undefined,
@@ -1482,6 +1503,8 @@ function focusSelectorFor(el: HTMLElement): string | null {
   if (el.classList.contains('select')) return '.select';
   if (el.classList.contains('zoom-button') && el.dataset.zoom) return `.zoom-button[data-zoom="${cssEscape(el.dataset.zoom)}"]`;
   if (el.classList.contains('today-button')) return '.today-button';
+  if (el.classList.contains('add-button')) return '.add-button';
+  if (el.classList.contains('rename')) return '.rename';
   if (el.classList.contains('head-button') && el.dataset.sort) return `.head-button[data-sort="${cssEscape(el.dataset.sort)}"]`;
   if (el.classList.contains('splitter') && el.getAttribute('role') === 'separator') return '.splitter[role="separator"]';
   if (el.classList.contains('bar') && el.dataset.taskId) return barSelector(el.dataset.taskId);
@@ -1518,6 +1541,8 @@ export type GanttLabels = {
   columnDuration: string;
   splitter: string;
   scrollToToday: string;
+  addTask: string;
+  rename: string;
   empty: string;
   noMatches: string;
   expand: string;
@@ -1559,6 +1584,8 @@ const DEFAULT_LABELS: GanttLabels = {
   columnDuration: 'Days',
   splitter: 'Resize the task list',
   scrollToToday: 'Scroll to today',
+  addTask: 'Add task',
+  rename: 'Rename task',
   empty: 'No tasks in this range',
   noMatches: 'No matching tasks',
   expand: 'Expand',
@@ -1826,7 +1853,7 @@ function routeDependencyPath(
 
 export class UIGantt extends ElementBase {
   static get observedAttributes() {
-    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width', 'fill', 'max-height', 'snap'];
+    return ['tasks', 'links', 'zoom', 'filter', 'sort', 'bar-variant', 'variant', 'readonly', 'show-toolbar', 'show-today', 'headless', 'week-start', 'labels', 'locale', 'columns', 'grid-width', 'fill', 'max-height', 'snap', 'creatable'];
   }
 
   private focusRequest: FocusSnapshot | null = null;
@@ -1841,6 +1868,9 @@ export class UIGantt extends ElementBase {
   private viewportLeft = 0;
   private viewportWidth = 1800;
   private hostWidth = 0;
+  private editingId: string | null = null;
+  private editingValue = '';
+  private suppressBlur = false;
   private layoutInfo = { min: 0, dayWidth: 13, gridWidth: GRID_WIDTH, rangeEnd: 0 };
   private visibleIds: string[] = [];
   private initialScrollPending = true;
@@ -1932,6 +1962,11 @@ export class UIGantt extends ElementBase {
   }
 
   protected override render(): void {
+    // Replacing the tree may blur the rename field; that is not the user leaving it.
+    this.suppressBlur = true;
+    queueMicrotask(() => {
+      this.suppressBlur = false;
+    });
     activeLocale = this.getAttribute('locale') || undefined;
     const text = this.labelSet();
     const tasks = this.getTasks();
@@ -1942,6 +1977,7 @@ export class UIGantt extends ElementBase {
     const filterText = this.getAttribute('filter') ?? this.internalFilter;
     const visible = this.getVisibleTasks(tasks, filterText, sort);
     const readonly = this.hasAttribute('readonly');
+    const creatable = this.hasAttribute('creatable') && !readonly;
     const showToolbar = this.getAttribute('show-toolbar') !== 'false';
     const showToday = this.getAttribute('show-today') !== 'false';
 
@@ -2012,7 +2048,9 @@ export class UIGantt extends ElementBase {
           case 'label':
             return `<div class="grid-cell task-name" role="gridcell" style="padding-left:${10 + task.depth * 18}px">
             ${task.hasChildren ? `<button class="expander" data-action="toggle" data-task-id="${escapeHtml(task.id)}" aria-label="${escapeHtml(this.collapsed.has(task.id) ? text.expand : text.collapse)} ${escapeHtml(task.label)}">${this.collapsed.has(task.id) ? '›' : '⌄'}</button>` : '<span style="inline-size:22px"></span>'}
-            <span class="name-text" title="${escapeHtml(task.label)}">${escapeHtml(task.label)}</span>
+            ${this.editingId === task.id
+              ? `<input class="rename" value="${escapeHtml(this.editingValue)}" aria-label="${escapeHtml(text.rename)}" />`
+              : `<span class="name-text" title="${escapeHtml(task.label)}">${escapeHtml(task.label)}</span>`}
           </div>`;
           case 'assignee':
             return `<div class="grid-cell badge" role="gridcell">${escapeHtml(task.assignee || kind)}</div>`;
@@ -2130,6 +2168,7 @@ export class UIGantt extends ElementBase {
                   ['progress', text.sortProgress]
                 ].map(([value, label]) => `<option value="${value}" ${sort === value ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('')}
               </select>
+              ${creatable ? `<button class="add-button" data-action="add"><span aria-hidden="true">+</span> ${escapeHtml(text.addTask)}</button>` : ''}
               ${showToday ? `<button class="today-button" data-action="today" title="${escapeHtml(text.scrollToToday)}" aria-label="${escapeHtml(text.scrollToToday)}"${todayInRange ? '' : ' disabled'}>${escapeHtml(text.today)}</button>` : ''}
               ${(['day', 'week', 'month', 'quarter', 'year', 'fit'] as GanttZoom[]).map((item) => `<button class="zoom-button" data-zoom="${item}" aria-pressed="${zoom === item}"${item === 'fit' ? ` title="${escapeHtml(text.zoomFitTitle)}"` : ''}>${escapeHtml(zoomLabel(item, text))}</button>`).join('')}
             </div>
@@ -2228,6 +2267,7 @@ export class UIGantt extends ElementBase {
     }
     if (!next || this.root.activeElement === next) return;
     next.focus({ preventScroll: !snapshot.reveal });
+    if (snapshot.selectAll && next instanceof HTMLInputElement) next.select();
     if (snapshot.selection && next instanceof HTMLInputElement) {
       try {
         next.setSelectionRange(snapshot.selection[0], snapshot.selection[1], snapshot.selection[2] ?? undefined);
@@ -2339,6 +2379,7 @@ export class UIGantt extends ElementBase {
     this.bindTooltips();
     this.bindSplitters();
     this.bindRows();
+    this.bindEditing();
 
     if (this.hasAttribute('readonly')) return;
     this.root.querySelectorAll<HTMLElement>('.bar[data-draggable="true"]').forEach((bar) => {
@@ -2545,7 +2586,7 @@ export class UIGantt extends ElementBase {
       this.requestRender();
       return false;
     }
-    for (const change of changes) this.overrides.set(change.id, { start: formatIso(change.start), end: formatIso(change.end) });
+    for (const change of changes) this.overrides.set(change.id, { ...this.overrides.get(change.id), start: formatIso(change.start), end: formatIso(change.end) });
     this.bumpOverrides();
     for (const change of changes) {
       this.dispatchEvent(new CustomEvent('taskchange', { detail: { id: change.id, start: formatIso(change.start), end: formatIso(change.end) }, bubbles: true, composed: true }));
@@ -2564,6 +2605,11 @@ export class UIGantt extends ElementBase {
     const editable = bar.dataset.draggable === 'true' && !this.hasAttribute('readonly');
     if (event.key === 'Escape') {
       this.hideTip();
+      return;
+    }
+    if (event.key === 'F2') {
+      event.preventDefault();
+      this.startRename(taskId);
       return;
     }
     if (event.key === 'Enter' || event.key === ' ') {
@@ -2639,6 +2685,96 @@ export class UIGantt extends ElementBase {
     this.root.querySelector<HTMLElement>('.bar-tip')?.removeAttribute('data-open');
   }
 
+  /** Rename a task in place: the name becomes a text field. Does nothing in a read-only chart or for a read-only task. */
+  private startRename(id: string): void {
+    if (this.hasAttribute('readonly')) return;
+    const task = this.getTasks().find((item) => item.id === id);
+    if (!task || task.readonly) return;
+    this.editingId = id;
+    this.editingValue = task.label;
+    this.focusRequest = { selector: '.rename', reveal: true, retries: 0, selectAll: true };
+    this.reveal(id, 'auto');
+    this.requestRender();
+  }
+
+  /** Leave the rename field: keep the new name (when `save` and it is not empty or unchanged and nobody refuses it) or drop it. */
+  private finishRename(save: boolean): void {
+    const id = this.editingId;
+    if (!id) return;
+    const label = this.editingValue.trim();
+    const previous = this.getTasks().find((item) => item.id === id)?.label;
+    this.editingId = null;
+    if (save && label && previous != null && label !== previous) {
+      const accepted = this.dispatchEvent(
+        new CustomEvent('taskrename', { detail: { id, label, previousLabel: previous }, bubbles: true, composed: true, cancelable: true })
+      );
+      if (accepted) {
+        this.overrides.set(id, { ...this.overrides.get(id), label });
+        this.bumpOverrides();
+      }
+    }
+    this.focusRequest = { selector: rowSelector(id) };
+    this.requestRender();
+  }
+
+  /** Create a task: the host is told where (`taskcreate`) and adds it; nothing is added here. */
+  private requestCreate(startMs: number, anchorId?: string): void {
+    const anchor = anchorId ? this.getTasks().find((item) => item.id === anchorId) : undefined;
+    this.dispatchEvent(
+      new CustomEvent('taskcreate', {
+        detail: { start: formatIso(startMs), end: formatIso(addDays(startMs, NEW_TASK_DAYS)), parent: anchor?.parent, after: anchor?.id },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
+
+  private bindEditing(): void {
+    this.root.querySelectorAll<HTMLElement>('.grid-row .task-name').forEach((cell) => {
+      cell.addEventListener('dblclick', (event) => {
+        if ((event.target as HTMLElement).closest('.expander, .rename')) return;
+        const id = (cell.closest('.grid-row') as HTMLElement | null)?.dataset.taskId;
+        if (id) this.startRename(id);
+      });
+    });
+    const input = this.root.querySelector<HTMLInputElement>('.rename');
+    if (input) {
+      input.addEventListener('input', () => {
+        this.editingValue = input.value;
+      });
+      input.addEventListener('keydown', (event) => {
+        event.stopPropagation();
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          this.finishRename(true);
+        } else if (event.key === 'Escape') {
+          event.preventDefault();
+          this.finishRename(false);
+        }
+      });
+      input.addEventListener('blur', () => {
+        if (!this.suppressBlur) this.finishRename(true);
+      });
+    }
+    this.root.querySelector<HTMLButtonElement>('.add-button')?.addEventListener('click', () => {
+      const { min, rangeEnd } = this.layoutInfo;
+      const today = startOfDay(Date.now());
+      this.requestCreate(today >= min && today <= rangeEnd ? today : min, this.selectedId ?? undefined);
+    });
+    if (this.hasAttribute('creatable') && !this.hasAttribute('readonly')) {
+      this.root.querySelectorAll<HTMLElement>('.timeline-row').forEach((rowElement) => {
+        rowElement.addEventListener('dblclick', (event) => {
+          if (event.target !== rowElement) return; // a bar, a link or a baseline has its own meaning
+          const body = this.root.querySelector<HTMLElement>('.timeline-body');
+          if (!body) return;
+          const { min, dayWidth } = this.layoutInfo;
+          const days = Math.floor((event.clientX - body.getBoundingClientRect().left) / dayWidth);
+          this.requestCreate(addDays(min, days), rowElement.dataset.taskId);
+        });
+      });
+    }
+  }
+
   /** The task list is a treegrid: a row takes focus and the arrow keys move around it. */
   private bindRows(): void {
     this.root.querySelectorAll<HTMLElement>('.grid-row').forEach((row) => {
@@ -2650,6 +2786,11 @@ export class UIGantt extends ElementBase {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           this.selectTask(id);
+          return;
+        }
+        if (event.key === 'F2') {
+          event.preventDefault();
+          this.startRename(id);
           return;
         }
         if (this.navigate(id, event.key, 'row')) event.preventDefault();

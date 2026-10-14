@@ -92,6 +92,7 @@ render(<Example />);
 | `weekStart` | `0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6` | First day of the week in the time header (0 is Sunday). Defaults to the locale's. |
 | `columns` | `GanttColumn[]` | The task list's columns, in order: `'label'` (always first), `'assignee'`, `'dates'`, `'start'`, `'end'`, `'duration'`, `'progress'`. Use `{ key, label, width }` to set a header text and a width in px. Unknown keys are dropped; the default is name, owner, dates, progress. At phone width only the name column is shown. |
 | `gridWidth` | `number` | Width of the task list in px (at least the other columns plus 96px for the name). A splitter on its edge resizes it with the mouse, touch or the arrow keys (Shift for bigger steps, Home and End for the extremes). |
+| `creatable` | `boolean` | Shows a **+ Add task** button and lets a double-click on empty timeline space ask for a task (`onTaskCreate`). The chart does not add the task: you do, then you can `scrollToTask` it. Off in a `readonly` chart. |
 | `snap` | `'day' \| 'week' \| 'month'` | How far a drag snaps: to whole days (the default), to the nearest week start (see `weekStart`) or to the nearest 1st of a month. Arrow keys always move a day. |
 | `initialScroll` | `'today' \| 'start'` | Where the chart opens. `'today'` (the default) scrolls today to the middle when it is not on the first screen; `'start'` leaves it at the start. |
 | `fill` | `boolean` | The chart fills the height of its container, which needs a height of its own (a fixed height, a flex or grid cell): the toolbar keeps its height and the rows scroll in the rest. |
@@ -114,6 +115,8 @@ render(<Example />);
 - `onLinkSelect(detail)`: fired when a dependency connector is selected.
 - `onZoomChange`, `onFilterChange`, `onSortChange`: fired from built-in toolbar controls.
 - `onGridResize({ width })`: fired when the task list is resized with its splitter.
+- `onTaskRename({ id, label, previousLabel })`: fired when a name is edited in place (double-click it, or F2 on a row or bar); `event.preventDefault()` refuses it. A read-only chart or task cannot be renamed. The chart keeps the new name only until you write `tasks` again.
+- `onTaskCreate({ start, end, parent, after })`: fired when the user asks for a task: its dates (a week from today, or from the clicked day) and the neighbour it was asked next to.
 - `onTaskToggle({ id, open })`: fired when a branch is opened or closed, by the user or by the ref methods.
 
 ## Methods

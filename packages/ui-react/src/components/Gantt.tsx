@@ -56,6 +56,11 @@ export type GanttBeforeTaskChangeDetail = {
   affected: Array<{ id: string; start: string; end: string; previousStart: string; previousEnd: string }>;
 };
 
+export type GanttTaskRenameDetail = { id: string; label: string; previousLabel: string };
+
+/** Where the user asked for a task: its dates (a week long) and the neighbour it was asked next to. */
+export type GanttTaskCreateDetail = { start: string; end: string; parent?: string; after?: string };
+
 export type GanttLinkSelectDetail = {
   id: string;
   source: string;
@@ -96,6 +101,8 @@ export type GanttLabels = {
   columnDuration: string;
   splitter: string;
   scrollToToday: string;
+  addTask: string;
+  rename: string;
   empty: string;
   noMatches: string;
   expand: string;
@@ -139,6 +146,8 @@ export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   weekStart?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
   /** The task list's columns, in order. The name column is always first. Default: name, owner, dates, progress. */
   columns?: GanttColumn[];
+  /** Show a "+ Add task" button and let a double-click on empty timeline space ask for a task (`onTaskCreate`). Off in a `readonly` chart. */
+  creatable?: boolean;
   /** How far a drag snaps: to whole `'day'`s (the default), `'week'`s or `'month'`s. Arrow keys still move a day at a time. */
   snap?: 'day' | 'week' | 'month';
   /** Where the chart opens: on `'today'` (the default, when today is not on the first screen) or at the `'start'`. */
@@ -155,6 +164,10 @@ export type GanttProps = Omit<React.HTMLAttributes<HTMLElement>, 'onChange' | 'o
   locale?: string;
   /** Fired before a drag, resize or key changes dates. Call `event.preventDefault()` to refuse the change: nothing moves and `onTaskChange` does not fire. */
   onBeforeTaskChange?: (detail: GanttBeforeTaskChangeDetail, event: CustomEvent<GanttBeforeTaskChangeDetail>) => void;
+  /** Fired when a name is edited in place (double-click it, or F2). Call `event.preventDefault()` to refuse. The component only keeps the new name until `tasks` is written again. */
+  onTaskRename?: (detail: GanttTaskRenameDetail, event: CustomEvent<GanttTaskRenameDetail>) => void;
+  /** Fired when the user asks for a new task (the Add button, or a double-click on empty timeline space). The host adds it. */
+  onTaskCreate?: (detail: GanttTaskCreateDetail, event: CustomEvent<GanttTaskCreateDetail>) => void;
   onTaskToggle?: (detail: { id: string; open: boolean }, event: CustomEvent<{ id: string; open: boolean }>) => void;
   onGridResize?: (detail: { width: number }, event: CustomEvent<{ width: number }>) => void;
   onTaskChange?: (detail: GanttTaskChangeDetail, event: CustomEvent<GanttTaskChangeDetail>) => void;
@@ -215,6 +228,7 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     maxHeight,
     initialScroll,
     snap,
+    creatable,
     children,
     onTaskChange,
     onTaskSelect,
@@ -226,6 +240,8 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     onGridResize,
     onTaskToggle,
     onBeforeTaskChange,
+    onTaskRename,
+    onTaskCreate,
     ...rest
   },
   forwardedRef
@@ -277,10 +293,11 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     syncAttr('columns', columns?.length ? JSON.stringify(columns) : null);
     syncAttr('grid-width', gridWidth != null && gridWidth > 0 ? String(gridWidth) : null);
     syncBool('fill', fill);
+    syncBool('creatable', creatable);
     syncAttr('snap', snap && snap !== 'day' ? snap : null);
     syncAttr('initial-scroll', initialScroll && initialScroll !== 'today' ? initialScroll : null);
     syncAttr('max-height', maxHeight == null || maxHeight === '' ? null : typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight);
-  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight, initialScroll, snap]);
+  }, [tasks, links, zoom, sort, barVariant, variant, readonly, showToolbar, showToday, filterText, virtualized, headless, weekStart, labels, locale, columns, gridWidth, fill, maxHeight, initialScroll, snap, creatable]);
 
   useEffect(() => {
     const el = ref.current;
@@ -307,8 +324,14 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
     el.addEventListener('gridresize', handleGridResize);
     const handleBeforeTaskChange = (event: Event) => onBeforeTaskChange?.((event as CustomEvent<GanttBeforeTaskChangeDetail>).detail, event as CustomEvent<GanttBeforeTaskChangeDetail>);
     el.addEventListener('tasktoggle', handleTaskToggle);
+    const handleTaskRename = (event: Event) => onTaskRename?.((event as CustomEvent<GanttTaskRenameDetail>).detail, event as CustomEvent<GanttTaskRenameDetail>);
+    const handleTaskCreate = (event: Event) => onTaskCreate?.((event as CustomEvent<GanttTaskCreateDetail>).detail, event as CustomEvent<GanttTaskCreateDetail>);
     el.addEventListener('beforetaskchange', handleBeforeTaskChange);
+    el.addEventListener('taskrename', handleTaskRename);
+    el.addEventListener('taskcreate', handleTaskCreate);
     return () => {
+      el.removeEventListener('taskrename', handleTaskRename);
+      el.removeEventListener('taskcreate', handleTaskCreate);
       el.removeEventListener('beforetaskchange', handleBeforeTaskChange);
       el.removeEventListener('tasktoggle', handleTaskToggle);
       el.removeEventListener('gridresize', handleGridResize);
@@ -320,7 +343,7 @@ export const Gantt = React.forwardRef<GanttElement, GanttProps>(function Gantt(
       el.removeEventListener('filterchange', handleFilterChange);
       el.removeEventListener('sortchange', handleSortChange);
     };
-  }, [onTaskChange, onTaskSelect, onTaskDelete, onLinkSelect, onZoomChange, onFilterChange, onSortChange, onGridResize, onTaskToggle, onBeforeTaskChange]);
+  }, [onTaskChange, onTaskSelect, onTaskDelete, onLinkSelect, onZoomChange, onFilterChange, onSortChange, onGridResize, onTaskToggle, onBeforeTaskChange, onTaskRename, onTaskCreate]);
 
   return createUIElement('ui-gantt', { ref, ...rest }, children);
 });

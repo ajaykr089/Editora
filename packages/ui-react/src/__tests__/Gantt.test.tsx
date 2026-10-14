@@ -168,4 +168,32 @@ describe('Gantt wrapper', () => {
     await Promise.resolve();
     expect(el.hasAttribute('snap')).toBe(false);
   });
+
+  it('passes creatable through and reports a rename and a request for a task', async () => {
+    const onTaskRename = vi.fn();
+    const onTaskCreate = vi.fn();
+    const { container, rerender } = render(<Gantt tasks={tasks} creatable onTaskRename={onTaskRename} onTaskCreate={onTaskCreate} />);
+    await Promise.resolve();
+    const el = container.querySelector('ui-gantt') as HTMLElement;
+    expect(el.hasAttribute('creatable')).toBe(true);
+
+    (el.shadowRoot!.querySelector('.add-button') as HTMLButtonElement).click();
+    expect(onTaskCreate).toHaveBeenCalledTimes(1);
+    expect(onTaskCreate.mock.calls[0][0]).toMatchObject({ start: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/), end: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/) });
+
+    const row = el.shadowRoot!.querySelector('.grid-row') as HTMLElement;
+    row.focus();
+    row.dispatchEvent(new KeyboardEvent('keydown', { key: 'F2', bubbles: true, cancelable: true }));
+    await Promise.resolve();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    const input = el.shadowRoot!.querySelector('.rename') as HTMLInputElement;
+    input.value = 'Renamed';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    expect(onTaskRename).toHaveBeenCalledWith({ id: 'a', label: 'Renamed', previousLabel: 'Design' }, expect.anything());
+
+    rerender(<Gantt tasks={tasks} />);
+    await Promise.resolve();
+    expect(el.hasAttribute('creatable')).toBe(false);
+  });
 });
