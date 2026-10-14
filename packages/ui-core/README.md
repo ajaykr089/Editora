@@ -253,6 +253,8 @@ and resize, and a toolbar for zoom, filter and sort. Give it `tasks` and `links`
 </p>
 
 - `zoom`: `day`, `week`, `month`, `quarter` or `year`. `sort`: `none`, `start`, `end`, `label` or `progress`.
+- The time header has two rows (month over days or weeks, year over months or quarters). `week-start` (`0` is Sunday)
+  sets the first day of the week; it defaults to the locale's.
 - `bar-variant`: `solid`, `soft`, `striped`, `outline` or `glass`.
 - Dependency types: `e2s`, `s2s`, `e2e` and `s2e`.
 - Also: `readonly`, `show-toolbar`, `show-today`, `filter`, and `virtualized="false"` for small layouts (large task sets are

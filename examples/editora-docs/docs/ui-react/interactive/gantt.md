@@ -89,6 +89,7 @@ render(<Example />);
 | `tasks` | `GanttTask[]` | Timeline rows. Supports `start`, `end`, `progress`, `baselineStart`, `baselineEnd`, `critical`, `segments`, `type`, `parent`, `assignee`, and `readonly`. |
 | `links` | `GanttLink[]` | Dependency links with `source`, `target`, and optional `type`. |
 | `zoom` | `'day' \| 'week' \| 'month' \| 'quarter' \| 'year'` | Timeline scale. |
+| `weekStart` | `0 \| 1 \| 2 \| 3 \| 4 \| 5 \| 6` | First day of the week in the time header (0 is Sunday). Defaults to the locale's. |
 | `sort` | `'none' \| 'start' \| 'end' \| 'label' \| 'progress'` | Sort mode used by the task grid. |
 | `barVariant` | `'solid' \| 'soft' \| 'striped' \| 'outline' \| 'glass'` | Visual treatment for task bars. |
 | `readonly` | `boolean` | Disables task drag and resize editing. |

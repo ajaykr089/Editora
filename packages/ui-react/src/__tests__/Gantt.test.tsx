@@ -47,4 +47,18 @@ describe('Gantt wrapper', () => {
     expect(shadowOf(container).querySelector('.toolbar')).not.toBeNull();
     expect(shadowOf(container).querySelector('.today')).not.toBeNull();
   });
+
+  it('passes weekStart through, including Sunday (0)', async () => {
+    const { container, rerender } = render(<Gantt tasks={tasks} weekStart={1} />);
+    await Promise.resolve();
+    expect(container.querySelector('ui-gantt')!.getAttribute('week-start')).toBe('1');
+
+    rerender(<Gantt tasks={tasks} weekStart={0} />);
+    await Promise.resolve();
+    expect(container.querySelector('ui-gantt')!.getAttribute('week-start')).toBe('0');
+
+    rerender(<Gantt tasks={tasks} />);
+    await Promise.resolve();
+    expect(container.querySelector('ui-gantt')!.hasAttribute('week-start')).toBe(false);
+  });
 });
