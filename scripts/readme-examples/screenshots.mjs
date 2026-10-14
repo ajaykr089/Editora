@@ -167,6 +167,22 @@ const shots = [
   { out: 'packages/ui-core/docs/images/data-table.png', example: 'ui-core-data-table' },
   { out: 'packages/ui-core/docs/images/gantt.png', example: 'ui-core-gantt' },
   {
+    out: 'packages/ui-core/docs/images/gantt-planner.png',
+    example: 'ui-core-gantt-planner',
+    viewport: { width: 1480, height: 800 },
+    async act(page) {
+      // A planner is wider than the usual 960px frame. Hold the pointer over a bar for its tooltip.
+      await page.addStyleTag({ content: 'body { width: 1480px !important; }' });
+      await page.waitForTimeout(600);
+      const bar = await page.locator('ui-gantt').evaluate((element) => {
+        const rect = element.shadowRoot.querySelector('.bar[data-task-id="beta"]').getBoundingClientRect();
+        return { x: rect.left + rect.width * 0.5, y: rect.top + rect.height / 2 };
+      });
+      await page.mouse.move(bar.x, bar.y);
+      await page.waitForTimeout(500);
+    },
+  },
+  {
     out: 'packages/ui-core/docs/images/dialog.png',
     example: 'ui-core-dialogs',
     viewport: { width: 1008, height: 560 },

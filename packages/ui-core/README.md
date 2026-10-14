@@ -252,50 +252,218 @@ and resize, and a toolbar for zoom, filter and sort. Give it `tasks` and `links`
   <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-core/docs/images/gantt.png" alt="A Gantt chart with a task bar for API contracts, a baseline under it, and an arrow to the QA sign-off milestone" width="900">
 </p>
 
+That is the whole setup for a basic chart. The rest of this section builds on it.
+
+### A full planner
+
+This one turns on most of the features at once: a two-level time header, weekends and a holiday shaded, parents that
+follow their children, scheduling that pushes the tasks after one you move, the critical path, dependencies you draw
+by dragging, and a date the host refuses to let slip. The chart draws what it is given and reports what the user does;
+the plan lives in your code, so every edit arrives as an event and you decide whether to keep it.
+
+```html
+<ui-gantt
+  id="planner"
+  zoom="week"
+  week-start="1"
+  bar-variant="soft"
+  columns='["label", "assignee", "start", "end", "progress"]'
+  non-working-days
+  auto-summary
+  cascade
+  schedule="auto"
+  critical-path
+  linkable
+  creatable
+></ui-gantt>
+
+<script type="module">
+  import '@editora/ui-core';
+
+  const planner = document.getElementById('planner');
+  const day = (offset) => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() + offset);
+    return date;
+  };
+
+  // The chart draws what it is given and reports what the user does; the plan lives here.
+  let tasks = [
+    { id: 'discovery', label: 'Discovery', type: 'summary' },
+    { id: 'research', label: 'User research', parent: 'discovery', start: day(-21), end: day(-12), progress: 100, assignee: 'Mina', baselineStart: day(-21), baselineEnd: day(-13) },
+    { id: 'interviews', label: 'Interviews', parent: 'discovery', start: day(-12), end: day(-5), progress: 100, assignee: 'Jonas' },
+    { id: 'scope', label: 'Scope signed off', parent: 'discovery', start: day(-5), type: 'milestone', tone: 'success' },
+    { id: 'build', label: 'Build', type: 'summary' },
+    { id: 'api', label: 'API and data model', parent: 'build', start: day(-4), end: day(10), progress: 70, assignee: 'Priya' },
+    {
+      id: 'ui',
+      label: 'Planner UI',
+      parent: 'build',
+      start: day(-2),
+      end: day(18),
+      progress: 45,
+      assignee: 'Tomás',
+      segments: [{ start: day(-2), end: day(5) }, { start: day(8), end: day(18) }]
+    },
+    { id: 'integration', label: 'Integration', parent: 'build', start: day(18), end: day(26), progress: 0, assignee: 'Priya' },
+    { id: 'launch', label: 'Launch', type: 'summary' },
+    { id: 'qa', label: 'QA and fixes', parent: 'launch', start: day(26), end: day(33), assignee: 'Aiko' },
+    { id: 'beta', label: 'Beta', parent: 'launch', start: day(33), end: day(40), assignee: 'Aiko' },
+    { id: 'release', label: 'Release', parent: 'launch', start: day(40), type: 'milestone', tone: 'danger' },
+    { id: 'docs', label: 'Write the docs', start: day(30), end: day(38), progress: 20, assignee: 'Sam' }
+  ];
+  let links = [
+    { id: 'l1', source: 'research', target: 'interviews' },
+    { id: 'l2', source: 'interviews', target: 'scope' },
+    { id: 'l3', source: 'scope', target: 'api', lag: 1 },
+    { id: 'l4', source: 'scope', target: 'ui', type: 's2s', lag: 3 },
+    { id: 'l5', source: 'api', target: 'integration' },
+    { id: 'l6', source: 'ui', target: 'integration' },
+    { id: 'l7', source: 'integration', target: 'qa' },
+    { id: 'l8', source: 'qa', target: 'beta' },
+    { id: 'l9', source: 'beta', target: 'release' },
+    { id: 'l10', source: 'beta', target: 'docs' } // docs are planned before beta ends: drawn red
+  ];
+  const sync = () => {
+    planner.tasks = tasks;
+    planner.links = links;
+  };
+  planner.holidays = [{ date: day(12), label: 'Founders day' }];
+  const patch = (id, changes) => {
+    tasks = tasks.map((task) => (task.id === id ? { ...task, ...changes } : task));
+  };
+  sync();
+
+  // Keep the release date: refuse any change that would push it.
+  planner.addEventListener('beforetaskchange', (event) => {
+    if (event.detail.affected.some((change) => change.id === 'release')) event.preventDefault();
+  });
+  planner.addEventListener('taskchange', ({ detail }) => {
+    patch(detail.id, { start: detail.start, end: detail.end });
+    sync();
+  });
+  planner.addEventListener('taskrename', ({ detail }) => {
+    patch(detail.id, { label: detail.label });
+    sync();
+  });
+  planner.addEventListener('taskcreate', ({ detail }) => {
+    const id = `task-${tasks.length + 1}`;
+    tasks = [...tasks, { id, label: 'New task', start: detail.start, end: detail.end, parent: detail.parent }];
+    sync();
+    planner.scrollToTask(id);
+  });
+  planner.addEventListener('linkcreate', ({ detail }) => {
+    links = [...links, { id: `l${links.length + 1}`, ...detail }];
+    sync();
+  });
+  planner.addEventListener('linkdelete', ({ detail }) => {
+    links = links.filter((link) => link.id !== detail.id);
+    sync();
+  });
+</script>
+```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ajaykr089/Editora/main/packages/ui-core/docs/images/gantt-planner.png" alt="A project planner: three summary rows, red critical-path bars joined by dependency arrows, shaded weekends and a holiday, a Today marker, a red dashed link for a task planned before its predecessor ends, and a tooltip on the Beta bar" width="900">
+</p>
+
+The red bars are the critical path (`critical-path`), the red dashed arrow is a dependency that is already broken
+(Write the docs is planned before Beta ends), the grey strip under User research is its baseline, and the dots on
+Beta are the handles `linkable` adds.
+
+### Timeline and display
+
 - `zoom`: `day`, `week`, `month`, `quarter`, `year` or `fit` (the whole project scaled to the chart's width, re-fitted when it is
-  resized). `sort`: `none`, `start`, `end`, `label` or `progress`.
-- The time header has two rows (month over days or weeks, year over months or quarters). `week-start` (`0` is Sunday)
-  sets the first day of the week; it defaults to the locale's.
-- `bar-variant`: `solid`, `soft`, `striped`, `outline` or `glass`.
-- Choose the task list's columns with `columns` (`["label", "start", "end", "duration", "progress"]`, or objects with a `label` and a
-  `width`) and size it with `grid-width`; a splitter on its edge resizes it (mouse, touch, or the arrow keys) and fires `gridresize`.
-- Dependencies: a link may carry a `lag` (days) and its `type` says what it ties (`e2s`, `s2s`, `e2e`, `s2e`). A link whose target is too early is drawn red and
-  dashed; `schedule="auto"` also pushes the tasks that follow a task you move (later only, keeping their length, down the chain, as one change you can
-  refuse in `beforetaskchange`); `schedule="off"` turns both off.
+  resized). The time header has two rows (month over days or weeks, year over months or quarters), a pill marks today, and the chart
+  opens on today when it is off the first screen (`initial-scroll="start"` keeps the start).
+- `week-start` (`0` is Sunday) sets the first day of the week; it defaults to the locale's.
+- `bar-variant`: `solid`, `soft`, `striped`, `outline` or `glass`. Progress is drawn inside each bar, and a task with `segments` is drawn in parts,
+  each with its own progress. `sort`: `none`, `start`, `end`, `label` or `progress`.
 - Non-working time: `non-working-days` (the attribute alone means the weekend, or `0,6` / `[1,2]`) and `holidays` (`["2026-12-25", {"date": "2026-12-26", "label": "Boxing Day"}]`)
   shade those days behind the rows (not at month scales and wider, where a day is a few pixels) and mute them in the day header. They are shown, not scheduled
   around: task lengths are calendar days.
-- `linkable` shows dots beside each bar: drag one onto another bar and the chart fires `linkcreate` with the source, the target and the type the two ends
-  give (`e2s`, `s2s`, `e2e`, `s2e`); click a link to select it and press Delete to get `linkdelete`. As with tasks, your code owns the data.
-- Export and print: `exportSvg()` returns the whole chart (not just the part on screen) as a standalone SVG string, and the chart prints as a whole (no scroll
-  area, no sticky headers, no controls; use `zoom="fit"` for a wide project).
+- Size: by default the chart grows with its rows up to 620px (`max-height="60vh"` or the `--ui-gantt-max-height` variable change that); add
+  `fill` and give the element a height (or a flex/grid cell) and it fills it, with the rows scrolling inside. Below 640px of width only the
+  name column is kept. Large task sets (over 240 rows) are virtualized automatically; `virtualized="false"` turns that off.
+- Dates are calendar days (`YYYY-MM-DD`). A time or offset after the day (`2026-03-02T23:30:00Z`) is ignored, so a task never moves a
+  day with the viewer's time zone; `taskchange` reports plain `YYYY-MM-DD`.
+- Translate every word with `labels` (a JSON object with any subset of the label keys, e.g. `{"title": "Planning", "zoomWeek": "semaine"}`) and
+  set `locale` (`fr-FR`) for month names, date formats and the first day of the week.
+
+### Task list
+
+- Choose the columns with `columns` (`["label", "assignee", "start", "end", "duration", "progress"]`, or objects with a `label` and a
+  `width`) and size the list with `grid-width`; a splitter on its edge resizes it (mouse, touch, or the arrow keys) and fires `gridresize`.
+- Parents: opening or closing a branch fires `tasktoggle`. `auto-summary` makes a parent span its children and take their progress (weighted by length)
+  when it has none; `cascade` lets you move a parent and everything under it together (`beforetaskchange` lists the tasks it moves in `affected`,
+  `taskchange` fires for each).
+
+### Dependencies and scheduling
+
+- A link may carry a `lag` (days) and its `type` says what it ties: `e2s` (the default), `s2s`, `e2e` or `s2e`. A link whose target is too early is
+  drawn red and dashed.
+- `schedule="auto"` also pushes the tasks that follow a task you move (later only, keeping their length, down the chain, as one change you can
+  refuse in `beforetaskchange`); `schedule="off"` turns both off. The pushing counts calendar days.
 - `critical-path` computes the critical path from the links (no slack on a chain that is tight all the way) and draws those bars as critical, on top of any
   task you flag `critical`.
-- Parents: `auto-summary` makes a parent span its children and take their progress (weighted by length) when it has none; `cascade` lets you move a parent
-  and everything under it together (`beforetaskchange` lists the tasks it moves in `affected`, `taskchange` fires for each).
-- Editing in place: double-click a task's name (or press F2 on a row or a bar) to rename it; Enter or leaving the field keeps it and fires `taskrename`
-  (cancelable), Escape drops it. With `creatable` there is a **+ Add task** button, and a double-click on empty timeline space does the same for that
-  day: the chart fires `taskcreate` with the dates and the neighbour and your code adds the task. Nothing is written to your data by the chart.
-- Keyboard: Tab enters the task list once (a row) and once more for the bars. On a row, Up/Down, Home/End and PageUp/PageDown move between rows, Right
-  opens a branch or steps into it, Left closes it or climbs to the parent, Enter or Space selects. On a bar the same keys move between rows, and
-  Left/Right move the bar a day (Shift: extend the end), Delete asks to remove it, and Escape closes the tooltip.
+- `linkable` shows dots beside each bar: drag one onto another bar and the chart fires `linkcreate` with the source, the target and the type the two ends
+  give (`e2s`, `s2s`, `e2e`, `s2e`); click a link to select it and press Delete to get `linkdelete`. As with tasks, your code owns the data.
+
+### Editing
+
 - Dragging: a bar can be dragged, resized from its ends, or moved with the arrow keys (Shift extends the end). The chart scrolls when a drag is held
   near the left or right edge, Escape cancels it, and `snap="week"` or `snap="month"` snaps it to whole weeks or months. `beforetaskchange`
   (cancelable) fires before the dates change, so a host can refuse the change with `event.preventDefault()`; `taskchange` fires after.
-- The chart opens on today when it is off the first screen (`initial-scroll="start"` keeps the start), the toolbar has a Today button, and the
-  element has methods: `scrollToDate(date)`, `scrollToTask(id)`, `toggleTask(id, open?)`, `expandAll()` and `collapseAll()`. `tasks` and `links` are also
-  properties that take arrays (with `Date`s if you like), and opening or closing a branch fires `tasktoggle`.
-- Size: by default the chart grows with its rows up to 620px (`max-height="60vh"` or the `--ui-gantt-max-height` variable change that); add
-  `fill` and give the element a height (or a flex/grid cell) and it fills it, with the rows scrolling inside.
-- Translate every word with `labels` (a JSON object with any subset of the label keys, e.g. `{"title": "Planning", "zoomWeek": "semaine"}`) and
-  set `locale` (`fr-FR`) for month names, date formats and the first day of the week.
-- Dates are calendar days (`YYYY-MM-DD`). A time or offset after the day (`2026-03-02T23:30:00Z`) is ignored, so a task never moves a
-  day with the viewer's time zone; `taskchange` reports plain `YYYY-MM-DD`.
-- Dependency types: `e2s`, `s2s`, `e2e` and `s2e`.
+- Rename in place: double-click a task's name (or press F2 on a row or a bar). Enter or leaving the field keeps it and fires `taskrename`
+  (cancelable), Escape drops it.
+- With `creatable` there is a **+ Add task** button, and a double-click on empty timeline space does the same for that
+  day: the chart fires `taskcreate` with the dates and the neighbour and your code adds the task. Nothing is written to your data by the chart.
+- `readonly` turns all of this off and keeps the browsing.
+
+### Keyboard and accessibility
+
+- Tab enters the task list once (a row) and once more for the bars. On a row, Up/Down, Home/End and PageUp/PageDown move between rows, Right
+  opens a branch or steps into it, Left closes it or climbs to the parent, Enter or Space selects. On a bar the same keys move between rows, and
+  Left/Right move the bar a day (Shift: extend the end), Delete asks to remove it, and Escape closes the tooltip.
 - Each bar is named for assistive technology with its dates, progress, owner and critical flag, and shows the same facts in a tooltip on
-  hover or keyboard focus (Escape dismisses it). While you drag a bar, the tooltip shows the dates it would take.
-- Also: `readonly`, `show-toolbar`, `show-today`, `filter`, and `virtualized="false"` for small layouts (large task sets are
-  virtualized automatically).
+  hover or keyboard focus. While you drag a bar, the tooltip shows the dates it would take. Bars and the touch targets of the splitter and the
+  link handles grow on touch screens.
+
+### Export and print
+
+`exportSvg()` returns the whole chart (not just the part on screen) as a standalone SVG string, and the chart prints as a whole (no scroll
+area, no sticky headers, no controls; use `zoom="fit"` for a wide project).
+
+### Reference
+
+| Attribute | Values |
+| --- | --- |
+| `zoom` | `day`, `week` (default), `month`, `quarter`, `year`, `fit` |
+| `week-start`, `locale`, `labels` | first weekday (`0`-`6`), a locale tag, a JSON object of label overrides |
+| `bar-variant`, `sort`, `variant` | bar skin, sort key, `contrast` for a dark surface |
+| `columns`, `grid-width` | task list columns and width |
+| `fill`, `max-height`, `virtualized` | sizing and row virtualization |
+| `non-working-days`, `holidays` | shaded days: weekdays, dates |
+| `auto-summary`, `cascade` | parents follow their children, parents move their children |
+| `schedule`, `critical-path` | `auto` pushes successors, red critical bars |
+| `linkable`, `creatable`, `readonly`, `snap`, `initial-scroll` | editing and scrolling behaviour |
+| `filter`, `show-toolbar`, `show-today`, `headless` | toolbar |
+
+| Event | `detail` |
+| --- | --- |
+| `beforetaskchange` (cancelable) | `{ id, start, end, previousStart, previousEnd, source, affected }`, `affected` lists the other tasks the change moves in the same shape |
+| `taskchange` | `{ id, start, end }`, once for each task that moved |
+| `taskselect`, `taskdelete` | `{ id }` |
+| `tasktoggle` | `{ id, open }` |
+| `taskrename` (cancelable) | `{ id, label, previousLabel }` |
+| `taskcreate` | `{ start, end, parent, after }` |
+| `linkcreate` | `{ source, target, type }` |
+| `linkselect`, `linkdelete` | `{ id, source, target, type }` |
+| `zoomchange`, `sortchange`, `filterchange`, `gridresize` | `{ zoom }`, `{ sort }`, `{ filter }`, `{ width }` |
+
+Methods: `scrollToDate(date)`, `scrollToTask(id)`, `toggleTask(id, open?)`, `expandAll()`, `collapseAll()` and `exportSvg()`. `tasks`, `links`
+and `holidays` are also properties that take arrays (with `Date`s if you like).
 
 ## Promise dialogs
 

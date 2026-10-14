@@ -508,7 +508,7 @@ npm run test:coverage
 
 ## 🧩 UI Components
 
-Editora also ships a production UI component system through `@editora/ui-core` and `@editora/ui-react`. The latest Gantt planning workspace includes task, summary, and milestone bars; dependency links; drag/resize editing; baselines; critical tasks; split segments; keyboard selection; selectable links; bar design variants; and row virtualization for large plans.
+Editora also ships a production UI component system through `@editora/ui-core` and `@editora/ui-react`. The latest Gantt planning workspace includes task, summary, and milestone bars; dependency links; drag/resize editing; baselines; critical tasks; split segments; keyboard selection; links you draw by dragging; a two-level time header with weekend and holiday shading; scheduling that pushes later tasks and a computed critical path; in-place rename and task creation; translatable labels; SVG export and printing; bar design variants; and row virtualization for large plans.
 
 - **React package:** `@editora/ui-react`
 - **Web Components package:** `@editora/ui-core`

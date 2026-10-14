@@ -1,0 +1,100 @@
+<ui-gantt
+  id="planner"
+  zoom="week"
+  week-start="1"
+  bar-variant="soft"
+  columns='["label", "assignee", "start", "end", "progress"]'
+  non-working-days
+  auto-summary
+  cascade
+  schedule="auto"
+  critical-path
+  linkable
+  creatable
+></ui-gantt>
+
+<script type="module">
+  import '@editora/ui-core';
+
+  const planner = document.getElementById('planner');
+  const day = (offset) => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() + offset);
+    return date;
+  };
+
+  // The chart draws what it is given and reports what the user does; the plan lives here.
+  let tasks = [
+    { id: 'discovery', label: 'Discovery', type: 'summary' },
+    { id: 'research', label: 'User research', parent: 'discovery', start: day(-21), end: day(-12), progress: 100, assignee: 'Mina', baselineStart: day(-21), baselineEnd: day(-13) },
+    { id: 'interviews', label: 'Interviews', parent: 'discovery', start: day(-12), end: day(-5), progress: 100, assignee: 'Jonas' },
+    { id: 'scope', label: 'Scope signed off', parent: 'discovery', start: day(-5), type: 'milestone', tone: 'success' },
+    { id: 'build', label: 'Build', type: 'summary' },
+    { id: 'api', label: 'API and data model', parent: 'build', start: day(-4), end: day(10), progress: 70, assignee: 'Priya' },
+    {
+      id: 'ui',
+      label: 'Planner UI',
+      parent: 'build',
+      start: day(-2),
+      end: day(18),
+      progress: 45,
+      assignee: 'Tomás',
+      segments: [{ start: day(-2), end: day(5) }, { start: day(8), end: day(18) }]
+    },
+    { id: 'integration', label: 'Integration', parent: 'build', start: day(18), end: day(26), progress: 0, assignee: 'Priya' },
+    { id: 'launch', label: 'Launch', type: 'summary' },
+    { id: 'qa', label: 'QA and fixes', parent: 'launch', start: day(26), end: day(33), assignee: 'Aiko' },
+    { id: 'beta', label: 'Beta', parent: 'launch', start: day(33), end: day(40), assignee: 'Aiko' },
+    { id: 'release', label: 'Release', parent: 'launch', start: day(40), type: 'milestone', tone: 'danger' },
+    { id: 'docs', label: 'Write the docs', start: day(30), end: day(38), progress: 20, assignee: 'Sam' }
+  ];
+  let links = [
+    { id: 'l1', source: 'research', target: 'interviews' },
+    { id: 'l2', source: 'interviews', target: 'scope' },
+    { id: 'l3', source: 'scope', target: 'api', lag: 1 },
+    { id: 'l4', source: 'scope', target: 'ui', type: 's2s', lag: 3 },
+    { id: 'l5', source: 'api', target: 'integration' },
+    { id: 'l6', source: 'ui', target: 'integration' },
+    { id: 'l7', source: 'integration', target: 'qa' },
+    { id: 'l8', source: 'qa', target: 'beta' },
+    { id: 'l9', source: 'beta', target: 'release' },
+    { id: 'l10', source: 'beta', target: 'docs' } // docs are planned before beta ends: drawn red
+  ];
+  const sync = () => {
+    planner.tasks = tasks;
+    planner.links = links;
+  };
+  planner.holidays = [{ date: day(12), label: 'Founders day' }];
+  const patch = (id, changes) => {
+    tasks = tasks.map((task) => (task.id === id ? { ...task, ...changes } : task));
+  };
+  sync();
+
+  // Keep the release date: refuse any change that would push it.
+  planner.addEventListener('beforetaskchange', (event) => {
+    if (event.detail.affected.some((change) => change.id === 'release')) event.preventDefault();
+  });
+  planner.addEventListener('taskchange', ({ detail }) => {
+    patch(detail.id, { start: detail.start, end: detail.end });
+    sync();
+  });
+  planner.addEventListener('taskrename', ({ detail }) => {
+    patch(detail.id, { label: detail.label });
+    sync();
+  });
+  planner.addEventListener('taskcreate', ({ detail }) => {
+    const id = `task-${tasks.length + 1}`;
+    tasks = [...tasks, { id, label: 'New task', start: detail.start, end: detail.end, parent: detail.parent }];
+    sync();
+    planner.scrollToTask(id);
+  });
+  planner.addEventListener('linkcreate', ({ detail }) => {
+    links = [...links, { id: `l${links.length + 1}`, ...detail }];
+    sync();
+  });
+  planner.addEventListener('linkdelete', ({ detail }) => {
+    links = links.filter((link) => link.id !== detail.id);
+    sync();
+  });
+</script>

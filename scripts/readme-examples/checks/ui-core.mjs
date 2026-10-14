@@ -61,6 +61,25 @@ export default async function checks({ run }) {
     return links > 0 ? true : 'the dependency link is not drawn';
   });
 
+  await run('ui-core-gantt-planner', async (page) => {
+    await page.waitForTimeout(500);
+    const facts = await page.locator('ui-gantt').evaluate((element) => {
+      const root = element.shadowRoot;
+      return {
+        bars: root.querySelectorAll('.bar').length,
+        critical: root.querySelectorAll('.bar.critical').length,
+        broken: root.querySelectorAll('path.violated').length,
+        offDays: root.querySelectorAll('.off-day').length,
+        svg: element.exportSvg().startsWith('<svg'),
+      };
+    });
+    if (facts.bars < 10) return `only ${facts.bars} bars are drawn`;
+    if (!facts.critical) return 'no bar is drawn as critical';
+    if (!facts.broken) return 'the docs link that starts before beta ends is not drawn as broken';
+    if (!facts.offDays) return 'weekends are not shaded';
+    return facts.svg ? true : 'exportSvg() did not return an SVG';
+  });
+
   await run('ui-core-dialogs', async (page) => {
     await page.getByRole('button', { name: 'Delete record' }).click();
     await page.waitForTimeout(400);
