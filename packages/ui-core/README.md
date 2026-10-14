@@ -258,6 +258,8 @@ and resize, and a toolbar for zoom, filter and sort. Give it `tasks` and `links`
   sets the first day of the week; it defaults to the locale's.
 - `bar-variant`: `solid`, `soft`, `striped`, `outline` or `glass`.
 - Dependency types: `e2s`, `s2s`, `e2e` and `s2e`.
+- Each bar is named for assistive technology with its dates, progress, owner and critical flag, and shows the same facts in a tooltip on
+  hover or keyboard focus (Escape dismisses it). While you drag a bar, the tooltip shows the dates it would take.
 - Also: `readonly`, `show-toolbar`, `show-today`, `filter`, and `virtualized="false"` for small layouts (large task sets are
   virtualized automatically).
 
