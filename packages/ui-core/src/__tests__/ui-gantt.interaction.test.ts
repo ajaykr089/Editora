@@ -278,3 +278,20 @@ describe('ui-gantt task `open: false`', () => {
     expect(rows(gantt)).toEqual(['n-p1', 'n-c']);
   });
 });
+
+describe('ui-gantt in a narrow host', () => {
+  // jsdom does not evaluate container queries, so this pins the pieces the layout relies on; the
+  // behaviour itself was checked in a real browser at 390, 600, 768 and 1365px.
+  it('sizes the task grid from one variable that a narrow container shrinks', async () => {
+    const gantt = await mount();
+    const css = root(gantt).querySelector('style')!.textContent!;
+    const surface = root(gantt).querySelector<HTMLElement>('.surface')!;
+
+    expect(css).toMatch(/@container ui-gantt \(max-width: 640px\)/);
+    expect(css).toMatch(/--gantt-grid-w: 376px/);
+    expect(css).toMatch(/--gantt-grid-w: 148px/);
+    expect(surface.getAttribute('style')).toContain('grid-template-columns:var(--gantt-grid-w)');
+    expect(surface.getAttribute('style')).not.toMatch(/grid-template-columns:376px/);
+    expect(root(gantt).querySelector('.frame')).not.toBeNull();
+  });
+});

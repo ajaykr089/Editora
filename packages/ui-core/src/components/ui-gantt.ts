@@ -102,6 +102,7 @@ const style = `
   }
 
   .frame {
+    container: ui-gantt / inline-size;
     border: 1px solid var(--ui-gantt-border);
     border-radius: 12px;
     background: var(--ui-gantt-bg);
@@ -178,9 +179,33 @@ const style = `
   }
 
   .surface {
+    --gantt-grid-w: ${GRID_WIDTH}px;
     display: grid;
-    grid-template-columns: ${GRID_WIDTH}px minmax(640px, 1fr);
+    grid-template-columns: var(--gantt-grid-w) minmax(640px, 1fr);
     min-inline-size: 100%;
+  }
+
+  /* The task grid is sticky, so at 376px it covers a phone-sized chart completely and no bar can be
+     reached. In a narrow host keep only the task name column and give the timeline the room. */
+  @container ui-gantt (max-width: 640px) {
+    .surface {
+      --gantt-grid-w: 148px;
+    }
+
+    .grid-head,
+    .grid-row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* !important: the sortable header wrappers carry an inline display: contents. */
+    .grid-head > :nth-child(n + 2),
+    .grid-cell:nth-child(n + 2) {
+      display: none !important;
+    }
+
+    .grid-cell.task-name {
+      padding-inline-end: 6px;
+    }
   }
 
   .grid-head,
@@ -1259,7 +1284,7 @@ export class UIGantt extends ElementBase {
           </header>
         ` : ''}
         <div class="viewport" part="viewport">
-          <div class="surface" part="surface" style="--day-width:${dayWidth}px;grid-template-columns:${GRID_WIDTH}px ${timelineWidth.toFixed(2)}px;inline-size:max(100%, ${(GRID_WIDTH + timelineWidth).toFixed(2)}px)">
+          <div class="surface" part="surface" style="--day-width:${dayWidth}px;grid-template-columns:var(--gantt-grid-w) ${timelineWidth.toFixed(2)}px;inline-size:max(100%, calc(var(--gantt-grid-w) + ${timelineWidth.toFixed(2)}px))">
             <div class="grid-semantics" role="treegrid" aria-label="${escapeHtml(this.getAttribute('aria-label') || 'Project schedule')}" aria-rowcount="${visible.length + 1}" aria-colcount="4">
               <div class="grid-head" part="grid-head" role="row">
                 <div role="columnheader" aria-sort="${sort === 'label' ? 'ascending' : 'none'}" style="display:contents"><button class="head-button" data-sort="label">Task</button></div>
