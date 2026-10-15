@@ -1,5 +1,11 @@
 # @editora/markdown-editor
 
+## 0.2.1
+
+### Patch Changes
+
+- 475bc42: Add npm keywords so the packages show up in npm search for editor, markdown preview and floating-toolbar queries.
+
 ## 0.2.0
 
 ### Minor Changes

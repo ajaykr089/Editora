@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.1.9
+
+### Patch Changes
+
+- 475bc42: Add npm keywords so the packages show up in npm search for editor, markdown preview and floating-toolbar queries.
+- Updated dependencies [26e9a7b]
+  - @editora/ui-core@0.1.25
+
 ## 0.1.8
 
 ### Patch Changes
