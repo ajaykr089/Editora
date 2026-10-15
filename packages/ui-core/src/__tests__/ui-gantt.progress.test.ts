@@ -45,7 +45,7 @@ describe('ui-gantt progress on the bar', () => {
   it('draws the fill as a solid shade, not the old 30%-opacity fade', async () => {
     const root = await mount([{ id: 'a', label: 'A', start: '2026-03-02', end: '2026-03-12', progress: 40 }]);
     const css = root.querySelector('style')!.textContent!;
-    const rule = /\n  \.progress \{([^}]*)\}/.exec(css)![1];
+    const rule = /\n {2}\.progress \{([^}]*)\}/.exec(css)![1];
 
     expect(rule).not.toMatch(/opacity/);
     expect(rule).toMatch(/color-mix\(in srgb, var\(--tone, var\(--ui-gantt-accent\)\) 58%, #0b1220\)/);
