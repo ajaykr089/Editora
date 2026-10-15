@@ -13,10 +13,11 @@ describe('ui-core in a process without a DOM', () => {
     expect(typeof document).toBe('undefined');
   });
 
+  // A cold import transforms every component, which takes a few seconds and grows with the catalog.
   it('imports the whole catalog', async () => {
     const catalog = await import('../index');
     expect(Object.keys(catalog).length).toBeGreaterThan(50);
-  });
+  }, 30_000);
 
   it('imports the standalone entries that extend HTMLElement directly or register late', async () => {
     for (const entry of ['anchor', 'collection', 'roving-focus-group', 'sidebar', 'color-picker', 'number-field']) {
