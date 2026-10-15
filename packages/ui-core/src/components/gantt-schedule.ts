@@ -1,4 +1,4 @@
-// Pure scheduling helpers for <ui-gantt>: roll-ups, cascades, link constraints and the critical path. Dates are
+// Pure scheduling helpers for the Gantt chart: roll-ups, cascades, link constraints and the critical path. Dates are
 // local-midnight timestamps (ms), and every task's `end` is the boundary after its last day, as the chart draws it.
 // Nothing here touches the DOM, so it can be tested on its own.
 

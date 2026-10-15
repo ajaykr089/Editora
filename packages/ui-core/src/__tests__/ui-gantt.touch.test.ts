@@ -66,6 +66,6 @@ describe('ui-gantt touch targets', () => {
     const css = root.querySelector('style')!.textContent!;
     const base = css.slice(0, css.indexOf('@media (pointer: coarse)'));
 
-    expect(base).toMatch(/\n  \.handle \{[^}]*inline-size: 14px;[^}]*opacity: 0;/);
+    expect(base).toMatch(/\n {2}\.handle \{[^}]*inline-size: 14px;[^}]*opacity: 0;/);
   });
 });
