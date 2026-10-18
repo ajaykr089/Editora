@@ -167,3 +167,74 @@ describe('choosing a slash command on an otherwise empty line', () => {
     expect(line.textContent).toBe('Word ');
   });
 });
+
+describe('running a command by name when the page has two command bridges', () => {
+  let nativeCommand: ReturnType<typeof vi.fn>;
+  let plugin: ReturnType<typeof SlashCommandsPlugin>;
+  const bridges = ['executeEditorCommand', 'execEditorCommand'] as const;
+
+  beforeEach(() => {
+    Object.defineProperty(Range.prototype, 'getClientRects', { configurable: true, writable: true, value: () => [] });
+    Object.defineProperty(Range.prototype, 'getBoundingClientRect', { configurable: true, writable: true, value: () => new DOMRect() });
+    document.body.innerHTML = '<div class="rte-content" contenteditable="true"><p id="line"></p></div>';
+    editor = document.querySelector('.rte-content') as HTMLElement;
+    nativeCommand = vi.fn(() => true);
+    (document as any).execCommand = nativeCommand;
+    plugin = SlashCommandsPlugin({ includeDefaultItems: false, items: [{ id: 'x', label: 'Extra', command: 'toggleBulletList' }] });
+    plugin.init?.({} as never);
+  });
+
+  afterEach(() => {
+    plugin.destroy?.();
+    for (const name of bridges) delete (window as any)[name];
+    delete (document as any).execCommand;
+    delete (Range.prototype as any).getClientRects;
+    delete (Range.prototype as any).getBoundingClientRect;
+    document.body.innerHTML = '';
+  });
+
+  const choose = async () => {
+    editor.focus();
+    editor.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    const text = document.createTextNode('/extra');
+    const line = document.getElementById('line') as HTMLElement;
+    line.appendChild(text);
+    place(text, text.data.length);
+    editor.dispatchEvent(new Event('input', { bubbles: true }));
+    editor.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  };
+
+  for (const [first, second] of [bridges, [...bridges].reverse()] as const) {
+    it(`finds the command on ${second} when ${first} does not know it`, async () => {
+      const knows = vi.fn(() => true);
+      (window as any)[first] = vi.fn(() => false);
+      (window as any)[second] = knows;
+
+      await choose();
+
+      expect(knows).toHaveBeenCalledWith('toggleBulletList', undefined, expect.objectContaining({ contentElement: editor }));
+      expect(nativeCommand).not.toHaveBeenCalled();
+    });
+  }
+
+  it('does not ask the same bridge twice when both names are one function', async () => {
+    const bridge = vi.fn(() => false);
+    (window as any).executeEditorCommand = bridge;
+    (window as any).execEditorCommand = bridge;
+
+    await choose();
+
+    // (The history recording is a second, different command on the same bridge.)
+    expect(bridge.mock.calls.filter((call) => call[0] === 'toggleBulletList')).toHaveLength(1);
+  });
+
+  it('falls back to the browser command only when no bridge knows it', async () => {
+    (window as any).executeEditorCommand = vi.fn(() => false);
+    (window as any).execEditorCommand = vi.fn(() => false);
+
+    await choose();
+
+    expect(nativeCommand).toHaveBeenCalledWith('insertUnorderedList');
+  });
+});

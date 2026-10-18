@@ -487,17 +487,22 @@ function executeCommand(editor: HTMLElement, command: string, value?: any): bool
     }
   }
 
-  const executor = (window as any).execEditorCommand || (window as any).executeEditorCommand;
-  if (typeof executor === 'function') {
+  // The page can have more than one command bridge (the toolbar's and the history plugin's), and each only
+  // knows the commands registered with it: ask every one before settling for the browser's raw command, which
+  // skips what the plugin does around it (a list command tidies the markup the browser leaves behind).
+  const bridges = [(window as any).executeEditorCommand, (window as any).execEditorCommand].filter(
+    (bridge, index, all) => typeof bridge === 'function' && all.indexOf(bridge) === index,
+  );
+  const commandContext = {
+    editorElement: editorRoot,
+    contentElement: editor,
+  };
+  for (const bridge of bridges) {
     try {
-      const commandContext = {
-        editorElement: editorRoot,
-        contentElement: editor,
-      };
-      const result = executor(command, value, commandContext);
+      const result = bridge(command, value, commandContext);
       if (result !== false) return true;
     } catch {
-      // Fall through to mapped commands.
+      // Try the next bridge, then the mapped commands.
     }
   }
 
