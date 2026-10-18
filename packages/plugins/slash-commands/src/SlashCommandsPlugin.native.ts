@@ -1,6 +1,7 @@
 import type { Plugin } from '@editora/core';
 import { normalizeOptions } from './SlashCommandsOptions';
 import { ensureStylesInjected } from './SlashCommandsStyles';
+import { keepCaretBlockSelectable } from './emptyBlock';
 import type {
   SlashCommandActionContext,
   SlashCommandItem,
@@ -552,6 +553,8 @@ async function selectItemAtIndex(
   replaceRange.deleteContents();
   const caret = replaceRange.cloneRange();
   caret.collapse(true);
+  // On an otherwise empty line the block is now empty, and a block command would land on a neighbour.
+  keepCaretBlockSelectable(editor, caret);
   setSelectionRange(editor, caret);
 
   let executed = false;
