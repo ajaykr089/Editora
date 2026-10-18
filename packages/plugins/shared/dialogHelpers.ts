@@ -79,4 +79,160 @@ export function initDialogOverlay(overlay: HTMLElement): void {
   overlay.setAttribute('data-rte-dialog', '');
   injectDialogBaseStyles();
   guardBackdropDrag(overlay);
+  makeDialogAccessible(overlay);
+}
+
+const FOCUSABLE =
+  'a[href], button, input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';
+
+function isShown(element: HTMLElement, within: HTMLElement): boolean {
+  for (let node: HTMLElement | null = element; node; node = node.parentElement) {
+    if (node.hidden || node.getAttribute('aria-hidden') === 'true') return false;
+    const style = window.getComputedStyle(node);
+    if (style.display === 'none' || style.visibility === 'hidden') return false;
+    if (node === within) break;
+  }
+  return true;
+}
+
+function focusableIn(root: HTMLElement): HTMLElement[] {
+  return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
+    (element) =>
+      !(element as HTMLButtonElement).disabled &&
+      element.getAttribute('tabindex') !== '-1' &&
+      isShown(element, root),
+  );
+}
+
+/** The corner "x" that closes a dialog is not where someone who has just opened it wants to start. */
+function isCloseControl(element: HTMLElement): boolean {
+  const label = `${element.getAttribute('aria-label') ?? ''} ${element.className?.toString() ?? ''}`.toLowerCase();
+  const text = (element.textContent ?? '').trim();
+  return /close|dismiss/.test(label) || /^[\u00d7\u2715\u2716x]$/i.test(text);
+}
+
+/** The name a dialog shows in its heading, without the close button that sits inside the same bar. */
+function headingText(dialog: HTMLElement): string {
+  const heading = dialog.querySelector<HTMLElement>(
+    'h1, h2, h3, h4, [class*="title"], [class*="header"], header, [role="heading"]',
+  );
+  if (!heading) return '';
+  const copy = heading.cloneNode(true) as HTMLElement;
+  copy.querySelectorAll('button, [role="button"], [aria-label*="lose"], [class*="close"]').forEach((node) => node.remove());
+  return (copy.textContent ?? '').replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * What every modal dialog needs for someone who cannot see it or cannot use a pointer, applied once to the shared
+ * overlay so each plugin does not repeat it (and cannot forget it): a dialog role with a name taken from its
+ * heading, focus moved into it, Tab kept inside it, and focus returned to where it was when the dialog closes.
+ * Runs after the plugin has built and attached the dialog, so it works with whatever structure the plugin made;
+ * anything the plugin already set (a role, a name, focus on its own field) is left as it is.
+ */
+function makeDialogAccessible(overlay: HTMLElement): void {
+  const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+  // Moving focus into the dialog moves the document's selection out of the text. Remember it, with the text it
+  // belonged to, so that a dialog that is closed without changing anything gives the caret back.
+  const selection = window.getSelection();
+  const savedRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0).cloneRange() : null;
+  const savedHost = savedRange
+    ? (savedRange.commonAncestorContainer instanceof HTMLElement
+        ? savedRange.commonAncestorContainer
+        : savedRange.commonAncestorContainer.parentElement
+      )?.closest<HTMLElement>('[contenteditable="true"]') ?? null
+    : null;
+  const savedHTML = savedHost ? savedHost.innerHTML : null;
+
+  overlay.addEventListener('keydown', (event) => {
+    if (event.key !== 'Tab' || event.defaultPrevented) return;
+    const items = focusableIn(overlay);
+    if (items.length === 0) {
+      event.preventDefault();
+      return;
+    }
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = document.activeElement;
+    if (event.shiftKey && (active === first || !overlay.contains(active))) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && (active === last || !overlay.contains(active))) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+
+  let wasShown = false;
+  const setUp = (attempt: number) => {
+    if (!overlay.isConnected) {
+      // The plugin has not attached it yet (or never will): look again once, then give up.
+      if (attempt < 3) window.setTimeout(() => setUp(attempt + 1), 50);
+      return;
+    }
+
+    wasShown = true;
+    // The dialog is whatever carries the role already, else the box inside the backdrop, else the overlay itself.
+    const hasDialogRole = (element: Element) => ['dialog', 'alertdialog'].includes(element.getAttribute('role') ?? '');
+    const box: HTMLElement =
+      (hasDialogRole(overlay) ? overlay : null) ??
+      overlay.querySelector<HTMLElement>('[role="dialog"], [role="alertdialog"]') ??
+      (overlay.firstElementChild instanceof HTMLElement ? overlay.firstElementChild : null) ??
+      overlay;
+
+    if (!box.getAttribute('role')) box.setAttribute('role', 'dialog');
+    if (!box.hasAttribute('aria-modal')) box.setAttribute('aria-modal', 'true');
+
+    const labelledBy = box.getAttribute('aria-labelledby');
+    const hasName =
+      !!box.getAttribute('aria-label') || (!!labelledBy && !!document.getElementById(labelledBy.split(/\s+/)[0]));
+    if (!hasName) {
+      const name = headingText(box);
+      if (name) {
+        box.removeAttribute('aria-labelledby');
+        box.setAttribute('aria-label', name);
+      }
+    }
+
+    // Focus: leave it if the plugin has already put it on one of its own fields.
+    if (!overlay.contains(document.activeElement)) {
+      const items = focusableIn(overlay);
+      const target = items.find((item) => !isCloseControl(item)) ?? items[0];
+      if (target) {
+        target.focus({ preventScroll: true });
+      } else {
+        box.setAttribute('tabindex', '-1');
+        box.focus({ preventScroll: true });
+      }
+    }
+  };
+  window.setTimeout(() => setUp(0), 0);
+
+  // When the dialog goes, put focus back where it came from, unless the plugin has already put it somewhere.
+  const watch = new MutationObserver(() => {
+    if (overlay.isConnected) wasShown = true;
+    if (overlay.isConnected || !wasShown) return;
+    watch.disconnect();
+    const active = document.activeElement;
+    const lost = !active || active === document.body || overlay.contains(active);
+    if (lost) {
+      const target = savedHost?.isConnected ? savedHost : opener;
+      if (target && target.isConnected) target.focus({ preventScroll: true });
+    }
+
+    // Closed without changing the text (Cancel, Escape): the caret goes back where it was. When the dialog
+    // did change it (an insert), the plugin has placed the caret itself and that is left alone.
+    if (savedRange && savedHost && savedHost.isConnected && savedHost.innerHTML === savedHTML && selection) {
+      const now = selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
+      const same =
+        !!now &&
+        now.compareBoundaryPoints(Range.START_TO_START, savedRange) === 0 &&
+        now.compareBoundaryPoints(Range.END_TO_END, savedRange) === 0;
+      if (!same && savedHost.contains(savedRange.startContainer) && savedHost.contains(savedRange.endContainer)) {
+        selection.removeAllRanges();
+        selection.addRange(savedRange);
+      }
+    }
+  });
+  watch.observe(document.body, { childList: true, subtree: true });
 }
