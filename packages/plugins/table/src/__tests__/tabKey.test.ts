@@ -101,7 +101,7 @@ describe('Tab in a table', () => {
   });
 
   it('records the added row so that Undo takes it back', () => {
-    const record = vi.fn(() => true);
+    const record = vi.fn((..._args: unknown[]) => true);
     (window as any).execEditorCommand = (command: string, ...args: unknown[]) => (command === 'recordDomTransaction' ? record(...args) : false);
     placeIn('B2');
     press();

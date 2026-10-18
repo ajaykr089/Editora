@@ -219,7 +219,7 @@ describe('inserting the media', () => {
   });
 
   it('records the insertion in the undo history', () => {
-    const record = vi.fn(() => true);
+    const record = vi.fn((..._args: unknown[]) => true);
     (window as any).execEditorCommand = (command: string, ...args: unknown[]) => (command === 'recordDomTransaction' ? record(...args) : false);
     try {
       insertFromUrl('https://example.com/a.png');

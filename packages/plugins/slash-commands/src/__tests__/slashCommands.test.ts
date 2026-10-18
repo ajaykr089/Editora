@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { SlashCommandsPlugin } from '../SlashCommandsPlugin.native';
 import { keepCaretBlockSelectable } from '../emptyBlock';
 
@@ -169,7 +169,7 @@ describe('choosing a slash command on an otherwise empty line', () => {
 });
 
 describe('running a command by name when the page has two command bridges', () => {
-  let nativeCommand: ReturnType<typeof vi.fn>;
+  let nativeCommand: Mock<any[], any>;
   let plugin: ReturnType<typeof SlashCommandsPlugin>;
   const bridges = ['executeEditorCommand', 'execEditorCommand'] as const;
 
@@ -219,7 +219,7 @@ describe('running a command by name when the page has two command bridges', () =
   }
 
   it('does not ask the same bridge twice when both names are one function', async () => {
-    const bridge = vi.fn(() => false);
+    const bridge = vi.fn((..._args: unknown[]) => false);
     (window as any).executeEditorCommand = bridge;
     (window as any).execEditorCommand = bridge;
 

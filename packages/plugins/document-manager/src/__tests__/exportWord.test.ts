@@ -1,16 +1,16 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { exportToWord } from '../documentManager';
 import { DEFAULT_CONFIG, getApiUrl, setDocumentManagerConfig } from '../constants';
 import { DEFAULT_API_CONFIG, getGlobalApiConfig, setGlobalApiConfig } from '../../../src/shared-config';
 import { getApiUrl as getMediaApiUrl, setMediaManagerConfig } from '../../../media-manager/src/constants';
 
 // Export used to ask http://localhost:3001 first, on every visitor's machine, whatever the page was.
-let fetchSpy: ReturnType<typeof vi.fn>;
+let fetchSpy: Mock<any[], any>;
 let downloaded: string[];
 const original = { fetch: globalThis.fetch, createObjectURL: URL.createObjectURL, revokeObjectURL: URL.revokeObjectURL };
 
 beforeEach(() => {
-  fetchSpy = vi.fn(() => Promise.reject(new Error('network down')));
+  fetchSpy = vi.fn<any[], any>(() => Promise.reject(new Error('network down')));
   globalThis.fetch = fetchSpy as unknown as typeof fetch;
   URL.createObjectURL = vi.fn(() => 'blob:fake');
   URL.revokeObjectURL = vi.fn();
