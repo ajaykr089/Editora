@@ -594,7 +594,7 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
               <p class="rte-media-muted">or click to browse</p>
               <p class="rte-media-hint">Max file size: 50MB</p>
             </div>
-            <input type="file" id="file-input" accept="${type === 'image' ? 'image/*' : 'video/*'}" style="display: none;">
+            <input type="file" id="file-input" aria-label="${type === 'image' ? 'Choose an image file' : 'Choose a video file'}" accept="${type === 'image' ? 'image/*' : 'video/*'}" style="display: none;">
             <div id="upload-progress" class="rte-media-progress" style="display: none;">
               <div class="rte-media-progress-track">
                 <div id="progress-bar" class="rte-media-progress-bar"></div>
@@ -1099,7 +1099,7 @@ const showReplaceImageDialog = (img: HTMLImageElement) => {
               <p class="rte-media-dropzone-title">Drag and drop your image here</p>
               <p class="rte-media-muted">or click to browse</p>
             </div>
-            <input type="file" id="file-input" accept="image/*" style="display: none;">
+            <input type="file" id="file-input" aria-label="Choose an image file" accept="image/*" style="display: none;">
             <div id="upload-progress" class="rte-media-progress" style="display: none;">
               <div class="rte-media-progress-track">
                 <div id="progress-bar" class="rte-media-progress-bar"></div>

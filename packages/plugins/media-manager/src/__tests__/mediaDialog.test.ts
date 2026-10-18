@@ -164,6 +164,15 @@ describe('the insert dialog without a pointer', () => {
     chooser.mockRestore();
   });
 
+  it('names the hidden file input too, so that nothing in the dialog is unnamed', () => {
+    open();
+    const input = dialog().querySelector<HTMLInputElement>('#file-input')!;
+    expect(input.getAttribute('aria-label')).toBe('Choose an image file');
+    document.querySelectorAll('.rte-media-overlay').forEach((node) => node.remove());
+    open('insertVideo');
+    expect(dialog().querySelector('#file-input')!.getAttribute('aria-label')).toBe('Choose a video file');
+  });
+
   it('has a name, a role and focus inside once it has opened', () => {
     open();
     expect(dialog().getAttribute('role')).toBe('dialog');
