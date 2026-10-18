@@ -86,8 +86,9 @@ export class KeymapExtension implements EditorExtension {
     this.addBinding(keymap, 's', { ctrlKey: true }, 'save');
     this.addBinding(keymap, 's', { metaKey: true }, 'save');
 
-    this.addBinding(keymap, 'z', { ctrlKey: true }, 'undo');
-    this.addBinding(keymap, 'z', { metaKey: true }, 'undo');
+    // Not with Shift: Ctrl/Cmd+Shift+Z is redo, and a binding that ignores Shift would match it first.
+    this.addBinding(keymap, 'z', { ctrlKey: true, shiftKey: false }, 'undo');
+    this.addBinding(keymap, 'z', { metaKey: true, shiftKey: false }, 'undo');
 
     this.addBinding(keymap, 'y', { ctrlKey: true }, 'redo');
     this.addBinding(keymap, 'y', { metaKey: true }, 'redo');
