@@ -176,6 +176,26 @@ export function keepPanelFocus(panel: HTMLElement | null, render: () => void): v
   else focusPanel(panel);
 }
 
+let listSequence = 0;
+
+/**
+ * While a list of suggestions (mentions, slash commands) is open, the focus stays in the editor so typing goes on. A
+ * screen reader then has no way to know which suggestion the arrow keys are on, so the editor says so itself:
+ * `aria-activedescendant` points at the active option and `aria-controls` at the list. Call it with no list to clear
+ * both when the suggestions close.
+ */
+export function announceActiveOption(editor: HTMLElement | null, list: HTMLElement | null, option: HTMLElement | null): void {
+  if (!editor) return;
+  if (!list || !option || !option.id) {
+    editor.removeAttribute('aria-activedescendant');
+    editor.removeAttribute('aria-controls');
+    return;
+  }
+  if (!list.id) list.id = `rte-suggestions-${++listSequence}`;
+  editor.setAttribute('aria-controls', list.id);
+  editor.setAttribute('aria-activedescendant', option.id);
+}
+
 /** True when the focus is in the panel, or has just been lost from it (its focused element was removed). */
 export function panelHasFocus(panel: HTMLElement | null): boolean {
   if (!panel) return false;

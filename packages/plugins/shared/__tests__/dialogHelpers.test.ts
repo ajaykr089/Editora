@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { focusPanel, initDialogOverlay, keepPanelFocus, panelHasFocus } from '../dialogHelpers';
+import { announceActiveOption, focusPanel, initDialogOverlay, keepPanelFocus, panelHasFocus } from '../dialogHelpers';
 
 let editorField: HTMLElement;
 
@@ -419,5 +419,51 @@ describe('side panels', () => {
       });
       expect(ran).toBe(true);
     });
+  });
+});
+
+describe('announceActiveOption', () => {
+  const build = () => {
+    document.body.insertAdjacentHTML('beforeend', '<div id="list"><button id="o1">One</button><button id="o2">Two</button></div>');
+    return { list: document.getElementById('list')!, one: document.getElementById('o1')!, two: document.getElementById('o2')! };
+  };
+
+  it('points the editor at the active option and at the list', () => {
+    const { list, two } = build();
+    announceActiveOption(editorField, list, two);
+    expect(editorField.getAttribute('aria-activedescendant')).toBe('o2');
+    expect(editorField.getAttribute('aria-controls')).toBe('list');
+  });
+
+  it('follows the active option as it changes', () => {
+    const { list, one, two } = build();
+    announceActiveOption(editorField, list, one);
+    announceActiveOption(editorField, list, two);
+    expect(editorField.getAttribute('aria-activedescendant')).toBe('o2');
+  });
+
+  it('gives a list without an id one, so that aria-controls has something to point at', () => {
+    const { list, one } = build();
+    list.removeAttribute('id');
+    announceActiveOption(editorField, list, one);
+    expect(list.id).toMatch(/^rte-suggestions-\d+$/);
+    expect(editorField.getAttribute('aria-controls')).toBe(list.id);
+  });
+
+  it('clears both when the suggestions close, or when there is no active option', () => {
+    const { list, one } = build();
+    announceActiveOption(editorField, list, one);
+    announceActiveOption(editorField, null, null);
+    expect(editorField.hasAttribute('aria-activedescendant')).toBe(false);
+    expect(editorField.hasAttribute('aria-controls')).toBe(false);
+
+    announceActiveOption(editorField, list, one);
+    announceActiveOption(editorField, list, document.createElement('button'));
+    expect(editorField.hasAttribute('aria-activedescendant')).toBe(false);
+  });
+
+  it('does nothing without an editor', () => {
+    const { list, one } = build();
+    expect(() => announceActiveOption(null, list, one)).not.toThrow();
   });
 });

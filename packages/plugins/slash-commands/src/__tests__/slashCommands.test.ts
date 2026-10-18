@@ -238,3 +238,63 @@ describe('running a command by name when the page has two command bridges', () =
     expect(nativeCommand).toHaveBeenCalledWith('insertUnorderedList');
   });
 });
+
+
+describe('the slash menu tells assistive technology which command is active', () => {
+  let plugin: ReturnType<typeof SlashCommandsPlugin>;
+
+  beforeEach(() => {
+    Object.defineProperty(Range.prototype, 'getClientRects', { configurable: true, writable: true, value: () => [] });
+    Object.defineProperty(Range.prototype, 'getBoundingClientRect', { configurable: true, writable: true, value: () => new DOMRect() });
+    HTMLElement.prototype.scrollIntoView = () => {};
+    document.body.innerHTML = '<div class="rte-content" contenteditable="true"><p id="line"></p></div>';
+    editor = document.querySelector('.rte-content') as HTMLElement;
+    plugin = SlashCommandsPlugin({
+      includeDefaultItems: false,
+      items: [
+        { id: 'a', label: 'Alpha', action: () => true },
+        { id: 'b', label: 'Bravo', action: () => true },
+        { id: 'c', label: 'Charlie', action: () => true },
+      ],
+    });
+    plugin.init?.({} as never);
+    editor.focus();
+    editor.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    const text = document.createTextNode('/');
+    document.getElementById('line')!.appendChild(text);
+    place(text, 1);
+    editor.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
+  afterEach(() => {
+    plugin.destroy?.();
+    delete (Range.prototype as any).getClientRects;
+    delete (Range.prototype as any).getBoundingClientRect;
+    document.body.innerHTML = '';
+  });
+
+  const options = () => Array.from(document.querySelectorAll<HTMLElement>('[role="option"]'));
+  const key = (name: string) => editor.dispatchEvent(new KeyboardEvent('keydown', { key: name, bubbles: true, cancelable: true }));
+
+  it('points the editor at the first command when the menu opens, and at the list', () => {
+    const [first] = options();
+    expect(editor.getAttribute('aria-activedescendant')).toBe(first.id);
+    expect(editor.getAttribute('aria-controls')).toBe(document.querySelector('[role="listbox"]')!.id);
+  });
+
+  it('follows the arrow keys', () => {
+    key('ArrowDown');
+    expect(editor.getAttribute('aria-activedescendant')).toBe(options()[1].id);
+    key('ArrowDown');
+    expect(editor.getAttribute('aria-activedescendant')).toBe(options()[2].id);
+    key('ArrowUp');
+    expect(editor.getAttribute('aria-activedescendant')).toBe(options()[1].id);
+    expect(options().map((option) => option.getAttribute('aria-selected'))).toEqual(['false', 'true', 'false']);
+  });
+
+  it('lets go when the menu closes', () => {
+    key('Escape');
+    expect(editor.hasAttribute('aria-activedescendant')).toBe(false);
+    expect(editor.hasAttribute('aria-controls')).toBe(false);
+  });
+});

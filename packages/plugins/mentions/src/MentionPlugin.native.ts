@@ -1,4 +1,5 @@
 import type { Plugin } from '@editora/core';
+import { announceActiveOption } from '../../shared/dialogHelpers';
 
 const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
 const EDITOR_HOST_SELECTOR = '[data-editora-editor], .rte-editor, .editora-editor, editora-editor';
@@ -328,6 +329,8 @@ function getCaretRect(editor: HTMLElement, range: Range): DOMRect {
   return rect;
 }
 
+let mentionListSequence = 0;
+
 function ensurePanel(state: MentionState, options: NormalizedMentionPluginOptions): void {
   if (state.panel && state.list) return;
 
@@ -337,6 +340,9 @@ function ensurePanel(state: MentionState, options: NormalizedMentionPluginOption
 
   const list = document.createElement('div');
   list.className = 'rte-mention-list';
+  list.setAttribute('role', 'listbox');
+  list.setAttribute('aria-label', 'Mentions');
+  list.id = `rte-mention-list-${++mentionListSequence}`;
 
   panel.appendChild(list);
   document.body.appendChild(panel);
@@ -379,6 +385,7 @@ function closeMentionPanel(state: MentionState): void {
   state.activeIndex = 0;
   state.query = '';
   state.replaceRange = null;
+  announceActiveOption(state.editor, null, null);
 }
 
 function positionPanel(state: MentionState, range: Range): void {
@@ -432,6 +439,7 @@ function renderMentionList(state: MentionState, options: NormalizedMentionPlugin
     loading.className = 'rte-mention-empty';
     loading.textContent = options.loadingText;
     list.appendChild(loading);
+    announceActiveOption(state.editor, null, null);
     return;
   }
 
@@ -440,6 +448,7 @@ function renderMentionList(state: MentionState, options: NormalizedMentionPlugin
     empty.className = 'rte-mention-empty';
     empty.textContent = state.query.length > 0 ? options.noResultsText : options.emptyStateText;
     list.appendChild(empty);
+    announceActiveOption(state.editor, null, null);
     return;
   }
 
@@ -451,6 +460,9 @@ function renderMentionList(state: MentionState, options: NormalizedMentionPlugin
       row.classList.add('active');
     }
     row.setAttribute('data-index', String(index));
+    row.setAttribute('role', 'option');
+    row.id = `${list.id}-${index}`;
+    row.setAttribute('aria-selected', index === state.activeIndex ? 'true' : 'false');
 
     const contentHtml = options.itemRenderer
       ? options.itemRenderer(item, state.query)
@@ -461,6 +473,8 @@ function renderMentionList(state: MentionState, options: NormalizedMentionPlugin
     row.innerHTML = contentHtml;
     list.appendChild(row);
   });
+
+  announceActiveOption(state.editor, list, list.children[state.activeIndex] as HTMLElement | null);
 }
 
 function normalizeMentionItems(items: MentionItem[], maxSuggestions: number): MentionItem[] {
@@ -938,8 +952,12 @@ function moveActiveMention(state: MentionState, delta: number): void {
 
   if (!state.list) return;
   const rows = Array.from(state.list.querySelectorAll('.rte-mention-item')) as HTMLElement[];
-  rows.forEach((row, idx) => row.classList.toggle('active', idx === state.activeIndex));
+  rows.forEach((row, idx) => {
+    row.classList.toggle('active', idx === state.activeIndex);
+    row.setAttribute('aria-selected', idx === state.activeIndex ? 'true' : 'false');
+  });
   const active = rows[state.activeIndex];
+  announceActiveOption(state.editor, state.list, active ?? null);
   active?.scrollIntoView({ block: 'nearest' });
 }
 

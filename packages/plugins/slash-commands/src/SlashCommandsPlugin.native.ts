@@ -2,6 +2,7 @@ import type { Plugin } from '@editora/core';
 import { normalizeOptions } from './SlashCommandsOptions';
 import { ensureStylesInjected } from './SlashCommandsStyles';
 import { keepCaretBlockSelectable } from './emptyBlock';
+import { announceActiveOption } from '../../shared/dialogHelpers';
 import type {
   SlashCommandActionContext,
   SlashCommandItem,
@@ -276,6 +277,7 @@ function closePanel(state: SlashState): void {
   state.query = '';
   state.replaceRange = null;
   state.anchorRange = null;
+  announceActiveOption(state.editor, null, null);
 }
 
 function filterItems(items: SlashCommandItem[], query: string, maxSuggestions: number): SlashCommandItem[] {
@@ -310,6 +312,7 @@ function renderList(state: SlashState, options: Required<SlashCommandsPluginOpti
     empty.textContent = options.emptyStateText;
     list.appendChild(empty);
     list.removeAttribute('aria-activedescendant');
+    announceActiveOption(state.editor, null, null);
     return;
   }
 
@@ -340,7 +343,11 @@ function renderList(state: SlashState, options: Required<SlashCommandsPluginOpti
   });
 
   if (state.filteredItems.length > 0) {
-    list.setAttribute('aria-activedescendant', `rte-slash-item-${state.instanceId}-${state.activeIndex}`);
+    const activeId = `rte-slash-item-${state.instanceId}-${state.activeIndex}`;
+    list.setAttribute('aria-activedescendant', activeId);
+    announceActiveOption(state.editor, list, list.querySelector<HTMLElement>(`[id="${activeId}"]`));
+  } else {
+    announceActiveOption(state.editor, null, null);
   }
 }
 
@@ -598,6 +605,7 @@ function moveActive(state: SlashState, delta: number): void {
   const active = rows[state.activeIndex];
   if (active) {
     state.list.setAttribute('aria-activedescendant', active.id);
+    announceActiveOption(state.editor, state.list, active);
     active.scrollIntoView({ block: 'nearest' });
   }
 }
