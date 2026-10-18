@@ -160,6 +160,13 @@
   background: #f0f0f0;
 }
 
+/* The item the arrow keys are on. */
+.rte-toolbar-dropdown-item:focus {
+  outline: 2px solid var(--rte-color-primary, #0f62fe);
+  outline-offset: -2px;
+  background: #f0f0f0;
+}
+
 /* Responsive Toolbar - More Button */
 .rte-toolbar-more-button {
   padding: 6px 10px;
@@ -763,6 +770,13 @@
   
 }
 .rte-inline-menu-item:hover {
+    background-color: #f5f5f5;
+}
+
+/* The item the arrow keys are on. */
+.rte-inline-menu-item:focus {
+    outline: 2px solid var(--rte-color-primary, #0f62fe);
+    outline-offset: -2px;
     background-color: #f5f5f5;
 }
 

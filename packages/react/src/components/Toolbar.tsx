@@ -144,6 +144,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const [formatPainterActive, setFormatPainterActive] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [openInlineMenu, setOpenInlineMenu] = useState<string | null>(null);
+  /** Where the focus goes in an inline menu that was opened from the keyboard. */
+  const [inlineMenuFocusRequest, setInlineMenuFocusRequest] = useState<'first' | 'last' | null>(null);
   const [visibleCount, setVisibleCount] = useState<number | null>(null);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [selectionState, setSelectionState] = useState<ToolbarSelectionState>(() => getToolbarSelectionState(null));
@@ -156,6 +158,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const itemWidthCacheRef = useRef<Record<string, number>>({});
   const itemSignatureRef = useRef<string>('');
   const toolbarRef = useRef<HTMLDivElement>(null);
+  const dropdownMenuRef = useRef<HTMLDivElement>(null);
+  /** Where focus goes in a dropdown that was opened from the keyboard (a mouse click leaves it in the editor). */
+  const dropdownFocusRequestRef = useRef<'active' | 'first' | 'last' | null>(null);
   const itemsContainerRef = useRef<HTMLDivElement>(null);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const items = useMemo(
@@ -512,18 +517,78 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     setOpenDropdown(null);
   };
 
-  const handleDropdownOpen = (command: string) => {
+  const handleDropdownOpen = (command: string, focus: 'active' | 'first' | 'last' | null = null) => {
     if (readonly) return;
     // Store current selection when opening dropdown
     captureSelectionFromEditor();
-    setOpenDropdown(openDropdown === command ? null : command);
+    const closing = openDropdown === command && focus === null;
+    dropdownFocusRequestRef.current = closing ? null : focus;
+    setOpenDropdown(closing ? null : command);
   };
 
-  const handleInlineMenuOpen = (command: string) => {
+  const dropdownItems = (): HTMLElement[] =>
+    Array.from(dropdownMenuRef.current?.querySelectorAll<HTMLElement>('[role^="menuitem"]') ?? []);
+
+  /** Arrow keys, Home and End move between a dropdown's items; Enter and Space choose one; Escape gives the focus back. */
+  const handleDropdownMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>, command: string) => {
+    const items = dropdownItems();
+    if (items.length === 0) return;
+    const index = items.indexOf(document.activeElement as HTMLElement);
+    const move = (to: number) => {
+      event.preventDefault();
+      items[(to + items.length) % items.length].focus();
+    };
+
+    switch (event.key) {
+      case 'ArrowDown':
+        return move(index + 1);
+      case 'ArrowUp':
+        return move(index < 0 ? items.length - 1 : index - 1);
+      case 'Home':
+        return move(0);
+      case 'End':
+        return move(items.length - 1);
+      case 'Enter':
+      case ' ':
+        event.preventDefault();
+        if (index >= 0) items[index].click();
+        return;
+      case 'Escape':
+        event.preventDefault();
+        event.stopPropagation();
+        setOpenDropdown(null);
+        getButtonRef(command).current?.focus();
+        return;
+      case 'Tab':
+        // Leave the menu with the focus where Tab takes it, and close it behind.
+        setOpenDropdown(null);
+        return;
+      default:
+    }
+  };
+
+  // A dropdown opened from the keyboard takes the focus into its menu, on the current choice if there is one.
+  useEffect(() => {
+    const request = dropdownFocusRequestRef.current;
+    if (!openDropdown || !request) return;
+    dropdownFocusRequestRef.current = null;
+    const items = dropdownItems();
+    const target =
+      request === 'last'
+        ? items[items.length - 1]
+        : request === 'active'
+          ? items.find((item) => item.getAttribute('data-active') === 'true') ?? items[0]
+          : items[0];
+    target?.focus();
+  }, [openDropdown]);
+
+  const handleInlineMenuOpen = (command: string, focus: 'first' | 'last' | null = null) => {
     if (readonly) return;
     // Store current selection when opening inline menu
     captureSelectionFromEditor();
-    setOpenInlineMenu(openInlineMenu === command ? null : command);
+    const closing = openInlineMenu === command && focus === null;
+    setInlineMenuFocusRequest(closing ? null : focus);
+    setOpenInlineMenu(closing ? null : command);
     setOpenDropdown(null); // Close any open dropdowns
   };
 
@@ -612,29 +677,48 @@ export const Toolbar: React.FC<ToolbarProps> = ({
           ) : item.type === "dropdown" ? (
             <div className="rte-toolbar-dropdown">
               <button
+                ref={getButtonRef(itemCommand)}
                 className={`rte-toolbar-button ${isActive ? "active" : ""}`}
                 data-command={itemCommand}
                 data-active={isActive ? "true" : "false"}
-                aria-pressed={isActive ? "true" : "false"}
+                aria-haspopup="menu"
+                aria-expanded={openDropdown === itemCommand ? "true" : "false"}
+                title={item.label}
                 onMouseDown={(e) => {
                     e.preventDefault();
                     captureSelectionFromEditor();
                   }}
-                  onClick={() => handleDropdownOpen(itemCommand)}
+                  // A click with no pointer behind it (Enter or Space) is from the keyboard: take the focus into the menu.
+                  onClick={(e) => handleDropdownOpen(itemCommand, e.detail === 0 ? 'active' : null)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      handleDropdownOpen(itemCommand, e.key === 'ArrowDown' ? 'first' : 'last');
+                    }
+                  }}
                 disabled={readonly}
               >
-                {dropdownLabel} ▼
+                {dropdownLabel} <span aria-hidden="true">▼</span>
               </button>
               {openDropdown === itemCommand && (
-                <div className="rte-toolbar-dropdown-menu">
+                <div
+                  ref={dropdownMenuRef}
+                  className="rte-toolbar-dropdown-menu"
+                  role="menu"
+                  aria-label={item.label}
+                  onKeyDown={(e) => handleDropdownMenuKeyDown(e, itemCommand)}
+                >
                   {item.options?.map((opt) => {
-                    const optionActive = itemCommand === 'setBlockType' && selectionState.blockType === opt.value;
+                    const choiceKnown = itemCommand === 'setBlockType';
+                    const optionActive = choiceKnown && selectionState.blockType === opt.value;
                     return (
                       <div
                         key={opt.value}
                         className={`rte-toolbar-dropdown-item ${optionActive ? 'active' : ''}`}
                         data-active={optionActive ? 'true' : 'false'}
-                        aria-selected={optionActive ? 'true' : 'false'}
+                        role={choiceKnown ? 'menuitemradio' : 'menuitem'}
+                        aria-checked={choiceKnown ? (optionActive ? 'true' : 'false') : undefined}
+                        tabIndex={-1}
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => handleCommand(itemCommand, opt.value)}
                       >
@@ -651,14 +735,23 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               className={`rte-toolbar-button ${isActive ? "active" : ""}`}
               data-command={itemCommand}
               data-active={isActive ? "true" : "false"}
-              aria-pressed={isActive ? "true" : "false"}
+              aria-haspopup="menu"
+              aria-expanded={openInlineMenu === itemCommand ? "true" : "false"}
               onMouseDown={(e) => {
                 e.preventDefault();
                 captureSelectionFromEditor();
               }}
-              onClick={() => handleInlineMenuOpen(itemCommand)}
+              // A click with no pointer behind it (Enter or Space) is from the keyboard: take the focus into the menu.
+              onClick={(e) => handleInlineMenuOpen(itemCommand, e.detail === 0 ? 'first' : null)}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  handleInlineMenuOpen(itemCommand, e.key === 'ArrowDown' ? 'first' : 'last');
+                }
+              }}
               disabled={readonly}
               title={item.label}
+              aria-label={item.label}
             >
               {renderIcon(item.icon, itemCommand)}
             </button>
@@ -776,6 +869,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
               onSelect={(value) => handleInlineMenuSelect(itemCommand, value)}
               onClose={() => setOpenInlineMenu(null)}
               anchorRef={getButtonRef(itemCommand)}
+              label={item.label}
+              focusRequest={openInlineMenu === itemCommand ? inlineMenuFocusRequest : null}
             />
           );
         }
