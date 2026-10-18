@@ -33,6 +33,13 @@ interface HistorySnapshot {
 
 let EDITOR_INSTANCE_COUNTER = 0;
 
+/** How many undo steps are kept. */
+const MAX_UNDO_STEPS = 200;
+/** Typing, or deleting, stays one undo step until the user pauses this long... */
+const TYPING_RUN_PAUSE_MS = 1000;
+/** ...or until the step has been growing this long, so a minute of typing is not one undo. */
+const TYPING_RUN_MAX_MS = 8000;
+
 type DeletionUnit = 'char' | 'word' | 'line';
 
 export class EditorCore implements EditorAPI {
@@ -57,6 +64,15 @@ export class EditorCore implements EditorAPI {
   private lastKnownSelection?: Range;
   private documentSelectionChangeHandler?: () => void;
   private pendingInputSnapshot?: HistorySnapshot;
+  /** The run of typed (or deleted) characters that the newest undo step is collecting. */
+  private typingRun: {
+    kind: 'insert' | 'delete';
+    startedAt: number;
+    updatedAt: number;
+    /** The text the run has produced so far: the next keystroke continues it only if it starts from exactly this. */
+    endText: string;
+    closed: boolean;
+  } | null = null;
   private readonly editorInstanceId = ++EDITOR_INSTANCE_COUNTER;
   private readonly decorationHighlightStyleId =
     `editora-decoration-style-${this.editorInstanceId}`;
@@ -264,8 +280,12 @@ export class EditorCore implements EditorAPI {
 
       if (newText !== oldText) {
         if (!this.suppressHistory) {
-          this.pushUndoSnapshot(
+          const edit = EditorCore.describeEdit(oldText, newText);
+          this.recordUndoStep(
             this.pendingInputSnapshot ?? this.captureHistorySnapshot(oldText),
+            edit.removedLength,
+            edit.inserted,
+            newText,
           );
         }
         this.pendingInputSnapshot = undefined;
@@ -320,6 +340,8 @@ export class EditorCore implements EditorAPI {
     });
 
     contentElement.addEventListener('keydown', (e) => {
+      // Moving the caret ends the run of typing: what is typed next is a step of its own.
+      if (/^(Arrow(Left|Right|Up|Down)|Home|End|Page(Up|Down))$/.test(e.key)) this.closeTypingRun();
       this.emit('keydown', e);
 
       // After Escape, one Tab (or Shift+Tab) is left to the browser, which moves the focus. Any other key
@@ -392,6 +414,7 @@ export class EditorCore implements EditorAPI {
 
     // Handle mouse events
     contentElement.addEventListener('mousedown', (e) => {
+      this.closeTypingRun();
       this.emit('mousedown', e);
 
       // Let extensions handle the event
@@ -1093,6 +1116,7 @@ export class EditorCore implements EditorAPI {
   private undo(): void {
     if (this.undoStack.length === 0) return;
     const snapshot = this.undoStack.pop()!;
+    this.closeTypingRun();
     const currentSnapshot = this.captureHistorySnapshot();
     this.pushSnapshot(this.redoStack, currentSnapshot);
 
@@ -1111,6 +1135,7 @@ export class EditorCore implements EditorAPI {
   private redo(): void {
     if (this.redoStack.length === 0) return;
     const snapshot = this.redoStack.pop()!;
+    this.closeTypingRun();
     const currentSnapshot = this.captureHistorySnapshot();
     this.pushSnapshot(this.undoStack, currentSnapshot);
 
@@ -1323,9 +1348,66 @@ export class EditorCore implements EditorAPI {
     this.redoStack.length = 0;
   }
 
+  /** A change of one or two characters, nothing else replaced, is typing; anything bigger is an edit of its own. */
+  private static typingKind(removedLength: number, inserted: string): 'insert' | 'delete' | null {
+    if (removedLength === 0 && inserted.length > 0 && inserted.length <= 2 && !inserted.includes('\n')) return 'insert';
+    if (removedLength > 0 && removedLength <= 2 && inserted.length === 0) return 'delete';
+    return null;
+  }
+
+  /** What changed between two versions of the text, found from both ends. */
+  private static describeEdit(oldText: string, newText: string): { removedLength: number; inserted: string } {
+    const limit = Math.min(oldText.length, newText.length);
+    let start = 0;
+    while (start < limit && oldText.charCodeAt(start) === newText.charCodeAt(start)) start++;
+    let end = 0;
+    while (
+      end < limit - start &&
+      oldText.charCodeAt(oldText.length - 1 - end) === newText.charCodeAt(newText.length - 1 - end)
+    ) {
+      end++;
+    }
+    return { removedLength: oldText.length - start - end, inserted: newText.slice(start, newText.length - end) };
+  }
+
+  /**
+   * Records the state before an edit as an undo step, unless the edit continues the typing (or deleting) the
+   * newest step is already collecting: then one Undo takes back the whole word, not one letter. A space or a
+   * line end finishes a word (it stays with the word before it); a pause, a click, a caret key, Undo and Redo
+   * start a new step.
+   */
+  private recordUndoStep(previous: HistorySnapshot, removedLength: number, inserted: string, newText: string): void {
+    const kind = EditorCore.typingKind(removedLength, inserted);
+    const now = Date.now();
+    const endsWord = kind === 'insert' && /\s/.test(inserted);
+    const run = this.typingRun;
+
+    if (
+      kind &&
+      run &&
+      run.kind === kind &&
+      !run.closed &&
+      run.endText === previous.text &&
+      now - run.updatedAt <= TYPING_RUN_PAUSE_MS &&
+      now - run.startedAt <= TYPING_RUN_MAX_MS
+    ) {
+      run.endText = newText;
+      run.updatedAt = now;
+      if (endsWord) run.closed = true;
+      return;
+    }
+
+    this.pushUndoSnapshot(previous);
+    this.typingRun = kind ? { kind, startedAt: now, updatedAt: now, endText: newText, closed: endsWord } : null;
+  }
+
+  private closeTypingRun(): void {
+    if (this.typingRun) this.typingRun.closed = true;
+  }
+
   private pushSnapshot(stack: HistorySnapshot[], snapshot: HistorySnapshot): void {
     stack.push(snapshot);
-    if (stack.length > 100) {
+    if (stack.length > MAX_UNDO_STEPS) {
       stack.shift();
     }
   }
@@ -1652,7 +1734,7 @@ export class EditorCore implements EditorAPI {
     this.pendingInputSnapshot = undefined;
 
     if (!this.suppressHistory) {
-      this.pushUndoSnapshot(previousSnapshot);
+      this.recordUndoStep(previousSnapshot, toOffset - fromOffset, normalizedText, this.textModel.getText());
     }
 
     const nextCursorOffset = fromOffset + normalizedText.length;
