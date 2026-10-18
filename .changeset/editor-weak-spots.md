@@ -19,6 +19,8 @@ Undo, dialogs, menus and a few plugins that did not do their job.
 - The toolbar's block-type, font, alignment, line-height and capitalisation menus work with the keyboard in both `@editora/react` and `<editora-editor>`: they announce that they open a menu, take focus, move with the arrow keys, Home and End, choose with Enter or Space, and close with Escape.
 - The Spell Check panel is a named region; the Math dialog's controls are labelled; the media dialog's labels are tied to their fields, its tabs say which is selected, and its upload zone works with the keyboard.
 - In a table, Tab and Shift+Tab move between cells, and Tab in the last cell adds a row.
+- The Comments, Spell Check and Approval Workflow side panels take focus when they open, keep it when they redraw, and give it back to the editor when they close.
+- The slash menu and the mention list tell a screen reader which suggestion is active, and the media dialog's hidden file input has a name.
 
 **Behaviour fixes:**
 - A URL can be typed in the Image and Video dialogs (the dialog was rebuilt on every keystroke, so only pasting worked), what is pasted there is escaped, and inserting media tells the editor, records Undo and puts the caret after it.
@@ -28,4 +30,8 @@ Undo, dialogs, menus and a few plugins that did not do their job.
 - The Math dialog opens with no network (KaTeX comes from the `katex` package, not a script from a CDN) and renders formulas with its layout rules embedded; its template grid no longer hides its last row.
 - Export Word no longer sends a request to `http://localhost:3001` on every click: there is no default API server any more, and with none configured the file is built in the browser. To use a backend, set `apiUrl` (`setGlobalApiConfig` or `setDocumentManagerConfig`). An empty `apiUrl` on a plugin now means "no API".
 - Spell-check suggestions rank the word that was meant first ("tset" gives "test", "wrods" gives "words").
+- The Comments panel no longer lies under the editor toolbar (a CSS variable was defined on the wrong element and the sticky toolbar sat above the panel).
+- Format Painter no longer writes styles the target already shows, so painting leaves no redundant inline styles.
+- Plugins no longer use the browser's `confirm()` and `prompt()`: removing media or a link, resizing, and discarding Source Editor changes use an in-page dialog with a named role, focus trap and Escape.
+- Undo history is capped by size as well as by count (about 40 million characters), and steps that start where the last one ended share a string, so a very large document no longer holds hundreds of copies.
 - Messages such as "Please select text first" appear in a live region instead of a blocking `alert()`.
