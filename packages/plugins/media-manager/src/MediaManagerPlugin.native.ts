@@ -1,5 +1,6 @@
 import { escapeHtml } from '../../shared/escapeHtml';
 import { initDialogOverlay } from '../../shared/dialogHelpers';
+import { recordDomHistory } from '../../shared/historyHelpers';
 import { Plugin } from '@editora/core';
 
 /**
@@ -523,6 +524,21 @@ const createDialogOverlay = (contextElement?: HTMLElement | null): HTMLDivElemen
   return overlay;
 };
 
+/** After a re-render the tab that was clicked is a new element: keep keyboard focus on the tab that is now active. */
+const focusActiveTab = (dialog: HTMLElement, tab: 'upload' | 'url') => {
+  dialog.querySelector<HTMLElement>(tab === 'upload' ? '.tab-upload' : '.tab-url')?.focus();
+};
+
+/** The dropzone opens the file chooser on click; Enter and Space do the same for someone without a pointer. */
+const makeDropzoneKeyboardAccessible = (dropzone: HTMLElement | null, fileInput: HTMLInputElement | null) => {
+  dropzone?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      fileInput?.click();
+    }
+  });
+};
+
 const createDialogShell = (compact = false): HTMLDivElement => {
   const dialog = document.createElement('div');
   dialog.className = compact ? 'rte-media-dialog rte-media-dialog-compact' : 'rte-media-dialog';
@@ -548,6 +564,15 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
   let heightValue = '';
   let altValue = '';
 
+  const previewFieldHTML = () => `
+    <div class="rte-media-field rte-media-preview-field">
+      <span class="rte-media-label">Preview</span>
+      <div class="rte-media-preview">
+        ${type === 'image' ? `<img src="${escapeHtml(urlValue)}" alt="Preview">` : `<video src="${escapeHtml(urlValue)}" controls></video>`}
+      </div>
+    </div>
+  `;
+
   const renderDialog = () => {
     dialog.innerHTML = `
       <div class="rte-media-header">
@@ -556,14 +581,14 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
       </div>
 
       <div class="rte-media-tabs">
-        <button class="tab-upload rte-media-tab ${activeTab === 'upload' ? 'active' : ''}" type="button">Upload</button>
-        <button class="tab-url rte-media-tab ${activeTab === 'url' ? 'active' : ''}" type="button">URL</button>
+        <button class="tab-upload rte-media-tab ${activeTab === 'upload' ? 'active' : ''}" type="button" role="tab" aria-selected="${activeTab === 'upload'}">Upload</button>
+        <button class="tab-url rte-media-tab ${activeTab === 'url' ? 'active' : ''}" type="button" role="tab" aria-selected="${activeTab === 'url'}">URL</button>
       </div>
 
       <div class="rte-media-body">
         ${activeTab === 'upload' ? `
           <div id="upload-section">
-            <div class="dropzone rte-media-dropzone">
+            <div class="dropzone rte-media-dropzone" role="button" tabindex="0" aria-label="Choose ${type === 'image' ? 'an image' : 'a video'} to upload, or drop one here">
               <div class="rte-media-dropzone-icon">📁</div>
               <p class="rte-media-dropzone-title">Drag and drop your ${type} here</p>
               <p class="rte-media-muted">or click to browse</p>
@@ -580,33 +605,26 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
         ` : `
           <div id="url-section">
             <div class="rte-media-field">
-              <label class="rte-media-label">URL</label>
-              <input type="text" id="url-input" class="rte-media-input" placeholder="https://example.com/${type}.${type === 'image' ? 'jpg' : 'mp4'}" value="${urlValue}">
+              <label class="rte-media-label" for="url-input">URL</label>
+              <input type="text" id="url-input" class="rte-media-input" placeholder="https://example.com/${type}.${type === 'image' ? 'jpg' : 'mp4'}" value="${escapeHtml(urlValue)}">
             </div>
             ${type === 'image' ? `
               <div class="rte-media-field">
-                <label class="rte-media-label">Alt Text (for accessibility)</label>
-                <input type="text" id="alt-input" class="rte-media-input" placeholder="Describe the image" value="${altValue}">
+                <label class="rte-media-label" for="alt-input">Alt Text (for accessibility)</label>
+                <input type="text" id="alt-input" class="rte-media-input" placeholder="Describe the image" value="${escapeHtml(altValue)}">
               </div>
             ` : ''}
             <div class="rte-media-grid">
               <div class="rte-media-field">
-                <label class="rte-media-label">Width (px)</label>
-                <input type="number" id="width-input" class="rte-media-input" placeholder="Auto" value="${widthValue}">
+                <label class="rte-media-label" for="width-input">Width (px)</label>
+                <input type="number" id="width-input" class="rte-media-input" placeholder="Auto" value="${escapeHtml(widthValue)}">
               </div>
               <div class="rte-media-field">
-                <label class="rte-media-label">Height (px)</label>
-                <input type="number" id="height-input" class="rte-media-input" placeholder="Auto" value="${heightValue}">
+                <label class="rte-media-label" for="height-input">Height (px)</label>
+                <input type="number" id="height-input" class="rte-media-input" placeholder="Auto" value="${escapeHtml(heightValue)}">
               </div>
             </div>
-            ${urlValue ? `
-              <div class="rte-media-field">
-                <label class="rte-media-label">Preview</label>
-                <div class="rte-media-preview">
-                  ${type === 'image' ? `<img src="${urlValue}" alt="Preview">` : `<video src="${urlValue}" controls></video>`}
-                </div>
-              </div>
-            ` : ''}
+            ${urlValue ? previewFieldHTML() : ''}
           </div>
         `}
       </div>
@@ -658,12 +676,42 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
       mediaEl.style.cssText = `display: block; margin: 1em 0; cursor: pointer; ${widthValue ? `width: ${widthValue}px;` : 'max-width: 100%;'} ${heightValue ? `height: ${heightValue}px;` : 'height: auto;'}`;
     }
 
-    if (savedSelection) {
+    // Where it goes: the selection the dialog was opened from, else the end of the editor it was opened for.
+    const host =
+      (savedSelection
+        ? (savedSelection.commonAncestorContainer instanceof HTMLElement
+            ? savedSelection.commonAncestorContainer
+            : savedSelection.commonAncestorContainer.parentElement
+          )?.closest<HTMLElement>('[contenteditable="true"]')
+        : null) ??
+      resolveDialogContext(contextElement)?.closest<HTMLElement>('[contenteditable="true"]') ??
+      null;
+    const beforeHTML = host?.innerHTML ?? '';
+
+    if (savedSelection && host?.contains(savedSelection.commonAncestorContainer)) {
       savedSelection.deleteContents();
       savedSelection.insertNode(mediaEl);
+    } else if (host) {
+      host.appendChild(mediaEl);
     }
 
     closeDialog();
+
+    if (host && mediaEl.isConnected) {
+      // The editor has to hear about it (its change callback, and Undo), and the caret goes after the new media
+      // so that what is typed next follows it.
+      host.focus({ preventScroll: true });
+      const selection = window.getSelection();
+      if (selection) {
+        const after = document.createRange();
+        after.setStartAfter(mediaEl);
+        after.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(after);
+      }
+      recordDomHistory(host, beforeHTML);
+      host.dispatchEvent(new Event('input', { bubbles: true }));
+    }
   };
 
   const handleFileUpload = async (file: File) => {
@@ -718,12 +766,14 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
       activeTab = 'upload';
       renderDialog();
       attachEventHandlers();
+      focusActiveTab(dialog, activeTab);
     });
 
     tabUrl?.addEventListener('click', () => {
       activeTab = 'url';
       renderDialog();
       attachEventHandlers();
+      focusActiveTab(dialog, activeTab);
     });
 
     if (activeTab === 'upload') {
@@ -731,6 +781,7 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
       const fileInput = dialog.querySelector('#file-input') as HTMLInputElement;
 
       dropzone?.addEventListener('click', () => fileInput?.click());
+      makeDropzoneKeyboardAccessible(dropzone, fileInput);
 
       dropzone?.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -760,10 +811,31 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
       const widthInput = dialog.querySelector('#width-input') as HTMLInputElement;
       const heightInput = dialog.querySelector('#height-input') as HTMLInputElement;
 
+      // Rebuilding the dialog here took the focus out of the field after every letter, so a URL could
+      // only be pasted. Keep the field, and bring the button and the preview up to date around it.
+      let previewTimer: ReturnType<typeof setTimeout> | undefined;
       urlInput?.addEventListener('input', () => {
         urlValue = urlInput.value;
-        renderDialog();
-        attachEventHandlers();
+        const insertButton = dialog.querySelector<HTMLButtonElement>('#insert-btn');
+        if (insertButton) insertButton.disabled = !urlValue;
+
+        clearTimeout(previewTimer);
+        previewTimer = setTimeout(() => {
+          const section = dialog.querySelector('#url-section');
+          const existing = section?.querySelector('.rte-media-preview-field');
+          if (!section) return;
+          if (!urlValue) {
+            existing?.remove();
+            return;
+          }
+          if (existing) {
+            const media = existing.querySelector<HTMLElement>('img, video');
+            if (media) media.setAttribute('src', urlValue);
+            return;
+          }
+          const grid = section.querySelector('.rte-media-grid');
+          grid?.insertAdjacentHTML('afterend', previewFieldHTML());
+        }, 400);
       });
 
       altInput?.addEventListener('input', () => {
@@ -1015,14 +1087,14 @@ const showReplaceImageDialog = (img: HTMLImageElement) => {
       </div>
 
       <div class="rte-media-tabs">
-        <button class="tab-upload rte-media-tab ${activeTab === 'upload' ? 'active' : ''}" type="button">Upload</button>
-        <button class="tab-url rte-media-tab ${activeTab === 'url' ? 'active' : ''}" type="button">URL</button>
+        <button class="tab-upload rte-media-tab ${activeTab === 'upload' ? 'active' : ''}" type="button" role="tab" aria-selected="${activeTab === 'upload'}">Upload</button>
+        <button class="tab-url rte-media-tab ${activeTab === 'url' ? 'active' : ''}" type="button" role="tab" aria-selected="${activeTab === 'url'}">URL</button>
       </div>
 
       <div class="rte-media-body">
         ${activeTab === 'upload' ? `
           <div id="upload-section">
-            <div class="dropzone rte-media-dropzone">
+            <div class="dropzone rte-media-dropzone" role="button" tabindex="0" aria-label="Choose an image to upload, or drop one here">
               <div class="rte-media-dropzone-icon">📁</div>
               <p class="rte-media-dropzone-title">Drag and drop your image here</p>
               <p class="rte-media-muted">or click to browse</p>
@@ -1038,14 +1110,14 @@ const showReplaceImageDialog = (img: HTMLImageElement) => {
         ` : `
           <div id="url-section">
             <div class="rte-media-field">
-              <label class="rte-media-label">Image URL</label>
-              <input type="text" id="url-input" class="rte-media-input" placeholder="https://example.com/image.jpg" value="${urlValue}">
+              <label class="rte-media-label" for="url-input">Image URL</label>
+              <input type="text" id="url-input" class="rte-media-input" placeholder="https://example.com/image.jpg" value="${escapeHtml(urlValue)}">
             </div>
             ${urlValue ? `
               <div class="rte-media-field">
-                <label class="rte-media-label">Preview</label>
+                <span class="rte-media-label">Preview</span>
                 <div class="rte-media-preview">
-                  <img src="${urlValue}" alt="Preview" onerror="this.parentElement.innerHTML='<p class=&quot;rte-media-muted&quot;>Failed to load image</p>'">
+                  <img src="${escapeHtml(urlValue)}" alt="Preview" onerror="this.parentElement.innerHTML='<p class=&quot;rte-media-muted&quot;>Failed to load image</p>'">
                 </div>
               </div>
             ` : ''}
@@ -1130,12 +1202,14 @@ const showReplaceImageDialog = (img: HTMLImageElement) => {
       activeTab = 'upload';
       renderDialog();
       attachEventHandlers();
+      focusActiveTab(dialog, activeTab);
     });
 
     tabUrl?.addEventListener('click', () => {
       activeTab = 'url';
       renderDialog();
       attachEventHandlers();
+      focusActiveTab(dialog, activeTab);
     });
 
     if (activeTab === 'upload') {
@@ -1143,6 +1217,7 @@ const showReplaceImageDialog = (img: HTMLImageElement) => {
       const fileInput = dialog.querySelector('#file-input') as HTMLInputElement;
 
       dropzone?.addEventListener('click', () => fileInput?.click());
+      makeDropzoneKeyboardAccessible(dropzone, fileInput);
       
       dropzone?.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -1169,10 +1244,11 @@ const showReplaceImageDialog = (img: HTMLImageElement) => {
     if (activeTab === 'url') {
       const urlInput = dialog.querySelector('#url-input') as HTMLInputElement;
 
+      // As in the insert dialog: keep the field (a rebuild took the focus after every letter).
       urlInput?.addEventListener('input', () => {
         urlValue = urlInput.value;
-        renderDialog();
-        attachEventHandlers();
+        const replaceButton = dialog.querySelector<HTMLButtonElement>('#replace-btn');
+        if (replaceButton) replaceButton.disabled = !urlValue;
       });
     }
   };
