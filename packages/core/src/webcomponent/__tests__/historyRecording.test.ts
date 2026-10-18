@@ -65,7 +65,20 @@ describe('<editora-editor> reports changes to the history', () => {
     expect(editor).toBe(content);
     expect(before).toBe('<p>Hi</p>');
     expect(after).toBe('<p>Hi!</p>');
-    expect(options).toEqual({ inputType: 'insertText', data: '!' });
+    expect(options).toEqual({ inputType: 'insertText', data: '!', selectionCollapsed: true });
+  });
+
+  it('says when text was selected as the key was pressed, so typing over it is not grouped with plain typing', async () => {
+    const { content } = await mount();
+    content.innerHTML = '<p>Hello</p>';
+    const range = document.createRange();
+    range.selectNodeContents(content.querySelector('p')!);
+    window.getSelection()!.removeAllRanges();
+    window.getSelection()!.addRange(range);
+
+    keystroke(content, 'insertText', 'X', () => { content.innerHTML = '<p>X</p>'; });
+
+    expect(record.mock.calls[0][3]).toMatchObject({ inputType: 'insertText', selectionCollapsed: false });
   });
 
   it('records each keystroke against the content the one before left', async () => {
@@ -85,7 +98,7 @@ describe('<editora-editor> reports changes to the history', () => {
     content.innerHTML = '<p>abc</p>';
     keystroke(content, 'deleteContentBackward', null, () => { content.innerHTML = '<p>ab</p>'; });
 
-    expect(record.mock.calls[0][3]).toEqual({ inputType: 'deleteContentBackward', data: null });
+    expect(record.mock.calls[0][3]).toEqual({ inputType: 'deleteContentBackward', data: null, selectionCollapsed: true });
   });
 
   it('does not record an input that changed nothing', async () => {

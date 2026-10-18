@@ -202,7 +202,7 @@ export class RichTextEditorElement extends HTMLElement {
   private loadedPlugins: Plugin[] = [];
   private lastBeforeInputType: string | null = null;
   /** The content a keystroke is about to change, kept until its `input` event so the history can record the change. */
-  private pendingHistorySnapshot: { beforeHTML: string; inputType: string | null; data: string | null } | null = null;
+  private pendingHistorySnapshot: { beforeHTML: string; inputType: string | null; data: string | null; selectionCollapsed: boolean } | null = null;
 
   // Observed attributes for reactive updates
   static get observedAttributes(): string[] {
@@ -1106,6 +1106,7 @@ export class RichTextEditorElement extends HTMLElement {
       executor('recordDomTransaction', this.contentElement, snapshot.beforeHTML, afterHTML, {
         inputType: snapshot.inputType,
         data: snapshot.data,
+        selectionCollapsed: snapshot.selectionCollapsed,
       });
     }
   }
@@ -1127,6 +1128,7 @@ export class RichTextEditorElement extends HTMLElement {
           beforeHTML: this.contentElement.innerHTML,
           inputType: event.inputType || null,
           data: typeof event.data === 'string' ? event.data : null,
+          selectionCollapsed: window.getSelection()?.isCollapsed ?? true,
         };
       }
     });

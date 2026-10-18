@@ -103,6 +103,78 @@ describe('history: typing is grouped', () => {
     expect(content()).toBe('Startabc');
   });
 
+  it('starts a new step when Tab moves the caret, as it does between table cells', () => {
+    typeChars('abc');
+    editor.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
+    typeChars('def');
+    undoDom(editor);
+    expect(content()).toBe('Startabc');
+  });
+
+  it('makes typing over a selection a step of its own, not part of the typing before it', () => {
+    typeChars('abc');
+    const text = editor.querySelector('p')!.firstChild as Text;
+    // "abc" was selected and a letter typed over it: the browser reports insertText, the host says a selection was there.
+    const before = editor.innerHTML;
+    text.data = 'StartZ';
+    recordDomTransaction(editor, before, editor.innerHTML, { inputType: 'insertText', data: 'Z', selectionCollapsed: false });
+    undoDom(editor);
+    expect(content()).toBe('Startabc');
+    undoDom(editor);
+    expect(content()).toBe('Start');
+  });
+
+  it('does not let the next typing join a step that replaced a selection either', () => {
+    typeChars('abc');
+    const text = editor.querySelector('p')!.firstChild as Text;
+    const before = editor.innerHTML;
+    text.data = 'StartZ';
+    recordDomTransaction(editor, before, editor.innerHTML, { inputType: 'insertText', data: 'Z', selectionCollapsed: false });
+    typeChars('yz');
+    undoDom(editor);
+    expect(content()).toBe('StartZ');
+  });
+
+  it('makes deleting a selection a step of its own, not part of the backspaces before it', () => {
+    backspace(2);
+    expect(content()).toBe('Sta');
+    const text = editor.querySelector('p')!.firstChild as Text;
+    const before = editor.innerHTML;
+    text.data = '';
+    recordDomTransaction(editor, before, editor.innerHTML, { inputType: 'deleteContentBackward', selectionCollapsed: false });
+    undoDom(editor);
+    expect(content()).toBe('Sta');
+    undoDom(editor);
+    expect(content()).toBe('Start');
+  });
+
+  it('treats a keystroke as plain when the host does not say anything about a selection', () => {
+    typeChars('abc');
+    const text = editor.querySelector('p')!.firstChild as Text;
+    const before = editor.innerHTML;
+    text.data += 'd';
+    recordDomTransaction(editor, before, editor.innerHTML, { inputType: 'insertText', data: 'd' });
+    undoDom(editor);
+    expect(content()).toBe('Start');
+  });
+
+  it('still groups a space that the browser typed as a no-break space and a word that follows it', () => {
+    typeChars('ab');
+    const text = editor.querySelector('p')!.firstChild as Text;
+    let before = editor.innerHTML;
+    text.data = 'Startab\u00a0';
+    recordDomTransaction(editor, before, editor.innerHTML, { inputType: 'insertText', data: ' ', selectionCollapsed: true });
+    // The next letter turns that no-break space back into a normal one, shrinking the HTML: still a plain keystroke.
+    before = editor.innerHTML;
+    text.data = 'Startab c';
+    recordDomTransaction(editor, before, editor.innerHTML, { inputType: 'insertText', data: 'c', selectionCollapsed: true });
+    typeChars('d');
+    undoDom(editor);
+    expect(content()).toBe('Startab\u00a0');
+    undoDom(editor);
+    expect(content()).toBe('Start');
+  });
+
   it('does not close a step for a key that does not move the caret', () => {
     typeChars('abc');
     editor.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', bubbles: true }));

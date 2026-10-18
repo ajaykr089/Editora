@@ -24,6 +24,8 @@ export interface DomTransactionOptions {
   inputType?: string | null;
   /** `InputEvent.data` of the change (the typed text). */
   data?: string | null;
+  /** False when text was selected as the key was pressed: typing over it, or deleting it, is not a plain keystroke. */
+  selectionCollapsed?: boolean;
 }
 
 interface EditorHistoryState {
@@ -272,7 +274,8 @@ function installTypingBreakListeners(): void {
   document.addEventListener(
     'keydown',
     (event) => {
-      if (!/^(Arrow(Left|Right|Up|Down)|Home|End|Page(Up|Down))$/.test(event.key)) return;
+      // Tab moves the caret too: between the cells of a table, or the fields of a form.
+      if (!/^(Arrow(Left|Right|Up|Down)|Home|End|Page(Up|Down)|Tab)$/.test(event.key)) return;
       closeTypingGroup(resolveEditorFromNode(event.target as Node | null));
     },
     true,
@@ -518,7 +521,10 @@ export const recordDomTransaction = (
   }
 
   const now = Date.now();
-  const group = typingGroupOf(options?.inputType);
+  // Only a keystroke that really is one joins a run. Typing over a selection, or deleting a selection, is reported
+  // as insertText or deleteContentBackward like any other keystroke, but it is an edit of its own: the host says
+  // when a selection was involved (a host that says nothing is taken to be reporting plain keystrokes).
+  const group = options?.selectionCollapsed === false ? null : typingGroupOf(options?.inputType);
   // The data of a space or a line end is where a word ends: it joins the word before it, and the next key starts a new step.
   const endsWord = group === 'insert' && typeof options?.data === 'string' && /\s/.test(options.data);
 
