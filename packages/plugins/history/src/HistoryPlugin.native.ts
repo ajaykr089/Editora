@@ -42,6 +42,11 @@ interface ElementSnapshot {
 
 const ROOT_EDITOR_SELECTOR = '.rte-content, .editora-content';
 const MAX_DOM_HISTORY = 200;
+/**
+ * Each step keeps the whole content from before and after it, so a long document makes each step big. The oldest steps
+ * go once the steps together hold more than this many characters (a step is always kept, however big).
+ */
+const MAX_DOM_HISTORY_CHARACTERS = 40_000_000;
 /** Typing, or deleting, stays one undo step until the user pauses this long. */
 const TYPING_GROUP_PAUSE_MS = 1000;
 /** ...or until the step has been growing this long, so a minute of typing is not one undo. */
@@ -292,6 +297,19 @@ function pushDomHistoryEntry(editor: HTMLElement | null, entry: DomHistoryEntry)
   if (state.undoStack.length > MAX_DOM_HISTORY) {
     state.undoStack.splice(0, state.undoStack.length - MAX_DOM_HISTORY);
   }
+
+  // Keep the history within a budget of characters: drop the oldest steps while it is over, but never the newest.
+  let held = 0;
+  state.undoStack.forEach((step) => {
+    held += (step.beforeHTML?.length ?? 0) + (step.afterHTML?.length ?? 0);
+  });
+  let dropped = 0;
+  while (held > MAX_DOM_HISTORY_CHARACTERS && state.undoStack.length - dropped > 1) {
+    const oldest = state.undoStack[dropped];
+    held -= (oldest.beforeHTML?.length ?? 0) + (oldest.afterHTML?.length ?? 0);
+    dropped += 1;
+  }
+  if (dropped > 0) state.undoStack.splice(0, dropped);
 
   lastTouchedEditor = editor;
 }
@@ -548,7 +566,8 @@ export const recordDomTransaction = (
   }
 
   const entry: DomHistoryEntry = {
-    beforeHTML,
+    // A step that starts where the one before it ended shares its string, instead of holding a second copy of the document.
+    beforeHTML: topEntry && topEntry.afterHTML === beforeHTML ? topEntry.afterHTML : beforeHTML,
     afterHTML: finalAfter,
     group: group ?? undefined,
     startedAt: now,

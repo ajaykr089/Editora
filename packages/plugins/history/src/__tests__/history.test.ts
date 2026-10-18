@@ -323,3 +323,53 @@ describe('history: the caret after undo and redo', () => {
     expect(window.getSelection()!.rangeCount).toBe(0);
   });
 });
+
+
+describe('history: how much it keeps', () => {
+  const change = (text: Text, to: string) => {
+    const before = editor.innerHTML;
+    text.data = to;
+    recordDomTransaction(editor, before, editor.innerHTML);
+  };
+
+  it('keeps 200 steps of an ordinary document', () => {
+    const text = editor.querySelector('p')!.firstChild as Text;
+    for (let i = 1; i <= 260; i++) change(text, `Start ${i}`);
+    let steps = 0;
+    while (undoDom(editor)) steps++;
+    expect(steps).toBe(200);
+  });
+
+  it('keeps fewer steps of a very large document, so the history does not hold hundreds of copies of it', () => {
+    const filler = 'x'.repeat(500_000);
+    const text = editor.querySelector('p')!.firstChild as Text;
+    text.data = `Start${filler}`;
+    for (let i = 1; i <= 120; i++) change(text, `Start${i}${filler}`);
+    let steps = 0;
+    while (undoDom(editor)) steps++;
+    // About a million characters a step against a budget of forty million.
+    expect(steps).toBeGreaterThanOrEqual(30);
+    expect(steps).toBeLessThanOrEqual(45);
+  });
+
+  it('always keeps the latest step, however large the document is', () => {
+    const text = editor.querySelector('p')!.firstChild as Text;
+    text.data = 'y'.repeat(25_000_000);
+    const before = editor.innerHTML;
+    text.data = 'z'.repeat(25_000_000);
+    recordDomTransaction(editor, before, editor.innerHTML);
+    expect(undoDom(editor)).toBe(true);
+    expect(content()!.startsWith('yyyy')).toBe(true);
+  });
+
+  it('drops the oldest steps first', () => {
+    const filler = 'x'.repeat(500_000);
+    const text = editor.querySelector('p')!.firstChild as Text;
+    text.data = `Start${filler}`;
+    for (let i = 1; i <= 120; i++) change(text, `Start${i}${filler}`);
+    let last = '';
+    while (undoDom(editor)) last = content()!.slice(0, 12);
+    // The earliest steps are gone: undo cannot reach the first version.
+    expect(last).not.toBe('Startxxxxxxx');
+  });
+});
