@@ -666,7 +666,7 @@ function applyBlockSnapshot(
     if (!current) return;
 
     const target = transformBlockTag(current, snapshot.block!.tagName);
-    applyStyleMap(target, snapshot.block!.styles);
+    applyStyleMap(target, stylesTheElementDoesNotHave(target, snapshot.block!.styles));
 
     if (snapshot.block!.attrs.dir) {
       target.setAttribute('dir', snapshot.block!.attrs.dir);
@@ -710,13 +710,38 @@ function applyTableSnapshot(
   });
 }
 
+/**
+ * The element whose style the painted text will inherit once its own inline formatting is gone: the nearest
+ * ancestor that is not one of the inline elements the painter replaces (a span, bold, italic...).
+ */
+function inheritedStyleSource(node: Node | null): HTMLElement | null {
+  let element: HTMLElement | null =
+    node instanceof HTMLElement ? node : (node?.parentElement as HTMLElement | null) ?? null;
+  while (element && element.matches(INLINE_FORMAT_SELECTOR)) element = element.parentElement;
+  return element;
+}
+
+/**
+ * Drops the styles the target already has. Painting copies a look, so a declaration equal to what the text already
+ * shows changes nothing; written anyway it only buries the markup in font, size and colour that were there already.
+ */
+function withoutStylesTheTargetAlreadyHas(inline: InlineFormatSnapshot, base: HTMLElement | null): InlineFormatSnapshot {
+  if (!base) return inline;
+  const computed = window.getComputedStyle(base) as unknown as Record<string, string>;
+  const styles: Record<string, string> = {};
+  Object.entries(inline.styles).forEach(([property, value]) => {
+    if (computed[property] !== value) styles[property] = value;
+  });
+  return { ...inline, styles };
+}
+
 function applyInlineSnapshot(
   range: Range,
   selection: Selection,
   snapshot: FormatPainterSnapshot,
 ): void {
   expandRangeToSelectedInlineAncestors(range);
-  const inline = snapshot.inline;
+  const inline = withoutStylesTheTargetAlreadyHas(snapshot.inline, inheritedStyleSource(range.commonAncestorContainer));
   const selectedContent = range.cloneContents();
 
   if (containsBlockElement(selectedContent)) {
@@ -757,7 +782,10 @@ function applyInlineSnapshotToSelectedTextNodes(
     if (!selectedText || !selectedText.data.trim() || isStructuralListWhitespace(selectedText)) return;
 
     selectedText = removeConflictingInlineAncestorsForTextNode(selectedText, snapshot);
-    const wrapper = wrapContentsWithInlineSnapshot(document.createTextNode(selectedText.data), snapshot.inline);
+    const wrapper = wrapContentsWithInlineSnapshot(
+      document.createTextNode(selectedText.data),
+      withoutStylesTheTargetAlreadyHas(snapshot.inline, inheritedStyleSource(selectedText)),
+    );
     selectedText.parentNode?.replaceChild(wrapper, selectedText);
     wrappedNodes.push(wrapper);
   });
@@ -1056,6 +1084,16 @@ function getSelectedTableCells(editor: HTMLElement, range: Range): HTMLElement[]
 
   const fallback = getElementForNode(range.startContainer)?.closest(TABLE_CELL_SELECTOR);
   return fallback instanceof HTMLElement && editor.contains(fallback) ? [fallback] : [];
+}
+
+/** The styles of a map that the element does not already show (see withoutStylesTheTargetAlreadyHas). */
+function stylesTheElementDoesNotHave(element: HTMLElement, styles: Record<string, string>): Record<string, string> {
+  const computed = window.getComputedStyle(element) as unknown as Record<string, string>;
+  const missing: Record<string, string> = {};
+  Object.entries(styles).forEach(([property, value]) => {
+    if (computed[property] !== value) missing[property] = value;
+  });
+  return missing;
 }
 
 function applyStyleMap(target: HTMLElement, styles: Record<string, string>): void {
