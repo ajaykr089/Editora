@@ -201,6 +201,8 @@ export class RichTextEditorElement extends HTMLElement {
   private preservedContent: string | null = null;
   private loadedPlugins: Plugin[] = [];
   private lastBeforeInputType: string | null = null;
+  /** The content a keystroke is about to change, kept until its `input` event so the history can record the change. */
+  private pendingHistorySnapshot: { beforeHTML: string; inputType: string | null; data: string | null } | null = null;
 
   // Observed attributes for reactive updates
   static get observedAttributes(): string[] {
@@ -1091,6 +1093,24 @@ export class RichTextEditorElement extends HTMLElement {
   }
 
   /**
+   * Hands what a keystroke changed to the history plugin, so Undo takes back typing. Without this the
+   * plugin only knew about changes that plugins reported themselves, and typed text could not be undone.
+   */
+  private recordInputHistory(afterHTML: string): void {
+    const snapshot = this.pendingHistorySnapshot;
+    this.pendingHistorySnapshot = null;
+    if (!snapshot || !this.contentElement || snapshot.beforeHTML === afterHTML) return;
+
+    const executor = (window as any).execEditorCommand;
+    if (typeof executor === 'function') {
+      executor('recordDomTransaction', this.contentElement, snapshot.beforeHTML, afterHTML, {
+        inputType: snapshot.inputType,
+        data: snapshot.data,
+      });
+    }
+  }
+
+  /**
    * Setup event listeners
    */
   private setupEventListeners(): void {
@@ -1099,6 +1119,16 @@ export class RichTextEditorElement extends HTMLElement {
 
     this.contentElement.addEventListener('beforeinput', (event: InputEvent) => {
       this.lastBeforeInputType = event.inputType || null;
+      // Undo and redo are the history's own work; everything else the user types or deletes is recorded on `input`.
+      if (event.inputType === 'historyUndo' || event.inputType === 'historyRedo') {
+        this.pendingHistorySnapshot = null;
+      } else if (this.contentElement) {
+        this.pendingHistorySnapshot = {
+          beforeHTML: this.contentElement.innerHTML,
+          inputType: event.inputType || null,
+          data: typeof event.data === 'string' ? event.data : null,
+        };
+      }
     });
     
     // Content change
@@ -1138,6 +1168,8 @@ export class RichTextEditorElement extends HTMLElement {
           html = sanitized;
         }
       }
+
+      this.recordInputHistory(html);
 
       if (this.contentChangeDebounceTimer) {
         clearTimeout(this.contentChangeDebounceTimer);
