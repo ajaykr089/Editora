@@ -423,6 +423,7 @@
     "dev": "vite build --watch",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run typecheck:build && npm run build",
+    "test:dom": "vitest run",
     "test:content-rules": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./content-rules/src/ContentRulesPlugin.native.test.js",
     "test:citations": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./citations/src/CitationsPlugin.native.test.js",
     "test:approval-workflow": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./approval-workflow/src/ApprovalWorkflowPlugin.native.test.js",
@@ -433,7 +434,7 @@
     "test:doc-schema": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./doc-schema/src/DocSchemaPlugin.native.test.js",
     "test:translation-workflow": "node ../../node_modules/jest/bin/jest.js -c ./jest.config.cjs --watchman=false --runTestsByPath ./translation-workflow/src/TranslationWorkflowPlugin.native.test.js",
     "test:format-painter": "node -r ../../node_modules/ts-node/register ./format-painter/src/FormatPainterPlugin.native.test.js",
-    "verify:citations": "npm run typecheck:build && npm run test:citations && npm run test:content-rules && npm run test:approval-workflow && npm run test:pii-redaction && npm run test:smart-paste && npm run test:blocks-library && npm run test:doc-schema && npm run test:translation-workflow && npm run test:format-painter && npm run test:toolbar-icons && npm run build"
+    "verify:citations": "npm run typecheck:build && npm run test:citations && npm run test:content-rules && npm run test:approval-workflow && npm run test:pii-redaction && npm run test:smart-paste && npm run test:blocks-library && npm run test:doc-schema && npm run test:translation-workflow && npm run test:format-painter && npm run test:toolbar-icons && npm run test:dom && npm run build"
   },
   "peerDependencies": {
     "@editora/core": "^1.0.23"
