@@ -784,7 +784,9 @@ function ensurePanelStyles(): void {
       opacity: 0;
       pointer-events: none;
       transition: transform 180ms ease, opacity 180ms ease;
-      z-index: 55;
+      /* Above the editor's sticky toolbar (z-index 100): on a narrow screen the panel lies over the editor, and
+         under the toolbar its header, and the button that closes it, could not be clicked. */
+      z-index: 110;
     }
 
     .rte-comments-panel.is-open {
@@ -793,7 +795,16 @@ function ensurePanelStyles(): void {
       pointer-events: auto;
     }
 
-    [data-rte-comments-open="true"] :is(.rte-toolbar, .editora-toolbar, .rte-content, .editora-content, .editora-statusbar, .editora-statusbar-container) {
+    /* The panel's width is set on the editor itself, not only on the panel: the toolbar and the text make room for the
+       panel with a margin of that width, and a variable set on the panel is not visible to them (the margin was
+       silently 0, so the panel lay over the toolbar and the text and its header could not be reached). */
+    [data-rte-comments-open="true"] {
+      --rte-comments-panel-width: min(360px, 42vw);
+    }
+
+    /* The toolbar's wrapper is the element that is as wide as the editor, and it sits above the panel (it is sticky,
+       z-index 100): it has to give up the panel's width too, or its empty right-hand end covers the panel's header. */
+    [data-rte-comments-open="true"] :is(.rte-toolbar-wrapper, .rte-toolbar:not(.rte-toolbar-wrapper .rte-toolbar), .editora-toolbar, .rte-content, .editora-content, .editora-statusbar, .editora-statusbar-container) {
       margin-right: var(--rte-comments-panel-width);
       transition: margin-right 180ms ease;
     }
@@ -1074,11 +1085,12 @@ function ensurePanelStyles(): void {
     }
 
     @media (max-width: 900px) {
+      [data-rte-comments-open="true"],
       .rte-comments-panel {
         --rte-comments-panel-width: min(420px, 100%);
       }
 
-      [data-rte-comments-open="true"] :is(.rte-toolbar, .editora-toolbar, .rte-content, .editora-content, .editora-statusbar, .editora-statusbar-container) {
+      [data-rte-comments-open="true"] :is(.rte-toolbar-wrapper, .rte-toolbar:not(.rte-toolbar-wrapper .rte-toolbar), .editora-toolbar, .rte-content, .editora-content, .editora-statusbar, .editora-statusbar-container) {
         margin-right: 0;
       }
     }
