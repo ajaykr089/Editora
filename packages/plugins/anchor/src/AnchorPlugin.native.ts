@@ -1,4 +1,5 @@
 import { initDialogOverlay } from '../../shared/dialogHelpers';
+import { notify } from '../../shared/notify';
 import type { Plugin } from '@editora/core';
 import { findEditorContainerFromSelection, getContentElement } from '../../shared/editorContainerHelpers';
 
@@ -707,7 +708,7 @@ export const AnchorPlugin = (): Plugin => {
         try {
           const selection = window.getSelection();
           if (!selection || selection.rangeCount === 0) {
-            alert('Please place your cursor where you want to insert the anchor.');
+            notify('Please place your cursor where you want to insert the anchor.');
             return false;
           }
           

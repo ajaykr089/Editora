@@ -1,4 +1,5 @@
 import type { Plugin } from '@editora/core';
+import { notify } from '../../shared/notify';
 import { applyColorToSelection } from '../../src/utils/colorSelectionApply';
 import {
   attachAnchoredPopover,
@@ -739,7 +740,7 @@ function openBackgroundColorPicker(): boolean {
   const selection = window.getSelection();
   
   if (!selection || selection.isCollapsed) {
-    alert('Please select text to apply background color');
+    notify('Please select text to apply background color');
     return false;
   }
 

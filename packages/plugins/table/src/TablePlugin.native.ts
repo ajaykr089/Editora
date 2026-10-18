@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { notify } from '../../shared/notify';
 import { findEditorContainerFromSelection, getContentElement } from '../../shared/editorContainerHelpers';
 import './table.css';
 
@@ -105,7 +106,7 @@ export const insertTableCommand = () => {
   const contentEl = getContentElement(editorContainer);
   
   if (!contentEl) {
-    alert('Please place your cursor in the editor before inserting a table');
+    notify('Please place your cursor in the editor before inserting a table');
     return false;
   }
 

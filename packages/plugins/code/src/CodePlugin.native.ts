@@ -1,4 +1,5 @@
 import { initDialogOverlay } from '../../shared/dialogHelpers';
+import { notify } from '../../shared/notify';
 import { Plugin } from '@editora/core';
 import {
   createEditor,
@@ -484,7 +485,7 @@ export const CodePlugin = (): Plugin => ({
 
       if (!contentElement) {
         console.error("[CodePlugin] Editor content area not found");
-        alert(
+        notify(
           "Editor content area not found. Please click inside the editor first.",
         );
         return false;
@@ -794,7 +795,7 @@ export const CodePlugin = (): Plugin => ({
             setUnsavedState(false);
             closeDialog();
           } catch (error) {
-            alert("Failed to update HTML. Please check your syntax.");
+            notify("Failed to update HTML. Please check your syntax.", "error");
             console.error("HTML update error:", error);
           }
         };
