@@ -86,12 +86,13 @@ export function getDocumentManagerConfig(): DocumentManagerConfig {
 /**
  * Get the full API URL for a specific endpoint
  * @param endpoint - The endpoint key
- * @returns Full URL for the endpoint
+ * @returns Full URL for the endpoint, or an empty string when no API is configured
  */
 export function getApiUrl(endpoint: keyof DocumentManagerConfig['apiEndpoints']): string {
   const config = getDocumentManagerConfig();
   const globalConfig = getGlobalApiConfig();
-  const apiUrl = config.apiUrl || globalConfig.apiUrl;
+  // `??`, not `||`: an empty apiUrl set on the plugin means "no API" and must not fall back to the global one.
+  const apiUrl = config.apiUrl ?? globalConfig.apiUrl;
   return buildApiUrl(apiUrl, config.apiEndpoints[endpoint]);
 }
 

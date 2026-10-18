@@ -55,7 +55,7 @@ export async function importFromWord(file: File): Promise<string> {
 /**
  * Export content to Word document
  * 
- * This function attempts to export using a backend API first (if configured).
+ * This function exports through a backend API when one is configured (apiUrl); with none, it builds the file in the browser.
  * If the API is unavailable or fails, it falls back to client-side generation
  * using the docx library (if useClientSideFallback is enabled in config).
  * 
@@ -68,10 +68,28 @@ export async function exportToWord(
 ): Promise<void> {
   const config = getDocumentManagerConfig();
   const useClientSideFallback = config.useClientSideFallback ?? true;
-  
+
+  const exportInBrowser = async () => {
+    const doc = htmlToDocx(htmlContent);
+    const blob = await Packer.toBlob(doc);
+    downloadBlob(blob, filename);
+  };
+
+  // No API configured (the default): build the file in the browser and send nothing anywhere.
+  const apiUrl = getApiUrl('exportWord');
+  if (!apiUrl) {
+    if (!useClientSideFallback) {
+      throw new Error('Failed to export to Word: no API is configured (set apiUrl) and client-side export is turned off');
+    }
+    try {
+      await exportInBrowser();
+    } catch (error) {
+      throw new Error(`Failed to export to Word: ${error}`);
+    }
+    return;
+  }
+
   try {
-    // Try API export first (if configured)
-    const apiUrl = getApiUrl('exportWord');
     const headers = getApiHeaders();
 
     const response = await fetch(apiUrl, {
@@ -101,11 +119,7 @@ export async function exportToWord(
       console.warn('API export failed, falling back to client-side generation:', apiError);
       
       try {
-        // Use client-side docx generation as fallback
-        const doc = htmlToDocx(htmlContent);
-        const blob = await Packer.toBlob(doc);
-        downloadBlob(blob, filename);
-        
+        await exportInBrowser();
         console.info('✅ Document exported successfully using client-side generation');
       } catch (fallbackError) {
         throw new Error(`Failed to export to Word (both API and client-side): ${fallbackError}`);
