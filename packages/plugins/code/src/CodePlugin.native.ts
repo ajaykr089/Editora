@@ -1,5 +1,6 @@
 import { initDialogOverlay } from '../../shared/dialogHelpers';
 import { notify } from '../../shared/notify';
+import { confirmAction } from '../../shared/confirmDialog';
 import { Plugin } from '@editora/core';
 import {
   createEditor,
@@ -759,10 +760,16 @@ export const CodePlugin = (): Plugin => ({
           }
         };
 
-        const handleCancel = () => {
+        const handleCancel = async () => {
           if (
             hasUnsavedChanges &&
-            !confirm("You have unsaved changes. Are you sure you want to cancel?")
+            !(await confirmAction("You have unsaved changes. Are you sure you want to cancel?", {
+              title: 'Discard changes?',
+              confirmText: 'Discard changes',
+              cancelText: 'Keep editing',
+              danger: true,
+              context: contentElement,
+            }))
           ) {
             return;
           }

@@ -1,6 +1,7 @@
 import { escapeHtml } from '../../shared/escapeHtml';
 import { initDialogOverlay } from '../../shared/dialogHelpers';
 import { recordDomHistory } from '../../shared/historyHelpers';
+import { confirmAction, promptText } from '../../shared/confirmDialog';
 import { Plugin } from '@editora/core';
 
 /**
@@ -1056,15 +1057,22 @@ const showLinkDialogForMedia = (media: HTMLImageElement | HTMLVideoElement) => {
     }
   });
 
-  removeLinkBtn?.addEventListener('click', () => {
-    if (existingLink && confirm('Remove link from this media?')) {
-      existingLink.replaceWith(media);
-      closeDialog();
-      
-      // Update toolbar
-      if (floatingToolbar && selectedMedia) {
-        showFloatingToolbar(selectedMedia);
-      }
+  removeLinkBtn?.addEventListener('click', async () => {
+    if (!existingLink) return;
+    const confirmed = await confirmAction('Remove link from this media?', {
+      title: 'Remove link',
+      confirmText: 'Remove link',
+      danger: true,
+      context: media,
+    });
+    if (!confirmed || !existingLink.isConnected) return;
+
+    existingLink.replaceWith(media);
+    closeDialog();
+
+    // Update toolbar
+    if (floatingToolbar && selectedMedia) {
+      showFloatingToolbar(selectedMedia);
     }
   });
 
@@ -1416,19 +1424,32 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
     }
   });
 
-  toolbar.querySelector('.btn-resize')?.addEventListener('click', () => {
-    const width = prompt('Enter width in pixels:', String(media.width || media.offsetWidth));
-    if (width && !isNaN(parseInt(width))) {
-      const w = parseInt(width);
-      media.style.width = `${w}px`;
-      media.setAttribute('width', String(w));
-      updateResizeHandles();
-      updatePosition();
-    }
+  toolbar.querySelector('.btn-resize')?.addEventListener('click', async () => {
+    const width = await promptText('Enter width in pixels:', {
+      title: 'Resize',
+      label: 'Width (px)',
+      initialValue: String(media.width || media.offsetWidth),
+      inputMode: 'numeric',
+      confirmText: 'Resize',
+      context: media,
+      validate: (value) => (/^\s*\d+\s*$/.test(value) && parseInt(value, 10) > 0 ? null : 'Enter a whole number of pixels, such as 480.'),
+    });
+    if (width === null) return;
+    const w = parseInt(width, 10);
+    media.style.width = `${w}px`;
+    media.setAttribute('width', String(w));
+    updateResizeHandles();
+    updatePosition();
   });
 
-  toolbar.querySelector('.btn-remove')?.addEventListener('click', () => {
-    if (confirm('Remove this media?')) {
+  toolbar.querySelector('.btn-remove')?.addEventListener('click', async () => {
+    const confirmed = await confirmAction('Remove this media?', {
+      title: 'Remove media',
+      confirmText: 'Remove',
+      danger: true,
+      context: media,
+    });
+    if (confirmed) {
       media.remove();
       if (floatingToolbar) {
         if ((floatingToolbar as any)._cleanup) {
