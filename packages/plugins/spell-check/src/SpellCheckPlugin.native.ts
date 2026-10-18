@@ -1,5 +1,6 @@
 import { Plugin } from '@editora/core';
 import { COMMON_ENGLISH_WORDS } from './englishDictionary';
+import { getSuggestions as rankSuggestions } from './suggestions';
 
 /**
  * Spell Check Plugin - Native Implementation
@@ -717,29 +718,6 @@ const saveCustomDictionary = () => {
 // ===== Spell Check Engine =====
 
 /**
- * Edit distance algorithm (Levenshtein distance) for suggestions
- */
-function editDistance(a: string, b: string): number {
-  const matrix: number[][] = [];
-  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      if (b.charAt(i - 1) === a.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1, // substitution
-          matrix[i][j - 1] + 1,     // insertion
-          matrix[i - 1][j] + 1      // deletion
-        );
-      }
-    }
-  }
-  return matrix[b.length][a.length];
-}
-
-/**
  * Check if word is in dictionary
  */
 function checkWord(word: string): boolean {
@@ -748,14 +726,10 @@ function checkWord(word: string): boolean {
 }
 
 /**
- * Get spelling suggestions using edit distance
+ * Get spelling suggestions (see suggestions.ts for how they are ranked)
  */
 function getSuggestions(word: string, maxSuggestions = 5): string[] {
-  const wordLower = word.toLowerCase();
-  const words = Array.from(ENGLISH_DICTIONARY);
-  const distances = words.map(w => ({ word: w, distance: editDistance(wordLower, w) }));
-  distances.sort((a, b) => a.distance - b.distance);
-  return distances.filter(d => d.distance <= 3).slice(0, maxSuggestions).map(d => d.word);
+  return rankSuggestions(word, ENGLISH_DICTIONARY, maxSuggestions);
 }
 
 /**
@@ -1179,6 +1153,9 @@ function createSidePanel(): HTMLElement {
 
   const panel = document.createElement('div');
   panel.className = 'rte-spell-check-panel';
+  // A named region, so it can be found and its purpose is known without seeing it.
+  panel.setAttribute('role', 'complementary');
+  panel.setAttribute('aria-label', 'Spell check');
 
   const computedHostStyle = window.getComputedStyle(host);
   if (computedHostStyle.position === 'static') {
