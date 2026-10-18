@@ -636,6 +636,62 @@ function updateTableInfo(): void {
 // FLOATING TOOLBAR MANAGEMENT
 // ============================================
 
+/**
+ * Moves into a cell as a word processor does: what the cell holds is selected, so typing replaces it and an arrow key
+ * puts the caret at either end; an empty cell just gets the caret (inside its paragraph, if it has one).
+ */
+function placeCaretInCell(cell: HTMLElement): void {
+  const selection = window.getSelection();
+  if (!selection) return;
+  const range = document.createRange();
+  if ((cell.textContent ?? '').trim() === '') {
+    range.selectNodeContents((cell.querySelector('p, div') as HTMLElement | null) || cell);
+    range.collapse(true);
+  } else {
+    range.selectNodeContents(cell);
+  }
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+/**
+ * Tab and Shift+Tab move between the cells of a table, as they do in a word processor; Tab in the last cell adds a
+ * row. Without this the key took the focus out of the editor from inside a table. Shift+Tab in the first cell is
+ * left to the browser, so the focus can still leave backwards.
+ */
+function handleTableTabKey(event: KeyboardEvent): void {
+  if (event.key !== 'Tab' || event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
+
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
+  const cell = closestFromNode(selection.getRangeAt(0).startContainer, 'td, th') as HTMLTableCellElement | null;
+  const table = cell?.closest('table') as HTMLTableElement | null;
+  if (!cell || !table || !isTableEditable(table)) return;
+  // Only a key pressed in that editor: not one typed into a dialog that happens to be open over it.
+  const host = table.closest('[contenteditable]');
+  if (!host || !(event.target instanceof Node) || !host.contains(event.target)) return;
+
+  // Cells in reading order; a table nested in a cell has its own.
+  const cells = Array.from(table.querySelectorAll<HTMLTableCellElement>('th, td')).filter(
+    (candidate) => candidate.closest('table') === table,
+  );
+  const index = cells.indexOf(cell);
+  let target: HTMLElement | null | undefined;
+
+  if (event.shiftKey) {
+    target = cells[index - 1];
+  } else if (index < cells.length - 1) {
+    target = cells[index + 1];
+  } else {
+    executeTableCommand('addRowBelow');
+    target = (cell.parentElement?.nextElementSibling as HTMLElement | null)?.querySelector<HTMLElement>('th, td');
+  }
+
+  if (!target) return;
+  event.preventDefault();
+  placeCaretInCell(target);
+}
+
 function initTableToolbar(): void {
   selectionChangeHandler = () => {
     const tableInfo = getTableInfoFromDOM();
@@ -672,6 +728,7 @@ function initTableToolbar(): void {
   };
 
   document.addEventListener('selectionchange', selectionChangeHandler);
+  document.addEventListener('keydown', handleTableTabKey);
   document.addEventListener('mousedown', mouseDownHandler);
   document.addEventListener('tableDeleted', tableDeletedHandler as EventListener);
   window.addEventListener('scroll', scrollHandler, true); // Use capture to catch all scroll events
