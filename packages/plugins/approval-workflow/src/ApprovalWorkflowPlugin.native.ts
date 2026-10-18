@@ -1,4 +1,5 @@
 import type { Plugin } from '@editora/core';
+import { focusPanel } from '../../shared/dialogHelpers';
 
 const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
 const EDITOR_HOST_SELECTOR = '[data-editora-editor], .rte-editor, .editora-editor, editora-editor';
@@ -839,6 +840,8 @@ function showPanel(editor: HTMLElement): void {
   applyThemeClass(panel, editor);
   positionPanel(editor, panel);
   refreshPanel(editor);
+  // Opened from the toolbar or a shortcut: take the focus in, so the panel is not left for a keyboard user to find.
+  focusPanel(panel);
 }
 
 function hidePanel(editor: HTMLElement, focusEditor = false): void {

@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { focusPanel, keepPanelFocus, panelHasFocus } from '../../shared/dialogHelpers';
 import { COMMON_ENGLISH_WORDS } from './englishDictionary';
 import { getSuggestions as rankSuggestions } from './suggestions';
 
@@ -1175,7 +1176,9 @@ function updateSidePanel(precomputedIssues?: SpellCheckIssue[]): void {
   const issues = precomputedIssues || scanDocumentForMisspellings();
   const stats = getSpellCheckStats(issues); // Pass issues to avoid duplicate scan
   
-  sidePanelElement.innerHTML = `
+  const panelElement = sidePanelElement;
+  keepPanelFocus(panelElement, () => {
+    panelElement.innerHTML = `
     <div class="rte-spellcheck-header">
       <div>
         <h3 class="rte-spellcheck-title">Spell Check</h3>
@@ -1225,6 +1228,7 @@ function updateSidePanel(precomputedIssues?: SpellCheckIssue[]): void {
       }
     </div>
   `;
+  });
   
   // Event listeners
   const closeBtn = sidePanelElement.querySelector('.rte-spellcheck-close');
@@ -1330,8 +1334,18 @@ function attachSpellCheckEscapeListener(): void {
   if (spellCheckEscapeListener) return;
   spellCheckEscapeListener = (event: KeyboardEvent) => {
     if (event.key !== 'Escape' || !isSpellCheckEnabled) return;
+    // Only an Escape pressed in the editor or the panel: not one meant for a dialog or a menu opened over the page
+    // (this listener sees every key on the page, and used to switch spell check off for all of them).
+    const target = event.target as Node | null;
+    const inScope = !!target && (!!sidePanelElement?.contains(target) || !!activeEditorElement?.contains(target));
+    if (!inScope) return;
     event.preventDefault();
     event.stopPropagation();
+    // A suggestion menu open over the word is closed first; the next Escape closes spell check.
+    if (document.querySelector('.rte-spellcheck-menu')) {
+      removeSpellcheckMenus();
+      return;
+    }
     disableSpellCheck();
   };
   document.addEventListener('keydown', spellCheckEscapeListener, true);
@@ -1351,6 +1365,8 @@ function disableSpellCheck(): boolean {
   detachSpellCheckContextMenu();
   removeSpellcheckMenus();
 
+  // The panel goes with whatever focus is in it: hand that back to the text, not to the page.
+  const editorToRefocus = panelHasFocus(sidePanelElement) ? activeEditorElement : null;
   if (sidePanelElement) {
     sidePanelElement.remove();
     sidePanelElement = null;
@@ -1360,6 +1376,7 @@ function disableSpellCheck(): boolean {
   pendingToggleEditorElement = null;
   isSpellCheckEnabled = false;
   detachSpellCheckEscapeListener();
+  editorToRefocus?.focus({ preventScroll: true });
   return false;
 }
 
@@ -1389,6 +1406,7 @@ function toggleSpellCheck(): boolean {
     startMutationObserver();
     sidePanelElement = createSidePanel();
     updateSidePanel();
+    focusPanel(sidePanelElement);
     return true;
   }
 
@@ -1412,6 +1430,7 @@ function toggleSpellCheck(): boolean {
   }
   sidePanelElement = createSidePanel();
   updateSidePanel();
+  focusPanel(sidePanelElement);
   return true;
 }
 

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { initDialogOverlay } from '../dialogHelpers';
+import { focusPanel, initDialogOverlay, keepPanelFocus, panelHasFocus } from '../dialogHelpers';
 
 let editorField: HTMLElement;
 
@@ -286,5 +286,138 @@ describe('the caret after a dialog that changed nothing', () => {
     await settle();
 
     expect(document.activeElement).toBe(editorField);
+  });
+});
+
+describe('side panels', () => {
+  let panel: HTMLElement;
+  const make = (html: string) => {
+    panel = document.createElement('aside');
+    panel.innerHTML = html;
+    document.body.appendChild(panel);
+    return panel;
+  };
+
+  describe('focusPanel', () => {
+    it('focuses the first control that is not the close button', () => {
+      make('<button class="x-close" aria-label="Close panel">x</button><button id="first">Run</button><button id="second">More</button>');
+      focusPanel(panel);
+      expect(document.activeElement?.id).toBe('first');
+    });
+
+    it('falls back to the close button when it is the only control', () => {
+      make('<button id="only" aria-label="Close">x</button>');
+      focusPanel(panel);
+      expect(document.activeElement?.id).toBe('only');
+    });
+
+    it('focuses the panel itself when it has nothing to focus', () => {
+      make('<p>Nothing to do here</p>');
+      focusPanel(panel);
+      expect(document.activeElement).toBe(panel);
+      expect(panel.getAttribute('tabindex')).toBe('-1');
+    });
+
+    it('ignores a missing or detached panel', () => {
+      expect(() => focusPanel(null)).not.toThrow();
+      const detached = document.createElement('div');
+      expect(() => focusPanel(detached)).not.toThrow();
+      expect(document.activeElement).toBe(editorField);
+    });
+  });
+
+  describe('panelHasFocus', () => {
+    it('says whether the focus is in the panel', () => {
+      make('<button id="inside">in</button>');
+      expect(panelHasFocus(panel)).toBe(false);
+      document.getElementById('inside')!.focus();
+      expect(panelHasFocus(panel)).toBe(true);
+      expect(panelHasFocus(null)).toBe(false);
+    });
+  });
+
+  describe('keepPanelFocus', () => {
+    const rebuild = (html: string) => () => {
+      panel.innerHTML = html;
+    };
+    const LIST = (n: number) =>
+      '<button class="x-close" aria-label="Close">x</button>' +
+      Array.from({ length: n }, (_, i) => `<button class="item-btn" data-action="ignore" data-id="w${i}">Ignore ${i}</button>`).join('');
+
+    it('puts the focus on the same control of the rebuilt panel', () => {
+      make(LIST(3));
+      (panel.querySelectorAll('.item-btn')[1] as HTMLElement).focus();
+      keepPanelFocus(panel, rebuild(LIST(3)));
+      expect(document.activeElement?.getAttribute('data-id')).toBe('w1');
+    });
+
+    it('moves to the control that is now at that place when the one it was on has gone', () => {
+      make('<button class="x-close" aria-label="Close">x</button><button class="item-btn" data-action="ignore">A</button><button class="item-btn" data-action="ignore">B</button>');
+      (panel.querySelectorAll('.item-btn')[0] as HTMLElement).focus();
+      // The first item was dealt with and left the list.
+      keepPanelFocus(panel, rebuild('<button class="x-close" aria-label="Close">x</button><button class="item-btn" data-action="ignore">B</button>'));
+      expect(document.activeElement?.textContent).toBe('B');
+    });
+
+    it('goes to the last control of that kind when there are fewer than before', () => {
+      make(LIST(3));
+      (panel.querySelectorAll('.item-btn')[2] as HTMLElement).focus();
+      keepPanelFocus(panel, rebuild(LIST(1)));
+      expect(document.activeElement?.getAttribute('data-id')).toBe('w0');
+    });
+
+    it('goes to the first control when no control of that kind is left', () => {
+      make('<button id="keep">Keep</button><button class="item-btn" data-action="ignore">A</button>');
+      (panel.querySelector('.item-btn') as HTMLElement).focus();
+      keepPanelFocus(panel, rebuild('<button id="keep">Keep</button>'));
+      expect(document.activeElement?.id).toBe('keep');
+    });
+
+    it('does not choose a control that is hidden, such as a button in a collapsed section', () => {
+      make('<button id="top">Top</button><div hidden><button class="item-btn" data-action="ignore">Hidden</button></div><button class="item-btn" data-action="ignore">Shown</button>');
+      // The focused one is the second of its kind; rebuilt, the one now at that place is in a collapsed section.
+      (panel.querySelectorAll('.item-btn')[1] as HTMLElement).focus();
+      keepPanelFocus(panel, rebuild('<button id="top">Top</button><div hidden><button class="item-btn" data-action="ignore">Hidden</button></div><button class="item-btn" data-action="ignore">Shown again</button>'));
+      expect(document.activeElement?.textContent).toBe('Shown again');
+    });
+
+    it('falls back to the first control when every control of that kind is hidden', () => {
+      make('<button id="top">Top</button><button class="item-btn" data-action="ignore">A</button>');
+      (panel.querySelector('.item-btn') as HTMLElement).focus();
+      keepPanelFocus(panel, rebuild('<button id="top">Top</button><div hidden><button class="item-btn" data-action="ignore">A</button></div>'));
+      expect(document.activeElement?.id).toBe('top');
+    });
+
+    it('moves the focus off the panel itself and onto a control once the panel has contents', () => {
+      make('<p>Loading</p>');
+      focusPanel(panel);
+      expect(document.activeElement).toBe(panel);
+      keepPanelFocus(panel, rebuild('<button class="x-close" aria-label="Close">x</button><textarea id="note"></textarea>'));
+      expect(document.activeElement?.id).toBe('note');
+    });
+
+    it('does not touch the focus when it was not in the panel', () => {
+      make(LIST(2));
+      keepPanelFocus(panel, rebuild(LIST(2)));
+      expect(document.activeElement).toBe(editorField);
+    });
+
+    it('leaves the focus where it is when the rebuild keeps the focused element', () => {
+      make(LIST(2));
+      const kept = panel.querySelectorAll('.item-btn')[0] as HTMLElement;
+      kept.focus();
+      keepPanelFocus(panel, () => {
+        panel.querySelectorAll('.item-btn')[1].textContent = 'changed';
+      });
+      expect(document.activeElement).toBe(kept);
+    });
+
+    it('copes with a null panel', () => {
+      let ran = false;
+      keepPanelFocus(null, () => {
+        ran = true;
+      });
+      expect(ran).toBe(true);
+    });
   });
 });

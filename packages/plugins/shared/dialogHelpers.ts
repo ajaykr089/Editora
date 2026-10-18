@@ -111,6 +111,78 @@ function isCloseControl(element: HTMLElement): boolean {
   return /close|dismiss/.test(label) || /^[\u00d7\u2715\u2716x]$/i.test(text);
 }
 
+/**
+ * Moves the focus into a side panel that has just opened (comments, spell check, approvals): onto its first control
+ * that is not the close button, or onto the panel itself when it has none. A panel opened from the toolbar used to
+ * leave the focus behind in the editor, so a keyboard user did not know it was there and had to tab to it.
+ */
+export function focusPanel(panel: HTMLElement | null): void {
+  if (!panel || !panel.isConnected) return;
+  const items = focusableIn(panel);
+  const target = items.find((item) => !isCloseControl(item)) ?? items[0];
+  if (target) {
+    target.focus({ preventScroll: true });
+    return;
+  }
+  panel.setAttribute('tabindex', '-1');
+  panel.focus({ preventScroll: true });
+}
+
+const IDENTIFYING_ATTRIBUTES = ['id', 'data-action', 'data-comment-id', 'data-id', 'data-index', 'data-suggestion', 'data-value', 'name'];
+
+/** A selector for "the same kind of control as this one": its tag, class and any attribute that identifies it. */
+function sameKindSelector(element: HTMLElement): string {
+  let selector = element.tagName.toLowerCase();
+  const first = element.classList[0];
+  if (first && /^[\w-]+$/.test(first)) selector += `.${first}`;
+  for (const name of IDENTIFYING_ATTRIBUTES) {
+    const value = element.getAttribute(name);
+    if (value !== null && /^[\w:.-]*$/.test(value)) selector += `[${name}="${value}"]`;
+  }
+  return selector;
+}
+
+/**
+ * Runs a function that rebuilds a panel's contents (`innerHTML = ...`) without losing the keyboard's place. The
+ * element that had the focus is removed by the rebuild, which drops the focus on the page; this notes which control it
+ * was and gives the focus to the same control in the new contents (the same one by position among controls of that
+ * kind, or the first control if there are none left).
+ */
+export function keepPanelFocus(panel: HTMLElement | null, render: () => void): void {
+  const active = panel && panelHasFocus(panel) ? (document.activeElement as HTMLElement) : null;
+  let selector = '';
+  let index = 0;
+  if (panel && active && active !== panel) {
+    selector = sameKindSelector(active);
+    index = Array.from(panel.querySelectorAll(selector)).indexOf(active);
+  }
+
+  const panelItselfHadFocus = !!panel && document.activeElement === panel;
+
+  render();
+
+  if (!panel) return;
+  // The panel took the focus itself because it had nothing to focus yet; now it has contents.
+  if (panelItselfHadFocus) {
+    focusPanel(panel);
+    return;
+  }
+  if (!active) return;
+  if (active.isConnected) return; // the rebuild left it alone
+  // Only controls that are on show can take the focus (a collapsed section's buttons cannot).
+  const same = selector ? Array.from(panel.querySelectorAll<HTMLElement>(selector)).filter((item) => isShown(item, panel)) : [];
+  const target = same[Math.min(Math.max(index, 0), same.length - 1)];
+  if (target) target.focus({ preventScroll: true });
+  else focusPanel(panel);
+}
+
+/** True when the focus is in the panel, or has just been lost from it (its focused element was removed). */
+export function panelHasFocus(panel: HTMLElement | null): boolean {
+  if (!panel) return false;
+  const active = document.activeElement;
+  return !!active && panel.contains(active);
+}
+
 /** The name a dialog shows in its heading, without the close button that sits inside the same bar. */
 function headingText(dialog: HTMLElement): string {
   const heading = dialog.querySelector<HTMLElement>(

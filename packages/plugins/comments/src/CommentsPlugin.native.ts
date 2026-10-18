@@ -1,4 +1,5 @@
 import { Plugin } from '@editora/core';
+import { focusPanel, keepPanelFocus, panelHasFocus } from '../../shared/dialogHelpers';
 import { recordDomHistory } from '../../shared/historyHelpers';
 
 interface CommentReply {
@@ -231,14 +232,18 @@ function setPanelVisibility(state: CommentsEditorState, visible: boolean): void 
       state.panelElement.setAttribute('aria-hidden', 'false');
     }
     startSelectionTracking(state);
+    focusPanel(state.panelElement);
     return;
   }
 
   state.root.removeAttribute('data-rte-comments-open');
   stopSelectionTracking(state);
   if (state.panelElement) {
+    // The panel goes with the focus that is in it: hand that back to the text instead of dropping it on the page.
+    const hadFocus = panelHasFocus(state.panelElement);
     state.panelElement.remove();
     state.panelElement = null;
+    if (hadFocus) state.root.querySelector<HTMLElement>('[contenteditable="true"]')?.focus({ preventScroll: true });
   }
 }
 
@@ -449,8 +454,10 @@ function refreshCommentsPanel(state?: CommentsEditorState): void {
   if (!targetState?.panelElement) return;
 
   const comments = getCommentsInDisplayOrder(targetState);
+  const panelElement = targetState.panelElement;
 
-  targetState.panelElement.innerHTML = `
+  keepPanelFocus(panelElement, () => {
+    panelElement.innerHTML = `
     <div class="rte-comments-header">
       <div>
         <h3>Comments (${comments.length})</h3>
@@ -470,6 +477,7 @@ function refreshCommentsPanel(state?: CommentsEditorState): void {
         : '<div class="rte-comments-list"></div>'
     }
   `;
+  });
 
   const closeBtn = targetState.panelElement.querySelector('.rte-comments-close');
   closeBtn?.addEventListener('click', () => {
