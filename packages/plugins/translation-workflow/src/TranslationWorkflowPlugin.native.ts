@@ -1,4 +1,5 @@
 import type { Plugin } from '@editora/core';
+import { keepPanelFocus } from '../../shared/dialogHelpers';
 
 const EDITOR_CONTENT_SELECTOR = '.rte-content, .editora-content';
 const EDITOR_HOST_SELECTOR = '[data-editora-editor], .rte-editor, .editora-editor, editora-editor';
@@ -1191,15 +1192,16 @@ function refreshPanel(editor: HTMLElement): void {
   const segmentsList = panel.querySelector<HTMLElement>('.rte-translation-segments');
   if (segmentsList) {
     segmentsList.setAttribute('aria-label', options.labels.segmentsLabel);
-    segmentsList.innerHTML = state.segments
+    // The buttons inside hold the focus; rebuilding the list must not drop it.
+    keepPanelFocus(panel, () => { segmentsList.innerHTML = state.segments
       .map((segment) => {
         const selectedClass = segment.id === state.selectedSegmentId ? 'selected' : '';
         const lockClass = segment.locked ? 'locked' : '';
         return `
-          <li class="rte-translation-segment-item ${selectedClass} ${lockClass}" role="option" aria-selected="${
-            segment.id === state.selectedSegmentId ? 'true' : 'false'
-          }" data-segment-id="${escapeHtml(segment.id)}">
-            <button type="button" class="rte-translation-segment-select" data-action="select-segment" data-segment-id="${escapeHtml(
+          <li class="rte-translation-segment-item ${selectedClass} ${lockClass}" data-segment-id="${escapeHtml(segment.id)}">
+            <button type="button" class="rte-translation-segment-select" data-action="select-segment"${
+              segment.id === state.selectedSegmentId ? ' aria-current="true"' : ''
+            } data-segment-id="${escapeHtml(
               segment.id,
             )}" title="${escapeHtml(segment.text)}">
               <span class="rte-translation-segment-meta">#${segment.index + 1} • ${escapeHtml(segment.tagName)}</span>
@@ -1213,7 +1215,7 @@ function refreshPanel(editor: HTMLElement): void {
           </li>
         `;
       })
-      .join('');
+      .join(''); });
   }
 
   const sourcePreview = panel.querySelector<HTMLElement>('.rte-translation-source-preview');
@@ -1559,7 +1561,7 @@ function ensurePanel(editor: HTMLElement): HTMLElement {
       <div class="rte-translation-grid">
         <section class="rte-translation-segments-wrap" aria-label="${escapeHtml(options.labels.segmentsLabel)}">
           <h3 class="rte-translation-subtitle">${escapeHtml(options.labels.segmentsLabel)}</h3>
-          <ul class="rte-translation-segments" role="listbox" tabindex="0" aria-label="${escapeHtml(
+          <ul class="rte-translation-segments" aria-label="${escapeHtml(
             options.labels.segmentsLabel,
           )}"></ul>
         </section>

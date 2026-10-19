@@ -973,7 +973,6 @@ function refreshPanel(editor: HTMLElement): void {
               data-block-id="${escapeHtml(block.id)}"
               role="option"
               aria-selected="${selected ? 'true' : 'false'}"
-              aria-label="${escapeHtml(block.label)}"
               tabindex="${selected ? '0' : '-1'}"
             >
               <span class="rte-blocks-library-item-head">
@@ -1981,7 +1980,7 @@ function ensureStylesInjected(): void {
     .rte-blocks-library-item-preview {
       font-size: 11px;
       line-height: 1.3;
-      color: #64748b;
+      color: #475569;
     }
 
     .rte-blocks-library-item-preview {
@@ -2005,7 +2004,7 @@ function ensureStylesInjected(): void {
     .rte-blocks-library-empty {
       margin: 8px;
       font-size: 12px;
-      color: #64748b;
+      color: #475569;
     }
 
     .rte-blocks-library-actions {

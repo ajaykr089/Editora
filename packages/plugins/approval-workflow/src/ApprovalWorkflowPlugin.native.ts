@@ -1379,7 +1379,7 @@ function ensureStylesInjected(): void {
 
     .rte-approval-item-time {
       font-size: 11px;
-      color: #64748b;
+      color: #475569;
     }
 
     .${PANEL_CLASS}.rte-approval-theme-dark .rte-approval-item-time {
@@ -1398,7 +1398,7 @@ function ensureStylesInjected(): void {
       border-radius: 8px;
       padding: 8px;
       font-size: 12px;
-      color: #64748b;
+      color: #475569;
     }
 
     .${PANEL_CLASS}.rte-approval-theme-dark .rte-approval-empty {
@@ -1409,7 +1409,7 @@ function ensureStylesInjected(): void {
     .rte-approval-shortcut {
       margin: 0;
       font-size: 11px;
-      color: #64748b;
+      color: #475569;
     }
 
     .${PANEL_CLASS}.rte-approval-theme-dark .rte-approval-shortcut {

@@ -316,7 +316,7 @@ const SOURCE_EDITOR_CSS = `/* Source Editor Dialog Styles */
 }
 
 .rte-source-editor-overlay.rte-theme-dark .rte-source-editor-toolbar-btn.active {
-  background: #3b82f6;
+  background: #2563eb;
   color: #ffffff;
 }
 
@@ -358,11 +358,11 @@ const SOURCE_EDITOR_CSS = `/* Source Editor Dialog Styles */
 }
 
 .rte-source-editor-overlay.rte-theme-dark .rte-source-editor-btn-save {
-  background: #3b82f6;
+  background: #2563eb;
 }
 
 .rte-source-editor-overlay.rte-theme-dark .rte-source-editor-btn-save:hover:not(:disabled) {
-  background: #2563eb;
+  background: #1d4ed8;
 }
 
 /* Responsive design */

@@ -1208,13 +1208,13 @@ function ensureStylesInjected(): void {
 
     .rte-mention-item-meta {
       font-size: 12px;
-      color: #64748b;
+      color: #475569;
       white-space: nowrap;
     }
 
     .rte-mention-empty {
       padding: 12px;
-      color: #64748b;
+      color: #475569;
       font-size: 13px;
       text-align: center;
     }
@@ -1248,7 +1248,7 @@ function ensureStylesInjected(): void {
     ${DARK_THEME_SELECTOR} .rte-mention-empty,
     .rte-mention-panel.rte-mention-theme-dark .rte-mention-item-meta,
     .rte-mention-panel.rte-mention-theme-dark .rte-mention-empty {
-      color: #9ca3af;
+      color: #cbd5e1;
     }
   `;
 

@@ -146,7 +146,7 @@ function createCodeSampleDialog(
       cancelBg: '#334155',
       cancelHover: '#475569',
       cancelText: '#e2e8f0',
-      primaryBg: '#3b82f6',
+      primaryBg: '#2563eb',
       primaryHover: '#2563eb',
     }
     : {
@@ -228,8 +228,8 @@ function createCodeSampleDialog(
   const languageGroup = document.createElement('div');
   languageGroup.style.marginBottom = '20px';
   languageGroup.innerHTML = `
-    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: ${palette.text}; font-size: 14px;">Language</label>
-    <select class="rte-code-language" style="
+    <label for="rte-code-language-select" style="display: block; margin-bottom: 8px; font-weight: 500; color: ${palette.text}; font-size: 14px;">Language</label>
+    <select id="rte-code-language-select" class="rte-code-language" style="
       width: 100%;
       padding: 10px 12px;
       border: 1px solid ${palette.fieldBorder};

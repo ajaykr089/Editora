@@ -746,6 +746,7 @@ function injectTemplateDialogStyles() {
       --rte-tmpl-subtle-hover: #eef2f7;
       --rte-tmpl-muted-text: #5f6b7d;
       --rte-tmpl-accent: #1976d2;
+      --rte-tmpl-accent-fill: #1976d2;
       --rte-tmpl-accent-strong: #1565c0;
       --rte-tmpl-ring: rgba(31, 117, 254, 0.18);
       position: fixed;
@@ -771,7 +772,8 @@ function injectTemplateDialogStyles() {
       --rte-tmpl-subtle-hover: #344256;
       --rte-tmpl-muted-text: #a5b1c5;
       --rte-tmpl-accent: #58a6ff;
-      --rte-tmpl-accent-strong: #4598f4;
+      --rte-tmpl-accent-fill: #1f6feb;
+      --rte-tmpl-accent-strong: #1a5fd0;
       --rte-tmpl-ring: rgba(88, 166, 255, 0.22);
     }
     .rte-template-dialog {
@@ -949,7 +951,7 @@ function injectTemplateDialogStyles() {
       border-radius: 4px;
       font-size: 14px;
       cursor: pointer;
-      background-color: var(--rte-tmpl-accent);
+      background-color: var(--rte-tmpl-accent-fill);
       color: white;
       transition: all 0.2s;
     }

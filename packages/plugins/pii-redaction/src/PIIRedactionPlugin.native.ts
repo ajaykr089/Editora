@@ -1653,7 +1653,7 @@ function ensureStylesInjected(): void {
     .rte-pii-redaction-btn-primary:hover,
     .rte-pii-redaction-btn-primary:focus-visible {
       border-color: #0369a1;
-      background: #0284c7;
+      background: #0369a1;
       color: #ffffff;
     }
 

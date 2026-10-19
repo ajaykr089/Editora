@@ -183,7 +183,7 @@ const injectLinkDialogStyles = (): void => {
     }
 
     .link-dialog-overlay.rte-theme-dark .btn-submit {
-      background: #3b82f6 !important;
+      background: #2563eb !important;
     }
 
     .link-dialog-overlay.rte-theme-dark .btn-submit:hover {
@@ -434,7 +434,7 @@ const showLinkDialog = (
       <div class="link-dialog-footer" style="padding: 12px 20px; border-top: 1px solid #ddd; display: flex; justify-content: flex-end; gap: 10px;">
         ${initialData.isEditing ? '<button type="button" class="btn-remove" style="padding: 8px 16px; border: 1px solid #dc3545; background: white; color: #dc3545; border-radius: 4px; cursor: pointer; margin-right: auto;">Remove Link</button>' : ''}
         <button type="button" class="btn-cancel" style="padding: 8px 16px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer;">Cancel</button>
-        <button type="submit" class="btn-submit" style="padding: 8px 16px; border: none; background: #007bff; color: white; border-radius: 4px; cursor: pointer;">
+        <button type="submit" class="btn-submit" style="padding: 8px 16px; border: none; background: #0069d9; color: white; border-radius: 4px; cursor: pointer;">
           ${initialData.isEditing ? 'Update Link' : 'Insert Link'}
         </button>
       </div>

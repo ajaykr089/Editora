@@ -468,6 +468,7 @@ function createColorPicker(): HTMLDivElement {
   colorInput.type = 'color';
   colorInput.className = 'rte-bg-color-input';
   colorInput.id = 'rte-bg-color-input';
+  colorInput.setAttribute('aria-label', 'Custom background colour');
   colorInput.value = selectedColor;
 
   const textInput = document.createElement('input');

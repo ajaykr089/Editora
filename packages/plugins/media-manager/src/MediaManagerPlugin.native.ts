@@ -68,7 +68,7 @@ const injectMediaDialogStyles = (): void => {
       --rte-media-border: #d6dbe4;
       --rte-media-surface: #f7f9fc;
       --rte-media-surface-hover: #eef2f7;
-      --rte-media-accent: #1f75fe;
+      --rte-media-accent: #1560e8;
       --rte-media-accent-hover: #165fd6;
       --rte-media-danger: #dc3545;
       --rte-media-danger-hover: #b92735;
@@ -96,7 +96,7 @@ const injectMediaDialogStyles = (): void => {
       --rte-media-border: #49566c;
       --rte-media-surface: #2a3444;
       --rte-media-surface-hover: #344256;
-      --rte-media-accent: #58a6ff;
+      --rte-media-accent: #1f6feb;
       --rte-media-accent-hover: #4598f4;
       --rte-media-danger: #ff7b72;
       --rte-media-danger-hover: #ff645b;
@@ -581,7 +581,7 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
         <button class="close-btn rte-media-close-btn" type="button" aria-label="Close">×</button>
       </div>
 
-      <div class="rte-media-tabs">
+      <div class="rte-media-tabs" role="tablist" aria-label="Where to get the ${type === 'image' ? 'image' : 'video'} from">
         <button class="tab-upload rte-media-tab ${activeTab === 'upload' ? 'active' : ''}" type="button" role="tab" aria-selected="${activeTab === 'upload'}">Upload</button>
         <button class="tab-url rte-media-tab ${activeTab === 'url' ? 'active' : ''}" type="button" role="tab" aria-selected="${activeTab === 'url'}">URL</button>
       </div>
@@ -589,8 +589,8 @@ const showMediaDialog = (type: 'image' | 'video', contextElement?: HTMLElement |
       <div class="rte-media-body">
         ${activeTab === 'upload' ? `
           <div id="upload-section">
-            <div class="dropzone rte-media-dropzone" role="button" tabindex="0" aria-label="Choose ${type === 'image' ? 'an image' : 'a video'} to upload, or drop one here">
-              <div class="rte-media-dropzone-icon">📁</div>
+            <div class="dropzone rte-media-dropzone" role="button" tabindex="0" aria-label="Drag and drop your ${type} here or click to browse. Max file size: 50MB">
+              <div class="rte-media-dropzone-icon" aria-hidden="true">📁</div>
               <p class="rte-media-dropzone-title">Drag and drop your ${type} here</p>
               <p class="rte-media-muted">or click to browse</p>
               <p class="rte-media-hint">Max file size: 50MB</p>
@@ -1094,7 +1094,7 @@ const showReplaceImageDialog = (img: HTMLImageElement) => {
         <button class="close-btn rte-media-close-btn" type="button" aria-label="Close">×</button>
       </div>
 
-      <div class="rte-media-tabs">
+      <div class="rte-media-tabs" role="tablist" aria-label="Where to get the image from">
         <button class="tab-upload rte-media-tab ${activeTab === 'upload' ? 'active' : ''}" type="button" role="tab" aria-selected="${activeTab === 'upload'}">Upload</button>
         <button class="tab-url rte-media-tab ${activeTab === 'url' ? 'active' : ''}" type="button" role="tab" aria-selected="${activeTab === 'url'}">URL</button>
       </div>
@@ -1102,8 +1102,8 @@ const showReplaceImageDialog = (img: HTMLImageElement) => {
       <div class="rte-media-body">
         ${activeTab === 'upload' ? `
           <div id="upload-section">
-            <div class="dropzone rte-media-dropzone" role="button" tabindex="0" aria-label="Choose an image to upload, or drop one here">
-              <div class="rte-media-dropzone-icon">📁</div>
+            <div class="dropzone rte-media-dropzone" role="button" tabindex="0" aria-label="Drag and drop your image here or click to browse">
+              <div class="rte-media-dropzone-icon" aria-hidden="true">📁</div>
               <p class="rte-media-dropzone-title">Drag and drop your image here</p>
               <p class="rte-media-muted">or click to browse</p>
             </div>

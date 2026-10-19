@@ -338,7 +338,7 @@ function injectEmojiDialogStyles(): void {
       --rte-emoji-subtle-bg: #f7f9fc;
       --rte-emoji-subtle-hover: #eef2f7;
       --rte-emoji-muted-text: #5f6b7d;
-      --rte-emoji-accent: #1f75fe;
+      --rte-emoji-accent: #1560e8;
       --rte-emoji-accent-strong: #165fd6;
       --rte-emoji-ring: rgba(31, 117, 254, 0.18);
       --rte-picker-dialog-width: min(640px, 96vw);
@@ -384,7 +384,7 @@ function injectEmojiDialogStyles(): void {
       --rte-emoji-subtle-bg: #2a3444;
       --rte-emoji-subtle-hover: #344256;
       --rte-emoji-muted-text: #a5b1c5;
-      --rte-emoji-accent: #58a6ff;
+      --rte-emoji-accent: #1f6feb;
       --rte-emoji-accent-strong: #4598f4;
       --rte-emoji-ring: rgba(88, 166, 255, 0.22);
     }
