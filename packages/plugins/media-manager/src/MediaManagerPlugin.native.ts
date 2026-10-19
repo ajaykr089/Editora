@@ -1269,19 +1269,39 @@ const updatePosition = () => {
   if (!floatingToolbar || !selectedMedia) return;
 
   const toolbarHeight = floatingToolbar.offsetHeight || 40;
-  const mediaTop = selectedMedia.offsetTop;
-  const mediaLeft = selectedMedia.offsetLeft;
-  const mediaWidth = selectedMedia.offsetWidth;
+  const toolbarWidth = floatingToolbar.offsetWidth || 120;
 
-  // Position above the image, centered
-  const top = mediaTop - toolbarHeight - 8;
-  const left = mediaLeft + (mediaWidth / 2) - ((floatingToolbar.offsetWidth || 120) / 2);
+  // The toolbar is placed against its parent (the containing block). Measure from the parent's own box, not from
+  // the image's offsetTop: when the parent is an inline link, browsers disagree about where its box starts.
+  const parent = floatingToolbar.parentElement || selectedMedia;
+  const parentRect = parent.getBoundingClientRect();
+  const mediaRect = selectedMedia.getBoundingClientRect();
+  const mediaTop = mediaRect.top - parentRect.top - parent.clientTop + parent.scrollTop;
+  const mediaLeft = mediaRect.left - parentRect.left - parent.clientLeft + parent.scrollLeft;
+
+  // Position above the image, centered, unless that would leave the editing area (an image at the top of the
+  // document): there the toolbar would lie over the editor toolbar, which takes the clicks. Put it below then.
+  const host = selectedMedia.closest('[contenteditable="true"]');
+  const roomAbove = host ? mediaRect.top - host.getBoundingClientRect().top - toolbarHeight - 8 : 1;
+  const top = roomAbove < 0 ? mediaTop + mediaRect.height + 8 : mediaTop - toolbarHeight - 8;
+  const left = mediaLeft + mediaRect.width / 2 - toolbarWidth / 2;
 
   floatingToolbar.style.top = `${top}px`;
   floatingToolbar.style.left = `${left}px`;
   setTimeout(() => {  
     if (floatingToolbar) floatingToolbar.style.display = "flex";
   },100);
+};
+
+// The element the floating toolbar is placed in. An inline parent (an image inside a link) is a poor containing
+// block: browsers differ on where its box starts, which put the toolbar over the editor toolbar. Use the nearest
+// block-level ancestor.
+const getToolbarParent = (media: HTMLElement): HTMLElement | null => {
+  let parent = media.parentElement;
+  while (parent && parent.parentElement && getComputedStyle(parent).display === 'inline') {
+    parent = parent.parentElement;
+  }
+  return parent;
 };
 
 // Show floating toolbar
@@ -1295,7 +1315,7 @@ const showFloatingToolbar = (media: HTMLImageElement | HTMLVideoElement) => {
   }
 
   // Ensure parent has relative positioning
-  const mediaParent = media.parentElement;
+  const mediaParent = getToolbarParent(media);
   if (mediaParent) {
     const originalPosition = mediaParent.style.position;
     if (!originalPosition || originalPosition === 'static') {
@@ -1515,8 +1535,8 @@ const initMediaManager = (editorEl?: HTMLElement) => {
         floatingToolbar = null;
         
         // Restore parent position
-        if (selectedMedia && selectedMedia.parentElement) {
-          const parent = selectedMedia.parentElement;
+        const parent = selectedMedia && getToolbarParent(selectedMedia);
+        if (parent) {
           if ((parent as any)._originalPosition !== undefined) {
             parent.style.position = (parent as any)._originalPosition;
             delete (parent as any)._originalPosition;
