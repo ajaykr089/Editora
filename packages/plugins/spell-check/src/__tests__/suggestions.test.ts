@@ -110,10 +110,11 @@ describe('suggestions for common slips', () => {
     expect(suggest('TSET')[0]).toBe('test');
   });
 
-  it('is quick: a document full of misspellings is checked in well under a second', () => {
+  it('is not slow: 200 lookups of misspelled words finish in a few seconds even on a busy machine', () => {
     const words = ['tset', 'recieve', 'wrods', 'definately', 'adress', 'seperate', 'becuase', 'freind', 'thier', 'wich'];
     const start = performance.now();
     for (let i = 0; i < 20; i++) for (const word of words) suggest(word);
-    expect(performance.now() - start).toBeLessThan(1500);
+    // About 0.8 s on a quiet laptop; the budget guards against a pathological slowdown, not a benchmark.
+    expect(performance.now() - start).toBeLessThan(6000);
   });
 });
